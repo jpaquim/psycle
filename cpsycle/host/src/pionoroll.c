@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -296,24 +296,27 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 			
 			entry = (psy_audio_PatternEntry*)(curr->entry);			
 			if (channel[entry->track].offset != -1.0f) {
-				pianogrid_drawevent(self, g, &channel[entry->track].event,
+				pianogrid_drawevent(self, g,
+					patternentry_front(&channel[entry->track]),
 					entry->track,
 					channel[entry->track].offset,
 					entry->offset - channel[entry->track].offset);				
 				channel[entry->track].offset = -1.0f;
 			}				
-			if (entry->event.note == 120) {				
+			if (patternentry_front(entry)->note == 120) {				
 				channel[entry->track].offset = -1.0f;				
 			} else {
 				channel[entry->track].offset = entry->offset;								
-				channel[entry->track].event = entry->event;
+				*patternentry_front(&channel[entry->track])
+					= *patternentry_front(entry);
 			}
 			curr = curr->next;
 		}
 	}	
 	for (track = 0; track < 64; ++track) {
 		if (channel[track].offset != -1.0f) {
-			pianogrid_drawevent(self, g, &channel[track].event, track,
+			pianogrid_drawevent(self, g, patternentry_front(&channel[track]),
+				track,
 				channel[track].offset,
 				self->view->pattern->length - channel[track].offset);			
 		}

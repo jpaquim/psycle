@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -30,7 +30,8 @@ void wav_songio_load(psy_audio_SongFile* self)
 		psy_audio_Pattern* pattern;
 		psy_audio_PatternEvent patternevent;		
 
-		patternevent_init(&patternevent, 48, 0, 0, 0, 0);
+		patternevent_clear(&patternevent);
+		patternevent.note = 48;
 		pattern = pattern_allocinit();
 		pattern_insert(pattern, 0, 0, (psy_dsp_beat_t) 0, &patternevent);
 		pattern_setlength(pattern, 

@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(SAMPLESVIEW_H)
 #define SAMPLESVIEW_H
@@ -48,7 +48,7 @@ typedef struct {
 	psy_ui_Component component;
 	psy_audio_Sample* sample;	
 	psy_ui_Label waveformheaderlabel;
-	ui_combobox waveformbox;
+	psy_ui_ComboBox waveformbox;
 	ui_slider attack;
 	ui_slider speed;
 	ui_slider depth;
@@ -61,14 +61,14 @@ typedef struct {
 	psy_audio_Sample* sample;	
 	psy_ui_Component cont;
 	psy_ui_Label loopheaderlabel;
-	ui_combobox loopdir;
+	psy_ui_ComboBox loopdir;
 	psy_ui_Label loopstartlabel;
 	psy_ui_Edit loopstartedit;
 	psy_ui_Label loopendlabel;
 	psy_ui_Edit loopendedit;
 	psy_ui_Component sustain;
 	psy_ui_Label sustainloopheaderlabel;
-	ui_combobox sustainloopdir;
+	psy_ui_ComboBox sustainloopdir;
 	psy_ui_Label sustainloopstartlabel;
 	psy_ui_Edit sustainloopstartedit;
 	psy_ui_Label sustainloopendlabel;

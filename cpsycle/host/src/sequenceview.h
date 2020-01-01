@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(SEQUENCERVIEW_H)
 #define SEQUENCERVIEW_H
@@ -81,11 +81,11 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 
 typedef struct {
 	psy_ui_Component component;
-	ui_checkbox followsong;
-	ui_checkbox shownames;
-	ui_checkbox showplaylist;
-	ui_checkbox recordtweaks;
-	ui_checkbox multichannelaudition;
+	psy_ui_CheckBox followsong;
+	psy_ui_CheckBox shownames;
+	psy_ui_CheckBox showplaylist;
+	psy_ui_CheckBox recordtweaks;
+	psy_ui_CheckBox multichannelaudition;
 } SequencerOptionsBar;
 
 void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent);

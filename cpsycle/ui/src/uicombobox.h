@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(UICOMBOBOX_H)
 #define UICOMBOBOX_H
@@ -14,13 +14,13 @@ typedef struct {
    int ownerdrawn;   
    int hover;
    int charnumber;
-} ui_combobox;
+} psy_ui_ComboBox;
 
-void ui_combobox_init(ui_combobox*, psy_ui_Component* parent);
-int ui_combobox_addstring(ui_combobox*, const char* text);
-void ui_combobox_clear(ui_combobox*);
-void ui_combobox_setcursel(ui_combobox*, intptr_t index);
-intptr_t ui_combobox_cursel(ui_combobox*);
-void ui_combobox_setcharnumber(ui_combobox*, int num);
+void ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
+int ui_combobox_addstring(psy_ui_ComboBox*, const char* text);
+void ui_combobox_clear(psy_ui_ComboBox*);
+void ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
+intptr_t ui_combobox_cursel(psy_ui_ComboBox*);
+void ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
 
 #endif

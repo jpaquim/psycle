@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(MACHINES_H)
 #define MACHINES_H
@@ -22,7 +22,7 @@ typedef enum {
 } Colors;
 
 typedef struct psy_audio_Machines {	
-	psy_Table slots;	
+	psy_Table slots;
 	psy_Table inputbuffers;
 	psy_Table outputbuffers;
 	psy_audio_Connections connections;
@@ -45,7 +45,8 @@ typedef struct psy_audio_Machines {
 void machines_init(psy_audio_Machines*);
 void machines_dispose(psy_audio_Machines*);
 void machines_clear(psy_audio_Machines*);
-void machines_insert(psy_audio_Machines*, uintptr_t slot, psy_audio_Machine*);
+void machines_insert(psy_audio_Machines*, uintptr_t slot,
+	psy_audio_Machine*);
 void machines_erase(psy_audio_Machines*, uintptr_t slot);
 void machines_remove(psy_audio_Machines*, uintptr_t slot);
 void machines_exchange(psy_audio_Machines*, uintptr_t srcslot, uintptr_t dstslot);

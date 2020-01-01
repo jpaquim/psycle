@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #if !defined(TRACKERVIEW)
 #define TRACKERVIEW
@@ -73,6 +73,11 @@ typedef struct {
 } TrackerMetrics;
 
 typedef struct {
+	int cmdnum;	
+} TrackConfig;
+
+
+typedef struct {
 	psy_ui_Component component;
 	int dx;	
 	unsigned int numtracks;
@@ -82,6 +87,18 @@ typedef struct {
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
+	struct TrackerView* view);
+
+typedef struct {
+	psy_ui_Component component;
+	int dx;	
+	unsigned int numtracks;
+	int classic;
+	TrackerSkin* skin;
+	struct TrackerView* view;
+} TrackerConfigHeader;
+
+void trackerconfigheader_init(TrackerConfigHeader*, psy_ui_Component* parent,
 	struct TrackerView* view);
 
 typedef struct {
@@ -121,6 +138,17 @@ typedef struct {
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
 
+enum {
+	TRACKER_COLUMN_NONE  = -1,
+	TRACKER_COLUMN_NOTE	 = 0,
+	TRACKER_COLUMN_INST	 = 1,
+	TRACKER_COLUMN_MACH	 = 2,
+	TRACKER_COLUMN_VOL	 = 3,
+	TRACKER_COLUMN_CMD	 = 4,
+	TRACKER_COLUMN_PARAM = 5,
+	TRACKER_COLUMN_END	 = 6
+};
+
 typedef struct {
 	uintptr_t numdigits;
 	uintptr_t numchars;	
@@ -145,9 +173,7 @@ typedef struct {
    PatternEditPosition cursor;
    psy_dsp_beat_t cursorstep;   
    psy_audio_Player* player;   
-   TrackerColumnDef coldefs[5];
-   TrackerHeader* header;
-   TrackerLineNumbers* linenumbers;
+   TrackerColumnDef coldefs[TRACKER_COLUMN_END];   
    struct TrackerView* view;
    PatternSelection selection;
    int hasselection;
@@ -162,6 +188,7 @@ typedef Inputs TrackerInputs;
 
 typedef struct TrackerView {
 	psy_ui_Component component;
+	TrackerConfigHeader configheader;
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
@@ -184,6 +211,7 @@ typedef struct TrackerView {
 	psy_List* sublines;
 	psy_Table screenlines;
 	TrackerMetrics metrics;
+	psy_Table trackconfigs;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);

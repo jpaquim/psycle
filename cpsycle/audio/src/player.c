@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -48,7 +48,6 @@ static void player_dostop(psy_audio_Player*);
 static void notifylinetick(psy_audio_Player*);
 
 // player init and dispose
-
 void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 {			
 	self->song = song;	
@@ -116,7 +115,6 @@ void player_disposerms(psy_audio_Player* self)
 // driver callbacks
 
 // sound driver callback
-
 psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 {	
 	uintptr_t maxamount;
@@ -207,7 +205,7 @@ void player_workpath(psy_audio_Player* self, uintptr_t amount)
 					buffercontext_init(&bc, events, output, output, amount,
 						self->numsongtracks, rms);
 					buffer_scale(output, machine_amprange(machine), amount);
-					machine->vtable->work(machine, &bc);
+					machine_work(machine, &bc);
 					buffer_pan(output, machine->vtable->panning(machine), amount);
 					if (self->vumode == VUMETER_RMS && buffer_numchannels(
 							bc.output) >= 2) {
@@ -252,7 +250,8 @@ void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t 
 			buffer_mulsamples(masteroutput, amount,
 				machines_volume(&self->song->machines));			
 			if (self->vumode == VUMETER_RMS) {
-				psy_dsp_rmsvol_tick(rms, masteroutput->samples[0], masteroutput->samples[1],
+				psy_dsp_rmsvol_tick(rms, masteroutput->samples[0],
+					masteroutput->samples[1],
 					amount);		
 			}
 			psy_signal_emit(&master->signal_worked, master, 2,
@@ -278,7 +277,6 @@ psy_dsp_RMSVol* player_rmsvol(psy_audio_Player* self, size_t slot)
 }
 
 // event driver callback
-
 void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
 {
 	psy_Properties* notes;
@@ -302,23 +300,27 @@ void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
 			self->song
 				? machines_slot(&self->song->machines)
 				: 0),
+			NOTECOMMANDS_VOL_EMPTY,
 			0, 0);
 		if (self->multichannelaudition) {
 			if (event.note < NOTECOMMANDS_RELEASE) {
 				if (psy_table_exists(&self->notestotracks, event.note)) {
-					track = (uintptr_t) psy_table_at(&self->notestotracks, event.note);
+					track = (uintptr_t) psy_table_at(&self->notestotracks,
+						event.note);
 				} else {							
 					while (psy_table_exists(&self->trackstonotes, track)) {
 						++track;
 					}
-					psy_table_insert(&self->notestotracks, event.note, (void*)track);
+					psy_table_insert(&self->notestotracks, event.note,
+						(void*) track);
 					psy_table_insert(&self->trackstonotes, track,
-						(void*)(uintptr_t)event.note);
+						(void*)(uintptr_t) event.note);
 				}
 			} else
 			if (event.note == NOTECOMMANDS_RELEASE) {				
 				if (psy_table_exists(&self->notestotracks, note)) {
-					track = (uintptr_t) psy_table_at(&self->notestotracks, note);
+					track = (uintptr_t) psy_table_at(&self->notestotracks,
+						note);
 					psy_table_remove(&self->notestotracks, note);
 					psy_table_remove(&self->trackstonotes, track);
 				}
@@ -334,7 +336,8 @@ void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
 	}
 }
 
-void workeventinput(psy_audio_Player* self, int cmd, unsigned char* data, unsigned int size)
+void workeventinput(psy_audio_Player* self, int cmd, unsigned char* data,
+	unsigned int size)
 {	
 /*	int validevent = 0;
 	uintptr_t note = 0;
@@ -408,7 +411,6 @@ void workeventinput(psy_audio_Player* self, int cmd, unsigned char* data, unsign
 }
 
 // general setter and getter
-
 void player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 {
 	self->song = song;
@@ -446,7 +448,6 @@ VUMeterMode player_vumetermode(psy_audio_Player* self)
 }
 
 // sequencer setter and getter
-
 void player_start(psy_audio_Player* self)
 {		
 	sequencer_start(&self->sequencer);	
@@ -511,7 +512,6 @@ uintptr_t player_lpb(psy_audio_Player* self)
 }
 
 // Driver set, get, load, unload, restart, ..., methods
-
 void player_setaudiodriver(psy_audio_Player* self, Driver* driver)
 {
 	self->driver = driver;
@@ -585,7 +585,6 @@ void player_restartdriver(psy_audio_Player* self, psy_Properties* config)
 }
 
 // Event Recording
-
 void player_startrecordingnotes(psy_audio_Player* self)
 {
 	self->recordingnotes = 1;
@@ -602,7 +601,6 @@ int player_recordingnotes(psy_audio_Player* self)
 }
 
 // EventDriver load, unload, restart, ..., methods
-
 void player_loadeventdriver(psy_audio_Player* self, const char* path)
 {
 	eventdrivers_load(&self->eventdrivers, path);

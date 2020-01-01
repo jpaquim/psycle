@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -47,7 +47,8 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 				short frame16;
 				psyfile_read(&file, &numsamples, 4);
 				sample->numframes = numsamples / 
-					format.nChannels / (format.wBitsPerSample / 8);	
+					format.nChannels / (format.wBitsPerSample / 8);
+				sample->stereo = (format.nChannels == 2);
 
 				for (channel = 0; channel < format.nChannels; ++channel) {
 					sample->channels.samples[channel] = malloc(numsamples * 

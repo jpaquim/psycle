@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -577,7 +577,7 @@ void readinsd(psy_audio_SongFile* self)
 			psyfile_read(self->file, &_RCUT, sizeof(_RCUT));
 			psyfile_read(self->file, &_RRES, sizeof(_RRES));
 
-			instrument->_RPAN = _RPAN;
+			instrument->randompan = _RPAN;
 			instrument->_RCUT = _RCUT;
 			instrument->_RRES = _RRES;			
 			
@@ -1307,11 +1307,11 @@ int psy3_write_patd(psy_audio_SongFile* self)
 				// uint8_t mach;		2
 				// uint8_t cmd;			3
 				// uint8_t parameter;	4
-				data[0] = entry->event.note;
-				data[1] = (uint8_t)(entry->event.inst & 0xFF);
-				data[2] = entry->event.mach;
-				data[3] = entry->event.cmd;
-				data[4] = entry->event.parameter;				
+				data[0] = patternentry_front(entry)->note;
+				data[1] = (uint8_t)(patternentry_front(entry)->inst & 0xFF);
+				data[2] = patternentry_front(entry)->mach;
+				data[3] = patternentry_front(entry)->cmd;
+				data[4] = patternentry_front(entry)->parameter;				
 			}			
 			size77 = beerz77comp2(source, 
 				&copy, self->song->patterns.songtracks * patternLines *
@@ -1449,41 +1449,44 @@ int psy3_write_connections(psy_audio_SongFile* self, uintptr_t slot)
 			? psy_list_size(sockets->outputs) : 0)) {
 		return status;
 	}
-	for (in = sockets->inputs, out = sockets->outputs, c = 0;
-			(in || out) && (c < MAX_CONNECTIONS);
-			in = in ? in->next : 0, out = out ? out->next : 0, ++c) {
-		float invol = 1.f;			
-		if (in) {
-			psy_audio_WireSocketEntry* entry;
+	c = 0;	
+	if (sockets) {
+		for (in = sockets->inputs, out = sockets->outputs;
+				(in || out) && (c < MAX_CONNECTIONS);
+				in = in ? in->next : 0, out = out ? out->next : 0, ++c) {
+			float invol = 1.f;			
+			if (in) {
+				psy_audio_WireSocketEntry* entry;
 
-			incon = 1;
-			entry = (psy_audio_WireSocketEntry*) in->entry;
-			invol = entry->volume;				
-			if (status = psyfile_write_int32(self->file, (int32_t)
-					(entry->slot))) {
+				incon = 1;
+				entry = (psy_audio_WireSocketEntry*) in->entry;
+				invol = entry->volume;				
+				if (status = psyfile_write_int32(self->file, (int32_t)
+						(entry->slot))) {
+					return status;
+				}
+			} else {
+				incon = 0;
+				if (status = psyfile_write_int32(self->file, -1)) {
 				return status;
 			}
-		} else {
-			incon = 0;
-			if (status = psyfile_write_int32(self->file, -1)) {
-			return status;
-		}
-		}
-		if (out) {
-			psy_audio_WireSocketEntry* entry;
+			}
+			if (out) {
+				psy_audio_WireSocketEntry* entry;
 
-			outcon = 1;
-			entry = (psy_audio_WireSocketEntry*) out->entry;
-			if (status = psyfile_write_int32(self->file, (int32_t)
-					(entry->slot))) {
-				return status;
-			}
-		} else {
-			outcon = 0;
-			if (status = psyfile_write_int32(self->file, -1)) {
-				return status;
-			}
-		}			
+				outcon = 1;
+				entry = (psy_audio_WireSocketEntry*) out->entry;
+				if (status = psyfile_write_int32(self->file, (int32_t)
+						(entry->slot))) {
+					return status;
+				}
+			} else {
+				outcon = 0;
+				if (status = psyfile_write_int32(self->file, -1)) {
+					return status;
+				}
+			}			
+		}
 		if (status = psyfile_write_float(self->file, 1.f)) {
 			return status;
 		}
@@ -1693,7 +1696,7 @@ int psy3_save_instrument(psy_audio_SongFile* self,
 		return status;
 	}
 	if (status = psyfile_write_uint8(self->file, (uint8_t)
-			instrument->_RPAN)) {
+			instrument->randompan)) {
 		return status;
 	}
 	if (status = psyfile_write_uint8(self->file, (uint8_t)

@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -130,7 +130,7 @@ psy_List* sequencerinsert(psy_audio_Duplicator2* self, psy_List* events)
 					duplicatorentry = (psy_audio_PatternEntry*)p->entry;
 					duplicatormap_allocate(&self->map, duplicatorentry->track, i,
 						self->macoutput[i]);
-					note = duplicatorentry->event.note;
+					note = patternentry_front(duplicatorentry)->note;
 					if (note < NOTECOMMANDS_RELEASE) {						
 						note = transpose(note, self->noteoffset[i]);
 					}					
@@ -139,13 +139,14 @@ psy_List* sequencerinsert(psy_audio_Duplicator2* self, psy_List* events)
 						psy_audio_PatternEntry* entry;						
 							
 						entry = patternentry_clone(duplicatorentry);
-						entry->event.mach = self->macoutput[i];
-						entry->event.note = note;
+						patternentry_front(entry)->mach = self->macoutput[i];
+						patternentry_front(entry)->note = note;
 						entry->track = duplicatormap_at(&self->map, 
 							duplicatorentry->track, i);												
 						psy_list_append(&insert, entry);												
 					}
-					if (duplicatorentry->event.note >= NOTECOMMANDS_RELEASE) {
+					if (patternentry_front(duplicatorentry)->note >=
+							NOTECOMMANDS_RELEASE) {
 						duplicatormap_remove(&self->map, duplicatorentry->track,
 							i, self->macoutput[i]);
 					}

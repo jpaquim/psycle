@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -49,7 +49,7 @@ static void SetSampleSamplesVibratoView(SamplesVibratoView*, psy_audio_Sample* s
 static void OnVibratoViewDescribe(SamplesVibratoView*, ui_slider*, char* txt);
 static void OnVibratoViewTweak(SamplesVibratoView*, ui_slider*, float value);
 static void OnVibratoViewValue(SamplesVibratoView*, ui_slider*, float* value);
-static void OnWaveFormChange(SamplesVibratoView*, ui_combobox* sender, int sel);
+static void OnWaveFormChange(SamplesVibratoView*, psy_ui_ComboBox* sender, int sel);
 static WaveForms ComboBoxToWaveForm(int combobox_index);
 static int WaveFormToComboBox(WaveForms waveform);
 /// Waveloop Setting View
@@ -59,9 +59,9 @@ static void samplesloopview_setsample(SamplesLoopView*, psy_audio_Sample*);
 static int LoopTypeToComboBox(LoopType looptype);
 static LoopType ComboBoxToLoopType(int combobox_index);
 static void samplesloopview_onlooptypechange(SamplesLoopView*,
-	ui_combobox* sender, int sel);
+	psy_ui_ComboBox* sender, int sel);
 static void samplesloopview_onsustainlooptypechange(SamplesLoopView*,
-	ui_combobox* sender, int selectedindex);
+	psy_ui_ComboBox* sender, int selectedindex);
 static void samplesloopview_looptypeenablepreventinput(SamplesLoopView*);
 static void samplesloopview_oneditchangedloopstart(SamplesLoopView*,
 	psy_ui_Edit* sender);
@@ -945,7 +945,8 @@ void OnVibratoViewDescribe(SamplesVibratoView* self, ui_slider* slidergroup, cha
 	}
 }
 
-void OnWaveFormChange(SamplesVibratoView* self, ui_combobox* sender, int sel)
+void OnWaveFormChange(SamplesVibratoView* self, psy_ui_ComboBox* sender,
+	int sel)
 {
 	if (self->sample) {
 		self->sample->vibrato.type = ComboBoxToWaveForm(sel);
@@ -1111,7 +1112,8 @@ int LoopTypeToComboBox(LoopType looptype)
 	return rv;
 }
 
-void samplesloopview_onlooptypechange(SamplesLoopView* self, ui_combobox* sender, int sel)
+void samplesloopview_onlooptypechange(SamplesLoopView* self,
+	psy_ui_ComboBox* sender, int sel)
 {
 	if (self->sample) {
 		self->sample->looptype = ComboBoxToLoopType(sel);
@@ -1120,7 +1122,8 @@ void samplesloopview_onlooptypechange(SamplesLoopView* self, ui_combobox* sender
 	}
 }
 
-void samplesloopview_onsustainlooptypechange(SamplesLoopView* self, ui_combobox* sender, int sel)
+void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
+	psy_ui_ComboBox* sender, int sel)
 {
 	if (self->sample) {
 		self->sample->sustainlooptype = ComboBoxToLoopType(sel);

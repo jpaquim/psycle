@@ -1,70 +1,73 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
 #include "uicheckbox.h"
 #include <string.h>
 
-static void oncommand(ui_checkbox*, psy_ui_Component*, WPARAM wParam,
-	LPARAM lParam);
-static void ondestroy(ui_checkbox*, psy_ui_Component*);
-static void preferredsize(ui_checkbox*, ui_size* limit, ui_size* rv);
+static void psy_ui_checkbox_oncommand(psy_ui_CheckBox*, psy_ui_Component*,
+	WPARAM wParam, LPARAM lParam);
+static void psy_ui_checkbox_ondestroy(psy_ui_CheckBox*, psy_ui_Component*);
+static void psy_ui_checkbox_preferredsize(psy_ui_CheckBox*, ui_size* limit,
+	ui_size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(ui_checkbox* self)
+static void vtable_init(psy_ui_CheckBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.preferredsize = (psy_ui_fp_preferredsize)
+			psy_ui_checkbox_preferredsize;
 	}
 }
 
-void ui_checkbox_init(ui_checkbox* self, psy_ui_Component* parent)
+void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 {  	
 	psy_signal_init(&self->signal_clicked);
 	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
 		1);
-	psy_signal_connect(&self->component.signal_command, self, oncommand);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	vtable_init(self);
 	self->component.vtable = &vtable;
+	psy_signal_connect(&self->component.signal_command, self,
+		psy_ui_checkbox_oncommand);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		psy_ui_checkbox_ondestroy);	
 }
 
-void ondestroy(ui_checkbox* self, psy_ui_Component* sender)
+void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_clicked);
 }
 
-void ui_checkbox_settext(ui_checkbox* self, const char* text)
+void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
 {
 	SetWindowText((HWND)self->component.hwnd, text);	
 }
 
-void ui_checkbox_check(ui_checkbox* self)
+void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 {
-	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, BM_SETCHECK, (WPARAM)BST_CHECKED,
+		(LPARAM)0);
 }
 
-int ui_checkbox_checked(ui_checkbox* self)
+int psy_ui_checkbox_checked(psy_ui_CheckBox* self)
 {
-	int rv;
-	
-	rv = SendMessage((HWND)self->component.hwnd, BM_GETSTATE, (WPARAM)0, (LPARAM)0);
-	return rv;
+	return SendMessage((HWND)self->component.hwnd, BM_GETCHECK, (WPARAM)0,
+		(LPARAM)0) != 0;	
 }
 
-void ui_checkbox_disablecheck(ui_checkbox* self)
+void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 {
-	SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0);
 }
 
-void oncommand(ui_checkbox* self, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam)
+void psy_ui_checkbox_oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
+	WPARAM wParam, LPARAM lParam)
 {
 	switch(HIWORD(wParam))
     {
@@ -80,7 +83,8 @@ void oncommand(ui_checkbox* self, psy_ui_Component* sender, WPARAM wParam,
     }
 }
 
-void preferredsize(ui_checkbox* self, ui_size* limit, ui_size* rv)
+void psy_ui_checkbox_preferredsize(psy_ui_CheckBox* self, ui_size* limit,
+	ui_size* rv)
 {	
 	if (rv) {
 		ui_size size;	

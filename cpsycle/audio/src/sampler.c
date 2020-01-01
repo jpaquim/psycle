@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -524,6 +524,7 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	self->usedefaultvolume = 1;
 	self->vol = 1.f;
 	self->pan = 0.5f;
+	self->dopan = 0;
 	self->positions = 0;
 	self->portaspeed = 1.0;	
 	self->effcmd = SAMPLER_CMD_NONE;
@@ -586,19 +587,15 @@ Voice* voice_allocinit(psy_audio_Sampler* sampler,
 }
 
 void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
-{	
-	if (event->note == NOTECOMMANDS_RELEASE) {
-		voice_noteoff(self, event);
-	} else
-	if (event->note < NOTECOMMANDS_RELEASE) {
-		voice_noteon(self, event);
-	}
+{
+	self->dopan = 0;
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
 		 self->usedefaultvolume = 0;
 		 self->vol = event->parameter / 
 			 (psy_dsp_amp_t) self->sampler->maxvolume;
 	} else
 	if (event->cmd == SAMPLER_CMD_PANNING) {
+		self->dopan = 1;
 		self->pan = event->parameter / (psy_dsp_amp_t) 255;
 	} else
 	if (event->cmd == SAMPLER_CMD_OFFSET) {
@@ -625,6 +622,12 @@ void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 		self->portanumframes = (uintptr_t) samplesprobeat;
 		self->portacurrframe = 0;
 		self->portaspeed = pow(2.0f, -event->parameter / 12.0 * 1.0 / samplesprobeat);
+	}
+	if (event->note == NOTECOMMANDS_RELEASE) {
+		voice_noteoff(self, event);
+	} else
+	if (event->note < NOTECOMMANDS_RELEASE) {		
+		voice_noteon(self, event);
 	}
 }
 
@@ -661,6 +664,11 @@ void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 		psy_dsp_adsr_start(&self->env);
 		psy_dsp_adsr_start(&self->filterenv);
 	}
+	if (!self->dopan && self->instrument->randompan) {
+		self->dopan = 1; 
+		self->pan = rand() / (psy_dsp_amp_t) 32768.f;
+	}
+
 }
 
 void voice_clearpositions(Voice* self)
@@ -699,7 +707,8 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 		
 		for (p = self->positions; p != 0; p = p->next) {
 			SampleIterator* position;
-			int i;	
+			int i;
+			psy_dsp_amp_t panning;
 			psy_dsp_amp_t svol;
 			psy_dsp_amp_t rvol;
 			psy_dsp_amp_t lvol;
@@ -709,16 +718,17 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 						(self->usedefaultvolume
 							? position->sample->defaultvolume
 							: self->vol);			
-			rvol = position->sample->panfactor * svol;
-			lvol = (1.f - position->sample->panfactor) * svol;
-			svol *= 0.5f;
+			panning = self->dopan ? self->pan : position->sample->panfactor;
+			rvol = panning * svol;
+			lvol = ((psy_dsp_amp_t) 1 - panning) * svol;
+			svol *= ((psy_dsp_amp_t) 0.5f);
 			//FT2 Style (Two slides) mode, but with max amp = 0.5.
-			if (rvol > 0.5f) { rvol = 0.5f; }
-			if (lvol > 0.5f) { lvol = 0.5f; }			
-			if (svol > 0.5f) { svol = 0.5f; }
+			if (rvol > 0.5f) { rvol = (psy_dsp_amp_t) 0.5f; }
+			if (lvol > 0.5f) { lvol = (psy_dsp_amp_t) 0.5f; }			
+			if (svol > 0.5f) { svol = (psy_dsp_amp_t) 0.5f; }
 
 			if (self->effcmd == SAMPLER_CMD_PORTAUP ||
-				self->effcmd == SAMPLER_CMD_PORTADOWN) {
+					self->effcmd == SAMPLER_CMD_PORTADOWN) {
 				portaframe = self->portacurrframe;
 				portaspeed = self->portaspeed;
 			}			

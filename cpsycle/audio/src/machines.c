@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2000-2019 members of the psycle project http://psycle.sourceforge.net
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
 
@@ -18,14 +18,16 @@ static uintptr_t machines_freeslot(psy_audio_Machines*, uintptr_t start);
 static void machines_setpath(psy_audio_Machines*, MachineList* path);
 static MachineList* compute_path(psy_audio_Machines*, uintptr_t slot);
 static void compute_slotpath(psy_audio_Machines*, uintptr_t slot, psy_List**);
-static void machines_preparebuffers(psy_audio_Machines*, MachineList* path, unsigned int amount);
+static void machines_preparebuffers(psy_audio_Machines*, MachineList* path,
+	uintptr_t amount);
 static void machines_releasebuffers(psy_audio_Machines*);
-static psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines*, unsigned int channels);
+static psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines*,
+	uintptr_t channels);
 static void machines_freebuffers(psy_audio_Machines*);
 
 void machines_init(psy_audio_Machines* self)
 {
-	psy_table_init(&self->slots);
+	psy_table_init(&self->slots);	
 	connections_init(&self->connections);	
 	psy_table_init(&self->inputbuffers);
 	psy_table_init(&self->outputbuffers);
@@ -59,7 +61,7 @@ void machines_dispose(psy_audio_Machines* self)
 	machines_freebuffers(self);
 	psy_list_free(self->path);
 	self->path = 0;
-	psy_table_dispose(&self->slots);
+	psy_table_dispose(&self->slots);	
 	connections_dispose(&self->connections);
 	psy_table_dispose(&self->nopath);
 	dsp.memory_dealloc(self->samplebuffers);
@@ -92,7 +94,8 @@ void machines_clear(psy_audio_Machines* self)
 	machines_init(self);
 }
 
-void machines_insert(psy_audio_Machines* self, uintptr_t slot, psy_audio_Machine* machine)
+void machines_insert(psy_audio_Machines* self, uintptr_t slot,
+	psy_audio_Machine* machine)
 {	
 	if (machine) {
 		psy_table_insert(&self->slots, slot, machine);
@@ -133,7 +136,7 @@ void machines_erase(psy_audio_Machines* self, uintptr_t slot)
 void machines_remove(psy_audio_Machines* self, uintptr_t slot)
 {	
 	psy_audio_Machine* machine;
-
+	
 	machine = machines_at(self, slot);
 	if (machine) {
 		machines_erase(self, slot);		
@@ -142,14 +145,15 @@ void machines_remove(psy_audio_Machines* self, uintptr_t slot)
 	}
 }
 
-void machines_exchange(psy_audio_Machines* self, uintptr_t srcslot, uintptr_t dstslot)
+void machines_exchange(psy_audio_Machines* self, uintptr_t srcslot,
+	uintptr_t dstslot)
 {
 	psy_audio_Machine* src;
 	psy_audio_Machine* dst;
 
 	src = machines_at(self, srcslot);
 	dst = machines_at(self, dstslot);
-	if (src && dst) {
+	if (src && dst) {		
 		machines_erase(self, srcslot);
 		machines_erase(self, dstslot);
 		machines_insert(self, srcslot, dst);
@@ -183,11 +187,12 @@ uintptr_t machines_freeslot(psy_audio_Machines* self, uintptr_t start)
 }
 
 psy_audio_Machine* machines_at(psy_audio_Machines* self, uintptr_t slot)
-{
+{		
 	return psy_table_at(&self->slots, slot);
 }
 
-int machines_connect(psy_audio_Machines* self, uintptr_t outputslot, uintptr_t inputslot)
+int machines_connect(psy_audio_Machines* self, uintptr_t outputslot,
+	uintptr_t inputslot)
 {
 	int rv;	
 
@@ -211,7 +216,8 @@ int machines_connect(psy_audio_Machines* self, uintptr_t outputslot, uintptr_t i
 	return rv;
 }
 
-void machines_disconnect(psy_audio_Machines* self, uintptr_t outputslot, uintptr_t inputslot)
+void machines_disconnect(psy_audio_Machines* self, uintptr_t outputslot,
+	uintptr_t inputslot)
 {
 	lock_enter();	
 	connections_disconnect(&self->connections, outputslot, inputslot);
@@ -226,7 +232,8 @@ void machines_disconnectall(psy_audio_Machines* self, uintptr_t slot)
 	lock_leave();
 }
 
-int machines_connected(psy_audio_Machines* self, uintptr_t outputslot, uintptr_t inputslot)
+int machines_connected(psy_audio_Machines* self, uintptr_t outputslot,
+	uintptr_t inputslot)
 {	
 	return connections_connected(&self->connections, outputslot, inputslot);
 }
@@ -299,7 +306,8 @@ MachineList* compute_path(psy_audio_Machines* self, uintptr_t slot)
 	return rv;
 }
 
-void compute_slotpath(psy_audio_Machines* self, uintptr_t slot, psy_List** path)
+void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
+	psy_List** path)
 {	
 	psy_audio_MachineSockets* connected_sockets;	
 
@@ -327,7 +335,8 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot, psy_List** path)
 	}
 }
 
-void machines_preparebuffers(psy_audio_Machines* self, MachineList* path, unsigned int amount)
+void machines_preparebuffers(psy_audio_Machines* self, MachineList* path,
+	uintptr_t amount)
 {
 	/*MachinePath* slot;	
 
@@ -345,8 +354,9 @@ void machines_preparebuffers(psy_audio_Machines* self, MachineList* path, unsign
 
 	psy_TableIterator it;
 	
-	for (it = machines_begin(self); !psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {			
+	for (it = machines_begin(self);
+			!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {			
 		psy_audio_Machine* machine;
 
 		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
@@ -368,9 +378,10 @@ void machines_releasebuffers(psy_audio_Machines* self)
 	self->currsamplebuffer = 0;	
 }
 
-psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines* self, unsigned int channels)
+psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines* self,
+	uintptr_t channels)
 {
-	unsigned int channel;
+	uintptr_t channel;
 	psy_audio_Buffer* rv;
 
 	rv = buffer_allocinit(channels);
@@ -412,7 +423,7 @@ psy_audio_Buffer* machines_inputs(psy_audio_Machines* self, uintptr_t slot)
 }
 
 psy_audio_Buffer* machines_outputs(psy_audio_Machines* self, uintptr_t slot)
-{
+{	
 	return psy_table_at(&self->outputbuffers, slot);
 }
 
@@ -464,4 +475,3 @@ psy_TableIterator machines_begin(psy_audio_Machines* self)
 {
 	return psy_table_begin(&self->slots);
 }
-
