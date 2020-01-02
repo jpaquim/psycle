@@ -10,9 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void patternentry_addevent(psy_audio_PatternEntry*,
-	const psy_audio_PatternEvent*);
-
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs)
 {
