@@ -49,6 +49,9 @@ psy_audio_PatternEntry* patternentry_allocinit(void);
 psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry*);
 psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry*);
 const psy_audio_PatternEvent* patternentry_front_const(const psy_audio_PatternEntry*);
+void patternentry_addevent(psy_audio_PatternEntry*,
+	const psy_audio_PatternEvent*);
+
 
 /// a list of event entries ordered by position in beat unit
 typedef psy_List PatternNode;

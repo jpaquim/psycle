@@ -73,11 +73,6 @@ typedef struct {
 } TrackerMetrics;
 
 typedef struct {
-	int cmdnum;	
-} TrackConfig;
-
-
-typedef struct {
 	psy_ui_Component component;
 	int dx;	
 	unsigned int numtracks;
@@ -156,10 +151,31 @@ typedef struct {
 	int wrapeditcolumn;
 	int wrapclearcolumn;
 	uintptr_t emptyvalue;
-} TrackerColumnDef;
+} TrackColumnDef;
 
-void trackercolumndef_init(TrackerColumnDef*, int numdigits, int numchars,
+typedef struct {
+	TrackColumnDef note;
+	TrackColumnDef inst;
+	TrackColumnDef mach;
+	TrackColumnDef vol;
+	TrackColumnDef cmd;
+	TrackColumnDef param;	
+	int numfx;
+} TrackDef;
+
+void trackdef_init(TrackDef*);
+
+void trackercolumndef_init(TrackColumnDef*, int numdigits, int numchars,
 	int marginright, int wrapeditcol, int wrapclearcol, int emptyvalue);
+
+typedef struct {
+	int playbar;
+	int cursor;
+	int selection;
+	int beat;
+	int beat4;
+	int mid;
+} TrackerColumnFlags;
 
 typedef struct {
    psy_ui_Component component;   
@@ -173,7 +189,6 @@ typedef struct {
    PatternEditPosition cursor;
    psy_dsp_beat_t cursorstep;   
    psy_audio_Player* player;   
-   TrackerColumnDef coldefs[TRACKER_COLUMN_END];   
    struct TrackerView* view;
    PatternSelection selection;
    int hasselection;
@@ -211,7 +226,8 @@ typedef struct TrackerView {
 	psy_List* sublines;
 	psy_Table screenlines;
 	TrackerMetrics metrics;
-	psy_Table trackconfigs;
+	psy_Table trackconfigs;	
+	TrackDef defaulttrackdef;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);
