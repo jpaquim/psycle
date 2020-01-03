@@ -38,7 +38,7 @@ static void player_unloadeventdrivers(psy_audio_Player*);
 static psy_dsp_amp_t* work(psy_audio_Player*, int* numsamples, int* stop);
 static void player_workamount(psy_audio_Player*, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples);
-static void player_eventdriverinput(psy_audio_Player*, EventDriver* sender);
+static void player_oneventdriverinput(psy_audio_Player*, EventDriver* sender);
 static void workeventinput(psy_audio_Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(psy_audio_Player*, uintptr_t amount);
 static void player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
@@ -59,11 +59,12 @@ void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 	player_initdriver(self);	
 	eventdrivers_init(&self->eventdrivers, handle);
 	psy_signal_connect(&self->eventdrivers.signal_input, self,
-		player_eventdriverinput);
+		player_oneventdriverinput);
 	player_initsignals(self);
 	player_initrms(self);
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
+	pattern_init(&self->patterndefaults);
 }
 
 void player_initdriver(psy_audio_Player* self)
@@ -99,6 +100,7 @@ void player_dispose(psy_audio_Player* self)
 	player_disposerms(self);
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
+	pattern_dispose(&self->patterndefaults);
 }
 
 void player_disposerms(psy_audio_Player* self)
@@ -277,7 +279,7 @@ psy_dsp_RMSVol* player_rmsvol(psy_audio_Player* self, size_t slot)
 }
 
 // event driver callback
-void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
+void player_oneventdriverinput(psy_audio_Player* self, EventDriver* sender)
 {
 	psy_Properties* notes;
 	EventDriverCmd cmd;	
@@ -301,7 +303,7 @@ void player_eventdriverinput(psy_audio_Player* self, EventDriver* sender)
 				? machines_slot(&self->song->machines)
 				: 0),
 			NOTECOMMANDS_VOL_EMPTY,
-			0, 0);
+			0, 0);		
 		if (self->multichannelaudition) {
 			if (event.note < NOTECOMMANDS_RELEASE) {
 				if (psy_table_exists(&self->notestotracks, event.note)) {

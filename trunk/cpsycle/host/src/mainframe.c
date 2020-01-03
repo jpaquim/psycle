@@ -113,7 +113,13 @@ void mainframe_init(MainFrame* self)
 	self->client.defaultpropagation = 1;
 	ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
 	ui_component_enablealign(&self->client);
-	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);
+	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);	
+	stepsequencerbar_init(&self->stepsequencerbar, &self->client,
+		&self->workspace);
+	ui_component_setalign(&self->stepsequencerbar.component, UI_ALIGN_BOTTOM);	
+	if (!workspace_showstepsequencer(&self->workspace)) {
+		ui_component_hide(&self->stepsequencerbar.component);
+	}	
 	// tabbars			
 	{
 		ui_margin spacing;
@@ -183,8 +189,7 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
 		mainframe_onplugineditor);
 	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
-		mainframe_ongearcreate);	
-
+		mainframe_ongearcreate);
 	mainframe_setstartpage(self);
 	if (self->workspace.song) {
 		mainframe_setstatusbartext(self,
@@ -576,6 +581,14 @@ void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
 void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
 	psy_Properties* property)
 {	
+	if (strcmp(psy_properties_key(property), "showstepsequencer") == 0) {
+		if (workspace_showstepsequencer(&self->workspace)) {
+			ui_component_show(&self->stepsequencerbar.component);
+		} else {
+			ui_component_hide(&self->stepsequencerbar.component);
+		}
+		ui_component_align(&self->client);
+	}
 	if (strcmp(psy_properties_key(property), "trackscopes") == 0) {
 		if (workspace_showtrackscopes(&self->workspace)) {
 			ui_component_show(&self->trackscopeview.component);

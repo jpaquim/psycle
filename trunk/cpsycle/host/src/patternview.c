@@ -167,7 +167,7 @@ void patternview_init(PatternView* self,
 	psy_signal_connect(&self->component.signal_size, self, patternview_onsize);	
 	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
 	InitPatternProperties(&self->properties, &self->notebook.component, 0);
-	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));		
+	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));
 	psy_signal_connect(&self->properties.closebutton.signal_clicked, self, patternview_onpropertiesclose);
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self, patternview_onpropertiesapply);	
 	// Tabbar
@@ -259,21 +259,23 @@ void patternview_onlpbchanged(PatternView* self, psy_audio_Player* sender, uintp
 
 void patternview_onsongchanged(PatternView* self, Workspace* workspace)
 {
+	psy_audio_Pattern* pattern;
 	SequenceSelection selection;	
 	
 	selection = workspace_sequenceselection(workspace);	
 	if (selection.editposition.trackposition.tracknode) {
 		SequenceEntry* entry;
 
-		entry = (SequenceEntry*) selection.editposition.trackposition.tracknode->entry;
-		patternview_setpattern(self, patterns_at(&workspace->song->patterns,
-			entry->pattern));	
+		entry = (SequenceEntry*)
+			selection.editposition.trackposition.tracknode->entry;
+		pattern = patterns_at(&workspace->song->patterns, entry->pattern);	
 	} else {
-		patternview_setpattern(self, 0);
+		pattern = 0;
 	}
+	patternview_setpattern(self, pattern);
 	self->trackerview.sequenceentryoffset = 0.f;
 	self->pianoroll.sequenceentryoffset = 0.f;
-	self->pianoroll.pattern = self->trackerview.pattern;	
+	self->pianoroll.pattern = pattern;
 	ui_component_invalidate(&self->component);	
 }
 

@@ -87,7 +87,7 @@ void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_a
 	
 void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
 {
-	if (is_aligned(dst, 16)) {
+	if (is_aligned(dst, 16) && (num % 4 == 0)) {
 		const __m128 zeroval = _mm_set_ps1(0.0f);
 		while (num > 0)
 		{
@@ -157,7 +157,7 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 //same method, for a single buffer (allowing to calculate max for each buffer). samples need to be aligned by 16 in optimized paths.
 float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 {
-	if (is_aligned(pSamples, 16)) {
+	if (is_aligned(pSamples, 16) && (numSamples % 4 == 0)) {
 		return noopt.maxvol(pSamples, numSamples);
 	} else {
 #if defined SSE
@@ -250,7 +250,7 @@ void dsp_accumulate(psy_dsp_big_amp_t* accumleft,
 	{
 		return;
 	}
-	if (!is_aligned(pSamplesL, count) || is_aligned(pSamplesR, count)) {
+	if ((count % 4 != 0) || !is_aligned(pSamplesL, count) || is_aligned(pSamplesR, count)) {
 		noopt.accumulate(accumleft, accumright, pSamplesL, pSamplesR, count);
 	} else {
 		float result;
