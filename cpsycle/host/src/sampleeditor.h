@@ -59,7 +59,7 @@ typedef struct SampleEditor {
 	psy_audio_Sample* sample;
 	psy_audio_Sampler sampler;
 	psy_audio_Buffer samplerbuffer;
-	psy_audio_PatternEvent samplerevent;
+	psy_audio_PatternEntry samplerentry;
 	psy_List* samplerevents;
 	Workspace* workspace;
 } SampleEditor;

@@ -331,6 +331,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {						
 	self->sample = 0;
+	self->samplerevents = 0;
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_destroy, self, sampleeditor_ondestroy);
@@ -363,8 +364,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
 		self->samplerbuffer.samples[c] = dsp.memory_alloc(MAX_STREAM_SIZE,
 			sizeof(float));
-	}
-	self->samplerevents = 0;
+	}	
 }
 
 void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
@@ -376,7 +376,7 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
 		dsp.memory_dealloc(self->samplerbuffer.samples[c]);
 	}
-	buffer_dispose(&self->samplerbuffer);
+	buffer_dispose(&self->samplerbuffer);	
 }
 
 void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
@@ -432,30 +432,35 @@ void sampleeditor_connectmachinessignals(SampleEditor* self,
 void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song && self->sample) {
+		psy_audio_PatternEvent event;
 		lock_enter();
 		psy_list_free(self->samplerevents);
-		patternevent_init(&self->samplerevent, 
+		patternevent_init(&event,
 			(unsigned char) 60,
 			(unsigned char) instruments_slot(&self->workspace->song->instruments),
 			NOTECOMMANDS_MACH_EMPTY,
 			NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	
-		self->samplerevents = psy_list_create(&self->samplerevent);
+		patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
+		self->samplerevents = psy_list_create(&self->samplerentry);
 		lock_leave();
 	}
 }
 
 void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 {	
+	psy_audio_PatternEvent event;
+
 	lock_enter();
 	psy_list_free(self->samplerevents);
-	patternevent_init(&self->samplerevent, 
+	patternevent_init(&event,
 		NOTECOMMANDS_RELEASE,
 		0,		
 		NOTECOMMANDS_MACH_EMPTY,
 		NOTECOMMANDS_VOL_EMPTY,
 		0, 0);	
-	self->samplerevents = psy_list_create(&self->samplerevent);
+	self->samplerevents = psy_list_create(&self->samplerentry);
+	patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
 	lock_leave();
 }
 
@@ -467,10 +472,13 @@ void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 	buffercontext_init(&samplerbc, self->samplerevents, 0,
 		&self->samplerbuffer, bc->numsamples, 16, 0);
 	buffer_clearsamples(&self->samplerbuffer, bc->numsamples);
-	self->sampler.custommachine.machine.vtable->work(
-		&self->sampler.custommachine.machine, &samplerbc);
+	machine_work(&self->sampler.custommachine.machine, &samplerbc);
 	buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
-		(psy_dsp_amp_t)1.f);
+		(psy_dsp_amp_t) 1.f);
+	if (self->samplerevents) {
+		patternentry_dispose(&self->samplerentry);
+	}
 	psy_list_free(self->samplerevents);
 	self->samplerevents = 0;
+	
 }

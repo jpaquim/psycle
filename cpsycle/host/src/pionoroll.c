@@ -85,7 +85,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	pianogrid_init(&self->grid, &self->component, self);		
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_onlpbchanged);
-	pianoroll_updatemetrics(self);
+	pianoroll_updatemetrics(self);	
 	ui_component_starttimer(&self->component, TIMERID_PIANOROLL, 100);
 }
 
@@ -286,6 +286,7 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 	int track;	
 
 	for (track = 0; track < 64; ++track) {
+		patternentry_init(&channel[track]);
 		channel[track].offset = -1.0f;		
 	}	
 	if (self->view->pattern) {
@@ -294,7 +295,7 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 		while (curr) {			
 			psy_audio_PatternEntry* entry;
 			
-			entry = (psy_audio_PatternEntry*)(curr->entry);			
+			entry = (psy_audio_PatternEntry*)(curr->entry);
 			if (channel[entry->track].offset != -1.0f) {
 				pianogrid_drawevent(self, g,
 					patternentry_front(&channel[entry->track]),
@@ -320,6 +321,10 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 				channel[track].offset,
 				self->view->pattern->length - channel[track].offset);			
 		}
+	}
+	for (track = 0; track < 64; ++track) {
+		patternentry_dispose(&channel[track]);
+		channel[track].offset = -1.0f;		
 	}
 }
 

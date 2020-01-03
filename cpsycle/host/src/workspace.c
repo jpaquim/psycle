@@ -205,7 +205,7 @@ void workspace_dispose(Workspace* self)
 	undoredo_dispose(&self->undoredo);
 	history_dispose(&self->history);
 	workspace_disposesignals(self);
-	pattern_dispose(&self->patternpaste);
+	pattern_dispose(&self->patternpaste);	
 	workspace_disposesequencepaste(self);
 	properties_free(self->cmds);
 	lock_dispose();
@@ -393,6 +393,8 @@ void workspace_makegeneral(Workspace* self)
 	psy_properties_settext(p, "Show Maximized at Startup");
 	p = psy_properties_append_bool(self->general, "showplaylisteditor", 0);
 	psy_properties_settext(p, "Show Playlist Editor");
+	p = psy_properties_append_bool(self->general, "showstepsequencer", 1);
+	psy_properties_settext(p, "Show Sequencestepbar");
 }
 
 void workspace_makevisual(Workspace* self)
@@ -846,6 +848,11 @@ int workspace_showmaximizedatstart(Workspace* self)
 int workspace_showplaylisteditor(Workspace* self)
 {	
 	return psy_properties_bool(self->config, "general.showplaylisteditor", 0);
+}
+
+int workspace_showstepsequencer(Workspace* self)
+{	
+	return psy_properties_bool(self->config, "general.showstepsequencer", 0);
 }
 
 int workspace_showlinenumbers(Workspace* self)

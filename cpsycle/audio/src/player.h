@@ -34,7 +34,8 @@ typedef struct {
 	int recordingnotes;
 	int multichannelaudition;	
 	psy_Table notestotracks;
-	psy_Table trackstonotes;	
+	psy_Table trackstonotes;
+	psy_audio_Pattern patterndefaults;
 } psy_audio_Player;
 
 // init dispose

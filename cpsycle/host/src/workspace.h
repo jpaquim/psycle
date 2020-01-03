@@ -92,7 +92,7 @@ typedef struct {
 	int currview;
 	psy_List* currnavigation;
 	int navigating;
-	int chordmode;
+	int chordmode;	
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -112,6 +112,7 @@ int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);
 int workspace_showmaximizedatstart(Workspace*);
 int workspace_showplaylisteditor(Workspace*);
+int workspace_showstepsequencer(Workspace*);
 int workspace_showlinenumbers(Workspace*);
 int workspace_showbeatoffset(Workspace*);
 int workspace_showlinenumbercursor(Workspace*);

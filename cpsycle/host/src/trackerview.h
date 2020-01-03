@@ -177,6 +177,11 @@ typedef struct {
 	int mid;
 } TrackerColumnFlags;
 
+typedef enum {
+	TRACKERGRID_EDITMODE_LOCAL,
+	TRACKERGRID_EDITMODE_SONG
+} TrackerGridEditMode;
+
 typedef struct {
    psy_ui_Component component;   
    int dx;
@@ -194,6 +199,8 @@ typedef struct {
    int hasselection;
    int midline;   
    int chordbegin;
+   psy_audio_Pattern* pattern;
+   TrackerGridEditMode editmode;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
@@ -207,9 +214,9 @@ typedef struct TrackerView {
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
+	TrackerGrid griddefaults;
 	TrackerGrid grid;
-	PatternBlockMenu blockmenu;
-	psy_audio_Pattern* pattern;
+	PatternBlockMenu blockmenu;	
 	TrackerSkin skin;	
 	int showlinenumbers;
 	int showlinenumbercursor;

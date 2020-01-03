@@ -67,7 +67,7 @@ void skin_load(psy_Properties* properties, const char* path)
 	FILE* hfile;
 	char buf[512];
 
-	if ((hfile=fopen(path,"rw")) == NULL )
+	if ((hfile=fopen(path,"rb")) == NULL )
 	{
 //		MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 		return;

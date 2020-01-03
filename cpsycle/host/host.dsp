@@ -288,6 +288,10 @@ SOURCE=.\src\stepbox.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\stepsequencerbar.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\tabbar.c
 # End Source File
 # Begin Source File
@@ -553,6 +557,10 @@ SOURCE=.\src\songtrackbar.h
 # Begin Source File
 
 SOURCE=.\src\stepbox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\stepsequencerbar.h
 # End Source File
 # Begin Source File
 

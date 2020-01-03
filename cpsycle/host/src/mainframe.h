@@ -23,6 +23,7 @@
 #include "plugineditor.h"
 #include "patternview.h"
 #include "sequenceview.h"
+#include "stepsequencerbar.h"
 #include "samplesview.h"
 #include "instrumentview.h"
 #include "settingsview.h"
@@ -58,6 +59,7 @@ typedef struct {
 	PlayBar playbar;
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;
+	StepsequencerBar stepsequencerbar;
 	SequenceView sequenceview;
 	MachineView machineview;
 	PatternView patternview;		
