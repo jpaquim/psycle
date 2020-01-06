@@ -150,6 +150,7 @@ void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
 void workspace_addhistory(Workspace*);
 const char* workspace_songs_directory(Workspace*);
+const char* workspace_samples_directory(Workspace*);
 const char* workspace_plugins_directory(Workspace*);
 const char* workspace_luascripts_directory(Workspace*);
 const char* workspace_vsts32_directory(Workspace*);

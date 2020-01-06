@@ -44,7 +44,7 @@ static void vtable_init(ParamView* self)
 	}
 }
 
-static psy_ui_Bitmap knobs;
+psy_ui_Bitmap knobs;
 static psy_ui_Bitmap mixer;
 
 void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine* machine,

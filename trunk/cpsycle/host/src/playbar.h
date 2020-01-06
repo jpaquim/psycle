@@ -5,15 +5,20 @@
 #define PLAYBAR_H
 
 #include "uibutton.h"
+#include "uicombobox.h"
+#include "uiedit.h"
 #include "workspace.h"
 
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Button loop;
+	psy_ui_ComboBox playmode;	
+	psy_ui_Edit loopbeatsedit;	
+	psy_ui_Button loopbeatsless;
+	psy_ui_Button loopbeatsmore;
 	psy_ui_Button recordnotes;
-	psy_ui_Button play;
-	psy_ui_Button playsel;
-	psy_ui_Button stop;	
+	psy_ui_Button play;	
+	psy_ui_Button stop;
 	psy_audio_Player* player;
 	Workspace* workspace;
 } PlayBar;

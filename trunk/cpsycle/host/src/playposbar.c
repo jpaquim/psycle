@@ -22,10 +22,10 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	ui_component_enablealign(&self->component);
 	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	self->player = player;		
-	ui_label_init(&self->header, &self->component);		
-	ui_label_settext(&self->header, "Player position");	
+	//ui_label_init(&self->header, &self->component);		
+	//ui_label_settext(&self->header, "");	
 	ui_label_init(&self->position, &self->component);
-	ui_label_setcharnumber(&self->position, 10);
+	ui_label_setcharnumber(&self->position, 8);
 	self->lastposition = -1.0f;
 	psy_signal_connect(&self->component.signal_timer, self,
 		playposbar_ontimer);
@@ -41,7 +41,7 @@ void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender, int timerid)
 	if (self->lastposition != player_position(self->player)) {
 		char text[20];
 
-		psy_snprintf(text, 10, "%.4f", player_position(self->player));
+		psy_snprintf(text, 10, "%.3f", player_position(self->player));
 		ui_label_settext(&self->position, text);
 		self->lastposition = player_position(self->player);
 	}

@@ -166,7 +166,15 @@ uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader
 				} else {
 					note = 255;
 				}
-				patternevent_init(&ev, note, instr, 0, 0x80, 0, 0);
+				patternevent_init_all(
+					&ev,
+					note,
+					instr,
+					0,
+					0x80,
+					(uint8_t) NOTECOMMANDS_GATE_EMPTY,
+					0,
+					0);
 				if (!patternevent_empty(&ev)) {
 					node = pattern_insert(pattern, node, track, line * bpl, &ev);
 				}

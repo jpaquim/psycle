@@ -222,13 +222,13 @@ void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	if (!machine_bypassed(vstplugin_base(self))) {		
 		processevents(self, bc);					
 		// add to buffer memory
-		if (bc->output) {		
+		if (bc->output && bc->output->numchannels > 0) {
 			if (machine_buffermemory(vstplugin_base(self))) {
 				buffer_insertsamples(
 					machine_buffermemory(vstplugin_base(self)),
-					bc->output,
-					machine_buffermemorysize(vstplugin_base(self)),
-					bc->numsamples);
+						bc->output,
+						machine_buffermemorysize(vstplugin_base(self)),
+						bc->numsamples);
 			}
 		}
 	}
@@ -379,9 +379,11 @@ void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		}
 		self->effect->dispatcher(self->effect, effProcessEvents, 0, 0,
 			self->events, 0);
-		self->effect->processReplacing(self->effect,
-			bc->output->samples, bc->output->samples,			
-			bc->numsamples);
+		if (bc->output->numchannels > 0) {
+			self->effect->processReplacing(self->effect,
+				bc->output->samples, bc->output->samples,			
+				bc->numsamples);
+		}
 		if (bc->output->offset > 0) {
 			for (c = 0; c < bc->output->numchannels; ++c) {
 				bc->output->samples[c] = bc->output->samples[c] - bc->output->offset;

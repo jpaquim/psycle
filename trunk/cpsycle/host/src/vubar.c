@@ -9,9 +9,9 @@ void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	ui_component_init(&self->component, parent);
 	vumeter_init(&self->vumeter, &self->component, workspace);
-	ui_component_setposition(&self->vumeter.component, 0, 00, 180, 20);	
+	ui_component_setposition(&self->vumeter.component, 0, 00, 170, 20);	
 	volslider_init(&self->volslider, &self->component, workspace);
-	ui_component_setposition(&self->volslider.component, 0, 20, 180, 20);	
+	ui_component_setposition(&self->volslider.component, 0, 20, 170, 20);	
 	clipbox_init(&self->clipbox, &self->component, workspace);
-	ui_component_setposition(&self->clipbox.component, 185, 5, 10, 35);
+	ui_component_setposition(&self->clipbox.component, 175, 5, 10, 35);
 }

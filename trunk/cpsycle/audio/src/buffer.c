@@ -169,16 +169,20 @@ void buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uint
 			dsp.add(self->samples[c], self->samples[c] + numsourcesamples, diff, 
 				rangefactor);
 			dsp.clear(self->samples[c], numsourcesamples);
-			dsp.add(source->samples[c], self->samples[c], numsourcesamples, 
+			if (c < source->numchannels) {
+				dsp.add(source->samples[c], self->samples[c], numsourcesamples, 
 				rangefactor);
+			}
 		}
 	} else {
 		uintptr_t c;
 
 		for (c = 0; c < self->numchannels; ++c) {
-			dsp.clear(self->samples[c], numsamples);			
-			dsp.add(source->samples[c], self->samples[c], numsamples,
-				rangefactor);	
+			dsp.clear(self->samples[c], numsamples);
+			if (c < source->numchannels) {
+				dsp.add(source->samples[c], self->samples[c], numsamples,
+					rangefactor);
+			}
 		}
 	}
 }

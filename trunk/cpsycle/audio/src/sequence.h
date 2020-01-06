@@ -69,7 +69,7 @@ typedef struct SequenceSelection {
 
 typedef struct psy_audio_Sequence {
 	SequenceTracks* tracks;
-	psy_audio_Patterns* patterns;	
+	psy_audio_Patterns* patterns;
 } psy_audio_Sequence;
 
 void sequence_init(psy_audio_Sequence*, psy_audio_Patterns*);

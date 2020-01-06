@@ -10,6 +10,7 @@
 
 typedef enum {
 	SEQUENCERPLAYMODE_PLAYALL,
+	SEQUENCERPLAYMODE_PLAYNUMBEATS,
 	SEQUENCERPLAYMODE_PLAYSEL
 } SequencerPlayMode;
 
@@ -25,7 +26,7 @@ typedef struct {
 
 typedef struct {
 	int active;
-	int count;
+	int count;	
 	psy_dsp_beat_t offset;	
 } SequencerLoop;
 
@@ -61,6 +62,9 @@ typedef struct {
 	SequenceRowDelay rowdelay;
 	SequencerLoop loop;
 	psy_Table lastmachine;
+	psy_dsp_beat_t playbeatloopstart;
+	psy_dsp_beat_t playbeatloopend;
+	psy_dsp_beat_t numplaybeats;
 } psy_audio_Sequencer;
 
 void sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*, psy_audio_Machines*);
@@ -73,6 +77,7 @@ void sequencer_setposition(psy_audio_Sequencer*, psy_dsp_beat_t position);
 psy_dsp_beat_t sequencer_position(psy_audio_Sequencer*);
 void sequencer_start(psy_audio_Sequencer*);
 void sequencer_stop(psy_audio_Sequencer*);
+void sequencer_setnumplaybeats(psy_audio_Sequencer*, psy_dsp_beat_t);
 psy_List* sequencer_tickevents(psy_audio_Sequencer*);
 psy_List* sequencer_machinetickevents(psy_audio_Sequencer*, uintptr_t slot);
 psy_List* sequencer_timedevents(psy_audio_Sequencer*, uintptr_t slot,
@@ -98,5 +103,6 @@ void sequencer_stoploop(psy_audio_Sequencer*);
 int sequencer_looping(psy_audio_Sequencer*);
 SequencerPlayMode sequencer_playmode(psy_audio_Sequencer*);
 psy_dsp_beat_t sequencer_beatspersample(psy_audio_Sequencer*);
+void sequencer_checkiterators(psy_audio_Sequencer*, PatternNode*);
 
 #endif

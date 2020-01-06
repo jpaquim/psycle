@@ -64,7 +64,7 @@ static const uint32_t SAMPLERVERSION = 0x00000002;
 static psy_audio_MachineInfo const MacInfo = {
 	MI_VERSION,
 	0x0250,
-	GENERATOR | 32 | 64,
+	GENERATOR | 32 | 64 | MACH_SUPPORTS_INSTRUMENTS,
 	MACHMODE_GENERATOR,
 	"Sampler"
 		#ifndef NDEBUG

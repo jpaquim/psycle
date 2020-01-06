@@ -14,6 +14,7 @@
 #include <operations.h>
 
 #define PSYCLE_SONGS_DEFAULT_DIR "C:\\Programme\\Psycle\\Songs"
+#define PSYCLE_SAMPLES_DEFAULT_DIR "C:\\Programme\\Psycle\\Samples"
 #define PSYCLE_PLUGINS_DEFAULT_DIR "C:\\Programme\\Psycle\\PsyclePlugins"
 #define PSYCLE_LUASCRIPTS_DEFAULT_DIR "C:\\Programme\\Psycle\\LuaScripts"
 #define PSYCLE_VSTS32_DEFAULT_DIR "C:\\Programme\\Psycle\\VstPlugins"
@@ -499,6 +500,13 @@ void workspace_makedirectories(Workspace* self)
 			"songs",
 			PSYCLE_SONGS_DEFAULT_DIR),
 		"Song directory"),
+		PSY_PROPERTY_HINT_EDITDIR);
+	psy_properties_sethint(psy_properties_settext(
+		psy_properties_append_string(
+			self->directories,
+			"samples",
+			PSYCLE_SAMPLES_DEFAULT_DIR),
+		"Samples directory"),
 		PSY_PROPERTY_HINT_EDITDIR);
 	psy_properties_sethint(psy_properties_settext(
 		psy_properties_append_string(
@@ -1312,6 +1320,12 @@ const char* workspace_songs_directory(Workspace* self)
 {
 	return psy_properties_readstring(self->directories, "songs",
 		PSYCLE_SONGS_DEFAULT_DIR);
+}
+
+const char* workspace_samples_directory(Workspace* self)
+{
+	return psy_properties_readstring(self->directories, "samples",
+		PSYCLE_SAMPLES_DEFAULT_DIR);
 }
 
 const char* workspace_plugins_directory(Workspace* self)

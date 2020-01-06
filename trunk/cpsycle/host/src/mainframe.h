@@ -59,7 +59,7 @@ typedef struct {
 	PlayBar playbar;
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;
-	StepsequencerBar stepsequencerbar;
+	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
 	MachineView machineview;
 	PatternView patternview;		
