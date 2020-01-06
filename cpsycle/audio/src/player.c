@@ -65,6 +65,7 @@ void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
 	pattern_init(&self->patterndefaults);
+	pattern_setlength(&self->patterndefaults, (psy_dsp_beat_t) 0.25f);
 }
 
 void player_initdriver(psy_audio_Player* self)
@@ -288,6 +289,7 @@ void player_oneventdriverinput(psy_audio_Player* self, EventDriver* sender)
 	cmd = sender->getcmd(sender, notes);
 	if (cmd.id != -1 && cmd.data.param1 < 255) {		
 		unsigned char note;
+		psy_audio_Machine* machine;
 
 		uintptr_t track = 0;
 		psy_audio_PatternEvent event;
@@ -296,13 +298,19 @@ void player_oneventdriverinput(psy_audio_Player* self, EventDriver* sender)
 			note = (unsigned char) cmd.data.param1;
 		} else {
 			note = cmd.data.param1;
-		}		
-		patternevent_init(&event, note, 255, 
-			(unsigned char) (
-			self->song
+		}
+		machine = machines_at(&self->song->machines,
+			machines_slot(&self->song->machines));
+		patternevent_init_all(&event,
+			note,
+			(uint16_t) (machine && machine_supports(machine,
+					MACH_SUPPORTS_INSTRUMENTS)
+				? instruments_slot(&self->song->instruments)
+				: NOTECOMMANDS_INST_EMPTY),
+			(uint8_t) (self->song
 				? machines_slot(&self->song->machines)
 				: 0),
-			NOTECOMMANDS_VOL_EMPTY,
+			(uint8_t) NOTECOMMANDS_VOL_EMPTY,
 			0, 0);		
 		if (self->multichannelaudition) {
 			if (event.note < NOTECOMMANDS_RELEASE) {
@@ -371,7 +379,7 @@ void workeventinput(psy_audio_Player* self, int cmd, unsigned char* data,
 		break;
 		// psy_audio_Pattern Data
 		case 2:
-			patternevent_init(&event, data[0], 255, 0, 0, 0);
+			patternevent_init_all(&event, data[0], 255, 0, 255, 0, 0);
 			note = data[1];
 			validevent = 1;
 		break;

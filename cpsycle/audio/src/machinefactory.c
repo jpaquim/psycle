@@ -22,9 +22,7 @@
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 #define _MAX_PATH 4096
-#endif    
-
-
+#endif
 
 void machinefactory_init(MachineFactory* self, MachineCallback callback,
 	psy_audio_PluginCatcher* catcher)

@@ -190,7 +190,7 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 	psy_List* p;
 	uintptr_t amount = bc->numsamples;
 	uintptr_t pos = 0;
-
+	
 	for (p = bc->events; p != 0; p = p->next) {					
 		int numworksamples;
 

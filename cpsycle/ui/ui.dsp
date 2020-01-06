@@ -145,6 +145,10 @@ SOURCE=.\src\uiimage.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiknob.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uilabel.c
 # End Source File
 # Begin Source File
@@ -250,6 +254,10 @@ SOURCE=.\src\uigroupbox.h
 # Begin Source File
 
 SOURCE=.\src\uiimage.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiknob.h
 # End Source File
 # Begin Source File
 

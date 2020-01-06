@@ -6,16 +6,18 @@
 
 #include "sample.h"
 
-#define WAVE_FORMAT_PCM     1
+#define psy_audio_WAVE_FORMAT_PCM			0x00001
+#define psy_audio_WAVE_FORMAT_FLOAT			0x00003
+#define psy_audio_WAVE_FORMAT_EXTENSIBLE	0xFFFEU;
 
 typedef struct { 
-    unsigned short wFormatTag; 
-    unsigned short nChannels; 
-    unsigned long nSamplesPerSec; 
-    unsigned long nAvgBytesPerSec; 
-    unsigned short nBlockAlign; 
-    unsigned short wBitsPerSample; 
-    unsigned short cbSize; 
+    uint16_t wFormatTag; 
+    uint16_t nChannels; 
+    uint32_t nSamplesPerSec; 
+    uint32_t nAvgBytesPerSec; 
+    uint16_t nBlockAlign; 
+    uint16_t wBitsPerSample; 
+    uint16_t cbSize; 
 } psy_audio_WaveFormatChunk; 
 
 void wave_load(psy_audio_Sample*, const char* path);

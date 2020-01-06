@@ -196,9 +196,9 @@ void pattern_remove(psy_audio_Pattern* self, PatternNode* node)
 	if (node) {
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
 		psy_list_remove(&self->events, node);
-		patternentry_dispose(entry);
+		patternentry_dispose(entry);		
 		free(entry);
-		++self->opcount;
+		++self->opcount;		
 	}
 }
 

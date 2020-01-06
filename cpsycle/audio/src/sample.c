@@ -179,6 +179,7 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 		rv->vibrato.speed = src->vibrato.speed;
 		rv->vibrato.type = src->vibrato.type;
 		rv->numframes = src->numframes;
+		rv->stereo = src->stereo;
 		buffer_init(&rv->channels, src->channels.numchannels);
 		for (c = 0; c < rv->channels.numchannels; ++c) {
 			rv->channels.samples[c] = dsp.memory_alloc(src->numframes,

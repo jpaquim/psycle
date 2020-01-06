@@ -10,6 +10,8 @@
 #include "workspace.h"
 #include <uibutton.h>
 #include <inputmap.h>
+#include <uibutton.h>
+#include <uilabel.h>
 
 #include <pattern.h>
 
@@ -203,6 +205,19 @@ typedef struct {
    TrackerGridEditMode editmode;
 } TrackerGrid;
 
+typedef struct {
+	psy_ui_Component component;
+	psy_ui_Button zoomin;
+	psy_ui_Label label;
+	psy_ui_Button zoomout;
+	psy_Signal signal_changed;
+	int zoomrate;
+	int zoomstep;
+} ZoomBox;
+
+void zoombox_init(ZoomBox*, psy_ui_Component* parent);
+double zoombox_rate(ZoomBox*);
+
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	struct TrackerView*, psy_audio_Player*);
 
@@ -235,6 +250,7 @@ typedef struct TrackerView {
 	TrackerMetrics metrics;
 	psy_Table trackconfigs;	
 	TrackDef defaulttrackdef;
+	ZoomBox zoombox;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);

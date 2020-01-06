@@ -59,6 +59,8 @@ static void trackergrid_adjustscroll(TrackerGrid*);
 static double trackergrid_offset(TrackerGrid*, int y, unsigned int* lines);
 static void trackergrid_numtrackschanged(TrackerGrid*, psy_audio_Player*,
 	unsigned int numtracks);
+void trackergrid_invalidatecursor(TrackerGrid*,
+	const PatternEditPosition* cursor);
 
 static void trackerview_initfont(self);
 static void trackerview_setfont(TrackerView*, ui_font*);
@@ -69,6 +71,9 @@ static void trackerview_onkeydown(TrackerView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void trackerview_onkeyup(TrackerView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
+static void trackerview_onscroll(TrackerView*, psy_ui_Component* sender,
+	int stepx, int stepy);
+static void trackerview_onzoomboxchanged(TrackerView*, ZoomBox* sender);
 static void trackerview_ontimer(TrackerView*, psy_ui_Component* sender, 
 	int timerid);
 static void trackerview_onalign(TrackerView*, psy_ui_Component* sender);
@@ -202,6 +207,13 @@ static int testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 static psy_ui_ComponentVtable trackergrid_vtable;
 static int trackergrid_vtable_initialized = 0;
 
+// zoombox
+static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
+static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
+static double zoombox_rate(ZoomBox*);
+static void zoombox_updatelabel(ZoomBox*);
+
+
 static void trackergrid_vtable_init(TrackerGrid* self)
 {
 	if (!trackergrid_vtable_initialized) {
@@ -298,7 +310,8 @@ static void InsertCommandExecute(InsertCommand*);
 static void InsertCommandRevert(InsertCommand*);
 
 InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
-	PatternEditPosition cursor, psy_audio_PatternEvent event, Workspace* workspace)
+	PatternEditPosition cursor, psy_audio_PatternEvent event,
+	Workspace* workspace)
 {
 	InsertCommand* rv;
 	
@@ -352,7 +365,9 @@ void InsertCommandRevert(InsertCommand* self)
 			(psy_dsp_beat_t)self->bpl, &prev);
 	if (node) {
 		if (self->insert) {		
-			pattern_remove(self->pattern, node);		
+			pattern_remove(self->pattern, node);
+			sequencer_checkiterators(&self->workspace->player.sequencer,
+				node);
 		} else {				
 			pattern_setevent(self->pattern, node, &self->oldevent);		
 		}
@@ -938,25 +953,27 @@ void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g,
 
 void trackergrid_adjustscroll(TrackerGrid* self)
 {
-	ui_size size;	
-	int vscrollmax;
-	int stepx;
-	size = ui_component_size(&self->component);		
-	ui_component_sethorizontalscrollrange(&self->component, 0,
-		self->numtracks - self->view->metrics.visitracks);
-	vscrollmax = trackerview_numlines(self->view);
-	if (!self->midline) {
-		vscrollmax -= self->view->metrics.visilines;
-	} else {
-		vscrollmax -= 1;
+	if (self->editmode == TRACKERGRID_EDITMODE_SONG) {
+		ui_size size;	
+		int vscrollmax;
+		int stepx;
+		size = ui_component_size(&self->component);		
+		ui_component_sethorizontalscrollrange(&self->component, 0,
+			self->numtracks - self->view->metrics.visitracks);
+		vscrollmax = trackerview_numlines(self->view);
+		if (!self->midline) {
+			vscrollmax -= self->view->metrics.visilines;
+		} else {
+			vscrollmax -= 1;
+		}
+		ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
+		if (self->midline) {		
+			trackerview_centeroncursor(self->view);
+		}
+		stepx = -self->dx / self->view->metrics.trackwidth;
+		ui_component_sethorizontalscrollposition(&self->component,
+			stepx > 0 ? stepx : 0);
 	}
-	ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
-	if (self->midline) {		
-		trackerview_centeroncursor(self->view);
-	}
-	stepx = -self->dx / self->view->metrics.trackwidth;
-	ui_component_sethorizontalscrollposition(&self->component,
-		stepx > 0 ? stepx : 0);
 }
 
 void trackerview_centeroncursor(TrackerView* self)
@@ -1091,6 +1108,8 @@ void trackergrid_prevcol(TrackerGrid* self)
 	if (self->editmode == TRACKERGRID_EDITMODE_SONG) {
 		workspace_setpatterneditposition(self->view->workspace, self->cursor);	
 		if (invalidate) {
+			trackergrid_invalidatecursor(self, &oldcursor);
+			trackergrid_invalidatecursor(self, &self->cursor);
 			trackerview_invalidatecursor(self->view, &oldcursor);
 			trackerview_invalidatecursor(self->view, &self->cursor);
 		}
@@ -1133,8 +1152,10 @@ void trackergrid_nextcol(TrackerGrid* self)
 		workspace_setpatterneditposition(self->view->workspace,
 			self->cursor);
 		if (invalidate) {
+			trackergrid_invalidatecursor(self, &oldcursor);
+			trackergrid_invalidatecursor(self, &self->cursor);
 			trackerview_invalidatecursor(self->view, &oldcursor);
-			trackerview_invalidatecursor(self->view, &self->cursor);
+			trackerview_invalidatecursor(self->view, &self->cursor);	
 		}
 	}
 }
@@ -1169,8 +1190,10 @@ void trackerview_prevlines(TrackerView* self, uintptr_t lines, int wrap)
 		trackerview_scrollup(self);
 	}
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
+	trackergrid_invalidatecursor(&self->grid, &oldcursor);
+	trackergrid_invalidatecursor(&self->grid, &self->grid.cursor);
 	trackerview_invalidatecursor(self, &oldcursor);
-	trackerview_invalidatecursor(self, &self->grid.cursor);	
+	trackerview_invalidatecursor(self, &self->grid.cursor);
 }
 
 void trackerview_advanceline(TrackerView* self)
@@ -1202,8 +1225,10 @@ void trackerview_advancelines(TrackerView* self, uintptr_t lines, int wrap)
 		trackerview_scrolldown(self);
 	}
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
+	trackergrid_invalidatecursor(&self->grid, &oldcursor);
+	trackergrid_invalidatecursor(&self->grid, &self->grid.cursor);
 	trackerview_invalidatecursor(self, &oldcursor);
-	trackerview_invalidatecursor(self, &self->grid.cursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);	
 }
 
 void trackerview_home(TrackerView* self)
@@ -1214,8 +1239,10 @@ void trackerview_home(TrackerView* self)
 	self->grid.cursor.offset = 0;
 	trackerview_scrollup(self);	
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
+	trackergrid_invalidatecursor(&self->grid, &oldcursor);
+	trackergrid_invalidatecursor(&self->grid, &self->grid.cursor);
 	trackerview_invalidatecursor(self, &oldcursor);
-	trackerview_invalidatecursor(self, &self->grid.cursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);	
 }
 
 void trackerview_end(TrackerView* self)
@@ -1226,8 +1253,10 @@ void trackerview_end(TrackerView* self)
 	self->grid.cursor.offset = self->grid.pattern->length - self->grid.bpl;
 	trackerview_scrolldown(self);	
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);
+	trackergrid_invalidatecursor(&self->grid, &oldcursor);
+	trackergrid_invalidatecursor(&self->grid, &self->grid.cursor);
 	trackerview_invalidatecursor(self, &oldcursor);
-	trackerview_invalidatecursor(self, &self->grid.cursor);
+	trackerview_invalidatecursor(self, &self->grid.cursor);	
 }
 
 void trackerview_selectall(TrackerView* self)
@@ -1349,6 +1378,8 @@ void trackerview_prevtrack(TrackerView* self)
 		invalidate = trackerview_scrollright(self);
 	}
 	if (invalidate) {
+		trackergrid_invalidatecursor(&self->grid, &oldcursor);
+		trackergrid_invalidatecursor(&self->grid, &self->grid.cursor);
 		trackerview_invalidatecursor(self, &oldcursor);
 		trackerview_invalidatecursor(self, &self->grid.cursor);
 	}
@@ -1374,6 +1405,8 @@ void trackerview_nexttrack(TrackerView* self)
 	}
 	workspace_setpatterneditposition(self->workspace, self->grid.cursor);		
 	if (invalidate) {
+		trackergrid_invalidatecursor(&self->grid, &oldcursor);
+		trackergrid_invalidatecursor(&self->grid, &self->grid.cursor);
 		trackerview_invalidatecursor(self, &oldcursor);
 		trackerview_invalidatecursor(self, &self->grid.cursor);
 	}
@@ -1386,9 +1419,12 @@ int trackerview_scrollleft(TrackerView* self)
 	
 	tracks = self->grid.cursor.track;
 	if (-self->grid.dx / self->metrics.trackwidth > tracks) {
-		self->grid.dx = -tracks * self->metrics.trackwidth;
+		self->grid.dx = -tracks * self->metrics.trackwidth;		
 		self->header.dx = self->grid.dx;
 		self->configheader.dx = self->grid.dx;
+		self->griddefaults.dx = self->grid.dx;
+		ui_component_invalidate(&self->griddefaults.component);
+		ui_component_update(&self->griddefaults.component);
 		ui_component_invalidate(&self->grid.component);
 		ui_component_update(&self->grid.component);
 		ui_component_invalidate(&self->configheader.component);
@@ -1414,6 +1450,9 @@ int trackerview_scrollright(TrackerView* self)
 		self->grid.dx = -(tracks - visitracks) * self->metrics.trackwidth;
 		self->header.dx = self->grid.dx;
 		self->configheader.dx = self->grid.dx;
+		self->griddefaults.dx = self->grid.dx;
+		ui_component_invalidate(&self->griddefaults.component);
+		ui_component_update(&self->griddefaults.component);
 		ui_component_invalidate(&self->configheader.component);
 		ui_component_update(&self->configheader.component);
 		ui_component_invalidate(&self->header.component);		
@@ -1514,6 +1553,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_Component* sender,
 				(psy_dsp_beat_t)self->grid.cursor.offset, (psy_dsp_beat_t)self->grid.bpl, &prev);		
 			if (node) {			
 				pattern_remove(self->grid.pattern, node);
+				sequencer_checkiterators(&self->workspace->player.sequencer,
+					node);
 				ui_component_invalidate(&self->linenumbers.component);
 			}
 			if (prev) {
@@ -1537,6 +1578,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_Component* sender,
 					offset = entry->offset;
 					track = entry->track;
 					pattern_remove(self->grid.pattern, p);
+					sequencer_checkiterators(&self->workspace->player.sequencer, p);
 					offset -= (psy_dsp_beat_t) self->grid.bpl;
 					node = pattern_findnode(self->grid.pattern, track,
 						offset,						
@@ -1567,6 +1609,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_Component* sender,
 				(psy_dsp_beat_t)self->grid.bpl, &prev);
 			if (node) {
 				pattern_remove(self->grid.pattern, node);
+				sequencer_checkiterators(&self->workspace->player.sequencer,
+					node);
 				ui_component_invalidate(&self->linenumbers.component);
 			}
 			trackerview_advanceline(self);	
@@ -1716,7 +1760,7 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	psy_audio_Machine* machine;
 	psy_audio_PatternEvent event;
 				
-	patternevent_init(&event,
+	patternevent_init_all(&event,
 		note,
 		NOTECOMMANDS_INST_EMPTY,
 		(unsigned char) machines_slot(&self->view->workspace->song->machines),
@@ -1790,7 +1834,7 @@ void trackergrid_inputvalue(TrackerGrid* self, int value, int digit)
 		} else {
 			trackergrid_nextcol(self);
 		}
-		trackerview_invalidatecursor(self->view, &self->cursor);
+		trackergrid_invalidatecursor(self, &self->cursor);
 		trackerview_enablesync(self->view);
 		patternentry_dispose(&newentry);
 	}
@@ -1879,18 +1923,23 @@ void entervaluecolumn(psy_audio_PatternEntry* entry, int column, int value)
 	}
 }
 
-void trackerview_invalidatecursor(TrackerView* self, const PatternEditPosition* cursor)
+void trackergrid_invalidatecursor(TrackerGrid* self,
+	const PatternEditPosition* cursor)
 {
 	int line;		
 	ui_rectangle r;		
 
-	line = trackerview_offsettoscreenline(self, cursor->offset);		
+	line = trackerview_offsettoscreenline(self->view, cursor->offset);
 	ui_setrectangle(&r,
-		trackerview_track_x(self, cursor->track) + self->grid.dx,
-		self->metrics.lineheight * line + self->grid.dy,		
-		trackerview_trackwidth(self, cursor->track),
-		self->metrics.lineheight);
-	ui_component_invalidaterect(&self->grid.component, &r);
+		trackerview_track_x(self->view, cursor->track) + self->dx,
+		self->view->metrics.lineheight * line + self->dy,
+		trackerview_trackwidth(self->view, cursor->track),
+		self->view->metrics.lineheight);
+	ui_component_invalidaterect(&self->component, &r);	
+}
+
+void trackerview_invalidatecursor(TrackerView* self, const PatternEditPosition* cursor)
+{	
 	trackerlinenumbers_invalidatecursor(&self->linenumbers, cursor);	
 }
 
@@ -1912,6 +1961,24 @@ void trackerview_invalidateline(TrackerView* self, psy_dsp_beat_t offset)
 	}
 }
 
+void trackerview_onscroll(TrackerView* self, psy_ui_Component* sender, int stepx,
+	int stepy)
+{
+	if (stepx != 0) {
+		self->header.dx = self->grid.dx;
+		self->configheader.dx = self->grid.dx;
+		self->griddefaults.dx = self->grid.dx;
+		ui_component_invalidate(&self->griddefaults.component);
+		ui_component_invalidate(&self->configheader.component);
+		ui_component_invalidate(&self->header.component);
+	}
+	if (stepy != 0) {
+		self->linenumbers.dy = self->grid.dy;
+		ui_component_invalidate(&self->linenumbers.component);		
+		ui_component_update(&self->linenumbers.component);
+	}
+}
+
 void trackergrid_onscroll(TrackerGrid* self, psy_ui_Component* sender, int stepx,
 	int stepy)
 {
@@ -1921,18 +1988,6 @@ void trackergrid_onscroll(TrackerGrid* self, psy_ui_Component* sender, int stepx
 	if (self->dx > 0) {
 		self->dx = 0;
 	}	
-
-	if (stepx != 0) {
-		self->view->configheader.dx = self->dx;
-		self->view->header.dx = self->dx;		
-		ui_component_invalidate(&self->view->configheader.component);
-		ui_component_invalidate(&self->view->header.component);		
-	}
-	if (stepy != 0) {
-		self->view->linenumbers.dy = self->dy;
-		ui_component_invalidate(&self->view->linenumbers.component);		
-		ui_component_update(&self->view->linenumbers.component);
-	}
 	if (self->midline) {
 		ui_size size;
 		int halfvisilines;	
@@ -1941,8 +1996,9 @@ void trackergrid_onscroll(TrackerGrid* self, psy_ui_Component* sender, int stepx
 			
 		size = ui_component_size(&self->component);		
 		halfvisilines = self->view->metrics.visilines / 2;
-		ui_setrectangle(&r, 0, halfvisilines * self->view->metrics.lineheight, size.width,
-			2 * self->view->metrics.lineheight);
+		ui_setrectangle(&r,
+			0, halfvisilines * self->view->metrics.lineheight,
+			size.width, self->view->metrics.lineheight * 2);
 		restoremidline = self->midline;
 		self->midline = 0;
 		ui_component_invalidaterect(&self->component, &r);
@@ -1969,8 +2025,10 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_Component* sender,
 				ui_component_invalidate(&self->component);
 			}
 			self->hasselection = 0;
+			trackergrid_invalidatecursor(self, &oldcursor);
+			trackergrid_invalidatecursor(self, &self->cursor);
 			trackerview_invalidatecursor(self->view, &oldcursor);
-			trackerview_invalidatecursor(self->view, &self->cursor);			
+			trackerview_invalidatecursor(self->view, &self->cursor);
 			ui_component_setfocus(&self->component);
 			ui_component_capture(&self->component);
 		}		
@@ -2074,9 +2132,14 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	self->griddefaults.pattern = &self->workspace->player.patterndefaults;
 	// pattern grid
 	trackergrid_init(&self->grid, &self->component, self, &workspace->player);
+	psy_signal_connect(&self->grid.component.signal_scroll, self,
+		trackerview_onscroll);
 	trackerview_computemetrics(self);
 	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, self);	
 	trackerlinenumbers_init(&self->linenumbers, &self->component, self);
+	zoombox_init(&self->zoombox, &self->component);
+	psy_signal_connect(&self->zoombox.signal_changed, self,
+		trackerview_onzoomboxchanged);
 	trackerview_initfont(self);	
 	self->header.skin = &self->skin;
 	self->configheader.skin = &self->skin;
@@ -2223,11 +2286,12 @@ void trackerview_onalign(TrackerView* self, psy_ui_Component* sender)
 	ui_size size;
 	ui_size menusize;	
 	int headerheight = 30;
-	int configheaderheight = 15;
-	int griddefaultheight = 15;
+	int configheaderheight = self->metrics.lineheight;
+	int griddefaultheight = self->metrics.lineheight;
 	int linenumberwidth = self->showlinenumbers ? 		
 		self->metrics.textwidth * 
-		(workspace_showbeatoffset(self->workspace) ? 8 : 4)	:0;
+		(workspace_showbeatoffset(self->workspace) ? 8 : 5)	:0;
+	int zoomboxheight;
 	size = ui_component_size(&self->component);
 	menusize.width = self->blockmenu.component.visible
 		? ui_component_preferredsize(&self->blockmenu.component, &size).width
@@ -2237,6 +2301,7 @@ void trackerview_onalign(TrackerView* self, psy_ui_Component* sender)
 		size.width - menusize.width,
 		0, menusize.width,
 		size.height);
+	zoomboxheight = ui_component_size(&self->zoombox.component).height;
 	// header
 	ui_component_setposition(&self->header.component,
 		linenumberwidth, 0,
@@ -2262,11 +2327,18 @@ void trackerview_onalign(TrackerView* self, psy_ui_Component* sender)
 	ui_component_setposition(&self->linenumbers.component,
 		0, headerheight + configheaderheight + griddefaultheight,
 		linenumberwidth,
-		size.height - headerheight);
+		size.height - headerheight - configheaderheight - griddefaultheight -
+		zoomboxheight);
 	// line number label
 	ui_component_resize(&self->linenumberslabel.component,
 		linenumberwidth, headerheight + configheaderheight +
 		griddefaultheight);
+	// zoombox	
+	ui_component_setposition(&self->zoombox.component,
+		0,
+		size.height - zoomboxheight,		
+		linenumberwidth,
+		zoomboxheight);
 	trackerview_computemetrics(self);
 	trackergrid_adjustscroll(&self->grid);
 }
@@ -2703,6 +2775,7 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 		ui_font_init(&font, &fontinfo);		
 		trackerview_setfont(self, &font);
 		ui_font_dispose(&font);
+		ui_component_align(&self->component);
 	}
 }
 
@@ -2926,6 +2999,8 @@ void trackerview_onblockpaste(TrackerView* self)
 	end.track += self->workspace->patternpaste.maxsongtracks;
 	end.offset += self->workspace->patternpaste.length;
 	pattern_blockremove(self->grid.pattern, begin, end);
+	// sequencer_checkiterators(&self->workspace->player.sequencer,
+	//	node);
 	while (p != 0) {			
 		psy_audio_PatternEntry* pasteentry;
 		PatternNode* node;
@@ -2987,6 +3062,8 @@ void trackerview_onblockdelete(TrackerView* self)
 		pattern_blockremove(self->grid.pattern, 
 			self->grid.selection.topleft,
 			self->grid.selection.bottomright);
+//		sequencer_checkiterators(&self->workspace->player.sequencer,
+//			node);
 		ui_component_invalidate(&self->component);
 	}	
 }
@@ -3078,6 +3155,25 @@ void trackerview_toggleblockmenu(TrackerView* self)
 	}
 }
 
+void trackerview_onzoomboxchanged(TrackerView* self, ZoomBox* sender)
+{
+	psy_Properties* pv;
+	
+	pv = psy_properties_findsection(self->workspace->config,
+		"visual.patternview");
+	if (pv) {
+		ui_fontinfo fontinfo;
+		ui_font font;
+
+		ui_fontinfo_init(&fontinfo, "Tahoma", 
+			(int) (psy_properties_int(pv, "fontsize", 80) *
+			zoombox_rate(sender)));
+		ui_font_init(&font, &fontinfo);		
+		trackerview_setfont(self, &font);
+		ui_font_dispose(&font);		
+	}
+}
+
 void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent)
 {
 	ui_component_init(&self->component, parent);
@@ -3159,7 +3255,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 	if (workspace_recordingtweaks(sender)) {		
 		psy_audio_PatternEvent event;				
 		
-		patternevent_init(&event,
+		patternevent_init_all(&event,
 			(unsigned char) (
 				workspace_recordtweaksastws(sender)
 				? NOTECOMMANDS_TWEAKSLIDE
@@ -3242,7 +3338,8 @@ void trackerview_setfont(TrackerView* self, ui_font* font)
 	ui_component_setfont(&self->linenumbers.component, font);
 	trackerview_computemetrics(self);	
 		self->grid.component.scrollstepx = self->metrics.trackwidth;
-	self->grid.component.scrollstepy = self->metrics.lineheight;	
+	self->grid.component.scrollstepy = self->metrics.lineheight;
+	ui_component_align(&self->component);
 }
 
 int trackerview_track_x(TrackerView* self, uintptr_t track)
@@ -3542,4 +3639,68 @@ TrackColumnDef* trackdef_columndef(TrackDef* self, int column)
 		break;
 	}
 	return rv;
+}
+
+void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
+{
+	ui_margin margin;
+
+	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
+		ui_value_makepx(0), ui_value_makepx(0));
+	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);
+	ui_component_resize(&self->component, 0, 20);
+	ui_button_init(&self->zoomout, &self->component);
+	ui_button_settext(&self->zoomout, "-");
+	ui_label_init(&self->label, &self->component);
+	ui_label_settext(&self->label, "100");
+	ui_button_init(&self->zoomin, &self->component);
+	ui_button_settext(&self->zoomin, "+");	
+	psy_list_free(ui_components_setalign(
+		ui_component_children(&self->component, 0),
+		UI_ALIGN_LEFT, &margin));
+	psy_signal_init(&self->signal_changed);
+	self->zoomrate = 100;
+	self->zoomstep = 50;
+	psy_signal_connect(&self->zoomin.signal_clicked, self, zoombox_onzoomin);
+	psy_signal_connect(&self->zoomout.signal_clicked, self, zoombox_onzoomout);
+}
+
+void zoombox_ondestroy(ZoomBox* self, psy_ui_Component* sender)
+{
+	psy_signal_dispose(&self->signal_changed);
+}
+
+void zoombox_onzoomin(ZoomBox* self, psy_ui_Component* sender)
+{		
+	self->zoomrate += self->zoomstep;	
+	if (self->zoomrate < 0) {
+		self->zoomrate = 0;
+	}
+	zoombox_updatelabel(self);
+	psy_signal_emit(&self->signal_changed, self, 0, self->zoomrate);
+}
+
+void zoombox_onzoomout(ZoomBox* self, psy_ui_Component* sender)
+{
+	self->zoomrate -= self->zoomstep;	
+	if (self->zoomrate > 1000) {
+		self->zoomrate = 900;
+	}
+	zoombox_updatelabel(self);
+	psy_signal_emit(&self->signal_changed, self, 0, self->zoomrate);
+}
+
+double zoombox_rate(ZoomBox* self)
+{
+	return self->zoomrate / (double) 100;
+}
+
+void zoombox_updatelabel(ZoomBox* self)
+{
+	char text[40];
+
+	psy_snprintf(text, 40, "%d", self->zoomrate);
+	ui_label_settext(&self->label, text);
 }

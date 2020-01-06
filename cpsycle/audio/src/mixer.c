@@ -391,9 +391,11 @@ void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
 					psy_audio_ReturnChannel* sendto;
 
 					sendto = (psy_audio_ReturnChannel*)psy_tableiterator_value(&sendsto_iter);
-					if (sendto) {										
-						addsamples(sendto->buffer, channel->buffer, amount, 
-							channel->volume);
+					if (sendto) {		
+						if (sendto->buffer) {
+							addsamples(sendto->buffer, channel->buffer, amount,
+								channel->volume);
+						}
 					}
 				}
 			}

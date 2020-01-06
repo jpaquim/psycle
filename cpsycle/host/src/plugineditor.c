@@ -39,7 +39,8 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 	psy_audio_Machine* machine;
 
 	machine = machines_at(machines, slot);
-	if (machine && machine->vtable->info(machine)->type == MACH_LUA) {
+	if (machine && machine_info(machine) &&
+			machine_info(machine)->type == MACH_LUA) {
 		const char* path;
 		
 		path = plugincatcher_searchpath(

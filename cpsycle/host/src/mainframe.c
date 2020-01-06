@@ -52,7 +52,6 @@ static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
 static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
 
-
 #define GEARVIEW 10
 
 enum {
@@ -114,11 +113,11 @@ void mainframe_init(MainFrame* self)
 	ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
 	ui_component_enablealign(&self->client);
 	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);	
-	stepsequencerbar_init(&self->stepsequencerbar, &self->client,
+	stepsequencerview_init(&self->stepsequencerview, &self->client,
 		&self->workspace);
-	ui_component_setalign(&self->stepsequencerbar.component, UI_ALIGN_BOTTOM);	
+	ui_component_setalign(&self->stepsequencerview.component, UI_ALIGN_BOTTOM);	
 	if (!workspace_showstepsequencer(&self->workspace)) {
-		ui_component_hide(&self->stepsequencerbar.component);
+		ui_component_hide(&self->stepsequencerview.component);
 	}	
 	// tabbars			
 	{
@@ -262,7 +261,7 @@ void mainframe_initbars(MainFrame* self)
 	
 	// Vugroup
 	vubar_init(&self->vubar, &self->top, &self->workspace);
-	ui_component_resize(&self->vubar.component, 200, 50);
+	ui_component_resize(&self->vubar.component, 190, 50);
 	ui_component_setalign(&self->vubar.component, UI_ALIGN_RIGHT);
 	// row0
 	ui_component_init(&self->toprow0, &self->top);
@@ -583,9 +582,9 @@ void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
 {	
 	if (strcmp(psy_properties_key(property), "showstepsequencer") == 0) {
 		if (workspace_showstepsequencer(&self->workspace)) {
-			ui_component_show(&self->stepsequencerbar.component);
+			ui_component_show(&self->stepsequencerview.component);
 		} else {
-			ui_component_hide(&self->stepsequencerbar.component);
+			ui_component_hide(&self->stepsequencerview.component);
 		}
 		ui_component_align(&self->client);
 	}

@@ -197,7 +197,6 @@ void sequence_dispose(psy_audio_Sequence* self)
 	psy_list_free(self->tracks);	
 }
 
-
 SequenceTrackNode* sequence_insert(psy_audio_Sequence* self, SequencePosition position,
 	int pattern)
 {		

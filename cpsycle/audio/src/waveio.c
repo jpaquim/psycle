@@ -19,15 +19,17 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 	psyfile_read(&file, header, 4);
 	header[4] = 0;		
 	if (strcmp(&header[0],"RIFF") == 0) {
-		unsigned long chunksize;
-		unsigned long pcmsize;		
+		uint32_t chunksize;
+		uint32_t pcmsize;
+		uint32_t pcmbegin = 0;
 
 		psyfile_read(&file, &chunksize, sizeof(chunksize));
 		psyfile_read(&file, header, 8);
 		header[8] = 0;
 		if (strcmp(&header[0], "WAVEfmt ") == 0) {
-			psy_audio_WaveFormatChunk format;
+			psy_audio_WaveFormatChunk format;			
 			psyfile_read(&file, &pcmsize, sizeof(pcmsize));
+			pcmbegin = psyfile_getpos(&file);
 			psyfile_read(&file, &format.wFormatTag, 2);
 			psyfile_read(&file, &format.nChannels, 2);
 			psyfile_read(&file, &format.nSamplesPerSec, 4);
@@ -37,14 +39,17 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 			// psyfile_read(&file, &format.cbSize, 2);
 			sample->samplerate = format.nSamplesPerSec;
 			buffer_resize(&sample->channels, format.nChannels);
+			psyfile_seek(&file, pcmbegin + pcmsize);
 			psyfile_read(&file, header, 4);
 			header[4] = 0;			
 			if (strcmp(&header[0], "data") == 0) {
 				int numsamples;
 				unsigned int frame;
 				int channel;
-				char frame8;
-				short frame16;
+				int8_t frame8;
+				int16_t frame16;
+				uint8_t frame24[3];
+				int32_t frame32;
 				psyfile_read(&file, &numsamples, 4);
 				sample->numframes = numsamples / 
 					format.nChannels / (format.wBitsPerSample / 8);
@@ -64,6 +69,27 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 							case 16: 
 								psyfile_read(&file, &frame16, 2);
 								sample->channels.samples[channel][frame] = frame16;
+							break;
+							case 24:
+								psyfile_read(&file, &frame24, 3);
+								frame32 = (
+									(frame24[2] << 24) |
+									(frame24[1] << 16) |
+									(frame24[0] << 8))
+									>> 8;							
+								{
+								static double int24todouble=0.00000011920928955078125;
+								static double doubletoint16=32767.f;
+								double temp = (double) frame32;
+								temp *= int24todouble * doubletoint16;								
+								sample->channels.samples[channel][frame] = 
+									(float) temp;
+								}
+							break;
+							case 32:
+								psyfile_read(&file, &frame32, 2);
+								sample->channels.samples[channel][frame] =
+									(float) frame32;
 							break;
 							default:
 							break;
@@ -98,7 +124,7 @@ void wave_save(psy_audio_Sample* sample, const char* path)
 	temp32 = 0;
 	psyfile_write(&file, &temp32, sizeof(temp32));
 	// Write Format Chunk
-	format.wFormatTag = WAVE_FORMAT_PCM;
+	format.wFormatTag = psy_audio_WAVE_FORMAT_PCM;
 	format.nChannels = sample->channels.numchannels;
 	format.nSamplesPerSec = sample->samplerate;
 	format.nAvgBytesPerSec = sample->channels.numchannels *

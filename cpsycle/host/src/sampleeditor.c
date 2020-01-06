@@ -435,8 +435,8 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 		psy_audio_PatternEvent event;
 		lock_enter();
 		psy_list_free(self->samplerevents);
-		patternevent_init(&event,
-			(unsigned char) 60,
+		patternevent_init_all(&event,
+			(unsigned char) 48,
 			(unsigned char) instruments_slot(&self->workspace->song->instruments),
 			NOTECOMMANDS_MACH_EMPTY,
 			NOTECOMMANDS_VOL_EMPTY,
@@ -453,7 +453,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 
 	lock_enter();
 	psy_list_free(self->samplerevents);
-	patternevent_init(&event,
+	patternevent_init_all(&event,
 		NOTECOMMANDS_RELEASE,
 		0,		
 		NOTECOMMANDS_MACH_EMPTY,

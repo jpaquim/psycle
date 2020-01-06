@@ -396,7 +396,8 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 		char  defaultextension[] = "WAV";
 
 		*path = '\0'; 
-		if (ui_openfile(&self->component, title, filter, defaultextension, 0, path)) {			
+		if (ui_openfile(&self->component, title, filter, defaultextension,
+			workspace_samples_directory(self->workspace), path)) {
 			psy_audio_Sample* sample;
 			SampleIndex index;
 			psy_audio_Instrument* instrument;

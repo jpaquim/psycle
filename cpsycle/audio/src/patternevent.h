@@ -30,7 +30,10 @@ typedef	enum {
 	SET_PANNING =		0x0F8,
 	BREAK_TO_LINE =		0xF2,
 	JUMP_TO_ORDER =		0xF3,
-	ARPEGGIO	  =		0xF0,
+	// 0..80: 0 .. 100%
+	// FE: tie	
+	GATE		=		0xF1,
+	ARPEGGIO	=		0xF0,
 	// Extended Commands from 0xFE
 	SET_LINESPERBEAT0 = 0x00, // 
 	SET_LINESPERBEAT1 = 0x10, // Range from FE00 to FE1F is reserved for 
@@ -64,20 +67,21 @@ typedef	enum {
 	NOTECOMMANDS_EMPTY = 255,
 	NOTECOMMANDS_INST_EMPTY = 0xFFFF,
 	NOTECOMMANDS_MACH_EMPTY = 0xFF,
-	NOTECOMMANDS_VOL_EMPTY = 0xFF
+	NOTECOMMANDS_VOL_EMPTY = 0xFF,
+	NOTECOMMANDS_GATE_EMPTY = 0xFF
 } NoteCommands;
 
 typedef struct {
 	uint8_t note;	
 	uint16_t inst;	
 	uint8_t mach;
-	uint8_t vol;
+	uint8_t vol;	
 	uint8_t cmd;
 	uint8_t parameter;	
 } psy_audio_PatternEvent;
 
 
-void patternevent_init(psy_audio_PatternEvent*,
+void patternevent_init_all(psy_audio_PatternEvent*,
 	uint8_t note,
 	uint16_t inst,
 	uint8_t mach,

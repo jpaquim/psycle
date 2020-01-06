@@ -19,7 +19,7 @@ int parameterrange_intersect(psy_audio_ParameterRange* self, uintptr_t value)
 	return value >= self->low && value <= self->high;
 }
 
-void patternevent_init(psy_audio_PatternEvent* self,
+void patternevent_init_all(psy_audio_PatternEvent* self,
 	uint8_t note,
 	uint16_t inst,
 	uint8_t mach,
@@ -40,7 +40,7 @@ void patternevent_clear(psy_audio_PatternEvent* self)
 	self->note = NOTECOMMANDS_EMPTY;
 	self->inst = NOTECOMMANDS_INST_EMPTY;
 	self->mach = NOTECOMMANDS_MACH_EMPTY;
-	self->vol = NOTECOMMANDS_EMPTY;
+	self->vol = NOTECOMMANDS_VOL_EMPTY;
 	self->cmd = 0;
 	self->parameter = 0;
 }

@@ -4,6 +4,11 @@
 #if !defined(MACHINEDEFS_H)
 #define MACHINEDEFS_H
 
+
+enum {
+	MACH_SUPPORTS_INSTRUMENTS = 128
+};
+
 typedef enum {
 	MACHMODE_GENERATOR = 0,
 	MACHMODE_FX = 1,
