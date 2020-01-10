@@ -61,7 +61,8 @@ typedef	enum {
 	NOTECOMMANDS_TWEAKEFFECT, //old. for compatibility only.
 	NOTECOMMANDS_MIDICC,
 	NOTECOMMANDS_TWEAKSLIDE,
-	//Place whatever that can be written in the pattern above invalid, and anything else below it
+	// Place whatever that can be written in the pattern above invalid, and
+	// anything else below it
 	NOTECOMMANDS_INVALID,
 	NOTECOMMANDS_MIDI_SYNC = 254,
 	NOTECOMMANDS_EMPTY = 255,

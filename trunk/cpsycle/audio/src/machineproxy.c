@@ -18,7 +18,6 @@
 #include <portable.h>
 
 // proxy
-
 static psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy*,
 	uintptr_t slot, uintptr_t amount, psy_audio_MachineSockets*,
 	psy_audio_Machines*);
@@ -27,6 +26,7 @@ static void machineproxy_generateaudio(psy_audio_MachineProxy*, psy_audio_Buffer
 static void machineproxy_seqtick(psy_audio_MachineProxy*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void machineproxy_sequencerlinetick(psy_audio_MachineProxy*);
+static psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy*, psy_List* events);
 static void machineproxy_stop(psy_audio_MachineProxy*);
 static void machineproxy_dispose(psy_audio_MachineProxy*);
 static int machineproxy_mode(psy_audio_MachineProxy*);
@@ -59,11 +59,13 @@ static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFil
 static unsigned int machineproxy_samplerate(psy_audio_MachineProxy*);
 static unsigned int machineproxy_bpm(psy_audio_MachineProxy*);
 static psy_dsp_beat_t machineproxy_beatspersample(psy_audio_MachineProxy*);
+static psy_dsp_beat_t machineproxy_currbeatsperline(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_slot(psy_audio_MachineProxy*);
 static void machineproxy_setslot(psy_audio_MachineProxy*, uintptr_t slot);
 static struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy*);
 static struct psy_audio_Machines* machineproxy_machines(psy_audio_MachineProxy*);
 static struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy*);
+static void machineproxy_output(psy_audio_MachineProxy*, const char* text);
 static void machineproxy_setcallback(psy_audio_MachineProxy*, MachineCallback);
 static int machineproxy_parameterlabel(psy_audio_MachineProxy*, char* txt, uintptr_t param);
 static int machineproxy_parametername(psy_audio_MachineProxy*, char* txt, uintptr_t param);
@@ -112,6 +114,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.seqtick = (fp_machine_seqtick) machineproxy_seqtick;
 		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
 			machineproxy_sequencerlinetick;
+		vtable.sequencerinsert = (fp_machine_sequencerinsert)
+			machineproxy_sequencerinsert;
 		vtable.stop = (fp_machine_stop) machineproxy_stop;
 		vtable.dispose = (fp_machine_dispose) machineproxy_dispose;
 		vtable.mode = (fp_machine_mode) machineproxy_mode;
@@ -156,10 +160,13 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_samplerate;
 		vtable.bpm = (fp_machine_bpm) machineproxy_bpm;
 		vtable.beatspersample= (fp_machine_beatspersample) machineproxy_beatspersample;
+		vtable.currbeatsperline = (fp_machine_currbeatsperline)machineproxy_currbeatsperline;
 		vtable.machines = (fp_machine_machines)
 			machineproxy_machines;
 		vtable.instruments = (fp_machine_instruments)
 			machineproxy_instruments;
+		vtable.output = (fp_machine_output)
+			machineproxy_output;
 		vtable.samples = (fp_machine_samples)
 			machineproxy_samples;
 		vtable.setcallback = (fp_machine_setcallback)
@@ -785,6 +792,26 @@ psy_dsp_beat_t machineproxy_beatspersample(psy_audio_MachineProxy* self)
 	return rv;
 }
 
+psy_dsp_beat_t machineproxy_currbeatsperline(psy_audio_MachineProxy* self)
+{
+	psy_dsp_beat_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->currbeatsperline(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "currbeatsperline", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
 struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy* self)
 {
 	struct psy_audio_Samples* rv = 0;
@@ -843,6 +870,23 @@ struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy* s
 #endif		
 	}
 	return rv;
+}
+
+void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{ 
+			self->client->vtable->output(self->client, text);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except(FilterException(self, "output", GetExceptionCode(),
+			GetExceptionInformation())) {			
+		}
+#endif		
+	}	
 }
 
 void machineproxy_setcallback(psy_audio_MachineProxy* self, MachineCallback callback)
@@ -1163,6 +1207,26 @@ psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "amprange", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy* self, psy_List* events)
+{
+	psy_List* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->sequencerinsert(self->client, events);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "sequencerinsert", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

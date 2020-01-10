@@ -51,6 +51,7 @@ static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
+static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 
 #define GEARVIEW 10
 
@@ -105,8 +106,13 @@ void mainframe_init(MainFrame* self)
 	ui_component_setalign(&self->top, UI_ALIGN_TOP);
 	ui_component_enablealign(&self->top);
 	// sequenceview
+	//ui_component_init(&self->left, &self->component);			
+	//ui_component_setalign(&self->left, UI_ALIGN_LEFT);
+	//ui_component_enablealign(&self->left);	
+	//self->left.preventpreferredsize = 1;
+	//ui_component_resize(&self->left, 160, 0);
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);	
-	ui_component_setalign(&self->sequenceview.component, UI_ALIGN_LEFT);
+	ui_component_setalign(&self->sequenceview.component, UI_ALIGN_LEFT);		
 	// client
 	ui_component_init(&self->client, &self->component);
 	self->client.defaultpropagation = 1;
@@ -190,10 +196,6 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
 		mainframe_ongearcreate);
 	mainframe_setstartpage(self);
-	if (self->workspace.song) {
-		mainframe_setstatusbartext(self,
-			self->workspace.song->properties.title);
-	}	
 	psy_signal_emit(&self->workspace.signal_configchanged,
 		&self->workspace, 1, self->workspace.config);
 	psy_signal_connect(&self->tabbar.signal_change, self,
@@ -204,6 +206,10 @@ void mainframe_init(MainFrame* self)
 	// create statusbar components
 	mainframe_initstatusbar(self);
 	ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
+	if (self->workspace.song) {
+		mainframe_setstatusbartext(self,
+			self->workspace.song->properties.title);
+	}	
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -224,6 +230,12 @@ void mainframe_initstatusbar(MainFrame* self)
 		
 	ui_margin_init(&margin, ui_value_makeeh(0.5), ui_value_makeew(2.0),
 		ui_value_makeeh(0.5), ui_value_makepx(0));	
+	// zoom
+	zoombox_init(&self->zoombox, &self->statusbar);
+	ui_component_setalign(&self->zoombox.component, UI_ALIGN_LEFT);
+	ui_component_setmargin(&self->zoombox.component, &margin);
+	psy_signal_connect(&self->zoombox.signal_changed, self,
+		mainframe_onzoomboxchanged);
 	// statusbar label	
 	ui_label_init(&self->statusbarlabel, &self->statusbar);
 	ui_label_settext(&self->statusbarlabel, "Ready");
@@ -661,3 +673,7 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 	ui_terminal_output(&self->terminal, text);
 }
 
+void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
+{
+	workspace_changedefaultfontsize(&self->workspace, (int)(80 * zoombox_rate(sender)));	
+}

@@ -171,8 +171,7 @@ uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader
 					note,
 					instr,
 					0,
-					0x80,
-					(uint8_t) NOTECOMMANDS_GATE_EMPTY,
+					0x80,					
 					0,
 					0);
 				if (!patternevent_empty(&ev)) {

@@ -7,8 +7,10 @@
 #include <dsptypes.h>
 #include "../../detail/stdint.h"
 
+#include "array.h"
+
 typedef struct psy_audio_Buffer {
-	uintptr_t numchannels;	
+	uintptr_t numchannels;
 	psy_dsp_amp_t** samples;
 	uintptr_t numsamples;
 	uintptr_t offset;

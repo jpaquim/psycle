@@ -8,9 +8,16 @@
 #include <dir.h>
 #include <portable.h>
 #include <presetio.h>
+#include <windows.h>
 
 static void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame);
 static void machineframe_onpresetchange(MachineFrame*, psy_ui_Component* sender, int index);
+static void machineframe_toggleparameterbox(MachineFrame*,
+	psy_ui_Component* sender);
+static void machineframe_togglehelp(MachineFrame*,
+	psy_ui_Component* sender);
+static void machineframe_resize(MachineFrame*);
+
 static void parameterbar_setpresetlist(ParameterBar*, psy_audio_Presets*);
 
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
@@ -18,14 +25,25 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 	self->presets = 0;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_button_init(&self->mute, &self->component);
+	// row0
+	ui_component_init(&self->row0, &self->component);
+	ui_component_enablealign(&self->row0);
+	ui_component_setalign(&self->row0, UI_ALIGN_TOP);
+	ui_button_init(&self->mute, &self->row0);	
 	ui_button_settext(&self->mute, "Mute");
+	ui_component_setalign(&self->mute.component, UI_ALIGN_LEFT);
+	ui_button_init(&self->parameters, &self->row0);
+	ui_button_settext(&self->parameters, "Parameters");	
+	ui_component_setalign(&self->parameters.component, UI_ALIGN_LEFT);
+	ui_button_init(&self->help, &self->row0);	
+	ui_button_settext(&self->help, "Help");
+	ui_component_setalign(&self->help.component, UI_ALIGN_LEFT);
+	// row1 
+	//ui_component_init(&self->row1, &self->component);
+	//ui_component_enablealign(&self->row0);
+	//ui_component_setalign(&self->row1, UI_ALIGN_TOP);
 	ui_combobox_init(&self->presetsbox, &self->component);
-	ui_combobox_setcharnumber(&self->presetsbox, 30);	
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT,
-		0));	
+	ui_component_setalign(&self->presetsbox.component, UI_ALIGN_TOP);	
 }
 
 void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
@@ -53,17 +71,25 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent)
 	ui_frame_init(&self->component, parent);
 	ui_component_seticonressource(&self->component, IDI_MACPARAM);
 	ui_component_move(&self->component, 200, 150);
-	ui_component_resize(&self->component, 800, 800);	
-
-	ui_component_enablealign(&self->component);
+	ui_component_resize(&self->component, 800, 800);
+	ui_component_enablealign(&self->component);	
 	parameterbar_init(&self->parameterbar, &self->component);
-	ui_component_setalign(&self->parameterbar.component, UI_ALIGN_TOP);	
+	ui_component_setalign(&self->parameterbar.component, UI_ALIGN_TOP);
 	parameterlistbox_init(&self->parameterbox, &self->component, 0);
 	ui_component_setalign(&self->parameterbox.component, UI_ALIGN_RIGHT);
+	ui_notebook_init(&self->notebook, &self->component);
+	ui_component_setalign(&self->notebook.component,
+		UI_ALIGN_CLIENT);
+	ui_editor_init(&self->help, &self->notebook.component);
+	ui_editor_addtext(&self->help, "About");
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machineframe_ondestroy);	
 	psy_signal_connect(&self->parameterbar.presetsbox.signal_selchanged,
 		self, machineframe_onpresetchange);
+	psy_signal_connect(&self->parameterbar.parameters.signal_clicked, self,
+		machineframe_toggleparameterbox);
+		psy_signal_connect(&self->parameterbar.help.signal_clicked, self,
+		machineframe_togglehelp);
 }
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
@@ -73,15 +99,15 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	char name[4096];
 	char prefix[4096];
 	char ext[4096];
-	char prspath[4096];
-	ui_size viewsize;
+	char prspath[4096];	
 	char text[128];
 
 	self->view = (psy_ui_Component*) view;
 	ui_component_setalign(self->view, UI_ALIGN_CLIENT);
 	self->machine = machine;
 	parameterlistbox_setmachine(&self->parameterbox, machine);
-	info = machine->vtable->info(machine);
+	ui_component_hide(&self->parameterbox.component);
+	info = machine_info(machine);
 	if (info && info->modulepath) {
 		psy_dir_extract_path(info->modulepath, prefix, name, ext);
 		psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
@@ -91,26 +117,25 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 		self->presets = presets_allocinit();
 		presetsio_load(prspath, self->presets);		
 	}
-	parameterbar_setpresetlist(&self->parameterbar, self->presets);	
-	viewsize = ui_component_preferredsize(view, 0);
-	ui_component_resize(&self->component, viewsize.width + 150,
-		viewsize.height + 28);
-	if (self->machine && self->machine->vtable->info(self->machine)) {
+	parameterbar_setpresetlist(&self->parameterbar, self->presets);		
+	machineframe_resize(self);
+	if (self->machine && machine_info(self->machine)) {
 		psy_snprintf(text, 128, "%.2X : %s",
-			self->machine->vtable->slot(self->machine),
-		self->machine->vtable->info(self->machine)->ShortName);
+			machine_slot(self->machine),
+			machine_info(self->machine)->ShortName);
 	} else {
 		ui_component_settitle(&self->component, text);
 			psy_snprintf(text, 128, "%.2X :",
-				self->machine->vtable->slot(self->machine));
+				machine_slot(self->machine));
 	}
+	ui_notebook_setpageindex(&self->notebook, 1);
 	ui_component_settitle(&self->component, text);
 	ui_component_align(&self->component);
 }
 
 void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame)
 {
-	self->component.hwnd = 0;
+	self->component.platform = 0;
 	if (self->presets) {
 		presets_dispose(self->presets);
 		self->presets = 0;
@@ -133,7 +158,7 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 				for (it = psy_table_begin(&preset->parameters); 
 						!psy_tableiterator_equal(&it, psy_table_end());
 						psy_tableiterator_inc(&it)) {
-					self->machine->vtable->parametertweak(self->machine,
+					machine_parametertweak(self->machine,
 						psy_tableiterator_key(&it),
 						(uintptr_t)psy_tableiterator_value(&it));
 				}		
@@ -161,3 +186,46 @@ MachineFrame* machineframe_allocinit(psy_ui_Component* parent)
 	return rv;	
 }
 
+void machineframe_toggleparameterbox(MachineFrame* self,
+	psy_ui_Component* sender)
+{
+	ui_size viewsize;
+
+	viewsize = ui_component_preferredsize(self->view, 0);
+	if (ui_component_visible(&self->parameterbox.component)) {
+		ui_component_hide(&self->parameterbox.component);		
+		ui_button_disablehighlight(&self->parameterbar.parameters);
+	} else {
+		ui_component_show(&self->parameterbox.component);		
+		ui_button_highlight(&self->parameterbar.parameters);
+	}
+	machineframe_resize(self);
+}
+
+void machineframe_togglehelp(MachineFrame* self,
+	psy_ui_Component* sender)
+{	
+	if (ui_notebook_pageindex(&self->notebook) == 0) {			
+		ui_notebook_setpageindex(&self->notebook, 1);
+		ui_button_disablehighlight(&self->parameterbar.help);
+	} else {		
+		ui_notebook_setpageindex(&self->notebook, 0);
+		ui_button_highlight(&self->parameterbar.help);
+	}	
+}
+
+void machineframe_resize(MachineFrame* self)
+{
+	ui_size viewsize;	
+	ui_size bar;
+	
+	viewsize = ui_component_preferredsize(self->view, 0);	
+	if (ui_component_visible(&self->parameterbox.component)) {				
+		viewsize.width += 150;		
+	}	
+	bar = ui_component_preferredsize(&self->parameterbar.component,
+		&viewsize);	
+	ui_component_clientresize(&self->component,		
+		viewsize.width,
+		bar.height + viewsize.height);
+}

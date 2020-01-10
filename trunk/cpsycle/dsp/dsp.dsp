@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\container\src" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,8 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\container\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -93,6 +94,10 @@ SOURCE=.\src\alignedalloc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\envelope.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\filter.c
 # End Source File
 # Begin Source File
@@ -101,11 +106,19 @@ SOURCE=.\src\filtercoeff.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\linear.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\lowpass12e.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\multifilter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\multiresampler.c
 # End Source File
 # Begin Source File
 
@@ -122,6 +135,10 @@ SOURCE=".\src\operations-sse2.c"
 # Begin Source File
 
 SOURCE=.\src\operations.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resampler.c
 # End Source File
 # Begin Source File
 
@@ -145,11 +162,19 @@ SOURCE=.\src\dsptypes.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\envelope.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\filter.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\filtercoeff.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\linear.h
 # End Source File
 # Begin Source File
 
@@ -161,11 +186,19 @@ SOURCE=.\src\multifilter.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\multiresampler.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\notestab.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\operations.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\resampler.h
 # End Source File
 # Begin Source File
 

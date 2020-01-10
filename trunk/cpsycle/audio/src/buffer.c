@@ -19,7 +19,8 @@ void buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 	buffer_resize(self, channels);
 }
 
-void buffer_init_shared(psy_audio_Buffer* self, psy_audio_Buffer* src, uintptr_t offset)
+void buffer_init_shared(psy_audio_Buffer* self, psy_audio_Buffer* src,
+	uintptr_t offset)
 {
 	uintptr_t channel;
 

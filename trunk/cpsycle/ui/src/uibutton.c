@@ -5,6 +5,7 @@
 
 #include "uibutton.h"
 #include <string.h>
+#include "uiwincomponent.h"
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
@@ -264,8 +265,8 @@ void ui_button_settext(psy_ui_Button* self, const char* text)
 		free(self->text);
 		self->text = _strdup(text);
 		ui_component_invalidate(&self->component);
-	} else {
-		SetWindowText((HWND)self->component.hwnd, text);
+	} else {		
+		SetWindowText(ui_win_component_hwnd(&self->component), text);
 	}
 }
 
@@ -278,7 +279,7 @@ void ui_button_highlight(psy_ui_Button* self)
 {
 	if (!self->highlight) {
 		self->highlight = 1;
-		SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)1, (LPARAM)0);
+		ui_win_component_sendmessage(&self->component, BM_SETSTATE, 1, 0);
 		if (self->ownerdrawn) {
 			ui_component_invalidate(&self->component);
 		}
@@ -289,7 +290,7 @@ void ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (self->highlight) {
 		self->highlight = 0;
-		SendMessage((HWND)self->component.hwnd, BM_SETSTATE, (WPARAM)0, (LPARAM)0);
+		ui_win_component_sendmessage(&self->component, BM_SETSTATE, 0, 0);
 		if (self->ownerdrawn) {
 			ui_component_invalidate(&self->component);
 		}

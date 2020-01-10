@@ -113,6 +113,7 @@ int workspace_showaboutatstart(Workspace*);
 int workspace_showmaximizedatstart(Workspace*);
 int workspace_showplaylisteditor(Workspace*);
 int workspace_showstepsequencer(Workspace*);
+int workspace_showgriddefaults(Workspace*);
 int workspace_showlinenumbers(Workspace*);
 int workspace_showbeatoffset(Workspace*);
 int workspace_showlinenumbercursor(Workspace*);
@@ -139,7 +140,7 @@ void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
 void workspace_selectview(Workspace*, int view);
-void workspace_parametertweak(Workspace*, int slot, int tweak, int value);
+void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, int value);
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);
 int workspace_recordingtweaks(Workspace*);
@@ -157,5 +158,6 @@ const char* workspace_vsts32_directory(Workspace*);
 const char* workspace_vsts64_directory(Workspace*);
 const char* workspace_skins_directory(Workspace*);
 const char* workspace_doc_directory(Workspace*);
+void workspace_changedefaultfontsize(Workspace*, int size);
 
 #endif

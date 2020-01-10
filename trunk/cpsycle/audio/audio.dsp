@@ -211,6 +211,10 @@ SOURCE=.\src\luaarray.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\luaenvelope.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\luaimport.c
 # End Source File
 # Begin Source File
@@ -634,6 +638,10 @@ SOURCE=.\src\library.h
 # Begin Source File
 
 SOURCE=.\src\luaarray.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\luaenvelope.h
 # End Source File
 # Begin Source File
 

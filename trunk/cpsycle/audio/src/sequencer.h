@@ -65,6 +65,7 @@ typedef struct {
 	psy_dsp_beat_t playbeatloopstart;
 	psy_dsp_beat_t playbeatloopend;
 	psy_dsp_beat_t numplaybeats;
+	psy_Signal signal_linetick;
 } psy_audio_Sequencer;
 
 void sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*, psy_audio_Machines*);
@@ -103,6 +104,7 @@ void sequencer_stoploop(psy_audio_Sequencer*);
 int sequencer_looping(psy_audio_Sequencer*);
 SequencerPlayMode sequencer_playmode(psy_audio_Sequencer*);
 psy_dsp_beat_t sequencer_beatspersample(psy_audio_Sequencer*);
+psy_dsp_beat_t sequencer_currbeatsperline(psy_audio_Sequencer*);
 void sequencer_checkiterators(psy_audio_Sequencer*, PatternNode*);
 
 #endif

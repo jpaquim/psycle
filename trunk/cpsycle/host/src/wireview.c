@@ -189,8 +189,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 }
 
 void wireframe_ondestroy(WireFrame* self, psy_ui_Component* frame)
-{	
-	self->component.hwnd = 0;
+{		
 }
 
 void wireframe_onsize(WireFrame* self, psy_ui_Component* sender, ui_size* size)

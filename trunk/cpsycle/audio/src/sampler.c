@@ -10,6 +10,7 @@
 #include "samples.h"
 #include "songio.h"
 #include <operations.h>
+#include <linear.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,6 +20,7 @@ static void generateaudio(psy_audio_Sampler*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void sequencerlinetick(psy_audio_Sampler*);
+static psy_List* sequencerinsert(psy_audio_Sampler*, psy_List* events);
 static void stop(psy_audio_Sampler*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
 static unsigned int numparametercols(psy_audio_Sampler*);
@@ -94,6 +96,7 @@ static void vtable_init(psy_audio_Sampler* self)
 		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
 		vtable.sequencerlinetick = (fp_machine_sequencerlinetick) sequencerlinetick;
+		vtable.sequencerinsert = (fp_machine_sequencerinsert) sequencerinsert;
 		vtable.stop = (fp_machine_stop) stop;
 		vtable.info = (fp_machine_info) info;
 		vtable.dispose = (fp_machine_dispose) dispose;
@@ -122,7 +125,7 @@ void sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 	machine_seteditname(sampler_base(self), "Sampler");
 	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;	
 	self->voices = 0;	
-	self->resamplingmethod = 2;
+	self->resamplingmethod = RESAMPLERTYPE_LINEAR;
 	self->defaultspeed = 1;	
 	self->maxvolume = 0xFF;
 	psy_table_init(&self->lastinst);
@@ -294,7 +297,7 @@ void parametertweak(psy_audio_Sampler* self, uintptr_t param, int value)
 {	
 	switch (param) {
 		case 0: self->numvoices = value; break;
-		case 1: self->resamplingmethod = value; break;
+		case 1: self->resamplingmethod = (ResamplerType) value; break;
 		case 2: self->defaultspeed = value; break;
 		case 3: self->maxvolume = value; break;
 		default:
@@ -305,13 +308,8 @@ void parametertweak(psy_audio_Sampler* self, uintptr_t param, int value)
 int describevalue(psy_audio_Sampler* self, char* txt, uintptr_t param, int value)
 { 
 	if (param == 1) {
-		switch(value)
-		{
-			case 0:sprintf(txt,"Hold/Chip [Lowest quality]");return 1;break;
-			case 1:sprintf(txt,"Linear [Low quality]");return 1;break;
-			case 2:sprintf(txt,"Spline [Medium quality]");return 1;break;
-			case 3:sprintf(txt,"32Tap Sinc [High Quality]");return 1;break;			
-		}		
+		sprintf(txt, psy_dsp_multiresampler_name((ResamplerType) value));
+		return 1;		
 	} else
 	if (param == 2) {
 		switch(value)
@@ -331,7 +329,7 @@ int parametervalue(psy_audio_Sampler* self, uintptr_t param)
 {	
 	switch (param) {
 		case 0: return self->numvoices; break;
-		case 1: return self->resamplingmethod; break;
+		case 1: return (int) self->resamplingmethod; break;
 		case 2: return self->defaultspeed; break;
 		case 3: return self->maxvolume; break;
 		default:
@@ -537,7 +535,10 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 		psy_dsp_adsr_initdefault(&self->filterenv, samplerate);
 	}	
 	psy_dsp_multifilter_init(&self->filter_l);
-	psy_dsp_multifilter_init(&self->filter_r);
+	psy_dsp_multifilter_init(&self->filter_r);			
+	psy_dsp_multiresampler_init(&self->resampler);
+	psy_dsp_multiresampler_settype(&self->resampler,
+		sampler->resamplingmethod);
 	if (instrument) {
 		((psy_dsp_Filter*)&self->filter_l)->vtable->setcutoff(&self->filter_l.filter, 
 			self->instrument->filtercutoff);
@@ -555,7 +556,7 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 void voice_reset(Voice* self)
 {
 	self->effcmd = SAMPLER_CMD_NONE;
-	self->portaspeed = 1.0;
+	self->portaspeed = 1.0;	
 	psy_dsp_adsr_reset(&self->env);
 	psy_dsp_adsr_reset(&self->filterenv);
 	((psy_dsp_Filter*)(&self->filter_r))->vtable->reset(&self->filter_l.filter);
@@ -657,6 +658,8 @@ void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 					(event->note + sample->tune - baseC + 
 						((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
 					((psy_dsp_beat_t)sample->samplerate / 44100));
+			self->resampler.resampler.vtable->setspeed(&
+				self->resampler.resampler, iterator->speed);
 		}
 	}		
 	psy_list_free(entries);	
@@ -747,8 +750,12 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 						break;
 					}
 					dst = buffer_at(output, c);
-					frame = sampleiterator_frameposition(position);
-					val = src[frame];
+					frame = sampleiterator_frameposition(position);					
+					val = self->resampler.resampler.vtable->work(
+						&self->resampler.resampler,
+						&src[frame], position->pos.HighPart,
+						position->pos.LowPart, position->sample->numframes,
+						0);
 					if (c == 0) {
 						if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
 							((psy_dsp_Filter*)&self->filter_l)->vtable->setcutoff(
@@ -783,6 +790,9 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 					} else {
 						position->speed = 
 							(int64_t) (position->speed * portaspeed);
+						self->resampler.resampler.vtable->setspeed(
+							&self->resampler.resampler,
+							position->speed);
 					}
 				}
 				if (!sampleiterator_inc(position)) {			
@@ -830,4 +840,33 @@ void voice_fastrelease(Voice* self)
 	self->effcmd = SAMPLER_CMD_NONE;
 	psy_dsp_adsr_release(&self->env);	
 	psy_dsp_adsr_release(&self->filterenv);
+}
+
+psy_List* sequencerinsert(psy_audio_Sampler* self, psy_List* events)
+{
+	psy_List* p;
+	psy_List* insert = 0;
+
+	for (p = events; p != 0; p = p->next) {
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent* event;
+
+		entry = p->entry;
+		event = patternentry_front(entry);
+		if (event->cmd == SAMPLER_CMD_EXTENDED) {
+			if ((event->parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF) {
+				psy_audio_PatternEntry* noteoff;
+
+				//This means there is always 6 ticks per row whatever number of rows.
+				//_triggerNoteOff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
+				noteoff = patternentry_allocinit();
+				patternentry_front(noteoff)->note = NOTECOMMANDS_RELEASE;
+				patternentry_front(noteoff)->mach = patternentry_front(entry)->mach;
+				noteoff->delta += entry->offset + (event->parameter & 0x0f) / 6.f *
+					machine_currbeatsperline(sampler_base(self)); 									
+				psy_list_append(&insert, noteoff);
+			}			
+		}
+	}
+	return insert;
 }

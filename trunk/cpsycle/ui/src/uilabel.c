@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
+#include "uiwincomponent.h"
 
 static void preferredsize(psy_ui_Label*, ui_size* limit, ui_size* rv);
 static ui_textmetric textmetric(psy_ui_Component*);
@@ -30,9 +31,9 @@ void ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->charnumber = 0;	
 }
 
-void ui_label_settext(psy_ui_Label* label, const char* text)
+void ui_label_settext(psy_ui_Label* self, const char* text)
 {
-	SetWindowText((HWND)label->component.hwnd, text);	
+	SetWindowText(ui_win_component_hwnd(&self->component), text);	
 }
 
 void ui_label_setcharnumber(psy_ui_Label* self, int number)
@@ -49,7 +50,7 @@ void preferredsize(psy_ui_Label* self, ui_size* limit, ui_size* rv)
 		tm = ui_component_textmetric(&self->component);	
 		if (self->charnumber == 0) {
 			ui_size size;
-			GetWindowText((HWND)self->component.hwnd, text, 256);
+			GetWindowText(ui_win_component_hwnd(&self->component), text, 256);
 			size = ui_component_textsize(&self->component, text);
 			rv->width = size.width + 2 +
 				ui_margin_width_px(&self->component.spacing, &tm);
@@ -63,10 +64,10 @@ void preferredsize(psy_ui_Label* self, ui_size* limit, ui_size* rv)
 
 void ui_label_setstyle(psy_ui_Label* self, int style)
 {
-	#if defined(_WIN64)
-	SetWindowLongPtr((HWND)self->component.hwnd, GWL_STYLE, style);		
+#if defined(_WIN64)
+	SetWindowLongPtr(ui_win_component_hwnd(&self->component), GWL_STYLE, style);		
 #else
-	SetWindowLong((HWND)self->component.hwnd, GWL_STYLE, style);
+	SetWindowLong(ui_win_component_hwnd(&self->component), GWL_STYLE, style);
 #endif
 }
 

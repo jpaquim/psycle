@@ -24,7 +24,7 @@ static const VstInt32 kNumProcessCycles = 5;
 static int mode(psy_audio_VstPlugin*);
 static void work(psy_audio_VstPlugin* self, psy_audio_BufferContext*);
 static const psy_audio_MachineInfo* info(psy_audio_VstPlugin*);
-static void parametertweak(psy_audio_VstPlugin* self, int par, int val);
+static void parametertweak(psy_audio_VstPlugin*, uintptr_t param, int val);
 static int parameterlabel(psy_audio_VstPlugin*, char* txt, uintptr_t param);
 static int parametername(psy_audio_VstPlugin*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_VstPlugin*, char* txt, uintptr_t param, int value);
@@ -36,9 +36,9 @@ static unsigned int numparametercols(psy_audio_VstPlugin*);
 static void dispose(psy_audio_VstPlugin* self);
 static uintptr_t numinputs(psy_audio_VstPlugin*);
 static uintptr_t numoutputs(psy_audio_VstPlugin*);
-static void loadspecific(psy_audio_VstPlugin*, struct psy_audio_SongFile*,
+static void loadspecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void savespecific(psy_audio_VstPlugin*, struct psy_audio_SongFile*,
+static void savespecific(psy_audio_VstPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int haseditor(psy_audio_VstPlugin*);
 static void seteditorhandle(psy_audio_VstPlugin*, void* handle);
@@ -47,17 +47,21 @@ static void editoridle(psy_audio_VstPlugin*);
 // private
 static void checkEffectProperties (AEffect* effect);
 static void checkEffectProcessing (AEffect* effect);
-static int machineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* path, int shellidx);
+static int machineinfo(AEffect* effect, psy_audio_MachineInfo* info,
+	const char* path, int shellidx);
 typedef AEffect* (*PluginEntryProc)(audioMasterCallback audioMaster);
-static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt);
+static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode,
+	VstInt32 index, VstIntPtr value, void* ptr, float opt);
 static PluginEntryProc getmainentry(Library* library);
 static void processevents(psy_audio_VstPlugin*, psy_audio_BufferContext*);
 static void generateaudio(psy_audio_VstPlugin*, psy_audio_BufferContext*);
-struct VstMidiEvent* allocinitmidievent(psy_audio_VstPlugin*, const psy_audio_PatternEntry*);
+struct VstMidiEvent* allocinitmidievent(psy_audio_VstPlugin*,
+	const psy_audio_PatternEntry*);
 
 struct VstMidiEvent* allocmidi(psy_audio_VstPlugin*, unsigned char data0,
 	unsigned char data1, unsigned char data2);
-struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin*, const psy_audio_PatternEntry*);
+struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin*,
+	const psy_audio_PatternEntry*);
 struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin*, int note, int channel);
 struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
 	const psy_audio_PatternEntry*);
@@ -87,7 +91,8 @@ static void vtable_init(psy_audio_VstPlugin* self)
 		vtable.describevalue = (fp_machine_describevalue) describevalue;	
 		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
 		vtable.numparameters = (fp_machine_numparameters) numparameters;
-		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;	
+		vtable.numparametercols = (fp_machine_numparametercols)
+			numparametercols;
 		vtable.dispose = (fp_machine_dispose) dispose;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
@@ -102,7 +107,8 @@ static void vtable_init(psy_audio_VstPlugin* self)
 	}
 }
 
-void vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callback, const char* path)
+void vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callback,
+	const char* path)
 {		
 	PluginEntryProc mainproc;
 	
@@ -136,7 +142,8 @@ void vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callback, const c
 			self->effect->dispatcher (self->effect, effOpen, 0, 0, 0, 0);
 			self->effect->dispatcher (self->effect, effSetSampleRate, 0, 0, 0,
 				(float) machine_samplerate(vstplugin_base(self)));
-			self->effect->dispatcher (self->effect, effSetProcessPrecision, 0, kVstProcessPrecision32, 0, 0);
+			self->effect->dispatcher (self->effect, effSetProcessPrecision, 0,
+				kVstProcessPrecision32, 0, 0);
 			self->effect->dispatcher (self->effect, effSetBlockSize, 0, kBlockSize, 0, 0);
 			self->effect->dispatcher (self->effect, effMainsChanged, 0, 1, 0, 0);
 			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
@@ -160,10 +167,10 @@ void dispose(psy_audio_VstPlugin* self)
 		}
 		library_dispose(&self->library);		
 		if (self->info) {
-			free((char*)self->info->Author);
-			free((char*)self->info->Name);
-			free((char*)self->info->ShortName);
-			free((char*)self->info->Command);
+			free((char*) self->info->Author);
+			free((char*) self->info->Name);
+			free((char*) self->info->ShortName);
+			free((char*) self->info->Command);
 		}
 		self->info = 0;
 		free(self->events);		
@@ -522,9 +529,9 @@ const psy_audio_MachineInfo* info(psy_audio_VstPlugin* self)
 	return self->plugininfo;
 }
 
-void parametertweak(psy_audio_VstPlugin* self, int par, int val)
+void parametertweak(psy_audio_VstPlugin* self, uintptr_t param, int value)
 {
-	self->effect->setParameter(self->effect, par, val / 65535.f);
+	self->effect->setParameter(self->effect, param, value / 65535.f);
 }
 
 int parameterlabel(psy_audio_VstPlugin* self, char* txt, uintptr_t param)

@@ -9,6 +9,7 @@
 #include "luaimport.h"
 #include "array.h"
 #include "luaarray.h"
+#include "luaenvelope.h"
 #include "custommachine.h"
 
 #include <stdlib.h>
@@ -21,7 +22,7 @@ static void seqtick(psy_audio_LuaPlugin*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void sequencerlinetick(psy_audio_LuaPlugin*);
 static psy_audio_MachineInfo* info(psy_audio_LuaPlugin*);
-static void parametertweak(psy_audio_LuaPlugin*, int par, int val);
+static void parametertweak(psy_audio_LuaPlugin*, uintptr_t par, int val);
 static int describevalue(psy_audio_LuaPlugin*, char* txt, uintptr_t param, int value);
 static int parametervalue(psy_audio_LuaPlugin*, uintptr_t param);
 static void dispose(psy_audio_LuaPlugin*);
@@ -89,6 +90,8 @@ void luaplugin_init(psy_audio_LuaPlugin* self, MachineCallback callback,
 	psyclescript_require(&self->script, "psycle.machine", luamachine_open);
 	psyclescript_require(&self->script, "psycle.array",
 		psy_audio_luabind_array_open);
+	psyclescript_require(&self->script, "psycle.envelope",
+		psy_audio_luabind_envelope_open);
 	if (err = psyclescript_run(&self->script)) {
 		return;
 	}
@@ -146,11 +149,13 @@ void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 		luaimport_init(&in, self->script.L, self->client);		
 		if (luaimport_open(&in, "work")) {
 			self->client->bc = bc;
-			lua_pushinteger(self->script.L, bc->numsamples);			
+			lua_pushinteger(self->script.L, bc->numsamples);
 			luaimport_pcall(&in, 0);
 			if (in.lasterr == 0) {
 				lua_gc(self->script.L, LUA_GCSTEP, 5);
-			}						
+			} else {
+				machine_output(&self->custommachine.machine, in.errmsg);	
+			}
 		}
 		luaimport_dispose(&in);
     }	
@@ -159,11 +164,30 @@ void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 void seqtick(psy_audio_LuaPlugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {
-	
+	psy_audio_LuaImport in;
+	luaimport_init(&in, self->script.L, self->client);
+	if (luaimport_open(&in, "seqtick")) {
+		lua_pushinteger(self->script.L, channel);
+		lua_pushinteger(self->script.L, event->note);
+		lua_pushinteger(self->script.L, event->inst);
+		lua_pushinteger(self->script.L, event->cmd);
+		lua_pushinteger(self->script.L, event->parameter);
+		luaimport_pcall(&in, 0);
+		if (in.lasterr == 0) {
+			lua_gc(self->script.L, LUA_GCSTEP, 5);
+		}
+    }
+	luaimport_dispose(&in);  
 }
 
 void sequencerlinetick(psy_audio_LuaPlugin* self)
 {
+	psy_audio_LuaImport in;
+	luaimport_init(&in, self->script.L, self->client);
+	if (luaimport_open(&in, "sequencertick")) {		
+		luaimport_pcall(&in, 0);		
+    }
+	luaimport_dispose(&in);  
 }
 
 psy_audio_MachineInfo* info(psy_audio_LuaPlugin* self)
@@ -171,12 +195,13 @@ psy_audio_MachineInfo* info(psy_audio_LuaPlugin* self)
 	return self->plugininfo;
 }
 
-void parametertweak(psy_audio_LuaPlugin* self, int par, int val)
+void parametertweak(psy_audio_LuaPlugin* self, uintptr_t par, int val)
 {
 
 }
 
-int describevalue(psy_audio_LuaPlugin* self, char* txt, uintptr_t param, int value)
+int describevalue(psy_audio_LuaPlugin* self, char* txt, uintptr_t param,
+	int value)
 { 
 	return 0;
 }
@@ -226,18 +251,25 @@ int luascript_setmachine(lua_State* L)
 	}
 	lua_pushvalue(L, 1);	
 	psyclescript_register_weakuserdata(L, proxy->client);
-	lua_setfield(L, 2, "proxy");	
+	lua_setfield(L, 2, "proxy");
 	return 0;
 }
 
 int luascript_terminal_output(lua_State* L)
 {
-	int n = lua_gettop(L);  // number of arguments  
+	psy_audio_LuaPlugin* proxy;
+	int n = lua_gettop(L);  // number of arguments 
+	
+	lua_getglobal(L, "psycle");	
+	lua_getfield(L, -1, "__self");
+	proxy = *(psy_audio_LuaPlugin**)luaL_checkudata(L, -1, "psyhostmeta");
+	lua_pop(L, 1);
+	lua_pop(L, 1);
 	if (lua_isboolean(L, 1)) {
 		const char* out = 0;
 		int v = lua_toboolean(L, 1);
-		if (v==1) out = "true"; else out = "false";
-		OutputDebugString(out);
+		if (v==1) out = "true"; else out = "false";		
+		machine_output(&proxy->custommachine.machine, out);
 	} else {
 		int i;
 		lua_getglobal(L, "tostring");
@@ -252,7 +284,7 @@ int luascript_terminal_output(lua_State* L)
 				return luaL_error(L,
 			LUA_QL("tostring") " must return a string to " LUA_QL("print"));
 			lua_pop(L, 1);  /* pop result */
-			OutputDebugString(s);
+			machine_output(&proxy->custommachine.machine, s);
 		}
 	}
 	return 0;
