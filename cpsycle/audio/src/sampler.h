@@ -7,6 +7,7 @@
 #include "custommachine.h"
 #include "instrument.h"
 #include "sample.h"
+#include "multiresampler.h"
 #include <adsr.h>
 #include <multifilter.h>
 #include <hashtbl.h>
@@ -34,13 +35,14 @@ typedef enum
 InterpolationType;
 
 typedef struct {
-	struct psy_audio_Sampler* sampler;
+	struct psy_audio_Sampler* sampler;	
 	psy_audio_Instrument* instrument;
 	psy_audio_Samples* samples;
 	psy_dsp_ADSR env;
 	psy_dsp_ADSR filterenv;
 	psy_dsp_MultiFilter filter_l;
 	psy_dsp_MultiFilter filter_r;
+	psy_dsp_MultiResampler resampler;
 	psy_List* positions;	
 	uintptr_t channel;
 	psy_dsp_amp_t vol;
@@ -58,7 +60,7 @@ typedef struct psy_audio_Sampler {
 	psy_audio_CustomMachine custommachine;		
 	psy_List* voices;
 	uintptr_t numvoices;
-	int resamplingmethod;
+	ResamplerType resamplingmethod;
 	int defaultspeed;	
 	psy_Table lastinst;
 	int maxvolume; // psycle 0CFF, xm 0C80	

@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uinotebook.h"
+#include "uiwincomponent.h"
 
 static void onsize(ui_notebook*, psy_ui_Component* sender, ui_size* size);
 static void align_split(ui_notebook* self, int x);
@@ -26,7 +27,7 @@ void ui_notebook_init(ui_notebook* self, psy_ui_Component* parent)
 	self->pageindex = 0;
 	self->split = 0;
 	self->splitx = -1;
-	self->splitbar.hwnd = 0;
+	self->splitbar.platform = 0;
 }
 
 void ui_notebook_setpageindex(ui_notebook* self, int pageindex)
@@ -102,7 +103,7 @@ void ontabbarchange(ui_notebook* self, psy_ui_Component* sender, int tabindex)
 
 void ui_notebook_split(ui_notebook* self)
 {
-	if (self->splitbar.hwnd == 0) {
+	if (self->splitbar.platform == 0) {
 		self->split = 1;
 		self->splitx = 400;
 		ui_component_init(&self->splitbar, &self->component);
@@ -123,11 +124,10 @@ void ui_notebook_split(ui_notebook* self)
 
 void ui_notebook_full(ui_notebook* self)
 {
-	if (self->splitbar.hwnd != 0) {
+	if (self->splitbar.platform != 0) {
 		self->split = 0;
 		ui_component_destroy(&self->splitbar);
-		ui_notebook_setpageindex(self, self->pageindex);
-		self->splitbar.hwnd = 0;
+		ui_notebook_setpageindex(self, self->pageindex);		
 	}
 }
 
@@ -196,7 +196,8 @@ void align_split(ui_notebook* self, int x) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*)p->entry;		
-		if (component->hwnd == self->splitbar.hwnd) {
+		if (ui_win_component_hwnd(component) == 
+				ui_win_component_hwnd(&self->splitbar)) {
 			ui_component_setposition(&self->splitbar,
 				x, 0, 4, size.height);
 		} else {

@@ -29,7 +29,7 @@ void machinefactory_init(MachineFactory* self, MachineCallback callback,
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
-	self->options = MACHINEFACTORY_CREATEASPROXY;	
+	self->options = 0; // MACHINEFACTORY_CREATEASPROXY;
 }
 
 void machinefactory_dispose(MachineFactory* self)

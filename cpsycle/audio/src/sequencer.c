@@ -62,6 +62,7 @@ void sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence* sequence, psy
 	compute_beatspersample(self);
 	makecurrtracks(self, (psy_dsp_beat_t) 0.f);
 	psy_table_init(&self->lastmachine);
+	psy_signal_init(&self->signal_linetick);
 }
 
 void sequencer_dispose(psy_audio_Sequencer* self)
@@ -73,12 +74,44 @@ void sequencer_dispose(psy_audio_Sequencer* self)
 	self->sequence = 0;
 	self->machines = 0;
 	psy_table_dispose(&self->lastmachine);
+	psy_signal_dispose(&self->signal_linetick);
 }
 
-void sequencer_reset(psy_audio_Sequencer* self, psy_audio_Sequence* sequence, psy_audio_Machines* machines)
+void sequencer_reset(psy_audio_Sequencer* self, psy_audio_Sequence* sequence,
+	psy_audio_Machines* machines)
 {	
-	sequencer_dispose(self);
-	sequencer_init(self, sequence, machines);
+
+	clearevents(self);
+	cleardelayed(self);
+	clearinputevents(self);
+	clearcurrtracks(self);	
+	self->sequence = sequence;
+	self->machines = machines;
+	self->samplerate = 44100;
+	self->bpm = 125.f;
+	self->lpb = 4;
+	self->lpbspeed = (psy_dsp_beat_t) 1.f;
+	self->playing = 0;
+	self->looping = 1;
+	self->numplaybeats = (psy_dsp_beat_t) 4.0f;
+	self->position = 0;	
+	self->window = 0;
+	self->events = 0;
+	self->delayedevents = 0;
+	self->inputevents = 0;
+	self->currtracks = 0;
+	self->mode = SEQUENCERPLAYMODE_PLAYALL;
+	self->jump.active = 0;
+	self->jump.offset = (psy_dsp_beat_t) 0.f;
+	self->rowdelay.active = 0;
+	self->rowdelay.rowspeed = (psy_dsp_beat_t) 1.f;
+	self->loop.active = 0;
+	self->loop.count = 0;
+	self->loop.offset = (psy_dsp_beat_t) 0.f;
+	self->linetickcount = (psy_dsp_beat_t) 0.f;
+	compute_beatspersample(self);
+	makecurrtracks(self, (psy_dsp_beat_t) 0.f);
+	psy_table_clear(&self->lastmachine);
 }
 
 void sequencer_setposition(psy_audio_Sequencer* self, psy_dsp_beat_t offset)
@@ -324,12 +357,11 @@ void notifysequencertick(psy_audio_Sequencer* self, psy_dsp_beat_t width)
 {
 	psy_TableIterator it;	
 	
-	for (it = machines_begin(self->machines); !psy_tableiterator_equal(&it, psy_table_end());		
-			psy_tableiterator_inc(&it)) {			
-		psy_audio_Machine* machine;
-
-		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-		machine->vtable->sequencertick(machine);
+	for (it = machines_begin(self->machines);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {		
+		machine_sequencertick((psy_audio_Machine*)
+			psy_tableiterator_value(&it));
 	}
 }
 
@@ -343,6 +375,7 @@ void sequencer_linetick(psy_audio_Sequencer* self)
 		self->rowdelay.active = 0;
 		compute_beatspersample(self);
 	}
+	psy_signal_emit(&self->signal_linetick, self, 0);
 }
 
 void sequencerinsert(psy_audio_Sequencer* self) {
@@ -365,7 +398,7 @@ void sequencerinsert(psy_audio_Sequencer* self) {
 				if (events) {					
 					psy_List* insert;
 					
-					insert = machine->vtable->sequencerinsert(machine, events);
+					insert = machine_sequencerinsert(machine, events);
 					if (insert) {
 						sequencer_append(self, insert);					
 						psy_list_free(insert);
@@ -530,11 +563,12 @@ void sequencer_append(psy_audio_Sequencer* self, psy_List* events)
 		psy_audio_PatternEntry* entry;
 
 		entry = (psy_audio_PatternEntry*) p->entry;
-		if (patternentry_front(entry)->cmd == NOTE_DELAY) {
-			psy_list_append(&self->delayedevents, entry);
-		} else {
-			psy_list_append(&self->events, entry);
-		}
+		psy_list_append(&self->delayedevents, entry);
+		// if (patternentry_front(entry)->cmd == NOTE_DELAY) {
+		// 	psy_list_append(&self->delayedevents, entry);
+		// } else {			
+		// 	psy_list_append(&self->events, entry);
+		// }
 	}
 }
 
@@ -666,7 +700,7 @@ void maketweakslideevents(psy_audio_Sequencer* self, psy_audio_PatternEntry* ent
 	machine = machines_at(self->machines, patternentry_front(entry)->mach);
 	if (machine &&
 			patternentry_front(entry)->inst <
-				machine->vtable->numparameters(machine) > 0) {
+				machine_numparameters(machine) > 0) {
 		uintptr_t param = patternentry_front(entry)->inst;
 		int minval;
 		int maxval;		
@@ -679,7 +713,7 @@ void maketweakslideevents(psy_audio_Sequencer* self, psy_audio_PatternEntry* ent
 		float delta;
 		float curr;
 
-		machine->vtable->parameterrange(machine,
+		machine_parameterrange(machine,
 			patternentry_front(entry)->parameter, &minval, &maxval);		
 		dest += minval;
 		if (slides == 0) {
@@ -972,4 +1006,9 @@ void sequencer_checkiterators(psy_audio_Sequencer* self, PatternNode* node)
 			sequencetrackiterator_incentry(it);
 		}
 	}
+}
+
+psy_dsp_beat_t sequencer_currbeatsperline(psy_audio_Sequencer* self)
+{
+	return 1 / (self->lpb * sequencer_speed(self));
 }

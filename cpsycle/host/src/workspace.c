@@ -54,7 +54,6 @@ static void workspace_configaudio(Workspace*);
 static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
 static void workspace_setsong(Workspace*, psy_audio_Song*, int flag);
-static void workspace_changedefaultfontsize(Workspace*, int size);
 static void workspace_onloadprogress(Workspace*, psy_audio_Song*, int progress);
 static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*, int progress);
 static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelection*);
@@ -64,12 +63,14 @@ static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
 static int machinecallback_bpm(Workspace*);
 static psy_dsp_beat_t machinecallback_beatspersample(Workspace*);
+static psy_dsp_beat_t machinecallback_currbeatsperline(Workspace*);
 static psy_audio_Samples* machinecallback_samples(Workspace*);
 static psy_audio_Machines* machinecallback_machines(Workspace*);
 static psy_audio_Instruments* machinecallback_instruments(Workspace*);
 static void machinecallback_fileselect_load(Workspace*);
 static void machinecallback_fileselect_save(Workspace*);
 static void machinecallback_fileselect_directory(Workspace*);
+static void machinecallback_output(Workspace*, const char* text);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
@@ -247,7 +248,8 @@ void workspace_disposesequencepaste(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
-	player_init(&self->player, self->song, (void*)self->mainhandle->hwnd);
+	player_init(&self->player, self->song, (void*)
+		ui_component_platformhandle(self->mainhandle));
 	self->cmds = cmdproperties_create();
 	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);
@@ -275,7 +277,7 @@ void workspace_configvisual(Workspace* self)
 	visual = psy_properties_find(self->config, "visual");
 	if (visual) {				
 		workspace_changedefaultfontsize(self, 
-			psy_properties_int(visual, "defaultfontsize", 80));		
+			psy_properties_int(visual, "defaultfontsize", 80));
 	}
 }
 
@@ -426,6 +428,9 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	psy_properties_settext(
 		psy_properties_append_int(pvc, "fontsize", 80, 0, 999),
 		"Font Size");
+	psy_properties_settext(
+		psy_properties_append_bool(pvc, "griddefaults", 1),
+		"Default entries");
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "linenumbers", 1),
 		"Line numbers");
@@ -863,6 +868,11 @@ int workspace_showstepsequencer(Workspace* self)
 	return psy_properties_bool(self->config, "general.showstepsequencer", 0);
 }
 
+int workspace_showgriddefaults(Workspace* self)
+{	
+	return psy_properties_bool(self->config, "visual.patternview.griddefaults", 1);	
+}
+
 int workspace_showlinenumbers(Workspace* self)
 {	
 	return psy_properties_bool(self->config, "visual.patternview.linenumbers", 1);	
@@ -918,7 +928,7 @@ void workspace_newsong(Workspace* self)
 void workspace_loadsong(Workspace* self, const char* path)
 {	
 	psy_audio_Song* song;
-	psy_audio_SongFile songfile;
+	psy_audio_SongFile songfile;	
 		
 	song = song_allocinit(&self->machinefactory);
 	if (song) {		
@@ -1240,7 +1250,7 @@ void workspace_selectview(Workspace* self, int view)
 	psy_signal_emit(&self->signal_viewselected, self, 1, view);
 }
 
-void workspace_parametertweak(Workspace* self, int slot, int tweak, int value)
+void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak, int value)
 {
 	psy_signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, 
 		value);
@@ -1373,11 +1383,13 @@ MachineCallback machinecallback(Workspace* self)
 	rv.samplerate = machinecallback_samplerate;
 	rv.bpm = machinecallback_bpm;
 	rv.beatspersample = machinecallback_beatspersample;
+	rv.currbeatsperline = machinecallback_currbeatsperline;
 	rv.machines = machinecallback_machines;
 	rv.instruments = machinecallback_instruments;
 	rv.fileselect_load = machinecallback_fileselect_load;
 	rv.fileselect_save = machinecallback_fileselect_save;
 	rv.fileselect_directory = machinecallback_fileselect_directory;
+	rv.output = machinecallback_output;
 	return rv;
 }
 
@@ -1430,6 +1442,11 @@ psy_dsp_beat_t machinecallback_beatspersample(Workspace* self)
 	return sequencer_beatspersample(&self->player.sequencer);
 }
 
+psy_dsp_beat_t machinecallback_currbeatsperline(Workspace* self)
+{
+	return sequencer_currbeatsperline(&self->player.sequencer);
+}
+
 psy_audio_Machines* machinecallback_machines(Workspace* self)
 {
 	return self->songcbk ? &self->song->machines : 0;
@@ -1454,6 +1471,11 @@ void workspace_onterminalerror(Workspace* self, psy_audio_SongFile* sender,
 
 void workspace_onterminaloutput(Workspace* self, psy_audio_SongFile* sender,
 	const char* text)	
+{
+	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
+}
+
+void machinecallback_output(Workspace* self, const char* text)
 {
 	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
 }

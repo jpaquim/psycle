@@ -1,5 +1,5 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
-// copyright 2007-2010 members of the psycle project http://psycle.sourceforge.net
+// copyright 2007-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "luaarray.h"
 
@@ -11,11 +11,29 @@
 
 #include "../../detail/stdint.h"
 
+#define MAKE_EXPORT_SELF(x) static int array_method_ ## x (lua_State* L)\
+{\
+	psy_audio_Array** ud;\
+	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);\
+	psy_audio_array_ ## x (*ud);\
+	lua_pushvalue(L, 1);\
+	return 1;\
+}
+	
 static const char* luaarraybind_meta = "array_meta";
 
 static int psy_audio_luabind_array_new(lua_State*);
 static int psy_audio_luabind_array_gc(lua_State*);
 static int psy_audio_luabind_array_index(lua_State*);
+static int psy_audio_luabind_array_new_index(lua_State*);
+
+MAKE_EXPORT_SELF(sqrt)
+MAKE_EXPORT_SELF(sin)
+MAKE_EXPORT_SELF(cos)
+MAKE_EXPORT_SELF(tan)
+MAKE_EXPORT_SELF(ceil)
+MAKE_EXPORT_SELF(floor)
+MAKE_EXPORT_SELF(fabs)
 
 int psy_audio_luabind_array_open(lua_State* L)
 {
@@ -33,21 +51,22 @@ int psy_audio_luabind_array_open(lua_State* L)
 		{ NULL, NULL }
 	};
 	static const luaL_Reg pm_meta[] = {
-/*		{ "random", array_method_random},
+//		{ "random", array_method_random},
+		{ "sqrt", array_method_sqrt},
 		{ "sin", array_method_sin},
 		{ "cos", array_method_cos },
-		{ "tan", array_method_tan },
-		{ "sqrt", array_method_sqrt},
-		{ "add", array_method_add},
+		{ "tan", array_method_tan },		
+		{ "ceil", array_method_ceil},
+		{ "floor", array_method_floor},
+		{ "abs", array_method_fabs},
+/*		{ "add", array_method_add},
 		{ "sub", array_method_sub},
 		{ "mix", array_method_mix},
 		{ "mul", array_method_mul},
 		{ "div", array_method_div},
 		{ "rsum", array_method_rsum},
-		{ "floor", array_method_floor},
-		{ "abs", array_method_abs},
 		{ "sgn", array_method_sgn},
-		{ "ceil", array_method_ceil},
+
 		{ "max", array_method_max},
 		{ "min", array_method_min},
 		{ "band", array_method_and},
@@ -65,8 +84,8 @@ int psy_audio_luabind_array_open(lua_State* L)
 		{ "margin", array_margin},
 		{ "fromtable", array_method_from_table},
 		{ "table", array_method_to_table},
-		{ "clearmargin", array_clearmargin },
-		{ "__newindex", array_new_index },*/
+		{ "clearmargin", array_clearmargin }, */
+		{ "__newindex", psy_audio_luabind_array_new_index },
 		{ "__index", psy_audio_luabind_array_index },
 		{ "__gc", psy_audio_luabind_array_gc },
 		/*{ "__tostring", array_tostring },
@@ -194,4 +213,26 @@ int psy_audio_luabind_array_index(lua_State *L)
 	}
 	// no method found
 	return 0;
+}
+
+int psy_audio_luabind_array_new_index(lua_State *L)
+{
+	if (lua_isnumber(L, 2)) {
+		int index;
+		float value;
+
+		psy_audio_Array** ud = (psy_audio_Array**) luaL_checkudata(L, 1,
+			luaarraybind_meta);
+		index = (int) luaL_checkinteger(L, 2);
+		value = (float) luaL_checknumber(L, 3);
+		if (!(0 <= index && index < psy_audio_array_len(*ud))) {
+			luaL_error(L, "index out of range");
+		}
+		*(psy_audio_array_data(*ud) + index) = value;
+			return 0;
+		} else {
+		//error
+		lua_error(L);
+		return 0;
+	}
 }

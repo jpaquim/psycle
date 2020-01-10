@@ -25,7 +25,7 @@ void ui_progressbar_init(ui_progressbar* self, psy_ui_Component* parent)
 {	
 	self->text = _strdup("");
 	self->progress = 0.f;
-	ui_component_init(&self->component, parent);
+	ui_component_init(&self->component, parent);	
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);

@@ -23,7 +23,7 @@
 #include "plugineditor.h"
 #include "patternview.h"
 #include "sequenceview.h"
-#include "stepsequencerbar.h"
+#include "stepsequencerview.h"
 #include "samplesview.h"
 #include "instrumentview.h"
 #include "settingsview.h"
@@ -37,6 +37,7 @@
 #include "songbar.h"
 #include "helpview.h"
 #include "stepbox.h"
+#include "zoombox.h"
 
 typedef struct {
 	psy_ui_Component component;
@@ -74,7 +75,9 @@ typedef struct {
 	VuBar vubar;
 	psy_ui_Component statusbar;
 	ui_notebook viewbars;
-	psy_ui_Component* activeview;	
+	ZoomBox zoombox;
+	psy_ui_Component left;
+	psy_ui_Component* activeview;
 	Workspace workspace;
 	psy_ui_Label label;	
 	psy_ui_Label statusbarlabel;

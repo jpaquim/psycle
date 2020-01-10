@@ -303,6 +303,10 @@ SOURCE=.\src\uiterminal.h
 
 SOURCE=.\src\uiwinapp.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincomponent.h
+# End Source File
 # End Group
 # End Target
 # End Project

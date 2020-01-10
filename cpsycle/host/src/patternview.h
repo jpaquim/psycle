@@ -27,7 +27,9 @@ typedef struct {
 	psy_ui_Component component;	
 	StepBox step;
 	psy_ui_CheckBox movecursorwhenpaste;
-	PatternViewStatus status;	
+	psy_ui_CheckBox defaultentries;
+	PatternViewStatus status;
+	Workspace* workspace;
 } PatternViewBar;
 
 void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent, Workspace*);

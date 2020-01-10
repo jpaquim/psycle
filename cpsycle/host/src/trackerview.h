@@ -12,6 +12,7 @@
 #include <inputmap.h>
 #include <uibutton.h>
 #include <uilabel.h>
+#include "zoombox.h"
 
 #include <pattern.h>
 
@@ -84,18 +85,6 @@ typedef struct {
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
-	struct TrackerView* view);
-
-typedef struct {
-	psy_ui_Component component;
-	int dx;	
-	unsigned int numtracks;
-	int classic;
-	TrackerSkin* skin;
-	struct TrackerView* view;
-} TrackerConfigHeader;
-
-void trackerconfigheader_init(TrackerConfigHeader*, psy_ui_Component* parent,
 	struct TrackerView* view);
 
 typedef struct {
@@ -201,22 +190,12 @@ typedef struct {
    int hasselection;
    int midline;   
    int chordbegin;
+   int columnresize;
+   int dragcolumn;
+   int dragcolumnbase;
    psy_audio_Pattern* pattern;
    TrackerGridEditMode editmode;
 } TrackerGrid;
-
-typedef struct {
-	psy_ui_Component component;
-	psy_ui_Button zoomin;
-	psy_ui_Label label;
-	psy_ui_Button zoomout;
-	psy_Signal signal_changed;
-	int zoomrate;
-	int zoomstep;
-} ZoomBox;
-
-void zoombox_init(ZoomBox*, psy_ui_Component* parent);
-double zoombox_rate(ZoomBox*);
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	struct TrackerView*, psy_audio_Player*);
@@ -224,8 +203,7 @@ void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 typedef Inputs TrackerInputs;
 
 typedef struct TrackerView {
-	psy_ui_Component component;
-	TrackerConfigHeader configheader;
+	psy_ui_Component component;	
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
@@ -251,6 +229,7 @@ typedef struct TrackerView {
 	psy_Table trackconfigs;	
 	TrackDef defaulttrackdef;
 	ZoomBox zoombox;
+	int doseqtick;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);

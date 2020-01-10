@@ -288,7 +288,7 @@ SOURCE=.\src\stepbox.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\stepsequencerbar.c
+SOURCE=.\src\stepsequencerview.c
 # End Source File
 # Begin Source File
 
@@ -345,6 +345,10 @@ SOURCE=.\src\wireview.c
 # Begin Source File
 
 SOURCE=.\src\workspace.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\zoombox.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -560,7 +564,7 @@ SOURCE=.\src\stepbox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\stepsequencerbar.h
+SOURCE=.\src\stepsequencerview.h
 # End Source File
 # Begin Source File
 
@@ -617,6 +621,10 @@ SOURCE=.\src\wireview.h
 # Begin Source File
 
 SOURCE=.\src\workspace.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\zoombox.h
 # End Source File
 # End Group
 # Begin Source File

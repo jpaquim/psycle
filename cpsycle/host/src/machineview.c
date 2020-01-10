@@ -347,16 +347,16 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 	if (self->machine) {		
 		if (self->frame == 0) {			
 			self->frame = machineframe_alloc();
-			self->frame->component.hwnd = 0;
+			self->frame->component.platform = 0;
 		}
-		if (self->frame->component.hwnd == 0) {
+		if (self->frame->component.platform == 0) {
 			psy_ui_Component* view = 0;
 			
 			machineframe_init(self->frame, parent);
 			if (machine_haseditor(self->machine)) {
 				Vst2View* vst2view;
 
-				vst2view = vst2view_allocinit(&self->frame->component,
+				vst2view = vst2view_allocinit(&self->frame->notebook.component,
 					self->machine, self->workspace);
 				if (vst2view) {
 					view = &vst2view->component;
@@ -364,7 +364,7 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 			} else {
 				ParamView* paramview;
 
-				paramview = paramview_allocinit(&self->frame->component,
+				paramview = paramview_allocinit(&self->frame->notebook.component,
 					self->machine, self->workspace);
 				if (paramview) {
 					view = &paramview->component;
@@ -391,16 +391,16 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->machines = &workspace->song->machines;
 	self->drawvumeters = 1;
 	self->wireframes = 0;
+	ui_component_init(&self->component, parent);
 	// skin init
 	psy_ui_bitmap_init(&self->skin.skinbmp);
 	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
 	ui_fontinfo_init(&fontinfo, "Tahoma", 80);
-	ui_font_init(&self->skin.font, &fontinfo);
-	ui_component_setfont(&self->component, &self->skin.font);
+	ui_font_init(&self->skin.font, &fontinfo);	
 	machinewireview_initmachinecoords(self);	
 	psy_table_init(&self->machineuis);			
-	machinewireview_initmasterui(self);
-	ui_component_init(&self->component, parent);
+	machinewireview_initmasterui(self);	
+	ui_component_setfont(&self->component, &self->skin.font);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	machinewireview_connectuisignals(self);	
@@ -1564,11 +1564,11 @@ void machinewireview_showwireview(MachineWireView* self, psy_audio_Wire wire)
 	if (!wireframe) {
 		wireframe = (WireFrame*)malloc(sizeof(WireFrame));
 		if (wireframe) {
-			wireframe->component.hwnd = 0;			
+			wireframe->component.platform = 0;			
 			psy_list_append(&self->wireframes, wireframe);			
 		}
 	}		
-	if (wireframe && wireframe->component.hwnd == 0) {
+	if (wireframe && wireframe->component.platform == 0) {
 		WireView* wireview;
 
 		wireframe_init(wireframe, &self->component, 0);

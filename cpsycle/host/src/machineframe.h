@@ -8,14 +8,20 @@
 #include "paramlistbox.h"
 
 #include <presets.h>
+#include <uinotebook.h>
 #include <uibutton.h>
+#include <uieditor.h>
 #include <uicombobox.h>
 #include <presets.h>
 #include <machine.h>
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Component row0;
+	psy_ui_Component row1;
 	psy_ui_Button mute;
+	psy_ui_Button parameters;
+	psy_ui_Button help;
 	psy_ui_ComboBox presetsbox;
 	psy_audio_Presets* presets;
 } ParameterBar;
@@ -24,9 +30,11 @@ typedef struct {
 	psy_ui_Component component;
 	ParameterBar parameterbar;
 	ParameterListBox parameterbox;
+	ui_notebook notebook;
+	psy_ui_Editor help;
 	psy_ui_Component* view;
 	psy_audio_Presets* presets;
-	psy_audio_Machine* machine;
+	psy_audio_Machine* machine;	
 } MachineFrame;
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent);

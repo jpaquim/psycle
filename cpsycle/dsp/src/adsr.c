@@ -9,19 +9,6 @@ static const psy_dsp_seconds_t defaultfastrelease = 0.003f;
 static void computestep(psy_dsp_ADSR* self, psy_dsp_amp_t dvalue,
 	psy_dsp_seconds_t numseconds);
 
-void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint* self, 
-	psy_dsp_seconds_t time, psy_dsp_amp_t value,
-	psy_dsp_seconds_t mintime, psy_dsp_seconds_t maxtime,
-	psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue)
-{
-	self->time = time;
-	self->value = value;
-	self->mintime = mintime;
-	self->maxtime = maxtime;
-	self->minvalue = minvalue;
-	self->maxvalue = maxvalue;
-}
-
 void adsr_settings_init(psy_dsp_ADSRSettings* self, psy_dsp_seconds_t attack,
 	psy_dsp_seconds_t decay, psy_dsp_percent_t sustain,
 	psy_dsp_seconds_t release)

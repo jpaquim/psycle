@@ -5,23 +5,7 @@
 #define PSY_DSP_ADSR_H
 
 #include "dsptypes.h"
-
-typedef struct {
-	psy_dsp_amp_t value;
-	psy_dsp_beat_t time;
-	psy_dsp_amp_t minvalue;
-	psy_dsp_amp_t maxvalue;
-	psy_dsp_beat_t mintime;
-	psy_dsp_beat_t maxtime;	
-} psy_dsp_EnvelopePoint;
-
-void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint*, 
-		psy_dsp_seconds_t time,
-		psy_dsp_amp_t value,
-		psy_dsp_seconds_t mintime,
-		psy_dsp_seconds_t maxtime,
-		psy_dsp_amp_t minvalue,
-		psy_dsp_amp_t maxvalue);
+#include "envelope.h"
 
 typedef struct {	
 	psy_dsp_seconds_t attack;
@@ -44,16 +28,6 @@ float adsr_settings_release(psy_dsp_ADSRSettings*);
 void adsr_settings_setrelease(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
 float adsr_settings_fastrelease(psy_dsp_ADSRSettings*);
 void adsr_settings_setfastrelease(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
-
-typedef enum
-{
-	ENV_OFF = 0,
-	ENV_ATTACK = 1,
-	ENV_DECAY = 2,
-	ENV_SUSTAIN = 3,
-	ENV_RELEASE = 4,
-	ENV_FASTRELEASE = 5
-} psy_dsp_EnvelopeStage;
 
 typedef struct {
 	psy_dsp_amp_t value;

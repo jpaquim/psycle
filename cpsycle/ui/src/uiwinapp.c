@@ -13,6 +13,7 @@
 #include <excpt.h>
 #include <stdlib.h>
 #include <commctrl.h> // common control header
+#include "uiwincomponent.h"
 
 int iDeltaPerLine = 120;
 static int mousetracking = 0;
@@ -144,13 +145,16 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			default:
 			break;
 		}
-		return CallWindowProc(component->wndproc, hwnd, message, wParam, lParam);
+		if (component->platform) {
+			return CallWindowProc(ui_win_component(component)->wndproc, hwnd,
+				message, wParam, lParam);
+		}
 	}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
-                               WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
+	LPARAM lParam)
 {	
     PAINTSTRUCT  ps ;     
 	psy_ui_Component*   component;
@@ -211,7 +215,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
 					if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
-						return (intptr_t) component->background;
+						return (intptr_t) ui_win_component(component)->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
@@ -533,8 +537,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							SendMessage((HWND) component->hwnd, 
-								WM_VSCROLL,
+							ui_win_component_sendmessage(component, WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);
 							component->accumwheeldelta -= iDeltaPerLine ;							
 						}				
@@ -551,7 +554,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							SendMessage((HWND) component->hwnd, WM_VSCROLL,
+							ui_win_component_sendmessage(component, WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);							
 							component->accumwheeldelta += iDeltaPerLine;							
 						}

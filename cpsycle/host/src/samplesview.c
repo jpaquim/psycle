@@ -316,7 +316,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		&workspace->player);
 	ui_component_setalign(&self->vibrato.component, UI_ALIGN_TOP);
 	ui_notebook_setpageindex(&self->notebook, 0);	
-	wavebox_init(&self->wavebox, &self->client);	
+	wavebox_init(&self->wavebox, &self->client);
 	ui_component_setalign(&self->wavebox.component, UI_ALIGN_CLIENT);
 	ui_component_setmargin(&self->wavebox.component, &waveboxmargin);
 	samplesloopview_init(&self->waveloop, &self->component, self);	
@@ -325,8 +325,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->samplesbox.signal_changed, self,
 		samplesview_onsamplesboxchanged);
 	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
-		samplesview_oninstrumentslotchanged);
-	samplesview_setsample(self, sampleindex_make(0, 0));	
+		samplesview_oninstrumentslotchanged);	
 	samplessongimportview_init(&self->songimport,
 		&self->clientnotebook.component, self, workspace);
 	sampleeditor_init(&self->sampleeditor,
@@ -337,6 +336,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	ui_notebook_setpageindex(&self->clientnotebook, 0);
 	ui_notebook_connectcontroller(&self->clientnotebook,
 		&self->clienttabbar.signal_change);
+	samplesview_setsample(self, sampleindex_make(0, 0));
 }
 
 void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender)

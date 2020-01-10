@@ -50,9 +50,6 @@ typedef struct {
 } EnumCallback;
 
 
-typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
-	LPARAM lParam);
-
 // vtable function pointers
 typedef void (*psy_ui_fp_preferredsize)(struct psy_ui_Component*,
 	ui_size* limit, ui_size* rv);
@@ -64,9 +61,7 @@ typedef struct psy_ui_ComponentVTable {
 } psy_ui_ComponentVtable;
 
 typedef struct psy_ui_Component {
-	psy_ui_ComponentVtable* vtable;
-	uintptr_t hwnd;
-	uintptr_t winid;	
+	psy_ui_ComponentVtable* vtable;	
 	psy_Signal signal_size;
 	psy_Signal signal_draw;
 	psy_Signal signal_timer;
@@ -88,7 +83,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_hide;
 	psy_Signal signal_windowproc;
 	psy_Signal signal_align;
-	//psy_Signal signal_preferredsize;
+	psy_Signal signal_preferredsize;
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
 	psy_Signal signal_focus;
@@ -103,21 +98,21 @@ typedef struct psy_ui_Component {
 	int defaultpropagation;
 	int propagateevent;
 	int preventdefault;
+	int preventpreferredsize;
 	int scrollstepx;
 	int scrollstepy;
 	int debugflag;
-	unsigned int backgroundcolor;
-	unsigned int color;
+	uint32_t backgroundcolor;
+	uint32_t color;
 	BackgroundMode backgroundmode;
-	ui_font font;
-	HBRUSH background;
-	int visible;
-	winproc wndproc;
+	ui_font font;	
+	int visible;	
 	int accumwheeldelta;
 	int wheelscroll;
 	int handlevscroll;
 	int handlehscroll;
-	int cursor;	
+	int cursor;
+	void* platform;
 } psy_ui_Component;
 
 void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font);
@@ -147,6 +142,7 @@ int ui_component_horizontalscrollposition(psy_ui_Component*);
 void ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
 void ui_component_move(psy_ui_Component*, int left, int top);
 void ui_component_resize(psy_ui_Component*, int width, int height);
+void ui_component_clientresize(psy_ui_Component*, int width, int height);
 void ui_component_setposition(psy_ui_Component*, int x, int y, int width, int height);
 void ui_component_setmenu(psy_ui_Component*, ui_menu* menu);
 void ui_component_settitle(psy_ui_Component*, const char* title);
@@ -187,6 +183,8 @@ ui_size ui_component_textsize(psy_ui_Component*, const char*);
 ui_textmetric ui_component_textmetric(psy_ui_Component*);
 ui_size ui_component_preferredsize(psy_ui_Component*, ui_size* limit);
 void ui_component_seticonressource(psy_ui_Component*, int ressourceid);
+void* ui_component_platform(psy_ui_Component*);
+uintptr_t ui_component_platformhandle(psy_ui_Component*);
 
 psy_List* ui_components_setalign(psy_List*, UiAlignType, const ui_margin*);
 psy_List* ui_components_setmargin(psy_List*, const ui_margin*);
