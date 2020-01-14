@@ -28,22 +28,22 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 	// row0
 	ui_component_init(&self->row0, &self->component);
 	ui_component_enablealign(&self->row0);
-	ui_component_setalign(&self->row0, UI_ALIGN_TOP);
-	ui_button_init(&self->mute, &self->row0);	
-	ui_button_settext(&self->mute, "Mute");
-	ui_component_setalign(&self->mute.component, UI_ALIGN_LEFT);
-	ui_button_init(&self->parameters, &self->row0);
-	ui_button_settext(&self->parameters, "Parameters");	
-	ui_component_setalign(&self->parameters.component, UI_ALIGN_LEFT);
-	ui_button_init(&self->help, &self->row0);	
-	ui_button_settext(&self->help, "Help");
-	ui_component_setalign(&self->help.component, UI_ALIGN_LEFT);
+	ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->mute, &self->row0);	
+	psy_ui_button_settext(&self->mute, "Mute");
+	ui_component_setalign(&self->mute.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_init(&self->parameters, &self->row0);
+	psy_ui_button_settext(&self->parameters, "Parameters");	
+	ui_component_setalign(&self->parameters.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_init(&self->help, &self->row0);	
+	psy_ui_button_settext(&self->help, "Help");
+	ui_component_setalign(&self->help.component, psy_ui_ALIGN_LEFT);
 	// row1 
 	//ui_component_init(&self->row1, &self->component);
 	//ui_component_enablealign(&self->row0);
 	//ui_component_setalign(&self->row1, UI_ALIGN_TOP);
 	ui_combobox_init(&self->presetsbox, &self->component);
-	ui_component_setalign(&self->presetsbox.component, UI_ALIGN_TOP);	
+	ui_component_setalign(&self->presetsbox.component, psy_ui_ALIGN_TOP);	
 }
 
 void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
@@ -57,7 +57,8 @@ void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 			psy_audio_Preset* preset;
 
 			preset = (psy_audio_Preset*) p->entry;
-			ui_combobox_addstring(&self->presetsbox, preset_name(preset));
+			ui_combobox_addstring(&self->presetsbox,
+				psy_audio_preset_name(preset));
 		}
 		ui_combobox_setcursel(&self->presetsbox, 0);
 	}
@@ -70,17 +71,16 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent)
 	self->machine = 0;
 	ui_frame_init(&self->component, parent);
 	ui_component_seticonressource(&self->component, IDI_MACPARAM);
-	ui_component_move(&self->component, 200, 150);
-	ui_component_resize(&self->component, 800, 800);
+	ui_component_move(&self->component, 200, 150);	
 	ui_component_enablealign(&self->component);	
 	parameterbar_init(&self->parameterbar, &self->component);
-	ui_component_setalign(&self->parameterbar.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	parameterlistbox_init(&self->parameterbox, &self->component, 0);
-	ui_component_setalign(&self->parameterbox.component, UI_ALIGN_RIGHT);
-	ui_notebook_init(&self->notebook, &self->component);
-	ui_component_setalign(&self->notebook.component,
-		UI_ALIGN_CLIENT);
-	ui_editor_init(&self->help, &self->notebook.component);
+	ui_component_setalign(&self->parameterbox.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_notebook_init(&self->notebook, &self->component);
+	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+		psy_ui_ALIGN_CLIENT);
+	ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));
 	ui_editor_addtext(&self->help, "About");
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machineframe_ondestroy);	
@@ -103,7 +103,7 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	char text[128];
 
 	self->view = (psy_ui_Component*) view;
-	ui_component_setalign(self->view, UI_ALIGN_CLIENT);
+	ui_component_setalign(self->view, psy_ui_ALIGN_CLIENT);
 	self->machine = machine;
 	parameterlistbox_setmachine(&self->parameterbox, machine);
 	ui_component_hide(&self->parameterbox.component);
@@ -112,10 +112,10 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 		psy_dir_extract_path(info->modulepath, prefix, name, ext);
 		psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
 		if (self->presets) {
-			presets_dispose(self->presets);
+			psy_audio_presets_dispose(self->presets);
 		}
-		self->presets = presets_allocinit();
-		presetsio_load(prspath, self->presets);		
+		self->presets = psy_audio_presets_allocinit();
+		psy_audio_presetsio_load(prspath, self->presets);		
 	}
 	parameterbar_setpresetlist(&self->parameterbar, self->presets);		
 	machineframe_resize(self);
@@ -128,16 +128,16 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 			psy_snprintf(text, 128, "%.2X :",
 				machine_slot(self->machine));
 	}
-	ui_notebook_setpageindex(&self->notebook, 1);
+	psy_ui_notebook_setpageindex(&self->notebook, 1);
 	ui_component_settitle(&self->component, text);
 	ui_component_align(&self->component);
 }
 
 void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame)
 {
-	self->component.platform = 0;
+	self->component.hwnd = 0; //.platform = 0;
 	if (self->presets) {
-		presets_dispose(self->presets);
+		psy_audio_presets_dispose(self->presets);
 		self->presets = 0;
 	}
 }
@@ -189,15 +189,15 @@ MachineFrame* machineframe_allocinit(psy_ui_Component* parent)
 void machineframe_toggleparameterbox(MachineFrame* self,
 	psy_ui_Component* sender)
 {
-	ui_size viewsize;
+	psy_ui_Size viewsize;
 
 	viewsize = ui_component_preferredsize(self->view, 0);
 	if (ui_component_visible(&self->parameterbox.component)) {
 		ui_component_hide(&self->parameterbox.component);		
-		ui_button_disablehighlight(&self->parameterbar.parameters);
+		psy_ui_button_disablehighlight(&self->parameterbar.parameters);
 	} else {
 		ui_component_show(&self->parameterbox.component);		
-		ui_button_highlight(&self->parameterbar.parameters);
+		psy_ui_button_highlight(&self->parameterbar.parameters);
 	}
 	machineframe_resize(self);
 }
@@ -205,19 +205,19 @@ void machineframe_toggleparameterbox(MachineFrame* self,
 void machineframe_togglehelp(MachineFrame* self,
 	psy_ui_Component* sender)
 {	
-	if (ui_notebook_pageindex(&self->notebook) == 0) {			
-		ui_notebook_setpageindex(&self->notebook, 1);
-		ui_button_disablehighlight(&self->parameterbar.help);
+	if (psy_ui_notebook_pageindex(&self->notebook) == 0) {			
+		psy_ui_notebook_setpageindex(&self->notebook, 1);
+		psy_ui_button_disablehighlight(&self->parameterbar.help);
 	} else {		
-		ui_notebook_setpageindex(&self->notebook, 0);
-		ui_button_highlight(&self->parameterbar.help);
+		psy_ui_notebook_setpageindex(&self->notebook, 0);
+		psy_ui_button_highlight(&self->parameterbar.help);
 	}	
 }
 
 void machineframe_resize(MachineFrame* self)
 {
-	ui_size viewsize;	
-	ui_size bar;
+	psy_ui_Size viewsize;	
+	psy_ui_Size bar;
 	
 	viewsize = ui_component_preferredsize(self->view, 0);	
 	if (ui_component_visible(&self->parameterbox.component)) {				

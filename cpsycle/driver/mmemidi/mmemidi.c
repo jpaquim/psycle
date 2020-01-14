@@ -13,7 +13,7 @@
 #define DEVICE_NONE 0
 
 typedef struct {
-	EventDriver driver;	
+	psy_EventDriver driver;	
 	HMIDIIN hMidiIn;
 	int deviceid;		
 	int (*error)(int, const char*);
@@ -21,17 +21,17 @@ typedef struct {
 	HANDLE hEvent;
 } MmeMidiDriver;
 
-static void driver_free(EventDriver*);
-static int driver_init(EventDriver*);
-static int driver_open(EventDriver*);
-static int driver_close(EventDriver*);
-static int driver_dispose(EventDriver*);
-static void driver_configure(EventDriver*);
-static void driver_cmd(EventDriver*, EventDriverData input, EventDriverCmd*);
-static EventDriverCmd driver_getcmd(EventDriver*, psy_Properties* section);
-static void setcmddef(EventDriver*, psy_Properties*);
+static void driver_free(psy_EventDriver*);
+static int driver_init(psy_EventDriver*);
+static int driver_open(psy_EventDriver*);
+static int driver_close(psy_EventDriver*);
+static int driver_dispose(psy_EventDriver*);
+static void driver_configure(psy_EventDriver*);
+static void driver_cmd(psy_EventDriver*, EventDriverData input, EventDriverCmd*);
+static EventDriverCmd driver_getcmd(psy_EventDriver*, psy_Properties* section);
+static void setcmddef(psy_EventDriver*, psy_Properties*);
 
-static void init_properties(EventDriver* self);
+static void init_properties(psy_EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
 
 static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
@@ -53,7 +53,7 @@ EXPORT EventDriverInfo const * __cdecl GetPsycleEventDriverInfo(void)
 	return &info;
 }
 
-EXPORT EventDriver* __cdecl eventdriver_create(void)
+EXPORT psy_EventDriver* __cdecl eventdriver_create(void)
 {
 	MmeMidiDriver* mme = (MmeMidiDriver*) malloc(sizeof(MmeMidiDriver));
 	memset(mme, 0, sizeof(MmeMidiDriver));
@@ -73,12 +73,12 @@ EXPORT EventDriver* __cdecl eventdriver_create(void)
 	return &mme->driver;
 }
 
-void driver_free(EventDriver* driver)
+void driver_free(psy_EventDriver* driver)
 {
 	free(driver);
 }
 
-int driver_init(EventDriver* driver)
+int driver_init(psy_EventDriver* driver)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;
 
@@ -88,7 +88,7 @@ int driver_init(EventDriver* driver)
 	return 0;
 }
 
-int driver_dispose(EventDriver* driver)
+int driver_dispose(psy_EventDriver* driver)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;
 	properties_free(self->driver.properties);
@@ -98,7 +98,7 @@ int driver_dispose(EventDriver* driver)
 	return 0;
 }
 
-void init_properties(EventDriver* self)
+void init_properties(psy_EventDriver* self)
 {		
 	psy_Properties* devices;
 	int i;
@@ -137,12 +137,12 @@ void apply_properties(MmeMidiDriver* self)
 	}
 }
 
-void driver_configure(EventDriver* self)
+void driver_configure(psy_EventDriver* self)
 {
 	apply_properties((MmeMidiDriver*)self);
 }
 
-int driver_open(EventDriver* driver)
+int driver_open(psy_EventDriver* driver)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 	unsigned int success = 1;
@@ -164,7 +164,7 @@ int driver_open(EventDriver* driver)
 	return success;
 }
 
-int driver_close(EventDriver* driver)
+int driver_close(psy_EventDriver* driver)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;
 	unsigned int success = 1;
@@ -180,7 +180,7 @@ int driver_close(EventDriver* driver)
 
 CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
 {			
-	EventDriver* driver = (EventDriver*)dwInstance;	
+	psy_EventDriver* driver = (psy_EventDriver*)dwInstance;	
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 	switch(uMsg) {
 		// normal data message
@@ -212,13 +212,13 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 	}
 }
 
-void driver_cmd(EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
+void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
 {		
 	cmd->id = input.param1;
 	cmd->data.param1 = input.param1;
 }
 
-EventDriverCmd driver_getcmd(EventDriver* driver, psy_Properties* section)
+EventDriverCmd driver_getcmd(psy_EventDriver* driver, psy_Properties* section)
 {
 	EventDriverCmd cmd;
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
@@ -228,7 +228,7 @@ EventDriverCmd driver_getcmd(EventDriver* driver, psy_Properties* section)
 }
 
 /*
-void driver_configure(EventDriver* driver)
+void driver_configure(psy_EventDriver* driver)
 {
 	psy_Properties* notes;
 
@@ -239,7 +239,7 @@ void driver_configure(EventDriver* driver)
 }
 */
 
-void setcmddef(EventDriver* driver, psy_Properties* cmddef)
+void setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
 {
 /*	psy_Properties* notes;
 

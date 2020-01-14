@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void eventdrivers_ondriverinput(EventDrivers*, EventDriver*);
+static void eventdrivers_ondriverinput(EventDrivers*, psy_EventDriver*);
 
 void eventdrivers_init(EventDrivers* self, void* systemhandle)
 {
@@ -25,7 +25,7 @@ void eventdrivers_init(EventDrivers* self, void* systemhandle)
 
 void eventdrivers_initkbd(EventDrivers* self)
 {
-	EventDriver* eventdriver;
+	psy_EventDriver* eventdriver;
 	EventDriverEntry* eventdriverentry;
 
 	eventdriver = create_kbd_driver();	
@@ -44,7 +44,7 @@ void eventdrivers_dispose(EventDrivers* self)
 
 	for (p = self->eventdrivers; p != 0; p = p->next) {
 		EventDriverEntry* eventdriverentry;
-		EventDriver* eventdriver;
+		psy_EventDriver* eventdriver;
 		
 		eventdriverentry = (EventDriverEntry*)p->entry;
 		eventdriver = eventdriverentry->eventdriver;
@@ -53,8 +53,8 @@ void eventdrivers_dispose(EventDrivers* self)
 		eventdriver->free(eventdriver);
 //		free(eventdriver);
 		if (eventdriverentry && eventdriverentry->library) {
-			library_unload(eventdriverentry->library);
-			library_disposefree(eventdriverentry->library);			
+			psy_library_unload(eventdriverentry->library);
+			psy_library_deallocate(eventdriverentry->library);			
 		}
 		free(eventdriverentry);
 	}
@@ -66,7 +66,7 @@ void eventdrivers_dispose(EventDrivers* self)
 
 void eventdrivers_load(EventDrivers* self, const char* path)
 {
-	EventDriver* eventdriver = 0;	
+	psy_EventDriver* eventdriver = 0;	
 	
 	if (path) {
 		if (strcmp(path, "kbd") == 0) {
@@ -74,16 +74,16 @@ void eventdrivers_load(EventDrivers* self, const char* path)
 				eventdrivers_initkbd(self);
 			}
 		} else {
-			Library* library;
-			EventDriver* eventdriver = 0;
+			psy_Library* library;
+			psy_EventDriver* eventdriver = 0;
 
-			library = library_allocinit();			
-			library_load(library, path);
-			if (!library_empty(library)) {				
+			library = psy_library_allocinit();			
+			psy_library_load(library, path);
+			if (!psy_library_empty(library)) {				
 				pfneventdriver_create fpeventdrivercreate;
 
 				fpeventdrivercreate = (pfneventdriver_create)
-					library_functionpointer(library, "eventdriver_create");
+					psy_library_functionpointer(library, "eventdriver_create");
 				if (fpeventdrivercreate) {
 					EventDriverEntry* eventdriverentry;
 
@@ -99,7 +99,7 @@ void eventdrivers_load(EventDrivers* self, const char* path)
 				}
 			}
 			if (!eventdriver) {
-				library_disposefree(library);
+				psy_library_deallocate(library);
 			}
 		}
 	}
@@ -107,7 +107,7 @@ void eventdrivers_load(EventDrivers* self, const char* path)
 
 void eventdrivers_restart(EventDrivers* self, int id)
 {	
-	EventDriver* eventdriver;
+	psy_EventDriver* eventdriver;
 
 	eventdriver = eventdrivers_driver(self, id);
 	if (eventdriver) {
@@ -123,7 +123,7 @@ void eventdrivers_restartall(EventDrivers* self)
 
 	for (p = self->eventdrivers; p != 0; p = p->next) {
 		EventDriverEntry* eventdriverentry;
-		EventDriver* eventdriver;
+		psy_EventDriver* eventdriver;
 		
 		eventdriverentry = (EventDriverEntry*)p->entry;
 		eventdriver = eventdriverentry->eventdriver;
@@ -137,7 +137,7 @@ void eventdrivers_restartall(EventDrivers* self)
 
 void eventdrivers_remove(EventDrivers* self, int id)
 {
-	EventDriver* eventdriver;
+	psy_EventDriver* eventdriver;
 
 	eventdriver = eventdrivers_driver(self, id);	
 	if (eventdriver) {
@@ -153,8 +153,8 @@ void eventdrivers_remove(EventDrivers* self, int id)
 		}
 		eventdriverentry = eventdrivers_entry(self, id);
 		if (eventdriverentry && eventdriverentry->library) {
-			library_unload(eventdriverentry->library);
-			library_disposefree(eventdriverentry->library);			
+			psy_library_unload(eventdriverentry->library);
+			psy_library_deallocate(eventdriverentry->library);			
 			eventdriverentry->library = 0;
 		}
 		for (p = self->eventdrivers; p != 0; p = p->next) {
@@ -186,7 +186,7 @@ EventDriverEntry* eventdrivers_entry(EventDrivers* self, int id)
 	return p ? ((EventDriverEntry*) (p->entry)) : 0;
 }
 
-EventDriver* eventdrivers_driver(EventDrivers* self, int id) 
+psy_EventDriver* eventdrivers_driver(EventDrivers* self, int id) 
 {
 	psy_List* p;
 	int c = 0;
@@ -196,7 +196,7 @@ EventDriver* eventdrivers_driver(EventDrivers* self, int id)
 	return p ? ((EventDriverEntry*) (p->entry))->eventdriver : 0;
 }
 
-void eventdrivers_ondriverinput(EventDrivers* self, EventDriver* sender)
+void eventdrivers_ondriverinput(EventDrivers* self, psy_EventDriver* sender)
 {
 	psy_signal_emit(&self->signal_input, sender, 0);
 }
@@ -208,7 +208,7 @@ void eventdrivers_setcmds(EventDrivers* self, psy_Properties* cmds)
 	self->cmds = cmds;
 	for (p = self->eventdrivers; p != 0; p = p->next) {
 		EventDriverEntry* eventdriverentry;
-		EventDriver* eventdriver;
+		psy_EventDriver* eventdriver;
 		
 		eventdriverentry = (EventDriverEntry*)p->entry;
 		eventdriver = eventdriverentry->eventdriver;

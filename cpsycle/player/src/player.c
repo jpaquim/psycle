@@ -20,7 +20,7 @@ typedef struct {
 	psy_audio_Player player;
 	psy_audio_Song* song;	
 	psy_audio_PluginCatcher plugincatcher;
-	MachineFactory machinefactory;
+	psy_audio_MachineFactory machinefactory;
 	psy_Properties* config;
 	psy_Properties* directories;
 	psy_Properties* inputoutput;
@@ -157,14 +157,14 @@ void cmdplayer_idle(void)
 void cmdplayer_init(CmdPlayer* self)
 {
 	cmdplayer_initenv(self);
-	lock_init();
+	psy_audio_lock_init();
 	psy_dsp_noopt_init(&dsp);
 	self->config = psy_properties_create();
 	cmdplayer_makedirectories(self);
 	cmdplayer_makeinputoutput(self);
 	cmdplayer_setdriverlist(self);
 	cmdplayer_initplugincatcherandmachinefactory(self);
-	self->song = song_allocinit(&self->machinefactory);	
+	self->song = psy_audio_song_allocinit(&self->machinefactory);	
 	player_init(&self->player, self->song, (void*)0);	
 	player_loaddriver(&self->player, cmdplayer_driverpath(self), 0);	
 	printf("Audio driver %s \n", 
@@ -247,7 +247,7 @@ void cmdplayer_setdriverlist(CmdPlayer* self)
 	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
 	drivers = psy_properties_append_choice(self->inputoutput, "driver", 1); 
-	psy_properties_settext(drivers, "Driver");
+	psy_properties_settext(drivers, "psy_AudioDriver");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(_DEBUG)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
@@ -261,13 +261,13 @@ void cmdplayer_setdriverlist(CmdPlayer* self)
 void cmdplayer_dispose(CmdPlayer* self)
 {
 	player_dispose(&self->player);	
-	song_free(self->song);	
+	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
 	properties_free(self->config);
 	self->config = 0;	
 	plugincatcher_dispose(&self->plugincatcher);
 	machinefactory_dispose(&self->machinefactory);	
-	lock_dispose();
+	psy_audio_lock_dispose();
 }
 
 const char* cmdplayer_driverpath(CmdPlayer* self)
@@ -302,8 +302,8 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 
 	player_stop(&self->player);
 	oldsong = self->song;
-	lock_enter();	
-	self->song = song_allocinit(&self->machinefactory);	
+	psy_audio_lock_enter();	
+	self->song = psy_audio_song_allocinit(&self->machinefactory);	
 	songfile.song = self->song;
 	songfile.file = 0;
 	psy_audio_songfile_init(&songfile);
@@ -313,8 +313,8 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	}	
 	player_setsong(&self->player, self->song);
 	cmdplayer_applysongproperties(self);
-	lock_leave();
-	song_free(oldsong);
+	psy_audio_lock_leave();
+	psy_audio_song_deallocate(oldsong);
 	psy_audio_songfile_dispose(&songfile);
 }
 

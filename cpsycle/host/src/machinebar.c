@@ -29,10 +29,10 @@ static void OnNextMachine(MachineBar*, psy_ui_Component* sender);
 
 void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* workspace)
 {		
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
-		ui_value_makepx(0), ui_value_makepx(0));				
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));				
 	self->selchange = 0;	
 	self->player = &workspace->player;
 	self->machines = &workspace->song->machines;	
@@ -44,10 +44,10 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	ui_combobox_init(&self->machinebox, &self->component);
 	ui_combobox_setcharnumber(&self->machinebox, 30);	
-	ui_button_init(&self->gear, &self->component);
-	ui_button_settext(&self->gear, "Gear Rack");
-	ui_button_init(&self->editor, &self->component);
-	ui_button_settext(&self->editor, "Editor");
+	psy_ui_button_init(&self->gear, &self->component);
+	psy_ui_button_settext(&self->gear, "Gear Rack");
+	psy_ui_button_init(&self->editor, &self->component);
+	psy_ui_button_settext(&self->editor, "Editor");
 	BuildMachineBox(self);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		OnMachineBoxSelChange);	
@@ -62,7 +62,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	ConnectSongSignals(self);					
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, &margin));
 }
 
 void OnDestroy(MachineBar* self, psy_ui_Component* component)

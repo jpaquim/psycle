@@ -29,7 +29,7 @@ static void settingsview_oneditkeydown(SettingsView*, psy_ui_Component* sender,
 static void settingsview_oninputdefinerchange(SettingsView* self,
 	InputDefiner* sender);
 static void settingsview_ondestroy(SettingsView*, psy_ui_Component* sender);
-static void settingsview_onsize(SettingsView*, psy_ui_Component* sender, ui_size*);
+static void settingsview_onsize(SettingsView*, psy_ui_Component* sender, psy_ui_Size*);
 static void settingsview_onscroll(SettingsView*, psy_ui_Component* sender,
 	int stepx, int stepy);
 static void settingsview_drawlinebackground(SettingsView*,psy_Properties*);
@@ -57,10 +57,12 @@ static void settingsview_adjustscroll(SettingsView*);
 void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Properties* properties)
 {
+	ui_component_init(&self->component, parent);		
+	ui_component_enablealign(&self->component);
 	self->properties = properties;
-	ui_component_init(&self->component, parent);
 	ui_component_init(&self->client, &self->component);
-	self->client.doublebuffered = 1;
+	ui_component_doublebuffer(&self->client);	
+	ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	self->client.wheelscroll = 4;
 	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	ui_component_showverticalscrollbar(&self->client);	
@@ -91,8 +93,8 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	ui_component_hide(&self->inputdefiner.component);		
 	psy_signal_init(&self->signal_changed);
 	tabbar_init(&self->tabbar, &self->component);
-	self->tabbar.tabalignment = UI_ALIGN_RIGHT;	
-	ui_component_resize(&self->tabbar.component, 130, 0);	
+	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
 	settingsview_appendtabbarsections(self);
 }
 
@@ -130,7 +132,7 @@ void settingsview_ondraw(SettingsView* self, psy_ui_Component* sender,
 
 void settingsview_preparepropertiesenum(SettingsView* self)
 {
-	ui_textmetric tm;
+	psy_ui_TextMetric tm;
 	
 	tm = ui_component_textmetric(&self->client);
 	self->lineheight = (int) (tm.tmHeight * 1.5);
@@ -192,11 +194,11 @@ void settingsview_drawlinebackground(SettingsView* self,
 	psy_Properties* property)
 {	
 	if (psy_properties_type(property) != PSY_PROPERTY_TYP_SECTION) {
-		ui_size size;
-		ui_rectangle r;
+		psy_ui_Size size;
+		psy_ui_Rectangle r;
 
 		size = ui_component_size(&self->client);
-		ui_setrectangle(&r, 10, self->cpy + self->dy, size.width - 20,
+		psy_ui_setrectangle(&r, 10, self->cpy + self->dy, size.width - 20,
 			self->lineheight);
 		ui_drawsolidrectangle(self->g, r, 0x00292929);
 	}
@@ -276,8 +278,8 @@ void settingsview_advanceline(SettingsView* self)
 void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	int column)
 {
-	ui_size size;
-	ui_rectangle r;	
+	psy_ui_Size size;
+	psy_ui_Rectangle r;	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
 		ui_textout(self->g, self->columnwidth * column + 3,
 			self->cpy + self->dy, "...", 3);
@@ -305,12 +307,12 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 	int column)
 {
-	ui_rectangle r;
+	psy_ui_Rectangle r;
 	int checked = 0;
-	ui_textmetric tm;
-	ui_size size;
-	ui_size cornersize;
-	ui_size knobsize;
+	psy_ui_TextMetric tm;
+	psy_ui_Size size;
+	psy_ui_Size cornersize;
+	psy_ui_Size knobsize;
 		
 	tm = ui_component_textmetric(&self->component);
 	size.width = tm.tmAveCharWidth * 4;
@@ -403,7 +405,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 	ui_component_invalidate(&self->client);
 }
 
-int settingsview_intersects(ui_rectangle* r, int x, int y)
+int settingsview_intersects(psy_ui_Rectangle* r, int x, int y)
 {
 	return x >= r->left && x < r->right && y >= r->top && y < r->bottom;
 }
@@ -466,10 +468,10 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 
 	self->dirbutton = 0;
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_BOOL) {					
-		ui_rectangle r;
+		psy_ui_Rectangle r;
 		int checked = 0;
-		ui_size size;
-		ui_textmetric tm;
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		
 		tm = ui_component_textmetric(&self->component);
 		size = ui_component_textsize(&self->client, "x");
@@ -483,14 +485,14 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER ||
 		psy_properties_type(property) == PSY_PROPERTY_TYP_STRING ||
 		psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
-		ui_rectangle r;		
-		ui_setrectangle(&r, self->columnwidth * column, 
+		psy_ui_Rectangle r;		
+		psy_ui_setrectangle(&r, self->columnwidth * column, 
 			self->cpy + self->dy, self->columnwidth, self->lineheight);
 		self->selrect = r;
 		rv = settingsview_intersects(&r, self->mx, self->my);
 		if (!rv &&
 				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
-			ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
+			psy_ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
 				self->cpy + self->dy, self->columnwidth, self->lineheight);
 			self->selrect = r;
 			rv = settingsview_intersects(&r, self->mx, self->my);
@@ -589,15 +591,8 @@ void settingsview_onscroll(SettingsView* self, psy_ui_Component* sender,
 }
 
 void settingsview_onsize(SettingsView* self, psy_ui_Component* sender,
-	ui_size* size)
+	psy_ui_Size* size)
 {	
-	ui_size tabbarsize;	
-		
-	tabbarsize = ui_component_preferredsize(&self->tabbar.component, size);
-	ui_component_resize(&self->client, size->width - tabbarsize.width,
-		size->height);
-	ui_component_setposition(&self->tabbar.component,
-		size->width - tabbarsize.width, 0, tabbarsize.width, size->height);
 	settingsview_adjustscroll(self);
 }
 
@@ -645,7 +640,7 @@ void settingsview_ontabbarchange(SettingsView* self, psy_ui_Component* sender,
 
 void settingsview_adjustscroll(SettingsView* self)
 {
-	ui_size size;
+	psy_ui_Size size;
 	int scrollmax;
 
 	size = ui_component_size(&self->client);

@@ -12,8 +12,8 @@
 #endif
 #endif
 
-#if !defined(EVENTDRIVER_H)
-#define EVENTDRIVER_H
+#if !defined(PSY_EVENTDRIVER_H)
+#define PSY_EVENTDRIVER_H
 
 #include <properties.h>
 #include <signal.h>
@@ -43,25 +43,25 @@ typedef struct {
 	EventDriverData data;
 } EventDriverCmd;
 
-typedef struct EventDriver {	
+typedef struct psy_EventDriver {
 	psy_Properties* properties;	
-	int (*open)(struct EventDriver*);
-	int (*dispose)(struct EventDriver*);
-	void (*free)(struct EventDriver*);	
-	void (*configure)(struct EventDriver*);	
-	int (*close)(struct EventDriver*);	
-	void (*write)(struct EventDriver*, EventDriverData);
-	void (*cmd)(struct EventDriver*, EventDriverData, EventDriverCmd*);
+	int (*open)(struct psy_EventDriver*);
+	int (*dispose)(struct psy_EventDriver*);
+	void (*free)(struct psy_EventDriver*);	
+	void (*configure)(struct psy_EventDriver*);	
+	int (*close)(struct psy_EventDriver*);	
+	void (*write)(struct psy_EventDriver*, EventDriverData);
+	void (*cmd)(struct psy_EventDriver*, EventDriverData, EventDriverCmd*);
 	int (*error)(int, const char*);
-	EventDriverCmd (*getcmd)(struct EventDriver*, psy_Properties* section);
-	void (*setcmddef)(struct EventDriver*, psy_Properties*);
+	EventDriverCmd (*getcmd)(struct psy_EventDriver*, psy_Properties* section);
+	void (*setcmddef)(struct psy_EventDriver*, psy_Properties*);
 	psy_Signal signal_input;
-} EventDriver;
+} psy_EventDriver;
 
 
-typedef EXPORT EventDriver* (__cdecl *pfneventdriver_create)(void);
+typedef EXPORT psy_EventDriver* (__cdecl *pfneventdriver_create)(void);
 
-EXPORT EventDriver* __cdecl eventdriver_create(void);
+EXPORT psy_EventDriver* __cdecl eventdriver_create(void);
 
 EXPORT EventDriverInfo const * __cdecl GetPsycleEventDriverInfo(void);
 

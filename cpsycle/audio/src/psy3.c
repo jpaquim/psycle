@@ -65,7 +65,7 @@ static short* psy3_floatbuffertoshort(float* buffer, uintptr_t numframes);
 //	===================
 //	PSY3 SONG LOAD
 //	===================
-int psy3_load(psy_audio_SongFile* self)
+int psy_audio_psy3_load(psy_audio_SongFile* self)
 {
 	char header[9];	
 	uint32_t temp32;
@@ -189,7 +189,7 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 		psy_audio_Sample* sample;
 
 		instrument = psy_tableiterator_value(&it);
-		sample = samples_at(&self->song->samples,
+		sample = psy_audio_samples_at(&self->song->samples,
 			sampleindex_make(psy_tableiterator_key(&it), 0));
 		instrument_setname(instrument, sample_name(sample));		
 	}
@@ -223,7 +223,7 @@ void readinfo(psy_audio_SongFile* self)
 		psyfile_readstring(self->file, author_, sizeof author_);
 		psyfile_readstring(self->file, comments_,sizeof comments_);
 		songproperties_init(&songproperties, name_, author_, comments_);
-		song_setproperties(self->song, &songproperties);
+		psy_audio_song_setproperties(self->song, &songproperties);
 		//bugfix. There were songs with incorrect size.
 		if(self->file->currchunk.version == 0) {
 			self->file->currchunk.size = 
@@ -829,7 +829,7 @@ void readsmsb(psy_audio_SongFile* self)
 					pData = 0;
 					wave->channels.numchannels = 2;
 				}
-				samples_insert(&self->song->samples, wave,
+				psy_audio_samples_insert(&self->song->samples, wave,
 					sampleindex_make(sampleidx, 0));
 			}
 		}
@@ -932,8 +932,8 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 				sample->channels.samples[1] = 0;
 			}
 		}
-		samples_insert(&self->song->samples, sample, sampleindex_make(instrIdx,
-			0));
+		psy_audio_samples_insert(&self->song->samples, sample,
+			sampleindex_make(instrIdx, 0));
 	}
 	else
 	{
@@ -1061,7 +1061,7 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 //	===================
 //	psy3 song save
 //	===================
-int psy3_save(psy_audio_SongFile* self)
+int psy_audio_psy3_save(psy_audio_SongFile* self)
 {
 	uint32_t chunkcount;
 	int status;
@@ -1106,13 +1106,13 @@ uint32_t psy3_chunkcount(psy_audio_Song* song)
 	uint32_t rv = 3;
 
 	// PATD
-	rv += (uint32_t)patterns_size(&song->patterns);
+	rv += (uint32_t) patterns_size(&song->patterns);
 	// MACD
-	rv += (uint32_t)machines_size(&song->machines);
+	rv += (uint32_t) machines_size(&song->machines);
 	// INSD
-	rv += (uint32_t)instruments_size(&song->instruments);
+	rv += (uint32_t) instruments_size(&song->instruments);
 	// SMSB
-	rv += (uint32_t)samples_groupsize(&song->samples);
+	rv += (uint32_t) psy_audio_samples_groupsize(&song->samples);
 	return rv;
 }
 
@@ -1936,7 +1936,7 @@ int psy3_write_smsb(psy_audio_SongFile* self)
 	uint32_t sizepos;	
 	int status;
 
-	for (it = samples_begin(&self->song->samples);
+	for (it = psy_audio_samples_begin(&self->song->samples);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 		psy_audio_Sample* sample;
@@ -1949,7 +1949,7 @@ int psy3_write_smsb(psy_audio_SongFile* self)
 				psy_tableiterator_key(&it))) {
 			return status;
 		}
-		sample = samples_at(&self->song->samples,
+		sample = psy_audio_samples_at(&self->song->samples,
 			sampleindex_make(psy_tableiterator_key(&it), 0));
 		if (sample) {
 			if (status = psy3_save_sample(self, sample)) {
@@ -1973,16 +1973,16 @@ int psy3_save_sample(psy_audio_SongFile* self, psy_audio_Sample* sample)
 	short* wavedata_right = 0;
 	int status;
 	
-	if (buffer_numchannels(&sample->channels) > 0) {
+	if (psy_audio_buffer_numchannels(&sample->channels) > 0) {
 		wavedata_left = psy3_floatbuffertoshort(
-			buffer_at(&sample->channels, 0), sample->numframes);
+			psy_audio_buffer_at(&sample->channels, 0), sample->numframes);
 		if (!wavedata_left) {
 			return PSY_ERRFILE;
 		}
 	}
-	if (buffer_numchannels(&sample->channels) > 1) {
+	if (psy_audio_buffer_numchannels(&sample->channels) > 1) {
 		wavedata_right = psy3_floatbuffertoshort(
-			buffer_at(&sample->channels, 1), sample->numframes);
+			psy_audio_buffer_at(&sample->channels, 1), sample->numframes);
 		if (!wavedata_right) {
 			free(wavedata_left);
 			return PSY_ERRFILE;

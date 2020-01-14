@@ -105,9 +105,9 @@ void machines_insert(psy_audio_Machines* self, uintptr_t slot,
 		machine->vtable->setslot(machine, slot);
 		psy_signal_emit(&self->signal_insert, self, 1, slot);
 		if (!self->filemode) {		
-			lock_enter();
+			psy_audio_lock_enter();
 			machines_setpath(self, compute_path(self, MASTER_INDEX));
-			lock_leave();
+			psy_audio_lock_leave();
 		}
 	}
 }
@@ -122,7 +122,7 @@ void machines_insertmaster(psy_audio_Machines* self, psy_audio_Machine* master)
 
 void machines_erase(psy_audio_Machines* self, uintptr_t slot)
 {	
-	lock_enter();
+	psy_audio_lock_enter();
 	if (slot == MASTER_INDEX) {
 		self->master = 0;
 	}
@@ -130,7 +130,7 @@ void machines_erase(psy_audio_Machines* self, uintptr_t slot)
 	psy_table_remove(&self->slots, slot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));
 	psy_signal_emit(&self->signal_removed, self, 1, slot);
-	lock_leave();	
+	psy_audio_lock_leave();	
 }
 
 void machines_remove(psy_audio_Machines* self, uintptr_t slot)
@@ -171,9 +171,9 @@ uintptr_t machines_append(psy_audio_Machines* self, psy_audio_Machine* machine)
 	machine->vtable->setslot(machine, slot);
 	psy_signal_emit(&self->signal_insert, self, 1, slot);
 	if (!self->filemode) {		
-		lock_enter();
+		psy_audio_lock_enter();
 		machines_setpath(self, compute_path(self, MASTER_INDEX));
-		lock_leave();
+		psy_audio_lock_leave();
 	}
 	return slot;
 }
@@ -197,7 +197,7 @@ int machines_connect(psy_audio_Machines* self, uintptr_t outputslot,
 	int rv;	
 
 	if (!self->filemode) {
-		lock_enter();			
+		psy_audio_lock_enter();			
 	}
 	/*if (!self->filemode) {
 		psy_audio_Machine* machine;
@@ -211,7 +211,7 @@ int machines_connect(psy_audio_Machines* self, uintptr_t outputslot,
 	rv = connections_connect(&self->connections, outputslot, inputslot);
 	if (!self->filemode) {
 		machines_setpath(self, compute_path(self, MASTER_INDEX));			
-		lock_leave();
+		psy_audio_lock_leave();
 	}
 	return rv;
 }
@@ -219,17 +219,17 @@ int machines_connect(psy_audio_Machines* self, uintptr_t outputslot,
 void machines_disconnect(psy_audio_Machines* self, uintptr_t outputslot,
 	uintptr_t inputslot)
 {
-	lock_enter();	
+	psy_audio_lock_enter();	
 	connections_disconnect(&self->connections, outputslot, inputslot);
 	machines_setpath(self, compute_path(self, MASTER_INDEX));		
-	lock_leave();
+	psy_audio_lock_leave();
 }
 
 void machines_disconnectall(psy_audio_Machines* self, uintptr_t slot)
 {
-	lock_enter();
+	psy_audio_lock_enter();
 	connections_disconnectall(&self->connections, slot);
-	lock_leave();
+	psy_audio_lock_leave();
 }
 
 int machines_connected(psy_audio_Machines* self, uintptr_t outputslot,
@@ -384,7 +384,7 @@ psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines* self,
 	uintptr_t channel;
 	psy_audio_Buffer* rv;
 
-	rv = buffer_allocinit(channels);
+	rv = psy_audio_buffer_allocinit(channels);
 	for (channel = 0; channel < channels; ++channel) {
 		float* samples;
 				
@@ -409,7 +409,7 @@ void machines_freebuffers(psy_audio_Machines* self)
 		psy_audio_Buffer* buffer;
 
 		buffer = (psy_audio_Buffer*) p->entry;
-		buffer_dispose(buffer);
+		psy_audio_buffer_dispose(buffer);
 		free(buffer);	
 	}
 	psy_list_free(q);

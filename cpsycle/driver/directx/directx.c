@@ -28,7 +28,7 @@ typedef struct {
 } CBlock;
 
 typedef struct {		
-	Driver driver;	
+	psy_AudioDriver driver;	
 	int _dither;
 	int _bitDepth;
 	unsigned int _samplesPerSec;		
@@ -62,19 +62,19 @@ typedef struct {
 	int (*error)(int, const char*);
 } DXDriver;
 
-static void driver_free(Driver*);
-static int driver_init(Driver*);
-static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,void* handle);
-static int driver_open(Driver*);
-static int driver_close(Driver*);
-static int driver_dispose(Driver*);
-static void driver_configure(Driver*, psy_Properties*);
-static unsigned int driver_samplerate(Driver*);
+static void driver_deallocate(psy_AudioDriver*);
+static int driver_init(psy_AudioDriver*);
+static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,void* handle);
+static int driver_open(psy_AudioDriver*);
+static int driver_close(psy_AudioDriver*);
+static int driver_dispose(psy_AudioDriver*);
+static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static unsigned int driver_samplerate(psy_AudioDriver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
 static void DoBlocks(DXDriver* self);
-static void init_properties(Driver* self);
+static void init_properties(psy_AudioDriver* self);
 static int on_error(int err, const char* msg);
 static void Quantize(float *pin, int *piout, int c);
 
@@ -106,18 +106,18 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 {
 	static AudioDriverInfo info;
 	info.Flags = 0;
-	info.Name = "DirectSound Output Driver";
+	info.Name = "DirectSound Output psy_AudioDriver";
 	info.ShortName = "DXSOUND";
 	info.Version = 0;
 	return &info;
 }
 
-EXPORT Driver* __cdecl driver_create(void)
+EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
 	DXDriver* dx = (DXDriver*) malloc(sizeof(DXDriver));
 	memset(dx, 0, sizeof(DXDriver));
 	dx->driver.open = driver_open;
-	dx->driver.free = driver_free;
+	dx->driver.deallocate = driver_deallocate;
 	dx->driver.connect = driver_connect;
 	dx->driver.open = driver_open;
 	dx->driver.close = driver_close;
@@ -128,12 +128,13 @@ EXPORT Driver* __cdecl driver_create(void)
 	return &dx->driver;
 }
 
-void driver_free(Driver* driver)
+void driver_deallocate(psy_AudioDriver* driver)
 {
+	driver->dispose(driver);
 	free(driver);
 }
 
-int driver_init(Driver* driver)
+int driver_init(psy_AudioDriver* driver)
 {
 	DXDriver* self = (DXDriver*) driver;	
 
@@ -162,7 +163,7 @@ int driver_init(Driver* driver)
 	return 0;
 }
 
-int driver_dispose(Driver* driver)
+int driver_dispose(psy_AudioDriver* driver)
 {
 	DXDriver* self = (DXDriver*) driver;
 	properties_free(self->driver.properties);
@@ -171,7 +172,7 @@ int driver_dispose(Driver* driver)
 	return 0;
 }
 
-static void init_properties(Driver* self)
+static void init_properties(psy_AudioDriver* self)
 {	
 	psy_Properties* property;	
 
@@ -193,7 +194,7 @@ static void init_properties(Driver* self)
 	psy_properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-void driver_configure(Driver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 {
 	DXDriver* self;
 	psy_Properties* property;
@@ -222,19 +223,19 @@ void driver_configure(Driver* driver, psy_Properties* config)
 	}
 }
 
-unsigned int driver_samplerate(Driver* self)
+unsigned int driver_samplerate(psy_AudioDriver* self)
 {
 	return ((DXDriver*)self)->_samplesPerSec;
 }
 
-void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
+void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
 {	
 	driver->_callbackContext = context;
 	driver->_pCallback = callback;
 	hwndmain = (HWND) handle;
 }
 
-int driver_open(Driver* driver)
+int driver_open(psy_AudioDriver* driver)
 {
 	DSBCAPS caps;
 	DSBUFFERDESC desc;
@@ -547,7 +548,7 @@ void DoBlocks(DXDriver* self)
 
 } 
 
-int driver_close(Driver* driver)
+int driver_close(psy_AudioDriver* driver)
 {
 	DXDriver* self = (DXDriver*) driver;
 	if (!self->_running)

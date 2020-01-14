@@ -12,7 +12,7 @@ static void renderview_makeproperties(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*, SettingsView* sender,
 	psy_Properties*);
 static void renderview_render(RenderView*);
-static void renderview_onstoprendering(RenderView*, Driver* sender);
+static void renderview_onstoprendering(RenderView*, psy_AudioDriver* sender);
 
 void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -27,16 +27,14 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 		self->properties);
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
-	ui_component_setalign(&self->view.component, UI_ALIGN_CLIENT);
-	self->fileoutdriver = create_fileout_driver();
+	ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
+	self->fileoutdriver = psy_audio_create_fileout_driver();
 }
 
 void renderview_ondestroy(RenderView* self, psy_ui_Component* sender)
 {
 	properties_free(self->properties);	
-	self->fileoutdriver->dispose(self->fileoutdriver);
-	self->fileoutdriver->free(self->fileoutdriver);
-//	free(self->fileoutdriver);
+	self->fileoutdriver->deallocate(self->fileoutdriver);
 }
 
 void renderview_makeproperties(RenderView* self)
@@ -155,7 +153,7 @@ void renderview_render(RenderView* self)
 	self->fileoutdriver->open(self->fileoutdriver);
 }
 
-void renderview_onstoprendering(RenderView* self, Driver* sender)
+void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 {
 	player_stop(&self->workspace->player);
 	player_setaudiodriver(&self->workspace->player, self->curraudiodriver);

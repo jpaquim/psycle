@@ -5,7 +5,7 @@
 
 #include "greet.h"
 
-static void OnSize(Greet*, psy_ui_Component* sender, ui_size*);
+static void OnSize(Greet*, psy_ui_Component* sender, psy_ui_Size*);
 static void AddString(Greet*, const char* text);
 static void Build(Greet* self);
 static void BuildOriginal(Greet* self);
@@ -17,14 +17,14 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->component.signal_size, self, OnSize);
 	self->current = 1;
 	ui_component_settitle(&self->component, "Greetings and info");	
-	ui_label_init(&self->header, &self->component);
-	ui_label_setstyle(&self->header, WS_CHILD | WS_VISIBLE | SS_CENTER);
-	ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
+	psy_ui_label_init(&self->header, &self->component);
+	psy_ui_label_setstyle(&self->header, WS_CHILD | WS_VISIBLE | SS_CENTER);
+	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
 	ui_listbox_init(&self->greetz, &self->component);	
 	ui_groupbox_init(&self->groupbox, &self->component);
 	ui_groupbox_settext(&self->groupbox, "Thanks!");
-	ui_button_init(&self->original, &self->component);
-	ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+	psy_ui_button_init(&self->original, &self->component);
+	psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
 	psy_signal_connect(&self->original.signal_clicked, self, OnOriginal);	
 /*
 	//Original Arguru's Greetings.
@@ -132,14 +132,14 @@ void OnOriginal(Greet* self, psy_ui_Component* sender)
 	self->current = self->current == 0;
 	if (self->current) {
 		Build(self);
-		ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+		psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
 	} else {
 		BuildOriginal(self);
-		ui_button_settext(&self->original, "Show Current Greetings");
+		psy_ui_button_settext(&self->original, "Show Current Greetings");
 	}	
 }
 
-void OnSize(Greet* self, psy_ui_Component* sender, ui_size* size)
+void OnSize(Greet* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
 	ui_component_setposition(&self->header.component, 0, 10, size->width, 40);
 	ui_component_setposition(&self->groupbox.component, 0, 45, size->width - 10, size->height - 75);

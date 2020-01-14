@@ -14,24 +14,26 @@ static void playposbar_ontimer(PlayPosBar*, psy_ui_Component* sender, int timeri
 void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	psy_audio_Player* player)
 {		
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
 	self->player = player;		
-	//ui_label_init(&self->header, &self->component);		
-	//ui_label_settext(&self->header, "");	
-	ui_label_init(&self->position, &self->component);
-	ui_label_setcharnumber(&self->position, 8);
+	//psy_ui_label_init(&self->header, &self->component);		
+	//psy_ui_label_settext(&self->header, "");	
+	psy_ui_label_init(&self->position, &self->component);
+	psy_ui_label_setcharnumber(&self->position, 8);
 	self->lastposition = -1.0f;
 	psy_signal_connect(&self->component.signal_timer, self,
 		playposbar_ontimer);
 	psy_list_free(ui_components_setalign(		
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT,
+		psy_ui_ALIGN_LEFT,
 		&margin));
 	ui_component_starttimer(&self->component, TIMERID_PLAYPOSBAR, 50);
 }
@@ -42,7 +44,7 @@ void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender, int timerid)
 		char text[20];
 
 		psy_snprintf(text, 10, "%.3f", player_position(self->player));
-		ui_label_settext(&self->position, text);
+		psy_ui_label_settext(&self->position, text);
 		self->lastposition = player_position(self->player);
 	}
 }

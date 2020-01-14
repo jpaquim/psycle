@@ -42,6 +42,6 @@ psy_dsp_amp_t work(psy_dsp_LinearResampler* self,
 	void* resampler_data)
 {
 	const float y0 = *data;
-	const float y1 = (offset == length-1) ? 0 : *(data + 1);
+	const float y1 = (offset >= length-1) ? 0 : *(data + 1);
 	return y0 + (y1 - y0) * l_table[res >> (32-CUBIC_RESOLUTION_LOG)];
 }

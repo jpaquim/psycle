@@ -51,7 +51,8 @@ int patternevent_empty(psy_audio_PatternEvent* self)
 		self->note == NOTECOMMANDS_EMPTY &&
 		self->inst == NOTECOMMANDS_INST_EMPTY &&
 		self->mach == NOTECOMMANDS_MACH_EMPTY &&
-		self->vol == NOTECOMMANDS_EMPTY &&
+		self->vol == NOTECOMMANDS_VOL_EMPTY &&
 		self->cmd == 0 &&		
 		self->parameter == 0;		
 }
+

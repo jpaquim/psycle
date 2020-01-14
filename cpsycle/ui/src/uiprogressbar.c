@@ -8,7 +8,7 @@
 
 static void ondestroy(ui_progressbar*, psy_ui_Component* sender);
 static void ondraw(ui_progressbar*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void preferredsize(ui_progressbar*, ui_size* limit, ui_size* rv);
+static void onpreferredsize(ui_progressbar*, psy_ui_Size* limit, psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -17,7 +17,7 @@ static void vtable_init(ui_progressbar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
 	}
 }
 
@@ -39,20 +39,20 @@ void ondestroy(ui_progressbar* self, psy_ui_Component* sender)
 
 void ondraw(ui_progressbar* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
-	ui_size size;
-	ui_rectangle r;
+	psy_ui_Size size;
+	psy_ui_Rectangle r;
 	int height;
 		
 	height = 10;
 	size = ui_component_size(&self->component);	
-	ui_setrectangle(&r, 0, 
+	psy_ui_setrectangle(&r, 0, 
 		(size.height - height) / 2, 
 		(int)(self->progress * size.width),
 		height);
 	ui_drawsolidrectangle(g, r, 0x00D1C5B6);
 }
 
-void preferredsize(ui_progressbar* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(ui_progressbar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	if (rv) {
 		rv->width = 100;

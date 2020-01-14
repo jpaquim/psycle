@@ -15,7 +15,6 @@
 #include <uicheckbox.h>
 #include <uicombobox.h>
 #include <uiedit.h>
-#include <uigroupbox.h>
 #include <uilabel.h>
 #include <uinotebook.h>
 #include <uislider.h>
@@ -58,12 +57,11 @@ typedef struct {
 
 typedef struct {
 	psy_ui_Component component;	
-	psy_ui_Groupbox groupbox;
 	EnvelopeView envelopeview;
-	ui_slider attack;
-	ui_slider decay;
-	ui_slider sustain;
-	ui_slider release;
+	psy_ui_Slider attack;
+	psy_ui_Slider decay;
+	psy_ui_Slider sustain;
+	psy_ui_Slider release;
 	psy_audio_Player* player;
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
@@ -78,15 +76,14 @@ typedef struct {
 
 typedef struct {
 	psy_ui_Component component;	
-	psy_ui_Groupbox groupbox;
 	EnvelopeView envelopeview;
-	ui_slider attack;
-	ui_slider decay;
-	ui_slider sustain;
-	ui_slider release;
-	ui_slider cutoff;
-	ui_slider res;
-	ui_slider modamount;
+	psy_ui_Slider attack;
+	psy_ui_Slider decay;
+	psy_ui_Slider sustain;
+	psy_ui_Slider release;
+	psy_ui_Slider cutoff;
+	psy_ui_Slider res;
+	psy_ui_Slider modamount;
 	psy_audio_Player* player;
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
@@ -100,7 +97,7 @@ typedef struct {
 
 typedef struct InstrumentView {
 	psy_ui_Component component;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	TabBar tabbar;
 	psy_ui_Component left;
 	psy_ui_Label label;

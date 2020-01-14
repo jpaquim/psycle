@@ -28,7 +28,7 @@ static int isoffsetinwindow(psy_audio_Sequencer*, psy_dsp_beat_t offset);
 static void insertevents(psy_audio_Sequencer*);
 static void insertinputevents(psy_audio_Sequencer*);
 static void insertdelayedevents(psy_audio_Sequencer*);
-static void sequencerinsert(psy_audio_Sequencer*);
+static int sequencerinsert(psy_audio_Sequencer*);
 static void compute_beatspersample(psy_audio_Sequencer*);
 static void notifysequencertick(psy_audio_Sequencer*, psy_dsp_beat_t width);
 static psy_dsp_beat_t sequencer_speed(psy_audio_Sequencer*);
@@ -339,11 +339,11 @@ void sequencer_tick(psy_audio_Sequencer* self, psy_dsp_beat_t width)
 			}
 		}
 		insertevents(self);
-		insertdelayedevents(self);		
+		insertdelayedevents(self);
 	}
 	notifysequencertick(self, width);
-	if (self->playing) {
-		sequencerinsert(self);
+	if (self->playing && sequencerinsert(self)) {
+		insertdelayedevents(self);		
 	}	
 }
 
@@ -378,13 +378,14 @@ void sequencer_linetick(psy_audio_Sequencer* self)
 	psy_signal_emit(&self->signal_linetick, self, 0);
 }
 
-void sequencerinsert(psy_audio_Sequencer* self) {
-	psy_List* p;
-
+int sequencerinsert(psy_audio_Sequencer* self) {
+	PatternNode* p;
+	int rv = 0;
+	
 	for (p = sequencer_tickevents(self); p != 0; p = p->next) {			
 		psy_audio_PatternEntry* entry;			
 		
-		entry = (psy_audio_PatternEntry*) p->entry;
+		entry = psy_audio_patternnode_entry(p);
 		if (patternentry_front(entry)->mach != NOTECOMMANDS_EMPTY) {
 			psy_audio_Machine* machine;				
 				
@@ -396,18 +397,20 @@ void sequencerinsert(psy_audio_Sequencer* self) {
 				events = sequencer_machinetickevents(self,
 					patternentry_front(entry)->mach);
 				if (events) {					
-					psy_List* insert;
+					PatternNode* insert;
 					
 					insert = machine_sequencerinsert(machine, events);
 					if (insert) {
-						sequencer_append(self, insert);					
+						sequencer_append(self, insert);
 						psy_list_free(insert);
+						rv = 1;
 					}
 					psy_list_free(events);
 				}					
 			}									
 		}
 	}
+	return rv;
 }
 
 void insertevents(psy_audio_Sequencer* self)
@@ -557,12 +560,12 @@ void insertevents(psy_audio_Sequencer* self)
 
 void sequencer_append(psy_audio_Sequencer* self, psy_List* events)
 {
-	psy_List* p;
+	PatternNode* p;
 
 	for (p = events; p != 0; p = p->next) {
 		psy_audio_PatternEntry* entry;
 
-		entry = (psy_audio_PatternEntry*) p->entry;
+		entry = psy_audio_patternnode_entry(p);
 		psy_list_append(&self->delayedevents, entry);
 		// if (patternentry_front(entry)->cmd == NOTE_DELAY) {
 		// 	psy_list_append(&self->delayedevents, entry);
@@ -813,17 +816,20 @@ void makeretriggercontinueevents(psy_audio_Sequencer* self, SequencerTrack* trac
 
 void insertdelayedevents(psy_audio_Sequencer* self)
 {
-	psy_List* p;
+	PatternNode* p;
 	
-	for (p = self->delayedevents; p != 0; p = p->next) {
-		psy_audio_PatternEntry* delayed = (psy_audio_PatternEntry*)p->entry;
+	p = self->delayedevents;
+	while (p != 0) {
+		psy_audio_PatternEntry* delayed = psy_audio_patternnode_entry(p);
 
 		if (isoffsetinwindow(self, delayed->offset + delayed->delta)) {						
 			psy_List* q;
 			int inserted = 0;
 			q = self->events;
 			while (q) {
-				psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)q->entry;
+				psy_audio_PatternEntry* entry;
+				
+				entry = psy_audio_patternnode_entry(q);
 				if (delayed->offset >= entry->offset) {					
 					break;
 				}
@@ -839,7 +845,9 @@ void insertdelayedevents(psy_audio_Sequencer* self)
 			if (!p) {
 				break;
 			}
-		}		
+		} else {
+			p = p->next;
+		}
 	}
 }
 

@@ -21,8 +21,8 @@ static void playlisteditor_onnext(PlayListEditor*, psy_ui_Component* sender);
 static void playlisteditor_onlistchanged(PlayListEditor*, psy_ui_Component* sender,
 	int slot);
 static void playlisteditor_buildplaylist(PlayListEditor*);
-static void playlisteditor_preferredsize(PlayListEditor*, ui_size* limit,
-	ui_size* rv);
+static void playlisteditor_onpreferredsize(PlayListEditor*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -31,8 +31,8 @@ static void vtable_init(PlayListEditor* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize)
-			playlisteditor_preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			playlisteditor_onpreferredsize;
 	}
 }
 
@@ -69,37 +69,38 @@ PlayListEntry* playlistentry_allocinit(const char* title, const char* path)
 void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	psy_ui_Component* parent)
 {
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makeeh(0.5), ui_value_makeew(0.5),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_component_init(&self->row1, &self->component);
 	ui_component_enablealign(&self->row1);
-	ui_component_setalign(&self->row1, UI_ALIGN_TOP);
-	ui_button_init(&self->addsong, &self->row1);
-	ui_button_settext(&self->addsong, "+ Song");
-	ui_button_init(&self->removesong, &self->row1);
-	ui_button_settext(&self->removesong, "- Song");
+	ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->addsong, &self->row1);
+	psy_ui_button_settext(&self->addsong, "+ Song");
+	psy_ui_button_init(&self->removesong, &self->row1);
+	psy_ui_button_settext(&self->removesong, "- Song");
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->row1, 0),
-		UI_ALIGN_LEFT,
+		psy_ui_ALIGN_LEFT,
 			&margin));	
 	ui_component_init(&self->row2, &self->component);
 	ui_component_enablealign(&self->row2);
-	ui_component_setalign(&self->row2, UI_ALIGN_TOP);
-	ui_button_init(&self->prev, &self->row2);
-	ui_button_settext(&self->prev, "Prev");
-	ui_button_init(&self->play, &self->row2);
-	ui_button_settext(&self->play, "Play");
-	ui_button_init(&self->stop, &self->row2);
-	ui_button_settext(&self->stop, "Stop");
-	ui_button_init(&self->next, &self->row2);
-	ui_button_settext(&self->next, "Next");
+	ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->prev, &self->row2);
+	psy_ui_button_settext(&self->prev, "Prev");
+	psy_ui_button_init(&self->play, &self->row2);
+	psy_ui_button_settext(&self->play, "Play");
+	psy_ui_button_init(&self->stop, &self->row2);
+	psy_ui_button_settext(&self->stop, "Stop");
+	psy_ui_button_init(&self->next, &self->row2);
+	psy_ui_button_settext(&self->next, "Next");
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->row2, 0),
-		UI_ALIGN_LEFT,
+		psy_ui_ALIGN_LEFT,
 			&margin));	
 }
 
@@ -115,9 +116,9 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	self->component.vtable = &vtable;
 	ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);	
-	ui_component_setalign(&self->listbox.component, UI_ALIGN_CLIENT);
+	ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	playlisteditorbuttons_init(&self->buttons, &self->component);
-	ui_component_setalign(&self->buttons.component, UI_ALIGN_BOTTOM);	
+	ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&self->buttons.addsong.signal_clicked, self, 
 		playlisteditor_onaddsong);
 	psy_signal_connect(&self->buttons.removesong.signal_clicked, self, 
@@ -275,8 +276,8 @@ void playlisteditor_onlistchanged(PlayListEditor* self, psy_ui_Component* sender
 	self->nextentry = p;
 }
 
-void playlisteditor_preferredsize(PlayListEditor* self, ui_size* limit,
-	ui_size* rv)
+void playlisteditor_onpreferredsize(PlayListEditor* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {	
 	if (rv) {
 		*rv = ui_component_size(&self->component);

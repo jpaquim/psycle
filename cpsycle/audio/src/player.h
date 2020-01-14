@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PLAYER_H)
-#define PLAYER_H
+#if !defined(PSY_AUDIO_PLAYER_H)
+#define PSY_AUDIO_PLAYER_H
 
 #include "../../driver/driver.h"
 #include "eventdrivers.h"
@@ -18,7 +18,7 @@ typedef enum {
 } VUMeterMode;
 
 typedef struct {	
-	Driver* driver;		
+	psy_AudioDriver* driver;
 	psy_audio_Song* song;
 	psy_audio_Sequencer sequencer;	
 	uintptr_t numsongtracks;
@@ -26,7 +26,7 @@ typedef struct {
 	psy_Signal signal_lpbchanged;
 	psy_Signal signal_inputevent;
 	psy_Signal signal_stop;	
-	Library drivermodule;
+	psy_Library drivermodule;
 	EventDrivers eventdrivers;
 	psy_Table rms;	
 	VUMeterMode vumode;
@@ -58,8 +58,8 @@ psy_dsp_beat_t player_bpm(psy_audio_Player*);
 void player_setlpb(psy_audio_Player*, uintptr_t lpb);
 uintptr_t player_lpb(psy_audio_Player*);
 // audio driver
-void player_setaudiodriver(psy_audio_Player*, Driver* driver);
-Driver* player_audiodriver(psy_audio_Player*);
+void player_setaudiodriver(psy_audio_Player*, psy_AudioDriver* driver);
+psy_AudioDriver* player_audiodriver(psy_audio_Player*);
 void player_loaddriver(psy_audio_Player*, const char* path, psy_Properties* config);
 void player_reloaddriver(psy_audio_Player*, const char* path, psy_Properties* config);
 void player_restartdriver(psy_audio_Player*, psy_Properties* config);
@@ -72,8 +72,8 @@ void player_loadeventdriver(psy_audio_Player*, const char * path);
 void player_addeventdriver(psy_audio_Player*, int id);
 void player_removeeventdriver(psy_audio_Player*, int id);
 void player_restarteventdriver(psy_audio_Player*, int id);
-EventDriver* player_kbddriver(psy_audio_Player*);
-EventDriver* player_eventdriver(psy_audio_Player*, int id);
+psy_EventDriver* player_kbddriver(psy_audio_Player*);
+psy_EventDriver* player_eventdriver(psy_audio_Player*, int id);
 unsigned int player_numeventdrivers(psy_audio_Player*);
 
 #endif

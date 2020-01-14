@@ -8,19 +8,49 @@
 #include <stdio.h>
 #include <portable.h>
 
-static void ondraw(InputDefiner*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void onkeydown(InputDefiner*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
-static void onkeyup(InputDefiner*, psy_ui_Component* sender, psy_ui_KeyEvent*);
+static void inputdefiner_ondestroy(InputDefiner*, psy_ui_Component* sender);
+static void ondraw(InputDefiner*, psy_ui_Graphics*);
+static void onkeydown(InputDefiner*, psy_ui_KeyEvent*);
+static void onkeyup(InputDefiner*, psy_ui_KeyEvent*);
+
+static psy_Table keynames;
+static int count = 0;
+
+static void keynames_init(void);
+static void keynames_release(void);
+static void keynames_dispose(void);
+static void keynames_add(int keycode, const char* name);
+static const char* keynames_at(int keycode);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(InputDefiner* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);	
+		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
+		vtable.onkeydown = (psy_ui_fp_onkeydown) onkeydown;
+		vtable.onkeyup = (psy_ui_fp_onkeyup) onkeyup;
+		vtable_initialized = 1;
+	}
+}
 
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
+	ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	psy_signal_connect(&self->component.signal_destroy, self,
+		inputdefiner_ondestroy);
+	keynames_init();
 	self->input = 0;
-	self->regularkey = 0;
-	ui_component_init(&self->component, parent);	
-	psy_signal_connect(&self->component.signal_draw, self, ondraw);
-	psy_signal_connect(&self->component.signal_keydown, self, onkeydown);
-	psy_signal_connect(&self->component.signal_keyup, self, onkeyup);
+	self->regularkey = 0;		
+}
+
+void inputdefiner_ondestroy(InputDefiner* self, psy_ui_Component* sender)
+{	
+	keynames_release();
 }
 
 void inputdefiner_setinput(InputDefiner* self, unsigned int input)
@@ -30,60 +60,23 @@ void inputdefiner_setinput(InputDefiner* self, unsigned int input)
 
 void inputdefiner_text(InputDefiner* self, char* text)
 {
-	char keystr[10];
+	
 	int keycode;
 	int shift;
 	int ctrl;
-
+	
+	text[0] = '\0';
 	decodeinput(self->input, &keycode, &shift, &ctrl);
-	if (keycode == VK_RETURN) {
-		strcpy(keystr, "RETURN");
-	} else
-	if (keycode == VK_LEFT) {
-		strcpy(keystr, "LEFT");
-	} else
-	if (keycode == VK_RIGHT) {
-		strcpy(keystr, "RIGHT");
-	} else
-	if (keycode == VK_UP) {
-		strcpy(keystr, "UP");
-	} else
-	if (keycode == VK_DOWN) {
-		strcpy(keystr, "DOWN");
-	} else
-	if (keycode == VK_TAB) {
-		strcpy(keystr, "TAB");
-	} else
-	if (keycode == VK_BACK) {
-		strcpy(keystr, "BACK");
-	} else
-	if (keycode == VK_DELETE) {
-		strcpy(keystr, "DELETE");
-	} else
-	if (keycode == VK_HOME) {
-		strcpy(keystr, "HOME");
-	} else
-	if (keycode == VK_END) {
-		strcpy(keystr, "END");
-	} else	
-	if (keycode >= VK_F1 && keycode <= VK_F12) {
-		psy_snprintf(keystr, 5, "F%d", keycode - VK_F1 + 1);
-	} else {
-		psy_snprintf(keystr, 5, "%c", keycode);
-	}
-	text[0] = '\0';	
 	if (shift) {
 		strcat(text, "Shift + ");		
 	}
 	if (ctrl) {		
 		strcat(text, "Ctrl + ");
-	}
-	// if (keycode >= 0x30) {
-		strcat(text, keystr);	
-	// }
+	}	
+	strcat(text, keynames_at(keycode));
 }
 
-void ondraw(InputDefiner* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void ondraw(InputDefiner* self, psy_ui_Graphics* g)
 {
 	char text[40];	
 	
@@ -93,8 +86,7 @@ void ondraw(InputDefiner* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	ui_textout(g, 0, 0, text, strlen(text));
 }
 
-void onkeydown(InputDefiner* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
 	int shift;
 	int ctrl;	
@@ -116,8 +108,7 @@ void onkeydown(InputDefiner* self, psy_ui_Component* sender,
 	ui_component_invalidate(&self->component);
 }
 
-void onkeyup(InputDefiner* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
 	int shift;
 	int ctrl;
@@ -138,4 +129,68 @@ void onkeyup(InputDefiner* self, psy_ui_Component* sender,
 		self->input = encodeinput(0, shift, ctrl);
 	}
 	ui_component_invalidate(&self->component);
+}
+
+void keynames_init(void)
+{
+	if (count == 0) {
+		int key;
+		
+		psy_table_init(&keynames);
+		keynames_add(VK_LEFT,"LEFT");	
+		keynames_add(VK_RIGHT, "RIGHT");	
+		keynames_add(VK_UP,"UP");	
+		keynames_add(VK_DOWN, "DOWN");	
+		keynames_add(VK_TAB, "TAB");	
+		keynames_add(VK_BACK, "BACK");	
+		keynames_add(VK_DELETE, "DELETE");	
+		keynames_add(VK_HOME, "HOME");	
+		keynames_add(VK_END, "END");
+		keynames_add(VK_RETURN, "RETURN");
+		for (key = VK_F1; key <= VK_F12; ++key) {	
+			char keystr[5];
+			psy_snprintf(keystr, 5, "F%d", key - VK_F1 + 1);
+			keynames_add(key, keystr);
+		}		
+		for (key = 0x30 /*VK_0*/; key <= 255 /*VK_Z*/; ++key) {
+			char keystr[2];		
+			psy_snprintf(keystr, 5, "%c", key);
+			keynames_add(key, keystr);
+		}
+	}
+	++count;
+}
+
+void keynames_release(void)
+{
+	--count;
+	if (count == 0) {
+		keynames_dispose();
+	}
+}
+
+void keynames_dispose(void)
+{			
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&keynames);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {		
+		free(psy_tableiterator_value(&it));		
+	}
+	psy_table_dispose(&keynames);
+}
+
+void keynames_add(int keycode, const char* name)
+{		
+	if (!psy_table_exists(&keynames, keycode)) {
+		psy_table_insert(&keynames, (uintptr_t) keycode, strdup(name));
+	}
+}
+
+const char* keynames_at(int keycode)
+{
+	return psy_table_exists(&keynames, keycode)
+		? (const char*) psy_table_at(&keynames, keycode)
+		: "";
 }

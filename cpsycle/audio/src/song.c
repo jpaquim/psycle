@@ -54,7 +54,7 @@ void songproperties_copy(SongProperties* self, const SongProperties* other)
 	}
 }
 
-void song_init(psy_audio_Song* self, MachineFactory* machinefactory)
+void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machinefactory)
 {		
 	self->machinefactory = machinefactory;	
 	songproperties_init(&self->properties, "Untitled", "Unnamed",
@@ -62,7 +62,7 @@ void song_init(psy_audio_Song* self, MachineFactory* machinefactory)
 	song_initmachines(self);
 	song_initpatterns(self);
 	song_initsequence(self);
-	samples_init(&self->samples);
+	psy_audio_samples_init(&self->samples);
 	instruments_init(&self->instruments);
 	song_initsignals(self);
 }
@@ -97,13 +97,13 @@ void song_initsignals(psy_audio_Song* self)
 	psy_signal_init(&self->signal_saveprogress);
 }
 
-void song_dispose(psy_audio_Song* self)
+void psy_audio_song_dispose(psy_audio_Song* self)
 {
 	songproperties_dispose(&self->properties);
 	machines_dispose(&self->machines);
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		
-	samples_dispose(&self->samples);
+	psy_audio_samples_dispose(&self->samples);
 	instruments_dispose(&self->instruments);	
 	song_disposesignals(self);
 }
@@ -114,38 +114,39 @@ void song_disposesignals(psy_audio_Song* self)
 	psy_signal_dispose(&self->signal_saveprogress);
 }
 
-psy_audio_Song* song_alloc(void)
+psy_audio_Song* psy_audio_song_alloc(void)
 {
 	return (psy_audio_Song*) malloc(sizeof(psy_audio_Song));
 }
 
-psy_audio_Song* song_allocinit(MachineFactory* machinefactory)
+psy_audio_Song* psy_audio_song_allocinit(psy_audio_MachineFactory* machinefactory)
 {
 	psy_audio_Song* rv;
 
-	rv = song_alloc();
+	rv = psy_audio_song_alloc();
 	if (rv) {
-		song_init(rv, machinefactory);
+		psy_audio_song_init(rv, machinefactory);
 	}
 	return rv;
 }
 
-void song_free(psy_audio_Song* self)
+void psy_audio_song_deallocate(psy_audio_Song* self)
 {
 	if (self) {
-		song_dispose(self);
+		psy_audio_song_dispose(self);
 		free(self);
 	}
 }
 
-void song_clear(psy_audio_Song* self)
+void psy_audio_song_clear(psy_audio_Song* self)
 {
 	sequence_clear(&self->sequence);
 	patterns_clear(&self->patterns);
 	machines_clear(&self->machines);
 }
 
-void song_setproperties(psy_audio_Song* self, const SongProperties* properties)
+void psy_audio_song_setproperties(psy_audio_Song* self,
+	const SongProperties* properties)
 {	
 	songproperties_copy(&self->properties, properties);
 }

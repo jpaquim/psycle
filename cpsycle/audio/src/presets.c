@@ -6,12 +6,12 @@
 #include "presets.h"
 #include <stdlib.h>
 
-void presets_init(psy_audio_Presets* self)
+void psy_audio_presets_init(psy_audio_Presets* self)
 {	
 	self->container = 0;
 }
 
-void presets_dispose(psy_audio_Presets* self)
+void psy_audio_presets_dispose(psy_audio_Presets* self)
 {
 	psy_List* p;
 
@@ -22,23 +22,24 @@ void presets_dispose(psy_audio_Presets* self)
 	self->container = 0;
 }
 
-psy_audio_Presets* presets_alloc(void)
+psy_audio_Presets* psy_audio_presets_alloc(void)
 {
 	return malloc(sizeof(psy_audio_Presets));
 }
 
-psy_audio_Presets* presets_allocinit(void)
+psy_audio_Presets* psy_audio_presets_allocinit(void)
 {
 	psy_audio_Presets* rv;
 
-	rv = presets_alloc();
+	rv = psy_audio_presets_alloc();
 	if (rv) {
-		presets_init(rv);
+		psy_audio_presets_init(rv);
 	}
 	return rv;
 }
 
-void presets_append(psy_audio_Presets* self, psy_audio_Preset* preset)
+void psy_audio_presets_append(psy_audio_Presets* self,
+	psy_audio_Preset* preset)
 {
 	psy_list_append(&self->container, preset);
 }

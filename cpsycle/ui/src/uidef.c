@@ -18,16 +18,17 @@ extern psy_ui_App app;
 static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 	int iDeciPtWidth, int iAttributes, BOOL fLogRes);
 
-ui_point ui_point_make(int x, int y)
+psy_ui_Point psy_ui_point_make(int x, int y)
 {
-	ui_point rv;
+	psy_ui_Point rv;
 
 	rv.x = x;
 	rv.y = y;
 	return rv;
 }
 
-void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int height)
+void psy_ui_setrectangle(psy_ui_Rectangle* self, int left, int top, int width,
+	int height)
 {
    self->left = left;
    self->top = top;
@@ -35,7 +36,8 @@ void ui_setrectangle(ui_rectangle* self, int left, int top, int width, int heigh
    self->bottom = top + height;   
 }
 
-int ui_rectangle_intersect_rectangle(const ui_rectangle* self, const ui_rectangle* other)
+int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle* self,
+	const psy_ui_Rectangle* other)
 {
 	return !(other->left > self->right ||
 		other->right < self->left ||
@@ -43,13 +45,14 @@ int ui_rectangle_intersect_rectangle(const ui_rectangle* self, const ui_rectangl
 		other->bottom < self->top);
 }
 
-int ui_rectangle_intersect(ui_rectangle* self, int x, int y)
+int psy_ui_rectangle_intersect(psy_ui_Rectangle* self, int x, int y)
 {
 	return (x >= self->left && x < self->right && 
 			y >= self->top && y < self->bottom);
 }
 
-void ui_rectangle_union(ui_rectangle* self, const ui_rectangle* other)
+void psy_ui_rectangle_union(psy_ui_Rectangle* self,
+	const psy_ui_Rectangle* other)
 {
 	self->left = self->left < other->left ? self->left : other->left;
 	self->right = self->right > other->right ? self->right : other->right;
@@ -57,8 +60,8 @@ void ui_rectangle_union(ui_rectangle* self, const ui_rectangle* other)
 	self->bottom = self->bottom > other->bottom ? self->bottom : other->bottom;
 }
 
-void ui_margin_init(ui_margin* self, ui_value top, ui_value right,
-	ui_value bottom, ui_value left)
+void psy_ui_margin_init(psy_ui_Margin* self, psy_ui_Value top,
+	psy_ui_Value right, psy_ui_Value bottom, psy_ui_Value left)
 {   
    self->top = top;
    self->right = right;
@@ -66,57 +69,61 @@ void ui_margin_init(ui_margin* self, ui_value top, ui_value right,
    self->left = left;
 }
 
-intptr_t ui_margin_width_px(ui_margin* self, const ui_textmetric* tm)
+intptr_t psy_ui_margin_width_px(psy_ui_Margin* self,
+	const psy_ui_TextMetric* tm)
 {
-	return ui_value_px(&self->left, tm) + ui_value_px(&self->right, tm);
+	return psy_ui_value_px(&self->left, tm) +
+		psy_ui_value_px(&self->right, tm);
 }
 
-intptr_t ui_margin_height_px(ui_margin* self, const ui_textmetric* tm)
+intptr_t psy_ui_margin_height_px(psy_ui_Margin* self,
+	const psy_ui_TextMetric* tm)
 {
-	return ui_value_px(&self->top, tm) + ui_value_px(&self->bottom, tm);
+	return psy_ui_value_px(&self->top, tm) +
+		psy_ui_value_px(&self->bottom, tm);
 }
 
-ui_value ui_value_makepx(intptr_t px)
+psy_ui_Value psy_ui_value_makepx(intptr_t px)
 {
-	ui_value rv;
+	psy_ui_Value rv;
 
 	rv.quantity.integer = px;
-	rv.unit = UI_UNIT_PX;
+	rv.unit = psy_ui_UNIT_PX;
 	return rv;
 }
 
-ui_value ui_value_makeew(double em)
+psy_ui_Value psy_ui_value_makeew(double em)
 {
-	ui_value rv;
+	psy_ui_Value rv;
 
 	rv.quantity.real = em;
-	rv.unit = UI_UNIT_EW;
+	rv.unit = psy_ui_UNIT_EW;
 	return rv;
 }
 
-ui_value ui_value_makeeh(double em)
+psy_ui_Value psy_ui_value_makeeh(double em)
 {
-	ui_value rv;
+	psy_ui_Value rv;
 
 	rv.quantity.real = em;
-	rv.unit = UI_UNIT_EH;
+	rv.unit = psy_ui_UNIT_EH;
 	return rv;
 }
 
-intptr_t ui_value_px(ui_value* self, const ui_textmetric* tm)
+intptr_t psy_ui_value_px(psy_ui_Value* self, const psy_ui_TextMetric* tm)
 {
 	intptr_t rv = self->quantity.integer;
 
 	switch (self->unit) {
-		case UI_UNIT_PX:
+		case psy_ui_UNIT_PX:
 			rv = self->quantity.integer;
 		break;
-		case UI_UNIT_EW:
+		case psy_ui_UNIT_EW:
 			if (tm) {
 				rv = (intptr_t)(self->quantity.real * tm->tmAveCharWidth);
 			}
 		break;
-		case UI_UNIT_EH:
+		case psy_ui_UNIT_EH:
 			if (tm) {
 				rv = (intptr_t)(self->quantity.real * tm->tmHeight);
 			}
@@ -127,12 +134,13 @@ intptr_t ui_value_px(ui_value* self, const ui_textmetric* tm)
 	return rv;
 }
 
-void ui_error(const char* err, const char* shorterr)
+void psy_ui_error(const char* err, const char* shorterr)
 {
 	MessageBox(NULL, err, shorterr, MB_OK | MB_ICONERROR);
 }
 
-void ui_fontinfo_init(ui_fontinfo* self, const char* family, int height)
+void psy_ui_fontinfo_init(psy_ui_FontInfo* self, const char* family,
+	int height)
 {
 	HDC hdc = GetDC (NULL) ;
 	self->lf = ui_fontinfo_make(hdc, (TCHAR*)family, height, 0, 0, 0);
@@ -192,7 +200,7 @@ LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 }
 
 
-void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
+void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 {		
 	if (fontinfo) {
 		HDC hdc = GetDC (NULL) ;
@@ -206,10 +214,10 @@ void ui_font_init(ui_font* self, const ui_fontinfo* fontinfo)
 	}
 }
 
-void ui_font_copy(ui_font* self, const ui_font* other)
+void psy_ui_font_copy(psy_ui_Font* self, const psy_ui_Font* other)
 {
 	if (self->hfont && self->hfont != app.defaults.defaultfont.hfont) {
-		ui_font_dispose(self);		
+		psy_ui_font_dispose(self);
 	}
 	if (other->hfont && other->hfont != app.defaults.defaultfont.hfont) {
 		LOGFONT lf;
@@ -221,7 +229,7 @@ void ui_font_copy(ui_font* self, const ui_font* other)
 	}
 }
 
-void ui_font_dispose(ui_font* self)
+void psy_ui_font_dispose(psy_ui_Font* self)
 {
 	if (self->hfont && self->hfont != app.defaults.defaultfont.hfont) {
 		DeleteObject(self->hfont);

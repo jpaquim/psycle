@@ -15,14 +15,14 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	ui_button_init(&self->undobutton, &self->component);
-	ui_button_settext(&self->undobutton,
+	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_button_init(&self->undobutton, &self->component);
+	psy_ui_button_settext(&self->undobutton,
 		workspace_translate(workspace, "undo"));
 	psy_signal_connect(&self->undobutton.signal_clicked, self,
 		undoredobar_onundo);
-	ui_button_init(&self->redobutton, &self->component);
-	ui_button_settext(&self->redobutton,
+	psy_ui_button_init(&self->redobutton, &self->component);
+	psy_ui_button_settext(&self->redobutton,
 		workspace_translate(workspace, "redo"));
 	psy_signal_connect(&self->redobutton.signal_clicked, self,
 		undoredobar_onredo);
@@ -31,13 +31,13 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 
 void undoredobar_initalign(UndoRedoBar* self)
 {		
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));	
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));	
 	psy_list_free(ui_components_setalign(		
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT,
+		psy_ui_ALIGN_LEFT,
 		&margin));
 }
 

@@ -102,7 +102,7 @@ void vibrato_init(Vibrato* self)
 
 void sample_init(psy_audio_Sample* self)
 {
-	buffer_init(&self->channels, 2);
+	psy_audio_buffer_init(&self->channels, 2);
 	self->stereo = 1;
 	self->numframes = 0;
 	self->samplerate = 44100;
@@ -130,7 +130,7 @@ void sample_dispose(psy_audio_Sample* self)
 		free(self->channels.samples[channel]);
 		self->channels.samples[channel] = 0;
 	}
-	buffer_dispose(&self->channels);
+	psy_audio_buffer_dispose(&self->channels);
 	self->numframes = 0;
 	free(self->name);
 }
@@ -180,13 +180,13 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 		rv->vibrato.type = src->vibrato.type;
 		rv->numframes = src->numframes;
 		rv->stereo = src->stereo;
-		buffer_init(&rv->channels, src->channels.numchannels);
+		psy_audio_buffer_init(&rv->channels, src->channels.numchannels);
 		for (c = 0; c < rv->channels.numchannels; ++c) {
 			rv->channels.samples[c] = dsp.memory_alloc(src->numframes,
 				sizeof(float));
 		}
-		buffer_clearsamples(&rv->channels, src->numframes);
-		buffer_addsamples(&rv->channels, &src->channels, src->numframes, 1.0f);
+		psy_audio_buffer_clearsamples(&rv->channels, src->numframes);
+		psy_audio_buffer_addsamples(&rv->channels, &src->channels, src->numframes, 1.0f);
 	}
 	return rv;
 }
@@ -194,14 +194,14 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 void sample_load(psy_audio_Sample* self, const char* path)
 {
 	char* delim;
-	wave_load(self, path);
+	psy_audio_wave_load(self, path);
 	delim = strrchr(path, '\\');	
 	sample_setname(self, delim ? delim + 1 : path);	
 }
 
 void sample_save(psy_audio_Sample* self, const char* path)
 {
-	wave_save(self, path);
+	psy_audio_wave_save(self, path);
 }
 
 void sample_setname(psy_audio_Sample* self, const char* name)

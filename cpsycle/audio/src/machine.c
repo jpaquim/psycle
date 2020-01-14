@@ -205,10 +205,10 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 			int restorenumsamples = bc->numsamples;
 		
 			if (bc->input) {
-				buffer_setoffset(bc->input, pos);
+				psy_audio_buffer_setoffset(bc->input, pos);
 			}
 			if (bc->output) {
-				buffer_setoffset(bc->output, pos);
+				psy_audio_buffer_setoffset(bc->output, pos);
 			}
 			bc->numsamples = numworksamples;
 			if (!machine_bypassed(self)) {
@@ -223,10 +223,10 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 	if (amount > 0) {
 		int restorenumsamples = bc->numsamples;
 		if (bc->input) {
-			buffer_setoffset(bc->input, pos);
+			psy_audio_buffer_setoffset(bc->input, pos);
 		}
 		if (bc->output) {
-			buffer_setoffset(bc->output, pos);
+			psy_audio_buffer_setoffset(bc->output, pos);
 		}
 		bc->numsamples = amount;
 		if (!machine_bypassed(self)) {
@@ -235,15 +235,15 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 		bc->numsamples = restorenumsamples;
 	}
 	if (bc->input) {
-		buffer_setoffset(bc->input, 0);
+		psy_audio_buffer_setoffset(bc->input, 0);
 	}
 	if (bc->output) {
 		psy_audio_Buffer* memory;
 
-		buffer_setoffset(bc->output, 0);		
+		psy_audio_buffer_setoffset(bc->output, 0);		
 		memory = machine_buffermemory(self);
 		if (memory) {			
-			buffer_insertsamples(memory, bc->output,
+			psy_audio_buffer_insertsamples(memory, bc->output,
 				machine_buffermemorysize(self), bc->numsamples);
 		}
 	}
@@ -308,7 +308,7 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 
 	output = machines_outputs(machines, slot);
 	if (output) {
-		buffer_clearsamples(output, amount);
+		psy_audio_buffer_clearsamples(output, amount);
 		if (connected_machine_sockets) {
 			WireSocket* input_socket;
 			
@@ -330,7 +330,7 @@ void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, uintptr_t numsa
 	unsigned int channel;
 
 	if (source) {
-		buffer_scale(dst, source->range, numsamples);
+		psy_audio_buffer_scale(dst, source->range, numsamples);
 		for (channel = 0; channel < source->numchannels && 
 			channel < dst->numchannels; ++channel) {
 				dsp.add(

@@ -50,7 +50,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		psy_audio_songfile_message(self, path);
 		psy_audio_songfile_message(self, "\n");
 		self->workspaceproperties = psy_properties_create();
-		song_clear(self->song);		
+		psy_audio_song_clear(self->song);		
 		machines_startfilemode(&self->song->machines);
 		psyfile_read(self->file, header, 8);
 		header[8] = '\0';
@@ -58,13 +58,13 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		riff[4] = '\0';
 		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
 		if (strcmp(header,"PSY3SONG") == 0) {
-			if (status = psy3_load(self)) {
+			if (status = psy_audio_psy3_load(self)) {
 				psy_audio_songfile_errfile(self);
 			}
 			psyfile_close(self->file);
 		} else
 		if (strcmp(header,"PSY2SONG") == 0) {
-			psy2_load(self);
+			psy_audio_psy2_load(self);
 			psyfile_close(self->file);
 		} else 
 		if (strcmp(riff, "RIFF") == 0) {			
@@ -72,13 +72,13 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			header[8] = 0;
 			if (strcmp(&header[0], "WAVEfmt ") == 0) {
 				psyfile_close(self->file);		
-				wav_songio_load(self);
+				psy_audio_wav_songio_load(self);
 			}
 		} else {
 			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);
 			header[strlen(XM_HEADER)] = '\0';
 			if (strcmp(header, XM_HEADER) == 0) {
-				xm_load(self);
+				psy_audio_xm_load(self);
 			} else {
 				self->err = 2;
 			}
@@ -106,7 +106,7 @@ int psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
 	self->warnings = 0;
 	self->path = path;
 	if (psyfile_create(self->file, path, 1)) {				
-		if (status = psy3_save(self)) {
+		if (status = psy_audio_psy3_save(self)) {
 			psy_audio_songfile_errfile(self);
 		}
 		psyfile_close(self->file);

@@ -9,18 +9,17 @@
 
 typedef struct {
 	char* text;
-	ui_size size;
-	ui_margin margin;
+	psy_ui_Size size;
+	psy_ui_Margin margin;
 } Tab;
 
-void tab_init(Tab*, const char* text, ui_size* size);
+void tab_init(Tab*, const char* text, psy_ui_Size* size);
 
 typedef struct {
 	psy_ui_Component component;
 	psy_List* tabs;	
 	int selected;	
-	psy_Signal signal_change;
-	ui_font font;
+	psy_Signal signal_change;	
 	int hover;
 	int hoverindex;
 	int tabalignment;
@@ -30,7 +29,8 @@ void tabbar_init(TabBar*, psy_ui_Component* parent);
 Tab* tabbar_append(TabBar*, const char* label);
 void tabbar_select(TabBar*, int tabindex);
 int tabbar_selected(TabBar*);
-void tabbar_settabmargin(TabBar*, int tab, const ui_margin* margin);
+void tabbar_settabmargin(TabBar*, int tab, const psy_ui_Margin*);
 Tab* tabbar_tab(TabBar*, int tabindex);
+psy_ui_Component* tabbar_base(TabBar*);
 
 #endif

@@ -5,39 +5,48 @@
 
 #include "helpview.h"
 
-static void OnShow(HelpView*, psy_ui_Component* sender);
-static void OnHide(HelpView*, psy_ui_Component* sender);
+static void helpview_onshow(HelpView*, psy_ui_Component* sender);
+static void helpview_onhide(HelpView*, psy_ui_Component* sender);
 
 void helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
-	ui_notebook_init(&self->notebook, &self->component);	
-	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
+	ui_component_init(helpview_base(self), parent);	
+	ui_component_enablealign(helpview_base(self));
+	psy_ui_notebook_init(&self->notebook, helpview_base(self));	
+	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+		psy_ui_ALIGN_CLIENT);
 	help_init(&self->help, &self->notebook.component, workspace);
-	about_init(&self->about, &self->notebook.component);
-	greet_init(&self->greet, &self->notebook.component);	
+	about_init(&self->about, psy_ui_notebook_base(&self->notebook));
+	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 	tabbar_init(&self->tabbar, tabbarparent);
-	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
-	ui_component_hide(&self->tabbar.component);
+	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	ui_component_hide(tabbar_base(&self->tabbar));
 	tabbar_append(&self->tabbar, "Help");
 	tabbar_append(&self->tabbar, "About");
 	tabbar_append(&self->tabbar, "Greetings");	
-	ui_notebook_connectcontroller(&self->notebook, &self->tabbar.signal_change);
+	psy_ui_notebook_connectcontroller(&self->notebook,
+		&self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 1);
-	psy_signal_connect(&self->component.signal_show, self, OnShow);
-	psy_signal_connect(&self->component.signal_hide, self, OnHide);
+	psy_signal_connect(&helpview_base(self)->signal_show, self,
+		helpview_onshow);
+	psy_signal_connect(&helpview_base(self)->signal_hide, self,
+		helpview_onhide);
 }
 
-void OnShow(HelpView* self, psy_ui_Component* sender)
+void helpview_onshow(HelpView* self, psy_ui_Component* sender)
 {	
 	self->tabbar.component.visible = 1;
-	ui_component_align(ui_component_parent(&self->tabbar.component));
-	ui_component_show(&self->tabbar.component);
+	ui_component_align(ui_component_parent(tabbar_base(&self->tabbar)));
+	ui_component_show(tabbar_base(&self->tabbar));
 }
 
-void OnHide(HelpView* self, psy_ui_Component* sender)
+void helpview_onhide(HelpView* self, psy_ui_Component* sender)
 {
-	ui_component_hide(&self->tabbar.component);
+	ui_component_hide(tabbar_base(&self->tabbar));
+}
+
+psy_ui_Component* helpview_base(HelpView* self)
+{
+	return &self->component;
 }

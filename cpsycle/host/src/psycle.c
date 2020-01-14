@@ -46,7 +46,8 @@ int main(int argc, char **argv)
 	// restores the environment path
 	if (env) {
 		setpathenv(env);
-	}
+	}	
 //	_CrtDumpMemoryLeaks();	
 	return err;
 }
+

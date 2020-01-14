@@ -21,7 +21,7 @@ typedef struct {
 } CBlock;
 
 typedef struct {
-	Driver driver;
+	psy_AudioDriver driver;
 	HWAVEOUT _handle;
 	int _deviceId;
 	int _dither;
@@ -44,19 +44,19 @@ typedef struct {
 	HANDLE hEvent;
 } MmeDriver;
 
-static void driver_free(Driver*);
-static int driver_init(Driver*);
-static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
-static int driver_open(Driver*);
-static int driver_close(Driver*);
-static int driver_dispose(Driver*);
-static void driver_configure(Driver*, psy_Properties*);
-static unsigned int samplerate(Driver*);
+static void driver_deallocate(psy_AudioDriver*);
+static int driver_init(psy_AudioDriver*);
+static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
+static int driver_open(psy_AudioDriver*);
+static int driver_close(psy_AudioDriver*);
+static int driver_dispose(psy_AudioDriver*);
+static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static unsigned int samplerate(psy_AudioDriver*);
 
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
 static void DoBlocks(MmeDriver* self);
-static void init_properties(Driver* self);
+static void init_properties(psy_AudioDriver* self);
 static int on_error(int err, const char* msg);
 static void Quantize(float *pin, int *piout, int c);
 
@@ -87,27 +87,26 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 {
 	static AudioDriverInfo info;
 	info.Flags = 0;
-	info.Name = "Windows MME Driver";
+	info.Name = "Windows MME psy_AudioDriver";
 	info.ShortName = "MME";
 	info.Version = 0;
 	return &info;
 }
 
-EXPORT Driver* __cdecl driver_create(void)
+EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
 	MmeDriver* mme = (MmeDriver*) malloc(sizeof(MmeDriver));
 	if (mme) {
 		memset(mme, 0, sizeof(MmeDriver));
 		mme->driver.open = driver_open;
-		mme->driver.free = driver_free;
+		mme->driver.deallocate = driver_deallocate;
 		mme->driver.connect = driver_connect;
 		mme->driver.open = driver_open;
 		mme->driver.close = driver_close;
 		mme->driver.dispose = driver_dispose;
 		mme->driver.configure = driver_configure;
 		mme->driver.samplerate = samplerate;
-		mme->hEvent = CreateEvent
-		(NULL, FALSE, FALSE, NULL);
+		mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 		driver_init(&mme->driver);
 		return &mme->driver;
 	} else {
@@ -115,12 +114,13 @@ EXPORT Driver* __cdecl driver_create(void)
 	}
 }
 
-void driver_free(Driver* driver)
+void driver_deallocate(psy_AudioDriver* driver)
 {
+	driver->dispose(driver);
 	free(driver);
 }
 
-int driver_init(Driver* driver)
+int driver_init(psy_AudioDriver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;	
 	/*self->_deviceId = 0; // WAVE_MAPPER;
@@ -145,7 +145,7 @@ int driver_init(Driver* driver)
 	return 0;
 }
 
-int driver_dispose(Driver* driver)
+int driver_dispose(psy_AudioDriver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
 	properties_free(self->driver.properties);
@@ -154,7 +154,7 @@ int driver_dispose(Driver* driver)
 	return 0;
 }
 
-static void init_properties(Driver* self)
+static void init_properties(psy_AudioDriver* self)
 {		
 	psy_Properties* devices;
 	int i;
@@ -187,7 +187,7 @@ static void init_properties(Driver* self)
 	psy_properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
 }
 
-void driver_configure(Driver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 {
 	MmeDriver* self;
 	psy_Properties* property;
@@ -230,18 +230,18 @@ void driver_configure(Driver* driver, psy_Properties* config)
 	}
 }
 
-unsigned int samplerate(Driver* self)
+unsigned int samplerate(psy_AudioDriver* self)
 {
 	return ((MmeDriver*)self)->_samplesPerSec;
 }
 
-void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
+void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
 {
 	driver->_callbackContext = context;
 	driver->_pCallback = callback;
 }
 
-int driver_open(Driver* driver)
+int driver_open(psy_AudioDriver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
 	CBlock *pBlock;
@@ -422,7 +422,7 @@ void DoBlocks(MmeDriver* self)
 	self->_currentBlock = pb - self->_blocks;
 } 
 
-int driver_close(Driver* driver)
+int driver_close(psy_AudioDriver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
 	size_t _numBlocks;
@@ -547,4 +547,3 @@ void Quantize(float *pin, int *piout, int c)
 	}
 	while(--c);
 }
-

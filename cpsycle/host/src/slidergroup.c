@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 static void OnDestroy(SliderGroup*);
-static void OnSize(SliderGroup*, psy_ui_Component* sender, ui_size*);
+static void OnSize(SliderGroup*, psy_ui_Component* sender, psy_ui_Size*);
 static void OnSliderChanged(SliderGroup*, psy_ui_Component* sender);
 static void DescribeValue(SliderGroup*);
 static float Value(SliderGroup*);
@@ -40,7 +40,7 @@ void OnDestroy(SliderGroup* self)
 	psy_signal_dispose(&self->signal_tweakvalue);
 }
 
-void OnSize(SliderGroup* self, psy_ui_Component* sender, ui_size* size)
+void OnSize(SliderGroup* self, psy_ui_Component* sender, psy_ui_Size* size)
 {	
 	int descwidth = 100;
 	int lblwidth = 70;

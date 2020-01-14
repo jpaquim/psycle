@@ -64,15 +64,13 @@ typedef struct {
 typedef TrackerGridBlock PatternSelection;
 
 typedef struct {
-	ui_textmetric tm;
+	psy_ui_TextMetric tm;
 	int textwidth;
 	int textleftedge;
-	int lineheight;
-	int trackwidth;
+	int lineheight;	
 	int patterntrackident;
 	int headertrackident;
-	int visilines;
-	int visitracks;
+	int visilines;	
 } TrackerMetrics;
 
 typedef struct {

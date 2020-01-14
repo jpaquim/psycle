@@ -16,13 +16,12 @@ typedef struct {
 	psy_ui_Label lengthlabel;
 	psy_ui_Edit nameedit;
 	psy_ui_Edit lengthedit;
-	psy_ui_Button applybutton;
-	psy_ui_Button closebutton;
+	psy_ui_Button applybutton;	
 	psy_audio_Pattern* pattern;
 } PatternProperties;
 
 
-void InitPatternProperties(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*);
-void PatternPropertiesSetPattern(PatternProperties*, psy_audio_Pattern*);
+void patternproperties_init(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*);
+void patternproperties_setpattern(PatternProperties*, psy_audio_Pattern*);
 
 #endif

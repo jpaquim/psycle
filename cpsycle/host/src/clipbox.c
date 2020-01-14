@@ -6,56 +6,69 @@
 #include "clipbox.h"
 #include <rms.h>
 
-static void clipbox_ondraw(ClipBox*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
 static void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid);
-static void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned int slot, psy_audio_BufferContext* bc);
+static void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent*);
+static void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, uintptr_t slot,
+	psy_audio_BufferContext* bc);
 static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
 static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
+static void clipbox_onpreferredsize(ClipBox*, psy_ui_Size* limit, psy_ui_Size* rv);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(ClipBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) clipbox_onpreferredsize;
+		vtable.ondraw = (psy_ui_fp_ondraw) clipbox_ondraw;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) clipbox_onmousedown;
+	}
+}
 
 #define TIMER_ID_CLIPBOX 700
 
 void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->clip = 0;	
-	ui_component_init(&self->component, parent);	
-	psy_signal_connect(&self->component.signal_draw, self, clipbox_ondraw);
-	psy_signal_connect(&self->component.signal_mousedown, self, clipbox_onmousedown);
+	ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;	
 	psy_signal_connect(&self->component.signal_timer, self, clipbox_ontimer);
 	psy_signal_connect(&workspace->signal_songchanged, self, clipbox_onsongchanged);	
-	clipbox_connectmachinessignals(self, workspace);
-	// ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 200);
+	clipbox_connectmachinessignals(self, workspace);	
 }
 
 void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid)
 {	
-	if (self->clip) {
-		ui_component_setbackgroundcolor(&self->component, 0x00FF0000);
+	if (self->clip) {		
 		ui_component_invalidate(&self->component);
-		self->clip = 0;
+		ui_component_stoptimer(&self->component, TIMER_ID_CLIPBOX);
 	}
 }
 
-void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, unsigned int slot, psy_audio_BufferContext* bc)
+void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master,
+	uintptr_t slot, psy_audio_BufferContext* bc)
 {	
 	if (bc->rmsvol) {		
 		if (bc->rmsvol->data.previousLeft >= 32767.f ||
 			bc->rmsvol->data.previousLeft < -32768.f) {				
 			self->clip = 1;
+			ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);
 		}
 		if (bc->rmsvol->data.previousRight >= 32767.f ||
-			bc->rmsvol->data.previousRight < -32768.f) {				
+			bc->rmsvol->data.previousRight < -32768.f) {
 			self->clip = 1;
+			ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);
 		}
 	}
 }
 
-void clipbox_onmousedown(ClipBox* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent* ev)
 {
-	self->clip = 0;
-	ui_component_setbackgroundcolor(&self->component, 0x00000000);
+	self->clip = 0;	
 	ui_component_invalidate(&self->component);
 }
 
@@ -74,13 +87,25 @@ void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 	}
 }
 
-void clipbox_ondraw(ClipBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 {
-	ui_rectangle r;
-	ui_size size;
+	psy_ui_Rectangle r;
+	psy_ui_Size size;
 
 	size = ui_component_size(&self->component);
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
+	if (size.height > 40) {
+		size.height = 40;
+	}
+	psy_ui_setrectangle(&r, 1, 5, size.width - 1, size.height - 5);
+	if (self->clip) {
+		ui_drawsolidrectangle(g, r, 0x00FF0000);
+	}	
 	ui_setcolor(g, 0x00333333);
 	ui_drawrectangle(g, r);
+}
+
+void clipbox_onpreferredsize(ClipBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
+{	
+	rv->width = 10;
+	rv->height = 20;
 }

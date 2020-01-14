@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "fileoutdriver.h"
+
+#include "../../driver/driver.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,7 +17,6 @@
 #include <mmsystem.h>
 #include <process.h>
 
-
 typedef struct {
 	PsyFile file;
 	char* path;
@@ -24,47 +26,48 @@ typedef struct {
 } FileContext;
 
 typedef struct {
-	Driver driver;
+	psy_AudioDriver driver;
 	int pollsleep;
 	int stoppolling;
 	HANDLE hEvent;
 	FileContext filecontext;
 } FileOutDriver;
 
-static void driver_free(Driver*);
+static void driver_deallocate(psy_AudioDriver*);
 static int fileoutdriver_init(FileOutDriver*);
-static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,
+static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
-static int driver_open(Driver*);
-static void driver_configure(Driver*, psy_Properties*);
-static int driver_close(Driver*);
-static int driver_dispose(Driver*);
-static unsigned int samplerate(Driver*);
+static int driver_open(psy_AudioDriver*);
+static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static int driver_close(psy_AudioDriver*);
+static int driver_dispose(psy_AudioDriver*);
+static unsigned int samplerate(psy_AudioDriver*);
 static void PollerThread(void *fileoutdriver);
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
 	unsigned int numsamples);
 static void fileoutdriver_closefile(FileOutDriver*);
 
-static void init_properties(Driver* driver);
+static void init_properties(psy_AudioDriver* driver);
 
-Driver* create_fileout_driver(void)
+psy_AudioDriver* psy_audio_create_fileout_driver(void)
 {
 	FileOutDriver* out = malloc(sizeof(FileOutDriver));
 	fileoutdriver_init(out);
 	return &out->driver;
 }
 
-void driver_free(Driver* driver)
+void driver_deallocate(psy_AudioDriver* driver)
 {
+	driver->dispose(driver);
 	free(driver);
 }
 
 int fileoutdriver_init(FileOutDriver* self)
 {
-	memset(&self->driver, 0, sizeof(Driver));
+	memset(&self->driver, 0, sizeof(psy_AudioDriver));
 	self->driver.open = driver_open;
-	self->driver.free = driver_free;	
+	self->driver.deallocate = driver_deallocate;	
 	self->driver.connect = driver_connect;
 	self->driver.open = driver_open;
 	self->driver.close = driver_close;
@@ -80,7 +83,7 @@ int fileoutdriver_init(FileOutDriver* self)
 	return 0;
 }
 
-int driver_dispose(Driver* driver)
+int driver_dispose(psy_AudioDriver* driver)
 {
 	FileOutDriver* self;
 
@@ -93,14 +96,14 @@ int driver_dispose(Driver* driver)
 	return 0;
 }
 
-void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback,
+void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback,
 	void* handle)
 {
 	driver->_pCallback = callback;
 	driver->_callbackContext = context;
 }
 
-int driver_open(Driver* driver)
+int driver_open(psy_AudioDriver* driver)
 {	
 	FileOutDriver* self;
 
@@ -111,7 +114,7 @@ int driver_open(Driver* driver)
 	return 0;
 }
 
-int driver_close(Driver* driver)
+int driver_close(psy_AudioDriver* driver)
 {
 	FileOutDriver* self = (FileOutDriver*) driver;
 
@@ -120,20 +123,20 @@ int driver_close(Driver* driver)
 	return 0;
 }
 
-void driver_configure(Driver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 {
 }
 
-unsigned int samplerate(Driver* self)
+unsigned int samplerate(psy_AudioDriver* self)
 {
 	return 44100;
 }
 
-void init_properties(Driver* self)
+void init_properties(psy_AudioDriver* self)
 {		
 	self->properties = psy_properties_create();
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "File Driver"),
+		psy_properties_append_string(self->properties, "name", "File psy_AudioDriver"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
 		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),

@@ -11,7 +11,7 @@
 static void presetio_loadversion0(FILE*, int numpresets, int numparameters, psy_audio_Presets*);
 static void presetio_loadversion1(FILE*, int numParameters, psy_audio_Presets*);
 
-void presetsio_load(const char* path, psy_audio_Presets* presets)
+void psy_audio_presetsio_load(const char* path, psy_audio_Presets* presets)
 {
 	FILE* fp;	
 	
@@ -48,7 +48,7 @@ void presetsio_load(const char* path, psy_audio_Presets* presets)
 	}	
 }
 
-void presetsio_save(const char* path, psy_audio_Presets* presets)
+void psy_audio_presetsio_save(const char* path, psy_audio_Presets* presets)
 {
 
 }
@@ -60,23 +60,23 @@ void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, psy_audi
 	int i;
 	
 	ibuf = malloc(sizeof(int) * numparameters);
-	for (i = 0; i< numpresets && !feof(fp) && !ferror(fp); ++i) {		
+	for (i = 0; i < numpresets && !feof(fp) && !ferror(fp); ++i) {		
 		psy_audio_Preset* preset;
 		int j;
 
-		preset = preset_allocinit();
+		preset = psy_audio_preset_allocinit();
 		fread(name, sizeof(name), 1, fp);
-		preset_setname(preset, name);
+		psy_audio_preset_setname(preset, name);
 		fread(ibuf, numparameters * sizeof(int), 1, fp);
 		for (j = 0; j < numparameters; ++j) {
-			preset_setvalue(preset, j, ibuf[j]);
+			psy_audio_preset_setvalue(preset, j, ibuf[j]);
 		}		
-		presets_append(presets, preset);
+		psy_audio_presets_append(presets, preset);
 	}
 	free(ibuf);
 }
 
-void presetio_loadversion1(FILE* fp, int numParameters, psy_audio_Presets* presets)
+void presetio_loadversion1(FILE* fp, int numparameters, psy_audio_Presets* presets)
 {
 	int numpresets;
 	int filenumpars;
@@ -91,32 +91,31 @@ void presetio_loadversion1(FILE* fp, int numParameters, psy_audio_Presets* prese
 	fread(&filenumpars, sizeof(int), 1, fp);
 	fread(&filepresetsize, sizeof(int), 1, fp);
 	// now it is time to check our file for compatability
-	if (filenumpars != numParameters) // || (filepresetsize != dataSizeStruct))
+	if (filenumpars != numparameters) // || (filepresetsize != dataSizeStruct))
 	{
 		//::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
 		return;
 	}
 	// ok that works, so we should now load the names of all of the presets
 	
-	ibuf= malloc(sizeof(int) * numParameters);
+	ibuf= malloc(sizeof(int) * numparameters);
 	dbuf = 0;
 	// if ( dataSizeStruct > 0 ) dbuf = new unsigned char[dataSizeStruct];
 
-	for (i=0; i< numpresets && !feof(fp) && !ferror(fp); i++)
-	{
+	for (i = 0; i < numpresets && !feof(fp) && !ferror(fp); ++i) {
 		psy_audio_Preset* preset;
 		int j;
 
-		preset = preset_allocinit();
+		preset = psy_audio_preset_allocinit();
 		fread(name, sizeof(name), 1, fp);
-		preset_setname(preset, name);
-		fread(ibuf, numParameters * sizeof(int), 1, fp);
-		for (j = 0; j < numParameters; ++j) {
-			preset_setvalue(preset, j, ibuf[j]);
+		psy_audio_preset_setname(preset, name);
+		fread(ibuf, numparameters * sizeof(int), 1, fp);
+		for (j = 0; j < numparameters; ++j) {
+			psy_audio_preset_setvalue(preset, j, ibuf[j]);
 		}
 		// if ( dataSizeStruct > 0 )  fread(dbuf, dataSizeStruct, 1, hfile);		
 		// preset.Init(numParameters,name,ibuf,dataSizeStruct,dbuf);
-		presets_append(presets, preset);
+		psy_audio_presets_append(presets, preset);
 	}
 	free(ibuf);
 	free(dbuf);

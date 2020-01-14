@@ -12,7 +12,7 @@ typedef struct {
 	uint32_t defaultbackgroundcolor;
 	uint32_t defaultcolor;
 	uint32_t default_color_border;
-	ui_font defaultfont;	
+	psy_ui_Font defaultfont;	
 } psy_ui_Defaults;
 
 void ui_defaults_init(psy_ui_Defaults*);

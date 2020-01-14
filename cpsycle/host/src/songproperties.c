@@ -21,18 +21,18 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 {		
 	self->song = workspace->song;	
 	ui_component_init(&self->component, parent);	
-	ui_label_init(&self->label_title, &self->component);
-	ui_label_settext(&self->label_title, "Song Title");
+	psy_ui_label_init(&self->label_title, &self->component);
+	psy_ui_label_settext(&self->label_title, "Song Title");
 	ui_edit_init(&self->edit_title, &self->component, 0);
 	psy_signal_connect(&self->edit_title.signal_change, self,
 		songpropertiesview_ontitlechanged);
-	ui_label_init(&self->label_credits, &self->component);
-	ui_label_settext(&self->label_credits, "Credits");	
+	psy_ui_label_init(&self->label_credits, &self->component);
+	psy_ui_label_settext(&self->label_credits, "Credits");	
 	ui_edit_init(&self->edit_credits, &self->component, 0);
 	psy_signal_connect(&self->edit_credits.signal_change, self,
 		songpropertiesview_oncreditschanged);
-	ui_label_init(&self->label_comments, &self->component);
-	ui_label_settext(&self->label_comments, "Comments");	
+	psy_ui_label_init(&self->label_comments, &self->component);
+	psy_ui_label_settext(&self->label_comments, "Comments");	
 	ui_edit_init(&self->edit_comments, &self->component,
 		WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL);
 	ui_component_resize(&self->edit_comments.component, 0, 200);
@@ -50,16 +50,17 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 
 void songpropertiesview_initalign(SongPropertiesView* self)
 {
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_TOP, &margin));
-	ui_component_setalign(&self->edit_comments.component, UI_ALIGN_CLIENT);
+		psy_ui_ALIGN_TOP, &margin));
+	ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 }
 
 void songpropertiesview_read(SongPropertiesView* self)

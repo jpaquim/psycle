@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "resources/resource.h"
 
-static void about_onsize(About*, psy_ui_Component* sender, ui_size*);
+static void about_onsize(About*, psy_ui_Component* sender, psy_ui_Size*);
 static void about_initbuttons(About* self);
 static void about_oncontributors(About*, psy_ui_Component* sender);
 static void about_onversion(About*, psy_ui_Component* sender);
@@ -66,21 +66,22 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	ui_edit_settext(&self->psycledelics, "http://psycle.pastnotecut.org");	
 	ui_edit_init(&self->sourceforge, &self->component, ES_READONLY);
 	ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
-	ui_label_init(&self->steincopyright, &self->component);
-	ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
+	psy_ui_label_init(&self->steincopyright, &self->component);
+	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 	
 	ui_component_resize(&self->contrib.component, 0, 150);
 	ui_component_resize(&self->psycledelics.component, 0, 20);
 	ui_component_resize(&self->sourceforge.component, 0, 20);
 	ui_component_resize(&self->steincopyright.component, 0, 20);
 	{
-		ui_margin margin;
+		psy_ui_Margin margin;
 
-		ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makeeh(0.5), ui_value_makepx(0));
+		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+			psy_ui_value_makepx(0));
 		psy_list_free(ui_components_setalign(
 			ui_component_children(&self->component, 0),
-			UI_ALIGN_TOP,
+			psy_ui_ALIGN_TOP,
 			&margin));				
 	}
 }
@@ -88,9 +89,9 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 void version_init(Version* self, psy_ui_Component* parent)
 {
 	ui_component_init(&self->component, parent);	
-	ui_label_init(&self->versioninfo, &self->component);
-	ui_label_setstyle(&self->versioninfo, WS_CHILD | WS_VISIBLE | SS_CENTER);
-	ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
+	psy_ui_label_init(&self->versioninfo, &self->component);
+	psy_ui_label_setstyle(&self->versioninfo, WS_CHILD | WS_VISIBLE | SS_CENTER);
+	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	ui_component_resize(&self->versioninfo.component, 500, 300);	
 	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
@@ -100,41 +101,41 @@ void about_init(About* self, psy_ui_Component* parent)
 	ui_component_init(&self->component, parent);	
 	psy_signal_connect(&self->component.signal_size, self, about_onsize);
 	about_initbuttons(self);
-	ui_notebook_init(&self->notebook, &self->component);
-	ui_image_init(&self->image, &self->notebook.component);	
+	psy_ui_notebook_init(&self->notebook, &self->component);
+	ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
 	self->image.component.preventdefault = 0;
 	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
-	contrib_init(&self->contrib, &self->notebook.component);
-	version_init(&self->version, &self->notebook.component);		
-	ui_notebook_setpageindex(&self->notebook, 0);
+	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));
+	version_init(&self->version, psy_ui_notebook_base(&self->notebook));		
+	psy_ui_notebook_setpageindex(&self->notebook, 0);
 	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		about_onmousedoubleclick);
 }
 
 void about_initbuttons(About* self)
 {
-	ui_button_init(&self->contribbutton, &self->component);
-	ui_button_settext(&self->contribbutton, "Contributors / Credits");
+	psy_ui_button_init(&self->contribbutton, &self->component);
+	psy_ui_button_settext(&self->contribbutton, "Contributors / Credits");
 	psy_signal_connect(&self->contribbutton.signal_clicked, self,
 		about_oncontributors);
-	ui_button_init(&self->versionbutton, &self->component);
-	ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
+	psy_ui_button_init(&self->versionbutton, &self->component);
+	psy_ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
 	psy_signal_connect(&self->versionbutton.signal_clicked, self,
 		about_onversion);
-	ui_button_init(&self->okbutton, &self->component);
-	ui_button_settext(&self->okbutton, "OK");	
+	psy_ui_button_init(&self->okbutton, &self->component);
+	psy_ui_button_settext(&self->okbutton, "OK");	
 }
 
 void about_align(About* self, psy_ui_Component* sender)
 {
-	ui_size size;
+	psy_ui_Size size;
 	int centerx;
 	int centery;
 
 	size = ui_component_size(&self->component);
 	centerx = (size.width - 500) / 2;	
 	centery = (size.height - 385) / 2;
-	ui_component_setposition(&self->notebook.component,
+	ui_component_setposition(psy_ui_notebook_base(&self->notebook),
 		centerx, centery + 5, 520, 360);	
 	if (centery + 365 > size.height - 25) {
 		centery = size.height - 365 - 25;
@@ -147,22 +148,22 @@ void about_align(About* self, psy_ui_Component* sender)
 		centerx + 445, centery + 365, 60, 20);
 }
 
-void about_onsize(About* self, psy_ui_Component* sender, ui_size* size)
+void about_onsize(About* self, psy_ui_Component* sender, psy_ui_Size* size)
 {	
 	about_align(self, &self->component);
 }
 
 void about_oncontributors(About* self, psy_ui_Component* sender) 
 {	
-	ui_notebook_setpageindex(&self->notebook, 
-		ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
+	psy_ui_notebook_setpageindex(&self->notebook, 
+		psy_ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
 	ui_component_invalidate(&self->component);
 }
 
 void about_onversion(About* self, psy_ui_Component* sender) 
 {	
-	ui_notebook_setpageindex(&self->notebook, 
-		ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
+	psy_ui_notebook_setpageindex(&self->notebook, 
+		psy_ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
 	ui_component_invalidate(&self->component);
 }
 

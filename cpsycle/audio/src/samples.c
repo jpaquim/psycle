@@ -10,7 +10,8 @@ static void samplesgroup_init(SamplesGroup*);
 static void samplesgroup_dispose(SamplesGroup*);
 static SamplesGroup* samplesgroup_alloc(void);
 static SamplesGroup* samplesgroup_allocinit(void);
-static void samplesgroup_insert(SamplesGroup*, psy_audio_Sample* sample, uintptr_t slot);
+static void samplesgroup_insert(SamplesGroup*, psy_audio_Sample*,
+	uintptr_t slot);
 static void samplesgroup_remove(SamplesGroup*, uintptr_t slot);
 static psy_audio_Sample* samplesgroup_at(SamplesGroup*, uintptr_t slot);
 
@@ -90,14 +91,14 @@ uintptr_t samplesgroup_size(SamplesGroup* self)
 }
 
 // psy_audio_Samples
-void samples_init(psy_audio_Samples* self)
+void psy_audio_samples_init(psy_audio_Samples* self)
 {
 	psy_table_init(&self->groups);
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
 }
 
-void samples_dispose(psy_audio_Samples* self)
+void psy_audio_samples_dispose(psy_audio_Samples* self)
 {	
 	psy_TableIterator it;
 
@@ -114,7 +115,8 @@ void samples_dispose(psy_audio_Samples* self)
 	psy_signal_dispose(&self->signal_removed);
 }
 
-void samples_insert(psy_audio_Samples* self, psy_audio_Sample* sample, SampleIndex index)
+void psy_audio_samples_insert(psy_audio_Samples* self,
+	psy_audio_Sample* sample, SampleIndex index)
 {
 	SamplesGroup* group;
 
@@ -131,7 +133,7 @@ void samples_insert(psy_audio_Samples* self, psy_audio_Sample* sample, SampleInd
 	}
 }
 
-void samples_remove(psy_audio_Samples* self, SampleIndex index)
+void psy_audio_samples_remove(psy_audio_Samples* self, SampleIndex index)
 {
 	SamplesGroup* group;
 
@@ -147,7 +149,8 @@ void samples_remove(psy_audio_Samples* self, SampleIndex index)
 	}	
 }
 
-psy_audio_Sample* samples_at(psy_audio_Samples* self, SampleIndex index)
+psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples* self,
+	SampleIndex index)
 {
 	SamplesGroup* group;
 
@@ -158,17 +161,18 @@ psy_audio_Sample* samples_at(psy_audio_Samples* self, SampleIndex index)
 	return 0;
 }
 
-uintptr_t samples_groupsize(psy_audio_Samples* self)
+uintptr_t psy_audio_samples_groupsize(psy_audio_Samples* self)
 {		
 	return psy_table_size(&self->groups);
 }
 
-psy_TableIterator samples_begin(psy_audio_Samples* self)
+psy_TableIterator psy_audio_samples_begin(psy_audio_Samples* self)
 {
 	return psy_table_begin(&self->groups);
 }
 
-psy_TableIterator samples_groupbegin(psy_audio_Samples* self, uintptr_t slot)
+psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples* self,
+	uintptr_t slot)
 {
 	SamplesGroup* group;
 

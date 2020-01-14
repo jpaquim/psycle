@@ -16,94 +16,123 @@
 #undef min
 #endif
 
-typedef TEXTMETRIC ui_textmetric;
+typedef TEXTMETRIC psy_ui_TextMetric;
 
 typedef enum {
-	UI_UNIT_EH,
-	UI_UNIT_EW,
-	UI_UNIT_PX,
-	UI_UNIT_PE
-} UiUnit;
+	psy_ui_UNIT_EH,
+	psy_ui_UNIT_EW,
+	psy_ui_UNIT_PX,
+	psy_ui_UNIT_PE
+} psy_ui_Unit;
 
 typedef struct {
 	union {
 		intptr_t integer;
 		double real;
 	} quantity;
-	UiUnit unit;
-} ui_value;
+	psy_ui_Unit unit;
+} psy_ui_Value;
 
-ui_value ui_value_makepx(intptr_t px);
-ui_value ui_value_makeew(double em);
-ui_value ui_value_makeeh(double em);
-intptr_t ui_value_px(ui_value*, const ui_textmetric*);
+psy_ui_Value psy_ui_value_makepx(intptr_t px);
+psy_ui_Value psy_ui_value_makeew(double em);
+psy_ui_Value psy_ui_value_makeeh(double em);
+intptr_t psy_ui_value_px(psy_ui_Value*, const psy_ui_TextMetric*);
 
 typedef struct { 
 	int x;
 	int y;
-} ui_point;
+} psy_ui_Point;
 
-ui_point ui_point_make(int x, int y);
+psy_ui_Point psy_ui_point_make(int x, int y);
 
 typedef struct {
 	int left;
 	int top;
 	int right;
 	int bottom;
-} ui_rectangle;
+} psy_ui_Rectangle;
 
 typedef struct {
 	int width;
 	int height;
-} ui_size;
+} psy_ui_Size;
 
 typedef struct {
-	ui_value top;
-	ui_value right;
-	ui_value bottom;
-	ui_value left;
-} ui_margin;
+	psy_ui_Value top;
+	psy_ui_Value right;
+	psy_ui_Value bottom;
+	psy_ui_Value left;
+} psy_ui_Margin;
 
-void ui_margin_init(ui_margin*, ui_value top, ui_value right, ui_value bottom,
-	ui_value left);
-intptr_t ui_margin_width_px(ui_margin*, const ui_textmetric*);
-intptr_t ui_margin_height_px(ui_margin*, const ui_textmetric*);
-
+void psy_ui_margin_init(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
+	psy_ui_Value bottom, psy_ui_Value left);
+intptr_t psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
+intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 
 typedef struct {
 	LOGFONT lf; 
-} ui_fontinfo;
+} psy_ui_FontInfo;
 
-void ui_fontinfo_init(ui_fontinfo*, const char* family, int height);
+void psy_ui_fontinfo_init(psy_ui_FontInfo*, const char* family, int height);
 
 typedef struct {
 	HFONT hfont;
 	int stock;
-} ui_font;
+} psy_ui_Font;
 
 typedef enum {
-	UI_CURSOR_DEFAULT,
-	UI_CURSOR_COLRESIZE
-} ui_cursor;
+	psy_ui_CURSOR_DEFAULT,
+	psy_ui_CURSOR_COLRESIZE
+} psy_ui_Cursor;
 
 typedef enum {
-	UI_ALIGNMENT_NONE				= 0,	
-	UI_ALIGNMENT_LEFT				= 2,
-	UI_ALIGNMENT_RIGHT				= 4,
-	UI_ALIGNMENT_CENTER_HORIZONTAL	= UI_ALIGNMENT_LEFT | UI_ALIGNMENT_RIGHT,
-	UI_ALIGNMENT_TOP				= 8,
-	UI_ALIGNMENT_BOTTOM				= 16,
-	UI_ALIGNMENT_CENTER_VERTICAL	= UI_ALIGNMENT_TOP | UI_ALIGNMENT_BOTTOM
-} UiAlignment;
+	psy_ui_JUSTIFY_NONE,	
+	psy_ui_JUSTIFY_EXPAND	
+} psy_ui_JustifyType;
 
-void ui_setrectangle(ui_rectangle*, int left, int top, int width, int height);
-int ui_rectangle_intersect(ui_rectangle*, int x, int y);
-int ui_rectangle_intersect_rectangle(const ui_rectangle*, const ui_rectangle* other);
-void ui_rectangle_union(ui_rectangle*, const ui_rectangle* other);
-void ui_error(const char* err, const char* shorterr);
 
-void ui_font_init(ui_font*, const ui_fontinfo* info);
-void ui_font_copy(ui_font*, const ui_font* other);
-void ui_font_dispose(ui_font*);
+typedef enum {
+	psy_ui_NOEXPAND = 1,	
+	psy_ui_HORIZONTALEXPAND = 2,
+	psy_ui_VERTICALEXPAND = 4	
+} psy_ui_ExpandMode;
+
+typedef enum {
+	psy_ui_HORIZONTAL,
+	psy_ui_VERTICAL
+} psy_ui_Orientation;
+
+typedef enum {
+	psy_ui_ALIGN_NONE,
+	psy_ui_ALIGN_CLIENT,
+	psy_ui_ALIGN_TOP,
+	psy_ui_ALIGN_LEFT,
+	psy_ui_ALIGN_BOTTOM,
+	psy_ui_ALIGN_RIGHT,
+	psy_ui_ALIGN_FILL
+} psy_ui_AlignType;
+
+typedef enum {
+	psy_ui_ALIGNMENT_NONE = 0,	
+	psy_ui_ALIGNMENT_LEFT = 2,
+	psy_ui_ALIGNMENT_RIGHT = 4,
+	psy_ui_ALIGNMENT_CENTER_HORIZONTAL = psy_ui_ALIGNMENT_LEFT |
+		psy_ui_ALIGNMENT_RIGHT,
+	psy_ui_ALIGNMENT_TOP	= 8,
+	psy_ui_ALIGNMENT_BOTTOM = 16,
+	psy_ui_ALIGNMENT_CENTER_VERTICAL = psy_ui_ALIGNMENT_TOP |
+		psy_ui_ALIGNMENT_BOTTOM
+} psy_ui_Alignment;
+
+void psy_ui_setrectangle(psy_ui_Rectangle*, int left, int top, int width, int height);
+int psy_ui_rectangle_intersect(psy_ui_Rectangle*, int x, int y);
+int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
+	const psy_ui_Rectangle* other);
+void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
+void psy_ui_error(const char* err, const char* shorterr);
+
+void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo* info);
+void psy_ui_font_copy(psy_ui_Font*, const psy_ui_Font* other);
+void psy_ui_font_dispose(psy_ui_Font*);
 
 #endif

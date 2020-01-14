@@ -38,9 +38,9 @@ int psy_ui_bitmap_load(psy_ui_Bitmap* self, const char* path)
 	return bmp == 0;
 }
 
-ui_size psy_ui_bitmap_size(psy_ui_Bitmap* self)
+psy_ui_Size psy_ui_bitmap_size(psy_ui_Bitmap* self)
 {
-	ui_size size;
+	psy_ui_Size size;
 	BITMAP bitmap ;
 	
 	if (self->hBitmap) {

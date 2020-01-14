@@ -1,5 +1,5 @@
-#if !defined(CONSTANTS_H)
-#define CONSTANTS_H
+#if !defined(PSY_AUDIO_CONSTANTS_H)
+#define PSY_AUDIO_CONSTANTS_H
 
 #include "psycleversion.h"
 

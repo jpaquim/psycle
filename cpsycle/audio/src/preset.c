@@ -7,52 +7,53 @@
 #include <string.h>
 #include <stdlib.h>
 
-void preset_init(psy_audio_Preset* self)
+void psy_audio_preset_init(psy_audio_Preset* self)
 {
 	self->name = strdup("");
 	psy_table_init(&self->parameters);
 }
 
-void preset_dispose(psy_audio_Preset* self)
+void psy_audio_preset_dispose(psy_audio_Preset* self)
 {
 	free(self->name);
 	self->name = 0;
 	psy_table_dispose(&self->parameters);
 }
 
-psy_audio_Preset* preset_alloc(void)
+psy_audio_Preset* psy_audio_preset_alloc(void)
 {
 	return malloc(sizeof(psy_audio_Preset));
 }
 
-psy_audio_Preset* preset_allocinit(void)
+psy_audio_Preset* psy_audio_preset_allocinit(void)
 {
 	psy_audio_Preset* rv;
 
-	rv = preset_alloc();
+	rv = psy_audio_preset_alloc();
 	if (rv) {
-		preset_init(rv);
+		psy_audio_preset_init(rv);
 	}
 	return rv;
 }
 
-void preset_setname(psy_audio_Preset* self, const char* name)
+void psy_audio_preset_setname(psy_audio_Preset* self, const char* name)
 {
 	free(self->name);
 	self->name = strdup(name);
 }
 
-const char* preset_name(psy_audio_Preset* self)
+const char* psy_audio_preset_name(psy_audio_Preset* self)
 {
 	return self->name;
 }
 
-void preset_setvalue(psy_audio_Preset* self, uintptr_t param, int value)
+void psy_audio_preset_setvalue(psy_audio_Preset* self, uintptr_t param,
+	int value)
 {
 	psy_table_insert(&self->parameters, param, (void*)(uintptr_t)value);
 }
 
-int preset_value(psy_audio_Preset* self, uintptr_t param)
+int psy_audio_preset_value(psy_audio_Preset* self, uintptr_t param)
 {
 	if (psy_table_exists(&self->parameters, param)) {
 		return (int)(uintptr_t) psy_table_at(&self->parameters, param);

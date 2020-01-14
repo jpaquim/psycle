@@ -9,7 +9,7 @@
 typedef struct {
    psy_ui_Component component;   
    unsigned int input;
-   int regularkey;
+   int regularkey;   
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);

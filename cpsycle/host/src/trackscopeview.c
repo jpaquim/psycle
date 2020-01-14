@@ -21,8 +21,8 @@ void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, int x,
 	int y, int width, int height, int track);
 static void trackscopeview_ontimer(TrackScopeView*, psy_ui_Component* sender,
 	int timerid);
-static void trackscopeview_preferredsize(TrackScopeView*, ui_size* limit,
-	ui_size* rv);
+static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -31,9 +31,9 @@ static void vtable_init(TrackScopeView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize)
-			trackscopeview_preferredsize;
-		vtable.draw = (psy_ui_fp_draw) trackscopeview_ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			trackscopeview_onpreferredsize;
+		vtable.ondraw = (psy_ui_fp_ondraw) trackscopeview_ondraw;
 	}
 }
 
@@ -45,7 +45,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	self->component.doublebuffered = 1;	
+	ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		trackscopeview_onmousedown); 
 	psy_signal_connect(&self->component.signal_timer, self,
@@ -56,7 +56,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
 	if (self->workspace->song) {
-		ui_size size;
+		psy_ui_Size size;
 		int numtracks = player_numsongtracks(&self->workspace->player);
 		int c;
 		int maxcolumns = 16;
@@ -193,17 +193,17 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 	int ident = (int)(width * 0.25);
 	ui_setcolor(g, app.defaults.defaultcolor);
 
-	ui_moveto(g, ui_point_make(x + ident, y + (int)(height * 0.2)));
+	ui_moveto(g, psy_ui_point_make(x + ident, y + (int)(height * 0.2)));
 	ui_devcurveto(g,
-		ui_point_make(x + width - ident * 2, y + (int)(height * 0.3)),
-		ui_point_make(x + width - ident, y + (int)(height * 0.6)),
-		ui_point_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
+		psy_ui_point_make(x + width - ident * 2, y + (int)(height * 0.3)),
+		psy_ui_point_make(x + width - ident, y + (int)(height * 0.6)),
+		psy_ui_point_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
 	ui_moveto(g,
-		ui_point_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
+		psy_ui_point_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
 	ui_devcurveto(g,
-		ui_point_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
-		ui_point_make(x + width - ident * 2, y + (int)(height * 0.2)),
-		ui_point_make(x + width - (int)(ident * 0.5), (int)(height * 0.25)));
+		psy_ui_point_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
+		psy_ui_point_make(x + width - ident * 2, y + (int)(height * 0.2)),
+		psy_ui_point_make(x + width - (int)(ident * 0.5), (int)(height * 0.25)));
 }
 
 void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, int timerid)
@@ -211,8 +211,8 @@ void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, int 
 	ui_component_invalidate(&self->component);	
 }
 
-void trackscopeview_preferredsize(TrackScopeView* self, ui_size* limit,
-	ui_size* rv)
+void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
 	int maxcolumns = 16;
 	int columns = maxcolumns;
@@ -228,7 +228,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_Component* sender,
 {
 	if (self->workspace->song) {
 		int columns;
-		ui_size size;
+		psy_ui_Size size;
 		int track;
 		int trackwidth;
 		int maxcolumns = 16;

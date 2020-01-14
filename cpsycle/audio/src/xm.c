@@ -14,6 +14,7 @@ static void xm_readheader(psy_audio_SongFile*, struct XMFILEHEADER*);
 static uint32_t xm_readpatterns(psy_audio_SongFile*, struct XMFILEHEADER*);
 static void xm_readinstruments(psy_audio_SongFile*, struct XMFILEHEADER*, uint32_t start);
 static void xm_makesequence(psy_audio_SongFile*, struct XMFILEHEADER*);
+static int xm_patternevent_empty(psy_audio_PatternEvent*);
 
 static uint16_t flip16(uint16_t value) 
 {
@@ -23,7 +24,7 @@ static uint16_t flip16(uint16_t value)
 	return rv;
 }
 
-void xm_load(psy_audio_SongFile* self)
+void psy_audio_xm_load(psy_audio_SongFile* self)
 {	
 	uint32_t nextstart;
 	SongProperties songproperties;
@@ -41,7 +42,7 @@ void xm_load(psy_audio_SongFile* self)
 	strcpy(comments, "Imported from FastTracker II Module: ");
 	strcat(comments, self->file->szName);
 	songproperties_init(&songproperties, name, "", comments);
-	song_setproperties(self->song, &songproperties);
+	psy_audio_song_setproperties(self->song, &songproperties);
 	trackername_follows = psyfile_read_uint8(self->file);
 	if (trackername_follows != XM_TRACKERNAME_FOLLOWS) {
 		self->err = 2;
@@ -166,15 +167,20 @@ uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader
 				} else {
 					note = 255;
 				}
+				if(vol >= 0x10 && vol <= 0x50)
+				{				
+				} else {
+					vol = 0x80;
+				}
 				patternevent_init_all(
 					&ev,
 					note,
 					instr,
 					0,
-					0x80,					
+					vol,					
 					0,
 					0);
-				if (!patternevent_empty(&ev)) {
+				if (!xm_patternevent_empty(&ev)) {
 					node = pattern_insert(pattern, node, track, line * bpl, &ev);
 				}
 				++track;
@@ -297,7 +303,7 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 				
 				sample = sample_allocinit();
 				sample_setname(sample, xmsamples[s].name);
-				buffer_resize(&sample->channels, 1);
+				psy_audio_buffer_resize(&sample->channels, 1);
 				
 				is16bit = (xmsamples[s].type & 0x10) == 0x10;
 				sample->panfactor =  xmsamples[s].pan / (psy_dsp_amp_t) 255.f;
@@ -309,7 +315,7 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 						sample->looptype = LOOP_NORMAL;
 					} else
 					if (xmsamples[s].type & 0x02) {
-						sample->looptype = LOOP_BIDI;
+						sample->looptype = LOOP_NORMAL; // LOOP_BIDI;
 					} else {
 						sample->looptype = LOOP_DO_NOT;
 					}
@@ -356,7 +362,7 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 					}
 					free(smpbuf);
 				}
-				samples_insert(&self->song->samples, sample,
+				psy_audio_samples_insert(&self->song->samples, sample,
 					sampleindex_make(slot + 1, s));
 				start += xmsamples[s].samplen;
 			}
@@ -378,4 +384,9 @@ void xm_makesequence(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader)
 		sequence_insert(&self->song->sequence, sequenceposition,
 			xmheader->order[i]);
 	}
+}
+
+int xm_patternevent_empty(psy_audio_PatternEvent* self)
+{	
+	return self->note == NOTECOMMANDS_EMPTY;
 }

@@ -287,7 +287,7 @@ void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines,
 	psy_TableIterator iter;
 
 	self->master.buffer = machines_outputs(machines, self->slot);
-	buffer_clearsamples(self->master.buffer, amount);	
+	psy_audio_buffer_clearsamples(self->master.buffer, amount);	
 	for (iter = psy_table_begin(&self->returns);
 		!psy_tableiterator_equal(&iter, psy_table_end());
 			psy_tableiterator_inc(&iter)) {	
@@ -297,7 +297,7 @@ void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		channel->buffer = machines_outputs(machines, channel->fxslot);
 		channel->fx = machines_at(machines, channel->fxslot);
 		if (channel->buffer) {
-			buffer_clearsamples(channel->buffer, amount);
+			psy_audio_buffer_clearsamples(channel->buffer, amount);
 		}
 	}
 }
@@ -377,7 +377,7 @@ void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
 			psy_List* events = 0;			
 			psy_TableIterator sendsto_iter;			
 			
-			buffercontext_init(&bc, events, channel->buffer, channel->buffer,
+			psy_audio_buffercontext_init(&bc, events, channel->buffer, channel->buffer,
 				amount, 16, 0);
 			channel->fx->vtable->work(channel->fx, &bc);
 		//	buffer_pan(fxbuffer, fx->panning(fx), amount);

@@ -4,10 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
-#include "uiwincomponent.h"
 
-static void preferredsize(psy_ui_Label*, ui_size* limit, ui_size* rv);
-static ui_textmetric textmetric(psy_ui_Component*);
+static void onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
+static psy_ui_TextMetric textmetric(psy_ui_Component*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -16,13 +15,13 @@ static void vtable_init(psy_ui_Label* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
 	}
 }
 
-void ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
+void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {  		
-	ui_win32_component_init(&self->component, parent, TEXT("STATIC"), 
+	ui_win32_component_init(psy_ui_label_base(self), parent, TEXT("STATIC"), 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,
 		0);	
@@ -31,43 +30,49 @@ void ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->charnumber = 0;	
 }
 
-void ui_label_settext(psy_ui_Label* self, const char* text)
+void psy_ui_label_settext(psy_ui_Label* label, const char* text)
 {
-	SetWindowText(ui_win_component_hwnd(&self->component), text);	
+	SetWindowText((HWND)label->component.hwnd, text);	
 }
 
-void ui_label_setcharnumber(psy_ui_Label* self, int number)
+void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
 {
 	self->charnumber = number;
 }
 
-void preferredsize(psy_ui_Label* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {	
 	if (rv) {
-		ui_textmetric tm;	
+		psy_ui_TextMetric tm;	
 		char text[256];
 		
-		tm = ui_component_textmetric(&self->component);	
+		tm = ui_component_textmetric(psy_ui_label_base(self));	
 		if (self->charnumber == 0) {
-			ui_size size;
-			GetWindowText(ui_win_component_hwnd(&self->component), text, 256);
-			size = ui_component_textsize(&self->component, text);
+			psy_ui_Size size;
+			GetWindowText((HWND)self->component.hwnd, text, 256);
+			size = ui_component_textsize(psy_ui_label_base(self), text);
 			rv->width = size.width + 2 +
-				ui_margin_width_px(&self->component.spacing, &tm);
+				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm);
 		} else {		
 			rv->width = tm.tmAveCharWidth * self->charnumber;
 		}
 		rv->height = tm.tmHeight +
-			ui_margin_height_px(&self->component.spacing, &tm);
+			psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm);
 	}
 }
 
-void ui_label_setstyle(psy_ui_Label* self, int style)
+void psy_ui_label_setstyle(psy_ui_Label* self, int style)
 {
-#if defined(_WIN64)
-	SetWindowLongPtr(ui_win_component_hwnd(&self->component), GWL_STYLE, style);		
+	#if defined(_WIN64)
+	SetWindowLongPtr((HWND)self->component.hwnd, GWL_STYLE, style);		
 #else
-	SetWindowLong(ui_win_component_hwnd(&self->component), GWL_STYLE, style);
+	SetWindowLong((HWND)self->component.hwnd, GWL_STYLE, style);
 #endif
 }
+
+psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
+{
+	return &self->component;
+}
+
 

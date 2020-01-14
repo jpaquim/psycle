@@ -28,6 +28,12 @@ void sequenceselection_init(SequenceSelection* self, psy_audio_Sequence* sequenc
 	psy_signal_init(&self->signal_editpositionchanged);
 }
 
+void sequenceselection_dispose(SequenceSelection* self)
+{
+	psy_signal_dispose(&self->signal_editpositionchanged);
+	psy_list_free(self->entries);
+}
+
 void sequenceselection_addeditposition(SequenceSelection* self)
 {						
 	if (self->editposition.trackposition.tracknode) {				
@@ -35,12 +41,6 @@ void sequenceselection_addeditposition(SequenceSelection* self)
 			self->editposition.trackposition.tracknode->entry);	
 	}
 	sequence_setplayselection(self->sequence, self);
-}
-
-
-void sequenceselection_dispose(SequenceSelection* self)
-{
-	psy_signal_dispose(&self->signal_editpositionchanged);
 }
 
 void sequenceselection_seteditposition(SequenceSelection* self,

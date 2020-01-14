@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PATTERN_H)
-#define PATTERN_H
+#if !defined(PSY_AUDIO_PATTERN_H)
+#define PSY_AUDIO_PATTERN_H
 
 #include "patternevent.h"
 #include <list.h>
@@ -17,6 +17,8 @@ typedef struct {
 	unsigned int digit;
 	uintptr_t pattern;
 } PatternEditPosition;
+
+void patterneditposition_init(PatternEditPosition*);
 
 /// compares two pattern edit positions, if they are equal
 int patterneditposition_equal(PatternEditPosition* lhs,
@@ -56,8 +58,10 @@ void patternentry_addevent(psy_audio_PatternEntry*,
 /// a list of event entries ordered by position in beat unit
 typedef psy_List PatternNode;
 
+psy_audio_PatternEntry* psy_audio_patternnode_entry(PatternNode*);
+
 typedef struct {
-	PatternNode* events;	
+	PatternNode* events;
 	psy_dsp_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns
 	uintptr_t maxsongtracks;

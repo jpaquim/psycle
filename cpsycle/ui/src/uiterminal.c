@@ -7,7 +7,7 @@
 #include <string.h>
 
 static void ondestroy(psy_ui_Terminal*, psy_ui_Component* sender);
-static void preferredsize(psy_ui_Terminal*, ui_size* limit, ui_size* rv);
+static void onpreferredsize(psy_ui_Terminal*, psy_ui_Size* limit, psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -16,7 +16,7 @@ static void vtable_init(psy_ui_Terminal* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
 	}
 }
 
@@ -27,7 +27,7 @@ void ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	self->component.vtable = &vtable;
 	ui_component_enablealign(&self->component);
 	ui_editor_init(&self->output, &self->component);
-	ui_component_setalign(&self->output.component, UI_ALIGN_CLIENT);
+	ui_component_setalign(&self->output.component, psy_ui_ALIGN_CLIENT);
 	ui_component_resize(&self->component, 200, 200);	
 }
 
@@ -35,10 +35,10 @@ void ondestroy(psy_ui_Terminal* self, psy_ui_Component* sender)
 {	
 }
 
-void preferredsize(psy_ui_Terminal* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Terminal* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	if (rv) {
-		ui_size size;
+		psy_ui_Size size;
 
 		size = ui_component_size(&self->component);
 		*rv = size;		

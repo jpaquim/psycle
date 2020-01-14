@@ -10,6 +10,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+void patterneditposition_init(PatternEditPosition* self)
+{
+	self->column = 0;
+	self->digit = 0;
+	self->track = 0;
+	self->offset = 0;
+	self->pattern = 0;
+}
+
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs)
 {
@@ -450,4 +459,9 @@ void pattern_setmaxsongtracks(psy_audio_Pattern* self, uintptr_t num)
 uintptr_t pattern_maxsongtracks(psy_audio_Pattern* self)
 {
 	return self->maxsongtracks;
+}
+
+psy_audio_PatternEntry* psy_audio_patternnode_entry(PatternNode* self)
+{
+	return (psy_audio_PatternEntry*) self->entry;
 }

@@ -52,7 +52,7 @@ typedef struct {
 	ui_progressbar progressbar;
 	Navigation navigation;
 	TabBar tabbar;	
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	FileBar filebar;
 	UndoRedoBar undoredobar;
 	MachineBar machinebar;
@@ -74,7 +74,7 @@ typedef struct {
 	PluginEditor plugineditor;
 	VuBar vubar;
 	psy_ui_Component statusbar;
-	ui_notebook viewbars;
+	psy_ui_Notebook viewbars;
 	ZoomBox zoombox;
 	psy_ui_Component left;
 	psy_ui_Component* activeview;

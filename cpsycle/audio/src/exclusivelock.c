@@ -15,37 +15,37 @@ static int disabled = 0;
 
 static CRITICAL_SECTION worklock;
 
-void lock_init(void)
+void psy_audio_lock_init(void)
 {
 	InitializeCriticalSection(&worklock);	
 	disabled = 0;	
 }
 
-void lock_dispose(void)
+void psy_audio_lock_dispose(void)
 {	
 	DeleteCriticalSection(&worklock);
 	disabled = 0;
 	
 }
 
-void lock_enable(void)
+void psy_audio_lock_enable(void)
 {
 	disabled = 0;
 }
 
-void lock_disable(void)
+void psy_audio_lock_disable(void)
 {
 	disabled = 1;
 }
 
-void lock_enter(void)
+void psy_audio_lock_enter(void)
 {
 	if (!disabled) {
 		EnterCriticalSection(&worklock);
 	}
 }
 
-void lock_leave(void)
+void psy_audio_lock_leave(void)
 {
 	if (!disabled) {
 		LeaveCriticalSection(&worklock);

@@ -14,7 +14,7 @@
 
 typedef struct {
 	psy_ui_Component component;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	TabBar tabbar;	
 	About about;
 	Greet greet;
@@ -23,5 +23,6 @@ typedef struct {
 
 void helpview_init(HelpView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+psy_ui_Component* helpview_base(HelpView*);
 
 #endif

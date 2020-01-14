@@ -30,7 +30,7 @@ typedef struct {
 	psy_ui_Component component;
 	ParameterBar parameterbar;
 	ParameterListBox parameterbox;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	psy_ui_Editor help;
 	psy_ui_Component* view;
 	psy_audio_Presets* presets;

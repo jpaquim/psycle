@@ -8,13 +8,13 @@
 #include <portable.h>
 
 static void parameterlistbox_build(ParameterListBox*);
-static void parameterlistbox_preferredsize(ParameterListBox*, ui_size* limit,
-	ui_size* rv);
-static void parameterlistbox_ondescribe(ParameterListBox*, ui_slider*,
+static void parameterlistbox_onpreferredsize(ParameterListBox*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
+static void parameterlistbox_ondescribe(ParameterListBox*, psy_ui_Slider*,
 	char* txt);
-static void parameterlistbox_ontweak(ParameterListBox*, ui_slider*,
+static void parameterlistbox_ontweak(ParameterListBox*, psy_ui_Slider*,
 	float value);
-static void parameterlistbox_onvalue(ParameterListBox*, ui_slider*,
+static void parameterlistbox_onvalue(ParameterListBox*, psy_ui_Slider*,
 	float* value);
 
 static psy_ui_ComponentVtable vtable;
@@ -24,8 +24,8 @@ static void vtable_init(ParameterListBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize)
-			parameterlistbox_preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			parameterlistbox_onpreferredsize;
 	}
 }
 
@@ -37,12 +37,12 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	self->component.vtable = &vtable;
 	ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);
-	ui_component_setalign(&self->listbox.component, UI_ALIGN_CLIENT);
+	ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	ui_slider_init(&self->slider, &self->component);
 	ui_slider_setcharnumber(&self->slider, 4);
 	ui_slider_showvertical(&self->slider);
 	ui_component_resize(&self->slider.component, 20, 0);
-	ui_component_setalign(&self->slider.component, UI_ALIGN_RIGHT);
+	ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);
 	ui_component_resize(&self->component, 150, 200);
 	parameterlistbox_setmachine(self, machine);	
 	ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
@@ -90,8 +90,8 @@ int parameterlistbox_selected(ParameterListBox* self)
 	return ui_listbox_cursel(&self->listbox);
 }
 
-void parameterlistbox_preferredsize(ParameterListBox* self, ui_size* limit,
-	ui_size* rv)
+void parameterlistbox_onpreferredsize(ParameterListBox* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
 	if (rv) {
 		*rv = ui_component_size(&self->component);
@@ -99,7 +99,7 @@ void parameterlistbox_preferredsize(ParameterListBox* self, ui_size* limit,
 	}
 }
 
-void parameterlistbox_ondescribe(ParameterListBox* self, ui_slider* slider, char* txt)
+void parameterlistbox_ondescribe(ParameterListBox* self, psy_ui_Slider* slider, char* txt)
 {
 	uintptr_t param = 0;
 
@@ -115,7 +115,7 @@ void parameterlistbox_ondescribe(ParameterListBox* self, ui_slider* slider, char
 	}
 }
 
-void parameterlistbox_ontweak(ParameterListBox* self, ui_slider* slider, float value)
+void parameterlistbox_ontweak(ParameterListBox* self, psy_ui_Slider* slider, float value)
 {
 	uintptr_t param = 0;
 
@@ -130,7 +130,7 @@ void parameterlistbox_ontweak(ParameterListBox* self, ui_slider* slider, float v
 	}
 }
 
-void parameterlistbox_onvalue(ParameterListBox* self, ui_slider* slider, float* value)
+void parameterlistbox_onvalue(ParameterListBox* self, psy_ui_Slider* slider, float* value)
 {
 	uintptr_t param = 0;
 	

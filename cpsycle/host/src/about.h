@@ -31,7 +31,7 @@ void version_init(Version*, psy_ui_Component* parent);
 
 typedef struct {	
 	psy_ui_Component component;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	psy_ui_Image image;
 	Contrib contrib;
 	Version version;

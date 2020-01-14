@@ -7,7 +7,7 @@
 
 #define TIMERID_VST2VIEW 420
 
-static void preferredsize(Vst2View* self, ui_size* limit, ui_size* rv);
+static void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ontimer(Vst2View*, psy_ui_Component* sender, int id);
 
 static psy_ui_ComponentVtable vtable;
@@ -17,7 +17,7 @@ static void vtable_init(Vst2View* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
 	}
 }
 
@@ -29,7 +29,8 @@ void vst2view_init(Vst2View* self, psy_ui_Component* parent, psy_audio_Machine* 
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	machine->vtable->seteditorhandle(machine,
-		(void*)ui_component_platformhandle(&self->component));	
+		(void*) self->component.hwnd);
+//		(void*)ui_component_platformhandle(&self->component));	
 	ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 
@@ -55,7 +56,7 @@ void ontimer(Vst2View* self, psy_ui_Component* sender, int timerid)
 	machine_editoridle(self->machine);
 }
 
-void preferredsize(Vst2View* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (rv) {		
 		machine_editorsize(self->machine, &rv->width, &rv->height);		

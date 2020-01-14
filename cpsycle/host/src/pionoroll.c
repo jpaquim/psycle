@@ -23,7 +23,7 @@ static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawevents(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawevent(Pianogrid*, psy_ui_Graphics*,
 	psy_audio_PatternEvent*, int track, float offset, float length);
-static void pianogrid_onsize(Pianogrid*, psy_ui_Component* sender, ui_size*);
+static void pianogrid_onsize(Pianogrid*, psy_ui_Component* sender, psy_ui_Size*);
 static void pianogrid_adjustscroll(Pianogrid*);
 static void pianogrid_onscroll(Pianogrid*, psy_ui_Component* sender, int stepx,
 	int stepy);
@@ -39,7 +39,7 @@ static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t width);
 static void pianoroll_invalidateline(Pianoroll*, psy_dsp_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
-static void pianoroll_onsize(Pianoroll*, psy_ui_Component* sender, ui_size*);
+static void pianoroll_onsize(Pianoroll*, psy_ui_Component* sender, psy_ui_Size*);
 static void pianoroll_onmousedown(Pianoroll*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void pianoroll_onmouseup(Pianoroll*, psy_ui_Component* sender,
@@ -131,13 +131,13 @@ int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 void pianoroll_invalidateline(Pianoroll* self, psy_dsp_beat_t offset)
 {
 	int line;
-	ui_rectangle r;
+	psy_ui_Rectangle r;
 
 	if (offset >= self->sequenceentryoffset &&
 		offset < self->sequenceentryoffset + self->pattern->length) {
 		line = (int)((offset - self->sequenceentryoffset) *
 			self->grid.metrics.lpb);
-		ui_setrectangle(&r,
+		psy_ui_setrectangle(&r,
 			(int)(self->grid.metrics.stepwidth * line +
 				self->grid.beatscrollpos * self->grid.metrics.beatwidth),
 			0,			
@@ -147,7 +147,7 @@ void pianoroll_invalidateline(Pianoroll* self, psy_dsp_beat_t offset)
 	}
 }
 
-void pianoroll_onsize(Pianoroll* self, psy_ui_Component* sender, ui_size* size)
+void pianoroll_onsize(Pianoroll* self, psy_ui_Component* sender, psy_ui_Size* size)
 {	
 	int keyboardwidth;
 	int headerheight;
@@ -198,7 +198,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent, Pianoroll* roll)
 	self->beatscrollpos = 0;
 	self->dy = 0;	
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	ui_component_doublebuffer(&self->component);
 	self->component.wheelscroll = 4;
 	psy_signal_connect(&self->component.signal_draw, self, pianogrid_ondraw);
 	psy_signal_connect(&self->component.signal_size, self, pianogrid_onsize);
@@ -214,7 +214,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent, Pianoroll* roll)
 	ui_component_setverticalscrollrange(&self->component, 0, 88);
 }
 
-void pianogrid_onsize(Pianogrid* self, psy_ui_Component* sender, ui_size* size)
+void pianogrid_onsize(Pianogrid* self, psy_ui_Component* sender, psy_ui_Size* size)
 {		
 	pianogrid_adjustscroll(self);	
 }
@@ -264,11 +264,11 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 			offset < self->view->sequenceentryoffset +
 				self->view->pattern->length) {
 			int line;
-			ui_rectangle r;
+			psy_ui_Rectangle r;
 
 			line = (int)((offset - self->view->sequenceentryoffset) *
 				self->metrics.lpb);			
-			ui_setrectangle(&r,
+			psy_ui_setrectangle(&r,
 				(int) (self->metrics.stepwidth * line +
 					self->beatscrollpos * self->metrics.beatwidth),
 				0,
@@ -331,10 +331,10 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 void pianogrid_drawevent(Pianogrid* self, psy_ui_Graphics* g,
 	psy_audio_PatternEvent* event, int track, float offset, float length)
 {
-	ui_rectangle r;	
+	psy_ui_Rectangle r;	
 	int left = (int)((offset + self->beatscrollpos) * self->metrics.beatwidth);
 	int width = (int)(length * self->metrics.beatwidth);
-	ui_setrectangle(&r, left,
+	psy_ui_setrectangle(&r, left,
 		(self->metrics.keymax - event->note - 1) * self->metrics.keyheight
 		+ 1 + self->dy, width, self->metrics.keyheight - 2);		
 	ui_drawsolidrectangle(g, r, 0x00B1C8B0);	
@@ -374,7 +374,7 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent)
 	self->dy = 0;
 	self->textheight = 12;	
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_draw, self,
 		pianokeyboard_ondraw);
 }
@@ -396,7 +396,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Component* sender,
 	int keymax = 88;
 	int key;	
 	int keyboardheight;
-	ui_size size;
+	psy_ui_Size size;
 		
 	keyboardheight = (keymax - keymin) * self->metrics.keyheight;
 	size = ui_component_size(&self->component);
@@ -407,18 +407,19 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Component* sender,
 		cpy = keyboardheight - (key + 1) * self->metrics.keyheight + self->dy;
 		ui_drawline(g, 0, cpy, size.width, cpy);
 		if (isblack(key)) {
-			ui_rectangle r;			
-			ui_setrectangle(&r, (int)(size.width * 0.75), cpy, 
+			psy_ui_Rectangle r;			
+			psy_ui_setrectangle(&r, (int)(size.width * 0.75), cpy, 
 				(int)(size.width * 0.25), self->metrics.keyheight);
 			ui_drawsolidrectangle(g, r, 0x00CACACA);
 			ui_drawline(g, 0, cpy + self->metrics.keyheight/2, size.width, 
 					cpy + self->metrics.keyheight/2);
-			ui_setrectangle(&r, 0, cpy, (int)(size.width * 0.75), 
+			psy_ui_setrectangle(&r, 0, cpy, (int)(size.width * 0.75), 
 				self->metrics.keyheight);
 			ui_drawsolidrectangle(g, r, 0x00444444);						
 		} else {
-			ui_rectangle r;			
-			ui_setrectangle(&r, 0, cpy, size.width, self->metrics.keyheight);
+			psy_ui_Rectangle r;
+			
+			psy_ui_setrectangle(&r, 0, cpy, size.width, self->metrics.keyheight);
 			ui_drawsolidrectangle(g, r, 0x00CACACA);
 			if (key % 12 == 0 || ((key % 12) == 5)) {
 				ui_drawline(g, 0, cpy + self->metrics.keyheight, size.width, 
@@ -481,7 +482,7 @@ void pianoheader_init(PianoHeader* self, psy_ui_Component* parent, Pianoroll* ro
 	self->view = roll;	
 	self->scrollpos = 0;
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_draw, self, pianoheader_ondraw);		
 }
 
@@ -495,8 +496,8 @@ void pianoheader_ondraw(PianoHeader* self, psy_ui_Component* sender,
 
 void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 {
-	ui_size size;
-	ui_margin margin = { 0, 0, 5, 0 };
+	psy_ui_Size size;
+	psy_ui_Margin margin = { 0, 0, 5, 0 };
 	int baseline;		
 	psy_dsp_beat_t cpx;	
 	int c;	
@@ -533,7 +534,7 @@ void pianoroll_updatemetrics(Pianoroll* self)
 
 void pianoroll_computemetrics(Pianoroll* self, PianoMetrics* rv)
 {	
-	ui_size gridsize;	
+	psy_ui_Size gridsize;	
 
 	gridsize = ui_component_size(&self->grid.component);		
 	rv->lpb = player_lpb(&self->workspace->player);

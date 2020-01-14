@@ -14,9 +14,9 @@
 typedef struct {
 	psy_ui_Component component;
 	TabBar tabbar;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	psy_ui_Component slidergroup;
-	ui_slider volslider;
+	psy_ui_Slider volslider;
 	psy_ui_Button dbvol;
 	psy_ui_Button percvol;
 	VuScope vuscope;
@@ -29,6 +29,7 @@ typedef struct {
 
 void wireview_init(WireView*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
 int wireview_wireexists(WireView*);
+psy_ui_Component* wireview_base(WireView*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -36,5 +37,7 @@ typedef struct {
 } WireFrame;
 
 void wireframe_init(WireFrame*, psy_ui_Component* parent, WireView* view);
+psy_ui_Component* wireframe_base(WireFrame*);
+
 
 #endif

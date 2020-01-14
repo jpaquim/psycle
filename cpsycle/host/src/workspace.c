@@ -114,7 +114,7 @@ void history_add(History* self, int viewid, int sequenceentryid)
 
 void workspace_init(Workspace* self, void* handle)
 {	
-	lock_init();
+	psy_audio_lock_init();
 #ifdef SSE
 	psy_dsp_sse2_init(&dsp);
 #else
@@ -138,7 +138,7 @@ void workspace_init(Workspace* self, void* handle)
 	history_init(&self->history);
 	workspace_makeconfig(self);	
 	workspace_initplugincatcherandmachinefactory(self);
-	self->song = song_allocinit(&self->machinefactory);
+	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	self->songcbk = self->song;
 	self->properties = workspace_makeproperties(self);
 	sequenceselection_init(&self->sequenceselection, &self->song->sequence);
@@ -191,7 +191,7 @@ void workspace_initsignals(Workspace* self)
 void workspace_dispose(Workspace* self)
 {	
 	player_dispose(&self->player);	
-	song_free(self->song);	
+	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
 	self->songcbk = 0;
 	properties_free(self->config);
@@ -210,7 +210,8 @@ void workspace_dispose(Workspace* self)
 	pattern_dispose(&self->patternpaste);	
 	workspace_disposesequencepaste(self);
 	properties_free(self->cmds);
-	lock_dispose();
+	sequenceselection_dispose(&self->sequenceselection);
+	psy_audio_lock_dispose();
 }
 
 void workspace_disposesignals(Workspace* self)
@@ -249,7 +250,8 @@ void workspace_disposesequencepaste(Workspace* self)
 void workspace_initplayer(Workspace* self)
 {
 	player_init(&self->player, self->song, (void*)
-		ui_component_platformhandle(self->mainhandle));
+		self->mainhandle->hwnd);
+//		ui_component_platformhandle(self->mainhandle));
 	self->cmds = cmdproperties_create();
 	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);
@@ -344,7 +346,7 @@ void workspace_driverconfig(Workspace* self)
 
 void workspace_mididriverconfig(Workspace* self, int driverid)
 {	
-	EventDriver* eventdriver;
+	psy_EventDriver* eventdriver;
 	
 	eventdriver = player_eventdriver(&self->player, driverid);
 	if (eventdriver) {	
@@ -568,7 +570,7 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
 	drivers = psy_properties_append_choice(self->inputoutput, "driver", 2); 
-	psy_properties_settext(drivers, "Driver");
+	psy_properties_settext(drivers, "psy_AudioDriver");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(_DEBUG)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
@@ -596,17 +598,17 @@ void workspace_makedriverconfigurations(Workspace* self)
 
 				path = psy_properties_valuestring(p);
 				if (path) {
-					Library library;
+					psy_Library library;
 
-					library_init(&library);
-					library_load(&library, path);
+					psy_library_init(&library);
+					psy_library_load(&library, path);
 					if (library.module) {
 						pfndriver_create fpdrivercreate;
 
 						fpdrivercreate = (pfndriver_create)
-						library_functionpointer(&library, "driver_create");
+							psy_library_functionpointer(&library, "driver_create");
 						if (fpdrivercreate) {
-							Driver* driver;							
+							psy_AudioDriver* driver;							
 
 							driver = fpdrivercreate();
 							if (driver && driver->properties) {
@@ -625,7 +627,7 @@ void workspace_makedriverconfigurations(Workspace* self)
 							}
 						}
 					}
-					library_dispose(&library);
+					psy_library_dispose(&library);
 				}
 			}
 		}
@@ -676,7 +678,7 @@ void workspace_updatemididriverlist(Workspace* self)
 		numdrivers = player_numeventdrivers(&self->player);
 		for (i = 0; i < numdrivers; ++i) {
 			char idstr[40];
-			EventDriver* eventdriver;
+			psy_EventDriver* eventdriver;
 
 			eventdriver = player_eventdriver(&self->player, i);
 			if (eventdriver) {
@@ -917,7 +919,7 @@ void workspace_newsong(Workspace* self)
 {			
 	psy_audio_Song* song;	
 	
-	song = song_allocinit(&self->machinefactory);
+	song = psy_audio_song_allocinit(&self->machinefactory);
 	properties_free(self->properties);
 	self->properties = workspace_makeproperties(self);
 	free(self->filename);
@@ -930,7 +932,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 	psy_audio_Song* song;
 	psy_audio_SongFile songfile;	
 		
-	song = song_allocinit(&self->machinefactory);
+	song = psy_audio_song_allocinit(&self->machinefactory);
 	if (song) {		
 		psy_signal_connect(&song->signal_loadprogress, self,
 			workspace_onloadprogress);	
@@ -942,12 +944,12 @@ void workspace_loadsong(Workspace* self, const char* path)
 			workspace_onterminaloutput);
 		songfile.song = song;
 		songfile.file = 0;		
-		lock_enter();
+		psy_audio_lock_enter();
 		self->songcbk = song;
 		if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
 			self->songcbk = self->song;
-			lock_leave();			
-			song_free(song);
+			psy_audio_lock_leave();			
+			psy_audio_song_deallocate(song);
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
 			psy_audio_songfile_dispose(&songfile);
@@ -959,7 +961,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 			self->filename = strdup(path);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG);
 			psy_audio_songfile_dispose(&songfile);
-			lock_leave();	
+			psy_audio_lock_leave();	
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
@@ -978,7 +980,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 	history_clear(&self->history);
 	oldsong = self->song;
 	player_stop(&self->player);
-	lock_enter();	
+	psy_audio_lock_enter();	
 	self->song = song;
 	self->songcbk = song;
 	player_setsong(&self->player, self->song);
@@ -989,8 +991,8 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 	psy_signal_emit(&self->signal_songchanged, self, 1, flag);
 	self->lastentry = 0;
 	workspace_disposesequencepaste(self);
-	lock_leave();
-	song_free(oldsong);	
+	psy_audio_lock_leave();
+	psy_audio_song_deallocate(oldsong);	
 }
 
 void workspace_savesong(Workspace* self, const char* path)
@@ -1087,11 +1089,11 @@ void workspace_redo(Workspace* self)
 
 void workspace_changedefaultfontsize(Workspace* self, int size)
 {
-	ui_fontinfo fontinfo;
-	ui_font font;
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Font font;
 
-	ui_fontinfo_init(&fontinfo, "Tahoma", size);
-	ui_font_init(&font, &fontinfo);
+	psy_ui_fontinfo_init(&fontinfo, "Tahoma", size);
+	psy_ui_font_init(&font, &fontinfo);
 	ui_replacedefaultfont(self->mainhandle, &font);
 	ui_component_invalidate(self->mainhandle);
 }
@@ -1154,7 +1156,7 @@ int workspace_hasplugincache(Workspace* self)
 	return self->hasplugincache;
 }
 
-EventDriver* workspace_kbddriver(Workspace* self)
+psy_EventDriver* workspace_kbddriver(Workspace* self)
 {
 	return player_kbddriver(&self->player);
 }

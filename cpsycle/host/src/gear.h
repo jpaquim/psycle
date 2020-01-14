@@ -25,10 +25,13 @@ typedef struct {
 	psy_ui_Button showmaster;
 } GearButtons;
 
+void gearbuttons_init(GearButtons*, psy_ui_Component* parent);
+psy_ui_Component* gearbuttons_base(GearButtons*);
+
 typedef struct {
 	psy_ui_Component component;
 	TabBar tabbar;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	ui_listbox listbox;	
 	MachinesBox machinesboxgen;
 	MachinesBox machinesboxfx;
@@ -40,5 +43,6 @@ typedef struct {
 } Gear;
 
 void gear_init(Gear*, psy_ui_Component* parent, Workspace*);
+psy_ui_Component* gear_base(Gear*);
 
 #endif

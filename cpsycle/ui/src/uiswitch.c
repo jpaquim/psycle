@@ -7,12 +7,11 @@
 #include <string.h>
 
 static void ondestroy(psy_ui_Switch*, psy_ui_Component* sender);
-static void ondraw(psy_ui_Switch*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void onmousedown(psy_ui_Switch*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void onmouseenter(psy_ui_Switch*, psy_ui_Component* sender);
-static void onmouseleave(psy_ui_Switch*, psy_ui_Component* sender);
-static void preferredsize(psy_ui_Switch*, ui_size* limit, ui_size* size);
+static void ondraw(psy_ui_Switch*, psy_ui_Graphics*);
+static void onmousedown(psy_ui_Switch*, psy_ui_MouseEvent*);
+static void onmouseenter(psy_ui_Switch*);
+static void onmouseleave(psy_ui_Switch*);
+static void onpreferredsize(psy_ui_Switch*, psy_ui_Size* limit, psy_ui_Size* size);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -21,7 +20,10 @@ static void vtable_init(psy_ui_Switch* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
 	}
 }
 
@@ -29,11 +31,7 @@ void ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
 	ui_component_init(&self->component, parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_signal_connect(&self->component.signal_draw, self, ondraw);
-	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
-	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
+	self->component.vtable = &vtable;		
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
 }
@@ -43,15 +41,15 @@ void ondestroy(psy_ui_Switch* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_clicked);	
 }
 
-void ondraw(psy_ui_Switch* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 {
-	ui_rectangle r;
+	psy_ui_Rectangle r;
 	int checked = 0;
-	ui_textmetric tm;
-	ui_size switchsize;
-	ui_size size;
-	ui_size cornersize;
-	ui_size knobsize;
+	psy_ui_TextMetric tm;
+	psy_ui_Size switchsize;
+	psy_ui_Size size;
+	psy_ui_Size cornersize;
+	psy_ui_Size knobsize;
 		
 	switchsize = ui_component_size(&self->component);
 	tm = ui_component_textmetric(&self->component);
@@ -82,10 +80,10 @@ void ondraw(psy_ui_Switch* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	}	
 }
 
-void preferredsize(psy_ui_Switch* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Switch* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	if (rv) {		
-		ui_textmetric tm;		
+		psy_ui_TextMetric tm;
 
 		tm = ui_component_textmetric(&self->component);
 		rv->height = (int) (1.5 * tm.tmHeight);
@@ -95,21 +93,18 @@ void preferredsize(psy_ui_Switch* self, ui_size* limit, ui_size* rv)
 	}
 }
 
-void onmousedown(psy_ui_Switch* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void onmousedown(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
 {
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void onmouseenter(psy_ui_Switch* self, psy_ui_Component* sender)
+void onmouseenter(psy_ui_Switch* self)
 {
-//	self->hover = 1;
 	ui_component_invalidate(&self->component);
 }
 
-void onmouseleave(psy_ui_Switch* self, psy_ui_Component* sender)
-{		
-//	self->hover = 0;
+void onmouseleave(psy_ui_Switch* self)
+{
 	ui_component_invalidate(&self->component);
 }
 

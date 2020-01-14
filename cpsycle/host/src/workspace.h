@@ -58,7 +58,7 @@ typedef struct {
 	psy_Properties* theme;
 	psy_Properties* cmds;
 	psy_audio_PluginCatcher plugincatcher;
-	MachineFactory machinefactory;
+	psy_audio_MachineFactory machinefactory;
 	int octave;
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;	
@@ -133,7 +133,7 @@ void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);
 int workspace_hasplugincache(Workspace*);
-EventDriver* workspace_kbddriver(Workspace*);
+psy_EventDriver* workspace_kbddriver(Workspace*);
 int workspace_followingsong(Workspace*);
 void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);

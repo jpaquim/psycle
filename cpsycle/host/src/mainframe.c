@@ -43,7 +43,7 @@ static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
-static void mainframe_oneventdriverinput(MainFrame*, EventDriver* sender);
+static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
 	const char* text);
@@ -68,11 +68,13 @@ enum {
 
 void mainframe_init(MainFrame* self)
 {			
-	ui_margin tabbardividemargin;
+	psy_ui_Margin tabbardividemargin;
 	
-	ui_margin_init(&tabbardividemargin, ui_value_makepx(0), ui_value_makeew(4.0),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&tabbardividemargin,
+		psy_ui_value_makepx(0), psy_ui_value_makeew(4.0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	ui_frame_init(&self->component, 0);
+	
 	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	ui_component_enablealign(&self->component);
 	
@@ -86,7 +88,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_updatetitle(self);
 	// create empty status bar
 	ui_component_init(&self->statusbar, &self->component);	
-	ui_component_setalign(&self->statusbar, UI_ALIGN_BOTTOM);
+	ui_component_setalign(&self->statusbar, psy_ui_ALIGN_BOTTOM);
 	ui_component_enablealign(&self->statusbar);
 	ui_terminal_init(&self->terminal, &self->component);
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
@@ -95,7 +97,7 @@ void mainframe_init(MainFrame* self)
 		mainframe_onterminaloutput);
 	psy_signal_connect(&self->workspace.signal_terminal_error, self,
 		mainframe_onterminalerror);
-	ui_component_setalign(&self->terminal.component, UI_ALIGN_BOTTOM);
+	ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);
 	ui_component_hide(&self->terminal.component);
 	ui_component_resize(&self->terminal.component, 0, 100);
 	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);	
@@ -103,92 +105,95 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->component.signal_keyup, self, mainframe_onkeyup);
 	psy_signal_connect(&self->component.signal_timer, self, mainframe_ontimer);
 	ui_component_init(&self->top, &self->component);
-	ui_component_setalign(&self->top, UI_ALIGN_TOP);
+	ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	ui_component_enablealign(&self->top);
 	// sequenceview
 	//ui_component_init(&self->left, &self->component);			
 	//ui_component_setalign(&self->left, UI_ALIGN_LEFT);
 	//ui_component_enablealign(&self->left);	
 	//self->left.preventpreferredsize = 1;
-	//ui_component_resize(&self->left, 160, 0);
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);	
-	ui_component_setalign(&self->sequenceview.component, UI_ALIGN_LEFT);		
+	ui_component_setalign(&self->sequenceview.component, psy_ui_ALIGN_LEFT);
 	// client
 	ui_component_init(&self->client, &self->component);
 	self->client.defaultpropagation = 1;
 	ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
 	ui_component_enablealign(&self->client);
-	ui_component_setalign(&self->client, UI_ALIGN_CLIENT);	
+	ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);	
 	stepsequencerview_init(&self->stepsequencerview, &self->client,
 		&self->workspace);
-	ui_component_setalign(&self->stepsequencerview.component, UI_ALIGN_BOTTOM);	
+	ui_component_setalign(&self->stepsequencerview.component, psy_ui_ALIGN_BOTTOM);	
 	if (!workspace_showstepsequencer(&self->workspace)) {
 		ui_component_hide(&self->stepsequencerview.component);
 	}	
 	// tabbars			
 	{
-		ui_margin spacing;
+		psy_ui_Margin spacing;
 
-		ui_margin_init(&spacing, ui_value_makepx(0),
-			ui_value_makepx(0), ui_value_makeeh(0.5), ui_value_makepx(0));
+		psy_ui_margin_init(&spacing, psy_ui_value_makepx(0),
+			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+			psy_ui_value_makepx(0));
 		ui_component_init(&self->tabbars, &self->client);
 		ui_component_setspacing(&self->tabbars, &spacing);
 		mainframe_initbars(self);
 	}
 	// tabbars
-	ui_component_setalign(&self->tabbars, UI_ALIGN_TOP);
+	ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
 	ui_component_enablealign(&self->tabbars);
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);
-	self->navigation.component.margin.right = ui_value_makeew(4.0);
-	ui_component_setalign(&self->navigation.component, UI_ALIGN_LEFT);
+	self->navigation.component.margin.right = psy_ui_value_makeew(2.0);
+	ui_component_setalign(&self->navigation.component, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->tabbars);
-	ui_component_setalign(&self->tabbar.component, UI_ALIGN_LEFT);
-	ui_component_setalignexpand(&self->tabbar.component, UI_HORIZONTALEXPAND);	
+	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
+	ui_component_setalignexpand(tabbar_base(&self->tabbar),
+		psy_ui_HORIZONTALEXPAND);	
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Patterns");	
 	tabbar_append(&self->tabbar, "Samples");
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Properties");
-	tabbar_append(&self->tabbar, "Settings")->margin.left = ui_value_makeew(4.0);	;
-	tabbar_append(&self->tabbar, "Help")->margin.right = ui_value_makeew(4.0);
+	tabbar_append(&self->tabbar, "Settings")->margin.left =
+		psy_ui_value_makeew(4.0);	;
+	tabbar_append(&self->tabbar, "Help")->margin.right =
+		psy_ui_value_makeew(4.0);
 	// splitbar
 	ui_splitbar_init(&self->splitbar, &self->component);	
 	/// init notebook views
-	ui_notebook_init(&self->notebook, &self->client);
-	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
-	ui_notebook_connectcontroller(&self->notebook,
+	psy_ui_notebook_init(&self->notebook, &self->client);
+	ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);
+	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);	
-	machineview_init(&self->machineview, &self->notebook.component, 
+	machineview_init(&self->machineview, psy_ui_notebook_base(&self->notebook), 
 		&self->tabbars, &self->workspace);
-	patternview_init(&self->patternview, &self->notebook.component,
+	patternview_init(&self->patternview, psy_ui_notebook_base(&self->notebook),
 		&self->tabbars, &self->workspace);	
-	samplesview_init(&self->samplesview, &self->notebook.component,
+	samplesview_init(&self->samplesview, psy_ui_notebook_base(&self->notebook),
 		&self->tabbars, &self->workspace);	
-	instrumentview_init(&self->instrumentsview, &self->notebook.component,
+	instrumentview_init(&self->instrumentsview, psy_ui_notebook_base(&self->notebook),
 		&self->workspace);
 	songpropertiesview_init(&self->songpropertiesview,
 		&self->notebook.component, &self->workspace);	
-	settingsview_init(&self->settingsview, &self->notebook.component,
+	settingsview_init(&self->settingsview, psy_ui_notebook_base(&self->notebook),
 		&self->tabbars, self->workspace.config);
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
-	helpview_init(&self->helpview, &self->notebook.component, &self->tabbars,
+	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook), &self->tabbars,
 		&self->workspace);	
 	psy_signal_connect(&self->helpview.about.okbutton.signal_clicked, self,
 		mainframe_onaboutok);	
-	renderview_init(&self->renderview, &self->notebook.component,
+	renderview_init(&self->renderview, psy_ui_notebook_base(&self->notebook),
 		&self->tabbars, &self->workspace);
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
 		mainframe_onviewselected);
 	gear_init(&self->gear, &self->component, &self->workspace);
-	ui_component_setalign(&self->gear.component, UI_ALIGN_RIGHT);
+	ui_component_setalign(&self->gear.component, psy_ui_ALIGN_RIGHT);
 	ui_component_hide(&self->gear.component);
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ongear);
 	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
-	ui_component_setalign(&self->plugineditor.component, UI_ALIGN_LEFT);
+	ui_component_setalign(&self->plugineditor.component, psy_ui_ALIGN_LEFT);
 	ui_component_resize(&self->plugineditor.component, 400, 0);
 	ui_component_hide(&self->plugineditor.component);
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
@@ -209,12 +214,12 @@ void mainframe_init(MainFrame* self)
 	if (self->workspace.song) {
 		mainframe_setstatusbartext(self,
 			self->workspace.song->properties.title);
-	}	
+	}
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
 {	
-	ui_label_settext(&self->statusbarlabel, text ? text : "");
+	psy_ui_label_settext(&self->statusbarlabel, text ? text : "");
 }
 
 const char* mainframe_statusbaridletext(MainFrame* self)
@@ -226,34 +231,36 @@ const char* mainframe_statusbaridletext(MainFrame* self)
 
 void mainframe_initstatusbar(MainFrame* self)
 {	
-	ui_margin margin;
+	psy_ui_Margin margin;
 		
-	ui_margin_init(&margin, ui_value_makeeh(0.5), ui_value_makeew(2.0),
-		ui_value_makeeh(0.5), ui_value_makepx(0));	
+	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeew(2.0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));	
 	// zoom
 	zoombox_init(&self->zoombox, &self->statusbar);
-	ui_component_setalign(&self->zoombox.component, UI_ALIGN_LEFT);
+	ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_LEFT);
 	ui_component_setmargin(&self->zoombox.component, &margin);
 	psy_signal_connect(&self->zoombox.signal_changed, self,
 		mainframe_onzoomboxchanged);
 	// statusbar label	
-	ui_label_init(&self->statusbarlabel, &self->statusbar);
-	ui_label_settext(&self->statusbarlabel, "Ready");
-	ui_label_setcharnumber(&self->statusbarlabel, 29);
+	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);
+	psy_ui_label_settext(&self->statusbarlabel, "Ready");
+	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
 	ui_component_setmargin(&self->statusbarlabel.component, &margin);
-	ui_component_setalign(&self->statusbarlabel.component, UI_ALIGN_LEFT);	
-	ui_notebook_init(&self->viewbars, &self->statusbar);
-	ui_component_setalign(&self->viewbars.component, UI_ALIGN_LEFT);
+	ui_component_setalign(&self->statusbarlabel.component, psy_ui_ALIGN_LEFT);	
+	psy_ui_notebook_init(&self->viewbars, &self->statusbar);
+	ui_component_setalign(&self->viewbars.component, psy_ui_ALIGN_LEFT);
 	ui_component_enablealign(&self->viewbars.component);		
 	machineviewbar_init(&self->machineviewbar, &self->viewbars.component, &self->workspace);
-	ui_component_setalign(&self->machineviewbar.component, UI_ALIGN_LEFT);
+	ui_component_setalign(&self->machineviewbar.component, psy_ui_ALIGN_LEFT);
 	self->machineview.wireview.statusbar = &self->machineviewbar;
 	patternviewbar_init(&self->patternbar, &self->viewbars.component, &self->workspace);
-	ui_component_setalign(&self->patternbar.component, UI_ALIGN_LEFT);
-	ui_notebook_setpageindex(&self->viewbars, 0);
-	ui_notebook_connectcontroller(&self->viewbars, &self->tabbar.signal_change);
+	ui_component_setalign(&self->patternbar.component, psy_ui_ALIGN_LEFT);
+	psy_ui_notebook_setpageindex(&self->viewbars, 0);
+	psy_ui_notebook_connectcontroller(&self->viewbars,
+		&self->tabbar.signal_change);
 	ui_progressbar_init(&self->progressbar, &self->statusbar);
-	ui_component_setalign(&self->progressbar.component, UI_ALIGN_RIGHT);	
+	ui_component_setalign(&self->progressbar.component, psy_ui_ALIGN_RIGHT);	
 	psy_signal_connect(&self->workspace.signal_loadprogress, self, 
 		mainframe_onsongloadprogress);
 	psy_signal_connect(&self->workspace.signal_scanprogress, self, 
@@ -262,37 +269,37 @@ void mainframe_initstatusbar(MainFrame* self)
 
 void mainframe_initbars(MainFrame* self)
 {
-	ui_margin margin;
-	ui_margin row0margin;
-	ui_margin rowmargin;	
+	psy_ui_Margin margin;
+	psy_ui_Margin row0margin;
+	psy_ui_Margin rowmargin;	
 
-	ui_margin_init(&row0margin, ui_value_makeeh(0.5), ui_value_makepx(0),
-	ui_value_makeeh(0.5), ui_value_makeeh(0.5));
-	ui_margin_init(&rowmargin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makeeh(0.5), ui_value_makeeh(0.5));
-	
+	psy_ui_margin_init(&row0margin, psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeeh(0.5));
+	psy_ui_margin_init(&rowmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeeh(0.5));	
 	// Vugroup
-	vubar_init(&self->vubar, &self->top, &self->workspace);
-	ui_component_resize(&self->vubar.component, 190, 50);
-	ui_component_setalign(&self->vubar.component, UI_ALIGN_RIGHT);
+	vubar_init(&self->vubar, &self->top, &self->workspace);	
+	ui_component_setalign(&self->vubar.component, psy_ui_ALIGN_RIGHT);
 	// row0
 	ui_component_init(&self->toprow0, &self->top);
 	ui_component_enablealign(&self->toprow0);	
-	ui_component_setalign(&self->toprow0, UI_ALIGN_TOP);
+	ui_component_setalign(&self->toprow0, psy_ui_ALIGN_TOP);
 	ui_component_setmargin(&self->toprow0, &row0margin);
 	// row1
 	ui_component_init(&self->toprow1, &self->top);
 	ui_component_enablealign(&self->toprow1);	
-	ui_component_setalign(&self->toprow1, UI_ALIGN_TOP);
+	ui_component_setalign(&self->toprow1, psy_ui_ALIGN_TOP);
 	ui_component_setmargin(&self->toprow1, &rowmargin);
 	// row2
 	ui_component_init(&self->toprow2, &self->top);
 	ui_component_enablealign(&self->toprow2);	
-	ui_component_setalign(&self->toprow2, UI_ALIGN_TOP);
+	ui_component_setalign(&self->toprow2, psy_ui_ALIGN_TOP);
 	ui_component_setmargin(&self->toprow2, &rowmargin);
 	// scopebar
 	trackscopeview_init(&self->trackscopeview, &self->top, &self->workspace);
-	ui_component_setalign(&self->trackscopeview.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->trackscopeview.component, psy_ui_ALIGN_TOP);
 	ui_component_setmargin(&self->trackscopeview.component, &rowmargin);
 	if (!workspace_showtrackscopes(&self->workspace)) {
 		ui_component_hide(&self->trackscopeview.component);
@@ -304,21 +311,22 @@ void mainframe_initbars(MainFrame* self)
 	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
 	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);	
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->toprow0, 0),
-		UI_ALIGN_LEFT, &margin));
-	margin.right = ui_value_makepx(0);
+		psy_ui_ALIGN_LEFT, &margin));
+	margin.right = psy_ui_value_makepx(0);
 	ui_component_setmargin(&self->playposbar.component, &margin);	
 	// row1
 	// Songbar	
 	songbar_init(&self->songbar, &self->toprow1, &self->workspace);
-	ui_component_setalign(&self->songbar.component, UI_ALIGN_LEFT);	
+	ui_component_setalign(&self->songbar.component, psy_ui_ALIGN_LEFT);	
 	// row2
 	// Machinebar
 	machinebar_init(&self->machinebar, &self->toprow2, &self->workspace);	
-	ui_component_setalign(&self->machinebar.component, UI_ALIGN_LEFT);	
+	ui_component_setalign(&self->machinebar.component, psy_ui_ALIGN_LEFT);	
 }
 
 void mainframe_setstartpage(MainFrame* self)
@@ -341,7 +349,7 @@ void mainframe_destroy(MainFrame* self, psy_ui_Component* component)
 	psy_ui_app_stop(&app);
 }
 
-void mainframe_oneventdriverinput(MainFrame* self, EventDriver* sender)
+void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 {
 	EventDriverCmd cmd;
 	// 	psy_Properties* section;
@@ -448,7 +456,7 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {	
 	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
-		EventDriver* kbd;
+		psy_EventDriver* kbd;
 		EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYDOWN;
@@ -464,7 +472,7 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component,
 	psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
-		EventDriver* kbd;
+		psy_EventDriver* kbd;
 		EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYUP;
@@ -554,11 +562,11 @@ void mainframe_updatetitle(MainFrame* self)
 void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 {
 	if (ui_component_visible(&self->gear.component)) {
-		ui_button_disablehighlight(&self->machinebar.gear);
+		psy_ui_button_disablehighlight(&self->machinebar.gear);
 		ui_component_hide(&self->gear.component);
 		ui_component_align(&self->component);
 	} else {						
-		ui_button_highlight(&self->machinebar.gear);
+		psy_ui_button_highlight(&self->machinebar.gear);
 		ui_component_show(&self->gear.component);
 		ui_component_align(&self->component);		
 	}	
@@ -567,11 +575,11 @@ void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 {
 	if (ui_component_visible(&self->plugineditor.component)) {
-		ui_button_disablehighlight(&self->machinebar.editor);
+		psy_ui_button_disablehighlight(&self->machinebar.editor);
 		ui_component_hide(&self->plugineditor.component);
 		ui_component_align(&self->component);
 	} else {						
-		ui_button_highlight(&self->machinebar.editor);
+		psy_ui_button_highlight(&self->machinebar.editor);
 		ui_component_show(&self->plugineditor.component);
 		ui_component_align(&self->component);		
 	}	
@@ -622,7 +630,7 @@ int mainframe_showmaximizedatstart(MainFrame* self)
 
 void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 {
-	ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
+	psy_ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
 }
 
 void mainframe_ontimer(MainFrame* self, psy_ui_Component* sender, int timerid)
@@ -642,7 +650,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 {
 	psy_ui_Component* component;
 	workspace_onviewchanged(&self->workspace, tabindex);
-	component = ui_notebook_activepage(&self->notebook);
+	component = psy_ui_notebook_activepage(&self->notebook);
 	ui_component_align(&self->component);
 	ui_component_setfocus(component);
 }

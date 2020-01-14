@@ -18,8 +18,8 @@ typedef struct {
 	SettingsView view;
 	psy_Properties* properties;
 	Workspace* workspace;
-	Driver* fileoutdriver;
-	Driver* curraudiodriver;
+	psy_AudioDriver* fileoutdriver;
+	psy_AudioDriver* curraudiodriver;
 	int restoreloopmode;
 } RenderView;
 

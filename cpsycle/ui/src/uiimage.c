@@ -7,7 +7,7 @@
 
 static void ondestroy(psy_ui_Image*);
 static void ondraw(psy_ui_Image*, psy_ui_Component* sender, psy_ui_Graphics* g);
-static int checkalignment(psy_ui_Image*, UiAlignment alignment);
+static int checkalignment(psy_ui_Image*, psy_ui_Alignment alignment);
 
 void ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 {  
@@ -15,7 +15,7 @@ void ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
-	self->alignment = UI_ALIGNMENT_NONE;	
+	self->alignment = psy_ui_ALIGNMENT_NONE;	
 }
 
 void ondestroy(psy_ui_Image* self)
@@ -23,32 +23,33 @@ void ondestroy(psy_ui_Image* self)
 	psy_ui_bitmap_dispose(&self->bitmap);
 }
 
-void ui_image_setbitmapalignment(psy_ui_Image* self, UiAlignment alignment)
+void ui_image_setbitmapalignment(psy_ui_Image* self,
+	psy_ui_Alignment alignment)
 {
 	self->alignment = alignment;
 }
 
 void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
-	ui_size size;
-	ui_size bmpsize;
+	psy_ui_Size size;
+	psy_ui_Size bmpsize;
 	int x;
 	int y;
 	
 	size = ui_component_size(&self->component);	
 	bmpsize = psy_ui_bitmap_size(&self->bitmap);
-	if (checkalignment(self, UI_ALIGNMENT_CENTER_HORIZONTAL)) {
+	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_HORIZONTAL)) {
 		x = (size.width - bmpsize.width) / 2;
 	} else 		
-	if (checkalignment(self, UI_ALIGNMENT_RIGHT)) {
+	if (checkalignment(self, psy_ui_ALIGNMENT_RIGHT)) {
 		x = size.width - bmpsize.width;		
 	} else {		
 		x = 0;		
 	}
-	if (checkalignment(self, UI_ALIGNMENT_CENTER_VERTICAL)) {								
+	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_VERTICAL)) {								
 		y = (size.height - bmpsize.height) / 2;
 	} else 		
-	if (checkalignment(self, UI_ALIGNMENT_BOTTOM)) {
+	if (checkalignment(self, psy_ui_ALIGNMENT_BOTTOM)) {
 		y = size.height - bmpsize.height;
 	} else {		
 		y = 0;		
@@ -57,7 +58,7 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 		x, y, bmpsize.width, bmpsize.height, 0, 0);
 }
 
-int checkalignment(psy_ui_Image* self, UiAlignment alignment)
+int checkalignment(psy_ui_Image* self, psy_ui_Alignment alignment)
 {
 	return (self->alignment & alignment) == alignment;	
 }

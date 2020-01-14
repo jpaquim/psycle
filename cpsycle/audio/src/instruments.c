@@ -20,10 +20,11 @@ void instruments_dispose(psy_audio_Instruments* self)
 	psy_TableIterator it;
 
 	for (it = psy_table_begin(&self->container);
-			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
 		psy_audio_Instrument* instrument;
 		
-		instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
+		instrument = (psy_audio_Instrument*) psy_tableiterator_value(&it);
 		instrument_dispose(instrument);
 		free(instrument);
 	}

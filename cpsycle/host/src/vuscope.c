@@ -37,6 +37,7 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	ui_component_init(&self->component, parent);
+	ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->leftavg = 0;
 	self->rightavg = 0;
@@ -47,7 +48,6 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->peakL = self->peakR = (psy_dsp_amp_t) 128.0f;
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
-	self->component.doublebuffered = 1;
 	self->pSamplesL = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
 	self->pSamplesR = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
 	dsp.clear(self->pSamplesL, SCOPE_BUF_SIZE);
@@ -82,8 +82,8 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	int centerx;
 	int right;
 	int step;
-	ui_size size;
-	ui_rectangle rect;
+	psy_ui_Size size;
+	psy_ui_Rectangle rect;
 
 	size = ui_component_size(&self->component);
 	right = size.width;
@@ -152,9 +152,9 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	int centerx;
 	int right;
 	int step;
-	ui_size size;
+	psy_ui_Size size;
 	int scopesamples;
-	ui_rectangle rect;
+	psy_ui_Rectangle rect;
 	char buf[64];
 
 	size = ui_component_size(&self->component);
@@ -358,10 +358,10 @@ void vuscope_stop(VuScope* self)
 		srcmachine = machines_at(&self->workspace->song->machines,
 			self->wire.src);
 		if (srcmachine) {
-			lock_enter();
+			psy_audio_lock_enter();
 			psy_signal_disconnect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
-			lock_leave();			
+			psy_audio_lock_leave();			
 		}
 	}
 }
