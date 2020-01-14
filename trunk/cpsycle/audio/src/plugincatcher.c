@@ -96,9 +96,9 @@ void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 	plugincatcher_makeplugininfo(self, "mixer", "", MACH_MIXER,
 		mixer_info());
 	plugincatcher_makeplugininfo(self, "duplicator", "", MACH_DUPLICATOR,
-		duplicator_info());
+		psy_audio_duplicator_info());
 	plugincatcher_makeplugininfo(self, "duplicator2", "", MACH_DUPLICATOR2,
-		duplicator2_info());
+		psy_audio_duplicator2_info());
 }
 
 void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
@@ -195,21 +195,21 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	machineinfo_init(&macinfo);
 	plugincatcher_catchername(self, path, name);
 	if (type == MACH_PLUGIN) {		
-		if (plugin_psycle_test(path, &macinfo)) {
+		if (psy_audio_plugin_psycle_test(path, &macinfo)) {
 			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}	
 	} else
 	if (type == MACH_LUA) {
-		if (plugin_luascript_test(path, &macinfo)) {
+		if (psy_audio_plugin_luascript_test(path, &macinfo)) {
 			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}
 	} else
 	if (type == MACH_VST) {
-		if (plugin_vst_test(path, &macinfo)) {			
+		if (psy_audio_plugin_vst_test(path, &macinfo)) {			
 			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
@@ -262,6 +262,14 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self, MachineType machty
 		if (!searchresult) {
 			if (strstr(path, "blitz")) {
 				searchname = "blitzn";
+				searchtype = machtype;
+				searchresult = 0;
+				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+			}
+		}
+		if (!searchresult) {
+			if (strstr(path, "blitzn")) {
+				searchname = "blitz";
 				searchtype = machtype;
 				searchresult = 0;
 				psy_properties_enumerate(self->plugins, self, onpropertiesenum);

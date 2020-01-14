@@ -3,13 +3,16 @@
 
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
+
+#include "inputmap.h"
 #include "patternevent.h"
 
 #include "kbddriver.h"
+#include "../../driver/eventdriver.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "inputmap.h"
 
 #if defined DIVERSALIS__OS__MICROSOFT    
 #include <windows.h>
@@ -72,23 +75,23 @@ enum {
 };
 
 typedef struct {
-	EventDriver driver;
+	psy_EventDriver driver;
 	Inputs noteinputs;
 	int (*error)(int, const char*);
 	EventDriverData lastinput;	
 } KbdDriver;
 
-static void driver_free(EventDriver*);
-static int driver_init(EventDriver*);
-static int driver_open(EventDriver*);
-static int driver_close(EventDriver*);
-static int driver_dispose(EventDriver*);
-static void driver_configure(EventDriver*);
-static void driver_write(EventDriver*, EventDriverData input);
-static void driver_cmd(EventDriver* driver, EventDriverData,
+static void driver_free(psy_EventDriver*);
+static int driver_init(psy_EventDriver*);
+static int driver_open(psy_EventDriver*);
+static int driver_close(psy_EventDriver*);
+static int driver_dispose(psy_EventDriver*);
+static void driver_configure(psy_EventDriver*);
+static void driver_write(psy_EventDriver*, EventDriverData input);
+static void driver_cmd(psy_EventDriver* driver, EventDriverData,
 	EventDriverCmd* cmd);
-static EventDriverCmd driver_getcmd(EventDriver*, psy_Properties* section);
-static void setcmddef(EventDriver*, psy_Properties*);
+static EventDriverCmd driver_getcmd(psy_EventDriver*, psy_Properties* section);
+static void setcmddef(psy_EventDriver*, psy_Properties*);
 
 static void driver_makeinputs(KbdDriver*, psy_Properties*);
 
@@ -103,7 +106,7 @@ int onerror(int err, const char* msg)
 #endif    
 }
 
-EventDriver* create_kbd_driver(void)
+psy_EventDriver* create_kbd_driver(void)
 {
 	KbdDriver* kbd = (KbdDriver*) malloc(sizeof(KbdDriver));
 	memset(kbd, 0, sizeof(KbdDriver));	
@@ -122,12 +125,12 @@ EventDriver* create_kbd_driver(void)
 	return &kbd->driver;			
 }
 
-void driver_free(EventDriver* driver)
+void driver_free(psy_EventDriver* driver)
 {
 	free(driver);
 }
 
-int driver_init(EventDriver* driver)
+int driver_init(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
 	
@@ -139,7 +142,7 @@ int driver_init(EventDriver* driver)
 	return 0;
 }
 
-int driver_dispose(EventDriver* driver)
+int driver_dispose(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
 	properties_free(self->driver.properties);
@@ -149,7 +152,7 @@ int driver_dispose(EventDriver* driver)
 	return 1;
 }
 
-int driver_open(EventDriver* driver)
+int driver_open(psy_EventDriver* driver)
 {
 	KbdDriver* self;
 
@@ -158,12 +161,12 @@ int driver_open(EventDriver* driver)
 	return 0;
 }
 
-int driver_close(EventDriver* driver)
+int driver_close(psy_EventDriver* driver)
 {
 	return 0;
 }
 
-void driver_write(EventDriver* driver, EventDriverData input)
+void driver_write(psy_EventDriver* driver, EventDriverData input)
 {	
 	KbdDriver* self;	
 
@@ -172,7 +175,7 @@ void driver_write(EventDriver* driver, EventDriverData input)
 	psy_signal_emit(&self->driver.signal_input, self, 0);
 }
 
-void driver_cmd(EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
+void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
 {		
 	KbdDriver* self;
 	EventDriverCmd kbcmd;
@@ -203,7 +206,7 @@ void driver_cmd(EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
 	}
 }
 
-EventDriverCmd driver_getcmd(EventDriver* driver, psy_Properties* section)
+EventDriverCmd driver_getcmd(psy_EventDriver* driver, psy_Properties* section)
 {	
 	KbdDriver* self;
 	EventDriverCmd cmd;	
@@ -225,7 +228,7 @@ void driver_makeinputs(KbdDriver* self, psy_Properties* notes)
 	}
 }
 
-void driver_configure(EventDriver* driver)
+void driver_configure(psy_EventDriver* driver)
 {
 	psy_Properties* notes;
 	psy_Properties* general;
@@ -240,7 +243,7 @@ void driver_configure(EventDriver* driver)
 	}
 }
 
-void setcmddef(EventDriver* driver, psy_Properties* cmddef)
+void setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
 {
 	driver->properties = psy_properties_clone(cmddef);
 	driver_configure(driver);

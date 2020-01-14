@@ -11,7 +11,7 @@
 typedef struct {
 	psy_ui_Component component;
 	ui_listbox listbox;
-	ui_slider slider;
+	psy_ui_Slider slider;
 	psy_audio_Machine* machine;
 } ParameterListBox;
 

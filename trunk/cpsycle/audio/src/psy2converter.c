@@ -17,7 +17,6 @@ typedef struct {
 	int32_t y;
 } POINT;
 
-
 static void psy2pluginload(psy_audio_SongFile* songfile, int32_t slot);
 static void psy2samplerload(psy_audio_SongFile* songfile, int32_t slot);
 static void psy2machineload(psy_audio_SongFile* songfile, int32_t slot);
@@ -40,7 +39,8 @@ typedef enum {
 	dummy = 255
 };
 
-psy_audio_Machine* psy2converter_load(psy_audio_SongFile* songfile, int index,
+psy_audio_Machine* psy_audio_psy2converter_load(
+	psy_audio_SongFile* songfile, int index,
 	int* newindex, int* x, int* y)
 {
 	psy_audio_Machine* rv = 0;
@@ -48,7 +48,7 @@ psy_audio_Machine* psy2converter_load(psy_audio_SongFile* songfile, int index,
 	int32_t temp32;
 	char dllname[256];
 	char editname[16];
-	MachineFactory* factory;
+	psy_audio_MachineFactory* factory;
 	
 	factory = songfile->song->machinefactory;
 	*newindex = convertindex(index);	

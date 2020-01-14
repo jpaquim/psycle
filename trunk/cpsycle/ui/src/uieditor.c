@@ -6,7 +6,6 @@
 #include "uieditor.h"
 #include "uiapp.h"
 #include "scintilla/include/scintilla.h"
-#include "uiwincomponent.h"
 
 #include <stdio.h>
 
@@ -29,7 +28,7 @@ void ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	if ((err = loadscilexer()) == 0) {	
 		ui_win32_component_init(&self->component, parent, TEXT("Scintilla"), 
 			0, 0, 100, 20, WS_CHILD | WS_VISIBLE, 0);
-		if (ui_win_component_hwnd(&self->component)) {
+		if (self->component.hwnd) {
 			extern psy_ui_App app;
 
 			ui_editor_setcolor(self, ui_defaults_color(&app.defaults));
@@ -45,15 +44,15 @@ void ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 			0, 0, 100, 20,
 			WS_CHILD | WS_VISIBLE | SS_CENTER, 0);
 #ifdef SCINTILLA_ENABLED
-		SetWindowText(ui_win_component_hwnd(&self->component), 
+		SetWindowText((HWND)self->component.hwnd, 
 			"Editor can't be used.\n"
 			"LoadLibrary SciLexer.dll failure\n"
 			"Check if 'SciLexer.dll' is in the psycle bin directory or\n"
 			"if you have the right version for your system.");
-		ui_error("LoadLibrary SciLexer.dll failure ...",
+		psy_ui_error("LoadLibrary SciLexer.dll failure ...",
 			"Error - Psycle Ui - Editor");
 #else
-	SetWindowText(ui_win_component_hwnd(&self->component), 
+	SetWindowText((HWND)self->component.hwnd, 
 			"Editor can't be used. Scintilla disabled in build\n");
 #endif
 	}
@@ -96,7 +95,7 @@ void ui_editor_load(psy_ui_Editor* self, const char* path)
 			++pos;
 		}		
 		fclose(fp);		
-		ui_win_component_sendmessage(&self->component,
+		SendMessage((HWND) self->component.hwnd,
 			SCI_ADDTEXT,
 			(WPARAM)(intptr_t)strlen(text),
 			(LPARAM)(intptr_t) text);		
@@ -105,53 +104,55 @@ void ui_editor_load(psy_ui_Editor* self, const char* path)
 
 void ui_editor_settext(psy_ui_Editor* self, const char* text)
 {
-	ui_win_component_sendmessage(&self->component, SCI_SETTEXT,
+	SendMessage((HWND) self->component.hwnd,
+		SCI_SETTEXT,
 		(WPARAM)(intptr_t)strlen(text),
 		(LPARAM)(intptr_t) text);		
 }
 
 void ui_editor_addtext(psy_ui_Editor* self, const char* text)
 {
-	ui_win_component_sendmessage(&self->component, SCI_ADDTEXT,
+	SendMessage((HWND) self->component.hwnd,
+		SCI_ADDTEXT,
 		(WPARAM)(intptr_t)strlen(text),
 		(LPARAM)(intptr_t) text);		
 }
 
 void ui_editor_clear(psy_ui_Editor* self)
 {
-	ui_win_component_sendmessage(&self->component, SCI_CLEARALL, 0, 0);
+	SendMessage((HWND) self->component.hwnd, SCI_CLEARALL, 0, 0);
 }
 
 void ui_editor_setcolor(psy_ui_Editor* self, uint32_t color)
 {
-	ui_win_component_sendmessage(&self->component, SCI_STYLESETFORE,
-		STYLE_DEFAULT, color);  
+	SendMessage((HWND) self->component.hwnd, 
+		SCI_STYLESETFORE, STYLE_DEFAULT, color);  
 }
 
 void ui_editor_setbackgroundcolor(psy_ui_Editor* self, uint32_t color)
 {
-	ui_win_component_sendmessage(&self->component, SCI_STYLESETBACK,
-		STYLE_DEFAULT, color);  
+	SendMessage((HWND) self->component.hwnd, 
+		SCI_STYLESETBACK, STYLE_DEFAULT, color);  
 }
 
 void ui_editor_styleclearall(psy_ui_Editor* self)
 {
-	ui_win_component_sendmessage(&self->component, SCI_STYLECLEARALL, 0, 0);
+	SendMessage((HWND) self->component.hwnd, SCI_STYLECLEARALL, 0, 0);
 }
 
 void ui_editor_setcaretcolor(psy_ui_Editor* self, uint32_t color)
 {
-	ui_win_component_sendmessage(&self->component, SCI_SETCARETFORE, color, 0);
+	SendMessage((HWND) self->component.hwnd, SCI_SETCARETFORE, color, 0);
 }
 
 void ui_editor_preventedit(psy_ui_Editor* self)
 {
-	ui_win_component_sendmessage(&self->component, SCI_SETREADONLY, 1, 0);
+	SendMessage((HWND) self->component.hwnd, SCI_SETREADONLY, 1, 0);
 }
 
 void ui_editor_enableedit(psy_ui_Editor* self)
 {
-	ui_win_component_sendmessage(&self->component, SCI_SETREADONLY, 0, 0);
+	SendMessage((HWND) self->component.hwnd, SCI_SETREADONLY, 0, 0);
 }
 
 

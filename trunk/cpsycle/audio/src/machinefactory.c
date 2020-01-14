@@ -24,30 +24,30 @@
 #define _MAX_PATH 4096
 #endif
 
-void machinefactory_init(MachineFactory* self, MachineCallback callback,
+void machinefactory_init(psy_audio_MachineFactory* self, MachineCallback callback,
 	psy_audio_PluginCatcher* catcher)
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
-	self->options = 0; // MACHINEFACTORY_CREATEASPROXY;
+	self->options = MACHINEFACTORY_CREATEASPROXY;
 }
 
-void machinefactory_dispose(MachineFactory* self)
+void machinefactory_dispose(psy_audio_MachineFactory* self)
 {	
 }
 
-void machinefactory_setoptions(MachineFactory* self, 
+void machinefactory_setoptions(psy_audio_MachineFactory* self, 
 	MachineFactoryOptions options)
 {
 	self->options = options;
 }
 
-MachineFactoryOptions machinefactory_options(MachineFactory* self)
+MachineFactoryOptions machinefactory_options(psy_audio_MachineFactory* self)
 {
 	return self->options;
 }
 
-psy_audio_Machine* machinefactory_makemachine(MachineFactory* self, MachineType type,
+psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, MachineType type,
 	const char* plugincatchername)
 {
 	char fullpath[_MAX_PATH];
@@ -60,7 +60,7 @@ psy_audio_Machine* machinefactory_makemachine(MachineFactory* self, MachineType 
 		plugincatchername, fullpath));	
 }
 
-psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
+psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
 	MachineType type, const char* path)
 {
 	psy_audio_Machine* rv = 0;
@@ -93,7 +93,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		{
 			psy_audio_Duplicator* duplicator = (psy_audio_Duplicator*)malloc(sizeof(psy_audio_Duplicator));
 			if (duplicator) {
-				duplicator_init(duplicator, self->machinecallback);
+				psy_audio_duplicator_init(duplicator, self->machinecallback);
 				rv = (psy_audio_Machine*) duplicator;
 			} else {
 				rv = 0;
@@ -104,7 +104,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 		{
 			psy_audio_Duplicator2* duplicator2 = (psy_audio_Duplicator2*)malloc(sizeof(psy_audio_Duplicator2));
 			if (duplicator2) {
-				duplicator2_init(duplicator2, self->machinecallback);
+				psy_audio_duplicator2_init(duplicator2, self->machinecallback);
 				rv = (psy_audio_Machine*) duplicator2;
 			} else {
 				rv = 0;
@@ -140,7 +140,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_VstPlugin));
 			if (plugin) {
-				vstplugin_init((psy_audio_VstPlugin*)plugin, self->machinecallback, path);
+				psy_audio_vstplugin_init((psy_audio_VstPlugin*)plugin, self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
@@ -158,7 +158,8 @@ psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 									
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_Plugin));
 			if (plugin) {
-				plugin_init((psy_audio_Plugin*)plugin, self->machinecallback, path);
+				psy_audio_plugin_init((psy_audio_Plugin*)plugin,
+					self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {
@@ -176,7 +177,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(MachineFactory* self,
 									
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LuaPlugin));
 			if (plugin) {
-				luaplugin_init((psy_audio_LuaPlugin*)plugin, self->machinecallback, path);
+				psy_audio_luaplugin_init((psy_audio_LuaPlugin*)plugin, self->machinecallback, path);
 				if (plugin->vtable->info(plugin)) {
 					rv = plugin;
 				} else {

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h> 
 
-void wave_load(psy_audio_Sample* sample, const char* path)
+void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 {
 	char header[9];
 	PsyFile file;
@@ -38,7 +38,7 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 			psyfile_read(&file, &format.wBitsPerSample, 2);		
 			// psyfile_read(&file, &format.cbSize, 2);
 			sample->samplerate = format.nSamplesPerSec;
-			buffer_resize(&sample->channels, format.nChannels);
+			psy_audio_buffer_resize(&sample->channels, format.nChannels);
 			psyfile_seek(&file, pcmbegin + pcmsize);
 			psyfile_read(&file, header, 4);
 			header[4] = 0;			
@@ -102,7 +102,7 @@ void wave_load(psy_audio_Sample* sample, const char* path)
 	psyfile_close(&file);
 }
 
-void wave_save(psy_audio_Sample* sample, const char* path)
+void psy_audio_wave_save(psy_audio_Sample* sample, const char* path)
 {
 	PsyFile file;
 	psy_audio_WaveFormatChunk format;

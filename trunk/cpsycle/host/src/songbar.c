@@ -7,7 +7,7 @@
 
 void songbar_init(SongBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
-	ui_margin margin;
+	psy_ui_Margin margin;
 
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
@@ -16,9 +16,10 @@ void songbar_init(SongBar* self, psy_ui_Component* parent, Workspace* workspace)
 	linesperbeatbar_init(&self->linesperbeatbar, &self->component,
 		&workspace->player);	
 	octavebar_init(&self->octavebar, &self->component, workspace);	
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(2.0),
-		ui_value_makepx(0), ui_value_makepx(0));		
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));		
 	psy_list_free(ui_components_setalign(		
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, &margin));
 }

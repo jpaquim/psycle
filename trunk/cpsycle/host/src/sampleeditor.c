@@ -21,7 +21,7 @@ static void samplezoom_drawsamples(SampleZoom*, psy_ui_Graphics*);
 
 static void sampleeditor_initsampler(SampleEditor*);
 static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
-static void sampleeditor_onsize(SampleEditor*, psy_ui_Component* sender, ui_size*);
+static void sampleeditor_onsize(SampleEditor*, psy_ui_Component* sender, psy_ui_Size*);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_computemetrics(SampleEditor*, SampleEditorMetrics* rv);
 static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace);
@@ -29,7 +29,7 @@ static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
-	unsigned int slot, psy_audio_BufferContext*);
+	uintptr_t slot, psy_audio_BufferContext*);
 
 static void samplezoom_ondestroy(SampleZoom*, psy_ui_Component* sender);
 static void samplezoom_onmousedown(SampleZoom*, psy_ui_Component* sender,
@@ -52,37 +52,39 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self, psy_ui_Component* paren
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	// ui_button_init(&self->loop, &self->component);
-	// ui_button_settext(&self->loop, "Loop");	
+	// psy_ui_button_init(&self->loop, &self->component);
+	// psy_ui_button_settext(&self->loop, "Loop");	
 	// psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
-	ui_button_init(&self->play, &self->component);
-	ui_button_settext(&self->play, workspace_translate(workspace, "play"));	
-	ui_button_init(&self->stop, &self->component);
-	ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
+	psy_ui_button_init(&self->play, &self->component);
+	psy_ui_button_settext(&self->play, workspace_translate(workspace, "play"));	
+	psy_ui_button_init(&self->stop, &self->component);
+	psy_ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
 	// psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);	
 	sampleeditorplaybar_initalign(self);	
 }
 
 void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 {
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, &margin));
 }
 
-void sampleeditorheader_init(SampleEditorHeader* self, psy_ui_Component* parent,
-	SampleEditor* view)
+void sampleeditorheader_init(SampleEditorHeader* self,
+	psy_ui_Component* parent, SampleEditor* view)
 {
 	self->view = view;
 	self->scrollpos = 0;
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	ui_component_doublebuffer(&self->component);
 	ui_component_resize(&self->component, 100, 50);
 	psy_signal_connect(&self->component.signal_draw, self,
 		sampleeditorheader_ondraw);
@@ -96,7 +98,7 @@ void sampleeditorheader_ondraw(SampleEditorHeader* self, psy_ui_Component* sende
 
 void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 {
-	ui_size size;	
+	psy_ui_Size size;	
 	int baseline;		
 	psy_dsp_beat_t cpx;	
 	int c;	
@@ -130,7 +132,7 @@ void samplezoom_init(SampleZoom* self, psy_ui_Component* parent)
 	self->dragmode = SAMPLEEDITOR_DRAG_NONE;
 	self->dragoffset = 00;
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	ui_component_doublebuffer(&self->component);
 	psy_signal_init(&self->signal_zoom);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		samplezoom_ondestroy);
@@ -152,8 +154,8 @@ void samplezoom_ondestroy(SampleZoom* self, psy_ui_Component* sender)
 
 void samplezoom_ondraw(SampleZoom* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
-	ui_rectangle r;
-	ui_size size;
+	psy_ui_Rectangle r;
+	psy_ui_Size size;
 	int zoomleftx;
 	int zoomrightx;
 
@@ -164,7 +166,7 @@ void samplezoom_ondraw(SampleZoom* self, psy_ui_Component* sender, psy_ui_Graphi
 		++zoomrightx;
 	}
 	ui_setcolor(g, 0x00B1C8B0);
-	ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx, size.height);
+	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx, size.height);
 	ui_drawrectangle(g, r);
 	if (self->sample) {
 		samplezoom_drawsamples(self, g);
@@ -173,12 +175,12 @@ void samplezoom_ondraw(SampleZoom* self, psy_ui_Component* sender, psy_ui_Graphi
 
 void samplezoom_drawsamples(SampleZoom* self, psy_ui_Graphics* g)
 {
-	ui_rectangle r;
-	ui_size size = ui_component_size(&self->component);	
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
+	psy_ui_Rectangle r;
+	psy_ui_Size size = ui_component_size(&self->component);	
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ui_setcolor(g, 0x00B1C8B0);
 	if (!self->sample) {
-		ui_textmetric tm;
+		psy_ui_TextMetric tm;
 		static const char* txt = "No wave loaded";
 
 		tm = ui_component_textmetric(&self->component);
@@ -211,7 +213,7 @@ void samplezoom_drawsamples(SampleZoom* self, psy_ui_Graphics* g)
 void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
-	ui_size size;
+	psy_ui_Size size;
 	int zoomleftx;
 	int zoomrightx;
 
@@ -239,7 +241,7 @@ void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender,
 void samplezoom_onmousemove(SampleZoom* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	ui_size size;	
+	psy_ui_Size size;	
 
 	size = ui_component_size(&self->component);
 	if (self->dragmode == SAMPLEEDITOR_DRAG_NONE) {
@@ -339,13 +341,13 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
 	psy_signal_connect(&self->playbar.play.signal_clicked, self, sampleeditor_onplay);
 	psy_signal_connect(&self->playbar.stop.signal_clicked, self, sampleeditor_onstop);
-	ui_component_setalign(&self->playbar.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);
 	sampleeditorheader_init(&self->header, &self->component, self);
-	ui_component_setalign(&self->header.component, UI_ALIGN_TOP);
+	ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	wavebox_init(&self->samplebox, &self->component);
-	ui_component_setalign(&self->samplebox.component, UI_ALIGN_CLIENT);	
+	ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
 	samplezoom_init(&self->zoom, &self->component);
-	ui_component_setalign(&self->zoom.component, UI_ALIGN_BOTTOM);
+	ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	sampleeditor_computemetrics(self, &self->metrics);
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -360,7 +362,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 
 	sampler_init(&self->sampler,
 		self->workspace->machinefactory.machinecallback);
-	buffer_init(&self->samplerbuffer, 2);
+	psy_audio_buffer_init(&self->samplerbuffer, 2);
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
 		self->samplerbuffer.samples[c] = dsp.memory_alloc(MAX_STREAM_SIZE,
 			sizeof(float));
@@ -376,7 +378,7 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
 		dsp.memory_dealloc(self->samplerbuffer.samples[c]);
 	}
-	buffer_dispose(&self->samplerbuffer);	
+	psy_audio_buffer_dispose(&self->samplerbuffer);	
 }
 
 void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
@@ -388,7 +390,7 @@ void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 	ui_component_invalidate(&self->component);
 }
 
-void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender, ui_size* size)
+void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
 	sampleeditor_computemetrics(self, &self->metrics);
 }
@@ -401,7 +403,7 @@ void sampleeditor_onzoom(SampleEditor* self, psy_ui_Component* sender)
 
 void sampleeditor_computemetrics(SampleEditor* self, SampleEditorMetrics* rv)
 {	
-	ui_size sampleboxsize;
+	psy_ui_Size sampleboxsize;
 
 	sampleboxsize = ui_component_size(&self->samplebox.component);
 	rv->samplewidth = self->sample
@@ -433,7 +435,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song && self->sample) {
 		psy_audio_PatternEvent event;
-		lock_enter();
+		psy_audio_lock_enter();
 		psy_list_free(self->samplerevents);
 		patternevent_init_all(&event,
 			(unsigned char) 48,
@@ -443,7 +445,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 			0, 0);	
 		patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
 		self->samplerevents = psy_list_create(&self->samplerentry);
-		lock_leave();
+		psy_audio_lock_leave();
 	}
 }
 
@@ -451,7 +453,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 {	
 	psy_audio_PatternEvent event;
 
-	lock_enter();
+	psy_audio_lock_enter();
 	psy_list_free(self->samplerevents);
 	patternevent_init_all(&event,
 		NOTECOMMANDS_RELEASE,
@@ -461,19 +463,19 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 		0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerentry);
 	patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
-	lock_leave();
+	psy_audio_lock_leave();
 }
 
 void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
-	unsigned int slot, psy_audio_BufferContext* bc)
+	uintptr_t slot, psy_audio_BufferContext* bc)
 {
 	psy_audio_BufferContext samplerbc;
 		
-	buffercontext_init(&samplerbc, self->samplerevents, 0,
+	psy_audio_buffercontext_init(&samplerbc, self->samplerevents, 0,
 		&self->samplerbuffer, bc->numsamples, 16, 0);
-	buffer_clearsamples(&self->samplerbuffer, bc->numsamples);
+	psy_audio_buffer_clearsamples(&self->samplerbuffer, bc->numsamples);
 	machine_work(&self->sampler.custommachine.machine, &samplerbc);
-	buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
+	psy_audio_buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
 		(psy_dsp_amp_t) 1.f);
 	if (self->samplerevents) {
 		patternentry_dispose(&self->samplerentry);

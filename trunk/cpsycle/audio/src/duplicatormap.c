@@ -6,64 +6,170 @@
 #include "duplicatormap.h"
 #include <stdlib.h>
 
-#define NUMMACHINES 8
+static int duplicatormap_isavail(psy_audio_DuplicatorMap* self, int machine,
+	int channel);
+static void duplicatormap_setavail(psy_audio_DuplicatorMap* self, int machine,
+	int channel);
+static void duplicatormap_setunavail(psy_audio_DuplicatorMap* self, int machine,
+	int channel);
+static void duplicatoroutput_dispose(psy_audio_DuplicatorOutput*);
+static void duplicatoroutput_clear(psy_audio_DuplicatorOutput*);
 
-void duplicatormap_init(psy_audio_DuplicatorMap* self)
+// Output
+void duplicatoroutput_dispose(psy_audio_DuplicatorOutput* self)
 {
-	int i;
+	psy_table_dispose(&self->allochans);
+	self->machine = -1;
+	self->offset = 0;
+	self->lowkey = NOTECOMMANDS_C0;
+	self->highkey = NOTECOMMANDS_B9;
+}
+
+void psy_audio_duplicatoroutput_setall(psy_audio_DuplicatorOutput* self,
+	int machine, int offset, int lowkey, int highkey)
+{
+	self->machine = machine;
+	self->offset = offset;
+	self->lowkey = lowkey;
+	self->highkey = highkey;
+}
+
+void duplicatoroutput_clear(psy_audio_DuplicatorOutput* self)
+{
+	psy_table_clear(&self->allochans);	
+}
+
+// Map
+void psy_audio_duplicatormap_init(psy_audio_DuplicatorMap* self,
+	uintptr_t numoutputs, uintptr_t maxtracks)
+{
+	uintptr_t i;
+
+	self->maxtracks = maxtracks;
+	psy_table_init(&self->outputs);
+	psy_table_init(&self->unavail);
+	for (i = 0; i < numoutputs; ++i) {
+		psy_audio_DuplicatorOutput* output;
+
+		output = (psy_audio_DuplicatorOutput*) malloc(sizeof(
+			psy_audio_DuplicatorOutput));
+		output->machine = -1;
+		output->offset = 0;
+		psy_table_init(&output->allochans);
+		psy_table_insert(&self->outputs, i, output);
+	}	
+}
+
+void psy_audio_duplicatormap_dispose(psy_audio_DuplicatorMap* self)
+{
+	psy_TableIterator it;
+	
+	for (it = psy_table_begin(&self->outputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {			
+		psy_audio_DuplicatorOutput* output;
+
+		output = (psy_audio_DuplicatorOutput*) psy_tableiterator_value(&it);
+		duplicatoroutput_dispose(output);
+		free(output);
+	}	
+	psy_table_dispose(&self->outputs);
+	psy_table_dispose(&self->unavail);		
+}
+
+void psy_audio_duplicatormap_clear(psy_audio_DuplicatorMap* self)
+{	
+	psy_TableIterator it;
+	
+	for (it = psy_table_begin(&self->outputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_DuplicatorOutput* output;
+
+		output = psy_tableiterator_value(&it);
+		duplicatoroutput_clear(output);
+	}
+	psy_table_clear(&self->unavail);
+}
+
+int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap* self, int patternchannel,
+	psy_audio_DuplicatorOutput* output)
+{
 	int j;
-
-	for (i=0; i< NUMMACHINES;i++)
-	{		
-		for (j=0;j<MAX_TRACKS;j++)
-		{
-			self->allocatedchans[j][i] = -1;
+	int repeat = 0;
+		
+	j = patternchannel;
+	if (psy_table_exists(&output->allochans, j)) {
+		j = (int) (intptr_t) psy_table_at(&output->allochans, j);
+	} else {						
+	while (!duplicatormap_isavail(self, output->machine, j)) {
+		if (repeat) {
+			if (j == patternchannel) {
+				break;
+			}
 		}
-	}
-	for (i=0;i<MAX_VIRTUALINSTS;i++)
-	{
-		for (j=0;j<MAX_TRACKS;j++)
-		{
-			self->availablechans[i][j] = 1;
+		++j;
+		if (j >= self->maxtracks) {
+			j = 0;
+			repeat = 1;
 		}
+	}	
+	psy_table_insert(&output->allochans, patternchannel,
+		(void*) (intptr_t) j);
+		duplicatormap_setunavail(self, output->machine, j);
 	}
+	return j;
 }
 
-void duplicatormap_dispose(psy_audio_DuplicatorMap* self)
+void psy_audio_duplicatormap_release(psy_audio_DuplicatorMap* self,
+	int patternchannel, int duplicatorchannel,
+	psy_audio_DuplicatorOutput* output)
+{	
+	duplicatormap_setavail(self, output->machine, duplicatorchannel);
+	psy_table_remove(&output->allochans, patternchannel);
+}
+
+psy_TableIterator psy_audio_duplicatormap_begin(psy_audio_DuplicatorMap* self)
 {
+	return psy_table_begin(&self->outputs);
 }
 
-void duplicatormap_allocate(psy_audio_DuplicatorMap* self, int channel, int machine, int outputmachine)
+// private
+int duplicatormap_isavail(psy_audio_DuplicatorMap* self, int machine,
+	int channel)
 {
-	int j=channel;
-	// If this channel already has allocated channels, use them.
-	if (self->allocatedchans[channel][machine] != -1 )
-		return;
-	// If not, search an available channel	
-	while (j<MAX_TRACKS && !self->availablechans[outputmachine][j]) j++;
-	if ( j == MAX_TRACKS)
-	{
-		j=0;
-		while (j<MAX_TRACKS && !self->availablechans[outputmachine][j]) j++;
-		if (j == MAX_TRACKS)
-		{
-			j = (unsigned int) (  (double)rand() * MAX_TRACKS /(((double)RAND_MAX) + 1.0 ));
-		}
-	}
-	self->allocatedchans[channel][machine]=j;
-	self->availablechans[outputmachine][j]=0;
+	int index;
+	
+	index = self->maxtracks * machine + channel;
+	return !psy_table_exists(&self->unavail, index);
 }
 
-int duplicatormap_at(psy_audio_DuplicatorMap* self, int channel, int machine)
+void duplicatormap_setavail(psy_audio_DuplicatorMap* self, int machine,
+	int channel)
 {
-	return self->allocatedchans[channel][machine];
+	int index;
+	
+	index = self->maxtracks * machine + channel;
+	psy_table_remove(&self->unavail, index);
 }
 
-void duplicatormap_remove(psy_audio_DuplicatorMap* self, int channel, int machine, int outputmachine)
+void duplicatormap_setunavail(psy_audio_DuplicatorMap* self, int machine,
+	int channel)
 {
-	if (self->allocatedchans[channel][machine] == -1 )
-			return;
-	self->availablechans[outputmachine][self->allocatedchans[channel][machine]]= 1;
-	self->allocatedchans[channel][machine]=-1;
+	int index;
+	
+	index = self->maxtracks * machine + channel;
+	psy_table_insert(&self->unavail, index, (void*) (intptr_t) 1);
 }
 
+psy_audio_DuplicatorOutput* psy_audio_duplicatormap_output(
+	psy_audio_DuplicatorMap* self, int output)
+{	
+	return (psy_audio_DuplicatorOutput*) psy_table_at(
+		&self->outputs, output);	
+}
+
+uintptr_t psy_audio_duplicatormap_numoutputs(psy_audio_DuplicatorMap* self)
+{
+	return psy_table_size(&self->outputs);
+}

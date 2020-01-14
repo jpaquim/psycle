@@ -11,9 +11,10 @@ typedef struct {
    int charnumber;
 } psy_ui_Label;
 
-void ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
-void ui_label_settext(psy_ui_Label*, const char* text);
-void ui_label_setcharnumber(psy_ui_Label*, int number);
-void ui_label_setstyle(psy_ui_Label*, int style);
+void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
+void psy_ui_label_settext(psy_ui_Label*, const char* text);
+void psy_ui_label_setcharnumber(psy_ui_Label*, int number);
+void psy_ui_label_setstyle(psy_ui_Label*, int style);
+psy_ui_Component* psy_ui_label_base(psy_ui_Label*);
 
 #endif

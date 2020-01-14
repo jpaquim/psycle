@@ -3,10 +3,11 @@
 #include "envelopeview.h"
 
 static void OnDraw(EnvelopeView*, psy_ui_Component* sender, psy_ui_Graphics* g);
+static void DrawLabel(EnvelopeView*, psy_ui_Graphics*);
 static void DrawGrid(EnvelopeView*, psy_ui_Graphics* g);
 static void DrawPoints(EnvelopeView*, psy_ui_Graphics* g);
 static void DrawLines(EnvelopeView*, psy_ui_Graphics* g);
-static void OnSize(EnvelopeView*, psy_ui_Component* sender, ui_size* size);
+static void OnSize(EnvelopeView*, psy_ui_Component* sender, psy_ui_Size* size);
 static void OnDestroy(EnvelopeView*, psy_ui_Component* component);
 static void OnMouseDown(EnvelopeView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
@@ -54,15 +55,16 @@ void adsrpointmapper_updatesettings(ADSRPointMapper* self)
 	}
 }
 
-void InitEnvelopeView(EnvelopeView* self, psy_ui_Component* parent)
+void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 {				
 	ui_component_init(&self->component, parent);	
-	ui_margin_init(&self->spacing, 
-		ui_value_makepx(5),
-		ui_value_makepx(5),
-		ui_value_makepx(5),
-		ui_value_makepx(5));
-	self->component.doublebuffered = 1;
+	psy_ui_margin_init(&self->spacing, 
+		psy_ui_value_makepx(30),
+		psy_ui_value_makepx(5),
+		psy_ui_value_makepx(5),
+		psy_ui_value_makepx(5));
+	self->text = strdup("");
+	ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_draw, self, OnDraw);
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	psy_signal_connect(&self->component.signal_size, self, OnSize);	
@@ -93,14 +95,24 @@ void EnvelopeViewSetAdsrEnvelope(EnvelopeView* self,
 void OnDestroy(EnvelopeView* self, psy_ui_Component* component)
 {	
 	psy_list_free(self->points);
+	free(self->text);
+	self->text = 0;
 	self->points = 0;
 }
 
 void OnDraw(EnvelopeView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {		
+	DrawLabel(self, g);
 	DrawGrid(self, g);
 	DrawLines(self, g);
 	DrawPoints(self, g);
+}
+
+void DrawLabel(EnvelopeView* self, psy_ui_Graphics* g)
+{
+	ui_setbackgroundmode(g, TRANSPARENT);
+	ui_settextcolor(g, 0x00D1C5B6);
+	ui_textout(g, 0, 0, self->text, strlen(self->text));
 }
 
 void DrawGrid(EnvelopeView* self, psy_ui_Graphics* g)
@@ -111,15 +123,15 @@ void DrawGrid(EnvelopeView* self, psy_ui_Graphics* g)
 	for (i = 0; i <= 1.0; i += 0.1 ) {
 		ui_drawline(g,
 			self->spacing.left.quantity.integer,
-			pxvalue(self, i),
+				pxvalue(self, i),
 			self->spacing.left.quantity.integer + self->cx,
-			pxvalue(self, i));
+				pxvalue(self, i));
 	}	
 	for (i = 0; i <= displaymaxtime(self); i += 0.5) {
 		ui_drawline(g,
-			pxtime(self, i),
+				pxtime(self, i),
 			self->spacing.top.quantity.integer,
-			pxtime(self, i),
+				pxtime(self, i),
 			self->spacing.top.quantity.integer + self->cy);
 	}
 }
@@ -127,8 +139,8 @@ void DrawGrid(EnvelopeView* self, psy_ui_Graphics* g)
 void DrawPoints(EnvelopeView* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
-	ui_size ptsize;
-	ui_size ptsize2;
+	psy_ui_Size ptsize;
+	psy_ui_Size ptsize2;
 	psy_dsp_EnvelopePoint* q = 0;
 
 	ptsize.width = 5;
@@ -136,11 +148,11 @@ void DrawPoints(EnvelopeView* self, psy_ui_Graphics* g)
 	ptsize2.width = ptsize.width / 2;
 	ptsize2.height = ptsize.height / 2;	
 	for (p = self->points; p !=0; p = p->next) {
-		ui_rectangle r;
+		psy_ui_Rectangle r;
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;
-		ui_setrectangle(&r, 
+		psy_ui_setrectangle(&r, 
 			pxtime(self, pt->time) - ptsize2.width,
 			pxvalue(self, pt->value) - ptsize2.height,
 			ptsize.width,
@@ -179,7 +191,7 @@ void DrawLines(EnvelopeView* self, psy_ui_Graphics* g)
 	}
 }
 
-void OnSize(EnvelopeView* self, psy_ui_Component* sender, ui_size* size)
+void OnSize(EnvelopeView* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
 	self->cx = size->width - self->spacing.left.quantity.integer -
 		self->spacing.right.quantity.integer;
@@ -280,13 +292,13 @@ psy_List* HitTestPoint(EnvelopeView* self, int x, int y)
 int pxvalue(EnvelopeView* self, double value)
 {
 	return (int)(self->cy - value * self->cy) +
-		self->spacing.left.quantity.integer;
+		self->spacing.top.quantity.integer;
 }
 
 int pxtime(EnvelopeView* self, double t)
 {
 	return (int)(t * self->cx / displaymaxtime(self)) +
-		self->spacing.top.quantity.integer;
+		self->spacing.left.quantity.integer;
 }
 
 float displaymaxtime(EnvelopeView* self)
@@ -316,4 +328,10 @@ void EnvelopeViewUpdate(EnvelopeView* self)
 		adsrpointmapper_updatepoints(&self->pointmapper);
 		ui_component_invalidate(&self->component);
 	}
+}
+
+void envelopeview_settext(EnvelopeView* self, const char* text)
+{
+	free(self->text);
+	self->text = strdup(text);
 }

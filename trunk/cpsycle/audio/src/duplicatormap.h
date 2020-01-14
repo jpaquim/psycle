@@ -6,20 +6,35 @@
 
 #include "machine.h"
 
-#define MAX_TRACKS 64
-#define MAX_VIRTUALINSTS 256
+typedef struct {
+	int machine;
+	int offset;
+	int lowkey;
+	int highkey;
+	psy_Table allochans;
+} psy_audio_DuplicatorOutput;
+
+void psy_audio_duplicatoroutput_setall(psy_audio_DuplicatorOutput*,
+	int machine, int offset, int lowkey, int highkey);
 
 typedef struct {
-	// returns the allocated channel of the machine, for the channel (duplicator's channel) of this tick.
-	int allocatedchans[MAX_TRACKS][MAX_VIRTUALINSTS]; //Not Using MAX_MACHINES because now there are the Virtual instruments
-	// indicates if the channel of the specified machine is in use or not
-	int availablechans[MAX_VIRTUALINSTS][MAX_TRACKS];//Not Using MAX_MACHINES because now there are the Virtual instruments	
+	psy_Table outputs;
+	psy_Table unavail;
+	uintptr_t maxtracks;
 } psy_audio_DuplicatorMap;
 
-void duplicatormap_init(psy_audio_DuplicatorMap*);
-void duplicatormap_dispose(psy_audio_DuplicatorMap*);
-int duplicatormap_at(psy_audio_DuplicatorMap*, int channel, int machine);
-void duplicatormap_allocate(psy_audio_DuplicatorMap*, int channel, int machine, int outputmachine);
-void duplicatormap_remove(psy_audio_DuplicatorMap*, int channel, int machine, int outputmachine);
+void psy_audio_duplicatormap_init(psy_audio_DuplicatorMap*,
+	uintptr_t numoutputs, uintptr_t maxtracks);
+void psy_audio_duplicatormap_dispose(psy_audio_DuplicatorMap*);
+void psy_audio_duplicatormap_clear(psy_audio_DuplicatorMap*);
+int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap*, int patternchannel,
+	psy_audio_DuplicatorOutput*);
+void psy_audio_duplicatormap_release(psy_audio_DuplicatorMap*, int patternchannel,
+	int duplicatorchannel, psy_audio_DuplicatorOutput*);
+psy_TableIterator psy_audio_duplicatormap_begin(psy_audio_DuplicatorMap*);
+psy_audio_DuplicatorOutput* psy_audio_duplicatormap_output(
+	psy_audio_DuplicatorMap*, int output);
+uintptr_t psy_audio_duplicatormap_numoutputs(psy_audio_DuplicatorMap*);
+
 
 #endif

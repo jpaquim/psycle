@@ -11,7 +11,7 @@
 
 #define TIMERID_PARAMVIEW 410
 
-static void preferredsize(ParamView* self, ui_size* limit, ui_size* rv);
+static void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv);
 static void OnDraw(ParamView* self, psy_ui_Component* sender, psy_ui_Graphics* g);
 static void DrawBackground(ParamView* self, psy_ui_Graphics* g);
 static void DrawParam(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row, uintptr_t col);
@@ -40,7 +40,7 @@ static void vtable_init(ParamView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
 	}
 }
 
@@ -63,6 +63,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
+	ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_draw, self, OnDraw);	
 	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	psy_signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
@@ -83,8 +84,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 		self->numparametercols = 0;
 		self->numrows = 0;
 	}
-	self->tweak = -1;
-	self->component.doublebuffered = TRUE;
+	self->tweak = -1;	
 	ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
 }
 
@@ -161,9 +161,9 @@ void DrawKnob(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t ro
 {	
 	char label[128];
 	char str[128];
-	ui_rectangle r;
-	ui_rectangle r_top;
-	ui_rectangle r_bottom;	
+	psy_ui_Rectangle r;
+	psy_ui_Rectangle r_top;
+	psy_ui_Rectangle r_bottom;	
 	int top;
 	int left;
 	int width;
@@ -179,9 +179,9 @@ void DrawKnob(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t ro
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, &width, &height);	
 
-	ui_setrectangle(&r, left, top, width, height);
-	ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx, height / 2);
-	ui_setrectangle(&r_bottom, left + knob_cx, top + height/2, width - knob_cx, height / 2);
+	psy_ui_setrectangle(&r, left, top, width, height);
+	psy_ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx, height / 2);
+	psy_ui_setrectangle(&r_bottom, left + knob_cx, top + height/2, width - knob_cx, height / 2);
 				
 	if (!self->machine->vtable->parametername(self->machine, label, param)) {
 		if (!self->machine->vtable->parameterlabel(self->machine, label, param)) {
@@ -213,7 +213,7 @@ void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr
 	int width;
 	int height;
 	int half;
-	ui_rectangle r;	
+	psy_ui_Rectangle r;	
 	char str[128];
 			
 	str[0] = '\0';		
@@ -221,7 +221,7 @@ void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, &width, &height);		
 	half = height/2;
-	ui_setrectangle(&r, left, top, width, top + half);
+	psy_ui_setrectangle(&r, left, top, width, top + half);
 
 	ui_setbackgroundcolor(g, 0x00232323);
 	ui_settextcolor(g, 0x00FFFFFF);
@@ -233,7 +233,7 @@ void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr
 	ui_textoutrectangle(g, 
 		left, top, ETO_OPAQUE | ETO_CLIPPED,
 		r, str, strlen(str));
-	ui_setrectangle(&r, left, top + half, width, top + half);
+	psy_ui_setrectangle(&r, left, top + half, width, top + half);
 	if (self->machine->vtable->describevalue(
 		self->machine, str, param, self->machine->vtable->parametervalue(self->machine, param)) == FALSE) {
 		psy_snprintf(str, 128, "%d", self->machine->vtable->parametervalue(self->machine, param));
@@ -251,7 +251,7 @@ void DrawHeader(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t 
 	int height;
 	int half;
 	int quarter;
-	ui_rectangle r;	
+	psy_ui_Rectangle r;	
 	const char *parValue;
 	char str[128];
 			
@@ -270,7 +270,7 @@ void DrawHeader(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t 
 	// dc.SetTextColor(uiSetting->fonttitleColor);
 	// dc.ExtTextOut(x + xoffset, y + quarter, ETO_OPAQUE | ETO_CLIPPED, CRect(x, y + quarter, x+width, y+half+quarter), CString(parName), 0);
 	// dc.SelectObject(oldfont);
-	ui_setrectangle(&r, left, top, width, top + half);
+	psy_ui_setrectangle(&r, left, top, width, top + half);
 
 	ui_setbackgroundcolor(g, 0x00232323);
 	ui_settextcolor(g, 0x00FFFFFF);
@@ -398,20 +398,19 @@ void OnMouseMove(ParamView* self, psy_ui_Component* sender,
 		int maxval;		
 				
 		self->my = ev->y;
-		self->machine->vtable->parameterrange(self->machine, self->tweak,
-			&minval, &maxval);
+		machine_parameterrange(self->machine, self->tweak, &minval, &maxval);
 		dy = self->tweakbase - ev->y;
 		val = (int)(self->tweakval +
-			(maxval - minval) / 100.0 * dy);
+			(maxval - minval) / 200.0 * dy);
 		if (val > maxval) {
 			val = maxval;
 		}
 		if (val < minval) {
 			val = minval;
 		}
-		self->machine->vtable->parametertweak(self->machine, self->tweak, val);		
+		machine_parametertweak(self->machine, self->tweak, val);		
 		workspace_parametertweak(self->workspace,
-			self->machine->vtable->slot(self->machine), self->tweak, val - minval);
+			machine_slot(self->machine), self->tweak, val - minval);
 		ui_component_invalidate(&self->component);		
 	}
 }
@@ -431,7 +430,7 @@ float floatparamvalue(int value)
 	return value / 65535.f;	
 }
 
-void preferredsize(ParamView* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (rv) {
 		int cellwidth;

@@ -8,29 +8,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-static psy_dsp_amp_t buffer_rangefactor(psy_audio_Buffer*, psy_dsp_amp_range_t);
+static psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
+	psy_dsp_amp_range_t);
 
-void buffer_init(psy_audio_Buffer* self, uintptr_t channels)
+void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 {
 	self->samples = 0;	
 	self->offset = 0;
 	self->numsamples = 0;
 	self->range = PSY_DSP_AMP_RANGE_NATIVE;
-	buffer_resize(self, channels);
+	psy_audio_buffer_resize(self, channels);
 }
 
-void buffer_init_shared(psy_audio_Buffer* self, psy_audio_Buffer* src,
+void psy_audio_buffer_init_shared(psy_audio_Buffer* self, psy_audio_Buffer* src,
 	uintptr_t offset)
 {
 	uintptr_t channel;
 
-	buffer_init(self, src->numchannels);
+	psy_audio_buffer_init(self, src->numchannels);
 	for (channel = 0; channel < src->numchannels; ++channel) {
 		self->samples[channel] = src->samples[channel] + offset;
 	}
 }
 
-void buffer_move(psy_audio_Buffer* self, uintptr_t offset)
+void psy_audio_buffer_move(psy_audio_Buffer* self, uintptr_t offset)
 {	
 	uintptr_t channel;
 
@@ -39,29 +40,29 @@ void buffer_move(psy_audio_Buffer* self, uintptr_t offset)
 	}
 }
 
-void buffer_dispose(psy_audio_Buffer* self)
+void psy_audio_buffer_dispose(psy_audio_Buffer* self)
 {
 	free(self->samples);
 }
 
-psy_audio_Buffer* buffer_alloc(void)
+psy_audio_Buffer* psy_audio_buffer_alloc(void)
 {
 	return (psy_audio_Buffer*) malloc(sizeof(psy_audio_Buffer));
 }
 
-psy_audio_Buffer* buffer_allocinit(uintptr_t channels)
+psy_audio_Buffer* psy_audio_buffer_allocinit(uintptr_t channels)
 {
 	psy_audio_Buffer* rv;
 
-	rv = buffer_alloc();
+	rv = psy_audio_buffer_alloc();
 	if (rv) {
-		buffer_init(rv, channels);
+		psy_audio_buffer_init(rv, channels);
 	}
 	return rv;
 }
 
 
-void buffer_resize(psy_audio_Buffer* self, uintptr_t channels)
+void psy_audio_buffer_resize(psy_audio_Buffer* self, uintptr_t channels)
 {
 	free(self->samples);
 	self->samples = 0;	
@@ -72,22 +73,22 @@ void buffer_resize(psy_audio_Buffer* self, uintptr_t channels)
 	self->numchannels = channels;
 }
 
-void buffer_setoffset(psy_audio_Buffer* self, uintptr_t offset)
+void psy_audio_buffer_setoffset(psy_audio_Buffer* self, uintptr_t offset)
 {
 	self->offset = offset;
 }
 
-uintptr_t buffer_offset(psy_audio_Buffer* self)
+uintptr_t psy_audio_buffer_offset(psy_audio_Buffer* self)
 {
 	return self->offset;
 }
 
-psy_dsp_amp_t* buffer_at(psy_audio_Buffer* self, uintptr_t channel)
+psy_dsp_amp_t* psy_audio_buffer_at(psy_audio_Buffer* self, uintptr_t channel)
 {
 	return self->samples[channel] + self->offset;
 }
 
-void buffer_clearsamples(psy_audio_Buffer* self, uintptr_t numsamples)
+void psy_audio_buffer_clearsamples(psy_audio_Buffer* self, uintptr_t numsamples)
 {
 	uintptr_t channel;
 
@@ -96,7 +97,7 @@ void buffer_clearsamples(psy_audio_Buffer* self, uintptr_t numsamples)
 	}
 }
 
-void buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* source,
+void psy_audio_buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* source,
 	uintptr_t numsamples,
 	psy_dsp_amp_t vol)
 {
@@ -104,7 +105,7 @@ void buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* source,
 		uintptr_t channel;
 		psy_dsp_amp_t factor;
 
-		factor = buffer_rangefactor(source, self->range) * vol;	
+		factor = psy_audio_buffer_rangefactor(source, self->range) * vol;	
 		for (channel = 0; channel < source->numchannels && 
 			channel < self->numchannels; ++channel) {
 				dsp.add(
@@ -116,7 +117,7 @@ void buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* source,
 	}
 }
 
-void buffer_mulsamples(psy_audio_Buffer* self, uintptr_t numsamples, psy_dsp_amp_t mul)
+void psy_audio_buffer_mulsamples(psy_audio_Buffer* self, uintptr_t numsamples, psy_dsp_amp_t mul)
 {
 	uintptr_t channel;
 	
@@ -125,7 +126,7 @@ void buffer_mulsamples(psy_audio_Buffer* self, uintptr_t numsamples, psy_dsp_amp
 	}	
 }
 
-void buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
+void psy_audio_buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
 {
 	uintptr_t channel;
 	psy_dsp_amp_t vol[2];
@@ -143,22 +144,22 @@ void buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t amount)
 	}
 }
 
-uintptr_t buffer_numchannels(psy_audio_Buffer* self)
+uintptr_t psy_audio_buffer_numchannels(psy_audio_Buffer* self)
 {
 	return self->numchannels;
 }
 
-int buffer_mono(psy_audio_Buffer* self)
+int psy_audio_buffer_mono(psy_audio_Buffer* self)
 {
 	return self->numchannels == 1;
 }
 
-void buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uintptr_t numsamples,
+void psy_audio_buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uintptr_t numsamples,
 	uintptr_t numsourcesamples)
 {	
 	psy_dsp_amp_t rangefactor;
 
-	rangefactor = buffer_rangefactor(source, self->range);
+	rangefactor = psy_audio_buffer_rangefactor(source, self->range);
 	if (numsourcesamples < numsamples) {		
 		uintptr_t diff;		
 		uintptr_t c;
@@ -188,14 +189,14 @@ void buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uint
 	}
 }
 
-void buffer_scale(psy_audio_Buffer* self, psy_dsp_amp_range_t range,
+void psy_audio_buffer_scale(psy_audio_Buffer* self, psy_dsp_amp_range_t range,
 	uintptr_t numsamples)
 {	
 	if (self->range != range && range != PSY_DSP_AMP_RANGE_IGNORE) {
 		uintptr_t c;
 		psy_dsp_amp_t rangefactor;
 
-		rangefactor = buffer_rangefactor(self, range);
+		rangefactor = psy_audio_buffer_rangefactor(self, range);
 		for (c = 0; c < self->numchannels; ++c) {
 			dsp.mul(self->samples[c], numsamples, rangefactor);
 		}
@@ -203,7 +204,7 @@ void buffer_scale(psy_audio_Buffer* self, psy_dsp_amp_range_t range,
 	}
 }
 
-psy_dsp_amp_t buffer_rangefactor(psy_audio_Buffer* self, psy_dsp_amp_range_t range)
+psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer* self, psy_dsp_amp_range_t range)
 {
 	psy_dsp_amp_t rv;
 

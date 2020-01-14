@@ -5,24 +5,19 @@
 
 #include "uibutton.h"
 #include <string.h>
-#include "uiwincomponent.h"
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
-static void ui_button_create_system(psy_ui_Button*, psy_ui_Component* parent);
-static void ui_button_create_ownerdrawn(psy_ui_Button*, psy_ui_Component* parent);
 static void ondestroy(psy_ui_Button*, psy_ui_Component* sender);
-static void draw(psy_ui_Button*, psy_ui_Graphics*);
+static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
 static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
-static void drawarrow(psy_ui_Button*, ui_point* arrow, psy_ui_Graphics*);
-static void makearrow(ui_point*, ButtonIcon icon, int x, int y);
-static void onmousedown(psy_ui_Button*, psy_ui_Component* sender);
-static void onmouseenter(psy_ui_Button*, psy_ui_Component* sender);
-static void onmouseleave(psy_ui_Button*, psy_ui_Component* sender);
-static void oncommand(psy_ui_Button*, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam);
-static void preferredsize(psy_ui_Button*, ui_size* limit, ui_size* size);
+static void drawarrow(psy_ui_Button*, psy_ui_Point* arrow, psy_ui_Graphics*);
+static void makearrow(psy_ui_Point*, psy_ui_ButtonIcon icon, int x, int y);
+static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
+static void onmouseenter(psy_ui_Button*);
+static void onmouseleave(psy_ui_Button*);
+static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit, psy_ui_Size* size);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -30,70 +25,50 @@ static int vtable_initialized = 0;
 static void vtable_init(psy_ui_Button* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.draw = (psy_ui_fp_draw) draw;
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;		
+		vtable = *(psy_ui_button_base(self)->vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
 	}
 }
 
-void ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
+void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {	
-	self->ownerdrawn = 1;
-	self->hover = 0;
-	self->highlight = 0;
-	self->icon = UI_ICON_NONE;
-	self->charnumber = 0;
-	self->textalignment = UI_ALIGNMENT_CENTER_VERTICAL |
-		UI_ALIGNMENT_CENTER_HORIZONTAL;
-	if (self->ownerdrawn) {
-		ui_button_create_ownerdrawn(self, parent);
-	} else {
-		ui_button_create_system(self, parent);
-	}
+	ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_signal_init(&self->signal_clicked);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	self->hover = 0;
+	self->highlight = 0;
+	self->icon = psy_ui_ICON_NONE;
+	self->charnumber = 0;
+	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
+	self->text = _strdup("");
+	psy_signal_init(&self->signal_clicked);	
+	psy_signal_connect(&psy_ui_button_base(self)->signal_destroy, self,
+		ondestroy);
 }	
 
-void ui_button_create_system(psy_ui_Button* self, psy_ui_Component* parent)
-{    	
-	self->text = 0;
-	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
-		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE,
-		1);
-	psy_signal_connect(&self->component.signal_command, self, oncommand);	
-}
-
-void ui_button_create_ownerdrawn(psy_ui_Button* self, psy_ui_Component* parent)
-{
-	self->text = _strdup("");	
-	ui_component_init(&self->component, parent);
-	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
-	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);
-}
-
 void ondestroy(psy_ui_Button* self, psy_ui_Component* sender)
-{
-	if (self->ownerdrawn == 1) {
-		free(self->text);
-	}
+{	
+	free(self->text);
+	self->text = 0;
 	psy_signal_dispose(&self->signal_clicked);
 }
 
-void draw(psy_ui_Button* self, psy_ui_Graphics* g)
+void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 {
-	ui_size size;
-	ui_size textsize;
-	ui_rectangle r;
+	psy_ui_Size size;
+	psy_ui_Size textsize;
+	psy_ui_Rectangle r;
 	int centerx = 0;
 	int centery = 0;
 		
-	size = ui_component_size(&self->component);
-	textsize = ui_component_textsize(&self->component, self->text);
-	ui_setrectangle(&r, 0, 0, size.width, size.height);
+	size = ui_component_size(psy_ui_button_base(self));
+	textsize = ui_component_textsize(psy_ui_button_base(self), self->text);
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	ui_setbackgroundmode(g, TRANSPARENT);
 	if (self->hover) {
 		ui_settextcolor(g, 0x00FFFFFF);
@@ -104,12 +79,12 @@ void draw(psy_ui_Button* self, psy_ui_Graphics* g)
 	{
 		ui_settextcolor(g, 0x00CACACA);
 	}
-	if ((self->textalignment & UI_ALIGNMENT_CENTER_HORIZONTAL) ==
-		UI_ALIGNMENT_CENTER_HORIZONTAL) {
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 		centerx = (size.width - textsize.width) / 2;		
 	}
-	if ((self->textalignment & UI_ALIGNMENT_CENTER_VERTICAL) ==
-		UI_ALIGNMENT_CENTER_VERTICAL) {
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
+		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - textsize.height) / 2;
 	}	
 	ui_textoutrectangle(g, 
@@ -119,47 +94,47 @@ void draw(psy_ui_Button* self, psy_ui_Graphics* g)
 		r,
 		self->text,
 		strlen(self->text));
-	if (self->icon != UI_ICON_NONE) {
+	if (self->icon != psy_ui_ICON_NONE) {
 		drawicon(self, g);
 	}
 }
 
 void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 {
-	ui_size size;
-	ui_point arrow[4];
+	psy_ui_Size size;
+	psy_ui_Point arrow[4];
 	int centerx = 4;
 	int centery = 0;
 	
-	size = ui_component_size(&self->component);
-	if ((self->textalignment & UI_ALIGNMENT_CENTER_HORIZONTAL) ==
-		UI_ALIGNMENT_CENTER_HORIZONTAL) {
+	size = ui_component_size(psy_ui_button_base(self));
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 		centerx = (size.width - 4) / 2;		
 	}
-	if ((self->textalignment & UI_ALIGNMENT_CENTER_VERTICAL) ==
-		UI_ALIGNMENT_CENTER_VERTICAL) {
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
+		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - 8) / 2;
 	}
-	if (self->icon == UI_ICON_LESSLESS) {
+	if (self->icon == psy_ui_ICON_LESSLESS) {
 		makearrow(arrow,
-			UI_ICON_LESS,
+			psy_ui_ICON_LESS,
 			centerx - 4,
 			centery);
 		drawarrow(self, arrow, g);
 		makearrow(arrow,
-			UI_ICON_LESS,
+			psy_ui_ICON_LESS,
 			centerx + 4,
 			centery);	
 		drawarrow(self, arrow, g);
 	} else
-	if (self->icon == UI_ICON_MOREMORE) {
+	if (self->icon == psy_ui_ICON_MOREMORE) {
 		makearrow(arrow,
-			UI_ICON_MORE,
+			psy_ui_ICON_MORE,
 			centerx - 6,
 			centery);
 		drawarrow(self, arrow, g);
 		makearrow(arrow,
-			UI_ICON_MORE,
+			psy_ui_ICON_MORE,
 			centerx + 2,
 			centery);	
 		drawarrow(self, arrow, g);
@@ -172,7 +147,7 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 }
 
-void drawarrow(psy_ui_Button* self, ui_point* arrow, psy_ui_Graphics* g)
+void drawarrow(psy_ui_Button* self, psy_ui_Point* arrow, psy_ui_Graphics* g)
 {
 	if (self->hover == 1) {
 		ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
@@ -182,10 +157,10 @@ void drawarrow(psy_ui_Button* self, ui_point* arrow, psy_ui_Graphics* g)
 	}		
 }
 
-void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
+void makearrow(psy_ui_Point* arrow, psy_ui_ButtonIcon icon, int x, int y)
 {
 	switch (icon) {
-		case UI_ICON_LESS:			
+		case psy_ui_ICON_LESS:		
 			arrow[0].x = 4 + x;
 			arrow[0].y = 0 + y;
 			arrow[1].x = 4 + x;
@@ -194,7 +169,7 @@ void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
 			arrow[2].y = 4 + y;
 			arrow[3] = arrow[0];
 		break;
-		case UI_ICON_MORE:						
+		case psy_ui_ICON_MORE:
 			arrow[0].x = 0 + x;
 			arrow[0].y = 0 + y;
 			arrow[1].x = 0 + x;
@@ -208,113 +183,87 @@ void makearrow(ui_point* arrow, ButtonIcon icon, int x, int y)
 	}
 }
 
-void ui_button_setcharnumber(psy_ui_Button* self, int number)
+void psy_ui_button_setcharnumber(psy_ui_Button* self, int number)
 {
 	self->charnumber = number;
 }
 
-void preferredsize(psy_ui_Button* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
-	if (rv) {
-		if (self->ownerdrawn) {
-			ui_textmetric tm;	
-			ui_size size;
-
-			tm = ui_component_textmetric(&self->component);
-			if (self->charnumber == 0) {
-				if (self->icon) {
-					if (self->icon == UI_ICON_LESS || self->icon == UI_ICON_MORE) {
-						size = ui_component_textsize(&self->component, "<");
-					} else {
-						size = ui_component_textsize(&self->component, "<<");
-					}
-				} else {
-					size = ui_component_textsize(&self->component, self->text);			
-				}
-				rv->width = size.width + 4;				
+	psy_ui_TextMetric tm;	
+	psy_ui_Size size;		
+		
+	tm = ui_component_textmetric(psy_ui_button_base(self));
+	if (self->charnumber == 0) {
+		if (self->icon) {
+			if (self->icon == psy_ui_ICON_LESS || self->icon == psy_ui_ICON_MORE) {
+				size = ui_component_textsize(psy_ui_button_base(self), "<");
 			} else {
-				rv->width = tm.tmAveCharWidth * self->charnumber;
+				size = ui_component_textsize(psy_ui_button_base(self), "<<");
 			}
-			rv->height = tm.tmHeight;
 		} else {
-			*rv = ui_component_size(&self->component);		
+			size = ui_component_textsize(psy_ui_button_base(self), self->text);	
 		}
+		rv->width = size.width + 4;				
+	} else {
+		rv->width = tm.tmAveCharWidth * self->charnumber;
 	}
+	rv->height = tm.tmHeight;	
 }
 
-void onmousedown(psy_ui_Button* self, psy_ui_Component* sender)
+void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
 	psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void onmouseenter(psy_ui_Button* self, psy_ui_Component* sender)
+void onmouseenter(psy_ui_Button* self)
 {
 	self->hover = 1;
-	ui_component_invalidate(&self->component);
+	ui_component_invalidate(psy_ui_button_base(self));
 }
 
-void onmouseleave(psy_ui_Button* self, psy_ui_Component* sender)
+void onmouseleave(psy_ui_Button* self)
 {		
 	self->hover = 0;
-	ui_component_invalidate(&self->component);
+	ui_component_invalidate(psy_ui_button_base(self));
 }
 
-void ui_button_settext(psy_ui_Button* self, const char* text)
-{
-	if (self->ownerdrawn) {
-		free(self->text);
-		self->text = _strdup(text);
-		ui_component_invalidate(&self->component);
-	} else {		
-		SetWindowText(ui_win_component_hwnd(&self->component), text);
-	}
+void psy_ui_button_settext(psy_ui_Button* self, const char* text)
+{	
+	free(self->text);
+	self->text = _strdup(text);
+	ui_component_invalidate(psy_ui_button_base(self));
 }
 
-void ui_button_seticon(psy_ui_Button* self, ButtonIcon icon)
+void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 {
 	self->icon = icon;
 }
 
-void ui_button_highlight(psy_ui_Button* self)
+void psy_ui_button_highlight(psy_ui_Button* self)
 {
 	if (!self->highlight) {
-		self->highlight = 1;
-		ui_win_component_sendmessage(&self->component, BM_SETSTATE, 1, 0);
-		if (self->ownerdrawn) {
-			ui_component_invalidate(&self->component);
-		}
+		self->highlight = 1;		
+		ui_component_invalidate(psy_ui_button_base(self));		
 	}
 }
 
-void ui_button_disablehighlight(psy_ui_Button* self)
+void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (self->highlight) {
-		self->highlight = 0;
-		ui_win_component_sendmessage(&self->component, BM_SETSTATE, 0, 0);
-		if (self->ownerdrawn) {
-			ui_component_invalidate(&self->component);
-		}
+		self->highlight = 0;				
+		ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
 
-void ui_button_settextalignment(psy_ui_Button* self, UiAlignment alignment)
+void psy_ui_button_settextalignment(psy_ui_Button* self,
+	psy_ui_Alignment alignment)
 {
 	self->textalignment = alignment;
 }
 
-void oncommand(psy_ui_Button* self, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam)
+psy_ui_Component* psy_ui_button_base(psy_ui_Button* self)
 {
-	switch(HIWORD(wParam))
-    {
-        case BN_CLICKED:
-        {            
-			if (self->signal_clicked.slots) {
-				psy_signal_emit(&self->signal_clicked, self, 0);
-			}
-        }
-		break;
-		default:
-		break;
-    }
+	return &self->component;
 }
+

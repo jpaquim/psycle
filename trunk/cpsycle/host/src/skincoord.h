@@ -16,4 +16,15 @@ typedef struct {
 	int range;
 } SkinCoord;
 
+void skincoord_setall(SkinCoord*,
+	int srcx,
+	int srcy,
+	int srcwidth,
+	int srcheight,
+	int destx,
+	int desty,
+	int destwidth,
+	int destheight,
+	int range);
+
 #endif

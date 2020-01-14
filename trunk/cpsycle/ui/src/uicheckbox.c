@@ -5,13 +5,12 @@
 
 #include "uicheckbox.h"
 #include <string.h>
-#include "uiwincomponent.h"
 
 static void psy_ui_checkbox_oncommand(psy_ui_CheckBox*, psy_ui_Component*,
 	WPARAM wParam, LPARAM lParam);
 static void psy_ui_checkbox_ondestroy(psy_ui_CheckBox*, psy_ui_Component*);
-static void psy_ui_checkbox_preferredsize(psy_ui_CheckBox*, ui_size* limit,
-	ui_size* rv);
+static void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -20,8 +19,8 @@ static void vtable_init(psy_ui_CheckBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.preferredsize = (psy_ui_fp_preferredsize)
-			psy_ui_checkbox_preferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			psy_ui_checkbox_onpreferredsize;
 	}
 }
 
@@ -47,25 +46,24 @@ void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
 
 void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
 {
-	SetWindowText(ui_win_component_hwnd(&self->component), text);
+	SetWindowText((HWND)self->component.hwnd, text);	
 }
 
 void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 {
-	SendMessage(ui_win_component_hwnd(&self->component), BM_SETCHECK,
-		(WPARAM)BST_CHECKED, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, BM_SETCHECK, (WPARAM)BST_CHECKED,
+		(LPARAM)0);
 }
 
 int psy_ui_checkbox_checked(psy_ui_CheckBox* self)
 {
-	return SendMessage(ui_win_component_hwnd(&self->component),
-		BM_GETCHECK, (WPARAM)0, (LPARAM)0) != 0;	
+	return SendMessage((HWND)self->component.hwnd, BM_GETCHECK, (WPARAM)0,
+		(LPARAM)0) != 0;	
 }
 
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 {
-	SendMessage(ui_win_component_hwnd(&self->component), BM_SETCHECK,
-		(WPARAM)0, (LPARAM)0);
+	SendMessage((HWND)self->component.hwnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0);
 }
 
 void psy_ui_checkbox_oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
@@ -85,14 +83,14 @@ void psy_ui_checkbox_oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
     }
 }
 
-void psy_ui_checkbox_preferredsize(psy_ui_CheckBox* self, ui_size* limit,
-	ui_size* rv)
+void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {	
 	if (rv) {
-		ui_size size;	
+		psy_ui_Size size;	
 		char text[256];
 
-		GetWindowText(ui_win_component_hwnd(&self->component), text, 256);
+		GetWindowText((HWND)self->component.hwnd, text, 256);
 		size = ui_component_textsize(&self->component, text);	
 		rv->width = size.width + 20;
 		rv->height = size.height + 4;

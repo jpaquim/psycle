@@ -66,7 +66,7 @@ void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
 	self->slot = NOMACHINE_INDEX;
-	buffer_init(&self->memorybuffer, 2);
+	psy_audio_buffer_init(&self->memorybuffer, 2);
 	self->memorybuffersize = 256;
 	for (c = 0; c < self->memorybuffer.numchannels; ++c) {
 		self->memorybuffer.samples[c] = dsp.memory_alloc(
@@ -83,7 +83,7 @@ void custommachine_dispose(psy_audio_CustomMachine* self)
 	for (c = 0; c < self->memorybuffer.numchannels; ++c) {
 		dsp.memory_dealloc(self->memorybuffer.samples[c]);
 	}
-	buffer_dispose(&self->memorybuffer);
+	psy_audio_buffer_dispose(&self->memorybuffer);
 	machine_dispose(&self->machine);
 }
 

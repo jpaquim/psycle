@@ -646,7 +646,7 @@ void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 		psy_audio_InstrumentEntry* entry;
 		
 		entry = (psy_audio_InstrumentEntry*) p->entry;
-		sample = samples_at(self->samples, entry->sampleindex);
+		sample = psy_audio_samples_at(self->samples, entry->sampleindex);
 		if (sample) {
 			SampleIterator* iterator;
 
@@ -738,18 +738,18 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 			for (i = 0; i < numsamples; ++i) {
 				unsigned int c;			
 								
-				for (c = 0; c < buffer_numchannels(&position->sample->channels);
-						++c) {
+				for (c = 0; c < psy_audio_buffer_numchannels(
+						&position->sample->channels); ++c) {
 					psy_dsp_amp_t* src;
 					psy_dsp_amp_t* dst;
 					psy_dsp_amp_t val;				
 					unsigned int frame;
 
-					src = buffer_at(&position->sample->channels, c);
-					if (c >= buffer_numchannels(output)) {
+					src = psy_audio_buffer_at(&position->sample->channels, c);
+					if (c >= psy_audio_buffer_numchannels(output)) {
 						break;
 					}
-					dst = buffer_at(output, c);
+					dst = psy_audio_buffer_at(output, c);
 					frame = sampleiterator_frameposition(position);					
 					val = self->resampler.resampler.vtable->work(
 						&self->resampler.resampler,
@@ -800,17 +800,17 @@ void voice_work(Voice* self, psy_audio_Buffer* output, int numsamples)
 					break;				
 				}								
 			}			
-			if (buffer_mono(&position->sample->channels) &&
-				buffer_numchannels(output) > 1) {
+			if (psy_audio_buffer_mono(&position->sample->channels) &&
+				psy_audio_buffer_numchannels(output) > 1) {
 				dsp.add(
-					buffer_at(output, 0),
-					buffer_at(output, 1),
+					psy_audio_buffer_at(output, 0),
+					psy_audio_buffer_at(output, 1),
 					numsamples,
 					1.f);
 			}
-			if (buffer_numchannels(output) > 1) {
-				dsp.mul(buffer_at(output, 0), numsamples, lvol);
-				dsp.mul(buffer_at(output, 1), numsamples, rvol);
+			if (psy_audio_buffer_numchannels(output) > 1) {
+				dsp.mul(psy_audio_buffer_at(output, 0), numsamples, lvol);
+				dsp.mul(psy_audio_buffer_at(output, 1), numsamples, rvol);
 			}			
 		}
 		if (self->effcmd == SAMPLER_CMD_PORTAUP ||

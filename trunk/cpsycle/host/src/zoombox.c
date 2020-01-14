@@ -9,31 +9,33 @@
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_updatelabel(ZoomBox*);
+static void zoombox_ondestroy(ZoomBox*, psy_ui_Component* sender);
 
 void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 {
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
 	ui_component_resize(&self->component, 0, 20);
-	ui_button_init(&self->zoomout, &self->component);
-	ui_button_settext(&self->zoomout, "-");
-	ui_label_init(&self->label, &self->component);
-	ui_label_settext(&self->label, "100");
-	ui_button_init(&self->zoomin, &self->component);
-	ui_button_settext(&self->zoomin, "+");	
+	psy_ui_button_init(&self->zoomout, &self->component);
+	psy_ui_button_settext(&self->zoomout, "-");
+	psy_ui_label_init(&self->label, &self->component);
+	psy_ui_label_settext(&self->label, "100");
+	psy_ui_button_init(&self->zoomin, &self->component);
+	psy_ui_button_settext(&self->zoomin, "+");	
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, &margin));
 	psy_signal_init(&self->signal_changed);
 	self->zoomrate = 100;
 	self->zoomstep = 25;
 	psy_signal_connect(&self->zoomin.signal_clicked, self, zoombox_onzoomin);
 	psy_signal_connect(&self->zoomout.signal_clicked, self, zoombox_onzoomout);
+	psy_signal_connect(&self->component.signal_destroy, self, zoombox_ondestroy);
 }
 
 void zoombox_ondestroy(ZoomBox* self, psy_ui_Component* sender)
@@ -71,5 +73,5 @@ void zoombox_updatelabel(ZoomBox* self)
 	char text[40];
 
 	psy_snprintf(text, 40, "%d", self->zoomrate);
-	ui_label_settext(&self->label, text);
+	psy_ui_label_settext(&self->label, text);
 }

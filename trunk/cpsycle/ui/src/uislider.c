@@ -9,31 +9,43 @@
 #include "uiapp.h"
 #include <portable.h>
 
-static void ui_slider_initsignals(ui_slider*);
-static void ui_slider_disposesignals(ui_slider*);
-static void ui_slider_ondraw(ui_slider*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
-static void ui_slider_drawverticalruler(ui_slider*, psy_ui_Graphics*);
-static void ui_slider_onmousedown(ui_slider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
-static void ui_slider_onmouseup(ui_slider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
-static void ui_slider_onmousemove(ui_slider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
-static void ui_slider_ondestroy(ui_slider*, psy_ui_Component* sender);
-static void ui_slider_ontimer(ui_slider*, psy_ui_Component* sender,
+static void ui_slider_initsignals(psy_ui_Slider*);
+static void ui_slider_disposesignals(psy_ui_Slider*);
+static void ui_slider_ondraw(psy_ui_Slider*, psy_ui_Graphics*);
+static void ui_slider_drawverticalruler(psy_ui_Slider*, psy_ui_Graphics*);
+static void ui_slider_onmousedown(psy_ui_Slider*, psy_ui_MouseEvent* ev);
+static void ui_slider_onmouseup(psy_ui_Slider*, psy_ui_MouseEvent* ev);
+static void ui_slider_onmousemove(psy_ui_Slider*, psy_ui_MouseEvent* ev);
+static void ui_slider_ondestroy(psy_ui_Slider*, psy_ui_Component* sender);
+static void ui_slider_ontimer(psy_ui_Slider*, psy_ui_Component* sender,
 	int timerid);
-static void ui_slider_updatevalue(ui_slider*);
-static void ui_slider_describevalue(self);
+static void ui_slider_updatevalue(psy_ui_Slider*);
+static void ui_slider_describevalue(psy_ui_Slider* self);
 
-static int UI_TIMERID_SLIDER = 600;
+static const int UI_TIMERID_SLIDER = 600;
 
-void ui_slider_init(ui_slider* self, psy_ui_Component* parent)
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(psy_ui_Slider* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw) ui_slider_ondraw;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) ui_slider_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_onmousemove) ui_slider_onmousemove;
+		vtable.onmouseup = (psy_ui_fp_onmouseup) ui_slider_onmouseup;
+	}
+}
+
+void ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 {	
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	ui_component_doublebuffer(&self->component);
 	self->tweakbase = -1;
-	self->orientation = UI_HORIZONTAL;
+	self->orientation = psy_ui_HORIZONTAL;
 	self->value = 0.0f;
 	self->labelsize = 100;
 	self->valuelabelsize = 40;	
@@ -42,23 +54,15 @@ void ui_slider_init(ui_slider* self, psy_ui_Component* parent)
 	self->margin = 5;
 	self->rulerstep = 0.1;
 	self->charnumber = 0;
-	ui_slider_initsignals(self);
-	psy_signal_connect(&self->component.signal_draw, self, 
-		ui_slider_ondraw);
+	ui_slider_initsignals(self);	
 	psy_signal_connect(&self->component.signal_destroy, self, 
-		ui_slider_ondestroy);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		ui_slider_onmousedown);
-	psy_signal_connect(&self->component.signal_mousemove, self,
-		ui_slider_onmousemove);
-	psy_signal_connect(&self->component.signal_mouseup, self,
-		ui_slider_onmouseup);
+		ui_slider_ondestroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
 		ui_slider_ontimer);
 	ui_component_starttimer(&self->component, UI_TIMERID_SLIDER, 50);	
 }
 
-void ui_slider_initsignals(ui_slider* self)
+void ui_slider_initsignals(psy_ui_Slider* self)
 {
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_init(&self->signal_changed);
@@ -67,12 +71,12 @@ void ui_slider_initsignals(ui_slider* self)
 	psy_signal_init(&self->signal_value);	
 }
 
-void ui_slider_ondestroy(ui_slider* self, psy_ui_Component* sender)
+void ui_slider_ondestroy(psy_ui_Slider* self, psy_ui_Component* sender)
 {
 	ui_slider_disposesignals(self);
 }
 
-void ui_slider_disposesignals(ui_slider* self)
+void ui_slider_disposesignals(psy_ui_Slider* self)
 {
 	psy_signal_dispose(&self->signal_clicked);
 	psy_signal_dispose(&self->signal_changed);
@@ -81,38 +85,38 @@ void ui_slider_disposesignals(ui_slider* self)
 	psy_signal_dispose(&self->signal_value);
 }
 
-void ui_slider_settext(ui_slider* self, const char* text)
+void ui_slider_settext(psy_ui_Slider* self, const char* text)
 {
 	strcpy(self->label, text);
 }
 
-void ui_slider_setcharnumber(ui_slider* self, int charnumber)
+void ui_slider_setcharnumber(psy_ui_Slider* self, int charnumber)
 {
 	self->charnumber = charnumber;
 }
 
-void ui_slider_setvalue(ui_slider* self, double value)
+void ui_slider_setvalue(psy_ui_Slider* self, double value)
 {
 	self->value = value;
 }
 
-double ui_slider_value(ui_slider* self)
+double ui_slider_value(psy_ui_Slider* self)
 {
 	return self->value;
 }
 
-void ui_slider_ondraw(ui_slider* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 {
-	ui_rectangle r;
+	psy_ui_Rectangle r;
 	extern psy_ui_App app;
 	
 	ui_setcolor(g, ui_defaults_bordercolor(&app.defaults));	
-	if (self->orientation == UI_HORIZONTAL) {
+	if (self->orientation == psy_ui_HORIZONTAL) {
 		int sliderwidth = 6;
-		ui_size size;	
+		psy_ui_Size size;	
 
 		size = ui_component_size(&self->component);
-		ui_setrectangle(&r, 0, 0,
+		psy_ui_setrectangle(&r, 0, 0,
 			self->labelsize, size.height);
 		ui_settextcolor(g, ui_defaults_color(&app.defaults));
 		ui_setbackgroundmode(g, TRANSPARENT);
@@ -120,15 +124,15 @@ void ui_slider_ondraw(ui_slider* self, psy_ui_Component* sender, psy_ui_Graphics
 			self->label, strlen(self->label));
 		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 		
-		ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
+		psy_ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
 		ui_drawrectangle(g, r);
-		ui_setrectangle(&r,
+		psy_ui_setrectangle(&r,
 			self->labelsize + self->margin + (int)((size.width - sliderwidth) * self->value),
 			2, sliderwidth, size.height - 4);
 		ui_drawsolidrectangle(g, r, ui_defaults_color(&app.defaults));
 		{
 			size = ui_component_size(&self->component);
-			ui_setrectangle(&r, size.width - self->valuelabelsize, 0,
+			psy_ui_setrectangle(&r, size.width - self->valuelabelsize, 0,
 				self->valuelabelsize, size.height);
 			ui_settextcolor(g, ui_defaults_color(&app.defaults));
 			ui_setbackgroundmode(g, TRANSPARENT);
@@ -137,13 +141,13 @@ void ui_slider_ondraw(ui_slider* self, psy_ui_Component* sender, psy_ui_Graphics
 		}
 	} else {
 		int sliderheight = 8;
-		ui_size size;
-		ui_size slidersize;
+		psy_ui_Size size;
+		psy_ui_Size slidersize;
 		int centerx = 0;
 		size = ui_component_size(&self->component);
 
 		if (self->charnumber != 0) {
-			ui_textmetric tm;			
+			psy_ui_TextMetric tm;			
 		
 			tm = ui_component_textmetric(&self->component);
 			slidersize.width = tm.tmAveCharWidth * self->charnumber;
@@ -154,19 +158,20 @@ void ui_slider_ondraw(ui_slider* self, psy_ui_Component* sender, psy_ui_Graphics
 		}
 		
 		ui_slider_drawverticalruler(self, g);
-		ui_setrectangle(&r, centerx, 0, slidersize.width, size.height);
+		psy_ui_setrectangle(&r, centerx, 0, slidersize.width, size.height);
 		ui_drawrectangle(g, r);
-		ui_setrectangle(&r, 2 + centerx, (int)((size.height - sliderheight) * (1 - self->value)),
+		psy_ui_setrectangle(&r, 2 + centerx,
+			(int)((size.height - sliderheight) * (1 - self->value)),
 			slidersize.width - 4, sliderheight);
 		ui_drawsolidrectangle(g, r, 0x00CACACA);
 	}	
 }
 
-void ui_slider_drawverticalruler(ui_slider* self, psy_ui_Graphics* g)
+void ui_slider_drawverticalruler(psy_ui_Slider* self, psy_ui_Graphics* g)
 {
 	double step = 0;
 	int markwidth = 5;
-	ui_size size;
+	psy_ui_Size size;
 
 	size = ui_component_size(&self->component);
 	for (step = 0; step <= 1.0; step += self->rulerstep) {
@@ -178,31 +183,29 @@ void ui_slider_drawverticalruler(ui_slider* self, psy_ui_Graphics* g)
 	}
 }
 
-void ui_slider_onmousedown(ui_slider* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void ui_slider_onmousedown(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
-	ui_size size;
+	psy_ui_Size size;
 	size = ui_component_size(&self->component);
 	size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
-	if (self->orientation == UI_HORIZONTAL) {
+	if (self->orientation == psy_ui_HORIZONTAL) {
 		self->tweakbase = (ev->x - self->labelsize - self->margin) -
 			(int)(self->value * (size.width - 6));
 	} else
-	if (self->orientation == UI_VERTICAL) {
+	if (self->orientation == psy_ui_VERTICAL) {
 		self->tweakbase = ev->y - (int)(self->value * (size.height - 6));
 	}
 	ui_component_capture(&self->component);
 }
 
-void ui_slider_onmousemove(ui_slider* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void ui_slider_onmousemove(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
 	if (self->tweakbase != -1) {
-		ui_size size;
+		psy_ui_Size size;
 
 		size = ui_component_size(&self->component);
 		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
-		if (self->orientation == UI_HORIZONTAL) {
+		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->value = max(0.f,
 				min(1.f, (ev->x - self->tweakbase - self->labelsize - self->margin) 
 					/ (float)(size.width - 6)));
@@ -217,35 +220,35 @@ void ui_slider_onmousemove(ui_slider* self, psy_ui_Component* sender,
 	}
 }
 
-void ui_slider_onmouseup(ui_slider* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void ui_slider_onmouseup(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
 	self->tweakbase = -1;
 	ui_component_releasecapture(&self->component);
 }
 
-void ui_slider_showvertical(ui_slider* self)
+void ui_slider_showvertical(psy_ui_Slider* self)
 {
-	self->orientation = UI_VERTICAL;
+	self->orientation = psy_ui_VERTICAL;
 }
 
-void ui_slider_showhorizontal(ui_slider* self)
+void ui_slider_showhorizontal(psy_ui_Slider* self)
 {
-	self->orientation = UI_HORIZONTAL;
+	self->orientation = psy_ui_HORIZONTAL;
 }
 
-UiOrientation ui_slider_orientation(ui_slider* self)
+psy_ui_Orientation ui_slider_orientation(psy_ui_Slider* self)
 {
 	return self->orientation;
 }
 
-void ui_slider_ontimer(ui_slider* self, psy_ui_Component* sender, int timerid)
+void ui_slider_ontimer(psy_ui_Slider* self, psy_ui_Component* sender,
+	int timerid)
 {	
 	ui_slider_updatevalue(self);
 	ui_slider_describevalue(self);
 }
 
-void ui_slider_updatevalue(ui_slider* self)
+void ui_slider_updatevalue(psy_ui_Slider* self)
 {
 	float value = 0;
 	float* pvalue;
@@ -258,7 +261,7 @@ void ui_slider_updatevalue(ui_slider* self)
 	}
 }
 
-void ui_slider_describevalue(ui_slider* self)
+void ui_slider_describevalue(psy_ui_Slider* self)
 {	
 	self->valuedescription[0] = '\0';
 	psy_signal_emit(&self->signal_describevalue, self, 1,
@@ -269,7 +272,7 @@ void ui_slider_describevalue(ui_slider* self)
 	ui_component_invalidate(&self->component);
 }
 
-void ui_slider_connect(ui_slider* self, void* context, ui_slider_fpdescribe describe,
+void ui_slider_connect(psy_ui_Slider* self, void* context, ui_slider_fpdescribe describe,
 	ui_slider_fptweak tweak, ui_slider_fpvalue value)
 {
 	psy_signal_connect(&self->signal_describevalue, context, describe);

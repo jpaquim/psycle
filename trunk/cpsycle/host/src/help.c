@@ -15,23 +15,24 @@ static void help_load(Help*, const char* path);
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
-	ui_notebook_init(&self->notebook, &self->component);	
-	ui_component_setalign(&self->notebook.component, UI_ALIGN_CLIENT);
-	tabbar_init(&self->tabbar, &self->component);
-	ui_component_setalign(&self->tabbar.component, UI_ALIGN_RIGHT);
-	self->tabbar.tabalignment = UI_ALIGN_RIGHT;	
+	ui_component_init(help_base(self), parent);	
+	ui_component_enablealign(help_base(self));
+	psy_ui_notebook_init(&self->notebook, help_base(self));	
+	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+		psy_ui_ALIGN_CLIENT);
+	tabbar_init(&self->tabbar, help_base(self));
+	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
 	tabbar_append(&self->tabbar, "./docs/readme.txt");
 	tabbar_append(&self->tabbar, "./docs/keys.txt");
 	tabbar_append(&self->tabbar, "./docs/tweaking.txt");
 	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");	
-	ui_editor_init(&self->editor, &self->component);
+	ui_editor_init(&self->editor, help_base(self));
 	ui_editor_preventedit(&self->editor);
-	ui_component_setalign(&self->editor.component, UI_ALIGN_CLIENT);	
+	ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
-	ui_notebook_setpageindex(&self->notebook, 0);
+	psy_ui_notebook_setpageindex(&self->notebook, 0);
 	help_loadpage(self, 0);
 }
 
@@ -97,4 +98,9 @@ void help_load(Help* self, const char* path)
 		}
 		ui_editor_preventedit(&self->editor);
 	}
+}
+
+psy_ui_Component* help_base(Help* self)
+{
+	return &self->component;
 }

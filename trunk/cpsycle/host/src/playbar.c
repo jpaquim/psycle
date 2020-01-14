@@ -34,15 +34,15 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	ui_component_init(&self->component, parent);
 	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	// loop
-	ui_button_init(&self->loop, &self->component);
-	ui_button_settext(&self->loop, "Loop");	
+	psy_ui_button_init(&self->loop, &self->component);
+	psy_ui_button_settext(&self->loop, "Loop");	
 	psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
 	// record
-	ui_button_init(&self->recordnotes, &self->component);
-	ui_button_settext(&self->recordnotes, "Record Notes");	
+	psy_ui_button_init(&self->recordnotes, &self->component);
+	psy_ui_button_settext(&self->recordnotes, "Record Notes");	
 	psy_signal_connect(&self->recordnotes.signal_clicked, self, onrecordnotesclicked);
-	ui_button_init(&self->play, &self->component);
-	ui_button_settext(&self->play, workspace_translate(workspace, "play"));
+	psy_ui_button_init(&self->play, &self->component);
+	psy_ui_button_settext(&self->play, workspace_translate(workspace, "play"));
 	psy_signal_connect(&self->play.signal_clicked, self, onplayclicked);	
 	// playmode
 	ui_combobox_init(&self->playmode, &self->component);	
@@ -56,17 +56,17 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	// play beat num
 	ui_edit_init(&self->loopbeatsedit, &self->component, 0);
 	ui_edit_settext(&self->loopbeatsedit, "4.00");
-	ui_button_init(&self->loopbeatsless, &self->component);
-	ui_button_seticon(&self->loopbeatsless, UI_ICON_LESS);
+	psy_ui_button_init(&self->loopbeatsless, &self->component);
+	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);
 	psy_signal_connect(&self->loopbeatsless.signal_clicked, self,
 		onnumplaybeatsless);
-	ui_button_init(&self->loopbeatsmore, &self->component);
-	ui_button_seticon(&self->loopbeatsmore, UI_ICON_MORE);
+	psy_ui_button_init(&self->loopbeatsmore, &self->component);
+	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);
 	psy_signal_connect(&self->loopbeatsmore.signal_clicked, self,
 		onnumplaybeatsmore);
 	// stop
-	ui_button_init(&self->stop, &self->component);
-	ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
+	psy_ui_button_init(&self->stop, &self->component);
+	psy_ui_button_settext(&self->stop, workspace_translate(workspace, "stop"));
 	psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	playbar_initalign(self);
@@ -75,20 +75,22 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 void playbar_initalign(PlayBar* self)
 {
-	ui_margin margin;
+	psy_ui_Margin margin;
 
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(0.5),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, &margin));
 }
 
 void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 {
-	lock_enter();
+	psy_audio_lock_enter();
 	switch (ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
 			player_stop(self->player);
@@ -114,7 +116,7 @@ void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 			startplay(self);
 		break;
 	}
-	lock_leave();
+	psy_audio_lock_leave();
 }
 
 void onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
@@ -176,12 +178,12 @@ void startplay(PlayBar* self)
 	psy_dsp_beat_t startposition;
 	psy_dsp_beat_t numplaybeats;
 	
-	ui_button_highlight(&self->play);
+	psy_ui_button_highlight(&self->play);
 	sequence = self->player->sequencer.sequence;
 	editposition = self->workspace->sequenceselection.editposition;
 	entry = sequenceposition_entry(&editposition);
 	if (entry) {
-		lock_enter();		
+		psy_audio_lock_enter();		
 		player_stop(self->player);
 		startposition = entry->offset;
 		if (sequencer_playmode(&self->player->sequencer)
@@ -195,7 +197,7 @@ void startplay(PlayBar* self)
 		}
 		player_setposition(self->player, startposition);
 		player_start(self->player);
-		lock_leave();
+		psy_audio_lock_leave();
 	}
 }
 
@@ -208,10 +210,10 @@ void onloopclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	if (sequencer_looping(&self->player->sequencer)) {
 		sequencer_stoploop(&self->player->sequencer);
-		ui_button_disablehighlight(&self->loop);
+		psy_ui_button_disablehighlight(&self->loop);
 	} else {
 		sequencer_loop(&self->player->sequencer);
-		ui_button_highlight(&self->loop);
+		psy_ui_button_highlight(&self->loop);
 	}
 }
 
@@ -219,23 +221,23 @@ void onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 {	
 	if (player_recordingnotes(self->player)) {
 		player_stoprecordingnotes(self->player);
-		ui_button_disablehighlight(&self->recordnotes);
+		psy_ui_button_disablehighlight(&self->recordnotes);
 	} else {
 		player_startrecordingnotes(self->player);
-		ui_button_highlight(&self->recordnotes);
+		psy_ui_button_highlight(&self->recordnotes);
 	}
 }
 
 void ontimer(PlayBar* self, psy_ui_Component* sender, int timerid)
 {
 	if (player_playing(self->player)) {
-		ui_button_highlight(&self->play);
+		psy_ui_button_highlight(&self->play);
 	} else {
-		ui_button_disablehighlight(&self->play);	
+		psy_ui_button_disablehighlight(&self->play);	
 	}
 	if (sequencer_looping(&self->player->sequencer)) {
-		ui_button_highlight(&self->loop);
+		psy_ui_button_highlight(&self->loop);
 	} else {
-		ui_button_disablehighlight(&self->loop);
+		psy_ui_button_disablehighlight(&self->loop);
 	}
 }

@@ -9,46 +9,46 @@ static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
-static void filebar_onrendersong(FileBar*, psy_ui_Component* sender);
 
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	ui_label_init(&self->header, &self->component);
-	ui_label_settext(&self->header,	"Song  ");
-	ui_button_init(&self->newbutton, &self->component);
-	ui_button_settext(&self->newbutton,
+	ui_component_init(filebar_base(self), parent);	
+	ui_component_enablealign(filebar_base(self));
+	ui_component_setalignexpand(filebar_base(self), psy_ui_HORIZONTALEXPAND);
+	psy_ui_label_init(&self->header, filebar_base(self));
+	psy_ui_label_settext(&self->header,	"Song  ");
+	psy_ui_button_init(&self->newbutton, filebar_base(self));
+	psy_ui_button_settext(&self->newbutton,
 		workspace_translate(workspace, "new"));
 	psy_signal_connect(&self->newbutton.signal_clicked, self,
 		filebar_onnewsong);
-	ui_button_init(&self->loadbutton, &self->component);
-	ui_button_settext(&self->loadbutton,
+	psy_ui_button_init(&self->loadbutton, filebar_base(self));
+	psy_ui_button_settext(&self->loadbutton,
 		workspace_translate(workspace, "load"));
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
-	ui_button_init(&self->savebutton, &self->component);
-	ui_button_settext(&self->savebutton, 
+	psy_ui_button_init(&self->savebutton, filebar_base(self));
+	psy_ui_button_settext(&self->savebutton, 
 		workspace_translate(workspace, "save"));
 	psy_signal_connect(&self->savebutton.signal_clicked, self,
 		filebar_onsavesong);
-	ui_button_init(&self->renderbutton, &self->component);
-	ui_button_settext(&self->renderbutton, 
-		workspace_translate(workspace, "Render"));
-	psy_signal_connect(&self->renderbutton.signal_clicked, self,
-		filebar_onrendersong);
+	psy_ui_button_init(&self->renderbutton, filebar_base(self));
+	psy_ui_button_settext(&self->renderbutton, 
+		workspace_translate(workspace, "Render"));	
 	filebar_initalign(self);
 }
 
 void filebar_initalign(FileBar* self)
 {	
-	ui_margin margin = { 0, 5, 0, 0 };
+	psy_ui_Margin margin;
 
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT,
+		ui_component_children(filebar_base(self), 0),
+		psy_ui_ALIGN_LEFT,
 		&margin));
 }
 
@@ -73,7 +73,7 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, 
+	if (ui_openfile(filebar_base(self), title, filter, defaultextension, 
 			workspace_songs_directory(self->workspace),
 			path)) {
 		workspace_loadsong(self->workspace, path);						
@@ -88,13 +88,13 @@ void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 	char  defaultextension[] = "PSY";
 	int showsonginfo = 0;	
 	*path = '\0'; 
-	if (ui_savefile(&self->component, title, filter, defaultextension, 
+	if (ui_savefile(filebar_base(self), title, filter, defaultextension, 
 			workspace_songs_directory(self->workspace), path)) {
 		workspace_savesong(self->workspace, path);
 	}
 }
 
-void filebar_onrendersong(FileBar* self, psy_ui_Component* sender)
+psy_ui_Component* filebar_base(FileBar* self)
 {
-
+	return &self->component;
 }

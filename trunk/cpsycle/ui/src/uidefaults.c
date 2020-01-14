@@ -23,18 +23,18 @@ void ui_defaults_initcolors(psy_ui_Defaults* self)
 
 void ui_defaults_initfont(psy_ui_Defaults* self)
 {
-	ui_fontinfo fontinfo;
+	psy_ui_FontInfo fontinfo;
 	
-	ui_fontinfo_init(&fontinfo, "Tahoma", 80);	
-	ui_font_init(&self->defaultfont, &fontinfo);	
+	psy_ui_fontinfo_init(&fontinfo, "Tahoma", 80);	
+	psy_ui_font_init(&self->defaultfont, &fontinfo);	
 }
 
 void ui_defaults_dispose(psy_ui_Defaults* self)
 {
-	ui_font font;
+	psy_ui_Font font;
 	font = self->defaultfont;
 	self->defaultfont.hfont = 0;
-	ui_font_dispose(&font);
+	psy_ui_font_dispose(&font);
 }
 
 uint32_t ui_defaults_color(psy_ui_Defaults* self)

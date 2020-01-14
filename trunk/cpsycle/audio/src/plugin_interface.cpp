@@ -164,13 +164,13 @@ CMachineInterface* mi_create(void* module)
 {
 	CMachineInterface* mi;
 	CREATEMACHINE GetInterface;
-	Library library;
+	psy_Library library;
 	
 	library.module = module;
 	library.err = 0;
 	
 	mi = 0;
-	GetInterface = (CREATEMACHINE) library_functionpointer(&library, "CreateMachine");
+	GetInterface = (CREATEMACHINE) psy_library_functionpointer(&library, "CreateMachine");
 	if (GetInterface != NULL)
 	{			
 		mi = GetInterface();			

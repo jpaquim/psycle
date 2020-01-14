@@ -37,11 +37,11 @@ typedef struct {
 	psy_ui_Component component;
 	psy_audio_Sample* sample;
 	psy_dsp_NotesTabMode notestabmode;
-	ui_slider defaultvolume;
-	ui_slider globalvolume;
-	ui_slider panposition;
-	ui_slider samplednote; 
-	ui_slider pitchfinetune;
+	psy_ui_Slider defaultvolume;
+	psy_ui_Slider globalvolume;
+	psy_ui_Slider panposition;
+	psy_ui_Slider samplednote; 
+	psy_ui_Slider pitchfinetune;
 } SamplesGeneralView;
 
 typedef struct {
@@ -49,9 +49,9 @@ typedef struct {
 	psy_audio_Sample* sample;	
 	psy_ui_Label waveformheaderlabel;
 	psy_ui_ComboBox waveformbox;
-	ui_slider attack;
-	ui_slider speed;
-	ui_slider depth;
+	psy_ui_Slider attack;
+	psy_ui_Slider speed;
+	psy_ui_Slider depth;
 	psy_audio_Player* player;
 } SamplesVibratoView;
 
@@ -103,10 +103,10 @@ typedef struct {
 typedef struct SamplesView {
 	psy_ui_Component component;	
 	TabBar clienttabbar;
-	ui_notebook clientnotebook;
+	psy_ui_Notebook clientnotebook;
 	psy_ui_Component mainview;
 	psy_ui_Component importview;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	SamplesBox samplesbox;
 	psy_ui_Component left;
 	SamplesViewButtons buttons;	

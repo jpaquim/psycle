@@ -8,11 +8,10 @@
 
 static void ondestroy(psy_ui_Knob*, psy_ui_Component* sender);
 static void ondraw(psy_ui_Knob*, psy_ui_Graphics*);
-static void onmousedown(psy_ui_Knob*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void onmouseenter(psy_ui_Knob*, psy_ui_Component* sender);
-static void onmouseleave(psy_ui_Knob*, psy_ui_Component* sender);
-static void preferredsize(psy_ui_Knob*, ui_size* limit, ui_size* size);
+static void onmousedown(psy_ui_Knob*, psy_ui_MouseEvent*);
+static void onmouseenter(psy_ui_Knob*);
+static void onmouseleave(psy_ui_Knob*);
+static void onpreferredsize(psy_ui_Knob*, psy_ui_Size* limit, psy_ui_Size* size);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -21,8 +20,11 @@ static void vtable_init(psy_ui_Knob* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.draw = (psy_ui_fp_draw) ondraw;
-		vtable.preferredsize = (psy_ui_fp_preferredsize) preferredsize;
+		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
 	}
 }
 
@@ -33,7 +35,6 @@ void ui_knob_init(psy_ui_Knob* self, psy_ui_Component* parent)
 	self->bitmap = 0;
 	self->label = strdup("");
 	self->desc = strdup("");
-	self->component.vtable = &vtable;
 	self->component.vtable = &vtable;	
 	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
 	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
@@ -77,7 +78,7 @@ void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 	ui_textout(g, 30, 28 / 2, self->desc, strlen(self->desc));
 }
 
-void preferredsize(psy_ui_Knob* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Knob* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	if (rv) {		
 		rv->width = 28 + 50;
@@ -87,22 +88,19 @@ void preferredsize(psy_ui_Knob* self, ui_size* limit, ui_size* rv)
 	}
 }
 
-void onmousedown(psy_ui_Knob* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void onmousedown(psy_ui_Knob* self, psy_ui_MouseEvent* ev)
 {
 	// psy_signal_emit(&self->signal_clicked, self, 0);
 }
 
-void onmouseenter(psy_ui_Knob* self, psy_ui_Component* sender)
+void onmouseenter(psy_ui_Knob* self)
 {
 //	self->hover = 1;
 	ui_component_invalidate(&self->component);
 }
 
-void onmouseleave(psy_ui_Knob* self, psy_ui_Component* sender)
+void onmouseleave(psy_ui_Knob* self)
 {		
 //	self->hover = 0;
 	ui_component_invalidate(&self->component);
 }
-
-

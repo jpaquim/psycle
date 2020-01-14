@@ -70,7 +70,7 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 	}
 }
 		
-void luaplugin_init(psy_audio_LuaPlugin* self, MachineCallback callback,
+void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, MachineCallback callback,
 	const char* path)
 {
 	int err = 0;	
@@ -115,7 +115,7 @@ void dispose(psy_audio_LuaPlugin* self)
 	custommachine_dispose(&self->custommachine);
 }
 
-int plugin_luascript_test(const char* path, psy_audio_MachineInfo* machineinfo)
+int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* machineinfo)
 {		
 	psy_audio_PsycleScript script;
 	int err = 0;	
@@ -145,49 +145,49 @@ int plugin_luascript_test(const char* path, psy_audio_MachineInfo* machineinfo)
 void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 {
 	if (bc->numsamples > 0) {				
-		psy_audio_LuaImport in;
-		luaimport_init(&in, self->script.L, self->client);		
-		if (luaimport_open(&in, "work")) {
+		psy_LuaImport in;
+		psy_luaimport_init(&in, self->script.L, self->client);		
+		if (psy_luaimport_open(&in, "work")) {
 			self->client->bc = bc;
 			lua_pushinteger(self->script.L, bc->numsamples);
-			luaimport_pcall(&in, 0);
+			psy_luaimport_pcall(&in, 0);
 			if (in.lasterr == 0) {
 				lua_gc(self->script.L, LUA_GCSTEP, 5);
 			} else {
 				machine_output(&self->custommachine.machine, in.errmsg);	
 			}
 		}
-		luaimport_dispose(&in);
+		psy_luaimport_dispose(&in);
     }	
 }
 
 void seqtick(psy_audio_LuaPlugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {
-	psy_audio_LuaImport in;
-	luaimport_init(&in, self->script.L, self->client);
-	if (luaimport_open(&in, "seqtick")) {
+	psy_LuaImport in;
+	psy_luaimport_init(&in, self->script.L, self->client);
+	if (psy_luaimport_open(&in, "seqtick")) {
 		lua_pushinteger(self->script.L, channel);
 		lua_pushinteger(self->script.L, event->note);
 		lua_pushinteger(self->script.L, event->inst);
 		lua_pushinteger(self->script.L, event->cmd);
 		lua_pushinteger(self->script.L, event->parameter);
-		luaimport_pcall(&in, 0);
+		psy_luaimport_pcall(&in, 0);
 		if (in.lasterr == 0) {
 			lua_gc(self->script.L, LUA_GCSTEP, 5);
 		}
     }
-	luaimport_dispose(&in);  
+	psy_luaimport_dispose(&in);
 }
 
 void sequencerlinetick(psy_audio_LuaPlugin* self)
 {
-	psy_audio_LuaImport in;
-	luaimport_init(&in, self->script.L, self->client);
-	if (luaimport_open(&in, "sequencertick")) {		
-		luaimport_pcall(&in, 0);		
+	psy_LuaImport in;
+	psy_luaimport_init(&in, self->script.L, self->client);
+	if (psy_luaimport_open(&in, "sequencertick")) {		
+		psy_luaimport_pcall(&in, 0);		
     }
-	luaimport_dispose(&in);  
+	psy_luaimport_dispose(&in);  
 }
 
 psy_audio_MachineInfo* info(psy_audio_LuaPlugin* self)

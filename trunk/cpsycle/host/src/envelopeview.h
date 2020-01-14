@@ -24,14 +24,17 @@ typedef struct {
 	psy_List* dragpoint;
 	int sustainstage;
 	int dragrelative;
-	ui_margin spacing;	
+	psy_ui_Margin spacing;	
 	psy_dsp_ADSRSettings dummysettings;
 	psy_dsp_ADSRSettings* adsr;
 	ADSRPointMapper pointmapper;
+	char* text;
 } EnvelopeView;
 
-void InitEnvelopeView(EnvelopeView*, psy_ui_Component* parent);
+void envelopeview_init(EnvelopeView*, psy_ui_Component* parent);
 void EnvelopeViewSetAdsrEnvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
 void EnvelopeViewUpdate(EnvelopeView*);
+void envelopeview_settext(EnvelopeView*, const char* text);
+
 
 #endif

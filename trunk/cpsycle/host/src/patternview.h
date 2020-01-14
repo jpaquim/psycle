@@ -15,8 +15,7 @@
 #include "workspace.h"
 
 typedef struct {
-	psy_ui_Component component;
-	struct PatternView* view;
+	psy_ui_Component component;	
 	Workspace* workspace;
 } PatternViewStatus;
 
@@ -32,18 +31,18 @@ typedef struct {
 	Workspace* workspace;
 } PatternViewBar;
 
-void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent, Workspace*);
+void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
+	Workspace*);
 
 typedef struct PatternView {
 	psy_ui_Component component;
-	ui_notebook notebook;
-	ui_notebook editnotebook;
-	TrackerView trackerview;
-	PatternProperties properties;
-	Pianoroll pianoroll;	
 	TabBar tabbar;
-	Workspace* workspace;
-	unsigned int lpb;	
+	psy_ui_Notebook notebook;
+	psy_ui_Notebook editnotebook;
+	TrackerView trackerview;
+	Pianoroll pianoroll;	
+	PatternProperties properties;	
+	Workspace* workspace;	
 } PatternView;
 
 void patternview_init(PatternView*, psy_ui_Component* parent,

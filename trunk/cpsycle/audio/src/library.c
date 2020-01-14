@@ -10,29 +10,29 @@
 #include <portable.h>
 
 
-Library* library_alloc(void)
+psy_Library* psy_library_alloc(void)
 {
-	return (Library*) malloc(sizeof(Library));
+	return (psy_Library*) malloc(sizeof(psy_Library));
 }
 
-Library* library_allocinit(void)
+psy_Library* psy_library_allocinit(void)
 {
-	Library* rv;
+	psy_Library* rv;
 
-	rv = library_alloc();
+	rv = psy_library_alloc();
 	if (rv) {
-		library_init(rv);
+		psy_library_init(rv);
 	}
 	return rv;
 }
 
-void library_disposefree(Library* self)
+void psy_library_deallocate(psy_Library* self)
 {
-	library_dispose(self);
+	psy_library_dispose(self);
 	free(self);
 }
 
-int library_empty(Library* self)
+int psy_library_empty(psy_Library* self)
 {
 	return self->module == 0;
 }
@@ -51,14 +51,14 @@ static int FilterException(const char* path, int code, struct _EXCEPTION_POINTER
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 
-void library_init(Library* self)
+void psy_library_init(psy_Library* self)
 {
 	self->module = 0;
 	self->err = 0;
 	self->path = _strdup("");
 }
 
-void library_load(Library* self, const char* path)
+void psy_library_load(psy_Library* self, const char* path)
 {	
 	__try {						
 		free(self->path);
@@ -92,18 +92,18 @@ void library_load(Library* self, const char* path)
 	}
 }
 
-void library_unload(Library* self)
+void psy_library_unload(psy_Library* self)
 {
-	library_dispose(self);
-	library_init(self);
+	psy_library_dispose(self);
+	psy_library_init(self);
 }
 
-void* library_functionpointer(Library* self, const char* name)
+void* psy_library_functionpointer(psy_Library* self, const char* name)
 {
 	return GetProcAddress(self->module, name);
 }
 
-void library_dispose(Library* self)
+void psy_library_dispose(psy_Library* self)
 {
 	if (self->module) {
 		FreeLibrary(self->module);
@@ -118,24 +118,24 @@ void library_dispose(Library* self)
 
 #include <CoreFoundation/CoreFoundation.h>
 
-void library_init(Library* self)
+void psy_library_init(psy_Library* self)
 {
 	self->module = 0;
 	self->err = 0;
 }
 
-void library_load(Library* self, const char* path)
+void psy_library_load(psy_Library* self, const char* path)
 {		
 	self->module = CFBundleCreate (NULL, path);	
 }
 
-void* library_functionpointerd(Library* self, const char* name)
+void* psy_library_functionpointerd(psy_Library* self, const char* name)
 {
 	return (void*)
 		CFBundleGetFunctionPointerForName((CFBundleRef)self->module, name);
 }
 
-void library_dispose(Library* self)
+void psy_library_dispose(psy_Library* self)
 {
 	if (self->module) {
 		CFBundleUnloadExecutable ((CFBundleRef)self->module);
@@ -148,13 +148,13 @@ void library_dispose(Library* self)
 
 #include <dlfcn.h>
 
-void library_init(Library* self)
+void psy_library_init(psy_Library* self)
 {
 	self->module = 0;
 	self->err = 0;
 }
 
-void library_load(Library* self, const char* path)
+void psy_library_load(psy_Library* self, const char* path)
 {	
 	self->module = dlopen(path, RTLD_LAZY /*RTLD_NOW*/);
 	
@@ -163,12 +163,12 @@ void library_load(Library* self, const char* path)
 	}	
 }
 
-void* library_functionpointer(Library* self, const char* name)
+void* psy_library_functionpointer(psy_Library* self, const char* name)
 {
 	return dlsym(self->module, name);
 }
 
-void library_dispose(Library* self)
+void psy_library_dispose(psy_Library* self)
 {
 	if (self->module) {
 		dlclose(self->module);

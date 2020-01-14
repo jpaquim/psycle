@@ -85,6 +85,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\src\uialigner.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiapp.c
 # End Source File
 # Begin Source File
@@ -197,6 +201,10 @@ SOURCE=.\src\uiwinapp.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=.\src\uialigner.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiapp.h
 # End Source File
 # Begin Source File
@@ -302,10 +310,6 @@ SOURCE=.\src\uiterminal.h
 # Begin Source File
 
 SOURCE=.\src\uiwinapp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uiwincomponent.h
 # End Source File
 # End Group
 # End Target

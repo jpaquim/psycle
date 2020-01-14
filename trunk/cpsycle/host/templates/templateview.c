@@ -12,7 +12,7 @@ void InitnameView(nameView* patternview, psy_ui_Component* parent)
 void Draw(nameView* self, ui_graphics* g)
 {	   	
     ui_size size = ui_component_size(&self->component);    
-	ui_rectangle r;
-    ui_setrectangle(&r, 0, 0, size.width, size.height);
+	psy_ui_Rectangle r;
+    psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
     ui_drawrectangle(g, r);
 }

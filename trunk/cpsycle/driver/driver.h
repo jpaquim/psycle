@@ -3,6 +3,12 @@
 
 #include "../detail/os.h"
 
+#if !defined(PSY_AUDIODRIVER_H)
+#define PSY_AUDIODRIVER_H
+
+#ifndef DLL_DRIVER_EXPORTS
+#define DLL_DRIVER_EXPORTS
+
 #ifdef __cplusplus
   #define EXPORT extern "C" __declspec (dllexport)
 #else
@@ -14,8 +20,7 @@
 #endif
 #endif
 
-#if !defined(DRIVER_H)
-#define DRIVER_H
+#endif
 
 #include <properties.h>
 #include <signal.h>
@@ -31,26 +36,27 @@ typedef struct {
 typedef psy_dsp_amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples,
 	int* playing);
 
-typedef struct Driver {
+typedef struct psy_AudioDriver {
 	AUDIODRIVERWORKFN _pCallback;	
 	void* _callbackContext;
 	psy_Properties* properties;
-	int (*open)(struct Driver*);
-	int (*dispose)(struct Driver*);
-	void (*free)(struct Driver*);	
-	void (*configure)(struct Driver*, psy_Properties*);	
-	int (*close)(struct Driver*);
-	void (*connect)(struct Driver*, void* context, AUDIODRIVERWORKFN callback,
+	int (*open)(struct psy_AudioDriver*);
+	int (*dispose)(struct psy_AudioDriver*);
+	void (*deallocate)(struct psy_AudioDriver*);	
+	void (*configure)(struct psy_AudioDriver*, psy_Properties*);	
+	int (*close)(struct psy_AudioDriver*);
+	void (*connect)(struct psy_AudioDriver*, void* context,
+		AUDIODRIVERWORKFN callback,
 		void* handle);
-	unsigned int (*samplerate)(struct Driver*);
+	unsigned int (*samplerate)(struct psy_AudioDriver*);
 	psy_Signal signal_stop;
-} Driver;
+} psy_AudioDriver;
 
+typedef psy_AudioDriver* (__cdecl *pfndriver_create)(void);
 
-typedef EXPORT Driver* (__cdecl *pfndriver_create)(void);
-
-EXPORT Driver* __cdecl driver_create(void);
+EXPORT psy_AudioDriver* __cdecl driver_create(void);
 
 EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void);
+
 
 #endif

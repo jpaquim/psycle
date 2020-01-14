@@ -13,7 +13,6 @@
 #include <excpt.h>
 #include <stdlib.h>
 #include <commctrl.h> // common control header
-#include "uiwincomponent.h"
 
 int iDeltaPerLine = 120;
 static int mousetracking = 0;
@@ -125,16 +124,21 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					psy_signal_emit(&component->signal_timer, component, 1,
 						(int) wParam);
 				}
-			case WM_KEYDOWN:				
-				if (component->signal_keydown.slots) {
-					psy_ui_KeyEvent keyevent;
-					
-					psy_ui_keyevent_init(&keyevent, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
-						(lParam & 0x40000000) == 0x40000000);
-					psy_signal_emit(&component->signal_keydown, component, 1,
-						&keyevent);
+			case WM_KEYDOWN:								
+			{
+				psy_ui_KeyEvent ev;
+				component->propagateevent = component->defaultpropagation;										
+				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+					(lParam & 0x40000000) == 0x40000000);
+				component->vtable->onkeydown(component, &ev);
+				psy_signal_emit(&component->signal_keydown, component, 1,
+					&ev);
+				if (component->propagateevent) {
+					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
 				}				
+				component->propagateevent = component->defaultpropagation;				
+			}
 			break;
 			case WM_KILLFOCUS:
 				if (component->signal_focuslost.slots) {
@@ -145,16 +149,13 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			default:
 			break;
 		}
-		if (component->platform) {
-			return CallWindowProc(ui_win_component(component)->wndproc, hwnd,
-				message, wParam, lParam);
-		}
+		return CallWindowProc(component->wndproc, hwnd, message, wParam, lParam);
 	}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
-LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
-	LPARAM lParam)
+LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message, 
+                               WPARAM wParam, LPARAM lParam)
 {	
     PAINTSTRUCT  ps ;     
 	psy_ui_Component*   component;
@@ -189,7 +190,7 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 			break;		
 			case WM_SIZE:			
 				{
-					ui_size size;
+					psy_ui_Size size;
 					if (component->alignchildren) {
 						ui_component_align(component);
 					}
@@ -215,7 +216,7 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
 					if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
-						return (intptr_t) ui_win_component(component)->background;
+						return (intptr_t) component->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
@@ -251,7 +252,7 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 				return 0 ;
 			break;
 			case WM_PAINT :			
-				if (component->vtable->draw || component->signal_draw.slots ||
+				if (component->vtable->ondraw || component->signal_draw.slots ||
 						component->backgroundmode != BACKGROUND_NONE) {
 					HDC bufferDC;
 					HBITMAP bufferBmp;
@@ -271,12 +272,13 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 					} else {
 						ui_graphics_init(&g, hdc);
 					}
-					ui_setrectangle(&g.clip,
+					psy_ui_setrectangle(&g.clip,
 						ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
 						ps.rcPaint.bottom - ps.rcPaint.top);				
 					if (component->backgroundmode == BACKGROUND_SET) {
-						ui_rectangle r;
-						ui_setrectangle(&r,
+						psy_ui_Rectangle r;
+
+						psy_ui_setrectangle(&r,
 						rect.left, rect.top, rect.right - rect.left,
 						rect.bottom - rect.top);				
 						ui_drawsolidrectangle(&g, r, component->backgroundcolor);
@@ -287,8 +289,8 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 						hPrevFont = SelectObject(g.hdc,
 							app.defaults.defaultfont.hfont);
 					}
-					if (component->vtable->draw) {
-						component->vtable->draw(component, &g);
+					if (component->vtable->ondraw) {
+						component->vtable->ondraw(component, &g);
 					}
 					psy_signal_emit(&component->signal_draw, component, 1, &g);
 					if (hPrevFont) {
@@ -333,151 +335,160 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 					return 0;
 				}
 			break;
-			case WM_KEYDOWN:							
-				component->propagateevent = component->defaultpropagation;
-				if (component->signal_keydown.slots) {
-					psy_ui_KeyEvent ev;
-					
-					psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
-						(lParam & 0x40000000) == 0x40000000);
-					psy_signal_emit(&component->signal_keydown, component, 1,
-						&ev);
-				}
+			case WM_KEYDOWN:
+			{
+				psy_ui_KeyEvent ev;
+				component->propagateevent = component->defaultpropagation;										
+				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+					(lParam & 0x40000000) == 0x40000000);
+				component->vtable->onkeydown(component, &ev);
+				psy_signal_emit(&component->signal_keydown, component, 1,
+					&ev);
 				if (component->propagateevent) {
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
 				}				
 				component->propagateevent = component->defaultpropagation;
-				return 0;				
+				return 0;
+			}
 			break;
-			case WM_KEYUP:			
-				component->propagateevent = component->defaultpropagation;
-				if (component->signal_keyup.slots) {
-					psy_ui_KeyEvent ev;
-					
-					psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
-						(lParam & 0x40000000) == 0x40000000);
-					psy_signal_emit(&component->signal_keyup, component, 1,
-						&ev);
-				}
+			case WM_KEYUP:
+			{
+				psy_ui_KeyEvent ev;
+
+				component->propagateevent = component->defaultpropagation;					
+				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+					(lParam & 0x40000000) == 0x40000000);
+				component->vtable->onkeyup(component, &ev);
+				psy_signal_emit(&component->signal_keyup, component, 1,
+					&ev);				
 				if (component->propagateevent) {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
 				}				
 				component->propagateevent = component->defaultpropagation;
 				return 0;
+			}
 			break;
-			case WM_LBUTTONUP:			
-				if (component->signal_mouseup.slots) {
-					psy_ui_MouseEvent ev;
+			case WM_LBUTTONUP:
+			{
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-					psy_signal_emit(&component->signal_mouseup, component, 1,
-						&ev);
-					return 0 ;
-				}
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
+				component->vtable->onmouseup(component, &ev);
+				psy_signal_emit(&component->signal_mouseup, component, 1,
+					&ev);
+				return 0;
+			}
 			break;
-			case WM_RBUTTONUP:			
-				if (component->signal_mouseup.slots) {
-					psy_ui_MouseEvent ev;
+			case WM_RBUTTONUP:							
+			{
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-					psy_signal_emit(&component->signal_mouseup, component, 1,
-						&ev);
-					return 0 ;
-				}			
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
+				component->vtable->onmouseup(component, &ev);
+				psy_signal_emit(&component->signal_mouseup, component, 1,
+					&ev);
+				return 0;
+			}
 			break;
 			case WM_MBUTTONUP:			
-				if (component->signal_mouseup.slots) {			
-					psy_ui_MouseEvent ev;
+			{			
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-					psy_signal_emit(&component->signal_mouseup, component, 1,
-						&ev);
-					return 0 ;
-				}
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
+				component->vtable->onmouseup(component, &ev);
+				psy_signal_emit(&component->signal_mouseup, component, 1,
+					&ev);
+				return 0 ;
+			}
 			break;
-			case WM_LBUTTONDOWN:			
-				if (component->signal_mousedown.slots) {
-					psy_ui_MouseEvent ev;
+			case WM_LBUTTONDOWN:
+			{
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-					psy_signal_emit(&component->signal_mousedown, component, 1,
-						&ev);
-					return 0 ;
-				}			
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
+				component->vtable->onmousedown(component, &ev);
+				psy_signal_emit(&component->signal_mousedown, component, 1,
+					&ev);
+				return 0;
+			}
 			break;
-			case WM_RBUTTONDOWN:			
-				if (component->signal_mousedown.slots) {		
-					psy_ui_MouseEvent ev;
+			case WM_RBUTTONDOWN:
+			{
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-					psy_signal_emit(&component->signal_mousedown, component, 1,
-						&ev);
-					return 0 ;
-				}
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
+				component->vtable->onmousedown(component, &ev);
+				psy_signal_emit(&component->signal_mousedown, component, 1,
+					&ev);
+				return 0;
+			}
 			break;
 			case WM_MBUTTONDOWN:			
-				if (component->signal_mousedown.slots) {		
-					psy_ui_MouseEvent ev;
+			{		
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-					psy_signal_emit(&component->signal_mousedown, component, 1,
-						&ev);
-					return 0 ;
-				}
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
+				component->vtable->onmousedown(component, &ev);
+				psy_signal_emit(&component->signal_mousedown, component, 1,
+					&ev);
+				return 0;
+			}
 			break;
-			case WM_LBUTTONDBLCLK:							
+			case WM_LBUTTONDBLCLK:
+			{
+				psy_ui_MouseEvent ev;
+				
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam),
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
 				component->propagateevent = component->defaultpropagation;
-				if (component->signal_mousedoubleclick.slots) {
-					psy_ui_MouseEvent ev;
-
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam),
-						(SHORT)HIWORD (lParam), MK_LBUTTON, 0);					
-					psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
-						&ev);
-				}
+				component->vtable->onmousedoubleclick(component, &ev);
+				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
+					&ev);				
 				if (component->propagateevent) {					
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
 				}				
 				component->propagateevent = component->defaultpropagation;
 				return 0;
+			}
 			break;
-			case WM_MBUTTONDBLCLK:			
-				if (component->signal_mousedoubleclick.slots) {
-					psy_ui_MouseEvent ev;
+			case WM_MBUTTONDBLCLK:
+			{
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-					psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
-						&ev);
-					return 0 ;
-				}
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
+				component->vtable->onmousedoubleclick(component, &ev);
+				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
+					&ev);
+				return 0 ;
+			}
 			break;		
-			case WM_RBUTTONDBLCLK:			
-				if (component->signal_mousedoubleclick.slots) {
-					psy_ui_MouseEvent ev;
+			case WM_RBUTTONDBLCLK:
+			{				
+				psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-					psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
-						&ev);
-					return 0;
-				}
+				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
+					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
+				component->vtable->onmousedoubleclick(component, &ev);
+				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
+					&ev);
+				return 0;
+			}
 			break;
 			case WM_MOUSEMOVE:
 				if (!mousetracking) {
 					TRACKMOUSEEVENT tme;
-
-					if (component && component->signal_mouseenter.slots) {	
-						psy_signal_emit(&component->signal_mouseenter, component, 0);
-					}
+					
+					component->vtable->onmouseenter(component);
+					psy_signal_emit(&component->signal_mouseenter, component, 0);					
 					tme.cbSize = sizeof(TRACKMOUSEEVENT);
 					tme.dwFlags = TME_LEAVE | TME_HOVER;
 					tme.dwHoverTime = 200;
@@ -487,16 +498,17 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 					} 
 					return 0;
 				}								
-				if (component->signal_mousemove.slots) {
+				{
 					psy_ui_MouseEvent ev;
 
 					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), wParam, 0);
+					component->vtable->onmousemove(component, &ev);
 					psy_signal_emit(&component->signal_mousemove, component, 1,
 						&ev);
 					return 0 ;
 				}
-			break;
+			break;			
 			case WM_SETTINGCHANGE:
 			{
 				static int ulScrollLines;
@@ -537,7 +549,8 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							ui_win_component_sendmessage(component, WM_VSCROLL,
+							SendMessage((HWND) component->hwnd, 
+								WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);
 							component->accumwheeldelta -= iDeltaPerLine ;							
 						}				
@@ -554,7 +567,7 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							ui_win_component_sendmessage(component, WM_VSCROLL,
+							SendMessage((HWND) component->hwnd, WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);							
 							component->accumwheeldelta += iDeltaPerLine;							
 						}
@@ -567,12 +580,13 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message, WPARAM wParam,
 					return 0;
 				}
 			break;
-			case WM_MOUSELEAVE:	
+			case WM_MOUSELEAVE:
+			{
 				mousetracking = 0;
-				if (component->signal_mouseleave.slots) {				                    
-					psy_signal_emit(&component->signal_mouseleave, component, 0);
-					return 0;
-				}			
+				component->vtable->onmouseleave(component);
+				psy_signal_emit(&component->signal_mouseleave, component, 0);
+				return 0;
+			}				
 			break;
 			case WM_VSCROLL:
 				handle_vscroll(hwnd, wParam, lParam);

@@ -13,36 +13,10 @@
 #include "../../detail/stdint.h"
 
 typedef enum {
-	UI_ALIGN_NONE,
-	UI_ALIGN_CLIENT,
-	UI_ALIGN_TOP,
-	UI_ALIGN_LEFT,
-	UI_ALIGN_BOTTOM,
-	UI_ALIGN_RIGHT,
-	UI_ALIGN_FILL
-} UiAlignType;
-
-typedef enum {
-	UI_JUSTIFY_NONE,	
-	UI_JUSTIFY_EXPAND	
-} UiJustifyType;
-
-typedef enum {
 	BACKGROUND_NONE,
 	BACKGROUND_SET,
 	BACKGROUND_PARENT,
 } BackgroundMode;
-
-typedef enum {
-	UI_NOEXPAND = 1,	
-	UI_HORIZONTALEXPAND = 2,
-	UI_VERTICALEXPAND = 4	
-} UiExpandMode;
-
-typedef enum {
-	UI_HORIZONTAL,
-	UI_VERTICAL
-} UiOrientation;
 
 typedef struct {		               
    int (*childenum)(void*, void*);   
@@ -50,18 +24,39 @@ typedef struct {
 } EnumCallback;
 
 
+typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
+	LPARAM lParam);
+
 // vtable function pointers
-typedef void (*psy_ui_fp_preferredsize)(struct psy_ui_Component*,
-	ui_size* limit, ui_size* rv);
-typedef void (*psy_ui_fp_draw)(struct psy_ui_Component*, psy_ui_Graphics*);
+typedef void (*psy_ui_fp_onpreferredsize)(struct psy_ui_Component*,
+	psy_ui_Size* limit, psy_ui_Size* rv);
+typedef void (*psy_ui_fp_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
+typedef void (*psy_ui_fp_onmousedown)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_onmousemove)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_onmouseup)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_onmousedoubleclick)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_onmouseenter)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_onmouseleave)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_onkeydown)(struct psy_ui_Component*, psy_ui_KeyEvent*);
+typedef void (*psy_ui_fp_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 
 typedef struct psy_ui_ComponentVTable {
-	psy_ui_fp_draw draw;
-	psy_ui_fp_preferredsize preferredsize;
+	psy_ui_fp_ondraw ondraw;
+	psy_ui_fp_onpreferredsize onpreferredsize;
+	psy_ui_fp_onmousedown onmousedown;
+	psy_ui_fp_onmousemove onmousemove;
+	psy_ui_fp_onmouseup onmouseup;
+	psy_ui_fp_onmousedoubleclick onmousedoubleclick;
+	psy_ui_fp_onmouseenter onmouseenter;
+	psy_ui_fp_onmouseleave onmouseleave;
+	psy_ui_fp_onkeydown onkeydown;
+	psy_ui_fp_onkeydown onkeyup;
 } psy_ui_ComponentVtable;
 
 typedef struct psy_ui_Component {
-	psy_ui_ComponentVtable* vtable;	
+	psy_ui_ComponentVtable* vtable;
+	uintptr_t hwnd;
+	uintptr_t winid;	
 	psy_Signal signal_size;
 	psy_Signal signal_draw;
 	psy_Signal signal_timer;
@@ -83,17 +78,17 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_hide;
 	psy_Signal signal_windowproc;
 	psy_Signal signal_align;
-	psy_Signal signal_preferredsize;
+	//psy_Signal signal_preferredsize;
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
 	psy_Signal signal_focus;
 	EnumCallback childenum;
-	UiAlignType align;
-	UiJustifyType justify;
+	psy_ui_AlignType align;
+	psy_ui_JustifyType justify;
 	int alignexpandmode;
 	int alignchildren;
-	ui_margin margin;
-	ui_margin spacing;
+	psy_ui_Margin margin;
+	psy_ui_Margin spacing;
 	int doublebuffered;
 	int defaultpropagation;
 	int propagateevent;
@@ -102,20 +97,21 @@ typedef struct psy_ui_Component {
 	int scrollstepx;
 	int scrollstepy;
 	int debugflag;
-	uint32_t backgroundcolor;
-	uint32_t color;
+	unsigned int backgroundcolor;
+	unsigned int color;
 	BackgroundMode backgroundmode;
-	ui_font font;	
-	int visible;	
+	psy_ui_Font font;
+	HBRUSH background;
+	int visible;
+	winproc wndproc;
 	int accumwheeldelta;
 	int wheelscroll;
 	int handlevscroll;
 	int handlehscroll;
-	int cursor;
-	void* platform;
+	int cursor;	
 } psy_ui_Component;
 
-void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font);
+void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 
 void ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
 void ui_component_dispose(psy_ui_Component*);
@@ -151,26 +147,26 @@ void ui_component_enumerate_children(psy_ui_Component*, void* context, int (*chi
 psy_List* ui_component_children(psy_ui_Component*, int recursive);
 void ui_component_capture(psy_ui_Component*);
 void ui_component_releasecapture();
-ui_size ui_component_size(psy_ui_Component*);
-ui_rectangle ui_component_position(psy_ui_Component*);
-ui_size ui_component_frame_size(psy_ui_Component*);
+psy_ui_Size ui_component_size(psy_ui_Component*);
+psy_ui_Rectangle ui_component_position(psy_ui_Component*);
+psy_ui_Size ui_component_frame_size(psy_ui_Component*);
 void ui_component_invalidate(psy_ui_Component*);
-void ui_component_invalidaterect(psy_ui_Component*, const ui_rectangle* rect);
+void ui_component_invalidaterect(psy_ui_Component*, const psy_ui_Rectangle*);
 void ui_component_update(psy_ui_Component*);
 void ui_component_setfocus(psy_ui_Component*);
 int ui_component_hasfocus(psy_ui_Component*);
-void ui_component_setfont(psy_ui_Component*, ui_font* font);
+void ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
 void ui_component_propagateevent(psy_ui_Component*);
 void ui_component_preventdefault(psy_ui_Component*);
 void ui_component_init_base(psy_ui_Component*);
 void ui_component_init_signals(psy_ui_Component*);
 int ui_component_visible(psy_ui_Component*);
 void ui_component_align(psy_ui_Component*);
-void ui_component_setmargin(psy_ui_Component*, const ui_margin*);
-void ui_component_setspacing(psy_ui_Component*, const ui_margin*);
-void ui_component_setalign(psy_ui_Component*, UiAlignType align);
+void ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
+void ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
+void ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 void ui_component_enablealign(psy_ui_Component*);
-void ui_component_setalignexpand(psy_ui_Component*, UiExpandMode);
+void ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
 void ui_component_preventalign(psy_ui_Component*);
 void ui_component_enableinput(psy_ui_Component*, int recursive);
 void ui_component_preventinput(psy_ui_Component*, int recursive);
@@ -179,21 +175,20 @@ void ui_component_setbackgroundcolor(psy_ui_Component*, uint32_t color);
 void ui_component_setcolor(psy_ui_Component*, uint32_t color);
 void ui_component_starttimer(psy_ui_Component*, unsigned int id, unsigned int interval);
 void ui_component_stoptimer(psy_ui_Component*, unsigned int id);
-ui_size ui_component_textsize(psy_ui_Component*, const char*);
-ui_textmetric ui_component_textmetric(psy_ui_Component*);
-ui_size ui_component_preferredsize(psy_ui_Component*, ui_size* limit);
+psy_ui_Size ui_component_textsize(psy_ui_Component*, const char*);
+psy_ui_TextMetric ui_component_textmetric(psy_ui_Component*);
+psy_ui_Size ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
 void ui_component_seticonressource(psy_ui_Component*, int ressourceid);
-void* ui_component_platform(psy_ui_Component*);
-uintptr_t ui_component_platformhandle(psy_ui_Component*);
 
-psy_List* ui_components_setalign(psy_List*, UiAlignType, const ui_margin*);
-psy_List* ui_components_setmargin(psy_List*, const ui_margin*);
+psy_List* ui_components_setalign(psy_List*, psy_ui_AlignType,
+	const psy_ui_Margin*);
+psy_List* ui_components_setmargin(psy_List*, const psy_ui_Margin*);
 
 int ui_openfile(psy_ui_Component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);
 int ui_savefile(psy_ui_Component* self, char* title, char* filter,
 	char* defextension, const char* szInitialDir, char* filename);
 int ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
-
+void ui_component_doublebuffer(psy_ui_Component*);
 
 #endif

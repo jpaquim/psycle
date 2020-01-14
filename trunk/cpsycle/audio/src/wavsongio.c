@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void wav_songio_load(psy_audio_SongFile* self)
+void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 {	
 	psy_audio_Sample* sample;
 	psy_audio_Instrument* instrument;	
@@ -21,7 +21,7 @@ void wav_songio_load(psy_audio_SongFile* self)
 	sample = sample_allocinit();
 	sample_load(sample, self->path);
 	index = index = sampleindex_make(0, 0);
-	samples_insert(&self->song->samples, sample, index);
+	psy_audio_samples_insert(&self->song->samples, sample, index);
 	instrument = instrument_allocinit();
 	instrument_setname(instrument, sample_name(sample));
 	instruments_insert(&self->song->instruments, instrument,
@@ -72,7 +72,7 @@ void wav_songio_load(psy_audio_SongFile* self)
 	}
 }
 
-void wav_songio_save(psy_audio_SongFile* self)
+void psy_audio_wav_songio_save(psy_audio_SongFile* self)
 {
 
 }

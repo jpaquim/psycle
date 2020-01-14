@@ -12,14 +12,14 @@ static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,
 
 void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 {		
-	ui_margin margin;
+	psy_ui_Margin margin;
 
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);	
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);	
-	ui_label_init(&self->header, &self->component);	
-	ui_label_settext(&self->header, "Step");
+	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_label_init(&self->header, &self->component);	
+	psy_ui_label_settext(&self->header, "Step");
 	ui_combobox_init(&self->combobox, &self->component);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
 		stepbox_onselectionchanged);
@@ -27,11 +27,11 @@ void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 	stepbox_build(self);
 	ui_combobox_setcursel(&self->combobox,
 		workspace_cursorstep(workspace) - 1);	
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	psy_list_free(ui_components_setalign(		
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT, &margin));	
+		psy_ui_ALIGN_LEFT, &margin));	
 }
 
 void stepbox_build(StepBox* self)

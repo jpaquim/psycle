@@ -264,6 +264,10 @@ SOURCE=.\src\settingsview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\skincoord.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\skingraphics.c
 # End Source File
 # Begin Source File

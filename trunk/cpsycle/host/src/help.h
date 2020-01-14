@@ -14,12 +14,13 @@
 
 typedef struct {
 	psy_ui_Component component;
-	ui_notebook notebook;
+	psy_ui_Notebook notebook;
 	psy_ui_Editor editor;
 	TabBar tabbar;
 	Workspace* workspace;
 } Help;
 
 void help_init(Help*, psy_ui_Component* parent, Workspace*);
+psy_ui_Component* help_base(Help*);
 
 #endif

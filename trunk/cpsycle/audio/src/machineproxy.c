@@ -25,6 +25,7 @@ static void machineproxy_work(psy_audio_MachineProxy*, psy_audio_BufferContext*)
 static void machineproxy_generateaudio(psy_audio_MachineProxy*, psy_audio_BufferContext*);
 static void machineproxy_seqtick(psy_audio_MachineProxy*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
+static void machineproxy_sequencertick(psy_audio_MachineProxy*);
 static void machineproxy_sequencerlinetick(psy_audio_MachineProxy*);
 static psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy*, psy_List* events);
 static void machineproxy_stop(psy_audio_MachineProxy*);
@@ -112,6 +113,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.generateaudio = (fp_machine_generateaudio)
 			machineproxy_generateaudio;
 		vtable.seqtick = (fp_machine_seqtick) machineproxy_seqtick;
+		vtable.sequencertick = (fp_machine_sequencertick)
+			machineproxy_sequencertick;
 		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
 			machineproxy_sequencerlinetick;
 		vtable.sequencerinsert = (fp_machine_sequencerinsert)
@@ -269,6 +272,24 @@ void machineproxy_seqtick(psy_audio_MachineProxy* self, uintptr_t channel,
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "seqtick", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+
+}
+
+void machineproxy_sequencertick(psy_audio_MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->sequencertick(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except(FilterException(self, "sequencertick", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

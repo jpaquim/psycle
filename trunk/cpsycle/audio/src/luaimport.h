@@ -1,15 +1,15 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(LUAIMPORT_H)
-#define LUAIMPORT_H
+#if !defined(PSY_AUDIO_LUAIMPORT_H)
+#define PSY_AUDIO_LUAIMPORT_H
 
 #include "psyclescript.h"
 
 enum {
-	psy_audio_LUAIMPORT_ERR_NOT_OPEN = 1,
-	psy_audio_LUAIMPORT_ERR_NO_PROXY = 2,
-	psy_audio_LUAIMPORT_ERR_PCALL = 3	
+	psy_LUAIMPORT_ERR_NOT_OPEN = 1,
+	psy_LUAIMPORT_ERR_NO_PROXY = 2,
+	psy_LUAIMPORT_ERR_PCALL = 3	
 };
 
 typedef struct {	
@@ -21,14 +21,14 @@ typedef struct {
 	void* target_;
 	int lasterr;
 	const char* errmsg;
-} psy_audio_LuaImport;
+} psy_LuaImport;
 
-void luaimport_init(psy_audio_LuaImport*, lua_State*, void* target);
-void luaimport_dispose(psy_audio_LuaImport*);
+void psy_luaimport_init(psy_LuaImport*, lua_State*, void* target);
+void psy_luaimport_dispose(psy_LuaImport*);
 
-void luaimport_settarget(psy_audio_LuaImport*, void* target);
-int luaimport_open(psy_audio_LuaImport*, const char* method);
-void luaimport_pcall(psy_audio_LuaImport*, int numret);
-void luaimport_close(psy_audio_LuaImport*);
+void psy_luaimport_settarget(psy_LuaImport*, void* target);
+int psy_luaimport_open(psy_LuaImport*, const char* method);
+void psy_luaimport_pcall(psy_LuaImport*, int numret);
+void psy_luaimport_close(psy_LuaImport*);
 
 #endif

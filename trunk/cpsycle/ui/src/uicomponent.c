@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uicomponent.h"
+#include "uialigner.h"
 #include "uiapp.h"
 #include "uiwinapp.h"
 #include "uimenu.h"
@@ -13,22 +14,16 @@
 #include <stdio.h>
 #include <shlobj.h>
 #include <portable.h>
-#include "uiwincomponent.h"
 
+static int windowstyle(psy_ui_Component*);
+static int windowexstyle(psy_ui_Component*);
 
-BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam);
-BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam);
-
-static int GetWindowStyle(HWND hwnd);
-static int GetWindowExStyle(HWND hwnd);
+BOOL CALLBACK childenumproc(HWND hwnd, LPARAM lParam);
+BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
 
 static void enableinput(psy_ui_Component*, int enable, int recursive);
-// vtable defaults
-static void preferredsize(psy_ui_Component*, ui_size* limit, ui_size* rv);
 
-
-
-void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font)
+void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (font && main) {
 		psy_List* p;
@@ -36,8 +31,7 @@ void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font)
 
 		if (main->font.hfont == app.defaults.defaultfont.hfont) {
 			main->font.hfont = font->hfont;
-			ui_win_component_sendmessage(main, WM_SETFONT,
-				(WPARAM) font->hfont, 0);
+			SendMessage((HWND)main->hwnd, WM_SETFONT, (WPARAM) font->hfont, 0);
 		}
 		for (p = q = ui_component_children(main, 1); p != 0; p = p->next) {
 			psy_ui_Component* child;
@@ -45,7 +39,7 @@ void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font)
 			child = (psy_ui_Component*)p->entry;
 			if (child->font.hfont == app.defaults.defaultfont.hfont) {
 				child->font.hfont = font->hfont;	
-				ui_win_component_sendmessage(child, WM_SETFONT,
+				SendMessage((HWND)child->hwnd, WM_SETFONT,
 					(WPARAM) font->hfont, 0);
 				ui_component_align(child);
 			}		
@@ -66,14 +60,34 @@ void ui_replacedefaultfont(psy_ui_Component* main, ui_font* font)
 	}
 }
 
+// vtable
+static void onpreferredsize(psy_ui_Component*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void onmouseenter(psy_ui_Component* self) { }
+static void onmouseleave(psy_ui_Component* self) { }
+static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
+static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
+
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
 
 static void vtable_init(void)
 {
 	if (!vtable_initialized) {
-		vtable.draw = 0;
-		vtable.preferredsize = preferredsize;
+		vtable.ondraw = 0;
+		vtable.onpreferredsize = onpreferredsize;
+		vtable.onmousedown = onmousedown;
+		vtable.onmousemove = onmousemove;
+		vtable.onmouseup = onmouseup;
+		vtable.onmousedoubleclick = onmousedoubleclick;
+		vtable.onmouseenter = onmouseenter;
+		vtable.onmouseleave = onmouseleave;
+		vtable.onkeyup = onkeyup;
+		vtable.onkeydown = onkeydown;
+		vtable.onkeydown = onkeyup;
 	}
 }
 
@@ -84,37 +98,32 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 		int usecommand)
 {
 	int err = 0;
-	HINSTANCE hInstance;	
-
+	HINSTANCE hInstance;
 	psy_ui_WinApp* winapp;
-	psy_ui_WinComponent* platform;
 
-	platform = malloc(sizeof(psy_ui_WinComponent));
-	memset(platform, 0, sizeof(psy_ui_WinComponent));
-	self->platform = platform;
 	winapp = (psy_ui_WinApp*) app.platform;	
 	ui_component_init_signals(self);
 	if (parent) {
 #if defined(_WIN64)		
 		hInstance = (HINSTANCE) GetWindowLongPtr(
-			ui_win_component_hwnd(parent), GWLP_HINSTANCE);
+			(HWND)parent->hwnd, GWLP_HINSTANCE);
 #else
 		hInstance = (HINSTANCE) GetWindowLong(
-			ui_win_component_hwnd(parent), GWL_HINSTANCE);
+			(HWND)parent->hwnd, GWL_HINSTANCE);
 #endif
 	} else {
 		hInstance = winapp->instance;
 	}
-	ui_win_component(self)->hwnd = CreateWindow(
+	self->hwnd = (uintptr_t) CreateWindow(
 		classname,
 		NULL,		
 		dwStyle,
 		x, y, width, height,
-		parent ? ui_win_component_hwnd(parent) : NULL,
+		parent ? (HWND) parent->hwnd : NULL,
 		usecommand ? (HMENU)winapp->winid : NULL,
 		hInstance,
 		NULL);	
-	if (ui_win_component_hwnd(self) == NULL) {
+	if ((HWND) self->hwnd == NULL) {
 		char text[256];
 		unsigned long err;
 
@@ -124,8 +133,7 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 			MB_OK | MB_ICONERROR);
 		err = 1;
 	} else {
-		psy_table_insert(&winapp->selfmap, (uintptr_t)
-			ui_win_component_hwnd(self), self);
+		psy_table_insert(&winapp->selfmap, (uintptr_t) self->hwnd, self);
 	}
 	if (err == 0 && usecommand) {
 		psy_table_insert(&winapp->winidmap, winapp->winid, self);
@@ -133,19 +141,15 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 	}
 	ui_component_init_base(self);		
 #if defined(_WIN64)		
-		ui_win_component(self)->wndproc = (winproc) GetWindowLongPtr(
-			ui_win_component_hwnd(self), GWLP_WNDPROC);
+		self->wndproc = (winproc)GetWindowLongPtr((HWND)self->hwnd, GWLP_WNDPROC);
 #else		
-		ui_win_component(self)->wndproc = (winproc) GetWindowLong(
-			ui_win_component_hwnd(self), GWL_WNDPROC);
+		self->wndproc = (winproc)GetWindowLong((HWND)self->hwnd, GWL_WNDPROC);
 #endif
 	if (classname != winapp->componentclass && classname != winapp->appclass) {
 #if defined(_WIN64)		
-		SetWindowLongPtr(ui_win_component_hwnd(self), GWLP_WNDPROC,
-			(LONG_PTR) winapp->comwinproc);
+		SetWindowLongPtr((HWND)self->hwnd, GWLP_WNDPROC, (LONG_PTR) winapp->comwinproc);
 #else	
-		SetWindowLong(ui_win_component_hwnd(self), GWL_WNDPROC,
-			(LONG)winapp->comwinproc);
+		SetWindowLong((HWND)self->hwnd, GWL_WNDPROC, (LONG)winapp->comwinproc);
 #endif
 	}
 	if (!parent) {
@@ -154,14 +158,9 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 	return err;
 }
 
-void* ui_component_platform(psy_ui_Component* self)
-{
-	return self->platform;
-}
-
 void ui_component_init(psy_ui_Component* component, psy_ui_Component* parent)
 {		
-	psy_ui_WinApp* winapp;	
+	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;
 	ui_win32_component_init(component, parent, winapp->componentclass,
@@ -191,7 +190,7 @@ void ui_component_init_signals(psy_ui_Component* component)
 	psy_signal_init(&component->signal_focus);
 	psy_signal_init(&component->signal_focuslost);
 	psy_signal_init(&component->signal_align);
-	psy_signal_init(&component->signal_preferredsize);
+//	psy_signal_init(&component->signal_preferredsize);
 	psy_signal_init(&component->signal_windowproc);
 	psy_signal_init(&component->signal_command);
 }
@@ -202,14 +201,16 @@ void ui_component_init_base(psy_ui_Component* self) {
 	self->propagateevent = 0;
 	self->preventdefault = 0;
 	self->preventpreferredsize = 0;
-	self->align = UI_ALIGN_NONE;
-	self->justify = UI_JUSTIFY_EXPAND;
+	self->align = psy_ui_ALIGN_NONE;
+	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
-	self->alignexpandmode = UI_NOEXPAND;	
-	ui_margin_init(&self->margin, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
-	ui_margin_init(&self->spacing, ui_value_makepx(0), ui_value_makepx(0),
-		ui_value_makepx(0), ui_value_makepx(0));
+	self->alignexpandmode = psy_ui_NOEXPAND;	
+	psy_ui_margin_init(&self->margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
+	psy_ui_margin_init(&self->spacing, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
 	self->debugflag = 0;
 	self->defaultpropagation = 0;	
 	self->visible = 1;
@@ -219,97 +220,93 @@ void ui_component_init_base(psy_ui_Component* self) {
 	self->handlevscroll = 1;
 	self->handlehscroll = 1;
 	self->backgroundmode = BACKGROUND_SET;
-	self->backgroundcolor = ui_defaults_backgroundcolor(&app.defaults);	
+	self->backgroundcolor = ui_defaults_backgroundcolor(&app.defaults);
+	self->background = 0;
 	self->color = ui_defaults_color(&app.defaults);
-	self->cursor = UI_CURSOR_DEFAULT;
-	ui_font_init(&self->font, 0);
+	self->cursor = psy_ui_CURSOR_DEFAULT;
+	psy_ui_font_init(&self->font, 0);
 	ui_component_setfont(self, &app.defaults.defaultfont);
 	ui_component_setbackgroundcolor(self, self->backgroundcolor);
 	vtable_init();
 	self->vtable = &vtable;	
 }
 
-void ui_component_dispose(psy_ui_Component* self)
+void ui_component_dispose(psy_ui_Component* component)
 {	
-	psy_signal_dispose(&self->signal_size);
-	psy_signal_dispose(&self->signal_draw);
-	psy_signal_dispose(&self->signal_timer);
-	psy_signal_dispose(&self->signal_keydown);
-	psy_signal_dispose(&self->signal_keyup);
-	psy_signal_dispose(&self->signal_mousedown);
-	psy_signal_dispose(&self->signal_mouseup);
-	psy_signal_dispose(&self->signal_mousemove);
-	psy_signal_dispose(&self->signal_mousewheel);
-	psy_signal_dispose(&self->signal_mousedoubleclick);
-	psy_signal_dispose(&self->signal_mouseenter);
-	psy_signal_dispose(&self->signal_mousehover);
-	psy_signal_dispose(&self->signal_mouseleave);
-	psy_signal_dispose(&self->signal_scroll);
-	psy_signal_dispose(&self->signal_create);
-	psy_signal_dispose(&self->signal_destroy);
-	psy_signal_dispose(&self->signal_show);
-	psy_signal_dispose(&self->signal_hide);
-	psy_signal_dispose(&self->signal_focus);
-	psy_signal_dispose(&self->signal_focuslost);
-	psy_signal_dispose(&self->signal_align);
-	psy_signal_dispose(&self->signal_preferredsize);
-	psy_signal_dispose(&self->signal_windowproc);
-	psy_signal_dispose(&self->signal_command);
-	if (self->font.hfont && self->font.hfont !=
+	psy_signal_dispose(&component->signal_size);
+	psy_signal_dispose(&component->signal_draw);
+	psy_signal_dispose(&component->signal_timer);
+	psy_signal_dispose(&component->signal_keydown);
+	psy_signal_dispose(&component->signal_keyup);
+	psy_signal_dispose(&component->signal_mousedown);
+	psy_signal_dispose(&component->signal_mouseup);
+	psy_signal_dispose(&component->signal_mousemove);
+	psy_signal_dispose(&component->signal_mousewheel);
+	psy_signal_dispose(&component->signal_mousedoubleclick);
+	psy_signal_dispose(&component->signal_mouseenter);
+	psy_signal_dispose(&component->signal_mousehover);
+	psy_signal_dispose(&component->signal_mouseleave);
+	psy_signal_dispose(&component->signal_scroll);
+	psy_signal_dispose(&component->signal_create);
+	psy_signal_dispose(&component->signal_destroy);
+	psy_signal_dispose(&component->signal_show);
+	psy_signal_dispose(&component->signal_hide);
+	psy_signal_dispose(&component->signal_focus);
+	psy_signal_dispose(&component->signal_focuslost);
+	psy_signal_dispose(&component->signal_align);
+	// psy_signal_dispose(&component->signal_preferredsize);
+	psy_signal_dispose(&component->signal_windowproc);
+	psy_signal_dispose(&component->signal_command);
+	if (component->font.hfont && component->font.hfont !=
 			app.defaults.defaultfont.hfont) {
-		ui_font_dispose(&self->font);
+		psy_ui_font_dispose(&component->font);
 	}
-	if (self->platform && ui_win_component(self)->background) {
-		DeleteObject(ui_win_component(self)->background);
+	if (component->background) {
+		DeleteObject(component->background);
 	}
-	free(self->platform);
-	self->platform = 0;
 }
 
 void ui_component_destroy(psy_ui_Component* self)
 {
-	if (self->platform) {
-		DestroyWindow(ui_win_component_hwnd(self));
-	}
+	DestroyWindow((HWND)self->hwnd);
 }
 
 
-void ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx,
-	intptr_t stepy)
+void ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t stepy)
 {
-	ScrollWindow(ui_win_component_hwnd(self),
+	ScrollWindow ((HWND)self->hwnd,
 		self->scrollstepx * stepx,
 		self->scrollstepy * stepy, 
 		NULL, NULL) ;
-	UpdateWindow(ui_win_component_hwnd(self));
+	UpdateWindow ((HWND)self->hwnd);
 }
 
 
-ui_size ui_component_size(psy_ui_Component* self)
+psy_ui_Size ui_component_size(psy_ui_Component* self)
 {   
-	ui_size rv;
+	psy_ui_Size rv;
 	RECT rect ;
 	    
-    GetClientRect(ui_win_component_hwnd(self), &rect);
+    GetClientRect((HWND)self->hwnd, &rect);
 	rv.width = rect.right;
 	rv.height = rect.bottom;
 	return rv;
 }
 
-ui_rectangle ui_component_position(psy_ui_Component* self)
+psy_ui_Rectangle ui_component_position(psy_ui_Component* self)
 {   
-	ui_rectangle rv;
+	psy_ui_Rectangle rv;
 	RECT rc;
 	POINT pt;	
 	int width;
 	int height;	
 	    	
-    GetWindowRect(ui_win_component_hwnd(self), &rc);
+    GetWindowRect((HWND)self->hwnd, &rc);
 	width = rc.right - rc.left;
 	height = rc.bottom - rc.top;
 	pt.x = rc.left;
 	pt.y = rc.top;
-	ScreenToClient(GetParent(ui_win_component_hwnd(self)), &pt);
+	ScreenToClient(GetParent((HWND)self->hwnd), &pt);
 	rv.left = pt.x;
 	rv.top = pt.y;
 	rv.right =  pt.x + width;
@@ -317,12 +314,12 @@ ui_rectangle ui_component_position(psy_ui_Component* self)
 	return rv;
 }
 
-ui_size ui_component_frame_size(psy_ui_Component* self)
+psy_ui_Size ui_component_frame_size(psy_ui_Component* self)
 {   
-	ui_size rv;
+	psy_ui_Size rv;
 	RECT rect ;
 	    
-    GetWindowRect(ui_win_component_hwnd(self), &rect) ;
+    GetWindowRect((HWND)self->hwnd, &rect) ;
 	rv.width = rect.right;
 	rv.height = rect.bottom;
 	return rv;
@@ -330,43 +327,43 @@ ui_size ui_component_frame_size(psy_ui_Component* self)
 
 void ui_component_show_state(psy_ui_Component* self, int cmd)
 {
-	ShowWindow(ui_win_component_hwnd(self), cmd);
-	UpdateWindow(ui_win_component_hwnd(self)) ;
+	ShowWindow((HWND)self->hwnd, cmd);
+	UpdateWindow((HWND)self->hwnd) ;
 }
 
 void ui_component_show(psy_ui_Component* self)
 {
 	self->visible = 1;
-	ShowWindow(ui_win_component_hwnd(self), SW_SHOW);
-	UpdateWindow(ui_win_component_hwnd(self)) ;
+	ShowWindow((HWND)self->hwnd, SW_SHOW);
+	UpdateWindow((HWND)self->hwnd) ;
 }
 
 void ui_component_hide(psy_ui_Component* self)
 {
 	self->visible = 0;
-	ShowWindow(ui_win_component_hwnd(self), SW_HIDE);
-	UpdateWindow(ui_win_component_hwnd(self)) ;
+	ShowWindow((HWND)self->hwnd, SW_HIDE);
+	UpdateWindow((HWND)self->hwnd) ;
 }
 
 void ui_component_showhorizontalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
-	SetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE) | WS_HSCROLL);
+	SetWindowLongPtr((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr((HWND)self->hwnd, GWL_STYLE) | WS_HSCROLL);
 #else
-	SetWindowLong(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLong(ui_win_component_hwnd(self), GWL_STYLE) | WS_HSCROLL);
+	SetWindowLong((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLong((HWND)self->hwnd, GWL_STYLE) | WS_HSCROLL);
 #endif
 }
 
 void ui_component_hidehorizontalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
-	SetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE) & ~WS_HSCROLL);
+	SetWindowLongPtr((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr((HWND)self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
 #else
-	SetWindowLong(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLong(ui_win_component_hwnd(self), GWL_STYLE) & ~WS_HSCROLL);
+	SetWindowLong((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLong((HWND)self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
 #endif
 }
 
@@ -377,28 +374,28 @@ void ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int 
 	si.nMin = min;
 	si.nMax = max;
 	si.fMask = SIF_RANGE;	
-	SetScrollInfo(ui_win_component_hwnd(self), SB_HORZ, &si, TRUE);
+	SetScrollInfo((HWND)self->hwnd, SB_HORZ, &si, TRUE);
 }
 
 void ui_component_showverticalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
-	SetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE) | WS_VSCROLL);
+	SetWindowLongPtr((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr((HWND)self->hwnd, GWL_STYLE) | WS_VSCROLL);
 #else
-	SetWindowLong(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLong(ui_win_component_hwnd(self), GWL_STYLE) | WS_VSCROLL);
+	SetWindowLong((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLong((HWND)self->hwnd, GWL_STYLE) | WS_VSCROLL);
 #endif
 }
 
 void ui_component_hideverticalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
-	SetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLongPtr(ui_win_component_hwnd(self), GWL_STYLE) & ~WS_VSCROLL);
+	SetWindowLongPtr((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLongPtr((HWND)self->hwnd, GWL_STYLE) & ~WS_VSCROLL);
 #else
-	SetWindowLong(ui_win_component_hwnd(self), GWL_STYLE, 
-		GetWindowLong(ui_win_component_hwnd(self), GWL_STYLE) & ~WS_VSCROLL);
+	SetWindowLong((HWND)self->hwnd, GWL_STYLE, 
+		GetWindowLong((HWND)self->hwnd, GWL_STYLE) & ~WS_VSCROLL);
 #endif
 }
 
@@ -409,7 +406,7 @@ void ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int ma
 	si.nMin = max(0, min);
 	si.nMax = max(si.nMin, max);
 	si.fMask = SIF_RANGE;	
-	SetScrollInfo(ui_win_component_hwnd(self), SB_VERT, &si, TRUE);
+	SetScrollInfo((HWND)self->hwnd, SB_VERT, &si, TRUE);
 }
 
 int ui_component_verticalscrollposition(psy_ui_Component* self)
@@ -417,7 +414,7 @@ int ui_component_verticalscrollposition(psy_ui_Component* self)
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_POS;	
-	GetScrollInfo(ui_win_component_hwnd(self), SB_VERT, &si);	
+	GetScrollInfo((HWND)self->hwnd, SB_VERT, &si);	
 	return si.nPos;
 }
 
@@ -426,14 +423,14 @@ void ui_component_setverticalscrollposition(psy_ui_Component* self, int position
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_RANGE;	
-	GetScrollInfo(ui_win_component_hwnd(self), SB_VERT, &si);
+	GetScrollInfo((HWND)self->hwnd, SB_VERT, &si);
 	if (position < si.nMax) {			
 		si.nPos = (int) position;
 	} else {
 		si.nPos = si.nMax;
 	}
 	si.fMask = SIF_POS;	
-	SetScrollInfo(ui_win_component_hwnd(self), SB_VERT, &si, TRUE);
+	SetScrollInfo((HWND)self->hwnd, SB_VERT, &si, TRUE);
 }
 
 int ui_component_horizontalscrollposition(psy_ui_Component* self)
@@ -441,7 +438,7 @@ int ui_component_horizontalscrollposition(psy_ui_Component* self)
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_POS;	
-	GetScrollInfo(ui_win_component_hwnd(self), SB_HORZ, &si);	
+	GetScrollInfo((HWND)self->hwnd, SB_HORZ, &si);	
 	return si.nPos;
 }
 
@@ -450,14 +447,14 @@ void ui_component_sethorizontalscrollposition(psy_ui_Component* self, int positi
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_RANGE;	
-	GetScrollInfo(ui_win_component_hwnd(self), SB_HORZ, &si);
+	GetScrollInfo((HWND)self->hwnd, SB_HORZ, &si);
 	if (position < si.nMax) {			
 		si.nPos = (int) position;
 	} else {
 		si.nPos = si.nMax;
 	}
 	si.fMask = SIF_POS;	
-	SetScrollInfo(ui_win_component_hwnd(self), SB_HORZ, &si, TRUE);
+	SetScrollInfo((HWND)self->hwnd, SB_HORZ, &si, TRUE);
 }
 
 void ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
@@ -466,14 +463,14 @@ void ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
 	si.fMask = SIF_RANGE;	
-	GetScrollInfo(ui_win_component_hwnd(self), SB_VERT, &si);
+	GetScrollInfo((HWND)self->hwnd, SB_VERT, &si);
 	*scrollmin = si.nMin;
 	*scrollmax = si.nMax;
 }
 
 void ui_component_move(psy_ui_Component* self, int left, int top)
 {
-	SetWindowPos(ui_win_component_hwnd(self), NULL, 
+	SetWindowPos((HWND)self->hwnd, NULL, 
 	   left, top,
 	   0, 0,
 	   SWP_NOZORDER | SWP_NOSIZE) ;	
@@ -481,7 +478,7 @@ void ui_component_move(psy_ui_Component* self, int left, int top)
 
 void ui_component_resize(psy_ui_Component* self, int width, int height)
 {	
-	SetWindowPos(ui_win_component_hwnd(self), NULL, 
+	SetWindowPos((HWND)self->hwnd, NULL, 
 	   0, 0,
 	   width, height,
 	   SWP_NOZORDER | SWP_NOMOVE);	
@@ -489,17 +486,17 @@ void ui_component_resize(psy_ui_Component* self, int width, int height)
 
 void ui_component_setposition(psy_ui_Component* self, int x, int y, int width, int height)
 {	
-	SetWindowPos(ui_win_component_hwnd(self), 0, x, y, width, height, SWP_NOZORDER);	
+	SetWindowPos((HWND)self->hwnd, 0, x, y, width, height, SWP_NOZORDER);	
 }
 
 void ui_component_setmenu(psy_ui_Component* self, ui_menu* menu)
 {
-	SetMenu(ui_win_component_hwnd(self), menu->hmenu);
+	SetMenu((HWND)self->hwnd, menu->hmenu);
 }
 
 void ui_component_settitle(psy_ui_Component* self, const char* title)
 {
-	SetWindowText(ui_win_component_hwnd(self), title);
+	SetWindowText((HWND)self->hwnd, title);
 }
 
 void ui_component_enumerate_children(psy_ui_Component* self, void* context, 
@@ -509,10 +506,10 @@ void ui_component_enumerate_children(psy_ui_Component* self, void* context,
 	
 	callback.context = context;
 	callback.childenum = childenum;
-	EnumChildWindows(ui_win_component_hwnd(self), ChildEnumProc, (LPARAM) &callback);
+	EnumChildWindows((HWND)self->hwnd, childenumproc, (LPARAM) &callback);
 }
 
-BOOL CALLBACK ChildEnumProc (HWND hwnd, LPARAM lParam)
+BOOL CALLBACK childenumproc(HWND hwnd, LPARAM lParam)
 {
 	EnumCallback* callback = (EnumCallback*) lParam;
 	psy_ui_WinApp* winapp;
@@ -530,9 +527,9 @@ psy_List* ui_component_children(psy_ui_Component* self, int recursive)
 {	
 	psy_List* children = 0;	
 	if (recursive == 1) {
-		EnumChildWindows (ui_win_component_hwnd(self), AllChildEnumProc, (LPARAM) &children);
+		EnumChildWindows((HWND)self->hwnd, allchildenumproc, (LPARAM) &children);
 	} else {
-		uintptr_t hwnd = (uintptr_t)GetWindow(ui_win_component_hwnd(self), GW_CHILD);
+		uintptr_t hwnd = (uintptr_t)GetWindow((HWND)self->hwnd, GW_CHILD);
 		if (hwnd) {
 			psy_ui_WinApp* winapp;							
 			psy_ui_Component* child;
@@ -560,7 +557,7 @@ psy_List* ui_component_children(psy_ui_Component* self, int recursive)
 	return children;
 }
 
-BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
+BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam)
 {
 	psy_List** pChildren = (psy_List**) lParam;
 	psy_ui_WinApp* winapp;							
@@ -576,7 +573,7 @@ BOOL CALLBACK AllChildEnumProc (HWND hwnd, LPARAM lParam)
 
 void ui_component_capture(psy_ui_Component* self)
 {
-	SetCapture(ui_win_component_hwnd(self));
+	SetCapture((HWND)self->hwnd);
 }
 
 void ui_component_releasecapture()
@@ -586,10 +583,10 @@ void ui_component_releasecapture()
 
 void ui_component_invalidate(psy_ui_Component* self)
 {
-	InvalidateRect(ui_win_component_hwnd(self), NULL, FALSE);
+	InvalidateRect((HWND)self->hwnd, NULL, FALSE);
 }
 
-void ui_component_invalidaterect(psy_ui_Component* self, const ui_rectangle* r)
+void ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle* r)
 {
 	RECT rc;
 
@@ -597,42 +594,42 @@ void ui_component_invalidaterect(psy_ui_Component* self, const ui_rectangle* r)
 	rc.top = r->top;
 	rc.right = r->right;
 	rc.bottom = r->bottom;
-	InvalidateRect(ui_win_component_hwnd(self), &rc, FALSE);
+	InvalidateRect((HWND)self->hwnd, &rc, FALSE);
 }
 
 void ui_component_update(psy_ui_Component* self)
 {
-	UpdateWindow(ui_win_component_hwnd(self));
+	UpdateWindow((HWND)self->hwnd);
 }
 
 void ui_component_setfocus(psy_ui_Component* self)
 {
-	SetFocus(ui_win_component_hwnd(self));
+	SetFocus((HWND)self->hwnd);
 	psy_signal_emit(&self->signal_focus, self, 0);
 }
 
 int ui_component_hasfocus(psy_ui_Component* self)
 {
-	return ui_win_component_hwnd(self) == GetFocus();
+	return (HWND) self->hwnd == GetFocus();
 }
 
-void ui_component_setfont(psy_ui_Component* self, ui_font* source)
+void ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
 {
-	ui_font font;
+	psy_ui_Font font;
 
 	font.hfont = 0;
 	font.stock = 0;
 	if (source && source->hfont && source->hfont !=
 			app.defaults.defaultfont.hfont) {
-		ui_font_init(&font, 0);
-		ui_font_copy(&font, source);
+		psy_ui_font_init(&font, 0);
+		psy_ui_font_copy(&font, source);
 	} else {
 		font.hfont = app.defaults.defaultfont.hfont;
 	}	
-	SendMessage(ui_win_component_hwnd(self), WM_SETFONT, (WPARAM) font.hfont, 0);	
+	SendMessage((HWND)self->hwnd, WM_SETFONT, (WPARAM) font.hfont, 0);	
 	if (self->font.hfont && self->font.hfont != 
 			app.defaults.defaultfont.hfont) {
-		ui_font_dispose(&self->font);		
+		psy_ui_font_dispose(&self->font);		
 	}
 	self->font = font;
 }
@@ -649,269 +646,52 @@ void ui_component_preventdefault(psy_ui_Component* self)
 
 int ui_component_visible(psy_ui_Component* self)
 {
-	return IsWindowVisible(ui_win_component_hwnd(self));
+	return IsWindowVisible((HWND) self->hwnd);
 }
 
 void ui_component_align(psy_ui_Component* self)
 {	
-	ui_size size;
-	ui_textmetric tm;
-	ui_point cp_topleft = { 0, 0 };
-	ui_point cp_bottomright = { 0, 0 };	
-	int cpymax = 0;
-	psy_List* p;
-	psy_List* q;
-	psy_List* wrap = 0;	
-	psy_ui_Component* client = 0;
-		
-	size = ui_component_size(self);
-	tm = ui_component_textmetric(self);
-	cp_bottomright.x = size.width;
-	cp_bottomright.y = size.height;
-	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
-		psy_ui_Component* component;
-			
-		component = (psy_ui_Component*)p->entry;		
-		if (component->visible) {
-			ui_size componentsize;
-			ui_size limit;
+	psy_ui_Aligner aligner;
 
-			limit.width = cp_bottomright.x - cp_topleft.x;
-			limit.height = cp_bottomright.y - cp_topleft.y;
-			componentsize = ui_component_preferredsize(component, &limit);
-			if (component->align == UI_ALIGN_CLIENT) {
-				client = component;
-			} 
-			if (component->align == UI_ALIGN_FILL) {
-				ui_component_setposition(component,
-					ui_value_px(&component->margin.left, &tm),
-					ui_value_px(&component->margin.top, &tm),				
-					size.width - ui_value_px(&component->margin.left, &tm) -
-						ui_value_px(&component->margin.right, &tm),
-					size.height -
-						ui_margin_height_px(&component->margin, &tm));
-			} else
-			if (component->align == UI_ALIGN_TOP) {
-				cp_topleft.y += ui_value_px(&component->margin.top, &tm);
-				ui_component_setposition(component, 
-					cp_topleft.x + ui_value_px(&component->margin.left, &tm), 
-					cp_topleft.y,
-					cp_bottomright.x - cp_topleft.x -
-						ui_margin_width_px(&component->margin, &tm),
-					componentsize.height);
-				cp_topleft.y += ui_value_px(&component->margin.bottom, &tm);
-				cp_topleft.y += componentsize.height;
-			} else
-			if (component->align == UI_ALIGN_BOTTOM) {
-				cp_bottomright.y -=
-					ui_value_px(&component->margin.bottom, &tm);
-				ui_component_setposition(component, 
-					cp_topleft.x + ui_value_px(&component->margin.left, &tm), 
-					cp_bottomright.y - componentsize.height,
-					cp_bottomright.x - cp_topleft.x -
-						ui_margin_width_px(&component->margin, &tm),						
-					componentsize.height);
-				cp_bottomright.y -= ui_value_px(&component->margin.top, &tm);
-				cp_bottomright.y -= componentsize.height;
-			} else
-			if (component->align == UI_ALIGN_RIGHT) {
-				int requiredcomponentwidth;
-
-				requiredcomponentwidth = componentsize.width +
-					ui_margin_width_px(&component->margin, &tm);
-				cp_bottomright.x -= requiredcomponentwidth;
-				ui_component_setposition(component,
-					cp_bottomright.x + ui_value_px(&component->margin.left, &tm),
-					cp_topleft.y +
-						ui_value_px(&component->margin.top, &tm),
-					componentsize.width,										
-					cp_bottomright.y - cp_topleft.y - 
-						ui_margin_height_px(&component->margin, &tm));
-			} else
-			if (component->align == UI_ALIGN_LEFT) {
-				if ((self->alignexpandmode & UI_HORIZONTALEXPAND)
-						== UI_HORIZONTALEXPAND) {
-				} else {
-					int requiredcomponentwidth;
-
-					requiredcomponentwidth = componentsize.width +
-						ui_margin_width_px(&component->margin, &tm);
-					if (cp_topleft.x + requiredcomponentwidth > size.width) {
-						psy_List* w;						
-						cp_topleft.x = 0;
-						for (w = wrap; w != 0; w = w->next) {
-							psy_ui_Component* c;
-							c = (psy_ui_Component*)w->entry;
-							ui_component_resize(c, ui_component_size(c).width,
-								cpymax - cp_topleft.y -
-								ui_margin_height_px(&component->margin, &tm));
-						}
-						cp_topleft.y = cpymax;
-						psy_list_free(wrap);						
-						wrap = 0;
-					}					
-					psy_list_append(&wrap, component);					
-				}
-				cp_topleft.x += ui_value_px(&component->margin.left, &tm);
-				ui_component_setposition(component,
-					cp_topleft.x,
-					cp_topleft.y + ui_value_px(&component->margin.top, &tm),
-					componentsize.width,
-					component->justify == UI_JUSTIFY_EXPAND 
-					? cp_bottomright.y - cp_topleft.y - 
-						ui_margin_height_px(&component->margin, &tm)
-					: componentsize.height);
-				cp_topleft.x += ui_value_px(&component->margin.right, &tm);
-				cp_topleft.x += componentsize.width;				
-				if (cpymax < cp_topleft.y + componentsize.height +
-						ui_margin_height_px(&component->margin, &tm)) {
-					cpymax = cp_topleft.y + componentsize.height +
-						ui_margin_height_px(&component->margin, &tm);
-				}
-			}				
-		}
-	}
-	if (client) {		
-		ui_component_setposition(client,
-			cp_topleft.x + ui_value_px(&client->margin.left, &tm),
-			cp_topleft.y + ui_value_px(&client->margin.top, &tm),
-			cp_bottomright.x - cp_topleft.x -
-				ui_margin_width_px(&client->margin, &tm),
-			cp_bottomright.y - cp_topleft.y -
-				ui_margin_height_px(&client->margin, &tm));
-	}
-	psy_list_free(q);
-	psy_list_free(wrap);
+	psy_ui_aligner_init(&aligner, self);
+	psy_ui_aligner_align(&aligner);	
 	psy_signal_emit(&self->signal_align, self, 0);
 }
 
-/*void preferredsize_new(psy_ui_Component* self, ui_size* limit, ui_size* rv)
-{
-	ui_size size;
-	ui_textmetric tm;
-	ui_point cp_topleft = { 0, 0 };
-	ui_point cp_bottomright = { 0, 0 };	
-	int cpymax = 0;
-	psy_List* p;
-	psy_List* q;
-	psy_List* wrap = 0;	
-	psy_ui_Component* client = 0;
-
-	size = ui_component_size(self);
-	tm = ui_component_textmetric(self);	
-	if (self->alignchildren) {
-		size.width = (self->alignexpandmode & UI_HORIZONTALEXPAND) ==
-				UI_HORIZONTALEXPAND 
-				? 0
-				: limit->width;	
-	}
-	cp_bottomright.x = size.width;
-	cp_bottomright.y = size.height;
-	for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
-		psy_ui_Component* component;
-			
-		component = (psy_ui_Component*)p->entry;		
-		if (component->visible) {
-			ui_size componentsize;
-		}
-	}
-}*/
-
-void preferredsize(psy_ui_Component* self, ui_size* limit, ui_size* rv)
+void onpreferredsize(psy_ui_Component* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {			
-	if (rv) {
-		ui_size size;
-		ui_textmetric tm;
+	psy_ui_Aligner aligner;
 
-		size = ui_component_size(self);
-		tm = ui_component_textmetric(self);
-		if (self->alignchildren && !self->preventpreferredsize) {
-			psy_List* p;
-			psy_List* q;
-			ui_point cp = { 0, 0 };
-			ui_size maxsize = { 0, 0 };
-			
-			
-			size.width = (self->alignexpandmode & UI_HORIZONTALEXPAND) ==
-				UI_HORIZONTALEXPAND 
-				? 0
-				: limit->width;
-			for (p = q = ui_component_children(self, 0); p != 0; p = p->next) {
-				psy_ui_Component* component;
-					
-				component = (psy_ui_Component*)p->entry;		
-				if (component->visible) {
-					ui_size componentsize;			
-					
-					componentsize = ui_component_preferredsize(component, &size);
-					if (component->align == UI_ALIGN_TOP ||
-							component->align == UI_ALIGN_BOTTOM) {
-						cp.y += componentsize.height +
-							ui_margin_height_px(&component->margin, &tm);
-						if (maxsize.height < cp.y) {
-							maxsize.height = cp.y;
-						}
-						if (maxsize.width < componentsize.width +
-								ui_margin_width_px(&component->margin, &tm)) {
-							maxsize.width = componentsize.width +
-								ui_margin_width_px(&component->margin, &tm);
-						}
-					} else					
-					if (component->align == UI_ALIGN_LEFT) {
-						if (size.width != 0) {
-							int requiredcomponentwidth;
-
-							requiredcomponentwidth = componentsize.width +
-								ui_margin_width_px(&component->margin, &tm);
-							if (cp.x + requiredcomponentwidth > size.width) {
-								cp.y = maxsize.height;
-								cp.x = 0;							
-							}						
-						}
-						cp.x += componentsize.width +
-							ui_margin_width_px(&component->margin, &tm);						
-						if (maxsize.width < cp.x) {
-							maxsize.width = cp.x;
-						}
-						if (maxsize.height < cp.y + componentsize.height +
-								ui_margin_height_px(&component->margin, &tm)) {
-							maxsize.height = cp.y + componentsize.height +
-								ui_margin_height_px(&component->margin, &tm);
-						}
-					}				
-				}
-			}
-			psy_list_free(q);
-			*rv = maxsize;
-			rv->width += ui_margin_width_px(&self->spacing, &tm);
-			rv->height += ui_margin_height_px(&self->spacing, &tm);
-		} else {
-			*rv = size;
-			rv->width += ui_margin_width_px(&self->spacing, &tm);
-			rv->height += ui_margin_height_px(&self->spacing, &tm);
-		}
-	}	
+	psy_ui_aligner_init(&aligner, self);
+	psy_ui_aligner_preferredsize(&aligner, limit, rv);
 }
 
-void ui_component_setmargin(psy_ui_Component* self, const ui_margin* margin)
+void ui_component_doublebuffer(psy_ui_Component* self)
+{
+	self->doublebuffered = 1;
+}
+
+void ui_component_setmargin(psy_ui_Component* self,
+	const psy_ui_Margin* margin)
 {	
 	if (margin) {
 		self->margin = *margin;		
 	} else {
-		memset(&self->margin, 0, sizeof(ui_margin));
+		memset(&self->margin, 0, sizeof(psy_ui_Margin));
 	}
 }
 
-void ui_component_setspacing(psy_ui_Component* self, const ui_margin* spacing)
+void ui_component_setspacing(psy_ui_Component* self,
+	const psy_ui_Margin* spacing)
 {	
 	if (spacing) {
 		self->spacing = *spacing;
 	} else {
-		memset(&self->spacing, 0, sizeof(ui_margin));
+		memset(&self->spacing, 0, sizeof(psy_ui_Margin));
 	}
 }
 
-void ui_component_setalign(psy_ui_Component* self, UiAlignType align)
+void ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 {
 	self->align = align;
 }
@@ -921,7 +701,7 @@ void ui_component_enablealign(psy_ui_Component* self)
 	self->alignchildren = 1;	
 }
 
-void ui_component_setalignexpand(psy_ui_Component* self, UiExpandMode mode)
+void ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)
 {
 	self->alignexpandmode = mode;
 }
@@ -943,15 +723,13 @@ void ui_component_preventinput(psy_ui_Component* self, int recursive)
 
 void enableinput(psy_ui_Component* self, int enable, int recursive)
 {	
-	EnableWindow(ui_win_component_hwnd(self), enable);
+	EnableWindow((HWND) self->hwnd, enable);
 	if (recursive) {
 		psy_List* p;
 		psy_List* q;
 		
-		for (p = q = ui_component_children(self, recursive); p != 0;
-				p = p->next) {
-			EnableWindow(ui_win_component_hwnd((psy_ui_Component*)p->entry),
-				enable);
+		for (p = q = ui_component_children(self, recursive); p != 0; p = p->next) {
+			EnableWindow((HWND)((psy_ui_Component*)(p->entry))->hwnd, enable);
 		}
 		psy_list_free(q);
 	}
@@ -966,7 +744,7 @@ int ui_openfile(psy_ui_Component* self, char* szTitle, char* szFilter,
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	*szOpenName = '\0'; 
 	ofn.lStructSize= sizeof(OPENFILENAME); 
-	ofn.hwndOwner = ui_win_component_hwnd(self); 
+	ofn.hwndOwner= (HWND) self->hwnd; 
 	ofn.lpstrFilter= szFilter;	
 	ofn.lpstrCustomFilter= (LPSTR)NULL; 
 	ofn.nMaxCustFilter= 0L; 
@@ -983,8 +761,8 @@ int ui_openfile(psy_ui_Component* self, char* szTitle, char* szFilter,
 	ofn.lpstrDefExt= szDefExtension;
 	rv = GetOpenFileName(&ofn);
 	if (app.main) {
-		InvalidateRect(ui_win_component_hwnd(app.main), 0, FALSE);
-		UpdateWindow(ui_win_component_hwnd(app.main));
+		InvalidateRect((HWND) app.main->hwnd, 0, FALSE);
+		UpdateWindow((HWND) app.main->hwnd);
 	}
 	return rv;
 }
@@ -998,7 +776,7 @@ int ui_savefile(psy_ui_Component* self, char* szTitle, char* szFilter,
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
 	*szFileName = '\0'; 
 	ofn.lStructSize= sizeof(OPENFILENAME); 
-	ofn.hwndOwner = ui_win_component_hwnd(self); 
+	ofn.hwndOwner= (HWND) self->hwnd; 
 	ofn.lpstrFilter= szFilter;	
 	ofn.lpstrCustomFilter= (LPSTR)NULL; 
 	ofn.nMaxCustFilter= 0L; 
@@ -1014,8 +792,8 @@ int ui_savefile(psy_ui_Component* self, char* szTitle, char* szFilter,
 	ofn.nFileExtension= 0; 
 	ofn.lpstrDefExt= szDefExtension;
 	if (app.main) {
-		InvalidateRect(ui_win_component_hwnd(app.main), 0, FALSE);
-		UpdateWindow(ui_win_component_hwnd(app.main));
+		InvalidateRect((HWND) app.main->hwnd, 0, FALSE);
+		UpdateWindow((HWND) app.main->hwnd);
 	}
 	rv = GetSaveFileName(&ofn);
 	return rv;
@@ -1029,10 +807,10 @@ void ui_component_setbackgroundmode(psy_ui_Component* self, BackgroundMode mode)
 void ui_component_setbackgroundcolor(psy_ui_Component* self, unsigned int color)
 {
 	self->backgroundcolor = color;
-	if (ui_win_component(self)->background) {
-		DeleteObject(ui_win_component(self)->background);
+	if (self->background) {
+		DeleteObject(self->background);
 	}
-	ui_win_component(self)->background = CreateSolidBrush(color);
+	self->background = CreateSolidBrush(color);
 }
 
 void ui_component_setcolor(psy_ui_Component* self, unsigned int color)
@@ -1040,14 +818,14 @@ void ui_component_setcolor(psy_ui_Component* self, unsigned int color)
 	self->color = color;
 }
 
-ui_size ui_component_textsize(psy_ui_Component* self, const char* text)
+psy_ui_Size ui_component_textsize(psy_ui_Component* self, const char* text)
 {
-	ui_size rv;
+	psy_ui_Size rv;
 	psy_ui_Graphics g;
 	HFONT hPrevFont = 0;
 	HDC hdc;
 	
-	hdc = GetDC(ui_win_component_hwnd(self));	
+	hdc = GetDC((HWND)self->hwnd);	
     SaveDC (hdc) ;          
 	ui_graphics_init(&g, hdc);
 	if (self->font.hfont) {
@@ -1059,7 +837,7 @@ ui_size ui_component_textsize(psy_ui_Component* self, const char* text)
 	}
 	ui_graphics_dispose(&g);
 	RestoreDC (hdc, -1);	
-	ReleaseDC(ui_win_component_hwnd(self), hdc);
+	ReleaseDC((HWND)self->hwnd, hdc);
 	return rv;
 }
 
@@ -1069,50 +847,49 @@ psy_ui_Component* ui_component_parent(psy_ui_Component* self)
 
 	winapp = (psy_ui_WinApp*) app.platform;
 	return (psy_ui_Component*) psy_table_at(&winapp->selfmap, 
-		(uintptr_t) GetParent(ui_win_component_hwnd(self)));
+		(uintptr_t) GetParent((HWND)self->hwnd));
 }
 
-psy_List* ui_components_setalign(psy_List* list, UiAlignType align,
-	const ui_margin* margin)
+psy_List* ui_components_setalign(psy_List* list, psy_ui_AlignType align,
+	const psy_ui_Margin* margin)
 {
 	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
-		ui_component_setalign((psy_ui_Component*)p->entry, align);
+		ui_component_setalign((psy_ui_Component*) p->entry, align);
 		if (margin) {
-			ui_component_setmargin((psy_ui_Component*)p->entry, margin);
+			ui_component_setmargin((psy_ui_Component*) p->entry, margin);
 		}
 	}
 	return list;
 }
 
-psy_List* ui_components_setmargin(psy_List* list, const ui_margin* margin)
+psy_List* ui_components_setmargin(psy_List* list, const psy_ui_Margin* margin)
 {
 	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
-		ui_component_setmargin((psy_ui_Component*)p->entry, margin);		
+		ui_component_setmargin((psy_ui_Component*) p->entry, margin);
 	}
 	return list;
 }
 
-ui_size ui_component_preferredsize(psy_ui_Component* self, ui_size* limit)
+psy_ui_Size ui_component_preferredsize(psy_ui_Component* self,
+	psy_ui_Size* limit)
 {
-	ui_size rv;
-	self->vtable->preferredsize(self, limit, &rv);
-	if (self->signal_preferredsize.slots) {
-		psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);
-	}
+	psy_ui_Size rv;	
+	self->vtable->onpreferredsize(self, limit, &rv);
+	// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
 	return rv;	
 }
 
-ui_textmetric ui_component_textmetric(psy_ui_Component* self)
+psy_ui_TextMetric ui_component_textmetric(psy_ui_Component* self)
 {			
 	TEXTMETRIC tm;
 	HDC hdc;		
 	HFONT hPrevFont = 0;	
 	
-	hdc = GetDC(ui_win_component_hwnd(self));	
+	hdc = GetDC((HWND)self->hwnd);	
     SaveDC(hdc) ;          	
 	if (self->font.hfont) {
 		hPrevFont = SelectObject(hdc, self->font.hfont);
@@ -1122,7 +899,7 @@ ui_textmetric ui_component_textmetric(psy_ui_Component* self)
 		SelectObject(hdc, hPrevFont);
 	}	
 	RestoreDC(hdc, -1);	
-	ReleaseDC(ui_win_component_hwnd(self), hdc);
+	ReleaseDC((HWND)self->hwnd, hdc);
 	return tm;
 }
 
@@ -1132,10 +909,10 @@ void ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 
 	winapp = (psy_ui_WinApp*) app.platform;
 #if defined(_WIN64)	
-	SetClassLongPtr(ui_win_component_hwnd(self), GCLP_HICON, 
+	SetClassLongPtr((HWND)self->hwnd, GCLP_HICON, 
 		(intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid)));
 #else	
-	SetClassLong(ui_win_component_hwnd(self), GCL_HICON, 
+	SetClassLong((HWND)self->hwnd, GCL_HICON, 
 		(intptr_t)LoadIcon(winapp->instance, MAKEINTRESOURCE(ressourceid)));
 #endif
 }
@@ -1143,12 +920,12 @@ void ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 void ui_component_starttimer(psy_ui_Component* self, unsigned int id,
 	unsigned int interval)
 {
-	SetTimer(ui_win_component_hwnd(self), id, interval, 0);
+	SetTimer((HWND)self->hwnd, id, interval, 0);
 }
 
 void ui_component_stoptimer(psy_ui_Component* self, unsigned int id)
 {
-	KillTimer(ui_win_component_hwnd(self), id);
+	KillTimer((HWND)self->hwnd, id);
 }
 
 int ui_browsefolder(psy_ui_Component* self, const char* title, char* path)
@@ -1171,7 +948,7 @@ int ui_browsefolder(psy_ui_Component* self, const char* title, char* path)
 		pszBuffer[0]='\0';
 		// Get help on BROWSEINFO struct - it's got all the bit settings.
 		//
-		bi.hwndOwner = ui_win_component_hwnd(self);
+		bi.hwndOwner = (HWND) self->hwnd;
 		bi.pidlRoot = NULL;
 		bi.pszDisplayName = pszBuffer;
 		bi.lpszTitle = title;
@@ -1211,37 +988,35 @@ void ui_component_clientresize(psy_ui_Component* self, int width, int height)
 	rc.top = 0;
 	rc.right = width;
 	rc.bottom = height;
-	AdjustWindowRectEx(&rc, GetWindowStyle(ui_win_component_hwnd(self)),
-		GetMenu(ui_win_component_hwnd(self)) != NULL,
-		GetWindowExStyle(ui_win_component_hwnd(self)));
+	AdjustWindowRectEx(&rc, windowstyle(self),
+		GetMenu((HWND)self->hwnd) != NULL,
+		windowexstyle(self));
 	ui_component_resize(self, rc.right - rc.left,
 		rc.bottom - rc.top);
 }
 
-int GetWindowStyle(HWND hwnd)
+int windowstyle(psy_ui_Component* self)
 {
 	int rv;
 #if defined(_WIN64)		
-	rv = (int)GetWindowLongPtr(hwnd, GWLP_STYLE);
+	rv = (int)GetWindowLongPtr(
+		(HWND)self->hwnd, GWLP_STYLE);
 #else
-	rv = (int)GetWindowLong(hwnd, GWL_STYLE);
+	rv = (int)GetWindowLong(
+		(HWND)self->hwnd, GWL_STYLE);
 #endif
 	return rv;
 }
 
-int GetWindowExStyle(HWND hwnd)
+int windowexstyle(psy_ui_Component* self)
 {
 	int rv;
 #if defined(_WIN64)		
-	rv = (int)GetWindowLongPtr(hwnd, GWLP_EXSTYLE);
+	rv = (int)GetWindowLongPtr(
+		(HWND)self->hwnd, GWLP_EXSTYLE);
 #else
-	rv = (int)GetWindowLong(hwnd, GWL_EXSTYLE);
+	rv = (int)GetWindowLong(
+		(HWND)self->hwnd, GWL_EXSTYLE);
 #endif
 	return rv;
-}
-
-uintptr_t ui_component_platformhandle(psy_ui_Component* self)
-{
-	assert(self->platform);
-	return (uintptr_t) (self->platform ? ui_win_component_hwnd(self) : 0);
 }

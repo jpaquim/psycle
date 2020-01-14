@@ -18,7 +18,7 @@ void pinedit_init(PinEdit* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->lineheight = 12;
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
-	self->component.doublebuffered = 1;
+	ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_draw, self, pinedit_ondraw);	
 }
 
@@ -40,9 +40,9 @@ void pinedit_drawpinsockets(PinEdit* self, psy_ui_Graphics* g)
 		numsrcpins = machine->vtable->numoutputs(machine);
 		if (machine) {
 			uintptr_t p;
-			ui_rectangle r;
-			ui_size pin = { 8, 8 };
-			ui_size size;
+			psy_ui_Rectangle r;
+			psy_ui_Size pin = { 8, 8 };
+			psy_ui_Size size;
 			int cpy;
 			int centerx;
 			char text[128];
@@ -58,9 +58,9 @@ void pinedit_drawpinsockets(PinEdit* self, psy_ui_Graphics* g)
 				psy_snprintf(text, 40, "%.02d", p);
 				text[39] = '\0';
 				ui_textout(g, centerx, cpy, text, strlen(text));
-				ui_setrectangle(&r, centerx + 20, cpy + (self->lineheight - pin.height) / 2, pin.width, pin.height);
+				psy_ui_setrectangle(&r, centerx + 20, cpy + (self->lineheight - pin.height) / 2, pin.width, pin.height);
 				ui_drawrectangle(g, r);
-				ui_setrectangle(&r, centerx + 100, cpy + (self->lineheight - pin.height) / 2, pin.width, pin.height);
+				psy_ui_setrectangle(&r, centerx + 100, cpy + (self->lineheight - pin.height) / 2, pin.width, pin.height);
 				ui_drawrectangle(g, r);
 				ui_textout(g, centerx + 120, cpy, text, strlen(text));
 			}			
@@ -73,8 +73,8 @@ void pinedit_drawpinconnections(PinEdit* self, psy_ui_Graphics* g)
 	psy_audio_Connections* connections;
 	psy_audio_WireSocketEntry* input;
 	psy_List* pinpair;
-	ui_size pin = { 8, 8 };
-	ui_size size;
+	psy_ui_Size pin = { 8, 8 };
+	psy_ui_Size size;
 	int centerx;
 
 	size = ui_component_size(&self->component);
@@ -98,13 +98,13 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	ui_component_enablealign(&self->component);	
 	ui_component_init(&self->buttongroup, &self->component);
 	ui_component_enablealign(&self->buttongroup);
-	ui_component_setalign(&self->buttongroup, UI_ALIGN_RIGHT);
-	ui_button_init(&self->autowire, &self->buttongroup);
-	ui_component_setalign(&self->autowire.component, UI_ALIGN_TOP);
-	ui_button_settext(&self->autowire, "AutoWire");
-	ui_button_init(&self->unselectall, &self->buttongroup);
-	ui_component_setalign(&self->unselectall.component, UI_ALIGN_TOP);
-	ui_button_settext(&self->unselectall, "Unselect all");
+	ui_component_setalign(&self->buttongroup, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_init(&self->autowire, &self->buttongroup);
+	ui_component_setalign(&self->autowire.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->autowire, "AutoWire");
+	psy_ui_button_init(&self->unselectall, &self->buttongroup);
+	ui_component_setalign(&self->unselectall.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->unselectall, "Unselect all");
 	pinedit_init(&self->pinedit, &self->component, wire, workspace);
-	ui_component_setalign(&self->pinedit.component, UI_ALIGN_CLIENT);
+	ui_component_setalign(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
 }

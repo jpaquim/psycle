@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(SEQUENCE_H)
-#define SEQUENCE_H
+#if !defined(PSY_AUDIO_SEQUENCE_H)
+#define PSY_AUDIO_SEQUENCE_H
 
 #include "patterns.h"
 #include <list.h>
@@ -67,6 +67,13 @@ typedef struct SequenceSelection {
 	SelectionMode selectionmode;
 } SequenceSelection;
 
+void sequenceselection_init(SequenceSelection*, struct psy_audio_Sequence*);
+void sequenceselection_dispose(SequenceSelection*);
+void sequenceselection_seteditposition(SequenceSelection*, SequencePosition);
+SequencePosition sequenceselection_editposition(SequenceSelection*);
+void sequenceselection_setsequence(SequenceSelection*, struct psy_audio_Sequence*);
+
+
 typedef struct psy_audio_Sequence {
 	SequenceTracks* tracks;
 	psy_audio_Patterns* patterns;
@@ -92,11 +99,6 @@ SequencePosition sequence_makeposition(psy_audio_Sequence*, SequenceTracks*, psy
 SequencePosition sequence_positionfromid(psy_audio_Sequence*, int id);
 void sequence_setplayselection(psy_audio_Sequence*, struct SequenceSelection*);
 void sequence_clearplayselection(psy_audio_Sequence*);
-
-void sequenceselection_init(SequenceSelection*, psy_audio_Sequence*);
-void sequenceselection_seteditposition(SequenceSelection*, SequencePosition);
-SequencePosition sequenceselection_editposition(SequenceSelection*);
-void sequenceselection_setsequence(SequenceSelection*, psy_audio_Sequence*);
 
 
 

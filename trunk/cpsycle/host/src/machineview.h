@@ -51,7 +51,7 @@ typedef struct {
 	unsigned int effect_font_flags;	
 	unsigned int effect_fontcolour;
 	psy_ui_Bitmap skinbmp;	
-	ui_font font;
+	psy_ui_Font font;
 	int drawmachineindexes;
 } MachineSkin;
 
@@ -115,7 +115,7 @@ void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
 typedef struct {
 	psy_ui_Component component;
 	TabBar tabbar;
-	ui_notebook notebook;	
+	psy_ui_Notebook notebook;	
 	MachineWireView wireview;
 	NewMachine newmachine;
 	Workspace* workspace;

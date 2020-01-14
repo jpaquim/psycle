@@ -4,38 +4,40 @@
 #include "../../detail/prefix.h"
 
 #include "silentdriver.h"
+#include "../../driver/driver.h"
 #include <stdlib.h>
 #include <string.h>
 
-static void driver_free(Driver*);
-static int driver_init(Driver*);
-static void driver_connect(Driver*, void* context, AUDIODRIVERWORKFN callback,
+static void driver_deallocate(psy_AudioDriver*);
+static int driver_init(psy_AudioDriver*);
+static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
-static int driver_open(Driver*);
-static void driver_configure(Driver*, psy_Properties*);
-static int driver_close(Driver*);
-static int driver_dispose(Driver*);
-static unsigned int samplerate(Driver*);
+static int driver_open(psy_AudioDriver*);
+static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static int driver_close(psy_AudioDriver*);
+static int driver_dispose(psy_AudioDriver*);
+static unsigned int samplerate(psy_AudioDriver*);
 
-static void init_properties(Driver* driver);
+static void init_properties(psy_AudioDriver* driver);
 
-Driver* create_silent_driver(void)
+psy_AudioDriver* psy_audio_create_silent_driver(void)
 {
-	Driver* driver = malloc(sizeof(Driver));	
+	psy_AudioDriver* driver = malloc(sizeof(psy_AudioDriver));	
 	driver_init(driver);
 	return driver;
 }
 
-void driver_free(Driver* driver)
+void driver_deallocate(psy_AudioDriver* self)
 {
-	free(driver);
+	self->dispose(self);
+	free(self);
 }
 
-int driver_init(Driver* driver)
+int driver_init(psy_AudioDriver* driver)
 {
-	memset(driver, 0, sizeof(Driver));
+	memset(driver, 0, sizeof(psy_AudioDriver));
 	driver->open = driver_open;
-	driver->free = driver_free;	
+	driver->deallocate = driver_deallocate;	
 	driver->connect = driver_connect;
 	driver->open = driver_open;
 	driver->close = driver_close;
@@ -46,45 +48,45 @@ int driver_init(Driver* driver)
 	return 0;
 }
 
-int driver_dispose(Driver* driver)
+int driver_dispose(psy_AudioDriver* driver)
 {
 	properties_free(driver->properties);
 	driver->properties = 0;
 	return 0;
 }
 
-void driver_connect(Driver* driver, void* context, AUDIODRIVERWORKFN callback,
+void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback,
 	void* handle)
 {
 	driver->_pCallback = callback;
 	driver->_callbackContext = context;
 }
 
-int driver_open(Driver* driver)
+int driver_open(psy_AudioDriver* driver)
 {
 	return 0;
 }
 
-int driver_close(Driver* driver)
+int driver_close(psy_AudioDriver* driver)
 {
 	return 0;
 }
 
-void driver_configure(Driver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 {
 
 }
 
-unsigned int samplerate(Driver* self)
+unsigned int samplerate(psy_AudioDriver* self)
 {
 	return 44100;
 }
 
-void init_properties(Driver* self)
+void init_properties(psy_AudioDriver* self)
 {		
 	self->properties = psy_properties_create();
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "Silent Driver"),
+		psy_properties_append_string(self->properties, "name", "Silent psy_AudioDriver"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
 		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),

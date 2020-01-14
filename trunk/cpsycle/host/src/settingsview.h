@@ -19,7 +19,7 @@ typedef struct {
 	int lastlevel;
 	psy_Properties* selected;
 	psy_Properties* search;
-	ui_rectangle selrect;
+	psy_ui_Rectangle selrect;
 	int dirbutton;
 	int dy;
 	int mx;

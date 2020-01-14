@@ -16,14 +16,14 @@ static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*);
 void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	workspace)
 {	
-	ui_margin margin;
+	psy_ui_Margin margin;
 
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
-	ui_label_init(&self->headerlabel, &self->component);	
-	ui_label_settext(&self->headerlabel, "Tracks");		
+	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_label_init(&self->headerlabel, &self->component);	
+	psy_ui_label_settext(&self->headerlabel, "Tracks");		
 	ui_combobox_init(&self->trackbox, &self->component);	
 	ui_combobox_setcharnumber(&self->trackbox, 4);
 	songtrackbar_build(self);	
@@ -33,11 +33,11 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songtrackbar_onsongchanged);
-	ui_margin_init(&margin, ui_value_makepx(0), ui_value_makeew(1),
-		ui_value_makepx(0), ui_value_makepx(0));		
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(1),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));		
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->component, 0),
-		UI_ALIGN_LEFT,
+		psy_ui_ALIGN_LEFT,
 		&margin));	
 }
 

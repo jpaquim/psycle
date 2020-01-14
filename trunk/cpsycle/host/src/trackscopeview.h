@@ -13,7 +13,8 @@ typedef struct {
 	int trackheight;
 } TrackScopeView;
 
-void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent, Workspace*);
+void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent,
+	Workspace*);
 void trackscopeview_start(TrackScopeView*);
 void trackscopeview_stop(TrackScopeView*);
 

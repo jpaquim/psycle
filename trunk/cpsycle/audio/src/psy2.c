@@ -15,7 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void psy2_load(struct psy_audio_SongFile* songfile)
+void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 {	
 	int32_t i;	
 	int32_t num,sampR;	
@@ -59,7 +59,7 @@ void psy2_load(struct psy_audio_SongFile* songfile)
 	psyfile_read(songfile->file, author_, 32);
 	psyfile_read(songfile->file, comments_,128);
 	songproperties_init(&songproperties, name_, author_, comments_);
-	song_setproperties(songfile->song, &songproperties);
+	psy_audio_song_setproperties(songfile->song, &songproperties);
 
 	psyfile_read(songfile->file, &m_beatspermin, sizeof m_beatspermin);
 	psyfile_read(songfile->file, &sampR, sizeof sampR);
@@ -373,7 +373,7 @@ void psy2_load(struct psy_audio_SongFile* songfile)
 							pData = 0;
 							wave->channels.numchannels = 2;
 						}			
-						samples_insert(&songfile->song->samples, wave,
+						psy_audio_samples_insert(&songfile->song->samples, wave,
 							sampleindex_make(i, 0));
 						{
 							psy_audio_Instrument* instrument;
@@ -443,7 +443,8 @@ void psy2_load(struct psy_audio_SongFile* songfile)
 				int32_t index;
 				int32_t x;
 				int32_t y;				
-				machine = psy2converter_load(songfile, i, &index, &x, &y);
+				machine = psy_audio_psy2converter_load(songfile, i, &index,
+					&x, &y);
 				if (machine) {				
 					psy_Properties* machineproperties;				
 				
