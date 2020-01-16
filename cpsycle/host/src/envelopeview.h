@@ -4,8 +4,9 @@
 #if !defined(ENVELOPEVIEW_H)
 #define ENVELOPEVIEW_H
 
-#include "uicomponent.h"
-#include "list.h"
+#include "scrollzoom.h"
+#include <uicomponent.h>
+#include <list.h>
 #include <adsr.h>
 
 typedef struct {	
@@ -16,7 +17,7 @@ typedef struct {
 	psy_dsp_ADSRSettings* settings;
 } ADSRPointMapper;
 
-typedef struct {	
+typedef struct {
 	psy_ui_Component component;
 	int cx;
 	int cy;
@@ -29,12 +30,24 @@ typedef struct {
 	psy_dsp_ADSRSettings* adsr;
 	ADSRPointMapper pointmapper;
 	char* text;
+	float zoomleft;
+	float zoomright;
+} EnvelopeBox;
+
+void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);
+void envelopebox_setadsrenvelope(EnvelopeBox*, psy_dsp_ADSRSettings*);
+void envelopebox_update(EnvelopeBox*);
+void envelopebox_settext(EnvelopeBox*, const char* text);
+
+typedef struct {
+	psy_ui_Component component;
+	EnvelopeBox envelopebox;
+	ScrollZoom zoom;	
 } EnvelopeView;
 
 void envelopeview_init(EnvelopeView*, psy_ui_Component* parent);
-void EnvelopeViewSetAdsrEnvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
-void EnvelopeViewUpdate(EnvelopeView*);
+void envelopeview_setadsrenvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
+void envelopeview_update(EnvelopeView*);
 void envelopeview_settext(EnvelopeView*, const char* text);
-
 
 #endif

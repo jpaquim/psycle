@@ -6,7 +6,7 @@
 #include "settingsview.h"
 #include <stdio.h>
 #include "inputmap.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
@@ -17,8 +17,6 @@ static int settingsview_onpropertieshittestenum(SettingsView*, psy_Properties*,
 static int settingsview_onenumpropertyposition(SettingsView*, psy_Properties*,
 	int level);
 static void settingsview_preparepropertiesenum(SettingsView* self);
-static void settingsview_onkeydown(SettingsView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
 static void settingsview_onmousedown(SettingsView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void settingsview_onmousedoubleclick(SettingsView*, psy_ui_Component* sender,
@@ -70,11 +68,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 		settingsview_ondestroy);
 	psy_signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
 	psy_signal_connect(&self->client.signal_scroll, self,
-		settingsview_onscroll);
-	psy_signal_connect(&self->client.signal_keydown, self,
-		settingsview_onkeydown);
-	psy_signal_connect(&self->component.signal_keydown, self,
-		settingsview_onkeydown);
+		settingsview_onscroll);		
 	psy_signal_connect(&self->client.signal_mousedown, self,
 		settingsview_onmousedown);
 	psy_signal_connect(&self->client.signal_mousedoubleclick, self,
@@ -345,12 +339,6 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 		r.bottom = r.top + knobsize.height;
 		ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00CACACA);
 	}	
-}
-
-void settingsview_onkeydown(SettingsView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* keyevent)
-{	
-	ui_component_propagateevent(sender);
 }
 
 void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,

@@ -243,7 +243,7 @@ void playlisteditor_ontimer(PlayListEditor* self, psy_ui_Component* sender, int 
 			self->currentry = self->nextentry;
 			entry = (PlayListEntry*) self->currentry->entry;			
 			workspace_loadsong(self->workspace, entry->path);		
-			sequencer_stoploop(&self->workspace->player.sequencer);					
+			psy_audio_sequencer_stoploop(&self->workspace->player.sequencer);
 			player_setposition(&self->workspace->player, 0);
 			player_start(&self->workspace->player);
 			self->nextentry = self->currentry->next;

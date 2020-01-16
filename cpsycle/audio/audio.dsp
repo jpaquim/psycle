@@ -749,10 +749,6 @@ SOURCE=.\src\psyclescript.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\psycleversion.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\sample.h
 # End Source File
 # Begin Source File

@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "instrumentview.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);
@@ -496,7 +496,10 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 void instrumentvolumeview_setinstrument(InstrumentVolumeView* self, psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;
-	EnvelopeViewSetAdsrEnvelope(&self->envelopeview, instrument ? &instrument->volumeenvelope : 0);
+	envelopeview_setadsrenvelope(&self->envelopeview,
+		instrument
+		? &instrument->volumeenvelope
+		: 0);
 }
 
 void OnVolumeViewDescribe(InstrumentVolumeView* self, psy_ui_Slider* slidergroup, char* txt)
@@ -556,7 +559,7 @@ void OnVolumeViewTweak(InstrumentVolumeView* self, psy_ui_Slider* slidergroup, f
 		adsr_settings_setrelease(
 			&self->instrument->volumeenvelope, value * 1.4f);
 	}
-	EnvelopeViewUpdate(&self->envelopeview);
+	envelopeview_update(&self->envelopeview);
 }
 
 void OnVolumeViewValue(InstrumentVolumeView* self, psy_ui_Slider* slidergroup, float* value)
@@ -684,8 +687,10 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 void instrumentfilterview_setinstrument(InstrumentFilterView* self, psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;
-	EnvelopeViewSetAdsrEnvelope(&self->envelopeview,
-		instrument ? &instrument->filterenvelope : 0);
+	envelopeview_setadsrenvelope(&self->envelopeview,
+		instrument
+		? &instrument->filterenvelope
+		: 0);
 }
 
 void OnFilterViewDescribe(InstrumentFilterView* self, psy_ui_Slider* slidergroup, char* txt)
@@ -780,7 +785,7 @@ void OnFilterViewTweak(InstrumentFilterView* self,
 	if (slidergroup == &self->modamount) {
 		self->instrument->filtermodamount = value - 0.5f;
 	}
-	EnvelopeViewUpdate(&self->envelopeview);
+	envelopeview_update(&self->envelopeview);
 }
 
 void OnFilterViewValue(InstrumentFilterView* self, psy_ui_Slider* slidergroup, float* value)

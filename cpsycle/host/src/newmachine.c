@@ -5,13 +5,16 @@
 
 #include "newmachine.h"
 #include <plugin_interface.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 // newmachine
 static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
 	psy_Properties*);
 static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onkeydown(NewMachine*, psy_ui_KeyEvent*);
+static void newmachine_onsortbyname(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onsortbytype(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onsortbymode(NewMachine*, psy_ui_Component* sender);
 // pluginsview
 static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
@@ -19,7 +22,6 @@ static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Properties*
 	int x, int y);
 static void pluginsview_onsize(PluginsView*, psy_ui_Component* sender,
 	psy_ui_Size* size);
-static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, int x, int y);
@@ -30,24 +32,45 @@ static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
 static void pluginsview_adjustscroll(PluginsView*);
 
-static void pluginname(psy_Properties*, char* txt);
-static int plugintype(psy_Properties*, char* txt);
-static int pluginmode(psy_Properties*, char* txt);
+static void pluginname(psy_Properties*, char* text);
+static int plugintype(psy_Properties*, char* text);
+static int pluginmode(psy_Properties*, char* text);
 
 static void newmachinebar_onrescan(NewMachineBar*, psy_ui_Component* sender);
 
 static void newmachinedetail_reset(NewMachineDetail*);
 
+typedef int (*fp_qsort_comp)(void *, void *);
+
+psy_Properties* newmachine_sort(psy_Properties* source, fp_qsort_comp);
+static int newmachine_comp_name(psy_Properties* p, psy_Properties* q);
+static int newmachine_comp_type(psy_Properties* p, psy_Properties* q);
+static int newmachine_comp_mode(psy_Properties* p, psy_Properties* q);
+static int newmachine_isplugin(int type);
+
+static void kr_qsort(void *lineptr[], int left, int right, fp_qsort_comp);
+static void kr_qsort_swap(void *v[], int i, int j);
+
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->workspace = workspace;	
-	ui_component_init(&self->component, parent);	
+	ui_component_init(&self->component, parent);
+	ui_component_enablealign(&self->component);	
 	psy_ui_button_init(&self->rescan, &self->component);
 	psy_ui_button_settext(&self->rescan, "Rescan");
+	ui_component_setalign(&self->rescan.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->sortbyname, &self->component);
+	psy_ui_button_settext(&self->sortbyname, "Sort By Name");
+	ui_component_setalign(&self->sortbyname.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->sortbytype, &self->component);
+	psy_ui_button_settext(&self->sortbytype, "Sort By Type");
+	ui_component_setalign(&self->sortbytype.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_init(&self->sortbymode, &self->component);
+	psy_ui_button_settext(&self->sortbymode, "Sort By Mode");
+	ui_component_setalign(&self->sortbymode.component, psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->rescan.signal_clicked, self,
 		newmachinebar_onrescan);
-	ui_component_setposition(&self->rescan.component, 0, 0, 80, 20);
 }
 
 void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
@@ -82,9 +105,7 @@ static void pluginsview_vtable_init(PluginsView* self)
 {
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);				
-		pluginsview_vtable.ondraw = (psy_ui_fp_ondraw) pluginsview_ondraw;
-		pluginsview_vtable.onkeydown = (psy_ui_fp_onkeydown)
-			pluginsview_onkeydown;
+		pluginsview_vtable.ondraw = (psy_ui_fp_ondraw) pluginsview_ondraw;		
 		pluginsview_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			pluginsview_onmousedown;
 		pluginsview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
@@ -97,6 +118,12 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 {	
 	ui_component_init(&self->component, parent);
 	pluginsview_vtable_init(self);
+	self->workspace = workspace;
+	if (workspace_pluginlist(workspace)) {
+		self->plugins = psy_properties_clone(workspace_pluginlist(workspace), 1);
+	} else {
+		self->plugins = 0;
+	}
 	self->component.vtable = &pluginsview_vtable;
 	ui_component_doublebuffer(&self->component);
 	ui_component_showverticalscrollbar(&self->component);	
@@ -106,8 +133,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 		pluginsview_onsize);
 	psy_signal_connect(&self->component.signal_scroll, self,
 		pluginsview_onscroll);	
-	self->selectedplugin = 0;
-	self->workspace = workspace;	
+	self->selectedplugin = 0;	
 	self->dy = 0;	
 	self->calledby = 0;
 	psy_signal_init(&self->signal_selected);
@@ -120,6 +146,9 @@ void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 {
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
+	if (self->plugins) {
+		properties_free(self->plugins);
+	}
 }
 
 void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
@@ -129,7 +158,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 	int cpy = 0;
 	
 	pluginsview_computetextsizes(self);
-	p = workspace_pluginlist(self->workspace);
+	p = self->plugins;
 	if (p) {
 		p = p->children;
 	}
@@ -146,7 +175,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_Properties* property, int x, int y)
 {
-	char txt[128];
+	char text[128];
 
 	if (property == self->selectedplugin) {
 		ui_setbackgroundcolor(g, 0x009B7800);
@@ -155,18 +184,18 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		ui_setbackgroundcolor(g, 0x00232323);
 		ui_settextcolor(g, 0x00CACACA);		
 	}		
-	pluginname(property, txt);			
-	ui_textout(g, x, y + self->dy + 2, txt, strlen(txt));
-	plugintype(property, txt);
+	pluginname(property, text);			
+	ui_textout(g, x, y + self->dy + 2, text, strlen(text));
+	plugintype(property, text);
 	ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
-		y + self->dy + 2, txt, strlen(txt));	
-	if (pluginmode(property, txt) == MACHMODE_FX) {
+		y + self->dy + 2, text, strlen(text));
+	if (pluginmode(property, text) == MACHMODE_FX) {
 		ui_settextcolor(g, 0x00B1C8B0);
 	} else {		
 		ui_settextcolor(g, 0x00D1C5B6);	
 	}
 	ui_textout(g, x + self->columnwidth - 10 * self->avgcharwidth,
-		y + self->dy + 2, txt, strlen(txt));	
+		y + self->dy + 2, text, strlen(text));	
 }
 
 void pluginsview_computetextsizes(PluginsView* self)
@@ -183,52 +212,53 @@ void pluginsview_computetextsizes(PluginsView* self)
 	self->numparametercols = max(1, size.width / self->columnwidth);
 }
 
-void pluginname(psy_Properties* property, char* txt)
+void pluginname(psy_Properties* property, char* text)
 {
 	psy_Properties* p;
 	
 	p = psy_properties_read(property, "name");	
-	psy_snprintf(txt, 128, "%s", 
+	psy_snprintf(text, 128, "%s", 
 		p && strlen(psy_properties_valuestring(p)) != 0
 		? psy_properties_valuestring(p)
 		: psy_properties_key(property));	
 }
 
-int plugintype(psy_Properties* property, char* txt)
+int plugintype(psy_Properties* property, char* text)
 {	
 	int rv;
 	
 	rv = psy_properties_int(property, "type", -1);
 	switch (rv) {
 		case MACH_PLUGIN:
-			strcpy(txt, "psy");
+			strcpy(text, "psy");
 		break;
 		case MACH_LUA:
-			strcpy(txt, "lua");
+			strcpy(text, "lua");
 		break;
 		case MACH_VST:
-			strcpy(txt, "vst");
+			strcpy(text, "vst");
 		break;
 		case MACH_VSTFX:
-			strcpy(txt, "vst");
+			strcpy(text, "vst");
 		break;
 		default:
-			strcpy(txt, "int");
+			strcpy(text, "int");
 		break;
 	}
 	return rv;
 }
 
-int pluginmode(psy_Properties* property, char* txt)
+int pluginmode(psy_Properties* property, char* text)
 {			
 	int rv;
 
 	rv = psy_properties_int(property, "mode", -1);
-	strcpy(txt, rv == MACHMODE_FX ? "fx" : "gn");
+	strcpy(text, rv == MACHMODE_FX ? "fx" : "gn");
 	return rv;
 }
 
-void pluginsview_onsize(PluginsView* self, psy_ui_Component* sender, psy_ui_Size* size)
+void pluginsview_onsize(PluginsView* self, psy_ui_Component* sender,
+	psy_ui_Size* size)
 {
 	pluginsview_adjustscroll(self);
 }
@@ -237,7 +267,7 @@ void pluginsview_adjustscroll(PluginsView* self)
 {
 	psy_Properties* p;
 
-	p = workspace_pluginlist(self->workspace);
+	p = self->plugins;
 	if (p) {
 		psy_ui_Size size;
 		int visilines;
@@ -246,8 +276,8 @@ void pluginsview_adjustscroll(PluginsView* self)
 		pluginsview_computetextsizes(self);
 		size = ui_component_size(&self->component);		
 		visilines = size.height / self->lineheight;
-		currlines = (int) (psy_properties_size(p) / (float) self->numparametercols
-			+ 0.5f);
+		currlines = (int) (psy_properties_size(p) /
+			(float) self->numparametercols + 0.5f);
 		self->component.scrollstepy = self->lineheight;
 		ui_component_setverticalscrollrange(&self->component,
 			0, currlines - visilines);
@@ -275,7 +305,7 @@ void pluginsview_hittest(PluginsView* self, int x, int y)
 	int cpy = 0;
 	
 	pluginsview_computetextsizes(self);
-	p = workspace_pluginlist(self->workspace);
+	p = self->plugins;
 	if (p) {			
 		for (p = p->children ; p != 0; p = p->next) {
 			psy_ui_Rectangle r;
@@ -301,14 +331,8 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 		psy_signal_emit(&self->signal_selected, self, 1,
 			self->selectedplugin);
 		workspace_selectview(self->workspace, self->calledby);
+		psy_ui_mouseevent_stoppropagation(ev);
 	}	
-}
-
-void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
-{
-	if (ev->keycode == VK_ESCAPE) {	
-		self->component.propagateevent = 1;
-	}
 }
 
 void pluginsview_onplugincachechanged(PluginsView* self,
@@ -316,6 +340,14 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 {
 	self->dy = 0;
 	self->selectedplugin = 0;
+	if (self->plugins) {
+		properties_free(self->plugins);
+	}
+	if (sender->plugins) {		
+		self->plugins = psy_properties_clone(sender->plugins, 1);
+	} else {
+		self->plugins = 0;
+	}	
 	pluginsview_adjustscroll(self);
 	ui_component_invalidate(&self->component);
 }
@@ -349,6 +381,12 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onpluginselected);
 	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
 		newmachine_onplugincachechanged);
+	psy_signal_connect(&self->detail.bar.sortbyname.signal_clicked, self,
+		newmachine_onsortbyname);
+	psy_signal_connect(&self->detail.bar.sortbytype.signal_clicked, self,
+		newmachine_onsortbytype);
+	psy_signal_connect(&self->detail.bar.sortbymode.signal_clicked, self,
+		newmachine_onsortbymode);
 }
 
 void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
@@ -365,14 +403,162 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->detail.desclabel, detail);
 }
 
-void newmachine_onplugincachechanged(NewMachine* self, psy_audio_PluginCatcher* sender)
+void newmachine_onplugincachechanged(NewMachine* self,
+	psy_audio_PluginCatcher* sender)
 {
 	newmachinedetail_reset(&self->detail);
 }
 
-void newmachine_onkeydown(NewMachine* self, psy_ui_KeyEvent* ev)
+void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 {
-	if (ev->keycode == VK_ESCAPE) {	
-		self->component.propagateevent = 1;
+	psy_Properties* sorted;
+	
+	if (self->pluginsview.plugins) {
+		sorted = newmachine_sort(self->pluginsview.plugins,
+			newmachine_comp_name);
+		properties_free(self->pluginsview.plugins);
+		self->pluginsview.plugins = sorted;
+		newmachinedetail_reset(&self->detail);
+		self->pluginsview.dy = 0;
+		pluginsview_adjustscroll(&self->pluginsview);
+		ui_component_invalidate(&self->pluginsview.component);
 	}
 }
+
+void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
+{
+	psy_Properties* sorted;
+	
+	if (self->pluginsview.plugins) {
+		sorted = newmachine_sort(self->pluginsview.plugins,
+			newmachine_comp_type);
+		properties_free(self->pluginsview.plugins);
+		self->pluginsview.plugins = sorted;
+		newmachinedetail_reset(&self->detail);
+		self->pluginsview.dy = 0;
+		pluginsview_adjustscroll(&self->pluginsview);
+		ui_component_invalidate(&self->pluginsview.component);
+	}
+}
+
+void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
+{
+	psy_Properties* sorted;
+	
+	if (self->pluginsview.plugins) {
+		sorted = newmachine_sort(self->pluginsview.plugins,
+			newmachine_comp_mode);
+		properties_free(self->pluginsview.plugins);
+		self->pluginsview.plugins = sorted;
+		newmachinedetail_reset(&self->detail);
+		self->pluginsview.dy = 0;
+		pluginsview_adjustscroll(&self->pluginsview);
+		ui_component_invalidate(&self->pluginsview.component);
+	}
+}
+
+void newmachine_onkeydown(NewMachine* self, psy_ui_KeyEvent* ev)
+{
+	if (ev->keycode != VK_ESCAPE) {	
+		psy_ui_keyevent_stoppropagation(ev);
+	}
+}
+
+psy_Properties* newmachine_sort(psy_Properties* source, fp_qsort_comp comp)
+{		
+	psy_Properties* rv = 0;
+
+	if (source) {
+		int i;
+		int num;
+		psy_Properties* p;
+		psy_Properties** propertiesptr;
+		
+		p = source;
+		num = psy_properties_size(p);
+		propertiesptr = malloc(sizeof(psy_Properties*) * num);
+		p = p->children;		
+		for (i =0 ; p != 0 && i < num; p = p->next, ++i) {
+			propertiesptr[i] = p;
+		}		
+		kr_qsort(propertiesptr, 0, num - 1, comp);
+
+		rv = psy_properties_create();		
+		for (i = 0; i < num; ++i) {
+			psy_properties_append_property(rv, psy_properties_clone(
+				propertiesptr[i], 0));
+		}		
+		free(propertiesptr);
+	}
+	return rv;
+}
+
+int newmachine_comp_name(psy_Properties* p, psy_Properties* q)
+{
+	const char* left;
+	const char* right;
+
+	left = psy_properties_readstring(p, "name", "");
+	if (strlen(left) == 0) {
+		left = psy_properties_key(p);
+	}
+	right = psy_properties_readstring(q, "name", "");
+	if (strlen(right) == 0) {
+		right = psy_properties_key(q);
+	}
+	return strcmp(left, right);		
+}
+
+int newmachine_comp_type(psy_Properties* p, psy_Properties* q)
+{
+	int left;
+	int right;
+	
+	left = psy_properties_int(p, "type", 128);
+	left = newmachine_isplugin(left) ? left : 0;
+	right = psy_properties_int(q, "type", 128);
+	right = newmachine_isplugin(right) ? right : 0;
+	return left - right;		
+}
+
+int newmachine_isplugin(int type)
+{
+	return (type == MACH_PLUGIN) ||
+	   (type == MACH_VST) ||
+	   (type == MACH_VSTFX) ||
+	   (type == MACH_LUA) ||
+	   (type == MACH_LADSPA);
+}
+
+int newmachine_comp_mode(psy_Properties* p, psy_Properties* q)
+{	
+	return psy_properties_int(p, "mode", 128) -
+		psy_properties_int(q, "mode", 128);	
+}
+
+void kr_qsort(void *v[], int left, int right, fp_qsort_comp comp)
+{
+	int i, last;
+	void swap(void *v[], int, int);
+	if (left >= right)
+		return;
+	kr_qsort_swap(v, left, (left + right)/2);
+	last = left;
+	for (i = left+1; i <= right; i++)
+		if ((*comp)(v[i], v[left]) < 0)
+			kr_qsort_swap(v, ++last, i);
+	kr_qsort_swap(v, left, last);
+	kr_qsort(v, left, last-1, comp);
+	kr_qsort(v, last+1, right, comp);
+}
+
+void kr_qsort_swap(void *v[], int i, int j)
+{
+	void *temp;
+
+	temp = v[i];
+	v[i] = v[j];
+	v[j] = temp;
+}
+
+

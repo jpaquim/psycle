@@ -5,12 +5,12 @@
 #define SAMPLEEDITOR_H
 
 #include "uibutton.h"
+#include "scrollzoom.h"
 #include "wavebox.h"
 #include "workspace.h"
 
 #include <sampler.h>
 #include <sample.h>
-
 
 typedef struct {
 	psy_ui_Component component;
@@ -39,22 +39,13 @@ typedef struct {
 	int scrollpos;	
 } SampleEditorHeader;
 
-typedef struct {	
-	psy_ui_Component component;	
-	psy_audio_Sample* sample;
-	float zoomleft;
-	float zoomright;	
-	int dragmode;
-	int dragoffset;
-	psy_Signal signal_zoom;
-} SampleZoom;
 
 typedef struct SampleEditor {	
 	psy_ui_Component component;
 	SampleEditorPlayBar playbar;
 	SampleEditorHeader header;
 	WaveBox samplebox;
-	SampleZoom zoom;
+	ScrollZoom zoom;
 	SampleEditorMetrics metrics;
 	psy_audio_Sample* sample;
 	psy_audio_Sampler sampler;

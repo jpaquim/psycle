@@ -20,8 +20,7 @@ static void onmouseleavesplitbar(psy_ui_Notebook*, psy_ui_Component* sender);
 void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 {  
     ui_component_init(psy_ui_notebook_base(self), parent);
-	ui_component_setbackgroundmode(psy_ui_notebook_base(self), BACKGROUND_NONE);
-	self->component.defaultpropagation = 1;
+	ui_component_setbackgroundmode(psy_ui_notebook_base(self), BACKGROUND_NONE);	
 	psy_signal_connect(&psy_ui_notebook_base(self)->signal_size, self, onsize);
 	self->pageindex = 0;
 	self->split = 0;

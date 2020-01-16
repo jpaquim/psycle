@@ -93,10 +93,6 @@ SOURCE=.\src\list.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\portable.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\properties.c
 # End Source File
 # Begin Source File
@@ -114,10 +110,6 @@ SOURCE=.\src\hashtbl.h
 # Begin Source File
 
 SOURCE=.\src\list.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\portable.h
 # End Source File
 # Begin Source File
 

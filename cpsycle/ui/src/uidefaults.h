@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSYUIDEFAULTS_H)
-#define PSYUIDEFAULTS_H
+#ifndef psy_ui_DEFAULTS_H
+#define psy_ui_DEFAULTS_H
 
 #include "../../detail/stdint.h"
 
@@ -22,4 +22,4 @@ uint32_t ui_defaults_color(psy_ui_Defaults*);
 uint32_t ui_defaults_backgroundcolor(psy_ui_Defaults*);
 uint32_t ui_defaults_bordercolor(psy_ui_Defaults*);
 
-#endif
+#endif /* psy_ui_DEFAULTS_H */

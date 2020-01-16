@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(UICOMBOBOX_H)
-#define UICOMBOBOX_H
+#ifndef psy_ui_COMBOBOX_H
+#define psy_ui_COMBOBOX_H
 
 #include "uicomponent.h"
 
@@ -23,4 +23,4 @@ void ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
 intptr_t ui_combobox_cursel(psy_ui_ComboBox*);
 void ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
 
-#endif
+#endif /* psy_ui_COMBOBOX_H */

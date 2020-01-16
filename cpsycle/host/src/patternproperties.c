@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "patternproperties.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void patternproperties_onapply(PatternProperties*,
 	psy_ui_Component* sender);

@@ -8,7 +8,7 @@
 #include "settingsview.h"
 #include "resources/resource.h"
 
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <dir.h>
 #include <uiapp.h>
 
@@ -115,8 +115,7 @@ void mainframe_init(MainFrame* self)
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);	
 	ui_component_setalign(&self->sequenceview.component, psy_ui_ALIGN_LEFT);
 	// client
-	ui_component_init(&self->client, &self->component);
-	self->client.defaultpropagation = 1;
+	ui_component_init(&self->client, &self->component);	
 	ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
 	ui_component_enablealign(&self->client);
 	ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);	

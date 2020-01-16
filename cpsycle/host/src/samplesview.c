@@ -7,7 +7,7 @@
 #include <instruments.h>
 
 #include <exclusivelock.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <songio.h>
 
 #include <math.h>
@@ -26,8 +26,6 @@ static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
 static void samplesview_onshow(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onhide(SamplesView*, psy_ui_Component* sender);
-static void samplesview_onkeydown(SamplesView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
@@ -265,9 +263,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	ui_component_enablealign(&self->component);	
 	samplesheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self);
-	ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_signal_connect(&self->component.signal_keydown, self,
-		samplesview_onkeydown);
+	ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
 	// left
 	ui_component_init(&self->left, &self->component);
 	ui_component_enablealign(&self->left);
@@ -539,13 +535,6 @@ void samplesview_onhide(SamplesView* self, psy_ui_Component* sender)
 {
 	ui_component_hide(&self->clienttabbar.component);
 }
-
-void samplesview_onkeydown(SamplesView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
-{
-	ui_component_propagateevent(&self->component);
-}
-
 
 void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, struct SamplesView* view)

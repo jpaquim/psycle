@@ -5,20 +5,19 @@
 
 #include "sequenceview.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <exclusivelock.h>
 
 #define TIMERID_SEQUENCEVIEW 2000
 
-static void sequencelistview_ondraw(SequenceListView*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
-static void sequencelistview_drawsequence(SequenceListView*, psy_ui_Graphics*);
+static void sequencelistview_onsize(SequenceListView*, const psy_ui_Size*);
+static void sequencelistview_ondraw(SequenceListView*, psy_ui_Graphics*);
 static void sequencelistview_drawtrack(SequenceListView*, psy_ui_Graphics*,
 	SequenceTrack* track, int trackindex, int x);
 static void sequencelistview_computetextsizes(SequenceListView*);
-static void sequencelistview_adjustscrollbars(SequenceListView*);
+static void sequencelistview_adjustscroll(SequenceListView*);
 static void sequencelistview_onmousedown(SequenceListView*, 
-	psy_ui_Component* sender, psy_ui_MouseEvent*);
+	psy_ui_MouseEvent*);
 static void sequencelistview_onscroll(SequenceListView*,
 	psy_ui_Component* sender, int stepx, int stepy);
 static void sequencelistview_ontimer(SequenceListView*,
@@ -67,6 +66,7 @@ static void sequenceview_vtable_init(SequenceView* self)
 		sequenceview_vtable = *(self->component.vtable);
 		sequenceview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			sequenceview_onpreferredsize;
+		sequenceview_vtable_initialized = 1;
 	}
 }
 
@@ -79,6 +79,7 @@ static void sequencebuttons_vtable_init(SequenceButtons* self)
 		sequencebuttons_vtable = *(self->component.vtable);
 		sequencebuttons_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			sequencebuttons_onpreferredsize;
+		sequencebuttons_vtable_initialized = 1;
 	}
 }
 
@@ -319,21 +320,38 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 	}	
 }
 
+// sequencelistview
+
+static psy_ui_ComponentVtable sequencelistview_vtable;
+static int sequencelistview_vtable_initialized = 0;
+
+static void sequencelistview_vtable_init(SequenceListView* self)
+{
+	if (!sequencelistview_vtable_initialized) {
+		sequencelistview_vtable = *(self->component.vtable);
+		sequencelistview_vtable.onsize = (psy_ui_fp_onsize)
+			sequencelistview_onsize;
+		sequencelistview_vtable.ondraw = (psy_ui_fp_ondraw)
+			sequencelistview_ondraw;
+		sequencelistview_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			sequencelistview_onmousedown;
+		sequencelistview_vtable_initialized = 1;		
+	}	
+}
+
 void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
-	SequenceView* view, psy_audio_Sequence* sequence, psy_audio_Patterns* patterns,
-	Workspace* workspace)
+	SequenceView* view, psy_audio_Sequence* sequence,
+	psy_audio_Patterns* patterns, Workspace* workspace)
 {	
+	ui_component_init(&self->component, parent);
+	sequencelistview_vtable_init(self);	
+	self->component.vtable = &sequencelistview_vtable;
+	ui_component_doublebuffer(&self->component);
 	self->view = view;
 	self->sequence = sequence;
 	self->patterns = patterns;
 	self->workspace = workspace;
 	self->selection = &workspace->sequenceselection;
-	ui_component_init(&self->component, parent);
-	ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_draw, self,
-		sequencelistview_ondraw);
-	psy_signal_connect(&self->component.signal_mousedown, self, 
-		sequencelistview_onmousedown);
 	psy_signal_connect(&self->component.signal_scroll, self,
 		sequencelistview_onscroll);
 	psy_signal_connect(&self->component.signal_timer, self,
@@ -349,13 +367,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	ui_component_starttimer(&self->component, TIMERID_SEQUENCEVIEW, 200);
 }
 
-void sequencelistview_ondraw(SequenceListView* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
-{	
-	sequencelistview_drawsequence(self, g);
-}
-
-void sequencelistview_drawsequence(SequenceListView* self, psy_ui_Graphics* g)
+void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 {
 	SequenceTracks* p;	
 	int cpx = 0;
@@ -379,6 +391,11 @@ void sequencelistview_drawsequence(SequenceListView* self, psy_ui_Graphics* g)
 			self->textheight);
 		ui_drawsolidrectangle(g, r, 0x009B7800);		
 	}
+}
+
+void sequencelistview_onsize(SequenceListView* self, const psy_ui_Size* size)
+{
+	sequencelistview_adjustscroll(self);
 }
 
 void sequencelistview_computetextsizes(SequenceListView* self)
@@ -462,7 +479,7 @@ void sequenceview_onnewentry(SequenceView* self)
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);	
 	sequenceduration_update(&self->duration);
-	sequencelistview_adjustscrollbars(&self->listview);
+	sequencelistview_adjustscroll(&self->listview);
 	ui_component_invalidate(&self->component);
 }
 
@@ -482,7 +499,7 @@ void sequenceview_oninsertentry(SequenceView* self)
 			tracknode));
 	workspace_setsequenceselection(self->workspace, self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
-	sequencelistview_adjustscrollbars(&self->listview);
+	sequencelistview_adjustscroll(&self->listview);
 }
 
 void sequenceview_oncloneentry(SequenceView* self)
@@ -541,7 +558,7 @@ void sequenceview_ondelentry(SequenceView* self)
 	workspace_setsequenceselection(self->workspace, 
 		self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
-	sequencelistview_adjustscrollbars(&self->listview);
+	sequencelistview_adjustscroll(&self->listview);
 }
 
 void sequenceview_onincpattern(SequenceView* self)
@@ -589,7 +606,7 @@ void sequenceview_onnewtrack(SequenceView* self)
 	psy_audio_lock_enter();
 	sequence_appendtrack(self->sequence, sequencetrack_allocinit());
 	psy_audio_lock_leave();
-	sequencelistview_adjustscrollbars(&self->listview);
+	sequencelistview_adjustscroll(&self->listview);
 	ui_component_invalidate(&self->component);	
 }
 
@@ -603,7 +620,7 @@ void sequenceview_ondeltrack(SequenceView* self)
 	psy_audio_lock_leave();
 	ui_component_invalidate(&self->component);	
 	sequenceduration_update(&self->duration);
-	sequencelistview_adjustscrollbars(&self->listview);
+	sequencelistview_adjustscroll(&self->listview);
 }
 
 void sequenceview_onclear(SequenceView* self)
@@ -723,7 +740,7 @@ void sequenceview_onmultichannelaudition(SequenceView* self, psy_ui_Button* send
 		!self->workspace->player.multichannelaudition;
 }
 
-void sequencelistview_onmousedown(SequenceListView* self, psy_ui_Component* sender,
+void sequencelistview_onmousedown(SequenceListView* self,
 	psy_ui_MouseEvent* ev)
 {
 	unsigned int selected;
@@ -746,7 +763,7 @@ void sequencelistview_onscroll(SequenceListView* self, psy_ui_Component* sender,
 	ui_component_invalidate(&self->view->trackheader.component);
 }
 
-void sequencelistview_adjustscrollbars(SequenceListView* self)
+void sequencelistview_adjustscroll(SequenceListView* self)
 {
 	psy_ui_Size size;
 
@@ -755,13 +772,21 @@ void sequencelistview_adjustscrollbars(SequenceListView* self)
 	{ // vertical lines
 		int num;
 		int visi;
+		int top;
 		
 		num = sequence_maxtracksize(self->sequence);		
 		visi = size.height / self->lineheight;
+		top = -self->dy / self->lineheight;
 		self->component.scrollstepy = self->lineheight;
 		if (visi - num >= 0) {
 			self->dy = 0;		
-		}	
+		} else
+		if (top + visi > num) {
+			self->dy = -(num - visi)	* self->lineheight;
+			if (self->dy > 0) {
+				self->dy = 0;
+			}
+		}		
 		ui_component_setverticalscrollrange(&self->component, 0, num - visi);	
 	}	
 	{ // horizontal tracks
@@ -773,7 +798,7 @@ void sequencelistview_adjustscrollbars(SequenceListView* self)
 		self->component.scrollstepx = self->trackwidth;
 		if (visi - num >= 0) {
 			self->dx = 0;		
-		}	
+		}			
 		ui_component_sethorizontalscrollrange(&self->component, 0, num - visi);	
 	}
 }
@@ -782,14 +807,13 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace)
 {
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;	
-//	signal_connect(&workspace->song->sequence.signal_editpositionchanged,
-//		self, sequenceview_oneditpositionchanged);
 	self->listview.sequence = &workspace->song->sequence;
 	self->listview.patterns = &workspace->song->patterns;
 	self->listview.selected = 0;
 	self->duration.sequence = &workspace->song->sequence;
-	sequencelistview_adjustscrollbars(&self->listview);
-	ui_component_invalidate(&self->component);
+	sequencelistview_adjustscroll(&self->listview);
+	sequenceduration_update(&self->duration);
+	ui_component_invalidate(&self->listview.component);
 }
 
 void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* sender)
@@ -798,7 +822,10 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	SequenceTracks* p;
 	psy_List* q;
 	int c = 0;
-
+	int visilines;
+	int listviewtop;
+	psy_ui_Size listviewsize;
+	
 	position = sender->sequenceselection.editposition;	
 	p = sender->song->sequence.tracks;
 	while (p != 0) {
@@ -821,6 +848,21 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 		}		
 	}
 	self->listview.selected = c;
+	listviewsize = ui_component_size(&self->listview.component);
+	visilines = (listviewsize.height - listviewmargin) / self->listview.lineheight;
+	listviewtop = -self->listview.dy / self->listview.lineheight;
+	if (c < listviewtop) {
+		self->listview.dy = -c * self->listview.lineheight;
+		listviewtop = -self->listview.dy / self->listview.lineheight;
+		ui_component_setverticalscrollposition(&self->listview.component,
+			listviewtop);
+	} else
+	if (c > listviewtop + visilines) {
+		self->listview.dy = -(c - visilines) * self->listview.lineheight;
+		listviewtop = -self->listview.dy / self->listview.lineheight;
+		ui_component_setverticalscrollposition(&self->listview.component,
+			listviewtop);
+	}
 	ui_component_invalidate(&self->listview.component);
 	ui_component_invalidate(&self->trackheader.component);
 }

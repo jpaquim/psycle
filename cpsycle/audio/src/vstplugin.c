@@ -115,7 +115,7 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callbac
 	custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	psy_audio_vstplugin_base(self)->vtable = &vtable;
-	machine_setcallback(psy_audio_vstplugin_base(self), callback);	
+	psy_audio_machine_setcallback(psy_audio_vstplugin_base(self), callback);	
 	self->info = 0;
 	self->editorhandle = 0;
 	self->events = 0;
@@ -141,7 +141,7 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callbac
 			self->effect->user = self;
 			self->effect->dispatcher (self->effect, effOpen, 0, 0, 0, 0);
 			self->effect->dispatcher (self->effect, effSetSampleRate, 0, 0, 0,
-				(float) machine_samplerate(psy_audio_vstplugin_base(self)));
+				(float) psy_audio_machine_samplerate(psy_audio_vstplugin_base(self)));
 			self->effect->dispatcher (self->effect, effSetProcessPrecision, 0,
 				kVstProcessPrecision32, 0, 0);
 			self->effect->dispatcher (self->effect, effSetBlockSize, 0, kBlockSize, 0, 0);
@@ -149,12 +149,12 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callbac
 			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
 			self->plugininfo = machineinfo_allocinit();
 			machineinfo(self->effect, self->plugininfo, self->library.path, 0);
-			machine_seteditname(psy_audio_vstplugin_base(self),
+			psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
 				self->plugininfo->ShortName);
 		}
 	}
-	if (!machine_editname(psy_audio_vstplugin_base(self))) {
-		machine_seteditname(psy_audio_vstplugin_base(self), "VstPlugin");
+	if (!psy_audio_machine_editname(psy_audio_vstplugin_base(self))) {
+		psy_audio_machine_seteditname(psy_audio_vstplugin_base(self), "VstPlugin");
 	}
 } 
 
@@ -226,15 +226,15 @@ int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 
 void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {	
-	if (!machine_bypassed(psy_audio_vstplugin_base(self))) {		
+	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self))) {		
 		processevents(self, bc);					
 		// add to buffer memory
 		if (bc->output && bc->output->numchannels > 0) {
-			if (machine_buffermemory(psy_audio_vstplugin_base(self))) {
+			if (psy_audio_machine_buffermemory(psy_audio_vstplugin_base(self))) {
 				psy_audio_buffer_insertsamples(
-					machine_buffermemory(psy_audio_vstplugin_base(self)),
+					psy_audio_machine_buffermemory(psy_audio_vstplugin_base(self)),
 						bc->output,
-						machine_buffermemorysize(psy_audio_vstplugin_base(self)),
+						psy_audio_machine_buffermemorysize(psy_audio_vstplugin_base(self)),
 						bc->numsamples);
 			}
 		}
@@ -256,7 +256,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		numworksamples = (unsigned int)entry->delta - pos;
 		if (patternentry_front(entry)->cmd == SET_PANNING) {
 			// todo split work
-			machine_setpanning(psy_audio_vstplugin_base(self),
+			psy_audio_machine_setpanning(psy_audio_vstplugin_base(self),
 				patternentry_front(entry)->parameter / 255.f);
 		} else
 		if (patternentry_front(entry)->note == NOTECOMMANDS_MIDICC) {
@@ -299,7 +299,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			}
 			value = (patternentry_front(entry)->cmd << 8) +
 				patternentry_front(entry)->parameter;
-			machine_patterntweak(psy_audio_vstplugin_base(self),
+			psy_audio_machine_patterntweak(psy_audio_vstplugin_base(self),
 				patternentry_front(entry)->inst, value);
 			for (i = 0; i < count; ++i) {		
 				free(self->events->events[i]);
@@ -376,7 +376,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 
 void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {
-	if (!machine_bypassed(psy_audio_vstplugin_base(self))) {
+	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self))) {
 		uintptr_t c;				
 				
 		if (bc->output->offset > 0) {
@@ -747,7 +747,8 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 		case audioMasterIdle:            
         break;
 		case audioMasterGetSampleRate:
-			result = machine_samplerate(psy_audio_vstplugin_base(self));
+			result = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
+				self));
 		break;
 		case audioMasterOpenFileSelector :
 			vstplugin_onfileselect(self, (struct VstFileSelect*) ptr);

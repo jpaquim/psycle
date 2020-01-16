@@ -53,6 +53,7 @@ typedef struct {
    int dy;
    int beatscrollpos;
    PianoMetrics metrics;
+   psy_audio_PatternEntry* hover;
 } Pianogrid;
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, struct Pianoroll*);

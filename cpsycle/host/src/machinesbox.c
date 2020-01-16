@@ -5,7 +5,7 @@
 
 #include "machinesbox.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void OnDestroy(MachinesBox*, psy_ui_Component*);
 static void ClearMachineBox(MachinesBox*);

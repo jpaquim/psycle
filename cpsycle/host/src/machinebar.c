@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "machinebar.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void OnDestroy(MachineBar*, psy_ui_Component* component);
 static void BuildMachineBox(MachineBar*);

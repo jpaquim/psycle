@@ -6,7 +6,7 @@
 #include "machineframe.h"
 #include "resources/resource.h"
 #include <dir.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <presetio.h>
 #include <windows.h>
 
@@ -107,7 +107,7 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	self->machine = machine;
 	parameterlistbox_setmachine(&self->parameterbox, machine);
 	ui_component_hide(&self->parameterbox.component);
-	info = machine_info(machine);
+	info = psy_audio_machine_info(machine);
 	if (info && info->modulepath) {
 		psy_dir_extract_path(info->modulepath, prefix, name, ext);
 		psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
@@ -119,14 +119,14 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	}
 	parameterbar_setpresetlist(&self->parameterbar, self->presets);		
 	machineframe_resize(self);
-	if (self->machine && machine_info(self->machine)) {
+	if (self->machine && psy_audio_machine_info(self->machine)) {
 		psy_snprintf(text, 128, "%.2X : %s",
-			machine_slot(self->machine),
-			machine_info(self->machine)->ShortName);
+			psy_audio_machine_slot(self->machine),
+			psy_audio_machine_info(self->machine)->ShortName);
 	} else {
 		ui_component_settitle(&self->component, text);
 			psy_snprintf(text, 128, "%.2X :",
-				machine_slot(self->machine));
+				psy_audio_machine_slot(self->machine));
 	}
 	psy_ui_notebook_setpageindex(&self->notebook, 1);
 	ui_component_settitle(&self->component, text);
@@ -158,7 +158,7 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 				for (it = psy_table_begin(&preset->parameters); 
 						!psy_tableiterator_equal(&it, psy_table_end());
 						psy_tableiterator_inc(&it)) {
-					machine_parametertweak(self->machine,
+					psy_audio_machine_parametertweak(self->machine,
 						psy_tableiterator_key(&it),
 						(uintptr_t)psy_tableiterator_value(&it));
 				}		

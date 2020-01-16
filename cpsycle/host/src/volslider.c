@@ -7,7 +7,7 @@
 #include <uiapp.h>
 #include <stdio.h>
 #include <math.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static int TIMERID_VOLSLIDER = 700;
 

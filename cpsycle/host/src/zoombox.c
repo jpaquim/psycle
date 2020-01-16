@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "zoombox.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);

@@ -9,7 +9,7 @@
 #include "songio.h"
 #include <string.h>
 #include <stdlib.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 // TODO: change will break songfile load/save
 #define DUPLICATOR2_NUMOUTPUTS 16
@@ -101,7 +101,7 @@ void psy_audio_duplicator2_init(psy_audio_Duplicator2* self,
 	self->isticking = 0;
 	psy_audio_duplicatormap_init(&self->map, DUPLICATOR2_NUMOUTPUTS,
 		MAX_TRACKS);
-	machine_seteditname(psy_audio_duplicator2_base(self), "Note Duplicator 2");
+	psy_audio_machine_seteditname(psy_audio_duplicator2_base(self), "Note Duplicator 2");
 }
 
 void dispose(psy_audio_Duplicator2* self)

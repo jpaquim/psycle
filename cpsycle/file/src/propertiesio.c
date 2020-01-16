@@ -3,7 +3,7 @@
 
 #include "../../detail/prefix.h"
 
-#include <portable.h>
+#include "../../detail/portable.h"
 #include "propertiesio.h"
 #include <malloc.h>
 #include <string.h> 

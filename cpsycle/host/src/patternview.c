@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "patternview.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 	int tabindex);
@@ -15,10 +15,6 @@ static void patternview_onsequenceselectionchanged(PatternView*,
 	Workspace* sender);
 static void patternview_onpropertiesapply(PatternView*,
 	psy_ui_Component* sender);
-static void patternview_onkeydown(PatternView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
-static void patternview_onkeyup(PatternView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
 static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
 static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Graphics*);
 static void patternviewstatus_onpreferredsize(PatternViewStatus* self,
@@ -172,11 +168,7 @@ void patternview_init(PatternView* self,
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
-	psy_signal_connect(&self->component.signal_keydown, self,
-		patternview_onkeydown);
-	psy_signal_connect(&self->component.signal_keyup, self,
-		patternview_onkeyup);
+	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	psy_signal_connect(&self->component.signal_focus, self, patternview_onfocus);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);
@@ -296,18 +288,6 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 void patternview_onpropertiesapply(PatternView* self, psy_ui_Component* sender)
 {
 	patternview_setpattern(self, self->properties.pattern);
-}
-
-void patternview_onkeydown(PatternView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* keyevent)
-{
-	ui_component_propagateevent(sender);
-}
-
-void patternview_onkeyup(PatternView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* keyevent)
-{
-	ui_component_propagateevent(sender);
 }
 
 void patternview_onfocus(PatternView* self, psy_ui_Component* sender)

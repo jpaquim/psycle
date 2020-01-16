@@ -11,7 +11,7 @@
 #include "machinefactory.h"
 #include <stdlib.h>
 #include <string.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 #define _MAX_PATH 4096
@@ -1002,12 +1002,12 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 		psy_properties_append_int(properties, "x", x, 0, 0);
 		psy_properties_append_int(properties, "y", y, 0, 0);
 		if (bypass) {
-			machine_bypass(machine);
+			psy_audio_machine_bypass(machine);
 		}
 		if (mute) {
-			machine_mute(machine);
+			psy_audio_machine_mute(machine);
 		}
-		machine_setpanning(machine, panning / 128.f);
+		psy_audio_machine_setpanning(machine, panning / 128.f);
 	}	
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		int32_t input;
@@ -1044,7 +1044,7 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 
 		strcpy(text, "X!");
 		strcat(text, editname);
-		machine_seteditname(machine, text);
+		psy_audio_machine_seteditname(machine, text);
 		psy_audio_songfile_warn(self, "replaced missing module ");
 		psy_audio_songfile_warn(self, modulename);
 		psy_audio_songfile_warn(self, " aka ");
@@ -1052,9 +1052,9 @@ psy_audio_Machine* machineloadfilechunk(psy_audio_SongFile* self, int32_t index,
 		psy_audio_songfile_warn(self, " with dummy-plug\n");
 
 	} else {
-		machine_seteditname(machine, editname);
+		psy_audio_machine_seteditname(machine, editname);
 	}	
-	machine_loadspecific(machine, self, index);
+	psy_audio_machine_loadspecific(machine, self, index);
 	return machine;	
 }
 
@@ -1586,7 +1586,7 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 	int status;
 
 	status = PSY_OK;
-	info = machine_info(machine);
+	info = psy_audio_machine_info(machine);
 	if (info) {
 		psy_Properties* p;
 		
@@ -1596,15 +1596,15 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 		}
 		psy3_savedllnameandindex(self->file, info->modulepath, info->shellidx);
 		if (status = psyfile_write_uint8(self->file, (uint8_t)
-				machine_bypassed(machine))) {
+				psy_audio_machine_bypassed(machine))) {
 			return status;
 		}
 		if (status = psyfile_write_uint8(self->file, (uint8_t)
-				machine_muted(machine))) {
+				psy_audio_machine_muted(machine))) {
 			return status;
 		}
 		if (status = psyfile_write_int32(self->file, (int32_t)
-			(machine_panning(machine) * 128.f))) {
+			(psy_audio_machine_panning(machine) * 128.f))) {
 			return status;
 		}
 		if (status = psyfile_write_int32(self->file,
@@ -1618,9 +1618,9 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 		if (status = psy3_write_connections(self, slot)) {
 			return status;
 		}
-		psyfile_writestring(self->file, machine_editname(machine)
-			? machine_editname(machine) : "");
-		machine_savespecific(machine, self, slot);
+		psyfile_writestring(self->file, psy_audio_machine_editname(machine)
+			? psy_audio_machine_editname(machine) : "");
+		psy_audio_machine_savespecific(machine, self, slot);
 		// SaveWireMapping(pFile);
 		// SaveParamMapping(pFile);
 	}

@@ -5,7 +5,7 @@
 #define PSY_AUDIO_BUFFER_H
 
 #include <dsptypes.h>
-#include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 #include "array.h"
 

@@ -7,7 +7,7 @@
 #include "skingraphics.h"
 #include "resources/resource.h"
 #include "skincoord.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 #define TIMERID_PARAMVIEW 410
 
@@ -398,7 +398,7 @@ void OnMouseMove(ParamView* self, psy_ui_Component* sender,
 		int maxval;		
 				
 		self->my = ev->y;
-		machine_parameterrange(self->machine, self->tweak, &minval, &maxval);
+		psy_audio_machine_parameterrange(self->machine, self->tweak, &minval, &maxval);
 		dy = self->tweakbase - ev->y;
 		val = (int)(self->tweakval +
 			(maxval - minval) / 200.0 * dy);
@@ -408,9 +408,9 @@ void OnMouseMove(ParamView* self, psy_ui_Component* sender,
 		if (val < minval) {
 			val = minval;
 		}
-		machine_parametertweak(self->machine, self->tweak, val);		
+		psy_audio_machine_parametertweak(self->machine, self->tweak, val);		
 		workspace_parametertweak(self->workspace,
-			machine_slot(self->machine), self->tweak, val - minval);
+			psy_audio_machine_slot(self->machine), self->tweak, val - minval);
 		ui_component_invalidate(&self->component);		
 	}
 }

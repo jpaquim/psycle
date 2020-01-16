@@ -14,7 +14,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void generateaudio(psy_audio_Sampler*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_Sampler*, uintptr_t channel,
@@ -122,7 +122,7 @@ void sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 	custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	sampler_base(self)->vtable = &vtable;
-	machine_seteditname(sampler_base(self), "Sampler");
+	psy_audio_machine_seteditname(sampler_base(self), "Sampler");
 	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;	
 	self->voices = 0;	
 	self->resamplingmethod = RESAMPLERTYPE_LINEAR;
@@ -179,11 +179,11 @@ void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	if (!voice) {		
 		psy_audio_Instrument* instrument;
 		
-		instrument = instruments_at(machine_instruments(sampler_base(self)),
+		instrument = instruments_at(psy_audio_machine_instruments(sampler_base(self)),
 			currslot(self, channel, event));
 		if (instrument) {
 			voice = voice_allocinit(self, instrument, channel,
-				machine_samplerate(sampler_base(self)));
+				psy_audio_machine_samplerate(sampler_base(self)));
 			psy_list_append(&self->voices, voice);
 		}
 	}
@@ -516,7 +516,7 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	unsigned int samplerate) 
 {	
 	self->sampler = sampler;
-	self->samples = machine_samples(sampler_base(sampler));
+	self->samples = psy_audio_machine_samples(sampler_base(sampler));
 	self->instrument = instrument;
 	self->channel = channel;
 	self->usedefaultvolume = 1;
@@ -607,7 +607,7 @@ void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 
 		self->effval = event->parameter;
 		self->effcmd = event->cmd;				
-		samplesprobeat = 1 / machine_beatspersample(
+		samplesprobeat = 1 / psy_audio_machine_beatspersample(
 			sampler_base(self->sampler));
 		self->portanumframes = (uintptr_t) samplesprobeat;
 		self->portacurrframe = 0;
@@ -618,7 +618,7 @@ void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 
 		self->effval = event->parameter;
 		self->effcmd = event->cmd;				
-		samplesprobeat = 1 / machine_beatspersample(
+		samplesprobeat = 1 / psy_audio_machine_beatspersample(
 			sampler_base(self->sampler));
 		self->portanumframes = (uintptr_t) samplesprobeat;
 		self->portacurrframe = 0;
@@ -863,7 +863,7 @@ psy_List* sequencerinsert(psy_audio_Sampler* self, psy_List* events)
 				patternentry_front(noteoff)->note = NOTECOMMANDS_RELEASE;
 				patternentry_front(noteoff)->mach = patternentry_front(entry)->mach;
 				noteoff->delta += entry->offset + (event->parameter & 0x0f) / 6.f *
-					machine_currbeatsperline(sampler_base(self)); 									
+					psy_audio_machine_currbeatsperline(sampler_base(self)); 									
 				psy_list_append(&insert, noteoff);
 			}			
 		}

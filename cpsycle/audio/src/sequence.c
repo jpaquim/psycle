@@ -358,7 +358,8 @@ SequencePosition sequence_at(psy_audio_Sequence* self, unsigned int trackindex,
 	return rv;
 }
 
-psy_List* sequenceentry_at_offset(psy_audio_Sequence* self, SequenceTracks* tracknode, psy_dsp_beat_t offset)
+psy_List* sequenceentry_at_offset(psy_audio_Sequence* self,
+	SequenceTracks* tracknode, psy_dsp_beat_t offset)
 {
 	psy_dsp_beat_t curroffset = 0.0f;	
 	psy_List* p = 0;
@@ -384,7 +385,8 @@ psy_List* sequenceentry_at_offset(psy_audio_Sequence* self, SequenceTracks* trac
 	return p;
 }
 
-SequenceTrackIterator sequence_begin(psy_audio_Sequence* self, psy_List* track, psy_dsp_beat_t pos)
+SequenceTrackIterator sequence_begin(psy_audio_Sequence* self, psy_List* track,
+	psy_dsp_beat_t pos)
 {		
 	SequenceTrackIterator rv;		
 	SequenceEntry* entry;	

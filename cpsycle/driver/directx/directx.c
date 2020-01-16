@@ -202,7 +202,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 	self = (DXDriver*) driver;
 	if (config) {
 		properties_free(self->driver.properties);
-		self->driver.properties = psy_properties_clone(config);
+		self->driver.properties = psy_properties_clone(config, 1);
 	} else {
 		property = psy_properties_read(self->driver.properties, "bitdepth");
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {

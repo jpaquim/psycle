@@ -14,6 +14,9 @@
 typedef struct {
 	psy_ui_Component component;	
 	psy_ui_Button rescan;
+	psy_ui_Button sortbyname;
+	psy_ui_Button sortbytype;
+	psy_ui_Button sortbymode;
 	Workspace* workspace;
 } NewMachineBar;
 
@@ -38,6 +41,7 @@ typedef struct {
    int numparametercols;
    int avgcharwidth;
    int pluginpos;
+   psy_Properties* plugins;
    psy_Properties* selectedplugin;
    psy_Signal signal_selected;
    psy_Signal signal_changed;

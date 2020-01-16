@@ -7,7 +7,7 @@
 #include "library.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 
 psy_Library* psy_library_alloc(void)

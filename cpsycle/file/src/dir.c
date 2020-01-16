@@ -8,7 +8,6 @@
 #include "dir.h"
 #include <stdio.h>
 #include <string.h>
-#include <portable.h>
 
 #if defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__OS__POSIX
 
@@ -18,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "../../detail/portable.h"
 
 static int wildcardmatch(const char *str, const char *match);
 
@@ -114,6 +114,7 @@ int wildcardmatch(const char *pszString, const char *pszMatch)
 
 #include <direct.h>
 #include <windows.h>
+#include "../../detail/portable.h"
 
 static const char pathenvvarname[] = { 
 	"PATH"

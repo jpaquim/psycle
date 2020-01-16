@@ -7,7 +7,7 @@
 #include <commctrl.h>
 #include <stdio.h>
 #include "uiapp.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void ui_slider_initsignals(psy_ui_Slider*);
 static void ui_slider_disposesignals(psy_ui_Slider*);

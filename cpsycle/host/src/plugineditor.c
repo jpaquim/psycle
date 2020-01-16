@@ -5,7 +5,7 @@
 
 #include "plugineditor.h"
 
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
@@ -39,8 +39,8 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 	psy_audio_Machine* machine;
 
 	machine = machines_at(machines, slot);
-	if (machine && machine_info(machine) &&
-			machine_info(machine)->type == MACH_LUA) {
+	if (machine && psy_audio_machine_info(machine) &&
+			psy_audio_machine_info(machine)->type == MACH_LUA) {
 		const char* path;
 		
 		path = plugincatcher_searchpath(

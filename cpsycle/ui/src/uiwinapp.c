@@ -127,17 +127,18 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			case WM_KEYDOWN:								
 			{
 				psy_ui_KeyEvent ev;
-				component->propagateevent = component->defaultpropagation;										
+				
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
 				component->vtable->onkeydown(component, &ev);
 				psy_signal_emit(&component->signal_keydown, component, 1,
 					&ev);
-				if (component->propagateevent) {
+				if (ev.bubble != FALSE &&
+						psy_table_at(&winapp->selfmap,
+						(uintptr_t) GetParent (hwnd))) {
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
 				}				
-				component->propagateevent = component->defaultpropagation;				
 			}
 			break;
 			case WM_KILLFOCUS:
@@ -196,8 +197,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 					size.width = LOWORD(lParam);
 					size.height = HIWORD(lParam);
+					component->vtable->onsize(component, &size);
 					psy_signal_emit(&component->signal_size, component, 1,
 						(void*)&size);
+
 					return 0 ;
 				}			
 			break;
@@ -317,8 +320,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			break;
 			case WM_SYSKEYDOWN:
-				if (wParam >= VK_F10 && wParam <= VK_F12) {
-					component->propagateevent = component->defaultpropagation;
+				if (wParam >= VK_F10 && wParam <= VK_F12) {					
 					if (component->signal_keydown.slots) {
 						psy_ui_KeyEvent ev;
 						
@@ -326,47 +328,49 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 							(lParam & 0x40000000) == 0x40000000);
 						psy_signal_emit(&component->signal_keydown, component, 1,
-							&ev);
+							&ev);					
+						if (ev.bubble != FALSE &&
+							psy_table_at(&winapp->selfmap,
+							(uintptr_t) GetParent (hwnd))) {				
+							SendMessage (GetParent (hwnd), message, wParam, lParam) ;
+						}
 					}
-					if (component->propagateevent) {					
-						SendMessage (GetParent (hwnd), message, wParam, lParam) ;
-					}				
-					component->propagateevent = component->defaultpropagation;
 					return 0;
 				}
 			break;
 			case WM_KEYDOWN:
 			{
 				psy_ui_KeyEvent ev;
-				component->propagateevent = component->defaultpropagation;										
+				
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
 				component->vtable->onkeydown(component, &ev);
 				psy_signal_emit(&component->signal_keydown, component, 1,
 					&ev);
-				if (component->propagateevent) {
-					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
+				if (ev.bubble != FALSE &&
+						psy_table_at(&winapp->selfmap,
+						(uintptr_t) GetParent (hwnd))) {
+					SendMessage(GetParent (hwnd), message, wParam, lParam);
 				}				
-				component->propagateevent = component->defaultpropagation;
 				return 0;
 			}
 			break;
 			case WM_KEYUP:
 			{
 				psy_ui_KeyEvent ev;
-
-				component->propagateevent = component->defaultpropagation;					
+								
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
 				component->vtable->onkeyup(component, &ev);
 				psy_signal_emit(&component->signal_keyup, component, 1,
-					&ev);				
-				if (component->propagateevent) {					
-					SendMessage (GetParent (hwnd), message, wParam, lParam) ;
+					&ev);
+				if (ev.bubble != FALSE &&
+						psy_table_at(&winapp->selfmap,
+						(uintptr_t) GetParent (hwnd))) {
+					SendMessage(GetParent (hwnd), message, wParam, lParam);
 				}				
-				component->propagateevent = component->defaultpropagation;
 				return 0;
 			}
 			break;
@@ -447,15 +451,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 				
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam),
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-				component->propagateevent = component->defaultpropagation;
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);				
 				component->vtable->onmousedoubleclick(component, &ev);
 				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
 					&ev);				
-				if (component->propagateevent) {					
+				if (ev.bubble != FALSE &&
+						psy_table_at(&winapp->selfmap,
+						(uintptr_t) GetParent (hwnd))) {
 					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
 				}				
-				component->propagateevent = component->defaultpropagation;
 				return 0;
 			}
 			break;

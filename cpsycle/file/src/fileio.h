@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 typedef struct TYPEULONGINV {
   unsigned char hihi;
