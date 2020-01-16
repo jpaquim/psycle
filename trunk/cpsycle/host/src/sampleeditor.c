@@ -9,15 +9,14 @@
 #include <alignedalloc.h>
 #include <exclusivelock.h>
 
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent,
 	SampleEditor*);
-static void sampleeditorheader_ondraw(SampleEditorHeader*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void sampleeditorheader_ondraw(SampleEditorHeader*,
+	psy_ui_Component* sender, psy_ui_Graphics*);
 static void sampleeditorheader_drawruler(SampleEditorHeader*, psy_ui_Graphics*);
-static void samplezoom_ondraw(SampleZoom*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void samplezoom_drawsamples(SampleZoom*, psy_ui_Graphics*);
 
 static void sampleeditor_initsampler(SampleEditor*);
 static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
@@ -31,13 +30,8 @@ static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
 	uintptr_t slot, psy_audio_BufferContext*);
 
-static void samplezoom_ondestroy(SampleZoom*, psy_ui_Component* sender);
-static void samplezoom_onmousedown(SampleZoom*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void samplezoom_onmouseup(SampleZoom*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void samplezoom_onmousemove(SampleZoom*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
+static void sampleeditor_onscrollzoom_customdraw(SampleEditor*,
+	ScrollZoom* sender, psy_ui_Graphics*);
 
 enum {
 	SAMPLEEDITOR_DRAG_NONE,
@@ -124,209 +118,45 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	}
 }
 
-void samplezoom_init(SampleZoom* self, psy_ui_Component* parent)
+void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender,
+	psy_ui_Graphics* g)
 {
-	self->sample = 0;
-	self->zoomleft = 0.f;
-	self->zoomright = 1.f;	
-	self->dragmode = SAMPLEEDITOR_DRAG_NONE;
-	self->dragoffset = 00;
-	ui_component_init(&self->component, parent);
-	ui_component_doublebuffer(&self->component);
-	psy_signal_init(&self->signal_zoom);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		samplezoom_ondestroy);
-	psy_signal_connect(&self->component.signal_draw, self,
-		samplezoom_ondraw);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		samplezoom_onmousedown);
-	psy_signal_connect(&self->component.signal_mouseup, self,
-		samplezoom_onmouseup);
-	psy_signal_connect(&self->component.signal_mousemove, self,
-		samplezoom_onmousemove);
-	ui_component_resize(&self->component, 100, 50);
-}
-
-void samplezoom_ondestroy(SampleZoom* self, psy_ui_Component* sender)
-{
-	psy_signal_dispose(&self->signal_zoom);
-}
-
-void samplezoom_ondraw(SampleZoom* self, psy_ui_Component* sender, psy_ui_Graphics* g)
-{
-	psy_ui_Rectangle r;
-	psy_ui_Size size;
-	int zoomleftx;
-	int zoomrightx;
-
-	size = ui_component_size(&self->component);
-	zoomleftx = (int)(size.width * self->zoomleft);
-	zoomrightx = (int)(size.width * self->zoomright);
-	if (zoomleftx == zoomrightx) {
-		++zoomrightx;
-	}
-	ui_setcolor(g, 0x00B1C8B0);
-	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx, size.height);
-	ui_drawrectangle(g, r);
 	if (self->sample) {
-		samplezoom_drawsamples(self, g);
-	}
-}
-
-void samplezoom_drawsamples(SampleZoom* self, psy_ui_Graphics* g)
-{
-	psy_ui_Rectangle r;
-	psy_ui_Size size = ui_component_size(&self->component);	
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_setcolor(g, 0x00B1C8B0);
-	if (!self->sample) {
-		psy_ui_TextMetric tm;
-		static const char* txt = "No wave loaded";
-
-		tm = ui_component_textmetric(&self->component);
-		ui_setbackgroundmode(g, TRANSPARENT);
-		ui_settextcolor(g, 0x00D1C5B6);
-		ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
-			(size.height - tm.tmHeight) / 2, txt, strlen(txt));
-	} else {
-		int x;
-		int centery = size.height / 2;
-		float offsetstep;
-		psy_dsp_amp_t scaley;
-
-		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;		
-		offsetstep = (float) self->sample->numframes / size.width;
+		psy_ui_Rectangle r;
+		psy_ui_Size size = ui_component_size(&sender->component);	
+		psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 		ui_setcolor(g, 0x00B1C8B0);
-		for (x = 0; x < size.width; ++x) {			
-			uintptr_t frame = (int)(offsetstep * x);
-			float framevalue;
-			
-			if (frame >= self->sample->numframes) {
-				break;
-			}
-			framevalue = self->sample->channels.samples[0][frame];							
-			ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
-		}
-	}
-}
+		if (!self->sample) {
+			psy_ui_TextMetric tm;
+			static const char* txt = "No wave loaded";
 
-void samplezoom_onmousedown(SampleZoom* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{
-	psy_ui_Size size;
-	int zoomleftx;
-	int zoomrightx;
-
-	size = ui_component_size(&self->component);
-	zoomleftx = (int)(size.width * self->zoomleft);
-	if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-		self->dragmode = SAMPLEEDITOR_DRAG_LEFT;
-		self->dragoffset = ev->x - zoomleftx;		
-	} else {
-		zoomrightx = (int)(size.width * self->zoomright);
-		if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-			self->dragmode = SAMPLEEDITOR_DRAG_RIGHT;
-			self->dragoffset = ev->x - zoomrightx;
-		} else
-		if (ev->x > zoomleftx && ev->x < zoomrightx) {
-			self->dragmode = SAMPLEEDITOR_DRAG_MOVE;
-			self->dragoffset = ev->x - zoomleftx;
-		}
-	}
-	ui_component_capture(&self->component);
-}
-
-void samplezoom_onmousemove(SampleZoom* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{	
-	psy_ui_Size size;	
-
-	size = ui_component_size(&self->component);
-	if (self->dragmode == SAMPLEEDITOR_DRAG_NONE) {
-		int zoomleftx;
-		int zoomrightx;
-
-		zoomleftx = (int)(size.width * self->zoomleft);
-		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+			tm = ui_component_textmetric(&sender->component);
+			ui_setbackgroundmode(g, TRANSPARENT);
+			ui_settextcolor(g, 0x00D1C5B6);
+			ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
+				(size.height - tm.tmHeight) / 2, txt, strlen(txt));
 		} else {
-			zoomrightx = (int)(size.width * self->zoomright);
-			if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-			}
-		}
-	} else 
-	if (self->dragmode == SAMPLEEDITOR_DRAG_LEFT) {
-		float zoomold;
+			int x;
+			int centery = size.height / 2;
+			float offsetstep;
+			psy_dsp_amp_t scaley;
 
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-		zoomold = self->zoomleft;
-		self->zoomleft = (ev->x - self->dragoffset) / (float) size.width;
-		if (self->zoomleft > self->zoomright) {
-			self->zoomleft = self->zoomright;
-		} else
-		if (self->zoomleft < 0.f) {
-			self->zoomleft = 0.f;
-		} else
-		if (self->zoomleft > 1.f) {
-			self->zoomleft = 1.f;
-		}
-		if (zoomold != self->zoomright) {
-			ui_component_invalidate(&self->component);
-			psy_signal_emit(&self->signal_zoom, self, 0);
-		}
-	} else
-	if (self->dragmode == SAMPLEEDITOR_DRAG_RIGHT) {
-		float zoomold;
-
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
-		zoomold = self->zoomright;
-		self->zoomright = (ev->x - self->dragoffset) / (float) size.width;
-		if (self->zoomright < self->zoomleft) {
-			self->zoomright = self->zoomleft;
-		} else
-		if (self->zoomright < 0.f) {
-			self->zoomright = 0.f;
-		} else
-		if (self->zoomright > 1.f) {
-			self->zoomright = 1.f;
-		}
-		if (zoomold != self->zoomright) {
-			ui_component_invalidate(&self->component);
-			psy_signal_emit(&self->signal_zoom, self, 0);
-		}
-	} else
-	if (self->dragmode == SAMPLEEDITOR_DRAG_MOVE) {
-		float zoomold;
-		float length;
-		
-		zoomold = self->zoomleft;
-		length = self->zoomright - self->zoomleft;
-		self->zoomleft = (ev->x - self->dragoffset) / (float) size.width;
-		if (self->zoomleft < 0.f) {
-			self->zoomleft = 0.f;			
-		}
-		if (self->zoomleft + length > 1.f) {
-			self->zoomleft = 1.f - length;
-			if (self->zoomleft < 0.f) {
-				self->zoomleft = 0.f;			
+			scaley = (size.height / 2) / (psy_dsp_amp_t) 32768;
+			offsetstep = (float) self->sample->numframes / size.width;
+			ui_setcolor(g, 0x00B1C8B0);
+			for (x = 0; x < size.width; ++x) {			
+				uintptr_t frame = (int)(offsetstep * x);
+				float framevalue;
+				
+				if (frame >= self->sample->numframes) {
+					break;
+				}
+				framevalue = self->sample->channels.samples[0][frame];							
+				ui_drawline(g, x, centery, x, centery +
+					(int)(framevalue * scaley));
 			}
-		}
-		if (self->zoomleft != zoomold) {			
-			self->zoomright = self->zoomleft + length;
-			ui_component_invalidate(&self->component);
-			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
 	}
-}
-
-void samplezoom_onmouseup(SampleZoom* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{
-	self->dragmode = SAMPLEEDITOR_DRAG_NONE;
-	ui_component_releasecapture(&self->component);
 }
 
 void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
@@ -336,22 +166,27 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->samplerevents = 0;
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
-	psy_signal_connect(&self->component.signal_destroy, self, sampleeditor_ondestroy);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		sampleeditor_ondestroy);
 	ui_component_enablealign(&self->component);	
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
-	psy_signal_connect(&self->playbar.play.signal_clicked, self, sampleeditor_onplay);
-	psy_signal_connect(&self->playbar.stop.signal_clicked, self, sampleeditor_onstop);
+	psy_signal_connect(&self->playbar.play.signal_clicked, self,
+		sampleeditor_onplay);
+	psy_signal_connect(&self->playbar.stop.signal_clicked, self,
+		sampleeditor_onstop);
 	ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);
 	sampleeditorheader_init(&self->header, &self->component, self);
 	ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	wavebox_init(&self->samplebox, &self->component);
 	ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
-	samplezoom_init(&self->zoom, &self->component);
+	scrollzoom_init(&self->zoom, &self->component);
+	psy_signal_connect(&self->zoom.signal_customdraw, self,
+		sampleeditor_onscrollzoom_customdraw);
 	ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	sampleeditor_computemetrics(self, &self->metrics);
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		sampleeditor_onsongchanged);
+		sampleeditor_onsongchanged);	
 	sampleeditor_initsampler(self);
 	sampleeditor_connectmachinessignals(self, workspace);	
 }
@@ -384,13 +219,13 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
-	wavebox_setsample(&self->samplebox, sample);
-	self->zoom.sample = sample;
+	wavebox_setsample(&self->samplebox, sample);	
 	sampleeditor_computemetrics(self, &self->metrics);
 	ui_component_invalidate(&self->component);
 }
 
-void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender, psy_ui_Size* size)
+void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender,
+	psy_ui_Size* size)
 {
 	sampleeditor_computemetrics(self, &self->metrics);
 }
@@ -474,7 +309,7 @@ void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 	psy_audio_buffercontext_init(&samplerbc, self->samplerevents, 0,
 		&self->samplerbuffer, bc->numsamples, 16, 0);
 	psy_audio_buffer_clearsamples(&self->samplerbuffer, bc->numsamples);
-	machine_work(&self->sampler.custommachine.machine, &samplerbc);
+	psy_audio_machine_work(&self->sampler.custommachine.machine, &samplerbc);
 	psy_audio_buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
 		(psy_dsp_amp_t) 1.f);
 	if (self->samplerevents) {

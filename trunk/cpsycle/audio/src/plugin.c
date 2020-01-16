@@ -8,7 +8,7 @@
 #include "songio.h"
 #include <stdlib.h>
 #include <string.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <math.h>
 #include <windows.h>
 
@@ -114,10 +114,10 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, MachineCallback callback,
 					mi_parametertweak(self->mi, gbp, 
 						pInfo->Parameters[gbp]->DefValue);
 				}
-				self->plugininfo = machineinfo_allocinit();
+				self->plugininfo = machineinfo_allocinit();				
 				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
 					self->library.path, 0);				
-				machine_seteditname(psy_audio_plugin_base(self),
+				psy_audio_machine_seteditname(psy_audio_plugin_base(self),
 					pInfo->ShortName);
 				if (strcmp(self->plugininfo->ShortName, "BexPhase!") == 0) {
 					self->preventsequencerlinetick = 1;
@@ -125,8 +125,8 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, MachineCallback callback,
 			}
 		}
 	}
-	if (!machine_editname(psy_audio_plugin_base(self))) {
-		machine_seteditname(psy_audio_plugin_base(self), "Plugin");
+	if (!psy_audio_machine_editname(psy_audio_plugin_base(self))) {
+		psy_audio_machine_seteditname(psy_audio_plugin_base(self), "Plugin");
 	}
 }
 
@@ -190,7 +190,7 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {
 	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd,
-		event->parameter);
+		event->parameter);	
 }
 
 void stop(psy_audio_Plugin* self)
@@ -199,7 +199,12 @@ void stop(psy_audio_Plugin* self)
 }
 
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
-{	
+{		
+	char text[60];
+	
+	psy_snprintf(text, 60, "numsamples %u\n",
+			bc->numsamples);
+	OutputDebugString(text);
 	mi_work(self->mi,
 		psy_audio_buffer_at(bc->output, 0),
 		psy_audio_buffer_at(bc->output, 1),
@@ -226,7 +231,18 @@ psy_audio_MachineInfo* info(psy_audio_Plugin* self)
 
 void parametertweak(psy_audio_Plugin* self, uintptr_t param, int val)
 {	
-	mi_parametertweak(self->mi, (int) param, val);
+	if (param < numparameters(self)) {
+		int minval;
+		int maxval;
+		char text[60];
+
+		psy_audio_machine_parameterrange(psy_audio_plugin_base(self), param,
+			&minval, &maxval);		
+		mi_parametertweak(self->mi, (int) param, val);
+		psy_snprintf(text, 60, "param %d, %d val, %d minval, %d maxval\n",
+			param, val, minval, maxval);
+		// OutputDebugString(text);
+	}
 }
 
 int describevalue(psy_audio_Plugin* self, char* txt, uintptr_t param,
@@ -259,7 +275,7 @@ void setcallback(psy_audio_Plugin* self, MachineCallback callback)
 
 void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
-{
+{	
 	uint32_t size;
 
 	// size of whole structure
@@ -273,8 +289,8 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		for (i = 0; i < count; i++) {
 			int temp;
 			
-			psyfile_read(songfile->file, &temp, sizeof(temp));
-			machine_parametertweak(psy_audio_plugin_base(self), i, temp);
+			psyfile_read(songfile->file, &temp, sizeof(temp));			
+			psy_audio_machine_parametertweak(psy_audio_plugin_base(self), i, temp);			
 		}
 		size -= sizeof(count) + sizeof(int)*count;
 		if(size) {
@@ -295,7 +311,7 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 void savespecific(psy_audio_Plugin* self, struct psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
-	uint32_t count = machine_numparameters(psy_audio_plugin_base(self));
+	uint32_t count = psy_audio_machine_numparameters(psy_audio_plugin_base(self));
 	uint32_t size2 = 0;
 	uint32_t size;
 	uint32_t i;
@@ -307,7 +323,7 @@ void savespecific(psy_audio_Plugin* self, struct psy_audio_SongFile* songfile,
 	for (i = 0; i < count; ++i) {
 		int32_t temp;
 		
-		temp = machine_parametervalue(psy_audio_plugin_base(self), i);
+		temp = psy_audio_machine_parametervalue(psy_audio_plugin_base(self), i);
 		psyfile_write(songfile->file, &temp, sizeof temp);
 	}
 	if (size2) {

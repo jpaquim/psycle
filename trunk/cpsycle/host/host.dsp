@@ -256,6 +256,10 @@ SOURCE=.\src\samplesview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\scrollzoom.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sequenceview.c
 # End Source File
 # Begin Source File
@@ -529,6 +533,10 @@ SOURCE=.\src\samplesbox.h
 # Begin Source File
 
 SOURCE=.\src\samplesview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\scrollzoom.h
 # End Source File
 # Begin Source File
 

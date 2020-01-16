@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "about.h"
-#include <psycleversion.h>
+#include "../../detail/psydef.h"
 
 #include <stdio.h>
 #include "resources/resource.h"

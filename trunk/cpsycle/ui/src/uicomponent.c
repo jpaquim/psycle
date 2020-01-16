@@ -13,7 +13,7 @@
 #include <commctrl.h>	// includes the common control header
 #include <stdio.h>
 #include <shlobj.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static int windowstyle(psy_ui_Component*);
 static int windowexstyle(psy_ui_Component*);
@@ -62,6 +62,7 @@ void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 
 // vtable
 static void onpreferredsize(psy_ui_Component*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
@@ -79,6 +80,7 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.ondraw = 0;
 		vtable.onpreferredsize = onpreferredsize;
+		vtable.onsize = onsize;
 		vtable.onmousedown = onmousedown;
 		vtable.onmousemove = onmousemove;
 		vtable.onmouseup = onmouseup;
@@ -197,8 +199,7 @@ void ui_component_init_signals(psy_ui_Component* component)
 
 void ui_component_init_base(psy_ui_Component* self) {
 	self->scrollstepx = 100;
-	self->scrollstepy = 12;
-	self->propagateevent = 0;
+	self->scrollstepy = 12;	
 	self->preventdefault = 0;
 	self->preventpreferredsize = 0;
 	self->align = psy_ui_ALIGN_NONE;
@@ -211,8 +212,7 @@ void ui_component_init_base(psy_ui_Component* self) {
 	psy_ui_margin_init(&self->spacing, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	self->debugflag = 0;
-	self->defaultpropagation = 0;	
+	self->debugflag = 0;	
 	self->visible = 1;
 	self->doublebuffered = 0;
 	self->wheelscroll = 0;
@@ -632,11 +632,6 @@ void ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
 		psy_ui_font_dispose(&self->font);		
 	}
 	self->font = font;
-}
-
-void ui_component_propagateevent(psy_ui_Component* self)
-{
-	self->propagateevent = 1;
 }
 
 void ui_component_preventdefault(psy_ui_Component* self)

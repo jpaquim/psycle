@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(UIEDITOR_H)
-#define UIEDITOR_H
+#ifndef psy_ui_EDITOR_H
+#define psy_ui_EDITOR_H
 
 #include "uicomponent.h"
 
@@ -22,4 +22,4 @@ void ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);
 void ui_editor_enableedit(psy_ui_Editor*);
 void ui_editor_preventedit(psy_ui_Editor*);
 
-#endif
+#endif /* psy_ui_EDITOR_H */

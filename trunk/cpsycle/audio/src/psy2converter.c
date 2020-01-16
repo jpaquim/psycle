@@ -114,7 +114,7 @@ psy_audio_Machine* psy_audio_psy2converter_load(
 		editname[0] = '\0';
 	}
 	if (rv) {
-		machine_seteditname(rv, editname);
+		psy_audio_machine_seteditname(rv, editname);
 	}
 	return rv;
 }

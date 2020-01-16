@@ -59,7 +59,7 @@ typedef int (*psy_PropertiesCallback)(void* , psy_Properties*, int level);
 
 void psy_properties_init(psy_Properties*, const char* key, psy_PropertyType);
 psy_Properties* psy_properties_create(void);
-psy_Properties* psy_properties_clone(psy_Properties*);
+psy_Properties* psy_properties_clone(psy_Properties*, int all);
 psy_Properties* psy_properties_create_section(psy_Properties*, const char* name);
 void properties_free(psy_Properties* );
 psy_Properties* psy_properties_create_string(const char* key, const char* value);
@@ -74,6 +74,7 @@ psy_Properties* psy_properties_append_int(psy_Properties*, const char* key, int 
 psy_Properties* psy_properties_append_bool(psy_Properties*, const char* key, int value);
 psy_Properties* psy_properties_append_double(psy_Properties*, const char* key, double value, double min, double max);
 psy_Properties* psy_properties_append_action(psy_Properties*, const char* key);
+psy_Properties* psy_properties_append_property(psy_Properties*, psy_Properties*);
 psy_Properties* psy_properties_read(psy_Properties*, const char* key);
 int psy_properties_int(psy_Properties*, const char* key, int defaultvalue);
 int psy_properties_bool(psy_Properties*, const char* key, int defaultvalue);

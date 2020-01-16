@@ -13,6 +13,12 @@ void psy_ui_keyevent_init(psy_ui_KeyEvent* self, int keycode, int keydata,
 	self->shift = shift;
 	self->ctrl = ctrl;
 	self->repeat = repeat;
+	self->bubble = 1;
+}
+
+void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent* self)
+{
+	self->bubble = 0;
 }
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, int x, int y, int button,
@@ -22,4 +28,10 @@ void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, int x, int y, int button,
 	self->y = y;
 	self->button = button;
 	self->delta = 0;
+	self->bubble = 1;
+}
+
+void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent* self)
+{
+	self->bubble = 0;
 }

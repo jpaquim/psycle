@@ -245,6 +245,6 @@ void driver_configure(psy_EventDriver* driver)
 
 void setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
 {
-	driver->properties = psy_properties_clone(cmddef);
+	driver->properties = psy_properties_clone(cmddef, 1);
 	driver_configure(driver);
 }

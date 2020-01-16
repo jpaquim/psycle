@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "songtrackbar.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,

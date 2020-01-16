@@ -4,9 +4,8 @@
 #if !defined(PSY_DSP_OPERATIONS_H)
 #define PSY_DSP_OPERATIONS_H
 
+#include "../../detail/psydef.h"
 #include "dsptypes.h"
-#include "stddef.h"
-#include "../../detail/stdint.h"
 
 typedef struct {
 	void* (*memory_alloc)(size_t count, size_t size);

@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 
 #if defined DIVERSALIS__OS__MICROSOFT

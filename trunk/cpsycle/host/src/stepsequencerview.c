@@ -216,7 +216,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 			(psy_dsp_beat_t) bpl, &prev);
 		if (node) {								
 			psy_audio_lock_enter();
-			sequencer_checkiterators(&self->workspace->player.sequencer,
+			psy_audio_sequencer_checkiterators(
+				&self->workspace->player.sequencer,
 				node);
 			pattern_remove(self->pattern, node);
 			psy_audio_lock_leave();						
@@ -621,7 +622,7 @@ void steptimer_tick(StepTimer* self)
 // audio thread
 void steptimer_onseqlinetick(StepTimer* self, psy_audio_Sequencer* sender)
 {	
-	if (sequencer_playing(sender)) {
+	if (psy_audio_sequencer_playing(sender)) {
 		self->doseqtick = 1;
 	}
 }

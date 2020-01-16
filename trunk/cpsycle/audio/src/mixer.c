@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dsptypes.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 const psy_audio_MachineInfo* mixer_info(void)
 {

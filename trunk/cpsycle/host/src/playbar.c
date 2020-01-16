@@ -5,7 +5,7 @@
 
 #include "playbar.h"
 #include <exclusivelock.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 #define TIMERID_PLAYBAR 400
 
@@ -94,25 +94,25 @@ void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 	switch (ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
 			player_stop(self->player);
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYALL);			
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYALL);			
 		break;
 		case PLAY_SEL:
 			player_stop(self->player);
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYSEL);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYSEL);
 			startplay(self);
 		break;
 		case PLAY_BEATS:
 			player_stop(self->player);
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYNUMBEATS);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
 			startplay(self);
 		break;
 		default:
 			player_stop(self->player);
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYALL);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
 			startplay(self);
 		break;
 	}
@@ -121,27 +121,27 @@ void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 
 void onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 {
-	psy_dsp_beat_t numplaybeats;
+	psy_dsp_beat_t playbeats;
 	char text[40];
 	
-	numplaybeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));
-	if (numplaybeats > 1) {
-		numplaybeats -= 1;
+	playbeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));
+	if (playbeats > 1) {
+		playbeats -= 1;
 	}
-	sequencer_setnumplaybeats(&self->player->sequencer, numplaybeats);
-	psy_snprintf(text, 40, "%f", (double) numplaybeats);
+	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
+	psy_snprintf(text, 40, "%f", (double) playbeats);
 	ui_edit_settext(&self->loopbeatsedit, text);
 }
 
 void onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 {
-	psy_dsp_beat_t numplaybeats;
+	psy_dsp_beat_t playbeats;
 	char text[40];
 	
-	numplaybeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));	
-	numplaybeats += 1;		
-	sequencer_setnumplaybeats(&self->player->sequencer, numplaybeats);
-	psy_snprintf(text, 40, "%f", (double) numplaybeats);
+	playbeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));	
+	playbeats += 1;		
+	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
+	psy_snprintf(text, 40, "%f", (double) playbeats);
 	ui_edit_settext(&self->loopbeatsedit, text);
 }
 
@@ -149,20 +149,20 @@ void onplayclicked(PlayBar* self, psy_ui_Component* sender)
 {
 	switch (ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYALL);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
 		break;
 		case PLAY_SEL:
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYSEL);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYSEL);
 		break;
 		case PLAY_BEATS:
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYNUMBEATS);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
 		break;
 		default:
-			sequencer_setplaymode(&self->player->sequencer,
-				SEQUENCERPLAYMODE_PLAYALL);
+			psy_audio_sequencer_setplaymode(&self->player->sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
 		break;
 	};	
 	if (!player_playing(self->player)) {
@@ -186,8 +186,8 @@ void startplay(PlayBar* self)
 		psy_audio_lock_enter();		
 		player_stop(self->player);
 		startposition = entry->offset;
-		if (sequencer_playmode(&self->player->sequencer)
-			== SEQUENCERPLAYMODE_PLAYNUMBEATS) {
+		if (psy_audio_sequencer_playmode(&self->player->sequencer)
+			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 			PatternEditPosition editposition;
 
 			editposition = workspace_patterneditposition(self->workspace);			
@@ -208,11 +208,11 @@ void onstopclicked(PlayBar* self, psy_ui_Component* sender)
 
 void onloopclicked(PlayBar* self, psy_ui_Component* sender)
 {
-	if (sequencer_looping(&self->player->sequencer)) {
-		sequencer_stoploop(&self->player->sequencer);
+	if (psy_audio_sequencer_looping(&self->player->sequencer)) {
+		psy_audio_sequencer_stoploop(&self->player->sequencer);
 		psy_ui_button_disablehighlight(&self->loop);
 	} else {
-		sequencer_loop(&self->player->sequencer);
+		psy_audio_sequencer_loop(&self->player->sequencer);
 		psy_ui_button_highlight(&self->loop);
 	}
 }
@@ -235,7 +235,7 @@ void ontimer(PlayBar* self, psy_ui_Component* sender, int timerid)
 	} else {
 		psy_ui_button_disablehighlight(&self->play);	
 	}
-	if (sequencer_looping(&self->player->sequencer)) {
+	if (psy_audio_sequencer_looping(&self->player->sequencer)) {
 		psy_ui_button_highlight(&self->loop);
 	} else {
 		psy_ui_button_disablehighlight(&self->loop);

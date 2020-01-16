@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/psyconf.h"
 
 #include "workspace.h"
 #include "cmdproperties.h"
@@ -10,17 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <songio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <operations.h>
-
-#define PSYCLE_SONGS_DEFAULT_DIR "C:\\Programme\\Psycle\\Songs"
-#define PSYCLE_SAMPLES_DEFAULT_DIR "C:\\Programme\\Psycle\\Samples"
-#define PSYCLE_PLUGINS_DEFAULT_DIR "C:\\Programme\\Psycle\\PsyclePlugins"
-#define PSYCLE_LUASCRIPTS_DEFAULT_DIR "C:\\Programme\\Psycle\\LuaScripts"
-#define PSYCLE_VSTS32_DEFAULT_DIR "C:\\Programme\\Psycle\\VstPlugins"
-#define PSYCLE_VSTS64_DEFAULT_DIR "C:\\Programme\\Psycle\\Vst64Plugins"
-#define PSYCLE_SKINS_DEFAULT_DIR "C:\\Programme\\Psycle\\Skins"
-#define PSYCLE_DOC_DEFAULT_DIR "C:\\Programme\\Psycle\\Docs"
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -115,7 +107,7 @@ void history_add(History* self, int viewid, int sequenceentryid)
 void workspace_init(Workspace* self, void* handle)
 {	
 	psy_audio_lock_init();
-#ifdef SSE
+#ifdef PSYCLE_USE_SSE
 	psy_dsp_sse2_init(&dsp);
 #else
 	psy_dsp_noopt_init(&dsp);
@@ -615,7 +607,7 @@ void workspace_makedriverconfigurations(Workspace* self)
 								psy_Properties* driverconfig;
 								psy_Properties* driversection;
 								
-								driverconfig = psy_properties_clone(driver->properties);
+								driverconfig = psy_properties_clone(driver->properties, 1);
 								driversection = psy_properties_create_section(
 									self->driverconfigurations,
 									psy_properties_key(p));	
@@ -793,7 +785,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 				properties_free(driversection->children);
 
 				driverconfig = 
-					psy_properties_clone(self->player.driver->properties);
+					psy_properties_clone(self->player.driver->properties, 1);
 				if (driverconfig) {
 					driversection->children = driverconfig->children;					
 					if (driversection->children) {
@@ -1441,12 +1433,12 @@ int machinecallback_bpm(Workspace* self)
 
 psy_dsp_beat_t machinecallback_beatspersample(Workspace* self)
 {
-	return sequencer_beatspersample(&self->player.sequencer);
+	return psy_audio_sequencer_beatspersample(&self->player.sequencer);
 }
 
 psy_dsp_beat_t machinecallback_currbeatsperline(Workspace* self)
 {
-	return sequencer_currbeatsperline(&self->player.sequencer);
+	return psy_audio_sequencer_currbeatsperline(&self->player.sequencer);
 }
 
 psy_audio_Machines* machinecallback_machines(Workspace* self)

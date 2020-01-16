@@ -6,7 +6,7 @@
 #include "inputdefiner.h"
 #include "inputmap.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void inputdefiner_ondestroy(InputDefiner*, psy_ui_Component* sender);
 static void ondraw(InputDefiner*, psy_ui_Graphics*);

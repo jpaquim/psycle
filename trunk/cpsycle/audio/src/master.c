@@ -8,7 +8,7 @@
 #include <string.h>
 #include <math.h>
 #include "songio.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);

@@ -5,7 +5,7 @@
 
 #include "playposbar.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 #define TIMERID_PLAYPOSBAR 500
 

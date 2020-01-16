@@ -49,7 +49,7 @@ static void parameterrange(psy_audio_Machine* self, uintptr_t numparam, int* min
 static void parametertweak(psy_audio_Machine* self, uintptr_t param, int val) { }
 static void patterntweak(psy_audio_Machine* self, uintptr_t param, int val)
 {
-	machine_parametertweak(self, param, val);
+	psy_audio_machine_parametertweak(self, param, val);
 }
 static int parameterlabel(psy_audio_Machine* self, char* txt, uintptr_t param) { txt[0] = '\0'; return 0; }
 static int parametername(psy_audio_Machine* self, char* txt, uintptr_t param) { txt[0] = '\0'; return 0; }
@@ -195,12 +195,15 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 	psy_List* p;
 	uintptr_t amount = bc->numsamples;
 	uintptr_t pos = 0;
+	uintptr_t last = 0;
 	
 	for (p = bc->events; p != 0; p = p->next) {					
 		int numworksamples;
 
-		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;		
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
+		assert((uintptr_t)(entry->delta) >= last);
 		numworksamples = (uintptr_t) entry->delta - pos;
+		last = (uintptr_t) entry->delta;
 		if (numworksamples > 0) {				
 			int restorenumsamples = bc->numsamples;
 		
@@ -211,8 +214,8 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 				psy_audio_buffer_setoffset(bc->output, pos);
 			}
 			bc->numsamples = numworksamples;
-			if (!machine_bypassed(self)) {
-				machine_generateaudio(self, bc);
+			if (!psy_audio_machine_bypassed(self)) {
+				psy_audio_machine_generateaudio(self, bc);
 			}
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
@@ -229,8 +232,8 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 			psy_audio_buffer_setoffset(bc->output, pos);
 		}
 		bc->numsamples = amount;
-		if (!machine_bypassed(self)) {
-			machine_generateaudio(self, bc);
+		if (!psy_audio_machine_bypassed(self)) {
+			psy_audio_machine_generateaudio(self, bc);
 		}
 		bc->numsamples = restorenumsamples;
 	}
@@ -241,10 +244,10 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 		psy_audio_Buffer* memory;
 
 		psy_audio_buffer_setoffset(bc->output, 0);		
-		memory = machine_buffermemory(self);
+		memory = psy_audio_machine_buffermemory(self);
 		if (memory) {			
 			psy_audio_buffer_insertsamples(memory, bc->output,
-				machine_buffermemorysize(self), bc->numsamples);
+				psy_audio_machine_buffermemorysize(self), bc->numsamples);
 		}
 	}
 }
@@ -262,22 +265,31 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 			psy_audio_Machine* dst;
 			int value;
 
-			dst = machines_at(machine_machines(self), ev->mach);
+			dst = machines_at(psy_audio_machine_machines(self), ev->mach);
 			if (dst) {
 				value = (ev->cmd << 8) + ev->parameter;
-				machine_patterntweak(dst, ev->inst, value);
+				psy_audio_machine_patterntweak(dst, ev->inst, value);
 			}
 		} else
 		if (ev->note == NOTECOMMANDS_TWEAK) {
-			int value;
-			
-			value = (ev->cmd << 8) + ev->parameter;
-			machine_patterntweak(self, ev->inst, value);
+			if (ev->inst < psy_audio_machine_numparameters(self)) {
+				int value;
+				int minval;
+				int maxval;
+				
+				value = (ev->cmd << 8) + ev->parameter;			
+				psy_audio_machine_parameterrange(self, ev->inst, &minval, &maxval);
+				value += minval;
+				if (value > maxval) {
+					value = maxval;
+				}
+				psy_audio_machine_patterntweak(self, ev->inst, value);
+			}
 		} else {
 			if (ev->cmd == SET_PANNING) {
-				machine_setpanning(self, ev->parameter / 255.f);
+				psy_audio_machine_setpanning(self, ev->parameter / 255.f);
 			}
-			machine_seqtick(self, entry->track, ev);
+			psy_audio_machine_seqtick(self, entry->track, ev);
 		}
 	}
 }
@@ -286,14 +298,14 @@ static int mode(psy_audio_Machine* self)
 { 
 	const psy_audio_MachineInfo* info;
 
-	info = machine_info(self);
+	info = psy_audio_machine_info(self);
 	return (!info) ? MACHMODE_FX : info->mode;
 }
 
 int machine_supports(psy_audio_Machine* self, int option)
 {
-	if (machine_info(self)) {
-		return (machine_info(self)->Flags & option) == option;
+	if (psy_audio_machine_info(self)) {
+		return (psy_audio_machine_info(self)->Flags & option) == option;
 	}
 	return 0;
 }
@@ -356,7 +368,7 @@ void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	for (i = 0; i < count; i++) {
 		uint32_t temp;
 		psyfile_read(songfile->file, &temp, sizeof(temp));
-		machine_parametertweak(self, i, temp);
+		psy_audio_machine_parametertweak(self, i, temp);
 	}
 	psyfile_skip(songfile->file, size - sizeof(count) - (count * sizeof(int)));
 }
@@ -368,260 +380,260 @@ void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	uint32_t count;
 	uint32_t size;
 	
-	count = (uint32_t) machine_numparameters(self);
+	count = (uint32_t) psy_audio_machine_numparameters(self);
 	size = sizeof(count) + (count * sizeof(int32_t));
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &count, sizeof(count));
 	for (i = 0; i < count; ++i) {		
 		psyfile_write_int32(songfile->file, 
-			(int32_t) machine_parametervalue(self, i));
+			(int32_t) psy_audio_machine_parametervalue(self, i));
 	}
 }
 
 // virtual calls
-const psy_audio_MachineInfo* machine_info(psy_audio_Machine* self)
+const psy_audio_MachineInfo* psy_audio_machine_info(psy_audio_Machine* self)
 {
 	return self->vtable->info(self);
 }
 
-psy_audio_Buffer* machine_mix(psy_audio_Machine* self, uintptr_t slot,
+psy_audio_Buffer* psy_audio_machine_mix(psy_audio_Machine* self, uintptr_t slot,
 	uintptr_t amount, psy_audio_MachineSockets* sockets,
 	struct psy_audio_Machines* machines)
 {
 	return self->vtable->mix(self, slot, amount, sockets, machines);
 }
 
-void machine_work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
+void psy_audio_machine_work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 {
 	self->vtable->work(self, bc);
 }
 
-void machine_generateaudio(psy_audio_Machine* self,
+void psy_audio_machine_generateaudio(psy_audio_Machine* self,
 	psy_audio_BufferContext* bc)
 {
 	self->vtable->generateaudio(self, bc);
 }
 
-void machine_seqtick(psy_audio_Machine* self, uintptr_t channel,
+void psy_audio_machine_seqtick(psy_audio_Machine* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {
 	self->vtable->seqtick(self, channel, event);
 }
 
-void machine_sequencertick(psy_audio_Machine* self)
+void psy_audio_machine_sequencertick(psy_audio_Machine* self)
 {
 	self->vtable->sequencertick(self);
 }
 
-void machine_sequencerlinetick(psy_audio_Machine* self)
+void psy_audio_machine_sequencerlinetick(psy_audio_Machine* self)
 {
 	self->vtable->sequencerlinetick(self);
 }
 
-psy_List* machine_sequencerinsert(psy_audio_Machine* self, psy_List* events)
+psy_List* psy_audio_machine_sequencerinsert(psy_audio_Machine* self, psy_List* events)
 {
 	return self->vtable->sequencerinsert(self, events);
 }
 
-int machine_mode(psy_audio_Machine* self)
+int psy_audio_machine_mode(psy_audio_Machine* self)
 {
 	return self->vtable->mode(self);
 }
 
-int machine_describevalue(psy_audio_Machine* self, char* txt, uintptr_t param,
+int psy_audio_machine_describevalue(psy_audio_Machine* self, char* txt, uintptr_t param,
 	int value)
 {
 	return self->vtable->describevalue(self, txt, param, value);
 }
 
-void machine_parametertweak(psy_audio_Machine* self, uintptr_t param, int value)
+void psy_audio_machine_parametertweak(psy_audio_Machine* self, uintptr_t param, int value)
 {
 	self->vtable->parametertweak(self, param, value);
 }
 
-void machine_patterntweak(psy_audio_Machine* self, uintptr_t param, int value)
+void psy_audio_machine_patterntweak(psy_audio_Machine* self, uintptr_t param, int value)
 {
 	self->vtable->patterntweak(self, param, value);
 }
 
-int machine_parametervalue(psy_audio_Machine* self, uintptr_t param)
+int psy_audio_machine_parametervalue(psy_audio_Machine* self, uintptr_t param)
 {
 	return self->vtable->parametervalue(self, param);
 }
 
-void machine_parameterrange(struct psy_audio_Machine* self,
+void psy_audio_machine_parameterrange(struct psy_audio_Machine* self,
 	uintptr_t param, int* minval, int* maxval)
 {
 	self->vtable->parameterrange(self, param, minval, maxval);
 }
 
-uintptr_t machine_numparameters(psy_audio_Machine* self)
+uintptr_t psy_audio_machine_numparameters(psy_audio_Machine* self)
 {
 	return self->vtable->numparameters(self);
 }
 
-int machine_parameterlabel(psy_audio_Machine* self, char* txt, uintptr_t param)
+int psy_audio_machine_parameterlabel(psy_audio_Machine* self, char* txt, uintptr_t param)
 {
 	return self->vtable->parameterlabel(self, txt, param);
 }
 
-int machine_parametername(psy_audio_Machine* self, char* txt, uintptr_t param)
+int psy_audio_machine_parametername(psy_audio_Machine* self, char* txt, uintptr_t param)
 {
 	return self->vtable->parametername(self, txt, param);
 }
 
-uintptr_t machine_numinputs(psy_audio_Machine* self)
+uintptr_t psy_audio_machine_numinputs(psy_audio_Machine* self)
 {
 	return self->vtable->numinputs(self);
 }
 
-uintptr_t machine_numoutputs(psy_audio_Machine* self)
+uintptr_t psy_audio_machine_numoutputs(psy_audio_Machine* self)
 {
 	return self->vtable->numoutputs(self);
 }
 
-uintptr_t machine_slot(psy_audio_Machine* self)
+uintptr_t psy_audio_machine_slot(psy_audio_Machine* self)
 {
 	return self->vtable->slot(self);
 }
 
-void machine_setcallback(psy_audio_Machine* self, MachineCallback callback)
+void psy_audio_machine_setcallback(psy_audio_Machine* self, MachineCallback callback)
 {
 	self->vtable->setcallback(self, callback);
 }
 
-void machine_setpanning(psy_audio_Machine* self, psy_dsp_amp_t pan)
+void psy_audio_machine_setpanning(psy_audio_Machine* self, psy_dsp_amp_t pan)
 {
 	self->vtable->setpanning(self, pan);
 }
 
-psy_dsp_amp_t machine_panning(psy_audio_Machine* self)
+psy_dsp_amp_t psy_audio_machine_panning(psy_audio_Machine* self)
 {
 	return self->vtable->panning(self);
 }
 
-void machine_mute(psy_audio_Machine* self)
+void psy_audio_machine_mute(psy_audio_Machine* self)
 {
 	self->vtable->mute(self);
 }
 
-void machine_unmute(psy_audio_Machine* self)
+void psy_audio_machine_unmute(psy_audio_Machine* self)
 {
 	self->vtable->unmute(self);
 }
 
-int machine_muted(psy_audio_Machine* self)
+int psy_audio_machine_muted(psy_audio_Machine* self)
 {
 	return self->vtable->muted(self);
 }
 
-void machine_bypass(psy_audio_Machine* self)
+void psy_audio_machine_bypass(psy_audio_Machine* self)
 {
 	self->vtable->bypass(self);
 }
 
-void machine_unbypass(psy_audio_Machine* self)
+void psy_audio_machine_unbypass(psy_audio_Machine* self)
 {
 	self->vtable->unbypass(self);
 }
 
-int machine_bypassed(psy_audio_Machine* self)
+int psy_audio_machine_bypassed(psy_audio_Machine* self)
 {
 	return self->vtable->bypassed(self);
 }
 
-int machine_haseditor(psy_audio_Machine* self)
+int psy_audio_machine_haseditor(psy_audio_Machine* self)
 {
 	return self->vtable->haseditor(self);
 }
 
-void machine_seteditorhandle(psy_audio_Machine* self, void* handle)
+void psy_audio_machine_seteditorhandle(psy_audio_Machine* self, void* handle)
 {
 	self->vtable->seteditorhandle(self, handle);
 }
 
-void machine_editorsize(psy_audio_Machine* self, int* width, int* height)
+void psy_audio_machine_editorsize(psy_audio_Machine* self, int* width, int* height)
 {
 	self->vtable->editorsize(self, width, height);
 }
 
-void machine_editoridle(psy_audio_Machine* self)
+void psy_audio_machine_editoridle(psy_audio_Machine* self)
 {
 	self->vtable->editoridle(self);
 }
 
-void machine_seteditname(psy_audio_Machine* self, const char* name)
+void psy_audio_machine_seteditname(psy_audio_Machine* self, const char* name)
 {
 	self->vtable->seteditname(self, name);
 }
 
-const char* machine_editname(psy_audio_Machine* self)
+const char* psy_audio_machine_editname(psy_audio_Machine* self)
 {
 	return self->vtable->editname(self);
 }
 
-unsigned int machine_bpm(psy_audio_Machine* self)
+unsigned int psy_audio_machine_bpm(psy_audio_Machine* self)
 {
 	return self->vtable->bpm(self);
 }
 
-psy_dsp_beat_t machine_beatspersample(psy_audio_Machine* self)
+psy_dsp_beat_t psy_audio_machine_beatspersample(psy_audio_Machine* self)
 {
 	return self->vtable->beatspersample(self);
 }
 
-psy_dsp_beat_t machine_currbeatsperline(psy_audio_Machine* self)
+psy_dsp_beat_t psy_audio_machine_currbeatsperline(psy_audio_Machine* self)
 {
 	return self->vtable->currbeatsperline(self);
 }
 
-unsigned int machine_samplerate(psy_audio_Machine* self)
+unsigned int psy_audio_machine_samplerate(psy_audio_Machine* self)
 {
 	return self->vtable->samplerate(self);
 }
 
-psy_audio_Samples* machine_samples(psy_audio_Machine* self)
+psy_audio_Samples* psy_audio_machine_samples(psy_audio_Machine* self)
 {
 	return self->vtable->samples(self);
 }
 
-psy_audio_Machines* machine_machines(psy_audio_Machine* self)
+psy_audio_Machines* psy_audio_machine_machines(psy_audio_Machine* self)
 {
 	return self->vtable->machines(self);
 }
 
-psy_audio_Instruments* machine_instruments(psy_audio_Machine* self)
+psy_audio_Instruments* psy_audio_machine_instruments(psy_audio_Machine* self)
 {
 	return self->vtable->instruments(self);
 }
 
-void machine_output(psy_audio_Machine* self, const char* text)
+void psy_audio_machine_output(psy_audio_Machine* self, const char* text)
 {
 	self->vtable->output(self, text);
 }
 
-psy_audio_Buffer* machine_buffermemory(psy_audio_Machine* self)
+psy_audio_Buffer* psy_audio_machine_buffermemory(psy_audio_Machine* self)
 {
 	return self->vtable->buffermemory(self);
 }
 
-uintptr_t machine_buffermemorysize(psy_audio_Machine* self)
+uintptr_t psy_audio_machine_buffermemorysize(psy_audio_Machine* self)
 {
 	return self->vtable->buffermemorysize(self);
 }
 
-psy_dsp_amp_range_t machine_amprange(psy_audio_Machine* self)
+psy_dsp_amp_range_t psy_audio_machine_amprange(psy_audio_Machine* self)
 {
 	return self->vtable->amprange(self);
 }
 
-void machine_loadspecific(psy_audio_Machine* self,
+void psy_audio_machine_loadspecific(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
 	self->vtable->loadspecific(self, songfile, slot);
 }
 
-void machine_savespecific(psy_audio_Machine* self,
+void psy_audio_machine_savespecific(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
 	self->vtable->savespecific(self, songfile, slot);

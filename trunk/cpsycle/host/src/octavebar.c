@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "octavebar.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void OnDestroy(OctaveBar*, psy_ui_Component* component);
 static void BuildOctaveBox(OctaveBar* self);

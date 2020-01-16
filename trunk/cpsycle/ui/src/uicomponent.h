@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(UICOMPONENT_H)
-#define UICOMPONENT_H
+#ifndef psy_ui_COMPONENT_H
+#define psy_ui_COMPONENT_H
 
 #include "uidef.h"
 #include "uievents.h"
@@ -31,6 +31,7 @@ typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 typedef void (*psy_ui_fp_onpreferredsize)(struct psy_ui_Component*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
+typedef void (*psy_ui_fp_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
 typedef void (*psy_ui_fp_onmousedown)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmousemove)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmouseup)(struct psy_ui_Component*, psy_ui_MouseEvent*);
@@ -42,6 +43,7 @@ typedef void (*psy_ui_fp_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_ondraw ondraw;
+	psy_ui_fp_onsize onsize;
 	psy_ui_fp_onpreferredsize onpreferredsize;
 	psy_ui_fp_onmousedown onmousedown;
 	psy_ui_fp_onmousemove onmousemove;
@@ -89,9 +91,7 @@ typedef struct psy_ui_Component {
 	int alignchildren;
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;
-	int doublebuffered;
-	int defaultpropagation;
-	int propagateevent;
+	int doublebuffered;	
 	int preventdefault;
 	int preventpreferredsize;
 	int scrollstepx;
@@ -156,7 +156,6 @@ void ui_component_update(psy_ui_Component*);
 void ui_component_setfocus(psy_ui_Component*);
 int ui_component_hasfocus(psy_ui_Component*);
 void ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
-void ui_component_propagateevent(psy_ui_Component*);
 void ui_component_preventdefault(psy_ui_Component*);
 void ui_component_init_base(psy_ui_Component*);
 void ui_component_init_signals(psy_ui_Component*);
@@ -191,4 +190,4 @@ int ui_savefile(psy_ui_Component* self, char* title, char* filter,
 int ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
 void ui_component_doublebuffer(psy_ui_Component*);
 
-#endif
+#endif /* psy_ui_COMPONENT_H */

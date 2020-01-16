@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "vuscope.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <math.h>
 #include <rms.h>
 #include <exclusivelock.h>

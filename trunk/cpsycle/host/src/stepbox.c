@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "stepbox.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void stepbox_build(StepBox*);
 static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,

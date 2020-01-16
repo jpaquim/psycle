@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "trackscopeview.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 #include <math.h>
 #include <uiapp.h>
 

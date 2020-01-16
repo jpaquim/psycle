@@ -5,7 +5,7 @@
 
 #include "instrumentsbox.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void BuildInstrumentList(InstrumentsBox* self);
 static void AddString(InstrumentsBox* self, const char* text);

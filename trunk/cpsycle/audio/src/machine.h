@@ -1,7 +1,7 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_MACHINE_H)
+#ifndef PSY_AUDIO_MACHINE_H
 #define PSY_AUDIO_MACHINE_H
 
 #include "machinedefs.h"
@@ -179,63 +179,63 @@ void machine_dispose(psy_audio_Machine*);
 int machine_supports(psy_audio_Machine*, int option);
 
 // virtual calls
-const psy_audio_MachineInfo* machine_info(psy_audio_Machine*);
-psy_audio_Buffer* machine_mix(psy_audio_Machine*,
+const psy_audio_MachineInfo* psy_audio_machine_info(psy_audio_Machine*);
+psy_audio_Buffer* psy_audio_machine_mix(psy_audio_Machine*,
 	uintptr_t slot, uintptr_t amount, psy_audio_MachineSockets*,
 	struct psy_audio_Machines*);
-void machine_work(psy_audio_Machine*, psy_audio_BufferContext*);
-void machine_generateaudio(psy_audio_Machine*, psy_audio_BufferContext*);
-void machine_seqtick(psy_audio_Machine*, uintptr_t channel,
+void psy_audio_machine_work(psy_audio_Machine*, psy_audio_BufferContext*);
+void psy_audio_machine_generateaudio(psy_audio_Machine*, psy_audio_BufferContext*);
+void psy_audio_machine_seqtick(psy_audio_Machine*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
-void machine_sequencertick(psy_audio_Machine*);
-void machine_sequencerlinetick(psy_audio_Machine*);
-psy_List* machine_sequencerinsert(psy_audio_Machine*, psy_List* events);
-int machine_describevalue(psy_audio_Machine*, char* txt, uintptr_t param, int value);
-void machine_parametertweak(psy_audio_Machine*, uintptr_t par, int val);
-void machine_patterntweak(psy_audio_Machine*, uintptr_t par, int val);
-int machine_parametervalue(psy_audio_Machine*, uintptr_t param);
-void machine_parameterrange(psy_audio_Machine*,
+void psy_audio_machine_sequencertick(psy_audio_Machine*);
+void psy_audio_machine_sequencerlinetick(psy_audio_Machine*);
+psy_List* psy_audio_machine_sequencerinsert(psy_audio_Machine*, psy_List* events);
+int psy_audio_machine_describevalue(psy_audio_Machine*, char* txt, uintptr_t param, int value);
+void psy_audio_machine_parametertweak(psy_audio_Machine*, uintptr_t par, int val);
+void psy_audio_machine_patterntweak(psy_audio_Machine*, uintptr_t par, int val);
+int psy_audio_machine_parametervalue(psy_audio_Machine*, uintptr_t param);
+void psy_audio_machine_parameterrange(psy_audio_Machine*,
 	uintptr_t param, int* minval, int* maxval);
-uintptr_t machine_numparameters(psy_audio_Machine*);
-int machine_parameterlabel(psy_audio_Machine*, char* txt, uintptr_t param);
-int machine_parametername(psy_audio_Machine*, char* txt, uintptr_t param);
-void machine_setcallback(psy_audio_Machine*, MachineCallback);
-void machine_setpanning(psy_audio_Machine*, psy_dsp_amp_t);
-psy_dsp_amp_t machine_panning(psy_audio_Machine*);
-uintptr_t machine_numinputs(psy_audio_Machine*);
-uintptr_t machine_numoutputs(psy_audio_Machine*);
-uintptr_t machine_slot(psy_audio_Machine*);
+uintptr_t psy_audio_machine_numparameters(psy_audio_Machine*);
+int psy_audio_machine_parameterlabel(psy_audio_Machine*, char* txt, uintptr_t param);
+int psy_audio_machine_parametername(psy_audio_Machine*, char* txt, uintptr_t param);
+void psy_audio_machine_setcallback(psy_audio_Machine*, MachineCallback);
+void psy_audio_machine_setpanning(psy_audio_Machine*, psy_dsp_amp_t);
+psy_dsp_amp_t psy_audio_machine_panning(psy_audio_Machine*);
+uintptr_t psy_audio_machine_numinputs(psy_audio_Machine*);
+uintptr_t psy_audio_machine_numoutputs(psy_audio_Machine*);
+uintptr_t psy_audio_machine_slot(psy_audio_Machine*);
 
-int machine_mode(psy_audio_Machine*);
-void machine_mute(psy_audio_Machine*);	
-void machine_unmute(psy_audio_Machine*);
-int machine_muted(psy_audio_Machine*);
-void machine_bypass(psy_audio_Machine*);
-void machine_unbypass(psy_audio_Machine*);
-int machine_bypassed(psy_audio_Machine*);
-int machine_haseditor(psy_audio_Machine*);
-void machine_seteditorhandle(psy_audio_Machine*, void* handle);
-void machine_editorsize(psy_audio_Machine*, int* width, int* height);
-void machine_editoridle(psy_audio_Machine*);
-void machine_seteditname(psy_audio_Machine*, const char* name);
-const char* machine_editname(psy_audio_Machine*);
+int psy_audio_machine_mode(psy_audio_Machine*);
+void psy_audio_machine_mute(psy_audio_Machine*);	
+void psy_audio_machine_unmute(psy_audio_Machine*);
+int psy_audio_machine_muted(psy_audio_Machine*);
+void psy_audio_machine_bypass(psy_audio_Machine*);
+void psy_audio_machine_unbypass(psy_audio_Machine*);
+int psy_audio_machine_bypassed(psy_audio_Machine*);
+int psy_audio_machine_haseditor(psy_audio_Machine*);
+void psy_audio_machine_seteditorhandle(psy_audio_Machine*, void* handle);
+void psy_audio_machine_editorsize(psy_audio_Machine*, int* width, int* height);
+void psy_audio_machine_editoridle(psy_audio_Machine*);
+void psy_audio_machine_seteditname(psy_audio_Machine*, const char* name);
+const char* psy_audio_machine_editname(psy_audio_Machine*);
 
-void machine_loadspecific(struct psy_audio_Machine*,
+void psy_audio_machine_loadspecific(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
-void machine_savespecific(struct psy_audio_Machine*,
+void psy_audio_machine_savespecific(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 
-unsigned int machine_bpm(struct psy_audio_Machine*);
-psy_dsp_beat_t machine_beatspersample(struct psy_audio_Machine*);
-psy_dsp_beat_t machine_currbeatsperline(struct psy_audio_Machine*);
-unsigned int machine_samplerate(psy_audio_Machine*);
-struct psy_audio_Samples* machine_samples(psy_audio_Machine*);
-struct psy_audio_Machines* machine_machines(struct psy_audio_Machine*);
-struct psy_audio_Instruments* machine_instruments(psy_audio_Machine*);
-void machine_output(psy_audio_Machine*, const char* text);
+unsigned int psy_audio_machine_bpm(struct psy_audio_Machine*);
+psy_dsp_beat_t psy_audio_machine_beatspersample(struct psy_audio_Machine*);
+psy_dsp_beat_t psy_audio_machine_currbeatsperline(struct psy_audio_Machine*);
+unsigned int psy_audio_machine_samplerate(psy_audio_Machine*);
+struct psy_audio_Samples* psy_audio_machine_samples(psy_audio_Machine*);
+struct psy_audio_Machines* psy_audio_machine_machines(struct psy_audio_Machine*);
+struct psy_audio_Instruments* psy_audio_machine_instruments(psy_audio_Machine*);
+void psy_audio_machine_output(psy_audio_Machine*, const char* text);
 
-psy_audio_Buffer* machine_buffermemory(psy_audio_Machine*);
-uintptr_t machine_buffermemorysize(psy_audio_Machine*);
-psy_dsp_amp_range_t machine_amprange(psy_audio_Machine*);
+psy_audio_Buffer* psy_audio_machine_buffermemory(psy_audio_Machine*);
+uintptr_t psy_audio_machine_buffermemorysize(psy_audio_Machine*);
+psy_dsp_amp_range_t psy_audio_machine_amprange(psy_audio_Machine*);
 
-#endif
+#endif /* PSY_AUDIO_MACHINE_H */

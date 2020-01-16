@@ -5,7 +5,7 @@
 
 #include "samplesbox.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void samplesbox_ondestroy(SamplesBox*);
 static void samplesbox_buildsamplelist(SamplesBox*);

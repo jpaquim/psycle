@@ -14,7 +14,7 @@
 #include <math.h>
 
 #include <dir.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 #define TIMERID_TRACKERVIEW 600
 static const psy_dsp_big_beat_t epsilon = 0.0001;
@@ -33,7 +33,6 @@ static void trackergrid_drawentries(TrackerGrid*, psy_ui_Graphics*,
 static void trackergrid_drawentry(TrackerGrid*, psy_ui_Graphics*,
 	psy_audio_PatternEntry*, int x, int y, TrackerColumnFlags);
 static void trackergrid_onkeydown(TrackerGrid*,psy_ui_KeyEvent*);
-static void trackergrid_onkeyup(TrackerGrid*, psy_ui_KeyEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
@@ -201,8 +200,6 @@ static void trackergrid_vtable_init(TrackerGrid* self)
 		trackergrid_vtable.ondraw = (psy_ui_fp_ondraw) trackergrid_ondraw;
 		trackergrid_vtable.onkeydown = (psy_ui_fp_onkeydown)
 			trackergrid_onkeydown;
-		trackergrid_vtable.onkeyup = (psy_ui_fp_onkeydown)
-			trackergrid_onkeyup;
 		trackergrid_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			trackergrid_onmousedown;
 		trackergrid_vtable.onmousemove = (psy_ui_fp_onmousemove)
@@ -357,7 +354,8 @@ void InsertCommandRevert(InsertCommand* self)
 	if (node) {
 		if (self->insert) {		
 			pattern_remove(self->pattern, node);
-			sequencer_checkiterators(&self->workspace->player.sequencer,
+			psy_audio_sequencer_checkiterators(
+				&self->workspace->player.sequencer,
 				node);
 		} else {				
 			pattern_setevent(self->pattern, node, &self->oldevent);		
@@ -1007,16 +1005,19 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		if (cmd == CMD_NAVLEFT) {
 			trackergrid_prevcol(self);
 			ui_component_invalidate(&self->component);
+			psy_ui_keyevent_stoppropagation(ev);
 		} else
 		if (cmd == CMD_NAVRIGHT) {
 			trackergrid_nextcol(self);
 			ui_component_invalidate(&self->component);
+			psy_ui_keyevent_stoppropagation(ev);
 		} else {
 			if (self->cursor.column != TRACKER_COLUMN_NOTE) {
 				int digit = keycodetoint(ev->keycode);
 				if (digit != -1) {
 					trackergrid_inputvalue(self, digit, 1);
 					ui_component_invalidate(&self->component);
+					psy_ui_keyevent_stoppropagation(ev);
 					return;
 				}			
 			}				
@@ -1035,19 +1036,14 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 					(psy_dsp_note_t)(cmd.id + workspace_octave(self->view->workspace) * 12),
 					1);
 				ui_component_invalidate(&self->component);
+				psy_ui_keyevent_stoppropagation(ev);
 				return;					
 			}
 		}
-
-	} else
-	if (self->editmode == TRACKERGRID_EDITMODE_SONG) {
-		self->component.propagateevent = 1;
 	}
-}
-
-void trackergrid_onkeyup(TrackerGrid* self, psy_ui_KeyEvent* keyevent)
-{
-	self->component.propagateevent = 1;	
+	if (self->editmode != TRACKERGRID_EDITMODE_SONG) {
+		psy_ui_keyevent_stoppropagation(ev);
+	}
 }
 
 void trackergrid_prevcol(TrackerGrid* self)
@@ -1536,7 +1532,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 				(psy_dsp_beat_t)self->grid.cursor.offset, (psy_dsp_beat_t)self->grid.bpl, &prev);		
 			if (node) {			
 				pattern_remove(self->grid.pattern, node);
-				sequencer_checkiterators(&self->workspace->player.sequencer,
+				psy_audio_sequencer_checkiterators(
+					&self->workspace->player.sequencer,
 					node);
 				ui_component_invalidate(&self->linenumbers.component);
 			}
@@ -1561,7 +1558,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 					offset = entry->offset;
 					track = entry->track;
 					pattern_remove(self->grid.pattern, p);
-					sequencer_checkiterators(&self->workspace->player.sequencer, p);
+					psy_audio_sequencer_checkiterators(
+						&self->workspace->player.sequencer, p);
 					offset -= (psy_dsp_beat_t) self->grid.bpl;
 					node = pattern_findnode(self->grid.pattern, track,
 						offset,						
@@ -1592,7 +1590,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 				(psy_dsp_beat_t)self->grid.bpl, &prev);
 			if (node) {
 				pattern_remove(self->grid.pattern, node);
-				sequencer_checkiterators(&self->workspace->player.sequencer,
+				psy_audio_sequencer_checkiterators(
+					&self->workspace->player.sequencer,
 					node);
 				ui_component_invalidate(&self->linenumbers.component);
 			}
@@ -1627,6 +1626,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 			int digit = keycodetoint(ev->keycode);
 			if (digit != -1) {
 				trackergrid_inputvalue(&self->grid, digit, 1);
+				psy_ui_keyevent_stoppropagation(ev);
 				return;
 			}			
 		}				
@@ -1644,6 +1644,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 			if (cmd.id == NOTECOMMANDS_RELEASE) {
 				trackergrid_inputnote(&self->grid, NOTECOMMANDS_RELEASE,
 					self->workspace->chordmode);
+				psy_ui_keyevent_stoppropagation(ev);
 				return;
 			}
 			if (cmd.id != -1 && cmd.id <= NOTECOMMANDS_RELEASE &&
@@ -1653,8 +1654,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 				self->grid.chordbegin = self->grid.cursor.track;
 			}
 		}
-	}		
-	ui_component_propagateevent(&self->component);
+	}	
 }
 
 void trackerview_onkeyup(TrackerView* self, psy_ui_KeyEvent* ev)
@@ -1664,8 +1664,7 @@ void trackerview_onkeyup(TrackerView* self, psy_ui_KeyEvent* ev)
 		trackerview_scrollleft(self);
 		trackerview_advanceline(self);
 		self->workspace->chordmode = 0;
-	} else {
-		ui_component_propagateevent(&self->component);
+		psy_ui_keyevent_stoppropagation(ev);
 	}
 }
 
@@ -2687,7 +2686,7 @@ void trackerview_ontimer(TrackerView* self, psy_ui_Component* sender, int timeri
 
 void trackerview_onseqlinetick(TrackerView* self, psy_audio_Sequencer* sender)
 {	
-	if (sequencer_playing(sender)) {
+	if (psy_audio_sequencer_playing(sender)) {
 		self->doseqtick = 1;
 	}
 }

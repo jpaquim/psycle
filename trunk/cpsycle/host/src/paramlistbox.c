@@ -5,7 +5,7 @@
 
 #include "paramlistbox.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void parameterlistbox_build(ParameterListBox*);
 static void parameterlistbox_onpreferredsize(ParameterListBox*, psy_ui_Size* limit,
@@ -59,11 +59,11 @@ void parameterlistbox_build(ParameterListBox* self)
 		char label[256];
 		char text[256];
 
-		for (param = 0; param < machine_numparameters(self->machine); ++param) {		
-			if (machine_parameterlabel(self->machine, label, param)) {
+		for (param = 0; param < psy_audio_machine_numparameters(self->machine); ++param) {		
+			if (psy_audio_machine_parameterlabel(self->machine, label, param)) {
 				psy_snprintf(text, 256, "%02X:%s", (int) param, label);
 			} else
-			if (machine_parametername(self->machine, label, param)) {
+			if (psy_audio_machine_parametername(self->machine, label, param)) {
 				psy_snprintf(text, 256, "%02X:%s", (int) param, label);
 			} else {			
 				psy_snprintf(text, 256, "%02X: Parameter", (int) param);
@@ -105,11 +105,11 @@ void parameterlistbox_ondescribe(ParameterListBox* self, psy_ui_Slider* slider, 
 
 	txt[0] = '\0';
 	if (self->machine) {
-		if (!machine_describevalue(self->machine, txt, 0,
-				machine_parametervalue(self->machine, param))) {
+		if (!psy_audio_machine_describevalue(self->machine, txt, 0,
+				psy_audio_machine_parametervalue(self->machine, param))) {
 			int intval;
 
-			intval = machine_parametervalue(self->machine, param);
+			intval = psy_audio_machine_parametervalue(self->machine, param);
 			psy_snprintf(txt, 256, "%d", intval);
 		}
 	}
@@ -124,9 +124,9 @@ void parameterlistbox_ontweak(ParameterListBox* self, psy_ui_Slider* slider, flo
 		int minval;
 		int maxval;
 
-		machine_parameterrange(self->machine, param, &minval, &maxval);
+		psy_audio_machine_parameterrange(self->machine, param, &minval, &maxval);
 		intval = (int) (value * (maxval - minval)) + minval;
-		machine_parametertweak(self->machine, intval, param);
+		psy_audio_machine_parametertweak(self->machine, intval, param);
 	}
 }
 
@@ -140,8 +140,8 @@ void parameterlistbox_onvalue(ParameterListBox* self, psy_ui_Slider* slider, flo
 		int minval;
 		int maxval;
 
-		machine_parameterrange(self->machine, param, &minval, &maxval);
-		intval = machine_parametervalue(self->machine, param);
+		psy_audio_machine_parameterrange(self->machine, param, &minval, &maxval);
+		intval = psy_audio_machine_parametervalue(self->machine, param);
 		*value = (intval - minval) / (float) (maxval - minval);
 	}
 }

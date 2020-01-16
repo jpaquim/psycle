@@ -6,7 +6,7 @@
 #include "wireview.h"
 #include "math.h"
 #include "resources/resource.h"
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);

@@ -53,13 +53,13 @@ Vst2View* vst2view_allocinit(psy_ui_Component* parent, psy_audio_Machine* machin
 
 void ontimer(Vst2View* self, psy_ui_Component* sender, int timerid)
 {	
-	machine_editoridle(self->machine);
+	psy_audio_machine_editoridle(self->machine);
 }
 
 void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (rv) {		
-		machine_editorsize(self->machine, &rv->width, &rv->height);		
+		psy_audio_machine_editorsize(self->machine, &rv->width, &rv->height);		
 	} else {
 		*rv = ui_component_size(&self->component);
 	}

@@ -13,8 +13,6 @@ static void songpropertiesview_onhide(SongPropertiesView*, psy_ui_Component* sen
 static void songpropertiesview_ontitlechanged(SongPropertiesView*, psy_ui_Component* sender);
 static void songpropertiesview_oncreditschanged(SongPropertiesView*, psy_ui_Component* sender);
 static void songpropertiesview_oncommentschanged(SongPropertiesView*, psy_ui_Component* sender);
-static void songpropertiesview_onkeydown(SongPropertiesView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
 
 void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -43,8 +41,6 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		songpropertiesview_onsongchanged);
 	psy_signal_connect(&self->component.signal_hide, self,
 		songpropertiesview_onhide);
-	psy_signal_connect(&self->component.signal_keydown, self,
-		songpropertiesview_onkeydown);	
 	songpropertiesview_initalign(self);
 }
 
@@ -136,10 +132,4 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 	free(self->song->properties.comments);
 	self->song->properties.comments = strdup(
 		ui_edit_text(&self->edit_comments));
-}
-
-void songpropertiesview_onkeydown(SongPropertiesView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
-{
-	ui_component_propagateevent(&self->component);
 }

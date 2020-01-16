@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 		cmdplayer_init(&cmdplayer);		
 		cmdplayer_loadsong(&cmdplayer, argv[1]);		
 		printf("psycle: player: press q to stop.\n");
-		sequencer_stoploop(&cmdplayer.player.sequencer);
+		psy_audio_sequencer_stoploop(&cmdplayer.player.sequencer);
 		player_setposition(&cmdplayer.player, (psy_dsp_beat_t) 0.f);
 		player_start(&cmdplayer.player);		
 #if !defined _WIN32

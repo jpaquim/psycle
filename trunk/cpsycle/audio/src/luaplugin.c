@@ -154,7 +154,7 @@ void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 			if (in.lasterr == 0) {
 				lua_gc(self->script.L, LUA_GCSTEP, 5);
 			} else {
-				machine_output(&self->custommachine.machine, in.errmsg);	
+				psy_audio_machine_output(&self->custommachine.machine, in.errmsg);	
 			}
 		}
 		psy_luaimport_dispose(&in);
@@ -269,7 +269,7 @@ int luascript_terminal_output(lua_State* L)
 		const char* out = 0;
 		int v = lua_toboolean(L, 1);
 		if (v==1) out = "true"; else out = "false";		
-		machine_output(&proxy->custommachine.machine, out);
+		psy_audio_machine_output(&proxy->custommachine.machine, out);
 	} else {
 		int i;
 		lua_getglobal(L, "tostring");
@@ -284,7 +284,7 @@ int luascript_terminal_output(lua_State* L)
 				return luaL_error(L,
 			LUA_QL("tostring") " must return a string to " LUA_QL("print"));
 			lua_pop(L, 1);  /* pop result */
-			machine_output(&proxy->custommachine.machine, s);
+			psy_audio_machine_output(&proxy->custommachine.machine, s);
 		}
 	}
 	return 0;

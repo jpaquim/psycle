@@ -15,7 +15,6 @@ static int properties_enumerate_rec(psy_Properties*);
 static int OnSearchPropertiesEnum(psy_Properties*, psy_Properties*, int level);
 static int OnPropertySearchPropertiesEnum(psy_Properties* self, 
 	psy_Properties* property, int level);
-static psy_Properties* append(psy_Properties* self, psy_Properties* p);
 static psy_Properties* tail(psy_Properties*);
 
 static void* target;
@@ -82,10 +81,10 @@ psy_Properties* psy_properties_create_section(psy_Properties* self, const char* 
 	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
 	psy_properties_init(rv, name, PSY_PROPERTY_TYP_SECTION);
 	
-	return append(self, rv);
+	return psy_properties_append_property(self, rv);
 }
 
-psy_Properties* psy_properties_clone(psy_Properties* self)
+psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 {
 	psy_Properties* first = 0;
 	psy_Properties* rv = 0;
@@ -93,10 +92,13 @@ psy_Properties* psy_properties_clone(psy_Properties* self)
 	psy_Properties* q = 0;
 	
 	p = self;
-	while (p) {				
+	while (p) {		
 		rv = (psy_Properties*) malloc(sizeof(psy_Properties));
 		if (!first) {
 			first = rv;			
+		} else
+		if (!all) {
+			break;
 		} else {
 			q->next = rv;
 		}
@@ -124,7 +126,7 @@ psy_Properties* psy_properties_clone(psy_Properties* self)
 		rv->item.save = p->item.save;
 		if (p->children) {
 			psy_Properties* i;
-			rv->children = psy_properties_clone(p->children);
+			rv->children = psy_properties_clone(p->children, 1);
 			for (i = rv->children; i != 0; i = i->next) {
 				i->parent = rv;
 			}
@@ -152,7 +154,7 @@ psy_Properties* psy_properties_create_string(const char* key, const char* value)
 
 psy_Properties* psy_properties_append_string(psy_Properties* self, const char* key, const char* value)
 {	
-	return append(self, psy_properties_create_string(key, value));	
+	return psy_properties_append_property(self, psy_properties_create_string(key, value));	
 }
 
 psy_Properties* psy_properties_append_userdata(psy_Properties* self, const char* key,
@@ -188,13 +190,13 @@ psy_Properties* psy_properties_append_action(psy_Properties* self, const char* k
 	p = psy_properties_create_int(key, 0, 0, 0);
 	p->item.typ = PSY_PROPERTY_TYP_ACTION;
 	p->item.hint = PSY_PROPERTY_HINT_CHECK;
-	append(self, p);
+	psy_properties_append_property(self, p);
 	return p;
 }
 
 psy_Properties* psy_properties_append_int(psy_Properties* self, const char* key, int value, int min, int max)
 {			
-	return append(self, psy_properties_create_int(key, value, min, max));	
+	return psy_properties_append_property(self, psy_properties_create_int(key, value, min, max));	
 }
 
 psy_Properties* psy_properties_create_bool(const char* key, int value)
@@ -225,7 +227,7 @@ psy_Properties* psy_properties_append_double(psy_Properties* self, const char* k
 	p = (psy_Properties*) malloc(sizeof(psy_Properties));
 	psy_properties_init(p, key, PSY_PROPERTY_TYP_DOUBLE);	
 	p->item.value.d = value;		
-	return append(self, p);	
+	return psy_properties_append_property(self, p);	
 }
 
 psy_Properties* psy_properties_create_choice(const char* key, int value)
@@ -241,7 +243,7 @@ psy_Properties* psy_properties_create_choice(const char* key, int value)
 
 psy_Properties* psy_properties_append_choice(psy_Properties* self, const char* key, int value)
 {	
-	return append(self, psy_properties_create_choice(key, value));	
+	return psy_properties_append_property(self, psy_properties_create_choice(key, value));	
 }
 
 char* pathend(const char* path, char* section, char* key)
@@ -613,7 +615,7 @@ psy_Properties* tail(psy_Properties* self)
 	return p;
 }
 
-psy_Properties* append(psy_Properties* self, psy_Properties* p)
+psy_Properties* psy_properties_append_property(psy_Properties* self, psy_Properties* p)
 {	
 	if (self) {
 		if (self->children) {

@@ -5,7 +5,7 @@
 
 #include "linesperbeatbar.h"
 #include <stdio.h>
-#include <portable.h>
+#include "../../detail/portable.h"
 
 static void OnLessClicked(LinesPerBeatBar*, psy_ui_Component* sender);
 static void OnMoreClicked(LinesPerBeatBar*, psy_ui_Component* sender);
