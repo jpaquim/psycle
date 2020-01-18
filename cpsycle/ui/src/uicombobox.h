@@ -16,11 +16,11 @@ typedef struct {
    int charnumber;
 } psy_ui_ComboBox;
 
-void ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
-int ui_combobox_addstring(psy_ui_ComboBox*, const char* text);
-void ui_combobox_clear(psy_ui_ComboBox*);
-void ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
-intptr_t ui_combobox_cursel(psy_ui_ComboBox*);
-void ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
+void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
+int psy_ui_combobox_addstring(psy_ui_ComboBox*, const char* text);
+void psy_ui_combobox_clear(psy_ui_ComboBox*);
+void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
+intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox*);
+void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
 
 #endif /* psy_ui_COMBOBOX_H */

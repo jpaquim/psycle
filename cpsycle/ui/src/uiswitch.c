@@ -24,10 +24,11 @@ static void vtable_init(psy_ui_Switch* self)
 		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
 		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable_initialized = 1;
 	}
 }
 
-void ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
+void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
 	ui_component_init(&self->component, parent);
 	vtable_init(self);

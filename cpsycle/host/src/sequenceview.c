@@ -100,7 +100,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	playlisteditor_init(&self->playlisteditor, &self->component,
 		workspace);
 	ui_component_setalign(&self->playlisteditor.component, psy_ui_ALIGN_TOP);
-	ui_splitbar_init(&self->splitbar, &self->component);
+	psy_ui_splitbar_init(&self->splitbar, &self->component);
 	ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_TOP);
 	if (!workspace_showplaylisteditor(workspace)) {
 		ui_component_hide(&self->playlisteditor.component);

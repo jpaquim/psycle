@@ -3,7 +3,6 @@
 
 #include "../../detail/prefix.h"
 
-#include "../../detail/portable.h"
 #include "propertiesio.h"
 #include <malloc.h>
 #include <string.h> 
@@ -11,6 +10,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <assert.h>
+#include "../../detail/portable.h"
 
 #define MAXSTRINGSIZE 4096
 

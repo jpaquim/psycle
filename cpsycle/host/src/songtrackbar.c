@@ -24,8 +24,8 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_label_init(&self->headerlabel, &self->component);	
 	psy_ui_label_settext(&self->headerlabel, "Tracks");		
-	ui_combobox_init(&self->trackbox, &self->component);	
-	ui_combobox_setcharnumber(&self->trackbox, 4);
+	psy_ui_combobox_init(&self->trackbox, &self->component);	
+	psy_ui_combobox_setcharnumber(&self->trackbox, 4);
 	songtrackbar_build(self);	
 	psy_signal_connect(&self->trackbox.signal_selchanged, self,
 		songtrackbar_onselchange);	
@@ -48,9 +48,9 @@ void songtrackbar_build(SongTrackBar* self)
 
 	for (track = 0; track < 65; ++track) {
 		psy_snprintf(text, 20, "%d", track);		
-		ui_combobox_addstring(&self->trackbox, text);
+		psy_ui_combobox_addstring(&self->trackbox, text);
 	}	
-	ui_combobox_setcursel(&self->trackbox,
+	psy_ui_combobox_setcursel(&self->trackbox,
 		player_numsongtracks(&self->workspace->player));
 }
 
@@ -66,11 +66,11 @@ void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
 	Workspace* workspace, unsigned int numsongtracks)
 {
-	ui_combobox_setcursel(&self->trackbox, numsongtracks);
+	psy_ui_combobox_setcursel(&self->trackbox, numsongtracks);
 }
 
 void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace)
 {	
-	ui_combobox_setcursel(&self->trackbox,
+	psy_ui_combobox_setcursel(&self->trackbox,
 		player_numsongtracks(&workspace->player));
 }

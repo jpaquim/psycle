@@ -13,7 +13,7 @@ typedef struct {
 	psy_ui_Alignment alignment;	
 } psy_ui_Image;
 
-void ui_image_init(psy_ui_Image*, psy_ui_Component* parent);
-void ui_image_setbitmapalignment(psy_ui_Image*, psy_ui_Alignment);
+void psy_ui_image_init(psy_ui_Image*, psy_ui_Component* parent);
+void psy_ui_image_setbitmapalignment(psy_ui_Image*, psy_ui_Alignment);
 
 #endif /* psy_ui_IMAGE_H */

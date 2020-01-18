@@ -21,7 +21,7 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 {	
 	self->main = 0;
 	psy_signal_init(&self->signal_dispose);
-	ui_defaults_init(&self->defaults);
+	psy_ui_defaults_init(&self->defaults);
 	ui_app_initplatform(self, instance);
 }
 

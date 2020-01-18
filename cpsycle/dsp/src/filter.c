@@ -47,7 +47,6 @@ void psy_dsp_filter_init(psy_dsp_Filter* self)
 }
 
 // psy_dsp_CustomFilter
-
 static void customfilter_setcutoff(psy_dsp_CustomFilter*, float cutoff);
 static float customfilter_cutoff(psy_dsp_CustomFilter*);
 static void customfilter_setressonance(psy_dsp_CustomFilter*, float ressonance);

@@ -195,7 +195,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 {
 	uintptr_t c;
 
-	sampler_init(&self->sampler,
+	psy_audio_sampler_init(&self->sampler,
 		self->workspace->machinefactory.machinecallback);
 	psy_audio_buffer_init(&self->samplerbuffer, 2);
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {

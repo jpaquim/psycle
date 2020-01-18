@@ -18,12 +18,6 @@ typedef enum {
 	BACKGROUND_PARENT,
 } BackgroundMode;
 
-typedef struct {		               
-   int (*childenum)(void*, void*);   
-   void* context;
-} EnumCallback;
-
-
 typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
 	LPARAM lParam);
 
@@ -55,10 +49,16 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_onkeydown onkeyup;
 } psy_ui_ComponentVtable;
 
-typedef struct psy_ui_Component {
-	psy_ui_ComponentVtable* vtable;
+typedef struct {
 	uintptr_t hwnd;
-	uintptr_t winid;	
+	uintptr_t winid;
+	HBRUSH background;
+	winproc wndproc;	
+} psy_ui_win_ComponentDetails;
+
+typedef struct psy_ui_Component {
+	psy_ui_ComponentVtable* vtable;	
+	psy_ui_win_ComponentDetails* platform;
 	psy_Signal signal_size;
 	psy_Signal signal_draw;
 	psy_Signal signal_timer;
@@ -75,16 +75,15 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_scroll;
 	psy_Signal signal_create;
 	psy_Signal signal_destroy;
+	psy_Signal signal_destroyed;
 	psy_Signal signal_childenum;
 	psy_Signal signal_show;
-	psy_Signal signal_hide;
-	psy_Signal signal_windowproc;
+	psy_Signal signal_hide;	
 	psy_Signal signal_align;
 	//psy_Signal signal_preferredsize;
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
-	psy_Signal signal_focus;
-	EnumCallback childenum;
+	psy_Signal signal_focus;	
 	psy_ui_AlignType align;
 	psy_ui_JustifyType justify;
 	int alignexpandmode;
@@ -100,10 +99,8 @@ typedef struct psy_ui_Component {
 	unsigned int backgroundcolor;
 	unsigned int color;
 	BackgroundMode backgroundmode;
-	psy_ui_Font font;
-	HBRUSH background;
-	int visible;
-	winproc wndproc;
+	psy_ui_Font font;	
+	int visible;	
 	int accumwheeldelta;
 	int wheelscroll;
 	int handlevscroll;
@@ -116,7 +113,6 @@ void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 void ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
 void ui_component_dispose(psy_ui_Component*);
 void ui_component_destroy(psy_ui_Component*);
-void ui_frame_init(psy_ui_Component*, psy_ui_Component* parent);
 int ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	LPCTSTR classname, int x, int y, int width, int height,
 	DWORD dwStyle, int usecommand);
@@ -178,16 +174,13 @@ psy_ui_Size ui_component_textsize(psy_ui_Component*, const char*);
 psy_ui_TextMetric ui_component_textmetric(psy_ui_Component*);
 psy_ui_Size ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
 void ui_component_seticonressource(psy_ui_Component*, int ressourceid);
+void ui_component_doublebuffer(psy_ui_Component*);
 
 psy_List* ui_components_setalign(psy_List*, psy_ui_AlignType,
 	const psy_ui_Margin*);
 psy_List* ui_components_setmargin(psy_List*, const psy_ui_Margin*);
 
-int ui_openfile(psy_ui_Component* self, char* title, char* filter,
-	char* defextension, const char* szInitialDir, char* filename);
-int ui_savefile(psy_ui_Component* self, char* title, char* filter,
-	char* defextension, const char* szInitialDir, char* filename);
 int ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
-void ui_component_doublebuffer(psy_ui_Component*);
+
 
 #endif /* psy_ui_COMPONENT_H */

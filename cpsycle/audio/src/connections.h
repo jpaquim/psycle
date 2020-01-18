@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_CONNECTIONS_H)
-#define PSY_AUDIO_CONNECTIONS_H
+#ifndef psy_audio_CONNECTIONS_H
+#define psy_audio_CONNECTIONS_H
 
 #include <hashtbl.h>
 #include <list.h>
@@ -63,4 +63,4 @@ psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, uintptr_t outputslo
 psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self, uintptr_t outputslot,
 	uintptr_t inputslot);
 
-#endif
+#endif /* psy_audio_CONNECTIONS_H */

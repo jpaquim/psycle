@@ -106,24 +106,42 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 {
 	psy_ui_Component*   component;
 	psy_ui_WinApp* winapp;
+	psy_ui_fp_winproc winproc;
 
 	winapp = (psy_ui_WinApp*) app.platform;
 	component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+
 	if (component) {		
+		winproc = component->platform->wndproc;		
 		switch (message)
 		{
+			case WM_NCDESTROY:
+				// restore default winproc
+				if (component->signal_destroyed.slots) {
+					psy_signal_emit(&component->signal_destroyed, component,
+						0);
+				}
+				#if defined(_WIN64)		
+					SetWindowLongPtr((HWND)component->platform->hwnd, GWLP_WNDPROC,
+						(LONG_PTR) component->platform->wndproc);
+				#else	
+					SetWindowLong((HWND)component->platform->hwnd, GWL_WNDPROC,
+						(LONG)component->platform->wndproc);
+				#endif				
+				ui_component_dispose(component);
+			break;
 			case WM_DESTROY:
 				if (component->signal_destroy.slots) {
 					psy_signal_emit(&component->signal_destroy, component,
 						0);
-				}
-				ui_component_dispose(component);				
+				}								
 			break;
 			case WM_TIMER:				
 				if (component && component->signal_timer.slots) {
 					psy_signal_emit(&component->signal_timer, component, 1,
 						(int) wParam);
 				}
+			break;
 			case WM_KEYDOWN:								
 			{
 				psy_ui_KeyEvent ev;
@@ -145,12 +163,11 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				if (component->signal_focuslost.slots) {
 					psy_signal_emit(&component->signal_focuslost, component, 0);
 				}
-			break;
-		break;		
+			break;			
 			default:
 			break;
 		}
-		return CallWindowProc(component->wndproc, hwnd, message, wParam, lParam);
+		return CallWindowProc(winproc, hwnd, message, wParam, lParam);
 	}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
@@ -168,16 +185,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 	winapp = (psy_ui_WinApp*) app.platform;
 	component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-	if (component && component->signal_windowproc.slots) {				
-		psy_signal_emit(&component->signal_windowproc, component, 3, 
-			(LONG)message, (SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam));
-		if (component->preventdefault) {					
-			return 0;
-		} else {
-			return DefWindowProc (hwnd, message, wParam, lParam);
-		}
-	}
-
 	if (component) {
 		switch (message)
 		{		
@@ -219,14 +226,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
 					if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
-						return (intptr_t) component->background;
+						return (intptr_t) component->platform->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
 				} else {				
-					SetTextColor((HDC) wParam, ui_defaults_color(&app.defaults));
+					SetTextColor((HDC) wParam, psy_ui_defaults_color(&app.defaults));
 					SetBkColor((HDC) wParam,
-						ui_defaults_backgroundcolor(&app.defaults));
+						psy_ui_defaults_backgroundcolor(&app.defaults));
 					return (intptr_t) winapp->defaultbackgroundbrush;
 				}
 			break;
@@ -312,11 +319,17 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					return 0 ;
 				}
 			break;
-			case WM_DESTROY:												
+			case WM_NCDESTROY:
+				if (component->signal_destroyed.slots) {
+					psy_signal_emit(&component->signal_destroyed, component, 0);
+				}
+				ui_component_dispose(component);
+				return 0;
+			break;
+			case WM_DESTROY:
 				if (component->signal_destroy.slots) {
 					psy_signal_emit(&component->signal_destroy, component, 0);
 				}
-				ui_component_dispose(component);							
 				return 0;
 			break;
 			case WM_SYSKEYDOWN:
@@ -553,7 +566,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							SendMessage((HWND) component->hwnd, 
+							SendMessage((HWND) component->platform->hwnd, 
 								WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);
 							component->accumwheeldelta -= iDeltaPerLine ;							
@@ -571,7 +584,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							SendMessage((HWND) component->hwnd, WM_VSCROLL,
+							SendMessage((HWND) component->platform->hwnd, WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);							
 							component->accumwheeldelta += iDeltaPerLine;							
 						}
@@ -596,12 +609,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				handle_vscroll(hwnd, wParam, lParam);
 				return 0;
 			break;
-			case WM_HSCROLL:
-				component = psy_table_at(&winapp->selfmap, (uintptr_t) (int) lParam);
-				if (component && component->signal_windowproc.slots) {				                    
-					psy_signal_emit(&component->signal_windowproc, component, 3, message, wParam, lParam);
-					return DefWindowProc (hwnd, message, wParam, lParam);
-				}
+			case WM_HSCROLL:				
 				handle_hscroll(hwnd, wParam, lParam);
 				return 0;
 			break;

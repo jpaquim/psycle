@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_SAMPLER_H)
-#define PSY_AUDIO_SAMPLER_H
+#ifndef psy_audio_SAMPLER_H
+#define psy_audio_SAMPLER_H
 
 #include "custommachine.h"
 #include "instrument.h"
@@ -54,7 +54,14 @@ typedef struct {
 	int effcmd;
 	int effval;
 	int dopan;
+	int dooffset;
+	uint8_t offset;
 } Voice;
+
+typedef struct ZxxMacro {
+	int mode;
+	int value;
+} ZxxMacro;
 
 typedef struct psy_audio_Sampler {
 	psy_audio_CustomMachine custommachine;		
@@ -63,12 +70,18 @@ typedef struct psy_audio_Sampler {
 	ResamplerType resamplingmethod;
 	int defaultspeed;	
 	psy_Table lastinst;
-	int maxvolume; // psycle 0CFF, xm 0C80	
+	int maxvolume; // psycle 0CFF, xm 0C80
+	int xmsamplerload;
 } psy_audio_Sampler;
 
-void sampler_init(psy_audio_Sampler*, MachineCallback);
-psy_audio_Machine* sampler_base(psy_audio_Sampler*);
+void psy_audio_sampler_init(psy_audio_Sampler*, MachineCallback);
+psy_audio_Sampler* psy_audio_sampler_alloc(void);
+psy_audio_Sampler* psy_audio_sampler_allocinit(MachineCallback);
+const psy_audio_MachineInfo* psy_audio_sampler_info(void);
 
-const psy_audio_MachineInfo* sampler_info(void);
+INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
+{
+	return &(self->custommachine.machine);
+}
 
-#endif
+#endif /* psy_audio_SAMPLER_H */

@@ -24,8 +24,7 @@ void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 	psy_signal_connect(&psy_ui_notebook_base(self)->signal_size, self, onsize);
 	self->pageindex = 0;
 	self->split = 0;
-	self->splitx = -1;
-	self->splitbar.hwnd = 0;
+	self->splitx = -1;	
 }
 
 void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
@@ -101,7 +100,7 @@ void ontabbarchange(psy_ui_Notebook* self, psy_ui_Component* sender, int tabinde
 
 void psy_ui_notebook_split(psy_ui_Notebook* self)
 {
-	if (self->splitbar.hwnd == 0) {
+	if (!self->split) {
 		self->split = 1;
 		self->splitx = 400;
 		ui_component_init(&self->splitbar, psy_ui_notebook_base(self));
@@ -120,16 +119,19 @@ void psy_ui_notebook_split(psy_ui_Notebook* self)
 	}
 }
 
-void psy_ui_notebook_full(psy_ui_Notebook* self)
+int psy_ui_notebook_splitactivated(psy_ui_Notebook* self)
 {
-	if (self->splitbar.hwnd != 0) {
-		self->split = 0;
-		ui_component_destroy(&self->splitbar);
-		psy_ui_notebook_setpageindex(self, self->pageindex);
-		self->splitbar.hwnd = 0;
-	}
+	return self->split;
 }
 
+void psy_ui_notebook_full(psy_ui_Notebook* self)
+{
+	if (self->split) {
+		self->split = 0;
+		ui_component_destroy(&self->splitbar);
+		psy_ui_notebook_setpageindex(self, self->pageindex);		
+	}
+}
 
 void onmousedown(psy_ui_Notebook* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
@@ -195,7 +197,7 @@ void align_split(psy_ui_Notebook* self, int x) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*)p->entry;		
-		if (component->hwnd == self->splitbar.hwnd) {
+		if (component->platform->hwnd == self->splitbar.platform->hwnd) {
 			ui_component_setposition(&self->splitbar,
 				x, 0, 4, size.height);
 		} else {

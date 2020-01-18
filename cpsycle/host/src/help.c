@@ -27,8 +27,8 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_append(&self->tabbar, "./docs/keys.txt");
 	tabbar_append(&self->tabbar, "./docs/tweaking.txt");
 	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");	
-	ui_editor_init(&self->editor, help_base(self));
-	ui_editor_preventedit(&self->editor);
+	psy_ui_editor_init(&self->editor, help_base(self));
+	psy_ui_editor_preventedit(&self->editor);
 	ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
@@ -80,23 +80,23 @@ void help_load(Help* self, const char* path)
 		int pos = 0;		
 		char text[MAXREADBUFFER];
 
-		ui_editor_clear(&self->editor);
-		ui_editor_enableedit(&self->editor);
+		psy_ui_editor_clear(&self->editor);
+		psy_ui_editor_enableedit(&self->editor);
 		memset(text, 0, MAXREADBUFFER);
 		while ((c = fgetc(fp)) != EOF) {
 			if (pos < MAXREADBUFFER) {
 				text[pos] = c;
 				++pos;
 			} else {
-				ui_editor_addtext(&self->editor, text);
+				psy_ui_editor_addtext(&self->editor, text);
 				pos = 0;
 			}
 		}		
 		fclose(fp);
 		if (pos > 0) {
-			ui_editor_addtext(&self->editor, text);
+			psy_ui_editor_addtext(&self->editor, text);
 		}
-		ui_editor_preventedit(&self->editor);
+		psy_ui_editor_preventedit(&self->editor);
 	}
 }
 

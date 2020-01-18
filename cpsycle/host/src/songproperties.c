@@ -21,17 +21,17 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->label_title, &self->component);
 	psy_ui_label_settext(&self->label_title, "Song Title");
-	ui_edit_init(&self->edit_title, &self->component, 0);
+	psy_ui_edit_init(&self->edit_title, &self->component, 0);
 	psy_signal_connect(&self->edit_title.signal_change, self,
 		songpropertiesview_ontitlechanged);
 	psy_ui_label_init(&self->label_credits, &self->component);
 	psy_ui_label_settext(&self->label_credits, "Credits");	
-	ui_edit_init(&self->edit_credits, &self->component, 0);
+	psy_ui_edit_init(&self->edit_credits, &self->component, 0);
 	psy_signal_connect(&self->edit_credits.signal_change, self,
 		songpropertiesview_oncreditschanged);
 	psy_ui_label_init(&self->label_comments, &self->component);
 	psy_ui_label_settext(&self->label_comments, "Comments");	
-	ui_edit_init(&self->edit_comments, &self->component,
+	psy_ui_edit_init(&self->edit_comments, &self->component,
 		WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL);
 	ui_component_resize(&self->edit_comments.component, 0, 200);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
@@ -61,11 +61,11 @@ void songpropertiesview_initalign(SongPropertiesView* self)
 
 void songpropertiesview_read(SongPropertiesView* self)
 {	
-	ui_edit_settext(&self->edit_title, 
+	psy_ui_edit_settext(&self->edit_title, 
 		self->song->properties.title);
-	ui_edit_settext(&self->edit_credits, 
+	psy_ui_edit_settext(&self->edit_credits, 
 		self->song->properties.credits);
-	ui_edit_settext(&self->edit_comments,
+	psy_ui_edit_settext(&self->edit_comments,
 		self->song->properties.comments);
 }
 
@@ -73,13 +73,13 @@ void songpropertiesview_write(SongPropertiesView* self)
 {
 	free(self->song->properties.title);
 	self->song->properties.title = 
-		strdup(ui_edit_text(&self->edit_title));
+		strdup(psy_ui_edit_text(&self->edit_title));
 	free(self->song->properties.credits);
 	self->song->properties.credits = 
-		strdup(ui_edit_text(&self->edit_credits));
+		strdup(psy_ui_edit_text(&self->edit_credits));
 	free(self->song->properties.comments);
 	self->song->properties.comments = 
-		strdup(ui_edit_text(&self->edit_comments));
+		strdup(psy_ui_edit_text(&self->edit_comments));
 }
 
 void songpropertiesview_onsongchanged(SongPropertiesView* self,
@@ -96,16 +96,16 @@ void songpropertiesview_onsongchanged(SongPropertiesView* self,
 
 void songpropertiesview_enableedit(SongPropertiesView* self)
 {
-	ui_edit_enableedit(&self->edit_title);
-	ui_edit_enableedit(&self->edit_credits);	
-	ui_edit_enableedit(&self->edit_comments);	
+	psy_ui_edit_enableedit(&self->edit_title);
+	psy_ui_edit_enableedit(&self->edit_credits);	
+	psy_ui_edit_enableedit(&self->edit_comments);	
 }
 
 void songpropertiesview_disableedit(SongPropertiesView* self)
 {
-	ui_edit_preventedit(&self->edit_title);
-	ui_edit_preventedit(&self->edit_credits);	
-	ui_edit_preventedit(&self->edit_comments);	
+	psy_ui_edit_preventedit(&self->edit_title);
+	psy_ui_edit_preventedit(&self->edit_credits);	
+	psy_ui_edit_preventedit(&self->edit_comments);	
 }
 
 void songpropertiesview_onhide(SongPropertiesView* self, psy_ui_Component* sender)
@@ -116,14 +116,14 @@ void songpropertiesview_onhide(SongPropertiesView* self, psy_ui_Component* sende
 void songpropertiesview_ontitlechanged(SongPropertiesView* self, psy_ui_Component* sender)
 {
 	free(self->song->properties.title);
-	self->song->properties.title = strdup(ui_edit_text(&self->edit_title));
+	self->song->properties.title = strdup(psy_ui_edit_text(&self->edit_title));
 }
 
 void songpropertiesview_oncreditschanged(SongPropertiesView* self,
 	psy_ui_Component* sender)
 {
 	free(self->song->properties.credits);
-	self->song->properties.credits = strdup(ui_edit_text(&self->edit_credits));
+	self->song->properties.credits = strdup(psy_ui_edit_text(&self->edit_credits));
 }
 
 void songpropertiesview_oncommentschanged(SongPropertiesView* self,
@@ -131,5 +131,5 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 {
 	free(self->song->properties.comments);
 	self->song->properties.comments = strdup(
-		ui_edit_text(&self->edit_comments));
+		psy_ui_edit_text(&self->edit_comments));
 }

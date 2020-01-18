@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_MACHINES_H)
-#define PSY_AUDIO_MACHINES_H
+#ifndef psy_audio_MACHINES_H
+#define psy_audio_MACHINES_H
 
 #include "connections.h"
 #include "master.h"
@@ -71,4 +71,4 @@ void machines_setvolume(psy_audio_Machines*, psy_dsp_amp_t volume);
 psy_dsp_amp_t machines_volume(psy_audio_Machines*);
 psy_TableIterator machines_begin(psy_audio_Machines*);
 
-#endif
+#endif /* psy_audio_MACHINES_H */

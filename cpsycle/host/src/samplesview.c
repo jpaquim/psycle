@@ -10,6 +10,9 @@
 #include "../../detail/portable.h"
 #include <songio.h>
 
+#include <uiopendialog.h>
+#include <uisavedialog.h>
+
 #include <math.h>
 
 /// psy_audio_Samples View
@@ -30,26 +33,26 @@ static void samplesview_onhide(SamplesView*, psy_ui_Component* sender);
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
 static void samplesheaderview_setsample(SamplesHeaderView*, psy_audio_Sample*);
-static void OnInstrumentSlotChanged(SamplesView*, psy_audio_Instrument* sender, int slot);
-static void OnPrevSample(SamplesHeaderView*, psy_ui_Component* sender);
-static void OnNextSample(SamplesHeaderView*, psy_ui_Component* sender);
-static void OnEditSampleName(SamplesHeaderView*, psy_ui_Edit* sender);
+static void oninstrumentslotchanged(SamplesView*, psy_audio_Instrument* sender, int slot);
+static void onprevsample(SamplesHeaderView*, psy_ui_Component* sender);
+static void onnextsample(SamplesHeaderView*, psy_ui_Component* sender);
+static void oneditsamplename(SamplesHeaderView*, psy_ui_Edit* sender);
 /// General Settings View
-static void InitSamplesGeneralView(SamplesGeneralView*, psy_ui_Component* parent);
-static void SetSampleSamplesGeneralView(SamplesGeneralView*, psy_audio_Sample* sample);
-static void OnGeneralViewDescribe(SamplesGeneralView*, psy_ui_Slider*, char* txt);
-static void GeneralViewFillPanDescription(SamplesGeneralView*, char* txt);
-static void OnGeneralViewTweak(SamplesGeneralView*, psy_ui_Slider*, float value);
-static void OnGeneralViewValue(SamplesGeneralView*, psy_ui_Slider*, float* value);
-static void InitSamplesVibratoView(SamplesVibratoView*, psy_ui_Component* parent, psy_audio_Player* player);
-static void SetSampleSamplesVibratoView(SamplesVibratoView*, psy_audio_Sample* sample);
+static void initsamplesgeneralview(SamplesGeneralView*, psy_ui_Component* parent);
+static void setsamplesamplesgeneralview(SamplesGeneralView*, psy_audio_Sample* sample);
+static void generalviewfillpandescription(SamplesGeneralView*, char* txt);
+static void ongeneralviewdescribe(SamplesGeneralView*, psy_ui_Slider*, char* txt);
+static void ongeneralviewtweak(SamplesGeneralView*, psy_ui_Slider*, float value);
+static void ongeneralviewvalue(SamplesGeneralView*, psy_ui_Slider*, float* value);
+static void initsamplesvibratoview(SamplesVibratoView*, psy_ui_Component* parent, psy_audio_Player* player);
+static void setsamplesamplesvibratoview(SamplesVibratoView*, psy_audio_Sample* sample);
 /// Vibrato Settings View
-static void OnVibratoViewDescribe(SamplesVibratoView*, psy_ui_Slider*, char* txt);
-static void OnVibratoViewTweak(SamplesVibratoView*, psy_ui_Slider*, float value);
-static void OnVibratoViewValue(SamplesVibratoView*, psy_ui_Slider*, float* value);
-static void OnWaveFormChange(SamplesVibratoView*, psy_ui_ComboBox* sender, int sel);
-static WaveForms ComboBoxToWaveForm(int combobox_index);
-static int WaveFormToComboBox(WaveForms waveform);
+static void onvibratoviewdescribe(SamplesVibratoView*, psy_ui_Slider*, char* txt);
+static void onvibratoviewtweak(SamplesVibratoView*, psy_ui_Slider*, float value);
+static void onvibratoviewvalue(SamplesVibratoView*, psy_ui_Slider*, float* value);
+static void onwaveformchange(SamplesVibratoView*, psy_ui_ComboBox* sender, int sel);
+static WaveForms comboboxtowaveform(int combobox_index);
+static int waveformtocombobox(WaveForms waveform);
 /// Waveloop Setting View
 static void samplesloopview_init(SamplesLoopView*, psy_ui_Component* parent,
 	SamplesView*);
@@ -167,29 +170,31 @@ void samplessongimportview_ondestroy(SamplesSongImportView* self,
 void samplessongimportview_onloadsong(SamplesSongImportView* self,
 	psy_ui_Component* sender)
 {
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH]	 = ""; 					
-	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
-				"Songs (*.psy)"				        "\0*.psy\0"
-				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
-				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
-				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
-				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
-	char  defaultextension[] = "PSY";
-	int showsonginfo = 0;	
-	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, 
-		workspace_songs_directory(self->workspace), path)) {
+	psy_ui_OpenDialog dialog;
+	static char filter[] =
+				"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+				"Songs (*.psy)"				        "|*.psy|"
+				"FastTracker II Songs (*.xm)"       "|*.xm|"
+				"Impulse Tracker Songs (*.it)"      "|*.it|"
+				"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
+				"Original Mod Format Songs (*.mod)" "|*.mod|"
+				"Wav Format Songs (*.wav)"			"|*.wav";
+
+	psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+		workspace_songs_directory(self->workspace));
+	if (psy_ui_opendialog_execute(&dialog)) {
 		psy_audio_SongFile songfile;
+
 		if (self->source) {
 			psy_audio_song_dispose(self->source);
 			free(self->source);
 		}	
-		self->source = psy_audio_song_allocinit(&self->workspace->machinefactory);
+		self->source = psy_audio_song_allocinit(
+			&self->workspace->machinefactory);
 		psy_audio_songfile_init(&songfile);
 		songfile.song = self->source;
 		songfile.file = 0;		
-		psy_audio_songfile_load(&songfile, path);
+		psy_audio_songfile_load(&songfile, psy_ui_opendialog_filename(&dialog));
 		if (!songfile.err) {
 			psy_ui_label_settext(&self->songname,
 				self->source->properties.title);
@@ -200,7 +205,8 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 				"No source song loaded");
 		}
 		psy_audio_songfile_dispose(&songfile);
-	}		
+	}
+	psy_ui_opendialog_dispose(&dialog);
 }
 
 void samplessongimportview_oncopy(SamplesSongImportView* self,
@@ -312,9 +318,9 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook), BACKGROUND_SET);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	InitSamplesGeneralView(&self->general, psy_ui_notebook_base(&self->notebook));
+	initsamplesgeneralview(&self->general, psy_ui_notebook_base(&self->notebook));
 	ui_component_setalign(&self->general.component, psy_ui_ALIGN_TOP);
-	InitSamplesVibratoView(&self->vibrato, psy_ui_notebook_base(&self->notebook),
+	initsamplesvibratoview(&self->vibrato, psy_ui_notebook_base(&self->notebook),
 		&workspace->player);
 	ui_component_setalign(&self->vibrato.component, psy_ui_ALIGN_TOP);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);	
@@ -359,8 +365,8 @@ void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender
 	ui_component_invalidate(&self->wavebox.component);
 }
 
-void samplesview_oninstrumentslotchanged(SamplesView* self, psy_audio_Instrument* sender,
-	int slot)
+void samplesview_oninstrumentslotchanged(SamplesView* self,
+	psy_audio_Instrument* sender, int slot)
 {
 	SampleIndex index;
 	
@@ -382,8 +388,8 @@ void samplesview_setsample(SamplesView* self, SampleIndex index)
 	wavebox_setsample(&self->wavebox, sample);
 	sampleeditor_setsample(&self->sampleeditor, sample);
 	samplesheaderview_setsample(&self->header, sample);
-	SetSampleSamplesGeneralView(&self->general, sample);
-	SetSampleSamplesVibratoView(&self->vibrato, sample);
+	setsamplesamplesgeneralview(&self->general, sample);
+	setsamplesamplesvibratoview(&self->vibrato, sample);
 	samplesloopview_setsample(&self->waveloop, sample);
 	ui_listbox_setcursel(&self->samplesbox.samplelist, index.slot);
 	ui_listbox_setcursel(&self->samplesbox.subsamplelist, index.subslot);
@@ -392,20 +398,21 @@ void samplesview_setsample(SamplesView* self, SampleIndex index)
 void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song) {
-		char path[MAX_PATH]	 = "";
-		char title[MAX_PATH] = ""; 
-		static char filter[] = "Wav Files (*.wav)\0*.wav\0" "IFF psy_audio_Samples (*.iff)\0*.iff\0" "All Files (*.*)\0*.*\0";
-		char  defaultextension[] = "WAV";
-
-		*path = '\0'; 
-		if (ui_openfile(&self->component, title, filter, defaultextension,
-			workspace_samples_directory(self->workspace), path)) {
+		psy_ui_OpenDialog dialog;
+		static char filter[] =
+			"Wav Files (*.wav)|*.wav|"
+			"IFF psy_audio_Samples (*.iff)|*.iff|"
+			"All Files (*.*)|*.*";
+	
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Sample", filter, "WAV",
+			workspace_samples_directory(self->workspace));		
+		if (psy_ui_opendialog_execute(&dialog)) {
 			psy_audio_Sample* sample;
 			SampleIndex index;
 			psy_audio_Instrument* instrument;
 
 			sample = sample_allocinit();
-			sample_load(sample, path);
+			sample_load(sample, psy_ui_opendialog_filename(&dialog));
 			index = samplesbox_selected(&self->samplesbox);
 			psy_audio_samples_insert(&self->workspace->song->samples, sample,
 				index);
@@ -424,23 +431,27 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 				self, samplesview_oninstrumentslotchanged);
 			ui_component_invalidate(&self->component);
 		}
-	}
+		psy_ui_opendialog_dispose(&dialog);
+	}	
 }
 
 void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 {	
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH]	 = ""; 
-	static char filter[]	 = "Wav Files (*.wav)\0*.wav\0" "IFF psy_audio_Samples (*.iff)\0*.iff\0" "All Files (*.*)\0*.*\0";
-	char  defaultextension[] = "WAV";
-	psy_audio_Sample* sample;
-
-	*path = '\0'; 
-	sample = self->wavebox.sample;
-	if (sample && ui_savefile(&self->component, title, filter,
-		defaultextension, 0, path)) {		
-			sample_save(sample, path);		
-	}	
+	psy_ui_SaveDialog dialog;
+	static char filter[] =
+		"Wav Files (*.wav)|*.wav|"
+		"IFF psy_audio_Samples (*.iff)|*.iff|"
+		"All Files (*.*)|*.*";
+	
+	psy_ui_savedialog_init_all(&dialog, 0,
+		"Save Sample",
+		filter,
+		"WAV",
+		workspace_samples_directory(self->workspace));
+	if (self->wavebox.sample && psy_ui_savedialog_execute(&dialog)) {
+		sample_save(self->wavebox.sample, psy_ui_savedialog_filename(&dialog));
+	}
+	psy_ui_savedialog_dispose(&dialog);
 }
 
 void samplesview_ondeletesample(SamplesView* self, psy_ui_Component* sender)
@@ -550,22 +561,22 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settext(&self->namelabel, "Sample Name");
-	ui_edit_init(&self->nameedit, &self->component, 0);		
-	ui_edit_setcharnumber(&self->nameedit, 20);	
+	psy_ui_edit_init(&self->nameedit, &self->component, 0);		
+	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
 	psy_signal_connect(&self->nameedit.signal_change, self,
-		OnEditSampleName);
+		oneditsamplename);
 	psy_ui_button_init(&self->prevbutton, &self->component);
 	psy_ui_button_seticon(&self->prevbutton, psy_ui_ICON_LESS);	
 	psy_signal_connect(&self->prevbutton.signal_clicked, self,
-		OnPrevSample);
+		onprevsample);
 	psy_ui_button_init(&self->nextbutton, &self->component);
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);	
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
-		OnNextSample);
+		onnextsample);
 	psy_ui_label_init(&self->srlabel, &self->component);
 	psy_ui_label_settext(&self->srlabel, "Sample Rate");	
-	ui_edit_init(&self->sredit, &self->component, 0);	
-	ui_edit_setcharnumber(&self->sredit, 8);
+	psy_ui_edit_init(&self->sredit, &self->component, 0);	
+	psy_ui_edit_setcharnumber(&self->sredit, 8);
 	psy_ui_label_init(&self->numsamplesheaderlabel, &self->component);
 	psy_ui_label_settext(&self->numsamplesheaderlabel, "Samples");	
 	psy_ui_label_init(&self->numsampleslabel, &self->component);
@@ -584,9 +595,9 @@ void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* samp
 	char text[20];
 
 	self->sample = sample;
-	ui_edit_settext(&self->nameedit, self->sample ? sample->name : "");	
+	psy_ui_edit_settext(&self->nameedit, self->sample ? sample->name : "");	
 	psy_snprintf(text, 20, "%d", self->sample ? self->sample->samplerate : 0);
-	ui_edit_settext(&self->sredit, text);
+	psy_ui_edit_settext(&self->sredit, text);
 	psy_snprintf(text, 20, "%d", self->sample ? self->sample->numframes : 0);
 	psy_ui_label_settext(&self->numsampleslabel, text);
 	if (self->sample) {
@@ -616,14 +627,14 @@ void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* samp
 	}
 }
 
-void OnEditSampleName(SamplesHeaderView* self, psy_ui_Edit* sender)
+void oneditsamplename(SamplesHeaderView* self, psy_ui_Edit* sender)
 {
 	if (self->sample) {
 		char text[40];
 		SampleIndex index;
 
 		index = samplesbox_selected(&self->view->samplesbox);
-		sample_setname(self->sample, ui_edit_text(sender));		
+		sample_setname(self->sample, psy_ui_edit_text(sender));		
 		if (index.subslot == 0) {
 			psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.slot, sample_name(self->sample));
@@ -637,21 +648,21 @@ void OnEditSampleName(SamplesHeaderView* self, psy_ui_Edit* sender)
 	}
 }
 
-void OnPrevSample(SamplesHeaderView* self, psy_ui_Component* sender)
+void onprevsample(SamplesHeaderView* self, psy_ui_Component* sender)
 {
 	instruments_changeslot(self->instruments,
 		instruments_slot(self->instruments) > 0 ?
 		instruments_slot(self->instruments) - 1 : 0);
 }
 
-void OnNextSample(SamplesHeaderView* self, psy_ui_Component* sender)
+void onnextsample(SamplesHeaderView* self, psy_ui_Component* sender)
 {
 	instruments_changeslot(self->instruments,
 		instruments_slot(self->instruments) < 255 ?
 		instruments_slot(self->instruments) + 1 : 255);
 }
 
-void InitSamplesGeneralView(SamplesGeneralView* self, psy_ui_Component* parent)
+void initsamplesgeneralview(SamplesGeneralView* self, psy_ui_Component* parent)
 {	
 	psy_ui_Margin margin;
 	psy_ui_Slider* sliders[] = {
@@ -671,26 +682,26 @@ void InitSamplesGeneralView(SamplesGeneralView* self, psy_ui_Component* parent)
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_slider_init(&self->defaultvolume, &self->component);
-	ui_slider_settext(&self->defaultvolume, "Default Volume");
-	ui_slider_init(&self->globalvolume, &self->component);
-	ui_slider_settext(&self->globalvolume, "Global Volume");
-	ui_slider_init(&self->panposition, &self->component);
-	ui_slider_settext(&self->panposition, "Pan Position");
-	ui_slider_init(&self->samplednote, &self->component);
-	ui_slider_settext(&self->samplednote, "Sampled Note"); 
-	ui_slider_init(&self->pitchfinetune, &self->component);
-	ui_slider_settext(&self->pitchfinetune, "Pitch Finetune");	
+	psy_ui_slider_init(&self->defaultvolume, &self->component);
+	psy_ui_slider_settext(&self->defaultvolume, "Default Volume");
+	psy_ui_slider_init(&self->globalvolume, &self->component);
+	psy_ui_slider_settext(&self->globalvolume, "Global Volume");
+	psy_ui_slider_init(&self->panposition, &self->component);
+	psy_ui_slider_settext(&self->panposition, "Pan Position");
+	psy_ui_slider_init(&self->samplednote, &self->component);
+	psy_ui_slider_settext(&self->samplednote, "Sampled Note"); 
+	psy_ui_slider_init(&self->pitchfinetune, &self->component);
+	psy_ui_slider_settext(&self->pitchfinetune, "Pitch Finetune");	
 	for (i = 0; sliders[i] != 0; ++i) {
 		ui_component_resize(&sliders[i]->component, 0, 20);
 		ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);		
 		ui_component_setmargin(&sliders[i]->component, &margin);		
-		ui_slider_connect(sliders[i], self, OnGeneralViewDescribe,
-			OnGeneralViewTweak, OnGeneralViewValue);		
+		psy_ui_slider_connect(sliders[i], self, ongeneralviewdescribe,
+			ongeneralviewtweak, ongeneralviewvalue);
 	}
 }
 
-void SetSampleSamplesGeneralView(SamplesGeneralView* self, psy_audio_Sample* sample)
+void setsamplesamplesgeneralview(SamplesGeneralView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	if (self->sample) {
@@ -704,7 +715,7 @@ int map_1_128(float value) {
 	return (int)(value * 128.f);
 }
 
-void OnGeneralViewTweak(SamplesGeneralView* self, psy_ui_Slider* slider,
+void ongeneralviewtweak(SamplesGeneralView* self, psy_ui_Slider* slider,
 	float value)
 {
 	if (self->sample) {			
@@ -726,7 +737,7 @@ void OnGeneralViewTweak(SamplesGeneralView* self, psy_ui_Slider* slider,
 	}
 }
 
-void OnGeneralViewValue(SamplesGeneralView* self, psy_ui_Slider* slider,
+void ongeneralviewvalue(SamplesGeneralView* self, psy_ui_Slider* slider,
 	float* value)
 {	
 	if (slider == &self->defaultvolume) {
@@ -750,7 +761,7 @@ void OnGeneralViewValue(SamplesGeneralView* self, psy_ui_Slider* slider,
 	}
 }
 
-void OnGeneralViewDescribe(SamplesGeneralView* self, psy_ui_Slider* slider, char* txt)
+void ongeneralviewdescribe(SamplesGeneralView* self, psy_ui_Slider* slider, char* txt)
 {		
 	if (slider == &self->defaultvolume) {		
 		psy_snprintf(txt, 10, "C%02X", self->sample 
@@ -769,7 +780,7 @@ void OnGeneralViewDescribe(SamplesGeneralView* self, psy_ui_Slider* slider, char
 		}
 	} else
 	if (slider == &self->panposition) {		
-		GeneralViewFillPanDescription(self, txt);		
+		generalviewfillpandescription(self, txt);		
 	} else
 	if (slider == &self->samplednote) {		
 		psy_snprintf(txt, 10, "%s", self->sample
@@ -783,7 +794,7 @@ void OnGeneralViewDescribe(SamplesGeneralView* self, psy_ui_Slider* slider, char
 	}
 }
 
-void GeneralViewFillPanDescription(SamplesGeneralView* self, char* txt) {	
+void generalviewfillpandescription(SamplesGeneralView* self, char* txt) {	
 
 	if (!self->sample) {
 		psy_snprintf(txt, 10, "|64|");
@@ -815,7 +826,7 @@ void GeneralViewFillPanDescription(SamplesGeneralView* self, char* txt) {
 	}	
 }
 
-void InitSamplesVibratoView(SamplesVibratoView* self, psy_ui_Component* parent, psy_audio_Player* player)
+void initsamplesvibratoview(SamplesVibratoView* self, psy_ui_Component* parent, psy_audio_Player* player)
 {
 	psy_ui_Margin margin;
 	int i;
@@ -834,23 +845,22 @@ void InitSamplesVibratoView(SamplesVibratoView* self, psy_ui_Component* parent, 
 	psy_ui_label_settext(&self->waveformheaderlabel, "Waveform");
 	ui_component_setposition(&self->waveformheaderlabel.component, 5, 5, 100, 20);
 
-	ui_combobox_init(&self->waveformbox, &self->component);	
-	ui_combobox_addstring(&self->waveformbox, "Sinus");
-	ui_combobox_addstring(&self->waveformbox, "Square");
-	ui_combobox_addstring(&self->waveformbox, "RampUp");
-	ui_combobox_addstring(&self->waveformbox, "RampDown");
-	ui_combobox_addstring(&self->waveformbox, "Random");	
+	psy_ui_combobox_init(&self->waveformbox, &self->component);	
+	psy_ui_combobox_addstring(&self->waveformbox, "Sinus");
+	psy_ui_combobox_addstring(&self->waveformbox, "Square");
+	psy_ui_combobox_addstring(&self->waveformbox, "RampUp");
+	psy_ui_combobox_addstring(&self->waveformbox, "RampDown");
+	psy_ui_combobox_addstring(&self->waveformbox, "Random");	
 	ui_component_setposition(&self->waveformbox.component, 110, 5, 100, 20);
-	ui_combobox_setcursel(&self->waveformbox, 0);
+	psy_ui_combobox_setcursel(&self->waveformbox, 0);
 	psy_signal_connect(&self->waveformbox.signal_selchanged, self,
-		OnWaveFormChange);
-
-	ui_slider_init(&self->attack, &self->component);
-	ui_slider_settext(&self->attack, "Attack");	
-	ui_slider_init(&self->speed, &self->component);
-	ui_slider_settext(&self->speed,"Speed");
-	ui_slider_init(&self->depth, &self->component);
-	ui_slider_settext(&self->depth, "Depth");
+		onwaveformchange);
+	psy_ui_slider_init(&self->attack, &self->component);
+	psy_ui_slider_settext(&self->attack, "Attack");	
+	psy_ui_slider_init(&self->speed, &self->component);
+	psy_ui_slider_settext(&self->speed,"Speed");
+	psy_ui_slider_init(&self->depth, &self->component);
+	psy_ui_slider_settext(&self->depth, "Depth");
 	psy_ui_margin_init(&margin,
 		psy_ui_value_makepx(3),
 		psy_ui_value_makepx(3),
@@ -860,27 +870,27 @@ void InitSamplesVibratoView(SamplesVibratoView* self, psy_ui_Component* parent, 
 		ui_component_resize(&sliders[i]->component, 0, 20);		
 		ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		ui_slider_connect(sliders[i], self, OnVibratoViewDescribe,
-			OnVibratoViewTweak, OnVibratoViewValue);		
+		psy_ui_slider_connect(sliders[i], self, onvibratoviewdescribe,
+			onvibratoviewtweak, onvibratoviewvalue);
 	}	
 	sliders[0]->component.margin.top.quantity.integer = 32;		
 }
 
-void SetSampleSamplesVibratoView(SamplesVibratoView* self, psy_audio_Sample* sample)
+void setsamplesamplesvibratoview(SamplesVibratoView* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	if (self->sample) {
 		ui_component_enableinput(&self->component, 1);
-		ui_combobox_setcursel(&self->waveformbox,
-			WaveFormToComboBox(self->sample->vibrato.type));
+		psy_ui_combobox_setcursel(&self->waveformbox,
+			waveformtocombobox(self->sample->vibrato.type));
 	} else {
 		ui_component_preventinput(&self->component, 1);
-		ui_combobox_setcursel(&self->waveformbox,
-			WaveFormToComboBox(WAVEFORMS_SINUS));
+		psy_ui_combobox_setcursel(&self->waveformbox,
+			waveformtocombobox(WAVEFORMS_SINUS));
 	}
 }
 
-void OnVibratoViewTweak(SamplesVibratoView* self, psy_ui_Slider* slidergroup, float value)
+void onvibratoviewtweak(SamplesVibratoView* self, psy_ui_Slider* slidergroup, float value)
 {
 	if (!self->sample) {
 		return;
@@ -896,7 +906,7 @@ void OnVibratoViewTweak(SamplesVibratoView* self, psy_ui_Slider* slidergroup, fl
 	}
 }
 
-void OnVibratoViewValue(SamplesVibratoView* self, psy_ui_Slider* slidergroup,
+void onvibratoviewvalue(SamplesVibratoView* self, psy_ui_Slider* slidergroup,
 	float* value)
 {	
 	if (slidergroup == &self->attack) {
@@ -910,7 +920,7 @@ void OnVibratoViewValue(SamplesVibratoView* self, psy_ui_Slider* slidergroup,
 	}
 }
 
-void OnVibratoViewDescribe(SamplesVibratoView* self, psy_ui_Slider* slidergroup, char* txt)
+void onvibratoviewdescribe(SamplesVibratoView* self, psy_ui_Slider* slidergroup, char* txt)
 {		
 	if (slidergroup == &self->attack) {		
 		if (!self->sample) {
@@ -946,15 +956,15 @@ void OnVibratoViewDescribe(SamplesVibratoView* self, psy_ui_Slider* slidergroup,
 	}
 }
 
-void OnWaveFormChange(SamplesVibratoView* self, psy_ui_ComboBox* sender,
+void onwaveformchange(SamplesVibratoView* self, psy_ui_ComboBox* sender,
 	int sel)
 {
 	if (self->sample) {
-		self->sample->vibrato.type = ComboBoxToWaveForm(sel);
+		self->sample->vibrato.type = comboboxtowaveform(sel);
 	}
 }
 
-int WaveFormToComboBox(WaveForms waveform)
+int waveformtocombobox(WaveForms waveform)
 {
 	int rv = 0;
 
@@ -970,7 +980,7 @@ int WaveFormToComboBox(WaveForms waveform)
 	return rv;
 }
 
-WaveForms ComboBoxToWaveForm(int combobox_index)
+WaveForms comboboxtowaveform(int combobox_index)
 {
 	WaveForms rv = WAVEFORMS_SINUS;			
 	
@@ -1008,20 +1018,20 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->loopheaderlabel, &self->cont);	
 	psy_ui_label_settext(&self->loopheaderlabel, "Continuous Loop");
 	psy_ui_label_setcharnumber(&self->loopheaderlabel, 18);	
-	ui_combobox_init(&self->loopdir, &self->cont);
-	ui_combobox_addstring(&self->loopdir, "Disabled");
-	ui_combobox_addstring(&self->loopdir, "Forward");
-	ui_combobox_addstring(&self->loopdir, "Bidirection");	
-	ui_combobox_setcursel(&self->loopdir, 0);
-	ui_combobox_setcharnumber(&self->loopdir, 10);
+	psy_ui_combobox_init(&self->loopdir, &self->cont);
+	psy_ui_combobox_addstring(&self->loopdir, "Disabled");
+	psy_ui_combobox_addstring(&self->loopdir, "Forward");
+	psy_ui_combobox_addstring(&self->loopdir, "Bidirection");	
+	psy_ui_combobox_setcursel(&self->loopdir, 0);
+	psy_ui_combobox_setcharnumber(&self->loopdir, 10);
 	psy_ui_label_init(&self->loopstartlabel, &self->cont);
 	psy_ui_label_settext(&self->loopstartlabel, "Start ");	
-	ui_edit_init(&self->loopstartedit, &self->cont, 0);
-	ui_edit_setcharnumber(&self->loopstartedit, 10);
+	psy_ui_edit_init(&self->loopstartedit, &self->cont, 0);
+	psy_ui_edit_setcharnumber(&self->loopstartedit, 10);
 	psy_ui_label_init(&self->loopendlabel, &self->cont);
 	psy_ui_label_settext(&self->loopendlabel, "End ");	
-	ui_edit_init(&self->loopendedit, &self->cont, 0);
-	ui_edit_setcharnumber(&self->loopendedit, 10);
+	psy_ui_edit_init(&self->loopendedit, &self->cont, 0);
+	psy_ui_edit_setcharnumber(&self->loopendedit, 10);
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->cont, 0),
 		psy_ui_ALIGN_LEFT,
@@ -1031,20 +1041,20 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->sustainloopheaderlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopheaderlabel, "Sustain Loop");
 	psy_ui_label_setcharnumber(&self->sustainloopheaderlabel, 18);
-	ui_combobox_init(&self->sustainloopdir, &self->sustain);
-	ui_combobox_addstring(&self->sustainloopdir, "Disabled");
-	ui_combobox_addstring(&self->sustainloopdir, "Forward");
-	ui_combobox_addstring(&self->sustainloopdir, "Bidirection");		
-	ui_combobox_setcursel(&self->sustainloopdir, 0);
-	ui_combobox_setcharnumber(&self->sustainloopdir, 10);
+	psy_ui_combobox_init(&self->sustainloopdir, &self->sustain);
+	psy_ui_combobox_addstring(&self->sustainloopdir, "Disabled");
+	psy_ui_combobox_addstring(&self->sustainloopdir, "Forward");
+	psy_ui_combobox_addstring(&self->sustainloopdir, "Bidirection");		
+	psy_ui_combobox_setcursel(&self->sustainloopdir, 0);
+	psy_ui_combobox_setcharnumber(&self->sustainloopdir, 10);
 	psy_ui_label_init(&self->sustainloopstartlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopstartlabel, "Start ");	
-	ui_edit_init(&self->sustainloopstartedit, &self->sustain, 0);		
-	ui_edit_setcharnumber(&self->sustainloopstartedit, 10);
+	psy_ui_edit_init(&self->sustainloopstartedit, &self->sustain, 0);		
+	psy_ui_edit_setcharnumber(&self->sustainloopstartedit, 10);
 	psy_ui_label_init(&self->sustainloopendlabel, &self->sustain);	
 	psy_ui_label_settext(&self->sustainloopendlabel, "End ");	
-	ui_edit_init(&self->sustainloopendedit, &self->sustain, 0);
-	ui_edit_setcharnumber(&self->sustainloopendedit, 10);
+	psy_ui_edit_init(&self->sustainloopendedit, &self->sustain, 0);
+	psy_ui_edit_setcharnumber(&self->sustainloopendedit, 10);
 	psy_list_free(ui_components_setalign(
 		ui_component_children(&self->sustain, 0),
 		psy_ui_ALIGN_LEFT,
@@ -1075,27 +1085,27 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 	if (self->sample) {
 		ui_component_enableinput(&self->component, 1);
 		sprintf(tmp, "%d", sample->loopstart);
-		ui_edit_settext(&self->loopstartedit, tmp);
+		psy_ui_edit_settext(&self->loopstartedit, tmp);
 		sprintf(tmp, "%d", sample->loopend);
-		ui_edit_settext(&self->loopendedit, tmp);
+		psy_ui_edit_settext(&self->loopendedit, tmp);
 		sprintf(tmp, "%d", sample->sustainloopstart);
-		ui_edit_settext(&self->sustainloopstartedit, tmp);
+		psy_ui_edit_settext(&self->sustainloopstartedit, tmp);
 		sprintf(tmp, "%d", sample->sustainloopend);
-		ui_edit_settext(&self->sustainloopendedit, tmp);
-		ui_combobox_setcursel(&self->loopdir,
+		psy_ui_edit_settext(&self->sustainloopendedit, tmp);
+		psy_ui_combobox_setcursel(&self->loopdir,
 			LoopTypeToComboBox(self->sample->looptype));
-		ui_combobox_setcursel(&self->sustainloopdir,
+		psy_ui_combobox_setcursel(&self->sustainloopdir,
 			LoopTypeToComboBox(self->sample->sustainlooptype));
 	} else {
 		ui_component_preventinput(&self->component, 1);
 		sprintf(tmp, "%d", 0);
-		ui_edit_settext(&self->loopstartedit, tmp);		
-		ui_edit_settext(&self->loopendedit, tmp);		
-		ui_edit_settext(&self->sustainloopstartedit, tmp);		
-		ui_edit_settext(&self->sustainloopendedit, tmp);
-		ui_combobox_setcursel(&self->loopdir,
+		psy_ui_edit_settext(&self->loopstartedit, tmp);		
+		psy_ui_edit_settext(&self->loopendedit, tmp);		
+		psy_ui_edit_settext(&self->sustainloopstartedit, tmp);		
+		psy_ui_edit_settext(&self->sustainloopendedit, tmp);
+		psy_ui_combobox_setcursel(&self->loopdir,
 			LoopTypeToComboBox(LOOP_DO_NOT));
-		ui_combobox_setcursel(&self->sustainloopdir,
+		psy_ui_combobox_setcursel(&self->sustainloopdir,
 			LoopTypeToComboBox(LOOP_DO_NOT));		
 	}
 	samplesloopview_looptypeenablepreventinput(self);
@@ -1178,7 +1188,7 @@ void samplesloopview_oneditchangedloopstart(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->sample) {
-		self->sample->loopstart = atoi(ui_edit_text(sender));
+		self->sample->loopstart = atoi(psy_ui_edit_text(sender));
 		ui_component_invalidate(&self->view->wavebox.component);
 	}
 }
@@ -1187,7 +1197,7 @@ void samplesloopview_oneditchangedloopend(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {				
 	if (self->sample) {
-		self->sample->loopend = atoi(ui_edit_text(sender));
+		self->sample->loopend = atoi(psy_ui_edit_text(sender));
 		ui_component_invalidate(&self->view->wavebox.component);
 	}
 }
@@ -1196,7 +1206,7 @@ void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->sample) {
-		self->sample->sustainloopstart = atoi(ui_edit_text(sender));
+		self->sample->sustainloopstart = atoi(psy_ui_edit_text(sender));
 		ui_component_invalidate(&self->view->wavebox.component);
 	}
 }
@@ -1205,7 +1215,7 @@ void samplesloopview_oneditchangedsustainend(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->sample) {
-		self->sample->sustainloopend = atoi(ui_edit_text(sender));		
+		self->sample->sustainloopend = atoi(psy_ui_edit_text(sender));		
 		ui_component_invalidate(&self->view->wavebox.component);
 	}
 }

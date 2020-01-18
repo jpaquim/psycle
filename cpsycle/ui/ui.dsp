@@ -169,7 +169,15 @@ SOURCE=.\src\uinotebook.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiopendialog.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiprogressbar.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uisavedialog.c
 # End Source File
 # Begin Source File
 
@@ -285,7 +293,15 @@ SOURCE=.\src\uinotebook.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiopendialog.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiprogressbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uisavedialog.h
 # End Source File
 # Begin Source File
 

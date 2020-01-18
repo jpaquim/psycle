@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_BUFFER_H)
-#define PSY_AUDIO_BUFFER_H
+#ifndef psy_audio_BUFFER_H
+#define psy_audio_BUFFER_H
 
 #include <dsptypes.h>
 #include "../../detail/psydef.h"
@@ -38,4 +38,4 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
 	uintptr_t numsourcesamples);
 void psy_audio_buffer_scale(psy_audio_Buffer*, psy_dsp_amp_range_t, uintptr_t numsamples);
 
-#endif
+#endif /* psy_audio_BUFFER_H */

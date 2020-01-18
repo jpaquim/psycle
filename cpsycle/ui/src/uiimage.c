@@ -9,7 +9,7 @@ static void ondestroy(psy_ui_Image*);
 static void ondraw(psy_ui_Image*, psy_ui_Component* sender, psy_ui_Graphics* g);
 static int checkalignment(psy_ui_Image*, psy_ui_Alignment alignment);
 
-void ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
+void psy_ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 {  
     ui_component_init(&self->component, parent);
 	psy_ui_bitmap_init(&self->bitmap);
@@ -23,7 +23,7 @@ void ondestroy(psy_ui_Image* self)
 	psy_ui_bitmap_dispose(&self->bitmap);
 }
 
-void ui_image_setbitmapalignment(psy_ui_Image* self,
+void psy_ui_image_setbitmapalignment(psy_ui_Image* self,
 	psy_ui_Alignment alignment)
 {
 	self->alignment = alignment;

@@ -1,13 +1,12 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_PATTERNEVENT_H)
-#define PSY_AUDIO_PATTERNEVENT_H
+#ifndef psy_audio_PATTERNEVENT_H
+#define psy_audio_PATTERNEVENT_H
 
 #include "../../detail/stdint.h"
 
 #include <dsptypes.h>
-
 
 typedef struct {
 	uintptr_t low;
@@ -88,7 +87,10 @@ void patternevent_init_all(psy_audio_PatternEvent*,
 	uint8_t vol,
 	uint8_t cmd,
 	uint8_t parameter);
-void patternevent_clear(psy_audio_PatternEvent*);
-int patternevent_empty(psy_audio_PatternEvent*);
 
-#endif
+void patternevent_clear(psy_audio_PatternEvent*);
+int patternevent_empty(const psy_audio_PatternEvent*);
+int patternevent_empty_except_volume(const psy_audio_PatternEvent*);
+int patternevent_has_volume(const psy_audio_PatternEvent*);
+
+#endif /* psy_audio_PATTERNEVENT_H */

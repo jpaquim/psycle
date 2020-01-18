@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_LUAIMPORT_H)
-#define PSY_AUDIO_LUAIMPORT_H
+#ifndef psy_audio_LUAIMPORT_H
+#define psy_audio_LUAIMPORT_H
 
 #include "psyclescript.h"
 
@@ -31,4 +31,4 @@ int psy_luaimport_open(psy_LuaImport*, const char* method);
 void psy_luaimport_pcall(psy_LuaImport*, int numret);
 void psy_luaimport_close(psy_LuaImport*);
 
-#endif
+#endif /* psy_audio_LUAIMPORT_H */

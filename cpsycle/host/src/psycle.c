@@ -7,6 +7,7 @@
 #include "mainframe.h"
 #include <uiapp.h>
 #include <dir.h>
+#include <sample.h>
 
 #ifdef DIVERSALIS__OS__MICROSOFT
 // The WinMain function is called by the system as the initial entry point for
@@ -22,7 +23,14 @@ int main(int argc, char **argv)
 	const char* env = 0;
 	extern psy_ui_App app;
 	MainFrame mainframe;
+	uint64_t w_offset;
+	uint64_t len;
+	Double pos;
 
+
+	len = 256;
+	w_offset = len << 24;
+	pos.QuadPart = w_offset;
 	// adds the app path to the environment path find some
 	// modules (scilexer, for plugins: universalis, vcredist dlls, ...)
 	env = pathenv();	

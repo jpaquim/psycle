@@ -21,8 +21,8 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	psy_ui_label_init(&self->headerlabel, &self->component);	
 	psy_ui_label_settext(&self->headerlabel, "Octave");		
-	ui_combobox_init(&self->octavebox, &self->component);
-	ui_combobox_setcharnumber(&self->octavebox, 2);	
+	psy_ui_combobox_init(&self->octavebox, &self->component);
+	psy_ui_combobox_setcharnumber(&self->octavebox, 2);	
 	BuildOctaveBox(self);	
 	psy_signal_connect(&self->octavebox.signal_selchanged, self,
 		OnOctaveBoxSelChange);	
@@ -52,9 +52,9 @@ void BuildOctaveBox(OctaveBar* self)
 
 	for (octave = 0; octave < 9; ++octave) {
 		psy_snprintf(text, 20, "%d", octave);		
-		ui_combobox_addstring(&self->octavebox, text);
+		psy_ui_combobox_addstring(&self->octavebox, text);
 	}
-	ui_combobox_setcursel(&self->octavebox, self->workspace->octave);
+	psy_ui_combobox_setcursel(&self->octavebox, self->workspace->octave);
 }
 
 void OnOctaveBoxSelChange(OctaveBar* self, psy_ui_Component* sender, int sel)
@@ -64,10 +64,10 @@ void OnOctaveBoxSelChange(OctaveBar* self, psy_ui_Component* sender, int sel)
 
 void OnOctaveChanged(OctaveBar* self, Workspace* workspace, int octave)
 {
-	ui_combobox_setcursel(&self->octavebox, workspace->octave);
+	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
 }
 
 void OnSongChanged(OctaveBar* self, Workspace* workspace)
 {	
-	ui_combobox_setcursel(&self->octavebox, workspace->octave);
+	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
 }

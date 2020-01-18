@@ -19,6 +19,7 @@ void psy_ui_notebook_setpageindex(psy_ui_Notebook*, int page);
 int psy_ui_notebook_pageindex(psy_ui_Notebook*);
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook*);
 void psy_ui_notebook_split(psy_ui_Notebook*);
+int psy_ui_notebook_splitactivated(psy_ui_Notebook*);
 void psy_ui_notebook_full(psy_ui_Notebook*);
 void psy_ui_notebook_connectcontroller(psy_ui_Notebook*, 
 	psy_Signal* controllersignal);

@@ -153,9 +153,11 @@ void keynames_init(void)
 			keynames_add(key, keystr);
 		}		
 		for (key = 0x30 /*VK_0*/; key <= 255 /*VK_Z*/; ++key) {
-			char keystr[2];		
+			char keystr[5];		
 			psy_snprintf(keystr, 5, "%c", key);
-			keynames_add(key, keystr);
+			if (strlen(keystr)) {
+				keynames_add(key, keystr);
+			}
 		}
 	}
 	++count;

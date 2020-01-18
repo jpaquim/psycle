@@ -79,7 +79,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	self->choiceproperty = 0;
 	self->dy = 0;
 	self->dirbutton = 0;
-	ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
+	psy_ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		settingsview_oneditkeydown);
 	ui_component_hide(&self->edit.component);
@@ -508,12 +508,12 @@ void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sende
 				char text[40];
 				psy_snprintf(text, 40, "%d",
 					psy_properties_value(self->selected));
-				ui_edit_settext(&self->edit, text);
+				psy_ui_edit_settext(&self->edit, text);
 				edit = &self->edit.component;				
 			}
 		} else
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_STRING) {
-			ui_edit_settext(&self->edit, self->selected->item.value.s);
+			psy_ui_edit_settext(&self->edit, self->selected->item.value.s);
 			edit = &self->edit.component;									
 		}		
 		if (edit) {
@@ -548,11 +548,11 @@ void settingsview_oneditchange(SettingsView* self, psy_ui_Edit* sender)
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_STRING) {
 			psy_properties_write_string(self->selected->parent,
-				self->selected->item.key, ui_edit_text(&self->edit));
+				self->selected->item.key, psy_ui_edit_text(&self->edit));
 		} else 
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			psy_properties_write_int(self->selected->parent,
-				self->selected->item.key, atoi(ui_edit_text(&self->edit)));
+				self->selected->item.key, atoi(psy_ui_edit_text(&self->edit)));
 		}
 		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
 	}

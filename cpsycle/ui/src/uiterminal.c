@@ -17,16 +17,17 @@ static void vtable_init(psy_ui_Terminal* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable_initialized = 1;
 	}
 }
 
-void ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
+void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 {			
 	ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	ui_component_enablealign(&self->component);
-	ui_editor_init(&self->output, &self->component);
+	psy_ui_editor_init(&self->output, &self->component);
 	ui_component_setalign(&self->output.component, psy_ui_ALIGN_CLIENT);
 	ui_component_resize(&self->component, 200, 200);	
 }
@@ -45,12 +46,12 @@ void onpreferredsize(psy_ui_Terminal* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	}
 }
 
-void ui_terminal_output(psy_ui_Terminal* self, const char* text)
+void psy_ui_terminal_output(psy_ui_Terminal* self, const char* text)
 {
-	ui_editor_addtext(&self->output, text);
+	psy_ui_editor_addtext(&self->output, text);
 }
 
-void ui_terminal_clear(psy_ui_Terminal* self)
+void psy_ui_terminal_clear(psy_ui_Terminal* self)
 {
-	ui_editor_clear(&self->output);
+	psy_ui_editor_clear(&self->output);
 }

@@ -341,7 +341,3 @@ void stop(psy_audio_Duplicator* self)
 	psy_audio_duplicatormap_clear(&self->map);
 }
 
-psy_audio_Machine* psy_audio_duplicator_base(psy_audio_Duplicator* self)
-{
-	return &(self->custommachine.machine);
-}

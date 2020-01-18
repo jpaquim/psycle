@@ -22,10 +22,10 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);	
-	ui_edit_init(&self->contrib, &self->component, 
+	psy_ui_edit_init(&self->contrib, &self->component, 
 		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
-	ui_edit_setlinenumber(&self->contrib, 10);
-	ui_edit_settext(&self->contrib,						
+	psy_ui_edit_setlinenumber(&self->contrib, 10);
+	psy_ui_edit_settext(&self->contrib,						
 		"Josep Mª Antolín. [JAZ]/JosepMa\tDeveloper since release 1.5" "\r\n"
 		"Johan Boulé [bohan]\t\tDeveloper since release 1.7.3" "\r\n"
 		"Stefan Nattkemper\t\t\tDeveloper of the LUA host in release 1.12" "\r\n"
@@ -62,10 +62,10 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 		"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 	);	
-	ui_edit_init(&self->psycledelics, &self->component, ES_READONLY);
-	ui_edit_settext(&self->psycledelics, "http://psycle.pastnotecut.org");	
-	ui_edit_init(&self->sourceforge, &self->component, ES_READONLY);
-	ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
+	psy_ui_edit_init(&self->psycledelics, &self->component, ES_READONLY);
+	psy_ui_edit_settext(&self->psycledelics, "http://psycle.pastnotecut.org");	
+	psy_ui_edit_init(&self->sourceforge, &self->component, ES_READONLY);
+	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
 	psy_ui_label_init(&self->steincopyright, &self->component);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 	
@@ -102,7 +102,7 @@ void about_init(About* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->component.signal_size, self, about_onsize);
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
-	ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
+	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
 	self->image.component.preventdefault = 0;
 	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));

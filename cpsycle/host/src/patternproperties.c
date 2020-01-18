@@ -19,11 +19,11 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);	
 	psy_ui_label_settext(&self->namelabel, "Name");	
-	ui_edit_init(&self->nameedit, &self->component, 0);
-	ui_edit_settext(&self->nameedit, "No Pattern");		
+	psy_ui_edit_init(&self->nameedit, &self->component, 0);
+	psy_ui_edit_settext(&self->nameedit, "No Pattern");		
 	psy_ui_label_init(&self->lengthlabel, &self->component);
 	psy_ui_label_settext(&self->lengthlabel, "Length");	
-	ui_edit_init(&self->lengthedit, &self->component, 0);
+	psy_ui_edit_init(&self->lengthedit, &self->component, 0);
 	psy_ui_button_init(&self->applybutton, &self->component);
 	psy_ui_button_settext(&self->applybutton, "Apply");	
 	psy_signal_connect(&self->applybutton.signal_clicked, self,
@@ -43,21 +43,21 @@ void patternproperties_setpattern(PatternProperties* self,
 	char buffer[20];
 	self->pattern = pattern;
 	if (self->pattern) {
-		ui_edit_settext(&self->nameedit, pattern->label);
+		psy_ui_edit_settext(&self->nameedit, pattern->label);
 		psy_snprintf(buffer, 20, "%.4f", self->pattern->length);		
 	} else {
-		ui_edit_settext(&self->nameedit, "");
+		psy_ui_edit_settext(&self->nameedit, "");
 		psy_snprintf(buffer, 10, "");
 	}
-	ui_edit_settext(&self->lengthedit, buffer);
+	psy_ui_edit_settext(&self->lengthedit, buffer);
 }
 
 void patternproperties_onapply(PatternProperties* self,
 	psy_ui_Component* sender)
 {
 	if (self->pattern) {
-		pattern_setlabel(self->pattern, ui_edit_text(&self->nameedit));
+		pattern_setlabel(self->pattern, psy_ui_edit_text(&self->nameedit));
 		pattern_setlength(self->pattern,
-			(psy_dsp_beat_t)atof(ui_edit_text(&self->lengthedit)));
+			(psy_dsp_beat_t)atof(psy_ui_edit_text(&self->lengthedit)));
 	}
 }

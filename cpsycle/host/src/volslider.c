@@ -68,12 +68,12 @@ void volslider_ondraw(VolSlider* self, psy_ui_Graphics* g)
 
 	size = ui_component_size(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_setcolor(g, ui_defaults_bordercolor(&app.defaults));
+	ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));
 	ui_drawrectangle(g, r);
 	sliderwidth = 6;	
 	psy_ui_setrectangle(&r, (int)((size.width - sliderwidth) * self->value), 
 		2, sliderwidth, size.height - 4);
-	ui_drawsolidrectangle(g, r, ui_defaults_color(&app.defaults));
+	ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
 	
 }
 

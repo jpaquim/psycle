@@ -41,6 +41,7 @@ static PatternEditPosition trackergrid_makecursor(TrackerGrid* self, int x, int 
 static int trackergrid_resizecolumn(TrackerGrid*, int x, int y);
 static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender,
 	int stepx, int stepy);
+static void trackergrid_onfocuslost(TrackerGrid*, psy_ui_Component* sender);
 static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
 	psy_dsp_big_beat_t offset);
 static int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset);
@@ -199,7 +200,7 @@ static void trackergrid_vtable_init(TrackerGrid* self)
 		trackergrid_vtable = *(self->component.vtable);		
 		trackergrid_vtable.ondraw = (psy_ui_fp_ondraw) trackergrid_ondraw;
 		trackergrid_vtable.onkeydown = (psy_ui_fp_onkeydown)
-			trackergrid_onkeydown;
+			trackergrid_onkeydown;		
 		trackergrid_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			trackergrid_onmousedown;
 		trackergrid_vtable.onmousemove = (psy_ui_fp_onmousemove)
@@ -426,7 +427,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	ui_component_init(&self->component, parent);
 	trackergrid_vtable_init(self);
 	self->component.vtable = &trackergrid_vtable;
-	ui_component_doublebuffer(&self->component);
+	ui_component_doublebuffer(&self->component);	
 	self->view = view;
 	self->editmode = TRACKERGRID_EDITMODE_SONG;
 	self->hasselection = 0;	
@@ -434,6 +435,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->columnresize = 0;
 	self->dragcolumn = -1;
 	self->dragcolumnbase = 0;
+	self->drawcursor = 1;
 	self->view->workspace->chordmode = 0;
 	self->chordbegin = 0;
 	self->pattern = 0;	
@@ -441,6 +443,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 		trackergrid_numtrackschanged);	
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);
+	psy_signal_connect(&self->component.signal_focuslost, self,
+		trackergrid_onfocuslost);
 	self->player = player;	
 	self->numtracks = player_numsongtracks(player);
 	self->lpb = player_lpb(self->player);
@@ -849,7 +853,7 @@ int testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 
 void setcolumncolor(TrackerSkin* skin, psy_ui_Graphics* g,
 	TrackerColumnFlags flags)
-{		
+{	
 	if (flags.cursor != 0) {
 		ui_setbackgroundcolor(g, skin->cursor);
 		ui_settextcolor(g, skin->fontCur);
@@ -1684,25 +1688,25 @@ void trackerview_oninput(TrackerView* self, psy_audio_Player* sender,
 
 void trackerview_setdefaultevent(TrackerView* self,
 	psy_audio_Pattern* patterndefaults,
-	psy_audio_PatternEvent* event)
+	psy_audio_PatternEvent* ev)
 {
 	PatternNode* node;
 	PatternNode* prev;
 				
-	node = pattern_findnode(patterndefaults,
-		self->grid.cursor.track,
-		0,
-		(psy_dsp_beat_t)self->grid.bpl,
-		&prev);
+	node = pattern_findnode(patterndefaults, self->grid.cursor.track, 0,
+		(psy_dsp_beat_t)self->grid.bpl, &prev);
 	if (node) {
-		psy_audio_PatternEntry* entry;
+		psy_audio_PatternEvent* defaultevent;
 
-		entry = (psy_audio_PatternEntry*) node->entry;
-		if (event->inst != NOTECOMMANDS_INST_EMPTY) {
-			event->inst = patternentry_front(entry)->inst;
+		defaultevent = patternentry_front(psy_audio_patternnode_entry(node));		
+		if (defaultevent->inst != NOTECOMMANDS_INST_EMPTY) {
+			ev->inst = defaultevent->inst;
 		}
-		if (event->mach != NOTECOMMANDS_MACH_EMPTY) {
-			event->mach = patternentry_front(entry)->mach;
+		if (defaultevent->mach != NOTECOMMANDS_MACH_EMPTY) {
+			ev->mach = defaultevent->mach;
+		}
+		if (defaultevent->vol != NOTECOMMANDS_VOL_EMPTY) {
+			ev->vol = defaultevent->vol;
 		}
 	}
 }
@@ -2152,6 +2156,11 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	self->dragcolumn = -1;
 }
 
+void trackergrid_onfocuslost(TrackerGrid* self, psy_ui_Component* sender)
+{
+	ui_component_invalidate(&self->component);
+}
+
 // trackerview
 static psy_ui_ComponentVtable trackerview_vtable;
 static int trackerview_vtable_initialized = 0;
@@ -2554,7 +2563,8 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Component* sende
 			columnflags.playbar = trackergrid_testplaybar(&self->view->grid,
 				offset);
 			columnflags.mid = 0;
-			columnflags.cursor = trackergrid_testcursor(&self->view->grid, 
+			columnflags.cursor = self->view->grid.drawcursor &&
+				trackergrid_testcursor(&self->view->grid, 
 				self->view->grid.cursor.track, offset);
 			columnflags.beat = fmod(offset, 1.0f) == 0.0f;
 			columnflags.beat4 = fmod(offset, 4.0f) == 0.0f;			
@@ -3393,7 +3403,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 	event = patternentry_front(entry);		
 	trackdef = trackerview_trackdef(self->view, entry->track);
 	focus = ui_component_hasfocus(&self->component);
-	currcolumnflags.cursor = focus && columnflags.cursor && self->cursor.column == 0;
+	currcolumnflags.cursor = self->drawcursor && focus && columnflags.cursor && self->cursor.column == 0;
 	setcolumncolor(&self->view->skin, g, currcolumnflags);
 	cpx = 0;	
 	// draw note	
@@ -3420,7 +3430,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 			uint8_t digitvalue;
 			
 			digitvalue = ((value >> ((num - digit - 1) * 4)) & 0x0F);			
-			currcolumnflags.cursor = focus &&
+			currcolumnflags.cursor = self->drawcursor && focus &&
 					columnflags.cursor && self->cursor.column == column &&
 					self->cursor.digit == digit;
 			setcolumncolor(&self->view->skin, g, currcolumnflags);

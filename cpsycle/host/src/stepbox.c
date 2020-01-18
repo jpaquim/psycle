@@ -20,12 +20,12 @@ void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_label_init(&self->header, &self->component);	
 	psy_ui_label_settext(&self->header, "Step");
-	ui_combobox_init(&self->combobox, &self->component);
+	psy_ui_combobox_init(&self->combobox, &self->component);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
 		stepbox_onselectionchanged);
-	ui_combobox_setcharnumber(&self->combobox, 3);
+	psy_ui_combobox_setcharnumber(&self->combobox, 3);
 	stepbox_build(self);
-	ui_combobox_setcursel(&self->combobox,
+	psy_ui_combobox_setcursel(&self->combobox,
 		workspace_cursorstep(workspace) - 1);	
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
@@ -41,7 +41,7 @@ void stepbox_build(StepBox* self)
 	for (step = 1; step <= 16; ++step) {
 		char text[20];
 		psy_snprintf(text, 20, "%d", step);
-		ui_combobox_addstring(&self->combobox, text);
+		psy_ui_combobox_addstring(&self->combobox, text);
 	}	
 }
 

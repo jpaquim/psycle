@@ -29,10 +29,11 @@ static void vtable_init(psy_ui_SplitBar* self)
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			splitbar_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) splitbar_ondraw;
+		vtable_initialized = 1;
 	}
 }
 
-void ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
+void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 {		
 	self->resize = 0;
 	self->hover = 0;

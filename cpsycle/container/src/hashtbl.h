@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(HASHTABL_H)
-#define HASHTABL_H
+#ifndef psy_HASHTABL_H
+#define psy_HASHTABL_H
 
 #include "../../detail/stdint.h"
 
@@ -48,4 +48,4 @@ const psy_TableIterator* psy_table_end(void);
 
 uintptr_t psy_table_freetableentry(void*, void*, psy_TableHashEntry*);
 
-#endif
+#endif /* psy_HASHTABL_H */

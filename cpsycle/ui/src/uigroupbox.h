@@ -10,7 +10,7 @@ typedef struct {
    psy_ui_Component component;
 } psy_ui_Groupbox;
 
-void ui_groupbox_init(psy_ui_Groupbox* groupbox, psy_ui_Component* parent);
-void ui_groupbox_settext(psy_ui_Groupbox* groupbox, const char* text);
+void psy_ui_groupbox_init(psy_ui_Groupbox* groupbox, psy_ui_Component* parent);
+void psy_ui_groupbox_settext(psy_ui_Groupbox* groupbox, const char* text);
 
 #endif /* psy_ui_GROUPBOX_H */

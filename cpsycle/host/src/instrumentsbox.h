@@ -9,7 +9,7 @@
 #include "instruments.h"
 
 typedef struct {
-	ui_listbox instrumentlist;	
+	psy_ui_Listbox instrumentlist;	
 	psy_audio_Instruments* instruments;
 } InstrumentsBox;
 

@@ -13,14 +13,11 @@ static void ui_combobox_create_system(psy_ui_ComboBox*,
 	psy_ui_Component* parent);
 static void ui_combobox_create_ownerdrawn(psy_ui_ComboBox*,
 	psy_ui_Component* parent);
-static void onownerdraw(psy_ui_ComboBox*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
-static void onmousedown(psy_ui_ComboBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
-static void onmousemove(psy_ui_ComboBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
-static void onmouseenter(psy_ui_ComboBox*, psy_ui_Component* sender);
-static void onmouseleave(psy_ui_ComboBox*, psy_ui_Component* sender);
+static void onownerdraw(psy_ui_ComboBox*, psy_ui_Graphics*);
+static void onmousedown(psy_ui_ComboBox*, psy_ui_MouseEvent*);
+static void onmousemove(psy_ui_ComboBox*, psy_ui_MouseEvent*);
+static void onmouseenter(psy_ui_ComboBox*);
+static void onmouseleave(psy_ui_ComboBox*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -29,11 +26,17 @@ static void vtable_init(psy_ui_ComboBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw) onownerdraw;
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
+		vtable.onmousemove = (psy_ui_fp_onmousemove) onmousemove;
+		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable_initialized = 1;
 	}
 }
 
-void ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
+void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 {  			
 	ui_combobox_create_ownerdrawn(self, parent);
 	vtable_init(self);
@@ -41,12 +44,11 @@ void ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	self->charnumber = 0;
 	self->hover = 0;
 	psy_signal_init(&self->signal_selchanged);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
-	
-	
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
 }
 
-void ui_combobox_create_system(psy_ui_ComboBox* self, psy_ui_Component* parent)
+static void psy_ui_combobox_create_system(psy_ui_ComboBox* self,
+	psy_ui_Component* parent)
 {	
 	ui_win32_component_init(&self->component, parent, TEXT("COMBOBOX"), 
 		0, 0, 100, 20,
@@ -60,15 +62,10 @@ void ui_combobox_create_system(psy_ui_ComboBox* self, psy_ui_Component* parent)
 void ui_combobox_create_ownerdrawn(psy_ui_ComboBox* self, psy_ui_Component* parent)
 {		
 	ui_component_init(&self->component, parent);	
-	psy_signal_connect(&self->component.signal_draw, self, onownerdraw);	
-	psy_signal_connect(&self->component.signal_mousedown, self, onmousedown);
-	psy_signal_connect(&self->component.signal_mousemove, self, onmousemove);
-	psy_signal_connect(&self->component.signal_mouseenter, self, onmouseenter);
-	psy_signal_connect(&self->component.signal_mouseleave, self, onmouseleave);		
 	ui_win32_component_init(&self->combo, &self->component, TEXT("COMBOBOX"), 
 		0, 0, 100, 200,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
-		1);
+		1);	
 	ui_component_hide(&self->combo);	
 	psy_signal_connect(&self->combo.signal_command, self, oncommand);	
 	self->ownerdrawn = 1;	
@@ -77,15 +74,14 @@ void ui_combobox_create_ownerdrawn(psy_ui_ComboBox* self, psy_ui_Component* pare
 
 void ondestroy(psy_ui_ComboBox* self, psy_ui_Component* sender)
 {
-	psy_signal_dispose(&self->signal_selchanged);
-	ui_component_dispose(&self->combo);
+	psy_signal_dispose(&self->signal_selchanged);	
 }
 
-int ui_combobox_addstring(psy_ui_ComboBox* self, const char* text)
+int psy_ui_combobox_addstring(psy_ui_ComboBox* self, const char* text)
 {
 	LRESULT index;
 
-	index = SendMessage((HWND)self->currcombo->hwnd, CB_ADDSTRING, (WPARAM)0,
+	index = SendMessage((HWND)self->currcombo->platform->hwnd, CB_ADDSTRING, (WPARAM)0,
 		(LPARAM)text);
 	if (self->ownerdrawn) {
 		ui_component_invalidate(&self->component);
@@ -93,35 +89,36 @@ int ui_combobox_addstring(psy_ui_ComboBox* self, const char* text)
 	return (int)index;
 }
 
-void ui_combobox_clear(psy_ui_ComboBox* self)
+void psy_ui_combobox_clear(psy_ui_ComboBox* self)
 {
-	SendMessage((HWND)self->currcombo->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
+	SendMessage((HWND)self->currcombo->platform->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
 	if (self->ownerdrawn) {
 		ui_component_invalidate(&self->component);
 	}
 }
 
-void ui_combobox_setcursel(psy_ui_ComboBox* self, intptr_t index)
+void psy_ui_combobox_setcursel(psy_ui_ComboBox* self, intptr_t index)
 {
-	SendMessage((HWND)self->currcombo->hwnd, CB_SETCURSEL, (WPARAM)index,
+	SendMessage((HWND)self->currcombo->platform->hwnd, CB_SETCURSEL, (WPARAM)index,
 		(LPARAM)0);
 	if (self->ownerdrawn) {
 		ui_component_invalidate(&self->component);
 	}
 }
 
-intptr_t ui_combobox_cursel(psy_ui_ComboBox* self)
+intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox* self)
 {
-	return SendMessage((HWND)self->currcombo->hwnd, CB_GETCURSEL, (WPARAM)0,
+	return SendMessage((HWND)self->currcombo->platform->hwnd, CB_GETCURSEL, (WPARAM)0,
 		(LPARAM)0);	
 }
 
-void ui_combobox_setcharnumber(psy_ui_ComboBox* self, int number)
+void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, int number)
 {
 	self->charnumber = number;
 }
 
-void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
+void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
 	if (rv) {
 		psy_ui_TextMetric tm;
@@ -143,7 +140,7 @@ void oncommand(psy_ui_ComboBox* self, psy_ui_Component* sender, WPARAM wParam,
         case CBN_SELCHANGE :
         {
             if (self->signal_selchanged.slots) {
-				intptr_t sel = SendMessage((HWND)self->currcombo->hwnd,
+				intptr_t sel = SendMessage((HWND)self->currcombo->platform->hwnd,
 					CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
 			}
@@ -157,8 +154,7 @@ void oncommand(psy_ui_ComboBox* self, psy_ui_Component* sender, WPARAM wParam,
     }
 }
 
-void onownerdraw(psy_ui_ComboBox* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
@@ -180,16 +176,16 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Component* sender,
 	tm = ui_component_textmetric(&self->component);
 	vcenter = (size.height - tm.tmHeight) / 2;
 	varrowcenter = (size.height - 10) / 2;
-	sel = SendMessage((HWND)self->combo.hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+	sel = SendMessage((HWND)self->combo.platform->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
 	if (sel != CB_ERR) {
 		intptr_t len;
 		
-		len = SendMessage((HWND)self->combo.hwnd, CB_GETLBTEXTLEN, (WPARAM)sel, 0);
+		len = SendMessage((HWND)self->combo.platform->hwnd, CB_GETLBTEXTLEN, (WPARAM)sel, 0);
 		if (len > 0) {
 			char* txt;
 
 			txt = (char*)malloc(len + 1);			
-			SendMessage((HWND)self->combo.hwnd, CB_GETLBTEXT, (WPARAM)sel,
+			SendMessage((HWND)self->combo.platform->hwnd, CB_GETLBTEXT, (WPARAM)sel,
 				(LPARAM)txt);
 
 			ui_setbackgroundmode(g, TRANSPARENT);
@@ -257,15 +253,14 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Component* sender,
 	}
 }
 
-void onmousedown(psy_ui_ComboBox* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_Size size = ui_component_size(sender);	
+	psy_ui_Size size = ui_component_size(&self->component);	
 
 	if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
-		intptr_t index = ui_combobox_cursel(self);
+		intptr_t index = psy_ui_combobox_cursel(self);
 		if (index > 0) {
-			ui_combobox_setcursel(self,  index - 1);
+			psy_ui_combobox_setcursel(self,  index - 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
 	} else
@@ -273,37 +268,30 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_Component* sender,
 		intptr_t count;
 		intptr_t index;
 
-		count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
-		index = ui_combobox_cursel(self);
+		count = SendMessage((HWND)self->currcombo->platform->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
+		index = psy_ui_combobox_cursel(self);
 		if (index < count - 1) {
-			ui_combobox_setcursel(self, index + 1);
+			psy_ui_combobox_setcursel(self, index + 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
 		}
 	} else {
-		SetWindowPos((HWND)self->combo.hwnd, NULL, 
+		SetWindowPos((HWND)self->combo.platform->hwnd, NULL, 
 		   0,
 		   0,
 		   size.width, size.height, SWP_NOZORDER | SWP_NOMOVE);
-		SendMessage((HWND)self->combo.hwnd, CB_SHOWDROPDOWN,
+		SendMessage((HWND)self->combo.platform->hwnd, CB_SHOWDROPDOWN,
 			(WPARAM)TRUE, (LPARAM)0);
 	}
 }
 
-void onmouseenter(psy_ui_ComboBox* self, psy_ui_Component* sender)
-{
-	self->hover = 1;
-	ui_component_invalidate(&self->component);
-}
-
-void onmousemove(psy_ui_ComboBox* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	if (self->hover) {
 		int hover = self->hover;
-		psy_ui_Size size = ui_component_size(sender);	
+		psy_ui_Size size = ui_component_size(&self->component);	
 
 		if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
-			intptr_t index = ui_combobox_cursel(self);
+			intptr_t index = psy_ui_combobox_cursel(self);
 			if (index > 0) {
 				self->hover = 2;
 			}
@@ -311,9 +299,9 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_Component* sender,
 		if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
 			intptr_t count;
 			intptr_t index;
-			count = SendMessage((HWND)self->currcombo->hwnd, CB_GETCOUNT, 0,
+			count = SendMessage((HWND)self->currcombo->platform->hwnd, CB_GETCOUNT, 0,
 				(LPARAM)0);
-			index = ui_combobox_cursel(self);
+			index = psy_ui_combobox_cursel(self);
 			if (index < count - 1) {
 				self->hover = 3;
 			}
@@ -326,9 +314,15 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_Component* sender,
 	}
 }
 
-void onmouseleave(psy_ui_ComboBox* self, psy_ui_Component* sender)
+void onmouseenter(psy_ui_ComboBox* self)
+{
+	self->hover = 1;
+	ui_component_invalidate(&self->component);
+}
+
+
+void onmouseleave(psy_ui_ComboBox* self)
 {		
 	self->hover = 0;
 	ui_component_invalidate(&self->component);
 }
-

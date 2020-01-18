@@ -5,6 +5,7 @@
 
 #include "instrumentview.h"
 #include "../../detail/portable.h"
+#include <math.h>
 
 static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);
@@ -41,7 +42,12 @@ static void instrumentgeneralview_setinstrument(InstrumentGeneralView*,
 	psy_audio_Instrument* instrument);
 static void OnNNACut(InstrumentGeneralView*);
 static void OnNNARelease(InstrumentGeneralView*);
+static void OnNNAFadeOut(InstrumentGeneralView*);
 static void OnNNANone(InstrumentGeneralView*);
+static void NNAHighlight(InstrumentGeneralView*, psy_ui_Button* highlight);
+static void OnGeneralViewDescribe(InstrumentGeneralView*, psy_ui_Slider*, char* txt);
+static void OnGeneralViewTweak(InstrumentGeneralView*, psy_ui_Slider*, float value);
+static void OnGeneralViewValue(InstrumentGeneralView*, psy_ui_Slider*, float* value);
 // InstrumentVolumeView
 static void instrumentvolumeview_init(InstrumentVolumeView*,
 	psy_ui_Component* parent, psy_audio_Instruments*);
@@ -249,8 +255,8 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settext(&self->namelabel, "Instrument Name");
-	ui_edit_init(&self->nameedit, &self->component, 0);		
-	ui_edit_setcharnumber(&self->nameedit, 20);	
+	psy_ui_edit_init(&self->nameedit, &self->component, 0);		
+	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
 	psy_signal_connect(&self->nameedit.signal_change, self,
 		OnEditInstrumentName);
 	psy_ui_button_init(&self->prevbutton, &self->component);
@@ -271,7 +277,7 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	ui_edit_settext(&self->nameedit, instrument ? instrument->name : "");
+	psy_ui_edit_settext(&self->nameedit, instrument ? instrument->name : "");
 }
 
 void OnEditInstrumentName(InstrumentHeaderView* self, psy_ui_Edit* sender)
@@ -281,7 +287,7 @@ void OnEditInstrumentName(InstrumentHeaderView* self, psy_ui_Edit* sender)
 		int index;
 		
 		index = instrumentsbox_selected(&self->view->instrumentsbox);
-		instrument_setname(self->instrument, ui_edit_text(sender));
+		instrument_setname(self->instrument, psy_ui_edit_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int) index, instrument_name(self->instrument));
 		ui_listbox_setstring(&self->view->instrumentsbox.instrumentlist, text,
@@ -369,81 +375,152 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	ui_component_init(&self->nna, &self->component);
 	ui_component_enablealign(&self->nna);
 	ui_component_setalign(&self->nna, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&self->nnaheaderlabel, &self->nna);
-	psy_ui_label_settext(&self->nnaheaderlabel, "New Note Action ");
-	psy_ui_button_init(&self->nnacutbutton, &self->nna);
-	psy_ui_button_settext(&self->nnacutbutton, "Note Cut");
-	ui_component_setposition(&self->nnacutbutton.component, 5, 30, 70, 20);
-	psy_signal_connect(&self->nnacutbutton.signal_clicked, self, OnNNACut);
-	psy_ui_button_init(&self->nnareleasebutton, &self->nna);
-	psy_ui_button_settext(&self->nnareleasebutton, "Note Release");
-	psy_ui_button_init(&self->nnanonebutton, &self->nna);
-	psy_ui_button_settext(&self->nnanonebutton, "None");	
-	psy_signal_connect(&self->nnanonebutton.signal_clicked, self, OnNNANone);
-	psy_signal_connect(&self->nnareleasebutton.signal_clicked, self,
+	psy_ui_label_init(&self->nnaheader, &self->nna);
+	psy_ui_label_settext(&self->nnaheader, "New Note Action ");
+	psy_ui_button_init(&self->nnacut, &self->nna);
+	psy_ui_button_settext(&self->nnacut, "Note Cut");
+	ui_component_setposition(&self->nnacut.component, 5, 30, 70, 20);
+	psy_signal_connect(&self->nnacut.signal_clicked, self, OnNNACut);
+	psy_ui_button_init(&self->nnarelease, &self->nna);
+	psy_ui_button_settext(&self->nnarelease, "Note Release");
+	psy_ui_button_init(&self->nnafadeout, &self->nna);
+	psy_ui_button_settext(&self->nnafadeout, "Note FadeOut");
+	psy_ui_button_init(&self->nnanone, &self->nna);
+	psy_ui_button_settext(&self->nnanone, "None");	
+	psy_signal_connect(&self->nnanone.signal_clicked, self, OnNNANone);
+	psy_signal_connect(&self->nnarelease.signal_clicked, self,
 		OnNNARelease);
+	psy_signal_connect(&self->nnafadeout.signal_clicked, self,
+		OnNNAFadeOut);
 	psy_list_free(ui_components_setalign(		
 		ui_component_children(&self->nna, 0),
 		psy_ui_ALIGN_LEFT, &margin));			
+	psy_ui_slider_init(&self->globalvolume, &self->component);
+	psy_ui_slider_settext(&self->globalvolume, "Global Volume");
+	ui_component_resize(&self->globalvolume.component, 0, 20);
+	ui_component_setalign(&self->globalvolume.component, psy_ui_ALIGN_TOP);
+	psy_ui_slider_connect(&self->globalvolume, self, OnGeneralViewDescribe,
+			OnGeneralViewTweak, OnGeneralViewValue);
 	instrumentnotemapview_init(&self->notemapview, &self->component);
 	ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
 }
 
-void instrumentgeneralview_setinstrument(InstrumentGeneralView* self, psy_audio_Instrument* instrument)
+void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
+	psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;		
 	instrumentnotemapview_setinstrument(&self->notemapview, instrument);	
-	psy_ui_button_disablehighlight(&self->nnacutbutton);
-	psy_ui_button_disablehighlight(&self->nnareleasebutton);
-	psy_ui_button_disablehighlight(&self->nnanonebutton);
-	if (instrument) {
+	if (instrument) {		
 		switch (self->instrument->nna) {
-			case NNA_STOP:
-				psy_ui_button_highlight(&self->nnacutbutton);
+			case psy_audio_NNA_STOP:
+				NNAHighlight(self, &self->nnacut);
 			break;
-			case NNA_NOTEOFF:
-				psy_ui_button_highlight(&self->nnareleasebutton);
+			case psy_audio_NNA_NOTEOFF:
+				NNAHighlight(self, &self->nnarelease);
 			break;
-			case NNA_CONTINUE:
-				psy_ui_button_highlight(&self->nnanonebutton);
+			case psy_audio_NNA_FADEOUT:
+				NNAHighlight(self, &self->nnafadeout);
 			break;
-			default:				
+			case psy_audio_NNA_CONTINUE:
+				NNAHighlight(self, &self->nnanone);
+			break;
+			default:
+				NNAHighlight(self, &self->nnacut);
 			break;
 		}
+	} else {
+		NNAHighlight(self, &self->nnacut);
 	}
 }
 
 void OnNNACut(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, NNA_STOP);
-		psy_ui_button_highlight(&self->nnacutbutton);
-		psy_ui_button_disablehighlight(&self->nnareleasebutton);
-		psy_ui_button_disablehighlight(&self->nnanonebutton);
+		instrument_setnna(self->instrument, psy_audio_NNA_STOP);
+		NNAHighlight(self, &self->nnacut);
 	}
 }
 
 void OnNNARelease(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, NNA_NOTEOFF);
-		psy_ui_button_disablehighlight(&self->nnacutbutton);
-		psy_ui_button_highlight(&self->nnareleasebutton);
-		psy_ui_button_disablehighlight(&self->nnanonebutton);
+		instrument_setnna(self->instrument, psy_audio_NNA_NOTEOFF);
+		NNAHighlight(self, &self->nnarelease);
+	}
+}
+
+void OnNNAFadeOut(InstrumentGeneralView* self)
+{
+	if (self->instrument) {
+		instrument_setnna(self->instrument, psy_audio_NNA_FADEOUT);		
+		NNAHighlight(self, &self->nnafadeout);
 	}
 }
 
 void OnNNANone(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, NNA_CONTINUE);
-		psy_ui_button_disablehighlight(&self->nnacutbutton);
-		psy_ui_button_disablehighlight(&self->nnareleasebutton);
-		psy_ui_button_highlight(&self->nnanonebutton);
+		instrument_setnna(self->instrument, psy_audio_NNA_CONTINUE);
+		NNAHighlight(self, &self->nnanone);		
 	}
 }
 
-// InistrumentVolumeView
+void NNAHighlight(InstrumentGeneralView* self, psy_ui_Button* highlight)
+{
+	psy_ui_button_highlight(highlight);
+	if (highlight != &self->nnacut) {
+		psy_ui_button_disablehighlight(&self->nnacut);
+	}
+	if (highlight != &self->nnafadeout) {
+		psy_ui_button_disablehighlight(&self->nnafadeout);
+	}
+	if (highlight != &self->nnarelease) {
+		psy_ui_button_disablehighlight(&self->nnarelease);
+	}
+	if (highlight != &self->nnanone) {
+		psy_ui_button_disablehighlight(&self->nnanone);
+	}	
+}
+
+void OnGeneralViewTweak(InstrumentGeneralView* self, psy_ui_Slider* slider,
+	float value)
+{
+	if (self->instrument) {					
+		if (slider == &self->globalvolume) {		
+			self->instrument->globalvolume = (value * value);
+		}
+	}
+}
+
+void OnGeneralViewValue(InstrumentGeneralView* self, psy_ui_Slider* slider,
+	float* value)
+{		
+	if (slider == &self->globalvolume) {
+		if (self->instrument) {			
+			*value = (float)sqrt(self->instrument->globalvolume);
+		} else {
+			*value = 1.f;
+		}
+	}
+}
+
+void OnGeneralViewDescribe(InstrumentGeneralView* self, psy_ui_Slider* slider,
+	char* txt)
+{			
+	if (slider == &self->globalvolume) {		
+		if (!self->instrument) {
+			psy_snprintf(txt, 10, "0.0dB");
+		} else
+		if (self->instrument->globalvolume == 0) {
+			psy_snprintf(txt, 10, "-inf. dB");
+		} else {
+			float db = (float)(20 * log10(self->instrument->globalvolume));
+			psy_snprintf(txt, 10, "%.1f dB", db);
+		}
+	}
+}
+
+// InstrumentVolumeView
 void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* parent, psy_audio_Instruments* instruments)
 {
 	psy_ui_Margin margin;
@@ -470,14 +547,14 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 200);	
 
-	ui_slider_init(&self->attack, &self->component);
-	ui_slider_settext(&self->attack, "Attack");
-	ui_slider_init(&self->decay, &self->component);
-	ui_slider_settext(&self->decay, "Decay");
-	ui_slider_init(&self->sustain, &self->component);
-	ui_slider_settext(&self->sustain, "Sustain Level");
-	ui_slider_init(&self->release, &self->component);
-	ui_slider_settext(&self->release, "Release");
+	psy_ui_slider_init(&self->attack, &self->component);
+	psy_ui_slider_settext(&self->attack, "Attack");
+	psy_ui_slider_init(&self->decay, &self->component);
+	psy_ui_slider_settext(&self->decay, "Decay");
+	psy_ui_slider_init(&self->sustain, &self->component);
+	psy_ui_slider_settext(&self->sustain, "Sustain Level");
+	psy_ui_slider_init(&self->release, &self->component);
+	psy_ui_slider_settext(&self->release, "Release");
 	
 	psy_ui_margin_init(&margin,
 		psy_ui_value_makepx(0),
@@ -488,7 +565,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		ui_slider_connect(sliders[i], self, OnVolumeViewDescribe,
+		psy_ui_slider_connect(sliders[i], self, OnVolumeViewDescribe,
 			OnVolumeViewTweak, OnVolumeViewValue);		
 	}	
 }
@@ -655,20 +732,20 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5));
 	ui_component_setmargin(&self->envelopeview.component, &margin);	
 	ui_component_resize(&self->envelopeview.component, 0, 200);
-	ui_slider_init(&self->attack, &self->component);
-	ui_slider_settext(&self->attack, "Attack");
-	ui_slider_init(&self->decay, &self->component);
-	ui_slider_settext(&self->decay, "Decay");
-	ui_slider_init(&self->sustain, &self->component);
-	ui_slider_settext(&self->sustain, "Sustain Level");
-	ui_slider_init(&self->release, &self->component);
-	ui_slider_settext(&self->release, "Release");
-	ui_slider_init(&self->cutoff, &self->component);
-	ui_slider_settext(&self->cutoff, "Cut-off");
-	ui_slider_init(&self->res, &self->component);
-	ui_slider_settext(&self->res, "Res/bandw.");
-	ui_slider_init(&self->modamount, &self->component);
-	ui_slider_settext(&self->modamount, "Mod. Amount");
+	psy_ui_slider_init(&self->attack, &self->component);
+	psy_ui_slider_settext(&self->attack, "Attack");
+	psy_ui_slider_init(&self->decay, &self->component);
+	psy_ui_slider_settext(&self->decay, "Decay");
+	psy_ui_slider_init(&self->sustain, &self->component);
+	psy_ui_slider_settext(&self->sustain, "Sustain Level");
+	psy_ui_slider_init(&self->release, &self->component);
+	psy_ui_slider_settext(&self->release, "Release");
+	psy_ui_slider_init(&self->cutoff, &self->component);
+	psy_ui_slider_settext(&self->cutoff, "Cut-off");
+	psy_ui_slider_init(&self->res, &self->component);
+	psy_ui_slider_settext(&self->res, "Res/bandw.");
+	psy_ui_slider_init(&self->modamount, &self->component);
+	psy_ui_slider_settext(&self->modamount, "Mod. Amount");
 	
 	psy_ui_margin_init(&margin,
 		psy_ui_value_makepx(0),
@@ -679,7 +756,7 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 		ui_component_resize(&sliders[i]->component, 100, 20);		
 		ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		ui_component_setmargin(&sliders[i]->component, &margin);
-		ui_slider_connect(sliders[i], self, OnFilterViewDescribe,
+		psy_ui_slider_connect(sliders[i], self, OnFilterViewDescribe,
 			OnFilterViewTweak, OnFilterViewValue);		
 	}	
 }

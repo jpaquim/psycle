@@ -7,11 +7,11 @@
 #include <stdlib.h>
 
 static int duplicatormap_isavail(psy_audio_DuplicatorMap* self, int machine,
-	int channel);
+	uintptr_t channel);
 static void duplicatormap_setavail(psy_audio_DuplicatorMap* self, int machine,
-	int channel);
+	uintptr_t channel);
 static void duplicatormap_setunavail(psy_audio_DuplicatorMap* self, int machine,
-	int channel);
+	uintptr_t channel);
 static void duplicatoroutput_dispose(psy_audio_DuplicatorOutput*);
 static void duplicatoroutput_clear(psy_audio_DuplicatorOutput*);
 
@@ -92,10 +92,11 @@ void psy_audio_duplicatormap_clear(psy_audio_DuplicatorMap* self)
 	psy_table_clear(&self->unavail);
 }
 
-int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap* self, int patternchannel,
+int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap* self,
+	uintptr_t patternchannel,
 	psy_audio_DuplicatorOutput* output)
 {
-	int j;
+	uintptr_t j;
 	int repeat = 0;
 		
 	j = patternchannel;
@@ -122,7 +123,7 @@ int psy_audio_duplicatormap_channel(psy_audio_DuplicatorMap* self, int patternch
 }
 
 void psy_audio_duplicatormap_release(psy_audio_DuplicatorMap* self,
-	int patternchannel, int duplicatorchannel,
+	uintptr_t patternchannel, uintptr_t duplicatorchannel,
 	psy_audio_DuplicatorOutput* output)
 {	
 	duplicatormap_setavail(self, output->machine, duplicatorchannel);
@@ -136,27 +137,27 @@ psy_TableIterator psy_audio_duplicatormap_begin(psy_audio_DuplicatorMap* self)
 
 // private
 int duplicatormap_isavail(psy_audio_DuplicatorMap* self, int machine,
-	int channel)
+	uintptr_t channel)
 {
-	int index;
+	uintptr_t index;
 	
 	index = self->maxtracks * machine + channel;
 	return !psy_table_exists(&self->unavail, index);
 }
 
 void duplicatormap_setavail(psy_audio_DuplicatorMap* self, int machine,
-	int channel)
+	uintptr_t channel)
 {
-	int index;
+	uintptr_t index;
 	
 	index = self->maxtracks * machine + channel;
 	psy_table_remove(&self->unavail, index);
 }
 
 void duplicatormap_setunavail(psy_audio_DuplicatorMap* self, int machine,
-	int channel)
+	uintptr_t channel)
 {
-	int index;
+	uintptr_t index;
 	
 	index = self->maxtracks * machine + channel;
 	psy_table_insert(&self->unavail, index, (void*) (intptr_t) 1);

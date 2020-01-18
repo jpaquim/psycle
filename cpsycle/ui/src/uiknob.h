@@ -15,9 +15,9 @@ typedef struct {
 	char* desc;
 } psy_ui_Knob;
 
-void ui_knob_init(psy_ui_Knob*, psy_ui_Component* parent);
-void ui_knob_setbitmap(psy_ui_Knob*, psy_ui_Bitmap* bitmap);
-void ui_knob_setlabel(psy_ui_Knob*, const char* text);
-void ui_knob_setdesc(psy_ui_Knob*, const char* text);
+void psy_ui_knob_init(psy_ui_Knob*, psy_ui_Component* parent);
+void psy_ui_knob_setbitmap(psy_ui_Knob*, psy_ui_Bitmap* bitmap);
+void psy_ui_knob_setlabel(psy_ui_Knob*, const char* text);
+void psy_ui_knob_setdesc(psy_ui_Knob*, const char* text);
 
 #endif /* psy_ui_KNOB_H */

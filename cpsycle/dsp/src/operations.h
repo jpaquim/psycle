@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_DSP_OPERATIONS_H)
-#define PSY_DSP_OPERATIONS_H
+#ifndef psy_dsp_OPERATIONS_H
+#define psy_dsp_OPERATIONS_H
 
 #include "../../detail/psydef.h"
 #include "dsptypes.h"
@@ -33,4 +33,4 @@ extern psy_dsp_Operations dsp;
 void psy_dsp_noopt_init(psy_dsp_Operations*);
 void psy_dsp_sse2_init(psy_dsp_Operations*);
 
-#endif
+#endif /* psy_dsp_OPERATIONS_H */

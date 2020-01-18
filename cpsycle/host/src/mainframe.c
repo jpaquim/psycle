@@ -24,7 +24,7 @@ static void mainframe_onkeydown(MainFrame*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
-static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry* entry);
+static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry*);
 static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
@@ -32,7 +32,8 @@ static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 	psy_Properties*);
-static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender, uintptr_t tabindex);
+static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
+	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
 	int flag);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
@@ -41,7 +42,8 @@ static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 static void mainframe_onviewselected(MainFrame*, Workspace*, int view);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatetitle(MainFrame*);
-static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender, int timerid);
+static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender,
+	int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 
@@ -73,7 +75,7 @@ void mainframe_init(MainFrame* self)
 	psy_ui_margin_init(&tabbardividemargin,
 		psy_ui_value_makepx(0), psy_ui_value_makeew(4.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
-	ui_frame_init(&self->component, 0);
+	psy_ui_frame_init(&self->component, 0);
 	
 	ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	ui_component_enablealign(&self->component);
@@ -90,7 +92,7 @@ void mainframe_init(MainFrame* self)
 	ui_component_init(&self->statusbar, &self->component);	
 	ui_component_setalign(&self->statusbar, psy_ui_ALIGN_BOTTOM);
 	ui_component_enablealign(&self->statusbar);
-	ui_terminal_init(&self->terminal, &self->component);
+	psy_ui_terminal_init(&self->terminal, &self->component);
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
 		mainframe_onterminalwarning);
 	psy_signal_connect(&self->workspace.signal_terminal_out, self,
@@ -156,7 +158,7 @@ void mainframe_init(MainFrame* self)
 	tabbar_append(&self->tabbar, "Help")->margin.right =
 		psy_ui_value_makeew(4.0);
 	// splitbar
-	ui_splitbar_init(&self->splitbar, &self->component);	
+	psy_ui_splitbar_init(&self->splitbar, &self->component);	
 	/// init notebook views
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);
@@ -258,7 +260,7 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_ui_notebook_setpageindex(&self->viewbars, 0);
 	psy_ui_notebook_connectcontroller(&self->viewbars,
 		&self->tabbar.signal_change);
-	ui_progressbar_init(&self->progressbar, &self->statusbar);
+	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
 	ui_component_setalign(&self->progressbar.component, psy_ui_ALIGN_RIGHT);	
 	psy_signal_connect(&self->workspace.signal_loadprogress, self, 
 		mainframe_onsongloadprogress);
@@ -515,17 +517,17 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
 {	
 	if (progress == -1) {
-		ui_terminal_clear(&self->terminal);		
+		psy_ui_terminal_clear(&self->terminal);
 	}
-	ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
+	psy_ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
 }
 
 void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace, int progress)
 {	
 	if (progress == 0) {
-		ui_progressbar_setprogress(&self->progressbar, 0);
+		psy_ui_progressbar_setprogress(&self->progressbar, 0);
 	} else {
-		ui_progressbar_tick(&self->progressbar);
+		psy_ui_progressbar_tick(&self->progressbar);
 	}
 }
 
@@ -657,7 +659,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	ui_terminal_output(&self->terminal, text);
+	psy_ui_terminal_output(&self->terminal, text);
 }
 
 void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
@@ -667,7 +669,7 @@ void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 		ui_component_show(&self->terminal.component);
 		ui_component_align(&self->component);		
 	}	
-	ui_terminal_output(&self->terminal, text);
+	psy_ui_terminal_output(&self->terminal, text);
 }
 
 void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
@@ -677,10 +679,11 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 		ui_component_show(&self->terminal.component);
 		ui_component_align(&self->component);		
 	}	
-	ui_terminal_output(&self->terminal, text);
+	psy_ui_terminal_output(&self->terminal, text);
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 {
-	workspace_changedefaultfontsize(&self->workspace, (int)(80 * zoombox_rate(sender)));	
+	workspace_changedefaultfontsize(&self->workspace, (int)(
+		zoombox_rate(sender) * 80));	
 }

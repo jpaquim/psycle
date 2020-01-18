@@ -729,10 +729,6 @@ SOURCE=.\src\presets.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\detail\project.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\psy2.h
 # End Source File
 # Begin Source File
