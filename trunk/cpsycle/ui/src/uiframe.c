@@ -10,7 +10,7 @@
 
 extern psy_ui_App app;
 
-void ui_frame_init(ui_frame* self, psy_ui_Component* parent)
+void psy_ui_frame_init(psy_ui_Frame* self, psy_ui_Component* parent)
 {			
 	psy_ui_WinApp* winapp;
 

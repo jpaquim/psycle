@@ -16,6 +16,7 @@ static void vtable_init(psy_ui_Label* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable_initialized = 1;
 	}
 }
 
@@ -32,7 +33,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 
 void psy_ui_label_settext(psy_ui_Label* label, const char* text)
 {
-	SetWindowText((HWND)label->component.hwnd, text);	
+	SetWindowText((HWND)label->component.platform->hwnd, text);	
 }
 
 void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
@@ -49,7 +50,7 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		tm = ui_component_textmetric(psy_ui_label_base(self));	
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
-			GetWindowText((HWND)self->component.hwnd, text, 256);
+			GetWindowText((HWND)self->component.platform->hwnd, text, 256);
 			size = ui_component_textsize(psy_ui_label_base(self), text);
 			rv->width = size.width + 2 +
 				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm);
@@ -64,9 +65,9 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 void psy_ui_label_setstyle(psy_ui_Label* self, int style)
 {
 	#if defined(_WIN64)
-	SetWindowLongPtr((HWND)self->component.hwnd, GWL_STYLE, style);		
+	SetWindowLongPtr((HWND)self->component.platform->hwnd, GWL_STYLE, style);		
 #else
-	SetWindowLong((HWND)self->component.hwnd, GWL_STYLE, style);
+	SetWindowLong((HWND)self->component.platform->hwnd, GWL_STYLE, style);
 #endif
 }
 

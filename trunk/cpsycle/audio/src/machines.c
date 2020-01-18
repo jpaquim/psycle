@@ -35,7 +35,8 @@ void machines_init(psy_audio_Machines* self)
 	self->path = 0;
 	self->numsamplebuffers = 100;
 	self->samplebuffers = dsp.memory_alloc(MAX_STREAM_SIZE *
-		self->numsamplebuffers, sizeof(float));	
+		self->numsamplebuffers, sizeof(float));
+	assert(self->samplebuffers);
 	self->currsamplebuffer = 0;
 	self->slot = 0;	
 	self->buffers = 0;

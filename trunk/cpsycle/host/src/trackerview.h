@@ -193,6 +193,7 @@ typedef struct {
    int dragcolumnbase;
    psy_audio_Pattern* pattern;
    TrackerGridEditMode editmode;
+   int drawcursor;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,

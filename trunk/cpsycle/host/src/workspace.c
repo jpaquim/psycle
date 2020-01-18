@@ -13,6 +13,8 @@
 #include <songio.h>
 #include "../../detail/portable.h"
 #include <operations.h>
+#include <uiopendialog.h>
+#include <uisavedialog.h>
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -242,8 +244,7 @@ void workspace_disposesequencepaste(Workspace* self)
 void workspace_initplayer(Workspace* self)
 {
 	player_init(&self->player, self->song, (void*)
-		self->mainhandle->hwnd);
-//		ui_component_platformhandle(self->mainhandle));
+		self->mainhandle->platform->hwnd);
 	self->cmds = cmdproperties_create();
 	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);
@@ -722,16 +723,18 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 	psy_Properties* choice)
 {
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
-		if (strcmp(psy_properties_key(property), "loadskin") == 0) {
-			char path[MAX_PATH]	 = "";
-			char title[MAX_PATH] = ""; 					
-			static char filter[] = "Psycle Display psy_audio_Presets\0*.psv\0";
-			char  defaultextension[] = "PSV";			
-			
-			if (ui_openfile(self->mainhandle, title, filter, defaultextension,
-					workspace_skins_directory(self), path)) {
-				workspace_loadskin(self, path);						
+		if (strcmp(psy_properties_key(property), "loadskin") == 0) {			
+			psy_ui_OpenDialog opendialog;
+
+			psy_ui_opendialog_init_all(&opendialog, 0,
+				"Load Theme",
+				"Psycle Display psy_audio_Presets|*.psv", "PSV",
+				workspace_skins_directory(self));
+			if (psy_ui_opendialog_execute(&opendialog)) {			
+				workspace_loadskin(self, psy_ui_opendialog_filename(
+					&opendialog));
 			}
+			psy_ui_opendialog_dispose(&opendialog);
 		} else
 		if (strcmp(psy_properties_key(property), "addeventdriver") == 0) {
 			psy_Properties* p;
@@ -1389,26 +1392,31 @@ MachineCallback machinecallback(Workspace* self)
 
 void machinecallback_fileselect_load(Workspace* self)
 {
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH] = ""; 					
-	static char filter[] = "Psycle Display psy_audio_Presets\0*.psv\0";
-	char  defaultextension[] = "PSV";			
-			
-	if (ui_openfile(self->mainhandle, title, filter, defaultextension,
-			workspace_skins_directory(self), path)) {		
-	}	
+	psy_ui_OpenDialog dialog;
+
+	psy_ui_opendialog_init_all(&dialog, 0,
+		"Plugin File Load",
+		"",
+		"",
+		workspace_vsts32_directory(self));
+	if (psy_ui_opendialog_execute(&dialog)) {		
+	}
+	psy_ui_opendialog_dispose(&dialog);
 }
 
 void machinecallback_fileselect_save(Workspace* self)
-{
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH] = ""; 					
-	static char filter[] = "Psycle Display psy_audio_Presets\0*.psv\0";
-	char  defaultextension[] = "PSV";			
-			
-	if (ui_savefile(self->mainhandle, title, filter, defaultextension,
-			workspace_skins_directory(self), path)) {		
-	}	
+{	
+	psy_ui_SaveDialog dialog;
+
+	psy_ui_savedialog_init_all(&dialog, 0,
+		"Plugin File Save",
+		"",
+		"",
+		workspace_vsts32_directory(self));
+	if (psy_ui_savedialog_execute(&dialog)) {		
+	}
+	psy_ui_savedialog_dispose(&dialog);
+
 }
 
 void machinecallback_fileselect_directory(Workspace* self)

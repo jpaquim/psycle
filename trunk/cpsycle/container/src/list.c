@@ -83,24 +83,29 @@ psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 {	
 	psy_List* rv;
-	if (ptr->prev == NULL && ptr->next == NULL) {
-		*self = NULL;
+
+	if (self && *self) {
+		if (ptr->prev == NULL && ptr->next == NULL) {
+			*self = NULL;
+			free(ptr);
+			return 0;
+		}
+		if (ptr->prev != NULL) {
+			ptr->prev->next = ptr->next;
+		} else {
+			*self = ptr->next;		
+			(*self)->tail = ptr->tail;
+		}
+		if (ptr->next != NULL) {
+			ptr->next->prev = ptr->prev;
+		} else {
+			(*self)->tail = ptr->prev;		
+		}
+		rv = ptr->next;
 		free(ptr);
-		return 0;
-	}
-	if (ptr->prev != NULL) {
-		ptr->prev->next = ptr->next;
 	} else {
-		*self = ptr->next;		
-		(*self)->tail = ptr->tail;
+		rv = 0;
 	}
-	if (ptr->next != NULL) {
-		ptr->next->prev = ptr->prev;
-	} else {
-		(*self)->tail = ptr->prev;		
-	}
-	rv = ptr->next;
-	free(ptr);
 	return rv;
 }
 

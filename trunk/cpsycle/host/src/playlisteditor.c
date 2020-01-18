@@ -8,6 +8,8 @@
 #include <dir.h>
 #include <exclusivelock.h>
 
+#include <uiopendialog.h>
+
 #define TIMERID_PLAYLIST 4000
 
 static void playlisteditor_ontimer(PlayListEditor*, psy_ui_Component* sender, int timerid);
@@ -141,21 +143,19 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 
 void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 {
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH]	 = ""; 					
-	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod)" "\0*.psy;*.xm;*.it;*.s3m;*.mod\0"
-				"Songs (*.psy)"				        "\0*.psy\0"
-				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
-				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
-				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
-				"Original Mod Format Songs (*.mod)" "\0*.mod\0";
-	char  defaultextension[] = "PSY";	
+	psy_ui_OpenDialog dialog;
+	static char filter[] =
+				"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+				"Songs (*.psy)"				        "|*.psy|"
+				"FastTracker II Songs (*.xm)"       "|*.xm|"
+				"Impulse Tracker Songs (*.it)"      "|*.it|"
+				"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
+				"Original Mod Format Songs (*.mod)" "|*.mod|"
+				"Wav Format Songs (*.wav)"			"|*.wav";
 
-	int showsonginfo = 0;	
-	*path = '\0'; 
-	if (ui_openfile(&self->component, title, filter, defaultextension, 
-			workspace_songs_directory(self->workspace),
-			path)) {		
+	psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+		workspace_songs_directory(self->workspace));
+	if (psy_ui_opendialog_execute(&dialog)) {	
 		char name[4096];
 		char prefix[4096];
 		char ext[4096];
@@ -163,8 +163,8 @@ void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 		int currsel;
 
 		currsel = ui_listbox_cursel(&self->listbox);
-		psy_dir_extract_path(path, prefix, name, ext);
-		entry = playlistentry_allocinit(name, path);
+		psy_dir_extract_path(psy_ui_opendialog_filename(&dialog), prefix, name, ext);
+		entry = playlistentry_allocinit(name, psy_ui_opendialog_filename(&dialog));
 		if (entry) {
 			psy_List* p;
 
@@ -179,6 +179,7 @@ void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 			}			
 		}
 	}
+	psy_ui_opendialog_dispose(&dialog);
 }
 
 void playlisteditor_onremovesong(PlayListEditor* self, psy_ui_Component* sender)

@@ -165,7 +165,7 @@ void psy_dsp_adsr_release(psy_dsp_ADSR* self)
 	}
 }
 
-void adsr_fastrelease(psy_dsp_ADSR* self)
+void psy_dsp_adsr_fastrelease(psy_dsp_ADSR* self)
 {
 	if (self->stage != ENV_OFF) {
 		self->stage = ENV_RELEASE;

@@ -124,10 +124,24 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 		break;
 		case MACH_SAMPLER:
 		{
-			psy_audio_Sampler* sampler = (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
+			psy_audio_Sampler* sampler;
+			
+			sampler = psy_audio_sampler_allocinit(self->machinecallback);
 			if (sampler) {
-				sampler_init(sampler, self->machinecallback);
-				rv = (psy_audio_Machine*) sampler;
+				rv = psy_audio_sampler_base(sampler);
+			} else {
+				rv = 0;
+			}
+		}
+		break;
+		case MACH_XMSAMPLER:
+		{
+			psy_audio_Sampler* sampler;
+			
+			sampler = psy_audio_sampler_allocinit(self->machinecallback);
+			if (sampler) {
+				sampler->xmsamplerload = 1;
+				rv = psy_audio_sampler_base(sampler);
 			} else {
 				rv = 0;
 			}

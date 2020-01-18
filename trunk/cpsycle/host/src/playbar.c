@@ -45,17 +45,17 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_settext(&self->play, workspace_translate(workspace, "play"));
 	psy_signal_connect(&self->play.signal_clicked, self, onplayclicked);	
 	// playmode
-	ui_combobox_init(&self->playmode, &self->component);	
-	ui_combobox_addstring(&self->playmode, "Song");
-	ui_combobox_addstring(&self->playmode, "Sel");
-	ui_combobox_addstring(&self->playmode, "Beats");	
-	ui_combobox_setcharnumber(&self->playmode, 6);
-	ui_combobox_setcursel(&self->playmode, 0);
+	psy_ui_combobox_init(&self->playmode, &self->component);	
+	psy_ui_combobox_addstring(&self->playmode, "Song");
+	psy_ui_combobox_addstring(&self->playmode, "Sel");
+	psy_ui_combobox_addstring(&self->playmode, "Beats");	
+	psy_ui_combobox_setcharnumber(&self->playmode, 6);
+	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		onplaymodeselchanged);
 	// play beat num
-	ui_edit_init(&self->loopbeatsedit, &self->component, 0);
-	ui_edit_settext(&self->loopbeatsedit, "4.00");
+	psy_ui_edit_init(&self->loopbeatsedit, &self->component, 0);
+	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
 	psy_ui_button_init(&self->loopbeatsless, &self->component);
 	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);
 	psy_signal_connect(&self->loopbeatsless.signal_clicked, self,
@@ -91,7 +91,7 @@ void playbar_initalign(PlayBar* self)
 void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 {
 	psy_audio_lock_enter();
-	switch (ui_combobox_cursel(&self->playmode)) {
+	switch (psy_ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
 			player_stop(self->player);
 			psy_audio_sequencer_setplaymode(&self->player->sequencer,
@@ -124,13 +124,13 @@ void onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 	psy_dsp_beat_t playbeats;
 	char text[40];
 	
-	playbeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));
+	playbeats = (psy_dsp_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));
 	if (playbeats > 1) {
 		playbeats -= 1;
 	}
 	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
-	ui_edit_settext(&self->loopbeatsedit, text);
+	psy_ui_edit_settext(&self->loopbeatsedit, text);
 }
 
 void onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
@@ -138,16 +138,16 @@ void onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 	psy_dsp_beat_t playbeats;
 	char text[40];
 	
-	playbeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));	
+	playbeats = (psy_dsp_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));	
 	playbeats += 1;		
 	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
-	ui_edit_settext(&self->loopbeatsedit, text);
+	psy_ui_edit_settext(&self->loopbeatsedit, text);
 }
 
 void onplayclicked(PlayBar* self, psy_ui_Component* sender)
 {
-	switch (ui_combobox_cursel(&self->playmode)) {
+	switch (psy_ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
 			psy_audio_sequencer_setplaymode(&self->player->sequencer,
 				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
@@ -192,7 +192,8 @@ void startplay(PlayBar* self)
 
 			editposition = workspace_patterneditposition(self->workspace);			
 			startposition += (psy_dsp_beat_t) editposition.offset;
-			numplaybeats = (psy_dsp_beat_t) atof(ui_edit_text(&self->loopbeatsedit));
+			numplaybeats = (psy_dsp_beat_t) atof(psy_ui_edit_text(
+				&self->loopbeatsedit));
 			self->player->sequencer.numplaybeats = numplaybeats;
 		}
 		player_setposition(self->player, startposition);

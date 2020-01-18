@@ -157,11 +157,6 @@ psy_audio_Machine* clone(psy_audio_Plugin* self)
 	return rv ? &rv->custommachine.machine : 0;
 }
 
-psy_audio_Machine* psy_audio_plugin_base(psy_audio_Plugin* self)
-{
-	return &(self->custommachine.machine);
-}
-
 int psy_audio_plugin_psycle_test(const char* path, psy_audio_MachineInfo* info)
 {	
 	int rv = 0;
@@ -187,10 +182,18 @@ int psy_audio_plugin_psycle_test(const char* path, psy_audio_MachineInfo* info)
 }
 
 void seqtick(psy_audio_Plugin* self, uintptr_t channel,
-	const psy_audio_PatternEvent* event)
+	const psy_audio_PatternEvent* ev)
 {
-	mi_seqtick(self->mi, channel, event->note, event->inst, event->cmd,
-		event->parameter);	
+	if (patternevent_has_volume(ev)) {
+		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, 0x0C, ev->vol);
+		if (ev->parameter != 0 || ev->cmd != 0) {
+			mi_seqtick(self->mi, channel, NOTECOMMANDS_EMPTY,
+				NOTECOMMANDS_EMPTY, ev->cmd, ev->parameter);
+		}
+	} else {	
+		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, ev->cmd,
+			ev->parameter);
+	}
 }
 
 void stop(psy_audio_Plugin* self)
@@ -199,12 +202,7 @@ void stop(psy_audio_Plugin* self)
 }
 
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
-{		
-	char text[60];
-	
-	psy_snprintf(text, 60, "numsamples %u\n",
-			bc->numsamples);
-	OutputDebugString(text);
+{	
 	mi_work(self->mi,
 		psy_audio_buffer_at(bc->output, 0),
 		psy_audio_buffer_at(bc->output, 1),

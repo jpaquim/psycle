@@ -9,8 +9,9 @@
 #include "../../detail/portable.h"
 #include <presetio.h>
 #include <windows.h>
+#include <uiframe.h>
 
-static void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame);
+static void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame);
 static void machineframe_onpresetchange(MachineFrame*, psy_ui_Component* sender, int index);
 static void machineframe_toggleparameterbox(MachineFrame*,
 	psy_ui_Component* sender);
@@ -42,7 +43,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 	//ui_component_init(&self->row1, &self->component);
 	//ui_component_enablealign(&self->row0);
 	//ui_component_setalign(&self->row1, UI_ALIGN_TOP);
-	ui_combobox_init(&self->presetsbox, &self->component);
+	psy_ui_combobox_init(&self->presetsbox, &self->component);
 	ui_component_setalign(&self->presetsbox.component, psy_ui_ALIGN_TOP);	
 }
 
@@ -51,16 +52,16 @@ void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 	psy_List* p;
 	self->presets = presets;
 	
-	ui_combobox_clear(&self->presetsbox);
+	psy_ui_combobox_clear(&self->presetsbox);
 	if (self->presets) {
 		for (p = presets->container; p != 0; p = p->next) {
 			psy_audio_Preset* preset;
 
 			preset = (psy_audio_Preset*) p->entry;
-			ui_combobox_addstring(&self->presetsbox,
+			psy_ui_combobox_addstring(&self->presetsbox,
 				psy_audio_preset_name(preset));
 		}
-		ui_combobox_setcursel(&self->presetsbox, 0);
+		psy_ui_combobox_setcursel(&self->presetsbox, 0);
 	}
 }
 
@@ -69,7 +70,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent)
 	self->view = 0;
 	self->presets = 0;
 	self->machine = 0;
-	ui_frame_init(&self->component, parent);
+	psy_ui_frame_init(&self->component, parent);
 	ui_component_seticonressource(&self->component, IDI_MACPARAM);
 	ui_component_move(&self->component, 200, 150);	
 	ui_component_enablealign(&self->component);	
@@ -80,10 +81,10 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent)
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
-	ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));
-	ui_editor_addtext(&self->help, "About");
-	psy_signal_connect(&self->component.signal_destroy, self,
-		machineframe_ondestroy);	
+	psy_ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));
+	psy_ui_editor_addtext(&self->help, "About");
+	psy_signal_connect(&self->component.signal_destroyed, self,
+		machineframe_ondestroyed);
 	psy_signal_connect(&self->parameterbar.presetsbox.signal_selchanged,
 		self, machineframe_onpresetchange);
 	psy_signal_connect(&self->parameterbar.parameters.signal_clicked, self,
@@ -133,12 +134,14 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	ui_component_align(&self->component);
 }
 
-void machineframe_ondestroy(MachineFrame* self, psy_ui_Component* frame)
-{
-	self->component.hwnd = 0; //.platform = 0;
+void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
+{	
 	if (self->presets) {
 		psy_audio_presets_dispose(self->presets);
 		self->presets = 0;
+		if (self->view) {
+			free(self->view);
+		}
 	}
 }
 

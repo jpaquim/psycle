@@ -10,11 +10,11 @@ typedef struct {
    psy_ui_Component component;   
    char* text;   
    float progress;
-} ui_progressbar;
+} psy_ui_ProgressBar;
 
-void ui_progressbar_init(ui_progressbar*, psy_ui_Component* parent);
-void ui_progressbar_settext(ui_progressbar*, const char* text);
-void ui_progressbar_setprogress(ui_progressbar*, float progress);
-void ui_progressbar_tick(ui_progressbar*);
+void psy_ui_progressbar_init(psy_ui_ProgressBar*, psy_ui_Component* parent);
+void psy_ui_progressbar_settext(psy_ui_ProgressBar*, const char* text);
+void psy_ui_progressbar_setprogress(psy_ui_ProgressBar*, float progress);
+void psy_ui_progressbar_tick(psy_ui_ProgressBar*);
 
 #endif /* psy_ui_PROGRESSBAR_H */

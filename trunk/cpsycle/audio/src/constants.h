@@ -1,5 +1,5 @@
-#ifndef PSY_AUDIO_CONSTANTS_H
-#define PSY_AUDIO_CONSTANTS_H
+#ifndef psy_audio_CONSTANTS_H
+#define psy_audio_CONSTANTS_H
 
 #include "../../detail/psydef.h"
 
@@ -85,4 +85,4 @@
 
 #define CURRENT_CACHE_MAP_VERSION	0x0002
 
-#endif /* PSY_AUDIO_CONSTANTS_H */
+#endif /* psy_audio_CONSTANTS_H */

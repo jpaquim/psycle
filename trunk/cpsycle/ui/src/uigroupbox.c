@@ -5,7 +5,7 @@
 
 #include "uigroupbox.h"
 
-void ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
+void psy_ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
 {
 	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"),
 		0, 0, 100, 20,
@@ -13,7 +13,7 @@ void ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
 		0);
 }
 
-void ui_groupbox_settext(psy_ui_Groupbox* self, const char* text)
+void psy_ui_groupbox_settext(psy_ui_Groupbox* self, const char* text)
 {
-	SetWindowText((HWND)self->component.hwnd, text);
+	SetWindowText((HWND)self->component.platform->hwnd, text);
 }

@@ -28,9 +28,8 @@ void vst2view_init(Vst2View* self, psy_ui_Component* parent, psy_audio_Machine* 
 	ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	machine->vtable->seteditorhandle(machine,
-		(void*) self->component.hwnd);
-//		(void*)ui_component_platformhandle(&self->component));	
+	psy_audio_machine_seteditorhandle(machine,
+		(void*) self->component.platform->hwnd);
 	ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 

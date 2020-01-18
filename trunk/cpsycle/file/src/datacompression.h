@@ -10,8 +10,8 @@
 /// designed with speed in mind
 /// simple, non adaptave delta predictor, less effective with high frequency content
 
-#ifndef DATACOMPRESSION_H
-#define DATACOMPRESSION_H
+#ifndef psy_DATACOMPRESSION_H
+#define psy_DATACOMPRESSION_H
 
 #include <stddef.h>
 
@@ -33,4 +33,4 @@ unsigned int soundsquash(short const * source, unsigned char ** destination, uns
 /// remember to delete your destination when done!
 int sounddesquash(unsigned char const * source, short ** destination);
 
-#endif
+#endif /* psy_DATACOMPRESSION_H */

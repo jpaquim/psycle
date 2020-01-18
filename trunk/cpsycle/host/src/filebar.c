@@ -5,6 +5,9 @@
 
 #include "filebar.h"
 
+#include <uiopendialog.h>
+#include <uisavedialog.h>
+
 static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
@@ -59,39 +62,39 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 }
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
-{
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH]	 = ""; 					
-	static char filter[] = "All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "\0*.psy;*.xm;*.it;*.s3m;*.mod;*.wav\0"
-				"Songs (*.psy)"				        "\0*.psy\0"
-				"FastTracker II Songs (*.xm)"       "\0*.xm\0"
-				"Impulse Tracker Songs (*.it)"      "\0*.it\0"
-				"Scream Tracker Songs (*.s3m)"      "\0*.s3m\0"
-				"Original Mod Format Songs (*.mod)" "\0*.mod\0"
-				"Wav Format Songs (*.wav)"			"\0*.wav\0";
-	char  defaultextension[] = "PSY";	
+{	
+	psy_ui_OpenDialog dialog;
+	static char filter[] =
+				"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+				"Songs (*.psy)"				        "|*.psy|"
+				"FastTracker II Songs (*.xm)"       "|*.xm|"
+				"Impulse Tracker Songs (*.it)"      "|*.it|"
+				"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
+				"Original Mod Format Songs (*.mod)" "|*.mod|"
+				"Wav Format Songs (*.wav)"			"|*.wav";
 
-	int showsonginfo = 0;	
-	*path = '\0'; 
-	if (ui_openfile(filebar_base(self), title, filter, defaultextension, 
-			workspace_songs_directory(self->workspace),
-			path)) {
-		workspace_loadsong(self->workspace, path);						
+	psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+		workspace_songs_directory(self->workspace));
+	if (psy_ui_opendialog_execute(&dialog)) {
+		workspace_loadsong(self->workspace,
+			psy_ui_opendialog_filename(&dialog));
 	}
+	psy_ui_opendialog_dispose(&dialog);
 }
 
 void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
-{
-	char path[MAX_PATH]	 = "";
-	char title[MAX_PATH]	 = ""; 					
-	static char filter[] = "Songs (*.psy)\0*.psy\0";
-	char  defaultextension[] = "PSY";
-	int showsonginfo = 0;	
-	*path = '\0'; 
-	if (ui_savefile(filebar_base(self), title, filter, defaultextension, 
-			workspace_songs_directory(self->workspace), path)) {
-		workspace_savesong(self->workspace, path);
+{	
+	psy_ui_SaveDialog dialog;
+
+	psy_ui_savedialog_init_all(&dialog, 0,
+		"Save Song",
+		"Songs (*.psy)|*.psy", "PSY",
+		workspace_songs_directory(self->workspace));
+	if (psy_ui_savedialog_execute(&dialog)) {
+		workspace_savesong(self->workspace,
+			psy_ui_savedialog_filename(&dialog));
 	}
+	psy_ui_savedialog_dispose(&dialog);
 }
 
 psy_ui_Component* filebar_base(FileBar* self)

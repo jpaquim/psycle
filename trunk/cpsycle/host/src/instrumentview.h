@@ -44,11 +44,13 @@ typedef struct {
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component nna;
-	psy_ui_Label nnaheaderlabel;
-	psy_ui_Button nnacutbutton;
-	psy_ui_Button nnareleasebutton;
-	psy_ui_Button nnanonebutton;
+	psy_ui_Label nnaheader;
+	psy_ui_Button nnacut;
+	psy_ui_Button nnarelease;
+	psy_ui_Button nnafadeout;
+	psy_ui_Button nnanone;
 	psy_ui_Component left;
+	psy_ui_Slider globalvolume;
 	SamplesBox samplesbox;
 	InstrumentNoteMapView notemapview;
 	psy_audio_Instrument* instrument;

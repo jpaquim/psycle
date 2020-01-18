@@ -38,14 +38,14 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);
 	ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
-	ui_slider_init(&self->slider, &self->component);
-	ui_slider_setcharnumber(&self->slider, 4);
-	ui_slider_showvertical(&self->slider);
+	psy_ui_slider_init(&self->slider, &self->component);
+	psy_ui_slider_setcharnumber(&self->slider, 4);
+	psy_ui_slider_showvertical(&self->slider);
 	ui_component_resize(&self->slider.component, 20, 0);
 	ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);
 	ui_component_resize(&self->component, 150, 200);
 	parameterlistbox_setmachine(self, machine);	
-	ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
+	psy_ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
 		parameterlistbox_ontweak, parameterlistbox_onvalue);
 	// psy_signal_connect(&self->parameterlist.signal_selchanged, self,
 		//onparameterlistchanged);

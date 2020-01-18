@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_SONGIO_H)
-#define PSY_AUDIO_SONGIO_H
+#ifndef psy_audio_SONGIO_H
+#define psy_audio_SONGIO_H
 
 #include <properties.h>
 #include "song.h"
@@ -28,4 +28,4 @@ int psy_audio_songfile_save(psy_audio_SongFile*, const char* path);
 void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
 
-#endif
+#endif /* psy_audio_SONGIO_H */

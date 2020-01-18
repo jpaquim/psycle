@@ -6,8 +6,8 @@
 
 #include "uicomponent.h"
 
-typedef psy_ui_Component ui_frame;
+typedef psy_ui_Component psy_ui_Frame;
 
-void ui_frame_init(ui_frame*, psy_ui_Component* parent);
+void psy_ui_frame_init(psy_ui_Frame*, psy_ui_Component* parent);
 
 #endif /* psy_ui_FRAME_H */

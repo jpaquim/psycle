@@ -16,7 +16,7 @@ typedef enum {
 } MachineBoxMode;
 
 typedef struct {
-	ui_listbox machinelist;	
+	psy_ui_Listbox machinelist;	
 	psy_audio_Machines* machines;
 	psy_Table listboxslots;
 	psy_Table slotslistbox;
@@ -25,8 +25,8 @@ typedef struct {
 	Workspace* workspace;
 } MachinesBox;
 
-void machinesbox_init(MachinesBox*, psy_ui_Component* parent, psy_audio_Machines*, MachineBoxMode,
-	Workspace*);
+void machinesbox_init(MachinesBox*, psy_ui_Component* parent,
+	psy_audio_Machines*, MachineBoxMode, Workspace*);
 void MachinesBoxClone(MachinesBox*);
 void MachinesBoxRemove(MachinesBox*);
 void MachinesBoxExchange(MachinesBox*);

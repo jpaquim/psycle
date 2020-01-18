@@ -7,6 +7,7 @@
 #include "math.h"
 #include "resources/resource.h"
 #include "../../detail/portable.h"
+#include <uiframe.h>
 
 static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
@@ -82,12 +83,12 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_button_settext(&self->dbvol, "db 100");
 	psy_ui_button_setcharnumber(&self->dbvol, 10);	
 	ui_component_setalign(&self->dbvol.component, psy_ui_ALIGN_BOTTOM);
-	ui_slider_init(&self->volslider, &self->slidergroup);
-	ui_slider_setcharnumber(&self->volslider, 4);
-	ui_slider_showvertical(&self->volslider);
+	psy_ui_slider_init(&self->volslider, &self->slidergroup);
+	psy_ui_slider_setcharnumber(&self->volslider, 4);
+	psy_ui_slider_showvertical(&self->volslider);
 	ui_component_resize(&self->volslider.component, 20, 0);
 	ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);
-	ui_slider_connect(&self->volslider, self, wireview_ondescribevolume,
+	psy_ui_slider_connect(&self->volslider, self, wireview_ondescribevolume,
 		wireview_ontweakvolume, wireview_onvaluevolume);
 }
 
@@ -187,7 +188,7 @@ psy_ui_Component* wireview_base(WireView* self)
 
 void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 {	
-	ui_frame_init(wireframe_base(self), parent);
+	psy_ui_frame_init(wireframe_base(self), parent);
 	self->wireview = view;
 	ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
 	ui_component_move(wireframe_base(self), 200, 150);

@@ -5,23 +5,23 @@
 
 #include "uidefaults.h"
 
-static void ui_defaults_initcolors(psy_ui_Defaults*);
-static void ui_defaults_initfont(psy_ui_Defaults*);
+static void psy_ui_defaults_initcolors(psy_ui_Defaults*);
+static void psy_ui_defaults_initfont(psy_ui_Defaults*);
 
-void ui_defaults_init(psy_ui_Defaults* self)
+void psy_ui_defaults_init(psy_ui_Defaults* self)
 {	
-	ui_defaults_initcolors(self);
-	ui_defaults_initfont(self);
+	psy_ui_defaults_initcolors(self);
+	psy_ui_defaults_initfont(self);
 }
 
-void ui_defaults_initcolors(psy_ui_Defaults* self)
+void psy_ui_defaults_initcolors(psy_ui_Defaults* self)
 {
 	self->defaultbackgroundcolor = 0x00232323;
 	self->defaultcolor = 0x00D1C5B6;
 	self->default_color_border = 0x00333333;
 }
 
-void ui_defaults_initfont(psy_ui_Defaults* self)
+void psy_ui_defaults_initfont(psy_ui_Defaults* self)
 {
 	psy_ui_FontInfo fontinfo;
 	
@@ -29,7 +29,7 @@ void ui_defaults_initfont(psy_ui_Defaults* self)
 	psy_ui_font_init(&self->defaultfont, &fontinfo);	
 }
 
-void ui_defaults_dispose(psy_ui_Defaults* self)
+void psy_ui_defaults_dispose(psy_ui_Defaults* self)
 {
 	psy_ui_Font font;
 	font = self->defaultfont;
@@ -37,17 +37,17 @@ void ui_defaults_dispose(psy_ui_Defaults* self)
 	psy_ui_font_dispose(&font);
 }
 
-uint32_t ui_defaults_color(psy_ui_Defaults* self)
+uint32_t psy_ui_defaults_color(psy_ui_Defaults* self)
 {
 	return self->defaultcolor;
 }
 
-uint32_t ui_defaults_backgroundcolor(psy_ui_Defaults* self)
+uint32_t psy_ui_defaults_backgroundcolor(psy_ui_Defaults* self)
 {
 	return self->defaultbackgroundcolor;
 }
 
-uint32_t ui_defaults_bordercolor(psy_ui_Defaults* self)
+uint32_t psy_ui_defaults_bordercolor(psy_ui_Defaults* self)
 {
 	return self->default_color_border;
 }

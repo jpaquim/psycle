@@ -6,38 +6,41 @@
 #include "uiprogressbar.h"
 #include <string.h>
 
-static void ondestroy(ui_progressbar*, psy_ui_Component* sender);
-static void ondraw(ui_progressbar*, psy_ui_Component* sender, psy_ui_Graphics*);
-static void onpreferredsize(ui_progressbar*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void ondestroy(psy_ui_ProgressBar*, psy_ui_Component* sender);
+static void ondraw(psy_ui_ProgressBar*, psy_ui_Graphics*);
+static void onpreferredsize(psy_ui_ProgressBar*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
 
-static void vtable_init(ui_progressbar* self)
+static void vtable_init(psy_ui_ProgressBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable_initialized = 1;
 	}
 }
 
-void ui_progressbar_init(ui_progressbar* self, psy_ui_Component* parent)
+void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
+	psy_ui_Component* parent)
 {	
 	self->text = _strdup("");
 	self->progress = 0.f;
 	ui_component_init(&self->component, parent);	
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_signal_connect(&self->component.signal_draw, self, ondraw);
+	self->component.vtable = &vtable;	
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
 }
 
-void ondestroy(ui_progressbar* self, psy_ui_Component* sender)
+void ondestroy(psy_ui_ProgressBar* self, psy_ui_Component* sender)
 {	
 	free(self->text);	
 }
 
-void ondraw(ui_progressbar* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
@@ -52,7 +55,8 @@ void ondraw(ui_progressbar* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	ui_drawsolidrectangle(g, r, 0x00D1C5B6);
 }
 
-void onpreferredsize(ui_progressbar* self, psy_ui_Size* limit, psy_ui_Size* rv)
+void onpreferredsize(psy_ui_ProgressBar* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {		
 	if (rv) {
 		rv->width = 100;
@@ -60,14 +64,14 @@ void onpreferredsize(ui_progressbar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	}
 }
 
-void ui_progressbar_setprogress(ui_progressbar* self, float progress)
+void psy_ui_progressbar_setprogress(psy_ui_ProgressBar* self, float progress)
 {
 	self->progress = progress;
 	ui_component_invalidate(&self->component);
 	ui_component_update(&self->component);	
 }
 
-void ui_progressbar_tick(ui_progressbar* self)
+void psy_ui_progressbar_tick(psy_ui_ProgressBar* self)
 {
 	self->progress += 0.01f;
 	ui_component_invalidate(&self->component);

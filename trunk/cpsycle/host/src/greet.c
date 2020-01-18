@@ -21,8 +21,8 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_label_setstyle(&self->header, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
 	ui_listbox_init(&self->greetz, &self->component);	
-	ui_groupbox_init(&self->groupbox, &self->component);
-	ui_groupbox_settext(&self->groupbox, "Thanks!");
+	psy_ui_groupbox_init(&self->groupbox, &self->component);
+	psy_ui_groupbox_settext(&self->groupbox, "Thanks!");
 	psy_ui_button_init(&self->original, &self->component);
 	psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
 	psy_signal_connect(&self->original.signal_clicked, self, OnOriginal);	

@@ -15,11 +15,11 @@ typedef struct {
 	psy_ui_Font defaultfont;	
 } psy_ui_Defaults;
 
-void ui_defaults_init(psy_ui_Defaults*);
-void ui_defaults_dispose(psy_ui_Defaults*);
+void psy_ui_defaults_init(psy_ui_Defaults*);
+void psy_ui_defaults_dispose(psy_ui_Defaults*);
 
-uint32_t ui_defaults_color(psy_ui_Defaults*);
-uint32_t ui_defaults_backgroundcolor(psy_ui_Defaults*);
-uint32_t ui_defaults_bordercolor(psy_ui_Defaults*);
+uint32_t psy_ui_defaults_color(psy_ui_Defaults*);
+uint32_t psy_ui_defaults_backgroundcolor(psy_ui_Defaults*);
+uint32_t psy_ui_defaults_bordercolor(psy_ui_Defaults*);
 
 #endif /* psy_ui_DEFAULTS_H */

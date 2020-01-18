@@ -61,7 +61,7 @@ struct VstMidiEvent* allocinitmidievent(psy_audio_VstPlugin*,
 struct VstMidiEvent* allocmidi(psy_audio_VstPlugin*, unsigned char data0,
 	unsigned char data1, unsigned char data2);
 struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin*,
-	const psy_audio_PatternEntry*);
+	const psy_audio_PatternEntry*, int channel);
 struct VstMidiEvent* allocnoteoff(psy_audio_VstPlugin*, int note, int channel);
 struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
 	const psy_audio_PatternEntry*);
@@ -184,11 +184,6 @@ void dispose(psy_audio_VstPlugin* self)
 	custommachine_dispose(&self->custommachine);
 }
 
-psy_audio_Machine* psy_audio_vstplugin_base(psy_audio_VstPlugin* self)
-{
-	return &(self->custommachine.machine);
-}
-
 PluginEntryProc getmainentry(psy_Library* library)
 {
 	PluginEntryProc rv = 0;
@@ -251,9 +246,15 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		
 	for (p = bc->events; p != 0 && count < self->eventcap; p = p->next) {
 		int numworksamples;
+		int midichannel;
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
 
-		numworksamples = (unsigned int)entry->delta - pos;
+		numworksamples = (unsigned int)entry->delta - pos;		
+		if (patternentry_front(entry)->inst == NOTECOMMANDS_INST_EMPTY) {
+			midichannel = 0;
+		} else {
+			midichannel = patternentry_front(entry)->inst & 0x0F;
+		}
 		if (patternentry_front(entry)->cmd == SET_PANNING) {
 			// todo split work
 			psy_audio_machine_setpanning(psy_audio_vstplugin_base(self),
@@ -268,8 +269,6 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			} else {						
 				// Panning
 				if (patternentry_front(entry)->cmd == 0xC2) {
-					unsigned char midichannel = 0;
-
 					self->events->events[count] = (VstEvent*) allocmidi(self,
 						(unsigned char)(0xB0 | midichannel), 0x0A,
 						(unsigned char)(
@@ -316,22 +315,21 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					allocnoteoff(self, note->key, entry->track);
 				++count;
 			}
-			if (patternentry_front(entry)->cmd == 0xC2) { // Panning
-				unsigned char midichannel = 0;
-
+			// Panning
+			if (patternentry_front(entry)->cmd == 0xC2) {
 				self->events->events[count] = (VstEvent*) allocmidi(self,
 					(unsigned char)(0xB0 | midichannel), 0x0A,
 					(unsigned char)(patternentry_front(entry)->parameter >> 1));
 				++count;	
 			}
 			self->events->events[count] = (VstEvent*)
-				allocnoteon(self, entry);
+				allocnoteon(self, entry, midichannel);
 			if (!note) {
-				note = malloc(sizeof(VstNote));			
+				note = malloc(sizeof(VstNote));
 				psy_table_insert(&self->tracknote, entry->track, (void*) note);
 			}
 			note->key = patternentry_front(entry)->note;
-			note->midichan = 0;
+			note->midichan = midichannel;
 			++count;			
 		} else
 		if (patternentry_front(entry)->note == NOTECOMMANDS_RELEASE) {
@@ -340,7 +338,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				
 				note = psy_table_at(&self->tracknote, entry->track);
 				self->events->events[count] = (VstEvent*)
-					allocnoteoff(self, note->key, entry->track);
+					allocnoteoff(self, note->key, note->midichan);
 				++count;
 				psy_table_remove(&self->tracknote, entry->track);				
 			}
@@ -399,7 +397,7 @@ void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	}
 }
 
-struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self, const psy_audio_PatternEntry* entry)
+struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self, const psy_audio_PatternEntry* entry, int channel)
 {
 	struct VstMidiEvent* rv;	
 
@@ -412,7 +410,7 @@ struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self, const psy_audio_Patt
 		rv->type = kVstMidiType;
 		rv->byteSize = sizeof(struct VstMidiEvent);
 		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char)(entry->track + 0x90);
+		rv->midiData[0] = (char)(channel + 0x90);
 		rv->midiData[1] = (char)note;
 		rv->midiData[2] = (char)(127);
 	}

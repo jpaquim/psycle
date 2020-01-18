@@ -24,7 +24,7 @@ typedef struct {
 	psy_Table selfmap;
 	psy_Table winidmap;
 	uintptr_t winid;
-	HBRUSH defaultbackgroundbrush;
+	HBRUSH defaultbackgroundbrush;	
 } psy_ui_WinApp;
 
 void psy_ui_winapp_init(psy_ui_WinApp*, HINSTANCE instance);

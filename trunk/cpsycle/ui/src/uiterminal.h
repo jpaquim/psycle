@@ -12,8 +12,8 @@ typedef struct {
    psy_ui_Editor output;
 } psy_ui_Terminal;
 
-void ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);
-void ui_terminal_output(psy_ui_Terminal*, const char* text);
-void ui_terminal_clear(psy_ui_Terminal*);
+void psy_ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);
+void psy_ui_terminal_output(psy_ui_Terminal*, const char* text);
+void psy_ui_terminal_clear(psy_ui_Terminal*);
 
 #endif /* psy_ui_TERMINAL_H */

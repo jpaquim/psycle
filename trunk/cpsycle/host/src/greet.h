@@ -13,11 +13,10 @@ typedef struct {
 	psy_ui_Component component;
 	psy_ui_Groupbox groupbox;
 	psy_ui_Label header;
-	ui_listbox greetz;
+	psy_ui_Listbox greetz;
 	psy_ui_Button original;
 	int current;
 } Greet;
-
 
 void greet_init(Greet* greet, psy_ui_Component* parent);
 

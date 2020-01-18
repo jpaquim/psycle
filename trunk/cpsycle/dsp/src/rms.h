@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_DSP_RMS_H)
-#define PSY_DSP_RMS_H
+#ifndef psy_dsp_RMS_H
+#define psy_dsp_RMS_H
 
 #include "dsptypes.h"
 
@@ -31,4 +31,4 @@ void psy_dsp_rmsvol_tick(psy_dsp_RMSVol*, const psy_dsp_amp_t* __restrict pSampl
 psy_dsp_amp_t psy_dsp_rmsvol_value(psy_dsp_RMSVol*);
 void psy_dsp_rmsvol_setsamplerate(unsigned int samplerate);
 
-#endif
+#endif /* psy_dsp_RMS_H */

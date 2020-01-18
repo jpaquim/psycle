@@ -47,7 +47,8 @@ void instrument_init(psy_audio_Instrument* self)
 	self->index = NOINSTRUMENT_INDEX;
 	self->entries = 0;	
 	self->name = _strdup("");
-	self->nna = NNA_STOP;
+	self->nna = psy_audio_NNA_STOP;
+	self->globalvolume = (psy_dsp_amp_t) 1.0f;
 	self->randompan = 0;
 	self->filtertype = F_NONE;
 	adsr_settings_initdefault(&self->volumeenvelope);

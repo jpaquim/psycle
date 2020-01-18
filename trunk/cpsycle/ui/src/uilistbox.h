@@ -9,16 +9,16 @@
 typedef struct {
    psy_ui_Component component;
    psy_Signal signal_selchanged;
-} ui_listbox;
+} psy_ui_Listbox;
 
-void ui_listbox_init(ui_listbox*, psy_ui_Component* parent);
-void ui_listbox_init_multiselect(ui_listbox*, psy_ui_Component* parent);
-intptr_t ui_listbox_addstring(ui_listbox*, const char* text);
-void ui_listbox_setstring(ui_listbox*, const char* text, intptr_t index);
-void ui_listbox_clear(ui_listbox*);
-void ui_listbox_setcursel(ui_listbox*, intptr_t index);
-intptr_t ui_listbox_cursel(ui_listbox*);
-void ui_listbox_selitems(ui_listbox*, int* items, int maxitems);
-intptr_t ui_listbox_selcount(ui_listbox*);
+void ui_listbox_init(psy_ui_Listbox*, psy_ui_Component* parent);
+void ui_listbox_init_multiselect(psy_ui_Listbox*, psy_ui_Component* parent);
+intptr_t ui_listbox_addstring(psy_ui_Listbox*, const char* text);
+void ui_listbox_setstring(psy_ui_Listbox*, const char* text, intptr_t index);
+void ui_listbox_clear(psy_ui_Listbox*);
+void ui_listbox_setcursel(psy_ui_Listbox*, intptr_t index);
+intptr_t ui_listbox_cursel(psy_ui_Listbox*);
+void ui_listbox_selitems(psy_ui_Listbox*, int* items, int maxitems);
+intptr_t ui_listbox_selcount(psy_ui_Listbox*);
 
 #endif /* psy_ui_LISTBOX_H */

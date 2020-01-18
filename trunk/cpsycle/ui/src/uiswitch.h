@@ -11,6 +11,6 @@ typedef struct {
 	psy_Signal signal_clicked;
 } psy_ui_Switch;
 
-void ui_switch_init(psy_ui_Switch*, psy_ui_Component* parent);
+void psy_ui_switch_init(psy_ui_Switch*, psy_ui_Component* parent);
 
 #endif /* psy_ui_SWITCH_H */

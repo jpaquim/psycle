@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_PATTERNS_H)
-#define PSY_AUDIO_PATTERNS_H
+#ifndef psy_audio_PATTERNS_H
+#define psy_audio_PATTERNS_H
 
 #include <hashtbl.h>
 #include <list.h>
@@ -34,5 +34,4 @@ int patterns_istracksoloed(psy_audio_Patterns*, uintptr_t track);
 void patterns_setsongtracks(psy_audio_Patterns*, uintptr_t trackcount);
 uintptr_t patterns_songtracks(psy_audio_Patterns*);
 
-
-#endif
+#endif /* psy_audio_PATTERNS_H */

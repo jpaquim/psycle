@@ -19,7 +19,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	ui_component_init(&self->component, parent);
 	ui_component_enablealign(&self->component);
-	ui_editor_init(&self->editor, &self->component);
+	psy_ui_editor_init(&self->editor, &self->component);
 	ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		plugineditor_ondestroy);
@@ -48,7 +48,7 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 			machine->vtable->info(machine)->Name,
 			MACH_LUA);
 		if (path) {
-			ui_editor_load(&self->editor, path);
+			psy_ui_editor_load(&self->editor, path);
 		}
 	}
 }

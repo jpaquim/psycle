@@ -11,7 +11,8 @@ static void ondraw(psy_ui_Knob*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_Knob*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Knob*);
 static void onmouseleave(psy_ui_Knob*);
-static void onpreferredsize(psy_ui_Knob*, psy_ui_Size* limit, psy_ui_Size* size);
+static void onpreferredsize(psy_ui_Knob*, psy_ui_Size* limit,
+	psy_ui_Size* size);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -25,10 +26,11 @@ static void vtable_init(psy_ui_Knob* self)
 		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
 		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable_initialized = 1;
 	}
 }
 
-void ui_knob_init(psy_ui_Knob* self, psy_ui_Component* parent)
+void psy_ui_knob_init(psy_ui_Knob* self, psy_ui_Component* parent)
 {		
 	ui_component_init(&self->component, parent);
 	vtable_init(self);
@@ -50,18 +52,18 @@ void ondestroy(psy_ui_Knob* self, psy_ui_Component* sender)
 	free(self->desc);
 }
 
-void ui_knob_setbitmap(psy_ui_Knob* self, psy_ui_Bitmap* bitmap)
+void psy_ui_knob_setbitmap(psy_ui_Knob* self, psy_ui_Bitmap* bitmap)
 {
 	self->bitmap = bitmap;
 }
 
-void ui_knob_setlabel(psy_ui_Knob* self, const char* text)
+void psy_ui_knob_setlabel(psy_ui_Knob* self, const char* text)
 {
 	free(self->label);
 	self->label = strdup(text);
 }
 
-void ui_knob_setdesc(psy_ui_Knob* self, const char* text)
+void psy_ui_knob_setdesc(psy_ui_Knob* self, const char* text)
 {
 	free(self->desc);
 	self->desc = strdup(text);

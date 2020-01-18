@@ -17,12 +17,12 @@ void psy_ui_statusbar_init(psy_ui_StatusBar* self, psy_ui_Component* parent)
 void psy_ui_statusbar_setfields(psy_ui_StatusBar* self, int parts,
 	int iStatusWidths[])
 {	
-	SendMessage((HWND)self->component.hwnd, SB_SETPARTS, parts, 
+	SendMessage((HWND)self->component.platform->hwnd, SB_SETPARTS, parts, 
 		(LPARAM)iStatusWidths);           
 }
 
 void psy_ui_statusbar_settext(psy_ui_StatusBar* self, int field,
 	const char* text)
 {
-	SendMessage((HWND)self->component.hwnd, SB_SETTEXT, field,(LPARAM)text);
+	SendMessage((HWND)self->component.platform->hwnd, SB_SETTEXT, field,(LPARAM)text);
 }

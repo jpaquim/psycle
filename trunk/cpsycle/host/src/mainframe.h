@@ -49,7 +49,7 @@ typedef struct {
 	psy_ui_Component client;
 	psy_ui_Terminal terminal;
 	psy_ui_SplitBar splitbar;	
-	ui_progressbar progressbar;
+	psy_ui_ProgressBar progressbar;
 	Navigation navigation;
 	TabBar tabbar;	
 	psy_ui_Notebook notebook;

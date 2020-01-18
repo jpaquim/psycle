@@ -10,16 +10,14 @@ typedef struct {
 	psy_ui_Component component;	
 } psy_ui_Editor;
 
-void ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);
-void ui_editor_load(psy_ui_Editor*, const char* path);
-
-void ui_editor_settext(psy_ui_Editor*, const char* text);
-void ui_editor_addtext(psy_ui_Editor*, const char* text);
-void ui_editor_clear(psy_ui_Editor*);
-void ui_editor_setcolor(psy_ui_Editor*, uint32_t color);
-void ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);
-
-void ui_editor_enableedit(psy_ui_Editor*);
-void ui_editor_preventedit(psy_ui_Editor*);
+void psy_ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);
+void psy_ui_editor_load(psy_ui_Editor*, const char* path);
+void psy_ui_editor_settext(psy_ui_Editor*, const char* text);
+void psy_ui_editor_addtext(psy_ui_Editor*, const char* text);
+void psy_ui_editor_clear(psy_ui_Editor*);
+void psy_ui_editor_setcolor(psy_ui_Editor*, uint32_t color);
+void psy_ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);
+void psy_ui_editor_enableedit(psy_ui_Editor*);
+void psy_ui_editor_preventedit(psy_ui_Editor*);
 
 #endif /* psy_ui_EDITOR_H */

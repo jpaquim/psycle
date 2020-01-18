@@ -45,7 +45,7 @@ void patternevent_clear(psy_audio_PatternEvent* self)
 	self->parameter = 0;
 }
 
-int patternevent_empty(psy_audio_PatternEvent* self)
+int patternevent_empty(const psy_audio_PatternEvent* self)
 {	
 	return
 		self->note == NOTECOMMANDS_EMPTY &&
@@ -56,3 +56,17 @@ int patternevent_empty(psy_audio_PatternEvent* self)
 		self->parameter == 0;		
 }
 
+int patternevent_empty_except_volume(const psy_audio_PatternEvent* self)
+{
+	return
+		self->note == NOTECOMMANDS_EMPTY &&
+		self->inst == NOTECOMMANDS_INST_EMPTY &&
+		self->mach == NOTECOMMANDS_MACH_EMPTY &&		
+		self->cmd == 0 &&		
+		self->parameter == 0;
+}
+
+int patternevent_has_volume(const psy_audio_PatternEvent* self)
+{
+	return self->vol != NOTECOMMANDS_VOL_EMPTY;
+}

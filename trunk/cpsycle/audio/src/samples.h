@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_AUDIO_SAMPLES_H)
-#define PSY_AUDIO_SAMPLES_H
+#ifndef psy_audio_SAMPLES_H
+#define psy_audio_SAMPLES_H
 
 #include "sample.h"
 #include <hashtbl.h>
@@ -40,4 +40,4 @@ psy_TableIterator psy_audio_samples_begin(psy_audio_Samples*);
 psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples*,
 	uintptr_t slot);
 
-#endif
+#endif /* psy_audio_SAMPLES_H */

@@ -31,6 +31,7 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
 		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable_initialized = 1;
 	}
 }
 
@@ -251,7 +252,7 @@ void psy_ui_button_highlight(psy_ui_Button* self)
 void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (self->highlight) {
-		self->highlight = 0;				
+		self->highlight = 0;
 		ui_component_invalidate(psy_ui_button_base(self));
 	}
 }

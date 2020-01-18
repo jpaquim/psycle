@@ -29,15 +29,15 @@ typedef void (*ui_slider_fpdescribe)(void*, psy_ui_Slider*, char* txt);
 typedef void (*ui_slider_fptweak)(void*, psy_ui_Slider*, float value);
 typedef void (*ui_slider_fpvalue)(void*, psy_ui_Slider*, float* value);
 
-void ui_slider_init(psy_ui_Slider*, psy_ui_Component* parent);
-void ui_slider_settext(psy_ui_Slider*, const char* text);
-void ui_slider_setcharnumber(psy_ui_Slider*, int number);
-void ui_slider_setvalue(psy_ui_Slider*, double value);
-double ui_slider_value(psy_ui_Slider*);
-void ui_slider_showvertical(psy_ui_Slider*);
-void ui_slider_showhorizontal(psy_ui_Slider*);
-psy_ui_Orientation ui_slider_orientation(psy_ui_Slider*);
-void ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,
+void psy_ui_slider_init(psy_ui_Slider*, psy_ui_Component* parent);
+void psy_ui_slider_settext(psy_ui_Slider*, const char* text);
+void psy_ui_slider_setcharnumber(psy_ui_Slider*, int number);
+void psy_ui_slider_setvalue(psy_ui_Slider*, double value);
+double psy_ui_slider_value(psy_ui_Slider*);
+void psy_ui_slider_showvertical(psy_ui_Slider*);
+void psy_ui_slider_showhorizontal(psy_ui_Slider*);
+psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider*);
+void psy_ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,
 	ui_slider_fptweak, ui_slider_fpvalue);
 
 #endif /* psy_ui_SLIDER_H */

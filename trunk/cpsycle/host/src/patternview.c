@@ -204,7 +204,7 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 	int tabindex)
 {
 	if (tabindex < 2) {
-		if (self->editnotebook.splitbar.hwnd) { //platform) {
+		if (psy_ui_notebook_splitactivated(&self->editnotebook)) {
 			psy_ui_notebook_full(&self->editnotebook);						
 		}
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
@@ -212,7 +212,7 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 	} else 
 	if (tabindex == 2) {
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		if (!self->editnotebook.splitbar.hwnd) { // platform) {
+		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
 			psy_ui_notebook_split(&self->editnotebook);			
 		}
 	} else {

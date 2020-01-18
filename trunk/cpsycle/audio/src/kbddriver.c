@@ -201,8 +201,11 @@ void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* 
 			cmd->data.param1 = kbcmd.id + input.param2;
 		}
 	} else {
-		cmd->id = NOTECOMMANDS_RELEASE;
-		cmd->data.param1 = NOTECOMMANDS_RELEASE;
+		kbcmd.id = inputs_cmd(&self->noteinputs, input.param1);
+		if (kbcmd.id <= NOTECOMMANDS_RELEASE) {
+			cmd->id = NOTECOMMANDS_RELEASE;
+			cmd->data.param1 = NOTECOMMANDS_RELEASE;
+		}
 	}
 }
 

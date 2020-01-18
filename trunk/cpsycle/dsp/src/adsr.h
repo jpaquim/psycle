@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PSY_DSP_ADSR_H)
-#define PSY_DSP_ADSR_H
+#ifndef psy_dsp_ADSR_H
+#define psy_dsp_ADSR_H
 
 #include "dsptypes.h"
 #include "envelope.h"
@@ -44,5 +44,6 @@ void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR*, unsigned int samplerate);
 void psy_dsp_adsr_tick(psy_dsp_ADSR*);
 void psy_dsp_adsr_start(psy_dsp_ADSR*);
 void psy_dsp_adsr_release(psy_dsp_ADSR*);
+void psy_dsp_adsr_fastrelease(psy_dsp_ADSR*);
 
-#endif
+#endif /* psy_dsp_ADSR_H */

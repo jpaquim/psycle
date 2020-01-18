@@ -4,8 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "operations.h"
+#include "../../detail/psyconf.h"
 
-#if defined SSE
+#if defined PSYCLE_USE_SSE and defined DIVERSALIS__CPU__X86__SSE
 #include <string.h>
 #include "alignedalloc.h"
 #include <xmmintrin.h>
@@ -134,20 +135,22 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 	#if !defined DIVERSALIS__CPU__X86
 		// just do nothing.. not crucial for other archs ?
 	#else
+	uint32_t exponent_mask;
+	uint32_t exponent;
+	uint32_t not_nan_nor_infinity;
+	uint32_t not_denormal;
 		union {
 			float sample;
 			uint32_t bits;
 		} u;
-		u.sample = sample;
-
-		uint32_t const exponent_mask(0x7f800000);
-		uint32_t const exponent(u.bits & exponent_mask);
-
+		u.sample = *sample;
+		exponent_mask = 0x7f800000;
+		exponent = u.bits & exponent_mask;
 		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
-		uint32_t const not_nan_nor_infinity(exponent < exponent_mask);
+		not_nan_nor_infinity = exponent < exponent_mask;
 
 		// exponent > 0 is 0 if denormalized, otherwise 1
-		uint32_t const not_denormal(exponent > 0);
+		not_denormal = exponent > 0;
 
 		u.bits *= not_nan_nor_infinity & not_denormal;
 		*sample = u.sample;
@@ -160,7 +163,7 @@ float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 	if (is_aligned(pSamples, 16) && (numSamples % 4 == 0)) {
 		return noopt.maxvol(pSamples, numSamples);
 	} else {
-#if defined SSE
+#if defined DIVERSALIS__CPU__X86__SSE and defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		__m128 minVol = _mm_set_ps1(0.0f);
 		__m128 maxVol = _mm_set_ps1(0.0f);
 		const __m128* psrc = (const __m128*)pSamples;
@@ -236,7 +239,8 @@ float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 		volmin *= -1.0f;
 		//beware: -0.0f and 0.0f are supposed to be the same number, -0.0f > 0.0f returns false, just because 0.0f == 0.0f returns true
 		return (volmin > volmax) ? volmin : volmax;
-#endif	
+#else
+#endif
 	}
 }
 
