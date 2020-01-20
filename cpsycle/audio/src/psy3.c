@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "psy3.h"
+#include "song.h"
 #include "songio.h"
 #include "constants.h"
 #include <datacompression.h>
@@ -13,6 +14,7 @@
 #include <string.h>
 #include "../../detail/portable.h"
 #include "../../detail/psydef.h"
+#include "plugin_interface.h"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 #define _MAX_PATH 4096

@@ -6,6 +6,10 @@
 
 #include "machine.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_Machine machine;
 	psy_dsp_amp_t pan;
@@ -19,5 +23,9 @@ typedef struct {
 
 void custommachine_init(psy_audio_CustomMachine*, MachineCallback);
 void custommachine_dispose(psy_audio_CustomMachine*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_CUSTOMMACHINE_H */

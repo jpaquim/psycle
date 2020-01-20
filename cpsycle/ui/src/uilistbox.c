@@ -26,7 +26,7 @@ void ui_listbox_init_multiselect(psy_ui_Listbox* listbox, psy_ui_Component* pare
 
 void ui_listbox_init_style(psy_ui_Listbox* self, psy_ui_Component* parent, int style)
 {  		
-	ui_win32_component_init(&self->component, parent, TEXT("LISTBOX"), 
+	psy_ui_win32_component_init(&self->component, parent, TEXT("LISTBOX"), 
 		0, 0, 100, 200,
 		style,
 		1);	

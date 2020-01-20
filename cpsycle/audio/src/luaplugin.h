@@ -7,6 +7,10 @@
 #include "custommachine.h"
 #include "psyclescript.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_Machine* machine;
 	psy_audio_BufferContext* bc;
@@ -22,5 +26,9 @@ typedef struct {
 void psy_audio_luaplugin_init(psy_audio_LuaPlugin*, MachineCallback,
 	const char* path);
 int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_LUAPLUGIN_H */

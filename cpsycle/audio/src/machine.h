@@ -13,6 +13,10 @@
 #include <dsptypes.h>
 #include "../../detail/psydef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NOMACHINE_INDEX UINTPTR_MAX
 
 typedef struct MachineCallback {	
@@ -427,5 +431,9 @@ INLINE void psy_audio_machine_savespecific(psy_audio_Machine* self,
 {
 	self->vtable->savespecific(self, songfile, slot);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MACHINE_H */

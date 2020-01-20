@@ -7,6 +7,7 @@
 #include "machineinfo.h"
 #include <string.h>
 #include <stdlib.h> 
+#include "plugin_interface.h"
 
 void machineinfo_init(psy_audio_MachineInfo* self)
 {

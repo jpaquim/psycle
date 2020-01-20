@@ -15,9 +15,9 @@ static void OnSongChanged(OctaveBar*, Workspace*);
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);	
 	psy_ui_label_init(&self->headerlabel, &self->component);	
 	psy_ui_label_settext(&self->headerlabel, "Octave");		
@@ -34,8 +34,8 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 			psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));				
-		psy_list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
+		psy_list_free(psy_ui_components_setalign(
+			psy_ui_component_children(&self->component, 0),
 			psy_ui_ALIGN_LEFT,
 			&margin));		
 	}

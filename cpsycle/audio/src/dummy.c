@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "dummy.h"
+#include "plugin_interface.h"
 
 const psy_audio_MachineInfo* dummymachine_info(void)
 {

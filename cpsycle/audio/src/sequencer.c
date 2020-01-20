@@ -6,7 +6,10 @@
 #include "sequencer.h"
 #include "pattern.h"
 #include "instruments.h"
-#include <stdlib.h> 
+#include <qsort.h>
+#include <assert.h>
+#include <stdlib.h>
+#include "../../detail/portable.h" 
 
 static void psy_audio_clearevents(psy_audio_Sequencer*);
 static void psy_audio_cleardelayed(psy_audio_Sequencer*);
@@ -19,8 +22,6 @@ static void psy_audio_clearcurrtracks(psy_audio_Sequencer*);
 static void psy_audio_advanceposition(psy_audio_Sequencer* self, psy_dsp_beat_t width);
 static void psy_audio_addsequenceevent(psy_audio_Sequencer*, psy_audio_SequencerTrack*,
 	psy_dsp_beat_t offset);
-//static void addvolume(psy_audio_Sequencer* self, psy_audio_PatternEntry*,
-//	int delayed);
 static void psy_audio_addgate(psy_audio_Sequencer*, psy_audio_PatternEntry*);
 static void psy_audio_maketweakslideevents(psy_audio_Sequencer*, psy_audio_PatternEntry*, psy_dsp_beat_t offset);
 static void psy_audio_makeretriggerevents(psy_audio_Sequencer*, psy_audio_SequencerTrack*,
@@ -37,7 +38,8 @@ static void psy_audio_notifysequencertick(psy_audio_Sequencer*, psy_dsp_beat_t w
 static psy_dsp_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer*);
 static uintptr_t psy_audio_sequencer_currframesperline(psy_audio_Sequencer*);
 static void psy_audio_sequencer_sortevents(psy_audio_Sequencer*);
-static void psy_audio_assertorder(psy_audio_Sequencer*);
+static int psy_audio_sequencer_comp_events(PatternNode* lhs, PatternNode* rhs);
+static void psy_audio_sequencer_assertorder(psy_audio_Sequencer*);
 
 void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	sequence, psy_audio_Machines* machines)
@@ -630,8 +632,7 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 		if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
 			entry->delta = offset + patternentry_front(entry)->parameter / 
 				(self->lpb * psy_audio_sequencer_speed(self) * 256.f);
-			psy_list_append(&self->delayedevents, entry);
-			// addvolume(self, entry, 1);
+			psy_list_append(&self->delayedevents, entry);			
 			
 		} else
 		if (patternentry_front(patternentry)->cmd == RETRIGGER) {
@@ -652,37 +653,11 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 				psy_table_insert(&self->lastmachine, entry->track,
 					(void*)(uintptr_t)patternentry_front(patternentry)->mach);
 			}
-			psy_list_append(&self->events, entry);
-			// addvolume(self, entry, 0);
+			psy_list_append(&self->events, entry);			
 			// addgate(self, entry);
 		}
 	}	
 }
-
-//void addvolume(psy_audio_Sequencer* self, psy_audio_PatternEntry* entry,
-//	int delayed)
-//{
-	/*if (patternentry_front(entry)->vol != NOTECOMMANDS_VOL_EMPTY) {
-		if (patternentry_front(entry)->cmd == 0 &&
-			patternentry_front(entry)->parameter == 0) {
-			patternentry_front(entry)->cmd = 0x0C;
-			patternentry_front(entry)->parameter = patternentry_front(entry)->vol;
-		} else {
-			psy_audio_PatternEntry* volentry;
-
-			volentry = patternentry_clone(entry);		
-			patternentry_front(volentry)->note = NOTECOMMANDS_EMPTY;
-			patternentry_front(volentry)->cmd = 0x0C;
-			patternentry_front(volentry)->parameter =
-				patternentry_front(entry)->vol;
-			if (delayed) {
-				psy_list_append(&self->delayedevents, volentry);
-			} else {
-				psy_list_append(&self->events, volentry);
-			}
-		}
-	}*/
-//}
 
 void psy_audio_addgate(psy_audio_Sequencer* self, psy_audio_PatternEntry*
 	entry)
@@ -822,7 +797,6 @@ void psy_audio_makeretriggerevents(psy_audio_Sequencer* self,
 		patternentry_front(retriggerentry)->parameter = 0;
 		retriggerentry->delta = offset + entry->delta + retriggeroffset;
 		psy_list_append(&self->delayedevents, retriggerentry);
-		// addvolume(self, retriggerentry, 1);
 		retriggeroffset += retriggerstep;
 	}
 	track->state.retriggeroffset = 		
@@ -851,8 +825,7 @@ void psy_audio_makeretriggercontinueevents(psy_audio_Sequencer* self,
 		patternentry_front(retriggerentry)->cmd = 0;
 		patternentry_front(retriggerentry)->parameter = 0;
 		retriggerentry->delta = offset + entry->delta + retriggeroffset;
-		psy_list_append(&self->delayedevents, retriggerentry);
-		// addvolume(self, retriggerentry, 1);
+		psy_list_append(&self->delayedevents, retriggerentry);		
 		retriggeroffset += retriggerstep;
 	}
 	track->state.retriggeroffset =
@@ -1062,41 +1035,48 @@ uintptr_t psy_audio_sequencer_currframesperline(psy_audio_Sequencer* self)
 }
 
 void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
-{
+{	
 	if (self->events && self->events != self->events->tail) {
-		psy_List* sorted;
-		psy_List* p;
-		psy_List* q;
-
-		sorted = 0;
-		for (p = self->events; p != 0; p = p->next) {
-			int inserted = 0;
-			psy_audio_PatternEntry* entry;
-
-			entry = psy_audio_patternnode_entry(p);
-			q = sorted;
-			while (q) {
-				psy_audio_PatternEntry* sortedentry;
-
-				sortedentry = psy_audio_patternnode_entry(q);
-				if (sortedentry->delta > entry->delta) {
-					psy_list_insert(&sorted, q->prev, entry);
-					inserted = 1;
-					break;
-				}
-				q = q->next;
-			}
-			if (!inserted) {
-				psy_list_append(&sorted, entry);
-			}
-		}	
+		PatternNode** nodes;
+		uintptr_t num;
+		uintptr_t i;
+		PatternNode* sorted = 0;
+		PatternNode* p;		
+			
+		num = psy_list_size(self->events);		
+		nodes = malloc(sizeof(PatternNode*) * num);
+		for (i = 0, p = self->events; p != 0 && i < num; p = p->next, ++i) {
+			nodes[i] = p;
+		}
+		psy_qsort(nodes, 0, num - 1, psy_audio_sequencer_comp_events);		
+		for (i = 0; i < num; ++i) {			
+			psy_list_append(&sorted, nodes[i]->entry);			
+		}		
 		psy_list_free(self->events);
 		self->events = sorted;
+		free(nodes);
 	}
-	// assertorder(self);
+	// psy_audio_sequencer_assertorder(self);
 }
 
-void psy_audio_assertorder(psy_audio_Sequencer* self)
+int psy_audio_sequencer_comp_events(PatternNode* lhs, PatternNode* rhs)
+{
+	int rv;
+	
+	if (psy_audio_patternnode_entry(rhs)->delta ==
+			 psy_audio_patternnode_entry(lhs)->delta) {
+		rv = 0;
+	} else
+	if (psy_audio_patternnode_entry(lhs)->delta <
+		psy_audio_patternnode_entry(rhs)->delta) {
+		rv = -1;
+	} else {
+		rv = 1;
+	}
+	return rv;		
+}	
+
+void psy_audio_sequencer_assertorder(psy_audio_Sequencer* self)
 {
 	psy_List* p;
 	float last = 0;

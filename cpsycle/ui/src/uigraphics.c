@@ -10,7 +10,7 @@
 
 extern psy_ui_App app;
 
-void ui_graphics_init(psy_ui_Graphics* g, HDC hdc)
+void psy_ui_graphics_init(psy_ui_Graphics* g, HDC hdc)
 {
 	g->hdc = hdc;		
 	g->pen = CreatePen(PS_SOLID, 1, app.defaults.defaultcolor);	
@@ -20,7 +20,7 @@ void ui_graphics_init(psy_ui_Graphics* g, HDC hdc)
 	g->hFontPrev = SelectObject(g->hdc, app.defaults.defaultfont.hfont);
 }	
 
-void ui_graphics_dispose(psy_ui_Graphics* g)
+void psy_ui_graphics_dispose(psy_ui_Graphics* g)
 {
 	SelectObject(g->hdc, g->penprev);
 	SelectObject(g->hdc, g->hFontPrev);
@@ -29,12 +29,12 @@ void ui_graphics_dispose(psy_ui_Graphics* g)
 	}	
 }
 
-void ui_textout(psy_ui_Graphics* self, int x, int y, const char* str, size_t len)
+void psy_ui_textout(psy_ui_Graphics* self, int x, int y, const char* str, size_t len)
 {	
 	TextOut(self->hdc, x, y, str, (int)len);
 }
 
-void ui_textoutrectangle(psy_ui_Graphics* g, int x, int y, unsigned int options,
+void psy_ui_textoutrectangle(psy_ui_Graphics* g, int x, int y, unsigned int options,
 	psy_ui_Rectangle r, const char* text, size_t len)
 {
 	RECT rect;
@@ -43,7 +43,7 @@ void ui_textoutrectangle(psy_ui_Graphics* g, int x, int y, unsigned int options,
 	ExtTextOut(g->hdc, x, y, options, &rect, text, (int)len, NULL);
 }
 
-psy_ui_Size ui_textsize(psy_ui_Graphics* g, const char* text)
+psy_ui_Size psy_ui_textsize(psy_ui_Graphics* g, const char* text)
 {
 	psy_ui_Size	rv;
 
@@ -60,7 +60,7 @@ psy_ui_Size ui_textsize(psy_ui_Graphics* g, const char* text)
 	return rv;
 }
 
-void ui_drawrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r)
+void psy_ui_drawrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -71,7 +71,7 @@ void ui_drawrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r)
 	SelectObject (self->hdc, hOldBrush);
 }
 
-void ui_drawroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r, psy_ui_Size cornersize)
+void psy_ui_drawroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r, psy_ui_Size cornersize)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -83,7 +83,7 @@ void ui_drawroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r, psy_
 	SelectObject (self->hdc, hOldBrush);
 }
 
-void ui_drawsolidrectangle(psy_ui_Graphics* g, const psy_ui_Rectangle r, unsigned int color)
+void psy_ui_drawsolidrectangle(psy_ui_Graphics* g, const psy_ui_Rectangle r, unsigned int color)
 {
      HBRUSH hBrush;     
      RECT   rect;	 
@@ -94,7 +94,7 @@ void ui_drawsolidrectangle(psy_ui_Graphics* g, const psy_ui_Rectangle r, unsigne
      DeleteObject (hBrush) ;
 }
 
-void ui_drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
+void psy_ui_drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color)
 {
 	HBRUSH hBrush;
@@ -114,7 +114,7 @@ void ui_drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
 	DeleteObject (hPen) ;
 }
 
-void ui_drawsolidpolygon(psy_ui_Graphics* g, psy_ui_Point* pts,
+void psy_ui_drawsolidpolygon(psy_ui_Graphics* g, psy_ui_Point* pts,
 	unsigned int numpoints, unsigned int inner, unsigned int outter)
 {
 	HBRUSH hBrush;     
@@ -141,7 +141,7 @@ void ui_drawsolidpolygon(psy_ui_Graphics* g, psy_ui_Point* pts,
 	free(wpts);
 }
 
-void ui_drawfullbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y)
+void psy_ui_drawfullbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y)
 {
 	HDC hdcMem;
 	psy_ui_Size size;
@@ -153,7 +153,7 @@ void ui_drawfullbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y)
 	DeleteDC (hdcMem);  
 }
 
-void ui_drawbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y, int width,
+void psy_ui_drawbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y, int width,
 	int height, int xsrc, int ysrc)
 {
 	HDC hdcMem;
@@ -164,7 +164,7 @@ void ui_drawbitmap(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y, int 
 	DeleteDC (hdcMem);  
 }
 
-void ui_setcolor(psy_ui_Graphics* g, unsigned int color)
+void psy_ui_setcolor(psy_ui_Graphics* g, unsigned int color)
 {
 	HPEN pen;	
 	pen = CreatePen(PS_SOLID, 1, color);
@@ -175,40 +175,40 @@ void ui_setcolor(psy_ui_Graphics* g, unsigned int color)
 	g->pen = pen;
 }
 
-void ui_setbackgroundmode(psy_ui_Graphics* g, unsigned int mode)
+void psy_ui_setbackgroundmode(psy_ui_Graphics* g, unsigned int mode)
 {
 	SetBkMode(g->hdc, mode);
 }
 
-void ui_setbackgroundcolor(psy_ui_Graphics* g, unsigned int color)
+void psy_ui_setbackgroundcolor(psy_ui_Graphics* g, unsigned int color)
 {
 	SetBkColor(g->hdc, color);
 }
 
-void ui_settextcolor(psy_ui_Graphics* g, unsigned int color)
+void psy_ui_settextcolor(psy_ui_Graphics* g, unsigned int color)
 {
 	SetTextColor(g->hdc, color);
 }
 
-void ui_setfont(psy_ui_Graphics* g, psy_ui_Font* font)
+void psy_ui_setfont(psy_ui_Graphics* g, psy_ui_Font* font)
 {	
 	if (font && font->hfont) {		
 		SelectObject(g->hdc, font->hfont);
 	}
 }
 
-void ui_drawline(psy_ui_Graphics* g, int x1, int y1, int x2, int y2)
+void psy_ui_drawline(psy_ui_Graphics* g, int x1, int y1, int x2, int y2)
 {
 	MoveToEx(g->hdc, x1, y1, NULL) ;
 	LineTo (g->hdc, x2, y2);
 }
 
-void ui_moveto(psy_ui_Graphics* g, psy_ui_Point pt)
+void psy_ui_moveto(psy_ui_Graphics* g, psy_ui_Point pt)
 {	
 	MoveToEx(g->hdc, pt.x, pt.y, NULL) ;	
 }
 
-void ui_devcurveto(psy_ui_Graphics* g, psy_ui_Point control_p1,
+void psy_ui_devcurveto(psy_ui_Graphics* g, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p)
 {
    POINT pts[3];

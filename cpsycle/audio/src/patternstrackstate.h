@@ -6,6 +6,10 @@
 
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_Table mute;	
 	psy_Table record;
@@ -21,5 +25,9 @@ void patternstrackstate_mutetrack(psy_audio_PatternsTrackState*, uintptr_t track
 void patternstrackstate_unmutetrack(psy_audio_PatternsTrackState*, uintptr_t track);
 int patternstrackstate_istrackmuted(psy_audio_PatternsTrackState*, uintptr_t track);
 int patternstrackstate_istracksoloed(psy_audio_PatternsTrackState*, uintptr_t track);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PATTERNSTRACKSTATE_H */

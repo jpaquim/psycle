@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
    psy_Signal signal_selchanged;
@@ -20,5 +24,9 @@ void ui_listbox_setcursel(psy_ui_Listbox*, intptr_t index);
 intptr_t ui_listbox_cursel(psy_ui_Listbox*);
 void ui_listbox_selitems(psy_ui_Listbox*, int* items, int maxitems);
 intptr_t ui_listbox_selcount(psy_ui_Listbox*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_LISTBOX_H */

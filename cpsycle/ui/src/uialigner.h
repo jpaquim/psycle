@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component* component;
 } psy_ui_Aligner;
@@ -14,5 +18,9 @@ void psy_ui_aligner_init(psy_ui_Aligner*, psy_ui_Component*);
 void psy_ui_aligner_align(psy_ui_Aligner*);
 void psy_ui_aligner_preferredsize(psy_ui_Aligner*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_ALIGNER_H */

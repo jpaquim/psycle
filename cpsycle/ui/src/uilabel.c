@@ -22,7 +22,7 @@ static void vtable_init(psy_ui_Label* self)
 
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {  		
-	ui_win32_component_init(psy_ui_label_base(self), parent, TEXT("STATIC"), 
+	psy_ui_win32_component_init(psy_ui_label_base(self), parent, TEXT("STATIC"), 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,
 		0);	
@@ -47,11 +47,11 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		psy_ui_TextMetric tm;	
 		char text[256];
 		
-		tm = ui_component_textmetric(psy_ui_label_base(self));	
+		tm = psy_ui_component_textmetric(psy_ui_label_base(self));	
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
 			GetWindowText((HWND)self->component.platform->hwnd, text, 256);
-			size = ui_component_textsize(psy_ui_label_base(self), text);
+			size = psy_ui_component_textsize(psy_ui_label_base(self), text);
 			rv->width = size.width + 2 +
 				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm);
 		} else {		

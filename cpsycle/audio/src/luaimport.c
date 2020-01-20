@@ -6,6 +6,8 @@
 
 #include "luaimport.h"
 
+#include <assert.h>
+
 static int psy_luaimport_get_method_optional(psy_LuaImport*,
 	const char*  method);
 static void psy_luaimport_find_weakuserdata(psy_LuaImport*);

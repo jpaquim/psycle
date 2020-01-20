@@ -8,11 +8,15 @@
 #include "plugincatcher.h"
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	MACHINEFACTORY_CREATEASPROXY = 1
 } MachineFactoryOptions;
 
-typedef struct {
+typedef struct psy_audio_MachineFactory {
 	MachineCallback machinecallback;	
 	psy_audio_PluginCatcher* catcher;
 	MachineFactoryOptions options;	
@@ -26,5 +30,9 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory*,
 	const char* path);
 void machinefactory_setoptions(psy_audio_MachineFactory*, MachineFactoryOptions options);
 MachineFactoryOptions machinefactory_options(psy_audio_MachineFactory*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MACHINEFACTORY_H */

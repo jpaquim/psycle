@@ -4,8 +4,16 @@
 #ifndef psy_audio_LUABIND_ARRAY_H
 #define psy_audio_LUABIND_ARRAY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <lua.h>
 
 int psy_audio_luabind_array_open(lua_State* L);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_LUABIND_ARRAY_H */

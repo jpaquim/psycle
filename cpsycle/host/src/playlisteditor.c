@@ -4,11 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "playlisteditor.h"
-#include <string.h>
 #include <dir.h>
 #include <exclusivelock.h>
 
 #include <uiopendialog.h>
+
+#include <string.h>
+#include <stdlib.h>
 
 #define TIMERID_PLAYLIST 4000
 
@@ -76,22 +78,22 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	ui_component_init(&self->row1, &self->component);
-	ui_component_enablealign(&self->row1);
-	ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->row1, &self->component);
+	psy_ui_component_enablealign(&self->row1);
+	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->addsong, &self->row1);
 	psy_ui_button_settext(&self->addsong, "+ Song");
 	psy_ui_button_init(&self->removesong, &self->row1);
 	psy_ui_button_settext(&self->removesong, "- Song");
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->row1, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->row1, 0),
 		psy_ui_ALIGN_LEFT,
 			&margin));	
-	ui_component_init(&self->row2, &self->component);
-	ui_component_enablealign(&self->row2);
-	ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->row2, &self->component);
+	psy_ui_component_enablealign(&self->row2);
+	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->prev, &self->row2);
 	psy_ui_button_settext(&self->prev, "Prev");
 	psy_ui_button_init(&self->play, &self->row2);
@@ -100,8 +102,8 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	psy_ui_button_settext(&self->stop, "Stop");
 	psy_ui_button_init(&self->next, &self->row2);
 	psy_ui_button_settext(&self->next, "Next");
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->row2, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->row2, 0),
 		psy_ui_ALIGN_LEFT,
 			&margin));	
 }
@@ -113,14 +115,14 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	self->entries = 0;
 	self->currentry = 0;
 	self->nextentry = 0;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);	
-	ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	playlisteditorbuttons_init(&self->buttons, &self->component);
-	ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_BOTTOM);	
+	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&self->buttons.addsong.signal_clicked, self, 
 		playlisteditor_onaddsong);
 	psy_signal_connect(&self->buttons.removesong.signal_clicked, self, 
@@ -133,12 +135,12 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 		playlisteditor_onprev);
 	psy_signal_connect(&self->buttons.next.signal_clicked, self, 
 		playlisteditor_onnext);
-	ui_component_resize(&self->component, 150, 0);
+	psy_ui_component_resize(&self->component, 150, 0);
 	psy_signal_connect(&self->component.signal_timer, self,
 		playlisteditor_ontimer);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		playlisteditor_onlistchanged);
-	ui_component_resize(&self->component, 200, 120);
+	psy_ui_component_resize(&self->component, 200, 120);
 }
 
 void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
@@ -204,12 +206,12 @@ void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 {		
 	player_stop(&self->workspace->player);
 	self->nextentry = self->currentry;
-	ui_component_starttimer(&self->component, TIMERID_PLAYLIST, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_PLAYLIST, 50);
 }
 
 void playlisteditor_onstop(PlayListEditor* self, psy_ui_Component* sender)
 {	
-	ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
+	psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
 	player_stop(&self->workspace->player);
 }
 
@@ -261,7 +263,7 @@ void playlisteditor_ontimer(PlayListEditor* self, psy_ui_Component* sender, int 
 			ui_listbox_setcursel(&self->listbox, c);
 		} else {
 			player_stop(&self->workspace->player);			
-			ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);		
+			psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
 		}
 	}
 }
@@ -281,6 +283,6 @@ void playlisteditor_onpreferredsize(PlayListEditor* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
 	if (rv) {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 	}
 }

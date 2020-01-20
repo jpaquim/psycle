@@ -9,6 +9,7 @@
 #include "songio.h"
 #include <string.h>
 #include <operations.h>
+#include "plugin_interface.h"
 
 static psy_audio_MachineInfo const macinfo = {	
 	MI_VERSION,

@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
    psy_Signal signal_clicked;   
@@ -16,5 +20,9 @@ void psy_ui_checkbox_settext(psy_ui_CheckBox*, const char* text);
 void psy_ui_checkbox_check(psy_ui_CheckBox*);
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox*);
 int psy_ui_checkbox_checked(psy_ui_CheckBox*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_CHECKBOX_H */

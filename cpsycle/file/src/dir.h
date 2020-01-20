@@ -4,6 +4,10 @@
 #ifndef psy_DIR_H
 #define psy_DIR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void psy_dir_enumerate(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
 void psy_dir_enumerate_recursive(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
 void psy_dir_findfile(const char* searchpath, const char* wildcard, char* filepath);
@@ -12,6 +16,10 @@ const char* pathenv(void);
 void setpathenv(const char* path);
 void insertpathenv(const char* path);
 void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_DIR_H */
 

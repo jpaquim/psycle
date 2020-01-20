@@ -12,6 +12,10 @@
 #include <multifilter.h>
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SAMPLER_DEFAULT_POLYPHONY	8
 
 #define SAMPLER_CMD_NONE			0x00
@@ -83,5 +87,9 @@ INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
 {
 	return &(self->custommachine.machine);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_SAMPLER_H */

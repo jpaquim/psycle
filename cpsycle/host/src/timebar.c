@@ -14,9 +14,9 @@ static void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timeri
 
 void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {				
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component,
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	self->player = player;
 	self->bpm = 0;
@@ -47,11 +47,11 @@ void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* pl
 		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 			psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
-		psy_list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
+		psy_list_free(psy_ui_components_setalign(
+			psy_ui_component_children(&self->component, 0),
 			psy_ui_ALIGN_LEFT, &margin));
 	}	
-	ui_component_starttimer(&self->component, TIMERID_TIMERBAR, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_TIMERBAR, 50);
 	psy_signal_connect(&self->component.signal_timer, self,
 		timerbar_ontimer);
 }

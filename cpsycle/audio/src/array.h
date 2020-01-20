@@ -9,6 +9,10 @@
 // array wrapper (shared : float*,
 //                notshared: universalis::os::aligned_memory_alloc(16,..)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct psy_audio_Array {
     float* ptr_, *base_;
     uintptr_t cap_;
@@ -44,5 +48,9 @@ void psy_audio_array_tan(psy_audio_Array*);
 void psy_audio_array_ceil(psy_audio_Array*);
 void psy_audio_array_floor(psy_audio_Array*);
 void psy_audio_array_fabs(psy_audio_Array*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

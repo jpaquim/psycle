@@ -6,6 +6,10 @@
 
 #include "machine.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	int machine;
 	int offset;
@@ -36,5 +40,9 @@ psy_TableIterator psy_audio_duplicatormap_begin(psy_audio_DuplicatorMap*);
 psy_audio_DuplicatorOutput* psy_audio_duplicatormap_output(
 	psy_audio_DuplicatorMap*, int output);
 uintptr_t psy_audio_duplicatormap_numoutputs(psy_audio_DuplicatorMap*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_DUPLICATORMAP_H */

@@ -7,6 +7,10 @@
 #include "dsptypes.h"
 #include "envelope.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {	
 	psy_dsp_seconds_t attack;
 	psy_dsp_seconds_t decay;
@@ -45,5 +49,9 @@ void psy_dsp_adsr_tick(psy_dsp_ADSR*);
 void psy_dsp_adsr_start(psy_dsp_ADSR*);
 void psy_dsp_adsr_release(psy_dsp_ADSR*);
 void psy_dsp_adsr_fastrelease(psy_dsp_ADSR*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_ADSR_H */

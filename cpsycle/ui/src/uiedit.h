@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	int charnumber;
@@ -20,5 +24,9 @@ void psy_ui_edit_setcharnumber(psy_ui_Edit*, int number);
 void psy_ui_edit_setlinenumber(psy_ui_Edit*, int number);
 void psy_ui_edit_enableedit(psy_ui_Edit*);
 void psy_ui_edit_preventedit(psy_ui_Edit*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_EDIT_H */

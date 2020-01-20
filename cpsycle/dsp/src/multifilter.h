@@ -6,6 +6,10 @@
 
 #include "lowpass12e.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum FilterType {
 	// This one is kept here because it is used in load/save. Also used in
 	// Sampulse instrument filter as "use channel default"
@@ -35,5 +39,9 @@ INLINE psy_dsp_Filter* psy_dsp_multifilter_base(psy_dsp_MultiFilter* self)
 {
 	return &(self->filter);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_MULTIFILTER_H */

@@ -4,6 +4,10 @@
 #ifndef psy_dsp_NOTESTAB_H
 #define psy_dsp_NOTESTAB_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef unsigned char psy_dsp_note_t;
 
 typedef enum {
@@ -15,5 +19,9 @@ typedef enum {
 
 const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode);
 const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_NOTESTAB_H */

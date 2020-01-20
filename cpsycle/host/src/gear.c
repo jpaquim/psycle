@@ -17,8 +17,8 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin margin;	
 
-	ui_component_init(gearbuttons_base(self), parent);	
-	ui_component_enablealign(gearbuttons_base(self));	
+	psy_ui_component_init(gearbuttons_base(self), parent);	
+	psy_ui_component_enablealign(gearbuttons_base(self));	
 	psy_ui_button_init(&self->createreplace, gearbuttons_base(self));
 	psy_ui_button_settext(&self->createreplace, "Create/Replace");
 	psy_ui_button_init(&self-> del, gearbuttons_base(self));
@@ -36,8 +36,8 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent)
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));				
-	psy_list_free(ui_components_setalign(
-		ui_component_children(gearbuttons_base(self), 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(gearbuttons_base(self), 0),
 		psy_ui_ALIGN_TOP,
 		&margin));
 }
@@ -53,17 +53,18 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	self->machines = &workspace->song->machines;
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
-	ui_component_init(gear_base(self), parent);
-	ui_component_enablealign(gear_base(self));
+	psy_ui_component_init(gear_base(self), parent);
+	psy_ui_component_enablealign(gear_base(self));
 	tabbar_init(&self->tabbar, gear_base(self));	
 	tabbar_append(&self->tabbar, "Generators");
 	tabbar_append(&self->tabbar, "Effects");	
 	tabbar_append(&self->tabbar, "Instruments");
 	tabbar_append(&self->tabbar, "Waves");	
 	tabbar_select(&self->tabbar, 0);
-	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
 	psy_ui_notebook_init(&self->notebook, gear_base(self));
-	ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+		psy_ui_ALIGN_CLIENT);
 	machinesbox_init(&self->machinesboxgen, psy_ui_notebook_base(&self->notebook), 
 		&workspace->song->machines, MACHINEBOX_GENERATOR, self->workspace);
 	machinesbox_init(&self->machinesboxfx, psy_ui_notebook_base(&self->notebook), 
@@ -78,7 +79,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		&self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);
 	gearbuttons_init(&self->buttons, gear_base(self));
-	ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self, gear_ondelete);
 	psy_signal_connect(&self->buttons.clone.signal_clicked, self,
 		gear_onclone);
@@ -120,7 +121,7 @@ void gear_onsongchanged(Gear* self, Workspace* workspace)
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
 	gear_connectsongsignals(self);
-	ui_component_invalidate(gear_base(self));
+	psy_ui_component_invalidate(gear_base(self));
 }
 
 void gear_onclone(Gear* self, psy_ui_Component* sender)

@@ -22,7 +22,7 @@ static void vtable_init(psy_ui_Edit* self)
 
 void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent, int styles)
 {  		
-	ui_win32_component_init(&self->component, parent, TEXT("EDIT"), 
+	psy_ui_win32_component_init(&self->component, parent, TEXT("EDIT"), 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | ES_LEFT | styles,
 		1);
@@ -84,11 +84,11 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		char text[256];
 		psy_ui_TextMetric tm;
 		
-		tm = ui_component_textmetric(&self->component);	
+		tm = psy_ui_component_textmetric(&self->component);	
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
 			GetWindowText((HWND)self->component.platform->hwnd, text, 256);
-			size = ui_component_textsize(&self->component, text);	
+			size = psy_ui_component_textsize(&self->component, text);	
 			rv->width = size.width + 2;		
 			rv->height = (int)(tm.tmHeight * self->linenumber);
 		} else {				

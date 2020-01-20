@@ -15,6 +15,7 @@
 #endif
 #include <operations.h>
 #include "pattern.h"
+#include "plugin_interface.h"
 #include "songio.h"
 
 static const VstInt32 kBlockSize = 512;

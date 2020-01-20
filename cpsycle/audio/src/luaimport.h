@@ -6,6 +6,10 @@
 
 #include "psyclescript.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
 	psy_LUAIMPORT_ERR_NOT_OPEN = 1,
 	psy_LUAIMPORT_ERR_NO_PROXY = 2,
@@ -30,5 +34,9 @@ void psy_luaimport_settarget(psy_LuaImport*, void* target);
 int psy_luaimport_open(psy_LuaImport*, const char* method);
 void psy_luaimport_pcall(psy_LuaImport*, int numret);
 void psy_luaimport_close(psy_LuaImport*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_LUAIMPORT_H */

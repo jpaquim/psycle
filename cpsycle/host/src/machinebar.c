@@ -39,8 +39,8 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	self->instruments = &workspace->song->instruments;
 	psy_table_init(&self->comboboxslots);
 	psy_table_init(&self->slotscombobox);
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	psy_ui_combobox_init(&self->machinebox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);	
@@ -60,8 +60,8 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 		OnInstParamBoxSelChange);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
 	ConnectSongSignals(self);					
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 

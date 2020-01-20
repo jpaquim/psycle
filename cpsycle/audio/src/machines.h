@@ -9,6 +9,10 @@
 #include <signal.h>
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MASTER_INDEX 128
 #define MAX_STREAM_SIZE 256
 
@@ -70,5 +74,9 @@ void machines_endfilemode(psy_audio_Machines*);
 void machines_setvolume(psy_audio_Machines*, psy_dsp_amp_t volume);
 psy_dsp_amp_t machines_volume(psy_audio_Machines*);
 psy_TableIterator machines_begin(psy_audio_Machines*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MACHINES_H */

@@ -23,13 +23,13 @@ static void vtable_init(psy_ui_Terminal* self)
 
 void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 {			
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);
 	psy_ui_editor_init(&self->output, &self->component);
-	ui_component_setalign(&self->output.component, psy_ui_ALIGN_CLIENT);
-	ui_component_resize(&self->component, 200, 200);	
+	psy_ui_component_setalign(&self->output.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_resize(&self->component, 200, 200);	
 }
 
 void ondestroy(psy_ui_Terminal* self, psy_ui_Component* sender)
@@ -41,7 +41,7 @@ void onpreferredsize(psy_ui_Terminal* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	if (rv) {
 		psy_ui_Size size;
 
-		size = ui_component_size(&self->component);
+		size = psy_ui_component_size(&self->component);
 		*rv = size;		
 	}
 }

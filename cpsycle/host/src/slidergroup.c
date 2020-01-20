@@ -17,7 +17,7 @@ static int timerid = 600;
 
 void InitSliderGroup(SliderGroup* self, psy_ui_Component* parent, const char* desc)
 {
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);	
 	ui_label_init(&self->desclabel, &self->component);
 	ui_slider_init(&self->slider, &self->component);		
 	ui_label_init(&self->label, &self->component);		
@@ -45,11 +45,11 @@ void OnSize(SliderGroup* self, psy_ui_Component* sender, psy_ui_Size* size)
 	int descwidth = 100;
 	int lblwidth = 70;
 	int sliderwidth = size->width - descwidth - lblwidth - 15;
-	ui_component_resize(&self->desclabel.component, descwidth, size->height);
-	ui_component_resize(&self->slider.component, sliderwidth, size->height);
-	ui_component_resize(&self->label.component, lblwidth, size->height);
-	ui_component_move(&self->slider.component, descwidth + 5, 0);
-	ui_component_move(&self->label.component, size->width - lblwidth - 5, 0);
+	psy_ui_component_resize(&self->desclabel.component, descwidth, size->height);
+	psy_ui_component_resize(&self->slider.component, sliderwidth, size->height);
+	psy_ui_component_resize(&self->label.component, lblwidth, size->height);
+	psy_ui_component_move(&self->slider.component, descwidth + 5, 0);
+	psy_ui_component_move(&self->label.component, size->width - lblwidth - 5, 0);
 }
 
 void OnSliderChanged(SliderGroup* self, psy_ui_Component* sender)

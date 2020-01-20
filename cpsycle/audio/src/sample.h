@@ -6,6 +6,10 @@
 
 #include "buffer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef union _Double { 
     struct {
         uint32_t LowPart;
@@ -98,5 +102,9 @@ void sample_save(psy_audio_Sample*, const char* path);
 void sample_setname(psy_audio_Sample*, const char* name);
 SampleIterator sample_begin(psy_audio_Sample*);
 const char* sample_name(psy_audio_Sample*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_SAMPLE_H */

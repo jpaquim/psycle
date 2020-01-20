@@ -4,6 +4,10 @@
 #ifndef psy_dsp_TYPES_H
 #define psy_dsp_TYPES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef float psy_dsp_amp_t;
 typedef float psy_dsp_beat_t;
 typedef float psy_dsp_seconds_t;
@@ -19,5 +23,9 @@ typedef enum {
 	PSY_DSP_AMP_RANGE_NATIVE,
 	PSY_DSP_AMP_RANGE_IGNORE
 } psy_dsp_amp_range_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_TYPES_H */

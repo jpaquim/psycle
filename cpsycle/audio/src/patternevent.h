@@ -8,6 +8,10 @@
 
 #include <dsptypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	uintptr_t low;
 	uintptr_t high; // including
@@ -92,5 +96,9 @@ void patternevent_clear(psy_audio_PatternEvent*);
 int patternevent_empty(const psy_audio_PatternEvent*);
 int patternevent_empty_except_volume(const psy_audio_PatternEvent*);
 int patternevent_has_volume(const psy_audio_PatternEvent*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PATTERNEVENT_H */

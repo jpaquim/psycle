@@ -6,6 +6,10 @@
 
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_Table map;	
 } Inputs;
@@ -17,5 +21,9 @@ int inputs_cmd(Inputs*, int input);
 
 unsigned int encodeinput(unsigned int keycode, int shift, int ctrl);
 void decodeinput(unsigned int input, unsigned int* keycode, int* shift, int* ctrl);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_INPUTS_H */

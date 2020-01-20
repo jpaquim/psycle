@@ -6,7 +6,15 @@
 
 #include "presets.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void psy_audio_presetsio_load(const char* path, psy_audio_Presets*);
 void psy_audio_presetsio_save(const char* path, psy_audio_Presets*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PRESETIO_H */

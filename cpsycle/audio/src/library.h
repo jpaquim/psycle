@@ -4,6 +4,10 @@
 #ifndef psy_audio_LIBRARY_H
 #define psy_audio_LIBRARY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   void* module; // psycore (///\todo should not be void* on _WIN64)
   int err;
@@ -20,5 +24,9 @@ void psy_library_load(psy_Library*, const char* path);
 void psy_library_unload(psy_Library*);
 void* psy_library_functionpointer(psy_Library*, const char* name);
 int psy_library_empty(psy_Library*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_LIBRARY_H */

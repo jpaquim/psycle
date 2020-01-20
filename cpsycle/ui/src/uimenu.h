@@ -6,17 +6,23 @@
 
 #include "uidef.h"
 
-struct ui_menu_struct {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct psy_ui_Menu {
   HMENU hmenu;
   int id;
   char* label;
-  void (*execute)(struct ui_menu_struct*);  
-};
-
-typedef struct ui_menu_struct ui_menu;
+  void (*execute)(struct psy_ui_Menu*);  
+} psy_ui_Menu;
 
 void ui_menu_setup(void);
-void ui_menu_init(ui_menu* menu, char* label, void (*execute)(ui_menu*));
-void ui_menu_append(ui_menu* self, ui_menu* child, int popup);
+void ui_menu_init(psy_ui_Menu*, char* label, void (*execute)(psy_ui_Menu*));
+void ui_menu_append(psy_ui_Menu*, psy_ui_Menu* child, int popup);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_MENU_H */

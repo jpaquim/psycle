@@ -19,7 +19,7 @@ void* psy_dsp_aligned_memory_alloc(size_t alignment, size_t count, size_t size) 
 	    address = 0;
 	}
 	return address;
-#elif defined _WIN32 and defined PSYCLE_USE_SSE and defined DIVERSALIS__CPU__X86__SSE
+#elif defined(_WIN32) && defined(PSYCLE_USE_SSE) && defined(DIVERSALIS__CPU__X86__SSE)
 		return _aligned_malloc(size * count, alignment);
 #else
 	return 0;
@@ -27,7 +27,7 @@ void* psy_dsp_aligned_memory_alloc(size_t alignment, size_t count, size_t size) 
 }
 
 void psy_dsp_aligned_memory_dealloc(void* address) {
-#if defined _WIN32 and defined PSYCLE_USE_SSE and defined DIVERSALIS__CPU__X86__SSE
+#if defined _WIN32 && defined PSYCLE_USE_SSE && defined DIVERSALIS__CPU__X86__SSE
 	_aligned_free(address);	
 #else
 	free(address);

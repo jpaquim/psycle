@@ -6,6 +6,10 @@
 
 #include "machine.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_Machine machine;
 	psy_audio_Machine* client;
@@ -15,5 +19,9 @@ typedef struct {
 } psy_audio_MachineProxy;
 
 void machineproxy_init(psy_audio_MachineProxy* self, psy_audio_Machine* client);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MACHINEPROXY_H */

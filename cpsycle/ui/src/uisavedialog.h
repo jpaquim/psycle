@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct psy_ui_SaveDialog {
 	psy_ui_Component* parent;
 	char* title;
@@ -26,5 +30,9 @@ void psy_ui_savedialog_dispose(psy_ui_SaveDialog*);
 
 int psy_ui_savedialog_execute(psy_ui_SaveDialog*);
 const char* psy_ui_savedialog_filename(psy_ui_SaveDialog*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

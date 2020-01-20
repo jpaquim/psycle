@@ -9,6 +9,10 @@
 #include <signal.h>
 #include <dsptypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MASTER_INDEX 128
 #define MAX_STREAM_SIZE 256
 
@@ -62,5 +66,9 @@ psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, uintptr_t outputslo
 	uintptr_t inputslot);
 psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self, uintptr_t outputslot,
 	uintptr_t inputslot);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_CONNECTIONS_H */

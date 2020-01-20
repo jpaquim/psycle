@@ -4,8 +4,16 @@
 #ifndef psy_audio_LUABIND_ENVELOPE_H
 #define psy_audio_LUABIND_ENVELOPE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <lua.h>
 
-int psy_audio_luabind_envelope_open(lua_State* L);
+int psy_audio_luabind_envelope_open(lua_State*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_LUABIND_ENVELOPE_H */

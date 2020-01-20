@@ -12,6 +12,10 @@
 #include <list.h>
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	BACKGROUND_NONE,
 	BACKGROUND_SET,
@@ -108,79 +112,82 @@ typedef struct psy_ui_Component {
 	int cursor;	
 } psy_ui_Component;
 
-void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
+void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 
-void ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
-void ui_component_dispose(psy_ui_Component*);
-void ui_component_destroy(psy_ui_Component*);
-int ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
+void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
+void psy_ui_component_dispose(psy_ui_Component*);
+void psy_ui_component_destroy(psy_ui_Component*);
+int psy_ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	LPCTSTR classname, int x, int y, int width, int height,
 	DWORD dwStyle, int usecommand);
-void ui_component_show(psy_ui_Component*);
-void ui_component_hide(psy_ui_Component*);
-void ui_component_show_state(psy_ui_Component*, int cmd);
-void ui_component_showhorizontalscrollbar(psy_ui_Component*);
-void ui_component_hidehorizontalscrollbar(psy_ui_Component*);
-void ui_component_sethorizontalscrollrange(psy_ui_Component*, int min, int max);
-void ui_component_showverticalscrollbar(psy_ui_Component*);
-void ui_component_hideverticalscrollbar(psy_ui_Component*);
-void ui_component_setverticalscrollrange(psy_ui_Component*, int min, int max);
-void ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
+void psy_ui_component_show(psy_ui_Component*);
+void psy_ui_component_hide(psy_ui_Component*);
+void psy_ui_component_show_state(psy_ui_Component*, int cmd);
+void psy_ui_component_showhorizontalscrollbar(psy_ui_Component*);
+void psy_ui_component_hidehorizontalscrollbar(psy_ui_Component*);
+void psy_ui_component_sethorizontalscrollrange(psy_ui_Component*, int min, int max);
+void psy_ui_component_showverticalscrollbar(psy_ui_Component*);
+void psy_ui_component_hideverticalscrollbar(psy_ui_Component*);
+void psy_ui_component_setverticalscrollrange(psy_ui_Component*, int min, int max);
+void psy_ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
 	int* scrollmax);
-int ui_component_verticalscrollposition(psy_ui_Component* self);
-void ui_component_setverticalscrollposition(psy_ui_Component*, int position);
-void ui_component_sethorizontalscrollposition(psy_ui_Component*, int position);
-int ui_component_horizontalscrollposition(psy_ui_Component*);
-void ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
-void ui_component_move(psy_ui_Component*, int left, int top);
-void ui_component_resize(psy_ui_Component*, int width, int height);
-void ui_component_clientresize(psy_ui_Component*, int width, int height);
-void ui_component_setposition(psy_ui_Component*, int x, int y, int width, int height);
-void ui_component_setmenu(psy_ui_Component*, ui_menu* menu);
-void ui_component_settitle(psy_ui_Component*, const char* title);
-psy_ui_Component* ui_component_parent(psy_ui_Component* component);
-void ui_component_enumerate_children(psy_ui_Component*, void* context, int (*childenum)(void*, void*));
-psy_List* ui_component_children(psy_ui_Component*, int recursive);
-void ui_component_capture(psy_ui_Component*);
-void ui_component_releasecapture();
-psy_ui_Size ui_component_size(psy_ui_Component*);
-psy_ui_Rectangle ui_component_position(psy_ui_Component*);
-psy_ui_Size ui_component_frame_size(psy_ui_Component*);
-void ui_component_invalidate(psy_ui_Component*);
-void ui_component_invalidaterect(psy_ui_Component*, const psy_ui_Rectangle*);
-void ui_component_update(psy_ui_Component*);
-void ui_component_setfocus(psy_ui_Component*);
-int ui_component_hasfocus(psy_ui_Component*);
-void ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
-void ui_component_preventdefault(psy_ui_Component*);
-void ui_component_init_base(psy_ui_Component*);
-void ui_component_init_signals(psy_ui_Component*);
-int ui_component_visible(psy_ui_Component*);
-void ui_component_align(psy_ui_Component*);
-void ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
-void ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
-void ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
-void ui_component_enablealign(psy_ui_Component*);
-void ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
-void ui_component_preventalign(psy_ui_Component*);
-void ui_component_enableinput(psy_ui_Component*, int recursive);
-void ui_component_preventinput(psy_ui_Component*, int recursive);
-void ui_component_setbackgroundmode(psy_ui_Component*, BackgroundMode);
-void ui_component_setbackgroundcolor(psy_ui_Component*, uint32_t color);
-void ui_component_setcolor(psy_ui_Component*, uint32_t color);
-void ui_component_starttimer(psy_ui_Component*, unsigned int id, unsigned int interval);
-void ui_component_stoptimer(psy_ui_Component*, unsigned int id);
-psy_ui_Size ui_component_textsize(psy_ui_Component*, const char*);
-psy_ui_TextMetric ui_component_textmetric(psy_ui_Component*);
-psy_ui_Size ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
-void ui_component_seticonressource(psy_ui_Component*, int ressourceid);
-void ui_component_doublebuffer(psy_ui_Component*);
+int psy_ui_component_verticalscrollposition(psy_ui_Component* self);
+void psy_ui_component_setverticalscrollposition(psy_ui_Component*, int position);
+void psy_ui_component_sethorizontalscrollposition(psy_ui_Component*, int position);
+int psy_ui_component_horizontalscrollposition(psy_ui_Component*);
+void psy_ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
+void psy_ui_component_move(psy_ui_Component*, int left, int top);
+void psy_ui_component_resize(psy_ui_Component*, int width, int height);
+void psy_ui_component_clientresize(psy_ui_Component*, int width, int height);
+void psy_ui_component_setposition(psy_ui_Component*, int x, int y, int width, int height);
+void psy_ui_component_setmenu(psy_ui_Component*, psy_ui_Menu* menu);
+void psy_ui_component_settitle(psy_ui_Component*, const char* title);
+psy_ui_Component* psy_ui_component_parent(psy_ui_Component* component);
+void psy_ui_component_enumerate_children(psy_ui_Component*, void* context, int (*childenum)(void*, void*));
+psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
+void psy_ui_component_capture(psy_ui_Component*);
+void psy_ui_component_releasecapture();
+psy_ui_Size psy_ui_component_size(psy_ui_Component*);
+psy_ui_Rectangle psy_ui_component_position(psy_ui_Component*);
+psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
+void psy_ui_component_invalidate(psy_ui_Component*);
+void psy_ui_component_invalidaterect(psy_ui_Component*, const psy_ui_Rectangle*);
+void psy_ui_component_update(psy_ui_Component*);
+void psy_ui_component_setfocus(psy_ui_Component*);
+int psy_ui_component_hasfocus(psy_ui_Component*);
+void psy_ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
+void psy_ui_component_preventdefault(psy_ui_Component*);
+void psy_ui_component_init_base(psy_ui_Component*);
+void psy_ui_component_init_signals(psy_ui_Component*);
+int psy_ui_component_visible(psy_ui_Component*);
+void psy_ui_component_align(psy_ui_Component*);
+void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
+void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
+void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
+void psy_ui_component_enablealign(psy_ui_Component*);
+void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
+void psy_ui_component_preventalign(psy_ui_Component*);
+void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
+void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
+void psy_ui_component_setbackgroundmode(psy_ui_Component*, BackgroundMode);
+void psy_ui_component_setbackgroundcolor(psy_ui_Component*, uint32_t color);
+void psy_ui_component_setcolor(psy_ui_Component*, uint32_t color);
+void psy_ui_component_starttimer(psy_ui_Component*, unsigned int id, unsigned int interval);
+void psy_ui_component_stoptimer(psy_ui_Component*, unsigned int id);
+psy_ui_Size psy_ui_component_textsize(psy_ui_Component*, const char*);
+psy_ui_TextMetric psy_ui_component_textmetric(psy_ui_Component*);
+psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
+void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
+void psy_ui_component_doublebuffer(psy_ui_Component*);
 
-psy_List* ui_components_setalign(psy_List*, psy_ui_AlignType,
+psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
 	const psy_ui_Margin*);
-psy_List* ui_components_setmargin(psy_List*, const psy_ui_Margin*);
+psy_List* psy_ui_components_setmargin(psy_List*, const psy_ui_Margin*);
 
-int ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
+int psy_ui_browsefolder(psy_ui_Component* self, const char* title, char* path);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_COMPONENT_H */

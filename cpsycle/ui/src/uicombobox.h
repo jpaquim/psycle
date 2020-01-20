@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
    psy_ui_Component combo;
@@ -22,5 +26,9 @@ void psy_ui_combobox_clear(psy_ui_ComboBox*);
 void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
 intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox*);
 void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_COMBOBOX_H */

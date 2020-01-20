@@ -11,6 +11,10 @@
 #include <signal.h>
 #include "library.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	VUMETER_NONE,
 	VUMETER_PEAK,
@@ -75,5 +79,9 @@ void player_restarteventdriver(psy_audio_Player*, int id);
 psy_EventDriver* player_kbddriver(psy_audio_Player*);
 psy_EventDriver* player_eventdriver(psy_audio_Player*, int id);
 unsigned int player_numeventdrivers(psy_audio_Player*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PLAYER_H */

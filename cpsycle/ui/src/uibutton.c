@@ -5,6 +5,7 @@
 
 #include "uibutton.h"
 #include <string.h>
+#include <stdlib.h>
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
@@ -37,7 +38,7 @@ static void vtable_init(psy_ui_Button* self)
 
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {	
-	ui_component_init(psy_ui_button_base(self), parent);
+	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->hover = 0;
@@ -67,18 +68,18 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	int centerx = 0;
 	int centery = 0;
 		
-	size = ui_component_size(psy_ui_button_base(self));
-	textsize = ui_component_textsize(psy_ui_button_base(self), self->text);
+	size = psy_ui_component_size(psy_ui_button_base(self));
+	textsize = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
 	if (self->hover) {
-		ui_settextcolor(g, 0x00FFFFFF);
+		psy_ui_settextcolor(g, 0x00FFFFFF);
 	} else 
 	if (self->highlight) {
-		ui_settextcolor(g, 0x00FFFFFF);
+		psy_ui_settextcolor(g, 0x00FFFFFF);
 	} else
 	{
-		ui_settextcolor(g, 0x00CACACA);
+		psy_ui_settextcolor(g, 0x00CACACA);
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
@@ -88,7 +89,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - textsize.height) / 2;
 	}	
-	ui_textoutrectangle(g, 
+	psy_ui_textoutrectangle(g, 
 		centerx,
 		centery,
 		ETO_CLIPPED,
@@ -107,7 +108,7 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 	int centerx = 4;
 	int centery = 0;
 	
-	size = ui_component_size(psy_ui_button_base(self));
+	size = psy_ui_component_size(psy_ui_button_base(self));
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
 		centerx = (size.width - 4) / 2;		
@@ -151,10 +152,10 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 void drawarrow(psy_ui_Button* self, psy_ui_Point* arrow, psy_ui_Graphics* g)
 {
 	if (self->hover == 1) {
-		ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
+		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
 			arrowhighlightcolor);
 	} else {		
-		ui_drawsolidpolygon(g, arrow, 4, arrowcolor, arrowcolor);
+		psy_ui_drawsolidpolygon(g, arrow, 4, arrowcolor, arrowcolor);
 	}		
 }
 
@@ -194,16 +195,16 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	psy_ui_TextMetric tm;	
 	psy_ui_Size size;		
 		
-	tm = ui_component_textmetric(psy_ui_button_base(self));
+	tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 	if (self->charnumber == 0) {
 		if (self->icon) {
 			if (self->icon == psy_ui_ICON_LESS || self->icon == psy_ui_ICON_MORE) {
-				size = ui_component_textsize(psy_ui_button_base(self), "<");
+				size = psy_ui_component_textsize(psy_ui_button_base(self), "<");
 			} else {
-				size = ui_component_textsize(psy_ui_button_base(self), "<<");
+				size = psy_ui_component_textsize(psy_ui_button_base(self), "<<");
 			}
 		} else {
-			size = ui_component_textsize(psy_ui_button_base(self), self->text);	
+			size = psy_ui_component_textsize(psy_ui_button_base(self), self->text);	
 		}
 		rv->width = size.width + 4;				
 	} else {
@@ -220,20 +221,20 @@ void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 void onmouseenter(psy_ui_Button* self)
 {
 	self->hover = 1;
-	ui_component_invalidate(psy_ui_button_base(self));
+	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
 void onmouseleave(psy_ui_Button* self)
 {		
 	self->hover = 0;
-	ui_component_invalidate(psy_ui_button_base(self));
+	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 {	
 	free(self->text);
 	self->text = _strdup(text);
-	ui_component_invalidate(psy_ui_button_base(self));
+	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
 void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
@@ -245,7 +246,7 @@ void psy_ui_button_highlight(psy_ui_Button* self)
 {
 	if (!self->highlight) {
 		self->highlight = 1;		
-		ui_component_invalidate(psy_ui_button_base(self));		
+		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
 
@@ -253,7 +254,7 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (self->highlight) {
 		self->highlight = 0;
-		ui_component_invalidate(psy_ui_button_base(self));
+		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
 

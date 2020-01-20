@@ -11,6 +11,10 @@
 #include <hashtbl.h>
 #include <signal.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_Signal signal_dispose;
 	struct psy_ui_Component* main;
@@ -25,5 +29,9 @@ void psy_ui_app_dispose(psy_ui_App*);
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
 int psy_ui_app_run(psy_ui_App*);
 void psy_ui_app_stop(psy_ui_App*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_APP_H */

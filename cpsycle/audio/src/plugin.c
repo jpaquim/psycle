@@ -5,12 +5,15 @@
 
 #include "plugin.h"
 #include "pattern.h"
+#include "plugin_interface.h"
 #include "songio.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "../../detail/portable.h"
 #include <math.h>
+
 #include <windows.h>
+#include "../../detail/portable.h"
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);

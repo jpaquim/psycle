@@ -4,7 +4,11 @@
 #ifndef psy_audio_WAVEIO_H
 #define psy_audio_WAVEIO_H
 
-#include "sample.h"
+#include "../../detail/stdint.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define psy_audio_WAVE_FORMAT_PCM			0x00001
 #define psy_audio_WAVE_FORMAT_FLOAT			0x00003
@@ -20,7 +24,11 @@ typedef struct {
     uint16_t cbSize; 
 } psy_audio_WaveFormatChunk; 
 
-void psy_audio_wave_load(psy_audio_Sample*, const char* path);
-void psy_audio_wave_save(psy_audio_Sample*, const char* path);
+void psy_audio_wave_load(struct psy_audio_Sample*, const char* path);
+void psy_audio_wave_save(struct psy_audio_Sample*, const char* path);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_WAVEIO_H */

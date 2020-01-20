@@ -17,15 +17,15 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {							
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	psy_ui_editor_init(&self->editor, &self->component);
-	ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		plugineditor_ondestroy);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		plugineditor_onsongchanged);	
-	ui_component_resize(&self->component, 400, 0);
+	psy_ui_component_resize(&self->component, 400, 0);
 	plugineditor_connectmachinesignals(self, workspace);
 }
 

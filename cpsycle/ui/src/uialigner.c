@@ -22,11 +22,11 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	psy_List* wrap = 0;	
 	psy_ui_Component* client = 0;
 		
-	size = ui_component_size(self->component);
-	tm = ui_component_textmetric(self->component);
+	size = psy_ui_component_size(self->component);
+	tm = psy_ui_component_textmetric(self->component);
 	cp_bottomright.x = size.width;
 	cp_bottomright.y = size.height;
-	for (p = q = ui_component_children(self->component, 0); p != 0;
+	for (p = q = psy_ui_component_children(self->component, 0); p != 0;
 			p = p->next) {
 		psy_ui_Component* component;
 			
@@ -37,12 +37,12 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 
 			limit.width = cp_bottomright.x - cp_topleft.x;
 			limit.height = cp_bottomright.y - cp_topleft.y;
-			componentsize = ui_component_preferredsize(component, &limit);
+			componentsize = psy_ui_component_preferredsize(component, &limit);
 			if (component->align == psy_ui_ALIGN_CLIENT) {
 				client = component;
 			} 
 			if (component->align == psy_ui_ALIGN_FILL) {
-				ui_component_setposition(component,
+				psy_ui_component_setposition(component,
 					psy_ui_value_px(&component->margin.left, &tm),
 					psy_ui_value_px(&component->margin.top, &tm),				
 					size.width - psy_ui_value_px(&component->margin.left, &tm)
@@ -52,7 +52,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			} else
 			if (component->align == psy_ui_ALIGN_TOP) {
 				cp_topleft.y += psy_ui_value_px(&component->margin.top, &tm);
-				ui_component_setposition(component, 
+				psy_ui_component_setposition(component, 
 					cp_topleft.x + psy_ui_value_px(&component->margin.left, &tm),
 					cp_topleft.y,
 					cp_bottomright.x - cp_topleft.x -
@@ -64,7 +64,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			if (component->align == psy_ui_ALIGN_BOTTOM) {
 				cp_bottomright.y -=
 					psy_ui_value_px(&component->margin.bottom, &tm);
-				ui_component_setposition(component, 
+				psy_ui_component_setposition(component, 
 					cp_topleft.x + psy_ui_value_px(&component->margin.left, &tm), 
 					cp_bottomright.y - componentsize.height,
 					cp_bottomright.x - cp_topleft.x -
@@ -79,7 +79,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				requiredcomponentwidth = componentsize.width +
 					psy_ui_margin_width_px(&component->margin, &tm);
 				cp_bottomright.x -= requiredcomponentwidth;
-				ui_component_setposition(component,
+				psy_ui_component_setposition(component,
 					cp_bottomright.x + psy_ui_value_px(&component->margin.left, &tm),
 					cp_topleft.y +
 						psy_ui_value_px(&component->margin.top, &tm),
@@ -101,7 +101,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						for (w = wrap; w != 0; w = w->next) {
 							psy_ui_Component* c;
 							c = (psy_ui_Component*)w->entry;
-							ui_component_resize(c, ui_component_size(c).width,
+							psy_ui_component_resize(c, psy_ui_component_size(c).width,
 								cpymax - cp_topleft.y -
 								psy_ui_margin_height_px(&component->margin, &tm));
 						}
@@ -112,7 +112,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 					psy_list_append(&wrap, component);					
 				}
 				cp_topleft.x += psy_ui_value_px(&component->margin.left, &tm);
-				ui_component_setposition(component,
+				psy_ui_component_setposition(component,
 					cp_topleft.x,
 					cp_topleft.y + psy_ui_value_px(&component->margin.top, &tm),
 					componentsize.width,
@@ -131,7 +131,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 		}
 	}
 	if (client) {		
-		ui_component_setposition(client,
+		psy_ui_component_setposition(client,
 			cp_topleft.x + psy_ui_value_px(&client->margin.left, &tm),
 			cp_topleft.y + psy_ui_value_px(&client->margin.top, &tm),
 			cp_bottomright.x - cp_topleft.x -
@@ -150,8 +150,8 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 
-		size = ui_component_size(self->component);
-		tm = ui_component_textmetric(self->component);
+		size = psy_ui_component_size(self->component);
+		tm = psy_ui_component_textmetric(self->component);
 		if (self->component->alignchildren && !self->component->preventpreferredsize) {
 			psy_List* p;
 			psy_List* q;
@@ -165,7 +165,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND
 				? 0
 				: limit->width;
-			for (p = q = ui_component_children(self->component, 0); p != 0;
+			for (p = q = psy_ui_component_children(self->component, 0); p != 0;
 					p = p->next) {
 				psy_ui_Component* component;
 					
@@ -177,7 +177,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 					limit.width = size.width - cp_topleft.x -
 						cp_bottomright.x;
 					limit.height = size.height;
-					componentsize = ui_component_preferredsize(component, &limit);
+					componentsize = psy_ui_component_preferredsize(component, &limit);
 					if (component->align == psy_ui_ALIGN_TOP ||
 							component->align == psy_ui_ALIGN_BOTTOM) {
 						cp.y += componentsize.height +

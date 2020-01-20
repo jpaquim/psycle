@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "patternproperties.h"
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 static void patternproperties_onapply(PatternProperties*,
@@ -15,8 +16,8 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 
 	self->pattern = pattern;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);	
 	psy_ui_label_settext(&self->namelabel, "Name");	
 	psy_ui_edit_init(&self->nameedit, &self->component, 0);
@@ -30,8 +31,8 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 		patternproperties_onapply);
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(1.0));
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_TOP,
 		&margin));	
 	

@@ -4,14 +4,15 @@
 #include "../../detail/prefix.h"
 
 #include "uicombobox.h"
+#include <stdlib.h>
 
 static void onpreferredsize(psy_ui_ComboBox*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void oncommand(psy_ui_ComboBox*, psy_ui_Component* sender, WPARAM wParam,
 	LPARAM lParam);
 static void ondestroy(psy_ui_ComboBox*, psy_ui_Component* sender);
-static void ui_combobox_create_system(psy_ui_ComboBox*,
+static void psy_ui_combobox_create_system(psy_ui_ComboBox*,
 	psy_ui_Component* parent);
-static void ui_combobox_create_ownerdrawn(psy_ui_ComboBox*,
+static void psy_ui_combobox_create_ownerdrawn(psy_ui_ComboBox*,
 	psy_ui_Component* parent);
 static void onownerdraw(psy_ui_ComboBox*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_ComboBox*, psy_ui_MouseEvent*);
@@ -38,7 +39,7 @@ static void vtable_init(psy_ui_ComboBox* self)
 
 void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 {  			
-	ui_combobox_create_ownerdrawn(self, parent);
+	psy_ui_combobox_create_ownerdrawn(self, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->charnumber = 0;
@@ -50,23 +51,23 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 static void psy_ui_combobox_create_system(psy_ui_ComboBox* self,
 	psy_ui_Component* parent)
 {	
-	ui_win32_component_init(&self->component, parent, TEXT("COMBOBOX"), 
+	psy_ui_win32_component_init(&self->component, parent, TEXT("COMBOBOX"),
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		1);
-	ui_component_resize(&self->component, 90, 200);
+	psy_ui_component_resize(&self->component, 90, 200);
 	psy_signal_connect(&self->component.signal_command, self, oncommand);	
 	self->currcombo = &self->component;
 }
 
-void ui_combobox_create_ownerdrawn(psy_ui_ComboBox* self, psy_ui_Component* parent)
+void psy_ui_combobox_create_ownerdrawn(psy_ui_ComboBox* self, psy_ui_Component* parent)
 {		
-	ui_component_init(&self->component, parent);	
-	ui_win32_component_init(&self->combo, &self->component, TEXT("COMBOBOX"), 
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_win32_component_init(&self->combo, &self->component, TEXT("COMBOBOX"), 
 		0, 0, 100, 200,
 		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
 		1);	
-	ui_component_hide(&self->combo);	
+	psy_ui_component_hide(&self->combo);
 	psy_signal_connect(&self->combo.signal_command, self, oncommand);	
 	self->ownerdrawn = 1;	
 	self->currcombo = &self->combo;	
@@ -84,7 +85,7 @@ int psy_ui_combobox_addstring(psy_ui_ComboBox* self, const char* text)
 	index = SendMessage((HWND)self->currcombo->platform->hwnd, CB_ADDSTRING, (WPARAM)0,
 		(LPARAM)text);
 	if (self->ownerdrawn) {
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 	return (int)index;
 }
@@ -93,7 +94,7 @@ void psy_ui_combobox_clear(psy_ui_ComboBox* self)
 {
 	SendMessage((HWND)self->currcombo->platform->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
 	if (self->ownerdrawn) {
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -102,7 +103,7 @@ void psy_ui_combobox_setcursel(psy_ui_ComboBox* self, intptr_t index)
 	SendMessage((HWND)self->currcombo->platform->hwnd, CB_SETCURSEL, (WPARAM)index,
 		(LPARAM)0);
 	if (self->ownerdrawn) {
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -123,7 +124,7 @@ void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit,
 	if (rv) {
 		psy_ui_TextMetric tm;
 
-		tm = ui_component_textmetric(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		if (self->charnumber == 0) {
 			rv->width = 90;
 		} else {		
@@ -145,7 +146,7 @@ void oncommand(psy_ui_ComboBox* self, psy_ui_Component* sender, WPARAM wParam,
 				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
 			}
 			if (self->ownerdrawn) {
-				ui_component_invalidate(&self->component);
+				psy_ui_component_invalidate(&self->component);
 			}
         }
 		break;
@@ -170,10 +171,10 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	unsigned int arrowcolor = 0x00777777;
 	unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 
-	tm = ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	vcenter = (size.height - tm.tmHeight) / 2;
 	varrowcenter = (size.height - 10) / 2;
 	sel = SendMessage((HWND)self->combo.platform->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
@@ -188,13 +189,13 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 			SendMessage((HWND)self->combo.platform->hwnd, CB_GETLBTEXT, (WPARAM)sel,
 				(LPARAM)txt);
 
-			ui_setbackgroundmode(g, TRANSPARENT);
+			psy_ui_setbackgroundmode(g, TRANSPARENT);
 			if (self->hover) {
-				ui_settextcolor(g, 0x00FFFFFF);
+				psy_ui_settextcolor(g, 0x00FFFFFF);
 			} else {
-				ui_settextcolor(g, 0x00CACACA);
+				psy_ui_settextcolor(g, 0x00CACACA);
 			}
-			ui_textoutrectangle(g, 0, vcenter, ETO_CLIPPED, r, txt, strlen(txt));
+			psy_ui_textoutrectangle(g, 0, vcenter, ETO_CLIPPED, r, txt, strlen(txt));
 			free(txt);
 		}
 	}
@@ -210,10 +211,10 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	arrow_down[3] = arrow_down[0];
 
 	if (self->hover == 1) {
-		ui_drawsolidpolygon(g, arrow_down, 4, arrowhighlightcolor,
+		psy_ui_drawsolidpolygon(g, arrow_down, 4, arrowhighlightcolor,
 			arrowhighlightcolor);
 	} else {
-		ui_drawsolidpolygon(g, arrow_down, 4, arrowcolor, arrowcolor);
+		psy_ui_drawsolidpolygon(g, arrow_down, 4, arrowcolor, arrowcolor);
 	}
 
 	ax = size.width - 25;
@@ -228,10 +229,10 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	arrow_right[3] = arrow_right[0];
 
 	if (self->hover == 3) {
-		ui_drawsolidpolygon(g, arrow_right, 4, arrowhighlightcolor,
+		psy_ui_drawsolidpolygon(g, arrow_right, 4, arrowhighlightcolor,
 			arrowhighlightcolor);
 	} else {
-		ui_drawsolidpolygon(g, arrow_right, 4, arrowcolor, arrowcolor);
+		psy_ui_drawsolidpolygon(g, arrow_right, 4, arrowcolor, arrowcolor);
 	}
 
 	ax = size.width - 40;
@@ -246,16 +247,16 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	arrow_left[3] = arrow_left[0];
 
 	if (self->hover == 2) {
-		ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor,
+		psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor,
 			arrowhighlightcolor);
 	} else {		
-		ui_drawsolidpolygon(g, arrow_left, 4, arrowcolor, arrowcolor);
+		psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowcolor, arrowcolor);
 	}
 }
 
 void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_Size size = ui_component_size(&self->component);	
+	psy_ui_Size size = psy_ui_component_size(&self->component);	
 
 	if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
 		intptr_t index = psy_ui_combobox_cursel(self);
@@ -288,7 +289,7 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	if (self->hover) {
 		int hover = self->hover;
-		psy_ui_Size size = ui_component_size(&self->component);	
+		psy_ui_Size size = psy_ui_component_size(&self->component);	
 
 		if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
 			intptr_t index = psy_ui_combobox_cursel(self);
@@ -309,7 +310,7 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 			self->hover = 1;
 		}
 		if (hover != self->hover) {
-			ui_component_invalidate(&self->component);
+			psy_ui_component_invalidate(&self->component);
 		}
 	}
 }
@@ -317,12 +318,12 @@ void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 void onmouseenter(psy_ui_ComboBox* self)
 {
 	self->hover = 1;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 
 void onmouseleave(psy_ui_ComboBox* self)
 {		
 	self->hover = 0;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }

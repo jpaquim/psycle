@@ -8,7 +8,7 @@
 void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y,
 	SkinCoord* coord)
 {
-	ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,
+	psy_ui_drawbitmap(g, bitmap, x + coord->destx, y + coord->desty,
 		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
 }
 

@@ -128,7 +128,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					SetWindowLong((HWND)component->platform->hwnd, GWL_WNDPROC,
 						(LONG)component->platform->wndproc);
 				#endif				
-				ui_component_dispose(component);
+				psy_ui_component_dispose(component);
 			break;
 			case WM_DESTROY:
 				if (component->signal_destroy.slots) {
@@ -179,7 +179,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	psy_ui_Component*   component;
 	psy_ui_Graphics	 g;
 	HMENU		 hMenu;
-	ui_menu*	 menu;
+	psy_ui_Menu* menu;
 	int			 menu_id;
 	psy_ui_WinApp* winapp;
 
@@ -200,7 +200,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				{
 					psy_ui_Size size;
 					if (component->alignchildren) {
-						ui_component_align(component);
+						psy_ui_component_align(component);
 					}
 					size.width = LOWORD(lParam);
 					size.height = HIWORD(lParam);
@@ -278,9 +278,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						bufferBmp = CreateCompatibleBitmap(hdc, rect.right,
 							rect.bottom);
 						oldBmp = SelectObject(bufferDC, bufferBmp);					
-						ui_graphics_init(&g, bufferDC);
+						psy_ui_graphics_init(&g, bufferDC);
 					} else {
-						ui_graphics_init(&g, hdc);
+						psy_ui_graphics_init(&g, hdc);
 					}
 					psy_ui_setrectangle(&g.clip,
 						ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
@@ -291,7 +291,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_setrectangle(&r,
 						rect.left, rect.top, rect.right - rect.left,
 						rect.bottom - rect.top);				
-						ui_drawsolidrectangle(&g, r, component->backgroundcolor);
+						psy_ui_drawsolidrectangle(&g, r, component->backgroundcolor);
 					}
 					if (component->font.hfont) {
 						hPrevFont = SelectObject(g.hdc, component->font.hfont);
@@ -314,7 +314,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						DeleteObject(bufferBmp);
 						DeleteDC(bufferDC);					
 					}
-					ui_graphics_dispose(&g);
+					psy_ui_graphics_dispose(&g);
 					EndPaint (hwnd, &ps) ;
 					return 0 ;
 				}
@@ -323,7 +323,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (component->signal_destroyed.slots) {
 					psy_signal_emit(&component->signal_destroyed, component, 0);
 				}
-				ui_component_dispose(component);
+				psy_ui_component_dispose(component);
 				return 0;
 			break;
 			case WM_DESTROY:
@@ -559,9 +559,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							int scrollmin;
 							int scrollmax;
 
-							ui_component_verticalscrollrange(component, &scrollmin,
+							psy_ui_component_verticalscrollrange(component, &scrollmin,
 								&scrollmax);							
-							iPos = ui_component_verticalscrollposition(component) - 
+							iPos = psy_ui_component_verticalscrollposition(component) - 
 								component->wheelscroll;
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
@@ -577,9 +577,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							int scrollmin;
 							int scrollmax;
 
-							ui_component_verticalscrollrange(component, &scrollmin,
+							psy_ui_component_verticalscrollrange(component, &scrollmin,
 								&scrollmax);
-							iPos = ui_component_verticalscrollposition(component) + 
+							iPos = psy_ui_component_verticalscrollposition(component) + 
 								component->wheelscroll;
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
@@ -656,7 +656,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 				0, (iPos - si.nPos));			
 		}
 		if (component->handlevscroll) {
-			ui_component_scrollstep(component, 0, (iPos - si.nPos));
+			psy_ui_component_scrollstep(component, 0, (iPos - si.nPos));
 		}
 	}
 }
@@ -692,7 +692,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 				(iPos - si.nPos), 0);			
 		}
 		if (component->handlehscroll) {
-			ui_component_scrollstep(component, (iPos - si.nPos), 0);
+			psy_ui_component_scrollstep(component, (iPos - si.nPos), 0);
 		}
 	}
 }

@@ -6,7 +6,7 @@
 #include "operations.h"
 #include "../../detail/psyconf.h"
 
-#if defined PSYCLE_USE_SSE and defined DIVERSALIS__CPU__X86__SSE
+#if defined PSYCLE_USE_SSE && defined DIVERSALIS__CPU__X86__SSE
 #include <string.h>
 #include "alignedalloc.h"
 #include <xmmintrin.h>

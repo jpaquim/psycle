@@ -9,12 +9,12 @@
 psy_Table menumap;
 static int id = 40000;
 
-void ui_menu_setup(void)
+void psy_ui_menu_setup(void)
 {
 	psy_table_init(&menumap);
 }
 
-void ui_menu_init(ui_menu* menu, char* label, void (*execute)(ui_menu*))
+void psy_ui_menu_init(psy_ui_Menu* menu, char* label, void (*execute)(psy_ui_Menu*))
 {  
   menu->hmenu = CreateMenu();
   menu->label = label;
@@ -22,7 +22,7 @@ void ui_menu_init(ui_menu* menu, char* label, void (*execute)(ui_menu*))
   menu->execute = execute;
 }
 
-void ui_menu_append(ui_menu* self, ui_menu* child, int popup)
+void psy_ui_menu_append(psy_ui_Menu* self, psy_ui_Menu* child, int popup)
 {
 	if (popup != 0)
 	{		

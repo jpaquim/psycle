@@ -6,6 +6,7 @@
 
 #include "psy2.h"
 #include "psy2converter.h"
+#include "song.h"
 #include "songio.h"
 #include "pattern.h"
 #include "constants.h"

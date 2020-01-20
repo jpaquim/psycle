@@ -8,6 +8,10 @@
 #include <signal.h>
 #include "../../detail/psydef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	int keycode;
 	int keydata;
@@ -32,5 +36,9 @@ typedef struct {
 void psy_ui_mouseevent_init(psy_ui_MouseEvent*, int x, int y, int button,
 	int delta);
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_EVENTS_H */

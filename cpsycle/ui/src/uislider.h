@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;	
 	double value;
@@ -39,5 +43,9 @@ void psy_ui_slider_showhorizontal(psy_ui_Slider*);
 psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider*);
 void psy_ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,
 	ui_slider_fptweak, ui_slider_fpvalue);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_SLIDER_H */

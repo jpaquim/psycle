@@ -7,9 +7,13 @@
 #include "custommachine.h"
 #include "library.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_CustomMachine custommachine;	
-	CMachineInterface* mi;
+	struct CMachineInterface* mi;
 	psy_Library library;	
 	psy_audio_MachineInfo* plugininfo;
 	unsigned int preventsequencerlinetick;
@@ -22,5 +26,9 @@ INLINE psy_audio_Machine* psy_audio_plugin_base(psy_audio_Plugin* self)
 {
 	return &(self->custommachine.machine);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PLUGIN_H */

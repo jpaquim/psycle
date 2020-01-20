@@ -7,6 +7,10 @@
 #include "custommachine.h"
 #include "duplicatormap.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_CustomMachine custommachine;	
 	psy_audio_DuplicatorMap map;
@@ -20,5 +24,9 @@ INLINE psy_audio_Machine* psy_audio_duplicator2_base(psy_audio_Duplicator2* self
 {
 	return &(self->custommachine.machine);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_DUPLICATOR2_H */

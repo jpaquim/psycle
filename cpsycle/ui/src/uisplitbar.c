@@ -37,11 +37,11 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 {		
 	self->resize = 0;
 	self->hover = 0;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
-	ui_component_resize(&self->component, 4, 5);
+	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_resize(&self->component, 4, 5);
 	psy_signal_connect(&self->component.signal_mousedown, self, splitbar_onmousedown);
 		psy_signal_connect(&self->component.signal_mousemove, self, splitbar_onmousemove);
 	psy_signal_connect(&self->component.signal_mouseup, self, splitbar_onmouseup);
@@ -55,18 +55,18 @@ void splitbar_onpreferredsize(psy_ui_SplitBar* self, psy_ui_Size* limit, psy_ui_
 	if (rv) {		
 		psy_ui_TextMetric tm;
 
-		tm = ui_component_textmetric(&self->component);		
+		tm = psy_ui_component_textmetric(&self->component);		
 		rv->width = (int)(tm.tmAveCharWidth * 0.8);
 		rv->height = (int) (tm.tmHeight * 1.5);
 	} else {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 	}
 }
 
 void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	ui_component_capture(sender);
+	psy_ui_component_capture(sender);
 	self->resize = 1;
 	splitbar_setcursor(self);
 }
@@ -77,16 +77,16 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_Component* sender,
 	if (self->resize == 1) {		
 		psy_ui_Rectangle position;
 			
-		position = ui_component_position(sender);
+		position = psy_ui_component_position(sender);
 		if (sender->align == psy_ui_ALIGN_LEFT) {
-			ui_component_move(sender, position.left + ev->x, position.top);
+			psy_ui_component_move(sender, position.left + ev->x, position.top);
 		} else {
-			ui_component_move(sender, position.left, position.top + ev->y);
+			psy_ui_component_move(sender, position.left, position.top + ev->y);
 		}
-		ui_component_invalidate(sender);
-		ui_component_update(sender);		
+		psy_ui_component_invalidate(sender);
+		psy_ui_component_update(sender);		
 	} else {
-		ui_component_invalidate(sender);
+		psy_ui_component_invalidate(sender);
 	}
 	splitbar_setcursor(self);
 }
@@ -97,20 +97,20 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_Component* sender,
 	psy_ui_Rectangle position;
 	psy_ui_Component* prev;
 
-	ui_component_releasecapture();
+	psy_ui_component_releasecapture();
 	self->resize = 0;
 	prev = splitbar_prevcomponent(self);
 	if (prev) {		
-		position = ui_component_position(sender);
+		position = psy_ui_component_position(sender);
 		if (prev->align == psy_ui_ALIGN_LEFT) {
-			ui_component_resize(prev, position.left,
-				ui_component_size(prev).height);
+			psy_ui_component_resize(prev, position.left,
+				psy_ui_component_size(prev).height);
 		} else
 		if (prev->align == psy_ui_ALIGN_TOP) {
-			ui_component_resize(prev, ui_component_size(prev).width,
+			psy_ui_component_resize(prev, psy_ui_component_size(prev).width,
 				position.top);
 		}
-		ui_component_align(ui_component_parent(sender));
+		psy_ui_component_align(psy_ui_component_parent(sender));
 	}
 	splitbar_setcursor(self);
 }
@@ -119,7 +119,7 @@ void splitbar_onmouseenter(psy_ui_SplitBar* self, psy_ui_Component* sender)
 {	
 	self->hover = 1;
 //	ui_component_setbackgroundcolor(sender, 0x00666666);
-	ui_component_invalidate(sender);	
+	psy_ui_component_invalidate(sender);
 	splitbar_setcursor(self);
 }
 
@@ -127,7 +127,7 @@ void splitbar_onmouseleave(psy_ui_SplitBar* self, psy_ui_Component* sender)
 {			
 	self->hover = 0;
 //	ui_component_setbackgroundcolor(sender, 0x00232323);
-	ui_component_invalidate(sender);
+	psy_ui_component_invalidate(sender);
 }
 
 psy_ui_Component* splitbar_prevcomponent(psy_ui_SplitBar* self)
@@ -135,7 +135,8 @@ psy_ui_Component* splitbar_prevcomponent(psy_ui_SplitBar* self)
 	psy_ui_Component* rv = 0;
 	psy_List* c;
 
-	c = ui_component_children(ui_component_parent(&self->component), 0);	
+	c = psy_ui_component_children(psy_ui_component_parent(&self->component),
+		0);
 	while (c) {
 		if (c->entry == &self->component) {
 			c = c->prev;
@@ -169,7 +170,7 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle r;
 	psy_ui_Size size;
 	
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	if (self->component.align == psy_ui_ALIGN_LEFT) {
 		psy_ui_setrectangle(&r, (int) (size.width * 0.1), 0,
 			(int) (size.width * 0.8), size.height);
@@ -178,8 +179,8 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 			size.width, (int) (size.height * 0.2));
 	}
 	if (self->hover) {
-		ui_drawsolidrectangle(g, r, 0x00666666);
+		psy_ui_drawsolidrectangle(g, r, 0x00666666);
 	} else {
-		ui_drawsolidrectangle(g, r, 0x00232323);
+		psy_ui_drawsolidrectangle(g, r, 0x00232323);
 	}
 }

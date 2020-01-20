@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "song.h"
+
+#include "machinefactory.h"
+
 #include <stdlib.h>
 #include <string.h>
 

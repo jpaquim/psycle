@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;	
 } psy_ui_Editor;
@@ -19,5 +23,9 @@ void psy_ui_editor_setcolor(psy_ui_Editor*, uint32_t color);
 void psy_ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);
 void psy_ui_editor_enableedit(psy_ui_Editor*);
 void psy_ui_editor_preventedit(psy_ui_Editor*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_EDITOR_H */

@@ -11,6 +11,10 @@
 #include <signal.h>
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_Properties* plugins;
 	char* inipath;
@@ -32,5 +36,9 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher*, MachineType, const char
 void plugincatcher_catchername(psy_audio_PluginCatcher*, const char* path, char* name);
 const char* plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
 	int type);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PLUGINCATCHER_H */

@@ -7,7 +7,7 @@
 
 void psy_ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
 {
-	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"),
+	psy_ui_win32_component_init(&self->component, parent, TEXT("BUTTON"),
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
 		0);

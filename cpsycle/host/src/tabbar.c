@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "tabbar.h"
+
+#include <stdlib.h>
 #include <string.h>
 
 static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
@@ -54,10 +56,10 @@ void tab_dispose(Tab* self)
 
 void tabbar_init(TabBar* self, psy_ui_Component* parent)
 {
-	ui_component_init(tabbar_base(self), parent);
+	psy_ui_component_init(tabbar_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_doublebuffer(tabbar_base(self));
+	psy_ui_component_doublebuffer(tabbar_base(self));
 	self->tabs = 0;
 	self->selected = 0;
 	self->hover = 0;
@@ -94,9 +96,9 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 	
-	size = ui_component_size(tabbar_base(self));
-	tm = ui_component_textmetric(tabbar_base(self));
-	ui_setbackgroundmode(g, TRANSPARENT);	
+	size = psy_ui_component_size(tabbar_base(self));
+	tm = psy_ui_component_textmetric(tabbar_base(self));
+	psy_ui_setbackgroundmode(g, TRANSPARENT);	
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		cpx = 0;
 	} else 
@@ -112,49 +114,49 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 
 		tab = (Tab*)tabs->entry;
 		if (self->selected == c) {
-			ui_settextcolor(g, 0x00B1C8B0);
+			psy_ui_settextcolor(g, 0x00B1C8B0);
 			cpxsel = cpx + psy_ui_value_px(&tab->margin.left, &tm);
 			selwidth = tab->size.width;
 		}
 		if (self->hover && self->hoverindex == c && self->hoverindex != self->selected) {
-			ui_settextcolor(g, 0x00FFFFFF);
+			psy_ui_settextcolor(g, 0x00FFFFFF);
 			cpxhover = cpx + psy_ui_value_px(&tab->margin.left, &tm);
 			hoverwidth = tab->size.width;
 		} else
 		if (self->selected == c) {
-			ui_settextcolor(g, 0x00B1C8B0);		
+			psy_ui_settextcolor(g, 0x00B1C8B0);		
 		} else {
-			ui_settextcolor(g, 0x00D1C5B6);
+			psy_ui_settextcolor(g, 0x00D1C5B6);
 		}		
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {
 			cpx += psy_ui_value_px(&tab->margin.left, &tm);
-			ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
+			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
 			cpx += tab->size.width + psy_ui_value_px(&tab->margin.right, &tm);
 		} else
 		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 			self->tabalignment == psy_ui_ALIGN_RIGHT) {
 			cpy += psy_ui_value_px(&tab->margin.top, &tm);
-			ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
+			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
 			cpy += tab->size.height + psy_ui_value_px(&tab->margin.bottom, &tm);
 		}
 	}
-	ui_setcolor(g, 0x005F5F5F);		
+	psy_ui_setcolor(g, 0x005F5F5F);		
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		int y;
 
-		ui_setcolor(g, 0x00B1C8B0);		
+		psy_ui_setcolor(g, 0x00B1C8B0);
 		y = tm.tmHeight + 2;
-		ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);		 
+		psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);		 
 		if (self->hover && self->hoverindex != self->selected) {		
-			ui_setcolor(g, 0x00FFFFFF);
-			ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
+			psy_ui_setcolor(g, 0x00FFFFFF);
+			psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
 		}
 	} else
 	if (self->tabalignment == psy_ui_ALIGN_LEFT) {
-		ui_drawline(g, size.width - 2, 0, size.width - 2, cpy);
+		psy_ui_drawline(g, size.width - 2, 0, size.width - 2, cpy);
 	}
 	if (self->tabalignment == psy_ui_ALIGN_RIGHT) {
-		ui_drawline(g, 0, 0, 0, cpy);
+		psy_ui_drawline(g, 0, 0, 0, cpy);
 	}
 }
 
@@ -165,7 +167,7 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y);
 	if (tabindex != -1 && tabindex != self->selected)  {
 		self->selected = tabbar_tabhittest(self, ev->x, ev->y);
-		ui_component_invalidate(tabbar_base(self));
+		psy_ui_component_invalidate(tabbar_base(self));
 		psy_signal_emit(&self->signal_change, self, 1, self->selected);
 	}		
 }
@@ -179,7 +181,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y)
 	int cpy = 0;
 	psy_ui_TextMetric tm;
 
-	tm = ui_component_textmetric(tabbar_base(self));
+	tm = psy_ui_component_textmetric(tabbar_base(self));
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		cpx = 0;
 	} else 
@@ -235,7 +237,7 @@ void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y);	
 	if (tabindex != self->hoverindex) {
 		self->hoverindex = tabindex;
-		ui_component_invalidate(tabbar_base(self));
+		psy_ui_component_invalidate(tabbar_base(self));
 	}
 	
 }
@@ -243,19 +245,19 @@ void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 void tabbar_onmouseenter(TabBar* self)
 {
 	self->hover = 1;
-	ui_component_invalidate(tabbar_base(self));
+	psy_ui_component_invalidate(tabbar_base(self));
 }
 
 void tabbar_onmouseleave(TabBar* self)
 {		
 	self->hover = 0;
-	ui_component_invalidate(tabbar_base(self));
+	psy_ui_component_invalidate(tabbar_base(self));
 }
 
 void tabbar_select(TabBar* self, int tab)
 {
 	self->selected = tab;
-	ui_component_invalidate(tabbar_base(self));
+	psy_ui_component_invalidate(tabbar_base(self));
 	psy_signal_emit(&self->signal_change, self, 1, self->selected);
 }
 
@@ -274,7 +276,7 @@ Tab* tabbar_append(TabBar* self, const char* label)
 		tab->margin.left = psy_ui_value_makeew(1.5);
 	} 
 	psy_list_append(&self->tabs, tab);	
-	tab->size = ui_component_textsize(tabbar_base(self), tab->text);
+	tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
 	tab->size.height = 20;
 
 	return tab;
@@ -312,7 +314,7 @@ void tabbar_onalign(TabBar* self, psy_ui_Component* sender)
 		Tab* tab;
 
 		tab = (Tab*)p->entry;
-		tab->size = ui_component_textsize(tabbar_base(self), tab->text);
+		tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
 	}		
 }
 
@@ -327,8 +329,8 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		int cpxmax = 0;
 		int cpymax = 0;
 		
-		size = ui_component_size(tabbar_base(self));
-		tm = ui_component_textmetric(tabbar_base(self));
+		size = psy_ui_component_size(tabbar_base(self));
+		tm = psy_ui_component_textmetric(tabbar_base(self));
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {
 			cpx = 0;
 		} else 
@@ -344,7 +346,7 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			psy_ui_Size tabsize;
 
 			tab = (Tab*) tabs->entry;
-			tabsize = ui_component_textsize(tabbar_base(self), tab->text);
+			tabsize = psy_ui_component_textsize(tabbar_base(self), tab->text);
 			tabsize.height = (int) (tabsize.height * 1.5);
 			tabsize.width = (int) tabsize.width;
 			if (self->tabalignment == psy_ui_ALIGN_TOP) {								

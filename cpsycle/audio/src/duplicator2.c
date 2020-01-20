@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../detail/portable.h"
+#include "plugin_interface.h"
 
 // TODO: change will break songfile load/save
 #define DUPLICATOR2_NUMOUTPUTS 16

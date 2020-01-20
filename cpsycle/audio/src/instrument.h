@@ -11,6 +11,10 @@
 #include <multifilter.h>
 #include <list.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// When a new note comes to play in a channel, and there is still one playing
 /// in it, do this on the currently playing note:
 typedef enum {
@@ -77,5 +81,9 @@ void instrument_removeentry(psy_audio_Instrument*,
 psy_audio_InstrumentEntry* instrument_entryat(psy_audio_Instrument*,
 	uintptr_t numentry);
 const psy_List* instrument_entries(psy_audio_Instrument*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_INSTRUMENT_H */

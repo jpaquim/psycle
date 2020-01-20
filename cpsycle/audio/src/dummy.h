@@ -6,6 +6,10 @@
 
 #include "custommachine.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_CustomMachine custommachine;
 	int mode;
@@ -13,5 +17,9 @@ typedef struct {
 
 void dummymachine_init(psy_audio_DummyMachine* self, MachineCallback);
 const psy_audio_MachineInfo* dummymachine_info(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_DUMMY_H */
