@@ -5,6 +5,9 @@
 
 #include "vst2view.h"
 
+#include <string.h>
+#include <stdlib.h>
+
 #define TIMERID_VST2VIEW 420
 
 static void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv);
@@ -25,12 +28,12 @@ void vst2view_init(Vst2View* self, psy_ui_Component* parent, psy_audio_Machine* 
 	Workspace* workspace)
 {		
 	self->machine = machine;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_audio_machine_seteditorhandle(machine,
 		(void*) self->component.platform->hwnd);
-	ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 
 Vst2View* vst2view_alloc(void)
@@ -60,6 +63,6 @@ void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	if (rv) {		
 		psy_audio_machine_editorsize(self->machine, &rv->width, &rv->height);		
 	} else {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 	}
 }

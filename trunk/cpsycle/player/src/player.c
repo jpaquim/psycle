@@ -4,8 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include <stdio.h>
+#include <machinefactory.h>
 #include <operations.h>
 #include <player.h>
+#include <plugincatcher.h>
 #include <songio.h>
 #include <exclusivelock.h>
 #ifdef _WIN32

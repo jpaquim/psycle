@@ -5,6 +5,7 @@
 
 #include "playbar.h"
 #include <exclusivelock.h>
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 #define TIMERID_PLAYBAR 400
@@ -31,7 +32,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	self->workspace = workspace;
 	self->player = &workspace->player;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	// loop
 	psy_ui_button_init(&self->loop, &self->component);
@@ -70,7 +71,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->stop.signal_clicked, self, onstopclicked);
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	playbar_initalign(self);
-	ui_component_starttimer(&self->component, TIMERID_PLAYBAR, 100);
+	psy_ui_component_starttimer(&self->component, TIMERID_PLAYBAR, 100);
 }
 
 void playbar_initalign(PlayBar* self)
@@ -80,11 +81,11 @@ void playbar_initalign(PlayBar* self)
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component,
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 

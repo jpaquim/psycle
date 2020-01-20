@@ -15,9 +15,9 @@ void linesperbeatbar_initalign(LinesPerBeatBar*);
 void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {	
 	self->lpb = 0;			
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component,
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	self->player = player;		
 	psy_ui_label_init(&self->lpbdesclabel, &self->component);		
@@ -33,7 +33,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent, psy_a
 	psy_signal_connect(&self->morebutton.signal_clicked, self,
 		OnMoreClicked);
 	psy_signal_connect(&self->component.signal_timer, self, OnTimer);
-	ui_component_starttimer(&self->component, 500, 200);
+	psy_ui_component_starttimer(&self->component, 500, 200);
 	linesperbeatbar_initalign(self);
 }
 
@@ -44,8 +44,8 @@ void linesperbeatbar_initalign(LinesPerBeatBar* self)
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 }

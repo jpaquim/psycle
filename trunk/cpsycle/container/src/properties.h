@@ -6,6 +6,10 @@
 
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	PSY_PROPERTY_TYP_ROOT,
 	PSY_PROPERTY_TYP_INTEGER,
@@ -109,5 +113,10 @@ psy_Properties* psy_properties_next(psy_Properties*);
 psy_Properties* psy_properties_remove(psy_Properties*, psy_Properties*);
 void psy_properties_clear(psy_Properties*);
 uintptr_t psy_properties_size(psy_Properties*);
+
+#ifdef __cplusplus
+}
+
+#endif
 
 #endif /* psy_PROPERTIES_H */

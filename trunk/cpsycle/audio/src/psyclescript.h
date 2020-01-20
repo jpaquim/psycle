@@ -5,6 +5,11 @@
 #define psy_audio_PSYCLESCRIPT_H
 
 #include "machineinfo.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <lua.h>
 #include <lauxlib.h>
 #include <lualib.h>
@@ -29,5 +34,9 @@ void psyclescript_require(psy_audio_PsycleScript*, const char* name, lua_CFuncti
 void psyclescript_register_weakuserdata(lua_State*, void* ud);
 
 void* psyclescript_checkself(lua_State* L, int index, const char* meta);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PSYCLESCRIPT_H */

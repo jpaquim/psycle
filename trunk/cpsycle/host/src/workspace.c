@@ -1089,8 +1089,8 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 
 	psy_ui_fontinfo_init(&fontinfo, "Tahoma", size);
 	psy_ui_font_init(&font, &fontinfo);
-	ui_replacedefaultfont(self->mainhandle, &font);
-	ui_component_invalidate(self->mainhandle);
+	psy_ui_replacedefaultfont(self->mainhandle, &font);
+	psy_ui_component_invalidate(self->mainhandle);
 }
 
 void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editposition)

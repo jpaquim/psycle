@@ -84,10 +84,10 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	self->stepwidth = 25;
 	self->stepheight = 25;
 	stepsequencerposition_init(&self->position);	
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_mousedown,
 		self, stepsequencerbar_onmousedown);
 	psy_signal_connect(&self->component.signal_size, self,
@@ -104,14 +104,14 @@ void stepsequencerbar_onlinetick(StepsequencerBar* self,
 	if (workspace_followingsong(self->workspace)) {
 		self->position = steptimer_position(steptimer);
 	}
-	ui_component_invalidate(&self->component);	
+	psy_ui_component_invalidate(&self->component);
 }
 
 void stepsequencerbar_setposition(StepsequencerBar* self,
 	StepSequencerPosition position)
 {
 	self->position = position;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void stepsequencerbar_ondraw(StepsequencerBar* self, psy_ui_Graphics* g)
@@ -167,17 +167,17 @@ void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 	psy_ui_setrectangle(&r, cpx, 0, (int)(self->stepwidth * 0.8),
 		self->stepheight);
 	if (mode == 1) {
-		ui_drawsolidroundrectangle(g, r, corner, 0x00666666);
+		psy_ui_drawsolidroundrectangle(g, r, corner, 0x00666666);
 	} else
 	if (mode == 2) {
-		ui_drawsolidroundrectangle(g, r, corner, 0x00999999);
+		psy_ui_drawsolidroundrectangle(g, r, corner, 0x00999999);
 	} else
 	if (mode == 3) {
-		ui_drawsolidroundrectangle(g, r, corner, 0x00FFFFFF);
+		psy_ui_drawsolidroundrectangle(g, r, corner, 0x00FFFFFF);
 	}
 	if ((step % player_lpb(&self->workspace->player)) == 0) {
-		ui_setcolor(g, 0x00CACACA);
-		ui_drawroundrectangle(g, r, corner);
+		psy_ui_setcolor(g, 0x00CACACA);
+		psy_ui_drawroundrectangle(g, r, corner);
 	}
 }
 
@@ -228,7 +228,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 				(psy_dsp_beat_t) cursor.offset,
 				&event);		
 		}
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -303,14 +303,13 @@ void stepsequencerbar_setpattern(StepsequencerBar* self,
 {
 	self->pattern = pattern;
 	stepsequencerposition_init(&self->position);
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
-
 
 void stepsequencerbar_onlpbchanged(StepsequencerBar* self, psy_audio_Player* sender,
 	uintptr_t lpb)
 {
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Component* sender,
@@ -318,7 +317,7 @@ void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Component* sender,
 {
 	psy_ui_TextMetric tm;
 
-	tm = ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	self->stepwidth = tm.tmAveCharWidth * 4;
 	if (self->stepwidth > size->width / 16) {
 		self->stepwidth = size->width / 16;
@@ -352,10 +351,10 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	self->lineheight = 15;
 	self->colwidth = 25;
 	stepsequencerposition_init(&self->position);
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);	
 	stepsequencerbarselect_vtable_init(self);
 	self->component.vtable = &stepsequencerbarselect_vtable;
-	ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_mousedown,
 		self, stepsequencerbarselect_onmousedown);
@@ -365,7 +364,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 		stepsequencerbarselect_onsize);
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		stepsequencerbarselect_oneditpositionchanged);
-	ui_component_resize(&self->component, 115, 25);
+	psy_ui_component_resize(&self->component, 115, 25);
 }
 
 void stepsequencerbarselect_ondestroy(StepsequencerBarSelect* self,
@@ -380,14 +379,14 @@ void stepsequencerbarselect_onlinetick(StepsequencerBarSelect* self,
 	if (workspace_followingsong(self->workspace)) {
 		self->position = steptimer_position(steptimer);
 	}
-	ui_component_invalidate(&self->component);	
+	psy_ui_component_invalidate(&self->component);
 }
 
 void stepsequencerbarselect_setposition(StepsequencerBarSelect* self,
 	StepSequencerPosition position)
 {
 	self->position = position;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void stepsequencerbarselect_oneditpositionchanged(StepsequencerBarSelect* self,
@@ -408,7 +407,8 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 	int i;
 	int cpx;
 	int cpy;
-	psy_ui_Rectangle r;	
+	psy_ui_Rectangle r_outter;
+	psy_ui_Rectangle r_inner;
 	int numsteprows;
 
 	cpx = 0;
@@ -423,12 +423,26 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 			cpy += self->lineheight;
 			cpx = 0;
 		}
-		psy_ui_setrectangle(&r, cpx, cpy, (int)(self->colwidth * 0.6),
-			(int)(self->lineheight * 0.8));
+		psy_ui_setrectangle(&r_inner,
+			cpx + self->colwidth / 2 - (int)(self->colwidth * 0.2),
+			cpy + self->lineheight / 2 - (int)(self->lineheight * 0.2),
+			(int)(self->colwidth * 0.4),
+			(int)(self->lineheight * 0.4));
+		r_outter = r_inner;
+		r_outter.left -= 3;
+		r_outter.right += 3;
+		r_outter.top -= 3;
+		r_outter.bottom += 3;
 		if (i == self->position.steprow) {
-			ui_drawsolidrectangle(g, r, 0x00999999);
+			psy_ui_drawsolidrectangle(g, r_outter, 0x00444444);
+			psy_ui_drawsolidrectangle(g, r_inner, 0x00D1E8D0);
+		} else
+		if ((i == self->position.steprow - 1) && ((self->position.line % 16)  < 1)) {
+			psy_ui_drawsolidrectangle(g, r_outter, 0x00333333);
+			psy_ui_drawsolidrectangle(g, r_inner, 0x00D1C5B6);
+		} else {
+			psy_ui_drawsolidrectangle(g, r_inner, 0x00A19586);
 		}
-		ui_drawrectangle(g, r);		
 		cpx += self->colwidth;
 	}
 }
@@ -438,7 +452,7 @@ void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
 {
 	psy_ui_TextMetric tm;
 
-	tm = ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	self->colwidth = tm.tmAveCharWidth * 4;
 	self->lineheight = (int)(0.8 * tm.tmHeight);
 }
@@ -450,7 +464,7 @@ void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui
 	int colwidth;
 	int lineheight;
 
-	tm = ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	colwidth = tm.tmAveCharWidth * 4;	
 	lineheight = (int)(0.8 * tm.tmHeight);
 	rv->width = self->colwidth * 4;
@@ -466,7 +480,7 @@ void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
 	row = ev->y / self->lineheight;
 	steprow = row * 4 + (ev->x / self->colwidth);
 	self->position.steprow = steprow;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 	psy_signal_emit(&self->signal_selected, self, 0);		
 }
 
@@ -475,7 +489,7 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect* self,
 {
 	self->pattern = pattern;
 	stepsequencerposition_init(&self->position);
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 // stepsequencerview
@@ -487,18 +501,20 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_margin_init(&margin, psy_ui_value_makeeh(1), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	self->workspace = workspace;	
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_enablealign(&self->component);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
-	ui_component_setalign(&self->stepsequencerbarselect.component, psy_ui_ALIGN_LEFT);
-	ui_component_setmargin(&self->stepsequencerbarselect.component, &margin);
+	psy_ui_component_setalign(&self->stepsequencerbarselect.component,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmargin(&self->stepsequencerbarselect.component, &margin);
 	stepsequencerbar_init(&self->stepsequencerbar, &self->component,
 		&self->steptimer, workspace);
 	stepsequencerview_setpattern(self, patterns_at(&workspace->song->patterns,
 		0));
-	ui_component_setalign(&self->stepsequencerbar.component, psy_ui_ALIGN_CLIENT);
-	ui_component_setmargin(&self->stepsequencerbar.component, &margin);
+	psy_ui_component_setalign(&self->stepsequencerbar.component,
+		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setmargin(&self->stepsequencerbar.component, &margin);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		stepsequencerview_onsongchanged);
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
@@ -516,7 +532,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->steptimer.signal_linetick,
 		&self->stepsequencerbarselect,
 		stepsequencerbarselect_onlinetick);
-	ui_component_starttimer(&self->component, TIMERID_STEPSEQUENCERVIEW, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_STEPSEQUENCERVIEW, 50);
 }
 
 void stepsequencerview_ontimer(StepsequencerView* self, psy_ui_Component* sender,

@@ -5,6 +5,9 @@
 
 #include "help.h"
 
+#include <stdlib.h>
+#include <stdio.h>
+
 #define MAXREADBUFFER 4096
 
 static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
@@ -15,13 +18,13 @@ static void help_load(Help*, const char* path);
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(help_base(self), parent);	
-	ui_component_enablealign(help_base(self));
+	psy_ui_component_init(help_base(self), parent);	
+	psy_ui_component_enablealign(help_base(self));
 	psy_ui_notebook_init(&self->notebook, help_base(self));	
-	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, help_base(self));
-	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
 	tabbar_append(&self->tabbar, "./docs/readme.txt");
 	tabbar_append(&self->tabbar, "./docs/keys.txt");
@@ -29,7 +32,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");	
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_editor_preventedit(&self->editor);
-	ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);

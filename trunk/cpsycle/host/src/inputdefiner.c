@@ -6,6 +6,8 @@
 #include "inputdefiner.h"
 #include "inputmap.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include "../../detail/portable.h"
 
 static void inputdefiner_ondestroy(InputDefiner*, psy_ui_Component* sender);
@@ -38,7 +40,7 @@ static void vtable_init(InputDefiner* self)
 
 void inputdefiner_init(InputDefiner* self, psy_ui_Component* parent)
 {
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -80,10 +82,10 @@ void ondraw(InputDefiner* self, psy_ui_Graphics* g)
 {
 	char text[40];	
 	
-	ui_settextcolor(g, 0x00FFFFFF);
-	ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_settextcolor(g, 0x00FFFFFF);
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
 	inputdefiner_text(self, text);
-	ui_textout(g, 0, 0, text, strlen(text));
+	psy_ui_textout(g, 0, 0, text, strlen(text));
 }
 
 void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
@@ -105,7 +107,7 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 		self->regularkey = ev->keycode;
 		self->input = encodeinput(self->regularkey, shift, ctrl);
 	}
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
@@ -128,7 +130,7 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	if (inputkeycode <= 0x30) {
 		self->input = encodeinput(0, shift, ctrl);
 	}
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void keynames_init(void)

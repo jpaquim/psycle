@@ -6,6 +6,10 @@
 
 #include "dsptypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	int count;
 	psy_dsp_big_amp_t AccumLeft, AccumRight;
@@ -30,5 +34,9 @@ void psy_dsp_rmsvol_tick(psy_dsp_RMSVol*, const psy_dsp_amp_t* __restrict pSampl
 	const psy_dsp_amp_t* __restrict pSamplesR, int numSamples);
 psy_dsp_amp_t psy_dsp_rmsvol_value(psy_dsp_RMSVol*);
 void psy_dsp_rmsvol_setsamplerate(unsigned int samplerate);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_RMS_H */

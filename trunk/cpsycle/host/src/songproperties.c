@@ -5,6 +5,9 @@
 
 #include "songproperties.h"
 
+#include <string.h>
+#include <stdlib.h>
+
 static void songpropertiesview_initalign(SongPropertiesView*);
 static void songpropertiesview_read(SongPropertiesView*);
 static void songpropertiesview_write(SongPropertiesView*);
@@ -18,7 +21,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	self->song = workspace->song;	
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->label_title, &self->component);
 	psy_ui_label_settext(&self->label_title, "Song Title");
 	psy_ui_edit_init(&self->edit_title, &self->component, 0);
@@ -33,7 +36,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->label_comments, "Comments");	
 	psy_ui_edit_init(&self->edit_comments, &self->component,
 		WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL);
-	ui_component_resize(&self->edit_comments.component, 0, 200);
+	psy_ui_component_resize(&self->edit_comments.component, 0, 200);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
 		songpropertiesview_oncommentschanged);
 	songpropertiesview_read(self);	
@@ -51,12 +54,12 @@ void songpropertiesview_initalign(SongPropertiesView* self)
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_TOP, &margin));
-	ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 }
 
 void songpropertiesview_read(SongPropertiesView* self)

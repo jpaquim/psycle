@@ -5,12 +5,14 @@
 
 #include "mixer.h"
 #include "machines.h"
+#include "song.h"
 #include "songio.h"
 #include <operations.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <dsptypes.h>
+#include "plugin_interface.h"
 #include "../../detail/portable.h"
 
 const psy_audio_MachineInfo* mixer_info(void)
@@ -1278,8 +1280,6 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	float volume_;
 	float drywetmix_;
 	float gain_;	
-	uint8_t temp8;
-	uint32_t temp32;
 	int32_t numins;
 	int32_t numrets;
 	uint32_t size;

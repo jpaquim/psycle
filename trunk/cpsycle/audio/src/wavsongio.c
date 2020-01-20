@@ -4,10 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "wavsongio.h"
-#include "songio.h"
 
-#include "sample.h"
 #include "instrument.h"
+#include "machinefactory.h"
+#include "sample.h"
+#include "song.h"
+#include "songio.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uiprogressbar.h"
+#include <stdlib.h>
 #include <string.h>
 
 static void ondestroy(psy_ui_ProgressBar*, psy_ui_Component* sender);
@@ -29,7 +30,7 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 {	
 	self->text = _strdup("");
 	self->progress = 0.f;
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
@@ -47,12 +48,12 @@ void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 	int height;
 		
 	height = 10;
-	size = ui_component_size(&self->component);	
+	size = psy_ui_component_size(&self->component);	
 	psy_ui_setrectangle(&r, 0, 
 		(size.height - height) / 2, 
 		(int)(self->progress * size.width),
 		height);
-	ui_drawsolidrectangle(g, r, 0x00D1C5B6);
+	psy_ui_drawsolidrectangle(g, r, 0x00D1C5B6);
 }
 
 void onpreferredsize(psy_ui_ProgressBar* self, psy_ui_Size* limit,
@@ -67,13 +68,13 @@ void onpreferredsize(psy_ui_ProgressBar* self, psy_ui_Size* limit,
 void psy_ui_progressbar_setprogress(psy_ui_ProgressBar* self, float progress)
 {
 	self->progress = progress;
-	ui_component_invalidate(&self->component);
-	ui_component_update(&self->component);	
+	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_update(&self->component);	
 }
 
 void psy_ui_progressbar_tick(psy_ui_ProgressBar* self)
 {
 	self->progress += 0.01f;
-	ui_component_invalidate(&self->component);
-	ui_component_update(&self->component);	
+	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_update(&self->component);	
 }

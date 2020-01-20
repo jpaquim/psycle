@@ -11,7 +11,7 @@ static int checkalignment(psy_ui_Image*, psy_ui_Alignment alignment);
 
 void psy_ui_image_init(psy_ui_Image* self, psy_ui_Component* parent)
 {  
-    ui_component_init(&self->component, parent);
+    psy_ui_component_init(&self->component, parent);
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_signal_connect(&self->component.signal_draw, self, ondraw);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
@@ -36,7 +36,7 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	int x;
 	int y;
 	
-	size = ui_component_size(&self->component);	
+	size = psy_ui_component_size(&self->component);	
 	bmpsize = psy_ui_bitmap_size(&self->bitmap);
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_HORIZONTAL)) {
 		x = (size.width - bmpsize.width) / 2;
@@ -54,7 +54,7 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 	} else {		
 		y = 0;		
 	}	
-	ui_drawbitmap(g, &self->bitmap, 
+	psy_ui_drawbitmap(g, &self->bitmap, 
 		x, y, bmpsize.width, bmpsize.height, 0, 0);
 }
 

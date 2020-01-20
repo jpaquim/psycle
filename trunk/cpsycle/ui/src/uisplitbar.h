@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	int resize;
@@ -13,5 +17,9 @@ typedef struct {
 } psy_ui_SplitBar;
 
 void psy_ui_splitbar_init(psy_ui_SplitBar*, psy_ui_Component* parent);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_SPLITBAR_H */

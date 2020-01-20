@@ -5,6 +5,8 @@
 
 #include "uisavedialog.h"
 #include "uiapp.h"
+#include <commdlg.h>
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 extern psy_ui_App app;

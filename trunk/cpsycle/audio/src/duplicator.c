@@ -10,6 +10,7 @@
 #include "songio.h"
 #include "constants.h"
 #include "../../detail/portable.h"
+#include "plugin_interface.h"
 
 // TODO: change will break songfile load/save
 #define DUPLICATOR_NUMOUTPUTS 8

@@ -11,6 +11,10 @@
 
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef LRESULT (CALLBACK *psy_ui_fp_winproc)(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
 
@@ -31,5 +35,9 @@ void psy_ui_winapp_init(psy_ui_WinApp*, HINSTANCE instance);
 void psy_ui_winapp_dispose(psy_ui_WinApp*);
 int psy_ui_winapp_run(psy_ui_WinApp*);
 void psy_ui_winapp_stop(psy_ui_WinApp*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_WINAPP_H */

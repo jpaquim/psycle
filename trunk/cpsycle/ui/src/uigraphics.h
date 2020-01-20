@@ -8,6 +8,10 @@
 #include "uidef.h"
 #include "uibitmap.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   HDC hdc;  
   HFONT hfont;
@@ -19,33 +23,37 @@ typedef struct {
   HBRUSH hBrushPrev;
 } psy_ui_Graphics;
 
-void ui_graphics_init(psy_ui_Graphics*, HDC);
-void ui_graphics_dispose(psy_ui_Graphics*);
-void ui_textout(psy_ui_Graphics*, int x, int y,  const char*, size_t len);
-void ui_textoutrectangle(psy_ui_Graphics*, int x, int y, unsigned int options,
+void psy_ui_graphics_init(psy_ui_Graphics*, HDC);
+void psy_ui_graphics_dispose(psy_ui_Graphics*);
+void psy_ui_textout(psy_ui_Graphics*, int x, int y,  const char*, size_t len);
+void psy_ui_textoutrectangle(psy_ui_Graphics*, int x, int y, unsigned int options,
 	psy_ui_Rectangle r, const char* text, size_t len);
-void ui_drawrectangle(psy_ui_Graphics*, const psy_ui_Rectangle);
-void ui_drawroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
+void psy_ui_drawrectangle(psy_ui_Graphics*, const psy_ui_Rectangle);
+void psy_ui_drawroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
 	psy_ui_Size cornersize);
-psy_ui_Size ui_textsize(psy_ui_Graphics*, const char*);
-void ui_drawsolidrectangle(psy_ui_Graphics*, const psy_ui_Rectangle r,
+psy_ui_Size psy_ui_textsize(psy_ui_Graphics*, const char*);
+void psy_ui_drawsolidrectangle(psy_ui_Graphics*, const psy_ui_Rectangle r,
 	unsigned int color);
-void ui_drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle r,
+void psy_ui_drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-void ui_drawsolidpolygon(psy_ui_Graphics*, psy_ui_Point*,
+void psy_ui_drawsolidpolygon(psy_ui_Graphics*, psy_ui_Point*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
-void ui_drawline(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
-void ui_drawarc(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
-void ui_drawfullbitmap(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y);
-void ui_drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, int width,
+void psy_ui_drawline(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
+void psy_ui_drawarc(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
+void psy_ui_drawfullbitmap(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y);
+void psy_ui_drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
-void ui_setbackgroundcolor(psy_ui_Graphics*, unsigned int color);
-void ui_setbackgroundmode(psy_ui_Graphics*, unsigned int mode);
-void ui_settextcolor(psy_ui_Graphics*, unsigned int color);
-void ui_setcolor(psy_ui_Graphics*, unsigned int color);
-void ui_setfont(psy_ui_Graphics*, psy_ui_Font* font);
-void ui_moveto(psy_ui_Graphics*, psy_ui_Point pt);
-void ui_devcurveto(psy_ui_Graphics*, psy_ui_Point control_p1,
+void psy_ui_setbackgroundcolor(psy_ui_Graphics*, unsigned int color);
+void psy_ui_setbackgroundmode(psy_ui_Graphics*, unsigned int mode);
+void psy_ui_settextcolor(psy_ui_Graphics*, unsigned int color);
+void psy_ui_setcolor(psy_ui_Graphics*, unsigned int color);
+void psy_ui_setfont(psy_ui_Graphics*, psy_ui_Font* font);
+void psy_ui_moveto(psy_ui_Graphics*, psy_ui_Point pt);
+void psy_ui_devcurveto(psy_ui_Graphics*, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_GRAPHICS_H */

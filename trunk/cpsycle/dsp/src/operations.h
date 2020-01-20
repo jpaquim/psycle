@@ -7,6 +7,10 @@
 #include "../../detail/psydef.h"
 #include "dsptypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	void* (*memory_alloc)(size_t count, size_t size);
 	void (*memory_dealloc)(void* address);
@@ -32,5 +36,9 @@ extern psy_dsp_Operations dsp;
 
 void psy_dsp_noopt_init(psy_dsp_Operations*);
 void psy_dsp_sse2_init(psy_dsp_Operations*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_OPERATIONS_H */

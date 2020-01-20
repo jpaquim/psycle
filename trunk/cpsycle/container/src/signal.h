@@ -4,8 +4,13 @@
 #ifndef psy_SIGNAL_H
 #define psy_SIGNAL_H
 
+
 #include "list.h"
 #include "../../detail/stdint.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
 	void* fp;
@@ -27,5 +32,9 @@ void psy_signal_emit(psy_Signal*, void* context, int num, ...);
 void psy_signal_emit_int(psy_Signal*, void* context, intptr_t param);
 void psy_signal_emit_float(psy_Signal*, void* context, float param);
 void psy_signal_dispose(psy_Signal*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_SIGNAL_H */

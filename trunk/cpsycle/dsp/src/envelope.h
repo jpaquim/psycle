@@ -7,6 +7,10 @@
 #include "dsptypes.h"
 #include <list.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
 {
 	ENV_OFF = 0,
@@ -73,5 +77,9 @@ void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, unsigned int samplerate);
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope*);
 void psy_dsp_envelope_start(psy_dsp_Envelope*);
 void psy_dsp_envelope_release(psy_dsp_Envelope*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_ENVELOPE_H */

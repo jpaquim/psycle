@@ -7,6 +7,7 @@
 #include "mainframe.h"
 #include <uiapp.h>
 #include <dir.h>
+#include <stdlib.h>
 #include <sample.h>
 
 #ifdef DIVERSALIS__OS__MICROSOFT
@@ -45,9 +46,9 @@ int main(int argc, char **argv)
 #endif	
 	mainframe_init(&mainframe);		
 	if (mainframe_showmaximizedatstart(&mainframe)) {
-		ui_component_show_state(&mainframe.component, SW_MAXIMIZE);
+		psy_ui_component_show_state(&mainframe.component, SW_MAXIMIZE);
 	} else {
-		ui_component_show_state(&mainframe.component, iCmdShow);
+		psy_ui_component_show_state(&mainframe.component, iCmdShow);
 	}	
 	err = psy_ui_app_run(&app);	
 	psy_ui_app_dispose(&app);

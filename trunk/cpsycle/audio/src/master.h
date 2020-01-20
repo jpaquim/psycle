@@ -6,11 +6,19 @@
 
 #include "machine.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_Machine machine;	
 } psy_audio_Master;
 
 void master_init(psy_audio_Master* self, MachineCallback);
 const psy_audio_MachineInfo* master_info(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MASTER_H */

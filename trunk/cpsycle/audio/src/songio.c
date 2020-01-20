@@ -7,9 +7,11 @@
 
 #include "psy2.h"
 #include "psy3.h"
-#include "xm.h"
+#include "song.h"
+#include "machinefactory.h"
 #include "wavsongio.h"
 #include "xmdefs.h"
+#include "xm.h"
 
 #include <string.h>
 

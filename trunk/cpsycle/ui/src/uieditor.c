@@ -28,7 +28,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	int err;
 
 	if ((err = loadscilexer()) == 0) {	
-		ui_win32_component_init(&self->component, parent, TEXT("Scintilla"), 
+		psy_ui_win32_component_init(&self->component, parent, TEXT("Scintilla"), 
 			0, 0, 100, 20, WS_CHILD | WS_VISIBLE, 0);
 		if (self->component.platform->hwnd) {
 			extern psy_ui_App app;
@@ -42,7 +42,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	} else
 #endif	
 	{
-		ui_win32_component_init(&self->component, parent, TEXT("STATIC"),
+		psy_ui_win32_component_init(&self->component, parent, TEXT("STATIC"),
 			0, 0, 100, 20,
 			WS_CHILD | WS_VISIBLE | SS_CENTER, 0);
 #ifdef SCI_ENABLED

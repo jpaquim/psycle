@@ -16,6 +16,7 @@ typedef struct psy_List {
 	struct psy_List* next; /// anchor to next node or null
 	struct psy_List* prev; /// anchor to previous node or null
 	struct psy_List* tail; /// first node only, anchor to the tail node
+	uintptr_t size;		   /// first node only, keeps track of the size
 } psy_List;
 
 /// constructs a list

@@ -15,6 +15,10 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// compresses.
 /// returns the destination size. remember to delete the destination when done!
 unsigned int beerz77comp2(unsigned char const * source, unsigned char ** destination, unsigned int source_size);
@@ -32,5 +36,9 @@ unsigned int soundsquash(short const * source, unsigned char ** destination, uns
 /// \todo the destination size is NOT returned
 /// remember to delete your destination when done!
 int sounddesquash(unsigned char const * source, short ** destination);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_DATACOMPRESSION_H */

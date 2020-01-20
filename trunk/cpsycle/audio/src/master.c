@@ -7,8 +7,10 @@
 #include "machines.h"
 #include <string.h>
 #include <math.h>
+#include "song.h"
 #include "songio.h"
 #include "../../detail/portable.h"
+#include "plugin_interface.h"
 
 static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);

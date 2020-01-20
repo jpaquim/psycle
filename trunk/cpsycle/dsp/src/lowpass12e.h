@@ -6,6 +6,10 @@
 
 #include "filter.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_dsp_CustomFilter customfilter;	
 	psy_dsp_FilterCoeff coeff;
@@ -13,5 +17,9 @@ typedef struct {
 } psy_dsp_LowPass12E;
 
 void psy_dsp_lowpass12e_init(psy_dsp_LowPass12E*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_LOWPASS12E_H */

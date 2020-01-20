@@ -8,6 +8,10 @@
 #include "../../detail/stdint.h"
 #include "../../detail/psydef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct TYPEULONGINV {
   unsigned char hihi;
   unsigned char hilo;
@@ -67,6 +71,10 @@ uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
 int psyfile_readchunkbegin(PsyFile*);
 void psyfile_seekchunkend(PsyFile*);
 
-static uint32_t FourCC(char *psName);	
+static uint32_t FourCC(char *psName);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_FILEIO_H */

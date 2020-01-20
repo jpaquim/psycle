@@ -5,6 +5,7 @@
 
 #include "list.h"
 #include <stdlib.h>
+#include <assert.h>
 
 psy_List* psy_list_create(void* entry)
 {
@@ -14,6 +15,7 @@ psy_List* psy_list_create(void* entry)
 	list->prev = 0;
 	list->next = 0;
 	list->tail = list;
+	list->size = 1;
 	list->entry = entry;
 	return list;
 }
@@ -40,8 +42,9 @@ psy_List* psy_list_append(psy_List** self, void* entry)
 	} else {
 		(*self)->tail->next = psy_list_create(entry);
 		(*self)->tail->next->prev = (*self)->tail;
-		(*self)->tail = (*self)->tail->next;	
-	}
+		(*self)->tail = (*self)->tail->next;
+		++((*self)->size);
+	}	
 	return (*self)->tail;
 }
 
@@ -50,9 +53,10 @@ psy_List* psy_list_cat(psy_List** self, psy_List* list)
 	if (!*self) {
 		*self = list;
 	} else 
-	if (list) {
+	if (list) {		
 		(*self)->tail->next = list;
 		(*self)->tail = list->tail;
+		(*self)->size += list->size;
 	}
 	return *self ? (*self)->tail : 0;
 }
@@ -66,17 +70,18 @@ psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 		ptr->next = *self;
 		ptr->tail = (*self)->tail;
 		(*self)->tail = 0;
-		*self = ptr;
+		*self = ptr;		
 		return ptr;
 	}	
 	next = ptr->next;	
 	if (next == NULL) {
 		return psy_list_append(self, entry);
 	}
-	ptr->next = psy_list_create(entry);	
+	ptr->next = psy_list_create(entry);
 	ptr->next->prev = ptr;	
 	next->prev = ptr->next;
 	ptr->next->next = next;
+	++(*self)->size;
 	return ptr->next;
 }
 
@@ -103,6 +108,7 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 		}
 		rv = ptr->next;
 		free(ptr);
+		--(*self)->size;
 	} else {
 		rv = 0;
 	}
@@ -111,11 +117,17 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 
 uintptr_t psy_list_size(const psy_List* self)
 {	
+	return self? self->size : 0;
+	/*
 	uintptr_t rv = 0;
 	const psy_List* p;
 
 	for (p = self; p != 0; p = p->next, ++rv);
+	if (self) {
+		assert(self->size == rv);
+	}
 	return rv;
+	*/
 }
 
 psy_List* list_last(psy_List* self)
@@ -163,5 +175,3 @@ psy_List* psy_list_at(psy_List* self, uintptr_t numentry)
 	}
 	return p;
 }
-
-

@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	psy_ui_ICON_NONE,
 	psy_ui_ICON_LESS,
@@ -33,5 +37,9 @@ void psy_ui_button_disablehighlight(psy_ui_Button*);
 void psy_ui_button_setcharnumber(psy_ui_Button*, int number);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
 psy_ui_Component* psy_ui_button_base(psy_ui_Button*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_BUTTON_H */

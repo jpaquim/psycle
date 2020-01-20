@@ -6,6 +6,10 @@
 
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
   char* name;
   psy_Table parameters;
@@ -20,5 +24,9 @@ void psy_audio_preset_setname(psy_audio_Preset*, const char* name);
 const char* psy_audio_preset_name(psy_audio_Preset*);
 void psy_audio_preset_setvalue(psy_audio_Preset*, uintptr_t param, int value);
 int psy_audio_preset_value(psy_audio_Preset*, uintptr_t param);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PRESET_H */

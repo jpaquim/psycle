@@ -6,6 +6,10 @@
 
 #include "uidef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    HBITMAP hBitmap;
 } psy_ui_Bitmap;
@@ -15,5 +19,9 @@ int psy_ui_bitmap_load(psy_ui_Bitmap*, const char* path);
 void psy_ui_bitmap_dispose(psy_ui_Bitmap*);
 psy_ui_Size psy_ui_bitmap_size(psy_ui_Bitmap*);
 int psy_ui_bitmap_loadresource(psy_ui_Bitmap*, int resourceid);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_BITMAP_H */

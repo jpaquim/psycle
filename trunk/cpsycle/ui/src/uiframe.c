@@ -15,10 +15,10 @@ void psy_ui_frame_init(psy_ui_Frame* self, psy_ui_Component* parent)
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;
-	ui_win32_component_init(self, parent, winapp->appclass, 
+	psy_ui_win32_component_init(self, parent, winapp->appclass, 
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		WS_OVERLAPPEDWINDOW,
 		0);
-	ui_component_setbackgroundmode(self, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(self, BACKGROUND_NONE);
 }

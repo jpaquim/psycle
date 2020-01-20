@@ -4,6 +4,14 @@
 #ifndef psy_audio_SILENTDRIVER_H
 #define psy_audio_SILENTDRIVER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct psy_AudioDriver* psy_audio_create_silent_driver(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_SILENTDRIVER_H */

@@ -6,6 +6,10 @@
 
 #include "linear.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum ResamplerType {
 	RESAMPLERTYPE_ZERO_ORDER,
 	RESAMPLERTYPE_LINEAR,
@@ -27,5 +31,9 @@ void psy_dsp_multiresampler_settype(psy_dsp_MultiResampler*, ResamplerType type)
 ResamplerType psy_dsp_multiresampler_type(psy_dsp_MultiResampler*);
 const char* psy_dsp_multiresampler_name(ResamplerType);
 uintptr_t psy_dsp_multiresampler_count(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_MULTIRESAMPLER_H */

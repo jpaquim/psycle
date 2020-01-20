@@ -59,7 +59,7 @@ typedef struct psy_EventDriver {
 } psy_EventDriver;
 
 
-typedef EXPORT psy_EventDriver* (__cdecl *pfneventdriver_create)(void);
+typedef psy_EventDriver* (__cdecl *pfneventdriver_create)(void);
 
 EXPORT psy_EventDriver* __cdecl eventdriver_create(void);
 

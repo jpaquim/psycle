@@ -9,6 +9,10 @@
 #include "pattern.h"
 #include "patternstrackstate.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {	
 	psy_Table slots;
 	uintptr_t songtracks;
@@ -33,5 +37,9 @@ int patterns_istrackmuted(psy_audio_Patterns*, uintptr_t track);
 int patterns_istracksoloed(psy_audio_Patterns*, uintptr_t track);
 void patterns_setsongtracks(psy_audio_Patterns*, uintptr_t trackcount);
 uintptr_t patterns_songtracks(psy_audio_Patterns*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PATTERNS_H */

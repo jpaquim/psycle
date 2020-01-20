@@ -4,7 +4,9 @@
 #ifndef psy_audio_MACHINEINFO_H
 #define psy_audio_MACHINEINFO_H
 
-#include "plugin_interface.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
 	/// API version. Use MI_VERSION
@@ -49,9 +51,13 @@ void machineinfo_set(psy_audio_MachineInfo*,
 		const char* modulepath,
 		int shellidx);
 void machineinfo_setnativeinfo(psy_audio_MachineInfo*,
-		CMachineInfo*,
+		struct CMachineInfo*,
 		int type,		
 		const char* modulepath,
 		int shellidx);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MACHINEINFO_H */

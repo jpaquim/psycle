@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;   
    char* text;   
@@ -16,5 +20,9 @@ void psy_ui_progressbar_init(psy_ui_ProgressBar*, psy_ui_Component* parent);
 void psy_ui_progressbar_settext(psy_ui_ProgressBar*, const char* text);
 void psy_ui_progressbar_setprogress(psy_ui_ProgressBar*, float progress);
 void psy_ui_progressbar_tick(psy_ui_ProgressBar*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_PROGRESSBAR_H */

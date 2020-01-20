@@ -6,8 +6,16 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef psy_ui_Component psy_ui_Frame;
 
 void psy_ui_frame_init(psy_ui_Frame*, psy_ui_Component* parent);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_FRAME_H */

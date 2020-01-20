@@ -36,8 +36,8 @@ static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
-	ui_component_init(&self->component, parent);
-	ui_component_doublebuffer(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->leftavg = 0;
 	self->rightavg = 0;
@@ -58,7 +58,7 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		vuscope_onsongchanged);
 	vuscope_connectmachinessignals(self, workspace);
-	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
 }
 
 void vuscope_ondestroy(VuScope* self)
@@ -85,12 +85,12 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	psy_ui_Rectangle rect;
 
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	right = size.width;
 	centerx = size.width / 2;
 	step = size.height / 7;
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ui_settextcolor(g, 0x606060);
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_settextcolor(g, 0x606060);
 	
 	rect.left = 32 + 24;
 	rect.right = right - 32 - 24;
@@ -98,47 +98,47 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	rect.top = 2;
 	rect.bottom = rect.top + 1;
 	sprintf(buf, "Peak");
-	ui_textout(g, centerx - 42, rect.top, buf, strlen(buf));
+	psy_ui_textout(g, centerx - 42, rect.top, buf, strlen(buf));
 	sprintf(buf, "RMS");
-	ui_textout(g, centerx + 25, rect.top, buf, strlen(buf));
+	psy_ui_textout(g, centerx + 25, rect.top, buf, strlen(buf));
 
 
 	rect.top = 2*step - step;
 	rect.bottom = rect.top + 1;
-	ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
 	sprintf(buf, "+6 db");
-	ui_textout(g, 32 - 1, rect.top - 6, buf, strlen(buf));
-	ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, 32 - 1, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
 
 	rect.top = 2*step + step;
 	rect.bottom = rect.top + 1;
-	ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
 
 	sprintf(buf, "-6 db");
-	ui_textout(g, 32 - 1 + 4, rect.top - 6, buf, strlen(buf));
-	ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, 32 - 1 + 4, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
 
 	rect.top = 4*step;
 	rect.bottom = rect.top + 1;
-	ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
 	sprintf(buf, "-12 db");
-	ui_textout(g, 32 - 1 - 6 + 4, rect.top - 6, buf, strlen(buf));
-	ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, 32 - 1 - 6 + 4, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
 
 	rect.top = 6*step;
 	rect.bottom = rect.top + 1;
-	ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
 	sprintf(buf, "-24 db");
-	ui_textout(g, 32 - 1 - 6 + 4, rect.top - 6, buf, strlen(buf));
-	ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, 32 - 1 - 6 + 4, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
 
 	rect.top = 2*step;
 	rect.bottom = rect.top + 1;
-	ui_settextcolor(g, 0x00707070);
-	ui_drawsolidrectangle(g, rect, 0x00707070);
+	psy_ui_settextcolor(g, 0x00707070);
+	psy_ui_drawsolidrectangle(g, rect, 0x00707070);
 	sprintf(buf, "0 db");
-	ui_textout(g, 32 - 1 + 6, rect.top - 6, buf, strlen(buf));
-	ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, 32 - 1 + 6, rect.top - 6, buf, strlen(buf));
+	psy_ui_textout(g, right - 32 - 22, rect.top - 6, buf, strlen(buf));
 }
 
 void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
@@ -157,7 +157,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle rect;
 	char buf[64];
 
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	right = size.width;
 	centerx = size.width / 2;
 	step = size.height / 7;
@@ -240,7 +240,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
-	ui_drawsolidrectangle(g, rect, 0xC08040);
+	psy_ui_drawsolidrectangle(g, rect, 0xC08040);
 
 	// RIGHT CHANNEL 
 	rect.left = centerx - 30;
@@ -272,7 +272,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	if (rect.top > rect.bottom) {
 		rect.top = rect.bottom;
 	}
-	ui_drawsolidrectangle(g, rect, 0x90D040);
+	psy_ui_drawsolidrectangle(g, rect, 0x90D040);
 
 
 	// update peak counter.
@@ -288,16 +288,16 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	}	
 	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);
 	//oldFont = bufDC.SelectObject(&font);
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ui_settextcolor(g, 0x505050);
-	ui_textout(g, 4, size.height - 14, buf, strlen(buf));
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_settextcolor(g, 0x505050);
+	psy_ui_textout(g, 4, size.height - 14, buf, strlen(buf));
 	// bufDC.SelectObject(oldFont);
 }
 
 void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 

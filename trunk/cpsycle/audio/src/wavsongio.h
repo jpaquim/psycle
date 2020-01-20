@@ -4,9 +4,16 @@
 #ifndef psy_audio_WAVSONGIO_H
 #define psy_audio_WAVSONGIO_H
 
-#include "songio.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void psy_audio_wav_songio_load(struct psy_audio_SongFile*);
 void psy_audio_wav_songio_save(struct psy_audio_SongFile*);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* psy_audio_WAVSONGIO_H */

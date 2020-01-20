@@ -97,6 +97,10 @@ SOURCE=.\src\properties.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\qsort.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\signal.c
 # End Source File
 # End Group
@@ -114,6 +118,10 @@ SOURCE=.\src\list.h
 # Begin Source File
 
 SOURCE=.\src\properties.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\qsort.h
 # End Source File
 # Begin Source File
 

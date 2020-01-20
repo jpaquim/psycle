@@ -8,6 +8,10 @@
 
 #include "uidef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	uint32_t defaultbackgroundcolor;
 	uint32_t defaultcolor;
@@ -21,5 +25,9 @@ void psy_ui_defaults_dispose(psy_ui_Defaults*);
 uint32_t psy_ui_defaults_color(psy_ui_Defaults*);
 uint32_t psy_ui_defaults_backgroundcolor(psy_ui_Defaults*);
 uint32_t psy_ui_defaults_bordercolor(psy_ui_Defaults*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_DEFAULTS_H */

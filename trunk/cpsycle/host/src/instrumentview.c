@@ -90,26 +90,26 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0));
 	self->player = &workspace->player;
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	// header
 	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self);
-	ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
-	ui_component_init(&self->left, &self->component);
-	ui_component_enablealign(&self->left);	
-	ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	ui_component_setmargin(&self->left, &margin);
+	psy_ui_component_init(&self->left, &self->component);
+	psy_ui_component_enablealign(&self->left);	
+	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmargin(&self->left, &margin);
 	// psy_ui_label_init(&self->label, &self->left);
 	// psy_ui_label_settext(&self->label, "Instruments");
 	// psy_ui_label_setcharnumber(&self->label, 25);
 	// ui_component_setalign(&self->label.component, UI_ALIGN_TOP);
 	instrumentviewbuttons_init(&self->buttons, &self->left);
-	ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
 		&workspace->song->instruments);
-	ui_component_setalign(&self->instrumentsbox.instrumentlist.component,
+	psy_ui_component_setalign(&self->instrumentsbox.instrumentlist.component,
 		psy_ui_ALIGN_CLIENT);
 	{
 		psy_ui_Margin margin;
@@ -117,22 +117,22 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
-		ui_component_setmargin(&self->instrumentsbox.instrumentlist.component,
+		psy_ui_component_setmargin(&self->instrumentsbox.instrumentlist.component,
 			&margin);
 	}
 	// client
-	ui_component_init(&self->client, &self->component);
-	ui_component_enablealign(&self->client);	
-	ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init(&self->client, &self->component);
+	psy_ui_component_enablealign(&self->client);	
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, &self->client);
-	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
 	tabbar_append(&self->tabbar, "General");
 	tabbar_append(&self->tabbar, "Volume");
 	tabbar_append(&self->tabbar, "Pan");
 	tabbar_append(&self->tabbar, "Filter");
 	tabbar_append(&self->tabbar, "Pitch");	
 	psy_ui_notebook_init(&self->notebook, &self->client);
-	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	//ui_component_setbackgroundmode(&self->notebook.component, BACKGROUND_SET);
 	instrumentgeneralview_init(&self->general, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments);
@@ -251,8 +251,8 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	self->view = view;
 	self->instrument = 0;
 	self->instruments = instruments;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settext(&self->namelabel, "Instrument Name");
 	psy_ui_edit_init(&self->nameedit, &self->component, 0);		
@@ -267,8 +267,8 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);	
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
 		OnNextInstrument);
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT,
 			&margin));
 }
@@ -322,12 +322,12 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	ui_component_init(&self->row1, &self->component);
-	ui_component_enablealign(&self->row1);
-	ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
-	ui_component_setalignexpand(&self->row1, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->row1, &self->component);
+	psy_ui_component_enablealign(&self->row1);
+	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalignexpand(&self->row1, psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->create, &self->row1);
 	psy_ui_button_settext(&self->create, "New");
 	psy_ui_button_init(&self->load, &self->row1);
@@ -336,17 +336,17 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_button_settext(&self->save, "Save");
 	psy_ui_button_init(&self->duplicate, &self->row1);
 	psy_ui_button_settext(&self->duplicate, "Duplicate");	
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->row1, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->row1, 0),
 		psy_ui_ALIGN_LEFT, &margin));
-	ui_component_init(&self->row2, &self->component);
-	ui_component_enablealign(&self->row2);
-	ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
-	ui_component_setalignexpand(&self->row2, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_init(&self->row2, &self->component);
+	psy_ui_component_enablealign(&self->row2);
+	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalignexpand(&self->row2, psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->del, &self->row2);
 	psy_ui_button_settext(&self->del, "Delete");
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->row2, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->row2, 0),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 
@@ -360,26 +360,26 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 		psy_ui_value_makepx(0));
 	self->instruments = instruments;
 	self->instrument = 0;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	// left
-	// ui_component_init(&self->left, &self->component);
-	// ui_component_enablealign(&self->left);	
-	// ui_component_setalign(&self->left, UI_ALIGN_LEFT);
+	// psy_ui_component_init(&self->left, &self->component);
+	// psy_ui_component_enablealign(&self->left);	
+	// psy_ui_component_setalign(&self->left, UI_ALIGN_LEFT);
 	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
 	self->samplesbox.changeinstrumentslot = 0;
-	ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);
-	ui_component_setmargin(&self->samplesbox.component, &margin);
-	ui_component_resize(&self->samplesbox.component, 150, 0);
+	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmargin(&self->samplesbox.component, &margin);
+	psy_ui_component_resize(&self->samplesbox.component, 150, 0);
 	// nna
-	ui_component_init(&self->nna, &self->component);
-	ui_component_enablealign(&self->nna);
-	ui_component_setalign(&self->nna, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->nna, &self->component);
+	psy_ui_component_enablealign(&self->nna);
+	psy_ui_component_setalign(&self->nna, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->nnaheader, &self->nna);
 	psy_ui_label_settext(&self->nnaheader, "New Note Action ");
 	psy_ui_button_init(&self->nnacut, &self->nna);
 	psy_ui_button_settext(&self->nnacut, "Note Cut");
-	ui_component_setposition(&self->nnacut.component, 5, 30, 70, 20);
+	psy_ui_component_setposition(&self->nnacut.component, 5, 30, 70, 20);
 	psy_signal_connect(&self->nnacut.signal_clicked, self, OnNNACut);
 	psy_ui_button_init(&self->nnarelease, &self->nna);
 	psy_ui_button_settext(&self->nnarelease, "Note Release");
@@ -392,17 +392,17 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 		OnNNARelease);
 	psy_signal_connect(&self->nnafadeout.signal_clicked, self,
 		OnNNAFadeOut);
-	psy_list_free(ui_components_setalign(		
-		ui_component_children(&self->nna, 0),
-		psy_ui_ALIGN_LEFT, &margin));			
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->nna, 0),
+		psy_ui_ALIGN_LEFT, &margin));
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_settext(&self->globalvolume, "Global Volume");
-	ui_component_resize(&self->globalvolume.component, 0, 20);
-	ui_component_setalign(&self->globalvolume.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_resize(&self->globalvolume.component, 0, 20);
+	psy_ui_component_setalign(&self->globalvolume.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->globalvolume, self, OnGeneralViewDescribe,
 			OnGeneralViewTweak, OnGeneralViewValue);
 	instrumentnotemapview_init(&self->notemapview, &self->component);
-	ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
 }
 
 void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
@@ -534,18 +534,18 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 
 	self->instruments = instruments;	
 	self->instrument = 0;
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_enablealign(&self->component);	
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "Amplitude envelope");
-	ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init(&margin,
 		psy_ui_value_makepx(20),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
-	ui_component_setmargin(&self->envelopeview.component, &margin);	
-	ui_component_resize(&self->envelopeview.component, 0, 200);	
+	psy_ui_component_setmargin(&self->envelopeview.component, &margin);	
+	psy_ui_component_resize(&self->envelopeview.component, 0, 200);
 
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "Attack");
@@ -562,9 +562,9 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
 	for (i = 0; i < 4; ++i) {		
-		ui_component_resize(&sliders[i]->component, 100, 20);		
-		ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
-		ui_component_setmargin(&sliders[i]->component, &margin);
+		psy_ui_component_resize(&sliders[i]->component, 100, 20);		
+		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
+		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_connect(sliders[i], self, OnVolumeViewDescribe,
 			OnVolumeViewTweak, OnVolumeViewValue);		
 	}	
@@ -673,16 +673,15 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent, p
 		psy_ui_value_makepx(0));
 	self->instrument = 0;
 	self->instruments = instruments;	
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	psy_ui_checkbox_init(&self->randompanning, &self->component);
 	psy_ui_checkbox_settext(&self->randompanning, "Random panning");
 	psy_signal_connect(&self->randompanning.signal_clicked, self,
 		instrumentview_onrandompanning);
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_TOP,
-			&margin));
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
+		psy_ui_ALIGN_TOP, &margin));
 }
 
 void instrumentpanview_setinstrument(InstrumentPanView* self,
@@ -720,18 +719,18 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 
 	self->instruments = instruments;
 	self->instrument = 0;
-	ui_component_init(&self->component, parent);	
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_enablealign(&self->component);
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "Filter envelope");
-	ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init(&margin,
 		psy_ui_value_makepx(20),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
-	ui_component_setmargin(&self->envelopeview.component, &margin);	
-	ui_component_resize(&self->envelopeview.component, 0, 200);
+	psy_ui_component_setmargin(&self->envelopeview.component, &margin);	
+	psy_ui_component_resize(&self->envelopeview.component, 0, 200);
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "Attack");
 	psy_ui_slider_init(&self->decay, &self->component);
@@ -753,9 +752,9 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
 	for (i = 0; i < 7; ++i) {		
-		ui_component_resize(&sliders[i]->component, 100, 20);		
-		ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
-		ui_component_setmargin(&sliders[i]->component, &margin);
+		psy_ui_component_resize(&sliders[i]->component, 100, 20);		
+		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
+		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_connect(sliders[i], self, OnFilterViewDescribe,
 			OnFilterViewTweak, OnFilterViewValue);		
 	}	
@@ -909,7 +908,7 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments)
 {
 	self->instruments = instruments;	
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
 }
 
 void instrumentpitchview_setinstrument(InstrumentPitchView* self,

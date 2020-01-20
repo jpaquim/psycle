@@ -7,11 +7,21 @@
 #include "../../detail/prefix.h"
 #include "../../detail/stdint.h"
 #include <stddef.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // target win98 or nt 4 or later systems
+#ifdef _WIN32_WINNT
+#undef _WIN32_WINNT
+#endif
 #define _WIN32_WINNT 0x400
 
-#include <windows.h>
 #if defined min
 #undef min
 #endif
@@ -134,6 +144,10 @@ void psy_ui_error(const char* err, const char* shorterr);
 void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo* info);
 void psy_ui_font_copy(psy_ui_Font*, const psy_ui_Font* other);
 void psy_ui_font_dispose(psy_ui_Font*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_DEF_H */
 

@@ -8,6 +8,10 @@
 #include <list.h>
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // edit position in the pattern
 typedef struct {	
 	unsigned int track;
@@ -138,5 +142,9 @@ void pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
 /// returns the maximum number of songtracks 
 /// used by the paste pattern, player uses songtracks of patterns
 uintptr_t pattern_maxsongtracks(psy_audio_Pattern*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_PATTERN_H */

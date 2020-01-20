@@ -32,18 +32,18 @@ static void vtable_init(ParameterListBox* self)
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine)
 {	
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);
 	ui_listbox_init(&self->listbox, &self->component);
-	ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_slider_init(&self->slider, &self->component);
 	psy_ui_slider_setcharnumber(&self->slider, 4);
 	psy_ui_slider_showvertical(&self->slider);
-	ui_component_resize(&self->slider.component, 20, 0);
-	ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);
-	ui_component_resize(&self->component, 150, 200);
+	psy_ui_component_resize(&self->slider.component, 20, 0);
+	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_resize(&self->component, 150, 200);
 	parameterlistbox_setmachine(self, machine);	
 	psy_ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
 		parameterlistbox_ontweak, parameterlistbox_onvalue);
@@ -94,7 +94,7 @@ void parameterlistbox_onpreferredsize(ParameterListBox* self, psy_ui_Size* limit
 	psy_ui_Size* rv)
 {
 	if (rv) {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 
 	}
 }

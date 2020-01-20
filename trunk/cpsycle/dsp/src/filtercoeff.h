@@ -6,6 +6,10 @@
 
 #include "dsptypes.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern const double TPI;
 
 typedef struct {	
@@ -25,5 +29,9 @@ void psy_dsp_filtermap_compute(psy_dsp_FilterMap*, void* context, psy_dsp_Filter
 
 float psy_dsp_cutoffinternalext(int v);
 float psy_dsp_resonanceinternal(float v);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_FILTERCOEFF_H */

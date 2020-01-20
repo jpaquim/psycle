@@ -19,8 +19,8 @@ static void onmouseleavesplitbar(psy_ui_Notebook*, psy_ui_Component* sender);
 
 void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 {  
-    ui_component_init(psy_ui_notebook_base(self), parent);
-	ui_component_setbackgroundmode(psy_ui_notebook_base(self), BACKGROUND_NONE);	
+    psy_ui_component_init(psy_ui_notebook_base(self), parent);
+	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(self), BACKGROUND_NONE);	
 	psy_signal_connect(&psy_ui_notebook_base(self)->signal_size, self, onsize);
 	self->pageindex = 0;
 	self->split = 0;
@@ -35,30 +35,31 @@ void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
 	psy_ui_Size size;
 	
 	self->pageindex = pageindex;
-	size = ui_component_size(psy_ui_notebook_base(self));
+	size = psy_ui_component_size(psy_ui_notebook_base(self));
 	if (self->component.align == psy_ui_ALIGN_LEFT) {
-		size = ui_component_preferredsize(psy_ui_notebook_base(self), &size);
+		size = psy_ui_component_preferredsize(psy_ui_notebook_base(self), &size);
 	}	
-	for (p = q = ui_component_children(psy_ui_notebook_base(self), 0); p != NULL;
+	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL;
 			p = p->next, ++c) {		
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)p->entry;
 		if (self->split) {
-			ui_component_show(component);			
+			psy_ui_component_show(component);
 		} else {
 			if (c == pageindex) {						
-				ui_component_show(component);
-				ui_component_setposition(component, 0, 0,
+				psy_ui_component_show(component);
+				psy_ui_component_setposition(component, 0, 0,
 					size.width, size.height);
 			} else {		
-				ui_component_hide(component);
+				psy_ui_component_hide(component);
 			}
 		}
 	}
 	psy_list_free(q);		
 	if (self->component.align == psy_ui_ALIGN_LEFT) {
-		ui_component_align(ui_component_parent(psy_ui_notebook_base(self)));
+		psy_ui_component_align(psy_ui_component_parent(psy_ui_notebook_base(
+			self)));
 	}
 }
 
@@ -82,11 +83,11 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 		align_split(self, self->splitx);
 	} else {
 		int cpx = 0;	
-		for (p = q = ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
+		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)p->entry;		
-				ui_component_setposition(component,
+				psy_ui_component_setposition(component,
 					0, 0, size->width, size->height);		
 		}	
 		psy_list_free(q);
@@ -103,7 +104,7 @@ void psy_ui_notebook_split(psy_ui_Notebook* self)
 	if (!self->split) {
 		self->split = 1;
 		self->splitx = 400;
-		ui_component_init(&self->splitbar, psy_ui_notebook_base(self));
+		psy_ui_component_init(&self->splitbar, psy_ui_notebook_base(self));
 		psy_signal_connect(&self->splitbar.signal_mouseenter, self,
 			onmouseentersplitbar);
 		psy_signal_connect(&self->splitbar.signal_mouseleave, self,
@@ -128,7 +129,7 @@ void psy_ui_notebook_full(psy_ui_Notebook* self)
 {
 	if (self->split) {
 		self->split = 0;
-		ui_component_destroy(&self->splitbar);
+		psy_ui_component_destroy(&self->splitbar);
 		psy_ui_notebook_setpageindex(self, self->pageindex);		
 	}
 }
@@ -137,7 +138,7 @@ void onmousedown(psy_ui_Notebook* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
 	if (self->split) {
-		ui_component_capture(sender);
+		psy_ui_component_capture(sender);
 		self->splitx = -1;
 	}
 }
@@ -149,12 +150,12 @@ void onmousemove(psy_ui_Notebook* self, psy_ui_Component* sender,
 		psy_ui_Size size;
 		psy_ui_Rectangle position;		
 	
-		size = ui_component_size(psy_ui_notebook_base(self));
-		position = ui_component_position(sender);
-		ui_component_setposition(sender, position.left + ev->x, 0, 4, size.height);		
+		size = psy_ui_component_size(psy_ui_notebook_base(self));
+		position = psy_ui_component_position(sender);
+		psy_ui_component_setposition(sender, position.left + ev->x, 0, 4, size.height);		
 		align_split(self, position.left + ev->x);
-		ui_component_invalidate(psy_ui_notebook_base(self));
-		ui_component_update(psy_ui_notebook_base(self));		
+		psy_ui_component_invalidate(psy_ui_notebook_base(self));
+		psy_ui_component_update(psy_ui_notebook_base(self));		
 	}
 }
 
@@ -165,25 +166,25 @@ void onmouseup(psy_ui_Notebook* self, psy_ui_Component* sender,
 		psy_ui_Size size;
 		psy_ui_Rectangle position;		
 	
-		size = ui_component_size(psy_ui_notebook_base(self));
-		position = ui_component_position(sender);
-		ui_component_move(sender, position.left + ev->x, size.height);
+		size = psy_ui_component_size(psy_ui_notebook_base(self));
+		position = psy_ui_component_position(sender);
+		psy_ui_component_move(sender, position.left + ev->x, size.height);
 		self->splitx = position.left + ev->x;
 		align_split(self, self->splitx);
-		ui_component_releasecapture();
+		psy_ui_component_releasecapture();
 	}
 }
 
 void onmouseentersplitbar(psy_ui_Notebook* self, psy_ui_Component* sender)
 {	
-	ui_component_setbackgroundcolor(sender, 0x00666666);
-	ui_component_invalidate(sender);
+	psy_ui_component_setbackgroundcolor(sender, 0x00666666);
+	psy_ui_component_invalidate(sender);
 }
 
 void onmouseleavesplitbar(psy_ui_Notebook* self, psy_ui_Component* sender)
 {			
-	ui_component_setbackgroundcolor(sender, 0x00232323);
-	ui_component_invalidate(sender);
+	psy_ui_component_setbackgroundcolor(sender, 0x00232323);
+	psy_ui_component_invalidate(sender);
 }
 
 void align_split(psy_ui_Notebook* self, int x) {
@@ -192,21 +193,21 @@ void align_split(psy_ui_Notebook* self, int x) {
 	int c = 0;
 	psy_ui_Size size;
 
-	size = ui_component_size(psy_ui_notebook_base(self));
-	for (p = q = ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
+	size = psy_ui_component_size(psy_ui_notebook_base(self));
+	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*)p->entry;		
 		if (component->platform->hwnd == self->splitbar.platform->hwnd) {
-			ui_component_setposition(&self->splitbar,
+			psy_ui_component_setposition(&self->splitbar,
 				x, 0, 4, size.height);
 		} else {
 			if (c == 0) {
-				ui_component_setposition((psy_ui_Component*)p->entry,
+				psy_ui_component_setposition((psy_ui_Component*)p->entry,
 					0, 0, x, size.height);
 				++c;
 			} else {
-				ui_component_setposition((psy_ui_Component*)p->entry,
+				psy_ui_component_setposition((psy_ui_Component*)p->entry,
 					x + 4, 0, size.width - x - 4, size.height);
 			}			
 		}		
@@ -220,12 +221,12 @@ psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)
 	psy_List* p;
 	psy_List* q;
 
-	for (p = q = ui_component_children(psy_ui_notebook_base(self), 0);
+	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0);
 			p != 0; p = p->next) {		
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)p->entry;
-		if (ui_component_visible(component)) {
+		if (psy_ui_component_visible(component)) {
 			rv = component;
 			break;
 		}

@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
    int charnumber;
@@ -16,5 +20,9 @@ void psy_ui_label_settext(psy_ui_Label*, const char* text);
 void psy_ui_label_setcharnumber(psy_ui_Label*, int number);
 void psy_ui_label_setstyle(psy_ui_Label*, int style);
 psy_ui_Component* psy_ui_label_base(psy_ui_Label*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_LABEL_H */

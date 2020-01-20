@@ -6,6 +6,10 @@
 
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define psy_TABLEKEYS 256
 
 typedef struct psy_TableHashEntry {
@@ -47,5 +51,9 @@ psy_TableIterator psy_table_begin(psy_Table*);
 const psy_TableIterator* psy_table_end(void);
 
 uintptr_t psy_table_freetableentry(void*, void*, psy_TableHashEntry*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_HASHTABL_H */

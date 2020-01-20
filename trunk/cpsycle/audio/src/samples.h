@@ -8,6 +8,10 @@
 #include <hashtbl.h>
 #include <signal.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NOSAMPLES_INDEX UINTPTR_MAX
 
 typedef struct {
@@ -39,5 +43,9 @@ uintptr_t psy_audio_samples_groupsize(psy_audio_Samples*);
 psy_TableIterator psy_audio_samples_begin(psy_audio_Samples*);
 psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples*,
 	uintptr_t slot);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_SAMPLES_H */

@@ -7,6 +7,8 @@
 #include "skingraphics.h"
 #include "resources/resource.h"
 #include "skincoord.h"
+#include <string.h>
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 #define TIMERID_PARAMVIEW 410
@@ -60,16 +62,16 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	}
 	self->machine = machine;
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_draw, self, OnDraw);	
 	psy_signal_connect(&self->component.signal_mousedown, self, OnMouseDown);
 	psy_signal_connect(&self->component.signal_mouseup, self, OnMouseUp);
 	psy_signal_connect(&self->component.signal_mousemove, self, OnMouseMove);
 	psy_signal_connect(&self->component.signal_timer, self, OnTimer);
-	ui_component_resize(&self->component, 800, 400);
+	psy_ui_component_resize(&self->component, 800, 400);
 	if (self->machine) {
 		self->numparams = self->machine->vtable->numparameters(self->machine);
 		self->numparametercols =
@@ -85,7 +87,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 		self->numrows = 0;
 	}
 	self->tweak = -1;	
-	ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
+	psy_ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
 }
 
 ParamView* paramview_alloc(void)
@@ -180,33 +182,38 @@ void DrawKnob(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t ro
 	cellsize(self, &width, &height);	
 
 	psy_ui_setrectangle(&r, left, top, width, height);
-	psy_ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx, height / 2);
-	psy_ui_setrectangle(&r_bottom, left + knob_cx, top + height/2, width - knob_cx, height / 2);
+	psy_ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx,
+		height / 2);
+	psy_ui_setrectangle(&r_bottom, left + knob_cx, top + height/2,
+		width - knob_cx, height / 2);
 				
-	if (!self->machine->vtable->parametername(self->machine, label, param)) {
-		if (!self->machine->vtable->parameterlabel(self->machine, label, param)) {
+	if (!psy_audio_machine_parametername(self->machine, label, param)) {
+		if (!psy_audio_machine_parameterlabel(self->machine, label, param)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	if (self->machine->vtable->describevalue(
-		self->machine, str, param, self->machine->vtable->parametervalue(self->machine, param)) == FALSE) {
-		psy_snprintf(str, 128, "%d", self->machine->vtable->parametervalue(self->machine, param));
+	if (psy_audio_machine_describevalue(self->machine, str, param,
+			psy_audio_machine_parametervalue(self->machine, param)) == FALSE) {
+		psy_snprintf(str, 128, "%d",
+			psy_audio_machine_parametervalue(self->machine, param));
 	}
-	ui_setbackgroundcolor(g, 0x00555555); // + nc*2);
-	ui_settextcolor(g, 0x00CDCDCD); // + nc);	
-	ui_textoutrectangle(g, r_top.left, r_top.top,
+	psy_ui_setbackgroundcolor(g, 0x00555555); // + nc*2);
+	psy_ui_settextcolor(g, 0x00CDCDCD); // + nc);	
+	psy_ui_textoutrectangle(g, r_top.left, r_top.top,
 		ETO_OPAQUE, r_top, label, strlen(label));	
-	ui_setbackgroundcolor(g, 0x00444444); // + nc*2);
-	ui_settextcolor(g, 0x00E7BD18); // + nc);
-	ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
+	psy_ui_setbackgroundcolor(g, 0x00444444); // + nc*2);
+	psy_ui_settextcolor(g, 0x00E7BD18); // + nc);
+	psy_ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
 		ETO_OPAQUE, r_bottom, str, strlen(str));
-	self->machine->vtable->parameterrange(self->machine, param, &minval, &maxval);
-	knob_frame = (int)((self->machine->vtable->parametervalue(self->machine, param) - minval) *
-		63.0 / (max(1, maxval - minval)));
-	ui_drawbitmap(g, &knobs, r.left, r.top, knob_cx, knob_cy, knob_frame*knob_cx, 0);	
+	psy_audio_machine_parameterrange(self->machine, param, &minval, &maxval);
+	knob_frame = (int)((psy_audio_machine_parametervalue(self->machine, param)
+		- minval) * 63.0 / (max(1, maxval - minval)));
+	psy_ui_drawbitmap(g, &knobs, r.left, r.top, knob_cx, knob_cy,
+		knob_frame*knob_cx, 0);
 }
 
-void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row, uintptr_t col)
+void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
+	uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -223,27 +230,28 @@ void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr
 	half = height/2;
 	psy_ui_setrectangle(&r, left, top, width, top + half);
 
-	ui_setbackgroundcolor(g, 0x00232323);
-	ui_settextcolor(g, 0x00FFFFFF);
-	if (!self->machine->vtable->parametername(self->machine, str, param)) {
-		if (!self->machine->vtable->parameterlabel(self->machine, str, param)) {
+	psy_ui_setbackgroundcolor(g, 0x00232323);
+	psy_ui_settextcolor(g, 0x00FFFFFF);
+	if (!psy_audio_machine_parametername(self->machine, str, param)) {
+		if (!psy_audio_machine_parameterlabel(self->machine, str, param)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}
-	ui_textoutrectangle(g, 
+	psy_ui_textoutrectangle(g, 
 		left, top, ETO_OPAQUE | ETO_CLIPPED,
 		r, str, strlen(str));
 	psy_ui_setrectangle(&r, left, top + half, width, top + half);
-	if (self->machine->vtable->describevalue(
-		self->machine, str, param, self->machine->vtable->parametervalue(self->machine, param)) == FALSE) {
-		psy_snprintf(str, 128, "%d", self->machine->vtable->parametervalue(self->machine, param));
+	if (psy_audio_machine_describevalue(self->machine, str, param,
+			psy_audio_machine_parametervalue(self->machine, param)) == FALSE) {
+		psy_snprintf(str, 128, "%d", psy_audio_machine_parametervalue(
+			self->machine, param));
 	}
-	ui_textoutrectangle(g, 
-		left, top + half, ETO_OPAQUE | ETO_CLIPPED,
+	psy_ui_textoutrectangle(g, left, top + half, ETO_OPAQUE | ETO_CLIPPED,
 		r, str, strlen(str));	
 }
 
-void DrawHeader(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row, uintptr_t col)
+void DrawHeader(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
+	uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -272,20 +280,19 @@ void DrawHeader(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t 
 	// dc.SelectObject(oldfont);
 	psy_ui_setrectangle(&r, left, top, width, top + half);
 
-	ui_setbackgroundcolor(g, 0x00232323);
-	ui_settextcolor(g, 0x00FFFFFF);
-	if (!self->machine->vtable->parametername(self->machine, str, param)) {
-		if (!self->machine->vtable->parameterlabel(self->machine, str, param)) {
+	psy_ui_setbackgroundcolor(g, 0x00232323);
+	psy_ui_settextcolor(g, 0x00FFFFFF);
+	if (!psy_audio_machine_parametername(self->machine, str, param)) {
+		if (!psy_audio_machine_parameterlabel(self->machine, str, param)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}
-
-	ui_textoutrectangle(g, 
-		left, top, ETO_OPAQUE | ETO_CLIPPED,
-		r, str, strlen(str));	
+	psy_ui_textoutrectangle(g, left, top, ETO_OPAQUE | ETO_CLIPPED, r, str,
+		strlen(str));	
 }
 
-void DrawSlider(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row, uintptr_t col)
+void DrawSlider(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
+	uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -303,12 +310,13 @@ void DrawSlider(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t 
 	cellsize(self, &width, &height);	
 	skin_blitpart(g, &mixer, left, top, &slider);
 	xoffset = (slider.destwidth - knob.destwidth) / 2;
-	value =	(self->machine->vtable->parametervalue(self->machine, param) / 65535.f);	
+	value =	psy_audio_machine_parametervalue(self->machine, param) / 65535.f;
 	yoffset = (int)((1 - value) * slider.destheight);
 	skin_blitpart(g, &mixer, left + xoffset, top + yoffset, &knob);	
 }
 
-void DrawLevel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row, uintptr_t col)
+void DrawLevel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row,
+	uintptr_t col)
 {
 	int top;
 	int left;
@@ -360,7 +368,7 @@ void OnMouseDown(ParamView* self, psy_ui_Component* sender,
 		self->tweakbase = ev->y;
 		self->tweakval =
 			self->machine->vtable->parametervalue(self->machine, self->tweak);
-		ui_component_capture(&self->component);
+		psy_ui_component_capture(&self->component);
 	}
 }
 
@@ -383,7 +391,7 @@ void OnMouseUp(ParamView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->tweak != -1) {
-		ui_component_releasecapture();
+		psy_ui_component_releasecapture();
 	}
 	self->tweak = -1;
 }
@@ -411,13 +419,13 @@ void OnMouseMove(ParamView* self, psy_ui_Component* sender,
 		psy_audio_machine_parametertweak(self->machine, self->tweak, val);		
 		workspace_parametertweak(self->workspace,
 			psy_audio_machine_slot(self->machine), self->tweak, val - minval);
-		ui_component_invalidate(&self->component);		
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
 void OnTimer(ParamView* self, psy_ui_Component* sender, int timerid)
 {
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 int intparamvalue(float value)
@@ -449,6 +457,6 @@ void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		rv->width = self->numparametercols * cellwidth;
 		rv->height = self->numrows * cellheight;
 	} else {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 	}
 }

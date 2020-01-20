@@ -4,6 +4,14 @@
 #ifndef psy_audio_KBDDRIVER_H
 #define psy_audio_KBDDRIVER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct psy_EventDriver* create_kbd_driver(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_KBDDRIVER_H */

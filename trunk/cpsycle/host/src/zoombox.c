@@ -17,18 +17,18 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
-	ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
-	ui_component_resize(&self->component, 0, 20);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_resize(&self->component, 0, 20);
 	psy_ui_button_init(&self->zoomout, &self->component);
 	psy_ui_button_settext(&self->zoomout, "-");
 	psy_ui_label_init(&self->label, &self->component);
 	psy_ui_label_settext(&self->label, "100");
 	psy_ui_button_init(&self->zoomin, &self->component);
 	psy_ui_button_settext(&self->zoomin, "+");	
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT, &margin));
 	psy_signal_init(&self->signal_changed);
 	self->zoomrate = 100;

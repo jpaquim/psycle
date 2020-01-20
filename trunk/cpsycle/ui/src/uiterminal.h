@@ -7,6 +7,10 @@
 #include "uicomponent.h"
 #include "uieditor.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
    psy_ui_Editor output;
@@ -15,5 +19,9 @@ typedef struct {
 void psy_ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);
 void psy_ui_terminal_output(psy_ui_Terminal*, const char* text);
 void psy_ui_terminal_clear(psy_ui_Terminal*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_TERMINAL_H */

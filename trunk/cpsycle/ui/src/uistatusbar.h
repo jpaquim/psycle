@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
 } psy_ui_StatusBar;
@@ -13,5 +17,9 @@ typedef struct {
 void psy_ui_statusbar_init(psy_ui_StatusBar*, psy_ui_Component* parent);
 void psy_ui_statusbar_setfields(psy_ui_StatusBar*, int parts, int iStatusWidths[]);
 void psy_ui_statusbar_settext(psy_ui_StatusBar*, int field, const char* text);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_STATUSBAR_H */

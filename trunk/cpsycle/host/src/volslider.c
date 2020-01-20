@@ -43,7 +43,7 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	self->value = 0.f;
 	self->dragx = -1;
 	self->machines = &workspace->song->machines;	
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	psy_signal_connect(&self->component.signal_mousedown, self,
@@ -56,7 +56,7 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 		volslider_ontimer);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		volslider_onsongchanged);
-	ui_component_starttimer(&self->component, TIMERID_VOLSLIDER, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_VOLSLIDER, 50);
 }
 
 void volslider_ondraw(VolSlider* self, psy_ui_Graphics* g)
@@ -66,14 +66,14 @@ void volslider_ondraw(VolSlider* self, psy_ui_Graphics* g)
 	int sliderwidth;
 	extern psy_ui_App app;
 
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));
-	ui_drawrectangle(g, r);
+	psy_ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));
+	psy_ui_drawrectangle(g, r);
 	sliderwidth = 6;	
 	psy_ui_setrectangle(&r, (int)((size.width - sliderwidth) * self->value), 
 		2, sliderwidth, size.height - 4);
-	ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
+	psy_ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
 	
 }
 
@@ -81,9 +81,9 @@ void volslider_onmousedown(VolSlider* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_ui_Size size;
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	self->dragx = ev->x - (int)(self->value * (size.width - 6));
-	ui_component_capture(&self->component);
+	psy_ui_component_capture(&self->component);
 }
 
 void volslider_onmousemove(VolSlider* self, psy_ui_Component* sender,
@@ -92,11 +92,11 @@ void volslider_onmousemove(VolSlider* self, psy_ui_Component* sender,
 	if (self->dragx != -1) {
 		psy_ui_Size size;
 
-		size = ui_component_size(&self->component);
+		size = psy_ui_component_size(&self->component);
 		self->value = max(0.f, 
 			min(1.f, (ev->x - self->dragx) / (float)(size.width - 6)));
 		volslider_onsliderchanged(self, sender);
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -104,7 +104,7 @@ void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	self->dragx = -1;
-	ui_component_releasecapture(&self->component);
+	psy_ui_component_releasecapture(&self->component);
 }
 
 void volslider_onsliderchanged(VolSlider* self, psy_ui_Component* sender)
@@ -127,7 +127,7 @@ void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, int timerid)
 		oldvalue = self->value;
 		self->value = (psy_dsp_amp_t)(sqrt(machines_volume(self->machines)) * 0.5f);
 		if (oldvalue != self->value) {
-			ui_component_invalidate(&self->component);
+			psy_ui_component_invalidate(&self->component);
 		}
 	}
 }

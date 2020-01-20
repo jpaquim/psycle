@@ -3,6 +3,7 @@
 
 #include "psy2converter.h"
 #include "machinefactory.h"
+#include "song.h"
 #include "songio.h"
 #include <string.h>
 #include <dir.h>

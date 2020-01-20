@@ -33,46 +33,46 @@ static void vtable_init(Vumeter* self)
 
 void vumeter_init(Vumeter* self, psy_ui_Component* parent, Workspace* workspace)
 {					
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->leftavg = 0;
 	self->rightavg = 0;
-	ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		vumeter_onsongchanged);
 	vumeter_connectmachinessignals(self, workspace);
-	ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
 }
 
 void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle left;
 	psy_ui_Rectangle right;
-	psy_ui_Size size = ui_component_size(&self->component);
+	psy_ui_Size size = psy_ui_component_size(&self->component);
 	psy_ui_setrectangle(&left, 0, 5, size.width, 5);
 	right = left;
 	right.top += 6;
 	right.bottom += 6;
-	ui_drawsolidrectangle(g, left, 0x00000000);
-	ui_drawsolidrectangle(g, right, 0x00000000);
+	psy_ui_drawsolidrectangle(g, left, 0x00000000);
+	psy_ui_drawsolidrectangle(g, right, 0x00000000);
 	
 	left.right = (int) (self->leftavg * size.width);
 	right.right = (int) (self->rightavg * size.width);
-	ui_drawsolidrectangle(g, left, 0x0000FF00);
-	ui_drawsolidrectangle(g, right, 0x0000FF00);
+	psy_ui_drawsolidrectangle(g, left, 0x0000FF00);
+	psy_ui_drawsolidrectangle(g, right, 0x0000FF00);
 
 	psy_ui_setrectangle(&left, left.right, left.top, size.width - left.right, 5);
 	psy_ui_setrectangle(&right, right.right, right.top, size.width - right.right, 5);
-	ui_drawsolidrectangle(g, left, 0x003E3E3E);
-	ui_drawsolidrectangle(g, right, 0x003E3E3E);
+	psy_ui_drawsolidrectangle(g, left, 0x003E3E3E);
+	psy_ui_drawsolidrectangle(g, right, 0x003E3E3E);
 }
 
 void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 

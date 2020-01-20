@@ -6,6 +6,7 @@
 #include "settingsview.h"
 #include <stdio.h>
 #include "inputmap.h"
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
@@ -55,15 +56,15 @@ static void settingsview_adjustscroll(SettingsView*);
 void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Properties* properties)
 {
-	ui_component_init(&self->component, parent);		
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	self->properties = properties;
-	ui_component_init(&self->client, &self->component);
-	ui_component_doublebuffer(&self->client);	
-	ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_init(&self->client, &self->component);
+	psy_ui_component_doublebuffer(&self->client);	
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	self->client.wheelscroll = 4;
-	ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
-	ui_component_showverticalscrollbar(&self->client);	
+	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
+	psy_ui_component_showverticalscrollbar(&self->client);	
 	psy_signal_connect(&self->client.signal_destroy, self,
 		settingsview_ondestroy);
 	psy_signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
@@ -82,12 +83,12 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		settingsview_oneditkeydown);
-	ui_component_hide(&self->edit.component);
+	psy_ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
-	ui_component_hide(&self->inputdefiner.component);		
+	psy_ui_component_hide(&self->inputdefiner.component);		
 	psy_signal_init(&self->signal_changed);
 	tabbar_init(&self->tabbar, &self->component);
-	ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
 	settingsview_appendtabbarsections(self);
 }
@@ -116,9 +117,9 @@ void settingsview_ondraw(SettingsView* self, psy_ui_Component* sender,
 	psy_ui_Graphics* g)
 {	
 	self->g = g;
-	ui_setcolor(g, 0x00EAEAEA);
-	ui_settextcolor(g, 0x00CACACA);
-	ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setcolor(g, 0x00EAEAEA);
+	psy_ui_settextcolor(g, 0x00CACACA);
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
 	settingsview_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
 		settingsview_onpropertiesdrawenum);
@@ -128,7 +129,7 @@ void settingsview_preparepropertiesenum(SettingsView* self)
 {
 	psy_ui_TextMetric tm;
 	
-	tm = ui_component_textmetric(&self->client);
+	tm = psy_ui_component_textmetric(&self->client);
 	self->lineheight = (int) (tm.tmHeight * 1.5);
 	self->columnwidth = tm.tmAveCharWidth * 50;
 	self->identwidth = tm.tmAveCharWidth * 4;
@@ -191,10 +192,10 @@ void settingsview_drawlinebackground(SettingsView* self,
 		psy_ui_Size size;
 		psy_ui_Rectangle r;
 
-		size = ui_component_size(&self->client);
+		size = psy_ui_component_size(&self->client);
 		psy_ui_setrectangle(&r, 10, self->cpy + self->dy, size.width - 20,
 			self->lineheight);
-		ui_drawsolidrectangle(self->g, r, 0x00292929);
+		psy_ui_drawsolidrectangle(self->g, r, 0x00292929);
 	}
 }
 
@@ -204,11 +205,9 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
 		settingsview_drawbutton(self, property, column + 1);
 	} else {
-		ui_textout(self->g,
-		self->cpx + column * self->columnwidth,
-		self->cpy + self->dy,
-		psy_properties_text(property),
-		strlen(psy_properties_text(property)));
+		psy_ui_textout(self->g, self->cpx + column * self->columnwidth,
+			self->cpy + self->dy, psy_properties_text(property),
+			strlen(psy_properties_text(property)));
 	}
 }
 
@@ -234,16 +233,16 @@ void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 	int column)
 {
 	if (self->selected == property) {					
-		ui_setbackgroundmode(self->g, OPAQUE);
-		ui_setbackgroundcolor(self->g, 0x009B7800);
-		ui_settextcolor(self->g, 0x00FFFFFF);
+		psy_ui_setbackgroundmode(self->g, OPAQUE);
+		psy_ui_setbackgroundcolor(self->g, 0x009B7800);
+		psy_ui_settextcolor(self->g, 0x00FFFFFF);
 	}				
-	ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy,
+	psy_ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy,
 		psy_properties_valuestring(property),
 		strlen(psy_properties_valuestring(property)));
-	ui_setbackgroundcolor(self->g, 0x003E3E3E);
-	ui_setbackgroundmode(self->g, TRANSPARENT);
-	ui_settextcolor(self->g, 0x00CACACA);
+	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
+	psy_ui_setbackgroundmode(self->g, TRANSPARENT);
+	psy_ui_settextcolor(self->g, 0x00CACACA);
 //	if (property->item.hint == PSY_PROPERTY_HINT_EDITDIR) {
 //		ui_textout(self->g, 500, 20 + self->cpy, "...", strlen("..."));
 //	}		
@@ -260,8 +259,8 @@ void settingsview_drawinteger(SettingsView* self, psy_Properties* property,
 	} else {
 		psy_snprintf(text, 20, "%d", psy_properties_value(property));
 	}
-	ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy, text,
-		strlen(text));
+	psy_ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy,
+		text, strlen(text));
 }
 
 void settingsview_advanceline(SettingsView* self)
@@ -273,29 +272,30 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	int column)
 {
 	psy_ui_Size size;
-	psy_ui_Rectangle r;	
+	psy_ui_Rectangle r;
+
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
-		ui_textout(self->g, self->columnwidth * column + 3,
+		psy_ui_textout(self->g, self->columnwidth * column + 3,
 			self->cpy + self->dy, "...", 3);
 	} else {
-		ui_textout(self->g, self->columnwidth * column + 3,
+		psy_ui_textout(self->g, self->columnwidth * column + 3,
 			self->cpy + self->dy, psy_properties_text(property),
 			strlen(psy_properties_text(property)));
 	}
-	ui_setbackgroundcolor(self->g, 0x003E3E3E);
-	ui_setbackgroundmode(self->g, TRANSPARENT);
-	ui_settextcolor(self->g, 0x00CACACA);	
+	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
+	psy_ui_setbackgroundmode(self->g, TRANSPARENT);
+	psy_ui_settextcolor(self->g, 0x00CACACA);	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
-		size = ui_component_textsize(&self->client, "...");
+		size = psy_ui_component_textsize(&self->client, "...");
 	} else {
-		size = ui_component_textsize(&self->client,
+		size = psy_ui_component_textsize(&self->client,
 			psy_properties_text(property));
 	}
 	r.left = self->columnwidth * column ;
 	r.top = self->cpy + self->dy ;
 	r.right = r.left + size.width + 6;
 	r.bottom = r.top + size.height + 2;
-	ui_drawrectangle(self->g, r);
+	psy_ui_drawrectangle(self->g, r);
 }
 
 void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
@@ -308,7 +308,7 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
 		
-	tm = ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	size.width = tm.tmAveCharWidth * 4;
 	size.height = tm.tmHeight;
 	knobsize.width = (int) (tm.tmAveCharWidth * 2);
@@ -319,8 +319,8 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 	r.top = self->cpy + self->dy + (self->lineheight - size.height) / 2;
 	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
 	r.bottom = r.top + size.height;
-	ui_setcolor(self->g, 0x00555555);
-	ui_drawroundrectangle(self->g, r, cornersize);
+	psy_ui_setcolor(self->g, 0x00555555);
+	psy_ui_drawroundrectangle(self->g, r, cornersize);
 	if (psy_properties_ischoiceitem(property)) {
 		checked = self->currchoice == self->choicecount;
 	} else {
@@ -331,27 +331,27 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
-		ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00555555);
+		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00555555);
 	} else {
 		r.left = self->columnwidth * column + tm.tmAveCharWidth * 2;
 		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
-		ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00CACACA);
+		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00CACACA);
 	}	
 }
 
 void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
-	ui_component_setfocus(&self->client);
-	if (ui_component_visible(&self->edit.component)) {
+	psy_ui_component_setfocus(&self->client);
+	if (psy_ui_component_visible(&self->edit.component)) {
 		settingsview_oneditchange(self, &self->edit);
-		ui_component_hide(&self->edit.component);
+		psy_ui_component_hide(&self->edit.component);
 	}	
-	if (ui_component_visible(&self->inputdefiner.component)) {
+	if (psy_ui_component_visible(&self->inputdefiner.component)) {
 		settingsview_oninputdefinerchange(self, &self->inputdefiner);
-		ui_component_hide(&self->inputdefiner.component);
+		psy_ui_component_hide(&self->inputdefiner.component);
 	}	
 	self->selected = 0;
 	self->mx = ev->x;
@@ -369,7 +369,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 			psy_snprintf(title, MAX_PATH, "%s",
 				psy_properties_text(self->selected));
 			title[MAX_PATH - 1] = '\0';
-			if (ui_browsefolder(&self->component, title, path)) {
+			if (psy_ui_browsefolder(&self->component, title, path)) {
 				psy_properties_write_string(self->selected->parent,
 					self->selected->item.key, path);
 			}
@@ -390,7 +390,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 				self->selected);
 		}
 	}
-	ui_component_invalidate(&self->client);
+	psy_ui_component_invalidate(&self->client);
 }
 
 int settingsview_intersects(psy_ui_Rectangle* r, int x, int y)
@@ -461,8 +461,8 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 		
-		tm = ui_component_textmetric(&self->component);
-		size = ui_component_textsize(&self->client, "x");
+		tm = psy_ui_component_textmetric(&self->component);
+		size = psy_ui_component_textsize(&self->client, "x");
 		r.left = self->columnwidth * column;
 		r.top = self->cpy + self->dy;
 		r.right = r.left + tm.tmAveCharWidth * 4;;
@@ -517,15 +517,15 @@ void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sende
 			edit = &self->edit.component;									
 		}		
 		if (edit) {
-			ui_component_setposition(edit,
+			psy_ui_component_setposition(edit,
 				self->selrect.left,
 				self->selrect.top,
 				self->selrect.right - self->selrect.left, 
 				self->selrect.bottom - self->selrect.top);
 			if (psy_properties_hint(self->selected) !=
 					PSY_PROPERTY_HINT_READONLY) {				
-				ui_component_show(edit);
-				ui_component_setfocus(edit);
+				psy_ui_component_show(edit);
+				psy_ui_component_setfocus(edit);
 			}			
 		}
 	}
@@ -562,13 +562,13 @@ void settingsview_oneditkeydown(SettingsView* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode == VK_RETURN) {
-		ui_component_hide(&self->edit.component);
-		ui_component_setfocus(&self->client);
+		psy_ui_component_hide(&self->edit.component);
+		psy_ui_component_setfocus(&self->client);
 		settingsview_oneditchange(self, &self->edit);
 	} else
 	if (ev->keycode == VK_ESCAPE) {
-		ui_component_hide(&self->edit.component);
-		ui_component_setfocus(&self->client);		
+		psy_ui_component_hide(&self->edit.component);
+		psy_ui_component_setfocus(&self->client);		
 	}
 }
 
@@ -613,16 +613,17 @@ void settingsview_ontabbarchange(SettingsView* self, psy_ui_Component* sender,
 			settingsview_preparepropertiesenum(self);
 			psy_properties_enumerate(self->properties->children, self,
 				settingsview_onenumpropertyposition);
-			ui_component_verticalscrollrange(&self->client, &scrollmin,
+			psy_ui_component_verticalscrollrange(&self->client, &scrollmin,
 				&scrollmax);
 			scrollposition = self->cpy / self->lineheight;
 			if (scrollposition > scrollmax) {
 				scrollposition = scrollmax;
 			}
 			self->dy = -scrollposition * self->lineheight;			
-			ui_component_setverticalscrollposition(&self->client, scrollposition);
+			psy_ui_component_setverticalscrollposition(&self->client,
+				scrollposition);
 		}	
-		ui_component_invalidate(&self->client);
+		psy_ui_component_invalidate(&self->client);
 	}
 }
 
@@ -631,7 +632,7 @@ void settingsview_adjustscroll(SettingsView* self)
 	psy_ui_Size size;
 	int scrollmax;
 
-	size = ui_component_size(&self->client);
+	size = psy_ui_component_size(&self->client);
 	self->search = 0;
 	settingsview_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
@@ -641,9 +642,9 @@ void settingsview_adjustscroll(SettingsView* self)
 	if (scrollmax < 0) {
 		scrollmax = 0;
 	}
-	ui_component_setverticalscrollrange(&self->client, 0, scrollmax);
+	psy_ui_component_setverticalscrollrange(&self->client, 0, scrollmax);
 	if (-self->dy / self->lineheight > scrollmax - 1) {
 		self->dy = -(scrollmax) * self->lineheight;
-		ui_component_setverticalscrollposition(&self->client, scrollmax);
+		psy_ui_component_setverticalscrollposition(&self->client, scrollmax);
 	}	
 }

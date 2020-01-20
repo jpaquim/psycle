@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "uiknob.h"
+
+#include <stdlib.h>
 #include <string.h>
 
 static void ondestroy(psy_ui_Knob*, psy_ui_Component* sender);
@@ -32,7 +34,7 @@ static void vtable_init(psy_ui_Knob* self)
 
 void psy_ui_knob_init(psy_ui_Knob* self, psy_ui_Component* parent)
 {		
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->bitmap = 0;
 	self->label = strdup("");
@@ -72,12 +74,12 @@ void psy_ui_knob_setdesc(psy_ui_Knob* self, const char* text)
 void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 {
 	if (self->bitmap) {
-		ui_drawbitmap(g, self->bitmap, 0, 0, 28, 28, 0, 0);
+		psy_ui_drawbitmap(g, self->bitmap, 0, 0, 28, 28, 0, 0);
 	}
-	ui_settextcolor(g, 0x00CACACA);
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ui_textout(g, 30, 0, self->label, strlen(self->label));
-	ui_textout(g, 30, 28 / 2, self->desc, strlen(self->desc));
+	psy_ui_settextcolor(g, 0x00CACACA);
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_textout(g, 30, 0, self->label, strlen(self->label));
+	psy_ui_textout(g, 30, 28 / 2, self->desc, strlen(self->desc));
 }
 
 void onpreferredsize(psy_ui_Knob* self, psy_ui_Size* limit, psy_ui_Size* rv)
@@ -86,7 +88,7 @@ void onpreferredsize(psy_ui_Knob* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		rv->width = 28 + 50;
 		rv->height = 28;
 	} else {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 	}
 }
 
@@ -98,11 +100,11 @@ void onmousedown(psy_ui_Knob* self, psy_ui_MouseEvent* ev)
 void onmouseenter(psy_ui_Knob* self)
 {
 //	self->hover = 1;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void onmouseleave(psy_ui_Knob* self)
 {		
 //	self->hover = 0;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }

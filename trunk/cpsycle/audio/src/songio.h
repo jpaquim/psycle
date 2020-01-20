@@ -5,8 +5,12 @@
 #define psy_audio_SONGIO_H
 
 #include <properties.h>
-#include "song.h"
 #include <fileio.h>
+#include <signal.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /// song load and save
 typedef struct psy_audio_SongFile {
@@ -21,11 +25,15 @@ typedef struct psy_audio_SongFile {
 	const char* path;
 } psy_audio_SongFile;
 
-void psy_audio_songfile_init(psy_audio_SongFile*);
-void psy_audio_songfile_dispose(psy_audio_SongFile*);
-int psy_audio_songfile_load(psy_audio_SongFile*, const char* path);
-int psy_audio_songfile_save(psy_audio_SongFile*, const char* path);
-void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
-void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
+void psy_audio_songfile_init(struct psy_audio_SongFile*);
+void psy_audio_songfile_dispose(struct psy_audio_SongFile*);
+int psy_audio_songfile_load(struct psy_audio_SongFile*, const char* path);
+int psy_audio_songfile_save(struct psy_audio_SongFile*, const char* path);
+void psy_audio_songfile_warn(struct psy_audio_SongFile*, const char* text);
+void psy_audio_songfile_message(struct psy_audio_SongFile*, const char* text);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_SONGIO_H */

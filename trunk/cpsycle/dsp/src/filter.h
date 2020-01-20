@@ -7,6 +7,10 @@
 #include "filtercoeff.h"
 #include "../../detail/psydef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct psy_dsp_Filter;
 
 // FilterVtable function pointer typedefs
@@ -116,5 +120,9 @@ void psy_dsp_firwork_init(psy_dsp_FIRWork*);
 psy_dsp_amp_t psy_dsp_firwork_work(psy_dsp_FIRWork*, psy_dsp_FilterCoeff* coeffs,
 	psy_dsp_amp_t sample);
 void psy_dsp_firwork_reset(psy_dsp_FIRWork*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_FILTER_H */

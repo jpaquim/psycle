@@ -8,7 +8,7 @@
 
 void psy_ui_statusbar_init(psy_ui_StatusBar* self, psy_ui_Component* parent)
 {	
-   	ui_win32_component_init(&self->component, parent, STATUSCLASSNAME, 
+   	psy_ui_win32_component_init(&self->component, parent, STATUSCLASSNAME, 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP,
 		0);

@@ -27,7 +27,7 @@ static int windowstyle(psy_ui_Component*);
 static int windowexstyle(psy_ui_Component*);
 static void enableinput(psy_ui_Component*, int enable, int recursive);
 
-void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
+void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (font && main) {
 		psy_List* p;
@@ -37,7 +37,7 @@ void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 			main->font.hfont = font->hfont;
 			SendMessage((HWND)main->platform->hwnd, WM_SETFONT, (WPARAM) font->hfont, 0);
 		}
-		for (p = q = ui_component_children(main, 1); p != 0; p = p->next) {
+		for (p = q = psy_ui_component_children(main, 1); p != 0; p = p->next) {
 			psy_ui_Component* child;
 
 			child = (psy_ui_Component*)p->entry;
@@ -45,7 +45,7 @@ void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 				child->font.hfont = font->hfont;	
 				SendMessage((HWND)child->platform->hwnd, WM_SETFONT,
 					(WPARAM) font->hfont, 0);
-				ui_component_align(child);
+				psy_ui_component_align(child);
 			}		
 		}
 		for (p = q; p != 0; p = p->next) {
@@ -54,13 +54,13 @@ void ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 			child = (psy_ui_Component*)p->entry;
 			if (child->font.hfont == font->hfont) {
 				child = (psy_ui_Component*)p->entry;
-				ui_component_align(child);
+				psy_ui_component_align(child);
 			}
 		}
 		psy_list_free(q);
 		DeleteObject(app.defaults.defaultfont.hfont);
 		app.defaults.defaultfont = *font;
-		ui_component_align(main);
+		psy_ui_component_align(main);
 	}
 }
 
@@ -98,7 +98,7 @@ static void vtable_init(void)
 	}
 }
 
-int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
+int psy_ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 		LPCTSTR classname, 
 		int x, int y, int width, int height,
 		DWORD dwStyle,
@@ -109,7 +109,7 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;	
-	ui_component_init_signals(self);
+	psy_ui_component_init_signals(self);
 	self->platform = (psy_ui_win_ComponentDetails*)
 		malloc(sizeof(psy_ui_win_ComponentDetails));
 	if (parent) {
@@ -148,7 +148,7 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 		psy_table_insert(&winapp->winidmap, winapp->winid, self);
 		++winapp->winid;
 	}
-	ui_component_init_base(self);		
+	psy_ui_component_init_base(self);		
 #if defined(_WIN64)		
 		self->platform->wndproc = (winproc)GetWindowLongPtr((HWND)self->platform->hwnd, GWLP_WNDPROC);
 #else		
@@ -167,16 +167,16 @@ int ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 	return err;
 }
 
-void ui_component_init(psy_ui_Component* component, psy_ui_Component* parent)
+void psy_ui_component_init(psy_ui_Component* component, psy_ui_Component* parent)
 {		
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;
-	ui_win32_component_init(component, parent, winapp->componentclass,
+	psy_ui_win32_component_init(component, parent, winapp->componentclass,
 		0, 0, 90, 90, WS_CHILDWINDOW | WS_VISIBLE, 0);
 }
 
-void ui_component_init_signals(psy_ui_Component* component)
+void psy_ui_component_init_signals(psy_ui_Component* component)
 {
 	psy_signal_init(&component->signal_size);
 	psy_signal_init(&component->signal_draw);
@@ -204,7 +204,7 @@ void ui_component_init_signals(psy_ui_Component* component)
 	psy_signal_init(&component->signal_command);
 }
 
-void ui_component_init_base(psy_ui_Component* self) {
+void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->scrollstepx = 100;
 	self->scrollstepy = 12;	
 	self->preventdefault = 0;
@@ -232,13 +232,13 @@ void ui_component_init_base(psy_ui_Component* self) {
 	self->color = psy_ui_defaults_color(&app.defaults);
 	self->cursor = psy_ui_CURSOR_DEFAULT;
 	psy_ui_font_init(&self->font, 0);
-	ui_component_setfont(self, &app.defaults.defaultfont);
-	ui_component_setbackgroundcolor(self, self->backgroundcolor);
+	psy_ui_component_setfont(self, &app.defaults.defaultfont);
+	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);
 	vtable_init();
 	self->vtable = &vtable;	
 }
 
-void ui_component_dispose(psy_ui_Component* self)
+void psy_ui_component_dispose(psy_ui_Component* self)
 {	
 	psy_signal_dispose(&self->signal_size);
 	psy_signal_dispose(&self->signal_draw);
@@ -275,13 +275,13 @@ void ui_component_dispose(psy_ui_Component* self)
 	self->platform = 0;
 }
 
-void ui_component_destroy(psy_ui_Component* self)
+void psy_ui_component_destroy(psy_ui_Component* self)
 {
 	DestroyWindow((HWND)self->platform->hwnd);
 }
 
 
-void ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t stepy)
+void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t stepy)
 {
 	ScrollWindow ((HWND)self->platform->hwnd,
 		self->scrollstepx * stepx,
@@ -291,7 +291,7 @@ void ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t st
 }
 
 
-psy_ui_Size ui_component_size(psy_ui_Component* self)
+psy_ui_Size psy_ui_component_size(psy_ui_Component* self)
 {   
 	psy_ui_Size rv;
 	RECT rect ;
@@ -302,7 +302,7 @@ psy_ui_Size ui_component_size(psy_ui_Component* self)
 	return rv;
 }
 
-psy_ui_Rectangle ui_component_position(psy_ui_Component* self)
+psy_ui_Rectangle psy_ui_component_position(psy_ui_Component* self)
 {   
 	psy_ui_Rectangle rv;
 	RECT rc;
@@ -323,7 +323,7 @@ psy_ui_Rectangle ui_component_position(psy_ui_Component* self)
 	return rv;
 }
 
-psy_ui_Size ui_component_frame_size(psy_ui_Component* self)
+psy_ui_Size psy_ui_component_frame_size(psy_ui_Component* self)
 {   
 	psy_ui_Size rv;
 	RECT rect ;
@@ -334,27 +334,27 @@ psy_ui_Size ui_component_frame_size(psy_ui_Component* self)
 	return rv;
 }
 
-void ui_component_show_state(psy_ui_Component* self, int cmd)
+void psy_ui_component_show_state(psy_ui_Component* self, int cmd)
 {
 	ShowWindow((HWND)self->platform->hwnd, cmd);
 	UpdateWindow((HWND)self->platform->hwnd) ;
 }
 
-void ui_component_show(psy_ui_Component* self)
+void psy_ui_component_show(psy_ui_Component* self)
 {
 	self->visible = 1;
 	ShowWindow((HWND)self->platform->hwnd, SW_SHOW);
 	UpdateWindow((HWND)self->platform->hwnd) ;
 }
 
-void ui_component_hide(psy_ui_Component* self)
+void psy_ui_component_hide(psy_ui_Component* self)
 {
 	self->visible = 0;
 	ShowWindow((HWND)self->platform->hwnd, SW_HIDE);
 	UpdateWindow((HWND)self->platform->hwnd) ;
 }
 
-void ui_component_showhorizontalscrollbar(psy_ui_Component* self)
+void psy_ui_component_showhorizontalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
 	SetWindowLongPtr((HWND)self->platform->hwnd, GWL_STYLE, 
@@ -365,7 +365,7 @@ void ui_component_showhorizontalscrollbar(psy_ui_Component* self)
 #endif
 }
 
-void ui_component_hidehorizontalscrollbar(psy_ui_Component* self)
+void psy_ui_component_hidehorizontalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
 	SetWindowLongPtr((HWND)self->platform->hwnd, GWL_STYLE, 
@@ -376,7 +376,7 @@ void ui_component_hidehorizontalscrollbar(psy_ui_Component* self)
 #endif
 }
 
-void ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int max)
+void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int max)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
@@ -386,7 +386,7 @@ void ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int 
 	SetScrollInfo((HWND)self->platform->hwnd, SB_HORZ, &si, TRUE);
 }
 
-void ui_component_showverticalscrollbar(psy_ui_Component* self)
+void psy_ui_component_showverticalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
 	SetWindowLongPtr((HWND)self->platform->hwnd, GWL_STYLE, 
@@ -397,7 +397,7 @@ void ui_component_showverticalscrollbar(psy_ui_Component* self)
 #endif
 }
 
-void ui_component_hideverticalscrollbar(psy_ui_Component* self)
+void psy_ui_component_hideverticalscrollbar(psy_ui_Component* self)
 {
 #if defined(_WIN64)
 	SetWindowLongPtr((HWND)self->platform->hwnd, GWL_STYLE, 
@@ -408,7 +408,7 @@ void ui_component_hideverticalscrollbar(psy_ui_Component* self)
 #endif
 }
 
-void ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int max)
+void psy_ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int max)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
@@ -418,7 +418,7 @@ void ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int ma
 	SetScrollInfo((HWND)self->platform->hwnd, SB_VERT, &si, TRUE);
 }
 
-int ui_component_verticalscrollposition(psy_ui_Component* self)
+int psy_ui_component_verticalscrollposition(psy_ui_Component* self)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
@@ -427,7 +427,7 @@ int ui_component_verticalscrollposition(psy_ui_Component* self)
 	return si.nPos;
 }
 
-void ui_component_setverticalscrollposition(psy_ui_Component* self, int position)
+void psy_ui_component_setverticalscrollposition(psy_ui_Component* self, int position)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
@@ -442,7 +442,7 @@ void ui_component_setverticalscrollposition(psy_ui_Component* self, int position
 	SetScrollInfo((HWND)self->platform->hwnd, SB_VERT, &si, TRUE);
 }
 
-int ui_component_horizontalscrollposition(psy_ui_Component* self)
+int psy_ui_component_horizontalscrollposition(psy_ui_Component* self)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
@@ -451,7 +451,7 @@ int ui_component_horizontalscrollposition(psy_ui_Component* self)
 	return si.nPos;
 }
 
-void ui_component_sethorizontalscrollposition(psy_ui_Component* self, int position)
+void psy_ui_component_sethorizontalscrollposition(psy_ui_Component* self, int position)
 {
 	SCROLLINFO si;
 	si.cbSize = sizeof(si);
@@ -466,7 +466,7 @@ void ui_component_sethorizontalscrollposition(psy_ui_Component* self, int positi
 	SetScrollInfo((HWND)self->platform->hwnd, SB_HORZ, &si, TRUE);
 }
 
-void ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
+void psy_ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
 	int* scrollmax)
 {
 	SCROLLINFO si;
@@ -477,7 +477,7 @@ void ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
 	*scrollmax = si.nMax;
 }
 
-void ui_component_move(psy_ui_Component* self, int left, int top)
+void psy_ui_component_move(psy_ui_Component* self, int left, int top)
 {
 	SetWindowPos((HWND)self->platform->hwnd, NULL, 
 	   left, top,
@@ -485,7 +485,7 @@ void ui_component_move(psy_ui_Component* self, int left, int top)
 	   SWP_NOZORDER | SWP_NOSIZE) ;	
 }
 
-void ui_component_resize(psy_ui_Component* self, int width, int height)
+void psy_ui_component_resize(psy_ui_Component* self, int width, int height)
 {	
 	SetWindowPos((HWND)self->platform->hwnd, NULL, 
 	   0, 0,
@@ -493,22 +493,22 @@ void ui_component_resize(psy_ui_Component* self, int width, int height)
 	   SWP_NOZORDER | SWP_NOMOVE);	
 }
 
-void ui_component_setposition(psy_ui_Component* self, int x, int y, int width, int height)
+void psy_ui_component_setposition(psy_ui_Component* self, int x, int y, int width, int height)
 {	
 	SetWindowPos((HWND)self->platform->hwnd, 0, x, y, width, height, SWP_NOZORDER);	
 }
 
-void ui_component_setmenu(psy_ui_Component* self, ui_menu* menu)
+void psy_ui_component_setmenu(psy_ui_Component* self, psy_ui_Menu* menu)
 {
 	SetMenu((HWND)self->platform->hwnd, menu->hmenu);
 }
 
-void ui_component_settitle(psy_ui_Component* self, const char* title)
+void psy_ui_component_settitle(psy_ui_Component* self, const char* title)
 {
 	SetWindowText((HWND)self->platform->hwnd, title);
 }
 
-void ui_component_enumerate_children(psy_ui_Component* self, void* context, 
+void psy_ui_component_enumerate_children(psy_ui_Component* self, void* context, 
 	int (*childenum)(void*, void*))
 {	
 	EnumCallback callback;
@@ -532,7 +532,7 @@ BOOL CALLBACK childenumproc(HWND hwnd, LPARAM lParam)
     return FALSE ;
 }
 
-psy_List* ui_component_children(psy_ui_Component* self, int recursive)
+psy_List* psy_ui_component_children(psy_ui_Component* self, int recursive)
 {	
 	psy_List* children = 0;	
 	if (recursive == 1) {
@@ -580,22 +580,22 @@ BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam)
     return TRUE;
 }
 
-void ui_component_capture(psy_ui_Component* self)
+void psy_ui_component_capture(psy_ui_Component* self)
 {
 	SetCapture((HWND)self->platform->hwnd);
 }
 
-void ui_component_releasecapture()
+void psy_ui_component_releasecapture()
 {
 	ReleaseCapture();
 }
 
-void ui_component_invalidate(psy_ui_Component* self)
+void psy_ui_component_invalidate(psy_ui_Component* self)
 {
 	InvalidateRect((HWND)self->platform->hwnd, NULL, FALSE);
 }
 
-void ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle* r)
+void psy_ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle* r)
 {
 	RECT rc;
 
@@ -606,23 +606,23 @@ void ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle*
 	InvalidateRect((HWND)self->platform->hwnd, &rc, FALSE);
 }
 
-void ui_component_update(psy_ui_Component* self)
+void psy_ui_component_update(psy_ui_Component* self)
 {
 	UpdateWindow((HWND)self->platform->hwnd);
 }
 
-void ui_component_setfocus(psy_ui_Component* self)
+void psy_ui_component_setfocus(psy_ui_Component* self)
 {
 	SetFocus((HWND)self->platform->hwnd);
 	psy_signal_emit(&self->signal_focus, self, 0);
 }
 
-int ui_component_hasfocus(psy_ui_Component* self)
+int psy_ui_component_hasfocus(psy_ui_Component* self)
 {
 	return (HWND) self->platform->hwnd == GetFocus();
 }
 
-void ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
+void psy_ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
 {
 	psy_ui_Font font;
 
@@ -643,17 +643,17 @@ void ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
 	self->font = font;
 }
 
-void ui_component_preventdefault(psy_ui_Component* self)
+void psy_ui_component_preventdefault(psy_ui_Component* self)
 {
 	self->preventdefault = 1;
 }
 
-int ui_component_visible(psy_ui_Component* self)
+int psy_ui_component_visible(psy_ui_Component* self)
 {
 	return IsWindowVisible((HWND) self->platform->hwnd);
 }
 
-void ui_component_align(psy_ui_Component* self)
+void psy_ui_component_align(psy_ui_Component* self)
 {	
 	psy_ui_Aligner aligner;
 
@@ -671,12 +671,12 @@ void onpreferredsize(psy_ui_Component* self, psy_ui_Size* limit,
 	psy_ui_aligner_preferredsize(&aligner, limit, rv);
 }
 
-void ui_component_doublebuffer(psy_ui_Component* self)
+void psy_ui_component_doublebuffer(psy_ui_Component* self)
 {
 	self->doublebuffered = 1;
 }
 
-void ui_component_setmargin(psy_ui_Component* self,
+void psy_ui_component_setmargin(psy_ui_Component* self,
 	const psy_ui_Margin* margin)
 {	
 	if (margin) {
@@ -686,7 +686,7 @@ void ui_component_setmargin(psy_ui_Component* self,
 	}
 }
 
-void ui_component_setspacing(psy_ui_Component* self,
+void psy_ui_component_setspacing(psy_ui_Component* self,
 	const psy_ui_Margin* spacing)
 {	
 	if (spacing) {
@@ -696,32 +696,32 @@ void ui_component_setspacing(psy_ui_Component* self,
 	}
 }
 
-void ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
+void psy_ui_component_setalign(psy_ui_Component* self, psy_ui_AlignType align)
 {
 	self->align = align;
 }
 
-void ui_component_enablealign(psy_ui_Component* self)
+void psy_ui_component_enablealign(psy_ui_Component* self)
 {
 	self->alignchildren = 1;	
 }
 
-void ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)
+void psy_ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)
 {
 	self->alignexpandmode = mode;
 }
 
-void ui_component_preventalign(psy_ui_Component* self)
+void psy_ui_component_preventalign(psy_ui_Component* self)
 {
 	self->alignchildren = 0;
 }
 
-void ui_component_enableinput(psy_ui_Component* self, int recursive)
+void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)
 {
 	enableinput(self, TRUE, recursive);
 }
 
-void ui_component_preventinput(psy_ui_Component* self, int recursive)
+void psy_ui_component_preventinput(psy_ui_Component* self, int recursive)
 {
 	enableinput(self, FALSE, recursive);
 }
@@ -733,7 +733,7 @@ void enableinput(psy_ui_Component* self, int enable, int recursive)
 		psy_List* p;
 		psy_List* q;
 		
-		for (p = q = ui_component_children(self, recursive); p != 0;
+		for (p = q = psy_ui_component_children(self, recursive); p != 0;
 				p = p->next) {
 			EnableWindow((HWND)((psy_ui_Component*)(p->entry))->platform->hwnd,
 				enable);
@@ -742,12 +742,12 @@ void enableinput(psy_ui_Component* self, int enable, int recursive)
 	}
 }
 
-void ui_component_setbackgroundmode(psy_ui_Component* self, BackgroundMode mode)
+void psy_ui_component_setbackgroundmode(psy_ui_Component* self, BackgroundMode mode)
 {
 	self->backgroundmode = mode;	
 }
 
-void ui_component_setbackgroundcolor(psy_ui_Component* self, unsigned int color)
+void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, unsigned int color)
 {
 	self->backgroundcolor = color;
 	if (self->platform->background) {
@@ -756,12 +756,12 @@ void ui_component_setbackgroundcolor(psy_ui_Component* self, unsigned int color)
 	self->platform->background = CreateSolidBrush(color);
 }
 
-void ui_component_setcolor(psy_ui_Component* self, unsigned int color)
+void psy_ui_component_setcolor(psy_ui_Component* self, unsigned int color)
 {
 	self->color = color;
 }
 
-psy_ui_Size ui_component_textsize(psy_ui_Component* self, const char* text)
+psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char* text)
 {
 	psy_ui_Size rv;
 	psy_ui_Graphics g;
@@ -770,21 +770,21 @@ psy_ui_Size ui_component_textsize(psy_ui_Component* self, const char* text)
 	
 	hdc = GetDC((HWND)self->platform->hwnd);
     SaveDC (hdc) ;          
-	ui_graphics_init(&g, hdc);
+	psy_ui_graphics_init(&g, hdc);
 	if (self->font.hfont) {
 		hPrevFont = SelectObject(hdc, self->font.hfont);
 	}
-	rv = ui_textsize(&g, text);
+	rv = psy_ui_textsize(&g, text);
 	if (hPrevFont) {
 		SelectObject(hdc, hPrevFont);
 	}
-	ui_graphics_dispose(&g);
+	psy_ui_graphics_dispose(&g);
 	RestoreDC (hdc, -1);	
 	ReleaseDC((HWND)self->platform->hwnd, hdc);
 	return rv;
 }
 
-psy_ui_Component* ui_component_parent(psy_ui_Component* self)
+psy_ui_Component* psy_ui_component_parent(psy_ui_Component* self)
 {		
 	psy_ui_WinApp* winapp;							
 
@@ -793,31 +793,31 @@ psy_ui_Component* ui_component_parent(psy_ui_Component* self)
 		(uintptr_t) GetParent((HWND)self->platform->hwnd));
 }
 
-psy_List* ui_components_setalign(psy_List* list, psy_ui_AlignType align,
+psy_List* psy_ui_components_setalign(psy_List* list, psy_ui_AlignType align,
 	const psy_ui_Margin* margin)
 {
 	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
-		ui_component_setalign((psy_ui_Component*) p->entry, align);
+		psy_ui_component_setalign((psy_ui_Component*) p->entry, align);
 		if (margin) {
-			ui_component_setmargin((psy_ui_Component*) p->entry, margin);
+			psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);
 		}
 	}
 	return list;
 }
 
-psy_List* ui_components_setmargin(psy_List* list, const psy_ui_Margin* margin)
+psy_List* psy_ui_components_setmargin(psy_List* list, const psy_ui_Margin* margin)
 {
 	psy_List* p;
 
 	for (p = list; p != 0; p = p->next) {
-		ui_component_setmargin((psy_ui_Component*) p->entry, margin);
+		psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);
 	}
 	return list;
 }
 
-psy_ui_Size ui_component_preferredsize(psy_ui_Component* self,
+psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	psy_ui_Size* limit)
 {
 	psy_ui_Size rv;	
@@ -826,7 +826,7 @@ psy_ui_Size ui_component_preferredsize(psy_ui_Component* self,
 	return rv;	
 }
 
-psy_ui_TextMetric ui_component_textmetric(psy_ui_Component* self)
+psy_ui_TextMetric psy_ui_component_textmetric(psy_ui_Component* self)
 {			
 	TEXTMETRIC tm;
 	HDC hdc;		
@@ -846,7 +846,7 @@ psy_ui_TextMetric ui_component_textmetric(psy_ui_Component* self)
 	return tm;
 }
 
-void ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
+void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 {
 	psy_ui_WinApp* winapp;
 
@@ -860,18 +860,18 @@ void ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 #endif
 }
 
-void ui_component_starttimer(psy_ui_Component* self, unsigned int id,
+void psy_ui_component_starttimer(psy_ui_Component* self, unsigned int id,
 	unsigned int interval)
 {
 	SetTimer((HWND)self->platform->hwnd, id, interval, 0);
 }
 
-void ui_component_stoptimer(psy_ui_Component* self, unsigned int id)
+void psy_ui_component_stoptimer(psy_ui_Component* self, unsigned int id)
 {
 	KillTimer((HWND)self->platform->hwnd, id);
 }
 
-int ui_browsefolder(psy_ui_Component* self, const char* title, char* path)
+int psy_ui_browsefolder(psy_ui_Component* self, const char* title, char* path)
 {
 
 	///\todo: alternate browser window for Vista/7: http://msdn.microsoft.com/en-us/library/bb775966%28v=VS.85%29.aspx
@@ -923,7 +923,7 @@ int ui_browsefolder(psy_ui_Component* self, const char* title, char* path)
 	return val;
 }
 
-void ui_component_clientresize(psy_ui_Component* self, int width, int height)
+void psy_ui_component_clientresize(psy_ui_Component* self, int width, int height)
 {
 	RECT rc;
 
@@ -934,7 +934,7 @@ void ui_component_clientresize(psy_ui_Component* self, int width, int height)
 	AdjustWindowRectEx(&rc, windowstyle(self),
 		GetMenu((HWND)self->platform->hwnd) != NULL,
 		windowexstyle(self));
-	ui_component_resize(self, rc.right - rc.left,
+	psy_ui_component_resize(self, rc.right - rc.left,
 		rc.bottom - rc.top);
 }
 

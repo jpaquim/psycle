@@ -5,6 +5,8 @@
 
 #include "machinesbox.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 static void OnDestroy(MachinesBox*, psy_ui_Component*);

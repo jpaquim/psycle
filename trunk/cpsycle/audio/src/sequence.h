@@ -8,6 +8,10 @@
 #include <list.h>
 #include <signal.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	uintptr_t pattern;
 	psy_dsp_beat_t offset;
@@ -99,5 +103,9 @@ SequencePosition sequence_makeposition(psy_audio_Sequence*, SequenceTracks*, psy
 SequencePosition sequence_positionfromid(psy_audio_Sequence*, int id);
 void sequence_setplayselection(psy_audio_Sequence*, struct SequenceSelection*);
 void sequence_clearplayselection(psy_audio_Sequence*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_SEQUENCE_H */

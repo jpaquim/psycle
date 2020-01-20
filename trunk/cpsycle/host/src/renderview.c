@@ -18,16 +18,16 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		renderview_ondestroy);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);
 	renderview_makeproperties(self);
 	settingsview_init(&self->view, &self->component, tabbarparent,
 		self->properties);
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
-	ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
 	self->fileoutdriver = psy_audio_create_fileout_driver();
 }
 

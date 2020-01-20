@@ -9,6 +9,10 @@
 #include <signal.h>
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NOINSTRUMENT_INDEX UINTPTR_MAX
 
 typedef struct psy_audio_Instruments {
@@ -27,5 +31,9 @@ void instruments_changeslot(psy_audio_Instruments*, uintptr_t slot);
 uintptr_t instruments_slot(psy_audio_Instruments*);
 psy_audio_Instrument* instruments_at(psy_audio_Instruments*, uintptr_t slot);
 uintptr_t instruments_size(psy_audio_Instruments*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_INSTRUMENTS_H */

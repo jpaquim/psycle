@@ -6,10 +6,12 @@
 #include "machineframe.h"
 #include "resources/resource.h"
 #include <dir.h>
-#include "../../detail/portable.h"
 #include <presetio.h>
 #include <windows.h>
 #include <uiframe.h>
+#include <string.h>
+#include <stdlib.h>
+#include "../../detail/portable.h"
 
 static void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame);
 static void machineframe_onpresetchange(MachineFrame*, psy_ui_Component* sender, int index);
@@ -24,27 +26,27 @@ static void parameterbar_setpresetlist(ParameterBar*, psy_audio_Presets*);
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 {				
 	self->presets = 0;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	// row0
-	ui_component_init(&self->row0, &self->component);
-	ui_component_enablealign(&self->row0);
-	ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
+	psy_ui_component_init(&self->row0, &self->component);
+	psy_ui_component_enablealign(&self->row0);
+	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->mute, &self->row0);	
 	psy_ui_button_settext(&self->mute, "Mute");
-	ui_component_setalign(&self->mute.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->mute.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->parameters, &self->row0);
 	psy_ui_button_settext(&self->parameters, "Parameters");	
-	ui_component_setalign(&self->parameters.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->parameters.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->help, &self->row0);	
 	psy_ui_button_settext(&self->help, "Help");
-	ui_component_setalign(&self->help.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_LEFT);
 	// row1 
-	//ui_component_init(&self->row1, &self->component);
-	//ui_component_enablealign(&self->row0);
-	//ui_component_setalign(&self->row1, UI_ALIGN_TOP);
+	// psy_ui_component_init(&self->row1, &self->component);
+	// psy_ui_component_enablealign(&self->row0);
+	// psy_ui_component_setalign(&self->row1, UI_ALIGN_TOP);
 	psy_ui_combobox_init(&self->presetsbox, &self->component);
-	ui_component_setalign(&self->presetsbox.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->presetsbox.component, psy_ui_ALIGN_TOP);	
 }
 
 void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
@@ -71,15 +73,15 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent)
 	self->presets = 0;
 	self->machine = 0;
 	psy_ui_frame_init(&self->component, parent);
-	ui_component_seticonressource(&self->component, IDI_MACPARAM);
-	ui_component_move(&self->component, 200, 150);	
-	ui_component_enablealign(&self->component);	
+	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);
+	psy_ui_component_move(&self->component, 200, 150);	
+	psy_ui_component_enablealign(&self->component);	
 	parameterbar_init(&self->parameterbar, &self->component);
-	ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	parameterlistbox_init(&self->parameterbox, &self->component, 0);
-	ui_component_setalign(&self->parameterbox.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(&self->parameterbox.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
-	ui_component_setalign(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));
 	psy_ui_editor_addtext(&self->help, "About");
@@ -104,10 +106,10 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	char text[128];
 
 	self->view = (psy_ui_Component*) view;
-	ui_component_setalign(self->view, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(self->view, psy_ui_ALIGN_CLIENT);
 	self->machine = machine;
 	parameterlistbox_setmachine(&self->parameterbox, machine);
-	ui_component_hide(&self->parameterbox.component);
+	psy_ui_component_hide(&self->parameterbox.component);
 	info = psy_audio_machine_info(machine);
 	if (info && info->modulepath) {
 		psy_dir_extract_path(info->modulepath, prefix, name, ext);
@@ -125,13 +127,13 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 			psy_audio_machine_slot(self->machine),
 			psy_audio_machine_info(self->machine)->ShortName);
 	} else {
-		ui_component_settitle(&self->component, text);
+		psy_ui_component_settitle(&self->component, text);
 			psy_snprintf(text, 128, "%.2X :",
 				psy_audio_machine_slot(self->machine));
 	}
 	psy_ui_notebook_setpageindex(&self->notebook, 1);
-	ui_component_settitle(&self->component, text);
-	ui_component_align(&self->component);
+	psy_ui_component_settitle(&self->component, text);
+	psy_ui_component_align(&self->component);
 }
 
 void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
@@ -194,12 +196,12 @@ void machineframe_toggleparameterbox(MachineFrame* self,
 {
 	psy_ui_Size viewsize;
 
-	viewsize = ui_component_preferredsize(self->view, 0);
-	if (ui_component_visible(&self->parameterbox.component)) {
-		ui_component_hide(&self->parameterbox.component);		
+	viewsize = psy_ui_component_preferredsize(self->view, 0);
+	if (psy_ui_component_visible(&self->parameterbox.component)) {
+		psy_ui_component_hide(&self->parameterbox.component);		
 		psy_ui_button_disablehighlight(&self->parameterbar.parameters);
 	} else {
-		ui_component_show(&self->parameterbox.component);		
+		psy_ui_component_show(&self->parameterbox.component);		
 		psy_ui_button_highlight(&self->parameterbar.parameters);
 	}
 	machineframe_resize(self);
@@ -222,13 +224,13 @@ void machineframe_resize(MachineFrame* self)
 	psy_ui_Size viewsize;	
 	psy_ui_Size bar;
 	
-	viewsize = ui_component_preferredsize(self->view, 0);	
-	if (ui_component_visible(&self->parameterbox.component)) {				
+	viewsize = psy_ui_component_preferredsize(self->view, 0);	
+	if (psy_ui_component_visible(&self->parameterbox.component)) {				
 		viewsize.width += 150;		
 	}	
-	bar = ui_component_preferredsize(&self->parameterbar.component,
+	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 		&viewsize);	
-	ui_component_clientresize(&self->component,		
+	psy_ui_component_clientresize(&self->component,		
 		viewsize.width,
 		bar.height + viewsize.height);
 }

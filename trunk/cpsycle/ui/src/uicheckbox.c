@@ -28,7 +28,7 @@ static void vtable_init(psy_ui_CheckBox* self)
 void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 {  	
 	psy_signal_init(&self->signal_clicked);
-	ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
+	psy_ui_win32_component_init(&self->component, parent, TEXT("BUTTON"), 
 		0, 0, 100, 20,
 		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
 		1);
@@ -92,7 +92,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 		char text[256];
 
 		GetWindowText((HWND)self->component.platform->hwnd, text, 256);
-		size = ui_component_textsize(&self->component, text);	
+		size = psy_ui_component_textsize(&self->component, text);	
 		rv->width = size.width + 20;
 		rv->height = size.height + 4;
 	}

@@ -7,6 +7,10 @@
 #include "buffer.h"
 #include <list.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_audio_Buffer* input;
 	psy_audio_Buffer* output;
@@ -28,5 +32,8 @@ uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext*);
 uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext*);
 float psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext*);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_BUFFERCONTEXT_H */

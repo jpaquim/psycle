@@ -30,7 +30,7 @@ static void vtable_init(psy_ui_Switch* self)
 
 void psy_ui_switch_init(psy_ui_Switch* self, psy_ui_Component* parent)
 {		
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;		
 	psy_signal_init(&self->signal_clicked);	
@@ -52,8 +52,8 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
 		
-	switchsize = ui_component_size(&self->component);
-	tm = ui_component_textmetric(&self->component);
+	switchsize = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	size.width = tm.tmAveCharWidth * 4;
 	size.height = tm.tmHeight;
 	knobsize.width = (int) (tm.tmAveCharWidth * 2);
@@ -64,20 +64,20 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	r.top = (switchsize.height - size.height) / 2;
 	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
 	r.bottom = r.top + size.height;
-	ui_setcolor(g, 0x00555555);
-	ui_drawroundrectangle(g, r, cornersize);	
+	psy_ui_setcolor(g, 0x00555555);
+	psy_ui_drawroundrectangle(g, r, cornersize);	
 	if (!checked) {
 		r.left = (int)(tm.tmAveCharWidth * 0.4);
 		r.top = (switchsize.height - knobsize.height) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
-		ui_drawsolidroundrectangle(g, r, cornersize, 0x00555555);
+		psy_ui_drawsolidroundrectangle(g, r, cornersize, 0x00555555);
 	} else {
 		r.left = (int)(tm.tmAveCharWidth * 2);
 		r.top = (switchsize.height - knobsize.height) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
-		ui_drawsolidroundrectangle(g, r, cornersize, 0x00CACACA);
+		psy_ui_drawsolidroundrectangle(g, r, cornersize, 0x00CACACA);
 	}	
 }
 
@@ -86,11 +86,11 @@ void onpreferredsize(psy_ui_Switch* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	if (rv) {		
 		psy_ui_TextMetric tm;
 
-		tm = ui_component_textmetric(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		rv->height = (int) (1.5 * tm.tmHeight);
 		rv->width = 4 * tm.tmAveCharWidth;
 	} else {
-		*rv = ui_component_size(&self->component);
+		*rv = psy_ui_component_size(&self->component);
 	}
 }
 
@@ -101,12 +101,12 @@ void onmousedown(psy_ui_Switch* self, psy_ui_MouseEvent* ev)
 
 void onmouseenter(psy_ui_Switch* self)
 {
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void onmouseleave(psy_ui_Switch* self)
 {
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 

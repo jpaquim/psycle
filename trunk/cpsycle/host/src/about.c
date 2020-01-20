@@ -20,8 +20,8 @@ static void about_onmousedoubleclick(About*, psy_ui_Component* sender,
 	
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);	
 	psy_ui_edit_init(&self->contrib, &self->component, 
 		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
 	psy_ui_edit_setlinenumber(&self->contrib, 10);
@@ -69,18 +69,18 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->steincopyright, &self->component);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 	
-	ui_component_resize(&self->contrib.component, 0, 150);
-	ui_component_resize(&self->psycledelics.component, 0, 20);
-	ui_component_resize(&self->sourceforge.component, 0, 20);
-	ui_component_resize(&self->steincopyright.component, 0, 20);
+	psy_ui_component_resize(&self->contrib.component, 0, 150);
+	psy_ui_component_resize(&self->psycledelics.component, 0, 20);
+	psy_ui_component_resize(&self->sourceforge.component, 0, 20);
+	psy_ui_component_resize(&self->steincopyright.component, 0, 20);
 	{
 		psy_ui_Margin margin;
 
 		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 			psy_ui_value_makepx(0));
-		psy_list_free(ui_components_setalign(
-			ui_component_children(&self->component, 0),
+		psy_list_free(psy_ui_components_setalign(
+			psy_ui_component_children(&self->component, 0),
 			psy_ui_ALIGN_TOP,
 			&margin));				
 	}
@@ -88,17 +88,17 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 
 void version_init(Version* self, psy_ui_Component* parent)
 {
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->versioninfo, &self->component);
 	psy_ui_label_setstyle(&self->versioninfo, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
-	ui_component_resize(&self->versioninfo.component, 500, 300);	
-	ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
+	psy_ui_component_resize(&self->versioninfo.component, 500, 300);	
+	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
 void about_init(About* self, psy_ui_Component* parent)
 {			
-	ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);	
 	psy_signal_connect(&self->component.signal_size, self, about_onsize);
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -132,19 +132,19 @@ void about_align(About* self, psy_ui_Component* sender)
 	int centerx;
 	int centery;
 
-	size = ui_component_size(&self->component);
+	size = psy_ui_component_size(&self->component);
 	centerx = (size.width - 500) / 2;	
 	centery = (size.height - 385) / 2;
-	ui_component_setposition(psy_ui_notebook_base(&self->notebook),
+	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
 		centerx, centery + 5, 520, 360);	
 	if (centery + 365 > size.height - 25) {
 		centery = size.height - 365 - 25;
 	}
-	ui_component_setposition(&self->contribbutton.component,
+	psy_ui_component_setposition(&self->contribbutton.component,
 		centerx, centery + 365, 120, 20);
-	ui_component_setposition(&self->versionbutton.component,
+	psy_ui_component_setposition(&self->versionbutton.component,
 		centerx + 145, centery + 365, 300, 20);
-	ui_component_setposition(&self->okbutton.component,
+	psy_ui_component_setposition(&self->okbutton.component,
 		centerx + 445, centery + 365, 60, 20);
 }
 
@@ -157,14 +157,14 @@ void about_oncontributors(About* self, psy_ui_Component* sender)
 {	
 	psy_ui_notebook_setpageindex(&self->notebook, 
 		psy_ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void about_onversion(About* self, psy_ui_Component* sender) 
 {	
 	psy_ui_notebook_setpageindex(&self->notebook, 
 		psy_ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void about_onmousedoubleclick(About* self, psy_ui_Component* sender,

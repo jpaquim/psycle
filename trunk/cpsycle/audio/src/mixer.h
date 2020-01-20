@@ -7,6 +7,10 @@
 #include "custommachine.h"
 #include <rms.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_Table sendvols;
 	float volume;
@@ -44,5 +48,9 @@ typedef struct {
 
 void mixer_init(psy_audio_Mixer*, MachineCallback);
 const psy_audio_MachineInfo* mixer_info(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MIXER_H */

@@ -6,10 +6,18 @@
 
 #include "resampler.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct psy_dsp_LinearResampler {
 	psy_dsp_Resampler resampler;
 } psy_dsp_LinearResampler;
 
 void psy_dsp_linearresampler_init(psy_dsp_LinearResampler*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_LINEAR_RESAMPLER_H */

@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "waveio.h"
+
+#include "sample.h"
+
 #include "fileio.h"
 #include <string.h>
 #include <stdlib.h> 

@@ -8,6 +8,10 @@
 
 #include "../../detail/stdint.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CUBIC_RESOLUTION_LOG 10
 #define CUBIC_RESOLUTION 2048 // 1 << CUBIC_RESOLUTION_LOG
 
@@ -30,5 +34,9 @@ typedef struct psy_dsp_Resampler {
 } psy_dsp_Resampler;
 
 void psy_dsp_resampler_init(psy_dsp_Resampler*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_RESAMPLER_H */

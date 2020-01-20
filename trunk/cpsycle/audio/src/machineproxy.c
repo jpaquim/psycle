@@ -16,6 +16,7 @@
 #include <excpt.h>
 #endif
 #include "../../detail/portable.h"
+#include "plugin_interface.h"
 
 // proxy
 static psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy*,

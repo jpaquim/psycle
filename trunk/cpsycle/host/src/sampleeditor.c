@@ -44,8 +44,8 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self, psy_ui_Component* paren
 	Workspace* workspace)
 {
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	// psy_ui_button_init(&self->loop, &self->component);
 	// psy_ui_button_settext(&self->loop, "Loop");	
 	// psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
@@ -64,11 +64,11 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	ui_component_enablealign(&self->component);
-	ui_component_setalignexpand(&self->component,
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
-	psy_list_free(ui_components_setalign(
-		ui_component_children(&self->component, 0),
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 
@@ -77,9 +77,9 @@ void sampleeditorheader_init(SampleEditorHeader* self,
 {
 	self->view = view;
 	self->scrollpos = 0;
-	ui_component_init(&self->component, parent);
-	ui_component_doublebuffer(&self->component);
-	ui_component_resize(&self->component, 100, 50);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_resize(&self->component, 100, 50);
 	psy_signal_connect(&self->component.signal_draw, self,
 		sampleeditorheader_ondraw);
 }
@@ -97,24 +97,24 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	psy_dsp_beat_t cpx;	
 	int c;	
 
-	size = ui_component_size(&self->component);	
+	size = psy_ui_component_size(&self->component);
 	baseline = size.height - 1;
-	ui_setcolor(g, 0x00CACACA); 
-	ui_drawline(g, 0, baseline, size.width, baseline);	
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ui_settextcolor(g, 0x00CACACA);
+	psy_ui_setcolor(g, 0x00CACACA); 
+	psy_ui_drawline(g, 0, baseline, size.width, baseline);	
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_settextcolor(g, 0x00CACACA);
 	for (c = 0, cpx = 0; c <= self->view->metrics.visisteps; 
 			cpx += self->view->metrics.stepwidth, ++c) {
 		char txt[40];
 		int frame;
 		
-		ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 4);
+		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 4);
 		frame = (int)((c - self->scrollpos) * 
 			(self->view->sample
 				? (self->view->sample->numframes / self->view->metrics.visisteps)
 				: 0));
 		psy_snprintf(txt, 40, "%d", frame);
-		ui_textout(g, (int) cpx + 3, baseline - 14, txt, strlen(txt));
+		psy_ui_textout(g, (int) cpx + 3, baseline - 14, txt, strlen(txt));
 	}
 }
 
@@ -123,17 +123,17 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 {
 	if (self->sample) {
 		psy_ui_Rectangle r;
-		psy_ui_Size size = ui_component_size(&sender->component);	
+		psy_ui_Size size = psy_ui_component_size(&sender->component);	
 		psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-		ui_setcolor(g, 0x00B1C8B0);
+		psy_ui_setcolor(g, 0x00B1C8B0);
 		if (!self->sample) {
 			psy_ui_TextMetric tm;
 			static const char* txt = "No wave loaded";
 
-			tm = ui_component_textmetric(&sender->component);
-			ui_setbackgroundmode(g, TRANSPARENT);
-			ui_settextcolor(g, 0x00D1C5B6);
-			ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
+			tm = psy_ui_component_textmetric(&sender->component);
+			psy_ui_setbackgroundmode(g, TRANSPARENT);
+			psy_ui_settextcolor(g, 0x00D1C5B6);
+			psy_ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
 				(size.height - tm.tmHeight) / 2, txt, strlen(txt));
 		} else {
 			int x;
@@ -143,7 +143,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 
 			scaley = (size.height / 2) / (psy_dsp_amp_t) 32768;
 			offsetstep = (float) self->sample->numframes / size.width;
-			ui_setcolor(g, 0x00B1C8B0);
+			psy_ui_setcolor(g, 0x00B1C8B0);
 			for (x = 0; x < size.width; ++x) {			
 				uintptr_t frame = (int)(offsetstep * x);
 				float framevalue;
@@ -152,7 +152,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 					break;
 				}
 				framevalue = self->sample->channels.samples[0][frame];							
-				ui_drawline(g, x, centery, x, centery +
+				psy_ui_drawline(g, x, centery, x, centery +
 					(int)(framevalue * scaley));
 			}
 		}
@@ -165,24 +165,24 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->sample = 0;
 	self->samplerevents = 0;
 	self->workspace = workspace;
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);
-	ui_component_enablealign(&self->component);	
+	psy_ui_component_enablealign(&self->component);	
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
 	psy_signal_connect(&self->playbar.play.signal_clicked, self,
 		sampleeditor_onplay);
 	psy_signal_connect(&self->playbar.stop.signal_clicked, self,
 		sampleeditor_onstop);
-	ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);
 	sampleeditorheader_init(&self->header, &self->component, self);
-	ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	wavebox_init(&self->samplebox, &self->component);
-	ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
 	scrollzoom_init(&self->zoom, &self->component);
 	psy_signal_connect(&self->zoom.signal_customdraw, self,
 		sampleeditor_onscrollzoom_customdraw);
-	ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	sampleeditor_computemetrics(self, &self->metrics);
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -221,7 +221,7 @@ void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 	self->sample = sample;
 	wavebox_setsample(&self->samplebox, sample);	
 	sampleeditor_computemetrics(self, &self->metrics);
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender,
@@ -240,7 +240,7 @@ void sampleeditor_computemetrics(SampleEditor* self, SampleEditorMetrics* rv)
 {	
 	psy_ui_Size sampleboxsize;
 
-	sampleboxsize = ui_component_size(&self->samplebox.component);
+	sampleboxsize = psy_ui_component_size(&self->samplebox.component);
 	rv->samplewidth = self->sample
 		? (float) sampleboxsize.width / self->sample->numframes
 		: 0;	

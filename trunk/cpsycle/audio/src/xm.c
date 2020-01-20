@@ -5,6 +5,7 @@
 
 #include "xm.h"
 #include "xmdefs.h"
+#include "song.h"
 #include "songio.h"
 
 #include <stdlib.h>

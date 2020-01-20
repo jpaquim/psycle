@@ -6,11 +6,19 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	psy_Signal signal_clicked;
 } psy_ui_Switch;
 
 void psy_ui_switch_init(psy_ui_Switch*, psy_ui_Component* parent);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_SWITCH_H */

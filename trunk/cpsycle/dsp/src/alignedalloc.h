@@ -6,8 +6,17 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 void* psy_dsp_aligned_memory_alloc(size_t alignment, size_t count,
 	size_t size);
 void psy_dsp_aligned_memory_dealloc(void* address);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_ALIGNEDALLOC_H */

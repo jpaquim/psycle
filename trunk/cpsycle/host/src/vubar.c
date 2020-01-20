@@ -7,12 +7,12 @@
 
 void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
-	ui_component_init(&self->component, parent);
-	ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	clipbox_init(&self->clipbox, &self->component, workspace);	
-	ui_component_setalign(&self->clipbox.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(&self->clipbox.component, psy_ui_ALIGN_RIGHT);
 	vumeter_init(&self->vumeter, &self->component, workspace);
-	ui_component_setalign(&self->vumeter.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->vumeter.component, psy_ui_ALIGN_TOP);	
 	volslider_init(&self->volslider, &self->component, workspace);
-	ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_TOP);		
+	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_TOP);		
 }

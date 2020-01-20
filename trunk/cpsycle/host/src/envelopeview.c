@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "envelopeview.h"
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
 
 static void envelopebox_ondraw(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawlabel(EnvelopeBox*, psy_ui_Graphics*);
@@ -78,7 +81,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	envelopebox_vtable_init(self);
 	self->component.vtable = &envelopebox_vtable;
 	self->zoomleft = 0.f;
@@ -89,7 +92,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 		psy_ui_value_makepx(4),
 		psy_ui_value_makepx(0));
 	self->text = strdup("");
-	ui_component_doublebuffer(&self->component);
+	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		envelopebox_ondestroy);	
 	self->cx = 0;
@@ -131,25 +134,25 @@ void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
 
 void envelopebox_drawlabel(EnvelopeBox* self, psy_ui_Graphics* g)
 {
-	ui_setbackgroundmode(g, TRANSPARENT);
-	ui_settextcolor(g, 0x00D1C5B6);
-	ui_textout(g, 0, 0, self->text, strlen(self->text));
+	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_settextcolor(g, 0x00D1C5B6);
+	psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 }
 
 void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	double i;		
 
-	ui_setcolor(g, 0xFF666666);	
+	psy_ui_setcolor(g, 0xFF666666);
 	for (i = 0; i <= 1.0; i += 0.1 ) {
-		ui_drawline(g,
+		psy_ui_drawline(g,
 			self->spacing.left.quantity.integer,
 				pxvalue(self, i),
 			self->spacing.left.quantity.integer + self->cx,
 				pxvalue(self, i));
 	}	
 	for (i = 0; i <= displaymaxtime(self); i += 0.5) {
-		ui_drawline(g,
+		psy_ui_drawline(g,
 				pxtime(self, i),
 			self->spacing.top.quantity.integer,
 				pxtime(self, i),
@@ -178,7 +181,7 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 			pxvalue(self, pt->value) - ptsize2.height,
 			ptsize.width,
 			ptsize.height);
-		ui_drawsolidrectangle(g, r, 0x00B1C8B0);		
+		psy_ui_drawsolidrectangle(g, r, 0x00B1C8B0);
 		q = pt;
 	}
 }
@@ -189,13 +192,13 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_dsp_EnvelopePoint* q = 0;
 	int count = 0;
 
-	ui_setcolor(g, 0x00B1C8B0);	
+	psy_ui_setcolor(g, 0x00B1C8B0);	
 	for (p = self->points; p !=0; p = p->next, ++count) {		
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;			
 		if (q) {
-			ui_drawline(g,
+			psy_ui_drawline(g,
 				pxtime(self, q->time),
 				pxvalue(self, q->value),
 				pxtime(self, pt->time),
@@ -203,7 +206,7 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 		}
 		q = pt;
 		if (count == self->sustainstage) {
-			ui_drawline(g,
+			psy_ui_drawline(g,
 				pxtime(self, q->time),
 				self->spacing.top.quantity.integer,
 				pxtime(self, q->time),
@@ -223,14 +226,14 @@ void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {
 	self->dragpoint = HitTestPoint(self, ev->x, ev->y);
-	ui_component_capture(&self->component);
+	psy_ui_component_capture(&self->component);
 }
 
 void envelopebox_setzoom(EnvelopeBox* self, float zoomleft, float zoomright)
 {
 	self->zoomleft = zoomleft;
 	self->zoomright = zoomright;
-	ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
@@ -247,7 +250,7 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 		CheckAdjustPointRange(self->dragpoint);
 		ShiftSuccessors(self, pt->time - oldtime);
 		adsrpointmapper_updatesettings(&self->pointmapper);
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -295,7 +298,7 @@ void CheckAdjustPointRange(psy_List* p)
 void envelopebox_onmouseup(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
 	self->dragpoint = 0;
-	ui_component_releasecapture(&self->component);
+	psy_ui_component_releasecapture(&self->component);
 }
 
 psy_List* HitTestPoint(EnvelopeBox* self, int x, int y)
@@ -368,7 +371,7 @@ void envelopebox_update(EnvelopeBox* self)
 {
 	if (self->points && !self->dragpoint) {
 		adsrpointmapper_updatepoints(&self->pointmapper);
-		ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->component);
 	}
 }
 
@@ -399,16 +402,16 @@ static void envelopeview_vtable_init(EnvelopeView* self)
 
 void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 {
-	ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);
 	envelopeview_vtable_init(self);
 	self->component.vtable = &envelopeview_vtable;
-	ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);
 	envelopebox_init(&self->envelopebox, &self->component);
-	ui_component_setalign(&self->envelopebox.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->envelopebox.component, psy_ui_ALIGN_CLIENT);
 	scrollzoom_init(&self->zoom, &self->component);
-	ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->zoom.signal_zoom, self, envelopeview_onzoom);
-	ui_component_resize(&self->zoom.component, 100, 20);
+	psy_ui_component_resize(&self->zoom.component, 100, 20);
 }
 
 void envelopeview_settext(EnvelopeView* self, const char* text)

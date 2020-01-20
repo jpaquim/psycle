@@ -6,6 +6,10 @@
 
 #include "uicomponent.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;
    psy_ui_Component splitbar;
@@ -24,5 +28,9 @@ void psy_ui_notebook_full(psy_ui_Notebook*);
 void psy_ui_notebook_connectcontroller(psy_ui_Notebook*, 
 	psy_Signal* controllersignal);
 psy_ui_Component* psy_ui_notebook_base(psy_ui_Notebook*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_ui_NOTEBOOK_H */

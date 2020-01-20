@@ -8,6 +8,10 @@
 #include "library.h"
 #include "list.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_EventDriver* eventdriver;
 	psy_Library* library;
@@ -33,5 +37,9 @@ void eventdrivers_setcmds(EventDrivers*, psy_Properties* self);
 unsigned int eventdrivers_size(EventDrivers*);
 psy_EventDriver* eventdrivers_driver(EventDrivers*, int id); 
 EventDriverEntry* eventdrivers_entry(EventDrivers*, int id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_EVENTDRIVERS_H */

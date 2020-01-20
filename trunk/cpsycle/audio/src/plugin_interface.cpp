@@ -3,10 +3,9 @@
 #include "plugin_interface.h"
 
 #include "machine.h"
-#include <string.h>
-extern "C" {
 #include "library.h"
-}
+
+#include <string.h>
 
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
