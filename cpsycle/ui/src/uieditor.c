@@ -5,6 +5,7 @@
 
 #include "uieditor.h"
 #include "uiapp.h"
+#include "uiwincompdetail.h"
 #include "scintilla/include/scintilla.h"
 
 #include <stdio.h>
@@ -30,7 +31,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 	if ((err = loadscilexer()) == 0) {	
 		psy_ui_win32_component_init(&self->component, parent, TEXT("Scintilla"), 
 			0, 0, 100, 20, WS_CHILD | WS_VISIBLE, 0);
-		if (self->component.platform->hwnd) {
+		if (psy_ui_win_component_details(&self->component)->hwnd) {
 			extern psy_ui_App app;
 
 			psy_ui_editor_setcolor(self, psy_ui_defaults_color(&app.defaults));
@@ -46,7 +47,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 			0, 0, 100, 20,
 			WS_CHILD | WS_VISIBLE | SS_CENTER, 0);
 #ifdef SCI_ENABLED
-		SetWindowText((HWND)self->component.platform->hwnd, 
+		SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, 
 			"Editor can't be used.\n"
 			"LoadLibrary SciLexer.dll failure\n"
 			"Check if 'SciLexer.dll' is in the psycle bin directory or\n"
@@ -54,7 +55,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 		psy_ui_error("LoadLibrary SciLexer.dll failure ...",
 			"Error - Psycle Ui - Editor");
 #else
-	SetWindowText((HWND)self->component.platform->hwnd, 
+	SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, 
 			"Editor can't be used. Scintilla disabled in build\n");
 #endif
 	}
@@ -84,7 +85,7 @@ void onappdestroy(void* context, psy_ui_App* sender)
 intptr_t sci(psy_ui_Editor* self, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam)
 {
-	return SendMessage((HWND) self->component.platform->hwnd,
+	return SendMessage((HWND) psy_ui_win_component_details(&self->component)->hwnd,
 		msg, (WPARAM) wparam, (LPARAM) lparam);
 }
 

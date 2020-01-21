@@ -25,13 +25,15 @@ ui			wrapped win32 calls
 
 Compiling
 
-It compiles with VC6 x86, VC2017 (x86/x64) and VC2019 (x86/x64).
-There are VC6 files, that can be imported by any later VC version.
+It compiles with VC6 x86, VC2008(x86 tested, SP1), VC2017 (x86/x64) and
+VC2019(x86/x64). You need at least Win98, tested versions: Win98/XP/10.
+There are VC6/VC2008 files, that can be imported by any later VC version.
 To build checkout the whole psycle trunk. After migrating to
-VC 2017 or 2019 set Gy- to Gy in each project (settings code generation).
-For the 64Bit Configuration adjust the Output File Target in Project
-Linker settings for the host project. Set the Output File Target to the 
-project standard. Install also mfc and atl support (resource includes 
-need it).
+VC 2008, 2017 or 2019 set Gy- to Gy in each project (settings code
+generation). For the 64Bit Configuration adjust the Output File Target
+in Project Linker settings for the host project. Set the Output File
+Target to the project standard. Install also mfc and atl support
+(resource includes need it) and install on older platforms the Direct
+SDK and add the include/lib sdk directories (Tools/Options/Directories).
 
 

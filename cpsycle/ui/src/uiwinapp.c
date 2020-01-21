@@ -7,9 +7,10 @@
 #define _WIN32_WINNT 0x400
 
 #include "uiwinapp.h"
+#include "uiwingraphicsimp.h"
 #include "uicomponent.h"
 #include "uiapp.h"
-#include <windows.h>
+#include "uiwincompdetail.h"
 #include <excpt.h>
 #include <stdlib.h>
 #include <commctrl.h> // common control header
@@ -112,7 +113,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
 
 	if (component) {		
-		winproc = component->platform->wndproc;		
+		winproc = psy_ui_win_component_details(component)->wndproc;		
 		switch (message)
 		{
 			case WM_NCDESTROY:
@@ -122,11 +123,11 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 						0);
 				}
 				#if defined(_WIN64)		
-					SetWindowLongPtr((HWND)component->platform->hwnd, GWLP_WNDPROC,
-						(LONG_PTR) component->platform->wndproc);
+					SetWindowLongPtr((HWND)psy_ui_win_component_details(component)->hwnd, GWLP_WNDPROC,
+						(LONG_PTR) psy_ui_win_component_details(component)->wndproc);
 				#else	
-					SetWindowLong((HWND)component->platform->hwnd, GWL_WNDPROC,
-						(LONG)component->platform->wndproc);
+					SetWindowLong((HWND)psy_ui_win_component_details(component)->hwnd, GWL_WNDPROC,
+						(LONG)psy_ui_win_component_details(component)->wndproc);
 				#endif				
 				psy_ui_component_dispose(component);
 			break;
@@ -226,7 +227,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					SetTextColor((HDC) wParam, component->color);
 					SetBkColor((HDC) wParam, component->backgroundcolor);
 					if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
-						return (intptr_t) component->platform->background;
+						return (intptr_t) psy_ui_win_component_details(component)->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
@@ -270,6 +271,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					HDC hdc;				
 					RECT rect;
 					HFONT hPrevFont = 0;
+					psy_ui_win_GraphicsImp* win_g = 0;
 
 					hdc = BeginPaint (hwnd, &ps);
 					GetClientRect(hwnd, &rect);
@@ -279,8 +281,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							rect.bottom);
 						oldBmp = SelectObject(bufferDC, bufferBmp);					
 						psy_ui_graphics_init(&g, bufferDC);
+						win_g = (psy_ui_win_GraphicsImp*) g.imp;
 					} else {
 						psy_ui_graphics_init(&g, hdc);
+						win_g = (psy_ui_win_GraphicsImp*) g.imp;
 					}
 					psy_ui_setrectangle(&g.clip,
 						ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
@@ -294,9 +298,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_drawsolidrectangle(&g, r, component->backgroundcolor);
 					}
 					if (component->font.hfont) {
-						hPrevFont = SelectObject(g.hdc, component->font.hfont);
+						hPrevFont = SelectObject(win_g->hdc, component->font.hfont);
 					} else {
-						hPrevFont = SelectObject(g.hdc,
+						hPrevFont = SelectObject(win_g->hdc,
 							app.defaults.defaultfont.hfont);
 					}
 					if (component->vtable->ondraw) {
@@ -304,10 +308,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 					psy_signal_emit(&component->signal_draw, component, 1, &g);
 					if (hPrevFont) {
-						SelectObject(g.hdc, hPrevFont);
+						SelectObject(win_g->hdc, hPrevFont);
 					}
 					if (component->doublebuffered) {
-						g.hdc = hdc;
+						win_g->hdc = hdc;
 						BitBlt(hdc, ps.rcPaint.left,ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom,
 							bufferDC, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);				
 						SelectObject(bufferDC, oldBmp);
@@ -315,7 +319,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						DeleteDC(bufferDC);					
 					}
 					psy_ui_graphics_dispose(&g);
-					EndPaint (hwnd, &ps) ;
+					EndPaint(hwnd, &ps);
 					return 0 ;
 				}
 			break;
@@ -566,7 +570,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							SendMessage((HWND) component->platform->hwnd, 
+							SendMessage((HWND) psy_ui_win_component_details(component)->hwnd,
 								WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);
 							component->accumwheeldelta -= iDeltaPerLine ;							
@@ -584,7 +588,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							SendMessage((HWND) component->platform->hwnd, WM_VSCROLL,
+							SendMessage((HWND) psy_ui_win_component_details(component)->hwnd, WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);							
 							component->accumwheeldelta += iDeltaPerLine;							
 						}

@@ -22,9 +22,6 @@ typedef enum {
 	BACKGROUND_PARENT,
 } BackgroundMode;
 
-typedef LRESULT(CALLBACK *winproc)(HWND hwnd, UINT message, WPARAM wParam,
-	LPARAM lParam);
-
 // vtable function pointers
 typedef void (*psy_ui_fp_onpreferredsize)(struct psy_ui_Component*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
@@ -53,16 +50,11 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_onkeydown onkeyup;
 } psy_ui_ComponentVtable;
 
-typedef struct {
-	uintptr_t hwnd;
-	uintptr_t winid;
-	HBRUSH background;
-	winproc wndproc;	
-} psy_ui_win_ComponentDetails;
+typedef void* psy_ui_ComponentDetails;
 
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;	
-	psy_ui_win_ComponentDetails* platform;
+	psy_ui_ComponentDetails* platform;
 	psy_Signal signal_size;
 	psy_Signal signal_draw;
 	psy_Signal signal_timer;
