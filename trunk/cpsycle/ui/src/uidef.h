@@ -7,6 +7,7 @@
 #include "../../detail/prefix.h"
 #include "../../detail/stdint.h"
 #include <stddef.h>
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -16,17 +17,33 @@
 extern "C" {
 #endif
 
-// target win98 or nt 4 or later systems
-#ifdef _WIN32_WINNT
-#undef _WIN32_WINNT
-#endif
-#define _WIN32_WINNT 0x400
-
 #if defined min
 #undef min
 #endif
 
-typedef TEXTMETRIC psy_ui_TextMetric;
+typedef struct psy_ui_TextMetric
+{
+    int32_t tmHeight;
+    int32_t tmAscent;
+    int32_t tmDescent;
+    int32_t tmInternalLeading;
+    int32_t tmExternalLeading;
+    int32_t tmAveCharWidth;
+    int32_t tmMaxCharWidth;
+    int32_t tmWeight;
+    int32_t tmOverhang;
+    int32_t tmDigitizedAspectX;
+    int32_t tmDigitizedAspectY;
+    uint8_t tmFirstChar;
+    uint8_t tmLastChar;
+    uint8_t tmDefaultChar;
+    uint8_t tmBreakChar;
+    uint8_t tmItalic;
+    uint8_t tmUnderlined;
+    uint8_t tmStruckOut;
+    uint8_t tmPitchAndFamily;
+    uint8_t tmCharSet;
+} psy_ui_TextMetric;
 
 typedef enum {
 	psy_ui_UNIT_EH,

@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uigroupbox.h"
+#include "uiwincompdetail.h"
 
 void psy_ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
 {
@@ -15,5 +16,5 @@ void psy_ui_groupbox_init(psy_ui_Groupbox* self, psy_ui_Component* parent)
 
 void psy_ui_groupbox_settext(psy_ui_Groupbox* self, const char* text)
 {
-	SetWindowText((HWND)self->component.platform->hwnd, text);
+	SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, text);
 }

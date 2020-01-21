@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uinotebook.h"
+#include "uiwincompdetail.h"
 
 static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
 static void align_split(psy_ui_Notebook* self, int x);
@@ -198,7 +199,8 @@ void align_split(psy_ui_Notebook* self, int x) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*)p->entry;		
-		if (component->platform->hwnd == self->splitbar.platform->hwnd) {
+		if (psy_ui_win_component_details(component)->hwnd ==
+				psy_ui_win_component_details(&self->splitbar)->hwnd) {
 			psy_ui_component_setposition(&self->splitbar,
 				x, 0, 4, size.height);
 		} else {

@@ -5,6 +5,7 @@
 
 #include "uiopendialog.h"
 #include "uiapp.h"
+#include "uiwincompdetail.h"
 #include <commdlg.h>
 #include <stdlib.h>
 #include "../../detail/portable.h"
@@ -68,7 +69,7 @@ int psy_ui_opendialog_execute(psy_ui_OpenDialog* self)
 	}
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));	 
 	ofn.lStructSize= sizeof(OPENFILENAME); 
-	ofn.hwndOwner= self->parent ? (HWND) self->parent->platform->hwnd : (HWND) 0; 
+	ofn.hwndOwner= self->parent ? (HWND) psy_ui_win_component_details(self->parent)->hwnd : (HWND) 0; 
 	ofn.lpstrFilter = (LPSTR) filter;
 	ofn.lpstrCustomFilter= (LPSTR) NULL;
 	ofn.nMaxCustFilter= 0L; 
@@ -85,8 +86,8 @@ int psy_ui_opendialog_execute(psy_ui_OpenDialog* self)
 	ofn.lpstrDefExt= (LPSTR) defextension;
 	rv = GetOpenFileName(&ofn);
 	if (app.main) {
-		InvalidateRect((HWND) app.main->platform->hwnd, 0, FALSE);
-		UpdateWindow((HWND) app.main->platform->hwnd);
+		InvalidateRect((HWND) psy_ui_win_component_details(app.main)->hwnd, 0, FALSE);
+		UpdateWindow((HWND) psy_ui_win_component_details(app.main)->hwnd);
 	}
 	if (rv) {
 		free(self->filename);

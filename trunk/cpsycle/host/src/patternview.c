@@ -47,9 +47,7 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_ui_component_doublebuffer(&self->component);	
-	psy_signal_connect(&self->component.signal_draw, self,
-		patternviewstatus_ondraw);
+	psy_ui_component_doublebuffer(&self->component);		
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		patternviewstatus_onpatterneditpositionchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -296,4 +294,3 @@ void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 {
 	psy_ui_component_setfocus(&self->trackerview.grid.component);
 }
-

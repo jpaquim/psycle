@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uiedit.h"
+#include "uiwincompdetail.h"
 
 static void oncommand(psy_ui_Edit*, psy_ui_Component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
@@ -40,9 +41,10 @@ void ondestroy(psy_ui_Edit* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_change);
 }
 
-void psy_ui_edit_settext(psy_ui_Edit* edit, const char* text)
+void psy_ui_edit_settext(psy_ui_Edit* self, const char* text)
 {
-	SetWindowText((HWND)edit->component.platform->hwnd, text);
+	SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd,
+		text);
 }
 
 void psy_ui_edit_setcharnumber(psy_ui_Edit* self, int number)
@@ -55,10 +57,12 @@ void psy_ui_edit_setlinenumber(psy_ui_Edit* self, int number)
 	self->linenumber = number;
 }
 
-const char* psy_ui_edit_text(psy_ui_Edit* edit)
+const char* psy_ui_edit_text(psy_ui_Edit* self)
 {
 	static char buf[256];
-	GetWindowText((HWND)edit->component.platform->hwnd, buf, 255);
+
+	GetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd,
+		buf, 255);
 	return buf;
 }
 
@@ -87,7 +91,7 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		tm = psy_ui_component_textmetric(&self->component);	
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
-			GetWindowText((HWND)self->component.platform->hwnd, text, 256);
+			GetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, text, 256);
 			size = psy_ui_component_textsize(&self->component, text);	
 			rv->width = size.width + 2;		
 			rv->height = (int)(tm.tmHeight * self->linenumber);
@@ -100,12 +104,12 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void psy_ui_edit_enableedit(psy_ui_Edit* self)
 {
-	SendMessage((HWND)self->component.platform->hwnd, EM_SETREADONLY, (WPARAM) 0,
-		(LPARAM) 0);
+	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd,
+		EM_SETREADONLY, (WPARAM) 0, (LPARAM) 0);
 }
 
 void psy_ui_edit_preventedit(psy_ui_Edit* self)
 {
-	SendMessage((HWND)self->component.platform->hwnd, EM_SETREADONLY, (WPARAM) 1,
-		(LPARAM) 0);
+	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd,
+		EM_SETREADONLY, (WPARAM) 1, (LPARAM) 0);
 }

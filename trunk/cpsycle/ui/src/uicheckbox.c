@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uicheckbox.h"
+#include "uiwincompdetail.h"
 #include <string.h>
 
 static void psy_ui_checkbox_oncommand(psy_ui_CheckBox*, psy_ui_Component*,
@@ -47,24 +48,24 @@ void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
 
 void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
 {
-	SetWindowText((HWND)self->component.platform->hwnd, text);
+	SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, text);
 }
 
 void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 {
-	SendMessage((HWND)self->component.platform->hwnd, BM_SETCHECK, (WPARAM)BST_CHECKED,
+	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, BM_SETCHECK, (WPARAM)BST_CHECKED,
 		(LPARAM)0);
 }
 
 int psy_ui_checkbox_checked(psy_ui_CheckBox* self)
 {
-	return SendMessage((HWND)self->component.platform->hwnd, BM_GETCHECK, (WPARAM)0,
+	return SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, BM_GETCHECK, (WPARAM)0,
 		(LPARAM)0) != 0;	
 }
 
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 {
-	SendMessage((HWND)self->component.platform->hwnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0);
+	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0);
 }
 
 void psy_ui_checkbox_oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
@@ -91,7 +92,7 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 		psy_ui_Size size;	
 		char text[256];
 
-		GetWindowText((HWND)self->component.platform->hwnd, text, 256);
+		GetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, text, 256);
 		size = psy_ui_component_textsize(&self->component, text);	
 		rv->width = size.width + 20;
 		rv->height = size.height + 4;

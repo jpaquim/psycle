@@ -835,6 +835,14 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\src\uiwincompdetail.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uwinigraphicsimp.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -958,6 +966,14 @@
 			</File>
 			<File
 				RelativePath="src\uiwinapp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwincompdetail.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwingraphicsimp.h"
 				>
 			</File>
 		</Filter>

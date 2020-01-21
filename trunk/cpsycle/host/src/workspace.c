@@ -11,10 +11,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <songio.h>
-#include "../../detail/portable.h"
 #include <operations.h>
 #include <uiopendialog.h>
 #include <uisavedialog.h>
+#include <uiwincompdetail.h>
+#include "../../detail/portable.h"
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -243,8 +244,9 @@ void workspace_disposesequencepaste(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
-	player_init(&self->player, self->song, (void*)
-		self->mainhandle->platform->hwnd);
+	player_init(&self->player, self->song, self->mainhandle
+		? (void*) psy_ui_win_component_details(self->mainhandle)->hwnd
+		: 0);
 	self->cmds = cmdproperties_create();
 	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);

@@ -5,6 +5,8 @@
 
 #include "vst2view.h"
 
+#include <uiwincompdetail.h>
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -32,7 +34,7 @@ void vst2view_init(Vst2View* self, psy_ui_Component* parent, psy_audio_Machine* 
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_audio_machine_seteditorhandle(machine,
-		(void*) self->component.platform->hwnd);
+		(void*) psy_ui_win_component_details(&self->component)->hwnd);
 	psy_ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 
