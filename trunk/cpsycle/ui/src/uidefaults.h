@@ -7,6 +7,7 @@
 #include "../../detail/stdint.h"
 
 #include "uidef.h"
+#include "uistyle.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,8 +16,8 @@ extern "C" {
 typedef struct {
 	uint32_t defaultbackgroundcolor;
 	uint32_t defaultcolor;
-	uint32_t default_color_border;
-	psy_ui_Font defaultfont;	
+	uint32_t default_color_border;		
+	psy_ui_Style style_common;
 } psy_ui_Defaults;
 
 void psy_ui_defaults_init(psy_ui_Defaults*);

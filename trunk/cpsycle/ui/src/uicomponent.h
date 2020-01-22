@@ -9,6 +9,7 @@
 #include "uigraphics.h"
 #include <signal.h>
 #include "uimenu.h"
+#include "uistyle.h"
 #include <list.h>
 #include "../../detail/stdint.h"
 
@@ -95,13 +96,13 @@ typedef struct psy_ui_Component {
 	unsigned int backgroundcolor;
 	unsigned int color;
 	BackgroundMode backgroundmode;
-	psy_ui_Font font;	
 	int visible;	
 	int accumwheeldelta;
 	int wheelscroll;
 	int handlevscroll;
 	int handlehscroll;
 	int cursor;	
+	psy_ui_Style style;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -148,6 +149,7 @@ void psy_ui_component_update(psy_ui_Component*);
 void psy_ui_component_setfocus(psy_ui_Component*);
 int psy_ui_component_hasfocus(psy_ui_Component*);
 void psy_ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
+psy_ui_Font* psy_ui_component_font(psy_ui_Component*);
 void psy_ui_component_preventdefault(psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);

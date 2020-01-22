@@ -133,6 +133,10 @@ SOURCE=.\src\uievents.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uifont.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiframe.c
 # End Source File
 # Begin Source File
@@ -193,6 +197,10 @@ SOURCE=.\src\uistatusbar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uistyle.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiswitch.c
 # End Source File
 # Begin Source File
@@ -202,6 +210,22 @@ SOURCE=.\src\uiterminal.c
 # Begin Source File
 
 SOURCE=.\src\uiwinapp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincompdetail.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincompdetail.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinfontimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwingraphicsimp.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -254,6 +278,10 @@ SOURCE=.\src\uieditor.h
 # Begin Source File
 
 SOURCE=.\src\uievents.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uifont.h
 # End Source File
 # Begin Source File
 
@@ -317,6 +345,10 @@ SOURCE=.\src\uistatusbar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uistyle.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiswitch.h
 # End Source File
 # Begin Source File
@@ -326,6 +358,14 @@ SOURCE=.\src\uiterminal.h
 # Begin Source File
 
 SOURCE=.\src\uiwinapp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinfontimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwingraphicsimp.h
 # End Source File
 # End Group
 # End Target

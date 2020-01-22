@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uiwingraphicsimp.h"
+#include "uiwinfontimp.h"
 #include "uiapp.h"
 #include <stdlib.h>
 
@@ -78,7 +79,7 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
-	self->hFontPrev = SelectObject(self->hdc, app.defaults.defaultfont.hfont);
+	self->hFontPrev = SelectObject(self->hdc, ((psy_ui_win_FontImp*)app.defaults.style_common.font.imp)->hfont);
 }
 
 // win32 implementation method for psy_ui_Graphics
@@ -254,8 +255,8 @@ void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp* self, unsigned int co
 
 void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 {	
-	if (font && font->hfont) {		
-		SelectObject(self->hdc, font->hfont);
+	if (font && ((psy_ui_win_FontImp*)font->imp)->hfont) {		
+		SelectObject(self->hdc, ((psy_ui_win_FontImp*)font->imp)->hfont);
 	}
 }
 
