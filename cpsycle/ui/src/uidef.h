@@ -7,6 +7,7 @@
 #include "../../detail/prefix.h"
 #include "../../detail/stdint.h"
 #include <stddef.h>
+#include "uifont.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -96,16 +97,12 @@ void psy_ui_margin_init(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
 intptr_t psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 
-typedef struct {
-	LOGFONT lf; 
-} psy_ui_FontInfo;
-
 void psy_ui_fontinfo_init(psy_ui_FontInfo*, const char* family, int height);
 
-typedef struct {
-	HFONT hfont;
-	int stock;
-} psy_ui_Font;
+// typedef struct {
+//	HFONT hfont;
+//	int stock;
+// } psy_ui_Font;
 
 typedef enum {
 	psy_ui_CURSOR_DEFAULT,
@@ -158,9 +155,9 @@ int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
 void psy_ui_error(const char* err, const char* shorterr);
 
-void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo* info);
-void psy_ui_font_copy(psy_ui_Font*, const psy_ui_Font* other);
-void psy_ui_font_dispose(psy_ui_Font*);
+// void psy_ui_font_init(psy_ui_Font*, const psy_ui_FontInfo* info);
+// void psy_ui_font_copy(psy_ui_Font*, const psy_ui_Font* other);
+// void psy_ui_font_dispose(psy_ui_Font*);
 
 #ifdef __cplusplus
 }

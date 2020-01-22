@@ -11,6 +11,7 @@
 #include "uiwincompdetail.h"
 #include <stdio.h>
 #include <shlobj.h>
+#include "uiwinfontimp.h"
 #include "../../detail/portable.h"
 
 typedef struct {		               
@@ -24,42 +25,70 @@ BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
 static int windowstyle(psy_ui_Component*);
 static int windowexstyle(psy_ui_Component*);
 static void enableinput(psy_ui_Component*, int enable, int recursive);
+static void psy_ui_updatesyles(psy_ui_Component* main);
+static void psy_ui_component_updatefont(psy_ui_Component*);
 
-void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
-{		
-	if (font && main) {
+void psy_ui_updatesyles(psy_ui_Component* main)
+{
+	if (main) {
 		psy_List* p;
 		psy_List* q;
-
-		if (main->font.hfont == app.defaults.defaultfont.hfont) {
-			main->font.hfont = font->hfont;
-			SendMessage(psy_ui_win_component_details(main)->hwnd,
-				WM_SETFONT, (WPARAM) font->hfont, 0);
-		}
+		
+		// merge
+		psy_ui_component_updatefont(main);
 		for (p = q = psy_ui_component_children(main, 1); p != 0; p = p->next) {
 			psy_ui_Component* child;
-
+			
 			child = (psy_ui_Component*)p->entry;
-			if (child->font.hfont == app.defaults.defaultfont.hfont) {
-				child->font.hfont = font->hfont;	
-				SendMessage(psy_ui_win_component_details(child)->hwnd, WM_SETFONT,
-					(WPARAM) font->hfont, 0);
-				psy_ui_component_align(child);
-			}		
+			psy_ui_component_updatefont(child);
 		}
+		// align
 		for (p = q; p != 0; p = p->next) {
 			psy_ui_Component* child;
 
-			child = (psy_ui_Component*)p->entry;
-			if (child->font.hfont == font->hfont) {
-				child = (psy_ui_Component*)p->entry;
-				psy_ui_component_align(child);
-			}
+			child = (psy_ui_Component*)p->entry;							
+			psy_ui_component_align(child);
 		}
 		psy_list_free(q);
-		DeleteObject(app.defaults.defaultfont.hfont);
-		app.defaults.defaultfont = *font;
 		psy_ui_component_align(main);
+	}
+}
+
+void psy_ui_component_updatefont(psy_ui_Component* self)
+{	
+	HFONT hfont;
+	
+	hfont = ((psy_ui_win_FontImp*) psy_ui_component_font(self)->imp)->hfont;	
+	SendMessage(psy_ui_win_component_details(self)->hwnd, WM_SETFONT,
+		(WPARAM) hfont, 0);
+}
+
+psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
+{
+	psy_ui_Font* rv;
+	psy_ui_Style* common;	
+
+	common = &app.defaults.style_common;
+	if (self->style.use_font) {
+		rv = &self->style.font;
+	} else {
+		rv = &app.defaults.style_common.font;
+	}
+	return rv;
+}
+
+void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
+{		
+	if (main) {
+		psy_ui_Style* common;
+		psy_ui_Font old_default_font;
+
+		common = &app.defaults.style_common;
+		old_default_font = common->font;
+		psy_ui_font_init(&common->font, 0);
+		psy_ui_font_copy(&common->font, font);
+		psy_ui_updatesyles(main);
+		psy_ui_font_dispose(&old_default_font);
 	}
 }
 
@@ -202,7 +231,7 @@ void psy_ui_component_init_signals(psy_ui_Component* component)
 	psy_signal_init(&component->signal_command);
 }
 
-void psy_ui_component_init_base(psy_ui_Component* self) {
+void psy_ui_component_init_base(psy_ui_Component* self) {	
 	self->scrollstepx = 100;
 	self->scrollstepy = 12;	
 	self->preventdefault = 0;
@@ -210,7 +239,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->align = psy_ui_ALIGN_NONE;
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
-	self->alignexpandmode = psy_ui_NOEXPAND;	
+	self->alignexpandmode = psy_ui_NOEXPAND;
+	psy_ui_style_init(&self->style);
 	psy_ui_margin_init(&self->margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
@@ -228,9 +258,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->backgroundcolor = psy_ui_defaults_backgroundcolor(&app.defaults);
 	psy_ui_win_component_details(self)->background = 0;
 	self->color = psy_ui_defaults_color(&app.defaults);
-	self->cursor = psy_ui_CURSOR_DEFAULT;
-	psy_ui_font_init(&self->font, 0);
-	psy_ui_component_setfont(self, &app.defaults.defaultfont);
+	self->cursor = psy_ui_CURSOR_DEFAULT;	
+	psy_ui_component_updatefont(self);
 	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);
 	vtable_init();
 	self->vtable = &vtable;	
@@ -261,14 +290,11 @@ void psy_ui_component_dispose(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_focuslost);
 	psy_signal_dispose(&self->signal_align);
 	// psy_signal_dispose(self->signal_preferredsize);	
-	psy_signal_dispose(&self->signal_command);
-	if (self->font.hfont && self->font.hfont !=
-			app.defaults.defaultfont.hfont) {
-		psy_ui_font_dispose(&self->font);
-	}
+	psy_signal_dispose(&self->signal_command);	
 	if (psy_ui_win_component_details(self)->background) {
 		DeleteObject(psy_ui_win_component_details(self)->background);
 	}
+	psy_ui_style_dispose(&self->style);
 	free(self->platform);
 	self->platform = 0;
 }
@@ -621,24 +647,31 @@ int psy_ui_component_hasfocus(psy_ui_Component* self)
 }
 
 void psy_ui_component_setfont(psy_ui_Component* self, psy_ui_Font* source)
-{
-	psy_ui_Font font;
+{	
+	if (source) {
+		HFONT hfont;
+		int dispose;
 
-	font.hfont = 0;
-	font.stock = 0;
-	if (source && source->hfont && source->hfont !=
-			app.defaults.defaultfont.hfont) {
-		psy_ui_font_init(&font, 0);
-		psy_ui_font_copy(&font, source);
-	} else {
-		font.hfont = app.defaults.defaultfont.hfont;
+		dispose = self->style.use_font;
+		hfont = ((psy_ui_win_FontImp*)(source))->hfont;
+		SendMessage(psy_ui_win_component_details(self)->hwnd, WM_SETFONT,
+			(WPARAM) hfont, 0);
+		if (dispose) {
+			psy_ui_font_dispose(&self->style.font);
+		}
+		psy_ui_font_init(&self->style.font, 0);
+		psy_ui_font_copy(&self->style.font, source);
+		self->style.use_font = 1;
+	} else {		
+		int dispose;
+
+		dispose = self->style.use_font;
+		self->style.use_font = 0;
+		psy_ui_component_updatefont(self);
+		if (dispose) {
+			psy_ui_font_dispose(&self->style.font);
+		}
 	}	
-	SendMessage(psy_ui_win_component_details(self)->hwnd, WM_SETFONT, (WPARAM) font.hfont, 0);	
-	if (self->font.hfont && self->font.hfont != 
-			app.defaults.defaultfont.hfont) {
-		psy_ui_font_dispose(&self->font);		
-	}
-	self->font = font;
 }
 
 void psy_ui_component_preventdefault(psy_ui_Component* self)
@@ -762,23 +795,17 @@ void psy_ui_component_setcolor(psy_ui_Component* self, unsigned int color)
 psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char* text)
 {
 	psy_ui_Size rv;
-	psy_ui_Graphics g;
-	HFONT hPrevFont = 0;
+	psy_ui_Graphics g;	
 	HDC hdc;
 	
-	hdc = GetDC((HWND)psy_ui_win_component_details(self)->hwnd);
+	hdc = GetDC(psy_ui_win_component_details(self)->hwnd);
     SaveDC (hdc) ;          
 	psy_ui_graphics_init(&g, hdc);
-	if (self->font.hfont) {
-		hPrevFont = SelectObject(hdc, self->font.hfont);
-	}
-	rv = psy_ui_textsize(&g, text);
-	if (hPrevFont) {
-		SelectObject(hdc, hPrevFont);
-	}
+	psy_ui_setfont(&g, psy_ui_component_font(self));	
+	rv = psy_ui_textsize(&g, text);	
 	psy_ui_graphics_dispose(&g);
-	RestoreDC (hdc, -1);	
-	ReleaseDC((HWND)psy_ui_win_component_details(self)->hwnd, hdc);
+	RestoreDC(hdc, -1);	
+	ReleaseDC(psy_ui_win_component_details(self)->hwnd, hdc);
 	return rv;
 }
 
@@ -829,12 +856,14 @@ psy_ui_TextMetric psy_ui_component_textmetric(psy_ui_Component* self)
 	psy_ui_TextMetric rv;
 	TEXTMETRIC tm;
 	HDC hdc;		
-	HFONT hPrevFont = 0;	
+	HFONT hPrevFont = 0;
+	HFONT hfont = 0;
 	
 	hdc = GetDC((HWND)psy_ui_win_component_details(self)->hwnd);
-    SaveDC(hdc) ;          	
-	if (self->font.hfont) {
-		hPrevFont = SelectObject(hdc, self->font.hfont);
+    SaveDC(hdc);
+	hfont = ((psy_ui_win_FontImp*)psy_ui_component_font(self)->imp)->hfont;
+	if (hfont) {
+		hPrevFont = SelectObject(hdc, hfont);
 	}
 	GetTextMetrics (hdc, &tm);
 	if (hPrevFont) {

@@ -8,6 +8,7 @@
 
 #include "uiwinapp.h"
 #include "uiwingraphicsimp.h"
+#include "uiwinfontimp.h"
 #include "uicomponent.h"
 #include "uiapp.h"
 #include "uiwincompdetail.h"
@@ -271,6 +272,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					HDC hdc;				
 					RECT rect;
 					HFONT hPrevFont = 0;
+					HFONT hfont = 0;
 					psy_ui_win_GraphicsImp* win_g = 0;
 
 					hdc = BeginPaint (hwnd, &ps);
@@ -296,13 +298,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						rect.left, rect.top, rect.right - rect.left,
 						rect.bottom - rect.top);				
 						psy_ui_drawsolidrectangle(&g, r, component->backgroundcolor);
-					}
-					if (component->font.hfont) {
-						hPrevFont = SelectObject(win_g->hdc, component->font.hfont);
-					} else {
-						hPrevFont = SelectObject(win_g->hdc,
-							app.defaults.defaultfont.hfont);
-					}
+					}					
+					hfont = ((psy_ui_win_FontImp*)
+						psy_ui_component_font(component)->imp)->hfont;
+					hPrevFont = SelectObject(win_g->hdc, hfont);					
 					if (component->vtable->ondraw) {
 						component->vtable->ondraw(component, &g);
 					}

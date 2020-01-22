@@ -200,7 +200,7 @@ LOGFONT ui_fontinfo_make(HDC hdc, TCHAR * szFaceName, int iDeciPtHeight,
 }
 
 
-void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
+/*void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 {		
 	if (fontinfo) {
 		HDC hdc = GetDC (NULL) ;
@@ -212,28 +212,4 @@ void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 		self->hfont = 0;
 		self->stock = 0;
 	}
-}
-
-void psy_ui_font_copy(psy_ui_Font* self, const psy_ui_Font* other)
-{
-	if (self->hfont && self->hfont != app.defaults.defaultfont.hfont) {
-		psy_ui_font_dispose(self);
-	}
-	if (other->hfont && other->hfont != app.defaults.defaultfont.hfont) {
-		LOGFONT lf;
-		GetObject(other->hfont, sizeof(LOGFONT), &lf);
-		self->hfont = CreateFontIndirect(&lf);
-	}
-	if (other->hfont == app.defaults.defaultfont.hfont) {
-		self->hfont = app.defaults.defaultfont.hfont;
-	}
-}
-
-void psy_ui_font_dispose(psy_ui_Font* self)
-{
-	if (self->hfont && self->hfont != app.defaults.defaultfont.hfont) {
-		DeleteObject(self->hfont);
-	}
-	self->hfont = 0;
-	self->stock = 0;
-}
+}*/

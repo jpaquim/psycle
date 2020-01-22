@@ -15,9 +15,9 @@
 // Concrete Implementor	psy_ui_win_GraphicsImp
 //
 // psy_ui_Graphics <>-------- psy_ui_GraphicsImp
-//		imp->dev_draw				 ^
-//		...							 |
-//							psy_ui_win_GraphicsImp
+//     imp->dev_draw                 ^
+//     ...                           |
+//                          psy_ui_win_GraphicsImp
 
 #ifdef __cplusplus
 extern "C" {
