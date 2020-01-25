@@ -71,7 +71,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 		static const char* txt = "No wave loaded";
 
 		tm = psy_ui_component_textmetric(&self->component);
-		psy_ui_setbackgroundmode(g, TRANSPARENT);
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00D1C5B6);
 		psy_ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
 			(size.height - tm.tmHeight) / 2, txt, strlen(txt));
@@ -171,18 +171,18 @@ void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
 		if (self->hasselection) {
 			if (wavebox_hittest(self, self->selectionstart, ev->x, 5)) {
 				self->dragmode = SAMPLEBOX_DRAG_LEFT;
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			} else 
 			if (wavebox_hittest(self, self->selectionend, ev->x, 5)) {
 				self->dragmode = SAMPLEBOX_DRAG_RIGHT;
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			} else
 			if (wavebox_hittest_range(self, self->selectionstart,
 					self->selectionend, ev->x)) {
 				self->dragmode = SAMPLEBOX_DRAG_MOVE;
 				self->dragoffset = wavebox_screentoframe(self, ev->x)
 					- self->selectionstart;
-				SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_MOVE);
 			} else {
 				self->hasselection = 0;
 			}
@@ -207,7 +207,7 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 				wavebox_swapselection(self);
 				self->dragmode = SAMPLEBOX_DRAG_RIGHT;
 			}
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			psy_ui_component_invalidate(&self->component);
 		} else
 		if (self->dragmode == SAMPLEBOX_DRAG_RIGHT) {
@@ -216,7 +216,7 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 				wavebox_swapselection(self);
 				self->dragmode = SAMPLEBOX_DRAG_LEFT;
 			}
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));		
+			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			psy_ui_component_invalidate(&self->component);
 		} else 
 		if (self->dragmode == SAMPLEBOX_DRAG_MOVE) {
@@ -234,17 +234,17 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 				self->selectionend = self->sample->numframes;
 				self->selectionstart = self->sample->numframes - length;			
 			}
-			SetCursor(LoadCursor(NULL, IDC_SIZEALL));		
+			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_MOVE);
 			psy_ui_component_invalidate(&self->component);
 		} else {
 			if (self->hasselection && 
 				(wavebox_hittest(self, self->selectionstart, ev->x, 5) ||
 				 wavebox_hittest(self, self->selectionend, ev->x, 5))) {
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			} else
 			if (wavebox_hittest_range(self, self->selectionstart,
 					self->selectionend, ev->x)) {
-				SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_MOVE);
 			}
 		}
 	}

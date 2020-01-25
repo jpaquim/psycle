@@ -66,7 +66,7 @@ static void vtable_init(void)
 	}
 }
 
-void psy_ui_graphics_init(psy_ui_Graphics* self, HDC hdc)
+void psy_ui_graphics_init(psy_ui_Graphics* self, void* hdc)
 {
 	vtable_init();
 	self->vtable = &vtable;

@@ -6,11 +6,6 @@
 
 #include "../../detail/psydef.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
 // Graphics Font Interface
 // Bridge
 // Aim: avoid coupling to one platform (win32, xt/motif, etc)
@@ -27,9 +22,24 @@
 extern "C" {
 #endif
 
-typedef struct {
-	LOGFONT lf; 
+typedef struct {	
+    int32_t      lfHeight;
+    int32_t      lfWidth;
+    int32_t      lfEscapement;
+    int32_t      lfOrientation;
+    int32_t      lfWeight;
+    uint8_t      lfItalic;
+    uint8_t      lfUnderline;
+    uint8_t      lfStrikeOut;
+    uint8_t      lfCharSet;
+    uint8_t      lfOutPrecision;
+    uint8_t      lfClipPrecision;
+    uint8_t      lfQuality;
+    uint8_t      lfPitchAndFamily;
+    char      lfFaceName[32];
 } psy_ui_FontInfo;
+
+void psy_ui_fontinfo_init(psy_ui_FontInfo*, const char* family, int height);
 
 typedef void (*psy_ui_font_fp_dispose)(struct psy_ui_Font*);
 typedef void (*psy_ui_font_fp_copy)(struct psy_ui_Font*, struct psy_ui_Font*);

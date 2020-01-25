@@ -11,7 +11,7 @@
 #include "uiwinfontimp.h"
 #include "uicomponent.h"
 #include "uiapp.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 #include <excpt.h>
 #include <stdlib.h>
 #include <commctrl.h> // common control header
@@ -30,6 +30,11 @@ LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
 static void psy_ui_winapp_registerclasses(psy_ui_WinApp*);
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static int FilterException(const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
 {	
@@ -106,41 +111,39 @@ void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
 LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam)
 {
-	psy_ui_Component*   component;
+	psy_ui_win_ComponentImp* imp;
 	psy_ui_WinApp* winapp;
 	psy_ui_fp_winproc winproc;
 
 	winapp = (psy_ui_WinApp*) app.platform;
-	component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-
-	if (component) {		
-		winproc = psy_ui_win_component_details(component)->wndproc;		
+	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+	if (imp) {		
+		winproc = imp->wndproc;		
 		switch (message)
 		{
 			case WM_NCDESTROY:
 				// restore default winproc
-				if (component->signal_destroyed.slots) {
-					psy_signal_emit(&component->signal_destroyed, component,
+				if (imp->component->signal_destroyed.slots) {
+					psy_signal_emit(&imp->component->signal_destroyed, imp->component,
 						0);
 				}
-				#if defined(_WIN64)		
-					SetWindowLongPtr((HWND)psy_ui_win_component_details(component)->hwnd, GWLP_WNDPROC,
-						(LONG_PTR) psy_ui_win_component_details(component)->wndproc);
-				#else	
-					SetWindowLong((HWND)psy_ui_win_component_details(component)->hwnd, GWL_WNDPROC,
-						(LONG)psy_ui_win_component_details(component)->wndproc);
-				#endif				
-				psy_ui_component_dispose(component);
+#if defined(_WIN64)		
+				SetWindowLongPtr(imp->hwnd, GWLP_WNDPROC, (LONG_PTR)
+					imp->wndproc);
+#else	
+				SetWindowLong(imp->hwnd, GWL_WNDPROC, (LONG)imp->wndproc);
+#endif				
+				psy_ui_component_dispose(imp->component);
 			break;
 			case WM_DESTROY:
-				if (component->signal_destroy.slots) {
-					psy_signal_emit(&component->signal_destroy, component,
-						0);
+				if (imp->component->signal_destroy.slots) {
+					psy_signal_emit(&imp->component->signal_destroy,
+						imp->component, 0);
 				}								
 			break;
 			case WM_TIMER:				
-				if (component && component->signal_timer.slots) {
-					psy_signal_emit(&component->signal_timer, component, 1,
+				if (imp->component && imp->component->signal_timer.slots) {
+					psy_signal_emit(&imp->component->signal_timer, imp->component, 1,
 						(int) wParam);
 				}
 			break;
@@ -151,8 +154,8 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
-				component->vtable->onkeydown(component, &ev);
-				psy_signal_emit(&component->signal_keydown, component, 1,
+				imp->component->vtable->onkeydown(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_keydown, imp->component, 1,
 					&ev);
 				if (ev.bubble != FALSE &&
 						psy_table_at(&winapp->selfmap,
@@ -162,8 +165,8 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			}
 			break;
 			case WM_KILLFOCUS:
-				if (component->signal_focuslost.slots) {
-					psy_signal_emit(&component->signal_focuslost, component, 0);
+				if (imp->component->signal_focuslost.slots) {
+					psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
 				}
 			break;			
 			default:
@@ -178,7 +181,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
                                WPARAM wParam, LPARAM lParam)
 {	
     PAINTSTRUCT  ps ;     
-	psy_ui_Component*   component;
+	psy_ui_win_ComponentImp* imp;
 	psy_ui_Graphics	 g;
 	HMENU		 hMenu;
 	psy_ui_Menu* menu;
@@ -186,36 +189,36 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;
-	component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-	if (component) {
+	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+	if (imp) {
 		switch (message)
 		{		
 			case WM_SHOWWINDOW:							
 				if (wParam == TRUE) {
-					psy_signal_emit(&component->signal_show, component, 0);
+					psy_signal_emit(&imp->component->signal_show, imp->component, 0);
 				} else {
-					psy_signal_emit(&component->signal_hide, component, 0);
+					psy_signal_emit(&imp->component->signal_hide, imp->component, 0);
 				}
 				return 0 ;				
 			break;		
 			case WM_SIZE:			
 				{
 					psy_ui_Size size;
-					if (component->alignchildren) {
-						psy_ui_component_align(component);
+					if (imp->component->alignchildren) {
+						psy_ui_component_align(imp->component);
 					}
 					size.width = LOWORD(lParam);
 					size.height = HIWORD(lParam);
-					component->vtable->onsize(component, &size);
-					psy_signal_emit(&component->signal_size, component, 1,
+					imp->component->vtable->onsize(imp->component, &size);
+					psy_signal_emit(&imp->component->signal_size, imp->component, 1,
 						(void*)&size);
 
 					return 0 ;
 				}			
 			break;
 			case WM_TIMER:			
-				if (component->signal_timer.slots) {
-					psy_signal_emit(&component->signal_timer, component, 1,
+				if (imp->component->signal_timer.slots) {
+					psy_signal_emit(&imp->component->signal_timer, imp->component, 1,
 						(int) wParam);				
 					return 0 ;
 				}
@@ -223,12 +226,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:
 			case WM_CTLCOLOREDIT:
-				component = psy_table_at(&winapp->selfmap, (uintptr_t) lParam);
-				if (component) {					
-					SetTextColor((HDC) wParam, component->color);
-					SetBkColor((HDC) wParam, component->backgroundcolor);
-					if ((component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
-						return (intptr_t) psy_ui_win_component_details(component)->background;
+				imp = psy_table_at(&winapp->selfmap, (uintptr_t) lParam);
+				if (imp->component) {					
+					SetTextColor((HDC) wParam, imp->component->color);
+					SetBkColor((HDC) wParam, imp->component->backgroundcolor);
+					if ((imp->component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
+						return (intptr_t) psy_ui_win_component_details(imp->component)->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
@@ -243,29 +246,29 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 1;
 			break;
 			case WM_COMMAND:
-			  hMenu = GetMenu (hwnd) ;
+			 hMenu = GetMenu (hwnd) ;
 			  menu_id = LOWORD (wParam);
 			  menu = psy_table_at(&menumap, (uintptr_t) menu_id);
 			  if (menu && menu->execute) {	
 				menu->execute(menu);
 			  }
-			  component = psy_table_at(&winapp->winidmap, (uintptr_t) LOWORD(wParam));
-			  if (component && component->signal_command.slots) {
-					psy_signal_emit(&component->signal_command, component, 2, 
+			  imp = psy_table_at(&winapp->winidmap, (uintptr_t) LOWORD(wParam));
+			  if (imp && imp->component && imp->component->signal_command.slots) {
+					psy_signal_emit(&imp->component->signal_command, imp->component, 2, 
 						wParam, lParam);
 					return 0;
 				}
 			  return 0 ;  
 			break;          
 			case WM_CREATE:			
-				if (component->signal_create.slots) {	
-					psy_signal_emit(&component->signal_create, component, 0);
+				if (imp->component->signal_create.slots) {	
+					psy_signal_emit(&imp->component->signal_create, imp->component, 0);
 				}
 				return 0 ;
 			break;
 			case WM_PAINT :			
-				if (component->vtable->ondraw || component->signal_draw.slots ||
-						component->backgroundmode != BACKGROUND_NONE) {
+				if (imp->component->vtable->ondraw || imp->component->signal_draw.slots ||
+						imp->component->backgroundmode != BACKGROUND_NONE) {
 					HDC bufferDC;
 					HBITMAP bufferBmp;
 					HBITMAP oldBmp;
@@ -277,7 +280,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					hdc = BeginPaint (hwnd, &ps);
 					GetClientRect(hwnd, &rect);
-					if (component->doublebuffered) {					
+					if (imp->component->doublebuffered) {					
 						bufferDC = CreateCompatibleDC(hdc);					
 						bufferBmp = CreateCompatibleBitmap(hdc, rect.right,
 							rect.bottom);
@@ -291,25 +294,25 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_setrectangle(&g.clip,
 						ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
 						ps.rcPaint.bottom - ps.rcPaint.top);				
-					if (component->backgroundmode == BACKGROUND_SET) {
+					if (imp->component->backgroundmode == BACKGROUND_SET) {
 						psy_ui_Rectangle r;
 
 						psy_ui_setrectangle(&r,
 						rect.left, rect.top, rect.right - rect.left,
 						rect.bottom - rect.top);				
-						psy_ui_drawsolidrectangle(&g, r, component->backgroundcolor);
+						psy_ui_drawsolidrectangle(&g, r, imp->component->backgroundcolor);
 					}					
 					hfont = ((psy_ui_win_FontImp*)
-						psy_ui_component_font(component)->imp)->hfont;
+						psy_ui_component_font(imp->component)->imp)->hfont;
 					hPrevFont = SelectObject(win_g->hdc, hfont);					
-					if (component->vtable->ondraw) {
-						component->vtable->ondraw(component, &g);
+					if (imp->component->vtable->ondraw) {
+						imp->component->vtable->ondraw(imp->component, &g);
 					}
-					psy_signal_emit(&component->signal_draw, component, 1, &g);
+					psy_signal_emit(&imp->component->signal_draw, imp->component, 1, &g);
 					if (hPrevFont) {
 						SelectObject(win_g->hdc, hPrevFont);
 					}
-					if (component->doublebuffered) {
+					if (imp->component->doublebuffered) {
 						win_g->hdc = hdc;
 						BitBlt(hdc, ps.rcPaint.left,ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom,
 							bufferDC, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);				
@@ -323,27 +326,27 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 			break;
 			case WM_NCDESTROY:
-				if (component->signal_destroyed.slots) {
-					psy_signal_emit(&component->signal_destroyed, component, 0);
+				if (imp->component->signal_destroyed.slots) {
+					psy_signal_emit(&imp->component->signal_destroyed, imp->component, 0);
 				}
-				psy_ui_component_dispose(component);
+				psy_ui_component_dispose(imp->component);
 				return 0;
 			break;
 			case WM_DESTROY:
-				if (component->signal_destroy.slots) {
-					psy_signal_emit(&component->signal_destroy, component, 0);
+				if (imp->component->signal_destroy.slots) {
+					psy_signal_emit(&imp->component->signal_destroy, imp->component, 0);
 				}
 				return 0;
 			break;
 			case WM_SYSKEYDOWN:
 				if (wParam >= VK_F10 && wParam <= VK_F12) {					
-					if (component->signal_keydown.slots) {
+					if (imp->component->signal_keydown.slots) {
 						psy_ui_KeyEvent ev;
 						
 						psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 							GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 							(lParam & 0x40000000) == 0x40000000);
-						psy_signal_emit(&component->signal_keydown, component, 1,
+						psy_signal_emit(&imp->component->signal_keydown, imp->component, 1,
 							&ev);					
 						if (ev.bubble != FALSE &&
 							psy_table_at(&winapp->selfmap,
@@ -361,8 +364,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
-				component->vtable->onkeydown(component, &ev);
-				psy_signal_emit(&component->signal_keydown, component, 1,
+				imp->component->vtable->onkeydown(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_keydown, imp->component, 1,
 					&ev);
 				if (ev.bubble != FALSE &&
 						psy_table_at(&winapp->selfmap,
@@ -379,12 +382,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
-				component->vtable->onkeyup(component, &ev);
-				psy_signal_emit(&component->signal_keyup, component, 1,
+				imp->component->vtable->onkeyup(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_keyup, imp->component, 1,
 					&ev);
 				if (ev.bubble != FALSE &&
 						psy_table_at(&winapp->selfmap,
-						(uintptr_t) GetParent (hwnd))) {
+							(uintptr_t) GetParent (hwnd))) {
 					SendMessage(GetParent (hwnd), message, wParam, lParam);
 				}				
 				return 0;
@@ -396,8 +399,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-				component->vtable->onmouseup(component, &ev);
-				psy_signal_emit(&component->signal_mouseup, component, 1,
+				imp->component->vtable->onmouseup(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
 				return 0;
 			}
@@ -408,8 +411,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-				component->vtable->onmouseup(component, &ev);
-				psy_signal_emit(&component->signal_mouseup, component, 1,
+				imp->component->vtable->onmouseup(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
 				return 0;
 			}
@@ -420,8 +423,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-				component->vtable->onmouseup(component, &ev);
-				psy_signal_emit(&component->signal_mouseup, component, 1,
+				imp->component->vtable->onmouseup(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
 				return 0 ;
 			}
@@ -432,8 +435,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
-				component->vtable->onmousedown(component, &ev);
-				psy_signal_emit(&component->signal_mousedown, component, 1,
+				imp->component->vtable->onmousedown(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
 				return 0;
 			}
@@ -444,8 +447,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-				component->vtable->onmousedown(component, &ev);
-				psy_signal_emit(&component->signal_mousedown, component, 1,
+				imp->component->vtable->onmousedown(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
 				return 0;
 			}
@@ -456,8 +459,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-				component->vtable->onmousedown(component, &ev);
-				psy_signal_emit(&component->signal_mousedown, component, 1,
+				imp->component->vtable->onmousedown(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
 				return 0;
 			}
@@ -468,8 +471,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam),
 					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);				
-				component->vtable->onmousedoubleclick(component, &ev);
-				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
+				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);				
 				if (ev.bubble != FALSE &&
 						psy_table_at(&winapp->selfmap,
@@ -485,8 +488,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
-				component->vtable->onmousedoubleclick(component, &ev);
-				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
+				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
 				return 0 ;
 			}
@@ -497,8 +500,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
-				component->vtable->onmousedoubleclick(component, &ev);
-				psy_signal_emit(&component->signal_mousedoubleclick, component, 1,
+				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
 				return 0;
 			}
@@ -507,8 +510,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (!mousetracking) {
 					TRACKMOUSEEVENT tme;
 					
-					component->vtable->onmouseenter(component);
-					psy_signal_emit(&component->signal_mouseenter, component, 0);					
+					imp->component->vtable->onmouseenter(imp->component);
+					psy_signal_emit(&imp->component->signal_mouseenter, imp->component, 0);					
 					tme.cbSize = sizeof(TRACKMOUSEEVENT);
 					tme.dwFlags = TME_LEAVE | TME_HOVER;
 					tme.dwHoverTime = 200;
@@ -523,8 +526,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), wParam, 0);
-					component->vtable->onmousemove(component, &ev);
-					psy_signal_emit(&component->signal_mousemove, component, 1,
+					imp->component->vtable->onmousemove(imp->component, &ev);
+					psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 						&ev);
 					return 0 ;
 				}
@@ -545,66 +548,66 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			return 0 ;
 			break;          
 			case WM_MOUSEWHEEL:
-				if (component->signal_mousewheel.slots) {
+				if (imp->component->signal_mousewheel.slots) {
 					psy_ui_MouseEvent ev;
 
 					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 						(SHORT)HIWORD (lParam), LOWORD(wParam), HIWORD(wParam));
-					psy_signal_emit(&component->signal_mousewheel, component, 1,
+					psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 						&ev);
 				} else
-				if (component->wheelscroll > 0) {
+				if (imp->component->wheelscroll > 0) {
 					if (iDeltaPerLine != 0) {
-						component->accumwheeldelta += (short) HIWORD (wParam); // 120 or -120
-						while (component->accumwheeldelta >= iDeltaPerLine)
+						imp->component->accumwheeldelta += (short) HIWORD (wParam); // 120 or -120
+						while (imp->component->accumwheeldelta >= iDeltaPerLine)
 						{           
 							int iPos;
 							int scrollmin;
 							int scrollmax;
 
-							psy_ui_component_verticalscrollrange(component, &scrollmin,
+							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);							
-							iPos = psy_ui_component_verticalscrollposition(component) - 
-								component->wheelscroll;
+							iPos = psy_ui_component_verticalscrollposition(imp->component) - 
+								imp->component->wheelscroll;
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							SendMessage((HWND) psy_ui_win_component_details(component)->hwnd,
+							SendMessage((HWND) psy_ui_win_component_details(imp->component)->hwnd,
 								WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);
-							component->accumwheeldelta -= iDeltaPerLine ;							
+							imp->component->accumwheeldelta -= iDeltaPerLine ;							
 						}				
-						while (component->accumwheeldelta <= -iDeltaPerLine)
+						while (imp->component->accumwheeldelta <= -iDeltaPerLine)
 						{
 							int iPos;
 							int scrollmin;
 							int scrollmax;
 
-							psy_ui_component_verticalscrollrange(component, &scrollmin,
+							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);
-							iPos = psy_ui_component_verticalscrollposition(component) + 
-								component->wheelscroll;
+							iPos = psy_ui_component_verticalscrollposition(imp->component) + 
+								imp->component->wheelscroll;
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							SendMessage((HWND) psy_ui_win_component_details(component)->hwnd, WM_VSCROLL,
+							SendMessage((HWND) psy_ui_win_component_details(imp->component)->hwnd, WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);							
-							component->accumwheeldelta += iDeltaPerLine;							
+							imp->component->accumwheeldelta += iDeltaPerLine;							
 						}
 					}
 				}
 			break;
 			case WM_MOUSEHOVER:			
-				if (component->signal_mousehover.slots) {	                    
-					psy_signal_emit(&component->signal_mousehover, component, 0);
+				if (imp->component->signal_mousehover.slots) {	                    
+					psy_signal_emit(&imp->component->signal_mousehover, imp->component, 0);
 					return 0;
 				}
 			break;
 			case WM_MOUSELEAVE:
 			{
 				mousetracking = 0;
-				component->vtable->onmouseleave(component);
-				psy_signal_emit(&component->signal_mouseleave, component, 0);
+				imp->component->vtable->onmouseleave(imp->component);
+				psy_signal_emit(&imp->component->signal_mouseleave, imp->component, 0);
 				return 0;
 			}				
 			break;
@@ -617,8 +620,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			break;
 			case WM_KILLFOCUS:
-				if (component->signal_focuslost.slots) {
-					psy_signal_emit(&component->signal_focuslost, component, 0);
+				if (imp->component->signal_focuslost.slots) {
+					psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
 					return 0;
 				}
 			break;
@@ -633,7 +636,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO		si;	
     int				iPos; //, iHorzPos;	
-	psy_ui_Component*   component;
+	psy_ui_win_ComponentImp* imp;
      
 	si.cbSize = sizeof (si) ;
     si.fMask  = SIF_ALL ;
@@ -653,13 +656,13 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_WinApp* winapp;
 
 		winapp = (psy_ui_WinApp*) app.platform;
-		component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-		if (component && component->signal_scroll.slots) {
-			psy_signal_emit(&component->signal_scroll, component, 2, 
+		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+		if (imp->component && imp->component->signal_scroll.slots) {
+			psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
 				0, (iPos - si.nPos));			
 		}
-		if (component->handlevscroll) {
-			psy_ui_component_scrollstep(component, 0, (iPos - si.nPos));
+		if (imp->component->handlevscroll) {
+			psy_ui_component_scrollstep(imp->component, 0, (iPos - si.nPos));
 		}
 	}
 }
@@ -667,7 +670,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
 	SCROLLINFO		si;	
     int				iPos; 
-	psy_ui_Component*   component;
+	psy_ui_win_ComponentImp* imp;
      
 	si.cbSize = sizeof (si) ;
     si.fMask  = SIF_ALL ;
@@ -689,13 +692,13 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_WinApp* winapp;
 
 		winapp = (psy_ui_WinApp*) app.platform;
-		component = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-		if (component && component->signal_scroll.slots) {
-			psy_signal_emit(&component->signal_scroll, component, 2, 
+		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+		if (imp->component && imp->component->signal_scroll.slots) {
+			psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
 				(iPos - si.nPos), 0);			
 		}
-		if (component->handlehscroll) {
-			psy_ui_component_scrollstep(component, (iPos - si.nPos), 0);
+		if (imp->component->handlehscroll) {
+			psy_ui_component_scrollstep(imp->component, (iPos - si.nPos), 0);
 		}
 	}
 }

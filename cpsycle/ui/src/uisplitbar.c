@@ -5,6 +5,12 @@
 
 #include "uisplitbar.h"
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <commctrl.h>
+
 static void splitbar_onmousedown(psy_ui_SplitBar*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void splitbar_onmousemove(psy_ui_SplitBar*, psy_ui_Component* sender,
@@ -97,7 +103,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_Component* sender,
 	psy_ui_Rectangle position;
 	psy_ui_Component* prev;
 
-	psy_ui_component_releasecapture();
+	psy_ui_component_releasecapture(&self->component);
 	self->resize = 0;
 	prev = splitbar_prevcomponent(self);
 	if (prev) {		
@@ -158,10 +164,10 @@ psy_ui_Component* splitbar_prevcomponent(psy_ui_SplitBar* self)
 void splitbar_setcursor(psy_ui_SplitBar* self)
 {
 	if (self->component.align == psy_ui_ALIGN_LEFT) {
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 	} else
 	if (self->component.align == psy_ui_ALIGN_TOP) {
-		SetCursor(LoadCursor(NULL, IDC_SIZENS));
+		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_ROW_RESIZE);
 	}
 }
 

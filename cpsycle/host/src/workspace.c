@@ -14,8 +14,13 @@
 #include <operations.h>
 #include <uiopendialog.h>
 #include <uisavedialog.h>
-#include <uiwincompdetail.h>
+#include <uiwincomponentimp.h>
 #include "../../detail/portable.h"
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);

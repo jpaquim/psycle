@@ -7,7 +7,14 @@
 #include <stdio.h>
 #include "inputmap.h"
 #include <stdlib.h>
+
+#include <uifolderdialog.h>
 #include "../../detail/portable.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 
 static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
@@ -119,7 +126,7 @@ void settingsview_ondraw(SettingsView* self, psy_ui_Component* sender,
 	self->g = g;
 	psy_ui_setcolor(g, 0x00EAEAEA);
 	psy_ui_settextcolor(g, 0x00CACACA);
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	settingsview_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
 		settingsview_onpropertiesdrawenum);
@@ -233,7 +240,7 @@ void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 	int column)
 {
 	if (self->selected == property) {					
-		psy_ui_setbackgroundmode(self->g, OPAQUE);
+		psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
 		psy_ui_setbackgroundcolor(self->g, 0x009B7800);
 		psy_ui_settextcolor(self->g, 0x00FFFFFF);
 	}				
@@ -241,7 +248,7 @@ void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 		psy_properties_valuestring(property),
 		strlen(psy_properties_valuestring(property)));
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
-	psy_ui_setbackgroundmode(self->g, TRANSPARENT);
+	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(self->g, 0x00CACACA);
 //	if (property->item.hint == PSY_PROPERTY_HINT_EDITDIR) {
 //		ui_textout(self->g, 500, 20 + self->cpy, "...", strlen("..."));
@@ -283,7 +290,7 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 			strlen(psy_properties_text(property)));
 	}
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
-	psy_ui_setbackgroundmode(self->g, TRANSPARENT);
+	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(self->g, 0x00CACACA);	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
 		size = psy_ui_component_textsize(&self->client, "...");
@@ -363,16 +370,17 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 		settingsview_onpropertieshittestenum);
 	if (self->selected) {
 		if (self->dirbutton) {
-			char path[MAX_PATH]	 = "";
+			psy_ui_FolderDialog dialog;			
 			char title[MAX_PATH];
 			
-			psy_snprintf(title, MAX_PATH, "%s",
-				psy_properties_text(self->selected));
-			title[MAX_PATH - 1] = '\0';
-			if (psy_ui_browsefolder(&self->component, title, path)) {
+			psy_snprintf(title, MAX_PATH, "%s", psy_properties_text(self->selected));
+			title[MAX_PATH - 1] = '\0';			
+			psy_ui_folderdialog_init_all(&dialog, 0, title, "");
+			if (psy_ui_folderdialog_execute(&dialog)) {
 				psy_properties_write_string(self->selected->parent,
-					self->selected->item.key, path);
+					self->selected->item.key, psy_ui_folderdialog_path(&dialog));
 			}
+			psy_ui_folderdialog_dispose(&dialog);							
 		} else
 		if (psy_properties_ischoiceitem(self->selected)) {
 			self->choiceproperty = self->selected->parent;
@@ -561,12 +569,12 @@ void settingsview_oneditchange(SettingsView* self, psy_ui_Edit* sender)
 void settingsview_oneditkeydown(SettingsView* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode == VK_RETURN) {
+	if (ev->keycode == psy_ui_KEY_RETURN) {
 		psy_ui_component_hide(&self->edit.component);
 		psy_ui_component_setfocus(&self->client);
 		settingsview_oneditchange(self, &self->edit);
 	} else
-	if (ev->keycode == VK_ESCAPE) {
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		psy_ui_component_hide(&self->edit.component);
 		psy_ui_component_setfocus(&self->client);		
 	}

@@ -5,12 +5,17 @@
 
 #include "uisavedialog.h"
 #include "uiapp.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 #include <commdlg.h>
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
 extern psy_ui_App app;
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 void psy_ui_savedialog_init(psy_ui_SaveDialog* self, psy_ui_Component* parent)
 {

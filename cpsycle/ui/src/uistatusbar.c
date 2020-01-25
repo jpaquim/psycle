@@ -4,8 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "uistatusbar.h"
+#include "uiwincomponentimp.h"
 #include <commctrl.h>
-#include "uiwincompdetail.h"
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 void psy_ui_statusbar_init(psy_ui_StatusBar* self, psy_ui_Component* parent)
 {	

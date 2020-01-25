@@ -4,7 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "uinotebook.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
 static void align_split(psy_ui_Notebook* self, int x);
@@ -172,7 +177,7 @@ void onmouseup(psy_ui_Notebook* self, psy_ui_Component* sender,
 		psy_ui_component_move(sender, position.left + ev->x, size.height);
 		self->splitx = position.left + ev->x;
 		align_split(self, self->splitx);
-		psy_ui_component_releasecapture();
+		psy_ui_component_releasecapture(&self->component);
 	}
 }
 

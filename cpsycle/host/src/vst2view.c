@@ -5,7 +5,7 @@
 
 #include "vst2view.h"
 
-#include <uiwincompdetail.h>
+#include <uiwincomponentimp.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -14,6 +14,11 @@
 
 static void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ontimer(Vst2View*, psy_ui_Component* sender, int id);
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;

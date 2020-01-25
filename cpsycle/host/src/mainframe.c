@@ -12,6 +12,12 @@
 #include <dir.h>
 #include <uiapp.h>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
+
 #define TIMERID_MAINFRAME 20
 
 static void mainframe_initstatusbar(MainFrame*);
@@ -465,7 +471,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {	
-	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
+	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
 		EventDriverData input;			
 		
@@ -481,13 +487,13 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender,
 void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component,
 	psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode != VK_CONTROL && ev->keycode != VK_SHIFT) {
+	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
 		EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYUP;
-		input.param1 = encodeinput(ev->keycode, GetKeyState(VK_SHIFT) < 0,
-			GetKeyState(VK_CONTROL) < 0);
+		input.param1 = encodeinput(ev->keycode, GetKeyState(psy_ui_KEY_SHIFT) < 0,
+			GetKeyState(psy_ui_KEY_CONTROL) < 0);
 		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);
 		kbd->write(kbd, input);

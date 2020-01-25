@@ -131,7 +131,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 	size = psy_ui_component_size(&self->component);
 	psy_ui_setcolor(g, 0x00333333);
 
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00333333);
 	for (key = keymin; key < keymax; ++key) {					
 		psy_ui_drawline(g, cp, 0, cp, size.height);
@@ -412,7 +412,7 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 
 		size = psy_ui_component_size(&self->component);
 		psy_ui_setcolor(g, 0x00CACACA);
-		psy_ui_setbackgroundmode(g, TRANSPARENT);
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00CACACA);
 		for (p = self->instrument->entries; p != 0; p = p->next) {
 			psy_audio_InstrumentEntry* entry;

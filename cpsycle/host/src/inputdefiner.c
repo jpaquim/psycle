@@ -8,6 +8,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 #include "../../detail/portable.h"
 
 static void inputdefiner_ondestroy(InputDefiner*, psy_ui_Component* sender);
@@ -83,7 +89,7 @@ void ondraw(InputDefiner* self, psy_ui_Graphics* g)
 	char text[40];	
 	
 	psy_ui_settextcolor(g, 0x00FFFFFF);
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
 	psy_ui_textout(g, 0, 0, text, strlen(text));
 }
@@ -93,10 +99,10 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 	int shift;
 	int ctrl;	
 
-	shift = GetKeyState (VK_SHIFT) < 0;
-	ctrl = GetKeyState (VK_CONTROL) < 0;	
+	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
+	ctrl = GetKeyState (psy_ui_KEY_CONTROL) < 0;	
 
-	if ((ev->keycode == VK_SHIFT || ev->keycode == VK_CONTROL)) {
+	if ((ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL)) {
 		if (self->regularkey == 0) {
 			self->input = encodeinput(0, shift, ctrl);
 		} else {
@@ -118,8 +124,8 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	int inputshift;
 	int inputctrl;
 
-	shift = GetKeyState (VK_SHIFT) < 0;
-	ctrl = GetKeyState (VK_CONTROL) < 0;
+	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
+	ctrl = GetKeyState (psy_ui_KEY_CONTROL) < 0;
 	decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl);
 	if (self->regularkey) {		
 		self->input = encodeinput(inputkeycode, shift, ctrl);
@@ -139,22 +145,22 @@ void keynames_init(void)
 		int key;
 		
 		psy_table_init(&keynames);
-		keynames_add(VK_LEFT,"LEFT");	
-		keynames_add(VK_RIGHT, "RIGHT");	
-		keynames_add(VK_UP,"UP");	
-		keynames_add(VK_DOWN, "DOWN");	
-		keynames_add(VK_TAB, "TAB");	
-		keynames_add(VK_BACK, "BACK");	
-		keynames_add(VK_DELETE, "DELETE");	
-		keynames_add(VK_HOME, "HOME");	
-		keynames_add(VK_END, "END");
-		keynames_add(VK_RETURN, "RETURN");
-		for (key = VK_F1; key <= VK_F12; ++key) {	
+		keynames_add(psy_ui_KEY_LEFT,"LEFT");	
+		keynames_add(psy_ui_KEY_RIGHT, "RIGHT");	
+		keynames_add(psy_ui_KEY_UP,"UP");	
+		keynames_add(psy_ui_KEY_DOWN, "DOWN");	
+		keynames_add(psy_ui_KEY_TAB, "TAB");	
+		keynames_add(psy_ui_KEY_BACK, "BACK");	
+		keynames_add(psy_ui_KEY_DELETE, "DELETE");	
+		keynames_add(psy_ui_KEY_HOME, "HOME");	
+		keynames_add(psy_ui_KEY_END, "END");
+		keynames_add(psy_ui_KEY_RETURN, "RETURN");
+		for (key = psy_ui_KEY_F1; key <= psy_ui_KEY_F12; ++key) {	
 			char keystr[5];
-			psy_snprintf(keystr, 5, "F%d", key - VK_F1 + 1);
+			psy_snprintf(keystr, 5, "F%d", key - psy_ui_KEY_F1 + 1);
 			keynames_add(key, keystr);
 		}		
-		for (key = 0x30 /*VK_0*/; key <= 255 /*VK_Z*/; ++key) {
+		for (key = 0x30 /*psy_ui_KEY_0*/; key <= 255 /*psy_ui_KEY_Z*/; ++key) {
 			char keystr[5];		
 			psy_snprintf(keystr, 5, "%c", key);
 			if (strlen(keystr)) {

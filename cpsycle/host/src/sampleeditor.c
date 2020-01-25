@@ -101,7 +101,7 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	baseline = size.height - 1;
 	psy_ui_setcolor(g, 0x00CACACA); 
 	psy_ui_drawline(g, 0, baseline, size.width, baseline);	
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00CACACA);
 	for (c = 0, cpx = 0; c <= self->view->metrics.visisteps; 
 			cpx += self->view->metrics.stepwidth, ++c) {
@@ -131,7 +131,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 			static const char* txt = "No wave loaded";
 
 			tm = psy_ui_component_textmetric(&sender->component);
-			psy_ui_setbackgroundmode(g, TRANSPARENT);
+			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolor(g, 0x00D1C5B6);
 			psy_ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
 				(size.height - tm.tmHeight) / 2, txt, strlen(txt));

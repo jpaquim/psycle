@@ -7,6 +7,12 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
+
 #define TIMERID_PIANOROLL 640
 
 static void pianoheader_ondraw(PianoHeader*, psy_ui_Component* sender,
@@ -457,7 +463,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 		next = pianogrid_nextnode(self, node, 0);
 		if (next) {
 			if (psy_audio_patternnode_entry(next)->offset - offset == 0.25) {
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 		}
 	}
@@ -605,7 +611,7 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 			cpx += self->metrics.stepwidth, ++c) {		
 		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 4);		
 	}		
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00CACACA);
 	for (c = 0, cpx = 0; c <= self->metrics.visibeats; 
 			cpx += self->metrics.beatwidth, ++c) {		

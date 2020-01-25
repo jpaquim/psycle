@@ -18,7 +18,7 @@ typedef struct {
 	int shift;
 	int ctrl;
 	int repeat;
-	BOOL bubble;
+	bool bubble;
 } psy_ui_KeyEvent;
 
 void psy_ui_keyevent_init(psy_ui_KeyEvent*, int keycode, int keydata,
@@ -30,7 +30,7 @@ typedef struct {
 	int y;
 	int button;
 	int delta;
-	BOOL bubble;
+	bool bubble;
 } psy_ui_MouseEvent;
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent*, int x, int y, int button,

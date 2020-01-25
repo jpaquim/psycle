@@ -1,28 +1,29 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef psy_ui_MENU_H
-#define psy_ui_MENU_H
+#ifndef psy_ui_win_BITMAPIMP_H
+#define psy_ui_win_BITMAPIMP_H
 
-#include "uidef.h"
+#include "uibitmap.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct psy_ui_Menu {
-  void* hmenu;
-  int id;
-  char* label;
-  void (*execute)(struct psy_ui_Menu*);  
-} psy_ui_Menu;
+typedef struct psy_ui_win_BitmapImp {
+	psy_ui_BitmapImp imp;
+	HBITMAP hBitmap;
+} psy_ui_win_BitmapImp;
 
-void ui_menu_setup(void);
-void ui_menu_init(psy_ui_Menu*, char* label, void (*execute)(psy_ui_Menu*));
-void ui_menu_append(psy_ui_Menu*, psy_ui_Menu* child, int popup);
+void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* psy_ui_MENU_H */
+#endif /* psy_ui_win_BITMAPIMP_H */

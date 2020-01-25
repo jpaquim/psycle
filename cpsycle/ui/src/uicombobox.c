@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uicombobox.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 #include <stdlib.h>
 
 static void onpreferredsize(psy_ui_ComboBox*, psy_ui_Size* limit, psy_ui_Size* rv);
@@ -20,6 +20,11 @@ static void onmousedown(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 static void onmousemove(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_ComboBox*);
 static void onmouseleave(psy_ui_ComboBox*);
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -190,7 +195,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 			SendMessage((HWND)psy_ui_win_component_details(&self->combo)->hwnd, CB_GETLBTEXT, (WPARAM)sel,
 				(LPARAM)txt);
 
-			psy_ui_setbackgroundmode(g, TRANSPARENT);
+			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			if (self->hover) {
 				psy_ui_settextcolor(g, 0x00FFFFFF);
 			} else {

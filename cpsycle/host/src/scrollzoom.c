@@ -78,17 +78,17 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_Component* sender,
 	psy_ui_Size size;
 	int zoomleftx;
 	int zoomrightx;
-
+	
 	size = psy_ui_component_size(&self->component);
 	zoomleftx = (int)(size.width * self->zoomleft);
 	if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		self->dragmode = SCROLLZOOM_DRAG_LEFT;
 		self->dragoffset = ev->x - zoomleftx;		
 	} else {
 		zoomrightx = (int)(size.width * self->zoomright);
 		if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			self->dragmode = SCROLLZOOM_DRAG_RIGHT;
 			self->dragoffset = ev->x - zoomrightx;
 		} else
@@ -112,18 +112,18 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 
 		zoomleftx = (int)(size.width * self->zoomleft);
 		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else {
 			zoomrightx = (int)(size.width * self->zoomright);
 			if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 		}
 	} else 
 	if (self->dragmode == SCROLLZOOM_DRAG_LEFT) {
 		float zoomold;
 
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		zoomold = self->zoomleft;
 		self->zoomleft = (ev->x - self->dragoffset) / (float) size.width;
 		if (self->zoomleft > self->zoomright) {
@@ -143,7 +143,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 	if (self->dragmode == SCROLLZOOM_DRAG_RIGHT) {
 		float zoomold;
 
-		SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		zoomold = self->zoomright;
 		self->zoomright = (ev->x - self->dragoffset) / (float) size.width;
 		if (self->zoomright < self->zoomleft) {

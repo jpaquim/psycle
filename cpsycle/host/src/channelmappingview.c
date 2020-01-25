@@ -51,7 +51,7 @@ void pinedit_drawpinsockets(PinEdit* self, psy_ui_Graphics* g)
 			centerx = (size.width - 100) / 2;
 			numdstpins = machine->vtable->numinputs(machine);
 			psy_ui_setcolor(g, 0x00CACACA);
-			psy_ui_setbackgroundmode(g, TRANSPARENT);
+			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolor(g, 0x00CACACA);
 			for (p = 0; p < numsrcpins; ++p) {
 				cpy = p * self->lineheight;

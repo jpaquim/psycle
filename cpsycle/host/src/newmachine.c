@@ -10,6 +10,11 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 // newmachine
 static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
 	psy_Properties*);
@@ -457,7 +462,7 @@ void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
 
 void newmachine_onkeydown(NewMachine* self, psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode != VK_ESCAPE) {	
+	if (ev->keycode != psy_ui_KEY_ESCAPE) {	
 		psy_ui_keyevent_stoppropagation(ev);
 	}
 }

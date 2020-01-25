@@ -24,7 +24,7 @@ static void psy2machineload(psy_audio_SongFile* songfile, int32_t slot);
 static void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot);
 static int convertindex(int index);
 
-typedef enum {
+enum {
 	master,
 	ring_modulator,
 	distortion, 

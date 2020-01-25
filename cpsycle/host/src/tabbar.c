@@ -98,7 +98,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	
 	size = psy_ui_component_size(tabbar_base(self));
 	tm = psy_ui_component_textmetric(tabbar_base(self));
-	psy_ui_setbackgroundmode(g, TRANSPARENT);	
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);	
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		cpx = 0;
 	} else 
