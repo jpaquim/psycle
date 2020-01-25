@@ -9,6 +9,11 @@
 #include <stdio.h>
 #include "resources/resource.h"
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 static void about_onsize(About*, psy_ui_Component* sender, psy_ui_Size*);
 static void about_initbuttons(About* self);
 static void about_oncontributors(About*, psy_ui_Component* sender);

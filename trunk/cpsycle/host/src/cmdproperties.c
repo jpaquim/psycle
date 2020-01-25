@@ -7,7 +7,7 @@
 #include "cmdsnotes.h"
 #include "cmdsgeneral.h"
 #include "inputmap.h"
-#include <windows.h> // Virtual keycodes
+#include "uidef.h"
 
 static void cmdproperties_makenotes(psy_Properties*);
 static void cmdproperties_makegeneral(psy_Properties*);
@@ -111,37 +111,37 @@ void cmdproperties_makegeneral(psy_Properties* self)
 	general = psy_properties_create_section(self, "generalcmds");	
 	psy_properties_settext(general, "generalcmds");	
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editmachine",
-		encodeinput(VK_F2, 0, 0), 0, 0), CMD_IMM_EDITMACHINE);
+		encodeinput(psy_ui_KEY_F2, 0, 0), 0, 0), CMD_IMM_EDITMACHINE);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editpattern",
-		encodeinput(VK_F3, 0, 0), 0, 0), CMD_IMM_EDITPATTERN);
+		encodeinput(psy_ui_KEY_F3, 0, 0), 0, 0), CMD_IMM_EDITPATTERN);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_addmachine",
-		encodeinput(VK_F9, 0, 0), 0, 0), CMD_IMM_ADDMACHINE);
+		encodeinput(psy_ui_KEY_F9, 0, 0), 0, 0), CMD_IMM_ADDMACHINE);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_playsong",
-		encodeinput(VK_F5, 1, 0), 0, 0), CMD_IMM_PLAYSONG);
+		encodeinput(psy_ui_KEY_F5, 1, 0), 0, 0), CMD_IMM_PLAYSONG);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_playstart",
-		encodeinput(VK_F5, 0, 0), 0, 0), CMD_IMM_PLAYSTART);
+		encodeinput(psy_ui_KEY_F5, 0, 0), 0, 0), CMD_IMM_PLAYSTART);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_playfrompos",
-		encodeinput(VK_F7, 0, 0), 0, 0), CMD_IMM_PLAYFROMPOS);
+		encodeinput(psy_ui_KEY_F7, 0, 0), 0, 0), CMD_IMM_PLAYFROMPOS);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_playstop",
-		encodeinput(VK_F8, 0, 0), 0, 0), CMD_IMM_PLAYSTOP);
+		encodeinput(psy_ui_KEY_F8, 0, 0), 0, 0), CMD_IMM_PLAYSTOP);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_songposdec",
-		encodeinput(VK_LEFT, 1, 0), 0, 0), CMD_IMM_SONGPOSDEC);
+		encodeinput(psy_ui_KEY_LEFT, 1, 0), 0, 0), CMD_IMM_SONGPOSDEC);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_songposinc",
-		encodeinput(VK_RIGHT, 1, 0), 0, 0), CMD_IMM_SONGPOSINC);
+		encodeinput(psy_ui_KEY_RIGHT, 1, 0), 0, 0), CMD_IMM_SONGPOSINC);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_maxpattern",
-		encodeinput(VK_TAB, 0, 1), 0, 0), CMD_IMM_MAXPATTERN);
+		encodeinput(psy_ui_KEY_TAB, 0, 1), 0, 0), CMD_IMM_MAXPATTERN);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_infomachine",
-		encodeinput(VK_RETURN, 1, 0), 0, 0), CMD_IMM_INFOMACHINE);
+		encodeinput(psy_ui_KEY_RETURN, 1, 0), 0, 0), CMD_IMM_INFOMACHINE);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editinstr",
-		encodeinput(VK_F10, 0, 0), 0, 0), CMD_IMM_EDITINSTR);
+		encodeinput(psy_ui_KEY_F10, 0, 0), 0, 0), CMD_IMM_EDITINSTR);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editinstr",
-		encodeinput(VK_F10, 1, 0), 0, 0), CMD_IMM_EDITSAMPLE);
+		encodeinput(psy_ui_KEY_F10, 1, 0), 0, 0), CMD_IMM_EDITSAMPLE);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editinstr",
-		encodeinput(VK_F10, 0, 1), 0, 0), CMD_IMM_EDITWAVE);
+		encodeinput(psy_ui_KEY_F10, 0, 1), 0, 0), CMD_IMM_EDITWAVE);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editinstr",
-		encodeinput(VK_F1, 0, 0), 0, 0), CMD_IMM_HELP);
+		encodeinput(psy_ui_KEY_F1, 0, 0), 0, 0), CMD_IMM_HELP);
 	psy_properties_setid(psy_properties_append_int(general, "cmd_editinstr",
-		encodeinput(VK_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL);	
+		encodeinput(psy_ui_KEY_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL);	
 	for (p = general->children; p != 0; p = psy_properties_next(p)) {
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_INPUT);
 	}	

@@ -134,7 +134,7 @@ void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
 
 void envelopebox_drawlabel(EnvelopeBox* self, psy_ui_Graphics* g)
 {
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00D1C5B6);
 	psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 }

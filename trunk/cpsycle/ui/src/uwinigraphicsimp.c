@@ -4,10 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "uiwingraphicsimp.h"
-#include "uiwinfontimp.h"
-#include "uiwinbitmapimp.h"
 #include "uiapp.h"
 #include <stdlib.h>
+#include "uiwinfontdetails.h"
+
+static psy_ui_win_FontDetails* win_font_details(psy_ui_Font* self)
+{
+	return (psy_ui_win_FontDetails*)self->platform;
+}
 
 extern psy_ui_App app;
 
@@ -80,7 +84,7 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
-	self->hFontPrev = SelectObject(self->hdc, ((psy_ui_win_FontImp*)app.defaults.style_common.font.imp)->hfont);
+	self->hFontPrev = SelectObject(self->hdc, win_font_details(&app.defaults.defaultfont)->hfont);
 }
 
 // win32 implementation method for psy_ui_Graphics
@@ -101,7 +105,7 @@ void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, int x, int y, const 
 void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, int x, int y, unsigned int options,
 	psy_ui_Rectangle r, const char* text, size_t len)
 {
-	RECT rect;	
+	RECT rect;
 		                
     SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     	
 	ExtTextOut(self->hdc, x, y, options, &rect, text, (int)len, NULL);
@@ -209,11 +213,9 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap
 {
 	HDC hdcMem;
 	psy_ui_Size size;
-	HBITMAP hbmp;
 
 	hdcMem = CreateCompatibleDC(self->hdc);
-	hbmp = ((psy_ui_win_BitmapImp*)bitmap->imp)->hBitmap;
-	SelectObject (hdcMem, hbmp);
+	SelectObject (hdcMem, bitmap->hBitmap);
 	size = psy_ui_bitmap_size(bitmap);
 	BitBlt(self->hdc, x, y, size.width, size.height, hdcMem, 0, 0, SRCCOPY);
 	DeleteDC(hdcMem);  
@@ -223,19 +225,16 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bi
 	int height, int xsrc, int ysrc)
 {
 	HDC hdcMem;
-	HBITMAP hbmp;
 
-	hbmp = ((psy_ui_win_BitmapImp*)bitmap->imp)->hBitmap;
 	hdcMem = CreateCompatibleDC (self->hdc) ;
-	SelectObject (hdcMem, hbmp) ;	
+	SelectObject (hdcMem, bitmap->hBitmap) ;	
 	BitBlt(self->hdc, x, y, width, height, hdcMem, xsrc, ysrc, SRCCOPY);
 	DeleteDC (hdcMem);  
 }
 
 void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
 {
-	HPEN pen;
-
+	HPEN pen;	
 	pen = CreatePen(PS_SOLID, 1, color);
 	SelectObject(self->hdc, pen);
 	if (self->pen) {
@@ -246,12 +245,7 @@ void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
 
 void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, unsigned int mode)
 {
-	if (mode == psy_ui_TRANSPARENT) {
-		SetBkMode(self->hdc, TRANSPARENT);
-	} else
-	if (mode == psy_ui_OPAQUE) {
-		SetBkMode(self->hdc, OPAQUE);
-	}
+	SetBkMode(self->hdc, mode);
 }
 
 void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
@@ -266,8 +260,8 @@ void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp* self, unsigned int co
 
 void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 {	
-	if (font && ((psy_ui_win_FontImp*)font->imp)->hfont) {		
-		SelectObject(self->hdc, ((psy_ui_win_FontImp*)font->imp)->hfont);
+	if (font && win_font_details(font)->hfont) {
+		SelectObject(self->hdc, win_font_details(font)->hfont);
 	}
 }
 

@@ -10,6 +10,11 @@
 #include <exclusivelock.h>
 #include <operations.h>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 #define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
 #define SCOPE_BUF_SIZE_LOG 13
@@ -89,7 +94,7 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	right = size.width;
 	centerx = size.width / 2;
 	step = size.height / 7;
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x606060);
 	
 	rect.left = 32 + 24;
@@ -288,7 +293,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	}	
 	psy_snprintf(buf, 64, "Refresh %.2fhz", 1000.0f / self->scope_peak_rate);
 	//oldFont = bufDC.SelectObject(&font);
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x505050);
 	psy_ui_textout(g, 4, size.height - 14, buf, strlen(buf));
 	// bufDC.SelectObject(oldFont);

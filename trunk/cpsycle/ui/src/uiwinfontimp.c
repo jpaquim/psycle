@@ -6,12 +6,15 @@
 #include "uiwinfontimp.h"
 #include "uiapp.h"
 #include <stdlib.h>
+#include <string.h>
 
 extern psy_ui_App app;
 
 // VTable Prototypes
 static void psy_ui_win_font_imp_dispose(psy_ui_win_FontImp*);
 static void psy_ui_win_font_imp_copy(psy_ui_win_FontImp*, psy_ui_win_FontImp* other);
+
+static LOGFONT logfont(psy_ui_FontInfo lf);
 
 // VTable init
 static psy_ui_FontImpVTable imp_vtable;
@@ -33,7 +36,10 @@ void psy_ui_win_fontimp_init(psy_ui_win_FontImp* self, const psy_ui_FontInfo* fo
 	imp_vtable_init(self);	
 	self->imp.vtable = &imp_vtable;
 	if (fontinfo) {		
-		self->hfont = CreateFontIndirect(&fontinfo->lf);		
+		LOGFONT lf;
+
+		lf = logfont(*fontinfo);
+		self->hfont = CreateFontIndirect(&lf);
 	} else {
 		self->hfont = 0;		
 	}
@@ -55,4 +61,25 @@ void psy_ui_win_font_imp_copy(psy_ui_win_FontImp* self, psy_ui_win_FontImp* othe
 	psy_ui_win_font_imp_dispose(self);
 	GetObject(other->hfont, sizeof(LOGFONT), &lf);
 	self->hfont = CreateFontIndirect(&lf);	
+}
+
+LOGFONT logfont(psy_ui_FontInfo lf)
+{
+	LOGFONT rv;
+
+	rv.lfHeight = lf.lfHeight;
+	rv.lfWidth = lf.lfWidth;
+	rv.lfEscapement = lf.lfEscapement;
+	rv.lfOrientation = lf.lfOrientation;
+	rv.lfWeight = lf.lfWeight;
+	rv.lfItalic = lf.lfItalic;
+	rv.lfUnderline = lf.lfUnderline;
+	rv.lfStrikeOut = lf.lfStrikeOut;
+	rv.lfCharSet = lf.lfCharSet;
+	rv.lfOutPrecision = lf.lfOutPrecision;
+	rv.lfClipPrecision = lf.lfClipPrecision;
+	rv.lfQuality = lf.lfQuality;
+	rv.lfPitchAndFamily = lf.lfPitchAndFamily;
+	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
+	return rv;
 }

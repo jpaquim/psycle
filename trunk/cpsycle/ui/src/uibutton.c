@@ -7,6 +7,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
@@ -71,7 +76,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	size = psy_ui_component_size(psy_ui_button_base(self));
 	textsize = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	psy_ui_setbackgroundmode(g, TRANSPARENT);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->hover) {
 		psy_ui_settextcolor(g, 0x00FFFFFF);
 	} else 

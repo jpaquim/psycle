@@ -4,10 +4,15 @@
 #include "../../detail/prefix.h"
 
 #include "uislider.h"
-#include <commctrl.h>
 #include <stdio.h>
 #include "uiapp.h"
 #include "../../detail/portable.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <commctrl.h>
 
 static void psy_ui_slider_initsignals(psy_ui_Slider*);
 static void psy_ui_slider_disposesignals(psy_ui_Slider*);
@@ -120,7 +125,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r, 0, 0,
 			self->labelsize, size.height);
 		psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
-		psy_ui_setbackgroundmode(g, TRANSPARENT);
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_textoutrectangle(g, 0, 0, 0, r,
 			self->label, strlen(self->label));
 		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
@@ -136,7 +141,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 			psy_ui_setrectangle(&r, size.width - self->valuelabelsize, 0,
 				self->valuelabelsize, size.height);
 			psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
-			psy_ui_setbackgroundmode(g, TRANSPARENT);
+			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_textoutrectangle(g, size.width - self->valuelabelsize, 0, 0, r,
 				self->valuedescription, strlen(self->valuedescription));
 		}

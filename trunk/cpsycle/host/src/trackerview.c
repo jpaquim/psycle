@@ -15,8 +15,19 @@
 #include <math.h>
 #include <assert.h>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 #include <dir.h>
 #include "../../detail/portable.h"
+
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 
 #define TIMERID_TRACKERVIEW 600
 static const psy_dsp_big_beat_t epsilon = 0.0001;
@@ -938,7 +949,7 @@ void trackergrid_drawdigit(TrackerGrid* self, psy_ui_Graphics* g,
 		}
 	}
 	psy_ui_textoutrectangle(g, r.left + self->view->metrics.textleftedge, r.top,
-		ETO_OPAQUE | ETO_CLIPPED, r, buffer, strlen(buffer));	
+		ETO_OPAQUE | ETO_CLIPPED, r, buffer, strlen(buffer));
 }
 
 void trackergrid_adjustscroll(TrackerGrid* self)
@@ -1007,7 +1018,7 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		int cmd;
 
 		cmd = inputs_cmd(&self->view->inputs, encodeinput(ev->keycode, 
-			GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0));
+			GetKeyState(psy_ui_KEY_SHIFT) < 0, GetKeyState(psy_ui_KEY_CONTROL) < 0));
 		if (cmd == CMD_NAVLEFT) {
 			trackergrid_prevcol(self);
 			psy_ui_component_invalidate(&self->component);
@@ -1035,8 +1046,8 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 				cmd.id = -1;			
 				kbd = workspace_kbddriver(self->view->workspace);
 				input.message = EVENTDRIVER_KEYDOWN;
-				input.param1 = encodeinput(ev->keycode, 0, /* GetKeyState(VK_SHIFT) < 0 */
-					GetKeyState(VK_CONTROL) < 0);
+				input.param1 = encodeinput(ev->keycode, 0, /* GetKeyState(psy_ui_KEY_SHIFT) < 0 */
+					GetKeyState(psy_ui_KEY_CONTROL) < 0);
 				kbd->cmd(kbd, input, &cmd);			
 				trackergrid_inputnote(self,
 					(psy_dsp_note_t)(cmd.id + workspace_octave(self->view->workspace) * 12),
@@ -1456,7 +1467,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 	int cmd;
 
 	cmd = inputs_cmd(&self->inputs, encodeinput(ev->keycode, 
-		GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0));
+		GetKeyState(psy_ui_KEY_SHIFT) < 0, GetKeyState(psy_ui_KEY_CONTROL) < 0));
 	if (cmd == CMD_NAVUP) {
 		trackerview_prevline(self);
 	} else
@@ -1643,8 +1654,8 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 			cmd.id = -1;			
 			kbd = workspace_kbddriver(self->workspace);			
 			input.message = EVENTDRIVER_KEYDOWN;
-			input.param1 = encodeinput(ev->keycode, 0, /* GetKeyState(VK_SHIFT) < 0 */
-				GetKeyState(VK_CONTROL) < 0);
+			input.param1 = encodeinput(ev->keycode, 0, /* GetKeyState(psy_ui_KEY_SHIFT) < 0 */
+				GetKeyState(psy_ui_KEY_CONTROL) < 0);
 			kbd->cmd(kbd, input, &cmd);
 			if (cmd.id == NOTECOMMANDS_RELEASE) {
 				trackergrid_inputnote(&self->grid, NOTECOMMANDS_RELEASE,
@@ -1654,7 +1665,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 			}
 			if (cmd.id != -1 && cmd.id <= NOTECOMMANDS_RELEASE &&
 					ev->shift && !self->workspace->chordmode
-					&& ev->keycode != VK_SHIFT) {
+					&& ev->keycode != psy_ui_KEY_SHIFT) {
 				self->workspace->chordmode = 1;
 				self->grid.chordbegin = self->grid.cursor.track;
 			}
@@ -1664,7 +1675,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 
 void trackerview_onkeyup(TrackerView* self, psy_ui_KeyEvent* ev)
 {
-	if (self->workspace->chordmode && ev->keycode == VK_SHIFT) {
+	if (self->workspace->chordmode && ev->keycode == psy_ui_KEY_SHIFT) {
 		self->grid.cursor.track = self->grid.chordbegin;
 		trackerview_scrollleft(self);
 		trackerview_advanceline(self);
@@ -2018,7 +2029,7 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 				psy_ui_component_capture(&self->component);
 			} else {
 				self->dragcolumnbase = ev->x;
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 		}		
 	}
@@ -2069,13 +2080,13 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			self->dragcolumnbase = ev->x;
 			psy_ui_component_invalidate(&self->view->component);
 			trackerview_updatescrollstep(self->view);
-			SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else {
 			int resizecolumn;
 			
 			resizecolumn = trackergrid_resizecolumn(self, ev->x, ev->y);
 			if (resizecolumn != -1) {
-				SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 		}
 	}
@@ -2851,20 +2862,20 @@ void trackerview_setcentermode(TrackerView* self, int mode)
 void trackerview_initinputs(TrackerView* self)
 {
 	inputs_init(&self->inputs);	
-	inputs_define(&self->inputs, encodeinput(VK_UP, 0, 0), CMD_NAVUP);
-	inputs_define(&self->inputs, encodeinput(VK_DOWN, 0, 0),CMD_NAVDOWN);
-	inputs_define(&self->inputs, encodeinput(VK_LEFT, 0, 0),CMD_NAVLEFT);
-	inputs_define(&self->inputs, encodeinput(VK_RIGHT, 0, 0),CMD_NAVRIGHT);
-	inputs_define(&self->inputs, encodeinput(VK_PRIOR, 0, 0),CMD_NAVPAGEUP);
-	inputs_define(&self->inputs, encodeinput(VK_NEXT, 0, 0),CMD_NAVPAGEDOWN);
-	inputs_define(&self->inputs, encodeinput(VK_HOME, 0, 0), CMD_NAVTOP);
-	inputs_define(&self->inputs, encodeinput(VK_END, 0, 0), CMD_NAVBOTTOM);	
-	inputs_define(&self->inputs, encodeinput(VK_TAB, 1, 0), CMD_COLUMNPREV);
-	inputs_define(&self->inputs, encodeinput(VK_TAB, 0, 0), CMD_COLUMNNEXT);	
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_DOWN, 0, 0),CMD_NAVDOWN);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_LEFT, 0, 0),CMD_NAVLEFT);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_RIGHT, 0, 0),CMD_NAVRIGHT);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_PRIOR, 0, 0),CMD_NAVPAGEUP);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_NEXT, 0, 0),CMD_NAVPAGEDOWN);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_HOME, 0, 0), CMD_NAVTOP);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_END, 0, 0), CMD_NAVBOTTOM);	
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_TAB, 1, 0), CMD_COLUMNPREV);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_TAB, 0, 0), CMD_COLUMNNEXT);	
 		
-	inputs_define(&self->inputs, encodeinput(VK_INSERT, 0, 0), CMD_ROWINSERT);
-	inputs_define(&self->inputs, encodeinput(VK_BACK, 0, 0), CMD_ROWDELETE);
-	inputs_define(&self->inputs, encodeinput(VK_DELETE, 0, 0), CMD_ROWCLEAR);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_INSERT, 0, 0), CMD_ROWINSERT);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_BACK, 0, 0), CMD_ROWDELETE);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_DELETE, 0, 0), CMD_ROWCLEAR);
 
 	inputs_define(&self->inputs, encodeinput('B', 0, 1), CMD_BLOCKSTART);
 	inputs_define(&self->inputs, encodeinput('E', 0, 1), CMD_BLOCKEND);
@@ -2874,10 +2885,10 @@ void trackerview_initinputs(TrackerView* self)
 	inputs_define(&self->inputs, encodeinput('V', 0, 1), CMD_BLOCKPASTE);
 	inputs_define(&self->inputs, encodeinput('M', 0, 1), CMD_BLOCKMIX);
 	
-	inputs_define(&self->inputs, encodeinput(VK_F12, 0, 1), CMD_TRANSPOSEBLOCKINC);
-	inputs_define(&self->inputs, encodeinput(VK_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC);
-	inputs_define(&self->inputs, encodeinput(VK_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12);
-	inputs_define(&self->inputs, encodeinput(VK_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F12, 0, 1), CMD_TRANSPOSEBLOCKINC);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12);
+	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12);
 	
 	inputs_define(&self->inputs, encodeinput('A', 0, 1), CMD_SELECTALL);
 	inputs_define(&self->inputs, encodeinput('R', 0, 1), CMD_SELECTCOL);

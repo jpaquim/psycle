@@ -4,10 +4,15 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 
 static void onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
 static psy_ui_TextMetric textmetric(psy_ui_Component*);
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;

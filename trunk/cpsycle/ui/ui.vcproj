@@ -440,6 +440,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\uifolderdialog.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uifont.c"
 				>
 			</File>
@@ -844,7 +848,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\uiwincompdetail.c"
+				RelativePath=".\src\uiwinbitmapimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwincomponentimp.c"
 				>
 			</File>
 			<File
@@ -905,6 +913,10 @@
 				</File>
 				<File
 					RelativePath="src\uievents.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uifolderdialog.h"
 					>
 				</File>
 				<File
@@ -988,7 +1000,11 @@
 					>
 				</File>
 				<File
-					RelativePath=".\src\uiwincompdetail.h"
+					RelativePath=".\src\uiwinbitmapimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwincomponentimp.h"
 					>
 				</File>
 				<File

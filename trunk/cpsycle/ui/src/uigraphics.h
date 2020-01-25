@@ -23,6 +23,11 @@
 extern "C" {
 #endif
 
+typedef enum {
+	psy_ui_TRANSPARENT,
+	psy_ui_OPAQUE
+} psy_ui_TextBackgroundMode;
+
 typedef void (*psy_ui_g_fp_dispose)(struct psy_ui_Graphics*);
 typedef void (*psy_ui_g_fp_textout)(struct psy_ui_Graphics*, int x, int y,  const char*, size_t len);
 typedef void (*psy_ui_g_fp_textoutrectangle)(struct psy_ui_Graphics*, int x, int y, unsigned int options,
@@ -78,7 +83,7 @@ typedef struct psy_ui_Graphics {
 	psy_ui_Rectangle clip;
 } psy_ui_Graphics;
 
-void psy_ui_graphics_init(psy_ui_Graphics*, HDC);
+void psy_ui_graphics_init(psy_ui_Graphics*, void* hdc);
 
 // vtable calls
 INLINE void psy_ui_graphics_dispose(psy_ui_Graphics* self)

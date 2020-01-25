@@ -12,6 +12,11 @@
 #include <dir.h>
 #include <stdlib.h>
 #include "../../detail/portable.h"
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 
 #define TIMERID_UPDATEVUMETERS 300
 
@@ -246,10 +251,10 @@ void machineui_editname(MachineUi* self, psy_ui_Edit* edit)
 void machineui_onkeydown(MachineUi* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {	
-	if (ev->keycode == VK_RETURN) {		
+	if (ev->keycode == psy_ui_KEY_RETURN) {		
 		psy_ui_component_hide(sender);
 	} else
-	if (ev->keycode == VK_ESCAPE) {
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		if (self->machine) {
 			psy_audio_machine_seteditname(self->machine, self->restorename);
 			free(self->restorename);
@@ -296,7 +301,7 @@ void machineui_draw(MachineUi* self, MachineWireView* wireview,
 					psy_audio_machine_editname(self->machine));
 			}
 		}
-		psy_ui_setbackgroundmode(g, TRANSPARENT);
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
 			&self->coords->background);
 		if (self->mode == MACHMODE_FX) {			
@@ -1302,13 +1307,13 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_Component* sender,
 void machinewireview_onkeydown(MachineWireView* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {		
-	if (ev->keycode == VK_DELETE &&
+	if (ev->keycode == psy_ui_KEY_DELETE &&
 			self->selectedwire.src != NOMACHINE_INDEX) {
 		machines_disconnect(self->machines, self->selectedwire.src, 
 			self->selectedwire.dst);
 		psy_ui_component_invalidate(&self->component);
 	} else 
-	if (ev->keycode == VK_DELETE && self->selectedslot != - 1 &&
+	if (ev->keycode == psy_ui_KEY_DELETE && self->selectedslot != - 1 &&
 			self->selectedslot != MASTER_INDEX) {		
 		machines_remove(self->machines, self->selectedslot);
 		self->selectedslot = NOMACHINE_INDEX;
@@ -1781,7 +1786,7 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_Component* sender,
 void machineview_onkeydown(MachineView* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode == VK_ESCAPE) {
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		if (tabbar_selected(&self->tabbar) == 1) {
 			tabbar_select(&self->tabbar, 0);			
 		}

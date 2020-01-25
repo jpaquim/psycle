@@ -9,6 +9,10 @@
 #include "skincoord.h"
 #include <string.h>
 #include <stdlib.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
 #include "../../detail/portable.h"
 
 #define TIMERID_PARAMVIEW 410
@@ -47,18 +51,22 @@ static void vtable_init(ParamView* self)
 }
 
 psy_ui_Bitmap knobs;
+static int knobs_initialized = 0;
 static psy_ui_Bitmap mixer;
+static int mixer_bmp_initialized = 0;
 
 void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
 {	
-	if (knobs.hBitmap == NULL) {
+	if (!knobs_initialized) {
 		psy_ui_bitmap_init(&knobs);
-		psy_ui_bitmap_loadresource(&knobs, IDB_PARAMKNOB);		
-	}
-	if (mixer.hBitmap == NULL) {
+		psy_ui_bitmap_loadresource(&knobs, IDB_PARAMKNOB);	
+		knobs_initialized = 1;
+	}	
+	if (mixer_bmp_initialized) {
 		psy_ui_bitmap_init(&mixer);
 		psy_ui_bitmap_loadresource(&mixer, IDB_MIXERSKIN);
+		mixer_bmp_initialized = 1;
 	}
 	self->machine = machine;
 	self->workspace = workspace;
@@ -391,7 +399,7 @@ void OnMouseUp(ParamView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->tweak != -1) {
-		psy_ui_component_releasecapture();
+		psy_ui_component_releasecapture(&self->component);
 	}
 	self->tweak = -1;
 }

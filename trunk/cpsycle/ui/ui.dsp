@@ -133,6 +133,10 @@ SOURCE=.\src\uievents.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uifolderdialog.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uifont.c
 # End Source File
 # Begin Source File
@@ -213,11 +217,11 @@ SOURCE=.\src\uiwinapp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\uiwincompdetail.c
+SOURCE=.\src\uiwinbitmapimp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\uiwincompdetail.h
+SOURCE=.\src\uiwincomponentimp.c
 # End Source File
 # Begin Source File
 
@@ -278,6 +282,10 @@ SOURCE=.\src\uieditor.h
 # Begin Source File
 
 SOURCE=.\src\uievents.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uifolderdialog.h
 # End Source File
 # Begin Source File
 
@@ -358,6 +366,14 @@ SOURCE=.\src\uiterminal.h
 # Begin Source File
 
 SOURCE=.\src\uiwinapp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinbitmapimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincomponentimp.h
 # End Source File
 # Begin Source File
 

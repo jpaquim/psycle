@@ -163,7 +163,7 @@ float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 	if (is_aligned(pSamples, 16) && (numSamples % 4 == 0)) {
 		return noopt.maxvol(pSamples, numSamples);
 	} else {
-#if defined DIVERSALIS__CPU__X86__SSE and defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 		__m128 minVol = _mm_set_ps1(0.0f);
 		__m128 maxVol = _mm_set_ps1(0.0f);
 		const __m128* psrc = (const __m128*)pSamples;

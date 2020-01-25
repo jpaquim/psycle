@@ -71,7 +71,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		columns = numtracks < maxcolumns ? numtracks : maxcolumns;
 		size = psy_ui_component_size(&self->component);
 		width = size.width / columns;
-		psy_ui_setbackgroundmode(g, TRANSPARENT);
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00444444);
 		for (c = 0; c < numtracks; ++c) {
 			trackscopeview_drawtrackindex(self, g, cpx, cpy, width,

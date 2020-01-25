@@ -8,6 +8,11 @@
 #include "../../detail/portable.h"
 #include <exclusivelock.h>
 
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
 #define TIMERID_SEQUENCEVIEW 2000
 
 static void sequencelistview_onsize(SequenceListView*, const psy_ui_Size*);
@@ -893,6 +898,7 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->desc, 10);
 	psy_ui_label_setstyle(&self->desc, 
 		WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE);
+	self->desc.component.debugflag = 45;
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->duration, &self->component);
 	psy_ui_label_setstyle(&self->duration, 

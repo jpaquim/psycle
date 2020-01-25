@@ -5,10 +5,15 @@
 
 #include "uieditor.h"
 #include "uiapp.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 #include "scintilla/include/scintilla.h"
 
 #include <stdio.h>
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 #define SCI_ENABLED 1
 

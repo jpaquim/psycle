@@ -5,6 +5,11 @@
 
 #include "greet.h"
 
+ #ifndef WIN32_LEAN_AND_MEAN
+ #define WIN32_LEAN_AND_MEAN
+ #endif
+ #include <windows.h>
+
 static void OnSize(Greet*, psy_ui_Component* sender, psy_ui_Size*);
 static void AddString(Greet*, const char* text);
 static void Build(Greet* self);

@@ -4,7 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uicheckbox.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 #include <string.h>
 
 static void psy_ui_checkbox_oncommand(psy_ui_CheckBox*, psy_ui_Component*,
@@ -12,6 +12,11 @@ static void psy_ui_checkbox_oncommand(psy_ui_CheckBox*, psy_ui_Component*,
 static void psy_ui_checkbox_ondestroy(psy_ui_CheckBox*, psy_ui_Component*);
 static void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;

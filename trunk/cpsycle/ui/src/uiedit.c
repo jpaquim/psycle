@@ -4,11 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "uiedit.h"
-#include "uiwincompdetail.h"
+#include "uiwincomponentimp.h"
 
 static void oncommand(psy_ui_Edit*, psy_ui_Component* sender, WPARAM wParam, LPARAM lParam);
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
 static void onpreferredsize(psy_ui_Edit*, psy_ui_Size* limit, psy_ui_Size* rv);
+
+static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
+{
+	return (psy_ui_win_ComponentImp*)self->imp;
+}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
