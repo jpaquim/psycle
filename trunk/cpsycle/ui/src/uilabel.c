@@ -4,15 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
-#include "uiwincomponentimp.h"
+#include "uiimpfactory.h"
 
 static void onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
-static psy_ui_TextMetric textmetric(psy_ui_Component*);
-
-static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-{
-	return (psy_ui_win_ComponentImp*)self->imp;
-}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -28,19 +22,22 @@ static void vtable_init(psy_ui_Label* self)
 
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {  		
-	psy_ui_win32_component_init(psy_ui_label_base(self), parent, TEXT("STATIC"), 
-		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,
-		0);	
+	self->imp = psy_ui_impfactory_allocinit_labelimp(&self->component, parent);
+	psy_ui_component_init_imp(psy_ui_label_base(self), parent,
+		&self->imp->component_imp);
 	vtable_init(self);
-	self->component.vtable = &vtable;
+	self->component.vtable = &vtable;	
 	self->charnumber = 0;	
 }
 
 void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 {
-	SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd,
-		text);
+	self->imp->vtable->dev_settext(self->imp, text);
+}
+
+void psy_ui_label_text(psy_ui_Label* self, char* text)
+{
+	self->imp->vtable->dev_text(self->imp, text);
 }
 
 void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
@@ -53,11 +50,12 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	if (rv) {
 		psy_ui_TextMetric tm;	
 		char text[256];
-		
+				
 		tm = psy_ui_component_textmetric(psy_ui_label_base(self));	
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
-			GetWindowText((HWND) psy_ui_win_component_details(&self->component)->hwnd, text, 256);
+
+			psy_ui_label_text(self, text);			
 			size = psy_ui_component_textsize(psy_ui_label_base(self), text);
 			rv->width = size.width + 2 +
 				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm);
@@ -70,17 +68,30 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 }
 
 void psy_ui_label_setstyle(psy_ui_Label* self, int style)
-{
-	#if defined(_WIN64)
-	SetWindowLongPtr((HWND)psy_ui_win_component_details(&self->component)->hwnd, GWL_STYLE, style);		
-#else
-	SetWindowLong((HWND)psy_ui_win_component_details(&self->component)->hwnd, GWL_STYLE, style);
-#endif
+{	
+	self->imp->vtable->dev_setstyle(self->imp, style);
 }
 
-psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
+// psy_ui_LabelImp vtable
+static void dev_settext(psy_ui_LabelImp* self, const char* title) { }
+static void dev_text(psy_ui_LabelImp* self, char* text) { }
+static void dev_setstyle(psy_ui_LabelImp* self, int style) { }
+
+static psy_ui_LabelImpVTable label_imp_vtable;
+static int label_imp_vtable_initialized = 0;
+
+static void label_imp_vtable_init(void)
 {
-	return &self->component;
+	if (!label_imp_vtable_initialized) {		
+		label_imp_vtable.dev_settext = dev_settext;
+		label_imp_vtable.dev_text = dev_text;
+		label_imp_vtable.dev_setstyle = dev_setstyle;		
+		label_imp_vtable_initialized = 1;
+	}
 }
 
-
+void psy_ui_labelimp_init(psy_ui_LabelImp* self)
+{
+	label_imp_vtable_init();
+	self->vtable = &label_imp_vtable;
+}

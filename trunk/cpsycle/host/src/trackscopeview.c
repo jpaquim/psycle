@@ -136,7 +136,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 		if (machine) {
 			psy_audio_Buffer* memory;
 			
-			memory = machine->vtable->buffermemory(machine);
+			memory = psy_audio_machine_buffermemory(machine);
 			if (memory) {
 				uintptr_t numsamples;
 				uintptr_t frame;
@@ -146,7 +146,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 				int x1, y1, x2, y2;
 				static float epsilon = 0.1f;
 
-				numsamples = machine->vtable->buffermemorysize(machine);				
+				numsamples = psy_audio_machine_buffermemorysize(machine);
 				
 
 				if (numsamples > 0) {

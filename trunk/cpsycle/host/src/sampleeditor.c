@@ -208,8 +208,7 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 {
 	uintptr_t c;
 
-	self->sampler.custommachine.machine.vtable->dispose(
-		&self->sampler.custommachine.machine);
+	psy_audio_machine_dispose(&self->sampler.custommachine.machine);
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
 		dsp.memory_dealloc(self->samplerbuffer.samples[c]);
 	}

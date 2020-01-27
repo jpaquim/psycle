@@ -40,18 +40,19 @@ static void vtable_init(VolSlider* self)
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			volslider_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) volslider_ondraw;
+		vtable_initialized = 1;
 	}
 }
 
 void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{		
-	self->value = 0.f;
-	self->dragx = -1;
-	self->machines = &workspace->song->machines;	
+{	
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;	
+	self->component.vtable = &vtable;
+	self->value = 0.f;
+	self->dragx = -1;
+	self->machines = &workspace->song->machines;			
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		volslider_onmousedown);
 	psy_signal_connect(&self->component.signal_mousemove, self,

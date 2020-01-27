@@ -80,17 +80,17 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_Component* sender,
 	int zoomrightx;
 	
 	size = psy_ui_component_size(&self->component);
-	zoomleftx = (int)(size.width * self->zoomleft);
-	if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
+	zoomrightx = (int)(size.width * self->zoomright);
+	if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
-		self->dragmode = SCROLLZOOM_DRAG_LEFT;
-		self->dragoffset = ev->x - zoomleftx;		
-	} else {
-		zoomrightx = (int)(size.width * self->zoomright);
-		if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
+		self->dragmode = SCROLLZOOM_DRAG_RIGHT;
+		self->dragoffset = ev->x - zoomrightx;
+	} else {	
+		zoomleftx = (int)(size.width * self->zoomleft);
+		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
-			self->dragmode = SCROLLZOOM_DRAG_RIGHT;
-			self->dragoffset = ev->x - zoomrightx;
+			self->dragmode = SCROLLZOOM_DRAG_LEFT;
+			self->dragoffset = ev->x - zoomleftx;
 		} else
 		if (ev->x > zoomleftx && ev->x < zoomrightx) {
 			self->dragmode = SCROLLZOOM_DRAG_MOVE;
@@ -137,6 +137,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 		}
 		if (zoomold != self->zoomright) {
 			psy_ui_component_invalidate(&self->component);
+			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
 	} else
@@ -157,6 +158,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 		}
 		if (zoomold != self->zoomright) {
 			psy_ui_component_invalidate(&self->component);
+			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
 	} else
@@ -179,6 +181,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 		if (self->zoomleft != zoomold) {
 			self->zoomright = self->zoomleft + length;
 			psy_ui_component_invalidate(&self->component);
+			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
 		}
 	}

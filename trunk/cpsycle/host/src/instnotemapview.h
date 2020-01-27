@@ -11,7 +11,6 @@
 #include "workspace.h"
 
 #include <uibutton.h>
-#include <uigroupbox.h>
 #include <uilabel.h>
 #include <uiedit.h>
 #include <uinotebook.h>

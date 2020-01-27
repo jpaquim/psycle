@@ -249,6 +249,35 @@ void dev_dispose(psy_ui_win_ComponentImp* self)
 	}
 }
 
+psy_ui_win_ComponentImp* psy_ui_win_componentimp_alloc(void)
+{
+	return (psy_ui_win_ComponentImp*) malloc(sizeof(psy_ui_win_ComponentImp));
+}
+
+psy_ui_win_ComponentImp* psy_ui_win_componentimp_allocinit(
+	struct psy_ui_Component* component,
+	psy_ui_ComponentImp* parent,
+	const char* classname,
+	int x, int y, int width, int height,
+	uint32_t dwStyle,
+	int usecommand)
+{
+	psy_ui_win_ComponentImp* rv;
+
+	rv = psy_ui_win_componentimp_alloc();
+	if (rv) {
+		psy_ui_win_componentimp_init(rv,
+			component,
+			parent,
+			classname,
+			x, y, width, height,
+			dwStyle,
+			usecommand
+		);
+	}
+	return rv;
+}
+
 void dev_destroy(psy_ui_win_ComponentImp* self)
 {
 	DestroyWindow(self->hwnd);

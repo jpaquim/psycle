@@ -33,7 +33,7 @@ static void psy_ui_winapp_registerclasses(psy_ui_WinApp*);
 
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
 {
-	return (psy_ui_win_ComponentImp*)self->imp;
+	return (psy_ui_win_ComponentImp*)self->imp->vtable->dev_platform(self->imp);
 }
 
 static int FilterException(const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
@@ -227,7 +227,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLORSTATIC:
 			case WM_CTLCOLOREDIT:
 				imp = psy_table_at(&winapp->selfmap, (uintptr_t) lParam);
-				if (imp->component) {					
+				if (imp && imp->component) {					
 					SetTextColor((HDC) wParam, imp->component->color);
 					SetBkColor((HDC) wParam, imp->component->backgroundcolor);
 					if ((imp->component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {

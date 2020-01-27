@@ -5,8 +5,7 @@
 
 #include "wavebox.h"
 
-static void wavebox_ondraw(WaveBox*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
+static void wavebox_ondraw(WaveBox*, psy_ui_Graphics*);
 static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
 static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
@@ -30,17 +29,31 @@ enum {
 	SAMPLEBOX_DRAG_MOVE
 };
 
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(WaveBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);		
+		vtable.ondraw = (psy_ui_fp_ondraw) wavebox_ondraw;
+		vtable_initialized = 1;
+	}
+}
+
 void wavebox_init(WaveBox* self, psy_ui_Component* parent)
 {			
+	psy_ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	psy_ui_component_doublebuffer(&self->component);
 	self->sample = 0;
 	self->hasselection = 0;
 	self->selectionstart = 0;
 	self->selectionend = 0;
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_draw, self, wavebox_ondraw);
+	self->offsetstep = 0;	
 	psy_signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		wavebox_onmousedown);
@@ -56,11 +69,16 @@ void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
 
 void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample)
 {
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(&self->component);
 	self->sample = sample;
+	self->offsetstep = sample ? (float)self->sample->numframes / size.width *
+		(self->zoomright - self->zoomleft) : 0.f;
 	psy_ui_component_invalidate(&self->component);
 }
 
-void wavebox_ondraw(WaveBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle r;
 	psy_ui_Size size = psy_ui_component_size(&self->component);	
@@ -76,8 +94,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 		psy_ui_textout(g, (size.width - tm.tmAveCharWidth * strlen(txt)) / 2,
 			(size.height - tm.tmHeight) / 2, txt, strlen(txt));
 	} else {
-		psy_dsp_amp_t scaley;
-		float offsetstep;
+		psy_dsp_amp_t scaley;		
 		int x;
 		int centery = size.height / 2;
 		psy_ui_Rectangle cont_loop_rc;
@@ -92,9 +109,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 				self->sample->sustainloopstart,
 				self->sample->sustainloopend);
 		}
-		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;		
-		offsetstep = (float) self->sample->numframes / size.width *
-			(self->zoomright - self->zoomleft);
+		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;	
 
 		if (self->sample && self->sample->looptype != LOOP_DO_NOT) {			
 			psy_ui_drawsolidrectangle(g, cont_loop_rc, 0x00292929);
@@ -104,7 +119,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 				self->selectionend, self->selectionend), 0x00B1C8B0);			
 		}		
 		for (x = 0; x < size.width; ++x) {			
-			uintptr_t frame = (int)(offsetstep * x + 
+			uintptr_t frame = (int)(self->offsetstep * x + 
 				(int)(self->sample->numframes * self->zoomleft));
 			float framevalue;
 			
@@ -278,13 +293,10 @@ uintptr_t wavebox_screentoframe(WaveBox* self, int x)
 	intptr_t frame;
 
 	if (self->sample) {
-		psy_ui_Size size;
-		float offsetstep;
+		psy_ui_Size size;		
 		
-		size = psy_ui_component_size(&self->component);	
-		offsetstep = (float) self->sample->numframes / size.width *
-			(self->zoomright - self->zoomleft);
-		frame = (int)(offsetstep * x) + 
+		size = psy_ui_component_size(&self->component);			
+		frame = (int)(self->offsetstep * x) + 
 			(int)(self->sample->numframes * self->zoomleft);
 		if (frame < 0) {
 			frame = 0;
@@ -302,14 +314,11 @@ int wavebox_frametoscreen(WaveBox* self, uintptr_t frame)
 	int rv = 0;
 
 	if (self->sample) {
-		psy_ui_Size size;
-		float offsetstep;
+		psy_ui_Size size;		
 		
-		size = psy_ui_component_size(&self->component);
-		offsetstep = (float) self->sample->numframes / size.width *
-			(self->zoomright - self->zoomleft);		
+		size = psy_ui_component_size(&self->component);		
 		rv = (int)((frame - (intptr_t)(self->sample->numframes *
-				self->zoomleft)) / offsetstep);		
+				self->zoomleft)) / self->offsetstep);
 	}
 	return rv;
 }
@@ -331,5 +340,13 @@ void wavebox_setzoom(WaveBox* self, float zoomleft, float zoomright)
 {
 	self->zoomleft = zoomleft;
 	self->zoomright = zoomright;
-	psy_ui_component_invalidate(&self->component);
+	if (self->sample) {
+		psy_ui_Size size;		
+
+		size = psy_ui_component_size(&self->component);
+		self->offsetstep = (float)self->sample->numframes / size.width *
+			(self->zoomright - self->zoomleft);
+		psy_ui_component_invalidate(&self->component);
+		psy_ui_component_update(&self->component);
+	}
 }

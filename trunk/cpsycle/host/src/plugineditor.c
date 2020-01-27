@@ -45,7 +45,7 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 		
 		path = plugincatcher_searchpath(
 			&self->workspace->plugincatcher, 
-			machine->vtable->info(machine)->Name,
+			psy_audio_machine_info(machine)->Name,
 			MACH_LUA);
 		if (path) {
 			psy_ui_editor_load(&self->editor, path);

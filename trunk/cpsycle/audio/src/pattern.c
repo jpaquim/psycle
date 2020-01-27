@@ -30,104 +30,6 @@ int patterneditposition_equal(PatternEditPosition* lhs,
 		rhs->pattern == lhs->pattern;
 }
 
-void patternentry_init(psy_audio_PatternEntry* self)
-{
-	psy_audio_PatternEvent first;
-
-	memset(self, 0, sizeof(psy_audio_PatternEntry));
-	patternevent_clear(&first);
-	patternentry_addevent(self,	&first);
-}
-
-void patternentry_init_all(psy_audio_PatternEntry* self,
-	const psy_audio_PatternEvent* event,
-	psy_dsp_beat_t offset,
-	psy_dsp_beat_t delta,
-	psy_dsp_beat_t bpm,
-	uintptr_t track)	
-{
-	self->events = 0;
-	patternentry_addevent(self,	event);	
-	self->offset = offset;
-	self->delta = delta;
-	self->bpm = bpm;
-	self->track = track;
-}
-
-void patternentry_dispose(psy_audio_PatternEntry* self)
-{
-	psy_List* p;
-
-	for (p = self->events; p != 0; p = p->next) {
-		free(p->entry);
-	}
-	psy_list_free(self->events);
-	self->events = 0;
-}
-
-psy_audio_PatternEntry* patternentry_alloc(void)
-{
-	return (psy_audio_PatternEntry*) malloc(sizeof(psy_audio_PatternEntry));
-}
-
-psy_audio_PatternEntry* patternentry_allocinit(void)
-{
-	psy_audio_PatternEntry* rv;
-	
-	rv = patternentry_alloc();
-	if (rv) {
-		patternentry_init(rv);
-	}
-	return rv;
-}
-
-psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
-{
-	psy_audio_PatternEntry* rv;
-	if (entry) {
-		psy_List* p;
-		rv = patternentry_alloc();
-		rv->bpm = entry->bpm;
-		rv->delta = entry->delta;
-		rv->offset = entry->offset;
-		rv->track = entry->track;
-		rv->events = 0;
-		for (p = entry->events; p != 0; p = p->next) {
-			psy_audio_PatternEvent* copy;
-
-			copy = (psy_audio_PatternEvent*)
-				malloc(sizeof(psy_audio_PatternEvent));
-			*copy = *((psy_audio_PatternEvent*)p->entry);
-			psy_list_append(&rv->events, copy);
-		}		
-	} else {
-		rv = 0;
-	}
-	return rv;
-}
-
-psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry* self)
-{	
-	return (psy_audio_PatternEvent*)(self->events->entry);
-}
-
-const psy_audio_PatternEvent* patternentry_front_const(
-	const psy_audio_PatternEntry* self)
-{
-	return (const psy_audio_PatternEvent*)(self->events->entry);
-}
-
-void patternentry_addevent(psy_audio_PatternEntry* self,
-	const psy_audio_PatternEvent* event)
-{
-	psy_audio_PatternEvent* copy;
-
-	copy = (psy_audio_PatternEvent*)malloc(sizeof(psy_audio_PatternEvent));
-	*copy = *event;
-	psy_list_append(&self->events, copy);
-}
-
-
 void pattern_init(psy_audio_Pattern* self)
 {
 	self->events = 0;
@@ -459,9 +361,4 @@ void pattern_setmaxsongtracks(psy_audio_Pattern* self, uintptr_t num)
 uintptr_t pattern_maxsongtracks(psy_audio_Pattern* self)
 {
 	return self->maxsongtracks;
-}
-
-psy_audio_PatternEntry* psy_audio_patternnode_entry(PatternNode* self)
-{
-	return (psy_audio_PatternEntry*) self->entry;
 }

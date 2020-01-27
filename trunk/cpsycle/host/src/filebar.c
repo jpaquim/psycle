@@ -19,8 +19,9 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(filebar_base(self), parent);	
 	psy_ui_component_enablealign(filebar_base(self));
 	psy_ui_component_setalignexpand(filebar_base(self), psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->header, filebar_base(self));
-	psy_ui_label_settext(&self->header,	"Song  ");
+	psy_ui_label_init(&self->header, filebar_base(self));	
+	psy_ui_label_settext(&self->header,	"Song  ");	
+	self->header.component.debugflag = 65;
 	psy_ui_button_init(&self->newbutton, filebar_base(self));
 	psy_ui_button_settext(&self->newbutton,
 		workspace_translate(workspace, "new"));

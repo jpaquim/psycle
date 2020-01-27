@@ -5,6 +5,7 @@
 
 #include "buffercontext.h"
 #include <rms.h>
+#include <math.h>
 
 void psy_audio_buffercontext_init(psy_audio_BufferContext* self,
 	psy_List* events,
@@ -36,7 +37,32 @@ uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext* self)
 	return self->numtracks;
 }
 
-float psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext* self)
+psy_dsp_amp_t psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext* self)
 {
 	return self->rmsvol ? psy_dsp_rmsvol_value(self->rmsvol) : 0.f;
+}
+
+psy_dsp_amp_t psy_audio_buffercontext_volumedisplay(psy_audio_BufferContext* self)
+{
+	return psy_audio_buffercontext_rmsscale(self,
+		psy_audio_buffercontext_rmsvolume(self));
+}
+
+psy_dsp_amp_t psy_audio_buffercontext_rmsscale(psy_audio_BufferContext* self,
+	psy_dsp_amp_t rms_volume)
+{
+	psy_dsp_amp_t temp;
+
+	temp = rms_volume;
+	if (temp == 0.f) {
+		return 0.f;
+	}
+	if (self->output->range == PSY_DSP_AMP_RANGE_NATIVE) {
+		temp /= 32767;
+	}
+	temp = 50.0f * (float) log10(temp) + 100.f;
+	if (temp > 97) {
+		temp = 97;
+	}
+	return (temp > 0) ? temp / (psy_dsp_amp_t)97.f : (psy_dsp_amp_t)0.f;
 }

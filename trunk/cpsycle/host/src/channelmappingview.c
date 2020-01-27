@@ -37,7 +37,7 @@ void pinedit_drawpinsockets(PinEdit* self, psy_ui_Graphics* g)
 	machine = machines_at(&self->workspace->song->machines, self->wire.src);
 	if (machine) {
 		machine = machines_at(&self->workspace->song->machines, self->wire.dst);
-		numsrcpins = machine->vtable->numoutputs(machine);
+		numsrcpins = psy_audio_machine_numoutputs(machine);
 		if (machine) {
 			uintptr_t p;
 			psy_ui_Rectangle r;
@@ -49,7 +49,7 @@ void pinedit_drawpinsockets(PinEdit* self, psy_ui_Graphics* g)
 
 			size = psy_ui_component_size(&self->component);
 			centerx = (size.width - 100) / 2;
-			numdstpins = machine->vtable->numinputs(machine);
+			numdstpins = psy_audio_machine_numinputs(machine);
 			psy_ui_setcolor(g, 0x00CACACA);
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_settextcolor(g, 0x00CACACA);

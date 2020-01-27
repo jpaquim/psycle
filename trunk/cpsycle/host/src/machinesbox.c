@@ -90,8 +90,8 @@ void InsertSlot(MachinesBox* self, int slot, psy_audio_Machine* machine)
 
 void insertmachine(MachinesBox* self, int slot, psy_audio_Machine* machine)
 {	
-	if (CheckMachineMode(self, machine) && machine->vtable->info(machine) && 
-			machine->vtable->info(machine)->ShortName) {
+	if (CheckMachineMode(self, machine) && psy_audio_machine_info(machine) &&
+			psy_audio_machine_info(machine)->ShortName) {
 		InsertSlot(self, slot, machine);
 	}	
 }
@@ -102,14 +102,14 @@ int CheckMachineMode(MachinesBox* self, psy_audio_Machine* machine)
 		return 0;
 	}
 	if (self->mode == MACHINEBOX_FX && 
-			machine->vtable->mode(machine) == MACHMODE_GENERATOR) {
+		psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
 		return 0;
 	}
 	if (self->mode == MACHINEBOX_GENERATOR &&
-			machine->vtable->mode(machine) == MACHMODE_FX) {
+		psy_audio_machine_mode(machine) == MACHMODE_FX) {
 		return 0;
 	}
-	if (machine->vtable->mode(machine) == MACHMODE_MASTER) {
+	if (psy_audio_machine_mode(machine) == MACHMODE_MASTER) {
 		return 0;
 	}
 	return 1;
@@ -203,8 +203,9 @@ void MachinesBoxClone(MachinesBox* self)
 						selection[i]);
 					machine = machines_at(self->machines, slot);
 					if (machine != srcmachine) {
-						psy_audio_Machine* clone = 
-							srcmachine->vtable->clone(srcmachine);
+						psy_audio_Machine* clone;
+
+						clone = psy_audio_machine_clone(srcmachine);
 						if (clone) {
 							machines_insert(self->machines, slot, clone);
 						}

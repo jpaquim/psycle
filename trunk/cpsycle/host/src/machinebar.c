@@ -132,8 +132,8 @@ void BuildMachineBox(MachineBar* self)
 
 int insertmachine(MachineBar* self, size_t slot, psy_audio_Machine* machine)
 {			
-	if (slot != MASTER_INDEX &&
-			machine->vtable->info(machine) && machine->vtable->info(machine)->ShortName) {
+	if (slot != MASTER_INDEX && psy_audio_machine_info(machine) &&
+			psy_audio_machine_info(machine)->ShortName) {
 		intptr_t comboboxindex;
 
 		char buffer[128];

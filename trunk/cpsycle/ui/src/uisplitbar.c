@@ -5,12 +5,6 @@
 
 #include "uisplitbar.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <commctrl.h>
-
 static void splitbar_onmousedown(psy_ui_SplitBar*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void splitbar_onmousemove(psy_ui_SplitBar*, psy_ui_Component* sender,

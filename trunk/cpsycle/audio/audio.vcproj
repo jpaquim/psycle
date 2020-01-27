@@ -851,6 +851,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\patternentry.c"
+				>
+			</File>
+			<File
 				RelativePath="src\patternevent.c"
 				>
 				<FileConfiguration
@@ -1563,6 +1567,10 @@
 			</File>
 			<File
 				RelativePath="src\pattern.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternentry.h"
 				>
 			</File>
 			<File

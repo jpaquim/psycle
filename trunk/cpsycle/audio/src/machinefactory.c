@@ -155,10 +155,10 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_VstPlugin));
 			if (plugin) {
 				psy_audio_vstplugin_init((psy_audio_VstPlugin*)plugin, self->machinecallback, path);
-				if (plugin->vtable->info(plugin)) {
+				if (psy_audio_machine_info(plugin)) {
 					rv = plugin;
 				} else {
-					plugin->vtable->dispose(plugin);
+					psy_audio_machine_dispose(plugin);
 					free(plugin);
 				}
 			} else {
@@ -174,10 +174,10 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			if (plugin) {
 				psy_audio_plugin_init((psy_audio_Plugin*)plugin,
 					self->machinecallback, path);
-				if (plugin->vtable->info(plugin)) {
+				if (psy_audio_machine_info(plugin)) {
 					rv = plugin;
 				} else {
-					plugin->vtable->dispose(plugin);
+					psy_audio_machine_dispose(plugin);
 					free(plugin);
 				}
 			} else {
@@ -192,10 +192,10 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LuaPlugin));
 			if (plugin) {
 				psy_audio_luaplugin_init((psy_audio_LuaPlugin*)plugin, self->machinecallback, path);
-				if (plugin->vtable->info(plugin)) {
+				if (psy_audio_machine_info(plugin)) {
 					rv = plugin;
 				} else {
-					plugin->vtable->dispose(plugin);
+					psy_audio_machine_dispose(plugin);
 					free(plugin);
 				}
 			} else {
@@ -214,7 +214,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			machineproxy_init(proxy, rv);
 			rv = &proxy->machine;
 		} else {
-			rv->vtable->dispose(rv);
+			machine_dispose(rv);
 			free(rv);
 			rv = 0;
 		}		

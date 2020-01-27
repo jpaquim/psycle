@@ -81,9 +81,9 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	psy_signal_connect(&self->component.signal_timer, self, OnTimer);
 	psy_ui_component_resize(&self->component, 800, 400);
 	if (self->machine) {
-		self->numparams = self->machine->vtable->numparameters(self->machine);
+		self->numparams = psy_audio_machine_numparameters(self->machine);
 		self->numparametercols =
-			self->machine->vtable->numparametercols(self->machine);
+			psy_audio_machine_numparametercols(self->machine);
 		if (self->numparametercols > 0) {
 			self->numrows = self->numparams / self->numparametercols;
 		} else {
@@ -122,8 +122,8 @@ void OnDraw(ParamView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 		uintptr_t col = 0;
 		uintptr_t param;		
 
-		self->numparams = self->machine->vtable->numparameters(self->machine);
-		self->numparametercols = self->machine->vtable->numparametercols(self->machine);
+		self->numparams = psy_audio_machine_numparameters(self->machine);
+		self->numparametercols = psy_audio_machine_numparametercols(self->machine);
 
 		if (self->numparams > 0 && self->numparametercols > 0) {
 			self->numrows = self->numparams / self->numparametercols;						
@@ -146,7 +146,7 @@ void DrawBackground(ParamView* self, psy_ui_Graphics* g)
 
 void DrawParam(ParamView* self, psy_ui_Graphics* g, uintptr_t par, uintptr_t row, uintptr_t col)
 {	
-	switch (self->machine->vtable->parametertype(self->machine, par)) {
+	switch (psy_audio_machine_parametertype(self->machine, par)) {
 		case 1:
 			DrawHeader(self, g, par, row, col);
 		break;
@@ -341,7 +341,7 @@ void DrawLevel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t r
 	cellsize(self, &width, &height);		
 	skin_blitpart(g, &mixer, left + slider.destwidth, 
 		slider.destheight - vuoff.destheight, &vuoff);			
-	value =	(self->machine->vtable->parametervalue(self->machine, param) / 65535.f);	
+	value =	(psy_audio_machine_parametervalue(self->machine, param) / 65535.f);
 	vuonheight = (int)(vuon.srcheight * value);
 	vuon.srcy += (vuon.srcheight - vuonheight);
 	vuon.srcheight = vuonheight;
@@ -453,8 +453,8 @@ void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		int cellheight;
 
 		if (self->machine) {
-			self->numparams = self->machine->vtable->numparameters(self->machine);
-			self->numparametercols = self->machine->vtable->numparametercols(self->machine);
+			self->numparams = psy_audio_machine_numparameters(self->machine);
+			self->numparametercols = psy_audio_machine_numparametercols(self->machine);
 			if (self->numparametercols > 0) {
 				self->numrows = self->numparams / self->numparametercols;
 			} else {

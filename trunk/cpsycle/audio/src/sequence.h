@@ -7,6 +7,7 @@
 #include "patterns.h"
 #include <list.h>
 #include <signal.h>
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,10 +44,30 @@ typedef struct {
 void sequencetrackiterator_inc(SequenceTrackIterator*);
 void sequencetrackiterator_incentry(SequenceTrackIterator*);
 void sequencetrackiterator_decentry(SequenceTrackIterator*);
-PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator*);
-SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator*);
-psy_audio_PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator*);
-psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator*);
+
+INLINE PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator* self)
+{
+	return self->patternnode;
+}
+
+INLINE SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator* self)
+{
+	return self->tracknode ? (SequenceEntry*)self->tracknode->entry : 0;
+}
+
+INLINE psy_audio_PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
+{
+	return self->patternnode ? (psy_audio_PatternEntry*)(self->patternnode)->entry : 0;
+}
+
+INLINE psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
+{
+	return sequencetrackiterator_patternentry(self)
+		? sequencetrackiterator_entry(self)->offset +
+		sequencetrackiterator_patternentry(self)->offset
+		: 0.f;
+}
+
 
 typedef psy_List SequenceTracks;
 
@@ -76,7 +97,6 @@ void sequenceselection_dispose(SequenceSelection*);
 void sequenceselection_seteditposition(SequenceSelection*, SequencePosition);
 SequencePosition sequenceselection_editposition(SequenceSelection*);
 void sequenceselection_setsequence(SequenceSelection*, struct psy_audio_Sequence*);
-
 
 typedef struct psy_audio_Sequence {
 	SequenceTracks* tracks;

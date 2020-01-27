@@ -6,6 +6,7 @@
 #include "uicomponent.h"
 #include "uialigner.h"
 #include "uiapp.h"
+#include "uiimpfactory.h"
 
 #include "uiwincomponentimp.h"
 #include "uiwinapp.h"
@@ -184,27 +185,40 @@ int psy_ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent
 	if (!parent) {
 		app.main = self;
 	}
-	imp = (psy_ui_win_ComponentImp*) malloc(sizeof(psy_ui_win_ComponentImp));
-	self->imp = (psy_ui_ComponentImp*)imp;
-	psy_ui_win_componentimp_init(imp,
-		self,
-		parent ? parent->imp : 0,		
+	imp = psy_ui_win_componentimp_allocinit(self,
+		parent ? parent->imp : 0,
 		classname,
 		x, y, width, height,
 		dwStyle,
 		usecommand);
+	self->imp = (psy_ui_ComponentImp*) imp;
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
 	return imp->hwnd == 0;
 }
 
-void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
-{		
-	psy_ui_WinApp* winapp;
+void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_ComponentImp* imp)
+{
+	vtable_init();
+	self->vtable = &vtable;
+	if (!parent) {
+		app.main = self;
+	}
+	self->imp = imp;
+	psy_ui_component_init_base(self);
+	psy_ui_component_init_signals(self);
+}
 
-	winapp = (psy_ui_WinApp*) app.platform;
-	psy_ui_win32_component_init(self, parent, winapp->componentclass,
-		0, 0, 90, 90, WS_CHILDWINDOW | WS_VISIBLE, 0);	
+void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
+{	
+	vtable_init();
+	self->vtable = &vtable;
+	if (!parent) {
+		app.main = self;
+	}
+	self->imp = psy_ui_impfactory_allocinit_componentimp(self, parent);
+	psy_ui_component_init_base(self);
+	psy_ui_component_init_signals(self);	
 }
 
 void dispose(psy_ui_Component* self)
@@ -762,12 +776,13 @@ static void dev_setcursor(psy_ui_ComponentImp* self, psy_ui_CursorStyle cursorst
 static void dev_starttimer(psy_ui_ComponentImp* self, unsigned int id, unsigned int interval) { }
 static void dev_stoptimer(psy_ui_ComponentImp* self, unsigned int id) { }
 static void dev_seticonressource(psy_ui_ComponentImp* self, int ressourceid) { }
-static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self, psy_ui_Font* font) { psy_ui_TextMetric tm; return tm; }
+static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self, psy_ui_Font* font) { psy_ui_TextMetric tm; memset(&tm, 0, sizeof(tm));  return tm; }
 static psy_ui_Size dev_textsize(psy_ui_ComponentImp* self, const char* text, psy_ui_Font* font) { psy_ui_Size rv = { 0, 0 }; return rv; }
 static void dev_setbackgroundcolor(psy_ui_ComponentImp* self, uint32_t color) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }
 static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }
+static void* dev_platform(psy_ui_ComponentImp* self) { return (void*) self; }
 
 static psy_ui_ComponentImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -821,6 +836,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_settitle = dev_settitle;
 		imp_vtable.dev_setfocus = dev_setfocus;
 		imp_vtable.dev_hasfocus = dev_hasfocus;
+		imp_vtable.dev_platform = dev_platform;
 	}
 }
 

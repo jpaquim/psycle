@@ -18,7 +18,7 @@ void songbar_init(SongBar* self, psy_ui_Component* parent, Workspace* workspace)
 	octavebar_init(&self->octavebar, &self->component, workspace);	
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));		
+		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setalign(		
 		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT, &margin));

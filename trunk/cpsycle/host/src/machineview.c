@@ -1511,11 +1511,8 @@ void machinewireview_onmachineworked(MachineWireView* self,
 		MachineUi* machineui;
 
 		machineui = machineuis_at(self, slot);
-		if (machineui) {		
-			machineui->volumedisplay = psy_audio_buffercontext_rmsvolume(bc);
-			if (bc->output->range == PSY_DSP_AMP_RANGE_NATIVE) {
-				machineui->volumedisplay /= 32767;
-			}
+		if (machineui) {								
+			machineui->volumedisplay = psy_audio_buffercontext_volumedisplay(bc);			
 		}
 	}
 }
