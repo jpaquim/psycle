@@ -42,7 +42,7 @@ typedef struct {
 typedef struct {
 	int active;
 	psy_dsp_beat_t rowspeed; // line delay
-} psy_audio_SequenceRowDelay;
+} psy_audio_SequencerRowDelay;
 
 typedef struct {
 	psy_audio_Sequence* sequence;
@@ -56,14 +56,15 @@ typedef struct {
 	psy_dsp_beat_t position;	
 	psy_dsp_beat_t window;	
 	psy_List* currtracks;	
-	psy_List* events;	
+	psy_List* events;
+	psy_List* globalevents;
 	psy_List* delayedevents;
 	psy_List* inputevents;	
 	psy_audio_SequencerPlayMode mode;	
 	int looping;	
 	psy_dsp_beat_t linetickcount;
 	psy_audio_SequencerJump jump;
-	psy_audio_SequenceRowDelay rowdelay;
+	psy_audio_SequencerRowDelay rowdelay;
 	psy_audio_SequencerLoop loop;
 	psy_Table lastmachine;
 	psy_dsp_beat_t playbeatloopstart;
@@ -81,10 +82,14 @@ void psy_audio_sequencer_frametick(psy_audio_Sequencer*,
 	uintptr_t numsamples);
 void psy_audio_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_beat_t offset);
+uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*, uintptr_t amount);
 void psy_audio_sequencer_onlinetick(psy_audio_Sequencer*);
 void psy_audio_sequencer_setposition(psy_audio_Sequencer*,
 	psy_dsp_beat_t position);
-psy_dsp_beat_t psy_audio_sequencer_position(psy_audio_Sequencer*);
+INLINE psy_dsp_beat_t psy_audio_sequencer_position(psy_audio_Sequencer* self)
+{
+	return self->position;
+}
 void psy_audio_sequencer_start(psy_audio_Sequencer*);
 void psy_audio_sequencer_stop(psy_audio_Sequencer*);
 void psy_audio_sequencer_setnumplaybeats(psy_audio_Sequencer*,
@@ -99,14 +104,24 @@ void psy_audio_sequencer_setsamplerate(psy_audio_Sequencer*,
 	unsigned int samplerate);
 unsigned int psy_audio_sequencer_samplerate(psy_audio_Sequencer*);
 void psy_audio_sequencer_setbpm(psy_audio_Sequencer*, psy_dsp_beat_t bpm);
-psy_dsp_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer*);
+
+INLINE psy_dsp_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer* self)
+{
+	return self->bpm;
+}
+
 void psy_audio_sequencer_setlpb(psy_audio_Sequencer*, uintptr_t lpb);
 uintptr_t psy_audio_sequencer_lpb(psy_audio_Sequencer*);
 unsigned int psy_audio_sequencer_frames(psy_audio_Sequencer*, psy_dsp_beat_t
 	offset);
 psy_dsp_beat_t psy_audio_sequencer_frametooffset(psy_audio_Sequencer*, uintptr_t
 	numsamples);
-int psy_audio_sequencer_playing(psy_audio_Sequencer*);
+
+INLINE int psy_audio_sequencer_playing(psy_audio_Sequencer* self)
+{
+	return self->playing;
+}
+
 void psy_audio_sequencer_addinputevent(psy_audio_Sequencer*,
 	const psy_audio_PatternEvent*, uintptr_t track);
 void psy_audio_sequencer_recordinputevent(psy_audio_Sequencer*,

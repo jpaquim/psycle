@@ -26,8 +26,9 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_label_setstyle(&self->header, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
 	ui_listbox_init(&self->greetz, &self->component);	
-	psy_ui_groupbox_init(&self->groupbox, &self->component);
-	psy_ui_groupbox_settext(&self->groupbox, "Thanks!");
+	psy_ui_label_init(&self->thanks, &self->component);
+	psy_ui_label_setstyle(&self->thanks, WS_CHILD | WS_VISIBLE | SS_LEFT);
+	psy_ui_label_settext(&self->thanks, "Thanks!");
 	psy_ui_button_init(&self->original, &self->component);
 	psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
 	psy_signal_connect(&self->original.signal_clicked, self, OnOriginal);	
@@ -147,7 +148,7 @@ void OnOriginal(Greet* self, psy_ui_Component* sender)
 void OnSize(Greet* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
 	psy_ui_component_setposition(&self->header.component, 0, 10, size->width, 40);
-	psy_ui_component_setposition(&self->groupbox.component, 0, 45, size->width - 10, size->height - 75);
+	psy_ui_component_setposition(&self->thanks.component, 0, 45, size->width - 10, 15);
 	psy_ui_component_setposition(&self->greetz.component, 10, 65, size->width - 30, size->height - 100);
 	psy_ui_component_setposition(&self->original.component, 0, size->height - 25, size->width, 20);
 }

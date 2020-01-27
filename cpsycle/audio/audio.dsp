@@ -331,6 +331,10 @@ SOURCE=.\src\pattern.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\patternentry.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\patternevent.c
 # End Source File
 # Begin Source File
@@ -686,6 +690,10 @@ SOURCE=.\src\mixer.h
 # Begin Source File
 
 SOURCE=.\src\pattern.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\patternentry.h
 # End Source File
 # Begin Source File
 

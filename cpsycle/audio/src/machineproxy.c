@@ -90,7 +90,7 @@ static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int c
 	char txt[512];
 	proxy->crashed = 1;	
 		
-	if (proxy->client->vtable->info(proxy->client)) {
+	if (psy_audio_machine_info(proxy->client)) {
 		psy_snprintf(txt, 512, "%u: %s crashed \n\r %s",
 			(unsigned int)proxy->client->vtable->slot(proxy->client),
 			proxy->client->vtable->info(proxy->client)->ShortName, msg);
@@ -234,7 +234,7 @@ void machineproxy_work(psy_audio_MachineProxy* self, psy_audio_BufferContext* bc
 		__try
 #endif				
 		{
-			self->client->vtable->work(self->client, bc);
+			psy_audio_machine_work(self->client, bc);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "work", GetExceptionCode(),
@@ -251,7 +251,7 @@ void machineproxy_generateaudio(psy_audio_MachineProxy* self, psy_audio_BufferCo
 		__try
 #endif		
 		{
-			self->client->vtable->generateaudio(self->client, bc);
+			psy_audio_machine_generateaudio(self->client, bc);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "generateaudio", GetExceptionCode(),
@@ -269,7 +269,7 @@ void machineproxy_seqtick(psy_audio_MachineProxy* self, uintptr_t channel,
 		__try
 #endif		
 		{
-			self->client->vtable->seqtick(self->client, channel, event);
+			psy_audio_machine_seqtick(self->client, channel, event);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "seqtick", GetExceptionCode(),
@@ -287,7 +287,7 @@ void machineproxy_sequencertick(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			self->client->vtable->sequencertick(self->client);
+			psy_audio_machine_sequencertick(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "sequencertick", GetExceptionCode(),
@@ -305,7 +305,7 @@ void machineproxy_sequencerlinetick(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			self->client->vtable->sequencerlinetick(self->client);
+			psy_audio_machine_sequencerlinetick(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "sequencerlinetick", GetExceptionCode(),
@@ -323,7 +323,7 @@ void machineproxy_stop(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			self->client->vtable->stop(self->client);
+			psy_audio_machine_stop(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "stop", GetExceptionCode(),
@@ -341,7 +341,7 @@ void machineproxy_dispose(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			self->client->vtable->dispose(self->client);
+			psy_audio_machine_dispose(self->client);
 			free(self->client);
 			self->machinedispose(&self->machine);
 			
@@ -363,7 +363,7 @@ int machineproxy_mode(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->mode(self->client);
+			rv = psy_audio_machine_mode(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "mode", GetExceptionCode(),
@@ -383,7 +383,7 @@ uintptr_t machineproxy_numinputs(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->numinputs(self->client);
+			rv = psy_audio_machine_numinputs(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "numinputs", GetExceptionCode(),
@@ -403,7 +403,7 @@ uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->numoutputs(self->client);
+			rv = psy_audio_machine_numoutputs(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "numoutputs",  GetExceptionCode(),
@@ -422,7 +422,7 @@ void machineproxy_parametertweak(psy_audio_MachineProxy* self, uintptr_t param,
 		__try
 #endif		
 		{
-			self->client->vtable->parametertweak(self->client, param, val);
+			psy_audio_machine_parametertweak(self->client, param, val);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametertweak", GetExceptionCode(),
@@ -440,7 +440,7 @@ void machineproxy_patterntweak(psy_audio_MachineProxy* self, uintptr_t param,
 		__try
 #endif		
 		{
-			self->client->vtable->patterntweak(self->client, param, val);
+			psy_audio_machine_patterntweak(self->client, param, val);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametertweak", GetExceptionCode(),
@@ -461,7 +461,7 @@ int machineproxy_describevalue(psy_audio_MachineProxy* self, char* txt, uintptr_
 		__try
 #endif		
 		{
-			rv = self->client->vtable->describevalue(self->client, txt, param, value);
+			rv = psy_audio_machine_describevalue(self->client, txt, param, value);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "describevalue", GetExceptionCode(),
@@ -481,7 +481,7 @@ int machineproxy_parametervalue(psy_audio_MachineProxy* self, uintptr_t param)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->parametervalue(self->client, param);
+			rv = psy_audio_machine_parametervalue(self->client, param);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametervalue", GetExceptionCode(),
@@ -499,7 +499,7 @@ void machineproxy_setpanning(psy_audio_MachineProxy* self, psy_dsp_amp_t panning
 		__try
 #endif		
 		{
-			self->client->vtable->setpanning(self->client, panning);
+			psy_audio_machine_setpanning(self->client, panning);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "setpanning", GetExceptionCode(),
@@ -536,7 +536,7 @@ void machineproxy_mute(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			self->client->vtable->mute(self->client);
+			psy_audio_machine_mute(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "mute", GetExceptionCode(),
@@ -590,7 +590,7 @@ void machineproxy_bypass(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			self->client->vtable->bypass(self->client);
+			psy_audio_machine_bypass(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "bypass", GetExceptionCode(),
@@ -646,7 +646,7 @@ const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->info(self->client);
+			rv = psy_audio_machine_info(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "info", GetExceptionCode(),
@@ -666,7 +666,7 @@ uintptr_t machineproxy_numparameters(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->numparameters(self->client);
+			rv = psy_audio_machine_numparameters(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "numparameters", GetExceptionCode(),
@@ -686,7 +686,7 @@ uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->numparametercols(self->client);
+			rv = psy_audio_machine_numparametercols(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "numparametercols", GetExceptionCode(),
@@ -706,7 +706,7 @@ int machineproxy_paramviewoptions(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->paramviewoptions(self->client);
+			rv = psy_audio_machine_paramviewoptions(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "paramviewoptions", GetExceptionCode(),
@@ -726,7 +726,7 @@ void machineproxy_loadspecific(psy_audio_MachineProxy* self,
 		__try
 #endif		
 		{
-			self->client->vtable->loadspecific(self->client, songfile, slot);
+			psy_audio_machine_loadspecific(self->client, songfile, slot);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self,"loadspecific",  GetExceptionCode(),
@@ -744,7 +744,7 @@ void machineproxy_savespecific(psy_audio_MachineProxy* self,
 		__try
 #endif		
 		{
-			self->client->vtable->savespecific(self->client, songfile, slot);
+			psy_audio_machine_savespecific(self->client, songfile, slot);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self,"loadspecific",  GetExceptionCode(),
@@ -763,7 +763,7 @@ unsigned int machineproxy_samplerate(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->samplerate(self->client);
+			rv = psy_audio_machine_samplerate(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "samplerate", GetExceptionCode(),
@@ -783,7 +783,7 @@ unsigned int machineproxy_bpm(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->bpm(self->client);
+			rv = psy_audio_machine_bpm(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "bpm", GetExceptionCode(),
@@ -803,7 +803,7 @@ psy_dsp_beat_t machineproxy_beatspersample(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->beatspersample(self->client);
+			rv = psy_audio_machine_beatspersample(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "beatspersample", GetExceptionCode(),
@@ -823,7 +823,7 @@ psy_dsp_beat_t machineproxy_currbeatsperline(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->currbeatsperline(self->client);
+			rv = psy_audio_machine_currbeatsperline(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "currbeatsperline", GetExceptionCode(),
@@ -843,7 +843,7 @@ struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->samples(self->client);
+			rv = psy_audio_machine_samples(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "samples", GetExceptionCode(),
@@ -863,7 +863,7 @@ struct psy_audio_Machines* machineproxy_machines(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{ 
-			rv = self->client->vtable->machines(self->client);
+			rv = psy_audio_machine_machines(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "machines", GetExceptionCode(),
@@ -901,7 +901,7 @@ void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
 		__try
 #endif		
 		{ 
-			self->client->vtable->output(self->client, text);
+			psy_audio_machine_output(self->client, text);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "output", GetExceptionCode(),
@@ -919,7 +919,7 @@ void machineproxy_setcallback(psy_audio_MachineProxy* self, MachineCallback call
 #endif		
 		{ 
             
-			self->client->vtable->setcallback(self->client, callback);
+			psy_audio_machine_setcallback(self->client, callback);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "setcallback", GetExceptionCode(),
@@ -938,7 +938,7 @@ uintptr_t machineproxy_slot(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{ 
-			rv = self->client->vtable->slot(self->client);
+			rv = psy_audio_machine_slot(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "slot", GetExceptionCode(),
@@ -975,7 +975,7 @@ int machineproxy_parametertype(psy_audio_MachineProxy* self, uintptr_t param)
 		__try
 #endif		
 		{ 
-			rv = self->client->vtable->parametertype(self->client, param);			
+			rv = psy_audio_machine_parametertype(self->client, param);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametertype", GetExceptionCode(),
@@ -994,7 +994,7 @@ void machineproxy_parameterrange(psy_audio_MachineProxy* self, uintptr_t param, 
 		__try
 #endif		
 		{ 
-			self->client->vtable->parameterrange(self->client, param, minval,
+			psy_audio_machine_parameterrange(self->client, param, minval,
 				maxval);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
@@ -1015,7 +1015,7 @@ int machineproxy_parameterlabel(psy_audio_MachineProxy* self, char* txt, uintptr
 		__try
 #endif		
 		{ 
-			rv = self->client->vtable->parameterlabel(self->client, txt, param);
+			rv = psy_audio_machine_parameterlabel(self->client, txt, param);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parameterlabel", GetExceptionCode(),
@@ -1037,7 +1037,7 @@ int machineproxy_parametername(psy_audio_MachineProxy* self, char* txt, uintptr_
 		__try
 #endif		
 		{ 
-			rv = self->client->vtable->parametername(self->client, txt, param);			
+			rv = psy_audio_machine_parametername(self->client, txt, param);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "parametername", GetExceptionCode(),
@@ -1058,7 +1058,7 @@ int machineproxy_haseditor(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{ 
-			rv = self->client->vtable->haseditor(self->client);
+			rv = psy_audio_machine_haseditor(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "haseditor", GetExceptionCode(),
@@ -1076,7 +1076,7 @@ void machineproxy_seteditorhandle(psy_audio_MachineProxy* self, void* handle)
 		__try
 #endif		
 		{ 
-			self->client->vtable->seteditorhandle(self->client, handle);
+			psy_audio_machine_seteditorhandle(self->client, handle);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "seteditorhandle", GetExceptionCode(),
@@ -1149,7 +1149,7 @@ void machineproxy_seteditname(psy_audio_MachineProxy* self, const char* name)
 		__try
 #endif		
 		{
-			self->client->vtable->seteditname(self->client, name);
+			psy_audio_machine_seteditname(self->client, name);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "seteditname", GetExceptionCode(),
@@ -1168,7 +1168,7 @@ psy_audio_Buffer* machineproxy_buffermemory(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->buffermemory(self->client);
+			rv = psy_audio_machine_buffermemory(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "buffermemory", GetExceptionCode(),
@@ -1188,7 +1188,7 @@ uintptr_t machineproxy_buffermemorysize(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->buffermemorysize(self->client);
+			rv = psy_audio_machine_buffermemorysize(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "buffermemorysize", GetExceptionCode(),
@@ -1206,7 +1206,7 @@ if (self->crashed == 0) {
 		__try
 #endif		
 		{
-			self->client->vtable->setbuffermemorysize(self->client, size);
+			psy_audio_machine_setbuffermemorysize(self->client, size);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "setbuffermemorysize",
@@ -1225,7 +1225,7 @@ psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy* self)
 		__try
 #endif		
 		{
-			rv = self->client->vtable->amprange(self->client);
+			rv = psy_audio_machine_amprange(self->client);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "amprange", GetExceptionCode(),
@@ -1245,7 +1245,7 @@ psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy* self, psy_List* e
 		__try
 #endif		
 		{
-			rv = self->client->vtable->sequencerinsert(self->client, events);
+			rv = psy_audio_machine_sequencerinsert(self->client, events);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "sequencerinsert", GetExceptionCode(),

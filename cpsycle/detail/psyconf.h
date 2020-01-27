@@ -5,13 +5,17 @@
 #define psy_CONF_H
 
 #include "cpu.h"
+#include "os.h"
 
 #if defined(DIVERSALIS__CPU__X86__SSE)
 #define PSYCLE_USE_SSE	/* enable support for SSE */
 #endif
 
-#define PSYCLE_APP_DIR "C:\\Programme\\Psycle"
-#define PSYCLE_USER_DIR "C:\\Programme\\Psycle"
+// #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle"
+// #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle"
+
+#define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
+#define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 
 #define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"
 #define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "\\Samples"
@@ -21,5 +25,7 @@
 #define PSYCLE_VSTS64_DEFAULT_DIR PSYCLE_USER_DIR "\\Vst64Plugins"
 #define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "\\Skins"
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "\\Docs"
+
+/* #define PSYCLE_LOG_WORKEVENTS */
 
 #endif psy_CONF_H

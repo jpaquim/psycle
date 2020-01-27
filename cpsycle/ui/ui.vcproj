@@ -536,6 +536,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\uiimpfactory.c"
+				>
+			</File>
+			<File
 				RelativePath="src\uiknob.c"
 				>
 				<FileConfiguration
@@ -852,7 +856,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uiwincheckboximp.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uiwincomponentimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwinfolderdialogimp.c"
 				>
 			</File>
 			<File
@@ -861,6 +873,18 @@
 			</File>
 			<File
 				RelativePath=".\src\uiwingraphicsimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwinlabelimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwinopendialogimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwinsavedialogimp.c"
 				>
 			</File>
 			<Filter
@@ -940,6 +964,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uiimpfactory.h"
+					>
+				</File>
+				<File
 					RelativePath="src\uiknob.h"
 					>
 				</File>
@@ -1004,7 +1032,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uiwincheckboximp.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\uiwincomponentimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwinfolderdialogimp.h"
 					>
 				</File>
 				<File
@@ -1013,6 +1049,18 @@
 				</File>
 				<File
 					RelativePath=".\src\uiwingraphicsimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwinlabelimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwinopendialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwinsavedialogimp.h"
 					>
 				</File>
 			</Filter>

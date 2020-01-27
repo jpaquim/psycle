@@ -4,9 +4,10 @@
 #ifndef psy_audio_PATTERN_H
 #define psy_audio_PATTERN_H
 
-#include "patternevent.h"
-#include <list.h>
+#include "patternentry.h"
+
 #include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,42 +28,6 @@ void patterneditposition_init(PatternEditPosition*);
 /// compares two pattern edit positions, if they are equal
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs);
-
-/// an event with additional position and track information
-typedef struct {
-	psy_List* events;
-	/// position in beat unit
-	psy_dsp_beat_t offset;
-	/// sound driver callback event position
-	psy_dsp_beat_t delta;
-	/// current sequencer bpm
-	psy_dsp_beat_t bpm;
-	/// the tracker channel
-	uintptr_t track; 
-} psy_audio_PatternEntry;
-
-void patternentry_init(psy_audio_PatternEntry*);
-void patternentry_init_all(psy_audio_PatternEntry*,
-	const psy_audio_PatternEvent* event,
-	psy_dsp_beat_t offset,
-	psy_dsp_beat_t delta,
-	psy_dsp_beat_t bpm,
-	uintptr_t track);
-void patternentry_dispose(psy_audio_PatternEntry*);
-
-psy_audio_PatternEntry* patternentry_alloc(void);
-psy_audio_PatternEntry* patternentry_allocinit(void);
-psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry*);
-psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry*);
-const psy_audio_PatternEvent* patternentry_front_const(const psy_audio_PatternEntry*);
-void patternentry_addevent(psy_audio_PatternEntry*,
-	const psy_audio_PatternEvent*);
-
-
-/// a list of event entries ordered by position in beat unit
-typedef psy_List PatternNode;
-
-psy_audio_PatternEntry* psy_audio_patternnode_entry(PatternNode*);
 
 typedef struct {
 	PatternNode* events;

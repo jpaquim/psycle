@@ -192,7 +192,7 @@ void mixer_init(psy_audio_Mixer* self, MachineCallback callback)
 	psy_table_init(&self->inputs);
 	psy_table_init(&self->sends);
 	psy_table_init(&self->returns);
-	machines = base->vtable->machines(base);
+	machines = psy_audio_machine_machines(base);
 	psy_signal_connect(&machines->connections.signal_connected, self,
 		onconnected);
 	psy_signal_connect(&machines->connections.signal_disconnected, self,
@@ -200,7 +200,7 @@ void mixer_init(psy_audio_Mixer* self, MachineCallback callback)
 	psy_dsp_rmsvol_init(&self->masterrmsvol);
 	mixerchannel_init(&self->master, 0);	
 	self->slot = 65535;
-	base->vtable->seteditname(base, "Mixer");
+	psy_audio_machine_seteditname(base, "Mixer");
 }
 
 void mixer_dispose(psy_audio_Mixer* self)
@@ -381,7 +381,7 @@ void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
 			
 			psy_audio_buffercontext_init(&bc, events, channel->buffer, channel->buffer,
 				amount, 16, 0);
-			channel->fx->vtable->work(channel->fx, &bc);
+			psy_audio_machine_work(channel->fx, &bc);
 		//	buffer_pan(fxbuffer, fx->panning(fx), amount);
 		//	buffer_pan(fxbuffer, channel->panning, amount);
 			psy_signal_emit(&channel->fx->signal_worked, channel->fx, 2, 
@@ -445,10 +445,11 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 	if (inputslot == (int)self->slot) {		
 		if (outputslot != (int)self->slot) {
 			psy_audio_Machine* machine;
-			psy_audio_Machines* machines = base->vtable->machines(base);
-
+			psy_audio_Machines* machines;
+			
+			machines = psy_audio_machine_machines(base);
 			machine = machines_at(machines, outputslot);
-			if (machine->vtable->mode(machine) == MACHMODE_GENERATOR) {
+			if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
 				psy_audio_MixerChannel* channel;
 
 				channel = mixerchannel_allocinit(outputslot);
@@ -467,10 +468,11 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections, u
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	if (inputslot == (int)self->slot) {
 		psy_audio_Machine* machine;
-		psy_audio_Machines* machines = base->vtable->machines(base);
-
+		psy_audio_Machines* machines;
+		
+		machines = psy_audio_machine_machines(base);
 		machine = machines_at(machines, outputslot);
-		if (machine->vtable->mode(machine) == MACHMODE_GENERATOR) {
+		if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
 			psy_TableIterator it;
 			int c = 0;
 
@@ -574,7 +576,7 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
 				? 4.0f
 				: ((value&0x3FF)/256.0f);
 		} else {			
-			base->vtable->setpanning(base, (value >> 1) / 256.f);
+			psy_audio_machine_setpanning(base, (value >> 1) / 256.f);
 		}
 	} else
 	// Inputs
@@ -857,9 +859,9 @@ int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 			{
 				psy_audio_Machine* machine;		
 				
-				machine = machines_at(base->vtable->machines(base), channel);
-				if (machine && machine->vtable->info(machine)) {
-					strcpy(txt, machine->vtable->info(machine)->ShortName);
+				machine = machines_at(psy_audio_machine_machines(base), channel);
+				if (machine && psy_audio_machine_info(machine)) {
+					strcpy(txt, psy_audio_machine_info(machine)->ShortName);
 					return 1;
 				}				
 			}
@@ -909,10 +911,10 @@ int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 			if (row == 0) {
 				psy_audio_Machine* machine;		
 				
-				machine = machines_at(base->vtable->machines(base),
+				machine = machines_at(psy_audio_machine_machines(base),
 					channel->inputslot);
-				if (machine && machine->vtable->info(machine)) {
-					strcpy(txt, machine->vtable->info(machine)->ShortName);					
+				if (machine && psy_audio_machine_info(machine)) {
+					strcpy(txt, psy_audio_machine_info(machine)->ShortName);
 				}
 				return 1;								
 			} else
@@ -975,10 +977,10 @@ int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 			if (row == 0) {
 				psy_audio_Machine* fx;		
 				
-				fx = machines_at(base->vtable->machines(base),
+				fx = machines_at(psy_audio_machine_machines(base),
 					channel->fxslot);
-				if (fx && fx->vtable->info(fx)) {
-					strcpy(txt, fx->vtable->info(fx)->ShortName);					
+				if (fx && psy_audio_machine_info(fx)) {
+					strcpy(txt, psy_audio_machine_info(fx)->ShortName);
 				}
 				return 1;
 			}
@@ -1145,8 +1147,9 @@ psy_audio_WireSocketEntry* wiresocketentry(psy_audio_Mixer* self, uintptr_t inpu
 	psy_audio_MachineSockets* sockets;
 	WireSocket* p;
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
-	psy_audio_Machines* machines = base->vtable->machines(base);
-
+	psy_audio_Machines* machines;
+	
+	machines = psy_audio_machine_machines(base);
 	sockets = connections_at(&machines->connections, self->slot);
 	if (sockets) {
 		uintptr_t c = 0;

@@ -184,9 +184,19 @@ void machine_dispose(psy_audio_Machine*);
 int machine_supports(psy_audio_Machine*, int option);
 
 // vtable calls
+INLINE void psy_audio_machine_dispose(psy_audio_Machine* self)
+{
+	self->vtable->dispose(self);
+}
+
 INLINE const psy_audio_MachineInfo* psy_audio_machine_info(psy_audio_Machine* self)
 {
 	return self->vtable->info(self);
+}
+
+INLINE psy_audio_Machine* psy_audio_machine_clone(psy_audio_Machine* self)
+{
+	return self->vtable->clone(self);
 }
 
 INLINE psy_audio_Buffer* psy_audio_machine_mix(psy_audio_Machine* self, uintptr_t slot,
@@ -211,6 +221,11 @@ INLINE void psy_audio_machine_seqtick(psy_audio_Machine* self, uintptr_t channel
 	const psy_audio_PatternEvent* event)
 {
 	self->vtable->seqtick(self, channel, event);
+}
+
+INLINE void psy_audio_machine_stop(psy_audio_Machine* self)
+{
+	self->vtable->stop(self);
 }
 
 INLINE void psy_audio_machine_sequencertick(psy_audio_Machine* self)
@@ -254,15 +269,30 @@ INLINE int psy_audio_machine_parametervalue(psy_audio_Machine* self, uintptr_t p
 	return self->vtable->parametervalue(self, param);
 }
 
+INLINE int psy_audio_machine_paramviewoptions(psy_audio_Machine* self)
+{
+	return self->vtable->paramviewoptions(self);
+}
+
 INLINE void psy_audio_machine_parameterrange(struct psy_audio_Machine* self,
 	uintptr_t param, int* minval, int* maxval)
 {
 	self->vtable->parameterrange(self, param, minval, maxval);
 }
 
+INLINE uintptr_t psy_audio_machine_parametertype(psy_audio_Machine* self, uintptr_t param)
+{
+	return self->vtable->parametertype(self, param);
+}
+
 INLINE uintptr_t psy_audio_machine_numparameters(psy_audio_Machine* self)
 {
 	return self->vtable->numparameters(self);
+}
+
+INLINE uintptr_t psy_audio_machine_numparametercols(psy_audio_Machine* self)
+{
+	return self->vtable->numparametercols(self);
 }
 
 INLINE int psy_audio_machine_parameterlabel(psy_audio_Machine* self, char* txt, uintptr_t param)
@@ -413,6 +443,11 @@ INLINE psy_audio_Buffer* psy_audio_machine_buffermemory(psy_audio_Machine* self)
 INLINE uintptr_t psy_audio_machine_buffermemorysize(psy_audio_Machine* self)
 {
 	return self->vtable->buffermemorysize(self);
+}
+
+INLINE void psy_audio_machine_setbuffermemorysize(psy_audio_Machine* self, uintptr_t size)
+{
+	self->vtable->setbuffermemorysize(self, size);
 }
 
 INLINE psy_dsp_amp_range_t psy_audio_machine_amprange(psy_audio_Machine* self)

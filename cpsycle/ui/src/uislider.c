@@ -8,12 +8,6 @@
 #include "uiapp.h"
 #include "../../detail/portable.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <commctrl.h>
-
 static void psy_ui_slider_initsignals(psy_ui_Slider*);
 static void psy_ui_slider_disposesignals(psy_ui_Slider*);
 static void psy_ui_slider_ondraw(psy_ui_Slider*, psy_ui_Graphics*);

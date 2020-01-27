@@ -107,7 +107,9 @@ void master_dispose(psy_audio_Master* self)
 void parametertweak(psy_audio_Master* self, uintptr_t param, int value)
 {
 	if (param == 0) {
-		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines;
+		
+		machines = psy_audio_machine_machines(&self->machine);
 		if (machines) {			
 			machines_setvolume(machines,
 				floatparamvalue(value) * floatparamvalue(value) * 4.f);
@@ -116,8 +118,9 @@ void parametertweak(psy_audio_Master* self, uintptr_t param, int value)
 		psy_audio_MachineSockets* sockets;
 		WireSocket* p;
 		uintptr_t c = 1;
-		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines;
 		
+		machines = psy_audio_machine_machines(&self->machine);		
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
@@ -146,8 +149,9 @@ int describevalue(psy_audio_Master* self, char* txt, uintptr_t param, int value)
 		psy_audio_MachineSockets* sockets;
 		WireSocket* p;
 		uintptr_t c = 1;
-		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines;
 		
+		machines = psy_audio_machine_machines(&self->machine);
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
@@ -179,8 +183,9 @@ int parametervalue(psy_audio_Master* self, uintptr_t param)
 		psy_audio_MachineSockets* sockets;
 		WireSocket* input_socket;
 		uintptr_t c = 1;
-		psy_audio_Machines* machines = self->machine.vtable->machines(&self->machine);
+		psy_audio_Machines* machines;
 		
+		machines = psy_audio_machine_machines(&self->machine);
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
 			for (input_socket = sockets->inputs; input_socket != 0 && c != param;

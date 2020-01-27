@@ -84,7 +84,7 @@ void machines_free(psy_audio_Machines* self)
 		psy_audio_Machine* machine;
 
 		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-		machine->vtable->dispose(machine);
+		psy_audio_machine_dispose(machine);
 		free(machine);
 	}
 }
@@ -141,7 +141,7 @@ void machines_remove(psy_audio_Machines* self, uintptr_t slot)
 	machine = machines_at(self, slot);
 	if (machine) {
 		machines_erase(self, slot);		
-		machine->vtable->dispose(machine);
+		psy_audio_machine_dispose(machine);
 		free(machine);		
 	}
 }
@@ -167,7 +167,7 @@ uintptr_t machines_append(psy_audio_Machines* self, psy_audio_Machine* machine)
 	uintptr_t slot;
 		
 	slot = machines_freeslot(self,
-		(machine->vtable->mode(machine) == MACHMODE_FX) ? 0x40 : 0);	
+		(psy_audio_machine_mode(machine) == MACHMODE_FX) ? 0x40 : 0);
 	psy_table_insert(&self->slots, slot, machine);
 	machine->vtable->setslot(machine, slot);
 	psy_signal_emit(&self->signal_insert, self, 1, slot);
@@ -364,7 +364,7 @@ void machines_preparebuffers(psy_audio_Machines* self, MachineList* path,
 		if (machine) {
 			psy_table_insert(&self->outputbuffers, psy_tableiterator_key(&it),
 				psy_list_append(&self->buffers, machines_nextbuffer(
-					self, machine->vtable->numoutputs(machine)))->entry);
+					self, psy_audio_machine_numoutputs(machine)))->entry);
 		}
 	}	
 }

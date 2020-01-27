@@ -4,12 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "uinotebook.h"
-#include "uiwincomponentimp.h"
-
-static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-{
-	return (psy_ui_win_ComponentImp*)self->imp;
-}
 
 static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
 static void align_split(psy_ui_Notebook* self, int x);
@@ -203,9 +197,8 @@ void align_split(psy_ui_Notebook* self, int x) {
 	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
 		psy_ui_Component* component;
 		
-		component = (psy_ui_Component*)p->entry;		
-		if (psy_ui_win_component_details(component)->hwnd ==
-				psy_ui_win_component_details(&self->splitbar)->hwnd) {
+		component = (psy_ui_Component*) p->entry;
+		if (component == &self->splitbar) {
 			psy_ui_component_setposition(&self->splitbar,
 				x, 0, 4, size.height);
 		} else {

@@ -35,6 +35,15 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	uint32_t dwStyle,
 	int usecommand);
 
+psy_ui_win_ComponentImp* psy_ui_win_componentimp_alloc(void);
+psy_ui_win_ComponentImp* psy_ui_win_componentimp_allocinit(
+	struct psy_ui_Component* component,
+	psy_ui_ComponentImp* parent,
+	const char* classname,
+	int x, int y, int width, int height,
+	uint32_t dwStyle,
+	int usecommand);
+
 #ifdef __cplusplus
 }
 #endif

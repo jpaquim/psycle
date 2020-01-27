@@ -204,11 +204,13 @@ typedef struct psy_ui_Component {
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
 
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
+void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent, struct psy_ui_ComponentImp*);
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
 int psy_ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	const char* classname, int x, int y, int width, int height,
 	uint32_t dwStyle, int usecommand);
+
 INLINE void psy_ui_component_show(psy_ui_Component* self)
 {
 	self->vtable->show(self);
@@ -322,8 +324,9 @@ typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolor)(struct psy_ui_Comp
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_hasfocus)(struct psy_ui_ComponentImp*);
+typedef void* (*psy_ui_fp_componentimp_dev_platform)(struct psy_ui_ComponentImp*);
 
-typedef struct {
+typedef struct {	
 	psy_ui_fp_componentimp_dev_dispose dev_dispose;
 	psy_ui_fp_componentimp_dev_destroy dev_destroy;
 	psy_ui_fp_componentimp_dev_show dev_show;
@@ -370,6 +373,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_settitle dev_settitle;
 	psy_ui_fp_componentimp_dev_setfocus dev_setfocus;
 	psy_ui_fp_componentimp_dev_hasfocus dev_hasfocus;
+	psy_ui_fp_componentimp_dev_platform dev_platform;
 } psy_ui_ComponentImpVTable;
 
 typedef struct psy_ui_ComponentImp {

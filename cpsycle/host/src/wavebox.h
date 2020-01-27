@@ -15,6 +15,7 @@ typedef struct {
 	uintptr_t selectionend;
 	float zoomleft;
 	float zoomright;
+	float offsetstep;	
 	int dragmode;
 	int dragoffset;
 } WaveBox;

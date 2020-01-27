@@ -157,6 +157,10 @@ SOURCE=.\src\uiimage.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiimpfactory.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiknob.c
 # End Source File
 # Begin Source File
@@ -221,7 +225,15 @@ SOURCE=.\src\uiwinbitmapimp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwincheckboximp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwincomponentimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinfolderdialogimp.c
 # End Source File
 # Begin Source File
 
@@ -230,6 +242,18 @@ SOURCE=.\src\uiwinfontimp.c
 # Begin Source File
 
 SOURCE=.\src\uiwingraphicsimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinlabelimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinopendialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinsavedialogimp.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -309,6 +333,10 @@ SOURCE=.\src\uiimage.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiimpfactory.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiknob.h
 # End Source File
 # Begin Source File
@@ -373,7 +401,15 @@ SOURCE=.\src\uiwinbitmapimp.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwincheckboximp.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwincomponentimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinfolderdialogimp.h
 # End Source File
 # Begin Source File
 
@@ -382,6 +418,18 @@ SOURCE=.\src\uiwinfontimp.h
 # Begin Source File
 
 SOURCE=.\src\uiwingraphicsimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinlabelimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinopendialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinsavedialogimp.h
 # End Source File
 # End Group
 # End Target

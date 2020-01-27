@@ -100,8 +100,8 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, MachineCallback callbac
 	}
 	self->plugininfo = machineinfo_allocinit();
 	psyclescript_machineinfo(&self->script, self->plugininfo);
-	self->custommachine.machine.vtable->seteditname(
-		&self->custommachine.machine, self->plugininfo->ShortName);
+	psy_audio_machine_seteditname(&self->custommachine.machine,
+		self->plugininfo->ShortName);
 }
 
 void dispose(psy_audio_LuaPlugin* self)

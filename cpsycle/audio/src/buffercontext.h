@@ -30,7 +30,10 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext*,
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext*);
 uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext*);
 uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext*);
-float psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext*);
+psy_dsp_amp_t psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext*);
+psy_dsp_amp_t psy_audio_buffercontext_volumedisplay(psy_audio_BufferContext*);
+psy_dsp_amp_t psy_audio_buffercontext_rmsscale(psy_audio_BufferContext*,
+	psy_dsp_amp_t rms_volume);
 
 #ifdef __cplusplus
 }

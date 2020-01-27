@@ -98,7 +98,7 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 	}
 	psy_ui_setrectangle(&r, 1, 5, size.width - 1, size.height - 5);
 	if (self->clip) {
-		psy_ui_drawsolidrectangle(g, r, 0x00FF0000);
+		psy_ui_drawsolidrectangle(g, r, 0x000000FF);
 	}	
 	psy_ui_setcolor(g, 0x00333333);
 	psy_ui_drawrectangle(g, r);

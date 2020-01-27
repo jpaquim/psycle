@@ -516,29 +516,6 @@ SequencePosition sequence_positionfromid(psy_audio_Sequence* self, int id)
 	return rv;
 }
 
-PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator* self)
-{
-	return self->patternnode;
-}
-
-SequenceEntry* sequencetrackiterator_entry(SequenceTrackIterator* self)
-{
-	return self->tracknode ? (SequenceEntry*) self->tracknode->entry : 0;
-}
-
-psy_audio_PatternEntry* sequencetrackiterator_patternentry(SequenceTrackIterator* self)
-{
-	return self->patternnode ? (psy_audio_PatternEntry*)(self->patternnode)->entry : 0;
-}
-
-psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
-{	
-	return sequencetrackiterator_patternentry(self)
-		? sequencetrackiterator_entry(self)->offset +
-		  sequencetrackiterator_patternentry(self)->offset
-		: 0.f;	
-}
-
 psy_List* sequence_appendtrack(psy_audio_Sequence* self, SequenceTrack* track)
 {	
 	return psy_list_append(&self->tracks, track);	
