@@ -26,25 +26,28 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 {
 	if (main) {
 		psy_List* p;
-		psy_List* q;
+		psy_List* q;		
 		
 		// merge
 		psy_ui_component_updatefont(main);
 		for (p = q = psy_ui_component_children(main, 1); p != 0; p = p->next) {
-			psy_ui_Component* child;
-			
-			child = (psy_ui_Component*)p->entry;
-			psy_ui_component_updatefont(child);
+			psy_ui_Component* child;			
+			child = (psy_ui_Component*) p->entry;		
+			psy_ui_component_updatefont(child);						
 		}
 		// align
+		psy_ui_component_align(main);
 		for (p = q; p != 0; p = p->next) {
 			psy_ui_Component* child;
 
-			child = (psy_ui_Component*)p->entry;							
-			psy_ui_component_align(child);
+			child = (psy_ui_Component*)p->entry;
+			if ((!psy_ui_component_parent(child) ||
+				(psy_ui_component_parent(child) && !psy_ui_component_parent(child)->alignchildren))
+				&& child->alignchildren) {
+				psy_ui_component_align(child);
+			}
 		}
-		psy_list_free(q);
-		psy_ui_component_align(main);
+		psy_list_free(q);		
 	}
 }
 
@@ -216,7 +219,7 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
 	if (!parent) {
 		app.main = self;
 	}
-	self->imp = psy_ui_impfactory_allocinit_componentimp(self, parent);
+	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(&app), self, parent);
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);	
 }
@@ -844,4 +847,10 @@ void psy_ui_componentimp_init(psy_ui_ComponentImp* self)
 {
 	imp_vtable_init();	
 	self->vtable = &imp_vtable;
+	psy_signal_init(&self->signal_command);
+}
+
+void psy_ui_componentimp_dispose(psy_ui_ComponentImp* self)
+{
+	psy_signal_dispose(&self->signal_command);
 }

@@ -255,7 +255,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settext(&self->namelabel, "Instrument Name");
-	psy_ui_edit_init(&self->nameedit, &self->component, 0);		
+	psy_ui_edit_init(&self->nameedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
 	psy_signal_connect(&self->nameedit.signal_change, self,
 		OnEditInstrumentName);
@@ -290,7 +290,7 @@ void OnEditInstrumentName(InstrumentHeaderView* self, psy_ui_Edit* sender)
 		instrument_setname(self->instrument, psy_ui_edit_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int) index, instrument_name(self->instrument));
-		ui_listbox_setstring(&self->view->instrumentsbox.instrumentlist, text,
+		psy_ui_listbox_settext(&self->view->instrumentsbox.instrumentlist, text,
 			index);		
 	}
 }

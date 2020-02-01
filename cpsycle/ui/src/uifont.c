@@ -8,6 +8,7 @@
 #include "uiwinfontimp.h"
 #include <stdlib.h>
 #include <math.h>
+#include "../../detail/portable.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -79,10 +80,7 @@ void psy_ui_font_imp_init(psy_ui_FontImp* self)
 	self->vtable = &imp_vtable;
 }
 
-
-//
 // fontinfo
-
 static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf);
 static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR* szFaceName, int iDeciPtHeight,
     int iDeciPtWidth, int iAttributes, BOOL fLogRes);
@@ -96,6 +94,38 @@ void psy_ui_fontinfo_init(psy_ui_FontInfo* self, const char* family,
     lf = ui_fontinfo_make(hdc, (TCHAR*)family, height, 0, 0, 0);
     *self = psy_ui_fontinfo(lf);
     ReleaseDC(NULL, hdc);
+}
+
+void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
+{	
+	char buffer[256];
+	char* token;
+	int c = 0;
+
+	psy_snprintf(buffer, 256, "%s", text);
+	memset(self, 0, sizeof(psy_ui_FontInfo));
+	token = strtok(buffer, ";");
+	while (token) {
+		if (c == 0) {			
+			memcpy(self->lfFaceName, token, max(strlen(token), 32));
+			self->lfFaceName[31] = '\0';
+		} else
+		if (c == 1) {
+			self->lfHeight = atoi(token);
+		} else {
+			break;
+		}
+		++c;
+		token = strtok(NULL, ";");
+	}
+}
+
+const char* psy_ui_fontinfo_string(psy_ui_FontInfo* self)
+{
+	static char text[256];
+	
+	psy_snprintf(text, 256, "%s;%d", self->lfFaceName, self->lfHeight);
+	return text;
 }
 
 psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)

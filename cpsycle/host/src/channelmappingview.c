@@ -5,6 +5,7 @@
 
 #include "channelmappingview.h"
 #include <stdio.h>
+#include <string.h>
 #include "../../detail/portable.h"
 
 static void pinedit_ondraw(PinEdit*, psy_ui_Component* sender, psy_ui_Graphics*);

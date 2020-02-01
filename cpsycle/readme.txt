@@ -9,19 +9,18 @@ mfc to win32 and wrapped behind an own layer. In a next step this layer will
 be used to add xt motif. The version is written in c with c++ parts, in which
 some plugin and driver apis are written in. 
 
-Structure of the host:
+Structure of the host
 
-audio:      machines, patterns, instruments, sequence, player,
-            song import/export, ...			
-container   list, hashtable, properties, signals
-dsp			mostly buffer operations, adsr, notetab defines
-detail		global header defines
-driver		mme, mmemidi, directx	
-file		file/dir routines
-host		graphical psycle front end
-lua			script engine used since psycle 1.10
-ui			wrapped win32 calls
-
+audio           machines, patterns, instruments, sequence, player,
+                song import/export, ...			
+container       list, hashtable, properties, signals
+dsp             buffer operations, adsr, notetab defines
+detail          global header defines
+driver          mme, mmemidi, directx	
+file            file/dir routines
+host            graphical psycle front end
+lua             script engine used since psycle 1.10
+ui              wrapped win32 calls
 
 Compiling
 
@@ -33,7 +32,11 @@ VC 2008, 2017 or 2019 set Gy- to Gy in each project (settings code
 generation). For the 64Bit Configuration adjust the Output File Target
 in Project Linker settings for the host project. Set the Output File
 Target to the project standard. Install also mfc and atl support
-(resource includes need it) and install on older platforms the Direct
+(resource includes need it) and install on older platforms the DirectX
 SDK and add the include/lib sdk directories (Tools/Options/Directories).
+
+
+
+
 
 

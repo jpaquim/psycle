@@ -33,12 +33,12 @@ static void parameterrange(psy_audio_Plugin*, uintptr_t param, int* minval,
 	int* maxval);
 static int parameterlabel(psy_audio_Plugin*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Plugin*, char* txt, uintptr_t param);
-static void parametertweak(psy_audio_Plugin*, uintptr_t param, int val);
+static void parametertweak(psy_audio_Plugin*, uintptr_t param, float val);
 static int parameterlabel(psy_audio_Plugin*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Plugin*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_Plugin*, char* txt, uintptr_t param,
 	int value);
-static int parametervalue(psy_audio_Plugin*, uintptr_t param);
+static float parametervalue(psy_audio_Plugin*, uintptr_t param);
 static void dispose(psy_audio_Plugin*);
 static uintptr_t numinputs(psy_audio_Plugin*);
 static uintptr_t numoutputs(psy_audio_Plugin*);
@@ -230,19 +230,12 @@ psy_audio_MachineInfo* info(psy_audio_Plugin* self)
 	return self->plugininfo;
 }
 
-void parametertweak(psy_audio_Plugin* self, uintptr_t param, int val)
+void parametertweak(psy_audio_Plugin* self, uintptr_t param, float val)
 {	
-	if (param < numparameters(self)) {
-		int minval;
-		int maxval;
-		char text[60];
-
-		psy_audio_machine_parameterrange(psy_audio_plugin_base(self), param,
-			&minval, &maxval);		
-		mi_parametertweak(self->mi, (int) param, val);
-		psy_snprintf(text, 60, "param %d, %d val, %d minval, %d maxval\n",
-			param, val, minval, maxval);
-		// OutputDebugString(text);
+	if (param < numparameters(self)) {		
+		mi_parametertweak(self->mi, (int) param,
+			machine_parametervalue_scaled(psy_audio_plugin_base(self), param,
+			val));
 	}
 }
 
@@ -252,9 +245,10 @@ int describevalue(psy_audio_Plugin* self, char* txt, uintptr_t param,
 	return mi_describevalue(self->mi, txt, (int) param, value);
 }
 
-int parametervalue(psy_audio_Plugin* self, uintptr_t param)
+float parametervalue(psy_audio_Plugin* self, uintptr_t param)
 {
-	return mi_val(self->mi, (int) param);
+	return machine_parametervalue_normed(psy_audio_plugin_base(self), param,
+		mi_val(self->mi, (int) param));
 }
 
 uintptr_t numinputs(psy_audio_Plugin* self)
@@ -282,18 +276,19 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	// size of whole structure
 	psyfile_read(songfile->file, &size, sizeof(size));
 	if(size) {
-		uint32_t count;
+		uint32_t numparams;
 		uint32_t i;
 
 		// size of vars
-		psyfile_read(songfile->file, &count, sizeof(count));
-		for (i = 0; i < count; i++) {
+		psyfile_read(songfile->file, &numparams, sizeof(numparams));
+		for (i = 0; i < numparams; ++i) {
 			int temp;
 			
 			psyfile_read(songfile->file, &temp, sizeof(temp));			
-			psy_audio_machine_parametertweak(psy_audio_plugin_base(self), i, temp);			
+			psy_audio_machine_parametertweak(psy_audio_plugin_base(self), i,
+				machine_parametervalue_normed(psy_audio_plugin_base(self), i, temp));			
 		}
-		size -= sizeof(count) + sizeof(int)*count;
+		size -= sizeof(numparams) + sizeof(int) * numparams;
 		if(size) {
 			unsigned int size2 = 0;
 			unsigned char* pData;
@@ -324,7 +319,8 @@ void savespecific(psy_audio_Plugin* self, struct psy_audio_SongFile* songfile,
 	for (i = 0; i < count; ++i) {
 		int32_t temp;
 		
-		temp = psy_audio_machine_parametervalue(psy_audio_plugin_base(self), i);
+		temp = machine_parametervalue_scaled(psy_audio_plugin_base(self), 
+			i, psy_audio_machine_parametervalue(psy_audio_plugin_base(self), i));
 		psyfile_write(songfile->file, &temp, sizeof temp);
 	}
 	if (size2) {

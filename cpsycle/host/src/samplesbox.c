@@ -36,14 +36,14 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_settext(&self->header, "Groups first sample");
 	psy_ui_component_setmargin(&self->header.component, &margin);
-	ui_listbox_init(&self->subsamplelist, &self->component);
+	psy_ui_listbox_init(&self->subsamplelist, &self->component);
 	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_resize(&self->subsamplelist.component, 0, 100);
 	psy_ui_label_init(&self->group, &self->component);
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_settext(&self->group, "Group samples");
 	psy_ui_component_setmargin(&self->group.component, &margin);
-	ui_listbox_init(&self->samplelist, &self->component);	
+	psy_ui_listbox_init(&self->samplelist, &self->component);	
 	psy_ui_component_setalign(&self->samplelist.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->samplelist.component, &margin);
 	samplesbox_setsamples(self, samples, instruments);	
@@ -63,7 +63,7 @@ void samplesbox_buildsamplelist(SamplesBox* self)
 	uintptr_t slot = 0;
 	char text[40];
 	
-	ui_listbox_clear(&self->samplelist);	
+	psy_ui_listbox_clear(&self->samplelist);	
 	for ( ; slot < 256; ++slot) {
 		psy_audio_Sample* sample;
 
@@ -75,7 +75,7 @@ void samplesbox_buildsamplelist(SamplesBox* self)
 		} else {
 			psy_snprintf(text, 20, "%02X:%s", slot, "");
 		}
-		ui_listbox_addstring(&self->samplelist, text);
+		psy_ui_listbox_addtext(&self->samplelist, text);
 	}	
 }
 
@@ -84,7 +84,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot)
 	uintptr_t subslot = 0;
 	char text[40];
 	
-	ui_listbox_clear(&self->subsamplelist);
+	psy_ui_listbox_clear(&self->subsamplelist);
 	for ( ; subslot < 256; ++subslot) {
 		psy_audio_Sample* sample;		
 
@@ -98,7 +98,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot)
 		} else {
 			psy_snprintf(text, 20, "%02X:%s", subslot, "");
 		}
-		ui_listbox_addstring(&self->subsamplelist, text);
+		psy_ui_listbox_addtext(&self->subsamplelist, text);
 	}	
 }
 
@@ -106,7 +106,7 @@ void samplesbox_onsamplelistchanged(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
 	samplesbox_buildsubsamplelist(self, slot);
-	ui_listbox_setcursel(&self->subsamplelist, 0);
+	psy_ui_listbox_setcursel(&self->subsamplelist, 0);
 	if (self->instruments && self->changeinstrumentslot) {
 		instruments_changeslot(self->instruments, slot);
 	}	
@@ -124,7 +124,7 @@ void samplesbox_oninstrumentinsert(SamplesBox* self, psy_ui_Component* sender,
 {
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, slot);
-	ui_listbox_setcursel(&self->samplelist, slot);
+	psy_ui_listbox_setcursel(&self->samplelist, slot);
 }
 
 void samplesbox_onsampleinsert(SamplesBox* self, psy_ui_Component* sender,
@@ -152,13 +152,13 @@ void samplesbox_oninstrumentremoved(SamplesBox* self, psy_ui_Component* sender,
 {
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, slot);
-	ui_listbox_setcursel(&self->samplelist, slot);
+	psy_ui_listbox_setcursel(&self->samplelist, slot);
 }
 
 void samplesbox_oninstrumentsslotchanged(SamplesBox* self, psy_audio_Instrument* sender,
 	int slot)
 {
-	ui_listbox_setcursel(&self->samplelist, slot);
+	psy_ui_listbox_setcursel(&self->samplelist, slot);
 	if ((uintptr_t)slot != samplesbox_selected(self).slot) {
 		samplesbox_buildsubsamplelist(self, slot);
 	}		
@@ -191,7 +191,7 @@ SampleIndex samplesbox_selected(SamplesBox* self)
 {
 	SampleIndex rv;
 
-	rv.slot = ui_listbox_cursel(&self->samplelist);
-	rv.subslot = ui_listbox_cursel(&self->subsamplelist);
+	rv.slot = psy_ui_listbox_cursel(&self->samplelist);
+	rv.subslot = psy_ui_listbox_cursel(&self->subsamplelist);
 	return rv;	
 }

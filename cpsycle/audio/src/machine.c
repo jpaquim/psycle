@@ -47,15 +47,15 @@ static void parameterrange(psy_audio_Machine* self, uintptr_t numparam, int* min
 	*minval = 0;
 	*maxval = 0;
 }
-static void parametertweak(psy_audio_Machine* self, uintptr_t param, int val) { }
-static void patterntweak(psy_audio_Machine* self, uintptr_t param, int val)
+static void parametertweak(psy_audio_Machine* self, uintptr_t param, float val) { }
+static void patterntweak(psy_audio_Machine* self, uintptr_t param, float val)
 {
 	psy_audio_machine_parametertweak(self, param, val);
 }
 static int parameterlabel(psy_audio_Machine* self, char* txt, uintptr_t param) { txt[0] = '\0'; return 0; }
 static int parametername(psy_audio_Machine* self, char* txt, uintptr_t param) { txt[0] = '\0'; return 0; }
 static int describevalue(psy_audio_Machine* self, char* txt, uintptr_t param, int value) { return 0; }
-static int parametervalue(psy_audio_Machine* self, uintptr_t param) { return 0; }
+static float parametervalue(psy_audio_Machine* self, uintptr_t param) { return 0.f; }
 static void setpanning(psy_audio_Machine* self, psy_dsp_amp_t panning) { }
 static psy_dsp_amp_t panning(psy_audio_Machine* self) { return (psy_dsp_amp_t) 0.5f; }
 static void mute(psy_audio_Machine* self) { }
@@ -262,29 +262,21 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 
 		ev = (psy_audio_PatternEvent*) p->entry;		
 		if (ev->note == NOTECOMMANDS_MIDICC) {
-			// only native plugins, vst handle it in vstplugin_work
-			psy_audio_Machine* dst;
-			int value;
+			// only native plugins, vst plugins handle tweaks in vstplugin_work
+			psy_audio_Machine* dst;			
 
 			dst = machines_at(psy_audio_machine_machines(self), ev->mach);
-			if (dst) {
-				value = (ev->cmd << 8) + ev->parameter;
-				psy_audio_machine_patterntweak(dst, ev->inst, value);
+			if (dst) {				
+				psy_audio_machine_patterntweak(self, ev->inst, 
+					machine_patternvalue_normed(self, ev->inst,
+						psy_audio_patternevent_tweakvalue(ev)));
 			}
 		} else
 		if (ev->note == NOTECOMMANDS_TWEAK) {
-			if (ev->inst < psy_audio_machine_numparameters(self)) {
-				int value;
-				int minval;
-				int maxval;
-				
-				value = (ev->cmd << 8) + ev->parameter;			
-				psy_audio_machine_parameterrange(self, ev->inst, &minval, &maxval);
-				value += minval;
-				if (value > maxval) {
-					value = maxval;
-				}
-				psy_audio_machine_patterntweak(self, ev->inst, value);
+			if (ev->inst < psy_audio_machine_numparameters(self)) {				
+				psy_audio_machine_patterntweak(self, ev->inst, 
+					machine_patternvalue_normed(self, ev->inst,
+						psy_audio_patternevent_tweakvalue(ev)));
 			}
 		} else {
 			if (ev->cmd == SET_PANNING) {
@@ -361,32 +353,35 @@ void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
-	uint32_t count;
+	uint32_t numparams;
 	uint32_t i;
-
-	psyfile_read(songfile->file, &size, sizeof(size)); // size of this part params to load	
-	psyfile_read(songfile->file, &count, sizeof(count)); // num params to load
-	for (i = 0; i < count; i++) {
+	
+	psyfile_read(songfile->file, &size, sizeof(size));	
+	psyfile_read(songfile->file, &numparams, sizeof(numparams));
+	for (i = 0; i < numparams; ++i) {
 		uint32_t temp;
+
 		psyfile_read(songfile->file, &temp, sizeof(temp));
-		psy_audio_machine_parametertweak(self, i, temp);
+		psy_audio_machine_parametertweak(self, i,
+			machine_parametervalue_normed(self, i, temp));
 	}
-	psyfile_skip(songfile->file, size - sizeof(count) - (count * sizeof(int)));
+	psyfile_skip(songfile->file, size - sizeof(numparams) - (numparams * sizeof(uint32_t)));
 }
 
 void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	uintptr_t slot)
-{
-	uint32_t i;
-	uint32_t count;
+{		
+	uint32_t numparams;
 	uint32_t size;
-	
-	count = (uint32_t) psy_audio_machine_numparameters(self);
-	size = sizeof(count) + (count * sizeof(int32_t));
+	uint32_t i;
+		
+	numparams = (uint32_t) psy_audio_machine_numparameters(self);
+	size = sizeof(numparams) + (numparams * sizeof(numparams));		
 	psyfile_write(songfile->file, &size, sizeof(size));
-	psyfile_write(songfile->file, &count, sizeof(count));
-	for (i = 0; i < count; ++i) {		
+	psyfile_write(songfile->file, &numparams, sizeof(numparams));
+	for (i = 0; i < numparams; ++i) {		
 		psyfile_write_int32(songfile->file, 
-			(int32_t) psy_audio_machine_parametervalue(self, i));
+			(int32_t) machine_parametervalue_scaled(self, i,
+				psy_audio_machine_parametervalue(self, i)));
 	}
 }

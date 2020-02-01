@@ -35,7 +35,7 @@ void playlisteditorbuttons_init(PlayListEditorButtons*, psy_ui_Component* parent
 
 typedef struct PlayListEditor {
 	psy_ui_Component component;
-	psy_ui_Listbox listbox;
+	psy_ui_ListBox listbox;
 	PlayListEditorButtons buttons;
 	psy_List* entries;
 	Workspace* workspace;

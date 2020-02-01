@@ -135,7 +135,7 @@ int psy_audio_sequencer_looping(psy_audio_Sequencer*);
 psy_audio_SequencerPlayMode psy_audio_sequencer_playmode(psy_audio_Sequencer*);
 psy_dsp_beat_t psy_audio_sequencer_beatspersample(psy_audio_Sequencer*);
 psy_dsp_beat_t psy_audio_sequencer_currbeatsperline(psy_audio_Sequencer*);
-void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, PatternNode*);
+void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, const PatternNode*);
 
 #ifdef __cplusplus
 }

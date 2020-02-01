@@ -19,8 +19,8 @@ typedef struct {
 	int lastlevel;
 	psy_Properties* selected;
 	psy_Properties* search;
-	psy_ui_Rectangle selrect;
-	int dirbutton;
+	psy_ui_Rectangle selrect;	
+	int button;
 	int dy;
 	int mx;
 	int my;

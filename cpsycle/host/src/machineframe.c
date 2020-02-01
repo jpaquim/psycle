@@ -165,7 +165,9 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 						psy_tableiterator_inc(&it)) {
 					psy_audio_machine_parametertweak(self->machine,
 						psy_tableiterator_key(&it),
-						(uintptr_t)psy_tableiterator_value(&it));
+						machine_parametervalue_normed(self->machine,
+							psy_tableiterator_key(&it),
+							(uintptr_t)psy_tableiterator_value(&it)));
 				}		
 				break;
 			}

@@ -24,18 +24,17 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->label_title, &self->component);
 	psy_ui_label_settext(&self->label_title, "Song Title");
-	psy_ui_edit_init(&self->edit_title, &self->component, 0);
+	psy_ui_edit_init(&self->edit_title, &self->component);
 	psy_signal_connect(&self->edit_title.signal_change, self,
 		songpropertiesview_ontitlechanged);
 	psy_ui_label_init(&self->label_credits, &self->component);
 	psy_ui_label_settext(&self->label_credits, "Credits");	
-	psy_ui_edit_init(&self->edit_credits, &self->component, 0);
+	psy_ui_edit_init(&self->edit_credits, &self->component);
 	psy_signal_connect(&self->edit_credits.signal_change, self,
 		songpropertiesview_oncreditschanged);
 	psy_ui_label_init(&self->label_comments, &self->component);
 	psy_ui_label_settext(&self->label_comments, "Comments");	
-	psy_ui_edit_init(&self->edit_comments, &self->component,
-		WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL);
+	psy_ui_edit_multiline_init(&self->edit_comments, &self->component);
 	psy_ui_component_resize(&self->edit_comments.component, 0, 200);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
 		songpropertiesview_oncommentschanged);

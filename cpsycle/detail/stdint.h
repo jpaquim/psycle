@@ -26,8 +26,8 @@
  *          PTRDIFF_MIN, PTRDIFF_MAX, SIG_ATOMIC_MIN, and SIG_ATOMIC_MAX
  *          to be 64-bit aware.
  */
- 
-#if !defined(_WIN32)
+
+#if !defined(_WIN32) || (_MSC_VER && (_MSC_VER > 1500))
 #include <stdint.h>
 #else 
 #ifndef _STDINT_H

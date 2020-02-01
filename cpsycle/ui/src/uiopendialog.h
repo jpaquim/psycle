@@ -6,6 +6,18 @@
 
 #include "uicomponent.h"
 
+// OpenDialog Device Interface
+// Bridge
+// Aim: avoid coupling to one platform (win32, xt/motif, etc)
+// Abstraction/Refined  psy_ui_OpenDialog
+// Implementor			psy_ui_OpenDialogImp
+// Concrete Implementor	psy_ui_win_OpenDialogImp
+//
+// psy_ui_OpenDialog <>-------- psy_ui_OpenDialogImp
+//     imp->dev_execute                     ^
+//     ...                                  |
+//                             psy_ui_win_OpenDialogImp
+
 #ifdef __cplusplus
 extern "C" {
 #endif

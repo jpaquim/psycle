@@ -378,9 +378,11 @@ typedef struct {
 
 typedef struct psy_ui_ComponentImp {
 	psy_ui_ComponentImpVTable* vtable;
+	psy_Signal signal_command;
 } psy_ui_ComponentImp;
 
 void psy_ui_componentimp_init(psy_ui_ComponentImp*);
+void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
 
 INLINE psy_ui_component_invalidate(psy_ui_Component* self)
 {

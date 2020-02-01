@@ -4,6 +4,8 @@
 #ifndef psy_ui_APP_H
 #define psy_ui_APP_H
 
+#include "../../detail/psyconf.h"
+#include "../../detail/psydef.h"
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
 #include "uidefaults.h"
@@ -20,6 +22,7 @@ typedef struct {
 	struct psy_ui_Component* main;
 	void* platform;
 	psy_ui_Defaults defaults;
+	struct psy_ui_ImpFactory* imp_factory;
 } psy_ui_App;
 
 extern psy_ui_App app;
@@ -29,6 +32,11 @@ void psy_ui_app_dispose(psy_ui_App*);
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
 int psy_ui_app_run(psy_ui_App*);
 void psy_ui_app_stop(psy_ui_App*);
+
+INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
+{
+	return self->imp_factory;
+}
 
 #ifdef __cplusplus
 }

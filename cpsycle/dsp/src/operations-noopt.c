@@ -123,21 +123,23 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 	#if !defined DIVERSALIS__CPU__X86
 		// just do nothing.. not crucial for other archs ?
 	#else
+		uint32_t const exponent_mask = 0x7f800000;
+		uint32_t exponent;
+		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
+		uint32_t not_nan_nor_infinity;
+
+		// exponent > 0 is 0 if denormalized, otherwise 1
+		uint32_t not_denormal;
 		union {
 			float sample;
 			uint32_t bits;
 		} u;
-		u.sample = sample;
-
-		uint32_t const exponent_mask(0x7f800000);
-		uint32_t const exponent(u.bits & exponent_mask);
-
+		u.sample = *sample;		
+		exponent = u.bits & exponent_mask;
 		// exponent < exponent_mask is 0 if NaN or Infinity, otherwise 1
-		uint32_t const not_nan_nor_infinity(exponent < exponent_mask);
-
+		not_nan_nor_infinity = exponent < exponent_mask;
 		// exponent > 0 is 0 if denormalized, otherwise 1
-		uint32_t const not_denormal(exponent > 0);
-
+		not_denormal = exponent > 0;
 		u.bits *= not_nan_nor_infinity & not_denormal;
 		*sample = u.sample;
 	#endif

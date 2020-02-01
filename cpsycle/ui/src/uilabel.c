@@ -4,7 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
+#include "uiapp.h"
 #include "uiimpfactory.h"
+
+extern psy_ui_App app;
 
 static void onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -22,7 +25,7 @@ static void vtable_init(psy_ui_Label* self)
 
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {  		
-	self->imp = psy_ui_impfactory_allocinit_labelimp(&self->component, parent);
+	self->imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(&app), &self->component, parent);
 	psy_ui_component_init_imp(psy_ui_label_base(self), parent,
 		&self->imp->component_imp);
 	vtable_init(self);

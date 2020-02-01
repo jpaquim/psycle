@@ -56,9 +56,9 @@ static int parametertype(psy_audio_Mixer*, uintptr_t param);
 static void parameterrange(psy_audio_Mixer*, uintptr_t param, int* minval, int* maxval);
 static int parameterlabel(psy_audio_Mixer*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Mixer*, char* txt, uintptr_t param);
-static void parametertweak(psy_audio_Mixer*, uintptr_t param, int value);
-static void patterntweak(psy_audio_Mixer* self, uintptr_t param, int val);
-static int parametervalue(psy_audio_Mixer*, uintptr_t param);
+static void parametertweak(psy_audio_Mixer*, uintptr_t param, float value);
+static void patterntweak(psy_audio_Mixer* self, uintptr_t param, float val);
+static float parametervalue(psy_audio_Mixer*, uintptr_t param);
 static int describevalue(psy_audio_Mixer*, char* txt, uintptr_t param, int value);
 static uintptr_t numparameters(psy_audio_Mixer*);
 static uintptr_t numparametercols(psy_audio_Mixer*);
@@ -548,7 +548,7 @@ static psy_dsp_amp_t dB2Amp(psy_dsp_amp_t db)
 	return (psy_dsp_amp_t) pow(10.0f, db / 20.0f);
 }
 
-void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
+void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, float value)
 {
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	uintptr_t channelindex = numparam / 16;
@@ -569,14 +569,17 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
 		if (param == 13) {
 			self->master.drymix = (value >= 0x100) 
 				? 1.0f
-				: ((value&0xFF)/ 256.f);
+				: ((machine_parametervalue_scaled(&self->custommachine.machine,
+				  param, value)&0xFF)/ 256.f);
 		} else
 		if (param == 14) { 
 			self->master.gain = (value >= 1024) 
 				? 4.0f
-				: ((value&0x3FF)/256.0f);
+				: ((machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value)&0x3FF)/256.0f);
 		} else {			
-			psy_audio_machine_setpanning(base, (value >> 1) / 256.f);
+			psy_audio_machine_setpanning(base, (machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value) >> 1) / 256.f);
 		}
 	} else
 	// Inputs
@@ -588,14 +591,17 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
 			if (param == 0) { 
 				channel->drymix = (value == 256) 
 					? 1.0f
-					: ((value&0xFF)/256.0f);
+					: ((machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value)&0xFF)/256.0f);
 			} else
 			if (param <= 12) {				 
 				if (param - 1 < self->sends.count) {														
 					psy_table_insert(&channel->sendvols, param - 1, 
 						(void*) (ptrdiff_t)intparamvalue( 
-							(value == 256) ? 1.0f : 
-							((value&0xFF)/256.0f)));					
+							(machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value) == 256) ? 1.0f : 
+							((machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value)&0xFF)/256.0f)));					
 				}
 			} else			
 			if (param == 13) {
@@ -608,7 +614,9 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
 
 				input_entry = wiresocketentry(self, channelindex - 1);
 				if (input_entry) {		
-					float val=(value>=1024)?4.0f:((value&0x3FF)/256.0f);
+					float val=(machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value)>=1024)?4.0f:((machine_parametervalue_scaled(&self->custommachine.machine,
+					param, value)&0x3FF)/256.0f);
 					input_entry->volume = val;
 				}
 			} else {
@@ -627,7 +635,7 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, int value)
 }
 
 
-void parametertweak(psy_audio_Mixer* self, uintptr_t param, int value)
+void parametertweak(psy_audio_Mixer* self, uintptr_t param, float value)
 {	
 	uintptr_t col;
 	uintptr_t row;
@@ -642,18 +650,16 @@ void parametertweak(psy_audio_Mixer* self, uintptr_t param, int value)
 	} else
 	if (col == mastercolumn(self)) {	// MASTER COLUMN
 		if (row == self->sends.count + 1) {
-			self->master.drymix = value / 65535.f;
+			self->master.drymix = value;
 		} else
 		if (row == self->sends.count + 2) {
-			self->master.gain = floatparamvalue(value) * 
-				floatparamvalue(value) * 4.f;
+			self->master.gain = value * value * 4.f;
 		} else	
 		if (row == self->sends.count + 3) {
-			self->master.panning = floatparamvalue(value); 
+			self->master.panning = value;
 		} else	
 		if (row == self->sends.count + 8) {
-			self->master.volume = floatparamvalue(value) * 
-					floatparamvalue(value) * 4.f;			
+			self->master.volume = value * value * 4.f;			
 		}
 	} else 
 	// Input Columns
@@ -664,38 +670,37 @@ void parametertweak(psy_audio_Mixer* self, uintptr_t param, int value)
 			col - inputcolumn(self));
 		if (channel) {
 			if (row == self->sends.count + 1) {
-				channel->drymix = value / 65535.f;
+				channel->drymix = value;
 			} else
 			if (row > 0 && row < self->sends.count + 1) {						
-				psy_table_insert(&channel->sendvols, row - 1, (void*)(ptrdiff_t)value);
+				psy_table_insert(&channel->sendvols, row - 1, (void*)(ptrdiff_t)machine_parametervalue_scaled(
+					&self->custommachine.machine, param, value));
 			} else
 			if (row == self->sends.count + 2) {
 				psy_audio_WireSocketEntry* input_entry;
 
 				input_entry = wiresocketentry(self, col - inputcolumn(self));
 				if (input_entry) {						
-					input_entry->volume = floatparamvalue(value) * 
-						floatparamvalue(value) * 4.f;
+					input_entry->volume = value * value * 4.f;
 				}
 			} else				
 			if (row == self->sends.count + 3) {
-				channel->panning = floatparamvalue(value); 
+				channel->panning = value;
 			} else				 
 			if (row == self->sends.count + 4) {
 
 			} else
 			if (row == self->sends.count + 5) {
-				channel->mute = value;
+				channel->mute = machine_parametervalue_scaled(&self->custommachine.machine, param,value);
 			} else
 			if (row == self->sends.count + 6) {
-				channel->dryonly = value;
+				channel->dryonly = machine_parametervalue_scaled(&self->custommachine.machine, param,value);
 			} else
 			if (row == self->sends.count + 7) {
-				channel->wetonly = value;
-			}
+				channel->wetonly = machine_parametervalue_scaled(&self->custommachine.machine, param,value);
+			} else
 			if (row == self->sends.count + 8) {
-				channel->volume = floatparamvalue(value) * 
-					floatparamvalue(value) * 4.f;
+				channel->volume = value * value * 4.f;
 			}
 		}
 	} else
@@ -716,25 +721,24 @@ void parametertweak(psy_audio_Mixer* self, uintptr_t param, int value)
 				}
 			} else
 			if (row == self->sends.count + 1) {
-				channel->mastersend = value; 
+				channel->mastersend = machine_parametervalue_scaled(&self->custommachine.machine, param,value);
 			} else
 			if (row == self->sends.count + 3) {
-				channel->panning = floatparamvalue(value); 
+				channel->panning = value;
 			} else
 			if (row == self->sends.count + 4) {				
 			} else
 			if (row == self->sends.count + 5) {
-				channel->mute = value;
+				channel->mute = machine_parametervalue_scaled(&self->custommachine.machine, param, value);
 			} else
 			if (row == self->sends.count + 8) {
-				channel->volume = floatparamvalue(value) * 
-					floatparamvalue(value) * 4.f;
+				channel->volume = value * value * 4.f;
 			}
 		}
 	}
 }
 
-int parametervalue(psy_audio_Mixer* self, uintptr_t param)
+float parametervalue(psy_audio_Mixer* self, uintptr_t param)
 {	
 	uintptr_t col;
 	uintptr_t row;
@@ -749,21 +753,19 @@ int parametervalue(psy_audio_Mixer* self, uintptr_t param)
 	} else
 	if (col == mastercolumn(self)) {	// MASTER COLUMN
 		if (row == self->sends.count + 1) {			
-			return (int)(self->master.drymix * 65535);
+			return self->master.drymix;
 		} else
 		if (row == self->sends.count + 2) {			
-			return intparamvalue(
-				(float)sqrt(self->master.gain) * 0.5f);
+			return (float) sqrt(self->master.gain) * 0.5f;
 		} else	
 		if (row == self->sends.count + 3) {			
-			return intparamvalue(self->master.panning);			
+			return self->master.panning;
 		} else
 		if (row == self->sends.count + 8) {
-			return intparamvalue(
-				(float)sqrt(self->master.volume) * 0.5f);
+			return (float) sqrt(self->master.volume) * 0.5f;
 		} else
 		if (row == self->sends.count + 9) {
-			return (int)(psy_dsp_rmsvol_value(&self->masterrmsvol) / 32768.f  * 65535);
+			return psy_dsp_rmsvol_value(&self->masterrmsvol) / 32768.f;
 		}
 	} else 
 	// Input Column
@@ -774,38 +776,36 @@ int parametervalue(psy_audio_Mixer* self, uintptr_t param)
 			col - inputcolumn(self));
 		if (channel) {
 			if (row == self->sends.count + 1) {
-				return (int)(channel->drymix * 65535);
+				return channel->drymix;
 			} else
 			if (row > 0 && row < self->sends.count + 1) {			
-				return (int)(ptrdiff_t)psy_table_at(&channel->sendvols, row - 1);
+				return (ptrdiff_t)psy_table_at(&channel->sendvols, row - 1) / (float) 0xFFFFFF;
 			} else
 			if (row == self->sends.count + 2) {
 				psy_audio_WireSocketEntry* input_entry;
 
 				input_entry = wiresocketentry(self, col - inputcolumn(self));
 				if (input_entry) {						
-					return intparamvalue(
-						(float)sqrt(input_entry->volume) * 0.5f);					
+					return (float) sqrt(input_entry->volume) * 0.5f;
 				}
 			} else
 			if (row == self->sends.count + 3) {
-				return intparamvalue(channel->panning);
+				return channel->panning;
 			} else
 			if (row == self->sends.count + 4) {
 				
 			} else
 			if (row == self->sends.count + 5) {
-				return channel->mute;
+				return machine_parametervalue_normed(&self->custommachine.machine, param, channel->mute);
 			} else
 			if (row == self->sends.count + 6) {
-				return channel->dryonly;
+				return machine_parametervalue_normed(&self->custommachine.machine, param, channel->dryonly);
 			} else
 			if (row == self->sends.count + 7) {
-				return channel->wetonly;
+				return machine_parametervalue_normed(&self->custommachine.machine, param, channel->wetonly);
 			} else
 			if (row == self->sends.count + 8) {
-				return intparamvalue(
-					(float)sqrt(channel->volume) * 0.5f);
+				return (float) sqrt(channel->volume) * 0.5f;
 			}
 		}
 	} else
@@ -817,20 +817,22 @@ int parametervalue(psy_audio_Mixer* self, uintptr_t param)
 			col - returncolumn(self));
 		if (channel) {
 			if (row > 0 && row < self->sends.count + 1) {
-				return psy_table_exists(&channel->sendsto, row - 1);				
+				return machine_parametervalue_normed(&self->custommachine.machine, param,
+					psy_table_exists(&channel->sendsto, row - 1));
 			} else
 			if (row == self->sends.count + 1) {
-				return channel->mastersend;
+				return machine_parametervalue_normed(&self->custommachine.machine, param,
+					channel->mastersend);
 			} else
 			if (row == self->sends.count + 3) {
-				return intparamvalue(channel->panning);
+				return channel->panning;
 			} else
 			if (row == self->sends.count + 5) {
-				return channel->mute;
+				return machine_parametervalue_normed(&self->custommachine.machine, param,
+					channel->mute);
 			} else	
 			if (row == self->sends.count + 8) {
-				return intparamvalue(
-					(float)sqrt(channel->volume) * 0.5f);
+				return (float)sqrt(channel->volume) * 0.5f;
 			}
 		}		
 	}

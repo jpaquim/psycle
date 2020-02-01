@@ -6,6 +6,18 @@
 
 #include "uicomponent.h"
 
+// SaveDialog Device Interface
+// Bridge
+// Aim: avoid coupling to one platform (win32, xt/motif, etc)
+// Abstraction/Refined  psy_ui_SaveDialog
+// Implementor			psy_ui_SaveDialogImp
+// Concrete Implementor	psy_ui_win_SaveDialogImp
+//
+// psy_ui_SaveDialog <>-------- psy_ui_SaveDialogImp
+//     imp->dev_execute                     ^
+//     ...                                  |
+//                             psy_ui_win_SaveDialogImp
+
 #ifdef __cplusplus
 extern "C" {
 #endif

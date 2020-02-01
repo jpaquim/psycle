@@ -39,10 +39,10 @@ static void parameterrange(psy_audio_Sampler*, uintptr_t param, int* minval,
 	int* maxval);
 static int parameterlabel(psy_audio_Sampler*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Sampler*, char* txt, uintptr_t param);
-static void parametertweak(psy_audio_Sampler*, uintptr_t param, int val);
+static void parametertweak(psy_audio_Sampler*, uintptr_t param, float val);
 static int describevalue(psy_audio_Sampler*, char* txt, uintptr_t param,
 	int value);
-static int parametervalue(psy_audio_Sampler*, uintptr_t param);
+static float parametervalue(psy_audio_Sampler*, uintptr_t param);
 static void dispose(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
 static void releaseallvoices(psy_audio_Sampler*);
@@ -341,13 +341,13 @@ const psy_audio_MachineInfo* info(psy_audio_Sampler* self)
 	return &macinfo;
 }
 
-void parametertweak(psy_audio_Sampler* self, uintptr_t param, int value)
+void parametertweak(psy_audio_Sampler* self, uintptr_t param, float value)
 {	
 	switch (param) {
-		case 0: self->numvoices = value; break;
-		case 1: self->resamplingmethod = (ResamplerType) value; break;
-		case 2: self->defaultspeed = value; break;
-		case 3: self->maxvolume = value; break;
+		case 0: self->numvoices = machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
+		case 1: self->resamplingmethod = (ResamplerType) machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
+		case 2: self->defaultspeed = machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
+		case 3: self->maxvolume = machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
 		default:
 		break;
 	}
@@ -373,13 +373,23 @@ int describevalue(psy_audio_Sampler* self, char* txt, uintptr_t param, int value
 	return 0;
 }
 
-int parametervalue(psy_audio_Sampler* self, uintptr_t param)
+float parametervalue(psy_audio_Sampler* self, uintptr_t param)
 {	
 	switch (param) {
-		case 0: return self->numvoices; break;
-		case 1: return (int) self->resamplingmethod; break;
-		case 2: return self->defaultspeed; break;
-		case 3: return self->maxvolume; break;
+		case 0:
+			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
+				self->numvoices);
+		break;
+		case 1:
+			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
+				self->resamplingmethod);
+		break;
+		case 2:
+			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
+				self->defaultspeed);
+		case 3:
+			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
+				self->maxvolume);
 		default:
 		break;
 	}

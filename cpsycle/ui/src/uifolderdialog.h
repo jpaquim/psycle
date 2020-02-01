@@ -6,6 +6,18 @@
 
 #include "uicomponent.h"
 
+// FolderDialog Device Interface
+// Bridge
+// Aim: avoid coupling to one platform (win32, xt/motif, etc)
+// Abstraction/Refined  psy_ui_FolderDialog
+// Implementor			psy_ui_FolderDialogImp
+// Concrete Implementor	psy_ui_win_FolderDialogImp
+//
+// psy_ui_FolderDialog <>-------- psy_ui_FolderDialogImp
+//     imp->dev_execute                     ^
+//     ...                                  |
+//                             psy_ui_win_FolderDialogImp
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -54,13 +54,32 @@ VUMeterMode player_vumetermode(psy_audio_Player*);
 // sequencer
 void player_start(psy_audio_Player*);
 void player_stop(psy_audio_Player*);
-int player_playing(psy_audio_Player*);
+
+INLINE int player_playing(psy_audio_Player* self)
+{
+	return psy_audio_sequencer_playing(&self->sequencer);
+}
+
 void player_setposition(psy_audio_Player*, psy_dsp_beat_t offset);
-psy_dsp_beat_t player_position(psy_audio_Player*);
+
+INLINE psy_dsp_beat_t player_position(psy_audio_Player* self)
+{
+	return psy_audio_sequencer_position(&self->sequencer);
+}
+
 void player_setbpm(psy_audio_Player*, psy_dsp_beat_t bpm);
-psy_dsp_beat_t player_bpm(psy_audio_Player*);
+
+INLINE psy_dsp_beat_t player_bpm(psy_audio_Player* self)
+{
+	return psy_audio_sequencer_bpm(&self->sequencer);
+}
 void player_setlpb(psy_audio_Player*, uintptr_t lpb);
-uintptr_t player_lpb(psy_audio_Player*);
+
+INLINE uintptr_t player_lpb(psy_audio_Player* self)
+{
+	return psy_audio_sequencer_lpb(&self->sequencer);
+}
+
 // audio driver
 void player_setaudiodriver(psy_audio_Player*, psy_AudioDriver* driver);
 psy_AudioDriver* player_audiodriver(psy_audio_Player*);

@@ -25,7 +25,7 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_setstyle(&self->header, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
-	ui_listbox_init(&self->greetz, &self->component);	
+	psy_ui_listbox_init(&self->greetz, &self->component);	
 	psy_ui_label_init(&self->thanks, &self->component);
 	psy_ui_label_setstyle(&self->thanks, WS_CHILD | WS_VISIBLE | SS_LEFT);
 	psy_ui_label_settext(&self->thanks, "Thanks!");
@@ -129,12 +129,12 @@ void BuildOriginal(Greet* self)
 
 void AddString(Greet* self, const char* text)
 {
-	ui_listbox_addstring(&self->greetz, text);
+	psy_ui_listbox_addtext(&self->greetz, text);
 }
 
 void OnOriginal(Greet* self, psy_ui_Component* sender)
 {
-	ui_listbox_clear(&self->greetz);
+	psy_ui_listbox_clear(&self->greetz);
 	self->current = self->current == 0;
 	if (self->current) {
 		Build(self);

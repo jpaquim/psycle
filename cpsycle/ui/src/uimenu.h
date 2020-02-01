@@ -4,6 +4,7 @@
 #ifndef psy_ui_MENU_H
 #define psy_ui_MENU_H
 
+/*
 #include "uidef.h"
 
 #ifdef __cplusplus
@@ -24,5 +25,7 @@ void ui_menu_append(psy_ui_Menu*, psy_ui_Menu* child, int popup);
 #ifdef __cplusplus
 }
 #endif
+
+*/
 
 #endif /* psy_ui_MENU_H */

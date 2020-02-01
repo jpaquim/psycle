@@ -12,10 +12,10 @@
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_Listbox samplelist;
+	psy_ui_ListBox samplelist;
 	psy_ui_Label header;
 	psy_ui_Label group;
-	psy_ui_Listbox subsamplelist;	
+	psy_ui_ListBox subsamplelist;	
 	psy_audio_Samples* samples;
 	psy_audio_Instruments* instruments;
 	psy_Signal signal_changed;

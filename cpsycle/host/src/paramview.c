@@ -201,9 +201,11 @@ void DrawKnob(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t ro
 		}
 	}
 	if (psy_audio_machine_describevalue(self->machine, str, param,
-			psy_audio_machine_parametervalue(self->machine, param)) == FALSE) {
+			machine_parametervalue_scaled(self->machine, param,
+			psy_audio_machine_parametervalue(self->machine, param))) == FALSE) {
 		psy_snprintf(str, 128, "%d",
-			psy_audio_machine_parametervalue(self->machine, param));
+			machine_parametervalue_scaled(self->machine, param,
+				psy_audio_machine_parametervalue(self->machine, param)));
 	}
 	psy_ui_setbackgroundcolor(g, 0x00555555); // + nc*2);
 	psy_ui_settextcolor(g, 0x00CDCDCD); // + nc);	
@@ -214,8 +216,7 @@ void DrawKnob(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t ro
 	psy_ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
 		ETO_OPAQUE, r_bottom, str, strlen(str));
 	psy_audio_machine_parameterrange(self->machine, param, &minval, &maxval);
-	knob_frame = (int)((psy_audio_machine_parametervalue(self->machine, param)
-		- minval) * 63.0 / (max(1, maxval - minval)));
+	knob_frame = (int)(psy_audio_machine_parametervalue(self->machine, param) * 63.f);
 	psy_ui_drawbitmap(g, &knobs, r.left, r.top, knob_cx, knob_cy,
 		knob_frame*knob_cx, 0);
 }
@@ -250,7 +251,8 @@ void DrawInfoLabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 		r, str, strlen(str));
 	psy_ui_setrectangle(&r, left, top + half, width, top + half);
 	if (psy_audio_machine_describevalue(self->machine, str, param,
-			psy_audio_machine_parametervalue(self->machine, param)) == FALSE) {
+			machine_parametervalue_scaled(self->machine, param,
+				psy_audio_machine_parametervalue(self->machine, param))) == FALSE) {
 		psy_snprintf(str, 128, "%d", psy_audio_machine_parametervalue(
 			self->machine, param));
 	}
@@ -318,7 +320,7 @@ void DrawSlider(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 	cellsize(self, &width, &height);	
 	skin_blitpart(g, &mixer, left, top, &slider);
 	xoffset = (slider.destwidth - knob.destwidth) / 2;
-	value =	psy_audio_machine_parametervalue(self->machine, param) / 65535.f;
+	value =	psy_audio_machine_parametervalue(self->machine, param);
 	yoffset = (int)((1 - value) * slider.destheight);
 	skin_blitpart(g, &mixer, left + xoffset, top + yoffset, &knob);	
 }
@@ -341,7 +343,7 @@ void DrawLevel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t r
 	cellsize(self, &width, &height);		
 	skin_blitpart(g, &mixer, left + slider.destwidth, 
 		slider.destheight - vuoff.destheight, &vuoff);			
-	value =	(psy_audio_machine_parametervalue(self->machine, param) / 65535.f);
+	value =	psy_audio_machine_parametervalue(self->machine, param);
 	vuonheight = (int)(vuon.srcheight * value);
 	vuon.srcy += (vuon.srcheight - vuonheight);
 	vuon.srcheight = vuonheight;
@@ -374,8 +376,8 @@ void OnMouseDown(ParamView* self, psy_ui_Component* sender,
 	self->tweak = HitTest(self, ev->x, ev->y);
 	if (self->tweak != -1) {
 		self->tweakbase = ev->y;
-		self->tweakval =
-			self->machine->vtable->parametervalue(self->machine, self->tweak);
+		self->tweakval = machine_parametervalue_scaled(self->machine, self->tweak,
+			psy_audio_machine_parametervalue(self->machine, self->tweak));
 		psy_ui_component_capture(&self->component);
 	}
 }
@@ -424,9 +426,11 @@ void OnMouseMove(ParamView* self, psy_ui_Component* sender,
 		if (val < minval) {
 			val = minval;
 		}
-		psy_audio_machine_parametertweak(self->machine, self->tweak, val);		
+		psy_audio_machine_parametertweak(self->machine, self->tweak,
+			machine_parametervalue_normed(self->machine, self->tweak, val));
 		workspace_parametertweak(self->workspace,
-			psy_audio_machine_slot(self->machine), self->tweak, val - minval);
+			psy_audio_machine_slot(self->machine), self->tweak,
+			machine_parametervalue_normed(self->machine, self->tweak, val - minval));
 		psy_ui_component_invalidate(&self->component);
 	}
 }

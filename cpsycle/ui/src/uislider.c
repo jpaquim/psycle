@@ -5,8 +5,14 @@
 
 #include "uislider.h"
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
 #include "uiapp.h"
 #include "../../detail/portable.h"
+
+#ifndef max
+#define max(a, b)  (((a) > (b)) ? (a) : (b)) 
+#endif
 
 static void psy_ui_slider_initsignals(psy_ui_Slider*);
 static void psy_ui_slider_disposesignals(psy_ui_Slider*);

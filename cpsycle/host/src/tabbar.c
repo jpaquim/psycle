@@ -60,6 +60,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(tabbar_base(self));
+	psy_ui_component_enablealign(tabbar_base(self));
 	self->tabs = 0;
 	self->selected = 0;
 	self->hover = 0;

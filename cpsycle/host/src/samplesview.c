@@ -397,8 +397,8 @@ void samplesview_setsample(SamplesView* self, SampleIndex index)
 	setsamplesamplesgeneralview(&self->general, sample);
 	setsamplesamplesvibratoview(&self->vibrato, sample);
 	samplesloopview_setsample(&self->waveloop, sample);
-	ui_listbox_setcursel(&self->samplesbox.samplelist, index.slot);
-	ui_listbox_setcursel(&self->samplesbox.subsamplelist, index.subslot);
+	psy_ui_listbox_setcursel(&self->samplesbox.samplelist, index.slot);
+	psy_ui_listbox_setcursel(&self->samplesbox.subsamplelist, index.subslot);
 }
 
 void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
@@ -568,7 +568,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settext(&self->namelabel, "Sample Name");
-	psy_ui_edit_init(&self->nameedit, &self->component, 0);		
+	psy_ui_edit_init(&self->nameedit, &self->component);		
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
 	psy_signal_connect(&self->nameedit.signal_change, self,
 		oneditsamplename);
@@ -582,7 +582,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 		onnextsample);
 	psy_ui_label_init(&self->srlabel, &self->component);
 	psy_ui_label_settext(&self->srlabel, "Sample Rate");	
-	psy_ui_edit_init(&self->sredit, &self->component, 0);	
+	psy_ui_edit_init(&self->sredit, &self->component);	
 	psy_ui_edit_setcharnumber(&self->sredit, 8);
 	psy_ui_label_init(&self->numsamplesheaderlabel, &self->component);
 	psy_ui_label_settext(&self->numsamplesheaderlabel, "Samples");	
@@ -645,12 +645,12 @@ void oneditsamplename(SamplesHeaderView* self, psy_ui_Edit* sender)
 		if (index.subslot == 0) {
 			psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.slot, sample_name(self->sample));
-			ui_listbox_setstring(&self->view->samplesbox.samplelist, text, 
+			psy_ui_listbox_settext(&self->view->samplesbox.samplelist, text, 
 				index.slot);
 		}
 		psy_snprintf(text, 20, "%02X:%s", 
 			(int)index.subslot, sample_name(self->sample));
-		ui_listbox_setstring(&self->view->samplesbox.subsamplelist, text,
+		psy_ui_listbox_settext(&self->view->samplesbox.subsamplelist, text,
 			index.subslot);
 	}
 }
@@ -1034,11 +1034,11 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcharnumber(&self->loopdir, 10);
 	psy_ui_label_init(&self->loopstartlabel, &self->cont);
 	psy_ui_label_settext(&self->loopstartlabel, "Start ");	
-	psy_ui_edit_init(&self->loopstartedit, &self->cont, 0);
+	psy_ui_edit_init(&self->loopstartedit, &self->cont);
 	psy_ui_edit_setcharnumber(&self->loopstartedit, 10);
 	psy_ui_label_init(&self->loopendlabel, &self->cont);
 	psy_ui_label_settext(&self->loopendlabel, "End ");	
-	psy_ui_edit_init(&self->loopendedit, &self->cont, 0);
+	psy_ui_edit_init(&self->loopendedit, &self->cont);
 	psy_ui_edit_setcharnumber(&self->loopendedit, 10);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->cont, 0),
@@ -1057,11 +1057,11 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcharnumber(&self->sustainloopdir, 10);
 	psy_ui_label_init(&self->sustainloopstartlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopstartlabel, "Start ");	
-	psy_ui_edit_init(&self->sustainloopstartedit, &self->sustain, 0);		
+	psy_ui_edit_init(&self->sustainloopstartedit, &self->sustain);		
 	psy_ui_edit_setcharnumber(&self->sustainloopstartedit, 10);
 	psy_ui_label_init(&self->sustainloopendlabel, &self->sustain);	
 	psy_ui_label_settext(&self->sustainloopendlabel, "End ");	
-	psy_ui_edit_init(&self->sustainloopendedit, &self->sustain, 0);
+	psy_ui_edit_init(&self->sustainloopendedit, &self->sustain);
 	psy_ui_edit_setcharnumber(&self->sustainloopendedit, 10);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->sustain, 0),

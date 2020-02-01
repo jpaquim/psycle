@@ -55,8 +55,9 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		onplaymodeselchanged);
 	// play beat num
-	psy_ui_edit_init(&self->loopbeatsedit, &self->component, 0);
+	psy_ui_edit_init(&self->loopbeatsedit, &self->component);
 	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
+	psy_ui_edit_setcharnumber(&self->loopbeatsedit, 6);
 	psy_ui_button_init(&self->loopbeatsless, &self->component);
 	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);
 	psy_signal_connect(&self->loopbeatsless.signal_clicked, self,

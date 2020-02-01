@@ -4,8 +4,9 @@
 #ifndef psy_ui_DEFAULTS_H
 #define psy_ui_DEFAULTS_H
 
-#include "../../detail/stdint.h"
+#include "../../detail/psyconf.h"
 
+#include "../../detail/stdint.h"
 #include "uidef.h"
 #include "uistyle.h"
 

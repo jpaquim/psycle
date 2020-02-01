@@ -141,7 +141,8 @@ void mainframe_init(MainFrame* self)
 		psy_ui_margin_init(&spacing, psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 			psy_ui_value_makepx(0));
-		psy_ui_component_init(&self->tabbars, &self->client);
+		psy_ui_component_init(&self->tabbars, &self->client);		
+		psy_ui_component_enablealign(&self->tabbars);
 		psy_ui_component_setspacing(&self->tabbars, &spacing);
 		mainframe_initbars(self);
 	}
@@ -153,7 +154,7 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(&self->navigation.component, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->tabbars);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
+	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),	
 		psy_ui_HORIZONTALEXPAND);	
 	tabbar_append(&self->tabbar, "Machines");
 	tabbar_append(&self->tabbar, "Patterns");	
@@ -701,5 +702,5 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 {
 	workspace_changedefaultfontsize(&self->workspace, (int)(
-		zoombox_rate(sender) * 80));	
+		zoombox_rate(sender) * 12));	
 }

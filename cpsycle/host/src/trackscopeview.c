@@ -6,6 +6,7 @@
 #include "trackscopeview.h"
 #include "../../detail/portable.h"
 #include <math.h>
+#include <string.h>
 #include <uiapp.h>
 
 #define TIMERID_TRACKSCOPEVIEW 6000

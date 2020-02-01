@@ -5,15 +5,17 @@
 #define psy_ui_DEF_H
 
 #include "../../detail/prefix.h"
+#include "../../detail/psyconf.h"
+
 #include "../../detail/stdint.h"
 #include <stddef.h>
 #include "uifont.h"
 
-
+/*
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-#include <windows.h>
+#include <windows.h>*/
 
 #if defined min
 #undef min
@@ -143,6 +145,7 @@ int psy_ui_rectangle_intersect(psy_ui_Rectangle*, int x, int y);
 int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 	const psy_ui_Rectangle* other);
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
+void psy_ui_rectangle_expand(psy_ui_Rectangle*, int top, int right, int bottom, int left);
 void psy_ui_error(const char* err, const char* shorterr);
 
 typedef enum {

@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "patternview.h"
+
+#include <string.h>
+
 #include "../../detail/portable.h"
 
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
