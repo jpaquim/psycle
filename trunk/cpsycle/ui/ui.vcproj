@@ -330,6 +330,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\uicursescomponentimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicursesimpfactory.c"
+				>
+			</File>
+			<File
 				RelativePath="src\uidef.c"
 				>
 				<FileConfiguration
@@ -448,6 +456,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uifontdialog.c"
+				>
+			</File>
+			<File
 				RelativePath="src\uiframe.c"
 				>
 				<FileConfiguration
@@ -471,28 +483,6 @@
 			</File>
 			<File
 				RelativePath="src\uigraphics.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="src\uigroupbox.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -864,7 +854,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uiwineditimp.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uiwinfolderdialogimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwinfontdialogimp.c"
 				>
 			</File>
 			<File
@@ -876,7 +874,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uiwinimpfactory.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uiwinlabelimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwinlistboximp.c"
 				>
 			</File>
 			<File
@@ -920,6 +926,14 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uicursescomponentimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uicursesimpfactory.h"
+					>
+				</File>
+				<File
 					RelativePath="src\uidef.h"
 					>
 				</File>
@@ -948,15 +962,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uifontdialog.h"
+					>
+				</File>
+				<File
 					RelativePath="src\uiframe.h"
 					>
 				</File>
 				<File
 					RelativePath="src\uigraphics.h"
-					>
-				</File>
-				<File
-					RelativePath="src\uigroupbox.h"
 					>
 				</File>
 				<File
@@ -1040,7 +1054,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uiwineditimp.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\uiwinfolderdialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwinfontdialogimp.h"
 					>
 				</File>
 				<File
@@ -1052,7 +1074,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uiwinimpfactory.h"
+					>
+				</File>
+				<File
 					RelativePath=".\src\uiwinlabelimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwinlistboximp.h"
 					>
 				</File>
 				<File

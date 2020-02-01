@@ -118,6 +118,9 @@ static void imp_vtable_init(void)
 	}
 }
 
+static void oncommand(psy_ui_CheckBox*, psy_ui_Component*,
+	WPARAM wParam, LPARAM lParam);
+
 // CheckBoxImp VTable
 static void dev_settext(psy_ui_win_CheckBoxImp*, const char* text);
 static void dev_text(psy_ui_win_CheckBoxImp*, char* text);
@@ -156,6 +159,7 @@ void psy_ui_win_checkboximp_init(psy_ui_win_CheckBoxImp* self,
 	psy_ui_checkboximp_init(&self->imp);
 	checkboximp_imp_vtable_init(self);
 	self->imp.vtable = &checkboximp_vtable;
+	psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
 }
 
 psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_alloc(void)
@@ -201,4 +205,21 @@ int dev_checked(psy_ui_win_CheckBoxImp* self)
 {
 	return SendMessage(self->win_component_imp.hwnd, BM_GETCHECK, (WPARAM)0,
 		(LPARAM)0) != 0;
+}
+
+void oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
+	WPARAM wParam, LPARAM lParam)
+{
+	switch (HIWORD(wParam))
+	{
+	case BN_CLICKED:
+	{
+		if (self->signal_clicked.slots) {
+			psy_signal_emit(&self->signal_clicked, self, 0);
+		}
+	}
+	break;
+	default:
+		break;
+	}
 }

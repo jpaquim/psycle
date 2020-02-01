@@ -41,7 +41,8 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\container\src" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\container\src" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +65,8 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\container\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\container\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FD /GZ /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -113,6 +115,14 @@ SOURCE=.\src\uicomponent.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uicursescomponentimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesimpfactory.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uidef.c
 # End Source File
 # Begin Source File
@@ -141,15 +151,15 @@ SOURCE=.\src\uifont.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uifontdialog.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiframe.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\uigraphics.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uigroupbox.c
 # End Source File
 # Begin Source File
 
@@ -233,7 +243,15 @@ SOURCE=.\src\uiwincomponentimp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwineditimp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwinfolderdialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinfontdialogimp.c
 # End Source File
 # Begin Source File
 
@@ -245,7 +263,15 @@ SOURCE=.\src\uiwingraphicsimp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwinimpfactory.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwinlabelimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinlistboximp.c
 # End Source File
 # Begin Source File
 
@@ -289,6 +315,14 @@ SOURCE=.\src\uicomponent.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uicursescomponentimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesimpfactory.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uidef.h
 # End Source File
 # Begin Source File
@@ -317,15 +351,15 @@ SOURCE=.\src\uifont.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uifontdialog.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiframe.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\uigraphics.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uigroupbox.h
 # End Source File
 # Begin Source File
 
@@ -409,7 +443,15 @@ SOURCE=.\src\uiwincomponentimp.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwineditimp.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwinfolderdialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinfontdialogimp.h
 # End Source File
 # Begin Source File
 
@@ -421,7 +463,15 @@ SOURCE=.\src\uiwingraphicsimp.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwinimpfactory.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwinlabelimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwinlistboximp.h
 # End Source File
 # Begin Source File
 

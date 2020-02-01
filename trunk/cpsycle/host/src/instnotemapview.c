@@ -5,6 +5,7 @@
 
 #include "instnotemapview.h"
 #include <math.h>
+#include <string.h>
 #include "../../detail/portable.h"
 
 static void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent,

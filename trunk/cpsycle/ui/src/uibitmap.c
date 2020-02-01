@@ -5,8 +5,11 @@
 #include "../../detail/os.h"
 
 #include "uibitmap.h"
-#include "uiwinbitmapimp.h"
+#include "uiapp.h"
+#include "uiimpfactory.h"
 #include <stdlib.h>
+
+extern psy_ui_App app;
 
 // VTable Prototypes
 static void dispose(psy_ui_Bitmap*);
@@ -36,11 +39,10 @@ void psy_ui_bitmap_init(psy_ui_Bitmap* self)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = (psy_ui_BitmapImp*)malloc(sizeof(psy_ui_win_BitmapImp));
-	psy_ui_win_bitmapimp_init((psy_ui_win_BitmapImp*)self->imp);
+	self->imp = psy_ui_impfactory_allocinit_bitmapimp(psy_ui_app_impfactory(&app));
 }
 
-// Delegation Methods to FontImp
+// Delegation Methods to psy_ui_BitmapImp
 void dispose(psy_ui_Bitmap* self)
 {
 	self->imp->vtable->dev_dispose(self->imp);

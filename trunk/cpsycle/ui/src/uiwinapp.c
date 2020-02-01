@@ -183,9 +183,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
     PAINTSTRUCT  ps ;     
 	psy_ui_win_ComponentImp* imp;
 	psy_ui_Graphics	 g;
-	HMENU		 hMenu;
-	psy_ui_Menu* menu;
-	int			 menu_id;
+	// HMENU		 hMenu;
+	// psy_ui_Menu* menu;
+	// int			 menu_id;
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;
@@ -204,6 +204,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_SIZE:			
 				{
 					psy_ui_Size size;
+					
 					if (imp->component->alignchildren) {
 						psy_ui_component_align(imp->component);
 					}
@@ -246,18 +247,23 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 1;
 			break;
 			case WM_COMMAND:
-			 hMenu = GetMenu (hwnd) ;
+			  /*hMenu = GetMenu (hwnd) ;
 			  menu_id = LOWORD (wParam);
 			  menu = psy_table_at(&menumap, (uintptr_t) menu_id);
 			  if (menu && menu->execute) {	
 				menu->execute(menu);
-			  }
+			  }*/
 			  imp = psy_table_at(&winapp->winidmap, (uintptr_t) LOWORD(wParam));
 			  if (imp && imp->component && imp->component->signal_command.slots) {
 					psy_signal_emit(&imp->component->signal_command, imp->component, 2, 
 						wParam, lParam);
 					return 0;
-				}
+			  }
+			  if (imp && imp->imp.signal_command.slots) {
+				  psy_signal_emit(&imp->imp.signal_command, imp->component, 2,
+					  wParam, lParam);
+				  return 0;
+			  }
 			  return 0 ;  
 			break;          
 			case WM_CREATE:			
@@ -299,7 +305,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 						psy_ui_setrectangle(&r,
 						rect.left, rect.top, rect.right - rect.left,
-						rect.bottom - rect.top);				
+						rect.bottom - rect.top);
+						psy_ui_rectangle_union(&r, &g.clip);
 						psy_ui_drawsolidrectangle(&g, r, imp->component->backgroundcolor);
 					}					
 					hfont = ((psy_ui_win_FontImp*)

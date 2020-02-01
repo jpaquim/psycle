@@ -119,7 +119,7 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_enablealign(&self->component);
-	ui_listbox_init(&self->listbox, &self->component);	
+	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	playlisteditorbuttons_init(&self->buttons, &self->component);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_BOTTOM);	
@@ -164,7 +164,7 @@ void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 		PlayListEntry* entry;
 		int currsel;
 
-		currsel = ui_listbox_cursel(&self->listbox);
+		currsel = psy_ui_listbox_cursel(&self->listbox);
 		psy_dir_extract_path(psy_ui_opendialog_filename(&dialog), prefix, name, ext);
 		entry = playlistentry_allocinit(name, psy_ui_opendialog_filename(&dialog));
 		if (entry) {
@@ -173,11 +173,11 @@ void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 			p = psy_list_append(&self->entries, entry);
 			playlisteditor_buildplaylist(self);
 			if (!self->currentry) {				
-				ui_listbox_setcursel(&self->listbox, 0);
+				psy_ui_listbox_setcursel(&self->listbox, 0);
 				self->currentry = p;
 				self->nextentry = p;
 			} else {				
-				ui_listbox_setcursel(&self->listbox, currsel);
+				psy_ui_listbox_setcursel(&self->listbox, currsel);
 			}			
 		}
 	}
@@ -193,12 +193,12 @@ void playlisteditor_buildplaylist(PlayListEditor* self)
 {
 	psy_List* p;
 	
-	ui_listbox_clear(&self->listbox);
+	psy_ui_listbox_clear(&self->listbox);
 	for (p = self->entries; p != 0; p = p->next) {
 		PlayListEntry* entry;
 
 		entry = (PlayListEntry*) p->entry;
-		ui_listbox_addstring(&self->listbox, entry->title);
+		psy_ui_listbox_addtext(&self->listbox, entry->title);
 	}	
 }
 
@@ -219,8 +219,8 @@ void playlisteditor_onprev(PlayListEditor* self, psy_ui_Component* sender)
 {
 	if (self->currentry->prev) {
 		self->nextentry = self->currentry->prev;
-		ui_listbox_setcursel(&self->listbox,
-			ui_listbox_cursel(&self->listbox) - 1);
+		psy_ui_listbox_setcursel(&self->listbox,
+			psy_ui_listbox_cursel(&self->listbox) - 1);
 		player_stop(&self->workspace->player);
 	}
 }
@@ -229,8 +229,8 @@ void playlisteditor_onnext(PlayListEditor* self, psy_ui_Component* sender)
 {
 	if (self->currentry->next) {
 		self->nextentry = self->currentry->next;
-		ui_listbox_setcursel(&self->listbox,
-			ui_listbox_cursel(&self->listbox) + 1);
+		psy_ui_listbox_setcursel(&self->listbox,
+			psy_ui_listbox_cursel(&self->listbox) + 1);
 		player_stop(&self->workspace->player);
 	}
 }
@@ -260,7 +260,7 @@ void playlisteditor_ontimer(PlayListEditor* self, psy_ui_Component* sender, int 
 				p = p->next;
 				++c;
 			}
-			ui_listbox_setcursel(&self->listbox, c);
+			psy_ui_listbox_setcursel(&self->listbox, c);
 		} else {
 			player_stop(&self->workspace->player);			
 			psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);

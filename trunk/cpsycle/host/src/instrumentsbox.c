@@ -18,7 +18,7 @@ static void OnInstrumentListChanged(InstrumentsBox* self, psy_ui_Component* send
 void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments)
 {	
-	ui_listbox_init(&self->instrumentlist, parent);	
+	psy_ui_listbox_init(&self->instrumentlist, parent);	
 	instrumentsbox_setinstruments(self, instruments);	
 	psy_signal_connect(&self->instrumentlist.signal_selchanged, self,
 		OnInstrumentListChanged);
@@ -30,7 +30,7 @@ void BuildInstrumentList(InstrumentsBox* self)
 	int slot = 0;
 	char buffer[20];
 
-	ui_listbox_clear(&self->instrumentlist);
+	psy_ui_listbox_clear(&self->instrumentlist);
 	for ( ; slot < 256; ++slot) {		
 		if (instrument = instruments_at(self->instruments, slot)) {
 			psy_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
@@ -43,7 +43,7 @@ void BuildInstrumentList(InstrumentsBox* self)
 
 void AddString(InstrumentsBox* self, const char* text)
 {
-	ui_listbox_addstring(&self->instrumentlist, text);
+	psy_ui_listbox_addtext(&self->instrumentlist, text);
 }
 
 void OnInstrumentListChanged(InstrumentsBox* self, psy_ui_Component* sender, int slot)
@@ -54,18 +54,18 @@ void OnInstrumentListChanged(InstrumentsBox* self, psy_ui_Component* sender, int
 void OnInstrumentInsert(InstrumentsBox* self, psy_ui_Component* sender, int slot)
 {
 	BuildInstrumentList(self);
-	ui_listbox_setcursel(&self->instrumentlist, slot);		
+	psy_ui_listbox_setcursel(&self->instrumentlist, slot);		
 }
 
 void OnInstrumentRemoved(InstrumentsBox* self, psy_ui_Component* sender, int slot)
 {
 	BuildInstrumentList(self);
-	ui_listbox_setcursel(&self->instrumentlist, slot);		
+	psy_ui_listbox_setcursel(&self->instrumentlist, slot);		
 }
 
 void OnInstrumentSlotChanged(InstrumentsBox* self, psy_audio_Instrument* sender, int slot)
 {
-	ui_listbox_setcursel(&self->instrumentlist, slot);	
+	psy_ui_listbox_setcursel(&self->instrumentlist, slot);	
 }
 
 void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments* instruments)
@@ -82,5 +82,5 @@ void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments* 
 
 int instrumentsbox_selected(InstrumentsBox* self)
 {
-	return ui_listbox_cursel(&self->instrumentlist);	
+	return psy_ui_listbox_cursel(&self->instrumentlist);	
 }

@@ -4,104 +4,103 @@
 #include "../../detail/prefix.h"
 
 #include "uilistbox.h"
-#include "uiwincomponentimp.h"
+#include "uiimpfactory.h"
+#include "uiapp.h"
 
-static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-{
-	return (psy_ui_win_ComponentImp*)self->imp;
-}
+extern psy_ui_App app;
 
-static void oncommand(psy_ui_Listbox*, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam);
-static void ondestroy(psy_ui_Listbox*, psy_ui_Component* sender);
-static void ui_listbox_init_style(psy_ui_Listbox* listbox, psy_ui_Component* parent,
-	int style);
+static void ondestroy(psy_ui_ListBox*, psy_ui_Component* sender);
 
-void ui_listbox_init(psy_ui_Listbox* listbox, psy_ui_Component* parent)
+void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 {  
-	ui_listbox_init_style(listbox, parent, 
-		(WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY) &~WS_BORDER);	
+	self->imp = psy_ui_impfactory_allocinit_listboximp(psy_ui_app_impfactory(&app), &self->component, parent);
+	psy_ui_component_init_imp(psy_psy_ui_listbox_base(self), parent,
+		&self->imp->component_imp);	
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_signal_init(&self->signal_selchanged);		
 }
 
-void ui_listbox_init_multiselect(psy_ui_Listbox* listbox, psy_ui_Component* parent)
+void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component* parent)
 {  
-	ui_listbox_init_style(listbox, parent, 
-		(WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_NOTIFY)
-		&~WS_BORDER);    
+	self->imp = psy_ui_impfactory_allocinit_listboximp_multiselect(psy_ui_app_impfactory(&app), &self->component, parent);
+	psy_ui_component_init_imp(psy_psy_ui_listbox_base(self), parent,
+		&self->imp->component_imp);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	psy_signal_init(&self->signal_selchanged);
 }
 
-void ui_listbox_init_style(psy_ui_Listbox* self, psy_ui_Component* parent, int style)
-{  		
-	psy_ui_win32_component_init(&self->component, parent, TEXT("LISTBOX"), 
-		0, 0, 100, 200,
-		style,
-		1);	
-	psy_signal_connect(&self->component.signal_command, self, oncommand);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
-	psy_signal_init(&self->signal_selchanged);	
-}
-
-void ondestroy(psy_ui_Listbox* self, psy_ui_Component* sender)
+void ondestroy(psy_ui_ListBox* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_selchanged);
 }
 
-intptr_t ui_listbox_addstring(psy_ui_Listbox* self, const char* text)
-{
-	return SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_ADDSTRING, 0, (LPARAM)text);
-}
-
-void ui_listbox_setstring(psy_ui_Listbox* self, const char* text, intptr_t index)
-{
-	intptr_t sel;
-
-	sel = ui_listbox_cursel(self);
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_DELETESTRING, (WPARAM)index, (LPARAM)text);
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_INSERTSTRING, (WPARAM)index, (LPARAM)text);
-	ui_listbox_setcursel(self, sel);
-}
-
-void ui_listbox_clear(psy_ui_Listbox* self)
-{
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_RESETCONTENT, 0, (LPARAM)0);
-}
-
-void ui_listbox_setcursel(psy_ui_Listbox* self, intptr_t index)
-{
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);	
-}
-
-intptr_t ui_listbox_cursel(psy_ui_Listbox* self)
-{
-	return SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-}
-
-void ui_listbox_selitems(psy_ui_Listbox* self, int* items, int maxitems)
+intptr_t psy_ui_listbox_addtext(psy_ui_ListBox* self, const char* text)
 {	
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_GETSELITEMS, (WPARAM)maxitems,
-		(LPARAM)items); 
+	return self->imp->vtable->dev_addtext(self->imp, text);
 }
 
-intptr_t ui_listbox_selcount(psy_ui_Listbox* self)
+void psy_ui_listbox_settext(psy_ui_ListBox* self, const char* text, intptr_t index)
 {
-	return SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd, LB_GETSELCOUNT, 
-		(WPARAM)0, (LPARAM)0); 
+	self->imp->vtable->dev_settext(self->imp, text, index);
 }
 
-void oncommand(psy_ui_Listbox* self, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam) {
-	switch(HIWORD(wParam))
-    {
-        case LBN_SELCHANGE :
-        {
-            if (self->signal_selchanged.slots) {
-				intptr_t sel = SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd,
-					LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
-			}
-        }
-		break;
-		default:
-		break;
-    }
+void psy_ui_listbox_clear(psy_ui_ListBox* self)
+{
+	self->imp->vtable->dev_clear(self->imp);
+}
+
+void psy_ui_listbox_setcursel(psy_ui_ListBox* self, intptr_t index)
+{
+	self->imp->vtable->dev_setcursel(self->imp, index);
+}
+
+intptr_t psy_ui_listbox_cursel(psy_ui_ListBox* self)
+{
+	return self->imp->vtable->dev_cursel(self->imp);
+}
+
+void psy_ui_listbox_selitems(psy_ui_ListBox* self, int* items, int maxitems)
+{	
+	self->imp->vtable->dev_selitems(self->imp, items, maxitems);
+}
+
+intptr_t psy_ui_listbox_selcount(psy_ui_ListBox* self)
+{
+	return self->imp->vtable->dev_selcount(self->imp);
+}
+
+// psy_ui_ListBoxImp vtable
+static int dev_addtext(psy_ui_ListBoxImp* self, const char* text) { return -1; }
+static void dev_settext(psy_ui_ListBoxImp* self, const char* text, intptr_t index) { }
+static void dev_text(psy_ui_ListBoxImp* self, char* text, intptr_t index) { }
+static void dev_setstyle(psy_ui_ListBoxImp* self, int style) { }
+static void dev_clear(psy_ui_ListBoxImp* self) { }
+static void dev_setcursel(psy_ui_ListBoxImp* self, intptr_t index) { }
+static intptr_t dev_cursel(psy_ui_ListBoxImp* self) { return -1; }
+static void dev_selitems(psy_ui_ListBoxImp* self, int* items, int maxitems) { }
+static  intptr_t dev_selcount(psy_ui_ListBoxImp* self) { return 0;  }
+
+static psy_ui_ListBoxImpVTable listbox_imp_vtable;
+static int listbox_imp_vtable_initialized = 0;
+
+static void listbox_imp_vtable_init(void)
+{
+	if (!listbox_imp_vtable_initialized) {
+		listbox_imp_vtable.dev_addtext = dev_addtext;
+		listbox_imp_vtable.dev_settext = dev_settext;
+		listbox_imp_vtable.dev_text = dev_text;
+		listbox_imp_vtable.dev_setstyle = dev_setstyle;
+		listbox_imp_vtable.dev_clear = dev_clear;
+		listbox_imp_vtable.dev_setcursel = dev_setcursel;
+		listbox_imp_vtable.dev_cursel = dev_cursel;
+		listbox_imp_vtable.dev_selitems = dev_selitems;
+		listbox_imp_vtable.dev_selcount = dev_selcount;
+		listbox_imp_vtable_initialized = 1;
+	}
+}
+
+void psy_ui_listboximp_init(psy_ui_ListBoxImp* self)
+{
+	listbox_imp_vtable_init();
+	self->vtable = &listbox_imp_vtable;
 }

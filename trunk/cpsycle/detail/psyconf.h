@@ -11,8 +11,13 @@
 #define PSYCLE_USE_SSE	/* enable support for SSE */
 #endif
 
-// #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle"
-// #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle"
+#define PSYCLE_TK_WIN32 1
+#define PSYCLE_TK_CURSES 2
+
+#define PSYCLE_USE_TK PSYCLE_TK_WIN32
+
+// #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
+// #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"

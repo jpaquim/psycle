@@ -4,16 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "uiedit.h"
-#include "uiwincomponentimp.h"
+#include "uiapp.h"
+#include "uiimpfactory.h"
 
-static void oncommand(psy_ui_Edit*, psy_ui_Component* sender, WPARAM wParam, LPARAM lParam);
+extern psy_ui_App app;
+
 static void ondestroy(psy_ui_Edit*, psy_ui_Component* sender);
 static void onpreferredsize(psy_ui_Edit*, psy_ui_Size* limit, psy_ui_Size* rv);
-
-static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-{
-	return (psy_ui_win_ComponentImp*)self->imp;
-}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -26,17 +23,28 @@ static void vtable_init(psy_ui_Edit* self)
 	}	vtable_initialized = 1;
 }
 
-void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent, int styles)
-{  		
-	psy_ui_win32_component_init(&self->component, parent, TEXT("EDIT"), 
-		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE | ES_LEFT | styles,
-		1);
+void psy_ui_edit_init(psy_ui_Edit* self, psy_ui_Component* parent)
+{ 
+	self->imp = psy_ui_impfactory_allocinit_editimp(psy_ui_app_impfactory(&app), &self->component, parent);
+	psy_ui_component_init_imp(psy_ui_edit_base(self), parent,
+		&self->imp->component_imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_signal_connect(&self->component.signal_command, self, oncommand);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	psy_signal_init(&self->signal_change);		
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	self->charnumber = 0;
+	self->linenumber = 1;	
+}
+
+void psy_ui_edit_multiline_init(psy_ui_Edit* self, psy_ui_Component* parent)
+{
+	self->imp = psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_app_impfactory(&app), &self->component, parent);
+	psy_ui_component_init_imp(psy_ui_edit_base(self), parent,
+		&self->imp->component_imp);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_signal_init(&self->signal_change);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	self->charnumber = 0;
 	self->linenumber = 1;
 }
@@ -48,8 +56,15 @@ void ondestroy(psy_ui_Edit* self, psy_ui_Component* sender)
 
 void psy_ui_edit_settext(psy_ui_Edit* self, const char* text)
 {
-	SetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd,
-		text);
+	self->imp->vtable->dev_settext(self->imp, text);
+}
+
+ const char* psy_ui_edit_text(psy_ui_Edit* self)
+{
+	static char text[256];
+
+	self->imp->vtable->dev_text(self->imp, text);
+	return text;
 }
 
 void psy_ui_edit_setcharnumber(psy_ui_Edit* self, int number)
@@ -62,43 +77,18 @@ void psy_ui_edit_setlinenumber(psy_ui_Edit* self, int number)
 	self->linenumber = number;
 }
 
-const char* psy_ui_edit_text(psy_ui_Edit* self)
-{
-	static char buf[256];
-
-	GetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd,
-		buf, 255);
-	return buf;
-}
-
-void oncommand(psy_ui_Edit* self, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam) {
-	switch(HIWORD(wParam))
-    {
-        case EN_CHANGE:
-        {
-            if (self->signal_change.slots) {
-				psy_signal_emit(&self->signal_change, self, 0);
-			}
-        }
-		break;
-		default:
-		break;
-    }
-}
-
 void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {			
-	if (rv) {
-		char text[256];
+	if (rv) {		
 		psy_ui_TextMetric tm;
 		
-		tm = psy_ui_component_textmetric(&self->component);	
+		tm = psy_ui_component_textmetric(&self->component);			
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
-			GetWindowText((HWND)psy_ui_win_component_details(&self->component)->hwnd, text, 256);
-			size = psy_ui_component_textsize(&self->component, text);	
-			rv->width = size.width + 2;		
+			
+			size = psy_ui_component_textsize(&self->component,
+				psy_ui_edit_text(self));
+			rv->width = size.width + 2;
 			rv->height = (int)(tm.tmHeight * self->linenumber);
 		} else {				
 			rv->width = tm.tmAveCharWidth * self->charnumber + 2;
@@ -107,14 +97,45 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	}
 }
 
+void psy_ui_edit_setstyle(psy_ui_Edit* self, int style)
+{
+	self->imp->vtable->dev_setstyle(self->imp, style);
+}
+
 void psy_ui_edit_enableedit(psy_ui_Edit* self)
 {
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd,
-		EM_SETREADONLY, (WPARAM) 0, (LPARAM) 0);
+	self->imp->vtable->dev_enableedit(self->imp);
 }
 
 void psy_ui_edit_preventedit(psy_ui_Edit* self)
 {
-	SendMessage((HWND)psy_ui_win_component_details(&self->component)->hwnd,
-		EM_SETREADONLY, (WPARAM) 1, (LPARAM) 0);
+	self->imp->vtable->dev_preventedit(self->imp);
+}
+
+// psy_ui_EditImp vtable
+static void dev_settext(psy_ui_EditImp* self, const char* title) { }
+static void dev_text(psy_ui_EditImp* self, char* text) { }
+static void dev_setstyle(psy_ui_EditImp* self, int style) { }
+static void dev_enableedit(psy_ui_EditImp* self) { }
+static void dev_preventedit(psy_ui_EditImp* self) { }
+
+static psy_ui_EditImpVTable edit_imp_vtable;
+static int edit_imp_vtable_initialized = 0;
+
+static void edit_imp_vtable_init(void)
+{
+	if (!edit_imp_vtable_initialized) {
+		edit_imp_vtable.dev_settext = dev_settext;
+		edit_imp_vtable.dev_text = dev_text;
+		edit_imp_vtable.dev_setstyle = dev_setstyle;
+		edit_imp_vtable.dev_enableedit = dev_enableedit;
+		edit_imp_vtable.dev_preventedit = dev_preventedit;
+		edit_imp_vtable_initialized = 1;
+	}
+}
+
+void psy_ui_editimp_init(psy_ui_EditImp* self)
+{
+	edit_imp_vtable_init();
+	self->vtable = &edit_imp_vtable;
 }

@@ -27,8 +27,8 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);	
-	psy_ui_edit_init(&self->contrib, &self->component, 
-		WS_VSCROLL | ES_MULTILINE |ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_READONLY);
+	psy_ui_edit_multiline_init(&self->contrib, &self->component);
+	psy_ui_edit_preventedit(&self->contrib);
 	psy_ui_edit_setlinenumber(&self->contrib, 10);
 	psy_ui_edit_settext(&self->contrib,						
 		"Josep Mª Antolín. [JAZ]/JosepMa\tDeveloper since release 1.5" "\r\n"
@@ -67,9 +67,11 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 		"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 	);	
-	psy_ui_edit_init(&self->psycledelics, &self->component, ES_READONLY);
+	psy_ui_edit_init(&self->psycledelics, &self->component);
+	psy_ui_edit_preventedit(&self->psycledelics);
 	psy_ui_edit_settext(&self->psycledelics, "http://psycle.pastnotecut.org");	
-	psy_ui_edit_init(&self->sourceforge, &self->component, ES_READONLY);
+	psy_ui_edit_init(&self->sourceforge, &self->component);
+	psy_ui_edit_preventedit(&self->sourceforge);
 	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
 	psy_ui_label_init(&self->steincopyright, &self->component);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	

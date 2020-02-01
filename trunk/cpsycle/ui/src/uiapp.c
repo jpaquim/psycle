@@ -6,8 +6,12 @@
 
 #include "uiapp.h"
 
-#ifdef DIVERSALIS__OS__MICROSOFT
-	#include "uiwinapp.h"	
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+#include "uiwinapp.h"	
+#include "uiwinimpfactory.h"
+#elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
+#include <curses.h>
+#include "uicursesimpfactory.h"
 #else
 	#error "Platform not supported"
 #endif
@@ -21,15 +25,20 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 {	
 	self->main = 0;
 	psy_signal_init(&self->signal_dispose);
-	psy_ui_defaults_init(&self->defaults);
 	ui_app_initplatform(self, instance);
+	psy_ui_defaults_init(&self->defaults);	
 }
 
 void ui_app_initplatform(psy_ui_App* self, uintptr_t instance)
 {
-#ifdef DIVERSALIS__OS__MICROSOFT
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	self->platform = (psy_ui_WinApp*) malloc(sizeof(psy_ui_WinApp));
 	psy_ui_winapp_init(app.platform, (HINSTANCE) instance);
+	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_win_impfactory_allocinit();
+#elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
+	initscr();
+	refresh();
+	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_curses_impfactory_allocinit();
 #else
 	#error "Platform not supported"
 #endif
@@ -39,9 +48,17 @@ void psy_ui_app_dispose(psy_ui_App* self)
 {	
 	psy_signal_emit(&self->signal_dispose, self, 0);
 	psy_signal_dispose(&self->signal_dispose);
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_ui_winapp_dispose(self->platform);
+#elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
+	endwin();
+#else
+#error "Platform not supported"
+#endif
 	free(self->platform);
 	self->platform = 0;
+	free(self->imp_factory);
+	self->imp_factory = 0;
 }
 
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)
@@ -51,14 +68,14 @@ struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)
 
 int psy_ui_app_run(psy_ui_App* self) 
 {
-#ifdef DIVERSALIS__OS__MICROSOFT
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	return psy_ui_winapp_run((psy_ui_WinApp*)self->platform);
 #endif	
 }
 
 void psy_ui_app_stop(psy_ui_App* self)
 {
-#ifdef DIVERSALIS__OS__MICROSOFT
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_ui_winapp_stop((psy_ui_WinApp*)self->platform);
 #endif	
 }

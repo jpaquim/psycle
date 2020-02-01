@@ -25,11 +25,11 @@ static const VstInt32 kNumProcessCycles = 5;
 static int mode(psy_audio_VstPlugin*);
 static void work(psy_audio_VstPlugin* self, psy_audio_BufferContext*);
 static const psy_audio_MachineInfo* info(psy_audio_VstPlugin*);
-static void parametertweak(psy_audio_VstPlugin*, uintptr_t param, int val);
+static void parametertweak(psy_audio_VstPlugin*, uintptr_t param, float val);
 static int parameterlabel(psy_audio_VstPlugin*, char* txt, uintptr_t param);
 static int parametername(psy_audio_VstPlugin*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_VstPlugin*, char* txt, uintptr_t param, int value);
-static int parametervalue(psy_audio_VstPlugin*, uintptr_t param);
+static float parametervalue(psy_audio_VstPlugin*, uintptr_t param);
 static int parametertype(psy_audio_VstPlugin*, uintptr_t param);
 static void parameterrange(psy_audio_VstPlugin*, uintptr_t param, int* minval, int* maxval);
 static uintptr_t numparameters(psy_audio_VstPlugin*);
@@ -300,7 +300,10 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			value = (patternentry_front(entry)->cmd << 8) +
 				patternentry_front(entry)->parameter;
 			psy_audio_machine_patterntweak(psy_audio_vstplugin_base(self),
-				patternentry_front(entry)->inst, value);
+				patternentry_front(entry)->inst, machine_parametervalue_normed(
+					psy_audio_vstplugin_base(self),
+					patternentry_front(entry)->inst,
+					value));
 			for (i = 0; i < count; ++i) {		
 				free(self->events->events[i]);
 			}
@@ -528,9 +531,9 @@ const psy_audio_MachineInfo* info(psy_audio_VstPlugin* self)
 	return self->plugininfo;
 }
 
-void parametertweak(psy_audio_VstPlugin* self, uintptr_t param, int value)
+void parametertweak(psy_audio_VstPlugin* self, uintptr_t param, float value)
 {
-	self->effect->setParameter(self->effect, param, value / 65535.f);
+	self->effect->setParameter(self->effect, param, value);
 }
 
 int parameterlabel(psy_audio_VstPlugin* self, char* txt, uintptr_t param)
@@ -554,9 +557,9 @@ int describevalue(psy_audio_VstPlugin* self, char* txt, uintptr_t param, int val
 	return *txt != '\0';
 }
 
-int parametervalue(psy_audio_VstPlugin* self, uintptr_t param)
+float parametervalue(psy_audio_VstPlugin* self, uintptr_t param)
 {
-	return (int)(self->effect->getParameter(self->effect, param) * 65535.f);
+	return self->effect->getParameter(self->effect, param);
 }
 
 uintptr_t numinputs(psy_audio_VstPlugin* self)

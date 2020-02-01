@@ -6,10 +6,10 @@
 #include "stepsequencerview.h"
 #include <exclusivelock.h>
 #include "resources/resource.h"
+#include "../../detail/portable.h"
 
 #define TIMERID_STEPSEQUENCERVIEW 9000
 
- 
 // barselect
 static void stepsequencerbarselect_ondestroy(StepsequencerBarSelect*,
 	psy_ui_Component* sender);
@@ -20,9 +20,9 @@ static void stepsequencerbarselect_onlinetick(StepsequencerBarSelect*,
 static void stepsequencerbarselect_ondraw(StepsequencerBarSelect*,
 	psy_ui_Graphics*);
 static void stepsequencerbarselect_onmousedown(StepsequencerBarSelect*,
-	psy_ui_Component* sender, psy_ui_MouseEvent*);
+	psy_ui_MouseEvent*);
 static void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
-	psy_ui_Component* sender, psy_ui_Size*);
+	psy_ui_Size*);
 static void stepsequencerbarselect_setposition(StepsequencerBarSelect* self,
 	StepSequencerPosition position);
 static void stepsequencerbarselect_oneditpositionchanged(
@@ -36,20 +36,21 @@ static void stepsequencerbar_drawbackground(StepsequencerBar*,
 static void stepsequencerbar_drawstep(StepsequencerBar*, psy_ui_Graphics*,
 	int step, int mode);
 static void stepsequencerbar_onmousedown(StepsequencerBar* self,
-	psy_ui_Component* sender, psy_ui_MouseEvent*);
+	psy_ui_MouseEvent*);
 static void stepsequencerbar_setdefaultevent(StepsequencerBar*,
 	uintptr_t track,
 	psy_audio_Pattern* patterndefaults,
 	psy_audio_PatternEvent*);
 static int offsettoline(psy_audio_Player*, psy_dsp_beat_t offset);
-void stepsequencerbar_onsize(StepsequencerBar*,
-	psy_ui_Component* sender, psy_ui_Size* size);
+void stepsequencerbar_onsize(StepsequencerBar*, psy_ui_Size* size);
 static void stepsequencerbar_onlpbchanged(StepsequencerBar*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void stepsequencerbar_setposition(StepsequencerBar* self,
 	StepSequencerPosition position);
 static void stepsequencerbar_oneditpositionchanged(StepsequencerBar*,
 	Workspace* sender);
+static void stepsequencerbar_onpreferredsize(StepsequencerBar*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 // view
 static void stepsequencerview_ontimer(StepsequencerView*,
@@ -72,6 +73,11 @@ static void vtable_init(StepsequencerBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_ondraw)stepsequencerbar_ondraw;
+		vtable.onsize = (psy_ui_fp_onsize) stepsequencerbar_onsize;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			stepsequencerbar_onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)
+			stepsequencerbar_onmousedown;
 	}
 }
 
@@ -87,11 +93,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_mousedown,
-		self, stepsequencerbar_onmousedown);
-	psy_signal_connect(&self->component.signal_size, self,
-		stepsequencerbar_onsize);		
+	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		stepsequencerbar_onlpbchanged);
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
@@ -182,7 +184,7 @@ void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 }
 
 void stepsequencerbar_onmousedown(StepsequencerBar* self,
-	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {
 	if (self->pattern && self->workspace->song) {
 		int step;
@@ -194,12 +196,10 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 
 		bpl = (psy_dsp_beat_t) 1 / player_lpb(&self->workspace->player);
 		step = ev->x / self->stepwidth + self->position.steprow * 16;
-
 		cursor = workspace_patterneditposition(self->workspace);
 		cursor.column = 0;	
 		cursor.offset = step / (psy_dsp_beat_t) player_lpb(
 			&self->workspace->player);		
-		
 		patternevent_clear(&event);
 		event.note = 48;
 		event.inst = (uint16_t) instruments_slot(
@@ -240,10 +240,7 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 	PatternNode* node;
 	PatternNode* prev;	
 				
-	node = pattern_findnode(patterndefaults,
-		track,
-		0,
-		(psy_dsp_beat_t) 0.25f,
+	node = pattern_findnode(patterndefaults, track, 0, (psy_dsp_beat_t) 0.25f,
 		&prev);
 	if (node) {
 		psy_audio_PatternEntry* entry;
@@ -312,8 +309,7 @@ void stepsequencerbar_onlpbchanged(StepsequencerBar* self, psy_audio_Player* sen
 	psy_ui_component_invalidate(&self->component);
 }
 
-void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Component* sender,
-	psy_ui_Size* size)
+void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Size* size)
 {
 	psy_ui_TextMetric tm;
 
@@ -325,6 +321,16 @@ void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Component* sender,
 	self->stepheight = (int)(tm.tmHeight * 1.5);
 }
 
+void stepsequencerbar_onpreferredsize(StepsequencerBar* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);	
+	rv->height = (int)(tm.tmHeight * 1.5);
+	rv->width = tm.tmAveCharWidth * 4 * 16;
+}
+
 // barselect
 static psy_ui_ComponentVtable stepsequencerbarselect_vtable;
 static int stepsequencerbarselect_vtable_initialized = 0;
@@ -334,9 +340,12 @@ static void stepsequencerbarselect_vtable_init(StepsequencerBarSelect* self)
 	if (!stepsequencerbarselect_vtable_initialized) {
 		stepsequencerbarselect_vtable = *(self->component.vtable);
 		stepsequencerbarselect_vtable.ondraw =
-			(psy_ui_fp_ondraw)stepsequencerbarselect_ondraw;
+			(psy_ui_fp_ondraw) stepsequencerbarselect_ondraw;
+		stepsequencerbarselect_vtable.onsize = (psy_ui_fp_onsize) stepsequencerbarselect_onsize;
 		stepsequencerbarselect_vtable.onpreferredsize =
-			(psy_ui_fp_onpreferredsize)stepsequencerbarselect_onpreferredsize;
+			(psy_ui_fp_onpreferredsize)stepsequencerbarselect_onpreferredsize;				
+		stepsequencerbarselect_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			stepsequencerbarselect_onmousedown;
 	}
 }
 
@@ -345,26 +354,22 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	StepTimer* steptimer,
 	Workspace* workspace)
 {
+	psy_ui_component_init(&self->component, parent);
+	stepsequencerbarselect_vtable_init(self);
+	self->component.vtable = &stepsequencerbarselect_vtable;
+	self->component.debugflag = 98;
 	self->steptimer = steptimer;
 	self->workspace = workspace;	
 	self->pattern = 0;
 	self->lineheight = 15;
 	self->colwidth = 25;
-	stepsequencerposition_init(&self->position);
-	psy_ui_component_init(&self->component, parent);	
-	stepsequencerbarselect_vtable_init(self);
-	self->component.vtable = &stepsequencerbarselect_vtable;
+	stepsequencerposition_init(&self->position);	
 	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_init(&self->signal_selected);
-	psy_signal_connect(&self->component.signal_mousedown,
-		self, stepsequencerbarselect_onmousedown);
+	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->component.signal_destroy,
-		self, stepsequencerbarselect_ondestroy);
-	psy_signal_connect(&self->component.signal_size, self,
-		stepsequencerbarselect_onsize);
+		self, stepsequencerbarselect_ondestroy);	
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
-		stepsequencerbarselect_oneditpositionchanged);
-	psy_ui_component_resize(&self->component, 115, 25);
+		stepsequencerbarselect_oneditpositionchanged);	
 }
 
 void stepsequencerbarselect_ondestroy(StepsequencerBarSelect* self,
@@ -448,13 +453,13 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 }
 
 void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
-	psy_ui_Component* sender, psy_ui_Size* size)
+	psy_ui_Size* size)
 {
-	psy_ui_TextMetric tm;
+	psy_ui_TextMetric tm;	
 
-	tm = psy_ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);	
 	self->colwidth = tm.tmAveCharWidth * 4;
-	self->lineheight = (int)(0.8 * tm.tmHeight);
+	self->lineheight = (int)(0.8 * tm.tmHeight);	
 }
 
 void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui_Size* limit,
@@ -462,17 +467,17 @@ void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui
 {
 	psy_ui_TextMetric tm;	
 	int colwidth;
-	int lineheight;
+	int lineheight;	
 
-	tm = psy_ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);	
 	colwidth = tm.tmAveCharWidth * 4;	
 	lineheight = (int)(0.8 * tm.tmHeight);
-	rv->width = self->colwidth * 4;
-	rv->height = self->lineheight * 2;
+	rv->width = colwidth * 4;
+	rv->height = lineheight * 2;	
 }
 
 void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,
-	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+	psy_ui_MouseEvent* ev)
 {	
 	int row;
 	int steprow;
@@ -513,7 +518,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	stepsequencerview_setpattern(self, patterns_at(&workspace->song->patterns,
 		0));
 	psy_ui_component_setalign(&self->stepsequencerbar.component,
-		psy_ui_ALIGN_CLIENT);
+		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->stepsequencerbar.component, &margin);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		stepsequencerview_onsongchanged);

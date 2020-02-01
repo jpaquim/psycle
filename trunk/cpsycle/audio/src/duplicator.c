@@ -19,10 +19,10 @@ static void work(psy_audio_Duplicator* self, psy_audio_BufferContext* bc) { }
 static void sequencertick(psy_audio_Duplicator*);
 static psy_List* sequencerinsert(psy_audio_Duplicator*, PatternNode* events);
 static const psy_audio_MachineInfo* info(psy_audio_Duplicator*);
-static void parametertweak(psy_audio_Duplicator*, uintptr_t param, int val);
+static void parametertweak(psy_audio_Duplicator*, uintptr_t param, float val);
 static int describevalue(psy_audio_Duplicator*, char* rv, uintptr_t param,
 	int value);
-static int parametervalue(psy_audio_Duplicator*, uintptr_t param);
+static float parametervalue(psy_audio_Duplicator*, uintptr_t param);
 static void parameterrange(psy_audio_Duplicator*, uintptr_t param, int* minval,
 	int* maxval);
 static int parameterlabel(psy_audio_Duplicator*, char* rv, uintptr_t param);
@@ -186,18 +186,20 @@ const psy_audio_MachineInfo* info(psy_audio_Duplicator* self)
 	return &macinfo;
 }
 
-void parametertweak(psy_audio_Duplicator* self, uintptr_t param, int value)
+void parametertweak(psy_audio_Duplicator* self, uintptr_t param, float value)
 {	
-	psy_audio_DuplicatorOutput* output;
+	psy_audio_DuplicatorOutput* output;	
 	
 	output = psy_audio_duplicatormap_output(&self->map, param %
 		psy_audio_duplicatormap_numoutputs(&self->map));
 	switch (parameterrow(self, param)) {
 		case 0:
-			output->machine = value;
+			output->machine = machine_parametervalue_scaled(
+				psy_audio_duplicator_base(self), param, value);
 		break;
 		case 1:
-			output->offset = value;
+			output->offset = machine_parametervalue_scaled(
+				psy_audio_duplicator_base(self), param, value);
 		break;		
 		default:			
 		break;
@@ -210,7 +212,7 @@ int describevalue(psy_audio_Duplicator* self, char* rv, uintptr_t param,
 	return 0;
 }
 
-int parametervalue(psy_audio_Duplicator* self, uintptr_t param)
+float parametervalue(psy_audio_Duplicator* self, uintptr_t param)
 {	
 	psy_audio_DuplicatorOutput* output;
 	
@@ -218,10 +220,12 @@ int parametervalue(psy_audio_Duplicator* self, uintptr_t param)
 		param % psy_audio_duplicatormap_numoutputs(&self->map));
 	switch (parameterrow(self, param)) {
 		case 0:
-			return output->machine;
+			return machine_parametervalue_normed(psy_audio_duplicator_base(self), param,
+				output->machine);
 		break;
 		case 1:
-			return output->offset;
+			return machine_parametervalue_normed(psy_audio_duplicator_base(self), param,
+				output->offset);
 		break;		
 		default:			
 		break;

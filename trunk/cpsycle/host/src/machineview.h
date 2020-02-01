@@ -59,7 +59,12 @@ typedef struct {
 	int x;
 	int y;	
 	int mode;
-	psy_dsp_amp_t volumedisplay;	
+	/// output level for display (0 .. 1.f)	
+	psy_dsp_amp_t volumedisplay;
+	/// output peak level for display (0 .. 1.f)
+	psy_dsp_amp_t volumemaxdisplay;
+	/// output peak level display time (refreshrate * 60)
+	int volumemaxcounterlife;
 	MachineCoords* coords;
 	MachineSkin* skin;
 	psy_audio_Machine* machine;

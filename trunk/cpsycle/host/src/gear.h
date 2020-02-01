@@ -32,7 +32,7 @@ typedef struct {
 	psy_ui_Component component;
 	TabBar tabbar;
 	psy_ui_Notebook notebook;
-	psy_ui_Listbox listbox;	
+	psy_ui_ListBox listbox;	
 	MachinesBox machinesboxgen;
 	MachinesBox machinesboxfx;
 	InstrumentsBox instrumentsbox;

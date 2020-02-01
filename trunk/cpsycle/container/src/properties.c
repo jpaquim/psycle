@@ -157,6 +157,21 @@ psy_Properties* psy_properties_append_string(psy_Properties* self, const char* k
 	return psy_properties_append_property(self, psy_properties_create_string(key, value));	
 }
 
+psy_Properties* psy_properties_create_font(const char* key, const char* value)
+{		
+	psy_Properties* p;
+
+	p = (psy_Properties*) malloc(sizeof(psy_Properties));
+	psy_properties_init(p, key, PSY_PROPERTY_TYP_FONT);	
+	p->item.value.s = strdup(value);	
+	return p;
+}
+
+psy_Properties* psy_properties_append_font(psy_Properties* self, const char* key, const char* value)
+{	
+	return psy_properties_append_property(self, psy_properties_create_font(key, value));	
+}
+
 psy_Properties* psy_properties_append_userdata(psy_Properties* self, const char* key,
 	void* value, void (*dispose)(psy_Property*))
 {			
@@ -344,7 +359,8 @@ const char* psy_properties_readstring(psy_Properties* properties, const char* ke
 		rv = defaulttext;
 	} else {
 		psy_Properties* property = psy_properties_read(properties, key);
-		if (property && property->item.typ == PSY_PROPERTY_TYP_STRING) {
+		if (property && property->item.typ == PSY_PROPERTY_TYP_STRING ||
+			property && property->item.typ == PSY_PROPERTY_TYP_FONT) {
 			rv = property->item.value.s;
 		} else {
 			rv = defaulttext;
@@ -367,6 +383,24 @@ psy_Properties* psy_properties_write_string(psy_Properties* self, const char* ke
 		p->item.typ = PSY_PROPERTY_TYP_STRING;
 	} else {
 		p = psy_properties_append_string(self, key, value);
+	}
+	return p;
+}
+
+psy_Properties* psy_properties_write_font(psy_Properties* self, const char* key,
+	const char* value)
+{
+	psy_Properties* p;
+	
+	p = psy_properties_read(self, key);
+	if (p) {
+		if (p->item.typ == PSY_PROPERTY_TYP_FONT) {
+			free(p->item.value.s);
+		}
+		p->item.value.s = strdup(value);
+		p->item.typ = PSY_PROPERTY_TYP_FONT;
+	} else {
+		p = psy_properties_append_font(self, key, value);
 	}
 	return p;
 }

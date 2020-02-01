@@ -247,6 +247,7 @@ void dev_dispose(psy_ui_win_ComponentImp* self)
 	if (self->background) {
 		DeleteObject(self->background);
 	}
+	psy_ui_componentimp_dispose(&self->imp);
 }
 
 psy_ui_win_ComponentImp* psy_ui_win_componentimp_alloc(void)
@@ -274,12 +275,12 @@ psy_ui_win_ComponentImp* psy_ui_win_componentimp_allocinit(
 			dwStyle,
 			usecommand
 		);
-	}
+	}	
 	return rv;
 }
 
 void dev_destroy(psy_ui_win_ComponentImp* self)
-{
+{	
 	DestroyWindow(self->hwnd);
 }
 

@@ -100,8 +100,11 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 						case PSY_PROPERTY_TYP_CHOICE:
 							psy_properties_write_choice(curr, key, atoi(value));
 						break;
-						case PSY_PROPERTY_TYP_STRING:
+						case PSY_PROPERTY_TYP_STRING:						
 							psy_properties_write_string(curr, key, value);
+						break;
+						case PSY_PROPERTY_TYP_FONT:
+							psy_properties_write_font(curr, key, value);
 						break;
 						default:
 						break;
@@ -241,8 +244,11 @@ int propertiesio_loadsection(psy_Properties* self, const char* path,
 							case PSY_PROPERTY_TYP_CHOICE:
 								psy_properties_write_choice(curr, key, atoi(value));
 							break;
-							case PSY_PROPERTY_TYP_STRING:
+							case PSY_PROPERTY_TYP_STRING:							
 								psy_properties_write_string(curr, key, value);
+							break;
+							case PSY_PROPERTY_TYP_FONT:
+								psy_properties_write_font(curr, key, value);
 							break;
 							default:
 							break;
@@ -363,6 +369,7 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;
 				case PSY_PROPERTY_TYP_STRING:
+				case PSY_PROPERTY_TYP_FONT:
 					fwrite(psy_properties_valuestring(property), sizeof(char),
 						strlen(psy_properties_valuestring(property)), fp);					
 				break;						

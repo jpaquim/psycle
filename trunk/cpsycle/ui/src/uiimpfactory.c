@@ -4,62 +4,92 @@
 #include "../../detail/prefix.h"
 
 #include "uiimpfactory.h"
-#include "uiapp.h"
-#include "uiwinapp.h"
-#include "uiwincomponentimp.h"
-#include "uiwinlabelimp.h"
-#include "uiwincheckboximp.h"
-
 #include <stdlib.h>
 
-struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_componentimp(psy_ui_Component* component, psy_ui_Component* parent)
+struct psy_ui_BitmapImp* psy_ui_impfactory_allocinit_bitmapimp(psy_ui_ImpFactory* self)
 {
-	psy_ui_win_ComponentImp* rv;
-	psy_ui_WinApp* winapp;
-
-	winapp = (psy_ui_WinApp*) app.platform;
-	rv = psy_ui_win_componentimp_allocinit(
-		component,
-		parent ? parent->imp : 0,
-		winapp->componentclass,
-		0, 0, 90, 90,
-		WS_CHILDWINDOW | WS_VISIBLE,
-		0);
-	if (rv->hwnd == 0) {
-		free(rv);
-		rv = 0;
-	}
-	return (psy_ui_ComponentImp*) rv;
+	return self->vtable->allocinit_bitmapimp(self);
 }
 
-struct psy_ui_LabelImp* psy_ui_impfactory_allocinit_labelimp(psy_ui_Component* component, psy_ui_Component* parent)
+struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp(psy_ui_ImpFactory* self, uintptr_t* platformdc)
 {
-	psy_ui_win_LabelImp* rv;
-	psy_ui_WinApp* winapp;
-
-	winapp = (psy_ui_WinApp*)app.platform;
-	rv = psy_ui_win_labelimp_allocinit(
-		component,
-		parent ? parent->imp : 0);
-	if (rv->win_component_imp.hwnd == 0) {
-		free(rv);
-		rv = 0;
-	}
-	return (psy_ui_LabelImp*)rv;
+	return self->vtable->allocinit_graphicsimp(self, platformdc);
 }
 
-struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_Component* component, psy_ui_Component* parent)
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_componentimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
-	psy_ui_win_CheckBoxImp* rv;
-	psy_ui_WinApp* winapp;
+	return self->vtable->allocinit_componentimp(self, component, parent);
+}
 
-	winapp = (psy_ui_WinApp*)app.platform;
-	rv = psy_ui_win_checkboximp_allocinit(
-		component,
-		parent ? parent->imp : 0);
-	if (rv->win_component_imp.hwnd == 0) {
-		free(rv);
-		rv = 0;
+struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_frameimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_frameimp(self, component, parent);
+}
+
+struct psy_ui_LabelImp* psy_ui_impfactory_allocinit_labelimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_labelimp(self, component, parent);
+}
+
+struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_listboximp(self, component, parent);
+}
+
+struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp_multiselect(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_listboximp_multiselect(self, component, parent);
+}
+
+struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_editimp(self, component, parent);
+}
+
+struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp_multiline(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_editimp_multiline(self, component, parent);
+}
+
+struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_checkboximp(self, component, parent);
+}
+
+static struct psy_ui_BitmapImp* allocinit_bitmapimp(struct psy_ui_ImpFactory* self) { return 0; }
+static struct psy_ui_GraphicsImp* allocinit_graphicsimp(struct psy_ui_ImpFactory* self, uintptr_t* platformdc) { return 0; }
+static struct psy_ui_ComponentImp* allocinit_componentimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_ComponentImp* allocinit_frameimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_EditImp* allocinit_editimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_EditImp* allocinit_editimp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_ListBoxImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_CheckBoxImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+
+// VTable init
+static psy_ui_ImpFactoryVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.allocinit_bitmapimp = vtable.allocinit_bitmapimp;
+		vtable.allocinit_graphicsimp = allocinit_graphicsimp;
+		vtable.allocinit_componentimp = allocinit_componentimp;
+		vtable.allocinit_frameimp = allocinit_frameimp;
+		vtable.allocinit_editimp = allocinit_editimp;
+		vtable.allocinit_editimp_multiline = allocinit_editimp_multiline;
+		vtable.allocinit_labelimp = allocinit_labelimp;
+		vtable.allocinit_listboximp = allocinit_listboximp;
+		vtable.allocinit_listboximp_multiselect = allocinit_listboximp_multiselect;
+		vtable.allocinit_checkboximp = allocinit_checkboximp;
+		vtable_initialized = 1;
 	}
-	return (psy_ui_CheckBoxImp*)rv;
+}
+
+void psy_ui_impfactory_init(psy_ui_ImpFactory* self)
+{
+	vtable_init();
+	self->vtable = &vtable;
 }

@@ -34,11 +34,11 @@ static void machineproxy_dispose(psy_audio_MachineProxy*);
 static int machineproxy_mode(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numinputs(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy*);
-static void machineproxy_parametertweak(psy_audio_MachineProxy*, uintptr_t par, int val);
-static void machineproxy_patterntweak(psy_audio_MachineProxy* self, uintptr_t par, int val);
+static void machineproxy_parametertweak(psy_audio_MachineProxy*, uintptr_t par, float val);
+static void machineproxy_patterntweak(psy_audio_MachineProxy* self, uintptr_t par, float val);
 static int machineproxy_describevalue(psy_audio_MachineProxy*, char* txt, uintptr_t param,
 	int value);
-static int machineproxy_parametervalue(psy_audio_MachineProxy*, uintptr_t param);
+static float machineproxy_parametervalue(psy_audio_MachineProxy*, uintptr_t param);
 static void machineproxy_setpanning(psy_audio_MachineProxy*, psy_dsp_amp_t);
 static psy_dsp_amp_t machineproxy_panning(psy_audio_MachineProxy*);
 static void machineproxy_mute(psy_audio_MachineProxy*);
@@ -415,7 +415,7 @@ uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy* self)
 }	
 
 void machineproxy_parametertweak(psy_audio_MachineProxy* self, uintptr_t param,
-	int val)
+	float val)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -433,7 +433,7 @@ void machineproxy_parametertweak(psy_audio_MachineProxy* self, uintptr_t param,
 }
 
 void machineproxy_patterntweak(psy_audio_MachineProxy* self, uintptr_t param,
-	int val)
+	float val)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -472,9 +472,9 @@ int machineproxy_describevalue(psy_audio_MachineProxy* self, char* txt, uintptr_
 	return rv;
 }
 
-int machineproxy_parametervalue(psy_audio_MachineProxy* self, uintptr_t param)
+float machineproxy_parametervalue(psy_audio_MachineProxy* self, uintptr_t param)
 {
-	int rv = 0;
+	float rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

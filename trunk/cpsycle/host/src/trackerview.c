@@ -161,7 +161,7 @@ static void trackerview_onlpbchanged(TrackerView*, psy_audio_Player* sender,
 static void trackerview_onpatterneditpositionchanged(TrackerView*,
 	Workspace* sender);
 static void trackerview_onparametertweak(TrackerView*,
-	Workspace* sender, int slot, uintptr_t tweak, int value);
+	Workspace* sender, int slot, uintptr_t tweak, float value);
 static void trackerview_onskinchanged(TrackerView*, Workspace*, psy_Properties*);
 static int trackerview_trackwidth(TrackerView*, uintptr_t track);
 static int trackerview_track_x(TrackerView*, uintptr_t track);
@@ -3259,11 +3259,16 @@ void trackerview_onskinchanged(TrackerView* self, Workspace* sender,
 }
 
 void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
-	int slot, uintptr_t tweak, int value)
+	int slot, uintptr_t tweak, float normvalue)
 {
-	if (workspace_recordingtweaks(sender)) {		
-		psy_audio_PatternEvent event;				
-		
+	if (workspace_recordingtweaks(sender)) {
+		psy_audio_PatternEvent event;
+		psy_audio_Machine* machine;
+		int value;
+
+		machine = machines_at(&self->workspace->song->machines, slot);
+		assert(machine);
+		value = machine_parametervalue_scaled(machine, tweak, normvalue);
 		patternevent_init_all(&event,
 			(unsigned char) (
 				workspace_recordtweaksastws(sender)

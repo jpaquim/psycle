@@ -7,6 +7,7 @@
 #include "../../detail/stdint.h"
 
 #include <dsptypes.h>
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -96,6 +97,18 @@ void patternevent_clear(psy_audio_PatternEvent*);
 int patternevent_empty(const psy_audio_PatternEvent*);
 int patternevent_empty_except_volume(const psy_audio_PatternEvent*);
 int patternevent_has_volume(const psy_audio_PatternEvent*);
+// pattern value starting at zero
+INLINE uint16_t psy_audio_patternevent_tweakvalue(const psy_audio_PatternEvent* self)
+{		
+	return ((uint16_t)(self->cmd) << 8) | ((uint16_t)(self->parameter) & 0xFF);
+}
+// pattern value starting at zero
+INLINE void psy_audio_patternevent_settweakvalue(psy_audio_PatternEvent* self, uint16_t tweakval)
+{		
+	self->cmd = (uint8_t) ((tweakval >> 8) & 0xFF);
+	self->parameter = (uint8_t)(tweakval & 0xFF);
+	
+}
 
 #ifdef __cplusplus
 }

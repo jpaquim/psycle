@@ -8,11 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
 static void ondestroy(psy_ui_Knob*, psy_ui_Component* sender);
 static void ondraw(psy_ui_Knob*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_Knob*, psy_ui_MouseEvent*);

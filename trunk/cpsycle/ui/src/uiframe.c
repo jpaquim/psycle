@@ -4,21 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "uiframe.h"
-#include "hashtbl.h"
 #include "uiapp.h"
-#include "uiwinapp.h"
+#include "uiimpfactory.h"
 
 extern psy_ui_App app;
 
 void psy_ui_frame_init(psy_ui_Frame* self, psy_ui_Component* parent)
-{			
-	psy_ui_WinApp* winapp;
+{	
+	psy_ui_ComponentImp* imp;
 
-	winapp = (psy_ui_WinApp*) app.platform;
-	psy_ui_win32_component_init(self, parent, winapp->appclass, 
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		CW_USEDEFAULT, CW_USEDEFAULT,
-		WS_OVERLAPPEDWINDOW,
-		0);
+	imp = psy_ui_impfactory_allocinit_frameimp(psy_ui_app_impfactory(&app), self, parent);
+	psy_ui_component_init_imp(self, parent, imp);
 	psy_ui_component_setbackgroundmode(self, BACKGROUND_NONE);
 }

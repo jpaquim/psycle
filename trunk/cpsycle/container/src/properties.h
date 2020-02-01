@@ -14,6 +14,7 @@ typedef enum {
 	PSY_PROPERTY_TYP_ROOT,
 	PSY_PROPERTY_TYP_INTEGER,
 	PSY_PROPERTY_TYP_STRING,
+	PSY_PROPERTY_TYP_FONT,
 	PSY_PROPERTY_TYP_DOUBLE,
 	PSY_PROPERTY_TYP_BOOL,	
 	PSY_PROPERTY_TYP_CHOICE,
@@ -67,10 +68,12 @@ psy_Properties* psy_properties_clone(psy_Properties*, int all);
 psy_Properties* psy_properties_create_section(psy_Properties*, const char* name);
 void properties_free(psy_Properties* );
 psy_Properties* psy_properties_create_string(const char* key, const char* value);
+psy_Properties* psy_properties_create_font(const char* key, const char* value);
 psy_Properties* psy_properties_create_int(const char* key, int value, int min, int max);
 psy_Properties* psy_properties_create_bool(const char* key, int value);
 psy_Properties* psy_properties_create_choice(const char* key, int value);
 psy_Properties* psy_properties_append_string(psy_Properties*, const char* key, const char* value);
+psy_Properties* psy_properties_append_font(psy_Properties*, const char* key, const char* value);
 psy_Properties* psy_properties_append_choice(psy_Properties*, const char* key, int value);
 psy_Properties* psy_properties_append_userdata(psy_Properties*, const char* key,
 	void* value, void (*dispose)(psy_Property*));
@@ -86,6 +89,7 @@ void psy_properties_readdouble(psy_Properties*, const char* key, double* value, 
 const char* psy_properties_readstring(psy_Properties*, const char* key, const char* defaulttext);
 psy_Properties* psy_properties_read_choice(psy_Properties*);
 psy_Properties* psy_properties_write_string(psy_Properties*, const char* key, const char* value);
+psy_Properties* psy_properties_write_font(psy_Properties*, const char* key, const char* value);
 psy_Properties* psy_properties_write_int(psy_Properties*, const char* key, int value);
 psy_Properties* psy_properties_write_bool(psy_Properties*, const char* key, int value);
 psy_Properties* psy_properties_write_choice(psy_Properties*, const char* key, int value);

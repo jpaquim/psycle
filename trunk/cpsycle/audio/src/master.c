@@ -18,17 +18,15 @@ static void master_dispose(psy_audio_Master*);
 static int parametertype(psy_audio_Master*, uintptr_t param);
 static uintptr_t numparameters(psy_audio_Master*);
 static unsigned int numparametercols(psy_audio_Master*);
-static void parametertweak(psy_audio_Master*, uintptr_t param, int val);	
+static void parametertweak(psy_audio_Master*, uintptr_t param, float val);	
 static void parameterrange(psy_audio_Master*, uintptr_t param, int* minval, int* maxval);
 static int parameterlabel(psy_audio_Master*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Master*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_Master*, char* txt, uintptr_t param, int value);
-static int parametervalue(psy_audio_Master*, uintptr_t param);
+static float parametervalue(psy_audio_Master*, uintptr_t param);
 static const psy_audio_MachineInfo* info(psy_audio_Master*);
 static uintptr_t numinputs(psy_audio_Master*);
 static uintptr_t numoutputs(psy_audio_Master*);
-static int intparamvalue(float value);
-static float floatparamvalue(int value);
 static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
@@ -104,15 +102,14 @@ void master_dispose(psy_audio_Master* self)
 	machine_dispose(&self->machine);
 }
 
-void parametertweak(psy_audio_Master* self, uintptr_t param, int value)
+void parametertweak(psy_audio_Master* self, uintptr_t param, float value)
 {
 	if (param == 0) {
 		psy_audio_Machines* machines;
 		
 		machines = psy_audio_machine_machines(&self->machine);
 		if (machines) {			
-			machines_setvolume(machines,
-				floatparamvalue(value) * floatparamvalue(value) * 4.f);
+			machines_setvolume(machines, value * value * 4.f);
 		}
 	} else {
 		psy_audio_MachineSockets* sockets;
@@ -128,8 +125,7 @@ void parametertweak(psy_audio_Master* self, uintptr_t param, int value)
 				psy_audio_WireSocketEntry* input_entry;
 
 				input_entry = (psy_audio_WireSocketEntry*) p->entry;
-				input_entry->volume =
-					floatparamvalue(value) * floatparamvalue(value) * 4.f;					
+				input_entry->volume = value * value * 4.f;					
 			}
 		}		
 	}
@@ -169,15 +165,14 @@ int describevalue(psy_audio_Master* self, char* txt, uintptr_t param, int value)
 	return 0;
 }
 
-int parametervalue(psy_audio_Master* self, uintptr_t param)
+float parametervalue(psy_audio_Master* self, uintptr_t param)
 {	
 	if (param == 0) {
 		psy_audio_Machines* machines = self->machine.callback.machines(
 			self->machine.callback.context);
 
 		if (machines) {
-			return intparamvalue(
-				(float)sqrt(machines_volume(machines)) * 0.5f);
+			return (float) sqrt(machines_volume(machines)) * 0.5f;
 		}
 	} else {
 		psy_audio_MachineSockets* sockets;
@@ -194,22 +189,11 @@ int parametervalue(psy_audio_Master* self, uintptr_t param)
 				psy_audio_WireSocketEntry* input_entry;
 
 				input_entry = (psy_audio_WireSocketEntry*) input_socket->entry;
-				return intparamvalue(
-					(float)sqrt(input_entry->volume) * 0.5f);
+				return (float) sqrt(input_entry->volume) * 0.5f;
 			}
 		}
 	}
 	return 0;
-}
-
-int intparamvalue(float value)
-{	
-	return (int)((value * 65535.f));	
-}
-
-float floatparamvalue(int value)
-{
-	return value / 65535.f;	
 }
 
 const psy_audio_MachineInfo* info(psy_audio_Master* self)

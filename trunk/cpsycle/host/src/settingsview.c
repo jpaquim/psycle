@@ -9,6 +9,7 @@
 #include <stdlib.h>
 
 #include <uifolderdialog.h>
+#include <uifontdialog.h>
 #include "../../detail/portable.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -86,8 +87,8 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	self->selected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
-	self->dirbutton = 0;
-	psy_ui_edit_init(&self->edit, &self->client, ES_AUTOHSCROLL);
+	self->button = 0;
+	psy_ui_edit_init(&self->edit, &self->client);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		settingsview_oneditkeydown);
 	psy_ui_component_hide(&self->edit.component);
@@ -231,6 +232,10 @@ void settingsview_drawvalue(SettingsView* self, psy_Properties* property,
 			settingsview_drawbutton(self, property, column + 1);
 		}
 	} else
+	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
+		settingsview_drawstring(self, property, column);
+		settingsview_drawbutton(self, property, column + 1);
+	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
 		settingsview_drawinteger(self, property, column);
 	}
@@ -284,6 +289,10 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
 		psy_ui_textout(self->g, self->columnwidth * column + 3,
 			self->cpy + self->dy, "...", 3);
+	} else
+	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
+		psy_ui_textout(self->g, self->columnwidth * column + 3,
+			self->cpy + self->dy, "Choose Font", strlen("Choose Font"));
 	} else {
 		psy_ui_textout(self->g, self->columnwidth * column + 3,
 			self->cpy + self->dy, psy_properties_text(property),
@@ -294,6 +303,9 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	psy_ui_settextcolor(self->g, 0x00CACACA);	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
 		size = psy_ui_component_textsize(&self->client, "...");
+	} else
+	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
+		size = psy_ui_component_textsize(&self->client, "Choose Font");
 	} else {
 		size = psy_ui_component_textsize(&self->client,
 			psy_properties_text(property));
@@ -364,12 +376,13 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 	self->mx = ev->x;
 	self->my = ev->y;
 	self->choiceproperty = 0;
-	self->dirbutton = 0;
+	self->button = 0;	
 	settingsview_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
 		settingsview_onpropertieshittestenum);
 	if (self->selected) {
-		if (self->dirbutton) {
+		if (self->button &&
+			psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;			
 			char title[MAX_PATH];
 			
@@ -381,6 +394,22 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 					self->selected->item.key, psy_ui_folderdialog_path(&dialog));
 			}
 			psy_ui_folderdialog_dispose(&dialog);							
+		} else
+		if (self->button && psy_properties_type(self->selected) == PSY_PROPERTY_TYP_FONT) {
+			psy_ui_FontDialog fontdialog;
+
+			psy_ui_fontdialog_init(&fontdialog, &self->component);
+			if (psy_ui_fontdialog_execute(&fontdialog)) {				
+				psy_ui_FontInfo fontinfo;
+				
+				fontinfo = psy_ui_fontdialog_fontinfo(&fontdialog);				
+				psy_properties_write_font(self->selected->parent,
+					self->selected->item.key,
+					psy_ui_fontinfo_string(&fontinfo));
+			}
+			psy_ui_fontdialog_dispose(&fontdialog);
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selected);
 		} else
 		if (psy_properties_ischoiceitem(self->selected)) {
 			self->choiceproperty = self->selected->parent;
@@ -462,7 +491,7 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 {
 	int rv = 0;	
 
-	self->dirbutton = 0;
+	self->button = 0;
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_BOOL) {					
 		psy_ui_Rectangle r;
 		int checked = 0;
@@ -480,20 +509,22 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER ||
 		psy_properties_type(property) == PSY_PROPERTY_TYP_STRING ||
-		psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
+		psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION ||
+		psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
 		psy_ui_Rectangle r;		
 		psy_ui_setrectangle(&r, self->columnwidth * column, 
 			self->cpy + self->dy, self->columnwidth, self->lineheight);
 		self->selrect = r;
 		rv = settingsview_intersects(&r, self->mx, self->my);
-		if (!rv &&
-				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
+		if (!rv && (
+				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
+				psy_properties_type(property) == PSY_PROPERTY_TYP_FONT)) {
 			psy_ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
 				self->cpy + self->dy, self->columnwidth, self->lineheight);
 			self->selrect = r;
 			rv = settingsview_intersects(&r, self->mx, self->my);
 			if (rv) {
-				self->dirbutton = 1;
+				self->button = 1;
 			}
 		}
 	}

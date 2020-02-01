@@ -514,19 +514,9 @@ void player_dostop(psy_audio_Player* self)
 	}
 }
 
-int player_playing(psy_audio_Player* self)
-{
-	return psy_audio_sequencer_playing(&self->sequencer);
-}
-
 void player_setposition(psy_audio_Player* self, psy_dsp_beat_t offset)
 {
 	psy_audio_sequencer_setposition(&self->sequencer, offset);
-}
-
-psy_dsp_beat_t player_position(psy_audio_Player* self)
-{
-	return psy_audio_sequencer_position(&self->sequencer);
 }
 
 void player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
@@ -534,20 +524,10 @@ void player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
 }
 
-psy_dsp_beat_t player_bpm(psy_audio_Player* self)
-{
-	return psy_audio_sequencer_bpm(&self->sequencer);
-}
-
 void player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 {
 	psy_audio_sequencer_setlpb(&self->sequencer, lpb);
 	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);
-}
-
-uintptr_t player_lpb(psy_audio_Player* self)
-{
-	return psy_audio_sequencer_lpb(&self->sequencer);
 }
 
 // psy_AudioDriver set, get, load, unload, restart, ..., methods

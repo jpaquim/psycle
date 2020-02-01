@@ -277,9 +277,14 @@ void workspace_configvisual(Workspace* self)
 	psy_Properties* visual;
 
 	visual = psy_properties_find(self->config, "visual");
-	if (visual) {				
-		workspace_changedefaultfontsize(self, 
-			psy_properties_int(visual, "defaultfontsize", 80));
+	if (visual) {
+		psy_ui_Font font;
+		psy_ui_FontInfo fontinfo;
+		
+		psy_ui_fontinfo_init_string(&fontinfo, 
+			psy_properties_readstring(visual, "defaultfont", "tahoma 16"));
+		psy_ui_font_init(&font, &fontinfo);
+		psy_ui_replacedefaultfont(self->mainhandle, &font);		
 	}
 }
 
@@ -412,8 +417,8 @@ void workspace_makevisual(Workspace* self)
 		psy_properties_append_action(visual, "loadskin"),
 		"Load Skin");
 	psy_properties_settext(
-		psy_properties_append_int(visual, "defaultfontsize", 80, 0, 999),
-		"Default font size");	
+		psy_properties_append_font(visual, "defaultfont", "tahoma:80"),
+		"Default Font");	
 	workspace_makepatternview(self, visual);
 	workspace_makemachineview(self, visual);
 }
@@ -730,7 +735,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 	psy_Properties* choice)
 {
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
-		if (strcmp(psy_properties_key(property), "loadskin") == 0) {			
+		if (strcmp(psy_properties_key(property), "loadskin") == 0) {
 			psy_ui_OpenDialog opendialog;
 
 			psy_ui_opendialog_init_all(&opendialog, 0,
@@ -830,9 +835,16 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 		player_reloaddriver(&self->player, psy_properties_valuestring(property),
 			workspace_driverconfiguration(self));
 		workspace_driverconfig(self);
-	} else
-	if (strcmp(psy_properties_key(property), "defaultfontsize") == 0) {
-		workspace_changedefaultfontsize(self, psy_properties_value(property));
+	} else	
+	if (strcmp(psy_properties_key(property), "defaultfont") == 0) {
+		psy_ui_Font font;
+		psy_ui_FontInfo fontinfo;
+		
+		psy_ui_fontinfo_init_string(&fontinfo, 
+			psy_properties_valuestring(property));
+		psy_ui_font_init(&font, &fontinfo);
+		psy_ui_replacedefaultfont(self->mainhandle, &font);
+		psy_ui_component_invalidate(self->mainhandle);			
 	} else
 	if ((psy_properties_hint(property) == PSY_PROPERTY_HINT_INPUT)) {		
 		workspace_configkeyboard(self);		
@@ -1060,7 +1072,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
-	psy_signal_emit(&self->signal_configchanged, self, 1,self->config);
+	psy_signal_emit(&self->signal_configchanged, self, 1, self->config);
 }
 
 void workspace_save_configuration(Workspace* self)
@@ -1091,13 +1103,20 @@ void workspace_redo(Workspace* self)
 
 void workspace_changedefaultfontsize(Workspace* self, int size)
 {
-	psy_ui_FontInfo fontinfo;
-	psy_ui_Font font;
+	psy_Properties* visual;
 
-	psy_ui_fontinfo_init(&fontinfo, "Tahoma", size);
-	psy_ui_font_init(&font, &fontinfo);
-	psy_ui_replacedefaultfont(self->mainhandle, &font);
-	psy_ui_component_invalidate(self->mainhandle);
+	visual = psy_properties_find(self->config, "visual");
+	if (visual) {
+		psy_ui_FontInfo fontinfo;
+		psy_ui_Font font;
+			
+		psy_ui_fontinfo_init_string(&fontinfo, 
+			psy_properties_readstring(visual, "defaultfont", "tahoma 16"));
+		fontinfo.lfHeight = size;	
+		psy_ui_font_init(&font, &fontinfo);
+		psy_ui_replacedefaultfont(self->mainhandle, &font);
+		psy_ui_component_invalidate(self->mainhandle);
+	}
 }
 
 void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editposition)
@@ -1254,7 +1273,7 @@ void workspace_selectview(Workspace* self, int view)
 	psy_signal_emit(&self->signal_viewselected, self, 1, view);
 }
 
-void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak, int value)
+void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak, float value)
 {
 	psy_signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, 
 		value);

@@ -4,12 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "uicheckbox.h"
+#include "uiapp.h"
 #include "uiimpfactory.h"
-#include "uiwincomponentimp.h"
 #include <string.h>
 
-static void psy_ui_checkbox_oncommand(psy_ui_CheckBox*, psy_ui_Component*,
-	WPARAM wParam, LPARAM lParam);
+extern psy_ui_App app;
+
 static void psy_ui_checkbox_ondestroy(psy_ui_CheckBox*, psy_ui_Component*);
 static void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -29,14 +29,12 @@ static void vtable_init(psy_ui_CheckBox* self)
 
 void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 {  	
-	self->imp = psy_ui_impfactory_allocinit_checkboximp(&self->component, parent);
+	self->imp = psy_ui_impfactory_allocinit_checkboximp(psy_ui_app_impfactory(&app), &self->component, parent);
 	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent,
 		&self->imp->component_imp);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_signal_init(&self->signal_clicked);
-	psy_signal_connect(&self->component.signal_command, self,
-		psy_ui_checkbox_oncommand);
+	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_checkbox_ondestroy);	
 }
@@ -69,23 +67,6 @@ void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 int psy_ui_checkbox_checked(psy_ui_CheckBox* self)
 {
 	return self->imp->vtable->dev_checked(self->imp);
-}
-
-void psy_ui_checkbox_oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,
-	WPARAM wParam, LPARAM lParam)
-{
-	switch(HIWORD(wParam))
-    {
-        case BN_CLICKED:
-        {            
-			if (self->signal_clicked.slots) {
-				psy_signal_emit(&self->signal_clicked, self, 0);
-			}
-        }
-		break;
-		default:
-		break;
-    }
 }
 
 void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,

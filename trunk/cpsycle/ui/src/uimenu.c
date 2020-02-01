@@ -3,6 +3,7 @@
 
 #include "../../detail/prefix.h"
 
+/*
 #include "uimenu.h"
 #include "hashtbl.h"
 
@@ -38,3 +39,4 @@ void psy_ui_menu_append(psy_ui_Menu* self, psy_ui_Menu* child, int popup)
 		++id;
 	}
 }
+*/

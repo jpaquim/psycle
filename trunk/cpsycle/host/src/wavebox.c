@@ -5,6 +5,8 @@
 
 #include "wavebox.h"
 
+#include <string.h>
+
 static void wavebox_ondraw(WaveBox*, psy_ui_Graphics*);
 static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
 static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender,

@@ -4,9 +4,12 @@
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
 
+#include "uiapp.h"
 #include "uigraphics.h"
-#include "uiwingraphicsimp.h"
+#include "uiimpfactory.h"
 #include <stdlib.h>
+
+extern psy_ui_App app;
 
 // VTable Prototypes
 static void dispose(psy_ui_Graphics*);
@@ -70,8 +73,7 @@ void psy_ui_graphics_init(psy_ui_Graphics* self, void* hdc)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = (psy_ui_GraphicsImp*) malloc(sizeof(psy_ui_win_GraphicsImp));
-	psy_ui_win_graphicsimp_init((psy_ui_win_GraphicsImp*)self->imp, hdc);
+	self->imp = psy_ui_impfactory_allocinit_graphicsimp(psy_ui_app_impfactory(&app), hdc);
 }
 
 // Delegation Methods to GraphicsImp

@@ -4,8 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "renderview.h"
-
 #include <fileoutdriver.h>
+
+#include <string.h>
 
 static void renderview_ondestroy(RenderView*, psy_ui_Component* sender);
 static void renderview_makeproperties(RenderView*);

@@ -9,6 +9,8 @@
 #include <alignedalloc.h>
 #include <exclusivelock.h>
 
+#include <string.h>
+
 #include "../../detail/portable.h"
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
