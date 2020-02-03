@@ -107,6 +107,10 @@ SOURCE=.\src\uicheckbox.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uicolordialog.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uicombobox.c
 # End Source File
 # Begin Source File
@@ -116,6 +120,10 @@ SOURCE=.\src\uicomponent.c
 # Begin Source File
 
 SOURCE=.\src\uicursescomponentimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesgraphicsimp.c
 # End Source File
 # Begin Source File
 
@@ -239,6 +247,10 @@ SOURCE=.\src\uiwincheckboximp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uiwincolordialogimp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uiwincomponentimp.c
 # End Source File
 # Begin Source File
@@ -307,6 +319,10 @@ SOURCE=.\src\uicheckbox.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uicolordialog.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uicombobox.h
 # End Source File
 # Begin Source File
@@ -316,6 +332,10 @@ SOURCE=.\src\uicomponent.h
 # Begin Source File
 
 SOURCE=.\src\uicursescomponentimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesgraphicsimp.h
 # End Source File
 # Begin Source File
 
@@ -436,6 +456,10 @@ SOURCE=.\src\uiwinbitmapimp.h
 # Begin Source File
 
 SOURCE=.\src\uiwincheckboximp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincolordialogimp.h
 # End Source File
 # Begin Source File
 

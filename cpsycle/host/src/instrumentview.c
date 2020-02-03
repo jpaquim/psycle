@@ -85,13 +85,13 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	self->player = &workspace->player;
-	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
+	self->player = &workspace->player;
+	self->workspace = workspace;
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));	
 	// header
 	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self);

@@ -18,6 +18,7 @@
 #include "../../detail/portable.h"
 #include "fileio.h"
 #include "../../detail/psyconf.h"
+// #include <process.h>
 
 static psy_dsp_amp_t bufferdriver[65535];
 static void* mainframe;
@@ -38,6 +39,7 @@ static void player_workamount(psy_audio_Player*, uintptr_t amount,
 static void player_oneventdriverinput(psy_audio_Player*, psy_EventDriver* sender);
 static void workeventinput(psy_audio_Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(psy_audio_Player*, uintptr_t amount);
+static void player_workmachine(psy_audio_Player*, uintptr_t amount, uintptr_t slot);
 static void log_workevents(psy_List* events);
 static void player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
 static psy_dsp_RMSVol* player_rmsvol(psy_audio_Player*, size_t slot);
@@ -63,6 +65,7 @@ void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 	player_initrms(self);
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
+	psy_table_init(&self->worked);
 	pattern_init(&self->patterndefaults);
 	pattern_setlength(&self->patterndefaults, (psy_dsp_beat_t) 0.25f);
 #ifdef PSYCLE_LOG_WORKEVENTS
@@ -103,6 +106,7 @@ void player_dispose(psy_audio_Player* self)
 	player_disposerms(self);
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
+	psy_table_dispose(&self->worked);
 	pattern_dispose(&self->patterndefaults);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_close(&logfile);
@@ -189,51 +193,63 @@ void player_workamount(psy_audio_Player* self, uintptr_t amount, uintptr_t* nums
 void player_workpath(psy_audio_Player* self, uintptr_t amount)
 {
 	MachinePath* path;
+
 	path = machines_path(&self->song->machines);
-	if (path) {
+	if (path) {		
 		for ( ; path != 0; path = path->next) {
-			size_t slot;									
-			psy_audio_Machine* machine;
-
-			slot = (size_t)path->entry;
-			machine = machines_at(&self->song->machines, slot);
-			if (machine && !psy_table_exists(&self->song->machines.connections.sends, slot)) {
-				psy_audio_Buffer* output;
-
-				output = psy_audio_machine_mix(machine, slot, amount,
-					connections_at(&self->song->machines.connections, slot),
-					&self->song->machines);
-				if (output && slot != MASTER_INDEX) {				
-					psy_audio_BufferContext bc;										
-					psy_List* events;
-					psy_dsp_RMSVol* rms;
-
-					events = psy_audio_sequencer_timedevents(&self->sequencer,
-						slot, amount);
-					rms = player_rmsvol(self, slot);					
-					psy_audio_buffercontext_init(&bc, events, output, output, amount,
-						self->numsongtracks, rms);
-					psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine), amount);
-					psy_audio_machine_work(machine, &bc);					
-#ifdef PSYCLE_LOG_WORKEVENTS
-					log_workevents(events);
-#endif
-					psy_audio_buffer_pan(output, psy_audio_machine_panning(machine), amount);
-					if (self->vumode == VUMETER_RMS && psy_audio_buffer_numchannels(
-							bc.output) >= 2) {
-						psy_dsp_rmsvol_tick(rms, bc.output->samples[0],
-							bc.output->samples[1],
-							bc.numsamples);
-					}
-					psy_signal_emit(&machine->signal_worked, machine, 2,
-						slot, &bc);
-					psy_list_free(events);										
-				}
+			size_t slot;			
+			
+			slot = (size_t)path->entry;			
+			if (slot == NOMACHINE_INDEX) {				
+				// delimits the machines that could be processed parallel
+				// todo: add thread functions
+				continue;				
 			}			
-		}							
+			player_workmachine(self, amount, slot);
+		}		
 	}
 	if (self->resetvumeters) {
 		player_resetvumeters(self);
+	}	
+}
+
+void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot)
+{
+	psy_audio_Machine* machine;
+
+	machine = machines_at(&self->song->machines, slot);
+	if (machine && !psy_table_exists(&self->song->machines.connections.sends, slot)) {
+		psy_audio_Buffer* output;
+
+		output = psy_audio_machine_mix(machine, slot, amount,
+			connections_at(&self->song->machines.connections, slot),
+			&self->song->machines);
+		if (output && slot != MASTER_INDEX) {
+			psy_audio_BufferContext bc;
+			psy_List* events;
+			psy_dsp_RMSVol* rms;
+
+			events = psy_audio_sequencer_timedevents(&self->sequencer,
+				slot, amount);
+			rms = player_rmsvol(self, slot);
+			psy_audio_buffercontext_init(&bc, events, output, output, amount,
+				self->numsongtracks, rms);
+			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine), amount);
+			psy_audio_machine_work(machine, &bc);
+#ifdef PSYCLE_LOG_WORKEVENTS
+			log_workevents(events);
+#endif
+			psy_audio_buffer_pan(output, psy_audio_machine_panning(machine), amount);
+			if (self->vumode == VUMETER_RMS && psy_audio_buffer_numchannels(
+				bc.output) >= 2) {
+				psy_dsp_rmsvol_tick(rms, bc.output->samples[0],
+					bc.output->samples[1],
+					bc.numsamples);
+			}
+			psy_signal_emit(&machine->signal_worked, machine, 2,
+				slot, &bc);
+			psy_list_free(events);
+		}
 	}
 }
 

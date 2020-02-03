@@ -472,7 +472,7 @@ void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui
 	tm = psy_ui_component_textmetric(&self->component);	
 	colwidth = tm.tmAveCharWidth * 4;	
 	lineheight = (int)(0.8 * tm.tmHeight);
-	rv->width = colwidth * 4;
+	rv->width = colwidth * 4 + tm.tmAveCharWidth;
 	rv->height = lineheight * 2;	
 }
 

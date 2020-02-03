@@ -17,9 +17,9 @@ static void help_loadpage(Help*, uintptr_t index);
 static void help_load(Help*, const char* path);
 
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
-{
-	self->workspace = workspace;
+{	
 	psy_ui_component_init(help_base(self), parent);	
+	self->workspace = workspace;
 	psy_ui_component_enablealign(help_base(self));
 	psy_ui_notebook_init(&self->notebook, help_base(self));	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),

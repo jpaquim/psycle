@@ -297,10 +297,10 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				amount -= numworksamples;
 				bc->numsamples = restorenumsamples;
 			}
-			value = (patternentry_front(entry)->cmd << 8) +
-				patternentry_front(entry)->parameter;
+			value = psy_audio_patternevent_tweakvalue(patternentry_front(entry));
 			psy_audio_machine_patterntweak(psy_audio_vstplugin_base(self),
-				patternentry_front(entry)->inst, machine_parametervalue_normed(
+				patternentry_front(entry)->inst,
+				machine_parametervalue_normed(
 					psy_audio_vstplugin_base(self),
 					patternentry_front(entry)->inst,
 					value));

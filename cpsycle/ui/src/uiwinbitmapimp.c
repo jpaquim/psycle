@@ -16,7 +16,6 @@ static int loadresource(psy_ui_win_BitmapImp*, int resourceid);
 static psy_ui_Size size(psy_ui_win_BitmapImp*);
 static int empty(psy_ui_win_BitmapImp*);
 
-
 // VTable init
 static psy_ui_BitmapImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -39,45 +38,45 @@ void psy_ui_win_bitmapimp_init(psy_ui_win_BitmapImp* self)
 	psy_ui_bitmap_imp_init(&self->imp);
 	imp_vtable_init(self);
 	self->imp.vtable = &imp_vtable;
-	self->hBitmap = 0;
+	self->bitmap = 0;
 }
 
 void dispose(psy_ui_win_BitmapImp* self)
 {
-	if (self->hBitmap) {
-		DeleteObject(self->hBitmap);
-		self->hBitmap = 0;
+	if (self->bitmap) {
+		DeleteObject(self->bitmap);
+		self->bitmap = 0;
 	}
 }
 
 int load(psy_ui_win_BitmapImp* self, const char* path)
 {
-	HBITMAP bmp;
+	HBITMAP bitmap;
 
-	bmp = (HBITMAP)LoadImage(NULL,
+	bitmap = (HBITMAP)LoadImage(NULL,
 		(LPCTSTR)path,
 		IMAGE_BITMAP,
 		0, 0,
 		LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	if (bmp != 0) {
+	if (bitmap != 0) {
 		dispose(self);
-		self->hBitmap = bmp;
+		self->bitmap = bitmap;
 	}
-	return bmp == 0;
+	return bitmap == 0;
 }
 
 int loadresource(psy_ui_win_BitmapImp* self, int resourceid)
 {
-	HBITMAP bmp;
+	HBITMAP bitmap;
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*)app.platform;
-	bmp = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
-	if (bmp != 0) {
+	bitmap = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
+	if (bitmap != 0) {
 		dispose(self);
-		self->hBitmap = bmp;
+		self->bitmap = bitmap;
 	}
-	return bmp == 0;
+	return bitmap == 0;
 }
 
 psy_ui_Size size(psy_ui_win_BitmapImp* self)
@@ -85,8 +84,8 @@ psy_ui_Size size(psy_ui_win_BitmapImp* self)
 	psy_ui_Size size;
 	BITMAP bitmap;
 
-	if (self->hBitmap) {
-		GetObject(self->hBitmap, sizeof(BITMAP), &bitmap);
+	if (self->bitmap) {
+		GetObject(self->bitmap, sizeof(BITMAP), &bitmap);
 		size.width = bitmap.bmWidth;
 		size.height = bitmap.bmHeight;
 	}
@@ -99,5 +98,5 @@ psy_ui_Size size(psy_ui_win_BitmapImp* self)
 
 int empty(psy_ui_win_BitmapImp* self)
 {
-	return self->hBitmap != 0;
+	return self->bitmap == 0;
 }

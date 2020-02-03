@@ -14,15 +14,26 @@
 #endif
 #include <windows.h>
 
-static void about_onsize(About*, psy_ui_Component* sender, psy_ui_Size*);
 static void about_initbuttons(About* self);
 static void about_oncontributors(About*, psy_ui_Component* sender);
 static void about_onversion(About*, psy_ui_Component* sender);
-static void about_onshowatstartup(About*, psy_ui_Component* sender);
-static void about_align(About*, psy_ui_Component* sender);
-static void about_onmousedoubleclick(About*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-	
+static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
+static void about_onalign(About*);
+
+static psy_ui_ComponentVtable about_vtable;
+static int about_vtable_initialized = 0;
+
+static void about_vtable_init(About* self)
+{
+	if (!about_vtable_initialized) {
+		about_vtable = *(self->component.vtable);		
+		about_vtable.onalign = (psy_ui_fp_onalign) about_onalign;
+		about_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+			about_onmousedoubleclick;
+		about_vtable_initialized = 1;
+	}
+}
+
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
 	psy_ui_component_init(&self->component, parent);
@@ -106,7 +117,9 @@ void version_init(Version* self, psy_ui_Component* parent)
 void about_init(About* self, psy_ui_Component* parent)
 {			
 	psy_ui_component_init(&self->component, parent);	
-	psy_signal_connect(&self->component.signal_size, self, about_onsize);
+	about_vtable_init(self);
+	self->component.vtable = &about_vtable;
+	psy_ui_component_enablealign(&self->component);	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
@@ -115,8 +128,6 @@ void about_init(About* self, psy_ui_Component* parent)
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));		
 	psy_ui_notebook_setpageindex(&self->notebook, 0);
-	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
-		about_onmousedoubleclick);
 }
 
 void about_initbuttons(About* self)
@@ -133,31 +144,52 @@ void about_initbuttons(About* self)
 	psy_ui_button_settext(&self->okbutton, "OK");	
 }
 
-void about_align(About* self, psy_ui_Component* sender)
+void about_onalign(About* self)
 {
 	psy_ui_Size size;
+	psy_ui_Size bitmapsize;
+	psy_ui_TextMetric tm;
 	int centerx;
 	int centery;
+	psy_ui_Size contribbuttonsize;
+	psy_ui_Size versionbuttonsize;
+	psy_ui_Size okbuttonsize;
+	int charmargin = 25;
+	int width = 0;	
+	int margin;
+	int cpx;
 
-	size = psy_ui_component_size(&self->component);
-	centerx = (size.width - 500) / 2;	
-	centery = (size.height - 385) / 2;
-	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
-		centerx, centery + 5, 520, 360);	
-	if (centery + 365 > size.height - 25) {
-		centery = size.height - 365 - 25;
+	size = psy_ui_component_size(&self->component);	
+	tm = psy_ui_component_textmetric(&self->component);
+	bitmapsize = psy_ui_bitmap_size(&self->image.bitmap);
+	bitmapsize.height += tm.tmHeight * 4;
+	centerx = (size.width - bitmapsize.width) / 2;
+	centery = (size.height - bitmapsize.height) / 2;	
+	contribbuttonsize = psy_ui_component_preferredsize(&self->contribbutton.component, &size);
+	versionbuttonsize = psy_ui_component_preferredsize(&self->versionbutton.component, &size);
+	okbuttonsize = psy_ui_component_preferredsize(&self->okbutton.component, &size);
+	if (centery + bitmapsize.height + okbuttonsize.height > size.height) {
+		bitmapsize.height = size.height - okbuttonsize.height * 2;
+		centery = (size.height - bitmapsize.height) / 2;
 	}
+	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
+		centerx, centery, bitmapsize.width, bitmapsize.height);	
+	do {
+		margin = tm.tmAveCharWidth * charmargin;
+		width = contribbuttonsize.width + versionbuttonsize.width + okbuttonsize.width + margin * 2;
+		--charmargin;
+	} while (width > size.width && charmargin > 0);	
+	cpx = (size.width - width) / 2;
 	psy_ui_component_setposition(&self->contribbutton.component,
-		centerx, centery + 365, 120, 20);
+		cpx, centery + bitmapsize.height,
+		contribbuttonsize.width, contribbuttonsize.height);
 	psy_ui_component_setposition(&self->versionbutton.component,
-		centerx + 145, centery + 365, 300, 20);
+		cpx + contribbuttonsize.width + margin, centery + bitmapsize.height,
+		versionbuttonsize.width, versionbuttonsize.height);
 	psy_ui_component_setposition(&self->okbutton.component,
-		centerx + 445, centery + 365, 60, 20);
-}
-
-void about_onsize(About* self, psy_ui_Component* sender, psy_ui_Size* size)
-{	
-	about_align(self, &self->component);
+		cpx + contribbuttonsize.width + versionbuttonsize.width + margin * 2,
+		centery + bitmapsize.height,
+		okbuttonsize.width, okbuttonsize.height);
 }
 
 void about_oncontributors(About* self, psy_ui_Component* sender) 
@@ -174,8 +206,7 @@ void about_onversion(About* self, psy_ui_Component* sender)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void about_onmousedoubleclick(About* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void about_onmousedoubleclick(About* self, psy_ui_MouseEvent* ev)
 {
 	psy_signal_emit(&self->okbutton.signal_clicked, self, 0);
 }

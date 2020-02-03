@@ -707,7 +707,7 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAKSLIDE) {
 		psy_audio_maketweakslideevents(self, patternentry, offset);
 	} else
-	if (patternentry_front(patternentry)->cmd < NOTECOMMANDS_TWEAK ||
+	if (patternentry_front(patternentry)->note < NOTECOMMANDS_TWEAK ||
 			patternentry_front(patternentry)->note == NOTECOMMANDS_EMPTY) {
 		if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
 			psy_audio_sequencer_notedelay(self, patternentry, offset);
@@ -720,6 +720,9 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 		} else {
 			psy_audio_sequencer_note(self, patternentry, offset);
 		}
+	} else
+	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAK) {
+		psy_audio_sequencer_note(self, patternentry, offset);
 	}
 }
 

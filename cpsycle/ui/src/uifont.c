@@ -59,8 +59,14 @@ void copy(psy_ui_Font* self, psy_ui_Font* other)
 }
 
 // psy_ui_FontImp
-static void psy_ui_imp_dispose(psy_ui_FontImp* self) { }
-static void psy_ui_imp_copy(psy_ui_FontImp* self, psy_ui_FontImp* other) { }
+static void dev_dispose(psy_ui_FontImp* self) { }
+static void dev_copy(psy_ui_FontImp* self, psy_ui_FontImp* other) { }
+static psy_ui_FontInfo dev_fontinfo(psy_ui_FontImp* self)
+{
+    psy_ui_FontInfo rv;
+    psy_ui_fontinfo_init(&rv, "tahoma", 8);
+    return rv;
+}
 
 static psy_ui_FontImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -68,8 +74,9 @@ static int imp_vtable_initialized = 0;
 static void imp_vtable_init(void)
 {
 	if (!imp_vtable_initialized) {
-		imp_vtable.dev_dispose = psy_ui_imp_dispose;		
-		imp_vtable.dev_copy = psy_ui_imp_copy;
+		imp_vtable.dev_dispose = dev_dispose;		
+		imp_vtable.dev_copy = dev_copy;
+        imp_vtable.dev_fontinfo = dev_fontinfo;
 		imp_vtable_initialized = 1;
 	}
 }

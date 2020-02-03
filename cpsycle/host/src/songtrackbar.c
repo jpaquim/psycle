@@ -6,6 +6,8 @@
 #include "songtrackbar.h"
 #include "../../detail/portable.h"
 
+#define MIN_TRACKS 4
+
 static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
@@ -46,31 +48,31 @@ void songtrackbar_build(SongTrackBar* self)
 	int track;
 	char text[20];
 
-	for (track = 0; track < 65; ++track) {
-		psy_snprintf(text, 20, "%d", track);		
+	for (track = MIN_TRACKS; track < 65; ++track) {
+		psy_snprintf(text, 20, "%d", track);
 		psy_ui_combobox_addstring(&self->trackbox, text);
 	}	
 	psy_ui_combobox_setcursel(&self->trackbox,
-		player_numsongtracks(&self->workspace->player));
+		player_numsongtracks(&self->workspace->player) - MIN_TRACKS);
 }
 
 void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 	int index)
 {		
-	player_setnumsongtracks(&self->workspace->player, index);
+	player_setnumsongtracks(&self->workspace->player, index + MIN_TRACKS);
 	if (self->workspace->song) {
-		patterns_setsongtracks(&self->workspace->song->patterns, index);
+		patterns_setsongtracks(&self->workspace->song->patterns, index + MIN_TRACKS);
 	}
 }
 
 void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
 	Workspace* workspace, unsigned int numsongtracks)
 {
-	psy_ui_combobox_setcursel(&self->trackbox, numsongtracks);
+	psy_ui_combobox_setcursel(&self->trackbox, numsongtracks - MIN_TRACKS);
 }
 
 void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace)
 {	
 	psy_ui_combobox_setcursel(&self->trackbox,
-		player_numsongtracks(&workspace->player));
+		player_numsongtracks(&workspace->player) - MIN_TRACKS);
 }

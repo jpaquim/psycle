@@ -12,31 +12,31 @@
 extern psy_ui_App app;
 
 // VTable Prototypes
-static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self);
-static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, int x, int y,  const char*, size_t len);
-static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, int x, int y, unsigned int options,
+static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp*);
+static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, int x, int y,  const char*, size_t len);
+static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, int x, int y, unsigned int options,
 	psy_ui_Rectangle r, const char* text, size_t len);
-static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle);
-static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle,
+static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle);
+static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle,
 	psy_ui_Size cornersize);
-static psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char*);
-static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r,
+static psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp*, const char*);
+static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
 	unsigned int color);
-static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r,
+static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_Point*,
+static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_Point*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
-static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, int x1, int y1, int x2, int y2);
-static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap*, int x, int y);
-static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap*, int x, int y, int width,
+static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, int x1, int y1, int x2, int y2);
+static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
+static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
-static void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp* self, unsigned int color);
-static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, unsigned int mode);
-static void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp* self, unsigned int color);
-static void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color);
-static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font);
-static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_Point pt);
-static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_Point control_p1,
+static void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp*, unsigned int color);
+static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, unsigned int mode);
+static void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp*, unsigned int color);
+static void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp*, unsigned int color);
+static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
+static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_Point pt);
+static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p);
 
 // VTable init
@@ -207,29 +207,30 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_Poin
 
 void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, int x, int y)
 {
-	HDC hdcMem;
+	HDC hdcmem;
 	psy_ui_Size size;
-	HBITMAP hbmp;
+	HBITMAP wbitmap;
 
-	hdcMem = CreateCompatibleDC(self->hdc);
-	hbmp = ((psy_ui_win_BitmapImp*)bitmap->imp)->hBitmap;
-	SelectObject (hdcMem, hbmp);
+	hdcmem = CreateCompatibleDC(self->hdc);
+	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
+	SelectObject (hdcmem, wbitmap);
 	size = psy_ui_bitmap_size(bitmap);
-	BitBlt(self->hdc, x, y, size.width, size.height, hdcMem, 0, 0, SRCCOPY);
-	DeleteDC(hdcMem);  
+	BitBlt(self->hdc, x, y, size.width, size.height, hdcmem, 0, 0, SRCCOPY);
+	DeleteDC(hdcmem);
 }
 
-void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, int x, int y, int width,
+void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
+	psy_ui_Bitmap* bitmap, int x, int y, int width,
 	int height, int xsrc, int ysrc)
 {
-	HDC hdcMem;
-	HBITMAP hbmp;
+	HDC hdcmem;
+	HBITMAP wbitmap;
 
-	hbmp = ((psy_ui_win_BitmapImp*)bitmap->imp)->hBitmap;
-	hdcMem = CreateCompatibleDC (self->hdc) ;
-	SelectObject (hdcMem, hbmp) ;	
-	BitBlt(self->hdc, x, y, width, height, hdcMem, xsrc, ysrc, SRCCOPY);
-	DeleteDC (hdcMem);  
+	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
+	hdcmem = CreateCompatibleDC (self->hdc) ;
+	SelectObject (hdcmem, wbitmap) ;
+	BitBlt(self->hdc, x, y, width, height, hdcmem, xsrc, ysrc, SRCCOPY);
+	DeleteDC (hdcmem);
 }
 
 void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color)

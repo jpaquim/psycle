@@ -29,6 +29,7 @@ typedef enum {
 	PSY_PROPERTY_HINT_READONLY,
 	PSY_PROPERTY_HINT_EDIT,
 	PSY_PROPERTY_HINT_EDITDIR,
+	PSY_PROPERTY_HINT_EDITCOLOR,
 	PSY_PROPERTY_HINT_INPUT,
 	PSY_PROPERTY_HINT_LIST,
 	PSY_PROPERTY_HINT_CHECK	
@@ -65,6 +66,7 @@ typedef int (*psy_PropertiesCallback)(void* , psy_Properties*, int level);
 void psy_properties_init(psy_Properties*, const char* key, psy_PropertyType);
 psy_Properties* psy_properties_create(void);
 psy_Properties* psy_properties_clone(psy_Properties*, int all);
+psy_Properties* psy_properties_sync(psy_Properties*, psy_Properties* src);
 psy_Properties* psy_properties_create_section(psy_Properties*, const char* name);
 void properties_free(psy_Properties* );
 psy_Properties* psy_properties_create_string(const char* key, const char* value);

@@ -161,7 +161,7 @@ void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
 		parent,
 		TEXT("LISTBOX"),
 		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE | SS_CENTER | SS_CENTERIMAGE,
+		(WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY) & ~WS_BORDER,
 		1);
 	imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;

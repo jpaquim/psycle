@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 #include <exclusivelock.h>
+#include <uialigner.h>
+#include <assert.h>
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -52,8 +54,7 @@ static void sequenceview_onpreferredsize(SequenceView*, psy_ui_Size* limit,
 
 static void sequenceduration_update(SequenceViewDuration*);
 
-static void sequencebuttons_onalign(SequenceButtons* self,
-	psy_ui_Component* sender);
+static void sequencebuttons_onalign(SequenceButtons* self);
 static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static psy_List* rowend(psy_List* p);
@@ -82,6 +83,8 @@ static void sequencebuttons_vtable_init(SequenceButtons* self)
 {
 	if (!sequencebuttons_vtable_initialized) {
 		sequencebuttons_vtable = *(self->component.vtable);
+		sequencebuttons_vtable.onalign = (psy_ui_fp_onalign)
+			sequencebuttons_onalign;
 		sequencebuttons_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			sequencebuttons_onpreferredsize;
 		sequencebuttons_vtable_initialized = 1;
@@ -93,13 +96,14 @@ static int listviewmargin = 5;
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	self->workspace = workspace;
-	self->sequence = &workspace->song->sequence;
-	self->patterns = &workspace->song->patterns;
-	self->selection = &workspace->sequenceselection;	
 	psy_ui_component_init(&self->component, parent);
 	sequenceview_vtable_init(self);
 	self->component.vtable = &sequenceview_vtable;
+	self->start = 1;
+	self->workspace = workspace;
+	self->sequence = &workspace->song->sequence;
+	self->patterns = &workspace->song->patterns;
+	self->selection = &workspace->sequenceselection;		
 	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);
 	playlisteditor_init(&self->playlisteditor, &self->component,
@@ -206,12 +210,10 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent)
 	psy_ui_button_init(&self->multisel, &self->component);	
 	psy_ui_button_settext(&self->multisel, "MultiSel");	
 	psy_ui_button_highlight(&self->singlesel);
-	psy_ui_button_disablehighlight(&self->multisel);
-	psy_signal_connect(&self->component.signal_align, self,
-		sequencebuttons_onalign);	
+	psy_ui_button_disablehighlight(&self->multisel);	
 }
 
-void sequencebuttons_onalign(SequenceButtons* self, psy_ui_Component* sender)
+void sequencebuttons_onalign(SequenceButtons* self)
 {
 	int numparametercols = 3;
 	int numrows = 0;
@@ -876,9 +878,16 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 
 void sequenceview_onpreferredsize(SequenceView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{	
-	if (rv) {		
-		*rv = psy_ui_component_size(&self->component);
+{		
+	assert(rv);
+	if (self->start) {		
+		psy_ui_Aligner aligner;
+
+		psy_ui_aligner_init(&aligner, &self->component);
+		psy_ui_aligner_preferredsize(&aligner, limit, rv);
+		self->start = 0;
+	} else {
+		*rv = psy_ui_component_size(&self->component);		
 	}
 }
 

@@ -16,6 +16,8 @@
 #include <uisavedialog.h>
 #include <uiwincomponentimp.h>
 #include "../../detail/portable.h"
+#include "Windows.h"
+#include "Shlobj.h"
 
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
 {
@@ -31,7 +33,11 @@ static void workspace_makegeneral(Workspace*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makevisual(Workspace*);
 static void workspace_makepatternview(Workspace*, psy_Properties*);
-static void workspace_makemachineview(Workspace* self, psy_Properties*);
+static void workspace_makepatternviewtheme(Workspace*, psy_Properties*);
+static void workspace_makemachineview(Workspace*, psy_Properties*);
+static void workspace_makemachineviewtheme(Workspace*, psy_Properties*);
+static void workspace_makeparamview(Workspace*, psy_Properties*);
+static void workspace_makeparamtheme(Workspace*, psy_Properties*);
 static void workspace_makekeyboard(Workspace*);
 static void workspace_makedirectories(Workspace*);
 static void workspace_makenotes(Workspace*);
@@ -120,6 +126,7 @@ void workspace_init(Workspace* self, void* handle)
 #else
 	psy_dsp_noopt_init(&dsp);
 #endif
+	self->fontheight = 12;
 	self->octave = 4;	
 	self->cursorstep = 1;
 	self->followsong = 0;
@@ -135,6 +142,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->maximizeview.row2 = 1;
 	self->currnavigation = 0;
 	self->currview = 0;
+	self->dialbitmappath = 0;
 	history_init(&self->history);
 	workspace_makeconfig(self);	
 	workspace_initplugincatcherandmachinefactory(self);
@@ -175,6 +183,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_songchanged);
 	psy_signal_init(&self->signal_configchanged);
 	psy_signal_init(&self->signal_skinchanged);
+	psy_signal_init(&self->signal_changecontrolskin);
 	psy_signal_init(&self->signal_patterneditpositionchanged);
 	psy_signal_init(&self->signal_sequenceselectionchanged);
 	psy_signal_init(&self->signal_loadprogress);
@@ -211,15 +220,17 @@ void workspace_dispose(Workspace* self)
 	workspace_disposesequencepaste(self);
 	properties_free(self->cmds);
 	sequenceselection_dispose(&self->sequenceselection);
+	free(self->dialbitmappath);
 	psy_audio_lock_dispose();
 }
 
 void workspace_disposesignals(Workspace* self)
 {
 	psy_signal_dispose(&self->signal_octavechanged);
-	psy_signal_dispose(&self->signal_songchanged);
+	psy_signal_dispose(&self->signal_songchanged);	
 	psy_signal_dispose(&self->signal_configchanged);
 	psy_signal_dispose(&self->signal_skinchanged);
+	psy_signal_dispose(&self->signal_changecontrolskin);
 	psy_signal_dispose(&self->signal_patterneditpositionchanged);
 	psy_signal_dispose(&self->signal_sequenceselectionchanged);
 	psy_signal_dispose(&self->signal_loadprogress);
@@ -284,6 +295,8 @@ void workspace_configvisual(Workspace* self)
 		psy_ui_fontinfo_init_string(&fontinfo, 
 			psy_properties_readstring(visual, "defaultfont", "tahoma 16"));
 		psy_ui_font_init(&font, &fontinfo);
+		fontinfo = psy_ui_font_fontinfo(&font);
+		self->fontheight = fontinfo.lfHeight;
 		psy_ui_replacedefaultfont(self->mainhandle, &font);		
 	}
 }
@@ -417,10 +430,14 @@ void workspace_makevisual(Workspace* self)
 		psy_properties_append_action(visual, "loadskin"),
 		"Load Skin");
 	psy_properties_settext(
+		psy_properties_append_action(visual, "defaultskin"),
+		"Default Skin");
+	psy_properties_settext(
 		psy_properties_append_font(visual, "defaultfont", "tahoma:80"),
 		"Default Font");	
 	workspace_makepatternview(self, visual);
 	workspace_makemachineview(self, visual);
+	workspace_makeparamview(self, visual);
 }
 
 void workspace_makepatternview(Workspace* self, psy_Properties* visual)
@@ -467,7 +484,97 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 		"Bar highlighting: (beats/bar)");
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "notetab", 1),
-		"A4 is 440Hz (Otherwise it is 220Hz)");	
+		"A4 is 440Hz (Otherwise it is 220Hz)");
+	workspace_makepatternviewtheme(self, pvc);
+}
+
+void workspace_makepatternviewtheme(Workspace* self, psy_Properties* view)
+{		
+	self->patternviewtheme = psy_properties_create_section(view, "theme");
+	psy_properties_append_string(self->patternviewtheme, "pattern_fontface", "Tahoma");	
+	psy_properties_append_int(self->patternviewtheme, "pattern_font_point", 0x00000050, 0, 0),
+	psy_properties_append_int(self->patternviewtheme, "pattern_font_flags", 0x00000001, 0, 0);
+	psy_properties_append_int(self->patternviewtheme, "pattern_font_x", 0x00000009, 0, 0);
+	psy_properties_append_int(self->patternviewtheme, "pattern_font_y", 0x0000000B, 0, 0);
+	psy_properties_append_string(self->patternviewtheme, "pattern_header_skin", "");
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_separator", 0x00292929, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_separator2", 0x00292929, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_background", 0x00292929, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_background2", 0x00292929, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_font", 0x00CACACA, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_font2", 0x00CACACA, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_fontCur", 0x00FFFFFF, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_fontCur2", 0x00FFFFFF, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_fontSel", 0x00FFFFFF, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_fontSel2", 0x00FFFFFF, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_fontPlay", 0x00FFFFFF, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_fontPlay2", 0x00FFFFFF, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_row", 0x003E3E3E, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_row2", 0x003E3E3E, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_rowbeat", 0x00363636, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_rowbeat2", 0x00363636, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_row4beat", 0x00595959, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_row4beat2", 0x00595959, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_selection", 0x009B7800, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_selection2", 0x009B7800, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_playbar", 0x009F7B00, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_playbar2", 0x009F7B00, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_cursor", 0x009F7B00, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_cursor2", 0x009F7B00, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_midline", 0x007D6100, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+		"pvc_midline", 0x007D6100, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
 }
 
 void workspace_makemachineview(Workspace* self, psy_Properties* visual)
@@ -483,6 +590,113 @@ void workspace_makemachineview(Workspace* self, psy_Properties* visual)
 	psy_properties_settext(
 		psy_properties_append_bool(mvc, "drawvumeters", 1),
 		"Draw VU Meters");
+	workspace_makemachineviewtheme(self, mvc);
+}
+
+void workspace_makemachineviewtheme(Workspace* self, psy_Properties* view)
+{
+	self->machineviewtheme = psy_properties_create_section(view, "theme");
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"vu1", 0x0080FF80, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"vu2", 0x00403731, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"vu3", 0x00262bd7, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_append_string(self->machineviewtheme, "generator_fontface", "Tahoma");		
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"generator_font_point" , 0x00000050, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"generator_font_flags" , 0x00000000, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_append_string(self->machineviewtheme, "effect_fontface", "Tahoma");		
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"effect_font_point", 0x00000050, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"effect_font_flags", 0x00000000, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_colour", 0x00232323, 0, 0), //
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_wirecolour", 0x005F5F5F, 0, 0),//
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_wirecolour2", 0x005F5F5F, 0, 0),//
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_polycolour", 0x00B1C8B0, 0, 0),//
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_generator_fontcolour", 0x00B1C8B0, 0, 0),//
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_effect_fontcolour", 0x00D1C5B6, 0, 0),//
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_wirewidth", 0x00000001, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_wireaa", 0x01, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"machine_background", 0, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+		"mv_triangle_size", 0x0A, 0, 0),//
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_append_string(self->machineviewtheme, "machine_skin", "");//		
+}
+
+void workspace_makeparamview(Workspace* self, psy_Properties* visual)
+{	
+	psy_Properties* paramview;
+
+	paramview = psy_properties_create_section(visual, "paramview");
+	psy_properties_settext(paramview, "Native Machine Parameter Window");
+	psy_properties_settext(
+		psy_properties_append_action(paramview, "loadcontrolskin"),
+		"Load Dial Bitmap");	
+	workspace_makeparamtheme(self, paramview);
+}
+
+void workspace_makeparamtheme(Workspace* self, psy_Properties* view)
+{
+	self->paramtheme = psy_properties_create_section(view, "theme");
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguitopcolor", 0x00555555, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguifonttopcolor", 0x00CDCDCD, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguibottomcolor", 0x00444444, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguifontbottomcolor", 0x00E7BD18, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguihtopcolor", 0x00555555, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguihfonttopcolor", 0x00CDCDCD, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguihbottomcolor", 0x00CDCDCD, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguihfontbottomcolor", 0x00E7BD18, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguititlecolor", 0x00292929, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+		"machineguititlefontcolor", 0x00B4B4B4, 0, 0),
+		PSY_PROPERTY_HINT_EDITCOLOR);	
 }
 
 void workspace_makekeyboard(Workspace* self)
@@ -490,11 +704,10 @@ void workspace_makekeyboard(Workspace* self)
 	self->keyboard = psy_properties_settext(
 		psy_properties_create_section(self->config, "keyboard"),
 		"Keyboard and Misc.");
-
 	psy_properties_settext(
 		psy_properties_append_bool(self->keyboard, 
 		"recordtweaksastws", 0),
-		"Record Mouse Tweaks as tws (Smooth tweaks)");	
+		"Record Mouse Tweaks as tws (Smooth tweaks)");
 	psy_properties_settext(
 		psy_properties_append_bool(self->keyboard, 
 		"advancelineonrecordtweak", 0),
@@ -575,7 +788,7 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
 	drivers = psy_properties_append_choice(self->inputoutput, "driver", 2); 
-	psy_properties_settext(drivers, "psy_AudioDriver");
+	psy_properties_settext(drivers, "AudioDriver");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(_DEBUG)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
@@ -744,6 +957,43 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 				workspace_skins_directory(self));
 			if (psy_ui_opendialog_execute(&opendialog)) {			
 				workspace_loadskin(self, psy_ui_opendialog_filename(
+					&opendialog));
+			}
+			psy_ui_opendialog_dispose(&opendialog);
+		} else
+		if (strcmp(psy_properties_key(property), "defaultskin") == 0) {
+			psy_Properties* view;
+			psy_Properties* theme;
+			
+			view = psy_properties_findsection(self->config, "visual.patternview");
+			theme = psy_properties_findsection(view, "theme");
+			if (theme) {
+				psy_properties_remove(view, theme);
+			}
+			workspace_makepatternviewtheme(self, view);
+			view = psy_properties_findsection(self->config, "visual.machineview");
+			theme = psy_properties_findsection(view, "theme");
+			if (theme) {
+				psy_properties_remove(view, theme);
+			}
+			workspace_makemachineviewtheme(self, view);
+			view = psy_properties_findsection(self->config, "visual.paramview");
+			theme = psy_properties_findsection(view, "theme");
+			if (theme) {
+				psy_properties_remove(view, theme);
+			}
+			workspace_makeparamtheme(self, view);
+			psy_signal_emit(&self->signal_skinchanged, self, 0);
+		} else
+		if (strcmp(psy_properties_key(property), "loadcontrolskin") == 0) {
+			psy_ui_OpenDialog opendialog;
+
+			psy_ui_opendialog_init_all(&opendialog, 0,
+				"Load Dial Bitmap",
+				"Control Skins|*.psc|Bitmaps|*.bmp", "psc",
+				workspace_skins_directory(self));
+			if (psy_ui_opendialog_execute(&opendialog)) {
+				workspace_loadcontrolskin(self, psy_ui_opendialog_filename(
 					&opendialog));
 			}
 			psy_ui_opendialog_dispose(&opendialog);
@@ -1031,9 +1281,19 @@ void workspace_loadskin(Workspace* self, const char* path)
 	psy_Properties* properties;
 		
 	properties = psy_properties_create();		
-	skin_load(properties, path);
-	psy_signal_emit(&self->signal_skinchanged, self, 1, properties);
+	skin_load(properties, path);	
+	psy_properties_sync(self->paramtheme, properties);
+	psy_properties_sync(self->machineviewtheme, properties);
+	psy_properties_sync(self->patternviewtheme, properties);
+	psy_signal_emit(&self->signal_skinchanged, self, 0);
 	properties_free(properties);
+}
+
+void workspace_loadcontrolskin(Workspace* self, const char* path)
+{
+	free(self->dialbitmappath);
+	self->dialbitmappath = strdup(path);
+	psy_signal_emit(&self->signal_changecontrolskin, self, 1, path);
 }
 
 psy_Properties* workspace_makeproperties(Workspace* self)
@@ -1065,19 +1325,26 @@ psy_Properties* workspace_pluginlist(Workspace* self)
 }
 
 void workspace_load_configuration(Workspace* self)
-{		
-	propertiesio_load(self->config, "psycle.ini", 0);	
+{
+	char path[_MAX_PATH];
+	
+	psy_snprintf(path, MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
+	propertiesio_load(self->config, path, 0);	
 	workspace_configaudio(self);	
 	eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
 	psy_signal_emit(&self->signal_configchanged, self, 1, self->config);
+	psy_signal_emit(&self->signal_skinchanged, self, 0);
 }
 
 void workspace_save_configuration(Workspace* self)
 {
-	propertiesio_save(self->config, "psycle.ini");	
+	char path[_MAX_PATH];
+
+	psy_snprintf(path, MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
+	propertiesio_save(self->config, path);	
 }
 
 void workspace_setoctave(Workspace* self, int octave)
@@ -1397,6 +1664,27 @@ const char* workspace_doc_directory(Workspace* self)
 		PSYCLE_DOC_DEFAULT_DIR);
 }
 
+const char* workspace_config_directory(Workspace* self)
+{	
+	static TCHAR   achDevice[MAX_PATH];
+#if _winver >= 0x600
+	HRESULT  hr;
+	// include file ShlObj.h contains list of CSIDL defines however only a subset
+	// are supported with Windows 7 and later.
+	// for the 3rd argument, hToken, can be a specified Access Token or SSID for
+	// a user other than the current user. Using NULL gives us the current user.
+
+	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, achDevice))) {
+		// append a folder name to the user's Documents directory.
+		// the Path Handling functions are pretty handy.
+		// PathAppend(achDevice, L"xxx");
+	}
+#else	
+	strcpy(achDevice, PSYCLE_APP_DIR);
+#endif
+	return achDevice;
+}
+
 MachineCallback machinecallback(Workspace* self)
 {
 	MachineCallback rv;	
@@ -1506,4 +1794,9 @@ void workspace_onterminaloutput(Workspace* self, psy_audio_SongFile* sender,
 void machinecallback_output(Workspace* self, const char* text)
 {
 	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
+}
+
+const char* workspace_dialbitmap_path(Workspace* self)
+{
+	return self->dialbitmappath;
 }

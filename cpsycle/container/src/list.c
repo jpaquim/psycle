@@ -55,6 +55,7 @@ psy_List* psy_list_cat(psy_List** self, psy_List* list)
 	} else 
 	if (list) {		
 		(*self)->tail->next = list;
+		list->prev = (*self)->tail;
 		(*self)->tail = list->tail;
 		(*self)->size += list->size;
 	}
@@ -88,8 +89,10 @@ psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 {	
 	psy_List* rv;
+	psy_List* tail;	
 
 	if (self && *self) {
+		tail = (*self)->tail;
 		if (ptr->prev == NULL && ptr->next == NULL) {
 			*self = NULL;
 			free(ptr);
@@ -98,8 +101,12 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 		if (ptr->prev != NULL) {
 			ptr->prev->next = ptr->next;
 		} else {
-			*self = ptr->next;		
-			(*self)->tail = ptr->tail;
+			*self = ptr->next;
+			if (tail != ptr) {
+				(*self)->tail = tail;
+			} else {
+				(*self)->tail = tail->prev;
+			}
 		}
 		if (ptr->next != NULL) {
 			ptr->next->prev = ptr->prev;

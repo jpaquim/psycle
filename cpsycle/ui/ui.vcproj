@@ -286,6 +286,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\uicolordialog.c"
+				>
+			</File>
+			<File
 				RelativePath="src\uicombobox.c"
 				>
 				<FileConfiguration
@@ -331,6 +335,10 @@
 			</File>
 			<File
 				RelativePath=".\src\uicursescomponentimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uicursesgraphicsimp.c"
 				>
 			</File>
 			<File
@@ -850,6 +858,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uiwincolordialogimp.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uiwincomponentimp.c"
 				>
 			</File>
@@ -918,6 +930,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\uicolordialog.h"
+					>
+				</File>
+				<File
 					RelativePath="src\uicombobox.h"
 					>
 				</File>
@@ -927,6 +943,10 @@
 				</File>
 				<File
 					RelativePath=".\src\uicursescomponentimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uicursesgraphicsimp.h"
 					>
 				</File>
 				<File
@@ -1047,6 +1067,10 @@
 				</File>
 				<File
 					RelativePath=".\src\uiwincheckboximp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwincolordialogimp.h"
 					>
 				</File>
 				<File

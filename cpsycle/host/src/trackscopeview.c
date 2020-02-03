@@ -12,8 +12,7 @@
 #define TIMERID_TRACKSCOPEVIEW 6000
 
 static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
-static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
+static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_MouseEvent*);
 static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
 	int x, int y, int width, int height, int track);
 void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
@@ -22,6 +21,7 @@ void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, int x,
 	int y, int width, int height, int track);
 static void trackscopeview_ontimer(TrackScopeView*, psy_ui_Component* sender,
 	int timerid);
+static void trackscopeview_onalign(TrackScopeView*);
 static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
@@ -32,23 +32,26 @@ static void vtable_init(TrackScopeView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.onalign = (psy_ui_fp_onalign) trackscopeview_onalign;
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			trackscopeview_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) trackscopeview_ondraw;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)
+			trackscopeview_onmousedown;
 	}
 }
 
 void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{		
-	self->workspace = workspace;
-	self->trackheight = 30;
+{	
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		trackscopeview_onmousedown); 
+	psy_ui_component_enablealign(&self->component);
+	self->workspace = workspace;
+	self->trackheight = 30;
+	self->textheight = 12;
 	psy_signal_connect(&self->component.signal_timer, self,
 		trackscopeview_ontimer);
 	psy_ui_component_starttimer(&self->component, TIMERID_TRACKSCOPEVIEW, 50);
@@ -60,18 +63,16 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		psy_ui_Size size;
 		int numtracks = player_numsongtracks(&self->workspace->player);
 		int c;
-		int maxcolumns = 16;
-		int columns = maxcolumns;
+		int maxcolumns = 16;		
 		int rows = 1;
 		int track = 0;
 		int line = 0;		
 		int cpx = 0;
 		int cpy = 0;
 		int width;		
-
-		columns = numtracks < maxcolumns ? numtracks : maxcolumns;
+		
 		size = psy_ui_component_size(&self->component);
-		width = size.width / columns;
+		width = size.width / maxcolumns;
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00444444);
 		for (c = 0; c < numtracks; ++c) {
@@ -85,7 +86,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 				trackscopeview_drawtrackmuted(self, g, cpx, cpy, width,
 					self->trackheight, c);
 			}
-			if (track < columns) {
+			if (track < maxcolumns - 1) {
 				++track;
 				cpx += width;
 			} else {
@@ -125,7 +126,8 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 		char text[40];
 
 		psy_snprintf(text, 40, "%X", lastmachine);
-		psy_ui_textout(g, x + width - 10, y + height - 12, text, strlen(text));		
+		psy_ui_textout(g, x + width - 10, y + height - self->textheight, text,
+			strlen(text));
 	}
 	psy_ui_setcolor(g, 0x00888888);
 	if (self->workspace->song) {
@@ -148,8 +150,6 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 				static float epsilon = 0.1f;
 
 				numsamples = psy_audio_machine_buffermemorysize(machine);
-				
-
 				if (numsamples > 0) {
 					int zero = 1;
 
@@ -212,20 +212,29 @@ void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, int 
 	psy_ui_component_invalidate(&self->component);	
 }
 
+void trackscopeview_onalign(TrackScopeView* self)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	self->trackheight = (int)(tm.tmHeight * 2.75f);
+	self->textheight = tm.tmHeight;
+}
+
 void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	int maxcolumns = 16;
-	int columns = maxcolumns;
+	psy_ui_TextMetric tm;	
+	int maxcolumns = 16;	
 	int numtracks = player_numsongtracks(&self->workspace->player);
-	columns = numtracks < maxcolumns ? numtracks : maxcolumns;
+	int rows = ((numtracks - 1) / maxcolumns) + 1;
 
+	tm = psy_ui_component_textmetric(&self->component);	
 	rv->width = 16 * 30;
-	rv->height = (numtracks / columns) * self->trackheight;
+	rv->height = (int)(rows * tm.tmHeight * 2.75f);
 }
 
-void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->workspace->song) {
 		int columns;

@@ -11,6 +11,7 @@ typedef struct {
 	psy_ui_Component component;
 	Workspace* workspace;
 	int trackheight;
+	int textheight;
 } TrackScopeView;
 
 void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent,

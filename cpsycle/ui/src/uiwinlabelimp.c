@@ -46,8 +46,8 @@ static void dev_verticalscrollrange(psy_ui_win_LabelImp* self, int* scrollmin, i
 static int dev_verticalscrollposition(psy_ui_win_LabelImp* self) { return self->win_component_imp.imp.vtable->dev_verticalscrollposition(&self->win_component_imp.imp); }
 static void dev_setverticalscrollposition(psy_ui_win_LabelImp* self, int position) { self->win_component_imp.imp.vtable->dev_setverticalscrollposition(&self->win_component_imp.imp, position); }
 static psy_List* dev_children(psy_ui_win_LabelImp* self, int recursive) { return self->win_component_imp.imp.vtable->dev_children(&self->win_component_imp.imp, recursive); }
-static void dev_enableinput(psy_ui_win_LabelImp* self) { self->win_component_imp.imp.vtable->dev_enableinput(&self->win_component_imp.imp); }
-static void dev_preventinput(psy_ui_win_LabelImp* self) { self->win_component_imp.imp.vtable->dev_preventinput(&self->win_component_imp.imp); }
+static void dev_enableinput(psy_ui_win_LabelImp* self) {  }
+static void dev_preventinput(psy_ui_win_LabelImp* self) {  }
 static void dev_setcursor(psy_ui_win_LabelImp* self, psy_ui_CursorStyle style) { self->win_component_imp.imp.vtable->dev_setcursor(&self->win_component_imp.imp, style); }
 static void dev_starttimer(psy_ui_win_LabelImp* self, unsigned int id, unsigned int interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_win_LabelImp* self, unsigned int id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }

@@ -39,6 +39,7 @@ typedef struct {
 	int multichannelaudition;	
 	psy_Table notestotracks;
 	psy_Table trackstonotes;
+	psy_Table worked;
 	psy_audio_Pattern patterndefaults;
 } psy_audio_Player;
 
