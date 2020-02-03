@@ -9,6 +9,7 @@
 #include "uicursesimpfactory.h"
 #include "uiapp.h"
 #include "uicursescomponentimp.h"
+#include "uicursesgraphicsimp.h"
 
 #include <stdlib.h>
 
@@ -75,9 +76,15 @@ struct psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_curses_ImpFactory* self)
 	return 0;
 }
 
-struct psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_curses_ImpFactory* self, uintptr_t* platformdc)
+psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_curses_ImpFactory* self, uintptr_t* platformdc)
 {
-	return 0;
+	psy_ui_GraphicsImp* rv;
+
+	rv = (psy_ui_GraphicsImp*)malloc(sizeof(psy_ui_curses_GraphicsImp));
+	if (rv) {
+		psy_ui_curses_graphicsimp_init((psy_ui_curses_GraphicsImp*) rv, platformdc);
+	}
+	return rv;
 }
 
 struct psy_ui_ComponentImp* allocinit_componentimp(psy_ui_curses_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)

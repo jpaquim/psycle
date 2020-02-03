@@ -57,6 +57,9 @@ typedef struct {
 	psy_Properties* midiconfigure;
 	psy_Properties* theme;
 	psy_Properties* cmds;
+	psy_Properties* patternviewtheme;
+	psy_Properties* machineviewtheme;
+	psy_Properties* paramtheme;
 	psy_audio_PluginCatcher plugincatcher;
 	psy_audio_MachineFactory machinefactory;
 	int octave;
@@ -64,6 +67,7 @@ typedef struct {
 	psy_Signal signal_songchanged;	
 	psy_Signal signal_configchanged;
 	psy_Signal signal_skinchanged;
+	psy_Signal signal_changecontrolskin;
 	psy_Signal signal_patterneditpositionchanged;
 	psy_Signal signal_sequenceselectionchanged;
 	psy_Signal signal_loadprogress;
@@ -92,7 +96,9 @@ typedef struct {
 	int currview;
 	psy_List* currnavigation;
 	int navigating;
-	int chordmode;	
+	int chordmode;
+	int fontheight;
+	char* dialbitmappath;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -102,6 +108,7 @@ void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_savesong(Workspace*, const char* path);
 void workspace_loadskin(Workspace*, const char* path);
+void workspace_loadcontrolskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 psy_Properties* workspace_pluginlist(Workspace*);
 void workspace_load_configuration(Workspace*);
@@ -158,6 +165,8 @@ const char* workspace_vsts32_directory(Workspace*);
 const char* workspace_vsts64_directory(Workspace*);
 const char* workspace_skins_directory(Workspace*);
 const char* workspace_doc_directory(Workspace*);
+const char* workspace_config_directory(Workspace*);
 void workspace_changedefaultfontsize(Workspace*, int size);
+const char* workspace_dialbitmap_path(Workspace*);
 
 #endif

@@ -19,7 +19,11 @@
 
 #define TIMERID_UPDATEVUMETERS 300
 
-static void machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y,
+#ifndef max
+#define max(a, b)  (((a) > (b)) ? (a) : (b)) 
+#endif
+
+static MachineUi* machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y,
 	MachineSkin*);
 static MachineUi* machineuis_at(MachineWireView*, uintptr_t slot);
 static void machineuis_remove(MachineWireView*, uintptr_t slot);
@@ -130,8 +134,7 @@ static void machineview_onmousedoubleclick(MachineView*,
 static void machineview_onkeydown(MachineView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
-static void machineview_onskinchanged(MachineView*, Workspace*,
-	psy_Properties*);
+static void machineview_onskinchanged(MachineView*, Workspace*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -446,6 +449,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->machines = &workspace->song->machines;
 	self->drawvumeters = 1;
 	self->wireframes = 0;
+	self->randominsert = 1;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_doublebuffer(&self->component);
 	// skin init
@@ -483,7 +487,10 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
 	psy_ui_component_starttimer(&self->component, TIMERID_UPDATEVUMETERS, 50);
-	self->firstsize = 1;
+	if (workspace->machineviewtheme) {
+		machinewireview_applyproperties(self, workspace->machineviewtheme);
+	}
+	self->firstsize = 1;	
 }
 
 void machinewireview_adjustscroll(MachineWireView* self)
@@ -672,7 +679,7 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 			+ ((self->skin.colour&0x00ff)))/2)&0x00ff);
 	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour);
 	machine_skin_name = psy_properties_readstring(p, "machine_skin", 0);
-	if (machine_skin_name) {
+	if (machine_skin_name && strlen(machine_skin_name)) {
 		char path[_MAX_PATH];
 		char filename[_MAX_PATH];
 
@@ -1066,6 +1073,8 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 			machinewireview_showwireview(self, self->selectedwire);
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_mouseevent_stoppropagation(ev);
+		} else {
+			self->randominsert = 0;
 		}
 	} else		 
 	if (machinewireview_hittesteditname(self, ev->x - self->dx,
@@ -1078,7 +1087,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 	} else {
 		workspace_showparameters(self->workspace, self->dragslot);
 		psy_ui_mouseevent_stoppropagation(ev);
-	}
+	}	
 	self->dragslot = NOMACHINE_INDEX;	
 }
 
@@ -1306,16 +1315,16 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_Component* sender
 			machineui = machineuis_at(self, self->dragslot);			
 			r_old = machineui_position(machineui);
 			psy_ui_rectangle_expand(&r_old, 5, 5, 5, 5);
-			machineui->x = ev->x - self->mx - self->dx;
-			machineui->y = ev->y - self->my - self->dy;
+			machineui->x = max(0, ev->x - self->mx - self->dx);
+			machineui->y = max(0, ev->y - self->my - self->dy);
 			if (self->statusbar && machineui->machine) {
 				static char txt[128];				
 				psy_snprintf(txt, 128, "%s (%d, %d)",
 					psy_audio_machine_editname(machineui->machine)
 					? psy_audio_machine_editname(machineui->machine)
 					: "",
-					ev->x - self->mx - self->dx,
-					ev->y - self->my - self->dy);
+					machineui->x,
+					machineui->y);
 				psy_ui_label_settext(&self->statusbar->label, txt);				
 			}
 			r_new = machinewireview_updaterect(self, self->dragslot);
@@ -1460,10 +1469,24 @@ void machinewireview_onmachinesinsert(MachineWireView* self,
 
 	machine = machines_at(self->machines, slot);
 	if (machine) {
-		machineuis_insert(self, slot, 0, 0, &self->skin);
+		MachineUi* machineui;
+
+		machineui = machineuis_insert(self, slot, 0, 0, &self->skin);
+		if (machineui && !self->randominsert) {
+			int width;
+			int height;
+
+			width = machineui_position(machineui).right -
+				machineui_position(machineui).left;
+			height = machineui_position(machineui).bottom -
+				machineui_position(machineui).top;
+			machineui->x = max(0, self->mx - width / 2);
+			machineui->y = max(0, self->my - height / 2);
+		}
 		psy_signal_connect(&machine->signal_worked, self, 
 			machinewireview_onmachineworked);
 		psy_ui_component_invalidate(&self->component);
+		self->randominsert = 1;
 	}
 }
 
@@ -1701,23 +1724,23 @@ void machinewireview_onnewmachineselected(MachineView* self,
 	}	
 }
 
-void machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y,
+MachineUi* machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y,
 	MachineSkin* skin)
 {	
+	MachineUi* rv = 0;
 	psy_audio_Machine* machine;
 
 	machine = machines_at(self->machines, slot);
 	if (machine) {
-		MachineUi* machineui;
-
 		if (psy_table_exists(&self->machineuis, slot)) {
 			machineuis_remove(self, slot);
 		}	
-		machineui = (MachineUi*) malloc(sizeof(MachineUi));
-		machineui_init(machineui, x, y, machine, slot, &self->skin,
-			self->workspace);
-		psy_table_insert(&self->machineuis, slot, machineui);
+		rv = (MachineUi*) malloc(sizeof(MachineUi));
+		machineui_init(rv, x, y, machine, slot, &self->skin,
+			self->workspace);		
+		psy_table_insert(&self->machineuis, slot, rv);
 	}
+	return rv;
 }
 
 MachineUi* machineuis_at(MachineWireView* self, uintptr_t slot)
@@ -1826,7 +1849,7 @@ void machineview_onhide(MachineView* self, psy_ui_Component* sender)
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_Component* sender,
 	int x, int y, int button)
 {	
-	self->newmachine.pluginsview.calledby = 0;
+	self->newmachine.pluginsview.calledby = 0;	
 	tabbar_select(&self->tabbar, 1);
 }
 
@@ -1851,10 +1874,9 @@ void machineview_onfocus(MachineView* self, psy_ui_Component* sender)
 	psy_ui_component_setfocus(&self->wireview.component);
 }
 
-void machineview_onskinchanged(MachineView* self, Workspace* sender,
-	psy_Properties* properties)
-{	
-	machineview_applyproperties(self, properties);
+void machineview_onskinchanged(MachineView* self, Workspace* sender)
+{			
+	machineview_applyproperties(self, sender->machineviewtheme);
 }
 
 psy_ui_Rectangle machinewireview_bounds(MachineWireView* self)

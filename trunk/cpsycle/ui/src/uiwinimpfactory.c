@@ -80,7 +80,9 @@ psy_ui_BitmapImp* allocinit_bitmapimp(psy_ui_win_ImpFactory* self)
 	psy_ui_BitmapImp* rv;
 
 	rv = (psy_ui_BitmapImp*) malloc(sizeof(psy_ui_win_BitmapImp));
-	psy_ui_win_bitmapimp_init((psy_ui_win_BitmapImp*)rv);
+	if (rv) {
+		psy_ui_win_bitmapimp_init((psy_ui_win_BitmapImp*)rv);
+	}
 	return rv;
 }
 
@@ -89,7 +91,9 @@ psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_win_ImpFactory* self, uintptr_t
 	psy_ui_GraphicsImp* rv;
 
 	rv = (psy_ui_GraphicsImp*)malloc(sizeof(psy_ui_win_GraphicsImp));
-	psy_ui_win_graphicsimp_init((psy_ui_win_GraphicsImp*)rv, (HDC)platformdc);
+	if (rv) {
+		psy_ui_win_graphicsimp_init((psy_ui_win_GraphicsImp*)rv, (HDC)platformdc);
+	}
 	return rv;
 }
 
@@ -106,7 +110,7 @@ psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory* self, struct 
 		0, 0, 90, 90,
 		WS_CHILDWINDOW | WS_VISIBLE,
 		0);
-	if (rv->hwnd == 0) {
+	if (rv && rv->hwnd == 0) {
 		free(rv);
 		rv = 0;
 	}

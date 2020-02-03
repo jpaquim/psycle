@@ -229,6 +229,8 @@ typedef enum {
 	psy_ui_KEY_F24             = 0x87,
 } psy_ui_Key;
 
+typedef uint32_t psy_ui_Color;
+
 #ifdef __cplusplus
 }
 #endif

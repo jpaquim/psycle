@@ -17,6 +17,7 @@ static void machines_free(psy_audio_Machines*);
 static uintptr_t machines_freeslot(psy_audio_Machines*, uintptr_t start);
 static void machines_setpath(psy_audio_Machines*, MachineList* path);
 static MachineList* compute_path(psy_audio_Machines*, uintptr_t slot);
+static void machines_sortpath(psy_audio_Machines*);
 static void compute_slotpath(psy_audio_Machines*, uintptr_t slot, psy_List**);
 static void machines_preparebuffers(psy_audio_Machines*, MachineList* path,
 	uintptr_t amount);
@@ -24,6 +25,7 @@ static void machines_releasebuffers(psy_audio_Machines*);
 static psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines*,
 	uintptr_t channels);
 static void machines_freebuffers(psy_audio_Machines*);
+static int isleaf(psy_audio_Machines*, uintptr_t slot, psy_Table* worked);
 
 void machines_init(psy_audio_Machines* self)
 {
@@ -246,6 +248,76 @@ void machines_setpath(psy_audio_Machines* self, MachineList* path)
 		psy_list_free(self->path);
 	}
 	self->path = path;
+	machines_sortpath(self);
+}
+
+// this orders the machines that can be processed parallel
+// and adds NOMACHINE_INDEX as delimiter slot
+// 1. Find leafs and add to sorted
+// 2. Mark this machines
+// 3. Repeat step 1 without checking input connections from
+//    marked machines
+// 4. Set sorted path
+void machines_sortpath(psy_audio_Machines* self)
+{	
+	if (self->path) {
+		psy_Table worked;
+		psy_List* sorted = 0;
+		psy_List* p;
+		psy_List* q;
+
+		psy_table_init(&worked);
+		p = self->path;		
+		while (self->path) {
+			p = self->path;			
+			while (p != 0) {
+				uintptr_t slot;
+				slot = (uintptr_t)p->entry;
+				if (isleaf(self, slot, &worked)) {
+					psy_list_append(&sorted, (void*)(uintptr_t)slot);
+					p = psy_list_remove(&self->path, p);
+				} else {
+					p = p->next;
+				}
+			}						
+			for (q = sorted; q != 0;  q = q->next) {
+				uintptr_t slot;
+
+				slot = (uintptr_t)q->entry;
+				psy_table_insert(&worked, slot, 0);				
+			}
+			psy_list_append(&sorted, (void*)(uintptr_t)NOMACHINE_INDEX);
+		}
+		psy_table_dispose(&worked);
+		psy_list_free(self->path);
+		self->path = sorted;		
+	}	
+}
+
+int isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
+{
+	psy_audio_MachineSockets* sockets;
+
+	sockets = connections_at(&self->connections, slot);
+	if (!sockets || !sockets->inputs) {
+		return 1;
+	}
+	if (sockets->inputs) {
+		int rv = 1;
+
+		psy_List* p;
+		for (p = sockets->inputs; p != 0; p = p->next) {
+			psy_audio_WireSocketEntry* source;
+
+			source = (psy_audio_WireSocketEntry*) p->entry;
+			if (!psy_table_exists(worked, source->slot)) {
+				rv = 0;
+				break;
+			}
+		}
+		return rv;
+	}
+	return 1;
 }
 
 MachineList* machines_path(psy_audio_Machines* self)

@@ -570,6 +570,86 @@ void skin_load(psy_Properties* properties, const char* path)
 				psy_properties_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
 			}
 		}
+		else if (strstr(buf, "\"machineGUITopColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguitopcolor", _httoi(q + 1), 0, 0);			
+			}
+		}
+		else if (strstr(buf, "\"machineGUIFontTopColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguifonttopcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUIBottomColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguibottomcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUIFontBottomColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguifontbottomcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUIHTopColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguihtopcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUIHFontTopColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguihfonttopcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUIHBottomColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguihbottomcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUIHFontBottomColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguihfontbottomcolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUITitleColor\"=dword:"))
+		{
+			char* q = strchr(buf, 58); // :
+			if (q)
+			{
+				psy_properties_append_int(properties, "machineguititlecolor", _httoi(q + 1), 0, 0);
+			}
+		}
+		else if (strstr(buf, "\"machineGUITitleFontColor\"=dword:"))
+		{
+		char* q = strchr(buf, 58); // :
+		if (q)
+		{
+			psy_properties_append_int(properties, "machineguititlefontcolor", _httoi(q + 1), 0, 0);
+		}
+		}
 	}
 	fclose(hfile);
 }
@@ -580,7 +660,7 @@ void skin_loadpsh(psy_Properties* properties, const char* path)
 	int loaded = 0;
 	FILE* hfile;	
 
-	if ((hfile=fopen(path,"rw")) == NULL )
+	if ((hfile=fopen(path,"r")) == NULL )
 	{
 //		MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
 		return;

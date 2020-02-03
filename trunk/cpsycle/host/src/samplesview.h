@@ -47,6 +47,7 @@ typedef struct {
 typedef struct {
 	psy_ui_Component component;
 	psy_audio_Sample* sample;	
+	psy_ui_Component header;
 	psy_ui_Label waveformheaderlabel;
 	psy_ui_ComboBox waveformbox;
 	psy_ui_Slider attack;

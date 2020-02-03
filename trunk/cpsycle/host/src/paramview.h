@@ -11,18 +11,30 @@
 #include <plugin_interface.h>
 
 typedef struct {
-   psy_ui_Component component;   
+    psy_ui_Color fonttopcolor;
+    psy_ui_Color fontbottomcolor;
+    psy_ui_Color fonthtopcolor;
+    psy_ui_Color fonthbottomcolor;
+    psy_ui_Color fonttitlecolor;
+    psy_ui_Color topcolor;
+    psy_ui_Color bottomcolor;
+    psy_ui_Color htopcolor;
+    psy_ui_Color hbottomcolor;
+    psy_ui_Color titlecolor;
+    psy_ui_Bitmap knobbitmap;
+    char* bitmappath;
+} ParamSkin;
+
+typedef struct {
+   psy_ui_Component component;
+   psy_audio_Machine* machine;
    int cx;
-   int cy;
-   psy_audio_Machine* machine;   
-   uintptr_t numparams;
-   uintptr_t numparametercols;   
-   uintptr_t numrows;
+   int cy;      
    int tweak;
-   int tweakbase;
-   int tweakval;
-   int my;
+   int tweakbase;   
+   float tweakval;   
    Workspace* workspace;
+   ParamSkin* skin;
 } ParamView;
 
 void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,
@@ -30,6 +42,7 @@ void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,
 ParamView* paramview_alloc(void);
 ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace*);
+void paramview_changecontrolskin(const char* path);
 
 
 #endif

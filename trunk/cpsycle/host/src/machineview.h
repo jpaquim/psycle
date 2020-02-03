@@ -104,6 +104,7 @@ typedef struct {
 	struct MachineViewBar* statusbar;
 	psy_ui_Edit editname;
 	int firstsize;
+	int randominsert;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,

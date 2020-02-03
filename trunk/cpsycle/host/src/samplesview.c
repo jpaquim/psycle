@@ -699,10 +699,10 @@ void initsamplesgeneralview(SamplesGeneralView* self, psy_ui_Component* parent)
 	psy_ui_slider_settext(&self->samplednote, "Sampled Note"); 
 	psy_ui_slider_init(&self->pitchfinetune, &self->component);
 	psy_ui_slider_settext(&self->pitchfinetune, "Pitch Finetune");	
-	for (i = 0; sliders[i] != 0; ++i) {
-		psy_ui_component_resize(&sliders[i]->component, 0, 20);
+	for (i = 0; sliders[i] != 0; ++i) {		
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);		
-		psy_ui_component_setmargin(&sliders[i]->component, &margin);		
+		psy_ui_component_setmargin(&sliders[i]->component, &margin);
+		psy_ui_slider_setcharnumber(sliders[i], 16);
 		psy_ui_slider_connect(sliders[i], self, ongeneralviewdescribe,
 			ongeneralviewtweak, ongeneralviewvalue);
 	}
@@ -846,38 +846,48 @@ void initsamplesvibratoview(SamplesVibratoView* self, psy_ui_Component* parent, 
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);	
 	self->sample = 0;
-	self->player = player;	
-
-	psy_ui_label_init(&self->waveformheaderlabel, &self->component);
-	psy_ui_label_settext(&self->waveformheaderlabel, "Waveform");
-	psy_ui_component_setposition(&self->waveformheaderlabel.component, 5, 5,
-		100, 20);
-	psy_ui_combobox_init(&self->waveformbox, &self->component);	
-	psy_ui_combobox_addstring(&self->waveformbox, "Sinus");
-	psy_ui_combobox_addstring(&self->waveformbox, "Square");
-	psy_ui_combobox_addstring(&self->waveformbox, "RampUp");
-	psy_ui_combobox_addstring(&self->waveformbox, "RampDown");
-	psy_ui_combobox_addstring(&self->waveformbox, "Random");	
-	psy_ui_component_setposition(&self->waveformbox.component, 110, 5, 100,
-		20);
-	psy_ui_combobox_setcursel(&self->waveformbox, 0);
-	psy_signal_connect(&self->waveformbox.signal_selchanged, self,
-		onwaveformchange);
+	self->player = player;
+	// header
+	{
+		psy_ui_Margin header_margin;
+		psy_ui_margin_init(&header_margin, psy_ui_value_makepx(0),
+			psy_ui_value_makeew(2), psy_ui_value_makepx(0),
+			psy_ui_value_makepx(0));
+		psy_ui_component_init(&self->header, &self->component);
+		psy_ui_component_enablealign(&self->header);
+		psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);		
+		psy_ui_label_init(&self->waveformheaderlabel, &self->header);
+		psy_ui_label_settext(&self->waveformheaderlabel, "Waveform");
+		psy_ui_component_setalign(&self->waveformheaderlabel.component,
+			psy_ui_ALIGN_LEFT);
+		psy_ui_component_setmargin(&self->waveformheaderlabel.component,
+			&header_margin);
+		psy_ui_combobox_init(&self->waveformbox, &self->header);
+		psy_ui_combobox_setcharnumber(&self->waveformbox, 15);
+		psy_ui_combobox_addstring(&self->waveformbox, "Sinus");
+		psy_ui_combobox_addstring(&self->waveformbox, "Square");
+		psy_ui_combobox_addstring(&self->waveformbox, "RampUp");
+		psy_ui_combobox_addstring(&self->waveformbox, "RampDown");
+		psy_ui_combobox_addstring(&self->waveformbox, "Random");
+		psy_ui_component_setalign(&self->waveformbox.component,
+			psy_ui_ALIGN_LEFT);
+		psy_ui_combobox_setcursel(&self->waveformbox, 0);
+		psy_signal_connect(&self->waveformbox.signal_selchanged, self,
+			onwaveformchange);
+	}
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "Attack");	
 	psy_ui_slider_init(&self->speed, &self->component);
 	psy_ui_slider_settext(&self->speed,"Speed");
 	psy_ui_slider_init(&self->depth, &self->component);
 	psy_ui_slider_settext(&self->depth, "Depth");
-	psy_ui_margin_init(&margin,
-		psy_ui_value_makepx(3),
-		psy_ui_value_makepx(3),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(3));
-	for (i = 0; i < 3; ++i) {		
-		psy_ui_component_resize(&sliders[i]->component, 0, 20);
+	psy_ui_margin_init(&margin, psy_ui_value_makeeh(1),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
+	for (i = 0; i < 3; ++i) {				
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
+		psy_ui_slider_setcharnumber(sliders[i], 16);
 		psy_ui_slider_connect(sliders[i], self, onvibratoviewdescribe,
 			onvibratoviewtweak, onvibratoviewvalue);
 	}	

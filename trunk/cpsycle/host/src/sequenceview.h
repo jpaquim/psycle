@@ -102,7 +102,8 @@ typedef struct SequenceView {
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;
 	SequenceSelection* selection;
-	Workspace* workspace;	
+	Workspace* workspace;
+	int start;
 } SequenceView;
 
 void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);

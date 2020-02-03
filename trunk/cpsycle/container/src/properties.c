@@ -62,7 +62,7 @@ void properties_free(psy_Properties* self)
 			}
 			free(p);			
 		}
-	}
+	}	
 }
 
 psy_Properties* psy_properties_create(void)
@@ -135,6 +135,36 @@ psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 		p = p->next;
 	}
 	return first;
+}
+
+psy_Properties* psy_properties_sync(psy_Properties* self, psy_Properties* src)
+{
+	psy_Properties* p;
+	p = src->children;
+	for (p = src->children; p != 0; p = psy_properties_next(p)) {
+		psy_Properties* q;
+
+		q = psy_properties_read(self, psy_properties_key(p));
+		if (q) {
+			if (psy_properties_type(p) == PSY_PROPERTY_TYP_STRING) {
+				psy_properties_write_string(self, psy_properties_key(p),
+					psy_properties_valuestring(p));
+			} else
+			if (psy_properties_type(p) == PSY_PROPERTY_TYP_INTEGER) {
+				psy_properties_write_int(self, psy_properties_key(p),
+					psy_properties_value(p));
+			} else
+			if (psy_properties_type(p) == PSY_PROPERTY_TYP_BOOL) {
+				psy_properties_write_bool(self, psy_properties_key(p),
+					psy_properties_value(p));
+			} else
+			if (psy_properties_type(p) == PSY_PROPERTY_TYP_FONT) {
+				psy_properties_write_font(self, psy_properties_key(p),
+					psy_properties_valuestring(p));
+			}
+		}
+	}
+	return self;
 }
 
 psy_Property* psy_properties_entry(psy_Properties* self)
@@ -692,6 +722,7 @@ psy_Properties* psy_properties_remove(psy_Properties* self, psy_Properties* prop
 					q->next = p->next;
 				}
 				properties_free(p);
+				break;
 			}
 			q = p;
 			p = p->next;

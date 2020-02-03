@@ -25,7 +25,9 @@ static void psy_ui_slider_ondestroy(psy_ui_Slider*, psy_ui_Component* sender);
 static void psy_ui_slider_ontimer(psy_ui_Slider*, psy_ui_Component* sender,
 	int timerid);
 static void psy_ui_slider_updatevalue(psy_ui_Slider*);
-static void psy_ui_slider_describevalue(psy_ui_Slider* self);
+static void psy_ui_slider_describevalue(psy_ui_Slider*);
+static void psy_ui_slider_onalign(psy_ui_Slider*);
+static void psy_ui_slider_onpreferredsize(psy_ui_Slider*, psy_ui_Size* limit, psy_ui_Size* rv);
 
 static const int UI_TIMERID_SLIDER = 600;
 
@@ -37,6 +39,9 @@ static void vtable_init(psy_ui_Slider* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_ondraw) psy_ui_slider_ondraw;
+		vtable.onalign = (psy_ui_fp_onalign) psy_ui_slider_onalign;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			psy_ui_slider_onpreferredsize;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) psy_ui_slider_onmousedown;
 		vtable.onmousemove = (psy_ui_fp_onmousemove) psy_ui_slider_onmousemove;
 		vtable.onmouseup = (psy_ui_fp_onmouseup) psy_ui_slider_onmouseup;
@@ -50,6 +55,7 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_enablealign(&self->component);
 	self->tweakbase = -1;
 	self->orientation = psy_ui_HORIZONTAL;
 	self->value = 0.0f;
@@ -285,4 +291,33 @@ void psy_ui_slider_connect(psy_ui_Slider* self, void* context,
 	psy_signal_connect(&self->signal_describevalue, context, describe);
 	psy_signal_connect(&self->signal_tweakvalue, context, tweak);
 	psy_signal_connect(&self->signal_value, context, value);
+}
+
+void psy_ui_slider_onalign(psy_ui_Slider* self)
+{
+	if (self->orientation == psy_ui_HORIZONTAL) {
+		psy_ui_TextMetric tm;
+
+		tm = psy_ui_component_textmetric(&self->component);
+		self->labelsize = tm.tmAveCharWidth *
+			((self->charnumber == 0)
+			? strlen(self->label) + 2
+			: self->charnumber);
+		self->valuelabelsize = tm.tmAveCharWidth * 8;
+	}
+}
+
+void psy_ui_slider_onpreferredsize(psy_ui_Slider* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	if (self->orientation == psy_ui_HORIZONTAL) {
+		rv->height = (int)(tm.tmHeight * 1.3f);
+		rv->width = 200;
+	} else {
+		rv->width = (int)(tm.tmAveCharWidth * self->charnumber);
+		rv->height = 200;
+	}
 }

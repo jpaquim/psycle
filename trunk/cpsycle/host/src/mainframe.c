@@ -7,6 +7,7 @@
 #include "cmdsgeneral.h"
 #include "settingsview.h"
 #include "resources/resource.h"
+#include "paramview.h"
 
 #include "../../detail/portable.h"
 #include <dir.h>
@@ -60,6 +61,9 @@ static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
 static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
+static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
+	unsigned int numsongtracks);
+static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender, const char* path);
 
 #define GEARVIEW 10
 
@@ -226,6 +230,10 @@ void mainframe_init(MainFrame* self)
 		mainframe_setstatusbartext(self,
 			self->workspace.song->properties.title);
 	}
+	psy_signal_connect(&self->workspace.player.signal_numsongtrackschanged, self,
+		mainframe_onsongtrackschanged);	
+	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
+		mainframe_onchangecontrolskin);
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -700,7 +708,18 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
-{
+{	
 	workspace_changedefaultfontsize(&self->workspace, (int)(
-		zoombox_rate(sender) * 12));	
+		zoombox_rate(sender) * self->workspace.fontheight));
+}
+
+void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Player* sender,
+	unsigned int numsongtracks)
+{
+	psy_ui_component_align(&self->component);
+}
+
+void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender, const char* path)
+{
+	paramview_changecontrolskin(path);
 }

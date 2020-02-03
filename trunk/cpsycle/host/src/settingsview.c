@@ -10,6 +10,7 @@
 
 #include <uifolderdialog.h>
 #include <uifontdialog.h>
+#include <uicolordialog.h>
 #include "../../detail/portable.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -227,29 +228,35 @@ void settingsview_drawvalue(SettingsView* self, psy_Properties* property,
 		settingsview_drawcheckbox(self, property, column);
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_STRING) {
-		settingsview_drawstring(self, property, column);
-		if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
-			settingsview_drawbutton(self, property, column + 1);
-		}
+		settingsview_drawstring(self, property, column);		
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
-		settingsview_drawstring(self, property, column);
-		settingsview_drawbutton(self, property, column + 1);
+		settingsview_drawstring(self, property, column);		
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
 		settingsview_drawinteger(self, property, column);
+	}
+	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT ||
+			psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
+			psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
+		settingsview_drawbutton(self, property, column + 1);
 	}
 }
 
 void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 	int column)
 {
+	psy_ui_Rectangle r;
 	if (self->selected == property) {					
 		psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
 		psy_ui_setbackgroundcolor(self->g, 0x009B7800);
 		psy_ui_settextcolor(self->g, 0x00FFFFFF);
 	}				
-	psy_ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy,
+	psy_ui_setrectangle(&r, self->columnwidth * column, self->cpy + self->dy,
+		self->columnwidth, self->lineheight);
+	psy_ui_rectangle_expand(&r, 0, -5, 0, 0);
+	psy_ui_textoutrectangle(self->g, self->columnwidth * column, self->cpy + self->dy,
+		ETO_CLIPPED, r,
 		psy_properties_valuestring(property),
 		strlen(psy_properties_valuestring(property)));
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
@@ -268,11 +275,25 @@ void settingsview_drawinteger(SettingsView* self, psy_Properties* property,
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_INPUT) {
 		inputdefiner_setinput(&self->inputdefiner, psy_properties_value(property));
 		inputdefiner_text(&self->inputdefiner, text);
+	} else
+	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
+		psy_snprintf(text, 20, "0x%d", psy_properties_value(property));
 	} else {
 		psy_snprintf(text, 20, "%d", psy_properties_value(property));
 	}
+	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
+		psy_ui_Rectangle r;
+		psy_ui_TextMetric tm;
+
+		tm = psy_ui_component_textmetric(&self->client);		
+		r.left = self->columnwidth * (column + 1) - tm.tmAveCharWidth * 6;
+		r.top = self->cpy + self->dy;
+		r.right = r.left + tm.tmAveCharWidth * 4;
+		r.bottom = r.top + tm.tmHeight + 2;
+		psy_ui_drawsolidrectangle(self->g, r, psy_properties_value(property));		
+	}
 	psy_ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy,
-		text, strlen(text));
+		text, strlen(text));	
 }
 
 void settingsview_advanceline(SettingsView* self)
@@ -284,11 +305,12 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	int column)
 {
 	psy_ui_Size size;
-	psy_ui_Rectangle r;
-
-	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
-		psy_ui_textout(self->g, self->columnwidth * column + 3,
-			self->cpy + self->dy, "...", 3);
+	psy_ui_Rectangle r;	
+	
+	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
+		psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
+			psy_ui_textout(self->g, self->columnwidth * column + 3,
+				self->cpy + self->dy, "...", 3);
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
 		psy_ui_textout(self->g, self->columnwidth * column + 3,
@@ -300,8 +322,9 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	}
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
 	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(self->g, 0x00CACACA);	
-	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR) {
+	psy_ui_settextcolor(self->g, 0x00CACACA);
+	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
+		(psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR)) {
 		size = psy_ui_component_textsize(&self->client, "...");
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
@@ -313,7 +336,7 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	r.left = self->columnwidth * column ;
 	r.top = self->cpy + self->dy ;
 	r.right = r.left + size.width + 6;
-	r.bottom = r.top + size.height + 2;
+	r.bottom = r.top + size.height + 2;	
 	psy_ui_drawrectangle(self->g, r);
 }
 
@@ -382,7 +405,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 		settingsview_onpropertieshittestenum);
 	if (self->selected) {
 		if (self->button &&
-			psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
+				psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;			
 			char title[MAX_PATH];
 			
@@ -394,6 +417,22 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 					self->selected->item.key, psy_ui_folderdialog_path(&dialog));
 			}
 			psy_ui_folderdialog_dispose(&dialog);							
+		} else
+		if (self->button && psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITCOLOR) {
+			psy_ui_ColorDialog colordialog;
+
+			psy_ui_colordialog_init(&colordialog, &self->component);
+			if (psy_ui_colordialog_execute(&colordialog)) {
+				psy_ui_Color color;
+
+				color = psy_ui_colordialog_color(&colordialog);
+				psy_properties_write_int(self->selected->parent,
+					self->selected->item.key,
+					color);
+			}
+			psy_ui_colordialog_dispose(&colordialog);
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selected);
 		} else
 		if (self->button && psy_properties_type(self->selected) == PSY_PROPERTY_TYP_FONT) {
 			psy_ui_FontDialog fontdialog;
@@ -518,6 +557,7 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 		rv = settingsview_intersects(&r, self->mx, self->my);
 		if (!rv && (
 				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
+				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR ||
 				psy_properties_type(property) == PSY_PROPERTY_TYP_FONT)) {
 			psy_ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
 				self->cpy + self->dy, self->columnwidth, self->lineheight);

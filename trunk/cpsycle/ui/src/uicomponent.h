@@ -93,6 +93,7 @@ typedef int (*psy_ui_fp_component_verticalscrollposition)(struct psy_ui_Componen
 typedef void (*psy_ui_fp_component_setverticalscrollposition)(struct psy_ui_Component*, int position);
 typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component* self, int recursive);
 // vtable events function pointers 
+typedef void (*psy_ui_fp_onalign)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onpreferredsize)(struct psy_ui_Component*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
@@ -136,6 +137,7 @@ typedef struct psy_ui_ComponentVTable {
 	// events
 	psy_ui_fp_ondraw ondraw;
 	psy_ui_fp_onsize onsize;
+	psy_ui_fp_onalign onalign;
 	psy_ui_fp_onpreferredsize onpreferredsize;
 	psy_ui_fp_onmousedown onmousedown;
 	psy_ui_fp_onmousemove onmousemove;
