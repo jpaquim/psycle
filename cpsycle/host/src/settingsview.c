@@ -67,6 +67,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->viewtabbar, tabbarparent);
 	self->properties = properties;
 	psy_ui_component_init(&self->client, &self->component);
 	psy_ui_component_doublebuffer(&self->client);	

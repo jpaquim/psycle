@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "../../detail/psyconf.h"
+#include "uicursesdef.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_CURSES
 
@@ -72,12 +73,12 @@ static void win_imp_vtable_init(psy_ui_curses_GraphicsImp* self)
 	}
 }
 
-void psy_ui_curses_graphicsimp_init(psy_ui_curses_GraphicsImp* self, uintptr_t* hdc)
+void psy_ui_curses_graphicsimp_init(psy_ui_curses_GraphicsImp* self, uintptr_t* w)
 {
 	psy_ui_graphics_imp_init(&self->imp);
 	win_imp_vtable_init(self);	
-	self->imp.vtable = &win_imp_vtable;
-	// self->hdc = hdc;	
+	self->imp.vtable = &win_imp_vtable;		
+	self->w = (WINDOW*) w;
 }
 
 // win32 implementation method for psy_ui_Graphics
@@ -86,7 +87,22 @@ void psy_ui_curses_g_imp_dispose(psy_ui_curses_GraphicsImp* self)
 }
 
 void psy_ui_curses_g_imp_textout(psy_ui_curses_GraphicsImp* self, int x, int y, const char* str, size_t len)
-{		
+{
+	int maxyscr;
+	int maxxscr;
+	int maxy;
+	int maxx;
+	int maxlen;
+	int cx;
+	int cy;
+
+	getmaxyx(stdscr, maxyscr, maxxscr);
+	cx = (int)((float) maxxscr / psy_ui_curses_VSCREENX * x);
+	cy = (int)((float) maxyscr / psy_ui_curses_VSCREENY * y);
+	getmaxyx(self->w, maxy, maxx);
+	maxlen = max(0, min(maxx - cx, (int) len));
+	mvwaddnstr(self->w, cy, cx, str, maxlen);
+	wrefresh(self->w);
 }
 
 void psy_ui_curses_g_imp_textoutrectangle(psy_ui_curses_GraphicsImp* self, int x, int y, unsigned int options,
@@ -96,7 +112,7 @@ void psy_ui_curses_g_imp_textoutrectangle(psy_ui_curses_GraphicsImp* self, int x
 
 psy_ui_Size psy_ui_curses_g_imp_textsize(psy_ui_curses_GraphicsImp* self, const char* text)
 {
-	psy_ui_Size	rv;
+	psy_ui_Size	rv = { 0, 0 };
 	return rv;
 }
 

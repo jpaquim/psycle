@@ -40,7 +40,8 @@ void machines_init(psy_audio_Machines* self)
 		self->numsamplebuffers, sizeof(float));
 	assert(self->samplebuffers);
 	self->currsamplebuffer = 0;
-	self->slot = 0;	
+	self->slot = 0;
+	self->soloed = NOMACHINE_INDEX;
 	self->buffers = 0;
 	self->filemode = 0;
 	self->master = 0;
@@ -509,6 +510,46 @@ void machines_changeslot(psy_audio_Machines* self, uintptr_t slot)
 uintptr_t machines_slot(psy_audio_Machines* self)
 {
 	return self->slot;
+}
+
+uintptr_t psy_audio_machines_soloed(psy_audio_Machines* self)
+{
+	return self->soloed;
+}
+
+void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
+{
+	if (self->soloed == slot) {
+		psy_TableIterator it;
+
+		self->soloed = NOMACHINE_INDEX;
+		for (it = machines_begin(self); !psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_Machine* machine;
+
+			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+			if ((psy_audio_machine_mode(machine) == MACHMODE_GENERATOR)) {
+				psy_audio_machine_unmute(machine);
+			}
+		}
+	} else {
+		psy_TableIterator it;
+
+		self->soloed = slot;
+		for (it = machines_begin(self); !psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_Machine* machine;
+
+			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);											
+			if ((psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) &&
+				psy_tableiterator_key(&it) != slot) {
+				psy_audio_machine_mute(machine);
+			} else
+			if (psy_tableiterator_key(&it) == slot) {
+				psy_audio_machine_unmute(machine);
+			}
+		}
+	}
 }
 
 psy_audio_Machine* machines_master(psy_audio_Machines* self)

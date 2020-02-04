@@ -338,6 +338,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\uicursesdef.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\uicursesgraphicsimp.c"
 				>
 			</File>
@@ -943,6 +947,10 @@
 				</File>
 				<File
 					RelativePath=".\src\uicursescomponentimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uicursesdef.h"
 					>
 				</File>
 				<File

@@ -29,7 +29,7 @@ void patterneditposition_init(PatternEditPosition*);
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs);
 
-typedef struct {
+typedef struct psy_audio_Pattern {
 	PatternNode* events;
 	psy_dsp_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns

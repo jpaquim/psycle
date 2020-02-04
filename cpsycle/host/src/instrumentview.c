@@ -81,12 +81,13 @@ static void instrumentviewbuttons_init(InstrumentViewButtons*,
 
 // InstrumentView
 void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->viewtabbar, tabbarparent);
 	self->player = &workspace->player;
 	self->workspace = workspace;
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),

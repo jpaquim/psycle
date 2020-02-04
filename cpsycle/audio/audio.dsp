@@ -341,6 +341,10 @@ SOURCE=.\src\patternevent.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\patternio.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\patterns.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -700,6 +704,10 @@ SOURCE=.\src\patternentry.h
 # Begin Source File
 
 SOURCE=.\src\patternevent.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\patternio.h
 # End Source File
 # Begin Source File
 

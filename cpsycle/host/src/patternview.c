@@ -11,8 +11,6 @@
 
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 	int tabindex);
-static void patternview_onshow(PatternView*, psy_ui_Component* sender);
-static void patternview_onhide(PatternView*, psy_ui_Component* sender);
 static void patternview_onsongchanged(PatternView*, Workspace* sender);
 static void patternview_onsequenceselectionchanged(PatternView*,
 	Workspace* sender);
@@ -108,7 +106,7 @@ void patternviewstatus_onpreferredsize(PatternViewStatus* self, psy_ui_Size* lim
 	
 		tm = psy_ui_component_textmetric(&self->component);
 		rv->width = tm.tmAveCharWidth * 40;
-		rv->height = (int)(tm.tmHeight * 1.5);
+		rv->height = (int)(tm.tmHeight);
 	}
 }
 
@@ -195,8 +193,6 @@ void patternview_init(PatternView* self,
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternview_ontabbarchange);	
 	tabbar_select(&self->tabbar, 0);	
-	psy_signal_connect(&self->component.signal_show, self, patternview_onshow);
-	psy_signal_connect(&self->component.signal_hide, self, patternview_onhide);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -228,18 +224,6 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 	trackerview_setpattern(&self->trackerview, pattern);
 	pianoroll_setpattern(&self->pianoroll, pattern);
 	patternproperties_setpattern(&self->properties, pattern);
-}
-
-void patternview_onshow(PatternView* self, psy_ui_Component* sender)
-{			
-	tabbar_base(&self->tabbar)->visible = 1;	
-	psy_ui_component_align(psy_ui_component_parent(tabbar_base(&self->tabbar)));
-	psy_ui_component_show(tabbar_base(&self->tabbar));	
-}
-
-void patternview_onhide(PatternView* self, psy_ui_Component* sender)
-{	
-	psy_ui_component_hide(tabbar_base(&self->tabbar));
 }
 
 void patternview_onsongchanged(PatternView* self, Workspace* workspace)

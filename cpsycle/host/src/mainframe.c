@@ -169,6 +169,9 @@ void mainframe_init(MainFrame* self)
 		psy_ui_value_makeew(4.0);	;
 	tabbar_append(&self->tabbar, "Help")->margin.right =
 		psy_ui_value_makeew(4.0);
+	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
+	psy_ui_component_enablealign(&self->viewtabbars.component);
+	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);
 	// splitbar
 	psy_ui_splitbar_init(&self->splitbar, &self->component);	
 	/// init notebook views
@@ -178,26 +181,31 @@ void mainframe_init(MainFrame* self)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);	
 	machineview_init(&self->machineview, psy_ui_notebook_base(&self->notebook), 
-		&self->tabbars, &self->workspace);
+		&self->viewtabbars.component, &self->workspace);
 	patternview_init(&self->patternview, psy_ui_notebook_base(&self->notebook),
-		&self->tabbars, &self->workspace);	
+		&self->viewtabbars.component, &self->workspace);
 	samplesview_init(&self->samplesview, psy_ui_notebook_base(&self->notebook),
-		&self->tabbars, &self->workspace);	
+		&self->viewtabbars.component, &self->workspace);
 	instrumentview_init(&self->instrumentsview,
 		psy_ui_notebook_base(&self->notebook),
+		&self->viewtabbars.component,
 		&self->workspace);
 	songpropertiesview_init(&self->songpropertiesview,
-		&self->notebook.component, &self->workspace);	
-	settingsview_init(&self->settingsview, psy_ui_notebook_base(&self->notebook),
-		&self->tabbars, self->workspace.config);
+		psy_ui_notebook_base(&self->notebook),
+		&self->viewtabbars.component,
+		&self->workspace);
+	settingsview_init(&self->settingsview,
+		psy_ui_notebook_base(&self->notebook),
+		&self->viewtabbars.component,
+		self->workspace.config);
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
-		&self->tabbars, &self->workspace);	
+		&self->viewtabbars.component, &self->workspace);
 	psy_signal_connect(&self->helpview.about.okbutton.signal_clicked, self,
 		mainframe_onaboutok);	
 	renderview_init(&self->renderview, psy_ui_notebook_base(&self->notebook),
-		&self->tabbars, &self->workspace);
+		&self->viewtabbars.component, &self->workspace);
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
@@ -269,6 +277,7 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_ui_component_setalign(&self->statusbarlabel.component,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_init(&self->viewbars, &self->statusbar);
+	psy_ui_component_setmargin(&self->viewbars.component, &margin);
 	psy_ui_component_setalign(&self->viewbars.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_enablealign(&self->viewbars.component);		
 	machineviewbar_init(&self->machineviewbar, &self->viewbars.component,
@@ -280,8 +289,8 @@ void mainframe_initstatusbar(MainFrame* self)
 		&self->workspace);
 	psy_ui_component_setalign(&self->patternbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_setpageindex(&self->viewbars, 0);
-	psy_ui_notebook_connectcontroller(&self->viewbars,
-		&self->tabbar.signal_change);
+//	psy_ui_notebook_connectcontroller(&self->viewbars,
+	//	&self->tabbar.signal_change);
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
 	psy_ui_component_setalign(&self->progressbar.component,
 		psy_ui_ALIGN_RIGHT);
@@ -358,11 +367,13 @@ void mainframe_setstartpage(MainFrame* self)
 {		
 	if (workspace_showaboutatstart(&self->workspace)) {
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);
-		psy_ui_component_show(&self->helpview.tabbar.component);
+		psy_ui_notebook_setpageindex(&self->viewtabbars, TABPAGE_HELPVIEW);
+		psy_ui_component_show(&self->helpview.tabbar.component);		
 	} else {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
-		psy_ui_component_show(&self->machineview.tabbar.component);
-	}
+		psy_ui_notebook_setpageindex(&self->viewtabbars, TABPAGE_MACHINEVIEW);
+		psy_ui_component_show(&self->machineview.tabbar.component);		
+	}	
 }
 
 void mainframe_destroy(MainFrame* self, psy_ui_Component* component)
@@ -675,9 +686,10 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
 	psy_ui_Component* component;
-	workspace_onviewchanged(&self->workspace, tabindex);
+	workspace_onviewchanged(&self->workspace, tabindex);	
 	component = psy_ui_notebook_activepage(&self->notebook);
-	psy_ui_component_align(&self->component);
+	psy_ui_notebook_setpageindex(&self->viewbars, tabindex);
+	psy_ui_notebook_setpageindex(&self->viewtabbars, tabindex);	
 	psy_ui_component_setfocus(component);
 }
 

@@ -13,6 +13,7 @@
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Component viewtabbar;
 	psy_ui_Component client;
 	psy_Properties* properties;
 	psy_ui_Graphics* g;

@@ -5,10 +5,14 @@
 
 #include "trackerview.h"
 #include <pattern.h>
+#include <patternio.h>
 #include "cmdsnotes.h"
 #include "skinio.h"
 #include "skingraphics.h"
 #include "resources/resource.h"
+#include <uiopendialog.h>
+#include <uisavedialog.h>
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,7 +59,7 @@ static int trackergrid_resizecolumn(TrackerGrid*, int x, int y);
 static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender,
 	int stepx, int stepy);
 static void trackergrid_onfocuslost(TrackerGrid*, psy_ui_Component* sender);
-static int trackergrid_testcursor(TrackerGrid*, unsigned int track,
+static int trackergrid_testcursor(TrackerGrid*, uintptr_t track,
 	psy_dsp_big_beat_t offset);
 static int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset);
 static int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset);
@@ -156,6 +160,8 @@ static void trackerview_onblocktransposeup(TrackerView*);
 static void trackerview_onblocktransposedown(TrackerView*);
 static void trackerview_onblocktransposeup12(TrackerView*);
 static void trackerview_onblocktransposedown12(TrackerView*);
+static void trackerview_onpatternimport(TrackerView*);
+static void trackerview_onpatternexport(TrackerView*);
 static void trackerview_onlpbchanged(TrackerView*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void trackerview_onpatterneditpositionchanged(TrackerView*,
@@ -756,7 +762,7 @@ int trackergrid_testselection(TrackerGrid* self, unsigned int track, double offs
 		offset < self->selection.bottomright.offset;
 }
 
-int trackergrid_testcursor(TrackerGrid* self, unsigned int track, double offset)
+int trackergrid_testcursor(TrackerGrid* self, uintptr_t track, psy_dsp_big_beat_t offset)
 {
 	return self->cursor.track == track && 
 		testrange(self->cursor.offset, offset, self->bpl);
@@ -1464,213 +1470,217 @@ int trackerview_scrollright(TrackerView* self)
 
 void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 {		
-	int cmd;
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		trackerview_hideblockmenu(self);
+	} else {
+		int cmd;
 
-	cmd = inputs_cmd(&self->inputs, encodeinput(ev->keycode, 
-		GetKeyState(psy_ui_KEY_SHIFT) < 0, GetKeyState(psy_ui_KEY_CONTROL) < 0));
-	if (cmd == CMD_NAVUP) {
-		trackerview_prevline(self);
-	} else
-	if (cmd == CMD_NAVPAGEUP) {		
-		trackerview_prevlines(self, 
-			player_lpb(&self->workspace->player), 0);
-	}
-	if (cmd == CMD_NAVDOWN) {		
-		trackerview_advanceline(self);
-	} else
-	if (cmd == CMD_NAVPAGEDOWN) {
-		trackerview_advancelines(self, 
-			player_lpb(&self->workspace->player), 0);
-	} else
-	if (cmd == CMD_NAVLEFT) {
-		trackergrid_prevcol(&self->grid);
-	} else
-	if (cmd == CMD_NAVRIGHT) {
-		trackergrid_nextcol(&self->grid);
-	} else
-	if (cmd == CMD_NAVTOP) {
-		trackerview_home(self);
-	} else
-	if (cmd == CMD_NAVBOTTOM) {
-		trackerview_end(self);
-	} else
-	if (cmd == CMD_COLUMNPREV) {
-		trackerview_prevtrack(self);
-	} else
-	if (cmd == CMD_COLUMNNEXT) {
-		trackerview_nexttrack(self);
-	} else
-	if (cmd == CMD_BLOCKSTART) {
-		trackerview_blockstart(self);
-	} else	
-	if (cmd == CMD_BLOCKEND) {
-		trackerview_blockend(self);
-	} else
-	if (cmd == CMD_BLOCKUNMARK) {
-		trackerview_blockunmark(self);
-	} else
-	if (cmd == CMD_BLOCKCUT) {
-		trackerview_onblockcut(self);
-	} else
-	if (cmd == CMD_BLOCKCOPY) {
-		trackerview_onblockcopy(self);
-	} else
-	if (cmd == CMD_BLOCKPASTE) {
-		trackerview_onblockpaste(self);
-	} else
-	if (cmd == CMD_BLOCKMIX) {
-		trackerview_onblockmixpaste(self);
-	} else
-	if (cmd == CMD_BLOCKMIX) {
-		trackerview_onblockmixpaste(self);
-	} else
-	if (cmd == CMD_TRANSPOSEBLOCKINC) {
-		trackerview_onblocktransposeup(self);
-	} else
-	if (cmd == CMD_TRANSPOSEBLOCKDEC) {
-		trackerview_onblocktransposedown(self);
-	} else
-	if (cmd == CMD_TRANSPOSEBLOCKINC12) {
-		trackerview_onblocktransposeup12(self);
-	} else
-	if (cmd == CMD_TRANSPOSEBLOCKDEC12) {
-		trackerview_onblocktransposedown12(self);
-	} else
-	if (cmd == CMD_ROWDELETE) {
-		if (self->grid.cursor.offset - self->grid.bpl >= 0) {
-			PatternNode* prev;
-			PatternNode* p;
-			PatternNode* q;
-			PatternNode* node;	
+		cmd = inputs_cmd(&self->inputs, encodeinput(ev->keycode, 
+			GetKeyState(psy_ui_KEY_SHIFT) < 0, GetKeyState(psy_ui_KEY_CONTROL) < 0));
+		if (cmd == CMD_NAVUP) {
+			trackerview_prevline(self);
+		} else
+		if (cmd == CMD_NAVPAGEUP) {		
+			trackerview_prevlines(self, 
+				player_lpb(&self->workspace->player), 0);
+		}
+		if (cmd == CMD_NAVDOWN) {		
+			trackerview_advanceline(self);
+		} else
+		if (cmd == CMD_NAVPAGEDOWN) {
+			trackerview_advancelines(self, 
+				player_lpb(&self->workspace->player), 0);
+		} else
+		if (cmd == CMD_NAVLEFT) {
+			trackergrid_prevcol(&self->grid);
+		} else
+		if (cmd == CMD_NAVRIGHT) {
+			trackergrid_nextcol(&self->grid);
+		} else
+		if (cmd == CMD_NAVTOP) {
+			trackerview_home(self);
+		} else
+		if (cmd == CMD_NAVBOTTOM) {
+			trackerview_end(self);
+		} else
+		if (cmd == CMD_COLUMNPREV) {
+			trackerview_prevtrack(self);
+		} else
+		if (cmd == CMD_COLUMNNEXT) {
+			trackerview_nexttrack(self);
+		} else
+		if (cmd == CMD_BLOCKSTART) {
+			trackerview_blockstart(self);
+		} else	
+		if (cmd == CMD_BLOCKEND) {
+			trackerview_blockend(self);
+		} else
+		if (cmd == CMD_BLOCKUNMARK) {
+			trackerview_blockunmark(self);
+		} else
+		if (cmd == CMD_BLOCKCUT) {
+			trackerview_onblockcut(self);
+		} else
+		if (cmd == CMD_BLOCKCOPY) {
+			trackerview_onblockcopy(self);
+		} else
+		if (cmd == CMD_BLOCKPASTE) {
+			trackerview_onblockpaste(self);
+		} else
+		if (cmd == CMD_BLOCKMIX) {
+			trackerview_onblockmixpaste(self);
+		} else
+		if (cmd == CMD_BLOCKMIX) {
+			trackerview_onblockmixpaste(self);
+		} else
+		if (cmd == CMD_TRANSPOSEBLOCKINC) {
+			trackerview_onblocktransposeup(self);
+		} else
+		if (cmd == CMD_TRANSPOSEBLOCKDEC) {
+			trackerview_onblocktransposedown(self);
+		} else
+		if (cmd == CMD_TRANSPOSEBLOCKINC12) {
+			trackerview_onblocktransposeup12(self);
+		} else
+		if (cmd == CMD_TRANSPOSEBLOCKDEC12) {
+			trackerview_onblocktransposedown12(self);
+		} else
+		if (cmd == CMD_ROWDELETE) {
+			if (self->grid.cursor.offset - self->grid.bpl >= 0) {
+				PatternNode* prev;
+				PatternNode* p;
+				PatternNode* q;
+				PatternNode* node;	
 
-			trackerview_prevline(self);		
-			node = pattern_findnode(self->grid.pattern, self->grid.cursor.track,
-				(psy_dsp_beat_t)self->grid.cursor.offset, (psy_dsp_beat_t)self->grid.bpl, &prev);		
-			if (node) {			
-				pattern_remove(self->grid.pattern, node);
-				psy_audio_sequencer_checkiterators(
-					&self->workspace->player.sequencer,
-					node);
-				psy_ui_component_invalidate(&self->linenumbers.component);
-			}
-			if (prev) {
-				p = prev->next;
-			} else {
-				p = self->grid.pattern->events;
-			}
-			for (; p != 0; p = q) {
-				psy_audio_PatternEntry* entry;
-
-				q = p->next;
-				entry = (psy_audio_PatternEntry*) p->entry;								
-				if (entry->track == self->grid.cursor.track) {
-					psy_audio_PatternEvent event;
-					psy_dsp_beat_t offset;
-					uintptr_t track;
-					PatternNode* node;
-					PatternNode* prev;
-
-					event = *patternentry_front(entry);
-					offset = entry->offset;
-					track = entry->track;
-					pattern_remove(self->grid.pattern, p);
+				trackerview_prevline(self);		
+				node = pattern_findnode(self->grid.pattern, self->grid.cursor.track,
+					(psy_dsp_beat_t)self->grid.cursor.offset, (psy_dsp_beat_t)self->grid.bpl, &prev);		
+				if (node) {			
+					pattern_remove(self->grid.pattern, node);
 					psy_audio_sequencer_checkiterators(
-						&self->workspace->player.sequencer, p);
-					offset -= (psy_dsp_beat_t) self->grid.bpl;
-					node = pattern_findnode(self->grid.pattern, track,
-						offset,						
-						(psy_dsp_beat_t)self->grid.bpl,
-						&prev);
-					if (node) {
-						psy_audio_PatternEntry* entry;
+						&self->workspace->player.sequencer,
+						node);
+					psy_ui_component_invalidate(&self->linenumbers.component);
+				}
+				if (prev) {
+					p = prev->next;
+				} else {
+					p = self->grid.pattern->events;
+				}
+				for (; p != 0; p = q) {
+					psy_audio_PatternEntry* entry;
 
-						entry = (psy_audio_PatternEntry*) node->entry;
-						*patternentry_front(entry) = event;
-					} else {
-						pattern_insert(self->grid.pattern, prev, track, 
-							(psy_dsp_beat_t)offset, &event);
-					}					
+					q = p->next;
+					entry = (psy_audio_PatternEntry*) p->entry;								
+					if (entry->track == self->grid.cursor.track) {
+						psy_audio_PatternEvent event;
+						psy_dsp_beat_t offset;
+						uintptr_t track;
+						PatternNode* node;
+						PatternNode* prev;
+
+						event = *patternentry_front(entry);
+						offset = entry->offset;
+						track = entry->track;
+						pattern_remove(self->grid.pattern, p);
+						psy_audio_sequencer_checkiterators(
+							&self->workspace->player.sequencer, p);
+						offset -= (psy_dsp_beat_t) self->grid.bpl;
+						node = pattern_findnode(self->grid.pattern, track,
+							offset,						
+							(psy_dsp_beat_t)self->grid.bpl,
+							&prev);
+						if (node) {
+							psy_audio_PatternEntry* entry;
+
+							entry = (psy_audio_PatternEntry*) node->entry;
+							*patternentry_front(entry) = event;
+						} else {
+							pattern_insert(self->grid.pattern, prev, track, 
+								(psy_dsp_beat_t)offset, &event);
+						}					
+					}
+				}
+				psy_ui_component_invalidate(&self->component);
+			}
+		} else
+		if (cmd == CMD_ROWCLEAR) {
+			if (self->grid.cursor.column == TRACKER_COLUMN_NOTE) {
+				PatternNode* prev;
+				PatternNode* node;
+			
+				node = pattern_findnode(self->grid.pattern,
+					self->grid.cursor.track,
+					(psy_dsp_beat_t)self->grid.cursor.offset,
+					(psy_dsp_beat_t)self->grid.bpl, &prev);
+				if (node) {
+					pattern_remove(self->grid.pattern, node);
+					psy_audio_sequencer_checkiterators(
+						&self->workspace->player.sequencer,
+						node);
+					psy_ui_component_invalidate(&self->linenumbers.component);
+				}
+				trackerview_advanceline(self);	
+			} else {
+				//TrackDef* trackdef;
+
+				//trackerview_inputvalue(self, 
+				//	self->coldefs[self->grid.cursor.column].emptyvalue, 0);
+				return;
+			}
+		} else
+		if (cmd == CMD_SELECTALL) {	
+			trackerview_selectall(self);
+		} else
+		if (cmd == CMD_SELECTCOL) {
+			trackerview_selectcol(self);
+		} else
+		if (cmd == CMD_SELECTBAR) {
+			trackerview_selectbar(self);
+		} else
+		if (cmd == CMD_UNDO) {
+			workspace_undo(self->workspace);
+		} else
+		if (cmd == CMD_REDO) {
+			workspace_redo(self->workspace);
+		} else
+		if (cmd == CMD_FOLLOWSONG) {
+			self->workspace->followsong = !self->workspace->followsong;
+		} else {
+			if (self->grid.cursor.column != TRACKER_COLUMN_NOTE) {			
+				int digit = keycodetoint(ev->keycode);
+				if (digit != -1) {
+					trackergrid_inputvalue(&self->grid, digit, 1);
+					psy_ui_keyevent_stoppropagation(ev);
+					return;
+				}			
+			}				
+			{	
+				psy_EventDriver* kbd;
+				EventDriverCmd cmd;
+				EventDriverData input;
+
+				cmd.id = -1;			
+				kbd = workspace_kbddriver(self->workspace);			
+				input.message = EVENTDRIVER_KEYDOWN;
+				input.param1 = encodeinput(ev->keycode, 0, /* GetKeyState(psy_ui_KEY_SHIFT) < 0 */
+					GetKeyState(psy_ui_KEY_CONTROL) < 0);
+				kbd->cmd(kbd, input, &cmd);
+				if (cmd.id == NOTECOMMANDS_RELEASE) {
+					trackergrid_inputnote(&self->grid, NOTECOMMANDS_RELEASE,
+						self->workspace->chordmode);
+					psy_ui_keyevent_stoppropagation(ev);
+					return;
+				}
+				if (cmd.id != -1 && cmd.id <= NOTECOMMANDS_RELEASE &&
+						ev->shift && !self->workspace->chordmode
+						&& ev->keycode != psy_ui_KEY_SHIFT) {
+					self->workspace->chordmode = 1;
+					self->grid.chordbegin = self->grid.cursor.track;
 				}
 			}
-			psy_ui_component_invalidate(&self->component);
 		}
-	} else
-	if (cmd == CMD_ROWCLEAR) {
-		if (self->grid.cursor.column == TRACKER_COLUMN_NOTE) {
-			PatternNode* prev;
-			PatternNode* node;
-			
-			node = pattern_findnode(self->grid.pattern,
-				self->grid.cursor.track,
-				(psy_dsp_beat_t)self->grid.cursor.offset,
-				(psy_dsp_beat_t)self->grid.bpl, &prev);
-			if (node) {
-				pattern_remove(self->grid.pattern, node);
-				psy_audio_sequencer_checkiterators(
-					&self->workspace->player.sequencer,
-					node);
-				psy_ui_component_invalidate(&self->linenumbers.component);
-			}
-			trackerview_advanceline(self);	
-		} else {
-			//TrackDef* trackdef;
-
-			//trackerview_inputvalue(self, 
-			//	self->coldefs[self->grid.cursor.column].emptyvalue, 0);
-			return;
-		}
-	} else
-	if (cmd == CMD_SELECTALL) {	
-		trackerview_selectall(self);
-	} else
-	if (cmd == CMD_SELECTCOL) {
-		trackerview_selectcol(self);
-	} else
-	if (cmd == CMD_SELECTBAR) {
-		trackerview_selectbar(self);
-	} else
-	if (cmd == CMD_UNDO) {
-		workspace_undo(self->workspace);
-	} else
-	if (cmd == CMD_REDO) {
-		workspace_redo(self->workspace);
-	} else
-	if (cmd == CMD_FOLLOWSONG) {
-		self->workspace->followsong = !self->workspace->followsong;
-	} else {
-		if (self->grid.cursor.column != TRACKER_COLUMN_NOTE) {			
-			int digit = keycodetoint(ev->keycode);
-			if (digit != -1) {
-				trackergrid_inputvalue(&self->grid, digit, 1);
-				psy_ui_keyevent_stoppropagation(ev);
-				return;
-			}			
-		}				
-		{	
-			psy_EventDriver* kbd;
-			EventDriverCmd cmd;
-			EventDriverData input;
-
-			cmd.id = -1;			
-			kbd = workspace_kbddriver(self->workspace);			
-			input.message = EVENTDRIVER_KEYDOWN;
-			input.param1 = encodeinput(ev->keycode, 0, /* GetKeyState(psy_ui_KEY_SHIFT) < 0 */
-				GetKeyState(psy_ui_KEY_CONTROL) < 0);
-			kbd->cmd(kbd, input, &cmd);
-			if (cmd.id == NOTECOMMANDS_RELEASE) {
-				trackergrid_inputnote(&self->grid, NOTECOMMANDS_RELEASE,
-					self->workspace->chordmode);
-				psy_ui_keyevent_stoppropagation(ev);
-				return;
-			}
-			if (cmd.id != -1 && cmd.id <= NOTECOMMANDS_RELEASE &&
-					ev->shift && !self->workspace->chordmode
-					&& ev->keycode != psy_ui_KEY_SHIFT) {
-				self->workspace->chordmode = 1;
-				self->grid.chordbegin = self->grid.cursor.track;
-			}
-		}
-	}	
+	}
 }
 
 void trackerview_onkeyup(TrackerView* self, psy_ui_KeyEvent* ev)
@@ -2268,6 +2278,10 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 		self, trackerview_onblocktransposeup12);
 	psy_signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked,
 		self, trackerview_onblocktransposedown12);
+	psy_signal_connect(&self->blockmenu.import.signal_clicked,
+		self, trackerview_onpatternimport);
+	psy_signal_connect(&self->blockmenu.export.signal_clicked,
+		self, trackerview_onpatternexport);
 	psy_ui_component_hide(&self->blockmenu.component);
 	TrackerViewApplyProperties(self, workspace->patternviewtheme);		
 	trackergrid_adjustscroll(&self->grid);
@@ -3141,6 +3155,41 @@ void trackerview_onblocktransposedown12(TrackerView* self)
 	}
 }
 
+void trackerview_onpatternimport(TrackerView* self)
+{
+	if (self->grid.pattern) {
+		psy_ui_OpenDialog dialog;
+		static char filter[] = "Pattern (*.psb)" "|*.psb";
+
+		psy_ui_opendialog_init_all(&dialog, 0, "Import Pattern", filter, "PSB",
+			workspace_songs_directory(self->workspace));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			psy_audio_patternio_load(self->grid.pattern,
+				psy_ui_opendialog_filename(&dialog),
+				1.f / player_lpb(&self->workspace->player));
+		}
+		psy_ui_opendialog_dispose(&dialog);		
+	}
+}
+
+void trackerview_onpatternexport(TrackerView* self)
+{
+	if (self->grid.pattern) {
+		psy_ui_SaveDialog dialog;
+		static char filter[] = "Pattern (*.psb)" "|*.PSB";
+
+		psy_ui_savedialog_init_all(&dialog, 0, "Export Pattern", filter, "PSB",
+			workspace_songs_directory(self->workspace));
+		if (psy_ui_savedialog_execute(&dialog)) {
+			psy_audio_patternio_save(self->grid.pattern,
+				psy_ui_savedialog_filename(&dialog),
+				1.f / player_lpb(&self->workspace->player),
+				player_numsongtracks(&self->workspace->player));
+		}
+		psy_ui_savedialog_dispose(&dialog);		
+	}
+}
+
 void trackerview_showblockmenu(TrackerView* self)
 {
 	psy_ui_component_show(&self->blockmenu.component);
@@ -3150,9 +3199,11 @@ void trackerview_showblockmenu(TrackerView* self)
 
 void trackerview_hideblockmenu(TrackerView* self)
 {
-	psy_ui_component_hide(&self->blockmenu.component);
-	psy_ui_component_align(&self->component);
-	psy_ui_component_invalidate(&self->linenumbers.component);
+	if (psy_ui_component_visible(&self->blockmenu.component)) {
+		psy_ui_component_hide(&self->blockmenu.component);
+		psy_ui_component_align(&self->component);
+		psy_ui_component_invalidate(&self->linenumbers.component);
+	}
 }
 
 void trackerview_toggleblockmenu(TrackerView* self)
@@ -3211,6 +3262,12 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent)
 	psy_ui_button_settext(&self->blocktransposeup12, "Transpose +12");	
 	psy_ui_button_init(&self->blocktransposedown12, &self->component);
 	psy_ui_button_settext(&self->blocktransposedown12, "Transpose -12");
+
+	psy_ui_button_init(&self->import, &self->component);
+	psy_ui_button_settext(&self->import, "Import (psb)");
+	psy_ui_button_init(&self->export, &self->component);
+	psy_ui_button_settext(&self->export, "Export (psb)");
+	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, 0), 
 		psy_ui_ALIGN_TOP, 0));	

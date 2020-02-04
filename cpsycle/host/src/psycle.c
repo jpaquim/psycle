@@ -11,9 +11,9 @@
 #include <uiframe.h>
 #include <dir.h>
 #include <stdlib.h>
-#if PSYCLE_USE_TK == PSYCLE_TK_CURSES
-#include <curses.h>
-#endif
+#include <string.h>
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 
 #ifdef DIVERSALIS__OS__MICROSOFT
 // The WinMain function is called by the system as the initial entry point for
@@ -33,11 +33,7 @@ int main(int argc, char **argv)
 	char workpath[_MAX_PATH];
 	const char* env = 0;
 	extern psy_ui_App app;
-#if PSYCLE_USE_TK == PSYCLE_TK_CURSES
-	static psy_ui_Frame frame;
-#else
 	MainFrame mainframe;
-#endif
 		
 	// adds the app path to the environment path find some
 	// modules (scilexer, for plugins: universalis, vcredist dlls, ...)
@@ -50,12 +46,7 @@ int main(int argc, char **argv)
 	psy_ui_app_init(&app, (uintptr_t) hInstance);
 #else
 	psy_ui_app_init(&app, 0);
-#endif			
-
-#if PSYCLE_USE_TK == PSYCLE_TK_CURSES
-	psy_ui_frame_init(&frame, 0);
-	getch();
-#else
+#endif
 	mainframe_init(&mainframe);		
 	if (mainframe_showmaximizedatstart(&mainframe)) {
 		psy_ui_component_showstate(&mainframe.component, SW_MAXIMIZE);
@@ -63,7 +54,6 @@ int main(int argc, char **argv)
 		psy_ui_component_showstate(&mainframe.component, iCmdShow);
 	}	
 	err = psy_ui_app_run(&app);
-#endif
 	psy_ui_app_dispose(&app);
 	// restores the environment path
 	if (env) {
@@ -72,3 +62,75 @@ int main(int argc, char **argv)
 //	_CrtDumpMemoryLeaks();	
 	return err;
 }
+#endif
+
+#if PSYCLE_USE_TK == PSYCLE_TK_CURSES
+#include <curses.h>
+
+typedef struct {
+	psy_ui_Component component;
+} MainFrm;
+
+static void ondraw(MainFrm*, psy_ui_Component* sender, psy_ui_Graphics*);
+
+static void mainfrm_init(MainFrm* self)
+{
+	psy_ui_frame_init(&self->component, 0);
+	psy_signal_connect(&self->component.signal_draw, self, ondraw);
+}
+
+void ondraw(MainFrm* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+{
+	const char* text = "text";
+
+	psy_ui_textout(g, 0, 0, text, strlen(text));
+}
+
+#ifdef DIVERSALIS__OS__MICROSOFT
+// The WinMain function is called by the system as the initial entry point for
+// a Win32-based application
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+	PSTR szCmdLine, int iCmdShow)
+#else
+int main(int argc, char** argv)
+#endif
+{
+	int err = 0;
+	char workpath[_MAX_PATH];
+	const char* env = 0;
+	extern psy_ui_App app;
+	static MainFrm mainframe;
+
+	// adds the app path to the environment path find some
+	// modules (scilexer, for plugins: universalis, vcredist dlls, ...)
+	env = pathenv();
+	if (env) {
+		insertpathenv(workdir(workpath));
+	}
+#ifdef DIVERSALIS__OS__MICROSOFT
+	// win32 needs an application handle (hInstance)
+	psy_ui_app_init(&app, (uintptr_t)hInstance);
+#else
+	psy_ui_app_init(&app, 0);
+#endif			
+
+	//psy_ui_frame_init(&frame, 0);
+	mainfrm_init(&mainframe);
+	psy_ui_component_invalidate(&mainframe.component);
+	getch();
+	psy_ui_component_move(&mainframe.component, 10, 100);
+	getch();
+	psy_ui_app_dispose(&app);
+	// restores the environment path
+	if (env) {
+		setpathenv(env);
+	}
+	//	_CrtDumpMemoryLeaks();	
+	return err;
+}
+#endif

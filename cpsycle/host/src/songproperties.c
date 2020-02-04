@@ -18,10 +18,11 @@ static void songpropertiesview_oncreditschanged(SongPropertiesView*, psy_ui_Comp
 static void songpropertiesview_oncommentschanged(SongPropertiesView*, psy_ui_Component* sender);
 
 void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	psy_ui_Component* tabbarparent, Workspace* workspace)
 {		
 	self->song = workspace->song;	
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->tabbar, tabbarparent);	
 	psy_ui_label_init(&self->label_title, &self->component);
 	psy_ui_label_settext(&self->label_title, "Song Title");
 	psy_ui_edit_init(&self->edit_title, &self->component);

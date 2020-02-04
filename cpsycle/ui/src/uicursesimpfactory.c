@@ -10,6 +10,7 @@
 #include "uiapp.h"
 #include "uicursescomponentimp.h"
 #include "uicursesgraphicsimp.h"
+#include "uicursesdef.h"
 
 #include <stdlib.h>
 
@@ -80,7 +81,7 @@ psy_ui_GraphicsImp* allocinit_graphicsimp(psy_ui_curses_ImpFactory* self, uintpt
 {
 	psy_ui_GraphicsImp* rv;
 
-	rv = (psy_ui_GraphicsImp*)malloc(sizeof(psy_ui_curses_GraphicsImp));
+	rv = (psy_ui_GraphicsImp*) malloc(sizeof(psy_ui_curses_GraphicsImp));
 	if (rv) {
 		psy_ui_curses_graphicsimp_init((psy_ui_curses_GraphicsImp*) rv, platformdc);
 	}
@@ -99,7 +100,7 @@ struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_curses_ImpFactory* self, s
 		component,
 		parent ? parent->imp : 0,
 		0, 0,
-		80, 25);
+		200, 100);
 	if (rv->hwnd == 0) {
 		free(rv);
 		rv = 0;

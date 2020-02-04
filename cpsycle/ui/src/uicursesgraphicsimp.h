@@ -17,7 +17,8 @@ extern "C" {
 #endif
 
 typedef struct psy_ui_curses_GraphicsImp {
-	psy_ui_GraphicsImp imp;	
+	psy_ui_GraphicsImp imp;
+	WINDOW* w;
 } psy_ui_curses_GraphicsImp;
 
 void psy_ui_curses_graphicsimp_init(psy_ui_curses_GraphicsImp* self, uintptr_t* hdc);

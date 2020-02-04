@@ -117,7 +117,9 @@ typedef struct {
 	psy_ui_Button blocktransposeup;
 	psy_ui_Button blocktransposedown;
 	psy_ui_Button blocktransposeup12;	
-	psy_ui_Button blocktransposedown12;
+	psy_ui_Button blocktransposedown12;	
+	psy_ui_Button import;
+	psy_ui_Button export;
 } PatternBlockMenu;
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
