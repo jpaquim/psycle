@@ -30,8 +30,6 @@ static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	psy_audio_Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
-static void samplesview_onshow(SamplesView*, psy_ui_Component* sender);
-static void samplesview_onhide(SamplesView*, psy_ui_Component* sender);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
@@ -299,10 +297,6 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		samplesview_onduplicatesample);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self,
 		samplesview_ondeletesample);	
-	psy_signal_connect(&self->component.signal_show, self,
-		samplesview_onshow);
-	psy_signal_connect(&self->component.signal_hide, self,
-		samplesview_onhide);	
 	// client
 	psy_ui_notebook_init(&self->clientnotebook, &self->component);	
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
@@ -539,19 +533,6 @@ void samplesview_onsongchanged(SamplesView* self, Workspace* workspace)
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
 	samplesview_setsample(self, sampleindex_make(0, 0));
-}
-
-void samplesview_onshow(SamplesView* self, psy_ui_Component* sender)
-{	
-	self->clienttabbar.component.visible = 1;
-	psy_ui_component_align(psy_ui_component_parent(
-		&self->clienttabbar.component));
-	psy_ui_component_show(&self->clienttabbar.component);
-}
-
-void samplesview_onhide(SamplesView* self, psy_ui_Component* sender)
-{
-	psy_ui_component_hide(&self->clienttabbar.component);
 }
 
 void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,

@@ -99,6 +99,7 @@ typedef struct {
 
 typedef struct InstrumentView {
 	psy_ui_Component component;
+	psy_ui_Component viewtabbar;
 	psy_ui_Notebook notebook;
 	TabBar tabbar;
 	psy_ui_Component left;
@@ -116,6 +117,7 @@ typedef struct InstrumentView {
 	Workspace* workspace;
 } InstrumentView;
 
-void instrumentview_init(InstrumentView*, psy_ui_Component* parent, Workspace*);
+void instrumentview_init(InstrumentView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 
 #endif

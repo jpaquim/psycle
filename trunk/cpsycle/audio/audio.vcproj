@@ -877,6 +877,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\patternio.c"
+				>
+			</File>
+			<File
 				RelativePath="src\patterns.c"
 				>
 				<FileConfiguration
@@ -1575,6 +1579,10 @@
 			</File>
 			<File
 				RelativePath="src\patternevent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\patternio.h"
 				>
 			</File>
 			<File

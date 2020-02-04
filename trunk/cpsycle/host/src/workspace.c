@@ -1667,7 +1667,7 @@ const char* workspace_doc_directory(Workspace* self)
 const char* workspace_config_directory(Workspace* self)
 {	
 	static TCHAR   achDevice[MAX_PATH];
-#if _winver >= 0x600
+#if WINVER >= 0x600
 	HRESULT  hr;
 	// include file ShlObj.h contains list of CSIDL defines however only a subset
 	// are supported with Windows 7 and later.

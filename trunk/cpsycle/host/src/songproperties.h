@@ -10,6 +10,7 @@
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Component tabbar;
 	psy_audio_Song* song;
 	psy_ui_Label label_title;
 	psy_ui_Label label_credits;
@@ -19,7 +20,8 @@ typedef struct {
 	psy_ui_Edit edit_comments;	
 } SongPropertiesView;
 
-void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent, Workspace*);
+void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, Workspace*);
 void songpropertiesview_enableedit(SongPropertiesView*);
 void songpropertiesview_disableedit(SongPropertiesView*);
 

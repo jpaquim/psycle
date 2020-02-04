@@ -24,8 +24,8 @@ typedef struct {
 	SkinCoord vupeak;
 	SkinCoord pan;
 	SkinCoord mute;
-	SkinCoord solo;
-	SkinCoord bypass;	
+	SkinCoord bypass;
+	SkinCoord solo;		
 	SkinCoord name;
 } MachineCoords;
 

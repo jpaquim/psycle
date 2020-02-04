@@ -4,13 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "uicursescomponentimp.h"
-
 #if PSYCLE_USE_TK == PSYCLE_TK_CURSES
+#include "uicursesgraphicsimp.h"
+#include <string.h>
+
 
 #include "uicomponent.h"
 #include "uiapp.h"
 #include <stdlib.h>
 #include "../../detail/portable.h"
+#include "uicursesdef.h"
 
 extern psy_ui_App app;
 
@@ -146,12 +149,21 @@ void psy_ui_curses_componentimp_init(psy_ui_curses_ComponentImp* self,
 void psy_ui_curses_component_create_window(psy_ui_curses_ComponentImp* self,
 	psy_ui_curses_ComponentImp* parent,	
 	int x, int y, int width, int height)
-{
-
-	WINDOW* local_win;
+{	
 	int err = 0;
+	int maxyscr;
+	int maxxscr;		
+	int cx;
+	int cy;
+	int cw;
+	int ch;
 
-	self->hwnd = newwin(height, width, y, x);
+	getmaxyx(stdscr, maxyscr, maxxscr);
+	cx = (int)((float)maxxscr / psy_ui_curses_VSCREENX * x);
+	cy = (int)((float)maxyscr / psy_ui_curses_VSCREENY * y);
+	cw = (int)((float)maxxscr / psy_ui_curses_VSCREENX * width);
+	ch = (int)((float)maxyscr / psy_ui_curses_VSCREENY * height);
+	self->hwnd = newwin(ch, cw, cy, cx);
 	wborder(self->hwnd, '|', '|', '-', '-', '+', '+', '+', '+');
 	wrefresh(self->hwnd);	
 	if (self->hwnd == NULL) {	
@@ -214,11 +226,37 @@ int dev_visible(psy_ui_curses_ComponentImp* self)
 }
 
 void dev_move(psy_ui_curses_ComponentImp* self, int left, int top)
-{	
+{
+	int maxyscr;
+	int maxxscr;
+	int maxy;
+	int maxx;
+	int cx;
+	int cy;
+
+	getmaxyx(stdscr, maxyscr, maxxscr);
+	getmaxyx(self->hwnd, maxy, maxx);
+	cx = (int)((float)maxxscr / psy_ui_curses_VSCREENX * left);
+	cy = (int)((float)maxyscr / psy_ui_curses_VSCREENY * top);	
+	// wresize(self->hwnd, min(maxy, maxyscr - top), min(maxy, maxxscr - left));
+	mvwin(self->hwnd, cy, cx);
+	wrefresh(self->hwnd);
+	dev_invalidate(self);
 }
 
 void dev_resize(psy_ui_curses_ComponentImp* self, int width, int height)
 {
+	int maxyscr;
+	int maxxscr;	
+	int cw;
+	int ch;
+
+	getmaxyx(stdscr, maxyscr, maxxscr);	
+	cw = (int)((float)maxxscr / psy_ui_curses_VSCREENX * width);
+	ch = (int)((float)maxyscr / psy_ui_curses_VSCREENY * height);
+	wresize(self->hwnd, ch, cw);
+	wrefresh(self->hwnd);
+	dev_invalidate(self);
 }
 
 void dev_clientresize(psy_ui_curses_ComponentImp* self, int width, int height)
@@ -228,22 +266,24 @@ void dev_clientresize(psy_ui_curses_ComponentImp* self, int width, int height)
 psy_ui_Rectangle dev_position(psy_ui_curses_ComponentImp* self)
 {
 	psy_ui_Rectangle rv;
+	psy_ui_setrectangle(&rv, 0, 0, 0, 0);
 	return rv;
 }
 
 void dev_setposition(psy_ui_curses_ComponentImp* self, int x, int y, int width, int height)
-{	
+{
+	
 }
 
 psy_ui_Size dev_size(psy_ui_curses_ComponentImp* self)
 {
-	psy_ui_Size rv;
+	psy_ui_Size rv = { 0, 0 };
 	return rv;
 }
 
 psy_ui_Size dev_framesize(psy_ui_curses_ComponentImp* self)
 {
-	psy_ui_Size rv;
+	psy_ui_Size rv = { 0, 0 };
 	return rv;
 }
 
@@ -272,7 +312,11 @@ void dev_releasecapture(psy_ui_curses_ComponentImp* self)
 }
 
 void dev_invalidate(psy_ui_curses_ComponentImp* self)
-{	
+{
+	psy_ui_curses_GraphicsImp g;
+	
+	psy_ui_curses_graphicsimp_init(&g, (uintptr_t*) self->hwnd);
+	psy_signal_emit(&self->component->signal_draw, self, 1, &g);	
 }
 
 void dev_invalidaterect(psy_ui_curses_ComponentImp* self, const psy_ui_Rectangle* r)
@@ -355,6 +399,7 @@ void dev_preventinput(psy_ui_curses_ComponentImp* self)
 psy_ui_TextMetric dev_textmetric(psy_ui_curses_ComponentImp* self, psy_ui_Font* font)
 {
 	psy_ui_TextMetric rv;
+	memset(&rv, 0, sizeof(psy_ui_TextMetric));
 	return rv;
 }
 
@@ -377,7 +422,7 @@ void dev_seticonressource(psy_ui_curses_ComponentImp* self, int ressourceid)
 
 psy_ui_Size dev_textsize(psy_ui_curses_ComponentImp* self, const char* text, psy_ui_Font* font)
 {
-	psy_ui_Size rv;
+	psy_ui_Size rv = { 0, 0 };
 	return rv;
 }
 

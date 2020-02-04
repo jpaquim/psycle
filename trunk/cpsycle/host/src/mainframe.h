@@ -74,6 +74,7 @@ typedef struct {
 	PluginEditor plugineditor;
 	VuBar vubar;
 	psy_ui_Component statusbar;
+	psy_ui_Notebook viewtabbars;
 	psy_ui_Notebook viewbars;
 	ZoomBox zoombox;
 	psy_ui_Component left;
