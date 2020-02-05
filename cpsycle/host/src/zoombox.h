@@ -19,5 +19,6 @@ typedef struct {
 
 void zoombox_init(ZoomBox*, psy_ui_Component* parent);
 double zoombox_rate(ZoomBox*);
+void zoombox_setrate(ZoomBox*, double);
 
 #endif

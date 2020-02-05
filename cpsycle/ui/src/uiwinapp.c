@@ -405,7 +405,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -417,7 +418,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -429,7 +431,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_MBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -441,7 +444,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -453,7 +457,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -465,7 +470,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_MBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -477,7 +483,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 				
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam),
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0);				
+					(SHORT)HIWORD (lParam), MK_LBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);				
@@ -494,7 +501,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_MBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_MBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
@@ -506,7 +514,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_RBUTTON, 0);
+					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
@@ -532,7 +541,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_MouseEvent ev;
 
 					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), wParam, 0);
+						(SHORT)HIWORD (lParam), wParam, 0,
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 						&ev);
@@ -554,36 +564,40 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			return 0 ;
 			break;          
-			case WM_MOUSEWHEEL:
+			case WM_MOUSEWHEEL:	
+			{
+				int preventdefault = 0;
 				if (imp->component->signal_mousewheel.slots) {
 					psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), LOWORD(wParam), HIWORD(wParam));
+					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD(lParam),
+						(SHORT)HIWORD(lParam), LOWORD(wParam), (short)HIWORD(wParam),
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 						&ev);
-				} else
-				if (imp->component->wheelscroll > 0) {
+					preventdefault = ev.preventdefault;
+				}
+				if (!preventdefault && imp->component->wheelscroll > 0) {
 					if (iDeltaPerLine != 0) {
-						imp->component->accumwheeldelta += (short) HIWORD (wParam); // 120 or -120
+						imp->component->accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
 						while (imp->component->accumwheeldelta >= iDeltaPerLine)
-						{           
+						{
 							int iPos;
 							int scrollmin;
 							int scrollmax;
 
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);							
-							iPos = psy_ui_component_verticalscrollposition(imp->component) - 
+								&scrollmax);
+							iPos = psy_ui_component_verticalscrollposition(imp->component) -
 								imp->component->wheelscroll;
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							SendMessage((HWND) psy_ui_win_component_details(imp->component)->hwnd,
+							SendMessage((HWND)psy_ui_win_component_details(imp->component)->hwnd,
 								WM_VSCROLL,
 								MAKELONG(SB_THUMBTRACK, iPos), 0);
-							imp->component->accumwheeldelta -= iDeltaPerLine ;							
-						}				
+							imp->component->accumwheeldelta -= iDeltaPerLine;
+						}
 						while (imp->component->accumwheeldelta <= -iDeltaPerLine)
 						{
 							int iPos;
@@ -592,17 +606,18 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
 								&scrollmax);
-							iPos = psy_ui_component_verticalscrollposition(imp->component) + 
+							iPos = psy_ui_component_verticalscrollposition(imp->component) +
 								imp->component->wheelscroll;
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							SendMessage((HWND) psy_ui_win_component_details(imp->component)->hwnd, WM_VSCROLL,
-								MAKELONG(SB_THUMBTRACK, iPos), 0);							
-							imp->component->accumwheeldelta += iDeltaPerLine;							
+							SendMessage((HWND)psy_ui_win_component_details(imp->component)->hwnd, WM_VSCROLL,
+								MAKELONG(SB_THUMBTRACK, iPos), 0);
+							imp->component->accumwheeldelta += iDeltaPerLine;
 						}
 					}
 				}
+			}
 			break;
 			case WM_MOUSEHOVER:			
 				if (imp->component->signal_mousehover.slots) {	                    

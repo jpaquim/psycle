@@ -192,13 +192,17 @@ void dev_text(psy_ui_win_CheckBoxImp* self, char* text)
 
 void dev_check(psy_ui_win_CheckBoxImp* self)
 {
-	SendMessage(self->win_component_imp.hwnd, BM_SETCHECK, (WPARAM)BST_CHECKED,
-		(LPARAM)0);
+	if (!dev_checked(self)) {
+		SendMessage(self->win_component_imp.hwnd, BM_SETCHECK, (WPARAM)BST_CHECKED,
+			(LPARAM)0);
+	}
 }
 
 void dev_disablecheck(psy_ui_win_CheckBoxImp* self)
 {
-	SendMessage(self->win_component_imp.hwnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0);
+	if (dev_checked(self)) {
+		SendMessage(self->win_component_imp.hwnd, BM_SETCHECK, (WPARAM)0, (LPARAM)0);
+	}
 }
 
 int dev_checked(psy_ui_win_CheckBoxImp* self)

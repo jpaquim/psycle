@@ -14,6 +14,7 @@
 typedef struct {
 	psy_ui_Component component;	
 	psy_ui_Button rescan;
+    psy_ui_Button selectdirectories;
 	psy_ui_Button sortbyname;
 	psy_ui_Button sortbytype;
 	psy_ui_Button sortbymode;

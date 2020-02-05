@@ -22,13 +22,16 @@ void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent* self)
 }
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, int x, int y, int button,
-	int delta)
+	int delta, int shift, int ctrl)
 {
 	self->x = x;
 	self->y = y;
 	self->button = button;
-	self->delta = 0;
+	self->delta = delta;
 	self->bubble = 1;
+	self->shift = shift;
+	self->ctrl = ctrl;
+	self->preventdefault = 0;
 }
 
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent* self)

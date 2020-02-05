@@ -12,11 +12,7 @@ static void zoombox_updatelabel(ZoomBox*);
 static void zoombox_ondestroy(ZoomBox*, psy_ui_Component* sender);
 
 void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+{	
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
@@ -29,7 +25,7 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_button_settext(&self->zoomin, "+");	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, 0));
 	psy_signal_init(&self->signal_changed);
 	self->zoomrate = 100;
 	self->zoomstep = 25;
@@ -66,6 +62,20 @@ void zoombox_onzoomout(ZoomBox* self, psy_ui_Component* sender)
 double zoombox_rate(ZoomBox* self)
 {
 	return self->zoomrate / (double) 100;
+}
+
+void zoombox_setrate(ZoomBox* self, double rate)
+{	
+	if (rate > 0) {
+		int zoomrate;
+
+		zoomrate = (int)(rate * 100);
+		if (zoomrate != self->zoomrate) {
+			self->zoomrate = zoomrate;
+			psy_signal_emit(&self->signal_changed, self, 0, self->zoomrate);
+			zoombox_updatelabel(self);
+		}
+	}
 }
 
 void zoombox_updatelabel(ZoomBox* self)

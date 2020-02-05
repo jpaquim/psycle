@@ -593,6 +593,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\interpolatecurveview.c"
+				>
+			</File>
+			<File
 				RelativePath="src\linesperbeatbar.c"
 				>
 				<FileConfiguration
@@ -1771,6 +1775,10 @@
 			</File>
 			<File
 				RelativePath="src\instrumentview.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\interpolatecurveview.h"
 				>
 			</File>
 			<File

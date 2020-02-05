@@ -45,6 +45,7 @@ static void sequenceview_onsingleselection(SequenceView*, psy_ui_Button* sender)
 static void sequenceview_onmultiselection(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onshowplaylist(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onfollowsong(SequenceView*, psy_ui_Button* sender);
+static void sequenceview_onfollowsongchanged(SequenceView*, Workspace* sender);
 static void sequenceview_onrecordtweaks(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onmultichannelaudition(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*);
@@ -172,6 +173,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_onsongchanged);
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged, self,
 		sequenceview_onsequenceselectionchanged);
+	psy_signal_connect(&workspace->signal_followsongchanged, self,
+		sequenceview_onfollowsongchanged);
 	psy_ui_component_resize(&self->component, 160, 0);
 }
 
@@ -711,6 +714,15 @@ void sequenceview_onfollowsong(SequenceView* self, psy_ui_Button* sender)
 		workspace_stopfollowsong(self->workspace);
 	} else {
 		workspace_followsong(self->workspace);
+	}
+}
+
+void sequenceview_onfollowsongchanged(SequenceView* self, Workspace* sender)
+{
+	if (workspace_followingsong(sender)) {
+		psy_ui_checkbox_check(&self->options.followsong);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->options.followsong);
 	}
 }
 

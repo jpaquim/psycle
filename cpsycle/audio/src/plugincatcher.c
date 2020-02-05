@@ -60,7 +60,7 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Properties* dirconfig
 	self->plugins = psy_properties_create();
 	plugincatcher_makeinternals(self);
 	
-	workdir(inipath);		
+	strcpy(inipath, psy_dir_config());
 	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
 	self->inipath = strdup(inipath);
 	self->dirconfig = dirconfig;

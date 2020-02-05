@@ -114,6 +114,7 @@ int wildcardmatch(const char *pszString, const char *pszMatch)
 
 #include <direct.h>
 #include <windows.h>
+#include "Shlobj.h"
 #include "../../detail/portable.h"
 
 static const char pathenvvarname[] = { 
@@ -276,6 +277,27 @@ void setpathenv(const char* path)
 			free(newenv);
 		}
 	}
+}
+
+const char* psy_dir_config(void)
+{
+	static TCHAR achDevice[MAX_PATH];	
+#if WINVER >= 0x600
+	HRESULT  hr;
+	// include file ShlObj.h contains list of CSIDL defines however only a subset
+	// are supported with Windows 7 and later.
+	// for the 3rd argument, hToken, can be a specified Access Token or SSID for
+	// a user other than the current user. Using NULL gives us the current user.
+
+	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, achDevice))) {
+		// append a folder name to the user's Documents directory.
+		// the Path Handling functions are pretty handy.
+		// PathAppend(achDevice, L"xxx");
+	}
+#else	
+	strcpy(achDevice, PSYCLE_APP_DIR);
+#endif
+	return achDevice;
 }
 
 #else

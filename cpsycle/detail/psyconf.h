@@ -16,12 +16,15 @@
 
 #define PSYCLE_USE_TK PSYCLE_TK_WIN32
 
+// XP
 // #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 // #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 
+// WIN 10
 // #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 // #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 
+// WIN 98
 #define PSYCLE_APP_DIR "C:\\Programme\\Psycle"
 #define PSYCLE_USER_DIR "C:\\Programme\\Psycle"
 

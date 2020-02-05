@@ -10,10 +10,6 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
 #include "../../detail/portable.h"
 
 #define TIMERID_PARAMVIEW 410
@@ -232,13 +228,13 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 	psy_ui_settextcolor(g, (self->tweak == param)
 		? self->skin->fonthtopcolor : self->skin->fonttopcolor);
 	psy_ui_textoutrectangle(g, r_top.left, r_top.top,
-		ETO_OPAQUE, r_top, label, strlen(label));	
+		psy_ui_ETO_OPAQUE, r_top, label, strlen(label));	
 	psy_ui_setbackgroundcolor(g, (self->tweak == param)
 		? self->skin->hbottomcolor : self->skin->bottomcolor);
 	psy_ui_settextcolor(g, (self->tweak == param)
 		? self->skin->fonthbottomcolor : self->skin->fontbottomcolor);
 	psy_ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
-		ETO_OPAQUE, r_bottom, str, strlen(str));		
+		psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
 	if (!psy_ui_bitmap_empty(&self->skin->knobbitmap)) {
 		int knob_frame;
 
@@ -283,7 +279,8 @@ void drawheader(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 	psy_ui_setbackgroundcolor(g, self->skin->titlecolor);
 	psy_ui_settextcolor(g, self->skin->fonttitlecolor);
 	// font_bold
-	psy_ui_textoutrectangle(g, left, top + quarter, ETO_OPAQUE | ETO_CLIPPED, r, str,
+	psy_ui_textoutrectangle(g, left, top + quarter,
+		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r, str,
 		strlen(str));
 }
 
@@ -311,7 +308,7 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 		}
 	}
 	psy_ui_textoutrectangle(g, 
-		left, top, ETO_OPAQUE | ETO_CLIPPED,
+		left, top, psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, str, strlen(str));
 	psy_ui_setrectangle(&r, left, top + half, width, top + half);
 	if (psy_audio_machine_describevalue(self->machine, str, param,
@@ -320,7 +317,8 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 		psy_snprintf(str, 128, "%d", psy_audio_machine_parametervalue(
 			self->machine, param));
 	}
-	psy_ui_textoutrectangle(g, left, top + half, ETO_OPAQUE | ETO_CLIPPED,
+	psy_ui_textoutrectangle(g, left, top + half,
+		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, str, strlen(str));	
 }
 

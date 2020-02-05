@@ -41,5 +41,6 @@ typedef struct {
 
 void settingsview_init(SettingsView* Settingsview, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Properties* properties);
+void settingsview_selectsection(SettingsView*, const char* key);
 
 #endif

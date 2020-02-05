@@ -123,14 +123,6 @@ SOURCE=.\src\uicursescomponentimp.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\uicursesdef.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uicursesgraphicsimp.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\uicursesimpfactory.c
 # End Source File
 # Begin Source File
@@ -336,14 +328,6 @@ SOURCE=.\src\uicomponent.h
 # Begin Source File
 
 SOURCE=.\src\uicursescomponentimp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uicursesdef.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\uicursesgraphicsimp.h
 # End Source File
 # Begin Source File
 

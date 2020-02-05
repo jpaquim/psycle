@@ -118,6 +118,25 @@ void settingsview_appendtabbarsections(SettingsView* self)
 		settingsview_ontabbarchange);
 }
 
+void settingsview_selectsection(SettingsView* self, const char* key)
+{
+	psy_Properties* p;
+	int pageindex;
+	int found = 0;
+
+	for (pageindex = 0, p = self->properties->children; p != 0;
+		p = psy_properties_next(p), ++pageindex) {
+		if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION &&
+			(strcmp(psy_properties_key(p), key) == 0)) {
+			found = 1;
+			break;
+		}
+	}
+	if (found) {
+		tabbar_select(&self->tabbar, pageindex);
+	}
+}
+
 void settingsview_ondestroy(SettingsView* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);

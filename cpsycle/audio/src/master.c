@@ -14,7 +14,15 @@
 
 static int master_mode(psy_audio_Master* self) { return MACHMODE_MASTER; }
 static void master_dispose(psy_audio_Master*);
-
+static const psy_audio_MachineInfo* info(psy_audio_Master*);
+static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
+	uintptr_t slot);
+static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
+	uintptr_t slot);
+static const char* master_editname(psy_audio_Master* self) { return "Master"; }
+static uintptr_t numinputs(psy_audio_Master*);
+static uintptr_t numoutputs(psy_audio_Master*);
+// Parameters
 static int parametertype(psy_audio_Master*, uintptr_t param);
 static uintptr_t numparameters(psy_audio_Master*);
 static unsigned int numparametercols(psy_audio_Master*);
@@ -24,13 +32,7 @@ static int parameterlabel(psy_audio_Master*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Master*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_Master*, char* txt, uintptr_t param, int value);
 static float parametervalue(psy_audio_Master*, uintptr_t param);
-static const psy_audio_MachineInfo* info(psy_audio_Master*);
-static uintptr_t numinputs(psy_audio_Master*);
-static uintptr_t numoutputs(psy_audio_Master*);
-static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
-	uintptr_t slot);
-static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
-	uintptr_t slot);
+
 static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
 {
 	return PSY_DSP_AMP_RANGE_IGNORE;
@@ -74,6 +76,7 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
 		vtable.loadspecific = (fp_machine_loadspecific) master_loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) master_savespecific;
+		vtable.editname = (fp_machine_editname) master_editname;
 		// Parameter
 		vtable.parametertype = (fp_machine_parametertype) parametertype;
 		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;
