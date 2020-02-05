@@ -231,6 +231,9 @@ typedef enum {
 
 typedef uint32_t psy_ui_Color;
 
+#define psy_ui_ETO_OPAQUE	0x0002
+#define psy_ui_ETO_CLIPPED	0x0004
+
 #ifdef __cplusplus
 }
 #endif

@@ -112,6 +112,8 @@ typedef struct {
 	psy_ui_Button paste;
 	psy_ui_Button mixpaste;
 	psy_ui_Button del;
+	psy_ui_Button interpolatelinear;
+	psy_ui_Button interpolatecurve;
 	psy_ui_Button changegenerator;
 	psy_ui_Button changeinstrument;
 	psy_ui_Button blocktransposeup;

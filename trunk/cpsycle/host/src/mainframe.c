@@ -46,7 +46,7 @@ static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
-static void mainframe_onviewselected(MainFrame*, Workspace*, int view);
+static void mainframe_onviewselected(MainFrame*, Workspace*, int view, const char* anchor);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender,
@@ -66,17 +66,6 @@ static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender, const char* path);
 
 #define GEARVIEW 10
-
-enum {
-	TABPAGE_MACHINEVIEW		= 0,
-	TABPAGE_PATTERNVIEW		= 1,
-	TABPAGE_SAMPLESVIEW		= 2,
-	TABPAGE_INSTRUMENTSVIEW = 3,
-	TABPAGE_PROPERTIESVIEW	= 4,
-	TABPAGE_SETTINGSVIEW	= 5,
-	TABPAGE_HELPVIEW		= 6,
-	TABPAGE_RENDERVIEW		= 7
-};
 
 void mainframe_init(MainFrame* self)
 {			
@@ -467,14 +456,14 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			machines_slot(&self->workspace.song->machines));
 	} else
 	if (cmd.id == CMD_IMM_EDITINSTR) {
-		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW);
+		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0);
 	} else
 	if (cmd.id == CMD_IMM_EDITSAMPLE) {
-		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW);
+		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0);
 		tabbar_select(&self->samplesview.clienttabbar, 0);
 	} else
 	if (cmd.id == CMD_IMM_EDITWAVE) {
-		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW);
+		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0);
 		tabbar_select(&self->samplesview.clienttabbar, 2);
 	} else
 	if (cmd.id == CMD_IMM_TERMINAL) {
@@ -675,10 +664,13 @@ void mainframe_ontimer(MainFrame* self, psy_ui_Component* sender, int timerid)
 	workspace_idle(&self->workspace);
 }
 
-void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view)
+void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view, const char* anchor)
 {
 	if (view != GEARVIEW) {
 		tabbar_select(&self->tabbar, view);
+	}
+	if (anchor && view == TABPAGE_SETTINGSVIEW) {
+		settingsview_selectsection(&self->settingsview, anchor);
 	}
 }
 

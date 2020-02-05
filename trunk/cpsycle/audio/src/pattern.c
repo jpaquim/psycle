@@ -12,12 +12,15 @@
 
 void patterneditposition_init(PatternEditPosition* self)
 {
-	self->column = 0;
-	self->digit = 0;
 	self->track = 0;
 	self->offset = 0;
+	self->line = 0;
+	self->column = 0;
+	self->digit = 0;
 	self->pattern = 0;
 }
+
+
 
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs)
@@ -271,6 +274,44 @@ void pattern_blockremove(psy_audio_Pattern* self, PatternEditPosition begin,
 			break;
 		}
 		p = q;
+	}
+}
+
+void pattern_blockinterpolatelinear(psy_audio_Pattern* self, PatternEditPosition begin,
+	PatternEditPosition end, psy_dsp_beat_t bpl)
+{
+	uintptr_t line;
+	float startval;
+	float endval;
+	float step;
+	PatternNode* prev;
+	PatternNode* node;
+
+	node = pattern_findnode(self, begin.track, begin.line * bpl, bpl, &prev);
+	startval = (node)
+		? psy_audio_patternevent_tweakvalue(patternentry_front(node->entry)) / 65535.f
+		: 0;
+	node = pattern_findnode(self, begin.track, end.line * bpl, bpl, &prev);
+	endval = (node)
+		? psy_audio_patternevent_tweakvalue(patternentry_front(node->entry)) / 65535.f
+		: 0;
+	step = (endval - startval) / (end.line - begin.line);
+	for (line = begin.line; line < end.line; ++line) {
+		psy_dsp_beat_t offset;
+		int value;
+		
+		offset = line * bpl;
+		value = (int)((step * (line - begin.line) + startval) * 0xFFFF);
+		node = pattern_findnode(self, begin.track, offset, bpl, &prev);
+		if (node) {
+			psy_audio_patternevent_settweakvalue(patternentry_front(node->entry), value);
+		} else {
+			psy_audio_PatternEvent ev;
+
+			patternevent_clear(&ev);
+			psy_audio_patternevent_settweakvalue(&ev, value);
+			pattern_insert(self, prev, begin.track, offset, &ev);
+		}
 	}
 }
 

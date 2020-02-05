@@ -92,6 +92,9 @@ void pattern_scale(psy_audio_Pattern*, float factor);
 /// erases all entries of the block
 void pattern_blockremove(psy_audio_Pattern*, PatternEditPosition begin, 
 	PatternEditPosition end);
+/// interpolates linear all entries of the block
+void pattern_blockinterpolatelinear(psy_audio_Pattern*, PatternEditPosition begin,
+	PatternEditPosition end, psy_dsp_beat_t bpl);
 /// transposes all entries of the block with the offset
 void pattern_blocktranspose(psy_audio_Pattern*, PatternEditPosition begin, 
 	PatternEditPosition end, int offset);

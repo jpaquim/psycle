@@ -15,14 +15,8 @@
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 #include <uiwincomponentimp.h>
+#include <dir.h>
 #include "../../detail/portable.h"
-#include "Windows.h"
-#include "Shlobj.h"
-
-static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-{
-	return (psy_ui_win_ComponentImp*)self->imp;
-}
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
@@ -157,12 +151,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->navigating = 0;
 	workspace_initsignals(self);	
 	workspace_initplayer(self);		
-	self->patterneditposition.pattern = 0;	
-	self->patterneditposition.column = 0;
-	self->patterneditposition.digit = 0;
-	self->patterneditposition.line = 0;
-	self->patterneditposition.offset = 0;	
-	self->patterneditposition.track = 0;
+	patterneditposition_init(&self->patterneditposition);	
 	pattern_init(&self->patternpaste);
 	self->sequencepaste = 0;	
 }
@@ -195,6 +184,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_terminal_error);
 	psy_signal_init(&self->signal_terminal_out);
 	psy_signal_init(&self->signal_terminal_warning);
+	psy_signal_init(&self->signal_followsongchanged);
 }
 
 void workspace_dispose(Workspace* self)
@@ -242,6 +232,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_terminal_error);
 	psy_signal_dispose(&self->signal_terminal_out);
 	psy_signal_dispose(&self->signal_terminal_warning);
+	psy_signal_dispose(&self->signal_followsongchanged);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -260,9 +251,12 @@ void workspace_disposesequencepaste(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
-	player_init(&self->player, self->song, self->mainhandle
-		? (void*) psy_ui_win_component_details(self->mainhandle)->hwnd
-		: 0);
+#ifdef DIVERSALIS__OS__MICROSOFT
+	player_init(&self->player, self->song,
+		((psy_ui_win_ComponentImp*)(self->mainhandle->imp))->hwnd);
+#else
+	player_init(&self->player, self->song, 0);
+#endif		
 	self->cmds = cmdproperties_create();
 	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);
@@ -293,7 +287,7 @@ void workspace_configvisual(Workspace* self)
 		psy_ui_FontInfo fontinfo;
 		
 		psy_ui_fontinfo_init_string(&fontinfo, 
-			psy_properties_readstring(visual, "defaultfont", "tahoma 16"));
+			psy_properties_readstring(visual, "defaultfont", "tahoma;-16"));
 		psy_ui_font_init(&font, &fontinfo);
 		fontinfo = psy_ui_font_fontinfo(&font);
 		self->fontheight = fontinfo.lfHeight;
@@ -433,7 +427,7 @@ void workspace_makevisual(Workspace* self)
 		psy_properties_append_action(visual, "defaultskin"),
 		"Default Skin");
 	psy_properties_settext(
-		psy_properties_append_font(visual, "defaultfont", "tahoma:80"),
+		psy_properties_append_font(visual, "defaultfont", "tahoma;-16"),
 		"Default Font");	
 	workspace_makepatternview(self, visual);
 	workspace_makemachineview(self, visual);
@@ -447,11 +441,11 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	pvc = psy_properties_create_section(visual, "patternview");
 	psy_properties_settext(pvc, "Pattern View");
 	psy_properties_settext(
-		psy_properties_append_bool(pvc, "drawemptydata", 0),
-		"Draw empty data");
+		psy_properties_append_font(pvc, "font", "tahoma;-16"),
+		"Font");
 	psy_properties_settext(
-		psy_properties_append_int(pvc, "fontsize", 80, 0, 999),
-		"Font Size");
+		psy_properties_append_bool(pvc, "drawemptydata", 0),
+		"Draw empty data");	
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "griddefaults", 1),
 		"Default entries");
@@ -1455,13 +1449,19 @@ int workspace_followingsong(Workspace* self)
 }
 
 void workspace_followsong(Workspace* self)
-{
-	self->followsong = 1;
+{	
+	if (self->followsong != 1) {
+		self->followsong = 1;
+		psy_signal_emit(&self->signal_followsongchanged, self, 0);
+	}	
 }
 
 void workspace_stopfollowsong(Workspace* self)
 {
-	self->followsong = 0;
+	if (self->followsong != 0) {
+		self->followsong = 0;
+		psy_signal_emit(&self->signal_followsongchanged, self, 0);
+	}
 }
 
 void workspace_onsequenceeditpositionchanged(Workspace* self,
@@ -1534,10 +1534,10 @@ void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 	psy_signal_emit(&self->signal_showparameters, self, 1, machineslot);
 }
 
-void workspace_selectview(Workspace* self, int view)
+void workspace_selectview(Workspace* self, int view, const char* anchor)
 {
 	self->currview = view;
-	psy_signal_emit(&self->signal_viewselected, self, 1, view);
+	psy_signal_emit(&self->signal_viewselected, self, 2, view, anchor);
 }
 
 void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak, float value)
@@ -1602,7 +1602,7 @@ void workspace_updatenavigation(Workspace* self)
 	entry = (HistoryEntry*) (self->currnavigation->entry);
 	self->navigating = 1;
 	if (self->currview != entry->viewid) {
-		workspace_selectview(self, entry->viewid);
+		workspace_selectview(self, entry->viewid, 0);
 	}
 	if (entry->sequenceentryid != -1 &&
 			self->sequenceselection.editposition.trackposition.tracknode) {
@@ -1666,23 +1666,7 @@ const char* workspace_doc_directory(Workspace* self)
 
 const char* workspace_config_directory(Workspace* self)
 {	
-	static TCHAR   achDevice[MAX_PATH];
-#if WINVER >= 0x600
-	HRESULT  hr;
-	// include file ShlObj.h contains list of CSIDL defines however only a subset
-	// are supported with Windows 7 and later.
-	// for the 3rd argument, hToken, can be a specified Access Token or SSID for
-	// a user other than the current user. Using NULL gives us the current user.
-
-	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, achDevice))) {
-		// append a folder name to the user's Documents directory.
-		// the Path Handling functions are pretty handy.
-		// PathAppend(achDevice, L"xxx");
-	}
-#else	
-	strcpy(achDevice, PSYCLE_APP_DIR);
-#endif
-	return achDevice;
+	return psy_dir_config();
 }
 
 MachineCallback machinecallback(Workspace* self)

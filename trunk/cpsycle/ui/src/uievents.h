@@ -30,11 +30,14 @@ typedef struct {
 	int y;
 	int button;
 	int delta;
+	int shift;
+	int ctrl;
 	bool bubble;
+	bool preventdefault;
 } psy_ui_MouseEvent;
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent*, int x, int y, int button,
-	int delta);
+	int delta, int shift, int ctrl);
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent*);
 
 #ifdef __cplusplus

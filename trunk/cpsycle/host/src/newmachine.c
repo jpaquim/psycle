@@ -45,6 +45,7 @@ static int plugintype(psy_Properties*, char* text);
 static int pluginmode(psy_Properties*, char* text);
 
 static void newmachinebar_onrescan(NewMachineBar*, psy_ui_Component* sender);
+static void newmachinebar_onselectdirectories(NewMachineBar*, psy_ui_Component* sender);
 
 static void newmachinedetail_reset(NewMachineDetail*);
 
@@ -57,23 +58,34 @@ static int newmachine_isplugin(int type);
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	self->workspace = workspace;	
+	psy_ui_Margin margin;
+			
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_enablealign(&self->component);
+	self->workspace = workspace;
 	psy_ui_button_init(&self->rescan, &self->component);
 	psy_ui_button_settext(&self->rescan, "Rescan");
-	psy_ui_component_setalign(&self->rescan.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_setcharnumber(&self->rescan, 30);
+	psy_ui_button_init(&self->selectdirectories, &self->component);
+	psy_ui_button_settext(&self->selectdirectories, "Select plugin directories");
+	psy_ui_button_setcharnumber(&self->rescan, 30);
 	psy_ui_button_init(&self->sortbyname, &self->component);
-	psy_ui_button_settext(&self->sortbyname, "Sort By Name");
-	psy_ui_component_setalign(&self->sortbyname.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->sortbyname, "Sort By Name");	
 	psy_ui_button_init(&self->sortbytype, &self->component);
-	psy_ui_button_settext(&self->sortbytype, "Sort By Type");
-	psy_ui_component_setalign(&self->sortbytype.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->sortbytype, "Sort By Type");	
 	psy_ui_button_init(&self->sortbymode, &self->component);
-	psy_ui_button_settext(&self->sortbymode, "Sort By Mode");
-	psy_ui_component_setalign(&self->sortbymode.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->sortbymode, "Sort By Mode");	
 	psy_signal_connect(&self->rescan.signal_clicked, self,
 		newmachinebar_onrescan);
+	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
+		newmachinebar_onselectdirectories);
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
+		psy_ui_ALIGN_TOP,
+		&margin));
 }
 
 void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
@@ -81,17 +93,31 @@ void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
 	workspace_scanplugins(self->workspace);
 }
 
+void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* sender)
+{
+	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, "directories");
+}
+
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_Margin margin;
+
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	newmachinebar_init(&self->bar, &self->component, workspace);
-	psy_ui_component_setposition(&self->bar.component, 0, 10, 80, 100);
+	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->desclabel, &self->component);
 	psy_ui_label_setstyle(&self->desclabel, WS_CHILD | WS_VISIBLE | SS_CENTER);
 	psy_ui_label_settext(&self->desclabel, 
 		"Select a plugin to view its description.");	
-	psy_ui_component_setposition(&self->desclabel.component, 0, 110, 80, 100);	
+	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2), psy_ui_value_makeeh(2),
+		psy_ui_value_makepx(0));
+	psy_list_free(psy_ui_components_setmargin(
+		psy_ui_component_children(&self->component, 0),
+		&margin));
 }
 
 void newmachinedetail_reset(NewMachineDetail* self)
@@ -333,7 +359,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 	if (self->selectedplugin) {
 		psy_signal_emit(&self->signal_selected, self, 1,
 			self->selectedplugin);
-		workspace_selectview(self->workspace, self->calledby);
+		workspace_selectview(self->workspace, self->calledby, 0);
 		psy_ui_mouseevent_stoppropagation(ev);
 	}	
 }

@@ -162,6 +162,10 @@ SOURCE=.\src\instrumentview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\interpolatecurveview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\linesperbeatbar.c
 # End Source File
 # Begin Source File
@@ -439,6 +443,10 @@ SOURCE=.\src\instrumentsbox.h
 # Begin Source File
 
 SOURCE=.\src\instrumentview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\interpolatecurveview.h
 # End Source File
 # Begin Source File
 

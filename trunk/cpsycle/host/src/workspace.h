@@ -15,6 +15,17 @@
 #include <sequence.h>
 
 enum {
+	TABPAGE_MACHINEVIEW = 0,
+	TABPAGE_PATTERNVIEW = 1,
+	TABPAGE_SAMPLESVIEW = 2,
+	TABPAGE_INSTRUMENTSVIEW = 3,
+	TABPAGE_PROPERTIESVIEW = 4,
+	TABPAGE_SETTINGSVIEW = 5,
+	TABPAGE_HELPVIEW = 6,
+	TABPAGE_RENDERVIEW = 7
+};
+
+enum {
 	WORKSPACE_NEWSONG,
 	WORKSPACE_LOADSONG
 };
@@ -79,6 +90,7 @@ typedef struct {
 	psy_Signal signal_terminal_error;
 	psy_Signal signal_terminal_out;
 	psy_Signal signal_terminal_warning;
+	psy_Signal signal_followsongchanged;
 	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
 	History history;
@@ -146,7 +158,7 @@ void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
-void workspace_selectview(Workspace*, int view);
+void workspace_selectview(Workspace*, int view, const char* anchor);
 void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);
