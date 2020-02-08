@@ -1,0 +1,15 @@
+CC = gcc
+inc = -I../../container/src -I../../../diversalis/src
+cflags = -Wfatal-errors
+src = $(wildcard *.c)
+obj = $(src:.c=.o)
+
+psyui.a: $(obj)
+	ar rsv $@ $^
+
+%.o: %.c
+	$(CC) $(cflags) $(inc) -c $(src);
+
+.PHONY: clean	
+clean:
+	rm -f $(obj) psyui.a

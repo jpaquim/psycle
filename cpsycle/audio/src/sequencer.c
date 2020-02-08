@@ -560,7 +560,7 @@ void psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 		psy_audio_PatternEvent* ev;
 
 		ev = (psy_audio_PatternEvent*) p->entry;
-		if (ev->cmd < NOTECOMMANDS_TWEAK || ev->note == NOTECOMMANDS_EMPTY) {
+		if (ev->note < NOTECOMMANDS_TWEAK || ev->note == NOTECOMMANDS_EMPTY) {
 			if (ev->cmd == EXTENDED) {
 				if ((ev->parameter & 0xF0) == PATTERN_DELAY) {
 					psy_audio_sequencer_patterndelay(self, ev);
@@ -723,7 +723,20 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 	} else
 	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAK) {
 		psy_audio_sequencer_note(self, patternentry, offset);
+	} else
+	if ((patternentry_front(patternentry)->note == NOTECOMMANDS_MIDICC) &&
+			(patternentry_front(patternentry)->inst < 0x80)) {
+		psy_audio_PatternEntry* entry;
+
+		entry = patternentry_clone(patternentry);
+		entry->bpm = self->bpm;
+		entry->delta = offset - self->position;
+		entry->track = patternentry_front(patternentry)->inst;
+		patternentry_front(entry)->note = NOTECOMMANDS_EMPTY;
+		patternentry_front(entry)->inst = NOTECOMMANDS_INST_EMPTY;
+		psy_list_append(&self->events, entry);
 	}
+		
 }
 
 void psy_audio_sequencer_notedelay(psy_audio_Sequencer* self, psy_audio_PatternEntry* patternentry,
@@ -778,7 +791,6 @@ void psy_audio_sequencer_note(psy_audio_Sequencer* self,
 			(void*)(uintptr_t)patternentry_front(patternentry)->mach);
 	}
 	psy_list_append(&self->events, entry);
-
 }
 
 void psy_audio_addgate(psy_audio_Sequencer* self, psy_audio_PatternEntry*

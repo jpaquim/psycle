@@ -459,7 +459,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	// skin init
 	psy_ui_bitmap_init(&self->skin.skinbmp);
 	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
-	psy_ui_fontinfo_init(&fontinfo, "Tahoma", 80);
+	psy_ui_fontinfo_init(&fontinfo, "Tahoma", 16);
 	psy_ui_font_init(&self->skin.font, &fontinfo);
 	machinewireview_initmachinecoords(self);	
 	psy_table_init(&self->machineuis);			

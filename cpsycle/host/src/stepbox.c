@@ -41,7 +41,7 @@ void stepbox_build(StepBox* self)
 	for (step = 1; step <= 16; ++step) {
 		char text[20];
 		psy_snprintf(text, 20, "%d", step);
-		psy_ui_combobox_addstring(&self->combobox, text);
+		psy_ui_combobox_addtext(&self->combobox, text);
 	}	
 }
 

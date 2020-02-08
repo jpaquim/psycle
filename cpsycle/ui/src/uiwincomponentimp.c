@@ -4,6 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "uiwincomponentimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
+#include "uiwinimpfactory.h"
 #include "uicomponent.h"
 #include "uiwinfontimp.h"
 #include "uiwinbitmapimp.h"
@@ -858,3 +862,5 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 #endif
 	return rv;
 }
+
+#endif

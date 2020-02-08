@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwinlabelimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiwincomponentimp.h"
 #include "uicomponent.h"
 #include "uiapp.h"
@@ -191,3 +194,5 @@ void dev_text(psy_ui_win_LabelImp* self, char* text)
 {	
 	GetWindowText(self->win_component_imp.hwnd, text, 256);
 }
+
+#endif

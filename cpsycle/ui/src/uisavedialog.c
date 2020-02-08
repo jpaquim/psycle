@@ -3,18 +3,19 @@
 
 #include "../../detail/prefix.h"
 
+#include "uiapp.h"
 #include "uisavedialog.h"
-#include "uiwinsavedialogimp.h"
+#include "uiimpfactory.h"
 #include <string.h>
 #include <stdlib.h>
 
+extern psy_ui_App app;
+
 void psy_ui_savedialog_init(psy_ui_SaveDialog* self, psy_ui_Component* parent)
 {
-	psy_ui_win_SaveDialogImp* imp;
-
-	imp = (psy_ui_win_SaveDialogImp*) malloc(sizeof(psy_ui_win_SaveDialogImp));
-	psy_ui_win_savedialogimp_init(imp, parent);
-	self->imp = (psy_ui_SaveDialogImp*) imp;
+	self->imp = psy_ui_impfactory_allocinit_savedialogimp(
+		psy_ui_app_impfactory(&app),
+		parent);
 }
 
 void psy_ui_savedialog_init_all(psy_ui_SaveDialog* self,
@@ -24,11 +25,13 @@ void psy_ui_savedialog_init_all(psy_ui_SaveDialog* self,
 	const char* defaultextension,
 	const char* initialdir)
 {
-	psy_ui_win_SaveDialogImp* imp;
-
-	imp = (psy_ui_win_SaveDialogImp*)malloc(sizeof(psy_ui_win_SaveDialogImp));
-	psy_ui_win_savedialogimp_init_all(imp, parent, title, filter, defaultextension, initialdir);
-	self->imp = (psy_ui_SaveDialogImp*)imp;
+	self->imp = psy_ui_impfactory_allocinit_all_savedialogimp(
+		psy_ui_app_impfactory(&app),
+		parent,
+		title,
+		filter,
+		defaultextension,
+		initialdir);
 }
 
 void psy_ui_savedialog_dispose(psy_ui_SaveDialog* self)

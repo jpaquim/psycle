@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwinlistboximp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiwincomponentimp.h"
 #include "uicomponent.h"
 #include "uiapp.h"
@@ -296,3 +299,5 @@ void oncommand(psy_ui_ListBox* self, psy_ui_Component* sender, WPARAM wParam,
 		break;
 	}
 }
+
+#endif

@@ -63,6 +63,8 @@ typedef enum {
 	BACKGROUND_PARENT,
 } BackgroundMode;
 
+struct psy_ui_Component;
+
 // vtable function pointers
 typedef void (*psy_ui_fp_component_dispose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_destroy)(struct psy_ui_Component*);
@@ -151,6 +153,8 @@ typedef struct psy_ui_ComponentVTable {
 
 typedef void* psy_ui_ComponentDetails;
 
+struct psy_ui_ComponentImp;
+
 typedef struct psy_ui_Component {
 	psy_ui_ComponentVtable* vtable;		
 	struct psy_ui_ComponentImp* imp;
@@ -209,9 +213,9 @@ void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
 void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent, struct psy_ui_ComponentImp*);
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
-int psy_ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
+/*int psy_ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
 	const char* classname, int x, int y, int width, int height,
-	uint32_t dwStyle, int usecommand);
+	uint32_t dwStyle, int usecommand);*/
 
 INLINE void psy_ui_component_show(psy_ui_Component* self)
 {
@@ -386,17 +390,17 @@ typedef struct psy_ui_ComponentImp {
 void psy_ui_componentimp_init(psy_ui_ComponentImp*);
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp*);
 
-INLINE psy_ui_component_invalidate(psy_ui_Component* self)
+INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_invalidate(self->imp);
 }
 
-INLINE psy_ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle* r)
+INLINE void psy_ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle* r)
 {
 	self->imp->vtable->dev_invalidaterect(self->imp, r);
 }
 
-INLINE psy_ui_component_update(psy_ui_Component* self)
+INLINE void psy_ui_component_update(psy_ui_Component* self)
 {
 	self->imp->vtable->dev_update(self->imp);
 }
@@ -411,13 +415,13 @@ INLINE psy_ui_Rectangle psy_ui_component_position(psy_ui_Component* self)
 	return self->imp->vtable->dev_position(self->imp);
 }
 
-INLINE psy_ui_component_starttimer(psy_ui_Component* self, unsigned int id,
+INLINE void psy_ui_component_starttimer(psy_ui_Component* self, unsigned int id,
 	unsigned int interval)
 {
 	self->imp->vtable->dev_starttimer(self->imp, id, interval);
 }
 
-INLINE psy_ui_component_stoptimer(psy_ui_Component* self, unsigned int id)
+INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, unsigned int id)
 {
 	self->imp->vtable->dev_stoptimer(self->imp, id);
 }
@@ -434,7 +438,7 @@ INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char*
 		psy_ui_component_font(self));
 }
 
-INLINE psy_ui_component_setcolor(psy_ui_Component* self, uint32_t color)
+INLINE void psy_ui_component_setcolor(psy_ui_Component* self, uint32_t color)
 {
 	self->color = color;
 }

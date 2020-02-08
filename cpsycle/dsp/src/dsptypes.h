@@ -24,6 +24,8 @@ typedef enum {
 	PSY_DSP_AMP_RANGE_IGNORE
 } psy_dsp_amp_range_t;
 
+#define psy_dsp_epsilon 0.001;
+
 #ifdef __cplusplus
 }
 #endif

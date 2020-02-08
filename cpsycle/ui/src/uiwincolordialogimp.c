@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwincolordialogimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiapp.h"
 #include <stdlib.h>
 #include "uiapp.h"
@@ -76,3 +79,5 @@ psy_ui_Color dev_color(psy_ui_win_ColorDialogImp* self)
 {
 	return self->color;	
 }
+
+#endif

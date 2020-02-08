@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-typedef struct {	
+typedef struct psy_ui_FontInfo {
     int32_t      lfHeight;
     int32_t      lfWidth;
     int32_t      lfEscapement;
@@ -43,6 +43,8 @@ void psy_ui_fontinfo_init(psy_ui_FontInfo*, const char* family, int height);
 void psy_ui_fontinfo_init_string(psy_ui_FontInfo*, const char* text);
 const char* psy_ui_fontinfo_string(psy_ui_FontInfo*);
 
+struct psy_ui_Font;
+
 typedef void (*psy_ui_font_fp_dispose)(struct psy_ui_Font*);
 typedef void (*psy_ui_font_fp_copy)(struct psy_ui_Font*, struct psy_ui_Font*);
 
@@ -50,6 +52,8 @@ typedef struct psy_ui_FontVTable {
 	psy_ui_font_fp_dispose dispose;	
 	psy_ui_font_fp_copy copy;
 } psy_ui_FontVTable;
+
+struct psy_ui_FontImp;
 
 typedef struct psy_ui_Font {
 	psy_ui_FontVTable* vtable;

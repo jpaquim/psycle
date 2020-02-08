@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwinfolderdialogimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiapp.h"
 #include <stdlib.h>
 #include "uiapp.h"
@@ -123,3 +126,5 @@ const char* dev_path(psy_ui_win_FolderDialogImp* self)
 {
 	return self->path;
 }
+
+#endif

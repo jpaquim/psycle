@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dsptypes.h>
+#include <convert.h>
 #include "plugin_interface.h"
 #include "../../detail/portable.h"
 
@@ -34,7 +35,7 @@ const psy_audio_MachineInfo* mixer_info(void)
 	};
 	return &macinfo;
 }
-
+// virtual prototypes
 static const psy_audio_MachineInfo* info(psy_audio_Mixer*);
 static void mixer_dispose(psy_audio_Mixer*);
 static int mixer_mode(psy_audio_Mixer* self) { return MACHMODE_FX; }
@@ -66,9 +67,7 @@ static psy_dsp_amp_range_t amprange(psy_audio_Mixer* self)
 {
 	return PSY_DSP_AMP_RANGE_IGNORE;
 }
-
-static int intparamvalue(float value);
-static float floatparamvalue(int value);
+// private methods
 static psy_audio_WireSocketEntry* wiresocketentry(psy_audio_Mixer*, uintptr_t input);
 static void insertinputchannels(psy_audio_Mixer*, uintptr_t num, psy_audio_Machines* machines);
 static int paramviewoptions(psy_audio_Machine* self) { return MACHINE_PARAMVIEW_COMPACT; }
@@ -543,11 +542,6 @@ const psy_audio_MachineInfo* info(psy_audio_Mixer* self)
 	return mixer_info();
 }
 
-static psy_dsp_amp_t dB2Amp(psy_dsp_amp_t db)
-{	
-	return (psy_dsp_amp_t) pow(10.0f, db / 20.0f);
-}
-
 void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, float value)
 {
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
@@ -563,7 +557,7 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, float value)
 				self->master.volume = 0.0f;
 			} else {
 				psy_dsp_amp_t dbs = (value/42.67f)-96.0f;
-				self->master.volume = dB2Amp(dbs);
+				self->master.volume = psy_dsp_convert_db_to_amp(dbs);
 			}			
 		} else 
 		if (param == 13) {
@@ -597,11 +591,12 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, float value)
 			if (param <= 12) {				 
 				if (param - 1 < self->sends.count) {														
 					psy_table_insert(&channel->sendvols, param - 1, 
-						(void*) (ptrdiff_t)intparamvalue( 
+						(void*)(uintptr_t)machine_parametervalue_scaled(&self->custommachine.machine, param,
 							(machine_parametervalue_scaled(&self->custommachine.machine,
 					param, value) == 256) ? 1.0f : 
 							((machine_parametervalue_scaled(&self->custommachine.machine,
-					param, value)&0xFF)/256.0f)));					
+					param, value)&0xFF)/256.0f))
+					);					
 				}
 			} else			
 			if (param == 13) {
@@ -627,13 +622,12 @@ void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, float value)
 					channel->volume = 0.0f;
 				} else {
 					psy_dsp_amp_t dbs = (value/42.67f)-96.0f;
-					channel->volume = dB2Amp(dbs);
+					channel->volume = psy_dsp_convert_db_to_amp(dbs);
 				}
 			}
 		}
 	}
 }
-
 
 void parametertweak(psy_audio_Mixer* self, uintptr_t param, float value)
 {	
@@ -1394,16 +1388,6 @@ void insertinputchannels(psy_audio_Mixer* self, uintptr_t num, psy_audio_Machine
 			psy_table_insert(&self->inputs, c, mixerchannel_allocinit(c));
 		}
 	}	
-}
-
-int intparamvalue(float value)
-{	
-	return (int)((value * 65535.f));	
-}
-
-float floatparamvalue(int value)
-{
-	return value / 65535.f;	
 }
 
 uintptr_t mastercolumn(psy_audio_Mixer* self)

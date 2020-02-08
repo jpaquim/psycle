@@ -762,28 +762,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="src\uistatusbar.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\src\uistyle.c"
 				>
 			</File>
@@ -863,6 +841,10 @@
 			</File>
 			<File
 				RelativePath=".\src\uiwincolordialogimp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\uiwincomboboximp.c"
 				>
 			</File>
 			<File
@@ -1050,10 +1032,6 @@
 					>
 				</File>
 				<File
-					RelativePath="src\uistatusbar.h"
-					>
-				</File>
-				<File
 					RelativePath=".\src\uistyle.h"
 					>
 				</File>
@@ -1079,6 +1057,10 @@
 				</File>
 				<File
 					RelativePath=".\src\uiwincolordialogimp.h"
+					>
+				</File>
+				<File
+					RelativePath=".\src\uiwincomboboximp.h"
 					>
 				</File>
 				<File

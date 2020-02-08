@@ -7,11 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 
@@ -52,7 +47,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->charnumber = 0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
-	self->text = _strdup("");
+	self->text = strdup("");
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&psy_ui_button_base(self)->signal_destroy, self,
 		ondestroy);
@@ -97,7 +92,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_textoutrectangle(g, 
 		centerx,
 		centery,
-		ETO_CLIPPED,
+		psy_ui_ETO_CLIPPED,
 		r,
 		self->text,
 		strlen(self->text));
@@ -238,7 +233,7 @@ void onmouseleave(psy_ui_Button* self)
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 {	
 	free(self->text);
-	self->text = _strdup(text);
+	self->text = strdup(text);
 	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 

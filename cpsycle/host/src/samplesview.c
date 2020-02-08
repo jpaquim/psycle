@@ -845,11 +845,11 @@ void initsamplesvibratoview(SamplesVibratoView* self, psy_ui_Component* parent, 
 			&header_margin);
 		psy_ui_combobox_init(&self->waveformbox, &self->header);
 		psy_ui_combobox_setcharnumber(&self->waveformbox, 15);
-		psy_ui_combobox_addstring(&self->waveformbox, "Sinus");
-		psy_ui_combobox_addstring(&self->waveformbox, "Square");
-		psy_ui_combobox_addstring(&self->waveformbox, "RampUp");
-		psy_ui_combobox_addstring(&self->waveformbox, "RampDown");
-		psy_ui_combobox_addstring(&self->waveformbox, "Random");
+		psy_ui_combobox_addtext(&self->waveformbox, "Sinus");
+		psy_ui_combobox_addtext(&self->waveformbox, "Square");
+		psy_ui_combobox_addtext(&self->waveformbox, "RampUp");
+		psy_ui_combobox_addtext(&self->waveformbox, "RampDown");
+		psy_ui_combobox_addtext(&self->waveformbox, "Random");
 		psy_ui_component_setalign(&self->waveformbox.component,
 			psy_ui_ALIGN_LEFT);
 		psy_ui_combobox_setcursel(&self->waveformbox, 0);
@@ -1018,9 +1018,9 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->loopheaderlabel, "Continuous Loop");
 	psy_ui_label_setcharnumber(&self->loopheaderlabel, 18);	
 	psy_ui_combobox_init(&self->loopdir, &self->cont);
-	psy_ui_combobox_addstring(&self->loopdir, "Disabled");
-	psy_ui_combobox_addstring(&self->loopdir, "Forward");
-	psy_ui_combobox_addstring(&self->loopdir, "Bidirection");	
+	psy_ui_combobox_addtext(&self->loopdir, "Disabled");
+	psy_ui_combobox_addtext(&self->loopdir, "Forward");
+	psy_ui_combobox_addtext(&self->loopdir, "Bidirection");
 	psy_ui_combobox_setcursel(&self->loopdir, 0);
 	psy_ui_combobox_setcharnumber(&self->loopdir, 10);
 	psy_ui_label_init(&self->loopstartlabel, &self->cont);
@@ -1041,9 +1041,9 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->sustainloopheaderlabel, "Sustain Loop");
 	psy_ui_label_setcharnumber(&self->sustainloopheaderlabel, 18);
 	psy_ui_combobox_init(&self->sustainloopdir, &self->sustain);
-	psy_ui_combobox_addstring(&self->sustainloopdir, "Disabled");
-	psy_ui_combobox_addstring(&self->sustainloopdir, "Forward");
-	psy_ui_combobox_addstring(&self->sustainloopdir, "Bidirection");		
+	psy_ui_combobox_addtext(&self->sustainloopdir, "Disabled");
+	psy_ui_combobox_addtext(&self->sustainloopdir, "Forward");
+	psy_ui_combobox_addtext(&self->sustainloopdir, "Bidirection");
 	psy_ui_combobox_setcursel(&self->sustainloopdir, 0);
 	psy_ui_combobox_setcharnumber(&self->sustainloopdir, 10);
 	psy_ui_label_init(&self->sustainloopstartlabel, &self->sustain);

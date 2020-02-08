@@ -16,6 +16,11 @@ struct psy_ui_GraphicsImp* psy_ui_impfactory_allocinit_graphicsimp(psy_ui_ImpFac
 	return self->vtable->allocinit_graphicsimp(self, platformdc);
 }
 
+struct psy_ui_FontImp* psy_ui_impfactory_allocinit_fontimp(psy_ui_ImpFactory* self, const struct psy_ui_FontInfo* fontinfo)
+{
+	return self->vtable->allocinit_fontimp(self, fontinfo);
+}
+
 struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_componentimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_componentimp(self, component, parent);
@@ -41,6 +46,11 @@ struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp_multiselect(psy
 	return self->vtable->allocinit_listboximp_multiselect(self, component, parent);
 }
 
+struct psy_ui_ComboBoxImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_comboboximp(self, component, parent);
+}
+
 struct psy_ui_EditImp* psy_ui_impfactory_allocinit_editimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_editimp(self, component, parent);
@@ -56,8 +66,62 @@ struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFac
 	return self->vtable->allocinit_checkboximp(self, component, parent);
 }
 
+struct psy_ui_ColorDialogImp* psy_ui_impfactory_allocinit_colordialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_colordialogimp(self, parent);
+}
+
+struct psy_ui_OpenDialogImp* psy_ui_impfactory_allocinit_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_opendialogimp(self, parent);
+}
+
+struct psy_ui_OpenDialogImp* psy_ui_impfactory_allocinit_all_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
+	const char* title,
+	const char* filter,
+	const char* defaultextension,
+	const char* initialdir)
+{
+	return self->vtable->allocinit_all_opendialogimp(self, parent, title,
+		filter, defaultextension, initialdir);
+}
+
+struct psy_ui_SaveDialogImp* psy_ui_impfactory_allocinit_savedialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_savedialogimp(self, parent);
+}
+
+struct psy_ui_SaveDialogImp* psy_ui_impfactory_allocinit_all_savedialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
+	const char* title,
+	const char* filter,
+	const char* defaultextension,
+	const char* initialdir)
+{
+	return self->vtable->allocinit_all_savedialogimp(self, parent, title,
+		filter, defaultextension, initialdir);
+}
+
+struct psy_ui_FolderDialogImp* psy_ui_impfactory_allocinit_folderdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_folderdialogimp(self, parent);
+}
+
+struct psy_ui_FolderDialogImp* psy_ui_impfactory_allocinit_all_folderdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
+	const char* title,	
+	const char* initialdir)
+{
+	return self->vtable->allocinit_all_folderdialogimp(self, parent, title,
+		 initialdir);
+}
+
+struct psy_ui_FontDialogImp* psy_ui_impfactory_allocinit_fontdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_fontdialogimp(self, parent);
+}
+
 static struct psy_ui_BitmapImp* allocinit_bitmapimp(struct psy_ui_ImpFactory* self) { return 0; }
 static struct psy_ui_GraphicsImp* allocinit_graphicsimp(struct psy_ui_ImpFactory* self, uintptr_t* platformdc) { return 0; }
+static struct psy_ui_FontImp* allocinit_fontimp(psy_ui_ImpFactory* self, const struct psy_ui_FontInfo* fontinfo) { return 0; }
 static struct psy_ui_ComponentImp* allocinit_componentimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_ComponentImp* allocinit_frameimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_EditImp* allocinit_editimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
@@ -65,7 +129,35 @@ static struct psy_ui_EditImp* allocinit_editimp_multiline(struct psy_ui_ImpFacto
 static struct psy_ui_LabelImp* allocinit_labelimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_ListBoxImp* allocinit_listboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_ComboBoxImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_CheckBoxImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_ColorDialogImp* allocinit_colordialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
+struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
+struct psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
+	const char* title,
+	const char* filter,
+	const char* defaultextension,
+	const char* initialdir)
+{
+	return 0;
+}
+struct psy_ui_SaveDialogImp* allocinit_savedialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
+struct psy_ui_SaveDialogImp* allocinit_all_savedialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
+	const char* title,
+	const char* filter,
+	const char* defaultextension,
+	const char* initialdir)
+{
+	return 0;
+}
+struct psy_ui_FolderDialogImp* allocinit_folderdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
+struct psy_ui_FolderDialogImp* allocinit_all_folderdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
+	const char* title,	
+	const char* initialdir)
+{
+	return 0;
+}
+struct psy_ui_FontDialogImp* allocinit_fontdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
 
 // VTable init
 static psy_ui_ImpFactoryVTable vtable;
@@ -76,6 +168,7 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.allocinit_bitmapimp = vtable.allocinit_bitmapimp;
 		vtable.allocinit_graphicsimp = allocinit_graphicsimp;
+		vtable.allocinit_fontimp = allocinit_fontimp;
 		vtable.allocinit_componentimp = allocinit_componentimp;
 		vtable.allocinit_frameimp = allocinit_frameimp;
 		vtable.allocinit_editimp = allocinit_editimp;
@@ -83,7 +176,16 @@ static void vtable_init(void)
 		vtable.allocinit_labelimp = allocinit_labelimp;
 		vtable.allocinit_listboximp = allocinit_listboximp;
 		vtable.allocinit_listboximp_multiselect = allocinit_listboximp_multiselect;
+		vtable.allocinit_comboboximp = allocinit_comboboximp;
 		vtable.allocinit_checkboximp = allocinit_checkboximp;
+		vtable.allocinit_colordialogimp = allocinit_colordialogimp;
+		vtable.allocinit_opendialogimp = allocinit_opendialogimp;
+		vtable.allocinit_all_opendialogimp = allocinit_all_opendialogimp;
+		vtable.allocinit_savedialogimp = allocinit_savedialogimp;
+		vtable.allocinit_all_savedialogimp = allocinit_all_savedialogimp;
+		vtable.allocinit_folderdialogimp = allocinit_folderdialogimp;
+		vtable.allocinit_all_folderdialogimp = allocinit_all_folderdialogimp;
+		vtable.allocinit_fontdialogimp = allocinit_fontdialogimp;
 		vtable_initialized = 1;
 	}
 }

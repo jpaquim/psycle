@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwinfontimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiapp.h"
 #include <stdlib.h>
 #include <string.h>
@@ -122,3 +125,5 @@ psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)
 	memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
 	return rv;
 }
+
+#endif

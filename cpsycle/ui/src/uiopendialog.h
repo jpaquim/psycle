@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+struct psy_ui_OpenDialogImp;
+
 typedef struct psy_ui_OpenDialog {
 	struct psy_ui_OpenDialogImp* imp;
 } psy_ui_OpenDialog;

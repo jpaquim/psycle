@@ -4,21 +4,19 @@
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
 
+#include "uiapp.h"
 #include "uifont.h"
-#include "uiwinfontimp.h"
+#include "uiimpfactory.h"
+#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 #include "../../detail/portable.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
+#ifndef max
+#define max(a, b) (((a > b) ? a : b))
 #endif
-#include <windows.h>
 
-#define EZ_ATTR_BOLD          1
-#define EZ_ATTR_ITALIC        2
-#define EZ_ATTR_UNDERLINE     4
-#define EZ_ATTR_STRIKEOUT     8
+extern psy_ui_App app;
 
 // VTable Prototypes
 static void dispose(psy_ui_Font*);
@@ -41,8 +39,7 @@ void psy_ui_font_init(psy_ui_Font* self, const psy_ui_FontInfo* fontinfo)
 {
 	vtable_init();
 	self->vtable = &vtable;
-	self->imp = (psy_ui_FontImp*) malloc(sizeof(psy_ui_win_FontImp));
-	psy_ui_win_fontimp_init((psy_ui_win_FontImp*)self->imp, fontinfo);	
+    self->imp = psy_ui_impfactory_allocinit_fontimp(psy_ui_app_impfactory(&app), fontinfo);	
 }
 
 // Delegation Methods to FontImp
@@ -87,20 +84,13 @@ void psy_ui_font_imp_init(psy_ui_FontImp* self)
 	self->vtable = &imp_vtable;
 }
 
-// fontinfo
-static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf);
-static LOGFONT ui_fontinfo_make(HDC hdc, TCHAR* szFaceName, int iDeciPtHeight,
-    int iDeciPtWidth, int iAttributes, BOOL fLogRes);
-
 void psy_ui_fontinfo_init(psy_ui_FontInfo* self, const char* family,
     int height)
-{
-    LOGFONT lf;
-
-    HDC hdc = GetDC(NULL);
-    lf = ui_fontinfo_make(hdc, (TCHAR*)family, height, 0, 0, 0);
-    *self = psy_ui_fontinfo(lf);
-    ReleaseDC(NULL, hdc);
+{ 
+    memset(self, 0, sizeof(psy_ui_FontInfo));
+    psy_snprintf(self->lfFaceName, 32, "%s", family);
+    self->lfFaceName[31] = '\0';
+    self->lfHeight = height;    
 }
 
 void psy_ui_fontinfo_init_string(psy_ui_FontInfo* self, const char* text)
@@ -133,77 +123,4 @@ const char* psy_ui_fontinfo_string(psy_ui_FontInfo* self)
 	
 	psy_snprintf(text, 256, "%s;%d", self->lfFaceName, self->lfHeight);
 	return text;
-}
-
-psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)
-{
-    psy_ui_FontInfo rv;
-
-    rv.lfHeight = lf.lfHeight;
-    rv.lfWidth = lf.lfWidth;
-    rv.lfEscapement = lf.lfEscapement;
-    rv.lfOrientation = lf.lfOrientation;
-    rv.lfWeight = lf.lfWeight;
-    rv.lfItalic = lf.lfItalic;
-    rv.lfUnderline = lf.lfUnderline;
-    rv.lfStrikeOut = lf.lfStrikeOut;
-    rv.lfCharSet = lf.lfCharSet;
-    rv.lfOutPrecision = lf.lfOutPrecision;
-    rv.lfClipPrecision = lf.lfClipPrecision;
-    rv.lfQuality = lf.lfQuality;
-    rv.lfPitchAndFamily = lf.lfPitchAndFamily;
-    memcpy(rv.lfFaceName, lf.lfFaceName, 32); // TODO UNICODE
-    return rv;
-}
-
-LOGFONT ui_fontinfo_make(HDC hdc, TCHAR* szFaceName, int iDeciPtHeight,
-    int iDeciPtWidth, int iAttributes, BOOL fLogRes)
-{
-    FLOAT      cxDpi, cyDpi;
-    LOGFONT    lf;
-    POINT      pt;
-    //     TEXTMETRIC tm ;
-
-    SaveDC(hdc);
-
-    SetGraphicsMode(hdc, GM_ADVANCED);
-    ModifyWorldTransform(hdc, NULL, MWT_IDENTITY);
-    SetViewportOrgEx(hdc, 0, 0, NULL);
-    SetWindowOrgEx(hdc, 0, 0, NULL);
-
-    if (fLogRes)
-    {
-        cxDpi = (FLOAT)GetDeviceCaps(hdc, LOGPIXELSX);
-        cyDpi = (FLOAT)GetDeviceCaps(hdc, LOGPIXELSY);
-    }
-    else
-    {
-        cxDpi = (FLOAT)(25.4 * GetDeviceCaps(hdc, HORZRES) /
-            GetDeviceCaps(hdc, HORZSIZE));
-
-        cyDpi = (FLOAT)(25.4 * GetDeviceCaps(hdc, VERTRES) /
-            GetDeviceCaps(hdc, VERTSIZE));
-    }
-
-    pt.x = (int)(iDeciPtWidth * cxDpi / 72);
-    pt.y = (int)(iDeciPtHeight * cyDpi / 72);
-
-    DPtoLP(hdc, &pt, 1);
-    lf.lfHeight = -(int)(fabs(pt.y) / 10.0 + 0.5);
-    lf.lfWidth = 0;
-    lf.lfEscapement = 0;
-    lf.lfOrientation = 0;
-    lf.lfWeight = iAttributes & EZ_ATTR_BOLD ? 700 : 0;
-    lf.lfItalic = iAttributes & EZ_ATTR_ITALIC ? 1 : 0;
-    lf.lfUnderline = iAttributes & EZ_ATTR_UNDERLINE ? 1 : 0;
-    lf.lfStrikeOut = iAttributes & EZ_ATTR_STRIKEOUT ? 1 : 0;
-    lf.lfCharSet = DEFAULT_CHARSET;
-    lf.lfOutPrecision = 0;
-    lf.lfClipPrecision = 0;
-    lf.lfQuality = 0;
-    lf.lfPitchAndFamily = 0;
-
-    lstrcpy(lf.lfFaceName, szFaceName);
-    RestoreDC(hdc, -1);
-    return lf;
 }

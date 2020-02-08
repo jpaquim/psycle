@@ -60,7 +60,7 @@ void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 			psy_audio_Preset* preset;
 
 			preset = (psy_audio_Preset*) p->entry;
-			psy_ui_combobox_addstring(&self->presetsbox,
+			psy_ui_combobox_addtext(&self->presetsbox,
 				psy_audio_preset_name(preset));
 		}
 		psy_ui_combobox_setcursel(&self->presetsbox, 0);

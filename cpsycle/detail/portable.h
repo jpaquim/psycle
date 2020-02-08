@@ -13,7 +13,7 @@
 #define min(a, b) (((a < b) ? a : b))
 #endif
 
-INLINE psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
+INLINE void psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);

@@ -15,10 +15,12 @@
 static void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ontimer(Vst2View*, psy_ui_Component* sender, int id);
 
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
 {
 	return (psy_ui_win_ComponentImp*)self->imp;
 }
+#endif
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -38,8 +40,10 @@ void vst2view_init(Vst2View* self, psy_ui_Component* parent, psy_audio_Machine* 
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_audio_machine_seteditorhandle(machine,
 		(void*) psy_ui_win_component_details(&self->component)->hwnd);
+#endif
 	psy_ui_component_starttimer(&self->component, TIMERID_VST2VIEW, 50);
 }
 
