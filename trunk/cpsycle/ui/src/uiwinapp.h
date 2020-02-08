@@ -1,8 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/psyconf.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #ifndef psy_ui_WINAPP_H
 #define psy_ui_WINAPP_H
+
+// target win98 or nt 4 or later systems
+#define _WIN32_WINNT 0x400
 
 #include <windows.h>
 
@@ -41,3 +47,4 @@ void psy_ui_winapp_stop(psy_ui_WinApp*);
 #endif
 
 #endif /* psy_ui_WINAPP_H */
+#endif /* PSYCLE_TK_WIN32 */

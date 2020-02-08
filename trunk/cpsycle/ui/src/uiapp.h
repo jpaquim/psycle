@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+struct psy_ui_ImpFactory;
+
 typedef struct {
 	psy_Signal signal_dispose;
 	struct psy_ui_Component* main;

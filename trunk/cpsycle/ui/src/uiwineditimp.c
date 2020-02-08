@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwineditimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiwincomponentimp.h"
 #include "uicomponent.h"
 #include "uiapp.h"
@@ -258,3 +261,5 @@ void oncommand(psy_ui_Edit* self, psy_ui_Component* sender, WPARAM wParam,
 		break;
 	}
 }
+
+#endif

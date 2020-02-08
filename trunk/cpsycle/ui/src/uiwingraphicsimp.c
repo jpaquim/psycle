@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwingraphicsimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiwinfontimp.h"
 #include "uiwinbitmapimp.h"
 #include "uiapp.h"
@@ -303,3 +306,5 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_Point cont
 	pts[2].y = p.y;
 	PolyBezierTo(self->hdc, pts, 3);
 }
+
+#endif

@@ -28,6 +28,8 @@ typedef enum {
 	psy_ui_OPAQUE
 } psy_ui_TextBackgroundMode;
 
+struct psy_ui_Graphics;
+
 typedef void (*psy_ui_g_fp_dispose)(struct psy_ui_Graphics*);
 typedef void (*psy_ui_g_fp_textout)(struct psy_ui_Graphics*, int x, int y,  const char*, size_t len);
 typedef void (*psy_ui_g_fp_textoutrectangle)(struct psy_ui_Graphics*, int x, int y, unsigned int options,
@@ -76,6 +78,8 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_g_fp_moveto moveto;
 	psy_ui_g_fp_devcurveto devcurveto;
 } psy_ui_GraphicsVTable;
+
+struct psy_ui_GraphicsImp;
 
 typedef struct psy_ui_Graphics {
 	psy_ui_GraphicsVTable* vtable;

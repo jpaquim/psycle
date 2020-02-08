@@ -22,6 +22,8 @@
 extern "C" {
 #endif
 
+struct psy_ui_FontDialogImp;
+
 typedef struct psy_ui_FontDialog {
 	struct psy_ui_FontDialogImp* imp;	
 } psy_ui_FontDialog;

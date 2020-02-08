@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+struct psy_ui_EditImp;
+
 typedef struct {
 	psy_ui_Component component;
     struct psy_ui_EditImp* imp;

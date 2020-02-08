@@ -3,17 +3,16 @@
 
 #include "../../detail/prefix.h"
 
+#include "uiapp.h"
 #include "uifolderdialog.h"
-#include "uiwinfolderdialogimp.h"
+#include "uiimpfactory.h"
 #include <stdlib.h>
 
 void psy_ui_folderdialog_init(psy_ui_FolderDialog* self, psy_ui_Component* parent)
 {
-	psy_ui_win_FolderDialogImp* imp;
-
-	imp = (psy_ui_win_FolderDialogImp*) malloc(sizeof(psy_ui_win_FolderDialogImp));
-	psy_ui_win_folderdialogimp_init(imp);
-	self->imp = (psy_ui_FolderDialogImp*) imp;
+	self->imp = psy_ui_impfactory_allocinit_folderdialogimp(
+		psy_ui_app_impfactory(&app),
+		parent);
 }
 
 void psy_ui_folderdialog_init_all(psy_ui_FolderDialog* self,
@@ -21,11 +20,11 @@ void psy_ui_folderdialog_init_all(psy_ui_FolderDialog* self,
 	const char* title,
 	const char* initialdir)
 {
-	psy_ui_win_FolderDialogImp* imp;
-
-	imp = (psy_ui_win_FolderDialogImp*)malloc(sizeof(psy_ui_win_FolderDialogImp));
-	psy_ui_win_folderdialogimp_init_all(imp, parent, title, initialdir);
-	self->imp = (psy_ui_FolderDialogImp*)imp;
+	self->imp = psy_ui_impfactory_allocinit_all_folderdialogimp(
+		psy_ui_app_impfactory(&app),
+		parent,
+		title,	
+		initialdir);
 }
 
 void psy_ui_folderdialog_dispose(psy_ui_FolderDialog* self)

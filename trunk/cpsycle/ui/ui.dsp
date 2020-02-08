@@ -215,10 +215,6 @@ SOURCE=.\src\uisplitbar.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\uistatusbar.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\uistyle.c
 # End Source File
 # Begin Source File
@@ -244,6 +240,10 @@ SOURCE=.\src\uiwincheckboximp.c
 # Begin Source File
 
 SOURCE=.\src\uiwincolordialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincomboboximp.c
 # End Source File
 # Begin Source File
 
@@ -423,10 +423,6 @@ SOURCE=.\src\uisplitbar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\uistatusbar.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\uistyle.h
 # End Source File
 # Begin Source File
@@ -452,6 +448,10 @@ SOURCE=.\src\uiwincheckboximp.h
 # Begin Source File
 
 SOURCE=.\src\uiwincolordialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uiwincomboboximp.h
 # End Source File
 # Begin Source File
 

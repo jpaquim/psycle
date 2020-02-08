@@ -50,7 +50,7 @@ void songtrackbar_build(SongTrackBar* self)
 
 	for (track = MIN_TRACKS; track < 65; ++track) {
 		psy_snprintf(text, 20, "%d", track);
-		psy_ui_combobox_addstring(&self->trackbox, text);
+		psy_ui_combobox_addtext(&self->trackbox, text);
 	}	
 	psy_ui_combobox_setcursel(&self->trackbox,
 		player_numsongtracks(&self->workspace->player) - MIN_TRACKS);

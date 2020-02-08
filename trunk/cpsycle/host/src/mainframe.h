@@ -13,7 +13,6 @@
 #include <uinotebook.h>
 #include <uiprogressbar.h>
 #include <uisplitbar.h>
-#include "uistatusbar.h"
 #include "filebar.h"
 #include "undoredobar.h"
 #include "navigation.h"

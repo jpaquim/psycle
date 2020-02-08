@@ -7,10 +7,12 @@
 #include "uiapp.h"
 #include <math.h>
 
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#endif
 
 extern psy_ui_App app;
 
@@ -140,5 +142,7 @@ intptr_t psy_ui_value_px(psy_ui_Value* self, const psy_ui_TextMetric* tm)
 
 void psy_ui_error(const char* err, const char* shorterr)
 {
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	MessageBox(NULL, err, shorterr, MB_OK | MB_ICONERROR);
+#endif
 }

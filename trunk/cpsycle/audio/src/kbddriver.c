@@ -196,6 +196,10 @@ void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* 
 			cmd->id = kbcmd.id;
 			cmd->data.param1 = NOTECOMMANDS_TWEAKSLIDE;			
 		} else
+		if (kbcmd.id == CMD_NOTE_MIDICC) {
+			cmd->id = kbcmd.id;
+			cmd->data.param1 = NOTECOMMANDS_MIDICC;
+		} else
 		if (kbcmd.id != -1) {
 			cmd->id = kbcmd.id;
 			cmd->data.param1 = kbcmd.id + input.param2;

@@ -3,18 +3,17 @@
 
 #include "../../detail/prefix.h"
 
+#include "uiapp.h"
 #include "uiopendialog.h"
-#include "uiwinopendialogimp.h"
+#include "uiimpfactory.h"
 #include <string.h>
 #include <stdlib.h>
 
 void psy_ui_opendialog_init(psy_ui_OpenDialog* self, psy_ui_Component* parent)
 {
-	psy_ui_win_OpenDialogImp* imp;
-
-	imp = (psy_ui_win_OpenDialogImp*) malloc(sizeof(psy_ui_win_OpenDialogImp));
-	psy_ui_win_opendialogimp_init(imp, parent);
-	self->imp = (psy_ui_OpenDialogImp*) imp;
+	self->imp = psy_ui_impfactory_allocinit_opendialogimp(
+		psy_ui_app_impfactory(&app),
+		parent);
 }
 
 void psy_ui_opendialog_init_all(psy_ui_OpenDialog* self,
@@ -24,11 +23,9 @@ void psy_ui_opendialog_init_all(psy_ui_OpenDialog* self,
 	const char* defaultextension,
 	const char* initialdir)
 {	
-	psy_ui_win_OpenDialogImp* imp;
-
-	imp = (psy_ui_win_OpenDialogImp*) malloc(sizeof(psy_ui_win_OpenDialogImp));
-	psy_ui_win_opendialogimp_init_all(imp, parent, title, filter, defaultextension, initialdir);
-	self->imp = (psy_ui_OpenDialogImp*) imp;
+	self->imp = psy_ui_impfactory_allocinit_all_opendialogimp(
+		psy_ui_app_impfactory(&app),
+		parent, title, filter, defaultextension, initialdir);	
 }
 
 void psy_ui_opendialog_dispose(psy_ui_OpenDialog* self)

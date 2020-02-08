@@ -9,6 +9,7 @@
 #include "songio.h"
 #include <string.h>
 #include <operations.h>
+#include <valuemapper.h>
 #include "plugin_interface.h"
 
 static psy_audio_MachineInfo const macinfo = {	
@@ -260,18 +261,7 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 	for (p = entry->events; p != 0; p = p->next) {
 		psy_audio_PatternEvent* ev;
 
-		ev = (psy_audio_PatternEvent*) p->entry;		
-		if (ev->note == NOTECOMMANDS_MIDICC) {
-			// only native plugins, vst plugins handle tweaks in vstplugin_work
-			psy_audio_Machine* dst;			
-
-			dst = machines_at(psy_audio_machine_machines(self), ev->mach);
-			if (dst) {				
-				psy_audio_machine_patterntweak(self, ev->inst, 
-					machine_patternvalue_normed(self, ev->inst,
-						psy_audio_patternevent_tweakvalue(ev)));
-			}
-		} else
+		ev = (psy_audio_PatternEvent*) p->entry;			
 		if (ev->note == NOTECOMMANDS_TWEAK) {
 			if (ev->inst < psy_audio_machine_numparameters(self)) {				
 				psy_audio_machine_patterntweak(self, ev->inst, 
@@ -279,8 +269,9 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 						psy_audio_patternevent_tweakvalue(ev)));
 			}
 		} else {
-			if (ev->cmd == SET_PANNING) {
-				psy_audio_machine_setpanning(self, ev->parameter / 255.f);
+			if (ev->cmd == SET_PANNING) {				
+				psy_audio_machine_setpanning(self,
+					psy_dsp_map_255_1(ev->parameter));
 			}
 			psy_audio_machine_seqtick(self, entry->track, ev);
 		}

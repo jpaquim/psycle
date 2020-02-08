@@ -8,10 +8,11 @@
 #include "uiapp.h"
 #include "uiimpfactory.h"
 
-#include "uiwincomponentimp.h"
-#include "uiwinapp.h"
+//#include "uiwincomponentimp.h"
+//#include "uiwinapp.h"
 
 #include <assert.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -177,6 +178,8 @@ static void vtable_init(void)
 	}
 }
 
+/*
+
 int psy_ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
 		const char* classname, 
 		int x, int y, int width, int height,
@@ -200,7 +203,7 @@ int psy_ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
 	return imp->hwnd == 0;
-}
+}*/
 
 void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_ComponentImp* imp)
 {

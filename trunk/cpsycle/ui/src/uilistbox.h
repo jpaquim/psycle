@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+struct psy_ui_ListBoxImp;
+
 typedef struct {
    psy_ui_Component component;
    struct psy_ui_ListBoxImp* imp;
@@ -40,6 +42,8 @@ void psy_ui_listbox_selitems(psy_ui_ListBox*, int* items, int maxitems);
 intptr_t psy_ui_listbox_selcount(psy_ui_ListBox*);
 
 // uilistboximp
+struct psy_ui_ListBoxImp;
+
 // vtable function pointers
 typedef int (*psy_ui_fp_listboximp_dev_addtext)(struct psy_ui_ListBoxImp*, const char* text);
 typedef void (*psy_ui_fp_listboximp_dev_settext)(struct psy_ui_ListBoxImp*, const char* text, intptr_t index);

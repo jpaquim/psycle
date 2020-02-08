@@ -252,8 +252,12 @@ void workspace_disposesequencepaste(Workspace* self)
 void workspace_initplayer(Workspace* self)
 {
 #ifdef DIVERSALIS__OS__MICROSOFT
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	player_init(&self->player, self->song,
 		((psy_ui_win_ComponentImp*)(self->mainhandle->imp))->hwnd);
+#else
+	player_init(&self->player, self->song, 0);
+#endif
 #else
 	player_init(&self->player, self->song, 0);
 #endif		
@@ -483,92 +487,152 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 }
 
 void workspace_makepatternviewtheme(Workspace* self, psy_Properties* view)
-{		
-	self->patternviewtheme = psy_properties_create_section(view, "theme");
-	psy_properties_append_string(self->patternviewtheme, "pattern_fontface", "Tahoma");	
+{
+	self->patternviewtheme = psy_properties_settext(
+		psy_properties_create_section(view, "theme"),
+		"Theme");
+	psy_properties_append_string(self->patternviewtheme, "pattern_fontface", "Tahoma");
 	psy_properties_append_int(self->patternviewtheme, "pattern_font_point", 0x00000050, 0, 0),
-	psy_properties_append_int(self->patternviewtheme, "pattern_font_flags", 0x00000001, 0, 0);
-	psy_properties_append_int(self->patternviewtheme, "pattern_font_x", 0x00000009, 0, 0);
-	psy_properties_append_int(self->patternviewtheme, "pattern_font_y", 0x0000000B, 0, 0);
+		psy_properties_append_int(self->patternviewtheme, "pattern_font_flags", 0x00000001, 0, 0);
+	psy_properties_settext(
+		psy_properties_append_int(self->patternviewtheme,
+		"pattern_font_x", 0x00000009, 0, 0),
+		"Point X");
+	psy_properties_settext(
+		psy_properties_append_int(self->patternviewtheme,
+		"pattern_font_y", 0x0000000B, 0, 0),
+		"Point Y");
 	psy_properties_append_string(self->patternviewtheme, "pattern_header_skin", "");
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_separator", 0x00292929, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_separator2", 0x00292929, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_background", 0x00292929, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_background2", 0x00292929, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_font", 0x00CACACA, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_font2", 0x00CACACA, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_fontCur", 0x00FFFFFF, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_fontCur2", 0x00FFFFFF, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_fontSel", 0x00FFFFFF, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_fontSel2", 0x00FFFFFF, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_fontPlay", 0x00FFFFFF, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_fontPlay2", 0x00FFFFFF, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_row", 0x003E3E3E, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_row2", 0x003E3E3E, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_rowbeat", 0x00363636, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_rowbeat2", 0x00363636, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_row4beat", 0x00595959, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_row4beat2", 0x00595959, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_selection", 0x009B7800, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_selection2", 0x009B7800, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_playbar", 0x009F7B00, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_playbar2", 0x009F7B00, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_cursor", 0x009F7B00, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_cursor2", 0x009F7B00, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_midline", 0x007D6100, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
-		"pvc_midline", 0x007D6100, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_separator", 0x00292929, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Separator Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_separator2", 0x00292929, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Separator Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_background", 0x00292929, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"BackGnd Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_background2", 0x00292929, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"BackGnd Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_font", 0x00CACACA, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+		"Font Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_font2", 0x00CACACA, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+		"Font Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_fontCur", 0x00FFFFFF, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Font Cur Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_fontCur2", 0x00FFFFFF, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Font Cur Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_fontSel", 0x00FFFFFF, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Font Sel Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_fontSel2", 0x00FFFFFF, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Font Sel Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_fontPlay", 0x00FFFFFF, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Font Play Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_fontPlay2", 0x00FFFFFF, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Font Play Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_row", 0x003E3E3E, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Row Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_row2", 0x003E3E3E, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Row Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_rowbeat", 0x00363636, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Beat Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_rowbeat2", 0x00363636, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Beat Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_row4beat", 0x00595959, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Bar Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_row4beat2", 0x00595959, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Bar Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_selection", 0x009B7800, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Selection Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_selection2", 0x009B7800, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Selection Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_playbar", 0x009F7B00, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Playbar Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_playbar2", 0x009F7B00, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Playbar Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_cursor", 0x009F7B00, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Cursor Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_cursor2", 0x009F7B00, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Cursor Right");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_midline", 0x007D6100, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Midline Left");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
+			"pvc_midline", 0x007D6100, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Midline Right");
 }
 
 void workspace_makemachineview(Workspace* self, psy_Properties* visual)
@@ -589,22 +653,35 @@ void workspace_makemachineview(Workspace* self, psy_Properties* visual)
 
 void workspace_makemachineviewtheme(Workspace* self, psy_Properties* view)
 {
-	self->machineviewtheme = psy_properties_create_section(view, "theme");
+	self->machineviewtheme = psy_properties_settext(
+		psy_properties_create_section(view, "theme"),
+		"Theme");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"vu2", 0x00403731, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+		"Vu BackGround");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"vu1", 0x0080FF80, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Vu Bar");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"vu3", 0x00262bd7, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"OnClip");
+	psy_properties_settext(
+		psy_properties_append_string(self->machineviewtheme,
+		"generator_fontface", "Tahoma"),
+		"Generators Font Face");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"generator_font_point", 0x00000050, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Generators Font Point");
 	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"vu1", 0x0080FF80, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"vu2", 0x00403731, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"vu3", 0x00262bd7, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_append_string(self->machineviewtheme, "generator_fontface", "Tahoma");		
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"generator_font_point" , 0x00000050, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"generator_font_flags" , 0x00000000, 0, 0),
+		"generator_font_flags", 0x00000000, 0, 0),
 		PSY_PROPERTY_HINT_EDITCOLOR);
 	psy_properties_append_string(self->machineviewtheme, "effect_fontface", "Tahoma");		
 	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
@@ -612,37 +689,57 @@ void workspace_makemachineviewtheme(Workspace* self, psy_Properties* view)
 		PSY_PROPERTY_HINT_EDITCOLOR);
 	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
 		"effect_font_flags", 0x00000000, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_colour", 0x00232323, 0, 0), //
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_wirecolour", 0x005F5F5F, 0, 0),//
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_wirecolour2", 0x005F5F5F, 0, 0),//
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_polycolour", 0x00B1C8B0, 0, 0),//
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_generator_fontcolour", 0x00B1C8B0, 0, 0),//
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_effect_fontcolour", 0x00D1C5B6, 0, 0),//
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_wirewidth", 0x00000001, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_wireaa", 0x01, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"machine_background", 0, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
-		"mv_triangle_size", 0x0A, 0, 0),//
-		PSY_PROPERTY_HINT_EDITCOLOR);
+		PSY_PROPERTY_HINT_EDITCOLOR);		
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_colour", 0x00232323, 0, 0), //
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_wirecolour", 0x005F5F5F, 0, 0),//
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Wires");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_wirecolour2", 0x005F5F5F, 0, 0),//
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_polycolour", 0x00B1C8B0, 0, 0),//
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Polygons");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_generator_fontcolour", 0x00B1C8B0, 0, 0),//
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Generators Font");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_effect_fontcolour", 0x00D1C5B6, 0, 0),//
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Effects Font");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_wirewidth", 0x00000001, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Wire width");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_wireaa", 0x01, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"AntiAlias halo");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"machine_background", 0, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Machine Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->machineviewtheme,
+			"mv_triangle_size", 0x0A, 0, 0),//
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Polygon size");
 	psy_properties_append_string(self->machineviewtheme, "machine_skin", "");//		
 }
 
@@ -661,36 +758,56 @@ void workspace_makeparamview(Workspace* self, psy_Properties* visual)
 void workspace_makeparamtheme(Workspace* self, psy_Properties* view)
 {
 	self->paramtheme = psy_properties_create_section(view, "theme");
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguitopcolor", 0x00555555, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguifonttopcolor", 0x00CDCDCD, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguibottomcolor", 0x00444444, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguifontbottomcolor", 0x00E7BD18, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguihtopcolor", 0x00555555, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguihfonttopcolor", 0x00CDCDCD, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguihbottomcolor", 0x00CDCDCD, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguihfontbottomcolor", 0x00E7BD18, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguititlecolor", 0x00292929, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);
-	psy_properties_sethint(psy_properties_append_int(self->paramtheme,
-		"machineguititlefontcolor", 0x00B4B4B4, 0, 0),
-		PSY_PROPERTY_HINT_EDITCOLOR);	
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguititlecolor", 0x00292929, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Title Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguititlefontcolor", 0x00B4B4B4, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Title Font");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguitopcolor", 0x00555555, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Param Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguifonttopcolor", 0x00CDCDCD, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Param Font");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguibottomcolor", 0x00444444, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Value Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguifontbottomcolor", 0x00E7BD18, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"Value Font");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguihtopcolor", 0x00555555, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"SelParam Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguihfonttopcolor", 0x00CDCDCD, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"SelParam Font");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguihbottomcolor", 0x00292929, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"SelValue Background");
+	psy_properties_settext(
+		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
+			"machineguihfontbottomcolor", 0x00E7BD18, 0, 0),
+			PSY_PROPERTY_HINT_EDITCOLOR),
+			"SelValue Font");	
 }
 
 void workspace_makekeyboard(Workspace* self)
@@ -1322,7 +1439,7 @@ void workspace_load_configuration(Workspace* self)
 {
 	char path[_MAX_PATH];
 	
-	psy_snprintf(path, MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
 	propertiesio_load(self->config, path, 0);	
 	workspace_configaudio(self);	
 	eventdrivers_restartall(&self->player.eventdrivers);
@@ -1337,7 +1454,7 @@ void workspace_save_configuration(Workspace* self)
 {
 	char path[_MAX_PATH];
 
-	psy_snprintf(path, MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
 	propertiesio_save(self->config, path);	
 }
 

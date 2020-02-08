@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "uiwinbitmapimp.h"
+
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
 #include "uiapp.h"
 #include "uiwinapp.h"
 
@@ -100,3 +103,5 @@ int empty(psy_ui_win_BitmapImp* self)
 {
 	return self->bitmap == 0;
 }
+
+#endif

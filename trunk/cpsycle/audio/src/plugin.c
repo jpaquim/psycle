@@ -186,14 +186,18 @@ int psy_audio_plugin_psycle_test(const char* path, psy_audio_MachineInfo* info)
 
 void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* ev)
-{
+{	
 	if (patternevent_has_volume(ev)) {
 		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, 0x0C, ev->vol);
 		if (ev->parameter != 0 || ev->cmd != 0) {
 			mi_seqtick(self->mi, channel, NOTECOMMANDS_EMPTY,
 				NOTECOMMANDS_EMPTY, ev->cmd, ev->parameter);
 		}
-	} else {	
+	} else
+	if (ev->note == NOTECOMMANDS_MIDICC && ev->inst >= 0x80 && ev->inst < 0xFF) {		
+		mi_midievent(self->mi, ev->inst & 0x0F, ev->inst & 0xF0,
+			(ev->cmd << 8) + ev->parameter);			
+	} else {
 		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, ev->cmd,
 			ev->parameter);
 	}

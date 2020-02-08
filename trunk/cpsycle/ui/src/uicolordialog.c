@@ -3,17 +3,18 @@
 
 #include "../../detail/prefix.h"
 
+#include "uiapp.h"
 #include "uicolordialog.h"
-#include "uiwincolordialogimp.h"
+#include "uiimpfactory.h"
 #include <stdlib.h>
+
+extern psy_ui_App app;
 
 void psy_ui_colordialog_init(psy_ui_ColorDialog* self, psy_ui_Component* parent)
 {
-	psy_ui_win_ColorDialogImp* imp;
-
-	imp = (psy_ui_win_ColorDialogImp*) malloc(sizeof(psy_ui_win_ColorDialogImp));
-	psy_ui_win_colordialogimp_init(imp);
-	self->imp = (psy_ui_ColorDialogImp*) imp;
+	self->imp = psy_ui_impfactory_allocinit_colordialogimp(
+		psy_ui_app_impfactory(&app),
+		parent);
 }
 
 void psy_ui_colordialog_dispose(psy_ui_ColorDialog* self)

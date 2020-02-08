@@ -3,10 +3,10 @@
 
 #include "../../detail/prefix.h"
 
-// target win98 or nt 4 or later systems
-#define _WIN32_WINNT 0x400
-
 #include "uiwinapp.h"
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+
+
 #include "uiwingraphicsimp.h"
 #include "uiwinfontimp.h"
 #include "uicomponent.h"
@@ -123,7 +123,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		{
 			case WM_NCDESTROY:
 				// restore default winproc
-				if (imp->component->signal_destroyed.slots) {
+				if (imp->component && imp->component->signal_destroyed.slots) {
 					psy_signal_emit(&imp->component->signal_destroyed, imp->component,
 						0);
 				}
@@ -133,10 +133,12 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 #else	
 				SetWindowLong(imp->hwnd, GWL_WNDPROC, (LONG)imp->wndproc);
 #endif				
-				psy_ui_component_dispose(imp->component);
+				if (imp->component) {
+					psy_ui_component_dispose(imp->component);
+				}
 			break;
 			case WM_DESTROY:
-				if (imp->component->signal_destroy.slots) {
+				if (imp->component && imp->component->signal_destroy.slots) {
 					psy_signal_emit(&imp->component->signal_destroy,
 						imp->component, 0);
 				}								
@@ -165,7 +167,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			}
 			break;
 			case WM_KILLFOCUS:
-				if (imp->component->signal_focuslost.slots) {
+				if (imp->component && imp->component->signal_focuslost.slots) {
 					psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
 				}
 			break;			
@@ -333,14 +335,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 			break;
 			case WM_NCDESTROY:
-				if (imp->component->signal_destroyed.slots) {
+				if (imp->component && imp->component->signal_destroyed.slots) {
 					psy_signal_emit(&imp->component->signal_destroyed, imp->component, 0);
 				}
 				psy_ui_component_dispose(imp->component);
 				return 0;
 			break;
 			case WM_DESTROY:
-				if (imp->component->signal_destroy.slots) {
+				if (imp->component && imp->component->signal_destroy.slots) {
 					psy_signal_emit(&imp->component->signal_destroy, imp->component, 0);
 				}
 				return 0;
@@ -775,3 +777,5 @@ void psy_ui_winapp_stop(psy_ui_WinApp* self)
 {
 	PostQuitMessage(0);
 }
+
+#endif

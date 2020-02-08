@@ -46,10 +46,11 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_settext(&self->play, workspace_translate(workspace, "play"));
 	psy_signal_connect(&self->play.signal_clicked, self, onplayclicked);	
 	// playmode
-	psy_ui_combobox_init(&self->playmode, &self->component);	
-	psy_ui_combobox_addstring(&self->playmode, "Song");
-	psy_ui_combobox_addstring(&self->playmode, "Sel");
-	psy_ui_combobox_addstring(&self->playmode, "Beats");	
+	psy_ui_combobox_init(&self->playmode, &self->component);
+	self->playmode.component.debugflag = 60;
+	psy_ui_combobox_addtext(&self->playmode, "Song");
+	psy_ui_combobox_addtext(&self->playmode, "Sel");
+	psy_ui_combobox_addtext(&self->playmode, "Beats");
 	psy_ui_combobox_setcharnumber(&self->playmode, 6);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,

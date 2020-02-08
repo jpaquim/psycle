@@ -12,6 +12,14 @@
 #include "uiapp.h"
 #include <stdlib.h>
 
+#ifndef max
+#define max(a, b) (((a > b) ? a : b))
+#endif
+
+#ifndef min
+#define min(a, b) (((a < b) ? a : b))
+#endif
+
 extern psy_ui_App app;
 
 // VTable Prototypes

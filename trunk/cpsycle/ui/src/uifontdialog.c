@@ -3,17 +3,16 @@
 
 #include "../../detail/prefix.h"
 
+#include "uiapp.h"
 #include "uifontdialog.h"
-#include "uiwinfontdialogimp.h"
+#include "uiimpfactory.h"
 #include <stdlib.h>
 
 void psy_ui_fontdialog_init(psy_ui_FontDialog* self, psy_ui_Component* parent)
 {
-	psy_ui_win_FontDialogImp* imp;
-
-	imp = (psy_ui_win_FontDialogImp*) malloc(sizeof(psy_ui_win_FontDialogImp));
-	psy_ui_win_fontdialogimp_init(imp);
-	self->imp = (psy_ui_FontDialogImp*) imp;
+	self->imp = psy_ui_impfactory_allocinit_fontdialogimp(
+		psy_ui_app_impfactory(&app),
+		parent);
 }
 
 void psy_ui_fontdialog_dispose(psy_ui_FontDialog* self)

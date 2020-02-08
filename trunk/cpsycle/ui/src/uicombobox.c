@@ -3,28 +3,21 @@
 
 #include "../../detail/prefix.h"
 
+#include "uiapp.h"
 #include "uicombobox.h"
-#include "uiwincomponentimp.h"
+#include "uiimpfactory.h"
+#include <string.h>
 #include <stdlib.h>
 
+extern psy_ui_App app;
+
 static void onpreferredsize(psy_ui_ComboBox*, psy_ui_Size* limit, psy_ui_Size* rv);
-static void oncommand(psy_ui_ComboBox*, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam);
 static void ondestroy(psy_ui_ComboBox*, psy_ui_Component* sender);
-static void psy_ui_combobox_create_system(psy_ui_ComboBox*,
-	psy_ui_Component* parent);
-static void psy_ui_combobox_create_ownerdrawn(psy_ui_ComboBox*,
-	psy_ui_Component* parent);
 static void onownerdraw(psy_ui_ComboBox*, psy_ui_Graphics*);
 static void onmousedown(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 static void onmousemove(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_ComboBox*);
 static void onmouseleave(psy_ui_ComboBox*);
-
-static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-{
-	return (psy_ui_win_ComponentImp*)self->imp;
-}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -33,90 +26,57 @@ static void vtable_init(psy_ui_ComboBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw) onownerdraw;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
-		vtable.onmousemove = (psy_ui_fp_onmousemove) onmousemove;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable.ondraw = (psy_ui_fp_ondraw)onownerdraw;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)onmousedown;
+		vtable.onmousemove = (psy_ui_fp_onmousemove)onmousemove;
+		vtable.onmouseenter = (psy_ui_fp_onmouseenter)onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave)onmouseleave;
 		vtable_initialized = 1;
 	}
 }
 
 void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
-{  			
-	psy_ui_combobox_create_ownerdrawn(self, parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
-	self->charnumber = 0;
-	self->hover = 0;
+{
+	self->imp = psy_ui_impfactory_allocinit_comboboximp(
+		psy_ui_app_impfactory(&app),
+		&self->component, parent);
+	psy_ui_component_init_imp(psy_psy_ui_combobox_base(self), parent,
+		&self->imp->component_imp);
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
-}
-
-static void psy_ui_combobox_create_system(psy_ui_ComboBox* self,
-	psy_ui_Component* parent)
-{	
-	psy_ui_win32_component_init(&self->component, parent, TEXT("COMBOBOX"),
-		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
-		1);
-	psy_ui_component_resize(&self->component, 90, 200);
-	psy_signal_connect(&self->component.signal_command, self, oncommand);	
-	self->currcombo = &self->component;
-}
-
-void psy_ui_combobox_create_ownerdrawn(psy_ui_ComboBox* self, psy_ui_Component* parent)
-{		
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_win32_component_init(&self->combo, &self->component, TEXT("COMBOBOX"), 
-		0, 0, 100, 200,
-		WS_CHILD | WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST,
-		1);	
-	psy_ui_component_hide(&self->combo);
-	psy_signal_connect(&self->combo.signal_command, self, oncommand);	
-	self->ownerdrawn = 1;	
-	self->currcombo = &self->combo;	
+	vtable_init(self);
+	self->component.vtable = &vtable;	
 }
 
 void ondestroy(psy_ui_ComboBox* self, psy_ui_Component* sender)
 {
-	psy_signal_dispose(&self->signal_selchanged);	
+	psy_signal_dispose(&self->signal_selchanged);
 }
 
-int psy_ui_combobox_addstring(psy_ui_ComboBox* self, const char* text)
+intptr_t psy_ui_combobox_addtext(psy_ui_ComboBox* self, const char* text)
 {
-	LRESULT index;
+	return self->imp->vtable->dev_addtext(self->imp, text);
+}
 
-	index = SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd, CB_ADDSTRING, (WPARAM)0,
-		(LPARAM)text);
-	if (self->ownerdrawn) {
-		psy_ui_component_invalidate(&self->component);
-	}
-	return (int)index;
+void psy_ui_combobox_settext(psy_ui_ComboBox* self, const char* text, intptr_t index)
+{
+	self->imp->vtable->dev_settext(self->imp, text, index);
 }
 
 void psy_ui_combobox_clear(psy_ui_ComboBox* self)
 {
-	SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
-	if (self->ownerdrawn) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	self->imp->vtable->dev_clear(self->imp);
 }
 
 void psy_ui_combobox_setcursel(psy_ui_ComboBox* self, intptr_t index)
 {
-	SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd, CB_SETCURSEL, (WPARAM)index,
-		(LPARAM)0);
-	if (self->ownerdrawn) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	self->imp->vtable->dev_setcursel(self->imp, index);
 }
 
 intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox* self)
 {
-	return SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd, CB_GETCURSEL, (WPARAM)0,
-		(LPARAM)0);	
+	return self->imp->vtable->dev_cursel(self->imp);
 }
 
 void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, int number)
@@ -133,32 +93,12 @@ void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit,
 		tm = psy_ui_component_textmetric(&self->component);
 		if (self->charnumber == 0) {
 			rv->width = 90;
-		} else {		
+		}
+		else {
 			rv->width = tm.tmAveCharWidth * self->charnumber + 40;
 		}
 		rv->height = tm.tmHeight;
 	}
-}
-
-void oncommand(psy_ui_ComboBox* self, psy_ui_Component* sender, WPARAM wParam,
-	LPARAM lParam) {
-	switch(HIWORD(wParam))
-    {
-        case CBN_SELCHANGE :
-        {
-            if (self->signal_selchanged.slots) {
-				intptr_t sel = SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd,
-					CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
-			}
-			if (self->ownerdrawn) {
-				psy_ui_component_invalidate(&self->component);
-			}
-        }
-		break;
-		default:
-		break;
-    }
 }
 
 void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
@@ -183,31 +123,30 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(&self->component);
 	vcenter = (size.height - tm.tmHeight) / 2;
 	varrowcenter = (size.height - 10) / 2;
-	sel = SendMessage((HWND)psy_ui_win_component_details(&self->combo)->hwnd, CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-	if (sel != CB_ERR) {
-		intptr_t len;
-		
-		len = SendMessage((HWND)psy_ui_win_component_details(&self->combo)->hwnd, CB_GETLBTEXTLEN, (WPARAM)sel, 0);
-		if (len > 0) {
-			char* txt;
+	sel = psy_ui_combobox_cursel(self);
+	if (self->component.debugflag == 60) {
+		self = self;
+	}
+	if (sel != -1) {
+		char text[512];
 
-			txt = (char*)malloc(len + 1);			
-			SendMessage((HWND)psy_ui_win_component_details(&self->combo)->hwnd, CB_GETLBTEXT, (WPARAM)sel,
-				(LPARAM)txt);
-
+		text[0] = '\0';
+		self->imp->vtable->dev_text(self->imp, text);
+		if (strlen(text)) {		
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			if (self->hover) {
 				psy_ui_settextcolor(g, 0x00FFFFFF);
-			} else {
+			}
+			else {
 				psy_ui_settextcolor(g, 0x00CACACA);
 			}
-			psy_ui_textoutrectangle(g, 0, vcenter, ETO_CLIPPED, r, txt, strlen(txt));
-			free(txt);
+			psy_ui_textoutrectangle(g, 0, vcenter, psy_ui_ETO_CLIPPED, r,
+				text, strlen(text));			
 		}
 	}
 	ax = size.width - 10;
 	ay = 4 + varrowcenter;
-	
+
 	arrow_down[0].x = 0 + ax;
 	arrow_down[0].y = 0 + ay;
 	arrow_down[1].x = 8 + ax;
@@ -215,14 +154,12 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	arrow_down[2].x = 4 + ax;
 	arrow_down[2].y = 4 + ay;
 	arrow_down[3] = arrow_down[0];
-
 	if (self->hover == 1) {
 		psy_ui_drawsolidpolygon(g, arrow_down, 4, arrowhighlightcolor,
 			arrowhighlightcolor);
 	} else {
 		psy_ui_drawsolidpolygon(g, arrow_down, 4, arrowcolor, arrowcolor);
 	}
-
 	ax = size.width - 25;
 	ay = 2 + varrowcenter;
 
@@ -255,66 +192,63 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	if (self->hover == 2) {
 		psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor,
 			arrowhighlightcolor);
-	} else {		
+	} else {
 		psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowcolor, arrowcolor);
 	}
 }
 
 void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_Size size = psy_ui_component_size(&self->component);	
+	psy_ui_Size size = psy_ui_component_size(&self->component);
 
 	if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
 		intptr_t index = psy_ui_combobox_cursel(self);
 		if (index > 0) {
-			psy_ui_combobox_setcursel(self,  index - 1);
+			psy_ui_combobox_setcursel(self, index - 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
 	} else
-	if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
-		intptr_t count;
-		intptr_t index;
-
-		count = SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd, CB_GETCOUNT, 0, (LPARAM)0);
-		index = psy_ui_combobox_cursel(self);
-		if (index < count - 1) {
-			psy_ui_combobox_setcursel(self, index + 1);
-			psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
+		if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
+			intptr_t count;
+			intptr_t index;
+			
+			index = psy_ui_combobox_cursel(self);
+			count = self->imp->vtable->dev_count(self->imp);
+			if (index < count - 1) {
+				psy_ui_combobox_setcursel(self, index + 1);
+				psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
+			}
 		}
-	} else {
-		SetWindowPos((HWND)psy_ui_win_component_details(&self->combo)->hwnd, NULL, 
-		   0,
-		   0,
-		   size.width, size.height, SWP_NOZORDER | SWP_NOMOVE);
-		SendMessage((HWND)psy_ui_win_component_details(&self->combo)->hwnd, CB_SHOWDROPDOWN,
-			(WPARAM)TRUE, (LPARAM)0);
-	}
+		else {
+			self->imp->vtable->dev_showdropdown(self->imp);			
+		}
 }
 
 void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	if (self->hover) {
 		int hover = self->hover;
-		psy_ui_Size size = psy_ui_component_size(&self->component);	
+		psy_ui_Size size = psy_ui_component_size(&self->component);
 
 		if (ev->x >= size.width - 40 && ev->x < size.width - 25) {
 			intptr_t index = psy_ui_combobox_cursel(self);
 			if (index > 0) {
 				self->hover = 2;
 			}
-		} else
-		if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
-			intptr_t count;
-			intptr_t index;
-			count = SendMessage((HWND)psy_ui_win_component_details(self->currcombo)->hwnd, CB_GETCOUNT, 0,
-				(LPARAM)0);
-			index = psy_ui_combobox_cursel(self);
-			if (index < count - 1) {
-				self->hover = 3;
-			}
-		} else {
-			self->hover = 1;
 		}
+		else
+			if (ev->x >= size.width - 25 && ev->x < size.width - 10) {
+				intptr_t count;
+				intptr_t index;
+				count = self->imp->vtable->dev_count(self->imp); 
+				index = psy_ui_combobox_cursel(self);
+				if (index < count - 1) {
+					self->hover = 3;
+				}
+			}
+			else {
+				self->hover = 1;
+			}
 		if (hover != self->hover) {
 			psy_ui_component_invalidate(&self->component);
 		}
@@ -327,9 +261,48 @@ void onmouseenter(psy_ui_ComboBox* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
-
 void onmouseleave(psy_ui_ComboBox* self)
-{		
+{
 	self->hover = 0;
 	psy_ui_component_invalidate(&self->component);
+}
+
+// psy_ui_ComboBoxImp vtable
+static int dev_addtext(psy_ui_ComboBoxImp* self, const char* text) { return -1; }
+static void dev_settext(psy_ui_ComboBoxImp* self, const char* text, intptr_t index) { }
+static void dev_text(psy_ui_ComboBoxImp* self, char* text) { }
+static void dev_setstyle(psy_ui_ComboBoxImp* self, int style) { }
+static void dev_clear(psy_ui_ComboBoxImp* self) { }
+static void dev_setcursel(psy_ui_ComboBoxImp* self, intptr_t index) { }
+static intptr_t dev_cursel(psy_ui_ComboBoxImp* self) { return -1; }
+static void dev_selitems(psy_ui_ComboBoxImp* self, int* items, int maxitems) { }
+static intptr_t dev_count(psy_ui_ComboBoxImp* self) { return 0; }
+static intptr_t dev_selcount(psy_ui_ComboBoxImp* self) { return 0; }
+static void dev_showdropdown(psy_ui_ComboBoxImp* self) { }
+
+static psy_ui_ComboBoxImpVTable combobox_imp_vtable;
+static int combobox_imp_vtable_initialized = 0;
+
+static void combobox_imp_vtable_init(void)
+{
+	if (!combobox_imp_vtable_initialized) {
+		combobox_imp_vtable.dev_addtext = dev_addtext;
+		combobox_imp_vtable.dev_settext = dev_settext;
+		combobox_imp_vtable.dev_text = dev_text;
+		combobox_imp_vtable.dev_setstyle = dev_setstyle;
+		combobox_imp_vtable.dev_clear = dev_clear;
+		combobox_imp_vtable.dev_setcursel = dev_setcursel;
+		combobox_imp_vtable.dev_cursel = dev_cursel;
+		combobox_imp_vtable.dev_count = dev_count;
+		combobox_imp_vtable.dev_selitems = dev_selitems;
+		combobox_imp_vtable.dev_selcount = dev_selcount;
+		combobox_imp_vtable.dev_showdropdown = dev_showdropdown;
+		combobox_imp_vtable_initialized = 1;
+	}
+}
+
+void psy_ui_comboboximp_init(psy_ui_ComboBoxImp* self)
+{
+	combobox_imp_vtable_init();
+	self->vtable = &combobox_imp_vtable;
 }

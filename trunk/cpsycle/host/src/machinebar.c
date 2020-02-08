@@ -115,7 +115,7 @@ void BuildMachineBox(MachineBar* self)
 {
 	ClearMachineBox(self);	
 	if (machines_size(self->machines) == 1) {
-		psy_ui_combobox_addstring(&self->machinebox, "No Machines Loaded");
+		psy_ui_combobox_addtext(&self->machinebox, "No Machines Loaded");
 		psy_ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
 		psy_TableIterator it;
@@ -139,7 +139,7 @@ int insertmachine(MachineBar* self, size_t slot, psy_audio_Machine* machine)
 		char buffer[128];
 		psy_snprintf(buffer, 128, "%02X: %s", slot, 
 			machine->vtable->info(machine)->ShortName); 
-		comboboxindex = psy_ui_combobox_addstring(&self->machinebox, buffer);
+		comboboxindex = psy_ui_combobox_addtext(&self->machinebox, buffer);
 		psy_table_insert(&self->comboboxslots, comboboxindex, (void*)slot);
 		psy_table_insert(&self->slotscombobox, slot, (void*) comboboxindex);
 	}
@@ -184,7 +184,7 @@ void BuildInstrumentList(MachineBar* self)
 
 void AddString(MachineBar* self, const char* text)
 {
-	psy_ui_combobox_addstring(&self->instparambox, text);
+	psy_ui_combobox_addtext(&self->instparambox, text);
 }
 
 void OnInstParamBoxSelChange(MachineBar* self, psy_ui_Component* sender, int sel)
