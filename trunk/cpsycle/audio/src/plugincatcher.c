@@ -225,8 +225,8 @@ void plugincatcher_catchername(psy_audio_PluginCatcher* self, const char* path, 
 	char ext[_MAX_PATH];	
 
 	psy_dir_extract_path(path, prefix, name, ext);
-	strlwr(name);
-	strlwr(ext);
+	psy_strlwr(name);
+	psy_strlwr(ext);
 	replace_char(name, ' ', '-');
 	replace_char(name, '_', '-');
 }

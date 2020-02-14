@@ -17,6 +17,7 @@ void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 	self->offset = 0;
 	self->numsamples = 0;
 	self->range = PSY_DSP_AMP_RANGE_NATIVE;
+	self->volumedisplay = 0;
 	psy_audio_buffer_resize(self, channels);
 }
 
@@ -24,7 +25,7 @@ void psy_audio_buffer_init_shared(psy_audio_Buffer* self, psy_audio_Buffer* src,
 	uintptr_t offset)
 {
 	uintptr_t channel;
-
+	
 	psy_audio_buffer_init(self, src->numchannels);
 	for (channel = 0; channel < src->numchannels; ++channel) {
 		self->samples[channel] = src->samples[channel] + offset;

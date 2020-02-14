@@ -11,44 +11,44 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-static psy_audio_sequencerjump_init(psy_audio_SequencerJump* self)
+static void psy_audio_sequencerjump_init(psy_audio_SequencerJump* self)
 {
 	self->active = 0;
 	self->offset = (psy_dsp_beat_t) 0.f;
 }
 
-static psy_audio_sequencerjump_reset(psy_audio_SequencerJump* self)
+static void psy_audio_sequencerjump_reset(psy_audio_SequencerJump* self)
 {
 	self->active = 0;
 	self->offset = (psy_dsp_beat_t)0.f;
 }
 
-static psy_audio_sequencerjump_activate(psy_audio_SequencerJump* self, psy_dsp_beat_t offset)
+static void psy_audio_sequencerjump_activate(psy_audio_SequencerJump* self, psy_dsp_beat_t offset)
 {
 	self->active = 1;
 	self->offset = offset;
 }
 
-static psy_audio_sequencerloop_init(psy_audio_SequencerLoop* self)
+static void psy_audio_sequencerloop_init(psy_audio_SequencerLoop* self)
 {
 	self->active = 0;
 	self->count = 0;
 	self->offset = (psy_dsp_beat_t) 0.f;
 }
 
-static psy_audio_sequencerloop_reset(psy_audio_SequencerLoop* self)
+static void psy_audio_sequencerloop_reset(psy_audio_SequencerLoop* self)
 {
 	psy_audio_sequencerloop_init(self);
 }
 
-static psy_audio_sequencerrowdelay_init(psy_audio_SequencerRowDelay* self)
+static void psy_audio_sequencerrowdelay_init(psy_audio_SequencerRowDelay* self)
 {
 	self->active = 0;
 	// line delay
 	self->rowspeed = (psy_dsp_beat_t) 1.f;
 }
 
-static psy_audio_sequencerrowdelay_reset(psy_audio_SequencerRowDelay* self)
+static void psy_audio_sequencerrowdelay_reset(psy_audio_SequencerRowDelay* self)
 {
 	psy_audio_sequencerrowdelay_init(self);
 }

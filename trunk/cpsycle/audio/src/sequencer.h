@@ -112,7 +112,7 @@ INLINE psy_dsp_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer* self)
 
 void psy_audio_sequencer_setlpb(psy_audio_Sequencer*, uintptr_t lpb);
 uintptr_t psy_audio_sequencer_lpb(psy_audio_Sequencer*);
-unsigned int psy_audio_sequencer_frames(psy_audio_Sequencer*, psy_dsp_beat_t
+uintptr_t psy_audio_sequencer_frames(psy_audio_Sequencer*, psy_dsp_beat_t
 	offset);
 psy_dsp_beat_t psy_audio_sequencer_frametooffset(psy_audio_Sequencer*, uintptr_t
 	numsamples);

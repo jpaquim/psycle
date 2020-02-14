@@ -8,7 +8,7 @@
 // cubic resampler tables
 
 
-static cubic_table_initialized = 0;
+static int cubic_table_initialized = 0;
 
 float cubic_table[CUBIC_RESOLUTION * 4];
 float l_table[CUBIC_RESOLUTION];

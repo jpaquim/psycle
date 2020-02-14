@@ -15,6 +15,7 @@
 #include "machinefactory.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../../detail/portable.h"
 
 void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 {	
@@ -414,7 +415,7 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 			if( valid )
 			{
 				/*pFile->Read(vstL[i].dllName,sizeof(vstL[i].dllName));
-				_strlwr(vstL[i].dllName);
+				psy_strlwr(vstL[i].dllName);
 				pFile->Read(&(vstL[i].numpars), sizeof(int32_t));
 				vstL[i].pars = new float[vstL[i].numpars];
 

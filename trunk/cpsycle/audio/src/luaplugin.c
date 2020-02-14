@@ -15,8 +15,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <windows.h>
-
 static void generateaudio(psy_audio_LuaPlugin*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_LuaPlugin*, uintptr_t channel,
 	const psy_audio_PatternEvent*);

@@ -9,6 +9,7 @@
 #include <uicomponent.h>
 #include <machine.h>
 #include <plugin_interface.h>
+#include "skincoord.h"
 
 typedef struct {
     psy_ui_Color fonttopcolor;
@@ -22,7 +23,17 @@ typedef struct {
     psy_ui_Color hbottomcolor;
     psy_ui_Color titlecolor;
     psy_ui_Bitmap knobbitmap;
+    psy_ui_Bitmap mixerbitmap;
     char* bitmappath;
+    SkinCoord slider;
+    SkinCoord knob;
+    SkinCoord sliderknob;
+    SkinCoord vuoff;
+    SkinCoord vuon;
+    SkinCoord switchon;
+    SkinCoord switchoff;
+    SkinCoord checkon;
+    SkinCoord checkoff;
 } ParamSkin;
 
 typedef struct {
@@ -35,6 +46,9 @@ typedef struct {
    float tweakval;   
    Workspace* workspace;
    ParamSkin* skin;
+   psy_Table positions;
+   psy_ui_Size cpmax;
+   uintptr_t numparams;
 } ParamView;
 
 void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,

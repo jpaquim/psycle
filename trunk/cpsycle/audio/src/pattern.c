@@ -217,7 +217,7 @@ void pattern_setlabel(psy_audio_Pattern* self, const char* text)
 {
 	if (self->label) {
 		free(self->label);
-		self->label = _strdup(text);
+		self->label = strdup(text);
 	}
 	++self->opcount;
 }

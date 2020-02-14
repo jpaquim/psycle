@@ -307,8 +307,8 @@ int propertiesio_loadsection(psy_Properties* self, const char* path,
 	return fp != 0;	
 }
 
-static skip;
-static skiplevel;
+static int skip;
+static int skiplevel;
 
 void propertiesio_save(psy_Properties* self, const char* path)
 {

@@ -21,7 +21,8 @@ typedef struct {
 	int dryonly;
 	int wetonly;
 	size_t inputslot;
-	psy_audio_Buffer* buffer;	
+	psy_audio_Buffer* buffer;
+	psy_dsp_amp_t volumedisplay;	
 } psy_audio_MixerChannel;
 
 typedef struct {
@@ -40,10 +41,11 @@ typedef struct {
 	psy_Table inputs;
 	psy_Table sends;
 	psy_Table returns;
-	int solocolumn;
-	psy_dsp_RMSVol masterrmsvol;
+	int solocolumn;	
 	psy_audio_MixerChannel master;
+	psy_dsp_amp_t mastervolumedisplay;
 	uintptr_t slot;	
+	psy_Table rms;
 } psy_audio_Mixer;
 
 void mixer_init(psy_audio_Mixer*, MachineCallback);

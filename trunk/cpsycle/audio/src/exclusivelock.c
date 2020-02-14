@@ -101,7 +101,7 @@ void lock_leave(void)
 }
 
 #elif
-	#error "
+	#error "Exclusive Lock Platform Not Supported"
 
 #endif
 

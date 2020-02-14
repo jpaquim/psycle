@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#if defined DIVERSALIS__COMPILER__GNU || DIVERSALIS__OS__POSIX
+#if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -42,7 +42,7 @@ void setpathenv(const char* path)
 }
 
 void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
-	 int flag, void (*enumproc)(void*, const char* path, int flag))
+	 int flag, psy_fp_findfile enumproc)
 {
  	DIR *dir;
 	struct dirent *dir_ptr;
@@ -55,7 +55,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
 	   if (wildcardmatch((*dir_ptr).d_name, wildcard)) {
 		  if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
  		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0)) {
-					psy_snprintf(path, MAX_PATH, "%s\\%s", root,
+					psy_snprintf(path, 4096, "%s\\%s", root,
 		                (*dir_ptr).d_name);
 					enumproc(context, path, flag);										   
           }				   
@@ -68,7 +68,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
 }
 
 void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
-	void (*enumproc)(void*, const char* path, int flag))
+	psy_fp_findfile enumproc)
 {
  	// todo
 }
@@ -122,7 +122,7 @@ static const char pathenvvarname[] = {
 };
 
 void psy_dir_enumerate(void* context, const char* root, const char* wildcard, int flag,
-	void (*enumproc)(void*, const char* path, int flag))
+	psy_fp_findfile enumproc)
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA wfd;
@@ -170,7 +170,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard, in
 }
 
 void psy_dir_enumerate_recursive(void* context, const char* root, const char* wildcard, int flag,
-	void (*enumproc)(void*, const char* path, int flag))
+	psy_fp_findfile enumproc)
 {
 	HANDLE hFind;
 	WIN32_FIND_DATA wfd;
@@ -349,7 +349,8 @@ void psy_dir_findfile(const char* searchpath, const char* wildcard,
 
 	filepath[0] = '\0';
 	filesearch.filepath = filepath;
-	psy_dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0, onenumfindfile);
+	psy_dir_enumerate_recursive(&filesearch, searchpath, wildcard, 0,
+		(psy_fp_findfile)onenumfindfile);
 }
 
 int onenumfindfile(struct FileSearch* self, const char* path, int flag)

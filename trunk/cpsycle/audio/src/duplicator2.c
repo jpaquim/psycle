@@ -357,7 +357,7 @@ void loadspecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
 }
 
 void savespecific(psy_audio_Duplicator2* self, psy_audio_SongFile* songfile,
-	unsigned int slot)
+	uintptr_t slot)
 {
 	uint32_t size;
 	int16_t macoutput[DUPLICATOR2_NUMOUTPUTS];

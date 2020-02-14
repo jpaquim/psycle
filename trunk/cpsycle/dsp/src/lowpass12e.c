@@ -7,7 +7,7 @@
 #include <math.h>
 
 static psy_dsp_FilterMap lowpass12e_coeffmap;
-static lowpass12e_coeffmap_initialized;
+static int lowpass12e_coeffmap_initialized;
 
 static void lowpass12e_computecoeffs(psy_dsp_LowPass12E* self, int freq, int r, psy_dsp_FilterCoeff* coeff);
 static void lowpass12e_update(psy_dsp_LowPass12E*, int full);

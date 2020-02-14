@@ -344,7 +344,7 @@ void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits,
 void PollerThread(void * self)
 {
 	MmeDriver* pThis = (MmeDriver*)self;
-	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
+	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL); // THREAD_PRIORITY_ABOVE_NORMAL);
 
 	while (!pThis->_stopPolling)
 	{

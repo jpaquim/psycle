@@ -39,6 +39,7 @@ typedef enum {
 } MachineViewOptions;
 
 struct psy_audio_Machine;
+struct psy_audio_SongFile;
 
 typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Machine* (*fp_machine_clone)(struct psy_audio_Machine*);
@@ -106,7 +107,7 @@ typedef psy_dsp_beat_t(*fp_machine_currbeatsperline)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Samples* (*fp_machine_samples)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Machines* (*fp_machine_machines)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Instruments* (*fp_machine_instruments)(struct psy_audio_Machine*);
-typedef void (*fp_machine_output)(void*, const char* text);
+typedef void (*fp_machine_output)(struct psy_audio_Machine*, const char* text);
 
 typedef struct MachineVtable {
 	fp_machine_init init;

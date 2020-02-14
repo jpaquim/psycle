@@ -12,7 +12,14 @@
 extern "C" {
 #endif
 
-INLINE static psy_dsp_amp_t psy_dsp_convert_db_to_amp(psy_dsp_amp_t db)
+/// linear -> deciBell
+/// amplitude normalized to 1.0f.
+INLINE psy_dsp_amp_t psy_dsp_convert_amp_to_db(psy_dsp_amp_t amplitude)
+{	
+	return (psy_dsp_amp_t)20.0 * (psy_dsp_amp_t)log10(amplitude);
+}
+
+INLINE psy_dsp_amp_t psy_dsp_convert_db_to_amp(psy_dsp_amp_t db)
 {
 	return (psy_dsp_amp_t) pow(10.0f, db / 20.0f);
 }
