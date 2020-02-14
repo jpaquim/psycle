@@ -25,10 +25,20 @@ typedef unsigned long dword;
 #define MAX_BUFFER_LENGTH		256		// in number of samples (per channel)
 
 // CMachineParameter flags
+
+/// shows a line with no text nor knob
 #define MPF_NULL				0
+/// shows a line with the text in a centered label
+#define MPF_HEADER				1
+/// shows a tweakable knob and text
 #define MPF_STATE				2
+#define MPF_INFOLABEL			3
 #define MPF_SLIDER				4
-#define MPF_LEVEL				8
+#define MPF_SLIDERLEVEL			5
+#define MPF_SLIDERCHECK			6
+#define MPF_SWITCH				7
+#define MPF_IGNORE				8
+#define MPF_SMALL				512
 
 typedef struct {
 	char const *Name;		// Short name: "Cutoff"
@@ -195,6 +205,8 @@ extern "C" {
 #endif
 
 #if defined __STDC__ || __cplusplus
+struct MachineCallback;
+
 extern void mi_resetcallback(CMachineInterface* mi);
 extern void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback);
 extern CMachineInterface* mi_create(void* module);

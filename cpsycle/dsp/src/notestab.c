@@ -73,13 +73,13 @@ const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode)
 
 	switch (mode) {
 		case psy_dsp_NOTESTAB_A440:
-			rv = notes_tab_a440;
+			rv = (const char* const *)notes_tab_a440;
 		break;
 		case psy_dsp_NOTESTAB_A220:
-			rv = notes_tab_a220;
+			rv = (const char* const *)notes_tab_a220;
 		break;
 		default:
-			rv = notes_tab_a220;
+			rv = (const char* const *)notes_tab_a220;
 		break;
 	}
 	return rv;

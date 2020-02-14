@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+struct psy_audio_SongFile;
+
 void psy_audio_xm_load(struct psy_audio_SongFile*);
 
 #ifdef __cplusplus

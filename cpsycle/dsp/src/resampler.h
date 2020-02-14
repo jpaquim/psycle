@@ -15,6 +15,8 @@ extern "C" {
 #define CUBIC_RESOLUTION_LOG 10
 #define CUBIC_RESOLUTION 2048 // 1 << CUBIC_RESOLUTION_LOG
 
+struct psy_dsp_Resampler;
+
 typedef void(*psy_dsp_fp_resampler_setspeed)(struct psy_dsp_Resampler*,
 	int64_t speed);
 typedef psy_dsp_amp_t (*psy_dsp_fp_resampler_work)(struct psy_dsp_Resampler*,

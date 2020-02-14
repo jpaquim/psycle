@@ -14,6 +14,10 @@
 #include "xm.h"
 
 #include <string.h>
+#include <stdio.h>
+#if defined DIVERSALIS__OS__POSIX
+#include <errno.h>
+#endif
 
 static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
 static int psy_audio_songfile_errfile(psy_audio_SongFile* self);

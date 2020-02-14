@@ -249,7 +249,7 @@ int currslot(psy_audio_Sampler* self, uintptr_t channel,
 	int rv;
 
 	if (event->inst != NOTECOMMANDS_EMPTY) {
-		psy_table_insert(&self->lastinst, channel, (void*)event->inst);
+		psy_table_insert(&self->lastinst, channel, (void*)(uintptr_t)event->inst);
 		rv = event->inst;
 	} else
 	if (psy_table_exists(&self->lastinst, channel)) {

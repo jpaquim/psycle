@@ -14,7 +14,7 @@
 #include <string.h>
 #include <rms.h>
 #include <multifilter.h>
-#include <windows.h>
+// #include <windows.h>
 #include "../../detail/portable.h"
 #include "fileio.h"
 #include "../../detail/psyconf.h"
@@ -245,6 +245,8 @@ void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot
 				psy_dsp_rmsvol_tick(rms, bc.output->samples[0],
 					bc.output->samples[1],
 					bc.numsamples);
+				bc.output->volumedisplay =
+					psy_audio_buffercontext_volumedisplay(&bc);
 			}
 			psy_signal_emit(&machine->signal_worked, machine, 2,
 				slot, &bc);
@@ -590,7 +592,9 @@ void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties*
 		self->driver->configure(self->driver, config);
 		//self->driver->properties = psy_properties_clone(config);
 	}
-	self->driver->open(self->driver);
+	if (self->driver) {
+		self->driver->open(self->driver);
+	}
 }
 
 void player_unloaddriver(psy_audio_Player* self)

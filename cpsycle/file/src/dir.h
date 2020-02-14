@@ -8,8 +8,14 @@
 extern "C" {
 #endif
 
-void psy_dir_enumerate(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
-void psy_dir_enumerate_recursive(void* self, const char* path, const char* wildcard, int flag, void (*enumproc)(void*, const char* path, int flag));
+struct FileSearch;
+
+typedef int (*psy_fp_findfile)(void* context, const char* path, int flag);
+
+void psy_dir_enumerate(void* self, const char* path, const char* wildcard, int flag,
+	psy_fp_findfile enumproc);
+void psy_dir_enumerate_recursive(void* self, const char* path, const char* wildcard, int flag,
+	psy_fp_findfile enumproc);
 void psy_dir_findfile(const char* searchpath, const char* wildcard, char* filepath);
 const char* psy_dir_config(void);
 char* workdir(char* buffer);

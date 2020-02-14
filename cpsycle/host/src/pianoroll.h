@@ -54,6 +54,7 @@ typedef struct {
    int beatscrollpos;
    PianoMetrics metrics;
    psy_audio_PatternEntry* hover;
+   psy_Table channel;
 } Pianogrid;
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, struct Pianoroll*);
@@ -70,7 +71,7 @@ typedef struct Pianoroll {
    unsigned int opcount;
    int syncpattern;
    psy_dsp_beat_t sequenceentryoffset;
-   psy_dsp_beat_t lastplayposition;
+   psy_dsp_beat_t lastplayposition;   
    Workspace* workspace;
 } Pianoroll;
 

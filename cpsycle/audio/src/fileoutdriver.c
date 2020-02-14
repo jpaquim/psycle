@@ -5,6 +5,7 @@
 
 #include "fileoutdriver.h"
 
+#include "../../detail/os.h"
 #include "../../driver/driver.h"
 
 #include <stdlib.h>
@@ -13,9 +14,11 @@
 #include "waveio.h"
 #include <fileio.h>
 
+#if defined(DIVERSALIS__OS__MICROSOFT)	
 #include <windows.h>
 #include <mmsystem.h>
 #include <process.h>
+#endif
 
 typedef struct {
 	PsyFile file;
@@ -29,7 +32,9 @@ typedef struct {
 	psy_AudioDriver driver;
 	int pollsleep;
 	int stoppolling;
+#if defined(DIVERSALIS__OS__MICROSOFT)	
 	HANDLE hEvent;
+#endif	
 	FileContext filecontext;
 } FileOutDriver;
 
@@ -76,7 +81,9 @@ int fileoutdriver_init(FileOutDriver* self)
 	self->driver.samplerate = samplerate;
 	psy_signal_init(&self->driver.signal_stop);
 	init_properties(&self->driver);
+#if defined(DIVERSALIS__OS__MICROSOFT)	
 	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+#endif	
 	self->pollsleep = 1;
 	self->stoppolling = 0;
 	self->filecontext.path = strdup("Untitled.wav");
@@ -109,8 +116,10 @@ int driver_open(psy_AudioDriver* driver)
 
 	self = (FileOutDriver*) driver;
 	self->stoppolling = 0;
+#if defined(DIVERSALIS__OS__MICROSOFT)	
 	ResetEvent(self->hEvent);
 	_beginthread(PollerThread, 0, self);
+#endif	
 	return 0;
 }
 
@@ -118,8 +127,10 @@ int driver_close(psy_AudioDriver* driver)
 {
 	FileOutDriver* self = (FileOutDriver*) driver;
 
-	self->stoppolling = 1;	
+	self->stoppolling = 1;
+#if defined(DIVERSALIS__OS__MICROSOFT)		
 	WaitForSingleObject(self->hEvent, INFINITE);
+#endif	
 	return 0;
 }
 
@@ -154,8 +165,10 @@ void PollerThread(void* driver)
 	int hostisplaying = 1;
 
 	FileOutDriver* self = (FileOutDriver*) driver;
+#if defined(DIVERSALIS__OS__MICROSOFT)	
 	SetThreadPriority(GetCurrentThread(),
 		THREAD_PRIORITY_ABOVE_NORMAL);
+#endif		
 	fileoutdriver_createfile(self);	
 	while (!self->stoppolling && hostisplaying)
 	{
@@ -166,12 +179,18 @@ void PollerThread(void* driver)
 			&hostisplaying);		
 		fileoutdriver_writebuffer(self, pBuf, blocksize);
 		self->filecontext.numsamples += blocksize;
+#if defined(DIVERSALIS__OS__MICROSOFT)			
 		Sleep(self->pollsleep);
+#endif		
 	}
-	fileoutdriver_closefile(self);	
-	SetEvent(self->hEvent);	
+	fileoutdriver_closefile(self);
+#if defined(DIVERSALIS__OS__MICROSOFT)			
+	SetEvent(self->hEvent);
+#endif	
 	psy_signal_emit(&self->driver.signal_stop, self, 0);
+#if defined(DIVERSALIS__OS__MICROSOFT)	
 	_endthread();
+#endif	
 }
 
 void fileoutdriver_createfile(FileOutDriver* self)
@@ -199,7 +218,7 @@ void fileoutdriver_createfile(FileOutDriver* self)
 	temp32 = 0;
 	psyfile_write(file, &temp32, sizeof(temp32));
 	// Write Format Chunk
-	format.wFormatTag = WAVE_FORMAT_PCM;
+	format.wFormatTag = psy_audio_WAVE_FORMAT_PCM;
 	format.nChannels = 2;
 	format.nSamplesPerSec = 44100;
 	format.nAvgBytesPerSec = 2 * 44100 * bitspersample / 8;	

@@ -1,6 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
+#include "../../detail/prefix.h"
+
 #include "psy2converter.h"
 #include "machinefactory.h"
 #include "song.h"
@@ -8,6 +10,7 @@
 #include <string.h>
 #include <dir.h>
 #include "constants.h"
+#include "../../detail/portable.h"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 #define _MAX_PATH 4096
@@ -82,7 +85,7 @@ psy_audio_Machine* psy_audio_psy2converter_load(
 	} else
 	if (type == nativeplug) {		
 		psyfile_read(songfile->file, dllname, sizeof(dllname));
-		_strlwr(dllname);
+		psy_strlwr(dllname);
 		psyfile_read(songfile->file, &editname, sizeof(editname));
 		if (strcmp(dllname, "arguru bass.dll") == 0) {
 			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");			

@@ -14,6 +14,9 @@
 #include <windows.h>
 #endif
 
+#include <string.h>
+#include <stdlib.h>
+
 static int psyclescript_parse_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 static void psyclescript_setsearchpath(psy_audio_PsycleScript*, const char* modulepath);
 

@@ -24,6 +24,8 @@ typedef struct {
     uint16_t cbSize; 
 } psy_audio_WaveFormatChunk; 
 
+struct psy_audio_Sample;
+
 void psy_audio_wave_load(struct psy_audio_Sample*, const char* path);
 void psy_audio_wave_save(struct psy_audio_Sample*, const char* path);
 

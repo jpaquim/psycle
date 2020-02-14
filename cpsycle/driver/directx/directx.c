@@ -3,21 +3,61 @@
 
 #include "../../detail/prefix.h"
 
+#define DIRECTSOUND_VERSION 0x8000
+
+// linking
+#pragma comment(lib, "dsound.lib")
+#pragma comment(lib, "dxguid.lib")
+#pragma comment(lib, "winmm.lib")
+
+// includes
 #include <string.h>
 #include "../driver.h"
-#define DIRECTSOUND_VERSION 0x8000
 #include <windows.h>
 #include <mmsystem.h>
-//#include <mmreg.h>
 #include <dsound.h>
-#include <process.h>
-#include <MMReg.h>
-
-static HWND hwndmain;
+#include <stdio.h>
 
 #define BYTES_PER_SAMPLE 4	// 2 * 16bits
 #define SHORT_MIN	-32768
 #define SHORT_MAX	32767
+
+// AVRT is the new "multimedia scheduling stuff"
+typedef HANDLE(WINAPI* FAvSetMmThreadCharacteristics)   (LPCTSTR, LPDWORD);
+typedef BOOL(WINAPI* FAvRevertMmThreadCharacteristics)(HANDLE);
+
+static FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics = NULL;
+static FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
+static HMODULE hDInputDLL = 0;
+
+#define _GetProc(fun, type, name) \
+{                                                  \
+    fun = (type) GetProcAddress(hDInputDLL,name);  \
+    if (fun == NULL) { return FALSE; }             \
+}
+
+//Dynamic load and unload of avrt.dll, so the executable can run on Windows 2K and XP.
+static BOOL SetupAVRT(void)
+{	
+	hDInputDLL = LoadLibraryA("avrt.dll");
+	if (hDInputDLL == NULL)
+		return FALSE;
+
+	_GetProc(pAvSetMmThreadCharacteristics, FAvSetMmThreadCharacteristics, "AvSetMmThreadCharacteristicsA");
+	_GetProc(pAvRevertMmThreadCharacteristics, FAvRevertMmThreadCharacteristics, "AvRevertMmThreadCharacteristics");
+
+	return pAvSetMmThreadCharacteristics &&
+		pAvRevertMmThreadCharacteristics;
+}
+
+// ------------------------------------------------------------------------------------------
+static void CloseAVRT(void)
+{
+	if (hDInputDLL != NULL)
+		FreeLibrary(hDInputDLL);
+	hDInputDLL = NULL;
+}
+
 
 typedef struct {			
 	HANDLE Handle;
@@ -29,6 +69,7 @@ typedef struct {
 
 typedef struct {		
 	psy_AudioDriver driver;	
+	HWND m_hWnd;
 	int _dither;
 	int _bitDepth;
 	unsigned int _samplesPerSec;		
@@ -36,13 +77,12 @@ typedef struct {
 	
 	int _initialized;
 	int _configured;	
-	//controls if the driver is supposed to be running or not
+	// controls if the driver is supposed to be running or not
 	int _running;
-	//informs the real state of the DSound buffer (see the control of buffer play in DoBlocks())
+	// informs the real state of the DSound buffer (see the control of buffer play in DoBlocks())
 	int _playing;
-	//Controls if we want the thread to be running or not
-	int _threadRun;
-	int _timerActive;	
+	// Controls if we want the thread to be running or not
+	int _threadRun;	
 	GUID device_guid_;
 	int _deviceIndex;	
 	int _numBuffers;
@@ -54,10 +94,9 @@ typedef struct {
 	int _buffersToDo;
 	int _exclusive;
 	/// number of "wraparounds" to compensate the GetCurrentPosition() call.
-	int m_readPosWraps;
-	LPCGUID _pDsGuid;
-	LPDIRECTSOUND _pDs;
-	LPDIRECTSOUNDBUFFER _pBuffer;
+	int m_readPosWraps;		
+	LPDIRECTSOUND8 _pDs;
+	LPDIRECTSOUNDBUFFER8 _pBuffer;
 	HANDLE hEvent;
 	int (*error)(int, const char*);
 } DXDriver;
@@ -71,13 +110,16 @@ static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static unsigned int driver_samplerate(psy_AudioDriver*);
 
+static unsigned int totalbufferbytes(DXDriver*s);
 static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
-static void PollerThread(void *pWaveOut);
-static void DoBlocks(DXDriver* self);
+static DWORD WINAPI NotifyThread(void* pDirectSound);
+static DWORD WINAPI PollerThread(void* pDirectSound);
+static void DoBlocks(DXDriver*);
 static void init_properties(psy_AudioDriver* self);
 static int on_error(int err, const char* msg);
 static void Quantize(float *pin, int *piout, int c);
-
+static BOOL isvistaorlater(void);
+static BOOL WantsMoreBlocks(DXDriver*);
 
 int f2i(float flt) 
 { 
@@ -115,17 +157,20 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
 	DXDriver* dx = (DXDriver*) malloc(sizeof(DXDriver));
-	memset(dx, 0, sizeof(DXDriver));
-	dx->driver.open = driver_open;
-	dx->driver.deallocate = driver_deallocate;
-	dx->driver.connect = driver_connect;
-	dx->driver.open = driver_open;
-	dx->driver.close = driver_close;
-	dx->driver.dispose = driver_dispose;
-	dx->driver.configure = driver_configure;
-	dx->driver.samplerate = driver_samplerate;
-	driver_init(&dx->driver);
-	return &dx->driver;
+	if (dx != 0) {
+		memset(dx, 0, sizeof(DXDriver));
+		dx->driver.open = driver_open;
+		dx->driver.deallocate = driver_deallocate;
+		dx->driver.connect = driver_connect;
+		dx->driver.open = driver_open;
+		dx->driver.close = driver_close;
+		dx->driver.dispose = driver_dispose;
+		dx->driver.configure = driver_configure;
+		dx->driver.samplerate = driver_samplerate;
+		driver_init(&dx->driver);
+		return &dx->driver;
+	}
+	return 0;
 }
 
 void driver_deallocate(psy_AudioDriver* driver)
@@ -142,8 +187,7 @@ int driver_init(psy_AudioDriver* driver)
 	self->_initialized = FALSE;
 	self->_configured = FALSE;
 	self->_running = FALSE;
-	self->_playing = FALSE;
-	self->_timerActive = FALSE;
+	self->_playing = FALSE;	
 	self->_pDs = NULL;
 	self->_pBuffer = NULL;
 	self->driver._pCallback = NULL;
@@ -151,14 +195,12 @@ int driver_init(psy_AudioDriver* driver)
 	self->_numBuffers = 6;
 	self->_bufferSize = 4096;	
 	self->_samplesPerSec= 44100;	
-	self->pollSleep_ = 20;
 	self->_dither = 0;
-	self->_bitDepth = 16;
-	self->_exclusive = 0;
+	self->_bitDepth = 16;	
 
 	init_properties(&self->driver);
-	self->hEvent = CreateEvent
-		(NULL, FALSE, FALSE, NULL);
+	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	SetupAVRT();
 //	driver_configure(&self->driver);
 	return 0;
 }
@@ -169,6 +211,7 @@ int driver_dispose(psy_AudioDriver* driver)
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
+	CloseAVRT();
 	return 0;
 }
 
@@ -232,7 +275,7 @@ void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN ca
 {	
 	driver->_callbackContext = context;
 	driver->_pCallback = callback;
-	hwndmain = (HWND) handle;
+	((DXDriver*)driver)->m_hWnd = (HWND) handle;
 }
 
 int driver_open(psy_AudioDriver* driver)
@@ -240,70 +283,57 @@ int driver_open(psy_AudioDriver* driver)
 	DSBCAPS caps;
 	DSBUFFERDESC desc;
 	WAVEFORMATEX format;
+	LPDIRECTSOUNDBUFFER pBufferGen;
+	HRESULT hr;
+	DWORD dwThreadId;
 
 	DXDriver* self = (DXDriver*)driver;
 	//CSingleLock lock(&_lock, TRUE);	
-	if (self->_running)
-	{
+	if (self->_running) {
 		return TRUE;
 	}
-	if (self->driver._pCallback == NULL)
-	{
+	if (self->m_hWnd == NULL) {
 		return FALSE;
 	}
-
-	if (FAILED(DirectSoundCreate(self->_pDsGuid, &self->_pDs, NULL)))
+	if (self->driver._pCallback == NULL) {
+		return FALSE;
+	}
+	if (FAILED(DirectSoundCreate8(&self->device_guid_, &self->_pDs, NULL)))
 	{
 		self->error(1, "Failed to create DirectSound object");
 		return FALSE;
-	}
-
-	if (self->_exclusive)
-	{
-		if (FAILED(IDirectSound_SetCooperativeLevel(self->_pDs, hwndmain, DSSCL_WRITEPRIMARY)))
-		{
-		// Don't report this, since we may have simply have lost focus
-		//
-		//	Error("Failed to set DirectSound cooperative level");
-			IDirectSound_Release(self->_pDs);
-			self->_pDs = NULL;
-			return FALSE;
-		}
-	}
-	else
-	{
-		if (FAILED(IDirectSound_SetCooperativeLevel(self->_pDs, hwndmain, DSSCL_PRIORITY)))
-		{
+	}		
+	if (FAILED(IDirectSound_SetCooperativeLevel(self->_pDs, self->m_hWnd, DSSCL_PRIORITY))) {
 			self->error(1, "Failed to set DirectSound cooperative level");
 			IDirectSound_Release(self->_pDs);
 			self->_pDs = NULL;
 			return FALSE;
-		}
 	}
-
-	self->_dsBufferSize = self->_exclusive ? 0 : self->_bufferSize*self->_numBuffers;
-	
-	format.wFormatTag = WAVE_FORMAT_PCM;
-	format.nChannels = 2;
-	format.wBitsPerSample = 16;//_bitDepth;
-	format.nSamplesPerSec = self->_samplesPerSec;
-	format.nBlockAlign = format.nChannels * format.wBitsPerSample / 8;
-	format.nAvgBytesPerSec = format.nSamplesPerSec * format.nBlockAlign;
-	format.cbSize = 0;
-
-	desc.dwSize = sizeof(desc);
-	desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2;
-	desc.dwFlags |= self->_exclusive ? (DSBCAPS_PRIMARYBUFFER) : (DSBCAPS_GLOBALFOCUS);
-	desc.dwBufferBytes = self->_dsBufferSize; 
+	self->_dsBufferSize = totalbufferbytes(self);
+	PrepareWaveFormat(&format, 2, self->_samplesPerSec, self->_bitDepth, self->_bitDepth);			
+	ZeroMemory(&desc, sizeof(DSBUFFERDESC));
+	desc.dwSize = sizeof(DSBUFFERDESC);
+	desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_GLOBALFOCUS;
+	desc.dwBufferBytes = self->_dsBufferSize;
 	desc.dwReserved = 0;
-	desc.lpwfxFormat = self->_exclusive ? NULL : &format;
-	desc.guid3DAlgorithm = GUID_NULL;
-	
-	if (FAILED(IDirectSound_CreateSoundBuffer(self->_pDs, &desc, &self->_pBuffer, NULL)))
+	desc.lpwfxFormat = &format;
+	desc.guid3DAlgorithm = GUID_NULL;	
+
+	if (FAILED(IDirectSound_CreateSoundBuffer(self->_pDs, &desc, &pBufferGen, NULL)))
 	{
 		self->error(1, "Failed to create DirectSound psy_audio_Buffer(s)");
 		IDirectSound_Release(self->_pDs);
 		self->_pDs = NULL;
+		return FALSE;
+	}		
+	hr = IDirectSound_QueryInterface(pBufferGen, &IID_IDirectSoundBuffer8, (LPVOID*)&self->_pBuffer);
+	IDirectSound_Release(pBufferGen);
+	if (FAILED(hr))
+	{
+		self->error(1, "Failed to obtain version 8 interface for Buffer");
+		self->_pBuffer = 0;
+		IDirectSound_Release(self->_pDs);
+		self->_pDs = 0;
 		return FALSE;
 	}
 
@@ -332,9 +362,21 @@ int driver_open(psy_AudioDriver* driver)
 		self->_dsBufferSize = caps.dwBufferBytes;
 		//WriteConfig();
 	}
-	IDirectSoundBuffer_Initialize(self->_pBuffer, self->_pDs, &desc);
 
-	self->_lowMark = 0;
+	ResetEvent(self->hEvent);
+	self->_threadRun = TRUE;
+	self->_playing = FALSE;	
+
+#define DIRECTSOUND_POLLING P
+#ifdef DIRECTSOUND_POLLING
+	CreateThread(NULL, 0, PollerThread, self, 0, &dwThreadId);
+#else
+	CreateThread(NULL, 0, NotifyThread, self, 0, &dwThreadId);
+#endif
+	self->_running = TRUE;
+	return TRUE;
+
+	/*self->_lowMark = 0;
 	self->_highMark = self->_bufferSize;
 	if (self->_highMark >= self->_dsBufferSize)
 	{
@@ -347,21 +389,26 @@ int driver_open(psy_AudioDriver* driver)
 	_beginthread(PollerThread, 0, self);
 
 	self->_running = TRUE;
-	return TRUE;
+	return TRUE;*/
+}
+
+unsigned int totalbufferbytes(DXDriver* self)
+{
+	return self->_bufferSize * self->_numBuffers;
 }
 
 void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits)
 {
 	// Set up wave format structure. 
 	ZeroMemory(wf, sizeof(WAVEFORMATEX));
+	wf->wFormatTag = WAVE_FORMAT_PCM;
 	wf->nChannels = channels;
 	wf->wBitsPerSample = bits;
 	wf->nSamplesPerSec = sampleRate;
-	wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
-	wf->nAvgBytesPerSec = wf->nSamplesPerSec * wf->nBlockAlign;
-
-	if(bits <= 16) {
-		wf->wFormatTag = WAVE_FORMAT_PCM;
+	wf->nBlockAlign = channels * bits / 8;
+	wf->nAvgBytesPerSec = sampleRate * wf->nBlockAlign;
+	wf->cbSize = 0;
+	if(bits <= 16) {		
 		wf->cbSize = 0;
 	} else {
 /*		wf->wFormatTag = WAVE_FORMAT_EXTENSIBLE;
@@ -380,197 +427,188 @@ void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits,
 	}
 }
 
-void PollerThread(void * self)
+DWORD WINAPI PollerThread(void* self)
 {	
 	DXDriver* pThis = (DXDriver*)self;
+	HANDLE hTask = NULL;
+	int i;
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
-
-	while (pThis->_timerActive)
+	// Ask MMCSS to temporarily boost the thread priority
+	// to reduce glitches while the low-latency stream plays.	
+	if (isvistaorlater())
 	{
-		DoBlocks(pThis);
-		Sleep(pThis->pollSleep_);
+		DWORD taskIndex = 0;
+		hTask = pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
 	}
-	SetEvent(pThis->hEvent);
-	_endthread();
+	// Prefill buffer:
+	pThis->_lowMark = 0;
+	pThis->m_readPosWraps = 0;
+	pThis->_highMark = pThis->_bufferSize;	
+	pThis->_currentOffset = 0;
+	for (i = 0; i < pThis->_numBuffers; ++i) {
+		// Directsound playback buffer is started here.
+		DoBlocks(pThis);
+	}
+	while (pThis->_threadRun)
+	{
+		int runs = 0;
+
+		while (WantsMoreBlocks(pThis))
+		{
+			// First, run the capture buffers so that audio is available to wavein machines.
+			
+			// Next, proceeed with the generation of audio
+			DoBlocks(pThis);
+			if (++runs > pThis->_numBuffers)
+				break;
+		}
+		Sleep(1);
+	}	
+	SetEvent(pThis->hEvent);	
+	return 0;
+}
+
+DWORD WINAPI NotifyThread(void* self)
+{
+	return 0;
+}
+
+BOOL WantsMoreBlocks(DXDriver* self)
+{
+	// [_lowMark,_highMark) is the next buffer to be filled.
+	// if (play) pos is still inside, we have to wait.
+	int pos = 0;
+	HRESULT hr;
+	
+	hr = IDirectSoundBuffer8_GetCurrentPosition(self->_pBuffer, &pos, 0);
+	if (FAILED(hr)) return FALSE;
+	if (self->_lowMark <= pos && pos < self->_highMark)	return FALSE;
+	return TRUE;
 }
 
 void DoBlocks(DXDriver* self)
 {
-	int pos;
+	int* pBlock1, * pBlock2;
+	unsigned long blockSize1, blockSize2;
 	HRESULT hr;
-	int playing = self->_playing;
-	int* pBlock;
-	int* pBlock1;
-	int* pBlock2;
-	int blockSize;
-	int blockSize1;	
-	int blockSize2;
-	int currentOffset;
 	
-	while(TRUE)
+	hr = IDirectSoundBuffer_Lock(
+		self->_pBuffer,
+		(DWORD)self->_lowMark, (DWORD)self->_bufferSize,
+		(void**)&pBlock1, (DWORD*)&blockSize1,
+		(void**)&pBlock2, (DWORD*)&blockSize2,
+		0);	
+	if (hr == DSERR_BUFFERLOST)
 	{
-		while(TRUE)
-		{
-			hr = IDirectSoundBuffer_GetCurrentPosition(self->_pBuffer, (DWORD*)&pos, NULL);
-			if (FAILED(hr))
-			{
-				if (hr == DSERR_BUFFERLOST)
-				{
-					playing = FALSE;
-					if (FAILED(IDirectSoundBuffer_Restore(self->_pBuffer)))
-					{
-						// Don't inform about this error, because it will
-						// appear each time the Psycle window loses focus in exclusive mode
-						//
-						return;
-					}
-					continue;
-				}
-				else
-				{
-					self->error(1, "DirectSoundBuffer::GetCurrentPosition failed");
-					return;
-				}
-			}
-			break;
+		// If DSERR_BUFFERLOST is returned, restore and retry lock. 
+		self->_playing = FALSE;
+		IDirectSoundBuffer_Restore(self->_pBuffer);
+		if (self->_highMark < self->_dsBufferSize) {
+			IDirectSoundBuffer8_SetCurrentPosition(self->_pBuffer, self->_highMark);
+		} else {
+			IDirectSoundBuffer8_SetCurrentPosition(self->_pBuffer, 0);			
 		}
-
-		if (self->_highMark < self->_lowMark)
-		{
-			if ((pos > self->_lowMark) || (pos < self->_highMark))
-			{
-				return;
-			}
+		hr = IDirectSoundBuffer_Lock(
+			self->_pBuffer,
+			(DWORD)self->_lowMark, (DWORD)self->_bufferSize,
+			(void**)&pBlock1, (DWORD*)&blockSize1,
+			(void**)&pBlock2, (DWORD*)&blockSize2,
+			0);
+	}
+	if (SUCCEEDED(hr))
+	{
+		// Generate audio and put it into the buffer
+		unsigned int _sampleValidBits = self->_bitDepth;
+		int numSamples = blockSize1 / 4; // GetSampleSizeBytes();
+		int hostisplaying;
+		float* pFloatBlock = 
+			self->driver._pCallback(
+				self->driver._callbackContext, &numSamples, &hostisplaying);			
+		if (_sampleValidBits == 32) {			
+			// dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pBlock1), numSamples * 2, 1.f / 32768.f);
 		}
-		else if ((pos > self->_lowMark) && (pos < self->_highMark))
-		{
-			return;
+		else if (_sampleValidBits == 24) {
+			// Quantize24in32Bit(pFloatBlock, pBlock1, numSamples);
 		}
-
-
-		currentOffset = self->_currentOffset;
-		while (self->_buffersToDo != 0)
+		else if (_sampleValidBits == 16) {
+			Quantize(pFloatBlock, pBlock1, numSamples);
+			// if (settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock1, numSamples);
+			// else Quantize16(pFloatBlock, pBlock1, numSamples);
+		}
+		self->_lowMark += blockSize1;
+		if (blockSize2 > 0)
 		{
-			while(TRUE)
-			{
-				hr = IDirectSoundBuffer_Lock(
-					self->_pBuffer,
-					(DWORD)currentOffset, (DWORD)self->_bufferSize,
-					(void**)&pBlock1, (DWORD*)&blockSize1,
-					(void**)&pBlock2, (DWORD*)&blockSize2,
-					0);
-				if (FAILED(hr))
-				{
-					if (hr == DSERR_BUFFERLOST)
-					{
-						playing = FALSE;
-						if (FAILED(IDirectSoundBuffer_Restore(self->_pBuffer)))
-						{
-							return;
-						}
-						continue;
-					}
-					else
-					{
-						self->error(1, "Failed to lock DirectSoundBuffer");
-						return;
-					}
-				}
-				break;
-			}
-		
-			blockSize = blockSize1 / BYTES_PER_SAMPLE;
-			pBlock = pBlock1;
-			while(blockSize > 0)
-			{
-				int n = blockSize;
-				int hostisplaying;
-				float *pFloatBlock = self->driver._pCallback(
-					self->driver._callbackContext, 
-					&n, &hostisplaying);
-				if (self->_dither)
-				{
-//					QuantizeWithDither(pFloatBlock, pBlock, n);
-				}
-				else
-				{
-					Quantize(pFloatBlock, pBlock, n);
-				}
-				pBlock += n;
-				blockSize -= n;
-			}
+			float* pFloatBlock;
+			numSamples = blockSize2 / 4; // GetSampleSizeBytes();
+			pFloatBlock = self->driver._pCallback(
+					self->driver._callbackContext, &numSamples, &hostisplaying);
 				
-			blockSize = blockSize2 / BYTES_PER_SAMPLE;
-			pBlock = pBlock2;
-			while(blockSize > 0)
-			{
-				int n = blockSize;
-				int hostisplaying;
-				float *pFloatBlock = self->driver._pCallback(
-					self->driver._callbackContext, &n, &hostisplaying);
-				if (self->_dither)
-				{
-					//QuantizeWithDither(pFloatBlock, pBlock, n);
-				}
-				else
-				{
-					Quantize(pFloatBlock, pBlock, n);
-				}
-				pBlock += n;
-				blockSize -= n;
+				//_pCallback(self->driver._callbackContext, numSamples);
+			if (_sampleValidBits == 32) {
+				// dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pBlock2), numSamples * 2, 1.f / 32768.f);
 			}
-	
-			IDirectSoundBuffer_Unlock(self->_pBuffer, pBlock1, blockSize1, pBlock2, blockSize2);
-			self->_currentOffset += self->_bufferSize;
-			if (self->_currentOffset >= self->_dsBufferSize)
-			{
-				self->_currentOffset -= self->_dsBufferSize;
+			else if (_sampleValidBits == 24) {
+				// Quantize24in32Bit(pFloatBlock, pBlock2, numSamples);
 			}
-			self->_lowMark += self->_bufferSize;
-			if (self->_lowMark >= self->_dsBufferSize)
-			{
-				self->_lowMark -= self->_dsBufferSize;
+			else if (_sampleValidBits == 16) {
+				//if (settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock2, numSamples);
+				//else Quantize16(pFloatBlock, pBlock2, numSamples);
+				Quantize(pFloatBlock, pBlock2, numSamples);
 			}
-			self->_highMark += self->_bufferSize;
-			if (self->_highMark >= self->_dsBufferSize)
-			{
-				self->_highMark -= self->_dsBufferSize;
-			}
-			self->_buffersToDo--;
-		} // while (_buffersToDo != 0)
-		self->_buffersToDo = 1;
-		if (!playing)
-		{
-			self->_playing = TRUE;
-			IDirectSoundBuffer_Play(self->_pBuffer, 0, 0, DSBPLAY_LOOPING);
+			self->_lowMark += blockSize2;
 		}
-	} // while (true)
+		// Release the data back to DirectSound. 		
+		hr = IDirectSoundBuffer_Unlock(self->_pBuffer, pBlock1, blockSize1, pBlock2, blockSize2);
+		if (self->_lowMark >= self->_dsBufferSize) {
+			self->_lowMark -= self->_dsBufferSize;
+			self->m_readPosWraps++;
+#if defined _MSC_VER > 1200
+			if ((uint64_t)self->m_readPosWraps * 
+				(uint64_t)self->_dsBufferSize >= 0x100000000LL)
+			{
+				self->m_readPosWraps = 0;
+				// PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
+			}
+#else
+			if ((uint64_t)self->m_readPosWraps * 
+				(uint64_t)self->_dsBufferSize >= 0x100000000L)
+			{
+				self->m_readPosWraps = 0;
+				// PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
+			}
+#endif
+		}
+		self->_highMark = self->_lowMark + self->_bufferSize;
+		if (SUCCEEDED(hr) && !self->_playing)
+		{
+			IDirectSoundBuffer8_SetCurrentPosition(self->_pBuffer, self->_highMark);						
+			IDirectSoundBuffer_Play(self->_pBuffer, 0, 0, DSBPLAY_LOOPING);
 
-} 
+			if (SUCCEEDED(hr)) {
+				self->_playing = TRUE;
+				// PsycleGlobal::midi().ReSync(); // MIDI IMPLEMENTATION
+			}
+		}
+	}
+}
 
 int driver_close(psy_AudioDriver* driver)
 {
-	DXDriver* self = (DXDriver*) driver;
-	if (!self->_running)
-	{
-		return TRUE;
-	}
-	self->_running = FALSE;
-	self->_timerActive = FALSE;
-	
+	DXDriver* self = (DXDriver*) driver;	
+
+	if (!self->_running) return TRUE;
+	self->_threadRun = FALSE;
 	WaitForSingleObject(self->hEvent, INFINITE);
 	// Once we get here, the PollerThread should have stopped
-	// or we hang in deadlock
-	if (self->_playing)
-	{
-		IDirectSoundBuffer_Stop(self->_pBuffer);
+	if (self->_playing) {
+		IDirectSoundBuffer_Stop(self->_pBuffer);		
 		self->_playing = FALSE;
 	}
-	IDirectSoundBuffer_Release(self->_pBuffer);
+	IDirectSoundBuffer_Release(self->_pBuffer);	
 	self->_pBuffer = NULL;
 	IDirectSound_Release(self->_pDs);
-	self->_pDs = NULL;
-
+	self->_pDs = NULL;		
+	self->_running = FALSE;
 	return TRUE;
 }
 
@@ -609,4 +647,26 @@ void Quantize(float *pin, int *piout, int c)
 		pin += 2;
 	}
 	while(--c);
+}
+
+BOOL isvistaorlater(void)
+{
+#if defined _MSC_VER > 1200
+	OSVERSIONINFOEX osvi;
+	DWORDLONG dwlConditionMask = 0;
+	int op = VER_GREATER_EQUAL;
+
+	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+	osvi.dwMajorVersion = 6;
+	osvi.dwMinorVersion = 0;
+	VER_SET_CONDITION(dwlConditionMask, VER_MAJORVERSION, op);
+	VER_SET_CONDITION(dwlConditionMask, VER_MINORVERSION, op);
+	// Perform the test.
+	return VerifyVersionInfo(
+		&osvi, VER_MAJORVERSION | VER_MINORVERSION,
+		dwlConditionMask);
+#else
+	return 0;
+#endif
 }

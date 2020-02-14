@@ -119,7 +119,7 @@ void sample_init(psy_audio_Sample* self)
 	self->panfactor = 0.5f;
 	self->panenabled = 0;
 	self->surround = 0;
-	self->name = _strdup("");
+	self->name = strdup("");
 	vibrato_init(&self->vibrato);
 }
 
@@ -207,7 +207,7 @@ void sample_save(psy_audio_Sample* self, const char* path)
 void sample_setname(psy_audio_Sample* self, const char* name)
 {
 	free(self->name);
-	self->name = _strdup(name);
+	self->name = strdup(name);
 }
 
 const char* sample_name(psy_audio_Sample* self)

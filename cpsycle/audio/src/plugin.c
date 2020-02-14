@@ -12,7 +12,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <windows.h>
 #include "../../detail/portable.h"
 
 typedef CMachineInfo * (*GETINFO)(void);
@@ -45,7 +44,7 @@ static uintptr_t numoutputs(psy_audio_Plugin*);
 static void loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
-	unsigned int slot);
+	uintptr_t slot);
 static void setcallback(psy_audio_Plugin*, MachineCallback);
 
 static MachineVtable vtable;
@@ -308,7 +307,7 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	}	
 }			
 
-void savespecific(psy_audio_Plugin* self, struct psy_audio_SongFile* songfile,
+void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t count = psy_audio_machine_numparameters(psy_audio_plugin_base(self));

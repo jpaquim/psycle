@@ -89,6 +89,7 @@ void machines_free(psy_audio_Machines* self)
 		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
 		psy_audio_machine_dispose(machine);
 		free(machine);
+		psy_table_insert(&self->slots, psy_tableiterator_key(&it), 0);
 	}
 }
 

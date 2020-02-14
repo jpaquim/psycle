@@ -5,6 +5,7 @@
 
 #include "pianoroll.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "../../detail/portable.h"
 
 #ifndef WIN32_LEAN_AND_MEAN
@@ -40,6 +41,7 @@ static psy_dsp_beat_t pianogrid_quantizise(Pianogrid*,
 	psy_dsp_beat_t offset);
 static PatternNode* pianogrid_nextnode(Pianogrid*, PatternNode*,
 	uintptr_t track);
+static void pianogrid_ondestroy(Pianogrid*);
 
 static void pianoroll_updatemetrics(Pianoroll*);
 static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
@@ -211,6 +213,8 @@ static void pianogrid_vtable_init(Pianogrid* self)
 
 void pianogrid_init(Pianogrid* self, psy_ui_Component* parent, Pianoroll* roll)
 {
+	int track;
+
 	psy_ui_component_init(&self->component, parent);
 	pianogrid_vtable_init(self);
 	self->component.vtable = &pianogrid_vtable;
@@ -220,12 +224,36 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent, Pianoroll* roll)
 	self->beatscrollpos = 0;
 	self->dy = 0;
 	self->hover = 0;
+	psy_table_init(&self->channel);	
+	for (track = 0; track < 64; ++track) {
+		psy_audio_PatternEntry* channelentry;
+
+		channelentry = patternentry_allocinit();
+		channelentry->offset = -1.0f;
+		psy_table_insert(&self->channel, track, channelentry);
+	}
 	psy_signal_connect(&self->component.signal_scroll, self,
-		pianogrid_onscroll);	
+		pianogrid_onscroll);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		pianogrid_ondestroy);
 	psy_ui_component_showhorizontalscrollbar(&self->component);
 	psy_ui_component_showverticalscrollbar(&self->component);	
 	psy_ui_component_sethorizontalscrollrange(&self->component, 0, 16);
 	psy_ui_component_setverticalscrollrange(&self->component, 0, 88);
+}
+
+void pianogrid_ondestroy(Pianogrid* self)
+{
+	int track;
+
+	for (track = 0; track < 64; ++track) {
+		psy_audio_PatternEntry* channelentry;
+
+		channelentry = (psy_audio_PatternEntry*)psy_table_at(&self->channel, track);
+		patternentry_dispose(channelentry);
+		free(channelentry);
+	}
+	psy_table_dispose(&self->channel);
 }
 
 void pianogrid_onsize(Pianogrid* self, const psy_ui_Size* size)
@@ -294,56 +322,54 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 }
 
 void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
-{
-	psy_audio_PatternEntry channel[64];
-	int track;	
-
-	for (track = 0; track < 64; ++track) {
-		patternentry_init(&channel[track]);
-		channel[track].offset = -1.0f;		
-	}	
+{	
+	
 	if (self->view->pattern) {
 		PatternNode* curr;
+		int track;
+
 		curr = self->view->pattern->events;
-		while (curr) {			
+		while (curr) {
 			psy_audio_PatternEntry* entry;
-			
+			psy_audio_PatternEntry* channelentry;
+
 			entry = (psy_audio_PatternEntry*)(curr->entry);
-			if (channel[entry->track].offset != -1.0f) {
+			channelentry = (psy_audio_PatternEntry*)psy_table_at(&self->channel, entry->track);
+			if (channelentry->offset != -1.0f) {
 				pianogrid_drawevent(self, g,
-					patternentry_front(&channel[entry->track]),
+					patternentry_front(channelentry),
 					entry->track,
-					channel[entry->track].offset,
-					entry->offset - channel[entry->track].offset,
-					channel[entry->track].delta > 0);
-				channel[entry->track].offset = -1.0f;
-			}				
-			if (patternentry_front(entry)->note == 120) {				
-				channel[entry->track].offset = -1.0f;
+					channelentry->offset,
+					entry->offset - channelentry->offset,
+					channelentry->delta > 0);
+				channelentry->offset = -1.0f;
+			}
+			if (patternentry_front(entry)->note == 120) {
+				channelentry->offset = -1.0f;
 			} else {
-				channel[entry->track].offset = entry->offset;								
-				*patternentry_front(&channel[entry->track])
+				channelentry->offset = entry->offset;
+				*patternentry_front(channelentry)
 					= *patternentry_front(entry);
-				channel[entry->track].delta = 0;
+				channelentry->delta = 0;
 				if (self->hover == entry) {
-					channel[entry->track].delta = 1;
+					channelentry->delta = 1;
 				}
 			}
 			curr = curr->next;
 		}
-	}	
-	for (track = 0; track < 64; ++track) {
-		if (channel[track].offset != -1.0f) {
-			pianogrid_drawevent(self, g, patternentry_front(&channel[track]),
-				track,
-				channel[track].offset,
-				self->view->pattern->length - channel[track].offset,
-				channel[track].delta > 0);
+		for (track = 0; track < 64; ++track) {
+			psy_audio_PatternEntry* channelentry;
+
+			channelentry = (psy_audio_PatternEntry*)psy_table_at(&self->channel, track);
+			if (channelentry->offset != -1.0f) {
+				pianogrid_drawevent(self, g, patternentry_front(channelentry),
+					track,
+					channelentry->offset,
+					self->view->pattern->length - channelentry->offset,
+					channelentry->delta > 0);
+				channelentry->offset = -1.f;
+			}
 		}
-	}
-	for (track = 0; track < 64; ++track) {
-		patternentry_dispose(&channel[track]);
-		channel[track].offset = -1.0f;		
 	}
 }
 

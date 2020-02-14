@@ -50,6 +50,7 @@ void machineinfo_set(psy_audio_MachineInfo*,
 		int type,		
 		const char* modulepath,
 		int shellidx);
+struct CMachineInfo;		
 void machineinfo_setnativeinfo(psy_audio_MachineInfo*,
 		struct CMachineInfo*,
 		int type,		

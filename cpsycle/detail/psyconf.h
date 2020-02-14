@@ -14,7 +14,13 @@
 #define PSYCLE_TK_WIN32 1
 #define PSYCLE_TK_CURSES 2
 
+#if defined(DIVERSALIS__OS__UNIX)
+#define PSYCLE_USE_TK PSYCLE_TK_CURSES
+#elif defined(DIVERSALIS__OS__MICROSOFT)
 #define PSYCLE_USE_TK PSYCLE_TK_WIN32
+#else
+#define PSYCLE_USE_TK PSYCLE_TK_CURSES  
+#endif
 
 // #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 // #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
@@ -22,7 +28,7 @@
 // #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 // #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 
-#define PSYCLE_APP_DIR "C:\\Programme)\\Psycle"
+#define PSYCLE_APP_DIR "C:\\Programme\\Psycle"
 #define PSYCLE_USER_DIR "C:\\Programme\\Psycle"
 
 #define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"

@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+struct psy_audio_SongFile;
+
 int psy_audio_psy3_load(struct psy_audio_SongFile*);
 int psy_audio_psy3_save(struct psy_audio_SongFile*);
 

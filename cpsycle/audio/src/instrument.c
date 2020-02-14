@@ -46,7 +46,7 @@ void instrument_init(psy_audio_Instrument* self)
 {	
 	self->index = NOINSTRUMENT_INDEX;
 	self->entries = 0;	
-	self->name = _strdup("");
+	self->name = strdup("");
 	self->nna = psy_audio_NNA_STOP;
 	self->globalvolume = (psy_dsp_amp_t) 1.0f;
 	self->randompan = 0;
@@ -98,7 +98,7 @@ void instrument_load(psy_audio_Instrument* self, const char* path)
 void instrument_setname(psy_audio_Instrument* self, const char* name)
 {
 	free(self->name);
-	self->name = _strdup(name);
+	self->name = strdup(name);
 	psy_signal_emit(&self->signal_namechanged, self, 0);
 }
 
