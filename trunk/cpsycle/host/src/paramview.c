@@ -38,6 +38,7 @@ static void paramview_computepositions(ParamView*);
 static void paramview_clearpositions(ParamView*);
 static void mixer_vumeterdraw(ParamView*, psy_ui_Graphics*, int x, int y,
 	float value);
+static void drawsliderlevelback(ParamView*, psy_ui_Graphics*, int x, int y);
 
 static int paramview_refcount = 0;
 static int paramskin_initialized = 0;
@@ -125,6 +126,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
@@ -134,7 +136,8 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	self->numparams = 0;
 	paramskin_init(self);	
 	psy_table_init(&self->positions);
-	self->tweak = -1;	
+	self->tweak = -1;
+	self->sizechanged = 1;
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);		
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);	
 	psy_ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
@@ -177,6 +180,8 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 		if (self->numparams != psy_audio_machine_numparameters(self->machine)) {
 			self->numparams = psy_audio_machine_numparameters(self->machine);
 			paramview_computepositions(self);
+			self->sizechanged = 1;
+			psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
 		}
 		numrows = paramview_numrows(self);
 		for (param = 0; param < psy_audio_machine_numparameters(self->machine);
@@ -379,7 +384,9 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, uintptr_t param,
 	str[0] = '\0';
 
 	cellposition(self, param, row, col, &left, &top);
-	cellsize(self, param, &width, &height);	
+	cellsize(self, param, &width, &height);
+	psy_ui_setrectangle(&r, left, top, width, height);
+	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
 	skin_blitpart(g, &self->skin->mixerbitmap, left, top, &self->skin->slider);
 	xoffset = (self->skin->slider.destwidth - self->skin->knob.destwidth) / 2;
 	value =	psy_audio_machine_parametervalue(self->machine, param);
@@ -420,7 +427,8 @@ void drawsliderlevel(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintp
 	int height;	
 		
 	cellposition(self, param, row, col, &left, &top);
-	cellsize(self, param, &width, &height);		
+	cellsize(self, param, &width, &height);
+	drawsliderlevelback(self, g, left, top);
 	mixer_vumeterdraw(self, g, left, top,		
 			psy_audio_machine_parametervalue(self->machine, param));		
 }
@@ -439,6 +447,17 @@ void mixer_vumeterdraw(ParamView* self, psy_ui_Graphics* g, int x, int y, float 
 		self->skin->vuoff.destheight - ypos,
 		self->skin->vuon.srcx,
 		self->skin->vuon.srcy + ypos);	
+}
+
+void drawsliderlevelback(ParamView* self, psy_ui_Graphics* g, int x, int y)
+{
+	psy_ui_drawbitmap(g, &self->skin->mixerbitmap,
+		x,
+		y,
+		self->skin->vuoff.destwidth,
+		self->skin->vuoff.destheight,
+		self->skin->vuoff.srcx,
+		self->skin->vuoff.srcy);
 }
 
 void drawslidercheck(ParamView* self, psy_ui_Graphics* g, uintptr_t param, uintptr_t row,
@@ -585,11 +604,11 @@ void onmousedown(ParamView* self, psy_ui_MouseEvent* ev)
 {
 	self->tweak = hittest(self, ev->x, ev->y);
 	if (self->tweak != -1) {
+		uintptr_t paramtype;
+
 		self->tweakbase = ev->y;		
 		self->tweakval = psy_audio_machine_parametervalue(self->machine,
 			self->tweak);
-		uintptr_t paramtype;
-
 		paramtype = psy_audio_machine_parametertype(self->machine, self->tweak) & ~MPF_SMALL;
 		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
 			if (psy_audio_machine_parametervalue(self->machine, self->tweak) == 0.f) {
@@ -659,12 +678,14 @@ void ontimer(ParamView* self, psy_ui_Component* sender, int timerid)
 
 void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	assert(rv);
+	assert(rv);	
 	if (self->machine && psy_audio_machine_numparameters(self->machine) > 0) {				
 		paramview_computepositions(self);
 		*rv = self->cpmax;
+		self->sizechanged = 0;
 	} else {
 		*rv = psy_ui_component_size(&self->component);
+		self->sizechanged = 0;
 	}
 }
 

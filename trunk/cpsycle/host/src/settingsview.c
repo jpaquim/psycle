@@ -7,16 +7,12 @@
 #include <stdio.h>
 #include "inputmap.h"
 #include <stdlib.h>
+#include <string.h>
 
 #include <uifolderdialog.h>
 #include <uifontdialog.h>
 #include <uicolordialog.h>
 #include "../../detail/portable.h"
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
 
 static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
@@ -276,7 +272,7 @@ void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 		self->columnwidth, self->lineheight);
 	psy_ui_rectangle_expand(&r, 0, -5, 0, 0);
 	psy_ui_textoutrectangle(self->g, self->columnwidth * column, self->cpy + self->dy,
-		ETO_CLIPPED, r,
+		psy_ui_ETO_CLIPPED, r,
 		psy_properties_valuestring(property),
 		strlen(psy_properties_valuestring(property)));
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
@@ -427,10 +423,10 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 		if (self->button &&
 				psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;			
-			char title[MAX_PATH];
+			char title[_MAX_PATH];
 			
-			psy_snprintf(title, MAX_PATH, "%s", psy_properties_text(self->selected));
-			title[MAX_PATH - 1] = '\0';			
+			psy_snprintf(title, _MAX_PATH, "%s", psy_properties_text(self->selected));
+			title[_MAX_PATH - 1] = '\0';			
 			psy_ui_folderdialog_init_all(&dialog, 0, title, "");
 			if (psy_ui_folderdialog_execute(&dialog)) {
 				psy_properties_write_string(self->selected->parent,

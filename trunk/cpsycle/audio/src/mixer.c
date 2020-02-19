@@ -650,7 +650,7 @@ void parametertweak(psy_audio_Mixer* self, uintptr_t param, float value)
 		if (row == self->sends.count + 3) {
 			self->master.panning = value;
 		} else	
-		if (row == self->sends.count + 8) {
+		if (row == self->sends.count + 4) {
 			self->master.volume = value * value;
 		}
 	} else 
@@ -679,24 +679,24 @@ void parametertweak(psy_audio_Mixer* self, uintptr_t param, float value)
 			} else				
 			if (row == self->sends.count + 3) {
 				channel->panning = value;
-			} else				 
+			} else		
 			if (row == self->sends.count + 4) {
+				channel->volume = value * value;
+			} else
+			if (row == self->sends.count + 6) {
 
 			} else
-			if (row == self->sends.count + 5) {
+			if (row == self->sends.count + 7) {
 				channel->mute = machine_parametervalue_scaled(
 					&self->custommachine.machine, param,value);
 			} else
-			if (row == self->sends.count + 6) {
+			if (row == self->sends.count + 8) {
 				channel->dryonly = machine_parametervalue_scaled(
 					&self->custommachine.machine, param,value);
 			} else
-			if (row == self->sends.count + 7) {
+			if (row == self->sends.count + 9) {
 				channel->wetonly = machine_parametervalue_scaled(
 					&self->custommachine.machine, param,value);
-			} else
-			if (row == self->sends.count + 8) {
-				channel->volume = value * value;
 			}
 		}
 	} else
@@ -722,16 +722,16 @@ void parametertweak(psy_audio_Mixer* self, uintptr_t param, float value)
 			} else
 			if (row == self->sends.count + 3) {
 				channel->panning = value;
+			} else			
+			if (row == self->sends.count + 4) {
+				channel->volume = value * value;
 			} else
-			if (row == self->sends.count + 4) {				
-			} else
-			if (row == self->sends.count + 5) {
+			if (row == self->sends.count + 6) {
+			} else		
+			if (row == self->sends.count + 7) {
 				channel->mute = machine_parametervalue_scaled(
 					&self->custommachine.machine, param, value);
-			} else
-			if (row == self->sends.count + 8) {
-				channel->volume = value * value;
-			}
+			}			
 		}
 	}
 }
@@ -759,10 +759,10 @@ float parametervalue(psy_audio_Mixer* self, uintptr_t param)
 		if (row == self->sends.count + 3) {			
 			return self->master.panning;
 		} else
-		if (row == self->sends.count + 8) {
+		if (row == self->sends.count + 4) {
 			return (float) sqrt(self->master.volume);
 		} else
-		if (row == self->sends.count + 9) {			
+		if (row == self->sends.count + 5) {			
 			return self->mastervolumedisplay;
 		}
 	} else 
@@ -791,30 +791,30 @@ float parametervalue(psy_audio_Mixer* self, uintptr_t param)
 			} else
 			if (row == self->sends.count + 3) {
 				return channel->panning;
-			} else
+			} else		
 			if (row == self->sends.count + 4) {
-				
+				return (float)sqrt(channel->volume);
 			} else
 			if (row == self->sends.count + 5) {
-				return machine_parametervalue_normed(
-					&self->custommachine.machine, param, channel->mute);
-			} else
-			if (row == self->sends.count + 6) {
-				return machine_parametervalue_normed(
-					&self->custommachine.machine, param, channel->dryonly);
-			} else
-			if (row == self->sends.count + 7) {
-				return machine_parametervalue_normed(
-					&self->custommachine.machine, param,
-					channel->wetonly);
-			} else
-			if (row == self->sends.count + 8) {
-				return (float) sqrt(channel->volume);
-			} else
-			if (row == self->sends.count + 9) {
 				return (channel->buffer)
 					? channel->buffer->volumedisplay
 					: 0.f;
+			} else
+			if (row == self->sends.count + 6) {
+				
+			} else
+			if (row == self->sends.count + 7) {
+				return machine_parametervalue_normed(
+					&self->custommachine.machine, param, channel->mute);
+			} else
+			if (row == self->sends.count + 8) {
+				return machine_parametervalue_normed(
+					&self->custommachine.machine, param, channel->dryonly);
+			} else
+			if (row == self->sends.count + 9) {
+				return machine_parametervalue_normed(
+					&self->custommachine.machine, param,
+					channel->wetonly);
 			}
 		}
 	} else
@@ -835,19 +835,19 @@ float parametervalue(psy_audio_Mixer* self, uintptr_t param)
 			} else
 			if (row == self->sends.count + 3) {
 				return channel->panning;
-			} else
-			if (row == self->sends.count + 5) {
-				return machine_parametervalue_normed(&self->custommachine.machine,
-					param, channel->mute);
-			} else	
-			if (row == self->sends.count + 8) {
+			} else			
+			if (row == self->sends.count + 4) {
 				return (float)sqrt(channel->volume);
 			} else
-			if (row == self->sends.count + 9) {
+			if (row == self->sends.count + 5) {
 				return (channel->buffer)
 					? channel->buffer->volumedisplay
 					: 0.f;
-			}
+			} else
+			if (row == self->sends.count + 6) {
+				return machine_parametervalue_normed(&self->custommachine.machine,
+					param, channel->mute);
+			}						
 		}		
 	}
 	return 0;
@@ -895,7 +895,7 @@ int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 			mixer_describepanning(self, txt, self->master.panning);
 			return 1;
 		} else
-		if (row == self->sends.count + 8) {			
+		if (row == self->sends.count + 4) {			
 			mixer_describelevel(self, txt, self->master.volume);
 			return 1;
 		}
@@ -940,7 +940,7 @@ int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 				mixer_describepanning(self, txt, channel->panning);
 				return 1;
 			} else
-			if (row == self->sends.count + 8) {				
+			if (row == self->sends.count + 4) {				
 				mixer_describelevel(self, txt, channel->volume);
 				return 1;
 			}
@@ -968,7 +968,7 @@ int describevalue(psy_audio_Mixer* self, char* txt, uintptr_t param, int value)
 				mixer_describepanning(self, txt, channel->panning);
 				return 1;
 			} else
-			if (row == self->sends.count + 8) {
+			if (row == self->sends.count + 4) {
 				mixer_describelevel(self, txt, channel->volume);
 				return 1;
 			}
@@ -1078,14 +1078,14 @@ int parametername(psy_audio_Mixer* self, char* txt, uintptr_t param)
 			psy_snprintf(txt, 128, "%s", "Gain");
 			return 1;
 		} else
-		if (row == self->sends.count + 8) {
-			psy_snprintf(txt, 128, "%s", "Level");
-			return 1;
-		} else
 		if (row == self->sends.count + 3) {
 			psy_snprintf(txt, 128, "%s", "Pan");
 			return 1;
-		}
+		} else
+		if (row == self->sends.count + 4) {
+			psy_snprintf(txt, 128, "%s", "Level");
+			return 1;
+		}		
 	} else	
 	if (col < returncolumn(self)) {
 		uintptr_t index;
@@ -1108,17 +1108,17 @@ int parametername(psy_audio_Mixer* self, char* txt, uintptr_t param)
 		if (row == self->sends.count + 3) {
 			psy_snprintf(txt, 128, "%s", "Pan");
 			return 1;
-		} else
-		if (row >= self->sends.count + 4 && row < self->sends.count + 8) {
+		} else		
+		if (row == self->sends.count + 4) {
+			psy_snprintf(txt, 128, "%s", "Level");
+			return 1;
+		} else 
+		if (row >= self->sends.count + 6 && row < self->sends.count + 10) {
 			static const char* label[] = { "S", "M", "D", "W" };
 
 			psy_snprintf(txt, 128, "%s", label[row - (self->sends.count + 4)]);
 			return 1;
-		} else
-		if (row == self->sends.count + 8) {
-			psy_snprintf(txt, 128, "%s", "Level");
-			return 1;
-		}			
+		}		
 	} else
 	if (col < returncolumn(self) + self->returns.count) {
 		uintptr_t index;
@@ -1141,7 +1141,7 @@ int parametername(psy_audio_Mixer* self, char* txt, uintptr_t param)
 			psy_snprintf(txt, 128, "%s", "Pan");
 			return 1;
 		} else
-		if (row == self->sends.count + 8) {
+		if (row == self->sends.count + 4) {
 			psy_snprintf(txt, 128, "%s", "Level");
 			return 1;
 		}			
@@ -1174,15 +1174,15 @@ int parametertype(psy_audio_Mixer* self, uintptr_t param)
 		} else
 		if (row >= self->sends.count + 1 && row < self->sends.count + 4) {
 			return MPF_STATE | MPF_SMALL;
-		} else
-		if (row >= self->sends.count + 4 && row < self->sends.count + 8) {
-			return MPF_IGNORE;
-		} else
-		if (row == self->sends.count + 8) {
+		} else		
+		if (row == self->sends.count + 4) {
 			return MPF_SLIDER | MPF_SMALL;
 		} else
-		if (row == self->sends.count + 9) {
+		if (row == self->sends.count + 5) {
 			return MPF_SLIDERLEVEL | MPF_SMALL;
+		} else
+		if (row >= self->sends.count + 6 && row < self->sends.count + 10) {
+			return MPF_IGNORE;
 		} else
 		if (row == self->sends.count + 10) {
 			return MPF_IGNORE;
@@ -1199,16 +1199,17 @@ int parametertype(psy_audio_Mixer* self, uintptr_t param)
 		} else
 		if (row > 0 && row < self->sends.count + 4) {
 			return MPF_STATE | MPF_SMALL;
-		} else		
-		if (row >= self->sends.count + 4 && row < self->sends.count + 8) {
-			return MPF_SLIDERCHECK;
 		} else
-		if (row == self->sends.count + 8) {
+		if (row == self->sends.count + 4) {
 			return MPF_SLIDER | MPF_SMALL;
-		} else	
-		if (row == self->sends.count + 9) {
+		} else
+		if (row == self->sends.count + 5) {
 			return MPF_SLIDERLEVEL;
 		} else
+		if (row >= self->sends.count + 6 && row < self->sends.count + 10) {
+			return MPF_SLIDERCHECK;
+		} else
+		
 		if (row == self->sends.count + 10) {
 			return MPF_IGNORE;
 		}
@@ -1241,15 +1242,15 @@ int parametertype(psy_audio_Mixer* self, uintptr_t param)
 		if (row == self->sends.count + 3) {
 			return MPF_STATE | MPF_SMALL;
 		} else
-		if (row >= self->sends.count + 4 &&	row < self->sends.count + 8) {
-			return MPF_SLIDERCHECK;
-		} else
-		if (row == self->sends.count + 8) {
+		if (row == self->sends.count + 4) {
 			return MPF_SLIDER | MPF_SMALL;;
 		} else
-		if (row == self->sends.count + 9) {
+		if (row == self->sends.count + 5) {
 			return MPF_SLIDERLEVEL;
 		} else
+		if (row >= self->sends.count + 6 &&	row < self->sends.count + 10) {
+			return MPF_SLIDERCHECK;
+		} else		
 		if (row == self->sends.count + 10) {
 			return MPF_IGNORE;
 		}

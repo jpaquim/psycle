@@ -14,6 +14,10 @@
 #define min(a, b) (((a < b) ? a : b))
 #endif
 
+#ifndef max
+#define max(a, b)  (((a) > (b)) ? (a) : (b)) 
+#endif
+
 INLINE void psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
 {
 	va_list ap;

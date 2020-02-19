@@ -387,32 +387,33 @@ psy_List* children(psy_ui_Component* self, int recursive)
 	return self->imp->vtable->dev_children(self->imp, recursive);
 }
 
-void psy_ui_component_init_signals(psy_ui_Component* component)
+void psy_ui_component_init_signals(psy_ui_Component* self)
 {
-	psy_signal_init(&component->signal_size);
-	psy_signal_init(&component->signal_draw);
-	psy_signal_init(&component->signal_timer);
-	psy_signal_init(&component->signal_keydown);
-	psy_signal_init(&component->signal_keyup);
-	psy_signal_init(&component->signal_mousedown);
-	psy_signal_init(&component->signal_mouseup);
-	psy_signal_init(&component->signal_mousemove);
-	psy_signal_init(&component->signal_mousewheel);
-	psy_signal_init(&component->signal_mousedoubleclick);
-	psy_signal_init(&component->signal_mouseenter);
-	psy_signal_init(&component->signal_mousehover);
-	psy_signal_init(&component->signal_mouseleave);
-	psy_signal_init(&component->signal_scroll);
-	psy_signal_init(&component->signal_create);
-	psy_signal_init(&component->signal_destroy);
-	psy_signal_init(&component->signal_destroyed);
-	psy_signal_init(&component->signal_show);
-	psy_signal_init(&component->signal_hide);
-	psy_signal_init(&component->signal_focus);
-	psy_signal_init(&component->signal_focuslost);
-	psy_signal_init(&component->signal_align);
-//	psy_signal_init(&component->signal_preferredsize);	
-	psy_signal_init(&component->signal_command);
+	psy_signal_init(&self->signal_size);
+	psy_signal_init(&self->signal_draw);
+	psy_signal_init(&self->signal_timer);
+	psy_signal_init(&self->signal_keydown);
+	psy_signal_init(&self->signal_keyup);
+	psy_signal_init(&self->signal_mousedown);
+	psy_signal_init(&self->signal_mouseup);
+	psy_signal_init(&self->signal_mousemove);
+	psy_signal_init(&self->signal_mousewheel);
+	psy_signal_init(&self->signal_mousedoubleclick);
+	psy_signal_init(&self->signal_mouseenter);
+	psy_signal_init(&self->signal_mousehover);
+	psy_signal_init(&self->signal_mouseleave);
+	psy_signal_init(&self->signal_scroll);
+	psy_signal_init(&self->signal_create);
+	psy_signal_init(&self->signal_destroy);
+	psy_signal_init(&self->signal_destroyed);
+	psy_signal_init(&self->signal_show);
+	psy_signal_init(&self->signal_hide);
+	psy_signal_init(&self->signal_focus);
+	psy_signal_init(&self->signal_focuslost);
+	psy_signal_init(&self->signal_align);
+//	psy_signal_init(&self->signal_preferredsize);	
+	psy_signal_init(&self->signal_preferredsizechanged);
+	psy_signal_init(&self->signal_command);
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
@@ -440,6 +441,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->handlehscroll = 1;
 	self->backgroundmode = BACKGROUND_SET;
 	self->backgroundcolor = psy_ui_defaults_backgroundcolor(&app.defaults);	
+	self->mousetracking = 0;
 	self->color = psy_ui_defaults_color(&app.defaults);
 	self->cursor = psy_ui_CURSOR_DEFAULT;	
 	psy_ui_component_updatefont(self);
@@ -476,7 +478,8 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_focuslost);
 	psy_signal_dispose(&self->signal_align);
 	// psy_signal_dispose(self->signal_preferredsize);	
-	psy_signal_dispose(&self->signal_command);	
+	psy_signal_dispose(&self->signal_command);
+	psy_signal_dispose(&self->signal_preferredsizechanged);
 }
 
 void psy_ui_component_destroy(psy_ui_Component* self)
@@ -594,7 +597,7 @@ int psy_ui_component_visible(psy_ui_Component* self)
 void psy_ui_component_align(psy_ui_Component* self)
 {	
 	psy_ui_Aligner aligner;
-
+	
 	psy_ui_aligner_init(&aligner, self);
 	psy_ui_aligner_align(&aligner);	
 	psy_signal_emit(&self->signal_align, self, 0);
@@ -607,7 +610,11 @@ void onpreferredsize(psy_ui_Component* self, psy_ui_Size* limit,
 	psy_ui_Aligner aligner;
 
 	psy_ui_aligner_init(&aligner, self);
+	if (self->debugflag == 65) {
+		self = self;
+	}
 	psy_ui_aligner_preferredsize(&aligner, limit, rv);
+	
 }
 
 void psy_ui_component_doublebuffer(psy_ui_Component* self)
@@ -760,6 +767,8 @@ static psy_ui_Size dev_size(psy_ui_ComponentImp* self) { psy_ui_Size rv = { 0, 0
 static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { psy_ui_Size rv = { 0, 0 }; return rv; }
 static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { }
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
+static void dev_setparent(psy_ui_ComponentImp* self, psy_ui_Component* parent) { }
+static void dev_insert(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child, psy_ui_ComponentImp* insertafter) { }
 static void dev_capture(psy_ui_ComponentImp* self) { }
 static void dev_releasecapture(psy_ui_ComponentImp* self) { }
 static void dev_invalidate(psy_ui_ComponentImp* self) { }
@@ -814,6 +823,8 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_framesize = dev_framesize;
 		imp_vtable.dev_scrollto = dev_scrollto;
 		imp_vtable.dev_parent = dev_parent;
+		imp_vtable.dev_setparent = dev_setparent;
+		imp_vtable.dev_insert = dev_insert;
 		imp_vtable.dev_capture = dev_capture;
 		imp_vtable.dev_releasecapture = dev_releasecapture;
 		imp_vtable.dev_invalidate = dev_invalidate;

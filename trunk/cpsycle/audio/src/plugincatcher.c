@@ -15,6 +15,7 @@
 #include "luaplugin.h"
 #include "sampler.h"
 #include "vstplugin.h"
+#include "ladspaplugin.h"
 
 #include <dir.h>
 
@@ -167,6 +168,11 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 			plugincatcher_scan_multipath(self, psy_properties_valuestring(p),
 				"*"MODULEEXT, MACH_VST);
 		}
+		p = psy_properties_findsection(self->dirconfig, "ladspas");
+		if (p) {
+			plugincatcher_scan_multipath(self, psy_properties_valuestring(p),
+				"*"MODULEEXT, MACH_LADSPA);
+		}
 	}
 	psy_signal_emit(&self->signal_changed, self, 0);
 	psy_signal_emit(&self->signal_scanprogress, self, 1, 0);
@@ -176,7 +182,8 @@ int isplugin(int type)
 {
 	return 
 		type == MACH_PLUGIN ||
-		type == MACH_VST;
+		type == MACH_VST ||
+		type == MACH_LADSPA;
 }
 
 char* replace_char(char* str, char c, char r)
@@ -207,9 +214,17 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
 		}
-	} else
+	}
+	else
 	if (type == MACH_VST) {
-		if (psy_audio_plugin_vst_test(path, &macinfo)) {			
+		if (psy_audio_plugin_vst_test(path, &macinfo)) {
+			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+				&macinfo);
+			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+		}
+	} else
+	if (type == MACH_LADSPA) {
+		if (psy_audio_plugin_ladspa_test(path, &macinfo)) {
 			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 				&macinfo);
 			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);

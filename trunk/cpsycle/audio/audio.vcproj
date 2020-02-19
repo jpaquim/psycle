@@ -534,6 +534,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\ladspaplugin.c"
+				>
+			</File>
+			<File
 				RelativePath="src\library.c"
 				>
 				<FileConfiguration
@@ -1515,6 +1519,10 @@
 			</File>
 			<File
 				RelativePath="src\kbddriver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\ladspaplugin.h"
 				>
 			</File>
 			<File

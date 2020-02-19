@@ -49,6 +49,8 @@ static psy_ui_Size dev_size(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_win_ComponentImp*);
 static void dev_scrollto(psy_ui_win_ComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* dev_parent(psy_ui_win_ComponentImp*);
+static void dev_setparent(psy_ui_win_ComponentImp* self, psy_ui_Component* parent);
+static void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child, psy_ui_win_ComponentImp* insertafter);
 static void dev_capture(psy_ui_win_ComponentImp*);
 static void dev_releasecapture(psy_ui_win_ComponentImp*);
 static void dev_invalidate(psy_ui_win_ComponentImp*);
@@ -106,6 +108,8 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
 		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;
 		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent) dev_parent;
+		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent) dev_setparent;
+		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert) dev_insert;
 		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture) dev_capture;
 		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture) dev_releasecapture;
 		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate) dev_invalidate;
@@ -405,6 +409,29 @@ psy_ui_Component* dev_parent(psy_ui_win_ComponentImp* self)
 	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap,
 		(uintptr_t)GetParent(self->hwnd));
 	return imp ? imp->component : 0;
+}
+
+void dev_setparent(psy_ui_win_ComponentImp* self, psy_ui_Component* parent)
+{
+	psy_ui_WinApp* winapp;
+	psy_ui_win_ComponentImp* parentimp;
+
+	winapp = (psy_ui_WinApp*)app.platform;
+	parentimp = (psy_ui_win_ComponentImp*) parent->imp;
+	if (parentimp) {
+		SetParent(self->hwnd, parentimp->hwnd);
+	}
+}
+
+void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child, psy_ui_win_ComponentImp* insertafter)
+{
+	SetParent(child->hwnd, self->hwnd);
+	SetWindowPos(
+		child->hwnd,
+		insertafter->hwnd,
+		0, 0, 0, 0,
+		SWP_NOMOVE | SWP_NOSIZE
+	);
 }
 
 void dev_capture(psy_ui_win_ComponentImp* self)

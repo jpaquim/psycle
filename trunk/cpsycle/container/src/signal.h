@@ -15,7 +15,8 @@ extern "C" {
 typedef struct {
 	void* fp;
 	void* context;
-	int prevented;	
+	int prevented;
+	int abort;
 } psy_Slot;
 
 typedef struct {
@@ -32,6 +33,7 @@ void psy_signal_emit(psy_Signal*, void* context, int num, ...);
 void psy_signal_emit_int(psy_Signal*, void* context, intptr_t param);
 void psy_signal_emit_float(psy_Signal*, void* context, float param);
 void psy_signal_dispose(psy_Signal*);
+psy_Slot* psy_signal_findslot(psy_Signal*, void* context, void* fp);
 
 #ifdef __cplusplus
 }

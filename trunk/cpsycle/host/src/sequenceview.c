@@ -5,22 +5,18 @@
 
 #include "sequenceview.h"
 #include <stdio.h>
+#include <string.h>
 #include "../../detail/portable.h"
 #include <exclusivelock.h>
 #include <uialigner.h>
 #include <assert.h>
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
 
 #define TIMERID_SEQUENCEVIEW 2000
 
 static void sequencelistview_onsize(SequenceListView*, const psy_ui_Size*);
 static void sequencelistview_ondraw(SequenceListView*, psy_ui_Graphics*);
 static void sequencelistview_drawtrack(SequenceListView*, psy_ui_Graphics*,
-	SequenceTrack* track, int trackindex, int x);
+	SequenceTrack*, int trackindex, int x);
 static void sequencelistview_computetextsizes(SequenceListView*);
 static void sequencelistview_adjustscroll(SequenceListView*);
 static void sequencelistview_onmousedown(SequenceListView*, 
@@ -58,8 +54,6 @@ static void sequenceduration_update(SequenceViewDuration*);
 static void sequencebuttons_onalign(SequenceButtons* self);
 static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static psy_List* rowend(psy_List* p);
-
 
 static void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader*,
 	psy_ui_Component* sender, psy_ui_Graphics*);
@@ -917,18 +911,16 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->desc, &self->component);	
 	psy_ui_label_settext(&self->desc, "Duration");
 	psy_ui_label_setcharnumber(&self->desc, 10);
-	psy_ui_label_setstyle(&self->desc, 
-		WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE);
+	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	self->desc.component.debugflag = 45;
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->duration, &self->component);
-	psy_ui_label_setstyle(&self->duration, 
-		WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE);
+	psy_ui_label_settextalignment(&self->duration, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_setcharnumber(&self->duration, 10);	
 	psy_list_free(psy_ui_components_setmargin(
-			psy_ui_component_children(&self->component, 0),
-			&margin));
+		psy_ui_component_children(&self->component, 0),
+		&margin));
 	sequenceduration_update(self);
 }
 

@@ -126,6 +126,7 @@ static void imp_vtable_init(void)
 static void dev_settext(psy_ui_win_LabelImp*, const char* text);
 static void dev_text(psy_ui_win_LabelImp* self, char* text);
 static void dev_setstyle(psy_ui_win_LabelImp*, int style);
+static void dev_settextalignment(psy_ui_win_LabelImp*, psy_ui_Alignment alignment);
 
 static psy_ui_LabelImpVTable labelimp_vtable;
 static int labelimp_vtable_initialized = 0;
@@ -136,6 +137,7 @@ static void labelimp_imp_vtable_init(psy_ui_win_LabelImp* self)
 		labelimp_vtable.dev_settext = (psy_ui_fp_labelimp_dev_settext) dev_settext;
 		labelimp_vtable.dev_text = (psy_ui_fp_labelimp_dev_text) dev_text;
 		labelimp_vtable.dev_setstyle = (psy_ui_fp_labelimp_dev_setstyle) dev_setstyle;
+		labelimp_vtable.dev_settextalignment = (psy_ui_fp_labelimp_dev_settextalignment) dev_settextalignment;
 		labelimp_vtable_initialized = 1;
 	}
 }
@@ -193,6 +195,19 @@ void dev_setstyle(psy_ui_win_LabelImp* self, int style)
 void dev_text(psy_ui_win_LabelImp* self, char* text)
 {	
 	GetWindowText(self->win_component_imp.hwnd, text, 256);
+}
+
+void dev_settextalignment(psy_ui_win_LabelImp* self, psy_ui_Alignment alignment)
+{
+	if ((alignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) == psy_ui_ALIGNMENT_CENTER_VERTICAL) {
+		dev_setstyle(self, WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE);
+	} else
+	if ((alignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) == psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
+		dev_setstyle(self, WS_CHILD | WS_VISIBLE | SS_CENTER);
+	} else
+	if ((alignment & psy_ui_ALIGNMENT_LEFT) == psy_ui_ALIGNMENT_LEFT) {
+		dev_setstyle(self, WS_CHILD | WS_VISIBLE | SS_LEFT);
+	}
 }
 
 #endif

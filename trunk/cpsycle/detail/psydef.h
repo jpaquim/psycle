@@ -28,9 +28,9 @@ typedef uint8_t bool;
 
 #ifndef INLINE
 # if __GNUC__ && !__GNUC_STDC_INLINE__
-#  define INLINE extern inline
+#  define INLINE static inline
 # elif __GNUC__
-#  define INLINE inline
+#  define INLINE static inline
 # elif _MSC_VER
 #  define INLINE __inline
 # endif

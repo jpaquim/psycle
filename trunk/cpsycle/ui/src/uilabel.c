@@ -43,6 +43,11 @@ void psy_ui_label_text(psy_ui_Label* self, char* text)
 	self->imp->vtable->dev_text(self->imp, text);
 }
 
+void psy_ui_label_settextalignment(psy_ui_Label* self, psy_ui_Alignment alignment)
+{
+	self->imp->vtable->dev_settextalignment(self->imp, alignment);
+}
+
 void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
 {
 	self->charnumber = number;
@@ -79,6 +84,7 @@ void psy_ui_label_setstyle(psy_ui_Label* self, int style)
 static void dev_settext(psy_ui_LabelImp* self, const char* title) { }
 static void dev_text(psy_ui_LabelImp* self, char* text) { }
 static void dev_setstyle(psy_ui_LabelImp* self, int style) { }
+static void dev_settextalignment(psy_ui_LabelImp* self, psy_ui_Alignment alignment) { }
 
 static psy_ui_LabelImpVTable label_imp_vtable;
 static int label_imp_vtable_initialized = 0;
@@ -88,7 +94,8 @@ static void label_imp_vtable_init(void)
 	if (!label_imp_vtable_initialized) {		
 		label_imp_vtable.dev_settext = dev_settext;
 		label_imp_vtable.dev_text = dev_text;
-		label_imp_vtable.dev_setstyle = dev_setstyle;		
+		label_imp_vtable.dev_setstyle = dev_setstyle;	
+		label_imp_vtable.dev_settextalignment = dev_settextalignment;
 		label_imp_vtable_initialized = 1;
 	}
 }
@@ -98,3 +105,4 @@ void psy_ui_labelimp_init(psy_ui_LabelImp* self)
 	label_imp_vtable_init();
 	self->vtable = &label_imp_vtable;
 }
+

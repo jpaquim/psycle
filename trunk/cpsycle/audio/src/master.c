@@ -19,9 +19,10 @@ static void master_loadspecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void master_savespecific(psy_audio_Master*, struct psy_audio_SongFile*,
 	uintptr_t slot);
-static const char* master_editname(psy_audio_Master* self) { return "Master"; }
+static const char* master_editname(psy_audio_Master* self) { return "Psycle Master and Minimixer"; }
 static uintptr_t numinputs(psy_audio_Master*);
 static uintptr_t numoutputs(psy_audio_Master*);
+static uintptr_t slot(psy_audio_Master* self) { return MASTER_INDEX; }
 // Parameters
 static int parametertype(psy_audio_Master*, uintptr_t param);
 static uintptr_t numparameters(psy_audio_Master*);
@@ -32,6 +33,7 @@ static int parameterlabel(psy_audio_Master*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Master*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_Master*, char* txt, uintptr_t param, int value);
 static float parametervalue(psy_audio_Master*, uintptr_t param);
+static void master_describeeditname(psy_audio_Master*, char* text, uintptr_t slot);
 
 static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
 {
@@ -58,6 +60,8 @@ static psy_audio_MachineInfo const MacInfo = {
 
 const psy_audio_MachineInfo* master_info(void) { return &MacInfo; }
 
+#define NUMROWS 3
+
 static MachineVtable vtable;
 static int vtable_initialized = 0;
 
@@ -74,6 +78,7 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.slot = (fp_machine_slot) slot;
 		vtable.loadspecific = (fp_machine_loadspecific) master_loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) master_savespecific;
 		vtable.editname = (fp_machine_editname) master_editname;
@@ -107,100 +112,262 @@ void master_dispose(psy_audio_Master* self)
 
 void parametertweak(psy_audio_Master* self, uintptr_t param, float value)
 {
-	if (param == 0) {
-		psy_audio_Machines* machines;
-		
-		machines = psy_audio_machine_machines(&self->machine);
-		if (machines) {			
-			machines_setvolume(machines, value * value * 4.f);
-		}
-	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* p;
-		uintptr_t c = 1;
-		psy_audio_Machines* machines;
-		
-		machines = psy_audio_machine_machines(&self->machine);		
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
-		if (sockets) {
-			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
-			if (p) {
-				psy_audio_WireSocketEntry* input_entry;
+	int col = param / NUMROWS;
+	int row = param % NUMROWS;
 
-				input_entry = (psy_audio_WireSocketEntry*) p->entry;
-				input_entry->volume = value * value * 4.f;					
+	if (col == 0) {
+		if (row == 1) {
+			psy_audio_Machines* machines;
+
+			machines = psy_audio_machine_machines(&self->machine);
+			if (machines) {
+				machines_setvolume(machines, value * value * 4.f);
 			}
-		}		
+		}
+	} else
+	if (col > 0) {
+		if (row == 1) {
+			psy_audio_MachineSockets* sockets;
+			WireSocket* p;
+			uintptr_t c = 1;
+			psy_audio_Machines* machines;
+
+			machines = psy_audio_machine_machines(&self->machine);
+			sockets = connections_at(&machines->connections, MASTER_INDEX);
+			if (sockets) {
+				for (p = sockets->inputs; p != 0 && c != col; p = p->next, ++c);
+				if (p) {
+					psy_audio_WireSocketEntry* input_entry;
+
+					input_entry = (psy_audio_WireSocketEntry*)p->entry;
+					input_entry->volume = value * value * 4.f;
+				}
+			}
+		}
 	}
 }
 
 int describevalue(psy_audio_Master* self, char* txt, uintptr_t param, int value)
 { 	
-	if (param == 0) {
-		psy_audio_Machines* machines = self->machine.callback.machines(
-			self->machine.callback.context);
+	int col = param / NUMROWS;
+	int row = param % NUMROWS;
+	if (col == 0) {
+		if (row == 1) {
+			psy_audio_Machines* machines = self->machine.callback.machines(
+				self->machine.callback.context);
 
-		psy_dsp_amp_t db = (psy_dsp_amp_t)(20 * 
-			log10(machines_volume(machines)));
-		psy_snprintf(txt, 10, "%.2f dB", db);
-		return 1;
-	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* p;
-		uintptr_t c = 1;
-		psy_audio_Machines* machines;
-		
-		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
-		if (sockets) {
-			for (p = sockets->inputs; p != 0 && c != param; p = p->next, ++c);
-			if (p) {				
-				psy_audio_WireSocketEntry* input_entry;
-				psy_dsp_amp_t db;
+			psy_dsp_amp_t db = (psy_dsp_amp_t)(20 *
+				log10(machines_volume(machines)));
+			psy_snprintf(txt, 10, "%.2f dB", db);
+			return 1;
+		}
+	} else
+	if (col > 0) {
+		if (row == 0) {
+			psy_audio_MachineSockets* sockets;
+			WireSocket* p;
+			uintptr_t c = 1;
+			psy_audio_Machines* machines;
 
-				input_entry = (psy_audio_WireSocketEntry*) p->entry;
-				db = (psy_dsp_amp_t)(20 * log10(input_entry->volume));
-				psy_snprintf(txt, 10, "%.2f dB", db);
-				return 1;
+			machines = psy_audio_machine_machines(&self->machine);
+			sockets = connections_at(&machines->connections, MASTER_INDEX);
+			if (sockets) {
+				for (p = sockets->inputs; p != 0 && c != col; p = p->next, ++c);
+				if (p) {
+					psy_audio_WireSocketEntry* input_entry;
+
+					input_entry = (psy_audio_WireSocketEntry*)p->entry;
+					master_describeeditname(self, txt, input_entry->slot);
+				}
 			}			
-		}
-	}
-	return 0;
-}
+			return 1;
+		} else
+		if (row == 1) {
+			psy_audio_MachineSockets* sockets;
+			WireSocket* p;
+			uintptr_t c = 1;
+			psy_audio_Machines* machines;
 
-float parametervalue(psy_audio_Master* self, uintptr_t param)
-{	
-	if (param == 0) {
-		psy_audio_Machines* machines = self->machine.callback.machines(
-			self->machine.callback.context);
+			machines = psy_audio_machine_machines(&self->machine);
+			sockets = connections_at(&machines->connections, MASTER_INDEX);
+			if (sockets) {
+				for (p = sockets->inputs; p != 0 && c != col; p = p->next, ++c);
+				if (p) {
+					psy_audio_WireSocketEntry* input_entry;
+					psy_dsp_amp_t db;
 
-		if (machines) {
-			return (float) sqrt(machines_volume(machines)) * 0.5f;
-		}
-	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* input_socket;
-		uintptr_t c = 1;
-		psy_audio_Machines* machines;
-		
-		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
-		if (sockets) {
-			for (input_socket = sockets->inputs; input_socket != 0 && c != param;
-					input_socket = input_socket->next, ++c);
-			if (input_socket) {
-				psy_audio_WireSocketEntry* input_entry;
-
-				input_entry = (psy_audio_WireSocketEntry*) input_socket->entry;
-				return (float) sqrt(input_entry->volume) * 0.5f;
+					input_entry = (psy_audio_WireSocketEntry*)p->entry;
+					db = (psy_dsp_amp_t)(20 * log10(input_entry->volume));
+					psy_snprintf(txt, 10, "%.2f dB", db);
+					return 1;
+				}
 			}
 		}
 	}
 	return 0;
 }
 
-const psy_audio_MachineInfo* info(psy_audio_Master* self)
+void master_describeeditname(psy_audio_Master* self, char* text, uintptr_t slot)
+{
+	psy_audio_Machine* machine;
+
+	machine = machines_at(psy_audio_machine_machines(&self->machine),
+		slot);
+	if (machine) {
+		psy_snprintf(text, 128, "%s",
+			psy_audio_machine_editname(machine));
+	}
+	else {
+		psy_snprintf(text, 128, "%s", "");
+	}
+}
+
+float parametervalue(psy_audio_Master* self, uintptr_t param)
 {	
+	int col = param / NUMROWS;
+	int row = param % NUMROWS;
+
+	if (col == 0) {
+		if (row == 1) {
+			psy_audio_Machines* machines = self->machine.callback.machines(
+				self->machine.callback.context);
+
+			if (machines) {
+				return (float)sqrt(machines_volume(machines)) * 0.5f;
+			}
+		} else
+		if (row == 2) {
+			psy_audio_Buffer* buffer;
+			psy_audio_Machines* machines;
+
+			machines = psy_audio_machine_machines(&self->machine);
+			buffer = machines_outputs(machines, MASTER_INDEX);
+			return buffer->volumedisplay;
+		}
+	} else
+	if (col > 0) {
+		if (row == 1) {
+			psy_audio_MachineSockets* sockets;
+			WireSocket* input_socket;
+			uintptr_t c = 1;
+			psy_audio_Machines* machines;
+
+			machines = psy_audio_machine_machines(&self->machine);
+			sockets = connections_at(&machines->connections, MASTER_INDEX);
+			if (sockets) {
+				for (input_socket = sockets->inputs; input_socket != 0 && c != col;
+					input_socket = input_socket->next, ++c);
+				if (input_socket) {
+					psy_audio_WireSocketEntry* input_entry;
+
+					input_entry = (psy_audio_WireSocketEntry*)input_socket->entry;
+					return (float)sqrt(input_entry->volume) * 0.5f;
+				}
+			}
+		} else
+		if (row == 2) {
+			psy_audio_MachineSockets* sockets;
+			WireSocket* input_socket;
+			uintptr_t c = 1;
+			psy_audio_Machines* machines;
+
+			machines = psy_audio_machine_machines(&self->machine);
+			sockets = connections_at(&machines->connections, MASTER_INDEX);
+			if (sockets) {
+				for (input_socket = sockets->inputs; input_socket != 0 && c != col;
+					input_socket = input_socket->next, ++c);
+				if (input_socket) {
+					psy_audio_WireSocketEntry* input_entry;
+					psy_audio_Buffer* buffer;
+
+					input_entry = (psy_audio_WireSocketEntry*) input_socket->entry;
+					buffer = machines_outputs(machines, input_entry->slot);
+					return buffer->volumedisplay;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int parametertype(psy_audio_Master* self, uintptr_t param)
+{
+	int col = param / NUMROWS;
+	int row = param % NUMROWS;
+
+	if (row == 0) {
+		return MPF_INFOLABEL | MPF_SMALL;
+	} else
+	if (row == 1) {
+		return MPF_SLIDER | MPF_SMALL;
+	} else
+	if (row == 2) {
+		return MPF_SLIDERLEVEL | MPF_SMALL;
+	}
+	return MPF_NULL;
+}
+
+void parameterrange(psy_audio_Master* self, uintptr_t param, int* minval, int* maxval)
+{
+	*minval = 0;
+	*maxval = 65535;
+}
+
+uintptr_t numparameters(psy_audio_Master* self)
+{	
+	return numparametercols(self) * NUMROWS;
+}
+
+unsigned int numparametercols(psy_audio_Master* self)
+{
+	psy_audio_MachineSockets* sockets;
+	WireSocket* input_socket;
+	psy_audio_Machines* machines;
+
+	machines = psy_audio_machine_machines(&self->machine);
+	sockets = connections_at(&machines->connections, MASTER_INDEX);
+	if (sockets) {
+		input_socket = sockets->inputs;
+		if (input_socket) {
+			return (psy_list_size(input_socket) + 1);
+		}
+	}
+	return 1;
+}
+
+int parameterlabel(psy_audio_Master* self, char* txt, uintptr_t param)
+{
+	psy_snprintf(txt, 128, "%s", "Vol");
+	return 1;
+}
+
+int parametername(psy_audio_Master* self, char* txt, uintptr_t param)
+{
+	int col = param / 3;
+	int row = param % 3;
+
+	if (col == 0) {
+		if (row == 0) {
+			psy_snprintf(txt, 128, "%s", "Master");
+		}
+		if (row == 1) {
+			psy_snprintf(txt, 128, "%s", "Vol");
+		}
+	} else
+	if (col > 0) {
+		if (row == 0) {
+			psy_snprintf(txt, 10, "m%d", (int)col);
+			return 1;
+		} else
+		if (row == 1) {
+			psy_snprintf(txt, 128, "%s", "Vol");
+		}
+	}	
+	return 1;
+}
+
+const psy_audio_MachineInfo* info(psy_audio_Master* self)
+{
 	return &MacInfo;
 }
 
@@ -212,39 +379,6 @@ uintptr_t numinputs(psy_audio_Master* self)
 uintptr_t numoutputs(psy_audio_Master* self)
 {
 	return 2;
-}
-
-int parametertype(psy_audio_Master* self, uintptr_t param)
-{
-	return MPF_STATE;
-}
-
-void parameterrange(psy_audio_Master* self, uintptr_t param, int* minval, int* maxval)
-{
-	*minval = 0;
-	*maxval = 65535;
-}
-
-uintptr_t numparameters(psy_audio_Master* self)
-{
-	return 13;
-}
-
-unsigned int numparametercols(psy_audio_Master* self)
-{
-	return 4;
-}
-
-int parameterlabel(psy_audio_Master* self, char* txt, uintptr_t param)
-{
-	psy_snprintf(txt, 128, "%s", "Vol");
-	return 1;
-}
-
-int parametername(psy_audio_Master* self, char* txt, uintptr_t param)
-{
-	psy_snprintf(txt, 128, "%s", "Vol");
-	return 1;
 }
 
 void master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,

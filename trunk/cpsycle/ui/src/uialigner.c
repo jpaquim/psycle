@@ -22,7 +22,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	psy_List* wrap = 0;	
 	psy_ui_Component* client = 0;
 		
-	if (self->component->debugflag == 99) {
+	if (self->component->debugflag == 65) {
 		self = self;
 	}
 	size = psy_ui_component_size(self->component);
@@ -43,7 +43,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			componentsize = psy_ui_component_preferredsize(component, &limit);
 			if (component->align == psy_ui_ALIGN_CLIENT) {
 				client = component;
-			} 
+			} else
 			if (component->align == psy_ui_ALIGN_FILL) {
 				psy_ui_component_setposition(component,
 					psy_ui_value_px(&component->margin.left, &tm),
@@ -152,6 +152,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 	if (rv) {
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
+		psy_ui_Component* client = 0;
 
 		size = psy_ui_component_size(self->component);
 		tm = psy_ui_component_textmetric(self->component);
@@ -181,6 +182,18 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 						cp_bottomright.x;
 					limit.height = size.height;
 					componentsize = psy_ui_component_preferredsize(component, &limit);
+					if (component->align == psy_ui_ALIGN_CLIENT) {
+						if (maxsize.height < cp.y + componentsize.height +
+							psy_ui_margin_height_px(&component->margin, &tm)) {
+							maxsize.height = cp.y + componentsize.height +
+								psy_ui_margin_height_px(&component->margin, &tm);
+						}
+						if (maxsize.width < componentsize.width +
+							psy_ui_margin_width_px(&component->margin, &tm)) {
+							maxsize.width = componentsize.width +
+								psy_ui_margin_width_px(&component->margin, &tm);
+						}
+					} else
 					if (component->align == psy_ui_ALIGN_TOP ||
 							component->align == psy_ui_ALIGN_BOTTOM) {
 						cp.y += componentsize.height +
@@ -238,7 +251,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 			psy_list_free(q);
 			*rv = maxsize;
 			rv->width += psy_ui_margin_width_px(&self->component->spacing, &tm);
-			rv->height += psy_ui_margin_height_px(&self->component->spacing, &tm);
+			rv->height += psy_ui_margin_height_px(&self->component->spacing, &tm);			
 		} else {
 			*rv = size;
 			rv->width += psy_ui_margin_width_px(&self->component->spacing, &tm);

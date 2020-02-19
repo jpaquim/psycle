@@ -7,15 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MAKE_ARRAY_METHOD(x) void psy_audio_array_ ## x (psy_audio_Array* self) \
-{ \
-	uintptr_t i; \
-\
-	for (i = 0; i < self->len_; ++i) { \
-		self->ptr_[i] = (float) ## x (self->ptr_[i]); \
-	} \
-} \
-
 void psy_audio_array_init(psy_audio_Array* self)
 {
     self->ptr_ = 0;
@@ -192,10 +183,66 @@ int psy_audio_array_copyfrom(psy_audio_Array* self, psy_audio_Array* other,
 	return 1;
 }
 
-MAKE_ARRAY_METHOD(sqrt)
-MAKE_ARRAY_METHOD(sin)
-MAKE_ARRAY_METHOD(cos)
-MAKE_ARRAY_METHOD(tan)
-MAKE_ARRAY_METHOD(ceil)
-MAKE_ARRAY_METHOD(floor)
-MAKE_ARRAY_METHOD(fabs)
+// array methods
+void psy_audio_array_sqrt(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) sqrt(self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_sin(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) sin(self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_cos(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) cos(self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_tan(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) tan(self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_ceil(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) ceil(self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_floor(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) floor(self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_fabs(psy_audio_Array* self)
+{
+	uintptr_t i;
+
+	for (i = 0; i < self->len_; ++i) {
+		self->ptr_[i] = (float) fabs(self->ptr_[i]);
+	}
+}

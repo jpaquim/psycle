@@ -33,6 +33,8 @@ static void mainframe_onkeyup(MainFrame*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry*);
 static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
+static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onmidi(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
@@ -46,7 +48,7 @@ static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
-static void mainframe_onviewselected(MainFrame*, Workspace*, int view, const char* anchor);
+static void mainframe_onviewselected(MainFrame*, Workspace*, int view, const char* anchor, int option);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender,
@@ -64,6 +66,7 @@ static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
 	unsigned int numsongtracks);
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender, const char* path);
+static void mainframe_ondockview(MainFrame*, Workspace* sender, psy_ui_Component* view);
 
 #define GEARVIEW 10
 
@@ -127,6 +130,12 @@ void mainframe_init(MainFrame* self)
 	if (!workspace_showstepsequencer(&self->workspace)) {
 		psy_ui_component_hide(&self->stepsequencerview.component);
 	}	
+	psy_ui_component_init(&self->paramviews, &self->client);
+	self->paramviews.debugflag = 65;
+	//psy_ui_component_setbackgroundcolor(&self->paramviews, 0x00FF0000);
+	psy_ui_component_enablealign(&self->paramviews);
+	psy_ui_component_setalign(&self->paramviews, psy_ui_ALIGN_BOTTOM);
+	//psy_ui_component_resize(&self->paramviews, 100, 100);
 	// tabbars			
 	{
 		psy_ui_Margin spacing;
@@ -204,6 +213,16 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_hide(&self->gear.component);
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ongear);
+	cpuview_init(&self->cpuview, &self->component, &self->workspace);
+	psy_ui_component_setalign(&self->cpuview.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(&self->cpuview.component);
+	midiview_init(&self->midiview, &self->component, &self->workspace);
+	psy_ui_component_setalign(&self->midiview.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(&self->midiview.component);
+	psy_signal_connect(&self->machinebar.cpu.signal_clicked, self,
+		mainframe_oncpu);
+	psy_signal_connect(&self->machinebar.midi.signal_clicked, self,
+		mainframe_onmidi);
 	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
 	psy_ui_component_setalign(&self->plugineditor.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_resize(&self->plugineditor.component, 400, 0);
@@ -231,6 +250,9 @@ void mainframe_init(MainFrame* self)
 		mainframe_onsongtrackschanged);	
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
+	psy_signal_connect(&self->workspace.signal_dockview, self,
+		mainframe_ondockview);
+	
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -456,14 +478,14 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			machines_slot(&self->workspace.song->machines));
 	} else
 	if (cmd.id == CMD_IMM_EDITINSTR) {
-		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0);
+		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0, 0);
 	} else
 	if (cmd.id == CMD_IMM_EDITSAMPLE) {
-		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0);
+		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
 		tabbar_select(&self->samplesview.clienttabbar, 0);
 	} else
 	if (cmd.id == CMD_IMM_EDITWAVE) {
-		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0);
+		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
 		tabbar_select(&self->samplesview.clienttabbar, 2);
 	} else
 	if (cmd.id == CMD_IMM_TERMINAL) {
@@ -597,6 +619,34 @@ void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 	}	
 }
 
+void mainframe_oncpu(MainFrame* self, psy_ui_Component* sender)
+{
+	if (psy_ui_component_visible(&self->cpuview.component)) {
+		psy_ui_button_disablehighlight(&self->machinebar.cpu);
+		psy_ui_component_hide(&self->cpuview.component);
+		psy_ui_component_align(&self->component);
+	}
+	else {
+		psy_ui_button_highlight(&self->machinebar.cpu);
+		psy_ui_component_show(&self->cpuview.component);
+		psy_ui_component_align(&self->component);
+	}
+}
+
+void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)
+{
+	if (psy_ui_component_visible(&self->midiview.component)) {
+		psy_ui_button_disablehighlight(&self->machinebar.midi);
+		psy_ui_component_hide(&self->midiview.component);
+		psy_ui_component_align(&self->component);
+	}
+	else {
+		psy_ui_button_highlight(&self->machinebar.midi);
+		psy_ui_component_show(&self->midiview.component);
+		psy_ui_component_align(&self->component);
+	}
+}
+
 void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 {
 	if (psy_ui_component_visible(&self->plugineditor.component)) {
@@ -664,10 +714,19 @@ void mainframe_ontimer(MainFrame* self, psy_ui_Component* sender, int timerid)
 	workspace_idle(&self->workspace);
 }
 
-void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view, const char* anchor)
+void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view, const char* anchor, int option)
 {
 	if (view != GEARVIEW) {
 		tabbar_select(&self->tabbar, view);
+		if (anchor) {
+			if (view == TABPAGE_MACHINEVIEW && anchor && (strcmp(anchor, "NEWMACHINE") == 0)) {
+				tabbar_select(&self->machineview.tabbar, 1);
+				if (option == 20) {
+					self->machineview.wireview.randominsert = 0;
+					self->machineview.wireview.addeffect = 1;					
+				}
+			}
+		}
 	}
 	if (anchor && view == TABPAGE_SETTINGSVIEW) {
 		settingsview_selectsection(&self->settingsview, anchor);
@@ -726,4 +785,16 @@ void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Player* sender,
 void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender, const char* path)
 {
 	paramview_changecontrolskin(path);
+}
+
+void mainframe_ondockview(MainFrame* self, Workspace* sender, psy_ui_Component* view)
+{
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(view);
+	psy_ui_component_resize(view, 0, 0);
+	psy_ui_component_setparent(view, &self->paramviews);	
+	psy_ui_component_setalign(view, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_align(&self->client);	
+	psy_ui_component_align(&self->paramviews);
 }

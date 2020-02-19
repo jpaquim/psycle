@@ -183,6 +183,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
 	psy_Signal signal_focus;	
+	psy_Signal signal_preferredsizechanged;
 	psy_ui_AlignType align;
 	psy_ui_JustifyType justify;
 	int alignexpandmode;
@@ -204,6 +205,7 @@ typedef struct psy_ui_Component {
 	int handlevscroll;
 	int handlehscroll;
 	int cursor;	
+	int mousetracking;
 	psy_ui_Style style;
 } psy_ui_Component;
 
@@ -250,8 +252,6 @@ void psy_ui_component_setposition(psy_ui_Component*, int x, int y, int width, in
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 
-void psy_ui_component_setfocus(psy_ui_Component*);
-int psy_ui_component_hasfocus(psy_ui_Component*);
 void psy_ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
 psy_ui_Font* psy_ui_component_font(psy_ui_Component*);
 void psy_ui_component_preventdefault(psy_ui_Component*);
@@ -268,7 +268,6 @@ void psy_ui_component_preventalign(psy_ui_Component*);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, BackgroundMode);
-psy_ui_Size psy_ui_component_textsize(psy_ui_Component*, const char*);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
@@ -296,6 +295,8 @@ typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(struct psy_ui_ComponentIm
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy);
 typedef struct psy_ui_Component* (*psy_ui_fp_componentimp_dev_parent)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_setparent)(struct psy_ui_ComponentImp*, struct psy_ui_Component*);
+typedef void (*psy_ui_fp_componentimp_dev_insert)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_capture)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_releasecapture)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_invalidate)(struct psy_ui_ComponentImp*);
@@ -348,6 +349,8 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_framesize dev_framesize;
 	psy_ui_fp_componentimp_dev_scrollto dev_scrollto;
 	psy_ui_fp_componentimp_dev_parent dev_parent;
+	psy_ui_fp_componentimp_dev_setparent dev_setparent;
+	psy_ui_fp_componentimp_dev_insert dev_insert;
 	psy_ui_fp_componentimp_dev_capture dev_capture;
 	psy_ui_fp_componentimp_dev_releasecapture dev_releasecapture;
 	psy_ui_fp_componentimp_dev_invalidate dev_invalidate;	
@@ -477,6 +480,16 @@ INLINE int psy_ui_component_hasfocus(psy_ui_Component* self)
 INLINE psy_ui_Component* psy_ui_component_parent(psy_ui_Component* self)
 {
 	return self->imp->vtable->dev_parent(self->imp);
+}
+
+INLINE void psy_ui_component_setparent(psy_ui_Component* self, psy_ui_Component* parent)
+{
+	self->imp->vtable->dev_setparent(self->imp, parent);
+}
+
+INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* child, psy_ui_Component* insertafter)
+{
+	self->imp->vtable->dev_insert(self->imp, child->imp, insertafter->imp);
 }
 
 #ifdef __cplusplus

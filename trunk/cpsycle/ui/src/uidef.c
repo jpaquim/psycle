@@ -66,6 +66,14 @@ void psy_ui_rectangle_expand(psy_ui_Rectangle* self, int top, int right, int bot
 	self->left -= left;	
 }
 
+void psy_ui_rectangle_move(psy_ui_Rectangle* self, int dx, int dy)
+{
+	self->top += dy;
+	self->right += dx;
+	self->bottom += dy;
+	self->left += dx;
+}
+
 void psy_ui_margin_init(psy_ui_Margin* self, psy_ui_Value top,
 	psy_ui_Value right, psy_ui_Value bottom, psy_ui_Value left)
 {   
