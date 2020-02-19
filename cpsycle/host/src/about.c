@@ -7,12 +7,8 @@
 #include "../../detail/psydef.h"
 
 #include <stdio.h>
+#include <string.h>
 #include "resources/resource.h"
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
 
 static void about_initbuttons(About* self);
 static void about_oncontributors(About*, psy_ui_Component* sender);
@@ -108,7 +104,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->versioninfo, &self->component);
-	psy_ui_label_setstyle(&self->versioninfo, WS_CHILD | WS_VISIBLE | SS_CENTER);
+	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	psy_ui_component_resize(&self->versioninfo.component, 500, 300);	
 	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);

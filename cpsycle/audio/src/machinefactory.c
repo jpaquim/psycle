@@ -15,6 +15,7 @@
 #include "luaplugin.h"
 #include "sampler.h"
 #include "vstplugin.h"
+#include "ladspaplugin.h"
 #include "machineproxy.h"
 
 #include <stdlib.h>
@@ -199,6 +200,26 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 					free(plugin);
 				}
 			} else {
+				rv = 0;
+			}
+		}
+		case MACH_LADSPA:
+		{
+			psy_audio_Machine* plugin;
+
+			plugin = (psy_audio_Machine*) malloc(sizeof(psy_audio_LadspaPlugin));
+			if (plugin) {
+				psy_audio_ladspaplugin_init((psy_audio_LadspaPlugin*)plugin,
+					self->machinecallback, path);
+				if (psy_audio_machine_info(plugin)) {
+					rv = plugin;
+				}
+				else {
+					psy_audio_machine_dispose(plugin);
+					free(plugin);
+				}
+			}
+			else {
 				rv = 0;
 			}
 		}

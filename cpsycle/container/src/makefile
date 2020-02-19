@@ -1,7 +1,7 @@
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-container.a: $(obj)	
+libcontainer.a: $(obj)	
 	ar rsv $@ $^
 
 %.o : %.c
@@ -9,4 +9,4 @@ container.a: $(obj)
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) container.a
+	rm -f $(obj) libcontainer.a

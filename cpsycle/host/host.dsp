@@ -118,6 +118,10 @@ SOURCE=.\src\config.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\cpuview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\envelopeview.c
 # End Source File
 # Begin Source File
@@ -166,6 +170,10 @@ SOURCE=.\src\interpolatecurveview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\labelpair.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\linesperbeatbar.c
 # End Source File
 # Begin Source File
@@ -187,6 +195,10 @@ SOURCE=.\src\machineview.c
 # Begin Source File
 
 SOURCE=.\src\mainframe.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\midiview.c
 # End Source File
 # Begin Source File
 
@@ -402,6 +414,10 @@ SOURCE=.\src\config.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\cpuview.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\envelopeview.h
 # End Source File
 # Begin Source File
@@ -450,6 +466,10 @@ SOURCE=.\src\interpolatecurveview.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\labelpair.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\linesperbeatbar.h
 # End Source File
 # Begin Source File
@@ -471,6 +491,10 @@ SOURCE=.\src\machineview.h
 # Begin Source File
 
 SOURCE=.\src\mainframe.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\midiview.h
 # End Source File
 # Begin Source File
 

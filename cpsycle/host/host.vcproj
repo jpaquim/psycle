@@ -351,6 +351,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\cpuview.c"
+				>
+			</File>
+			<File
 				RelativePath="src\envelopeview.c"
 				>
 				<FileConfiguration
@@ -597,6 +601,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\labelpair.c"
+				>
+			</File>
+			<File
 				RelativePath="src\linesperbeatbar.c"
 				>
 				<FileConfiguration
@@ -727,6 +735,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\midiview.c"
+				>
 			</File>
 			<File
 				RelativePath="src\navigation.c"
@@ -1734,6 +1746,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\cpuview.h"
+				>
+			</File>
+			<File
 				RelativePath="src\envelopeview.h"
 				>
 			</File>
@@ -1782,6 +1798,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\labelpair.h"
+				>
+			</File>
+			<File
 				RelativePath="src\linesperbeatbar.h"
 				>
 			</File>
@@ -1803,6 +1823,10 @@
 			</File>
 			<File
 				RelativePath="src\mainframe.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\midiview.h"
 				>
 			</File>
 			<File

@@ -9,11 +9,7 @@
 #include <rms.h>
 #include <exclusivelock.h>
 #include <operations.h>
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+#include <string.h>
 
 #define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
@@ -21,11 +17,11 @@
 
 const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
 const int SCOPE_BUF_SIZE = 1 << SCOPE_BUF_SIZE_LOG;
-const COLORREF CLBARDC = 0x1010DC;
-const COLORREF CLBARPEAK = 0xC0C0C0;
-const COLORREF CLLEFT = 0xC06060;
-const COLORREF CLRIGHT = 0x60C060;
-const COLORREF CLBOTH = 0xC0C060;
+const uint32_t CLBARDC = 0x1010DC;
+const uint32_t CLBARPEAK = 0xC0C0C0;
+const uint32_t CLLEFT = 0xC06060;
+const uint32_t CLRIGHT = 0x60C060;
+const uint32_t CLBOTH = 0xC0C060;
 
 static void vuscope_ondestroy(VuScope*);
 static void vuscope_ondraw(VuScope*, psy_ui_Component* sender, psy_ui_Graphics*);
@@ -106,7 +102,6 @@ void vuscope_drawscale(VuScope* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, centerx - 42, rect.top, buf, strlen(buf));
 	sprintf(buf, "RMS");
 	psy_ui_textout(g, centerx + 25, rect.top, buf, strlen(buf));
-
 
 	rect.top = 2*step - step;
 	rect.bottom = rect.top + 1;

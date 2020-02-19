@@ -190,7 +190,8 @@ typedef struct {
    struct TrackerView* view;
    PatternSelection selection;
    int hasselection;
-   int midline;   
+   int midline;
+   int doublemidline;
    int chordbegin;
    int columnresize;
    int dragcolumn;

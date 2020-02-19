@@ -91,6 +91,7 @@ typedef struct {
 	psy_Signal signal_terminal_out;
 	psy_Signal signal_terminal_warning;
 	psy_Signal signal_followsongchanged;
+	psy_Signal signal_dockview;
 	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
 	History history;
@@ -140,8 +141,11 @@ int workspace_showlinenumbersinhex(Workspace*);
 int workspace_showwideinstcolumn(Workspace*);
 int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
+int workspace_showparamviewaswindow(Workspace*);
 void workspace_configchanged(Workspace*, psy_Properties* property,
 	psy_Properties* choice);
+int workspace_wraparound(Workspace*);
+int workspace_doublemidline(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_setpatterneditposition(Workspace*, PatternEditPosition);
@@ -158,7 +162,7 @@ void workspace_followsong(Workspace*);
 void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
-void workspace_selectview(Workspace*, int view, const char* anchor);
+void workspace_selectview(Workspace*, int view, const char* anchor, int option);
 void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);
@@ -175,10 +179,12 @@ const char* workspace_plugins_directory(Workspace*);
 const char* workspace_luascripts_directory(Workspace*);
 const char* workspace_vsts32_directory(Workspace*);
 const char* workspace_vsts64_directory(Workspace*);
+const char* workspace_ladspas_directory(Workspace*);
 const char* workspace_skins_directory(Workspace*);
 const char* workspace_doc_directory(Workspace*);
 const char* workspace_config_directory(Workspace*);
 void workspace_changedefaultfontsize(Workspace*, int size);
 const char* workspace_dialbitmap_path(Workspace*);
+void workspace_dockview(Workspace*, psy_ui_Component* view);
 
 #endif

@@ -49,6 +49,7 @@ typedef struct {
    psy_Table positions;
    psy_ui_Size cpmax;
    uintptr_t numparams;
+   int sizechanged;
 } ParamView;
 
 void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,

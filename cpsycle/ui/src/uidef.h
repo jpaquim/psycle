@@ -140,6 +140,7 @@ int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 	const psy_ui_Rectangle* other);
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
 void psy_ui_rectangle_expand(psy_ui_Rectangle*, int top, int right, int bottom, int left);
+void psy_ui_rectangle_move(psy_ui_Rectangle*, int dx, int dy);
 void psy_ui_error(const char* err, const char* shorterr);
 
 typedef enum {

@@ -12,7 +12,6 @@ static void psy_signal_notify1(psy_Signal*, void* sender, void* param1);
 static void psy_signal_notify2(psy_Signal*, void* sender, void* param1, void* param2);
 static void psy_signal_notify3(psy_Signal*, void* sender, void* param1, void* param2, void* param3);
 static void psy_signal_notify_int(psy_Signal*, void* sender, intptr_t param);
-static psy_Slot* psy_signal_findslot(psy_Signal*, void* context, void* fp);
 
 typedef void (*signalcallback0)(void*, void*);
 typedef void (*signalcallback_int)(void*, void*, intptr_t);
@@ -58,10 +57,13 @@ void psy_signal_connect(psy_Signal* self, void* context, void* fp)
 		psy_Slot* slot;
 		
 		slot = (psy_Slot*) malloc(sizeof(psy_Slot));
-		slot->context = context;
-		slot->fp = fp;
-		slot->prevented = 0;
-		psy_list_append(&self->slots, slot);
+		if (slot) {
+			slot->context = context;
+			slot->fp = fp;
+			slot->abort = 0;
+			slot->prevented = 0;
+			psy_list_append(&self->slots, slot);
+		}
 	}
 }
 
@@ -117,7 +119,7 @@ psy_Slot* psy_signal_findslot(psy_Signal* self, void* context,
 			psy_Slot* slot;
 			
 			slot = (psy_Slot*) p->entry;
-			if (slot->context == context && slot->fp == fp) {
+			if (slot->context == context && slot->fp == fp) {				
 				rv = slot;
 				break;
 			}				
@@ -190,12 +192,17 @@ void psy_signal_notify(psy_Signal* self, void* sender)
 				
 		for (p = self->slots; p != 0; p = q) {			
 			psy_Slot* slot;
+			int abort;
 			
 			slot = (psy_Slot*) p->entry;
+			abort = slot->abort;
 			q = p->next;
 			if (!slot->prevented) {
 				((signalcallback0)slot->fp)(slot->context, sender);
-			}			
+				if (abort) {
+					break;
+				}
+			}		
 		}
 	}
 }

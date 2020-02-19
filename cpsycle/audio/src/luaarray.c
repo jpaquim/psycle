@@ -11,15 +11,6 @@
 
 #include "../../detail/stdint.h"
 
-#define MAKE_EXPORT_SELF(x) static int array_method_ ## x (lua_State* L)\
-{\
-	psy_audio_Array** ud;\
-	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);\
-	psy_audio_array_ ## x (*ud);\
-	lua_pushvalue(L, 1);\
-	return 1;\
-}
-	
 static const char* luaarraybind_meta = "array_meta";
 
 static int psy_audio_luabind_array_new(lua_State*);
@@ -27,13 +18,68 @@ static int psy_audio_luabind_array_gc(lua_State*);
 static int psy_audio_luabind_array_index(lua_State*);
 static int psy_audio_luabind_array_new_index(lua_State*);
 
-MAKE_EXPORT_SELF(sqrt)
-MAKE_EXPORT_SELF(sin)
-MAKE_EXPORT_SELF(cos)
-MAKE_EXPORT_SELF(tan)
-MAKE_EXPORT_SELF(ceil)
-MAKE_EXPORT_SELF(floor)
-MAKE_EXPORT_SELF(fabs)
+int array_method_sqrt(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_sqrt(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int array_method_sin(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_sin(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int array_method_cos(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_cos(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int array_method_tan(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_tan(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int array_method_ceil(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_ceil(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int array_method_floor(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_floor(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int array_method_fabs(lua_State* L)
+{
+	psy_audio_Array** ud;
+	ud = (psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_array_fabs(*ud);
+	lua_pushvalue(L, 1);
+	return 1;
+}
 
 int psy_audio_luabind_array_open(lua_State* L)
 {

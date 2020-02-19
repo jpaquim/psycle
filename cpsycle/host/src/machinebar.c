@@ -48,6 +48,10 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_button_settext(&self->gear, "Gear Rack");
 	psy_ui_button_init(&self->editor, &self->component);
 	psy_ui_button_settext(&self->editor, "Editor");
+	psy_ui_button_init(&self->cpu, &self->component);
+	psy_ui_button_settext(&self->cpu, "CPU");
+	psy_ui_button_init(&self->midi, &self->component);
+	psy_ui_button_settext(&self->midi, "MIDI");
 	BuildMachineBox(self);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		OnMachineBoxSelChange);	

@@ -6,24 +6,14 @@
 #include "pianoroll.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../../detail/portable.h"
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
 
 #define TIMERID_PIANOROLL 640
 
-static void pianoheader_ondraw(PianoHeader*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
+static void pianoheader_ondraw(PianoHeader*, psy_ui_Graphics*);
 void pianoheader_drawruler(PianoHeader*, psy_ui_Graphics*);
 
-static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender,
-	uintptr_t lpb);
-static void pianoroll_ontimer(Pianoroll*, psy_ui_Component* sender, 
-	int timerid);
 static void pianogrid_ondraw(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawevents(Pianogrid*, psy_ui_Graphics*);
@@ -43,6 +33,10 @@ static PatternNode* pianogrid_nextnode(Pianogrid*, PatternNode*,
 	uintptr_t track);
 static void pianogrid_ondestroy(Pianogrid*);
 
+static void pianoroll_ontimer(Pianoroll*, psy_ui_Component* sender,
+	int timerid);
+static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender,
+	uintptr_t lpb);
 static void pianoroll_updatemetrics(Pianoroll*);
 static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
 static int pianorolld_testplaybar(Pianoroll*, psy_dsp_big_beat_t offset);
@@ -50,40 +44,49 @@ static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t width);
 static void pianoroll_invalidateline(Pianoroll*, psy_dsp_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
-static void pianoroll_onsize(Pianoroll*, psy_ui_Component* sender, psy_ui_Size*);
-static void pianoroll_onmousedown(Pianoroll*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void pianoroll_onmouseup(Pianoroll*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void pianoroll_onmousemove(Pianoroll*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void pianoroll_onmousedoubleclick(Pianoroll*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
+static void pianoroll_onsize(Pianoroll*, psy_ui_Size*);
+static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
+static void pianoroll_onmouseup(Pianoroll*, psy_ui_MouseEvent*);
+static void pianoroll_onmousemove(Pianoroll*, psy_ui_MouseEvent*);
+static void pianoroll_onmousedoubleclick(Pianoroll*, psy_ui_MouseEvent*);
 
-static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
+static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Graphics*);
+
+// pianoroll vtable
+static psy_ui_ComponentVtable pianoroll_vtable;
+static int pianoroll_vtable_initialized = 0;
+
+static void pianoroll_vtable_init(Pianoroll* self)
+{
+	if (!pianoroll_vtable_initialized) {
+		pianoroll_vtable = *(self->component.vtable);		
+		pianoroll_vtable.onsize = (psy_ui_fp_onsize) pianoroll_onsize;
+		pianoroll_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			pianoroll_onmousedown;
+		pianoroll_vtable.onmouseup = (psy_ui_fp_onmouseup)
+			pianoroll_onmouseup;
+		pianoroll_vtable.onmousemove = (psy_ui_fp_onmousemove)
+			pianoroll_onmousemove;
+		pianoroll_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+			pianoroll_onmousedoubleclick;
+		pianoroll_vtable_initialized = 1;
+	}
+}
 
 void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {				
+	psy_ui_component_init(&self->component, parent);
+	pianoroll_vtable_init(self);
+	self->component.vtable = &pianoroll_vtable;
 	self->workspace = workspace;	
 	self->opcount = 0;
 	self->syncpattern = 1;
 	self->pattern = 0;
-	self->sequenceentryoffset = 0.f;
-	psy_ui_component_init(&self->component, parent);
+	self->sequenceentryoffset = 0.f;	
 	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		pianoroll_ondestroy);
-	psy_signal_connect(&self->component.signal_size, self, pianoroll_onsize);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		pianoroll_onmousedown);
-	psy_signal_connect(&self->component.signal_mouseup, self,
-		pianoroll_onmouseup);
-	psy_signal_connect(&self->component.signal_mousemove, self,
-		pianoroll_onmousemove);
-	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
-		pianoroll_onmousedoubleclick);
+		pianoroll_ondestroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
 		pianoroll_ontimer);
 	pianoheader_init(&self->header, &self->component, self);
@@ -154,7 +157,7 @@ void pianoroll_invalidateline(Pianoroll* self, psy_dsp_beat_t offset)
 	}
 }
 
-void pianoroll_onsize(Pianoroll* self, psy_ui_Component* sender, psy_ui_Size* size)
+void pianoroll_onsize(Pianoroll* self, psy_ui_Size* size)
 {	
 	int keyboardwidth;
 	int headerheight;
@@ -172,24 +175,20 @@ void pianoroll_onsize(Pianoroll* self, psy_ui_Component* sender, psy_ui_Size* si
 	pianoroll_updatemetrics(self);
 }
 
-void pianoroll_onmousedown(Pianoroll* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void pianoroll_onmousedown(Pianoroll* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_setfocus(&self->grid.component);
 }
 
-void pianoroll_onmouseup(Pianoroll* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void pianoroll_onmouseup(Pianoroll* self, psy_ui_MouseEvent* ev)
 {		
 }
 
-void pianoroll_onmousemove(Pianoroll* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void pianoroll_onmousemove(Pianoroll* self, psy_ui_MouseEvent* ev)
 {	
 }
 
-void pianoroll_onmousedoubleclick(Pianoroll* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void pianoroll_onmousedoubleclick(Pianoroll* self, psy_ui_MouseEvent* ev)
 {	
 }
 
@@ -509,6 +508,7 @@ PatternNode* pianogrid_nextnode(Pianogrid* self, PatternNode* node,
 			if (entry->track == track) {
 				break;
 			}
+			rv = rv->next;
 		}
 	} else {
 		rv = 0;
@@ -529,15 +529,28 @@ psy_dsp_beat_t pianogrid_quantizise(Pianogrid* self, psy_dsp_beat_t offset)
 }
 
 // PianoKeyboard
+// vtable
+static psy_ui_ComponentVtable pianokeyboard_vtable;
+static int pianokeyboard_vtable_initialized = 0;
+
+static void pianokeyboard_vtable_init(PianoKeyboard* self)
+{
+	if (!pianokeyboard_vtable_initialized) {
+		pianokeyboard_vtable = *(self->component.vtable);
+		pianokeyboard_vtable.ondraw = (psy_ui_fp_ondraw)
+			pianokeyboard_ondraw;
+		pianokeyboard_vtable_initialized = 1;
+	}
+}
 
 void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent)
 {	
-	self->dy = 0;
-	self->textheight = 12;	
 	psy_ui_component_init(&self->component, parent);
+	pianokeyboard_vtable_init(self);
+	self->component.vtable = &pianokeyboard_vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_draw, self,
-		pianokeyboard_ondraw);
+	self->dy = 0;
+	self->textheight = 12;		
 }
 
 int isblack(int key)
@@ -549,8 +562,7 @@ int isblack(int key)
 		|| offset == 10);	
 }
 
-void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 {		
 	int keymin = 0;
 	int keymax = 88;
@@ -601,19 +613,32 @@ void pianoroll_setpattern(Pianoroll* self, psy_audio_Pattern* pattern)
 }
 
 // Header
+// pianoroll vtable
+static psy_ui_ComponentVtable pianoheader_vtable;
+static int pianoheader_vtable_initialized = 0;
+
+static void pianoheader_vtable_init(PianoHeader* self)
+{
+	if (!pianoheader_vtable_initialized) {
+		pianoheader_vtable = *(self->component.vtable);		
+		pianoheader_vtable.ondraw = (psy_ui_fp_ondraw)
+			pianoheader_ondraw;		
+		pianoheader_vtable_initialized = 1;
+	}
+}
+
 void pianoheader_init(PianoHeader* self, psy_ui_Component* parent,
 	Pianoroll* roll)
 {
-	self->view = roll;	
-	self->scrollpos = 0;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_draw, self,
-		pianoheader_ondraw);
+	pianoheader_vtable_init(self);
+	self->component.vtable = &pianoheader_vtable;
+	self->view = roll;	
+	self->scrollpos = 0;	
+	psy_ui_component_doublebuffer(&self->component);	
 }
 
-void pianoheader_ondraw(PianoHeader* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void pianoheader_ondraw(PianoHeader* self, psy_ui_Graphics* g)
 {
 	if (self->view->pattern) {
 		pianoheader_drawruler(self, g);

@@ -9,12 +9,6 @@
 #include <math.h>
 #include "../../detail/portable.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
-
 static int TIMERID_VOLSLIDER = 700;
 
 static void volslider_ondraw(VolSlider*, psy_ui_Graphics*);

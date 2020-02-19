@@ -302,6 +302,8 @@ void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t 
 					masteroutput->samples[1],
 					amount);		
 			}
+			bc.output->volumedisplay =
+				psy_audio_buffercontext_volumedisplay(&bc);
 			psy_signal_emit(&master->signal_worked, master, 2,
 				MASTER_INDEX, &bc);
 		}

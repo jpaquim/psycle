@@ -178,7 +178,7 @@ psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory* self, struct psy_
 	rv = psy_ui_win_componentimp_allocinit(
 		component,
 		parent ? parent->imp : 0,
-		winapp->appclass,
+		winapp->appclass,		
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		WS_OVERLAPPEDWINDOW,

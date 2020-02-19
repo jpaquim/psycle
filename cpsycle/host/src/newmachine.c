@@ -10,11 +10,6 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-
 // newmachine
 static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
 	psy_Properties*);
@@ -95,7 +90,7 @@ void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
 
 void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* sender)
 {
-	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, "directories");
+	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, "directories", 0);
 }
 
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
@@ -108,7 +103,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->desclabel, &self->component);
-	psy_ui_label_setstyle(&self->desclabel, WS_CHILD | WS_VISIBLE | SS_CENTER);
+	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);	
 	psy_ui_label_settext(&self->desclabel, 
 		"Select a plugin to view its description.");	
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);	
@@ -270,6 +265,9 @@ int plugintype(psy_Properties* property, char* text)
 		case MACH_VSTFX:
 			strcpy(text, "vst");
 		break;
+		case MACH_LADSPA:
+			strcpy(text, "lad");
+			break;
 		default:
 			strcpy(text, "int");
 		break;
@@ -359,7 +357,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 	if (self->selectedplugin) {
 		psy_signal_emit(&self->signal_selected, self, 1,
 			self->selectedplugin);
-		workspace_selectview(self->workspace, self->calledby, 0);
+		workspace_selectview(self->workspace, self->calledby, 0, 0);
 		psy_ui_mouseevent_stoppropagation(ev);
 	}	
 }
@@ -426,9 +424,13 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 
 	text = psy_properties_readstring(selected, "name", "");
 	strcpy(detail, text);
-	text = psy_properties_readstring(selected, "desc", "");
-	strcat(detail, "  ");
+	// text = psy_properties_readstring(selected, "desc", "");
+	// strcat(detail, "  ");
+	// strcat(detail, text);	
+	text = psy_properties_readstring(selected, "author", "");
+	strcat(detail, "\n(");
 	strcat(detail, text);
+	strcat(detail, ")");
 	psy_ui_label_settext(&self->detail.desclabel, detail);
 }
 

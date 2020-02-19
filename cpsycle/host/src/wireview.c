@@ -13,17 +13,19 @@ static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView* self);
 static void wireview_initbottomgroup(WireView*);
-static void wireview_ondraw(WireView*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void wireview_onsongchanged(WireView*, Workspace*);
 static void wireview_connectmachinessignals(WireView*, Workspace*);
 static void wireview_ondescribevolume(WireView*, psy_ui_Slider*, char* txt);
 static void wireview_ontweakvolume(WireView*, psy_ui_Slider*, float value);
 static void wireview_onvaluevolume(WireView*, psy_ui_Slider*, float* value);
 static void wireview_ondeleteconnection(WireView*, psy_ui_Component* sender);
+static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
 static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 
 static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
-static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size* size);
+static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size*);
+
+
 
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
@@ -99,10 +101,14 @@ void wireview_initbottomgroup(WireView* self)
 	psy_ui_component_enablealign(&self->bottomgroup);
 	psy_ui_button_init(&self->deletewire, &self->bottomgroup);
 	psy_ui_button_settext(&self->deletewire, "Delete Connection");
-	psy_ui_component_doublebuffer(&self->deletewire.component);	
+	psy_ui_component_setalign(&self->deletewire.component, psy_ui_ALIGN_LEFT);
 	psy_signal_connect(&self->deletewire.signal_clicked, self,
 		wireview_ondeleteconnection);
-	psy_ui_component_setalign(&self->deletewire.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_init(&self->addeffect, &self->bottomgroup);
+	psy_ui_button_settext(&self->addeffect, "Add Effect");
+	psy_ui_component_setalign(&self->addeffect.component, psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->addeffect.signal_clicked, self,
+		wireview_onaddeffect);
 }
 
 void wireview_onsongchanged(WireView* self, Workspace* workspace)
@@ -155,6 +161,13 @@ void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 	if (self->workspace && self->workspace->song) {		
 		machines_disconnect(&self->workspace->song->machines, self->wire.src,
 			self->wire.dst);		
+	}
+}
+
+void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
+{
+	if (self->workspace && self->workspace->song) {
+		workspace_selectview(self->workspace, TABPAGE_MACHINEVIEW, "NEWMACHINE", 20);
 	}
 }
 

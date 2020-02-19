@@ -22,6 +22,7 @@ typedef struct {
 	VuScope vuscope;
 	ChannelMappingView channelmappingview;
 	psy_ui_Component bottomgroup;
+	psy_ui_Button addeffect;
 	psy_ui_Button deletewire;
 	psy_audio_Wire wire;
 	Workspace* workspace;

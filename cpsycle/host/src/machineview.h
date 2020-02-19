@@ -77,9 +77,11 @@ typedef struct {
 } MachineUi;
 
 enum {	
+	MACHINEWIREVIEW_DRAG_NONE,
 	MACHINEWIREVIEW_DRAG_MACHINE,
 	MACHINEWIREVIEW_DRAG_NEWCONNECTION,
-	MACHINEWIREVIEW_DRAG_CHANGECONNECTION,
+	MACHINEWIREVIEW_DRAG_LEFTCONNECTION,
+	MACHINEWIREVIEW_DRAG_RIGHTCONNECTION,
 	MACHINEWIREVIEW_DRAG_PAN,
 };
 
@@ -105,6 +107,7 @@ typedef struct {
 	psy_ui_Edit editname;
 	int firstsize;
 	int randominsert;
+	int addeffect;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,

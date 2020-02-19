@@ -46,7 +46,8 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
 	vtable_init(self);
-	self->component.vtable = &vtable;	
+	self->component.vtable = &vtable;
+	self->charnumber = 0;
 }
 
 void ondestroy(psy_ui_ComboBox* self, psy_ui_Component* sender)

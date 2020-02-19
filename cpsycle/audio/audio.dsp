@@ -196,6 +196,10 @@ SOURCE=.\src\kbddriver.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\ladspaplugin.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\library.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -640,6 +644,14 @@ SOURCE=.\src\instruments.h
 # Begin Source File
 
 SOURCE=.\src\kbddriver.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\ladspa.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\ladspaplugin.h
 # End Source File
 # Begin Source File
 

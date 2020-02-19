@@ -13,9 +13,10 @@
 
 #define PSYCLE_TK_WIN32 1
 #define PSYCLE_TK_CURSES 2
+#define PSYCLE_TK_XT 3
 
 #if defined(DIVERSALIS__OS__UNIX)
-#define PSYCLE_USE_TK PSYCLE_TK_CURSES
+#define PSYCLE_USE_TK PSYCLE_TK_XT
 #elif defined(DIVERSALIS__OS__MICROSOFT)
 #define PSYCLE_USE_TK PSYCLE_TK_WIN32
 #else
@@ -37,6 +38,11 @@
 #define PSYCLE_LUASCRIPTS_DEFAULT_DIR PSYCLE_USER_DIR "\\LuaScripts"
 #define PSYCLE_VSTS32_DEFAULT_DIR PSYCLE_USER_DIR "\\VstPlugins"
 #define PSYCLE_VSTS64_DEFAULT_DIR PSYCLE_USER_DIR "\\Vst64Plugins"
+#if defined __unix__ || defined __APPLE__
+#define PSYCLE_LADSPAS_DEFAULT_DIR "/usr/lib/ladspa/"
+#else
+#define PSYCLE_LADSPAS_DEFAULT_DIR "C:\\Program Files (x86)\\Audacity\\Plug-Ins"
+#endif
 #define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "\\Skins"
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "\\Docs"
 

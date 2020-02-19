@@ -33,6 +33,8 @@
 #include "playbar.h"
 #include "playposbar.h"
 #include "vubar.h"
+#include "cpuview.h"
+#include "midiview.h"
 #include "songbar.h"
 #include "helpview.h"
 #include "stepbox.h"
@@ -59,6 +61,7 @@ typedef struct {
 	PlayBar playbar;
 	PlayPosBar playposbar;
 	TrackScopeView trackscopeview;
+	psy_ui_Component paramviews;
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
 	MachineView machineview;
@@ -72,6 +75,8 @@ typedef struct {
 	Gear gear;
 	PluginEditor plugineditor;
 	VuBar vubar;
+	CPUView cpuview;
+	MidiView midiview;
 	psy_ui_Component statusbar;
 	psy_ui_Notebook viewtabbars;
 	psy_ui_Notebook viewbars;

@@ -17,7 +17,6 @@
 #include <commctrl.h> // common control header
 
 int iDeltaPerLine = 120;
-static int mousetracking = 0;
 extern psy_Table menumap;
 extern psy_ui_App app;
 
@@ -136,6 +135,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				if (imp->component) {
 					psy_ui_component_dispose(imp->component);
 				}
+				psy_table_remove(&winapp->selfmap, (uintptr_t) hwnd);
 			break;
 			case WM_DESTROY:
 				if (imp->component && imp->component->signal_destroy.slots) {
@@ -339,6 +339,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_signal_emit(&imp->component->signal_destroyed, imp->component, 0);
 				}
 				psy_ui_component_dispose(imp->component);
+				psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 				return 0;
 			break;
 			case WM_DESTROY:
@@ -525,7 +526,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			break;
 			case WM_MOUSEMOVE:
-				if (!mousetracking) {
+				if (!imp->component->mousetracking) {
 					TRACKMOUSEEVENT tme;
 					
 					imp->component->vtable->onmouseenter(imp->component);
@@ -535,7 +536,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					tme.dwHoverTime = 200;
 					tme.hwndTrack = hwnd;
 					if (_TrackMouseEvent(&tme)) {
-						mousetracking = 1;
+						imp->component->mousetracking = 1;
 					} 
 					return 0;
 				}								
@@ -629,7 +630,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_MOUSELEAVE:
 			{
-				mousetracking = 0;
+				imp->component->mousetracking = 0;
 				imp->component->vtable->onmouseleave(imp->component);
 				psy_signal_emit(&imp->component->signal_mouseleave, imp->component, 0);
 				return 0;

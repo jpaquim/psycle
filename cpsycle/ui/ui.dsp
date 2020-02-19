@@ -123,6 +123,14 @@ SOURCE=.\src\uicursescomponentimp.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\uicursesdef.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesgraphicsimp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\uicursesimpfactory.c
 # End Source File
 # Begin Source File
@@ -289,6 +297,70 @@ SOURCE=.\src\uiwinopendialogimp.c
 
 SOURCE=.\src\uiwinsavedialogimp.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\Uixtapp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtbitmapimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcheckboximp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcolordialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcomboboximp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcomponentimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixteditimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtfolderdialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtfontdialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtfontimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtgraphicsimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtimpfactory.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtlabelimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtlistboximp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtopendialogimp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtsavedialogimp.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -328,6 +400,14 @@ SOURCE=.\src\uicomponent.h
 # Begin Source File
 
 SOURCE=.\src\uicursescomponentimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesdef.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uicursesgraphicsimp.h
 # End Source File
 # Begin Source File
 
@@ -496,6 +576,70 @@ SOURCE=.\src\uiwinopendialogimp.h
 # Begin Source File
 
 SOURCE=.\src\uiwinsavedialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\Uixtapp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtbitmapimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcheckboximp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcolordialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcomboboximp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtcomponentimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixteditimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtfolderdialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtfontdialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtfontimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtgraphicsimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtimpfactory.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtlabelimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtlistboximp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtopendialogimp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\uixtsavedialogimp.h
 # End Source File
 # End Group
 # End Target

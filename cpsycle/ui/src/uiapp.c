@@ -12,6 +12,9 @@
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 #include <curses.h>
 #include "uicursesimpfactory.h"
+#elif PSYCLE_USE_TK == PSYCLE_TK_XT
+#include "uixtapp.h"
+#include "uixtimpfactory.h"
 #else
 	#error "Platform not supported"
 #endif
@@ -39,6 +42,10 @@ void ui_app_initplatform(psy_ui_App* self, uintptr_t instance)
 	initscr();
 	refresh();
 	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_curses_impfactory_allocinit();
+#elif PSYCLE_USE_TK == PSYCLE_TK_XT
+	self->platform = (psy_ui_XtApp*) malloc(sizeof(psy_ui_XtApp));
+	psy_ui_xtapp_init(app.platform, 0);
+	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_xt_impfactory_allocinit();
 #else
 	#error "Platform not supported"
 #endif
@@ -52,6 +59,8 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	psy_ui_winapp_dispose(self->platform);
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 	endwin();
+#elif PSYCLE_USE_TK == PSYCLE_TK_XT
+	psy_ui_xtapp_dispose(self->platform);
 #else
 #error "Platform not supported"
 #endif
@@ -70,7 +79,9 @@ int psy_ui_app_run(psy_ui_App* self)
 {
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	return psy_ui_winapp_run((psy_ui_WinApp*)self->platform);
-#endif	
+#elif PSYCLE_USE_TK == PSYCLE_TK_XT
+	return psy_ui_xtapp_run((psy_ui_XtApp*)self->platform);
+#endif
 }
 
 void psy_ui_app_stop(psy_ui_App* self)

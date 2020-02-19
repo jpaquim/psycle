@@ -34,6 +34,8 @@ static void workspace_makeparamview(Workspace*, psy_Properties*);
 static void workspace_makeparamtheme(Workspace*, psy_Properties*);
 static void workspace_makekeyboard(Workspace*);
 static void workspace_makedirectories(Workspace*);
+static void workspace_makedirectory(Workspace*, const char* key,
+	const char* label, const char* defaultdir);
 static void workspace_makenotes(Workspace*);
 static void workspace_makeinputoutput(Workspace*);
 static void workspace_makemidi(Workspace*);
@@ -185,6 +187,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_terminal_out);
 	psy_signal_init(&self->signal_terminal_warning);
 	psy_signal_init(&self->signal_followsongchanged);
+	psy_signal_init(&self->signal_dockview);
 }
 
 void workspace_dispose(Workspace* self)
@@ -233,6 +236,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_terminal_out);
 	psy_signal_dispose(&self->signal_terminal_warning);
 	psy_signal_dispose(&self->signal_followsongchanged);
+	psy_signal_dispose(&self->signal_dockview);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -478,6 +482,9 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 		psy_properties_append_bool(pvc, "centercursoronscreen", 1),
 		"Center cursor on screen");
 	psy_properties_settext(
+		psy_properties_append_bool(pvc, "doublemidline", 0),
+		"Double Midline Height");
+	psy_properties_settext(
 		psy_properties_append_int(pvc, "beatsperbar", 4, 1, 16),
 		"Bar highlighting: (beats/bar)");
 	psy_properties_settext(
@@ -632,7 +639,7 @@ void workspace_makepatternviewtheme(Workspace* self, psy_Properties* view)
 		psy_properties_sethint(psy_properties_append_int(self->patternviewtheme,
 			"pvc_midline", 0x007D6100, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
-			"Midline Right");
+			"Midline Right");	
 }
 
 void workspace_makemachineview(Workspace* self, psy_Properties* visual)
@@ -751,7 +758,10 @@ void workspace_makeparamview(Workspace* self, psy_Properties* visual)
 	psy_properties_settext(paramview, "Native Machine Parameter Window");
 	psy_properties_settext(
 		psy_properties_append_action(paramview, "loadcontrolskin"),
-		"Load Dial Bitmap");	
+		"Load Dial Bitmap");
+	psy_properties_settext(
+		psy_properties_append_bool(paramview, "showaswindow", 1),
+		"Show As Window");
 	workspace_makeparamtheme(self, paramview);
 }
 
@@ -830,54 +840,31 @@ void workspace_makedirectories(Workspace* self)
 	self->directories = psy_properties_settext(
 		psy_properties_create_section(self->config, "directories"),
 		"Directories");
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"songs",
-			PSYCLE_SONGS_DEFAULT_DIR),
-		"Song directory"),
-		PSY_PROPERTY_HINT_EDITDIR);
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"samples",
-			PSYCLE_SAMPLES_DEFAULT_DIR),
-		"Samples directory"),
-		PSY_PROPERTY_HINT_EDITDIR);
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"plugins",
-			PSYCLE_PLUGINS_DEFAULT_DIR),
-		"Plug-in directory"),
-		PSY_PROPERTY_HINT_EDITDIR);
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"luascripts",
-			PSYCLE_LUASCRIPTS_DEFAULT_DIR),
-		"Lua scripts directory"),
-		PSY_PROPERTY_HINT_EDITDIR);
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"vsts32",			
-			PSYCLE_VSTS32_DEFAULT_DIR),
-		"VST directories"),
-		PSY_PROPERTY_HINT_EDITDIR);
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"vsts64",			
-			PSYCLE_VSTS64_DEFAULT_DIR),
-		"VST directories"),
-		PSY_PROPERTY_HINT_EDITDIR);
-	psy_properties_sethint(psy_properties_settext(
-		psy_properties_append_string(
-			self->directories,
-			"skin",			
-			"C:\\Programme\\Psycle\\Skins"),
-		"Skin directory"),
+	workspace_makedirectory(self, "songs", "Song directory",
+		PSYCLE_SONGS_DEFAULT_DIR);	
+	workspace_makedirectory(self, "samples", "Samples directory",
+		PSYCLE_SAMPLES_DEFAULT_DIR);	
+	workspace_makedirectory(self, "plugins", "Plug-in directory",
+		PSYCLE_PLUGINS_DEFAULT_DIR);
+	workspace_makedirectory(self, "luascripts", "Lua scripts directory",
+		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
+	workspace_makedirectory(self, "vsts32", "VST directories",
+		PSYCLE_VSTS32_DEFAULT_DIR);
+	workspace_makedirectory(self, "vsts64", "VST64 directories",
+		PSYCLE_VSTS64_DEFAULT_DIR);
+	workspace_makedirectory(self, "ladspas", "LADSPA directories",
+		PSYCLE_LADSPAS_DEFAULT_DIR);
+	workspace_makedirectory(self, "skin", "Skin directory",
+		"C:\\Programme\\Psycle\\Skins");	
+}
+
+void workspace_makedirectory(Workspace* self, const char* key,
+	const char* label, const char* defaultdir)
+{
+	psy_properties_sethint(
+		psy_properties_settext(
+			psy_properties_append_string(self->directories, key, defaultdir),
+			label),
 		PSY_PROPERTY_HINT_EDITDIR);
 }
 
@@ -904,9 +891,11 @@ void workspace_makedriverlist(Workspace* self)
 #if defined(_DEBUG)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
 	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
+	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Debug\\wasapi.dll");
 #else
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
-	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");	
+	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");
+	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Release\\wasapi.dll");
 #endif
 }
 
@@ -1285,9 +1274,19 @@ int workspace_wraparound(Workspace* self)
 	return psy_properties_bool(self->config, "visual.patternview.wraparound", 1);
 }
 
+int workspace_doublemidline(Workspace* self)
+{
+	return psy_properties_bool(self->config, "visual.patternview.doublemidline", 1);
+}
+
 int workspace_showmachineindexes(Workspace* self)
 {
 	return psy_properties_bool(self->config, "visual.machineview.drawmachineindexes", 1);
+}
+
+int workspace_showparamviewaswindow(Workspace* self)
+{
+	return psy_properties_bool(self->config, "visual.paramview.showaswindow", 1);
 }
 
 void workspace_newsong(Workspace* self)
@@ -1651,10 +1650,10 @@ void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 	psy_signal_emit(&self->signal_showparameters, self, 1, machineslot);
 }
 
-void workspace_selectview(Workspace* self, int view, const char* anchor)
+void workspace_selectview(Workspace* self, int view, const char* anchor, int option)
 {
 	self->currview = view;
-	psy_signal_emit(&self->signal_viewselected, self, 2, view, anchor);
+	psy_signal_emit(&self->signal_viewselected, self, 3, view, anchor, option);
 }
 
 void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak, float value)
@@ -1719,7 +1718,7 @@ void workspace_updatenavigation(Workspace* self)
 	entry = (HistoryEntry*) (self->currnavigation->entry);
 	self->navigating = 1;
 	if (self->currview != entry->viewid) {
-		workspace_selectview(self, entry->viewid, 0);
+		workspace_selectview(self, entry->viewid, 0, 0);
 	}
 	if (entry->sequenceentryid != -1 &&
 			self->sequenceselection.editposition.trackposition.tracknode) {
@@ -1767,6 +1766,12 @@ const char* workspace_vsts64_directory(Workspace* self)
 {
 	return psy_properties_readstring(self->directories, "vsts64",
 		PSYCLE_VSTS64_DEFAULT_DIR);
+}
+
+const char* workspace_ladspa_directory(Workspace* self)
+{
+	return psy_properties_readstring(self->directories, "ladspas",
+		PSYCLE_LADSPAS_DEFAULT_DIR);
 }
 
 const char* workspace_skins_directory(Workspace* self)
@@ -1900,4 +1905,9 @@ void machinecallback_output(Workspace* self, const char* text)
 const char* workspace_dialbitmap_path(Workspace* self)
 {
 	return self->dialbitmappath;
+}
+
+void workspace_dockview(Workspace* self, psy_ui_Component* view)
+{
+	psy_signal_emit(&self->signal_dockview, self, 1, view);
 }
