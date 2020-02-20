@@ -114,7 +114,7 @@ void psy_library_dispose(psy_Library* self)
 	self->path = 0;
 }
 
-#elif defined(DIVERSALIS_OS_APPLE)
+#elif defined(DIVERSALIS__OS__APPLE)
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -127,6 +127,12 @@ void psy_library_init(psy_Library* self)
 void psy_library_load(psy_Library* self, const char* path)
 {		
 	self->module = CFBundleCreate (NULL, path);	
+}
+
+void psy_library_unload(psy_Library* self)
+{
+	psy_library_dispose(self);
+	psy_library_init(self);
 }
 
 void* psy_library_functionpointerd(psy_Library* self, const char* name)
@@ -144,9 +150,10 @@ void psy_library_dispose(psy_Library* self)
 	}
 }
 
-#elif defined(DIVERSALIS_OS_LINUX)
+#elif defined(DIVERSALIS__OS__LINUX)
 
 #include <dlfcn.h>
+
 
 void psy_library_init(psy_Library* self)
 {
@@ -161,6 +168,12 @@ void psy_library_load(psy_Library* self, const char* path)
 	if (self->module == 0) {
 		self->err = dlerror();
 	}	
+}
+
+void psy_library_unload(psy_Library* self)
+{
+	psy_library_dispose(self);
+	psy_library_init(self);
 }
 
 void* psy_library_functionpointer(psy_Library* self, const char* name)

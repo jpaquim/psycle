@@ -15,6 +15,7 @@
 #include <conio.h>
 #else
 #include "coniotermios.h"
+#define _MAX_PATH 4096
 #endif
 #include <dir.h>
 

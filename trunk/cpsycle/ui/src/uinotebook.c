@@ -58,8 +58,11 @@ void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
 	}
 	psy_list_free(q);		
 	if (self->component.align == psy_ui_ALIGN_LEFT) {
-		psy_ui_component_align(psy_ui_component_parent(psy_ui_notebook_base(
-			self)));
+        if (psy_ui_component_parent(psy_ui_notebook_base(
+                self))) {
+            psy_ui_component_align(psy_ui_component_parent(psy_ui_notebook_base(
+                self)));
+        }        
 	}
 }
 

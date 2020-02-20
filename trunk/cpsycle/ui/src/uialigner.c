@@ -22,9 +22,6 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	psy_List* wrap = 0;	
 	psy_ui_Component* client = 0;
 		
-	if (self->component->debugflag == 65) {
-		self = self;
-	}
 	size = psy_ui_component_size(self->component);
 	tm = psy_ui_component_textmetric(self->component);
 	cp_bottomright.x = size.width;

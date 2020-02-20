@@ -13,6 +13,11 @@
 #include <uifontdialog.h>
 #include <uicolordialog.h>
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
 	psy_ui_Graphics*);

@@ -6,7 +6,7 @@
 
 #include "vstplugin.h"
 #if defined(__GNUC__)
-#define _inline inline
+#define _inline static inline
 #endif
 #include "aeffectx.h"
 #include <stdlib.h>

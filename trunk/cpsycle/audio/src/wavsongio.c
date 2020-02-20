@@ -54,7 +54,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 		psy_audio_Machine* machine;
 
 		machine = machinefactory_makemachine(self->song->machinefactory,
-			MACH_SAMPLER, "");
+			MACH_SAMPLER, "", 0);
 		if (machine) {			
 			psy_Properties* machinesproperties;
 			psy_Properties* machineproperties;

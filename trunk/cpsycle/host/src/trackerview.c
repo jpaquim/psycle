@@ -21,6 +21,11 @@
 #include <assert.h>
 
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 #define TIMERID_TRACKERVIEW 600
 static const psy_dsp_big_beat_t epsilon = 0.0001;

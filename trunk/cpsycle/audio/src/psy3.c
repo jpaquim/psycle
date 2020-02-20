@@ -1527,12 +1527,13 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index, psy
 	psyfile_read(self->file, &type,sizeof(type));
 	psyfile_readstring(self->file, modulename, 256);
 	plugincatcher_catchername(self->song->machinefactory->catcher,
-		modulename, plugincatchername);	
+		modulename, plugincatchername);
+	// todo shellidx;
 	machine = machinefactory_makemachine(self->song->machinefactory, type,
-		plugincatchername);
+		plugincatchername, 0);
 	if (!machine) {
 		machine = machinefactory_makemachine(self->song->machinefactory, MACH_DUMMY, 
-			plugincatchername);
+			plugincatchername, 0);
 		type = MACH_DUMMY;		
 	}	
 	{

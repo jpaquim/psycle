@@ -11,7 +11,7 @@
 #include "patternproperties.h"
 #include "trackerview.h"
 #include "pianoroll.h"
-#include "StepBox.h"
+#include "stepbox.h"
 #include "workspace.h"
 
 typedef struct {

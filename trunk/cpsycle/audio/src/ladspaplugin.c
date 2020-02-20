@@ -253,7 +253,7 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 }
 
 void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, MachineCallback callback,
-	const char* path)
+	const char* path, uintptr_t shellidx)
 {
 	LADSPA_Descriptor_Function pfDescriptorFunction;
 
@@ -274,7 +274,7 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, MachineCallback c
 	} else {
 		/*Step three: Get the descriptor of the selected plugin (a shared library can have
 		several plugins*/
-		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(0); //key.index()); // ?
+		const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(shellidx);
 		if (psDescriptor) {
 			LADSPA_Handle handle = instantiate(psDescriptor);
 			if (handle) {
@@ -292,9 +292,8 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, MachineCallback c
 					0, // short plugversion,
 					MACH_LADSPA,
 					path, //const char* modulepath,
-					0);
-				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.
-				// pinfo.identifier = index;				
+					shellidx);
+				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.						
 				psy_audio_machine_seteditname(psy_audio_ladspaplugin_base(self),
 					self->plugininfo->ShortName);
 				prepareparams(self);
@@ -335,12 +334,12 @@ psy_audio_Machine* clone(psy_audio_LadspaPlugin* self)
 	rv = malloc(sizeof(psy_audio_LadspaPlugin));
 	if (rv) {
 		psy_audio_ladspaplugin_init(rv, self->custommachine.machine.callback,
-			self->library.path);
+			self->library.path, self->plugininfo->shellidx);
 	}
 	return rv ? &rv->custommachine.machine : 0;
 }
 
-int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info)
+int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info, uintptr_t shellidx)
 {
 	int rv = 0;
 
@@ -353,7 +352,7 @@ int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info)
 		pfDescriptorFunction = (LADSPA_Descriptor_Function)
 			psy_library_functionpointer(&library, "ladspa_descriptor");		
 		if (pfDescriptorFunction != NULL) {
-			const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(0);
+			const LADSPA_Descriptor* psDescriptor = pfDescriptorFunction(shellidx);
 			if (psDescriptor != NULL) {
 				machineinfo_set(info,
 					psDescriptor->Maker,
@@ -361,14 +360,13 @@ int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info)
 					0, // int flags,
 					MACHMODE_FX, //int mode,
 					psDescriptor->Name, // const char* name,
-					psDescriptor->Name, //const char* shortname,
+					psDescriptor->Label, //const char* shortname,
 					1, // short apiversion,
 					0, // short plugversion,
 					MACH_LADSPA, // int type,
 					path, //const char* modulepath,
-					0);																
-				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.
-				// pinfo.identifier = index;						
+					shellidx);
+				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.										
 				rv = 1;
 			}
 		}

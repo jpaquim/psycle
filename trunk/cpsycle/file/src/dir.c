@@ -110,6 +110,11 @@ int wildcardmatch(const char *pszString, const char *pszMatch)
 	return !*pszMatch;
 }
 
+const char* psy_dir_config(void)
+{
+    return "/home/user";
+}
+
 #elif defined(DIVERSALIS__OS__MICROSOFT)
 
 #include <direct.h>
@@ -381,3 +386,5 @@ void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext)
 		ext = '\0';
 	}
 }
+
+

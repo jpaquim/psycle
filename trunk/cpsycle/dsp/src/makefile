@@ -3,7 +3,7 @@ inc = -I../../container/src -I../../../diversalis/src
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-dsp.a: $(obj)
+libdsp.a: $(obj)
 	ar rsv $@ $^
 
 %.o: %.c
@@ -11,4 +11,4 @@ dsp.a: $(obj)
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) dsp.a
+	rm -f $(obj) libdsp.a

@@ -8,7 +8,9 @@
 #define EXPORT __declspec (dllexport)
 #else
 #define EXPORT
+#ifndef __x86_64
 #define __cdecl __attribute__((__cdecl__))
+#endif
 #endif
 #endif
 
@@ -19,10 +21,10 @@
 #include <signal.h>
 
 typedef struct {
-	int Version;							// VERSION
-	int Flags;								// Flags	
-	char const *Name;						// "Windows MME Driver"
-	char const *ShortName;					// "MME"	
+	int Version;							
+	int Flags;								
+	char const *Name;				
+	char const *ShortName;
 } EventDriverInfo;
 
 
@@ -61,8 +63,16 @@ typedef struct psy_EventDriver {
 
 typedef psy_EventDriver* (__cdecl *pfneventdriver_create)(void);
 
+#ifndef __x86_64
 EXPORT psy_EventDriver* __cdecl eventdriver_create(void);
+#else
+psy_EventDriver* eventdriver_create(void);
+#endif
 
+#ifndef __x86_64
 EXPORT EventDriverInfo const * __cdecl GetPsycleEventDriverInfo(void);
+#else
+EventDriverInfo const * GetPsycleEventDriverInfo(void);
+#endif
 
 #endif
