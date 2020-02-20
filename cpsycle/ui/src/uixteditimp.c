@@ -150,18 +150,19 @@ void psy_ui_xt_editimp_init(psy_ui_xt_EditImp* self,
 	psy_ui_Component* component,
 	psy_ui_ComponentImp* parent)
 {	
-	//psy_ui_xt_componentimp_init(&self->xt_component_imp,
-		//component,
-		//parent,
-		//TEXT("EDIT"),
-		//0, 0, 100, 20,		
+	psy_ui_xt_componentimp_init(&self->xt_component_imp,
+		component,
+		parent,
+		"EDIT",
+		0, 0, 100, 20,
+        0,
 		//WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT,
-		//1);
-	//imp_vtable_init();
-	//self->imp.component_imp.vtable = &vtable;
-	//psy_ui_editimp_init(&self->imp);
-	//editimp_imp_vtable_init(self);
-	//self->imp.vtable = &editimp_vtable;
+		1);
+	imp_vtable_init();
+	self->imp.component_imp.vtable = &vtable;
+	psy_ui_editimp_init(&self->imp);
+	editimp_imp_vtable_init(self);
+	self->imp.vtable = &editimp_vtable;
 	//psy_signal_connect(&self->xt_component_imp.imp.signal_command, component, oncommand);
 }
 
@@ -169,18 +170,19 @@ void psy_ui_xt_editimp_multiline_init(psy_ui_xt_EditImp* self,
 	psy_ui_Component* component,
 	psy_ui_ComponentImp* parent)
 {
-	//psy_ui_xt_componentimp_init(&self->xt_component_imp,
-		//component,
-		//parent,
-		//TEXT("EDIT"),
-		//0, 0, 100, 20,
+	psy_ui_xt_componentimp_init(&self->xt_component_imp,
+		component,
+		parent,
+		"EDIT",
+		0, 0, 100, 20,
 		//WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT,
-		//1);
-	//imp_vtable_init();
-	//self->imp.component_imp.vtable = &vtable;
-	//psy_ui_editimp_init(&self->imp);
-	//editimp_imp_vtable_init(self);
-	//self->imp.vtable = &editimp_vtable;
+        0,
+		1);
+	imp_vtable_init();
+	self->imp.component_imp.vtable = &vtable;
+	psy_ui_editimp_init(&self->imp);
+	editimp_imp_vtable_init(self);
+	self->imp.vtable = &editimp_vtable;
 	//psy_signal_connect(&self->xt_component_imp.imp.signal_command, component, oncommand);
 }
 

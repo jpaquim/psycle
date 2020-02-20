@@ -15,6 +15,7 @@
 #include "uiapp.h"
 #include "uixtapp.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include "../../detail/portable.h"
 
 #include <Xm/BulletinB.h>
@@ -360,12 +361,18 @@ int dev_visible(psy_ui_xt_ComponentImp* self)
 
 void dev_move(psy_ui_xt_ComponentImp* self, int left, int top)
 {
-	XtMoveWidget(self->hwnd, left, top);
+    if (self->hwnd) {
+        printf("move left: %d top: %d\n", left, top);
+        XtMoveWidget(self->hwnd, left, top);
+    }
 }
 
 void dev_resize(psy_ui_xt_ComponentImp* self, int width, int height)
 {
-    XtResizeWidget(self->hwnd, width, height, 0);	
+    if (self->hwnd && height > 0 && width > 0) {
+        printf("resize width: %d height: %d\n", width, height);
+        XtResizeWidget(self->hwnd, width, height, 0);
+    }
 }
 
 void dev_clientresize(psy_ui_xt_ComponentImp* self, int width, int height)
@@ -409,42 +416,54 @@ void dev_setposition(psy_ui_xt_ComponentImp* self, int x, int y, int width,
 	int height)
 {
      XtMoveWidget(self->hwnd, x, y);
-     XtResizeWidget(self->hwnd, width, height, 0);	
+     if (self->hwnd && height > 0 && width > 0) {
+        XtResizeWidget(self->hwnd, width, height, 0);	
+     }
 }
 
 psy_ui_Size dev_size(psy_ui_xt_ComponentImp* self)
-{
+{    
 	psy_ui_Size rv;
-    
-    Window root;
-    unsigned int temp;
-    unsigned int width;
-    unsigned int height;
-    psy_ui_XtApp* xtapp;		
+ 
+    if (self->hwnd) {
+        Window root;
+        unsigned int temp;
+        unsigned int width = 0;
+        unsigned int height = 0;
+        psy_ui_XtApp* xtapp;		
 
-    xtapp = (psy_ui_XtApp*) app.platform;        
-    XGetGeometry(xtapp->dpy, (Window)self->hwnd, &root, &temp, &temp,
-            &width, &height, &temp, &temp);	
-	rv.width = width;
-	rv.height = height;
+        xtapp = (psy_ui_XtApp*) app.platform;        
+        // XGetGeometry(xtapp->dpy, (Window)self->hwnd, &root, &temp, &temp,
+        //        &width, &height, &temp, &temp);	
+        rv.width = width;
+        rv.height = height;
+    } else {
+        rv.width = 0;
+        rv.height = 0;
+    }
 	return rv;
 }
 
 psy_ui_Size dev_framesize(psy_ui_xt_ComponentImp* self)
 {
 	psy_ui_Size rv;
-    
-    Window root;
-    unsigned int temp;
-    unsigned int width;
-    unsigned int height;
-    psy_ui_XtApp* xtapp;		
+ 
+    if (self->hwnd) {   
+        Window root;
+        unsigned int temp;
+        unsigned int width = 0;
+        unsigned int height = 0;
+        psy_ui_XtApp* xtapp;		
 
-    xtapp = (psy_ui_XtApp*) app.platform;        
-    XGetGeometry(xtapp->dpy, (Window)self->hwnd, &root, &temp, &temp,
-            &width, &height, &temp, &temp);	
-	rv.width = width;
-	rv.height = height;
+        xtapp = (psy_ui_XtApp*) app.platform;        
+        //XGetGeometry(xtapp->dpy, (Window)self->hwnd, &root, &temp, &temp,
+        //       &width, &height, &temp, &temp);	
+        rv.width = width;
+        rv.height = height;
+    } else {
+        rv.width = 0;
+        rv.height = 0;
+    }
 	return rv;
 }
 
@@ -898,6 +917,7 @@ void dev_setbackgroundcolor(psy_ui_xt_ComponentImp* self, uint32_t color)
 
 void dev_settitle(psy_ui_xt_ComponentImp* self, const char* title)
 {
+    XtVaSetValues(self->hwnd, XmNtitle, title, NULL);
 //	SetWindowText(self->hwnd, title);
 }
 

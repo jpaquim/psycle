@@ -17,6 +17,11 @@
 #include <uiwincomponentimp.h>
 #include <dir.h>
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);

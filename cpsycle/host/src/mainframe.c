@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "mainframe.h"
 #include "cmdsgeneral.h"
@@ -13,11 +14,12 @@
 #include <dir.h>
 #include <uiapp.h>
 
+#if defined DIVERSALIS__OS__MICROSOFT
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-
+#endif
 
 #define TIMERID_MAINFRAME 20
 
@@ -523,8 +525,12 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component,
 		EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYUP;
+#if defined DIVERSALIS__OS__MICROSOFT_        
 		input.param1 = encodeinput(ev->keycode, GetKeyState(psy_ui_KEY_SHIFT) < 0,
 			GetKeyState(psy_ui_KEY_CONTROL) < 0);
+#else
+        input.param1 = encodeinput(ev->keycode, ev->shift, ev->ctrl);
+#endif          
 		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);
 		kbd->write(kbd, input);

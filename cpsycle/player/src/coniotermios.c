@@ -17,15 +17,15 @@ void reset_terminal_mode(void)
 	tcsetattr(0, TCSANOW, &orig_termios);
 }
 
-void set_conio_termial_mode(void)
+void set_conio_terminal_mode(void)
 {
 	struct termios new_termios;
 	
 	tcgetattr(0, &orig_termios);
-	memcpy(&tios, &orig_termios, sizeof(new_termios));
+	memcpy(&new_termios, &orig_termios, sizeof(new_termios));
 	atexit(reset_terminal_mode);
 	cfmakeraw(&new_termios);
-	tcsetatrr(0, TCSANOW, &new_termios);
+	tcsetattr(0, TCSANOW, &new_termios);
 }
 
 int kbhit(void)

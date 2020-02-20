@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "inputdefiner.h"
 #include "inputmap.h"
@@ -9,10 +10,14 @@
 #include <stdlib.h>
 #include <math.h>
 
+#if defined DIVERSALIS__OS__MICROSOFT
+
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+
+#endif
 
 #include "../../detail/portable.h"
 
@@ -99,8 +104,13 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 	int shift;
 	int ctrl;	
 
+#if defined DIVERSALIS__OS__MICROSOFT
 	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
 	ctrl = GetKeyState (psy_ui_KEY_CONTROL) < 0;	
+#else
+    shift = ev->shift;
+    ctrl = ev->ctrl;
+#endif    
 
 	if ((ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL)) {
 		if (self->regularkey == 0) {
@@ -124,8 +134,13 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	int inputshift;
 	int inputctrl;
 
+#if defined DIVERSALIS__OS__MICROSOFT
 	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
 	ctrl = GetKeyState (psy_ui_KEY_CONTROL) < 0;
+#else
+    shift = ev->shift;
+    ctrl = ev->ctrl;
+#endif        
 	decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl);
 	if (self->regularkey) {		
 		self->input = encodeinput(inputkeycode, shift, ctrl);

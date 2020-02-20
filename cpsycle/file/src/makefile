@@ -3,7 +3,7 @@ inc = -I../../container/src -I../../../diversalis/src
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-file.a: $(obj)
+libfile.a: $(obj)
 	ar rsv $@ $^
 
 %.o: %.c
@@ -11,4 +11,4 @@ file.a: $(obj)
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) file.a
+	rm -f $(obj) libfile.a

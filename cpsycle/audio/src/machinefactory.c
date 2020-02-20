@@ -49,7 +49,7 @@ MachineFactoryOptions machinefactory_options(psy_audio_MachineFactory* self)
 }
 
 psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, MachineType type,
-	const char* plugincatchername)
+	const char* plugincatchername, uintptr_t shellidx)
 {
 	char fullpath[_MAX_PATH];
 
@@ -58,11 +58,11 @@ psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, Ma
 	}
 	return machinefactory_makemachinefrompath(self, type,
 		plugincatcher_modulepath(self->catcher, type,
-		plugincatchername, fullpath));	
+		plugincatchername, fullpath), shellidx);
 }
 
 psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
-	MachineType type, const char* path)
+	MachineType type, const char* path, uintptr_t shellidx)
 {
 	psy_audio_Machine* rv = 0;
 	psy_audio_MachineProxy* proxy = 0;
@@ -210,7 +210,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			plugin = (psy_audio_Machine*) malloc(sizeof(psy_audio_LadspaPlugin));
 			if (plugin) {
 				psy_audio_ladspaplugin_init((psy_audio_LadspaPlugin*)plugin,
-					self->machinecallback, path);
+					self->machinecallback, path, shellidx);
 				if (psy_audio_machine_info(plugin)) {
 					rv = plugin;
 				}

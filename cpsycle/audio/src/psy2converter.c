@@ -65,22 +65,22 @@ psy_audio_Machine* psy_audio_psy2converter_load(
 
 	if (type == master) {
 		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_MASTER, "");		
+		rv = machinefactory_makemachine(factory, MACH_MASTER, "", 0);		
 		psy2machineload(songfile, *newindex);
 	} else
 	if (type == delay) {
 		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "delay");		
+		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "delay", 0);		
 		psy2machineload(songfile, *newindex);
 	} else
 	if (type == filter_2_poles) {
 		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "filter-2-poles");		
+		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "filter-2-poles", 0);		
 		psy2machineload(songfile, *newindex);
 	} else
 	if (type == sampler) {
 		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_SAMPLER, "");		
+		rv = machinefactory_makemachine(factory, MACH_SAMPLER, "", 0);		
 		psy2samplerload(songfile, *newindex);
 	} else
 	if (type == nativeplug) {		
@@ -88,29 +88,29 @@ psy_audio_Machine* psy_audio_psy2converter_load(
 		psy_strlwr(dllname);
 		psyfile_read(songfile->file, &editname, sizeof(editname));
 		if (strcmp(dllname, "arguru bass.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");			
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f", 0);			
 		} else	
 		if (strcmp(dllname, "arguru synth.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");			
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f", 0);
 		} else
 		if (strcmp(dllname, "arguru synth 2.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");			
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f", 0);
 		} else
 		if (strcmp(dllname, "synth21.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");			
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f", 0);
 		} else
 		if (strcmp(dllname, "synth22.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f", 0);
 		} else {
 			char plugincatchername[256];
 			
 			plugincatcher_catchername(songfile->song->machinefactory->catcher,
 				dllname, plugincatchername);			
 			rv = machinefactory_makemachine(factory, MACH_PLUGIN,
-				plugincatchername);
+				plugincatchername, 0);
 			if (!rv) {
 				rv = machinefactory_makemachine(factory, MACH_DUMMY,
-					plugincatchername);
+					plugincatchername, 0);
 			}
 			psy2pluginload(songfile, *newindex);
 		}

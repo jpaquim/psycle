@@ -39,7 +39,7 @@ static void vtable_init(TabBar* self)
 
 void tab_init(Tab* self, const char* text, psy_ui_Size* size)
 {
-	self->text = _strdup(text);
+	self->text = strdup(text);
 	if (size) {
 		self->size = *size;
 	}	

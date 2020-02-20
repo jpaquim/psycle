@@ -91,13 +91,13 @@ psy_ui_Size size(psy_ui_xt_BitmapImp* self)
 	if (self->pixmap) {
         Window root;
         unsigned int temp;
-        unsigned int width;
-        unsigned int height;
+        unsigned int width = 0;
+        unsigned int height = 0;
         psy_ui_XtApp* xtapp;		
 
         xtapp = (psy_ui_XtApp*) app.platform;        
-        XGetGeometry(xtapp->dpy, self->pixmap, &root, &temp, &temp,
-            &width, &height, &temp, &temp);
+        // XGetGeometry(xtapp->dpy, self->pixmap, &root, &temp, &temp,
+            //&width, &height, &temp, &temp);
 		size.width = width;
 		size.height = height;
 	} else {

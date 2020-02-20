@@ -2,13 +2,29 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "skinio.h"
 #include <string.h>
 #include <stdio.h>
 
-#include <windows.h>
+#if defined DIVERSALIS__OS__UNIX
 
+void skin_load(psy_Properties* properties, const char* path)
+{
+}
+
+void skin_loadpsh(psy_Properties* properties, const char* path)
+{
+}
+
+void skin_psh_values(const char* str, int maxcount, int* values)
+{
+}
+
+#else
+
+#include <windows.h>
 
 #define HexMapL 16
 
@@ -733,3 +749,7 @@ void skin_psh_values(const char* str, int maxcount, int* values)
 	}
 
 }
+
+#endif
+
+

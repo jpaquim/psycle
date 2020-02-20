@@ -35,7 +35,7 @@ static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
 static void pluginsview_adjustscroll(PluginsView*);
 
-static void pluginname(psy_Properties*, char* text);
+static void plugindisplayname(psy_Properties*, char* text);
 static int plugintype(psy_Properties*, char* text);
 static int pluginmode(psy_Properties*, char* text);
 
@@ -186,7 +186,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 	if (p) {
 		p = p->children;
 	}
-	for ( ; p != 0; p = p->next) {
+	for ( ; p != 0; p = psy_properties_next(p)) {
 		pluginsview_drawitem(self, g, p, cpx, cpy);
 		cpx += self->columnwidth;
 		if (cpx >= self->numparametercols * self->columnwidth) {
@@ -208,7 +208,7 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		psy_ui_setbackgroundcolor(g, 0x00232323);
 		psy_ui_settextcolor(g, 0x00CACACA);		
 	}		
-	pluginname(property, text);			
+	plugindisplayname(property, text);
 	psy_ui_textout(g, x, y + self->dy + 2, text, strlen(text));
 	plugintype(property, text);
 	psy_ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
@@ -236,15 +236,11 @@ void pluginsview_computetextsizes(PluginsView* self)
 	self->numparametercols = max(1, size.width / self->columnwidth);
 }
 
-void pluginname(psy_Properties* property, char* text)
-{
-	psy_Properties* p;
-	
-	p = psy_properties_read(property, "name");	
-	psy_snprintf(text, 128, "%s", 
-		p && strlen(psy_properties_valuestring(p)) != 0
-		? psy_properties_valuestring(p)
-		: psy_properties_key(property));	
+void plugindisplayname(psy_Properties* property, char* text)
+{	
+	psy_snprintf(text, 128, "%s",
+		psy_properties_readstring(property, "shortname", psy_properties_key(property))
+	);
 }
 
 int plugintype(psy_Properties* property, char* text)

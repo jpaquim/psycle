@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "machineview.h"
 #include "wireview.h"
@@ -13,6 +14,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../../detail/portable.h"
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 #define RGB(r,g,b)  ((uint32_t)(((uint16_t)(r)|((uint16_t)((uint8_t)(g))<<8))|(((uint16_t)(uint8_t)(b))<<16)))
 
@@ -1814,7 +1819,9 @@ void machinewireview_onnewmachineselected(MachineView* self,
 	path = psy_properties_readstring(plugininfo, "path", "");
 	machine = machinefactory_makemachinefrompath(
 		&self->workspace->machinefactory, 
-		psy_properties_int(plugininfo, "type", NOMACHINE_INDEX), path);
+		psy_properties_int(plugininfo, "type", NOMACHINE_INDEX),
+		path,
+		psy_properties_int(plugininfo, "shellidx", 0));
 	if (machine) {		
 		if (self->wireview.addeffect) {
 			uintptr_t slot;

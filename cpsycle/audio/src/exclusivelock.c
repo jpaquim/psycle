@@ -60,7 +60,7 @@ static pthread_mutex_t worklock;
 
 static int disabled = 0;
 
-void lock_init(void)
+void psy_audio_lock_init(void)
 {	
 	disabled = 0;
 	pthread_mutexattr_t recursiveattr;
@@ -70,30 +70,30 @@ void lock_init(void)
 	pthread_mutexattr_destroy(&recursiveattr);		
 }
 
-void lock_dispose(void)
+void psy_audio_lock_dispose(void)
 {	
 	pthread_mutex_destroy(&worklock);
 	disabled = 0;	
 }
 
-void lock_enable(void)
+void psy_audio_lock_enable(void)
 {
 	disabled = 0;
 }
 
-void lock_disable(void)
+void psy_audio_lock_disable(void)
 {
 	disabled = 1;
 }
 
-void lock_enter(void)
+void psy_audio_lock_enter(void)
 {
 	if (!disabled) {
 		pthread_mutex_lock(&worklock);
 	}
 }
 
-void lock_leave(void)
+void psy_audio_lock_leave(void)
 {
 	if (!disabled) {
 		 pthread_mutex_unlock(&worklock);

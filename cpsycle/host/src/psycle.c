@@ -13,7 +13,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32 || PSYCLE_USE_TK == PSYCLE_TK_XT
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 #ifdef DIVERSALIS__OS__MICROSOFT
 // The WinMain function is called by the system as the initial entry point for
@@ -47,12 +51,16 @@ int main(int argc, char **argv)
 #else
 	psy_ui_app_init(&app, 0);
 #endif
-	mainframe_init(&mainframe);		
+	mainframe_init(&mainframe);	
+#if defined DIVERSALIS__OS__MICROSOFT	
 	if (mainframe_showmaximizedatstart(&mainframe)) {
 		psy_ui_component_showstate(&mainframe.component, SW_MAXIMIZE);
 	} else {
 		psy_ui_component_showstate(&mainframe.component, iCmdShow);
 	}	
+#else
+    psy_ui_component_show(&mainframe.component);
+#endif    
 	err = psy_ui_app_run(&app);
 	psy_ui_app_dispose(&app);
 	// restores the environment path

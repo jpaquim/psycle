@@ -163,16 +163,19 @@ void psy_ui_xt_comboboximp_init(psy_ui_xt_ComboBoxImp* self,
 	psy_ui_Component* component,
 	psy_ui_ComponentImp* parent)
 {	
-	//psy_ui_XtApp* winapp;
+	psy_ui_XtApp* xtapp;
 
-	//winapp = (psy_ui_XtApp*)app.platform;
-	//psy_ui_xt_componentimp_init(&self->xt_component_imp,
-		//component,
-		//parent,
-		//xtapp->componentclass,
-		//0, 0, 90, 90,
+	xtapp = (psy_ui_XtApp*)app.platform;
+	psy_ui_xt_componentimp_init(&self->xt_component_imp,
+		component,
+		parent,
+		xtapp->componentclass,
+		0, 0, 90, 90,
+        0,
 		//WS_CHILDWINDOW | WS_VISIBLE,
-		//0);	
+		0);
+    imp_vtable_init();
+	self->imp.component_imp.vtable = &vtable;
 	//psy_ui_xt_componentimp_init(&self->xt_combo_imp,
 		//0,
 		//&self->xt_component_imp.imp,
@@ -180,12 +183,11 @@ void psy_ui_xt_comboboximp_init(psy_ui_xt_ComboBoxImp* self,
 		//0, 0, 100, 20,
 		//WS_CHILD | WS_VSCROLL | CBS_DROPDOWNLIST,
 		//1);	
-	//imp_vtable_init();
-	//self->imp.component_imp.vtable = &vtable;
-	//psy_ui_comboboximp_init(&self->imp);
-	//self->component = component;
-	//comboboximp_imp_vtable_init(self);
-	//self->imp.vtable = &comboboximp_vtable;
+	
+	psy_ui_comboboximp_init(&self->imp);
+	self->component = component;
+	// comboboximp_imp_vtable_init(self);
+	// self->imp.vtable = &comboboximp_vtable;
 	//psy_signal_connect(&self->xt_combo_imp.imp.signal_command, component, oncommand);	
 }
 

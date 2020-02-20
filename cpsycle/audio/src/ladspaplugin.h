@@ -63,8 +63,8 @@ typedef struct {
 	float* pOutSamplesR;
 } psy_audio_LadspaPlugin;
 
-void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin*, MachineCallback, const char* path);
-int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo*);
+void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin*, MachineCallback, const char* path, uintptr_t shellidx);
+int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo*, uintptr_t shellidx);
 
 INLINE psy_audio_Machine* psy_audio_ladspaplugin_base(psy_audio_LadspaPlugin* self)
 {

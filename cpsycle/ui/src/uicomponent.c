@@ -53,8 +53,11 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 }
 
 void psy_ui_component_updatefont(psy_ui_Component* self)
-{	
-	self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));
+{	 
+    // assert(self->imp);   
+    if (self->imp) {
+        self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));
+    }
 }
 
 psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)

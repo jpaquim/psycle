@@ -74,7 +74,7 @@ void song_initmachines(psy_audio_Song* self)
 {
 	machines_init(&self->machines);
 	machines_insertmaster(&self->machines,
-		machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0));
+		machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0, 0));
 }
 
 void song_initpatterns(psy_audio_Song* self)

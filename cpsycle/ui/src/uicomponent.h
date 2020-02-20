@@ -449,7 +449,10 @@ INLINE void psy_ui_component_setcolor(psy_ui_Component* self, uint32_t color)
 INLINE void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, uint32_t color)
 {
 	self->backgroundcolor = color;
-	self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
+    // assert(self->imp);   
+    if (self->imp) {
+        self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
+    }
 }
 
 INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)

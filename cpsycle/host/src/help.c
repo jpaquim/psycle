@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/os.h"
 
 #include "help.h"
 
@@ -10,6 +11,10 @@
 #include <string.h>
 
 #define MAXREADBUFFER 4096
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
