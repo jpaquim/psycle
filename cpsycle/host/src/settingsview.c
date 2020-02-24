@@ -53,6 +53,7 @@ static void settingsview_drawbutton(SettingsView*, psy_Properties*,
 static void settingsview_drawcheckbox(SettingsView*, psy_Properties*,
 	int column);
 static void settingsview_advanceline(SettingsView*);
+static void settingsview_countblocklines(SettingsView*, psy_Properties*);
 static void settingsview_addremoveident(SettingsView*, int level);
 static void settingsview_addident(SettingsView*);
 static void settingsview_removeident(SettingsView*);
@@ -165,12 +166,13 @@ void settingsview_preparepropertiesenum(SettingsView* self)
 	self->identwidth = tm.tmAveCharWidth * 4;
 	self->cpx = 0;
 	self->cpy = 0;
+	self->numblocklines = 1;
 	self->lastlevel = 0;
 }
 
 int settingsview_onpropertiesdrawenum(SettingsView* self,
 	psy_Properties* property, int level)
-{			
+{				
 	settingsview_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && psy_properties_type(property) ==
 			PSY_PROPERTY_TYP_SECTION) {
@@ -182,7 +184,7 @@ int settingsview_onpropertiesdrawenum(SettingsView* self,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_CHOICE) {
 		self->currchoice = psy_properties_value(property);
 		self->choicecount = 0;					
-	}		
+	}			
 	settingsview_drawlinebackground(self, property);						
 	settingsview_drawkey(self, property, 0);	
 	settingsview_drawvalue(self, property, 1);
@@ -218,14 +220,17 @@ void settingsview_removeident(SettingsView* self)
 void settingsview_drawlinebackground(SettingsView* self,
 	psy_Properties* property)
 {	
-	if (psy_properties_type(property) != PSY_PROPERTY_TYP_SECTION) {
-		psy_ui_Size size;
+	if (psy_properties_type(property) == PSY_PROPERTY_TYP_SECTION) {
+		/*psy_ui_Size size;
 		psy_ui_Rectangle r;
 
 		size = psy_ui_component_size(&self->client);
 		psy_ui_setrectangle(&r, 10, self->cpy + self->dy, size.width - 20,
 			self->lineheight);
-		psy_ui_drawsolidrectangle(self->g, r, 0x00292929);
+		psy_ui_drawsolidrectangle(self->g, r, 0x00292929);*/
+		psy_ui_settextcolor(self->g, 0x00D1C5B6);
+	} else {
+		psy_ui_settextcolor(self->g, 0x00CACACA);
 	}
 }
 
@@ -235,9 +240,28 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
 		settingsview_drawbutton(self, property, column + 1);
 	} else {
-		psy_ui_textout(self->g, self->cpx + column * self->columnwidth,
-			self->cpy + self->dy, psy_properties_text(property),
-			strlen(psy_properties_text(property)));
+		unsigned int count;
+		const char* str;
+		int numcolumnavgchars;
+		psy_ui_TextMetric tm;
+
+		count = strlen(psy_properties_text(property));
+		str = psy_properties_text(property);
+		tm = psy_ui_component_textmetric(&self->client);
+		
+		numcolumnavgchars = (int)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
+		while (count > 0) {
+			unsigned int numoutput;
+
+			numoutput = min(numcolumnavgchars, count);
+			psy_ui_textout(self->g, self->cpx + column * self->columnwidth,
+				self->cpy + self->dy + (self->numblocklines - 1) * self->lineheight, str, numoutput);
+			count -= numoutput;
+			str += numoutput;
+			if (count > 0) {
+				++self->numblocklines;
+			}
+		}
 	}
 }
 
@@ -319,7 +343,8 @@ void settingsview_drawinteger(SettingsView* self, psy_Properties* property,
 
 void settingsview_advanceline(SettingsView* self)
 {
-	self->cpy += self->lineheight;
+	self->cpy += (self->lineheight * self->numblocklines);
+	self->numblocklines = 1;
 }
 
 void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
@@ -510,6 +535,7 @@ int settingsview_onpropertieshittestenum(SettingsView* self,
 		self->currchoice = psy_properties_value(property);
 		self->choicecount = 0;					
 	}	
+	settingsview_countblocklines(self, property);
 	if (settingsview_intersectsvalue(self, property, 1)) {
 		self->selected = property;		
 		return 0;
@@ -538,12 +564,37 @@ int settingsview_onenumpropertyposition(SettingsView* self,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_CHOICE) {
 		self->currchoice = psy_properties_value(property);
 		self->choicecount = 0;					
-	}	
+	}
+	settingsview_countblocklines(self, property);
 	if (psy_properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
 	settingsview_advanceline(self);
 	return 1;	
+}
+
+void settingsview_countblocklines(SettingsView* self, psy_Properties* property)
+{
+	unsigned int count;
+	const char* str;
+	int numcolumnavgchars;
+	psy_ui_TextMetric tm;
+
+	count = strlen(psy_properties_text(property));
+	str = psy_properties_text(property);
+	tm = psy_ui_component_textmetric(&self->client);
+
+	numcolumnavgchars = (int)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
+	while (count > 0) {
+		unsigned int numoutput;
+
+		numoutput = min(numcolumnavgchars, count);		
+		count -= numoutput;
+		str += numoutput;
+		if (count > 0) {
+			++self->numblocklines;
+		}
+	}
 }
 
 int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,

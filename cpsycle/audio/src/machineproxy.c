@@ -68,6 +68,10 @@ static struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy*);
 static struct psy_audio_Machines* machineproxy_machines(psy_audio_MachineProxy*);
 static struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy*);
 static void machineproxy_output(psy_audio_MachineProxy*, const char* text);
+static bool machineproxy_addcapture(psy_audio_MachineProxy*, int index);
+static bool machineproxy_removecapture(psy_audio_MachineProxy*, int index);
+static void machineproxy_readbuffers(psy_audio_MachineProxy*, int index, float** pleft, float** pright, int numsamples);
+
 static void machineproxy_setcallback(psy_audio_MachineProxy*, MachineCallback);
 static int machineproxy_parameterlabel(psy_audio_MachineProxy*, char* txt, uintptr_t param);
 static int machineproxy_parametername(psy_audio_MachineProxy*, char* txt, uintptr_t param);
@@ -171,6 +175,9 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_instruments;
 		vtable.output = (fp_machine_output)
 			machineproxy_output;
+		vtable.addcapture = (fp_machine_addcapture) machineproxy_addcapture;
+		vtable.removecapture = (fp_machine_removecapture) machineproxy_removecapture;
+		vtable.readbuffers = (fp_machine_readbuffers) machineproxy_readbuffers;
 		vtable.samples = (fp_machine_samples)
 			machineproxy_samples;
 		vtable.setcallback = (fp_machine_setcallback)
@@ -906,6 +913,63 @@ void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "output", GetExceptionCode(),
 			GetExceptionInformation())) {			
+		}
+#endif		
+	}	
+}
+
+bool machineproxy_addcapture(psy_audio_MachineProxy* self, int index)
+{
+	bool rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->addcapture(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "addcapture", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+bool machineproxy_removecapture(psy_audio_MachineProxy* self, int index)
+{
+	bool rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->removecapture(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "removecapture", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void machineproxy_readbuffers(psy_audio_MachineProxy* self, int index, float**pleft, float** pright, int numsamples)
+{	
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->readbuffers(self->client, index, pleft, pright, numsamples);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "readbuffers", GetExceptionCode(),
+			GetExceptionInformation())) {
 		}
 #endif		
 	}	

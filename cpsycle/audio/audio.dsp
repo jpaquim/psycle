@@ -91,6 +91,10 @@ SOURCE=.\src\array.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\audiorecorder.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\buffer.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -580,6 +584,10 @@ SOURCE=.\src\xm.c
 # Begin Source File
 
 SOURCE=.\src\array.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\audiorecorder.h
 # End Source File
 # Begin Source File
 

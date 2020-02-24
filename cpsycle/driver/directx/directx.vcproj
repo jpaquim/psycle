@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\container\src"
+				AdditionalIncludeDirectories="..\..\container\src;..\..\dsp\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;DIRECTX_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -77,11 +77,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib container.lib dsound.lib dxguid.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib container.lib dsp.lib dsound.lib dxguid.lib"
 				OutputFile=".\Debug/directx.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\container\debug,..\..\dsound-9\lib"
+				AdditionalLibraryDirectories="..\..\container\debug,..\..\dsp\debug;..\..\dsound-9\lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/directx.pdb"
 				RandomizedBaseAddress="1"
@@ -148,7 +148,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\container\src"
+				AdditionalIncludeDirectories="..\..\container\src;..\..\dsp\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;DIRECTX_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -174,11 +174,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib dsound.lib dxguid.lib container.lib winmm.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib dsound.lib dxguid.lib container.lib dsp.lib winmm.lib"
 				OutputFile=".\Release/directx.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\container\release,..\..\dsound-9\lib"
+				AdditionalLibraryDirectories="..\..\container\release,..\..\dsp\release,..\..\dsound-9\lib"
 				ProgramDatabaseFile=".\Release/directx.pdb"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -218,6 +218,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\avrt.c"
+				>
+			</File>
+			<File
 				RelativePath="directx.c"
 				>
 				<FileConfiguration
@@ -239,11 +243,23 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\quantize.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath=".\avrt.h"
+				>
+			</File>
+			<File
+				RelativePath=".\quantize.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

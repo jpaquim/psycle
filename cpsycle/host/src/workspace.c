@@ -68,7 +68,7 @@ static void workspace_updatenavigation(Workspace*);
 /// Machinecallback
 static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
-static int machinecallback_bpm(Workspace*);
+static unsigned int machinecallback_bpm(Workspace*);
 static psy_dsp_beat_t machinecallback_beatspersample(Workspace*);
 static psy_dsp_beat_t machinecallback_currbeatsperline(Workspace*);
 static psy_audio_Samples* machinecallback_samples(Workspace*);
@@ -78,6 +78,9 @@ static void machinecallback_fileselect_load(Workspace*);
 static void machinecallback_fileselect_save(Workspace*);
 static void machinecallback_fileselect_directory(Workspace*);
 static void machinecallback_output(Workspace*, const char* text);
+static bool machinecallback_addcapture(Workspace*, int index);
+static bool machinecallback_removecapture(Workspace*, int index);
+static void machinecallback_readbuffers(Workspace*, int index, float** pleft, float** pright, int numsamples);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
@@ -893,6 +896,7 @@ void workspace_makedriverlist(Workspace* self)
 	drivers = psy_properties_append_choice(self->inputoutput, "driver", 2); 
 	psy_properties_settext(drivers, "AudioDriver");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
+#if defined(DIVERSALIS__OS__MICROSOFT)
 #if defined(_DEBUG)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
 	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
@@ -901,6 +905,9 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
 	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");
 	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Release\\wasapi.dll");
+#endif
+#elif defined(DIVERSALIS__OS__LINUX)
+	psy_properties_append_string(drivers, "alsa", "..\\driver\\alsa\\libpsyalsa.so");
 #endif
 }
 
@@ -1801,17 +1808,20 @@ MachineCallback machinecallback(Workspace* self)
 	MachineCallback rv;	
 
 	rv.context = self;
-	rv.samples = machinecallback_samples;
-	rv.samplerate = machinecallback_samplerate;
-	rv.bpm = machinecallback_bpm;
-	rv.beatspersample = machinecallback_beatspersample;
-	rv.currbeatsperline = machinecallback_currbeatsperline;
-	rv.machines = machinecallback_machines;
-	rv.instruments = machinecallback_instruments;
-	rv.fileselect_load = machinecallback_fileselect_load;
-	rv.fileselect_save = machinecallback_fileselect_save;
-	rv.fileselect_directory = machinecallback_fileselect_directory;
-	rv.output = machinecallback_output;
+	rv.samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
+	rv.bpm = (fp_mcb_bpm) machinecallback_bpm;
+	rv.beatspersample = (fp_mcb_beatspersample) machinecallback_beatspersample;
+	rv.currbeatsperline = (fp_mcb_currbeatsperline) machinecallback_currbeatsperline;
+	rv.samples = (fp_mcb_samples) machinecallback_samples;
+	rv.machines = (fp_mcb_machines) machinecallback_machines;
+	rv.instruments = (fp_mcb_instruments) machinecallback_instruments;
+	rv.fileselect_load = (fp_mcb_fileselect_load) machinecallback_fileselect_load;
+	rv.fileselect_save = (fp_mcb_fileselect_save) machinecallback_fileselect_save;
+	rv.fileselect_directory = (fp_mcb_fileselect_directory) machinecallback_fileselect_directory;
+	rv.output = (fp_mcb_output) machinecallback_output;
+	rv.addcapture = (fp_mcb_addcapture) machinecallback_addcapture;
+	rv.removecapture = (fp_mcb_removecapture) machinecallback_removecapture;
+	rv.readbuffers = (fp_mcb_readbuffers) machinecallback_readbuffers;
 	return rv;
 }
 
@@ -1859,9 +1869,9 @@ unsigned int machinecallback_samplerate(Workspace* self)
 	return self->player.driver->samplerate(self->player.driver);
 }
 
-int machinecallback_bpm(Workspace* self)
+unsigned int machinecallback_bpm(Workspace* self)
 {
-	return (int) player_bpm(&self->player);
+	return (unsigned int) player_bpm(&self->player);
 }
 
 psy_dsp_beat_t machinecallback_beatspersample(Workspace* self)
@@ -1905,6 +1915,29 @@ void workspace_onterminaloutput(Workspace* self, psy_audio_SongFile* sender,
 void machinecallback_output(Workspace* self, const char* text)
 {
 	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
+}
+
+bool machinecallback_addcapture(Workspace* self, int index)
+{
+	if (self->player.driver) {
+		return self->player.driver->addcapture(self->player.driver, index);
+	}
+	return FALSE;
+}
+
+bool machinecallback_removecapture(Workspace* self, int index)
+{
+	if (self->player.driver) {
+		return self->player.driver->removecapture(self->player.driver, index);
+	}
+	return FALSE;
+}
+
+void machinecallback_readbuffers(Workspace* self, int index, float** pleft, float** pright, int numsamples)
+{
+	if (self->player.driver) {
+		self->player.driver->readbuffers(self->player.driver, index, pleft, pright, numsamples);
+	}
 }
 
 const char* workspace_dialbitmap_path(Workspace* self)

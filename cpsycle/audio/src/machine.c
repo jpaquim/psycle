@@ -99,7 +99,6 @@ static psy_dsp_amp_range_t amprange(psy_audio_Machine* self)
 {
 	return PSY_DSP_AMP_RANGE_NATIVE;
 }
-
 /// machinecallback
 static unsigned int samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -109,6 +108,12 @@ static struct psy_audio_Samples* samples(psy_audio_Machine* self) { return self-
 static struct psy_audio_Machines* machines(psy_audio_Machine* self) { return self->callback.machines(self->callback.context); }
 static struct psy_audio_Instruments* instruments(psy_audio_Machine* self) { return self->callback.instruments(self->callback.context); }
 static void output(psy_audio_Machine* self, const char* text) { self->callback.output(self->callback.context, text); }
+static bool addcapture(psy_audio_Machine* self, int index) { return self->callback.addcapture(self->callback.context, index); }
+static bool removecapture(psy_audio_Machine* self, int index) { return self->callback.removecapture(self->callback.context, index); }
+static void readbuffers(psy_audio_Machine* self, int index, float** pleft, float** pright, int numsamples)
+{ 
+	self->callback.readbuffers(self->callback.context, index, pleft, pright, numsamples);
+}
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -162,6 +167,9 @@ static void vtable_init(void)
 		vtable.samples = samples;
 		vtable.machines = machines;
 		vtable.output = output;
+		vtable.addcapture = addcapture;
+		vtable.removecapture = removecapture;
+		vtable.readbuffers = readbuffers;
 		vtable.slot = slot;
 		vtable.setslot = setslot;		
 		vtable.haseditor = haseditor;

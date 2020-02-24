@@ -2,8 +2,15 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../audiodriversettings.h"
+#include "avrt.h"
 
+#include <MMReg.h>
 #define DIRECTSOUND_VERSION 0x8000
+#include <ks.h>
+#include <ksmedia.h>
+
+#include <dsound.h>
 
 // linking
 #pragma comment(lib, "dsound.lib")
@@ -13,66 +20,83 @@
 // includes
 #include <string.h>
 #include "../driver.h"
-#include <windows.h>
-#include <mmsystem.h>
-#include <dsound.h>
 #include <stdio.h>
+#include "quantize.h"
+#include <operations.h>
+#include <hashtbl.h>
+
+static psy_dsp_Operations dsp;
+
+#undef KSDATAFORMAT_SUBTYPE_PCM
+const GUID KSDATAFORMAT_SUBTYPE_PCM = { 0x00000001, 0x0000, 0x0010,
+{0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71} };
+
+#undef KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
+const GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = { 00000003, 0x0000, 0x0010,
+{0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71} };
 
 #define BYTES_PER_SAMPLE 4	// 2 * 16bits
 #define SHORT_MIN	-32768
 #define SHORT_MAX	32767
 
-// AVRT is the new "multimedia scheduling stuff"
-typedef HANDLE(WINAPI* FAvSetMmThreadCharacteristics)   (LPCTSTR, LPDWORD);
-typedef BOOL(WINAPI* FAvRevertMmThreadCharacteristics)(HANDLE);
+static BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
+static BOOL CALLBACK DSCaptureEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext);
 
-static FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics = NULL;
-static FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
-static HMODULE hDInputDLL = 0;
+typedef struct {	
+	char* portname;
+	LPGUID guid;
+} PortEnums;
 
-#define _GetProc(fun, type, name) \
-{                                                  \
-    fun = (type) GetProcAddress(hDInputDLL,name);  \
-    if (fun == NULL) { return FALSE; }             \
-}
-
-//Dynamic load and unload of avrt.dll, so the executable can run on Windows 2K and XP.
-static BOOL SetupAVRT(void)
-{	
-	hDInputDLL = LoadLibraryA("avrt.dll");
-	if (hDInputDLL == NULL)
-		return FALSE;
-
-	_GetProc(pAvSetMmThreadCharacteristics, FAvSetMmThreadCharacteristics, "AvSetMmThreadCharacteristicsA");
-	_GetProc(pAvRevertMmThreadCharacteristics, FAvRevertMmThreadCharacteristics, "AvRevertMmThreadCharacteristics");
-
-	return pAvSetMmThreadCharacteristics &&
-		pAvRevertMmThreadCharacteristics;
-}
-
-// ------------------------------------------------------------------------------------------
-static void CloseAVRT(void)
+INLINE void portenums_init(PortEnums* self)
 {
-	if (hDInputDLL != NULL)
-		FreeLibrary(hDInputDLL);
-	hDInputDLL = NULL;
+	self->guid = 0;
+	self->portname = strdup("");
 }
 
+INLINE void portenums_initall(PortEnums* self, LPGUID guid, const char* portname)
+{
+	self->guid = (guid == NULL) ? (GUID*) &DSDEVID_DefaultPlayback : guid;
+	self->portname = portname ? strdup(portname) : strdup("");
+}
 
-typedef struct {			
-	HANDLE Handle;
-	unsigned char *pData;
-	WAVEHDR *pHeader;
-	HANDLE HeaderHandle;
-	int Prepared;
-} CBlock;
+INLINE void portenums_dispose(PortEnums* self)
+{
+	self->guid = 0;
+	free(self->portname);
+}
+
+INLINE bool portenums_isformatsupported(WAVEFORMATEXTENSIBLE* pwfx, bool isInput)
+{
+	///\todo: Implement
+	return TRUE;
+}
+
+typedef struct {
+	LPGUID _pGuid;
+	LPDIRECTSOUNDCAPTURE8 _pDs;
+	LPDIRECTSOUNDCAPTUREBUFFER8  _pBuffer;
+	int _lowMark;
+	float* pleft;
+	float* pright;
+	int _machinepos;
+} PortCapt;
+
+INLINE portcapt_init(PortCapt* self)
+{
+	self->pleft = 0;
+	self->pright = 0;
+	self->_pGuid = 0;
+	self->_pDs = 0;
+	self->_pBuffer = 0;
+	self->_lowMark = 0;
+	self->_machinepos = 0;
+}
 
 typedef struct {		
 	psy_AudioDriver driver;	
+	psy_AudioDriverSettings settings;
 	HWND m_hWnd;
-	int _dither;
-	int _bitDepth;
-	unsigned int _samplesPerSec;		
+	int _dither;	
 	unsigned int pollSleep_;	
 	
 	int _initialized;
@@ -84,17 +108,18 @@ typedef struct {
 	// Controls if we want the thread to be running or not
 	int _threadRun;	
 	GUID device_guid_;
-	int _deviceIndex;	
-	int _numBuffers;
-	int _bufferSize;
-	int _dsBufferSize;
+	int _deviceIndex;		
 	int _currentOffset;
-	int _lowMark;
-	int _highMark;
-	int _buffersToDo;
-	int _exclusive;
+	uint32_t _dsBufferSize;
+	uint32_t _lowMark;
+	uint32_t _highMark;	
+	int _buffersToDo;	
 	/// number of "wraparounds" to compensate the GetCurrentPosition() call.
-	int m_readPosWraps;		
+	int m_readPosWraps;
+	psy_List* _playEnums;
+	psy_List*  _capEnums;
+	psy_List* _capPorts;
+	psy_Table _portMapping; // <int, int>
 	LPDIRECTSOUND8 _pDs;
 	LPDIRECTSOUNDBUFFER8 _pBuffer;
 	HANDLE hEvent;
@@ -110,33 +135,23 @@ static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static unsigned int driver_samplerate(psy_AudioDriver*);
 
-static unsigned int totalbufferbytes(DXDriver*s);
-static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
-static DWORD WINAPI NotifyThread(void* pDirectSound);
-static DWORD WINAPI PollerThread(void* pDirectSound);
-static void DoBlocks(DXDriver*);
+static void preparewaveformat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
+static DWORD WINAPI notifythread(void* pDirectSound);
+static DWORD WINAPI pollerthread(void* pDirectSound);
+static void doblocksrecording(DXDriver*, PortCapt*);
+static void doblocks(DXDriver*);
 static void init_properties(psy_AudioDriver* self);
 static int on_error(int err, const char* msg);
-static void Quantize(float *pin, int *piout, int c);
 static BOOL isvistaorlater(void);
-static BOOL WantsMoreBlocks(DXDriver*);
-
-int f2i(float flt) 
-{ 
-#if defined(_WIN64)
-	return (int)flt;
-#else
-  int i; 
-  static const double half = 0.5f; 
-  _asm 
-  { 
-	 fld flt 
-	 fsub half 
-	 fistp i 
-  } 
-  return i;
-#endif
-}
+static BOOL wantsmoreblocks(DXDriver*);
+static void refreshavailableports(DXDriver*);
+static void clearplayenums(DXDriver*);
+static void clearcapenums(DXDriver*);
+static void clearcapports(DXDriver*);
+static bool createcaptureport(DXDriver*, PortCapt* port);
+static void readbuffers(DXDriver* self, int index, float** pleft, float** pright, int numsamples);
+static int addcaptureport(DXDriver* self, int idx);
+static int removecaptureport(DXDriver* self, int idx);
 
 int on_error(int err, const char* msg)
 {
@@ -191,17 +206,22 @@ int driver_init(psy_AudioDriver* driver)
 	self->_pDs = NULL;
 	self->_pBuffer = NULL;
 	self->driver._pCallback = NULL;
-	self->device_guid_ = DSDEVID_DefaultPlayback;
-	self->_numBuffers = 6;
-	self->_bufferSize = 4096;	
-	self->_samplesPerSec= 44100;	
+	self->device_guid_ = DSDEVID_DefaultPlayback;	
 	self->_dither = 0;
-	self->_bitDepth = 16;	
-
+	self->_playEnums = 0;
+	self->_capEnums = 0;
+	self->_capPorts = 0;
+	psy_table_init(&self->_portMapping);
+#ifdef PSYCLE_USE_SSE
+	psy_dsp_sse2_init(&dsp);
+#else
+	psy_dsp_noopt_init(&dsp);
+#endif
+	psy_audiodriversettings_init(&self->settings);
+	refreshavailableports(self);
 	init_properties(&self->driver);
 	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	SetupAVRT();
-//	driver_configure(&self->driver);
+	SetupAVRT();	
 	return 0;
 }
 
@@ -212,29 +232,125 @@ int driver_dispose(psy_AudioDriver* driver)
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
 	CloseAVRT();
+	clearplayenums(self);
+	clearcapenums(self);
+	psy_table_dispose(&self->_portMapping);
 	return 0;
 }
 
-static void init_properties(psy_AudioDriver* self)
-{	
-	psy_Properties* property;	
+void refreshavailableports(DXDriver* self)
+{
+	clearplayenums(self);
+	clearcapenums(self);
+	DirectSoundEnumerate(DSEnumCallback, &self->_playEnums);
+	DirectSoundCaptureEnumerate(DSCaptureEnumCallback, &self->_capEnums);
+}
 
-	self->properties = psy_properties_create();
+BOOL CALLBACK DSEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext)
+{	
+	PortEnums* port;
+	
+	port = (PortEnums*) malloc(sizeof(PortEnums));
+	if (port) {
+		psy_List** ports;
+
+		ports = (psy_List**)lpContext;
+		portenums_initall(port, lpGuid, lpcstrDescription);		
+		psy_list_append(ports, port);
+	}
+	return TRUE;
+}
+BOOL CALLBACK DSCaptureEnumCallback(LPGUID lpGuid, LPCSTR lpcstrDescription, LPCSTR lpcstrModule, LPVOID lpContext)
+{	
+	PortEnums* port;
+
+	port = (PortEnums*)malloc(sizeof(PortEnums));
+	if (port) {
+		psy_List** ports;
+
+		ports = (psy_List**)lpContext;
+		portenums_initall(port, lpGuid, lpcstrDescription);
+		psy_list_append(ports, port);
+	}
+	return TRUE;	
+}
+
+void clearplayenums(DXDriver* self)
+{
+	psy_List* p;
+
+	for (p = self->_playEnums; p != 0; p = p->next) {
+		PortEnums* port = (PortEnums*) p->entry;
+		portenums_dispose(port);
+		free(port);
+	}
+	psy_list_free(self->_playEnums);
+	self->_playEnums = 0;	
+}
+
+void clearcapenums(DXDriver* self)
+{	
+	psy_List* p;
+
+	for (p = self->_capEnums; p != 0; p = p->next) {
+		PortEnums* port = (PortEnums*)p->entry;
+		portenums_dispose(port);
+		free(port);
+	}
+	psy_list_free(self->_capEnums);
+	self->_capEnums = 0;
+}
+
+void clearcapports(DXDriver* self)
+{
+}
+
+static void init_properties(psy_AudioDriver* driver)
+{	
+	DXDriver* self = (DXDriver*)driver;
+	psy_Properties* property;	
+	psy_Properties* devices;
+	psy_Properties* indevices;
+	psy_List* p;
+	int i;		
+
+	driver->properties = psy_properties_create();
+	psy_properties_settext(
+		psy_properties_sethint(
+			psy_properties_append_string(driver->properties, "name", "directsound"),
+				PSY_PROPERTY_HINT_READONLY),
+			"Name");
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "directsound"),
+		psy_properties_append_string(driver->properties, "vendor", "Psycedelics"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		psy_properties_append_string(driver->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);
-	property = psy_properties_append_choice(self->properties, "device", -1);	
-	psy_properties_append_int(self->properties, "bitdepth", 16, 0, 32);
-	psy_properties_append_int(self->properties, "samplerate", 44100, 0, 0);
-	psy_properties_append_int(self->properties, "dither", 0, 0, 1);
-	psy_properties_append_int(self->properties, "numbuf", 8, 6, 8);
-	psy_properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
+	property = psy_properties_append_choice(driver->properties, "device", -1);
+	psy_properties_append_int(driver->properties, "bitdepth",
+		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
+	psy_properties_append_int(driver->properties, "samplerate",
+		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
+	psy_properties_append_int(driver->properties, "dither", 0, 0, 1);
+	psy_properties_settext(
+		psy_properties_append_int(driver->properties, "numbuf",
+			psy_audiodriversettings_blockcount(&self->settings), 1, 8),
+		"Buffer Number");
+	psy_properties_settext(
+		psy_properties_append_int(driver->properties, "numsamples",
+			psy_audiodriversettings_blockframes(&self->settings),
+				64, 8193),
+		"Buffer Samples");
+	devices = psy_properties_append_choice(driver->properties, "device", 0);
+	for (p = self->_playEnums, i = 0; p != 0; p = p->next, ++i) {
+		PortEnums* port = (PortEnums*)p->entry;				
+		psy_properties_append_int(devices, port->portname, i, 0, 0);
+	}
+	indevices = psy_properties_append_choice(driver->properties, "indevice", 0);
+	for (p = self->_capEnums, i = 0; p != 0; p = p->next, ++i) {
+		PortEnums* port = (PortEnums*)p->entry;
+		psy_properties_append_int(indevices, port->portname, i, 0, 0);
+	}
 }
 
 void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
@@ -249,26 +365,30 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 	} else {
 		property = psy_properties_read(self->driver.properties, "bitdepth");
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			self->_bitDepth = property->item.value.i;
+			psy_audiodriversettings_setvalidbitdepth(&self->settings,
+				property->item.value.i);
 		}
 		property = psy_properties_read(self->driver.properties, "samplerate");
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			self->_samplesPerSec = property->item.value.i;
+			psy_audiodriversettings_setsamplespersec(&self->settings,
+				property->item.value.i);
 		}
 		property = psy_properties_read(self->driver.properties, "numbuf");
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			self->_numBuffers = property->item.value.i;
+			psy_audiodriversettings_setblockcount(&self->settings,
+				property->item.value.i);
 		}
 		property = psy_properties_read(self->driver.properties, "numsamples");
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			self->_bufferSize = property->item.value.i;
+			psy_audiodriversettings_setblockframes(&self->settings,
+				property->item.value.i);
 		}
 	}
 }
 
 unsigned int driver_samplerate(psy_AudioDriver* self)
 {
-	return ((DXDriver*)self)->_samplesPerSec;
+	return psy_audiodriversettings_samplespersec(&((DXDriver*)self)->settings);
 }
 
 void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
@@ -279,9 +399,9 @@ void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN ca
 }
 
 int driver_open(psy_AudioDriver* driver)
-{
-	DSBCAPS caps;
+{	
 	DSBUFFERDESC desc;
+	// WAVEFORMATPCMEX format;
 	WAVEFORMATEX format;
 	LPDIRECTSOUNDBUFFER pBufferGen;
 	HRESULT hr;
@@ -309,14 +429,18 @@ int driver_open(psy_AudioDriver* driver)
 			self->_pDs = NULL;
 			return FALSE;
 	}
-	self->_dsBufferSize = totalbufferbytes(self);
-	PrepareWaveFormat(&format, 2, self->_samplesPerSec, self->_bitDepth, self->_bitDepth);			
+	self->_dsBufferSize = psy_audiodriversettings_totalbufferbytes(&self->settings);
+	preparewaveformat(&format,
+		psy_audiodriversettings_numchannels(&self->settings),
+		psy_audiodriversettings_samplespersec(&self->settings),
+		psy_audiodriversettings_bitdepth(&self->settings),
+		psy_audiodriversettings_validbitdepth(&self->settings));
 	ZeroMemory(&desc, sizeof(DSBUFFERDESC));
 	desc.dwSize = sizeof(DSBUFFERDESC);
 	desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_GLOBALFOCUS;
 	desc.dwBufferBytes = self->_dsBufferSize;
 	desc.dwReserved = 0;
-	desc.lpwfxFormat = &format;
+	desc.lpwfxFormat = (LPWAVEFORMATEX) &format;
 	desc.guid3DAlgorithm = GUID_NULL;	
 
 	if (FAILED(IDirectSound_CreateSoundBuffer(self->_pDs, &desc, &pBufferGen, NULL)))
@@ -336,102 +460,51 @@ int driver_open(psy_AudioDriver* driver)
 		self->_pDs = 0;
 		return FALSE;
 	}
-
-	if (self->_exclusive)
-	{
-		IDirectSoundBuffer_Stop(self->_pBuffer);
-		if (FAILED(IDirectSoundBuffer_SetFormat(self->_pBuffer, &format)))
-		{
-			self->error(1, "Failed to set DirectSound psy_audio_Buffer format");
-			IDirectSoundBuffer_Release(self->_pBuffer);
-			self->_pBuffer = NULL;
-			IDirectSound_Release(self->_pDs);
-			self->_pDs = NULL;
-			return FALSE;
-		}
-		caps.dwSize = sizeof(caps);
-		if (FAILED(IDirectSoundBuffer_GetCaps(self->_pBuffer, &caps)))
-		{
-			self->error(1, "Failed to get DirectSound psy_audio_Buffer capabilities");
-			IDirectSoundBuffer_Release(self->_pBuffer);
-			self->_pBuffer = NULL;
-			IDirectSound_Release(self->_pDs);
-			self->_pDs = NULL;
-			return FALSE;
-		}
-		self->_dsBufferSize = caps.dwBufferBytes;
-		//WriteConfig();
-	}
-
 	ResetEvent(self->hEvent);
 	self->_threadRun = TRUE;
 	self->_playing = FALSE;	
-
 #define DIRECTSOUND_POLLING P
 #ifdef DIRECTSOUND_POLLING
-	CreateThread(NULL, 0, PollerThread, self, 0, &dwThreadId);
+	CreateThread(NULL, 0, pollerthread, self, 0, &dwThreadId);
 #else
-	CreateThread(NULL, 0, NotifyThread, self, 0, &dwThreadId);
+	CreateThread(NULL, 0, notifythread, self, 0, &dwThreadId);
 #endif
 	self->_running = TRUE;
-	return TRUE;
-
-	/*self->_lowMark = 0;
-	self->_highMark = self->_bufferSize;
-	if (self->_highMark >= self->_dsBufferSize)
-	{
-		self->_highMark = self->_dsBufferSize-1;
-	}
-	self->_currentOffset = 0;
-	self->_buffersToDo = self->_numBuffers;
-	ResetEvent(self->hEvent);
-	self->_timerActive = TRUE;
-	_beginthread(PollerThread, 0, self);
-
-	self->_running = TRUE;
-	return TRUE;*/
+	return TRUE;	
 }
 
-unsigned int totalbufferbytes(DXDriver* self)
-{
-	return self->_bufferSize * self->_numBuffers;
-}
-
-void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits)
+void preparewaveformat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits)
 {
 	// Set up wave format structure. 
-	ZeroMemory(wf, sizeof(WAVEFORMATEX));
-	wf->wFormatTag = WAVE_FORMAT_PCM;
-	wf->nChannels = channels;
-	wf->wBitsPerSample = bits;
-	wf->nSamplesPerSec = sampleRate;
-	wf->nBlockAlign = channels * bits / 8;
-	wf->nAvgBytesPerSec = sampleRate * wf->nBlockAlign;
-	wf->cbSize = 0;
-	if(bits <= 16) {		
-		wf->cbSize = 0;
+	ZeroMemory(wf, sizeof(WAVEFORMATEX));	
+	wf->Format.nChannels = channels;
+	wf->Format.wBitsPerSample = bits;
+	wf->Format.nSamplesPerSec = sampleRate;
+	wf->Format.nBlockAlign = wf->Format.nChannels * wf->Format.wBitsPerSample / 8;
+	wf->Format.nAvgBytesPerSec = wf->Format.nSamplesPerSec * wf->Format.nBlockAlign;					
+	if(bits <= 16) {
+		wf->Format.wFormatTag = WAVE_FORMAT_PCM;
+		wf->Format.cbSize = 0;
 	} else {
-/*		wf->wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-		wf.Format.cbSize = 0x16;
-				wf.psy_audio_Samples.wValidBitsPerSample  = validBits;
-				if(channels == 2) {
-					wf.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
-				}
-				if(validBits ==32) {
-					wf.SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
-				}
-				else {
-					wf.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-				}
-			}*/
+		wf->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+		wf->Format.cbSize = 0x16;
+		wf->Samples.wValidBitsPerSample = validBits;
+		if (channels == 2) {
+			wf->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
+		}
+		if (validBits == 32) {
+			wf->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+		} else {
+			wf->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+		}
 	}
 }
 
-DWORD WINAPI PollerThread(void* self)
+DWORD WINAPI pollerthread(void* self)
 {	
 	DXDriver* pThis = (DXDriver*)self;
 	HANDLE hTask = NULL;
-	int i;
+	unsigned int i;
 	SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
 	// Ask MMCSS to temporarily boost the thread priority
 	// to reduce glitches while the low-latency stream plays.	
@@ -443,23 +516,23 @@ DWORD WINAPI PollerThread(void* self)
 	// Prefill buffer:
 	pThis->_lowMark = 0;
 	pThis->m_readPosWraps = 0;
-	pThis->_highMark = pThis->_bufferSize;	
+	pThis->_highMark = psy_audiodriversettings_blockbytes(&pThis->settings);
 	pThis->_currentOffset = 0;
-	for (i = 0; i < pThis->_numBuffers; ++i) {
+	for (i = 0; i < psy_audiodriversettings_blockcount(&pThis->settings); ++i) {
 		// Directsound playback buffer is started here.
-		DoBlocks(pThis);
+		doblocks(pThis);
 	}
 	while (pThis->_threadRun)
 	{
-		int runs = 0;
+		unsigned int runs = 0;
 
-		while (WantsMoreBlocks(pThis))
+		while (wantsmoreblocks(pThis))
 		{
 			// First, run the capture buffers so that audio is available to wavein machines.
 			
 			// Next, proceeed with the generation of audio
-			DoBlocks(pThis);
-			if (++runs > pThis->_numBuffers)
+			doblocks(pThis);
+			if (++runs > psy_audiodriversettings_blockcount(&pThis->settings))
 				break;
 		}
 		Sleep(1);
@@ -468,16 +541,16 @@ DWORD WINAPI PollerThread(void* self)
 	return 0;
 }
 
-DWORD WINAPI NotifyThread(void* self)
+DWORD WINAPI notifythread(void* self)
 {
 	return 0;
 }
 
-BOOL WantsMoreBlocks(DXDriver* self)
+BOOL wantsmoreblocks(DXDriver* self)
 {
 	// [_lowMark,_highMark) is the next buffer to be filled.
 	// if (play) pos is still inside, we have to wait.
-	int pos = 0;
+	uint32_t pos = 0;
 	HRESULT hr;
 	
 	hr = IDirectSoundBuffer8_GetCurrentPosition(self->_pBuffer, &pos, 0);
@@ -486,7 +559,62 @@ BOOL WantsMoreBlocks(DXDriver* self)
 	return TRUE;
 }
 
-void DoBlocks(DXDriver* self)
+void doblocksrecording(DXDriver* self, PortCapt* port)
+{
+	int* pBlock1, * pBlock2;
+	unsigned long blockSize1, blockSize2;
+	HRESULT hr;
+
+	//If directsound capture fails
+	if (port->_pBuffer == NULL) {
+		return;
+	}		
+	hr = IDirectSoundBuffer_Lock(
+		self->_pBuffer,
+		(DWORD)self->_lowMark,
+		(DWORD)psy_audiodriversettings_blockbytes(&self->settings),
+		(void**)&pBlock1, (DWORD*)&blockSize1,
+		(void**)&pBlock2, (DWORD*)&blockSize2,
+		0);
+	if (SUCCEEDED(hr)) {
+		// Put the audio in our float buffers.
+		unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
+		int numSamples = blockSize1 / psy_audiodriversettings_framebytes(&self->settings);				
+		if (numSamples > 0) {
+			if (_sampleValidBits == 32) {
+				// DeinterlaceFloat(reinterpret_cast<float*>(pBlock1), port.pleft, port.pright, numSamples);
+			}
+			else if (_sampleValidBits == 24) {
+				// DeQuantize32AndDeinterlace(pBlock1, port.pleft, port.pright, numSamples);
+			}
+			else {
+				dequantize16anddeinterlace((short int*)(pBlock1), port->pleft, port->pright, numSamples);				
+			}
+		}
+		port->_lowMark += blockSize1;
+		if (blockSize2 > 0)
+		{
+			numSamples = blockSize2 / psy_audiodriversettings_framebytes(&self->settings);
+			if (_sampleValidBits == 32) {
+				// DeinterlaceFloat(reinterpret_cast<float*>(pBlock2), port.pleft + numSamples, port.pright + numSamples, numSamples);
+			}
+			else if (_sampleValidBits == 24) {
+				// DeQuantize32AndDeinterlace(pBlock2, port.pleft + numSamples, port.pright + numSamples, numSamples);
+			}
+			else {
+				dequantize16anddeinterlace((short int*)(pBlock2), port->pleft + numSamples, port->pright + numSamples, numSamples);
+			}
+			port->_lowMark += blockSize2;
+		}
+		// Release the data back to DirectSound. 
+		// Release the data back to DirectSound. 		
+		hr = IDirectSoundBuffer_Unlock(self->_pBuffer, pBlock1, blockSize1, pBlock2, blockSize2);
+		if (port->_lowMark >= self->_dsBufferSize) port->_lowMark = 0;
+	}
+	port->_machinepos = 0;
+}
+
+void doblocks(DXDriver* self)
 {
 	int* pBlock1, * pBlock2;
 	unsigned long blockSize1, blockSize2;
@@ -494,9 +622,10 @@ void DoBlocks(DXDriver* self)
 	
 	hr = IDirectSoundBuffer_Lock(
 		self->_pBuffer,
-		(DWORD)self->_lowMark, (DWORD)self->_bufferSize,
-		(void**)&pBlock1, (DWORD*)&blockSize1,
-		(void**)&pBlock2, (DWORD*)&blockSize2,
+		(DWORD) self->_lowMark,
+		(DWORD) psy_audiodriversettings_blockbytes(&self->settings),
+		(void**) &pBlock1, (DWORD*)&blockSize1,
+		(void**) &pBlock2, (DWORD*)&blockSize2,
 		0);	
 	if (hr == DSERR_BUFFERLOST)
 	{
@@ -510,7 +639,8 @@ void DoBlocks(DXDriver* self)
 		}
 		hr = IDirectSoundBuffer_Lock(
 			self->_pBuffer,
-			(DWORD)self->_lowMark, (DWORD)self->_bufferSize,
+			(DWORD)self->_lowMark,
+			(DWORD)psy_audiodriversettings_blockbytes(&self->settings),
 			(void**)&pBlock1, (DWORD*)&blockSize1,
 			(void**)&pBlock2, (DWORD*)&blockSize2,
 			0);
@@ -518,10 +648,10 @@ void DoBlocks(DXDriver* self)
 	if (SUCCEEDED(hr))
 	{
 		// Generate audio and put it into the buffer
-		unsigned int _sampleValidBits = self->_bitDepth;
-		int numSamples = blockSize1 / 4; // GetSampleSizeBytes();
+		unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
+		int numSamples = blockSize1 / psy_audiodriversettings_framebytes(&self->settings);
 		int hostisplaying;
-		float* pFloatBlock = 
+		float* pFloatBlock =
 			self->driver._pCallback(
 				self->driver._callbackContext, &numSamples, &hostisplaying);			
 		if (_sampleValidBits == 32) {			
@@ -531,7 +661,7 @@ void DoBlocks(DXDriver* self)
 			// Quantize24in32Bit(pFloatBlock, pBlock1, numSamples);
 		}
 		else if (_sampleValidBits == 16) {
-			Quantize(pFloatBlock, pBlock1, numSamples);
+			quantize16(pFloatBlock, pBlock1, numSamples);
 			// if (settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock1, numSamples);
 			// else Quantize16(pFloatBlock, pBlock1, numSamples);
 		}
@@ -539,7 +669,7 @@ void DoBlocks(DXDriver* self)
 		if (blockSize2 > 0)
 		{
 			float* pFloatBlock;
-			numSamples = blockSize2 / 4; // GetSampleSizeBytes();
+			numSamples = blockSize2 / psy_audiodriversettings_framebytes(&self->settings);
 			pFloatBlock = self->driver._pCallback(
 					self->driver._callbackContext, &numSamples, &hostisplaying);
 				
@@ -553,7 +683,7 @@ void DoBlocks(DXDriver* self)
 			else if (_sampleValidBits == 16) {
 				//if (settings_->dither()) Quantize16WithDither(pFloatBlock, pBlock2, numSamples);
 				//else Quantize16(pFloatBlock, pBlock2, numSamples);
-				Quantize(pFloatBlock, pBlock2, numSamples);
+				quantize16(pFloatBlock, pBlock2, numSamples);
 			}
 			self->_lowMark += blockSize2;
 		}
@@ -578,7 +708,8 @@ void DoBlocks(DXDriver* self)
 			}
 #endif
 		}
-		self->_highMark = self->_lowMark + self->_bufferSize;
+		self->_highMark = self->_lowMark + 
+			psy_audiodriversettings_blockbytes(&self->settings);
 		if (SUCCEEDED(hr) && !self->_playing)
 		{
 			IDirectSoundBuffer8_SetCurrentPosition(self->_pBuffer, self->_highMark);						
@@ -612,43 +743,6 @@ int driver_close(psy_AudioDriver* driver)
 	return TRUE;
 }
 
-void Quantize(float *pin, int *piout, int c)
-{
-//	double const d2i = (1.5 * (1 << 26) * (1 << 26));
-	
-	do
-	{
-		int l;
-//		double res = ((double)pin[1]) + d2i;
-//		int r = *(int *)&res;
-		int r = f2i(pin[1]);
-
-		if (r < SHORT_MIN)
-		{
-			r = SHORT_MIN;
-		}
-		else if (r > SHORT_MAX)
-		{
-			r = SHORT_MAX;
-		}
-//		res = ((double)pin[0]) + d2i;
-//		int l = *(int *)&res;
-		l = f2i(pin[0]);
-
-		if (l < SHORT_MIN)
-		{
-			l = SHORT_MIN;
-		}
-		else if (l > SHORT_MAX)
-		{
-			l = SHORT_MAX;
-		}
-		*piout++ = (r << 16) | (WORD)l;
-		pin += 2;
-	}
-	while(--c);
-}
-
 BOOL isvistaorlater(void)
 {
 #if defined _MSC_VER > 1200
@@ -669,4 +763,100 @@ BOOL isvistaorlater(void)
 #else
 	return 0;
 #endif
+}
+bool createcaptureport(DXDriver* self, PortCapt* port)
+{
+	HRESULT hr;
+//	WAVEFORMATPCMEX wf;
+	WAVEFORMATEX wf;
+	DSCBUFFERDESC dscbd;
+	LPDIRECTSOUNDCAPTUREBUFFER cb;
+
+	// avoid opening a port twice
+	if (port->_pDs) return TRUE;
+	port->_machinepos = 0;
+	// Create IDirectSoundCapture using the selected capture device
+	if (FAILED(hr = DirectSoundCaptureCreate8(port->_pGuid, &port->_pDs, NULL))) {
+		self->error(0, "Failed to create Capture DirectSound Device");
+		return FALSE;
+	}
+	// Create the capture buffer	
+	preparewaveformat(&wf,
+		psy_audiodriversettings_numchannels(&self->settings),
+		psy_audiodriversettings_samplespersec(&self->settings),
+		psy_audiodriversettings_bitdepth(&self->settings),
+		psy_audiodriversettings_validbitdepth(&self->settings));	
+	ZeroMemory(&dscbd, sizeof(DSCBUFFERDESC));
+	dscbd.dwSize = sizeof(DSCBUFFERDESC);
+	dscbd.dwBufferBytes = self->_dsBufferSize;
+	dscbd.lpwfxFormat = (LPWAVEFORMATEX)(&wf);	
+	if (FAILED(hr = IDirectSoundCapture_CreateCaptureBuffer(port->_pDs, &dscbd,
+			&cb, NULL))) {
+		self->error(0, "Failed to create Capture DirectSound Buffer");
+		if (port->_pDs) {
+			IDirectSoundCapture_Release(port->_pDs);
+			port->_pDs = 0;
+		}
+		return FALSE;
+	}
+	if (FAILED(hr = IDirectSoundCapture_QueryInterface(cb,
+			&IID_IDirectSoundCaptureBuffer8, (void**)&port->_pBuffer))) {
+		self->error(0, "Failed to create Interface for Capture DirectSound Buffer(s)");
+		if (cb) {
+			IDirectSoundCaptureBuffer_Release(cb);
+			cb = 0;
+		}
+		if (port->_pDs) {
+			IDirectSoundCapture_Release(port->_pDs);
+			port->_pDs = 0;
+		}
+		return FALSE;
+	}
+	// 2* is a safety measure (Haven't been able to dig out why it crashes if it is exactly the size)
+	port->pleft = dsp.memory_alloc(2 * psy_audiodriversettings_blockbytes(&self->settings), 1);
+	port->pright = dsp.memory_alloc(2 * psy_audiodriversettings_blockbytes(&self->settings), 1);
+	dsp.clear(port->pleft, psy_audiodriversettings_blockbytes(&self->settings));
+	dsp.clear(port->pright, psy_audiodriversettings_blockbytes(&self->settings));	
+	return TRUE;
+}
+
+int addcaptureport(DXDriver* self, int idx)
+{
+	bool isplaying;
+	PortCapt* port;
+	PortEnums* cap;
+
+	isplaying = self->_running;
+	if (idx >= psy_list_size(self->_capEnums)) return FALSE;
+	if (idx < psy_table_size(&self->_portMapping) && 
+		(intptr_t) psy_table_at(&self->_portMapping, idx) != -1) return TRUE;
+
+	// if (isplaying) Stop();
+	port = (PortCapt*) malloc(sizeof(PortCapt));
+	if (port) {
+		cap = (PortEnums*) psy_list_at(self->_capEnums, idx);
+		if (cap) {
+			port->_pGuid = cap->guid;
+			psy_list_append(&self->_capPorts, port);
+			// if (psy_table_size(&self->_portMapping) <= idx) {
+			//		int oldsize = psy_table_size(&self->_portMapping);
+			//		_portMapping.resize(idx + 1);
+			//		for (int i = oldsize; i < _portMapping.size(); i++) _portMapping[i] = -1;
+			// }
+			// _portMapping[idx] = (int)(_capPorts.size() - 1);
+			// if (isplaying) return Start();
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+int removecaptureport(DXDriver* self, int idx)
+{
+	return FALSE;
+}
+
+void readbuffers(DXDriver* self, int index, float** pleft, float** pright, int numsamples)
+{
+
 }

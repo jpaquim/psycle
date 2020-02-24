@@ -61,7 +61,11 @@ typedef struct psy_EventDriver {
 } psy_EventDriver;
 
 
+#ifndef __x86_64
 typedef psy_EventDriver* (__cdecl *pfneventdriver_create)(void);
+#else
+typedef psy_EventDriver* (*pfneventdriver_create)(void);
+#endif
 
 #ifndef __x86_64
 EXPORT psy_EventDriver* __cdecl eventdriver_create(void);

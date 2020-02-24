@@ -139,7 +139,7 @@ void psy_audio_songfile_createmaster(psy_audio_SongFile* self)
 
 	machines_insertmaster(&self->song->machines,
 		machinefactory_makemachine(self->song->machinefactory,
-		MACH_MASTER, 0, 0));
+		MACH_MASTER, 0));
 	machines = psy_properties_findsection(self->workspaceproperties,
 		"machines");
 	if (!machines) {
