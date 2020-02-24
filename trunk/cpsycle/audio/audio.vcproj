@@ -199,6 +199,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\audiorecorder.c"
+				>
+			</File>
+			<File
 				RelativePath="src\buffer.c"
 				>
 				<FileConfiguration
@@ -1455,6 +1459,10 @@
 			>
 			<File
 				RelativePath="src\array.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\audiorecorder.h"
 				>
 			</File>
 			<File

@@ -25,7 +25,7 @@ typedef struct psy_audio_MachineFactory {
 void machinefactory_init(psy_audio_MachineFactory*, MachineCallback, psy_audio_PluginCatcher*);
 void machinefactory_dispose(psy_audio_MachineFactory*);
 psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory*, MachineType,
-	const char* plugincatchername, uintptr_t shellidx);
+	const char* plugincatchername);
 psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory*, MachineType,
 	const char* path, uintptr_t shellidx);
 void machinefactory_setoptions(psy_audio_MachineFactory*, MachineFactoryOptions options);

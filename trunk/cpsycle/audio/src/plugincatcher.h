@@ -33,7 +33,8 @@ void plugincatcher_save(psy_audio_PluginCatcher*);
 	const char* name);*/
 char* plugincatcher_modulepath(psy_audio_PluginCatcher*, MachineType, const char* path,
 	char* fullpath);
-void plugincatcher_catchername(psy_audio_PluginCatcher*, const char* path, char* name);
+uintptr_t plugincatcher_extractshellidx(const char* path);
+void plugincatcher_catchername(psy_audio_PluginCatcher*, const char* path, char* name, uintptr_t shellidx);
 const char* plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
 	int type);
 

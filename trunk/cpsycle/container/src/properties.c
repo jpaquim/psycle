@@ -28,15 +28,15 @@ void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType
 	self->children = 0;
 	self->parent = 0;
 	self->next = 0;	
-	self->dispose = 0;
-	memset(&self->item, 0, sizeof(psy_Property));
+	self->dispose = 0;    
+	memset(&self->item, 0, sizeof(psy_Property));    
 	self->item.key = strdup(key);
 	self->item.text = 0;
 	self->item.typ = typ;
 	self->item.hint = PSY_PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
 	self->item.id = -1;
-	self->item.save = 1;
+	self->item.save = 1;    
 }
 
 void properties_free(psy_Properties* self)
@@ -68,8 +68,11 @@ void properties_free(psy_Properties* self)
 psy_Properties* psy_properties_create(void)
 {
 	psy_Properties* rv;
-	rv = (psy_Properties*) malloc(sizeof(psy_Properties));	
-	psy_properties_init(rv, "root", PSY_PROPERTY_TYP_ROOT);
+        
+	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
+    if (rv) {	    
+        psy_properties_init(rv, "root", PSY_PROPERTY_TYP_ROOT);
+    }
 	return rv;
 }
 
@@ -79,8 +82,9 @@ psy_Properties* psy_properties_create_section(psy_Properties* self, const char* 
 	
 	assert(self);
 	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init(rv, name, PSY_PROPERTY_TYP_SECTION);
-	
+    if (rv) {
+        psy_properties_init(rv, name, PSY_PROPERTY_TYP_SECTION);
+    }
 	return psy_properties_append_property(self, rv);
 }
 

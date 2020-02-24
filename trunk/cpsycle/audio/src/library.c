@@ -167,6 +167,7 @@ void psy_library_load(psy_Library* self, const char* path)
 	
 	if (self->module == 0) {
 		self->err = dlerror();
+        perror("library load ");
 	}	
 }
 

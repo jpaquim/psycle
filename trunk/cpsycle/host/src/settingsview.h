@@ -30,6 +30,7 @@ typedef struct {
 	int currchoice;
 	int choicecount;
 	int lineheight;
+	int numblocklines;
 	int columnwidth;
 	int identwidth;	
 	psy_Properties* choiceproperty;

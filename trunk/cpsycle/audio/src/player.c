@@ -10,6 +10,7 @@
 #include "silentdriver.h"
 #include "kbddriver.h"
 #include <operations.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <rms.h>
@@ -568,6 +569,7 @@ void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties*
 	
 	player_unloaddriver(self);	
 	if (path) {
+        printf("driver path: %s\n", path);
 		psy_library_load(&self->drivermodule, path);	
 		if (self->drivermodule.module) {
 			pfndriver_create fpdrivercreate;

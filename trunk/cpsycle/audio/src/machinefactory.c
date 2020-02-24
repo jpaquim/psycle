@@ -11,6 +11,7 @@
 #include "duplicator2.h"
 #include "master.h"
 #include "mixer.h"
+#include "audiorecorder.h"
 #include "plugin.h"
 #include "luaplugin.h"
 #include "sampler.h"
@@ -49,7 +50,7 @@ MachineFactoryOptions machinefactory_options(psy_audio_MachineFactory* self)
 }
 
 psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, MachineType type,
-	const char* plugincatchername, uintptr_t shellidx)
+	const char* plugincatchername)
 {
 	char fullpath[_MAX_PATH];
 
@@ -58,7 +59,8 @@ psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, Ma
 	}
 	return machinefactory_makemachinefrompath(self, type,
 		plugincatcher_modulepath(self->catcher, type,
-		plugincatchername, fullpath), shellidx);
+		plugincatchername, fullpath),
+		plugincatcher_extractshellidx(plugincatchername));
 }
 
 psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
@@ -70,7 +72,9 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 	switch (type) {
 		case MACH_MASTER:
 		{
-			psy_audio_Master* master = (psy_audio_Master*)malloc(sizeof(psy_audio_Master));
+			psy_audio_Master* master;
+			
+			master = (psy_audio_Master*)malloc(sizeof(psy_audio_Master));
 			if (master) {
 				master_init(master, self->machinecallback);
 				rv = (psy_audio_Machine*) master;
@@ -81,7 +85,9 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 		break;
 		case MACH_DUMMY:
 		{
-			psy_audio_DummyMachine* dummy = (psy_audio_DummyMachine*)malloc(sizeof(psy_audio_DummyMachine));
+			psy_audio_DummyMachine* dummy;
+			
+			dummy = (psy_audio_DummyMachine*)malloc(sizeof(psy_audio_DummyMachine));
 			if (dummy) {
 				dummymachine_init(dummy, self->machinecallback);
 				rv = (psy_audio_Machine*) dummy;
@@ -92,7 +98,9 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 		break;
 		case MACH_DUPLICATOR:
 		{
-			psy_audio_Duplicator* duplicator = (psy_audio_Duplicator*)malloc(sizeof(psy_audio_Duplicator));
+			psy_audio_Duplicator* duplicator;
+			
+			duplicator = (psy_audio_Duplicator*)malloc(sizeof(psy_audio_Duplicator));
 			if (duplicator) {
 				psy_audio_duplicator_init(duplicator, self->machinecallback);
 				rv = (psy_audio_Machine*) duplicator;
@@ -103,7 +111,9 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 		break;
 		case MACH_DUPLICATOR2:
 		{
-			psy_audio_Duplicator2* duplicator2 = (psy_audio_Duplicator2*)malloc(sizeof(psy_audio_Duplicator2));
+			psy_audio_Duplicator2* duplicator2;
+			
+			duplicator2 = (psy_audio_Duplicator2*)malloc(sizeof(psy_audio_Duplicator2));
 			if (duplicator2) {
 				psy_audio_duplicator2_init(duplicator2, self->machinecallback);
 				rv = (psy_audio_Machine*) duplicator2;
@@ -114,11 +124,27 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 		break;
 		case MACH_MIXER:
 		{
-			psy_audio_Mixer* mixer = (psy_audio_Mixer*)malloc(sizeof(psy_audio_Mixer));
+			psy_audio_Mixer* mixer;
+			
+			mixer = (psy_audio_Mixer*)malloc(sizeof(psy_audio_Mixer));
 			if (mixer) {
 				mixer_init(mixer, self->machinecallback);
 				rv = (psy_audio_Machine*) mixer;
 			} else {
+				rv = 0;
+			}
+		}
+		break;
+		case MACH_RECORDER:
+		{
+			psy_audio_AudioRecorder* recorder;
+			
+			recorder = (psy_audio_AudioRecorder*)malloc(sizeof(psy_audio_AudioRecorder));
+			if (recorder) {
+				psy_audio_audiorecorder_init(recorder, self->machinecallback);
+				rv = (psy_audio_Machine*)recorder;
+			}
+			else {
 				rv = 0;
 			}
 		}

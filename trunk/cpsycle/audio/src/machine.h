@@ -19,18 +19,36 @@ extern "C" {
 
 #define NOMACHINE_INDEX UINTPTR_MAX
 
+typedef unsigned int (*fp_mcb_samplerate)(void*);
+typedef	unsigned int (*fp_mcb_bpm)(void*);
+typedef	psy_dsp_beat_t (*fp_mcb_beatspersample)(void*);
+typedef	psy_dsp_beat_t (*fp_mcb_currbeatsperline)(void*);
+typedef	struct psy_audio_Samples* (*fp_mcb_samples)(void*);
+typedef	struct psy_audio_Machines* (*fp_mcb_machines)(void*);
+typedef	struct psy_audio_Instruments* (*fp_mcb_instruments)(void*);	
+typedef	void (*fp_mcb_fileselect_load)(void*);
+typedef	void (*fp_mcb_fileselect_save)(void*);
+typedef	void (*fp_mcb_fileselect_directory)(void*);
+typedef	void (*fp_mcb_output)(void*, const char* text);
+typedef	bool (*fp_mcb_addcapture)(void*, int index);
+typedef	bool (*fp_mcb_removecapture)(void*, int index);
+typedef void (*fp_mcb_readbuffers)(void*, int index, float** pleft, float** pright, int numsamples);
+
 typedef struct MachineCallback {	
-	unsigned int (*samplerate)(void*);
-	unsigned int (*bpm)(void*);
-	psy_dsp_beat_t (*beatspersample)(void*);
-	psy_dsp_beat_t (*currbeatsperline)(void*);
-	struct psy_audio_Samples* (*samples)(void*);
-	struct psy_audio_Machines* (*machines)(void*);
-	struct psy_audio_Instruments* (*instruments)(void*);	
-	void (*fileselect_load)(void*);
-	void (*fileselect_save)(void*);
-	void (*fileselect_directory)(void*);
-	void (*output)(void*, const char* text);
+	fp_mcb_samplerate samplerate;
+	fp_mcb_bpm bpm;
+	fp_mcb_beatspersample beatspersample;
+	fp_mcb_currbeatsperline currbeatsperline;
+	fp_mcb_samples samples;
+	fp_mcb_machines machines;
+	fp_mcb_instruments instruments;	
+	fp_mcb_fileselect_load fileselect_load;
+	fp_mcb_fileselect_save fileselect_save;
+	fp_mcb_fileselect_directory fileselect_directory;
+	fp_mcb_output output;
+	fp_mcb_addcapture addcapture;
+	fp_mcb_removecapture removecapture;
+	fp_mcb_readbuffers readbuffers;
 	void* context;	
 } MachineCallback;
 
@@ -108,6 +126,9 @@ typedef	struct psy_audio_Samples* (*fp_machine_samples)(struct psy_audio_Machine
 typedef	struct psy_audio_Machines* (*fp_machine_machines)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Instruments* (*fp_machine_instruments)(struct psy_audio_Machine*);
 typedef void (*fp_machine_output)(struct psy_audio_Machine*, const char* text);
+typedef bool (*fp_machine_addcapture)(struct psy_audio_Machine*, int idx);
+typedef bool (*fp_machine_removecapture)(struct psy_audio_Machine*, int idx);
+typedef void (*fp_machine_readbuffers)(struct psy_audio_Machine*, int index, float** pleft, float** pright, int numsamples);
 
 typedef struct MachineVtable {
 	fp_machine_init init;
@@ -172,6 +193,9 @@ typedef struct MachineVtable {
 	fp_machine_machines machines;
 	fp_machine_instruments instruments;
 	fp_machine_output output;
+	fp_machine_addcapture addcapture;
+	fp_machine_removecapture removecapture;
+	fp_machine_readbuffers readbuffers;
 } MachineVtable;
 
 typedef struct psy_audio_Machine {
@@ -429,6 +453,21 @@ INLINE struct psy_audio_Machines* psy_audio_machine_machines(psy_audio_Machine* 
 INLINE struct psy_audio_Instruments* psy_audio_machine_instruments(psy_audio_Machine* self)
 {
 	return self->vtable->instruments(self);
+}
+
+INLINE bool psy_audio_machine_addcapture(psy_audio_Machine* self, int index)
+{
+	return self->vtable->addcapture(self, index);
+}
+
+INLINE bool psy_audio_machine_removecapture(psy_audio_Machine* self, int index)
+{
+	return self->vtable->removecapture(self, index);
+}
+
+INLINE bool psy_audio_machine_readbuffers(psy_audio_Machine* self, int index, float** pleft, float** pright, int numsamples)
+{
+	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
 }
 
 INLINE void psy_audio_machine_output(psy_audio_Machine* self, const char* text)

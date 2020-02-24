@@ -4,8 +4,8 @@
 #if !defined(psy_DEF_H)
 #define psy_DEF_H
 
-#include "../../detail/psyconf.h"
-#include "../../detail/stdint.h"
+#include "psyconf.h"
+#include "stdint.h"
 #include <stddef.h>
 #include "psyversion.h"
 
