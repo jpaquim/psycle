@@ -79,6 +79,11 @@ INLINE psy_ui_Component* psy_psy_ui_listbox_base(psy_ui_ListBox* self)
     return &self->component;
 }
 
+INLINE void psy_psy_ui_listbox_text(psy_ui_ListBox* self, char* text, uintptr_t index)
+{
+    self->imp->vtable->dev_text(self->imp, text, index);        
+}
+
 #ifdef __cplusplus
 }
 #endif

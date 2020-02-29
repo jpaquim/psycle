@@ -8,6 +8,20 @@
 #include <string.h>
 #include <stdlib.h>
 
+void frequencyrange_init(psy_audio_FrequencyRange* self,
+	double low, double high, double min, double max)
+{
+	self->low = low;
+	self->high = high;
+	self->min = min;
+	self->max = high;
+}
+
+int frequencyrange_intersect(psy_audio_FrequencyRange* self, double value)
+{
+	return value >= self->low && value <= self->high;
+}
+
 static void instrument_disposeentries(psy_audio_Instrument*);
 
 void instrumententry_init(psy_audio_InstrumentEntry* self)
@@ -17,6 +31,10 @@ void instrumententry_init(psy_audio_InstrumentEntry* self)
 	parameterrange_init(&self->keyrange, 0, NOTECOMMANDS_RELEASE - 1, 0,
 		NOTECOMMANDS_RELEASE - 1);
 	parameterrange_init(&self->velocityrange, 0, 0xFF, 0, 0xFF);
+	frequencyrange_init(&self->freqrange, 0, 0, 0, 0);	
+	self->use_keyrange = 1;
+	self->use_velrange = 0;
+	self->use_freqrange = 0;
 }
 
 psy_audio_InstrumentEntry* instrumententry_alloc(void)

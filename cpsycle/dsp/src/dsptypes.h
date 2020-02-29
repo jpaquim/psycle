@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define psy_dsp_PI 3.14159265358979323846
+
 typedef float psy_dsp_amp_t;
 typedef float psy_dsp_beat_t;
 typedef float psy_dsp_seconds_t;

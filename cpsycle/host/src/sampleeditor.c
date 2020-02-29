@@ -271,7 +271,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 {	
 	if (self->workspace->song && self->sample) {
 		psy_audio_PatternEvent event;
-		psy_audio_lock_enter();
+		psy_audio_exclusivelock_enter();
 		psy_list_free(self->samplerevents);
 		patternevent_init_all(&event,
 			(unsigned char) 48,
@@ -281,7 +281,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 			0, 0);	
 		patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
 		self->samplerevents = psy_list_create(&self->samplerentry);
-		psy_audio_lock_leave();
+		psy_audio_exclusivelock_leave();
 	}
 }
 
@@ -289,7 +289,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 {	
 	psy_audio_PatternEvent event;
 
-	psy_audio_lock_enter();
+	psy_audio_exclusivelock_enter();
 	psy_list_free(self->samplerevents);
 	patternevent_init_all(&event,
 		NOTECOMMANDS_RELEASE,
@@ -299,7 +299,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 		0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerentry);
 	patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
-	psy_audio_lock_leave();
+	psy_audio_exclusivelock_leave();
 }
 
 void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,

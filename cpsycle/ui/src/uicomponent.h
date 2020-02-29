@@ -495,6 +495,11 @@ INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* ch
 	self->imp->vtable->dev_insert(self->imp, child->imp, insertafter->imp);
 }
 
+INLINE void psy_ui_component_setwheelscroll(psy_ui_Component* self, int lines)
+{
+	self->wheelscroll = lines;
+}
+
 #ifdef __cplusplus
 }
 #endif

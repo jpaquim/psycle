@@ -34,6 +34,7 @@ void psy_luaimport_settarget(psy_LuaImport*, void* target);
 int psy_luaimport_open(psy_LuaImport*, const char* method);
 void psy_luaimport_pcall(psy_LuaImport*, int numret);
 void psy_luaimport_close(psy_LuaImport*);
+void psy_luaimport_findweakuserdata(psy_LuaImport*);
 
 #ifdef __cplusplus
 }

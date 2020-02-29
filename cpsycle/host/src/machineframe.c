@@ -30,6 +30,10 @@ static void machineframe_setfloatbar(MachineFrame*);
 static void machineframe_setdockbar(MachineFrame*);
 
 static void parameterbar_setpresetlist(ParameterBar*, psy_audio_Presets*);
+static void machineframe_buildbanks(MachineFrame*);
+static void machineframe_buildprograms(MachineFrame*);
+static void plugineditor_onprogramselected(MachineFrame*, psy_ui_Component* sender, int slot);
+static void plugineditor_onbankselected(MachineFrame*, psy_ui_Component* sender, int slot);
 
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 {				
@@ -64,13 +68,19 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 	psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->dock, &self->row0);
 	psy_ui_button_settext(&self->dock, "Dock");
-	psy_ui_component_setalign(&self->dock.component, psy_ui_ALIGN_LEFT);	
-	// row1 
-	// psy_ui_component_init(&self->row1, &self->component);
-	// psy_ui_component_enablealign(&self->row0);
-	// psy_ui_component_setalign(&self->row1, UI_ALIGN_TOP);
+	psy_ui_component_setalign(&self->dock.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_init(&self->presetsbox, &self->component);
-	psy_ui_component_setalign(&self->presetsbox.component, psy_ui_ALIGN_TOP);	
+	psy_ui_component_setalign(&self->presetsbox.component, psy_ui_ALIGN_TOP);
+	// row1
+	psy_ui_component_init(&self->row1, &self->component);
+	psy_ui_component_enablealign(&self->row1);
+	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_combobox_init(&self->bankselector, &self->row1);
+	psy_ui_combobox_setcharnumber(&self->bankselector, 20);
+	psy_ui_component_setalign(&self->bankselector.component, psy_ui_ALIGN_LEFT);
+	psy_ui_combobox_init(&self->programbox, &self->row1);
+	psy_ui_combobox_setcharnumber(&self->programbox, 32);
+	psy_ui_component_setalign(&self->programbox.component, psy_ui_ALIGN_LEFT);
 }
 
 void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
@@ -140,6 +150,10 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floate
 	} else {
 		machineframe_setdockbar(self);
 	}
+	psy_signal_connect(&self->parameterbar.bankselector.signal_selchanged, self,
+		plugineditor_onbankselected);
+	psy_signal_connect(&self->parameterbar.programbox.signal_selchanged, self,
+		plugineditor_onprogramselected);
 }
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
@@ -188,6 +202,60 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	}
 	else {
 		psy_ui_label_settext(&self->parameterbar.title, "");
+	}
+	machineframe_buildbanks(self);
+	machineframe_buildprograms(self);
+}
+
+void machineframe_buildprograms(MachineFrame* self)
+{
+	if (self->machine) {
+		uintptr_t numprograms;
+		uintptr_t i;
+
+		psy_ui_combobox_clear(&self->parameterbar.programbox);
+		numprograms = psy_audio_machine_numprograms(self->machine);
+		for (i = 0; i < numprograms; ++i) {
+			char name[256];
+
+			psy_audio_machine_programname(self->machine, 0, i, name);
+			psy_ui_combobox_addtext(&self->parameterbar.programbox, name);
+		}
+		psy_ui_combobox_setcursel(&self->parameterbar.programbox,
+			psy_audio_machine_currprogram(self->machine));
+	}
+}
+
+void machineframe_buildbanks(MachineFrame* self)
+{
+	if (self->machine) {
+		uintptr_t numbanks;
+		uintptr_t i;
+
+		psy_ui_combobox_clear(&self->parameterbar.bankselector);
+		numbanks = psy_audio_machine_numbanks(self->machine);
+		for (i = 0; i < numbanks; ++i) {
+			char name[256];
+
+			psy_audio_machine_bankname(self->machine, i, name);
+			psy_ui_combobox_addtext(&self->parameterbar.bankselector, name);
+		}
+		psy_ui_combobox_setcursel(&self->parameterbar.bankselector,
+			psy_audio_machine_currbank(self->machine));
+	}
+}
+
+void plugineditor_onbankselected(MachineFrame* self, psy_ui_Component* sender, int slot)
+{
+	if (self->machine) {
+		psy_audio_machine_setcurrbank(self->machine, slot);
+	}
+}
+
+void plugineditor_onprogramselected(MachineFrame* self, psy_ui_Component* sender, int slot)
+{
+	if (self->machine) {
+		psy_audio_machine_setcurrprogram(self->machine, slot);
 	}
 }
 

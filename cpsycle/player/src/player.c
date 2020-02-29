@@ -174,7 +174,7 @@ void cmdplayer_init(CmdPlayer* self)
     printf("init player\n");
 	cmdplayer_initenv(self);
     printf("init lock\n");
-	psy_audio_lock_init();
+	psy_audio_exclusivelock_init();
     printf("init dsp\n");
 	psy_dsp_noopt_init(&dsp);
     
@@ -290,7 +290,7 @@ void cmdplayer_dispose(CmdPlayer* self)
 	self->config = 0;	
 	plugincatcher_dispose(&self->plugincatcher);
 	machinefactory_dispose(&self->machinefactory);	
-	psy_audio_lock_dispose();
+	psy_audio_exclusivelock_dispose();
 }
 
 const char* cmdplayer_driverpath(CmdPlayer* self)
@@ -325,7 +325,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 
 	player_stop(&self->player);
 	oldsong = self->song;
-	psy_audio_lock_enter();	
+	psy_audio_exclusivelock_enter();	
 	self->song = psy_audio_song_allocinit(&self->machinefactory);	
 	songfile.song = self->song;
 	songfile.file = 0;
@@ -336,7 +336,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	}	
 	player_setsong(&self->player, self->song);
 	cmdplayer_applysongproperties(self);
-	psy_audio_lock_leave();
+	psy_audio_exclusivelock_leave();
 	psy_audio_song_deallocate(oldsong);
 	psy_audio_songfile_dispose(&songfile);
 }

@@ -8,12 +8,12 @@
 extern "C" {
 #endif
 
-void psy_audio_lock_init(void);
-void psy_audio_lock_dispose(void);
-void psy_audio_lock_enable(void);
-void psy_audio_lock_disable(void);
-void psy_audio_lock_enter(void);
-void psy_audio_lock_leave(void);
+void psy_audio_exclusivelock_init(void);
+void psy_audio_exclusivelock_dispose(void);
+void psy_audio_exclusivelock_enable(void);
+void psy_audio_exclusivelock_disable(void);
+void psy_audio_exclusivelock_enter(void);
+void psy_audio_exclusivelock_leave(void);
 
 #ifdef __cplusplus
 }

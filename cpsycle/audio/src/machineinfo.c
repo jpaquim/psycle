@@ -24,6 +24,35 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->shellidx = 0;
 }
 
+void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* other)
+{
+	self->Author = strdup(other->Author ? other->Author : "");
+	self->Command = strdup(other->Command ? other->Command : "");
+	self->Flags = other->Flags;
+	self->Name = strdup(other->Name ? other->Name : "");
+	self->ShortName = strdup(other->ShortName ? other->ShortName : "");
+	self->APIVersion = other->APIVersion;
+	self->PlugVersion = other->PlugVersion;
+	self->type = other->type;
+	self->modulepath = strdup(other->modulepath ? other->modulepath : "");
+	self->shellidx = other->shellidx;
+}
+
+void machineinfo_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* other)
+{
+	machineinfo_dispose(self);
+	self->Author = strdup(other->Author ? other->Author : "");
+	self->Command = strdup(other->Command ? other->Command : "");
+	self->Flags = other->Flags;
+	self->Name = strdup(other->Name ? other->Name : "");
+	self->ShortName = strdup(other->ShortName ? other->ShortName : "");
+	self->APIVersion = other->APIVersion;
+	self->PlugVersion = other->PlugVersion;
+	self->type = other->type;
+	self->modulepath = strdup(other->modulepath ? other->modulepath : "");
+	self->shellidx = other->shellidx;
+}
+
 void machineinfo_set(psy_audio_MachineInfo* self,
 		const char* author,
 		const char* command,

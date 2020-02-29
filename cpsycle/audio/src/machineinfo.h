@@ -56,6 +56,8 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo*,
 		int type,		
 		const char* modulepath,
 		int shellidx);
+void machineinfo_init_copy(psy_audio_MachineInfo*, psy_audio_MachineInfo* other);
+void machineinfo_copy(psy_audio_MachineInfo*, psy_audio_MachineInfo* other);
 
 #ifdef __cplusplus
 }

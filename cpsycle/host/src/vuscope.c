@@ -358,10 +358,10 @@ void vuscope_stop(VuScope* self)
 		srcmachine = machines_at(&self->workspace->song->machines,
 			self->wire.src);
 		if (srcmachine) {
-			psy_audio_lock_enter();
+			psy_audio_exclusivelock_enter();
 			psy_signal_disconnect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
-			psy_audio_lock_leave();			
+			psy_audio_exclusivelock_leave();			
 		}
 	}
 }

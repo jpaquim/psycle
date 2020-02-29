@@ -35,7 +35,7 @@ static void settingsview_onmousedoubleclick(SettingsView*, psy_ui_Component* sen
 static void settingsview_oneditchange(SettingsView*, psy_ui_Edit* sender);
 static void settingsview_oneditkeydown(SettingsView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
-static void settingsview_oninputdefinerchange(SettingsView* self,
+static void settingsview_oninputdefinerchange(SettingsView*,
 	InputDefiner* sender);
 static void settingsview_ondestroy(SettingsView*, psy_ui_Component* sender);
 static void settingsview_onsize(SettingsView*, psy_ui_Component* sender, psy_ui_Size*);
@@ -63,6 +63,7 @@ static void settingsview_appendtabbarsections(SettingsView*);
 static void settingsview_ontabbarchange(SettingsView*, psy_ui_Component* sender,
 	int tabindex);
 static void settingsview_adjustscroll(SettingsView*);
+static char* strrchrpos(char* str, char c, uintptr_t pos);
 
 void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Properties* properties)
@@ -74,7 +75,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->client, &self->component);
 	psy_ui_component_doublebuffer(&self->client);	
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	self->client.wheelscroll = 4;
+	psy_ui_component_setwheelscroll(&self->client, 4);
 	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
 	psy_ui_component_showverticalscrollbar(&self->client);	
 	psy_signal_connect(&self->client.signal_destroy, self,
@@ -252,8 +253,16 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 		numcolumnavgchars = (int)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
 		while (count > 0) {
 			unsigned int numoutput;
+			char* wrap;
 
 			numoutput = min(numcolumnavgchars, count);
+			if (numoutput < count) {
+				wrap = strrchrpos(str, ' ', numoutput);
+				if (wrap) {
+					++wrap;
+					numoutput = wrap - str;
+				}
+			}
 			psy_ui_textout(self->g, self->cpx + column * self->columnwidth,
 				self->cpy + self->dy + (self->numblocklines - 1) * self->lineheight, str, numoutput);
 			count -= numoutput;
@@ -263,6 +272,26 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 			}
 		}
 	}
+}
+
+char* strrchrpos(char* str, char c, uintptr_t pos)
+{
+	uintptr_t count;
+
+	if (pos >= strlen(str)) {
+		return 0;
+	}
+	count = pos;
+	while (1) {
+		if (str[count] == c) {
+			return str + count;
+		}
+		if (count == 0) {
+			break;
+		}
+		--count;
+	}
+	return 0;
 }
 
 void settingsview_drawvalue(SettingsView* self, psy_Properties* property,
@@ -587,8 +616,16 @@ void settingsview_countblocklines(SettingsView* self, psy_Properties* property)
 	numcolumnavgchars = (int)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
 	while (count > 0) {
 		unsigned int numoutput;
+		char* wrap;
 
-		numoutput = min(numcolumnavgchars, count);		
+		numoutput = min(numcolumnavgchars, count);
+		if (numoutput < count) {
+			wrap = strrchrpos(str, ' ', numoutput);
+			if (wrap) {
+				++wrap;
+				numoutput = wrap - str;
+			}
+		}
 		count -= numoutput;
 		str += numoutput;
 		if (count > 0) {

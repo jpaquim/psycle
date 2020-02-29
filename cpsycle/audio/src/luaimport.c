@@ -10,7 +10,6 @@
 
 static int psy_luaimport_get_method_optional(psy_LuaImport*,
 	const char*  method);
-static void psy_luaimport_find_weakuserdata(psy_LuaImport*);
 static int psy_luaimport_error_handler(lua_State* L);
 
 void psy_luaimport_init(psy_LuaImport* self, lua_State* L, void* target)
@@ -123,7 +122,7 @@ void psy_luaimport_close(psy_LuaImport* self)
 //  const LockIF* lh() const { return lh_; }  
 //  void* target() const { return target_; }
   
-void psy_luaimport_find_weakuserdata(psy_LuaImport* self)
+void psy_luaimport_findweakuserdata(psy_LuaImport* self)
 {
 	lua_getglobal(self->L_, "psycle");
 	if (!lua_isnil(self->L_, -1)) {
@@ -146,7 +145,7 @@ void psy_luaimport_find_weakuserdata(psy_LuaImport* self)
 int psy_luaimport_get_method_optional(psy_LuaImport* self, 
 	  const char*  method)
 {	
-	psy_luaimport_find_weakuserdata(self);
+	psy_luaimport_findweakuserdata(self);
 	if (lua_isnil(self->L_, -1)) {
 		static const char* msg = "LUAIMPORT NO PROXY";
 

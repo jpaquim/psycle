@@ -11,6 +11,42 @@
 #include <operations.h>
 #include <valuemapper.h>
 #include "plugin_interface.h"
+#include "../../detail/portable.h"
+
+
+/// Machinecallback
+static unsigned int machinecallback_samplerate(void* self) { return 44100;  }
+static unsigned int machinecallback_bpm(void* self) { return 125; }
+static psy_dsp_beat_t machinecallback_beatspersample(void* self) { return 512; }
+static psy_dsp_beat_t machinecallback_currbeatsperline(void* self) { return 4096; }
+static struct psy_audio_Samples* machinecallback_samples(void* self) { return 0; }
+static psy_audio_Machines* machinecallback_machines(void* self) { return 0; }
+static struct psy_audio_Instruments* machinecallback_instruments(void* self) { return 0; }
+static void machinecallback_fileselect_load(void* self) { }
+static void machinecallback_fileselect_save(void* self) { }
+static void machinecallback_fileselect_directory(void* self) { }
+static void machinecallback_output(void* self, const char* text) { }
+static bool machinecallback_addcapture(void* self, int index) { return 0; }
+static bool machinecallback_removecapture(void* self, int index) { return 0; }
+static void machinecallback_readbuffers(void* self, int index, float** pleft, float** pright, int numsamples) { }
+
+void machinecallback_initempty(MachineCallback* self)
+{
+	self->samplerate = (fp_mcb_samplerate)machinecallback_samplerate;
+	self->bpm = (fp_mcb_bpm)machinecallback_bpm;
+	self->beatspersample = (fp_mcb_beatspersample)machinecallback_beatspersample;
+	self->currbeatsperline = (fp_mcb_currbeatsperline)machinecallback_currbeatsperline;
+	self->samples = (fp_mcb_samples)machinecallback_samples;
+	self->machines = (fp_mcb_machines)machinecallback_machines;
+	self->instruments = (fp_mcb_instruments)machinecallback_instruments;
+	self->fileselect_load = (fp_mcb_fileselect_load)machinecallback_fileselect_load;
+	self->fileselect_save = (fp_mcb_fileselect_save)machinecallback_fileselect_save;
+	self->fileselect_directory = (fp_mcb_fileselect_directory)machinecallback_fileselect_directory;
+	self->output = (fp_mcb_output)machinecallback_output;
+	self->addcapture = (fp_mcb_addcapture)machinecallback_addcapture;
+	self->removecapture = (fp_mcb_removecapture)machinecallback_removecapture;
+	self->readbuffers = (fp_mcb_readbuffers)machinecallback_readbuffers;
+}
 
 static psy_audio_MachineInfo const macinfo = {	
 	MI_VERSION,
@@ -28,6 +64,7 @@ static psy_audio_MachineInfo const macinfo = {
 	MACH_UNDEFINED
 };
 
+static void reload(psy_audio_Machine* self) {}
 static psy_audio_Machine* clone(psy_audio_Machine* self) { return 0; }
 static psy_audio_Buffer* mix(psy_audio_Machine*, size_t slot, uintptr_t amount,
 	psy_audio_MachineSockets*, psy_audio_Machines*);
@@ -99,6 +136,30 @@ static psy_dsp_amp_range_t amprange(psy_audio_Machine* self)
 {
 	return PSY_DSP_AMP_RANGE_NATIVE;
 }
+// programs
+static void programname(psy_audio_Machine* self, int bnkidx, int prgIdx, char* val)
+{
+	psy_snprintf(val, 256, "%s", "Program 0");
+}
+static int numprograms(psy_audio_Machine* self)
+{
+	return 0;
+}
+static void setcurrprogram(psy_audio_Machine* self, int prgIdx) { }
+static int currprogram(psy_audio_Machine* self)
+{
+	return 0;
+}
+static void bankname(psy_audio_Machine* self, int bnkidx, char* val)
+{
+	psy_snprintf(val, 256, "%s", "Internal");
+}
+static int numbanks(psy_audio_Machine* self) { return 1; }
+static void setcurrbank(psy_audio_Machine* self, int prgIdx) { }
+static int currbank(psy_audio_Machine* self)
+{
+	return 0;
+}
 /// machinecallback
 static unsigned int samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -123,6 +184,7 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.clone = clone;
 		vtable.dispose = machine_dispose;
+		vtable.reload = reload;
 		vtable.mix = mix;
 		vtable.work = work;
 		vtable.mode = mode;
@@ -182,6 +244,14 @@ static void vtable_init(void)
 		vtable.buffermemorysize = buffermemorysize;
 		vtable.setbuffermemorysize = setbuffermemorysize;
 		vtable.amprange = amprange;
+		vtable.programname = programname;
+		vtable.numprograms = numprograms;
+		vtable.setcurrprogram = setcurrprogram;
+		vtable.currprogram = currprogram;
+		vtable.bankname = bankname;
+		vtable.numbanks = numbanks;
+		vtable.setcurrbank = setcurrbank;
+		vtable.currbank = currbank;
 		vtable_initialized = 1;
 	}
 }
@@ -192,7 +262,8 @@ void machine_init(psy_audio_Machine* self, MachineCallback callback)
 	vtable_init();
 	self->vtable = &vtable;
 	self->callback = callback;
-	psy_signal_init(&self->signal_worked);
+	self->err = 0;
+	psy_signal_init(&self->signal_worked);	
 }
 
 void machine_dispose(psy_audio_Machine* self)

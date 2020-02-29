@@ -16,6 +16,7 @@ typedef struct {
 
 void psy_ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);
 void psy_ui_editor_load(psy_ui_Editor*, const char* path);
+void psy_ui_editor_save(psy_ui_Editor*, const char* path);
 void psy_ui_editor_settext(psy_ui_Editor*, const char* text);
 void psy_ui_editor_addtext(psy_ui_Editor*, const char* text);
 void psy_ui_editor_clear(psy_ui_Editor*);

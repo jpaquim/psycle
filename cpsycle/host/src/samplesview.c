@@ -460,12 +460,12 @@ void samplesview_ondeletesample(SamplesView* self, psy_ui_Component* sender)
 		SampleIndex index;
 			
 		index = samplesbox_selected(&self->samplesbox);
-		psy_audio_lock_enter();
+		psy_audio_exclusivelock_enter();
 		psy_audio_samples_remove(&self->workspace->song->samples, index);
 		instruments_remove(&self->workspace->song->instruments,
 			index.subslot);
 		samplesview_setsample(self, index);
-		psy_audio_lock_leave();
+		psy_audio_exclusivelock_leave();
 	}
 }
 

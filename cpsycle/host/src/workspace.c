@@ -124,7 +124,7 @@ void history_add(History* self, int viewid, int sequenceentryid)
 
 void workspace_init(Workspace* self, void* handle)
 {	
-	psy_audio_lock_init();
+	psy_audio_exclusivelock_init();
 #ifdef PSYCLE_USE_SSE
 	psy_dsp_sse2_init(&dsp);
 #else
@@ -222,7 +222,7 @@ void workspace_dispose(Workspace* self)
 	properties_free(self->cmds);
 	sequenceselection_dispose(&self->sequenceselection);
 	free(self->dialbitmappath);
-	psy_audio_lock_dispose();
+	psy_audio_exclusivelock_dispose();
 }
 
 void workspace_disposesignals(Workspace* self)
@@ -1330,11 +1330,11 @@ void workspace_loadsong(Workspace* self, const char* path)
 			workspace_onterminaloutput);
 		songfile.song = song;
 		songfile.file = 0;		
-		psy_audio_lock_enter();
+		psy_audio_exclusivelock_enter();
 		self->songcbk = song;
 		if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
 			self->songcbk = self->song;
-			psy_audio_lock_leave();			
+			psy_audio_exclusivelock_leave();			
 			psy_audio_song_deallocate(song);
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
@@ -1347,7 +1347,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 			self->filename = strdup(path);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG);
 			psy_audio_songfile_dispose(&songfile);
-			psy_audio_lock_leave();	
+			psy_audio_exclusivelock_leave();	
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
@@ -1366,7 +1366,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 	history_clear(&self->history);
 	oldsong = self->song;
 	player_stop(&self->player);
-	psy_audio_lock_enter();	
+	psy_audio_exclusivelock_enter();	
 	self->song = song;
 	self->songcbk = song;
 	player_setsong(&self->player, self->song);
@@ -1377,7 +1377,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 	psy_signal_emit(&self->signal_songchanged, self, 1, flag);
 	self->lastentry = 0;
 	workspace_disposesequencepaste(self);
-	psy_audio_lock_leave();
+	psy_audio_exclusivelock_leave();
 	psy_audio_song_deallocate(oldsong);	
 }
 

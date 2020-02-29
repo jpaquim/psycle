@@ -21,6 +21,7 @@ typedef struct {
 	psy_ui_Component titlerow;
 	psy_ui_Component row0;
 	psy_ui_Component row1;
+	psy_ui_Component row2;
 	psy_ui_Label title;
 	psy_ui_Button floatview;
 	psy_ui_Button close;
@@ -29,6 +30,8 @@ typedef struct {
 	psy_ui_Button help;
 	psy_ui_Button dock;
 	psy_ui_ComboBox presetsbox;
+	psy_ui_ComboBox bankselector;
+	psy_ui_ComboBox programbox;
 	psy_audio_Presets* presets;
 } ParameterBar;
 

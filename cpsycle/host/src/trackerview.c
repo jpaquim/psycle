@@ -453,7 +453,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	trackergrid_vtable_init(self);
 	self->component.vtable = &trackergrid_vtable;
-	psy_ui_component_doublebuffer(&self->component);	
+	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setwheelscroll(&self->component, 4);
 	self->view = view;
 	self->editmode = TRACKERGRID_EDITMODE_SONG;
 	self->hasselection = 0;	
@@ -488,7 +489,6 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->dx = 0;
 	self->dy = 0;	
 	trackergrid_computecolumns(self, 9);		
-	self->component.wheelscroll = 4;	
 }
 
 void trackerview_initcolumns(TrackerView* self)

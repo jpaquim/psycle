@@ -47,7 +47,6 @@ static int isplugin(int type);
 static int onenumdir(psy_audio_PluginCatcher*, const char* path, int flag);
 static int onpropertiesenum(psy_audio_PluginCatcher*, psy_Properties*, int level);
 static int pathhasextension(const char* path);
-static char* replace_char(char* str, char c, char r);
 static void plugincatcher_scan_multipath(psy_audio_PluginCatcher*,
 	const char* multipath, const char* wildcard, int option);
 
@@ -189,14 +188,6 @@ int isplugin(int type)
 		type == MACH_LADSPA;
 }
 
-char* replace_char(char* str, char c, char r)
-{
-	char* p;
-		
-	for (p = strchr(str, c); p != 0; p = strchr(p + 1, c)) *p = r;
-	return p;
-}
-
 int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 {	
 	psy_audio_MachineInfo macinfo;
@@ -249,8 +240,8 @@ void plugincatcher_catchername(psy_audio_PluginCatcher* self, const char* path, 
 	
 	psy_dir_extract_path(path, prefix, rv, ext);
 	psy_strlwr(rv);	
-	replace_char(rv, ' ', '-');
-	replace_char(rv, '_', '-');
+	psy_replacechar(rv, ' ', '-');
+	psy_replacechar(rv, '_', '-');
 	psy_snprintf(rv, 256, "%s:%d", rv, (int) shellidx);
 }
 
