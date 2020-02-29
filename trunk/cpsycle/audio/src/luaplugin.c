@@ -607,7 +607,8 @@ int luamachine_setparameters(lua_State* L)
 int luamachine_addparameters(lua_State* L)
 {
 	psy_audio_LuaMachine* self;
-
+	size_t len;
+	
 	self = psyclescript_checkself(L, 1, luamachine_meta);		
 	lua_getfield(L, 1, "params");
 	lua_pushvalue(L, 2);
@@ -616,7 +617,6 @@ int luamachine_addparameters(lua_State* L)
 	lua_getfield(L, 2, "opairs");
 	lua_pushvalue(L, -2);
 	lua_call(L, 1, 2);
-	size_t len;
 	// iter, self (t), nil
 	for (lua_pushnil(L); luaL_orderednext(L);)
 	{

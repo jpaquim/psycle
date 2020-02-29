@@ -472,8 +472,10 @@ int psy_audio_luabind_array_index(lua_State *L)
 	return 1;
 	} else {
 	  size_t len;
+	  const char* key;
+
 	  luaL_checkudata(L, 1, luaarraybind_meta);
-	  const char* key = luaL_checklstring(L, 2, &len);
+	  key = luaL_checklstring(L, 2, &len);
 	  lua_getmetatable(L, 1);
 	  for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
 	    const char* method = luaL_checklstring(L, -2, &len);
@@ -678,9 +680,10 @@ int array_method_size(lua_State* L)
 int array_copy(lua_State* L)
 {
 	int n;
+	psy_audio_Array* dest;
 	
 	n = lua_gettop(L);
-	psy_audio_Array* dest = *(psy_audio_Array **)luaL_checkudata(L, 1, luaarraybind_meta);
+	dest = *(psy_audio_Array **)luaL_checkudata(L, 1, luaarraybind_meta);
 	if (n==3) {
 		uintptr_t pos = (uintptr_t) luaL_checknumber (L, 2);
 		psy_audio_Array* src = *(psy_audio_Array **)luaL_checkudata(L, 3, luaarraybind_meta);
@@ -770,9 +773,10 @@ int array_mul(lua_State* L)
 {
 	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
 		psy_audio_Array* rv;
+		psy_audio_Array* v;
 
 		rv = create_copy_array(L, 1);
-		psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
+		 v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
 		luaL_argcheck(L, psy_audio_array_len(rv) == psy_audio_array_len(v), 2, "size not compatible");
 		psy_audio_array_mul_array(rv, v);
 	}
@@ -800,9 +804,10 @@ int array_div(lua_State* L)
 {
 	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
 		psy_audio_Array* rv;
+		psy_audio_Array* v;
 
 		rv = create_copy_array(L, 1);
-		psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
+		v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
 		luaL_argcheck(L, psy_audio_array_len(rv) == psy_audio_array_len(v), 2, "size not compatible");
 		psy_audio_array_div_array(rv, v);
 	}
@@ -831,9 +836,10 @@ int array_add(lua_State* L)
 {
 	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
 		psy_audio_Array* rv;
+		psy_audio_Array* v;
 
 		rv = create_copy_array(L, 1);
-		psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
+		v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
 		luaL_argcheck(L, psy_audio_array_len(rv) == psy_audio_array_len(v), 2, "size not compatible");
 		psy_audio_array_add_array(rv, v);
 	}
@@ -862,9 +868,10 @@ int array_sub(lua_State* L)
 {
 	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
 		psy_audio_Array* rv;
+		psy_audio_Array* v;
 
 		rv = create_copy_array(L, 1);
-		psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
+		v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
 		luaL_argcheck(L, psy_audio_array_len(rv) == psy_audio_array_len(v), 2, "size not compatible");
 		psy_audio_array_sub_array(rv, v);
 	}

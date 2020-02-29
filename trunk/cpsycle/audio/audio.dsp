@@ -217,6 +217,10 @@ SOURCE=.\src\library.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\lock.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\luaarray.c
 # End Source File
 # Begin Source File
@@ -571,6 +575,14 @@ SOURCE=.\src\waveio.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\waveosc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\waveosctables.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\wavsongio.c
 # End Source File
 # Begin Source File
@@ -664,6 +676,10 @@ SOURCE=.\src\ladspaplugin.h
 # Begin Source File
 
 SOURCE=.\src\library.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\lock.h
 # End Source File
 # Begin Source File
 
@@ -820,6 +836,14 @@ SOURCE=.\src\vstplugin.h
 # Begin Source File
 
 SOURCE=.\src\waveio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\waveosc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\waveosctables.h
 # End Source File
 # Begin Source File
 

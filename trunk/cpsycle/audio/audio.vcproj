@@ -565,6 +565,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\lock.c"
+				>
+			</File>
+			<File
 				RelativePath="src\luaarray.c"
 				>
 				<FileConfiguration
@@ -1409,6 +1413,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\waveosc.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\waveosctables.c"
+				>
+			</File>
+			<File
 				RelativePath="src\wavsongio.c"
 				>
 				<FileConfiguration
@@ -1535,6 +1547,10 @@
 			</File>
 			<File
 				RelativePath="src\library.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\lock.h"
 				>
 			</File>
 			<File
@@ -1691,6 +1707,14 @@
 			</File>
 			<File
 				RelativePath="src\waveio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\waveosc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\waveosctables.h"
 				>
 			</File>
 			<File

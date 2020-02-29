@@ -139,11 +139,14 @@ void constructwave(double fh, psy_audio_Sample* wave,
 void psy_audio_waveosctables_makesaw(float* data, int num, int maxharmonic)
 {
     double gain = 0.5 / 0.777;
-    for (int h = 1; h <= maxharmonic; ++h) {
+	int h;
+	int i;
+
+    for (h = 1; h <= maxharmonic; ++h) {
         double amplitude = gain / h;
         double to_angle = 2 * psy_dsp_PI / num * h;
-        for (int i = 0; i < num; ++i) {
-            data[i] += sin(pow(1.0, h + 1) * i * to_angle) * amplitude;
+        for (i = 0; i < num; ++i) {
+            data[i] += (float)(sin(pow(1.0, h + 1) * i * to_angle) * amplitude);
         }
     }
 }
@@ -151,22 +154,27 @@ void psy_audio_waveosctables_makesaw(float* data, int num, int maxharmonic)
 void psy_audio_waveosctables_makesqr(float* data, int num, int maxharmonic)
 {
     double gain = 0.5 / 0.777;
-    for (int h = 1; h <= maxharmonic; h = h + 2) {
+	int h;
+	int i;
+
+    for (h = 1; h <= maxharmonic; h = h + 2) {
         double amplitude = gain / h;
         double to_angle = 2 * psy_dsp_PI / num * h;
-        for (int i = 0; i < num; ++i) {
-            data[i] += sin(i * to_angle) * amplitude;
+        for (i = 0; i < num; ++i) {
+            data[i] += (float)(sin(i * to_angle) * amplitude);
         }
     }
 }
 
 void psy_audio_waveosctables_maketri(float* data, int num, int maxharmonic)
 {
+	int h;
     // double gain = 0.5 / 0.777;
-    for (int h = 1; h <= maxharmonic; h = h + 2) {
+    for (h = 1; h <= maxharmonic; h = h + 2) {
+		int i;
         double to_angle = 2 * psy_dsp_PI / num * h;
-        for (int i = 0; i < num; ++i) {
-            data[i] += pow(-1.0, (h - 1) / 2.0) / (h * h) * sin(i * to_angle);
+        for (i = 0; i < num; ++i) {
+            data[i] += (float)(pow(-1.0, (h - 1) / 2.0) / (h * h) * sin(i * to_angle));
         }
     }
 }
@@ -174,7 +182,9 @@ void psy_audio_waveosctables_maketri(float* data, int num, int maxharmonic)
 void psy_audio_waveosctables_makesin(float* data, int num, int maxharmonic)
 {
     double to_angle = 2 * psy_dsp_PI / num;
-    for (int i = 0; i < num; ++i) {
-        data[i] = sin(i * to_angle);
+	int i;
+
+    for (i = 0; i < num; ++i) {
+        data[i] = (float)(sin(i * to_angle));
     }
 }
