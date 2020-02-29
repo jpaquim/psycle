@@ -31,6 +31,7 @@ static void machineproxy_sequencerlinetick(psy_audio_MachineProxy*);
 static psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy*, psy_List* events);
 static void machineproxy_stop(psy_audio_MachineProxy*);
 static void machineproxy_dispose(psy_audio_MachineProxy*);
+static void machineproxy_reload(psy_audio_MachineProxy*);
 static int machineproxy_mode(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numinputs(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy*);
@@ -85,7 +86,15 @@ static psy_audio_Buffer* machineproxy_buffermemory(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_buffermemorysize(psy_audio_MachineProxy*);
 static void machineproxy_setbuffermemorysize(psy_audio_MachineProxy*, uintptr_t);
 static psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy*);
-
+// programs
+static void machineproxy_programname(psy_audio_MachineProxy*, int bnkidx, int prgIdx, char* val);
+static int machineproxy_numprograms(psy_audio_MachineProxy*);
+static void machineproxy_setcurrprogram(psy_audio_MachineProxy*, int prgIdx);
+static int machineproxy_currprogram(psy_audio_MachineProxy*);
+static void machineproxy_bankname(psy_audio_MachineProxy*, int bnkidx, char* val);
+static int machineproxy_numbanks(psy_audio_MachineProxy*);
+static void machineproxy_setcurrbank(psy_audio_MachineProxy*, int prgIdx);
+static int machineproxy_currbank(psy_audio_MachineProxy*);
 
 #if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
@@ -126,6 +135,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_sequencerinsert;
 		vtable.stop = (fp_machine_stop) machineproxy_stop;
 		vtable.dispose = (fp_machine_dispose) machineproxy_dispose;
+		vtable.reload = (fp_machine_reload) machineproxy_reload;
 		vtable.mode = (fp_machine_mode) machineproxy_mode;
 		vtable.numinputs = (fp_machine_numinputs) machineproxy_numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) machineproxy_numoutputs;
@@ -197,6 +207,14 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
 			machineproxy_buffermemory;
 		vtable.amprange = (fp_machine_amprange) machineproxy_amprange;
+		vtable.programname = (fp_machine_programname) machineproxy_programname;
+		vtable.numprograms = (fp_machine_numprograms) machineproxy_numprograms;
+		vtable.setcurrprogram = (fp_machine_setcurrprogram) machineproxy_setcurrprogram;
+		vtable.currprogram = (fp_machine_currprogram) machineproxy_currprogram;
+		vtable.bankname = (fp_machine_bankname) machineproxy_bankname;
+		vtable.numbanks = (fp_machine_numbanks) machineproxy_numbanks;
+		vtable.setcurrbank = (fp_machine_setcurrbank) machineproxy_setcurrbank;
+		vtable.currbank = (fp_machine_currbank) machineproxy_currbank;
 		vtable_initialized = 1;
 	}
 }
@@ -259,6 +277,10 @@ void machineproxy_generateaudio(psy_audio_MachineProxy* self, psy_audio_BufferCo
 #endif		
 		{
 			psy_audio_machine_generateaudio(self->client, bc);
+			if (self->client->err) {
+				self->crashed = 1;
+				FilterException(self, "generateaudio", self->client->err, 0);
+			}
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "generateaudio", GetExceptionCode(),
@@ -355,6 +377,24 @@ void machineproxy_dispose(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "dispose", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_reload(psy_audio_MachineProxy* self)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_reload(self->client);			
+
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "reload", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		
@@ -1313,6 +1353,155 @@ psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy* self, psy_List* e
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "sequencerinsert", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	
+	return rv;
+}
+
+void machineproxy_programname(psy_audio_MachineProxy* self, int bnkidx, int prgIdx, char* val)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_programname(self->client, bnkidx, prgIdx, val);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "programname",
+			GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+int machineproxy_numprograms(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_numprograms(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "numprograms", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void machineproxy_bankname(psy_audio_MachineProxy* self, int bnkidx, char* val)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_bankname(self->client, bnkidx, val);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "bankname",
+			GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+int machineproxy_numbanks(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_numbanks(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "numbanks", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void machineproxy_setcurrprogram(psy_audio_MachineProxy* self, int prgIdx)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_setcurrprogram(self->client, prgIdx);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "programname",
+			GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+int machineproxy_currprogram(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_currprogram(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "currprogram", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+void machineproxy_setcurrbank(psy_audio_MachineProxy* self, int prgIdx)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_setcurrbank(self->client, prgIdx);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "bankname",
+			GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+int machineproxy_currbank(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_currbank(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "currbank", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

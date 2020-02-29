@@ -14,18 +14,41 @@ extern "C" {
 typedef struct {
 	psy_audio_Machine* machine;
 	psy_audio_BufferContext* bc;
+	int numparameters_;
+	int numcols_;
+	int numprograms_;	
 } psy_audio_LuaMachine;
+
+void psy_audio_luamachine_init(psy_audio_LuaMachine*);
+
+INLINE void luamachine_setnumparameters(psy_audio_LuaMachine* self, int num)
+{
+	self->numparameters_ = num;
+}
+
+INLINE int luamachine_numparameters(psy_audio_LuaMachine* self)
+{
+	return self->numparameters_;
+}
+
+struct psy_audio_Lock;
 
 typedef struct {
 	psy_audio_CustomMachine custommachine;
 	psy_audio_PsycleScript script;
 	psy_audio_LuaMachine* client;
 	psy_audio_MachineInfo* plugininfo;
+	struct psy_audio_Lock* lock;
 } psy_audio_LuaPlugin;
 
 void psy_audio_luaplugin_init(psy_audio_LuaPlugin*, MachineCallback,
 	const char* path);
 int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo*);
+
+INLINE psy_audio_Machine* psy_audio_luaplugin_base(psy_audio_LuaPlugin* self)
+{
+	return &(self->custommachine.machine);
+}
 
 #ifdef __cplusplus
 }

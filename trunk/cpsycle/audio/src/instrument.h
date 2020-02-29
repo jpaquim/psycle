@@ -15,6 +15,16 @@
 extern "C" {
 #endif
 
+typedef struct {
+	double low;
+	double high; // including
+	double min;
+	double max;
+} psy_audio_FrequencyRange;
+
+void frequencyrange_init(psy_audio_FrequencyRange* self,
+	double low, double high, double min, double max);
+
 /// When a new note comes to play in a channel, and there is still one playing
 /// in it, do this on the currently playing note:
 typedef enum {
@@ -30,8 +40,12 @@ typedef enum {
 
 typedef struct {
 	SampleIndex sampleindex;
+	psy_audio_FrequencyRange freqrange;
 	psy_audio_ParameterRange keyrange;
-	psy_audio_ParameterRange velocityrange;
+	psy_audio_ParameterRange velocityrange;	
+	int use_keyrange;
+	int use_velrange;
+	int use_freqrange;
 } psy_audio_InstrumentEntry;
 
 void instrumententry_init(psy_audio_InstrumentEntry*);

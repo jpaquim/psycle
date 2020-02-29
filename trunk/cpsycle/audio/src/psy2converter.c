@@ -338,3 +338,6 @@ int convertindex(int index)
 	return rv;
 }
 
+void psy_audio_psy2converter_retweak(int type, int parameter, int* integral_value)
+{
+}

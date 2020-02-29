@@ -13,6 +13,7 @@
 #include <dir.h>
 #include <stdlib.h>
 #include <string.h>
+#include <exclusivelock.h>
 #include "../../detail/portable.h"
 
 #if defined DIVERSALIS__OS__UNIX
@@ -1833,12 +1834,12 @@ void machinewireview_onnewmachineselected(MachineView* self,
 			machines_changeslot(self->wireview.machines, slot);
 			self->wireview.addeffect = 0;
 		} else
-		if (self->newmachine.pluginsview.calledby == 10) {
+		if (self->newmachine.pluginsview.calledby == 10) {			
 			machines_insert(self->wireview.machines,
 				machines_slot(self->wireview.machines), machine);
-		} else {
+		} else {			
 			machines_changeslot(self->wireview.machines,
-				machines_append(self->wireview.machines, machine));
+				machines_append(self->wireview.machines, machine));			
 		}
 		tabbar_select(&self->tabbar, 0);
 	}	

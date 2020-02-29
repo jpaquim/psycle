@@ -95,7 +95,7 @@ void mainframe_init(MainFrame* self)
 	// create empty status bar
 	psy_ui_component_init(&self->statusbar, &self->component);
 	psy_ui_component_setalign(&self->statusbar, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_enablealign(&self->statusbar);
+	psy_ui_component_enablealign(&self->statusbar);	
 	psy_ui_terminal_init(&self->terminal, &self->component);
 	psy_signal_connect(&self->workspace.signal_terminal_warning, self,
 		mainframe_onterminalwarning);
@@ -103,9 +103,10 @@ void mainframe_init(MainFrame* self)
 		mainframe_onterminaloutput);
 	psy_signal_connect(&self->workspace.signal_terminal_error, self,
 		mainframe_onterminalerror);
-	psy_ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_hide(&self->terminal.component);
-	psy_ui_component_resize(&self->terminal.component, 0, 100);
+	psy_ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);	
+	psy_ui_component_resize(&self->terminal.component, 0, 0);
+	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
+	psy_ui_component_setalign(&self->splitbarterminal.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);	
 	psy_signal_connect(&self->component.signal_keydown, self, mainframe_onkeydown);
 	psy_signal_connect(&self->component.signal_keyup, self, mainframe_onkeyup);
@@ -273,7 +274,7 @@ void mainframe_initstatusbar(MainFrame* self)
 {	
 	psy_ui_Margin margin;
 		
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));	
 	// zoom
@@ -491,11 +492,12 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		tabbar_select(&self->samplesview.clienttabbar, 2);
 	} else
 	if (cmd.id == CMD_IMM_TERMINAL) {
-		if (psy_ui_component_visible(&self->terminal.component)) {
-			psy_ui_component_hide(&self->terminal.component);
+		psy_ui_Size size = psy_ui_component_size(&self->terminal.component);
+		if (size.height > 0) {
+			psy_ui_component_resize(&self->terminal.component, 0, 0);
 			psy_ui_component_align(&self->component);
 		} else {								
-			psy_ui_component_show(&self->terminal.component);
+			psy_ui_component_resize(&self->terminal.component, 0, 100);
 			psy_ui_component_align(&self->component);		
 		}
 	}

@@ -150,7 +150,8 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	}
 	self->component.vtable = &pluginsview_vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_showverticalscrollbar(&self->component);	
+	psy_ui_component_showverticalscrollbar(&self->component);
+	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pluginsview_ondestroy);	
 	psy_signal_connect(&self->component.signal_size, self,
@@ -315,6 +316,7 @@ void pluginsview_onscroll(PluginsView* self, psy_ui_Component* sender,
 
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {
+	psy_ui_component_setfocus(&self->component);
 	pluginsview_hittest(self, ev->x, ev->y);
 	psy_ui_component_invalidate(&self->component);
 	psy_signal_emit(&self->signal_changed, self, 1, self->selectedplugin);

@@ -17,6 +17,7 @@
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "songio.h"
+#include "../../detail/portable.h"
 
 static const VstInt32 kBlockSize = 512;
 static const VstInt32 kNumProcessCycles = 5;
@@ -70,6 +71,15 @@ static psy_dsp_amp_range_t amprange(psy_audio_VstPlugin* self)
 {
 	return PSY_DSP_AMP_RANGE_VST;
 }
+// programs
+static void programname(psy_audio_VstPlugin*, int bnkidx, int prgIdx, char* val);
+static int numprograms(psy_audio_VstPlugin*);
+static void setcurrprogram(psy_audio_VstPlugin*, int prgIdx);
+static int currprogram(psy_audio_VstPlugin*);
+static void bankname(psy_audio_VstPlugin*, int bnkidx, char* val);
+static int numbanks(psy_audio_VstPlugin*);
+static void setcurrbank(psy_audio_VstPlugin*, int bnkIdx);
+static int currbank(psy_audio_VstPlugin*);
 
 static void vstplugin_onfileselect(psy_audio_VstPlugin*, struct VstFileSelect*);
 
@@ -104,6 +114,14 @@ static void vtable_init(psy_audio_VstPlugin* self)
 		vtable.editorsize = (fp_machine_editorsize) editorsize;
 		vtable.editoridle = (fp_machine_editoridle) editoridle;
 		vtable.amprange = (fp_machine_amprange) amprange;
+		vtable.programname = (fp_machine_programname) programname;
+		vtable.numprograms = (fp_machine_numprograms) numprograms;
+		vtable.setcurrprogram = (fp_machine_setcurrprogram) setcurrprogram;
+		vtable.currprogram = (fp_machine_currprogram) currprogram;
+		vtable.bankname = (fp_machine_bankname) bankname;
+		vtable.numbanks = (fp_machine_numbanks) numbanks;
+		vtable.setcurrbank = (fp_machine_setcurrbank) setcurrbank;
+		vtable.currbank = (fp_machine_currbank) currbank;
 		vtable_initialized = 1;
 	}
 }
@@ -781,4 +799,48 @@ void vstplugin_onfileselect(psy_audio_VstPlugin* self,
 		default:
 		break;
 	}
+}
+
+void programname(psy_audio_VstPlugin* self, int bnkidx, int prgIdx, char* val)
+{
+	self->effect->dispatcher(self->effect, effGetProgramNameIndexed, bnkidx * 128 + prgIdx, -1, val, 0);
+}
+
+int numprograms(psy_audio_VstPlugin* self)
+{
+	return self->effect->numPrograms;
+}
+
+void setcurrprogram(psy_audio_VstPlugin* self, int prgIdx)
+{
+	self->effect->dispatcher(self->effect, effSetProgram, 0, prgIdx, 0, 0);
+}
+
+int currprogram(psy_audio_VstPlugin* self)
+{
+	return self->effect->dispatcher(self->effect, effGetProgram, 0, 0, 0, 0);
+}
+
+void bankname(psy_audio_VstPlugin* self, int bnkidx, char* val)
+{
+	if (bnkidx < numbanks(self)) {
+		psy_snprintf(val, 256, "Internal %d", bnkidx + 1);
+	} else {
+		val[0] = '\0';
+	}
+}
+
+int numbanks(psy_audio_VstPlugin* self)
+{
+	return (numprograms(self) / 128) + 1;
+}
+
+void setcurrbank(psy_audio_VstPlugin* self, int bnkIdx)
+{
+	setcurrprogram(self, bnkIdx * 128 + currprogram(self));
+}
+
+int currbank(psy_audio_VstPlugin* self)
+{
+	return currprogram(self) / 128;
 }

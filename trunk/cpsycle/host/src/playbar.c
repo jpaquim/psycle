@@ -93,7 +93,7 @@ void playbar_initalign(PlayBar* self)
 
 void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 {
-	psy_audio_lock_enter();
+	psy_audio_exclusivelock_enter();
 	switch (psy_ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
 			player_stop(self->player);
@@ -119,7 +119,7 @@ void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 			startplay(self);
 		break;
 	}
-	psy_audio_lock_leave();
+	psy_audio_exclusivelock_leave();
 }
 
 void onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
@@ -186,7 +186,7 @@ void startplay(PlayBar* self)
 	editposition = self->workspace->sequenceselection.editposition;
 	entry = sequenceposition_entry(&editposition);
 	if (entry) {
-		psy_audio_lock_enter();		
+		psy_audio_exclusivelock_enter();		
 		player_stop(self->player);
 		startposition = entry->offset;
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
@@ -201,7 +201,7 @@ void startplay(PlayBar* self)
 		}
 		player_setposition(self->player, startposition);
 		player_start(self->player);
-		psy_audio_lock_leave();
+		psy_audio_exclusivelock_leave();
 	}
 }
 

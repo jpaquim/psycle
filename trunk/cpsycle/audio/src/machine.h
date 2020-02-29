@@ -52,6 +52,8 @@ typedef struct MachineCallback {
 	void* context;	
 } MachineCallback;
 
+void machinecallback_initempty(MachineCallback* self);
+
 typedef enum {
 	MACHINE_PARAMVIEW_COMPACT = 1
 } MachineViewOptions;
@@ -60,6 +62,7 @@ struct psy_audio_Machine;
 struct psy_audio_SongFile;
 
 typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_reload)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Machine* (*fp_machine_clone)(struct psy_audio_Machine*);
 typedef	psy_audio_Buffer* (*fp_machine_mix)(struct psy_audio_Machine*,
 	uintptr_t slot, uintptr_t amount, psy_audio_MachineSockets*,
@@ -117,6 +120,15 @@ typedef	struct psy_audio_Buffer* (*fp_machine_buffermemory)(struct psy_audio_Mac
 typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setbuffermemorysize)(struct psy_audio_Machine*, uintptr_t);
 typedef	psy_dsp_amp_range_t (*fp_machine_amprange)(struct psy_audio_Machine*);
+// programs
+typedef void (*fp_machine_programname)(struct psy_audio_Machine*, int bnkidx, int prgIdx, char* val);
+typedef int (*fp_machine_numprograms)(struct psy_audio_Machine*);
+typedef void (*fp_machine_setcurrprogram)(struct psy_audio_Machine*, int prgIdx);
+typedef int (*fp_machine_currprogram)(struct psy_audio_Machine*);
+typedef void (*fp_machine_bankname)(struct psy_audio_Machine*, int bnkidx, char* val);
+typedef int (*fp_machine_numbanks)(struct psy_audio_Machine*);
+typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, int bnkIdx);
+typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
 // machine callbacks
 typedef	unsigned int (*fp_machine_samplerate)(struct psy_audio_Machine*);
 typedef unsigned int (*fp_machine_bpm)(struct psy_audio_Machine*);
@@ -132,6 +144,7 @@ typedef void (*fp_machine_readbuffers)(struct psy_audio_Machine*, int index, flo
 
 typedef struct MachineVtable {
 	fp_machine_init init;
+	fp_machine_reload reload;
 	fp_machine_clone clone;
 	fp_machine_mix mix;
 	fp_machine_work work;
@@ -184,6 +197,15 @@ typedef struct MachineVtable {
 	fp_machine_buffermemorysize buffermemorysize;
 	fp_machine_setbuffermemorysize setbuffermemorysize;
 	fp_machine_amprange amprange;
+	// programs
+	fp_machine_programname programname;
+	fp_machine_numprograms numprograms;
+	fp_machine_setcurrprogram setcurrprogram;
+	fp_machine_currprogram currprogram;
+	fp_machine_bankname bankname;
+	fp_machine_numbanks numbanks;
+	fp_machine_setcurrbank setcurrbank;
+	fp_machine_currbank currbank;
 	// machine callbacks
 	fp_machine_samplerate samplerate;
 	fp_machine_bpm bpm;
@@ -201,7 +223,8 @@ typedef struct MachineVtable {
 typedef struct psy_audio_Machine {
 	MachineVtable* vtable;
 	MachineCallback callback;	
-	psy_Signal signal_worked;	
+	psy_Signal signal_worked;
+	int err;
 } psy_audio_Machine;
 
 void machine_init(psy_audio_Machine*, MachineCallback);
@@ -212,6 +235,11 @@ int machine_supports(psy_audio_Machine*, int option);
 INLINE void psy_audio_machine_dispose(psy_audio_Machine* self)
 {
 	self->vtable->dispose(self);
+}
+
+INLINE void psy_audio_machine_reload(psy_audio_Machine* self)
+{
+	self->vtable->reload(self);
 }
 
 INLINE const psy_audio_MachineInfo* psy_audio_machine_info(psy_audio_Machine* self)
@@ -548,6 +576,47 @@ INLINE float machine_patternvalue_normed(psy_audio_Machine* self,
 	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
 	range = maxval - minval;	
 	return (value > range) ? range : value / (float)range;
+}
+
+// programs
+INLINE void psy_audio_machine_programname(psy_audio_Machine* self, int bnkidx, int prgIdx, char* val)
+{
+	self->vtable->programname(self, bnkidx, prgIdx, val);
+}
+
+INLINE int psy_audio_machine_numprograms(psy_audio_Machine* self)
+{
+	return self->vtable->numprograms(self);
+}
+
+INLINE void psy_audio_machine_setcurrprogram(psy_audio_Machine* self, int prgIdx)
+{
+	self->vtable->setcurrprogram(self, prgIdx);
+}
+
+INLINE int psy_audio_machine_currprogram(psy_audio_Machine* self)
+{
+	return self->vtable->currprogram(self);
+}
+
+INLINE void psy_audio_machine_bankname(psy_audio_Machine* self, int bnkidx, char* val)
+{
+	self->vtable->bankname(self, bnkidx, val);
+}
+
+INLINE int psy_audio_machine_numbanks(psy_audio_Machine* self)
+{
+	return self->vtable->numbanks(self);
+}
+
+INLINE void psy_audio_machine_setcurrbank(psy_audio_Machine* self, int prgIdx)
+{
+	self->vtable->setcurrbank(self, prgIdx);
+}
+
+INLINE int psy_audio_machine_currbank(psy_audio_Machine* self)
+{
+	return self->vtable->currbank(self);
 }
 
 #ifdef __cplusplus

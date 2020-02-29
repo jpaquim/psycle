@@ -229,6 +229,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 				rv = 0;
 			}
 		}
+		break;
 		case MACH_LADSPA:
 		{
 			psy_audio_Machine* plugin;
@@ -239,8 +240,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 					self->machinecallback, path, shellidx);
 				if (psy_audio_machine_info(plugin)) {
 					rv = plugin;
-				}
-				else {
+				} else {
 					psy_audio_machine_dispose(plugin);
 					free(plugin);
 				}

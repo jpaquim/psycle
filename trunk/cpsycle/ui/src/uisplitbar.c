@@ -70,7 +70,8 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				psy_ui_component_resize(prev, 0,
 					psy_ui_component_size(prev).height);
 			} else
-			if (prev->align == psy_ui_ALIGN_TOP) {
+			if (prev->align == psy_ui_ALIGN_TOP ||
+					prev->align == psy_ui_ALIGN_BOTTOM) {
 				psy_ui_component_resize(prev,
 					psy_ui_component_size(prev).width, 0);
 			}
@@ -116,9 +117,16 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_resize(prev, position.left,
 				psy_ui_component_size(prev).height);
 		} else
-		if (prev->align == psy_ui_ALIGN_TOP) {
+		if (prev->align == psy_ui_ALIGN_TOP) {			
 			psy_ui_component_resize(prev, psy_ui_component_size(prev).width,
 				position.top);
+		} else
+		if (prev->align == psy_ui_ALIGN_BOTTOM) {
+			psy_ui_Rectangle prev_position;
+
+			prev_position = psy_ui_component_position(prev);
+			psy_ui_component_resize(prev, psy_ui_component_size(prev).width,
+				prev_position.bottom - position.bottom);
 		}
 		psy_ui_component_align(psy_ui_component_parent(&self->component));
 	}
@@ -168,7 +176,8 @@ void splitbar_setcursor(psy_ui_SplitBar* self)
 	if (self->component.align == psy_ui_ALIGN_LEFT) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 	} else
-	if (self->component.align == psy_ui_ALIGN_TOP) {
+	if (self->component.align == psy_ui_ALIGN_TOP ||
+			self->component.align == psy_ui_ALIGN_BOTTOM) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_ROW_RESIZE);
 	}
 }

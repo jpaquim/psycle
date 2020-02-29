@@ -2,106 +2,38 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
 
 #include "exclusivelock.h"
+#include "lock.h"
 
+static psy_audio_Lock lock;
 
-#if defined DIVERSALIS__OS__MICROSOFT
-
-#include <windows.h>
-
-static int disabled = 0;
-
-static CRITICAL_SECTION worklock;
-
-void psy_audio_lock_init(void)
+void psy_audio_exclusivelock_init(void)
 {
-	InitializeCriticalSection(&worklock);	
-	disabled = 0;	
+	psy_audio_lock_init(&lock);	
 }
 
-void psy_audio_lock_dispose(void)
+void psy_audio_exclusivelock_dispose(void)
 {	
-	DeleteCriticalSection(&worklock);
-	disabled = 0;
-	
+	psy_audio_lock_dispose(&lock);
 }
 
-void psy_audio_lock_enable(void)
+void psy_audio_exclusivelock_enable(void)
 {
-	disabled = 0;
+	psy_audio_lock_enable(&lock);
 }
 
-void psy_audio_lock_disable(void)
+void psy_audio_exclusivelock_disable(void)
 {
-	disabled = 1;
+	psy_audio_lock_disable(&lock);
 }
 
-void psy_audio_lock_enter(void)
+void psy_audio_exclusivelock_enter(void)
 {
-	if (!disabled) {
-		EnterCriticalSection(&worklock);
-	}
+	psy_audio_lock_enter(&lock);
 }
 
-void psy_audio_lock_leave(void)
+void psy_audio_exclusivelock_leave(void)
 {
-	if (!disabled) {
-		LeaveCriticalSection(&worklock);
-	}
+	psy_audio_lock_leave(&lock);
 }
-
-#elif defined DIVERSALIS__OS__POSIX
-
-#include <pthread.h>
-
-static pthread_mutex_t worklock;
-
-static int disabled = 0;
-
-void psy_audio_lock_init(void)
-{	
-	disabled = 0;
-	pthread_mutexattr_t recursiveattr;
-	pthread_mutexattr_init(&recursiveattr);
-	pthread_mutexattr_settype(&recursiveattr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&worklock, &recursiveattr);
-	pthread_mutexattr_destroy(&recursiveattr);		
-}
-
-void psy_audio_lock_dispose(void)
-{	
-	pthread_mutex_destroy(&worklock);
-	disabled = 0;	
-}
-
-void psy_audio_lock_enable(void)
-{
-	disabled = 0;
-}
-
-void psy_audio_lock_disable(void)
-{
-	disabled = 1;
-}
-
-void psy_audio_lock_enter(void)
-{
-	if (!disabled) {
-		pthread_mutex_lock(&worklock);
-	}
-}
-
-void psy_audio_lock_leave(void)
-{
-	if (!disabled) {
-		 pthread_mutex_unlock(&worklock);
-	}
-}
-
-#elif
-	#error "Exclusive Lock Platform Not Supported"
-
-#endif
-

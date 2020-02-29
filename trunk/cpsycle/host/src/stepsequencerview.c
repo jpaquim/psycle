@@ -215,12 +215,12 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 			(psy_dsp_beat_t) cursor.offset,
 			(psy_dsp_beat_t) bpl, &prev);
 		if (node) {								
-			psy_audio_lock_enter();
+			psy_audio_exclusivelock_enter();
 			psy_audio_sequencer_checkiterators(
 				&self->workspace->player.sequencer,
 				node);
 			pattern_remove(self->pattern, node);
-			psy_audio_lock_leave();						
+			psy_audio_exclusivelock_leave();						
 		} else {			
 			node = pattern_insert(self->pattern,
 				prev,

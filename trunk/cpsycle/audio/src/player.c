@@ -141,7 +141,7 @@ psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 	samples = bufferdriver;
 	numsamplex = *numsamples;
 	maxamount = numsamplex > MAX_STREAM_SIZE ? MAX_STREAM_SIZE : numsamplex;
-	psy_audio_lock_enter();
+	psy_audio_exclusivelock_enter();
 	do {		
 		amount = maxamount;
 		if (amount > numsamplex) {
@@ -159,7 +159,7 @@ psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 			psy_audio_sequencer_onlinetick(&self->sequencer);			
 		}
 	} while (numsamplex > 0);
-	psy_audio_lock_leave();
+	psy_audio_exclusivelock_leave();
 	*hostisplaying = psy_audio_sequencer_playing(&self->sequencer);
 	return bufferdriver;
 }
@@ -580,12 +580,12 @@ void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties*
 				driver = fpdrivercreate();				
 				driver->connect(driver, self, work, mainframe);
 			}
-			psy_audio_lock_enable();
+			psy_audio_exclusivelock_enable();
 		}		
 	}
 	if (!driver) {
 		driver = psy_audio_create_silent_driver();
-		psy_audio_lock_disable();
+		psy_audio_exclusivelock_disable();
 	}	
 	psy_audio_sequencer_setsamplerate(&self->sequencer, driver->samplerate(
 		driver));

@@ -5,25 +5,28 @@
 #include "../../detail/os.h"
 #include "../../detail/stdint.h"
 
-#include "psyclescript.h"
-#include "machinedefs.h"
-
-#include <lauxlib.h>
-#include <lualib.h>
 #if defined DIVERSALIS__OS__MICROSOFT    
 #include <windows.h>
 #endif
 
+#include "psyclescript.h"
+#include "machinedefs.h"
+
+#include <dir.h>
+
+#include <lauxlib.h>
+#include <lualib.h>
+#include "../../detail/portable.h"
 #include <string.h>
 #include <stdlib.h>
 
-static int psyclescript_parse_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 static void psyclescript_setsearchpath(psy_audio_PsycleScript*, const char* modulepath);
 
 int psyclescript_init(psy_audio_PsycleScript* self)
 {
 	self->L = luaL_newstate();
 	luaL_openlibs(self->L);
+	self->modulepath = strdup("");
 	return 0;
 }
 
@@ -35,24 +38,30 @@ int psyclescript_dispose(psy_audio_PsycleScript* self)
     lua_close(self->L);	
   }
   self->L = 0;
+  free(self->modulepath);
+  self->modulepath = 0;
   return err;
 }
 
 int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
 {
-  int status;  
-// set search path for require  
-//  lua_pushstring(L, "?.lua");
-//  lua_setfield(L, -2, "path");
-  psyclescript_setsearchpath(self, path);
-  status = luaL_loadfile(self->L, path);
-  if (status) {
-    const char* msg =lua_tostring(self->L, -1);
+	int status;
+	char temp[_MAX_PATH];
+
+	psyclescript_setsearchpath(self, path);
+	// This is needed to prevent loading problems
+	free(self->modulepath);
+	self->modulepath = strdup(path);
+	psy_snprintf(temp, _MAX_PATH, "%s", path);
+	psy_replacechar(temp, '\\', '/');
+	status = luaL_loadfile(self->L, temp);
+	if (status) {
+		const char* msg =lua_tostring(self->L, -1);
 #if defined DIVERSALIS__OS__MICROSOFT    
-	MessageBox(0, msg, "Lua Error", MB_ICONERROR);
-#endif    
-  }
-  return status;
+		MessageBox(0, msg, "Lua Error", MB_ICONERROR);
+#endif
+	}
+	return status;
 }
 
 int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
@@ -88,6 +97,8 @@ int psyclescript_run(psy_audio_PsycleScript* self)
   status = lua_pcall(self->L, 0, LUA_MULTRET, 0);
   if (status) {      
     const char* msg = lua_tostring(self->L, -1);
+
+	self = self;
   }
   return status;
 }
@@ -240,13 +251,18 @@ void psyclescript_require(psy_audio_PsycleScript* self, const char* name,
 }
 
 void psyclescript_setsearchpath(psy_audio_PsycleScript* self, const char* modulepath)
-{	
-  const char* path =
-	  "c:/programme/psycle/luascripts/?.lua;"
-	  "c:/programme/psycle/luascripts/effecttest?.lua;";
+{    
+  char prefix[_MAX_PATH];
+  char fname[_MAX_PATH];
+  char ext[_MAX_PATH];  
+  char path[_MAX_PATH];
+
+  psy_dir_extract_path(modulepath, prefix, fname, ext);  
+  psy_snprintf(path, _MAX_PATH, "%s/?.lua;%s/%s/?.lua;%s/psycle/?.lua", prefix, prefix, fname, prefix);
+  psy_replacechar(path, '/', '\\');
   lua_getglobal(self->L, "package");
   lua_pushstring(self->L, path);
-  lua_setfield(self->L, -2, "path");
+  lua_setfield(self->L, -2, "path");  
 }
 
 void psyclescript_register_weakuserdata(lua_State* L, void* ud)

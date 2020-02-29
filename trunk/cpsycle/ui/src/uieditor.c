@@ -130,8 +130,27 @@ void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 			++pos;
 		}		
 		fclose(fp);		
-		psy_ui_editor_addtext(self, text);		
+		psy_ui_editor_settext(self, text);		
 	}
+}
+
+void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
+{
+	FILE* fp;
+	
+	int size = sci(self, SCI_GETLENGTH, 0, 0) + 1;
+	fp = fopen(path, "wb");
+	if (fp) {		
+		char* buffer;		
+
+		buffer = malloc(sizeof(char) * (size + 1));
+		if (buffer) {
+			sci(self, SCI_GETTEXT, size, (LPARAM)buffer);			
+			fwrite(buffer, sizeof(char), (size - 1) / sizeof(char), fp);
+		}				
+		fclose(fp);
+		free(buffer);
+	}	
 }
 
 void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)

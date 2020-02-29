@@ -14,9 +14,12 @@ extern "C" {
 #include <lauxlib.h>
 #include <lualib.h>
 
+#include "../../detail/psydef.h"
+
 typedef struct {
 	int id;
 	lua_State* L;
+	char* modulepath;
 } psy_audio_PsycleScript;
 
 int psyclescript_init(psy_audio_PsycleScript*);
@@ -26,14 +29,19 @@ int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg metho
 int psyclescript_run(psy_audio_PsycleScript*);
 int psyclescript_start(psy_audio_PsycleScript*);
 int psyclescript_dispose(psy_audio_PsycleScript*);
-
+INLINE const char* psyclescript_modulepath(psy_audio_PsycleScript* self)
+{
+	return self->modulepath;
+}
 int psyclescript_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
+int psyclescript_parse_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 int psyclescript_open(lua_State*, const char* meta, const luaL_Reg methods[],
 	lua_CFunction gc, lua_CFunction tostring);
 void psyclescript_require(psy_audio_PsycleScript*, const char* name, lua_CFunction openf);
 void psyclescript_register_weakuserdata(lua_State*, void* ud);
 
 void* psyclescript_checkself(lua_State* L, int index, const char* meta);
+
 
 #ifdef __cplusplus
 }

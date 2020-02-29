@@ -81,6 +81,11 @@ typedef struct psy_ui_ComboBoxImp {
 
 void psy_ui_comboboximp_init(psy_ui_ComboBoxImp*);
 
+INLINE void psy_psy_ui_combobox_text(psy_ui_ComboBox* self, char* text)
+{
+    self->imp->vtable->dev_text(self->imp, text);
+}
+
 #ifdef __cplusplus
 }
 #endif

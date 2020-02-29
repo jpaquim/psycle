@@ -4,11 +4,27 @@
 #if !defined(PORTABLE_H)
 #define PORTABLE_H
 
-#include "../../detail/psydef.h"
+#include "psydef.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
+
+/*
+** Windows stuff
+*/
+#if defined(_WIN32) 	/* { */
+
+// #define _CRTDBG_MAP_ALLOC
+// #include <crtdbg.h>
+
+#if !defined(_CRT_SECURE_NO_WARNINGS)
+#define _CRT_SECURE_NO_WARNINGS  /* avoid warnings about ISO C functions */
+#define _CRT_NONSTDC_NO_DEPRECATE
+#endif
+
+#endif			/* } */
 
 #ifndef min
 #define min(a, b) (((a < b) ? a : b))
@@ -31,6 +47,14 @@ INLINE void psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
 	vsnprintf(buf, buflen, fmt, ap);	
 #endif	
 	va_end(ap);
+}
+
+INLINE char* psy_replacechar(char* str, char c, char r)
+{
+	char* p;
+		
+	for (p = strchr(str, c); p != 0; p = strchr(p + 1, c)) *p = r;
+	return p;
 }
 
 /*-------------------------------------------------------------------------

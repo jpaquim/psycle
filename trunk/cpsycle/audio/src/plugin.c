@@ -25,7 +25,7 @@ static void seqtick(psy_audio_Plugin*, uintptr_t channel,
 static void stop(psy_audio_Plugin*);
 static void sequencerlinetick(psy_audio_Plugin*);
 static psy_audio_MachineInfo* info(psy_audio_Plugin*);
-static int parametertype(psy_audio_Plugin* self, uintptr_t par);
+static int parametertype(psy_audio_Plugin* self, uintptr_t param);
 static unsigned int numparametercols(psy_audio_Plugin*);
 static uintptr_t numparameters(psy_audio_Plugin*);
 static void parameterrange(psy_audio_Plugin*, uintptr_t param, int* minval,
@@ -33,8 +33,6 @@ static void parameterrange(psy_audio_Plugin*, uintptr_t param, int* minval,
 static int parameterlabel(psy_audio_Plugin*, char* txt, uintptr_t param);
 static int parametername(psy_audio_Plugin*, char* txt, uintptr_t param);
 static void parametertweak(psy_audio_Plugin*, uintptr_t param, float val);
-static int parameterlabel(psy_audio_Plugin*, char* txt, uintptr_t param);
-static int parametername(psy_audio_Plugin*, char* txt, uintptr_t param);
 static int describevalue(psy_audio_Plugin*, char* txt, uintptr_t param,
 	int value);
 static float parametervalue(psy_audio_Plugin*, uintptr_t param);
@@ -66,11 +64,9 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.numparameters = (fp_machine_numparameters) numparameters;
 		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
 		vtable.parametertype = (fp_machine_parametertype) parametertype;
-		vtable.parametername = (fp_machine_parametername) parametername;
 		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
-		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
-		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
-		vtable.parametername = (fp_machine_parametername) parametername;
+		vtable.parametername = (fp_machine_parametername) parametername;		
+		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;				
 		vtable.describevalue = (fp_machine_describevalue) describevalue;
 		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
 		vtable.dispose = (fp_machine_dispose) dispose;
