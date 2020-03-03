@@ -316,11 +316,14 @@ void pluginsview_onscroll(PluginsView* self, psy_ui_Component* sender,
 
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_setfocus(&self->component);
-	pluginsview_hittest(self, ev->x, ev->y);
-	psy_ui_component_invalidate(&self->component);
-	psy_signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
-	psy_ui_component_setfocus(&self->component);
+	if (ev->button == 1) {
+		psy_ui_component_setfocus(&self->component);
+		pluginsview_hittest(self, ev->x, ev->y);
+		psy_ui_component_invalidate(&self->component);
+		psy_signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
+		psy_ui_component_setfocus(&self->component);
+		psy_ui_mouseevent_stoppropagation(ev);
+	}
 }
 
 void pluginsview_hittest(PluginsView* self, int x, int y)

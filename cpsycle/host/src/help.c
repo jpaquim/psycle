@@ -35,7 +35,8 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_append(&self->tabbar, "./docs/readme.txt");
 	tabbar_append(&self->tabbar, "./docs/keys.txt");
 	tabbar_append(&self->tabbar, "./docs/tweaking.txt");
-	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");	
+	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");
+	tabbar_append(&self->tabbar, "./docs/luascripting.txt");
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_editor_preventedit(&self->editor);
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
@@ -73,7 +74,11 @@ void help_loadpage(Help* self, uintptr_t index)
 		case 3:
 			strcat(path, "whatsnew.txt");
 			help_load(self, path);
-		break;		
+		break;
+		case 4:
+			strcat(path, "luascripting.txt");
+			help_load(self, path);
+		break;
 		default:
 		break;
 	}

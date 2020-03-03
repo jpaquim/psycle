@@ -100,9 +100,9 @@ void vibrato_init(Vibrato* self)
 	self->type = WAVEFORMS_SINUS;
 }
 
-void sample_init(psy_audio_Sample* self)
+void sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 {
-	psy_audio_buffer_init(&self->channels, 2);
+	psy_audio_buffer_init(&self->channels, numchannels);
 	self->stereo = 1;
 	self->numframes = 0;
 	self->samplerate = 44100;
@@ -125,9 +125,10 @@ void sample_init(psy_audio_Sample* self)
 
 void sample_dispose(psy_audio_Sample* self)
 {
-	unsigned int channel;
+	uintptr_t channel;
+
 	for (channel = 0; channel < self->channels.numchannels; ++channel) {
-		free(self->channels.samples[channel]);
+		dsp.memory_dealloc(self->channels.samples[channel]);
 		self->channels.samples[channel] = 0;
 	}
 	psy_audio_buffer_dispose(&self->channels);
@@ -140,13 +141,13 @@ psy_audio_Sample* sample_alloc(void)
 	return (psy_audio_Sample*) malloc(sizeof(psy_audio_Sample));
 }
 
-psy_audio_Sample* sample_allocinit(void)
+psy_audio_Sample* sample_allocinit(uintptr_t numchannels)
 {
 	psy_audio_Sample* rv;
 
 	rv = sample_alloc();
 	if (rv) {
-		sample_init(rv);
+		sample_init(rv, numchannels);
 	}
 	return rv;
 }
@@ -157,7 +158,7 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 	
 	rv = sample_alloc();
 	if (rv) {
-		uintptr_t c;
+		uintptr_t channel;
 
 		rv->samplerate = src->samplerate;
 		rv->defaultvolume = src->defaultvolume;
@@ -181,8 +182,8 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 		rv->numframes = src->numframes;
 		rv->stereo = src->stereo;
 		psy_audio_buffer_init(&rv->channels, src->channels.numchannels);
-		for (c = 0; c < rv->channels.numchannels; ++c) {
-			rv->channels.samples[c] = dsp.memory_alloc(src->numframes,
+		for (channel = 0; channel < rv->channels.numchannels; ++channel) {
+			rv->channels.samples[channel] = dsp.memory_alloc(src->numframes,
 				sizeof(float));
 		}
 		psy_audio_buffer_clearsamples(&rv->channels, src->numframes);
@@ -194,6 +195,7 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 void sample_load(psy_audio_Sample* self, const char* path)
 {
 	char* delim;
+
 	psy_audio_wave_load(self, path);
 	delim = strrchr(path, '\\');	
 	sample_setname(self, delim ? delim + 1 : path);	

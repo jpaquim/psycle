@@ -38,8 +38,9 @@ typedef enum
 }
 InterpolationType;
 
+struct psy_audio_Sampler;
+
 typedef struct {
-	struct psy_audio_Sampler* sampler;	
 	psy_audio_Instrument* instrument;
 	psy_audio_Samples* samples;
 	psy_dsp_ADSR env;
@@ -60,7 +61,32 @@ typedef struct {
 	int dopan;
 	int dooffset;
 	uint8_t offset;
-} Voice;
+	int maxvolume;
+} psy_audio_SamplerVoice;
+
+void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, psy_audio_Samples*,
+	psy_audio_Instrument*,
+	uintptr_t channel, unsigned int samplerate, int resamplingmethod,
+	int maxvolume);
+void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice*);
+psy_audio_SamplerVoice* psy_audio_samplervoice_alloc(void);
+psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(struct psy_audio_Sampler*,
+	psy_audio_Instrument*,
+	uintptr_t channel, unsigned int samplerate);
+void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice*,
+	const psy_audio_PatternEvent*, double samplesprobeat);
+void psy_audio_samplervoice_nna(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice*,
+	const psy_audio_PatternEvent*);
+void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice*,
+	double frequency);
+void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_fastnoteoff(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, psy_audio_Buffer*,
+	uintptr_t numsamples);
+void psy_audio_samplervoice_release(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice*);
+void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice*);
 
 typedef struct ZxxMacro {
 	int mode;

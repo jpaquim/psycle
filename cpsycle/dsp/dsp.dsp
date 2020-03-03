@@ -139,6 +139,10 @@ SOURCE=.\src\operations.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\quantize.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\resampler.c
 # End Source File
 # Begin Source File
@@ -196,6 +200,10 @@ SOURCE=.\src\notestab.h
 # Begin Source File
 
 SOURCE=.\src\operations.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\quantize.h
 # End Source File
 # Begin Source File
 

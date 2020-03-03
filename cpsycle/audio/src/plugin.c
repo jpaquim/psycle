@@ -229,27 +229,6 @@ psy_audio_MachineInfo* info(psy_audio_Plugin* self)
 	return self->plugininfo;
 }
 
-void parametertweak(psy_audio_Plugin* self, uintptr_t param, float val)
-{	
-	if (param < numparameters(self)) {		
-		mi_parametertweak(self->mi, (int) param,
-			machine_parametervalue_scaled(psy_audio_plugin_base(self), param,
-			val));
-	}
-}
-
-int describevalue(psy_audio_Plugin* self, char* txt, uintptr_t param,
-	int value)
-{ 
-	return mi_describevalue(self->mi, txt, (int) param, value);
-}
-
-float parametervalue(psy_audio_Plugin* self, uintptr_t param)
-{
-	return machine_parametervalue_normed(psy_audio_plugin_base(self), param,
-		mi_val(self->mi, (int) param));
-}
-
 uintptr_t numinputs(psy_audio_Plugin* self)
 {
 	return info(self) ? (self->plugininfo->mode == MACHMODE_FX ? 2 : 0) : 0;
@@ -331,6 +310,27 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		free(pData);
 		pData = 0;
 	}
+}
+
+void parametertweak(psy_audio_Plugin* self, uintptr_t param, float val)
+{
+	if (param < numparameters(self)) {
+		mi_parametertweak(self->mi, (int)param,
+			machine_parametervalue_scaled(psy_audio_plugin_base(self), param,
+				val));
+	}
+}
+
+int describevalue(psy_audio_Plugin* self, char* txt, uintptr_t param,
+	int value)
+{
+	return mi_describevalue(self->mi, txt, (int)param, value);
+}
+
+float parametervalue(psy_audio_Plugin* self, uintptr_t param)
+{
+	return machine_parametervalue_normed(psy_audio_plugin_base(self), param,
+		mi_val(self->mi, (int)param));
 }
 
 int parametertype(psy_audio_Plugin* self, uintptr_t param)

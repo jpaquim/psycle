@@ -39,9 +39,15 @@ int psyclescript_open(lua_State*, const char* meta, const luaL_Reg methods[],
 	lua_CFunction gc, lua_CFunction tostring);
 void psyclescript_require(psy_audio_PsycleScript*, const char* name, lua_CFunction openf);
 void psyclescript_register_weakuserdata(lua_State*, void* ud);
-
-void* psyclescript_checkself(lua_State* L, int index, const char* meta);
-
+void* psyclescript_checkself(lua_State*, int index, const char* meta);
+int psyclescript_createuserdata(lua_State*, int index, const char* meta, void* ud);
+int psyclescript_buildenum(lua_State*, const char* const e[], int len, int startidx);
+INLINE int psyclescript_chaining(lua_State* L)
+{
+	lua_pushvalue(L, 1);
+	return 1;
+}
+void* psyclescript_host(lua_State*);
 
 #ifdef __cplusplus
 }

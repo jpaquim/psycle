@@ -46,7 +46,7 @@ static float parametervalue(psy_audio_Sampler*, uintptr_t param);
 static void dispose(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
 static void releaseallvoices(psy_audio_Sampler*);
-static Voice* activevoice(psy_audio_Sampler*, uintptr_t channel);
+static psy_audio_SamplerVoice* activevoice(psy_audio_Sampler*, uintptr_t channel);
 static void releasevoices(psy_audio_Sampler*, uintptr_t channel);
 static void nnavoices(psy_audio_Sampler*, uintptr_t channel);
 static void removeunusedvoices(psy_audio_Sampler* self);
@@ -60,21 +60,7 @@ static void savespecific(psy_audio_Sampler*, psy_audio_SongFile*,
 static int currslot(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 
-static void voice_init(Voice*, psy_audio_Sampler*, psy_audio_Instrument*,
-	uintptr_t channel, unsigned int samplerate);
-static void voice_dispose(Voice*);
-Voice* voice_alloc(void);
-Voice* voice_allocinit(psy_audio_Sampler*, psy_audio_Instrument*,
-	uintptr_t channel, unsigned int samplerate);
-static void voice_seqtick(Voice*, const psy_audio_PatternEvent*);
-static void voice_nna(Voice*);
-static void voice_noteon(Voice*, const psy_audio_PatternEvent*);
-static void voice_noteoff(Voice*);
-static void voice_fastnoteoff(Voice*);
-static void voice_work(Voice*, psy_audio_Buffer*, uintptr_t numsamples);
-static void voice_release(Voice*);
-static void voice_fastrelease(Voice*);
-static void voice_clearpositions(Voice*);
+
 
 static const uint32_t SAMPLERVERSION = 0x00000002;
 
@@ -153,10 +139,10 @@ void dispose(psy_audio_Sampler* self)
 	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;
-		voice_dispose(voice);		
+		voice = (psy_audio_SamplerVoice*) p->entry;
+		psy_audio_samplervoice_dispose(voice);		
 		free(voice);
 	}
 	psy_list_free(self->voices);
@@ -187,10 +173,10 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 	
 	removeunusedvoices(self);
 	for (p = self->voices; p != 0 && c < self->numvoices; p = p->next, ++c) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;		
-		voice_work(voice, bc->output, bc->numsamples);
+		voice = (psy_audio_SamplerVoice*) p->entry;		
+		psy_audio_samplervoice_work(voice, bc->output, bc->numsamples);
 	}	
 }
 
@@ -198,7 +184,7 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {		
-	Voice* voice = 0;	
+	psy_audio_SamplerVoice* voice = 0;	
 		
 	if (event->note == NOTECOMMANDS_RELEASE) {
 		releasevoices(self, channel);
@@ -216,13 +202,15 @@ void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 			psy_audio_sampler_base(self)),
 			currslot(self, channel, event));
 		if (instrument) {
-			voice = voice_allocinit(self, instrument, channel,
+			voice = psy_audio_samplervoice_allocinit(self, instrument, channel,
 				psy_audio_machine_samplerate(psy_audio_sampler_base(self)));
 			psy_list_append(&self->voices, voice);
 		}
 	}
 	if (voice) {
-		voice_seqtick(voice, event);
+		psy_audio_samplervoice_seqtick(voice, event,
+			1 / psy_audio_machine_beatspersample(
+				psy_audio_sampler_base(self)));
 	}
 }
 
@@ -231,9 +219,9 @@ void sequencerlinetick(psy_audio_Sampler* self)
 	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;		
+		voice = (psy_audio_SamplerVoice*) p->entry;		
 		// voice->portaspeed = 1.0;
 	}
 }
@@ -265,10 +253,10 @@ void releaseallvoices(psy_audio_Sampler* self)
 	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;		
-		voice_release(voice);		
+		voice = (psy_audio_SamplerVoice*) p->entry;		
+		psy_audio_samplervoice_release(voice);		
 	}
 }
 
@@ -277,11 +265,11 @@ void releasevoices(psy_audio_Sampler* self, uintptr_t channel)
 	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;
+		voice = (psy_audio_SamplerVoice*) p->entry;
 		if (voice->channel == channel) {			
-			voice_release(voice);
+			psy_audio_samplervoice_release(voice);
 		}
 	}
 }
@@ -291,24 +279,24 @@ void nnavoices(psy_audio_Sampler* self, uintptr_t channel)
 	psy_List* p;
 	
 	for (p = self->voices; p != 0; p = p->next) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;
+		voice = (psy_audio_SamplerVoice*) p->entry;
 		if (voice->channel == channel) {			
-			voice_nna(voice);
+			psy_audio_samplervoice_nna(voice);
 		}
 	}
 }
 
-Voice* activevoice(psy_audio_Sampler* self, uintptr_t channel)
+psy_audio_SamplerVoice* activevoice(psy_audio_Sampler* self, uintptr_t channel)
 {
-	Voice* rv = 0;	
+	psy_audio_SamplerVoice* rv = 0;	
 	psy_List* p = 0;
 	
 	for (p = self->voices; p != 0; p = p->next) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
-		voice = (Voice*) p->entry;
+		voice = (psy_audio_SamplerVoice*) p->entry;
 		if (voice->channel == channel && voice->env.stage != ENV_RELEASE
 				&& voice->env.stage != ENV_OFF) {
 			rv = voice;
@@ -324,12 +312,12 @@ void removeunusedvoices(psy_audio_Sampler* self)
 	psy_List* q;
 		
 	for (p = self->voices; p != 0; p = q) {
-		Voice* voice;
+		psy_audio_SamplerVoice* voice;
 
 		q = p->next;
-		voice = (Voice*) p->entry;				
+		voice = (psy_audio_SamplerVoice*) p->entry;				
 		if (voice->env.stage == ENV_OFF) {
-			voice_dispose(voice);
+			psy_audio_samplervoice_dispose(voice);
 			free(voice);
 			psy_list_remove(&self->voices, p);
 		}			
@@ -495,13 +483,16 @@ uintptr_t numoutputs(psy_audio_Sampler* self)
 	return 2;
 }
 
-// Voice
-void voice_init(Voice* self, psy_audio_Sampler* sampler,
-	psy_audio_Instrument* instrument, uintptr_t channel,
-	unsigned int samplerate) 
+// psy_audio_SamplerVoice
+void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
+	psy_audio_Samples* samples,
+	psy_audio_Instrument* instrument,
+	uintptr_t channel,
+	unsigned int samplerate,
+	int resamplingmethod,
+	int maxvolume) 
 {	
-	self->sampler = sampler;
-	self->samples = psy_audio_machine_samples(psy_audio_sampler_base(sampler));
+	self->samples = samples;
 	self->instrument = instrument;
 	self->channel = channel;
 	self->usedefaultvolume = 1;
@@ -513,6 +504,7 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	self->effcmd = SAMPLER_CMD_NONE;
 	self->effval = 0;
 	self->dooffset = 0;
+	self->maxvolume = maxvolume;
 	if (instrument) {
 		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
 		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
@@ -524,7 +516,7 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	psy_dsp_multifilter_init(&self->filter_r);			
 	psy_dsp_multiresampler_init(&self->resampler);
 	psy_dsp_multiresampler_settype(&self->resampler,
-		sampler->resamplingmethod);
+		resamplingmethod);
 	if (instrument) {
 		psy_dsp_filter_setcutoff(psy_dsp_multifilter_base(&self->filter_l),
 			self->instrument->filtercutoff);
@@ -539,7 +531,7 @@ void voice_init(Voice* self, psy_audio_Sampler* sampler,
 	}
 }
 
-void voice_reset(Voice* self)
+void psy_audio_samplervoice_reset(psy_audio_SamplerVoice* self)
 {
 	self->effcmd = SAMPLER_CMD_NONE;
 	self->portaspeed = 1.0;	
@@ -549,37 +541,40 @@ void voice_reset(Voice* self)
 	psy_dsp_filter_reset(psy_dsp_multifilter_base(&self->filter_r));
 }
 
-void voice_dispose(Voice* self)
+void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 {
-	voice_clearpositions(self);
+	psy_audio_samplervoice_clearpositions(self);
 	self->positions = 0;	
 }
 
-Voice* voice_alloc(void)
+psy_audio_SamplerVoice* psy_audio_samplervoice_alloc(void)
 {
-	return (Voice*) malloc(sizeof(Voice));
+	return (psy_audio_SamplerVoice*) malloc(sizeof(psy_audio_SamplerVoice));
 }
 
-Voice* voice_allocinit(psy_audio_Sampler* sampler,
+psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(psy_audio_Sampler* sampler,
 	psy_audio_Instrument* instrument, uintptr_t channel,
 	unsigned int samplerate)
 {
-	Voice* rv;
+	psy_audio_SamplerVoice* rv;
 
-	rv = voice_alloc();
+	rv = psy_audio_samplervoice_alloc();
 	if (rv) {
-		voice_init(rv, sampler, instrument, channel, samplerate);
+		psy_audio_samplervoice_init(rv, psy_audio_machine_samples(psy_audio_sampler_base(sampler)),
+			instrument, channel, samplerate,
+			sampler->resamplingmethod,
+			sampler->maxvolume);
 	}
 	return rv;
 }
 
-void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
+void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event, double samplesprobeat)
 {
 	self->dopan = 0;
 	if (event->cmd == SAMPLER_CMD_VOLUME) {
 		 self->usedefaultvolume = 0;
 		 self->vol = event->parameter / 
-			 (psy_dsp_amp_t) self->sampler->maxvolume;
+			 (psy_dsp_amp_t) self->maxvolume;
 	} else
 	if (event->cmd == SAMPLER_CMD_PANNING) {
 		self->dopan = 1;
@@ -590,43 +585,35 @@ void voice_seqtick(Voice* self, const psy_audio_PatternEvent* event)
 		self->offset = event->parameter;
 	} else
 	if (event->cmd == SAMPLER_CMD_PORTAUP) {
-		double samplesprobeat;
-
 		self->effval = event->parameter;
-		self->effcmd = event->cmd;				
-		samplesprobeat = 1 / psy_audio_machine_beatspersample(
-			psy_audio_sampler_base(self->sampler));
+		self->effcmd = event->cmd;
 		self->portanumframes = (uintptr_t) samplesprobeat;
 		self->portacurrframe = 0;
 		self->portaspeed = pow(2.0f, event->parameter / 12.0 *
 			1.0 / samplesprobeat);
 	} else
 	if (event->cmd == SAMPLER_CMD_PORTADOWN) {
-		double samplesprobeat;
-
 		self->effval = event->parameter;
-		self->effcmd = event->cmd;				
-		samplesprobeat = 1 / psy_audio_machine_beatspersample(
-			psy_audio_sampler_base(self->sampler));
+		self->effcmd = event->cmd;
 		self->portanumframes = (uintptr_t) samplesprobeat;
 		self->portacurrframe = 0;
 		self->portaspeed = pow(2.0f, -event->parameter / 12.0 * 1.0 / samplesprobeat);
 	}	
 	if (event->note < NOTECOMMANDS_RELEASE) {		
-		voice_noteon(self, event);
+		psy_audio_samplervoice_noteon(self, event);
 	}
 }
 
-void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
+void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event)
 {	
 	psy_audio_Sample* sample;		
 	int baseC = 48;
 	psy_List* entries;
 	psy_List* p;
 						
-	voice_clearpositions(self);
+	psy_audio_samplervoice_clearpositions(self);
 	entries = instrument_entriesintersect(self->instrument,
-		event->note, 127);
+		event->note, 127, 0);
 	for (p = entries; p != 0; p = p->next) {
 		psy_audio_InstrumentEntry* entry;
 		
@@ -656,10 +643,47 @@ void voice_noteon(Voice* self, const psy_audio_PatternEvent* event)
 		self->dopan = 1; 
 		self->pan = rand() / (psy_dsp_amp_t) 32768.f;
 	}
-
 }
 
-void voice_clearpositions(Voice* self)
+void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, double frequency)
+{
+	psy_audio_Sample* sample;
+	int baseC = 48;
+	psy_List* entries;
+	psy_List* p;
+
+	psy_audio_samplervoice_clearpositions(self);
+	entries = instrument_entriesintersect(self->instrument,
+		0, 0, frequency);
+	for (p = entries; p != 0; p = p->next) {
+		psy_audio_InstrumentEntry* entry;
+
+		entry = (psy_audio_InstrumentEntry*)p->entry;
+		sample = psy_audio_samples_at(self->samples, entry->sampleindex);
+		if (sample) {
+			SampleIterator* iterator;
+
+			iterator = sampleiterator_alloc();
+			*iterator = sample_begin(sample);
+			psy_list_append(&self->positions, iterator);
+			iterator->speed = (int64_t)(4294967296.0f *
+				frequency / 440);
+			self->resampler.resampler.vtable->setspeed(&
+				self->resampler.resampler, iterator->speed);
+		}
+	}
+	psy_list_free(entries);
+	if (self->positions) {
+		psy_dsp_adsr_start(&self->env);
+		psy_dsp_adsr_start(&self->filterenv);
+	}
+	if (!self->dopan && self->instrument->randompan) {
+		self->dopan = 1;
+		self->pan = rand() / (psy_dsp_amp_t)32768.f;
+	}
+}
+
+void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice* self)
 {
 	psy_List* p;
 
@@ -670,39 +694,39 @@ void voice_clearpositions(Voice* self)
 	self->positions = 0;
 }
 
-void voice_nna(Voice* self)
+void psy_audio_samplervoice_nna(psy_audio_SamplerVoice* self)
 {
 	if (self->instrument) {
 		switch (instrument_nna(self->instrument)) {
 			case psy_audio_NNA_STOP:
-				voice_fastnoteoff(self);
+				psy_audio_samplervoice_fastnoteoff(self);
 			break;
 			case psy_audio_NNA_NOTEOFF:
-				voice_noteoff(self);
+				psy_audio_samplervoice_noteoff(self);
 			break;
 			case psy_audio_NNA_CONTINUE:				
 			break;
 			default:
 				// note cut
-				voice_fastnoteoff(self);
+				psy_audio_samplervoice_fastnoteoff(self);
 			break;
 		}
 	}
 }
 
-void voice_noteoff(Voice* self)
+void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 {
 	psy_dsp_adsr_release(&self->env);
 	psy_dsp_adsr_release(&self->filterenv);	
 }
 
-void voice_fastnoteoff(Voice* self)
+void psy_audio_samplervoice_fastnoteoff(psy_audio_SamplerVoice* self)
 {
 	psy_dsp_adsr_fastrelease(&self->env);
 	psy_dsp_adsr_fastrelease(&self->filterenv);
 }
 
-void voice_work(Voice* self, psy_audio_Buffer* output, uintptr_t numsamples)
+void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer* output, uintptr_t numsamples)
 {		
 	if (self->positions && self->env.stage != ENV_OFF) {
 		psy_List* p;
@@ -816,7 +840,7 @@ void voice_work(Voice* self, psy_audio_Buffer* output, uintptr_t numsamples)
 					}
 				}
 				if (!sampleiterator_inc(position)) {			
-					voice_reset(self);					
+					psy_audio_samplervoice_reset(self);					
 					break;				
 				}								
 			}			
@@ -849,7 +873,7 @@ void voice_work(Voice* self, psy_audio_Buffer* output, uintptr_t numsamples)
 	self->dooffset = 0;
 }
 
-void voice_release(Voice* self)
+void psy_audio_samplervoice_release(psy_audio_SamplerVoice* self)
 {
 	self->portaspeed = 1.0;
 	self->effcmd = SAMPLER_CMD_NONE;
@@ -857,7 +881,7 @@ void voice_release(Voice* self)
 	psy_dsp_adsr_release(&self->filterenv);
 }
 
-void voice_fastrelease(Voice* self)
+void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice* self)
 {
 	self->portaspeed = 1.0;
 	self->effcmd = SAMPLER_CMD_NONE;

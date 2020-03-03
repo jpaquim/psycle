@@ -243,10 +243,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\quantize.c"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -254,10 +250,6 @@
 			>
 			<File
 				RelativePath=".\avrt.h"
-				>
-			</File>
-			<File
-				RelativePath=".\quantize.h"
 				>
 			</File>
 		</Filter>

@@ -4,6 +4,8 @@
 #include "luaarray.h"
 
 #include "array.h"
+#include "psyclescript.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -13,13 +15,7 @@
 #include "../../detail/stdint.h"
 #include "../../detail/portable.h"
 
-INLINE static int lua_chaining(lua_State* L)
-{
-	lua_pushvalue(L, 1);
-	return 1;
-}
-
-static const char* luaarraybind_meta = "array_meta";
+const char* luaarraybind_meta = "array_meta";
 
 static int psy_audio_luabind_array_new(lua_State*);
 static int psy_audio_luabind_array_arange(lua_State*);
@@ -37,7 +33,12 @@ static int array_sin(lua_State*);
 static int array_cos(lua_State*);
 static int array_tan(lua_State*);
 static int array_pow(lua_State*);
+static int array_mod(lua_State*);
 static int array_sqrt(lua_State*);
+static int array_unm(lua_State*);
+static int array_concat(lua_State*);
+static int array_tostring(lua_State*);
+static int array_rsum(lua_State*);
 
 static int array_method_mul(lua_State*);
 static int array_method_div(lua_State*);
@@ -66,9 +67,10 @@ static int array_copy(lua_State*);
 static int array_method_fillzero(lua_State*);
 static int array_method_fill(lua_State*);
 static int array_method_resize(lua_State*);
-static int array_method_tostring(lua_State*);
 static int array_method_margin(lua_State*);
 static int array_method_clearmargin(lua_State*);
+static int array_method_from_table(lua_State*);
+static int array_method_to_table(lua_State*);
 
 int array_method_mix(lua_State* L)
 {
@@ -262,7 +264,7 @@ int psy_audio_luabind_array_open(lua_State* L)
 		{ "tan", array_tan },
 		{ "sqrt", array_sqrt },
 //		{ "sum", array_sum },
-//		{ "rsum", array_rsum },
+		{ "rsum", array_rsum },
 		{ "pow", array_pow },
 		{ NULL, NULL }
 	};
@@ -295,23 +297,23 @@ int psy_audio_luabind_array_open(lua_State* L)
 		{ "copy", array_copy},
 		{ "fillzero", array_method_fillzero},
 		{ "fill", array_method_fill},
-		{ "tostring", array_method_tostring },
+		{ "tostring", array_tostring },
 		{ "margin", array_method_margin},
 		{ "clearmargin", array_method_clearmargin },
-/*		{ "fromtable", array_method_from_table},
-		{ "table", array_method_to_table},		*/
+		{ "fromtable", array_method_from_table},
+		{ "table", array_method_to_table},
 		{ "__newindex", psy_audio_luabind_array_new_index },
 		{ "__index", psy_audio_luabind_array_index },
 		{ "__gc", psy_audio_luabind_array_gc },
-		/*{ "__tostring", array_tostring }, */
+		{ "__tostring", array_tostring },
 		{ "__add", array_add },
 		{ "__sub", array_sub },
 		{ "__mul", array_mul },
 		{ "__div", array_div },
-/*		{ "__mod", array_mod },
-		{ "__pow", array_op_pow },
+		{ "__mod", array_mod },
+		{ "__pow", array_pow },
 		{ "__unm", array_unm },
-		{ "__concat", array_concat},*/
+		{ "__concat", array_concat},
 		{ NULL, NULL }
 	};
 	luaL_newmetatable(L, luaarraybind_meta);
@@ -435,7 +437,7 @@ int psy_audio_luabind_array_index(lua_State *L)
 	if (lua_isnumber(L, 2)) {
 		intptr_t index;
 		psy_audio_Array** ud = (psy_audio_Array**)
-		luaL_checkudata(L, 1, luaarraybind_meta);
+			luaL_checkudata(L, 1, luaarraybind_meta);
 		index = (intptr_t) luaL_checknumber(L, 2);
 		if (index < 0 && index >= (intptr_t) psy_audio_array_len(*ud)) {
 			luaL_error(L, "index out of range");
@@ -511,22 +513,18 @@ int psy_audio_luabind_array_new_index(lua_State *L)
 	}
 }
 
-/*int array_method_rsum(lua_State* L);
+int array_rsum(lua_State* L)
 {
-  uintptr_t i;
-  double sum = 0;
-  psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
-  psy_audio_Array** rv = (psy_audio_Array**)lua_newuserdata(L, sizeof(psy_audio_Array*));
-  *rv = malloc(sizeof(psy_audio_Array));
-  psy_audio_array_init_len(*rv, psy_audio_array_len(v), 0);
-  luaL_setmetatable(L, luaarraybind_meta);
-  
-  for (i = 0; i < psy_audio_array_len(v); ++i) {
-    sum = sum + psy_audio_array_at(v, i);
-	psy_audio_array_set(*rv, i, sum);    
-  }
-  return 1;
-}*/
+	uintptr_t i;
+	double sum = 0;
+	psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	psy_audio_Array** rv = (psy_audio_Array**)lua_newuserdata(L, sizeof(psy_audio_Array*));
+	*rv = malloc(sizeof(psy_audio_Array));
+	psy_audio_array_init_len(*rv, psy_audio_array_len(v), 0);
+	luaL_setmetatable(L, luaarraybind_meta);
+	psy_audio_array_rsum(rv, 0);
+	return 1;
+}
 
 int array_method_rsum(lua_State* L)
 {  
@@ -537,7 +535,7 @@ int array_method_rsum(lua_State* L)
     sum = luaL_checknumber(L, 2);
   }
   psy_audio_array_rsum(rv, luaL_checknumber(L, 2));
-  return lua_chaining(L);
+  return psyclescript_chaining(L);
 }
 
 int array_method_max(lua_State* L)
@@ -554,7 +552,7 @@ int array_method_max(lua_State* L)
 	} else {    
 		psy_audio_array_max_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_min(lua_State* L)
@@ -571,7 +569,7 @@ int array_method_min(lua_State* L)
 	} else {    
 		psy_audio_array_min_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_band(lua_State* L)
@@ -588,7 +586,7 @@ int array_method_band(lua_State* L)
 	} else {    
 		psy_audio_array_band_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_bor(lua_State* L)
@@ -605,7 +603,7 @@ int array_method_bor(lua_State* L)
 	} else {    
 		psy_audio_array_bor_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_bxor(lua_State* L)
@@ -622,7 +620,7 @@ int array_method_bxor(lua_State* L)
 	} else {    
 		psy_audio_array_bxor_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_sleft(lua_State* L)
@@ -639,7 +637,7 @@ int array_method_sleft(lua_State* L)
 	} else {    
 		psy_audio_array_sleft_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_sright(lua_State* L)
@@ -656,7 +654,7 @@ int array_method_sright(lua_State* L)
 	} else {    
 		psy_audio_array_sright_constant(rv, (float)luaL_checknumber(L, 2));
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_bnot(lua_State* L)
@@ -665,7 +663,7 @@ int array_method_bnot(lua_State* L)
 
 	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_array_bnot(*ud);
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_size(lua_State* L)
@@ -697,7 +695,7 @@ int array_copy(lua_State* L)
 			luaL_error(L, "Array out of range error");
 		}
 	}
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_fillzero(lua_State* L)
@@ -706,7 +704,7 @@ int array_method_fillzero(lua_State* L)
 
 	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_array_fillzero(*ud);
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_fill(lua_State* L)
@@ -715,7 +713,7 @@ int array_method_fill(lua_State* L)
 
 	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_array_fill(*ud, (float) luaL_checknumber(L, 2));
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_resize(lua_State* L)
@@ -724,10 +722,10 @@ int array_method_resize(lua_State* L)
 
 	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_array_resize(*ud, (int) luaL_checknumber(L, 2));
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
-int array_method_tostring(lua_State* L)
+int array_tostring(lua_State* L)
 {
 	char* str;
 	uintptr_t i;
@@ -756,7 +754,7 @@ int array_method_margin(lua_State* L)
 
 	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_array_margin(*ud, (int) luaL_checkinteger(L, 2), (int) luaL_checkinteger(L, 3));
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 int array_method_clearmargin(lua_State* L)
@@ -765,7 +763,7 @@ int array_method_clearmargin(lua_State* L)
 
 	ud = (psy_audio_Array**) luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_array_clearmargin(*ud);
-	return lua_chaining(L);
+	return psyclescript_chaining(L);
 }
 
 // static methods
@@ -923,15 +921,6 @@ int array_tan(lua_State* L)
 	return 1;
 }
 
-int array_pow(lua_State* L)
-{
-	psy_audio_Array* rv;
-
-	rv = create_copy_array(L, 1);
-	// psy_audio_array_pow(rv);
-	return 1;
-}
-
 int array_sqrt(lua_State* L)
 {
 	psy_audio_Array* rv;
@@ -940,3 +929,118 @@ int array_sqrt(lua_State* L)
 	psy_audio_array_sqrt(rv);	
 	return 1;
 }
+
+int array_unm(lua_State* L)
+{
+	psy_audio_Array* rv;
+
+	rv = create_copy_array(L, 1);
+	psy_audio_array_mul_constant(rv, -1);
+	return 1;
+}
+
+int array_concat(lua_State* L)
+{
+	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
+		psy_audio_Array* rv;
+		psy_audio_Array* v;
+
+		rv = create_copy_array(L, 1);
+		v = *(psy_audio_Array**) luaL_checkudata(L, 2, luaarraybind_meta);
+		psy_audio_array_concat(rv, v);
+	} else {
+		luaL_error(L, "No array userdata error");
+	}
+	return 1;
+}
+
+int array_pow(lua_State* L)
+{
+	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
+		psy_audio_Array* rv;
+		psy_audio_Array* v;
+
+		rv = create_copy_array(L, 1);
+		v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
+		luaL_argcheck(L, psy_audio_array_len(rv) == psy_audio_array_len(v), 2, "size not compatible");
+		psy_audio_array_pow_array(rv, v);
+	}
+	else {
+		psy_audio_Array* rv;
+
+		rv = create_copy_array(L, 1);
+		if ((lua_isuserdata(L, 1)) && (lua_isnumber(L, 2))) {
+			lua_Number param1;
+
+			param1 = luaL_checknumber(L, 2);
+			psy_audio_array_pow_array_constant(rv, (float)param1);
+		}
+		else {
+			lua_Number param1;
+
+			param1 = luaL_checknumber(L, 1);
+			rv = create_copy_array(L, 2);
+			psy_audio_array_pow_constant_array(rv, (float)param1);
+		}
+	}
+	return 1;
+}
+
+int array_mod(lua_State* L)
+{
+	if ((lua_isuserdata(L, 1)) && (lua_isuserdata(L, 2))) {
+		psy_audio_Array* rv;
+		psy_audio_Array* v;
+
+		rv = create_copy_array(L, 1);
+		v = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);
+		luaL_argcheck(L, psy_audio_array_len(rv) == psy_audio_array_len(v), 2, "size not compatible");
+		psy_audio_array_fmod_array(rv, v);
+	} else {
+		psy_audio_Array* rv;
+
+		rv = create_copy_array(L, 1);
+		if ((lua_isuserdata(L, 1)) && (lua_isnumber(L, 2))) {
+			lua_Number param1;
+
+			param1 = luaL_checknumber(L, 2);
+			psy_audio_array_fmod_array_constant(rv, (float)param1);
+		} else {
+			lua_Number param1;
+
+			param1 = luaL_checknumber(L, 1);
+			rv = create_copy_array(L, 2);
+			psy_audio_array_fmod_constant_array(rv, (float)param1);
+		}
+	}
+	return 1;
+}
+
+int array_method_from_table(lua_State* L)
+{
+	psy_audio_Array* rv = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	size_t len = lua_rawlen(L, 2);
+	float* ptr = psy_audio_array_data(rv);
+	size_t i;
+
+	for (i = 1; i <= len; ++i) {
+		lua_rawgeti(L, 2, i);
+		*ptr++ = (float) luaL_checknumber(L, -1);
+		lua_pop(L, 1);
+	}
+	return psyclescript_chaining(L);
+}
+
+int array_method_to_table(lua_State* L)
+{
+	psy_audio_Array* rv = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
+	size_t i;
+
+	lua_createtable(L, psy_audio_array_len(rv), 0);
+	for (i = 0; i < psy_audio_array_len(rv); ++i) {
+		lua_pushnumber(L, psy_audio_array_at(rv, i));
+		lua_rawseti(L, 2, i + 1);
+	}
+	return 1;
+}
+

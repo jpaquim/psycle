@@ -12,25 +12,25 @@ extern "C" {
 #endif
 
 //in -> -32768.0..32768.0 , out -32768..32767
-void quantize16(float *pin, int *piout, int c);
+void psy_dsp_quantize16(float *pin, int *piout, int c);
 //in -> -32768.0..32768.0 , out -32768..32767
-void quantize16withdither(float *pin, int *piout, int c);
+void psy_dsp_quantize16withdither(float *pin, int *piout, int c);
 //in -> -8388608.0..8388608.0, out  -2147483648.0 to 2147483648.0
-void quantize24in32bit(float *pin, int *piout, int c);
+void psy_dsp_quantize24in32bit(float *pin, int *piout, int c);
 //in -> -8388608.0..8388608.0 in 4 bytes, out -8388608..8388608, aligned to 3 bytes, big endian
-void quantize24be(float *pin, int *piout, int c);
+void psy_dsp_quantize24be(float *pin, int *piout, int c);
 //in -> -8388608.0..8388608.0 in 4 bytes, out -8388608..8388608, aligned to 3 bytes, little endian
-void quantize24le(float *pin, int *piout, int c);
+void psy_dsp_quantize24le(float *pin, int *piout, int c);
 //in -> -32768..32767 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
-void dequantize16anddeinterlace(short int *pin, float *poutleft,float *poutright,int c);
+void psy_dsp_dequantize16anddeinterlace(short int *pin, float *poutleft,float *poutright,int c);
 //in -> -2147483648..2147483647 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
-void dequantize32anddeinterlace(int *pin, float *poutleft,float *poutright,int c);
+void psy_dsp_dequantize32anddeinterlace(int *pin, float *poutleft,float *poutright,int c);
 //in -> -1.0..1.0 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
-void deinterlacefloat(float *pin, float *poutleft,float *poutright,int c);
+void psy_dsp_deinterlacefloat(float *pin, float *poutleft,float *poutright,int c);
 
 INLINE int32_t psy_dsp_rint(float flt) { return flt; }
 
-INLINE int32_t fround(float flt)
+INLINE int32_t psy_dsp_fround(float flt)
 {
 #if defined(_WIN64)
     return flt > 0 ? floor(flt + 0.5) : ceil(flt - 0.5);

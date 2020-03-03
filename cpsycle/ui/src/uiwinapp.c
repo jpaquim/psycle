@@ -465,6 +465,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE &&
+					psy_table_at(&winapp->selfmap,
+					(uintptr_t)GetParent(hwnd))) {
+					SendMessage(GetParent(hwnd), message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;

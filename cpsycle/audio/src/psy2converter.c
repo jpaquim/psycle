@@ -8,6 +8,7 @@
 #include "song.h"
 #include "songio.h"
 #include <string.h>
+#include <stdlib.h>
 #include <dir.h>
 #include "constants.h"
 #include "../../detail/portable.h"
@@ -26,6 +27,7 @@ static void psy2samplerload(psy_audio_SongFile* songfile, int32_t slot);
 static void psy2machineload(psy_audio_SongFile* songfile, int32_t slot);
 static void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot);
 static int convertindex(int index);
+static void ReadPlugin(psy_audio_SongFile* songfile, int machtype, int psy2type);
 
 enum {
 	master,
@@ -41,6 +43,15 @@ enum {
 	vstfx,
 	scope,
 	dummy = 255
+};
+
+enum {
+	abass,
+	asynth,
+	asynth2,
+	asynth21,
+	synth21,
+	asynth22
 };
 
 psy_audio_Machine* psy_audio_psy2converter_load(
@@ -70,12 +81,12 @@ psy_audio_Machine* psy_audio_psy2converter_load(
 	} else
 	if (type == delay) {
 		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "delay");		
+		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "delay:0");		
 		psy2machineload(songfile, *newindex);
 	} else
 	if (type == filter_2_poles) {
 		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "filter-2-poles");		
+		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "filter-2-poles:0");		
 		psy2machineload(songfile, *newindex);
 	} else
 	if (type == sampler) {
@@ -88,19 +99,23 @@ psy_audio_Machine* psy_audio_psy2converter_load(
 		psy_strlwr(dllname);
 		psyfile_read(songfile->file, &editname, sizeof(editname));
 		if (strcmp(dllname, "arguru bass.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");			
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
+			if (rv) {
+				ReadPlugin(songfile, MACH_PLUGIN, abass);
+				psy2machineload(songfile, *newindex);
+			}
 		} else	
 		if (strcmp(dllname, "arguru synth.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
 		} else
 		if (strcmp(dllname, "arguru synth 2.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
 		} else
 		if (strcmp(dllname, "synth21.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
 		} else
 		if (strcmp(dllname, "synth22.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f");
+			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
 		} else {
 			char plugincatchername[256];
 			
@@ -293,6 +308,9 @@ void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot)
 	int32_t _numOutputs;						// number of Outgoing connections
 	POINT _connectionPoint[MAX_CONNECTIONS];			
 	int c;
+	int32_t index;
+
+	index = slot;
 
 	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
 	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
@@ -303,22 +321,28 @@ void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot)
 	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
 	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
 
-
 	for (c = 0; c < MAX_CONNECTIONS; ++c) { // all for each of its input connections.		
 		if (_connection[c]) {
 			int32_t output;
 			int32_t input;
+			unsigned char connection;
+			unsigned char incon;
+			float inconvol;
+			float wiremultiplier = 1.f;
 
+			connection = _connection[c];
+			incon = _inputCon[c];
+			inconvol = _inputConVol[c];
 			input = convertindex(_inputMachines[c]);
-			output = convertindex(_outputMachines[c]);			
-			if (_connection[c] && output != -1) {					
-				machines_connect(&songfile->song->machines, slot, output);
+			output = convertindex(_outputMachines[c]);	
+			if (connection && output != -1) {
+				machines_connect(&songfile->song->machines, index, output);
 			}
-			if (_inputCon[c] && input != -1) {
-				machines_connect(&songfile->song->machines, input, slot);
-				//connections_setwirevolume(&self->song->machines.connections,
-				//input, index, inconvol * wiremultiplier);
-			}			
+			if (incon && input != -1) {
+				machines_connect(&songfile->song->machines, input, index);
+				connections_setwirevolume(&songfile->song->machines.connections,
+					input, index, inconvol * wiremultiplier);
+			}		
 		}		
 	}
 }
@@ -340,4 +364,51 @@ int convertindex(int index)
 
 void psy_audio_psy2converter_retweak(int type, int parameter, int* integral_value)
 {
+}
+
+void ReadPlugin(psy_audio_SongFile* songfile, int machtype, int psy2type) //const std::pair<int, std::string> type, Machine& machine, RiffFile& riff)
+{
+	int32_t numParameters;
+	int* Vals;
+
+	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
+	Vals = malloc(numParameters * sizeof(int32_t));
+	psyfile_read(songfile->file, Vals, numParameters * sizeof(int));
+
+	if (machtype == MACH_DUMMY) {
+		//do nothing.
+	}
+	else if (psy2type == abass) {
+		// retweak(machine, type, Vals, 15, 0);
+		// machine.SetParameter(19, 0);
+		// retweak(machine, type, Vals + 15, 1, 15);
+		// if (numParameters > 16) {
+			//retweak(machine, type, Vals + 16, 2, 16);
+		// }
+		// else {
+		//	machine.SetParameter(24, 0);
+		//	machine.SetParameter(25, 0);
+		//}
+	}
+	else if (psy2type == asynth) {
+		// retweak(machine, type, Vals, numParameters, 0);
+		// machine.SetParameter(24, 0);
+		// machine.SetParameter(25, 0);
+		// machine.SetParameter(27, 1);
+	}
+	else if (psy2type == asynth2) {
+		// retweak(machine, type, Vals, numParameters, 0);
+		// machine.SetParameter(24, 0);
+		// machine.SetParameter(25, 0);
+	}
+	else if (psy2type == asynth21) {
+		//I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs)
+		// retweak(machine, type, Vals, numParameters, 0);
+		// machine.SetParameter(24, 0);
+		// machine.SetParameter(25, 0);
+	}
+	else if (psy2type == asynth22) {
+		// retweak(machine, type, Vals, numParameters, 0);
+	}
+	free(Vals);
 }

@@ -22,6 +22,7 @@ static psy_dsp_beat_t machinecallback_currbeatsperline(void* self) { return 4096
 static struct psy_audio_Samples* machinecallback_samples(void* self) { return 0; }
 static psy_audio_Machines* machinecallback_machines(void* self) { return 0; }
 static struct psy_audio_Instruments* machinecallback_instruments(void* self) { return 0; }
+static struct psy_audio_MachineFactory* machinecallback_machinefactory(void* self) { return 0; }
 static void machinecallback_fileselect_load(void* self) { }
 static void machinecallback_fileselect_save(void* self) { }
 static void machinecallback_fileselect_directory(void* self) { }
@@ -29,23 +30,32 @@ static void machinecallback_output(void* self, const char* text) { }
 static bool machinecallback_addcapture(void* self, int index) { return 0; }
 static bool machinecallback_removecapture(void* self, int index) { return 0; }
 static void machinecallback_readbuffers(void* self, int index, float** pleft, float** pright, int numsamples) { }
+static const char* machinecallback_capturename(void* self, int index) { return ""; }
+static int machinecallback_numcaptures(void* self) { return 0; }
+static const char* machinecallback_playbackname(void* self, int index) { return ""; }
+static int machinecallback_numplaybacks(void* self) { return 0; }
 
 void machinecallback_initempty(MachineCallback* self)
 {
-	self->samplerate = (fp_mcb_samplerate)machinecallback_samplerate;
-	self->bpm = (fp_mcb_bpm)machinecallback_bpm;
-	self->beatspersample = (fp_mcb_beatspersample)machinecallback_beatspersample;
-	self->currbeatsperline = (fp_mcb_currbeatsperline)machinecallback_currbeatsperline;
-	self->samples = (fp_mcb_samples)machinecallback_samples;
-	self->machines = (fp_mcb_machines)machinecallback_machines;
-	self->instruments = (fp_mcb_instruments)machinecallback_instruments;
-	self->fileselect_load = (fp_mcb_fileselect_load)machinecallback_fileselect_load;
-	self->fileselect_save = (fp_mcb_fileselect_save)machinecallback_fileselect_save;
-	self->fileselect_directory = (fp_mcb_fileselect_directory)machinecallback_fileselect_directory;
-	self->output = (fp_mcb_output)machinecallback_output;
-	self->addcapture = (fp_mcb_addcapture)machinecallback_addcapture;
-	self->removecapture = (fp_mcb_removecapture)machinecallback_removecapture;
-	self->readbuffers = (fp_mcb_readbuffers)machinecallback_readbuffers;
+	self->samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
+	self->bpm = (fp_mcb_bpm) machinecallback_bpm;
+	self->beatspersample = (fp_mcb_beatspersample) machinecallback_beatspersample;
+	self->currbeatsperline = (fp_mcb_currbeatsperline) machinecallback_currbeatsperline;
+	self->samples = (fp_mcb_samples) machinecallback_samples;
+	self->machines = (fp_mcb_machines) machinecallback_machines;
+	self->instruments = (fp_mcb_instruments) machinecallback_instruments;
+	self->machinefactory = (fp_mcb_machinefactory) machinecallback_machinefactory;
+	self->fileselect_load = (fp_mcb_fileselect_load) machinecallback_fileselect_load;
+	self->fileselect_save = (fp_mcb_fileselect_save) machinecallback_fileselect_save;
+	self->fileselect_directory = (fp_mcb_fileselect_directory) machinecallback_fileselect_directory;
+	self->output = (fp_mcb_output) machinecallback_output;
+	self->addcapture = (fp_mcb_addcapture) machinecallback_addcapture;
+	self->removecapture = (fp_mcb_removecapture) machinecallback_removecapture;
+	self->readbuffers = (fp_mcb_readbuffers) machinecallback_readbuffers;
+	self->capturename = (fp_mcb_capturename) machinecallback_capturename;
+	self->numcaptures = (fp_mcb_numcaptures) machinecallback_numcaptures;
+	self->playbackname = (fp_mcb_playbackname) machinecallback_playbackname;
+	self->numplaybacks = (fp_mcb_numplaybacks) machinecallback_numplaybacks;
 }
 
 static psy_audio_MachineInfo const macinfo = {	
@@ -168,12 +178,33 @@ static psy_dsp_beat_t currbeatsperline(psy_audio_Machine* self) { return self->c
 static struct psy_audio_Samples* samples(psy_audio_Machine* self) { return self->callback.samples(self->callback.context); }
 static struct psy_audio_Machines* machines(psy_audio_Machine* self) { return self->callback.machines(self->callback.context); }
 static struct psy_audio_Instruments* instruments(psy_audio_Machine* self) { return self->callback.instruments(self->callback.context); }
+static struct psy_audio_MachineFactory* machinefactory(psy_audio_Machine* self) { return self->callback.machinefactory(self->callback.context); }
 static void output(psy_audio_Machine* self, const char* text) { self->callback.output(self->callback.context, text); }
 static bool addcapture(psy_audio_Machine* self, int index) { return self->callback.addcapture(self->callback.context, index); }
 static bool removecapture(psy_audio_Machine* self, int index) { return self->callback.removecapture(self->callback.context, index); }
 static void readbuffers(psy_audio_Machine* self, int index, float** pleft, float** pright, int numsamples)
 { 
 	self->callback.readbuffers(self->callback.context, index, pleft, pright, numsamples);
+}
+
+static const char* capturename(psy_audio_Machine* self, int index)
+{
+	return self->callback.capturename(self->callback.context, index);
+}
+
+static int numcaptures(psy_audio_Machine* self)
+{
+	return self->callback.numcaptures(self->callback.context);
+}
+
+static const char* playbackname(psy_audio_Machine* self, int index)
+{
+	return self->callback.playbackname(self->callback.context, index);
+}
+
+static int numplaybacks(psy_audio_Machine* self)
+{
+	return self->callback.numplaybacks(self->callback.context);
 }
 
 static MachineVtable vtable;
@@ -225,13 +256,18 @@ static void vtable_init(void)
 		vtable.beatspersample = beatspersample;
 		vtable.currbeatsperline = currbeatsperline;
 		vtable.samplerate = samplerate;
-		vtable.instruments = instruments;	
+		vtable.instruments = instruments;
+		vtable.machinefactory = machinefactory;
 		vtable.samples = samples;
 		vtable.machines = machines;
 		vtable.output = output;
 		vtable.addcapture = addcapture;
 		vtable.removecapture = removecapture;
 		vtable.readbuffers = readbuffers;
+		vtable.capturename = capturename;
+		vtable.numcaptures = numcaptures;
+		vtable.playbackname = playbackname;
+		vtable.numplaybacks = numplaybacks;
 		vtable.slot = slot;
 		vtable.setslot = setslot;		
 		vtable.haseditor = haseditor;

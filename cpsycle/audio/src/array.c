@@ -194,6 +194,80 @@ void psy_audio_array_div_array(psy_audio_Array* self, psy_audio_Array* other)
 	}
 }
 
+void psy_audio_array_pow_array_constant(psy_audio_Array* self, float exponent)
+{
+	float* source;
+	uintptr_t i;
+	uintptr_t num;
+
+	num = self->len_;
+	for (i = 0; i < num; ++i) {
+		self->ptr_[i] = pow(self->ptr_[i], exponent);
+	}
+}
+
+void psy_audio_array_pow_constant_array(psy_audio_Array* self, float exponent)
+{
+	float* source;
+	uintptr_t i;
+	uintptr_t num;
+
+	num = self->len_;
+	for (i = 0; i < num; ++i) {
+		self->ptr_[i] = pow(exponent, self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_pow_array(psy_audio_Array* self, psy_audio_Array* other)
+{
+	float* source;
+	uintptr_t i;
+	uintptr_t num;
+
+	num = (self->len_ < other->len_) ? self->len_ : other->len_;
+	source = psy_audio_array_data(other);
+	for (i = 0; i < num; ++i) {
+		self->ptr_[i] = pow(self->ptr_[i], source[i]);
+	}
+}
+
+void psy_audio_array_fmod_array_constant(psy_audio_Array* self, float exponent)
+{
+	float* source;
+	uintptr_t i;
+	uintptr_t num;
+
+	num = self->len_;
+	for (i = 0; i < num; ++i) {
+		self->ptr_[i] = fmod(self->ptr_[i], exponent);
+	}
+}
+
+void psy_audio_array_fmod_constant_array(psy_audio_Array* self, float exponent)
+{
+	float* source;
+	uintptr_t i;
+	uintptr_t num;
+
+	num = self->len_;
+	for (i = 0; i < num; ++i) {
+		self->ptr_[i] = fmod(exponent, self->ptr_[i]);
+	}
+}
+
+void psy_audio_array_fmod_array(psy_audio_Array* self, psy_audio_Array* other)
+{
+	float* source;
+	uintptr_t i;
+	uintptr_t num;
+
+	num = (self->len_ < other->len_) ? self->len_ : other->len_;
+	source = psy_audio_array_data(other);
+	for (i = 0; i < num; ++i) {
+		self->ptr_[i] = fmod(self->ptr_[i], source[i]);
+	}
+}
+
 void psy_audio_array_mix(psy_audio_Array* self, psy_audio_Array* other,
 	float factor)
 {
@@ -279,16 +353,6 @@ int psy_audio_array_copyfrom(psy_audio_Array* self, psy_audio_Array* other,
 		self->ptr_[i + pos] = source[i];
 	}
 	return 1;
-}
-
-// array methods
-void psy_audio_array_pow(psy_audio_Array* self)
-{
-	uintptr_t i;
-
-	for (i = 0; i < self->len_; ++i) {
-		self->ptr_[i] = (float)sin(self->ptr_[i]);
-	}
 }
 
 void psy_audio_array_random(psy_audio_Array* self)
@@ -567,3 +631,19 @@ void psy_audio_array_resize(psy_audio_Array* self, uintptr_t newsize)
 	}
 }
 
+void psy_audio_array_concat(psy_audio_Array* self, psy_audio_Array* other)
+{
+	uintptr_t len_other;
+
+	len_other = psy_audio_array_len(other);
+	if (len_other > 0) {
+		uintptr_t len;
+		uintptr_t i;
+
+		len = psy_audio_array_len(self);
+		psy_audio_array_resize(self, len + len_other);
+		for (i = 0; i < len_other; ++i) {
+			self->ptr_[i + len] = psy_audio_array_at(other, i);
+		}
+	}
+}

@@ -462,6 +462,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\quantize.c"
+				>
+			</File>
+			<File
 				RelativePath="src\resampler.c"
 				>
 				<FileConfiguration
@@ -556,6 +560,10 @@
 			</File>
 			<File
 				RelativePath="src\operations.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\quantize.h"
 				>
 			</File>
 			<File

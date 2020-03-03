@@ -11,7 +11,13 @@ extern "C" {
 #endif
 
 typedef struct {
-	psy_audio_CustomMachine custommachine;	
+	psy_audio_CustomMachine custommachine;
+	char drivername[32];
+	int _captureidx;
+	bool _initialized;
+	float _gainvol;
+	float* pleftorig;
+	float* prightorig;
 } psy_audio_AudioRecorder;
 
 void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, MachineCallback);

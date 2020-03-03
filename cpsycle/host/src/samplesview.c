@@ -411,7 +411,7 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			SampleIndex index;
 			psy_audio_Instrument* instrument;
 
-			sample = sample_allocinit();
+			sample = sample_allocinit(2);
 			sample_load(sample, psy_ui_opendialog_filename(&dialog));
 			index = samplesbox_selected(&self->samplesbox);
 			psy_audio_samples_insert(&self->workspace->song->samples, sample,

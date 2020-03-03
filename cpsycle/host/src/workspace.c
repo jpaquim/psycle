@@ -74,6 +74,7 @@ static psy_dsp_beat_t machinecallback_currbeatsperline(Workspace*);
 static psy_audio_Samples* machinecallback_samples(Workspace*);
 static psy_audio_Machines* machinecallback_machines(Workspace*);
 static psy_audio_Instruments* machinecallback_instruments(Workspace*);
+static psy_audio_MachineFactory* machinecallback_machinefactory(Workspace*);
 static void machinecallback_fileselect_load(Workspace*);
 static void machinecallback_fileselect_save(Workspace*);
 static void machinecallback_fileselect_directory(Workspace*);
@@ -81,6 +82,10 @@ static void machinecallback_output(Workspace*, const char* text);
 static bool machinecallback_addcapture(Workspace*, int index);
 static bool machinecallback_removecapture(Workspace*, int index);
 static void machinecallback_readbuffers(Workspace*, int index, float** pleft, float** pright, int numsamples);
+static const char* machinecallback_capturename(Workspace*, int index);
+static int machinecallback_numcaptures(Workspace*);
+static const char* machinecallback_playbackname(Workspace*, int index);
+static int machinecallback_numplaybacks(Workspace*);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
@@ -1815,6 +1820,7 @@ MachineCallback machinecallback(Workspace* self)
 	rv.samples = (fp_mcb_samples) machinecallback_samples;
 	rv.machines = (fp_mcb_machines) machinecallback_machines;
 	rv.instruments = (fp_mcb_instruments) machinecallback_instruments;
+	rv.machinefactory = (fp_mcb_machinefactory)machinecallback_machinefactory;
 	rv.fileselect_load = (fp_mcb_fileselect_load) machinecallback_fileselect_load;
 	rv.fileselect_save = (fp_mcb_fileselect_save) machinecallback_fileselect_save;
 	rv.fileselect_directory = (fp_mcb_fileselect_directory) machinecallback_fileselect_directory;
@@ -1822,6 +1828,10 @@ MachineCallback machinecallback(Workspace* self)
 	rv.addcapture = (fp_mcb_addcapture) machinecallback_addcapture;
 	rv.removecapture = (fp_mcb_removecapture) machinecallback_removecapture;
 	rv.readbuffers = (fp_mcb_readbuffers) machinecallback_readbuffers;
+	rv.capturename = (fp_mcb_capturename) machinecallback_capturename;
+	rv.numcaptures = (fp_mcb_numcaptures) machinecallback_numcaptures;
+	rv.playbackname = (fp_mcb_playbackname) machinecallback_playbackname;
+	rv.numplaybacks = (fp_mcb_numplaybacks) machinecallback_numplaybacks;
 	return rv;
 }
 
@@ -1894,6 +1904,11 @@ psy_audio_Instruments* machinecallback_instruments(Workspace* self)
 	return self->songcbk ? &self->song->instruments : 0;
 }
 
+psy_audio_MachineFactory* machinecallback_machinefactory(Workspace* self)
+{
+	return &self->machinefactory;
+}
+
 void workspace_onterminalwarning(Workspace* self, psy_audio_SongFile* sender,
 	const char* text)	
 {
@@ -1938,6 +1953,38 @@ void machinecallback_readbuffers(Workspace* self, int index, float** pleft, floa
 	if (self->player.driver) {
 		self->player.driver->readbuffers(self->player.driver, index, pleft, pright, numsamples);
 	}
+}
+
+const char* machinecallback_capturename(Workspace* self, int index)
+{
+	if (self->player.driver) {
+		return self->player.driver->capturename(self->player.driver, index);
+	}
+	return "";
+}
+
+int machinecallback_numcaptures(Workspace* self)
+{
+	if (self->player.driver) {
+		return self->player.driver->numcaptures(self->player.driver);
+	}
+	return 0;
+}
+
+const char* machinecallback_playbackname(Workspace* self, int index)
+{
+	if (self->player.driver) {
+		return self->player.driver->playbackname(self->player.driver, index);
+	}
+	return "";
+}
+
+int machinecallback_numplaybacks(Workspace* self)
+{
+	if (self->player.driver) {
+		return self->player.driver->numplaybacks(self->player.driver);
+	}
+	return 0;
 }
 
 const char* workspace_dialbitmap_path(Workspace* self)

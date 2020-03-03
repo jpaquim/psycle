@@ -246,6 +246,10 @@ SOURCE=.\src\luaplugin.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\luawaveosc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\machine.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -696,6 +700,10 @@ SOURCE=.\src\luaimport.h
 # Begin Source File
 
 SOURCE=.\src\luaplugin.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\luawaveosc.h
 # End Source File
 # Begin Source File
 

@@ -86,7 +86,7 @@ const char* instrument_name(psy_audio_Instrument*);
 void instrument_setnna(psy_audio_Instrument*, psy_audio_NewNoteAction nna);
 psy_audio_NewNoteAction instrument_nna(psy_audio_Instrument*);
 psy_List* instrument_entriesintersect(psy_audio_Instrument*, uintptr_t key,
-	uintptr_t velocity);
+	uintptr_t velocity, double frequency);
 void instrument_clearentries(psy_audio_Instrument*);
 void instrument_addentry(psy_audio_Instrument*,
 	const psy_audio_InstrumentEntry* entry);

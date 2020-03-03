@@ -68,10 +68,15 @@ static void machineproxy_setslot(psy_audio_MachineProxy*, uintptr_t slot);
 static struct psy_audio_Samples* machineproxy_samples(psy_audio_MachineProxy*);
 static struct psy_audio_Machines* machineproxy_machines(psy_audio_MachineProxy*);
 static struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy*);
+static struct psy_audio_MachineFactory* machineproxy_machinefactory(psy_audio_MachineProxy*);
 static void machineproxy_output(psy_audio_MachineProxy*, const char* text);
 static bool machineproxy_addcapture(psy_audio_MachineProxy*, int index);
 static bool machineproxy_removecapture(psy_audio_MachineProxy*, int index);
 static void machineproxy_readbuffers(psy_audio_MachineProxy*, int index, float** pleft, float** pright, int numsamples);
+static const char* machineproxy_capturename(psy_audio_MachineProxy*, int index);
+static int machineproxy_numcaptures(psy_audio_MachineProxy*);
+static const char* machineproxy_playbackname(psy_audio_MachineProxy*, int index);
+static int machineproxy_numplaybacks(psy_audio_MachineProxy*);
 
 static void machineproxy_setcallback(psy_audio_MachineProxy*, MachineCallback);
 static int machineproxy_parameterlabel(psy_audio_MachineProxy*, char* txt, uintptr_t param);
@@ -183,11 +188,17 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_machines;
 		vtable.instruments = (fp_machine_instruments)
 			machineproxy_instruments;
+		vtable.machinefactory = (fp_machine_machinefactory)
+			machineproxy_machinefactory;
 		vtable.output = (fp_machine_output)
 			machineproxy_output;
 		vtable.addcapture = (fp_machine_addcapture) machineproxy_addcapture;
 		vtable.removecapture = (fp_machine_removecapture) machineproxy_removecapture;
 		vtable.readbuffers = (fp_machine_readbuffers) machineproxy_readbuffers;
+		vtable.capturename = (fp_machine_capturename) machineproxy_capturename;
+		vtable.numcaptures = (fp_machine_numcaptures) machineproxy_numcaptures;
+		vtable.playbackname = (fp_machine_playbackname) machineproxy_playbackname;
+		vtable.numplaybacks = (fp_machine_numplaybacks) machineproxy_numplaybacks;
 		vtable.samples = (fp_machine_samples)
 			machineproxy_samples;
 		vtable.setcallback = (fp_machine_setcallback)
@@ -941,6 +952,26 @@ struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy* s
 	return rv;
 }
 
+struct psy_audio_MachineFactory* machineproxy_machinefactory(psy_audio_MachineProxy* self)
+{
+	struct psy_audio_MachineFactory* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = self->client->vtable->machinefactory(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "machinefactory", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
 void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
 {
 	if (self->crashed == 0) {
@@ -1502,6 +1533,86 @@ int machineproxy_currbank(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "currbank", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+const char* machineproxy_capturename(psy_audio_MachineProxy* self, int index)
+{
+	const char* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_capturename(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "capturename", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+int machineproxy_numcaptures(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_numcaptures(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "numcaptures", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+const char* machineproxy_playbackname(psy_audio_MachineProxy* self, int index)
+{
+	const char* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_playbackname(self->client, index);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "playbackname", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+int machineproxy_numplaybacks(psy_audio_MachineProxy* self)
+{
+	int rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_numplaybacks(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "numplaybacks", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

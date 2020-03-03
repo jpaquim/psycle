@@ -128,8 +128,10 @@ static void machinewireview_setcoords(MachineWireView*, psy_Properties*);
 static void machinewireview_onsize(MachineWireView*, psy_ui_Component* sender,
 	psy_ui_Size* size);
 static psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slot);
+static void machineview_onmousedown(MachineView*,
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*,
-	psy_ui_Component* sender, int x, int y, int button);
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void machineview_onkeydown(MachineView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
@@ -1939,6 +1941,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		machinewireview_onnewmachineselected);
 	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		machineview_onmousedoubleclick);
+	psy_signal_connect(&self->component.signal_mousedown, self,
+		machineview_onmousedown);
 	psy_signal_connect(&self->component.signal_keydown, self,
 		machineview_onkeydown);
 	psy_signal_connect(&self->component.signal_focus, self,
@@ -1949,10 +1953,21 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_Component* sender,
-	int x, int y, int button)
+	psy_ui_MouseEvent* ev)
 {	
 	self->newmachine.pluginsview.calledby = 0;	
 	tabbar_select(&self->tabbar, 1);
+}
+
+void machineview_onmousedown(MachineView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{
+	if (ev->button == 2) {
+		if (tabbar_selected(&self->tabbar) == 1) {
+			tabbar_select(&self->tabbar, 0);
+		}
+	}
+	psy_ui_mouseevent_stoppropagation(ev);
 }
 
 void machineview_onkeydown(MachineView* self, psy_ui_Component* sender,

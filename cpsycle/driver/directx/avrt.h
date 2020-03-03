@@ -15,10 +15,11 @@ extern "C" {
 typedef HANDLE(WINAPI* FAvSetMmThreadCharacteristics)(LPCTSTR, LPDWORD);
 typedef BOOL(WINAPI* FAvRevertMmThreadCharacteristics)(HANDLE);
 
-static FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics = NULL;
-static FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
+extern FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics;
+extern FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics;
 
-// Dynamic load and unload of avrt.dll, so the executable can run on Windows 2K and XP.
+// Dynamic load and unload of avrt.dll, so the executable can run on
+// Windows 2K and XP.
 BOOL SetupAVRT(void);
 void CloseAVRT(void);
 

@@ -10,11 +10,16 @@
 #include "array.h"
 #include "luaarray.h"
 #include "luaenvelope.h"
+#include "luawaveosc.h"
 #include "custommachine.h"
 #include "plugin_interface.h"
 #include "../../detail/portable.h"
 #include "exclusivelock.h"
 #include "lock.h"
+#include "machines.h"
+#include "machinefactory.h"
+
+#include <list.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -60,6 +65,7 @@ static void getparam(psy_LuaImport*, int idx, const char* method);
 static int luaL_orderednext(lua_State*);
 static int luamachine_addparameters(lua_State*);
 static int luamachine_setnumcols(lua_State*);
+static int luamachine_setbuffer(lua_State*);
 
 static const char* luaarraybind_meta = "array_meta";
 
@@ -213,6 +219,8 @@ int psy_audio_plugin_luascript_exportcmodules(psy_audio_PsycleScript* self)
 		psy_audio_luabind_array_open);
 	psyclescript_require(self, "psycle.envelope",
 		psy_audio_luabind_envelope_open);
+	psyclescript_require(self, "psycle.osc",
+		psy_audio_luabind_waveosc_open);
 	return 1;
 }
 
@@ -224,6 +232,7 @@ void generateaudio(psy_audio_LuaPlugin* self, psy_audio_BufferContext* bc)
 		psy_audio_lock_enter(self->lock);
 		psy_luaimport_init(&in, self->script.L, self->client);		
 		if (psy_luaimport_open(&in, "work")) {
+			self->client->bcshared_ = TRUE;
 			self->client->bc = bc;
 			lua_pushinteger(self->script.L, bc->numsamples);
 			psy_luaimport_pcall(&in, 0);
@@ -536,6 +545,8 @@ int luamachine_open(lua_State *L)
 		{"setparameters", luamachine_setparameters},
 		{"addparameters", luamachine_addparameters},
 		{"setnumcols", luamachine_setnumcols},
+		{"machinework", luamachine_work},
+		{"setbuffer", luamachine_setbuffer},
 		{NULL, NULL}
 	  };
 	psyclescript_open(L, luamachine_meta, methods, 
@@ -569,7 +580,7 @@ int luamachine_create(lua_State* L)
 	int n;
 
 	n = lua_gettop(L);
-	if (n==1) {
+	if (n == 1) {
 		psy_audio_LuaMachine* luamachine;
 
 		luamachine = malloc(sizeof(psy_audio_LuaMachine));
@@ -577,16 +588,80 @@ int luamachine_create(lua_State* L)
 		luamachine_newshareduserdata(L, luamachine_meta, luamachine, 1);
 		lua_newtable(L);
 		lua_setfield(L, -2, "params");
+	} else
+	if (n == 2) {
+		psy_audio_LuaPlugin* host = 0;
+		psy_audio_LuaMachine* ud = 0;
+		psy_audio_Machine* mac = 0;
+		if (lua_isnumber(L, 2)) {
+			int idx = (int) luaL_checkinteger(L, 2);
+			if (idx < 0) {
+				return luaL_error(L, "negative index not allowed");
+			}
+			host = (psy_audio_LuaPlugin*)psyclescript_host(L);
+			if (!host) {
+				return luaL_error(L, "host not found");
+			}
+			mac = machines_at(psy_audio_machine_machines(
+				psy_audio_luaplugin_base(host)), idx);
+			if (mac) {
+				ud = malloc(sizeof(psy_audio_LuaMachine));
+				psy_audio_luamachine_init_shared(ud, mac);
+				luamachine_newshareduserdata(L, luamachine_meta, ud, 1);
+				lua_newtable(L);
+				lua_setfield(L, -2, "params");
+			}
+		} else {
+			size_t len;
+			const char* plug_name = luaL_checklstring(L, 2, &len);
+			psy_audio_LuaMachine* ud = 0;
+			psy_audio_Machine* machine;
+			psy_audio_LuaPlugin* host = 0;
+			psy_audio_MachineFactory* machinefactory;
+
+			host = (psy_audio_LuaPlugin*)psyclescript_host(L);
+			if (!host) {
+				return luaL_error(L, "host not found");
+			}
+			machinefactory = psy_audio_machine_machinefactory(psy_audio_luaplugin_base(host));
+			if (machinefactory) {
+				machine = machinefactory_makemachine(machinefactory, MACH_PLUGIN,
+					plug_name);
+				if (machine) {
+					ud = malloc(sizeof(psy_audio_LuaMachine));
+					psy_audio_luamachine_init_machine(ud, machine);
+					luamachine_newshareduserdata(L, luamachine_meta, ud, 1);
+					lua_newtable(L);
+					lua_setfield(L, -2, "params");
+				} else {
+					luaL_error(L, "plugin not found error");
+				}
+			} 
+		}
 	}
 	return 1;
+}
+
+void psy_audio_luamachine_dispose(psy_audio_LuaMachine* self)
+{
+	if (self->machine && !luamachine_shared(self)) {
+		machine_dispose(self->machine);
+		free(self->machine);
+		self->machine = 0;
+	}
+	if (self->bcshared_ == FALSE) {
+		if (self->bc && self->bc->output) {
+			psy_audio_buffer_dispose(self->bc->output);
+		}
+		free(self->bc);
+	}
 }
 
 int luamachine_gc(lua_State* L)
 {
 	psy_audio_LuaMachine** ud = (psy_audio_LuaMachine**)
-		luaL_checkudata(L, 1, luamachine_meta);	
-	machine_dispose((*ud)->machine);
-	free((*ud)->machine);
+		luaL_checkudata(L, 1, luamachine_meta);
+	psy_audio_luamachine_dispose(*ud);
 	free(*ud);
 	return 0;
 }
@@ -602,6 +677,20 @@ int luamachine_setparameters(lua_State* L)
 	lua_setfield(L, -2, "params");
 	lua_pushvalue(L, 1);
 	return 1;
+}
+
+int luamachine_work(lua_State* L)
+{
+	psy_audio_LuaMachine* self;
+	int numsamples;
+
+	self = psyclescript_checkself(L, 1, luamachine_meta);
+	numsamples = luaL_checkinteger(L, 2);
+	if (self->bc) {
+		self->bc->numsamples = numsamples;
+		psy_audio_machine_work(self->machine, self->bc);
+	}
+	return 0;
 }
 
 int luamachine_addparameters(lua_State* L)
@@ -636,6 +725,54 @@ int luamachine_setnumcols(lua_State* L)
 
 	self = psyclescript_checkself(L, 1, luamachine_meta);
 	self->numcols_ = (int) luaL_checkinteger(L, 2);
+	lua_pushvalue(L, 1);
+	return 1;
+}
+
+int luamachine_setbuffer(lua_State* L)
+{	
+	int n = lua_gettop(L);		
+	if (n == 2) {
+		psy_audio_LuaMachine* self;
+		psy_audio_Buffer* buffer;
+		psy_audio_BufferContext* bc;
+		psy_List* arrays = 0;
+		psy_List* p;
+		int c;
+		int numsamples;
+
+		self = psyclescript_checkself(L, 1, luamachine_meta);
+		luaL_checktype(L, 2, LUA_TTABLE);
+		lua_pushvalue(L, 2);
+			
+		for (lua_pushnil(L); lua_next(L, -2); lua_pop(L, 1)) {
+			psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, -1, luaarraybind_meta);
+			numsamples = psy_audio_array_len(v);
+			psy_list_append(&arrays, v);
+		}
+		if (arrays) {
+			buffer = psy_audio_buffer_allocinit(psy_list_size(arrays));
+			for (c = 0, p = arrays; p != 0; p = p->next, ++c) {
+				psy_audio_Array* v;
+
+				v = (psy_audio_Array*)p->entry;
+				buffer->samples[c] = psy_audio_array_data(v);
+			}
+			if (self->bc && self->bcshared_ == FALSE) {
+				if (self->bc->output) {
+					psy_audio_buffer_dispose(self->bc->output);
+				}
+				free(self->bc);
+			}
+			bc = (psy_audio_BufferContext*)malloc(sizeof(psy_audio_BufferContext));
+			psy_audio_buffercontext_init(bc, 0, buffer, buffer, numsamples, 64, 0);
+			self->bc = bc;
+			self->bcshared_ = FALSE;
+			psy_list_free(arrays);
+		}
+	} else {
+		luaL_error(L, "Got %d arguments expected 2 (self, index)", n);
+	}
 	lua_pushvalue(L, 1);
 	return 1;
 }
@@ -706,6 +843,32 @@ void psy_audio_luamachine_init(psy_audio_LuaMachine* self)
 	self->numparameters_ = 0;
 	self->numcols_ = 0;
 	self->numprograms_ = 0;
+	self->shared_ = FALSE;
+	self->bcshared_ = FALSE;
+}
+
+void psy_audio_luamachine_init_shared(psy_audio_LuaMachine* self,
+	psy_audio_Machine* machine)
+{
+	self->machine = machine;
+	self->bc = 0;
+	self->numparameters_ = 0;
+	self->numcols_ = 0;
+	self->numprograms_ = 0;
+	self->shared_ = TRUE;
+	self->bcshared_ = FALSE;
+}
+
+void psy_audio_luamachine_init_machine(psy_audio_LuaMachine* self,
+	psy_audio_Machine* machine)
+{
+	self->machine = machine;
+	self->bc = 0;
+	self->numparameters_ = 0;
+	self->numcols_ = 0;
+	self->numprograms_ = 0;
+	self->shared_ = FALSE;
+	self->bcshared_ = FALSE;
 }
 
 int luamachine_getparam(lua_State* L)
