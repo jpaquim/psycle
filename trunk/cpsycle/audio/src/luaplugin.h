@@ -16,10 +16,22 @@ typedef struct {
 	psy_audio_BufferContext* bc;
 	int numparameters_;
 	int numcols_;
-	int numprograms_;	
+	int numprograms_;
+	bool shared_;
+	bool bcshared_;
 } psy_audio_LuaMachine;
 
 void psy_audio_luamachine_init(psy_audio_LuaMachine*);
+void psy_audio_luamachine_init_shared(psy_audio_LuaMachine*,
+	psy_audio_Machine*);
+void psy_audio_luamachine_init_machine(psy_audio_LuaMachine*,
+	psy_audio_Machine*);
+void psy_audio_luamachine_dispose(psy_audio_LuaMachine*);
+
+INLINE bool luamachine_shared(psy_audio_LuaMachine* self)
+{
+	return self->shared_;
+}
 
 INLINE void luamachine_setnumparameters(psy_audio_LuaMachine* self, int num)
 {

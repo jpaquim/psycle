@@ -17,6 +17,10 @@ static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static unsigned int samplerate(psy_AudioDriver*);
+static const char* capturename(psy_AudioDriver*, int index);
+static int numcaptures(psy_AudioDriver*);
+static const char* playbackname(psy_AudioDriver*, int index);
+static int numplaybacks(psy_AudioDriver*);
 
 static void init_properties(psy_AudioDriver* driver);
 
@@ -44,6 +48,10 @@ int driver_init(psy_AudioDriver* driver)
 	driver->dispose = driver_dispose;
 	driver->configure = driver_configure;
 	driver->samplerate = samplerate;
+	driver->capturename = (psy_audiodriver_fp_capturename) capturename;
+	driver->numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
+	driver->playbackname = (psy_audiodriver_fp_playbackname)playbackname;
+	driver->numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
 	init_properties(driver);
 	return 0;
 }
@@ -94,4 +102,24 @@ void init_properties(psy_AudioDriver* self)
 	psy_properties_sethint(
 		psy_properties_append_string(self->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
+}
+
+const char* capturename(psy_AudioDriver* driver, int index)
+{
+	return "";
+}
+
+int numcaptures(psy_AudioDriver* driver)
+{
+	return 0;
+}
+
+const char* playbackname(psy_AudioDriver* driver, int index)
+{
+	return "";
+}
+
+int numplaybacks(psy_AudioDriver* driver)
+{
+	return 0;
 }

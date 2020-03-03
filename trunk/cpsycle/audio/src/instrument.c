@@ -54,10 +54,18 @@ psy_audio_InstrumentEntry* instrumententry_allocinit(void)
 }
 
 int instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
-	uintptr_t velocity)
+	uintptr_t velocity, double frequency)
 {
-	return parameterrange_intersect(&self->keyrange, key) &&
-		   parameterrange_intersect(&self->velocityrange, velocity);
+	if (self->use_keyrange && !parameterrange_intersect(&self->keyrange, key)) {
+		return 0;
+	}
+	if (self->use_velrange && !parameterrange_intersect(&self->velocityrange, velocity)) {
+		return 0;
+	}
+	if (self->use_freqrange && !frequencyrange_intersect(&self->freqrange, frequency)) {
+		return 0;
+	}
+	return 1;
 }
 
 void instrument_init(psy_audio_Instrument* self)
@@ -151,7 +159,7 @@ psy_audio_NewNoteAction instrument_nna(psy_audio_Instrument* self)
 }
 
 psy_List* instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
-	uintptr_t velocity)
+	uintptr_t velocity, double frequency)
 {
 	psy_List* rv = 0;
 
@@ -162,7 +170,7 @@ psy_List* instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
 			psy_audio_InstrumentEntry* entry;
 
 			entry = (psy_audio_InstrumentEntry*) p->entry;
-			if (instrumententry_intersect(entry, key, velocity)) {
+			if (instrumententry_intersect(entry, key, velocity, frequency)) {
 				psy_list_append(&rv, entry);
 			}			
 		}		

@@ -49,7 +49,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\container\src"
+				AdditionalIncludeDirectories="..\..\container\src;..\..\dsp\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;MME_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -75,11 +75,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib winmm.lib container.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib winmm.lib container.lib dsp.lib"
 				OutputFile=".\Release/mme.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\container\release"
+				AdditionalLibraryDirectories="..\..\container\release;,..\..\dsp\release"
 				ProgramDatabaseFile=".\Release/mme.pdb"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -145,7 +145,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\container\src"
+				AdditionalIncludeDirectories="..\..\container\src;..\..\dsp\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;MME_EXPORTS"
 				MinimalRebuild="true"
 				ExceptionHandling="1"
@@ -174,11 +174,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib winmm.lib container.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib winmm.lib container.lib dsp.lib"
 				OutputFile=".\Debug/mme.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\..\container\debug"
+				AdditionalLibraryDirectories="..\..\container\debug,..\..\dsp\debug"
 				IgnoreAllDefaultLibraries="false"
 				GenerateDebugInformation="true"
 				AssemblyDebug="0"

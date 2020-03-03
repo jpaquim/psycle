@@ -13,12 +13,12 @@ extern "C" {
 #endif
 
 typedef enum {
-	SIN = 1,
-	SAW = 2,
-	SQR = 3,
-	TRI = 4,
-	PWM = 5,
-	RND = 6
+	psy_audio_WAVESHAPE_SIN = 1,
+	psy_audio_WAVESHAPE_SAW = 2,
+	psy_audio_WAVESHAPE_SQR = 3,
+	psy_audio_WAVESHAPE_TRI = 4,
+	psy_audio_WAVESHAPE_PWM = 5,
+	psy_audio_WAVESHAPE_RND = 6
 } psy_audio_WaveShape;
 
 typedef struct psy_audio_WaveOscTables {
@@ -34,6 +34,8 @@ void psy_audio_waveosctables_init(psy_audio_WaveOscTables*);
 void psy_audio_waveosctables_dispose(psy_audio_WaveOscTables*);
 void psy_audio_waveosctables_clear(psy_audio_WaveOscTables*);
 void psy_audio_waveosctables_makeall(psy_audio_WaveOscTables*, uintptr_t sr);
+psy_audio_Instrument* psy_audio_waveosctables_table(psy_audio_WaveOscTables*,
+	psy_audio_WaveShape);
 
 #ifdef __cplusplus
 }

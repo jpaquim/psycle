@@ -7,27 +7,30 @@
 
 static HMODULE hDInputDLL = 0;
 
+FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics = NULL;
+FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
+
 #define _GetProc(fun, type, name) \
 {                                                  \
     fun = (type) GetProcAddress(hDInputDLL,name);  \
     if (fun == NULL) { return FALSE; }             \
 }
 
-//Dynamic load and unload of avrt.dll, so the executable can run on Windows 2K and XP.
+// Dynamic load and unload of avrt.dll, so the executable can run on
+// Windows 2K and XP.
 BOOL SetupAVRT(void)
 {	
 	hDInputDLL = LoadLibraryA("avrt.dll");
 	if (hDInputDLL == NULL)
 		return FALSE;
-
-	_GetProc(pAvSetMmThreadCharacteristics, FAvSetMmThreadCharacteristics, "AvSetMmThreadCharacteristicsA");
-	_GetProc(pAvRevertMmThreadCharacteristics, FAvRevertMmThreadCharacteristics, "AvRevertMmThreadCharacteristics");
-
+	_GetProc(pAvSetMmThreadCharacteristics, FAvSetMmThreadCharacteristics,
+		"AvSetMmThreadCharacteristicsA");
+	_GetProc(pAvRevertMmThreadCharacteristics, FAvRevertMmThreadCharacteristics,
+		"AvRevertMmThreadCharacteristics");
 	return pAvSetMmThreadCharacteristics &&
 		pAvRevertMmThreadCharacteristics;
 }
 
-// ------------------------------------------------------------------------------------------
 void CloseAVRT(void)
 {
 	if (hDInputDLL != NULL)

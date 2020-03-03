@@ -100,10 +100,6 @@ SOURCE=.\avrt.c
 
 SOURCE=.\directx.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\quantize.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -111,10 +107,6 @@ SOURCE=.\quantize.c
 # Begin Source File
 
 SOURCE=.\avrt.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\quantize.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

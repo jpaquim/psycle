@@ -47,6 +47,10 @@ typedef void (*psy_audiodriver_fp_connect)(struct psy_AudioDriver*, void* contex
 	AUDIODRIVERWORKFN callback,
 	void* handle);
 typedef unsigned int (*psy_audiodriver_fp_samplerate)(struct psy_AudioDriver*);
+typedef const char* (*psy_audiodriver_fp_capturename)(struct psy_AudioDriver*, int index);
+typedef int (*psy_audiodriver_fp_numcaptures)(struct psy_AudioDriver*);
+typedef const char* (*psy_audiodriver_fp_playbackname)(struct psy_AudioDriver*, int index);
+typedef int (*psy_audiodriver_fp_numplaybacks)(struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_addcapture)(struct psy_AudioDriver*, int index);
 typedef int (*psy_audiodriver_fp_removecapture)(struct psy_AudioDriver*, int index);
 typedef void (*psy_audiodriver_fp_readbuffers)(struct psy_AudioDriver*, int index, float** pleft, float** pright, int numsamples);
@@ -65,6 +69,10 @@ typedef struct psy_AudioDriver {
 	psy_audiodriver_fp_addcapture addcapture;
 	psy_audiodriver_fp_removecapture removecapture;
 	psy_audiodriver_fp_readbuffers readbuffers;
+	psy_audiodriver_fp_capturename capturename;
+	psy_audiodriver_fp_numcaptures numcaptures;
+	psy_audiodriver_fp_playbackname playbackname;
+	psy_audiodriver_fp_numplaybacks numplaybacks;
 	psy_Signal signal_stop;
 } psy_AudioDriver;
 

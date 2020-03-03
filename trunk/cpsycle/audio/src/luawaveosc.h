@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef psy_audio_LUABIND_ARRAY_H
-#define psy_audio_LUABIND_ARRAY_H
+#ifndef psy_audio_LUABIND_WAVEOSC_H
+#define psy_audio_LUABIND_WAVEOSC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -10,12 +10,10 @@ extern "C" {
 
 #include <lua.h>
 
-int psy_audio_luabind_array_open(lua_State* L);
-
-extern const char* luaarraybind_meta;
+int psy_audio_luabind_waveosc_open(lua_State*);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* psy_audio_LUABIND_ARRAY_H */
+#endif /* psy_audio_LUABIND_WAVEOSC_H */

@@ -658,6 +658,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\luawaveosc.c"
+				>
+			</File>
+			<File
 				RelativePath="src\machine.c"
 				>
 				<FileConfiguration
@@ -1567,6 +1571,10 @@
 			</File>
 			<File
 				RelativePath="src\luaplugin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\luawaveosc.h"
 				>
 			</File>
 			<File

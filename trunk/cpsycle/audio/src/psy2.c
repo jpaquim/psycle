@@ -11,6 +11,7 @@
 #include "pattern.h"
 #include "constants.h"
 #include <datacompression.h>
+#include <operations.h>
 #include <dir.h>
 #include "machinefactory.h"
 #include <stdlib.h>
@@ -18,48 +19,51 @@
 #include "../../detail/portable.h"
 
 void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
-{	
-	int32_t i;	
-	int32_t num,sampR;	
-//	unsigned char busEffect[64];
+{
+	int32_t i;
+	int32_t num, sampR;
+	//	unsigned char busEffect[64];
 	unsigned char busMachine[64];
 	unsigned char playorder[MAX_SONG_POSITIONS];
-	int32_t patternLines[MAX_PATTERNS];
-	char patternName[MAX_PATTERNS][32];
+	char patternName[32];
 	char name_[129];
 	char author_[65];
 	char comments_[65536];
 	SongProperties songproperties;
-		
-//	int32_t temp;
+
+	//	int32_t temp;
 	int32_t songtracks;
 	int32_t m_beatspermin;
 	int32_t m_linesperbeat;
-	int32_t currentoctave;
-//	int32_t solo;
-//	int32_t _tracksoloed;
-//	int32_t seqbus;
-//	int32_t paramselected;
-//	int32_t auxcolselected;
+	uint8_t currentoctave;
+	//	int32_t solo;
+	//	int32_t _tracksoloed;
+	//	int32_t seqbus;
+	//	int32_t paramselected;
+	//	int32_t auxcolselected;
 	int32_t instselected;
-//	unsigned char _trackmuted[64];
-///	int32_t _trackarmedcount;
-//	unsigned char _trackarmed[64];
+	//	unsigned char _trackmuted[64];
+	///	int32_t _trackarmedcount;
+	//	unsigned char _trackarmed[64];
 	int32_t m_ticksperbeat;
 	int32_t m_extraticksperline;
-//	unsigned char sharetracknames;
+	//	unsigned char sharetracknames;
 	int32_t playlength;
+	int32_t numlines;
 
 	int32_t pans[OLD_MAX_INSTRUMENTS];
-	char names[OLD_MAX_INSTRUMENTS][32];	
+	char names[OLD_MAX_INSTRUMENTS][32];
 
 
 	//progress.SetWindowText("Loading old format...");
 	// DoNew();
-	
+
 	psyfile_read(songfile->file, name_, 32);
+	name_[32] = '\0';
 	psyfile_read(songfile->file, author_, 32);
-	psyfile_read(songfile->file, comments_,128);
+	author_[32] = '\0';
+	psyfile_read(songfile->file, comments_, 128);
+	comments_[128] = '\0';
 	songproperties_init(&songproperties, name_, author_, comments_);
 	psy_audio_song_setproperties(songfile->song, &songproperties);
 
@@ -94,9 +98,9 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 		psyfile_read(songfile->file, &num, sizeof num);
 		for(i =0 ; i < num; ++i)
 		{
-			psyfile_read(songfile->file, &patternLines[i], sizeof *patternLines);
-			psyfile_read(songfile->file, &patternName[i][0], sizeof *patternName);
-			if(patternLines[i] > 0)
+			psyfile_read(songfile->file, &numlines, sizeof(numlines));
+			psyfile_read(songfile->file, patternName, sizeof(patternName));
+			if(numlines > 0)
 			{				
 				///\todo: tweak_effect should be converted to normal tweaks!				
 				PatternNode* node = 0;
@@ -108,23 +112,40 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 				pattern = pattern_allocinit();
 				patterns_insert(&songfile->song->patterns, i, pattern);
 				pData = malloc(OLD_MAX_TRACKS * sizeof(psy_audio_PatternEntry));
-				for(c = 0; c < patternLines[i] ; ++c)
-				{					
+				for (c = 0; c < numlines; ++c) {
 					int32_t track;
 					unsigned char* ptrack;
 
-					psyfile_read(songfile->file, pData, OLD_MAX_TRACKS * sizeof(psy_audio_PatternEvent));
+					psyfile_read(songfile->file, pData, OLD_MAX_TRACKS * EVENT_SIZE);
 					ptrack = pData;
 					for (track = 0; track < songtracks; ++track) {
-						psy_audio_PatternEvent* event = (psy_audio_PatternEvent*)(ptrack);
-						if (event->note != 255) {
-							node = pattern_insert(pattern, node, track, offset, event);
+						psy_audio_PatternEvent event;
+						// Psy3 PatternEntry format
+						// type				offset
+						// uint8_t note;		0
+						// uint8_t inst;		1
+						// uint8_t mach;		2
+						// uint8_t cmd;			3
+						// uint8_t parameter;	4												
+						patternevent_clear(&event);
+						event.note = ptrack[0];
+						event.inst = (ptrack[1] == 0xFF)
+							? event.inst = NOTECOMMANDS_INST_EMPTY
+							: ptrack[1];
+						event.mach = (ptrack[2] == 0xFF)
+							? event.mach = NOTECOMMANDS_MACH_EMPTY
+							: ptrack[2];
+						event.cmd = ptrack[3];
+						event.parameter = ptrack[4];
+						if (!patternevent_empty(&event)) {							
+							node = pattern_insert(pattern, node, track, offset,
+								&event);
 						}
-						ptrack += sizeof(psy_audio_PatternEvent);
-					}					
+						ptrack += EVENT_SIZE;
+					}
 					offset += 0.25;					
 				}
-				pattern->length = patternLines[i] * 0.25f;
+				pattern->length = numlines * 0.25f;
 				free(pData);
 				pData = 0;	
 			}
@@ -328,7 +349,7 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 						short* pData;
 						uint32_t f;
 
-						wave = sample_allocinit();						
+						wave = sample_allocinit(2);						
 						//Old format assumed 44Khz
 						wave->samplerate = 44100;
 						wave->panfactor = (float) pans[i] / 256.f ; //(value_mapper::map_256_1(pan));
@@ -352,7 +373,8 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 						pData = malloc(wltemp*sizeof(short)+4);// +4 to avoid any attempt at buffer overflow by the code
 						psyfile_read(songfile->file, pData, wltemp*sizeof(short));
 						wave->numframes = wltemp;			
-						wave->channels.samples[0] = malloc(sizeof(float)*wave->numframes);
+						wave->channels.samples[0] =
+							dsp.memory_alloc(wave->numframes, sizeof(float));
 						for (f = 0; f < wave->numframes; ++f) {
 							short val = (short) pData[f];
 							wave->channels.samples[0][f] = (float) val;				
@@ -366,9 +388,9 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 							pData = malloc(wltemp*sizeof(short)+4);// +4 to avoid any attempt at buffer overflow by the code
 							psyfile_read(songfile->file, pData, wltemp*sizeof(short));				
 							wave->channels.samples[1] = 
-								malloc(sizeof(float)*wave->numframes);
+								dsp.memory_alloc(wave->numframes, sizeof(float));
 							for (f = 0; f < wave->numframes; ++f) {
-								short val = pData[f];
+								short val = (short) pData[f];
 								wave->channels.samples[1][f] = (float) val;					
 							}
 							free(pData);

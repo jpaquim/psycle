@@ -25,7 +25,8 @@ typedef	psy_dsp_beat_t (*fp_mcb_beatspersample)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_currbeatsperline)(void*);
 typedef	struct psy_audio_Samples* (*fp_mcb_samples)(void*);
 typedef	struct psy_audio_Machines* (*fp_mcb_machines)(void*);
-typedef	struct psy_audio_Instruments* (*fp_mcb_instruments)(void*);	
+typedef	struct psy_audio_Instruments* (*fp_mcb_instruments)(void*);
+typedef	struct psy_audio_MachineFactory* (*fp_mcb_machinefactory)(void*);
 typedef	void (*fp_mcb_fileselect_load)(void*);
 typedef	void (*fp_mcb_fileselect_save)(void*);
 typedef	void (*fp_mcb_fileselect_directory)(void*);
@@ -33,6 +34,10 @@ typedef	void (*fp_mcb_output)(void*, const char* text);
 typedef	bool (*fp_mcb_addcapture)(void*, int index);
 typedef	bool (*fp_mcb_removecapture)(void*, int index);
 typedef void (*fp_mcb_readbuffers)(void*, int index, float** pleft, float** pright, int numsamples);
+typedef const char* (*fp_mcb_capturename)(void*, int index);
+typedef int (*fp_mcb_numcaptures)(void*);
+typedef const char* (*fp_mcb_playbackname)(void*, int index);
+typedef int (*fp_mcb_numplaybacks)(void*);
 
 typedef struct MachineCallback {	
 	fp_mcb_samplerate samplerate;
@@ -41,7 +46,8 @@ typedef struct MachineCallback {
 	fp_mcb_currbeatsperline currbeatsperline;
 	fp_mcb_samples samples;
 	fp_mcb_machines machines;
-	fp_mcb_instruments instruments;	
+	fp_mcb_instruments instruments;
+	fp_mcb_machinefactory machinefactory;
 	fp_mcb_fileselect_load fileselect_load;
 	fp_mcb_fileselect_save fileselect_save;
 	fp_mcb_fileselect_directory fileselect_directory;
@@ -49,6 +55,10 @@ typedef struct MachineCallback {
 	fp_mcb_addcapture addcapture;
 	fp_mcb_removecapture removecapture;
 	fp_mcb_readbuffers readbuffers;
+	fp_mcb_capturename capturename;
+	fp_mcb_numcaptures numcaptures;
+	fp_mcb_playbackname playbackname;
+	fp_mcb_numplaybacks numplaybacks;
 	void* context;	
 } MachineCallback;
 
@@ -137,10 +147,16 @@ typedef psy_dsp_beat_t(*fp_machine_currbeatsperline)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Samples* (*fp_machine_samples)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Machines* (*fp_machine_machines)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Instruments* (*fp_machine_instruments)(struct psy_audio_Machine*);
+typedef	struct psy_audio_MachineFactory* (*fp_machine_machinefactory)(struct psy_audio_Machine*);
 typedef void (*fp_machine_output)(struct psy_audio_Machine*, const char* text);
 typedef bool (*fp_machine_addcapture)(struct psy_audio_Machine*, int idx);
 typedef bool (*fp_machine_removecapture)(struct psy_audio_Machine*, int idx);
 typedef void (*fp_machine_readbuffers)(struct psy_audio_Machine*, int index, float** pleft, float** pright, int numsamples);
+typedef const char* (*fp_machine_capturename)(struct psy_audio_Machine*, int index);
+typedef int (*fp_machine_numcaptures)(struct psy_audio_Machine*);
+typedef const char* (*fp_machine_playbackname)(struct psy_audio_Machine*, int index);
+typedef int (*fp_machine_numplaybacks)(struct psy_audio_Machine*);
+
 
 typedef struct MachineVtable {
 	fp_machine_init init;
@@ -214,10 +230,15 @@ typedef struct MachineVtable {
 	fp_machine_samples samples;
 	fp_machine_machines machines;
 	fp_machine_instruments instruments;
+	fp_machine_machinefactory machinefactory;
 	fp_machine_output output;
 	fp_machine_addcapture addcapture;
 	fp_machine_removecapture removecapture;
 	fp_machine_readbuffers readbuffers;
+	fp_machine_capturename capturename;
+	fp_machine_numcaptures numcaptures;
+	fp_machine_playbackname playbackname;
+	fp_machine_numplaybacks numplaybacks;
 } MachineVtable;
 
 typedef struct psy_audio_Machine {
@@ -483,6 +504,11 @@ INLINE struct psy_audio_Instruments* psy_audio_machine_instruments(psy_audio_Mac
 	return self->vtable->instruments(self);
 }
 
+INLINE struct psy_audio_MachineFactory* psy_audio_machine_machinefactory(psy_audio_Machine* self)
+{
+	return self->vtable->machinefactory(self);
+}
+
 INLINE bool psy_audio_machine_addcapture(psy_audio_Machine* self, int index)
 {
 	return self->vtable->addcapture(self, index);
@@ -493,9 +519,29 @@ INLINE bool psy_audio_machine_removecapture(psy_audio_Machine* self, int index)
 	return self->vtable->removecapture(self, index);
 }
 
-INLINE bool psy_audio_machine_readbuffers(psy_audio_Machine* self, int index, float** pleft, float** pright, int numsamples)
+INLINE void psy_audio_machine_readbuffers(psy_audio_Machine* self, int index, float** pleft, float** pright, int numsamples)
 {
 	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
+}
+
+INLINE const char* psy_audio_machine_capturename(psy_audio_Machine* self, int index)
+{
+	return self->vtable->capturename(self, index);
+}
+
+INLINE int psy_audio_machine_numcaptures(psy_audio_Machine* self)
+{
+	return self->vtable->numcaptures(self);
+}
+
+INLINE const char* psy_audio_machine_playbackname(psy_audio_Machine* self, int index)
+{
+	return self->vtable->playbackname(self, index);
+}
+
+INLINE int psy_audio_machine_numplaybacks(psy_audio_Machine* self)
+{
+	return self->vtable->numplaybacks(self);
 }
 
 INLINE void psy_audio_machine_output(psy_audio_Machine* self, const char* text)
@@ -563,7 +609,9 @@ INLINE float machine_parametervalue_normed(psy_audio_Machine* self,
 	int maxval;
 
 	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
-	return (value - minval) / (float)(maxval - minval);
+	return ((maxval - minval) != 0)
+		? (value - minval) / (float)(maxval - minval)
+		: 0.f;
 }
 
 INLINE float machine_patternvalue_normed(psy_audio_Machine* self,
@@ -574,7 +622,10 @@ INLINE float machine_patternvalue_normed(psy_audio_Machine* self,
 	int range;
 						
 	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
-	range = maxval - minval;	
+	range = maxval - minval;
+	if (range == 0) {
+		return 0.f;
+	}
 	return (value > range) ? range : value / (float)range;
 }
 

@@ -16,6 +16,14 @@ static void psy_audio_waveosctables_makesaw(float* data, int num, int maxharmoni
 static void psy_audio_waveosctables_makesqr(float* data, int num, int maxharmonic);
 static void psy_audio_waveosctables_maketri(float* data, int num, int maxharmonic);
 static void psy_audio_waveosctables_makesin(float* data, int num, int maxharmonic);
+static void constructtable(psy_audio_WaveOscTables*,
+    psy_audio_Instrument*,
+    psy_audio_WaveShape,
+    uintptr_t i,
+    double f_lo,
+    double f_hi,
+    void (*func)(float*, int, int),
+    int sr);
 
 static void constructwave(double fh, psy_audio_Sample* wave,
     void (*func)(float*, int, int),
@@ -29,6 +37,7 @@ void psy_audio_waveosctables_init(psy_audio_WaveOscTables* self)
     instrument_init(&self->sqr_tbl);
     instrument_init(&self->tri_tbl);
     instrument_init(&self->rnd_tbl);
+    psy_audio_waveosctables_makeall(self, 44100);
 }
 
 void psy_audio_waveosctables_dispose(psy_audio_WaveOscTables* self)
@@ -52,68 +61,48 @@ void psy_audio_waveosctables_makeall(psy_audio_WaveOscTables* self, uintptr_t sr
     double f_lo;
     int i;    
 
-    psy_audio_waveosctables_clear(self);
     f_lo = 440 * pow(2.0, (0 - MIDDLEA) / 12.0);
-    for (i = 0; i < 10; ++i) {
-        psy_audio_Sample* w;
-        psy_audio_InstrumentEntry* entry;
-        SampleIndex index;
-        
+    for (i = 0; i < 10; ++i) {        
         double f_hi = 2 * f_lo;
         if (i == 0) {
             f_lo = 0;
-        }        
-
-        // sqr
-        index = sampleindex_make(SQR, i);
-        w = sample_allocinit();        
-        constructwave(f_hi, w, psy_audio_waveosctables_makesqr, sr);
-        psy_audio_samples_insert(&self->container, w, index);
-        entry = instrumententry_allocinit();        
-        entry->use_freqrange = 1;
-        entry->freqrange.low = f_lo;
-        entry->freqrange.high = f_hi;
-        entry->sampleindex = index;
-        instrument_addentry(&self->sqr_tbl, entry);
-
-        // saw
-        index = sampleindex_make(SAW, i);
-        w = sample_allocinit();
-        constructwave(f_hi, w, psy_audio_waveosctables_makesqr, sr);
-        psy_audio_samples_insert(&self->container, w, index);
-        entry = instrumententry_allocinit();
-        entry->use_freqrange = 1;
-        entry->freqrange.low = f_lo;
-        entry->freqrange.high = f_hi;
-        entry->sampleindex = index;
-        instrument_addentry(&self->saw_tbl, entry);
-       
-        // sin
-        index = sampleindex_make(SIN, i);
-        w = sample_allocinit();
-        constructwave(f_hi, w, psy_audio_waveosctables_makesqr, sr);
-        psy_audio_samples_insert(&self->container, w, index);
-        entry = instrumententry_allocinit();
-        entry->use_freqrange = 1;
-        entry->freqrange.low = f_lo;
-        entry->freqrange.high = f_hi;
-        entry->sampleindex = index;
-        instrument_addentry(&self->sin_tbl, entry);
-        
-        // tri
-        index = sampleindex_make(TRI, i);
-        w = sample_allocinit();
-        constructwave(f_hi, w, psy_audio_waveosctables_makesqr, sr);
-        psy_audio_samples_insert(&self->container, w, index);
-        entry = instrumententry_allocinit();
-        entry->use_freqrange = 1;
-        entry->freqrange.low = f_lo;
-        entry->freqrange.high = f_hi;
-        entry->sampleindex = index;
-        instrument_addentry(&self->tri_tbl, entry);
-
+        }
+        constructtable(self, &self->sqr_tbl, i, psy_audio_WAVESHAPE_SQR, f_lo, f_hi,
+            psy_audio_waveosctables_makesqr, sr);
+        constructtable(self, &self->saw_tbl, i, psy_audio_WAVESHAPE_SAW, f_lo, f_hi,
+            psy_audio_waveosctables_makesaw, sr);
+        constructtable(self, &self->sin_tbl, i, psy_audio_WAVESHAPE_SIN, f_lo, f_hi,
+            psy_audio_waveosctables_makesin, sr);
+        constructtable(self, &self->tri_tbl, i, psy_audio_WAVESHAPE_TRI, f_lo, f_hi,
+            psy_audio_waveosctables_maketri, sr);
         f_lo = f_hi;
     }
+}
+
+void constructtable(psy_audio_WaveOscTables* self,
+    psy_audio_Instrument* table,
+    uintptr_t i,
+    psy_audio_WaveShape shape,
+    double f_lo,
+    double f_hi,
+    void (*func)(float*, int, int),
+    int sr)
+{
+    SampleIndex index;
+    psy_audio_Sample* w;
+    psy_audio_InstrumentEntry* entry;
+
+    index = sampleindex_make(shape, i);
+    w = sample_allocinit(1);
+    constructwave(f_hi, w, func, sr);
+    psy_audio_samples_insert(&self->container, w, index);
+    entry = instrumententry_allocinit();
+    entry->use_keyrange = 0;
+    entry->use_freqrange = 1;
+    entry->freqrange.low = f_lo;
+    entry->freqrange.high = f_hi;
+    entry->sampleindex = index;
+    instrument_addentry(table, entry);
 }
 
 void constructwave(double fh, psy_audio_Sample* wave,
@@ -133,7 +122,7 @@ void constructwave(double fh, psy_audio_Sample* wave,
     wave->loopstart = 0;
     wave->loopend = num;
     wave->looptype = LOOP_NORMAL;    
-    func(wave->channels.samples[c], num, hmax);
+    func(wave->channels.samples[0], num, hmax);
 }
 
 void psy_audio_waveosctables_makesaw(float* data, int num, int maxharmonic)
@@ -187,4 +176,35 @@ void psy_audio_waveosctables_makesin(float* data, int num, int maxharmonic)
     for (i = 0; i < num; ++i) {
         data[i] = (float)(sin(i * to_angle));
     }
+}
+
+psy_audio_Instrument* psy_audio_waveosctables_table(psy_audio_WaveOscTables* self,
+    psy_audio_WaveShape shape)
+{
+    psy_audio_Instrument* rv;
+
+    switch (shape) {
+        case psy_audio_WAVESHAPE_SIN:
+            rv = &self->sin_tbl;
+        break;
+        case psy_audio_WAVESHAPE_SAW:
+            rv = &self->saw_tbl;
+        break;
+        case psy_audio_WAVESHAPE_SQR:
+            rv = &self->sqr_tbl;
+        break;
+        case psy_audio_WAVESHAPE_TRI:
+            rv = &self->sin_tbl;
+        break;
+        case psy_audio_WAVESHAPE_PWM:
+            rv = 0;
+        break;
+        case psy_audio_WAVESHAPE_RND:
+            rv = &self->rnd_tbl;
+        break;
+        default:
+            rv = 0;
+        break;
+    }
+    return rv;
 }

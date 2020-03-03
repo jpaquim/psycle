@@ -335,7 +335,7 @@ bool IsFormatSupported(PortEnum* self, WAVEFORMATEXTENSIBLE* pwfx, AUDCLNT_SHARE
 		hr = IMMDevice_Activate(device, &IID_IAudioClient, CLSCTX_ALL, NULL,
 		(void**)&client);
 	EXIT_ON_ERROR(hr)
-		hr = IAudioClient_IsFormatSupported(client, sharemode, pwfx,
+		hr = IAudioClient_IsFormatSupported(client, sharemode, (WAVEFORMATEXTENSIBLE*)pwfx,
 		(sharemode == AUDCLNT_SHAREMODE_SHARED) ? &bla : NULL);
 	if (bla != NULL) { CoTaskMemFree(bla); }
 	if (hr == S_OK) issuccess = TRUE;

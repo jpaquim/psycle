@@ -43,6 +43,12 @@ void psy_audio_array_mul_constant(psy_audio_Array*, float factor);
 void psy_audio_array_mul_array(psy_audio_Array*, psy_audio_Array* other);
 void psy_audio_array_div_constant(psy_audio_Array*, float factor);
 void psy_audio_array_div_array(psy_audio_Array*, psy_audio_Array* other);
+void psy_audio_array_pow_array_constant(psy_audio_Array* self, float exponent);
+void psy_audio_array_pow_constant_array(psy_audio_Array* self, float exponent);
+void psy_audio_array_pow_array(psy_audio_Array*, psy_audio_Array* other);
+void psy_audio_array_fmod_array_constant(psy_audio_Array* self, float exponent);
+void psy_audio_array_fmod_constant_array(psy_audio_Array* self, float exponent);
+void psy_audio_array_fmod_array(psy_audio_Array*, psy_audio_Array* other);
 void psy_audio_array_mix(psy_audio_Array*, psy_audio_Array* other,
 	float factor);
 void psy_audio_array_add_array(psy_audio_Array*, psy_audio_Array* other);
@@ -78,6 +84,7 @@ void psy_audio_array_sright_array(psy_audio_Array*, psy_audio_Array* other);
 void psy_audio_array_bnot(psy_audio_Array*);
 int psy_audio_array_copy(psy_audio_Array*, psy_audio_Array* source);
 void psy_audio_array_resize(psy_audio_Array*, uintptr_t newsize);
+void psy_audio_array_concat(psy_audio_Array*, psy_audio_Array* other);
 
 #ifdef __cplusplus
 }

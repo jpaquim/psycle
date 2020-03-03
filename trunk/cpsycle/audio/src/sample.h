@@ -92,9 +92,9 @@ typedef struct psy_audio_Sample {
 	Vibrato vibrato;
 } psy_audio_Sample;
 
-void sample_init(psy_audio_Sample*);
+void sample_init(psy_audio_Sample*, uintptr_t numchannels);
 psy_audio_Sample* sample_alloc(void);
-psy_audio_Sample* sample_allocinit(void);
+psy_audio_Sample* sample_allocinit(uintptr_t numchannels);
 psy_audio_Sample* sample_clone(psy_audio_Sample*);
 void sample_dispose(psy_audio_Sample*);
 void sample_load(psy_audio_Sample*, const char* path);

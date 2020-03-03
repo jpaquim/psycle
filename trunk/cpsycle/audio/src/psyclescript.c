@@ -90,6 +90,16 @@ int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg metho
   return 0;
 }
 
+void* psyclescript_host(lua_State* L)
+{
+	void* host;
+
+	lua_getglobal(L, "psycle");
+	lua_getfield(L, -1, "__self");
+	host = *(void**)luaL_checkudata(L, -1, "psyhostmeta");
+	return host;
+}
+
 int psyclescript_run(psy_audio_PsycleScript* self)
 { 
   int status;
@@ -97,8 +107,6 @@ int psyclescript_run(psy_audio_PsycleScript* self)
   status = lua_pcall(self->L, 0, LUA_MULTRET, 0);
   if (status) {      
     const char* msg = lua_tostring(self->L, -1);
-
-	self = self;
   }
   return status;
 }
@@ -286,4 +294,39 @@ void* psyclescript_checkself(lua_State* L, int index, const char* meta)
 	lua_pop(L, 1);
 	// luaL_argcheck(L, (*SPTR) != 0, 1, (meta+" expected").c_str());     
 	return *ud;
+}
+
+int psyclescript_createuserdata(lua_State* L, int self, const char* meta, void* T)
+{
+	int n;
+	void** ud;
+
+	lua_pushvalue(L, self);
+	n = lua_gettop(L);
+	luaL_checktype(L, -1, LUA_TTABLE);  // self
+	lua_newtable(L);  // new
+	lua_pushvalue(L, self);
+	lua_setmetatable(L, -2);
+	lua_pushvalue(L, self);
+	lua_setfield(L, self, "__index");
+	ud = (void*)lua_newuserdata(L, sizeof(void*));
+	*ud = T;
+	luaL_getmetatable(L, meta);
+	lua_setmetatable(L, -2);
+	lua_setfield(L, -2, "__self");
+	lua_remove(L, n);
+	psyclescript_register_weakuserdata(L, *ud);
+	return 1;
+}
+
+// build enum table
+int psyclescript_buildenum(lua_State* L, const char* const e[], int len, int startidx)
+{
+	int i;
+
+	for (i = 0; i < len; ++i) {
+		lua_pushnumber(L, i + startidx);
+		lua_setfield(L, -2, e[i]);
+	}
+	return 0;
 }
