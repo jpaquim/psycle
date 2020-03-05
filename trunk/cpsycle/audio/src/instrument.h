@@ -52,7 +52,7 @@ void instrumententry_init(psy_audio_InstrumentEntry*);
 psy_audio_InstrumentEntry* instrumententry_alloc(void);
 psy_audio_InstrumentEntry* instrumententry_allocinit(void);
 
-typedef struct {	
+typedef struct psy_audio_Instrument {	
 	char* name;
 	/// Action to take on the playing voice when any new note comes in the same channel.
 	psy_audio_NewNoteAction nna;

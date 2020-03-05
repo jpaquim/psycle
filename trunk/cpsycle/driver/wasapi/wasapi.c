@@ -3,20 +3,32 @@
 
 // linking
 #include "../../detail/prefix.h"
+#include "../audiodriversettings.h"
+#include "avrt.h"
+#include <quantize.h>
+#include <operations.h>
 
 #include "../driver.h"
 #include "../../detail/psydef.h"
 
 #include <windows.h>
-#include <mmsystem.h>
-#include <process.h>
 #include <stdio.h>
 #include <hashtbl.h>
+
+#include <ks.h>
+#include <ksmedia.h>
+
+#undef KSDATAFORMAT_SUBTYPE_PCM
+const GUID KSDATAFORMAT_SUBTYPE_PCM = { 0x00000001, 0x0000, 0x0010,
+{0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71} };
+
+#undef KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
+const GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = { 00000003, 0x0000, 0x0010,
+{0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71} };
 
 // WASAPI
 #include <mmreg.h>  // must be before other Wasapi headers
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#include <Avrt.h>
 #define COBJMACROS
 #include <Audioclient.h>
 #include <endpointvolume.h>
@@ -29,9 +41,6 @@
 
 #define EXIT_ON_ERROR(hres) \
 	if (FAILED(hres)) { goto Exit; }
-
-#define SAFE_RELEASE(punk) \
-	if ((punk) != NULL) { IAudioClient_Release(punk); (punk) = NULL; }
 
 
 /* __uuidof is only available in C++, so we hard-code the GUID values for all
@@ -77,42 +86,6 @@ const IID IID_IAudioRenderClient = { 0xf294acfc, 0x3146, 0x4483,
 
 #define MAX_STR_LEN 512
 
-// AVRT is the new "multimedia scheduling stuff"
-typedef HANDLE(WINAPI* FAvSetMmThreadCharacteristics)   (LPCTSTR, LPDWORD);
-typedef BOOL(WINAPI* FAvRevertMmThreadCharacteristics)(HANDLE);
-
-static FAvSetMmThreadCharacteristics pAvSetMmThreadCharacteristics = NULL;
-static FAvRevertMmThreadCharacteristics pAvRevertMmThreadCharacteristics = NULL;
-static HMODULE hDInputDLL = 0;
-
-#define _GetProc(fun, type, name) \
-{                                                  \
-    fun = (type) GetProcAddress(hDInputDLL,name);  \
-    if (fun == NULL) { return FALSE; }             \
-}
-
-//Dynamic load and unload of avrt.dll, so the executable can run on Windows 2K and XP.
-static BOOL SetupAVRT(void)
-{
-	hDInputDLL = LoadLibraryA("avrt.dll");
-	if (hDInputDLL == NULL)
-		return FALSE;
-
-	_GetProc(pAvSetMmThreadCharacteristics, FAvSetMmThreadCharacteristics, "AvSetMmThreadCharacteristicsA");
-	_GetProc(pAvRevertMmThreadCharacteristics, FAvRevertMmThreadCharacteristics, "AvRevertMmThreadCharacteristics");
-
-	return pAvSetMmThreadCharacteristics &&
-		pAvRevertMmThreadCharacteristics;
-}
-
-// ------------------------------------------------------------------------------------------
-static void CloseAVRT(void)
-{
-	if (hDInputDLL != NULL)
-		FreeLibrary(hDInputDLL);
-	hDInputDLL = NULL;
-}
-
 interface IMMDevice;
 interface IMMDeviceEnumerator;
 interface IMMDeviceCollection;
@@ -126,8 +99,6 @@ typedef struct {
 } CBlock;
 
 static DWORD WINAPI EventAudioThread(void* pWasapi);
-
-
 
 typedef struct {	
 	// from GetId
@@ -163,18 +134,14 @@ PaWasapiSubStream;
 
 typedef struct {
 	psy_AudioDriver driver;
+	psy_AudioDriverSettings settings;
 	HWAVEOUT _handle;
 	int _deviceId;
 	int _dither;
-	int _bitDepth;
-	unsigned int _samplesPerSec;
-	size_t _numBlocks;
-	int _blockSizeBytes;
-	int _blockSize;
+
 	size_t _currentBlock;
 	int _running;
-	int _stopPolling;	
-	unsigned int pollSleep_;
+	int _stopPolling;
 	unsigned int _writePos;
 	/// number of "wraparounds" to compensate the WaveOutGetPosition() call.
 	int m_readPosWraps;
@@ -184,15 +151,14 @@ typedef struct {
 	int (*error)(int, const char*);
 	HANDLE hEvent;
 
-	uint32_t numChannels;
 	bool shared;
 	WCHAR szDeviceID[MAX_STR_LEN];
 	bool _initialized;
 	bool _configured;
-	psy_Table _playEnums;
-	psy_Table _capEnums;
+	psy_List* _playEnums;
+	psy_List* _capEnums;
 	psy_List* _capPorts;
-	psy_Table _portMapping;
+	psy_Table _portMapping; // <int, int>
 	// output
 	PaWasapiSubStream out;
 	IAudioClock* pAudioClock;
@@ -207,7 +173,7 @@ typedef struct {
 } WasapiDriver;
 
 static void RefreshPorts(WasapiDriver*, IMMDeviceEnumerator* pEnumerator);
-static void FillPortList(WasapiDriver*, psy_Table* portList, IMMDeviceCollection* pCollection, LPWSTR defaultID);
+static void FillPortList(WasapiDriver*, psy_List** portList, IMMDeviceCollection* pCollection, LPWSTR defaultID);
 static const char* GetError(HRESULT hr);
 static HRESULT DoBlock(WasapiDriver*, IAudioRenderClient* pRenderClient, int numFramesAvailable);
 static HRESULT DoBlockRecording(WasapiDriver*, PaWasapiSubStream* port, IAudioCaptureClient* pCaptureClient, int numFramesAvailable);
@@ -225,9 +191,9 @@ static bool AddCapturePort(WasapiDriver*, int idx);
 static bool RemoveCapturePort(WasapiDriver*, int idx);
 static HRESULT CreateCapturePort(WasapiDriver*, IMMDeviceEnumerator* pEnumerator, PaWasapiSubStream* port);
 static void FreePorts(psy_List* ports);
-static bool Start(WasapiDriver*);
-static bool Stop(WasapiDriver*);
-static int GetBufferSamples(WasapiDriver*);
+static bool start(WasapiDriver*);
+static bool stop(WasapiDriver*);
+static unsigned int GetBufferSamples(WasapiDriver*);
 
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
@@ -237,11 +203,20 @@ static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static unsigned int samplerate(psy_AudioDriver*);
+static const char* capturename(psy_AudioDriver*, int index);
+static int numcaptures(psy_AudioDriver*);
+static const char* playbackname(psy_AudioDriver*, int index);
+static int numplaybacks(psy_AudioDriver*);
+static int addcaptureport(WasapiDriver*, int idx);
+static int removecaptureport(WasapiDriver*, int idx);
 
-static void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits);
+static void PrepareWaveFormat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static void init_properties(psy_AudioDriver* self);
 static int on_error(int err, const char* msg);
-static void Quantize(float *pin, int *piout, int c);
+
+static void refreshavailableports(WasapiDriver*);
+static void clearplayenums(WasapiDriver*);
+static void clearcapenums(WasapiDriver*);
 
 // ------------------------------------------------------------------------------------------
 // Aligns v backwards
@@ -324,7 +299,7 @@ bool IsFormatSupported(PortEnum* self, WAVEFORMATEXTENSIBLE* pwfx, AUDCLNT_SHARE
 	IAudioClient* client = NULL;
 	bool issuccess = FALSE;
 	HRESULT hr;
-	WAVEFORMATEX* bla = NULL;
+	WAVEFORMATEXTENSIBLE* bla = NULL;
 
 	hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
 		&IID_IMMDeviceEnumerator, (void**)&pEnumerator);
@@ -340,33 +315,24 @@ bool IsFormatSupported(PortEnum* self, WAVEFORMATEXTENSIBLE* pwfx, AUDCLNT_SHARE
 	if (bla != NULL) { CoTaskMemFree(bla); }
 	if (hr == S_OK) issuccess = TRUE;
 Exit:
-	IAudioClient_Release(client);
-	IAudioClient_Release(device);
-	IAudioClient_Release(pEnumerator);
+	if (client) {
+		IAudioClient_Release(client);
+	}
+	client = 0;
+	if (device) {
+		IMMDevice_Release(device);
+	}
+	device = 0;
+	if (pEnumerator) {
+		IMMDeviceEnumerator_Release(pEnumerator);
+	}
+	pEnumerator = 0;
 	return issuccess;
-}
-
-
-int f2i(float flt)
-{ 
-#if defined(_WIN64)
-	return (int)flt;
-#else
-  int i; 
-  static const double half = 0.5f; 
-  _asm 
-  { 
-	 fld flt 
-	 fsub half 
-	 fistp i 
-  } 
-  return i;
-#endif
 }
 
 int on_error(int err, const char* msg)
 {
-	MessageBox(0, (LPCWSTR)msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
+	MessageBox(0, (LPCWSTR)msg, (LPCWSTR)"Windows Wasapi driver", MB_OK | MB_ICONERROR);
 	return 0;
 }
 
@@ -374,28 +340,36 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 {
 	static AudioDriverInfo info;
 	info.Flags = 0;
-	info.Name = "Windows MME psy_AudioDriver";
-	info.ShortName = "MME";
+	info.Name = "Windows Wasapi AudioDriver";
+	info.ShortName = "wasapi";
 	info.Version = 0;
 	return &info;
 }
 
 EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
-	WasapiDriver* mme = (WasapiDriver*) malloc(sizeof(WasapiDriver));
-	if (mme) {
-		memset(mme, 0, sizeof(WasapiDriver));
-		mme->driver.open = driver_open;
-		mme->driver.deallocate = driver_deallocate;
-		mme->driver.connect = driver_connect;
-		mme->driver.open = driver_open;
-		mme->driver.close = driver_close;
-		mme->driver.dispose = driver_dispose;
-		mme->driver.configure = driver_configure;
-		mme->driver.samplerate = samplerate;
-		mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-		driver_init(&mme->driver);
-		return &mme->driver;
+	WasapiDriver* wasapi;
+	
+	wasapi = (WasapiDriver*) malloc(sizeof(WasapiDriver));
+	if (wasapi) {
+		memset(wasapi, 0, sizeof(WasapiDriver));
+		wasapi->driver.open = driver_open;
+		wasapi->driver.deallocate = driver_deallocate;
+		wasapi->driver.connect = driver_connect;
+		wasapi->driver.open = driver_open;
+		wasapi->driver.close = driver_close;
+		wasapi->driver.dispose = driver_dispose;
+		wasapi->driver.configure = driver_configure;
+		wasapi->driver.samplerate = samplerate;
+		wasapi->driver.addcapture = (psy_audiodriver_fp_addcapture) addcaptureport;
+		wasapi->driver.removecapture = (psy_audiodriver_fp_removecapture) removecaptureport;
+		wasapi->driver.capturename = (psy_audiodriver_fp_capturename) capturename;
+		wasapi->driver.numcaptures = (psy_audiodriver_fp_numcaptures) numcaptures;
+		wasapi->driver.playbackname = (psy_audiodriver_fp_playbackname) playbackname;
+		wasapi->driver.numplaybacks = (psy_audiodriver_fp_numplaybacks) numplaybacks;
+		wasapi->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		driver_init(&wasapi->driver);
+		return &wasapi->driver;
 	} else {
 		return 0;
 	}
@@ -409,36 +383,26 @@ void driver_deallocate(psy_AudioDriver* driver)
 
 int driver_init(psy_AudioDriver* driver)
 {
-	WasapiDriver* self = (WasapiDriver*) driver;	
-	/*self->_deviceId = 0; // WAVE_MAPPER;
-	self->_bitDepth = 16;
-	self->_samplesPerSec = 44100;
-	self->_numBlocks = 6;
-	self->_blockSizeBytes = 4096;
-	self->pollSleep_ = 10;*/
+	WasapiDriver* self = (WasapiDriver*) driver;
+#ifdef PSYCLE_USE_SSE
+	psy_dsp_sse2_init(&dsp);
+#else
+	psy_dsp_noopt_init(&dsp);
+#endif
+	SetupAVRT();
+	psy_audiodriversettings_init(&self->settings);
+	psy_audiodriversettings_setblockcount(&self->settings, 2);
+	psy_table_init(&self->_portMapping);
+	ZeroMemory(&self->out, sizeof(PaWasapiSubStream));
+	refreshavailableports(self);
 	self->error = on_error;
-
-	self->_samplesPerSec=44100;
-	self->_deviceId=0;
-	self->_numBlocks = 6;
-	self->_blockSize = 4096;
-	self->_blockSizeBytes = 4096;
-	self->pollSleep_ = 20;
-	self->_dither = 0;
-//	self->_channelmode = 3;	
-	
-	self->_bitDepth = 24;
-	self->_numBlocks = 2;
-	self->_blockSize = 2048;
-	self->numChannels = 2;
+	self->_deviceId = 0;
+	self->_dither = 0;	
 	self->shared = TRUE;
 	wcscpy_s(self->szDeviceID, MAX_STR_LEN - 1, L"");
-
-	psy_table_init(&self->_playEnums);
-	psy_table_init(&self->_capEnums);
 	self->_capPorts = 0;
-	psy_table_init(&self->_portMapping);
 	init_properties(&self->driver);
+	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	return 0;
 }
 
@@ -448,44 +412,50 @@ int driver_dispose(psy_AudioDriver* driver)
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
-	psy_table_dispose(&self->_playEnums);
-	psy_table_dispose(&self->_capEnums);
+	clearplayenums(self);
+	clearcapenums(self);
 	psy_list_free(self->_capPorts);	
 	psy_table_dispose(&self->_portMapping);
+	CloseAVRT();
 	return 0;
 }
 
-static void init_properties(psy_AudioDriver* self)
+static void init_properties(psy_AudioDriver* driver)
 {		
+	WasapiDriver* self = (WasapiDriver*) driver;
 	psy_Properties* devices;
+	psy_Properties* indevices;
+	psy_List* p;
 	int i;
-	int n;
 
-	self->properties = psy_properties_create();
+	driver->properties = psy_properties_create();
 		
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "wasapi"),
+		psy_properties_append_string(driver->properties, "name", "wasapi"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		psy_properties_append_string(driver->properties, "vendor", "Psycedelics"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "version", "1.0"),
+		psy_properties_append_string(driver->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
-	devices = psy_properties_append_choice(self->properties, "device", -1);
-	psy_properties_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
-	n = waveOutGetNumDevs();	
-	for (i = 0; i < n; i++)
-	{
-		WAVEOUTCAPS caps;
-		waveOutGetDevCaps(i, &caps, sizeof(WAVEOUTCAPS));
-		psy_properties_append_int(devices, caps.szPname, i, 0, 0);
+	devices = psy_properties_append_choice(driver->properties, "device", -1);
+	
+	psy_properties_append_int(driver->properties, "bitdepth", 16, 0, 32);
+	psy_properties_append_int(driver->properties, "samplerate", 44100, 0, 0);
+	psy_properties_append_int(driver->properties, "dither", 0, 0, 1);
+	psy_properties_append_int(driver->properties, "numbuf", 8, 6, 8);
+	psy_properties_append_int(driver->properties, "numsamples", 4096, 128, 8193);
+	devices = psy_properties_append_choice(driver->properties, "device", 0);
+	for (p = self->_playEnums, i = 0; p != 0; p = p->next, ++i) {
+		PortEnum* port = (PortEnum*)p->entry;
+		psy_properties_append_int(devices, port->portName, i, 0, 0);
 	}
-	psy_properties_append_int(self->properties, "bitdepth", 16, 0, 32);
-	psy_properties_append_int(self->properties, "samplerate", 44100, 0, 0);
-	psy_properties_append_int(self->properties, "dither", 0, 0, 1);
-	psy_properties_append_int(self->properties, "numbuf", 8, 6, 8);
-	psy_properties_append_int(self->properties, "numsamples", 4096, 128, 8193);	
+	indevices = psy_properties_append_choice(driver->properties, "indevice", 0);
+	for (p = self->_capEnums, i = 0; p != 0; p = p->next, ++i) {
+		PortEnum* port = (PortEnum*)p->entry;
+		psy_properties_append_int(indevices, port->portName, i, 0, 0);
+	}
 }
 
 void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
@@ -508,32 +478,33 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 			self->_deviceId =  psy_properties_value(device);
 		}
 	}
-	property = psy_properties_read(self->driver.properties, "bitdepth");
-	if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-		self->_bitDepth = property->item.value.i;
-	}
+	// property = psy_properties_read(self->driver.properties, "bitdepth");
+	// if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
+	// 	self->_bitDepth = property->item.value.i;
+	// }
 	property = psy_properties_read(self->driver.properties, "samplerate");
 	if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-		self->_samplesPerSec = property->item.value.i;
+		psy_audiodriversettings_setsamplespersec(&self->settings,
+			property->item.value.i);
 	}
-	property = psy_properties_read(self->driver.properties, "numbuf");
-	if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-		self->_numBlocks = property->item.value.i;
-	}
-	property = psy_properties_read(self->driver.properties, "numsamples");
-	if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-		self->_blockSizeBytes = property->item.value.i;
-	}
-	property = psy_properties_read(self->driver.properties, "numsamples");
-	if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-		self->_blockSizeBytes = property->item.value.i;
-	}
+	//property = psy_properties_read(self->driver.properties, "numbuf");
+	//if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
+	//	self->_numBlocks = property->item.value.i;
+	//}
+	//property = psy_properties_read(self->driver.properties, "numsamples");
+	//if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
+	//	self->_blockSizeBytes = property->item.value.i;
+	//}
+	//property = psy_properties_read(self->driver.properties, "numsamples");
+	//if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
+	//	self->_blockSizeBytes = property->item.value.i;
+	//}
 	}
 }
 
 unsigned int samplerate(psy_AudioDriver* self)
 {
-	return ((WasapiDriver*)self)->_samplesPerSec;
+	return psy_audiodriversettings_samplespersec(&((WasapiDriver*)self)->settings);
 }
 
 void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
@@ -545,10 +516,10 @@ void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN ca
 int driver_open(psy_AudioDriver* driver)
 {
 	WasapiDriver* self = (WasapiDriver*) driver;
-	return Start(self);	
+	return start(self);	
 }
 
-bool Start(WasapiDriver* self)
+bool start(WasapiDriver* self)
 {
 	HRESULT hr;
 	IMMDeviceEnumerator* pEnumerator = NULL;
@@ -585,7 +556,7 @@ bool Start(WasapiDriver* self)
 		EXIT_ON_ERROR(hr)
 
 		framesPerLatency = MakeFramesFromHns(self->out.period, self->out.wavex.Format.nSamplesPerSec);
-		self->_numBlocks = 2;
+		psy_audiodriversettings_setblockcount(&self->settings, 2);
 	}
 	else {
 		framesPerLatency = GetBufferSamples(self);
@@ -596,7 +567,7 @@ bool Start(WasapiDriver* self)
 			// Add latency frames
 			framesPerLatency = MakeFramesFromHns(self->out.period, self->out.wavex.Format.nSamplesPerSec);
 		}
-		self->_numBlocks = 2;
+		psy_audiodriversettings_setblockcount(&self->settings, 2);
 	}
 	// Align frames to HD Audio packet size of 128 bytes 
 	framesPerLatency = AlignFramesPerBuffer(framesPerLatency,
@@ -604,7 +575,7 @@ bool Start(WasapiDriver* self)
 
 	// Calculate period
 	self->out.period = MakeHnsPeriod(framesPerLatency, self->out.wavex.Format.nSamplesPerSec);
-	self->_blockSize = framesPerLatency;	
+	psy_audiodriversettings_setblockframes(&self->settings, framesPerLatency);	
 
 	hr = IAudioClient_Initialize(self->out.client, 	
 		self->out.shareMode,
@@ -618,7 +589,7 @@ bool Start(WasapiDriver* self)
 		
 	hr = IAudioClient_GetBufferSize(self->out.client, &self->out.bufferFrameCount);
 	EXIT_ON_ERROR(hr)
-	self->_blockSize = self->out.bufferFrameCount;
+	psy_audiodriversettings_setblockframes(&self->settings, self->out.bufferFrameCount);
 	
 	hr = IAudioClient_GetService(self->out.client, &IID_IAudioClock,
 		(void**)&self->pAudioClock);
@@ -633,185 +604,93 @@ bool Start(WasapiDriver* self)
 		//}
 
 	self->out.flags = 0;
-	//_event.ResetEvent();
+	ResetEvent(self->hEvent);
 	CreateThread(NULL, 0, EventAudioThread, self, 0, &self->dwThreadId);
 
 	self->running = TRUE;
-	SAFE_RELEASE(pEnumerator)
-		return TRUE;
+	if (pEnumerator) {
+		IMMDeviceEnumerator_Release(pEnumerator);
+	}
+	pEnumerator = 0;
+	return TRUE;
 Exit:
 	//For debugging purposes
 	if (FAILED(hr)) {
 		//Error(GetError(hr));
 	}
-	SAFE_RELEASE(self->pAudioClock);
-	SAFE_RELEASE(self->out.client)
-	SAFE_RELEASE(self->out.device)
-	SAFE_RELEASE(pEnumerator)
+	if (self->pAudioClock) {
+		IAudioClock_Release(self->pAudioClock);
+	}
+	self->pAudioClock = 0;
+	if (self->out.client) {
+		IAudioClient_Release(self->out.client);
+	}
+	self->out.client = 0;
+	if (self->out.device) {
+		IMMDevice_Release(self->out.device);
+	}
+	self->out.device = 0;
+	if (pEnumerator) {
+		IMMDeviceEnumerator_Release(pEnumerator);
+	}
+	pEnumerator = 0;
 	return FALSE;
 }
 
-int GetBufferSamples(WasapiDriver* self) { return self->_blockSize; }
+unsigned int GetBufferSamples(WasapiDriver* self)
+{
+	return psy_audiodriversettings_blockframes(&self->settings);
+}
 
-void PrepareWaveFormat(WAVEFORMATEX* wf, int channels, int sampleRate, int bits, int validBits)
+void PrepareWaveFormat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits)
 {
 	// Set up wave format structure. 
 	ZeroMemory(wf, sizeof(WAVEFORMATEX));
-	wf->nChannels = channels;
-	wf->wBitsPerSample = bits;
-	wf->nSamplesPerSec = sampleRate;
-	wf->nBlockAlign = wf->nChannels * wf->wBitsPerSample / 8;
-	wf->nAvgBytesPerSec = wf->nSamplesPerSec * wf->nBlockAlign;
-
-	if(bits <= 16) {
-		wf->wFormatTag = WAVE_FORMAT_PCM;
-		wf->cbSize = 0;
-	} else {
-/*		wf->wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-		wf.Format.cbSize = 0x16;
-				wf.psy_audio_Samples.wValidBitsPerSample  = validBits;
-				if(channels == 2) {
-					wf.dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
-				}
-				if(validBits ==32) {
-					wf.SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
-				}
-				else {
-					wf.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-				}
-			}*/
+	wf->Format.nChannels = channels;
+	wf->Format.wBitsPerSample = bits;
+	wf->Format.nSamplesPerSec = sampleRate;
+	wf->Format.nBlockAlign = wf->Format.nChannels * wf->Format.wBitsPerSample / 8;
+	wf->Format.nAvgBytesPerSec = wf->Format.nSamplesPerSec * wf->Format.nBlockAlign;
+	if (bits <= 16) {
+		wf->Format.wFormatTag = WAVE_FORMAT_PCM;
+		wf->Format.cbSize = 0;
+	}
+	else {
+		wf->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
+		wf->Format.cbSize = 0x16;
+		wf->Samples.wValidBitsPerSample = validBits;
+		if (channels == 2) {
+			wf->dwChannelMask = SPEAKER_FRONT_LEFT | SPEAKER_FRONT_RIGHT;
+		}
+		if (validBits == 32) {
+			wf->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+		}
+		else {
+			wf->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+		}
 	}
 }
 
 int driver_close(psy_AudioDriver* driver)
 {
-	WasapiDriver* self = (WasapiDriver*) driver;
-	size_t _numBlocks;
-	CBlock *pBlock;	
-	if(!self->_running) {
-		return TRUE;
-	}
-	self->_stopPolling = TRUE;	
-	_numBlocks = self->_numBlocks;
-	WaitForSingleObject(self->hEvent, INFINITE);
-	// Once we get here, the PollerThread should have stopped
-	// or we hang in deadlock	
-	if(waveOutReset(self->_handle) != MMSYSERR_NOERROR)
-	{
-		self->error(1, "waveOutReset() failed");
-		return FALSE;
-	}
-	for(;;)
-	{
-		BOOL alldone = TRUE;
-		CBlock *pBlock;
-		for(pBlock = self->_blocks; pBlock < self->_blocks + self->_numBlocks; pBlock++)
-		{
-			if((pBlock->pHeader->dwFlags & WHDR_DONE) == 0) alldone = FALSE;
-		}
-		if(alldone) break;
-		Sleep(10);
-	}
-	for(pBlock = self->_blocks; pBlock < self->_blocks + self->_numBlocks; pBlock++)
-	{
-		if(pBlock->Prepared)
-		{
-			if(waveOutUnprepareHeader(self->_handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-			{
-				self->error(1, "waveOutUnprepareHeader() failed");
-			}
-		}
-	}
-	if(waveOutClose(self->_handle) != MMSYSERR_NOERROR)
-	{
-		self->error(1, "waveOutClose() failed");
-		return FALSE;
-	}
-	for(pBlock = self->_blocks; pBlock < self->_blocks + self->_numBlocks; pBlock++)
-	{
-		GlobalUnlock(pBlock->Handle);
-		GlobalFree(pBlock->Handle);
-		GlobalUnlock(pBlock->HeaderHandle);
-		GlobalFree(pBlock->HeaderHandle);
-	}
-	/*
-	for(unsigned int i=0; i<_capPorts.size(); i++)
-	{
-		if(_capPorts[i]._handle == NULL)
-			continue;
-		if(::waveInReset(_capPorts[i]._handle) != MMSYSERR_NOERROR)
-		{
-			Error("waveInReset() failed");
-			return false;
-		}
-		///\todo: wait until WHDR_DONE like with waveout?
-		for(CBlock *pBlock = _capPorts[i]._blocks; pBlock < _capPorts[i]._blocks + _numBlocks; pBlock++)
-		{
-			if(pBlock->Prepared)
-			{
-				if(::waveInUnprepareHeader(_capPorts[i]._handle, pBlock->pHeader, sizeof(WAVEHDR)) != MMSYSERR_NOERROR)
-				{
-					Error("waveInUnprepareHeader() failed");
-				}
-			}
-		}
-		waveInClose(_capPorts[i]._handle);
-		_capPorts[i]._handle = NULL;
-		universalis::os::aligned_memory_dealloc(_capPorts[i].pleft);
-		universalis::os::aligned_memory_dealloc(_capPorts[i].pright);
-		for(CBlock *pBlock = _capPorts[i]._blocks; pBlock < _capPorts[i]._blocks + _numBlocks; pBlock++)
-		{
-			::GlobalUnlock(pBlock->Handle);
-			::GlobalFree(pBlock->Handle);
-			::GlobalUnlock(pBlock->HeaderHandle);
-			::GlobalFree(pBlock->HeaderHandle);
-		}
-	}*/
+	psy_List* pCapPort;
+	int status;
+	WasapiDriver* self;
 
-	self->_running = FALSE;
-	return TRUE;
+	self = (WasapiDriver*)driver;
+	status = stop((WasapiDriver*)driver);
+	for (pCapPort = self->_capPorts; pCapPort != 0; pCapPort = pCapPort->next) {
+		PaWasapiSubStream* portcap;
+
+		portcap = (PaWasapiSubStream*)pCapPort->entry;
+		free(portcap);
+	}
+	psy_list_free(self->_capPorts);
+	self->_capPorts = 0;
+	return status;
 }
 
-void Quantize(float *pin, int *piout, int c)
-{
-//	double const d2i = (1.5 * (1 << 26) * (1 << 26));
-	
-	do
-	{
-		int l;
-//		double res = ((double)pin[1]) + d2i;
-//		int r = *(int *)&res;
-		int r = f2i(pin[1]);
-
-		if (r < SHORT_MIN)
-		{
-			r = SHORT_MIN;
-		}
-		else if (r > SHORT_MAX)
-		{
-			r = SHORT_MAX;
-		}
-//		res = ((double)pin[0]) + d2i;
-//		int l = *(int *)&res;
-		l = f2i(pin[0]);
-
-		if (l < SHORT_MIN)
-		{
-			l = SHORT_MIN;
-		}
-		else if (l > SHORT_MAX)
-		{
-			l = SHORT_MAX;
-		}
-		*piout++ = (r << 16) | (WORD)l;
-		pin += 2;
-	}
-	while(--c);
-}
-
-
-
-void RefreshAvailablePorts(WasapiDriver* self)
+void refreshavailableports(WasapiDriver* self)
 {
 	IMMDeviceEnumerator* pEnumerator = NULL;
 	HRESULT hr = S_OK;
@@ -821,7 +700,10 @@ void RefreshAvailablePorts(WasapiDriver* self)
 	EXIT_ON_ERROR(hr)
 		RefreshPorts(self, pEnumerator);
 Exit:
-	IAudioClient_Release(pEnumerator);
+	if (pEnumerator) {
+		IMMDeviceEnumerator_Release(pEnumerator);
+	}
+	pEnumerator = 0;
 }
 
 void RefreshPorts(WasapiDriver* self, IMMDeviceEnumerator* pEnumerator)
@@ -831,8 +713,8 @@ void RefreshPorts(WasapiDriver* self, IMMDeviceEnumerator* pEnumerator)
 	IMMDevice* pEndpoint = NULL;
 	LPWSTR defaultID = NULL;	
 	
-	psy_table_clear(&self->_playEnums);
-	psy_table_clear(&self->_capEnums);
+	clearplayenums(self);
+	clearcapenums(self);
 
 	hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
 		DEVICE_STATE_ACTIVE, &pCollection);	
@@ -845,7 +727,10 @@ void RefreshPorts(WasapiDriver* self, IMMDeviceEnumerator* pEnumerator)
 	FillPortList(self, &self->_playEnums, pCollection, defaultID);
 	CoTaskMemFree(defaultID);
 	defaultID = NULL;
-	IAudioClient_Release(pCollection);
+	if (pCollection) {
+		IMMDeviceCollection_Release(pCollection);
+	}
+	pCollection = 0;
 	hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eCapture,
 		DEVICE_STATE_ACTIVE, &pCollection);
 	EXIT_ON_ERROR(hr)		
@@ -857,11 +742,17 @@ void RefreshPorts(WasapiDriver* self, IMMDeviceEnumerator* pEnumerator)
 	FillPortList(self, &self->_capEnums, pCollection, defaultID);
 Exit:
 	CoTaskMemFree(defaultID);
-	IAudioClient_Release(pEndpoint);
-	IAudioClient_Release(pCollection);
+	if (pEndpoint) {
+		IMMDevice_Release(pEndpoint);
+	}
+	pEndpoint = 0;
+	if (pCollection) {
+		IMMDeviceCollection_Release(pCollection);
+	}
+	pCollection = 0;
 }
 
-void FillPortList(WasapiDriver* self, psy_Table* portList, IMMDeviceCollection* pCollection, LPWSTR defaultID)
+void FillPortList(WasapiDriver* self, psy_List** portList, IMMDeviceCollection* pCollection, LPWSTR defaultID)
 {
 	IMMDevice* pEndpoint = NULL;
 	IPropertyStore* pProps = NULL;
@@ -873,7 +764,6 @@ void FillPortList(WasapiDriver* self, psy_Table* portList, IMMDeviceCollection* 
 	
 	hr = IMMDeviceCollection_GetCount(pCollection, &count);
 	EXIT_ON_ERROR(hr)
-
 	// Each loop prints the name of an endpoint device.
 	for (i = 0; i < count; ++i)
 	{
@@ -944,21 +834,37 @@ void FillPortList(WasapiDriver* self, psy_Table* portList, IMMDeviceCollection* 
 				pEnum->MixFormat.Format.nSamplesPerSec);
 			samples = AlignFramesPerBuffer(samples,
 				pEnum->MixFormat.Format.nSamplesPerSec, pEnum->MixFormat.Format.nBlockAlign);
-			pEnum->DefaultDevicePeriod = MakeHnsPeriod(samples, pEnum->MixFormat.Format.nSamplesPerSec);
-			
-			psy_table_insert(portList, psy_table_size(portList), pEnum);			
-
+			pEnum->DefaultDevicePeriod = MakeHnsPeriod(samples, pEnum->MixFormat.Format.nSamplesPerSec);			
+			psy_list_append(portList, pEnum);
 			CoTaskMemFree(pszDeviceId);
 			pszDeviceId = NULL;
-			IAudioClient_Release(client);
-			IAudioClient_Release(pProps);
-			IAudioClient_Release(pEndpoint);
+			if (client) {
+				IAudioClient_Release(client);
+			}
+			client = 0;
+			if (pProps) {
+				IPropertyStore_Release(pProps);
+			}
+			pProps = 0;
+			if (pEndpoint) {
+				IMMDevice_Release(pEndpoint);
+			}
+			pEndpoint = 0;
 		}
 Exit:
 	CoTaskMemFree(pszDeviceId);
-	IAudioClient_Release(client);
-	IAudioClient_Release(pProps);
-	IAudioClient_Release(pEndpoint);
+	if (client) {
+		IAudioClient_Release(client);
+	}
+	client = 0;
+	if (pProps) {
+		IPropertyStore_Release(pProps);
+	}
+	pProps = 0;
+	if (pEndpoint) {
+		IMMDevice_Release(pEndpoint);
+	}
+	pEndpoint = 0;
 }
 
 static DWORD WINAPI EventAudioThread(void* pWasapi)
@@ -979,8 +885,8 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 	hTask = pAvSetMmThreadCharacteristics(TEXT("Pro Audio"), &taskIndex);
 	if (hTask == NULL)
 	{
-		hr = E_FAIL;
-		EXIT_ON_ERROR(hr)
+		// hr = E_FAIL;
+		// EXIT_ON_ERROR(hr)
 	}
 	// Create an event handle and register it for buffer-event notifications.
 	hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -1010,7 +916,7 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 		//hr = pThis->DoBlock(pRenderClient, bufferFrameCount);
 	EXIT_ON_ERROR(hr)
 
-		pThis->writeMark = 0;
+	pThis->writeMark = 0;
 	hr = IAudioClient_Start(pThis->out.client); // Start playing.
 	EXIT_ON_ERROR(hr)
 
@@ -1113,12 +1019,15 @@ Exit:
 		// First, run the capture buffers so that audio is available to wavein machines.
 		for (q = capture; q != 0; q = q->next) {			
 			IAudioCaptureClient* captureClient = (IAudioCaptureClient*)q->entry;		
-			IAudioClient_Release(captureClient);
+			IAudioCaptureClient_Release(captureClient);
 		}
 	}
-	IAudioRenderClient_Release(pRenderClient);
+	if (pRenderClient) {
+		IAudioRenderClient_Release(pRenderClient);
+	}
+	pRenderClient = 0;
 	pThis->running = FALSE;
-	//pThis->_event.SetEvent();
+	SetEvent(pThis->hEvent);
 	return 0;
 }
 
@@ -1139,7 +1048,7 @@ HRESULT DoBlockRecording(WasapiDriver* self, PaWasapiSubStream* port, IAudioCapt
 		EXIT_ON_ERROR(hr)
 			if (!(flags & AUDCLNT_BUFFERFLAGS_SILENT))
 			{
-				unsigned int _sampleValidBits = self->_bitDepth; // settings_->validBitDepth();
+				unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
 				if (_sampleValidBits == 32) {
 					// DeinterlaceFloat(reinterpret_cast<float*>(pData), port.pleft, port.pright, numf);
 				}
@@ -1170,13 +1079,13 @@ HRESULT DoBlock(WasapiDriver* self, IAudioRenderClient* pRenderClient, int numFr
 	// Grab the next empty buffer from the audio device.	
 	HRESULT hr = IAudioRenderClient_GetBuffer(pRenderClient, numFramesAvailable, &pData);
 	EXIT_ON_ERROR(hr)
-	unsigned int _sampleValidBits = self->_bitDepth; // settings_->validBitDepth();	
+	unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
 	int hostisplaying;
 	float* pFloatBlock =
 		self->driver._pCallback(
 			self->driver._callbackContext, &numFramesAvailable, &hostisplaying);
 	if (_sampleValidBits == 32) {
-		// dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pData), numFramesAvailable * 2, 1.f / 32768.f);
+		dsp.movmul(pFloatBlock, (float*)pData, numFramesAvailable * 2, 1.f / 32768.f);
 	}
 	else if (_sampleValidBits == 24) {
 		// Quantize24in32Bit(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
@@ -1184,7 +1093,7 @@ HRESULT DoBlock(WasapiDriver* self, IAudioRenderClient* pRenderClient, int numFr
 	else if (_sampleValidBits == 16) {
 		//if (settings_->dither()) Quantize16WithDither(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
 		// else Quantize16(pFloatBlock, reinterpret_cast<int*>(pData), numFramesAvailable);
-		Quantize(pFloatBlock, pFloatBlock, numFramesAvailable);
+		psy_dsp_quantize16(pFloatBlock, (int*)pFloatBlock, numFramesAvailable);
 	}
 
 	hr = IAudioRenderClient_ReleaseBuffer(pRenderClient, numFramesAvailable, self->out.flags);
@@ -1241,11 +1150,15 @@ HRESULT GetStreamFormat(WasapiDriver* self, PaWasapiSubStream* stream, WAVEFORMA
 		WAVEFORMATEX* pwft;
 		hr = IAudioClient_GetMixFormat(stream->client, &pwft);
 		EXIT_ON_ERROR(hr)
-		self->_samplesPerSec = pwft->nSamplesPerSec;
-		self->_bitDepth = pwft->wBitsPerSample;
+		
+		psy_audiodriversettings_setsamplespersec(&self->settings,
+			pwft->nSamplesPerSec);
+		psy_audiodriversettings_setvalidbitdepth(&self->settings,
+			pwft->wBitsPerSample);
 		if (pwft->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
 			WAVEFORMATEXTENSIBLE* wfex = (WAVEFORMATEXTENSIBLE*)pwft;
-			self->_bitDepth = wfex->Samples.wValidBitsPerSample;
+			psy_audiodriversettings_setvalidbitdepth(&self->settings,
+				wfex->Samples.wValidBitsPerSample);
 		}
 		memcpy(wfOut, pwft, min(sizeof(WAVEFORMATEX) + pwft->cbSize, sizeof(WAVEFORMATEXTENSIBLE)));
 		CoTaskMemFree(pwft);
@@ -1254,8 +1167,11 @@ HRESULT GetStreamFormat(WasapiDriver* self, PaWasapiSubStream* stream, WAVEFORMA
 	{
 		WAVEFORMATPCMEX format;
 		
-		PrepareWaveFormat(&format, self->numChannels, self->_samplesPerSec, self->_bitDepth,
-			self->_bitDepth);
+		PrepareWaveFormat((WAVEFORMATEXTENSIBLE*)&format,
+			psy_audiodriversettings_numchannels(&self->settings),
+			psy_audiodriversettings_samplespersec(&self->settings),
+			psy_audiodriversettings_bitdepth(&self->settings),
+			psy_audiodriversettings_validbitdepth(&self->settings));
 		memcpy(wfOut, &format, sizeof(WAVEFORMATPCMEX));
 	}
 	WAVEFORMATEX* bla = NULL;	
@@ -1279,11 +1195,11 @@ uint32_t GetPlayPosInSamples(WasapiDriver* self)
 	if (self->running) {
 		HRESULT hr = IAudioClock_GetPosition(self->pAudioClock, &pos, NULL);		
 		EXIT_ON_ERROR(hr)
-		if (self->audioClockFreq == self->_samplesPerSec) {
+		if (self->audioClockFreq == psy_audiodriversettings_samplespersec(&self->settings)) {
 			retVal = pos;
 		} else {
 			// Thus, the stream-relative offset in seconds can always be calculated as p/f.
-			retVal = (pos * self->_samplesPerSec / self->audioClockFreq);
+			retVal = (pos * psy_audiodriversettings_samplespersec(&self->settings) / self->audioClockFreq);
 		}
 	}
 Exit:
@@ -1314,23 +1230,27 @@ uint32_t GetOutputLatencyMs(WasapiDriver* self)
 
 uint32_t GetInputLatencySamples(WasapiDriver* self)
 { 
-	return GetInputLatencyMs(self) * self->_samplesPerSec * 0.001f;
+	return GetInputLatencyMs(self) * psy_audiodriversettings_samplespersec(&self->settings) * 0.001f;
 }
 
 uint32_t GetOutputLatencySamples(WasapiDriver* self)
 { 
-	return GetOutputLatencyMs(self) * self->_samplesPerSec * 0.001f;
+	return GetOutputLatencyMs(self) * psy_audiodriversettings_samplespersec(&self->settings) * 0.001f;
 }
 
 uint32_t GetIdxFromDevice(WasapiDriver* self, WCHAR* szDeviceID)
 {
-	/*for (int i = 0; i < _playEnums.size(); ++i)
-	{
-		if (wcscmp(_playEnums[i].szDeviceID, szDeviceID) == 0)
-		{
+	psy_List* pPort;
+	uint32_t i;
+
+	for (pPort = self->_capEnums, i = 0; pPort != 0; pPort = pPort->next, ++i) {
+		PortEnum* port;
+
+		port = (PortEnum*) pPort->entry;
+		if (wcscmp(port->szDeviceID, szDeviceID) == 0) {
 			return i;
 		}
-	}*/
+	}
 	return 0;
 }
 
@@ -1478,18 +1398,179 @@ Exit:
 	return hr;
 }
 
-bool Stop(WasapiDriver* self)
+bool stop(WasapiDriver* self)
 {
 	if (!self->running) return FALSE;
+
 	self->out.flags = AUDCLNT_BUFFERFLAGS_SILENT;
-	/*CSingleLock event(&_event, TRUE);
-	for (unsigned int i = 0; i < _capPorts.size(); i++)
-	{
-		SAFE_RELEASE(_capPorts[i].client)
-			SAFE_RELEASE(_capPorts[i].device)
-	}*/
-	SAFE_RELEASE(self->pAudioClock);
-	SAFE_RELEASE(self->out.client)
-	SAFE_RELEASE(self->out.device)
+	WaitForSingleObject(self->hEvent, INFINITE);
+	// for (unsigned int i = 0; i < _capPorts.size(); i++)
+	// {
+	//	SAFE_RELEASE(_capPorts[i].client)
+	//		SAFE_RELEASE(_capPorts[i].device)
+	//}
+	if (self->pAudioClock) {
+		IAudioClock_Release(self->pAudioClock);
+	}
+	self->pAudioClock = 0;
+	if (self->out.client) {
+		IAudioClient_Release(self->out.client);
+	}
+	self->out.client = 0;
+	if (self->out.device) {
+		IMMDevice_Release(self->out.device);
+	}
+	self->out.device = 0;
 	return TRUE;
+}
+
+void clearplayenums(WasapiDriver* self)
+{
+	psy_List* p;
+
+	for (p = self->_playEnums; p != 0; p = p->next) {
+		PortEnum* port = (PortEnum*)p->entry;
+		// portenum_dispose(port);
+		free(port);
+	}
+	psy_list_free(self->_playEnums);
+	self->_playEnums = 0;
+}
+
+void clearcapenums(WasapiDriver* self)
+{
+	psy_List* p;
+
+	for (p = self->_capEnums; p != 0; p = p->next) {
+		PortEnum* port = (PortEnum*)p->entry;
+		// portenum_dispose(port);
+		free(port);
+	}
+	psy_list_free(self->_capEnums);
+	self->_capEnums = 0;
+}
+
+int addcaptureport(WasapiDriver* self, int idx)
+{
+	PaWasapiSubStream* port;
+	bool isplaying;
+	
+	isplaying = self->_running;
+	if (idx >= (int)psy_list_size(self->_capEnums)) {
+		return FALSE;
+	}
+	if (idx < (int)psy_table_size(&self->_portMapping) &&
+		(intptr_t)psy_table_at(&self->_portMapping, idx) != -1) {
+		return TRUE;
+	}
+	if (isplaying) {
+		stop(self);
+	}
+	port = malloc(sizeof(PaWasapiSubStream));
+	if (port) {
+		ZeroMemory(port, sizeof(PaWasapiSubStream));
+		wcscpy_s(port->szDeviceID, MAX_STR_LEN - 1,
+			((PortEnum*)psy_list_at(self->_capEnums, idx)->entry)->szDeviceID);
+		psy_list_append(&self->_capPorts, port);
+		if ((int) psy_table_size(&self->_portMapping) <= idx) {
+			int oldsize = psy_table_size(&self->_portMapping);
+			int i;
+
+			for (i = oldsize; i < idx + 1; i++) {
+				psy_table_insert(&self->_portMapping, i, (void*)(intptr_t)i);
+			}
+		}
+		psy_table_insert(&self->_portMapping, idx, (void*)(intptr_t)(psy_list_size(self->_capPorts) - 1));
+		if (isplaying) return start(self);
+	} else {
+		return FALSE;
+	}
+	return TRUE;
+}
+
+int removecaptureport(WasapiDriver* self, int idx)
+{
+	bool isplaying = self->_running;
+	int maxSize = 0;
+	unsigned int i;
+	psy_List* pCapPort;
+	psy_List* newports;
+
+	newports = 0;
+	if (idx >= (int)psy_list_size(self->_capEnums) ||
+		idx >= (int)psy_table_size(&self->_portMapping) ||
+		(intptr_t)psy_table_at(&self->_portMapping, idx) == -1) {
+		return FALSE;
+	}
+	if (isplaying) {
+		stop(self);
+	}
+	for (i = 0; i < psy_table_size(&self->_portMapping); ++i) {
+		if (i != idx && (intptr_t)psy_table_at(&self->_portMapping, i) != -1) {
+			maxSize = i + 1;
+			psy_list_append(&newports,
+				psy_list_at(self->_capPorts,
+				(intptr_t)psy_table_at(&self->_portMapping, i)));
+			psy_table_insert(&self->_portMapping, i,
+				(void*)(intptr_t)(psy_list_size(newports) - 1));
+		}
+	}
+	psy_table_insert(&self->_portMapping, idx, (void*)(intptr_t)-1);
+	// if (maxSize < (int) psy_table_size(&self->_portMapping)) {
+	//	_portMapping.resize(maxSize);
+	// }
+	for (pCapPort = self->_capPorts; pCapPort != 0; pCapPort = pCapPort->next) {
+		PaWasapiSubStream* portcap;
+
+		portcap = (PaWasapiSubStream*)pCapPort->entry;
+		free(portcap);
+	}
+	psy_list_free(self->_capPorts);
+	self->_capPorts = newports;
+	if (isplaying) {
+		start(self);
+	}
+	return TRUE;
+}
+
+const char* capturename(psy_AudioDriver* driver, int index)
+{
+	WasapiDriver* self = (WasapiDriver*)driver;
+	psy_List* pPort;
+
+	if (self->_capEnums) {
+		pPort = psy_list_at(self->_capEnums, index);
+		if (pPort) {
+			return ((PortEnum*)(pPort->entry))->portName;
+		}
+	}
+	return "";
+}
+
+int numcaptures(psy_AudioDriver* driver)
+{
+	WasapiDriver* self = (WasapiDriver*)driver;
+
+	return psy_list_size(self->_capEnums);
+}
+
+const char* playbackname(psy_AudioDriver* driver, int index)
+{
+	WasapiDriver* self = (WasapiDriver*)driver;
+	psy_List* pPort;
+
+	if (self->_playEnums) {
+		pPort = psy_list_at(self->_playEnums, index);
+		if (pPort) {
+			return ((PortEnum*)(pPort->entry))->portName;
+		}
+	}
+	return "";
+}
+
+int numplaybacks(psy_AudioDriver* driver)
+{
+	WasapiDriver* self = (WasapiDriver*)driver;
+
+	return psy_list_size(self->_playEnums);
 }

@@ -7,6 +7,7 @@
 #include "workspace.h"
 #include <uibutton.h>
 #include <uilabel.h>
+#include <uicheckbox.h>
 #include <plugincatcher.h>
 #include <hashtbl.h>
 
@@ -27,6 +28,9 @@ typedef struct {
 	psy_ui_Component component;
 	NewMachineBar bar;
 	psy_ui_Label desclabel;
+    psy_ui_Label compatlabel;
+    psy_ui_CheckBox compatblitzgamefx;
+    Workspace* workspace;
 } NewMachineDetail;
 
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,

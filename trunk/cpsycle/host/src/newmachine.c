@@ -49,6 +49,7 @@ static int newmachine_comp_name(psy_Properties* p, psy_Properties* q);
 static int newmachine_comp_type(psy_Properties* p, psy_Properties* q);
 static int newmachine_comp_mode(psy_Properties* p, psy_Properties* q);
 static int newmachine_isplugin(int type);
+static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
 
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -100,15 +101,30 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
+	self->workspace = workspace;
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->desclabel, &self->component);
-	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);	
-	psy_ui_label_settext(&self->desclabel, 
-		"Select a plugin to view its description.");	
-	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
+	psy_ui_label_settext(&self->desclabel,
+		"Select a plugin to view its description.");
+	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_checkbox_init(&self->compatblitzgamefx, &self->component);
+	psy_ui_checkbox_settext(&self->compatblitzgamefx,
+		"Load new gamefx and Blitz if version unknown");
+	if (workspace_loadnewblitz(self->workspace)) {
+		psy_ui_checkbox_check(&self->compatblitzgamefx);
+	}
+	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
+		newmachinedetail_onloadnewblitz);
+	psy_ui_component_setalign(&self->compatblitzgamefx.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_label_init(&self->compatlabel, &self->component);
+	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_label_settext(&self->compatlabel,
+		"Song loading compatibility");	
+	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2), psy_ui_value_makeeh(2),
+		psy_ui_value_makeew(2), psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
@@ -119,6 +135,15 @@ void newmachinedetail_reset(NewMachineDetail* self)
 {
 	psy_ui_label_settext(&self->desclabel, 
 		"Select a plugin to view its description.");	
+}
+
+void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* sender)
+{
+	if (psy_ui_checkbox_checked(&self->compatblitzgamefx)) {
+		workspace_setloadnewblitz(self->workspace, 1);
+	} else {
+		workspace_setloadnewblitz(self->workspace, 0);
+	}
 }
 
 // PluginsView

@@ -54,6 +54,7 @@ static void workspace_makedriverconfigurations(Workspace*);
 static void workspace_driverconfig(Workspace*);
 static void workspace_mididriverconfig(Workspace*, int deviceid);
 static void workspace_updatemididriverlist(Workspace*);
+static void workspace_makecompatibility(Workspace*);
 static const char* workspace_driverpath(Workspace*);
 static const char* workspace_driverkey(Workspace*);
 static const char* workspace_eventdriverpath(Workspace*);
@@ -410,7 +411,8 @@ void workspace_makeconfig(Workspace* self)
 	workspace_makekeyboard(self);
 	workspace_makedirectories(self);
 	workspace_makeinputoutput(self);
-	workspace_makemidi(self);	
+	workspace_makemidi(self);
+	workspace_makecompatibility(self);
 }
 
 void workspace_makegeneral(Workspace* self)
@@ -869,6 +871,16 @@ void workspace_makedirectories(Workspace* self)
 		PSYCLE_LADSPAS_DEFAULT_DIR);
 	workspace_makedirectory(self, "skin", "Skin directory",
 		"C:\\Programme\\Psycle\\Skins");	
+}
+
+void workspace_makecompatibility(Workspace* self)
+{
+	self->compatibility = psy_properties_settext(
+		psy_properties_create_section(self->config, "compatibility"),
+		"Compatibility");
+	psy_properties_settext(
+		psy_properties_append_bool(self->compatibility, "loadnewgamefxblitz", 0),
+		"Load new gamefx and Blitz if version unknown");
 }
 
 void workspace_makedirectory(Workspace* self, const char* key,
@@ -1462,6 +1474,11 @@ void workspace_load_configuration(Workspace* self)
 	workspace_updatemididriverlist(self);
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
+	if (workspace_loadnewblitz(self)) {
+		machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
+	} else {
+		machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
+	}
 	psy_signal_emit(&self->signal_configchanged, self, 1, self->config);
 	psy_signal_emit(&self->signal_skinchanged, self, 0);
 }
@@ -1995,4 +2012,21 @@ const char* workspace_dialbitmap_path(Workspace* self)
 void workspace_dockview(Workspace* self, psy_ui_Component* view)
 {
 	psy_signal_emit(&self->signal_dockview, self, 1, view);
+}
+
+void workspace_setloadnewblitz(Workspace* self, int mode)
+{
+	psy_properties_write_bool(self->compatibility,
+		"loadnewgamefxblitz", mode != 0);
+	if (mode == 1) {
+		machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
+	} else {
+		machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
+	}
+}
+
+int workspace_loadnewblitz(Workspace* self)
+{
+	return psy_properties_bool(self->compatibility,
+		"loadnewgamefxblitz", 0);
 }

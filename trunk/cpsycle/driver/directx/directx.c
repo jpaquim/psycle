@@ -138,6 +138,8 @@ static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
 static int numplaybacks(psy_AudioDriver*);
+static int addcaptureport(DXDriver* self, int idx);
+static int removecaptureport(DXDriver* self, int idx);
 static bool start(DXDriver*);
 static bool stop(DXDriver*);
 
@@ -156,8 +158,7 @@ static void clearcapenums(DXDriver*);
 static void clearcapports(DXDriver*);
 static bool createcaptureport(DXDriver*, PortCapt* port);
 static void readbuffers(DXDriver* self, int index, float** pleft, float** pright, int numsamples);
-static int addcaptureport(DXDriver* self, int idx);
-static int removecaptureport(DXDriver* self, int idx);
+
 
 int on_error(int err, const char* msg)
 {
@@ -177,26 +178,28 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 
 EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
-	DXDriver* dx = (DXDriver*) malloc(sizeof(DXDriver));
-	if (dx != 0) {
-		memset(dx, 0, sizeof(DXDriver));
-		dx->driver.open = driver_open;
-		dx->driver.deallocate = driver_deallocate;
-		dx->driver.connect = driver_connect;
-		dx->driver.open = driver_open;
-		dx->driver.close = driver_close;
-		dx->driver.dispose = driver_dispose;
-		dx->driver.configure = driver_configure;
-		dx->driver.samplerate = driver_samplerate;
-		dx->driver.addcapture = (psy_audiodriver_fp_addcapture) addcaptureport;
-		dx->driver.removecapture = (psy_audiodriver_fp_removecapture) removecaptureport;
-		dx->driver.readbuffers = (psy_audiodriver_fp_readbuffers) readbuffers;
-		dx->driver.capturename = (psy_audiodriver_fp_capturename) capturename;
-		dx->driver.numcaptures = (psy_audiodriver_fp_numcaptures) numcaptures;
-		dx->driver.playbackname = (psy_audiodriver_fp_playbackname) playbackname;
-		dx->driver.numplaybacks = (psy_audiodriver_fp_numplaybacks) numplaybacks;
-		driver_init(&dx->driver);
-		return &dx->driver;
+	DXDriver* directx;
+	
+	directx = (DXDriver*) malloc(sizeof(DXDriver));
+	if (directx != 0) {
+		memset(directx, 0, sizeof(DXDriver));
+		directx->driver.open = driver_open;
+		directx->driver.deallocate = driver_deallocate;
+		directx->driver.connect = driver_connect;
+		directx->driver.open = driver_open;
+		directx->driver.close = driver_close;
+		directx->driver.dispose = driver_dispose;
+		directx->driver.configure = driver_configure;
+		directx->driver.samplerate = driver_samplerate;
+		directx->driver.addcapture = (psy_audiodriver_fp_addcapture) addcaptureport;
+		directx->driver.removecapture = (psy_audiodriver_fp_removecapture) removecaptureport;
+		directx->driver.readbuffers = (psy_audiodriver_fp_readbuffers) readbuffers;
+		directx->driver.capturename = (psy_audiodriver_fp_capturename) capturename;
+		directx->driver.numcaptures = (psy_audiodriver_fp_numcaptures) numcaptures;
+		directx->driver.playbackname = (psy_audiodriver_fp_playbackname) playbackname;
+		directx->driver.numplaybacks = (psy_audiodriver_fp_numplaybacks) numplaybacks;
+		driver_init(&directx->driver);
+		return &directx->driver;
 	}
 	return 0;
 }

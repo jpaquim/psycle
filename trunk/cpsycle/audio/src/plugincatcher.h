@@ -31,7 +31,9 @@ int plugincatcher_load(psy_audio_PluginCatcher*);
 void plugincatcher_save(psy_audio_PluginCatcher*);
 /*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, MachineType,
 	const char* name);*/
-char* plugincatcher_modulepath(psy_audio_PluginCatcher*, MachineType, const char* path,
+char* plugincatcher_modulepath(psy_audio_PluginCatcher*, MachineType,
+	int newgamefxblitzifversionunknown,
+	const char* path,
 	char* fullpath);
 uintptr_t plugincatcher_extractshellidx(const char* path);
 void plugincatcher_catchername(psy_audio_PluginCatcher*, const char* path, char* name, uintptr_t shellidx);

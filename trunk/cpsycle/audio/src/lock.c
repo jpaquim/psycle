@@ -20,22 +20,6 @@ void psy_audio_lock_dispose(psy_audio_Lock* self)
 	self->disabled = 0;	
 }
 
-psy_audio_Lock* psy_audio_lock_alloc(void)
-{
-	return (psy_audio_Lock*) malloc(sizeof(psy_audio_Lock));
-}
-
-psy_audio_Lock* psy_audio_lock_allocinit(void)
-{
-	psy_audio_Lock* rv;
-
-	rv = psy_audio_lock_alloc();
-	if (rv) {
-		psy_audio_lock_init(rv);
-	}
-	return rv;
-}
-
 void psy_audio_lock_enable(psy_audio_Lock* self)
 {
 	self->disabled = 0;
@@ -63,10 +47,7 @@ void psy_audio_lock_leave(psy_audio_Lock* self)
 #elif defined DIVERSALIS__OS__POSIX
 
 #include <pthread.h>
-
-static pthread_mutex_t self->lock;
-
-static int self->disabled = 0;
+#include <stdlib.h>
 
 void psy_audio_lock_init(psy_audio_Lock* self)
 {	
@@ -111,3 +92,19 @@ void psy_audio_lock_leave(psy_audio_Lock* self)
 #elif
 	#error "Exclusive Lock Platform Not Supported"
 #endif
+
+psy_audio_Lock* psy_audio_lock_alloc(void)
+{
+	return (psy_audio_Lock*) malloc(sizeof(psy_audio_Lock));
+}
+
+psy_audio_Lock* psy_audio_lock_allocinit(void)
+{
+	psy_audio_Lock* rv;
+
+	rv = psy_audio_lock_alloc();
+	if (rv) {
+		psy_audio_lock_init(rv);
+	}
+	return rv;
+}

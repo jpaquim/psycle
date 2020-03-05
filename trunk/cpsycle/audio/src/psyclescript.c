@@ -7,6 +7,8 @@
 
 #if defined DIVERSALIS__OS__MICROSOFT    
 #include <windows.h>
+#else
+#define _MAX_PATH 4096
 #endif
 
 #include "psyclescript.h"

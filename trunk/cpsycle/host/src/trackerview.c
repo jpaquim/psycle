@@ -22,6 +22,7 @@
 
 #include "../../detail/portable.h"
 #include "../../detail/os.h"
+#include "../../detail/trace.h"
 
 #if defined DIVERSALIS__OS__UNIX
 #define _MAX_PATH 4096
@@ -2309,6 +2310,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerview_connectplayer(self);
 	trackerview_readconfig(self);
 	psy_ui_component_starttimer(&self->component, TIMERID_TRACKERVIEW, 50);
+    TRACE("trackerview initialzed");
 }
 
 void trackerview_initblockmenu(TrackerView* self)

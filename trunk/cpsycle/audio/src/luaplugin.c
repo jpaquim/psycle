@@ -53,8 +53,9 @@ int psy_audio_plugin_luascript_exportcmodules(psy_audio_PsycleScript*);
 int luascript_setmachine(lua_State*);
 int luascript_terminal_output(lua_State*);
 
-static int luamachine_open(lua_State*);
 static const char* luamachine_meta = "psypluginmeta";
+
+static int luamachine_open(lua_State*);
 static int luamachine_create(lua_State*);
 static int luamachine_gc(lua_State*);
 static int luamachine_work(lua_State*);
@@ -66,8 +67,6 @@ static int luaL_orderednext(lua_State*);
 static int luamachine_addparameters(lua_State*);
 static int luamachine_setnumcols(lua_State*);
 static int luamachine_setbuffer(lua_State*);
-
-static const char* luaarraybind_meta = "array_meta";
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;

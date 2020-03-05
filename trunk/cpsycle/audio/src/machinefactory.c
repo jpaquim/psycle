@@ -32,6 +32,7 @@ void machinefactory_init(psy_audio_MachineFactory* self, MachineCallback callbac
 	self->machinecallback = callback;	
 	self->catcher = catcher;
 	self->options = MACHINEFACTORY_CREATEASPROXY;
+	self->loadnewgamefxblitz = 0;
 }
 
 void machinefactory_dispose(psy_audio_MachineFactory* self)
@@ -59,6 +60,7 @@ psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, Ma
 	}
 	return machinefactory_makemachinefrompath(self, type,
 		plugincatcher_modulepath(self->catcher, type,
+		self->loadnewgamefxblitz,
 		plugincatchername, fullpath),
 		plugincatcher_extractshellidx(plugincatchername));
 }
@@ -267,4 +269,14 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 		}		
 	}	
 	return rv;
+}
+
+void machinefactory_loadnewgamefxandblitzifversionunknown(psy_audio_MachineFactory* self)
+{
+	self->loadnewgamefxblitz = 1;
+}
+
+void machinefactory_loadoldgamefxandblitzifversionunknown(psy_audio_MachineFactory* self)
+{
+	self->loadnewgamefxblitz = 0;
 }

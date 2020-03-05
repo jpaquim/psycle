@@ -18,8 +18,8 @@ static void psy_audio_waveosctables_maketri(float* data, int num, int maxharmoni
 static void psy_audio_waveosctables_makesin(float* data, int num, int maxharmonic);
 static void constructtable(psy_audio_WaveOscTables*,
     psy_audio_Instrument*,
-    psy_audio_WaveShape,
     uintptr_t i,
+    psy_audio_WaveShape,
     double f_lo,
     double f_hi,
     void (*func)(float*, int, int),
