@@ -11,6 +11,7 @@
 #include <math.h>
 #include <assert.h>
 #include "../../detail/psydef.h"
+#include "../../detail/portable.h"
 
 void psy_audio_array_init(psy_audio_Array* self)
 {

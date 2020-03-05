@@ -7,6 +7,7 @@
 #include <operations.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../detail/trace.h"
 
 static psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
 	psy_dsp_amp_range_t);
@@ -164,18 +165,17 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* so
 	if (numsourcesamples < numsamples) {		
 		uintptr_t diff;		
 		uintptr_t c;
-		
-		
+				
 		diff = numsamples - numsourcesamples;
-		for (c = 0; c < self->numchannels; ++c) {
+		for (c = 0; c < self->numchannels; ++c) {			
 			dsp.clear(self->samples[c] + numsourcesamples, diff);			
 			dsp.add(self->samples[c], self->samples[c] + numsourcesamples, diff, 
-				rangefactor);
+				1.f);
 			dsp.clear(self->samples[c], numsourcesamples);
 			if (c < source->numchannels) {
 				dsp.add(source->samples[c], self->samples[c], numsourcesamples, 
 				rangefactor);
-			}
+			}									
 		}
 	} else {
 		uintptr_t c;

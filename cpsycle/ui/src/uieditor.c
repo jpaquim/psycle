@@ -208,6 +208,12 @@ void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 {
 
 }
+
+void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
+{
+    
+}
+
 void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
 {
 

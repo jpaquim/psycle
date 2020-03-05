@@ -19,7 +19,8 @@ typedef enum {
 typedef struct psy_audio_MachineFactory {
 	MachineCallback machinecallback;	
 	psy_audio_PluginCatcher* catcher;
-	MachineFactoryOptions options;	
+	MachineFactoryOptions options;
+	int loadnewgamefxblitz;
 } psy_audio_MachineFactory;
 
 void machinefactory_init(psy_audio_MachineFactory*, MachineCallback, psy_audio_PluginCatcher*);
@@ -30,6 +31,8 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory*,
 	const char* path, uintptr_t shellidx);
 void machinefactory_setoptions(psy_audio_MachineFactory*, MachineFactoryOptions options);
 MachineFactoryOptions machinefactory_options(psy_audio_MachineFactory*);
+void machinefactory_loadnewgamefxandblitzifversionunknown(psy_audio_MachineFactory*);
+void machinefactory_loadoldgamefxandblitzifversionunknown(psy_audio_MachineFactory*);
 
 #ifdef __cplusplus
 }

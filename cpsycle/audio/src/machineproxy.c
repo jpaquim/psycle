@@ -290,7 +290,9 @@ void machineproxy_generateaudio(psy_audio_MachineProxy* self, psy_audio_BufferCo
 			psy_audio_machine_generateaudio(self->client, bc);
 			if (self->client->err) {
 				self->crashed = 1;
+#if defined DIVERSALIS__OS__MICROSOFT                 
 				FilterException(self, "generateaudio", self->client->err, 0);
+#endif                
 			}
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		

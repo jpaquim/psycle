@@ -302,7 +302,7 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 		coords = self->coords;		
 		if (psy_audio_machine_editname(self->machine)) {
 			if (self->skin->drawmachineindexes) {
-				psy_snprintf(editname, 130, "%02d:%s", slot, 
+				psy_snprintf(editname, 130, "%.2X:%s", (int)slot, 
 					psy_audio_machine_editname(self->machine));
 			} else {
 				psy_snprintf(editname, 130, "%s", 

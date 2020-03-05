@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 #include <Xm/BulletinB.h>
 #include <Xm/PushB.h>
@@ -361,8 +362,7 @@ int dev_visible(psy_ui_xt_ComponentImp* self)
 
 void dev_move(psy_ui_xt_ComponentImp* self, int left, int top)
 {
-    if (self->hwnd) {
-        printf("move left: %d top: %d\n", left, top);
+    if (self->hwnd && left > 0 && top > 0) {        
         XtMoveWidget(self->hwnd, left, top);
     }
 }
@@ -370,7 +370,6 @@ void dev_move(psy_ui_xt_ComponentImp* self, int left, int top)
 void dev_resize(psy_ui_xt_ComponentImp* self, int width, int height)
 {
     if (self->hwnd && height > 0 && width > 0) {
-        printf("resize width: %d height: %d\n", width, height);
         XtResizeWidget(self->hwnd, width, height, 0);
     }
 }
@@ -389,10 +388,19 @@ void dev_clientresize(psy_ui_xt_ComponentImp* self, int width, int height)
 	//dev_resize(self, rc.right - rc.left, rc.bottom - rc.top);
 }
 
+void dev_setposition(psy_ui_xt_ComponentImp* self, int x, int y, int width,
+	int height)
+{
+    if (self->hwnd) {
+        dev_move(self, x, y);
+        dev_resize(self, width, height);
+    }
+}
 
 psy_ui_Rectangle dev_position(psy_ui_xt_ComponentImp* self)
 {
 	psy_ui_Rectangle rv;
+    psy_ui_Size size;
 	//RECT rc;
 	//POINT pt;
 	//int width;
@@ -408,17 +416,13 @@ psy_ui_Rectangle dev_position(psy_ui_xt_ComponentImp* self)
 	//rv.top = pt.y;
 	//rv.right = pt.x + width;
 	//rv.bottom = pt.y + height;
-        
+    
+    size = dev_size(self);
+    rv.left = 0;
+    rv.top = 0;
+    rv.right = rv.left + size.width;
+    rv.bottom = rv.top + size.height;
 	return rv;
-}
-
-void dev_setposition(psy_ui_xt_ComponentImp* self, int x, int y, int width,
-	int height)
-{
-     XtMoveWidget(self->hwnd, x, y);
-     if (self->hwnd && height > 0 && width > 0) {
-        XtResizeWidget(self->hwnd, width, height, 0);	
-     }
 }
 
 psy_ui_Size dev_size(psy_ui_xt_ComponentImp* self)
@@ -433,8 +437,8 @@ psy_ui_Size dev_size(psy_ui_xt_ComponentImp* self)
         psy_ui_XtApp* xtapp;		
 
         xtapp = (psy_ui_XtApp*) app.platform;        
-        // XGetGeometry(xtapp->dpy, (Window)self->hwnd, &root, &temp, &temp,
-        //        &width, &height, &temp, &temp);	
+        XGetGeometry(xtapp->dpy, XtWindow(self->hwnd), &root, &temp, &temp,
+                &width, &height, &temp, &temp);	
         rv.width = width;
         rv.height = height;
     } else {
@@ -456,8 +460,8 @@ psy_ui_Size dev_framesize(psy_ui_xt_ComponentImp* self)
         psy_ui_XtApp* xtapp;		
 
         xtapp = (psy_ui_XtApp*) app.platform;        
-        //XGetGeometry(xtapp->dpy, (Window)self->hwnd, &root, &temp, &temp,
-        //       &width, &height, &temp, &temp);	
+        XGetGeometry(xtapp->dpy, XtWindow(self->hwnd), &root, &temp, &temp,
+               &width, &height, &temp, &temp);	
         rv.width = width;
         rv.height = height;
     } else {
@@ -892,18 +896,47 @@ void dev_seticonressource(psy_ui_xt_ComponentImp* self, int ressourceid)
 psy_ui_Size dev_textsize(psy_ui_xt_ComponentImp* self, const char* text,
 	psy_ui_Font* font)
 {
-	psy_ui_Size rv;
-	//psy_ui_Graphics g;
-	//HDC hdc;
-
-	//hdc = GetDC(self->hwnd);
-	//SaveDC(hdc);
-	//psy_ui_graphics_init(&g, hdc);
-	//psy_ui_setfont(&g, font);
-	//rv = psy_ui_textsize(&g, text);
-	//psy_ui_graphics_dispose(&g);
-	//RestoreDC(hdc, -1);
-	//ReleaseDC(self->hwnd, hdc);
+    psy_ui_Size rv;
+        
+    if (self->hwnd) {
+        Widget window;	    
+        psy_ui_Graphics g;
+        PlatformXtGC xgc;
+        GC gc;
+        XGCValues gcv;
+        psy_ui_XtApp* xtapp;
+        psy_ui_xt_ComponentImp* imp;
+        
+        xtapp = (psy_ui_XtApp*) app.platform;
+        imp = (psy_ui_xt_ComponentImp*) psy_table_at(&xtapp->selfmap, (uintptr_t)
+            self->hwnd);
+        if (!imp) {
+            TRACE("psycle xt ui textsize no imp found\n");
+            rv.width = 0;
+            rv.height = 0;
+            return rv;
+        }
+        if (imp->bulletin) {
+            window = imp->bulletin;
+        } else {
+            window = self->hwnd;
+        }        
+        gcv.foreground = BlackPixelOfScreen(XtScreen(window));
+        gc = XCreateGC(XtDisplay(window), 
+	    RootWindowOfScreen(XtScreen(window)),
+		    GCForeground, &gcv);
+        xgc.display = XtDisplay(window);
+        xgc.window = XtWindow(window);
+        xgc.gc = gc;
+        psy_ui_graphics_init(&g, &xgc);
+        // psy_ui_setfont(&g, font);
+        rv = psy_ui_textsize(&g, text);
+        psy_ui_graphics_dispose(&g);
+    } else {
+        TRACE("psycle xt ui textsize no window found\n");
+        rv.width = 0;
+        rv.height = 0;
+    }
 	return rv;
 }
 

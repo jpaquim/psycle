@@ -759,7 +759,8 @@ void paramview_computepositions(ParamView* self)
 				paramrowbegin = param + 1;
 			}
 		}
-		cpy_slidercheck = 0;		
+		cpy_slidercheck = 0;	
+		row = 0;
 		self->cpmax.height = 0;
 		for (param = 0; param < psy_audio_machine_numparameters(self->machine);
 				++param) {

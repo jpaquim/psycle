@@ -61,6 +61,7 @@ typedef struct {
 	psy_Properties* midi;
 	psy_Properties* keyboard;
 	psy_Properties* directories;
+	psy_Properties* compatibility;
 	psy_Properties* properties;
 	psy_Properties* lang;	
 	psy_Properties* driverconfigure;
@@ -173,6 +174,8 @@ void workspace_onviewchanged(Workspace*, int view);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
 void workspace_addhistory(Workspace*);
+void workspace_setloadnewblitz(Workspace*, int mode);
+int workspace_loadnewblitz(Workspace*);
 const char* workspace_songs_directory(Workspace*);
 const char* workspace_samples_directory(Workspace*);
 const char* workspace_plugins_directory(Workspace*);

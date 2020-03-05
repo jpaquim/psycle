@@ -6,6 +6,7 @@
 #include "uibutton.h"
 #include <string.h>
 #include <stdlib.h>
+#include "../../detail/trace.h"
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
@@ -38,6 +39,7 @@ static void vtable_init(psy_ui_Button* self)
 
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {	
+    TRACE("button init\n");
 	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
@@ -67,9 +69,10 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle r;
 	int centerx = 0;
 	int centery = 0;
-		
+
 	size = psy_ui_component_size(psy_ui_button_base(self));
 	textsize = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
+   
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->hover) {
@@ -88,7 +91,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (size.height - textsize.height) / 2;
-	}	
+	}   
 	psy_ui_textoutrectangle(g, 
 		centerx,
 		centery,
@@ -235,6 +238,9 @@ void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 	free(self->text);
 	self->text = strdup(text);
 	psy_ui_component_invalidate(psy_ui_button_base(self));
+    TRACE("button text:");
+    TRACE(self->text);
+    TRACE("\n");
 }
 
 void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)

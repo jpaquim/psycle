@@ -273,7 +273,9 @@ uintptr_t plugincatcher_extractshellidx(const char* path)
 	return 0;
 }
 
-char* plugincatcher_modulepath(psy_audio_PluginCatcher* self, MachineType machtype,
+char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
+	MachineType machtype,
+	int newgamefxblitzifversionunknown,
 	const char* path, char* fullpath)
 {	
 	if (!path) {
@@ -289,10 +291,58 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self, MachineType machty
 		psy_properties_enumerate(self->plugins, self, onpropertiesenum);
 		if (!searchresult) {
 			if (strstr(path, "blitz")) {
-				searchname = "blitzn:0";
+				if (newgamefxblitzifversionunknown) {
+					searchname = "blitz16:0";
+				} else {
+					searchname = "blitz12:0";
+				}
 				searchtype = machtype;
 				searchresult = 0;
 				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				if (!searchresult) {
+					searchname = "blitzn:0";
+					searchtype = machtype;
+					searchresult = 0;
+					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				}
+				if (!searchresult) {
+					if (newgamefxblitzifversionunknown) {						
+						searchname = "blitz12:0";
+					} else {
+						searchname = "blitz16:0";
+					}
+					searchtype = machtype;
+					searchresult = 0;
+					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				}
+			} else
+			if (strstr(path, "gamefx")) {
+				if (newgamefxblitzifversionunknown) {
+					searchname = "gamefx16:0";
+				}
+				else {
+					searchname = "gamefx13:0";
+				}
+				searchtype = machtype;
+				searchresult = 0;
+				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				if (!searchresult) {
+					searchname = "gamefxn:0";
+					searchtype = machtype;
+					searchresult = 0;
+					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				}
+				if (!searchresult) {
+					if (newgamefxblitzifversionunknown) {
+						searchname = "gamefx13:0";
+					}
+					else {
+						searchname = "gamefx16:0";
+					}
+					searchtype = machtype;
+					searchresult = 0;
+					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				}
 			}
 		}
 		if (!searchresult) {

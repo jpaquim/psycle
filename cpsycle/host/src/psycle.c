@@ -26,6 +26,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+#include <objbase.h>
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	PSTR szCmdLine, int iCmdShow)
@@ -48,6 +49,7 @@ int main(int argc, char **argv)
 #ifdef DIVERSALIS__OS__MICROSOFT
 	// win32 needs an application handle (hInstance)
 	psy_ui_app_init(&app, (uintptr_t) hInstance);
+	CoInitialize(NULL);
 #else
 	psy_ui_app_init(&app, 0);
 #endif
@@ -67,6 +69,9 @@ int main(int argc, char **argv)
 	if (env) {
 		setpathenv(env);
 	}	
+#ifdef DIVERSALIS__OS__MICROSOFT
+	CoUninitialize();
+#endif 
 //	_CrtDumpMemoryLeaks();	
 	return err;
 }

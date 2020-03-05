@@ -5,6 +5,7 @@
 
 #include "trackscopeview.h"
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 #include <math.h>
 #include <string.h>
 #include <uiapp.h>
@@ -147,7 +148,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 				float py;
 				float cpx = 0;
 				int x1, y1, x2, y2;
-				static float epsilon = 0.1f;
+				static float epsilon = 0.01f;
 
 				numsamples = psy_audio_machine_buffermemorysize(machine);
 				if (numsamples > 0) {
@@ -161,9 +162,9 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 					}
 					if (!zero) {
 						px = width / (float) numsamples;
-						py = height / 32768.f / 2;
+						py = height / 32768.f / 3;
 						x1 = 0;
-						y1 = (int) (memory->samples[0][0] * py);
+						y1 = (int) (memory->samples[0][0] * py);						
 						x2 = 0;
 						y2 = y1;						
 						for (frame = 0; frame < numsamples; ++frame, cpx += px) {
@@ -172,6 +173,12 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 							if (frame == 0 || x1 != x2) {
 								y1 = y2;							
 								y2 = (int) (memory->samples[0][frame] * py);
+								if (y2 > height / 2) {
+									y2 = height / 2;
+								} else
+								if (y2 < -height / 2) {
+									y2 = -height / 2;
+								}
 								psy_ui_drawline(g, x + x1, centery + y1, x + x2,
 									centery + y2);
 							}

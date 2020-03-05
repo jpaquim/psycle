@@ -12,15 +12,15 @@ some plugin and driver apis are written in.
 Structure of the host
 
 audio           machines, patterns, instruments, sequence, player,
-                song import/export, ...			
+                song import/export, library load, ...			
 container       list, hashtable, properties, signals
-dsp             buffer operations, adsr, notetab defines
-detail          global header defines
-driver          mme, mmemidi, directx	
+dsp             buffer operations, adsr, notetab defines, sse2 optimizations
+detail          global header defines, platform tweaks
+driver          mme, mmemidi, directx, wasapi
 file            file/dir routines
 host            graphical psycle front end
 lua             script engine used since psycle 1.10
-ui              wrapped win32 calls
+ui              bridged win32 calls, setup for x/motif (placeholder)
 
 Compiling
 
