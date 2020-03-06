@@ -27,6 +27,7 @@ static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
 static void workspace_initsignals(Workspace*);
 static void workspace_disposesignals(Workspace*);
+static void workspace_makerecentsongs(Workspace*);
 static void workspace_makeconfig(Workspace*);
 static void workspace_makegeneral(Workspace*);
 static void workspace_makenotes(Workspace*);
@@ -94,6 +95,7 @@ static void workspace_onterminaloutput(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
+static void workspace_addrecentsong(Workspace*, const char* path);
 
 void history_init(History* self)
 {
@@ -154,6 +156,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->currview = 0;
 	self->dialbitmappath = 0;
 	history_init(&self->history);
+	workspace_makerecentsongs(self);
 	workspace_makeconfig(self);	
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
@@ -403,6 +406,14 @@ void workspace_onscanprogress(Workspace* self, psy_audio_PluginCatcher* sender, 
 	psy_signal_emit(&self->signal_scanprogress, self, 1, progress);
 }
 
+void workspace_makerecentsongs(Workspace* self)
+{
+	self->recentsongs = psy_properties_create();
+	self->recentfiles = psy_properties_settext(
+		psy_properties_create_section(self->recentsongs, "files"),
+		"Recent Songs");
+}
+
 void workspace_makeconfig(Workspace* self)
 {	
 	workspace_makelang(self);
@@ -416,14 +427,14 @@ void workspace_makeconfig(Workspace* self)
 }
 
 void workspace_makegeneral(Workspace* self)
-{	
+{
 	psy_Properties* p;
 
-	self->config = psy_properties_create();	
+	self->config = psy_properties_create();
 	self->general = psy_properties_create_section(self->config, "general");
 	psy_properties_settext(self->general, "General");
-	p = psy_properties_append_string(self->general, "version", "alpha");	
-	psy_properties_settext(p, "Version");	
+	p = psy_properties_append_string(self->general, "version", "alpha");
+	psy_properties_settext(p, "Version");
 	p->item.hint = PSY_PROPERTY_HINT_HIDE;
 	p = psy_properties_append_bool(self->general, "showaboutatstart", 1);
 	psy_properties_settext(p, "Show About at Startup");
@@ -435,6 +446,9 @@ void workspace_makegeneral(Workspace* self)
 	psy_properties_settext(p, "Show Playlist Editor");
 	p = psy_properties_append_bool(self->general, "showstepsequencer", 1);
 	psy_properties_settext(p, "Show Sequencestepbar");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "saverecentsongs", 1),
+		"Save Recent Songs");
 }
 
 void workspace_makevisual(Workspace* self)
@@ -1253,6 +1267,11 @@ int workspace_showmaximizedatstart(Workspace* self)
 	return psy_properties_bool(self->config, "general.showmaximizedatstart", 1);	
 }
 
+int workspace_saverecentsongs(Workspace* self)
+{
+	return psy_properties_bool(self->general, "saverecentsongs", 1);
+}
+
 int workspace_showplaylisteditor(Workspace* self)
 {	
 	return psy_properties_bool(self->config, "general.showplaylisteditor", 0);
@@ -1364,10 +1383,21 @@ void workspace_loadsong(Workspace* self, const char* path)
 			self->filename = strdup(path);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG);
 			psy_audio_songfile_dispose(&songfile);
-			psy_audio_exclusivelock_leave();	
+			psy_audio_exclusivelock_leave();
+			workspace_addrecentsong(self, path);
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
+	}
+}
+
+void workspace_addrecentsong(Workspace* self, const char* path)
+{
+	if (workspace_saverecentsongs(self) && !psy_properties_find(self->recentfiles, path)) {
+		psy_properties_sethint(
+			psy_properties_append_string(self->recentfiles, path, ""),
+			PSY_PROPERTY_HINT_READONLY);
+		workspace_save_recentsongs(self);
 	}
 }
 
@@ -1463,6 +1493,11 @@ psy_Properties* workspace_pluginlist(Workspace* self)
 	return self->plugincatcher.plugins;
 }
 
+psy_Properties* workspace_recentsongs(Workspace* self)
+{
+	return self->recentsongs;
+}
+
 void workspace_load_configuration(Workspace* self)
 {
 	char path[_MAX_PATH];
@@ -1489,6 +1524,35 @@ void workspace_save_configuration(Workspace* self)
 
 	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
 	propertiesio_save(self->config, path);	
+}
+
+void workspace_load_recentsongs(Workspace* self)
+{
+	char path[_MAX_PATH];
+	psy_Properties* p;
+
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
+	propertiesio_load(self->recentsongs, path, 1);
+	for (p = self->recentfiles->children; p != 0; p = psy_properties_next(p)) {
+		psy_properties_sethint(p, PSY_PROPERTY_HINT_READONLY);
+	}
+}
+
+void workspace_save_recentsongs(Workspace* self)
+{
+	char path[_MAX_PATH];
+
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
+	propertiesio_save(self->recentsongs, path);
+}
+
+void workspace_clearrecentsongs(Workspace* self)
+{
+	char path[_MAX_PATH];
+
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
+	psy_properties_clear(self->recentfiles);
+	propertiesio_save(self->recentsongs, path);
 }
 
 void workspace_setoctave(Workspace* self, int octave)

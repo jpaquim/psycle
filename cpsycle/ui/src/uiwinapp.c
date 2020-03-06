@@ -53,6 +53,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 	self->winproc = ui_winproc;
 	self->comwinproc = ui_com_winproc;
 	self->winid = 20000;
+	self->eventretarget = 0;
 	psy_ui_winapp_registerclasses(self);
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
@@ -462,14 +463,17 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
 					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_settarget(&ev, winapp->eventretarget);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
 				if (ev.bubble != FALSE &&
 					psy_table_at(&winapp->selfmap,
 					(uintptr_t)GetParent(hwnd))) {
+					winapp->eventretarget = imp->component;
 					SendMessage(GetParent(hwnd), message, wParam, lParam);
 				}
+				winapp->eventretarget = 0;
 				return 0;
 			}
 			break;

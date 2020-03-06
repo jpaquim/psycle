@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+struct psy_ui_Component;
+
 typedef struct {
 	int keycode;
 	int keydata;
@@ -34,11 +36,14 @@ typedef struct {
 	int ctrl;
 	bool bubble;
 	bool preventdefault;
+	struct psy_ui_Component* target;
 } psy_ui_MouseEvent;
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent*, int x, int y, int button,
 	int delta, int shift, int ctrl);
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent*);
+struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent*);
+void psy_ui_mouseevent_settarget(psy_ui_MouseEvent*, struct psy_ui_Component* target);
 
 #ifdef __cplusplus
 }

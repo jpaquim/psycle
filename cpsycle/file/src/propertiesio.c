@@ -128,10 +128,13 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 				psy_Properties* p;				
 				psy_Properties* prev = 0;
 				p = psy_properties_findsectionex(self, key, &prev);
-				if (p && p->children) {
+				if (p == self) {
+					curr = self;
+				} else
+				if (p && p->item.typ == PSY_PROPERTY_TYP_SECTION) {
 					curr = p;
 				} else
-				if (allowappend) {										
+				if (allowappend) {									
 					curr = psy_properties_create_section(prev, key);
 				} else {
 					curr = self;
@@ -261,6 +264,7 @@ int propertiesio_loadsection(psy_Properties* self, const char* path,
 						intval = strtol(value, &stopstring, 10);
 						if (errno == ERANGE || strcmp(stopstring, "") != 0) {
 							psy_properties_append_string(curr, key, value);	
+							psy_properties_sethint(curr, PSY_PROPERTY_HINT_READONLY);
 						} else {
 							psy_properties_append_int(curr, key, intval, 0, 0);											
 						}

@@ -35,6 +35,7 @@
 #include "vubar.h"
 #include "cpuview.h"
 #include "midiview.h"
+#include "recentview.h"
 #include "songbar.h"
 #include "helpview.h"
 #include "stepbox.h"
@@ -42,7 +43,8 @@
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_Component top;	
+	psy_ui_Component top;
+	psy_ui_Component topright;
 	psy_ui_Component toprow0;
 	psy_ui_Component toprow1;
 	psy_ui_Component toprow2;
@@ -78,6 +80,7 @@ typedef struct {
 	VuBar vubar;
 	CPUView cpuview;
 	MidiView midiview;
+	RecentView recentview;
 	psy_ui_Component statusbar;
 	psy_ui_Notebook viewtabbars;
 	psy_ui_Notebook viewbars;

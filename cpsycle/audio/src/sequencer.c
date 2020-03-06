@@ -709,16 +709,22 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 	} else
 	if (patternentry_front(patternentry)->note < NOTECOMMANDS_TWEAK ||
 			patternentry_front(patternentry)->note == NOTECOMMANDS_EMPTY) {
-		if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
-			psy_audio_sequencer_notedelay(self, patternentry, offset);
-		} else
-		if (patternentry_front(patternentry)->cmd == RETRIGGER) {
-			psy_audio_sequencer_retrigger(self, patternentry, track, offset);
-		} else
-		if (patternentry_front(patternentry)->cmd == RETR_CONT) {
-			psy_audio_sequencer_retriggercont(self, patternentry, track, offset);
-		} else {
-			psy_audio_sequencer_note(self, patternentry, offset);
+		psy_audio_Machine* machine;
+
+		machine = machines_at(self->machines, patternentry_front(patternentry)->mach);
+		// Does this machine really exist and is not muted?
+		if (machine && !psy_audio_machine_muted(machine)) {
+			if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
+				psy_audio_sequencer_notedelay(self, patternentry, offset);
+			} else
+			if (patternentry_front(patternentry)->cmd == RETRIGGER) {
+				psy_audio_sequencer_retrigger(self, patternentry, track, offset);
+			} else
+			if (patternentry_front(patternentry)->cmd == RETR_CONT) {
+				psy_audio_sequencer_retriggercont(self, patternentry, track, offset);
+			} else {
+				psy_audio_sequencer_note(self, patternentry, offset);
+			}
 		}
 	} else
 	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAK) {
@@ -772,7 +778,7 @@ void psy_audio_sequencer_retriggercont(psy_audio_Sequencer* self,
 
 	entry = patternentry_clone(patternentry);
 	entry->bpm = self->bpm;
-	entry->delta = offset + track->state.retriggeroffset - self->position;
+	entry->delta = offset + track->state.retriggeroffset;
 	psy_list_append(&self->delayedevents, entry);
 	psy_audio_makeretriggercontinueevents(self, track, entry, offset);
 }
@@ -939,12 +945,19 @@ void psy_audio_makeretriggercontinueevents(psy_audio_Sequencer* self,
 	psy_dsp_beat_t offset)
 {
 	psy_dsp_beat_t retriggerstep;
-	psy_dsp_beat_t retriggeroffset;		
+	psy_dsp_beat_t retriggeroffset;
+	
+	if ((patternentry_front(entry)->parameter & 0xf0) != 0) {
+		uint8_t retriggerrate; // x / 16 = row duration per trigger
 
-	// if (patternentry_front(entry)->parameter == 0) {		
-	// }
-	// use current
-	retriggerstep = track->state.retriggerstep;	
+		retriggerrate = patternentry_front(entry)->parameter & 0xf0;
+		// convert retriggerrate to beat unit
+		retriggerstep = retriggerrate *
+			(psy_audio_sequencer_currbeatsperline(self) / 256.f);
+	} else {
+		// use current retriggerrate	
+		retriggerstep = track->state.retriggerstep;		
+	}
 	retriggeroffset = track->state.retriggeroffset + retriggerstep;
 	while (retriggeroffset < psy_audio_sequencer_currbeatsperline(self)) {
 		psy_audio_PatternEntry* retriggerentry;
@@ -952,7 +965,7 @@ void psy_audio_makeretriggercontinueevents(psy_audio_Sequencer* self,
 		retriggerentry = patternentry_clone(entry);
 		patternentry_front(retriggerentry)->cmd = 0;
 		patternentry_front(retriggerentry)->parameter = 0;
-		retriggerentry->delta = offset + entry->delta + retriggeroffset;
+		retriggerentry->delta = entry->delta + retriggeroffset;
 		psy_list_append(&self->delayedevents, retriggerentry);		
 		retriggeroffset += retriggerstep;
 	}
