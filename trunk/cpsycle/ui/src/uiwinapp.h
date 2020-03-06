@@ -24,6 +24,8 @@ extern "C" {
 typedef LRESULT (CALLBACK *psy_ui_fp_winproc)(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
 
+struct psy_ui_Component;
+
 typedef struct {
 	int reserved;
 	HINSTANCE instance;
@@ -34,7 +36,8 @@ typedef struct {
 	psy_Table selfmap;
 	psy_Table winidmap;
 	uintptr_t winid;
-	HBRUSH defaultbackgroundbrush;	
+	HBRUSH defaultbackgroundbrush;
+	struct psy_ui_Component* eventretarget;
 } psy_ui_WinApp;
 
 void psy_ui_winapp_init(psy_ui_WinApp*, HINSTANCE instance);

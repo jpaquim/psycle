@@ -32,9 +32,20 @@ void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, int x, int y, int button,
 	self->shift = shift;
 	self->ctrl = ctrl;
 	self->preventdefault = 0;
+	self->target = 0;
 }
 
 void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent* self)
 {
 	self->bubble = 0;
+}
+
+struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent* self)
+{
+	return self->target;
+}
+
+void psy_ui_mouseevent_settarget(psy_ui_MouseEvent* self, struct psy_ui_Component* target)
+{
+	self->target = target;
 }

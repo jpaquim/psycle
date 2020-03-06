@@ -12,6 +12,7 @@
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label header;
+	psy_ui_Button recentbutton;
 	psy_ui_Button newbutton;
 	psy_ui_Button loadbutton;
 	psy_ui_Button savebutton;

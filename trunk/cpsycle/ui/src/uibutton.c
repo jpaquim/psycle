@@ -246,6 +246,7 @@ void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 {
 	self->icon = icon;
+	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
 void psy_ui_button_highlight(psy_ui_Button* self)

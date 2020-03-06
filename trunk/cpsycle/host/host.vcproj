@@ -1027,6 +1027,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\src\recentview.c"
+				>
+			</File>
+			<File
 				RelativePath="src\renderview.c"
 				>
 				<FileConfiguration
@@ -1875,6 +1879,10 @@
 			</File>
 			<File
 				RelativePath="src\plugineditor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\recentview.h"
 				>
 			</File>
 			<File

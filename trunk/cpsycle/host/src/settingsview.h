@@ -19,6 +19,7 @@ typedef struct {
 	psy_ui_Graphics* g;
 	int lastlevel;
 	psy_Properties* selected;
+	int keyselected;
 	psy_Properties* search;
 	psy_ui_Rectangle selrect;	
 	int button;
@@ -37,6 +38,7 @@ typedef struct {
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
+	psy_Signal signal_selected;
 	TabBar tabbar;	
 } SettingsView;
 

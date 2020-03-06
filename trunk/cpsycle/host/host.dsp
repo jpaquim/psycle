@@ -254,6 +254,10 @@ SOURCE=.\src\psycle.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\recentview.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\renderview.c
 # End Source File
 # Begin Source File
@@ -543,6 +547,10 @@ SOURCE=.\src\playposbar.h
 # Begin Source File
 
 SOURCE=.\src\plugineditor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\recentview.h
 # End Source File
 # Begin Source File
 

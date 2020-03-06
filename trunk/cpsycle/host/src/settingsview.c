@@ -59,6 +59,8 @@ static void settingsview_addident(SettingsView*);
 static void settingsview_removeident(SettingsView*);
 static int settingsview_intersectsvalue(SettingsView*, psy_Properties*,
 	int column);
+static int settingsview_intersectskey(SettingsView*, psy_Properties*,
+	int column);
 static void settingsview_appendtabbarsections(SettingsView*);
 static void settingsview_ontabbarchange(SettingsView*, psy_ui_Component* sender,
 	int tabindex);
@@ -90,6 +92,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_size, self,
 		settingsview_onsize);
 	self->selected = 0;
+	self->keyselected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
 	self->button = 0;
@@ -100,6 +103,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	psy_ui_component_hide(&self->inputdefiner.component);		
 	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_selected);
 	tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
@@ -143,6 +147,7 @@ void settingsview_selectsection(SettingsView* self, const char* key)
 void settingsview_ondestroy(SettingsView* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_selected);
 }
 
 void settingsview_ondraw(SettingsView* self, psy_ui_Component* sender,
@@ -471,6 +476,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 		psy_ui_component_hide(&self->inputdefiner.component);
 	}	
 	self->selected = 0;
+	self->keyselected = 1;
 	self->mx = ev->x;
 	self->my = ev->y;
 	self->choiceproperty = 0;
@@ -540,6 +546,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 			psy_signal_emit(&self->signal_changed, self, 1,
 				self->selected);
 		}
+		psy_signal_emit(&self->signal_selected, self, 1, self->selected);
 	}
 	psy_ui_component_invalidate(&self->client);
 }
@@ -565,6 +572,11 @@ int settingsview_onpropertieshittestenum(SettingsView* self,
 		self->choicecount = 0;					
 	}	
 	settingsview_countblocklines(self, property);
+	if (settingsview_intersectskey(self, property, 0)) {
+		self->selected = property;
+		self->keyselected = 1;
+		return 0;
+	}
 	if (settingsview_intersectsvalue(self, property, 1)) {
 		self->selected = property;		
 		return 0;
@@ -680,6 +692,19 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 	return rv;
 }
 
+int settingsview_intersectskey(SettingsView* self, psy_Properties* property, int column)
+{
+	int rv = 0;
+	psy_ui_Rectangle r;
+
+	self->button = 0;
+	psy_ui_setrectangle(&r, self->columnwidth * column,
+		self->cpy + self->dy, self->columnwidth, self->lineheight * self->numblocklines);
+	self->selrect = r;
+	rv = settingsview_intersects(&r, self->mx, self->my);
+	return rv;
+}
+
 void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
@@ -701,8 +726,10 @@ void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sende
 			}
 		} else
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_STRING) {
-			psy_ui_edit_settext(&self->edit, self->selected->item.value.s);
-			edit = &self->edit.component;									
+			if (psy_properties_hint(self->selected) != PSY_PROPERTY_HINT_READONLY) {
+				psy_ui_edit_settext(&self->edit, self->selected->item.value.s);
+				edit = &self->edit.component;
+			}
 		}		
 		if (edit) {
 			psy_ui_component_setposition(edit,
