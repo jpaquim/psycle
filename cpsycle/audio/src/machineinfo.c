@@ -38,7 +38,7 @@ void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* o
 	self->shellidx = other->shellidx;
 }
 
-void machineinfo_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* other)
+void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* other)
 {
 	machineinfo_dispose(self);
 	self->Author = strdup(other->Author ? other->Author : "");

@@ -11,6 +11,7 @@ static void psy_signal_notify(psy_Signal*, void* sender);
 static void psy_signal_notify1(psy_Signal*, void* sender, void* param1);
 static void psy_signal_notify2(psy_Signal*, void* sender, void* param1, void* param2);
 static void psy_signal_notify3(psy_Signal*, void* sender, void* param1, void* param2, void* param3);
+static void psy_signal_notify4(psy_Signal*, void* sender, void* param1, void* param2, void* param3, void* param4);
 static void psy_signal_notify_int(psy_Signal*, void* sender, intptr_t param);
 
 typedef void (*signalcallback0)(void*, void*);
@@ -19,6 +20,7 @@ typedef void (*signalcallback_float)(void*, void*, float);
 typedef void (*signalcallback1)(void*, void*, void*);
 typedef void (*signalcallback2)(void*, void*, void*, void*);
 typedef void (*signalcallback3)(void*, void*, void*, void*, void*);
+typedef void (*signalcallback4)(void*, void*, void*, void*, void*, void*);
 
 void psy_signal_init(psy_Signal* self)
 {
@@ -180,6 +182,13 @@ void psy_signal_emit(psy_Signal* self, void* context, int num, ...)
 		void* arg2 = va_arg(ap, void*);
 		void* arg3 = va_arg(ap, void*);
 		psy_signal_notify3(self, context, arg1, arg2, arg3);
+	} else
+	if (num == 4) {
+		void* arg1 = va_arg(ap, void*);
+		void* arg2 = va_arg(ap, void*);
+		void* arg3 = va_arg(ap, void*);
+		void* arg4 = va_arg(ap, void*);
+		psy_signal_notify4(self, context, arg1, arg2, arg3, arg4);
 	}
 	va_end(ap);
 }
@@ -260,6 +269,21 @@ void psy_signal_notify3(psy_Signal* self, void* sender, void* param1,
 			psy_Slot* slot = (psy_Slot*) ptr->entry;
 			if (!slot->prevented) {
 				((signalcallback3)slot->fp)(slot->context, sender, param1, param2, param3);
+			}
+			ptr = ptr->next;
+		}
+	}
+}
+
+void psy_signal_notify4(psy_Signal* self, void* sender, void* param1,
+	void* param2, void* param3, void* param4)
+{
+	if (self->slots) {
+		psy_List* ptr = self->slots;
+		while (ptr) {
+			psy_Slot* slot = (psy_Slot*)ptr->entry;
+			if (!slot->prevented) {
+				((signalcallback4)slot->fp)(slot->context, sender, param1, param2, param3, param4);
 			}
 			ptr = ptr->next;
 		}

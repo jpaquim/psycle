@@ -781,8 +781,8 @@ void paramview_computepositions(ParamView* self)
 			} else {
 				position->bottom = cpy + height;
 			}
-			if (self->cpmax.height < cpy + height) {
-				self->cpmax.height = cpy + height;
+			if (self->cpmax.height < (int) (cpy + height)) {
+				self->cpmax.height = (int) (cpy + height);
 			}
 			if (paramtype != MPF_IGNORE && paramtype != MPF_SLIDER &&
 					paramtype != MPF_SLIDERCHECK) {

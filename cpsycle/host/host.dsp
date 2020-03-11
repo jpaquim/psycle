@@ -214,6 +214,10 @@ SOURCE=.\src\octavebar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\oscilloscope.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\paramlistbox.c
 # End Source File
 # Begin Source File
@@ -314,11 +318,19 @@ SOURCE=.\src\songtrackbar.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\spectrumanalyzer.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\stepbox.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\stepsequencerview.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\stereophase.c
 # End Source File
 # Begin Source File
 
@@ -514,6 +526,10 @@ SOURCE=.\src\octavebar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\oscilloscope.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\paramlistbox.h
 # End Source File
 # Begin Source File
@@ -614,11 +630,19 @@ SOURCE=.\src\songtrackbar.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\spectrumanalyzer.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\stepbox.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\stepsequencerview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\stereophase.h
 # End Source File
 # Begin Source File
 

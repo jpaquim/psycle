@@ -9,6 +9,9 @@
 #include <uislider.h>
 #include "tabbar.h"
 #include "vuscope.h"
+#include "oscilloscope.h"
+#include "spectrumanalyzer.h"
+#include "stereophase.h"
 #include "workspace.h"
 
 typedef struct {
@@ -20,6 +23,9 @@ typedef struct {
 	psy_ui_Button dbvol;
 	psy_ui_Button percvol;
 	VuScope vuscope;
+	Oscilloscope oscilloscope;
+	SpectrumAnalyzer spectrumanalyzer;
+	StereoPhase stereophase;
 	ChannelMappingView channelmappingview;
 	psy_ui_Component bottomgroup;
 	psy_ui_Button addeffect;

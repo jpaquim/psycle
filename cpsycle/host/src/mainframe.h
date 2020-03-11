@@ -83,7 +83,7 @@ typedef struct {
 	RecentView recentview;
 	psy_ui_Component statusbar;
 	psy_ui_Notebook viewtabbars;
-	psy_ui_Notebook viewbars;
+	psy_ui_Notebook viewstatusbars;
 	ZoomBox zoombox;
 	psy_ui_Component left;
 	psy_ui_Component* activeview;

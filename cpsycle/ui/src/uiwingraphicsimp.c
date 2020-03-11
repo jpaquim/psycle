@@ -41,6 +41,10 @@ static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font)
 static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_Point pt);
 static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p);
+static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
+	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, unsigned int width);
+static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self);
 
 // VTable init
 static psy_ui_GraphicsImpVTable win_imp_vtable;
@@ -50,25 +54,28 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 {
 	if (!win_imp_vtable_initialized) {
 		win_imp_vtable = *self->imp.vtable;
-		win_imp_vtable.dev_dispose = (psy_ui_g_imp_fp_dispose)psy_ui_win_g_imp_dispose;
-		win_imp_vtable.dev_textout = (psy_ui_g_imp_fp_textout)psy_ui_win_g_imp_textout;
-		win_imp_vtable.dev_textoutrectangle = (psy_ui_g_imp_fp_textoutrectangle)psy_ui_win_g_imp_textoutrectangle;
-		win_imp_vtable.dev_drawrectangle = (psy_ui_g_imp_fp_drawrectangle)psy_ui_win_g_imp_drawrectangle;
-		win_imp_vtable.dev_drawroundrectangle = (psy_ui_g_imp_fp_drawroundrectangle)psy_ui_win_g_imp_drawroundrectangle;
-		win_imp_vtable.dev_textsize = (psy_ui_g_imp_fp_textsize)psy_ui_win_g_imp_textsize;
-		win_imp_vtable.dev_drawsolidrectangle = (psy_ui_g_imp_fp_drawsolidrectangle)psy_ui_win_g_imp_drawsolidrectangle;
-		win_imp_vtable.dev_drawsolidroundrectangle = (psy_ui_g_imp_fp_drawsolidroundrectangle)psy_ui_win_g_imp_drawsolidroundrectangle;
-		win_imp_vtable.dev_drawsolidpolygon = (psy_ui_g_imp_fp_drawsolidpolygon)psy_ui_win_g_imp_drawsolidpolygon;
-		win_imp_vtable.dev_drawline = (psy_ui_g_imp_fp_drawline)psy_ui_win_g_imp_drawline;
-		win_imp_vtable.dev_drawfullbitmap = (psy_ui_g_imp_fp_drawfullbitmap)psy_ui_win_g_imp_drawfullbitmap;
-		win_imp_vtable.dev_drawbitmap = (psy_ui_g_imp_fp_drawbitmap)psy_ui_win_g_imp_drawbitmap;
-		win_imp_vtable.dev_setbackgroundcolor = (psy_ui_g_imp_fp_setbackgroundcolor)psy_ui_win_g_imp_setbackgroundcolor;
-		win_imp_vtable.dev_setbackgroundmode = (psy_ui_g_imp_fp_setbackgroundmode)psy_ui_win_g_imp_setbackgroundmode;
-		win_imp_vtable.dev_settextcolor = (psy_ui_g_imp_fp_settextcolor)psy_ui_win_g_imp_settextcolor;
-		win_imp_vtable.dev_setcolor = (psy_ui_g_imp_fp_setcolor)psy_ui_win_g_imp_setcolor;
-		win_imp_vtable.dev_setfont = (psy_ui_g_imp_fp_setfont)psy_ui_win_g_imp_setfont;
-		win_imp_vtable.dev_moveto = (psy_ui_g_imp_fp_moveto)psy_ui_win_g_imp_moveto;
-		win_imp_vtable.dev_devcurveto = (psy_ui_g_imp_fp_devcurveto)psy_ui_win_g_imp_devcurveto;
+		win_imp_vtable.dev_dispose = (psy_ui_fp_graphicsimp_dev_dispose) psy_ui_win_g_imp_dispose;
+		win_imp_vtable.dev_textout = (psy_ui_fp_graphicsimp_dev_textout) psy_ui_win_g_imp_textout;
+		win_imp_vtable.dev_textoutrectangle = (psy_ui_fp_graphicsimp_dev_textoutrectangle) psy_ui_win_g_imp_textoutrectangle;
+		win_imp_vtable.dev_drawrectangle = (psy_ui_fp_graphicsimp_dev_drawrectangle) psy_ui_win_g_imp_drawrectangle;
+		win_imp_vtable.dev_drawroundrectangle = (psy_ui_fp_graphicsimp_dev_drawroundrectangle) psy_ui_win_g_imp_drawroundrectangle;
+		win_imp_vtable.dev_textsize = (psy_ui_fp_graphicsimp_dev_textsize) psy_ui_win_g_imp_textsize;
+		win_imp_vtable.dev_drawsolidrectangle = (psy_ui_fp_graphicsimp_dev_drawsolidrectangle) psy_ui_win_g_imp_drawsolidrectangle;
+		win_imp_vtable.dev_drawsolidroundrectangle = (psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle) psy_ui_win_g_imp_drawsolidroundrectangle;
+		win_imp_vtable.dev_drawsolidpolygon = (psy_ui_fp_graphicsimp_dev_drawsolidpolygon) psy_ui_win_g_imp_drawsolidpolygon;
+		win_imp_vtable.dev_drawline = (psy_ui_fp_graphicsimp_dev_drawline) psy_ui_win_g_imp_drawline;
+		win_imp_vtable.dev_drawfullbitmap = (psy_ui_fp_graphicsimp_dev_drawfullbitmap) psy_ui_win_g_imp_drawfullbitmap;
+		win_imp_vtable.dev_drawbitmap = (psy_ui_fp_graphicsimp_dev_drawbitmap) psy_ui_win_g_imp_drawbitmap;
+		win_imp_vtable.dev_setbackgroundcolor = (psy_ui_fp_graphicsimp_dev_setbackgroundcolor) psy_ui_win_g_imp_setbackgroundcolor;
+		win_imp_vtable.dev_setbackgroundmode = (psy_ui_fp_graphicsimp_dev_setbackgroundmode) psy_ui_win_g_imp_setbackgroundmode;
+		win_imp_vtable.dev_settextcolor = (psy_ui_fp_graphicsimp_dev_settextcolor) psy_ui_win_g_imp_settextcolor;
+		win_imp_vtable.dev_setcolor = (psy_ui_fp_graphicsimp_dev_setcolor) psy_ui_win_g_imp_setcolor;
+		win_imp_vtable.dev_setfont = (psy_ui_fp_graphicsimp_dev_setfont) psy_ui_win_g_imp_setfont;
+		win_imp_vtable.dev_moveto = (psy_ui_fp_graphicsimp_dev_moveto) psy_ui_win_g_imp_moveto;
+		win_imp_vtable.dev_curveto = (psy_ui_fp_graphicsimp_dev_curveto) psy_ui_win_g_imp_devcurveto;
+		win_imp_vtable.dev_drawarc = (psy_ui_fp_graphicsimp_dev_drawarc) psy_ui_win_g_imp_devdrawarc;
+		win_imp_vtable.dev_setlinewidth = (psy_ui_fp_graphicsimp_dev_setlinewidth) psy_ui_win_g_devsetlinewidth;
+		win_imp_vtable.dev_linewidth = (psy_ui_fp_graphicsimp_dev_linewidth) psy_ui_win_g_devlinewidth;
 		win_imp_vtable_initialized = 1;
 	}
 }
@@ -83,7 +90,8 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
-	self->hFontPrev = SelectObject(self->hdc, ((psy_ui_win_FontImp*)app.defaults.style_common.font.imp)->hfont);
+	self->hFontPrev = SelectObject(self->hdc,
+		((psy_ui_win_FontImp*) app.defaults.style_common.font.imp)->hfont);
 }
 
 // win32 implementation method for psy_ui_Graphics
@@ -96,7 +104,8 @@ void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
 	}
 }
 
-void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, int x, int y, const char* str, size_t len)
+void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, int x, int y,
+	const char* str, size_t len)
 {
 	TextOut(self->hdc, x, y, str, (int)len);
 }
@@ -245,9 +254,12 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 
 void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
 {
+	LOGPEN currpen;
 	HPEN pen;
 
-	pen = CreatePen(PS_SOLID, 1, color);
+	GetObject(self->pen, sizeof(LOGPEN), &currpen);
+	currpen.lopnColor = color;
+	pen = CreatePenIndirect(&currpen);
 	SelectObject(self->hdc, pen);
 	if (self->pen) {
 		DeleteObject(self->pen);
@@ -305,6 +317,35 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_Point cont
 	pts[2].x = p.x;
 	pts[2].y = p.y;
 	PolyBezierTo(self->hdc, pts, 3);
+}
+
+void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
+	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+	Arc(self->hdc, x1, y1, x2, y2, x3, y3, x4, y4);
+}
+
+void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, unsigned int width)
+{
+	LOGPEN currpen;
+	HPEN pen;
+
+	GetObject(self->pen, sizeof(LOGPEN), &currpen);
+	currpen.lopnWidth.x = width;	
+	pen = CreatePenIndirect(&currpen);
+	SelectObject(self->hdc, pen);
+	if (self->pen) {
+		DeleteObject(self->pen);
+	}
+	self->pen = pen;
+}
+
+unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self)
+{
+	LOGPEN currpen;
+
+	GetObject(self->pen, sizeof(LOGPEN), &currpen);
+	return currpen.lopnWidth.x;
 }
 
 #endif

@@ -9,6 +9,8 @@ extern "C" {
 #endif
 
 #define psy_dsp_PI 3.14159265358979323846
+#define psy_dsp_PI_F 3.14159265358979323846f
+#define psy_dsp_e 2.71828182845904523536028747135266249775724709369995
 
 typedef float psy_dsp_amp_t;
 typedef float psy_dsp_beat_t;

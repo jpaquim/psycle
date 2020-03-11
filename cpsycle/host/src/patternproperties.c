@@ -44,7 +44,7 @@ void patternproperties_setpattern(PatternProperties* self,
 	char buffer[20];
 	self->pattern = pattern;
 	if (self->pattern) {
-		psy_ui_edit_settext(&self->nameedit, pattern->label);
+		psy_ui_edit_settext(&self->nameedit, pattern_name(pattern));
 		psy_snprintf(buffer, 20, "%.4f", self->pattern->length);		
 	} else {
 		psy_ui_edit_settext(&self->nameedit, "");
@@ -57,7 +57,7 @@ void patternproperties_onapply(PatternProperties* self,
 	psy_ui_Component* sender)
 {
 	if (self->pattern) {
-		pattern_setlabel(self->pattern, psy_ui_edit_text(&self->nameedit));
+		pattern_setname(self->pattern, psy_ui_edit_text(&self->nameedit));
 		pattern_setlength(self->pattern,
 			(psy_dsp_beat_t)atof(psy_ui_edit_text(&self->lengthedit)));
 	}

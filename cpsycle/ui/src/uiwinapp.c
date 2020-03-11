@@ -20,6 +20,7 @@ int iDeltaPerLine = 120;
 extern psy_Table menumap;
 extern psy_ui_App app;
 
+static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
@@ -144,10 +145,11 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 						imp->component, 0);
 				}								
 			break;
-			case WM_TIMER:				
-				if (imp->component && imp->component->signal_timer.slots) {
+			case WM_TIMER:								
+				imp->component->vtable->ontimer(imp->component, (int) wParam);
+				if (imp->component->signal_timer.slots) {
 					psy_signal_emit(&imp->component->signal_timer, imp->component, 1,
-						(int) wParam);
+						(int)wParam);
 				}
 			break;
 			case WM_KEYDOWN:								
@@ -220,12 +222,13 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					return 0 ;
 				}			
 			break;
-			case WM_TIMER:			
+			case WM_TIMER:				
+				imp->component->vtable->ontimer(imp->component, (int) wParam);
 				if (imp->component->signal_timer.slots) {
 					psy_signal_emit(&imp->component->signal_timer, imp->component, 1,
-						(int) wParam);				
-					return 0 ;
+						(int)wParam);
 				}
+				return 0;
 			break;		
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLORSTATIC:
@@ -378,11 +381,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onkeydown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_keydown, imp->component, 1,
 					&ev);
-				if (ev.bubble != FALSE &&
-						psy_table_at(&winapp->selfmap,
-						(uintptr_t) GetParent (hwnd))) {
-					SendMessage(GetParent (hwnd), message, wParam, lParam);
-				}				
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}							
 				return 0;
 			}
 			break;
@@ -396,11 +397,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onkeyup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_keyup, imp->component, 1,
 					&ev);
-				if (ev.bubble != FALSE &&
-						psy_table_at(&winapp->selfmap,
-							(uintptr_t) GetParent (hwnd))) {
-					SendMessage(GetParent (hwnd), message, wParam, lParam);
-				}				
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -414,6 +413,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -427,6 +429,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -440,6 +445,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0 ;
 			}
 			break;
@@ -453,6 +461,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -467,13 +478,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
-				if (ev.bubble != FALSE &&
-					psy_table_at(&winapp->selfmap,
-					(uintptr_t)GetParent(hwnd))) {
-					winapp->eventretarget = imp->component;
-					SendMessage(GetParent(hwnd), message, wParam, lParam);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
 				}
-				winapp->eventretarget = 0;
 				return 0;
 			}
 			break;
@@ -487,6 +494,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -500,11 +510,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);				
-				if (ev.bubble != FALSE &&
-						psy_table_at(&winapp->selfmap,
-						(uintptr_t) GetParent (hwnd))) {
-					SendMessage (GetParent (hwnd), message, wParam, lParam) ;               
-				}				
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -518,6 +526,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0 ;
 			}
 			break;		
@@ -531,6 +542,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
+				if (ev.bubble != FALSE) {
+					sendmessagetoparent(imp, message, wParam, lParam);
+				}
 				return 0;
 			}
 			break;
@@ -664,6 +678,19 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 		}	
 	}
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
+}
+
+void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
+{
+	psy_ui_WinApp* winapp;
+
+	winapp = (psy_ui_WinApp*)app.platform;	
+	if (psy_table_at(&winapp->selfmap,
+			(uintptr_t)GetParent(imp->hwnd))) {
+		winapp->eventretarget = imp->component;
+		SendMessage(GetParent(imp->hwnd), message, wparam, lparam);
+	}
+	winapp->eventretarget = 0;
 }
 
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)

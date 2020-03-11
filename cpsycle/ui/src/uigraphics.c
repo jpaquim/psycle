@@ -4,8 +4,8 @@
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
 
-#include "uiapp.h"
 #include "uigraphics.h"
+#include "uiapp.h"
 #include "uiimpfactory.h"
 #include <stdlib.h>
 
@@ -36,8 +36,12 @@ static void settextcolor(psy_ui_Graphics*, unsigned int color);
 static void setcolor(psy_ui_Graphics*, unsigned int color);
 static void setfont(psy_ui_Graphics*, psy_ui_Font* font);
 static void moveto(psy_ui_Graphics*, psy_ui_Point point);
-static void devcurveto(psy_ui_Graphics*, psy_ui_Point control_p1,
+static void curveto(psy_ui_Graphics*, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p);
+static void drawarc(psy_ui_Graphics*,
+	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
+static void setlinewidth(psy_ui_Graphics*, unsigned int width);
+static unsigned int linewidth(psy_ui_Graphics*);
 
 // VTable init
 static psy_ui_GraphicsVTable vtable;
@@ -64,7 +68,10 @@ static void vtable_init(void)
 		vtable.setcolor = setcolor;
 		vtable.setfont = setfont;
 		vtable.moveto = moveto;
-		vtable.devcurveto = devcurveto;
+		vtable.curveto = curveto;
+		vtable.drawarc = drawarc;
+		vtable.setlinewidth = setlinewidth;
+		vtable.linewidth = linewidth;
 		vtable_initialized = 1;
 	}
 }
@@ -171,45 +178,64 @@ static void moveto(psy_ui_Graphics* self, psy_ui_Point point)
 	self->imp->vtable->dev_moveto(self->imp, point);
 }
 
-static void devcurveto(psy_ui_Graphics* self, psy_ui_Point control_p1,
+static void curveto(psy_ui_Graphics* self, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p)
 {
-	self->imp->vtable->dev_devcurveto(self->imp, control_p1, control_p2, p);
+	self->imp->vtable->dev_curveto(self->imp, control_p1, control_p2, p);
+}
+
+static void drawarc(psy_ui_Graphics* self,
+	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+{
+	self->imp->vtable->dev_drawarc(self->imp, x1, y1, x2, y2, x3, y3, x4, y4);
+}
+
+static void setlinewidth(psy_ui_Graphics* self, unsigned int width)
+{
+	self->imp->vtable->dev_setlinewidth(self->imp, width);
+}
+
+static unsigned int linewidth(psy_ui_Graphics* self)
+{
+	return self->imp->vtable->dev_linewidth(self->imp);
 }
 
 // psy_ui_GraphicsImp
-
-static void psy_ui_imp_dispose(psy_ui_GraphicsImp* self) { }
-static void psy_ui_imp_textout(psy_ui_GraphicsImp* self, int x, int y,  const char* text, size_t len) { }
-static void psy_ui_imp_textoutrectangle(psy_ui_GraphicsImp* self, int x, int y, unsigned int options,
+static void dev_dispose(psy_ui_GraphicsImp* self) { }
+static void dev_textout(psy_ui_GraphicsImp* self, int x, int y,  const char* text, size_t len) { }
+static void dev_textoutrectangle(psy_ui_GraphicsImp* self, int x, int y, unsigned int options,
 	psy_ui_Rectangle r, const char* text, size_t len){ }
-static void psy_ui_imp_drawrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r) { }
-static void psy_ui_imp_drawroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
+static void dev_drawrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r) { }
+static void dev_drawroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize) { }
-static psy_ui_Size psy_ui_imp_textsize(psy_ui_GraphicsImp* self, const char* text)
+static psy_ui_Size dev_textsize(psy_ui_GraphicsImp* self, const char* text)
 {
 	psy_ui_Size rv = {0, 0};
 
 	return rv;
 }
-static void psy_ui_imp_drawsolidrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
+static void dev_drawsolidrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
 	unsigned int color) { }
-static void psy_ui_imp_drawsolidroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
+static void dev_drawsolidroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color) { }
-static void psy_ui_imp_drawsolidpolygon(psy_ui_GraphicsImp* self, psy_ui_Point* pt,
+static void dev_drawsolidpolygon(psy_ui_GraphicsImp* self, psy_ui_Point* pt,
 	unsigned int numpoints, unsigned int inner, unsigned int outter) { }
-static void psy_ui_imp_drawline(psy_ui_GraphicsImp* self, int x1, int y1, int x2, int y2) { }
-static void psy_ui_imp_drawfullbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y) { }
-static void psy_ui_imp_drawbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y, int width,
+static void dev_drawline(psy_ui_GraphicsImp* self, int x1, int y1, int x2, int y2) { }
+static void dev_drawfullbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y) { }
+static void dev_drawbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y, int width,
 	int height, int xsrc, int ysrc) { }
-static void psy_ui_imp_setbackgroundcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
-static void psy_ui_imp_setbackgroundmode(psy_ui_GraphicsImp* self, unsigned int mode) { }
-static void psy_ui_imp_settextcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
-static void psy_ui_imp_setcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
-static void psy_ui_imp_setfont(psy_ui_GraphicsImp* self, psy_ui_Font* font) { }
-static void psy_ui_imp_moveto(psy_ui_GraphicsImp* self, psy_ui_Point pt) { }
-static void psy_ui_imp_devcurveto(psy_ui_GraphicsImp* self, psy_ui_Point control_p1,
+static void dev_setbackgroundcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
+static void dev_setbackgroundmode(psy_ui_GraphicsImp* self, unsigned int mode) { }
+static void dev_settextcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
+static void dev_setcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
+static void dev_setfont(psy_ui_GraphicsImp* self, psy_ui_Font* font) { }
+static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_Point pt) { }
+static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_Point control_p1,
 	psy_ui_Point control_p2, psy_ui_Point p) { }
+static void dev_drawarc(psy_ui_GraphicsImp* self,
+	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) { }
+static void dev_setlinewidth(psy_ui_GraphicsImp* self, unsigned int width) { }
+static unsigned int dev_linewidth(psy_ui_GraphicsImp* self) { return 1; }
 
 static psy_ui_GraphicsImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
@@ -217,25 +243,28 @@ static int imp_vtable_initialized = 0;
 static void imp_vtable_init(void)
 {
 	if (!imp_vtable_initialized) {
-		imp_vtable.dev_dispose = psy_ui_imp_dispose;
-		imp_vtable.dev_textout = psy_ui_imp_textout;
-		imp_vtable.dev_textoutrectangle = psy_ui_imp_textoutrectangle;
-		imp_vtable.dev_drawrectangle = psy_ui_imp_drawrectangle;
-		imp_vtable.dev_drawroundrectangle = psy_ui_imp_drawroundrectangle;
-		imp_vtable.dev_textsize = psy_ui_imp_textsize;
-		imp_vtable.dev_drawsolidrectangle = psy_ui_imp_drawsolidrectangle;
-		imp_vtable.dev_drawsolidroundrectangle = psy_ui_imp_drawsolidroundrectangle;
-		imp_vtable.dev_drawsolidpolygon = psy_ui_imp_drawsolidpolygon;
-		imp_vtable.dev_drawline = psy_ui_imp_drawline;		
-		imp_vtable.dev_drawfullbitmap = psy_ui_imp_drawfullbitmap;
-		imp_vtable.dev_drawbitmap = psy_ui_imp_drawbitmap;
-		imp_vtable.dev_setbackgroundcolor = psy_ui_imp_setbackgroundcolor;
-		imp_vtable.dev_setbackgroundmode = psy_ui_imp_setbackgroundmode;
-		imp_vtable.dev_settextcolor = psy_ui_imp_settextcolor;
-		imp_vtable.dev_setcolor = psy_ui_imp_setcolor;
-		imp_vtable.dev_setfont = psy_ui_imp_setfont;
-		imp_vtable.dev_moveto = psy_ui_imp_moveto;
-		imp_vtable.dev_devcurveto = psy_ui_imp_devcurveto;
+		imp_vtable.dev_dispose = dev_dispose;
+		imp_vtable.dev_textout = dev_textout;
+		imp_vtable.dev_textoutrectangle = dev_textoutrectangle;
+		imp_vtable.dev_drawrectangle = dev_drawrectangle;
+		imp_vtable.dev_drawroundrectangle = dev_drawroundrectangle;
+		imp_vtable.dev_textsize = dev_textsize;
+		imp_vtable.dev_drawsolidrectangle = dev_drawsolidrectangle;
+		imp_vtable.dev_drawsolidroundrectangle = dev_drawsolidroundrectangle;
+		imp_vtable.dev_drawsolidpolygon = dev_drawsolidpolygon;
+		imp_vtable.dev_drawline = dev_drawline;		
+		imp_vtable.dev_drawfullbitmap = dev_drawfullbitmap;
+		imp_vtable.dev_drawbitmap = dev_drawbitmap;
+		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
+		imp_vtable.dev_setbackgroundmode = dev_setbackgroundmode;
+		imp_vtable.dev_settextcolor = dev_settextcolor;
+		imp_vtable.dev_setcolor = dev_setcolor;
+		imp_vtable.dev_setfont = dev_setfont;
+		imp_vtable.dev_moveto = dev_moveto;
+		imp_vtable.dev_curveto = dev_curveto;
+		imp_vtable.dev_drawarc = dev_drawarc;
+		imp_vtable.dev_setlinewidth = dev_setlinewidth;
+		imp_vtable.dev_linewidth = dev_linewidth;
 		imp_vtable_initialized = 1;
 	}
 }

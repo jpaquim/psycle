@@ -24,6 +24,12 @@
 
 #define TIMERID_UPDATEVUMETERS 300
 
+static void machineviewbar_settext(MachineViewBar*, const char* text);
+static void machineviewbar_ondestroy(MachineViewBar*, psy_ui_Component* sender);
+static void machineviewbar_ondraw(MachineViewBar* self, psy_ui_Graphics*);
+static void machineviewbar_onpreferredsize(MachineViewBar*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
+
 static MachineUi* machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y,
 	MachineSkin*);
 static MachineUi* machineuis_at(MachineWireView*, uintptr_t slot);
@@ -73,16 +79,11 @@ static psy_ui_Point rotate_point(psy_ui_Point, double phi);
 static psy_ui_Point move_point(psy_ui_Point pt, psy_ui_Point d);
 static void machinewireview_ondestroy(MachineWireView*,
 	psy_ui_Component* component);
-static void machinewireview_onmousedown(MachineWireView*,
-	psy_ui_Component* sender, psy_ui_MouseEvent*);
-static void machinewireview_onmouseup(MachineWireView*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void machinewireview_onmousemove(MachineWireView*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void machinewireview_onmousedoubleclick(MachineWireView*,
-	psy_ui_Component* sender, psy_ui_MouseEvent*);
-static void machinewireview_onkeydown(MachineWireView*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+static void machinewireview_onmousedown(MachineWireView*, psy_ui_MouseEvent*);
+static void machinewireview_onmouseup(MachineWireView*, psy_ui_MouseEvent*);
+static void machinewireview_onmousemove(MachineWireView*, psy_ui_MouseEvent*);
+static void machinewireview_onmousedoubleclick(MachineWireView*, psy_ui_MouseEvent*);
+static void machinewireview_onkeydown(MachineWireView*, psy_ui_KeyEvent*);
 static void machinewireview_hittest(MachineWireView*, int x, int y);
 static int machinewireview_hittestpan(MachineWireView*, int x, int y,
 	uintptr_t slot, int* dx);
@@ -111,8 +112,7 @@ static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
 	uintptr_t slot);
 static void machinewireview_onmachineworked(MachineWireView*,
 	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
-static void machinewireview_ontimer(MachineWireView*, psy_ui_Component* sender,
-	int timerid);
+static void machinewireview_ontimer(MachineWireView*, int timerid);
 static void machinewireview_preparedrawallmacvus(MachineWireView*);
 static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
 	psy_Properties*);
@@ -136,6 +136,7 @@ static void machineview_onkeydown(MachineView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
 static void machineview_onskinchanged(MachineView*, Workspace*);
+static void selectsection(MachineView*, psy_ui_Component* sender, uintptr_t section);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -145,6 +146,16 @@ static void vtable_init(MachineWireView* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ondraw = (psy_ui_fp_ondraw) machinewireview_ondraw;
+		vtable.ontimer = (psy_ui_fp_ontimer) machinewireview_ontimer;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)
+			machinewireview_onmousedown;
+		vtable.onmouseup = (psy_ui_fp_onmouseup) machinewireview_onmouseup;
+		vtable.onmousemove = (psy_ui_fp_onmousemove)
+			machinewireview_onmousemove;
+		vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+			machinewireview_onmousedoubleclick;
+		vtable.onkeydown = (psy_ui_fp_onkeydown)
+			machinewireview_onkeydown;
 	}
 }
 
@@ -548,18 +559,6 @@ void machinewireview_connectuisignals(MachineWireView* self)
 {
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machinewireview_ondestroy);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		machinewireview_onmousedown);
-	psy_signal_connect(&self->component.signal_mouseup, self,
-		machinewireview_onmouseup);
-	psy_signal_connect(&self->component.signal_mousemove, self,
-		machinewireview_onmousemove);
-	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
-		machinewireview_onmousedoubleclick);
-	psy_signal_connect(&self->component.signal_keydown, self,
-		machinewireview_onkeydown);
-	psy_signal_connect(&self->component.signal_timer, self,
-		machinewireview_ontimer);
 }
 
 void machinewireview_initmasterui(MachineWireView* self)
@@ -1073,8 +1072,7 @@ void machinewireview_align(MachineWireView* self)
 	}
 }
 
-void machinewireview_onmousedoubleclick(MachineWireView* self,
-	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+void machinewireview_onmousedoubleclick(MachineWireView* self, psy_ui_MouseEvent* ev)
 {
 	self->mx = ev->x - self->dx;
 	self->my = ev->y - self->dy;
@@ -1120,8 +1118,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self,
 	self->dragslot = NOMACHINE_INDEX;	
 }
 
-void machinewireview_onmousedown(MachineWireView* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_hide(&self->editname.component);
 	psy_ui_component_setfocus(&self->component);
@@ -1332,8 +1329,7 @@ void machinewireview_hittest(MachineWireView* self, int x, int y)
 	}	
 }
 
-void machinewireview_onmousemove(MachineWireView* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 {
 	if (self->dragslot != NOMACHINE_INDEX) {
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_PAN) {
@@ -1364,7 +1360,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_Component* sender
 					: "",
 					machineui->x,
 					machineui->y);
-				psy_ui_label_settext(&self->statusbar->label, txt);				
+				machineviewbar_settext(self->statusbar, txt);				
 			}
 			r_new = machinewireview_updaterect(self, self->dragslot);
 			psy_ui_rectangle_union(&r_new, &r_old);
@@ -1381,8 +1377,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_Component* sender
 	}
 }
 
-void machinewireview_onmouseup(MachineWireView* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_releasecapture(&self->component);
 	if (self->dragslot != NOMACHINE_INDEX) {
@@ -1412,8 +1407,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_Component* sender,
 	psy_ui_component_invalidate(&self->component);
 }
 
-void machinewireview_onkeydown(MachineWireView* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 {		
 	if (ev->keycode == psy_ui_KEY_DELETE &&
 			self->selectedwire.src != NOMACHINE_INDEX) {
@@ -1640,8 +1634,7 @@ void machinewireview_onmachineworked(MachineWireView* self,
 	}
 }
 
-void machinewireview_ontimer(MachineWireView* self, psy_ui_Component* sender,
-	int timerid)
+void machinewireview_ontimer(MachineWireView* self, int timerid)
 {	
 	psy_List* p;
 	psy_List* q;
@@ -1900,17 +1893,64 @@ void machineuis_removeall(MachineWireView* self)
 	psy_table_init(&self->machineuis);
 }
 
+static psy_ui_ComponentVtable machineviewbar_vtable;
+static int machineviewbar_vtable_initialized = 0;
+
+static void machineviewbar_vtable_init(MachineViewBar* self)
+{
+	if (!machineviewbar_vtable_initialized) {
+		machineviewbar_vtable = *(self->component.vtable);
+		machineviewbar_vtable.ondraw = (psy_ui_fp_ondraw)
+			machineviewbar_ondraw;
+		machineviewbar_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			machineviewbar_onpreferredsize;
+		machineviewbar_vtable_initialized = 1;
+	}
+}
+
 void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	psy_ui_component_init(&self->component, parent);
+	machineviewbar_vtable_init(self);
+	self->component.vtable = &machineviewbar_vtable;;
 	psy_ui_component_enablealign(&self->component);
-	psy_ui_label_init(&self->label, &self->component);	
-	psy_ui_label_setcharnumber(&self->label, 40);			
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_LEFT,
-		0));	
+	psy_ui_component_doublebuffer(&self->component);
+	self->text = strdup("");
+}
+
+void machineviewbar_ondestroy(MachineViewBar* self, psy_ui_Component* sender)
+{
+	free(self->text);
+}
+
+void machineviewbar_settext(MachineViewBar* self, const char* text)
+{
+	free(self->text);
+	self->text = strdup(text);
+	psy_ui_component_invalidate(&self->component);
+}
+
+void machineviewbar_ondraw(MachineViewBar* self, psy_ui_Graphics* g)
+{
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_component_size(&self->component);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	psy_ui_settextcolor(g, 0x00D1C5B6);
+	psy_ui_textout(g, 0, (size.height - tm.tmHeight) / 2, self->text, strlen(self->text));
+}
+
+void machineviewbar_onpreferredsize(MachineViewBar* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	rv->width = tm.tmAveCharWidth * 40;
+	rv->height = (int)(tm.tmHeight * 1.5);
 }
 
 void machineview_init(MachineView* self, psy_ui_Component* parent,
@@ -1931,9 +1971,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(tabbar_base(&self->tabbar));
-	tabbar_append(&self->tabbar, "Wires");
-	tabbar_append(&self->tabbar, "New Machine");	
+	tabbar_append_tabs(&self->tabbar, "Wires", "New Machine", NULL);
+	psy_signal_connect(&self->component.signal_selectsection, self, selectsection);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
@@ -2061,4 +2100,9 @@ psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slo
 		psy_ui_setrectangle(&rv, 0, 0, 0, 0);		
 	}	
 	return rv;
+}
+
+void selectsection(MachineView* self, psy_ui_Component* sender, uintptr_t section)
+{
+	tabbar_select(&self->tabbar, (int) section);
 }

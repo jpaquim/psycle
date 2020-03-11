@@ -4,11 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "trackscopeview.h"
-#include "../../detail/portable.h"
-#include "../../detail/trace.h"
 #include <math.h>
 #include <string.h>
 #include <uiapp.h>
+
+#include "../../detail/trace.h"
+#include "../../detail/portable.h"
 
 #define TIMERID_TRACKSCOPEVIEW 6000
 
@@ -202,13 +203,13 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 	int ident = (int)(width * 0.25);
 	psy_ui_setcolor(g, app.defaults.defaultcolor);
 	psy_ui_moveto(g, psy_ui_point_make(x + ident, y + (int)(height * 0.2)));
-	psy_ui_devcurveto(g,
+	psy_ui_curveto(g,
 		psy_ui_point_make(x + width - ident * 2, y + (int)(height * 0.3)),
 		psy_ui_point_make(x + width - ident, y + (int)(height * 0.6)),
 		psy_ui_point_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
 	psy_ui_moveto(g,
 		psy_ui_point_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
-	psy_ui_devcurveto(g,
+	psy_ui_curveto(g,
 		psy_ui_point_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
 		psy_ui_point_make(x + width - ident * 2, y + (int)(height * 0.2)),
 		psy_ui_point_make(x + width - (int)(ident * 0.5), (int)(height * 0.25)));

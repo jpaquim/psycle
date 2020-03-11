@@ -6,6 +6,7 @@
 #include "sequenceview.h"
 #include <stdio.h>
 #include <string.h>
+#include <patterns.h>
 #include "../../detail/portable.h"
 #include <exclusivelock.h>
 #include <uialigner.h>
@@ -23,8 +24,7 @@ static void sequencelistview_onmousedown(SequenceListView*,
 	psy_ui_MouseEvent*);
 static void sequencelistview_onscroll(SequenceListView*,
 	psy_ui_Component* sender, int stepx, int stepy);
-static void sequencelistview_ontimer(SequenceListView*,
-	psy_ui_Component* sender, int timerid);
+static void sequencelistview_ontimer(SequenceListView*, int timerid);
 static void sequenceview_onnewentry(SequenceView*);
 static void sequenceview_oninsertentry(SequenceView*);
 static void sequenceview_oncloneentry(SequenceView*);
@@ -40,6 +40,7 @@ static void sequenceview_onpaste(SequenceView*);
 static void sequenceview_onsingleselection(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onmultiselection(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onshowplaylist(SequenceView*, psy_ui_Button* sender);
+static void sequenceview_onshowpatternnames(SequenceView*, psy_ui_CheckBox* sender);
 static void sequenceview_onfollowsong(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onfollowsongchanged(SequenceView*, Workspace* sender);
 static void sequenceview_onrecordtweaks(SequenceView*, psy_ui_Button* sender);
@@ -159,6 +160,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_onshowplaylist);
 	psy_signal_connect(&self->options.followsong.signal_clicked, self,
 		sequenceview_onfollowsong);
+	psy_signal_connect(&self->options.shownames.signal_clicked, self,
+		sequenceview_onshowpatternnames);
 	psy_signal_connect(&self->options.recordtweaks.signal_clicked, self,
 		sequenceview_onrecordtweaks);
 	psy_signal_connect(&self->options.multichannelaudition.signal_clicked, self,
@@ -339,6 +342,8 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 			sequencelistview_ondraw;
 		sequencelistview_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			sequencelistview_onmousedown;
+		sequencelistview_vtable.ontimer = (psy_ui_fp_ontimer)
+			sequencelistview_ontimer;
 		sequencelistview_vtable_initialized = 1;		
 	}	
 }
@@ -358,8 +363,6 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->selection = &workspace->sequenceselection;
 	psy_signal_connect(&self->component.signal_scroll, self,
 		sequencelistview_onscroll);
-	psy_signal_connect(&self->component.signal_timer, self,
-		sequencelistview_ontimer);
 	self->selected = 0;
 	self->selectedtrack = 0;	
 	self->lineheight = 12;
@@ -368,6 +371,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->dy = 0;
 	self->lastplayposition = -1.f;
 	self->lastentry = 0;
+	self->showpatternnames = 0;
 	psy_ui_component_starttimer(&self->component, TIMERID_SEQUENCEVIEW, 200);
 }
 
@@ -450,8 +454,19 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 						pattern->length) {
 				playing = 1;
 			}
-		}		
-		psy_snprintf(text, 20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
+		}
+		if (self->showpatternnames) {
+			psy_audio_Pattern* pattern;
+
+			pattern = patterns_at(self->patterns, entry->pattern);
+			if (pattern) {
+				psy_snprintf(text, 20, "%02X: %s %4.2f", c, pattern_name(pattern), entry->offset);
+			} else {
+				psy_snprintf(text, 20, "%02X:%02X(ERR) %4.2f", c, entry->pattern, entry->offset);
+			}
+		} else {
+			psy_snprintf(text, 20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
+		}
 		if ( self->selectedtrack == trackindex &&
 			(self->selection->editposition.trackposition.tracknode == p
 				 || (psy_list_findentry(self->selection->entries, entry))				 
@@ -470,6 +485,18 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 		psy_ui_textout(g, x + 5, cpy + self->dy + listviewmargin, text,
 			strlen(text));
 	}	
+}
+
+void sequencelistview_showpatternnames(SequenceListView* self)
+{
+	self->showpatternnames = 1;
+	psy_ui_component_invalidate(&self->component);
+}
+
+void sequencelistview_showpatternslots(SequenceListView* self)
+{
+	self->showpatternnames = 0;
+	psy_ui_component_invalidate(&self->component);
 }
 
 void sequenceview_onnewentry(SequenceView* self)
@@ -740,6 +767,15 @@ void sequenceview_onshowplaylist(SequenceView* self, psy_ui_Button* sender)
 	psy_ui_component_align(&self->component);
 }
 
+void sequenceview_onshowpatternnames(SequenceView* self, psy_ui_CheckBox* sender)
+{
+	if (psy_ui_checkbox_checked(sender) != 0) {
+		sequencelistview_showpatternnames(&self->listview);
+	} else {
+		sequencelistview_showpatternslots(&self->listview);
+	}
+}
+
 void sequenceview_onrecordtweaks(SequenceView* self, psy_ui_Button* sender)
 {
 	if (workspace_recordingtweaks(self->workspace)) {
@@ -932,7 +968,7 @@ void sequenceduration_update(SequenceViewDuration* self)
 	psy_ui_label_settext(&self->duration, text);
 }
 
-void sequencelistview_ontimer(SequenceListView* self, psy_ui_Component* sender, int timerid)
+void sequencelistview_ontimer(SequenceListView* self, int timerid)
 {			
 	SequenceTrackIterator it;
 	

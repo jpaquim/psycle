@@ -14,7 +14,7 @@
 
 #define TIMERID_PLAYLIST 4000
 
-static void playlisteditor_ontimer(PlayListEditor*, psy_ui_Component* sender, int timerid);
+static void playlisteditor_ontimer(PlayListEditor*, int timerid);
 
 static void playlisteditor_onaddsong(PlayListEditor*, psy_ui_Component* sender);
 static void playlisteditor_onremovesong(PlayListEditor*, psy_ui_Component* sender);
@@ -37,6 +37,8 @@ static void vtable_init(PlayListEditor* self)
 		vtable = *(self->component.vtable);
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			playlisteditor_onpreferredsize;
+		vtable.ontimer = (psy_ui_fp_ontimer)
+			playlisteditor_ontimer;
 	}
 }
 
@@ -136,8 +138,6 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->buttons.next.signal_clicked, self, 
 		playlisteditor_onnext);
 	psy_ui_component_resize(&self->component, 150, 0);
-	psy_signal_connect(&self->component.signal_timer, self,
-		playlisteditor_ontimer);
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		playlisteditor_onlistchanged);
 	psy_ui_component_resize(&self->component, 200, 120);
@@ -235,7 +235,7 @@ void playlisteditor_onnext(PlayListEditor* self, psy_ui_Component* sender)
 	}
 }
 
-void playlisteditor_ontimer(PlayListEditor* self, psy_ui_Component* sender, int timerid)
+void playlisteditor_ontimer(PlayListEditor* self, int timerid)
 {		
 	if (!player_playing(&self->workspace->player)) {
 		if (self->nextentry) {

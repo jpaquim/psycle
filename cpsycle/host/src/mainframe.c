@@ -14,13 +14,6 @@
 #include <dir.h>
 #include <uiapp.h>
 
-#if defined DIVERSALIS__OS__MICROSOFT
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#endif
-
 #define TIMERID_MAINFRAME 20
 
 static void mainframe_initstatusbar(MainFrame*);
@@ -29,10 +22,9 @@ static void mainframe_initvubar(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
 static void mainframe_destroy(MainFrame*, psy_ui_Component* component);
-static void mainframe_onkeydown(MainFrame*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
-static void mainframe_onkeyup(MainFrame*, psy_ui_Component* sender,
-	psy_ui_KeyEvent*);
+static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
+static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
+static void mainframe_onmousedown(MainFrame*, psy_ui_MouseEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry*);
 static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
@@ -51,11 +43,10 @@ static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
-static void mainframe_onviewselected(MainFrame*, Workspace*, int view, const char* anchor, int option);
+static void mainframe_onviewselected(MainFrame*, Workspace*, int view, uintptr_t section, int option);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_updatetitle(MainFrame*);
-static void mainframe_ontimer(MainFrame*, psy_ui_Component* sender,
-	int timerid);
+static void mainframe_ontimer(MainFrame*, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 
@@ -70,9 +61,22 @@ static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
 	unsigned int numsongtracks);
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender, const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender, psy_ui_Component* view);
-static void mainframe_onmousedown(MainFrame*, psy_ui_Component* sender, psy_ui_MouseEvent*);
 
 #define GEARVIEW 10
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(MainFrame* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.onkeydown = (psy_ui_fp_onkeydown) mainframe_onkeydown;
+		vtable.onkeyup = (psy_ui_fp_onkeyup) mainframe_onkeyup;
+		vtable.onmousedown = (psy_ui_fp_onmousedown) mainframe_onmousedown;
+		vtable.ontimer = (psy_ui_fp_ontimer) mainframe_ontimer;
+	}
+}
 
 void mainframe_init(MainFrame* self)
 {			
@@ -82,6 +86,8 @@ void mainframe_init(MainFrame* self)
 		psy_ui_value_makepx(0), psy_ui_value_makeew(4.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	psy_ui_frame_init(&self->component, 0);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	
 	psy_ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	psy_ui_component_enablealign(&self->component);	
@@ -109,10 +115,7 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_resize(&self->terminal.component, 0, 0);
 	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
 	psy_ui_component_setalign(&self->splitbarterminal.component, psy_ui_ALIGN_BOTTOM);	
-	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);	
-	psy_signal_connect(&self->component.signal_keydown, self, mainframe_onkeydown);
-	psy_signal_connect(&self->component.signal_keyup, self, mainframe_onkeyup);
-	psy_signal_connect(&self->component.signal_timer, self, mainframe_ontimer);
+	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_enablealign(&self->top);	
@@ -149,13 +152,10 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),	
 		psy_ui_HORIZONTALEXPAND);	
-	tabbar_append(&self->tabbar, "Machines");
-	tabbar_append(&self->tabbar, "Patterns");	
-	tabbar_append(&self->tabbar, "Samples");
-	tabbar_append(&self->tabbar, "Instruments");
-	tabbar_append(&self->tabbar, "Properties");
+	tabbar_append_tabs(&self->tabbar, "Machines", "Patterns", "Samples",
+		"Instruments", "Properties", NULL);
 	tabbar_append(&self->tabbar, "Settings")->margin.left =
-		psy_ui_value_makeew(4.0);	;
+		psy_ui_value_makeew(4.0);
 	tabbar_append(&self->tabbar, "Help")->margin.right =
 		psy_ui_value_makeew(4.0);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
@@ -223,7 +223,6 @@ void mainframe_init(MainFrame* self)
 		mainframe_onplugineditor);
 	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
 		mainframe_ongearcreate);
-	mainframe_setstartpage(self);
 	psy_signal_emit(&self->workspace.signal_configchanged,
 		&self->workspace, 1, self->workspace.config);
 	psy_signal_connect(&self->tabbar.signal_change, self,
@@ -262,8 +261,7 @@ void mainframe_init(MainFrame* self)
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_dockview, self,
 		mainframe_ondockview);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		mainframe_onmousedown);
+	mainframe_setstartpage(self);
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -298,20 +296,20 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_ui_component_setmargin(&self->statusbarlabel.component, &margin);
 	psy_ui_component_setalign(&self->statusbarlabel.component,
 		psy_ui_ALIGN_LEFT);
-	psy_ui_notebook_init(&self->viewbars, &self->statusbar);
-	psy_ui_component_setmargin(&self->viewbars.component, &margin);
-	psy_ui_component_setalign(&self->viewbars.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_enablealign(&self->viewbars.component);		
-	machineviewbar_init(&self->machineviewbar, &self->viewbars.component,
+	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);
+	psy_ui_component_setmargin(&self->viewstatusbars.component, &margin);
+	psy_ui_component_setalign(&self->viewstatusbars.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_enablealign(&self->viewstatusbars.component);		
+	machineviewbar_init(&self->machineviewbar, &self->viewstatusbars.component,
 		&self->workspace);
 	psy_ui_component_setalign(&self->machineviewbar.component,
 		psy_ui_ALIGN_LEFT);
 	self->machineview.wireview.statusbar = &self->machineviewbar;
-	patternviewbar_init(&self->patternbar, &self->viewbars.component,
+	patternviewbar_init(&self->patternbar, &self->viewstatusbars.component,
 		&self->workspace);
 	psy_ui_component_setalign(&self->patternbar.component, psy_ui_ALIGN_LEFT);
-	psy_ui_notebook_setpageindex(&self->viewbars, 0);
-//	psy_ui_notebook_connectcontroller(&self->viewbars,
+	psy_ui_notebook_setpageindex(&self->viewstatusbars, 0);
+//	psy_ui_notebook_connectcontroller(&self->viewstatusbars,
 	//	&self->tabbar.signal_change);
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
 	psy_ui_component_setalign(&self->progressbar.component,
@@ -392,13 +390,9 @@ void mainframe_initbars(MainFrame* self)
 void mainframe_setstartpage(MainFrame* self)
 {		
 	if (workspace_showaboutatstart(&self->workspace)) {
-		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);
-		psy_ui_notebook_setpageindex(&self->viewtabbars, TABPAGE_HELPVIEW);
-		psy_ui_component_show(&self->helpview.tabbar.component);		
+		workspace_selectview(&self->workspace, TABPAGE_HELPVIEW, 1, 0);	
 	} else {
-		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
-		psy_ui_notebook_setpageindex(&self->viewtabbars, TABPAGE_MACHINEVIEW);
-		psy_ui_component_show(&self->machineview.tabbar.component);		
+		workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW, 0, 0);
 	}	
 }
 
@@ -515,8 +509,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	}
 }
 
-void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender,
-	psy_ui_KeyEvent* ev)
+void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 {	
 	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
@@ -531,8 +524,7 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_Component* sender,
 	}
 }
 
-void mainframe_onkeyup(MainFrame* self, psy_ui_Component* component,
-	psy_ui_KeyEvent* ev)
+void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
@@ -743,27 +735,27 @@ void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 	psy_ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
 }
 
-void mainframe_ontimer(MainFrame* self, psy_ui_Component* sender, int timerid)
+void mainframe_ontimer(MainFrame* self, int timerid)
 {
 	workspace_idle(&self->workspace);
 }
 
-void mainframe_onviewselected(MainFrame* self, Workspace* sender, int view, const char* anchor, int option)
+void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index, uintptr_t section, int option)
 {
-	if (view != GEARVIEW) {
-		tabbar_select(&self->tabbar, view);
-		if (anchor) {
-			if (view == TABPAGE_MACHINEVIEW && anchor && (strcmp(anchor, "NEWMACHINE") == 0)) {
-				tabbar_select(&self->machineview.tabbar, 1);
-				if (option == 20) {
-					self->machineview.wireview.randominsert = 0;
-					self->machineview.wireview.addeffect = 1;					
-				}
+	if (index != GEARVIEW) {
+		psy_ui_Component* view;
+
+		tabbar_select(&self->tabbar, index);
+		view = psy_ui_notebook_activepage(&self->notebook);
+		if (view) {
+			psy_ui_component_selectsection(view, section);
+		}
+		if (index == TABPAGE_MACHINEVIEW && section == 1) {
+			if (option == 20) {
+				self->machineview.wireview.randominsert = 0;
+				self->machineview.wireview.addeffect = 1;
 			}
 		}
-	}
-	if (anchor && view == TABPAGE_SETTINGSVIEW) {
-		settingsview_selectsection(&self->settingsview, anchor);
 	}
 }
 
@@ -771,11 +763,13 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
 	psy_ui_Component* component;
-	workspace_onviewchanged(&self->workspace, tabindex);	
+	workspace_onviewchanged(&self->workspace, tabindex);		
+	psy_ui_notebook_setpageindex(&self->viewstatusbars, tabindex);
+	psy_ui_notebook_setpageindex(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
-	psy_ui_notebook_setpageindex(&self->viewbars, tabindex);
-	psy_ui_notebook_setpageindex(&self->viewtabbars, tabindex);	
-	psy_ui_component_setfocus(component);
+	if (component) {
+		psy_ui_component_setfocus(component);
+	}
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
@@ -835,8 +829,7 @@ void mainframe_ondockview(MainFrame* self, Workspace* sender,
 	psy_ui_component_align(&self->paramviews);
 }
 
-void mainframe_onmousedown(MainFrame* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 2 && psy_ui_mouseevent_target(ev) == &self->recentview.component) {
 		mainframe_onrecentsongs(self, &self->component);

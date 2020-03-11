@@ -331,9 +331,10 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 				psy_audio_buffer_setoffset(bc->output, pos);
 			}
 			bc->numsamples = numworksamples;
-			if (!psy_audio_machine_bypassed(self)) {
+			if (!psy_audio_machine_bypassed(self) &&
+					!psy_audio_machine_muted(self)) {
 				psy_audio_machine_generateaudio(self, bc);
-			}
+			}			
 			amount -= numworksamples;
 			bc->numsamples = restorenumsamples;
 		}
@@ -349,7 +350,8 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 			psy_audio_buffer_setoffset(bc->output, pos);
 		}
 		bc->numsamples = amount;
-		if (!psy_audio_machine_bypassed(self)) {
+		if (!psy_audio_machine_bypassed(self) &&
+				!psy_audio_machine_muted(self)) {
 			psy_audio_machine_generateaudio(self, bc);
 		}
 		bc->numsamples = restorenumsamples;

@@ -130,6 +130,7 @@ static void onmouseenter(psy_ui_Component* self) { }
 static void onmouseleave(psy_ui_Component* self) { }
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
+static void ontimer(psy_ui_Component* self, int timerid) { }
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -177,6 +178,7 @@ static void vtable_init(void)
 		vtable.onkeyup = onkeyup;
 		vtable.onkeydown = onkeydown;
 		vtable.onkeydown = onkeyup;
+		vtable.ontimer = ontimer;
 		vtable_initialized = 1;
 	}
 }
@@ -208,7 +210,8 @@ int psy_ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent
 	return imp->hwnd == 0;
 }*/
 
-void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent, psy_ui_ComponentImp* imp)
+void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
+	psy_ui_ComponentImp* imp)
 {
 	vtable_init();
 	self->vtable = &vtable;
@@ -227,7 +230,8 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
 	if (!parent) {
 		app.main = self;
 	}
-	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(&app), self, parent);
+	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(&app),
+		self, parent);
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);	
 }
@@ -417,6 +421,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 //	psy_signal_init(&self->signal_preferredsize);	
 	psy_signal_init(&self->signal_preferredsizechanged);
 	psy_signal_init(&self->signal_command);
+	psy_signal_init(&self->signal_selectsection);
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
@@ -483,6 +488,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	// psy_signal_dispose(self->signal_preferredsize);	
 	psy_signal_dispose(&self->signal_command);
 	psy_signal_dispose(&self->signal_preferredsizechanged);
+	psy_signal_dispose(&self->signal_selectsection);
 }
 
 void psy_ui_component_destroy(psy_ui_Component* self)
@@ -873,4 +879,24 @@ void psy_ui_componentimp_init(psy_ui_ComponentImp* self)
 void psy_ui_componentimp_dispose(psy_ui_ComponentImp* self)
 {
 	psy_signal_dispose(&self->signal_command);
+}
+
+psy_ui_Component* psy_ui_component_at(psy_ui_Component* self, uintptr_t index)
+{
+	psy_ui_Component* rv = 0;
+	psy_List* p;
+	psy_List* q;
+	uintptr_t c = 0;
+
+	p = q = psy_ui_component_children(self, 0);
+	while (p) {
+		if (c == index) {
+			rv = (psy_ui_Component*) p->entry;
+			break;
+		}
+		p = p->next;
+		++c;
+	}
+	psy_list_free(q);
+	return rv;
 }

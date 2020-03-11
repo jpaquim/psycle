@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
 static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
@@ -271,16 +272,29 @@ Tab* tabbar_append(TabBar* self, const char* label)
 {
 	Tab* tab;
 
-	tab = (Tab*)malloc(sizeof(Tab));
-	tab_init(tab, label, 0);
-	if (self->tabs != 0) {
-		tab->margin.left = psy_ui_value_makeew(1.5);
-	} 
-	psy_list_append(&self->tabs, tab);	
-	tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
-	tab->size.height = 20;
-
+	tab = (Tab*) malloc(sizeof(Tab));
+	if (tab) {
+		tab_init(tab, label, 0);
+		if (self->tabs != 0) {
+			tab->margin.left = psy_ui_value_makeew(1.5);
+		}
+		psy_list_append(&self->tabs, tab);
+		tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
+		tab->size.height = 20;
+	}
 	return tab;
+}
+
+void tabbar_append_tabs(TabBar* self, const char* label, ...)
+{
+	const char* currlabel;
+	va_list ap;
+	
+	va_start(ap, label);
+	for (currlabel = label; currlabel != NULL; currlabel = va_arg(ap, const char*)) {
+		tabbar_append(self, currlabel);		
+	}
+	va_end(ap);
 }
 
 void tabbar_settabmargin(TabBar* self, int tabindex,

@@ -56,10 +56,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(gear_base(self), parent);
 	psy_ui_component_enablealign(gear_base(self));
 	tabbar_init(&self->tabbar, gear_base(self));	
-	tabbar_append(&self->tabbar, "Generators");
-	tabbar_append(&self->tabbar, "Effects");	
-	tabbar_append(&self->tabbar, "Instruments");
-	tabbar_append(&self->tabbar, "Waves");	
+	tabbar_append_tabs(&self->tabbar, "Generators", "Effects", "Instruments",
+		"Waves", NULL);
 	tabbar_select(&self->tabbar, 0);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
 	psy_ui_notebook_init(&self->notebook, gear_base(self));

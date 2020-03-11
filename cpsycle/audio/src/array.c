@@ -23,7 +23,7 @@ void psy_audio_array_init(psy_audio_Array* self)
 	self->cap_ = 0;
 }
 
-void psy_audio_array_init_len(psy_audio_Array* self, int len, float value)
+void psy_audio_array_init_len(psy_audio_Array* self, uintptr_t len, float value)
 {
     self->len_ = len;
     self->baselen_ = len;
@@ -49,14 +49,14 @@ void psy_audio_array_init_arange(psy_audio_Array* self, float start, float stop,
 	int count = 0;
 	double i;
 
-	self->len_ = (stop - start + 0.5) / step;
+	self->len_ = (uintptr_t)((stop - start + 0.5) / step);
 	self->baselen_ = self->len_;
 	self->cap_ = self->len_ - (self->len_ % 4) + 4;
 	self->ptr_ = dsp.memory_alloc(self->cap_, sizeof(float)); // reserve
 	if (self->ptr_) {
 		self->base_ = self->ptr_;
 		for (i = start; i < stop; i += step, ++count) {
-			self->ptr_[count] = i;
+			self->ptr_[count] = (float) i;
 		}
 	} else {
 		self->cap_ = 0;		
@@ -109,14 +109,14 @@ void psy_audio_array_clear(psy_audio_Array* self)
 	dsp.clear(self->ptr_, self->len_);
 }
 
-void psy_audio_array_margin(psy_audio_Array* self, int start, int end)
+void psy_audio_array_margin(psy_audio_Array* self, uintptr_t start, uintptr_t end)
 {
   self->ptr_ = self->base_ + start;
   assert(end >= start && start >= 0 && end <= self->baselen_);
   self->len_ = end-start;  
 }
 
-void psy_audio_array_offset(psy_audio_Array* self, int offset)
+void psy_audio_array_offset(psy_audio_Array* self, intptr_t offset)
 {
   self->base_ += offset;
   self->ptr_ += offset;  
@@ -197,25 +197,23 @@ void psy_audio_array_div_array(psy_audio_Array* self, psy_audio_Array* other)
 
 void psy_audio_array_pow_array_constant(psy_audio_Array* self, float exponent)
 {
-	float* source;
 	uintptr_t i;
 	uintptr_t num;
 
 	num = self->len_;
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = pow(self->ptr_[i], exponent);
+		self->ptr_[i] = (float) pow(self->ptr_[i], exponent);
 	}
 }
 
 void psy_audio_array_pow_constant_array(psy_audio_Array* self, float exponent)
 {
-	float* source;
 	uintptr_t i;
 	uintptr_t num;
 
 	num = self->len_;
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = pow(exponent, self->ptr_[i]);
+		self->ptr_[i] = (float) pow(exponent, self->ptr_[i]);
 	}
 }
 
@@ -228,31 +226,29 @@ void psy_audio_array_pow_array(psy_audio_Array* self, psy_audio_Array* other)
 	num = (self->len_ < other->len_) ? self->len_ : other->len_;
 	source = psy_audio_array_data(other);
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = pow(self->ptr_[i], source[i]);
+		self->ptr_[i] = (float) pow(self->ptr_[i], source[i]);
 	}
 }
 
 void psy_audio_array_fmod_array_constant(psy_audio_Array* self, float exponent)
 {
-	float* source;
 	uintptr_t i;
 	uintptr_t num;
 
 	num = self->len_;
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = fmod(self->ptr_[i], exponent);
+		self->ptr_[i] = (float) fmod(self->ptr_[i], exponent);
 	}
 }
 
 void psy_audio_array_fmod_constant_array(psy_audio_Array* self, float exponent)
 {
-	float* source;
 	uintptr_t i;
 	uintptr_t num;
 
 	num = self->len_;
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = fmod(exponent, self->ptr_[i]);
+		self->ptr_[i] = (float) fmod(exponent, self->ptr_[i]);
 	}
 }
 
@@ -265,7 +261,7 @@ void psy_audio_array_fmod_array(psy_audio_Array* self, psy_audio_Array* other)
 	num = (self->len_ < other->len_) ? self->len_ : other->len_;
 	source = psy_audio_array_data(other);
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = fmod(self->ptr_[i], source[i]);
+		self->ptr_[i] = (float) fmod(self->ptr_[i], source[i]);
 	}
 }
 

@@ -271,8 +271,4 @@ void psy_ui_button_settextalignment(psy_ui_Button* self,
 	self->textalignment = alignment;
 }
 
-psy_ui_Component* psy_ui_button_base(psy_ui_Button* self)
-{
-	return &self->component;
-}
 

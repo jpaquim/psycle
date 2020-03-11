@@ -6,6 +6,14 @@
 
 #include "psydef.h"
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>

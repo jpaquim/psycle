@@ -17,6 +17,8 @@ static void patternview_onsequenceselectionchanged(PatternView*,
 static void patternview_onpropertiesapply(PatternView*,
 	psy_ui_Component* sender);
 static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
+static void patternview_oncontextmenu(PatternView*,
+	psy_ui_Component* sender);
 static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Graphics*);
 static void patternviewstatus_onpreferredsize(PatternViewStatus* self,
 	psy_ui_Size* limit, psy_ui_Size* rv);
@@ -26,7 +28,8 @@ static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
 	Workspace* sender);
 static void patternviewbar_ondefaultline(PatternViewBar*,
 	psy_ui_CheckBox* sender);
-void patternviewbar_initalign(PatternViewBar*);
+static void patternviewbar_initalign(PatternViewBar*);
+
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -118,7 +121,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_enablealign(&self->component);	
 	stepbox_init(&self->step, &self->component, workspace);
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
-	psy_ui_checkbox_settext(&self->movecursorwhenpaste, "Move Cursor When Paste");
+	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
+		"Move Cursor When Paste");
 	psy_ui_checkbox_init(&self->defaultentries, &self->component);
 	psy_ui_checkbox_settext(&self->defaultentries, "Default Line");
 	if (workspace_showgriddefaults(self->workspace)) {
@@ -183,16 +187,28 @@ void patternview_init(PatternView* self,
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self, patternview_onpropertiesapply);	
 	// Tabbar
-	tabbar_init(&self->tabbar, tabbarparent);
+	psy_ui_component_init(&self->sectionbar, tabbarparent);
+	psy_ui_component_enablealign(&self->sectionbar);
+	psy_ui_component_setalign(&self->sectionbar, psy_ui_ALIGN_LEFT);
+	tabbar_init(&self->tabbar, &self->sectionbar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
-	psy_ui_component_hide(tabbar_base(&self->tabbar));	
-	tabbar_append(&self->tabbar, "Tracker");
-	tabbar_append(&self->tabbar, "Pianoroll");	
-	tabbar_append(&self->tabbar, "Split");
-	tabbar_append(&self->tabbar, "Properties");	
+	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split",
+		"Properties", NULL);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternview_ontabbarchange);	
-	tabbar_select(&self->tabbar, 0);	
+	tabbar_select(&self->tabbar, 0);
+	psy_ui_button_init(&self->contextbutton, &self->sectionbar);
+	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
+	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton), psy_ui_ALIGN_RIGHT);
+	{
+		psy_ui_Margin margin;
+
+		psy_ui_margin_init(&margin, psy_ui_value_makeeh(-1), psy_ui_value_makepx(0),
+			psy_ui_value_makepx(0), psy_ui_value_makeew(1));
+		psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);
+	}
+	psy_signal_connect(&self->contextbutton.signal_clicked,
+		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -280,4 +296,13 @@ void patternview_onpropertiesapply(PatternView* self, psy_ui_Component* sender)
 void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 {
 	psy_ui_component_setfocus(&self->trackerview.grid.component);
+}
+
+void patternview_oncontextmenu(PatternView* self, psy_ui_Component* sender)
+{
+	if (trackerview_blockmenuvisible(&self->trackerview)) {
+		trackerview_hideblockmenu(&self->trackerview);
+	} else {
+		trackerview_showblockmenu(&self->trackerview);
+	}
 }

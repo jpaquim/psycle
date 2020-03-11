@@ -48,7 +48,7 @@ void ladspaparam_init(LadspaParam* self, LADSPA_PortDescriptor descriptor,LADSPA
 		if ( LADSPA_IS_HINT_LOGARITHMIC(hint.HintDescriptor) ){
 			self->logarithmic_ = TRUE;
 			// rangeMultiplier_ =   9 / (maxVal_ - minVal_);
-			self->rangeMultiplier_ =   (exp(1.0)-1) / (self->maxVal_ - self->minVal_);
+			self->rangeMultiplier_ = (float)  (exp(1.0)-1) / (self->maxVal_ - self->minVal_);
 		}
 		else if ( LADSPA_IS_HINT_INTEGER(hint.HintDescriptor) ){
 			self->integer_ = TRUE;
@@ -99,13 +99,13 @@ void ladspaparam_setdefault(LadspaParam* self)
 	case LADSPA_HINT_DEFAULT_LOW:
 		if (LADSPA_IS_HINT_LOGARITHMIC(self->hint_.HintDescriptor)) {
 			fDefault 
-			= exp(log(self->hint_.LowerBound) * 0.75
+			= (LADSPA_Data) exp(log(self->hint_.LowerBound) * 0.75
 			+ log(self->hint_.UpperBound) * 0.25) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
 				(float)samplerate : 1.0f);
 		}
 		else {
 			fDefault 
-			= (self->hint_.LowerBound * 0.75
+			= (LADSPA_Data) (self->hint_.LowerBound * 0.75
 			+ self->hint_.UpperBound * 0.25)* (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
 				(float)samplerate : 1.0f);
 		}
@@ -113,33 +113,33 @@ void ladspaparam_setdefault(LadspaParam* self)
 	case LADSPA_HINT_DEFAULT_MIDDLE:
 		if (LADSPA_IS_HINT_LOGARITHMIC(self->hint_.HintDescriptor)) {
 			fDefault 
-			= sqrt(self->hint_.LowerBound
+			= (LADSPA_Data) sqrt(self->hint_.LowerBound
 			* self->hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
 				(float)samplerate : 1.0f);
 		}
 		else {
 			fDefault 
-			= 0.5 * (self->hint_.LowerBound
+			= (LADSPA_Data) (0.5 * (self->hint_.LowerBound
 			+ self->hint_.UpperBound) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
-				(float)samplerate : 1.0f);
+				(float)samplerate : 1.0f));
 		}
 		break;
 	case LADSPA_HINT_DEFAULT_HIGH:
 		if (LADSPA_IS_HINT_LOGARITHMIC(self->hint_.HintDescriptor)) {
 			fDefault 
-			= exp(log(self->hint_.LowerBound) * 0.25
+			= (LADSPA_Data) exp(log(self->hint_.LowerBound) * 0.25
 			+ log(self->hint_.UpperBound) * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
 				(float)samplerate : 1.0f);
 		}
 		else {
 			fDefault 
-			= (self->hint_.LowerBound * 0.25
+			= (LADSPA_Data) (self->hint_.LowerBound * 0.25
 			+ self->hint_.UpperBound * 0.75) * (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
 				(float)samplerate : 1.0f);
 		}
 		break;
 	case LADSPA_HINT_DEFAULT_MAXIMUM:
-		fDefault = self->hint_.UpperBound* (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
+		fDefault = (LADSPA_Data) self->hint_.UpperBound * (float)((LADSPA_IS_HINT_SAMPLE_RATE(self->hint_.HintDescriptor)) ?
 			(float)samplerate : 1.0f);
 		break;
 	case LADSPA_HINT_DEFAULT_0:
@@ -162,18 +162,18 @@ void ladspaparam_setdefault(LadspaParam* self)
 		
 int LadspaParam_value(LadspaParam* self)
 { 
-	return (self->integer_)? self->value_ :
+	return (int) ((self->integer_) ? self->value_ :
 		// (logarithmic_) ? log10(1+((value_-minVal_)*rangeMultiplier_))*65535.0f:
 		(self->logarithmic_) ?  log(1 + ((self->value_ - self->minVal_) * self->rangeMultiplier_)) * 65535.0f:
-		(self->value_- self->minVal_)* self->rangeMultiplier_;
+		(self->value_- self->minVal_)* self->rangeMultiplier_);
 }
 
 void LadspaParam_setValue(LadspaParam* self, int data)
 {
-	self->value_ = (self->integer_) ? data :
+	self->value_ = (LADSPA_Data)( (self->integer_) ? data :
 		// (logarithmic_) ? minVal_ + (pow(10, data/65535.0f)-1)/ rangeMultiplier_ :
 		(self->logarithmic_) ? self->minVal_ + (exp(data / 65535.0f) - 1) / self->rangeMultiplier_ :
-		self->minVal_+ (data/ self->rangeMultiplier_);
+		self->minVal_+ (data/ self->rangeMultiplier_));
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -597,8 +597,8 @@ void parameterrange(psy_audio_LadspaPlugin* self, uintptr_t param, int* minval,
 
 	ladspa_param = valueat(self, param);
 	if (param) {
-		*minval = ladspaparam_minval(ladspa_param);
-		*maxval = ladspaparam_maxval(ladspa_param);
+		*minval = (int) ladspaparam_minval(ladspa_param);
+		*maxval = (int) ladspaparam_maxval(ladspa_param);
 	} else {
 		*minval = 0;
 		*maxval = 0;

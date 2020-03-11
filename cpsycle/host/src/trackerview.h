@@ -189,6 +189,8 @@ typedef struct {
    psy_audio_Player* player;   
    struct TrackerView* view;
    PatternSelection selection;
+   PatternEditPosition dragselectionbase;
+   PatternEditPosition lastdragcursor;
    int hasselection;
    int midline;
    int doublemidline;
@@ -240,5 +242,12 @@ void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
 void TrackerViewApplyProperties(TrackerView*, psy_Properties*);
+void trackerview_showblockmenu(TrackerView*);
+void trackerview_hideblockmenu(TrackerView*);
+
+INLINE trackerview_blockmenuvisible(TrackerView* self)
+{
+	return psy_ui_component_visible(&self->blockmenu.component);
+}
 
 #endif

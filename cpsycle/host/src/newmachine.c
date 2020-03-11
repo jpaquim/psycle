@@ -91,7 +91,7 @@ void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
 
 void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* sender)
 {
-	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, "directories", 0);
+	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, 3, 0);
 }
 
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,

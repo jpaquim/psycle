@@ -14,8 +14,6 @@ typedef struct {
 	psy_dsp_amp_t rightavg;
 	float invol;
 	float mult;
-	float* pSamplesL;
-	float* pSamplesR;
 	int scope_peak_rate;
 	int hold;	
 	// memories for vu-meter

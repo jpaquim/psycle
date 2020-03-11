@@ -13,7 +13,6 @@
 #include "luawaveosc.h"
 #include "custommachine.h"
 #include "plugin_interface.h"
-#include "../../detail/portable.h"
 #include "exclusivelock.h"
 #include "lock.h"
 #include "machines.h"
@@ -23,6 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "../../detail/portable.h"
 
 static void generateaudio(psy_audio_LuaPlugin*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_LuaPlugin*, uintptr_t channel,
@@ -681,10 +681,10 @@ int luamachine_setparameters(lua_State* L)
 int luamachine_work(lua_State* L)
 {
 	psy_audio_LuaMachine* self;
-	int numsamples;
+	uintptr_t numsamples;
 
 	self = psyclescript_checkself(L, 1, luamachine_meta);
-	numsamples = luaL_checkinteger(L, 2);
+	numsamples = (uintptr_t) luaL_checkinteger(L, 2);
 	if (self->bc) {
 		self->bc->numsamples = numsamples;
 		psy_audio_machine_work(self->machine, self->bc);

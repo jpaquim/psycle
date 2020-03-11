@@ -494,14 +494,14 @@ int psy_audio_luabind_array_index(lua_State *L)
 int psy_audio_luabind_array_new_index(lua_State *L)
 {
 	if (lua_isnumber(L, 2)) {
-		int index;
+		intptr_t index;
 		float value;
 
 		psy_audio_Array** ud = (psy_audio_Array**) luaL_checkudata(L, 1,
 			luaarraybind_meta);
-		index = (int) luaL_checkinteger(L, 2);
+		index = (intptr_t) luaL_checkinteger(L, 2);
 		value = (float) luaL_checknumber(L, 3);
-		if (!(0 <= index && index < psy_audio_array_len(*ud))) {
+		if (!(0 <= index && index < (intptr_t) psy_audio_array_len(*ud))) {
 			luaL_error(L, "index out of range");
 		}
 		*(psy_audio_array_data(*ud) + index) = value;
@@ -515,14 +515,12 @@ int psy_audio_luabind_array_new_index(lua_State *L)
 
 int array_rsum(lua_State* L)
 {
-	uintptr_t i;
-	double sum = 0;
 	psy_audio_Array* v = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
 	psy_audio_Array** rv = (psy_audio_Array**)lua_newuserdata(L, sizeof(psy_audio_Array*));
 	*rv = malloc(sizeof(psy_audio_Array));
 	psy_audio_array_init_len(*rv, psy_audio_array_len(v), 0);
 	luaL_setmetatable(L, luaarraybind_meta);
-	psy_audio_array_rsum(rv, 0);
+	psy_audio_array_rsum(*rv, 0);
 	return 1;
 }
 
