@@ -7,12 +7,12 @@
 #include <rms.h>
 
 static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
-static void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid);
-static void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent*);
-static void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master, uintptr_t slot,
+static void clipbox_ontimer(ClipBox*, int timerid);
+static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
+static void clipbox_onmasterworked(ClipBox*, psy_audio_Machine* master, uintptr_t slot,
 	psy_audio_BufferContext* bc);
-static void clipbox_onsongchanged(ClipBox* self, Workspace* workspace);
-static void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace);
+static void clipbox_onsongchanged(ClipBox*, Workspace*);
+static void clipbox_connectmachinessignals(ClipBox*, Workspace*);
 static void clipbox_onpreferredsize(ClipBox*, psy_ui_Size* limit, psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
@@ -25,6 +25,7 @@ static void vtable_init(ClipBox* self)
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) clipbox_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) clipbox_ondraw;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) clipbox_onmousedown;
+		vtable.ontimer = (psy_ui_fp_ontimer) clipbox_ontimer;
 	}
 }
 
@@ -35,13 +36,12 @@ void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->clip = 0;	
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;	
-	psy_signal_connect(&self->component.signal_timer, self, clipbox_ontimer);
+	self->component.vtable = &vtable;
 	psy_signal_connect(&workspace->signal_songchanged, self, clipbox_onsongchanged);	
 	clipbox_connectmachinessignals(self, workspace);	
 }
 
-void clipbox_ontimer(ClipBox* self, psy_ui_Component* sender, int timerid)
+void clipbox_ontimer(ClipBox* self, int timerid)
 {	
 	if (self->clip) {		
 		psy_ui_component_invalidate(&self->component);

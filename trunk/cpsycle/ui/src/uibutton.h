@@ -36,7 +36,11 @@ void psy_ui_button_highlight(psy_ui_Button*);
 void psy_ui_button_disablehighlight(psy_ui_Button*);
 void psy_ui_button_setcharnumber(psy_ui_Button*, int number);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
-psy_ui_Component* psy_ui_button_base(psy_ui_Button*);
+
+INLINE psy_ui_Component* psy_ui_button_base(psy_ui_Button* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

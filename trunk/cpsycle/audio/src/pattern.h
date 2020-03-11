@@ -34,7 +34,7 @@ typedef struct psy_audio_Pattern {
 	psy_dsp_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns
 	uintptr_t maxsongtracks;
-	char* label;
+	char* name;
 	// incremented by each operation, the ui is using
 	// this flag to synchronize its views
 	unsigned int opcount;
@@ -72,7 +72,9 @@ PatternNode* pattern_findnode(psy_audio_Pattern* pattern, unsigned int track,
 ///\return finds the last pattern node
 PatternNode* pattern_last(psy_audio_Pattern*);
 /// sets the pattern description
-void pattern_setlabel(psy_audio_Pattern*, const char*);
+void pattern_setname(psy_audio_Pattern*, const char*);
+///\return pattern description
+const char* pattern_name(psy_audio_Pattern*);
 /// sets the pattern length
 void pattern_setlength(psy_audio_Pattern*, psy_dsp_beat_t length);
 /// return length of the pattern

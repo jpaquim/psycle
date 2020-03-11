@@ -21,8 +21,12 @@ typedef struct {
 	Help help;
 } HelpView;
 
-void helpview_init(HelpView*, psy_ui_Component* parent,
+TabBar* helpview_init(HelpView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
-psy_ui_Component* helpview_base(HelpView*);
+
+INLINE psy_ui_Component* helpview_base(HelpView* self)
+{
+	return &self->component;
+}
 
 #endif

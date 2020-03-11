@@ -81,6 +81,11 @@ INLINE uintptr_t player_lpb(psy_audio_Player* self)
 	return psy_audio_sequencer_lpb(&self->sequencer);
 }
 
+INLINE unsigned int  player_samplerate(psy_audio_Player* self)
+{
+	return psy_audio_sequencer_samplerate(&self->sequencer);
+}
+
 // audio driver
 void player_setaudiodriver(psy_audio_Player*, psy_AudioDriver* driver);
 psy_AudioDriver* player_audiodriver(psy_audio_Player*);

@@ -26,7 +26,6 @@ static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
 static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size*);
 
 
-
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
@@ -44,6 +43,12 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		wireview_ondestroy);
 	wireview_connectmachinessignals(self, workspace);
 	vuscope_init(&self->vuscope, psy_ui_notebook_base(&self->notebook), wire,
+		workspace);
+	oscilloscope_init(&self->oscilloscope, psy_ui_notebook_base(&self->notebook), wire,
+		workspace);
+	spectrumanalyzer_init(&self->spectrumanalyzer, psy_ui_notebook_base(&self->notebook), wire,
+		workspace);
+	stereophase_init(&self->stereophase, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
 	channelmappingview_init(&self->channelmappingview,
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
@@ -65,8 +70,8 @@ void wireview_inittabbar(WireView* self)
 {
 	tabbar_init(&self->tabbar, wireview_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
-	tabbar_append(&self->tabbar, "Vu");
-	tabbar_append(&self->tabbar, "Channel Mapping");
+	tabbar_append_tabs(&self->tabbar, "Vu", "Oscilloscope", "Spectrum Analyzer", "Stereo Phase",
+		"Channel Mapping", NULL);	
 }
 
 void wireview_initvolumeslider(WireView* self)
@@ -167,7 +172,7 @@ void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && self->workspace->song) {
-		workspace_selectview(self->workspace, TABPAGE_MACHINEVIEW, "NEWMACHINE", 20);
+		workspace_selectview(self->workspace, TABPAGE_MACHINEVIEW, 1, 20);
 	}
 }
 

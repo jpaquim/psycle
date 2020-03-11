@@ -50,7 +50,8 @@ typedef struct {
 	int identwidth;   
 	int avgcharwidth;
 	int dx;
-	int dy;	
+	int dy;
+	int showpatternnames;
 	psy_dsp_beat_t lastplayposition;
 	psy_audio_Player* player;
 	SequenceEntry* lastentry;	
@@ -60,6 +61,9 @@ typedef struct {
 
 void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
 	struct SequenceView*, psy_audio_Sequence*, psy_audio_Patterns*, Workspace*);
+
+void sequencelistview_showpatternnames(SequenceListView*);
+void sequencelistview_showpatternslots(SequenceListView*);
 
 typedef struct {
 	psy_ui_Component component;

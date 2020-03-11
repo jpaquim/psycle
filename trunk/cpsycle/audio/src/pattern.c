@@ -20,8 +20,6 @@ void patterneditposition_init(PatternEditPosition* self)
 	self->pattern = 0;
 }
 
-
-
 int patterneditposition_equal(PatternEditPosition* lhs,
 	PatternEditPosition* rhs)
 {
@@ -37,7 +35,7 @@ void pattern_init(psy_audio_Pattern* self)
 {
 	self->events = 0;
 	self->length = 16;
-	self->label = strdup("Untitled");	
+	self->name = strdup("Untitled");	
 	self->opcount = 0;
 	self->maxsongtracks = 0;
 }
@@ -52,8 +50,8 @@ void pattern_dispose(psy_audio_Pattern* self)
 	}
 	psy_list_free(self->events);
 	self->events = 0;
-	free(self->label);
-	self->label = 0;
+	free(self->name);
+	self->name = 0;
 }
 
 void pattern_copy(psy_audio_Pattern* self, psy_audio_Pattern* src)
@@ -73,8 +71,8 @@ void pattern_copy(psy_audio_Pattern* self, psy_audio_Pattern* src)
 		psy_list_append(&self->events, entry);
 	}
 	self->length = src->length;
-	free(self->label);
-	self->label = strdup(src->label);
+	free(self->name);
+	self->name = strdup(src->name);
 	self->opcount = opcount + 1;
 }
 
@@ -213,13 +211,18 @@ PatternNode* pattern_last(psy_audio_Pattern* self)
 	return self->events ? self->events->tail : 0;
 }
 
-void pattern_setlabel(psy_audio_Pattern* self, const char* text)
+void pattern_setname(psy_audio_Pattern* self, const char* text)
 {
-	if (self->label) {
-		free(self->label);
-		self->label = strdup(text);
+	if (self->name) {
+		free(self->name);
+		self->name = strdup(text);
 	}
 	++self->opcount;
+}
+
+const char* pattern_name(psy_audio_Pattern* self)
+{
+	return self->name;
 }
 
 void pattern_setlength(psy_audio_Pattern* self, psy_dsp_beat_t length)
@@ -403,3 +406,4 @@ uintptr_t pattern_maxsongtracks(psy_audio_Pattern* self)
 {
 	return self->maxsongtracks;
 }
+

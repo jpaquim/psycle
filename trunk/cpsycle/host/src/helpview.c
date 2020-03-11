@@ -5,7 +5,9 @@
 
 #include "helpview.h"
 
-void helpview_init(HelpView* self, psy_ui_Component* parent,
+static void selectsection(HelpView*, psy_ui_Component* sender, uintptr_t section);
+
+TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
 	psy_ui_component_init(helpview_base(self), parent);	
@@ -18,16 +20,15 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	psy_ui_component_hide(tabbar_base(&self->tabbar));
-	tabbar_append(&self->tabbar, "Help");
-	tabbar_append(&self->tabbar, "About");
-	tabbar_append(&self->tabbar, "Greetings");	
+	tabbar_append_tabs(&self->tabbar, "Help", "About", "Greetings", NULL);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
+	psy_signal_connect(&self->component.signal_selectsection, self, selectsection);
 	tabbar_select(&self->tabbar, 1);
+	return &self->tabbar;
 }
 
-psy_ui_Component* helpview_base(HelpView* self)
+void selectsection(HelpView* self, psy_ui_Component* sender, uintptr_t section)
 {
-	return &self->component;
+	tabbar_select(&self->tabbar, (int) section);
 }

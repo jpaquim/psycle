@@ -64,6 +64,7 @@ static int settingsview_intersectskey(SettingsView*, psy_Properties*,
 static void settingsview_appendtabbarsections(SettingsView*);
 static void settingsview_ontabbarchange(SettingsView*, psy_ui_Component* sender,
 	int tabindex);
+static void settingsview_selectsection(SettingsView*, psy_ui_Component* sender, uintptr_t section);
 static void settingsview_adjustscroll(SettingsView*);
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 
@@ -108,6 +109,7 @@ void settingsview_init(SettingsView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
 	settingsview_appendtabbarsections(self);
+	psy_signal_connect(&self->component.signal_selectsection, self, settingsview_selectsection);
 }
 
 void settingsview_appendtabbarsections(SettingsView* self)
@@ -125,23 +127,9 @@ void settingsview_appendtabbarsections(SettingsView* self)
 		settingsview_ontabbarchange);
 }
 
-void settingsview_selectsection(SettingsView* self, const char* key)
+void settingsview_selectsection(SettingsView* self, psy_ui_Component* sender, uintptr_t section)
 {
-	psy_Properties* p;
-	int pageindex;
-	int found = 0;
-
-	for (pageindex = 0, p = self->properties->children; p != 0;
-		p = psy_properties_next(p), ++pageindex) {
-		if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION &&
-			(strcmp(psy_properties_key(p), key) == 0)) {
-			found = 1;
-			break;
-		}
-	}
-	if (found) {
-		tabbar_select(&self->tabbar, pageindex);
-	}
+	tabbar_select(&self->tabbar, (int)section);
 }
 
 void settingsview_ondestroy(SettingsView* self, psy_ui_Component* sender)
@@ -246,23 +234,23 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
 		settingsview_drawbutton(self, property, column + 1);
 	} else {
-		unsigned int count;
+		uintptr_t count;
 		const char* str;
-		int numcolumnavgchars;
+		uintptr_t numcolumnavgchars;
 		psy_ui_TextMetric tm;
 
 		count = strlen(psy_properties_text(property));
 		str = psy_properties_text(property);
 		tm = psy_ui_component_textmetric(&self->client);
 		
-		numcolumnavgchars = (int)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
+		numcolumnavgchars = (uintptr_t)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
 		while (count > 0) {
-			unsigned int numoutput;
+			uintptr_t numoutput;
 			char* wrap;
 
 			numoutput = min(numcolumnavgchars, count);
 			if (numoutput < count) {
-				wrap = strrchrpos(str, ' ', numoutput);
+				wrap = strrchrpos((char*)str, ' ', numoutput);
 				if (wrap) {
 					++wrap;
 					numoutput = wrap - str;
@@ -618,21 +606,21 @@ void settingsview_countblocklines(SettingsView* self, psy_Properties* property)
 {
 	unsigned int count;
 	const char* str;
-	int numcolumnavgchars;
+	uintptr_t numcolumnavgchars;
 	psy_ui_TextMetric tm;
 
 	count = strlen(psy_properties_text(property));
 	str = psy_properties_text(property);
 	tm = psy_ui_component_textmetric(&self->client);
 
-	numcolumnavgchars = (int)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
+	numcolumnavgchars = (uintptr_t)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
 	while (count > 0) {
-		unsigned int numoutput;
+		uintptr_t numoutput;
 		char* wrap;
 
 		numoutput = min(numcolumnavgchars, count);
 		if (numoutput < count) {
-			wrap = strrchrpos(str, ' ', numoutput);
+			wrap = strrchrpos((char*)str, ' ', numoutput);
 			if (wrap) {
 				++wrap;
 				numoutput = wrap - str;

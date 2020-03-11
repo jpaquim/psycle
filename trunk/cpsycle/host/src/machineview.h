@@ -116,7 +116,7 @@ void machinewireview_align(MachineWireView*);
 
 typedef struct MachineViewBar {
 	psy_ui_Component component;
-	psy_ui_Label label;	
+	char* text;
 } MachineViewBar;
 
 void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);

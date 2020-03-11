@@ -250,7 +250,7 @@ void machines_setpath(psy_audio_Machines* self, MachineList* path)
 		psy_list_free(self->path);
 	}
 	self->path = path;
-	machines_sortpath(self);
+	// machines_sortpath(self);
 }
 
 // this orders the machines that can be processed parallel

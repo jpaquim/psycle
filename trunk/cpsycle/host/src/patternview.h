@@ -8,6 +8,7 @@
 #include <uilabel.h>
 #include <uicheckbox.h>
 #include <uinotebook.h>
+#include <uibutton.h>
 #include "patternproperties.h"
 #include "trackerview.h"
 #include "pianoroll.h"
@@ -36,7 +37,9 @@ void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
 
 typedef struct PatternView {
 	psy_ui_Component component;
+	psy_ui_Component sectionbar;
 	TabBar tabbar;
+	psy_ui_Button contextbutton;
 	psy_ui_Notebook notebook;
 	psy_ui_Notebook editnotebook;
 	TrackerView trackerview;

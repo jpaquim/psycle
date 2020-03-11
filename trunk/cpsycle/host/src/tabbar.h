@@ -27,6 +27,7 @@ typedef struct {
 
 void tabbar_init(TabBar*, psy_ui_Component* parent);
 Tab* tabbar_append(TabBar*, const char* label);
+void tabbar_append_tabs(TabBar*, const char* label, ...);
 void tabbar_select(TabBar*, int tabindex);
 int tabbar_selected(TabBar*);
 void tabbar_settabmargin(TabBar*, int tab, const psy_ui_Margin*);

@@ -114,7 +114,10 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	if (prev) {		
 		position = psy_ui_component_position(&self->component);
 		if (prev->align == psy_ui_ALIGN_LEFT) {
-			psy_ui_component_resize(prev, position.left,
+			psy_ui_Rectangle prev_position;
+
+			prev_position = psy_ui_component_position(prev);
+			psy_ui_component_resize(prev, position.left - prev_position.left,
 				psy_ui_component_size(prev).height);
 		} else
 		if (prev->align == psy_ui_ALIGN_TOP) {			

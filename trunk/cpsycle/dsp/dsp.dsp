@@ -99,6 +99,10 @@ SOURCE=.\src\envelope.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\fft.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\filter.c
 # End Source File
 # Begin Source File
@@ -168,6 +172,10 @@ SOURCE=.\src\dsptypes.h
 # Begin Source File
 
 SOURCE=.\src\envelope.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\fft.h
 # End Source File
 # Begin Source File
 

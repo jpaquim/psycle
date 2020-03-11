@@ -12,7 +12,9 @@
 #define TIMERID_PIANOROLL 640
 
 static void pianoheader_ondraw(PianoHeader*, psy_ui_Graphics*);
-void pianoheader_drawruler(PianoHeader*, psy_ui_Graphics*);
+static void pianoheader_drawruler(PianoHeader*, psy_ui_Graphics*);
+static void pianoheader_onpreferredsize(PianoHeader*,
+	psy_ui_Size* limit, psy_ui_Size* size);
 
 static void pianogrid_ondraw(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*);
@@ -33,8 +35,7 @@ static PatternNode* pianogrid_nextnode(Pianogrid*, PatternNode*,
 	uintptr_t track);
 static void pianogrid_ondestroy(Pianogrid*);
 
-static void pianoroll_ontimer(Pianoroll*, psy_ui_Component* sender,
-	int timerid);
+static void pianoroll_ontimer(Pianoroll*, int timerid);
 static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void pianoroll_updatemetrics(Pianoroll*);
@@ -69,6 +70,8 @@ static void pianoroll_vtable_init(Pianoroll* self)
 			pianoroll_onmousemove;
 		pianoroll_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
 			pianoroll_onmousedoubleclick;
+		pianoroll_vtable.ontimer = (psy_ui_fp_ontimer)
+			pianoroll_ontimer;
 		pianoroll_vtable_initialized = 1;
 	}
 }
@@ -86,9 +89,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->sequenceentryoffset = 0.f;	
 	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		pianoroll_ondestroy);	
-	psy_signal_connect(&self->component.signal_timer, self,
-		pianoroll_ontimer);
+		pianoroll_ondestroy);
 	pianoheader_init(&self->header, &self->component, self);
 	psy_ui_component_init(&self->keyboardheader, &self->component);
 	pianokeyboard_init(&self->keyboard, &self->component);
@@ -103,7 +104,7 @@ void pianoroll_ondestroy(Pianoroll* self, psy_ui_Component* component)
 {	
 }
 
-void pianoroll_ontimer(Pianoroll* self, psy_ui_Component* sender, int timerid)
+void pianoroll_ontimer(Pianoroll* self, int timerid)
 {
 	if (timerid == TIMERID_PIANOROLL && self->pattern) {		
 		if (player_playing(&self->workspace->player)) {
@@ -163,7 +164,7 @@ void pianoroll_onsize(Pianoroll* self, psy_ui_Size* size)
 	int headerheight;
 		
 	keyboardwidth = 40;
-	headerheight = 25;	
+	headerheight = psy_ui_component_preferredsize(&self->header.component, size).height;
 	psy_ui_component_setposition(&self->keyboardheader, 0, 0, keyboardwidth,
 		headerheight);
 	psy_ui_component_setposition(&self->keyboard.component, 0, headerheight,
@@ -623,6 +624,8 @@ static void pianoheader_vtable_init(PianoHeader* self)
 		pianoheader_vtable = *(self->component.vtable);		
 		pianoheader_vtable.ondraw = (psy_ui_fp_ondraw)
 			pianoheader_ondraw;		
+		pianoheader_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			pianoheader_onpreferredsize;
 		pianoheader_vtable_initialized = 1;
 	}
 }
@@ -631,6 +634,7 @@ void pianoheader_init(PianoHeader* self, psy_ui_Component* parent,
 	Pianoroll* roll)
 {
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
 	pianoheader_vtable_init(self);
 	self->component.vtable = &pianoheader_vtable;
 	self->view = roll;	
@@ -648,29 +652,41 @@ void pianoheader_ondraw(PianoHeader* self, psy_ui_Graphics* g)
 void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_ui_Margin margin = { 0, 0, 5, 0 };
 	int baseline;		
 	psy_dsp_beat_t cpx;	
 	int c;	
 
 	size = psy_ui_component_size(&self->component);
-	baseline = size.height - margin.bottom.quantity.integer;	
-	psy_ui_setcolor(g, 0x00CACACA); 
+	tm = psy_ui_component_textmetric(&self->component);
+	baseline = size.height - 1;	
+	psy_ui_setcolor(g, 0x00555555);
 	psy_ui_drawline(g, 0, baseline, size.width, baseline);	
 	
 	for (c = 0, cpx = 0; c <= self->metrics.visisteps; 
 			cpx += self->metrics.stepwidth, ++c) {		
-		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 4);		
+		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - tm.tmHeight / 3);
 	}		
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00CACACA);
+	psy_ui_settextcolor(g, 0x00666666);
 	for (c = 0, cpx = 0; c <= self->metrics.visibeats; 
 			cpx += self->metrics.beatwidth, ++c) {		
 		char txt[40];
-		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 6);
+		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - tm.tmHeight / 2);
 		psy_snprintf(txt, 40, "%d", (int)(c - self->scrollpos));
-		psy_ui_textout(g, (int) cpx + 3, baseline - 14, txt, strlen(txt));		
+		psy_ui_textout(g, (int) cpx + 3, baseline - tm.tmHeight, txt, strlen(txt));
 	}
+}
+
+void pianoheader_onpreferredsize(PianoHeader* self,
+	psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	rv->width = limit->width;
+	rv->height = tm.tmHeight;
 }
 
 void pianoroll_updatemetrics(Pianoroll* self)

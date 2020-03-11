@@ -396,7 +396,8 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 
 void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {
-	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self))) {
+	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self)) &&
+			!psy_audio_machine_muted(psy_audio_vstplugin_base(self))) {
 		uintptr_t c;				
 				
 		if (bc->output->offset > 0) {
@@ -419,7 +420,8 @@ void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	}
 }
 
-struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self, const psy_audio_PatternEntry* entry, int channel)
+struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self,
+	const psy_audio_PatternEntry* entry, int channel)
 {
 	struct VstMidiEvent* rv;	
 

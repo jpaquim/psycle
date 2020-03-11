@@ -32,11 +32,8 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_init(&self->tabbar, help_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
-	tabbar_append(&self->tabbar, "./docs/readme.txt");
-	tabbar_append(&self->tabbar, "./docs/keys.txt");
-	tabbar_append(&self->tabbar, "./docs/tweaking.txt");
-	tabbar_append(&self->tabbar, "./docs/whatsnew.txt");
-	tabbar_append(&self->tabbar, "./docs/luascripting.txt");
+	tabbar_append_tabs(&self->tabbar, "./docs/readme.txt", "./docs/keys.txt",
+		"./docs/tweaking.txt", "./docs/whatsnew.txt", "./docs/luascripting.txt", NULL);
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_editor_preventedit(&self->editor);
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	

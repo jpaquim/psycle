@@ -22,7 +22,7 @@ typedef struct psy_audio_Array {
 } psy_audio_Array;
 
 void psy_audio_array_init(psy_audio_Array*);
-void psy_audio_array_init_len(psy_audio_Array*, int len, float value);
+void psy_audio_array_init_len(psy_audio_Array*, uintptr_t len, float value);
 void psy_audio_array_init_shared(psy_audio_Array*, float* ptr, int len);
 void psy_audio_array_init_arange(psy_audio_Array*, float start, float stop, float step);
 void psy_audio_array_dispose(psy_audio_Array*);
@@ -32,8 +32,8 @@ void psy_audio_array_set(psy_audio_Array*, uintptr_t index, float value);
 float psy_audio_array_at(psy_audio_Array*, uintptr_t index);
 float* psy_audio_array_data(psy_audio_Array*);
 void psy_audio_array_clear(psy_audio_Array*);
-void psy_audio_array_margin(psy_audio_Array*, int start, int end);
-void psy_audio_array_offset(psy_audio_Array*, int offset);
+void psy_audio_array_margin(psy_audio_Array*, uintptr_t start, uintptr_t end);
+void psy_audio_array_offset(psy_audio_Array*, intptr_t offset);
 void psy_audio_array_clearmargin(psy_audio_Array*);
 
 void psy_audio_array_fill(psy_audio_Array*, float val);

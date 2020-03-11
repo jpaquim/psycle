@@ -592,8 +592,7 @@ void dev_sethorizontalscrollposition(psy_ui_win_ComponentImp* self, int position
 	GetScrollInfo(self->hwnd, SB_HORZ, &si);
 	if (position < si.nMax) {
 		si.nPos = (int)position;
-	}
-	else {
+	} else {
 		si.nPos = si.nMax;
 	}
 	si.fMask = SIF_POS;

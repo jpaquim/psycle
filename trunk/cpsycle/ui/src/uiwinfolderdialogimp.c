@@ -13,7 +13,6 @@
 #include <shlobj.h>
 #include "uiwincomponentimp.h"
 #include <commdlg.h>
-#include <stdlib.h>
 #include "../../detail/portable.h"
 
 extern psy_ui_App app;

@@ -108,6 +108,7 @@ typedef void (*psy_ui_fp_onmouseenter)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onmouseleave)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onkeydown)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
+typedef void (*psy_ui_fp_ontimer)(struct psy_ui_Component*, int);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -149,6 +150,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_onmouseleave onmouseleave;
 	psy_ui_fp_onkeydown onkeydown;
 	psy_ui_fp_onkeydown onkeyup;
+	psy_ui_fp_ontimer ontimer;
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;
@@ -179,6 +181,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_show;
 	psy_Signal signal_hide;	
 	psy_Signal signal_align;
+	psy_Signal signal_selectsection;
 	//psy_Signal signal_preferredsize;
 	psy_Signal signal_command;
 	psy_Signal signal_focuslost;
@@ -251,6 +254,7 @@ void psy_ui_component_clientresize(psy_ui_Component*, int width, int height);
 void psy_ui_component_setposition(psy_ui_Component*, int x, int y, int width, int height);
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
+psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
 
 void psy_ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
 psy_ui_Font* psy_ui_component_font(psy_ui_Component*);
@@ -327,7 +331,7 @@ typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
 typedef psy_ui_TextMetric (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*, psy_ui_Font* font);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(struct psy_ui_ComponentImp*, const char* text, psy_ui_Font*);
-typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolor)(struct psy_ui_ComponentImp*, uint32_t color);
+typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolor)(struct psy_ui_ComponentImp*, psy_ui_Color color);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
 typedef void (*psy_ui_fp_componentimp_dev_setfocus)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_hasfocus)(struct psy_ui_ComponentImp*);
@@ -441,12 +445,12 @@ INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char*
 		psy_ui_component_font(self));
 }
 
-INLINE void psy_ui_component_setcolor(psy_ui_Component* self, uint32_t color)
+INLINE void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color)
 {
 	self->color = color;
 }
 
-INLINE void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, uint32_t color)
+INLINE void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
 {
 	self->backgroundcolor = color;
     // assert(self->imp);   
@@ -490,7 +494,8 @@ INLINE void psy_ui_component_setparent(psy_ui_Component* self, psy_ui_Component*
 	self->imp->vtable->dev_setparent(self->imp, parent);
 }
 
-INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* child, psy_ui_Component* insertafter)
+INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* child,
+	psy_ui_Component* insertafter)
 {
 	self->imp->vtable->dev_insert(self->imp, child->imp, insertafter->imp);
 }
@@ -498,6 +503,11 @@ INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* ch
 INLINE void psy_ui_component_setwheelscroll(psy_ui_Component* self, int lines)
 {
 	self->wheelscroll = lines;
+}
+
+INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t section)
+{
+	psy_signal_emit(&self->signal_selectsection, self, 1, section);
 }
 
 #ifdef __cplusplus

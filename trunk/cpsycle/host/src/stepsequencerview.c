@@ -53,8 +53,7 @@ static void stepsequencerbar_onpreferredsize(StepsequencerBar*, psy_ui_Size* lim
 	psy_ui_Size* rv);
 
 // view
-static void stepsequencerview_ontimer(StepsequencerView*,
-	psy_ui_Component* sender, int timerid);
+static void stepsequencerview_ontimer(StepsequencerView*, int timerid);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
 	Workspace* sender);
 static void stepsequencerview_onsteprowselected(StepsequencerView*,
@@ -498,6 +497,19 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect* self,
 }
 
 // stepsequencerview
+// pianoroll vtable
+static psy_ui_ComponentVtable stepsequencerview_vtable;
+static int stepsequencerview_vtable_initialized = 0;
+
+static void stepsequencerview_vtable_init(StepsequencerView* self)
+{
+	if (!stepsequencerview_vtable_initialized) {
+		stepsequencerview_vtable = *(self->component.vtable);
+		stepsequencerview_vtable.ontimer = (psy_ui_fp_ontimer)
+			stepsequencerview_ontimer;
+		stepsequencerview_vtable_initialized = 1;
+	}
+}
 void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -506,7 +518,9 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_margin_init(&margin, psy_ui_value_makeeh(1), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	self->workspace = workspace;	
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
+	stepsequencerview_vtable_init(self);
+	self->component.vtable = &stepsequencerview_vtable;
 	psy_ui_component_enablealign(&self->component);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
@@ -527,9 +541,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
 		self, stepsequencerview_onsequenceselectionchanged);
 	psy_signal_connect(&self->stepsequencerbarselect.signal_selected,
-		self, stepsequencerview_onsteprowselected);	
-	psy_signal_connect(&self->component.signal_timer, self,
-		stepsequencerview_ontimer);	
+		self, stepsequencerview_onsteprowselected);		
 	steptimer_init(&self->steptimer, &workspace->player);
 	psy_signal_connect(&self->steptimer.signal_linetick,
 		&self->stepsequencerbar,
@@ -540,8 +552,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_starttimer(&self->component, TIMERID_STEPSEQUENCERVIEW, 50);
 }
 
-void stepsequencerview_ontimer(StepsequencerView* self, psy_ui_Component* sender,
-	int timerid)
+void stepsequencerview_ontimer(StepsequencerView* self, int timerid)
 {
 	if (timerid == TIMERID_STEPSEQUENCERVIEW) {
 		steptimer_tick(&self->steptimer);

@@ -58,25 +58,25 @@ static void win_imp_vtable_init(psy_ui_curses_GraphicsImp* self)
 {
 	if (!win_imp_vtable_initialized) {
 		win_imp_vtable = *self->imp.vtable;
-		win_imp_vtable.dev_dispose = (psy_ui_g_imp_fp_dispose) psy_ui_curses_g_imp_dispose;
-		win_imp_vtable.dev_textout = (psy_ui_g_imp_fp_textout) psy_ui_curses_g_imp_textout;
-		win_imp_vtable.dev_textoutrectangle = (psy_ui_g_imp_fp_textoutrectangle) psy_ui_curses_g_imp_textoutrectangle;
-		win_imp_vtable.dev_drawrectangle = (psy_ui_g_imp_fp_drawrectangle) psy_ui_curses_g_imp_drawrectangle;
-		win_imp_vtable.dev_drawroundrectangle = (psy_ui_g_imp_fp_drawroundrectangle)psy_ui_curses_g_imp_drawroundrectangle;
-		win_imp_vtable.dev_textsize = (psy_ui_g_imp_fp_textsize) psy_ui_curses_g_imp_textsize;
-		win_imp_vtable.dev_drawsolidrectangle = (psy_ui_g_imp_fp_drawsolidrectangle)psy_ui_curses_g_imp_drawsolidrectangle;
-		win_imp_vtable.dev_drawsolidroundrectangle = (psy_ui_g_imp_fp_drawsolidroundrectangle)psy_ui_curses_g_imp_drawsolidroundrectangle;
-		win_imp_vtable.dev_drawsolidpolygon = (psy_ui_g_imp_fp_drawsolidpolygon)psy_ui_curses_g_imp_drawsolidpolygon;
-		win_imp_vtable.dev_drawline = (psy_ui_g_imp_fp_drawline)psy_ui_curses_g_imp_drawline;		
-		win_imp_vtable.dev_drawfullbitmap = (psy_ui_g_imp_fp_drawfullbitmap)psy_ui_curses_g_imp_drawfullbitmap;
-		win_imp_vtable.dev_drawbitmap = (psy_ui_g_imp_fp_drawbitmap)psy_ui_curses_g_imp_drawbitmap;
-		win_imp_vtable.dev_setbackgroundcolor = (psy_ui_g_imp_fp_setbackgroundcolor)psy_ui_curses_g_imp_setbackgroundcolor;
-		win_imp_vtable.dev_setbackgroundmode = (psy_ui_g_imp_fp_setbackgroundmode)psy_ui_curses_g_imp_setbackgroundmode;
-		win_imp_vtable.dev_settextcolor = (psy_ui_g_imp_fp_settextcolor)psy_ui_curses_g_imp_settextcolor;
-		win_imp_vtable.dev_setcolor = (psy_ui_g_imp_fp_setcolor)psy_ui_curses_g_imp_setcolor;
-		win_imp_vtable.dev_setfont = (psy_ui_g_imp_fp_setfont)psy_ui_curses_g_imp_setfont;
-		win_imp_vtable.dev_moveto = (psy_ui_g_imp_fp_moveto)psy_ui_curses_g_imp_moveto;
-		win_imp_vtable.dev_devcurveto = (psy_ui_g_imp_fp_devcurveto)psy_ui_curses_g_imp_devcurveto;
+		win_imp_vtable.dev_dispose = (psy_ui_fp_graphicsimp_dev_dispose) psy_ui_curses_g_imp_dispose;
+		win_imp_vtable.dev_textout = (psy_ui_fp_graphicsimp_dev_textout) psy_ui_curses_g_imp_textout;
+		win_imp_vtable.dev_textoutrectangle = (psy_ui_fp_graphicsimp_dev_textoutrectangle) psy_ui_curses_g_imp_textoutrectangle;
+		win_imp_vtable.dev_drawrectangle = (psy_ui_fp_graphicsimp_dev_drawrectangle) psy_ui_curses_g_imp_drawrectangle;
+		win_imp_vtable.dev_drawroundrectangle = (psy_ui_fp_graphicsimp_dev_drawroundrectangle)psy_ui_curses_g_imp_drawroundrectangle;
+		win_imp_vtable.dev_textsize = (psy_ui_fp_graphicsimp_dev_textsize) psy_ui_curses_g_imp_textsize;
+		win_imp_vtable.dev_drawsolidrectangle = (psy_ui_fp_graphicsimp_dev_drawsolidrectangle)psy_ui_curses_g_imp_drawsolidrectangle;
+		win_imp_vtable.dev_drawsolidroundrectangle = (psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle)psy_ui_curses_g_imp_drawsolidroundrectangle;
+		win_imp_vtable.dev_drawsolidpolygon = (psy_ui_fp_graphicsimp_dev_drawsolidpolygon)psy_ui_curses_g_imp_drawsolidpolygon;
+		win_imp_vtable.dev_drawline = (psy_ui_fp_graphicsimp_dev_drawline)psy_ui_curses_g_imp_drawline;		
+		win_imp_vtable.dev_drawfullbitmap = (psy_ui_fp_graphicsimp_dev_drawfullbitmap)psy_ui_curses_g_imp_drawfullbitmap;
+		win_imp_vtable.dev_drawbitmap = (psy_ui_fp_graphicsimp_dev_drawbitmap)psy_ui_curses_g_imp_drawbitmap;
+		win_imp_vtable.dev_setbackgroundcolor = (psy_ui_fp_graphicsimp_dev_setbackgroundcolor)psy_ui_curses_g_imp_setbackgroundcolor;
+		win_imp_vtable.dev_setbackgroundmode = (psy_ui_fp_graphicsimp_dev_setbackgroundmode)psy_ui_curses_g_imp_setbackgroundmode;
+		win_imp_vtable.dev_settextcolor = (psy_ui_fp_graphicsimp_dev_settextcolor)psy_ui_curses_g_imp_settextcolor;
+		win_imp_vtable.dev_setcolor = (psy_ui_fp_graphicsimp_dev_setcolor)psy_ui_curses_g_imp_setcolor;
+		win_imp_vtable.dev_setfont = (psy_ui_fp_graphicsimp_dev_setfont)psy_ui_curses_g_imp_setfont;
+		win_imp_vtable.dev_moveto = (psy_ui_fp_graphicsimp_dev_moveto)psy_ui_curses_g_imp_moveto;
+		win_imp_vtable.dev_devcurveto = (psy_ui_fp_graphicsimp_dev_curveto)psy_ui_curses_g_imp_devcurveto;
 		win_imp_vtable_initialized = 1;
 	}
 }

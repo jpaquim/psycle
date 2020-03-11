@@ -13,7 +13,7 @@
 #define TIMERID_VST2VIEW 420
 
 static void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv);
-static void ontimer(Vst2View*, psy_ui_Component* sender, int id);
+static void ontimer(Vst2View*, int id);
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
@@ -30,6 +30,7 @@ static void vtable_init(Vst2View* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.ontimer = (psy_ui_fp_ontimer) ontimer;
 	}
 }
 
@@ -64,7 +65,7 @@ Vst2View* vst2view_allocinit(psy_ui_Component* parent, psy_audio_Machine* machin
 	return rv;	
 }
 
-void ontimer(Vst2View* self, psy_ui_Component* sender, int timerid)
+void ontimer(Vst2View* self, int timerid)
 {	
 	psy_audio_machine_editoridle(self->machine);
 }
@@ -73,7 +74,5 @@ void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (rv) {		
 		psy_audio_machine_editorsize(self->machine, &rv->width, &rv->height);		
-	} else {
-		*rv = psy_ui_component_size(&self->component);
 	}
 }

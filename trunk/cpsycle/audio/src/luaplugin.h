@@ -14,7 +14,7 @@ extern "C" {
 typedef struct {
 	psy_audio_Machine* machine;
 	psy_audio_BufferContext* bc;
-	int numparameters_;
+	uintptr_t numparameters_;
 	int numcols_;
 	int numprograms_;
 	bool shared_;

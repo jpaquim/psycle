@@ -947,7 +947,7 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 		psyfile_read(self->file, pData, size1);
 		sounddesquash(pData, &pDest);
 		free(pData);
-		wave->channels.samples[0] = malloc(sizeof(float)*wave->numframes);
+		wave->channels.samples[0] = dsp.memory_alloc(wave->numframes, sizeof(float));
 		for (i = 0; i < wave->numframes; i++) {
 			short val = (short) pDest[i];
 			wave->channels.samples[0][i] = (float) val;				
@@ -963,7 +963,7 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 			psyfile_read(self->file, pData, size1);
 			sounddesquash(pData, &pDest);
 			free(pData);
-			wave->channels.samples[1] = malloc(sizeof(float)*wave->numframes);
+			wave->channels.samples[1] = dsp.memory_alloc(wave->numframes, sizeof(float));
 			for (i = 0; i < wave->numframes; i++) {
 				short val = (short) pDest[i];
 				wave->channels.samples[1][i] = (float) val;					
@@ -1355,7 +1355,7 @@ void readsmsb(psy_audio_SongFile* self)
 				psyfile_read(self->file, pData, size1);
 				sounddesquash(pData, &pDest);
 				free(pData);
-				wave->channels.samples[0] = malloc(sizeof(float)*wave->numframes);
+				wave->channels.samples[0] = dsp.memory_alloc(wave->numframes, sizeof(float));
 				for (i = 0; i < wave->numframes; i++) {
 					short val = (short) pDest[i];
 					wave->channels.samples[0][i] = (float) val;				
@@ -1371,7 +1371,7 @@ void readsmsb(psy_audio_SongFile* self)
 					psyfile_read(self->file, pData, size2);
 					sounddesquash(pData, &pDest);
 					free(pData);
-					wave->channels.samples[1] = malloc(sizeof(float)*wave->numframes);
+					wave->channels.samples[1] = dsp.memory_alloc(wave->numframes, sizeof(float));
 					for (i = 0; i < wave->numframes; i++) {
 						short val = (short) pDest[i];
 						wave->channels.samples[1][i] = (float) val;					
@@ -1956,7 +1956,7 @@ int psy3_write_patd(psy_audio_SongFile* self)
 			temp = self->song->patterns.songtracks; // eventually this may be variable per pattern
 			psyfile_write(self->file, &temp, sizeof(temp));
 
-			psyfile_writestring(self->file, pattern->label);
+			psyfile_writestring(self->file, pattern_name(pattern));
 
 			psyfile_write(self->file, &size77, sizeof(size77));
 			psyfile_write(self->file, copy, size77);
@@ -2028,7 +2028,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 				return status;
 			}
 			// pattern label
-			psyfile_writestring(self->file, pattern->label);
+			psyfile_writestring(self->file, pattern_name(pattern));
 			// num pattern entries
 			if (status = psyfile_write_int32(self->file,
 					psy_list_size(pattern->events))) {

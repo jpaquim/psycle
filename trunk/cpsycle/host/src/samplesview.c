@@ -282,9 +282,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	tabbar_init(&self->clienttabbar, tabbarparent);
 	psy_ui_component_setalign(&self->clienttabbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->clienttabbar.component);
-	tabbar_append(&self->clienttabbar, "Properties");
-	tabbar_append(&self->clienttabbar, "Import");
-	tabbar_append(&self->clienttabbar, "Editor");	
+	tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
 	samplesbox_init(&self->samplesbox, &self->left,
 		&workspace->song->samples, &workspace->song->instruments);	
 	psy_ui_component_setalign(&self->samplesbox.component,

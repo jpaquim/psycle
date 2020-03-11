@@ -127,11 +127,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
-	tabbar_append(&self->tabbar, "General");
-	tabbar_append(&self->tabbar, "Volume");
-	tabbar_append(&self->tabbar, "Pan");
-	tabbar_append(&self->tabbar, "Filter");
-	tabbar_append(&self->tabbar, "Pitch");	
+	tabbar_append_tabs(&self->tabbar, "General", "Volume", "Pan", "Filter",
+		"Pitch", NULL);	
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);

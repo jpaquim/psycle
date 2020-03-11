@@ -13,15 +13,13 @@
 
 #define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
-#define SCOPE_BUF_SIZE_LOG 13
 
-const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
-const int SCOPE_BUF_SIZE = 1 << SCOPE_BUF_SIZE_LOG;
-const uint32_t CLBARDC = 0x1010DC;
-const uint32_t CLBARPEAK = 0xC0C0C0;
-const uint32_t CLLEFT = 0xC06060;
-const uint32_t CLRIGHT = 0x60C060;
-const uint32_t CLBOTH = 0xC0C060;
+static const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
+static const uint32_t CLBARDC = 0x1010DC;
+static const uint32_t CLBARPEAK = 0xC0C0C0;
+static const uint32_t CLLEFT = 0xC06060;
+static const uint32_t CLRIGHT = 0x60C060;
+static const uint32_t CLBOTH = 0xC0C060;
 
 static void vuscope_ondestroy(VuScope*);
 static void vuscope_ondraw(VuScope*, psy_ui_Component* sender, psy_ui_Graphics*);
@@ -31,7 +29,7 @@ static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, int timerid);
 static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void vuscope_onsongchanged(VuScope*, Workspace*);
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
-static void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace);
+static void vuscope_disconnectmachinessignals(VuScope*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
 void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
@@ -49,10 +47,6 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->peakL = self->peakR = (psy_dsp_amp_t) 128.0f;
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
-	self->pSamplesL = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
-	self->pSamplesR = dsp.memory_alloc(SCOPE_BUF_SIZE, sizeof(float));
-	dsp.clear(self->pSamplesL, SCOPE_BUF_SIZE);
-	dsp.clear(self->pSamplesR, SCOPE_BUF_SIZE);
 	psy_signal_connect(&self->component.signal_destroy, self, vuscope_ondestroy);
 	psy_signal_connect(&self->component.signal_draw, self, vuscope_ondraw);	
 	psy_signal_connect(&self->component.signal_timer, self, vuscope_ontimer);	
@@ -65,10 +59,6 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 void vuscope_ondestroy(VuScope* self)
 {
 	vuscope_disconnectmachinessignals(self, self->workspace);
-	dsp.memory_dealloc(self->pSamplesL);
-	dsp.memory_dealloc(self->pSamplesR);
-	self->pSamplesL = 0;
-	self->pSamplesR = 0;
 }
 
 void vuscope_ondraw(VuScope* self, psy_ui_Component* sender, psy_ui_Graphics* g)
@@ -156,15 +146,36 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	int scopesamples;
 	psy_ui_Rectangle rect;
 	char buf[64];
+	float* pSamplesL;
+	float* pSamplesR;
+	psy_audio_Machine* machine;
+	psy_audio_Buffer* buffer;
+
+	machine = machines_at(&self->workspace->song->machines, self->wire.src);
+	if (!machine) {
+		return;
+	}
+
+	buffer = psy_audio_machine_buffermemory(machine);
+	if (!buffer) {
+		return;
+	}
+	scopesamples = psy_audio_machine_buffermemorysize(machine);
+	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
+	scopesamples = min(scopesamples, (int)(psy_audio_machine_samplerate(machine) * self->scope_peak_rate * 0.001)) & (~3);
+	pSamplesL = buffer->samples[0];
+	pSamplesR = buffer->samples[1];
 
 	size = psy_ui_component_size(&self->component);
 	right = size.width;
 	centerx = size.width / 2;
 	step = size.height / 7;
 	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
-	scopesamples = min((int)(SCOPE_BUF_SIZE), (int)(samplerate * self->scope_peak_rate * 0.001)) & (~0x3);
+	// scopesamples = min((int)(SCOPE_BUF_SIZE), (int)(samplerate * self->scope_peak_rate * 0.001)) & (~0x3);
 	//scopeBufferIndex is the position where it will write new data.
 	//int index = srcMachine._scopeBufferIndex & (~0x3); // & ~0x3 to ensure aligned to 16 bytes
+	
+
 	/*if (index > 0 && index < scopesamples) {
 		
 		int remaining = scopesamples - index; //Remaining samples at the end of the buffer.
@@ -182,9 +193,11 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 		//}
 	}
 	else {*/
-		if (index == 0) { index = SCOPE_BUF_SIZE; }
-		maxL = dsp.maxvol(self->pSamplesL + index - scopesamples, scopesamples);
-		maxR = dsp.maxvol(self->pSamplesR + index - scopesamples, scopesamples);
+		// if (index == 0) { index = SCOPE_BUF_SIZE; }
+	//for (index = 0; index < scopesamples; ++index) {
+		maxL = dsp.maxvol(pSamplesL + index, scopesamples);
+		maxR = dsp.maxvol(pSamplesR + index, scopesamples);
+	//}
 #if PSYCLE__CONFIGURATION__RMS_VUS
 		if (srcMachine.Bypass())
 #endif

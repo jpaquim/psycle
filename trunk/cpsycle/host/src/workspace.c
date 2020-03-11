@@ -1748,10 +1748,10 @@ void workspace_showparameters(Workspace* self, uintptr_t machineslot)
 	psy_signal_emit(&self->signal_showparameters, self, 1, machineslot);
 }
 
-void workspace_selectview(Workspace* self, int view, const char* anchor, int option)
+void workspace_selectview(Workspace* self, int view, uintptr_t section, int option)
 {
 	self->currview = view;
-	psy_signal_emit(&self->signal_viewselected, self, 3, view, anchor, option);
+	psy_signal_emit(&self->signal_viewselected, self, 3, view, section, option);
 }
 
 void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak, float value)
