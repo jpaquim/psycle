@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "stepsequencerview.h"
+
+#include <songio.h>
 #include <exclusivelock.h>
 #include "resources/resource.h"
 #include "../../detail/portable.h"
@@ -55,7 +57,7 @@ static void stepsequencerbar_onpreferredsize(StepsequencerBar*, psy_ui_Size* lim
 // view
 static void stepsequencerview_ontimer(StepsequencerView*, int timerid);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
-	Workspace* sender);
+	Workspace* sender, int flag, psy_audio_SongFile* songfile);
 static void stepsequencerview_onsteprowselected(StepsequencerView*,
 	psy_ui_Component* sender);
 static void stepsequencerview_setpattern(StepsequencerView*,
@@ -578,7 +580,8 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 	steptimer_reset(&self->steptimer, entry ? entry->offset : 0);	
 }
 
-void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspace)
+void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspace,
+	int flag, psy_audio_SongFile* songfile)
 {
 	SequenceSelection selection;	
 	psy_audio_Pattern* pattern;

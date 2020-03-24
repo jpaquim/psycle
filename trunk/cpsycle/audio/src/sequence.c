@@ -66,7 +66,7 @@ void sequenceselection_seteditposition(SequenceSelection* self,
 		}
 	} else {		
 		SequenceTrack* track;
-		psy_List* p = list_last(self->entries);
+		psy_List* p = psy_list_last(self->entries);
 			
 		if (p) {
 			track = (SequenceTrack*)position.track->entry;

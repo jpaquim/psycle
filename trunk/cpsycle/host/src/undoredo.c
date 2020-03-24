@@ -45,16 +45,20 @@ void undoredo_redo(UndoRedo* self)
 
 Command* swap(psy_List** first, psy_List** second)
 {
-	Command* rv;
-
 	if (*first) {		
-		rv = (Command*)list_last(*first)->entry;
-		psy_list_append(second, rv);
-		psy_list_remove(first, list_last(*first));		
-	} else {
-		rv = 0;
-	}
-	return rv;
+		psy_List* last;
+
+		last = psy_list_last(*first);
+		if (last) {
+			Command* rv;
+
+			rv = last->entry;
+			psy_list_append(second, rv);
+			psy_list_remove(first, last);
+			return rv;
+		}
+	} 
+	return 0;
 }
 
 void undoredo_execute(UndoRedo* self, Command* command)

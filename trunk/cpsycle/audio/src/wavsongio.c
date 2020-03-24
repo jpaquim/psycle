@@ -55,19 +55,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 
 		machine = machinefactory_makemachine(self->song->machinefactory,
 			MACH_SAMPLER, "");
-		if (machine) {			
-			psy_Properties* machinesproperties;
-			psy_Properties* machineproperties;
-	
-			machinesproperties = psy_properties_create_section(
-				self->workspaceproperties, "machines");	
-			machineproperties = psy_properties_create_section(
-				machinesproperties, "machine");
-			psy_properties_append_int(machineproperties, "index", 0, 0,
-				256);
-			psy_properties_append_int(machineproperties, "x", 100, 0, 0);
-			psy_properties_append_int(machineproperties, "y", 100, 0, 0);
-			self->workspaceproperties = machinesproperties;
+		if (machine) {
 			machines_insert(&self->song->machines, 0, machine);
 			machines_connect(&self->song->machines, 0, MASTER_INDEX);
 		}

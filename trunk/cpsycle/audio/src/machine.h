@@ -10,6 +10,7 @@
 #include "patternevent.h"
 #include "buffercontext.h"
 #include "connections.h"
+#include "cputimeclock.h"
 #include <dsptypes.h>
 #include "../../detail/psydef.h"
 
@@ -157,7 +158,6 @@ typedef int (*fp_machine_numcaptures)(struct psy_audio_Machine*);
 typedef const char* (*fp_machine_playbackname)(struct psy_audio_Machine*, int index);
 typedef int (*fp_machine_numplaybacks)(struct psy_audio_Machine*);
 
-
 typedef struct MachineVtable {
 	fp_machine_init init;
 	fp_machine_reload reload;
@@ -246,6 +246,7 @@ typedef struct psy_audio_Machine {
 	MachineCallback callback;	
 	psy_Signal signal_worked;
 	int err;
+	psy_audio_CpuTimeClock accumulated_processing_time_;
 } psy_audio_Machine;
 
 void machine_init(psy_audio_Machine*, MachineCallback);

@@ -37,7 +37,7 @@ psy_List* psy_list_insert(psy_List**, psy_List* node, void* entry);
 ///\return next node of the removed node or last node, if next is null
 psy_List* psy_list_remove(psy_List**, psy_List* node);
 /// returns the tail node or null
-psy_List* list_last(psy_List*);
+psy_List* psy_list_last(psy_List*);
 /// counts the nodes of the list
 uintptr_t psy_list_size(const psy_List*);
 /// checks if the list has the node

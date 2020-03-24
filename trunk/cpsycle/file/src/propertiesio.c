@@ -14,78 +14,83 @@
 
 #define MAXSTRINGSIZE 4096
 
+typedef enum {
+	PROPERTIESIO_STATE_READKEY = 0,
+	PROPERTIESIO_STATE_READVAL = 1,
+	PROPERTIESIO_STATE_ADDPROPERTY = 2,
+	PROPERTIESIO_STATE_READSECTION = 3,
+	PROPERTIESIO_STATE_ADDSECTION = 4,
+} PropertiesIOState;
+
 static int reallocstr(char** str, size_t size, size_t* cap);
 static int OnSaveIniEnum(FILE* file, psy_Properties*, int level);
 
 int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 {
 	FILE* fp;
-	psy_Properties* curr;
-
-	curr = self;			
+				
 	fp = fopen(path, "rb");
 	if (fp) {
 		int c;
-		int i;
-		int state;
+		uintptr_t cp = 0;
+		PropertiesIOState state;
 		char* key = 0;
 		size_t keycap = 0;
 		char* value = 0;
 		size_t valcap = 0;
-		
-		i = 0;
-		state = 0;
+		psy_Properties* curr;
 
+		curr = self;		
+		state = PROPERTIESIO_STATE_READKEY;
 		reallocstr(&key, 256, &keycap);
-		reallocstr(&value, 256, &valcap);		
-				
+		reallocstr(&value, 256, &valcap);				
 		while ((c = fgetc(fp)) != EOF) {			
-			if (state == 0) {
+			if (state == PROPERTIESIO_STATE_READKEY) {
 				if (c == '\r') {
-					state = 0;
+					state = PROPERTIESIO_STATE_READKEY;
 				} else
 				if (c == '\n') {
-					state = 0;
+					state = PROPERTIESIO_STATE_READKEY;
 				} else
 				if (c == '[') {
-					state = 3;
-					key[i] = '\0';
-					i = 0;
+					state = PROPERTIESIO_STATE_READSECTION;
+					key[cp] = '\0';
+					cp = 0;
 				} else
 				if (c == '=') {
-					state = 1;
-					key[i] = '\0';
-					i = 0;
+					state = PROPERTIESIO_STATE_READVAL;
+					key[cp] = '\0';
+					cp = 0;
 				} else {
-					if (!reallocstr(&key, i, &keycap)) {
-						key[i] = c;	
+					if (!reallocstr(&key, cp, &keycap)) {
+						key[cp] = c;
 					}
-					++i;
+					++cp;
 				}
 			} else
-			if (state == 1) {
+			if (state == PROPERTIESIO_STATE_READVAL) {
 				if (c == '\n') {
-					state = 2;
-					value[i] = '\0';
-					i = 0;					
+					state = PROPERTIESIO_STATE_ADDPROPERTY;
+					value[cp] = '\0';
+					cp = 0;
 				} else
-				if (!reallocstr(&value, i, &valcap)) {
-					value[i] = c;					
+				if (!reallocstr(&value, cp, &valcap)) {
+					value[cp] = c;
 				}
-				++i;
+				++cp;
 			} else 
-			if (state == 3) {
+			if (state == PROPERTIESIO_STATE_READSECTION) {
 				if (c == ']') {
-					state = 4;
-					key[i] = '\0';
-					i = 0;					
+					state = PROPERTIESIO_STATE_ADDSECTION;
+					key[cp] = '\0';
+					cp = 0;
 				} else
-				if (!reallocstr(&key, i, &keycap)) {
-					key[i] = c;					
+				if (!reallocstr(&key, cp, &keycap)) {
+					key[cp] = c;
 				}
-				++i;
+				++cp;
 			}
-			if (state == 2) {
+			if (state == PROPERTIESIO_STATE_ADDPROPERTY) {
 				psy_Properties* p = psy_properties_read(curr, key);
 				if (p) {					
 					switch (p->item.typ) {
@@ -121,10 +126,10 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 						psy_properties_append_int(curr, key, intval, 0, 0);											
 					}
 				}
-				i = 0;
-				state = 0;
+				cp = 0;
+				state = PROPERTIESIO_STATE_READKEY;
 			} else
-			if (state == 4) {
+			if (state == PROPERTIESIO_STATE_ADDSECTION) {
 				psy_Properties* p;				
 				psy_Properties* prev = 0;
 				p = psy_properties_findsectionex(self, key, &prev);
@@ -139,16 +144,16 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 				} else {
 					curr = self;
 				}
-				i = 0;
-				state = 0;
+				cp = 0;
+				state = PROPERTIESIO_STATE_READKEY;
 			}
 		}		
 		fclose(fp);
-		if (state == 1) {
-			if (!reallocstr(&value, i, &valcap)) {
-				value[i] = '\0';
+		if (state == PROPERTIESIO_STATE_READVAL) {
+			if (!reallocstr(&value, cp, &valcap)) {
+				value[cp] = '\0';
 			} else {
-				value[MAXSTRINGSIZE-1] = '\0';
+				value[MAXSTRINGSIZE - 1] = '\0';
 			}
 			if (psy_properties_read(curr, key)) {
 				psy_properties_write_string(curr, key, value);
@@ -160,168 +165,18 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 	return fp != 0;
 }
 
-int propertiesio_loadsection(psy_Properties* self, const char* path,
-	const char* section, int allowappend)
-{
-	FILE* fp;
-	psy_Properties* curr;
-	int dowrite;
-
-	dowrite = 0;
-	curr = self;
-	fp = fopen(path, "rb");
-	if (fp) {
-		int c;
-		int i;
-		int state;
-		char* key = 0;
-		size_t keycap = 0;
-		char* value = 0;
-		size_t valcap = 0;
-		
-		i = 0;
-		state = 0;
-
-		reallocstr(&key, 256, &keycap);
-		reallocstr(&value, 256, &valcap);		
-				
-		while ((c = fgetc(fp)) != EOF) {			
-			if (state == 0) {
-				if (c == '\r') {
-					state = 0;
-				} else
-				if (c == '\n') {
-					state = 0;
-				} else
-				if (c == '[') {
-					state = 3;
-					key[i] = '\0';
-					i = 0;
-				} else
-				if (c == '=') {
-					state = 1;
-					key[i] = '\0';
-					i = 0;
-				} else {
-					if (!reallocstr(&key, i, &keycap)) {
-						key[i] = c;	
-					}
-					++i;
-				}
-			} else
-			if (state == 1) {
-				if (c == '\n') {
-					state = 2;
-					value[i] = '\0';
-					i = 0;					
-				} else
-				if (!reallocstr(&value, i, &valcap)) {
-					value[i] = c;					
-				}
-				++i;
-			} else 
-			if (state == 3) {
-				if (c == ']') {
-					state = 4;
-					key[i] = '\0';
-					i = 0;					
-				} else
-				if (!reallocstr(&key, i, &keycap)) {
-					key[i] = c;					
-				}
-				++i;
-			}
-			if (state == 2) {
-				if (dowrite) {
-					psy_Properties* p = psy_properties_read(curr, key);
-					if (p) {						
-						switch (p->item.typ) {
-							case PSY_PROPERTY_TYP_ROOT:
-							break;
-							case PSY_PROPERTY_TYP_INTEGER:
-								psy_properties_write_int(curr, key, atoi(value));
-							break;
-							case PSY_PROPERTY_TYP_BOOL:
-								psy_properties_write_bool(curr, key, atoi(value));
-							break;
-							case PSY_PROPERTY_TYP_CHOICE:
-								psy_properties_write_choice(curr, key, atoi(value));
-							break;
-							case PSY_PROPERTY_TYP_STRING:							
-								psy_properties_write_string(curr, key, value);
-							break;
-							case PSY_PROPERTY_TYP_FONT:
-								psy_properties_write_font(curr, key, value);
-							break;
-							default:
-							break;
-						}					
-					} else
-					if (allowappend) {
-						int intval;
-						char *stopstring;
-
-						intval = strtol(value, &stopstring, 10);
-						if (errno == ERANGE || strcmp(stopstring, "") != 0) {
-							psy_properties_append_string(curr, key, value);	
-							psy_properties_sethint(curr, PSY_PROPERTY_HINT_READONLY);
-						} else {
-							psy_properties_append_int(curr, key, intval, 0, 0);											
-						}
-					}
-				}
-				i = 0;
-				state = 0;
-			} else
-			if (state == 4) {
-				psy_Properties* p;				
-				psy_Properties* prev = 0;				
-				dowrite = strncmp(key, section, strlen(section)) == 0;					
-				if (dowrite) {
-					p = psy_properties_findsectionex(self, key, &prev);
-					if (p && p->children) {
-						curr = p;
-					} else
-					if (allowappend) {										
-						curr = psy_properties_create_section(prev, key);
-					} else {
-						curr = self;
-					}
-				}
-				i = 0;
-				state = 0;
-			}
-		}
-		fclose(fp);
-		if (state == 1) {
-			if (!reallocstr(&value, i, &valcap)) {
-				value[i] = '\0';
-			} else {
-				value[MAXSTRINGSIZE-1] = '\0';
-			}
-			if (dowrite) {
-				if (psy_properties_read(curr, key)) {
-					psy_properties_write_string(curr, key, value);
-				}
-			}
-		}
-		free(key);
-		free(value);
-	}	
-	return fp != 0;	
-}
-
 static int skip;
 static int skiplevel;
 
 void propertiesio_save(psy_Properties* self, const char* path)
 {
 	FILE* fp;
+
 	fp = fopen(path, "wb");
 	if (fp) {
 		skip = 0;
 		skiplevel = 0;
-		psy_properties_enumerate(self, fp, (psy_PropertiesCallback)OnSaveIniEnum);
+		psy_properties_enumerate(self, fp, (psy_PropertiesCallback) OnSaveIniEnum);
 		fclose(fp);
 	}
 }

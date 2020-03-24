@@ -13,6 +13,7 @@
 #include <uibutton.h>
 #include <uilabel.h>
 #include "zoombox.h"
+#include "interpolatecurveview.h"
 
 #include <pattern.h>
 
@@ -55,13 +56,6 @@ typedef struct {
 	TrackerHeaderCoords headercoords;
 	psy_ui_Bitmap bitmap;
 } TrackerSkin;
-
-typedef struct {
-	PatternEditPosition topleft;
-	PatternEditPosition bottomright;
-} TrackerGridBlock;
-
-typedef TrackerGridBlock PatternSelection;
 
 typedef struct {
 	psy_ui_TextMetric tm;
@@ -215,7 +209,8 @@ typedef struct TrackerView {
 	TrackerLineNumbers linenumbers;
 	TrackerGrid griddefaults;
 	TrackerGrid grid;
-	PatternBlockMenu blockmenu;	
+	PatternBlockMenu blockmenu;
+	InterpolateCurveView interpolatecurveview;
 	TrackerSkin skin;	
 	int showlinenumbers;
 	int showlinenumbercursor;

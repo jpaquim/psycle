@@ -13,9 +13,12 @@
 #include <luaplugin.h>
 #include <exclusivelock.h>
 
+#include <songio.h>
+
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
-static void plugineditor_onsongchanged(PluginEditor*, Workspace*);
+static void plugineditor_onsongchanged(PluginEditor*, Workspace*, int flag,
+	psy_audio_SongFile*);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
 static void plugineditor_ondestroy(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onreload(PluginEditor*, psy_ui_Component* sender);
@@ -99,7 +102,7 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 	}
 }
 
-void plugineditor_onsongchanged(PluginEditor* self, Workspace* workspace)
+void plugineditor_onsongchanged(PluginEditor* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {
 	plugineditor_connectmachinesignals(self, workspace);
 }

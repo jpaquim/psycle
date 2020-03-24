@@ -15,6 +15,7 @@
 #include <string.h>
 #include <exclusivelock.h>
 #include "../../detail/portable.h"
+#include <songio.h>
 
 #if defined DIVERSALIS__OS__UNIX
 #define _MAX_PATH 4096
@@ -104,9 +105,10 @@ static void machinewireview_onmachinesinsert(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onmachinesremoved(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
-static void machinewireview_onsongchanged(MachineWireView*, Workspace*);
-static void machinewireview_updatemachineuis(MachineWireView*,
-	psy_Properties*);
+static void machinewireview_onsongchanged(MachineWireView*, Workspace*,
+	int flag, psy_audio_SongFile*);
+static void machinewireview_buildmachineuis(MachineWireView*,
+	psy_Table*);
 static void machinewireview_applyproperties(MachineWireView*, psy_Properties*);
 static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
 	uintptr_t slot);
@@ -117,7 +119,8 @@ static void machinewireview_preparedrawallmacvus(MachineWireView*);
 static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
 	psy_Properties*);
 static void machinewireview_readconfig(MachineWireView*);
-static void machinewireview_beforesavesong(MachineWireView*, Workspace*);
+static void machinewireview_beforesavesong(MachineWireView*, Workspace*,
+	psy_audio_SongFile*);
 static void machinewireview_showwireview(MachineWireView*,
 	psy_audio_Wire wire);
 static void machinewireview_onwireframedestroyed(MachineWireView*,
@@ -991,20 +994,16 @@ void machinewireview_drawmachines(MachineWireView* self, psy_ui_Graphics* g)
 {
 	psy_TableIterator it;
 	
-	for (it = psy_table_begin(&self->machineuis); it.curr != 0; 
+	for (it = psy_table_begin(&self->machineuis);
+			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {				
-		psy_audio_Machine* machine;
+		MachineUi* machineui;
 
-		machine = machines_at(self->machines, psy_tableiterator_key(&it));
-		if (machine) {
-			MachineUi* machineui;
-
-			machineui = (MachineUi*)psy_tableiterator_value(&it);
-			machineui_draw(machineui, g, self, psy_tableiterator_key(&it));
-			if (self->selectedwire.src == NOMACHINE_INDEX &&
-					self->selectedslot == psy_tableiterator_key(&it)) {
-				machineui_drawhighlight(machineui, g, self);	
-			}
+		machineui = (MachineUi*)psy_tableiterator_value(&it);
+		machineui_draw(machineui, g, self, psy_tableiterator_key(&it));
+		if (self->selectedwire.src == NOMACHINE_INDEX &&
+				self->selectedslot == psy_tableiterator_key(&it)) {
+			machineui_drawhighlight(machineui, g, self);	
 		}
 	}
 }
@@ -1543,68 +1542,60 @@ void machinewireview_onmachinesremoved(MachineWireView* self,
 }
 
 void machinewireview_beforesavesong(MachineWireView* self,
-	Workspace* workspace)
+	Workspace* workspace, psy_audio_SongFile* songfile)
 {
-	if (workspace->properties) {		
-		psy_Properties* p;
-		
-		p = psy_properties_find(workspace->properties, "machines");
-		if (p) {
-			for (p = p->children; p != 0; p = psy_properties_next(p)) {				
-				int index;				
-								
-				index = psy_properties_int(p, "index", NOMACHINE_INDEX);
-				if (index != NOMACHINE_INDEX) {
-					MachineUi* machineui;
-					
-					machineui = machineuis_at(self, index);
-					if (machineui) {
-						psy_properties_write_int(p, "x", machineui->x);
-						psy_properties_write_int(p, "y", machineui->y);						
-					}
-				}
-			}			
-		}
-	}	
-}
+	if (songfile) {
+		psy_TableIterator it;
 
-void machinewireview_updatemachineuis(MachineWireView* self,
-	psy_Properties* machines)
-{
-	if (machines) {
-		psy_audio_Machine* machine;
-		psy_Properties* p;
+		for (it = psy_table_begin(&self->machineuis);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			MachineUi* machineui;
+			psy_audio_MachineUi* songio_machineui;
 
-		machineuis_removeall(self);
-		p = machines->children;
-		while (p) {
-			if (p->item.key && strcmp(p->item.key, "machine") == 0) {				
-				int x;
-				int y;
-				int index;				
-																							
-				index = psy_properties_int(p, "index", 0);
-				x = psy_properties_int(p, "x", 0);
-				y = psy_properties_int(p, "y", 0);				
-				machine = machines_at(self->machines, index);
-				if (machine) {					
-					machineuis_insert(self, index, x, y, &self->skin);
-					if (index != MASTER_INDEX) {					
-						psy_signal_connect(&machine->signal_worked, self,
-							machinewireview_onmachineworked);
-					}
-				}
-			}
-			p = psy_properties_next(p);
+			machineui = (MachineUi*)psy_tableiterator_value(&it);
+			songio_machineui = psy_audio_songfile_machineui(songfile, psy_tableiterator_key(&it));
+			songio_machineui->x = machineui->x;
+			songio_machineui->y = machineui->y;
 		}
 	}
 }
 
-void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace)
+void machinewireview_buildmachineuis(MachineWireView* self,
+	psy_Table* machineuis)
+{
+	machineuis_removeall(self);
+	if (machineuis) {
+		psy_TableIterator it;
+
+		for (it = psy_table_begin(machineuis);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_MachineUi* machineui;
+			psy_audio_Machine* machine;
+
+			machineui = (psy_audio_MachineUi*)psy_tableiterator_value(&it);
+			machine = machines_at(self->machines, psy_tableiterator_key(&it));
+			if (machine) {
+				machineuis_insert(self, psy_tableiterator_key(&it),
+					machineui->x, machineui->y, &self->skin);
+				if (psy_tableiterator_key(&it) != MASTER_INDEX) {
+					psy_signal_connect(&machine->signal_worked, self,
+						machinewireview_onmachineworked);
+				}
+			}
+		}
+	} else {
+		machineuis_insert(self, MASTER_INDEX,
+			640, 480, &self->skin);
+		machinewireview_align(self);
+	}
+}
+
+void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {		
 	self->machines = &workspace->song->machines;	
-	machinewireview_updatemachineuis(self, psy_properties_find(
-		workspace->properties, "machines"));	
+	machinewireview_buildmachineuis(self, songfile ? &songfile->machineuis : 0);	
 	machinewireview_connectmachinessignals(self);
 	self->dx = 0;
 	self->dy = 0;
@@ -1664,10 +1655,12 @@ void machinewireview_ontimer(MachineWireView* self, int timerid)
 				psy_ui_Component temp;
 				psy_ui_Component* view;
 				psy_audio_Machine* machine;
+				psy_ui_Component* dockparent;
 
 				frame = machineui->frame;
 				psy_ui_component_init(&temp, &self->component);
 				view = frame->view;
+				dockparent = psy_ui_component_parent(&frame->component);
 				machine = frame->machine;
 				psy_ui_component_setparent(frame->view, &temp);
 				psy_signal_disconnectall(&view->signal_preferredsizechanged);
@@ -1682,6 +1675,8 @@ void machinewireview_ontimer(MachineWireView* self, int timerid)
 				machineui->frame = frame;
 				psy_signal_connect(&frame->component.signal_destroy, machineui,
 					machineui_onframedestroyed);
+				psy_ui_component_align(psy_ui_component_parent(dockparent));
+				psy_ui_component_align(dockparent);
 			} else
 			if (machineui->frame->dodock) {
 				MachineFrame* frame;
@@ -1709,7 +1704,12 @@ void machinewireview_ontimer(MachineWireView* self, int timerid)
 					machineui_onframedestroyed);
 			} else
 			if (machineui->frame->doclose) {
+				psy_ui_Component* dockparent;
+
+				dockparent = psy_ui_component_parent(&machineui->frame->component);
 				psy_ui_component_destroy(&machineui->frame->component);
+				psy_ui_component_align(psy_ui_component_parent(dockparent));
+				psy_ui_component_align(dockparent);
 			}
 		}
 	}

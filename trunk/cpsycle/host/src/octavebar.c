@@ -5,12 +5,13 @@
 
 #include "octavebar.h"
 #include "../../detail/portable.h"
+#include <songio.h>
 
 static void OnDestroy(OctaveBar*, psy_ui_Component* component);
 static void BuildOctaveBox(OctaveBar* self);
 static void OnOctaveBoxSelChange(OctaveBar*, psy_ui_Component* sender, int sel);
 static void OnOctaveChanged(OctaveBar*, Workspace*, int octave);
-static void OnSongChanged(OctaveBar*, Workspace*);
+static void OnSongChanged(OctaveBar*, Workspace*, int flag, psy_audio_SongFile*);
 
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
 {	
@@ -67,7 +68,7 @@ void OnOctaveChanged(OctaveBar* self, Workspace* workspace, int octave)
 	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
 }
 
-void OnSongChanged(OctaveBar* self, Workspace* workspace)
+void OnSongChanged(OctaveBar* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
 }

@@ -64,7 +64,6 @@ typedef struct {
 	psy_Properties* keyboard;
 	psy_Properties* directories;
 	psy_Properties* compatibility;
-	psy_Properties* properties;
 	psy_Properties* lang;	
 	psy_Properties* driverconfigure;
 	psy_Properties* driverconfigurations;
@@ -196,5 +195,7 @@ const char* workspace_config_directory(Workspace*);
 void workspace_changedefaultfontsize(Workspace*, int size);
 const char* workspace_dialbitmap_path(Workspace*);
 void workspace_dockview(Workspace*, psy_ui_Component* view);
+int workspace_ismovecursorwhenpaste(Workspace*);
+void workspace_movecursorwhenpaste(Workspace*, bool on);
 
 #endif

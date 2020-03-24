@@ -38,7 +38,7 @@ static void readepat(psy_audio_SongFile*);
 static void readinsd(psy_audio_SongFile*);
 static void readeins(psy_audio_SongFile*);
 static void readsmid(psy_audio_SongFile*);
-static void readmacd(psy_audio_SongFile*, psy_Properties* workspace);
+static void readmacd(psy_audio_SongFile*);
 static void readsmsb(psy_audio_SongFile*);
 static void loadxminstrument(psy_audio_SongFile*, psy_audio_Instrument* instrument,
 	bool islegacy, uint32_t legacyversion);
@@ -47,7 +47,7 @@ static psy_audio_Sample* xmloadwav(psy_audio_SongFile*);
 static void loadwavesubchunk(psy_audio_SongFile*, int32_t instrIdx,
 	int32_t pan, char * instrum_name, int32_t fullopen, int32_t loadIdx);
 static psy_audio_Machine* machineloadchunk(psy_audio_SongFile*,
-	int32_t index, psy_Properties* workspace);
+	int32_t index);
 static void buildsequence(psy_audio_SongFile*, unsigned char* playorder,
 	int playlength);
 static void psy3_setinstrumentnames(psy_audio_SongFile*);
@@ -67,7 +67,6 @@ static int psy3_write_machine(psy_audio_SongFile*, psy_audio_Machine*,
 static void psy3_savedllnameandindex(PsyFile*, const char* name,
 	int32_t shellindex);
 static int psy3_write_connections(psy_audio_SongFile*, uintptr_t slot);
-static psy_Properties* machine_properties(psy_audio_SongFile*, int32_t slot);
 static int psy3_save_instrument(psy_audio_SongFile*, psy_audio_Instrument*);
 static int psy3_save_sample(psy_audio_SongFile*, psy_audio_Sample*);
 static short* psy3_floatbuffertoshort(float* buffer, uintptr_t numframes);
@@ -86,10 +85,7 @@ int psy_audio_psy3_load(psy_audio_SongFile* self)
 	int32_t progress = 0;
 	uint32_t filesize = psyfile_filesize(self->file);
 	unsigned char playorder[MAX_SONG_POSITIONS];	
-	psy_Properties* machinesproperties;
 	
-	machinesproperties = psy_properties_create_section(
-		self->workspaceproperties, "machines");	
 	psyfile_read(self->file, &temp32, sizeof(temp32));
 	self->file->fileversion = temp32;
 	psyfile_read(self->file, &temp32, sizeof(temp32));	
@@ -139,7 +135,7 @@ int psy_audio_psy3_load(psy_audio_SongFile* self)
 		} else
 		if (strcmp(header,"MACD")==0) {
 			psyfile_readchunkbegin(self->file);			
-			readmacd(self, machinesproperties);			
+			readmacd(self);			
 			psyfile_seekchunkend(self->file);
 			progress += 1;
 		} else
@@ -247,7 +243,6 @@ void readsngi(psy_audio_SongFile* self)
 	int32_t temp;
 	int32_t songtracks;		
 	int32_t currentoctave;
-	int32_t solo;
 	int32_t _tracksoloed;
 	int32_t seqbus;
 	int32_t paramselected;
@@ -288,7 +283,11 @@ void readsngi(psy_audio_SongFile* self)
 		// machinesoloed
 		// we need to buffer this because destroy machine will clear it
 		psyfile_read(self->file, &temp, sizeof temp);
-		solo = temp;
+		if (temp >= 0) {
+			self->machinesoloed = (uint32_t) temp;			
+		} else {
+			self->machinesoloed = NOMACHINE_INDEX;			
+		}
 		// tracksoloed
 		psyfile_read(self->file, &temp, sizeof temp);
 		_tracksoloed = temp;
@@ -1484,7 +1483,7 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 	}
 }
 
-void readmacd(psy_audio_SongFile* self, psy_Properties* machinesproperties)
+void readmacd(psy_audio_SongFile* self)
 {	
 	if((self->file->currchunk.version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 	{
@@ -1496,11 +1495,8 @@ void readmacd(psy_audio_SongFile* self, psy_Properties* machinesproperties)
 		if(index < MAX_MACHINES)
 		{			
 			psy_audio_Machine* machine;
-			psy_Properties* machineproperties;
 			
-			machineproperties = psy_properties_create_section(machinesproperties, "machine");
-			psy_properties_append_int(machineproperties, "index", index, 0, MAX_MACHINES);
-			machine = machineloadchunk(self, index, machineproperties);
+			machine = machineloadchunk(self, index);
 			if (machine) {
 				machines_insert(&self->song->machines, index, machine);
 			}
@@ -1508,7 +1504,7 @@ void readmacd(psy_audio_SongFile* self, psy_Properties* machinesproperties)
 	}	
 }
 
-psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index, psy_Properties* properties)
+psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 {
 	// assume version 0 for now	
 	psy_audio_Machine* machine;
@@ -1536,6 +1532,7 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index, psy
 		int32_t panning;
 		int32_t x;
 		int32_t y;
+		psy_audio_MachineUi* machineui;
 		
 		psyfile_read(self->file, &bypass, sizeof(bypass));
 		psyfile_read(self->file, &mute, sizeof(mute));
@@ -1543,8 +1540,10 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index, psy
 		psyfile_read(self->file, &x, sizeof(x));
 		psyfile_read(self->file, &y, sizeof(y));
 		psyfile_skip(self->file, 2*sizeof(int32_t));	// numInputs, numOutputs
-		psy_properties_append_int(properties, "x", x, 0, 0);
-		psy_properties_append_int(properties, "y", y, 0, 0);
+		
+		machineui = psy_audio_songfile_machineui(self, index);
+		machineui->x = x;
+		machineui->y = y;
 		if (bypass) {
 			psy_audio_machine_bypass(machine);
 		}
@@ -1743,7 +1742,13 @@ int psy3_write_sngi(psy_audio_SongFile* self)
 		return status;
 	}
 	// machinesoloed
-	if (status = psyfile_write_int32(self->file, 0)) {
+	if (psy_audio_machines_soloed(&self->song->machines) != NOMACHINE_INDEX) {
+
+	}
+	if (status = psyfile_write_int32(self->file,
+		(psy_audio_machines_soloed(&self->song->machines) != NOMACHINE_INDEX)
+		? (int)psy_audio_machines_soloed(&self->song->machines)
+		: -1)) {
 		return status;
 	}
 	// tracksoloed
@@ -2120,9 +2125,8 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 
 	info = psy_audio_machine_info(machine);
 	if (info) {
-		psy_Properties* p;
-		
-		p = machine_properties(self, slot);		
+		psy_audio_MachineUi* machineui;
+			
 		if (status =psyfile_write_int32(self->file, (int32_t)info->type)) {
 			return status;
 		}
@@ -2139,12 +2143,11 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 			(psy_audio_machine_panning(machine) * 128.f))) {
 			return status;
 		}
-		if (status = psyfile_write_int32(self->file,
-			(int32_t)(p ? psy_properties_int(p, "x", 100) : 100))) {
+		machineui = psy_audio_songfile_machineui(self, slot);
+		if (status = psyfile_write_int32(self->file, machineui->x)) {
 			return status;
 		}
-		if (status = psyfile_write_int32(self->file, 
-			(int32_t)(p ? psy_properties_int(p, "y", 100) : 100))) {
+		if (status = psyfile_write_int32(self->file, machineui->y)) {
 			return status;
 		}
 		if (status = psy3_write_connections(self, slot)) {
@@ -2286,34 +2289,6 @@ void psy3_savedllnameandindex(PsyFile* file, const char* path,
 		psy_snprintf(str, 256, "%s.%s%s", name, ext, idxtext);
 	}
 	psyfile_write(file, str, strlen(str) + 1);
-}
-
-psy_Properties* machine_properties(psy_audio_SongFile* self, int32_t slot)
-{
-	psy_Properties* rv = 0;
-
-	if (self->workspaceproperties) {
-		psy_Properties* p;
-
-		p = psy_properties_findsection(self->workspaceproperties, "machines");
-		if (p) {
-			p = p->children;
-
-			while (p != 0) {
-				psy_Properties* q;
-				
-				q = psy_properties_read(p, "index");
-				if (q) {
-					if (psy_properties_value(q) == slot) {
-						rv = p;
-						break;
-					}
-				}
-				p = p->next;
-			}
-		}
-	}
-	return rv;
 }
 
 //	===================

@@ -456,28 +456,22 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 
 	{  	// psy_audio_Machines			
 		unsigned char active[128];
-		psy_Properties* machinesproperties;	
 		int32_t i;
-		psyfile_read(songfile->file, &active[0], sizeof(active));		
-		machinesproperties = psy_properties_create_section(
-			songfile->workspaceproperties, "machines");	
+
+		psyfile_read(songfile->file, &active[0], sizeof(active));
 		for (i=0; i<128; ++i) {
 			if (active[i]) {
 				psy_audio_Machine* machine;
+				psy_audio_MachineUi* machineui;
 				int32_t index;
 				int32_t x;
 				int32_t y;				
 				machine = psy_audio_psy2converter_load(songfile, i, &index,
 					&x, &y);
 				if (machine) {				
-					psy_Properties* machineproperties;				
-				
-					machineproperties = psy_properties_create_section(
-						machinesproperties, "machine");
-					psy_properties_append_int(machineproperties, "index",
-						index, 0, MAX_MACHINES);				
-					psy_properties_append_int(machineproperties, "x", x, 0, 0);
-					psy_properties_append_int(machineproperties, "y", y, 0, 0);								
+					machineui = psy_audio_songfile_machineui(songfile, index);
+					machineui->x = x;
+					machineui->y = y;
 					machines_insert(&songfile->song->machines, index, machine);
 				}
 			}

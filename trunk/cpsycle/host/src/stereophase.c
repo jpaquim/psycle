@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "stereophase.h"
+
+#include <songio.h>
 #include "../../detail/portable.h"
 #include <math.h>
 #include <rms.h>
@@ -34,7 +36,7 @@ static void stereophase_drawscale(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawbars(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_ontimer(StereoPhase*, psy_ui_Component* sender, int timerid);
 static void stereophase_onsrcmachineworked(StereoPhase*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
-static void stereophase_onsongchanged(StereoPhase*, Workspace*);
+static void stereophase_onsongchanged(StereoPhase*, Workspace*, int flag, psy_audio_SongFile*);
 static void stereophase_connectmachinessignals(StereoPhase*, Workspace*);
 static void stereophase_disconnectmachinessignals(StereoPhase*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
@@ -341,7 +343,8 @@ void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machin
 	}
 }
 
-void stereophase_onsongchanged(StereoPhase* self, Workspace* workspace)
+void stereophase_onsongchanged(StereoPhase* self, Workspace* workspace,
+	int flag, psy_audio_SongFile* songfile)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;

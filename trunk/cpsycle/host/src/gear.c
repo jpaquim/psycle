@@ -4,10 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "gear.h"
+#include "songio.h"
 
 static void gear_connectsongsignals(Gear*);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
-static void gear_onsongchanged(Gear*, Workspace*);
+static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_onexchange(Gear* self, psy_ui_Component* sender);
 static void gear_onparameters(Gear*, psy_ui_Component* sender);
@@ -109,7 +110,7 @@ void gear_ondelete(Gear* self, psy_ui_Component* sender)
 	}
 }
 
-void gear_onsongchanged(Gear* self, Workspace* workspace)
+void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	self->machines = &workspace->song->machines;		
 	SetMachines(&self->machinesboxgen, &workspace->song->machines);

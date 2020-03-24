@@ -299,6 +299,7 @@ void machine_init(psy_audio_Machine* self, MachineCallback callback)
 	self->vtable = &vtable;
 	self->callback = callback;
 	self->err = 0;
+	psy_audio_cputimeclock_init(&self->accumulated_processing_time_);
 	psy_signal_init(&self->signal_worked);	
 }
 

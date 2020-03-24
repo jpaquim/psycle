@@ -270,7 +270,7 @@ void machineproxy_work(psy_audio_MachineProxy* self, psy_audio_BufferContext* bc
 		__try
 #endif				
 		{
-			psy_audio_machine_work(self->client, bc);
+			psy_audio_machine_work(self->client, bc);			
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "work", GetExceptionCode(),

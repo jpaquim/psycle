@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "volslider.h"
+
+#include <songio.h>
 #include <uiapp.h>
 #include <stdio.h>
 #include <math.h>
@@ -18,10 +20,12 @@ static void volslider_onmouseup(VolSlider*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void volslider_onmousemove(VolSlider*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
+static void volslider_onmousewheel(VolSlider*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static void volslider_ontimer(VolSlider*, psy_ui_Component* sender,
 	int timerid);
 static void volslider_onsliderchanged(VolSlider*, psy_ui_Component* sender);
-static void volslider_onsongchanged(VolSlider*, Workspace*);
+static void volslider_onsongchanged(VolSlider*, Workspace*, int flag, psy_audio_SongFile* songfile);
 static void volslider_onpreferredsize(VolSlider*, psy_ui_Size* limit, psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
@@ -57,6 +61,8 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 		volslider_ontimer);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		volslider_onsongchanged);
+	psy_signal_connect(&self->component.signal_mousewheel, self,
+		volslider_onmousewheel);
 	psy_ui_component_starttimer(&self->component, TIMERID_VOLSLIDER, 50);
 }
 
@@ -115,7 +121,8 @@ void volslider_onsliderchanged(VolSlider* self, psy_ui_Component* sender)
 	}
 }
 
-void volslider_onsongchanged(VolSlider* self, Workspace* workspace)
+void volslider_onsongchanged(VolSlider* self, Workspace* workspace, int flag,
+	psy_audio_SongFile* songfile)
 {
 	self->machines = &workspace->song->machines;
 }
@@ -137,4 +144,21 @@ void volslider_onpreferredsize(VolSlider* self, psy_ui_Size* limit, psy_ui_Size*
 {	
 	rv->width = 180;
 	rv->height = 20;
+}
+
+void volslider_onmousewheel(VolSlider* self, psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+{
+	if (ev->delta > 0) {
+		self->value = max(0.f,
+			min(1.f, self->value + 0.1));
+		volslider_onsliderchanged(self, sender);
+		psy_ui_component_invalidate(&self->component);
+	} else
+	if (ev->delta < 0) {
+		self->value = max(0.f,
+			min(1.f, self->value - 0.1));
+		volslider_onsliderchanged(self, sender);
+		psy_ui_component_invalidate(&self->component);
+	}
+	ev->preventdefault = 1;
 }
