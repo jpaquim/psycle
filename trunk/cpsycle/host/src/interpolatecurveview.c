@@ -220,7 +220,9 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 				(int)(size.height - entry->value * scaley));
 		} else
 		if (curve == INTERPOLATECURVETYPE_HERMITE) {
-			for (int i = 1; i < distance; i++) {
+			int i;
+
+			for (i = 1; i < distance; i++) {
 				double curveval = hermitecurveinterpolate(val0, val1, val2, val3, i, distance, 0, TRUE);
 				psy_ui_drawline(g, x + i - 1, (int)(size.height - lastcurveval * scaley), x + i, (int)(size.height - curveval * scaley));
 				lastcurveval = curveval;

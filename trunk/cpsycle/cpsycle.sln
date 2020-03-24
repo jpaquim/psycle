@@ -50,6 +50,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ui", "ui\ui.vcproj", "{4F98
 		{8CEB65BD-4B67-416C-9DDE-03F395CC522F} = {8CEB65BD-4B67-416C-9DDE-03F395CC522F}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "asiodriver", "driver\asiodriver\asiodriver.vcproj", "{F59B36E8-0395-404F-B7BF-2C9773314063}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -100,6 +102,10 @@ Global
 		{4F983EA4-B43D-49FE-A4E8-8BCFDD4A1277}.Debug|Win32.Build.0 = Debug|Win32
 		{4F983EA4-B43D-49FE-A4E8-8BCFDD4A1277}.Release|Win32.ActiveCfg = Release|Win32
 		{4F983EA4-B43D-49FE-A4E8-8BCFDD4A1277}.Release|Win32.Build.0 = Release|Win32
+		{F59B36E8-0395-404F-B7BF-2C9773314063}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F59B36E8-0395-404F-B7BF-2C9773314063}.Debug|Win32.Build.0 = Debug|Win32
+		{F59B36E8-0395-404F-B7BF-2C9773314063}.Release|Win32.ActiveCfg = Release|Win32
+		{F59B36E8-0395-404F-B7BF-2C9773314063}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

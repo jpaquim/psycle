@@ -30,6 +30,9 @@
 #include <map>
 #include <sstream>
 
+#include <string.h>
+#include <stdlib.h>
+
 #include <asiodrivers.h>
 #include <asio.h>
 
@@ -194,7 +197,7 @@ private:
 };
 
 AsioDrivers ASIOInterface::asioDrivers;
-ASIOInterface::AsioStereoBuffer* ASIOInterface::ASIObuffers(0);
+ASIOInterface::AsioStereoBuffer* ASIOInterface::ASIObuffers = 0;
 bool ASIOInterface::_firstrun(true);
 bool ASIOInterface::_supportsOutputReady(false);
 ASIOInterface::PortOut ASIOInterface::_selectedout;
@@ -203,8 +206,8 @@ uint32_t ASIOInterface::writePos(0);
 uint32_t ASIOInterface::m_wrapControl(0);
 psy_AudioDriverSettings ASIOInterface::settings_;
 
-AUDIODRIVERWORKFN ASIOInterface::_pCallback(0);
-void* ASIOInterface::_pCallbackContext(0);
+AUDIODRIVERWORKFN ASIOInterface::_pCallback = 0;
+void* ASIOInterface::_pCallbackContext = 0;
 
 std::string ASIOInterface::PortEnum::GetName() const
 {
@@ -438,19 +441,20 @@ void ASIOInterface::Initialize(AUDIODRIVERWORKFN pcallback, void* context)
 void ASIOInterface::RefreshAvailablePorts()
 {
 	bool isPlaying = _running;
+	int i;
 	if (isPlaying) Stop();
 	char szNameBuf[MAX_ASIO_DRIVERS][33];
 	char* pNameBuf[MAX_ASIO_DRIVERS];
-	for (int i(0); i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
+	for (i = 0; i < MAX_ASIO_DRIVERS; ++i) pNameBuf[i] = szNameBuf[i];
 	int drivers = asioDrivers.getDriverNames((char**)pNameBuf, MAX_ASIO_DRIVERS);
 	drivEnum_.resize(0);
 	ASIODriverInfo driverInfo;
-	for (int i(0); i < drivers; ++i)
+	for (i = 0; i < drivers; ++i)
 	{
 #if !defined ALLOW_NON_ASIO
-		if (std::strcmp("ASIO DirectX Driver", szNameBuf[i]) == 0) continue;
-		if (std::strcmp("ASIO DirectX Full Duplex Driver", szNameBuf[i]) == 0) continue;
-		if (std::strcmp("ASIO Multimedia Driver", szNameBuf[i]) == 0) continue;
+		if (strcmp("ASIO DirectX Driver", szNameBuf[i]) == 0) continue;
+		if (strcmp("ASIO DirectX Full Duplex Driver", szNameBuf[i]) == 0) continue;
+		if (strcmp("ASIO Multimedia Driver", szNameBuf[i]) == 0) continue;
 #endif
 		memset(&driverInfo, 0, sizeof(ASIODriverInfo));
 		driverInfo.asioVersion = ASIO_VERSION;
@@ -465,8 +469,10 @@ void ASIOInterface::RefreshAvailablePorts()
 				long in, out;
 				if (ASIOGetChannels(&in, &out) == ASE_OK)
 				{
+					int j;
+
 					// += 2 because we pair them in stereo
-					for (int j(0); j < out; j += 2)
+					for (j = 0; j < out; j += 2)
 					{
 						ASIOChannelInfo channelInfo;
 						channelInfo.isInput = ASIOFalse;
@@ -476,7 +482,7 @@ void ASIOInterface::RefreshAvailablePorts()
 						driver.AddOutPort(port);
 					}
 					// += 2 because we pair them in stereo
-					for (int j(0); j < in; j += 2)
+					for (j = 0; j < in; j += 2)
 					{
 						ASIOChannelInfo channelInfo;
 						channelInfo.isInput = ASIOTrue;
@@ -502,6 +508,8 @@ void ASIOInterface::Reset()
 
 bool ASIOInterface::Start()
 {
+	unsigned int i;
+
 	// CSingleLock lock(&_lock, TRUE);
 	_firstrun = true;
 	if (_running) return true;
@@ -520,8 +528,11 @@ bool ASIOInterface::Start()
 			psy_audiodriversettings_setblockframes(&settings_, _selectedout.driver->prefSamples);
 		else if (psy_audiodriversettings_blockframes(&settings_) > _selectedout.driver->maxSamples)
 			psy_audiodriversettings_setblockframes(&settings_, _selectedout.driver->prefSamples);
+	} else {
+		_running = false;
+		return false;
 	}
-
+	
 
 	char bla[128]; strcpy(bla, _selectedout.driver->_name.c_str());
 	if (!asioDrivers.loadDriver(bla))
@@ -564,7 +575,7 @@ bool ASIOInterface::Start()
 	int numbuffers = (int)(1 + _selectedins.size()) * 2;
 	ASIOBufferInfo* info = new ASIOBufferInfo[numbuffers];
 	int counter = 0;
-	for (unsigned int i(0); i < _selectedins.size(); ++i)
+	for (i = 0; i < _selectedins.size(); ++i)
 	{
 		info[counter].isInput = info[counter + 1].isInput = _selectedins[i].port->_info.isInput;
 		info[counter].channelNum = _selectedins[i].port->_idx;
@@ -586,8 +597,7 @@ bool ASIOInterface::Start()
 	}
 	ASIObuffers = new AsioStereoBuffer[_selectedins.size() + 1];
 	counter = 0;
-	unsigned int i(0);
-	for (; i < _selectedins.size(); ++i)
+	for (i = 0; i < _selectedins.size(); ++i)
 	{
 		AsioStereoBuffer buffer(info[counter].buffers, info[counter + 1].buffers, _selectedins[i].port->_info.type);
 		ASIObuffers[i] = buffer;
@@ -658,8 +668,12 @@ void ASIOInterface::ControlPanel(int driverID)
 	}
 }
 
-#define SwapDouble(v) SwapLongLong((long long)(v))
-#define SwapFloat(v) SwapLong(long(v))
+//#ifdef _MSC_VER > 1200
+//#define SwapDouble(v) SwapLongLong((long long)(v))
+//#else
+#define SwapDouble(v) SwapLong((_int64)(v))
+//#endif
+#define SwapFloat(v) SwapLong(_int32(v))
 #define SwapLongLong(v) ((((v)>>56)&0xFF)|(((v)>>40)&0xFF00)|(((v)>>24)&0xFF0000)|(((v)>>8)&0xFF000000) \
 						       | (((v)&0xFF)<<56)|(((v)&0xFF00)<<40)|(((v)&0xFF0000)<<24)|(((v)&0xFF000000)<<8))
 #define SwapLong(v) ((((v)>>24)&0xFF)|(((v)>>8)&0xFF00)|(((v)&0xFF00)<<8)|(((v)&0xFF)<<24)) 
@@ -931,8 +945,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (float*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = SwapFloat(*inl);
-				_selectedins[counter].pright[i] = SwapFloat(*inr);
+				_selectedins[counter].pleft[i] = SwapFloat((long)*inl);
+				_selectedins[counter].pright[i] = SwapFloat((long)*inr);
 			}
 		}
 		break;
@@ -1232,7 +1246,7 @@ void ASIOInterface::bufferSwitch(long index, ASIOBool processNow)
 	// as this is a "back door" into the bufferSwitchTimeInfo a timeInfo needs to be created
 	// though it will only set the timeInfo.samplePosition and timeInfo.systemTime fields and the according flags
 	ASIOTime  timeInfo;
-	std::memset(&timeInfo, 0, sizeof timeInfo);
+	memset(&timeInfo, 0, sizeof timeInfo);
 
 	// get the time stamp of the buffer, not necessary if no
 	// synchronization to other media is required
