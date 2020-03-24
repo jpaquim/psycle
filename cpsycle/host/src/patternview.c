@@ -6,12 +6,14 @@
 #include "patternview.h"
 
 #include <string.h>
+#include <songio.h>
 
 #include "../../detail/portable.h"
 
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 	int tabindex);
-static void patternview_onsongchanged(PatternView*, Workspace* sender);
+static void patternview_onsongchanged(PatternView*, Workspace* sender,
+	int flag, psy_audio_SongFile*);
 static void patternview_onsequenceselectionchanged(PatternView*,
 	Workspace* sender);
 static void patternview_onpropertiesapply(PatternView*,
@@ -29,7 +31,10 @@ static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
 static void patternviewbar_ondefaultline(PatternViewBar*,
 	psy_ui_CheckBox* sender);
 static void patternviewbar_initalign(PatternViewBar*);
-
+static void patternviewbar_onconfigchanged(PatternViewBar*, Workspace*,
+	psy_Properties*);
+static void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self,
+	psy_ui_Component* sender);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -123,6 +128,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
 	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
 		"Move Cursor When Paste");
+	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
+		patternviewbar_onmovecursorwhenpaste);
 	psy_ui_checkbox_init(&self->defaultentries, &self->component);
 	psy_ui_checkbox_settext(&self->defaultentries, "Default Line");
 	if (workspace_showgriddefaults(self->workspace)) {
@@ -131,7 +138,16 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->defaultentries.signal_clicked, self,
 		patternviewbar_ondefaultline);
 	patternviewstatus_init(&self->status, &self->component, workspace);
-	patternviewbar_initalign(self);	
+	patternviewbar_initalign(self);
+	psy_signal_connect(&self->workspace->signal_configchanged, self,
+		patternviewbar_onconfigchanged);
+	if (workspace_ismovecursorwhenpaste(workspace)) {
+		psy_ui_checkbox_check(&self->movecursorwhenpaste);
+	}
+	else {
+		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
+	}
+
 }
 
 void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
@@ -242,7 +258,7 @@ void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 	patternproperties_setpattern(&self->properties, pattern);
 }
 
-void patternview_onsongchanged(PatternView* self, Workspace* workspace)
+void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {
 	psy_audio_Pattern* pattern;
 	SequenceSelection selection;	
@@ -304,5 +320,20 @@ void patternview_oncontextmenu(PatternView* self, psy_ui_Component* sender)
 		trackerview_hideblockmenu(&self->trackerview);
 	} else {
 		trackerview_showblockmenu(&self->trackerview);
+	}
+}
+
+void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component* sender)
+{
+	workspace_movecursorwhenpaste(self->workspace, psy_ui_checkbox_checked(&self->movecursorwhenpaste));
+}
+
+void patternviewbar_onconfigchanged(PatternViewBar* self, Workspace* workspace,
+	psy_Properties* property)
+{
+	if (workspace_ismovecursorwhenpaste(workspace)) {
+		psy_ui_checkbox_check(&self->movecursorwhenpaste);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
 	}
 }

@@ -49,7 +49,6 @@ static void workspace_makelang(Workspace*);
 static void workspace_makelangen(Workspace*);
 static void workspace_makelanges(Workspace*);
 static void applysongproperties(Workspace*);
-static psy_Properties* workspace_makeproperties(Workspace*);
 static void workspace_makedriverlist(Workspace*);
 static void workspace_makedriverconfigurations(Workspace*);
 static void workspace_driverconfig(Workspace*);
@@ -62,7 +61,7 @@ static const char* workspace_eventdriverpath(Workspace*);
 static void workspace_configaudio(Workspace*);
 static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
-static void workspace_setsong(Workspace*, psy_audio_Song*, int flag);
+static void workspace_setsong(Workspace*, psy_audio_Song*, int flag, psy_audio_SongFile* songfile);
 static void workspace_onloadprogress(Workspace*, psy_audio_Song*, int progress);
 static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*, int progress);
 static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelection*);
@@ -161,7 +160,6 @@ void workspace_init(Workspace* self, void* handle)
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	self->songcbk = self->song;
-	self->properties = workspace_makeproperties(self);
 	sequenceselection_init(&self->sequenceselection, &self->song->sequence);
 	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
 	psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
@@ -215,8 +213,6 @@ void workspace_dispose(Workspace* self)
 	self->songcbk = 0;
 	properties_free(self->config);
 	self->config = 0;
-	properties_free(self->properties);
-	self->properties = 0;
 	properties_free(self->lang);
 	self->lang = 0;
 	free(self->filename);
@@ -519,6 +515,10 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "notetab", 1),
 		"A4 is 440Hz (Otherwise it is 220Hz)");
+	psy_properties_settext(
+		psy_properties_append_bool(pvc, "movecursorwhenpaste", 1),
+		"Move Cursor When Paste");
+	
 	workspace_makepatternviewtheme(self, pvc);
 }
 
@@ -932,10 +932,12 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
 	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
 	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Debug\\wasapi.dll");
+	psy_properties_append_string(drivers, "asio", "..\\driver\\asiodriver\\Debug\\asiodriver.dll");
 #else
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
 	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");
 	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Release\\wasapi.dll");
+	psy_properties_append_string(drivers, "asio", "..\\driver\\asiodriver\\Release\\asiodriver.dll");
 #endif
 #elif defined(DIVERSALIS__OS__LINUX)
 	psy_properties_append_string(drivers, "alsa", "..\\driver\\alsa\\libpsyalsa.so");
@@ -1322,6 +1324,17 @@ int workspace_wraparound(Workspace* self)
 	return psy_properties_bool(self->config, "visual.patternview.wraparound", 1);
 }
 
+int workspace_ismovecursorwhenpaste(Workspace* self)
+{
+	return psy_properties_bool(self->config, "visual.patternview.movecursorwhenpaste", 1);
+}
+
+void workspace_movecursorwhenpaste(Workspace* self, bool on)
+{
+	psy_properties_write_bool(self->config,
+		"visual.patternview.movecursorwhenpaste", on);
+}
+
 int workspace_doublemidline(Workspace* self)
 {
 	return psy_properties_bool(self->config, "visual.patternview.doublemidline", 1);
@@ -1342,11 +1355,9 @@ void workspace_newsong(Workspace* self)
 	psy_audio_Song* song;	
 	
 	song = psy_audio_song_allocinit(&self->machinefactory);
-	properties_free(self->properties);
-	self->properties = workspace_makeproperties(self);
 	free(self->filename);
 	self->filename = strdup("Untitled.psy");
-	workspace_setsong(self, song, WORKSPACE_NEWSONG);		
+	workspace_setsong(self, song, WORKSPACE_NEWSONG, 0);		
 }
 
 void workspace_loadsong(Workspace* self, const char* path)
@@ -1375,16 +1386,14 @@ void workspace_loadsong(Workspace* self, const char* path)
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
 			psy_audio_songfile_dispose(&songfile);
-		} else {
-			properties_free(self->properties);
-			self->properties = songfile.workspaceproperties;
-			psy_audio_songfile_dispose(&songfile);
+		} else {		
 			free(self->filename);
 			self->filename = strdup(path);
-			workspace_setsong(self, song, WORKSPACE_LOADSONG);
+			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
 			psy_audio_songfile_dispose(&songfile);
 			psy_audio_exclusivelock_leave();
 			workspace_addrecentsong(self, path);
+			psy_audio_songfile_dispose(&songfile);
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
@@ -1406,7 +1415,7 @@ void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender, int progr
 	psy_signal_emit(&self->signal_loadprogress, self, 1, progress);
 }
 
-void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
+void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag, psy_audio_SongFile* songfile)
 {
 	psy_audio_Song* oldsong;
 
@@ -1421,7 +1430,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag)
 	sequenceselection_setsequence(&self->sequenceselection
 		,&self->song->sequence);
 	workspace_addhistory(self);
-	psy_signal_emit(&self->signal_songchanged, self, 1, flag);
+	psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);
 	self->lastentry = 0;
 	workspace_disposesequencepaste(self);
 	psy_audio_exclusivelock_leave();
@@ -1434,8 +1443,7 @@ void workspace_savesong(Workspace* self, const char* path)
 	psy_audio_songfile_init(&songfile);
 	songfile.file = 0;
 	songfile.song = self->song;
-	psy_signal_emit(&self->signal_beforesavesong, self, 0);
-	songfile.workspaceproperties = self->properties;
+	psy_signal_emit(&self->signal_beforesavesong, self, 1, &songfile);
 	if (psy_audio_songfile_save(&songfile, path)) {
 		psy_signal_emit(&self->signal_terminal_error, self, 1,
 			songfile.serr);
@@ -1463,21 +1471,6 @@ void workspace_loadcontrolskin(Workspace* self, const char* path)
 	free(self->dialbitmappath);
 	self->dialbitmappath = strdup(path);
 	psy_signal_emit(&self->signal_changecontrolskin, self, 1, path);
-}
-
-psy_Properties* workspace_makeproperties(Workspace* self)
-{
-	psy_Properties* root;
-	psy_Properties* machines;	
-	psy_Properties* machine;
-	
-	root = psy_properties_create();
-	machines = psy_properties_create_section(root, "machines");	
-	machine = psy_properties_create_section(machines, "machine");	
-	psy_properties_append_int(machine, "index", MASTER_INDEX, 0, 0);		
-	psy_properties_append_int(machine, "x", 320, 0, 0);
-	psy_properties_append_int(machine, "y", 200, 0, 0);
-	return root;
 }
 
 void applysongproperties(Workspace* self)

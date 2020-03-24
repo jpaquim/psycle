@@ -25,7 +25,7 @@ static void samplesview_onloadsample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onsavesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_ondeletesample(SamplesView*, psy_ui_Component* sender);
 static void samplesview_onduplicatesample(SamplesView*, psy_ui_Component* sender);
-static void samplesview_onsongchanged(SamplesView*, Workspace*);
+static void samplesview_onsongchanged(SamplesView*, Workspace*, int flag, psy_audio_SongFile*);
 static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	psy_audio_Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
@@ -524,7 +524,7 @@ uintptr_t samplesview_freesampleslot(SamplesView* self, uintptr_t startslot,
 	return rv;
 }
 
-void samplesview_onsongchanged(SamplesView* self, Workspace* workspace)
+void samplesview_onsongchanged(SamplesView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
 		samplesview_oninstrumentslotchanged);	

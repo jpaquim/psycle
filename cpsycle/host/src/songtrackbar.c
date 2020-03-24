@@ -4,6 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "songtrackbar.h"
+
+#include <songio.h>
+
 #include "../../detail/portable.h"
 
 #define MIN_TRACKS 4
@@ -13,7 +16,8 @@ static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
 static void songtrackbar_onsongtracknumchanged(SongTrackBar*, Workspace*,
 	unsigned int numsongtracks);
-static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*);
+static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*,
+	int flag, psy_audio_SongFile* songfile);
 
 void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	workspace)
@@ -71,7 +75,8 @@ void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
 	psy_ui_combobox_setcursel(&self->trackbox, numsongtracks - MIN_TRACKS);
 }
 
-void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace)
+void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace,
+	int flag, psy_audio_SongFile* songfile)
 {	
 	psy_ui_combobox_setcursel(&self->trackbox,
 		player_numsongtracks(&workspace->player) - MIN_TRACKS);

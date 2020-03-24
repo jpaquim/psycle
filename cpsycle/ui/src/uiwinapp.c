@@ -595,9 +595,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				int preventdefault = 0;
 				if (imp->component->signal_mousewheel.slots) {
 					psy_ui_MouseEvent ev;
+					POINT pt_client;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD(lParam),
-						(SHORT)HIWORD(lParam), LOWORD(wParam), (short)HIWORD(wParam),
+					pt_client.x = (SHORT)LOWORD(lParam);
+					pt_client.y = (SHORT)HIWORD(lParam);
+					ScreenToClient(imp->hwnd, &pt_client);
+					psy_ui_mouseevent_init(&ev,
+						pt_client.x, pt_client.y, (short)LOWORD(wParam),
+						(short)HIWORD(wParam),
 						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 					psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 						&ev);

@@ -10,6 +10,7 @@
 #include <exclusivelock.h>
 #include <operations.h>
 #include <string.h>
+#include <songio.h>
 
 #define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
@@ -25,7 +26,7 @@ static void oscilloscope_ondestroy(Oscilloscope*);
 static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, int timerid);
 static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
-static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*);
+static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*, int flag, psy_audio_SongFile*);
 static void oscilloscope_connectmachinessignals(Oscilloscope*, Workspace*);
 static void oscilloscope_disconnectmachinessignals(Oscilloscope* self, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
@@ -151,7 +152,7 @@ void oscilloscope_onsrcmachineworked(Oscilloscope* self, psy_audio_Machine* mast
 	}
 }
 
-void oscilloscope_onsongchanged(Oscilloscope* self, Workspace* workspace)
+void oscilloscope_onsongchanged(Oscilloscope* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;

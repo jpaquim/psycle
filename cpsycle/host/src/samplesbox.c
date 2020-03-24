@@ -130,9 +130,6 @@ void samplesbox_oninstrumentinsert(SamplesBox* self, psy_ui_Component* sender,
 void samplesbox_onsampleinsert(SamplesBox* self, psy_ui_Component* sender,
 	SampleIndex* index)
 {
-	if (self->component.debugflag == 200) {
-		self->component.debugflag = self->component.debugflag;
-	}
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, index->subslot);
 }
@@ -140,9 +137,6 @@ void samplesbox_onsampleinsert(SamplesBox* self, psy_ui_Component* sender,
 void samplesbox_onsampleremoved(SamplesBox* self, psy_ui_Component* sender,
 	SampleIndex* index)
 {
-	if (self->component.debugflag == 200) {
-		self->component.debugflag = self->component.debugflag;
-	}
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, index->subslot);
 }

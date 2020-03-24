@@ -13,6 +13,8 @@
 
 #include "../../detail/portable.h"
 
+#include <songio.h>
+
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent,
 	SampleEditor*);
@@ -25,7 +27,7 @@ static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onsize(SampleEditor*, psy_ui_Component* sender, psy_ui_Size*);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_computemetrics(SampleEditor*, SampleEditorMetrics* rv);
-static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace);
+static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace, int flag, psy_audio_SongFile*);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
@@ -251,7 +253,7 @@ void sampleeditor_computemetrics(SampleEditor* self, SampleEditorMetrics* rv)
 		: sampleboxsize.width;	
 }
 
-void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace)
+void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {
 	sampleeditor_connectmachinessignals(self, workspace);
 }

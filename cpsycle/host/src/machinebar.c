@@ -5,6 +5,7 @@
 
 #include "machinebar.h"
 #include "../../detail/portable.h"
+#include <songio.h>
 
 static void OnDestroy(MachineBar*, psy_ui_Component* component);
 static void BuildMachineBox(MachineBar*);
@@ -20,7 +21,7 @@ static void OnInstrumentNameChanged(MachineBar*, psy_ui_Component* sender);
 static void OnInstrumentInsert(MachineBar*, psy_audio_Instruments* sender, int slot);
 static void OnInstrumentSlotChanged(MachineBar* self, psy_audio_Instrument* sender, int slot);
 static void OnInstrumentListChanged(MachineBar* self, psy_ui_Component* sender, int slot);
-static void OnSongChanged(MachineBar*, Workspace*);
+static void OnSongChanged(MachineBar*, Workspace*, int flag, psy_audio_SongFile*);
 static void ConnectSongSignals(MachineBar*);
 static void ConnectInstrumentSignals(MachineBar*);
 static void ClearMachineBox(MachineBar* self);
@@ -200,7 +201,7 @@ void OnInstParamBoxSelChange(MachineBar* self, psy_ui_Component* sender, int sel
 		OnInstrumentSlotChanged);
 }
 
-void OnSongChanged(MachineBar* self, Workspace* workspace)
+void OnSongChanged(MachineBar* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	self->machines = &workspace->song->machines;
 	self->instruments = &workspace->song->instruments;	

@@ -29,7 +29,22 @@ void psy_dsp_dequantize32anddeinterlace(int *pin, float *poutleft,float *poutrig
 //in -> -1.0..1.0 stereo interlaced, out -32768.0..32767.0 stereo deinterlaced
 void psy_dsp_deinterlacefloat(float *pin, float *poutleft,float *poutright,int c);
 
-INLINE int32_t psy_dsp_rint(float flt) { return flt; }
+INLINE int32_t psy_dsp_rint(float flt)
+{
+#if defined DIVERSALIS__CPU__X86 && defined DIVERSALIS__COMPILER__MICROSOFT && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL// also intel's compiler?
+    ///\todo not always the fastest when using sse(2)
+    ///\todo the double "2^51 + 2^52" version might be faster.
+    int32_t i;
+    __asm
+    {
+        fld flt;
+        fistp i;
+    }
+    return i;
+#else
+    return static_cast<int32_t>(flt);
+#endif
+}
 
 INLINE int32_t psy_dsp_fround(float flt)
 {

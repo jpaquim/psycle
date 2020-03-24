@@ -110,3 +110,4 @@ void vumeter_onpreferredsize(Vumeter* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	rv->width = 180;
 	rv->height = 20;
 }
+

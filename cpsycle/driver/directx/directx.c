@@ -126,7 +126,6 @@ typedef struct {
 	int (*error)(int, const char*);
 } DXDriver;
 
-static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
 static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,void* handle);
 static int driver_open(psy_AudioDriver*);
@@ -142,6 +141,7 @@ static int addcaptureport(DXDriver* self, int idx);
 static int removecaptureport(DXDriver* self, int idx);
 static bool start(DXDriver*);
 static bool stop(DXDriver*);
+static void driver_deallocate(psy_AudioDriver*);
 
 static void preparewaveformat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static DWORD WINAPI notifythread(void* pDirectSound);
@@ -170,7 +170,7 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 {
 	static AudioDriverInfo info;
 	info.Flags = 0;
-	info.Name = "DirectSound Output psy_AudioDriver";
+	info.Name = "DirectSound Audio Driver";
 	info.ShortName = "DXSOUND";
 	info.Version = 0;
 	return &info;

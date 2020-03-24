@@ -430,6 +430,7 @@ void psy_audio_notifysequencertick(psy_audio_Sequencer* self, psy_dsp_beat_t wid
 uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer* self, uintptr_t amount)
 {
 	uintptr_t rv;
+
 	self->linetickcount -= psy_audio_sequencer_frametooffset(self, amount);
 	if (self->linetickcount <= 0) {
 		rv = psy_audio_sequencer_frames(self, -self->linetickcount);
@@ -1015,13 +1016,9 @@ void psy_audio_insertinputevents(psy_audio_Sequencer* self)
 
 void psy_audio_compute_beatspersample(psy_audio_Sequencer* self)
 {
+	assert(self->samplerate != 0);
 	self->beatspersample = (self->bpm * psy_audio_sequencer_speed(self)) /
 		(self->samplerate * 60.0f);
-}
-
-psy_dsp_beat_t psy_audio_sequencer_beatspersample(psy_audio_Sequencer* self)
-{
-	return self->beatspersample;
 }
 
 psy_dsp_beat_t psy_audio_sequencer_frametooffset(psy_audio_Sequencer* self,

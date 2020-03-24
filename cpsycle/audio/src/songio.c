@@ -15,23 +15,43 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #if defined DIVERSALIS__OS__POSIX
 #include <errno.h>
 #endif
 
 static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
 static int psy_audio_songfile_errfile(psy_audio_SongFile* self);
+static void psy_audio_songfile_machineuis_dispose(psy_audio_SongFile*);
 
 void psy_audio_songfile_init(psy_audio_SongFile* self)
 {
 	psy_signal_init(&self->signal_output);
-	psy_signal_init(&self->signal_warning);	
+	psy_signal_init(&self->signal_warning);
+	self->machinesoloed = -1;
+	psy_table_init(&self->machineuis);
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
 {
 	psy_signal_dispose(&self->signal_output);
 	psy_signal_dispose(&self->signal_warning);	
+	psy_audio_songfile_machineuis_dispose(self);
+}
+
+void psy_audio_songfile_machineuis_dispose(psy_audio_SongFile* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->machineuis);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_MachineUi* machineui;
+
+		machineui = (psy_audio_MachineUi*)psy_tableiterator_value(&it);
+		free(machineui);
+	}
+	psy_table_dispose(&self->machineuis);
 }
 
 int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
@@ -45,6 +65,11 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 	self->warnings = 0;
 	self->file = &file;
 	self->path = path;	
+	self->machinesoloed = -1;
+	if (psy_table_size(&self->machineuis) > 0) {
+		psy_audio_songfile_machineuis_dispose(self);
+		psy_table_init(&self->machineuis);
+	}
 	psy_audio_songfile_message(self, "searching for ");
 	psy_audio_songfile_message(self, path);
 	psy_audio_songfile_message(self, "\n");
@@ -55,7 +80,6 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		psy_audio_songfile_message(self, "loading ");
 		psy_audio_songfile_message(self, path);
 		psy_audio_songfile_message(self, "\n");
-		self->workspaceproperties = psy_properties_create();
 		psy_audio_song_clear(self->song);		
 		machines_startfilemode(&self->song->machines);
 		psyfile_read(self->file, header, 8);
@@ -92,7 +116,9 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		}
 		if (!machines_at(&self->song->machines, MASTER_INDEX)) {
 			psy_audio_songfile_createmaster(self);
-		}		
+		}				
+		psy_audio_machines_solo(&self->song->machines,
+			self->machinesoloed);
 		machines_endfilemode(&self->song->machines);		
 	} else {
 		status = psy_audio_songfile_errfile(self);
@@ -134,22 +160,14 @@ void psy_audio_songfile_warn(psy_audio_SongFile* self, const char* text)
 
 void psy_audio_songfile_createmaster(psy_audio_SongFile* self)
 {
-	psy_Properties* machines;	
-	psy_Properties* machine;
+	psy_audio_MachineUi* machineui;	
 
 	machines_insertmaster(&self->song->machines,
 		machinefactory_makemachine(self->song->machinefactory,
-		MACH_MASTER, 0));
-	machines = psy_properties_findsection(self->workspaceproperties,
-		"machines");
-	if (!machines) {
-		machines = psy_properties_create_section(
-			self->workspaceproperties, "machines");
-	}
-	machine = psy_properties_create_section(machines, "machine");
-	psy_properties_append_int(machine, "index", MASTER_INDEX, 0, 0);		
-	psy_properties_append_int(machine, "x", 320, 0, 0);
-	psy_properties_append_int(machine, "y", 200, 0, 0);
+		MACH_MASTER, 0));	
+	machineui = psy_audio_songfile_machineui(self, MASTER_INDEX);
+	machineui->x = 320;
+	machineui->y = 200;
 }
 
 int psy_audio_songfile_errfile(psy_audio_SongFile* self)
@@ -157,4 +175,21 @@ int psy_audio_songfile_errfile(psy_audio_SongFile* self)
 	self->err = errno;
 	self->serr = strerror(self->err);
 	return PSY_ERRFILE;
+}
+
+psy_audio_MachineUi* psy_audio_songfile_machineui(psy_audio_SongFile* self,
+	uintptr_t index)
+{
+	psy_audio_MachineUi* rv;
+
+	if (!psy_table_exists(&self->machineuis, index)) {
+		rv = (psy_audio_MachineUi*)malloc(sizeof(psy_audio_MachineUi));
+		if (rv) {
+			memset(rv, 0, sizeof(psy_audio_MachineUi));		
+			psy_table_insert(&self->machineuis, index, rv);
+		}
+	} else {
+		rv = psy_table_at(&self->machineuis, index);
+	}
+	return rv;
 }

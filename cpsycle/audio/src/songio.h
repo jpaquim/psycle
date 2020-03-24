@@ -7,30 +7,39 @@
 #include <properties.h>
 #include <fileio.h>
 #include <signal.h>
+#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+typedef struct {
+	int x;
+	int y;
+} psy_audio_MachineUi;
+
 /// song load and save
 typedef struct psy_audio_SongFile {
 	struct psy_audio_Song* song;
 	struct PsyFile* file;
-	psy_Properties* workspaceproperties;
 	int err;
 	const char *serr;
 	int warnings;
 	psy_Signal signal_output;
 	psy_Signal signal_warning;	
 	const char* path;
+	uintptr_t machinesoloed;
+	psy_Table machineuis;
 } psy_audio_SongFile;
 
-void psy_audio_songfile_init(struct psy_audio_SongFile*);
-void psy_audio_songfile_dispose(struct psy_audio_SongFile*);
-int psy_audio_songfile_load(struct psy_audio_SongFile*, const char* path);
-int psy_audio_songfile_save(struct psy_audio_SongFile*, const char* path);
-void psy_audio_songfile_warn(struct psy_audio_SongFile*, const char* text);
-void psy_audio_songfile_message(struct psy_audio_SongFile*, const char* text);
+void psy_audio_songfile_init(psy_audio_SongFile*);
+void psy_audio_songfile_dispose(psy_audio_SongFile*);
+int psy_audio_songfile_load(psy_audio_SongFile*, const char* path);
+int psy_audio_songfile_save(psy_audio_SongFile*, const char* path);
+void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
+void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
+psy_audio_MachineUi* psy_audio_songfile_machineui(psy_audio_SongFile*,
+	uintptr_t index);
 
 #ifdef __cplusplus
 }

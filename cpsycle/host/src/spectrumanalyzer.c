@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "spectrumanalyzer.h"
+
+#include <songio.h>
 #include "../../detail/portable.h"
 #include <math.h>
 #include <rms.h>
@@ -27,8 +29,10 @@ static void spectrumanalyzer_ondraw(SpectrumAnalyzer*, psy_ui_Component* sender,
 static void spectrumanalyzer_drawbackground(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawspectrum(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_ontimer(SpectrumAnalyzer*, psy_ui_Component* sender, int timerid);
-static void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
-static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*);
+static void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer*, psy_audio_Machine*,
+	unsigned int slot, psy_audio_BufferContext*);
+static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*,
+	int flag, psy_audio_SongFile* songfile);
 static void spectrumanalyzer_connectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
@@ -319,7 +323,8 @@ void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self, psy_audio_Machi
 	}
 }
 
-void spectrumanalyzer_onsongchanged(SpectrumAnalyzer* self, Workspace* workspace)
+void spectrumanalyzer_onsongchanged(SpectrumAnalyzer* self, Workspace* workspace,
+	int flag, psy_audio_SongFile* songfile)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;

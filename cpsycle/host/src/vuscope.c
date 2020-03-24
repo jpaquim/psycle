@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "vuscope.h"
+
+#include <songio.h>
 #include "../../detail/portable.h"
 #include <math.h>
 #include <rms.h>
@@ -27,7 +29,8 @@ static void vuscope_drawscale(VuScope*, psy_ui_Graphics*);
 static void vuscope_drawbars(VuScope*, psy_ui_Graphics*);
 static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, int timerid);
 static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
-static void vuscope_onsongchanged(VuScope*, Workspace*);
+static void vuscope_onsongchanged(VuScope*, Workspace*,
+	int flag, psy_audio_SongFile* songfile);
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
 static void vuscope_disconnectmachinessignals(VuScope*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
@@ -331,7 +334,7 @@ void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsign
 	}
 }
 
-void vuscope_onsongchanged(VuScope* self, Workspace* workspace)
+void vuscope_onsongchanged(VuScope* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	self->leftavg = 0;
 	self->rightavg = 0;

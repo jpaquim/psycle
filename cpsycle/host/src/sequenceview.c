@@ -9,6 +9,7 @@
 #include <patterns.h>
 #include "../../detail/portable.h"
 #include <exclusivelock.h>
+#include <songio.h>
 #include <uialigner.h>
 #include <assert.h>
 
@@ -45,7 +46,7 @@ static void sequenceview_onfollowsong(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onfollowsongchanged(SequenceView*, Workspace* sender);
 static void sequenceview_onrecordtweaks(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onmultichannelaudition(SequenceView*, psy_ui_Button* sender);
-static void sequenceview_onsongchanged(SequenceView*, Workspace*);
+static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag, psy_audio_SongFile* songfile);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 static void sequenceview_onpreferredsize(SequenceView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -854,7 +855,7 @@ void sequencelistview_adjustscroll(SequenceListView* self)
 	}
 }
 
-void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace)
+void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;	

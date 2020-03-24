@@ -31,6 +31,8 @@ static void cellposition(ParamView*, uintptr_t param, uintptr_t row, uintptr_t c
 static void onmousedown(ParamView*, psy_ui_MouseEvent*);
 static void onmouseup(ParamView*, psy_ui_MouseEvent*);
 static void onmousemove(ParamView*, psy_ui_MouseEvent*);
+static void onmousewheel(ParamView*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static int hittest(ParamView*, int x, int y);
 static void ontimer(ParamView*, psy_ui_Component* sender, int timerid);
 static uintptr_t paramview_numrows(ParamView*);
@@ -139,7 +141,9 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	self->tweak = -1;
 	self->sizechanged = 1;
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);		
-	psy_signal_connect(&self->component.signal_timer, self, ontimer);	
+	psy_signal_connect(&self->component.signal_timer, self, ontimer);
+	psy_signal_connect(&self->component.signal_mousewheel, self,
+		onmousewheel);
 	psy_ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
 }
 
@@ -668,6 +672,53 @@ void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 void onmouseup(ParamView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_releasecapture(&self->component);
+	self->tweak = -1;
+}
+
+void onmousewheel(ParamView* self, psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+{
+	self->tweak = hittest(self, ev->x, ev->y);
+	if (self->tweak != -1) {
+		self->tweakval = psy_audio_machine_parametervalue(self->machine,
+			self->tweak);
+		if (ev->delta > 0) {
+			float val;
+
+			
+			val = self->tweakval + 1 / 200.f;
+			if (val > 1.f) {
+				val = 1.f;
+			}
+			else
+				if (val < 0.f) {
+					val = 0.f;
+				}
+			psy_audio_machine_parametertweak(self->machine, self->tweak, val);
+			workspace_parametertweak(self->workspace,
+				psy_audio_machine_slot(self->machine),
+				self->tweak, val);
+			psy_ui_component_invalidate(&self->component);
+		}
+		else
+			if (ev->delta < 0) {
+				float val;
+
+				val = self->tweakval - 1 / 200.f;
+				if (val > 1.f) {
+					val = 1.f;
+				}
+				else
+					if (val < 0.f) {
+						val = 0.f;
+					}
+				psy_audio_machine_parametertweak(self->machine, self->tweak, val);
+				workspace_parametertweak(self->workspace,
+					psy_audio_machine_slot(self->machine),
+					self->tweak, val);
+				psy_ui_component_invalidate(&self->component);
+			}
+	}
+	ev->preventdefault = 1;
 	self->tweak = -1;
 }
 

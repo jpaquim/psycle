@@ -14,6 +14,8 @@
 #include <dir.h>
 #include <uiapp.h>
 
+#include <songio.h>
+
 #define TIMERID_MAINFRAME 20
 
 static void mainframe_initstatusbar(MainFrame*);
@@ -39,7 +41,7 @@ static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
-	int flag);
+	int flag, psy_audio_SongFile*);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
@@ -589,7 +591,7 @@ void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace, int p
 	}
 }
 
-void mainframe_onsongchanged(MainFrame* self, psy_ui_Component* sender, int flag)
+void mainframe_onsongchanged(MainFrame* self, psy_ui_Component* sender, int flag, psy_audio_SongFile* songfile)
 {		
 	if (flag == WORKSPACE_LOADSONG) {
 		if (workspace_showsonginfoonload(&self->workspace)) {

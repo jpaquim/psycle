@@ -137,7 +137,7 @@ uintptr_t psy_list_size(const psy_List* self)
 	*/
 }
 
-psy_List* list_last(psy_List* self)
+psy_List* psy_list_last(psy_List* self)
 {
 	return self ? self->tail : 0;
 }

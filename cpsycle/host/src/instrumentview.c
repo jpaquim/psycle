@@ -6,6 +6,7 @@
 #include "instrumentview.h"
 #include "../../detail/portable.h"
 #include <math.h>
+#include <songio.h>
 
 static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);
@@ -25,7 +26,7 @@ static void OnMachinesInsert(InstrumentView* self, psy_audio_Machines* sender,
 	int slot);
 static void OnMachinesRemoved(InstrumentView* self, psy_audio_Machines* sender,
 	int slot);
-static void OnSongChanged(InstrumentView*, Workspace* workspace);
+static void OnSongChanged(InstrumentView*, Workspace* workspace, int flag, psy_audio_SongFile* songfile);
 // InstrumentHeaderView
 static void instrumentheaderview_init(InstrumentHeaderView*,
 	psy_ui_Component* parent, psy_audio_Instruments*, InstrumentView*);
@@ -209,7 +210,7 @@ void instrumentview_setinstrument(InstrumentView* self, int slot)
 	instrumentpitchview_setinstrument(&self->pitch, instrument);	
 }
 
-void OnSongChanged(InstrumentView* self, Workspace* workspace)
+void OnSongChanged(InstrumentView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	if (workspace->song) {
 		self->header.instruments = &workspace->song->instruments;

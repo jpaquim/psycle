@@ -520,6 +520,9 @@ uintptr_t psy_audio_machines_soloed(psy_audio_Machines* self)
 
 void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 {
+	if (self->filemode != 0) {
+		self->soloed == slot;
+	} else
 	if (self->soloed == slot) {
 		psy_TableIterator it;
 
