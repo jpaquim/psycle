@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4F983EA4-B43D-49FE-A4E8-8BCFDD4A1277}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.29511.113</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\Release\</OutDir>
+    <IntDir>.\Release\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\container\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Debug/ui.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0407</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>.\Debug\ui.lib</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/ui.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\container\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Release/ui.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0407</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>.\Release\ui.lib</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/ui.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\uialigner.c" />
+    <ClCompile Include="src\uiapp.c" />
+    <ClCompile Include="src\uibitmap.c" />
+    <ClCompile Include="src\uibutton.c" />
+    <ClCompile Include="src\uicheckbox.c" />
+    <ClCompile Include="src\uicolordialog.c" />
+    <ClCompile Include="src\uicombobox.c" />
+    <ClCompile Include="src\uicomponent.c" />
+    <ClCompile Include="src\uicursescomponentimp.c" />
+    <ClCompile Include="src\uicursesdef.c" />
+    <ClCompile Include="src\uicursesgraphicsimp.c" />
+    <ClCompile Include="src\uicursesimpfactory.c" />
+    <ClCompile Include="src\uidef.c" />
+    <ClCompile Include="src\uidefaults.c" />
+    <ClCompile Include="src\uiedit.c" />
+    <ClCompile Include="src\uieditor.c" />
+    <ClCompile Include="src\uievents.c" />
+    <ClCompile Include="src\uifolderdialog.c" />
+    <ClCompile Include="src\uifont.c" />
+    <ClCompile Include="src\uifontdialog.c" />
+    <ClCompile Include="src\uiframe.c" />
+    <ClCompile Include="src\uigraphics.c" />
+    <ClCompile Include="src\uiimage.c" />
+    <ClCompile Include="src\uiimpfactory.c" />
+    <ClCompile Include="src\uiknob.c" />
+    <ClCompile Include="src\uilabel.c" />
+    <ClCompile Include="src\uilistbox.c" />
+    <ClCompile Include="src\uimenu.c" />
+    <ClCompile Include="src\uinotebook.c" />
+    <ClCompile Include="src\uiopendialog.c" />
+    <ClCompile Include="src\uiprogressbar.c" />
+    <ClCompile Include="src\uisavedialog.c" />
+    <ClCompile Include="src\uislider.c" />
+    <ClCompile Include="src\uisplitbar.c" />
+    <ClCompile Include="src\uistyle.c" />
+    <ClCompile Include="src\uiswitch.c" />
+    <ClCompile Include="src\uiterminal.c" />
+    <ClCompile Include="src\uiwinapp.c" />
+    <ClCompile Include="src\uiwinbitmapimp.c" />
+    <ClCompile Include="src\uiwincheckboximp.c" />
+    <ClCompile Include="src\uiwincolordialogimp.c" />
+    <ClCompile Include="src\uiwincomboboximp.c" />
+    <ClCompile Include="src\uiwincomponentimp.c" />
+    <ClCompile Include="src\uiwineditimp.c" />
+    <ClCompile Include="src\uiwinfolderdialogimp.c" />
+    <ClCompile Include="src\uiwinfontdialogimp.c" />
+    <ClCompile Include="src\uiwinfontimp.c" />
+    <ClCompile Include="src\uiwingraphicsimp.c" />
+    <ClCompile Include="src\uiwinimpfactory.c" />
+    <ClCompile Include="src\uiwinlabelimp.c" />
+    <ClCompile Include="src\uiwinlistboximp.c" />
+    <ClCompile Include="src\uiwinopendialogimp.c" />
+    <ClCompile Include="src\uiwinsavedialogimp.c" />
+    <ClCompile Include="src\uixtapp.c" />
+    <ClCompile Include="src\uixtbitmapimp.c" />
+    <ClCompile Include="src\uixtcheckboximp.c" />
+    <ClCompile Include="src\uixtcolordialogimp.c" />
+    <ClCompile Include="src\uixtcomboboximp.c" />
+    <ClCompile Include="src\uixtcomponentimp.c" />
+    <ClCompile Include="src\uixteditimp.c" />
+    <ClCompile Include="src\uixtfolderdialogimp.c" />
+    <ClCompile Include="src\uixtfontdialogimp.c" />
+    <ClCompile Include="src\uixtfontimp.c" />
+    <ClCompile Include="src\uixtgraphicsimp.c" />
+    <ClCompile Include="src\uixtimpfactory.c" />
+    <ClCompile Include="src\uixtlabelimp.c" />
+    <ClCompile Include="src\uixtlistboximp.c" />
+    <ClCompile Include="src\uixtopendialogimp.c" />
+    <ClCompile Include="src\uixtsavedialogimp.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\uialigner.h" />
+    <ClInclude Include="src\uiapp.h" />
+    <ClInclude Include="src\uibitmap.h" />
+    <ClInclude Include="src\uibutton.h" />
+    <ClInclude Include="src\uicheckbox.h" />
+    <ClInclude Include="src\uicolordialog.h" />
+    <ClInclude Include="src\uicombobox.h" />
+    <ClInclude Include="src\uicomponent.h" />
+    <ClInclude Include="src\uicursescomponentimp.h" />
+    <ClInclude Include="src\uicursesdef.h" />
+    <ClInclude Include="src\uicursesgraphicsimp.h" />
+    <ClInclude Include="src\uicursesimpfactory.h" />
+    <ClInclude Include="src\uidef.h" />
+    <ClInclude Include="src\uidefaults.h" />
+    <ClInclude Include="src\uiedit.h" />
+    <ClInclude Include="src\uieditor.h" />
+    <ClInclude Include="src\uievents.h" />
+    <ClInclude Include="src\uifolderdialog.h" />
+    <ClInclude Include="src\uifont.h" />
+    <ClInclude Include="src\uifontdialog.h" />
+    <ClInclude Include="src\uiframe.h" />
+    <ClInclude Include="src\uigraphics.h" />
+    <ClInclude Include="src\uiimage.h" />
+    <ClInclude Include="src\uiimpfactory.h" />
+    <ClInclude Include="src\uiknob.h" />
+    <ClInclude Include="src\uilabel.h" />
+    <ClInclude Include="src\uilistbox.h" />
+    <ClInclude Include="src\uimenu.h" />
+    <ClInclude Include="src\uinotebook.h" />
+    <ClInclude Include="src\uiopendialog.h" />
+    <ClInclude Include="src\uiprogressbar.h" />
+    <ClInclude Include="src\uisavedialog.h" />
+    <ClInclude Include="src\uislider.h" />
+    <ClInclude Include="src\uisplitbar.h" />
+    <ClInclude Include="src\uistyle.h" />
+    <ClInclude Include="src\uiswitch.h" />
+    <ClInclude Include="src\uiterminal.h" />
+    <ClInclude Include="src\uiwinapp.h" />
+    <ClInclude Include="src\uiwinbitmapimp.h" />
+    <ClInclude Include="src\uiwincheckboximp.h" />
+    <ClInclude Include="src\uiwincolordialogimp.h" />
+    <ClInclude Include="src\uiwincomboboximp.h" />
+    <ClInclude Include="src\uiwincomponentimp.h" />
+    <ClInclude Include="src\uiwineditimp.h" />
+    <ClInclude Include="src\uiwinfolderdialogimp.h" />
+    <ClInclude Include="src\uiwinfontdialogimp.h" />
+    <ClInclude Include="src\uiwinfontimp.h" />
+    <ClInclude Include="src\uiwingraphicsimp.h" />
+    <ClInclude Include="src\uiwinimpfactory.h" />
+    <ClInclude Include="src\uiwinlabelimp.h" />
+    <ClInclude Include="src\uiwinlistboximp.h" />
+    <ClInclude Include="src\uiwinopendialogimp.h" />
+    <ClInclude Include="src\uiwinsavedialogimp.h" />
+    <ClInclude Include="src\uixtapp.h" />
+    <ClInclude Include="src\uixtbitmapimp.h" />
+    <ClInclude Include="src\uixtcheckboximp.h" />
+    <ClInclude Include="src\uixtcolordialogimp.h" />
+    <ClInclude Include="src\uixtcomboboximp.h" />
+    <ClInclude Include="src\uixtcomponentimp.h" />
+    <ClInclude Include="src\uixteditimp.h" />
+    <ClInclude Include="src\uixtfolderdialogimp.h" />
+    <ClInclude Include="src\uixtfontdialogimp.h" />
+    <ClInclude Include="src\uixtfontimp.h" />
+    <ClInclude Include="src\uixtgraphicsimp.h" />
+    <ClInclude Include="src\uixtimpfactory.h" />
+    <ClInclude Include="src\uixtlabelimp.h" />
+    <ClInclude Include="src\uixtlistboximp.h" />
+    <ClInclude Include="src\uixtopendialogimp.h" />
+    <ClInclude Include="src\uixtsavedialogimp.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\container\container.vcxproj">
+      <Project>{8ceb65bd-4b67-416c-9dde-03f395cc522f}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

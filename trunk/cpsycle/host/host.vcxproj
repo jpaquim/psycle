@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{740AAC0D-1FAC-4D4A-9045-62E0EF74578E}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>16.0.29511.113</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\Debug\</OutDir>
+    <IntDir>.\Debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\Release\</OutDir>
+    <IntDir>.\Release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/host.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\lua53\src\;..\ui\src;..\file\src;..\audio\src;..\container\src;..\dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Debug/host.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
+      <ObjectFileName>.\Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0407</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lua53.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>.\Debug/host.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\lua53\Debug;..\ui\Debug;..\file\Debug;..\audio\Debug;..\container\Debug;..\dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug/host.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/host.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/host.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>..\lua53\src\;..\ui\src;..\file\src;..\audio\src;..\container\src;..\dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Release/host.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
+      <ObjectFileName>.\Release/</ObjectFileName>
+      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0407</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>lua53.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>.\Release/host.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>..\lua53\Release;..\ui\Release;..\file\Release;..\audio\Release;..\container\Release;..\dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>.\Release/host.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/host.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\about.c" />
+    <ClCompile Include="src\channelmappingview.c" />
+    <ClCompile Include="src\clipbox.c" />
+    <ClCompile Include="src\cmdproperties.c" />
+    <ClCompile Include="src\command.c" />
+    <ClCompile Include="src\config.c" />
+    <ClCompile Include="src\cpuview.c" />
+    <ClCompile Include="src\envelopeview.c" />
+    <ClCompile Include="src\file.c" />
+    <ClCompile Include="src\filebar.c" />
+    <ClCompile Include="src\gear.c" />
+    <ClCompile Include="src\greet.c" />
+    <ClCompile Include="src\help.c" />
+    <ClCompile Include="src\helpview.c" />
+    <ClCompile Include="src\inputdefiner.c" />
+    <ClCompile Include="src\instnotemapview.c" />
+    <ClCompile Include="src\instrumentsbox.c" />
+    <ClCompile Include="src\instrumentview.c" />
+    <ClCompile Include="src\interpolatecurveview.c" />
+    <ClCompile Include="src\labelpair.c" />
+    <ClCompile Include="src\linesperbeatbar.c" />
+    <ClCompile Include="src\machinebar.c" />
+    <ClCompile Include="src\machineframe.c" />
+    <ClCompile Include="src\machinesbox.c" />
+    <ClCompile Include="src\machineview.c" />
+    <ClCompile Include="src\mainframe.c" />
+    <ClCompile Include="src\midiview.c" />
+    <ClCompile Include="src\navigation.c" />
+    <ClCompile Include="src\newmachine.c" />
+    <ClCompile Include="src\octavebar.c" />
+    <ClCompile Include="src\oscilloscope.c" />
+    <ClCompile Include="src\paramlistbox.c" />
+    <ClCompile Include="src\paramview.c" />
+    <ClCompile Include="src\patternproperties.c" />
+    <ClCompile Include="src\patternview.c" />
+    <ClCompile Include="src\pionoroll.c" />
+    <ClCompile Include="src\playbar.c" />
+    <ClCompile Include="src\playlisteditor.c" />
+    <ClCompile Include="src\playposbar.c" />
+    <ClCompile Include="src\plugineditor.c" />
+    <ClCompile Include="src\psycle.c" />
+    <ClCompile Include="src\recentview.c" />
+    <ClCompile Include="src\renderview.c" />
+    <ClCompile Include="src\sampleeditor.c" />
+    <ClCompile Include="src\samplesbox.c" />
+    <ClCompile Include="src\samplesview.c" />
+    <ClCompile Include="src\scrollzoom.c" />
+    <ClCompile Include="src\sequenceview.c" />
+    <ClCompile Include="src\settingsview.c" />
+    <ClCompile Include="src\skincoord.c" />
+    <ClCompile Include="src\skingraphics.c" />
+    <ClCompile Include="src\skinio.c" />
+    <ClCompile Include="src\songbar.c" />
+    <ClCompile Include="src\songproperties.c" />
+    <ClCompile Include="src\songtrackbar.c" />
+    <ClCompile Include="src\spectrumanalyzer.c" />
+    <ClCompile Include="src\stepbox.c" />
+    <ClCompile Include="src\stepsequencerview.c" />
+    <ClCompile Include="src\stereophase.c" />
+    <ClCompile Include="src\tabbar.c" />
+    <ClCompile Include="src\timebar.c" />
+    <ClCompile Include="src\trackerview.c" />
+    <ClCompile Include="src\trackscopeview.c" />
+    <ClCompile Include="src\undoredo.c" />
+    <ClCompile Include="src\undoredobar.c" />
+    <ClCompile Include="src\volslider.c" />
+    <ClCompile Include="src\vst2view.c" />
+    <ClCompile Include="src\vubar.c" />
+    <ClCompile Include="src\vumeter.c" />
+    <ClCompile Include="src\vuscope.c" />
+    <ClCompile Include="src\wavebox.c" />
+    <ClCompile Include="src\wireview.c" />
+    <ClCompile Include="src\workspace.c" />
+    <ClCompile Include="src\zoombox.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\resources\resource.rc">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">src\resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">src\resources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\audio\src\sampler.h" />
+    <ClInclude Include="src\about.h" />
+    <ClInclude Include="src\channelmappingview.h" />
+    <ClInclude Include="src\clipbox.h" />
+    <ClInclude Include="src\cmdproperties.h" />
+    <ClInclude Include="src\cmdsgeneral.h" />
+    <ClInclude Include="src\cmdsnotes.h" />
+    <ClInclude Include="src\command.h" />
+    <ClInclude Include="src\config.h" />
+    <ClInclude Include="src\cpuview.h" />
+    <ClInclude Include="src\envelopeview.h" />
+    <ClInclude Include="src\file.h" />
+    <ClInclude Include="src\filebar.h" />
+    <ClInclude Include="src\gear.h" />
+    <ClInclude Include="src\greet.h" />
+    <ClInclude Include="src\help.h" />
+    <ClInclude Include="src\helpview.h" />
+    <ClInclude Include="src\inputdefiner.h" />
+    <ClInclude Include="src\instnotemapview.h" />
+    <ClInclude Include="src\instrumentsbox.h" />
+    <ClInclude Include="src\instrumentview.h" />
+    <ClInclude Include="src\interpolatecurveview.h" />
+    <ClInclude Include="src\labelpair.h" />
+    <ClInclude Include="src\linesperbeatbar.h" />
+    <ClInclude Include="src\machinebar.h" />
+    <ClInclude Include="src\machineframe.h" />
+    <ClInclude Include="src\machinesbox.h" />
+    <ClInclude Include="src\machineview.h" />
+    <ClInclude Include="src\mainframe.h" />
+    <ClInclude Include="src\midiview.h" />
+    <ClInclude Include="src\navigation.h" />
+    <ClInclude Include="src\newmachine.h" />
+    <ClInclude Include="src\octavebar.h" />
+    <ClInclude Include="src\oscilloscope.h" />
+    <ClInclude Include="src\paramlistbox.h" />
+    <ClInclude Include="src\paramview.h" />
+    <ClInclude Include="src\patternproperties.h" />
+    <ClInclude Include="src\patternview.h" />
+    <ClInclude Include="src\pianoroll.h" />
+    <ClInclude Include="src\playbar.h" />
+    <ClInclude Include="src\playlisteditor.h" />
+    <ClInclude Include="src\playposbar.h" />
+    <ClInclude Include="src\plugineditor.h" />
+    <ClInclude Include="src\recentview.h" />
+    <ClInclude Include="src\renderview.h" />
+    <ClInclude Include="src\resources\resource.h" />
+    <ClInclude Include="src\sampleeditor.h" />
+    <ClInclude Include="src\samplesbox.h" />
+    <ClInclude Include="src\samplesview.h" />
+    <ClInclude Include="src\scrollzoom.h" />
+    <ClInclude Include="src\sequenceview.h" />
+    <ClInclude Include="src\settingsview.h" />
+    <ClInclude Include="src\skincoord.h" />
+    <ClInclude Include="src\skingraphics.h" />
+    <ClInclude Include="src\skinio.h" />
+    <ClInclude Include="src\songbar.h" />
+    <ClInclude Include="src\songproperties.h" />
+    <ClInclude Include="src\songtrackbar.h" />
+    <ClInclude Include="src\spectrumanalyzer.h" />
+    <ClInclude Include="src\stepbox.h" />
+    <ClInclude Include="src\stepsequencerview.h" />
+    <ClInclude Include="src\stereophase.h" />
+    <ClInclude Include="src\tabbar.h" />
+    <ClInclude Include="src\timebar.h" />
+    <ClInclude Include="src\trackerview.h" />
+    <ClInclude Include="src\trackscopeview.h" />
+    <ClInclude Include="src\undoredo.h" />
+    <ClInclude Include="src\undoredobar.h" />
+    <ClInclude Include="src\volslider.h" />
+    <ClInclude Include="src\vst2view.h" />
+    <ClInclude Include="src\vubar.h" />
+    <ClInclude Include="src\vumeter.h" />
+    <ClInclude Include="src\vuscope.h" />
+    <ClInclude Include="src\wavebox.h" />
+    <ClInclude Include="src\wireview.h" />
+    <ClInclude Include="src\workspace.h" />
+    <ClInclude Include="src\zoombox.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\resources\icon1.ico" />
+    <Image Include="src\resources\machine_skin.bmp" />
+    <Image Include="src\resources\macparam.ico" />
+    <Image Include="src\resources\mixer_skin.bmp" />
+    <Image Include="src\resources\pattern_header_skin.bmp" />
+    <Image Include="src\resources\Project3.ico" />
+    <Image Include="src\resources\splash_screen.bmp" />
+    <Image Include="src\resources\TbMainKnob.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\audio\audio.vcxproj">
+      <Project>{40ec0ff3-1592-49d3-ac1b-3c5f85d268a9}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\container\container.vcxproj">
+      <Project>{8ceb65bd-4b67-416c-9dde-03f395cc522f}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\file\file.vcxproj">
+      <Project>{205ce71c-faa1-4310-89f5-f29a9b023433}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\lua53\lua53.vcxproj">
+      <Project>{d0152a83-ce76-4f9b-82e4-595326255abf}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="..\ui\ui.vcxproj">
+      <Project>{4f983ea4-b43d-49fe-a4e8-8bcfdd4a1277}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
