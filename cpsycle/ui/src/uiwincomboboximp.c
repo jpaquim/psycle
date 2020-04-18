@@ -257,6 +257,7 @@ void dev_text(psy_ui_win_ComboBoxImp* self, char* text)
 void dev_clear(psy_ui_win_ComboBoxImp* self)
 {
 	SendMessage(self->win_combo_imp.hwnd, CB_RESETCONTENT, 0, (LPARAM)0);
+	dev_invalidate(self);
 }
 
 void dev_setcursel(psy_ui_win_ComboBoxImp* self, intptr_t index)
@@ -268,7 +269,7 @@ void dev_setcursel(psy_ui_win_ComboBoxImp* self, intptr_t index)
 	len = SendMessage(self->win_combo_imp.hwnd, CB_GETLBTEXTLEN, (WPARAM)index, 0);
 	SendMessage(self->win_combo_imp.hwnd, CB_GETLBTEXT, (WPARAM)index,
 		(LPARAM)text);
-	dev_invalidate(self);
+	dev_invalidate(self);	
 }
 
 intptr_t dev_cursel(psy_ui_win_ComboBoxImp* self)

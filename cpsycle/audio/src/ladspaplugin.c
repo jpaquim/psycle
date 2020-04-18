@@ -232,15 +232,6 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
 		vtable.numparameters = (fp_machine_numparameters)numparameters;
-		vtable.parameterrange = (fp_machine_parameterrange)parameterrange;
-		vtable.parametertype = (fp_machine_parametertype)parametertype;
-		vtable.parametername = (fp_machine_parametername)parametername;
-		vtable.parameterlabel = (fp_machine_parameterlabel)parameterlabel;
-		vtable.parametertweak = (fp_machine_parametertweak)parametertweak;
-		vtable.parameterlabel = (fp_machine_parameterlabel)parameterlabel;
-		vtable.parametername = (fp_machine_parametername)parametername;
-		vtable.describevalue = (fp_machine_describevalue)describevalue;
-		vtable.parametervalue = (fp_machine_parametervalue)parametervalue;
 		vtable.dispose = (fp_machine_dispose)dispose;
 		vtable.generateaudio = (fp_machine_generateaudio)generateaudio;
 		vtable.numinputs = (fp_machine_numinputs)numinputs;

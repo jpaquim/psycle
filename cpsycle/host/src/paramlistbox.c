@@ -59,17 +59,17 @@ void parameterlistbox_build(ParameterListBox* self)
 		char label[256];
 		char text[256];
 
-		for (param = 0; param < psy_audio_machine_numparameters(self->machine); ++param) {		
-			if (psy_audio_machine_parameterlabel(self->machine, label, param)) {
-				psy_snprintf(text, 256, "%02X:%s", (int) param, label);
-			} else
-			if (psy_audio_machine_parametername(self->machine, label, param)) {
-				psy_snprintf(text, 256, "%02X:%s", (int) param, label);
-			} else {			
-				psy_snprintf(text, 256, "%02X: Parameter", (int) param);
-			}
-			psy_ui_listbox_addtext(&self->listbox, text);
-		}
+		//for (param = 0; param < psy_audio_machine_numparameters(self->machine); ++param) {		
+		//	if (psy_audio_machine_parameterlabel(self->machine, label, param)) {
+		//		psy_snprintf(text, 256, "%02X:%s", (int) param, label);
+		//	} else
+		//	if (psy_audio_machine_parametername(self->machine, label, param)) {
+		//		psy_snprintf(text, 256, "%02X:%s", (int) param, label);
+		//	} else {			
+		//		psy_snprintf(text, 256, "%02X: Parameter", (int) param);
+		//	}
+		//	psy_ui_listbox_addtext(&self->listbox, text);
+		//}
 	}
 }
 
@@ -105,15 +105,15 @@ void parameterlistbox_ondescribe(ParameterListBox* self, psy_ui_Slider* slider, 
 
 	txt[0] = '\0';
 	if (self->machine) {
-		if (!psy_audio_machine_describevalue(self->machine, txt, 0,
-				machine_parametervalue_scaled(self->machine, param,
-					psy_audio_machine_parametervalue(self->machine, param)))) {
-			int intval;
+		//if (!psy_audio_machine_describevalue(self->machine, txt, 0,
+		//		machine_parametervalue_scaled(self->machine, param,
+		//			psy_audio_machine_parametervalue(self->machine, param)))) {
+		//	int intval;
 
-			intval = machine_parametervalue_scaled(self->machine, param,
-				psy_audio_machine_parametervalue(self->machine, param));
-			psy_snprintf(txt, 256, "%d", intval);
-		}
+		//	intval = machine_parametervalue_scaled(self->machine, param,
+		//		psy_audio_machine_parametervalue(self->machine, param));
+		//	psy_snprintf(txt, 256, "%d", intval);
+		//}
 	}
 }
 
@@ -122,7 +122,7 @@ void parameterlistbox_ontweak(ParameterListBox* self, psy_ui_Slider* slider, flo
 	uintptr_t param = 0;
 
 	if (self->machine) {		
-		psy_audio_machine_parametertweak(self->machine, param, value);
+		//psy_audio_machine_parametertweak(self->machine, param, value);
 	}
 }
 
@@ -130,5 +130,5 @@ void parameterlistbox_onvalue(ParameterListBox* self, psy_ui_Slider* slider, flo
 {
 	uintptr_t param = 0;
 	
-	*value = psy_audio_machine_parametervalue(self->machine, param);	
+	*value = 0; // psy_audio_machine_parametervalue(self->machine, param);
 }

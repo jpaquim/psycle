@@ -20,6 +20,7 @@ typedef struct psy_audio_Buffer {
 	uintptr_t offset;
 	psy_dsp_amp_range_t range;
 	psy_dsp_amp_t volumedisplay;
+	bool preventmixclear;
 } psy_audio_Buffer;
 
 void psy_audio_buffer_init(psy_audio_Buffer*, uintptr_t channels);

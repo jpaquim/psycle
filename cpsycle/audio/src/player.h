@@ -21,7 +21,7 @@ typedef enum {
 	VUMETER_RMS,	
 } VUMeterMode;
 
-typedef struct {	
+typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;
 	psy_audio_Sequencer sequencer;	
@@ -104,6 +104,7 @@ void player_restarteventdriver(psy_audio_Player*, int id);
 psy_EventDriver* player_kbddriver(psy_audio_Player*);
 psy_EventDriver* player_eventdriver(psy_audio_Player*, int id);
 unsigned int player_numeventdrivers(psy_audio_Player*);
+void player_workmachine(psy_audio_Player*, uintptr_t amount, uintptr_t slot);
 
 #ifdef __cplusplus
 }

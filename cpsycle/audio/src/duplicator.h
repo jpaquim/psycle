@@ -15,6 +15,7 @@ typedef struct {
 	psy_audio_CustomMachine custommachine;
 	int isticking;
 	psy_audio_DuplicatorMap map;
+	psy_Table parameters;
 } psy_audio_Duplicator;
 
 void psy_audio_duplicator_init(psy_audio_Duplicator*, MachineCallback);

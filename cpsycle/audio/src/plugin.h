@@ -11,12 +11,30 @@
 extern "C" {
 #endif
 
-typedef struct {
+struct psy_audio_PluginMachineParam;
+
+typedef struct psy_audio_PluginMachineParam {
+	psy_audio_MachineParam machineparam;
+	struct CMachineInterface* mi;
+	struct CMachineInfo* cinfo;	
+	uintptr_t index;
+} psy_audio_PluginMachineParam;
+
+void psy_audio_pluginmachineparam_init(psy_audio_PluginMachineParam*, struct CMachineInterface* mi,
+	struct CMachineInfo* info,
+	uintptr_t index);
+void psy_audio_pluginmachineparam_dispose(psy_audio_PluginMachineParam*);
+psy_audio_PluginMachineParam* psy_audio_pluginmachineparam_alloc(void);
+
+struct psy_audio_Plugin;
+
+typedef struct psy_audio_Plugin {
 	psy_audio_CustomMachine custommachine;	
 	struct CMachineInterface* mi;
 	psy_Library library;	
 	psy_audio_MachineInfo* plugininfo;
 	unsigned int preventsequencerlinetick;
+	psy_Table parameters;
 } psy_audio_Plugin;
 
 void psy_audio_plugin_init(psy_audio_Plugin*, MachineCallback, const char* path);

@@ -55,6 +55,8 @@ void psy_audio_duplicatormap_init(psy_audio_DuplicatorMap* self,
 			psy_audio_DuplicatorOutput));
 		output->machine = -1;
 		output->offset = 0;
+		output->lowkey = 0;
+		output->highkey = 119;
 		psy_table_init(&output->allochans);
 		psy_table_insert(&self->outputs, i, output);
 	}	

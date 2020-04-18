@@ -286,11 +286,11 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 				for (it = psy_table_begin(&preset->parameters); 
 						!psy_tableiterator_equal(&it, psy_table_end());
 						psy_tableiterator_inc(&it)) {
-					psy_audio_machine_parametertweak(self->machine,
-						psy_tableiterator_key(&it),
-						machine_parametervalue_normed(self->machine,
-							psy_tableiterator_key(&it),
-							(uintptr_t)psy_tableiterator_value(&it)));
+					//psy_audio_machine_parametertweak(self->machine,
+					//	psy_tableiterator_key(&it),
+					//	machine_parametervalue_normed(self->machine,
+					//		psy_tableiterator_key(&it),
+					//		(uintptr_t)psy_tableiterator_value(&it)));
 				}		
 				break;
 			}

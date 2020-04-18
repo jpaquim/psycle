@@ -10,13 +10,14 @@
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_ComboBox machinebox;
+	psy_ui_ComboBox machinebox;	
 	psy_ui_Button prevmachinebutton;
 	psy_ui_Button nextmachinebutton;
 	psy_ui_Button gear;
 	psy_ui_Button editor;
 	psy_ui_Button cpu;
 	psy_ui_Button midi;
+	psy_ui_ComboBox selectinstparam;
 	psy_ui_ComboBox instparambox;	
 	psy_audio_Player* player;	
 	void (*selchange)(void*, int);

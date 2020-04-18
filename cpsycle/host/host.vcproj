@@ -807,10 +807,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\oscilloscope.c"
-				>
-			</File>
-			<File
 				RelativePath="src\paramlistbox.c"
 				>
 				<FileConfiguration
@@ -1343,10 +1339,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\spectrumanalyzer.c"
-				>
-			</File>
-			<File
 				RelativePath="src\stepbox.c"
 				>
 				<FileConfiguration
@@ -1389,10 +1381,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\stereophase.c"
-				>
 			</File>
 			<File
 				RelativePath="src\tabbar.c"
@@ -1858,10 +1846,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\oscilloscope.h"
-				>
-			</File>
-			<File
 				RelativePath="src\paramlistbox.h"
 				>
 			</File>
@@ -1962,19 +1946,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\spectrumanalyzer.h"
-				>
-			</File>
-			<File
 				RelativePath="src\stepbox.h"
 				>
 			</File>
 			<File
 				RelativePath="src\stepsequencerview.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\stereophase.h"
 				>
 			</File>
 			<File

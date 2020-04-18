@@ -102,6 +102,10 @@ typedef struct psy_audio_Sampler {
 	psy_Table lastinst;
 	int maxvolume; // psycle 0CFF, xm 0C80
 	int xmsamplerload;
+	psy_audio_IntMachineParam param_numvoices;
+	psy_audio_ChoiceMachineParam param_resamplingmethod;
+	psy_audio_ChoiceMachineParam param_defaultspeed;
+	psy_audio_IntMachineParam param_maxvolume;
 } psy_audio_Sampler;
 
 void psy_audio_sampler_init(psy_audio_Sampler*, MachineCallback);

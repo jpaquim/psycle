@@ -50,6 +50,7 @@ static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag, psy_
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 static void sequenceview_onpreferredsize(SequenceView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
+static void sequenceview_updateplayposition(SequenceView*);
 
 static void sequenceduration_update(SequenceViewDuration*);
 
@@ -511,7 +512,8 @@ void sequenceview_onnewentry(SequenceView* self)
 			self->selection->editposition.track,
 			tracknode));
 	workspace_setsequenceselection(self->workspace,
-		self->workspace->sequenceselection);	
+		self->workspace->sequenceselection);
+	sequenceview_updateplayposition(self);
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscroll(&self->listview);
 	psy_ui_component_invalidate(&self->component);
@@ -531,6 +533,7 @@ void sequenceview_oninsertentry(SequenceView* self)
 		sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			tracknode));
+	sequenceview_updateplayposition(self);
 	workspace_setsequenceselection(self->workspace, self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscroll(&self->listview);
@@ -557,6 +560,7 @@ void sequenceview_oncloneentry(SequenceView* self)
 				tracknode));			
 			workspace_setsequenceselection(self->workspace,
 				self->workspace->sequenceselection);
+			sequenceview_updateplayposition(self);
 		}						
 	}			
 	sequenceduration_update(&self->duration);
@@ -591,6 +595,7 @@ void sequenceview_ondelentry(SequenceView* self)
 	sequenceselection_seteditposition(self->selection, editposition);
 	workspace_setsequenceselection(self->workspace, 
 		self->workspace->sequenceselection);
+	sequenceview_updateplayposition(self);
 	sequenceduration_update(&self->duration);
 	sequencelistview_adjustscroll(&self->listview);
 }
@@ -612,6 +617,7 @@ void sequenceview_onincpattern(SequenceView* self)
 			editposition.trackposition.tracknode));
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);
+	sequenceview_updateplayposition(self);
 	sequenceduration_update(&self->duration);
 }
 
@@ -632,6 +638,7 @@ void sequenceview_ondecpattern(SequenceView* self)
 			editposition.trackposition.tracknode));
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);
+	sequenceview_updateplayposition(self);
 	sequenceduration_update(&self->duration);
 }
 
@@ -674,6 +681,7 @@ void sequenceview_onclear(SequenceView* self)
 		sequence_insert(self->sequence, sequenceposition, 0);
 		sequenceselection_setsequence(self->selection, self->sequence);
 		workspace_setsequenceselection(self->workspace, *self->selection);		
+		sequenceview_updateplayposition(self);
 		psy_ui_component_invalidate(&self->component);
 		psy_audio_exclusivelock_leave();
 	}
@@ -805,10 +813,12 @@ void sequencelistview_onmousedown(SequenceListView* self,
 		sequenceselection_seteditposition(self->selection,
 			sequence_at(self->sequence, selectedtrack, selected));		
 		workspace_setsequenceselection(self->workspace, *self->selection);
+		sequenceview_updateplayposition(self->view);
 	}
 }
 
-void sequencelistview_onscroll(SequenceListView* self, psy_ui_Component* sender, int stepx, int stepy)
+void sequencelistview_onscroll(SequenceListView* self,
+	psy_ui_Component* sender, int stepx, int stepy)
 {
 	self->dx += (stepx * self->component.scrollstepx);
 	self->dy += (stepy * self->component.scrollstepy);	
@@ -1010,4 +1020,24 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_TOP,
 		&margin));	
+}
+
+void sequenceview_updateplayposition(SequenceView* self)
+{
+	SequencePosition editposition;
+	
+	editposition = self->workspace->sequenceselection.editposition;
+	if (workspace_followingsong(self->workspace) &&
+			player_playing(&self->workspace->player)) {
+		SequenceEntry* entry;
+		psy_dsp_beat_t startposition;
+
+		entry = sequenceposition_entry(&editposition);
+		startposition = entry->offset;
+		psy_audio_exclusivelock_enter();
+		player_stop(&self->workspace->player);
+		player_setposition(&self->workspace->player, startposition);
+		player_start(&self->workspace->player);
+		psy_audio_exclusivelock_leave();
+	}
 }

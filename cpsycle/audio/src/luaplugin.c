@@ -86,16 +86,9 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
 			sequencerlinetick;
 		vtable.info = (fp_machine_info) info;
-		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;
-		vtable.parametername = (fp_machine_parametername) parametername;
-		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
-		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;		
-		vtable.describevalue = (fp_machine_describevalue) describevalue;
-		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
-		vtable.parametertype = (fp_machine_parametertype) parametertype;
+		vtable.numparameters = (fp_machine_numparameters) numparameters;		
 		vtable.dispose =(fp_machine_dispose) dispose;
 		vtable.reload = (fp_machine_reload) reload;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;

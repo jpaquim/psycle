@@ -846,11 +846,11 @@ void psy_audio_maketweakslideevents(psy_audio_Sequencer* self,
 	}
 	
 	{
-		int minval;
-		int maxval;		
+		int minval = 0;
+		int maxval = 0;		
 		int numslides;
 		int dest;
-		int start;		
+		int start = 0;		
 		int slide;
 		float delta;
 		float curr;
@@ -859,9 +859,9 @@ void psy_audio_maketweakslideevents(psy_audio_Sequencer* self,
 		if (numslides == 0) {
 			return;
 		}
-		psy_audio_machine_parameterrange(machine, param, &minval, &maxval);		
-		start = machine_parametervalue_scaled(machine, param,
-			psy_audio_machine_parametervalue(machine, param));
+		//psy_audio_machine_parameterrange(machine, param, &minval, &maxval);		
+		//start = machine_parametervalue_scaled(machine, param,
+		//	psy_audio_machine_parametervalue(machine, param));
 		if (start < minval) {
 			start = minval;
 		} else

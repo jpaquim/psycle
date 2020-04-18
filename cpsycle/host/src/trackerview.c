@@ -3575,7 +3575,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 
 		machine = machines_at(&self->workspace->song->machines, slot);
 		assert(machine);
-		value = machine_parametervalue_scaled(machine, tweak, normvalue);
+		value = 0; // machine_parametervalue_scaled(machine, tweak, normvalue);
 		patternevent_init_all(&event,
 			(unsigned char) (
 				workspace_recordtweaksastws(sender)

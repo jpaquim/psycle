@@ -16,7 +16,7 @@ audio           machines, patterns, instruments, sequence, player,
 container       list, hashtable, properties, signals
 dsp             buffer operations, adsr, notetab defines, sse2 optimizations
 detail          global header defines, platform tweaks
-driver          mme, mmemidi, directx, wasapi
+driver          asio, mme, mmemidi, directx, wasapi
 file            file/dir routines
 host            graphical psycle front end
 lua             script engine used since psycle 1.10
@@ -26,14 +26,28 @@ Compiling
 
 It compiles with VC6 x86, VC2008(x86 tested, SP1), VC2017 (x86/x64) and
 VC2019(x86/x64). You need at least Win98, tested versions: Win98/XP/10.
-There are VC6/VC2008 files, that can be imported by any later VC version.
-To build checkout the whole psycle trunk. After migrating to
+There are VC6/VC2008/2019 files, that can be used to import by different 
+VC versions. To build checkout the whole psycle trunk. After migrating to
 VC 2008, 2017 or 2019 set Gy- to Gy in each project (settings code
 generation). For the 64Bit Configuration adjust the Output File Target
 in Project Linker settings for the host project. Set the Output File
 Target to the project standard. Install also mfc and atl support
 (resource includes need it) and install on older platforms the DirectX
 SDK and add the include/lib sdk directories (Tools/Options/Directories).
+Copy the appropiate vc runtime and universalis dlls an existing psycle
+installation from into the host directory and adjust the plugin
+directories. Copy bwltbl.dll from the plugin to the host path aswell.
+Copy the SciLexer.dd from the psycle external package path to host.
+List of runtime files to be copied:
+bwltbl.dll,
+boost_chrono_your_version.dll,
+boost_date_time_your_version.dll,
+boost_filesystem_your_version.dll,
+boost_signals_your_version.dll,
+boost_systems_your_version.dll,
+boost_thread_your_version.dll,
+SciLexer.dll,
+universalis.dll
 
 
 

@@ -40,7 +40,6 @@ static void player_workamount(psy_audio_Player*, uintptr_t amount,
 static void player_oneventdriverinput(psy_audio_Player*, psy_EventDriver* sender);
 static void workeventinput(psy_audio_Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(psy_audio_Player*, uintptr_t amount);
-static void player_workmachine(psy_audio_Player*, uintptr_t amount, uintptr_t slot);
 static void log_workevents(psy_List* events);
 static void player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
 static psy_dsp_RMSVol* player_rmsvol(psy_audio_Player*, size_t slot);
@@ -205,8 +204,10 @@ void player_workpath(psy_audio_Player* self, uintptr_t amount)
 				// delimits the machines that could be processed parallel
 				// todo: add thread functions
 				continue;				
-			}			
-			player_workmachine(self, amount, slot);
+			}
+			if (!machines_ismixersend(&self->song->machines, slot)) {
+				player_workmachine(self, amount, slot);
+			}
 		}		
 	}
 	if (self->resetvumeters) {
@@ -219,12 +220,12 @@ void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot
 	psy_audio_Machine* machine;
 
 	machine = machines_at(&self->song->machines, slot);
-	if (machine && !psy_table_exists(&self->song->machines.connections.sends, slot)) {
+	if (machine) {
 		psy_audio_Buffer* output;
 
 		output = psy_audio_machine_mix(machine, slot, amount,
 			connections_at(&self->song->machines.connections, slot),
-			&self->song->machines);
+			&self->song->machines, self);
 		if (output && slot != MASTER_INDEX) {
 			psy_audio_BufferContext bc;
 			psy_List* events;
@@ -351,7 +352,9 @@ void player_oneventdriverinput(psy_audio_Player* self, psy_EventDriver* sender)
 			machines_slot(&self->song->machines));
 		patternevent_init_all(&event,
 			note,
-			(uint16_t) (machine && machine_supports(machine,
+			(note == NOTECOMMANDS_TWEAK)
+			? (uint16_t) self->song->machines.tweakparam
+			: (uint16_t) (machine && machine_supports(machine,
 					MACH_SUPPORTS_INSTRUMENTS)
 				? instruments_slot(&self->song->instruments)
 				: NOTECOMMANDS_INST_EMPTY),
