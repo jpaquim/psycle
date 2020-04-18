@@ -11,12 +11,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../detail/trace.h"
+
 static void machines_initsignals(psy_audio_Machines*);
 static void machines_disposesignals(psy_audio_Machines*);
 static void machines_free(psy_audio_Machines*);
 static uintptr_t machines_freeslot(psy_audio_Machines*, uintptr_t start);
 static void machines_setpath(psy_audio_Machines*, MachineList* path);
-static MachineList* compute_path(psy_audio_Machines*, uintptr_t slot);
 static void machines_sortpath(psy_audio_Machines*);
 static void compute_slotpath(psy_audio_Machines*, uintptr_t slot, psy_List**);
 static void machines_preparebuffers(psy_audio_Machines*, MachineList* path,
@@ -41,6 +42,7 @@ void machines_init(psy_audio_Machines* self)
 	assert(self->samplebuffers);
 	self->currsamplebuffer = 0;
 	self->slot = 0;
+	self->tweakparam = 0;
 	self->soloed = NOMACHINE_INDEX;
 	self->buffers = 0;
 	self->filemode = 0;
@@ -111,7 +113,7 @@ void machines_insert(psy_audio_Machines* self, uintptr_t slot,
 		psy_signal_emit(&self->signal_insert, self, 1, slot);
 		if (!self->filemode) {		
 			psy_audio_exclusivelock_enter();
-			machines_setpath(self, compute_path(self, MASTER_INDEX));
+			machines_setpath(self, compute_path(self, MASTER_INDEX, TRUE));
 			psy_audio_exclusivelock_leave();
 		}
 	}
@@ -133,7 +135,7 @@ void machines_erase(psy_audio_Machines* self, uintptr_t slot)
 	}
 	machines_disconnectall(self, slot);	
 	psy_table_remove(&self->slots, slot);
-	machines_setpath(self, compute_path(self, MASTER_INDEX));
+	machines_setpath(self, compute_path(self, MASTER_INDEX, TRUE));
 	psy_signal_emit(&self->signal_removed, self, 1, slot);
 	psy_audio_exclusivelock_leave();	
 }
@@ -177,7 +179,7 @@ uintptr_t machines_append(psy_audio_Machines* self, psy_audio_Machine* machine)
 	psy_signal_emit(&self->signal_insert, self, 1, slot);
 	if (!self->filemode) {		
 		psy_audio_exclusivelock_enter();
-		machines_setpath(self, compute_path(self, MASTER_INDEX));
+		machines_setpath(self, compute_path(self, MASTER_INDEX, TRUE));
 		psy_audio_exclusivelock_leave();
 	}
 	return slot;
@@ -215,7 +217,7 @@ int machines_connect(psy_audio_Machines* self, uintptr_t outputslot,
 	}*/
 	rv = connections_connect(&self->connections, outputslot, inputslot);
 	if (!self->filemode) {
-		machines_setpath(self, compute_path(self, MASTER_INDEX));			
+		machines_setpath(self, compute_path(self, MASTER_INDEX, TRUE));			
 		psy_audio_exclusivelock_leave();
 	}
 	return rv;
@@ -226,7 +228,7 @@ void machines_disconnect(psy_audio_Machines* self, uintptr_t outputslot,
 {
 	psy_audio_exclusivelock_enter();	
 	connections_disconnect(&self->connections, outputslot, inputslot);
-	machines_setpath(self, compute_path(self, MASTER_INDEX));		
+	machines_setpath(self, compute_path(self, MASTER_INDEX, TRUE));		
 	psy_audio_exclusivelock_leave();
 }
 
@@ -357,7 +359,7 @@ MachineList* nopath(psy_audio_Machines* self)
 	return rv;
 }
 
-MachineList* compute_path(psy_audio_Machines* self, uintptr_t slot)
+MachineList* compute_path(psy_audio_Machines* self, uintptr_t slot, bool concat)
 {
 	MachineList* rv = 0;	
 
@@ -366,18 +368,17 @@ MachineList* compute_path(psy_audio_Machines* self, uintptr_t slot)
 	compute_slotpath(self, slot, &rv);
 	psy_table_dispose(&self->colors);
 	//	Debug Path Output
-	//	if (rv) {
-	//		psy_List* p;
+	// if (rv) {
+	// 	psy_List* p;
 
-	//		for (p = rv; p != 0; p = p->next) {
-	//			char text[20];
-
-	//			psy_snprintf(text, 20, "%d, ", (int)(p->entry));
-	//			OutputDebugString(text);
-	//		}
-	//		OutputDebugString("\n");
-	//	}
-	psy_list_cat(&rv, nopath(self));
+	// 	for (p = rv; p != 0; p = p->next) {
+	// 		TRACE_INT((int)(p->entry));
+	// 	}
+	// 	OutputDebugString("\n");
+	// }
+	if (concat) {
+		psy_list_cat(&rv, nopath(self));
+	}
 	return rv;
 }
 
@@ -395,7 +396,7 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 
 			entry = (psy_audio_WireSocketEntry*) p->entry;
 			if (!psy_table_exists(&self->colors, entry->slot)) {
-				psy_table_insert(&self->colors, entry->slot, (void*)1);
+				psy_table_insert(&self->colors, entry->slot, (void*) 1);
 				compute_slotpath(self, entry->slot, path);
 			} else {
 				// cycle detected				
@@ -504,8 +505,13 @@ psy_audio_Buffer* machines_outputs(psy_audio_Machines* self, uintptr_t slot)
 
 void machines_changeslot(psy_audio_Machines* self, uintptr_t slot)
 {
-	self->slot = slot;	
+	self->slot = slot;
 	psy_signal_emit(&self->signal_slotchange, self, 1, slot);
+}
+
+void machines_changetweakparam(psy_audio_Machines* self, uintptr_t param)
+{
+	self->tweakparam = param;
 }
 
 uintptr_t machines_slot(psy_audio_Machines* self)
@@ -521,7 +527,7 @@ uintptr_t psy_audio_machines_soloed(psy_audio_Machines* self)
 void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 {
 	if (self->filemode != 0) {
-		self->soloed == slot;
+		self->soloed = slot;
 	} else
 	if (self->soloed == slot) {
 		psy_TableIterator it;
@@ -569,7 +575,7 @@ void machines_startfilemode(psy_audio_Machines* self)
 
 void machines_endfilemode(psy_audio_Machines* self)
 {
-	machines_setpath(self, compute_path(self, MASTER_INDEX));
+	machines_setpath(self, compute_path(self, MASTER_INDEX, TRUE));
 	self->filemode = 0;	
 	self->connections.filemode = 0;
 }
@@ -592,4 +598,34 @@ psy_dsp_amp_t machines_volume(psy_audio_Machines* self)
 psy_TableIterator machines_begin(psy_audio_Machines* self)
 {
 	return psy_table_begin(&self->slots);
+}
+
+bool machines_ismixersend(psy_audio_Machines* self, uintptr_t slot)
+{
+	return psy_table_exists(&self->connections.sends, slot);
+}
+
+void machines_addmixersend(psy_audio_Machines* self, uintptr_t slot)
+{
+	psy_table_insert(&self->connections.sends, slot, (void*)(uintptr_t)1);
+}
+
+void machines_removemixersend(psy_audio_Machines* self, uintptr_t slot)
+{
+	psy_table_remove(&self->connections.sends, slot);
+}
+
+void machines_connectasmixersend(psy_audio_Machines* self)
+{
+	self->mixersendconnect = TRUE;
+}
+
+void machines_connectasmixerinput(psy_audio_Machines* self)
+{
+	self->mixersendconnect = FALSE;
+}
+
+bool machines_isconnectasmixersend(psy_audio_Machines* self)
+{
+	return self->mixersendconnect;
 }

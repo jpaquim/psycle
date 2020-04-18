@@ -6,6 +6,7 @@
 
 #include "machinedefs.h"
 #include "machineinfo.h"
+#include "machineparam.h"
 #include <signal.h>
 #include "patternevent.h"
 #include "buffercontext.h"
@@ -70,6 +71,7 @@ typedef enum {
 } MachineViewOptions;
 
 struct psy_audio_Machine;
+struct psy_audio_Player;
 struct psy_audio_SongFile;
 
 typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
@@ -77,7 +79,7 @@ typedef	void (*fp_machine_reload)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Machine* (*fp_machine_clone)(struct psy_audio_Machine*);
 typedef	psy_audio_Buffer* (*fp_machine_mix)(struct psy_audio_Machine*,
 	uintptr_t slot, uintptr_t amount, psy_audio_MachineSockets*,
-	struct psy_audio_Machines*);
+	struct psy_audio_Machines*, struct psy_audio_Player*);
 typedef	void (*fp_machine_work)(struct psy_audio_Machine*, psy_audio_BufferContext*);
 typedef	void (*fp_machine_generateaudio)(struct psy_audio_Machine*, psy_audio_BufferContext*);
 typedef	int (*fp_machine_hostevent)(struct psy_audio_Machine*, int const eventNr, int const val1, float const val2);
@@ -104,22 +106,18 @@ typedef	uintptr_t (*fp_machine_numoutputs)(struct psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_slot)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setslot)(struct psy_audio_Machine*, uintptr_t);
 	// Parameters	
-typedef	int (*fp_machine_parametertype)(struct psy_audio_Machine*, uintptr_t param);
+typedef	psy_audio_MachineParam* (*fp_machine_parameter)(struct psy_audio_Machine*, uintptr_t param);
+typedef	psy_audio_MachineParam* (*fp_machine_tweakparameter)(struct psy_audio_Machine*, uintptr_t param);
 typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
+typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
 typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
-typedef	void (*fp_machine_parameterrange)(struct psy_audio_Machine*,
-	uintptr_t param, int* minval, int* maxval);
-typedef	void (*fp_machine_parametertweak)(struct psy_audio_Machine*, uintptr_t par, float val);	
-typedef	void (*fp_machine_patterntweak)(struct psy_audio_Machine*, uintptr_t par, float val);
-typedef	int (*fp_machine_parameterlabel)(struct psy_audio_Machine*, char* txt, uintptr_t param);
-typedef	int (*fp_machine_parametername)(struct psy_audio_Machine*, char* txt, uintptr_t param);
-typedef	int (*fp_machine_describevalue)(struct psy_audio_Machine*, char* txt, uintptr_t param, int value);
-typedef	float (*fp_machine_parametervalue)(struct psy_audio_Machine*, uintptr_t param);	
 typedef	int (*fp_machine_paramviewoptions)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, MachineCallback);
 typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*,
+	struct psy_audio_SongFile*, uintptr_t slot);
+typedef	void (*fp_machine_postload)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	int (*fp_machine_haseditor)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditorhandle)(struct psy_audio_Machine*, void* handle);
@@ -188,21 +186,17 @@ typedef struct MachineVtable {
 	fp_machine_numoutputs numoutputs;
 	fp_machine_slot slot;
 	fp_machine_setslot setslot;
-	// Parameters	
-	fp_machine_parametertype parametertype;
+	// Parameters
+	fp_machine_parameter parameter;
+	fp_machine_tweakparameter tweakparameter;
 	fp_machine_numparameters numparameters;
 	fp_machine_numparametercols numparametercols;
-	fp_machine_parameterrange parameterrange;
-	fp_machine_parametertweak parametertweak;
-	fp_machine_patterntweak patterntweak;
-	fp_machine_parameterlabel parameterlabel;
-	fp_machine_parametername parametername;
-	fp_machine_describevalue describevalue;
-	fp_machine_parametervalue parametervalue;
+	fp_machine_numtweakparameters numtweakparameters;
 	fp_machine_paramviewoptions paramviewoptions;
 	fp_machine_setcallback setcallback;
 	fp_machine_loadspecific loadspecific;
 	fp_machine_savespecific savespecific;
+	fp_machine_postload postload;
 	fp_machine_haseditor haseditor;
 	fp_machine_seteditorhandle seteditorhandle;
 	fp_machine_editorsize editorsize;
@@ -276,9 +270,10 @@ INLINE psy_audio_Machine* psy_audio_machine_clone(psy_audio_Machine* self)
 
 INLINE psy_audio_Buffer* psy_audio_machine_mix(psy_audio_Machine* self, uintptr_t slot,
 	uintptr_t amount, psy_audio_MachineSockets* sockets,
-	struct psy_audio_Machines* machines)
+	struct psy_audio_Machines* machines,
+	struct psy_audio_Player* player)
 {
-	return self->vtable->mix(self, slot, amount, sockets, machines);
+	return self->vtable->mix(self, slot, amount, sockets, machines, player);
 }
 
 INLINE void psy_audio_machine_work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
@@ -323,41 +318,9 @@ INLINE int psy_audio_machine_mode(psy_audio_Machine* self)
 	return self->vtable->mode(self);
 }
 
-INLINE int psy_audio_machine_describevalue(psy_audio_Machine* self, char* txt, uintptr_t param,
-	int value)
-{
-	return self->vtable->describevalue(self, txt, param, value);
-}
-
-INLINE void psy_audio_machine_parametertweak(psy_audio_Machine* self, uintptr_t param, float value)
-{
-	self->vtable->parametertweak(self, param, value);
-}
-
-INLINE void psy_audio_machine_patterntweak(psy_audio_Machine* self, uintptr_t param, float value)
-{
-	self->vtable->patterntweak(self, param, value);
-}
-
-INLINE float psy_audio_machine_parametervalue(psy_audio_Machine* self, uintptr_t param)
-{
-	return self->vtable->parametervalue(self, param);
-}
-
 INLINE int psy_audio_machine_paramviewoptions(psy_audio_Machine* self)
 {
 	return self->vtable->paramviewoptions(self);
-}
-
-INLINE void psy_audio_machine_parameterrange(struct psy_audio_Machine* self,
-	uintptr_t param, int* minval, int* maxval)
-{
-	self->vtable->parameterrange(self, param, minval, maxval);
-}
-
-INLINE uintptr_t psy_audio_machine_parametertype(psy_audio_Machine* self, uintptr_t param)
-{
-	return self->vtable->parametertype(self, param);
 }
 
 INLINE uintptr_t psy_audio_machine_numparameters(psy_audio_Machine* self)
@@ -365,19 +328,14 @@ INLINE uintptr_t psy_audio_machine_numparameters(psy_audio_Machine* self)
 	return self->vtable->numparameters(self);
 }
 
+INLINE uintptr_t psy_audio_machine_numtweakparameters(psy_audio_Machine* self)
+{
+	return self->vtable->numtweakparameters(self);
+}
+
 INLINE uintptr_t psy_audio_machine_numparametercols(psy_audio_Machine* self)
 {
 	return self->vtable->numparametercols(self);
-}
-
-INLINE int psy_audio_machine_parameterlabel(psy_audio_Machine* self, char* txt, uintptr_t param)
-{
-	return self->vtable->parameterlabel(self, txt, param);
-}
-
-INLINE int psy_audio_machine_parametername(psy_audio_Machine* self, char* txt, uintptr_t param)
-{
-	return self->vtable->parametername(self, txt, param);
 }
 
 INLINE uintptr_t psy_audio_machine_numinputs(psy_audio_Machine* self)
@@ -582,52 +540,23 @@ INLINE void psy_audio_machine_savespecific(psy_audio_Machine* self,
 	self->vtable->savespecific(self, songfile, slot);
 }
 
-// parameter mapping
-INLINE int machine_parametervalue_scaled(psy_audio_Machine* self,
-	uintptr_t param, float value)
-{	
-	int minval;
-	int maxval;
-
-	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
-	return (int)(value * (maxval - minval) + 0.5f) + minval;
-}
-
-INLINE int machine_patternvalue_scaled(psy_audio_Machine* self,
-	uintptr_t param, float value)
+INLINE void psy_audio_machine_postload(psy_audio_Machine* self,
+	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
-	int minval;
-	int maxval;
-
-	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
-	return (int)(value * (maxval - minval) + 0.5f);
+	self->vtable->postload(self, songfile, slot);
 }
 
-INLINE float machine_parametervalue_normed(psy_audio_Machine* self,
-	uintptr_t param, int value)
-{	
-	int minval;
-	int maxval;
-
-	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
-	return ((maxval - minval) != 0)
-		? (value - minval) / (float)(maxval - minval)
-		: 0.f;
+// parameter mapping
+INLINE psy_audio_MachineParam* psy_audio_machine_parameter(psy_audio_Machine* self,
+	uintptr_t param)
+{
+	return self->vtable->parameter(self, param);
 }
 
-INLINE float machine_patternvalue_normed(psy_audio_Machine* self,
-	uintptr_t param, int value)
-{	
-	int minval;
-	int maxval;	
-	int range;
-						
-	psy_audio_machine_parameterrange(self, param, &minval, &maxval);
-	range = maxval - minval;
-	if (range == 0) {
-		return 0.f;
-	}
-	return (value > range) ? range : value / (float)range;
+INLINE psy_audio_MachineParam* psy_audio_machine_tweakparameter(psy_audio_Machine* self,
+	uintptr_t param)
+{
+	return self->vtable->tweakparameter(self, param);
 }
 
 // programs

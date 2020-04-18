@@ -38,6 +38,7 @@ typedef struct psy_audio_Machines {
 	int numsamplebuffers;
 	int currsamplebuffer;
 	uintptr_t slot;
+	uintptr_t tweakparam;
 	uintptr_t soloed;
 	int filemode;
 	float volume;	
@@ -45,6 +46,7 @@ typedef struct psy_audio_Machines {
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
 	psy_audio_Machine* master;
+	bool mixersendconnect;
 } psy_audio_Machines;
 
 void machines_init(psy_audio_Machines*);
@@ -67,7 +69,9 @@ psy_audio_Buffer* machines_inputs(psy_audio_Machines*, uintptr_t slot);
 psy_audio_Buffer* machines_outputs(psy_audio_Machines*, uintptr_t slot);
 void machines_buffer_end(psy_audio_Machines*);
 void machines_changeslot(psy_audio_Machines*, uintptr_t slot);
+void machines_changetweakparam(psy_audio_Machines*, uintptr_t slot);
 uintptr_t machines_slot(psy_audio_Machines*);
+uintptr_t machines_tweakparam(psy_audio_Machines*);
 uintptr_t psy_audio_machines_soloed(psy_audio_Machines*);
 void psy_audio_machines_solo(psy_audio_Machines*, uintptr_t slot);
 void machines_insertmaster(psy_audio_Machines*, psy_audio_Machine*);
@@ -77,6 +81,13 @@ void machines_endfilemode(psy_audio_Machines*);
 void machines_setvolume(psy_audio_Machines*, psy_dsp_amp_t volume);
 psy_dsp_amp_t machines_volume(psy_audio_Machines*);
 psy_TableIterator machines_begin(psy_audio_Machines*);
+MachineList* compute_path(psy_audio_Machines*, uintptr_t slot, bool concat);
+bool machines_ismixersend(psy_audio_Machines* self, uintptr_t slot);
+void machines_addmixersend(psy_audio_Machines* self, uintptr_t slot);
+void machines_removemixersend(psy_audio_Machines* self, uintptr_t slot);
+void machines_connectasmixersend(psy_audio_Machines*);
+void machines_connectasmixerinput(psy_audio_Machines*);
+bool machines_isconnectasmixersend(psy_audio_Machines*);
 
 #ifdef __cplusplus
 }

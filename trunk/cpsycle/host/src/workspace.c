@@ -1387,10 +1387,21 @@ void workspace_loadsong(Workspace* self, const char* path)
 				songfile.serr);
 			psy_audio_songfile_dispose(&songfile);
 		} else {		
+			psy_TableIterator it;
+
 			free(self->filename);
 			self->filename = strdup(path);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
 			psy_audio_songfile_dispose(&songfile);
+			// notify machines postload	
+			for (it = machines_begin(&self->song->machines); 
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+				psy_audio_Machine* machine;
+
+				machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+				psy_audio_machine_postload(machine, &songfile, psy_tableiterator_key(&it));
+			}
 			psy_audio_exclusivelock_leave();
 			workspace_addrecentsong(self, path);
 			psy_audio_songfile_dispose(&songfile);
@@ -1606,7 +1617,7 @@ void workspace_setsequenceselection(Workspace* self,
 	self->sequenceselection = selection;	
 	sequence_setplayselection(&self->song->sequence, &selection);
 	psy_signal_emit(&self->signal_sequenceselectionchanged, self, 0);
-	workspace_addhistory(self);
+	workspace_addhistory(self);	
 }
 
 void workspace_addhistory(Workspace* self)
@@ -2086,4 +2097,19 @@ int workspace_loadnewblitz(Workspace* self)
 {
 	return psy_properties_bool(self->compatibility,
 		"loadnewgamefxblitz", 0);
+}
+
+void workspace_connectasmixersend(Workspace* self)
+{
+	machines_connectasmixersend(&self->song->machines);
+}
+
+void workspace_connectasmixerinput(Workspace* self)
+{
+	machines_connectasmixerinput(&self->song->machines);
+}
+
+bool workspace_isconnectasmixersend(Workspace* self)
+{
+	return machines_isconnectasmixersend(&self->song->machines);
 }

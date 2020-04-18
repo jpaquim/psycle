@@ -80,13 +80,6 @@ static void vtable_init(psy_audio_AudioRecorder* self)
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
 		vtable.numparameters = (fp_machine_numparameters) numparameters;
-		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
-		vtable.parametertype = (fp_machine_parametertype) parametertype;
-		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
-		vtable.parametername = (fp_machine_parametername) parametername;
-		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
-		vtable.describevalue = (fp_machine_describevalue) describevalue;
-		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
 		vtable_initialized = 1;
 	}
 }
@@ -138,8 +131,8 @@ void parametertweak(psy_audio_AudioRecorder* self, uintptr_t param, float value)
 	} else
 	if (param == 1) {
 		int newport;
-		newport = machine_parametervalue_scaled(&self->custommachine.machine,
-			param, value);
+		//newport = machine_parametervalue_scaled(&self->custommachine.machine,
+		//	param, value);
 		changeport(self, newport);
 	}
 }
@@ -171,8 +164,8 @@ float parametervalue(psy_audio_AudioRecorder* self, uintptr_t param)
 		return (float)sqrt(self->_gainvol) * 0.5f;;
 	} else
 	if (param == 1) {
-		return machine_parametervalue_normed(&self->custommachine.machine,
-			param, self->_captureidx);
+		//return machine_parametervalue_normed(&self->custommachine.machine,
+		//	param, self->_captureidx);
 	}
 	return 0.f;
 }

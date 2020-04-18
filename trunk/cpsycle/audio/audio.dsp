@@ -280,6 +280,10 @@ SOURCE=.\src\machineinfo.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\machineparam.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\machineproxy.c
 # End Source File
 # Begin Source File
@@ -720,6 +724,10 @@ SOURCE=.\src\machinefactory.h
 # Begin Source File
 
 SOURCE=.\src\machineinfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machineparam.h
 # End Source File
 # Begin Source File
 

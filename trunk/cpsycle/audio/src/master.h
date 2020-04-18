@@ -11,7 +11,10 @@ extern "C" {
 #endif
 
 typedef struct {
-	psy_audio_Machine machine;	
+	psy_audio_Machine machine;
+	psy_audio_CustomMachineParam param_info;
+	psy_audio_CustomMachineParam param_slider;
+	psy_audio_CustomMachineParam param_level;
 } psy_audio_Master;
 
 void master_init(psy_audio_Master* self, MachineCallback);

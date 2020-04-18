@@ -15,21 +15,14 @@
 // TODO: change will break songfile load/save
 #define DUPLICATOR_NUMOUTPUTS 8
 
+static void dispose(psy_audio_Duplicator*);
 static void work(psy_audio_Duplicator* self, psy_audio_BufferContext* bc) { }
 static void sequencertick(psy_audio_Duplicator*);
 static psy_List* sequencerinsert(psy_audio_Duplicator*, PatternNode* events);
 static const psy_audio_MachineInfo* info(psy_audio_Duplicator*);
-static void parametertweak(psy_audio_Duplicator*, uintptr_t param, float val);
-static int describevalue(psy_audio_Duplicator*, char* rv, uintptr_t param,
-	int value);
-static float parametervalue(psy_audio_Duplicator*, uintptr_t param);
-static void parameterrange(psy_audio_Duplicator*, uintptr_t param, int* minval,
-	int* maxval);
-static int parameterlabel(psy_audio_Duplicator*, char* rv, uintptr_t param);
-static int parametername(psy_audio_Duplicator*, char* rv, uintptr_t param);
+static psy_audio_MachineParam* parameter(psy_audio_Duplicator*, uintptr_t param);
 static uintptr_t numparameters(psy_audio_Duplicator*);
 static unsigned int numparametercols(psy_audio_Duplicator*);
-static void dispose(psy_audio_Duplicator*);
 static uintptr_t numinputs(psy_audio_Duplicator* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Duplicator* self) { return 0; }
 static void loadspecific(psy_audio_Duplicator*, psy_audio_SongFile*,
@@ -39,7 +32,8 @@ static void savespecific(psy_audio_Duplicator*, psy_audio_SongFile*,
 static void stop(psy_audio_Duplicator*);
 
 static int transpose(int note, int offset);
-static uintptr_t parameterrow(psy_audio_Duplicator*, uintptr_t param);
+static void initparameters(psy_audio_Duplicator*);
+static void disposeparameters(psy_audio_Duplicator*);
 
 static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
@@ -73,16 +67,10 @@ static void vtable_init(psy_audio_Duplicator* self)
 		vtable.info = (fp_machine_info) info;
 		vtable.sequencertick = (fp_machine_sequencertick) sequencertick;
 		vtable.sequencerinsert = (fp_machine_sequencerinsert) sequencerinsert;
-		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
-		vtable.describevalue = (fp_machine_describevalue) describevalue;	
-		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;
-		vtable.describevalue = (fp_machine_describevalue) describevalue;
-		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
+		vtable.parameter = (fp_machine_parameter) parameter;
 		vtable.numparameters = (fp_machine_numparameters) numparameters;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;
-		vtable.parametername = (fp_machine_parametername) parametername;
 		vtable.dispose = (fp_machine_dispose) dispose;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;	
@@ -103,12 +91,56 @@ void psy_audio_duplicator_init(psy_audio_Duplicator* self,
 	psy_audio_machine_seteditname(psy_audio_duplicator_base(self), "Note Duplicator");
 	psy_audio_duplicatormap_init(&self->map, DUPLICATOR_NUMOUTPUTS,
 		MAX_TRACKS);
+	initparameters(self);
 }
 
 void dispose(psy_audio_Duplicator* self)
 {					
+	disposeparameters(self);
 	custommachine_dispose(&self->custommachine);
 	psy_audio_duplicatormap_dispose(&self->map);
+}
+
+void initparameters(psy_audio_Duplicator* self)
+{
+	uintptr_t gbp;
+
+	psy_table_init(&self->parameters);
+	for (gbp = 0; gbp < psy_audio_duplicatormap_numoutputs(&self->map); ++gbp) {
+		char name[128];
+		psy_audio_IntMachineParam* param;
+		psy_audio_DuplicatorOutput* output;
+				
+		output = psy_audio_duplicatormap_output(&self->map, gbp);
+		if (output) {
+			psy_snprintf(name, 128, "%s %d", "Output Machine ", gbp);
+			param = psy_audio_intmachineparam_allocinit(name, name, MPF_STATE,
+				(int32_t*)&output->machine, -1, 0x7E);
+			psy_table_insert(&self->parameters, gbp, (void*)param);
+			psy_snprintf(name, 128, "%s %d", "Note Offset ", gbp);
+			param = psy_audio_intmachineparam_allocinit(name, name, MPF_STATE,
+				&output->offset, -48, 48);
+			psy_table_insert(&self->parameters,
+				psy_audio_duplicatormap_numoutputs(&self->map) + gbp,
+				(void*)param);
+		}
+	}	
+}
+
+void disposeparameters(psy_audio_Duplicator* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->parameters);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_IntMachineParam* param;
+
+		param = (psy_audio_IntMachineParam*) psy_tableiterator_value(&it);
+		psy_audio_intmachineparam_dispose(param);
+		free(param);
+	}
+	psy_table_dispose(&self->parameters);
 }
 
 void sequencertick(psy_audio_Duplicator* self)
@@ -186,99 +218,6 @@ const psy_audio_MachineInfo* info(psy_audio_Duplicator* self)
 	return &macinfo;
 }
 
-void parametertweak(psy_audio_Duplicator* self, uintptr_t param, float value)
-{	
-	psy_audio_DuplicatorOutput* output;	
-	
-	output = psy_audio_duplicatormap_output(&self->map, param %
-		psy_audio_duplicatormap_numoutputs(&self->map));
-	switch (parameterrow(self, param)) {
-		case 0:
-			output->machine = machine_parametervalue_scaled(
-				psy_audio_duplicator_base(self), param, value);
-		break;
-		case 1:
-			output->offset = machine_parametervalue_scaled(
-				psy_audio_duplicator_base(self), param, value);
-		break;		
-		default:			
-		break;
-	}
-}
-
-int describevalue(psy_audio_Duplicator* self, char* rv, uintptr_t param,
-	int value)
-{ 
-	return 0;
-}
-
-float parametervalue(psy_audio_Duplicator* self, uintptr_t param)
-{	
-	psy_audio_DuplicatorOutput* output;
-	
-	output = psy_audio_duplicatormap_output(&self->map,
-		param % psy_audio_duplicatormap_numoutputs(&self->map));
-	switch (parameterrow(self, param)) {
-		case 0:
-			return machine_parametervalue_normed(psy_audio_duplicator_base(self), param,
-				output->machine);
-		break;
-		case 1:
-			return machine_parametervalue_normed(psy_audio_duplicator_base(self), param,
-				output->offset);
-		break;		
-		default:			
-		break;
-	}
-	return 0;
-}
-
-void parameterrange(psy_audio_Duplicator* self, uintptr_t param, int* minval,
-	int* maxval)
-{
-	switch (parameterrow(self, param)) {
-		case 0:
-			*minval = -1;
-			*maxval = 0x7E;
-		break;
-		case 1:		
-			*minval = -48;
-			*maxval = 48;
-		break;	
-		default:
-			*minval = 0;
-			*maxval = 0;
-		break;
-	}
-}
-
-int parameterlabel(psy_audio_Duplicator* self, char* rv, uintptr_t param)
-{
-	return parametername(self, rv, param);
-}
-
-int parametername(psy_audio_Duplicator* self, char* rv, uintptr_t param)
-{
-	switch (parameterrow(self, param)) {
-		case 0:
-			psy_snprintf(rv, 128, "%s %d", "Output Machine ", param);
-		break;
-		case 1:
-			psy_snprintf(rv, 128, "%s %d", "Note Offset ",
-				param % psy_audio_duplicatormap_numoutputs(&self->map));
-		break;		
-		default:
-			rv[0] = '\0';
-		break;
-	}	
-	return 1;	
-}
-
-uintptr_t parameterrow(psy_audio_Duplicator* self, uintptr_t param)
-{
-	return param / psy_audio_duplicatormap_numoutputs(&self->map);
-}
-
 uintptr_t numparameters(psy_audio_Duplicator* self)
 {
 	return psy_audio_duplicatormap_numoutputs(&self->map) *
@@ -314,6 +253,8 @@ void loadspecific(psy_audio_Duplicator* self, psy_audio_SongFile* songfile,
 			output->offset = noteoffset[i];
 		}
 	}
+	disposeparameters(self);
+	initparameters(self);
 }
 
 void savespecific(psy_audio_Duplicator* self, psy_audio_SongFile* songfile,
@@ -346,3 +287,7 @@ void stop(psy_audio_Duplicator* self)
 	psy_audio_duplicatormap_clear(&self->map);
 }
 
+psy_audio_MachineParam* parameter(psy_audio_Duplicator* self, uintptr_t param)
+{
+	return (psy_audio_MachineParam*) psy_table_at(&self->parameters, param);
+}

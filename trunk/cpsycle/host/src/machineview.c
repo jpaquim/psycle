@@ -30,6 +30,9 @@ static void machineviewbar_ondestroy(MachineViewBar*, psy_ui_Component* sender);
 static void machineviewbar_ondraw(MachineViewBar* self, psy_ui_Graphics*);
 static void machineviewbar_onpreferredsize(MachineViewBar*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
+static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
+	int flag, psy_audio_SongFile*);
+
 
 static MachineUi* machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y,
 	MachineSkin*);
@@ -1896,12 +1899,14 @@ void machineuis_removeall(MachineWireView* self)
 static psy_ui_ComponentVtable machineviewbar_vtable;
 static int machineviewbar_vtable_initialized = 0;
 
+static void machineviewbar_drawstatus(MachineViewBar*, psy_ui_Component* sender,
+	psy_ui_Graphics*);
+static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*, psy_ui_Component* sender);
+
 static void machineviewbar_vtable_init(MachineViewBar* self)
 {
 	if (!machineviewbar_vtable_initialized) {
 		machineviewbar_vtable = *(self->component.vtable);
-		machineviewbar_vtable.ondraw = (psy_ui_fp_ondraw)
-			machineviewbar_ondraw;
 		machineviewbar_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			machineviewbar_onpreferredsize;
 		machineviewbar_vtable_initialized = 1;
@@ -1914,9 +1919,35 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	machineviewbar_vtable_init(self);
 	self->component.vtable = &machineviewbar_vtable;;
-	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_enablealign(&self->component);	
+	psy_ui_checkbox_init(&self->mixersend, &self->component);
+	psy_ui_checkbox_settext(&self->mixersend,
+		"Connect to Mixer Send/Return Input");
+	psy_ui_checkbox_check(&self->mixersend);
+	psy_signal_connect(&self->mixersend.signal_clicked, self,
+		machineviewbar_onmixerconnectmodeclick);
+	psy_ui_component_setalign(&self->mixersend.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_init(&self->status, &self->component);
+	psy_ui_component_setalign(&self->status, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_doublebuffer(&self->status);
+	psy_signal_connect(&self->status.signal_draw, self, machineviewbar_drawstatus);
 	self->text = strdup("");
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		machineviewbar_onsongchanged);
+	self->workspace = workspace;
+}
+
+void machineviewbar_drawstatus(MachineViewBar* self, psy_ui_Component* sender,
+	psy_ui_Graphics* g)
+{
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_component_size(&self->component);
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	psy_ui_settextcolor(g, 0x00D1C5B6);
+	psy_ui_textout(g, tm.tmAveCharWidth * 4, (size.height - tm.tmHeight) / 2, self->text, strlen(self->text));
 }
 
 void machineviewbar_ondestroy(MachineViewBar* self, psy_ui_Component* sender)
@@ -1928,19 +1959,7 @@ void machineviewbar_settext(MachineViewBar* self, const char* text)
 {
 	free(self->text);
 	self->text = strdup(text);
-	psy_ui_component_invalidate(&self->component);
-}
-
-void machineviewbar_ondraw(MachineViewBar* self, psy_ui_Graphics* g)
-{
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_size(&self->component);
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00D1C5B6);
-	psy_ui_textout(g, 0, (size.height - tm.tmHeight) / 2, self->text, strlen(self->text));
+	psy_ui_component_invalidate(&self->status);
 }
 
 void machineviewbar_onpreferredsize(MachineViewBar* self, psy_ui_Size* limit,
@@ -1949,8 +1968,29 @@ void machineviewbar_onpreferredsize(MachineViewBar* self, psy_ui_Size* limit,
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	rv->width = tm.tmAveCharWidth * 40;
+	rv->width = tm.tmAveCharWidth * 44 +
+		psy_ui_component_preferredsize(&self->mixersend.component, rv).width;
 	rv->height = (int)(tm.tmHeight * 1.5);
+}
+
+void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self, psy_ui_Component* sender)
+{
+	if (psy_ui_checkbox_checked(&self->mixersend)) {
+		workspace_connectasmixersend(self->workspace);
+	} else {
+		workspace_connectasmixerinput(self->workspace);
+	}    
+}
+
+void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
+	int flag, psy_audio_SongFile* songfile)
+{
+	if (!self->workspace->song ||
+			machines_isconnectasmixersend(&self->workspace->song->machines)) {
+		psy_ui_checkbox_check(&self->mixersend);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->mixersend);
+	}
 }
 
 void machineview_init(MachineView* self, psy_ui_Component* parent,

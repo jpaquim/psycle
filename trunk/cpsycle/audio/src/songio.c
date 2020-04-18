@@ -118,7 +118,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			psy_audio_songfile_createmaster(self);
 		}				
 		psy_audio_machines_solo(&self->song->machines,
-			self->machinesoloed);
+			self->machinesoloed);		
 		machines_endfilemode(&self->song->machines);		
 	} else {
 		status = psy_audio_songfile_errfile(self);

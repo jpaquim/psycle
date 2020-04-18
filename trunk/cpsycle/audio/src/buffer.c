@@ -19,6 +19,7 @@ void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 	self->numsamples = 0;
 	self->range = PSY_DSP_AMP_RANGE_NATIVE;
 	self->volumedisplay = 0;
+	self->preventmixclear = FALSE;
 	psy_audio_buffer_resize(self, channels);
 }
 

@@ -14,7 +14,8 @@ extern "C" {
 typedef struct {
 	psy_audio_CustomMachine custommachine;	
 	psy_audio_DuplicatorMap map;
-	int isticking;	
+	int isticking;
+	psy_Table parameters;
 } psy_audio_Duplicator2;
 
 void psy_audio_duplicator2_init(psy_audio_Duplicator2*, MachineCallback);

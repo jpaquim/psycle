@@ -32,17 +32,11 @@ static void sequencerlinetick(psy_audio_Sampler*);
 static psy_List* sequencerinsert(psy_audio_Sampler*, psy_List* events);
 static void stop(psy_audio_Sampler*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
+// Parameters
 static unsigned int numparametercols(psy_audio_Sampler*);
 static uintptr_t numparameters(psy_audio_Sampler*);
-static int parametertype(psy_audio_Sampler* self, uintptr_t param);
-static void parameterrange(psy_audio_Sampler*, uintptr_t param, int* minval,
-	int* maxval);
-static int parameterlabel(psy_audio_Sampler*, char* txt, uintptr_t param);
-static int parametername(psy_audio_Sampler*, char* txt, uintptr_t param);
-static void parametertweak(psy_audio_Sampler*, uintptr_t param, float val);
-static int describevalue(psy_audio_Sampler*, char* txt, uintptr_t param,
-	int value);
-static float parametervalue(psy_audio_Sampler*, uintptr_t param);
+static psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
+	uintptr_t param);
 static void dispose(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
 static void releaseallvoices(psy_audio_Sampler*);
@@ -59,8 +53,6 @@ static void savespecific(psy_audio_Sampler*, psy_audio_SongFile*,
 	uintptr_t slot);
 static int currslot(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
-
-
 
 static const uint32_t SAMPLERVERSION = 0x00000002;
 
@@ -87,43 +79,39 @@ const psy_audio_MachineInfo* psy_audio_sampler_info(void)
 	return &macinfo;
 }
 
-static MachineVtable vtable;
-static int vtable_initialized = 0;
+static MachineVtable sampler_vtable;
+static int sampler_vtable_initialized = 0;
 
-static void vtable_init(psy_audio_Sampler* self)
+static void sampler_vtable_init(psy_audio_Sampler* self)
 {
-	if (!vtable_initialized) {
-		vtable = *(psy_audio_sampler_base(self)->vtable);
-		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
-		vtable.seqtick = (fp_machine_seqtick) seqtick;
-		vtable.sequencerlinetick = (fp_machine_sequencerlinetick) sequencerlinetick;
-		vtable.sequencerinsert = (fp_machine_sequencerinsert) sequencerinsert;
-		vtable.stop = (fp_machine_stop) stop;
-		vtable.info = (fp_machine_info) info;
-		vtable.dispose = (fp_machine_dispose) dispose;
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
-		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;
-		vtable.numparametercols = (fp_machine_numparametercols)
+	if (!sampler_vtable_initialized) {
+		sampler_vtable = *(psy_audio_sampler_base(self)->vtable);
+		sampler_vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
+		sampler_vtable.seqtick = (fp_machine_seqtick) seqtick;
+		sampler_vtable.sequencerlinetick = (fp_machine_sequencerlinetick) sequencerlinetick;
+		sampler_vtable.sequencerinsert = (fp_machine_sequencerinsert) sequencerinsert;
+		sampler_vtable.stop = (fp_machine_stop) stop;
+		sampler_vtable.info = (fp_machine_info) info;
+		sampler_vtable.dispose = (fp_machine_dispose) dispose;
+		sampler_vtable.numinputs = (fp_machine_numinputs) numinputs;
+		sampler_vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		sampler_vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
+		sampler_vtable.savespecific = (fp_machine_savespecific) savespecific;
+		sampler_vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;
-		vtable.parametertweak = (fp_machine_parametertweak) parametertweak;
-		vtable.describevalue = (fp_machine_describevalue) describevalue;	
-		vtable.parametervalue = (fp_machine_parametervalue) parametervalue;		
-		vtable.parameterrange = (fp_machine_parameterrange) parameterrange;
-		vtable.parametertype = (fp_machine_parametertype) parametertype;
-		vtable.parametername = (fp_machine_parametername) parametername;
-		vtable.parameterlabel = (fp_machine_parameterlabel) parameterlabel;			
-		vtable_initialized = 1;
+		sampler_vtable.numparameters = (fp_machine_numparameters) numparameters;
+		sampler_vtable.parameter = (fp_machine_parameter) parameter;
+		sampler_vtable_initialized = 1;
 	}
 }
 
 void psy_audio_sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 {	
+	uintptr_t i;
+
 	custommachine_init(&self->custommachine, callback);	
-	vtable_init(self);
-	psy_audio_sampler_base(self)->vtable = &vtable;
+	sampler_vtable_init(self);
+	psy_audio_sampler_base(self)->vtable = &sampler_vtable;
 	psy_audio_machine_seteditname(psy_audio_sampler_base(self), "Sampler");
 	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;	
 	self->voices = 0;	
@@ -132,6 +120,31 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 	self->maxvolume = 0xFF;
 	self->xmsamplerload = 0;
 	psy_table_init(&self->lastinst);
+	psy_audio_intmachineparam_init(&self->param_numvoices,
+		"Polyphony", "Polyphony", MPF_STATE,
+		(int32_t*)&self->numvoices,
+		1, 64);
+	psy_audio_choicemachineparam_init(&self->param_resamplingmethod,
+		"Resampling", "Resampling", MPF_STATE,
+		(int32_t*)&self->resamplingmethod,
+		0, 3);
+	for (i = 0; i < RESAMPLERTYPE_NUMRESAMPLERS; ++i) {
+		psy_audio_choicemachineparam_setdescription(&self->param_resamplingmethod, i,
+			psy_dsp_multiresampler_name((ResamplerType)i));
+	}
+	psy_audio_choicemachineparam_init(&self->param_defaultspeed,
+		"Default speed", "Default speed", MPF_STATE,
+		(int32_t*)&self->defaultspeed,
+		0, 1);	
+	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 0,
+		"played by C3"); 
+	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 1,
+		"played by C4");
+	psy_audio_intmachineparam_init(&self->param_maxvolume,
+		"Max volume", "Max volume", MPF_STATE,
+		(int32_t*)&self->maxvolume,
+		0, 255);
+	psy_audio_intmachineparam_setmask(&self->param_maxvolume, "%0X");
 }
 
 void dispose(psy_audio_Sampler* self)
@@ -147,7 +160,11 @@ void dispose(psy_audio_Sampler* self)
 	}
 	psy_list_free(self->voices);
 	self->voices = 0;
-	custommachine_dispose(&self->custommachine);
+	psy_audio_intmachineparam_dispose(&self->param_numvoices);
+	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
+	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
+	psy_audio_intmachineparam_dispose(&self->param_maxvolume);
+	custommachine_dispose(&self->custommachine);	
 }
 
 psy_audio_Sampler* psy_audio_sampler_alloc(void)
@@ -329,61 +346,6 @@ const psy_audio_MachineInfo* info(psy_audio_Sampler* self)
 	return &macinfo;
 }
 
-void parametertweak(psy_audio_Sampler* self, uintptr_t param, float value)
-{	
-	switch (param) {
-		case 0: self->numvoices = machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
-		case 1: self->resamplingmethod = (ResamplerType) machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
-		case 2: self->defaultspeed = machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
-		case 3: self->maxvolume = machine_parametervalue_scaled(psy_audio_sampler_base(self), param, value); break;
-		default:
-		break;
-	}
-}
-
-int describevalue(psy_audio_Sampler* self, char* txt, uintptr_t param, int value)
-{ 
-	if (param == 1) {
-		sprintf(txt, psy_dsp_multiresampler_name((ResamplerType) value));
-		return 1;		
-	} else
-	if (param == 2) {
-		switch(value)
-		{
-			case 0:sprintf(txt,"played by C3");return 1;break;
-			case 1:sprintf(txt,"played by C4");return 1;break;		
-		}
-	} else
-	if (param == 3) {
-		sprintf(txt,"%0X", value);
-		return 1;
-	}
-	return 0;
-}
-
-float parametervalue(psy_audio_Sampler* self, uintptr_t param)
-{	
-	switch (param) {
-		case 0:
-			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
-				self->numvoices);
-		break;
-		case 1:
-			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
-				self->resamplingmethod);
-		break;
-		case 2:
-			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
-				self->defaultspeed);
-		case 3:
-			return machine_parametervalue_normed(psy_audio_sampler_base(self), param,
-				self->maxvolume);
-		default:
-		break;
-	}
-	return 0;
-}
-
 uintptr_t numparameters(psy_audio_Sampler* self)
 {
 	return 4;
@@ -392,85 +354,6 @@ uintptr_t numparameters(psy_audio_Sampler* self)
 unsigned int numparametercols(psy_audio_Sampler* self)
 {
 	return 4;
-}
-
-int parametertype(psy_audio_Sampler* self, uintptr_t param)
-{
-	return MPF_STATE;
-}
-
-void parameterrange(psy_audio_Sampler* self, uintptr_t param, int* minval, int* maxval)
-{
-	switch (param) {
-	case 0:
-		*minval = 1;
-		*maxval = 64;
-		break;
-	case 1:
-		*minval = 0;
-		*maxval = 3;
-		break;
-	case 2:
-		*minval = 0;
-		*maxval = 1;
-		break;
-	case 3:
-		*minval = 0;
-		*maxval = 255;
-		break;
-	default:
-		*minval = 0;
-		*maxval = 0;
-		break;
-	}
-}
-
-int parameterlabel(psy_audio_Sampler* self, char* txt, uintptr_t param)
-{
-	int rv = 1;
-	switch (param) {
-	case 0:
-		psy_snprintf(txt, 128, "%s", "Polyphony Voices");
-		break;
-	case 1:
-		psy_snprintf(txt, 128, "%s", "Resampling method");
-		break;
-	case 2:
-		psy_snprintf(txt, 128, "%s", "Default speed");
-		break;
-	case 3:
-		psy_snprintf(txt, 128, "%s", "Max volume");
-		break;
-	default:
-		txt[0] = '\0';
-		rv = 0;
-		break;
-	}
-	return rv;
-}
-
-int parametername(psy_audio_Sampler* self, char* txt, uintptr_t param)
-{
-	int rv = 1;
-	switch (param) {
-	case 0:
-		psy_snprintf(txt, 128, "%s", "Polyphony");
-		break;
-	case 1:
-		psy_snprintf(txt, 128, "%s", "Resampling");
-		break;
-	case 2:
-		psy_snprintf(txt, 128, "%s", "Default speed");
-		break;
-	case 3:
-		psy_snprintf(txt, 128, "%s", "Max volume");
-		break;
-	default:
-		txt[0] = '\0';
-		rv = 0;
-		break;
-	}
-	return rv;
 }
 
 uintptr_t numinputs(psy_audio_Sampler* self)
@@ -1084,4 +967,17 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	psyfile_write(songfile->file, &defaultC4, sizeof(defaultC4)); // correct A4
 	slidemode = 1;
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
+}
+
+psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
+	uintptr_t param)
+{
+	switch (param) {
+		case 0: return &self->param_numvoices.machineparam; break;
+		case 1: return &self->param_resamplingmethod.machineparam; break;
+		case 2: return &self->param_defaultspeed.machineparam;  break;
+		case 3: return &self->param_maxvolume.machineparam; break;
+		default:;
+	}
+	return 0;
 }

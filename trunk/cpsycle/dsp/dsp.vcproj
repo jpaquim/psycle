@@ -220,10 +220,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\convert.c"
-				>
-			</File>
-			<File
 				RelativePath="src\envelope.c"
 				>
 				<FileConfiguration
@@ -244,10 +240,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\fft.c"
-				>
 			</File>
 			<File
 				RelativePath="src\filter.c"
@@ -531,19 +523,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\convert.h"
-				>
-			</File>
-			<File
 				RelativePath="src\dsptypes.h"
 				>
 			</File>
 			<File
 				RelativePath="src\envelope.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\fft.h"
 				>
 			</File>
 			<File

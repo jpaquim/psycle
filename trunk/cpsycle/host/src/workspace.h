@@ -197,5 +197,8 @@ const char* workspace_dialbitmap_path(Workspace*);
 void workspace_dockview(Workspace*, psy_ui_Component* view);
 int workspace_ismovecursorwhenpaste(Workspace*);
 void workspace_movecursorwhenpaste(Workspace*, bool on);
+void workspace_connectasmixersend(Workspace*);
+void workspace_connectasmixerinput(Workspace*);
+bool workspace_isconnectasmixersend(Workspace*);
 
 #endif
