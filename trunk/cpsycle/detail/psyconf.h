@@ -26,11 +26,11 @@
 // #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 // #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
 
-// #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
-// #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
+#define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
+#define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 
-#define PSYCLE_APP_DIR "C:\\Programme\\Psycle"
-#define PSYCLE_USER_DIR "C:\\Programme\\Psycle"
+// #define PSYCLE_APP_DIR "C:\\Programme\\Psycle"
+// #define PSYCLE_USER_DIR "C:\\Programme\\Psycle"
 
 #define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"
 #define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "\\Samples"

@@ -94,6 +94,7 @@ typedef struct {
 	psy_Signal signal_terminal_warning;
 	psy_Signal signal_followsongchanged;
 	psy_Signal signal_dockview;
+	psy_Signal signal_defaultfontchanged;
 	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
 	History history;

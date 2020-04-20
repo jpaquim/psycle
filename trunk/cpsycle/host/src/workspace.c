@@ -203,6 +203,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_terminal_warning);
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_dockview);
+	psy_signal_init(&self->signal_defaultfontchanged);
 }
 
 void workspace_dispose(Workspace* self)
@@ -250,6 +251,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_terminal_warning);
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_dockview);
+	psy_signal_dispose(&self->signal_defaultfontchanged);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -928,17 +930,10 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_settext(drivers, "AudioDriver");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(DIVERSALIS__OS__MICROSOFT)
-#if defined(_DEBUG)
-	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");
-	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Debug\\directx.dll");
-	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Debug\\wasapi.dll");
-	psy_properties_append_string(drivers, "asio", "..\\driver\\asiodriver\\Debug\\asiodriver.dll");
-#else
-	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Release\\mme.dll");
-	psy_properties_append_string(drivers, "directx", "..\\driver\\directx\\Release\\directx.dll");
-	psy_properties_append_string(drivers, "wasapi", "..\\driver\\wasapi\\Release\\wasapi.dll");
-	psy_properties_append_string(drivers, "asio", "..\\driver\\asiodriver\\Release\\asiodriver.dll");
-#endif
+	psy_properties_append_string(drivers, "mme", ".\\mme.dll");
+	psy_properties_append_string(drivers, "directx", ".\\directx.dll");
+	psy_properties_append_string(drivers, "wasapi", ".\\wasapi.dll");
+	psy_properties_append_string(drivers, "asio", ".\\asiodriver.dll");
 #elif defined(DIVERSALIS__OS__LINUX)
 	psy_properties_append_string(drivers, "alsa", "..\\driver\\alsa\\libpsyalsa.so");
 #endif
@@ -1010,10 +1005,8 @@ void workspace_makemidi(Workspace* self)
 	installed = psy_properties_append_choice(self->midi, "installeddriver", 0);
 	psy_properties_settext(installed, "Input Drivers");
 	psy_properties_append_string(installed, "kbd", "kbd");	
-#if defined(_DEBUG)
-	psy_properties_append_string(installed, "mmemidi", "..\\driver\\mmemidi\\Debug\\mmemidi.dll");	
-#else
-	psy_properties_append_string(installed, "mmemidi", "..\\driver\\mmemidi\\Release\\mmemidi.dll");
+#if defined(DIVERSALIS__OS__MICROSOFT)
+	psy_properties_append_string(installed, "mmemidi", ".\\mmemidi.dll");
 #endif
 	psy_properties_settext(
 		psy_properties_append_action(self->midi, "addeventdriver"),
@@ -1239,7 +1232,8 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 			psy_properties_valuestring(property));
 		psy_ui_font_init(&font, &fontinfo);
 		psy_ui_replacedefaultfont(self->mainhandle, &font);
-		psy_ui_component_invalidate(self->mainhandle);			
+		psy_ui_component_invalidate(self->mainhandle);
+		psy_signal_emit(&self->signal_defaultfontchanged, self, 0);
 	} else
 	if ((psy_properties_hint(property) == PSY_PROPERTY_HINT_INPUT)) {		
 		workspace_configkeyboard(self);		
@@ -1595,6 +1589,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 		psy_ui_font_init(&font, &fontinfo);
 		psy_ui_replacedefaultfont(self->mainhandle, &font);
 		psy_ui_component_invalidate(self->mainhandle);
+		psy_signal_emit(&self->signal_defaultfontchanged, self, 0);
 	}
 }
 

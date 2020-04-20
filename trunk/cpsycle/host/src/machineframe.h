@@ -6,6 +6,7 @@
 
 #include "paramview.h"
 #include "paramlistbox.h"
+#include "workspace.h"
 
 #include <presets.h>
 #include <uinotebook.h>
@@ -49,13 +50,14 @@ typedef struct {
 	int dodock;
 	int doclose;
 	int floated;
+	Workspace* workspace;
 } MachineFrame;
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent);
 
-void machineframe_init(MachineFrame*, psy_ui_Component* parent, bool floated);
+void machineframe_init(MachineFrame*, psy_ui_Component* parent, bool floated, Workspace* workspace);
 MachineFrame* machineframe_alloc(void);
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated);
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Workspace* workspace);
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
 

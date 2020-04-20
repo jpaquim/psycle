@@ -1457,7 +1457,7 @@ void init_properties(psy_AudioDriver* driver)
 			PSY_PROPERTY_HINT_READONLY),
 		"Name");
 	psy_properties_sethint(
-		psy_properties_append_string(driver->properties, "vendor", "Psycedelics"),
+		psy_properties_append_string(driver->properties, "vendor", "Psycledelics"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
 		psy_properties_append_string(driver->properties, "version", "1.0"),

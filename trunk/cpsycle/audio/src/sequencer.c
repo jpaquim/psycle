@@ -834,17 +834,21 @@ void psy_audio_maketweakslideevents(psy_audio_Sequencer* self,
 	psy_audio_PatternEntry* entry, psy_dsp_beat_t offset)
 {
 	psy_audio_Machine* machine;
-	uintptr_t param;
+	uintptr_t tweak;
+	psy_audio_MachineParam* param;
 	
 	machine = machines_at(self->machines, patternentry_front(entry)->mach);
 	if (!machine) {
 		return;
 	}
-	param = patternentry_front(entry)->inst;
-	if (param >= psy_audio_machine_numparameters(machine)) {
+	tweak = patternentry_front(entry)->inst;
+	if (tweak >= psy_audio_machine_numtweakparameters(machine)) {
 		return;	
 	}
-	
+	param = psy_audio_machine_tweakparameter(machine, tweak);
+	if (!param) {
+		return;
+	}
 	{
 		int minval = 0;
 		int maxval = 0;		
@@ -854,14 +858,12 @@ void psy_audio_maketweakslideevents(psy_audio_Sequencer* self,
 		int slide;
 		float delta;
 		float curr;
-
+		
 		numslides = psy_audio_sequencer_currframesperline(self) / 64;
 		if (numslides == 0) {
 			return;
 		}
-		//psy_audio_machine_parameterrange(machine, param, &minval, &maxval);		
-		//start = machine_parametervalue_scaled(machine, param,
-		//	psy_audio_machine_parametervalue(machine, param));
+		start = psy_audio_machineparam_scaledvalue(param);		
 		if (start < minval) {
 			start = minval;
 		} else

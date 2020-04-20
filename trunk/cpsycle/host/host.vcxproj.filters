@@ -375,9 +375,6 @@
     <ClInclude Include="src\sampleeditor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\audio\src\sampler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\samplesbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
