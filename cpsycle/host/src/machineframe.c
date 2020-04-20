@@ -35,6 +35,8 @@ static void machineframe_buildprograms(MachineFrame*);
 static void plugineditor_onprogramselected(MachineFrame*, psy_ui_Component* sender, int slot);
 static void plugineditor_onbankselected(MachineFrame*, psy_ui_Component* sender, int slot);
 
+static void ondefaultfontchanged(MachineFrame*, Workspace* sender);
+
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent)
 {				
 	self->presets = 0;	
@@ -101,7 +103,7 @@ void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 	}
 }
 
-void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floated)
+void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floated, Workspace* workspace)
 {	
 	self->view = 0;
 	self->presets = 0;
@@ -111,6 +113,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floate
 	self->dodock = 0;
 	self->doclose = 0;
 	self->floated = floated;
+	self->workspace = workspace;
 	if (floated) {
 		psy_ui_frame_init(&self->component, parent);
 		psy_ui_component_move(&self->component, 200, 150);
@@ -154,6 +157,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floate
 		plugineditor_onbankselected);
 	psy_signal_connect(&self->parameterbar.programbox.signal_selchanged, self,
 		plugineditor_onprogramselected);
+	psy_signal_connect(&self->workspace->signal_defaultfontchanged, self,
+		ondefaultfontchanged);
 }
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
@@ -268,6 +273,8 @@ void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
 			free(self->view);
 		}
 	}
+	psy_signal_disconnect(&self->workspace->signal_defaultfontchanged, self,
+		ondefaultfontchanged);
 }
 
 void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, int index)
@@ -305,13 +312,13 @@ MachineFrame* machineframe_alloc(void)
 	return (MachineFrame*) malloc(sizeof(MachineFrame));
 }
 
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated)
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Workspace* workspace)
 {
 	MachineFrame* rv;
 
 	rv = machineframe_alloc();
 	if (rv) {
-		machineframe_init(rv, parent, floated);
+		machineframe_init(rv, parent, floated, workspace);
 	}
 	return rv;	
 }
@@ -382,6 +389,11 @@ void machineframe_resize(MachineFrame* self)
 }
 
 void machineframe_preferredviewsizechanged(MachineFrame* self, psy_ui_Component* sender)
+{
+	machineframe_resize(self);
+}
+
+void ondefaultfontchanged(MachineFrame* self, Workspace* sender)
 {
 	machineframe_resize(self);
 }

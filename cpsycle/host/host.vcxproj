@@ -12,6 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{740AAC0D-1FAC-4D4A-9045-62E0EF74578E}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -42,12 +43,12 @@
     <_ProjectFileVersion>16.0.29511.113</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>.\Debug\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>.\Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>.\Release\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\$(PlatformTarget)\</OutDir>
     <IntDir>.\Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
@@ -57,21 +58,19 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Debug/host.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)host.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\lua53\src\;..\ui\src;..\file\src;..\audio\src;..\container\src;..\dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua53\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\Debug/host.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)host.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -84,11 +83,11 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>lua53.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\Debug/host.exe</OutputFile>
+      <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lua53\Debug;..\ui\Debug;..\file\Debug;..\audio\Debug;..\container\Debug;..\dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lua53\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>.\Debug/host.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -96,8 +95,11 @@
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug/host.bsc</OutputFile>
+      <OutputFile>$(OutDir)host.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\external-packages\scintilla\Win32\SciLexer.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -105,21 +107,19 @@
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>Win32</TargetEnvironment>
-      <TypeLibraryName>.\Release/host.tlb</TypeLibraryName>
+      <TypeLibraryName>$(IntDir)host.tlb</TypeLibraryName>
       <HeaderFileName />
     </Midl>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>..\lua53\src\;..\ui\src;..\file\src;..\audio\src;..\container\src;..\dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua53\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeaderOutputFile>.\Release/host.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)host.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -131,10 +131,10 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>lua53.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>.\Release/host.exe</OutputFile>
+      <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>..\lua53\Release;..\ui\Release;..\file\Release;..\audio\Release;..\container\Release;..\dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ProgramDatabaseFile>.\Release/host.pdb</ProgramDatabaseFile>
+      <AdditionalLibraryDirectories>$(SolutionDir)lua53\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
@@ -142,8 +142,11 @@
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release/host.bsc</OutputFile>
+      <OutputFile>$(OutDir)host.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)..\external-packages\scintilla\Win32\SciLexer.dll $(OutDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\about.c" />
@@ -228,7 +231,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\audio\src\sampler.h" />
     <ClInclude Include="src\about.h" />
     <ClInclude Include="src\channelmappingview.h" />
     <ClInclude Include="src\clipbox.h" />
@@ -317,23 +319,23 @@
     <Image Include="src\resources\TbMainKnob.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\audio\audio.vcxproj">
+    <ProjectReference Include="$(SolutionDir)audio\audio.vcxproj">
       <Project>{40ec0ff3-1592-49d3-ac1b-3c5f85d268a9}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\container\container.vcxproj">
+    <ProjectReference Include="$(SolutionDir)container\container.vcxproj">
       <Project>{8ceb65bd-4b67-416c-9dde-03f395cc522f}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\file\file.vcxproj">
+    <ProjectReference Include="$(SolutionDir)file\file.vcxproj">
       <Project>{205ce71c-faa1-4310-89f5-f29a9b023433}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\lua53\lua53.vcxproj">
+    <ProjectReference Include="$(SolutionDir)lua53\lua53.vcxproj">
       <Project>{d0152a83-ce76-4f9b-82e4-595326255abf}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\ui\ui.vcxproj">
+    <ProjectReference Include="$(SolutionDir)ui\ui.vcxproj">
       <Project>{4f983ea4-b43d-49fe-a4e8-8bcfdd4a1277}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>

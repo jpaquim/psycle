@@ -64,6 +64,7 @@ static void machineparam_vtable_init(psy_audio_MachineParam* self)
 		machineparam_vtable.label = machineparam_label;
 		machineparam_vtable.type = machineparam_type;
 		machineparam_vtable.describe = machineparam_describe;
+		machineparam_vtable_initialized = 1;
 	}
 }
 
@@ -88,7 +89,6 @@ void psy_audio_machineparam_dispose(psy_audio_MachineParam* self)
 }
 
 // CustomParameter
-
 static void customparam_tweak(psy_audio_CustomMachineParam*, float val);
 static float customparam_normvalue(psy_audio_CustomMachineParam*);
 static void customparam_range(psy_audio_CustomMachineParam*,
@@ -112,6 +112,7 @@ static void customparam_vtable_init(psy_audio_CustomMachineParam* self)
 		customparam_vtable.label = (fp_machineparam_label) customparam_label;
 		customparam_vtable.type = (fp_machineparam_type) customparam_type;
 		customparam_vtable.describe = (fp_machineparam_describe) customparam_describe;
+		customparam_vtable_initialized = 1;
 	}
 }
 
@@ -194,7 +195,8 @@ int customparam_describe(psy_audio_CustomMachineParam* self, char* text)
 {
 	int rv = 0;
 	if (self->machineparam.signal_describe.slots != NULL) {
-		psy_signal_emit(&self->machineparam.signal_describe, self, 2, (void*)(&rv), (void*)(text));
+		psy_signal_emit(&self->machineparam.signal_describe, self, 2,
+			(void*)(&rv), (void*)(text));
 	}
 	return rv;
 }
@@ -299,6 +301,7 @@ static void infomachineparam_vtable_init(psy_audio_InfoMachineParam* self)
 		infomachineparam_vtable.label = (fp_machineparam_label)infomachineparam_label;
 		infomachineparam_vtable.type = (fp_machineparam_type)infomachineparam_type;
 		infomachineparam_vtable.describe = (fp_machineparam_describe)infomachineparam_describe;
+		infomachineparam_vtable_initialized = 1;
 	}
 }
 
@@ -396,6 +399,7 @@ static void intmachineparam_vtable_init(psy_audio_IntMachineParam* self)
 		intmachineparam_vtable.label = (fp_machineparam_label)intmachineparam_label;
 		intmachineparam_vtable.type = (fp_machineparam_type)intmachineparam_type;
 		intmachineparam_vtable.describe = (fp_machineparam_describe)intmachineparam_describe;
+		intmachineparam_vtable_initialized = 1;
 	}
 }
 
@@ -537,6 +541,7 @@ static void floatmachineparam_vtable_init(psy_audio_FloatMachineParam* self)
 		floatmachineparam_vtable.label = (fp_machineparam_label)floatmachineparam_label;
 		floatmachineparam_vtable.type = (fp_machineparam_type)floatmachineparam_type;
 		floatmachineparam_vtable.describe = (fp_machineparam_describe)floatmachineparam_describe;
+		floatmachineparam_vtable_initialized = 1;
 	}
 }
 
@@ -676,6 +681,7 @@ static void choicemachineparam_vtable_init(psy_audio_ChoiceMachineParam* self)
 		choicemachineparam_vtable.label = (fp_machineparam_label)choicemachineparam_label;
 		choicemachineparam_vtable.type = (fp_machineparam_type)choicemachineparam_type;
 		choicemachineparam_vtable.describe = (fp_machineparam_describe)choicemachineparam_describe;
+		choicemachineparam_vtable_initialized = 1;
 	}
 }
 
@@ -826,6 +832,7 @@ static void volumemachineparam_vtable_init(psy_audio_VolumeMachineParam* self)
 		volumemachineparam_vtable.label = (fp_machineparam_label)volumemachineparam_label;
 		volumemachineparam_vtable.type = (fp_machineparam_type)volumemachineparam_type;
 		volumemachineparam_vtable.describe = (fp_machineparam_describe)volumemachineparam_describe;
+		volumemachineparam_vtable_initialized = 1;
 	}
 }
 
@@ -976,6 +983,7 @@ static void gainmachineparam_vtable_init(psy_audio_GainMachineParam* self)
 		gainmachineparam_vtable.label = (fp_machineparam_label)gainmachineparam_label;
 		gainmachineparam_vtable.type = (fp_machineparam_type)gainmachineparam_type;
 		gainmachineparam_vtable.describe = (fp_machineparam_describe)gainmachineparam_describe;
+		gainmachineparam_vtable_initialized = 1;
 	}
 }
 

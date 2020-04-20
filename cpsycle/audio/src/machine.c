@@ -482,7 +482,7 @@ void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 		psy_audio_MachineParam* param;
 
 		psyfile_read(songfile->file, &temp, sizeof(temp));
-		param = psy_audio_machine_parameter(self, i);
+		param = psy_audio_machine_tweakparameter(self, i);
 		if (param) {
 			int minval;
 			int maxval;
@@ -505,7 +505,7 @@ void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	uint32_t size;
 	uint32_t i;
 		
-	numparams = (uint32_t) psy_audio_machine_numparameters(self);
+	numparams = (uint32_t) psy_audio_machine_numtweakparameters(self);
 	size = sizeof(numparams) + (numparams * sizeof(numparams));		
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &numparams, sizeof(numparams));
@@ -513,7 +513,7 @@ void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 		int32_t scaled = 0;
 		psy_audio_MachineParam* param;
 
-		param = psy_audio_machine_parameter(self, i);
+		param = psy_audio_machine_tweakparameter(self, i);
 		if (param) {
 			scaled = psy_audio_machineparam_scaledvalue(param);
 		}		

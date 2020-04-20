@@ -425,7 +425,8 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 			psy_ui_Component* view = 0;
 
 			self->frame = machineframe_alloc();
-			machineframe_init(self->frame, parent, workspace_showparamviewaswindow(self->workspace));
+			machineframe_init(self->frame, parent, workspace_showparamviewaswindow(self->workspace),
+				self->workspace);
 			psy_signal_connect(&self->frame->component.signal_destroy, self,
 				machineui_onframedestroyed);
 			if (psy_audio_machine_haseditor(self->machine)) {
@@ -1670,7 +1671,7 @@ void machinewireview_ontimer(MachineWireView* self, int timerid)
 				frame->view = 0;
 				psy_ui_component_destroy(&frame->component);
 				frame = machineframe_alloc();
-				machineframe_init(frame, &self->component, TRUE);				
+				machineframe_init(frame, &self->component, TRUE, self->workspace);
 				psy_ui_component_insert(&frame->notebook.component, view, &frame->help.component);
 				machineframe_setview(frame, view, machine);
 				psy_ui_component_show(&frame->component);
@@ -1696,7 +1697,7 @@ void machinewireview_ontimer(MachineWireView* self, int timerid)
 				psy_signal_disconnectall(&view->signal_preferredsizechanged);
 				psy_ui_component_destroy(&frame->component);
 				frame = machineframe_alloc();
-				machineframe_init(frame, &self->component, FALSE);				
+				machineframe_init(frame, &self->component, FALSE, self->workspace);
 				psy_ui_component_insert(&frame->notebook.component, view, &frame->help.component);
 				machineframe_setview(frame, view, machine);
 				psy_ui_component_show(&frame->component);

@@ -26,7 +26,8 @@ static void drawheader(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* par
 static void drawinfolabel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
 static void drawknob(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
 static void drawblank(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void cellsize(ParamView*, psy_audio_MachineParam* param, int* width, int* height);
+static void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* height);
+static void cellsize(ParamView*, uintptr_t row, uintptr_t col, int* width, int* height);
 static void cellposition(ParamView*, uintptr_t row, uintptr_t col, int* x, int* y);
 static void onmousedown(ParamView*, psy_ui_MouseEvent*);
 static void onmouseup(ParamView*, psy_ui_MouseEvent*);
@@ -254,7 +255,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	knob_cx = self->skin->knob.destwidth;
 	knob_cy = self->skin->knob.destheight;		
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);
+	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx,
 		height / 2);
@@ -313,7 +314,7 @@ void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	char str[128];
 
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);	
+	cellsize(self, row, col, &width, &height);
 	parValue = str;	
 	half = height / 2;
 	quarter = half / 2;	
@@ -348,7 +349,7 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* 
 			
 	str[0] = '\0';
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);		
+	cellsize(self, row, col, &width, &height);
 	half = height/2;
 	psy_ui_setrectangle(&r, left, top, width, top + half);
 	psy_ui_setbackgroundcolor(g, self->skin->titlecolor);
@@ -388,7 +389,7 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	str[0] = '\0';
 
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);
+	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
 	skin_blitpart(g, &self->skin->mixerbitmap, left, top, &self->skin->slider);
@@ -428,7 +429,7 @@ void drawsliderlevel(ParamView* self, psy_ui_Graphics* g,
 	int height;	
 		
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);
+	cellsize(self, row, col, &width, &height);
 	drawsliderlevelback(self, g, left, top);
 	mixer_vumeterdraw(self, g, left, top,
 		psy_audio_machineparam_normvalue(param));		
@@ -467,27 +468,31 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 	int top;
 	int left;
 	int width;
-	int height;	
+	int height;
+	int centery;
 	psy_ui_Rectangle r;
 	char label[512];
-	
+	psy_ui_TextMetric tm;
+
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);
+	cellsize(self, row, col, &width, &height);
+	centery = (height - self->skin->checkoff.destheight) / 2;
+	if (psy_audio_machineparam_normvalue(param) == 0.f) {
+		skin_blitpart(g, &self->skin->mixerbitmap, left,
+			top + centery, &self->skin->checkoff);
+	} else {
+		skin_blitpart(g, &self->skin->mixerbitmap, left,
+			top + centery, & self->skin->checkon);
+	}
+	psy_ui_setrectangle(&r, left + 20, top, width, height);
 	if (!psy_audio_machineparam_name(param, label)) {
 		if (!psy_audio_machineparam_label(param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	if (psy_audio_machineparam_normvalue(param) == 0.f) {
-		skin_blitpart(g, &self->skin->mixerbitmap, left,
-			top, &self->skin->checkoff);
-	} else {
-		skin_blitpart(g, &self->skin->mixerbitmap, left,
-			top, &self->skin->checkon);
-	}
-	psy_ui_setrectangle(&r, left + 20, top, width, height);
-	
-	psy_ui_textoutrectangle(g, left + 20, top,
+	tm = psy_ui_component_textmetric(&self->component);
+	centery = (height - tm.tmHeight) / 2;
+	psy_ui_textoutrectangle(g, left + 20, top + centery,
 		psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, label, strlen(label));
 }
@@ -503,7 +508,7 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	char label[512];
 
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);
+	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
 	if (psy_audio_machineparam_normvalue(param) == 0.f) {
@@ -537,62 +542,99 @@ void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* para
 	psy_ui_Rectangle r;
 
 	cellposition(self, row, col, &left, &top);
-	cellsize(self, param, &width, &height);
+	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
 }
 
-void cellsize(ParamView* self, psy_audio_MachineParam* param, int* width, int* height)
-{
+void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* height)
+{	
 	psy_ui_TextMetric tm;
-	uintptr_t paramtype;
-	bool small;
 
-	*width = (psy_audio_machine_paramviewoptions(self->machine) & 
-		MACHINE_PARAMVIEW_COMPACT) == MACHINE_PARAMVIEW_COMPACT 
-			? 67
-			: 134;
-	*height = 28;
-	small = (psy_audio_machineparam_type(param) & MPF_SMALL) == MPF_SMALL;
-	paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
-	if (paramtype == MPF_IGNORE) {
+	switch (paramtype) {
+	case MPF_IGNORE:
 		*height = 0;
 		*width = 0;
-	} else
-	if (paramtype == MPF_SLIDERCHECK) {
-		*height = self->skin->checkoff.destheight;
-		*width = self->skin->checkoff.destwidth;
-	} else
-	if (paramtype == MPF_SLIDER) {
+		break;
+	case MPF_SLIDERCHECK:
+		tm = psy_ui_component_textmetric(&self->component);
+
+		*height = max(self->skin->checkoff.destheight,
+			tm.tmHeight);
+		*width = self->skin->checkoff.destwidth +
+			tm.tmAveCharWidth * 5;
+		break;
+	case MPF_SLIDER:
 		*height = self->skin->slider.destheight;
 		*width = self->skin->slider.destwidth;
 		tm = psy_ui_component_textmetric(&self->component);
 		if (*width < tm.tmAveCharWidth * 30) {
 			*width = tm.tmAveCharWidth * 30;
 		}
-	} else
-	if (paramtype == MPF_SLIDERLEVEL) {
-		*height = self->skin->vuon.destheight;
-		*width = self->skin->slider.destwidth;
-	} else {
-		tm = psy_ui_component_textmetric(&self->component);
-		if (*width < tm.tmAveCharWidth * 30) {
-			*width = tm.tmAveCharWidth * 30;
+		if (small) {
+			*width /= 2;
 		}
-		if (*height < tm.tmHeight * 2) {
-			*height = tm.tmHeight * 2;
-		}		
+		if (*width < self->skin->vuon.destwidth +
+			self->skin->checkoff.destwidth + 50 +
+			tm.tmAveCharWidth * 5) {
+			*width = self->skin->vuon.destwidth +
+				self->skin->checkoff.destwidth + 50 +
+				tm.tmAveCharWidth * 5;
+		}
+		break;
+		case MPF_SLIDERLEVEL:
+			*height = self->skin->vuon.destheight;
+			*width = self->skin->slider.destwidth;
+			if (small) {
+				*width /= 2;
+			}
+		break;
+		case MPF_STATE:
+			tm = psy_ui_component_textmetric(&self->component);
+			*height = self->skin->knob.destheight;
+			*width = self->skin->knob.destwidth;
+			if (*width < tm.tmAveCharWidth * 30) {
+				*width = tm.tmAveCharWidth * 30;
+			}
+			if (*height < tm.tmHeight * 2) {
+				*height = tm.tmHeight * 2;
+			}
+			if (small) {
+				*width /= 2;
+			}			
+		break;
+		default:
+			tm = psy_ui_component_textmetric(&self->component);
+			*width = tm.tmAveCharWidth * 30;			
+			*height = tm.tmHeight * 2;			
+			if (small) {
+				*width /= 2;
+			}			
+		break;
 	}
-	if (small) {
-		*width /= 2;
-	}
+}
+
+void cellsize(ParamView* self, uintptr_t row, uintptr_t col, int* width, int* height)
+{
+	psy_ui_Rectangle* position;
+
+	position = (psy_ui_Rectangle*) psy_table_at(&self->positions,
+		paramview_numrows(self) * col + row);
+	if (position) {
+		*width = position->right - position->left;
+		*height = position->bottom - position->top;
+	} else {
+		*width = 0;
+		*height = 0;
+	}	
 }
 
 void cellposition(ParamView* self, uintptr_t row, uintptr_t col, int* x, int* y)
 {
 	psy_ui_Rectangle* position;
 
-	position = (psy_ui_Rectangle*) psy_table_at(&self->positions, paramview_numrows(self) * col + row);
+	position = (psy_ui_Rectangle*) psy_table_at(&self->positions,
+		paramview_numrows(self) * col + row);
 	if (position) {
 		*x = position->left;
 		*y = position->top;
@@ -751,14 +793,19 @@ void paramview_computepositions(ParamView* self)
 			psy_ui_Rectangle* position;
 			psy_ui_Rectangle* firstrow;
 			uintptr_t paramtype;
+			bool small;
 			int width;
 			int height;
 			psy_audio_MachineParam* machineparam;
 
 			machineparam = psy_audio_machine_parameter(self->machine, param);
 			paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
+			small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
 			position = (psy_ui_Rectangle*) malloc(sizeof(psy_ui_Rectangle));
 			psy_ui_setrectangle(position, cpx, 0, 0, 0);
+			if (paramtype == MPF_SLIDER) {
+				self = self;
+			}
 			if (paramtype == MPF_SLIDERLEVEL) {
 				position->left += self->skin->slider.destwidth;
 			} else
@@ -766,7 +813,7 @@ void paramview_computepositions(ParamView* self)
 				position->left += 50;
 			}
 			psy_table_insert(&self->positions, param, position);
-			cellsize(self, machineparam, &width, &height);
+			mpfsize(self, paramtype, small, &width, &height);
 			if (colmax < width) {
 				colmax = width;
 			}
@@ -790,7 +837,7 @@ void paramview_computepositions(ParamView* self)
 								== MPF_SLIDERCHECK ||
 							psy_audio_machineparam_type(machineparam)
 								== MPF_SLIDERLEVEL) {
-						cellsize(self, machineparam, &width, &height);
+						cellsize(self, i, col, &width, &height);
 						position->right = position->left + width;
 					} else {						
 						position->right = cpx + colmax;
@@ -812,20 +859,23 @@ void paramview_computepositions(ParamView* self)
 				++param) {
 			psy_ui_Rectangle* position;
 			psy_ui_Rectangle* firstrow;
+			int w, h;
 			uintptr_t height;
 			uintptr_t paramtype;
+			bool small;
 			psy_audio_MachineParam* machineparam;
 
 			machineparam = psy_audio_machine_parameter(self->machine, param);
 			position = psy_table_at(&self->positions, param);
 			firstrow = psy_table_at(&self->positions, row);
 			paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
+			small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
+			mpfsize(self, paramtype, small, &w, &h);
 			height = firstrow->bottom - firstrow->top;
 			position->top = cpy;
-			if (paramtype == MPF_SLIDERCHECK) {
+			if (paramtype == MPF_SLIDERCHECK) {								
 				position->top += cpy_slidercheck;
-				position->bottom = position->top +
-					self->skin->checkon.destheight;
+				position->bottom = position->top + h;
 			} else {
 				position->bottom = cpy + height;
 			}
@@ -837,7 +887,7 @@ void paramview_computepositions(ParamView* self)
 				cpy += height;
 			}
 			if (paramtype == MPF_SLIDERCHECK) {
-				cpy_slidercheck += self->skin->checkon.destheight;
+				cpy_slidercheck += h;
 			}
 			++row;					
 			if (row >= numrows) {

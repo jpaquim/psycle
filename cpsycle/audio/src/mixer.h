@@ -10,6 +10,24 @@
 extern "C" {
 #endif
 
+struct psy_audio_Mixer;
+
+typedef struct psy_audio_SendLabelParam {
+	psy_audio_MachineParam machineparam;
+	uintptr_t send;
+	struct psy_audio_Mixer* mixer;
+} psy_audio_SendLabelParam;
+
+void psy_audio_sendlabelparam_init(psy_audio_SendLabelParam*,
+	struct psy_audio_Mixer* mixer, uintptr_t send);
+void psy_audio_sendlabelparam_dispose(psy_audio_SendLabelParam*);
+
+INLINE psy_audio_MachineParam* psy_audio_sendlabelmachineparam_base(
+	psy_audio_SendLabelParam* self)
+{
+	return &(self->machineparam);
+}
+
 typedef struct psy_audio_DryWetMixMachineParam {
 	psy_audio_MachineParam machineparam;
 	int32_t* mute;
@@ -112,6 +130,7 @@ typedef struct psy_audio_Mixer {
 	psy_audio_CustomMachineParam ignore_param;
 	psy_audio_CustomMachineParam route_param;
 	psy_audio_CustomMachineParam routemaster_param;
+	psy_audio_SendLabelParam sendlabel_param;
 } psy_audio_Mixer;
 
 void mixer_init(psy_audio_Mixer*, MachineCallback);

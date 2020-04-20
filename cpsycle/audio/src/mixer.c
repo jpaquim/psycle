@@ -20,6 +20,58 @@
 
 #include "../../detail/portable.h"
 
+// SendLabelParam
+static int sendlabelparam_type(psy_audio_SendLabelParam* self) { return MPF_INFOLABEL | MPF_SMALL; }
+static int sendlabelparam_name(psy_audio_SendLabelParam*, char* text);
+static int sendlabelparam_describe(psy_audio_SendLabelParam*, char* text);
+
+static MachineParamVtable sendlabelparam_vtable;
+static int sendlabelparam_vtable_initialized = 0;
+
+static void sendlabelparam_vtable_init(psy_audio_SendLabelParam* self)
+{
+	if (!sendlabelparam_vtable_initialized) {
+		sendlabelparam_vtable = *(self->machineparam.vtable);
+		sendlabelparam_vtable.describe = (fp_machineparam_describe)sendlabelparam_describe;
+		sendlabelparam_vtable.name = (fp_machineparam_name)sendlabelparam_name;		
+		sendlabelparam_vtable.type = (fp_machineparam_type)sendlabelparam_type;
+		sendlabelparam_vtable_initialized = 1;
+	}
+}
+
+void psy_audio_sendlabelparam_init(psy_audio_SendLabelParam* self,
+	struct psy_audio_Mixer* mixer, uintptr_t send)
+{
+	psy_audio_machineparam_init(&self->machineparam);
+	sendlabelparam_vtable_init(self);
+	self->machineparam.vtable = &sendlabelparam_vtable;
+	self->mixer = mixer;
+	self->send = send;
+}
+
+void psy_audio_sendlabelparam_dispose(psy_audio_SendLabelParam* self)
+{
+	psy_audio_machineparam_dispose(&self->machineparam);
+}
+
+int sendlabelparam_name(psy_audio_SendLabelParam* self, char* text)
+{
+	psy_snprintf(text, 128, "Send %d", (int) self->send + 1);
+	return 1;
+}
+
+int sendlabelparam_describe(psy_audio_SendLabelParam* self, char* text)
+{
+	psy_audio_ReturnChannel* returnchannel;
+
+	returnchannel = psy_table_at(&self->mixer->returns, self->send);
+	if (returnchannel && returnchannel->fx) {
+		psy_snprintf(text, 128, "%s", psy_audio_machine_editname(returnchannel->fx));
+		return 1;
+	}
+	return 0;
+}
+
 // DryWetMixParam
 static void drywetmixmachineparam_tweak(psy_audio_DryWetMixMachineParam*, float val);
 static float drywetmixmachineparam_normvalue(psy_audio_DryWetMixMachineParam*);
@@ -36,6 +88,7 @@ static void drywetmixmachineparam_vtable_init(psy_audio_DryWetMixMachineParam* s
 		drywetmixmachineparam_vtable.tweak = (fp_machineparam_tweak)drywetmixmachineparam_tweak;
 		drywetmixmachineparam_vtable.normvalue = (fp_machineparam_normvalue)drywetmixmachineparam_normvalue;
 		drywetmixmachineparam_vtable.range = (fp_machineparam_range)drywetmixmachineparam_range;
+		drywetmixmachineparam_vtable_initialized = 1;
 	}
 }
 
@@ -599,6 +652,7 @@ void mixer_init(psy_audio_Mixer* self, MachineCallback callback)
 	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-", MPF_IGNORE | MPF_SMALL, 0, 0);
 	psy_audio_custommachineparam_init(&self->route_param, "Route", "Route", MPF_SWITCH | MPF_SMALL, 0, 0);
 	psy_audio_custommachineparam_init(&self->routemaster_param, "Master", "Master", MPF_SWITCH | MPF_SMALL, 0, 0);
+	psy_audio_sendlabelparam_init(&self->sendlabel_param, self, 0);
 }
 
 void mixer_dispose(psy_audio_Mixer* self)
@@ -639,7 +693,8 @@ void mixer_dispose(psy_audio_Mixer* self)
 	psy_audio_custommachineparam_dispose(&self->ignore_param);
 	psy_audio_custommachineparam_dispose(&self->route_param);
 	psy_audio_custommachineparam_dispose(&self->routemaster_param);
-	custommachine_dispose(&self->custommachine);
+	psy_audio_sendlabelparam_dispose(&self->sendlabel_param);
+	custommachine_dispose(&self->custommachine);	
 }
 
 psy_audio_Buffer* mix(psy_audio_Mixer* self, uintptr_t slot, uintptr_t amount,
@@ -1130,14 +1185,8 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 	paramcoords(self, param, &col, &row);
 	if (col < mastercolumn(self)) {
 		if (row > 0 && row < self->sends.count + 1) {
-			psy_audio_ReturnChannel* channel;
-
-			channel = (psy_audio_ReturnChannel*)psy_table_at(&self->returns, row - 1);
-			if (channel) {
-				return &channel->send_param.machineparam;
-			} else {
-				return &self->ignore_param.machineparam;
-			}
+			self->sendlabel_param.send = row - 1;
+			return psy_audio_sendlabelmachineparam_base(&self->sendlabel_param);
 		} else
 		if (row > self->sends.count + 3 && row < self->sends.count + 9) {
 			return &self->ignore_param.machineparam;

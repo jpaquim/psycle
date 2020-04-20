@@ -94,10 +94,10 @@ void init_properties(psy_AudioDriver* self)
 {		
 	self->properties = psy_properties_create();
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "Silent psy_AudioDriver"),
+		psy_properties_append_string(self->properties, "name", "Silent AudioDriver"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		psy_properties_append_string(self->properties, "vendor", "Psycledelics"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
 		psy_properties_append_string(self->properties, "version", "1.0"),
