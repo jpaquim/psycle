@@ -133,7 +133,6 @@ static void postload(psy_audio_Machine*, struct psy_audio_SongFile*,
 static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source,
 	uintptr_t numsamples, psy_dsp_amp_t vol);
 static unsigned int numparametercols(psy_audio_Machine* self) { return 0; }
-static int paramviewoptions(psy_audio_Machine* self) { return 0; }
 static uintptr_t slot(psy_audio_Machine* self) { return NOMACHINE_INDEX; }
 static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
 static int haseditor(psy_audio_Machine* self) { return 0; }
@@ -249,7 +248,6 @@ static void vtable_init(void)
 		vtable.numparameters = numparameters;
 		vtable.numtweakparameters = numtweakparameters;
 		vtable.numparametercols = numparametercols;
-		vtable.paramviewoptions = paramviewoptions;
 		vtable.setcallback = setcallback;
 		vtable.updatesamplerate = updatesamplerate;
 		vtable.loadspecific = loadspecific;
@@ -382,15 +380,28 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 	for (p = entry->events; p != 0; p = p->next) {
 		psy_audio_PatternEvent* ev;
 
-		ev = (psy_audio_PatternEvent*) p->entry;			
+		ev = (psy_audio_PatternEvent*) p->entry;		
 		if (ev->note == NOTECOMMANDS_TWEAK) {
 			if (ev->inst < psy_audio_machine_numparameters(self)) {
-				psy_audio_MachineParam* param;
-
+				psy_audio_MachineParam* param;				
+				
 				param = psy_audio_machine_tweakparameter(self, ev->inst);
 				if (param) {
-					psy_audio_machineparam_tweak_patternvalue(param,
-						psy_audio_patternevent_tweakvalue(ev));
+					uint16_t v;
+
+					v = psy_audio_patternevent_tweakvalue(ev);
+					if (ev->vol > 0) {
+						int32_t curr;
+						int32_t step;
+						int32_t nv;
+
+						curr = psy_audio_machineparam_patternvalue(param);
+						step = (v - curr) / ev->vol;
+						nv = curr + step;						
+						psy_audio_machineparam_tweak_patternvalue(param, nv);
+					} else {
+						psy_audio_machineparam_tweak_patternvalue(param, v);
+					}
 				}
 			}
 		} else {

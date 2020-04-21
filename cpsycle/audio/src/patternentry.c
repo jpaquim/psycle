@@ -71,6 +71,7 @@ psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
 		rv->offset = entry->offset;
 		rv->track = entry->track;
 		rv->events = 0;
+		rv->priority = 0;
 		for (p = entry->events; p != 0; p = p->next) {
 			psy_audio_PatternEvent* copy;
 

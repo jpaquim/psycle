@@ -17,9 +17,8 @@ extern "C" {
 struct psy_audio_MachineParam;
 
 typedef	void (*fp_machineparam_tweak)(struct psy_audio_MachineParam*, float val);
-//typedef	void (*fp_machineparam_tweak_patternvalue)(struct psy_audio_MachineParam*, int val);
 typedef float (*fp_machineparam_normvalue)(struct psy_audio_MachineParam*);
-typedef void (*fp_machineparam_range)(struct psy_audio_MachineParam*, int32_t* minval, int32_t* maxval);
+typedef void (*fp_machineparam_range)(struct psy_audio_MachineParam*, intptr_t* minval, intptr_t* maxval);
 typedef	int (*fp_machineparam_type)(struct psy_audio_MachineParam*);
 typedef	int (*fp_machineparam_label)(struct psy_audio_MachineParam*, char* text);
 typedef	int (*fp_machineparam_name)(struct psy_audio_MachineParam*, char* text);
@@ -56,30 +55,50 @@ INLINE void psy_audio_machineparam_tweak(psy_audio_MachineParam* self, float val
 
 INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* self, int16_t patternvalue)
 {
-	int minval;
-	int maxval;
-	int range;
+	intptr_t minval;
+	intptr_t maxval;
+	intptr_t range;
 	float value;
 
 	self->vtable->range(self, &minval, &maxval);
 	range = maxval - minval;
 	if (range == 0) {
 		value = 0.f;
+	} else {
+		value = patternvalue / (float) range;
 	}
-	value = (patternvalue > range) ? 1.f : patternvalue / (float) range;
+	if (value > 1.f) {
+		value = 1.f;
+	}
+	if (value < 0.f) {
+		value = 0.f;
+	}
 	self->vtable->tweak(self, value);
 }
 
 INLINE int32_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
 {
 	int32_t rv;
-	int minval;
-	int maxval;
-	int range;
+	intptr_t minval;
+	intptr_t maxval;
+	intptr_t range;
 
 	self->vtable->range(self, &minval, &maxval);
 	range = maxval - minval;
 	rv = (int)(self->vtable->normvalue(self) * range) + minval;
+	return rv;
+}
+
+INLINE int32_t psy_audio_machineparam_patternvalue(psy_audio_MachineParam* self)
+{
+	int32_t rv;
+	intptr_t minval;
+	intptr_t maxval;
+	intptr_t range;
+
+	self->vtable->range(self, &minval, &maxval);
+	range = maxval - minval;
+	rv = (int)(self->vtable->normvalue(self) * range);
 	return rv;
 }
 
@@ -98,7 +117,8 @@ INLINE int psy_audio_machineparam_label(psy_audio_MachineParam* self, char* text
 	return self->vtable->label(self, text);
 }
 
-INLINE void psy_audio_machineparam_range(psy_audio_MachineParam* self, int32_t* minval, int32_t* maxval)
+INLINE void psy_audio_machineparam_range(psy_audio_MachineParam* self,
+	intptr_t* minval, intptr_t* maxval)
 {
 	self->vtable->range(self, minval, maxval);
 }
@@ -128,8 +148,8 @@ typedef enum {
 
 typedef struct psy_audio_CustomMachineParam {
 	psy_audio_MachineParam machineparam;
-	int32_t minval;
-	int32_t maxval;
+	intptr_t minval;
+	intptr_t maxval;
 	char* name;
 	char* label;
 	int type;
@@ -182,8 +202,8 @@ psy_audio_InfoMachineParam* psy_audio_infomachineparam_allocinit(
 // psy_audio_IntMachineParam
 typedef struct psy_audio_IntMachineParam {
 	psy_audio_MachineParam machineparam;
-	int32_t minval;
-	int32_t maxval;
+	intptr_t minval;
+	intptr_t maxval;
 	char* name;
 	char* label;
 	char* mask;
@@ -192,8 +212,8 @@ typedef struct psy_audio_IntMachineParam {
 } psy_audio_IntMachineParam;
 
 void psy_audio_intmachineparam_init(psy_audio_IntMachineParam*,
-	const char* name, const char* label, int type, int32_t* data, int32_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, int32_t* data, intptr_t minval,
+	intptr_t maxval);
 void psy_audio_intmachineparam_dispose(psy_audio_IntMachineParam*);
 void psy_audio_intmachineparam_setmask(psy_audio_IntMachineParam*, const char* mask);
 
@@ -204,14 +224,14 @@ INLINE psy_audio_MachineParam* psy_audio_intmachineparam_base(psy_audio_IntMachi
 
 psy_audio_IntMachineParam* psy_audio_intmachineparam_alloc(void);
 psy_audio_IntMachineParam* psy_audio_intmachineparam_allocinit(
-	const char* name, const char* label, int type, int32_t* data, int32_t minval,
+	const char* name, const char* label, int type, intptr_t* data, intptr_t minval,
 	int32_t maxval);
 
 // psy_audio_FloatMachineParam [0 .. 1]
 typedef struct psy_audio_FloatMachineParam {
 	psy_audio_MachineParam machineparam;
-	int32_t minval;
-	int32_t maxval;
+	intptr_t minval;
+	intptr_t maxval;
 	char* name;
 	char* label;
 	char* mask;
@@ -220,8 +240,8 @@ typedef struct psy_audio_FloatMachineParam {
 } psy_audio_FloatMachineParam;
 
 void psy_audio_floatmachineparam_init(psy_audio_FloatMachineParam*,
-	const char* name, const char* label, int type, float* data, int32_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, float* data, intptr_t minval,
+	intptr_t maxval);
 void psy_audio_floatmachineparam_dispose(psy_audio_FloatMachineParam*);
 void psy_audio_floatmachineparam_setmask(psy_audio_FloatMachineParam*, const char* mask);
 
@@ -232,15 +252,15 @@ INLINE psy_audio_MachineParam* psy_audio_floatmachineparam_base(psy_audio_FloatM
 
 psy_audio_FloatMachineParam* psy_audio_floatmachineparam_alloc(void);
 psy_audio_FloatMachineParam* psy_audio_floatmachineparam_allocinit(
-	const char* name, const char* label, int type, float* data, int32_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, float* data, intptr_t minval,
+	intptr_t maxval);
 
 // psy_audio_ChoiceMachineParam
 
 typedef struct psy_audio_ChoiceMachineParam {
 	psy_audio_MachineParam machineparam;
-	int32_t minval;
-	int32_t maxval;
+	intptr_t minval;
+	intptr_t maxval;
 	char* name;
 	char* label;
 	int type;
@@ -249,8 +269,8 @@ typedef struct psy_audio_ChoiceMachineParam {
 } psy_audio_ChoiceMachineParam;
 
 void psy_audio_choicemachineparam_init(psy_audio_ChoiceMachineParam*,
-	const char* name, const char* label, int type, int32_t* data, int32_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, int32_t* data, intptr_t minval,
+	intptr_t maxval);
 void psy_audio_choicemachineparam_dispose(psy_audio_ChoiceMachineParam*);
 void psy_audio_choicemachineparam_setdescription(psy_audio_ChoiceMachineParam*,
 	uintptr_t index, const char* desc);
@@ -263,8 +283,8 @@ INLINE psy_audio_MachineParam* psy_audio_choicemachineparam_base(psy_audio_Choic
 // psy_audio_VolumeMachineParam [0 .. 1]
 typedef struct psy_audio_VolumeMachineParam {
 	psy_audio_MachineParam machineparam;
-	int32_t minval;
-	int32_t maxval;
+	intptr_t minval;
+	intptr_t maxval;
 	char* name;
 	char* label;
 	char* mask;
@@ -289,8 +309,8 @@ INLINE psy_audio_MachineParam* psy_audio_volumemachineparam_base(psy_audio_Volum
 // psy_audio_GainMachineParam [0 .. 4 // -12db .. 12db]
 typedef struct psy_audio_GainMachineParam {
 	psy_audio_MachineParam machineparam;
-	int32_t minval;
-	int32_t maxval;
+	intptr_t minval;
+	intptr_t maxval;
 	char* name;
 	char* label;
 	char* mask;
@@ -306,8 +326,8 @@ void psy_audio_gainmachineparam_setmask(psy_audio_GainMachineParam*, const char*
 
 psy_audio_GainMachineParam* psy_audio_gainmachineparam_alloc(void);
 psy_audio_GainMachineParam* psy_audio_gainmachineparam_allocinit(
-	const char* name, const char* label, int type, float* data, int32_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, float* data, intptr_t minval,
+	intptr_t maxval);
 
 INLINE psy_audio_MachineParam* psy_audio_gainmachineparam_base(psy_audio_GainMachineParam* self)
 {

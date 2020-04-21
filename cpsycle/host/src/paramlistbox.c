@@ -55,21 +55,29 @@ void parameterlistbox_build(ParameterListBox* self)
 {	
 	psy_ui_listbox_clear(&self->listbox);
 	if (self->machine) {
-		uintptr_t param = 0;
+		uintptr_t i = 0;
 		char label[256];
-		char text[256];
+		char text[256];		
+		
 
-		//for (param = 0; param < psy_audio_machine_numparameters(self->machine); ++param) {		
-		//	if (psy_audio_machine_parameterlabel(self->machine, label, param)) {
-		//		psy_snprintf(text, 256, "%02X:%s", (int) param, label);
-		//	} else
-		//	if (psy_audio_machine_parametername(self->machine, label, param)) {
-		//		psy_snprintf(text, 256, "%02X:%s", (int) param, label);
-		//	} else {			
-		//		psy_snprintf(text, 256, "%02X: Parameter", (int) param);
-		//	}
-		//	psy_ui_listbox_addtext(&self->listbox, text);
-		//}
+		for (i = 0; i < psy_audio_machine_numtweakparameters(self->machine); ++i) {
+			psy_audio_MachineParam* param;
+
+			param = psy_audio_machine_tweakparameter(self->machine, i);
+			if (param) {
+				if (psy_audio_machineparam_label(param, label)) {
+					psy_snprintf(text, 256, "%02X:%s", (int)i, label);
+				} else
+					if (psy_audio_machineparam_name(param, label)) {
+						psy_snprintf(text, 256, "%02X:%s", (int)i, label);
+					} else {
+						psy_snprintf(text, 256, "%02X: Parameter", (int)i);
+					}
+				psy_ui_listbox_addtext(&self->listbox, text);
+			} else {
+				psy_snprintf(text, 256, "%s", "--------");
+			}
+		}
 	}
 }
 

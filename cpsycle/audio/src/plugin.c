@@ -14,15 +14,37 @@
 
 #include "../../detail/portable.h"
 
-// Parameter
+// psy_audio_PluginMachineParam
+
+typedef struct psy_audio_PluginMachineParam {
+	psy_audio_MachineParam machineparam;
+	struct CMachineInterface* mi;
+	struct CMachineInfo* cinfo;
+	uintptr_t index;
+} psy_audio_PluginMachineParam;
+
+static void psy_audio_pluginmachineparam_init(psy_audio_PluginMachineParam*,
+	struct CMachineInterface* mi,
+	struct CMachineInfo* info,
+	uintptr_t index);
+static void psy_audio_pluginmachineparam_dispose(psy_audio_PluginMachineParam*);
+psy_audio_PluginMachineParam* psy_audio_pluginmachineparam_alloc(void);
+
 static void pluginparam_tweak(psy_audio_PluginMachineParam*, float val);
 static float pluginparam_normvalue(psy_audio_PluginMachineParam*);
 static void pluginparam_range(psy_audio_PluginMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int pluginparam_type(psy_audio_PluginMachineParam*);
 static int pluginparam_label(psy_audio_PluginMachineParam*, char* text);
 static int pluginparam_name(psy_audio_PluginMachineParam*, char* text);
 static int pluginparam_describe(psy_audio_PluginMachineParam*, char* text);
+
+static psy_audio_MachineParam* pluginparam_base(
+	psy_audio_PluginMachineParam* self)
+{
+	return &(self->machineparam);
+}
+
 
 static MachineParamVtable pluginparam_vtable;
 static int pluginparam_vtable_initialized = 0;
@@ -103,8 +125,8 @@ int pluginparam_describe(psy_audio_PluginMachineParam* self, char* text)
 		(int)self->index));
 }
 
-void pluginparam_range(psy_audio_PluginMachineParam* self, int32_t* minval,
-	int32_t* maxval)
+void pluginparam_range(psy_audio_PluginMachineParam* self, intptr_t* minval,
+	intptr_t* maxval)
 {
 	*minval = self->cinfo->Parameters[self->index]->MinValue;
 	*maxval = self->cinfo->Parameters[self->index]->MaxValue;
@@ -131,10 +153,11 @@ int pluginparam_label(psy_audio_PluginMachineParam* self, char* text)
 	return self->cinfo->Parameters[self->index]->Description != NULL;
 }
 
-
 typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
+// virtual methods
+static void setcallback(psy_audio_Plugin*, MachineCallback);
 static psy_audio_Machine* clone(psy_audio_Plugin*);
 static int hostevent(psy_audio_Plugin*, int const eventNr, int val1, float val2);
 static void generateaudio(psy_audio_Plugin*, psy_audio_BufferContext*);
@@ -143,7 +166,6 @@ static void seqtick(psy_audio_Plugin*, uintptr_t channel,
 static void stop(psy_audio_Plugin*);
 static void sequencerlinetick(psy_audio_Plugin*);
 static psy_audio_MachineInfo* info(psy_audio_Plugin*);
-// Parameter
 static psy_audio_MachineParam* parameter(psy_audio_Plugin*, uintptr_t param);
 static unsigned int numparametercols(psy_audio_Plugin*);
 static uintptr_t numparameters(psy_audio_Plugin*);
@@ -154,9 +176,11 @@ static void loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void setcallback(psy_audio_Plugin*, MachineCallback);
-static void initparameters(psy_audio_Plugin*, CMachineInfo*);
+
+// private methods
 static void disposeparameters(psy_audio_Plugin*);
+static void tweakdefaults(psy_audio_Plugin*, CMachineInfo* info);
+static void clearparameters(psy_audio_Plugin* self);
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -165,6 +189,7 @@ static void vtable_init(psy_audio_Plugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(psy_audio_plugin_base(self)->vtable);
+		vtable.setcallback = (fp_machine_setcallback)setcallback;
 		vtable.clone = (fp_machine_clone) clone;
 		vtable.hostevent = (fp_machine_hostevent) hostevent;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
@@ -181,8 +206,7 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;
-		vtable.setcallback = (fp_machine_setcallback) setcallback;	
+		vtable.savespecific = (fp_machine_savespecific) savespecific;			
 		vtable_initialized = 1;
 	}
 }
@@ -195,12 +219,12 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, MachineCallback callback,
 	custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	psy_audio_plugin_base(self)->vtable = &vtable;
+	psy_table_init(&self->parameters);
 	psy_library_init(&self->library);
 	psy_library_load(&self->library, path);			
 	self->mi = 0;
 	self->plugininfo = 0;
-	self->preventsequencerlinetick = 0;
-	psy_table_init(&self->parameters);
+	self->preventsequencerlinetick = 0;	
 	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
 		psy_library_dispose(&self->library);		
@@ -214,7 +238,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, MachineCallback callback,
 				mi_resetcallback(self->mi);
 				mi_setcallback(self->mi, &callback);
 				mi_init(self->mi);
-				initparameters(self, pInfo);				
+				tweakdefaults(self, pInfo);
 				self->plugininfo = machineinfo_allocinit();				
 				machineinfo_setnativeinfo(self->plugininfo, pInfo, MACH_PLUGIN,
 					self->library.path, 0);				
@@ -231,32 +255,13 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, MachineCallback callback,
 	}
 }
 
-void initparameters(psy_audio_Plugin* self, CMachineInfo* info)
+void tweakdefaults(psy_audio_Plugin* self, CMachineInfo* info)
 {
 	int gbp;
 
 	for (gbp = 0; gbp < info->numParameters; ++gbp) {
-		psy_audio_PluginMachineParam* param;
-		
-		param = psy_audio_pluginmachineparam_allocinit(self->mi, info, gbp);
-		mi_parametertweak(self->mi, gbp, info->Parameters[gbp]->DefValue);
-		psy_table_insert(&self->parameters, gbp, (void*) param);
+		mi_parametertweak(self->mi, gbp, info->Parameters[gbp]->DefValue);		
 	}
-}
-
-void disposeparameters(psy_audio_Plugin* self)
-{
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->parameters);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_PluginMachineParam* param;
-
-		param = (psy_audio_PluginMachineParam*)psy_tableiterator_value(&it);
-		psy_audio_pluginmachineparam_dispose(param);
-		free(param);
-	}
-	psy_table_dispose(&self->parameters);
 }
 
 void dispose(psy_audio_Plugin* self)
@@ -273,6 +278,34 @@ void dispose(psy_audio_Plugin* self)
 	}
 	disposeparameters(self);
 	custommachine_dispose(&self->custommachine);
+}
+
+void disposeparameters(psy_audio_Plugin* self)
+{
+	clearparameters(self);
+	psy_table_dispose(&self->parameters);
+}
+
+void clearparameters(psy_audio_Plugin* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->parameters);
+		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
+		psy_audio_PluginMachineParam* param;
+
+		param = (psy_audio_PluginMachineParam*)psy_tableiterator_value(&it);
+		psy_audio_pluginmachineparam_dispose(param);
+		free(param);
+	}
+	psy_table_clear(&self->parameters);
+}
+
+void setcallback(psy_audio_Plugin* self, MachineCallback callback)
+{
+	if (self->mi) {
+		mi_setcallback(self->mi, &callback);
+	}
 }
 
 psy_audio_Machine* clone(psy_audio_Plugin* self)
@@ -361,6 +394,56 @@ psy_audio_MachineInfo* info(psy_audio_Plugin* self)
 	return self->plugininfo;
 }
 
+psy_audio_MachineParam* parameter(psy_audio_Plugin* self, uintptr_t id)
+{
+	psy_audio_MachineParam* param = NULL;
+
+	if (!psy_table_exists(&self->parameters, id)) {
+		GETINFO GetInfo;
+
+		GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
+		if (GetInfo != NULL) {
+			CMachineInfo* info = GetInfo();
+
+			param = pluginparam_base(psy_audio_pluginmachineparam_allocinit(
+				self->mi, info, id));
+			psy_table_insert(&self->parameters, id, (void*)param);
+		}
+	} else {
+		param = (psy_audio_MachineParam*)psy_table_at(&self->parameters, id);
+	}
+	return param;
+}
+
+unsigned int numparametercols(psy_audio_Plugin* self)
+{
+	int rv = 0;
+	GETINFO GetInfo;
+
+	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {
+		CMachineInfo* info = GetInfo();
+		if (info) {
+			rv = info->numparametercols;
+		}
+	}
+	return rv;
+}
+
+uintptr_t numparameters(psy_audio_Plugin* self)
+{
+	uintptr_t rv = 0;
+	GETINFO GetInfo;
+
+	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
+	if (GetInfo != NULL) {
+		CMachineInfo* info = GetInfo();
+
+		rv = info->numParameters;
+	}
+	return rv;
+}
+
 uintptr_t numinputs(psy_audio_Plugin* self)
 {
 	return info(self) ? (self->plugininfo->mode == MACHMODE_FX ? 2 : 0) : 0;
@@ -371,18 +454,12 @@ uintptr_t numoutputs(psy_audio_Plugin* self)
 	return info(self) ? 2 : 0;
 }
 
-void setcallback(psy_audio_Plugin* self, MachineCallback callback)
-{
-	if (self->mi) {				
-		mi_setcallback(self->mi, &callback);
-	}
-}
-
 void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {	
 	uint32_t size;
 
+	clearparameters(self);
 	// size of whole structure
 	psyfile_read(songfile->file, &size, sizeof(size));
 	if(size) {
@@ -438,8 +515,8 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &count, sizeof(count));
 	for (i = 0; i < count; ++i) {
-		int32_t scaled = 0;
 		psy_audio_MachineParam* param;
+		int32_t scaled = 0;		
 
 		param = psy_audio_machine_parameter(psy_audio_plugin_base(self), i);
 		if (param) {
@@ -456,29 +533,4 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		free(pData);
 		pData = 0;
 	}
-}
-
-unsigned int numparametercols(psy_audio_Plugin* self)
-{
-	int rv = 0;
-	GETINFO GetInfo;
-
-	GetInfo =(GETINFO) psy_library_functionpointer(&self->library, "GetInfo");
-	if (GetInfo != NULL) {	
-		CMachineInfo* info = GetInfo();
-		if (info) {	
-			rv = info->numparametercols;				
-		}
-	}
-	return rv;
-}
-
-uintptr_t numparameters(psy_audio_Plugin* self)
-{
-	return psy_table_size(&self->parameters);
-}
-
-psy_audio_MachineParam* parameter(psy_audio_Plugin* self, uintptr_t param)
-{
-	return (psy_audio_MachineParam*) psy_table_at(&self->parameters, param);
 }

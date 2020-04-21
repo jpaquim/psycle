@@ -111,7 +111,6 @@ typedef	psy_audio_MachineParam* (*fp_machine_tweakparameter)(struct psy_audio_Ma
 typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
 typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
 typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
-typedef	int (*fp_machine_paramviewoptions)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, MachineCallback);
 typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
@@ -192,7 +191,6 @@ typedef struct MachineVtable {
 	fp_machine_numparameters numparameters;
 	fp_machine_numparametercols numparametercols;
 	fp_machine_numtweakparameters numtweakparameters;
-	fp_machine_paramviewoptions paramviewoptions;
 	fp_machine_setcallback setcallback;
 	fp_machine_loadspecific loadspecific;
 	fp_machine_savespecific savespecific;
@@ -316,11 +314,6 @@ INLINE psy_List* psy_audio_machine_sequencerinsert(psy_audio_Machine* self, psy_
 INLINE int psy_audio_machine_mode(psy_audio_Machine* self)
 {
 	return self->vtable->mode(self);
-}
-
-INLINE int psy_audio_machine_paramviewoptions(psy_audio_Machine* self)
-{
-	return self->vtable->paramviewoptions(self);
 }
 
 INLINE uintptr_t psy_audio_machine_numparameters(psy_audio_Machine* self)

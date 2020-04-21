@@ -95,6 +95,8 @@ static void psy_audio_sequencer_retriggercont(psy_audio_Sequencer*,
 	psy_dsp_beat_t offset);
 static void psy_audio_sequencer_note(psy_audio_Sequencer*,
 	psy_audio_PatternEntry* patternentry, psy_dsp_beat_t offset);
+void psy_audio_sequencer_tweak(psy_audio_Sequencer* self,
+	psy_audio_PatternEntry* patternentry, psy_dsp_beat_t offset);
 static void psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer*,
 	SequenceTrackIterator*, psy_dsp_beat_t offset);
 static void psy_audio_sequencer_patterndelay(psy_audio_Sequencer*,
@@ -729,7 +731,7 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 		}
 	} else
 	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAK) {
-		psy_audio_sequencer_note(self, patternentry, offset);
+		psy_audio_sequencer_tweak(self, patternentry, offset);
 	} else
 	if ((patternentry_front(patternentry)->note == NOTECOMMANDS_MIDICC) &&
 			(patternentry_front(patternentry)->inst < 0x80)) {
@@ -800,6 +802,18 @@ void psy_audio_sequencer_note(psy_audio_Sequencer* self,
 	psy_list_append(&self->events, entry);
 }
 
+void psy_audio_sequencer_tweak(psy_audio_Sequencer* self,
+	psy_audio_PatternEntry* patternentry, psy_dsp_beat_t offset)
+{
+	psy_audio_PatternEntry* entry;
+
+	entry = patternentry_clone(patternentry);
+	entry->bpm = self->bpm;
+	entry->delta = offset - self->position;
+	patternentry_front(entry)->vol = 0;
+	psy_list_append(&self->events, entry);
+}
+
 void psy_audio_addgate(psy_audio_Sequencer* self, psy_audio_PatternEntry*
 	entry)
 {
@@ -849,72 +863,27 @@ void psy_audio_maketweakslideevents(psy_audio_Sequencer* self,
 	if (!param) {
 		return;
 	}
-	{
-		int minval = 0;
-		int maxval = 0;		
-		int numslides;
-		int dest;
-		int start = 0;		
+	{		
 		int slide;
-		float delta;
-		float curr;
+		int numslides;
 		
 		numslides = psy_audio_sequencer_currframesperline(self) / 64;
 		if (numslides == 0) {
 			return;
 		}
-		start = psy_audio_machineparam_scaledvalue(param);		
-		if (start < minval) {
-			start = minval;
-		} else
-		if (start > maxval) {
-			start = maxval;
-		}		
-		start -= minval;		
-		dest = psy_audio_patternevent_tweakvalue(patternentry_front(entry));
-		if (dest > maxval - minval) { 
-			dest = maxval - minval;
-		}
-		if (dest == start) {
+		
+		for (slide = 0; slide < numslides; ++slide) {
 			psy_audio_PatternEntry* slideentry;
-			
+				
 			slideentry = patternentry_clone(entry);
 			patternentry_front(slideentry)->note = NOTECOMMANDS_TWEAK;
-			slideentry->bpm = self->bpm;
-			psy_list_append(&self->events, slideentry);
-		} else {
-			delta = (dest - start) / (float) numslides;
-			if (delta < 0) {
-				delta = delta;
-			}
-			curr = (float) start;
-			for (slide = 0; slide < numslides; ++slide) {
-				psy_audio_PatternEntry* slideentry;
-				int nv;
-
-				if (slide == numslides -1) {
-					curr = (float) dest;
-				}	
-				if (curr > maxval - minval) {
-					nv = maxval - minval;
-				} else
-				if (curr < 0) {
-					nv = 0;
-				} else {
-					nv = (int) curr;
-				}				
-				curr += delta;
-				slideentry = patternentry_clone(entry);
-				patternentry_front(slideentry)->note = NOTECOMMANDS_TWEAK;
-				psy_audio_patternevent_settweakvalue(
-					patternentry_front(slideentry),					
-					(uint16_t) nv);
-				slideentry->bpm = self->bpm;				
-				slideentry->delta = offset +
-					psy_audio_sequencer_frametooffset(self, slide * 64);
-				psy_list_append(&self->delayedevents, slideentry);
-			}
-		}
+			patternentry_front(slideentry)->vol = numslides - slide;				
+			slideentry->bpm = self->bpm;				
+			slideentry->delta = offset +
+				psy_audio_sequencer_frametooffset(self, slide * 64);
+			slideentry->priority = 1;
+			psy_list_append(&self->delayedevents, slideentry);
+		}		
 	}
 }
 
@@ -1197,10 +1166,23 @@ void psy_audio_sequencer_sortevents(psy_audio_Sequencer* self)
 int psy_audio_sequencer_comp_events(PatternNode* lhs, PatternNode* rhs)
 {
 	int rv;
+	float vr;
+	float vl;
+	psy_audio_PatternEntry* entry;
+
+	entry = psy_audio_patternnode_entry(lhs);
+
+	vl = psy_audio_patternnode_entry(lhs)->delta;
+	vr = psy_audio_patternnode_entry(rhs)->delta;
 	
 	if (psy_audio_patternnode_entry(rhs)->delta ==
-			 psy_audio_patternnode_entry(lhs)->delta) {
-		rv = 0;
+		psy_audio_patternnode_entry(lhs)->delta) {
+		if (psy_audio_patternnode_entry(rhs)->priority <
+			psy_audio_patternnode_entry(lhs)->priority) {
+			rv = -1;
+		} else {
+			rv = 0;
+		}
 	} else
 	if (psy_audio_patternnode_entry(lhs)->delta <
 		psy_audio_patternnode_entry(rhs)->delta) {
