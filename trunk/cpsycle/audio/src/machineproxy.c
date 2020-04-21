@@ -52,7 +52,6 @@ static const psy_audio_MachineInfo* machineproxy_info(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numtweakparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy*);
-static int machineproxy_paramviewoptions(psy_audio_MachineProxy*);
 static void machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
@@ -162,9 +161,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.numtweakparameters = (fp_machine_numtweakparameters)
 			machineproxy_numtweakparameters;
 		vtable.numparametercols = (fp_machine_numparametercols)
-			machineproxy_numparametercols;	
-		vtable.paramviewoptions = (fp_machine_paramviewoptions)
-			machineproxy_paramviewoptions;
+			machineproxy_numparametercols;		
 		vtable.loadspecific = (fp_machine_loadspecific)
 			machineproxy_loadspecific;
 		vtable.savespecific = (fp_machine_savespecific)
@@ -724,27 +721,6 @@ uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy* self)
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "numparametercols", GetExceptionCode(),
 			GetExceptionInformation())) {			
-		}
-#endif		
-	}
-	return rv;
-}
-
-int machineproxy_paramviewoptions(psy_audio_MachineProxy* self)
-{
-	int rv = 0;
-
-	if (self->crashed == 0) {
-#if defined DIVERSALIS__OS__MICROSOFT        
-		__try
-#endif		
-		{
-			rv = psy_audio_machine_paramviewoptions(self->client);
-		}
-#if defined DIVERSALIS__OS__MICROSOFT		
-		__except(FilterException(self, "paramviewoptions", GetExceptionCode(),
-			GetExceptionInformation())) {
-			rv = 0;
 		}
 #endif		
 	}

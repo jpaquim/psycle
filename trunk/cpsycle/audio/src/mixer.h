@@ -11,19 +11,37 @@ extern "C" {
 #endif
 
 struct psy_audio_Mixer;
+struct psy_audio_ReturnChannel;
+struct psy_audio_InputChannel;
 
-typedef struct psy_audio_SendLabelParam {
+typedef struct psy_audio_InputLabelParam {
 	psy_audio_MachineParam machineparam;
-	uintptr_t send;
-	struct psy_audio_Mixer* mixer;
-} psy_audio_SendLabelParam;
+	struct psy_audio_InputChannel* channel;
+} psy_audio_InputLabelParam;
 
-void psy_audio_sendlabelparam_init(psy_audio_SendLabelParam*,
-	struct psy_audio_Mixer* mixer, uintptr_t send);
-void psy_audio_sendlabelparam_dispose(psy_audio_SendLabelParam*);
+void psy_audio_inputlabelparam_init(psy_audio_InputLabelParam*,
+	struct psy_audio_InputChannel*);
+void psy_audio_inputlabelparam_dispose(psy_audio_InputLabelParam*);
 
-INLINE psy_audio_MachineParam* psy_audio_sendlabelmachineparam_base(
-	psy_audio_SendLabelParam* self)
+INLINE psy_audio_MachineParam* psy_audio_inputlabelparam_base(
+	psy_audio_InputLabelParam* self)
+{
+	return &(self->machineparam);
+}
+
+
+typedef struct psy_audio_SendReturnLabelParam {
+	psy_audio_MachineParam machineparam;
+	struct psy_audio_ReturnChannel* channel;
+	bool displaysend;
+} psy_audio_SendReturnLabelParam;
+
+void psy_audio_sendreturnlabelparam_init(psy_audio_SendReturnLabelParam*,
+	struct psy_audio_ReturnChannel*, bool displaysend);
+void psy_audio_sendreturnlabelparam_dispose(psy_audio_SendReturnLabelParam*);
+
+INLINE psy_audio_MachineParam* psy_audio_sendreturnlabelparam_base(
+	psy_audio_SendReturnLabelParam* self)
 {
 	return &(self->machineparam);
 }
@@ -45,7 +63,26 @@ INLINE psy_audio_MachineParam* psy_audio_drywetmixmachineparam_base(
 	return &(self->machineparam);
 }
 
-typedef struct {
+struct psy_audio_ReturnChannel;
+
+typedef struct psy_audio_RouteMachineParam {
+	psy_audio_MachineParam machineparam;
+	uintptr_t send;	
+	struct psy_audio_ReturnChannel* channel;
+	struct psy_audio_Mixer* mixer;
+} psy_audio_RouteMachineParam;
+
+void psy_audio_routemachineparam_init(psy_audio_RouteMachineParam*,
+	struct psy_audio_ReturnChannel*, struct psy_audio_Mixer* mixer, uintptr_t send);
+void psy_audio_routemachineparam_dispose(psy_audio_RouteMachineParam*);
+
+INLINE psy_audio_MachineParam* psy_audio_routemachineparam_base(
+	psy_audio_RouteMachineParam* self)
+{
+	return &(self->machineparam);
+}
+
+typedef struct psy_audio_MasterChannel {
 	psy_Table sendvols;
 	psy_dsp_amp_t volume;
 	psy_dsp_amp_t panning;
@@ -72,7 +109,8 @@ typedef struct {
 
 struct psy_audio_Mixer;
 
-typedef struct {
+typedef struct psy_audio_InputChannel {
+	uintptr_t id;
 	psy_Table sendvols;
 	psy_dsp_amp_t volume;
 	psy_dsp_amp_t panning;
@@ -84,7 +122,7 @@ typedef struct {
 	size_t inputslot;
 	psy_audio_Buffer* buffer;
 	psy_dsp_amp_t volumedisplay;
-	psy_audio_InfoMachineParam info_param;
+	psy_audio_InputLabelParam info_param;
 	psy_audio_FloatMachineParam mix_param;
 	psy_audio_CustomMachineParam sendvol_param;
 	psy_audio_CustomMachineParam gain_param;
@@ -97,9 +135,11 @@ typedef struct {
 	psy_audio_IntMachineParam wetonly_param;
 	psy_audio_DryWetMixMachineParam drywetmix_param;
 	struct psy_audio_Mixer* mixer;
-} psy_audio_MixerChannel;
+} psy_audio_InputChannel;
 
-typedef struct {
+typedef struct psy_audio_ReturnChannel {
+	uintptr_t id;
+	struct psy_audio_Mixer* mixer;
 	psy_Table sendsto;
 	unsigned char mastersend;
 	psy_dsp_amp_t volume;
@@ -109,6 +149,9 @@ typedef struct {
 	psy_audio_Buffer* buffer;
 	psy_audio_Machine* fx;
 	psy_audio_CustomMachineParam send_param;
+	psy_audio_SendReturnLabelParam sendlabel_param;
+	psy_audio_SendReturnLabelParam returnlabel_param;	
+	psy_audio_RouteMachineParam route_param;
 	psy_audio_CustomMachineParam info_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
@@ -125,12 +168,9 @@ typedef struct psy_audio_Mixer {
 	int solocolumn;	
 	psy_audio_MasterChannel master;
 	psy_dsp_amp_t mastervolumedisplay;
-	uintptr_t slot;
 	psy_audio_CustomMachineParam blank_param;
-	psy_audio_CustomMachineParam ignore_param;
-	psy_audio_CustomMachineParam route_param;
+	psy_audio_CustomMachineParam ignore_param;	
 	psy_audio_CustomMachineParam routemaster_param;
-	psy_audio_SendLabelParam sendlabel_param;
 } psy_audio_Mixer;
 
 void mixer_init(psy_audio_Mixer*, MachineCallback);

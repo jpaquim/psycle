@@ -38,7 +38,6 @@ static psy_dsp_amp_t* work(psy_audio_Player*, int* numsamples, int* stop);
 static void player_workamount(psy_audio_Player*, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples);
 static void player_oneventdriverinput(psy_audio_Player*, psy_EventDriver* sender);
-static void workeventinput(psy_audio_Player*, int cmd, unsigned char* data, unsigned int size);
 static void player_workpath(psy_audio_Player*, uintptr_t amount);
 static void log_workevents(psy_List* events);
 static void player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
@@ -396,80 +395,6 @@ void player_oneventdriverinput(psy_audio_Player* self, psy_EventDriver* sender)
 			psy_signal_emit(&self->signal_inputevent, self, 1, &event);
 		}
 	}
-}
-
-void workeventinput(psy_audio_Player* self, int cmd, unsigned char* data,
-	unsigned int size)
-{	
-/*	int validevent = 0;
-	uintptr_t note = 0;
-	psy_audio_PatternEvent event;
-	
-	switch (cmd) {
-		// MIDI DATA
-		case 1:
-		{
-			int lsb;
-			int msb;
-
-			lsb = data[0] & 0x0F;
-			msb = (data[0] & 0xF0) >> 4;
-			switch (msb) {
-				case 0x9:
-					// Note On/Off
-					event.note = data[2] > 0 ? data[1] : NOTECOMMANDS_RELEASE;
-					event.inst = 255;
-					event.mach = lsb;
-					event.cmd = 0;
-					event.parameter = 0;
-					validevent = 1;
-					note = data[1];
-				default:
-				break;
-			}
-		}
-		break;
-		// psy_audio_Pattern Data
-		case 2:
-			patternevent_init_all(&event, data[0], 255, 0, 255, 0, 0);
-			note = data[1];
-			validevent = 1;
-		break;
-		default:		
-		break;
-	}
-	if (validevent) {
-		uintptr_t track = 0;
-
-		if (self->multichannelaudition) {
-			if (event.note < NOTECOMMANDS_RELEASE) {
-				if (psy_table_exists(&self->notestotracks, event.note)) {
-					track = (uintptr_t) psy_table_at(&self->notestotracks, event.note);
-				} else {							
-					while (psy_table_exists(&self->trackstonotes, track)) {
-						++track;
-					}
-					psy_table_insert(&self->notestotracks, event.note, (void*)track);
-					psy_table_insert(&self->trackstonotes, track,
-						(void*)(uintptr_t)event.note);
-				}
-			} else
-			if (event.note == NOTECOMMANDS_RELEASE) {				
-				if (psy_table_exists(&self->notestotracks, note)) {
-					track = (uintptr_t) psy_table_at(&self->notestotracks, note);
-					psy_table_remove(&self->notestotracks, note);
-					psy_table_remove(&self->trackstonotes, track);
-				}
-			}
-		}
-		sequencer_addinputevent(&self->sequencer, &event, track);
-		if (self->recordingnotes && sequencer_playing(&self->sequencer)) {
-			sequencer_recordinputevent(&self->sequencer, &event, 0, 
-				player_position(self));			
-		} else {			
-			signal_emit(&self->signal_inputevent, self, 1, &event);
-		}		
-	}*/
 }
 
 // general setter and getter

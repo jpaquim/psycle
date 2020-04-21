@@ -21,8 +21,8 @@ static float machineparam_normvalue(psy_audio_MachineParam* self)
 	return 0.f;
 }
 
-static void machineparam_range(psy_audio_MachineParam* self, int32_t* minval,
-		int32_t* maxval)
+static void machineparam_range(psy_audio_MachineParam* self, intptr_t* minval,
+	intptr_t* maxval)
 {
 	*minval = 0;
 	*maxval = 0;
@@ -92,7 +92,7 @@ void psy_audio_machineparam_dispose(psy_audio_MachineParam* self)
 static void customparam_tweak(psy_audio_CustomMachineParam*, float val);
 static float customparam_normvalue(psy_audio_CustomMachineParam*);
 static void customparam_range(psy_audio_CustomMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int customparam_type(psy_audio_CustomMachineParam*);
 static int customparam_label(psy_audio_CustomMachineParam*, char* text);
 static int customparam_name(psy_audio_CustomMachineParam*, char* text);
@@ -239,7 +239,7 @@ float customparam_normvalue(psy_audio_CustomMachineParam* self)
 }
 
 void customparam_range(psy_audio_CustomMachineParam* self,
-	int32_t* minval, int32_t* maxval)
+	intptr_t* minval, intptr_t* maxval)
 {
 	*minval = self->minval;
 	*maxval = self->maxval;
@@ -270,7 +270,7 @@ int customparam_name(psy_audio_CustomMachineParam* self, char* text)
 }
 
 void psy_audio_custommachineparam_bind_int(psy_audio_CustomMachineParam* self,
-	int32_t* value)
+	intptr_t* value)
 {
 	self->value.i = value;
 	self->vartype = VARIANT_INT;
@@ -379,7 +379,7 @@ int infomachineparam_type(psy_audio_InfoMachineParam* self)
 static void intmachineparam_tweak(psy_audio_IntMachineParam*, float val);
 static float intmachineparam_normvalue(psy_audio_IntMachineParam*);
 static void intmachineparam_range(psy_audio_IntMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int intmachineparam_type(psy_audio_IntMachineParam*);
 static int intmachineparam_label(psy_audio_IntMachineParam*, char* text);
 static int intmachineparam_name(psy_audio_IntMachineParam*, char* text);
@@ -404,8 +404,8 @@ static void intmachineparam_vtable_init(psy_audio_IntMachineParam* self)
 }
 
 void psy_audio_intmachineparam_init(psy_audio_IntMachineParam* self,
-	const char* name, const char* label, int type, int32_t* data, int32_t minval,
-	int32_t maxval)
+	const char* name, const char* label, int type, int32_t* data, intptr_t minval,
+	intptr_t maxval)
 {
 	psy_audio_machineparam_init(&self->machineparam);
 	intmachineparam_vtable_init(self);
@@ -446,7 +446,7 @@ psy_audio_IntMachineParam* psy_audio_intmachineparam_allocinit(
 }
 
 void intmachineparam_range(psy_audio_IntMachineParam* self,
-	int32_t* minval, int32_t* maxval)
+	intptr_t* minval, intptr_t* maxval)
 {
 	*minval = self->minval;
 	*maxval = self->maxval;
@@ -521,7 +521,7 @@ void psy_audio_intmachineparam_setmask(psy_audio_IntMachineParam* self, const ch
 static void floatmachineparam_tweak(psy_audio_FloatMachineParam*, float val);
 static float floatmachineparam_normvalue(psy_audio_FloatMachineParam*);
 static void floatmachineparam_range(psy_audio_FloatMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int floatmachineparam_type(psy_audio_FloatMachineParam*);
 static int floatmachineparam_label(psy_audio_FloatMachineParam*, char* text);
 static int floatmachineparam_name(psy_audio_FloatMachineParam*, char* text);
@@ -546,8 +546,8 @@ static void floatmachineparam_vtable_init(psy_audio_FloatMachineParam* self)
 }
 
 void psy_audio_floatmachineparam_init(psy_audio_FloatMachineParam* self,
-	const char* name, const char* label, int type, float* data, int32_t minval,
-	int32_t maxval)
+	const char* name, const char* label, int type, float* data, intptr_t minval,
+	intptr_t maxval)
 {
 	psy_audio_machineparam_init(&self->machineparam);
 	floatmachineparam_vtable_init(self);
@@ -588,7 +588,7 @@ psy_audio_FloatMachineParam* psy_audio_floatmachineparam_allocinit(
 }
 
 void floatmachineparam_range(psy_audio_FloatMachineParam* self,
-	int32_t* minval, int32_t* maxval)
+	intptr_t* minval, intptr_t* maxval)
 {
 	*minval = self->minval;
 	*maxval = self->maxval;
@@ -661,7 +661,7 @@ void psy_audio_floatmachineparam_setmask(psy_audio_FloatMachineParam* self, cons
 static void choicemachineparam_tweak(psy_audio_ChoiceMachineParam*, float val);
 static float choicemachineparam_normvalue(psy_audio_ChoiceMachineParam*);
 static void choicemachineparam_range(psy_audio_ChoiceMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int choicemachineparam_type(psy_audio_ChoiceMachineParam*);
 static int choicemachineparam_label(psy_audio_ChoiceMachineParam*, char* text);
 static int choicemachineparam_name(psy_audio_ChoiceMachineParam*, char* text);
@@ -686,8 +686,8 @@ static void choicemachineparam_vtable_init(psy_audio_ChoiceMachineParam* self)
 }
 
 void psy_audio_choicemachineparam_init(psy_audio_ChoiceMachineParam* self,
-	const char* name, const char* label, int type, int32_t* data, int32_t minval,
-	int32_t maxval)
+	const char* name, const char* label, int type, int32_t* data, intptr_t minval,
+	intptr_t maxval)
 {
 	psy_audio_machineparam_init(&self->machineparam);
 	choicemachineparam_vtable_init(self);
@@ -719,7 +719,7 @@ void psy_audio_choicemachineparam_dispose(psy_audio_ChoiceMachineParam* self)
 }
 
 void choicemachineparam_range(psy_audio_ChoiceMachineParam* self,
-	int32_t* minval, int32_t* maxval)
+	intptr_t* minval, intptr_t* maxval)
 {
 	*minval = self->minval;
 	*maxval = self->maxval;
@@ -812,7 +812,7 @@ void psy_audio_choicemachineparam_setdescription(psy_audio_ChoiceMachineParam*
 static void volumemachineparam_tweak(psy_audio_VolumeMachineParam*, float val);
 static float volumemachineparam_normvalue(psy_audio_VolumeMachineParam*);
 static void volumemachineparam_range(psy_audio_VolumeMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int volumemachineparam_type(psy_audio_VolumeMachineParam*);
 static int volumemachineparam_label(psy_audio_VolumeMachineParam*, char* text);
 static int volumemachineparam_name(psy_audio_VolumeMachineParam*, char* text);
@@ -877,7 +877,7 @@ psy_audio_VolumeMachineParam* psy_audio_volumemachineparam_allocinit(
 }
 
 void volumemachineparam_range(psy_audio_VolumeMachineParam* self,
-	int32_t* minval, int32_t* maxval)
+	intptr_t* minval, intptr_t* maxval)
 {
 	*minval = 0;
 	*maxval = 0x1000;
@@ -963,7 +963,7 @@ void psy_audio_volumemachineparam_setmask(psy_audio_VolumeMachineParam* self, co
 static void gainmachineparam_tweak(psy_audio_GainMachineParam*, float val);
 static float gainmachineparam_normvalue(psy_audio_GainMachineParam*);
 static void gainmachineparam_range(psy_audio_GainMachineParam*,
-	int32_t* minval, int32_t* maxval);
+	intptr_t* minval, intptr_t* maxval);
 static int gainmachineparam_type(psy_audio_GainMachineParam*);
 static int gainmachineparam_label(psy_audio_GainMachineParam*, char* text);
 static int gainmachineparam_name(psy_audio_GainMachineParam*, char* text);
@@ -988,8 +988,8 @@ static void gainmachineparam_vtable_init(psy_audio_GainMachineParam* self)
 }
 
 void psy_audio_gainmachineparam_init(psy_audio_GainMachineParam* self,
-	const char* name, const char* label, int type, float* data, int32_t minval,
-	int32_t maxval)
+	const char* name, const char* label, int type, float* data, intptr_t minval,
+	intptr_t maxval)
 {
 	psy_audio_machineparam_init(&self->machineparam);
 	gainmachineparam_vtable_init(self);
@@ -1030,7 +1030,7 @@ psy_audio_GainMachineParam* psy_audio_gainmachineparam_allocinit(
 }
 
 void gainmachineparam_range(psy_audio_GainMachineParam* self,
-	int32_t* minval, int32_t* maxval)
+	intptr_t* minval, intptr_t* maxval)
 {
 	*minval = self->minval;
 	*maxval = self->maxval;

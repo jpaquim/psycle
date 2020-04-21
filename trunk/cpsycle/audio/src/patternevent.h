@@ -80,7 +80,7 @@ typedef struct {
 	uint8_t note;	
 	uint16_t inst;	
 	uint8_t mach;
-	uint8_t vol;	
+	uint16_t vol;	
 	uint8_t cmd;
 	uint8_t parameter;	
 } psy_audio_PatternEvent;
