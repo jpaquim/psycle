@@ -551,11 +551,7 @@ void readepat(psy_audio_SongFile* self)
 
 void readinsd(psy_audio_SongFile* self)
 {	
-///\name Loop stuff
-	///\{
-	unsigned char _loop;
-	int32_t _lines;
-	///\}
+
 
 	///\verbatim
 	/// NNA values overview:
@@ -619,11 +615,16 @@ void readinsd(psy_audio_SongFile* self)
 		if(index < MAX_INSTRUMENTS)
 		{	
 			psy_audio_Instrument* instrument;
+			// Loop stuff
+			unsigned char loop;
+			int32_t lines;
 			psy_audio_NewNoteAction nna;
 
 			instrument = instrument_allocinit();
-			psyfile_read(self->file, &_loop, sizeof(_loop));
-			psyfile_read(self->file, &_lines, sizeof(_lines));
+			psyfile_read(self->file, &loop, sizeof(loop));
+			instrument->loop = loop;
+			psyfile_read(self->file, &lines, sizeof(lines));
+			instrument->lines = lines;
 			psyfile_read(self->file, &_NNA, sizeof(_NNA));
 			///\verbatim
 			/// NNA values overview:
@@ -2327,11 +2328,12 @@ int psy3_save_instrument(psy_audio_SongFile* self,
 	int status = PSY_OK;
 	
 	// loop	
-	if (status = psyfile_write_uint8(self->file, 0)) {
+	if (status = psyfile_write_uint8(self->file, instrument->loop != 0)) {
 		return status;
 	}
 	// lines	
-	if (status = psyfile_write_int32(self->file, 0)) {
+	if (status = psyfile_write_int32(self->file,
+			(int32_t) instrument->lines)) {
 		return status;
 	}	
 	if (status = psyfile_write_uint8(self->file, (uint8_t) instrument->nna)) {

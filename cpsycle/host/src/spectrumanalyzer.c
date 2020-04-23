@@ -68,6 +68,8 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 
 void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
 {
+	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
+		spectrumanalyzer_onsongchanged);
 	spectrumanalyzer_disconnectmachinessignals(self, self->workspace);
 	fftclass_dispose(&self->fftSpec);
 }

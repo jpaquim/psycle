@@ -102,6 +102,7 @@ typedef void (*psy_ui_fp_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
 typedef void (*psy_ui_fp_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
 typedef void (*psy_ui_fp_onmousedown)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmousemove)(struct psy_ui_Component*, psy_ui_MouseEvent*);
+typedef void (*psy_ui_fp_onmousewheel)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmouseup)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmousedoubleclick)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmouseenter)(struct psy_ui_Component*);
@@ -144,6 +145,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_onpreferredsize onpreferredsize;
 	psy_ui_fp_onmousedown onmousedown;
 	psy_ui_fp_onmousemove onmousemove;
+	psy_ui_fp_onmousewheel onmousewheel;
 	psy_ui_fp_onmouseup onmouseup;
 	psy_ui_fp_onmousedoubleclick onmousedoubleclick;
 	psy_ui_fp_onmouseenter onmouseenter;

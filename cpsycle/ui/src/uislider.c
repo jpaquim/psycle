@@ -21,6 +21,7 @@ static void psy_ui_slider_drawverticalruler(psy_ui_Slider*, psy_ui_Graphics*);
 static void psy_ui_slider_onmousedown(psy_ui_Slider*, psy_ui_MouseEvent* ev);
 static void psy_ui_slider_onmouseup(psy_ui_Slider*, psy_ui_MouseEvent* ev);
 static void psy_ui_slider_onmousemove(psy_ui_Slider*, psy_ui_MouseEvent* ev);
+static void psy_ui_slider_onmousewheel(psy_ui_Slider*, psy_ui_MouseEvent*);
 static void psy_ui_slider_ondestroy(psy_ui_Slider*, psy_ui_Component* sender);
 static void psy_ui_slider_ontimer(psy_ui_Slider*, psy_ui_Component* sender,
 	int timerid);
@@ -44,6 +45,7 @@ static void vtable_init(psy_ui_Slider* self)
 			psy_ui_slider_onpreferredsize;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) psy_ui_slider_onmousedown;
 		vtable.onmousemove = (psy_ui_fp_onmousemove) psy_ui_slider_onmousemove;
+		vtable.onmousewheel = (psy_ui_fp_onmousewheel) psy_ui_slider_onmousewheel;
 		vtable.onmouseup = (psy_ui_fp_onmouseup) psy_ui_slider_onmouseup;
 		vtable_initialized = 1;
 	}
@@ -58,8 +60,9 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	psy_ui_component_enablealign(&self->component);
 	self->tweakbase = -1;
 	self->orientation = psy_ui_HORIZONTAL;
-	self->value = 0.0f;
+	self->value = 0.0;
 	self->labelsize = 100;
+	self->slidersize = 6;
 	self->valuelabelsize = 40;	
 	self->valuedescription[0] = '\0';
 	self->label[0] = '\0';
@@ -124,7 +127,6 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 	
 	psy_ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));	
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		int sliderwidth = 6;
 		psy_ui_Size size;	
 
 		size = psy_ui_component_size(&self->component);
@@ -139,8 +141,8 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
 		psy_ui_drawrectangle(g, r);
 		psy_ui_setrectangle(&r,
-			self->labelsize + self->margin + (int)((size.width - sliderwidth) * self->value),
-			2, sliderwidth, size.height - 4);
+			self->labelsize + self->margin + (int)((size.width - self->slidersize) * self->value),
+			2, self->slidersize, size.height - 4);
 		psy_ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
 		{
 			size = psy_ui_component_size(&self->component);
@@ -202,10 +204,10 @@ void psy_ui_slider_onmousedown(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 	size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		self->tweakbase = (ev->x - self->labelsize - self->margin) -
-			(int)(self->value * (size.width - 6));
+			(int)(self->value * (size.width - self->slidersize));
 	} else
 	if (self->orientation == psy_ui_VERTICAL) {
-		self->tweakbase = ev->y - (int)(self->value * (size.height - 6));
+		self->tweakbase = ev->y - (int)((1.0 - self->value) * (size.height - self->slidersize));
 	}
 	psy_ui_component_capture(&self->component);
 }
@@ -220,11 +222,11 @@ void psy_ui_slider_onmousemove(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->value = max(0.f,
 				min(1.f, (ev->x - self->tweakbase - self->labelsize - self->margin) 
-					/ (float)(size.width - 6)));
+					/ (float)(size.width - self->slidersize)));
 		}
 		else {
 			self->value = max(0.f,
-				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(size.height - 6)));
+				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(size.height - self->slidersize)));
 		}
 		psy_signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
 		psy_signal_emit(&self->signal_changed, self, 0);
@@ -236,6 +238,21 @@ void psy_ui_slider_onmouseup(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
 	self->tweakbase = -1;
 	psy_ui_component_releasecapture(&self->component);
+}
+
+void psy_ui_slider_onmousewheel(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
+{
+	if (ev->delta != 0) {
+		if (ev->delta > 0) {
+			self->value += 0.1;
+		} else {
+			self->value -= 0.1;
+		}
+		self->value = max(0.0, min(1.0, self->value));
+		psy_signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
+		psy_signal_emit(&self->signal_changed, self, 0);
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void psy_ui_slider_showvertical(psy_ui_Slider* self)

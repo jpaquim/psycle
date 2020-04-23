@@ -533,10 +533,7 @@ void psy_audio_insertevents(psy_audio_Sequencer* self)
 				if (it->patternnode) {
 					offset = sequencetrackiterator_offset(it);
 					if (psy_audio_isoffsetinwindow(self, offset)) {					
-						psy_audio_sequencer_executeglobalcommands(self, it, offset);
-						if (offset == 16.625) {
-							self = self;
-						}
+						psy_audio_sequencer_executeglobalcommands(self, it, offset);						
 						psy_audio_addsequenceevent(self, track, offset);						
 						sequencetrackiterator_inc(it);
 						work = 1;
@@ -576,7 +573,7 @@ void psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 						(psy_dsp_beat_t)self->lpb;
 					psy_audio_compute_beatspersample(self);
 				}
-			} else
+			} else				
 			if (ev->cmd == SET_TEMPO) {
 				self->bpm = patternentry_front(patternentry)->parameter;
 				psy_audio_compute_beatspersample(self);
@@ -725,10 +722,26 @@ void psy_audio_addsequenceevent(psy_audio_Sequencer* self,
 			} else
 			if (patternentry_front(patternentry)->cmd == RETR_CONT) {
 				psy_audio_sequencer_retriggercont(self, patternentry, track, offset);
-			} else {
+			} else
+			if (patternentry_front(patternentry)->cmd != SET_VOLUME) {
 				psy_audio_sequencer_note(self, patternentry, offset);
 			}
 		}
+		if (patternentry_front(patternentry)->cmd == SET_VOLUME) {
+			psy_audio_PatternEntry* entry;
+
+			// volume column used to store mach
+			entry = patternentry_clone(patternentry);			
+			patternentry_front(entry)->vol = 
+				(patternentry_front(entry)->mach == NOTECOMMANDS_MACH_EMPTY)
+				? MASTER_INDEX
+				: patternentry_front(entry)->mach;
+			// because master handles all wires volumes
+			patternentry_front(entry)->mach = MASTER_INDEX;
+			entry->bpm = self->bpm;
+			entry->delta = offset - self->position;
+			psy_list_append(&self->events, entry);				
+		}		
 	} else
 	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAK) {
 		psy_audio_sequencer_tweak(self, patternentry, offset);

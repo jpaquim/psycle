@@ -57,6 +57,8 @@ void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_W
 
 void oscilloscope_ondestroy(Oscilloscope* self)
 {
+	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
+		oscilloscope_onsongchanged);
 	oscilloscope_disconnectmachinessignals(self, self->workspace);
 }
 

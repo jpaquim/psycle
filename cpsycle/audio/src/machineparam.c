@@ -15,10 +15,17 @@
 
 // MachineParameter
 
-static void machineparam_tweak(psy_audio_MachineParam* self, float val) { }
+static void machineparam_tweak(psy_audio_MachineParam* self, float value)
+{
+	psy_signal_emit_float(&self->signal_tweak, self, value);
+}
+
 static float machineparam_normvalue(psy_audio_MachineParam* self)
 {
-	return 0.f;
+	float rv = 0.f;
+
+	psy_signal_emit(&self->signal_normvalue, self, 1, (void*)(&rv));
+	return rv;
 }
 
 static void machineparam_range(psy_audio_MachineParam* self, intptr_t* minval,
@@ -127,10 +134,7 @@ void psy_audio_custommachineparam_init(psy_audio_CustomMachineParam* self,
 	self->label = (label) ? strdup(label) : 0;
 	self->minval = minval;
 	self->maxval = maxval;
-	self->type = type;
-	self->vartype = VARIANT_NONE;
-	self->scaletype = SCALE_NONE;
-	self->value.i = NULL;
+	self->type = type;	
 }
 
 void psy_audio_custommachineparam_dispose(psy_audio_CustomMachineParam* self)
@@ -160,40 +164,13 @@ psy_audio_CustomMachineParam* psy_audio_custommachineparam_allocinit(
 
 void customparam_tweak(psy_audio_CustomMachineParam* self, float value)
 {
-	switch (self->vartype) {
-		case VARIANT_INT:
-			if (self->value.i) {
-				int scaled;
-
-				scaled = (int)(value * (self->maxval - self->minval) + 0.5f) +
-					self->minval;
-				*self->value.i = scaled;
-			}
-		break;
-		case VARIANT_FLOAT:
-			if (self->value.r) {
-				switch (self->scaletype) {
-					case SCALE_SQR2:
-						*self->value.r = value * value * 4;						
-					break;					
-					default:
-						*self->value.r = value;
-					break;
-				}
-			}
-		break;
-		case VARIANT_NONE:
-			psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
-		break;
-		default:
-			psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
-		break;
-	}
+	psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);	
 }
 
 int customparam_describe(psy_audio_CustomMachineParam* self, char* text)
 {
 	int rv = 0;
+
 	if (self->machineparam.signal_describe.slots != NULL) {
 		psy_signal_emit(&self->machineparam.signal_describe, self, 2,
 			(void*)(&rv), (void*)(text));
@@ -205,36 +182,7 @@ float customparam_normvalue(psy_audio_CustomMachineParam* self)
 {
 	float rv = 0.f;
 
-	switch (self->vartype) {
-		case VARIANT_INT:
-			if (self->value.i) {
-				rv = ((self->maxval - self->minval) != 0)
-					? (*self->value.i - self->minval) /
-					(float)(self->maxval - self->minval)
-					: 0.f;
-			}
-		break;
-		case VARIANT_FLOAT:
-			switch (self->scaletype) {
-			case SCALE_SQR2:
-				rv = (float) sqrt(*self->value.r) * 0.5f;
-				break;
-			default:
-				rv = *(self->value.r);
-				break;
-			}
-			if (self->value.r) {
-				
-			}
-		break;
-		case VARIANT_NONE:
-			psy_signal_emit(&self->machineparam.signal_normvalue, self, 1, (void*)(&rv));
-		break;
-		default:
-			psy_signal_emit(&self->machineparam.signal_normvalue, self, 1, (void*)(&rv));
-		break;
-	}
-
+	psy_signal_emit(&self->machineparam.signal_normvalue, self, 1, (void*)(&rv));
 	return rv;
 }
 
@@ -267,21 +215,6 @@ int customparam_name(psy_audio_CustomMachineParam* self, char* text)
 		return 1;
 	}
 	return 0;
-}
-
-void psy_audio_custommachineparam_bind_int(psy_audio_CustomMachineParam* self,
-	intptr_t* value)
-{
-	self->value.i = value;
-	self->vartype = VARIANT_INT;
-}
-
-void psy_audio_custommachineparam_bind_float(psy_audio_CustomMachineParam* self,
-	float* value, ScaleType scale)
-{
-	self->value.r = value;
-	self->scaletype = scale;
-	self->vartype = VARIANT_FLOAT;
 }
 
 // InfoMachineParam
@@ -472,6 +405,8 @@ float intmachineparam_normvalue(psy_audio_IntMachineParam* self)
 			? (*self->data - self->minval) /
 			(float)(self->maxval - self->minval)
 			: 0.f;
+	} else {
+		psy_signal_emit(&self->machineparam.signal_normvalue, self, 1, (void*)(&rv));
 	}
 	return rv;
 }

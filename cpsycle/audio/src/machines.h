@@ -4,8 +4,8 @@
 #ifndef psy_audio_MACHINES_H
 #define psy_audio_MACHINES_H
 
+#include "machine.h"
 #include "connections.h"
-#include "master.h"
 #include <signal.h>
 #include "../../detail/stdint.h"
 
@@ -41,7 +41,6 @@ typedef struct psy_audio_Machines {
 	uintptr_t tweakparam;
 	uintptr_t soloed;
 	int filemode;
-	float volume;	
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
@@ -78,8 +77,6 @@ void machines_insertmaster(psy_audio_Machines*, psy_audio_Machine*);
 psy_audio_Machine* machines_master(psy_audio_Machines*);
 void machines_startfilemode(psy_audio_Machines*);
 void machines_endfilemode(psy_audio_Machines*);
-void machines_setvolume(psy_audio_Machines*, psy_dsp_amp_t volume);
-psy_dsp_amp_t machines_volume(psy_audio_Machines*);
 psy_TableIterator machines_begin(psy_audio_Machines*);
 MachineList* compute_path(psy_audio_Machines*, uintptr_t slot, bool concat);
 bool machines_ismixersend(psy_audio_Machines* self, uintptr_t slot);

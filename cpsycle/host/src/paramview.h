@@ -41,7 +41,7 @@ typedef struct {
    psy_audio_Machine* machine;
    int cx;
    int cy;      
-   psy_audio_MachineParam* tweak;
+   uintptr_t tweak;
    int tweakbase;   
    float tweakval;   
    Workspace* workspace;

@@ -61,6 +61,8 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 
 void vuscope_ondestroy(VuScope* self)
 {
+	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
+		vuscope_onsongchanged);
 	vuscope_disconnectmachinessignals(self, self->workspace);
 }
 

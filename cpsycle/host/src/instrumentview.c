@@ -26,7 +26,8 @@ static void OnMachinesInsert(InstrumentView* self, psy_audio_Machines* sender,
 	int slot);
 static void OnMachinesRemoved(InstrumentView* self, psy_audio_Machines* sender,
 	int slot);
-static void OnSongChanged(InstrumentView*, Workspace* workspace, int flag, psy_audio_SongFile* songfile);
+static void OnSongChanged(InstrumentView*, Workspace* workspace, int flag,
+	psy_audio_SongFile* songfile);
 // InstrumentHeaderView
 static void instrumentheaderview_init(InstrumentHeaderView*,
 	psy_ui_Component* parent, psy_audio_Instruments*, InstrumentView*);
@@ -41,6 +42,7 @@ static void instrumentgeneralview_init(InstrumentGeneralView*,
 	psy_ui_Component* parent, psy_audio_Instruments*);
 static void instrumentgeneralview_setinstrument(InstrumentGeneralView*,
 	psy_audio_Instrument* instrument);
+static void OnFitRow(InstrumentGeneralView*, psy_ui_Component* sender);
 static void OnNNACut(InstrumentGeneralView*);
 static void OnNNARelease(InstrumentGeneralView*);
 static void OnNNAFadeOut(InstrumentGeneralView*);
@@ -394,6 +396,20 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->nna, 0),
 		psy_ui_ALIGN_LEFT, &margin));
+	// fitrow
+	psy_ui_component_init(&self->fitrow, &self->component);
+	psy_ui_component_enablealign(&self->fitrow);
+	psy_ui_component_setalign(&self->fitrow, psy_ui_ALIGN_TOP);
+	psy_ui_checkbox_init(&self->fitrowcheck, &self->fitrow);
+	psy_ui_checkbox_settext(&self->fitrowcheck, "Play sample to fit");
+	psy_signal_connect(&self->fitrowcheck.signal_clicked, self, OnFitRow);
+	psy_ui_edit_init(&self->fitrowedit, &self->fitrow);
+	psy_ui_edit_setcharnumber(&self->fitrowedit, 4);
+	psy_ui_label_init(&self->fitrowlabel, &self->fitrow);
+	psy_ui_label_settext(&self->fitrowlabel, "pattern rows");
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->fitrow, 0),
+		psy_ui_ALIGN_LEFT, &margin));
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_settext(&self->globalvolume, "Global Volume");
 	psy_ui_component_resize(&self->globalvolume.component, 0, 20);
@@ -408,8 +424,17 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 	psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;		
-	instrumentnotemapview_setinstrument(&self->notemapview, instrument);	
-	if (instrument) {		
+	instrumentnotemapview_setinstrument(&self->notemapview, instrument);
+	if (instrument) {
+		char text[128];
+
+		if (self->instrument->loop) {
+			psy_ui_checkbox_check(&self->fitrowcheck);
+		} else {
+			psy_ui_checkbox_disablecheck(&self->fitrowcheck);
+		}
+		psy_snprintf(text, 128, "%d", (int)self->instrument->lines);
+		psy_ui_edit_settext(&self->fitrowedit, text);
 		switch (self->instrument->nna) {
 			case psy_audio_NNA_STOP:
 				NNAHighlight(self, &self->nnacut);
@@ -429,6 +454,17 @@ void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
 		}
 	} else {
 		NNAHighlight(self, &self->nnacut);
+	}
+}
+
+void OnFitRow(InstrumentGeneralView* self, psy_ui_Component* sender)
+{
+	if (self->instrument) {
+		if (psy_ui_checkbox_checked(&self->fitrowcheck)) {
+			self->instrument->loop = TRUE;
+		} else {
+			self->instrument->loop = FALSE;
+		}
 	}
 }
 

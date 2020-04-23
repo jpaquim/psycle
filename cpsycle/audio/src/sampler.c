@@ -197,7 +197,6 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 	}	
 }
 
-// seqtick
 void seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {		
@@ -368,6 +367,7 @@ uintptr_t numoutputs(psy_audio_Sampler* self)
 
 // psy_audio_SamplerVoice
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
+	psy_audio_Machine* machine,
 	psy_audio_Samples* samples,
 	psy_audio_Instrument* instrument,
 	uintptr_t channel,
@@ -375,6 +375,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	int resamplingmethod,
 	int maxvolume) 
 {	
+	self->machine = machine;
 	self->samples = samples;
 	self->instrument = instrument;
 	self->channel = channel;
@@ -443,7 +444,8 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(psy_audio_Sampler* samp
 
 	rv = psy_audio_samplervoice_alloc();
 	if (rv) {
-		psy_audio_samplervoice_init(rv, psy_audio_machine_samples(psy_audio_sampler_base(sampler)),
+		psy_audio_samplervoice_init(rv, psy_audio_sampler_base(sampler),
+			psy_audio_machine_samples(psy_audio_sampler_base(sampler)),
 			instrument, channel, samplerate,
 			sampler->resamplingmethod,
 			sampler->maxvolume);
@@ -483,11 +485,11 @@ void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self, const psy_audi
 		self->portaspeed = pow(2.0f, -event->parameter / 12.0 * 1.0 / samplesprobeat);
 	}	
 	if (event->note < NOTECOMMANDS_RELEASE) {		
-		psy_audio_samplervoice_noteon(self, event);
+		psy_audio_samplervoice_noteon(self, event, samplesprobeat);
 	}
 }
 
-void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event)
+void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event, double samplesprobeat)
 {	
 	psy_audio_Sample* sample;		
 	int baseC = 48;
@@ -508,11 +510,21 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 			iterator = sampleiterator_alloc();
 			*iterator = sample_begin(sample);			
 			psy_list_append(&self->positions, iterator);
-			iterator->speed = (int64_t)(4294967296.0f *
-				pow(2.0f,
-					(event->note + sample->tune - baseC + 
-						((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
+			if (self->instrument->loop && self->machine) {
+				psy_dsp_beat_t bpl;
+				double totalsamples;
+				
+				bpl = psy_audio_machine_currbeatsperline(self->machine);				
+				totalsamples = samplesprobeat * bpl * self->instrument->lines;
+				iterator->speed = (int64_t)(4294967296.0f *
+					(sample->numframes / (double)totalsamples));
+			} else {
+				iterator->speed = (int64_t)(4294967296.0f *
+					pow(2.0f,
+						(event->note + sample->tune - baseC +
+							((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
 					((psy_dsp_beat_t)sample->samplerate / 44100));
+			}
 			self->resampler.resampler.vtable->setspeed(&
 				self->resampler.resampler, iterator->speed);
 		}

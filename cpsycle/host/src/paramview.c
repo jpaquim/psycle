@@ -34,7 +34,7 @@ static void onmouseup(ParamView*, psy_ui_MouseEvent*);
 static void onmousemove(ParamView*, psy_ui_MouseEvent*);
 static void onmousewheel(ParamView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static psy_audio_MachineParam* hittest(ParamView*, int x, int y);
+static uintptr_t hittest(ParamView*, int x, int y);
 static void ontimer(ParamView*, psy_ui_Component* sender, int timerid);
 static uintptr_t paramview_numrows(ParamView*);
 static void paramview_computepositions(ParamView*);
@@ -42,6 +42,7 @@ static void paramview_clearpositions(ParamView*);
 static void mixer_vumeterdraw(ParamView*, psy_ui_Graphics*, int x, int y,
 	float value);
 static void drawsliderlevelback(ParamView*, psy_ui_Graphics*, int x, int y);
+static psy_audio_MachineParam* tweakparam(ParamView* self);
 
 static int paramview_refcount = 0;
 static int paramskin_initialized = 0;
@@ -139,13 +140,13 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	self->numparams = 0;
 	paramskin_init(self);	
 	psy_table_init(&self->positions);
-	self->tweak = NULL;
+	self->tweak = NOMACHINE_INDEX;
 	self->sizechanged = 1;
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);		
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	psy_signal_connect(&self->component.signal_mousewheel, self,
 		onmousewheel);
-	psy_ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 100);
+	psy_ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 50);
 }
 
 ParamView* paramview_alloc(void)
@@ -251,7 +252,9 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	int height;
 	int knob_cx;
 	int knob_cy;
-	
+	psy_audio_MachineParam* tweak;
+
+	tweak = tweakparam(self);
 	knob_cx = self->skin->knob.destwidth;
 	knob_cy = self->skin->knob.destheight;		
 	cellposition(self, row, col, &left, &top);
@@ -275,15 +278,15 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 		psy_snprintf(str, 128, "%f",
 			psy_audio_machineparam_normvalue(param));
 	}
-	psy_ui_setbackgroundcolor(g, (self->tweak == param)
+	psy_ui_setbackgroundcolor(g, (tweak == param)
 		? self->skin->htopcolor : self->skin->topcolor);
-	psy_ui_settextcolor(g, (self->tweak == param)
+	psy_ui_settextcolor(g, (tweak == param)
 		? self->skin->fonthtopcolor : self->skin->fonttopcolor);
 	psy_ui_textoutrectangle(g, r_top.left, r_top.top,
 		psy_ui_ETO_OPAQUE, r_top, label, strlen(label));	
-	psy_ui_setbackgroundcolor(g, (self->tweak == param)
+	psy_ui_setbackgroundcolor(g, (tweak == param)
 		? self->skin->hbottomcolor : self->skin->bottomcolor);
-	psy_ui_settextcolor(g, (self->tweak == param)
+	psy_ui_settextcolor(g, (tweak == param)
 		? self->skin->fonthbottomcolor : self->skin->fontbottomcolor);
 	psy_ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
 		psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
@@ -646,27 +649,40 @@ void cellposition(ParamView* self, uintptr_t row, uintptr_t col, int* x, int* y)
 
 void onmousedown(ParamView* self, psy_ui_MouseEvent* ev)
 {
+	psy_audio_MachineParam* param;
+
 	self->tweak = hittest(self, ev->x, ev->y);
-	if (self->tweak != NULL) {
+	param = tweakparam(self);
+	if (param) {
 		uintptr_t paramtype;
-		
+				
 		self->tweakbase = ev->y;		
-		self->tweakval = psy_audio_machineparam_normvalue(self->tweak);
-		paramtype = psy_audio_machineparam_type(self->tweak) & ~MPF_SMALL;
+		self->tweakval = psy_audio_machineparam_normvalue(param);
+		paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
 		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
 			if (self->tweakval == 0.f) {
-				psy_audio_machineparam_tweak(self->tweak, 1.f);
+				psy_audio_machineparam_tweak(param, 1.f);
 			} else {
-				psy_audio_machineparam_tweak(self->tweak, 0.f);
+				psy_audio_machineparam_tweak(param, 0.f);
 			}			
 		}
 		psy_ui_component_capture(&self->component);
 	}
 }
 
-psy_audio_MachineParam* hittest(ParamView* self, int x, int y)
+psy_audio_MachineParam* tweakparam(ParamView* self)
 {
 	psy_audio_MachineParam* rv = NULL;
+
+	if (self->machine && self->tweak != NOMACHINE_INDEX) {
+		rv = psy_audio_machine_parameter(self->machine, self->tweak);
+	}
+	return rv;
+}
+
+uintptr_t hittest(ParamView* self, int x, int y)
+{
+	uintptr_t rv = NOMACHINE_INDEX;
 
 	if (self->machine) {
 		uintptr_t param;
@@ -677,7 +693,7 @@ psy_audio_MachineParam* hittest(ParamView* self, int x, int y)
 			position = (psy_ui_Rectangle*) psy_table_at(&self->positions,
 				param);			
 			if (psy_ui_rectangle_intersect(position, x, y)) {
-				rv = psy_audio_machine_parameter(self->machine, param);
+				rv = param;
 				// break;
 			}
 		}
@@ -687,7 +703,10 @@ psy_audio_MachineParam* hittest(ParamView* self, int x, int y)
 
 void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 {
-	if (self->tweak != NULL) {
+	psy_audio_MachineParam* param;
+
+	param = tweakparam(self);
+	if (param != NULL) {
 		float val = 0;
 						
 		val = self->tweakval + (self->tweakbase - ev->y) / 200.f;
@@ -697,10 +716,7 @@ void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 		if (val < 0.f) {
 			val = 0.f;
 		}		
-		psy_audio_machineparam_tweak(self->tweak, val);
-			//workspace_parametertweak(self->workspace,
-			//	psy_audio_machine_slot(self->machine),
-			//	self->tweak, val);
+		psy_audio_machineparam_tweak(param, val);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -708,14 +724,17 @@ void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 void onmouseup(ParamView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_releasecapture(&self->component);
-	self->tweak = NULL;
+	self->tweak = NOMACHINE_INDEX;
 }
 
 void onmousewheel(ParamView* self, psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
+	psy_audio_MachineParam* param;
+
 	self->tweak = hittest(self, ev->x, ev->y);
-	if (self->tweak != NULL) {
-		self->tweakval = psy_audio_machineparam_normvalue(self->tweak);
+	param = tweakparam(self);
+	if (param != NULL) {
+		self->tweakval = psy_audio_machineparam_normvalue(param);
 		if (ev->delta > 0) {
 			float val;
 			
@@ -727,10 +746,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender, psy_ui_MouseEvent* 
 				if (val < 0.f) {
 					val = 0.f;
 				}
-			psy_audio_machineparam_tweak(self->tweak, val);
-			// workspace_parametertweak(self->workspace,
-			//	psy_audio_machine_slot(self->machine),
-			//	self->tweak, val);
+			psy_audio_machineparam_tweak(param, val);			
 			psy_ui_component_invalidate(&self->component);
 		} else
 		if (ev->delta < 0) {
@@ -743,15 +759,12 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender, psy_ui_MouseEvent* 
 			if (val < 0.f) {
 				val = 0.f;
 			}
-			psy_audio_machineparam_tweak(self->tweak, val);
-			// workspace_parametertweak(self->workspace,
-			// psy_audio_machine_slot(self->machine),
-			// self->tweak, val);
+			psy_audio_machineparam_tweak(param, val);			
 			psy_ui_component_invalidate(&self->component);
 		}
 	}
 	ev->preventdefault = 1;
-	self->tweak = NULL;
+	self->tweak = NOMACHINE_INDEX;
 }
 
 void ontimer(ParamView* self, psy_ui_Component* sender, int timerid)

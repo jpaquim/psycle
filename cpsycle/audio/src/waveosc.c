@@ -28,6 +28,7 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape)
 		psy_audio_PatternEvent ev;
 
 		psy_audio_samplervoice_init(&self->voice,
+			0,
 			&waveosctables.container, 
 			table,
 			1, 44100, 0, // uintptr_t channel, unsigned int samplerate, int resamplingmethod,
@@ -35,7 +36,7 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape)
 
 		patternevent_clear(&ev);
 		ev.note = 60;
-		psy_audio_samplervoice_noteon(&self->voice, &ev);
+		psy_audio_samplervoice_noteon(&self->voice, &ev, 0);
 		self->playing = 1;
 	}
 	self->frequency = 0;

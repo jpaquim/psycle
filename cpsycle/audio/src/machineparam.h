@@ -76,9 +76,23 @@ INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* se
 	self->vtable->tweak(self, value);
 }
 
-INLINE int32_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
+// [0.0f..1.0f] 
+INLINE float psy_audio_machineparam_normvalue(psy_audio_MachineParam* self)
 {
-	int32_t rv;
+	return self->vtable->normvalue(self);
+}
+
+// scale in integer
+INLINE void psy_audio_machineparam_range(psy_audio_MachineParam* self,
+	intptr_t* minval, intptr_t* maxval)
+{
+	self->vtable->range(self, minval, maxval);
+}
+
+// converts normvalue(0.f .. 1.f) -> scaled integer value 
+INLINE intptr_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
+{
+	intptr_t rv;
 	intptr_t minval;
 	intptr_t maxval;
 	intptr_t range;
@@ -89,22 +103,20 @@ INLINE int32_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
 	return rv;
 }
 
-INLINE int32_t psy_audio_machineparam_patternvalue(psy_audio_MachineParam* self)
+// converts normvalue(0.f .. 1.f) -> pattern integer value
+// difference to scaledvalue: starting always at 0 (offseted by minvalue)
+// returning the pattern tweak value
+INLINE intptr_t psy_audio_machineparam_patternvalue(psy_audio_MachineParam* self)
 {
-	int32_t rv;
+	intptr_t rv;
 	intptr_t minval;
 	intptr_t maxval;
 	intptr_t range;
 
 	self->vtable->range(self, &minval, &maxval);
 	range = maxval - minval;
-	rv = (int)(self->vtable->normvalue(self) * range);
+	rv = (intptr_t)(self->vtable->normvalue(self) * range);
 	return rv;
-}
-
-INLINE float psy_audio_machineparam_normvalue(psy_audio_MachineParam* self)
-{
-	return self->vtable->normvalue(self);
 }
 
 INLINE int psy_audio_machineparam_name(psy_audio_MachineParam* self, char* text)
@@ -115,12 +127,6 @@ INLINE int psy_audio_machineparam_name(psy_audio_MachineParam* self, char* text)
 INLINE int psy_audio_machineparam_label(psy_audio_MachineParam* self, char* text)
 {
 	return self->vtable->label(self, text);
-}
-
-INLINE void psy_audio_machineparam_range(psy_audio_MachineParam* self,
-	intptr_t* minval, intptr_t* maxval)
-{
-	self->vtable->range(self, minval, maxval);
 }
 
 INLINE int psy_audio_machineparam_type(psy_audio_MachineParam* self)
@@ -135,30 +141,13 @@ INLINE int psy_audio_machineparam_describe(psy_audio_MachineParam* self, char* t
 
 struct psy_audio_CustomMachineParam;
 
-typedef enum {
-	SCALE_NONE,
-	SCALE_SQR2,
-} ScaleType;
-
-typedef enum {
-	VARIANT_NONE,
-	VARIANT_INT,
-	VARIANT_FLOAT,
-} VariantType;
-
 typedef struct psy_audio_CustomMachineParam {
 	psy_audio_MachineParam machineparam;
 	intptr_t minval;
 	intptr_t maxval;
 	char* name;
 	char* label;
-	int type;
-	union {
-		int32_t* i;
-		float* r;
-	} value;
-	VariantType vartype;
-	ScaleType scaletype;
+	int type;	
 	intptr_t index;
 	intptr_t row;
 } psy_audio_CustomMachineParam;
@@ -166,8 +155,6 @@ typedef struct psy_audio_CustomMachineParam {
 void psy_audio_custommachineparam_init(psy_audio_CustomMachineParam*,
 	const char* name, const char* label, int type, int minval, int maxval);
 void psy_audio_custommachineparam_dispose(psy_audio_CustomMachineParam*);
-void psy_audio_custommachineparam_bind_int(psy_audio_CustomMachineParam*, int32_t* value);
-void psy_audio_custommachineparam_bind_float(psy_audio_CustomMachineParam*, float* value, ScaleType scale);
 
 psy_audio_CustomMachineParam* psy_audio_custommachineparam_alloc(void);
 psy_audio_CustomMachineParam* psy_audio_custommachineparam_allocinit(

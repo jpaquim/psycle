@@ -18,6 +18,7 @@ typedef struct {
 	char label[128];
 	char valuedescription[128];
 	int labelsize;
+	int slidersize;
 	int valuelabelsize;
 	int margin;	
 	int charnumber;

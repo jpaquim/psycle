@@ -23,6 +23,8 @@ static void sequencelistview_computetextsizes(SequenceListView*);
 static void sequencelistview_adjustscroll(SequenceListView*);
 static void sequencelistview_onmousedown(SequenceListView*, 
 	psy_ui_MouseEvent*);
+static void sequencelistview_onmousedoubleclick(SequenceListView*,
+	psy_ui_MouseEvent*);
 static void sequencelistview_onscroll(SequenceListView*,
 	psy_ui_Component* sender, int stepx, int stepy);
 static void sequencelistview_ontimer(SequenceListView*, int timerid);
@@ -51,6 +53,7 @@ static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 static void sequenceview_onpreferredsize(SequenceView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void sequenceview_updateplayposition(SequenceView*);
+static void sequenceview_changeplayposition(SequenceView*);
 
 static void sequenceduration_update(SequenceViewDuration*);
 
@@ -344,6 +347,8 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 			sequencelistview_ondraw;
 		sequencelistview_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			sequencelistview_onmousedown;
+		sequencelistview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+			sequencelistview_onmousedoubleclick;		
 		sequencelistview_vtable.ontimer = (psy_ui_fp_ontimer)
 			sequencelistview_ontimer;
 		sequencelistview_vtable_initialized = 1;		
@@ -817,6 +822,23 @@ void sequencelistview_onmousedown(SequenceListView* self,
 	}
 }
 
+void sequencelistview_onmousedoubleclick(SequenceListView* self,
+	psy_ui_MouseEvent* ev)
+{
+	unsigned int selected;
+	unsigned int selectedtrack;
+
+	sequencelistview_computetextsizes(self);
+	selected = (ev->y - listviewmargin - self->dy) / self->lineheight;
+	selectedtrack = (ev->x - self->dx) / self->trackwidth;
+	if (selectedtrack < sequence_sizetracks(self->sequence)) {
+		sequenceselection_seteditposition(self->selection,
+			sequence_at(self->sequence, selectedtrack, selected));
+		workspace_setsequenceselection(self->workspace, *self->selection);
+		sequenceview_changeplayposition(self->view);
+	}	
+}
+
 void sequencelistview_onscroll(SequenceListView* self,
 	psy_ui_Component* sender, int stepx, int stepy)
 {
@@ -1023,21 +1045,25 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 }
 
 void sequenceview_updateplayposition(SequenceView* self)
-{
-	SequencePosition editposition;
-	
-	editposition = self->workspace->sequenceselection.editposition;
+{	
 	if (workspace_followingsong(self->workspace) &&
 			player_playing(&self->workspace->player)) {
-		SequenceEntry* entry;
-		psy_dsp_beat_t startposition;
-
-		entry = sequenceposition_entry(&editposition);
-		startposition = entry->offset;
-		psy_audio_exclusivelock_enter();
-		player_stop(&self->workspace->player);
-		player_setposition(&self->workspace->player, startposition);
-		player_start(&self->workspace->player);
-		psy_audio_exclusivelock_leave();
+		sequenceview_changeplayposition(self);
 	}
+}
+
+void sequenceview_changeplayposition(SequenceView* self)
+{
+	SequencePosition editposition;
+	SequenceEntry* entry;
+	psy_dsp_beat_t startposition;
+
+	editposition = self->workspace->sequenceselection.editposition;
+	entry = sequenceposition_entry(&editposition);
+	startposition = entry->offset;
+	psy_audio_exclusivelock_enter();
+	player_stop(&self->workspace->player);
+	player_setposition(&self->workspace->player, startposition);
+	player_start(&self->workspace->player);
+	psy_audio_exclusivelock_leave();
 }

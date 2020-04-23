@@ -11,7 +11,7 @@
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Machines* machines;
-	float value;
+	double value;
 	int dragx;
 } VolSlider;
 

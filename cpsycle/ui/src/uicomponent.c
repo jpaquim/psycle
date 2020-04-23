@@ -124,6 +124,7 @@ static void onpreferredsize(psy_ui_Component*, psy_ui_Size* limit, psy_ui_Size* 
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
+static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseup(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousedoubleclick(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmouseenter(psy_ui_Component* self) { }
@@ -171,6 +172,7 @@ static void vtable_init(void)
 		vtable.onsize = onsize;
 		vtable.onmousedown = onmousedown;
 		vtable.onmousemove = onmousemove;
+		vtable.onmousewheel = onmousewheel;
 		vtable.onmouseup = onmouseup;
 		vtable.onmousedoubleclick = onmousedoubleclick;
 		vtable.onmouseenter = onmouseenter;

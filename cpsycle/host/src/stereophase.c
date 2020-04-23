@@ -83,6 +83,8 @@ void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wir
 
 void stereophase_ondestroy(StereoPhase* self)
 {
+	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
+		stereophase_onsongchanged);
 	stereophase_disconnectmachinessignals(self, self->workspace);
 	// dsp.memory_dealloc(self->pSamplesL);
 	// dsp.memory_dealloc(self->pSamplesR);

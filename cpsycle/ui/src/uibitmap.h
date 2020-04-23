@@ -1,7 +1,6 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-
 #ifndef psy_ui_BITMAP_H
 #define psy_ui_BITMAP_H
 
@@ -9,7 +8,7 @@
 #include "uidef.h"
 
 // Graphics Bitmap Interface
-// Bridge
+// Pattern: Bridge
 // Aim: avoid coupling to one platform (win32, xt/motif, etc)
 // Abstraction/Refined  psy_ui_Bitmap
 // Implementor			psy_ui_BitmapImp

@@ -47,7 +47,6 @@ void machines_init(psy_audio_Machines* self)
 	self->buffers = 0;
 	self->filemode = 0;
 	self->master = 0;
-	self->volume = 1.0f;
 	machines_initsignals(self);
 }
 
@@ -583,16 +582,6 @@ void machines_endfilemode(psy_audio_Machines* self)
 uintptr_t machines_size(psy_audio_Machines* self)
 {
 	return psy_table_size(&self->slots);
-}
-
-void machines_setvolume(psy_audio_Machines* self, psy_dsp_amp_t volume)
-{
-	self->volume = volume;
-}
-
-psy_dsp_amp_t machines_volume(psy_audio_Machines* self)
-{
-	return self->volume;
 }
 
 psy_TableIterator machines_begin(psy_audio_Machines* self)

@@ -73,6 +73,8 @@ void instrument_init(psy_audio_Instrument* self)
 	self->index = NOINSTRUMENT_INDEX;
 	self->entries = 0;	
 	self->name = strdup("");
+	self->loop = FALSE;
+	self->lines = 16;
 	self->nna = psy_audio_NNA_STOP;
 	self->globalvolume = (psy_dsp_amp_t) 1.0f;
 	self->randompan = 0;

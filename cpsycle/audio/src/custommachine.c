@@ -72,6 +72,7 @@ void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 		self->memorybuffer.samples[c] = dsp.memory_alloc(
 			self->memorybuffersize, sizeof(psy_dsp_amp_t));
 	}
+	psy_audio_buffer_clearsamples(&self->memorybuffer, self->memorybuffersize);
 }
 
 void custommachine_dispose(psy_audio_CustomMachine* self)
