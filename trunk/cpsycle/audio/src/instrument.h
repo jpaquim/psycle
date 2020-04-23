@@ -54,6 +54,8 @@ psy_audio_InstrumentEntry* instrumententry_allocinit(void);
 
 typedef struct psy_audio_Instrument {	
 	char* name;
+	bool loop;
+	uintptr_t lines;
 	/// Action to take on the playing voice when any new note comes in the same channel.
 	psy_audio_NewNoteAction nna;
 	/// [0..1.0f] Global volume affecting all samples of the instrument.

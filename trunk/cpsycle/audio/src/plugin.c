@@ -15,7 +15,6 @@
 #include "../../detail/portable.h"
 
 // psy_audio_PluginMachineParam
-
 typedef struct psy_audio_PluginMachineParam {
 	psy_audio_MachineParam machineparam;
 	struct CMachineInterface* mi;
@@ -44,7 +43,6 @@ static psy_audio_MachineParam* pluginparam_base(
 {
 	return &(self->machineparam);
 }
-
 
 static MachineParamVtable pluginparam_vtable;
 static int pluginparam_vtable_initialized = 0;

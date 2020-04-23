@@ -49,6 +49,10 @@ typedef struct {
 	psy_ui_Button nnarelease;
 	psy_ui_Button nnafadeout;
 	psy_ui_Button nnanone;
+	psy_ui_Component fitrow;
+	psy_ui_CheckBox fitrowcheck;
+	psy_ui_Edit fitrowedit;
+	psy_ui_Label fitrowlabel;
 	psy_ui_Component left;
 	psy_ui_Slider globalvolume;
 	SamplesBox samplesbox;

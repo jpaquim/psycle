@@ -225,7 +225,7 @@ void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot
 		output = psy_audio_machine_mix(machine, slot, amount,
 			connections_at(&self->song->machines.connections, slot),
 			&self->song->machines, self);
-		if (output && slot != MASTER_INDEX) {
+		if (output) {
 			psy_audio_BufferContext bc;
 			psy_List* events;
 			psy_dsp_RMSVol* rms;
@@ -251,7 +251,7 @@ void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot
 			}
 			psy_signal_emit(&machine->signal_worked, machine, 2,
 				slot, &bc);
-			psy_list_free(events);
+			psy_list_free(events);			
 		}
 	}
 }
@@ -286,28 +286,6 @@ void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t 
 	psy_audio_Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
 	if (masteroutput) {		
-		psy_audio_Machine* master;
-
-		master = machines_master(&self->song->machines);
-		if (master) {
-			psy_audio_BufferContext bc;
-			psy_dsp_RMSVol* rms;
-
-			rms = player_rmsvol(self, MASTER_INDEX);
-			psy_audio_buffercontext_init(&bc, 0, masteroutput, masteroutput, amount,
-				self->numsongtracks, rms);
-			psy_audio_buffer_mulsamples(masteroutput, amount,
-				machines_volume(&self->song->machines));			
-			if (self->vumode == VUMETER_RMS) {
-				psy_dsp_rmsvol_tick(rms, masteroutput->samples[0],
-					masteroutput->samples[1],
-					amount);		
-			}
-			bc.output->volumedisplay =
-				psy_audio_buffercontext_volumedisplay(&bc);
-			psy_signal_emit(&master->signal_worked, master, 2,
-				MASTER_INDEX, &bc);
-		}
 		psy_audio_buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
 		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);

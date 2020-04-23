@@ -96,7 +96,7 @@ void psy_audio_buffer_clearsamples(psy_audio_Buffer* self, uintptr_t numsamples)
 	uintptr_t channel;
 
 	for (channel = 0; channel < self->numchannels; ++channel) {
-		dsp.clear(self->samples[channel], numsamples);
+		dsp.clear(self->samples[channel] + self->offset, numsamples);
 	}
 }
 
@@ -124,8 +124,8 @@ void psy_audio_buffer_mulsamples(psy_audio_Buffer* self, uintptr_t numsamples, p
 {
 	uintptr_t channel;
 	
-	for (channel = 0; channel < self->numchannels; ++channel) {
-		dsp.mul(self->samples[channel], numsamples, mul);
+	for (channel = 0; channel < self->numchannels; ++channel) {		
+		dsp.mul(self->samples[channel] + self->offset, numsamples, mul);
 	}	
 }
 
@@ -143,7 +143,7 @@ void psy_audio_buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t a
 		vol[1] = 1.0f;
 	}
 	for (channel = 0; channel < 2 && channel < self->numchannels; ++channel) {
-		dsp.mul(self->samples[channel], amount, vol[channel]);
+		dsp.mul(self->samples[channel] + self->offset, amount, vol[channel]);
 	}
 }
 
@@ -157,8 +157,8 @@ int psy_audio_buffer_mono(psy_audio_Buffer* self)
 	return self->numchannels == 1;
 }
 
-void psy_audio_buffer_insertsamples(psy_audio_Buffer* self, psy_audio_Buffer* source, uintptr_t numsamples,
-	uintptr_t numsourcesamples)
+void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
+	psy_audio_Buffer* source, uintptr_t numsamples, uintptr_t numsourcesamples)
 {	
 	psy_dsp_amp_t rangefactor;
 

@@ -116,8 +116,13 @@ void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender,
 
 void volslider_onsliderchanged(VolSlider* self, psy_ui_Component* sender)
 {	
-	if (self->machines) {
-		machines_setvolume(self->machines, self->value * self->value * 4.f);
+	if (self->machines && machines_master(self->machines)) {
+		psy_audio_MachineParam* param;
+
+		param = psy_audio_machine_tweakparameter(machines_master(self->machines), 0);
+		if (param) {
+			psy_audio_machineparam_tweak(param, (float) self->value);
+		}
 	}
 }
 
@@ -129,15 +134,20 @@ void volslider_onsongchanged(VolSlider* self, Workspace* workspace, int flag,
 
 void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, int timerid)
 {		
-	if (self->machines) {
-		psy_dsp_amp_t oldvalue;
+	if (self->machines && machines_master(self->machines)) {
+		psy_audio_MachineParam* param;
 
-		oldvalue = self->value;
-		self->value = (psy_dsp_amp_t)(sqrt(machines_volume(self->machines)) * 0.5f);
-		if (oldvalue != self->value) {
-			psy_ui_component_invalidate(&self->component);
+		param = psy_audio_machine_tweakparameter(machines_master(self->machines), 0);
+		if (param) {
+			double oldvalue;
+
+			oldvalue = self->value;
+			self->value = psy_audio_machineparam_normvalue(param);
+			if (oldvalue != self->value) {
+				psy_ui_component_invalidate(&self->component);
+			}
 		}
-	}
+	}	
 }
 
 void volslider_onpreferredsize(VolSlider* self, psy_ui_Size* limit, psy_ui_Size* rv)

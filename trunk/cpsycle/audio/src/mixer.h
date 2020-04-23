@@ -99,7 +99,7 @@ typedef struct psy_audio_MasterChannel {
 	psy_audio_GainMachineParam gain_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_CustomMachineParam level_param;
+	psy_audio_IntMachineParam level_param;
 	psy_audio_IntMachineParam solo_param;
 	psy_audio_IntMachineParam mute_param;
 	psy_audio_IntMachineParam dryonly_param;
@@ -128,7 +128,7 @@ typedef struct psy_audio_InputChannel {
 	psy_audio_CustomMachineParam gain_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_CustomMachineParam level_param;
+	psy_audio_IntMachineParam level_param;
 	psy_audio_IntMachineParam solo_param;
 	psy_audio_IntMachineParam mute_param;
 	psy_audio_IntMachineParam dryonly_param;
@@ -155,7 +155,7 @@ typedef struct psy_audio_ReturnChannel {
 	psy_audio_CustomMachineParam info_param;
 	psy_audio_FloatMachineParam pan_param;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_CustomMachineParam level_param;
+	psy_audio_IntMachineParam level_param;
 	psy_audio_IntMachineParam solo_param;
 	psy_audio_IntMachineParam mute_param;
 } psy_audio_ReturnChannel;

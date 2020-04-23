@@ -412,9 +412,10 @@ void masterchannel_init(psy_audio_MasterChannel* self, uintptr_t inputslot, cons
 	psy_signal_connect(&self->pan_param.machineparam.signal_describe, self, channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);	
-	psy_audio_custommachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, 0, 100);
-	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self, masterchannel_level_normvalue);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
+		masterchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	psy_audio_intmachineparam_init(&self->mute_param,
@@ -434,7 +435,7 @@ void masterchannel_dispose(psy_audio_MasterChannel* self)
 	psy_audio_gainmachineparam_dispose(&self->gain_param);
 	psy_audio_floatmachineparam_dispose(&self->pan_param);
 	psy_audio_volumemachineparam_dispose(&self->slider_param);
-	psy_audio_custommachineparam_dispose(&self->level_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);
 	psy_audio_intmachineparam_dispose(&self->solo_param);
 	psy_audio_intmachineparam_dispose(&self->mute_param);		
 	psy_audio_intmachineparam_dispose(&self->dryonly_param);
@@ -492,27 +493,35 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id, psy_audio_Mix
 	psy_audio_inputlabelparam_init(&self->info_param, self);
 	psy_audio_floatmachineparam_init(&self->mix_param,
 		"Mix", "Mix", MPF_STATE | MPF_SMALL, &self->drymix, 0, 0xFF);
-	psy_signal_connect(&self->mix_param.machineparam.signal_describe, self, inputchannel_dw_describe);
+	psy_signal_connect(&self->mix_param.machineparam.signal_describe, self,
+		inputchannel_dw_describe);
 	psy_audio_custommachineparam_init(&self->sendvol_param,
 		"Send", "Send", MPF_STATE | MPF_SMALL, 0, 0xFF);
-	psy_signal_connect(&self->sendvol_param.machineparam.signal_tweak, self, inputchannel_sendvol_tweak);
-	psy_signal_connect(&self->sendvol_param.machineparam.signal_normvalue, self, inputchannel_sendvol_normvalue);
-	psy_signal_connect(&self->sendvol_param.machineparam.signal_describe, self, inputchannel_sendvol_describe);
+	psy_signal_connect(&self->sendvol_param.machineparam.signal_tweak, self,
+		inputchannel_sendvol_tweak);
+	psy_signal_connect(&self->sendvol_param.machineparam.signal_normvalue, self,
+		inputchannel_sendvol_normvalue);
+	psy_signal_connect(&self->sendvol_param.machineparam.signal_describe, self,
+		inputchannel_sendvol_describe);
 	psy_audio_custommachineparam_init(&self->gain_param,
 		"Gain", "Gain", MPF_STATE | MPF_SMALL, 0, 0x400);
 	self->gain_param.index = id;
-	psy_signal_connect(&self->gain_param.machineparam.signal_tweak, self, inputchannel_gain_tweak);
-	psy_signal_connect(&self->gain_param.machineparam.signal_normvalue, self, inputchannel_gain_normvalue);
-	psy_signal_connect(&self->gain_param.machineparam.signal_describe, self, inputchannel_gain_describe);
+	psy_signal_connect(&self->gain_param.machineparam.signal_tweak, self,
+		inputchannel_gain_tweak);
+	psy_signal_connect(&self->gain_param.machineparam.signal_normvalue, self,
+		inputchannel_gain_normvalue);
+	psy_signal_connect(&self->gain_param.machineparam.signal_describe, self,
+		inputchannel_gain_describe);
 	psy_audio_floatmachineparam_init(&self->pan_param,
 		"Pan", "Pan", MPF_STATE | MPF_SMALL, &self->panning, 0, 0x100);
 	psy_signal_connect(&self->pan_param.machineparam.signal_describe,
 		self, channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);	
-	psy_audio_custommachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, 0, 100);
-	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self, inputchannel_level_normvalue);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
+		inputchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
 		"S", "S", MPF_SLIDERCHECK | MPF_SMALL, NULL, 0, 1);
 	psy_audio_intmachineparam_init(&self->mute_param,
@@ -533,7 +542,7 @@ void inputchannel_dispose(psy_audio_InputChannel* self)
 	psy_audio_custommachineparam_dispose(&self->gain_param);
 	psy_audio_floatmachineparam_dispose(&self->pan_param);
 	psy_audio_volumemachineparam_dispose(&self->slider_param);
-	psy_audio_custommachineparam_dispose(&self->level_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);
 	psy_audio_intmachineparam_dispose(&self->solo_param);
 	psy_audio_intmachineparam_dispose(&self->mute_param);
 	psy_audio_intmachineparam_dispose(&self->dryonly_param);
@@ -664,8 +673,8 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 		channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);	
-	psy_audio_custommachineparam_init(&self->level_param,
-		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, 0, 100);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
 		returnchannel_level_normvalue);
 	psy_audio_intmachineparam_init(&self->solo_param,
@@ -682,7 +691,7 @@ void returnchannel_dispose(psy_audio_ReturnChannel* self)
 	psy_audio_custommachineparam_dispose(&self->info_param);
 	psy_audio_floatmachineparam_dispose(&self->pan_param);
 	psy_audio_volumemachineparam_dispose(&self->slider_param);
-	psy_audio_custommachineparam_dispose(&self->level_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);
 	psy_audio_intmachineparam_dispose(&self->solo_param);
 	psy_audio_intmachineparam_dispose(&self->mute_param);
 	psy_audio_routemachineparam_dispose(&self->route_param);
@@ -1796,7 +1805,7 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	}
 }
 
-void postload(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
+void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	psy_TableIterator it;

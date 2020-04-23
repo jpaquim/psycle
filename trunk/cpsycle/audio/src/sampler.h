@@ -41,6 +41,7 @@ InterpolationType;
 struct psy_audio_Sampler;
 
 typedef struct {
+	psy_audio_Machine* machine;
 	psy_audio_Instrument* instrument;
 	psy_audio_Samples* samples;
 	psy_dsp_ADSR env;
@@ -64,7 +65,8 @@ typedef struct {
 	int maxvolume;
 } psy_audio_SamplerVoice;
 
-void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, psy_audio_Samples*,
+void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, psy_audio_Machine* machine,
+	psy_audio_Samples*,
 	psy_audio_Instrument*,
 	uintptr_t channel, unsigned int samplerate, int resamplingmethod,
 	int maxvolume);
@@ -77,7 +79,7 @@ void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice*,
 	const psy_audio_PatternEvent*, double samplesprobeat);
 void psy_audio_samplervoice_nna(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice*,
-	const psy_audio_PatternEvent*);
+	const psy_audio_PatternEvent*, double samplesprobeat);
 void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice*,
 	double frequency);
 void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
