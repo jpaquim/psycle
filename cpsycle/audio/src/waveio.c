@@ -8,6 +8,8 @@
 #include "sample.h"
 
 #include "fileio.h"
+#include <operations.h>
+
 #include <string.h>
 #include <stdlib.h> 
 
@@ -59,8 +61,7 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 				sample->stereo = (format.nChannels == 2);
 
 				for (channel = 0; channel < format.nChannels; ++channel) {
-					sample->channels.samples[channel] = malloc(numsamples * 
-						sizeof(psy_dsp_amp_t));
+					sample->channels.samples[channel] = dsp.memory_alloc(numsamples, sizeof(float));
 				}
 				for (frame = 0; frame < sample->numframes; ++frame) {
 					for (channel = 0; channel < format.nChannels; ++channel) {

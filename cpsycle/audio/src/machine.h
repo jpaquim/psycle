@@ -23,6 +23,7 @@ extern "C" {
 
 typedef unsigned int (*fp_mcb_samplerate)(void*);
 typedef	unsigned int (*fp_mcb_bpm)(void*);
+typedef	psy_dsp_beat_t (*fp_mcb_beatspertick)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_beatspersample)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_currbeatsperline)(void*);
 typedef	struct psy_audio_Samples* (*fp_mcb_samples)(void*);
@@ -44,8 +45,9 @@ typedef int (*fp_mcb_numplaybacks)(void*);
 typedef struct MachineCallback {	
 	fp_mcb_samplerate samplerate;
 	fp_mcb_bpm bpm;
+	fp_mcb_beatspertick beatspertick;
 	fp_mcb_beatspersample beatspersample;
-	fp_mcb_currbeatsperline currbeatsperline;
+	fp_mcb_currbeatsperline currbeatsperline;	
 	fp_mcb_samples samples;
 	fp_mcb_machines machines;
 	fp_mcb_instruments instruments;
@@ -140,6 +142,7 @@ typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
 // machine callbacks
 typedef	unsigned int (*fp_machine_samplerate)(struct psy_audio_Machine*);
 typedef unsigned int (*fp_machine_bpm)(struct psy_audio_Machine*);
+typedef psy_dsp_beat_t (*fp_machine_beatspertick)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_beatspersample)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t(*fp_machine_currbeatsperline)(struct psy_audio_Machine*);
 typedef	struct psy_audio_Samples* (*fp_machine_samples)(struct psy_audio_Machine*);
@@ -217,6 +220,7 @@ typedef struct MachineVtable {
 	// machine callbacks
 	fp_machine_samplerate samplerate;
 	fp_machine_bpm bpm;
+	fp_machine_beatspertick beatspertick;
 	fp_machine_beatspersample beatspersample;
 	fp_machine_currbeatsperline currbeatsperline;
 	fp_machine_samples samples;
@@ -424,6 +428,11 @@ INLINE const char* psy_audio_machine_editname(psy_audio_Machine* self)
 INLINE unsigned int psy_audio_machine_bpm(psy_audio_Machine* self)
 {
 	return self->vtable->bpm(self);
+}
+
+INLINE psy_dsp_beat_t psy_audio_machine_beatspertick(psy_audio_Machine* self)
+{
+	return self->vtable->beatspertick(self);
 }
 
 INLINE psy_dsp_beat_t psy_audio_machine_beatspersample(psy_audio_Machine* self)
