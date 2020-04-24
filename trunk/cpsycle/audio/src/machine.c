@@ -19,6 +19,7 @@
 /// Machinecallback
 static unsigned int machinecallback_samplerate(void* self) { return 44100;  }
 static unsigned int machinecallback_bpm(void* self) { return 125; }
+static psy_dsp_beat_t machinecallback_beatspertick(void* self) { return 1 / (psy_dsp_beat_t) 24.f; }
 static psy_dsp_beat_t machinecallback_beatspersample(void* self) { return 512; }
 static psy_dsp_beat_t machinecallback_currbeatsperline(void* self) { return 4096; }
 static struct psy_audio_Samples* machinecallback_samples(void* self) { return 0; }
@@ -42,6 +43,7 @@ void machinecallback_initempty(MachineCallback* self)
 {
 	self->samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
 	self->bpm = (fp_mcb_bpm) machinecallback_bpm;
+	self->beatspertick = (fp_mcb_beatspertick) machinecallback_beatspertick;
 	self->beatspersample = (fp_mcb_beatspersample) machinecallback_beatspersample;
 	self->currbeatsperline = (fp_mcb_currbeatsperline) machinecallback_currbeatsperline;
 	self->samples = (fp_mcb_samples) machinecallback_samples;
@@ -179,6 +181,7 @@ static int currbank(psy_audio_Machine* self)
 /// machinecallback
 static unsigned int samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
 static unsigned int bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
+static psy_dsp_beat_t beatspertick(psy_audio_Machine* self) { return self->callback.beatspertick(self->callback.context); }
 static psy_dsp_beat_t beatspersample(psy_audio_Machine* self) { return self->callback.beatspersample(self->callback.context); }
 static psy_dsp_beat_t currbeatsperline(psy_audio_Machine* self) { return self->callback.currbeatsperline(self->callback.context); }
 static struct psy_audio_Samples* samples(psy_audio_Machine* self) { return self->callback.samples(self->callback.context); }
@@ -254,6 +257,7 @@ static void vtable_init(void)
 		vtable.savespecific = savespecific;
 		vtable.postload = postload;
 		vtable.bpm = bpm;
+		vtable.beatspertick = beatspertick;
 		vtable.beatspersample = beatspersample;
 		vtable.currbeatsperline = currbeatsperline;
 		vtable.samplerate = samplerate;
@@ -398,7 +402,10 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 						curr = psy_audio_machineparam_patternvalue(param);
 						step = (v - curr) / ev->vol;
 						nv = curr + step;						
-						psy_audio_machineparam_tweak_patternvalue(param, nv);
+						if (nv < 0) {
+							nv = 0;
+						}
+						psy_audio_machineparam_tweak_patternvalue(param, (uint16_t) nv);
 					} else {
 						psy_audio_machineparam_tweak_patternvalue(param, v);
 					}

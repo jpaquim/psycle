@@ -415,6 +415,7 @@ void readpatd(psy_audio_SongFile* self)
 					psource = pdest;
 					pattern = pattern_allocinit();
 					patterns_insert(&self->song->patterns, index, pattern);
+					pattern_setname(pattern, patternname[index]);
 					for (y = 0; y < patternlines[index]; ++y) {
 						unsigned char* ptrack = psource;
 						uint32_t track;

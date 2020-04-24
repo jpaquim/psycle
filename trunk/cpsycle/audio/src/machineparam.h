@@ -53,7 +53,7 @@ INLINE void psy_audio_machineparam_tweak(psy_audio_MachineParam* self, float val
 	self->vtable->tweak(self, value);
 }
 
-INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* self, int16_t patternvalue)
+INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* self, uint16_t patternvalue)
 {
 	intptr_t minval;
 	intptr_t maxval;

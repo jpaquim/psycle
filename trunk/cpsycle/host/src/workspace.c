@@ -70,6 +70,7 @@ static void workspace_updatenavigation(Workspace*);
 static MachineCallback machinecallback(Workspace*);
 static unsigned int machinecallback_samplerate(Workspace*);
 static unsigned int machinecallback_bpm(Workspace*);
+static psy_dsp_beat_t machinecallback_beatspertick(Workspace*);
 static psy_dsp_beat_t machinecallback_beatspersample(Workspace*);
 static psy_dsp_beat_t machinecallback_currbeatsperline(Workspace*);
 static psy_audio_Samples* machinecallback_samples(Workspace*);
@@ -1895,6 +1896,7 @@ MachineCallback machinecallback(Workspace* self)
 	rv.context = self;
 	rv.samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
 	rv.bpm = (fp_mcb_bpm) machinecallback_bpm;
+	rv.beatspertick = (fp_mcb_beatspertick)machinecallback_beatspertick;
 	rv.beatspersample = (fp_mcb_beatspersample) machinecallback_beatspersample;
 	rv.currbeatsperline = (fp_mcb_currbeatsperline) machinecallback_currbeatsperline;
 	rv.samples = (fp_mcb_samples) machinecallback_samples;
@@ -1962,6 +1964,11 @@ unsigned int machinecallback_samplerate(Workspace* self)
 unsigned int machinecallback_bpm(Workspace* self)
 {
 	return (unsigned int) player_bpm(&self->player);
+}
+
+psy_dsp_beat_t machinecallback_beatspertick(Workspace* self)
+{
+	return 1 / (psy_dsp_beat_t) 24.f;
 }
 
 psy_dsp_beat_t machinecallback_beatspersample(Workspace* self)

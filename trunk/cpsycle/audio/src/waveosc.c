@@ -31,7 +31,9 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape)
 			0,
 			&waveosctables.container, 
 			table,
-			1, 44100, 0, // uintptr_t channel, unsigned int samplerate, int resamplingmethod,
+			0,
+			1, 44100,
+			0, // uintptr_t channel, unsigned int samplerate, int resamplingmethod,
 			0xFF);
 
 		patternevent_clear(&ev);
