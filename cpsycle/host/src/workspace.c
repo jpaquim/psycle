@@ -1953,7 +1953,7 @@ void machinecallback_fileselect_directory(Workspace* self)
 
 psy_audio_Samples* machinecallback_samples(Workspace* self)
 {
-	return &self->songcbk->samples;
+	return (self->songcbk) ? &self->songcbk->samples : 0;
 }
 
 unsigned int machinecallback_samplerate(Workspace* self)
@@ -1968,7 +1968,9 @@ unsigned int machinecallback_bpm(Workspace* self)
 
 psy_dsp_beat_t machinecallback_beatspertick(Workspace* self)
 {
-	return 1 / (psy_dsp_beat_t) 24.f;
+	return (self->songcbk)
+		? 1 / (psy_dsp_beat_t) self->songcbk->properties.tpb
+		: 1 / (psy_dsp_beat_t) 24.f;
 }
 
 psy_dsp_beat_t machinecallback_beatspersample(Workspace* self)
@@ -1983,12 +1985,12 @@ psy_dsp_beat_t machinecallback_currbeatsperline(Workspace* self)
 
 psy_audio_Machines* machinecallback_machines(Workspace* self)
 {
-	return self->songcbk ? &self->song->machines : 0;
+	return (self->songcbk) ? &self->song->machines : 0;
 }
 
 psy_audio_Instruments* machinecallback_instruments(Workspace* self)
 {
-	return self->songcbk ? &self->song->instruments : 0;
+	return (self->songcbk) ? &self->song->instruments : 0;
 }
 
 psy_audio_MachineFactory* machinecallback_machinefactory(Workspace* self)

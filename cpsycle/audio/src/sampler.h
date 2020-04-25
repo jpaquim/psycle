@@ -148,6 +148,7 @@ typedef struct psy_audio_Sampler {
 	psy_audio_IntMachineParam param_maxvolume;
 	psy_audio_ChoiceMachineParam param_panpersistent;
 	psy_Table channels;
+	uint8_t basec;
 } psy_audio_Sampler;
 
 void psy_audio_sampler_init(psy_audio_Sampler*, MachineCallback);
@@ -159,6 +160,17 @@ INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
 {
 	return &(self->custommachine.machine);
 }
+
+INLINE void psy_audio_sampler_defaultC4(psy_audio_Sampler* self, bool correct)
+{
+	self->basec = correct ? NOTECOMMANDS_MIDDLEC : 48;
+}
+			
+INLINE bool psy_audio_sampler_isdefaultC4(psy_audio_Sampler* self)
+{
+	return self->basec == NOTECOMMANDS_MIDDLEC;
+}
+
 
 #ifdef __cplusplus
 }

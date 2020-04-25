@@ -163,6 +163,7 @@ typedef struct psy_audio_ReturnChannel {
 typedef struct psy_audio_Mixer {
 	psy_audio_CustomMachine custommachine;
 	psy_Table inputs;
+	uintptr_t maxinput;
 	psy_Table sends;
 	psy_Table returns;
 	int solocolumn;	

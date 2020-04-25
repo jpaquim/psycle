@@ -104,7 +104,9 @@ int psy_audio_psy3_load(psy_audio_SongFile* self)
 		psyfile_readstring(self->file, trackername, 256);
 		psyfile_readstring(self->file, trackervers, 256);
 		bytesread = 4 + strlen(trackername)+strlen(trackervers)+2;
-		psyfile_skip(self->file, self->file->filesize - bytesread);// Size of the current Header DATA // This ensures that any extra data is skipped.
+		// Size of the current Header DATA
+		// This ensures that any extra data is skipped.
+		psyfile_skip(self->file, self->file->filesize - bytesread);
 	}	
 	// start reading chunks		
 	header[4] = 0;
@@ -250,9 +252,7 @@ void readsngi(psy_audio_SongFile* self)
 	int32_t instselected;
 	unsigned char _trackmuted[64];
 	int32_t _trackarmedcount;
-	unsigned char _trackarmed[64];
-	int32_t m_ticksperbeat;
-	int32_t m_extraticksperline;
+	unsigned char _trackarmed[64];	
 	unsigned char sharetracknames;
 	
 	if((self->file->currchunk.version&0xFFFF0000) == VERSION_MAJOR_ZERO)
@@ -309,8 +309,6 @@ void readsngi(psy_audio_SongFile* self)
 			psyfile_read(self->file, &_trackarmed[i],sizeof(_trackarmed[i]));
 			if(_trackarmed[i]) ++_trackarmedcount;
 		}
-		m_ticksperbeat=24;
-		m_extraticksperline = 0;
 		if(self->file->currchunk.version == 0) {
 			// fix for a bug existing in the song saver in the 1.7.x series
 			self->file->currchunk.size = (11 * sizeof(int32_t)) + (songtracks * 2 * 1); //sizeof(bool));
@@ -329,9 +327,12 @@ void readsngi(psy_audio_SongFile* self)
 		}
 		if (self->file->currchunk.version >= 2) {
 			psyfile_read(self->file, &temp, sizeof temp);
-			m_ticksperbeat = temp;
+			self->song->properties.tpb = temp;
 			psyfile_read(self->file, &temp, sizeof temp);
-			m_extraticksperline = temp;
+			self->song->properties.extraticksperbeat = temp;
+		} else {
+			self->song->properties.tpb = 24;
+			self->song->properties.extraticksperbeat = 0;
 		}
 //		if (fullopen)
 		{
@@ -1578,9 +1579,16 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 			machines_connect(&self->song->machines, index, output);
 		}
 		if (incon && input != -1) {
+			psy_audio_WireSocketEntry* entry;
+			
 			machines_connect(&self->song->machines, input, index);			
+			entry = connection_input(&self->song->machines.connections, input, index);
+			if (entry) {
+				entry->id = i;
+			}
 			connections_setwirevolume(&self->song->machines.connections,
 				input, index, inconvol * wiremultiplier);
+			
 		}
 	}
 	psyfile_readstring(self->file, editname, 32);

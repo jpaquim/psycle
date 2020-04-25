@@ -438,6 +438,8 @@ void player_dostop(psy_audio_Player* self)
 			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
 			machine->vtable->stop(machine);			
 		}
+		player_setbpm(self, self->song->properties.bpm);
+		player_setlpb(self, self->song->properties.lpb);		
 	}
 }
 

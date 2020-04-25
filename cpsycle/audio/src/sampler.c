@@ -157,6 +157,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 	self->maxvolume = 0xFF;
 	self->panpersistent = 0;
 	self->xmsamplerload = 0;
+	self->basec = 48;
 	psy_table_init(&self->channels);
 	psy_table_init(&self->lastinst);
 	psy_audio_intmachineparam_init(&self->param_numvoices,
@@ -591,8 +592,7 @@ void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self, const psy_audi
 
 void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event, double samplesprobeat)
 {	
-	psy_audio_Sample* sample;		
-	int baseC = 48;
+	psy_audio_Sample* sample;
 	psy_List* entries;
 	psy_List* p;
 						
@@ -622,7 +622,7 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 			} else {
 				iterator->speed = (int64_t)(4294967296.0f *
 					pow(2.0f,
-						(event->note + sample->tune - baseC +
+						(event->note + sample->tune - self->sampler->basec +
 							((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
 					((psy_dsp_beat_t)sample->samplerate / 44100));
 			}
@@ -644,7 +644,6 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, double frequency)
 {
 	psy_audio_Sample* sample;
-	int baseC = 48;
 	psy_List* entries;
 	psy_List* p;
 
@@ -934,7 +933,6 @@ psy_List* sequencerinsert(psy_audio_Sampler* self, psy_List* events)
 	return insert;
 }
 
-
 // fileio
 void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
@@ -946,7 +944,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 		size_t filepos;
 		uint32_t size=0;
 
-
+		psy_audio_sampler_defaultC4(self, TRUE);
 		self->panpersistent = TRUE;
 		psyfile_read(songfile->file, &size,sizeof(size));
 		filepos = psyfile_getpos(songfile->file);
@@ -1002,7 +1000,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 		}
 	} else {
 		// Old version had default C4 as false
-		// DefaultC4(false);
+		psy_audio_sampler_defaultC4(self, FALSE);
 		// LinearSlide(false);
 		uint32_t size = 0;
 
@@ -1028,9 +1026,10 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 				unsigned int internalversion;
 				psyfile_read(songfile->file, &internalversion, sizeof(internalversion));
 				if (internalversion >= 1) {
-					unsigned char defaultC4;
+					uint8_t defaultC4;
+
 					psyfile_read(songfile->file, &defaultC4, sizeof(defaultC4)); // correct A4 frequency.
-					// DefaultC4(defaultC4);
+					psy_audio_sampler_defaultC4(self, defaultC4 != 0);
 				}
 				if (internalversion >= 2) {
 					unsigned char slidemode;

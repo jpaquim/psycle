@@ -25,6 +25,7 @@ typedef struct {
 	uintptr_t slot;	
 	psy_dsp_amp_t volume;
 	psy_List* mapping;
+	intptr_t id;
 } psy_audio_WireSocketEntry;
 
 typedef psy_List WireSocket;
