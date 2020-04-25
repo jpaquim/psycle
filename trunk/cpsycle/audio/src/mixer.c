@@ -341,10 +341,26 @@ static uintptr_t inputcolumn(psy_audio_Mixer* self)
 {
 	return mastercolumn(self) + 1;
 }
+
+static uintptr_t numinputcolumns(psy_audio_Mixer* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->maxinput == 0 && !psy_table_exists(&self->inputs, 0)) {
+		rv = 0;
+	} else {
+		rv = self->maxinput + 1;
+	}
+	return rv;
+}
+
 static uintptr_t returncolumn(psy_audio_Mixer* self)
 {
-	return inputcolumn(self) + psy_table_size(&self->inputs);
+	return inputcolumn(self) + numinputcolumns(self);
 }
+
+static uintptr_t freeinputchannel(psy_audio_Mixer*);
+static uintptr_t inputmax(psy_audio_Mixer*);
 static void preparemix(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
 static void mixinputs(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount,
 	psy_audio_Player*);
@@ -769,6 +785,7 @@ void mixer_init(psy_audio_Mixer* self, MachineCallback callback)
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;
 	psy_table_init(&self->inputs);
+	self->maxinput = 0;
 	psy_table_init(&self->sends);
 	psy_table_init(&self->returns);
 	machines = psy_audio_machine_machines(base);
@@ -1029,10 +1046,20 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 			machine = machines_at(machines, outputslot);
 			if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR ||
 					!machines_isconnectasmixersend(machines)) {
+				uintptr_t inputnum;
 				psy_audio_InputChannel* input;
+				psy_audio_WireSocketEntry* entry;
 				
-				input = inputchannel_allocinit(self, self->inputs.count, outputslot);
-				psy_table_insert(&self->inputs, self->inputs.count, (void*) input);
+				inputnum = freeinputchannel(self);
+				entry = connection_input(connections, outputslot, inputslot);
+				if (entry) {
+					entry->id = inputnum;
+				}
+				input = inputchannel_allocinit(self, inputnum, outputslot);
+				psy_table_insert(&self->inputs, inputnum, (void*) input);
+				if (self->maxinput < inputnum) {
+					self->maxinput = inputnum;
+				}
 			}
 			else {
 				MachineList* path;
@@ -1065,6 +1092,14 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 	}
 }
 
+uintptr_t freeinputchannel(psy_audio_Mixer* self)
+{
+	uintptr_t rv = 0;
+
+	while (psy_table_exists(&self->inputs, rv)) ++rv;
+	return rv;
+}
+
 void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 	uintptr_t outputslot, uintptr_t inputslot)
 {
@@ -1085,10 +1120,11 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 				psy_audio_InputChannel* channel;
 
 				channel = (psy_audio_InputChannel*)psy_tableiterator_value(&it);
-				if (channel->inputslot == outputslot) {
+				if (channel->inputslot == outputslot) {					
 					psy_table_remove(&self->inputs, c);
+					self->maxinput = inputmax(self);
 					inputchannel_dispose(channel);
-					free(channel);
+					free(channel);					
 					break;
 				}
 			}
@@ -1156,6 +1192,22 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 			}
 		}
 	}
+}
+
+uintptr_t inputmax(psy_audio_Mixer* self)
+{
+	psy_TableIterator it;
+	uintptr_t rv = 0;
+
+	for (it = psy_table_begin(&self->inputs);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		
+		if (rv < psy_tableiterator_key(&it)) {
+			rv = psy_tableiterator_key(&it);
+		}
+	}
+	return rv;
 }
 
 void patterntweak(psy_audio_Mixer* self, uintptr_t numparam, float value)
@@ -1371,7 +1423,14 @@ psy_audio_MachineParam* parameter(psy_audio_Mixer* self, uintptr_t param)
 		uintptr_t index;
 
 		index = col - inputcolumn(self);
-		channel = (psy_audio_InputChannel*)psy_table_at(&self->inputs, index);
+		channel = (psy_audio_InputChannel*) psy_table_at(&self->inputs, index);
+		if (!channel) {			
+			if (row > self->sends.count + 3 && row < self->sends.count + 9) {
+				return &self->ignore_param.machineparam;
+			} else {
+				return &self->blank_param.machineparam;
+			}			
+		}
 		if (row == 0) {			
 			return &channel->info_param.machineparam;
 		} else
@@ -1582,8 +1641,7 @@ void paramcoords(psy_audio_Mixer* self, uintptr_t param, uintptr_t* col, uintptr
 psy_audio_WireSocketEntry* wiresocketentry(psy_audio_Mixer* self, uintptr_t input)
 {
 	psy_audio_WireSocketEntry* rv = 0;
-	psy_audio_MachineSockets* sockets;
-	WireSocket* p;
+	psy_audio_MachineSockets* sockets;	
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	psy_audio_Machines* machines;
 
@@ -1591,12 +1649,19 @@ psy_audio_WireSocketEntry* wiresocketentry(psy_audio_Mixer* self, uintptr_t inpu
 	sockets = connections_at(&machines->connections,
 		psy_audio_machine_slot(psy_audio_mixer_base(self)));
 	if (sockets) {
-		uintptr_t c = 0;
+		WireSocket* p;		
 
-		for (p = sockets->inputs; p != 0 && c != input; p = p->next, ++c);
-		if (p) {
-			rv = (psy_audio_WireSocketEntry*) p->entry;
-		}
+		p = sockets->inputs;
+		while (p != NULL) {
+			psy_audio_WireSocketEntry* entry;
+
+			entry = (psy_audio_WireSocketEntry*)p->entry;
+			if (entry->id == input) {
+				rv = (psy_audio_WireSocketEntry*)p->entry;
+				break;
+			}
+			p = p->next;
+		}	
 	}
 	return rv;
 }
@@ -1620,22 +1685,45 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 	if (numins > 0) insertinputchannels(self, numins, &songfile->song->machines);
 	//	if (numrets > 0) InsertReturn(numrets - 1);
 	//	if (numrets > 0) InsertSend(numrets-1, NULL);
-	for (i = 0; i < psy_table_size(&self->inputs); ++i) {
+	for (i = 0; i < (uint32_t) numins; ++i) {
 		psy_audio_InputChannel* channel;
 		unsigned int j;
+		float temp;
+		uint8_t temp8;
 
-		channel = (psy_audio_InputChannel*)psy_table_at(&self->inputs, i);
+		channel = (psy_audio_InputChannel*) psy_table_at(&self->inputs, i);
 		for (j = 0; j < numrets; ++j) {
 			float send = 0.0f;
+
 			psyfile_read(songfile->file, &send, sizeof(float));
-			psy_table_insert(&channel->sendvols, j, (void*)(intptr_t)(send * 0xFF));
+			if (channel) {
+				psy_table_insert(&channel->sendvols, j, (void*)(intptr_t)(send * 0xFF));
+			}
 		}
-		psyfile_read(songfile->file, &channel->volume, sizeof(float));
-		psyfile_read(songfile->file, &channel->panning, sizeof(float));
-		psyfile_read(songfile->file, &channel->drymix, sizeof(float));
-		psyfile_read(songfile->file, &channel->mute, sizeof(unsigned char));
-		psyfile_read(songfile->file, &channel->dryonly, sizeof(unsigned char));
-		psyfile_read(songfile->file, &channel->wetonly, sizeof(unsigned char));
+		psyfile_read(songfile->file, &temp, sizeof(float));
+		if (channel) {
+			channel->volume = temp;
+		}
+		psyfile_read(songfile->file, &temp, sizeof(float));
+		if (channel) {
+			channel->panning = temp;
+		}
+		psyfile_read(songfile->file, &temp, sizeof(float));
+		if (channel) {
+			channel->drymix = temp;
+		}
+		psyfile_read(songfile->file, &temp8, sizeof(unsigned char));
+		if (channel) {
+			channel->mute = temp8;
+		}
+		psyfile_read(songfile->file, &temp8, sizeof(unsigned char));
+		if (channel) {
+			channel->dryonly = temp8;
+		}
+		psyfile_read(songfile->file, &temp8, sizeof(unsigned char));
+		if (channel) {
+			channel->wetonly = temp8;
+		}
 	}
 	//legacyReturn_.resize(numrets);
 	//legacySend_.resize(numrets);
@@ -1844,20 +1932,22 @@ void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 void insertinputchannels(psy_audio_Mixer* self, uintptr_t num, psy_audio_Machines* machines)
 {
 	psy_audio_WireSocketEntry* rv = 0;
-	psy_audio_MachineSockets* sockets;
-	WireSocket* p;
+	psy_audio_MachineSockets* sockets;	
 
 	sockets = connections_at(&machines->connections,
 		psy_audio_machine_slot(psy_audio_mixer_base(self)));
-	if (sockets) {
-		int c = 0;
+	if (sockets) {		
+		WireSocket* p;
 
-		for (p = sockets->inputs; p != 0 && c != num; p = p->next, ++c) {
+		for (p = sockets->inputs; p != 0; p = p->next) {
 			psy_audio_WireSocketEntry* entry;		
 
-			entry = (psy_audio_WireSocketEntry*)p->entry;			
-			psy_table_insert(&self->inputs, c,
-				inputchannel_allocinit(self, c, entry->slot));
+			entry = (psy_audio_WireSocketEntry*)p->entry;
+			if (entry->id != -1) {
+				psy_table_insert(&self->inputs, entry->id,
+					inputchannel_allocinit(self, entry->id, entry->slot));
+			}
 		}
+		self->maxinput = inputmax(self);
 	}
 }

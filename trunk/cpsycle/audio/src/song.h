@@ -34,6 +34,8 @@ void songproperties_init(SongProperties*, const char* title,
 	const char* credits, const char* comments);
 void songproperties_copy(SongProperties*, const SongProperties* other);
 void songproperties_dispose(SongProperties*);
+void songproperties_setbpm(SongProperties*, psy_dsp_beat_t bpm);
+psy_dsp_beat_t songproperties_pm(SongProperties*);
 
 typedef struct psy_audio_Song {
 	SongProperties properties;
@@ -63,6 +65,10 @@ void psy_audio_song_deallocate(psy_audio_Song*);
 void psy_audio_song_clear(psy_audio_Song*);
 /// set song properties
 void psy_audio_song_setproperties(psy_audio_Song*, const SongProperties*);
+/// set song properties bpm
+void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_beat_t bpm);
+/// return song properties bpm
+psy_dsp_beat_t psy_audio_song_bpm(psy_audio_Song*);
 
 #ifdef __cplusplus
 }

@@ -63,7 +63,9 @@ psy_audio_WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
 		psy_audio_PinConnection* pins;
 
 		rv->slot = slot;
-		rv->volume = 1.0;		
+		rv->volume = 1.0;
+		rv->id = -1;
+		rv->mapping = 0;
 		pins = (psy_audio_PinConnection*)malloc(sizeof(psy_audio_PinConnection));
 		if (pins) {
 			pins->src = 0;

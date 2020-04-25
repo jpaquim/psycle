@@ -12,12 +12,19 @@ typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component tabbar;
 	psy_audio_Song* song;
+	psy_ui_Component title;
 	psy_ui_Label label_title;
-	psy_ui_Label label_credits;
-	psy_ui_Label label_comments;
 	psy_ui_Edit edit_title;
+	psy_ui_Component credits;
+	psy_ui_Label label_credits;
 	psy_ui_Edit edit_credits;
-	psy_ui_Edit edit_comments;	
+	psy_ui_Component speed;
+	psy_ui_Label label_speed;	
+	psy_ui_Label label_tpb;
+	psy_ui_Edit edit_tpb;
+	psy_ui_Component comments;
+	psy_ui_Label label_comments;
+	psy_ui_Edit edit_comments;			
 } SongPropertiesView;
 
 void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent,

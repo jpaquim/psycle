@@ -207,6 +207,9 @@ void dev_settextalignment(psy_ui_win_LabelImp* self, psy_ui_Alignment alignment)
 	} else
 	if ((alignment & psy_ui_ALIGNMENT_LEFT) == psy_ui_ALIGNMENT_LEFT) {
 		dev_setstyle(self, WS_CHILD | WS_VISIBLE | SS_LEFT);
+	} else
+	if ((alignment & psy_ui_ALIGNMENT_RIGHT) == psy_ui_ALIGNMENT_RIGHT) {
+		dev_setstyle(self, WS_CHILD | WS_VISIBLE | SS_RIGHT);
 	}
 }
 

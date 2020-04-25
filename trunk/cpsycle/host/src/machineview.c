@@ -1350,26 +1350,30 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 			psy_ui_Rectangle r_old;
 			psy_ui_Rectangle r_new;
 
-			machineui = machineuis_at(self, self->dragslot);			
-			r_old = machineui_position(machineui);			
-			psy_ui_rectangle_expand(&r_old, 5, 5, 5, 5);			
-			machineui->x = max(0, ev->x - self->mx - self->dx);
-			machineui->y = max(0, ev->y - self->my - self->dy);
-			if (self->statusbar && machineui->machine) {
-				static char txt[128];				
-				psy_snprintf(txt, 128, "%s (%d, %d)",
-					psy_audio_machine_editname(machineui->machine)
-					? psy_audio_machine_editname(machineui->machine)
-					: "",
-					machineui->x,
-					machineui->y);
-				machineviewbar_settext(self->statusbar, txt);				
+			machineui = machineuis_at(self, self->dragslot);
+			if (machineui) {
+				r_old = machineui_position(machineui);
+				psy_ui_rectangle_expand(&r_old, 5, 5, 5, 5);
+				machineui->x = max(0, ev->x - self->mx - self->dx);
+				machineui->y = max(0, ev->y - self->my - self->dy);
+				if (self->statusbar && machineui->machine) {
+					static char txt[128];
+					psy_snprintf(txt, 128, "%s (%d, %d)",
+						psy_audio_machine_editname(machineui->machine)
+						? psy_audio_machine_editname(machineui->machine)
+						: "",
+						machineui->x,
+						machineui->y);
+					machineviewbar_settext(self->statusbar, txt);
+				}
+				r_new = machinewireview_updaterect(self, self->dragslot);
+				psy_ui_rectangle_union(&r_new, &r_old);
+				psy_ui_rectangle_expand(&r_new, 5, 5, 5, 5);
+				psy_ui_rectangle_move(&r_new, self->dx, self->dy);
+				psy_ui_component_invalidaterect(&self->component, &r_new);
+			} else {
+				self->dragmode = MACHINEWIREVIEW_DRAG_NONE;
 			}
-			r_new = machinewireview_updaterect(self, self->dragslot);
-			psy_ui_rectangle_union(&r_new, &r_old);
-			psy_ui_rectangle_expand(&r_new, 5, 5, 5, 5);
-			psy_ui_rectangle_move(&r_new, self->dx, self->dy);
-			psy_ui_component_invalidaterect(&self->component, &r_new);			
 		} else
 		if (self->dragmode >= MACHINEWIREVIEW_DRAG_NEWCONNECTION &&
 				self->dragmode <= MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {

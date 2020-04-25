@@ -57,6 +57,23 @@ void songproperties_copy(SongProperties* self, const SongProperties* other)
 	}
 }
 
+void songproperties_setbpm(SongProperties* self, psy_dsp_beat_t bpm)
+{
+	if (bpm < 32) {
+		self->bpm = 32;
+	} else
+	if (bpm > 999) {
+		self->bpm = 999;
+	} else {
+		self->bpm = bpm;
+	}	
+}
+
+psy_dsp_beat_t songproperties_bpm(SongProperties* self)
+{
+	return self->bpm;
+}
+
 void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machinefactory)
 {		
 	self->machinefactory = machinefactory;	
@@ -152,4 +169,14 @@ void psy_audio_song_setproperties(psy_audio_Song* self,
 	const SongProperties* properties)
 {	
 	songproperties_copy(&self->properties, properties);
+}
+
+void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_beat_t bpm)
+{
+	songproperties_setbpm(&self->properties, bpm);		
+}
+
+psy_dsp_beat_t psy_audio_song_bpm(psy_audio_Song* self)
+{
+	return songproperties_bpm(&self->properties);
 }

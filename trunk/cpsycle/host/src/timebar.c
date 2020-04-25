@@ -6,11 +6,12 @@
 
 #define TIMERID_TIMERBAR 500
 
-static void timerbar_onlesslessclicked(TimeBar* self, psy_ui_Component* sender);
-static void timerbar_onlessclicked(TimeBar* self, psy_ui_Component* sender);
-static void timerbar_onmoreclicked(TimeBar* self, psy_ui_Component* sender);
-static void timerbar_onmoremoreclicked(TimeBar* self, psy_ui_Component* sender);
-static void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid);
+static void timerbar_onlesslessclicked(TimeBar*, psy_ui_Component* sender);
+static void timerbar_onlessclicked(TimeBar*, psy_ui_Component* sender);
+static void timerbar_onmoreclicked(TimeBar*, psy_ui_Component* sender);
+static void timerbar_onmoremoreclicked(TimeBar*, psy_ui_Component* sender);
+static void timerbar_ontimer(TimeBar*, psy_ui_Component* sender, int timerid);
+static void timerbar_offsetbpm(TimeBar*, psy_dsp_beat_t bpm);
 
 void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {				
@@ -58,22 +59,31 @@ void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* pl
 
 void timerbar_onlesslessclicked(TimeBar* self, psy_ui_Component* sender)
 {		
-	player_setbpm(self->player, player_bpm(self->player) - 10);
+	timerbar_offsetbpm(self, -10);
 }
 
 void timerbar_onlessclicked(TimeBar* self, psy_ui_Component* sender)
 {		
-	player_setbpm(self->player, player_bpm(self->player) - 1);
+	timerbar_offsetbpm(self, -1);
 }
 
 void timerbar_onmoreclicked(TimeBar* self, psy_ui_Component* sender)
-{		
-	player_setbpm(self->player, player_bpm(self->player) + 1);
+{			
+	timerbar_offsetbpm(self, 1);
 }
 
 void timerbar_onmoremoreclicked(TimeBar* self, psy_ui_Component* sender)
+{		
+	timerbar_offsetbpm(self, 10);
+}
+
+void timerbar_offsetbpm(TimeBar* self, psy_dsp_beat_t delta)
 {	
-	player_setbpm(self->player, player_bpm(self->player) + 10);
+	if (self->player && player_song(self->player)) {
+		player_setbpm(self->player, player_bpm(self->player) + delta);
+		psy_audio_song_setbpm(player_song(self->player),
+			player_bpm(self->player));
+	}
 }
 
 void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid)
@@ -86,3 +96,4 @@ void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid)
 		psy_ui_label_settext(&self->bpmlabel, txt);
 	}
 }
+

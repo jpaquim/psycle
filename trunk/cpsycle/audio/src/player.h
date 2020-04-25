@@ -48,6 +48,10 @@ void player_init(psy_audio_Player*, psy_audio_Song*, void* systemhandle);
 void player_dispose(psy_audio_Player*);
 // general
 void player_setsong(psy_audio_Player*, psy_audio_Song*);
+INLINE psy_audio_Song* player_song(psy_audio_Player* self)
+{
+	return self->song;
+}
 void player_setnumsongtracks(psy_audio_Player*, uintptr_t numsongtracks);
 uintptr_t player_numsongtracks(psy_audio_Player*);
 void player_setvumetermode(psy_audio_Player*, VUMeterMode);
