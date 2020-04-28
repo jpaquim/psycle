@@ -107,9 +107,6 @@
     <ClCompile Include="src\mixer.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\dsp\src\operations.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\pattern.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -207,6 +204,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\machineparam.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="$(SolutionDir)dsp\src\operations.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wire.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -413,6 +416,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\machineparam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wire.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

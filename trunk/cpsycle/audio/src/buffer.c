@@ -112,8 +112,8 @@ void psy_audio_buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* sourc
 		for (channel = 0; channel < source->numchannels && 
 			channel < self->numchannels; ++channel) {
 				dsp.add(
-					source->samples[channel],
-					self->samples[channel],
+					source->samples[channel] + source->offset,
+					self->samples[channel] + self->offset,
 					numsamples,
 					factor);
 		}

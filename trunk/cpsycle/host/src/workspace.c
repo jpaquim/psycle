@@ -209,7 +209,7 @@ void workspace_initsignals(Workspace* self)
 
 void workspace_dispose(Workspace* self)
 {	
-	player_dispose(&self->player);	
+	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
 	self->songcbk = 0;
@@ -273,7 +273,7 @@ void workspace_initplayer(Workspace* self)
 {
 #ifdef DIVERSALIS__OS__MICROSOFT
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
-	player_init(&self->player, self->song,
+	psy_audio_player_init(&self->player, self->song,
 		((psy_ui_win_ComponentImp*)(self->mainhandle->imp))->hwnd);
 #else
 	player_init(&self->player, self->song, 0);
@@ -296,7 +296,7 @@ psy_Properties* workspace_driverconfiguration(Workspace* self)
 	
 void workspace_configaudio(Workspace* self)
 {			
-	player_loaddriver(&self->player, workspace_driverpath(self),
+	psy_audio_player_loaddriver(&self->player, workspace_driverpath(self),
 		workspace_driverconfiguration(self));	
 	workspace_driverconfig(self);
 }
@@ -384,7 +384,7 @@ void workspace_mididriverconfig(Workspace* self, int driverid)
 {	
 	psy_EventDriver* eventdriver;
 	
-	eventdriver = player_eventdriver(&self->player, driverid);
+	eventdriver = psy_audio_player_eventdriver(&self->player, driverid);
 	if (eventdriver) {	
 		self->midiconfigure->item.disposechildren = 0;
 		self->midiconfigure->children = eventdriver->properties ?
@@ -1032,12 +1032,12 @@ void workspace_updatemididriverlist(Workspace* self)
 	drivers = psy_properties_read(self->midi, "mididriver");
 	if (drivers) {
 		psy_properties_clear(drivers);	
-		numdrivers = player_numeventdrivers(&self->player);
+		numdrivers = psy_audio_player_numeventdrivers(&self->player);
 		for (i = 0; i < numdrivers; ++i) {
 			char idstr[40];
 			psy_EventDriver* eventdriver;
 
-			eventdriver = player_eventdriver(&self->player, i);
+			eventdriver = psy_audio_player_eventdriver(&self->player, i);
 			if (eventdriver) {
 				const char* text;
 				
@@ -1148,12 +1148,13 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 				id = psy_properties_value(p);				
 				for (p = p->children; p != 0  && c != id; p = p->next, ++c);
 				if (p) {
-					player_loadeventdriver(&self->player,					
+					psy_audio_player_loadeventdriver(&self->player,
 						psy_properties_valuestring(p));
 					workspace_updatemididriverlist(self);
 					p = psy_properties_read(self->midi, "mididriver");
 					if (p) {
-						p->item.value.i = player_numeventdrivers(&self->player) - 1;
+						p->item.value.i =
+							psy_audio_player_numeventdrivers(&self->player) - 1;
 						workspace_mididriverconfig(self, psy_properties_value(p));
 					}
 				}
@@ -1167,7 +1168,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 				int id;				
 				
 				id = psy_properties_value(p);
-				player_removeeventdriver(&self->player, id);
+				psy_audio_player_removeeventdriver(&self->player, id);
 				workspace_updatemididriverlist(self);
 				--(p->item.value.i);
 				if (p->item.value.i < 0) {
@@ -1180,7 +1181,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 	if (psy_properties_insection(property, self->driverconfigure)) {		
 		psy_Properties* driversection;
 
-		player_restartdriver(&self->player, 0);		
+		psy_audio_player_restartdriver(&self->player, 0);
 		driversection = psy_properties_find(self->driverconfigurations, 
 			workspace_driverkey(self));
 		if (driversection) {
@@ -1208,7 +1209,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 
 			p = psy_properties_find(self->midi, "mididriver");
 			if (p) {
-				player_restarteventdriver(&self->player, psy_properties_value(p));
+				psy_audio_player_restarteventdriver(&self->player, psy_properties_value(p));
 			}
 		}
 	} else
@@ -1217,11 +1218,11 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 
 		p = psy_properties_read(self->midi, "mididriver");
 		if (p) {
-			player_restarteventdriver(&self->player, psy_properties_value(p));
+			psy_audio_player_restarteventdriver(&self->player, psy_properties_value(p));
 		}		
 	} else
 	if (choice && (strcmp(psy_properties_key(choice), "driver") == 0)) {
-		player_reloaddriver(&self->player, psy_properties_valuestring(property),
+		psy_audio_player_reloaddriver(&self->player, psy_properties_valuestring(property),
 			workspace_driverconfiguration(self));
 		workspace_driverconfig(self);
 	} else	
@@ -1241,9 +1242,9 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 	} else
 	if (strcmp(psy_properties_key(property), "drawvumeters") == 0) {
 		if (psy_properties_value(property)) {
-			player_setvumetermode(&self->player, VUMETER_RMS);
+			psy_audio_player_setvumetermode(&self->player, VUMETER_RMS);
 		} else {
-			player_setvumetermode(&self->player, VUMETER_NONE);
+			psy_audio_player_setvumetermode(&self->player, VUMETER_NONE);
 		}
 	}
 	psy_signal_emit(&self->signal_configchanged, self, 1, property);
@@ -1381,22 +1382,11 @@ void workspace_loadsong(Workspace* self, const char* path)
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
 			psy_audio_songfile_dispose(&songfile);
-		} else {		
-			psy_TableIterator it;
-
+		} else {
 			free(self->filename);
 			self->filename = strdup(path);
-			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
+			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);						
 			psy_audio_songfile_dispose(&songfile);
-			// notify machines postload	
-			for (it = machines_begin(&self->song->machines); 
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-				psy_audio_Machine* machine;
-
-				machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-				psy_audio_machine_postload(machine, &songfile, psy_tableiterator_key(&it));
-			}
 			psy_audio_exclusivelock_leave();
 			workspace_addrecentsong(self, path);
 			psy_audio_songfile_dispose(&songfile);
@@ -1427,11 +1417,11 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag, psy_audi
 
 	history_clear(&self->history);
 	oldsong = self->song;
-	player_stop(&self->player);
+	psy_audio_player_stop(&self->player);
 	psy_audio_exclusivelock_enter();	
 	self->song = song;
 	self->songcbk = song;
-	player_setsong(&self->player, self->song);
+	psy_audio_player_setsong(&self->player, self->song);
 	applysongproperties(self);
 	sequenceselection_setsequence(&self->sequenceselection
 		,&self->song->sequence);
@@ -1482,8 +1472,8 @@ void workspace_loadcontrolskin(Workspace* self, const char* path)
 void applysongproperties(Workspace* self)
 {	
 	if (self->song) {	
-		player_setbpm(&self->player, self->song->properties.bpm);	
-		player_setlpb(&self->player, self->song->properties.lpb);
+		psy_audio_player_setbpm(&self->player, self->song->properties.bpm);
+		psy_audio_player_setlpb(&self->player, self->song->properties.lpb);
 	}
 }
 
@@ -1598,7 +1588,7 @@ void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editp
 {	
 	self->patterneditposition = editposition;
 	self->patterneditposition.line = 
-		(int) (editposition.offset * player_lpb(&self->player));
+		(int) (editposition.offset * psy_audio_player_lpb(&self->player));
 	psy_signal_emit(&self->signal_patterneditpositionchanged, self, 0);
 }
 
@@ -1654,7 +1644,7 @@ int workspace_hasplugincache(Workspace* self)
 
 psy_EventDriver* workspace_kbddriver(Workspace* self)
 {
-	return player_kbddriver(&self->player);
+	return psy_audio_player_kbddriver(&self->player);
 }
 
 int workspace_followingsong(Workspace* self)
@@ -1701,10 +1691,10 @@ void workspace_idle(Workspace* self)
 	if (self->followsong) {
 		SequenceTrackIterator it;
 		
-		if (player_playing(&self->player)) {
+		if (psy_audio_player_playing(&self->player)) {
 			it = sequence_begin(&self->song->sequence, 
 				self->song->sequence.tracks,
-				player_position(&self->player));
+				psy_audio_player_position(&self->player));
 			if (it.tracknode && self->lastentry != it.tracknode->entry) {
 				sequenceselection_seteditposition(&self->sequenceselection, 
 						sequence_makeposition(&self->song->sequence,
@@ -1716,26 +1706,26 @@ void workspace_idle(Workspace* self)
 			}
 			if (self->lastentry) {				
 				self->patterneditposition.line = (int) (
-					(player_position(&self->player) -
-					self->lastentry->offset) * player_lpb(&self->player));				
+					(psy_audio_player_position(&self->player) -
+					self->lastentry->offset) * psy_audio_player_lpb(&self->player));
 				self->patterneditposition.offset = 
-					player_position(&self->player) - self->lastentry->offset;
+					psy_audio_player_position(&self->player) - self->lastentry->offset;
 				self->patterneditposition.offset = 
 					self->patterneditposition.line / 
-					(psy_dsp_beat_t) player_lpb(&self->player);
+					(psy_dsp_beat_t) psy_audio_player_lpb(&self->player);
 				workspace_setpatterneditposition(self, 
 					self->patterneditposition);				
 			}
 		} else
 		if (self->lastentry) {				
 			self->patterneditposition.line = (int) (
-				(player_position(&self->player) -
-				self->lastentry->offset) * player_lpb(&self->player));				
+				(psy_audio_player_position(&self->player) -
+				self->lastentry->offset) * psy_audio_player_lpb(&self->player));
 			self->patterneditposition.offset = 
-				player_position(&self->player) - self->lastentry->offset;
+				psy_audio_player_position(&self->player) - self->lastentry->offset;
 			self->patterneditposition.offset = 
 				self->patterneditposition.line / 
-				(psy_dsp_beat_t) player_lpb(&self->player);
+				(psy_dsp_beat_t)psy_audio_player_lpb(&self->player);
 			workspace_setpatterneditposition(self, 
 				self->patterneditposition);
 			self->lastentry = 0;
@@ -1963,7 +1953,7 @@ unsigned int machinecallback_samplerate(Workspace* self)
 
 unsigned int machinecallback_bpm(Workspace* self)
 {
-	return (unsigned int) player_bpm(&self->player);
+	return (unsigned int) psy_audio_player_bpm(&self->player);
 }
 
 psy_dsp_beat_t machinecallback_beatspertick(Workspace* self)

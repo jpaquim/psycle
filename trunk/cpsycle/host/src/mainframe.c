@@ -430,15 +430,15 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		tabbar_select(&self->machineview.tabbar, 1);
 	} else
 	if (cmd.id == CMD_IMM_PLAYSONG) {
-		player_setposition(&self->workspace.player, 0);
-		player_start(&self->workspace.player);
+		psy_audio_player_setposition(&self->workspace.player, 0);
+		psy_audio_player_start(&self->workspace.player);
 	} else
 	if (cmd.id == CMD_IMM_PLAYSTART) {
 		SequenceEntry* entry;
 
 		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);		
-		player_setposition(&self->workspace.player, entry ? entry->offset : 0);		
-		player_start(&self->workspace.player);		
+		psy_audio_player_setposition(&self->workspace.player, entry ? entry->offset : 0);
+		psy_audio_player_start(&self->workspace.player);
 	} else
 	if (cmd.id == CMD_IMM_PLAYFROMPOS) {
 		psy_dsp_beat_t playposition = 0;
@@ -447,11 +447,11 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
 		playposition = (entry ? entry->offset : 0) + 
 			(psy_dsp_beat_t) self->workspace.patterneditposition.offset;
-		player_setposition(&self->workspace.player, playposition);
-		player_start(&self->workspace.player);
+		psy_audio_player_setposition(&self->workspace.player, playposition);
+		psy_audio_player_start(&self->workspace.player);
 	} else
 	if (cmd.id == CMD_IMM_PLAYSTOP) {
-		player_stop(&self->workspace.player);
+		psy_audio_player_stop(&self->workspace.player);
 	} else
 	if (cmd.id == CMD_IMM_SONGPOSDEC) {
 		if (self->workspace.song) {		

@@ -195,7 +195,9 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 			psy_audio_MachineParam* machineparam;
 
 			machineparam = psy_audio_machine_parameter(self->machine, param);
-			drawparameter(self, g, machineparam, row, col);
+			if (machineparam) {
+				drawparameter(self, g, machineparam, row, col);
+			}
 			++row;
 			if (row >= numrows) {
 			  row = 0;
@@ -812,13 +814,15 @@ void paramview_computepositions(ParamView* self)
 			psy_audio_MachineParam* machineparam;
 
 			machineparam = psy_audio_machine_parameter(self->machine, param);
-			paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
-			small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
-			position = (psy_ui_Rectangle*) malloc(sizeof(psy_ui_Rectangle));
-			psy_ui_setrectangle(position, cpx, 0, 0, 0);
-			if (paramtype == MPF_SLIDER) {
-				self = self;
+			if (machineparam) {
+				paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
+				small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
+			} else {
+				paramtype = MPF_IGNORE;
+				small = TRUE;
 			}
+			position = (psy_ui_Rectangle*) malloc(sizeof(psy_ui_Rectangle));
+			psy_ui_setrectangle(position, cpx, 0, 0, 0);			
 			if (paramtype == MPF_SLIDERLEVEL) {
 				position->left += self->skin->slider.destwidth;
 			} else
@@ -846,14 +850,16 @@ void paramview_computepositions(ParamView* self)
 
 					machineparam = psy_audio_machine_parameter(self->machine, i);
 					position = psy_table_at(&self->positions, i);
-					if (psy_audio_machineparam_type(machineparam)
-								== MPF_SLIDERCHECK ||
+					if (machineparam) {
+						if (psy_audio_machineparam_type(machineparam)
+							== MPF_SLIDERCHECK ||
 							psy_audio_machineparam_type(machineparam)
-								== MPF_SLIDERLEVEL) {
-						cellsize(self, i, col, &width, &height);
-						position->right = position->left + width;
-					} else {						
-						position->right = cpx + colmax;
+							== MPF_SLIDERLEVEL) {
+							cellsize(self, i, col, &width, &height);
+							position->right = position->left + width;
+						} else {
+							position->right = cpx + colmax;
+						}
 					}
 				}
 				cpx += colmax;
@@ -881,8 +887,13 @@ void paramview_computepositions(ParamView* self)
 			machineparam = psy_audio_machine_parameter(self->machine, param);
 			position = psy_table_at(&self->positions, param);
 			firstrow = psy_table_at(&self->positions, row);
-			paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
-			small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
+			if (machineparam) {
+				paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
+				small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
+			} else {
+				paramtype = MPF_IGNORE;
+				small = TRUE;
+			}
 			mpfsize(self, paramtype, small, &w, &h);
 			height = firstrow->bottom - firstrow->top;
 			position->top = cpy;

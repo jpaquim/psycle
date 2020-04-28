@@ -57,13 +57,13 @@ void songtrackbar_build(SongTrackBar* self)
 		psy_ui_combobox_addtext(&self->trackbox, text);
 	}	
 	psy_ui_combobox_setcursel(&self->trackbox,
-		player_numsongtracks(&self->workspace->player) - MIN_TRACKS);
+		psy_audio_player_numsongtracks(&self->workspace->player) - MIN_TRACKS);
 }
 
 void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 	int index)
 {		
-	player_setnumsongtracks(&self->workspace->player, index + MIN_TRACKS);
+	psy_audio_player_setnumsongtracks(&self->workspace->player, index + MIN_TRACKS);
 	if (self->workspace->song) {
 		patterns_setsongtracks(&self->workspace->song->patterns, index + MIN_TRACKS);
 	}
@@ -79,5 +79,5 @@ void songtrackbar_onsongchanged(SongTrackBar* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
 {	
 	psy_ui_combobox_setcursel(&self->trackbox,
-		player_numsongtracks(&workspace->player) - MIN_TRACKS);
+		psy_audio_player_numsongtracks(&workspace->player) - MIN_TRACKS);
 }

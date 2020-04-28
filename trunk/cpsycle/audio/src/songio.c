@@ -10,6 +10,7 @@
 #include "song.h"
 #include "machinefactory.h"
 #include "wavsongio.h"
+#include "wire.h"
 #include "xmdefs.h"
 #include "xm.h"
 
@@ -22,6 +23,7 @@
 
 static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
 static int psy_audio_songfile_errfile(psy_audio_SongFile* self);
+static void psy_audio_songfile_legacywires_dispose(psy_audio_SongFile*);
 static void psy_audio_songfile_machineuis_dispose(psy_audio_SongFile*);
 
 void psy_audio_songfile_init(psy_audio_SongFile* self)
@@ -30,13 +32,38 @@ void psy_audio_songfile_init(psy_audio_SongFile* self)
 	psy_signal_init(&self->signal_warning);
 	self->machinesoloed = -1;
 	psy_table_init(&self->machineuis);
+	psy_table_init(&self->legacywires);
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
 {
 	psy_signal_dispose(&self->signal_output);
-	psy_signal_dispose(&self->signal_warning);	
+	psy_signal_dispose(&self->signal_warning);		
+	psy_audio_songfile_legacywires_dispose(self);
 	psy_audio_songfile_machineuis_dispose(self);
+}
+
+void psy_audio_songfile_legacywires_dispose(psy_audio_SongFile* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->legacywires);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_Table* legacywiretable;
+		psy_TableIterator it_wires;
+
+		legacywiretable = (psy_Table*) psy_tableiterator_value(&it);		
+		for (it_wires = psy_table_begin(legacywiretable);
+			!psy_tableiterator_equal(&it_wires, psy_table_end());
+			psy_tableiterator_inc(&it_wires)) {
+			LegacyWire* legacywire;
+			legacywire = (LegacyWire*)psy_tableiterator_value(&it_wires);
+			free(legacywire);
+		}
+		psy_table_dispose(legacywiretable);
+	}
+	psy_table_dispose(&self->legacywires);
 }
 
 void psy_audio_songfile_machineuis_dispose(psy_audio_SongFile* self)
@@ -119,6 +146,18 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		}				
 		psy_audio_machines_solo(&self->song->machines,
 			self->machinesoloed);		
+		{
+			psy_TableIterator it;
+			// notify machines postload	
+			for (it = machines_begin(&self->song->machines);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+				psy_audio_Machine* machine;
+
+				machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+				psy_audio_machine_postload(machine, self, psy_tableiterator_key(&it));
+			}
+		}
 		machines_endfilemode(&self->song->machines);		
 	} else {
 		status = psy_audio_songfile_errfile(self);

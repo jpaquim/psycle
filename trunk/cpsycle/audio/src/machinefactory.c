@@ -130,7 +130,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			
 			mixer = (psy_audio_Mixer*)malloc(sizeof(psy_audio_Mixer));
 			if (mixer) {
-				mixer_init(mixer, self->machinecallback);
+				psy_audio_mixer_init(mixer, self->machinecallback);
 				rv = (psy_audio_Machine*) mixer;
 			} else {
 				rv = 0;

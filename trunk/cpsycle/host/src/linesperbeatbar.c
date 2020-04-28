@@ -52,20 +52,22 @@ void linesperbeatbar_initalign(LinesPerBeatBar* self)
 
 void OnLessClicked(LinesPerBeatBar* self, psy_ui_Component* sender)
 {		
-	player_setlpb(self->player, player_lpb(self->player) - 1);
+	psy_audio_player_setlpb(self->player,
+		psy_audio_player_lpb(self->player) - 1);
 }
 
 void OnMoreClicked(LinesPerBeatBar* self, psy_ui_Component* sender)
 {		
-	player_setlpb(self->player, player_lpb(self->player) + 1);
+	psy_audio_player_setlpb(self->player,
+		psy_audio_player_lpb(self->player) + 1);
 }
 
 void OnTimer(LinesPerBeatBar* self, psy_ui_Component* sender, int timerid)
 {		
-	if (self->lpb != player_lpb(self->player)) {
+	if (self->lpb != psy_audio_player_lpb(self->player)) {
 		char text[20];
 
-		self->lpb = player_lpb(self->player);
+		self->lpb = psy_audio_player_lpb(self->player);
 		psy_snprintf(text, 10, "%2d", self->lpb);
 		psy_ui_label_settext(&self->lpblabel, text);		
 	}

@@ -121,7 +121,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	rect.top = 0;
 	rect.bottom = 256;
 	invlog2 = (float)(1.0 / log10(2.0));
-	thebar = 440.f * 2.f * 256.f / player_samplerate(&self->workspace->player);
+	thebar = 440.f * 2.f * 256.f / psy_audio_player_samplerate(&self->workspace->player);
 	if (self->scope_spec_mode == 1) rect.left = (int) thebar;
 	else if (self->scope_spec_mode == 2) rect.left = (int)(16 * sqrt(thebar));
 	else if (self->scope_spec_mode == 3) rect.left = (int)(32 * log10(1 + thebar) * invlog2);
@@ -131,7 +131,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, rect.left, 0, buf, strlen(buf));
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
 
-	thebar = 7000 * 2.f * 256.f / player_samplerate(&self->workspace->player);
+	thebar = 7000 * 2.f * 256.f / psy_audio_player_samplerate(&self->workspace->player);
 	if (self->scope_spec_mode == 1) rect.left = thebar;
 	else if (self->scope_spec_mode == 2) rect.left = 16 * sqrt(thebar);
 	else if (self->scope_spec_mode == 3) rect.left = 32 * log10(1 + thebar) * invlog2;
@@ -141,7 +141,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, rect.left, 0, buf, strlen(buf));
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
 
-	thebar = 16000 * 2.f * 256.f / player_samplerate(&self->workspace->player);
+	thebar = 16000 * 2.f * 256.f / psy_audio_player_samplerate(&self->workspace->player);
 	if (self->scope_spec_mode == 1) rect.left = thebar;
 	else if (self->scope_spec_mode == 2) rect.left = 16 * sqrt(thebar);
 	else if (self->scope_spec_mode == 3) rect.left = 32 * log10(1 + thebar) * invlog2;

@@ -30,6 +30,8 @@ typedef struct psy_audio_SongFile {
 	const char* path;
 	uintptr_t machinesoloed;
 	psy_Table machineuis;
+	// MachineID X [psy_Table* LegacyWires (ConnectionID X LegacyWire*)]
+	psy_Table legacywires;
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);

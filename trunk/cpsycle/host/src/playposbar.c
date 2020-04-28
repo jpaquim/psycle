@@ -40,11 +40,12 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 
 void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender, int timerid)
 {		
-	if (self->lastposition != player_position(self->player)) {
+	if (self->lastposition != psy_audio_player_position(self->player)) {
 		char text[20];
 
-		psy_snprintf(text, 10, "%.3f", player_position(self->player));
+		psy_snprintf(text, 10, "%.3f",
+			(float) psy_audio_player_position(self->player));
 		psy_ui_label_settext(&self->position, text);
-		self->lastposition = player_position(self->player);
+		self->lastposition = psy_audio_player_position(self->player);
 	}
 }

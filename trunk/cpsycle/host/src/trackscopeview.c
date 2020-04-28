@@ -63,7 +63,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
 	if (self->workspace->song) {
 		psy_ui_Size size;
-		int numtracks = player_numsongtracks(&self->workspace->player);
+		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 		int c;
 		int maxcolumns = 16;		
 		int rows = 1;
@@ -234,7 +234,7 @@ void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
 {
 	psy_ui_TextMetric tm;	
 	int maxcolumns = 16;	
-	int numtracks = player_numsongtracks(&self->workspace->player);
+	int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 	int rows = ((numtracks - 1) / maxcolumns) + 1;
 
 	tm = psy_ui_component_textmetric(&self->component);	
@@ -250,7 +250,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		int track;
 		int trackwidth;
 		int maxcolumns = 16;
-		int numtracks = player_numsongtracks(&self->workspace->player);
+		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 
 		columns = numtracks < maxcolumns ? numtracks : maxcolumns;
 		size = psy_ui_component_size(&self->component);
