@@ -231,6 +231,7 @@
     <ClCompile Include="src\waveosc.c" />
     <ClCompile Include="src\waveosctables.c" />
     <ClCompile Include="src\wavsongio.c" />
+    <ClCompile Include="src\wire.c" />
     <ClCompile Include="src\xm.c" />
   </ItemGroup>
   <ItemGroup>
@@ -300,6 +301,7 @@
     <ClInclude Include="src\waveosc.h" />
     <ClInclude Include="src\waveosctables.h" />
     <ClInclude Include="src\wavsongio.h" />
+    <ClInclude Include="src\wire.h" />
     <ClInclude Include="src\xm.h" />
     <ClInclude Include="src\xmdefs.h" />
   </ItemGroup>

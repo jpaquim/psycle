@@ -79,19 +79,20 @@ void timerbar_onmoremoreclicked(TimeBar* self, psy_ui_Component* sender)
 
 void timerbar_offsetbpm(TimeBar* self, psy_dsp_beat_t delta)
 {	
-	if (self->player && player_song(self->player)) {
-		player_setbpm(self->player, player_bpm(self->player) + delta);
-		psy_audio_song_setbpm(player_song(self->player),
-			player_bpm(self->player));
+	if (self->player && psy_audio_player_song(self->player)) {
+		psy_audio_player_setbpm(self->player,
+			psy_audio_player_bpm(self->player) + delta);
+		psy_audio_song_setbpm(psy_audio_player_song(self->player),
+			psy_audio_player_bpm(self->player));
 	}
 }
 
 void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid)
 {		
-	if (self->bpm != player_bpm(self->player)) {
+	if (self->bpm != psy_audio_player_bpm(self->player)) {
 		char txt[20];
 
-		self->bpm = self->player->sequencer.bpm;
+		self->bpm = psy_audio_player_bpm(self->player);
 		psy_snprintf(txt, 10, "%.2f", self->bpm);
 		psy_ui_label_settext(&self->bpmlabel, txt);
 	}

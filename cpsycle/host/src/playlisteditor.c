@@ -204,7 +204,7 @@ void playlisteditor_buildplaylist(PlayListEditor* self)
 
 void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 {		
-	player_stop(&self->workspace->player);
+	psy_audio_player_stop(&self->workspace->player);
 	self->nextentry = self->currentry;
 	psy_ui_component_starttimer(&self->component, TIMERID_PLAYLIST, 50);
 }
@@ -212,7 +212,7 @@ void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 void playlisteditor_onstop(PlayListEditor* self, psy_ui_Component* sender)
 {	
 	psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
-	player_stop(&self->workspace->player);
+	psy_audio_player_stop(&self->workspace->player);
 }
 
 void playlisteditor_onprev(PlayListEditor* self, psy_ui_Component* sender)
@@ -221,7 +221,7 @@ void playlisteditor_onprev(PlayListEditor* self, psy_ui_Component* sender)
 		self->nextentry = self->currentry->prev;
 		psy_ui_listbox_setcursel(&self->listbox,
 			psy_ui_listbox_cursel(&self->listbox) - 1);
-		player_stop(&self->workspace->player);
+		psy_audio_player_stop(&self->workspace->player);
 	}
 }
 
@@ -231,13 +231,13 @@ void playlisteditor_onnext(PlayListEditor* self, psy_ui_Component* sender)
 		self->nextentry = self->currentry->next;
 		psy_ui_listbox_setcursel(&self->listbox,
 			psy_ui_listbox_cursel(&self->listbox) + 1);
-		player_stop(&self->workspace->player);
+		psy_audio_player_stop(&self->workspace->player);
 	}
 }
 
 void playlisteditor_ontimer(PlayListEditor* self, int timerid)
 {		
-	if (!player_playing(&self->workspace->player)) {
+	if (!psy_audio_player_playing(&self->workspace->player)) {
 		if (self->nextentry) {
 			PlayListEntry* entry;
 			psy_List* p;
@@ -247,8 +247,8 @@ void playlisteditor_ontimer(PlayListEditor* self, int timerid)
 			entry = (PlayListEntry*) self->currentry->entry;			
 			workspace_loadsong(self->workspace, entry->path);		
 			psy_audio_sequencer_stoploop(&self->workspace->player.sequencer);
-			player_setposition(&self->workspace->player, 0);
-			player_start(&self->workspace->player);
+			psy_audio_player_setposition(&self->workspace->player, 0);
+			psy_audio_player_start(&self->workspace->player);
 			self->nextentry = self->currentry->next;
 			
 			p = self->entries;
@@ -262,7 +262,7 @@ void playlisteditor_ontimer(PlayListEditor* self, int timerid)
 			}
 			psy_ui_listbox_setcursel(&self->listbox, c);
 		} else {
-			player_stop(&self->workspace->player);			
+			psy_audio_player_stop(&self->workspace->player);
 			psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
 		}
 	}
@@ -274,7 +274,7 @@ void playlisteditor_onlistchanged(PlayListEditor* self, psy_ui_Component* sender
 	psy_List* p;
 	
 	p = psy_list_at(self->entries, slot);
-	player_stop(&self->workspace->player);
+	psy_audio_player_stop(&self->workspace->player);
 	self->currentry = p;
 	self->nextentry = p;
 }

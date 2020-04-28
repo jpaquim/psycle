@@ -107,9 +107,10 @@ void pianoroll_ondestroy(Pianoroll* self, psy_ui_Component* component)
 void pianoroll_ontimer(Pianoroll* self, int timerid)
 {
 	if (timerid == TIMERID_PIANOROLL && self->pattern) {		
-		if (player_playing(&self->workspace->player)) {
+		if (psy_audio_player_playing(&self->workspace->player)) {
 			pianoroll_invalidateline(self, self->lastplayposition);
-			self->lastplayposition = player_position(&self->workspace->player);			
+			self->lastplayposition =
+				psy_audio_player_position(&self->workspace->player);
 			pianoroll_invalidateline(self, self->lastplayposition);
 		} else {
 			if (self->lastplayposition != -1) {				
@@ -127,7 +128,7 @@ void pianoroll_ontimer(Pianoroll* self, int timerid)
 
 int pianoroll_testplaybar(Pianoroll* self, psy_dsp_big_beat_t offset)
 {
-	return player_playing(&self->workspace->player) &&
+	return psy_audio_player_playing(&self->workspace->player) &&
 		testrange(self->lastplayposition -
 			self->sequenceentryoffset,
 			offset, 1 / (psy_dsp_big_beat_t)self->grid.metrics.lpb);
@@ -297,7 +298,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 		}		
 	}
 
-	if (player_playing(&self->view->workspace->player)) {
+	if (psy_audio_player_playing(&self->view->workspace->player)) {
 		psy_dsp_big_beat_t offset;
 		
 		offset = self->view->lastplayposition;
@@ -704,7 +705,7 @@ void pianoroll_computemetrics(Pianoroll* self, PianoMetrics* rv)
 	psy_ui_Size gridsize;	
 
 	gridsize = psy_ui_component_size(&self->grid.component);		
-	rv->lpb = player_lpb(&self->workspace->player);
+	rv->lpb = psy_audio_player_lpb(&self->workspace->player);
 	rv->beatwidth = 80;
 	rv->keyheight = 12;
 	rv->keymin = 0;

@@ -481,9 +481,9 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_mousewheel, self,
 		trackergrid_onmousewheel);
 	self->player = player;	
-	self->numtracks = player_numsongtracks(player);
-	self->lpb = player_lpb(self->player);
-	self->bpl = 1 / (psy_dsp_big_beat_t) player_lpb(self->player);
+	self->numtracks = psy_audio_player_numsongtracks(player);
+	self->lpb = psy_audio_player_lpb(self->player);
+	self->bpl = 1 / (psy_dsp_big_beat_t)psy_audio_player_lpb(self->player);
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;	
 	self->cursor.track = 0;
 	self->cursor.offset = 0;
@@ -786,7 +786,7 @@ int trackergrid_testcursor(TrackerGrid* self, uintptr_t track, psy_dsp_big_beat_
 
 int trackergrid_testplaybar(TrackerGrid* self, psy_dsp_big_beat_t offset)
 {
-	return player_playing(self->player) && 
+	return psy_audio_player_playing(self->player) &&
 		testrange(self->view->lastplayposition -
 				      self->view->sequenceentryoffset,
 				  offset, self->bpl); 	
@@ -1105,7 +1105,7 @@ void trackergrid_prevcol(TrackerGrid* self)
 		if (self->view->wraparound) {
 			TrackDef* trackdef;
 
-			self->cursor.track = player_numsongtracks(
+			self->cursor.track = psy_audio_player_numsongtracks(
 				&self->view->workspace->player) - 1;
 			trackdef = trackerview_trackdef(self->view, self->cursor.track);
 			self->cursor.column = trackdef_numcolumns(trackdef) - 1;
@@ -1148,7 +1148,7 @@ void trackergrid_nextcol(TrackerGrid* self)
 	if (self->cursor.column == trackdef_numcolumns(trackdef) - 1 &&
 		self->cursor.digit == trackdef_numdigits(trackdef,
 			self->cursor.column) - 1) {		
-		if (self->cursor.track < player_numsongtracks(
+		if (self->cursor.track < psy_audio_player_numsongtracks(
 			&self->view->workspace->player) - 1) {
 			self->cursor.column = 0;
 			self->cursor.digit = 0;
@@ -1394,7 +1394,7 @@ void trackerview_prevtrack(TrackerView* self)
 	} else 
 	if (self->wraparound) {
 		self->grid.cursor.track = 
-			player_numsongtracks(&self->workspace->player) - 1;
+			psy_audio_player_numsongtracks(&self->workspace->player) - 1;
 		invalidate = trackerview_scrollright(self, self->grid.cursor);
 	}
 	if (invalidate) {
@@ -1415,7 +1415,7 @@ void trackerview_nexttrack(TrackerView* self)
 	self->grid.cursor.column = 0;
 	self->grid.cursor.digit = 0;
 	if (self->grid.cursor.track < 
-		player_numsongtracks(&self->workspace->player) - 1) {
+			psy_audio_player_numsongtracks(&self->workspace->player) - 1) {
 		++self->grid.cursor.track;
 		invalidate = trackerview_scrollright(self, self->grid.cursor);
 	} else
@@ -1521,14 +1521,14 @@ void trackerview_handlecommand(TrackerView* self, psy_ui_KeyEvent* ev, int cmd)
 		break;
 		case CMD_NAVPAGEUP:
 			trackerview_prevlines(self,
-				player_lpb(&self->workspace->player), 0);
+				psy_audio_player_lpb(&self->workspace->player), 0);
 		break;
 		case CMD_NAVDOWN:
 			trackerview_advanceline(self);
 		break;
 		case CMD_NAVPAGEDOWN:
 			trackerview_advancelines(self,
-				player_lpb(&self->workspace->player), 0);
+				psy_audio_player_lpb(&self->workspace->player), 0);
 		break;
 		case CMD_NAVLEFT:
 			trackergrid_prevcol(&self->grid);
@@ -2305,8 +2305,8 @@ PatternEditPosition trackergrid_makecursor(TrackerGrid* self, int x, int y)
 		rv.offset = pattern_length(self->pattern) - self->bpl;
 	}
 	rv.track = trackerview_screentotrack(self->view, x - self->dx);
-	if (rv.track >= player_numsongtracks(&self->view->workspace->player)) {
-		rv.track = player_numsongtracks(&self->view->workspace->player) - 1;
+	if (rv.track >= psy_audio_player_numsongtracks(&self->view->workspace->player)) {
+		rv.track = psy_audio_player_numsongtracks(&self->view->workspace->player) - 1;
 	}
 	coloffset = (x - self->dx - self->view->metrics.patterntrackident) -
 		trackerview_track_x(self->view, rv.track);
@@ -2394,7 +2394,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerview_initinputs(self);			
 	trackerview_initdefaultskin(self);		
 	trackerheader_init(&self->header, &self->component, self);	
-	self->header.numtracks = player_numsongtracks(&workspace->player);
+	self->header.numtracks = psy_audio_player_numsongtracks(&workspace->player);
 	// pattern default line
 	trackergrid_init(&self->griddefaults, &self->component, self, &workspace->player);	
 	self->griddefaults.editmode = TRACKERGRID_EDITMODE_LOCAL;
@@ -2874,12 +2874,13 @@ void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, psy_ui_Component* sen
 void trackerview_ontimer(TrackerView* self, psy_ui_Component* sender, int timerid)
 {
 	if (timerid == TIMERID_TRACKERVIEW && self->grid.pattern) {
-		if (self->doseqtick && player_playing(self->grid.player)) {
+		if (self->doseqtick && psy_audio_player_playing(self->grid.player)) {
 			if (!workspace_followingsong(self->workspace)) {
 				trackerview_invalidateline(self, self->lastplayposition);
 				trackerlinenumbers_invalidateline(&self->linenumbers,
 					self->lastplayposition);
-				self->lastplayposition = player_position(&self->workspace->player);
+				self->lastplayposition =
+					psy_audio_player_position(&self->workspace->player);
 				trackerview_invalidateline(self, self->lastplayposition);
 				trackerlinenumbers_invalidateline(&self->linenumbers,
 					self->lastplayposition);
@@ -3412,7 +3413,7 @@ void trackerview_onpatternimport(TrackerView* self)
 		if (psy_ui_opendialog_execute(&dialog)) {
 			psy_audio_patternio_load(self->grid.pattern,
 				psy_ui_opendialog_filename(&dialog),
-				1.f / player_lpb(&self->workspace->player));
+				1.f / psy_audio_player_lpb(&self->workspace->player));
 		}
 		psy_ui_opendialog_dispose(&dialog);		
 	}
@@ -3429,8 +3430,8 @@ void trackerview_onpatternexport(TrackerView* self)
 		if (psy_ui_savedialog_execute(&dialog)) {
 			psy_audio_patternio_save(self->grid.pattern,
 				psy_ui_savedialog_filename(&dialog),
-				1.f / player_lpb(&self->workspace->player),
-				player_numsongtracks(&self->workspace->player));
+				1.f / psy_audio_player_lpb(&self->workspace->player),
+				psy_audio_player_numsongtracks(&self->workspace->player));
 		}
 		psy_ui_savedialog_dispose(&dialog);		
 	}
@@ -3531,15 +3532,15 @@ void trackerview_onpatterneditpositionchanged(TrackerView* self, Workspace* send
 	self->grid.cursor = workspace_patterneditposition(sender);
 	if (!patterneditposition_equal(&self->grid.cursor, &oldcursor)) {
 		trackerview_invalidatecursor(self, &oldcursor);
-		if (player_playing(&sender->player) && workspace_followingsong(sender)) {
+		if (psy_audio_player_playing(&sender->player) && workspace_followingsong(sender)) {
 			int scrolldown;
 
 			scrolldown = self->lastplayposition < 
-				player_position(&self->workspace->player);
+				psy_audio_player_position(&self->workspace->player);
 			trackerview_invalidateline(self, self->lastplayposition);
 			trackerlinenumbers_invalidateline(&self->linenumbers,
 					self->lastplayposition);
-			self->lastplayposition = player_position(&self->workspace->player);
+			self->lastplayposition = psy_audio_player_position(&self->workspace->player);
 			trackerview_invalidateline(self, self->lastplayposition);
 			trackerlinenumbers_invalidateline(&self->linenumbers,
 					self->lastplayposition);			
@@ -3593,7 +3594,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 				self->grid.cursor, event, self->workspace)->command);
 		if (workspace_advancelineonrecordtweak(sender) &&
 				!(workspace_followingsong(sender) && 
-				  player_playing(&sender->player))) {			
+					psy_audio_player_playing(&sender->player))) {
 			trackerview_advanceline(self);
 		} else {
 			trackerview_invalidatecursor(self, &self->grid.cursor);
@@ -3689,7 +3690,7 @@ uintptr_t trackerview_screentotrack(TrackerView* self, int x)
 	int curr = 0;
 	uintptr_t rv = 0;
 
-	while (rv < player_numsongtracks(&self->workspace->player)) {
+	while (rv < psy_audio_player_numsongtracks(&self->workspace->player)) {
 		curr += trackerview_trackwidth(self, rv);
 		if (curr > x) {
 			break;

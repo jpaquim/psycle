@@ -14,18 +14,21 @@ Structure of the host
 audio           machines, patterns, instruments, sequence, player,
                 song import/export, library load, ...
 host            graphical psycle front end
-player			textmode psycle front end
+player          textmode psycle front end
 ui              bridged win32 calls, setup for x/motif (placeholder)
-audiodrivers	win:  asio, mme, mmemidi, directx, wasapi
-				linux: alsa (placeholder)
+audiodrivers	win: asio, mme, mmemidi, directx, wasapi
+                linux: alsa (placeholder)
+
 external libs
 lua             script engine used since psycle 1.10
-scintilla		plugin editor, help file viewer
+scintilla       plugin editor, help file viewer
+
 helper libs				
 container       list, hashtable, properties, signals
 dsp             buffer operations, adsr, notetab defines, sse2 optimizations
 file            file/dir routines
 
+Additional includes
 compiler
 detail          global header defines, platform tweaks
 
@@ -40,10 +43,10 @@ generation). For the 64Bit Configuration adjust the Output File Target
 in Project Linker settings for the host project. Set the Output File
 Target to the project standard. Install on older platforms the DirectX
 SDK and add the include/lib sdk directories (Tools/Options/Directories).
-Copy the appropiate vc runtime and universalis dlls an existing psycle
-installation from into cpsycle/Debug or cpsycle/Release
-cpyscle/Host and adjust the plugin directories.
-Copy bwltbl.dll from the plugin to the host path aswell.
+Copy the appropiate vc runtime and universalis dlls from an existing psycle
+installation into cpsycle/Debug or cpsycle/Release (VC2019) or 
+cpyscle/Host(VC6 and VC2008) and adjust the plugin directories.
+Copy bwltbl.dll from the existing psycle plugin path aswell.
 List of runtime files needed to be copied:
 bwltbl.dll,
 boost_chrono_your_version.dll,

@@ -141,7 +141,7 @@ void stepsequencerbar_ondraw(StepsequencerBar* self, psy_ui_Graphics* g)
 			curr = curr->next;
 		}
 	}
-	if (player_playing(&self->workspace->player)) {		
+	if (psy_audio_player_playing(&self->workspace->player)) {
 		if (self->steptimer->position.line >= self->position.steprow * 16 &&
 				self->steptimer->position.line < self->position.steprow * 16 + 16) {
 			stepsequencerbar_drawstep(self, g,
@@ -178,7 +178,7 @@ void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 	if (mode == 3) {
 		psy_ui_drawsolidroundrectangle(g, r, corner, 0x00FFFFFF);
 	}
-	if ((step % player_lpb(&self->workspace->player)) == 0) {
+	if ((step % psy_audio_player_lpb(&self->workspace->player)) == 0) {
 		psy_ui_setcolor(g, 0x00CACACA);
 		psy_ui_drawroundrectangle(g, r, corner);
 	}
@@ -195,11 +195,11 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		PatternEditPosition cursor;
 		psy_dsp_beat_t bpl;
 
-		bpl = (psy_dsp_beat_t) 1 / player_lpb(&self->workspace->player);
+		bpl = (psy_dsp_beat_t) 1 / psy_audio_player_lpb(&self->workspace->player);
 		step = ev->x / self->stepwidth + self->position.steprow * 16;
 		cursor = workspace_patterneditposition(self->workspace);
 		cursor.column = 0;	
-		cursor.offset = step / (psy_dsp_beat_t) player_lpb(
+		cursor.offset = step / (psy_dsp_beat_t) psy_audio_player_lpb(
 			&self->workspace->player);		
 		patternevent_clear(&event);
 		event.note = 48;
@@ -422,7 +422,7 @@ void stepsequencerbarselect_ondraw(StepsequencerBarSelect* self, psy_ui_Graphics
 	numsteprows = 4;
 	if (self->pattern) {
 		numsteprows = (int)(pattern_length(self->pattern) *
-			player_lpb(&self->workspace->player) / 16 + 0.5f);
+			psy_audio_player_lpb(&self->workspace->player) / 16 + 0.5f);
 	}
 	for (i = 0; i < numsteprows; ++i) {
 		if (i != 0 && (i % 4) == 0) {
@@ -648,7 +648,7 @@ void steptimer_tick(StepTimer* self)
 	if (self->doseqtick) {
 		self->doseqtick = 0;
 		self->position.line = offsettoline(self->player,
-			player_position(self->player) - self->sequenceentryoffset);		
+			psy_audio_player_position(self->player) - self->sequenceentryoffset);
 		self->position.steprow = self->position.line / 16;			
 		psy_signal_emit(&self->signal_linetick, self, 0);				
 	}
@@ -664,7 +664,7 @@ void steptimer_onseqlinetick(StepTimer* self, psy_audio_Sequencer* sender)
 
 int offsettoline(psy_audio_Player* player, psy_dsp_beat_t offset)
 {		
-	return (int)(offset * player_lpb(player));
+	return (int)(offset * psy_audio_player_lpb(player));
 }
 
 StepSequencerPosition steptimer_position(StepTimer* self)

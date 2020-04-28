@@ -138,13 +138,13 @@ int main(int argc, char *argv[])
 		cmdplayer_loadsong(&cmdplayer, argv[1]);		
 		printf("psycle: player: press q to stop.\n");
 		psy_audio_sequencer_stoploop(&cmdplayer.player.sequencer);
-		player_setposition(&cmdplayer.player, (psy_dsp_beat_t) 0.f);
-		player_start(&cmdplayer.player);		
+		psy_audio_player_setposition(&cmdplayer.player, (psy_dsp_beat_t) 0.f);
+		psy_audio_player_start(&cmdplayer.player);
 #if !defined _WIN32
 		set_conio_terminal_mode();
 #endif
 	c = '\0';
-	while (player_playing(&cmdplayer.player)) {
+	while (psy_audio_player_playing(&cmdplayer.player)) {
 		if (kbhit()) {
 			c = getch();
 			if (c == 'q') {
@@ -187,9 +187,9 @@ void cmdplayer_init(CmdPlayer* self)
 	cmdplayer_initplugincatcherandmachinefactory(self);
     printf("alloc song\n");
 	self->song = psy_audio_song_allocinit(&self->machinefactory);	
-	player_init(&self->player, self->song, (void*)0);	
+	psy_audio_player_init(&self->player, self->song, (void*)0);
     printf("load driver \n");
-	player_loaddriver(&self->player, cmdplayer_driverpath(self), 0);	
+	psy_audio_player_loaddriver(&self->player, cmdplayer_driverpath(self), 0);
 	printf("Audio driver %s \n", 
 		psy_properties_readstring(self->player.driver->properties, "name",
 		"no description"));
@@ -283,7 +283,7 @@ void cmdplayer_setdriverlist(CmdPlayer* self)
 
 void cmdplayer_dispose(CmdPlayer* self)
 {
-	player_dispose(&self->player);	
+	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
 	properties_free(self->config);
@@ -323,7 +323,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	psy_audio_Song* oldsong;
 	psy_audio_SongFile songfile;
 
-	player_stop(&self->player);
+	psy_audio_player_stop(&self->player);
 	oldsong = self->song;
 	psy_audio_exclusivelock_enter();	
 	self->song = psy_audio_song_allocinit(&self->machinefactory);	
@@ -334,7 +334,7 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 	if (songfile.err) {
 		fprintf(stderr, "Couldn't load song\n");
 	}	
-	player_setsong(&self->player, self->song);
+	psy_audio_player_setsong(&self->player, self->song);
 	cmdplayer_applysongproperties(self);
 	psy_audio_exclusivelock_leave();
 	psy_audio_song_deallocate(oldsong);
@@ -343,8 +343,8 @@ void cmdplayer_loadsong(CmdPlayer* self, const char* path)
 
 void cmdplayer_applysongproperties(CmdPlayer* self)
 {			
-	player_setbpm(&self->player, self->song->properties.bpm);	
-	player_setlpb(&self->player, self->song->properties.lpb);
+	psy_audio_player_setbpm(&self->player, self->song->properties.bpm);
+	psy_audio_player_setlpb(&self->player, self->song->properties.lpb);
 }
 
 // callbacks
@@ -377,7 +377,7 @@ unsigned int machinecallback_samplerate(CmdPlayer* self)
 
 unsigned int machinecallback_bpm(CmdPlayer* self)
 {
-    return (unsigned int) player_bpm(&self->player);
+    return (unsigned int) psy_audio_player_bpm(&self->player);
 }
 
 psy_dsp_beat_t machinecallback_beatspersample(CmdPlayer* self)

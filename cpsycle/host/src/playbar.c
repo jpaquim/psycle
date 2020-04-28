@@ -96,24 +96,24 @@ void onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
 	psy_audio_exclusivelock_enter();
 	switch (psy_ui_combobox_cursel(&self->playmode)) {
 		case PLAY_SONG:
-			player_stop(self->player);
+			psy_audio_player_stop(self->player);
 			psy_audio_sequencer_setplaymode(&self->player->sequencer,
 				psy_audio_SEQUENCERPLAYMODE_PLAYALL);			
 		break;
 		case PLAY_SEL:
-			player_stop(self->player);
+			psy_audio_player_stop(self->player);
 			psy_audio_sequencer_setplaymode(&self->player->sequencer,
 				psy_audio_SEQUENCERPLAYMODE_PLAYSEL);
 			startplay(self);
 		break;
 		case PLAY_BEATS:
-			player_stop(self->player);
+			psy_audio_player_stop(self->player);
 			psy_audio_sequencer_setplaymode(&self->player->sequencer,
 				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
 			startplay(self);
 		break;
 		default:
-			player_stop(self->player);
+			psy_audio_player_stop(self->player);
 			psy_audio_sequencer_setplaymode(&self->player->sequencer,
 				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
 			startplay(self);
@@ -168,7 +168,7 @@ void onplayclicked(PlayBar* self, psy_ui_Component* sender)
 				psy_audio_SEQUENCERPLAYMODE_PLAYALL);
 		break;
 	};	
-	if (!player_playing(self->player)) {
+	if (!psy_audio_player_playing(self->player)) {
 		startplay(self);
 	}
 }
@@ -187,7 +187,7 @@ void startplay(PlayBar* self)
 	entry = sequenceposition_entry(&editposition);
 	if (entry) {
 		psy_audio_exclusivelock_enter();		
-		player_stop(self->player);
+		psy_audio_player_stop(self->player);
 		startposition = entry->offset;
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
 			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
@@ -199,15 +199,15 @@ void startplay(PlayBar* self)
 				&self->loopbeatsedit));
 			self->player->sequencer.numplaybeats = numplaybeats;
 		}
-		player_setposition(self->player, startposition);
-		player_start(self->player);
+		psy_audio_player_setposition(self->player, startposition);
+		psy_audio_player_start(self->player);
 		psy_audio_exclusivelock_leave();
 	}
 }
 
 void onstopclicked(PlayBar* self, psy_ui_Component* sender)
 {
-	player_stop(self->player);
+	psy_audio_player_stop(self->player);
 }
 
 void onloopclicked(PlayBar* self, psy_ui_Component* sender)
@@ -223,18 +223,18 @@ void onloopclicked(PlayBar* self, psy_ui_Component* sender)
 
 void onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 {	
-	if (player_recordingnotes(self->player)) {
-		player_stoprecordingnotes(self->player);
+	if (psy_audio_player_recordingnotes(self->player)) {
+		psy_audio_player_stoprecordingnotes(self->player);
 		psy_ui_button_disablehighlight(&self->recordnotes);
 	} else {
-		player_startrecordingnotes(self->player);
+		psy_audio_player_startrecordingnotes(self->player);
 		psy_ui_button_highlight(&self->recordnotes);
 	}
 }
 
 void ontimer(PlayBar* self, psy_ui_Component* sender, int timerid)
 {
-	if (player_playing(self->player)) {
+	if (psy_audio_player_playing(self->player)) {
 		psy_ui_button_highlight(&self->play);
 	} else {
 		psy_ui_button_disablehighlight(&self->play);	

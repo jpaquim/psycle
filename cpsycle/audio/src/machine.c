@@ -11,6 +11,9 @@
 #include <operations.h>
 #include <valuemapper.h>
 #include "plugin_interface.h"
+#include "constants.h"
+#include "wire.h"
+#include "song.h"
 
 #include <stdlib.h>
 
@@ -215,6 +218,8 @@ static int numplaybacks(psy_audio_Machine* self)
 {
 	return self->callback.numplaybacks(self->callback.context);
 }
+
+static int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex);
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -539,8 +544,92 @@ void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	}
 }
 
-void postload(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
+void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
+	uintptr_t c;
+	psy_Table* legacywiretable;
+
+	legacywiretable = psy_table_at(&songfile->legacywires, slot);
+	if (!legacywiretable) {
+		return;
+	}
+
+	for (c = 0; c < MAX_CONNECTIONS; ++c) {
+		LegacyWire* wire;
+		psy_audio_Machine* inputmachine;
+		uintptr_t f;
+				
+		wire = psy_table_at(legacywiretable, c);
+		if (!wire) {
+			continue;
+		}
+		//load bugfix: Ensure no duplicate wires could be created.
+		for (f = 0; f < c; f++) {
+			LegacyWire* legacywire;
+
+			legacywire = psy_table_at(legacywiretable, f);
+			if (!legacywire) {
+				continue;
+			}
+			if (wire->_inputCon && legacywire->_inputCon &&
+				wire->_inputMachine == legacywire->_inputMachine) {
+				wire->_inputCon = FALSE;
+			}
+		}
+		inputmachine = machines_at(&songfile->song->machines, wire->_inputMachine);
+		if (wire->_inputCon
+			&& wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
+			&& slot != wire->_inputMachine && inputmachine)
+		{
+			//Do not create the hidden wire from mixer send to the send machine.
+			int outWire = findlegacyoutput(songfile, wire->_inputMachine, slot);
+			if (outWire != -1) {
+				//if (wire.pinMapping.size() > 0) {
+				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
+				//		, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex)
+				//		, &wire.pinMapping);
+				//} else {
+				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
+				//		, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex));
+				//}
+				//while (wire->_inputConVol * wire->_wireMultiplier > 8.0f) { //psycle 1.10.1 alpha bugfix
+					//wire->_inputConVol /= 32768.f;
+				//}
+				//while (wire->_inputConVol > 0.f && wire->_inputConVol * wire->_wireMultiplier < 0.0002f) { //psycle 1.10.1 alpha bugfix
+					//wire->_inputConVol *= 32768.f;
+				//}
+				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
+				machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+				connections_setwirevolume(&songfile->song->machines.connections,
+					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
+			}
+		}
+	}
+}
+
+int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex)
+{
+	psy_Table* legacywiretable;
+
+	legacywiretable = psy_table_at(&songfile->legacywires, sourceMac);
+	if (!legacywiretable) {
+		return -1;
+	}
+	for (int c = 0; c < MAX_CONNECTIONS; c++)
+	{
+		LegacyWire* legacywire;
+
+		legacywire = psy_table_at(legacywiretable, c);
+		if (!legacywire) {
+			continue;
+		}
+		if (legacywire->_connection &&
+			legacywire->_outputMachine == macIndex)
+		{
+			return c;
+		}
+	}
+	return -1;
 }
 

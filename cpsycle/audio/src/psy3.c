@@ -11,8 +11,11 @@
 #include <operations.h>
 #include <dir.h>
 #include "machinefactory.h"
+#include "wire.h"
+
 #include <stdlib.h>
 #include <string.h>
+
 #include "../../detail/portable.h"
 #include "../../detail/psydef.h"
 #include "plugin_interface.h"
@@ -1516,6 +1519,7 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 	char plugincatchername[256];
 	char editname[32];	
 	int32_t i;
+	psy_Table* legacywiretable;
 	
 	psyfile_read(self->file, &type,sizeof(type));
 	psyfile_readstring(self->file, modulename, 256);
@@ -1554,7 +1558,9 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 			psy_audio_machine_mute(machine);
 		}
 		psy_audio_machine_setpanning(machine, panning / 128.f);
-	}	
+	}
+	legacywiretable = (psy_Table*)malloc(sizeof(psy_Table));
+	psy_table_init(legacywiretable);
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		int32_t input;
 		int32_t output;
@@ -1562,7 +1568,8 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		float wiremultiplier;
 		unsigned char connection;
 		unsigned char incon;
-																					
+		LegacyWire* legacywire;
+						
 		// Incoming connections psy_audio_Machine number
 		psyfile_read(self->file, &input ,sizeof(input));		
 		// Outgoing connections psy_audio_Machine number
@@ -1575,10 +1582,10 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		psyfile_read(self->file, &connection, sizeof(connection));
 		// Incoming connections activated
 		psyfile_read(self->file, &incon, sizeof(incon));
-		if (connection && output != -1) {					
-			machines_connect(&self->song->machines, index, output);
-		}
-		if (incon && input != -1) {
+		//if (connection && output != -1) {
+			//machines_connect(&self->song->machines, index, output);			
+		//}
+		/*if (incon && input != -1) {
 			psy_audio_WireSocketEntry* entry;
 			
 			machines_connect(&self->song->machines, input, index);			
@@ -1589,8 +1596,17 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 			connections_setwirevolume(&self->song->machines.connections,
 				input, index, inconvol * wiremultiplier);
 			
-		}
+		}*/
+		legacywire = (LegacyWire*)malloc(sizeof(LegacyWire));
+		legacywire->_inputMachine = input;
+		legacywire->_outputMachine = output;
+		legacywire->_connection = connection;
+		legacywire->_inputCon = incon;
+		legacywire->_inputConVol = inconvol;
+		legacywire->_wireMultiplier = wiremultiplier;
+		psy_table_insert(legacywiretable, (uintptr_t)i, (void*)legacywire);
 	}
+	psy_table_insert(&self->legacywires, index, legacywiretable);
 	psyfile_readstring(self->file, editname, 32);
 	if (type == MACH_DUMMY) {
 		char text[256];

@@ -27,27 +27,27 @@ static void* mainframe;
 static PsyFile logfile;
 #endif
 
-static void player_initdriver(psy_audio_Player*);
-static void player_initkbddriver(psy_audio_Player*);
-static void player_initrms(psy_audio_Player*);
-static void player_initsignals(psy_audio_Player*);
-static void player_disposerms(psy_audio_Player*);
-static void player_unloaddriver(psy_audio_Player*);
-static void player_unloadeventdrivers(psy_audio_Player*);
-static psy_dsp_amp_t* work(psy_audio_Player*, int* numsamples, int* stop);
-static void player_workamount(psy_audio_Player*, uintptr_t amount,
+static void psy_audio_player_initdriver(psy_audio_Player*);
+static void psy_audio_player_initkbddriver(psy_audio_Player*);
+static void psy_audio_player_initrms(psy_audio_Player*);
+static void psy_audio_player_initsignals(psy_audio_Player*);
+static void psy_audio_player_disposerms(psy_audio_Player*);
+static void psy_audio_player_unloaddriver(psy_audio_Player*);
+static void psy_audio_player_unloadeventdrivers(psy_audio_Player*);
+static psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player*, int* numsamples, int* stop);
+static void psy_audio_player_workamount(psy_audio_Player*, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples);
-static void player_oneventdriverinput(psy_audio_Player*, psy_EventDriver* sender);
-static void player_workpath(psy_audio_Player*, uintptr_t amount);
+static void psy_audio_player_oneventdriverinput(psy_audio_Player*, psy_EventDriver* sender);
+static void psy_audio_player_workpath(psy_audio_Player*, uintptr_t amount);
 static void log_workevents(psy_List* events);
-static void player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
-static psy_dsp_RMSVol* player_rmsvol(psy_audio_Player*, size_t slot);
-static void player_resetvumeters(psy_audio_Player*);
-static void player_dostop(psy_audio_Player*);
-static void notifylinetick(psy_audio_Player*);
+static void psy_audio_player_filldriver(psy_audio_Player*, psy_dsp_amp_t* buffer, uintptr_t amount);
+static psy_dsp_RMSVol* psy_audio_player_rmsvol(psy_audio_Player*, size_t slot);
+static void psy_audio_player_resetvumeters(psy_audio_Player*);
+static void psy_audio_player_dostop(psy_audio_Player*);
+static void psy_audio_player_notifylinetick(psy_audio_Player*);
 
 // player init and dispose
-void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
+void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 {			
 	self->song = song;	
 	self->numsongtracks = 16;
@@ -56,12 +56,12 @@ void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
 		&song->machines);
 	mainframe = handle;
-	player_initdriver(self);	
+	psy_audio_player_initdriver(self);
 	eventdrivers_init(&self->eventdrivers, handle);
 	psy_signal_connect(&self->eventdrivers.signal_input, self,
-		player_oneventdriverinput);
-	player_initsignals(self);
-	player_initrms(self);
+		psy_audio_player_oneventdriverinput);
+	psy_audio_player_initsignals(self);
+	psy_audio_player_initrms(self);
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
@@ -72,37 +72,37 @@ void player_init(psy_audio_Player* self, psy_audio_Song* song, void* handle)
 #endif
 }
 
-void player_initdriver(psy_audio_Player* self)
+void psy_audio_player_initdriver(psy_audio_Player* self)
 {	
 	self->driver = 0;	
 	psy_library_init(&self->drivermodule);
-	player_loaddriver(self, 0, 0);		
+	psy_audio_player_loaddriver(self, 0, 0);
 }
 
-void player_initsignals(psy_audio_Player* self)
+void psy_audio_player_initsignals(psy_audio_Player* self)
 {
 	psy_signal_init(&self->signal_numsongtrackschanged);
 	psy_signal_init(&self->signal_lpbchanged);
 	psy_signal_init(&self->signal_inputevent);
 }
 
-void player_initrms(psy_audio_Player* self)
+void psy_audio_player_initrms(psy_audio_Player* self)
 {
 	self->vumode = VUMETER_RMS;
 	self->resetvumeters = 0;
 	psy_table_init(&self->rms);
 }
 
-void player_dispose(psy_audio_Player* self)
+void psy_audio_player_dispose(psy_audio_Player* self)
 {			
-	player_unloaddriver(self);
+	psy_audio_player_unloaddriver(self);
 	psy_library_dispose(&self->drivermodule);
 	eventdrivers_dispose(&self->eventdrivers);	
 	psy_signal_dispose(&self->signal_numsongtrackschanged);
 	psy_signal_dispose(&self->signal_lpbchanged);
 	psy_signal_dispose(&self->signal_inputevent);	
 	psy_audio_sequencer_dispose(&self->sequencer);
-	player_disposerms(self);
+	psy_audio_player_disposerms(self);
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
 	psy_table_dispose(&self->worked);
@@ -112,7 +112,7 @@ void player_dispose(psy_audio_Player* self)
 #endif
 }
 
-void player_disposerms(psy_audio_Player* self)
+void psy_audio_player_disposerms(psy_audio_Player* self)
 {
 	psy_TableIterator it;
 
@@ -129,7 +129,7 @@ void player_disposerms(psy_audio_Player* self)
 // - splits work to MAX_STREAM_SIZE parts or to let work begin on a line tick
 // - player_workamount processes each spltted part
 // - updates the sequencer line tick count
-psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
+psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 {	
 	uintptr_t maxamount;
 	uintptr_t amount;
@@ -150,10 +150,10 @@ psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 				amount);
 		}
 		if (amount > 0) {
-			player_workamount(self, amount, &numsamplex, &samples);
+			psy_audio_player_workamount(self, amount, &numsamplex, &samples);
 		}
 		if (self->sequencer.linetickcount <= 0) {
-			notifylinetick(self);			
+			psy_audio_player_notifylinetick(self);
 			psy_audio_sequencer_onlinetick(&self->sequencer);			
 		}
 	} while (numsamplex > 0);
@@ -163,7 +163,7 @@ psy_dsp_amp_t* work(psy_audio_Player* self, int* numsamples, int* hostisplaying)
 }
 
 // each machine gets notified a new tracker line has started
-void notifylinetick(psy_audio_Player* self)
+void psy_audio_player_notifylinetick(psy_audio_Player* self)
 {
 	if (self->song) {
 		psy_TableIterator it;
@@ -177,19 +177,19 @@ void notifylinetick(psy_audio_Player* self)
 	}
 }
 
-void player_workamount(psy_audio_Player* self, uintptr_t amount, uintptr_t* numsamplex,
+void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount, uintptr_t* numsamplex,
 					   psy_dsp_amp_t** psamples)
 {
 	psy_audio_sequencer_frametick(&self->sequencer, amount);	
 	if (self->song) {
-		player_workpath(self, amount);
+		psy_audio_player_workpath(self, amount);
 	}
-	player_filldriver(self, *psamples, amount);
+	psy_audio_player_filldriver(self, *psamples, amount);
 	*numsamplex -= amount;
 	*psamples  += (amount * 2);
 }
 
-void player_workpath(psy_audio_Player* self, uintptr_t amount)
+void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 {
 	MachinePath* path;
 
@@ -205,16 +205,16 @@ void player_workpath(psy_audio_Player* self, uintptr_t amount)
 				continue;				
 			}
 			if (!machines_ismixersend(&self->song->machines, slot)) {
-				player_workmachine(self, amount, slot);
+				psy_audio_player_workmachine(self, amount, slot);
 			}
 		}		
 	}
 	if (self->resetvumeters) {
-		player_resetvumeters(self);
+		psy_audio_player_resetvumeters(self);
 	}	
 }
 
-void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot)
+void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot)
 {
 	psy_audio_Machine* machine;
 
@@ -232,7 +232,7 @@ void player_workmachine(psy_audio_Player* self, uintptr_t amount, uintptr_t slot
 
 			events = psy_audio_sequencer_timedevents(&self->sequencer,
 				slot, amount);
-			rms = player_rmsvol(self, slot);
+			rms = psy_audio_player_rmsvol(self, slot);
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
 				self->numsongtracks, rms);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine), amount);
@@ -274,14 +274,14 @@ void log_workevents(psy_List* events)
 }
 #endif
 
-void player_resetvumeters(psy_audio_Player* self)
+void psy_audio_player_resetvumeters(psy_audio_Player* self)
 {	
 	psy_table_dispose(&self->rms);
 	psy_table_init(&self->rms);
 	self->resetvumeters = 0;	
 }
 
-void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
+void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t amount)
 {
 	psy_audio_Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
@@ -292,7 +292,7 @@ void player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer, uintptr_t 
 	}
 }
 
-psy_dsp_RMSVol* player_rmsvol(psy_audio_Player* self, size_t slot)
+psy_dsp_RMSVol* psy_audio_player_rmsvol(psy_audio_Player* self, size_t slot)
 {
 	psy_dsp_RMSVol* rv;
 
@@ -306,7 +306,7 @@ psy_dsp_RMSVol* player_rmsvol(psy_audio_Player* self, size_t slot)
 }
 
 // event driver callback
-void player_oneventdriverinput(psy_audio_Player* self, psy_EventDriver* sender)
+void psy_audio_player_oneventdriverinput(psy_audio_Player* self, psy_EventDriver* sender)
 {
 	psy_Properties* notes;
 	EventDriverCmd cmd;	
@@ -368,7 +368,7 @@ void player_oneventdriverinput(psy_audio_Player* self, psy_EventDriver* sender)
 		if (self->recordingnotes && psy_audio_sequencer_playing(&
 				self->sequencer)) {
 			psy_audio_sequencer_recordinputevent(&self->sequencer, &event, 0, 
-				player_position(self));			
+				psy_audio_player_position(self));
 		} else {			
 			psy_signal_emit(&self->signal_inputevent, self, 1, &event);
 		}
@@ -376,7 +376,7 @@ void player_oneventdriverinput(psy_audio_Player* self, psy_EventDriver* sender)
 }
 
 // general setter and getter
-void player_setsong(psy_audio_Player* self, psy_audio_Song* song)
+void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 {
 	self->song = song;
 	if (self->song) {
@@ -384,11 +384,11 @@ void player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 			&song->machines);
 		psy_audio_sequencer_setsamplerate(&self->sequencer,
 			self->driver->samplerate(self->driver));
-		player_setnumsongtracks(self, patterns_songtracks(&song->patterns));
+		psy_audio_player_setnumsongtracks(self, patterns_songtracks(&song->patterns));
 	}
 }
 
-void player_setnumsongtracks(psy_audio_Player* self, uintptr_t numsongtracks)
+void psy_audio_player_setnumsongtracks(psy_audio_Player* self, uintptr_t numsongtracks)
 {
 	if (numsongtracks >= 1 && numsongtracks <= 64) {
 		self->numsongtracks = numsongtracks;	
@@ -397,35 +397,35 @@ void player_setnumsongtracks(psy_audio_Player* self, uintptr_t numsongtracks)
 	}
 }
 
-uintptr_t player_numsongtracks(psy_audio_Player* self)
+uintptr_t psy_audio_player_numsongtracks(psy_audio_Player* self)
 {
 	return self->numsongtracks;
 }
 
-void player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)
+void psy_audio_player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)
 {
 	self->vumode = mode;
 	self->resetvumeters = 1;
 }
 
-VUMeterMode player_vumetermode(psy_audio_Player* self)
+VUMeterMode psy_audio_player_vumetermode(psy_audio_Player* self)
 {
 	return self->vumode;
 }
 
 // sequencer setter and getter
-void player_start(psy_audio_Player* self)
+void psy_audio_player_start(psy_audio_Player* self)
 {		
 	psy_audio_sequencer_start(&self->sequencer);
 }
 
-void player_stop(psy_audio_Player* self)
+void psy_audio_player_stop(psy_audio_Player* self)
 {
 	psy_audio_sequencer_stop(&self->sequencer);
-	player_dostop(self);
+	psy_audio_player_dostop(self);
 }
 
-void player_dostop(psy_audio_Player* self)
+void psy_audio_player_dostop(psy_audio_Player* self)
 {
 	if (self->song) {
 		psy_TableIterator it;
@@ -438,44 +438,44 @@ void player_dostop(psy_audio_Player* self)
 			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
 			machine->vtable->stop(machine);			
 		}
-		player_setbpm(self, self->song->properties.bpm);
-		player_setlpb(self, self->song->properties.lpb);		
+		psy_audio_player_setbpm(self, self->song->properties.bpm);
+		psy_audio_player_setlpb(self, self->song->properties.lpb);
 	}
 }
 
-void player_setposition(psy_audio_Player* self, psy_dsp_beat_t offset)
+void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_beat_t offset)
 {
 	psy_audio_sequencer_setposition(&self->sequencer, offset);
 }
 
-void player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
+void psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
 {
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
 }
 
-void player_setlpb(psy_audio_Player* self, uintptr_t lpb)
+void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 {
 	psy_audio_sequencer_setlpb(&self->sequencer, lpb);
 	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);
 }
 
 // psy_AudioDriver set, get, load, unload, restart, ..., methods
-void player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver* driver)
+void psy_audio_player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver* driver)
 {
 	self->driver = driver;
-	driver->connect(driver, self, work, mainframe);
+	driver->connect(driver, self, psy_audio_player_work, mainframe);
 }
 
-psy_AudioDriver* player_audiodriver(psy_audio_Player* self)
+psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player* self)
 {
 	return self->driver;
 }
 
-void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
+void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
 {
 	psy_AudioDriver* driver = 0;
 	
-	player_unloaddriver(self);	
+	psy_audio_player_unloaddriver(self);
 	if (path) {
         printf("driver path: %s\n", path);
 		psy_library_load(&self->drivermodule, path);	
@@ -486,7 +486,7 @@ void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties*
 				psy_library_functionpointer(&self->drivermodule, "driver_create");
 			if (fpdrivercreate) {
 				driver = fpdrivercreate();				
-				driver->connect(driver, self, work, mainframe);
+				driver->connect(driver, self, psy_audio_player_work, mainframe);
 			}
 			psy_audio_exclusivelock_enable();
 		}		
@@ -509,7 +509,7 @@ void player_loaddriver(psy_audio_Player* self, const char* path, psy_Properties*
 	}
 }
 
-void player_unloaddriver(psy_audio_Player* self)
+void psy_audio_player_unloaddriver(psy_audio_Player* self)
 {
 	if (self->driver) {
 		self->driver->close(self->driver);				
@@ -519,13 +519,13 @@ void player_unloaddriver(psy_audio_Player* self)
 	self->driver = 0;
 }
 
-void player_reloaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
+void psy_audio_player_reloaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
 {		
-	player_unloaddriver(self);
-	player_loaddriver(self, path, config);		
+	psy_audio_player_unloaddriver(self);
+	psy_audio_player_loaddriver(self, path, config);
 }
 
-void player_restartdriver(psy_audio_Player* self, psy_Properties* config)
+void psy_audio_player_restartdriver(psy_audio_Player* self, psy_Properties* config)
 {	
 	if (self->driver) {
 		self->driver->close(self->driver);	
@@ -535,48 +535,48 @@ void player_restartdriver(psy_audio_Player* self, psy_Properties* config)
 }
 
 // Event Recording
-void player_startrecordingnotes(psy_audio_Player* self)
+void psy_audio_player_startrecordingnotes(psy_audio_Player* self)
 {
 	self->recordingnotes = 1;
 }
 
-void player_stoprecordingnotes(psy_audio_Player* self)
+void psy_audio_player_stoprecordingnotes(psy_audio_Player* self)
 {
 	self->recordingnotes = 0;
 }
 
-int player_recordingnotes(psy_audio_Player* self)
+int psy_audio_player_recordingnotes(psy_audio_Player* self)
 {
 	return self->recordingnotes;
 }
 
 // psy_EventDriver load, unload, restart, ..., methods
-void player_loadeventdriver(psy_audio_Player* self, const char* path)
+void psy_audio_player_loadeventdriver(psy_audio_Player* self, const char* path)
 {
 	eventdrivers_load(&self->eventdrivers, path);
 }
 
-void player_restarteventdriver(psy_audio_Player* self, int id)
+void psy_audio_player_restarteventdriver(psy_audio_Player* self, int id)
 {
 	eventdrivers_restart(&self->eventdrivers, id);
 }
 
-void player_removeeventdriver(psy_audio_Player * self, int id)
+void psy_audio_player_removeeventdriver(psy_audio_Player * self, int id)
 {
 	eventdrivers_remove(&self->eventdrivers, id);
 }
 
-psy_EventDriver* player_kbddriver(psy_audio_Player* self)
+psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player* self)
 {
 	return self->eventdrivers.kbddriver;
 }
 
-psy_EventDriver* player_eventdriver(psy_audio_Player* self, int id) 
+psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player* self, int id)
 {
 	return eventdrivers_driver(&self->eventdrivers, id);
 }
 
-unsigned int player_numeventdrivers(psy_audio_Player* self)
+unsigned int psy_audio_player_numeventdrivers(psy_audio_Player* self)
 {
 	return eventdrivers_size(&self->eventdrivers);
 }

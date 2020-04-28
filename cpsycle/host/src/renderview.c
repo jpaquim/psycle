@@ -142,13 +142,13 @@ void renderview_onsettingsviewchanged(RenderView* self, SettingsView* sender,
 
 void renderview_render(RenderView* self)
 {	
-	self->curraudiodriver = player_audiodriver(&self->workspace->player);
+	self->curraudiodriver = psy_audio_player_audiodriver(&self->workspace->player);
 	self->curraudiodriver->close(self->curraudiodriver);
-	player_setaudiodriver(&self->workspace->player, self->fileoutdriver);
+	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);
 	self->restoreloopmode = self->workspace->player.sequencer.looping;
 	self->workspace->player.sequencer.looping = 0;
-	player_setposition(&self->workspace->player, 0);
-	player_start(&self->workspace->player);	
+	psy_audio_player_setposition(&self->workspace->player, 0);
+	psy_audio_player_start(&self->workspace->player);
 	psy_signal_connect(&self->fileoutdriver->signal_stop, self,
 		renderview_onstoprendering);
 	self->fileoutdriver->open(self->fileoutdriver);
@@ -156,8 +156,9 @@ void renderview_render(RenderView* self)
 
 void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 {
-	player_stop(&self->workspace->player);
-	player_setaudiodriver(&self->workspace->player, self->curraudiodriver);
+	psy_audio_player_stop(&self->workspace->player);
+	psy_audio_player_setaudiodriver(&self->workspace->player,
+		self->curraudiodriver);
 	self->workspace->player.sequencer.looping = self->restoreloopmode;
 	self->curraudiodriver->open(self->curraudiodriver);
 	self->fileoutdriver->close(self->fileoutdriver);

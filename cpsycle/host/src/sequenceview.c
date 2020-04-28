@@ -451,14 +451,14 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 		// psy_audio_Pattern* pattern;
 		entry = (SequenceEntry*)p->entry;		
 
-		if (player_playing(self->player)) {
+		if (psy_audio_player_playing(self->player)) {
 			psy_audio_Pattern* pattern;
 
 			pattern = patterns_at(self->patterns, entry->pattern);			
 			if (pattern && 
-					player_position(self->player) >= entry->offset &&
-					player_position(self->player) < entry->offset +
-						pattern->length) {
+					psy_audio_player_position(self->player) >= entry->offset &&
+					psy_audio_player_position(self->player) < entry->offset +
+					pattern->length) {
 				playing = 1;
 			}
 		}
@@ -1005,9 +1005,9 @@ void sequencelistview_ontimer(SequenceListView* self, int timerid)
 {			
 	SequenceTrackIterator it;
 	
-	if (player_playing(self->player)) {
+	if (psy_audio_player_playing(self->player)) {
 		it = sequence_begin(self->sequence, self->sequence->tracks, 
-			player_position(self->player));
+			psy_audio_player_position(self->player));
 		if (it.tracknode && self->lastentry != it.tracknode->entry) {
 			psy_ui_component_invalidate(&self->component);
 			self->lastentry = (SequenceEntry*) it.tracknode->entry;
@@ -1047,7 +1047,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 void sequenceview_updateplayposition(SequenceView* self)
 {	
 	if (workspace_followingsong(self->workspace) &&
-			player_playing(&self->workspace->player)) {
+		psy_audio_player_playing(&self->workspace->player)) {
 		sequenceview_changeplayposition(self);
 	}
 }
@@ -1062,8 +1062,8 @@ void sequenceview_changeplayposition(SequenceView* self)
 	entry = sequenceposition_entry(&editposition);
 	startposition = entry->offset;
 	psy_audio_exclusivelock_enter();
-	player_stop(&self->workspace->player);
-	player_setposition(&self->workspace->player, startposition);
-	player_start(&self->workspace->player);
+	psy_audio_player_stop(&self->workspace->player);
+	psy_audio_player_setposition(&self->workspace->player, startposition);
+	psy_audio_player_start(&self->workspace->player);
 	psy_audio_exclusivelock_leave();
 }

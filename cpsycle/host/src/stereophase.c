@@ -138,7 +138,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	float mvc, mvpc, mvl, mvdl, mvpl, mvdpl, mvr, mvdr, mvpr, mvdpr;
 	const float multleft = self->invol * self->mult; //  *self->lsrcMachine._lVol;
 	const float multright = self->invol * self->mult; //* srcMachine._rVol;
-	unsigned int sr = player_samplerate(&self->workspace->player);
+	unsigned int sr = psy_audio_player_samplerate(&self->workspace->player);
 	char buf[64];
 	int x, y;
 	float* pSamplesL;
