@@ -28,8 +28,23 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext*,
 	uintptr_t numtracks,
 	struct psy_dsp_RMSVol* rmsvol);
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext*);
-uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext*);
-uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext*);
+void psy_audio_buffercontext_setoffset(psy_audio_BufferContext* self, uintptr_t offset);
+
+INLINE void psy_audio_buffercontext_setnumsamples(psy_audio_BufferContext* self, uintptr_t amount)
+{
+	self->numsamples = amount;
+}
+
+INLINE uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext* self)
+{
+	return self->numsamples;
+}
+
+INLINE uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext* self)
+{
+	return self->numtracks;
+}
+
 psy_dsp_amp_t psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext*);
 psy_dsp_amp_t psy_audio_buffercontext_volumedisplay(psy_audio_BufferContext*);
 psy_dsp_amp_t psy_audio_buffercontext_rmsscale(psy_audio_BufferContext*,

@@ -27,15 +27,16 @@ void psy_audio_buffercontext_dispose(psy_audio_BufferContext* self)
 {	
 }
 
-uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext* self)
+void psy_audio_buffercontext_setoffset(psy_audio_BufferContext* self, uintptr_t offset)
 {
-	return self->numsamples;
+	if (self->input) {
+		psy_audio_buffer_setoffset(self->input, offset);
+	}
+	if (self->output) {
+		psy_audio_buffer_setoffset(self->output, offset);
+	}
 }
 
-uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext* self)
-{
-	return self->numtracks;
-}
 
 psy_dsp_amp_t psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext* self)
 {

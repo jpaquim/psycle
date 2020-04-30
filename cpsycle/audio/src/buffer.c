@@ -116,6 +116,8 @@ void psy_audio_buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* sourc
 					self->samples[channel] + self->offset,
 					numsamples,
 					factor);
+				dsp.erase_all_nans_infinities_and_denormals(
+					self->samples[channel] + self->offset, numsamples);
 		}
 	}
 }
@@ -226,4 +228,16 @@ psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer* self, psy_dsp_amp_r
 		rv = 1.f;
 	}
 	return rv;
+}
+
+void psy_audio_buffer_trace(psy_audio_Buffer* self, uintptr_t channel, uintptr_t numsamples)
+{
+	uintptr_t i;
+
+	for (i = 0; i < numsamples; ++i) {
+		float* p = self->samples[channel] + self->offset + i;
+
+		TRACE_FLOAT(*p);
+	}
+	TRACE("\n");
 }

@@ -426,12 +426,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			if (numworksamples > 0) {				
 				int restorenumsamples = bc->numsamples;
 		
-				if (bc->input) {
-					psy_audio_buffer_setoffset(bc->input, pos);
-				}
-				if (bc->output) {
-					psy_audio_buffer_setoffset(bc->output, pos);
-				}
+				psy_audio_buffercontext_setoffset(bc, pos);				
 				bc->numsamples = numworksamples;
 				self->events->numEvents = count;
 				self->events->reserved = 0;
@@ -506,24 +501,14 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	self->events->reserved = 0;
 	if (amount > 0) {
 		int restorenumsamples = bc->numsamples;
-		if (bc->input) {
-			psy_audio_buffer_setoffset(bc->input, pos);
-		}
-		if (bc->output) {
-			psy_audio_buffer_setoffset(bc->output, pos);
-		}
+		psy_audio_buffercontext_setoffset(bc, pos);		
 		bc->numsamples = amount;
 		self->events->numEvents = count;
 		self->events->reserved = 0;
 		generateaudio(self, bc);		
 		bc->numsamples = restorenumsamples;
 	}
-	if (bc->input) {
-		psy_audio_buffer_setoffset(bc->input, 0);
-	}
-	if (bc->output) {
-		psy_audio_buffer_setoffset(bc->output, 0);	
-	}
+	psy_audio_buffercontext_setoffset(bc, 0);	
 	for (i = 0; i < count; ++i) {		
 		free(self->events->events[i]);
 	}

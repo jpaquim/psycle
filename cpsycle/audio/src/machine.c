@@ -40,7 +40,6 @@ static const char* machinecallback_capturename(void* self, int index) { return "
 static int machinecallback_numcaptures(void* self) { return 0; }
 static const char* machinecallback_playbackname(void* self, int index) { return ""; }
 static int machinecallback_numplaybacks(void* self) { return 0; }
-static int machine_parametertype(psy_audio_Machine* machine, uintptr_t param);
 
 void machinecallback_initempty(MachineCallback* self)
 {
@@ -89,7 +88,11 @@ static psy_audio_Machine* clone(psy_audio_Machine* self) { return 0; }
 static psy_audio_Buffer* mix(psy_audio_Machine*, size_t slot, uintptr_t amount,
 	psy_audio_MachineSockets*, psy_audio_Machines*, struct psy_audio_Player*);
 static void work(psy_audio_Machine*, psy_audio_BufferContext*);
-static void work_entries(psy_audio_Machine*, psy_audio_PatternEntry*);
+void work_events(psy_audio_Machine*, psy_audio_BufferContext*);
+static uintptr_t work_dogenerateaudio(psy_audio_Machine*, psy_audio_BufferContext*,
+	uintptr_t position, uintptr_t amount);
+static void work_entry(psy_audio_Machine*, psy_audio_PatternEntry*);
+static void work_memory(psy_audio_Machine*, psy_audio_BufferContext*);
 static void generateaudio(psy_audio_Machine* self, psy_audio_BufferContext* bc) { }
 static int hostevent(psy_audio_Machine* self, int const eventNr, int const val1, float const val2) { return 0; }
 static void seqtick(psy_audio_Machine* self, uintptr_t channel,
@@ -135,8 +138,6 @@ static void savespecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void postload(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
-static void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source,
-	uintptr_t numsamples, psy_dsp_amp_t vol);
 static unsigned int numparametercols(psy_audio_Machine* self) { return 0; }
 static uintptr_t slot(psy_audio_Machine* self) { return NOMACHINE_INDEX; }
 static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
@@ -320,69 +321,49 @@ void machine_dispose(psy_audio_Machine* self)
 
 void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 {			
-	psy_List* p;
-	uintptr_t amount = bc->numsamples;
-	uintptr_t pos = 0;
-	uintptr_t last = 0;
-	
-	for (p = bc->events; p != 0; p = p->next) {					
-		int numworksamples;
-
-		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
-		assert((uintptr_t)(entry->delta) >= last);
-		numworksamples = (uintptr_t) entry->delta - pos;
-		last = (uintptr_t) entry->delta;
-		if (numworksamples > 0) {				
-			int restorenumsamples = bc->numsamples;
-		
-			if (bc->input) {
-				psy_audio_buffer_setoffset(bc->input, pos);
-			}
-			if (bc->output) {
-				psy_audio_buffer_setoffset(bc->output, pos);
-			}
-			bc->numsamples = numworksamples;
-			if (!psy_audio_machine_bypassed(self) &&
-					!psy_audio_machine_muted(self)) {
-				psy_audio_machine_generateaudio(self, bc);
-			}			
-			amount -= numworksamples;
-			bc->numsamples = restorenumsamples;
-		}
-		work_entries(self, entry);
-		pos = (uintptr_t) entry->delta;	
-	}
-	if (amount > 0) {
-		int restorenumsamples = bc->numsamples;
-		if (bc->input) {
-			psy_audio_buffer_setoffset(bc->input, pos);
-		}
-		if (bc->output) {
-			psy_audio_buffer_setoffset(bc->output, pos);
-		}
-		bc->numsamples = amount;
-		if (!psy_audio_machine_bypassed(self) &&
-				!psy_audio_machine_muted(self)) {
-			psy_audio_machine_generateaudio(self, bc);
-		}
-		bc->numsamples = restorenumsamples;
-	}
-	if (bc->input) {
-		psy_audio_buffer_setoffset(bc->input, 0);
-	}
-	if (bc->output) {
-		psy_audio_Buffer* memory;
-
-		psy_audio_buffer_setoffset(bc->output, 0);		
-		memory = psy_audio_machine_buffermemory(self);
-		if (memory) {			
-			psy_audio_buffer_insertsamples(memory, bc->output,
-				psy_audio_machine_buffermemorysize(self), bc->numsamples);
-		}
-	}
+	work_events(self, bc);	
+	work_memory(self, bc);
 }
 
-void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
+void work_events(psy_audio_Machine* self, psy_audio_BufferContext* bc)
+{
+	psy_List* p;
+	uintptr_t amount;
+	uintptr_t pos;
+
+	amount = psy_audio_buffercontext_numsamples(bc);
+	for (pos = 0, p = bc->events; p != NULL; p = p->next) {
+		psy_audio_PatternEntry* entry;
+
+		entry = (psy_audio_PatternEntry*)p->entry;
+		if (((uintptr_t)entry->delta) >= pos) {
+			amount -= work_dogenerateaudio(self, bc, pos,
+				(uintptr_t)entry->delta - pos);
+			work_entry(self, entry);
+			pos = (uintptr_t)entry->delta;
+		}
+	}
+	work_dogenerateaudio(self, bc, pos, amount);
+	psy_audio_buffercontext_setoffset(bc, 0);
+}
+
+uintptr_t work_dogenerateaudio(psy_audio_Machine* self, psy_audio_BufferContext* bc,
+	uintptr_t position, uintptr_t amount)
+{
+	if (amount > 0 && !psy_audio_machine_bypassed(self) &&
+			!psy_audio_machine_muted(self)) {
+		uintptr_t restorenumsamples;
+
+		restorenumsamples = psy_audio_buffercontext_numsamples(bc);		
+		psy_audio_buffercontext_setnumsamples(bc, amount);
+		psy_audio_buffercontext_setoffset(bc, position);
+		psy_audio_machine_generateaudio(self, bc);		
+		psy_audio_buffercontext_setnumsamples(bc, restorenumsamples);
+	}
+	return amount;
+}
+
+void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 {
 	psy_List* p;
 
@@ -426,7 +407,21 @@ void work_entries(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 	}
 }
 
-static int mode(psy_audio_Machine* self)
+void work_memory(psy_audio_Machine* self, psy_audio_BufferContext* bc)
+{
+	if (bc->output) {
+		psy_audio_Buffer* memory;
+
+		memory = psy_audio_machine_buffermemory(self);
+		if (memory) {
+			psy_audio_buffer_insertsamples(memory, bc->output,
+				psy_audio_machine_buffermemorysize(self),
+				psy_audio_buffercontext_numsamples(bc));
+		}
+	}
+}
+
+int mode(psy_audio_Machine* self)
 { 
 	const psy_audio_MachineInfo* info;
 
@@ -463,32 +458,13 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 					input_socket != 0; input_socket = input_socket->next) {
 				psy_audio_WireSocketEntry* source = (psy_audio_WireSocketEntry*)
 					input_socket->entry;
-				addsamples(output, machines_outputs(machines, source->slot),
+				psy_audio_buffer_addsamples(output,
+					machines_outputs(machines, source->slot),
 					amount, source->volume);				
 			}							
 		}
 	}
 	return output;
-}
-
-void addsamples(psy_audio_Buffer* dst, psy_audio_Buffer* source, uintptr_t numsamples,
-	psy_dsp_amp_t vol)
-{
-	unsigned int channel;
-
-	if (source) {
-		psy_audio_buffer_scale(dst, source->range, numsamples);
-		for (channel = 0; channel < source->numchannels && 
-			channel < dst->numchannels; ++channel) {
-				dsp.add(
-					source->samples[channel],
-					dst->samples[channel],
-					numsamples,
-					vol);
-				dsp.erase_all_nans_infinities_and_denormals(
-					dst->samples[channel], numsamples);					
-		}
-	}
 }
 
 void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
@@ -632,4 +608,3 @@ int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex)
 	}
 	return -1;
 }
-
