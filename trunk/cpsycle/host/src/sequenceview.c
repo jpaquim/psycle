@@ -436,13 +436,6 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 	
 	size = psy_ui_component_size(&self->component);		
 	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);
-//	if (trackindex == self->selectedtrack) {		
-//		ui_drawsolidrectangle(g, r, 0x00303030);
-//	} else {
-//		ui_drawsolidrectangle(g, r, 0x00272727);		
-//	}
-	
-	// ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
 	psy_ui_settextcolor(g, 0);
 	p = track->entries;
 	for (; p != 0; p = p->next, ++c, cpy += self->lineheight) {
@@ -941,8 +934,8 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 		psy_ui_component_setverticalscrollposition(&self->listview.component,
 			listviewtop);
 	} else
-	if (c > listviewtop + visilines) {
-		self->listview.dy = -(c - visilines) * self->listview.lineheight;
+	if (c > listviewtop + visilines - 1) {
+		self->listview.dy = -(c - visilines + 1) * self->listview.lineheight;
 		listviewtop = -self->listview.dy / self->listview.lineheight;
 		psy_ui_component_setverticalscrollposition(&self->listview.component,
 			listviewtop);

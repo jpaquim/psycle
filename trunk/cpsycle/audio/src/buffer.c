@@ -170,12 +170,14 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 		diff = numsamples - numsourcesamples;
 		for (c = 0; c < self->numchannels; ++c) {			
 			dsp.clear(self->samples[c] + numsourcesamples, diff);			
-			dsp.add(self->samples[c], self->samples[c] + numsourcesamples, diff, 
+			dsp.add(self->samples[c] + self->offset,
+				self->samples[c] + self->offset + numsourcesamples, diff, 
 				1.f);
 			dsp.clear(self->samples[c], numsourcesamples);
 			if (c < source->numchannels) {
-				dsp.add(source->samples[c], self->samples[c], numsourcesamples, 
-				rangefactor);
+				dsp.add(source->samples[c] + self->offset,
+					self->samples[c] + self->offset, numsourcesamples, 
+					rangefactor);
 			}									
 		}
 	} else {
@@ -184,7 +186,8 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 		for (c = 0; c < self->numchannels; ++c) {
 			dsp.clear(self->samples[c], numsamples);
 			if (c < source->numchannels) {
-				dsp.add(source->samples[c], self->samples[c], numsamples,
+				dsp.add(source->samples[c] + self->offset, self->samples[c] + self->offset,
+					numsamples,
 					rangefactor);
 			}
 		}
@@ -200,7 +203,7 @@ void psy_audio_buffer_scale(psy_audio_Buffer* self, psy_dsp_amp_range_t range,
 
 		rangefactor = psy_audio_buffer_rangefactor(self, range);
 		for (c = 0; c < self->numchannels; ++c) {
-			dsp.mul(self->samples[c], numsamples, rangefactor);
+			dsp.mul(self->samples[c] + self->offset, numsamples, rangefactor);
 		}
 		self->range = range;
 	}

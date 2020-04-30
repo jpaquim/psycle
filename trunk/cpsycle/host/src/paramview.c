@@ -17,15 +17,15 @@
 static void onpreferredsize(ParamView*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ondestroy(ParamView*, psy_ui_Component* sender);
 static void ondraw(ParamView*, psy_ui_Graphics*);
-static void drawparameter(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawslider(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawsliderlevel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawslidercheck(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawswitch(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawheader(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawinfolabel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawknob(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
-static void drawblank(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t row, uintptr_t col);
+static void drawparameter(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawslider(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawsliderlevel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawslidercheck(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawswitch(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawheader(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawinfolabel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawknob(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawblank(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
 static void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* height);
 static void cellsize(ParamView*, uintptr_t row, uintptr_t col, int* width, int* height);
 static void cellposition(ParamView*, uintptr_t row, uintptr_t col, int* x, int* y);
@@ -181,7 +181,7 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 		uintptr_t row = 0;
 		uintptr_t col = 0;
 		uintptr_t numrows = 0;
-		uintptr_t param;		
+		uintptr_t paramnum;		
 						
 		if (self->numparams != psy_audio_machine_numparameters(self->machine)) {
 			self->numparams = psy_audio_machine_numparameters(self->machine);
@@ -190,13 +190,13 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 			psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
 		}
 		numrows = paramview_numrows(self);
-		for (param = 0; param < psy_audio_machine_numparameters(self->machine);
-				++param) {
+		for (paramnum = 0; paramnum < psy_audio_machine_numparameters(self->machine);
+				++paramnum) {
 			psy_audio_MachineParam* machineparam;
 
-			machineparam = psy_audio_machine_parameter(self->machine, param);
+			machineparam = psy_audio_machine_parameter(self->machine, paramnum);
 			if (machineparam) {
-				drawparameter(self, g, machineparam, row, col);
+				drawparameter(self, g, machineparam, paramnum, row, col);
 			}
 			++row;
 			if (row >= numrows) {
@@ -208,32 +208,32 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 }
 
 void drawparameter(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	uintptr_t row, uintptr_t col)
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {		
 	switch (psy_audio_machineparam_type(param) & ~MPF_SMALL) {
 		case MPF_HEADER:
-			drawheader(self, g, param, row, col);
+			drawheader(self, g, param, paramnum, row, col);
 		break;
 		case MPF_INFOLABEL:
-			drawinfolabel(self, g, param, row, col);
+			drawinfolabel(self, g, param, paramnum, row, col);
 		break;
 		case MPF_STATE:
-			drawknob(self, g, param, row, col);
+			drawknob(self, g, param, paramnum, row, col);
 		break;
 		case MPF_SLIDER:				
-			drawslider(self, g, param, row, col);					
+			drawslider(self, g, param, paramnum, row, col);
 		break;
 		case MPF_SLIDERCHECK:
-			drawslidercheck(self, g, param, row, col);
+			drawslidercheck(self, g, param, paramnum, row, col);
 		break;
 		case MPF_SWITCH:
-			drawswitch(self, g, param, row, col);
+			drawswitch(self, g, param, paramnum, row, col);
 		break;
 		case MPF_SLIDERLEVEL:
-			drawsliderlevel(self, g, param, row, col);
+			drawsliderlevel(self, g, param, paramnum, row, col);
 		break;
 		case MPF_NULL:
-			drawblank(self, g, param, row, col);
+			drawblank(self, g, param, paramnum, row, col);
 		break;
 		default:
 		break;
@@ -241,7 +241,7 @@ void drawparameter(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* 
 }
 
 void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	uintptr_t row, uintptr_t col)
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {	
 	char label[128];
 	char str[128];
@@ -254,9 +254,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	int height;
 	int knob_cx;
 	int knob_cy;
-	psy_audio_MachineParam* tweak;
-
-	tweak = tweakparam(self);
+	
 	knob_cx = self->skin->knob.destwidth;
 	knob_cy = self->skin->knob.destheight;		
 	cellposition(self, row, col, &left, &top);
@@ -280,15 +278,15 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 		psy_snprintf(str, 128, "%f",
 			psy_audio_machineparam_normvalue(param));
 	}
-	psy_ui_setbackgroundcolor(g, (tweak == param)
+	psy_ui_setbackgroundcolor(g, (self->tweak == paramnum)
 		? self->skin->htopcolor : self->skin->topcolor);
-	psy_ui_settextcolor(g, (tweak == param)
+	psy_ui_settextcolor(g, (self->tweak == paramnum)
 		? self->skin->fonthtopcolor : self->skin->fonttopcolor);
 	psy_ui_textoutrectangle(g, r_top.left, r_top.top,
 		psy_ui_ETO_OPAQUE, r_top, label, strlen(label));	
-	psy_ui_setbackgroundcolor(g, (tweak == param)
+	psy_ui_setbackgroundcolor(g, (self->tweak == paramnum)
 		? self->skin->hbottomcolor : self->skin->bottomcolor);
-	psy_ui_settextcolor(g, (tweak == param)
+	psy_ui_settextcolor(g, (self->tweak == paramnum)
 		? self->skin->fonthbottomcolor : self->skin->fontbottomcolor);
 	psy_ui_textoutrectangle(g, r_bottom.left, r_bottom.top,
 		psy_ui_ETO_OPAQUE, r_bottom, str, strlen(str));
@@ -306,7 +304,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 }
 
 void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	uintptr_t row, uintptr_t col)
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -342,7 +340,7 @@ void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 }
 
 void drawinfolabel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	uintptr_t row, uintptr_t col)
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -379,7 +377,7 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* 
 }
 
 void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	uintptr_t row, uintptr_t col)
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -425,8 +423,8 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 		r, str, strlen(str));
 }
 
-void drawsliderlevel(ParamView* self, psy_ui_Graphics* g,
-	psy_audio_MachineParam* param, uintptr_t row, uintptr_t col)
+void drawsliderlevel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -467,8 +465,8 @@ void drawsliderlevelback(ParamView* self, psy_ui_Graphics* g, int x, int y)
 		self->skin->vuoff.srcy);
 }
 
-void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param, uintptr_t row,
-	uintptr_t col)
+void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -502,8 +500,8 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 		r, label, strlen(label));
 }
 
-void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param, uintptr_t row,
-	uintptr_t col)
+void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
@@ -538,7 +536,7 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 }
 
 void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
-	uintptr_t row, uintptr_t col)
+	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {
 	int top;
 	int left;
