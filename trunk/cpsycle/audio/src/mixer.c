@@ -806,7 +806,16 @@ void returnchannel_computepath(psy_audio_ReturnChannel* self)
 	if (self->path) {
 		psy_list_free(self->path);
 	}
-	self->path = path;
+	self->path = path;	
+	for (path = self->path; path != 0; path = path->next) {
+		uintptr_t slot;
+		
+		slot = (uintptr_t)path->entry;
+		if (slot == NOMACHINE_INDEX) {			
+			continue;
+		}
+		machines_addmixersend(machines, slot);
+	}
 }
 
 psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel* self)
@@ -1090,7 +1099,7 @@ void mixreturnstomaster(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		channel = psy_tableiterator_value(&iter);
 		if (channel && channel->mastersend) {
 			psy_audio_buffer_addsamples(self->master.buffer, channel->buffer,
-				amount, channel->volume);
+				amount, channel->volume);			
 		}
 	}
 }
@@ -1148,7 +1157,6 @@ void workreturn(psy_audio_Mixer* self, psy_audio_Machines* machines,
 			}
 			psy_audio_player_workmachine(player, amount, slot);
 		}
-		psy_list_free(path);
 	}
 	channel->buffer = machines_outputs(machines, channel->fxslot);
 }

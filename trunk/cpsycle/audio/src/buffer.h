@@ -47,6 +47,8 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
 	uintptr_t numsamples, uintptr_t numsourcesamples);
 void psy_audio_buffer_scale(psy_audio_Buffer*, psy_dsp_amp_range_t,
 	uintptr_t numsamples);
+void psy_audio_buffer_trace(psy_audio_Buffer* self, uintptr_t channel,
+	uintptr_t numsamples);
 
 #ifdef __cplusplus
 }

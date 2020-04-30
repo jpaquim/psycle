@@ -208,14 +208,16 @@ void connections_disconnect(psy_audio_Connections* self, uintptr_t outputslot, u
 			psy_list_remove(&connections->outputs, p);			
 		}		
 		connections = connections_at(self, inputslot);
-		p = connection_at(connections->inputs, outputslot);
-		if (p) {		
-			free(p->entry);
-			psy_list_remove(&connections->inputs, p);			
-		}
-		if (!self->filemode) {
-			psy_signal_emit(&self->signal_disconnected, self, 2,
-				outputslot, inputslot);
+		if (connections) {
+			p = connection_at(connections->inputs, outputslot);
+			if (p) {
+				free(p->entry);
+				psy_list_remove(&connections->inputs, p);
+			}
+			if (!self->filemode) {
+				psy_signal_emit(&self->signal_disconnected, self, 2,
+					outputslot, inputslot);
+			}
 		}
 	}	
 }
@@ -282,8 +284,10 @@ int connections_connected(psy_audio_Connections* self, uintptr_t outputslot, uin
 #if defined(_DEBUG)
 		if (p) {			
 			sockets = connections_at(self, inputslot);
-			assert(sockets);
-			p = connection_at(sockets->inputs, outputslot);
+			assert(sockets && sockets->inputs);
+			if (sockets && sockets->inputs) {
+				p = connection_at(sockets->inputs, outputslot);
+			}
 			assert(p);
 		}
 #endif
