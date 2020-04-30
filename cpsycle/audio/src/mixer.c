@@ -70,7 +70,6 @@ int inputlabelparam_describe(psy_audio_InputLabelParam* self, char* text)
 	return 1;
 }
 
-
 // SendLabelParam
 static int sendreturnlabelparam_type(psy_audio_SendReturnLabelParam* self) { return MPF_INFOLABEL | MPF_SMALL; }
 static int sendreturnlabelparam_name(psy_audio_SendReturnLabelParam*, char* text);
@@ -117,10 +116,13 @@ int sendreturnlabelparam_name(psy_audio_SendReturnLabelParam* self, char* text)
 
 int sendreturnlabelparam_describe(psy_audio_SendReturnLabelParam* self, char* text)
 {
-	psy_snprintf(text, 128, "%s", psy_audio_machine_editname(self->channel->fx));
+	if (self->channel->fx) {
+		psy_snprintf(text, 128, "%s", psy_audio_machine_editname(self->channel->fx));
+	} else {
+		psy_snprintf(text, 128, "%s", "");
+	}
 	return 1;
 }
-
 
 // DryWetMixParam
 static void drywetmixmachineparam_tweak(psy_audio_DryWetMixMachineParam*, float val);
@@ -253,8 +255,7 @@ void routemachineparam_tweak(psy_audio_RouteMachineParam* self, float val)
 {
 	if (self->send < numreturncolumns(self->mixer)) {
 		if (val > 0.f) {
-			psy_table_insert(&self->channel->sendsto, self->send,
-				self->channel);
+			psy_table_insert(&self->channel->sendsto, self->send, (void*)(uintptr_t)TRUE);
 		} else {
 			psy_table_remove(&self->channel->sendsto, self->send);
 		}
@@ -393,38 +394,55 @@ static void workreturn(psy_audio_Mixer* self, psy_audio_Machines* machines,
 	psy_audio_ReturnChannel*,
 	uintptr_t amount,
 	psy_audio_Player*);
-static void mixreturns(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
+static void mixreturnstomaster(psy_audio_Mixer*, psy_audio_Machines*, uintptr_t amount);
 static void levelmaster(psy_audio_Mixer*, uintptr_t amount);
 // MasterChannel
 static void masterchannel_init(psy_audio_MasterChannel*, uintptr_t inputslot, const char* name, const char* label);
 static psy_audio_MasterChannel* masterchannel_allocinit(uintptr_t inputslot, const char* name, const char* label);
 static void masterchannel_dispose(psy_audio_MasterChannel*);
 // D/W
-static void masterchannel_dw_describe(psy_audio_MasterChannel*, psy_audio_CustomMachineParam* sender, int* active, char* txt);
+static void masterchannel_dw_describe(psy_audio_MasterChannel*,
+	psy_audio_CustomMachineParam* sender, int* active, char* text);
 // Pan
-static void channel_pan_describe(psy_audio_MachineParam* self, psy_audio_MachineParam* sender, int* active, char* txt);
+static void channel_pan_describe(psy_audio_MachineParam*,
+	psy_audio_MachineParam* sender, int* active, char* text);
 // Slider/Level
-static void masterchannel_level_normvalue(psy_audio_MasterChannel* self, psy_audio_CustomMachineParam* sender, float* rv);
+static void masterchannel_level_normvalue(psy_audio_MasterChannel* self,
+	psy_audio_CustomMachineParam* sender, float* rv);
 // InputChannel
-static void inputchannel_init(psy_audio_InputChannel*, uintptr_t id, psy_audio_Mixer*, uintptr_t inputslot);
-static psy_audio_InputChannel* inputchannel_allocinit(psy_audio_Mixer* , uintptr_t id, uintptr_t inputslot);
+static void inputchannel_init(psy_audio_InputChannel*, uintptr_t id,
+	psy_audio_Mixer*, uintptr_t inputslot);
+static psy_audio_InputChannel* inputchannel_allocinit(psy_audio_Mixer* ,
+	uintptr_t id, uintptr_t inputslot);
 static void inputchannel_dispose(psy_audio_InputChannel*);
 // Send Vol
-static void inputchannel_sendvol_tweak(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, float value);
-static void inputchannel_sendvol_normvalue(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, float* rv);
-static void inputchannel_sendvol_describe(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, int* active, char* txt);
+static void inputchannel_sendvol_tweak(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, float value);
+static void inputchannel_sendvol_normvalue(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, float* rv);
+static void inputchannel_sendvol_describe(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, int* active, char* txt);
 // D/W
-static void inputchannel_dw_describe(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, int* active, char* txt);
+static void inputchannel_dw_describe(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, int* active, char* txt);
 // Gain
-static void inputchannel_gain_tweak(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, float value);
-static void inputchannel_gain_normvalue(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, float* rv);
-static void inputchannel_gain_describe(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, int* active, char* txt);
+static void inputchannel_gain_tweak(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, float value);
+static void inputchannel_gain_normvalue(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, float* rv);
+static void inputchannel_gain_describe(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, int* active, char* txt);
 // Slider/Level
-static void inputchannel_level_normvalue(psy_audio_InputChannel*, psy_audio_CustomMachineParam* sender, float* rv);
+static void inputchannel_level_normvalue(psy_audio_InputChannel*,
+	psy_audio_CustomMachineParam* sender, float* rv);
 // ReturnChannel
-static void returnchannel_init(psy_audio_ReturnChannel*, struct psy_audio_Mixer* mixer, uintptr_t id, uintptr_t fxslot);
-static psy_audio_ReturnChannel* returnchannel_allocinit(uintptr_t id, uintptr_t fxslot, struct psy_audio_Mixer* mixer);
+static void returnchannel_init(psy_audio_ReturnChannel*,
+	psy_audio_Mixer* mixer, uintptr_t id, uintptr_t fxslot);
+static psy_audio_ReturnChannel* returnchannel_allocinit(psy_audio_Mixer* mixer, uintptr_t id, uintptr_t fxslot);
 static void returnchannel_dispose(psy_audio_ReturnChannel*);
+static void returnchannel_computepath(psy_audio_ReturnChannel*);
+static psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel*);
+
 // Slider/Level
 static void returnchannel_level_normvalue(psy_audio_ReturnChannel*, psy_audio_CustomMachineParam* sender, float* rv);
 
@@ -719,10 +737,13 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 {
 	self->id = id;
 	self->fxslot = fxslot;
+	self->fx = 0;
+	self->path = 0;
 	self->mute = 0;
 	self->panning = 0.5f;
 	self->volume = 1.f;
 	self->mastersend = 1;
+	self->mixer = mixer;
 	psy_table_init(&self->sendsto);	
 	psy_audio_sendreturnlabelparam_init(&self->sendlabel_param, self, TRUE);
 	psy_audio_sendreturnlabelparam_init(&self->returnlabel_param, self, FALSE);
@@ -759,16 +780,59 @@ void returnchannel_dispose(psy_audio_ReturnChannel* self)
 	psy_audio_intmachineparam_dispose(&self->mute_param);
 	psy_audio_routemachineparam_dispose(&self->route_param);
 	psy_table_dispose(&self->sendsto);
+	if (self->path) {
+		psy_list_free(self->path);
+	}
 }
 
-psy_audio_ReturnChannel* returnchannel_allocinit(uintptr_t id, uintptr_t fxslot,
-	struct psy_audio_Mixer* mixer)
+psy_audio_ReturnChannel* returnchannel_allocinit(psy_audio_Mixer* mixer, uintptr_t id, uintptr_t fxslot)
 {
 	psy_audio_ReturnChannel* rv;
 
 	rv = (psy_audio_ReturnChannel*) malloc(sizeof(psy_audio_ReturnChannel));
 	if (rv) {
 		returnchannel_init(rv, mixer, id, fxslot);
+	}
+	return rv;
+}
+
+void returnchannel_computepath(psy_audio_ReturnChannel* self)
+{
+	MachineList* path;
+	psy_audio_Machines* machines;
+
+	machines = psy_audio_machine_machines(psy_audio_mixer_base(self->mixer));
+	path = compute_path(machines, self->fxslot, FALSE);
+	if (self->path) {
+		psy_list_free(self->path);
+	}
+	self->path = path;
+}
+
+psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel* self)
+{
+	psy_audio_Buffer* rv = 0;
+
+	if (!self->path) {
+		returnchannel_computepath(self);
+	}
+	if (self->path) {
+		uintptr_t slot;
+
+		slot = (uintptr_t)(self->path->entry);
+		if (slot != NOMACHINE_INDEX) {
+			psy_audio_Machine* firstmachine;
+			psy_audio_Machines* machines;
+
+			machines = psy_audio_machine_machines(
+				psy_audio_mixer_base(self->mixer));
+			if (machines) {
+				firstmachine = machines_at(machines, slot);
+				if (firstmachine) {
+					rv = machines_outputs(machines, slot);
+				}
+			}
+		}
 	}
 	return rv;
 }
@@ -929,7 +993,7 @@ psy_audio_Buffer* mix(psy_audio_Mixer* self, uintptr_t slot, uintptr_t amount,
 	preparemix(self, machines, amount);
 	mixinputs(self, machines, amount, player);
 	workreturns(self, machines, amount, player);
-	mixreturns(self, machines, amount);	
+	mixreturnstomaster(self, machines, amount);
 	levelmaster(self, amount);
 	return self->master.buffer;
 }
@@ -952,13 +1016,15 @@ void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines,
 			!psy_tableiterator_equal(&iter, psy_table_end());
 			psy_tableiterator_inc(&iter)) {
 		psy_audio_ReturnChannel* channel;
+		psy_audio_Buffer* buffer;
 
 		channel = (psy_audio_ReturnChannel*)psy_tableiterator_value(&iter);
+		returnchannel_computepath(channel);
+		buffer = returnchannel_firstbuffer(channel); 
+		psy_audio_buffer_clearsamples(buffer, amount);
+		buffer->preventmixclear = TRUE;		
 		channel->buffer = machines_outputs(machines, channel->fxslot);
-		channel->fx = machines_at(machines, channel->fxslot);
-		if (channel->buffer) {
-			psy_audio_buffer_clearsamples(channel->buffer, amount);
-		}
+		channel->fx = machines_at(machines, channel->fxslot);		
 	}
 }
 
@@ -966,9 +1032,7 @@ void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines,
 	uintptr_t amount, psy_audio_Player* player)
 {
 	psy_TableIterator input_iter;
-	psy_Table clearsend;
 
-	psy_table_init(&clearsend);
 	for (input_iter = psy_table_begin(&self->inputs);
 			!psy_tableiterator_equal(&input_iter, psy_table_end());
 			psy_tableiterator_inc(&input_iter)) {
@@ -979,53 +1043,41 @@ void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		if (input) {
 			psy_dsp_amp_t wirevol;
 
+			// mix input to master
 			input->buffer = machines_outputs(machines, input->inputslot);			
 			wirevol = connections_wirevolume(&machines->connections, input->inputslot, 
 				psy_audio_machine_slot(psy_audio_mixer_base(self)));			
 			psy_audio_buffer_addsamples(self->master.buffer, input->buffer,
 				amount, input->volume * input->drymix * wirevol);
+			// mix input to return channel chain start
 			for (sendvol_iter = psy_table_begin(&input->sendvols);
-				!psy_tableiterator_equal(&sendvol_iter, psy_table_end());
-				psy_tableiterator_inc(&sendvol_iter)) {
-				uintptr_t sendvol;
-				uintptr_t sendchannelslot;
-				uintptr_t sendmachineslot;
-				MachineList* chainpath;
+					!psy_tableiterator_equal(&sendvol_iter, psy_table_end());
+					psy_tableiterator_inc(&sendvol_iter)) {
+				psy_dsp_amp_t sendvol;
+				
+				sendvol = ((uintptr_t)psy_tableiterator_value(&sendvol_iter)) /
+					(psy_dsp_amp_t) 0xFF;
+				if (sendvol > 0.f) {
+					psy_audio_ReturnChannel* returnchannel;
 
-				sendvol = (uintptr_t)psy_tableiterator_value(&sendvol_iter);
-				if (sendvol >= 0) {
-					psy_audio_MixerSend* send;
-
-					sendchannelslot = psy_tableiterator_key(&sendvol_iter);
-					send = (psy_audio_MixerSend*) psy_table_at(&self->sends, sendchannelslot);
-					sendmachineslot = (send) ? send->slot : 0;
-					chainpath = compute_path(machines, sendmachineslot, FALSE);
-					if (chainpath) {
-						uintptr_t slot;
-						psy_audio_Buffer* sendbuffer;
-
-						// mix inputs to start of fx chain
-						slot = (uintptr_t)chainpath->entry;
-						sendbuffer = machines_outputs(machines, slot);
-						if (sendvol > 0) {
-							if (!psy_table_exists(&clearsend, sendchannelslot)) {
-								psy_audio_buffer_clearsamples(sendbuffer, amount);
-								psy_table_insert(&clearsend, sendchannelslot, NULL);
-							}
-							psy_audio_buffer_addsamples(sendbuffer, input->buffer,
-								amount, (sendvol / (psy_dsp_amp_t)0xFF));
-							sendbuffer->preventmixclear = TRUE;
+					returnchannel = psy_audio_mixer_Return(self,
+						psy_tableiterator_key(&sendvol_iter));
+					if (returnchannel) {
+						psy_audio_Buffer* buffer;
+												
+						buffer = returnchannel_firstbuffer(returnchannel);
+						if (buffer) {
+							psy_audio_buffer_addsamples(buffer, input->buffer,
+								amount, sendvol);
 						}
-						psy_list_free(chainpath);
-					}
+					}					
 				}
 			}
 		}
 	}
-	psy_table_dispose(&clearsend);
 }
 
-void mixreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
+void mixreturnstomaster(psy_audio_Mixer* self, psy_audio_Machines* machines,
 	uintptr_t amount)
 {
 	psy_TableIterator iter;
@@ -1067,12 +1119,10 @@ void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
 					psy_tableiterator_inc(&sendsto_iter)) {
 					psy_audio_ReturnChannel* sendto;
 
-					sendto = (psy_audio_ReturnChannel*)psy_tableiterator_value(&sendsto_iter);
-					if (sendto) {
-						if (sendto->buffer) {
+					sendto = psy_audio_mixer_Return(self, psy_tableiterator_key(&sendsto_iter));					
+					if (sendto && sendto->buffer) {
 							psy_audio_buffer_addsamples(sendto->buffer, channel->buffer, amount,
-								channel->volume);
-						}
+								channel->volume);						
 					}
 				}
 			}
@@ -1081,17 +1131,15 @@ void workreturns(psy_audio_Mixer* self, psy_audio_Machines* machines,
 }
 
 void workreturn(psy_audio_Mixer* self, psy_audio_Machines* machines,
-	psy_audio_ReturnChannel* returnchannel,
+	psy_audio_ReturnChannel* channel,
 	uintptr_t amount,
 	psy_audio_Player* player)
-{
-	MachineList* path;
-
-	path = compute_path(machines, returnchannel->fxslot, FALSE);
-	if (path) {
+{	
+	if (channel->path) {
 		uintptr_t slot;
-				
-		for (; path != 0; path = path->next) {
+		MachineList* path;
+		
+		for (path = channel->path; path != 0; path = path->next) {
 			slot = (uintptr_t) path->entry;
 			if (slot == NOMACHINE_INDEX) {
 				// delimits the machines that could be processed parallel
@@ -1102,7 +1150,7 @@ void workreturn(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		}
 		psy_list_free(path);
 	}
-	returnchannel->buffer = machines_outputs(machines, returnchannel->fxslot);
+	channel->buffer = machines_outputs(machines, channel->fxslot);
 }
 
 void levelmaster(psy_audio_Mixer* self, uintptr_t amount)
@@ -1137,7 +1185,7 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 				send = psy_audio_mixer_insertsend(self, numreturncolumns(self),
 					psy_audio_mixersend_allocinit(outputslot));
 				psy_audio_mixer_insertreturn(self, numreturncolumns(self),
-					returnchannel_allocinit(numreturncolumns(self), outputslot, self));
+					returnchannel_allocinit(self, numreturncolumns(self), outputslot));
 				path = compute_path(machines, outputslot, FALSE);
 				if (path) {
 					// work fx chain
@@ -1215,7 +1263,7 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 					uintptr_t key;
 
 					key = psy_tableiterator_key(&sendsto_iter);
-					sendto = (psy_audio_ReturnChannel*)psy_tableiterator_value(&sendsto_iter);
+					sendto = psy_audio_mixer_Return(self, psy_tableiterator_key(&sendsto_iter));
 					psy_tableiterator_inc(&sendsto_iter);
 					if (sendto) {
 						if (sendto->fxslot == outputslot) {
@@ -1666,11 +1714,11 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		channel->panning = temp;		
 		psyfile_read(songfile->file, &temp, sizeof(float));
 		channel->drymix = temp;		
-		psyfile_read(songfile->file, &temp8, sizeof(unsigned char));
+		psyfile_read(songfile->file, &temp8, sizeof(uint8_t));
 		channel->mute = temp8;		
-		psyfile_read(songfile->file, &temp8, sizeof(unsigned char));
+		psyfile_read(songfile->file, &temp8, sizeof(uint8_t));
 		channel->dryonly = temp8;		
-		psyfile_read(songfile->file, &temp8, sizeof(unsigned char));
+		psyfile_read(songfile->file, &temp8, sizeof(uint8_t));
 		channel->wetonly = temp8;		
 	}
 	if (numins > 0) {
@@ -1682,7 +1730,7 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		psy_audio_ReturnChannel* channel;
 
 		channel = psy_audio_mixer_insertreturn(self, i,
-			returnchannel_allocinit(i, -1, self));
+			returnchannel_allocinit(self, i, -1));
 		{
 			int inputmachine;
 			float inputconvol;
@@ -1739,8 +1787,7 @@ void loadspecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 
 			psyfile_read(songfile->file, &send, sizeof(uint8_t));
 			if (send != 0) {
-				psy_table_insert(&channel->sendsto, j,
-					psy_table_at(&self->returns, j));
+				psy_table_insert(&channel->sendsto, j, (void*)(uintptr_t)TRUE);
 			}
 		}
 		{
@@ -1812,9 +1859,9 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		psyfile_write(songfile->file, &channel->volume, sizeof(float));
 		psyfile_write(songfile->file, &channel->panning, sizeof(float));
 		psyfile_write(songfile->file, &channel->drymix, sizeof(float));
-		psyfile_write(songfile->file, &channel->mute, sizeof(unsigned char));
-		psyfile_write(songfile->file, &channel->dryonly, sizeof(unsigned char));
-		psyfile_write(songfile->file, &channel->wetonly, sizeof(unsigned char));
+		psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t));
+		psyfile_write(songfile->file, &channel->dryonly, sizeof(uint8_t));
+		psyfile_write(songfile->file, &channel->wetonly, sizeof(uint8_t));
 	}
 	returnchannel_init(&emptyreturn, self, 0, 0);
 	for (i = 0; i < (uint32_t) numrets; ++i) {
@@ -1838,9 +1885,14 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 		if (psy_table_exists(&channel->sendsto, i)) {
 			psy_audio_ReturnChannel* sendto;
 
-			sendto = psy_table_at(&channel->sendsto, i);
-			wMacIdx = sendto->fxslot;
-			volume = sendto->volume;
+			sendto = psy_audio_mixer_Return(self, i);
+			if (sendto) {
+				wMacIdx = sendto->fxslot;
+				volume = sendto->volume;
+			} else {
+				wMacIdx = -1;
+				volume = 1.f;
+			}
 		}
 		else {
 			wMacIdx = -1;
@@ -1857,12 +1909,12 @@ void savespecific(psy_audio_Mixer* self, struct psy_audio_SongFile* songfile,
 			unsigned char send;
 
 			send = psy_table_exists(&channel->sendsto, j);
-			psyfile_write(songfile->file, &send, sizeof(unsigned char));
+			psyfile_write(songfile->file, &send, sizeof(uint8_t));
 		}
-		psyfile_write(songfile->file, &channel->mastersend, sizeof(unsigned char));
+		psyfile_write(songfile->file, &channel->mastersend, sizeof(uint8_t));
 		psyfile_write(songfile->file, &channel->volume, sizeof(float));
 		psyfile_write(songfile->file, &channel->panning, sizeof(float));
-		psyfile_write(songfile->file, &channel->mute, sizeof(unsigned char));
+		psyfile_write(songfile->file, &channel->mute, sizeof(uint8_t));
 	}
 	inputchannel_dispose(&emptyinput);
 	returnchannel_dispose(&emptyreturn);

@@ -159,6 +159,8 @@ typedef struct psy_audio_ReturnChannel {
 	size_t fxslot;
 	psy_audio_Buffer* buffer;
 	psy_audio_Machine* fx;
+	psy_List* path;
+
 	psy_audio_CustomMachineParam send_param;
 	psy_audio_SendReturnLabelParam sendlabel_param;
 	psy_audio_SendReturnLabelParam returnlabel_param;	

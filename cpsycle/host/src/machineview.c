@@ -334,9 +334,15 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 		} else {		
 			psy_ui_settextcolor(g, wireview->skin.generator_fontcolour);;
 		}
-		if (self->mode != MACHMODE_MASTER) {			
-			psy_ui_textout(g, r.left + coords->name.destx + 2,
-				r.top + coords->name.desty + 2,
+		if (self->mode != MACHMODE_MASTER) {
+			psy_ui_Rectangle clip;
+
+			psy_ui_setrectangle(&clip, r.left + coords->name.destx,
+				r.top + coords->name.desty, coords->name.destwidth,
+				coords->name.destheight);
+			psy_ui_textoutrectangle(g, r.left + coords->name.destx,
+				r.top + coords->name.desty,
+				psy_ui_ETO_CLIPPED, clip,
 				editname, strlen(editname));
 			skin_blitpart(g, &wireview->skin.skinbmp,
 				r.left + slidercoord(&coords->pan, 
@@ -617,7 +623,7 @@ void machinewireview_initmachinecoords(MachineWireView* self)
 	};
 	MachineCoords generator = {
 		{ 0, 87, 138, 52, 0, 0, 138, 52, 0 },		// background
-		{ 0, 156, 0, 7, 4, 20, 129, 4, 129},		// vu0
+		{ 0, 156, 0, 7, 4, 20, 129, 7, 129},		// vu0
 		{ 108, 156, 1, 7, 4, 20, 1, 7, 82 },		// vupeak
 		{ 0, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
 		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
@@ -627,7 +633,7 @@ void machinewireview_initmachinecoords(MachineWireView* self)
 	};			
 	MachineCoords effect = {
 		{ 0, 0, 138, 52, 0, 0, 138, 52, 0 },		// background
-		{ 0, 163, 0, 7, 4, 20, 129, 4, 129 },		// vu0
+		{ 0, 163, 0, 7, 4, 20, 129, 7, 129 },		// vu0
 		{ 96, 144, 1, 7, 4, 20, 1, 7, 0 },			// vupeak
 		{ 57, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
 		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
@@ -1935,7 +1941,8 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->status, &self->component);
 	psy_ui_component_setalign(&self->status, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_doublebuffer(&self->status);
-	psy_signal_connect(&self->status.signal_draw, self, machineviewbar_drawstatus);
+	psy_signal_connect(&self->status.signal_draw, self,
+		machineviewbar_drawstatus);
 	self->text = strdup("");
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineviewbar_onsongchanged);
@@ -1975,7 +1982,7 @@ void machineviewbar_onpreferredsize(MachineViewBar* self, psy_ui_Size* limit,
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = tm.tmAveCharWidth * 44 +
 		psy_ui_component_preferredsize(&self->mixersend.component, rv).width;
-	rv->height = (int)(tm.tmHeight * 1.5);
+	rv->height = (int)(tm.tmHeight);
 }
 
 void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self, psy_ui_Component* sender)
