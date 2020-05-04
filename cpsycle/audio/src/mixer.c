@@ -327,7 +327,6 @@ static void postload(psy_audio_Mixer*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void postloadinputchannels(psy_audio_Mixer*, psy_audio_SongFile* songfile, uintptr_t slot);
 static void postreturnchannels(psy_audio_Mixer*, psy_audio_SongFile* songfile, uintptr_t slot);
-static int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex);
 static void psy_audio_mixer_clearlegacywires(psy_audio_Mixer*);
 static void onconnected(psy_audio_Mixer*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void ondisconnected(psy_audio_Mixer*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
@@ -1979,7 +1978,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 	uintptr_t c;
 	psy_Table* legacywiretable;
 
-	legacywiretable = psy_table_at(&songfile->legacywires, slot);
+	legacywiretable = psy_audio_legacywires_at(&songfile->legacywires, slot);
 	if (!legacywiretable) {
 		return;
 	}
@@ -2013,7 +2012,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 			&& slot != wire->_inputMachine && inputmachine)
 		{
 			//Do not create the hidden wire from mixer send to the send machine.
-			int outWire = findlegacyoutput(songfile, wire->_inputMachine, slot);
+			int outWire = psy_audio_legacywires_findlegacyoutput(&songfile->legacywires, wire->_inputMachine, slot);
 			if (outWire != -1) {	
 				psy_audio_InputChannel* channel;
 
@@ -2127,31 +2126,6 @@ void psy_audio_mixer_clearlegacywires(psy_audio_Mixer* self)
 		}
 		psy_table_clear(&self->legacysend_);
 	}
-}
-
-int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex)
-{
-	psy_Table* legacywiretable;
-
-	legacywiretable = psy_table_at(&songfile->legacywires, sourceMac);
-	if (!legacywiretable) {
-		return -1;
-	}
-	for (int c = 0; c < MAX_CONNECTIONS; c++)
-	{
-		LegacyWire* legacywire;
-
-		legacywire = psy_table_at(legacywiretable, c);
-		if (!legacywire) {
-			continue;
-		}
-		if (legacywire->_connection &&
-			legacywire->_outputMachine == macIndex)
-		{
-			return c;
-		}
-	}
-	return -1;
 }
 
 psy_audio_InputChannel* psy_audio_mixer_insertchannel(psy_audio_Mixer* self, uintptr_t idx,

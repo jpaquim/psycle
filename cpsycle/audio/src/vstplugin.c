@@ -391,8 +391,26 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		int numworksamples;
 		int midichannel;
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
+		psy_audio_PatternEvent* ev = patternentry_front(entry);
 
-		numworksamples = (unsigned int)entry->delta - pos;		
+		numworksamples = (unsigned int)entry->delta - pos;
+
+		if (ev->note == NOTECOMMANDS_EMPTY && ev->cmd == EXTENDED) {
+			if ((ev->parameter & 0xF0) == SET_BYPASS) {
+				if ((ev->parameter & 0x0F) == 0) {
+					psy_audio_machine_unbypass(psy_audio_vstplugin_base(self));
+				} else {
+					psy_audio_machine_bypass(psy_audio_vstplugin_base(self));
+				}
+			} else
+				if ((ev->parameter & 0xF0) == SET_MUTE) {
+					if ((ev->parameter & 0x0F) == 0) {
+						psy_audio_machine_unmute(psy_audio_vstplugin_base(self));
+					} else {
+						psy_audio_machine_mute(psy_audio_vstplugin_base(self));
+					}
+				}
+		} else
 		if (patternentry_front(entry)->inst == NOTECOMMANDS_INST_EMPTY) {
 			midichannel = 0;
 		} else {

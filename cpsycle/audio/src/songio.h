@@ -4,6 +4,8 @@
 #ifndef psy_audio_SONGIO_H
 #define psy_audio_SONGIO_H
 
+#include "wire.h"
+
 #include <properties.h>
 #include <fileio.h>
 #include <signal.h>
@@ -31,7 +33,7 @@ typedef struct psy_audio_SongFile {
 	uintptr_t machinesoloed;
 	psy_Table machineuis;
 	// MachineID X [psy_Table* LegacyWires (ConnectionID X LegacyWire*)]
-	psy_Table legacywires;
+	psy_audio_LegacyWires legacywires;
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);

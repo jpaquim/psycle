@@ -502,9 +502,6 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path, psy_P
 	self->driver = driver;
 	if (self->driver && config) {
 		self->driver->configure(self->driver, config);
-		//self->driver->properties = psy_properties_clone(config);
-	}
-	if (self->driver) {
 		self->driver->open(self->driver);
 	}
 }
@@ -519,13 +516,15 @@ void psy_audio_player_unloaddriver(psy_audio_Player* self)
 	self->driver = 0;
 }
 
-void psy_audio_player_reloaddriver(psy_audio_Player* self, const char* path, psy_Properties* config)
+void psy_audio_player_reloaddriver(psy_audio_Player* self, const char* path,
+	psy_Properties* config)
 {		
 	psy_audio_player_unloaddriver(self);
 	psy_audio_player_loaddriver(self, path, config);
 }
 
-void psy_audio_player_restartdriver(psy_audio_Player* self, psy_Properties* config)
+void psy_audio_player_restartdriver(psy_audio_Player* self,
+	psy_Properties* config)
 {	
 	if (self->driver) {
 		self->driver->close(self->driver);	

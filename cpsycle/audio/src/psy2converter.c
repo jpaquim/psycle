@@ -7,33 +7,51 @@
 #include "machinefactory.h"
 #include "song.h"
 #include "songio.h"
+#include "plugin.h"
+#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 #include <dir.h>
+#include <math.h>
 #include "constants.h"
+#include "scale.h"
 #include "../../detail/portable.h"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 #define _MAX_PATH 4096
 #endif
 
-typedef struct {
+typedef struct cpoint_t {
 	int32_t x;
 	int32_t y;
-} POINT;
+} cpoint_t;
 
-static void psy2pluginload(psy_audio_SongFile* songfile, int32_t slot);
-static void psy2samplerload(psy_audio_SongFile* songfile, int32_t slot);
-static void psy2machineload(psy_audio_SongFile* songfile, int32_t slot);
-static void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot);
-static int convertindex(int index);
-static void ReadPlugin(psy_audio_SongFile* songfile, int machtype, int psy2type);
+uintptr_t hash(const unsigned char* str);
+static void pluginnames_insert(PluginNames*, int type, const char* name, const char* convname);
+static void readplugin(InternalMachinesConvert*, psy_audio_Machine* plugin, psy_audio_SongFile* songfile, int* index, int type, const char* name);
+static void retweak_parameter(psy_audio_SongFile*, psy_audio_Machine*, int type, const char* name, int* parameter, int* integral_value);
+static void retweak_parameters(psy_audio_SongFile*, psy_audio_Machine* machine, int type, const char* name,
+	int* parameters, int parameter_count, int parameter_offset);
+void retweak_parameters_uint8(psy_audio_SongFile*, psy_audio_Machine*, int type, const char* name,
+	uint8_t* parameters, int parameter_count, int parameter_offset);
+
+static const char* convnames[] =
+{
+	"",
+	"ring_modulator.dll",
+	"distortion.dll",
+	"",
+	"delay.dll",
+	"filter_2_poles.dll",
+	"gainer.dll",
+	"flanger.dll"
+};
 
 enum {
 	master,
 	ring_modulator,
-	distortion, 
-	sampler, 
+	distortion,
+	sampler,
 	delay,
 	filter_2_poles,
 	gainer,
@@ -45,370 +63,655 @@ enum {
 	dummy = 255
 };
 
-enum {
-	abass,
-	asynth,
-	asynth2,
-	asynth21,
-	synth21,
-	asynth22
-};
+static const char* abass = "arguru bass.dll";
+static const char* asynth = "arguru synth.dll";
+static const char* asynth2 = "arguru synth 2.dll";
+static const char* asynth21 = "synth21.dll";
+static const char* asynth22 = "synth22.dll";
 
-psy_audio_Machine* psy_audio_psy2converter_load(
-	psy_audio_SongFile* songfile, int index,
-	int* newindex, int* x, int* y)
+void pluginnames_init(PluginNames* self)
 {
-	psy_audio_Machine* rv = 0;
-	int32_t type;	
-	int32_t temp32;
-	char dllname[256];
-	char editname[16];
-	psy_audio_MachineFactory* factory;
-	
-	factory = songfile->song->machinefactory;
-	*newindex = convertindex(index);	
-	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	*x = temp32;
-	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	*y = temp32;
-	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	type = temp32;	
+	psy_table_init(&self->container);
+	pluginnames_insert(self, ring_modulator, "", convnames[ring_modulator]);
+	pluginnames_insert(self, distortion, "", convnames[distortion]);
+	pluginnames_insert(self, delay, "", convnames[delay]);
+	pluginnames_insert(self, filter_2_poles, "", convnames[filter_2_poles]);
+	pluginnames_insert(self, gainer, "", convnames[gainer]);
+	pluginnames_insert(self, flanger, "", convnames[flanger]);
+	pluginnames_insert(self, nativeplug, "arguru bass.dll", "arguru synth 2f.dll");
+	pluginnames_insert(self, nativeplug, "arguru synth.dll", "arguru synth 2f.dll");
+	pluginnames_insert(self, nativeplug, "arguru synth 2.dll", "arguru synth 2f.dll");
+	pluginnames_insert(self, nativeplug, "synth21.dll", "arguru synth 2f.dll");
+	pluginnames_insert(self, nativeplug, "synth22.dll", "arguru synth 2f.dll");
+}
 
-	if (type == master) {
-		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_MASTER, "");		
-		psy2machineload(songfile, *newindex);
-	} else
-	if (type == delay) {
-		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "delay:0");		
-		psy2machineload(songfile, *newindex);
-	} else
-	if (type == filter_2_poles) {
-		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_PLUGIN, "filter-2-poles:0");		
-		psy2machineload(songfile, *newindex);
-	} else
-	if (type == sampler) {
-		psyfile_read(songfile->file, &editname, sizeof(editname));
-		rv = machinefactory_makemachine(factory, MACH_SAMPLER, "");		
-		psy2samplerload(songfile, *newindex);
-	} else
-	if (type == nativeplug) {		
-		psyfile_read(songfile->file, dllname, sizeof(dllname));
-		psy_strlwr(dllname);
-		psyfile_read(songfile->file, &editname, sizeof(editname));
-		if (strcmp(dllname, "arguru bass.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
-			if (rv) {
-				ReadPlugin(songfile, MACH_PLUGIN, abass);
-				psy2machineload(songfile, *newindex);
-			}
-		} else	
-		if (strcmp(dllname, "arguru synth.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
-		} else
-		if (strcmp(dllname, "arguru synth 2.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
-		} else
-		if (strcmp(dllname, "synth21.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
-		} else
-		if (strcmp(dllname, "synth22.dll") == 0) {
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN, "arguru-synth-2f:0");
-		} else {
-			char plugincatchername[256];
-			
-			plugincatcher_catchername(songfile->song->machinefactory->catcher,
-				dllname, plugincatchername, 0);			
-			rv = machinefactory_makemachine(factory, MACH_PLUGIN,
-				plugincatchername);
-			if (!rv) {
-				rv = machinefactory_makemachine(factory, MACH_DUMMY,
-					plugincatchername);
-			}
-			psy2pluginload(songfile, *newindex);
-		}
-	} else {
-		editname[0] = '\0';
+void pluginnames_dispose(PluginNames* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->container);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_Table* nametable;
+
+		nametable = (psy_Table*)psy_tableiterator_value(&it);
+		psy_table_dispose(nametable);
+		free(nametable);
 	}
-	if (rv) {
-		psy_audio_machine_seteditname(rv, editname);
+	psy_table_dispose(&self->container);
+}
+
+void pluginnames_insert(PluginNames* self, int type, const char* name, const char* convname)
+{
+	psy_Table* nametable;
+
+	nametable = (psy_Table*) psy_table_at(&self->container, type);
+	if (!nametable) {
+		nametable = (psy_Table*)malloc(sizeof(psy_Table));
+		psy_table_init(nametable);
+		psy_table_insert(&self->container, type, nametable);
+	}
+	psy_table_insert(nametable, hash(name), (void*) convname);
+}
+
+bool pluginnames_exists(PluginNames* self, int type, const char* name)
+{
+	bool rv = FALSE;
+
+	psy_Table* nametable;
+
+	nametable = psy_table_at(&self->container, type);
+	if (nametable) {
+		rv = psy_table_exists(nametable, hash(name));
 	}
 	return rv;
 }
 
-void psy2machineload(psy_audio_SongFile* songfile, int32_t slot)
+const char* pluginnames_convname(PluginNames* self, int type, const char* name)
 {
-	char junk[256];
+	const char* rv = 0;
 
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
+	psy_Table* nametable;
 
-	memset(&junk, 0, sizeof(junk));
-
-	psy2readmachineconnections(songfile, slot);
-	psyfile_read(songfile->file, &_panning, sizeof(_panning));
-	// psy_audio_Machine::SetPan(_panning);
-	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // numSubtracks
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // interpol
-
-	psyfile_read(songfile->file, &_outDry, sizeof(_outDry));
-	psyfile_read(songfile->file, &_outWet, sizeof(_outWet));
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosClamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegClamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinespeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sineglide
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinevolume
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfoamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeR
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackR
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterCutoff
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterResonance
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode	
+	nametable = psy_table_at(&self->container, type);
+	if (nametable) {
+		rv = (const char*) psy_table_at(nametable, hash(name));
+	}
+	return rv;
 }
 
-void psy2pluginload(psy_audio_SongFile* songfile, int32_t slot)
+void internalmachinesconvert_init(InternalMachinesConvert* self)
 {
-	char junk[256];
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
-	int32_t i;
-	int32_t numParameters;
-	
-	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
-	for (i=0; i<numParameters; i++)
-	{
-		psyfile_read(songfile->file, &junk[0], sizeof(int32_t));			
-	}
-	psy2readmachineconnections(songfile, slot);
-	psyfile_read(songfile->file, &_panning, sizeof(_panning));
-//	psy_audio_Machine::SetPan(_panning);
-	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // numSubtracks
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // interpol
-
-	psyfile_read(songfile->file, &_outDry, sizeof(_outDry));
-	psyfile_read(songfile->file, &_outWet, sizeof(_outWet));
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosClamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegClamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinespeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sineglide
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinevolume
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfoamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeR
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackR
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterCutoff
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterResonance
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode
+	pluginnames_init(&self->pluginnames);
 }
 
-void psy2samplerload(psy_audio_SongFile* songfile, int32_t slot)
-{	
-	char junk[256];	
-	int32_t _panning;
-	int32_t _outDry;
-	int32_t _outWet;
-	int32_t i;
-//	int32_t numParameters;
-	int32_t _numVoices;
+void internalmachinesconvert_dispose(InternalMachinesConvert* self)
+{
+	pluginnames_dispose(&self->pluginnames);
+}
 
+psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* self, psy_audio_SongFile* songfile, int* index, int type,
+	const char* name)
+{
+	psy_audio_Machine* machine;
+	char sDllName[256];
+	char plugincatchername[256];
+	const char* convname;
+	char _editName[32];
+	cpoint_t connectionpoint[MAX_CONNECTIONS];
+	int32_t panning;
 
-	memset(&junk, 0, sizeof(junk)); 	
-	psy2readmachineconnections(songfile, slot);
-	psyfile_read(songfile->file, &_panning, sizeof(_panning));
-// 	psy_audio_Machine::SetPan(_panning);
-	psyfile_read(songfile->file, &junk[0], 8*sizeof(int32_t)); // SubTrack[]
-	psyfile_read(songfile->file, &_numVoices, sizeof(_numVoices)); // numSubtracks
+	convname = pluginnames_convname(&self->pluginnames, type, name);
+	assert(convname);
+	psy_snprintf(sDllName, 256, "%s", convname);
+	_strlwr(sDllName);
+	plugincatcher_catchername(songfile->song->machinefactory->catcher,
+		sDllName, plugincatchername, 0);
+	machine = machinefactory_makemachine(songfile->song->machinefactory,
+		MACH_PLUGIN, plugincatchername);
 
-/*	if (_numVoices < 4)  // No more need for this code.
-	{
-		// Most likely an old polyphony
-		_numVoices = 8;
+	psyfile_read(songfile->file, _editName, 16);
+	_editName[15] = 0;
+	if (machine) {
+		psy_audio_machine_seteditname(machine, _editName);
 	}
-*/
-	psyfile_read(songfile->file, &i, sizeof(int32_t)); // interpol
-/*	switch (i)
-	{
-	case 2:
-		_resampler.SetQuality(RESAMPLE_SPLINE);
+	if (type == nativeplug) {
+		readplugin(self, machine, songfile, index, type, name);
+	}
+	legacywires_load_psy2(songfile, *index);
+
+	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
+	// numInputs and numOutputs
+	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+
+	psyfile_read(songfile->file, &panning, sizeof(panning));
+	// Machine::SetPan(_panning);
+	psyfile_skip(songfile->file, 40); // skips sampler data.
+	switch (type) {
+		case delay:
+		{
+			int32_t parameters[2];
+
+			psyfile_read(songfile->file, parameters, sizeof(parameters));
+			retweak_parameters(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 5);
+		}
 		break;
-	case 0:
-		_resampler.SetQuality(RESAMPLE_NONE);
+		case flanger:
+		{
+			int32_t parameters[2];
+		
+			psyfile_read(songfile->file, parameters, sizeof(parameters));
+			retweak_parameters(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 7);
+		}
+		break;
+		case gainer:
+			psyfile_skip(songfile->file, sizeof(int32_t));
+			{
+				int parameters[1];
+
+				psyfile_read(songfile->file, parameters, sizeof(parameters));
+				retweak_parameters(songfile, machine, type, name,
+					parameters, sizeof parameters / sizeof * parameters, 1);
+			}
+		break;
+		default:
+			psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+		break;
+	}
+	switch (type) {
+		case distortion:
+			{
+			int32_t parameters[4];
+
+			psyfile_read(songfile->file, parameters, sizeof(parameters));
+			retweak_parameters(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 1);
+			}
+		break;
+		default:
+			psyfile_skip(songfile->file, 4 * sizeof(int));
+		break;
+	}
+	switch (type) {
+	case ring_modulator:
+		{
+			unsigned char parameters[4];
+			psyfile_read(songfile->file, &parameters[0], 2 * sizeof * parameters);
+			psyfile_skip(songfile->file, sizeof(char));
+			psyfile_read(songfile->file, &parameters[2], 2 * sizeof * parameters);
+			retweak_parameters_uint8(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 1);
+		}
+		psyfile_skip(songfile->file, 40);
+	break;
+	case delay:
+		psyfile_skip(songfile->file, 5);
+		{
+			int parameters[4];
+			psyfile_read(songfile->file, &parameters[0], sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[2], sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[1], sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[3], sizeof * parameters);
+			retweak_parameters(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 1);
+		}
+		psyfile_skip(songfile->file, 24);
+	break;
+	case flanger:
+		psyfile_skip(songfile->file, 4);
+		{
+			unsigned char parameters[1];
+			
+			psyfile_read(songfile->file, parameters, sizeof parameters);
+			retweak_parameters_uint8(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 9);
+		}
+		{
+			int parameters[6];
+			psyfile_read(songfile->file, &parameters[0], sizeof * parameters);
+			psyfile_skip(songfile->file, 4);
+			psyfile_read(songfile->file, &parameters[3], sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[5], sizeof * parameters);
+			psyfile_skip(songfile->file, 8);
+			psyfile_read(songfile->file, &parameters[2], sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[1], sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[4], sizeof * parameters);
+			retweak_parameters(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 1);
+		}
+		psyfile_skip(songfile->file, 4);
+	break;
+	case filter_2_poles:
+		psyfile_skip(songfile->file, 21);
+		{
+			int parameters[6];
+
+			psyfile_read(songfile->file, &parameters[1], sizeof parameters - sizeof * parameters);
+			psyfile_read(songfile->file, &parameters[0], sizeof * parameters);
+			retweak_parameters(songfile, machine, type, name,
+				parameters, sizeof parameters / sizeof * parameters, 1);
+		}
 		break;
 	default:
-	case 1:
-		_resampler.SetQuality(RESAMPLE_LINEAR);
-		break;
-	}*/
-
-	psyfile_read(songfile->file, &_outDry, sizeof(_outDry));
-	psyfile_read(songfile->file, &_outWet, sizeof(_outWet));
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distPosClamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegThreshold
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // distNegClamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinespeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sineglide
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinevolume
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(char)); // sinelfoamp
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayTimeR
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackL
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // delayFeedbackR
-
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterCutoff
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterResonance
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfospeed
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfoamp
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterLfophase
-	psyfile_read(songfile->file, &junk[0], sizeof(int32_t)); // filterMode	
-}
-
-void psy2readmachineconnections(psy_audio_SongFile* songfile, int32_t slot)
-{	
-	int32_t _inputMachines[MAX_CONNECTIONS];	// Incoming connections psy_audio_Machine number
-	int32_t _outputMachines[MAX_CONNECTIONS];	// Outgoing connections psy_audio_Machine number
-	float _inputConVol[MAX_CONNECTIONS];	// Incoming connections psy_audio_Machine vol
-//	float _wireMultiplier[MAX_CONNECTIONS];	// Value to multiply _inputConVol[] to have a 0.0...1.0 range
-	unsigned char _connection[MAX_CONNECTIONS];      // Outgoing connections activated
-	unsigned char _inputCon[MAX_CONNECTIONS];		// Incoming connections activated
-	int32_t _numInputs;							// number of Incoming connections
-	int32_t _numOutputs;						// number of Outgoing connections
-	POINT _connectionPoint[MAX_CONNECTIONS];			
-	int c;
-	int32_t index;
-
-	index = slot;
-
-	psyfile_read(songfile->file, &_inputMachines[0], sizeof(_inputMachines));
-	psyfile_read(songfile->file, &_outputMachines[0], sizeof(_outputMachines));
-	psyfile_read(songfile->file, &_inputConVol[0], sizeof(_inputConVol));
-	psyfile_read(songfile->file, &_connection[0], sizeof(_connection));
-	psyfile_read(songfile->file, &_inputCon[0], sizeof(_inputCon));
-	psyfile_read(songfile->file, &_connectionPoint[0], sizeof(_connectionPoint));
-	psyfile_read(songfile->file, &_numInputs, sizeof(_numInputs));
-	psyfile_read(songfile->file, &_numOutputs, sizeof(_numOutputs));
-
-	for (c = 0; c < MAX_CONNECTIONS; ++c) { // all for each of its input connections.		
-		if (_connection[c]) {
-			int32_t output;
-			int32_t input;
-			unsigned char connection;
-			unsigned char incon;
-			float inconvol;
-			float wiremultiplier = 1.f;
-
-			connection = _connection[c];
-			incon = _inputCon[c];
-			inconvol = _inputConVol[c];
-			input = convertindex(_inputMachines[c]);
-			output = convertindex(_outputMachines[c]);	
-			if (connection && output != -1) {
-				machines_connect(&songfile->song->machines, index, output);
-			}
-			if (incon && input != -1) {
-				machines_connect(&songfile->song->machines, input, index);
-				connections_setwirevolume(&songfile->song->machines.connections,
-					input, index, inconvol * wiremultiplier);
-			}		
-		}		
+		psyfile_skip(songfile->file, 45);
 	}
+	
+	return machine;
 }
 
-int convertindex(int index)
+void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
+	psy_audio_SongFile* songfile, int* index, int type, const char* name)
 {
-	int rv;
-
-	if (index == 0) {
-		rv = MASTER_INDEX;
-	} else
-	if (index == MASTER_INDEX) {
-		rv = 0;
-	} else {
-		rv = index;
-	}
-	return rv;
-}
-
-void psy_audio_psy2converter_retweak(int type, int parameter, int* integral_value)
-{
-}
-
-void ReadPlugin(psy_audio_SongFile* songfile, int machtype, int psy2type) //const std::pair<int, std::string> type, Machine& machine, RiffFile& riff)
-{
-	int32_t numParameters;
+	int numParameters;
 	int* Vals;
+	psy_audio_MachineParam* param;
 
 	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
-	Vals = malloc(numParameters * sizeof(int32_t));
+	Vals = malloc(sizeof(int32_t) * numParameters);
 	psyfile_read(songfile->file, Vals, numParameters * sizeof(int));
-
-	if (machtype == MACH_DUMMY) {
+	if (type == MACH_DUMMY) {
 		//do nothing.
-	}
-	else if (psy2type == abass) {
-		// retweak(machine, type, Vals, 15, 0);
-		// machine.SetParameter(19, 0);
-		// retweak(machine, type, Vals + 15, 1, 15);
-		// if (numParameters > 16) {
-			//retweak(machine, type, Vals + 16, 2, 16);
-		// }
-		// else {
-		//	machine.SetParameter(24, 0);
-		//	machine.SetParameter(25, 0);
-		//}
-	}
-	else if (psy2type == asynth) {
-		// retweak(machine, type, Vals, numParameters, 0);
-		// machine.SetParameter(24, 0);
-		// machine.SetParameter(25, 0);
-		// machine.SetParameter(27, 1);
-	}
-	else if (psy2type == asynth2) {
-		// retweak(machine, type, Vals, numParameters, 0);
-		// machine.SetParameter(24, 0);
-		// machine.SetParameter(25, 0);
-	}
-	else if (psy2type == asynth21) {
+	} else if (strcmp(name, abass) == 0) {
+		retweak_parameters(songfile, machine, type, name, Vals, 15, 0);
+		param = psy_audio_machine_parameter(machine, 19);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+		retweak_parameters(songfile, machine, type, name, Vals + 15, 1, 15);
+		if (numParameters > 16) {
+			retweak_parameters(songfile, machine, type, name, Vals + 16, 2, 16);
+		} else {
+			param = psy_audio_machine_parameter(machine, 24);
+			if (param) {
+				psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			}
+			param = psy_audio_machine_parameter(machine, 25);
+			if (param) {
+				psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			}
+		}
+	} else
+	if (strcmp(name, asynth) == 0) {
+		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
+		param = psy_audio_machine_parameter(machine, 24);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+		param = psy_audio_machine_parameter(machine, 25);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+		param = psy_audio_machine_parameter(machine, 27);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 1);
+		}
+	} else if (strcmp(name, asynth2) == 0) {
+		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
+		param = psy_audio_machine_parameter(machine, 24);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+		param = psy_audio_machine_parameter(machine, 25);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+	} else  if (strcmp(name, asynth21) == 0) {
 		//I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs)
-		// retweak(machine, type, Vals, numParameters, 0);
-		// machine.SetParameter(24, 0);
-		// machine.SetParameter(25, 0);
-	}
-	else if (psy2type == asynth22) {
-		// retweak(machine, type, Vals, numParameters, 0);
+		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
+		param = psy_audio_machine_parameter(machine, 24);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+		param = psy_audio_machine_parameter(machine, 25);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+		}
+	} else if (strcmp(name, asynth22) == 0) {
+		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 0);
 	}
 	free(Vals);
+	Vals = 0;
+}
+
+void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_audio_Song* song)
+{
+	/// \todo must each twk repeat the machine number ?
+	// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&song->patterns.slots);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_Pattern* pattern;
+		PatternNode* p;
+
+		pattern = (psy_audio_Pattern*)psy_tableiterator_value(&it);
+		if (pattern_empty(pattern)) {
+			continue;
+		}
+		for (p = pattern->events; p != 0; p = p->next) {			
+			psy_audio_PatternEntry* entry;
+			psy_audio_PatternEvent* event;
+
+			entry = (psy_audio_PatternEntry*)p->entry;
+			event = patternentry_front(entry);
+
+			if (event->note == NOTECOMMANDS_TWEAKEFFECT)
+			{
+				event->mach += 0x40;
+				event->note = NOTECOMMANDS_TWEAK;
+			}
+			if (event->note == NOTECOMMANDS_TWEAK && event->mach < MAX_MACHINES)
+			{
+				/*std::map<Machine* const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
+				if (i != machine_converted_from.end())
+				{
+					int parameter(event._inst);
+					int value((event._cmd << 8) + event._parameter);
+					retweak(i->second, parameter, value);
+					event._inst = parameter;
+					event._cmd = value >> 8; event._parameter = 0xff & value;
+				}*/
+			} else
+			if (event->cmd == 0x0E && event->mach < MAX_MACHINES) {
+				/*std::map<Machine* const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
+				if (i != machine_converted_from.end())
+				{
+					if (i->second.second == asynth22) {
+						int param(25);
+						int value(event._parameter);
+						retweak(i->second, param, value);
+						event._cmd = 0x0F;
+						event._parameter = value;
+					}
+				}*/
+			}			
+		}
+	}
+}
+
+void retweak_parameters(psy_audio_SongFile* songfile, psy_audio_Machine* machine, int type, const char* name,
+	int* parameters, int parameter_count, int parameter_offset)
+{
+	int parameter = 0;
+
+	for (; parameter < parameter_count; ++parameter)
+	{
+		int new_parameter;
+		int new_value;
+		psy_audio_MachineParam* param;
+		new_parameter = parameter_offset + parameter;				
+		new_value = parameters[parameter];
+		retweak_parameter(songfile, machine, type, name, &new_parameter, &new_value);
+		param = psy_audio_machine_parameter(machine, new_parameter);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param,  new_value);
+		}
+	}
+}
+
+void retweak_parameters_uint8(psy_audio_SongFile* songfile, psy_audio_Machine* machine, int type, const char* name,
+	uint8_t* parameters, int parameter_count, int parameter_offset)
+{
+	int parameter = 0;
+
+	for (; parameter < parameter_count; ++parameter)
+	{
+		int new_parameter;
+		int new_value;
+		psy_audio_MachineParam* param;
+		new_parameter = parameter_offset + parameter;
+		new_value = parameters[parameter];
+		retweak_parameter(songfile, machine, type, name, &new_parameter, &new_value);
+		param = psy_audio_machine_parameter(machine, new_parameter);
+		if (param) {
+			psy_audio_machineparam_tweak_scaledvalue(param, new_value);
+		}
+	}
+}
+
+void retweak_parameter(psy_audio_SongFile* songfile, psy_audio_Machine* machine, int type, const char* name, int* parameter, int* integral_value)
+{
+	typedef double Real;
+	double value;
+	const Real maximum = 0xffff;
+	psy_dsp_Scale scale;
+	double sr;
+	double spr;
+	double bpl;
+	double bps;
+
+	sr = psy_audio_machine_samplerate(machine);
+	bps = (psy_audio_song_bpm(songfile->song) * (psy_dsp_beat_t) 1.f) /
+		(sr * 60.0f);
+	bpl = 1 / (psy_dsp_beat_t) songfile->song->properties.lpb;
+	spr =  bpl * 1/bps;
+
+	value = *integral_value;
+	switch (type)
+	{
+	case gainer:
+	{
+		enum Parameters { gain };
+		static const int parameters[] = { gain };
+		*parameter = parameters[--*parameter];
+		switch (*parameter)
+		{
+		case gain:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, exp(-4.), exp(+4.));
+				value = psy_dsp_scale_exp_apply(&scale, value / 0x100);
+			}
+			break;
+		}
+	}
+	break;
+	case distortion:
+	{
+		enum Parameters { input_gain, output_gain, positive_threshold, positive_clamp, negative_threshold, negative_clamp, symmetric };
+		static const int parameters[] = { positive_threshold, positive_clamp, negative_threshold, negative_clamp };
+		*parameter = parameters[--*parameter];
+		switch (*parameter)
+		{
+		case negative_threshold:
+		case negative_clamp:
+		case positive_threshold:
+		case positive_clamp:
+			value *= maximum / 0x100;
+			break;
+		}
+	}
+	break;
+	case delay:
+	{
+		enum Parameters { dry, wet, left_delay, left_feedback, right_delay, right_feedback };
+		static const int parameters[] = { left_delay, left_feedback, right_delay, right_feedback, dry, wet };
+		*parameter = parameters[--*parameter];
+		switch (*parameter)
+		{
+		case left_delay:
+		case right_delay:
+			value *= (float)(2 * 3 * 4 * 5 * 7) / spr;
+			break;
+		case left_feedback:
+		case right_feedback:
+			value = (100 + value) * maximum / 200;
+			break;
+		case dry:
+		case wet:
+			value = (0x100 + value) * maximum / 0x200;
+			break;
+		}
+	}
+	break;
+	case flanger:
+	{
+		enum Parameters { delay, modulation_amplitude, modulation_radians_per_second, modulation_stereo_dephase, interpolation, dry, wet, left_feedback, right_feedback };
+		static const int parameters[] = { delay, modulation_amplitude, modulation_radians_per_second, left_feedback, modulation_stereo_dephase, right_feedback, dry, wet, interpolation };
+		*parameter = parameters[--*parameter];
+		switch (*parameter)
+		{
+		case delay:
+			value *= maximum / 0.1 / sr;
+			break;
+		case modulation_amplitude:
+		case modulation_stereo_dephase:
+			value *= maximum / 0x100;
+			break;
+		case modulation_radians_per_second:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 100 * psy_dsp_PI * 2);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 3e-9 * sr);
+			}
+			break;
+		case left_feedback:
+		case right_feedback:
+			value = (100 + value) * maximum / 200;
+			break;
+		case dry:
+		case wet:
+			value = (0x100 + value) * maximum / 0x200;
+			break;
+		case interpolation:
+			value = value != 0;
+			break;
+		}
+	}
+	break;
+	case filter_2_poles:
+	{
+		enum Parameters { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
+		static const int parameters[] = { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
+		*parameter = parameters[--*parameter];
+		switch (*parameter)
+		{
+		case cutoff_frequency:
+			if (value < 1.0f) {
+				value = 0;
+			} else {				
+				psy_dsp_scale_init_exp(&scale, maximum, 15 * psy_dsp_PI, 22050 * psy_dsp_PI);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, asin(value / 0x100) * sr);
+			}
+			break;
+		case modulation_sequencer_ticks:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, psy_dsp_PI * 2 / 10000, psy_dsp_PI * 2 * 2 * 3 * 4 * 5 * 7);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 3e-8 * spr);
+			}
+			break;
+		case resonance:
+		case modulation_amplitude:
+		case modulation_stereo_dephase:
+			value *= maximum / 0x100;
+			break;
+		}
+	}
+	break;
+	case ring_modulator:
+	{
+		enum Parameters { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
+		static const int parameters[] = { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
+		*parameter = parameters[--*parameter];
+		switch (*parameter)
+		{
+		case am_radians_per_second:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 22050 * psy_dsp_PI * 2);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 2.5e-3 * sr);
+			}			
+			break;
+		case am_glide:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 15 * 22050 * psy_dsp_PI * 2);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 5e-6 * sr * sr);
+			}
+			break;
+		case fm_radians_per_second:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 100 * psy_dsp_PI * 2);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 2.5e-5 * sr);
+			}			
+			break;
+		case fm_bandwidth:
+			if (value < 1.0f) {
+				value = 0;
+			} else {
+				psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 22050 * psy_dsp_PI * 2);
+				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 5e-4 * sr);
+			}
+			break;
+		}
+	}
+	break;
+	case nativeplug:
+	{
+		if (strcmp(name, abass) == 0) {
+			if (*parameter > 0 && *parameter < 15) {
+				*parameter += 4;
+			} else if (*parameter == 15) {
+				*parameter += 5;
+			} else if (*parameter > 15) {
+				*parameter += 8;
+			}
+		} else
+		if (strcmp(name, asynth) == 0) {
+			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
+				value = 5;
+			}
+			if (*parameter == 17) {
+				value += 10.f;
+			}
+		} else
+		if (strcmp(name, asynth2) == 0) {
+			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
+				value = 5;
+			}
+		} else
+		if (strcmp(name, asynth21) == 0) {
+			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
+				value = 5;
+			}
+		} else
+		if (strcmp(name, asynth22) == 0) {			
+			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
+				value = 5;
+			}
+			if (*parameter == 7 && integral_value == 0) {
+				value = 1.f;
+			} else if (*parameter == 25) {
+				value = 256 - sqrt(16000.f - value * 16000.f / 127.f);
+				*parameter += 1;
+			} else if (*parameter == 26) {
+				*parameter -= 1;
+			}
+		}
+	}
+	break;
+	}
+	*integral_value = (int)floor(value + (float)(0.5));
+}
+
+uintptr_t hash(const unsigned char* str)
+{
+	uintptr_t hash = 5381;
+	int c;
+
+	while (c = *str++)
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	return hash;
 }

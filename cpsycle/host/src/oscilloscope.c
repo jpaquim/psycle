@@ -4,13 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "oscilloscope.h"
-#include "../../detail/portable.h"
-#include <math.h>
 #include <rms.h>
 #include <exclusivelock.h>
 #include <operations.h>
-#include <string.h>
+
 #include <songio.h>
+
+#include <math.h>
+#include <string.h>
+
+#include "../../detail/portable.h"
 
 #define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256

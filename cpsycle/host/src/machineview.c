@@ -1129,6 +1129,7 @@ void machinewireview_onmousedoubleclick(MachineWireView* self, psy_ui_MouseEvent
 
 void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 {
+	self->mousemoved = FALSE;
 	psy_ui_component_hide(&self->editname.component);
 	psy_ui_component_setfocus(&self->component);
 	self->mx = ev->x - self->dx;
@@ -1340,6 +1341,7 @@ void machinewireview_hittest(MachineWireView* self, int x, int y)
 
 void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 {
+	self->mousemoved = TRUE;
 	if (self->dragslot != NOMACHINE_INDEX) {
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_PAN) {
 			MachineUi* machineui;
@@ -1382,10 +1384,10 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 			}
 		} else
 		if (self->dragmode >= MACHINEWIREVIEW_DRAG_NEWCONNECTION &&
-				self->dragmode <= MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {
+				self->dragmode <= MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {			
 			self->mx = ev->x - self->dx;
 			self->my = ev->y - self->dy;
-			psy_ui_component_invalidate(&self->component);
+			psy_ui_component_invalidate(&self->component);			
 		}		
 	}
 }
@@ -1395,25 +1397,30 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_releasecapture(&self->component);
 	if (self->dragslot != NOMACHINE_INDEX) {
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_MACHINE) {
-			machinewireview_adjustscroll(self);
+			machinewireview_adjustscroll(self);			
 		} else
 		if (self->dragmode >= MACHINEWIREVIEW_DRAG_NEWCONNECTION &&
 				self->dragmode <= MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {
-			uintptr_t slot = self->dragslot;
-			self->dragslot = NOMACHINE_INDEX;
-			machinewireview_hittest(self, ev->x - self->dx,
-				ev->y - self->dy);
-			if (self->dragslot != NOMACHINE_INDEX) {				
-				if (self->dragmode != MACHINEWIREVIEW_DRAG_NEWCONNECTION) {
-					machines_disconnect(self->machines, self->selectedwire.src,
-						self->selectedwire.dst);
+			if (self->mousemoved) {
+				uintptr_t slot = self->dragslot;
+				self->dragslot = NOMACHINE_INDEX;
+				machinewireview_hittest(self, ev->x - self->dx,
+					ev->y - self->dy);
+				if (self->dragslot != NOMACHINE_INDEX) {
+					if (self->dragmode != MACHINEWIREVIEW_DRAG_NEWCONNECTION) {
+						machines_disconnect(self->machines, self->selectedwire.src,
+							self->selectedwire.dst);
+					}
+					if (self->dragmode < MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {
+						machines_connect(self->machines, slot, self->dragslot);
+					} else {
+						machines_connect(self->machines, self->dragslot, slot);
+					}
 				}
-				if (self->dragmode < MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {
-					machines_connect(self->machines, slot, self->dragslot);
-				} else {
-					machines_connect(self->machines, self->dragslot, slot);
-				}
-			}
+			} else
+			if (ev->button == 2) {
+				workspace_showgear(self->workspace);
+			}			
 		}
 	}
 	self->dragslot = NOMACHINE_INDEX;

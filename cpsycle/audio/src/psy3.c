@@ -1606,7 +1606,7 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		legacywire->_wireMultiplier = wiremultiplier;
 		psy_table_insert(legacywiretable, (uintptr_t)i, (void*)legacywire);
 	}
-	psy_table_insert(&self->legacywires, index, legacywiretable);
+	psy_table_insert(&self->legacywires.legacywires, index, legacywiretable);
 	psyfile_readstring(self->file, editname, 32);
 	if (type == MACH_DUMMY) {
 		char text[256];

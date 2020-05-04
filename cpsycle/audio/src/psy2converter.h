@@ -4,18 +4,45 @@
 #ifndef psy_audio_PSY2CONVERTER_H
 #define psy_audio_PSY2CONVERTER_H
 
+#include <hashtbl.h>
+
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct psy_audio_SongFile;
+struct psy_audio_Song;
+struct psy_audio_Machine;
 
-struct psy_audio_Machine* psy_audio_psy2converter_load(
-	struct psy_audio_SongFile*,
-	int index, int* newindex, int* x, int* y);
+typedef struct PluginNames {
+	psy_Table container;
+} PluginNames;
 
-void psy_audio_psy2converter_retweak(int type, int parameter, int* integral_value);
+void pluginnames_init(PluginNames*);
+void pluginnames_dispose(PluginNames*);
+bool pluginnames_exists(PluginNames*, int type, const char* name);
+const char* pluginnames_convname(PluginNames*, int type, const char* name);
 
+typedef struct InternalMachinesConvert {
+	PluginNames pluginnames;
+} InternalMachinesConvert;
+
+void internalmachinesconvert_init(InternalMachinesConvert*);
+void internalmachinesconvert_dispose(InternalMachinesConvert*);
+
+INLINE bool internalmachinesconvert_pluginname_exists(
+	InternalMachinesConvert* self, int type, const char* name)
+{
+	return pluginnames_exists(&self->pluginnames, type, name);
+}
+
+struct psy_audio_Machine* internalmachinesconvert_redirect(
+	InternalMachinesConvert*,
+	struct psy_audio_SongFile*, int* index, int type, const char* name);
+void internalmachineconverter_retweak_song(InternalMachinesConvert*,
+	struct psy_audio_Song*);
 #ifdef __cplusplus
 }
 #endif

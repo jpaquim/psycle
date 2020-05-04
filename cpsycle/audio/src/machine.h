@@ -130,6 +130,10 @@ typedef	struct psy_audio_Buffer* (*fp_machine_buffermemory)(struct psy_audio_Mac
 typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setbuffermemorysize)(struct psy_audio_Machine*, uintptr_t);
 typedef	psy_dsp_amp_range_t (*fp_machine_amprange)(struct psy_audio_Machine*);
+// Data
+typedef void (*fp_machine_putdata)(struct psy_audio_Machine*, uint8_t* data);
+typedef uint8_t* (*fp_machine_data)(struct psy_audio_Machine*);
+typedef uintptr_t (*fp_machine_datasize)(struct psy_audio_Machine*);
 // programs
 typedef void (*fp_machine_programname)(struct psy_audio_Machine*, int bnkidx, int prgIdx, char* val);
 typedef int (*fp_machine_numprograms)(struct psy_audio_Machine*);
@@ -194,6 +198,11 @@ typedef struct MachineVtable {
 	fp_machine_numparameters numparameters;
 	fp_machine_numparametercols numparametercols;
 	fp_machine_numtweakparameters numtweakparameters;
+	// Data
+	fp_machine_putdata putdata;
+	fp_machine_data data;
+	fp_machine_datasize datasize;
+
 	fp_machine_setcallback setcallback;
 	fp_machine_loadspecific loadspecific;
 	fp_machine_savespecific savespecific;
@@ -253,6 +262,20 @@ int machine_supports(psy_audio_Machine*, int option);
 INLINE void psy_audio_machine_dispose(psy_audio_Machine* self)
 {
 	self->vtable->dispose(self);
+}
+
+INLINE intptr_t psy_audio_machine_type(psy_audio_Machine* self)
+{
+	intptr_t rv;
+	const psy_audio_MachineInfo* info;
+
+	info = self->vtable->info(self);
+	if (info) {
+		rv = info->type;
+	} else {
+		rv = MACH_UNDEFINED;
+	}
+	return rv;
 }
 
 INLINE void psy_audio_machine_reload(psy_audio_Machine* self)
@@ -335,6 +358,22 @@ INLINE uintptr_t psy_audio_machine_numparametercols(psy_audio_Machine* self)
 	return self->vtable->numparametercols(self);
 }
 
+INLINE void psy_audio_machine_putdata(psy_audio_Machine* self, uint8_t* data)
+{
+	self->vtable->putdata(self, data);
+}
+
+INLINE  uint8_t* psy_audio_machine_data(psy_audio_Machine* self)
+{
+	return self->vtable->data(self);
+}
+
+INLINE  uintptr_t psy_audio_machine_datasize(psy_audio_Machine* self)
+{
+	return self->vtable->datasize(self);
+}
+
+
 INLINE uintptr_t psy_audio_machine_numinputs(psy_audio_Machine* self)
 {
 	return self->vtable->numinputs(self);
@@ -348,6 +387,11 @@ INLINE uintptr_t psy_audio_machine_numoutputs(psy_audio_Machine* self)
 INLINE uintptr_t psy_audio_machine_slot(psy_audio_Machine* self)
 {
 	return self->vtable->slot(self);
+}
+
+INLINE void psy_audio_machine_setslot(psy_audio_Machine* self, uintptr_t slot)
+{
+	self->vtable->setslot(self, slot);
 }
 
 INLINE void psy_audio_machine_setcallback(psy_audio_Machine* self, MachineCallback callback)

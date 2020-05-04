@@ -7,11 +7,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <patterns.h>
-#include "../../detail/portable.h"
 #include <exclusivelock.h>
 #include <songio.h>
 #include <uialigner.h>
 #include <assert.h>
+
+#include "../../detail/portable.h"
 
 #define TIMERID_SEQUENCEVIEW 2000
 

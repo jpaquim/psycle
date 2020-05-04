@@ -8,8 +8,11 @@
 #include "psy2converter.h"
 #include "song.h"
 #include "songio.h"
+#include "plugin.h"
+#include "plugin_interface.h"
 #include "pattern.h"
 #include "constants.h"
+#include "wire.h"
 #include <datacompression.h>
 #include <operations.h>
 #include <dir.h>
@@ -18,11 +21,24 @@
 #include <string.h>
 #include "../../detail/portable.h"
 
-void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
+typedef struct cpoint_t {
+	int32_t x;
+	int32_t y;
+} cpoint_t;
+
+static void machine_load(psy_audio_SongFile*, uintptr_t slot);
+static void master_load(psy_audio_SongFile*, uintptr_t slot);
+static void sampler_load(psy_audio_SongFile*, uintptr_t slot);
+static void plugin_load(psy_audio_SongFile*, psy_audio_Machine*, uintptr_t slot);
+static void plugin_skipload(psy_audio_SongFile*, uintptr_t slot);
+
+void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 {
 	int32_t i;
 	int32_t num, sampR;
 	//	unsigned char busEffect[64];
+	uint8_t _machineActive[128];
+	unsigned char busEffect[64];
 	unsigned char busMachine[64];
 	unsigned char playorder[MAX_SONG_POSITIONS];
 	char patternName[32];
@@ -50,11 +66,12 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 	//	unsigned char sharetracknames;
 	int32_t playlength;
 	int32_t numlines;
+	psy_audio_MachineUi machineuis[128];
 
 	int32_t pans[OLD_MAX_INSTRUMENTS];
 	char names[OLD_MAX_INSTRUMENTS][32];
 
-
+	memset(machineuis, 0, sizeof(machineuis));
 	//progress.SetWindowText("Loading old format...");
 	// DoNew();
 
@@ -318,9 +335,7 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 		{			
 			psyfile_read(songfile->file, &_RRES[i], sizeof(_RRES[0]));
 		}
-	
-
-	
+		
 		// progress.m_Progress.SetPos(4096);
 		// ::Sleep(1);
 		// Waves
@@ -449,303 +464,512 @@ void psy_audio_psy2_load(struct psy_audio_SongFile* songfile)
 		}
 	}
 
-	
-
 //	progress.m_Progress.SetPos(8192);
 //	::Sleep(1);
 
-	{  	// psy_audio_Machines			
-		unsigned char active[128];
+	{  	// psy_audio_Machines				
+		psy_audio_Machine* pMac[128];
 		int32_t i;
+		InternalMachinesConvert converter;
 
-		psyfile_read(songfile->file, &active[0], sizeof(active));
+		internalmachinesconvert_init(&converter);
+		psyfile_read(songfile->file, &_machineActive[0], sizeof(_machineActive));		
+		memset(pMac, 0, sizeof(pMac));
 		for (i=0; i<128; ++i) {
-			if (active[i]) {
-				psy_audio_Machine* machine;
-				psy_audio_MachineUi* machineui;
-				int32_t index;
+			if (_machineActive[i]) {
+				int32_t type;
 				int32_t x;
-				int32_t y;				
-				machine = psy_audio_psy2converter_load(songfile, i, &index,
-					&x, &y);
-				if (machine) {				
-					machineui = psy_audio_songfile_machineui(songfile, index);
-					machineui->x = x;
-					machineui->y = y;
-					machines_insert(&songfile->song->machines, index, machine);
-				}
-			}
-		}
-	}
+				int32_t y;		
+				psy_audio_MachineFactory* factory;
 
-	/*
-	// Patch 0: Some extra data added around the 1.0 release.
-	for (int32_t i=0; i<OLD_MAX_INSTRUMENTS; i++)
-	{
-		pFile->Read(&_pInstrument[i]->_loop, sizeof(_pInstrument[0]->_loop));
-	}
-	for (int32_t i=0; i<OLD_MAX_INSTRUMENTS; i++)
-	{
-		pFile->Read(&_pInstrument[i]->_lines, sizeof(_pInstrument[0]->_lines));
-	}
+				psyfile_read(songfile->file, &x, sizeof(x));
+				psyfile_read(songfile->file, &y, sizeof(y));				
+				machineuis[i].x = x;
+				machineuis[i].y = y;
+				psyfile_read(songfile->file, &type, sizeof(type));
 
-	// Validate the machine arrays. 
-	for (int32_t i=0; i<128; i++) // First, we add the output volumes to a Matrix for reference later
-	{
-		if (!_machineActive[i])
-		{
-			zapObject(pMac[i]);
-		}
-		else if (!pMac[i])
-		{
-			_machineActive[i] = false;
-		}
-	}
-
-	// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
-	progress.m_Progress.SetPos(8192+4096);
-	::Sleep(1);
-	if ( pFile->Read(&busEffect[0],sizeof(busEffect)) == false )
-	{
-		int32_t j=0;
-		unsigned char invmach[128];
-		memset(invmach,255,sizeof(invmach));
-		// The guessing procedure does not rely on the machmode because if a plugin
-		// is missing, then it is always tagged as a generator.
-		for (int32_t i = 0; i < 64; i++)
-		{
-			if (busMachine[i] != 255) invmach[busMachine[i]]=i;
-		}
-		for ( int32_t i=1;i<128;i++ ) // machine 0 is the psy_audio_Master machine.
-		{
-			if (_machineActive[i])
-			{
-				if (invmach[i] == 255)
+				factory = songfile->song->machinefactory;
+				if (internalmachinesconvert_pluginname_exists(&converter, type, "")) {
+					pMac[i] = internalmachinesconvert_redirect(&converter, songfile, &i, type, "");					
+				} else
+				switch (type)
 				{
-					busEffect[j]=i;	
-					j++;
-				}
-			}
-		}
-		while(j < 64)
-		{
-			busEffect[j] = 255;
-			j++;
-		}
-	}
-	// Validate that there isn't any duplicated machine.
-	for ( int32_t i=0;i<64;i++ ) 
-	{
-		for ( int32_t j=i+1;j<64;j++ ) 
-		{
-			if  (busMachine[i] == busMachine[j]) busMachine[j]=255;
-			if  (busEffect[i] == busEffect[j]) busEffect[j]=255;
-		}
-		for (int32_t j=0;j<64;j++)
-		{
-			if  (busMachine[i] == busEffect[j]) busEffect[j]=255;
-		}
-	}
+				case MACH_MASTER:
+					pMac[i] = machinefactory_makemachine(factory, MACH_MASTER, "");
+					machines_insert(&songfile->song->machines, MASTER_INDEX, pMac[i]);
+					master_load(songfile, i);					
+				break;
+				case MACH_SAMPLER:
+					pMac[i] = machinefactory_makemachine(factory, MACH_SAMPLER, "");
+					sampler_load(songfile, i);
+				break;
+				case MACH_PLUGIN:
+				{
+					char sDllName[256];
+					char plugincatchername[256];
 
-	// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
-	// (missing dll, or when the load process failed).
-	// At the same time, we validate the indexes of the busMachine and busEffects arrays.
-	for ( int32_t i=0;i<64;i++ ) 
-	{
-		if (busEffect[i] != 255)
-		{
-			if ( busEffect[i] > 128 || !_machineActive[busEffect[i]] )
-				busEffect[i] = 255;
-			// If there's a dummy, force it to be an effect
-			else if (pMac[busEffect[i]]->_type == MACH_DUMMY ) 
-			{
-				pMac[busEffect[i]]->_mode = MACHMODE_FX;
-			}
-			// Else if the machine is a generator, move it to gens bus.
-			// This can't happen, but it is here for completeness
-			else if (pMac[busEffect[i]]->_mode == MACHMODE_GENERATOR)
-			{
-				int32_t k=0;
-				while (busEffect[k] != 255 && k<MAX_BUSES) 
-				{
-					k++;
+					// Plugin dll name
+					psyfile_read(songfile->file, sDllName, sizeof(sDllName));
+					_strlwr(sDllName);
+					if (internalmachinesconvert_pluginname_exists(&converter, type, sDllName)) {
+						pMac[i] = internalmachinesconvert_redirect(&converter, songfile, &i, type, sDllName);
+					} else {
+						plugincatcher_catchername(songfile->song->machinefactory->catcher,
+							sDllName, plugincatchername, 0);
+						pMac[i] = machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername);
+						if (pMac[i]) {
+							plugin_load(songfile, pMac[i], i);
+						} else {
+							pMac[i] = machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername);
+							plugin_skipload(songfile, i);
+							// Warning: It cannot be known if the missing plugin is a generator
+							// or an effect. This will be guessed from the busMachine array.
+						}
+					}
 				}
-				busMachine[k]=busEffect[i];
-				busEffect[i]=255;
+				default:
+				break;
+				}							
 			}
 		}
-		if (busMachine[i] != 255)
+
+		internalmachinesconvert_dispose(&converter);
+
+		// Patch 0: Some extra data added around the 1.0 release.
+		for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
 		{
-			if (busMachine[i] > 128 || !_machineActive[busMachine[i]])
-				busMachine[i] = 255;
-			 // If there's a dummy, force it to be a Generator
-			else if (pMac[busMachine[i]]->_type == MACH_DUMMY ) 
+			uint8_t _loop;
+			psyfile_read(songfile->file, &_loop, sizeof(_loop));
+		}
+		for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
+		{
+			int32_t _lines;
+			psyfile_read(songfile->file, &_lines, sizeof(_lines));
+		}
+
+		// Validate the machine arrays. 
+		for (int i = 0; i < 128; i++) // First, we add the output volumes to a Matrix for reference later
+		{
+			if (!_machineActive[i])
 			{
-				pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
-			}
-			// Else if the machine is an fx, move it to FXs bus.
-			// This can't happen, but it is here for completeness
-			else if ( pMac[busMachine[i]]->_mode != MACHMODE_GENERATOR)
-			{
-				int32_t j=0;
-				while (busEffect[j] != 255 && j<MAX_BUSES) 
-				{
-					j++;
+				if (pMac[i]) {
+					psy_audio_machine_dispose(pMac[i]);
+					free(pMac[i]);
+					pMac[i] = 0;
 				}
-				busEffect[j]=busMachine[i];
-				busMachine[i]=255;
+			} else if (!pMac[i])
+			{
+				_machineActive[i] = FALSE;
 			}
 		}
-	}
 
-	 // Patch 2: VST Chunks.
-	progress.m_Progress.SetPos(8192+4096+1024);
-	::Sleep(1);
-	bool chunkpresent=false;
-	pFile->Read(&chunkpresent,sizeof(chunkpresent));
-
-	if ( fullopen && chunkpresent ) for ( int32_t i=0;i<128;i++ ) 
-	{
-		if (_machineActive[i])
+		// Patch 1: BusEffects (twf). Try to read it, and if it doesn't exist, generate it.
+		// progress.m_Progress.SetPos(8192 + 4096);
+		// ::Sleep(1);
+		if (psyfile_read(songfile->file, &busEffect[0], sizeof(busEffect)) == 0)
 		{
-			if ( pMac[i]->_type == MACH_DUMMY ) 
+			int j = 0;
+			unsigned char invmach[128];
+			memset(invmach, 255, sizeof(invmach));
+			// The guessing procedure does not rely on the machmode because if a plugin
+			// is missing, then it is always tagged as a generator.
+			for (int i = 0; i < 64; i++)
 			{
-				if (((Dummy*)pMac[i])->wasVST && chunkpresent )
-				{
-					// Since we don't know if the plugin saved it or not, 
-					// we're stuck on letting the loading crash/behave incorrectly.
-					// There should be a flag, like in the VST loading Section to be correct.
-					MessageBox(NULL,"Missing or Corrupted VST plug-in has chunk, trying not to crash.", "Loading Error", MB_OK);
-				}
+				if (busMachine[i] < 128 && busMachine[i] != 255) invmach[busMachine[i]] = i;
 			}
-			else if (( pMac[i]->_type == MACH_VST ) || ( pMac[i]->_type == MACH_VSTFX))
+			for (int i = 1; i < 128; i++) // machine 0 is the Master machine.
 			{
-				bool chunkread = false;
-				try
+				if (_machineActive[i])
 				{
-					vst::psy_audio_Plugin & plugin(*static_cast<vst::psy_audio_Plugin*>(pMac[i]));
-					if(chunkpresent) chunkread = plugin.LoadChunk(pFile);
-				}
-				catch(const std::exception &)
-				{
-					// o_O`
-				}
-			}
-		}
-	}
-
-	*/
-	//////////////////////////////////////////////////////////////////////////
-	//Finished all the songfile->file loading. Now Process the data to the current structures
-
-	// The old fileformat stored the volumes on each output, 
-	// so what we have in inputConVol is really outputConVol
-	// and we have to convert while recreating them.
-	
-	/*progress.m_Progress.SetPos(8192+4096+2048);
-	::Sleep(1);
-	for (int32_t i=0; i<128; i++) // we go to fix this for each
-	{
-		if (_machineActive[i])		// valid machine (important, since we have to navigate!)
-		{
-			for (int32_t c=0; c<MAX_CONNECTIONS; c++) // all for each of its input connections.
-			{
-				LegacyWire& wire = pMac[i]->legacyWires[c];
-				if (wire._inputCon && wire._inputMachine > -1 && wire._inputMachine < 128
-					&& pMac[wire._inputMachine])	// If there's a valid machine in this inputconnection,
-				{
-					psy_audio_Machine* pSourceMac = pMac[wire._inputMachine];
-					int32_t d = psy_audio_Machine::FindLegacyOutput(pSourceMac, i); // We get that machine and wire
-					if ( d != -1 )
+					if (invmach[i] == 255)
 					{
-						float val = pSourceMac->legacyWires[d]._inputConVol;
-						if( val > 4.1f )
-						{
-							val*=0.000030517578125f; // BugFix
+						busEffect[j] = i;
+						j++;
+					}
+				}
+			}
+			while (j < 64)
+			{
+				busEffect[j] = 255;
+				j++;
+			}
+		}
+
+		// Validate that there isn't any duplicated machine.
+		for (int i = 0; i < 64; i++)
+		{
+			for (int j = i + 1; j < 64; j++)
+			{
+				if (busMachine[i] == busMachine[j]) busMachine[j] = 255;
+				if (busEffect[i] == busEffect[j]) busEffect[j] = 255;
+			}
+			for (int j = 0; j < 64; j++)
+			{
+				if (busMachine[i] == busEffect[j]) busEffect[j] = 255;
+			}
+		}
+
+		// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
+		// (missing dll, or when the load process failed).
+		// At the same time, we validate the indexes of the busMachine and busEffects arrays.
+		for (int i = 0; i < 64; i++)
+		{
+			if (busEffect[i])
+			{
+				if (busEffect[i] > 128 || (busEffect[i] < 128 && !_machineActive[busEffect[i]]))
+					busEffect[i] = 255;
+				// If there's a dummy, force it to be an effect
+				else
+				if (busEffect[i] < 128 && pMac[busEffect[i]] && psy_audio_machine_type(pMac[busEffect[i]]) == MACH_DUMMY)
+				{					
+					// pMac[busEffect[i]]->_mode = MACHMODE_FX;
+				}
+				// Else if the machine is a generator, move it to gens bus.
+				// This can't happen, but it is here for completeness
+				else if (busEffect[i] < 128 && pMac[busEffect[i]] && psy_audio_machine_mode(pMac[busEffect[i]]) == MACHMODE_GENERATOR)
+				{
+					int k = 0;
+					while (busEffect[k] != 255 && k < MAX_BUSES)
+					{
+						k++;
+					}
+					busMachine[k] = busEffect[i];
+					busEffect[i] = 255;
+				}
+			}
+			if (busMachine[i] != 255)
+			{
+				if (busMachine[i] > 128 || (busMachine[i] < 128 && !_machineActive[busMachine[i]]))
+					busMachine[i] = 255;
+				// If there's a dummy, force it to be a Generator
+				else if (psy_audio_machine_type(pMac[busMachine[i]]) == MACH_DUMMY)
+				{
+					// pMac[busMachine[i]]->_mode = MACHMODE_GENERATOR;
+				}
+				// Else if the machine is an fx, move it to FXs bus.
+				// This can't happen, but it is here for completeness
+				else if (busEffect[i] < 128 && pMac[busEffect[i]] && psy_audio_machine_mode(pMac[busMachine[i]]) != MACHMODE_GENERATOR)
+				{
+					int j = 0;
+					while (busEffect[j] != 255 && j < MAX_BUSES)
+					{
+						j++;
+					}
+					busEffect[j] = busMachine[i];
+					busMachine[i] = 255;
+				}
+			}
+		}
+
+		
+		{
+			// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
+				// to the real machine.
+				// Due to this, we have to move machines to where they really are, 
+				// and remap the inputs and outputs indexes again... ouch
+				// At the same time, we validate each wire.
+			//progress.m_Progress.SetPos(8192 + 4096 + 2048 + 1024);
+			//::Sleep(1);
+			unsigned char invmach[128];
+			memset(invmach, 255, sizeof(invmach));
+			for (int i = 0; i < 64; i++)
+			{
+				if (busMachine[i] < 128 && busMachine[i] != 255) invmach[busMachine[i]] = i;
+				if (busEffect[i] < 128 && busEffect[i] != 255) invmach[busEffect[i]] = i + 64;
+			}
+			invmach[0] = MASTER_INDEX;
+			
+			for (int i = 0; i < 128; i++)
+			{
+				if (invmach[i] != 255)
+				{
+					psy_audio_Machine* cMac = pMac[i];
+					psy_audio_MachineUi* machineui;
+					
+					machines_insert(&songfile->song->machines, invmach[i], pMac[i]);
+					machineui = psy_audio_songfile_machineui(songfile, invmach[i]);
+					machineui->x = machineuis[i].x;
+					machineui->y = machineuis[i].y;
+					_machineActive[i] = FALSE; // mark as "converted"
+				}
+			}
+			// verify that there isn't any machine that hasn't been copied into _pMachine
+			// Shouldn't happen. It would mean a damaged file.
+			int j = 0;
+			int k = 64;
+			for (int i = 0; i < 128; i++)
+			{
+				if (_machineActive[i])
+				{
+					if (psy_audio_machine_mode(pMac[i]) == MACHMODE_GENERATOR)
+					{
+						psy_audio_MachineUi* machineui;
+
+						while (machines_at(&songfile->song->machines, j) && j < 64) j++;
+						machines_insert(&songfile->song->machines, j, pMac[i]);
+						invmach[i] = j;
+						machineui = psy_audio_songfile_machineui(songfile, j);
+						machineui->x = machineuis[i].x;
+						machineui->y = machineuis[i].y;
+					} else
+					{
+						psy_audio_MachineUi* machineui;
+
+						while (machines_at(&songfile->song->machines, j) && k < 128) k++;
+						machines_insert(&songfile->song->machines, k, pMac[i]);
+						invmach[i] = k;
+						machineui = psy_audio_songfile_machineui(songfile, k);
+						machineui->x = machineuis[i].x;
+						machineui->y = machineuis[i].y;
+					}
+				}
+			}
+			internalmachineconverter_retweak_song(&converter, songfile->song);
+			{
+				//////////////////////////////////////////////////////////////////////////
+				//Finished all the songfile->file loading. Now Process the data to the current structures
+
+				// The old fileformat stored the volumes on each output, 
+				// so what we have in inputConVol is really outputConVol
+				// and we have to convert while recreating them.
+
+				// progress.m_Progress.SetPos(8192+4096+2048);
+				// ::Sleep(1);
+				int32_t i;
+				psy_Table* legacywiretable;
+
+				for (i = 0; i < 128; i++) // we go to fix this for each
+				{
+					if (pMac[i] != NULL)
+					{
+						uintptr_t c;
+
+						legacywiretable = psy_audio_legacywires_at(&songfile->legacywires, i);
+						if (!legacywiretable) {
+							continue;
 						}
-						else if ( val < 0.00004f) 
-						{
-							val*=32768.0f; // BugFix
+						for (c = 0; c < MAX_CONNECTIONS; ++c) {
+							LegacyWire* wire;
+
+							wire = psy_table_at(legacywiretable, c);
+							if (!wire) {
+								continue;
+							}
+							// If there's a valid machine in this inputconnection
+							if (wire->_inputCon
+								&& wire->_inputMachine >= 0 && wire->_inputMachine < 128
+								&& i != wire->_inputMachine && pMac[wire->_inputMachine])
+							{
+								psy_audio_Machine* pSourceMac;
+								int32_t d;
+
+								pSourceMac = pMac[wire->_inputMachine];
+								d = psy_audio_legacywires_findlegacyoutput(&songfile->legacywires, wire->_inputMachine, i);
+								if (d != -1)
+								{
+									LegacyWire* outputwire;
+
+									outputwire = psy_table_at(legacywiretable, d);
+									if (outputwire) {
+										float val = outputwire->_inputConVol;
+										if (val > 4.1f)
+										{
+											val *= 0.000030517578125f; // BugFix
+										} else if (val < 0.00004f)
+										{
+											val *= 32768.0f; // BugFix
+										}
+										// and set the volume.
+										//if (wire.pinMapping.size() > 0) {
+										//	pMac[i]->inWires[c].ConnectSource(*pSourceMac, 0, d, &wire.pinMapping);
+										//} else {
+										//	pMac[i]->inWires[c].ConnectSource(*pSourceMac, 0, d);
+										//}
+										//pMac[i]->inWires[c].SetVolume(val * wire._wireMultiplier); */
+											machines_connect(&songfile->song->machines, invmach[wire->_inputMachine], invmach[i]);
+										connections_setwirevolume(&songfile->song->machines.connections,
+											invmach[wire->_inputMachine], invmach[i], val* wire->_wireMultiplier);
+									}
+								}
+							}
 						}
-						// and set the volume.
-						if (wire.pinMapping.size() > 0) {
-							pMac[i]->inWires[c].ConnectSource(*pSourceMac,0,d,&wire.pinMapping);
-						}
-						else {
-							pMac[i]->inWires[c].ConnectSource(*pSourceMac,0,d);
-						}
-						pMac[i]->inWires[c].SetVolume(val*wire._wireMultiplier);
 					}
 				}
 			}
 		}
+	}		
+}
+
+
+// old file format machine loaders
+void machine_load(psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	char _editName[32];
+	cpoint_t connectionpoint[MAX_CONNECTIONS];
+	int32_t panning;	
+
+	psyfile_read(songfile->file, _editName, 16);
+	_editName[15] = 0;
+	
+	legacywires_load_psy2(songfile, slot);
+	
+	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
+	// numInputs and numOutputs
+	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+
+	psyfile_read(songfile->file, &panning, sizeof(panning));
+	// Machine::SetPan(_panning);
+	psyfile_skip(songfile->file, 109);	
+}
+
+void master_load(psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	char _editName[32];
+	cpoint_t connectionpoint[MAX_CONNECTIONS];
+	int32_t panning;
+	int32_t _outDry;	
+
+	psyfile_read(songfile->file, _editName, 16);
+	_editName[15] = 0;
+	
+	legacywires_load_psy2(songfile, slot);
+
+	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
+	// numInputs and numOutputs
+	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+
+	psyfile_read(songfile->file, &panning, sizeof(panning));
+	// Machine::SetPan(_panning);
+	psyfile_skip(songfile->file, 40);
+
+	// outdry
+	psyfile_read(songfile->file, &_outDry, sizeof(int));
+	psyfile_skip(songfile->file, 65);	
+}
+
+void sampler_load(psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	char _editName[32];
+	cpoint_t connectionpoint[MAX_CONNECTIONS];
+	int32_t panning;
+	int32_t _numVoices;
+	int32_t interpol;
+
+	psyfile_read(songfile->file, _editName, 16);
+	_editName[15] = 0;
+	
+	legacywires_load_psy2(songfile, slot);
+
+	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
+	// numInputs and numOutputs
+	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+
+	psyfile_read(songfile->file, &panning, sizeof(panning));
+	psyfile_skip(songfile->file, 8 * sizeof(int)); // SubTrack[]
+	psyfile_read(songfile->file, &_numVoices, sizeof(_numVoices)); // numSubtracks
+
+	if (_numVoices < 4)
+	{
+		// Psycle versions < 1.1b2 had polyphony per channel,not per machine.
+		_numVoices = 8;
 	}
 
-	// Psycle no longer uses busMachine and busEffect, since the pMachine Array directly maps
-	// to the real machine.
-	// Due to this, we have to move machines to where they really are, 
-	// and remap the inputs and outputs indexes again... ouch
-	// At the same time, we validate each wire.
-	progress.m_Progress.SetPos(8192+4096+2048+1024);
-	::Sleep(1);
-	unsigned char invmach[128];
-	memset(invmach,255,sizeof(invmach));
-	for (int32_t i = 0; i < 64; i++)
-	{
-		if (busMachine[i] != 255) invmach[busMachine[i]]=i;
-		if (busEffect[i] != 255) invmach[busEffect[i]]=i+64;
-	}
-	invmach[0]=MASTER_INDEX;
+	psyfile_read(songfile->file, &interpol, sizeof(int32_t)); // interpol
+	//switch (interpol)
+	//{
+	//case 2:	_resampler.quality(helpers::dsp::resampler::quality::spline); break;
+	//case 3:	_resampler.quality(helpers::dsp::resampler::quality::sinc); break;
+	//case 0:	_resampler.quality(helpers::dsp::resampler::quality::zero_order); break;
+	//case 1:
+	//default: _resampler.quality(helpers::dsp::resampler::quality::linear);
+	//}
+	psyfile_skip(songfile->file, 69);	
+}
 
-	for (int32_t i = 0; i < 128; i++)
-	{
-		if (invmach[i] != 255)
+void plugin_load(psy_audio_SongFile* songfile, psy_audio_Machine* machine, uintptr_t slot)
+{
+	char _editName[32];
+	cpoint_t connectionpoint[MAX_CONNECTIONS];
+	int32_t panning;
+	int32_t numParameters;
+	int* Vals;
+	uintptr_t i;
+
+	assert(machine);
+	psyfile_read(songfile->file, _editName, 16);
+	_editName[15] = 0;
+	psy_audio_machine_seteditname(machine, _editName);
+	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
+	if (numParameters > 0) {
+		Vals = malloc(sizeof(int32_t) * numParameters);
+		psyfile_read(songfile->file, Vals, numParameters * sizeof(int));
+		for (i = 0; i < (uintptr_t)numParameters; ++i)
 		{
-			psy_audio_Machine *cMac = _pMachine[invmach[i]] = pMac[i];
-			cMac->_macIndex = invmach[i];
-			_machineActive[i] = false; // mark as "converted"
-		}
-	}
-	// verify that there isn't any machine that hasn't been copied into _pMachine
-	// Shouldn't happen. It would mean a damaged songfile->file.
-	int32_t j=0;
-	int32_t k=64;
-	for (int32_t i=0;i < 128; i++)
-	{
-		if (_machineActive[i])
-		{
-			if ( pMac[i]->_mode == MACHMODE_GENERATOR)
-			{
-				while (_pMachine[j] && j<64) j++;
-				_pMachine[j]=pMac[i];
+			psy_audio_MachineParam* param;
+
+			param = psy_audio_machine_parameter(machine, i);
+			if (param) {
+				psy_audio_machineparam_tweak_scaledvalue(param, Vals[i]);
 			}
-			else
-			{
-				while (_pMachine[k] && k<128) k++;
-				_pMachine[k]=pMac[i];
-			}
 		}
+	} else {
+		Vals = NULL;
 	}
-
-	progress.m_Progress.SetPos(16384);
-	::Sleep(1);
-	if(fullopen) converter.retweak(*this);
-	for (int32_t i(0); i < MAX_MACHINES;++i) if ( _pMachine[i]) _pMachine[i]->PostLoad(_pMachine);
-	seqBus=0;
-	// Clean memory.
-	for(int32_t i(0) ; i < MAX_MACHINES ; ++i) if(_pMachine[i])	{
-		_pMachine[i]->legacyWires.clear();
-	}
-	// Clean the vst loader helpers.
-	for (int32_t i=0; i<OLD_MAX_PLUGINS; i++)
+	
 	{
-		if( vstL[i].valid )
+		uintptr_t size;
+		
+		size = psy_audio_machine_datasize(machine);
+		//pFile->Read(&size,sizeof(int));	// This SHOULD be the right thing to do
+		if (size)
 		{
-			zapObject(vstL[i].pars);
+			uint8_t* pData;
+			
+			pData = (uint8_t*)malloc(size);
+			psyfile_read(songfile->file, pData, size); // Number of parameters
+			psy_audio_machine_putdata(machine, pData); // Internal load
+			free(pData);
+			pData = 0;
 		}
-	}
-	*/
-//	_saved=true;
-//	return true;	
+	}	
+	free(Vals);
+	Vals = 0;
+	
+	legacywires_load_psy2(songfile, slot);
+
+	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
+	// numInputs and numOutputs
+	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+
+	psyfile_read(songfile->file, &panning, sizeof(panning));
+	psyfile_skip(songfile->file, 109);	
+}
+
+void plugin_skipload(psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	char _editName[32];
+	cpoint_t connectionpoint[MAX_CONNECTIONS];
+	int32_t panning;
+	int32_t numParameters;
+
+	psyfile_read(songfile->file, _editName, 16);
+	_editName[15] = 0;
+	
+	psyfile_read(songfile->file, &numParameters, sizeof(numParameters));
+	psyfile_skip(songfile->file, sizeof(numParameters));
+	/* This SHOULD be done, but it breaks the fileformat.
+		int size;
+		pFile->Read(&size,sizeof(int));
+		if (size)
+		{
+			pFile->Skip(size);
+	}*/
+	legacywires_load_psy2(songfile, slot);
+	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
+	// numInputs and numOutputs
+	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
+
+	psyfile_read(songfile->file, &panning, sizeof(panning));
+	psyfile_skip(songfile->file, 109);	
 }
 

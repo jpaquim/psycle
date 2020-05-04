@@ -8,12 +8,12 @@
 #include <string.h>
 #include <dir.h>
 
-#include "../../detail/portable.h"
-
 #include <luaplugin.h>
 #include <exclusivelock.h>
 
 #include <songio.h>
+
+#include "../../detail/portable.h"
 
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
