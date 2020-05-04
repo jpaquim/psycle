@@ -4,9 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "instrumentview.h"
-#include "../../detail/portable.h"
 #include <math.h>
 #include <songio.h>
+
+#include "../../detail/portable.h"
 
 static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);

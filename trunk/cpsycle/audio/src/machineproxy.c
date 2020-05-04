@@ -91,6 +91,10 @@ static psy_audio_Buffer* machineproxy_buffermemory(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_buffermemorysize(psy_audio_MachineProxy*);
 static void machineproxy_setbuffermemorysize(psy_audio_MachineProxy*, uintptr_t);
 static psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy*);
+// data
+static void machineproxy_putdata(psy_audio_MachineProxy*, uint8_t* data);
+static uint8_t* machineproxy_data(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_datasize(psy_audio_MachineProxy*);
 // programs
 static void machineproxy_programname(psy_audio_MachineProxy*, int bnkidx, int prgIdx, char* val);
 static int machineproxy_numprograms(psy_audio_MachineProxy*);
@@ -209,6 +213,9 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
 			machineproxy_buffermemory;
 		vtable.amprange = (fp_machine_amprange) machineproxy_amprange;
+		vtable.putdata = (fp_machine_putdata) machineproxy_putdata;
+		vtable.data = (fp_machine_data) machineproxy_data;
+		vtable.datasize = (fp_machine_datasize) machineproxy_datasize;
 		vtable.programname = (fp_machine_programname) machineproxy_programname;
 		vtable.numprograms = (fp_machine_numprograms) machineproxy_numprograms;
 		vtable.setcurrprogram = (fp_machine_setcurrprogram) machineproxy_setcurrprogram;
@@ -1297,6 +1304,63 @@ psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy* self, psy_List* e
 #endif		
 	}
 	
+	return rv;
+}
+
+void machineproxy_putdata(psy_audio_MachineProxy* self, uint8_t* data)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_putdata(self->client, data);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "putdata",
+			GetExceptionCode(), GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+uint8_t* machineproxy_data(psy_audio_MachineProxy* self)
+{
+	uint8_t* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_data(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "data", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+uintptr_t machineproxy_datasize(psy_audio_MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_datasize(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "datasize", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
 	return rv;
 }
 

@@ -127,6 +127,7 @@
     <ClCompile Include="src\quantize.c" />
     <ClCompile Include="src\resampler.c" />
     <ClCompile Include="src\rms.c" />
+    <ClCompile Include="src\scale.c" />
     <ClCompile Include="src\valuemapper.c" />
   </ItemGroup>
   <ItemGroup>
@@ -149,6 +150,7 @@
     <ClInclude Include="src\rint.h" />
     <ClInclude Include="src\rintclip.h" />
     <ClInclude Include="src\rms.h" />
+    <ClInclude Include="src\scale.h" />
     <ClInclude Include="src\valuemapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

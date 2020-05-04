@@ -205,6 +205,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_dockview);
 	psy_signal_init(&self->signal_defaultfontchanged);
+	psy_signal_init(&self->signal_showgear);
 }
 
 void workspace_dispose(Workspace* self)
@@ -253,6 +254,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_dockview);
 	psy_signal_dispose(&self->signal_defaultfontchanged);
+	psy_signal_dispose(&self->signal_showgear);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -1199,7 +1201,8 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 					}
 				}
 			}
-		}		
+		}
+		return;
 	} else	
 	if (choice && psy_properties_insection(property, self->midi)) {
 		if (strcmp(psy_properties_key(choice), "mididriver") == 0) {
@@ -2106,4 +2109,9 @@ void workspace_connectasmixerinput(Workspace* self)
 bool workspace_isconnectasmixersend(Workspace* self)
 {
 	return machines_isconnectasmixersend(&self->song->machines);
+}
+
+void workspace_showgear(Workspace* self)
+{
+	psy_signal_emit(&self->signal_showgear, self, 0);
 }

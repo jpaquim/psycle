@@ -174,7 +174,10 @@ static void loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-
+// data
+static void putdata(psy_audio_Plugin*, uint8_t* data);
+static uint8_t* data(psy_audio_Plugin*);
+static uintptr_t datasize(psy_audio_Plugin*);
 // private methods
 static void disposeparameters(psy_audio_Plugin*);
 static void tweakdefaults(psy_audio_Plugin*, CMachineInfo* info);
@@ -203,6 +206,9 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
 		vtable.numinputs = (fp_machine_numinputs) numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.putdata = (fp_machine_putdata)putdata;
+		vtable.data = (fp_machine_data)data;
+		vtable.datasize = (fp_machine_datasize)datasize;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) savespecific;			
 		vtable_initialized = 1;
@@ -450,6 +456,24 @@ uintptr_t numinputs(psy_audio_Plugin* self)
 uintptr_t numoutputs(psy_audio_Plugin* self)
 {
 	return info(self) ? 2 : 0;
+}
+
+void putdata(psy_audio_Plugin* self, uint8_t* data)
+{
+	mi_putdata(self->mi, data);
+}
+
+uint8_t* data(psy_audio_Plugin* self)
+{
+	uint8_t* rv = 0;
+
+	mi_getdata(self->mi, rv);
+	return rv;
+}
+
+uintptr_t datasize(psy_audio_Plugin* self)
+{
+	return mi_getdatasize(self->mi);
 }
 
 void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,

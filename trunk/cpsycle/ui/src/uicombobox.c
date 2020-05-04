@@ -48,6 +48,7 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->charnumber = 0;
+	self->hover = 0;
 }
 
 void ondestroy(psy_ui_ComboBox* self, psy_ui_Component* sender)
@@ -124,10 +125,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(&self->component);
 	vcenter = (size.height - tm.tmHeight) / 2;
 	varrowcenter = (size.height - 10) / 2;
-	sel = psy_ui_combobox_cursel(self);
-	if (self->component.debugflag == 60) {
-		self = self;
-	}
+	sel = psy_ui_combobox_cursel(self);	
 	if (sel != -1) {
 		char text[512];
 

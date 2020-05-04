@@ -11,9 +11,9 @@
 
 #include <string.h>
 
-#include "../../detail/portable.h"
-
 #include <songio.h>
+
+#include "../../detail/portable.h"
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent,

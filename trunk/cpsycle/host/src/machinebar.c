@@ -4,9 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "machinebar.h"
-#include "../../detail/portable.h"
 #include <songio.h>
 #include <plugin_interface.h>
+
+#include "../../detail/portable.h"
 
 static void OnDestroy(MachineBar*, psy_ui_Component* component);
 static void BuildMachineBox(MachineBar*);

@@ -68,6 +68,9 @@
     <ClCompile Include="src\fft.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scale.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\adsr.h">
@@ -128,6 +131,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\rintclip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scale.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

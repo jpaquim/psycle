@@ -76,6 +76,29 @@ INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* se
 	self->vtable->tweak(self, value);
 }
 
+INLINE void psy_audio_machineparam_tweak_scaledvalue(psy_audio_MachineParam* self, int scaledvalue)
+{
+	intptr_t minval;
+	intptr_t maxval;
+	intptr_t range;
+	float value;
+
+	self->vtable->range(self, &minval, &maxval);
+	range = maxval - minval;
+	if (range == 0) {
+		value = 0.f;
+	} else {
+		value = (scaledvalue - minval) / (float)range;
+	}
+	if (value > 1.f) {
+		value = 1.f;
+	}
+	if (value < 0.f) {
+		value = 0.f;
+	}
+	self->vtable->tweak(self, value);
+}
+
 // [0.0f..1.0f] 
 INLINE float psy_audio_machineparam_normvalue(psy_audio_MachineParam* self)
 {

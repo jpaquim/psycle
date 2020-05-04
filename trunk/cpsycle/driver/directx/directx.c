@@ -374,28 +374,27 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 	if (config) {
 		properties_free(self->driver.properties);
 		self->driver.properties = psy_properties_clone(config, 1);
-	} else {
-		property = psy_properties_read(self->driver.properties, "bitdepth");
-		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			psy_audiodriversettings_setvalidbitdepth(&self->settings,
-				property->item.value.i);
-		}
-		property = psy_properties_read(self->driver.properties, "samplerate");
-		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			psy_audiodriversettings_setsamplespersec(&self->settings,
-				property->item.value.i);
-		}
-		property = psy_properties_read(self->driver.properties, "numbuf");
-		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			psy_audiodriversettings_setblockcount(&self->settings,
-				property->item.value.i);
-		}
-		property = psy_properties_read(self->driver.properties, "numsamples");
-		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			psy_audiodriversettings_setblockframes(&self->settings,
-				property->item.value.i);
-		}
 	}
+	property = psy_properties_read(self->driver.properties, "bitdepth");
+	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+		psy_audiodriversettings_setvalidbitdepth(&self->settings,
+			psy_properties_value(property));
+	}
+	property = psy_properties_read(self->driver.properties, "samplerate");
+	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+		psy_audiodriversettings_setsamplespersec(&self->settings,
+			psy_properties_value(property));
+	}
+	property = psy_properties_read(self->driver.properties, "numbuf");
+	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+		psy_audiodriversettings_setblockcount(&self->settings,
+			psy_properties_value(property));
+	}
+	property = psy_properties_read(self->driver.properties, "numsamples");
+	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+		psy_audiodriversettings_setblockframes(&self->settings,
+			psy_properties_value(property));
+	}	
 }
 
 unsigned int driver_samplerate(psy_AudioDriver* self)

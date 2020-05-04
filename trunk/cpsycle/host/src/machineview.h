@@ -108,6 +108,7 @@ typedef struct {
 	int firstsize;
 	int randominsert;
 	int addeffect;
+	bool mousemoved;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,

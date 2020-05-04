@@ -158,6 +158,10 @@ static psy_dsp_amp_range_t amprange(psy_audio_Machine* self)
 {
 	return PSY_DSP_AMP_RANGE_NATIVE;
 }
+// data
+static void putdata(psy_audio_Machine* self, uint8_t* data) { }
+static uint8_t* data(psy_audio_Machine* self) { return NULL; }
+static uintptr_t datasize(psy_audio_Machine* self) { return 0; }
 // programs
 static void programname(psy_audio_Machine* self, int bnkidx, int prgIdx, char* val)
 {
@@ -219,8 +223,6 @@ static int numplaybacks(psy_audio_Machine* self)
 {
 	return self->callback.numplaybacks(self->callback.context);
 }
-
-static int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex);
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -291,6 +293,9 @@ static void vtable_init(void)
 		vtable.buffermemorysize = buffermemorysize;
 		vtable.setbuffermemorysize = setbuffermemorysize;
 		vtable.amprange = amprange;
+		vtable.putdata = putdata;
+		vtable.data = data;
+		vtable.datasize = datasize;
 		vtable.programname = programname;
 		vtable.numprograms = numprograms;
 		vtable.setcurrprogram = setcurrprogram;
@@ -370,7 +375,7 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 	for (p = entry->events; p != 0; p = p->next) {
 		psy_audio_PatternEvent* ev;
 
-		ev = (psy_audio_PatternEvent*) p->entry;		
+		ev = (psy_audio_PatternEvent*) p->entry;
 		if (ev->note == NOTECOMMANDS_TWEAK) {
 			if (ev->inst < psy_audio_machine_numparameters(self)) {
 				psy_audio_MachineParam* param;				
@@ -397,11 +402,23 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 					}
 				}
 			}
+		} else 
+		if (ev->note == NOTECOMMANDS_EMPTY && ev->cmd == EXTENDED) {
+			if ((ev->parameter & 0xF0) == SET_BYPASS) {
+				if ((ev->parameter & 0x0F) == 0) {
+					psy_audio_machine_unbypass(self);
+				} else {
+					psy_audio_machine_bypass(self);
+				}
+			} else
+			if ((ev->parameter & 0xF0) == SET_MUTE) {
+				if ((ev->parameter & 0x0F) == 0) {
+					psy_audio_machine_unmute(self);
+				} else {
+					psy_audio_machine_mute(self);
+				}
+			}			
 		} else {
-			if (ev->cmd == SET_PANNING) {				
-				psy_audio_machine_setpanning(self,
-					psy_dsp_map_255_1(ev->parameter));
-			}
 			psy_audio_machine_seqtick(self, entry->track, ev);
 		}
 	}
@@ -526,7 +543,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t c;
 	psy_Table* legacywiretable;
 
-	legacywiretable = psy_table_at(&songfile->legacywires, slot);
+	legacywiretable = psy_audio_legacywires_at(&songfile->legacywires, slot);
 	if (!legacywiretable) {
 		return;
 	}
@@ -558,8 +575,8 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			&& wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
 			&& slot != wire->_inputMachine && inputmachine)
 		{
-			//Do not create the hidden wire from mixer send to the send machine.
-			int outWire = findlegacyoutput(songfile, wire->_inputMachine, slot);
+			// Do not create the hidden wire from mixer send to the send machine.
+			int outWire = psy_audio_legacywires_findlegacyoutput(&songfile->legacywires, wire->_inputMachine, slot);
 			if (outWire != -1) {
 				//if (wire.pinMapping.size() > 0) {
 				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
@@ -582,29 +599,4 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			}
 		}
 	}
-}
-
-int findlegacyoutput(psy_audio_SongFile* songfile, int sourceMac, int macIndex)
-{
-	psy_Table* legacywiretable;
-
-	legacywiretable = psy_table_at(&songfile->legacywires, sourceMac);
-	if (!legacywiretable) {
-		return -1;
-	}
-	for (int c = 0; c < MAX_CONNECTIONS; c++)
-	{
-		LegacyWire* legacywire;
-
-		legacywire = psy_table_at(legacywiretable, c);
-		if (!legacywire) {
-			continue;
-		}
-		if (legacywire->_connection &&
-			legacywire->_outputMachine == macIndex)
-		{
-			return c;
-		}
-	}
-	return -1;
 }

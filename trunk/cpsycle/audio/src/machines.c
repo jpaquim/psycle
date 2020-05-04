@@ -83,7 +83,8 @@ void machines_free(psy_audio_Machines* self)
 {
 	psy_TableIterator it;
 	
-	for (it = machines_begin(self); !psy_tableiterator_equal(&it, psy_table_end());
+	for (it = machines_begin(self);
+			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {			
 		psy_audio_Machine* machine;
 

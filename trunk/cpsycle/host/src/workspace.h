@@ -95,6 +95,7 @@ typedef struct {
 	psy_Signal signal_followsongchanged;
 	psy_Signal signal_dockview;
 	psy_Signal signal_defaultfontchanged;
+	psy_Signal signal_showgear;
 	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
 	History history;
@@ -201,5 +202,6 @@ void workspace_movecursorwhenpaste(Workspace*, bool on);
 void workspace_connectasmixersend(Workspace*);
 void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(Workspace*);
+void workspace_showgear(Workspace*);
 
 #endif

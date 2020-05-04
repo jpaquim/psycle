@@ -10,11 +10,12 @@
 #include "resources/resource.h"
 #include "paramview.h"
 
-#include "../../detail/portable.h"
 #include <dir.h>
 #include <uiapp.h>
 
 #include <songio.h>
+
+#include "../../detail/portable.h"
 
 #define TIMERID_MAINFRAME 20
 
@@ -47,6 +48,7 @@ static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
 static void mainframe_onviewselected(MainFrame*, Workspace*, int view, uintptr_t section, int option);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onshowgear(MainFrame*, Workspace* sender);
 static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, int timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
@@ -263,6 +265,8 @@ void mainframe_init(MainFrame* self)
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_dockview, self,
 		mainframe_ondockview);
+	psy_signal_connect(&self->workspace.signal_showgear, self,
+		mainframe_onshowgear);
 	mainframe_setstartpage(self);
 }
 
@@ -619,6 +623,14 @@ void mainframe_updatetitle(MainFrame* self)
 	psy_ui_component_settitle(&self->component, txt);
 }
 
+void mainframe_onshowgear(MainFrame* self, Workspace* sender)
+{
+	if (!psy_ui_component_visible(&self->gear.component)) {
+		psy_ui_button_highlight(&self->machinebar.gear);
+		psy_ui_component_show(&self->gear.component);
+		psy_ui_component_align(&self->client);
+	}
+}
 
 void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 {

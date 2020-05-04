@@ -4,6 +4,8 @@
 #ifndef psy_audio_WIRE_H
 #define psy_audio_WIRE_H
 
+#include <hashtbl.h>
+
 #include <stdlib.h>
 
 #include "../../detail/psydef.h"
@@ -45,6 +47,16 @@ typedef struct LegacyWire
 	///\}
 } LegacyWire;
 
+INLINE void psy_audio_legacywire_init(LegacyWire* self)
+{
+	self->_inputMachine = -1;
+	self->_inputCon = FALSE;
+	self->_inputConVol = 1.f;;
+	self->_wireMultiplier = 1.f;
+	self->_outputMachine = -1;
+	self->_connection = FALSE;
+}
+
 INLINE void psy_audio_legacywire_init_all(LegacyWire* self,
 	int inputmachine,
 	bool inputcon,
@@ -64,6 +76,17 @@ INLINE void psy_audio_legacywire_init_all(LegacyWire* self,
 INLINE LegacyWire* psy_audio_legacywire_alloc(void)
 {
 	return (LegacyWire*) malloc(sizeof(LegacyWire));
+}
+
+INLINE LegacyWire* psy_audio_legacywire_allocinit(void)
+{
+	LegacyWire* rv;
+
+	rv = psy_audio_legacywire_alloc();
+	if (rv) {
+		psy_audio_legacywire_init(rv);
+	}
+	return rv;
 }
 
 INLINE LegacyWire* psy_audio_legacywire_allocinit_all(
@@ -88,6 +111,20 @@ INLINE LegacyWire* psy_audio_legacywire_allocinit_all(
 	}
 	return rv;
 }
+
+typedef struct psy_audio_LegacyWires {
+	psy_Table legacywires;
+} psy_audio_LegacyWires;
+
+struct psy_audio_SongFile;
+
+void psy_audio_legacywires_init(psy_audio_LegacyWires*);
+void psy_audio_legacywires_dispose(psy_audio_LegacyWires*);
+psy_Table* psy_audio_legacywires_at(psy_audio_LegacyWires*,
+	uintptr_t machineslot);
+int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires*,
+	int sourcemac, int macindex);
+void legacywires_load_psy2(struct psy_audio_SongFile*, uintptr_t slot);
 	
 #ifdef __cplusplus
 }
