@@ -172,8 +172,8 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	{
 		float wl = pSamplesL[index] * multleft;
 		float wr = pSamplesR[index] * multright;
-		float awl = fabs(wl);
-		float awr = fabs(wr);
+		float awl = (float)fabs(wl);
+		float awr = (float)fabs(wr);
 #if 0
 		float mid = wl + wr;
 		float side = wl - wr;
@@ -253,49 +253,49 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	//CPen* oldpen = bufDC.SelectObject(&linepenbL);
 	quarterpi = psy_dsp_PI_F * 0.25f;
 
-	x = psy_dsp_fround(sin(-quarterpi - (self->o_mvdpl * quarterpi)) * self->o_mvpl * 128.0f) + 128;
-	y = psy_dsp_fround(-cos(-quarterpi - (self->o_mvdpl * quarterpi)) * self->o_mvpl * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin(-quarterpi - (self->o_mvdpl * quarterpi)) * self->o_mvpl * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos(-quarterpi - (self->o_mvdpl * quarterpi)) * self->o_mvpl * 128.0f) + 128;
 	psy_ui_drawline(g, x, y, 128, 128);
 	//	bufDC.LineTo(128,128-helpers::math::round<int,float>(o_mvpc*128.0f));
 	//	bufDC.MoveTo(128,128);
-	x = psy_dsp_fround(sin(quarterpi + (self->o_mvdpr * quarterpi)) * self->o_mvpr * 128.0f) + 128;
-	y = psy_dsp_fround(-cos(quarterpi + (self->o_mvdpr * quarterpi)) * self->o_mvpr * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin(quarterpi + (self->o_mvdpr * quarterpi)) * self->o_mvpr * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos(quarterpi + (self->o_mvdpr * quarterpi)) * self->o_mvpr * 128.0f) + 128;
 	psy_ui_drawline(g, 128, 128, x, y);
 
 	// panning data
 	// bufDC.SelectObject(&linepenbR);
 
-	x = psy_dsp_fround(sin(-(self->o_mvdl * quarterpi)) * self->o_mvl * 128.0f) + 128;
-	y = psy_dsp_fround(-cos(-(self->o_mvdl * quarterpi)) * self->o_mvl * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin(-(self->o_mvdl * quarterpi)) * self->o_mvl * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos(-(self->o_mvdl * quarterpi)) * self->o_mvl * 128.0f) + 128;
 	psy_ui_drawline(g, x, y, 128, 128);
 
 	//						bufDC.LineTo(128,128-helpers::math::round<int,float>(o_mvc*128.0f));
 	//						bufDC.MoveTo(128,128);
-	x = psy_dsp_fround(sin((self->o_mvdr * quarterpi)) * self->o_mvr * 128.0f) + 128;
-	y = psy_dsp_fround(-cos((self->o_mvdr * quarterpi)) * self->o_mvr * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin((self->o_mvdr * quarterpi)) * self->o_mvr * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos((self->o_mvdr * quarterpi)) * self->o_mvr * 128.0f) + 128;
 	psy_ui_drawline(g, 128, 128, x, y);
 
 	// bufDC.SelectObject(&linepenL);
 
-	x = psy_dsp_fround(sin(-quarterpi - (mvdpl * quarterpi)) * mvpl * 128.0f) + 128;
-	y = psy_dsp_fround(-cos(-quarterpi - (mvdpl * quarterpi)) * mvpl * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin(-quarterpi - (mvdpl * quarterpi)) * mvpl * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos(-quarterpi - (mvdpl * quarterpi)) * mvpl * 128.0f) + 128;
 	psy_ui_drawline(g, x, y, 128, 128);
 	//						bufDC.LineTo(128,128-helpers::math::round<int,float>(mvpc*128.0f));
 	//						bufDC.MoveTo(128,128);
-	x = psy_dsp_fround(sin(quarterpi + (mvdpr * quarterpi)) * mvpr * 128.0f) + 128;
-	y = psy_dsp_fround(-cos(quarterpi + (mvdpr * quarterpi)) * mvpr * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin(quarterpi + (mvdpr * quarterpi)) * mvpr * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos(quarterpi + (mvdpr * quarterpi)) * mvpr * 128.0f) + 128;
 	psy_ui_drawline(g, 128, 128, x, y);
 
 	// panning data
 	// bufDC.SelectObject(&linepenR);
 
-	x = psy_dsp_fround(sin(-(mvdl * quarterpi)) * mvl * 128.0f) + 128;
-	y = psy_dsp_fround(-cos(-(mvdl * quarterpi)) * mvl * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin(-(mvdl * quarterpi)) * mvl * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos(-(mvdl * quarterpi)) * mvl * 128.0f) + 128;
 	psy_ui_drawline(g, x, y, 128, 128);
 	//						bufDC.LineTo(128,128-helpers::math::round<int,float>(mvc*128.0f));
 	//						bufDC.MoveTo(128,128);
-	x = psy_dsp_fround(sin((mvdr * quarterpi)) * mvr * 128.0f) + 128;
-	y = psy_dsp_fround(-cos((mvdr * quarterpi)) * mvr * 128.0f) + 128;
+	x = psy_dsp_fround((float)sin((mvdr * quarterpi)) * mvr * 128.0f) + 128;
+	y = psy_dsp_fround(-(float)cos((mvdr * quarterpi)) * mvr * 128.0f) + 128;
 	psy_ui_drawline(g, 128, 128, x, y);
 
 	if (!self->hold)

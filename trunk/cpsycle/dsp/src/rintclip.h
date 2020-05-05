@@ -70,7 +70,7 @@ uint16_t INLINE psy_dsp_ruint16_clip(float x)
 /// combines float to int8_t conversion with clipping.
 int8_t INLINE psy_dsp_rint8_clip_bits(float x, const unsigned int bits)
 {
-	return psy_dsp_rint16_float(psy_dsp_clip_bits(x, bits));
+	return (int8_t) psy_dsp_rint16_float(psy_dsp_clip_bits(x, bits));
 }
 
 int8_t INLINE psy_dsp_rint8_clip(float x)

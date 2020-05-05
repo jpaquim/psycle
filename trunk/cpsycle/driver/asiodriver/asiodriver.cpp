@@ -139,18 +139,18 @@ public:
 	void RefreshAvailablePorts();
 	void GetPlaybackPorts(std::vector<std::string>& ports) const;
 	void GetCapturePorts(std::vector<std::string>& ports) const;
-	bool AddCapturePort(int idx);
-	bool RemoveCapturePort(int idx);
-	void GetReadBuffers(int idx, float** pleft, float** pright, int numsamples);
+	bool AddCapturePort(uintptr_t idx);
+	bool RemoveCapturePort(uintptr_t idx);
+	void GetReadBuffers(uintptr_t idx, float** pleft, float** pright, int numsamples);
 	uint32_t GetWritePosInSamples() const;
 	uint32_t GetPlayPosInSamples();
 	inline uint32_t GetInputLatencySamples() const { return _inlatency; }
 	inline uint32_t GetOutputLatencySamples() const { return _outlatency; }
 
-	DriverEnum GetDriverFromidx(int driverID) const;
-	PortOut GetOutPortFromidx(int driverID);
+	DriverEnum GetDriverFromidx(uintptr_t driverID) const;
+	PortOut GetOutPortFromidx(uintptr_t driverID);
 	int GetidxFromOutPort(PortOut& port) const;
-	void ControlPanel(int driverID);
+	void ControlPanel(uintptr_t driverID);
 
 	static bool SupportsAsio();
 	static void bufferSwitch(long index, ASIOBool processNow);
@@ -178,7 +178,7 @@ private:
 	std::vector<DriverEnum> drivEnum_;
 
 	
-	unsigned int driverID;
+	uintptr_t driverID;
 	static AsioDrivers asioDrivers;
 
 	
@@ -315,7 +315,7 @@ void ASIOInterface::GetCapturePorts(std::vector<std::string>& ports) const
 	if (!driver) return;
 	for (unsigned int i = 0; i < driver->_portin.size(); i++) ports.push_back(driver->_portin[i].GetName());
 }
-bool ASIOInterface::AddCapturePort(int idx)
+bool ASIOInterface::AddCapturePort(uintptr_t idx)
 {
 	bool isplaying = _running;
 	DriverEnum* driver = _selectedout.driver;
@@ -329,17 +329,17 @@ bool ASIOInterface::AddCapturePort(int idx)
 	if (_portMapping.size() <= idx) {
 		int oldsize = _portMapping.size();
 		_portMapping.resize(idx + 1);
-		for (int i = oldsize; i < _portMapping.size(); i++) _portMapping[i] = -1;
+		for (uintptr_t i = oldsize; i < _portMapping.size(); i++) _portMapping[i] = -1;
 	}
 	_portMapping[idx] = (int)(_selectedins.size() - 1);
 	if (isplaying) return Start();
 
 	return true;
 }
-bool ASIOInterface::RemoveCapturePort(int idx)
+bool ASIOInterface::RemoveCapturePort(uintptr_t idx)
 {
 	bool isplaying = _running;
-	int maxSize = 0;
+	uintptr_t maxSize = 0;
 	std::vector<PortCapt> newports;
 	DriverEnum* driver = _selectedout.driver;
 	if (idx >= driver->_portin.size() ||
@@ -360,7 +360,7 @@ bool ASIOInterface::RemoveCapturePort(int idx)
 	if (isplaying) Start();
 	return true;
 }
-void ASIOInterface::GetReadBuffers(int idx, float** pleft, float** pright, int numsamples)
+void ASIOInterface::GetReadBuffers(uintptr_t idx, float** pleft, float** pright, int numsamples)
 {
 	if (!_running || idx >= _portMapping.size() || _portMapping[idx] == -1)
 	{
@@ -373,10 +373,10 @@ void ASIOInterface::GetReadBuffers(int idx, float** pleft, float** pright, int n
 	*pright = _selectedins[_portMapping[idx]].pright + mpos;
 	_selectedins[_portMapping[idx]].machinepos += numsamples;
 }
-ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(int driverID) const
+ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(uintptr_t driverID) const
 {
 	int counter = 0;
-	for (unsigned int i(0); i < drivEnum_.size(); ++i)
+	for (uintptr_t i(0); i < drivEnum_.size(); ++i)
 	{
 		if (driverID < counter + drivEnum_[i]._portout.size())
 		{
@@ -387,7 +387,7 @@ ASIOInterface::DriverEnum ASIOInterface::GetDriverFromidx(int driverID) const
 	DriverEnum driver;
 	return driver;
 }
-ASIOInterface::PortOut ASIOInterface::GetOutPortFromidx(int driverID)
+ASIOInterface::PortOut ASIOInterface::GetOutPortFromidx(uintptr_t driverID)
 {
 	PortOut port;
 	int counter = 0;
@@ -516,9 +516,9 @@ bool ASIOInterface::Start()
 	_selectedout = GetOutPortFromidx(driverID);
 	if (!_selectedout.driver) _selectedout = GetOutPortFromidx(0);
 	if (_selectedout.driver) {
-		if (psy_audiodriversettings_blockframes(&settings_) < _selectedout.driver->minSamples)
+		if (psy_audiodriversettings_blockframes(&settings_) < (uintptr_t) _selectedout.driver->minSamples)
 			psy_audiodriversettings_setblockframes(&settings_, _selectedout.driver->prefSamples);
-		else if (psy_audiodriversettings_blockframes(&settings_) > _selectedout.driver->maxSamples)
+		else if (psy_audiodriversettings_blockframes(&settings_) > (uintptr_t) _selectedout.driver->maxSamples)
 			psy_audiodriversettings_setblockframes(&settings_, _selectedout.driver->prefSamples);
 	}
 
@@ -636,7 +636,7 @@ bool ASIOInterface::Stop()
 	return true;
 }
 
-void ASIOInterface::ControlPanel(int driverID)
+void ASIOInterface::ControlPanel(uintptr_t driverID)
 {
 	PortOut pout = GetOutPortFromidx(driverID);
 	DriverEnum* newdriver = pout.driver;
@@ -689,7 +689,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 	for (; counter < _selectedins.size(); ++counter)
 	{
 		ASIOSampleType dtype = _selectedins[counter].port->_info.type;
-		int i(0);
+		uintptr_t i(0);
 		switch (dtype)
 		{
 		case ASIOSTInt16LSB:
@@ -736,8 +736,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (long*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = (*inl) * 0.0000152587890625;
-				_selectedins[counter].pright[i] = (*inr) * 0.0000152587890625;
+				_selectedins[counter].pleft[i] = (float)((*inl) * 0.0000152587890625);
+				_selectedins[counter].pright[i] = (float)((*inr) * 0.0000152587890625);
 			}
 		}
 		break;
@@ -755,8 +755,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (double*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = (*inl) * 32768.0;
-				_selectedins[counter].pright[i] = (*inr) * 32768.0;
+				_selectedins[counter].pleft[i] = (float)((*inl) * 32768.0);
+				_selectedins[counter].pright[i] = (float)((*inr) * 32768.0);
 			}
 		}
 		break;
@@ -770,8 +770,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (long*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = *inl;
-				_selectedins[counter].pright[i] = *inr;
+				_selectedins[counter].pleft[i] = (float) *inl;
+				_selectedins[counter].pright[i] = (float) *inr;
 			}
 		}
 		break;
@@ -822,8 +822,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (short*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = SwapShort(*inl);
-				_selectedins[counter].pright[i] = SwapShort(*inr);
+				_selectedins[counter].pleft[i] = (float) SwapShort(*inl);
+				_selectedins[counter].pright[i] = (float) SwapShort(*inr);
 			}
 		}
 		break;
@@ -859,9 +859,9 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
 				long val = SwapLong(*inl++);
-				_selectedins[counter].pleft[i] = val * 0.0000152587890625;
+				_selectedins[counter].pleft[i] = (float)(val * 0.0000152587890625);
 				val = SwapLong(*inr++);
-				_selectedins[counter].pright[i] = val * 0.0000152587890625;
+				_selectedins[counter].pright[i] = (float)(val * 0.0000152587890625);
 			}
 		}
 		break;
@@ -873,8 +873,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (long*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = SwapLong(*inl);
-				_selectedins[counter].pright[i] = SwapLong(*inr);
+				_selectedins[counter].pleft[i] = (float) SwapLong(*inl);
+				_selectedins[counter].pright[i] = (float) SwapLong(*inr);
 			}
 		}
 		break;
@@ -931,8 +931,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (float*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = SwapFloat(*inl);
-				_selectedins[counter].pright[i] = SwapFloat(*inr);
+				_selectedins[counter].pleft[i] = (float) SwapFloat(*inl);
+				_selectedins[counter].pright[i] = (float) SwapFloat(*inr);
 			}
 		}
 		break;
@@ -944,8 +944,8 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 			inr = (double*)ASIObuffers[counter].pright[index];
 			for (i = 0; i < _ASIObufferSamples; i++, inl++, inr++)
 			{
-				_selectedins[counter].pleft[i] = SwapDouble(*inl);
-				_selectedins[counter].pright[i] = SwapDouble(*inr);
+				_selectedins[counter].pleft[i] = (float) SwapDouble(*inl);
+				_selectedins[counter].pright[i] = (float) SwapDouble(*inr);
 			}
 		}
 		break;
@@ -971,7 +971,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int16_t* outr;
 		outl = (int16_t*)ASIObuffers[counter].pleft[index];
 		outr = (int16_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = psy_dsp_rint16_clip(*pBuf++);
 			*outr++ = psy_dsp_rint16_clip(*pBuf++);
 		}
@@ -985,7 +985,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		outr = (char*)ASIObuffers[counter].pright[index];
 		int t;
 		char* pt = (char*)&t;
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			t = psy_dsp_rint32_clip_bits((*pBuf++) * 256.0f, 24);
 			*outl++ = pt[0];
 			*outl++ = pt[1];
@@ -1008,7 +1008,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		// Don't really know why, but the -100 is what made the clipping work correctly.
 		int const maxv((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
 		int const minv(-maxv - 1);
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			//*outl++ = psy_dsp_rint32_float(psy_dsp_clip((float) minv, (*pBuf++) * 65536.0f, (float) maxv));
 			//*outr++ = psy_dsp_rint32_float(psy_dsp_clip((float) minv, (*pBuf++) * 65536.0f, (float) maxv));
 			*outl++ = psy_dsp_rint((*pBuf++) * 65536.0f);
@@ -1022,7 +1022,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		float* outr;
 		outl = (float*)ASIObuffers[counter].pleft[index];
 		outr = (float*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = (*pBuf++) / 32768.0f;
 			*outr++ = (*pBuf++) / 32768.0f;
 		}
@@ -1034,7 +1034,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		double* outr;
 		outl = (double*)ASIObuffers[counter].pleft[index];
 		outr = (double*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = (*pBuf++) / 32768.0;
 			*outr++ = (*pBuf++) / 32768.0;
 		}
@@ -1048,7 +1048,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = (int32_t)(*pBuf++);  //  rint_clip<int32_t, 16>
 			*outr++ = (int32_t)(*pBuf++);  //  rint_clip<int32_t, 16>
 		}
@@ -1060,7 +1060,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = (int32_t)((*pBuf++) * 4.0f); // rint_clip<int32_t, 18>
 			*outr++ = (int32_t)((*pBuf++) * 4.0f); // rint_clip<int32_t, 18>
 		}
@@ -1072,7 +1072,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = (int32_t)((*pBuf++) * 16.0f); // rint_clip<int32_t, 20>
 			*outr++ = (int32_t)((*pBuf++) * 16.0f); //  rint_clip<int32_t, 20>
 		}
@@ -1084,7 +1084,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = (int32_t)((*pBuf++) * 256.0f); // rint_clip<int32_t, 24>
 			*outr++ = (int32_t)((*pBuf++) * 256.0f); // rint_clip<int32_t, 24>
 		}
@@ -1096,7 +1096,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int16_t* outr;
 		outl = (int16_t*)ASIObuffers[counter].pleft[index];
 		outr = (int16_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = SwapShort(psy_dsp_rint16_clip(*pBuf++));
 			*outr++ = SwapShort(psy_dsp_rint16_clip(*pBuf++));
 		}
@@ -1110,7 +1110,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		outr = (char*)ASIObuffers[counter].pright[index];
 		int t;
 		char* pt = (char*)&t;
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			t = (int)((*pBuf++) * 256.0f); // rint_clip<int, 24>
 			*outl++ = pt[2];
 			*outl++ = pt[1];
@@ -1129,7 +1129,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			//See the LSB case above.
 			int const maxv((1u << ((sizeof(int32_t) << 3) - 1)) - 100);
 			int const minv(-maxv - 1);
@@ -1147,7 +1147,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			// rint_clip<int32_t, 16>
 			*outl++ = SwapLong(((int32_t)(*pBuf++)));
 			*outr++ = SwapLong(((int32_t)(*pBuf++)));
@@ -1160,7 +1160,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			// rint_clip<int32_t, 18
 			*outl++ = SwapLong((int32_t)((*pBuf++) * 4.0f));
 			*outr++ = SwapLong((int32_t)((*pBuf++) * 4.0f));
@@ -1173,7 +1173,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			//rint_clip<int32_t, 20>
 			*outl++ = SwapLong((int32_t)((*pBuf++) * 16.0f));
 			*outr++ = SwapLong((int32_t)((*pBuf++) * 16.0f));
@@ -1186,7 +1186,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		int32_t* outr;
 		outl = (int32_t*)ASIObuffers[counter].pleft[index];
 		outr = (int32_t*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			// rint_clip<int32_t, 24>
 			*outl++ = SwapLong((int32_t)((*pBuf++) * 256.0f));
 			*outr++ = SwapLong((int32_t)((*pBuf++) * 256.0f));
@@ -1199,9 +1199,9 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		float* outr;
 		outl = (float*)ASIObuffers[counter].pleft[index];
 		outr = (float*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
-			*outl++ = SwapFloat((*pBuf++) * 0.00030517578125);
-			*outr++ = SwapFloat((*pBuf++) * 0.00030517578125);
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
+			*outl++ = (float) SwapFloat((*pBuf++) * 0.00030517578125);
+			*outr++ = (float) SwapFloat((*pBuf++) * 0.00030517578125);
 		}
 	}
 	break;
@@ -1211,7 +1211,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 		double* outr;
 		outl = (double*)ASIObuffers[counter].pleft[index];
 		outr = (double*)ASIObuffers[counter].pright[index];
-		for (int i = 0; i < _ASIObufferSamples; ++i) {
+		for (uintptr_t i = 0; i < _ASIObufferSamples; ++i) {
 			*outl++ = SwapDouble((*pBuf++) * 0.00030517578125);
 			*outr++ = SwapDouble((*pBuf++) * 0.00030517578125);
 		}
@@ -1250,7 +1250,7 @@ void ASIOInterface::sampleRateChanged(ASIOSampleRate sRate)
 	// might not have even changed, maybe only the sample rate status of an
 	// AES/EBU or S/PDIF digital input at the audio device.
 	// You might have to update time/sample related conversion routines, etc.
-	psy_audiodriversettings_setsamplespersec(&settings_, sRate);
+	psy_audiodriversettings_setsamplespersec(&settings_, (uintptr_t) sRate);
 }
 
 long ASIOInterface::asioMessages(long selector, long value, void* message, double* opt)
@@ -1447,8 +1447,6 @@ void init_properties(psy_AudioDriver* driver)
 	psy_Properties* property;
 	psy_Properties* devices;
 	psy_Properties* indevices;
-	psy_List* p;
-	int i;
 
 	driver->properties = psy_properties_create();
 	psy_properties_settext(

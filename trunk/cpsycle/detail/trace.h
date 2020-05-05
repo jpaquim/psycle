@@ -5,11 +5,11 @@
 #define psy_TRACE_H
 
 #include "psydef.h"
-#include "portable.h"
 #include "os.h"
 
 #ifdef DIVERSALIS__OS__MICROSOFT
 #include <windows.h>
+#include "portable.h"
 #define TRACE(str) OutputDebugString(str)
 #define TRACE_FLOAT(val) do { char str[128]; psy_snprintf(str, 128, "%f ", (float)val); OutputDebugString(str); } while(0)
 #define TRACE_INT(val) do { char str[128]; psy_snprintf(str, 128, "%d ", (int)val); OutputDebugString(str); } while(0)

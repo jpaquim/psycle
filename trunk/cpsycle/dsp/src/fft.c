@@ -457,7 +457,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		size_t n;
 
         for (n = 0; n < size; n++) {
-			window[n] = (0.50f - 0.50f * cos( twopi* n / sizem1)) * scale;
+			window[n] = (float)(0.50f - 0.50f * cos( twopi* n / sizem1)) * scale;
         }
 	}
 
@@ -468,7 +468,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		size_t n;
 
         for (n = 0; n < size; n++) {
-			window[n] = (0.54f - 0.46f * cos(twopi * n / sizem1)) * scale;
+			window[n] = (float)(0.54f - 0.46f * cos(twopi * n / sizem1)) * scale;
         }
 	}
 
@@ -554,8 +554,8 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			}
 			for (n = 0; n < self->outputSize; n++) {
 				float j = 2.0f * psy_dsp_PI_F* n / self->bufferSize;
-				self->precos[n] = cos(j);
-				self->presin[n] = sin(j);
+				self->precos[n] = (float)cos(j);
+				self->presin[n] = (float)sin(j);
 			}
 		}
 		switch(type){
@@ -594,7 +594,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			size_t n;
 
 			for (n = 0; n < self->bands; n++ ) {
-				self->fftLog[n]=(pow(2.0f,n*factor)-1.f)*factor2;
+				self->fftLog[n]= (float)(pow(2.0f,n*factor)-1.f)*factor2;
 			}
 		}
 		psy_dsp_multiresampler_settype(&self->resampler, RESAMPLERTYPE_LINEAR);

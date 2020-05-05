@@ -15,6 +15,12 @@
 #include "../../detail/stdint.h"
 #include "../../detail/portable.h"
 
+#ifdef _WIN32
+#pragma warning( push )
+#pragma warning( disable : 4996 )
+#endif
+
+
 const char* luaarraybind_meta = "array_meta";
 
 static int psy_audio_luabind_array_new(lua_State*);
@@ -1042,3 +1048,6 @@ int array_method_to_table(lua_State* L)
 	return 1;
 }
 
+#ifdef _WIN32
+#pragma warning( pop )
+#endif

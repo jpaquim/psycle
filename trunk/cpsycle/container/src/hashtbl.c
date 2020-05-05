@@ -9,6 +9,7 @@
 
 psy_TableIterator tableend;
 
+static uintptr_t hash(const unsigned char* str);
 static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
 
 void psy_table_init(psy_Table* self)
@@ -80,6 +81,11 @@ void psy_table_insert(psy_Table* self, uintptr_t k, void* value)
 	}
 }
 
+void psy_table_insert_strhash(psy_Table* self, const char* strkey, void* value)
+{
+	psy_table_insert(self, hash(strkey), value);
+}
+
 void psy_table_remove(psy_Table* self, uintptr_t k)
 {
 	uintptr_t hn;
@@ -131,6 +137,11 @@ void* psy_table_at(psy_Table* self, uintptr_t k)
 	return rv;
 }
 
+void* psy_table_at_strhash(psy_Table* self, const char* strkey)
+{
+	return psy_table_at(self, hash(strkey));
+}
+
 int psy_table_exists(psy_Table* self, uintptr_t k)
 {	
 	int rv = 0;
@@ -153,6 +164,11 @@ int psy_table_exists(psy_Table* self, uintptr_t k)
 		}
 	}
 	return rv;
+}
+
+int psy_table_exists_strhash(psy_Table* self, const char* strkey)
+{
+	return psy_table_exists(self, hash(strkey));
 }
 
 uintptr_t psy_table_size(psy_Table* self)
@@ -219,11 +235,36 @@ void psy_tableiterator_inc(psy_TableIterator* self)
 uintptr_t psy_tableiterator_key(psy_TableIterator* self)
 {
 	assert(self->curr);
-	return self->curr->key;
+	if (self->curr) {
+		return self->curr->key;
+	} else {
+		return 0;
+	}
+}
+
+int psy_tableiterator_strhash_equals(psy_TableIterator* self, const char* str)
+{
+	assert(self->curr);
+	if (self->curr) {
+		return self->curr->key == hash(str);
+	} else {
+		return 0;
+	}
 }
 
 void* psy_tableiterator_value(psy_TableIterator* self)
 {
 	assert(self->curr);
 	return self->curr->value;
+}
+
+uintptr_t hash(const unsigned char* str)
+{
+	uintptr_t hash = 5381;
+	int c;
+
+	while (c = *str++)
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	return hash;
 }

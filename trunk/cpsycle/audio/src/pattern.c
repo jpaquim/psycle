@@ -287,7 +287,6 @@ void pattern_blockremove(psy_audio_Pattern* self, PatternEditPosition begin,
 void pattern_blockinterpolatelinear(psy_audio_Pattern* self, PatternEditPosition begin,
 	PatternEditPosition end, psy_dsp_beat_t bpl)
 {
-	uintptr_t line;
 	intptr_t startval;
 	intptr_t endval;
 	PatternNode* prev;

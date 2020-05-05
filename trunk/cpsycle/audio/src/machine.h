@@ -606,7 +606,8 @@ INLINE psy_audio_MachineParam* psy_audio_machine_tweakparameter(psy_audio_Machin
 }
 
 // programs
-INLINE void psy_audio_machine_programname(psy_audio_Machine* self, int bnkidx, int prgIdx, char* val)
+INLINE void psy_audio_machine_programname(psy_audio_Machine* self, int bnkidx,
+	int prgIdx, char* val)
 {
 	self->vtable->programname(self, bnkidx, prgIdx, val);
 }

@@ -47,10 +47,13 @@ INLINE void psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
 	va_list ap;
 	va_start(ap, fmt);
 #ifdef _WIN32
+#pragma warning( push )
+#pragma warning( disable : 4996 )
 	if (buflen > 0) {
 		_vsnprintf(buf, buflen, fmt, ap);
 		buf[buflen - 1] = '\0';
 	}
+#pragma warning( pop )
 #else
 	vsnprintf(buf, buflen, fmt, ap);	
 #endif	
