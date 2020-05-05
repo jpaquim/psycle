@@ -26,14 +26,11 @@ typedef struct cpoint_t {
 	int32_t y;
 } cpoint_t;
 
-uintptr_t hash(const unsigned char* str);
 static void pluginnames_insert(PluginNames*, int type, const char* name, const char* convname);
 static void readplugin(InternalMachinesConvert*, psy_audio_Machine* plugin, psy_audio_SongFile* songfile, int* index, int type, const char* name);
 static void retweak_parameter(psy_audio_SongFile*, psy_audio_Machine*, int type, const char* name, int* parameter, int* integral_value);
 static void retweak_parameters(psy_audio_SongFile*, psy_audio_Machine* machine, int type, const char* name,
 	int* parameters, int parameter_count, int parameter_offset);
-void retweak_parameters_uint8(psy_audio_SongFile*, psy_audio_Machine*, int type, const char* name,
-	uint8_t* parameters, int parameter_count, int parameter_offset);
 
 static const char* convnames[] =
 {
@@ -111,7 +108,7 @@ void pluginnames_insert(PluginNames* self, int type, const char* name, const cha
 		psy_table_init(nametable);
 		psy_table_insert(&self->container, type, nametable);
 	}
-	psy_table_insert(nametable, hash(name), (void*) convname);
+	psy_table_insert_strhash(nametable, name, (void*) convname);
 }
 
 bool pluginnames_exists(PluginNames* self, int type, const char* name)
@@ -122,7 +119,7 @@ bool pluginnames_exists(PluginNames* self, int type, const char* name)
 
 	nametable = psy_table_at(&self->container, type);
 	if (nametable) {
-		rv = psy_table_exists(nametable, hash(name));
+		rv = psy_table_exists_strhash(nametable, name);
 	}
 	return rv;
 }
@@ -135,7 +132,7 @@ const char* pluginnames_convname(PluginNames* self, int type, const char* name)
 
 	nametable = psy_table_at(&self->container, type);
 	if (nametable) {
-		rv = (const char*) psy_table_at(nametable, hash(name));
+		rv = (const char*) psy_table_at_strhash(nametable, name);
 	}
 	return rv;
 }
@@ -236,15 +233,20 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 	}
 	switch (type) {
 	case ring_modulator:
-		{
-			unsigned char parameters[4];
-			psyfile_read(songfile->file, &parameters[0], 2 * sizeof * parameters);
-			psyfile_skip(songfile->file, sizeof(char));
-			psyfile_read(songfile->file, &parameters[2], 2 * sizeof * parameters);
-			retweak_parameters_uint8(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 1);
+	{
+		unsigned char parameters_uint8[4];
+		int parameters[4];
+		int i;
+		psyfile_read(songfile->file, &parameters_uint8[0], 2 * sizeof * parameters_uint8);
+		psyfile_skip(songfile->file, sizeof(char));
+		psyfile_read(songfile->file, &parameters_uint8[2], 2 * sizeof * parameters_uint8);
+		for (i = 0; i < 4; ++i) {
+			parameters[i] = parameters_uint8[i];
 		}
+		retweak_parameters(songfile, machine, type, name,
+			parameters, sizeof parameters / sizeof * parameters, 1);
 		psyfile_skip(songfile->file, 40);
+	}
 	break;
 	case delay:
 		psyfile_skip(songfile->file, 5);
@@ -262,10 +264,12 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 	case flanger:
 		psyfile_skip(songfile->file, 4);
 		{
-			unsigned char parameters[1];
+			uint8_t parameters_uint8[1];
+			int parameters[1];
 			
-			psyfile_read(songfile->file, parameters, sizeof parameters);
-			retweak_parameters_uint8(songfile, machine, type, name,
+			psyfile_read(songfile->file, parameters_uint8, sizeof(parameters_uint8));			
+			parameters[0] = parameters_uint8[0];			
+			retweak_parameters(songfile, machine, type, name,
 				parameters, sizeof parameters / sizeof * parameters, 9);
 		}
 		{
@@ -317,7 +321,7 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 		retweak_parameters(songfile, machine, type, name, Vals, 15, 0);
 		param = psy_audio_machine_parameter(machine, 19);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 		retweak_parameters(songfile, machine, type, name, Vals + 15, 1, 15);
 		if (numParameters > 16) {
@@ -325,11 +329,11 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 		} else {
 			param = psy_audio_machine_parameter(machine, 24);
 			if (param) {
-				psy_audio_machineparam_tweak_scaledvalue(param, 0);
+				psy_audio_machineparam_tweak_scaled(param, 0);
 			}
 			param = psy_audio_machine_parameter(machine, 25);
 			if (param) {
-				psy_audio_machineparam_tweak_scaledvalue(param, 0);
+				psy_audio_machineparam_tweak_scaled(param, 0);
 			}
 		}
 	} else
@@ -337,36 +341,36 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 25);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 27);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 1);
+			psy_audio_machineparam_tweak_scaled(param, 1);
 		}
 	} else if (strcmp(name, asynth2) == 0) {
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 25);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 	} else  if (strcmp(name, asynth21) == 0) {
 		//I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs)
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 25);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, 0);
+			psy_audio_machineparam_tweak_scaled(param, 0);
 		}
 	} else if (strcmp(name, asynth22) == 0) {
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 0);
@@ -444,35 +448,18 @@ void retweak_parameters(psy_audio_SongFile* songfile, psy_audio_Machine* machine
 		psy_audio_MachineParam* param;
 		new_parameter = parameter_offset + parameter;				
 		new_value = parameters[parameter];
-		retweak_parameter(songfile, machine, type, name, &new_parameter, &new_value);
+		retweak_parameter(songfile, machine, type, name, &new_parameter,
+			&new_value);
 		param = psy_audio_machine_parameter(machine, new_parameter);
 		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param,  new_value);
+			psy_audio_machineparam_tweak_scaled(param,  new_value);
 		}
 	}
 }
 
-void retweak_parameters_uint8(psy_audio_SongFile* songfile, psy_audio_Machine* machine, int type, const char* name,
-	uint8_t* parameters, int parameter_count, int parameter_offset)
-{
-	int parameter = 0;
-
-	for (; parameter < parameter_count; ++parameter)
-	{
-		int new_parameter;
-		int new_value;
-		psy_audio_MachineParam* param;
-		new_parameter = parameter_offset + parameter;
-		new_value = parameters[parameter];
-		retweak_parameter(songfile, machine, type, name, &new_parameter, &new_value);
-		param = psy_audio_machine_parameter(machine, new_parameter);
-		if (param) {
-			psy_audio_machineparam_tweak_scaledvalue(param, new_value);
-		}
-	}
-}
-
-void retweak_parameter(psy_audio_SongFile* songfile, psy_audio_Machine* machine, int type, const char* name, int* parameter, int* integral_value)
+void retweak_parameter(psy_audio_SongFile* songfile,
+	psy_audio_Machine* machine, int type, const char* name, int* parameter,
+	int* integral_value)
 {
 	typedef double Real;
 	double value;
@@ -703,15 +690,4 @@ void retweak_parameter(psy_audio_SongFile* songfile, psy_audio_Machine* machine,
 	break;
 	}
 	*integral_value = (int)floor(value + (float)(0.5));
-}
-
-uintptr_t hash(const unsigned char* str)
-{
-	uintptr_t hash = 5381;
-	int c;
-
-	while (c = *str++)
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-	return hash;
 }

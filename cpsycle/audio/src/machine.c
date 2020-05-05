@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 
+#include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
 /// Machinecallback
@@ -340,7 +341,7 @@ void work_events(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 	for (pos = 0, p = bc->events; p != NULL; p = p->next) {
 		psy_audio_PatternEntry* entry;
 
-		entry = (psy_audio_PatternEntry*)p->entry;
+		entry = (psy_audio_PatternEntry*)p->entry;		
 		if (((uintptr_t)entry->delta) >= pos) {
 			amount -= work_dogenerateaudio(self, bc, pos,
 				(uintptr_t)entry->delta - pos);
@@ -396,9 +397,9 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 						if (nv < 0) {
 							nv = 0;
 						}
-						psy_audio_machineparam_tweak_patternvalue(param, (uint16_t) nv);
+						psy_audio_machineparam_tweak_pattern(param, (uint16_t) nv);
 					} else {
-						psy_audio_machineparam_tweak_patternvalue(param, v);
+						psy_audio_machineparam_tweak_pattern(param, v);
 					}
 				}
 			}

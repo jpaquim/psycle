@@ -17,16 +17,16 @@
 static void onpreferredsize(ParamView*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ondestroy(ParamView*, psy_ui_Component* sender);
 static void ondraw(ParamView*, psy_ui_Graphics*);
-static void drawparameter(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawslider(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawsliderlevel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawslidercheck(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawswitch(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawheader(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawinfolabel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawknob(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void drawblank(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam* param, uintptr_t paramnum, uintptr_t row, uintptr_t col);
-static void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* height);
+static void drawparameter(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawslider(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawsliderlevel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawslidercheck(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawswitch(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawheader(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawinfolabel(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawknob(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void drawblank(ParamView*, psy_ui_Graphics*, psy_audio_MachineParam*, uintptr_t paramnum, uintptr_t row, uintptr_t col);
+static void mpfsize(ParamView*, uintptr_t paramtype, bool small, int* width, int* height);
 static void cellsize(ParamView*, uintptr_t row, uintptr_t col, int* width, int* height);
 static void cellposition(ParamView*, uintptr_t row, uintptr_t col, int* x, int* y);
 static void onmousedown(ParamView*, psy_ui_MouseEvent*);
@@ -42,7 +42,7 @@ static void paramview_clearpositions(ParamView*);
 static void mixer_vumeterdraw(ParamView*, psy_ui_Graphics*, int x, int y,
 	float value);
 static void drawsliderlevelback(ParamView*, psy_ui_Graphics*, int x, int y);
-static psy_audio_MachineParam* tweakparam(ParamView* self);
+static psy_audio_MachineParam* tweakparam(ParamView*);
 
 static int paramview_refcount = 0;
 static int paramskin_initialized = 0;
@@ -100,6 +100,7 @@ void paramskin_init(ParamView* self)
 		psy_ui_bitmap_loadresource(&paramskin.mixerbitmap, IDB_MIXERSKIN);		
 	}
 	self->skin = &paramskin;
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin->bottomcolor);
 }
 
 void paramskin_release(ParamView* self)
@@ -263,7 +264,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	psy_ui_setrectangle(&r_top, left + knob_cx, top, width - knob_cx,
 		height / 2);
 	psy_ui_drawsolidrectangle(g, r, self->skin->topcolor);
-	psy_ui_setrectangle(&r_bottom, left + knob_cx, top + height/2,
+	psy_ui_setrectangle(&r_bottom, left + knob_cx, top + height / 2,
 		width - knob_cx, height / 2);				
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
 	if (!psy_audio_machineparam_name(param, label)) {
@@ -272,11 +273,8 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 		}
 	}
 	if (psy_audio_machineparam_describe(param, str) == FALSE) {
-		// psy_snprintf(str, 128, "%f",
-		// machine_parametervalue_scaled(self->machine, param,
-		//	psy_audio_machine_parametervalue(self->machine, param)));
-		psy_snprintf(str, 128, "%f",
-			psy_audio_machineparam_normvalue(param));
+		psy_snprintf(str, 128, "%d",
+			(int) psy_audio_machineparam_scaledvalue(param));
 	}
 	psy_ui_setbackgroundcolor(g, (self->tweak == paramnum)
 		? self->skin->htopcolor : self->skin->topcolor);
@@ -685,15 +683,22 @@ uintptr_t hittest(ParamView* self, int x, int y)
 	uintptr_t rv = NOMACHINE_INDEX;
 
 	if (self->machine) {
-		uintptr_t param;
+		uintptr_t paramnum;
 
-		for (param = 0;	param < psy_table_size(&self->positions); ++param) {				
-			psy_ui_Rectangle* position;
+		for (paramnum = 0;	paramnum < psy_table_size(&self->positions);
+				++paramnum) {			
+			psy_audio_MachineParam* param;
+			
+			param = psy_audio_machine_parameter(self->machine, paramnum);
+			if (param && ((psy_audio_machineparam_type(param) & MPF_IGNORE)
+					!= MPF_IGNORE)) {
+				psy_ui_Rectangle* position;
 
-			position = (psy_ui_Rectangle*) psy_table_at(&self->positions,
-				param);			
-			if (psy_ui_rectangle_intersect(position, x, y)) {
-				rv = param;
+				position = (psy_ui_Rectangle*) psy_table_at(&self->positions,
+					paramnum);
+				if (position && psy_ui_rectangle_intersect(position, x, y)) {
+					rv = paramnum;
+				}
 				// break;
 			}
 		}
@@ -881,7 +886,7 @@ void paramview_computepositions(ParamView* self)
 			uintptr_t paramtype;
 			bool small;
 			psy_audio_MachineParam* machineparam;
-
+			
 			machineparam = psy_audio_machine_parameter(self->machine, param);
 			position = psy_table_at(&self->positions, param);
 			firstrow = psy_table_at(&self->positions, row);
@@ -899,7 +904,7 @@ void paramview_computepositions(ParamView* self)
 				position->top += cpy_slidercheck;
 				position->bottom = position->top + h;
 			} else {
-				position->bottom = cpy + height;
+				position->bottom = cpy + height;				
 			}
 			if (self->cpmax.height < (int) (cpy + height)) {
 				self->cpmax.height = (int) (cpy + height);

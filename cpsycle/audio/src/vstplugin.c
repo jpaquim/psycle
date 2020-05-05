@@ -466,9 +466,9 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					curr = psy_audio_machineparam_patternvalue(param);
 					step = (v - curr) / patternentry_front(entry)->vol;
 					nv = curr + step;
-					psy_audio_machineparam_tweak_patternvalue(param, nv);
+					psy_audio_machineparam_tweak_pattern(param, nv);
 				} else {
-					psy_audio_machineparam_tweak_patternvalue(param, v);
+					psy_audio_machineparam_tweak_pattern(param, v);
 				}
 			}			
 			for (i = 0; i < count; ++i) {		

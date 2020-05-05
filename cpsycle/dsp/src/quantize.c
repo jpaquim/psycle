@@ -137,8 +137,8 @@ void psy_dsp_dequantize32anddeinterlace(int *pin, float *poutleft,float *poutrig
 {
 	do
 	{
-		*poutleft++ = (*pin++)*0.0000152587890625;
-		*poutright++ = (*pin++)*0.0000152587890625;
+		*poutleft++ = (float)((*pin++)*0.0000152587890625);
+		*poutright++ = (float)((*pin++)*0.0000152587890625);
 	}
 	while(--c);
 }

@@ -65,7 +65,7 @@ INLINE psy_dsp_beat_t sequencetrackiterator_offset(SequenceTrackIterator* self)
 	return sequencetrackiterator_patternentry(self)
 		? sequencetrackiterator_entry(self)->offset +
 		sequencetrackiterator_patternentry(self)->offset
-		: 0.f;
+		: sequencetrackiterator_entry(self)->offset;
 }
 
 

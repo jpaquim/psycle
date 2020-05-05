@@ -33,7 +33,6 @@ typedef struct MachineParamVtable {
 	fp_machineparam_describe describe;
 	// events
 	fp_machineparam_tweak tweak;
-	//fp_machineparam_tweak_patternvalue tweakpattern;
 } MachineParamVtable;
 
 typedef struct psy_audio_MachineParam {
@@ -53,7 +52,8 @@ INLINE void psy_audio_machineparam_tweak(psy_audio_MachineParam* self, float val
 	self->vtable->tweak(self, value);
 }
 
-INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* self, uint16_t patternvalue)
+INLINE void psy_audio_machineparam_tweak_pattern(
+	psy_audio_MachineParam* self, uintptr_t patternvalue)
 {
 	intptr_t minval;
 	intptr_t maxval;
@@ -76,7 +76,7 @@ INLINE void psy_audio_machineparam_tweak_patternvalue(psy_audio_MachineParam* se
 	self->vtable->tweak(self, value);
 }
 
-INLINE void psy_audio_machineparam_tweak_scaledvalue(psy_audio_MachineParam* self, int scaledvalue)
+INLINE void psy_audio_machineparam_tweak_scaled(psy_audio_MachineParam* self, intptr_t scaledvalue)
 {
 	intptr_t minval;
 	intptr_t maxval;

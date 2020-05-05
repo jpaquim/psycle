@@ -25,14 +25,14 @@ typedef enum {
 } psy_AudioDriverChannelMode;
 
 typedef struct {
-	unsigned int samplespersec_;
+	uintptr_t samplespersec_;
 	psy_AudioDriverChannelMode channelmode_;
 	bool dither_;
-	unsigned int validbitdepth_;
-	unsigned int bitdepth_;
-	unsigned int framebytes_;	
-	unsigned int blockframes_;
-	unsigned int blockcount_;
+	uintptr_t validbitdepth_;
+	uintptr_t bitdepth_;
+	uintptr_t framebytes_;
+	uintptr_t blockframes_;
+	uintptr_t blockcount_;
 } psy_AudioDriverSettings;
 
 INLINE unsigned int psy_audiodriversettings_numchannels(
@@ -48,7 +48,7 @@ INLINE unsigned int psy_audiodriversettings_samplespersec(
 }
 
 INLINE void psy_audiodriversettings_setsamplespersec(
-	psy_AudioDriverSettings* self, unsigned int value)
+	psy_AudioDriverSettings* self, uintptr_t value)
 {
 	self->samplespersec_ = value;
 }
@@ -72,7 +72,7 @@ INLINE unsigned int psy_audiodriversettings_bitdepth(
 // Valid values (bitdepth/validbitdepth)
 // 8/8, 16/16 , 32/24 (int) and 32/32 (float)
 INLINE void psy_audiodriversettings_setvalidbitdepth(
-	psy_AudioDriverSettings* self,	unsigned int validbitdepth)
+	psy_AudioDriverSettings* self, uintptr_t validbitdepth)
 {
 	self->validbitdepth_ = validbitdepth;
 	self->bitdepth_ = (validbitdepth == 24) ? 32 : validbitdepth;
@@ -89,7 +89,7 @@ INLINE unsigned int psy_audiodriversettings_blockcount(
 }
 
 INLINE void psy_audiodriversettings_setblockcount(
-	psy_AudioDriverSettings* self, unsigned int blockcount)
+	psy_AudioDriverSettings* self, uintptr_t blockcount)
 {
 	self->blockcount_ = blockcount;
 }
@@ -102,7 +102,7 @@ INLINE unsigned int psy_audiodriversettings_blockframes(
 }
 
 INLINE void psy_audiodriversettings_setblockframes(
-	psy_AudioDriverSettings* self, unsigned int value)
+	psy_AudioDriverSettings* self, uintptr_t value)
 {
 	self->blockframes_ = value;
 	assert(self->blockframes_ < MAX_SAMPLES_WORKFN);

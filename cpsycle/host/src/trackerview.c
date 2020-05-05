@@ -1465,7 +1465,7 @@ int trackerview_scrollright(TrackerView* self, PatternEditPosition cursor)
 	int trackleft;
 	int minrange;
 	int maxrange;
-	int newscrollposition;
+	uintptr_t newscrollposition;
 
 	gridsize = psy_ui_component_size(&self->grid.component);
 	trackleft = trackerview_screentotrack(self, -self->grid.dx);
@@ -1487,8 +1487,8 @@ int trackerview_scrollright(TrackerView* self, PatternEditPosition cursor)
 		psy_ui_component_invalidate(&self->grid.component);		
 		psy_ui_component_update(&self->grid.component);
 		psy_ui_component_horizontalscrollrange(&self->grid.component, &minrange, &maxrange);
-		newscrollposition = min(tracks - visitracks, maxrange - 1);
-		newscrollposition = max(newscrollposition, minrange);
+		newscrollposition = min(tracks - visitracks, (uintptr_t)maxrange - 1);
+		newscrollposition = max(newscrollposition, (uintptr_t)minrange);
 		psy_ui_component_sethorizontalscrollposition(&self->grid.component, 
 			newscrollposition);
 		invalidate = 0;

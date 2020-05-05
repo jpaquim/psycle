@@ -437,13 +437,14 @@ static void inputchannel_level_normvalue(psy_audio_InputChannel*,
 // ReturnChannel
 static void returnchannel_init(psy_audio_ReturnChannel*,
 	psy_audio_Mixer* mixer, uintptr_t id, uintptr_t fxslot);
-static psy_audio_ReturnChannel* returnchannel_allocinit(psy_audio_Mixer* mixer, uintptr_t id, uintptr_t fxslot);
+static psy_audio_ReturnChannel* returnchannel_allocinit(psy_audio_Mixer*,
+	uintptr_t id, uintptr_t fxslot);
 static void returnchannel_dispose(psy_audio_ReturnChannel*);
 static void returnchannel_computepath(psy_audio_ReturnChannel*);
 static psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel*);
-
 // Slider/Level
-static void returnchannel_level_normvalue(psy_audio_ReturnChannel*, psy_audio_CustomMachineParam* sender, float* rv);
+static void returnchannel_level_normvalue(psy_audio_ReturnChannel*,
+	psy_audio_CustomMachineParam* sender, float* rv);
 
 // Send
 void psy_audio_mixersend_init(psy_audio_MixerSend* self, uintptr_t slot)
@@ -755,7 +756,7 @@ void returnchannel_init(psy_audio_ReturnChannel* self,
 	psy_signal_connect(&self->pan_param.machineparam.signal_describe, self,
 		channel_pan_describe);
 	psy_audio_volumemachineparam_init(&self->slider_param,
-		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);	
+		"Volume", "Volume", MPF_SLIDER | MPF_SMALL, &self->volume);
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
@@ -843,18 +844,6 @@ psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel* self)
 		}
 	}
 	return rv;
-}
-
-void returnchannel_slider_tweak(psy_audio_ReturnChannel* self,
-	psy_audio_CustomMachineParam* sender, float value)
-{
-	self->volume = value * value;
-}
-
-void returnchannel_slider_normvalue(psy_audio_ReturnChannel* self,
-	psy_audio_CustomMachineParam* sender, float* rv)
-{
-	*rv = (float)sqrt(self->volume);
 }
 
 void returnchannel_level_normvalue(psy_audio_ReturnChannel* self,
