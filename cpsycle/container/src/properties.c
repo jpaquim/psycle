@@ -32,6 +32,7 @@ void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType
 	memset(&self->item, 0, sizeof(psy_Property));    
 	self->item.key = strdup(key);
 	self->item.text = 0;
+	self->item.shorttext = 0;
 	self->item.typ = typ;
 	self->item.hint = PSY_PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
@@ -46,7 +47,7 @@ void properties_free(psy_Properties* self)
 
 	if (self) {
 		p = self;
-		for (p = self; p != 0; p = q) {
+		for (p = self; p != NULL; p = q) {
 			q = p->next;
 			if (p->dispose) {
 				p->dispose(&p->item);
@@ -57,6 +58,7 @@ void properties_free(psy_Properties* self)
 				}			
 			free(p->item.key);
 			free(p->item.text);
+			free(p->item.shorttext);
 			if (p->item.typ == PSY_PROPERTY_TYP_STRING) {
 				free(p->item.value.s);
 			}
@@ -114,6 +116,7 @@ psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 
 		rv->item.key = p->item.key ? strdup(p->item.key) : 0;
 		rv->item.text = p->item.text ? strdup(p->item.text) : 0;
+		rv->item.shorttext = p->item.shorttext ? strdup(p->item.shorttext) : 0;
 		rv->item.min = p->item.min;
 		rv->item.max = p->item.max;		
 		if (rv->item.typ == PSY_PROPERTY_TYP_STRING) {
@@ -145,7 +148,7 @@ psy_Properties* psy_properties_sync(psy_Properties* self, psy_Properties* src)
 {
 	psy_Properties* p;
 	p = src->children;
-	for (p = src->children; p != 0; p = psy_properties_next(p)) {
+	for (p = src->children; p != NULL; p = psy_properties_next(p)) {
 		psy_Properties* q;
 
 		q = psy_properties_read(self, psy_properties_key(p));
@@ -328,7 +331,7 @@ psy_Properties* psy_properties_read(psy_Properties* self, const char* key)
 			free(path);
 		}
 	}
-	while (p != 0) {		
+	while (p != NULL) {		
 		if (p->item.key && strcmp(key, p->item.key) == 0) {
 			break;
 		}
@@ -498,7 +501,7 @@ int properties_enumerate_rec(psy_Properties* self)
 {
 	psy_Properties* p;
 	p = self;
-	while (p != 0) {
+	while (p != NULL) {
 		int walkoption = callback(target, p, level);
 		if (walkoption == 0) {
 			return 0;
@@ -652,6 +655,22 @@ const char* psy_properties_text(psy_Properties* self)
 	return self->item.text ? self->item.text : self->item.key ? self->item.key : "";
 }
 
+psy_Properties* psy_properties_setshorttext(psy_Properties* self, const char* text)
+{
+	if (self) {
+		free(self->item.shorttext);
+		self->item.shorttext = strdup(text);
+	}
+	return self;
+}
+
+const char* psy_properties_shorttext(psy_Properties* self)
+{
+	return self->item.shorttext ? self->item.shorttext : 
+		self->item.text ? self->item.text :
+		self->item.key ? self->item.key : "";
+}
+
 psy_Properties* psy_properties_setid(psy_Properties* self, int id)
 {	
 	if (self) {
@@ -720,7 +739,7 @@ psy_Properties* psy_properties_remove(psy_Properties* self, psy_Properties* prop
 		psy_Properties* p;
 
 		p = self->children;		
-		while (p != 0) {
+		while (p != NULL) {
 			if (p == property) {
 				if (q) {
 					q->next = p->next;
@@ -749,7 +768,7 @@ uintptr_t psy_properties_size(psy_Properties* self)
 		
 	if (self) {
 		psy_Properties* p;
-		for (p = self->children; p != 0; p = p->next, ++rv);
+		for (p = self->children; p != NULL; p = p->next, ++rv);
 	}
 	return rv;
 }

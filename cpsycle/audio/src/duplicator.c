@@ -159,7 +159,7 @@ psy_List* sequencerinsert(psy_audio_Duplicator* self, PatternNode* events)
 		// isticking = 1, prevents for this tick duplicator to insert further
 		// notes than these ones to avoid possible loops of duplicators
 		self->isticking = 1;
-		for (p = events; p != 0; p = p->next) {
+		for (p = events; p != NULL; p = p->next) {
 			psy_TableIterator it;
 	
 			for (it = psy_audio_duplicatormap_begin(&self->map);

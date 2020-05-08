@@ -16,14 +16,16 @@ extern "C" {
 typedef struct {	
 	psy_Table slots;
 	uintptr_t songtracks;
-	unsigned char sharetracknames;
+	bool sharetracknames;
 	psy_audio_PatternsTrackState trackstate;
+	psy_Signal signal_namechanged;
+	psy_Signal signal_lengthchanged;
 } psy_audio_Patterns;
 
 void patterns_init(psy_audio_Patterns*);
 void patterns_dispose(psy_audio_Patterns*);
 void patterns_insert(psy_audio_Patterns*,uintptr_t slot, psy_audio_Pattern*);
-int patterns_append(psy_audio_Patterns*, psy_audio_Pattern*);
+uintptr_t patterns_append(psy_audio_Patterns*, psy_audio_Pattern*);
 psy_audio_Pattern* patterns_at(psy_audio_Patterns*, uintptr_t slot);
 void patterns_clear(psy_audio_Patterns*);
 void patterns_erase(psy_audio_Patterns*, uintptr_t slot);
@@ -32,11 +34,12 @@ uintptr_t patterns_size(psy_audio_Patterns*);
 void patterns_activatesolotrack(psy_audio_Patterns*, uintptr_t track);
 void patterns_deactivatesolotrack(psy_audio_Patterns*);
 void patterns_mutetrack(psy_audio_Patterns*, uintptr_t track);
-void patterns_unmutetrack(psy_audio_Patterns* self, uintptr_t track);
+void patterns_unmutetrack(psy_audio_Patterns*, uintptr_t track);
 int patterns_istrackmuted(psy_audio_Patterns*, uintptr_t track);
 int patterns_istracksoloed(psy_audio_Patterns*, uintptr_t track);
 void patterns_setsongtracks(psy_audio_Patterns*, uintptr_t trackcount);
 uintptr_t patterns_songtracks(psy_audio_Patterns*);
+uintptr_t patterns_slot(psy_audio_Patterns*, psy_audio_Pattern*);
 
 #ifdef __cplusplus
 }

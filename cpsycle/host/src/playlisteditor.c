@@ -194,7 +194,7 @@ void playlisteditor_buildplaylist(PlayListEditor* self)
 	psy_List* p;
 	
 	psy_ui_listbox_clear(&self->listbox);
-	for (p = self->entries; p != 0; p = p->next) {
+	for (p = self->entries; p != NULL; p = p->next) {
 		PlayListEntry* entry;
 
 		entry = (PlayListEntry*) p->entry;
@@ -253,7 +253,7 @@ void playlisteditor_ontimer(PlayListEditor* self, int timerid)
 			
 			p = self->entries;
 			c = 0;
-			while (p != 0) {
+			while (p != NULL) {
 				if (p == self->currentry) {
 					break;
 				}

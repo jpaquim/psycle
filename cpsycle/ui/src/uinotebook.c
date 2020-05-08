@@ -86,7 +86,7 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 		align_split(self, self->splitx);
 	} else {
 		int cpx = 0;	
-		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
+		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)p->entry;		
@@ -197,7 +197,7 @@ void align_split(psy_ui_Notebook* self, int x) {
 	psy_ui_Size size;
 
 	size = psy_ui_component_size(psy_ui_notebook_base(self));
-	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != 0; p = p->next) {
+	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; p = p->next) {
 		psy_ui_Component* component;
 		
 		component = (psy_ui_Component*) p->entry;
@@ -225,7 +225,7 @@ psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)
 	psy_List* q;
 
 	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0);
-			p != 0; p = p->next) {		
+			p != NULL; p = p->next) {		
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)p->entry;

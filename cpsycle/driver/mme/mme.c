@@ -296,14 +296,14 @@ static void init_properties(psy_AudioDriver* driver)
 		psy_properties_append_choice(driver->properties, "device", 0),
 		"Device");
 	psy_properties_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
-	for (p = self->_playEnums, i = 0; p != 0; p = p->next, ++i) {
+	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
 		psy_properties_append_int(devices, port->portname, i, 0, 0);
 	}
 	indevices = psy_properties_settext(
 		psy_properties_append_choice(driver->properties, "indevice", 0),
 		"Standard Input Device (Select different in Recorder)");
-	for (p = self->_capEnums, i = 0; p != 0; p = p->next, ++i) {
+	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
 		psy_properties_append_int(indevices, port->portname, i, 0, 0);
 	}
@@ -713,7 +713,7 @@ void clearplayenums(MmeDriver* self)
 {
 	psy_List* p;
 
-	for (p = self->_playEnums; p != 0; p = p->next) {
+	for (p = self->_playEnums; p != NULL; p = p->next) {
 		PortEnums* port = (PortEnums*)p->entry;
 		portenums_dispose(port);
 		free(port);
@@ -726,7 +726,7 @@ void clearcapenums(MmeDriver* self)
 {
 	psy_List* p;
 
-	for (p = self->_capEnums; p != 0; p = p->next) {
+	for (p = self->_capEnums; p != NULL; p = p->next) {
 		PortEnums* port = (PortEnums*)p->entry;
 		portenums_dispose(port);
 		free(port);

@@ -212,7 +212,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 	if (p) {
 		p = p->children;
 	}
-	for ( ; p != 0; p = psy_properties_next(p)) {
+	for ( ; p != NULL; p = psy_properties_next(p)) {
 		pluginsview_drawitem(self, g, p, cpx, cpy);
 		cpx += self->columnwidth;
 		if (cpx >= self->numparametercols * self->columnwidth) {
@@ -360,7 +360,7 @@ void pluginsview_hittest(PluginsView* self, int x, int y)
 	pluginsview_computetextsizes(self);
 	p = self->plugins;
 	if (p) {			
-		for (p = p->children ; p != 0; p = p->next) {
+		for (p = p->children ; p != NULL; p = p->next) {
 			psy_ui_Rectangle r;
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
@@ -535,7 +535,7 @@ psy_Properties* newmachine_sort(psy_Properties* source, psy_fp_comp comp)
 		num = psy_properties_size(p);
 		propertiesptr = malloc(sizeof(psy_Properties*) * num);
 		p = p->children;		
-		for (i =0 ; p != 0 && i < num; p = p->next, ++i) {
+		for (i =0 ; p != NULL && i < num; p = p->next, ++i) {
 			propertiesptr[i] = p;
 		}		
 		psy_qsort(propertiesptr, 0, num - 1, comp);

@@ -744,7 +744,7 @@ int luamachine_setbuffer(lua_State* L)
 		}
 		if (arrays) {
 			buffer = psy_audio_buffer_allocinit(psy_list_size(arrays));
-			for (c = 0, p = arrays; p != 0; p = p->next, ++c) {
+			for (c = 0, p = arrays; p != NULL; p = p->next, ++c) {
 				psy_audio_Array* v;
 
 				v = (psy_audio_Array*)p->entry;

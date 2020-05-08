@@ -97,7 +97,7 @@ void song_initmachines(psy_audio_Song* self)
 void song_initpatterns(psy_audio_Song* self)
 {
 	patterns_init(&self->patterns);
-	patterns_insert(&self->patterns, 0, pattern_allocinit());
+	patterns_insert(&self->patterns, 0, psy_audio_pattern_allocinit());
 }
 
 void song_initsequence(psy_audio_Song* self)

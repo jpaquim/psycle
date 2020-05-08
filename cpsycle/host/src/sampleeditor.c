@@ -18,8 +18,9 @@
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
 static void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent,
 	SampleEditor*);
-static void sampleeditorheader_ondraw(SampleEditorHeader*,
-	psy_ui_Component* sender, psy_ui_Graphics*);
+static void sampleeditorheader_ondraw(SampleEditorHeader*, psy_ui_Graphics*);
+static void sampleeditorheader_onpreferredsize(SampleEditorHeader*,
+	psy_ui_Size* limit, psy_ui_Size* size);
 static void sampleeditorheader_drawruler(SampleEditorHeader*, psy_ui_Graphics*);
 
 static void sampleeditor_initsampler(SampleEditor*);
@@ -76,22 +77,48 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 		psy_ui_ALIGN_LEFT, &margin));
 }
 
+// Header
+// pianoroll vtable
+static psy_ui_ComponentVtable sampleeditorheader_vtable;
+static int sampleeditorheader_vtable_initialized = 0;
+
+static void sampleeditorheader_vtable_init(SampleEditorHeader* self)
+{
+	if (!sampleeditorheader_vtable_initialized) {
+		sampleeditorheader_vtable = *(self->component.vtable);
+		sampleeditorheader_vtable.ondraw = (psy_ui_fp_ondraw)
+			sampleeditorheader_ondraw;
+		sampleeditorheader_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			sampleeditorheader_onpreferredsize;
+		sampleeditorheader_vtable_initialized = 1;
+	}
+}
+
 void sampleeditorheader_init(SampleEditorHeader* self,
 	psy_ui_Component* parent, SampleEditor* view)
 {
 	self->view = view;
 	self->scrollpos = 0;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_resize(&self->component, 100, 50);
-	psy_signal_connect(&self->component.signal_draw, self,
-		sampleeditorheader_ondraw);
+	psy_ui_component_enablealign(&self->component);
+	sampleeditorheader_vtable_init(self);
+	self->component.vtable = &sampleeditorheader_vtable;
+	psy_ui_component_doublebuffer(&self->component);	
 }
 
-void sampleeditorheader_ondraw(SampleEditorHeader* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void sampleeditorheader_ondraw(SampleEditorHeader* self, psy_ui_Graphics* g)
 {	
 	sampleeditorheader_drawruler(self, g);	
+}
+
+void sampleeditorheader_onpreferredsize(SampleEditorHeader* self,
+	psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	rv->width = limit->width;
+	rv->height = (int)(tm.tmHeight * 1.5);
 }
 
 void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
@@ -99,12 +126,14 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	psy_ui_Size size;	
 	int baseline;		
 	psy_dsp_beat_t cpx;	
-	int c;	
+	int c;
+	psy_ui_TextMetric tm;
 
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	baseline = size.height - 1;
 	psy_ui_setcolor(g, 0x00CACACA); 
-	psy_ui_drawline(g, 0, baseline, size.width, baseline);	
+	psy_ui_drawline(g, 0, baseline, size.width, baseline);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00CACACA);
 	for (c = 0, cpx = 0; c <= self->view->metrics.visisteps; 
@@ -112,13 +141,13 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 		char txt[40];
 		int frame;
 		
-		psy_ui_drawline(g, (int) cpx, baseline, (int) cpx, baseline - 4);
+		psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
 		frame = (int)((c - self->scrollpos) * 
 			(self->view->sample
 				? (self->view->sample->numframes / self->view->metrics.visisteps)
 				: 0));
 		psy_snprintf(txt, 40, "%d", frame);
-		psy_ui_textout(g, (int) cpx + 3, baseline - 14, txt, strlen(txt));
+		psy_ui_textout(g, (int)cpx + 3, baseline - tm.tmHeight, txt, strlen(txt));
 	}
 }
 

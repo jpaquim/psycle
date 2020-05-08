@@ -38,6 +38,7 @@ typedef enum {
 typedef struct {
 	char* key;
 	char* text;
+	char* shorttext;
 	union {
 		char* s;
 		int i;
@@ -109,7 +110,9 @@ int psy_properties_value(psy_Properties*);
 psy_Property* psy_properties_entry(psy_Properties*);
 const char* psy_properties_valuestring(psy_Properties*);
 psy_Properties* psy_properties_settext(psy_Properties*, const char* text);
+psy_Properties* psy_properties_setshorttext(psy_Properties*, const char* text);
 const char* psy_properties_text(psy_Properties* self);
+const char* psy_properties_shorttext(psy_Properties* self);
 psy_Properties* psy_properties_setid(psy_Properties*, int id);
 int psy_properties_id(psy_Properties* self);
 psy_Properties* psy_properties_sethint(psy_Properties*, psy_PropertyHint);

@@ -387,7 +387,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	uintptr_t amount = bc->numsamples;
 	uintptr_t pos = 0;
 		
-	for (p = bc->events; p != 0 && count < self->eventcap; p = p->next) {
+	for (p = bc->events; p != NULL && count < self->eventcap; p = p->next) {
 		int numworksamples;
 		int midichannel;
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;

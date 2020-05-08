@@ -178,13 +178,13 @@ typedef struct {
    double bpl;
    double cbpl;   
    psy_dsp_NotesTabMode notestabmode;
-   PatternEditPosition cursor;
+   psy_audio_PatternEditPosition cursor;
    psy_dsp_beat_t cursorstep;   
    psy_audio_Player* player;   
    struct TrackerView* view;
    PatternSelection selection;
-   PatternEditPosition dragselectionbase;
-   PatternEditPosition lastdragcursor;
+   psy_audio_PatternEditPosition dragselectionbase;
+   psy_audio_PatternEditPosition lastdragcursor;
    int hasselection;
    int midline;
    int doublemidline;
@@ -231,6 +231,7 @@ typedef struct TrackerView {
 	TrackDef defaulttrackdef;
 	ZoomBox zoombox;
 	int doseqtick;
+	int zoomheightbase;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);

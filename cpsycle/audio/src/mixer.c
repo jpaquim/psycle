@@ -574,6 +574,7 @@ void inputchannel_init(psy_audio_InputChannel* self, uintptr_t id, psy_audio_Mix
 	psy_table_init(&self->sendvols);
 	self->volume = 1.0f;
 	self->gain = 1.f;
+	self->dryonly = 0;
 	self->wetonly = 0;
 	self->volumedisplay = 0.f;
 	self->buffer = 0;

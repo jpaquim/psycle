@@ -107,7 +107,7 @@ void history_dispose(History* self)
 {
 	psy_List* p;
 
-	for (p = self->container; p != 0; p = p->next) {
+	for (p = self->container; p != NULL; p = p->next) {
 		free(p->entry);
 	}
 	psy_list_free(self->container);
@@ -169,8 +169,8 @@ void workspace_init(Workspace* self, void* handle)
 	self->navigating = 0;
 	workspace_initsignals(self);	
 	workspace_initplayer(self);		
-	patterneditposition_init(&self->patterneditposition);	
-	pattern_init(&self->patternpaste);
+	psy_audio_patterneditposition_init(&self->patterneditposition);
+	psy_audio_pattern_init(&self->patternpaste);
 	self->sequencepaste = 0;	
 }
 
@@ -225,7 +225,7 @@ void workspace_dispose(Workspace* self)
 	undoredo_dispose(&self->undoredo);
 	history_dispose(&self->history);
 	workspace_disposesignals(self);
-	pattern_dispose(&self->patternpaste);	
+	psy_audio_pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);
 	properties_free(self->cmds);
 	sequenceselection_dispose(&self->sequenceselection);
@@ -261,7 +261,7 @@ void workspace_disposesequencepaste(Workspace* self)
 {
 	psy_List* p;
 
-	for (p = self->sequencepaste; p != 0; p = p->next) {
+	for (p = self->sequencepaste; p != NULL; p = p->next) {
 		SequenceEntry* entry;		
 
 		entry = (SequenceEntry*) p->entry;
@@ -953,7 +953,7 @@ void workspace_makedriverconfigurations(Workspace* self)
 	
 	drivers = psy_properties_read(self->inputoutput, "driver");
 	if (drivers) {
-		for (p = drivers->children; p != 0; p = psy_properties_next(p)) {			
+		for (p = drivers->children; p != NULL; p = psy_properties_next(p)) {			
 			if (psy_properties_type(p) == PSY_PROPERTY_TYP_STRING) {
 				const char* path;
 
@@ -1148,7 +1148,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 				int c = 0;
 				
 				id = psy_properties_value(p);				
-				for (p = p->children; p != 0  && c != id; p = p->next, ++c);
+				for (p = p->children; p != NULL  && c != id; p = p->next, ++c);
 				if (p) {
 					psy_audio_player_loadeventdriver(&self->player,
 						psy_properties_valuestring(p));
@@ -1525,7 +1525,7 @@ void workspace_load_recentsongs(Workspace* self)
 
 	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
 	propertiesio_load(self->recentsongs, path, 1);
-	for (p = self->recentfiles->children; p != 0; p = psy_properties_next(p)) {
+	for (p = self->recentfiles->children; p != NULL; p = psy_properties_next(p)) {
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_READONLY);
 	}
 }
@@ -1587,7 +1587,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 	}
 }
 
-void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editposition)
+void workspace_setpatterneditposition(Workspace* self, psy_audio_PatternEditPosition editposition)
 {	
 	self->patterneditposition = editposition;
 	self->patterneditposition.line = 
@@ -1595,7 +1595,7 @@ void workspace_setpatterneditposition(Workspace* self, PatternEditPosition editp
 	psy_signal_emit(&self->signal_patterneditpositionchanged, self, 0);
 }
 
-PatternEditPosition workspace_patterneditposition(Workspace* self)
+psy_audio_PatternEditPosition workspace_patterneditposition(Workspace* self)
 {
 	return self->patterneditposition;
 }
@@ -1674,7 +1674,7 @@ void workspace_stopfollowsong(Workspace* self)
 void workspace_onsequenceeditpositionchanged(Workspace* self,
 	SequenceSelection* selection)
 {
-	PatternEditPosition position;
+	psy_audio_PatternEditPosition position;
 	SequenceEntry* entry;
 
 	if (selection->editposition.trackposition.tracknode) {

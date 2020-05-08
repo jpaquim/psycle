@@ -38,6 +38,12 @@ void patternentry_dispose(psy_audio_PatternEntry*);
 
 psy_audio_PatternEntry* patternentry_alloc(void);
 psy_audio_PatternEntry* patternentry_allocinit(void);
+psy_audio_PatternEntry* patternentry_allocinit_all(
+	const psy_audio_PatternEvent* event,
+	psy_dsp_beat_t offset,
+	psy_dsp_beat_t delta,
+	psy_dsp_beat_t bpm,
+	uintptr_t track);
 psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry*);
 
 INLINE psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry* self)
@@ -50,6 +56,12 @@ INLINE const psy_audio_PatternEvent* patternentry_front_const(
 {
 	return (const psy_audio_PatternEvent*)(self->events->entry);
 }
+
+INLINE void patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_beat_t bpm)
+{
+	self->bpm = bpm;
+}
+
 void patternentry_addevent(psy_audio_PatternEntry*,
 	const psy_audio_PatternEvent*);
 

@@ -182,7 +182,7 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 						WireSocket* p;
 						uintptr_t c = 0;
 
-						for (p = sockets->outputs; p != 0 && c != ev->inst;
+						for (p = sockets->outputs; p != NULL && c != ev->inst;
 							p = p->next, ++c);
 						if (p) {
 							psy_audio_WireSocketEntry* output_entry;
@@ -255,7 +255,7 @@ void master_title_describe(psy_audio_Master* self,
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
-			for (p = sockets->inputs; p != 0 && c != sender->index;
+			for (p = sockets->inputs; p != NULL && c != sender->index;
 				p = p->next, ++c);
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;
@@ -287,7 +287,7 @@ void master_slider_tweak(psy_audio_Master* self,
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		if (sockets) {
-			for (p = sockets->inputs; p != 0 && c != sender->index; p = p->next, ++c);
+			for (p = sockets->inputs; p != NULL && c != sender->index; p = p->next, ++c);
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;
 
@@ -377,7 +377,7 @@ void master_level_describe(psy_audio_Master* self,
 		sockets = connections_at(&machines->connections, MASTER_INDEX);
 		*active = 0;
 		if (sockets) {
-			for (p = sockets->inputs; p != 0 && c != sender->index;
+			for (p = sockets->inputs; p != NULL && c != sender->index;
 				p = p->next, ++c);
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;

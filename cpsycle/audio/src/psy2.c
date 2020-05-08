@@ -126,7 +126,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 				int32_t c;
 				psy_audio_Pattern* pattern;
 				
-				pattern = pattern_allocinit();
+				pattern = psy_audio_pattern_allocinit();
 				patterns_insert(&songfile->song->patterns, i, pattern);
 				pData = malloc(OLD_MAX_TRACKS * sizeof(psy_audio_PatternEntry));
 				for (c = 0; c < numlines; ++c) {
@@ -155,7 +155,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 						event.cmd = ptrack[3];
 						event.parameter = ptrack[4];
 						if (!patternevent_empty(&event)) {							
-							node = pattern_insert(pattern, node, track, offset,
+							node = psy_audio_pattern_insert(pattern, node, track, offset,
 								&event);
 						}
 						ptrack += EVENT_SIZE;
@@ -170,7 +170,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 			{
 				psy_audio_Pattern* pattern;
 				
-				pattern = pattern_allocinit();
+				pattern = psy_audio_pattern_allocinit();
 				patterns_insert(&songfile->song->patterns, i, pattern);
 				pattern->length = 64 * 0.25f;				
 			}			

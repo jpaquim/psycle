@@ -30,7 +30,7 @@ void psy_ui_menu_init(psy_ui_Menu* menu, char* label, void (*execute)(psy_ui_Men
 
 void psy_ui_menu_append(psy_ui_Menu* self, psy_ui_Menu* child, int popup)
 {
-	if (popup != 0)
+	if (popup != NULL)
 	{		
 		AppendMenu(self->hmenu, MF_POPUP, (UINT_PTR)child->hmenu, child->label);		
 	} else {

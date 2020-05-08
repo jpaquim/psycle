@@ -31,14 +31,14 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 		
 		// merge
 		psy_ui_component_updatefont(main);
-		for (p = q = psy_ui_component_children(main, 1); p != 0; p = p->next) {
+		for (p = q = psy_ui_component_children(main, 1); p != NULL; p = p->next) {
 			psy_ui_Component* child;			
 			child = (psy_ui_Component*) p->entry;		
 			psy_ui_component_updatefont(child);						
 		}
 		// align
 		psy_ui_component_align(main);
-		for (p = q; p != 0; p = p->next) {
+		for (p = q; p != NULL; p = p->next) {
 			psy_ui_Component* child;
 
 			child = (psy_ui_Component*)p->entry;
@@ -694,7 +694,7 @@ void enableinput(psy_ui_Component* self, int enable, int recursive)
 		psy_List* p;
 		psy_List* q;
 		
-		for (p = q = psy_ui_component_children(self, recursive); p != 0;
+		for (p = q = psy_ui_component_children(self, recursive); p != NULL;
 				p = p->next) {
 			psy_ui_Component* child;
 
@@ -719,7 +719,7 @@ psy_List* psy_ui_components_setalign(psy_List* list, psy_ui_AlignType align,
 {
 	psy_List* p;
 
-	for (p = list; p != 0; p = p->next) {
+	for (p = list; p != NULL; p = p->next) {
 		psy_ui_component_setalign((psy_ui_Component*) p->entry, align);
 		if (margin) {
 			psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);
@@ -732,7 +732,7 @@ psy_List* psy_ui_components_setmargin(psy_List* list, const psy_ui_Margin* margi
 {
 	psy_List* p;
 
-	for (p = list; p != 0; p = p->next) {
+	for (p = list; p != NULL; p = p->next) {
 		psy_ui_component_setmargin((psy_ui_Component*) p->entry, margin);
 	}
 	return list;

@@ -134,6 +134,7 @@ static void machinewireview_setcoords(MachineWireView*, psy_Properties*);
 static void machinewireview_onsize(MachineWireView*, psy_ui_Component* sender,
 	psy_ui_Size* size);
 static psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slot);
+static void machineview_onsongchanged(MachineView*, Workspace*, int flag, psy_audio_SongFile*);
 static void machineview_onmousedown(MachineView*,
 	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*,
@@ -1614,12 +1615,12 @@ void machinewireview_buildmachineuis(MachineWireView* self,
 }
 
 void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
-{		
+{			
 	self->machines = &workspace->song->machines;	
 	machinewireview_buildmachineuis(self, songfile ? &songfile->machineuis : 0);	
 	machinewireview_connectmachinessignals(self);
 	self->dx = 0;
-	self->dy = 0;
+	self->dy = 0;	
 	machinewireview_adjustscroll(self);
 	psy_ui_component_invalidate(&self->component);	
 }
@@ -1652,7 +1653,7 @@ void machinewireview_ontimer(MachineWireView* self, int timerid)
 	psy_List* q;
 	psy_TableIterator it;
 	
-	for (p = self->wireframes; p != 0; p = q) {
+	for (p = self->wireframes; p != NULL; p = q) {
 		WireFrame* frame;
 
 		frame = (WireFrame*) p->entry;
@@ -1795,7 +1796,7 @@ void machinewireview_onwireframedestroyed(MachineWireView* self,
 	psy_List* p;
 	psy_List* q;
 
-	for (p = self->wireframes; p != 0; p = q) {
+	for (p = self->wireframes; p != NULL; p = q) {
 		WireFrame* frame;
 
 		frame = (WireFrame*) p->entry;
@@ -2008,7 +2009,7 @@ void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
 			machines_isconnectasmixersend(&self->workspace->song->machines)) {
 		psy_ui_checkbox_check(&self->mixersend);
 	} else {
-		psy_ui_checkbox_disablecheck(&self->mixersend);
+		psy_ui_checkbox_disablecheck(&self->mixersend);		
 	}
 }
 
@@ -2020,6 +2021,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setposition(&self->component, 0, 0, 0, 0);
 	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);
+	psy_signal_connect(&self->workspace->signal_songchanged, self,
+		machineview_onsongchanged);
 	psy_ui_notebook_init(&self->notebook, &self->component);	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);	
 	machinewireview_init(&self->wireview,psy_ui_notebook_base(&self->notebook),
@@ -2046,7 +2049,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_focus, self,
 		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
-		machineview_onskinchanged);
+		machineview_onskinchanged);	
 	self->wireview.firstsize = 1;
 }
 
@@ -2164,4 +2167,9 @@ psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slo
 void selectsection(MachineView* self, psy_ui_Component* sender, uintptr_t section)
 {
 	tabbar_select(&self->tabbar, (int) section);
+}
+
+void machineview_onsongchanged(MachineView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+{
+	tabbar_select(&self->tabbar, 0);
 }

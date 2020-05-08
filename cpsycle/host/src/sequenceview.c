@@ -29,6 +29,9 @@ static void sequencelistview_onmousedoubleclick(SequenceListView*,
 static void sequencelistview_onscroll(SequenceListView*,
 	psy_ui_Component* sender, int stepx, int stepy);
 static void sequencelistview_ontimer(SequenceListView*, int timerid);
+static void sequencelistview_onpatternnamechanged(SequenceListView*, psy_audio_Patterns*,
+	uintptr_t slot);
+
 static void sequenceview_onnewentry(SequenceView*);
 static void sequenceview_oninsertentry(SequenceView*);
 static void sequenceview_oncloneentry(SequenceView*);
@@ -58,7 +61,7 @@ static void sequenceview_changeplayposition(SequenceView*);
 
 static void sequenceduration_update(SequenceViewDuration*);
 
-static void sequencebuttons_onalign(SequenceButtons* self);
+static void sequencebuttons_onalign(SequenceButtons*);
 static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
@@ -239,7 +242,7 @@ void sequencebuttons_onalign(SequenceButtons* self)
 	p = q = psy_ui_component_children(&self->component, 0);	
 	numrows = (psy_list_size(p) / numparametercols) + 1;
 	rowheight = size.height / numrows - margin;	
-	for ( ; p != 0; p = p->next, ++c, cpx += colwidth + margin) {
+	for ( ; p != NULL; p = p->next, ++c, cpx += colwidth + margin) {
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)p->entry;
@@ -270,7 +273,7 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 		psy_List* q;
 		
 		size = psy_ui_component_size(&self->component);	
-		for (p = q = psy_ui_component_children(&self->component, 0); p != 0;
+		for (p = q = psy_ui_component_children(&self->component, 0); p != NULL;
 				p = p->next, ++c) {
 			psy_ui_Component* component;
 			psy_ui_Size componentsize;
@@ -320,7 +323,7 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 
 	centery = (psy_ui_component_size(&self->component).height - lineheight) / 2;
 	sequencelistview_computetextsizes(&self->view->listview);
-	for (p = self->view->sequence->tracks; p != 0; p = p->next, 
+	for (p = self->view->sequence->tracks; p != NULL; p = p->next, 
 			cpx += self->view->listview.trackwidth, ++c) {
 		psy_ui_setrectangle(&r, cpx, centery, 
 			self->view->listview.trackwidth - 5,
@@ -380,6 +383,10 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->lastplayposition = -1.f;
 	self->lastentry = 0;
 	self->showpatternnames = 0;
+	if (self->sequence && self->sequence->patterns) {
+		psy_signal_connect(&self->sequence->patterns->signal_namechanged, self,
+			sequencelistview_onpatternnamechanged);
+	}
 	psy_ui_component_starttimer(&self->component, TIMERID_SEQUENCEVIEW, 200);
 }
 
@@ -390,7 +397,7 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 	int c = 0;		
 	self->foundselected = 0;
 	sequencelistview_computetextsizes(self);
-	for (p = self->sequence->tracks; p != 0; p = p->next, 
+	for (p = self->sequence->tracks; p != NULL; p = p->next, 
 			cpx += self->trackwidth, ++c) {
 		sequencelistview_drawtrack(self, g, (SequenceTrack*)p->entry, c, cpx +
 			self->dx + listviewmargin);
@@ -439,7 +446,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);
 	psy_ui_settextcolor(g, 0);
 	p = track->entries;
-	for (; p != 0; p = p->next, ++c, cpy += self->lineheight) {
+	for (; p != NULL; p = p->next, ++c, cpy += self->lineheight) {
 		SequenceEntry* entry;
 		int playing = 0;
 		// psy_audio_Pattern* pattern;
@@ -461,7 +468,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 
 			pattern = patterns_at(self->patterns, entry->pattern);
 			if (pattern) {
-				psy_snprintf(text, 20, "%02X: %s %4.2f", c, pattern_name(pattern), entry->offset);
+				psy_snprintf(text, 20, "%02X: %s %4.2f", c, psy_audio_pattern_name(pattern), entry->offset);
 			} else {
 				psy_snprintf(text, 20, "%02X:%02X(ERR) %4.2f", c, entry->pattern, entry->offset);
 			}
@@ -505,7 +512,7 @@ void sequenceview_onnewentry(SequenceView* self)
 	psy_List* tracknode;
 	
 	tracknode = sequence_insert(self->sequence, self->selection->editposition, 
-		patterns_append(self->patterns, pattern_allocinit()));	
+		patterns_append(self->patterns, psy_audio_pattern_allocinit()));
 	sequenceselection_seteditposition(self->selection,
 		sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
@@ -552,7 +559,7 @@ void sequenceview_oncloneentry(SequenceView* self)
 		pattern = patterns_at(self->patterns, entry->pattern);
 		if (pattern) {			
 			tracknode = sequence_insert(self->sequence, editposition, 
-				patterns_append(self->patterns, pattern_clone(pattern)));
+				patterns_append(self->patterns, psy_audio_pattern_clone(pattern)));
 			sequenceselection_seteditposition(self->selection,
 				sequence_makeposition(self->sequence,
 				self->selection->editposition.track,
@@ -672,7 +679,8 @@ void sequenceview_onclear(SequenceView* self)
 		workspace_disposesequencepaste(self->workspace);
 		sequence_clear(self->sequence);
 		patterns_clear(&self->workspace->song->patterns);		
-		patterns_insert(&self->workspace->song->patterns, 0, pattern_allocinit());
+		patterns_insert(&self->workspace->song->patterns, 0,
+			psy_audio_pattern_allocinit());
 		sequenceposition.track = 
 			sequence_appendtrack(self->sequence, sequencetrack_allocinit());
 		sequenceposition.trackposition =
@@ -695,7 +703,7 @@ void sequenceview_oncopy(SequenceView* self)
 	psy_List* p;
 	
 	workspace_disposesequencepaste(self->workspace);	
-	for (p = self->selection->entries; p != 0; p = p->next) {
+	for (p = self->selection->entries; p != NULL; p = p->next) {
 		SequenceEntry* entry;		
 
 		entry = (SequenceEntry*) p->entry;		
@@ -710,7 +718,7 @@ void sequenceview_onpaste(SequenceView* self)
 	psy_List* p;
 	
 	position = self->selection->editposition;	
-	for (p = self->workspace->sequencepaste; p != 0; p = p->next) {
+	for (p = self->workspace->sequencepaste; p != NULL; p = p->next) {
 		SequenceEntry* entry;
 		SequenceTrackNode* node;
 		
@@ -889,6 +897,11 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 	self->listview.patterns = &workspace->song->patterns;
 	self->listview.selected = 0;
 	self->duration.sequence = &workspace->song->sequence;
+	if (self->sequence && self->sequence->patterns) {
+		psy_signal_connect(&self->sequence->patterns->signal_namechanged,
+			&self->listview,
+			sequencelistview_onpatternnamechanged);
+	}
 	sequencelistview_adjustscroll(&self->listview);
 	sequenceduration_update(&self->duration);
 	psy_ui_component_invalidate(&self->listview.component);
@@ -906,7 +919,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	
 	position = sender->sequenceselection.editposition;	
 	p = sender->song->sequence.tracks;
-	while (p != 0) {
+	while (p != NULL) {
 		if (position.track == p) {
 			break;
 		}
@@ -1011,6 +1024,12 @@ void sequencelistview_ontimer(SequenceListView* self, int timerid)
 		psy_ui_component_invalidate(&self->component);
 		self->lastentry = 0;
 	}	
+}
+
+void sequencelistview_onpatternnamechanged(SequenceListView* self, psy_audio_Patterns* patterns,
+	uintptr_t slot)
+{
+	psy_ui_component_invalidate(&self->component);
 }
 
 void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent)

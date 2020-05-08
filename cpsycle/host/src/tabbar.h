@@ -10,6 +10,8 @@
 typedef struct {
 	char* text;
 	psy_ui_Size size;
+	bool istoggle;
+	int checkstate;
 	psy_ui_Margin margin;
 } Tab;
 

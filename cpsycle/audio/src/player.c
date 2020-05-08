@@ -65,8 +65,8 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song, void* h
 	psy_table_init(&self->notestotracks);
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
-	pattern_init(&self->patterndefaults);
-	pattern_setlength(&self->patterndefaults, (psy_dsp_beat_t) 0.25f);
+	psy_audio_pattern_init(&self->patterndefaults);
+	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_beat_t) 0.25f);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
@@ -106,7 +106,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
 	psy_table_dispose(&self->worked);
-	pattern_dispose(&self->patterndefaults);
+	psy_audio_pattern_dispose(&self->patterndefaults);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_close(&logfile);
 #endif
@@ -263,7 +263,7 @@ void log_workevents(psy_List* events)
 		psy_List* p;
 		char text[256];
 		char temp;
-		for (p = events; p != 0; p = p->next) {
+		for (p = events; p != NULL; p = p->next) {
 			psy_audio_PatternEntry* entry;			
 			
 			entry = psy_audio_patternnode_entry(p);
@@ -381,9 +381,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 	self->song = song;
 	if (self->song) {
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
-			&song->machines);
-		psy_audio_sequencer_setsamplerate(&self->sequencer,
-			self->driver->samplerate(self->driver));
+			&song->machines, self->driver->samplerate(self->driver));		
 		psy_audio_player_setnumsongtracks(self, patterns_songtracks(&song->patterns));
 	}
 }
@@ -395,11 +393,6 @@ void psy_audio_player_setnumsongtracks(psy_audio_Player* self, uintptr_t numsong
 		psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
 			self->numsongtracks);
 	}
-}
-
-uintptr_t psy_audio_player_numsongtracks(psy_audio_Player* self)
-{
-	return self->numsongtracks;
 }
 
 void psy_audio_player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)
@@ -446,11 +439,6 @@ void psy_audio_player_dostop(psy_audio_Player* self)
 void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_beat_t offset)
 {
 	psy_audio_sequencer_setposition(&self->sequencer, offset);
-}
-
-void psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
-{
-	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
 }
 
 void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)

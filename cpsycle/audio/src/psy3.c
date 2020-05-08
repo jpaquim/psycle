@@ -417,9 +417,9 @@ void readpatd(psy_audio_SongFile* self)
 					PatternNode* node = 0;
 
 					psource = pdest;
-					pattern = pattern_allocinit();
+					pattern = psy_audio_pattern_allocinit();
 					patterns_insert(&self->song->patterns, index, pattern);
-					pattern_setname(pattern, patternname[index]);
+					psy_audio_pattern_setname(pattern, patternname[index]);
 					for (y = 0; y < patternlines[index]; ++y) {
 						unsigned char* ptrack = psource;
 						uint32_t track;
@@ -447,7 +447,7 @@ void readpatd(psy_audio_SongFile* self)
 							event.cmd = ptrack[3];
 							event.parameter = ptrack[4];
 							if (!patternevent_empty(&event)) {
-								node = pattern_insert(pattern, node, track, offset,
+								node = psy_audio_pattern_insert(pattern, node, track, offset,
 									&event);
 							}
 							ptrack += EVENT_SIZE;
@@ -499,14 +499,14 @@ void readepat(psy_audio_SongFile* self)
 		for (i = 0; i < numpatterns; ++i) {
 			psy_audio_Pattern* pattern;
 
-			pattern = pattern_allocinit();
+			pattern = psy_audio_pattern_allocinit();
 
 			psyfile_read(self->file, &temp, sizeof(temp));
 			index = temp;			
 			patterns_insert(&self->song->patterns, index, pattern);
 			// pattern length
 			psyfile_read(self->file, &ftemp, sizeof ftemp);
-			pattern_setlength(pattern, ftemp);						
+			psy_audio_pattern_setlength(pattern, ftemp);
 			// num tracks per pattern // eventually this may be variable per pattern, like when we get multipattern
 			psyfile_read(self->file, &temp, sizeof temp );
 			psyfile_readstring(self->file, patternname[index], sizeof *patternname);
@@ -1987,7 +1987,7 @@ int psy3_write_patd(psy_audio_SongFile* self)
 			temp = self->song->patterns.songtracks; // eventually this may be variable per pattern
 			psyfile_write(self->file, &temp, sizeof(temp));
 
-			psyfile_writestring(self->file, pattern_name(pattern));
+			psyfile_writestring(self->file, psy_audio_pattern_name(pattern));
 
 			psyfile_write(self->file, &size77, sizeof(size77));
 			psyfile_write(self->file, copy, size77);
@@ -2059,7 +2059,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 				return status;
 			}
 			// pattern label
-			psyfile_writestring(self->file, pattern_name(pattern));
+			psyfile_writestring(self->file, psy_audio_pattern_name(pattern));
 			// num pattern entries
 			if (status = psyfile_write_int32(self->file,
 					psy_list_size(pattern->events))) {
@@ -2083,7 +2083,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 					return status;
 				}				
 				entry = (psy_audio_PatternEntry*) node->entry;				
-				for (p = entry->events; p != 0; p = p->next) {
+				for (p = entry->events; p != NULL; p = p->next) {
 					psy_audio_PatternEvent* ev;
 
 					ev = (psy_audio_PatternEvent*) p->entry;
@@ -2353,7 +2353,7 @@ int psy3_save_instrument(psy_audio_SongFile* self,
 	int status = PSY_OK;
 	
 	// loop	
-	if (status = psyfile_write_uint8(self->file, instrument->loop != 0)) {
+	if (status = psyfile_write_uint8(self->file, instrument->loop != FALSE)) {
 		return status;
 	}
 	// lines	

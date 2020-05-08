@@ -84,7 +84,7 @@ void clear_list(psy_List* list)
 {
 	psy_List* p;
 
-	for (p = list; p != 0; p = p->next) {
+	for (p = list; p != NULL; p = p->next) {
 		Command* command;
 
 		command = (Command*) p->entry;

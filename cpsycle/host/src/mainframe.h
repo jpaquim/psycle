@@ -38,6 +38,7 @@
 #include "recentview.h"
 #include "songbar.h"
 #include "helpview.h"
+#include "kbdhelp.h"
 #include "stepbox.h"
 #include "zoombox.h"
 
@@ -75,6 +76,7 @@ typedef struct {
 	RenderView renderview;
 	SettingsView settingsview;
 	HelpView helpview;	
+	KbdHelp kbdhelp;
 	Gear gear;
 	PluginEditor plugineditor;
 	VuBar vubar;

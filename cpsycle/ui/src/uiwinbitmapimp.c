@@ -61,7 +61,7 @@ int load(psy_ui_win_BitmapImp* self, const char* path)
 		IMAGE_BITMAP,
 		0, 0,
 		LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	if (bitmap != 0) {
+	if (bitmap != NULL) {
 		dispose(self);
 		self->bitmap = bitmap;
 	}
@@ -75,7 +75,7 @@ int loadresource(psy_ui_win_BitmapImp* self, int resourceid)
 
 	winapp = (psy_ui_WinApp*)app.platform;
 	bitmap = LoadBitmap(winapp->instance, MAKEINTRESOURCE(resourceid));
-	if (bitmap != 0) {
+	if (bitmap != NULL) {
 		dispose(self);
 		self->bitmap = bitmap;
 	}

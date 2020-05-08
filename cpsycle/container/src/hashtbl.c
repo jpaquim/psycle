@@ -30,7 +30,7 @@ void psy_table_dispose(psy_Table* self)
   psy_TableHashEntry* q;
 
   for (i = 0; i < self->arraysize; ++i) {
-    for (p = self->keys[i]; p != 0; p = q) {      
+    for (p = self->keys[i]; p != NULL; p = q) {      
 	  q = p->next;
       free(p);      
     }
@@ -55,7 +55,7 @@ void psy_table_insert(psy_Table* self, uintptr_t k, void* value)
 	p = 0;
 	if (self->keys[hn] != 0) {
 		p = self->keys[hn];
-		while (p != 0) {
+		while (p != NULL) {
 			if (k == p->key) {
 				p->value = value;
 				break;
@@ -96,7 +96,7 @@ void psy_table_remove(psy_Table* self, uintptr_t k)
 	if (self->keys[hn] != 0) {	
 		p = self->keys[hn];
 		q = 0;
-		while (p != 0) {
+		while (p != NULL) {
 			if (k == p->key) {
 				if (q) {				
 					q->next = p->next;				
@@ -125,7 +125,7 @@ void* psy_table_at(psy_Table* self, uintptr_t k)
 			psy_TableHashEntry* p;
 
 			p = self->keys[hn];
-			while (p != 0) {
+			while (p != NULL) {
 				if (k == p->key) {
 					rv = p->value;
 					break;
@@ -154,7 +154,7 @@ int psy_table_exists(psy_Table* self, uintptr_t k)
 			psy_TableHashEntry* p;
 
 			p = self->keys[hn];
-			while (p != 0) {
+			while (p != NULL) {
 				if (k == p->key) {
 					rv = 1;
 					break;

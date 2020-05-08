@@ -98,8 +98,8 @@ uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader
 		patternheader.packedsize = psyfile_read_uint16(self->file);
 		nextstart += patternheader.size;
 
-		pattern = pattern_allocinit();
-		pattern_setlength(pattern, patternheader.rows * (psy_dsp_beat_t) 0.25);
+		pattern = psy_audio_pattern_allocinit();
+		psy_audio_pattern_setlength(pattern, patternheader.rows * (psy_dsp_beat_t) 0.25);
 		patterns_insert(&self->song->patterns, slot, pattern);
 		if (patternheader.packedsize > 0) {
 			unsigned char* packeddata;
@@ -182,7 +182,7 @@ uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader
 					0,
 					0);
 				if (!xm_patternevent_empty(&ev)) {
-					node = pattern_insert(pattern, node, track, line * bpl, &ev);
+					node = psy_audio_pattern_insert(pattern, node, track, line * bpl, &ev);
 				}
 				++track;
 				if (track >= xmheader->channels) {
