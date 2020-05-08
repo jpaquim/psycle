@@ -129,7 +129,7 @@ uintptr_t psy_list_size(const psy_List* self)
 	uintptr_t rv = 0;
 	const psy_List* p;
 
-	for (p = self; p != 0; p = p->next, ++rv);
+	for (p = self; p != NULL; p = p->next, ++rv);
 	if (self) {
 		assert(self->size == rv);
 	}
@@ -146,20 +146,20 @@ int psy_list_check(psy_List* self, psy_List* node)
 {
 	psy_List* p = self;
 			
-	while (p != 0) {
+	while (p != NULL) {
 		if (p == node) {
 			break;
 		}
 		p = p->next;		
 	}
-	return p != 0;
+	return p != NULL;
 }
 
 psy_List* psy_list_findentry(psy_List* self, void* entry)
 {
 	psy_List* p = self;
 			
-	while (p != 0) {
+	while (p != NULL) {
 		if (p->entry == entry) {
 			break;
 		}
@@ -173,7 +173,7 @@ psy_List* psy_list_at(psy_List* self, uintptr_t numentry)
 	psy_List* p = self;
 	uintptr_t c = 0;
 			
-	while (p != 0) {
+	while (p != NULL) {
 		if (c == numentry) {
 			break;
 		}

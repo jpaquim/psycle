@@ -34,9 +34,9 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 
 		patternevent_clear(&patternevent);
 		patternevent.note = 48;
-		pattern = pattern_allocinit();
-		pattern_insert(pattern, 0, 0, (psy_dsp_beat_t) 0, &patternevent);
-		pattern_setlength(pattern, 
+		pattern = psy_audio_pattern_allocinit();
+		psy_audio_pattern_insert(pattern, 0, 0, (psy_dsp_beat_t) 0, &patternevent);
+		psy_audio_pattern_setlength(pattern,
 			(sample->numframes / (psy_dsp_beat_t)sample->samplerate) / 60 * 125);
 		patterns_insert(&self->song->patterns, 0, pattern);
 		patterns_setsongtracks(&self->song->patterns, 1);

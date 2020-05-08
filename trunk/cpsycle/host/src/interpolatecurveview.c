@@ -487,7 +487,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 		PatternNode* q;
 		int insertlast = 1;
 
-		p = pattern_greaterequal(self->pattern,
+		p = psy_audio_pattern_greaterequal(self->pattern,
 			(psy_dsp_beat_t)self->selection.topleft.offset);
 		if (p) {
 			psy_audio_PatternEntry* entry;
@@ -503,7 +503,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 				}
 			}
 		}
-		while (p != 0) {
+		while (p != NULL) {
 			psy_audio_PatternEntry* entry;
 			q = p->next;
 
@@ -566,23 +566,23 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 		lastvalue = entry->value;
 		for (kf = self->box.keyframes->next; kf != 0; kf = kf->next) {
 			KeyFrame* entry;
-			PatternEditPosition start;
-			PatternEditPosition end;
+			psy_audio_PatternEditPosition start;
+			psy_audio_PatternEditPosition end;
 
-			patterneditposition_init(&start);
-			patterneditposition_init(&end);
+			psy_audio_patterneditposition_init(&start);
+			psy_audio_patterneditposition_init(&end);
 			start.offset = lastoffset;
 			start.line = (uintptr_t)(lastoffset / 0.25f);
 			entry = (KeyFrame*)kf->entry;
 			end.offset = (entry->offset + self->box.selection.topleft.offset);
 			end.line = (uintptr_t)(end.offset / bpl) + 1;
 			if (lastentry->curve == INTERPOLATECURVETYPE_LINEAR) {
-				pattern_blockinterpolaterange(self->box.pattern,
+				psy_audio_pattern_blockinterpolaterange(self->box.pattern,
 					start, end,
 					bpl, lastvalue, entry->value);
 			} else
 			if (lastentry->curve == INTERPOLATECURVETYPE_HERMITE) {
-				pattern_blockinterpolaterangehermite(self->box.pattern,
+				psy_audio_pattern_blockinterpolaterangehermite(self->box.pattern,
 					start, end,
 					bpl, lastvalue, entry->value);
 			}

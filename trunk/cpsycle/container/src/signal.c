@@ -32,7 +32,7 @@ void psy_signal_dispose(psy_Signal* self)
 	if (self->slots) {
 		psy_List* p;
 
-		for (p = self->slots; p != 0; p = p->next) {
+		for (p = self->slots; p != NULL; p = p->next) {
 			psy_Slot* slot = (psy_Slot*) p->entry;
 			free(slot);			
 		}
@@ -47,7 +47,7 @@ void psy_signal_connect(psy_Signal* self, void* context, void* fp)
 	int connected = 0;
 
 	p = self->slots;
-	while (p != 0) {
+	while (p != NULL) {
 		psy_Slot* slot = (psy_Slot*) p->entry;
 		if (slot->context == context && slot->fp == fp) {
 			connected = 1;
@@ -74,7 +74,7 @@ void psy_signal_disconnect(psy_Signal* self, void* context, void* fp)
 	psy_List* p;	
 
 	p = self->slots;
-	while (p != 0) {		
+	while (p != NULL) {		
 		psy_Slot* slot = (psy_Slot*) p->entry;
 		if (slot->context == context && slot->fp == fp) {
 			psy_list_remove(&self->slots, p);
@@ -117,7 +117,7 @@ psy_Slot* psy_signal_findslot(psy_Signal* self, void* context,
 	if (self->slots) {
 		psy_List* p;
 
-		for (p = self->slots; p != 0; p = p->next) {
+		for (p = self->slots; p != NULL; p = p->next) {
 			psy_Slot* slot;
 			
 			slot = (psy_Slot*) p->entry;
@@ -136,7 +136,7 @@ void psy_signal_emit_int(psy_Signal* self, void* context,
 	if (self->slots) {
 		psy_List* p;
 
-		for (p = self->slots; p != 0; p = p->next) {
+		for (p = self->slots; p != NULL; p = p->next) {
 			psy_Slot* slot;
 			
 			slot = (psy_Slot*) p->entry;
@@ -151,7 +151,7 @@ void psy_signal_emit_float(psy_Signal* self, void* context, float param)
 {
 	if (self->slots) {
 		psy_List* p = self->slots;
-		for (p = self->slots; p != 0; p = p->next) {
+		for (p = self->slots; p != NULL; p = p->next) {
 			psy_Slot* slot;
 			
 			slot = (psy_Slot*) p->entry;
@@ -199,7 +199,7 @@ void psy_signal_notify(psy_Signal* self, void* sender)
 		psy_List* p;
 		psy_List* q;
 				
-		for (p = self->slots; p != 0; p = q) {			
+		for (p = self->slots; p != NULL; p = q) {			
 			psy_Slot* slot;
 			int abort;
 			

@@ -231,7 +231,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Component* sen
 		int width = keysize * numwhitekey(NOTECOMMANDS_RELEASE);		
 
 		size = psy_ui_component_size(&self->component);		
-		for (p = self->instrument->entries; p != 0; p = p->next, ++c) {
+		for (p = self->instrument->entries; p != NULL; p = p->next, ++c) {
 			psy_audio_InstrumentEntry* entry;
 			int startx;
 			int endx;			
@@ -415,7 +415,7 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 		psy_ui_setcolor(g, 0x00CACACA);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00CACACA);
-		for (p = self->instrument->entries; p != 0; p = p->next) {
+		for (p = self->instrument->entries; p != NULL; p = p->next) {
 			psy_audio_InstrumentEntry* entry;
 			char text[40];
 

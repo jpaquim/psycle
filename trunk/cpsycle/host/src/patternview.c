@@ -22,7 +22,7 @@ static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
 static void patternview_oncontextmenu(PatternView*,
 	psy_ui_Component* sender);
 static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Graphics*);
-static void patternviewstatus_onpreferredsize(PatternViewStatus* self,
+static void patternviewstatus_onpreferredsize(PatternViewStatus*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus*,
 	Workspace* sender);
@@ -33,7 +33,7 @@ static void patternviewbar_ondefaultline(PatternViewBar*,
 static void patternviewbar_initalign(PatternViewBar*);
 static void patternviewbar_onconfigchanged(PatternViewBar*, Workspace*,
 	psy_Properties*);
-static void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self,
+static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
 
 static psy_ui_ComponentVtable vtable;
@@ -78,7 +78,7 @@ void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus* self,
 void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 {
 	char text[256];
-	PatternEditPosition editposition;
+	psy_audio_PatternEditPosition editposition;
 	SequencePosition sequenceposition;
 	SequenceEntry* sequenceentry;
 	int pattern;
@@ -147,7 +147,6 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	else {
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
 	}
-
 }
 
 void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
@@ -199,9 +198,12 @@ void patternview_init(PatternView* self,
 	psy_ui_notebook_setpageindex(&self->editnotebook, 0);
 	trackerview_init(&self->trackerview, &self->editnotebook.component, workspace);	
 	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
-	patternproperties_init(&self->properties, psy_ui_notebook_base(&self->notebook), 0);
+	patternproperties_init(&self->properties, &self->component, NULL, workspace);
+	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->properties.component);
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
-	psy_signal_connect(&self->properties.applybutton.signal_clicked, self, patternview_onpropertiesapply);	
+	psy_signal_connect(&self->properties.applybutton.signal_clicked, self,
+		patternview_onpropertiesapply);	
 	// Tabbar
 	psy_ui_component_init(&self->sectionbar, tabbarparent);
 	psy_ui_component_enablealign(&self->sectionbar);
@@ -209,7 +211,8 @@ void patternview_init(PatternView* self,
 	tabbar_init(&self->tabbar, &self->sectionbar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
 	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split",
-		"Properties", NULL);	
+		"Properties", NULL);
+	tabbar_tab(&self->tabbar, 3)->istoggle = TRUE;
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternview_ontabbarchange);	
 	tabbar_select(&self->tabbar, 0);
@@ -246,6 +249,14 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
 			psy_ui_notebook_split(&self->editnotebook);			
 		}
+	} else
+	if (tabindex == 3) {
+		if (psy_ui_component_visible(&self->properties.component)) {
+			psy_ui_component_hide(&self->properties.component);			
+		} else {
+			psy_ui_component_show(&self->properties.component);
+		}
+		psy_ui_component_align(&self->component);
 	} else {
 		psy_ui_notebook_setpageindex(&self->notebook, 1);
 	}

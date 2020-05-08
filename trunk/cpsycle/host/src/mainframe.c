@@ -117,6 +117,9 @@ void mainframe_init(MainFrame* self)
 		mainframe_onterminalerror);
 	psy_ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_resize(&self->terminal.component, 0, 0);
+	kbdhelp_init(&self->kbdhelp, &self->component, &self->workspace);
+	psy_ui_component_setalign(kbdhelp_base(&self->kbdhelp), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
 	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
 	psy_ui_component_setalign(&self->splitbarterminal.component, psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
@@ -421,6 +424,15 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	if (cmd.id == CMD_IMM_HELP) {
 		tabbar_select(&self->helpview.tabbar, 0);
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);		
+	} else
+	if (cmd.id == CMD_IMM_HELPSHORTCUT) {
+		if (psy_ui_component_visible(kbdhelp_base(&self->kbdhelp))) {
+			psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
+			psy_ui_component_align(&self->component);
+		} else {
+			psy_ui_component_show(kbdhelp_base(&self->kbdhelp));
+			psy_ui_component_align(&self->component);
+		}
 	} else
 	if (cmd.id == CMD_IMM_EDITMACHINE) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);

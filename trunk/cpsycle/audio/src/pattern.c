@@ -14,7 +14,7 @@
 static double hermitecurveinterpolate(int kf0, int kf1, int kf2,
 	int kf3, int curposition, int maxposition, double tangmult, bool interpolation);
 
-void patterneditposition_init(PatternEditPosition* self)
+void psy_audio_patterneditposition_init(psy_audio_PatternEditPosition* self)
 {
 	self->track = 0;
 	self->offset = 0;
@@ -24,8 +24,8 @@ void patterneditposition_init(PatternEditPosition* self)
 	self->pattern = 0;
 }
 
-int patterneditposition_equal(PatternEditPosition* lhs,
-	PatternEditPosition* rhs)
+int psy_audio_patterneditposition_equal(psy_audio_PatternEditPosition* lhs,
+	psy_audio_PatternEditPosition* rhs)
 {
 	return 
 		rhs->column == lhs->column &&
@@ -35,20 +35,30 @@ int patterneditposition_equal(PatternEditPosition* lhs,
 		rhs->pattern == lhs->pattern;
 }
 
-void pattern_init(psy_audio_Pattern* self)
+static void psy_audio_pattern_init_signals(psy_audio_Pattern*);
+static void psy_audio_pattern_dispose_signals(psy_audio_Pattern*);
+
+void psy_audio_pattern_init(psy_audio_Pattern* self)
 {
 	self->events = 0;
 	self->length = 16;
 	self->name = strdup("Untitled");	
 	self->opcount = 0;
 	self->maxsongtracks = 0;
+	psy_audio_pattern_init_signals(self);
 }
 
-void pattern_dispose(psy_audio_Pattern* self)
+void psy_audio_pattern_init_signals(psy_audio_Pattern* self)
+{
+	psy_signal_init(&self->signal_namechanged);
+	psy_signal_init(&self->signal_lengthchanged);
+}
+
+void psy_audio_pattern_dispose(psy_audio_Pattern* self)
 {
 	PatternNode* p;	
 	
-	for (p = self->events; p != 0; p = p->next) {
+	for (p = self->events; p != NULL; p = p->next) {
 		patternentry_dispose((psy_audio_PatternEntry*) p->entry);
 		free(p->entry);		
 	}
@@ -56,22 +66,29 @@ void pattern_dispose(psy_audio_Pattern* self)
 	self->events = 0;
 	free(self->name);
 	self->name = 0;
+	psy_audio_pattern_dispose_signals(self);
 }
 
-void pattern_copy(psy_audio_Pattern* self, psy_audio_Pattern* src)
+void psy_audio_pattern_dispose_signals(psy_audio_Pattern* self)
+{
+	psy_signal_dispose(&self->signal_namechanged);
+	psy_signal_dispose(&self->signal_lengthchanged);
+}
+
+void psy_audio_pattern_copy(psy_audio_Pattern* self, psy_audio_Pattern* src)
 {	
 	PatternNode* p;
 	int opcount;
 
 	opcount = self->opcount;
-	pattern_dispose(self);
-	pattern_init(self);	
-	for (p = src->events; p != 0; p = p->next) {
+	psy_audio_pattern_dispose(self);
+	psy_audio_pattern_init(self);
+	for (p = src->events; p != NULL; p = p->next) {
 		psy_audio_PatternEntry* srcentry;
 		psy_audio_PatternEntry* entry;
 
 		srcentry = (psy_audio_PatternEntry*) p->entry;		
-		entry = patternentry_clone(srcentry);		
+		entry = patternentry_clone(srcentry);
 		psy_list_append(&self->events, entry);
 	}
 	self->length = src->length;
@@ -80,45 +97,45 @@ void pattern_copy(psy_audio_Pattern* self, psy_audio_Pattern* src)
 	self->opcount = opcount + 1;
 }
 
-psy_audio_Pattern* pattern_alloc(void)
+psy_audio_Pattern* psy_audio_pattern_alloc(void)
 {
 	return (psy_audio_Pattern*) malloc(sizeof(psy_audio_Pattern));
 }
 
-psy_audio_Pattern* pattern_allocinit(void)
+psy_audio_Pattern* psy_audio_pattern_allocinit(void)
 {
 	psy_audio_Pattern* rv;
 
-	rv = pattern_alloc();
+	rv = psy_audio_pattern_alloc();
 	if (rv) {
-		pattern_init(rv);
+		psy_audio_pattern_init(rv);
 	}
 	return rv;
 }
 
-psy_audio_Pattern* pattern_clone(psy_audio_Pattern* self)
+psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern* self)
 {	
 	psy_audio_Pattern* rv;	
 
-	rv = pattern_allocinit();
+	rv = psy_audio_pattern_allocinit();
 	if (rv) {
-		pattern_copy(rv, self);
+		psy_audio_pattern_copy(rv, self);
 	}
 	return rv;
 }
 
-void pattern_remove(psy_audio_Pattern* self, PatternNode* node)
+void psy_audio_pattern_remove(psy_audio_Pattern* self, PatternNode* node)
 {
 	if (node) {
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
 		psy_list_remove(&self->events, node);
-		patternentry_dispose(entry);		
+		patternentry_dispose(entry);
 		free(entry);
 		++self->opcount;		
 	}
 }
 
-PatternNode* pattern_insert(psy_audio_Pattern* self, PatternNode* prev,
+PatternNode* psy_audio_pattern_insert(psy_audio_Pattern* self, PatternNode* prev,
 	int track, psy_dsp_beat_t offset, const psy_audio_PatternEvent* event)
 {
 	PatternNode* rv;
@@ -137,7 +154,7 @@ PatternNode* pattern_insert(psy_audio_Pattern* self, PatternNode* prev,
 	return rv;
 }
 
-void pattern_setevent(psy_audio_Pattern* self, PatternNode* node,
+void psy_audio_pattern_setevent(psy_audio_Pattern* self, PatternNode* node,
 	const psy_audio_PatternEvent* event)
 {
 	if (node) {
@@ -156,7 +173,7 @@ void pattern_setevent(psy_audio_Pattern* self, PatternNode* node,
 	}
 }
 
-psy_audio_PatternEvent pattern_event(psy_audio_Pattern* self, PatternNode* node)
+psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern* self, PatternNode* node)
 {
 	if (node) {
 		return *patternentry_front(((psy_audio_PatternEntry*)node->entry));
@@ -168,11 +185,12 @@ psy_audio_PatternEvent pattern_event(psy_audio_Pattern* self, PatternNode* node)
 	}	
 }
 
-PatternNode* pattern_greaterequal(psy_audio_Pattern* self, psy_dsp_beat_t offset)
+PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern* self, psy_dsp_beat_t offset)
 {
-	PatternNode* p;		
+	PatternNode* p;
+
 	p = self->events;
-	while (p != 0) {
+	while (p != NULL) {
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
 		if (entry->offset >= offset) {			
 			break;
@@ -182,22 +200,23 @@ PatternNode* pattern_greaterequal(psy_audio_Pattern* self, psy_dsp_beat_t offset
 	return p;
 }
 
-PatternNode* pattern_findnode(psy_audio_Pattern* pattern, unsigned int track, float offset, 
-	psy_dsp_beat_t bpl, PatternNode** prev)
-{		
-	unsigned int currsubline = 0;
-	unsigned int subline = 0;
-	int first = 1;
-	PatternNode* node = pattern_greaterequal(pattern, offset);	
+PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
+	psy_dsp_beat_t offset, psy_dsp_beat_t bpl, PatternNode** prev)
+{
+	PatternNode* node;
+	
+	node = psy_audio_pattern_greaterequal(pattern, offset);
 	if (node) {
 		*prev = node->prev;
 	} else {
-		*prev = pattern_last(pattern);
+		*prev = psy_audio_pattern_last(pattern);
 	}	
 	while (node) {
-		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)(node->entry);
+		psy_audio_PatternEntry* entry;
+		
+		entry = (psy_audio_PatternEntry*)(node->entry);
 		if (entry->offset >= offset + bpl || entry->track > track) {
-			node = 0;
+			node = NULL;
 			break;
 		}		
 		if (entry->track == track) {
@@ -205,77 +224,59 @@ PatternNode* pattern_findnode(psy_audio_Pattern* pattern, unsigned int track, fl
 		}				
 		*prev = node;		
 		node = node->next;
-		first = 0;
 	}
 	return node;
 }
 
-PatternNode* pattern_last(psy_audio_Pattern* self)
+PatternNode* psy_audio_pattern_last(psy_audio_Pattern* self)
 {	
 	return self->events ? self->events->tail : 0;
 }
 
-void pattern_setname(psy_audio_Pattern* self, const char* text)
+void psy_audio_pattern_setname(psy_audio_Pattern* self, const char* text)
 {
 	if (self->name) {
 		free(self->name);
 		self->name = strdup(text);
 	}
 	++self->opcount;
+	psy_signal_emit(&self->signal_namechanged, self, 0);
 }
 
-const char* pattern_name(psy_audio_Pattern* self)
-{
-	return self->name;
-}
-
-void pattern_setlength(psy_audio_Pattern* self, psy_dsp_beat_t length)
+void psy_audio_pattern_setlength(psy_audio_Pattern* self, psy_dsp_beat_t length)
 {
 	self->length = length;
 	++self->opcount;
+	psy_signal_emit(&self->signal_lengthchanged, self, 0);
 }
 
-psy_dsp_beat_t pattern_length(psy_audio_Pattern* self)
-{
-	return self->length;
-}
-
-int pattern_empty(psy_audio_Pattern* self)
-{
-	return self->events == 0;
-}
-
-unsigned int pattern_opcount(psy_audio_Pattern* self)
-{
-	return self->opcount;
-}
-
-void pattern_scale(psy_audio_Pattern* self, float factor)
+void psy_audio_pattern_scale(psy_audio_Pattern* self, float factor)
 {
 	PatternNode* p;	
 	
-	for (p = self->events; p != 0; p = p->next) {		
+	for (p = self->events; p != NULL; p = p->next) {		
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
 
 		entry->offset *= factor;
 	}
 }
 
-void pattern_blockremove(psy_audio_Pattern* self, PatternEditPosition begin, 
-	PatternEditPosition end)
+void psy_audio_pattern_blockremove(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end)
 {	
 	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);	
-	while (p != 0) {			
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
+	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
 		entry = (psy_audio_PatternEntry*) p->entry;
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				pattern_remove(self, p);
+				psy_audio_pattern_remove(self, p);
 			}
 		} else {
 			break;
@@ -284,27 +285,30 @@ void pattern_blockremove(psy_audio_Pattern* self, PatternEditPosition begin,
 	}
 }
 
-void pattern_blockinterpolatelinear(psy_audio_Pattern* self, PatternEditPosition begin,
-	PatternEditPosition end, psy_dsp_beat_t bpl)
+void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end, psy_dsp_beat_t bpl)
 {
 	intptr_t startval;
 	intptr_t endval;
 	PatternNode* prev;
 	PatternNode* node;
 
-	node = pattern_findnode(self, begin.track, begin.line * bpl, bpl, &prev);
+	node = psy_audio_pattern_findnode(self, begin.track, begin.line * bpl, bpl, &prev);
 	startval = (node)
 		? psy_audio_patternevent_tweakvalue(patternentry_front(node->entry))
 		: 0;
-	node = pattern_findnode(self, begin.track, (end.line - 1) * bpl, bpl, &prev);
+	node = psy_audio_pattern_findnode(self, begin.track, (end.line - 1) * bpl, bpl, &prev);
 	endval = (node)
 		? psy_audio_patternevent_tweakvalue(patternentry_front(node->entry))
 		: 0;
-	pattern_blockinterpolaterange(self, begin, end, bpl, startval, endval);
+	psy_audio_pattern_blockinterpolaterange(self, begin, end, bpl, startval, endval);
 }
 
-void pattern_blockinterpolaterange(psy_audio_Pattern* self, PatternEditPosition begin,
-	PatternEditPosition end, psy_dsp_beat_t bpl, intptr_t startval, intptr_t endval)
+void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end,
+	psy_dsp_beat_t bpl, intptr_t startval, intptr_t endval)
 {
 	uintptr_t line;
 	float step;
@@ -318,7 +322,7 @@ void pattern_blockinterpolaterange(psy_audio_Pattern* self, PatternEditPosition 
 
 		offset = line * bpl;
 		value = (int)((step * (line - begin.line) + startval));
-		node = pattern_findnode(self, begin.track, offset, bpl, &prev);
+		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
 		if (node) {
 			psy_audio_patternevent_settweakvalue(patternentry_front(node->entry), value);
 			++self->opcount;
@@ -328,13 +332,15 @@ void pattern_blockinterpolaterange(psy_audio_Pattern* self, PatternEditPosition 
 
 			patternevent_clear(&ev);
 			psy_audio_patternevent_settweakvalue(&ev, value);
-			prev = pattern_insert(self, prev, begin.track, offset, &ev);
+			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
 		}
 	}
 }
 
-void pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, PatternEditPosition begin,
-	PatternEditPosition end, psy_dsp_beat_t bpl, intptr_t startval, intptr_t endval)
+void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end,
+	psy_dsp_beat_t bpl, intptr_t startval, intptr_t endval)
 {
 	uintptr_t line;
 	PatternNode* prev = 0;
@@ -354,7 +360,7 @@ void pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, PatternEditPo
 		psy_dsp_beat_t offset;
 
 		offset = line * bpl;
-		node = pattern_findnode(self, begin.track, offset, bpl, &prev);
+		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
 		if (node) {
 			double curveval = hermitecurveinterpolate(val0, val1, val2, val3, line - begin.line, distance, 0, TRUE);
 			psy_audio_patternevent_settweakvalue(patternentry_front(node->entry), (intptr_t)curveval);
@@ -365,7 +371,7 @@ void pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, PatternEditPo
 
 			patternevent_clear(&ev);
 			psy_audio_patternevent_settweakvalue(&ev, (intptr_t)curveval);
-			prev = pattern_insert(self, prev, begin.track, offset, &ev);
+			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
 		}
 	}
 }
@@ -395,14 +401,15 @@ double hermitecurveinterpolate(int kf0, int kf1, int kf2,
 	}
 }
 
-void pattern_blocktranspose(psy_audio_Pattern* self, PatternEditPosition begin, 
-	PatternEditPosition end, int offset)
+void psy_audio_pattern_blocktranspose(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end, int offset)
 {	
 	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
-	while (p != 0) {			
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
+	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
@@ -428,14 +435,15 @@ void pattern_blocktranspose(psy_audio_Pattern* self, PatternEditPosition begin,
 	++self->opcount;
 }
 
-void pattern_changemachine(psy_audio_Pattern* self, PatternEditPosition begin, 
-	PatternEditPosition end, int machine)
+void psy_audio_pattern_changemachine(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end, int machine)
 {
-		PatternNode* p;
+	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
-	while (p != 0) {			
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
+	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
@@ -451,14 +459,15 @@ void pattern_changemachine(psy_audio_Pattern* self, PatternEditPosition begin,
 	}
 }
 
-void pattern_changeinstrument(psy_audio_Pattern* self, PatternEditPosition begin, 
-	PatternEditPosition end, int instrument)
+void psy_audio_pattern_changeinstrument(psy_audio_Pattern* self,
+	psy_audio_PatternEditPosition begin,
+	psy_audio_PatternEditPosition end, int instrument)
 {
 	PatternNode* p;
 	PatternNode* q;
 
-	p = pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
-	while (p != 0) {			
+	p = psy_audio_pattern_greaterequal(self, (psy_dsp_beat_t) begin.offset);
+	while (p != NULL) {			
 		psy_audio_PatternEntry* entry;
 		q = p->next;
 
@@ -474,12 +483,12 @@ void pattern_changeinstrument(psy_audio_Pattern* self, PatternEditPosition begin
 	}
 }
 
-void pattern_setmaxsongtracks(psy_audio_Pattern* self, uintptr_t num)
+void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern* self, uintptr_t num)
 {
 	self->maxsongtracks = num;
 }
 
-uintptr_t pattern_maxsongtracks(psy_audio_Pattern* self)
+uintptr_t psy_audio_pattern_maxsongtracks(psy_audio_Pattern* self)
 {
 	return self->maxsongtracks;
 }

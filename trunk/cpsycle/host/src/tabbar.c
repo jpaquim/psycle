@@ -15,7 +15,7 @@ static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmouseenter(TabBar*);
 static void tabbar_onmouseleave(TabBar*);
-static int tabbar_tabhittest(TabBar* self, int x, int y);
+static int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab);
 static void tabbar_onalign(TabBar*);
 static void tabbar_onpreferredsize(TabBar*, psy_ui_Size* limit, psy_ui_Size* rv);
 
@@ -41,6 +41,8 @@ static void vtable_init(TabBar* self)
 void tab_init(Tab* self, const char* text, psy_ui_Size* size)
 {
 	self->text = strdup(text);
+	self->istoggle = FALSE;
+	self->checkstate = 0;
 	if (size) {
 		self->size = *size;
 	}	
@@ -77,7 +79,7 @@ void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
 {	
 	psy_List* p;	
 
-	for (p = self->tabs; p != 0; p = p->next) {	
+	for (p = self->tabs; p != NULL; p = p->next) {	
 		tab_dispose((Tab*)(p->entry));
 		free(p->entry);
 	}
@@ -125,8 +127,15 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 			cpxhover = cpx + psy_ui_value_px(&tab->margin.left, &tm);
 			hoverwidth = tab->size.width;
 		} else
-		if (self->selected == c) {
-			psy_ui_settextcolor(g, 0x00B1C8B0);		
+		if (tab->istoggle) {
+			if (tab->checkstate) {
+				psy_ui_settextcolor(g, 0x00B1C8B0);
+			} else {
+				psy_ui_settextcolor(g, 0x00D1C5B6);
+			}
+		} else		
+		if (self->selected == c) {			
+			psy_ui_settextcolor(g, 0x00B1C8B0);			
 		} else {
 			psy_ui_settextcolor(g, 0x00D1C5B6);
 		}		
@@ -165,24 +174,30 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 {
 	int tabindex;
+	Tab* tab = 0;
 	
-	tabindex = tabbar_tabhittest(self, ev->x, ev->y);
-	if (tabindex != -1 && tabindex != self->selected)  {
-		self->selected = tabbar_tabhittest(self, ev->x, ev->y);
+	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);
+	if (tab && tabindex != -1 && (tabindex != self->selected || tab->istoggle))  {
+		if (!tab->istoggle) {
+			self->selected = tabindex;
+		} else {
+			tab->checkstate = !tab->checkstate;
+		}
 		psy_ui_component_invalidate(tabbar_base(self));
-		psy_signal_emit(&self->signal_change, self, 1, self->selected);
+		psy_signal_emit(&self->signal_change, self, 1, tabindex);
 	}		
 }
 
-int tabbar_tabhittest(TabBar* self, int x, int y) 
+int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
 {
-	psy_List* tabs;	
+	psy_List* tabs;
 	int rv = -1;
 	int c = 0;
 	int cpx = 0;
 	int cpy = 0;
 	psy_ui_TextMetric tm;
 
+	*rvtab = NULL;
 	tm = psy_ui_component_textmetric(tabbar_base(self));
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		cpx = 0;
@@ -193,8 +208,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y)
 	} else
 	if (self->tabalignment == psy_ui_ALIGN_LEFT) {		
 		cpy = 5;
-	}
-	
+	}	
 	tabs = self->tabs;
 	while (tabs) {
 		Tab* tab;
@@ -204,6 +218,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y)
 			x < cpx + tab->size.width +
 				psy_ui_value_px(&tab->margin.left, &tm) +
 				psy_ui_value_px(&tab->margin.right, &tm)) {
+			*rvtab = tab;
 			rv = c;
 			break;
 		} else
@@ -212,6 +227,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y)
 			y >= cpy && y < cpy + tab->size.height +
 				psy_ui_value_px(&tab->margin.top, &tm) +
 				psy_ui_value_px(&tab->margin.bottom, &tm)) {
+			*rvtab = tab;
 			rv = c;
 			break;
 		}
@@ -235,8 +251,9 @@ int tabbar_tabhittest(TabBar* self, int x, int y)
 void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 {	
 	int tabindex;
+	Tab* tab = 0;
 
-	tabindex = tabbar_tabhittest(self, ev->x, ev->y);	
+	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);	
 	if (tabindex != self->hoverindex) {
 		self->hoverindex = tabindex;
 		psy_ui_component_invalidate(tabbar_base(self));
@@ -325,7 +342,7 @@ void tabbar_onalign(TabBar* self)
 {
 	psy_List* p;
 	
-	for (p = self->tabs; p != 0; p = p->next) {
+	for (p = self->tabs; p != NULL; p = p->next) {
 		Tab* tab;
 
 		tab = (Tab*)p->entry;
@@ -411,7 +428,7 @@ Tab* tabbar_tab(TabBar* self, int tabindex)
 	psy_List* p;
 	int c = 0;
 	
-	for (p = self->tabs; p != 0 && c < tabindex; p = p->next, ++c);
+	for (p = self->tabs; p != NULL && c < tabindex; p = p->next, ++c);
 	if (p) {		
 		rv = (Tab*)p->entry;		
 	}

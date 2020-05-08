@@ -274,7 +274,7 @@ void machines_sortpath(psy_audio_Machines* self)
 		p = self->path;		
 		while (self->path) {
 			p = self->path;			
-			while (p != 0) {
+			while (p != NULL) {
 				uintptr_t slot;
 				slot = (uintptr_t)p->entry;
 				if (isleaf(self, slot, &worked)) {
@@ -310,7 +310,7 @@ int isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
 		int rv = 1;
 
 		psy_List* p;
-		for (p = sockets->inputs; p != 0; p = p->next) {
+		for (p = sockets->inputs; p != NULL; p = p->next) {
 			psy_audio_WireSocketEntry* source;
 
 			source = (psy_audio_WireSocketEntry*) p->entry;
@@ -371,7 +371,7 @@ MachineList* compute_path(psy_audio_Machines* self, uintptr_t slot, bool concat)
 	// if (rv) {
 	// 	psy_List* p;
 
-	// 	for (p = rv; p != 0; p = p->next) {
+	// 	for (p = rv; p != NULL; p = p->next) {
 	// 		TRACE_INT((int)(p->entry));
 	// 	}
 	// 	OutputDebugString("\n");
@@ -391,7 +391,7 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 	if (connected_sockets) {
 		WireSocket* p;
 
-		for (p = connected_sockets->inputs; p != 0; p = p->next) {
+		for (p = connected_sockets->inputs; p != NULL; p = p->next) {
 			psy_audio_WireSocketEntry* entry;
 
 			entry = (psy_audio_WireSocketEntry*) p->entry;
@@ -481,7 +481,7 @@ void machines_freebuffers(psy_audio_Machines* self)
 	psy_List* p;
 	psy_List* q;
 
-	for (p = q = self->buffers; p != 0; p = p->next) {
+	for (p = q = self->buffers; p != NULL; p = p->next) {
 		psy_audio_Buffer* buffer;
 
 		buffer = (psy_audio_Buffer*) p->entry;

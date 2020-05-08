@@ -392,10 +392,10 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 		PatternNode* p;
 
 		pattern = (psy_audio_Pattern*)psy_tableiterator_value(&it);
-		if (pattern_empty(pattern)) {
+		if (psy_audio_pattern_empty(pattern)) {
 			continue;
 		}
-		for (p = pattern->events; p != 0; p = p->next) {			
+		for (p = pattern->events; p != NULL; p = p->next) {			
 			psy_audio_PatternEntry* entry;
 			psy_audio_PatternEvent* event;
 

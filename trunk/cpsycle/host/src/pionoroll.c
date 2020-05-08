@@ -426,18 +426,18 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 		patternevent_clear(&event);
 		event.note = self->metrics.keymax - 1 - (ev->y - self->dy) /
 			self->metrics.keyheight;
-		node = pattern_findnode(self->view->pattern, 0, offset,
+		node = psy_audio_pattern_findnode(self->view->pattern, 0, offset,
 			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (node) {				
-			pattern_setevent(self->view->pattern, node, &event);		
+			psy_audio_pattern_setevent(self->view->pattern, node, &event);
 		} else {
-			pattern_insert(self->view->pattern, prev, 0, offset, &event);
+			psy_audio_pattern_insert(self->view->pattern, prev, 0, offset, &event);
 		}
 	} else 
 	if (ev->button == 2) {
 		PatternNode* prev;
 
-		PatternNode* node = pattern_findnode(self->view->pattern, 0,
+		PatternNode* node = psy_audio_pattern_findnode(self->view->pattern, 0,
 			offset, 1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (!node) {
 			node = prev;
@@ -449,14 +449,14 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 			if (self->hover == psy_audio_patternnode_entry(node)) {
 				self->hover = 0;
 			}
-			pattern_remove(self->view->pattern, node);
+			psy_audio_pattern_remove(self->view->pattern, node);
 			if (next) {				
 				if (patternentry_front(psy_audio_patternnode_entry(next))->note
 						== NOTECOMMANDS_RELEASE) {
 					if (self->hover == psy_audio_patternnode_entry(next)) {
 						self->hover = 0;
 					}
-					pattern_remove(self->view->pattern, next);
+					psy_audio_pattern_remove(self->view->pattern, next);
 				}
 			}
 		}
@@ -472,7 +472,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 	psy_audio_PatternEntry* hover;
 		
 	offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x));
-	node = pattern_findnode(self->view->pattern, 0, offset,
+	node = psy_audio_pattern_findnode(self->view->pattern, 0, offset,
 			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 	hover = self->hover;
 	if (!node) {

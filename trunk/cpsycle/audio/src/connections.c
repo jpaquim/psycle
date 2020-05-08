@@ -22,7 +22,7 @@ void machinesockets_dispose(psy_audio_MachineSockets* self)
 {
 	WireSocket* p;
 
-	for (p = self->inputs; p != 0; p = p->next) {
+	for (p = self->inputs; p != NULL; p = p->next) {
 		psy_audio_WireSocketEntry* entry;
 
 		entry = (psy_audio_WireSocketEntry*)p->entry;
@@ -31,7 +31,7 @@ void machinesockets_dispose(psy_audio_MachineSockets* self)
 	}
 	psy_list_free(self->inputs);
 	self->inputs = 0;
-	for (p = self->outputs; p != 0; p = p->next) {
+	for (p = self->outputs; p != NULL; p = p->next) {
 		psy_audio_WireSocketEntry* entry;
 
 		entry = (psy_audio_WireSocketEntry*)p->entry;
@@ -86,7 +86,7 @@ void wiresocketentry_dispose(psy_audio_WireSocketEntry* self)
 {	
 	psy_List* p;
 
-	for (p = self->mapping; p != 0; p = p->next) {
+	for (p = self->mapping; p != NULL; p = p->next) {
 		free(p->entry);
 	}
 	psy_list_free(self->mapping);
@@ -292,7 +292,7 @@ int connections_connected(psy_audio_Connections* self, uintptr_t outputslot, uin
 		}
 #endif
 	}
-	return p != 0;
+	return p != NULL;
 }
 
 void connections_setwirevolume(psy_audio_Connections* self, uintptr_t outputslot,

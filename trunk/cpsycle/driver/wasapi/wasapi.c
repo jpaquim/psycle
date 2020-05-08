@@ -447,12 +447,12 @@ static void init_properties(psy_AudioDriver* driver)
 	psy_properties_append_int(driver->properties, "numbuf", 8, 6, 8);
 	psy_properties_append_int(driver->properties, "numsamples", 4096, 128, 8193);
 	devices = psy_properties_append_choice(driver->properties, "device", 0);
-	for (p = self->_playEnums, i = 0; p != 0; p = p->next, ++i) {
+	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnum* port = (PortEnum*)p->entry;
 		psy_properties_append_int(devices, port->portName, i, 0, 0);
 	}
 	indevices = psy_properties_append_choice(driver->properties, "indevice", 0);
-	for (p = self->_capEnums, i = 0; p != 0; p = p->next, ++i) {
+	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnum* port = (PortEnum*)p->entry;
 		psy_properties_append_int(indevices, port->portName, i, 0, 0);
 	}
@@ -921,7 +921,7 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 	EXIT_ON_ERROR(hr)
 
 	psy_List* p;
-	for (p = pThis->_capPorts; p != 0; p = p->next) {	
+	for (p = pThis->_capPorts; p != NULL; p = p->next) {	
 		PaWasapiSubStream* capport = (PaWasapiSubStream*) p->entry;
 			
 		if (capport->client == NULL)
@@ -948,7 +948,7 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 		{
 			// Event handle timed out after a 2-second wait.
 			IAudioClient_Stop(pThis->out.client);			
-			for (p = pThis->_capPorts; p != 0; p = p->next) {			
+			for (p = pThis->_capPorts; p != NULL; p = p->next) {			
 				PaWasapiSubStream* capport = (PaWasapiSubStream*)p->entry;
 				if (capport->client == NULL)
 					continue; 
@@ -968,7 +968,7 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 			if (numFramesAvailable > 0) {
 				psy_List* q;
 				// First, run the capture buffers so that audio is available to wavein machines.
-				for (p = pThis->_capPorts, q = capture; p != 0 && q != 0; p = p->next, q = q->next) {
+				for (p = pThis->_capPorts, q = capture; p != NULL && q != 0; p = p->next, q = q->next) {
 					PaWasapiSubStream* capport = (PaWasapiSubStream*)p->entry;
 					IAudioCaptureClient* captureClient = (IAudioCaptureClient*) q->entry;
 
@@ -983,7 +983,7 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 		else {
 			psy_List* q;
 			// First, run the capture buffers so that audio is available to wavein machines.
-			for (p = pThis->_capPorts, q = capture; p != 0 && q != 0; p = p->next, q = q->next) {
+			for (p = pThis->_capPorts, q = capture; p != NULL && q != 0; p = p->next, q = q->next) {
 				PaWasapiSubStream* capport = (PaWasapiSubStream*)p->entry;
 				IAudioCaptureClient* captureClient = (IAudioCaptureClient*)q->entry;
 				if (capport->client == NULL)
@@ -997,7 +997,7 @@ static DWORD WINAPI EventAudioThread(void* pWasapi)
 	{
 		unsigned int i = 0;
 
-		for (p = pThis->_capPorts; p != 0; p = p->next) {
+		for (p = pThis->_capPorts; p != NULL; p = p->next) {
 			PaWasapiSubStream* capport = (PaWasapiSubStream*)p->entry;
 			if (capport->client == NULL)
 				continue;
@@ -1120,7 +1120,7 @@ void FreePorts(psy_List* ports)
 {
 	psy_List* p;
 
-	for (p = ports; p != 0; p = p->next) {
+	for (p = ports; p != NULL; p = p->next) {
 		free(p->entry);
 	}
 	psy_list_free(ports);
@@ -1428,7 +1428,7 @@ void clearplayenums(WasapiDriver* self)
 {
 	psy_List* p;
 
-	for (p = self->_playEnums; p != 0; p = p->next) {
+	for (p = self->_playEnums; p != NULL; p = p->next) {
 		PortEnum* port = (PortEnum*)p->entry;
 		// portenum_dispose(port);
 		free(port);
@@ -1441,7 +1441,7 @@ void clearcapenums(WasapiDriver* self)
 {
 	psy_List* p;
 
-	for (p = self->_capEnums; p != 0; p = p->next) {
+	for (p = self->_capEnums; p != NULL; p = p->next) {
 		PortEnum* port = (PortEnum*)p->entry;
 		// portenum_dispose(port);
 		free(port);

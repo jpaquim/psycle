@@ -25,6 +25,8 @@ void sequenceentry_init(SequenceEntry*, uintptr_t pattern, psy_dsp_beat_t offset
 SequenceEntry* sequenceentry_alloc(void);
 SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, psy_dsp_beat_t offset);
 
+typedef psy_List SequenceTrackNode;
+
 typedef struct {
 	psy_List* entries;	
 } SequenceTrack;
@@ -32,8 +34,6 @@ typedef struct {
 void sequencetrack_init(SequenceTrack*);
 SequenceTrack* sequencetrack_alloc(void);
 SequenceTrack* sequencetrack_allocinit(void);
-
-typedef psy_List SequenceTrackNode;
 
 typedef struct {
 	psy_audio_Patterns* patterns;	

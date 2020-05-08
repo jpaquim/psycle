@@ -248,7 +248,7 @@ void sequence_clear(psy_audio_Sequence* self)
 {
 	SequenceTracks* p;	
 	
-	for (p = self->tracks; p != 0; p = p->next) {		
+	for (p = self->tracks; p != NULL; p = p->next) {		
 		sequencetrack_dispose((SequenceTrack*)p->entry);
 		free(p->entry);
 	}
@@ -289,7 +289,7 @@ void sequence_reposition(psy_audio_Sequence* self, SequenceTrack* track)
 	psy_dsp_beat_t curroffset = 0.0f;	
 	psy_List* p;	
 			
-	for (p = track->entries; p != 0; p = p->next) {
+	for (p = track->entries; p != NULL; p = p->next) {
 		psy_audio_Pattern* pattern;
 		SequenceEntry* entry = (SequenceEntry*) p->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
@@ -311,7 +311,7 @@ unsigned int sequence_size(psy_audio_Sequence* self, psy_List* tracknode)
 		psy_List* p;
 
 		track = (SequenceTrack*)(tracknode->entry);
-		for (p = track->entries; p != 0; p = p->next, ++rv);
+		for (p = track->entries; p != NULL; p = p->next, ++rv);
 	}
 	return rv;
 }
@@ -398,7 +398,7 @@ SequenceTrackIterator sequence_begin(psy_audio_Sequence* self, psy_List* track,
 
 		entry = (SequenceEntry*) rv.tracknode->entry;
 		pattern = patterns_at(self->patterns, entry->pattern);
-		rv.patternnode = pattern_greaterequal(pattern, pos - entry->offset);
+		rv.patternnode = psy_audio_pattern_greaterequal(pattern, pos - entry->offset);
 	} else {
 		rv.patternnode = 0;
 	}
@@ -531,7 +531,7 @@ unsigned int sequence_sizetracks(psy_audio_Sequence* self)
 	unsigned int c = 0;	
 	SequenceTracks* p;
 	
-	for (p = self->tracks; p != 0; p = p->next, ++c);
+	for (p = self->tracks; p != NULL; p = p->next, ++c);
 	return c;
 }
 
@@ -573,7 +573,7 @@ void sequence_setpatternslot(psy_audio_Sequence* self, SequencePosition position
 		
 		pattern = patterns_at(self->patterns, slot);
 		if (pattern == 0) {			
-			pattern = pattern_allocinit();			
+			pattern = psy_audio_pattern_allocinit();
 			patterns_insert(self->patterns, slot, pattern);		
 		}
 		entry->pattern = slot;		
@@ -631,7 +631,7 @@ void sequence_setplayselection(psy_audio_Sequence* self, SequenceSelection* sele
 	psy_List* p;
 
 	sequence_clearplayselection(self);
-	for (p = selection->entries; p != 0; p = p->next) {
+	for (p = selection->entries; p != NULL; p = p->next) {
 		SequenceEntry* entry;
 
 		entry = (SequenceEntry*) p->entry;
@@ -648,7 +648,7 @@ void sequence_clearplayselection(psy_audio_Sequence* self)
 		psy_List* p;
 
 		track = t->entry;
-		for (p = track->entries; p != 0; p = p->next) {
+		for (p = track->entries; p != NULL; p = p->next) {
 			SequenceEntry* entry;
 
 			entry = (SequenceEntry*) p->entry;

@@ -168,6 +168,8 @@
     <ClCompile Include="src\instrumentsbox.c" />
     <ClCompile Include="src\instrumentview.c" />
     <ClCompile Include="src\interpolatecurveview.c" />
+    <ClCompile Include="src\kbdbox.c" />
+    <ClCompile Include="src\kbdhelp.c" />
     <ClCompile Include="src\labelpair.c" />
     <ClCompile Include="src\linesperbeatbar.c" />
     <ClCompile Include="src\machinebar.c" />
@@ -252,6 +254,8 @@
     <ClInclude Include="src\instrumentsbox.h" />
     <ClInclude Include="src\instrumentview.h" />
     <ClInclude Include="src\interpolatecurveview.h" />
+    <ClInclude Include="src\kbdbox.h" />
+    <ClInclude Include="src\kbdhelp.h" />
     <ClInclude Include="src\labelpair.h" />
     <ClInclude Include="src\linesperbeatbar.h" />
     <ClInclude Include="src\machinebar.h" />

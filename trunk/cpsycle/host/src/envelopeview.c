@@ -258,7 +258,7 @@ void ShiftSuccessors(EnvelopeBox* self, double timeshift)
 {	
 	if (self->dragrelative) {
 		psy_List* p;
-		for (p = self->dragpoint->next; p != 0; p = p->next) {		
+		for (p = self->dragpoint->next; p != NULL; p = p->next) {		
 			psy_dsp_EnvelopePoint* pt;		
 
 			pt = (psy_dsp_EnvelopePoint*)p->entry;
@@ -305,7 +305,7 @@ psy_List* HitTestPoint(EnvelopeBox* self, int x, int y)
 {
 	psy_List* p = 0;	
 	
-	for (p = self->points->tail; p != 0; p = p->prev) {		
+	for (p = self->points->tail; p != NULL; p = p->prev) {		
 		psy_dsp_EnvelopePoint* pt;		
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;			

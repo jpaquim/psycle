@@ -92,7 +92,7 @@ void parameterbar_setpresetlist(ParameterBar* self, psy_audio_Presets* presets)
 	
 	psy_ui_combobox_clear(&self->presetsbox);
 	if (self->presets) {
-		for (p = presets->container; p != 0; p = p->next) {
+		for (p = presets->container; p != NULL; p = p->next) {
 			psy_audio_Preset* preset;
 
 			preset = (psy_audio_Preset*) p->entry;
@@ -284,7 +284,7 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 		int c = 0;
 
 		p = self->presets->container;
-		while (p != 0) {
+		while (p != NULL) {
 			if (c == index) {
 				psy_audio_Preset* preset;
 				psy_TableIterator it;

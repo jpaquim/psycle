@@ -151,7 +151,7 @@ void plugineditor_buildpluginlist(PluginEditor* self)
 	if (p) {
 		p = p->children;
 	}
-	for (c = 0; p != 0; p = psy_properties_next(p)) {
+	for (c = 0; p != NULL; p = psy_properties_next(p)) {
 		if (psy_properties_int(p, "type", -1) == MACH_LUA) {
 			psy_ui_combobox_addtext(&self->pluginselector, psy_properties_key(p));
 			psy_table_insert(&self->pluginmappping, (uintptr_t) c, p);

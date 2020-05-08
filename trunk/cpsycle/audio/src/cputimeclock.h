@@ -29,7 +29,7 @@ INLINE void psy_audio_cputimeclock_begin(psy_audio_CpuTimeClock* self)
 INLINE void psy_audio_cputimeclock_end(psy_audio_CpuTimeClock* self)
 {
 	self->end = clock();
-	self->cpu_time_used = ((double)(self->end - self->start)) / CLOCKS_PER_SEC;
+	self->cpu_time_used = ((double)self->end - (double)self->start) / CLOCKS_PER_SEC;
 }
 
 INLINE void psy_audio_cputimeclock_reset(psy_audio_CpuTimeClock* self)

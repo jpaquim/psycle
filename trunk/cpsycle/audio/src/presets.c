@@ -15,7 +15,7 @@ void psy_audio_presets_dispose(psy_audio_Presets* self)
 {
 	psy_List* p;
 
-	for (p = self->container; p != 0; p = p->next) {
+	for (p = self->container; p != NULL; p = p->next) {
 		free(p->entry);
 	}
 	free(self->container);

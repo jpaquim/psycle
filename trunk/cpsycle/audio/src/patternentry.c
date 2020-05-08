@@ -37,7 +37,7 @@ void patternentry_dispose(psy_audio_PatternEntry* self)
 {
 	psy_List* p;
 
-	for (p = self->events; p != 0; p = p->next) {
+	for (p = self->events; p != NULL; p = p->next) {
 		free(p->entry);
 	}
 	psy_list_free(self->events);
@@ -60,6 +60,22 @@ psy_audio_PatternEntry* patternentry_allocinit(void)
 	return rv;
 }
 
+psy_audio_PatternEntry* patternentry_allocinit_all(
+	const psy_audio_PatternEvent* event,
+	psy_dsp_beat_t offset,
+	psy_dsp_beat_t delta,
+	psy_dsp_beat_t bpm,
+	uintptr_t track)
+{
+	psy_audio_PatternEntry* rv;
+
+	rv = patternentry_alloc();
+	if (rv) {
+		patternentry_init_all(rv, event, offset, delta, bpm, track);
+	}
+	return rv;
+}
+
 psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
 {
 	psy_audio_PatternEntry* rv;
@@ -72,7 +88,7 @@ psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
 		rv->track = entry->track;
 		rv->events = 0;
 		rv->priority = 0;
-		for (p = entry->events; p != 0; p = p->next) {
+		for (p = entry->events; p != NULL; p = p->next) {
 			psy_audio_PatternEvent* copy;
 
 			copy = (psy_audio_PatternEvent*)

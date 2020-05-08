@@ -26,7 +26,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	tm = psy_ui_component_textmetric(self->component);
 	cp_bottomright.x = size.width;
 	cp_bottomright.y = size.height;
-	for (p = q = psy_ui_component_children(self->component, 0); p != 0;
+	for (p = q = psy_ui_component_children(self->component, 0); p != NULL;
 			p = p->next) {
 		psy_ui_Component* component;
 			
@@ -166,7 +166,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 				psy_ui_HORIZONTALEXPAND) == psy_ui_HORIZONTALEXPAND
 				? 0
 				: limit->width;
-			for (p = q = psy_ui_component_children(self->component, 0); p != 0;
+			for (p = q = psy_ui_component_children(self->component, 0); p != NULL;
 					p = p->next) {
 				psy_ui_Component* component;
 					

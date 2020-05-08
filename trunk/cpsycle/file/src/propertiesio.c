@@ -162,7 +162,7 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 		free(key);
 		free(value);
 	}	
-	return fp != 0;
+	return fp != NULL;
 }
 
 static int skip;

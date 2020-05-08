@@ -233,6 +233,12 @@
     <ClCompile Include="src\stereophase.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\kbdbox.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\kbdhelp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -466,6 +472,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\stereophase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\kbdbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\kbdhelp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

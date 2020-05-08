@@ -373,7 +373,7 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 {
 	psy_List* p;
 
-	for (p = entry->events; p != 0; p = p->next) {
+	for (p = entry->events; p != NULL; p = p->next) {
 		psy_audio_PatternEvent* ev;
 
 		ev = (psy_audio_PatternEvent*) p->entry;

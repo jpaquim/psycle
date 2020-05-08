@@ -116,7 +116,7 @@ void settingsview_appendtabbarsections(SettingsView* self)
 {	
 	psy_Properties* p;	
 	
-	for (p = self->properties->children; p != 0;
+	for (p = self->properties->children; p != NULL;
 			p = psy_properties_next(p)) {
 		if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
 			tabbar_append(&self->tabbar, psy_properties_text(p));			

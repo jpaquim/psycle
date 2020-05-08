@@ -9,6 +9,7 @@
 #include "uiedit.h"
 #include "uibutton.h"
 #include "pattern.h"
+#include "workspace.h"
 
 typedef struct {
 	psy_ui_Component component;
@@ -18,10 +19,11 @@ typedef struct {
 	psy_ui_Edit lengthedit;
 	psy_ui_Button applybutton;	
 	psy_audio_Pattern* pattern;
+	Workspace* workspace;
 } PatternProperties;
 
-
-void patternproperties_init(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*);
+void patternproperties_init(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*,
+	Workspace*);
 void patternproperties_setpattern(PatternProperties*, psy_audio_Pattern*);
 
 #endif

@@ -96,7 +96,7 @@ void instrument_disposeentries(psy_audio_Instrument* self)
 {
 	psy_List* p;
 
-	for (p = self->entries; p != 0; p = p->next) {
+	for (p = self->entries; p != NULL; p = p->next) {
 		free(p->entry);
 	}
 	psy_list_free(self->entries);
@@ -168,7 +168,7 @@ psy_List* instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
 	if (self->entries) {
 		psy_List* p;
 		
-		for (p = self->entries; p != 0; p = p->next) {
+		for (p = self->entries; p != NULL; p = p->next) {
 			psy_audio_InstrumentEntry* entry;
 
 			entry = (psy_audio_InstrumentEntry*) p->entry;
