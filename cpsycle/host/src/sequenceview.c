@@ -367,6 +367,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	sequencelistview_vtable_init(self);	
 	self->component.vtable = &sequencelistview_vtable;
 	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setwheelscroll(&self->component, 1);
 	self->view = view;
 	self->sequence = sequence;
 	self->patterns = patterns;
@@ -896,6 +897,8 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 	self->listview.sequence = &workspace->song->sequence;
 	self->listview.patterns = &workspace->song->patterns;
 	self->listview.selected = 0;
+	self->listview.dx = 0;
+	self->listview.dy = 0;
 	self->duration.sequence = &workspace->song->sequence;
 	if (self->sequence && self->sequence->patterns) {
 		psy_signal_connect(&self->sequence->patterns->signal_namechanged,
@@ -1080,3 +1083,4 @@ void sequenceview_changeplayposition(SequenceView* self)
 	psy_audio_player_start(&self->workspace->player);
 	psy_audio_exclusivelock_leave();
 }
+

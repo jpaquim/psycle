@@ -17,7 +17,6 @@ typedef struct {
 	psy_List* events;
 	uintptr_t numsamples;
 	uintptr_t numtracks;
-	struct psy_dsp_RMSVol* rmsvol;
 } psy_audio_BufferContext;
 
 void psy_audio_buffercontext_init(psy_audio_BufferContext*,
@@ -25,8 +24,7 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext*,
 	psy_audio_Buffer* input,
 	psy_audio_Buffer* output,
 	uintptr_t numsamples,
-	uintptr_t numtracks,
-	struct psy_dsp_RMSVol* rmsvol);
+	uintptr_t numtracks);
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext*);
 void psy_audio_buffercontext_setoffset(psy_audio_BufferContext* self, uintptr_t offset);
 
@@ -45,10 +43,6 @@ INLINE uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext* self
 	return self->numtracks;
 }
 
-psy_dsp_amp_t psy_audio_buffercontext_rmsvolume(psy_audio_BufferContext*);
-psy_dsp_amp_t psy_audio_buffercontext_volumedisplay(psy_audio_BufferContext*);
-psy_dsp_amp_t psy_audio_buffercontext_rmsscale(psy_audio_BufferContext*,
-	psy_dsp_amp_t rms_volume);
 
 #ifdef __cplusplus
 }

@@ -28,6 +28,7 @@ typedef struct psy_dsp_RMSVol {
 void psy_dsp_rmsvol_init(psy_dsp_RMSVol*);
 psy_dsp_RMSVol* psy_dsp_rmsvol_alloc(void);
 psy_dsp_RMSVol* psy_dsp_rmsvol_allocinit(void);
+void psy_dsp_rmsvol_deallocate(psy_dsp_RMSVol*);
 /// Note: Values are accumulated since the standard calculation requires 50ms
 /// of data.
 void psy_dsp_rmsvol_tick(psy_dsp_RMSVol*, const psy_dsp_amp_t* __restrict pSamplesL,

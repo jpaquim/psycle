@@ -235,6 +235,10 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		psy_ui_settextcolor(g, 0x00CACACA);		
 	}		
 	plugindisplayname(property, text);
+	if (strstr(text, "endorphin") != 0) {
+		self = self;
+		plugindisplayname(property, text);
+	}	
 	psy_ui_textout(g, x, y + self->dy + 2, text, strlen(text));
 	plugintype(property, text);
 	psy_ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
@@ -264,9 +268,13 @@ void pluginsview_computetextsizes(PluginsView* self)
 
 void plugindisplayname(psy_Properties* property, char* text)
 {	
-	psy_snprintf(text, 128, "%s",
-		psy_properties_readstring(property, "shortname", psy_properties_key(property))
-	);
+	const char* label;
+
+	label = psy_properties_readstring(property, "shortname", "");
+	if (strcmp(label, "") == 0) {
+		label = psy_properties_key(property);
+	}
+	psy_snprintf(text, 128, "%s", label);
 }
 
 int plugintype(psy_Properties* property, char* text)

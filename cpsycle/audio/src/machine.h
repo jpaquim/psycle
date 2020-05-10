@@ -306,6 +306,9 @@ INLINE void psy_audio_machine_work(psy_audio_Machine* self, psy_audio_BufferCont
 	self->vtable->work(self, bc);
 }
 
+void psy_audio_machine_updatememory(psy_audio_Machine*,
+	psy_audio_BufferContext* bc);
+
 INLINE void psy_audio_machine_generateaudio(psy_audio_Machine* self,
 	psy_audio_BufferContext* bc)
 {

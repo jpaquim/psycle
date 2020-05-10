@@ -17,6 +17,9 @@
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "songio.h"
+
+#include <dir.h>
+
 #include "../../detail/portable.h"
 
 static const VstInt32 kBlockSize = 512;
@@ -145,7 +148,7 @@ static void editoridle(psy_audio_VstPlugin*);
 // private
 static void checkEffectProperties (AEffect* effect);
 static void checkEffectProcessing (AEffect* effect);
-static int machineinfo(AEffect* effect, psy_audio_MachineInfo* info,
+static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info,
 	const char* path, int shellidx);
 typedef AEffect* (*PluginEntryProc)(audioMasterCallback audioMaster);
 static VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode,
@@ -261,7 +264,7 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callbac
 			self->effect->dispatcher (self->effect, effMainsChanged, 0, 1, 0, 0);
 			self->effect->dispatcher (self->effect, effStartProcess, 0, 0, 0, 0);
 			self->plugininfo = machineinfo_allocinit();
-			machineinfo(self->effect, self->plugininfo, self->library.path, 0);
+			makemachineinfo(self->effect, self->plugininfo, self->library.path, 0);
 			psy_audio_machine_seteditname(psy_audio_vstplugin_base(self),
 				self->plugininfo->ShortName);
 			initparameters(self);
@@ -354,7 +357,7 @@ int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 				AEffect* effect;
 				
 				effect = mainentry(hostcallback);
-				vst = effect && machineinfo(effect, rv, path, 0) == 0;
+				vst = effect && makemachineinfo(effect, rv, path, 0) == 0;
 			}	
 		}
 		psy_library_dispose(&library);	
@@ -365,17 +368,7 @@ int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 void work(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 {	
 	if (!psy_audio_machine_bypassed(psy_audio_vstplugin_base(self))) {		
-		processevents(self, bc);					
-		// add to buffer memory
-		if (bc->output && bc->output->numchannels > 0) {
-			if (psy_audio_machine_buffermemory(psy_audio_vstplugin_base(self))) {
-				psy_audio_buffer_insertsamples(
-					psy_audio_machine_buffermemory(psy_audio_vstplugin_base(self)),
-						bc->output,
-						psy_audio_machine_buffermemorysize(psy_audio_vstplugin_base(self)),
-						bc->numsamples);
-			}
-		}
+		processevents(self, bc);		
 	}
 }
 
@@ -643,12 +636,14 @@ static int FilterException(int code, struct _EXCEPTION_POINTERS *ep)
 }
 #endif
 
-int machineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* path,
+static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* path,
 	int shellidx)
 {
 	char effectName[256] = {0};
 	char vendorString[256] = {0};
 	char productString[256] = {0};
+	char productName[256] = { 0 };
+	char productNameShort[256] = { 0 };
 	int err = 0;
 
 #if defined DIVERSALIS__OS__MICROSOFT    
@@ -657,9 +652,42 @@ int machineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* path,
     {
 		psy_audio_MachineMode mode;
 
-		effect->dispatcher (effect, effGetEffectName, 0, 0, effectName, 0);
-		effect->dispatcher (effect, effGetVendorString, 0, 0, vendorString, 0);
-		effect->dispatcher (effect, effGetProductString, 0, 0, productString, 0);
+		// GetEffectName is the better option to GetProductString.
+		// To the few that they show different values in these,
+		// synthedit plugins show only "SyntheditVST" in GetProductString()
+		// and others like battery 1 or psp-nitro, don't have GetProductString(),
+		// so it's almost a no-go.
+		effect->dispatcher(effect, effGetEffectName, 0, 0, effectName, 0);
+		effect->dispatcher(effect, effGetVendorString, 0, 0, vendorString, 0);
+		effect->dispatcher(effect, effGetProductString, 0, 0, productString, 0);
+		// No effectName but productString, use productstring
+		if (effectName[0] == '\0' && productString[0] != '\0') {			
+			psy_snprintf(productName, 256, "%s", productString);
+			psy_snprintf(productNameShort, 256, "%s", productString);
+		} else
+		// use effectName and productString if different
+		if (effectName[0] != '\0' && productString[0] != '\0' &&
+			strcmp(effectName, productString) != 0) {			
+			psy_snprintf(productName, 256, "%s (%s)", effectName, productString);
+			psy_snprintf(productNameShort, 256, "%s", effectName);
+		} else
+		// use only effectName
+		if (effectName[0] != '\0') {			
+			psy_snprintf(productName, 256, "%s", effectName);
+			psy_snprintf(productNameShort, 256, "%s", effectName);
+		} else {
+			// neither effect nor productString, extract name from dll path
+			char prefix[_MAX_PATH];
+			char ext[_MAX_PATH];
+			char name[_MAX_PATH];
+			
+			psy_dir_extract_path(path, prefix, name, ext);
+			psy_strlwr(name);
+			psy_replacechar(name, ' ', '-');
+			psy_replacechar(name, '_', '-');
+			psy_snprintf(productName, 256, "%s", name);
+			psy_snprintf(productNameShort, 256, "%s", name);
+		}				
 		mode = ((effect->flags & effFlagsIsSynth) == effFlagsIsSynth)
 			? MACHMODE_GENERATOR
 			: MACHMODE_FX;
@@ -669,10 +697,10 @@ int machineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* path,
 			"",
 			0,
 			mode,
-			effectName,
-			effectName,
-			(short) 0, 
-			(short) 0,
+			productName,
+			productNameShort,
+			(int16_t) 0, 
+			(int16_t) 0,
 			(mode == MACHMODE_GENERATOR) ? MACH_VST : MACH_VSTFX,
 			path,
 			shellidx);		

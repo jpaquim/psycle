@@ -94,6 +94,7 @@ psy_audio_MixerSend* psy_audio_mixersend_alloc(void);
 psy_audio_MixerSend* psy_audio_mixersend_allocinit(uintptr_t slot);
 
 typedef struct psy_audio_MasterChannel {
+	struct psy_audio_Mixer* mixer;
 	psy_Table sendvols;
 	psy_dsp_amp_t volume;
 	psy_dsp_amp_t panning;
@@ -102,7 +103,6 @@ typedef struct psy_audio_MasterChannel {
 	int mute;
 	int dryonly;
 	int wetonly;
-	size_t inputslot;
 	psy_audio_Buffer* buffer;
 	psy_dsp_amp_t volumedisplay;
 	psy_audio_InfoMachineParam info_param;
@@ -182,7 +182,6 @@ typedef struct psy_audio_Mixer {
 	uintptr_t maxreturn;
 	int solocolumn;	
 	psy_audio_MasterChannel master;
-	psy_dsp_amp_t mastervolumedisplay;
 	psy_audio_CustomMachineParam blank_param;
 	psy_audio_CustomMachineParam ignore_param;	
 	psy_audio_CustomMachineParam routemaster_param;

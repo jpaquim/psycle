@@ -31,10 +31,8 @@ typedef struct psy_audio_Player {
 	psy_Signal signal_inputevent;
 	psy_Signal signal_stop;	
 	psy_Library drivermodule;
-	EventDrivers eventdrivers;
-	psy_Table rms;	
+	EventDrivers eventdrivers;	
 	VUMeterMode vumode;
-	int resetvumeters;
 	int recordingnotes;
 	int multichannelaudition;	
 	psy_Table notestotracks;

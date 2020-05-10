@@ -8,6 +8,8 @@
 #include <string.h>
 #include <operations.h>
 
+static void custommachine_init_memory(psy_audio_CustomMachine*);
+static void custommachine_dispose_memory(psy_audio_CustomMachine*);
 static const char* custommachine_editname(psy_audio_CustomMachine*);
 static void custommachine_seteditname(psy_audio_CustomMachine*, const char* name);
 static void setpanning(psy_audio_CustomMachine*, psy_dsp_amp_t);
@@ -55,9 +57,7 @@ static void vtable_init(psy_audio_CustomMachine* self)
 }
 
 void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
-{
-	uintptr_t c;
-
+{	
 	machine_init(&self->machine, callback);
 	vtable_init(self);
 	self->machine.vtable = &vtable;
@@ -66,26 +66,39 @@ void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
 	self->slot = NOMACHINE_INDEX;
+	custommachine_init_memory(self);
+}
+
+void custommachine_init_memory(psy_audio_CustomMachine* self)
+{
+	uintptr_t channel;
+
 	psy_audio_buffer_init(&self->memorybuffer, 2);
-	self->memorybuffersize = 256;
-	for (c = 0; c < self->memorybuffer.numchannels; ++c) {
-		self->memorybuffer.samples[c] = dsp.memory_alloc(
-			self->memorybuffersize, sizeof(psy_dsp_amp_t));
+	self->memorybuffersize = MAX_STREAM_SIZE;
+	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
+		self->memorybuffer.samples[channel] = dsp.memory_alloc(
+			self->memorybuffersize, sizeof(psy_dsp_amp_t));		
 	}
 	psy_audio_buffer_clearsamples(&self->memorybuffer, self->memorybuffersize);
+	psy_audio_buffer_enablerms(&self->memorybuffer);
 }
 
 void custommachine_dispose(psy_audio_CustomMachine* self)
-{
-	uintptr_t c;
-
+{	
 	free(self->editname);
 	self->editname = 0;
-	for (c = 0; c < self->memorybuffer.numchannels; ++c) {
-		dsp.memory_dealloc(self->memorybuffer.samples[c]);
+	custommachine_dispose_memory(self);
+	machine_dispose(&self->machine);
+}
+
+void custommachine_dispose_memory(psy_audio_CustomMachine* self)
+{
+	uintptr_t channel;
+
+	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
+		dsp.memory_dealloc(self->memorybuffer.samples[channel]);
 	}
 	psy_audio_buffer_dispose(&self->memorybuffer);
-	machine_dispose(&self->machine);
 }
 
 void setpanning(psy_audio_CustomMachine* self, psy_dsp_amp_t val)

@@ -53,14 +53,14 @@ void clipbox_ontimer(ClipBox* self, int timerid)
 void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master,
 	uintptr_t slot, psy_audio_BufferContext* bc)
 {	
-	if (bc->rmsvol) {		
-		if (bc->rmsvol->data.previousLeft >= 32767.f ||
-			bc->rmsvol->data.previousLeft < -32768.f) {				
+	if (bc->output->rms) {		
+		if (bc->output->rms->data.previousLeft >= 32767.f ||
+			bc->output->rms->data.previousLeft < -32768.f) {
 			self->clip = 1;
 			psy_ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);
 		}
-		if (bc->rmsvol->data.previousRight >= 32767.f ||
-			bc->rmsvol->data.previousRight < -32768.f) {
+		if (bc->output->rms->data.previousRight >= 32767.f ||
+			bc->output->rms->data.previousRight < -32768.f) {
 			self->clip = 1;
 			psy_ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);
 		}

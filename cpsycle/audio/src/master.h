@@ -15,6 +15,8 @@ typedef struct {
 	psy_audio_CustomMachineParam param_info;
 	psy_audio_CustomMachineParam param_slider;
 	psy_audio_CustomMachineParam param_level;
+	psy_audio_Buffer memorybuffer;
+	uintptr_t memorybuffersize;
 	psy_dsp_amp_t volume;
 } psy_audio_Master;
 

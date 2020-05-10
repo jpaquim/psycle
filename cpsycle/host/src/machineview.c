@@ -52,7 +52,7 @@ static void machineui_drawvu(MachineUi*, psy_ui_Graphics*, MachineWireView*);
 static void machineui_drawvudisplay(MachineUi*, psy_ui_Graphics*, MachineWireView*);
 static void machineui_drawvupeak(MachineUi*, psy_ui_Graphics*, MachineWireView*);
 static void machineui_drawhighlight(MachineUi*, psy_ui_Graphics*, MachineWireView*);
-static void machineui_updatevolumedisplay(MachineUi*, psy_dsp_amp_t);
+static void machineui_updatevolumedisplay(MachineUi*);
 static void machineui_updatemaxvolumedisplay(MachineUi*);
 static void machineui_showparameters(MachineUi*, psy_ui_Component* parent);
 static void machineui_editname(MachineUi*, psy_ui_Edit* edit);
@@ -409,10 +409,19 @@ void machineui_drawvupeak(MachineUi* self, psy_ui_Graphics* g,  MachineWireView*
 	}
 }
 
-void machineui_updatevolumedisplay(MachineUi* self, psy_dsp_amp_t volumedisplay)
+void machineui_updatevolumedisplay(MachineUi* self)
 {
-	self->volumedisplay = volumedisplay;
-	machineui_updatemaxvolumedisplay(self);
+	if (self->machine) {
+		psy_audio_Buffer* memory;
+
+		memory = psy_audio_machine_buffermemory(self->machine);
+		if (memory) {
+			self->volumedisplay = psy_audio_buffer_rmsdisplay(memory);
+		} else {
+			self->volumedisplay = (psy_dsp_amp_t)0.f;
+		}
+		machineui_updatemaxvolumedisplay(self);
+	}
 }
 
 void machineui_updatemaxvolumedisplay(MachineUi* self)
@@ -488,6 +497,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->addeffect = 0;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setwheelscroll(&self->component, 4);
 	// skin init
 	psy_ui_bitmap_init(&self->skin.skinbmp);
 	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
@@ -559,7 +569,7 @@ void machinewireview_adjustscroll(MachineWireView* self)
 		self->dy = -self->component.scrollstepy * maxstepy;
 	}
 	psy_ui_component_sethorizontalscrollrange(&self->component, 0, maxstepx);
-	psy_ui_component_setverticalscrollrange(&self->component, 0, maxstepy);	
+	psy_ui_component_setverticalscrollrange(&self->component, 0, maxstepy);		
 }
 
 void machinewireview_onscroll(MachineWireView* self, psy_ui_Component* sender,
@@ -1615,12 +1625,14 @@ void machinewireview_buildmachineuis(MachineWireView* self,
 }
 
 void machinewireview_onsongchanged(MachineWireView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
-{			
+{	
 	self->machines = &workspace->song->machines;	
 	machinewireview_buildmachineuis(self, songfile ? &songfile->machineuis : 0);	
 	machinewireview_connectmachinessignals(self);
 	self->dx = 0;
-	self->dy = 0;	
+	self->dy = 0;
+	psy_ui_component_sethorizontalscrollposition(&self->component, 0);
+	psy_ui_component_setverticalscrollposition(&self->component, 0);
 	machinewireview_adjustscroll(self);
 	psy_ui_component_invalidate(&self->component);	
 }
@@ -1640,9 +1652,8 @@ void machinewireview_onmachineworked(MachineWireView* self,
 		MachineUi* machineui;
 
 		machineui = machineuis_at(self, slot);
-		if (machineui) {
-			machineui_updatevolumedisplay(machineui,
-				psy_audio_buffercontext_volumedisplay(bc));
+		if (machineui) {			
+			machineui_updatevolumedisplay(machineui);
 		}
 	}
 }

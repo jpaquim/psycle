@@ -143,15 +143,15 @@ void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender, int time
 void oscilloscope_onsrcmachineworked(Oscilloscope* self, psy_audio_Machine* master, unsigned int slot,
 	psy_audio_BufferContext* bc)
 {	
-	if (bc->rmsvol) {	
+	if (bc->output->rms) {
 		psy_audio_Connections* connections;
 		psy_audio_WireSocketEntry* input;	
 
 		connections = &self->workspace->song->machines.connections;
 		input = connection_input(connections, self->wire.src, self->wire.dst);
 		if (input) {					
-			self->leftavg = bc->rmsvol->data.previousLeft / 32768;
-			self->rightavg = bc->rmsvol->data.previousRight / 32768;
+			self->leftavg = bc->output->rms->data.previousLeft / 32768;
+			self->rightavg = bc->output->rms->data.previousRight / 32768;
 			self->invol = input->volume;			
 		}
 	}

@@ -5,6 +5,8 @@
 
 #include "buffer.h"
 #include <operations.h>
+#include <rms.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include "../../detail/trace.h"
@@ -14,6 +16,7 @@ static psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
 
 void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 {
+	self->rms = 0;
 	self->samples = 0;	
 	self->offset = 0;
 	self->numsamples = 0;
@@ -46,6 +49,7 @@ void psy_audio_buffer_move(psy_audio_Buffer* self, uintptr_t offset)
 void psy_audio_buffer_dispose(psy_audio_Buffer* self)
 {
 	free(self->samples);
+	psy_audio_buffer_disablerms(self);
 }
 
 psy_audio_Buffer* psy_audio_buffer_alloc(void)
@@ -64,16 +68,15 @@ psy_audio_Buffer* psy_audio_buffer_allocinit(uintptr_t channels)
 	return rv;
 }
 
-
-void psy_audio_buffer_resize(psy_audio_Buffer* self, uintptr_t channels)
+void psy_audio_buffer_resize(psy_audio_Buffer* self, uintptr_t numchannels)
 {
 	free(self->samples);
 	self->samples = 0;	
-	if (channels > 0) {
-		self->samples = (psy_dsp_amp_t**) malloc(sizeof(psy_dsp_amp_t*)*channels);		
-		memset(self->samples, 0, sizeof(psy_dsp_amp_t*)*channels);
+	if (numchannels > 0) {
+		self->samples = (psy_dsp_amp_t**) malloc(sizeof(psy_dsp_amp_t*)*numchannels);		
+		memset(self->samples, 0, sizeof(psy_dsp_amp_t*)*numchannels);
 	}
-	self->numchannels = channels;
+	self->numchannels = numchannels;
 }
 
 void psy_audio_buffer_setoffset(psy_audio_Buffer* self, uintptr_t offset)
@@ -167,31 +170,40 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 	rangefactor = psy_audio_buffer_rangefactor(source, self->range);
 	if (numsourcesamples < numsamples) {		
 		uintptr_t diff;		
-		uintptr_t c;
+		uintptr_t channel;
 				
 		diff = numsamples - numsourcesamples;
-		for (c = 0; c < self->numchannels; ++c) {			
-			dsp.clear(self->samples[c] + numsourcesamples, diff);			
-			dsp.add(self->samples[c] + self->offset,
-				self->samples[c] + self->offset + numsourcesamples, diff, 
-				1.f);
-			dsp.clear(self->samples[c], numsourcesamples);
-			if (c < source->numchannels) {
-				dsp.add(source->samples[c] + self->offset,
-					self->samples[c] + self->offset, numsourcesamples, 
+		for (channel = 0; channel < self->numchannels; ++channel) {
+			dsp.clear(self->samples[channel] + numsourcesamples, diff);
+			dsp.add(self->samples[channel] + self->offset,
+				self->samples[channel] + self->offset + numsourcesamples, diff,
+				(psy_dsp_amp_t) 1.f);
+			dsp.clear(self->samples[channel], numsourcesamples);
+			if (channel < source->numchannels) {
+				dsp.add(source->samples[channel] + self->offset,
+					self->samples[channel] + self->offset,
+					numsourcesamples,
 					rangefactor);
 			}									
 		}
 	} else {
-		uintptr_t c;
+		uintptr_t channel;
 
-		for (c = 0; c < self->numchannels; ++c) {
-			dsp.clear(self->samples[c], numsamples);
-			if (c < source->numchannels) {
-				dsp.add(source->samples[c] + self->offset, self->samples[c] + self->offset,
+		for (channel = 0; channel < self->numchannels; ++channel) {
+			dsp.clear(self->samples[channel], numsamples);
+			if (channel < source->numchannels) {
+				dsp.add(source->samples[channel] + self->offset,
+					self->samples[channel] + self->offset,
 					numsamples,
 					rangefactor);
 			}
+		}
+	}
+	if (self->rms) {
+		if (self->numchannels > 1) {
+			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
+				self->samples[1],
+				numsourcesamples);
 		}
 	}
 }
@@ -240,4 +252,49 @@ void psy_audio_buffer_trace(psy_audio_Buffer* self, uintptr_t channel, uintptr_t
 		TRACE_FLOAT(*p);
 	}
 	TRACE("\n");
+}
+
+void psy_audio_buffer_enablerms(psy_audio_Buffer* self)
+{
+	if (self->rms == NULL) {
+		self->rms = psy_dsp_rmsvol_allocinit();
+	}	
+}
+
+void psy_audio_buffer_disablerms(psy_audio_Buffer* self)
+{
+	if (self->rms != NULL) {
+		psy_dsp_rmsvol_deallocate(self->rms);
+		self->rms = 0;
+	}
+}
+
+psy_dsp_amp_t psy_audio_buffer_rmsvolume(psy_audio_Buffer* self)
+{
+	return self->rms ? psy_dsp_rmsvol_value(self->rms) : 0.f;
+}
+
+psy_dsp_amp_t psy_audio_buffer_rmsdisplay(psy_audio_Buffer* self)
+{
+	return psy_audio_buffer_rmsscale(self,
+		psy_audio_buffer_rmsvolume(self));
+}
+
+psy_dsp_amp_t psy_audio_buffer_rmsscale(psy_audio_Buffer* self,
+	psy_dsp_amp_t rms_volume)
+{
+	psy_dsp_amp_t temp;
+
+	temp = rms_volume;
+	if (temp == 0.f) {
+		return 0.f;
+	}
+	if (self->range == PSY_DSP_AMP_RANGE_NATIVE) {
+		temp /= 32767;
+	}
+	temp = 50.0f * (float)log10(temp) + 100.f;
+	if (temp > 97) {
+		temp = 97;
+	}
+	return (temp > 0) ? temp / (psy_dsp_amp_t)97.f : (psy_dsp_amp_t)0.f;
 }

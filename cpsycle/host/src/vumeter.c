@@ -80,11 +80,11 @@ void vumeter_onmasterworked(Vumeter* self, psy_audio_Machine* master,
 	uintptr_t slot,
 	psy_audio_BufferContext* bc)
 {	
-	if (bc->rmsvol) {
-		self->leftavg = psy_audio_buffercontext_rmsscale(bc,
-			bc->rmsvol->data.previousLeft);
-		self->rightavg = psy_audio_buffercontext_rmsscale(bc,
-			bc->rmsvol->data.previousRight);
+	if (bc->output->rms) {
+		self->leftavg = psy_audio_buffer_rmsscale(bc->output,
+			bc->output->rms->data.previousLeft);
+		self->rightavg = psy_audio_buffer_rmsscale(bc->output,
+			bc->output->rms->data.previousRight);
 	}
 }
 

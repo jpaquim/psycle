@@ -34,6 +34,7 @@ static void vuscope_onsongchanged(VuScope*, Workspace*,
 static void vuscope_connectmachinessignals(VuScope*, Workspace*);
 static void vuscope_disconnectmachinessignals(VuScope*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
+static psy_dsp_amp_t vuscope_wirevolume(VuScope*);
 
 void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
@@ -322,18 +323,24 @@ void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, int timerid)
 void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsigned int slot,
 	psy_audio_BufferContext* bc)
 {	
-	if (bc->rmsvol) {	
-		psy_audio_Connections* connections;
-		psy_audio_WireSocketEntry* input;	
+	psy_audio_Machine* machine;
+	psy_audio_Buffer* memory;
 
-		connections = &self->workspace->song->machines.connections;
-		input = connection_input(connections, self->wire.src, self->wire.dst);
-		if (input) {					
-			self->leftavg = bc->rmsvol->data.previousLeft / 32768;
-			self->rightavg = bc->rmsvol->data.previousRight / 32768;
-			self->invol = input->volume;			
+	machine = machines_at(&self->workspace->song->machines, self->wire.src);
+	if (machine) {
+		memory = psy_audio_machine_buffermemory(machine);
+		if (memory && memory->rms) {
+			self->leftavg = memory->rms->data.previousLeft / 32768;
+			self->rightavg = memory->rms->data.previousRight / 32768;
+			self->invol = vuscope_wirevolume(self);
 		}
 	}
+}
+
+psy_dsp_amp_t vuscope_wirevolume(VuScope* self)
+{
+	return connections_wirevolume(&self->workspace->song->machines.connections,
+		self->wire.src, self->wire.dst);
 }
 
 void vuscope_onsongchanged(VuScope* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
