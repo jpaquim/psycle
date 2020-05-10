@@ -89,7 +89,6 @@ static psy_audio_Machine* clone(psy_audio_Machine* self) { return 0; }
 static psy_audio_Buffer* mix(psy_audio_Machine*, size_t slot, uintptr_t amount,
 	psy_audio_MachineSockets*, psy_audio_Machines*, struct psy_audio_Player*);
 static void work(psy_audio_Machine*, psy_audio_BufferContext*);
-void work_events(psy_audio_Machine*, psy_audio_BufferContext*);
 static uintptr_t work_dogenerateaudio(psy_audio_Machine*, psy_audio_BufferContext*,
 	uintptr_t position, uintptr_t amount);
 static void work_entry(psy_audio_Machine*, psy_audio_PatternEntry*);
@@ -326,12 +325,6 @@ void machine_dispose(psy_audio_Machine* self)
 }
 
 void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
-{			
-	work_events(self, bc);	
-	work_memory(self, bc);
-}
-
-void work_events(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 {
 	psy_List* p;
 	uintptr_t amount;
@@ -425,7 +418,8 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 	}
 }
 
-void work_memory(psy_audio_Machine* self, psy_audio_BufferContext* bc)
+void psy_audio_machine_updatememory(psy_audio_Machine* self,
+	psy_audio_BufferContext* bc)
 {
 	if (bc->output) {
 		psy_audio_Buffer* memory;

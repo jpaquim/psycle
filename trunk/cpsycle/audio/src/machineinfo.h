@@ -4,6 +4,8 @@
 #ifndef psy_audio_MACHINEINFO_H
 #define psy_audio_MACHINEINFO_H
 
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -45,8 +47,8 @@ void machineinfo_set(psy_audio_MachineInfo*,
 		int mode,
 		const char* name,
 		const char* shortname,
-		short apiversion,
-		short plugversion,
+		int16_t apiversion,
+		int16_t plugversion,
 		int type,		
 		const char* modulepath,
 		int shellidx);

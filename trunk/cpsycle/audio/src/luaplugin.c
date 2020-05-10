@@ -757,7 +757,7 @@ int luamachine_setbuffer(lua_State* L)
 				free(self->bc);
 			}
 			bc = (psy_audio_BufferContext*)malloc(sizeof(psy_audio_BufferContext));
-			psy_audio_buffercontext_init(bc, 0, buffer, buffer, numsamples, 64, 0);
+			psy_audio_buffercontext_init(bc, 0, buffer, buffer, numsamples, 64);
 			self->bc = bc;
 			self->bcshared_ = FALSE;
 			psy_list_free(arrays);

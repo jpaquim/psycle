@@ -339,7 +339,7 @@ void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 	psy_audio_BufferContext samplerbc;
 		
 	psy_audio_buffercontext_init(&samplerbc, self->samplerevents, 0,
-		&self->samplerbuffer, bc->numsamples, 16, 0);
+		&self->samplerbuffer, bc->numsamples, 16);
 	psy_audio_buffer_clearsamples(&self->samplerbuffer, bc->numsamples);
 	psy_audio_machine_work(&self->sampler.custommachine.machine, &samplerbc);
 	psy_audio_buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 

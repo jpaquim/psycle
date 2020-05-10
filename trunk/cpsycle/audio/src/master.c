@@ -10,12 +10,15 @@
 #include "plugin_interface.h"
 
 #include <convert.h>
+#include <operations.h>
 
 #include <string.h>
 #include <math.h>
 
 #include "../../detail/portable.h"
 
+static void master_init_memory(psy_audio_Master*);
+static void master_dispose_memory(psy_audio_Master*);
 static void master_generateaudio(psy_audio_Master*, psy_audio_BufferContext*);
 static void master_seqtick(psy_audio_Master*, uintptr_t channel,
 	const psy_audio_PatternEvent* ev);
@@ -55,6 +58,9 @@ static void master_level_normvalue(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, float* rv);
 static void master_level_describe(psy_audio_Master*,
 	psy_audio_CustomMachineParam* sender, int* active, char* text);
+
+static psy_audio_Buffer* master_buffermemory(psy_audio_Master*);
+static uintptr_t master_buffermemorysize(psy_audio_Master*);
 
 static psy_dsp_amp_range_t amprange(psy_audio_Master* self)
 {
@@ -110,6 +116,11 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.numparameters = (fp_machine_numparameters) numparameters;
 		vtable.numtweakparameters = (fp_machine_numparameters)numtweakparameters;
 		vtable.amprange = (fp_machine_amprange) amprange;
+		// buffermemory
+		vtable.buffermemory = (fp_machine_buffermemory)
+			master_buffermemory;
+		vtable.buffermemorysize = (fp_machine_buffermemorysize)
+			master_buffermemorysize;
 		vtable_initialized = 1;
 	}
 }
@@ -139,6 +150,21 @@ void master_init(psy_audio_Master* self, MachineCallback callback)
 		"", "", MPF_SLIDERLEVEL | MPF_SMALL, 0, 0xFFFF);
 	psy_signal_connect(&self->param_level.machineparam.signal_normvalue, self,
 		master_level_normvalue);
+	master_init_memory(self);
+}
+
+void master_init_memory(psy_audio_Master* self)
+{
+	uintptr_t channel;
+
+	psy_audio_buffer_init(&self->memorybuffer, 2);
+	self->memorybuffersize = MAX_STREAM_SIZE;
+	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
+		self->memorybuffer.samples[channel] = dsp.memory_alloc(
+			self->memorybuffersize, sizeof(psy_dsp_amp_t));
+	}
+	psy_audio_buffer_clearsamples(&self->memorybuffer, self->memorybuffersize);
+	psy_audio_buffer_enablerms(&self->memorybuffer);
 }
 
 void master_dispose(psy_audio_Master* self)
@@ -147,6 +173,17 @@ void master_dispose(psy_audio_Master* self)
 	psy_audio_custommachineparam_dispose(&self->param_info);
 	psy_audio_custommachineparam_dispose(&self->param_slider);
 	psy_audio_custommachineparam_dispose(&self->param_level);
+	machine_dispose(&self->machine);
+}
+
+void master_memory(psy_audio_Master* self)
+{
+	uintptr_t channel;
+
+	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
+		dsp.memory_dealloc(self->memorybuffer.samples[channel]);
+	}
+	psy_audio_buffer_dispose(&self->memorybuffer);
 }
 
 const psy_audio_MachineInfo* info(psy_audio_Master* self)
@@ -329,13 +366,17 @@ void master_level_normvalue(psy_audio_Master* self,
 	psy_audio_CustomMachineParam* sender, float* rv)
 {
 	*rv = 0;
-	if (sender->index == 0) {
-		psy_audio_Buffer* buffer;
+	if (sender->index == 0) {		
 		psy_audio_Machines* machines;
+		psy_audio_Machine* machine;
+		psy_audio_Buffer* memory;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		buffer = machines_outputs(machines, MASTER_INDEX);
-		*rv = buffer->volumedisplay;
+		machine = machines_at(machines, MASTER_INDEX);
+		memory = psy_audio_machine_buffermemory(machine);
+		if (memory) {
+			*rv = psy_audio_buffer_rmsdisplay(memory);
+		}
 	} else {
 		psy_audio_MachineSockets* sockets;
 		WireSocket* input_socket;
@@ -350,11 +391,17 @@ void master_level_normvalue(psy_audio_Master* self,
 				input_socket = input_socket->next, ++c);
 			if (input_socket) {
 				psy_audio_WireSocketEntry* input_entry;
-				psy_audio_Buffer* buffer;
+				psy_audio_Machine* machine;
+				psy_audio_Buffer* memory;
 
-				input_entry = (psy_audio_WireSocketEntry*)input_socket->entry;
-				buffer = machines_outputs(machines, input_entry->slot);
-				*rv = buffer->volumedisplay;
+				input_entry = (psy_audio_WireSocketEntry*)input_socket->entry;				
+				machine = machines_at(machines, input_entry->slot);
+				if (machine) {
+					memory = psy_audio_machine_buffermemory(machine);
+					if (memory) {
+						*rv = psy_audio_buffer_rmsdisplay(memory);
+					}
+				}
 			}
 		}
 	}
@@ -363,7 +410,7 @@ void master_level_normvalue(psy_audio_Master* self,
 void master_level_describe(psy_audio_Master* self,
 	psy_audio_CustomMachineParam* sender, int* active, char* text)
 {
-	if (sender->index == 0) {		
+	if (sender->index == 0) {
 		psy_snprintf(text, 10, "%.2f dB",
 			(float)psy_dsp_convert_amp_to_db(self->volume));
 		*active = 1;
@@ -382,12 +429,12 @@ void master_level_describe(psy_audio_Master* self,
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;
 
-				input_entry = (psy_audio_WireSocketEntry*)p->entry;				
-				psy_snprintf(text, 10, "%.2f dB", 
-					(float) psy_dsp_convert_amp_to_db(input_entry->volume));
+				input_entry = (psy_audio_WireSocketEntry*)p->entry;
+				psy_snprintf(text, 10, "%.2f dB",
+					(float)psy_dsp_convert_amp_to_db(input_entry->volume));
 				*active = 1;
 			}
-		}		
+		}
 	}
 }
 
@@ -444,12 +491,28 @@ void master_savespecific(psy_audio_Master* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
-	int32_t outdry = 256;
+	int32_t outdry;
 	unsigned char decreaseOnClip = 0;
 				
 	size = sizeof outdry + sizeof decreaseOnClip;
+	outdry = (int32_t)(self->volume * 256);
 	// size of this part params to save
 	psyfile_write(songfile->file, &size, sizeof(size));
 	psyfile_write(songfile->file, &outdry, sizeof(outdry));
 	psyfile_write(songfile->file, &decreaseOnClip, sizeof(decreaseOnClip));
+}
+
+psy_audio_Buffer* master_buffermemory(psy_audio_Master* self)
+{
+	return &self->memorybuffer;
+}
+
+uintptr_t master_buffermemorysize(psy_audio_Master* self)
+{
+	return self->memorybuffersize;
+}
+
+void master_setbuffermemorysize(psy_audio_Master* self, uintptr_t size)
+{
+	// self->memorybuffersize = size;
 }
