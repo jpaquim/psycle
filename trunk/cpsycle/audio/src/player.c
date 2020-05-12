@@ -11,6 +11,7 @@
 #include "kbddriver.h"
 #include <rms.h>
 #include <operations.h>
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -214,13 +215,13 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 				self->numsongtracks);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
-			psy_audio_machine_work(machine, &bc);
-			psy_audio_machine_updatememory(machine, &bc);
+			psy_audio_machine_work(machine, &bc);			
 #ifdef PSYCLE_LOG_WORKEVENTS
 			log_workevents(events);
 #endif
 			psy_audio_buffer_pan(output, psy_audio_machine_panning(machine),
-				amount);			
+				amount);
+			psy_audio_machine_updatememory(machine, &bc);
 			psy_signal_emit(&machine->signal_worked, machine, 2, slot, &bc);
 			psy_list_free(events);			
 		}

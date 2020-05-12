@@ -4,9 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "trackscopeview.h"
+
+#include <uiapp.h>
+
 #include <math.h>
 #include <string.h>
-#include <uiapp.h>
 
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
@@ -101,8 +103,8 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 	}
 }
 
-void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g, int x, int y,
-	int width, int height, int track)
+void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
+	int x, int y, int width, int height, int track)
 {
 	char text[40];
 	extern psy_ui_App app;
@@ -113,14 +115,16 @@ void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g, int
 }
 
 
-void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, int y,
-	int width, int height, int track)
+void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
+	int x, int y, int width, int height, int track)
 {
 	uintptr_t lastmachine;	
 
-	if (psy_table_exists(&self->workspace->player.sequencer.lastmachine, track)) {
+	if (psy_table_exists(&self->workspace->player.sequencer.lastmachine,
+			track)) {
 		lastmachine = (uintptr_t)
-			psy_table_at(&self->workspace->player.sequencer.lastmachine, track);	
+			psy_table_at(&self->workspace->player.sequencer.lastmachine,
+				track);
 	} else {
 		lastmachine = NOMACHINE_INDEX;
 	}	
@@ -135,6 +139,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 	if (self->workspace->song) {
 		psy_audio_Machine* machine;
 		int centery;
+		bool active = FALSE;
 
 		centery = height / 2 + y;
 		machine = machines_at(&self->workspace->song->machines, lastmachine);
@@ -149,29 +154,40 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 				float py;
 				float cpx = 0;
 				int x1, y1, x2, y2;
-				static float epsilon = 0.01f;
-
+				static float epsilon = 0.0001f;
+				
 				numsamples = psy_audio_machine_buffermemorysize(machine);
+				numsamples = min(numsamples, MAX_STREAM_SIZE);
 				if (numsamples > 0) {
-					int zero = 1;
+					bool zero;
+					uintptr_t writepos;
 
-					for (frame = 0; frame < numsamples; ++frame) {
-						if (fabs(memory->samples[0][frame]) > epsilon) {
-							zero = 0;
-							break;
-						}
-					}
+					zero = psy_audio_buffer_rmsvolume(memory) < epsilon;
 					if (!zero) {
+						uintptr_t i;
+
+						active = TRUE;
 						px = width / (float) numsamples;
 						py = height / 32768.f / 3;
-						x1 = 0;
-						y1 = (int) (memory->samples[0][0] * py);						
-						x2 = 0;
-						y2 = y1;						
-						for (frame = 0; frame < numsamples; ++frame, cpx += px) {
+						writepos = memory->writepos;
+						if (writepos >= numsamples) {
+							frame = numsamples - writepos;
+						} else {
+							frame = writepos - numsamples;
+						}
+						frame = min(frame, numsamples - 1);
+						x1 = x2 = 0;
+						y1 = y2 = (int) (memory->samples[0][frame] * py);							
+						if (y2 > height / 2) {
+							y2 = height / 2;
+						} else
+						if (y2 < -height / 2) {
+							y2 = -height / 2;
+						}
+						for (i = 1; i < numsamples; ++i) {
 							x1 = x2;
-							x2 = (int) (frame * px);
-							if (frame == 0 || x1 != x2) {
+							x2 = (int) (i * px);
+							if (x1 != x2) {
 								y1 = y2;							
 								y2 = (int) (memory->samples[0][frame] * py);
 								if (y2 > height / 2) {
@@ -181,17 +197,18 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g, int x, i
 									y2 = -height / 2;
 								}
 								psy_ui_drawline(g, x + x1, centery + y1, x + x2,
-									centery + y2);
+									centery + y2);								
+							}
+							++frame;
+							if (frame >= numsamples) {
+								frame = 0;
 							}
 						}
-					} else {
-						psy_ui_drawline(g, x, centery, x + width, centery);
 					}
 				}
-			} else {
-				psy_ui_drawline(g, x, centery, x + width, centery);
-			}
-		} else {
+			}			
+		}
+		if (!active) {
 			psy_ui_drawline(g, x, centery, x + width, centery);
 		}
 	}	

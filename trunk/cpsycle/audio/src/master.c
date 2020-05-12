@@ -173,10 +173,11 @@ void master_dispose(psy_audio_Master* self)
 	psy_audio_custommachineparam_dispose(&self->param_info);
 	psy_audio_custommachineparam_dispose(&self->param_slider);
 	psy_audio_custommachineparam_dispose(&self->param_level);
+	master_dispose_memory(self);
 	machine_dispose(&self->machine);
 }
 
-void master_memory(psy_audio_Master* self)
+void master_dispose_memory(psy_audio_Master* self)
 {
 	uintptr_t channel;
 

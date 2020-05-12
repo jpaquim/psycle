@@ -79,13 +79,14 @@ void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, int timerid)
 void vumeter_onmasterworked(Vumeter* self, psy_audio_Machine* master,
 	uintptr_t slot,
 	psy_audio_BufferContext* bc)
-{	
-	if (bc->output->rms) {
-		self->leftavg = psy_audio_buffer_rmsscale(bc->output,
-			bc->output->rms->data.previousLeft);
-		self->rightavg = psy_audio_buffer_rmsscale(bc->output,
-			bc->output->rms->data.previousRight);
-	}
+{
+	psy_audio_Buffer* memory;
+	
+	memory = psy_audio_machine_buffermemory(master);
+	if (memory && memory->rms) {
+		self->leftavg = memory->rms->data.previousLeft / 32768;
+		self->rightavg = memory->rms->data.previousRight / 32768;
+	}	
 }
 
 void vumeter_onsongchanged(Vumeter* self, Workspace* workspace)

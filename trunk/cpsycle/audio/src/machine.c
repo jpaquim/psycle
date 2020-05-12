@@ -418,16 +418,16 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 	}
 }
 
-void psy_audio_machine_updatememory(psy_audio_Machine* self,
+void psy_audio_machine_updatememory(psy_audio_Machine* machine,
 	psy_audio_BufferContext* bc)
 {
 	if (bc->output) {
 		psy_audio_Buffer* memory;
 
-		memory = psy_audio_machine_buffermemory(self);
-		if (memory) {
-			psy_audio_buffer_insertsamples(memory, bc->output,
-				psy_audio_machine_buffermemorysize(self),
+		memory = psy_audio_machine_buffermemory(machine);
+		if (memory) {			
+			psy_audio_buffer_writesamples(memory, bc->output,
+				psy_audio_machine_buffermemorysize(machine),
 				psy_audio_buffercontext_numsamples(bc));
 		}
 	}

@@ -28,6 +28,15 @@ typedef enum {
 	psy_ui_OPAQUE
 } psy_ui_TextBackgroundMode;
 
+typedef enum {
+	psy_ui_TA_LEFT = 0,
+	psy_ui_TA_RIGHT = 2,
+	psy_ui_TA_CENTER = 6,
+	psy_ui_TA_TOP = 0,
+	psy_ui_TA_BOTTOM = 8,
+	psy_ui_TA_BASELINE =24
+} psy_ui_TextAlign;
+
 struct psy_ui_Graphics;
 
 typedef void (*psy_ui_fp_graphics_dispose)(struct psy_ui_Graphics*);
@@ -51,6 +60,7 @@ typedef void (*psy_ui_fp_graphics_drawbitmap)(struct psy_ui_Graphics*, psy_ui_Bi
 typedef void (*psy_ui_fp_graphics_setbackgroundcolor)(struct psy_ui_Graphics*, unsigned int color);
 typedef void (*psy_ui_fp_graphics_setbackgroundmode)(struct psy_ui_Graphics*, unsigned int mode);
 typedef void (*psy_ui_fp_graphics_settextcolor)(struct psy_ui_Graphics*, unsigned int color);
+typedef void (*psy_ui_fp_graphics_settextalign)(struct psy_ui_Graphics*, unsigned int color);
 typedef void (*psy_ui_fp_graphics_setcolor)(struct psy_ui_Graphics*, unsigned int color);
 typedef void (*psy_ui_fp_graphics_setfont)(struct psy_ui_Graphics*, psy_ui_Font* font);
 typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*, psy_ui_Point pt);
@@ -77,7 +87,8 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_setbackgroundcolor setbackgroundcolor;
 	psy_ui_fp_graphics_setbackgroundmode setbackgroundmode;
 	psy_ui_fp_graphics_settextcolor settextcolor;
-	psy_ui_fp_graphics_setcolor setcolor;
+	psy_ui_fp_graphics_settextalign settextalign;
+	psy_ui_fp_graphics_setcolor setcolor;	
 	psy_ui_fp_graphics_setfont setfont;
 	psy_ui_fp_graphics_moveto moveto;
 	psy_ui_fp_graphics_curveto curveto;
@@ -176,6 +187,11 @@ INLINE void psy_ui_settextcolor(psy_ui_Graphics* self, unsigned int color)
 	self->vtable->settextcolor(self, color);
 }
 
+INLINE void psy_ui_settextalign(psy_ui_Graphics* self, unsigned int align)
+{
+	self->vtable->settextalign(self, align);
+}
+
 INLINE void psy_ui_setfont(psy_ui_Graphics* self, psy_ui_Font* font)
 {		
 	self->vtable->setfont(self, font);
@@ -236,6 +252,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawbitmap)(struct psy_ui_GraphicsImp*,
 typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundcolor)(struct psy_ui_GraphicsImp*, unsigned int color);
 typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundmode)(struct psy_ui_GraphicsImp*, unsigned int mode);
 typedef void (*psy_ui_fp_graphicsimp_dev_settextcolor)(struct psy_ui_GraphicsImp*, unsigned int color);
+typedef void (*psy_ui_fp_graphicsimp_dev_settextalign)(struct psy_ui_GraphicsImp*, unsigned int align);
 typedef void (*psy_ui_fp_graphicsimp_dev_setcolor)(struct psy_ui_GraphicsImp*, unsigned int color);
 typedef void (*psy_ui_fp_graphicsimp_dev_setfont)(struct psy_ui_GraphicsImp*, psy_ui_Font* font);
 typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*, psy_ui_Point pt);
@@ -262,6 +279,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_setbackgroundcolor dev_setbackgroundcolor;
 	psy_ui_fp_graphicsimp_dev_setbackgroundmode dev_setbackgroundmode;
 	psy_ui_fp_graphicsimp_dev_settextcolor dev_settextcolor;
+	psy_ui_fp_graphicsimp_dev_settextalign dev_settextalign;
 	psy_ui_fp_graphicsimp_dev_setcolor dev_setcolor;
 	psy_ui_fp_graphicsimp_dev_setfont dev_setfont;
 	psy_ui_fp_graphicsimp_dev_moveto dev_moveto;

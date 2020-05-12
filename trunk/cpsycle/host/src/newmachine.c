@@ -234,11 +234,7 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		psy_ui_setbackgroundcolor(g, 0x00232323);
 		psy_ui_settextcolor(g, 0x00CACACA);		
 	}		
-	plugindisplayname(property, text);
-	if (strstr(text, "endorphin") != 0) {
-		self = self;
-		plugindisplayname(property, text);
-	}	
+	plugindisplayname(property, text);	
 	psy_ui_textout(g, x, y + self->dy + 2, text, strlen(text));
 	plugintype(property, text);
 	psy_ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,

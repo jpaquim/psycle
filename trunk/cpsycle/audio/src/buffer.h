@@ -24,6 +24,7 @@ typedef struct psy_audio_Buffer {
 	psy_dsp_amp_t volumedisplay;
 	bool preventmixclear;
 	struct psy_dsp_RMSVol* rms;
+	uintptr_t writepos;
 } psy_audio_Buffer;
 
 void psy_audio_buffer_init(psy_audio_Buffer*, uintptr_t channels);
@@ -48,6 +49,8 @@ void psy_audio_buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan,
 int psy_audio_buffer_mono(psy_audio_Buffer*);
 void psy_audio_buffer_insertsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
 	uintptr_t numsamples, uintptr_t numsourcesamples);
+void psy_audio_buffer_writesamples(psy_audio_Buffer*,
+	psy_audio_Buffer* source, uintptr_t numsamples, uintptr_t numsourcesamples);
 void psy_audio_buffer_scale(psy_audio_Buffer*, psy_dsp_amp_range_t,
 	uintptr_t numsamples);
 void psy_audio_buffer_trace(psy_audio_Buffer* self, uintptr_t channel,
@@ -56,8 +59,10 @@ void psy_audio_buffer_enablerms(psy_audio_Buffer*);
 void psy_audio_buffer_disablerms(psy_audio_Buffer*);
 psy_dsp_amp_t psy_audio_buffer_rmsvolume(psy_audio_Buffer*);
 psy_dsp_amp_t psy_audio_buffer_rmsdisplay(psy_audio_Buffer*);
-psy_dsp_amp_t psy_audio_buffer_rmsscale(psy_audio_Buffer* self,
+psy_dsp_amp_t psy_audio_buffer_rmsscale(psy_audio_Buffer*,
 	psy_dsp_amp_t rms_volume);
+psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
+	psy_dsp_amp_range_t);
 
 
 #ifdef __cplusplus
