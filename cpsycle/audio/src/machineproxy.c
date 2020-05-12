@@ -79,8 +79,6 @@ static const char* machineproxy_playbackname(psy_audio_MachineProxy*, int index)
 static int machineproxy_numplaybacks(psy_audio_MachineProxy*);
 
 static void machineproxy_setcallback(psy_audio_MachineProxy*, MachineCallback);
-static int machineproxy_parameterlabel(psy_audio_MachineProxy*, char* txt, uintptr_t param);
-static int machineproxy_parametername(psy_audio_MachineProxy*, char* txt, uintptr_t param);
 static int machineproxy_haseditor(psy_audio_MachineProxy*);
 static void machineproxy_seteditorhandle(psy_audio_MachineProxy*, void* handle);
 static void machineproxy_editorsize(psy_audio_MachineProxy*, int* width, int* height);
@@ -211,7 +209,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.buffermemorysize = (fp_machine_buffermemorysize)
 			machineproxy_buffermemorysize;
 		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
-			machineproxy_buffermemory;
+			machineproxy_setbuffermemorysize;
 		vtable.amprange = (fp_machine_amprange) machineproxy_amprange;
 		vtable.putdata = (fp_machine_putdata) machineproxy_putdata;
 		vtable.data = (fp_machine_data) machineproxy_data;

@@ -11,16 +11,25 @@
 
 static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
-static void wireview_inittabbar(WireView* self);
+static void wireview_inittabbar(WireView*);
+static void wireview_initrategroup(WireView*);
 static void wireview_initbottomgroup(WireView*);
 static void wireview_onsongchanged(WireView*, Workspace*);
 static void wireview_connectmachinessignals(WireView*, Workspace*);
 static void wireview_ondescribevolume(WireView*, psy_ui_Slider*, char* txt);
 static void wireview_ontweakvolume(WireView*, psy_ui_Slider*, float value);
 static void wireview_onvaluevolume(WireView*, psy_ui_Slider*, float* value);
+static void wireview_ontweakmode(WireView*, psy_ui_Slider*, float value);
+static void wireview_onvaluemode(WireView*, psy_ui_Slider*, float* value);
+static void wireview_ontweakrate(WireView*, psy_ui_Slider*, float value);
+static void wireview_onvaluerate(WireView*, psy_ui_Slider*, float* value);
+static void wireview_onhold(WireView*, psy_ui_Component* sender);
 static void wireview_ondeleteconnection(WireView*, psy_ui_Component* sender);
 static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
 static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+static void wireview_ontabbarchanged(WireView*, psy_ui_Component* sender,
+	uintptr_t tabindex);
+
 
 static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
 static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size*);
@@ -31,12 +40,15 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 {					
 	self->wire = wire;	
 	self->workspace = workspace;
+	self->scope_spec_mode = 0.2f;
+	self->scope_spec_rate = 0.f;
 	psy_ui_component_init(wireview_base(self), parent);
 	psy_ui_component_doublebuffer(wireview_base(self));
-	psy_ui_component_enablealign(wireview_base(self));
+	psy_ui_component_enablealign(wireview_base(self));	
 	wireview_initvolumeslider(self);
-	wireview_inittabbar(self);
-	wireview_initbottomgroup(self);	
+	wireview_initbottomgroup(self);
+	wireview_initrategroup(self);
+	wireview_inittabbar(self);	
 	psy_ui_notebook_init(&self->notebook, wireview_base(self));	
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&wireview_base(self)->signal_destroy, self,
@@ -46,7 +58,9 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		workspace);
 	oscilloscope_init(&self->oscilloscope, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
-	spectrumanalyzer_init(&self->spectrumanalyzer, psy_ui_notebook_base(&self->notebook), wire,
+	oscilloscope_setzoom(&self->oscilloscope, 0.2f);
+	spectrumanalyzer_init(&self->spectrumanalyzer,
+		psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
 	stereophase_init(&self->stereophase, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
@@ -54,6 +68,8 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
+	psy_signal_connect(&self->tabbar.signal_change, self,
+		wireview_ontabbarchanged);
 	tabbar_select(&self->tabbar, 0);	
 }
 
@@ -70,15 +86,21 @@ void wireview_inittabbar(WireView* self)
 {
 	tabbar_init(&self->tabbar, wireview_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
-	tabbar_append_tabs(&self->tabbar, "Vu", "Oscilloscope", "Spectrum Analyzer", "Stereo Phase",
-		"Channel Mapping", NULL);	
+	tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
+		"Channel Mapping", NULL);
 }
 
 void wireview_initvolumeslider(WireView* self)
 {
+	psy_ui_Margin margin;
+
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2));
 	psy_ui_component_init(&self->slidergroup, wireview_base(self));
 	psy_ui_component_doublebuffer(wireview_base(self));
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setmargin(&self->slidergroup, &margin);
 	psy_ui_component_enablealign(&self->slidergroup);
 	psy_ui_component_resize(&self->slidergroup, 20, 0);
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
@@ -94,9 +116,42 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
 	psy_ui_slider_showvertical(&self->volslider);
 	psy_ui_component_resize(&self->volslider.component, 20, 0);
-	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_slider_connect(&self->volslider, self, wireview_ondescribevolume,
 		wireview_ontweakvolume, wireview_onvaluevolume);
+}
+
+void wireview_initrategroup(WireView* self)
+{
+	psy_ui_Margin margin;
+
+	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
+	psy_ui_component_init(&self->rategroup, wireview_base(self));
+	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setmargin(&self->rategroup, &margin);
+	psy_ui_component_enablealign(&self->rategroup);
+	psy_ui_button_init(&self->hold, &self->rategroup);
+	psy_ui_button_settext(&self->hold, "Hold");
+	psy_ui_component_setalign(&self->hold.component, psy_ui_ALIGN_RIGHT);
+	psy_signal_connect(&self->hold.signal_clicked, self,
+		wireview_onhold);
+	psy_ui_slider_init(&self->modeslider, &self->rategroup);
+	psy_ui_slider_showhorizontal(&self->modeslider);
+	psy_ui_slider_showhorizontal(&self->modeslider);
+	psy_ui_slider_hidevaluelabel(&self->modeslider);
+	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
+	psy_ui_slider_connect(&self->modeslider, self, NULL,
+		wireview_ontweakmode, wireview_onvaluemode);
+	psy_ui_component_hide(&self->modeslider.component);
+	psy_ui_slider_init(&self->rateslider, &self->rategroup);
+	psy_ui_slider_showhorizontal(&self->rateslider);	
+	psy_ui_slider_showhorizontal(&self->rateslider);
+	psy_ui_slider_hidevaluelabel(&self->rateslider);
+	psy_ui_component_setalign(&self->rateslider.component, psy_ui_ALIGN_TOP);
+	psy_ui_slider_connect(&self->rateslider, self, NULL,
+		wireview_ontweakrate, wireview_onvaluerate);
 }
 
 void wireview_initbottomgroup(WireView* self)
@@ -132,7 +187,7 @@ void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 		char text[128];
 		psy_snprintf(text, 128, "%.1f dB",20.0f * log10(input->volume));
 		psy_ui_button_settext(&self->dbvol, text);
-		psy_snprintf(text, 128, "%.2f %%", input->volume * 100.f);
+		psy_snprintf(text, 128, "%.2f %%", (float)input->volume * 100.f);
 		psy_ui_button_settext(&self->percvol, text);
 	}
 }
@@ -161,6 +216,42 @@ void wireview_onvaluevolume(WireView* self, psy_ui_Slider* slider, float* value)
 	}
 }
 
+void wireview_ontweakmode(WireView* self, psy_ui_Slider* slider, float value)
+{
+	self->scope_spec_mode = value;
+	oscilloscope_setzoom(&self->oscilloscope, value);
+}
+
+void wireview_onvaluemode(WireView* self, psy_ui_Slider* slider, float* value)
+{
+	*value = self->scope_spec_mode;
+}
+
+void wireview_ontweakrate(WireView* self, psy_ui_Slider* slider, float value)
+{
+	self->scope_spec_rate = value;
+	oscilloscope_setspecbegin(&self->oscilloscope, value);
+}
+
+void wireview_onvaluerate(WireView* self, psy_ui_Slider* slider, float* value)
+{
+	*value = self->scope_spec_rate;
+}
+
+void wireview_onhold(WireView* self, psy_ui_Component* sender)
+{
+	if (tabbar_selected(&self->tabbar) == 1) {
+		if (oscilloscope_stopped(&self->oscilloscope)) {
+			oscilloscope_continue(&self->oscilloscope);
+		} else {
+			self->scope_spec_rate = 0.0;
+			oscilloscope_setspecbegin(&self->oscilloscope,
+				self->scope_spec_rate);
+			oscilloscope_hold(&self->oscilloscope);
+		}
+	}
+}
+
 void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && self->workspace->song) {		
@@ -184,7 +275,7 @@ void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
 
 int wireview_wireexists(WireView* self)
 {
-	return self->workspace && self->workspace->song 
+	return (self->workspace && self->workspace->song)
 		   ? machines_connected(&self->workspace->song->machines,
 				self->wire.src, self->wire.dst)
 		   : 0;
@@ -199,9 +290,15 @@ void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 	}
 }
 
-psy_ui_Component* wireview_base(WireView* self)
+void wireview_ontabbarchanged(WireView* self, psy_ui_Component* sender,
+	uintptr_t tabindex)
 {
-	return &self->component;
+	if (tabindex == 0) {
+		psy_ui_component_hide(&self->modeslider.component);
+	} else {		
+		psy_ui_component_show(&self->modeslider.component);		
+	}
+	psy_ui_component_align(&self->component);
 }
 
 void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
@@ -227,9 +324,4 @@ void wireframe_onsize(WireFrame* self, psy_ui_Component* sender, psy_ui_Size* si
 		psy_ui_component_resize(wireview_base(self->wireview), size->width,
 			size->height);
 	}
-}
-
-psy_ui_Component* wireframe_base(WireFrame* self)
-{
-	return &self->component;
 }

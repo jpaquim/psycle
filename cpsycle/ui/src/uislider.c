@@ -69,6 +69,9 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	self->margin = 5;
 	self->rulerstep = 0.1;
 	self->charnumber = 0;
+	self->valuecharnumber = 8;
+	self->labelvisible = TRUE;
+	self->valuelabelvisible = TRUE;
 	psy_ui_slider_initsignals(self);	
 	psy_signal_connect(&self->component.signal_destroy, self, 
 		psy_ui_slider_ondestroy);	
@@ -110,6 +113,11 @@ void psy_ui_slider_setcharnumber(psy_ui_Slider* self, int charnumber)
 	self->charnumber = charnumber;
 }
 
+void psy_ui_slider_setvaluecharnumber(psy_ui_Slider* self, int charnumber)
+{
+	self->valuecharnumber = charnumber;
+}
+
 void psy_ui_slider_setvalue(psy_ui_Slider* self, double value)
 {
 	self->value = value;
@@ -130,21 +138,23 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_Size size;	
 
 		size = psy_ui_component_size(&self->component);
-		psy_ui_setrectangle(&r, 0, 0,
-			self->labelsize, size.height);
-		psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
-		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_textoutrectangle(g, 0, 0, 0, r,
-			self->label, strlen(self->label));
-		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
-		
-		psy_ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
-		psy_ui_drawrectangle(g, r);
+		if (self->labelvisible) {
+			psy_ui_setrectangle(&r, 0, 0,
+				self->labelsize, size.height);
+			psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
+			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+			psy_ui_textoutrectangle(g, 0, 0, 0, r,
+				self->label, strlen(self->label));
+			size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
+
+			psy_ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
+			psy_ui_drawrectangle(g, r);
+		}
 		psy_ui_setrectangle(&r,
 			self->labelsize + self->margin + (int)((size.width - self->slidersize) * self->value),
 			2, self->slidersize, size.height - 4);
 		psy_ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
-		{
+		if (self->valuelabelvisible) {
 			size = psy_ui_component_size(&self->component);
 			psy_ui_setrectangle(&r, size.width - self->valuelabelsize, 0,
 				self->valuelabelsize, size.height);
@@ -265,6 +275,26 @@ void psy_ui_slider_showhorizontal(psy_ui_Slider* self)
 	self->orientation = psy_ui_HORIZONTAL;
 }
 
+void psy_ui_slider_showlabel(psy_ui_Slider* self)
+{
+	self->labelvisible = TRUE;
+}
+
+void psy_ui_slider_hidelabel(psy_ui_Slider* self)
+{
+	self->labelvisible = FALSE;
+}
+
+void psy_ui_slider_showvaluelabel(psy_ui_Slider* self)
+{
+	self->valuelabelvisible = TRUE;
+}
+
+void psy_ui_slider_hidevaluelabel(psy_ui_Slider* self)
+{
+	self->valuelabelvisible = FALSE;
+}
+
 psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider* self)
 {
 	return self->orientation;
@@ -302,12 +332,18 @@ void psy_ui_slider_describevalue(psy_ui_Slider* self)
 }
 
 void psy_ui_slider_connect(psy_ui_Slider* self, void* context,
-	ui_slider_fpdescribe describe, ui_slider_fptweak tweak,
-	ui_slider_fpvalue value)
+	ui_slider_fpdescribe fp_describe, ui_slider_fptweak fp_tweak,
+	ui_slider_fpvalue fp_value)
 {
-	psy_signal_connect(&self->signal_describevalue, context, describe);
-	psy_signal_connect(&self->signal_tweakvalue, context, tweak);
-	psy_signal_connect(&self->signal_value, context, value);
+	if (fp_describe) {
+		psy_signal_connect(&self->signal_describevalue, context, fp_describe);
+	}
+	if (fp_tweak) {
+		psy_signal_connect(&self->signal_tweakvalue, context, fp_tweak);
+	}
+	if (fp_value) {
+		psy_signal_connect(&self->signal_value, context, fp_value);
+	}
 }
 
 void psy_ui_slider_onalign(psy_ui_Slider* self)
@@ -316,11 +352,22 @@ void psy_ui_slider_onalign(psy_ui_Slider* self)
 		psy_ui_TextMetric tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
-		self->labelsize = tm.tmAveCharWidth *
-			((self->charnumber == 0)
-			? strlen(self->label) + 2
-			: self->charnumber);
-		self->valuelabelsize = tm.tmAveCharWidth * 8;
+		if (self->labelvisible) {
+			self->labelsize = tm.tmAveCharWidth *
+				((self->charnumber == 0)
+					? strlen(self->label) + 2
+					: self->charnumber);
+		} else {
+			self->labelsize = 0;
+		}
+		if (self->valuelabelvisible) {
+			self->valuelabelsize = tm.tmAveCharWidth *
+				((self->valuecharnumber == 0)
+					? strlen(self->label) + 2
+					: self->valuecharnumber);
+		} else {
+			self->valuelabelsize = 0;
+		}
 	}
 }
 

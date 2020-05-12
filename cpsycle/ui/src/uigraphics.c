@@ -33,6 +33,7 @@ static void drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y, int w
 static void setbackgroundcolor(psy_ui_Graphics*, unsigned int color);
 static void setbackgroundmode(psy_ui_Graphics*, unsigned int mode);
 static void settextcolor(psy_ui_Graphics*, unsigned int color);
+static void settextalign(psy_ui_Graphics*, unsigned int align);
 static void setcolor(psy_ui_Graphics*, unsigned int color);
 static void setfont(psy_ui_Graphics*, psy_ui_Font* font);
 static void moveto(psy_ui_Graphics*, psy_ui_Point point);
@@ -65,6 +66,7 @@ static void vtable_init(void)
 		vtable.setbackgroundcolor = setbackgroundcolor;
 		vtable.setbackgroundmode = setbackgroundmode;
 		vtable.settextcolor = settextcolor;
+		vtable.settextalign = settextalign;
 		vtable.setcolor = setcolor;
 		vtable.setfont = setfont;
 		vtable.moveto = moveto;
@@ -163,6 +165,11 @@ static void settextcolor(psy_ui_Graphics* self, unsigned int color)
 	self->imp->vtable->dev_settextcolor(self->imp, color);
 }
 
+static void settextalign(psy_ui_Graphics* self, unsigned int align)
+{
+	self->imp->vtable->dev_settextalign(self->imp, align);
+}
+
 static void setcolor(psy_ui_Graphics* self, unsigned int color)
 {
 	self->imp->vtable->dev_setcolor(self->imp, color);
@@ -227,6 +234,7 @@ static void dev_drawbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, 
 static void dev_setbackgroundcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
 static void dev_setbackgroundmode(psy_ui_GraphicsImp* self, unsigned int mode) { }
 static void dev_settextcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
+static void dev_settextalign(psy_ui_GraphicsImp* self, unsigned int align) { }
 static void dev_setcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
 static void dev_setfont(psy_ui_GraphicsImp* self, psy_ui_Font* font) { }
 static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_Point pt) { }
@@ -258,6 +266,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
 		imp_vtable.dev_setbackgroundmode = dev_setbackgroundmode;
 		imp_vtable.dev_settextcolor = dev_settextcolor;
+		imp_vtable.dev_settextalign = dev_settextalign;
 		imp_vtable.dev_setcolor = dev_setcolor;
 		imp_vtable.dev_setfont = dev_setfont;
 		imp_vtable.dev_moveto = dev_moveto;

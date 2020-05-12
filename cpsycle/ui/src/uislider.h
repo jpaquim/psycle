@@ -22,6 +22,9 @@ typedef struct {
 	int valuelabelsize;
 	int margin;	
 	int charnumber;
+	int valuecharnumber;
+	bool labelvisible;
+	bool valuelabelvisible;
 	psy_ui_Orientation orientation;
 	psy_Signal signal_clicked;
 	psy_Signal signal_changed;
@@ -37,9 +40,15 @@ typedef void (*ui_slider_fpvalue)(void*, psy_ui_Slider*, float* value);
 void psy_ui_slider_init(psy_ui_Slider*, psy_ui_Component* parent);
 void psy_ui_slider_settext(psy_ui_Slider*, const char* text);
 void psy_ui_slider_setcharnumber(psy_ui_Slider*, int number);
+void psy_ui_slider_setvaluecharnumber(psy_ui_Slider*, int number);
 void psy_ui_slider_setvalue(psy_ui_Slider*, double value);
 double psy_ui_slider_value(psy_ui_Slider*);
 void psy_ui_slider_showvertical(psy_ui_Slider*);
+void psy_ui_slider_showhorizontal(psy_ui_Slider*);
+void psy_ui_slider_showlabel(psy_ui_Slider*);
+void psy_ui_slider_hidelabel(psy_ui_Slider*);
+void psy_ui_slider_showvaluelabel(psy_ui_Slider*);
+void psy_ui_slider_hidevaluelabel(psy_ui_Slider*);
 void psy_ui_slider_showhorizontal(psy_ui_Slider*);
 psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider*);
 void psy_ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,

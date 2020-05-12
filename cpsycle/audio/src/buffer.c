@@ -11,9 +11,6 @@
 #include <string.h>
 #include "../../detail/trace.h"
 
-static psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
-	psy_dsp_amp_range_t);
-
 void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 {
 	self->rms = 0;
@@ -23,6 +20,7 @@ void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 	self->range = PSY_DSP_AMP_RANGE_NATIVE;
 	self->volumedisplay = 0;
 	self->preventmixclear = FALSE;
+	self->writepos = 0;
 	psy_audio_buffer_resize(self, channels);
 }
 
@@ -174,13 +172,15 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 				
 		diff = numsamples - numsourcesamples;
 		for (channel = 0; channel < self->numchannels; ++channel) {
-			dsp.clear(self->samples[channel] + numsourcesamples, diff);
-			dsp.add(self->samples[channel] + self->offset,
-				self->samples[channel] + self->offset + numsourcesamples, diff,
-				(psy_dsp_amp_t) 1.f);
-			dsp.clear(self->samples[channel], numsourcesamples);
+
+			uintptr_t i;
+
+			for (i = 0; i < diff; ++i) {
+				self->samples[channel][numsamples - 1 - i] =
+					self->samples[channel][numsamples - 1 - i - numsourcesamples];
+			}				
 			if (channel < source->numchannels) {
-				dsp.add(source->samples[channel] + self->offset,
+				dsp.movmul(source->samples[channel] + source->offset,
 					self->samples[channel] + self->offset,
 					numsourcesamples,
 					rangefactor);
@@ -190,9 +190,8 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 		uintptr_t channel;
 
 		for (channel = 0; channel < self->numchannels; ++channel) {
-			dsp.clear(self->samples[channel], numsamples);
 			if (channel < source->numchannels) {
-				dsp.add(source->samples[channel] + self->offset,
+				dsp.movmul(source->samples[channel] + source->offset,
 					self->samples[channel] + self->offset,
 					numsamples,
 					rangefactor);
@@ -203,7 +202,61 @@ void psy_audio_buffer_insertsamples(psy_audio_Buffer* self,
 		if (self->numchannels > 1) {
 			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
 				self->samples[1],
-				numsourcesamples);
+				numsamples);
+		}
+	}
+}
+
+void psy_audio_buffer_writesamples(psy_audio_Buffer* self,
+	psy_audio_Buffer* source, uintptr_t numsamples, uintptr_t numsourcesamples)
+{
+	uintptr_t channel;
+	psy_dsp_amp_t rangefactor;
+
+	rangefactor = psy_audio_buffer_rangefactor(source, self->range);
+	if (self->writepos + numsourcesamples < numsamples) {
+		for (channel = 0; channel < self->numchannels; ++channel) {
+			if (channel < source->numchannels) {
+				dsp.movmul(source->samples[channel] + source->offset,
+					self->samples[channel] + self->offset + self->writepos,
+					numsourcesamples,
+					rangefactor);
+			}
+		}
+		self->writepos += numsourcesamples;
+	} else {
+		uintptr_t tail;
+		uintptr_t front;
+
+		tail = numsamples - self->writepos;
+		front = numsourcesamples - tail;
+		if (tail > 0) {
+			for (channel = 0; channel < self->numchannels; ++channel) {
+				if (channel < source->numchannels) {
+					dsp.movmul(source->samples[channel] + source->offset,
+						self->samples[channel] + self->offset + self->writepos,
+						tail,
+						rangefactor);
+				}
+			}
+		}
+		if (front > 0) {
+			for (channel = 0; channel < self->numchannels; ++channel) {
+				if (channel < source->numchannels) {
+					dsp.movmul(source->samples[channel] + source->offset,
+						self->samples[channel] + self->offset,
+						front,
+						rangefactor);
+				}
+			}
+		}
+		self->writepos = front;
+	}	
+	if (self->rms) {
+		if (self->numchannels > 1) {
+			psy_dsp_rmsvol_tick(self->rms, self->samples[0],
+				self->samples[1],
+				numsamples);
 		}
 	}
 }

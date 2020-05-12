@@ -8,7 +8,7 @@
 #include <string.h>
 #include <operations.h>
 
-static void custommachine_init_memory(psy_audio_CustomMachine*);
+static void custommachine_init_memory(psy_audio_CustomMachine*, uintptr_t numframes);
 static void custommachine_dispose_memory(psy_audio_CustomMachine*);
 static const char* custommachine_editname(psy_audio_CustomMachine*);
 static void custommachine_seteditname(psy_audio_CustomMachine*, const char* name);
@@ -66,15 +66,15 @@ void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
 	self->slot = NOMACHINE_INDEX;
-	custommachine_init_memory(self);
+	custommachine_init_memory(self, MAX_STREAM_SIZE);
 }
 
-void custommachine_init_memory(psy_audio_CustomMachine* self)
+void custommachine_init_memory(psy_audio_CustomMachine* self, uintptr_t numframes)
 {
 	uintptr_t channel;
 
 	psy_audio_buffer_init(&self->memorybuffer, 2);
-	self->memorybuffersize = MAX_STREAM_SIZE;
+	self->memorybuffersize = numframes;
 	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
 		self->memorybuffer.samples[channel] = dsp.memory_alloc(
 			self->memorybuffersize, sizeof(psy_dsp_amp_t));		
@@ -134,7 +134,8 @@ uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine* self)
 
 void custommachine_setbuffermemorysize(psy_audio_CustomMachine* self, uintptr_t size)
 {
-	// self->memorybuffersize = size;
+	custommachine_dispose_memory(self);
+	custommachine_init_memory(self, size);
 }
 
 uintptr_t custommachine_slot(psy_audio_CustomMachine* self)
