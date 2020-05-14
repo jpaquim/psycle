@@ -44,20 +44,17 @@ in Project Linker settings for the host project. Set the Output File
 Target to the project standard. Install on older platforms the DirectX
 SDK and add the include/lib sdk directories (Tools/Options/Directories).
 Copy the appropiate vc runtime and universalis dlls from an existing psycle
-installation into cpsycle/Debug or cpsycle/Release (VC2019) or 
-cpyscle/Host(VC6 and VC2008) and adjust the plugin directories.
-Copy bwltbl.dll from the existing psycle plugin path aswell.
-List of runtime files needed to be copied:
-bwltbl.dll,
-boost_chrono_your_version.dll,
-boost_date_time_your_version.dll,
-boost_filesystem_your_version.dll,
-boost_signals_your_version.dll,
-boost_systems_your_version.dll,
-boost_thread_your_version.dll,
-universalis.dll
+installation, copy bwltbl.dll from the existing psycle plugin path,
+to the output dir(cpsycle/debug and cpsycle/release).
 
+List of runtime files to be copied:
 
-
-
-
+bwltbl.dll, (from plugin path)
+boost_chrono_your_version.dll, (from bin path)
+boost_date_time_your_version.dll, (from bin path)
+boost_filesystem_your_version.dll, (from bin path)
+boost_signals_your_version.dll, (from bin path)
+boost_systems_your_version.dll, (from bin path)
+boost_thread_your_version.dll, (from bin path)
+universalis.dll (depending on your version needed or not) (from bin path)
+scintilla.dll (vc6, vc2008 only, search for an old compatible win98/xp dll)

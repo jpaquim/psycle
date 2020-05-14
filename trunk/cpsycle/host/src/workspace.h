@@ -124,6 +124,7 @@ void workspace_disposesequencepaste(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path);
 void workspace_savesong(Workspace*, const char* path);
+INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
 void workspace_loadskin(Workspace*, const char* path);
 void workspace_loadcontrolskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);

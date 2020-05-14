@@ -28,6 +28,10 @@ typedef struct psy_ui_win_ComponentImp {
 	uintptr_t winid;
 	HBRUSH background;
 	winproc wndproc;
+	int vscrollmin;
+	int vscrollmax;
+	int hscrollmin;
+	int hscrollmax;
 } psy_ui_win_ComponentImp;
 
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,

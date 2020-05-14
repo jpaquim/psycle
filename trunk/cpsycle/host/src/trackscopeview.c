@@ -168,7 +168,8 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 
 						active = TRUE;
 						px = width / (float) numsamples;
-						py = height / 32768.f / 3;
+						py = height * psy_audio_buffer_rangefactor(memory,
+							PSY_DSP_AMP_RANGE_VST) / 3;
 						writepos = memory->writepos;
 						if (writepos >= numsamples) {
 							frame = numsamples - writepos;
@@ -177,24 +178,15 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 						}
 						frame = min(frame, numsamples - 1);
 						x1 = x2 = 0;
-						y1 = y2 = (int) (memory->samples[0][frame] * py);							
-						if (y2 > height / 2) {
-							y2 = height / 2;
-						} else
-						if (y2 < -height / 2) {
-							y2 = -height / 2;
-						}
+						y1 = y2 = (int) (memory->samples[0][frame] * py);													
 						for (i = 1; i < numsamples; ++i) {
 							x1 = x2;
 							x2 = (int) (i * px);
 							if (x1 != x2) {
 								y1 = y2;							
 								y2 = (int) (memory->samples[0][frame] * py);
-								if (y2 > height / 2) {
-									y2 = height / 2;
-								} else
-								if (y2 < -height / 2) {
-									y2 = -height / 2;
+								if (y2 > height / 2 || y2 < -height / 2) {
+									continue;
 								}
 								psy_ui_drawline(g, x + x1, centery + y1, x + x2,
 									centery + y2);								

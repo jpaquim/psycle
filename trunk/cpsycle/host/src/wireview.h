@@ -23,7 +23,7 @@ typedef struct {
 	psy_ui_Button dbvol;
 	psy_ui_Button percvol;
 	VuScope vuscope;
-	Oscilloscope oscilloscope;
+	OscilloscopeView oscilloscopeview;
 	SpectrumAnalyzer spectrumanalyzer;
 	StereoPhase stereophase;
 	ChannelMappingView channelmappingview;

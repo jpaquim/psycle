@@ -87,6 +87,10 @@ typedef struct {
 
 void psy_ui_margin_init(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
 	psy_ui_Value bottom, psy_ui_Value left);
+void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
+void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
+void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
+void psy_ui_margin_setleft(psy_ui_Margin*, psy_ui_Value value);
 intptr_t psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 

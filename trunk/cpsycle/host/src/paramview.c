@@ -732,7 +732,8 @@ void onmouseup(ParamView* self, psy_ui_MouseEvent* ev)
 	self->tweak = NOMACHINE_INDEX;
 }
 
-void onmousewheel(ParamView* self, psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+void onmousewheel(ParamView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
 	psy_audio_MachineParam* param;
 

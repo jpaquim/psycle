@@ -83,6 +83,26 @@ void psy_ui_margin_init(psy_ui_Margin* self, psy_ui_Value top,
    self->left = left;
 }
 
+void psy_ui_margin_settop(psy_ui_Margin* self, psy_ui_Value value)
+{
+	self->top = value;
+}
+
+void psy_ui_margin_setright(psy_ui_Margin* self, psy_ui_Value value)
+{
+	self->right = value;
+}
+
+void psy_ui_margin_setbottom(psy_ui_Margin* self, psy_ui_Value value)
+{
+	self->bottom = value;
+}
+
+void psy_ui_margin_setleft(psy_ui_Margin* self, psy_ui_Value value)
+{
+	self->left = value;
+}
+
 intptr_t psy_ui_margin_width_px(psy_ui_Margin* self,
 	const psy_ui_TextMetric* tm)
 {

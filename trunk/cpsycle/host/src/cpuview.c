@@ -98,7 +98,7 @@ void cpuview_initperformancelist(CPUView* self)
 void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 	int timerid)
 {
-#if defined(DIVERSALIS__OS__MICROSOFT)
+#if defined(DIVERSALIS__OS__MICROSOFT) && WINVER >= 0x600
 	MEMORYSTATUSEX lpBuffer;
 	char buffer[128];
 

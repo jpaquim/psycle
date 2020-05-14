@@ -313,7 +313,8 @@ void workspace_configvisual(Workspace* self)
 		psy_ui_FontInfo fontinfo;
 		
 		psy_ui_fontinfo_init_string(&fontinfo, 
-			psy_properties_readstring(visual, "defaultfont", "tahoma;-16"));
+			psy_properties_readstring(visual, "defaultfont",
+			PSYCLE_DEFAULT_FONT));
 		psy_ui_font_init(&font, &fontinfo);
 		fontinfo = psy_ui_font_fontinfo(&font);
 		self->fontheight = fontinfo.lfHeight;
@@ -465,7 +466,7 @@ void workspace_makevisual(Workspace* self)
 		psy_properties_append_action(visual, "defaultskin"),
 		"Default Skin");
 	psy_properties_settext(
-		psy_properties_append_font(visual, "defaultfont", "tahoma;-16"),
+		psy_properties_append_font(visual, "defaultfont", PSYCLE_DEFAULT_FONT),
 		"Default Font");	
 	workspace_makepatternview(self, visual);
 	workspace_makemachineview(self, visual);
@@ -479,7 +480,7 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	pvc = psy_properties_create_section(visual, "patternview");
 	psy_properties_settext(pvc, "Pattern View");
 	psy_properties_settext(
-		psy_properties_append_font(pvc, "font", "tahoma;-16"),
+		psy_properties_append_font(pvc, "font", PSYCLE_DEFAULT_FONT),
 		"Font");
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "drawemptydata", 0),
@@ -1578,7 +1579,8 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 		psy_ui_Font font;
 			
 		psy_ui_fontinfo_init_string(&fontinfo, 
-			psy_properties_readstring(visual, "defaultfont", "tahoma 16"));
+			psy_properties_readstring(visual, "defaultfont",
+			PSYCLE_DEFAULT_FONT));
 		fontinfo.lfHeight = size;	
 		psy_ui_font_init(&font, &fontinfo);
 		psy_ui_replacedefaultfont(self->mainhandle, &font);

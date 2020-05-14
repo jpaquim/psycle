@@ -27,7 +27,7 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	//psy_ui_label_init(&self->header, &self->component);		
 	//psy_ui_label_settext(&self->header, "");	
 	psy_ui_label_init(&self->position, &self->component);
-	psy_ui_label_setcharnumber(&self->position, 8);
+	psy_ui_label_setcharnumber(&self->position, 10);
 	self->lastposition = -1.0f;
 	psy_signal_connect(&self->component.signal_timer, self,
 		playposbar_ontimer);

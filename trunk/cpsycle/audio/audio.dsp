@@ -595,6 +595,10 @@ SOURCE=.\src\wavsongio.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\wire.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\xm.c
 # End Source File
 # End Group
@@ -864,6 +868,10 @@ SOURCE=.\src\waveosctables.h
 # Begin Source File
 
 SOURCE=.\src\wavsongio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\wire.h
 # End Source File
 # Begin Source File
 

@@ -95,7 +95,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 		}
 	}
 	// Outgoing connections Machine number
-	for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		int32_t output;
 		LegacyWire* legacywire;
 
@@ -106,7 +106,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 		}
 	}
 	// Incoming connections Machine vol
-	for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		float _inputConVol;
 		LegacyWire* legacywire;
 
@@ -117,7 +117,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 		}
 	}
 	// Outgoing connections activated
-	for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		uint8_t connection;
 		LegacyWire* legacywire;
 
@@ -128,7 +128,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 		}
 	}
 	// Incoming connections activated
-	for (int i = 0; i < MAX_CONNECTIONS; ++i) {
+	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		uint8_t _inputCon;
 		LegacyWire* legacywire;
 

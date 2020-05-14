@@ -29,33 +29,52 @@ static const uint32_t CLBOTH = 0xC0C060;
 static void oscilloscope_init_memory(Oscilloscope*);
 static void oscilloscope_ondestroy(Oscilloscope*);
 static void oscilloscope_deallocate_holdbuffer(Oscilloscope*);
-static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Graphics*);
 static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, int timerid);
-static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
+static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*,
+	uintptr_t slot, psy_audio_BufferContext*);
 static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*, int flag, psy_audio_SongFile*);
 static void oscilloscope_connectmachinessignals(Oscilloscope*, Workspace*);
 static void oscilloscope_disconnectmachinessignals(Oscilloscope*, Workspace*);
 static psy_audio_Buffer* oscilloscope_buffer(Oscilloscope*, uintptr_t* numsamples);
+static uintptr_t oscilloscope_channel(Oscilloscope*);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(Oscilloscope* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw)oscilloscope_ondraw;
+		vtable_initialized = 1;
+	}
+}
 
 void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	self->wire = wire;
 	self->invol = (psy_dsp_amp_t)1.0f;
 	self->mult = 1.0f;
 	self->scope_peak_rate = 20;
-	self->scope_spec_samples = SCOPE_BUF_SIZE;
-	self->scope_spec_begin = 0; // (hold mode scroll)
+	self->scope_view_samples = SCOPE_BUF_SIZE;
+	self->scope_begin = 0; // (hold mode scroll)
 	self->hold = FALSE;
 	self->peakL = self->peakR = (psy_dsp_amp_t) 128.0f;
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
 	self->hold_buffer = 0;
-	psy_signal_connect(&self->component.signal_destroy, self, oscilloscope_ondestroy);
-	psy_signal_connect(&self->component.signal_draw, self, oscilloscope_ondraw);	
-	psy_signal_connect(&self->component.signal_timer, self, oscilloscope_ontimer);	
+	self->channelmode = OSCILLOSCOPE_CHMODE_LEFT;
+	self->ampzoom = (psy_dsp_amp_t)1.0f;
+	psy_signal_connect(&self->component.signal_destroy, self,
+		oscilloscope_ondestroy);	
+	psy_signal_connect(&self->component.signal_timer, self,
+		oscilloscope_ontimer);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		oscilloscope_onsongchanged);
 	oscilloscope_connectmachinessignals(self, workspace);
@@ -94,7 +113,8 @@ void oscilloscope_ondestroy(Oscilloscope* self)
 			memory = psy_audio_machine_buffermemory(machine);
 			if (memory) {
 				psy_audio_exclusivelock_enter();
-				psy_audio_machine_setbuffermemorysize(machine, MAX_STREAM_SIZE);
+				psy_audio_machine_setbuffermemorysize(machine,
+					MAX_STREAM_SIZE);
 				psy_audio_exclusivelock_leave();
 			}
 		}
@@ -106,7 +126,8 @@ void oscilloscope_deallocate_holdbuffer(Oscilloscope* self)
 	if (self->hold_buffer) {
 		uintptr_t channel;
 
-		for (channel = 0; channel < psy_audio_buffer_numchannels(self->hold_buffer);
+		for (channel = 0; channel <
+				psy_audio_buffer_numchannels(self->hold_buffer);
 				++channel) {
 			dsp.memory_dealloc(self->hold_buffer->samples[channel]);
 		}
@@ -116,7 +137,7 @@ void oscilloscope_deallocate_holdbuffer(Oscilloscope* self)
 	}
 }
 
-void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	int centery;
@@ -137,45 +158,33 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Component* sender, psy_ui_Gr
 			float py;
 			int x1, y1, x2, y2;			
 			uintptr_t frame;
-			intptr_t height2;
-			
+			uintptr_t channel;
+
+			channel = oscilloscope_channel(self);			
 			active = TRUE;
-			px = size.width / (float)self->scope_spec_samples;
+			px = size.width / (float)self->scope_view_samples;
 			py = size.height * psy_audio_buffer_rangefactor(buffer,
-				PSY_DSP_AMP_RANGE_VST) / 3 * self->invol;
-			height2 = size.height / 2;
+				PSY_DSP_AMP_RANGE_VST) / 3 * self->invol * self->ampzoom;
 			readpos = buffer->writepos;
-			if (readpos >= self->scope_spec_begin) {
-				readpos -= self->scope_spec_begin;
+			if (readpos >= self->scope_begin) {
+				readpos -= self->scope_begin;
 			} else {
-				readpos = numsamples - 1 - (self->scope_spec_begin - readpos);
+				readpos = numsamples - 1 - (self->scope_begin - readpos);
 			}
-			if (readpos >= self->scope_spec_samples) {
-				frame = readpos - self->scope_spec_samples;
+			if (readpos >= self->scope_view_samples) {
+				frame = readpos - self->scope_view_samples;
 			} else {
-				frame = numsamples - 1 - (self->scope_spec_samples - readpos);
+				frame = numsamples - 1 - (self->scope_view_samples - readpos);
 			}
 			frame = min(frame, numsamples - 1);
 			x1 = x2 = 0;
-			y1 = y2 = (int)(buffer->samples[0][frame] * py);			
-			if (y2 > height2) {
-				y2 = height2;
-			} else
-			if (y2 < -height2) {
-				y2 = -height2;
-			}
-			for (i = 1; i < self->scope_spec_samples; ++i) {
+			y1 = y2 = (int)(buffer->samples[channel][frame] * py);			
+			for (i = 1; i < self->scope_view_samples; ++i) {
 				x1 = x2;
 				x2 = (int)(i * px);
 				if (x1 != x2) {
 					y1 = y2;
-					y2 = (int)(buffer->samples[0][frame] * py);
-					if (y2 > height2 / 2) {
-						y2 = height2 / 2;
-					} else
-					if (y2 < -height2 / 2) {
-						y2 = -height2 / 2;
-					}
+					y2 = (int)(buffer->samples[channel][frame] * py);					
 					psy_ui_drawline(g, x1, centery + y1, x2, centery + y2);
 				}
 				frame++;
@@ -190,7 +199,8 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Component* sender, psy_ui_Gr
 	}
 }
 
-psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self, uintptr_t* numsamples)
+psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
+	uintptr_t* numsamples)
 {
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
@@ -210,7 +220,8 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self, uintptr_t* numsamples)
 	return buffer;
 }
 
-void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender, int timerid)
+void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender,
+	int timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		psy_ui_component_invalidate(&self->component);
@@ -218,7 +229,7 @@ void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender, int time
 }
 
 void oscilloscope_onsrcmachineworked(Oscilloscope* self,
-	psy_audio_Machine* machine, unsigned int slot,
+	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
 {	
 	if (self->hold_buffer == NULL && self->hold == TRUE) {
@@ -298,21 +309,23 @@ void oscilloscope_stop(Oscilloscope* self)
 
 void oscilloscope_setzoom(Oscilloscope* self, float rate)
 {
-	self->scope_spec_samples = (uintptr_t)((float)(SCOPE_BUF_SIZE) * rate);
+	self->scope_view_samples = (uintptr_t)((float)(SCOPE_BUF_SIZE) * rate);
 }
 
-void oscilloscope_setspecbegin(Oscilloscope* self, float begin)
+void oscilloscope_setbegin(Oscilloscope* self, float begin)
 {
-	if (self->scope_spec_samples > 0 && self->scope_spec_samples < SCOPE_BUF_SIZE) {		
-		self->scope_spec_begin = (uintptr_t)(begin * self->scope_spec_samples);
+	if (self->scope_view_samples > 0 &&
+			self->scope_view_samples < SCOPE_BUF_SIZE) {
+		self->scope_begin = (uintptr_t)(begin * ((float)(SCOPE_BUF_SIZE) -
+			self->scope_view_samples));
 	} else {
-		self->scope_spec_begin = 0;
+		self->scope_begin = 0;
 	}
 }
 
 void oscilloscope_hold(Oscilloscope* self)
 {
-	self->scope_spec_begin = 0;
+	self->scope_begin = 0;
 	self->hold = TRUE;
 }
 
@@ -325,5 +338,105 @@ void oscilloscope_continue(Oscilloscope* self)
 bool oscilloscope_stopped(Oscilloscope* self)
 {
 	return self->hold;
+}
+
+uintptr_t oscilloscope_channel(Oscilloscope* self)
+{
+	uintptr_t rv;
+
+	switch (self->channelmode) {
+		case OSCILLOSCOPE_CHMODE_LEFT:
+			rv = 0;
+		break;
+		case OSCILLOSCOPE_CHMODE_RIGHT:
+			rv = 1;
+		break;
+		default:
+			rv = 0;
+		break;
+	}	
+	return rv;
+}
+
+static void oscilloscopecontrols_onchannelselect(OscilloscopeControls*,
+	psy_ui_Component* sender);
+static void oscilloscopecontrols_updatechannelselect(OscilloscopeControls*);
+static void oscilloscopecontrols_onampzoomchanged(OscilloscopeControls*,
+	ZoomBox* sender);
+
+void oscilloscopecontrols_init(OscilloscopeControls* self, psy_ui_Component* parent,
+	Oscilloscope* oscilloscope)
+{
+	psy_ui_Margin margin;
+
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	self->oscilloscope = oscilloscope;
+	psy_ui_label_init(&self->channellbl, &self->component);
+	psy_ui_label_settext(&self->channellbl, "Channel");
+	psy_ui_component_setmargin(&self->channellbl.component, &margin);
+	psy_ui_button_init(&self->channelmode, &self->component);
+	psy_ui_button_setcharnumber(&self->channelmode, 6);
+	psy_ui_margin_setright(&margin, psy_ui_value_makeew(2.0));
+	psy_ui_component_setmargin(&self->channelmode.component, &margin);
+	psy_signal_connect(&self->channelmode.signal_clicked, self,
+		oscilloscopecontrols_onchannelselect);
+	oscilloscopecontrols_updatechannelselect(self);
+	psy_ui_label_init(&self->amplbl, &self->component);
+	psy_ui_label_settext(&self->amplbl, "Amp");
+	psy_ui_margin_setright(&margin, psy_ui_value_makeew(0.5));
+	psy_ui_component_setmargin(&self->amplbl.component, &margin);
+	zoombox_init(&self->ampzoom, &self->component);
+	psy_signal_connect(&self->ampzoom.signal_changed, self,
+		oscilloscopecontrols_onampzoomchanged);	
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(&self->component, 0),
+		psy_ui_ALIGN_LEFT,
+		0));
+}
+
+void oscilloscopecontrols_onchannelselect(OscilloscopeControls* self,
+	psy_ui_Component* sender)
+{	
+	if (self->oscilloscope->channelmode == OSCILLOSCOPE_CHMODE_LEFT) {
+		self->oscilloscope->channelmode = OSCILLOSCOPE_CHMODE_RIGHT;
+	} else {
+		self->oscilloscope->channelmode = OSCILLOSCOPE_CHMODE_LEFT;
+	}
+	oscilloscopecontrols_updatechannelselect(self);
+}
+
+void oscilloscopecontrols_updatechannelselect(OscilloscopeControls* self)
+{
+	if (self->oscilloscope->channelmode == OSCILLOSCOPE_CHMODE_LEFT) {
+		psy_ui_button_settext(&self->channelmode, "Left");
+	} else
+	if (self->oscilloscope->channelmode == OSCILLOSCOPE_CHMODE_RIGHT) {
+		psy_ui_button_settext(&self->channelmode, "Right");
+	}
+	psy_ui_component_align(&self->component);
+}
+
+void oscilloscopecontrols_onampzoomchanged(OscilloscopeControls* self, ZoomBox* sender)
+{
+	self->oscilloscope->ampzoom = (psy_dsp_amp_t)zoombox_rate(sender);
+}
+
+void oscilloscopeview_init(OscilloscopeView* self, psy_ui_Component* parent,
+	psy_audio_Wire wire, Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	oscilloscope_init(&self->oscilloscope, &self->component, wire,
+		workspace);
+	psy_ui_component_setalign(&self->oscilloscope.component,
+		psy_ui_ALIGN_CLIENT);
+	oscilloscopecontrols_init(&self->oscilloscopecontrols, &self->component,
+		&self->oscilloscope);
+	psy_ui_component_setalign(&self->oscilloscopecontrols.component,
+		psy_ui_ALIGN_TOP);
 }
 

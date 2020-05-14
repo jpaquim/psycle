@@ -30,7 +30,6 @@ static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t
 static void wireview_ontabbarchanged(WireView*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 
-
 static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
 static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size*);
 
@@ -56,9 +55,9 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	wireview_connectmachinessignals(self, workspace);
 	vuscope_init(&self->vuscope, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
-	oscilloscope_init(&self->oscilloscope, psy_ui_notebook_base(&self->notebook), wire,
+	oscilloscopeview_init(&self->oscilloscopeview, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
-	oscilloscope_setzoom(&self->oscilloscope, 0.2f);
+	oscilloscope_setzoom(&self->oscilloscopeview.oscilloscope, 0.2f);
 	spectrumanalyzer_init(&self->spectrumanalyzer,
 		psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
@@ -185,9 +184,10 @@ void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 	input = connection_input(connections, self->wire.src, self->wire.dst);
 	if (input) {
 		char text[128];
+
 		psy_snprintf(text, 128, "%.1f dB",20.0f * log10(input->volume));
 		psy_ui_button_settext(&self->dbvol, text);
-		psy_snprintf(text, 128, "%.2f %%", (float)input->volume * 100.f);
+		psy_snprintf(text, 128, "%.2f %%", (float)(input->volume * 100.0));
 		psy_ui_button_settext(&self->percvol, text);
 	}
 }
@@ -219,7 +219,7 @@ void wireview_onvaluevolume(WireView* self, psy_ui_Slider* slider, float* value)
 void wireview_ontweakmode(WireView* self, psy_ui_Slider* slider, float value)
 {
 	self->scope_spec_mode = value;
-	oscilloscope_setzoom(&self->oscilloscope, value);
+	oscilloscope_setzoom(&self->oscilloscopeview.oscilloscope, value);
 }
 
 void wireview_onvaluemode(WireView* self, psy_ui_Slider* slider, float* value)
@@ -230,7 +230,7 @@ void wireview_onvaluemode(WireView* self, psy_ui_Slider* slider, float* value)
 void wireview_ontweakrate(WireView* self, psy_ui_Slider* slider, float value)
 {
 	self->scope_spec_rate = value;
-	oscilloscope_setspecbegin(&self->oscilloscope, value);
+	oscilloscope_setbegin(&self->oscilloscopeview.oscilloscope, value);
 }
 
 void wireview_onvaluerate(WireView* self, psy_ui_Slider* slider, float* value)
@@ -241,13 +241,13 @@ void wireview_onvaluerate(WireView* self, psy_ui_Slider* slider, float* value)
 void wireview_onhold(WireView* self, psy_ui_Component* sender)
 {
 	if (tabbar_selected(&self->tabbar) == 1) {
-		if (oscilloscope_stopped(&self->oscilloscope)) {
-			oscilloscope_continue(&self->oscilloscope);
+		if (oscilloscope_stopped(&self->oscilloscopeview.oscilloscope)) {
+			oscilloscope_continue(&self->oscilloscopeview.oscilloscope);
 		} else {
 			self->scope_spec_rate = 0.0;
-			oscilloscope_setspecbegin(&self->oscilloscope,
+			oscilloscope_setbegin(&self->oscilloscopeview.oscilloscope,
 				self->scope_spec_rate);
-			oscilloscope_hold(&self->oscilloscope);
+			oscilloscope_hold(&self->oscilloscopeview.oscilloscope);
 		}
 	}
 }
