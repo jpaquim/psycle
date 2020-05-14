@@ -328,8 +328,8 @@ void stereophase_ontimer(StereoPhase* self, psy_ui_Component* sender, int timeri
 	}
 }
 
-void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machine, unsigned int slot,
-	psy_audio_BufferContext* bc)
+void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machine,
+	uintptr_t slot, psy_audio_BufferContext* bc)
 {	
 	if (bc->output->rms) {
 		psy_audio_Connections* connections;

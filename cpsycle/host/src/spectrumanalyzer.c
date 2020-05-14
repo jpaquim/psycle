@@ -25,26 +25,38 @@ static const uint32_t CLRIGHT = 0x60C060;
 static const uint32_t CLBOTH = 0xC0C060;
 
 static void spectrumanalyzer_ondestroy(SpectrumAnalyzer*);
-static void spectrumanalyzer_ondraw(SpectrumAnalyzer*, psy_ui_Component* sender, psy_ui_Graphics*);
+static void spectrumanalyzer_ondraw(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawbackground(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawspectrum(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_ontimer(SpectrumAnalyzer*, psy_ui_Component* sender, int timerid);
-static void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer*, psy_audio_Machine*,
-	unsigned int slot, psy_audio_BufferContext*);
+static void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer*,
+	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
 static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*,
 	int flag, psy_audio_SongFile* songfile);
 static void spectrumanalyzer_connectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
 
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(SpectrumAnalyzer* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw)spectrumanalyzer_ondraw;
+		vtable_initialized = 1;
+	}
+}
+
 void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	self->wire = wire;
-	self->leftavg = 0;
-	self->rightavg = 0;
+	self->wire = wire;	
 	self->invol = 1.0f;
 	self->mult = 1.0f;
 	self->scope_peak_rate = 20;
@@ -56,7 +68,6 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	self->peakLifeL = self->peakLifeR = 0;
 	self->workspace = workspace;
 	psy_signal_connect(&self->component.signal_destroy, self, spectrumanalyzer_ondestroy);
-	psy_signal_connect(&self->component.signal_draw, self, spectrumanalyzer_ondraw);	
 	psy_signal_connect(&self->component.signal_timer, self, spectrumanalyzer_ontimer);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		spectrumanalyzer_onsongchanged);
@@ -74,7 +85,7 @@ void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
 	fftclass_dispose(&self->fftSpec);
 }
 
-void spectrumanalyzer_ondraw(SpectrumAnalyzer* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void spectrumanalyzer_ondraw(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 {
 	spectrumanalyzer_drawbackground(self, g);
 	spectrumanalyzer_drawspectrum(self, g);
@@ -308,28 +319,17 @@ void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, 
 	}
 }
 
-void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self, psy_audio_Machine* master, unsigned int slot,
+void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
+	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
 {	
-	if (bc->output->rms) {
-		psy_audio_Connections* connections;
-		psy_audio_WireSocketEntry* input;	
-
-		connections = &self->workspace->song->machines.connections;
-		input = connection_input(connections, self->wire.src, self->wire.dst);
-		if (input) {					
-			self->leftavg = bc->output->rms->data.previousLeft / 32768;
-			self->rightavg = bc->output->rms->data.previousRight / 32768;
-			self->invol = input->volume;			
-		}
-	}
+	self->invol = connections_wirevolume(&self->workspace->song->machines.connections,
+		self->wire.src, self->wire.dst);	
 }
 
 void spectrumanalyzer_onsongchanged(SpectrumAnalyzer* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
-{	
-	self->leftavg = 0;
-	self->rightavg = 0;
+{		
 	spectrumanalyzer_connectmachinessignals(self, workspace);	
 }
 

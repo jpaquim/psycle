@@ -7,18 +7,18 @@
 #include <uibutton.h>
 #include <uilabel.h>
 
-typedef struct {
+typedef struct ZoomBox {
 	psy_ui_Component component;
 	psy_ui_Button zoomin;
 	psy_ui_Label label;
 	psy_ui_Button zoomout;
 	psy_Signal signal_changed;
-	int zoomrate;
-	int zoomstep;
+	double zoomrate;
+	double zoomstep;
 } ZoomBox;
 
 void zoombox_init(ZoomBox*, psy_ui_Component* parent);
-double zoombox_rate(ZoomBox*);
+INLINE double zoombox_rate(ZoomBox* self) { return self->zoomrate; }
 void zoombox_setrate(ZoomBox*, double);
 
 #endif

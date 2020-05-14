@@ -23,14 +23,13 @@
 #define PSYCLE_USE_TK PSYCLE_TK_CURSES  
 #endif
 
-// #define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
-// #define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
-
+#if defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_APP_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
 #define PSYCLE_USER_DIR "C:\\Program Files (x86)\\Psycle Modular Music Studio"
-
-// #define PSYCLE_APP_DIR "C:\\Programme\\Psycle"
-// #define PSYCLE_USER_DIR "C:\\Programme\\Psycle"
+#else
+#define PSYCLE_APP_DIR "C:\\Program Files\\Psycle Modular Music Studio"
+#define PSYCLE_USER_DIR "C:\\Program Files\\Psycle Modular Music Studio"
+#endif
 
 #define PSYCLE_SONGS_DEFAULT_DIR PSYCLE_USER_DIR "\\Songs"
 #define PSYCLE_SAMPLES_DEFAULT_DIR PSYCLE_USER_DIR "\\Samples"
@@ -45,6 +44,12 @@
 #endif
 #define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "\\Skins"
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "\\Docs"
+
+#if defined(_MSC_VER) && _MSC_VER > 1200
+#define PSYCLE_DEFAULT_FONT "tahoma;-16"
+#else
+#define PSYCLE_DEFAULT_FONT "tahoma;-12"
+#endif
 
 /* #define PSYCLE_LOG_WORKEVENTS */
 

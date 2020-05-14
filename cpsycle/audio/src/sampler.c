@@ -999,11 +999,12 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 			return; // FALSE;
 		}
 	} else {
+		uint32_t size;
+
 		// Old version had default C4 as false
 		psy_audio_sampler_defaultC4(self, FALSE);
 		// LinearSlide(false);
-		uint32_t size = 0;
-
+		size = 0;
 		psyfile_read(songfile->file, &size, sizeof(size));
 		if (size)
 		{

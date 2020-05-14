@@ -41,12 +41,13 @@ static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
 	psy_Properties*);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
-static void mainframe_onsongchanged(MainFrame*, psy_ui_Component* sender,
+static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
 	int flag, psy_audio_SongFile*);
 static void mainframe_onsongloadprogress(MainFrame*, Workspace*, int progress);
 static void mainframe_onpluginscanprogress(MainFrame*, Workspace*,
 	int progress);
-static void mainframe_onviewselected(MainFrame*, Workspace*, int view, uintptr_t section, int option);
+static void mainframe_onviewselected(MainFrame*, Workspace*, int view,
+	uintptr_t section, int option);
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onshowgear(MainFrame*, Workspace* sender);
 static void mainframe_updatetitle(MainFrame*);
@@ -63,8 +64,10 @@ static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
 	unsigned int numsongtracks);
-static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender, const char* path);
-static void mainframe_ondockview(MainFrame*, Workspace* sender, psy_ui_Component* view);
+static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
+	const char* path);
+static void mainframe_ondockview(MainFrame*, Workspace* sender,
+	psy_ui_Component* view);
 
 #define GEARVIEW 10
 
@@ -102,8 +105,7 @@ void mainframe_init(MainFrame* self)
 		workspace_scanplugins(&self->workspace);
 	}	
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
-		mainframe_onsongchanged);
-	mainframe_updatetitle(self);
+		mainframe_onsongchanged);	
 	// create empty status bar
 	psy_ui_component_init(&self->statusbar, &self->component);
 	psy_ui_component_setalign(&self->statusbar, psy_ui_ALIGN_BOTTOM);
@@ -118,11 +120,14 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_resize(&self->terminal.component, 0, 0);
 	kbdhelp_init(&self->kbdhelp, &self->component, &self->workspace);
-	psy_ui_component_setalign(kbdhelp_base(&self->kbdhelp), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setalign(kbdhelp_base(&self->kbdhelp),
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
 	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
-	psy_ui_component_setalign(&self->splitbarterminal.component, psy_ui_ALIGN_BOTTOM);	
-	psy_signal_connect(&self->component.signal_destroy, self, mainframe_destroy);
+	psy_ui_component_setalign(&self->splitbarterminal.component,
+		psy_ui_ALIGN_BOTTOM);	
+	psy_signal_connect(&self->component.signal_destroy, self,
+		mainframe_destroy);
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_enablealign(&self->top);	
@@ -223,7 +228,8 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->machinebar.midi.signal_clicked, self,
 		mainframe_onmidi);
 	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
-	psy_ui_component_setalign(&self->plugineditor.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->plugineditor.component,
+		psy_ui_ALIGN_LEFT);
 	psy_ui_component_resize(&self->plugineditor.component, 400, 0);
 	psy_ui_component_hide(&self->plugineditor.component);
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
@@ -246,13 +252,15 @@ void mainframe_init(MainFrame* self)
 		psy_ui_component_hide(&self->stepsequencerview.component);
 	}
 	// recent song view
-	recentview_init(&self->recentview, &self->component, &self->viewtabbars.component,
+	recentview_init(&self->recentview, &self->component,
+		&self->viewtabbars.component,
 		&self->workspace);
 	psy_ui_component_setalign(&self->recentview.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->recentview.component);
 	// sequenceview
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);
-	psy_ui_component_setalign(&self->sequenceview.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->sequenceview.component,
+		psy_ui_ALIGN_LEFT);
 	// splitbar
 	psy_ui_splitbar_init(&self->splitbar, &self->component);
 	// create statusbar components
@@ -262,8 +270,8 @@ void mainframe_init(MainFrame* self)
 		mainframe_setstatusbartext(self,
 			self->workspace.song->properties.title);
 	}
-	psy_signal_connect(&self->workspace.player.signal_numsongtrackschanged, self,
-		mainframe_onsongtrackschanged);	
+	psy_signal_connect(&self->workspace.player.signal_numsongtrackschanged,
+		self, mainframe_onsongtrackschanged);	
 	psy_signal_connect(&self->workspace.signal_changecontrolskin, self,
 		mainframe_onchangecontrolskin);
 	psy_signal_connect(&self->workspace.signal_dockview, self,
@@ -271,6 +279,7 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_showgear, self,
 		mainframe_onshowgear);
 	mainframe_setstartpage(self);
+	mainframe_updatetitle(self);
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -307,7 +316,8 @@ void mainframe_initstatusbar(MainFrame* self)
 		psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);
 	psy_ui_component_setmargin(&self->viewstatusbars.component, &margin);
-	psy_ui_component_setalign(&self->viewstatusbars.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->viewstatusbars.component,
+		psy_ui_ALIGN_LEFT);
 	psy_ui_component_enablealign(&self->viewstatusbars.component);		
 	machineviewbar_init(&self->machineviewbar, &self->viewstatusbars.component,
 		&self->workspace);
@@ -441,7 +451,8 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
 	} else
 	if (cmd.id == CMD_IMM_ADDMACHINE) {
-		self->machineview.newmachine.pluginsview.calledby = self->tabbar.selected;
+		self->machineview.newmachine.pluginsview.calledby =
+			self->tabbar.selected;
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
 		tabbar_select(&self->machineview.tabbar, 1);
 	} else
@@ -453,7 +464,8 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		SequenceEntry* entry;
 
 		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);		
-		psy_audio_player_setposition(&self->workspace.player, entry ? entry->offset : 0);
+		psy_audio_player_setposition(&self->workspace.player,
+			(entry) ? entry->offset : 0);
 		psy_audio_player_start(&self->workspace.player);
 	} else
 	if (cmd.id == CMD_IMM_PLAYFROMPOS) {
@@ -607,17 +619,14 @@ void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace, int p
 	}
 }
 
-void mainframe_onsongchanged(MainFrame* self, psy_ui_Component* sender, int flag, psy_audio_SongFile* songfile)
+void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
+	psy_audio_SongFile* songfile)
 {		
 	if (flag == WORKSPACE_LOADSONG) {
-		if (workspace_showsonginfoonload(&self->workspace)) {
+		if (workspace_showsonginfoonload(sender)) {
 			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
-		}
-		if (self->workspace.song) {			
-			mainframe_setstatusbartext(self,
-				self->workspace.song->properties.title);
-		}
-	}
+		}		
+	}	
 	mainframe_updatetitle(self);
 	psy_ui_component_invalidate(&self->component);	
 }
@@ -633,6 +642,10 @@ void mainframe_updatetitle(MainFrame* self)
 	psy_snprintf(txt, 512, "[%s.%s]  Psycle Modular Music Creation Studio ",
 		name, ext);			
 	psy_ui_component_settitle(&self->component, txt);
+	if (workspace_song(&self->workspace)) {
+		mainframe_setstatusbartext(self, psy_audio_song_title(
+			workspace_song(&self->workspace)));
+	}
 }
 
 void mainframe_onshowgear(MainFrame* self, Workspace* sender)
@@ -766,7 +779,8 @@ void mainframe_ontimer(MainFrame* self, int timerid)
 	workspace_idle(&self->workspace);
 }
 
-void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index, uintptr_t section, int option)
+void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
+	uintptr_t section, int option)
 {
 	if (index != GEARVIEW) {
 		psy_ui_Component* view;
@@ -857,7 +871,8 @@ void mainframe_ondockview(MainFrame* self, Workspace* sender,
 
 void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2 && psy_ui_mouseevent_target(ev) == &self->recentview.component) {
+	if (ev->button == 2 && psy_ui_mouseevent_target(ev) ==
+			&self->recentview.component) {
 		mainframe_onrecentsongs(self, &self->component);
 	}
 }

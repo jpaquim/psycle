@@ -65,6 +65,11 @@ void psy_audio_song_deallocate(psy_audio_Song*);
 void psy_audio_song_clear(psy_audio_Song*);
 /// set song properties
 void psy_audio_song_setproperties(psy_audio_Song*, const SongProperties*);
+/// return song properties title
+INLINE const char* psy_audio_song_title(psy_audio_Song* self)
+{
+	return self->properties.title;
+}
 /// set song properties bpm
 void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_beat_t bpm);
 /// return song properties bpm

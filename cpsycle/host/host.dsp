@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 lua53.lib ui.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib /nologo /subsystem:windows /machine:I386 /libpath:"..\lua53\Release" /libpath:"..\ui\Release" /libpath:"..\file\Release" /libpath:"..\audio\Release" /libpath:"..\container\Release" /libpath:"..\dsp\Release"
+# ADD LINK32 lua53.lib ui.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib /nologo /subsystem:windows /machine:I386 /out:"..\Release\host.exe" /libpath:"..\lua53\Release" /libpath:"..\ui\Release" /libpath:"..\file\Release" /libpath:"..\audio\Release" /libpath:"..\container\Release" /libpath:"..\dsp\Release"
 
 !ELSEIF  "$(CFG)" == "host - Win32 Debug"
 
@@ -81,7 +81,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 lua53.lib ui.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"..\lua53\Debug" /libpath:"..\ui\Debug" /libpath:"..\file\Debug" /libpath:"..\audio\Debug" /libpath:"..\container\Debug" /libpath:"..\dsp\Debug"
+# ADD LINK32 lua53.lib ui.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib /nologo /subsystem:windows /debug /machine:I386 /out:"../Debug/host.exe" /pdbtype:sept /libpath:"..\lua53\Debug" /libpath:"..\ui\Debug" /libpath:"..\file\Debug" /libpath:"..\audio\Debug" /libpath:"..\container\Debug" /libpath:"..\dsp\Debug"
 
 !ENDIF 
 
@@ -167,6 +167,14 @@ SOURCE=.\src\instrumentview.c
 # Begin Source File
 
 SOURCE=.\src\interpolatecurveview.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\kbdbox.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\kbdhelp.c
 # End Source File
 # Begin Source File
 
@@ -479,6 +487,14 @@ SOURCE=.\src\instrumentview.h
 # Begin Source File
 
 SOURCE=.\src\interpolatecurveview.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\kbdbox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\kbdhelp.h
 # End Source File
 # Begin Source File
 

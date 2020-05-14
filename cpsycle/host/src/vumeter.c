@@ -16,7 +16,8 @@ static void vumeter_onmasterworked(Vumeter*, psy_audio_Machine*,
 	uintptr_t slot, psy_audio_BufferContext*);
 static void vumeter_onsongchanged(Vumeter*, Workspace*);
 static void vumeter_connectmachinessignals(Vumeter*, Workspace*);
-static void vumeter_onpreferredsize(Vumeter*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void vumeter_onpreferredsize(Vumeter*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -31,7 +32,8 @@ static void vtable_init(Vumeter* self)
 	}
 }
 
-void vumeter_init(Vumeter* self, psy_ui_Component* parent, Workspace* workspace)
+void vumeter_init(Vumeter* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);

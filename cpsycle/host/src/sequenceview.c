@@ -28,9 +28,11 @@ static void sequencelistview_onmousedoubleclick(SequenceListView*,
 	psy_ui_MouseEvent*);
 static void sequencelistview_onscroll(SequenceListView*,
 	psy_ui_Component* sender, int stepx, int stepy);
+static void sequencelistview_limitverticalscroll(SequenceListView*);
+static void sequencelistview_limithorizontalscroll(SequenceListView*);
 static void sequencelistview_ontimer(SequenceListView*, int timerid);
-static void sequencelistview_onpatternnamechanged(SequenceListView*, psy_audio_Patterns*,
-	uintptr_t slot);
+static void sequencelistview_onpatternnamechanged(SequenceListView*,
+	psy_audio_Patterns*, uintptr_t slot);
 
 static void sequenceview_onnewentry(SequenceView*);
 static void sequenceview_oninsertentry(SequenceView*);
@@ -845,49 +847,69 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 void sequencelistview_onscroll(SequenceListView* self,
 	psy_ui_Component* sender, int stepx, int stepy)
 {
+	int olddy;
+
+	olddy = self->dy;
 	self->dx += (stepx * self->component.scrollstepx);
 	self->dy += (stepy * self->component.scrollstepy);	
-	psy_ui_component_invalidate(&self->view->trackheader.component);
+	sequencelistview_limitverticalscroll(self);
+	if (olddy != self->dy) {
+		psy_ui_component_invalidate(&self->view->trackheader.component);
+	}
 }
 
 void sequencelistview_adjustscroll(SequenceListView* self)
 {
 	psy_ui_Size size;
+	int smin, smax;
 
+	psy_ui_component_verticalscrollrange(&self->component, &smin, &smax);
 	size = psy_ui_component_size(&self->component);
 	sequencelistview_computetextsizes(self);
-	{ // vertical lines
-		int num;
-		int visi;
-		int top;
-		
-		num = sequence_maxtracksize(self->sequence);		
-		visi = size.height / self->lineheight;
+	sequencelistview_limitverticalscroll(self);
+	sequencelistview_limithorizontalscroll(self);
+}
+
+void sequencelistview_limitverticalscroll(SequenceListView* self)
+{ 
+	int num;
+	int visi;
+	int top;
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(&self->component);	
+	num = sequence_maxtracksize(self->sequence);
+	visi = size.height / self->lineheight;
+	if (visi > 0) {
 		top = -self->dy / self->lineheight;
 		self->component.scrollstepy = self->lineheight;
 		if (visi - num >= 0) {
-			self->dy = 0;		
+			self->dy = 0;
 		} else
-		if (top + visi > num) {
-			self->dy = -(num - visi)	* self->lineheight;
-			if (self->dy > 0) {
-				self->dy = 0;
+			if (top + visi > num) {
+				self->dy = -(num - visi) * self->lineheight;
+				if (self->dy > 0) {
+					self->dy = 0;
+				}
 			}
-		}		
-		psy_ui_component_setverticalscrollrange(&self->component, 0, num - visi);	
-	}	
-	{ // horizontal tracks
-		int num;
-		int visi;
-		
-		num = sequence_sizetracks(self->sequence);
-		visi = size.width / self->trackwidth;
-		self->component.scrollstepx = self->trackwidth;
-		if (visi - num >= 0) {
-			self->dx = 0;		
-		}			
-		psy_ui_component_sethorizontalscrollrange(&self->component, 0, num - visi);	
+		psy_ui_component_setverticalscrollrange(&self->component, 0, num - visi);
 	}
+}
+
+void sequencelistview_limithorizontalscroll(SequenceListView* self)
+{ // horizontal tracks
+	int num;
+	int visi;
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(&self->component);
+	num = sequence_sizetracks(self->sequence);
+	visi = size.width / self->trackwidth;
+	self->component.scrollstepx = self->trackwidth;
+	if (visi - num >= 0) {
+		self->dx = 0;
+	}
+	psy_ui_component_sethorizontalscrollrange(&self->component, 0, num - visi);
 }
 
 void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)

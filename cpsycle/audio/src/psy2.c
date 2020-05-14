@@ -548,7 +548,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 		}
 
 		// Validate the machine arrays. 
-		for (int i = 0; i < 128; i++) // First, we add the output volumes to a Matrix for reference later
+		for (i = 0; i < 128; ++i) // First, we add the output volumes to a Matrix for reference later
 		{
 			if (!_machineActive[i])
 			{
@@ -569,15 +569,16 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 		if (psyfile_read(songfile->file, &busEffect[0], sizeof(busEffect)) == 0)
 		{
 			int j = 0;
+			int i = 0;
 			unsigned char invmach[128];
 			memset(invmach, 255, sizeof(invmach));
 			// The guessing procedure does not rely on the machmode because if a plugin
 			// is missing, then it is always tagged as a generator.
-			for (int i = 0; i < 64; i++)
+			for (i = 0; i < 64; i++)
 			{
 				if (busMachine[i] < 128 && busMachine[i] != 255) invmach[busMachine[i]] = i;
 			}
-			for (int i = 1; i < 128; i++) // machine 0 is the Master machine.
+			for (i = 1; i < 128; i++) // machine 0 is the Master machine.
 			{
 				if (_machineActive[i])
 				{
@@ -596,14 +597,16 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 		}
 
 		// Validate that there isn't any duplicated machine.
-		for (int i = 0; i < 64; i++)
+		for (i = 0; i < 64; i++)
 		{
-			for (int j = i + 1; j < 64; j++)
+			int32_t j;
+
+			for (j = i + 1; j < 64; j++)
 			{
 				if (busMachine[i] == busMachine[j]) busMachine[j] = 255;
 				if (busEffect[i] == busEffect[j]) busEffect[j] = 255;
 			}
-			for (int j = 0; j < 64; j++)
+			for (j = 0; j < 64; j++)
 			{
 				if (busMachine[i] == busEffect[j]) busEffect[j] = 255;
 			}
@@ -612,7 +615,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 		// Patch 1.2: Fixes erroneous machine mode when a dummy replaces a bad plugin
 		// (missing dll, or when the load process failed).
 		// At the same time, we validate the indexes of the busMachine and busEffects arrays.
-		for (int i = 0; i < 64; i++)
+		for (i = 0; i < 64; i++)
 		{
 			if (busEffect[i])
 			{
@@ -671,15 +674,18 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 			//progress.m_Progress.SetPos(8192 + 4096 + 2048 + 1024);
 			//::Sleep(1);
 			unsigned char invmach[128];
+			int j = 0;
+			int k = 64;
+
 			memset(invmach, 255, sizeof(invmach));
-			for (int i = 0; i < 64; i++)
+			for (i = 0; i < 64; i++)
 			{
 				if (busMachine[i] < 128 && busMachine[i] != 255) invmach[busMachine[i]] = i;
 				if (busEffect[i] < 128 && busEffect[i] != 255) invmach[busEffect[i]] = i + 64;
 			}
 			invmach[0] = MASTER_INDEX;
 			
-			for (int i = 0; i < 128; i++)
+			for (i = 0; i < 128; i++)
 			{
 				if (invmach[i] != 255)
 				{
@@ -695,9 +701,8 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 			}
 			// verify that there isn't any machine that hasn't been copied into _pMachine
 			// Shouldn't happen. It would mean a damaged file.
-			int j = 0;
-			int k = 64;
-			for (int i = 0; i < 128; i++)
+			
+			for (i = 0; i < 128; i++)
 			{
 				if (_machineActive[i])
 				{

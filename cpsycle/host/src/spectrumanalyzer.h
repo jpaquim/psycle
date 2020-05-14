@@ -13,8 +13,6 @@
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Wire wire;
-	psy_dsp_amp_t leftavg;
-	psy_dsp_amp_t rightavg;
 	float invol;
 	float mult;
 	int bar_heights[SCOPE_SPEC_BANDS];

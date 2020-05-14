@@ -163,6 +163,10 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->winid = -1;
 	self->hwnd = 0;
 	self->wndproc = 0;
+	self->vscrollmin = 0;
+	self->vscrollmax = 100;
+	self->hscrollmin = 0;
+	self->hscrollmax = 100;
 	parent_imp = parent ? (psy_ui_win_ComponentImp*)parent : 0;	
 	psy_ui_win_component_create_window(self, parent_imp, classname, x, y, width, height,
 		dwStyle, usecommand);
@@ -498,16 +502,17 @@ void dev_hidehorizontalscrollbar(psy_ui_win_ComponentImp* self)
 }
 
 void dev_sethorizontalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, int scrollmax)
-{
-	SCROLLINFO si;
+{	
+	if (self->hscrollmin != scrollmin || self->hscrollmax != scrollmax) {
+		SCROLLINFO si;
 
-	memset(&si, 0, sizeof(SCROLLINFO));
-	si.cbSize = sizeof(si);	
-	si.fMask = SIF_RANGE;
-	GetScrollInfo(self->hwnd, SB_HORZ, &si);
-	if (si.nMin != scrollmin || si.nMax != scrollmax) {
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_RANGE;
+		GetScrollInfo(self->hwnd, SB_HORZ, &si);
 		si.nMin = max(0, scrollmin);
-		si.nMax = scrollmax;
+		si.nMax = max(0, scrollmax);
+		self->hscrollmin = si.nMin;
+		self->hscrollmax = si.nMax;
 		SetScrollInfo(self->hwnd, SB_HORZ, &si, TRUE);
 	}
 }
@@ -515,14 +520,8 @@ void dev_sethorizontalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, 
 void dev_horizontalscrollrange(psy_ui_win_ComponentImp* self, int* scrollmin,
 	int* scrollmax)
 {
-	SCROLLINFO si;
-
-	memset(&si, 0, sizeof(SCROLLINFO));
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_RANGE;
-	GetScrollInfo(self->hwnd, SB_HORZ, &si);
-	*scrollmin = si.nMin;
-	*scrollmax = si.nMax;
+	*scrollmin = self->hscrollmin;
+	*scrollmax = self->hscrollmax;
 }
 
 void dev_showverticalscrollbar(psy_ui_win_ComponentImp* self)
@@ -548,16 +547,18 @@ void dev_hideverticalscrollbar(psy_ui_win_ComponentImp* self)
 }
 
 void dev_setverticalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, int scrollmax)
-{
-	SCROLLINFO si;
+{		
+	if (self->vscrollmin != scrollmin || self->vscrollmax != scrollmax) {
+		SCROLLINFO si;
 
-	si.cbSize = sizeof(si);	
-	si.fMask = SIF_RANGE;
-	GetScrollInfo(self->hwnd, SB_VERT, &si);	
-	if (si.nMin != scrollmin || si.nMax != scrollmax) {
+		si.cbSize = sizeof(si);
+		si.fMask = SIF_RANGE;
 		si.nMin = max(0, scrollmin);
-		si.nMax = scrollmax;
-		SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
+		si.nMax = max(0, scrollmax);
+		self->vscrollmin = si.nMin;
+		self->vscrollmax = si.nMax;
+		si.nPage = 0;
+		SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);		
 	}
 }
 
@@ -616,13 +617,8 @@ void dev_sethorizontalscrollposition(psy_ui_win_ComponentImp* self, int position
 void dev_verticalscrollrange(psy_ui_win_ComponentImp* self, int* scrollmin,
 	int* scrollmax)
 {
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_RANGE;	
-	GetScrollInfo(self->hwnd, SB_VERT, &si);
-	*scrollmin = si.nMin;
-	*scrollmax = si.nMax;
+	*scrollmin = self->vscrollmin;
+	*scrollmax = self->vscrollmax;
 }
 
 psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)

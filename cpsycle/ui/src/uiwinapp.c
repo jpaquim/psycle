@@ -173,7 +173,26 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				if (imp->component && imp->component->signal_focuslost.slots) {
 					psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
 				}
-			break;			
+			break;	
+			case WM_MOUSEWHEEL:
+			{
+				int preventdefault = 0;
+				psy_ui_MouseEvent ev;
+				POINT pt_client;
+
+				pt_client.x = (SHORT)LOWORD(lParam);
+				pt_client.y = (SHORT)HIWORD(lParam);
+				ScreenToClient(imp->hwnd, &pt_client);
+				psy_ui_mouseevent_init(&ev,
+					pt_client.x, pt_client.y, (short)LOWORD(wParam),
+					(short)HIWORD(wParam),
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				imp->component->vtable->onmousewheel(imp->component, &ev);
+				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
+					&ev);
+				preventdefault = ev.preventdefault;				
+			}
+			break;
 			default:
 			break;
 		}
