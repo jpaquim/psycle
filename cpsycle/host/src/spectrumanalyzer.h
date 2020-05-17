@@ -19,13 +19,10 @@ typedef struct {
 	int scope_peak_rate;
 	int scope_spec_rate;
 	int hold;	
-	// memories for vu-meter
-	psy_dsp_amp_t peakL, peakR;
-	int peakLifeL, peakLifeR;
 	int scope_spec_mode;
 	int scope_spec_samples;
 	FFTClass fftSpec;
-	Workspace* workspace;	
+	Workspace* workspace;
 } SpectrumAnalyzer;
 
 void spectrumanalyzer_init(SpectrumAnalyzer*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);

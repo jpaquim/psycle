@@ -17,4 +17,10 @@ typedef struct {
 
 void octavebar_init(OctaveBar*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* octavebar_base(OctaveBar* self)
+{
+	return &self->component;
+}
+
+
 #endif

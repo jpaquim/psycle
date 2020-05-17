@@ -31,8 +31,9 @@ void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType
 	self->dispose = 0;    
 	memset(&self->item, 0, sizeof(psy_Property));    
 	self->item.key = strdup(key);
-	self->item.text = 0;
-	self->item.shorttext = 0;
+	self->item.text = NULL;
+	self->item.translation = NULL;
+	self->item.shorttext = NULL;
 	self->item.typ = typ;
 	self->item.hint = PSY_PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
@@ -58,6 +59,7 @@ void properties_free(psy_Properties* self)
 				}			
 			free(p->item.key);
 			free(p->item.text);
+			free(p->item.translation);
 			free(p->item.shorttext);
 			if (p->item.typ == PSY_PROPERTY_TYP_STRING) {
 				free(p->item.value.s);
@@ -116,6 +118,7 @@ psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 
 		rv->item.key = p->item.key ? strdup(p->item.key) : 0;
 		rv->item.text = p->item.text ? strdup(p->item.text) : 0;
+		rv->item.translation = p->item.translation ? strdup(p->item.translation) : 0;
 		rv->item.shorttext = p->item.shorttext ? strdup(p->item.shorttext) : 0;
 		rv->item.min = p->item.min;
 		rv->item.max = p->item.max;		
@@ -653,6 +656,20 @@ psy_Properties* psy_properties_settext(psy_Properties* self, const char* text)
 const char* psy_properties_text(psy_Properties* self)
 {
 	return self->item.text ? self->item.text : self->item.key ? self->item.key : "";
+}
+
+psy_Properties* psy_properties_settranslation(psy_Properties* self, const char* text)
+{
+	if (self) {
+		free(self->item.translation);
+		self->item.translation = strdup(text);
+	}
+	return self;
+}
+
+const char* psy_properties_translation(psy_Properties* self)
+{
+	return self->item.translation ? self->item.translation : psy_properties_text(self);
 }
 
 psy_Properties* psy_properties_setshorttext(psy_Properties* self, const char* text)

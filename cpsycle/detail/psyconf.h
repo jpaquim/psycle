@@ -51,6 +51,9 @@
 #define PSYCLE_DEFAULT_FONT "tahoma;-12"
 #endif
 
+#define PSYCLE_DEFAULT_LANG_EN
+// #define PSYCLE_DEFAULT_LANG_ES
+
 /* #define PSYCLE_LOG_WORKEVENTS */
 
 #endif /* psy_CONF_H */

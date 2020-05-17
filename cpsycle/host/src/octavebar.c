@@ -9,46 +9,64 @@
 
 #include "../../detail/portable.h"
 
-static void OnDestroy(OctaveBar*, psy_ui_Component* component);
-static void BuildOctaveBox(OctaveBar* self);
-static void OnOctaveBoxSelChange(OctaveBar*, psy_ui_Component* sender, int sel);
-static void OnOctaveChanged(OctaveBar*, Workspace*, int octave);
-static void OnSongChanged(OctaveBar*, Workspace*, int flag, psy_audio_SongFile*);
+static void octavebar_updatetext(OctaveBar*);
+static void octavebar_initalign(OctaveBar*);
+static void octavebar_ondestroy(OctaveBar*, psy_ui_Component* component);
+static void octavebar_buildoctavebox(OctaveBar*);
+static void octavebar_onoctaveboxselchange(OctaveBar*, psy_ui_Component* sender, int sel);
+static void octavebar_onoctavechanged(OctaveBar*, Workspace*, int octave);
+static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag, psy_audio_SongFile*);
+static void octavebar_onlanguagechanged(OctaveBar*, Workspace* sender);
 
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
-{	
+{
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);	
-	psy_ui_label_init(&self->headerlabel, &self->component);	
-	psy_ui_label_settext(&self->headerlabel, "Octave");		
-	psy_ui_combobox_init(&self->octavebox, &self->component);
+	psy_ui_component_init(octavebar_base(self), parent);
+	psy_ui_component_enablealign(octavebar_base(self));
+	psy_ui_component_setalignexpand(octavebar_base(self),
+		psy_ui_HORIZONTALEXPAND);
+	psy_signal_connect(&octavebar_base(self)->signal_destroy, self,
+		octavebar_ondestroy);
+	psy_ui_label_init(&self->headerlabel, octavebar_base(self));
+	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->octavebox, 2);	
-	BuildOctaveBox(self);	
+	octavebar_buildoctavebox(self);
 	psy_signal_connect(&self->octavebox.signal_selchanged, self,
-		OnOctaveBoxSelChange);	
-	psy_signal_connect(&workspace->signal_octavechanged, self, OnOctaveChanged);
-	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	{		
-		psy_ui_Margin margin;
-
-		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
-			psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0));				
-		psy_list_free(psy_ui_components_setalign(
-			psy_ui_component_children(&self->component, 0),
-			psy_ui_ALIGN_LEFT,
-			&margin));		
-	}
+		octavebar_onoctaveboxselchange);
+	psy_signal_connect(&workspace->signal_octavechanged, self,
+		octavebar_onoctavechanged);
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		octavebar_onsongchanged);
+	psy_signal_connect(&self->workspace->signal_languagechanged, self,
+		octavebar_onlanguagechanged);
+	octavebar_updatetext(self);
+	octavebar_initalign(self);
 }
 
-void OnDestroy(OctaveBar* self, psy_ui_Component* component)
+void octavebar_updatetext(OctaveBar* self)
+{
+	psy_ui_label_settext(&self->headerlabel,
+		workspace_translate(self->workspace, "Octave"));
+}
+
+void octavebar_initalign(OctaveBar* self)
+{
+	psy_ui_Margin margin;
+
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(octavebar_base(self), psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));
+}
+
+void octavebar_ondestroy(OctaveBar* self, psy_ui_Component* component)
 {
 }
 
-void BuildOctaveBox(OctaveBar* self)
+void octavebar_buildoctavebox(OctaveBar* self)
 {
 	int octave;
 	char text[20];
@@ -60,17 +78,23 @@ void BuildOctaveBox(OctaveBar* self)
 	psy_ui_combobox_setcursel(&self->octavebox, self->workspace->octave);
 }
 
-void OnOctaveBoxSelChange(OctaveBar* self, psy_ui_Component* sender, int sel)
+void octavebar_onoctaveboxselchange(OctaveBar* self, psy_ui_Component* sender, int sel)
 {	
 	workspace_setoctave(self->workspace, sel);
 }
 
-void OnOctaveChanged(OctaveBar* self, Workspace* workspace, int octave)
+void octavebar_onoctavechanged(OctaveBar* self, Workspace* workspace, int octave)
 {
 	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
 }
 
-void OnSongChanged(OctaveBar* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void octavebar_onsongchanged(OctaveBar* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
+}
+
+void octavebar_onlanguagechanged(OctaveBar* self, Workspace* sender)
+{
+	octavebar_updatetext(self);
+	psy_ui_component_align(octavebar_base(self));
 }

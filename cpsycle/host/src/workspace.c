@@ -30,6 +30,7 @@ static void workspace_disposesignals(Workspace*);
 static void workspace_makerecentsongs(Workspace*);
 static void workspace_makeconfig(Workspace*);
 static void workspace_makegeneral(Workspace*);
+static void workspace_makelanguagelist(Workspace*, psy_Properties*);
 static void workspace_makenotes(Workspace*);
 static void workspace_makevisual(Workspace*);
 static void workspace_makepatternview(Workspace*, psy_Properties*);
@@ -46,7 +47,6 @@ static void workspace_makenotes(Workspace*);
 static void workspace_makeinputoutput(Workspace*);
 static void workspace_makemidi(Workspace*);
 static void workspace_makelang(Workspace*);
-static void workspace_makelangen(Workspace*);
 static void workspace_makelanges(Workspace*);
 static void applysongproperties(Workspace*);
 static void workspace_makedriverlist(Workspace*);
@@ -58,10 +58,13 @@ static void workspace_makecompatibility(Workspace*);
 static const char* workspace_driverpath(Workspace*);
 static const char* workspace_driverkey(Workspace*);
 static const char* workspace_eventdriverpath(Workspace*);
+const char* workspace_languagekey(Workspace*);
 static void workspace_configaudio(Workspace*);
 static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
-static void workspace_setsong(Workspace*, psy_audio_Song*, int flag, psy_audio_SongFile* songfile);
+static void workspace_configlanguage(Workspace*);
+static void workspace_setsong(Workspace*, psy_audio_Song*, int flag,
+	psy_audio_SongFile* songfile);
 static void workspace_onloadprogress(Workspace*, psy_audio_Song*, int progress);
 static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*, int progress);
 static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelection*);
@@ -83,7 +86,8 @@ static void machinecallback_fileselect_directory(Workspace*);
 static void machinecallback_output(Workspace*, const char* text);
 static bool machinecallback_addcapture(Workspace*, int index);
 static bool machinecallback_removecapture(Workspace*, int index);
-static void machinecallback_readbuffers(Workspace*, int index, float** pleft, float** pright, int numsamples);
+static void machinecallback_readbuffers(Workspace*, int index, float** pleft,
+	float** pright, int numsamples);
 static const char* machinecallback_capturename(Workspace*, int index);
 static int machinecallback_numcaptures(Workspace*);
 static const char* machinecallback_playbackname(Workspace*, int index);
@@ -95,7 +99,11 @@ static void workspace_onterminaloutput(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
+// recent files
 static void workspace_addrecentsong(Workspace*, const char* path);
+static void workspace_onlanguagechanged(Workspace*);
+static int workspace_onchangelanguageenum(Workspace*, psy_Properties*,
+	int level);
 
 void history_init(History* self)
 {
@@ -155,6 +163,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->currnavigation = 0;
 	self->currview = 0;
 	self->dialbitmappath = 0;
+	self->lang = NULL;
 	history_init(&self->history);
 	workspace_makerecentsongs(self);
 	workspace_makeconfig(self);	
@@ -171,7 +180,9 @@ void workspace_init(Workspace* self, void* handle)
 	workspace_initplayer(self);		
 	psy_audio_patterneditposition_init(&self->patterneditposition);
 	psy_audio_pattern_init(&self->patternpaste);
-	self->sequencepaste = 0;	
+	self->sequencepaste = 0;
+	psy_signal_connect(&self->signal_languagechanged, self,
+		workspace_onlanguagechanged);
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -206,6 +217,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_dockview);
 	psy_signal_init(&self->signal_defaultfontchanged);
 	psy_signal_init(&self->signal_showgear);
+	psy_signal_init(&self->signal_languagechanged);
 }
 
 void workspace_dispose(Workspace* self)
@@ -217,7 +229,7 @@ void workspace_dispose(Workspace* self)
 	properties_free(self->config);
 	self->config = 0;
 	properties_free(self->lang);
-	self->lang = 0;
+	self->lang = NULL;
 	free(self->filename);
 	self->filename = 0;
 	plugincatcher_dispose(&self->plugincatcher);
@@ -255,6 +267,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_dockview);
 	psy_signal_dispose(&self->signal_defaultfontchanged);
 	psy_signal_dispose(&self->signal_showgear);
+	psy_signal_dispose(&self->signal_languagechanged);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -303,6 +316,30 @@ void workspace_configaudio(Workspace* self)
 	workspace_driverconfig(self);
 }
 
+void workspace_configlanguage(Workspace* self)
+{
+	const char* lang;
+	
+	lang = workspace_languagekey(self);
+	if (lang) {
+		if (strcmp(lang, "en") == 0) {
+			properties_free(self->lang);
+			self->lang = psy_properties_create();
+			psy_signal_emit(&self->signal_languagechanged, self,
+				0);
+			psy_ui_updatealign(self->mainhandle, NULL);
+		} else
+		if (strcmp(lang, "es") == 0) {
+			properties_free(self->lang);
+			self->lang = psy_properties_create();
+			workspace_makelanges(self);
+			psy_signal_emit(&self->signal_languagechanged, self,
+				0);
+			psy_ui_updatealign(self->mainhandle, NULL);
+		}
+	}
+}
+
 void workspace_configvisual(Workspace* self)
 {	
 	psy_Properties* visual;
@@ -333,6 +370,19 @@ const char* workspace_driverpath(Workspace* self)
 
 	if (p = psy_properties_read(self->inputoutput, "driver")) {	
 		if (p = psy_properties_read_choice(p)) {		
+			rv = psy_properties_valuestring(p);
+		}
+	}
+	return rv;
+}
+
+const char* workspace_languagekey(Workspace* self)
+{
+	psy_Properties* p;
+	const char* rv = 0;
+
+	if (p = psy_properties_read(self->general, "lang")) {
+		if (p = psy_properties_read_choice(p)) {
 			rv = psy_properties_valuestring(p);
 		}
 	}
@@ -437,7 +487,8 @@ void workspace_makegeneral(Workspace* self)
 	psy_properties_settext(self->general, "General");
 	p = psy_properties_append_string(self->general, "version", "alpha");
 	psy_properties_settext(p, "Version");
-	p->item.hint = PSY_PROPERTY_HINT_HIDE;
+	psy_properties_sethint(p, PSY_PROPERTY_HINT_HIDE);
+	workspace_makelanguagelist(self, self->general);
 	p = psy_properties_append_bool(self->general, "showaboutatstart", 1);
 	psy_properties_settext(p, "Show About at Startup");
 	p = psy_properties_append_bool(self->general, "showsonginfoonload", 1);
@@ -451,6 +502,21 @@ void workspace_makegeneral(Workspace* self)
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "saverecentsongs", 1),
 		"Save Recent Songs");
+}
+
+void workspace_makelanguagelist(Workspace* self, psy_Properties* parent)
+{
+	psy_Properties* langchoice;
+
+	langchoice = psy_properties_settext(
+		psy_properties_append_choice(parent, "lang", 0),
+		"Language");
+	psy_properties_settext(
+		psy_properties_append_string(langchoice, "en", "en"),
+		"english");
+	psy_properties_settext(
+		psy_properties_append_string(langchoice, "es", "es"),
+		"spanish");
 }
 
 void workspace_makevisual(Workspace* self)
@@ -478,7 +544,8 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	psy_Properties* pvc;	
 	
 	pvc = psy_properties_create_section(visual, "patternview");
-	psy_properties_settext(pvc, "Pattern View");
+	psy_properties_settext(pvc,
+		"Pattern View");
 	psy_properties_settext(
 		psy_properties_append_font(pvc, "font", PSYCLE_DEFAULT_FONT),
 		"Font");
@@ -683,7 +750,7 @@ void workspace_makemachineview(Workspace* self, psy_Properties* visual)
 	
 	mvc = psy_properties_settext(
 		psy_properties_create_section(visual, "machineview"),
-		"Machine View");
+			"Machine View");
 	psy_properties_settext(
 		psy_properties_append_bool(mvc, "drawmachineindexes", 1),
 		"Draw psy_audio_Machine Indexes");
@@ -859,7 +926,7 @@ void workspace_makekeyboard(Workspace* self)
 {	
 	self->keyboard = psy_properties_settext(
 		psy_properties_create_section(self->config, "keyboard"),
-		"Keyboard and Misc.");
+		"Keyboard and Misc");
 	psy_properties_settext(
 		psy_properties_append_bool(self->keyboard, 
 		"recordtweaksastws", 0),
@@ -874,7 +941,7 @@ void workspace_makedirectories(Workspace* self)
 {	
 	self->directories = psy_properties_settext(
 		psy_properties_create_section(self->config, "directories"),
-		"Directories");
+			"Directories");
 	workspace_makedirectory(self, "songs", "Song directory",
 		PSYCLE_SONGS_DEFAULT_DIR);	
 	workspace_makedirectory(self, "samples", "Samples directory",
@@ -897,7 +964,7 @@ void workspace_makecompatibility(Workspace* self)
 {
 	self->compatibility = psy_properties_settext(
 		psy_properties_create_section(self->config, "compatibility"),
-		"Compatibility");
+			"Compatibility");
 	psy_properties_settext(
 		psy_properties_append_bool(self->compatibility, "loadnewgamefxblitz", 0),
 		"Load new gamefx and Blitz if version unknown");
@@ -918,8 +985,9 @@ void workspace_makeinputoutput(Workspace* self)
 	self->inputoutput = psy_properties_create_section(self->config, "inputoutput");
 	workspace_makedriverlist(self);
 	self->driverconfigure = psy_properties_settext(
-		psy_properties_create_section(self->inputoutput, "configure"),
-		"Configure");
+		psy_properties_create_section(self->inputoutput,			
+			"configure"),
+			"Configure");
 	self->driverconfigure->item.save = 0;
 	workspace_makedriverconfigurations(self);
 }
@@ -931,7 +999,7 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
 	drivers = psy_properties_append_choice(self->inputoutput, "driver", 2); 
-	psy_properties_settext(drivers, "AudioDriver");
+	psy_properties_settext(drivers, "Audio Drivers");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	psy_properties_append_string(drivers, "mme", ".\\mme.dll");
@@ -1022,8 +1090,9 @@ void workspace_makemidi(Workspace* self)
 		psy_properties_append_action(self->midi, "removeeventdriver"),
 			"Remove active driver");
 	self->midiconfigure = psy_properties_settext(
-		psy_properties_create_section(self->midi, "configure"),
-		"Configure");
+		psy_properties_create_section(self->midi,
+			"configure"),
+			"Configure");
 }
 
 void workspace_updatemididriverlist(Workspace* self)
@@ -1055,34 +1124,62 @@ void workspace_updatemididriverlist(Workspace* self)
 void workspace_makelang(Workspace* self)
 {
 	self->lang = psy_properties_create();
-	workspace_makelangen(self);
-//	workspace_makelanges(self);
-}
-
-void workspace_makelangen(Workspace* self)
-{
-	psy_properties_append_string(self->lang, "load", "Load");
-	psy_properties_append_string(self->lang, "save", "Save");
-	psy_properties_append_string(self->lang, "new", "New");
-	psy_properties_append_string(self->lang, "undo", "Undo");
-	psy_properties_append_string(self->lang, "redo", "Redo");
-	psy_properties_append_string(self->lang, "play", "Play");
-	psy_properties_append_string(self->lang, "sel", "Sel");
-	psy_properties_append_string(self->lang, "stop", "Stop");
+#if defined(PSYCLE_DEFAULT_LANG_ES)	
+	workspace_makelanges(self);
+#endif
 }
 
 void workspace_makelanges(Workspace* self)
 {
-	psy_properties_write_string(self->lang, "load", "Cargar");
-	psy_properties_write_string(self->lang, "save", "Guardar");
-	psy_properties_write_string(self->lang, "new", "Nuevo");
-	psy_properties_write_string(self->lang, "undo", "Deshacer");
-	psy_properties_write_string(self->lang, "redo", "Rehacer");
-	psy_properties_write_string(self->lang, "play", "Toca");
-	psy_properties_write_string(self->lang, "stop", "Para");
+	psy_properties_write_string(self->lang, "Load", "Cargar");
+	psy_properties_write_string(self->lang, "Save", "Guardar");
+	psy_properties_write_string(self->lang, "New", "Nuevo");
+	psy_properties_write_string(self->lang, "Undo", "Deshacer");
+	psy_properties_write_string(self->lang, "Redo", "Rehacer");
+	psy_properties_write_string(self->lang, "Play", "Toca");
+	psy_properties_write_string(self->lang, "Stop", "Para");
+	psy_properties_write_string(self->lang, "Help", "Ayuda");
+	psy_properties_write_string(self->lang, "About", "Acerca de");
+	psy_properties_write_string(self->lang, "Machines", "Máquinas");
+	psy_properties_write_string(self->lang, "Instrument", "Instrumento");
+	psy_properties_write_string(self->lang, "Instruments", "Instrumentos");
+	psy_properties_write_string(self->lang, "New Machine", "Nueva Máquina");
+	psy_properties_write_string(self->lang, "Wires", "Cables");
+	psy_properties_write_string(self->lang, "Settings", "Opciones");
+	psy_properties_write_string(self->lang, "Copy", "Copiar");
+	psy_properties_write_string(self->lang, "Del", "Eliminar");
+	psy_properties_write_string(self->lang, "Paste", "Pegar");
+	psy_properties_write_string(self->lang, "Clear", "Borrar");
+	psy_properties_write_string(self->lang, "New Trk", "Nuevo Trk");
+	psy_properties_write_string(self->lang, "Del Trk", "Eliminar Trk");
+	psy_properties_write_string(self->lang, "Clone", "Clonar");
+	psy_properties_write_string(self->lang, "Follow Song", "Seguir Song");
+	psy_properties_write_string(self->lang, "Show playlist", "Mostrar lista de reproducción");
+	psy_properties_write_string(self->lang, "Show pattern names", "Mostrar nombres del patterns");
+	psy_properties_write_string(self->lang, "Record tweaks", "Grabar tweaks");
+	psy_properties_write_string(self->lang, "Greetings", "Saludos");	
+	psy_properties_write_string(self->lang, "Octave", "Octava");
+	psy_properties_write_string(self->lang, "No Machines Loaded", "No Máquinas cargado");
+	psy_properties_write_string(self->lang, "No Machine", "No Máquina");
+	psy_properties_write_string(self->lang, "OK", "¡vale!");
+	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");	
+	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");
+	psy_properties_write_string(self->lang, "Machine View", "Vista de las Máquinas");
+	psy_properties_write_string(self->lang, "Pattern View", "Vista del Pattern");
+	psy_properties_write_string(self->lang, "Keyboard and Misc", "Teclado y diverso");
+	psy_properties_write_string(self->lang, "Compatibility", "Compatibilidad");
+	psy_properties_write_string(self->lang, "Directories", "Directorios");
+	psy_properties_write_string(self->lang, "Configure", "Configurar");
+	psy_properties_write_string(self->lang, "Lines per beat", "Líneas por beat");
+	psy_properties_write_string(self->lang, "english", "inglés");
+	psy_properties_write_string(self->lang, "spanish", "español");
+	psy_properties_write_string(self->lang, "Language", "idioma");
+	psy_properties_write_string(self->lang, "Properties", "Propiedades");	
+	psy_properties_write_string(self->lang, "File", "Archivo");
 }
 
-const char* workspace_translate(Workspace* self, const char* key) {
+const char* workspace_translate(Workspace* self, const char* key)
+{
 	return psy_properties_readstring(self->lang, key, key);	
 }
 
@@ -1229,7 +1326,10 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 		psy_audio_player_reloaddriver(&self->player, psy_properties_valuestring(property),
 			workspace_driverconfiguration(self));
 		workspace_driverconfig(self);
-	} else	
+	} else
+	if (choice && (strcmp(psy_properties_key(choice), "lang") == 0)) {
+		workspace_configlanguage(self);
+	} else
 	if (strcmp(psy_properties_key(property), "defaultfont") == 0) {
 		psy_ui_Font font;
 		psy_ui_FontInfo fontinfo;
@@ -1496,7 +1596,8 @@ void workspace_load_configuration(Workspace* self)
 	char path[_MAX_PATH];
 	
 	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
-	propertiesio_load(self->config, path, 0);	
+	propertiesio_load(self->config, path, 0);
+	workspace_configlanguage(self);
 	workspace_configaudio(self);	
 	eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_updatemididriverlist(self);
@@ -2116,4 +2217,18 @@ bool workspace_isconnectasmixersend(Workspace* self)
 void workspace_showgear(Workspace* self)
 {
 	psy_signal_emit(&self->signal_showgear, self, 0);
+}
+
+void workspace_onlanguagechanged(Workspace* self)
+{
+	psy_properties_enumerate(self->config->children, self,
+		workspace_onchangelanguageenum);
+}
+
+int workspace_onchangelanguageenum(Workspace* self,
+	psy_Properties* property, int level)
+{
+	psy_properties_settranslation(property, workspace_translate(self,
+		psy_properties_text(property)));
+	return TRUE;
 }

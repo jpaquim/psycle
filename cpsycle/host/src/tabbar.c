@@ -58,6 +58,12 @@ void tab_dispose(Tab* self)
 	free(self->text);
 }
 
+void tab_settext(Tab* self, const char* text)
+{
+	free(self->text);
+	self->text = strdup(text);	
+}
+
 void tabbar_init(TabBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(tabbar_base(self), parent);

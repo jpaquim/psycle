@@ -31,10 +31,12 @@ typedef struct {
 	psy_ui_Button paste;
 	psy_ui_Button singlesel;
 	psy_ui_Button multisel;	
-	void* context;	
+	void* context;
+	Workspace* workspace;
 } SequenceButtons;
 
-void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent);
+void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent,
+	Workspace*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -90,9 +92,11 @@ typedef struct {
 	psy_ui_CheckBox showplaylist;
 	psy_ui_CheckBox recordtweaks;
 	psy_ui_CheckBox multichannelaudition;
+	Workspace* workspace;
 } SequencerOptionsBar;
 
-void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent);
+void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent,
+	Workspace*);
 
 typedef struct SequenceView {
 	psy_ui_Component component;	

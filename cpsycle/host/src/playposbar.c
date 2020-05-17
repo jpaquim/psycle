@@ -32,7 +32,7 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_timer, self,
 		playposbar_ontimer);
 	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	psy_ui_component_starttimer(&self->component, TIMERID_PLAYPOSBAR, 50);

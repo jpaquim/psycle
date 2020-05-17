@@ -16,4 +16,9 @@ typedef struct {
 
 void undoredobar_init(UndoRedoBar*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* undoredobar_base(UndoRedoBar* self)
+{
+	return &self->component;
+}
+
 #endif

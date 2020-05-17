@@ -143,7 +143,7 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 		
 	strcpy(text, multipath);
 	token = strtok(text, seps);
-	while(token != 0) {
+	while (token != NULL) {
 		psy_dir_enumerate_recursive(self, token, wildcard, option, onenumdir);
 		token = strtok(0, seps );
 	}
@@ -303,7 +303,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					searchname = "blitzn:0";
 					searchtype = machtype;
 					searchresult = 0;
-					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+					psy_properties_enumerate(self->plugins, self,
+						onpropertiesenum);
 				}
 				if (!searchresult) {
 					if (newgamefxblitzifversionunknown) {						
@@ -313,7 +314,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					}
 					searchtype = machtype;
 					searchresult = 0;
-					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+					psy_properties_enumerate(self->plugins, self,
+						onpropertiesenum);
 				}
 			} else
 			if (strstr(path, "gamefx")) {
@@ -325,12 +327,14 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				}
 				searchtype = machtype;
 				searchresult = 0;
-				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				psy_properties_enumerate(self->plugins, self,
+					onpropertiesenum);
 				if (!searchresult) {
 					searchname = "gamefxn:0";
 					searchtype = machtype;
 					searchresult = 0;
-					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+					psy_properties_enumerate(self->plugins, self,
+						onpropertiesenum);
 				}
 				if (!searchresult) {
 					if (newgamefxblitzifversionunknown) {
@@ -341,7 +345,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					}
 					searchtype = machtype;
 					searchresult = 0;
-					psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+					psy_properties_enumerate(self->plugins, self,
+						onpropertiesenum);
 				}
 			}
 		}
@@ -350,7 +355,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchname = "blitz:0";
 				searchtype = machtype;
 				searchresult = 0;
-				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				psy_properties_enumerate(self->plugins, self,
+					onpropertiesenum);
 			}
 		}
 		if (!searchresult) {
@@ -358,7 +364,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchname = "blitzn:0";
 				searchtype = machtype;
 				searchresult = 0;
-				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				psy_properties_enumerate(self->plugins, self,
+					onpropertiesenum);
 			}
 		}
 		if (!searchresult) {
@@ -366,7 +373,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchname = "blitz16:0";
 				searchtype = machtype;
 				searchresult = 0;
-				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				psy_properties_enumerate(self->plugins, self,
+					onpropertiesenum);
 			}
 		}
 		if (searchresult) {			

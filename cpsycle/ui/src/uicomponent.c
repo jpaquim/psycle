@@ -8,9 +8,6 @@
 #include "uiapp.h"
 #include "uiimpfactory.h"
 
-//#include "uiwincomponentimp.h"
-//#include "uiwinapp.h"
-
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -37,7 +34,22 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 			psy_ui_component_updatefont(child);						
 		}
 		// align
+		psy_ui_updatealign(main, q);
+	}
+}
+
+void psy_ui_updatealign(psy_ui_Component* main, psy_List* children)
+{
+	if (main) {
+		psy_List* p;
+		psy_List* q;
+
 		psy_ui_component_align(main);
+		if (!children) {
+			q = psy_ui_component_children(main, 1);
+		} else {
+			q = children;
+		}
 		for (p = q; p != NULL; p = p->next) {
 			psy_ui_Component* child;
 
@@ -48,7 +60,7 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 				psy_ui_component_align(child);
 			}
 		}
-		psy_list_free(q);		
+		psy_list_free(q);
 	}
 }
 

@@ -10,17 +10,22 @@ static void selectsection(HelpView*, psy_ui_Component* sender, uintptr_t section
 TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
+	self->workspace = workspace;
 	psy_ui_component_init(helpview_base(self), parent);	
 	psy_ui_component_enablealign(helpview_base(self));
 	psy_ui_notebook_init(&self->notebook, helpview_base(self));	
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	help_init(&self->help, &self->notebook.component, workspace);
-	about_init(&self->about, psy_ui_notebook_base(&self->notebook));
+	about_init(&self->about, psy_ui_notebook_base(&self->notebook), workspace);
 	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, "Help", "About", "Greetings", NULL);	
+	tabbar_append_tabs(&self->tabbar, 
+		workspace_translate(self->workspace, "Help"),
+		workspace_translate(self->workspace, "About"),
+		workspace_translate(self->workspace, "Greetings"),
+		NULL);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->component.signal_selectsection, self, selectsection);

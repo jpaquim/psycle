@@ -110,8 +110,9 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
-void about_init(About* self, psy_ui_Component* parent)
+void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {			
+	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);	
 	about_vtable_init(self);
 	self->component.vtable = &about_vtable;
@@ -129,7 +130,8 @@ void about_init(About* self, psy_ui_Component* parent)
 void about_initbuttons(About* self)
 {
 	psy_ui_button_init(&self->contribbutton, &self->component);
-	psy_ui_button_settext(&self->contribbutton, "Contributors / Credits");
+	psy_ui_button_settext(&self->contribbutton, 
+		workspace_translate(self->workspace, "Contributors / Credits"));
 	psy_signal_connect(&self->contribbutton.signal_clicked, self,
 		about_oncontributors);
 	psy_ui_button_init(&self->versionbutton, &self->component);
@@ -137,7 +139,8 @@ void about_initbuttons(About* self)
 	psy_signal_connect(&self->versionbutton.signal_clicked, self,
 		about_onversion);
 	psy_ui_button_init(&self->okbutton, &self->component);
-	psy_ui_button_settext(&self->okbutton, "OK");	
+	psy_ui_button_settext(&self->okbutton,
+		workspace_translate(self->workspace, "OK"));
 }
 
 void about_onalign(About* self)

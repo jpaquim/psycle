@@ -27,6 +27,7 @@ typedef struct {
 	int prevent_selchange_notify;
 	psy_Table comboboxslots;
 	psy_Table slotscombobox;
+	Workspace* workspace;
 } MachineBar;
 
 void machinebar_init(MachineBar*, psy_ui_Component* parent, Workspace* );

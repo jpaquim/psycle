@@ -25,4 +25,9 @@ typedef struct {
 
 void playbar_init(PlayBar*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* playbar_base(PlayBar* self)
+{
+	return &self->component;
+}
+
 #endif

@@ -22,6 +22,7 @@
 static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
+static void mainframe_updatetext(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
 static void mainframe_destroy(MainFrame*, psy_ui_Component* component);
@@ -68,6 +69,7 @@ static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
 	psy_ui_Component* view);
+static void mainframe_onlanguagechanged(MainFrame*, Workspace* sender);
 
 #define GEARVIEW 10
 
@@ -164,11 +166,18 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),	
 		psy_ui_HORIZONTALEXPAND);	
-	tabbar_append_tabs(&self->tabbar, "Machines", "Patterns", "Samples",
-		"Instruments", "Properties", NULL);
-	tabbar_append(&self->tabbar, "Settings")->margin.left =
+	tabbar_append_tabs(&self->tabbar, 
+		"" /* Machines */,
+		"" /* Patterns */,
+		"" /* Samples */,
+		"" /* Instruments */,
+		"" /* Properties */,
+		NULL);
+	tabbar_append(&self->tabbar,
+		"" /* Settings */)->margin.left =
 		psy_ui_value_makeew(4.0);
-	tabbar_append(&self->tabbar, "Help")->margin.right =
+	tabbar_append(&self->tabbar,
+		"" /* Help */)->margin.right =
 		psy_ui_value_makeew(4.0);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
 	psy_ui_component_enablealign(&self->viewtabbars.component);
@@ -280,6 +289,47 @@ void mainframe_init(MainFrame* self)
 		mainframe_onshowgear);
 	mainframe_setstartpage(self);
 	mainframe_updatetitle(self);
+	mainframe_updatetext(self);
+	psy_signal_connect(&self->workspace.signal_languagechanged, self,
+		mainframe_onlanguagechanged);
+}
+
+void mainframe_updatetext(MainFrame* self)
+{
+	psy_List* t;
+	int i;
+	
+	for (i = 0, t = self->tabbar.tabs; t != NULL; t = t->next, ++i) {
+		Tab* tab;
+
+		tab = (Tab*)t->entry;
+		switch (i) {
+			case TABPAGE_MACHINEVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Machines"));
+			break;
+			case TABPAGE_PATTERNVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Patterns"));
+			break;
+			case TABPAGE_SAMPLESVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Samples"));
+			break;
+			case TABPAGE_INSTRUMENTSVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Instruments"));
+			break;
+			case TABPAGE_PROPERTIESVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Properties"));
+			break;
+			case TABPAGE_SETTINGSVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Settings"));
+			break;
+			case TABPAGE_HELPVIEW:
+				tab_settext(tab, workspace_translate(&self->workspace, "Help"));
+			break;
+			default:
+			break;
+		}
+	}
+	psy_ui_component_invalidate(&self->component);
 }
 
 void mainframe_setstatusbartext(MainFrame* self, const char* text)
@@ -875,4 +925,9 @@ void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 			&self->recentview.component) {
 		mainframe_onrecentsongs(self, &self->component);
 	}
+}
+
+void mainframe_onlanguagechanged(MainFrame* self, Workspace* sender)
+{
+	mainframe_updatetext(self);
 }

@@ -119,7 +119,7 @@ void settingsview_appendtabbarsections(SettingsView* self)
 	for (p = self->properties->children; p != NULL;
 			p = psy_properties_next(p)) {
 		if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
-			tabbar_append(&self->tabbar, psy_properties_text(p));			
+			tabbar_append(&self->tabbar, psy_properties_translation(p));
 		}		
 	}
 	tabbar_select(&self->tabbar, 0);			
@@ -239,8 +239,8 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 		uintptr_t numcolumnavgchars;
 		psy_ui_TextMetric tm;
 
-		count = strlen(psy_properties_text(property));
-		str = psy_properties_text(property);
+		count = strlen(psy_properties_translation(property));
+		str = psy_properties_translation(property);
 		tm = psy_ui_component_textmetric(&self->client);
 		
 		numcolumnavgchars = (uintptr_t)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
@@ -385,8 +385,8 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 			self->cpy + self->dy, "Choose Font", strlen("Choose Font"));
 	} else {
 		psy_ui_textout(self->g, self->columnwidth * column + 3,
-			self->cpy + self->dy, psy_properties_text(property),
-			strlen(psy_properties_text(property)));
+			self->cpy + self->dy, psy_properties_translation(property),
+			strlen(psy_properties_translation(property)));
 	}
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
 	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
@@ -399,7 +399,7 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 		size = psy_ui_component_textsize(&self->client, "Choose Font");
 	} else {
 		size = psy_ui_component_textsize(&self->client,
-			psy_properties_text(property));
+			psy_properties_translation(property));
 	}
 	r.left = self->columnwidth * column ;
 	r.top = self->cpy + self->dy ;
@@ -478,7 +478,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 			psy_ui_FolderDialog dialog;			
 			char title[_MAX_PATH];
 			
-			psy_snprintf(title, _MAX_PATH, "%s", psy_properties_text(self->selected));
+			psy_snprintf(title, _MAX_PATH, "%s", psy_properties_translation(self->selected));
 			title[_MAX_PATH - 1] = '\0';			
 			psy_ui_folderdialog_init_all(&dialog, 0, title, "");
 			if (psy_ui_folderdialog_execute(&dialog)) {
@@ -609,8 +609,8 @@ void settingsview_countblocklines(SettingsView* self, psy_Properties* property)
 	uintptr_t numcolumnavgchars;
 	psy_ui_TextMetric tm;
 
-	count = strlen(psy_properties_text(property));
-	str = psy_properties_text(property);
+	count = strlen(psy_properties_translation(property));
+	str = psy_properties_translation(property);
 	tm = psy_ui_component_textmetric(&self->client);
 
 	numcolumnavgchars = (uintptr_t)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
@@ -800,7 +800,7 @@ void settingsview_ontabbarchange(SettingsView* self, psy_ui_Component* sender,
 		if (tab) {		
 			while (p) {
 				if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {				
-					if (strcmp(psy_properties_text(p), tab->text) == 0) {
+					if (strcmp(psy_properties_translation(p), tab->text) == 0) {
 						break;
 					}				
 				}		

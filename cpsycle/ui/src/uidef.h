@@ -15,6 +15,9 @@
 #undef min
 #endif
 
+#define	psy_ui_NONRECURSIVE 0
+#define	psy_ui_RECURSIVE 1
+
 typedef struct psy_ui_TextMetric
 {
     int32_t tmHeight;

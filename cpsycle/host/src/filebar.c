@@ -8,40 +8,51 @@
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 
+static void filebar_updatetext(FileBar*);
 static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
+static void filebar_onlanguagechanged(FileBar*, Workspace* sender);
 
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
 	psy_ui_component_init(filebar_base(self), parent);	
 	psy_ui_component_enablealign(filebar_base(self));
-	psy_ui_component_setalignexpand(filebar_base(self), psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setalignexpand(filebar_base(self),
+		psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->recentbutton, filebar_base(self));
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);
-	psy_ui_label_init(&self->header, filebar_base(self));	
-	psy_ui_label_settext(&self->header,	"Song  ");
+	psy_ui_label_init(&self->header, filebar_base(self));
 	psy_ui_button_init(&self->newbutton, filebar_base(self));
-	psy_ui_button_settext(&self->newbutton,
-		workspace_translate(workspace, "new"));
 	psy_signal_connect(&self->newbutton.signal_clicked, self,
 		filebar_onnewsong);
 	psy_ui_button_init(&self->loadbutton, filebar_base(self));
-	psy_ui_button_settext(&self->loadbutton,
-		workspace_translate(workspace, "load"));
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 	psy_ui_button_init(&self->savebutton, filebar_base(self));
-	psy_ui_button_settext(&self->savebutton, 
-		workspace_translate(workspace, "save"));
 	psy_signal_connect(&self->savebutton.signal_clicked, self,
 		filebar_onsavesong);
-	psy_ui_button_init(&self->renderbutton, filebar_base(self));
-	psy_ui_button_settext(&self->renderbutton, 
-		workspace_translate(workspace, "Render"));	
+	psy_ui_button_init(&self->renderbutton, filebar_base(self));	
 	filebar_initalign(self);
+	psy_signal_connect(&self->workspace->signal_languagechanged, self,
+		filebar_onlanguagechanged);
+	filebar_updatetext(self);
+}
+
+void filebar_updatetext(FileBar* self)
+{
+	psy_ui_label_settext(&self->header,
+		workspace_translate(self->workspace, "Song"));
+	psy_ui_button_settext(&self->newbutton,
+		workspace_translate(self->workspace, "New"));	
+	psy_ui_button_settext(&self->loadbutton,
+		workspace_translate(self->workspace, "Load"));	
+	psy_ui_button_settext(&self->savebutton,
+		workspace_translate(self->workspace, "Save"));	
+	psy_ui_button_settext(&self->renderbutton,
+		workspace_translate(self->workspace, "Render"));	
 }
 
 void filebar_initalign(FileBar* self)
@@ -99,7 +110,8 @@ void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 	psy_ui_savedialog_dispose(&dialog);
 }
 
-psy_ui_Component* filebar_base(FileBar* self)
+void filebar_onlanguagechanged(FileBar* self, Workspace* sender)
 {
-	return &self->component;
+	filebar_updatetext(self);
+	psy_ui_component_align(filebar_base(self));
 }
