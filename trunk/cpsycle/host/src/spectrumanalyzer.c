@@ -16,8 +16,8 @@
 #define TIMERID_MASTERVU 400
 #define SCOPE_BUF_SIZE_LOG 13
 
-static const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
-static const int SCOPE_BUF_SIZE = 1 << SCOPE_BUF_SIZE_LOG;
+#define SCOPE_BARS_WIDTH  (256 / SCOPE_SPEC_BANDS)
+#define SCOPE_BUF_SIZE  (1 << SCOPE_BUF_SIZE_LOG)
 static const uint32_t CLBARDC = 0x1010DC;
 static const uint32_t CLBARPEAK = 0xC0C0C0;
 static const uint32_t CLLEFT = 0xC06060;
@@ -35,7 +35,10 @@ static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*,
 	int flag, psy_audio_SongFile* songfile);
 static void spectrumanalyzer_connectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer*, Workspace*);
-static psy_dsp_amp_t dB(psy_dsp_amp_t amplitude);
+static void FillLinearFromCircularBuffer(SpectrumAnalyzer*,
+	float inBuffer[], float outBuffer[], float vol);
+static psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer*,
+	uintptr_t* numsamples);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -63,9 +66,7 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	self->hold = 0;
 	self->scope_spec_mode = 2;
 	self->scope_spec_samples = 256;
-	self->scope_spec_rate = 20;
-	self->peakL = self->peakR = (psy_dsp_amp_t) 128.0f;
-	self->peakLifeL = self->peakLifeR = 0;
+	self->scope_spec_rate = 20;	
 	self->workspace = workspace;
 	psy_signal_connect(&self->component.signal_destroy, self, spectrumanalyzer_ondestroy);
 	psy_signal_connect(&self->component.signal_timer, self, spectrumanalyzer_ontimer);	
@@ -143,9 +144,9 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
 
 	thebar = 7000 * 2.f * 256.f / psy_audio_player_samplerate(&self->workspace->player);
-	if (self->scope_spec_mode == 1) rect.left = thebar;
-	else if (self->scope_spec_mode == 2) rect.left = 16 * sqrt(thebar);
-	else if (self->scope_spec_mode == 3) rect.left = 32 * log10(1 + thebar) * invlog2;
+	if (self->scope_spec_mode == 1) rect.left = (int) thebar;
+	else if (self->scope_spec_mode == 2) rect.left = (int) (16 * sqrt(thebar));
+	else if (self->scope_spec_mode == 3) rect.left = (int) (32 * log10(1 + thebar) * invlog2);
 	rect.right = rect.left + 1;
 	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
 	psy_snprintf(buf, sizeof(buf), "7K");
@@ -153,9 +154,9 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
 
 	thebar = 16000 * 2.f * 256.f / psy_audio_player_samplerate(&self->workspace->player);
-	if (self->scope_spec_mode == 1) rect.left = thebar;
-	else if (self->scope_spec_mode == 2) rect.left = 16 * sqrt(thebar);
-	else if (self->scope_spec_mode == 3) rect.left = 32 * log10(1 + thebar) * invlog2;
+	if (self->scope_spec_mode == 1) rect.left = (int) thebar;
+	else if (self->scope_spec_mode == 2) rect.left = (int)(16 * sqrt(thebar));
+	else if (self->scope_spec_mode == 3) rect.left = (int)(32 * log10(1 + thebar) * invlog2);
 	rect.right = rect.left + 1;
 	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
 	sprintf(buf, "16K");
@@ -164,46 +165,40 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 }
 
 void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
-{
-	float db_left[SCOPE_SPEC_BANDS];
-	float db_right[SCOPE_SPEC_BANDS];
+{	
 	const float multleft = self->invol * self->mult; // *srcMachine._lVol;
 	const float multright = self->invol * self->mult; // *srcMachine._rVol;
 	unsigned int scopesamples;
-	float* pSamplesL;
-	float* pSamplesR;
-	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
 	int DCBar;
 	psy_ui_Rectangle rect;
 	char buf[64];
-	int i;
+	float db_left[SCOPE_SPEC_BANDS];
+	float db_right[SCOPE_SPEC_BANDS];
+	int i;	
 
-	machine = machines_at(&self->workspace->song->machines, self->wire.src);
-	if (!machine) {
-		return;
-	}
-
-	buffer = psy_audio_machine_buffermemory(machine);
+	buffer = spectrumanalyzer_buffer(self, &scopesamples);
 	if (!buffer) {
 		return;
 	}
-	scopesamples = psy_audio_machine_buffermemorysize(machine);
 	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
-	scopesamples = min(scopesamples, (int)(psy_audio_machine_samplerate(machine) * self->scope_peak_rate * 0.001)) & (~3);
-	pSamplesL = buffer->samples[0];
-	pSamplesR = buffer->samples[1];
-
+	scopesamples = min(scopesamples, (unsigned int)(psy_audio_player_samplerate(&self->workspace->player) *
+		self->scope_peak_rate * 0.001)) & (~3);
 #if 0
 	if (FFTMethod == 0)
 #endif
 	{
 		//schism mod FFT
-		float temp[256];
-		float tempout[256 >> 1];
-		// FillLinearFromCircularBuffer(pSamplesL, temp, multleft);
+		float temp[SCOPE_BUF_SIZE];
+		float tempout[SCOPE_BUF_SIZE >> 1];
+
+		FillLinearFromCircularBuffer(self, buffer->samples[0], temp, multleft);
 		fftclass_calculatespectrum(&self->fftSpec, temp, tempout);
 		fftclass_fillbandsfromfft(&self->fftSpec, tempout, db_left);
+
+		FillLinearFromCircularBuffer(self, buffer->samples[1], temp, multright);
+		fftclass_calculatespectrum(&self->fftSpec, temp, tempout);
+		fftclass_fillbandsfromfft(&self->fftSpec, tempout, db_right);
 	}
 #if 0
 	else if (FFTMethod == 1)
@@ -264,8 +259,8 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		//Remember, 0 -> top of spectrum, 128 bottom of spectrum.
 		int curpeak, halfpeak;
 		uint32_t colour;
-		int aml = -db_left[i] * 2; // Reducing visible range from 128dB to 64dB.
-		int amr = -db_right[i] * 2; // Reducing visible range from 128dB to 64dB.
+		int aml = (int) (-db_left[i] * 2); // Reducing visible range from 128dB to 64dB.
+		int amr = (int) (-db_right[i] * 2); // Reducing visible range from 128dB to 64dB.
 		//int aml = - db_left[i];
 		//int amr = - db_right[i];
 		aml = (aml < 0) ? 0 : (aml > 128) ? 128 : aml;
@@ -288,7 +283,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		if (curpeak < self->bar_heights[i]) { self->bar_heights[i] = curpeak; }
 		else if (!self->hold && self->bar_heights[i] < 128)
 		{
-			self->bar_heights[i] += 128 / self->scope_spec_rate * 0.5;//two seconds to decay
+			self->bar_heights[i] += (int)(128 / self->scope_spec_rate * 0.5);//two seconds to decay
 			if (self->bar_heights[i] > 128) { self->bar_heights[i] = 128; }
 		}
 
@@ -304,9 +299,9 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		rect.bottom = self->bar_heights[i] + 1;
 		psy_ui_drawsolidrectangle(g, rect, CLBARPEAK);
 	}
-	psy_snprintf(buf, sizeof(buf), "%d Samples Refresh %.2fhz", self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
+	psy_snprintf(buf, sizeof(buf), "%d Samples Refresh %.2fhz",
+		self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
 	//sprintf(buf,"%d Samples Refresh %.2fhz Window %d",scope_spec_samples,1000.0f/scope_spec_rate, FFTMethod);
-	//CFont* oldFont = bufDC.SelectObject(&font);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x505050);
 	psy_ui_textout(g, 4, 128 - 14, buf, strlen(buf));
@@ -322,7 +317,7 @@ void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, 
 void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
 	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
-{	
+{		
 	self->invol = connections_wirevolume(&self->workspace->song->machines.connections,
 		self->wire.src, self->wire.dst);	
 }
@@ -374,10 +369,52 @@ void spectrumanalyzer_stop(SpectrumAnalyzer* self)
 	}
 }
 
-/// linear -> deciBell
-/// amplitude normalized to 1.0f.
-psy_dsp_amp_t dB(psy_dsp_amp_t amplitude)
+void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], float outBuffer[], float vol)
 {
-	///\todo merge with psycle::helpers::math::linear_to_deci_bell
-	return (psy_dsp_amp_t) (20.0 * log10(amplitude));
+	psy_audio_Buffer* buffer;
+	uintptr_t buffersize;
+
+	buffer = spectrumanalyzer_buffer(self, &buffersize);
+	if (buffer) {
+		uintptr_t index;
+
+		if (buffer->writepos > (uintptr_t) self->scope_spec_samples) {
+			index = buffer->writepos - self->scope_spec_samples;
+		} else {
+			index = buffersize - 1 - (self->scope_spec_samples - buffer->writepos);
+		}
+		//scopeBufferIndex is the position where it will write new data. 
+		if (index + self->scope_spec_samples < buffersize) {
+			dsp.movmul(inBuffer + index, outBuffer, self->scope_spec_samples, vol);
+		} else {
+			uintptr_t tail;
+			uintptr_t front;
+
+			tail = buffersize - index;
+			front = self->scope_spec_samples - tail;
+			if (tail > 0) {
+				dsp.movmul(inBuffer + index, outBuffer, tail, vol);
+			}
+			if (front > 0) {
+				dsp.movmul(inBuffer, outBuffer, front, vol);
+			}
+		}		
+	}
 }
+
+psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer * self,
+	uintptr_t * numsamples)
+{
+	psy_audio_Machine* machine;
+	psy_audio_Buffer* buffer;
+
+	machine = machines_at(&self->workspace->song->machines, self->wire.src);
+	if (!machine) {
+		*numsamples = 0;
+		return NULL;
+	}	
+	buffer = psy_audio_machine_buffermemory(machine);
+	*numsamples = psy_audio_machine_buffermemorysize(machine);	
+	return buffer;
+} 
+

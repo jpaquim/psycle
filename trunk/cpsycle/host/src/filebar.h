@@ -21,6 +21,10 @@ typedef struct {
 } FileBar;
 
 void filebar_init(FileBar*, psy_ui_Component* parent, Workspace*);
-psy_ui_Component* filebar_base(FileBar*);
+
+INLINE psy_ui_Component* filebar_base(FileBar* self)
+{
+	return &self->component;
+}
 
 #endif

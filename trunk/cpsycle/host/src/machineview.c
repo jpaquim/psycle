@@ -2044,7 +2044,10 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, "Wires", "New Machine", NULL);
+	tabbar_append_tabs(&self->tabbar,
+		workspace_translate(self->workspace, "Wires"),
+		workspace_translate(self->workspace, "New Machine"),
+		NULL);
 	psy_signal_connect(&self->component.signal_selectsection, self, selectsection);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);	
 	psy_ui_notebook_connectcontroller(&self->notebook,

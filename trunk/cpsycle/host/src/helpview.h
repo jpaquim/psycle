@@ -19,6 +19,7 @@ typedef struct {
 	About about;
 	Greet greet;
 	Help help;
+	Workspace* workspace;
 } HelpView;
 
 TabBar* helpview_init(HelpView*, psy_ui_Component* parent,

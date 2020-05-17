@@ -39,6 +39,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 {		
 	psy_ui_Margin margin;
 
+	self->workspace = workspace;
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));				
 	self->selchange = 0;	
@@ -65,9 +66,10 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 		OnMachineBoxSelChange);	
 	self->prevent_selchange_notify = FALSE;
 	psy_ui_combobox_init(&self->selectinstparam, &self->component);
-	psy_ui_combobox_setcharnumber(&self->selectinstparam, 12);
+	psy_ui_combobox_setcharnumber(&self->selectinstparam, 14);
 	psy_ui_combobox_addtext(&self->selectinstparam, "Params");
-	psy_ui_combobox_addtext(&self->selectinstparam, "Instrument");
+	psy_ui_combobox_addtext(&self->selectinstparam,
+		workspace_translate(workspace, "Instrument"));
 	psy_ui_combobox_init(&self->instparambox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->instparambox, 30);
 	psy_ui_combobox_setcursel(&self->selectinstparam, 1);
@@ -134,7 +136,8 @@ void BuildMachineBox(MachineBar* self)
 {
 	ClearMachineBox(self);	
 	if (machines_size(self->machines) == 1) {
-		psy_ui_combobox_addtext(&self->machinebox, "No Machines Loaded");
+		psy_ui_combobox_addtext(&self->machinebox,
+			workspace_translate(self->workspace, "No Machines Loaded"));
 		psy_ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
 		psy_TableIterator it;
@@ -233,7 +236,8 @@ void BuildParamList(MachineBar* self)
 			}
 		}
 	} else {
-		psy_ui_combobox_addtext(&self->instparambox, "No Machine");
+		psy_ui_combobox_addtext(&self->instparambox,
+			workspace_translate(self->workspace, "No Machine"));
 	}
 }
 

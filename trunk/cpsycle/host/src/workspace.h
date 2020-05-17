@@ -96,6 +96,7 @@ typedef struct {
 	psy_Signal signal_dockview;
 	psy_Signal signal_defaultfontchanged;
 	psy_Signal signal_showgear;
+	psy_Signal signal_languagechanged;
 	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
 	History history;

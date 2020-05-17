@@ -4,6 +4,8 @@
 #if !defined(ABOUT_H)
 #define ABOUT_H
 
+#include "workspace.h"
+
 #include <uibutton.h>
 #include <uiedit.h>
 #include <uiimage.h>
@@ -37,9 +39,10 @@ typedef struct {
 	Version version;
 	psy_ui_Button contribbutton;
 	psy_ui_Button versionbutton;
-	psy_ui_Button okbutton;		
+	psy_ui_Button okbutton;
+	Workspace* workspace;
 } About;
 
-void about_init(About*, psy_ui_Component* parent);
+void about_init(About*, psy_ui_Component* parent, Workspace*);
 
 #endif

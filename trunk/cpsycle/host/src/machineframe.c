@@ -177,14 +177,17 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	parameterlistbox_setmachine(&self->parameterbox, machine);
 	psy_ui_component_hide(&self->parameterbox.component);
 	info = psy_audio_machine_info(machine);
-	if (info && info->modulepath) {
+	if (info && info->modulepath) {			
 		psy_dir_extract_path(info->modulepath, prefix, name, ext);
 		psy_snprintf(prspath, 4096, "%s\\%s%s", prefix, name, ".prs");
 		if (self->presets) {
 			psy_audio_presets_dispose(self->presets);
 		}
 		self->presets = psy_audio_presets_allocinit();
-		psy_audio_presetsio_load(prspath, self->presets);		
+		psy_audio_presetsio_load(prspath, self->presets,
+			psy_audio_machine_numtweakparameters(self->machine),
+			psy_audio_machine_datasize(self->machine),
+			workspace_plugins_directory(self->workspace));
 	}
 	parameterbar_setpresetlist(&self->parameterbar, self->presets);		
 	machineframe_resize(self);
@@ -293,11 +296,14 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 				for (it = psy_table_begin(&preset->parameters); 
 						!psy_tableiterator_equal(&it, psy_table_end());
 						psy_tableiterator_inc(&it)) {
-					//psy_audio_machine_parametertweak(self->machine,
-					//	psy_tableiterator_key(&it),
-					//	machine_parametervalue_normed(self->machine,
-					//		psy_tableiterator_key(&it),
-					//		(uintptr_t)psy_tableiterator_value(&it)));
+					psy_audio_MachineParam* param;
+
+					param = psy_audio_machine_tweakparameter(self->machine,
+						psy_tableiterator_key(&it));
+					if (param) {
+						psy_audio_machineparam_tweak_scaled(param,
+							(intptr_t)psy_tableiterator_value(&it));
+					}					
 				}		
 				break;
 			}

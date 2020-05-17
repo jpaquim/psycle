@@ -11,6 +11,8 @@ void psy_audio_preset_init(psy_audio_Preset* self)
 {
 	self->name = strdup("");
 	psy_table_init(&self->parameters);
+	self->datasize = 0;
+	self->data = 0;
 }
 
 void psy_audio_preset_dispose(psy_audio_Preset* self)
@@ -18,6 +20,9 @@ void psy_audio_preset_dispose(psy_audio_Preset* self)
 	free(self->name);
 	self->name = 0;
 	psy_table_dispose(&self->parameters);
+	free(self->data);
+	self->data = 0;
+	self->datasize = 0;	
 }
 
 psy_audio_Preset* psy_audio_preset_alloc(void)
@@ -53,11 +58,41 @@ void psy_audio_preset_setvalue(psy_audio_Preset* self, uintptr_t param,
 	psy_table_insert(&self->parameters, param, (void*)(uintptr_t)value);
 }
 
-int psy_audio_preset_value(psy_audio_Preset* self, uintptr_t param)
+intptr_t psy_audio_preset_value(psy_audio_Preset* self, uintptr_t param)
 {
 	if (psy_table_exists(&self->parameters, param)) {
-		return (int)(uintptr_t) psy_table_at(&self->parameters, param);
+		return (intptr_t)(uintptr_t) psy_table_at(&self->parameters, param);
 	} else {
 		return 0;
 	}
+}
+
+void psy_audio_preset_setdatastruct(psy_audio_Preset* self,
+	int num, const char* newname, int const* parameters, int size,
+	void* newdata)
+{	
+	if (num > 0) {
+		int p;
+		psy_table_dispose(&self->parameters);
+		for (p = 0; p < num; ++p) {
+			psy_audio_preset_setvalue(self, p, (intptr_t)parameters[p]);
+		}
+	} else
+	{
+		psy_table_dispose(&self->parameters);
+	}
+	if (size > 0)
+	{
+		free(self->data);
+		self->data = (unsigned char*)malloc(size);
+		memcpy(self->data, newdata, size);
+		self->datasize = size;
+	} else
+	{
+		free(self->data);
+		self->data = 0;
+		self->datasize = 0;
+	}
+	free(self->name);
+	self->name = strdup(newname);
 }

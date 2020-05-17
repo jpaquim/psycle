@@ -7,7 +7,7 @@
 
 #include "uilabel.h"
 #include "uibutton.h"
-#include "player.h"
+#include "workspace.h"
 
 typedef struct {
 	psy_ui_Component component;
@@ -17,9 +17,15 @@ typedef struct {
 	psy_ui_Button morebutton;
 	psy_audio_Player* player;
 	unsigned int lpb;
+	Workspace* workspace;
 } LinesPerBeatBar;
 
 
-void linesperbeatbar_init(LinesPerBeatBar*, psy_ui_Component* parent,psy_audio_Player* player);
+void linesperbeatbar_init(LinesPerBeatBar*, psy_ui_Component* parent, Workspace*);
+
+INLINE psy_ui_Component* linesperbeatbar_base(LinesPerBeatBar* self)
+{
+	return &self->component;
+}
 
 #endif

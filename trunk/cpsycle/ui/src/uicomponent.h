@@ -215,9 +215,11 @@ typedef struct psy_ui_Component {
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
+void psy_ui_updatealign(psy_ui_Component* main, psy_List* children);
 
 void psy_ui_component_init(psy_ui_Component*, psy_ui_Component* parent);
-void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent, struct psy_ui_ComponentImp*);
+void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
+	struct psy_ui_ComponentImp*);
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
 /*int psy_ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,

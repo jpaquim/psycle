@@ -10,7 +10,8 @@
 extern "C" {
 #endif
 
-void psy_audio_presetsio_load(const char* path, psy_audio_Presets*);
+void psy_audio_presetsio_load(const char* path, psy_audio_Presets*,
+	uintptr_t numparameters, uintptr_t datasizestruct, const char* pluginroot);
 void psy_audio_presetsio_save(const char* path, psy_audio_Presets*);
 
 #ifdef __cplusplus

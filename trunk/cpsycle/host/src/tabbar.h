@@ -16,6 +16,7 @@ typedef struct {
 } Tab;
 
 void tab_init(Tab*, const char* text, psy_ui_Size* size);
+void tab_settext(Tab*, const char* text);
 
 typedef struct {
 	psy_ui_Component component;
