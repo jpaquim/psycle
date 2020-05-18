@@ -56,7 +56,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->recordingnotes = 0;
 	self->multichannelaudition = 0;
 	self->dodither = FALSE;
-	// psy_dsp_dither_init(&self->dither);
+	psy_dsp_dither_init(&self->dither);
 	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
 		&song->machines);
 	mainframe = handle;
@@ -103,7 +103,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_table_dispose(&self->trackstonotes);
 	psy_table_dispose(&self->worked);
 	psy_audio_pattern_dispose(&self->patterndefaults);
-	//psy_dsp_dither_dispose(&self->dither);
+	psy_dsp_dither_dispose(&self->dither);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_close(&logfile);
 #endif

@@ -47,6 +47,8 @@
 // (c++-ified for psycle by dw aley)
 // (64-bit compatibility by johan boule)
 
+// todo update, there is a faster version available
+
 #include "../../detail/psydef.h"
 
 /// Period parameters

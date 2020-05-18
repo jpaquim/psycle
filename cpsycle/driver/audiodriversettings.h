@@ -35,10 +35,22 @@ typedef struct {
 	uintptr_t blockcount_;
 } psy_AudioDriverSettings;
 
+INLINE psy_AudioDriverChannelMode psy_audiodriversettings_channelmode(
+	psy_AudioDriverSettings* self)
+{
+	return self->channelmode_;
+}
+
 INLINE unsigned int psy_audiodriversettings_numchannels(
 	psy_AudioDriverSettings* self)
 {
 	return (self->channelmode_ == psy_AUDIODRIVERCHANNELMODE_STEREO) ? 2 : 1;
+}
+
+INLINE void psy_audiodriversettings_setchannelmode(
+	psy_AudioDriverSettings* self, psy_AudioDriverChannelMode mode)
+{
+	self->channelmode_ = mode;
 }
 
 INLINE unsigned int psy_audiodriversettings_samplespersec(

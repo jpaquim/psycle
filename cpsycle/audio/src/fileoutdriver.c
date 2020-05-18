@@ -7,6 +7,7 @@
 
 #include "../../detail/os.h"
 #include "../../driver/driver.h"
+#include "../../driver/audiodriversettings.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,22 @@
 #include <process.h>
 #endif
 
+typedef enum {
+	DDC_SUCCESS,           ///< operation succeded
+	DDC_FAILURE,           ///< operation failed for unspecified reasons
+	DDC_OUT_OF_MEMORY,     ///< operation failed due to running out of memory
+	DDC_FILE_ERROR,        ///< operation encountered file I/O error
+	DDC_INVALID_CALL,      ///< operation was called with invalid parameters
+	DDC_USER_ABORT,        ///< operation was aborted by the user
+	DDC_INVALID_FILE       ///< file format does not match
+} DDCRET;
+
+
+DDCRET WriteMonoSample(psy_audio_WaveFormatChunk*, float SampleData,
+	PsyFile*);
+DDCRET WriteStereoSample(psy_audio_WaveFormatChunk*, float LeftSample, float RightSample,
+	PsyFile*);
+
 typedef struct {
 	PsyFile file;
 	char* path;
@@ -30,12 +47,14 @@ typedef struct {
 
 typedef struct {
 	psy_AudioDriver driver;
+	psy_AudioDriverSettings settings;
 	int pollsleep;
 	int stoppolling;
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	HANDLE hEvent;
 #endif	
 	FileContext filecontext;
+	psy_audio_WaveFormatChunk format;
 } FileOutDriver;
 
 static void driver_deallocate(psy_AudioDriver*);
@@ -43,17 +62,17 @@ static int fileoutdriver_init(FileOutDriver*);
 static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
 static int driver_open(psy_AudioDriver*);
-static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static void driver_configure(FileOutDriver*, psy_Properties*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static unsigned int samplerate(psy_AudioDriver*);
 static void PollerThread(void *fileoutdriver);
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
-	unsigned int numsamples);
+	uintptr_t amount);
 static void fileoutdriver_closefile(FileOutDriver*);
 
-static void init_properties(psy_AudioDriver* driver);
+static void init_properties(FileOutDriver* driver);
 
 psy_AudioDriver* psy_audio_create_fileout_driver(void)
 {
@@ -71,22 +90,23 @@ void driver_deallocate(psy_AudioDriver* driver)
 int fileoutdriver_init(FileOutDriver* self)
 {
 	memset(&self->driver, 0, sizeof(psy_AudioDriver));
+	psy_audiodriversettings_init(&self->settings);
 	self->driver.open = driver_open;
 	self->driver.deallocate = driver_deallocate;	
 	self->driver.connect = driver_connect;
 	self->driver.open = driver_open;
 	self->driver.close = driver_close;
 	self->driver.dispose = driver_dispose;
-	self->driver.configure = driver_configure;
+	self->driver.configure = (psy_audiodriver_fp_configure) driver_configure;
 	self->driver.samplerate = samplerate;
 	psy_signal_init(&self->driver.signal_stop);
-	init_properties(&self->driver);
+	init_properties(self);
 #if defined(DIVERSALIS__OS__MICROSOFT)	
 	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif	
 	self->pollsleep = 1;
 	self->stoppolling = 0;
-	self->filecontext.path = strdup("Untitled.wav");
+	self->filecontext.path = strdup("Untitled.wav");	
 	return 0;
 }
 
@@ -134,8 +154,24 @@ int driver_close(psy_AudioDriver* driver)
 	return 0;
 }
 
-void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
+void driver_configure(FileOutDriver* self, psy_Properties* config)
 {
+	psy_AudioDriver* driver = &self->driver;
+
+	if (config) {
+		psy_properties_sync(driver->properties, config);
+	}
+	free(self->filecontext.path);
+	self->filecontext.path = strdup(
+		psy_properties_readstring(driver->properties,
+			"outputpath", "Untitled.wav"));
+	psy_audiodriversettings_setvalidbitdepth(&self->settings,
+		psy_properties_int(driver->properties, "bitdepth", 16));
+	psy_audiodriversettings_setsamplespersec(&self->settings,
+		psy_properties_int(driver->properties, "samplerate", 44100));
+	psy_audiodriversettings_setchannelmode(&self->settings,
+		psy_properties_int(driver->properties, "channels",
+			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 
 unsigned int samplerate(psy_AudioDriver* self)
@@ -143,19 +179,29 @@ unsigned int samplerate(psy_AudioDriver* self)
 	return 44100;
 }
 
-void init_properties(psy_AudioDriver* self)
-{		
-	self->properties = psy_properties_create();
+void init_properties(FileOutDriver* self)
+{
+	psy_AudioDriver* driver = &self->driver;
+
+	driver->properties = psy_properties_create();
+	psy_properties_settext(
+		psy_properties_sethint(
+			psy_properties_append_string(driver->properties, "name", "FileOut Driver"),
+			PSY_PROPERTY_HINT_READONLY),
+		"Name");
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "File psy_AudioDriver"),
+		psy_properties_append_string(driver->properties, "vendor", "Psycledelics"),
 		PSY_PROPERTY_HINT_READONLY);
 	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
+		psy_properties_append_string(driver->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);	
-	psy_properties_append_string(self->properties, "outputpath", "Untitled.wav");
+	psy_properties_append_string(driver->properties, "outputpath", "Untitled.wav");
+	psy_properties_append_int(driver->properties, "bitdepth",
+		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
+	psy_properties_append_int(driver->properties, "samplerate",
+		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
+	psy_properties_append_choice(driver->properties, "channels",
+		(int)psy_audiodriversettings_channelmode(&self->settings));
 }
 
 void PollerThread(void* driver)
@@ -194,8 +240,7 @@ void PollerThread(void* driver)
 }
 
 void fileoutdriver_createfile(FileOutDriver* self)
-{	
-	psy_audio_WaveFormatChunk format;
+{		
 	int bitspersample = 16;
 	uint8_t temp8 = 0;
 	uint16_t temp16 = 0;
@@ -209,7 +254,7 @@ void fileoutdriver_createfile(FileOutDriver* self)
 
 	file = &self->filecontext.file;
 	self->filecontext.numsamples = 0;
-	if (!psyfile_create(file, "untitled.wav", 1)) {
+	if (!psyfile_create(file, self->filecontext.path, 1)) {
 		return;
 	}
 	psyfile_write(file, "RIFF", 4);
@@ -218,28 +263,26 @@ void fileoutdriver_createfile(FileOutDriver* self)
 	temp32 = 0;
 	psyfile_write(file, &temp32, sizeof(temp32));
 	// Write Format Chunk
-	format.wFormatTag = psy_audio_WAVE_FORMAT_PCM;
-	format.nChannels = 2;
-	format.nSamplesPerSec = 44100;
-	format.nAvgBytesPerSec = 2 * 44100 * bitspersample / 8;	
-	format.nBlockAlign = 2 * bitspersample / 8;
-	format.wBitsPerSample = bitspersample;	
-	format.cbSize = 0;
+	psy_audio_waveformatchunk_config(&self->format,
+		psy_audiodriversettings_samplespersec(&self->settings),
+		psy_audiodriversettings_validbitdepth(&self->settings),
+		psy_audiodriversettings_numchannels(&self->settings),
+		FALSE /* isfloat */);
 	psyfile_write(file, "WAVEfmt ", 8);
 	temp32 = 0;
 	pcmbegin = psyfile_getpos(file);
 	psyfile_write(file, &temp32, sizeof(temp32));	
-	temp16 = format.wFormatTag;
+	temp16 = self->format.wFormatTag;
 	psyfile_write(file, &temp16, sizeof(temp16));
-	temp16 = format.nChannels;
+	temp16 = self->format.nChannels;
 	psyfile_write(file, &temp16, sizeof(temp16));
-	temp32 = format.nSamplesPerSec;
+	temp32 = self->format.nSamplesPerSec;
 	psyfile_write(file, &temp32, sizeof(temp32));
-	temp32 = format.nAvgBytesPerSec;
+	temp32 = self->format.nAvgBytesPerSec;
 	psyfile_write(file, &temp32, sizeof(temp32));
-	temp16 = format.nBlockAlign;
+	temp16 = self->format.nBlockAlign;
 	psyfile_write(file, &temp16, sizeof(temp16));
-	temp16 = format.wBitsPerSample;
+	temp16 = self->format.wBitsPerSample;
 	psyfile_write(file, &temp16, sizeof(temp16));
 	{
 		uint32_t pos2;
@@ -260,16 +303,53 @@ void fileoutdriver_createfile(FileOutDriver* self)
 	psyfile_write(file, &temp32, sizeof(temp32));
 }
 
-void fileoutdriver_writebuffer(FileOutDriver* self, float* pBuf, unsigned int numsamples)
+void fileoutdriver_writebuffer(FileOutDriver* self, float* pBuf, uintptr_t amount)
 {
 	uintptr_t i;
-	uint16_t temp16;
+	float* currbuf = pBuf;	
+	
+	amount /= 2;
+	switch (psy_audiodriversettings_channelmode(&self->settings)) {
+	case psy_AUDIODRIVERCHANNELMODE_MONO_MIX: // mono mix				
+		for (i = 0; i < amount; i++) {
+			float l, r;
 
-	for (i = 0; i < numsamples;	++i) {		
-		temp16 = (uint16_t) pBuf[i];
-		psyfile_write(&self->filecontext.file, &temp16, sizeof(temp16));								
+			l = *currbuf;
+			++currbuf;
+			r = *currbuf;
+			++currbuf;
+			//argh! dithering both channels and then mixing.. we'll have to sum the arrays before-hand, and then dither.
+			WriteMonoSample(&self->format, ((l + r) * 0.5f), &self->filecontext.file);
+		}
+	break;
+	case psy_AUDIODRIVERCHANNELMODE_MONO_LEFT: // mono L
+		for (i = 0; i < amount; ++i) {
+			WriteMonoSample(&self->format, *currbuf, &self->filecontext.file);
+			currbuf++;
+			currbuf++; // skip right channel
+		}	
+	break;
+	case psy_AUDIODRIVERCHANNELMODE_MONO_RIGHT: // mono R
+		for (i = 0; i < amount; ++i) {
+			currbuf++; // skip left channel
+			WriteMonoSample(&self->format, *currbuf, &self->filecontext.file);
+			currbuf++;
+		}
+		break;
+	default: // psy_AUDIODRIVERCHANNELMODE_STEREO
+		for (i = 0; i < amount; ++i) {
+			float l;
+			float r;
+
+			l = *currbuf;
+			++currbuf;
+			r = *currbuf;
+			++currbuf;
+			WriteStereoSample(&self->format, l, r, &self->filecontext.file);
+		}
+		break;
 	}
-	self->filecontext.numsamples += numsamples;
+	self->filecontext.numsamples += amount;
 }
 
 void fileoutdriver_closefile(FileOutDriver* self)
@@ -294,4 +374,123 @@ void fileoutdriver_closefile(FileOutDriver* self)
 	psyfile_write(file, &size, sizeof(size));
 	psyfile_seek(file, pos2);	
 	psyfile_close(file);
+}
+
+DDCRET WriteMonoSample(psy_audio_WaveFormatChunk* wave_format, float SampleData,
+	PsyFile* fp)
+{
+	int32_t d;
+
+	switch (wave_format->wFormatTag)
+	{
+	case 1: // Integer PCM
+		if (SampleData > 32767.0f) SampleData = 32767.0f;
+		else if (SampleData < -32768.0f) SampleData = -32768.0f;
+		switch (wave_format->wBitsPerSample) {
+		case 8:
+			// pcm_data.ckSize += 1;
+			d = (int32_t)(SampleData / 256.0f);
+			d += 128;
+			return psyfile_write(fp, &d, 1);
+		case 16:
+			// pcm_data.ckSize += 2;
+			d = (int32_t)(SampleData);
+			return psyfile_write(fp, &d, 2);
+		case 24:
+			//pcm_data.ckSize += 3;
+			d = (int32_t)(SampleData * 256.0f);
+			return psyfile_write(fp, &d, 3);
+		case 32:
+			// pcm_data.ckSize += 4;
+			// d = (int32_t)(SampleData * 65536.0f);
+			return psyfile_write(fp, &SampleData, 4);
+		default:
+			break;
+		}
+		break;
+	case 3: // IEEE float PCM
+		if (wave_format->wBitsPerSample == 32)
+		{
+			// pcm_data.ckSize += 4;
+			const float f = SampleData * 0.000030517578125f;
+			return psyfile_write(fp, &f, 4);
+		}
+	default:
+		break;
+	}
+	return DDC_INVALID_CALL;
+}
+
+DDCRET WriteStereoSample(psy_audio_WaveFormatChunk* wave_format, float LeftSample, float RightSample,
+	PsyFile* fp)
+{
+	DDCRET retcode = DDC_SUCCESS;
+	int32_t l, r;
+	float f;
+	switch (wave_format->wFormatTag)
+	{
+	case 1: // Integer PCM
+		if (LeftSample > 32767.0f) LeftSample = 32767.0f;
+		else if (LeftSample < -32768.0f) LeftSample = -32768.0f;
+		if (RightSample > 32767.0f) RightSample = 32767.0f;
+		else if (RightSample < -32768.0f) RightSample = -32768.0f;
+		switch (wave_format->wBitsPerSample) {
+		case 8:
+			l = (int32_t)(LeftSample / 256.0f);
+			r = (int32_t)(RightSample / 256.0f);
+			l += 128;
+			r += 128;
+			retcode = psyfile_write(fp, &l, 1);
+			if (retcode == DDC_SUCCESS) {
+				retcode = psyfile_write(fp, &r, 1);
+				// if (retcode == DDC_SUCCESS) pcm_data.ckSize += 2;
+			}
+			break;
+		case 16:
+			l = (int32_t)(LeftSample);
+			r = (int32_t)(RightSample);
+			retcode = psyfile_write(fp, &l, 2);
+			if (retcode == DDC_SUCCESS) {
+				retcode = psyfile_write(fp, &r, 2);
+				// if (retcode == DDC_SUCCESS) pcm_data.ckSize += 4;
+			}
+			break;
+		case 24:
+			l = (int32_t)(LeftSample * 256.0f);
+			r = (int32_t)(RightSample * 256.0f);
+			retcode = psyfile_write(fp, &l, 3);
+			if (retcode == DDC_SUCCESS) {
+				retcode = psyfile_write(fp, &r, 3);
+				// if (retcode == DDC_SUCCESS) pcm_data.ckSize += 6;
+			}
+			break;
+		case 32:
+			l = (int32_t)(LeftSample * 65536.0f);
+			r = (int32_t)(RightSample * 65536.0f);
+			retcode = psyfile_write(fp, &l, 4);
+			if (retcode == DDC_SUCCESS) {
+				retcode = psyfile_write(fp, &r, 4);
+				//if (retcode == DDC_SUCCESS) pcm_data.ckSize += 8;
+			}
+			break;
+		default:
+			retcode = DDC_INVALID_CALL;
+		}
+		break;
+	case 3: // IEEE float PCM
+		if (wave_format->wBitsPerSample == 32)
+		{
+			f = LeftSample * 0.000030517578125f;
+			retcode = psyfile_write(fp, &f, 4);
+			if (retcode == DDC_SUCCESS)
+			{
+				f = RightSample * 0.000030517578125f;
+				retcode = psyfile_write(fp, &f, 4);
+				//if (retcode == DDC_SUCCESS) pcm_data.ckSize += 8;
+			}
+		}
+	default:
+		break;
+	}
+	return retcode;
 }

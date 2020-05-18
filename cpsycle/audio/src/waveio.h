@@ -5,6 +5,7 @@
 #define psy_audio_WAVEIO_H
 
 #include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,26 @@ typedef struct {
     uint16_t wBitsPerSample; 
     uint16_t cbSize; 
 } psy_audio_WaveFormatChunk; 
+
+INLINE void psy_audio_waveformatchunk_config(psy_audio_WaveFormatChunk* self,
+		uint32_t NewSamplingRate,
+		uint16_t NewBitsPerSample,
+		uint16_t NewNumChannels,
+		bool isFloat)
+{	
+	if (isFloat) {
+		self->wFormatTag = psy_audio_WAVE_FORMAT_FLOAT;
+	} else {
+		self->wFormatTag = psy_audio_WAVE_FORMAT_PCM;
+	}
+	self->nSamplesPerSec = NewSamplingRate;
+	self->nChannels = NewNumChannels;
+	self->wBitsPerSample = NewBitsPerSample;
+	self->nAvgBytesPerSec = self->nChannels * self->nSamplesPerSec * self->wBitsPerSample / 8;
+	self->nBlockAlign = self->nChannels * self->wBitsPerSample / 8;
+	self->cbSize = 0;
+}
+
 
 struct psy_audio_Sample;
 
