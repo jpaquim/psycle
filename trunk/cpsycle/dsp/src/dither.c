@@ -11,7 +11,7 @@ void psy_dsp_dither_init(psy_dsp_Dither* self)
 	self->settings.pdf = psy_dsp_DITHER_PDF_TRIANGULAR;
 	self->settings.noiseshape = psy_dsp_DITHER_NOISESHAPE_NONE;
 
-	psy_dsp_mersennetwisterinit_by_array(&self->mt, init, sizeof init);
+	psy_dsp_mersennetwisterinit_by_array(&self->mt, init, sizeof(init));
 }
 
 void psy_dsp_dither_dispose(psy_dsp_Dither* self)

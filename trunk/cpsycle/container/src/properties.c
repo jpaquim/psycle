@@ -347,9 +347,11 @@ int psy_properties_int(psy_Properties* properties, const char* key, int defaultv
 {
 	int rv = defaultvalue;
 
-	if (properties) {	
+	if (properties) {
 		psy_Properties* property = psy_properties_read(properties, key);
-		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
+		if (property &&
+			(property->item.typ == PSY_PROPERTY_TYP_INTEGER ||
+			 property->item.typ == PSY_PROPERTY_TYP_CHOICE)) {
 			rv = property->item.value.i;
 		} else {
 			rv = defaultvalue;

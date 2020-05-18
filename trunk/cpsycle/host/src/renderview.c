@@ -5,6 +5,7 @@
 
 #include "renderview.h"
 #include <fileoutdriver.h>
+#include "../../driver/audiodriversettings.h"
 
 #include <string.h>
 
@@ -47,6 +48,7 @@ void renderview_makeproperties(RenderView* self)
 	psy_Properties* recordpatnum;
 	psy_Properties* recordseqpos;
 	psy_Properties* quality;
+	psy_Properties* channelchoice;
 	psy_Properties* dither;
 	psy_Properties* ditherpdf;
 	psy_Properties* dithernoiseshape;
@@ -63,7 +65,7 @@ void renderview_makeproperties(RenderView* self)
 		psy_properties_create_section(self->properties, "filesave"),
 		"File");
 	psy_properties_settext(
-		psy_properties_append_string(filesave, "filesave-outputpath", "Untitled.wav"),
+		psy_properties_append_string(filesave, "outputpath", "Untitled.wav"),
 		"Output Path");
 	savechoice = psy_properties_settext(
 		psy_properties_append_choice(filesave, "filesave-choice", 0),
@@ -120,17 +122,30 @@ void renderview_makeproperties(RenderView* self)
 		psy_properties_create_section(self->properties, "quality"),
 		"Quality");	
 	psy_properties_settext(
-		psy_properties_append_int(quality, "quality-samplerate", 44100, 0, 96000),
-		"Sample Rate"
+		psy_properties_append_int(quality, "samplerate", 44100, 0, 96000),
+		"Samplerate"
 	);
 	psy_properties_settext(
-		psy_properties_append_int(quality, "quality-bitdepth", 8, 8, 16),
+		psy_properties_append_int(quality, "bitdepth", 16, 8, 16),
 		"Bit Depth"
 	);
-	psy_properties_settext(
-		psy_properties_append_int(quality, "quality-channels", 2, 0, 2),
+	channelchoice = psy_properties_settext(
+		psy_properties_append_choice(quality, "channels",
+			psy_AUDIODRIVERCHANNELMODE_STEREO),
 		"Channels"
 	);
+	psy_properties_settext(
+		psy_properties_append_string(channelchoice, "mono_mix", ""),
+		"Mono (Mix)");
+	psy_properties_settext(
+		psy_properties_append_string(channelchoice, "mono_left", ""),
+		"Mono (Left");
+	psy_properties_settext(
+		psy_properties_append_string(channelchoice, "mono_right", ""),
+		"Mono (Right)");
+	psy_properties_settext(
+		psy_properties_append_string(channelchoice, "stereo", ""),
+		"Stereo");
 	dither = psy_properties_settext(
 		psy_properties_create_section(self->properties, "dither"),
 		"Dither");
@@ -173,9 +188,23 @@ void renderview_onsettingsviewchanged(RenderView* self, SettingsView* sender,
 
 void renderview_render(RenderView* self)
 {	
+	psy_Properties* driverconfig;
+	 
 	self->curraudiodriver = psy_audio_player_audiodriver(&self->workspace->player);
 	self->curraudiodriver->close(self->curraudiodriver);
-	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);
+	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);	
+	driverconfig = psy_properties_clone(self->fileoutdriver->properties, 1);
+	psy_properties_write_string(driverconfig, "outputpath",
+		psy_properties_readstring(self->properties, "filesave.outputpath", "Untitled.wav"));
+	psy_properties_write_int(driverconfig, "samplerate",
+		psy_properties_int(self->properties, "quality.samplerate", 44100));
+	psy_properties_write_int(driverconfig, "bitdepth",
+		psy_properties_int(self->properties, "quality.bitdepth", 16));
+	psy_properties_write_int(driverconfig, "channels",
+		psy_properties_int(self->properties, "quality.channels",
+			psy_AUDIODRIVERCHANNELMODE_STEREO));
+	self->fileoutdriver->configure(self->fileoutdriver, driverconfig);
+	properties_free(driverconfig);
 	self->restoreloopmode = self->workspace->player.sequencer.looping;
 	self->workspace->player.sequencer.looping = 0;
 	self->restoredither = psy_dsp_dither_settings(&self->workspace->player.dither);
