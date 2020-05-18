@@ -11,7 +11,6 @@
 
 static void octavebar_updatetext(OctaveBar*);
 static void octavebar_initalign(OctaveBar*);
-static void octavebar_ondestroy(OctaveBar*, psy_ui_Component* component);
 static void octavebar_buildoctavebox(OctaveBar*);
 static void octavebar_onoctaveboxselchange(OctaveBar*, psy_ui_Component* sender, int sel);
 static void octavebar_onoctavechanged(OctaveBar*, Workspace*, int octave);
@@ -25,8 +24,6 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 	psy_ui_component_enablealign(octavebar_base(self));
 	psy_ui_component_setalignexpand(octavebar_base(self),
 		psy_ui_HORIZONTALEXPAND);
-	psy_signal_connect(&octavebar_base(self)->signal_destroy, self,
-		octavebar_ondestroy);
 	psy_ui_label_init(&self->headerlabel, octavebar_base(self));
 	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->octavebox, 2);	
@@ -60,10 +57,6 @@ void octavebar_initalign(OctaveBar* self)
 		psy_ui_component_children(octavebar_base(self), psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
-}
-
-void octavebar_ondestroy(OctaveBar* self, psy_ui_Component* component)
-{
 }
 
 void octavebar_buildoctavebox(OctaveBar* self)

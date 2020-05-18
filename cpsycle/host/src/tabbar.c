@@ -320,6 +320,23 @@ void tabbar_append_tabs(TabBar* self, const char* label, ...)
 	va_end(ap);
 }
 
+void tabbar_rename_tabs(TabBar* self, const char* label, ...)
+{
+	const char* currlabel;
+	psy_List* t;
+	va_list ap;
+
+	va_start(ap, label);
+	for (t = self->tabs, currlabel = label; t != NULL && currlabel != NULL;
+			t = t->next, currlabel = va_arg(ap, const char*)) {
+		Tab* tab;
+
+		tab = (Tab*)t->entry;
+		tab_settext(tab, currlabel);
+	}
+	va_end(ap);
+}
+
 void tabbar_settabmargin(TabBar* self, int tabindex,
 	const psy_ui_Margin* margin)
 {

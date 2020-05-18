@@ -11,6 +11,8 @@
 #include <signal.h>
 #include "library.h"
 
+#include <dither.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -39,6 +41,8 @@ typedef struct psy_audio_Player {
 	psy_Table trackstonotes;
 	psy_Table worked;
 	psy_audio_Pattern patterndefaults;
+	psy_dsp_Dither dither;
+	bool dodither;
 } psy_audio_Player;
 
 // init dispose
@@ -59,6 +63,11 @@ INLINE uintptr_t psy_audio_player_numsongtracks(psy_audio_Player* self)
 
 void psy_audio_player_setvumetermode(psy_audio_Player*, VUMeterMode);
 VUMeterMode psy_audio_player_vumetermode(psy_audio_Player*);
+void psy_audio_player_enabledither(psy_audio_Player*);
+void psy_audio_player_disabledither(psy_audio_Player*);
+void psy_audio_player_setdither(psy_audio_Player*, uintptr_t depth,
+	psy_dsp_DitherPdf, psy_dsp_DitherNoiseShape);
+
 // sequencer
 void psy_audio_player_start(psy_audio_Player*);
 void psy_audio_player_stop(psy_audio_Player*);

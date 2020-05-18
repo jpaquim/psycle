@@ -19,8 +19,10 @@ typedef struct {
 	psy_Properties* properties;
 	Workspace* workspace;
 	psy_AudioDriver* fileoutdriver;
-	psy_AudioDriver* curraudiodriver;
+	psy_AudioDriver* curraudiodriver;	
 	int restoreloopmode;
+	psy_dsp_DitherSettings restoredither;
+	bool restoredodither;
 } RenderView;
 
 void renderview_init(RenderView*, psy_ui_Component* parent,

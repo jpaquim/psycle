@@ -63,31 +63,169 @@ void dsp_memory_dealloc(void* address)
 
 void dsp_add(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t vol)
 {
-	for ( ; num != 0; ++dst, ++src, --num) {
-		*dst += (*src * vol);
-	}	
-}
-	
-void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul)
-{	
-	for ( ; num != 0; ++dst, --num) {
-		*dst *= mul;		
-	}	
-}
-	
-void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul)
-{
-	--src;
-	--dst;
-	do
-	{
-		*++dst = *++src*mul;
+	if (is_aligned(dst, 16) && (num % 4 == 0)) {
+#if defined DIVERSALIS__COMPILER__GNU
+		numSamples += 3;
+		numSamples >>= 2;
+		typedef float vec __attribute__((vector_size(4 * sizeof(float))));
+		const vec vol_vec = { vol, vol, vol, vol };
+		const vec* src = (const vec*)(src);
+		vec* dst = (vec*)(pDstSamples);
+#pragma omp parallel for // with gcc, build with the -fopenmp flag
+		for (int i = 0; i < num; ++i) dst[i] += src[i] * vol_vec;
+#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+		const __m128 volps = _mm_set_ps1(vol);
+		const __m128* psrc = (const __m128*)src;
+		__m128* pdst = (__m128*)dst;
+		uintptr_t i;
+		num += 3;
+		num >>= 2;
+		for (i = 0; i < num; ++i) pdst[i] = _mm_add_ps(pdst[i], _mm_mul_ps(psrc[i], volps));
+#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+		__asm
+		{
+			movss xmm2, vol
+			shufps xmm2, xmm2, 0H
+			mov esi, src
+			mov edi, dst
+			mov eax, [num]
+			LOOPSTART:
+			cmp eax, 0
+				jle END
+				movaps xmm0, [esi]
+				movaps xmm1, [edi]
+				mulps xmm0, xmm2
+				addps xmm0, xmm1
+				movaps[edi], xmm0
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+				END :
+		}
+#else
+		noopt.add(src, dst, num, vol);
+#endif
+	} else {
+		noopt.add(src, dst, num, vol);
 	}
-	while (--num);
 }
 	
-void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
+void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t multi)
+{	
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+	if (is_aligned(dst, 16) && (num % 4 == 0)) {
+		const __m128 volps = _mm_set_ps1(multi);
+		__m128* pdst = (__m128*)dst;
+		while (num > 0)
+		{
+			*pdst = _mm_mul_ps(*pdst, volps);
+			pdst++;
+			num -= 4;
+		}
+	} else {
+		noopt.mul(dst, num, multi);
+	}
+#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+	// This code assumes aligned memory (to 16) and assigned by powers of 4!
+	if (is_aligned(dst, 16) && (num % 4 == 0)) {
+		__asm
+		{
+			movss xmm2, multi
+			shufps xmm2, xmm2, 0H
+			mov edi, dst
+			mov eax, [num]
+			LOOPSTART:
+			cmp eax, 0
+				jle END
+				movaps xmm0, [edi]
+				mulps xmm0, xmm2
+				movaps[edi], xmm0
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+				END :
+		}
+	} else {
+		noopt.mul(dst, num, multi);
+	}
+#else
+	noopt.mul(dst, num, multi);
+#endif	
+}
+	
+void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t multi)
 {
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+	const __m128 volps = _mm_set_ps1(multi);
+	const __m128* psrc = (__m128*)src;
+	if (is_aligned(dst, 16)) {
+		while (num > 3)
+		{
+			_mm_storeu_ps(dst, _mm_mul_ps(*psrc, volps));
+			psrc++;
+			dst += 4;
+			num -= 4;
+		}
+		if (num > 0) {
+			noopt.movmul(src, dst, num, multi);
+		}
+	} else {
+		noopt.movmul(src, dst, num, multi);
+	}
+#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+	if (is_aligned(dst, 16)) {
+		__asm
+		{
+			movss xmm2, multi
+			shufps xmm2, xmm2, 0H
+			mov esi, src
+			mov edi, dst
+			mov eax, [num]
+			LOOPSTART:
+			cmp eax, 3
+				jle END
+				movaps xmm0, [esi]
+				mulps xmm0, xmm2
+				movups[edi], xmm0
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+				END :
+		}
+		if (num > 0) {
+			noopt.movmul(src, dst, num, multi);
+		}
+	} else {
+		__asm
+		{
+			movss xmm2, multi
+			shufps xmm2, xmm2, 0H
+			mov esi, src
+			mov edi, dst
+			mov eax, [num]
+			LOOPSTART:
+			cmp eax, 0
+				jle END
+				movaps xmm0, [esi]
+				mulps xmm0, xmm2
+				movaps[edi], xmm0
+				add esi, 10H
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+				END :
+		}
+	}
+#else
+	noopt.movmul(src, dst, num, multi);
+#endif
+}
+	
+void dsp_clear(psy_dsp_amp_t* dst, uintptr_t num)
+{
+#if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 	if (is_aligned(dst, 16) && (num % 4 == 0)) {
 		const __m128 zeroval = _mm_set_ps1(0.0f);
 		while (num > 0)
@@ -97,8 +235,31 @@ void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
 			num -= 4;
 		}
 	} else {
-		noopt.clear(dst, num);		
+		noopt.clear(dst, num);
 	}
+#elif defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__ASSEMBLER__INTEL
+	// This code assumes aligned memory (to 16) and assigned by powers of 4!
+	if (is_aligned(dst, 16) && (num % 4 == 0)) {
+		__asm
+		{
+			xorps xmm0, xmm0
+			mov edi, dst
+			mov eax, [num]
+			LOOPSTART:
+			cmp eax, 0
+				jle END
+				movaps[edi], xmm0
+				add edi, 10H
+				sub eax, 4
+				jmp LOOPSTART
+				END :
+		}
+	} else {
+		noopt.clear(dst, num);
+	}
+#else
+	noopt.clear(dst, num);
+#endif
 }
 
 void dsp_interleave(psy_dsp_amp_t* dst, psy_dsp_amp_t* left, psy_dsp_amp_t* right, uintptr_t num)

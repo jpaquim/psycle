@@ -47,6 +47,9 @@ void renderview_makeproperties(RenderView* self)
 	psy_Properties* recordpatnum;
 	psy_Properties* recordseqpos;
 	psy_Properties* quality;
+	psy_Properties* dither;
+	psy_Properties* ditherpdf;
+	psy_Properties* dithernoiseshape;
 	psy_Properties* actions;
 
 	self->properties = psy_properties_create();
@@ -127,7 +130,35 @@ void renderview_makeproperties(RenderView* self)
 	psy_properties_settext(
 		psy_properties_append_int(quality, "quality-channels", 2, 0, 2),
 		"Channels"
-	);	
+	);
+	dither = psy_properties_settext(
+		psy_properties_create_section(self->properties, "dither"),
+		"Dither");
+	psy_properties_settext(
+		psy_properties_append_bool(dither, "enable", FALSE),
+		"Enable"
+	);
+	ditherpdf = psy_properties_settext(
+		psy_properties_append_choice(dither, "pdf", 0),
+		"Prob. Distribution");
+	psy_properties_settext(
+		psy_properties_append_string(ditherpdf, "triangular", ""),
+		"Triangular");
+	psy_properties_settext(
+		psy_properties_append_string(ditherpdf, "rectangular", ""),
+		"Rectangular");
+	psy_properties_settext(
+		psy_properties_append_string(ditherpdf, "gaussian", ""),
+		"Gaussian");
+	dithernoiseshape = psy_properties_settext(
+		psy_properties_append_choice(dither, "noiseshape", 0),
+		"Noise-shaping");
+	psy_properties_settext(
+		psy_properties_append_string(dithernoiseshape, "none", ""),
+		"None");
+	psy_properties_settext(
+		psy_properties_append_string(dithernoiseshape, "highpass", ""),
+		"High-Pass Contour");
 }
 
 void renderview_onsettingsviewchanged(RenderView* self, SettingsView* sender,
@@ -147,6 +178,27 @@ void renderview_render(RenderView* self)
 	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);
 	self->restoreloopmode = self->workspace->player.sequencer.looping;
 	self->workspace->player.sequencer.looping = 0;
+	self->restoredither = psy_dsp_dither_settings(&self->workspace->player.dither);
+	self->restoredodither = self->workspace->player.dodither;
+	if (psy_properties_bool(self->properties, "dither.enable", FALSE) != FALSE) {
+		psy_Properties* pdf;
+		psy_Properties* noiseshaping;
+		psy_dsp_DitherPdf dither_pdf = psy_dsp_DITHER_PDF_TRIANGULAR;
+		psy_dsp_DitherNoiseShape dither_noiseshape = psy_dsp_DITHER_NOISESHAPE_NONE;
+		
+		pdf = psy_properties_read(self->properties, "dither.pdf");
+		if (pdf) {
+			dither_pdf = (psy_dsp_DitherPdf)pdf->item.value.i;
+		}
+		noiseshaping = psy_properties_read(self->properties,
+			"dither.noiseshape");
+		if (noiseshaping) {
+			dither_noiseshape = (psy_dsp_DitherNoiseShape)noiseshaping->item.value.i;
+		}
+		psy_audio_player_setdither(&self->workspace->player, 16, dither_pdf,
+			dither_noiseshape);
+		psy_audio_player_enabledither(&self->workspace->player);
+	}
 	psy_audio_player_setposition(&self->workspace->player, 0);
 	psy_audio_player_start(&self->workspace->player);
 	psy_signal_connect(&self->fileoutdriver->signal_stop, self,
@@ -159,7 +211,12 @@ void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 	psy_audio_player_stop(&self->workspace->player);
 	psy_audio_player_setaudiodriver(&self->workspace->player,
 		self->curraudiodriver);
-	self->workspace->player.sequencer.looping = self->restoreloopmode;
+	self->workspace->player.sequencer.looping = self->restoreloopmode;	
+	if (!self->restoredodither) {
+		psy_audio_player_disabledither(&self->workspace->player);
+	}
+	psy_dsp_dither_setsettings(&self->workspace->player.dither,
+		self->restoredither);	
 	self->curraudiodriver->open(self->curraudiodriver);
 	self->fileoutdriver->close(self->fileoutdriver);
 }

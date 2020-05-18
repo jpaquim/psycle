@@ -869,7 +869,9 @@ void workspace_makeparamview(Workspace* self, psy_Properties* visual)
 
 void workspace_makeparamtheme(Workspace* self, psy_Properties* view)
 {
-	self->paramtheme = psy_properties_create_section(view, "theme");
+	self->paramtheme = psy_properties_settext(
+		psy_properties_create_section(view, "theme"),
+		"Theme");
 	psy_properties_settext(
 		psy_properties_sethint(psy_properties_append_int(self->paramtheme,
 			"machineguititlecolor", 0x00292929, 0, 0),
@@ -1148,6 +1150,7 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Settings", "Opciones");
 	psy_properties_write_string(self->lang, "Copy", "Copiar");
 	psy_properties_write_string(self->lang, "Del", "Eliminar");
+	psy_properties_write_string(self->lang, "Delete", "Eliminar");
 	psy_properties_write_string(self->lang, "Paste", "Pegar");
 	psy_properties_write_string(self->lang, "Clear", "Borrar");
 	psy_properties_write_string(self->lang, "New Trk", "Nuevo Trk");
@@ -1176,6 +1179,31 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Language", "idioma");
 	psy_properties_write_string(self->lang, "Properties", "Propiedades");	
 	psy_properties_write_string(self->lang, "File", "Archivo");
+	psy_properties_write_string(self->lang, "Parameters", "Parámetros");
+	psy_properties_write_string(self->lang, "Exchange", "Cambiar");
+	psy_properties_write_string(self->lang, "Show Master", "Mostrar maestro");
+	psy_properties_write_string(self->lang, "Create/Replace", "Crear/Sustituir");
+	psy_properties_write_string(self->lang, "Effects", "Efectos");
+	psy_properties_write_string(self->lang, "Generators", "Generadores");
+	psy_properties_write_string(self->lang, "Waves", "Ondas");
+	psy_properties_write_string(self->lang, "Event Input", "Input de los Eventos");
+	psy_properties_write_string(self->lang, "Audio Drivers", "Drivers del Audio");
+	psy_properties_write_string(self->lang, "Load new gamefx and Blitz if version unknown",
+		"Carga nuevo gamefx y Blitz si la versión es desconocido");
+	psy_properties_write_string(self->lang, "Background", "Segundo plano");
+	psy_properties_write_string(self->lang, "Font", "Tipo de letra");
+	psy_properties_write_string(self->lang, "Name", "Nombre");
+	psy_properties_write_string(self->lang, "Show About at Startup", "Muestra 'Acerca de' en startup");
+
+	psy_properties_write_string(self->lang, "Show song info on Load", "Muestra song información después de carga");
+	psy_properties_write_string(self->lang, "Show Maximized at Startup", "Muestra maximizado en startup");
+	psy_properties_write_string(self->lang, "Show Playlist Editor", "Muestra lista de reproducción");
+	psy_properties_write_string(self->lang, "Show Sequencestepbar", "Muestra barra del secuenciador por pasos");
+	psy_properties_write_string(self->lang, "Save Recent Songs", "Guardar recientes songs");
+	psy_properties_write_string(self->lang, "Theme", "Tema");
+	psy_properties_write_string(self->lang, "Show As Window", "Mostrar como una ventana");
+	psy_properties_write_string(self->lang, "Gear Rack", "Estante del Equipo");	
+	psy_properties_write_string(self->lang, "Tracks", "Pistas");
 }
 
 const char* workspace_translate(Workspace* self, const char* key)

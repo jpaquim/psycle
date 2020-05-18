@@ -5,7 +5,9 @@
 #define psy_dsp_CONVERT_H
 
 #include "dsptypes.h"
+
 #include "../../detail/psydef.h"
+
 #include <math.h>
 
 #ifdef __cplusplus

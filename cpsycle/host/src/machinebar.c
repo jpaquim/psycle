@@ -30,6 +30,7 @@ static void ConnectInstrumentSignals(MachineBar*);
 static void ClearMachineBox(MachineBar* self);
 static void OnPrevMachine(MachineBar*, psy_ui_Component* sender);
 static void OnNextMachine(MachineBar*, psy_ui_Component* sender);
+static void machinebar_updatetext(MachineBar*);
 static bool instrumentmode(MachineBar* self)
 {
 	return psy_ui_combobox_cursel(&self->instparambox) == 1;
@@ -53,14 +54,10 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_signal_connect(&self->component.signal_destroy, self, OnDestroy);
 	psy_ui_combobox_init(&self->machinebox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);	
-	psy_ui_button_init(&self->gear, &self->component);
-	psy_ui_button_settext(&self->gear, "Gear Rack");
-	psy_ui_button_init(&self->editor, &self->component);
-	psy_ui_button_settext(&self->editor, "Editor");
+	psy_ui_button_init(&self->gear, &self->component);	
+	psy_ui_button_init(&self->editor, &self->component);	
 	psy_ui_button_init(&self->cpu, &self->component);
-	psy_ui_button_settext(&self->cpu, "CPU");
-	psy_ui_button_init(&self->midi, &self->component);
-	psy_ui_button_settext(&self->midi, "MIDI");
+	psy_ui_button_init(&self->midi, &self->component);	
 	BuildMachineBox(self);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		OnMachineBoxSelChange);	
@@ -80,10 +77,23 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_signal_connect(&self->instparambox.signal_selchanged, self,
 		OnInstParamBoxSelChange);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	ConnectSongSignals(self);					
+	ConnectSongSignals(self);
+	machinebar_updatetext(self);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_ALIGN_LEFT, &margin));	
+}
+
+void machinebar_updatetext(MachineBar* self)
+{
+	psy_ui_button_settext(&self->gear,
+		workspace_translate(self->workspace, "Gear Rack"));
+	psy_ui_button_settext(&self->editor,
+		workspace_translate(self->workspace, "Editor"));
+	psy_ui_button_settext(&self->cpu,
+		workspace_translate(self->workspace, "CPU"));
+	psy_ui_button_settext(&self->midi,
+		workspace_translate(self->workspace, "MIDI"));
 }
 
 void OnDestroy(MachineBar* self, psy_ui_Component* component)

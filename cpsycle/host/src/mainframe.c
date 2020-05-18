@@ -296,39 +296,15 @@ void mainframe_init(MainFrame* self)
 
 void mainframe_updatetext(MainFrame* self)
 {
-	psy_List* t;
-	int i;
-	
-	for (i = 0, t = self->tabbar.tabs; t != NULL; t = t->next, ++i) {
-		Tab* tab;
-
-		tab = (Tab*)t->entry;
-		switch (i) {
-			case TABPAGE_MACHINEVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Machines"));
-			break;
-			case TABPAGE_PATTERNVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Patterns"));
-			break;
-			case TABPAGE_SAMPLESVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Samples"));
-			break;
-			case TABPAGE_INSTRUMENTSVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Instruments"));
-			break;
-			case TABPAGE_PROPERTIESVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Properties"));
-			break;
-			case TABPAGE_SETTINGSVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Settings"));
-			break;
-			case TABPAGE_HELPVIEW:
-				tab_settext(tab, workspace_translate(&self->workspace, "Help"));
-			break;
-			default:
-			break;
-		}
-	}
+	tabbar_rename_tabs(&self->tabbar,
+		workspace_translate(&self->workspace, "Machines"),
+		workspace_translate(&self->workspace, "Patterns"),
+		workspace_translate(&self->workspace, "Samples"),
+		workspace_translate(&self->workspace, "Instruments"),
+		workspace_translate(&self->workspace, "Properties"),
+		workspace_translate(&self->workspace, "Settings"),
+		workspace_translate(&self->workspace, "Help"),
+		NULL);
 	psy_ui_component_invalidate(&self->component);
 }
 
