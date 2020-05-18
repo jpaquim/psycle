@@ -112,12 +112,14 @@
     <ClCompile Include="src\adsr.c" />
     <ClCompile Include="src\alignedalloc.c" />
     <ClCompile Include="src\convert.c" />
+    <ClCompile Include="src\dither.c" />
     <ClCompile Include="src\envelope.c" />
     <ClCompile Include="src\fft.c" />
     <ClCompile Include="src\filter.c" />
     <ClCompile Include="src\filtercoeff.c" />
     <ClCompile Include="src\linear.c" />
     <ClCompile Include="src\lowpass12e.c" />
+    <ClCompile Include="src\mersennetwister.c" />
     <ClCompile Include="src\multifilter.c" />
     <ClCompile Include="src\multiresampler.c" />
     <ClCompile Include="src\notestab.c" />
@@ -134,6 +136,7 @@
     <ClInclude Include="src\adsr.h" />
     <ClInclude Include="src\alignedalloc.h" />
     <ClInclude Include="src\convert.h" />
+    <ClInclude Include="src\dither.h" />
     <ClInclude Include="src\dsptypes.h" />
     <ClInclude Include="src\envelope.h" />
     <ClInclude Include="src\fft.h" />
@@ -141,6 +144,7 @@
     <ClInclude Include="src\filtercoeff.h" />
     <ClInclude Include="src\linear.h" />
     <ClInclude Include="src\lowpass12e.h" />
+    <ClInclude Include="src\mersennetwister.h" />
     <ClInclude Include="src\multifilter.h" />
     <ClInclude Include="src\multiresampler.h" />
     <ClInclude Include="src\notestab.h" />

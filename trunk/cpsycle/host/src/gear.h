@@ -13,7 +13,6 @@
 #include "tabbar.h"
 #include "workspace.h"
 
-
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Button createreplace;
@@ -25,8 +24,13 @@ typedef struct {
 	psy_ui_Button showmaster;
 } GearButtons;
 
-void gearbuttons_init(GearButtons*, psy_ui_Component* parent);
+void gearbuttons_init(GearButtons*, psy_ui_Component* parent, Workspace*);
 psy_ui_Component* gearbuttons_base(GearButtons*);
+
+INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
+{
+	return &self->component;
+}
 
 typedef struct {
 	psy_ui_Component component;
@@ -43,6 +47,10 @@ typedef struct {
 } Gear;
 
 void gear_init(Gear*, psy_ui_Component* parent, Workspace*);
-psy_ui_Component* gear_base(Gear*);
+
+INLINE psy_ui_Component* gear_base(Gear* self)
+{
+	return &self->component;
+}
 
 #endif

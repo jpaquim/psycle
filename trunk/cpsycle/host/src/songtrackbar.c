@@ -11,6 +11,7 @@
 
 #define MIN_TRACKS 4
 
+static void songtrackbar_updatetext(SongTrackBar*);
 static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
@@ -28,8 +29,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->headerlabel, &self->component);	
-	psy_ui_label_settext(&self->headerlabel, "Tracks");		
+	psy_ui_label_init(&self->headerlabel, &self->component);				
 	psy_ui_combobox_init(&self->trackbox, &self->component);	
 	psy_ui_combobox_setcharnumber(&self->trackbox, 4);
 	songtrackbar_build(self);	
@@ -39,12 +39,19 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songtrackbar_onsongchanged);
+	songtrackbar_updatetext(self);
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(1),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));		
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT,
 		&margin));	
+}
+
+void songtrackbar_updatetext(SongTrackBar* self)
+{
+	psy_ui_label_settext(&self->headerlabel, 
+		workspace_translate(self->workspace, "Tracks"));
 }
 
 void songtrackbar_build(SongTrackBar* self)

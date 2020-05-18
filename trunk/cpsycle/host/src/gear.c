@@ -6,34 +6,26 @@
 #include "gear.h"
 #include "songio.h"
 
-static void gear_connectsongsignals(Gear*);
-static void gear_ondelete(Gear*, psy_ui_Component* sender);
-static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
-static void gear_onclone(Gear*, psy_ui_Component* sender);
-static void gear_onexchange(Gear* self, psy_ui_Component* sender);
-static void gear_onparameters(Gear*, psy_ui_Component* sender);
-static void gear_onmaster(Gear*, psy_ui_Component* sender);
 
-void gearbuttons_init(GearButtons* self, psy_ui_Component* parent)
+static void gearbuttons_updatetext(GearButtons*, Workspace* workspace);
+static void gearbuttons_onlanguagechanged(GearButtons*, Workspace* sender);
+
+void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_Margin margin;	
 
 	psy_ui_component_init(gearbuttons_base(self), parent);	
 	psy_ui_component_enablealign(gearbuttons_base(self));	
 	psy_ui_button_init(&self->createreplace, gearbuttons_base(self));
-	psy_ui_button_settext(&self->createreplace, "Create/Replace");
-	psy_ui_button_init(&self-> del, gearbuttons_base(self));
-	psy_ui_button_settext(&self->del, "Delete");	
+	psy_ui_button_init(&self->del, gearbuttons_base(self));
 	psy_ui_button_init(&self->parameters, gearbuttons_base(self));
-	psy_ui_button_settext(&self->parameters, "Parameters");
 	psy_ui_button_init(&self->properties, gearbuttons_base(self));
-	psy_ui_button_settext(&self->properties, "Properties");
 	psy_ui_button_init(&self->exchange, gearbuttons_base(self));
-	psy_ui_button_settext(&self->exchange, "Exchange");
 	psy_ui_button_init(&self->clone, gearbuttons_base(self));
-	psy_ui_button_settext(&self->clone, "Clone");
 	psy_ui_button_init(&self->showmaster, gearbuttons_base(self));
-	psy_ui_button_settext(&self->showmaster, "Show master");			
+	gearbuttons_updatetext(self, workspace);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		gearbuttons_onlanguagechanged);
 	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));				
@@ -43,10 +35,39 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent)
 		&margin));
 }
 
-psy_ui_Component* gearbuttons_base(GearButtons* self)
+void gearbuttons_updatetext(GearButtons* self, Workspace* workspace)
 {
-	return &self->component;
+	psy_ui_button_settext(&self->createreplace,
+		workspace_translate(workspace, "Create/Replace"));
+	psy_ui_button_settext(&self->del,
+		workspace_translate(workspace, "Delete"));
+	psy_ui_button_settext(&self->parameters,
+		workspace_translate(workspace, "Parameters"));
+	psy_ui_button_settext(&self->properties,
+		workspace_translate(workspace, "Properties"));
+	psy_ui_button_settext(&self->exchange,
+		workspace_translate(workspace, "Exchange"));
+	psy_ui_button_settext(&self->clone,
+		workspace_translate(workspace, "Clone"));
+	psy_ui_button_settext(&self->showmaster,
+		workspace_translate(workspace, "Show Master"));
 }
+
+void gearbuttons_onlanguagechanged(GearButtons* self, Workspace* sender)
+{
+	gearbuttons_updatetext(self, sender);
+	psy_ui_component_align(gearbuttons_base(self));
+}
+
+static void gear_updatetext(Gear*, Workspace*);
+static void gear_connectsongsignals(Gear*);
+static void gear_ondelete(Gear*, psy_ui_Component* sender);
+static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
+static void gear_onclone(Gear*, psy_ui_Component* sender);
+static void gear_onexchange(Gear* self, psy_ui_Component* sender);
+static void gear_onparameters(Gear*, psy_ui_Component* sender);
+static void gear_onmaster(Gear*, psy_ui_Component* sender);
+static void gear_onlanguagechanged(Gear*, Workspace* sender);
 
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
@@ -77,7 +98,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);
-	gearbuttons_init(&self->buttons, gear_base(self));
+	gearbuttons_init(&self->buttons, gear_base(self), workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self, gear_ondelete);
 	psy_signal_connect(&self->buttons.clone.signal_clicked, self,
@@ -87,7 +108,20 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->buttons.showmaster.signal_clicked, self,
 		gear_onmaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
-		gear_onexchange);	
+		gear_onexchange);
+	gear_updatetext(self, workspace);
+	psy_signal_connect(&self->workspace->signal_languagechanged, self,
+		gear_onlanguagechanged);
+}
+
+void gear_updatetext(Gear* self, Workspace* workspace)
+{
+	tabbar_rename_tabs(&self->tabbar,
+		workspace_translate(workspace, "Generators"),
+		workspace_translate(workspace, "Effects"),
+		workspace_translate(workspace, "Instruments"),
+		workspace_translate(workspace, "Waves"),
+		NULL);
 }
 
 void gear_connectsongsignals(Gear* self)
@@ -170,7 +204,8 @@ void gear_onmaster(Gear* self, psy_ui_Component* sender)
 	workspace_showparameters(self->workspace, MASTER_INDEX);
 }
 
-psy_ui_Component* gear_base(Gear* self)
+void gear_onlanguagechanged(Gear* self, Workspace* sender)
 {
-	return &self->component;
+	gear_updatetext(self, sender);
+	psy_ui_component_align(gear_base(self));
 }

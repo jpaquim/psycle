@@ -41,6 +41,8 @@ static void psy_audio_player_workpath(psy_audio_Player*, uintptr_t amount);
 static void log_workevents(psy_List* events);
 static void psy_audio_player_filldriver(psy_audio_Player*,
 	psy_dsp_amp_t* buffer, uintptr_t amount);
+static void psy_audio_player_ditherbuffer(psy_audio_Player*,
+	psy_audio_Buffer* buffer, uintptr_t amount);
 static void psy_audio_player_resetvumeters(psy_audio_Player*);
 static void psy_audio_player_dostop(psy_audio_Player*);
 static void psy_audio_player_notifylinetick(psy_audio_Player*);
@@ -53,6 +55,8 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->numsongtracks = 16;
 	self->recordingnotes = 0;
 	self->multichannelaudition = 0;
+	self->dodither = FALSE;
+	// psy_dsp_dither_init(&self->dither);
 	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
 		&song->machines);
 	mainframe = handle;
@@ -99,6 +103,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_table_dispose(&self->trackstonotes);
 	psy_table_dispose(&self->worked);
 	psy_audio_pattern_dispose(&self->patterndefaults);
+	//psy_dsp_dither_dispose(&self->dither);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_close(&logfile);
 #endif
@@ -251,10 +256,26 @@ void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 {
 	psy_audio_Buffer* masteroutput;	
 	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
-	if (masteroutput) {		
+	if (masteroutput) {
 		psy_audio_buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
+		if (self->dodither) {
+			psy_audio_player_ditherbuffer(self, masteroutput, amount);			
+		}
 		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
+	}
+}
+
+void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer* buffer,
+	uintptr_t amount)
+{
+	uintptr_t channel;
+
+	// dither needs PSY_DSP_AMP_RANGE_NATIVE
+	for (channel = 0; channel < psy_audio_buffer_numchannels(buffer);
+			++channel) {
+		psy_dsp_dither_process(&self->dither,
+			psy_audio_buffer_at(buffer, channel), amount);
 	}
 }
 
@@ -359,6 +380,24 @@ void psy_audio_player_setvumetermode(psy_audio_Player* self, VUMeterMode mode)
 VUMeterMode psy_audio_player_vumetermode(psy_audio_Player* self)
 {
 	return self->vumode;
+}
+
+void psy_audio_player_enabledither(psy_audio_Player* self)
+{
+	self->dodither = TRUE;	
+}
+
+void psy_audio_player_disabledither(psy_audio_Player* self)
+{
+	self->dodither = FALSE;
+}
+
+void psy_audio_player_setdither(psy_audio_Player* self, uintptr_t depth,
+	psy_dsp_DitherPdf pdf, psy_dsp_DitherNoiseShape noiseshaping)
+{
+	psy_dsp_dither_setbitdepth(&self->dither, depth);
+	psy_dsp_dither_setpdf(&self->dither, pdf);
+	psy_dsp_dither_setnoiseshaping(&self->dither, noiseshaping);
 }
 
 // sequencer setter and getter
