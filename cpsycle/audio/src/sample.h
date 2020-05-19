@@ -18,7 +18,16 @@ typedef union _Double {
     uint64_t QuadPart;
 } Double;
 
-void double_setvalue(Double*, double value);
+
+INLINE void double_setvalue(Double* self, double value)
+{
+	self->QuadPart = (uint64_t)(value * 4294967296.0f);
+}
+
+INLINE double double_real(Double* self)
+{
+	return self->QuadPart * 1 / 4294967296.0;
+}
 
 /// psy_audio_Sample Loop Types
 typedef enum {
@@ -54,7 +63,8 @@ typedef struct {
 	struct psy_audio_Sample* sample;
 	Double pos;
 	int64_t speed;	
-	int forward;	
+	int forward;
+	void* resampler_data;
 } SampleIterator;
 
 void sampleiterator_init(SampleIterator*, struct psy_audio_Sample*);

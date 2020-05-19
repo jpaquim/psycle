@@ -77,6 +77,18 @@
     <ClCompile Include="src\mersennetwister.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\spline.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spline-sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sinc-sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sinc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\adsr.h">
@@ -146,6 +158,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\mersennetwister.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\spline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sinc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\spline-sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sinc-sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sse_mathfun.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

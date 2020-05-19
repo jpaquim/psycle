@@ -51,6 +51,10 @@
 
 #include "../../detail/psydef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /// Period parameters
 #define psy_dsp_MERSENNETWISTER_N 624
 /// Period parameters
@@ -97,5 +101,9 @@ double psy_dsp_mersennetwister_genrand_res53(psy_dsp_MersenneTwister*);
 /// standard deviation of 1
 void psy_dsp_mersennetwister_genrand_gaussian(psy_dsp_MersenneTwister*,
 	double* out1, double* out2);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_MERSENNETWISTER_H */

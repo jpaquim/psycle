@@ -38,7 +38,7 @@ static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
-static void mainframe_onsettingsviewchanged(MainFrame*, SettingsView* sender,
+static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
 	psy_Properties*);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
@@ -202,7 +202,7 @@ void mainframe_init(MainFrame* self)
 		psy_ui_notebook_base(&self->notebook),
 		&self->viewtabbars.component,
 		&self->workspace);
-	settingsview_init(&self->settingsview,
+	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		&self->viewtabbars.component,
 		self->workspace.config);
@@ -763,7 +763,7 @@ void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
 	tabbar_select(&self->machineview.tabbar, 1);
 }
 
-void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
+void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 	psy_Properties* property)
 {	
 	if (strcmp(psy_properties_key(property), "showstepsequencer") == 0) {
@@ -786,7 +786,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, SettingsView* sender,
 		}
 	} else {
 		workspace_configchanged(&self->workspace, property,
-			sender->choiceproperty);
+			sender->renderer.choiceproperty);
 	}
 }
 

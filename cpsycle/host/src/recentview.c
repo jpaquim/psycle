@@ -6,9 +6,9 @@
 #include "recentview.h"
 #include <string.h>
 
-static void recentview_onselected(RecentView*, SettingsView* sender,
+static void recentview_onselected(RecentView*, PropertiesView* sender,
 	psy_Properties*);
-static void recentview_onclear(RecentView*, SettingsView* sender);
+static void recentview_onclear(RecentView*, PropertiesView* sender);
 
 void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -21,17 +21,17 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->clear.component, psy_ui_ALIGN_TOP);
 	psy_signal_connect(&self->clear.signal_clicked, self,
 		recentview_onclear);
-	settingsview_init(&self->view, &self->component, tabbarparent,
+	propertiesview_init(&self->view, &self->component, tabbarparent,
 		workspace_recentsongs(workspace));
-	psy_ui_component_hide(&self->view.tabbar.component);
-	self->view.columnwidth = 300;
+	propertiesview_setcolumnwidth(&self->view, 1.f, 0.f, 0.f);
+	psy_ui_component_hide(&self->view.tabbar.component);	
 	psy_ui_component_resize(&self->view.component, 300, 0);
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->view.signal_selected, self,
 		recentview_onselected);
 }
 
-void recentview_onselected(RecentView* self, SettingsView* sender,
+void recentview_onselected(RecentView* self, PropertiesView* sender,
 	psy_Properties* property)
 {
 	if (psy_properties_insection(property, self->workspace->recentfiles)) {
@@ -42,7 +42,7 @@ void recentview_onselected(RecentView* self, SettingsView* sender,
 	}
 }
 
-void recentview_onclear(RecentView* self, SettingsView* sender)
+void recentview_onclear(RecentView* self, PropertiesView* sender)
 {
 	workspace_clearrecentsongs(self->workspace);
 	psy_ui_component_align(&self->view.component);

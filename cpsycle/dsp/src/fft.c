@@ -410,7 +410,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 		self->state_real = 0;
 		self->state_imag = 0;
 		self->fftLog = 0;
-		psy_dsp_multiresampler_init(&self->resampler);
+		psy_dsp_linearresampler_init(&self->resampler);
 	}
 
 	void fftclass_dispose(FFTClass* self)
@@ -597,7 +597,6 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 				self->fftLog[n]= (float)(pow(2.0f,n*factor)-1.f)*factor2;
 			}
 		}
-		psy_dsp_multiresampler_settype(&self->resampler, RESAMPLERTYPE_LINEAR);
 	}
 
 	void fftclass_calculatespectrum(FFTClass* self, float samplesIn[], float samplesOut[])
@@ -661,8 +660,10 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 				j = calculatedfftIn[a];
 			}
 			else*/ if (afloat +1.0f > self->fftLog[h+1]) {
-				// j = self->resampler.resampler.vtable->work(&self->resampler.resampler, calculatedfftIn, afloat,
-					// self->outputSize, calculatedfftIn + self->outputSize - 1, NULL);
+				j = psy_dsp_resampler_work_float(
+					psy_dsp_linearresampler_base(&self->resampler),
+					calculatedfftIn, afloat, self->outputSize, NULL,
+					calculatedfftIn, calculatedfftIn + self->outputSize - 1);				
 				j = calculatedfftIn[(int)afloat];
 				a = psy_dsp_fround(afloat);
 			}
@@ -676,10 +677,10 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			banddBOut[h] = (float)(10 * log10(j + 0.0000000001f) + dbinvSamples);
 		}
 	}
+
 	float fftclass_resample(FFTClass* self, float const * data, float offset, uint64_t length)
 	{
-		//return self->resampler.resampler.vtable->work(&self->resampler.resampler, data, offset, length, NULL);
-		return data[(int)offset];
+		return psy_dsp_resampler_work_float(
+			psy_dsp_linearresampler_base(&self->resampler),
+			data, offset, length, NULL, data, data + length - 1);
 	}
-
-	

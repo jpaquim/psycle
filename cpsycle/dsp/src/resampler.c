@@ -5,6 +5,8 @@
 
 #include "resampler.h"
 
+#include <math.h>
+
 // cubic resampler tables
 
 
@@ -36,13 +38,42 @@ static void cubic_table_initialize(void)
 }
 
 // vtable
-static void setspeed(psy_dsp_Resampler* self, int64_t speed) { }
+static void setspeed(psy_dsp_Resampler* self, void* resampler_data, double speed) { }
+static void* getresamplerdata(psy_dsp_Resampler* self) { return 0; }
+static void disposeresamplerdata(psy_dsp_Resampler* self, void* resampler_data) { }
+
 static psy_dsp_amp_t work(psy_dsp_Resampler* self, 
-	float const * data,
+	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
 	uint64_t length,
 	void* resampler_data)
+{
+	return *data;
+}
+
+static psy_dsp_amp_t work_unchecked(psy_dsp_Resampler* self,
+	int16_t const* data,
+	uint32_t res,
+	void* resampler_data)
+{
+	return *data;
+}
+
+
+static float work_float(psy_dsp_Resampler* self,
+	float const* data,
+	float offset,
+	uint64_t length,
+	void* resampler_data,
+	float const* loopBeg,
+	float const* loopEnd)
+{
+	return data[(uintptr_t)floor(offset)];
+}
+
+static float work_float_unchecked(psy_dsp_Resampler* self,
+	float const* data, uint32_t res, void* resampler_data)
 {
 	return *data;
 }
@@ -54,7 +85,12 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {		
 		vtable.work = work;
+		vtable.work_unchecked = work_unchecked;
+		vtable.work_float = work_float;
+		vtable.work_float_unchecked = work_float_unchecked;
 		vtable.setspeed = setspeed;
+		vtable.getresamplerdata = getresamplerdata;
+		vtable.disposeresamplerdata = disposeresamplerdata;
 		vtable_initialized = 1;
 	}
 }

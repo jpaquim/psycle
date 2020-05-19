@@ -19,144 +19,116 @@
 #define _MAX_PATH 4096
 #endif
 
-static void settingsview_ondraw(SettingsView*, psy_ui_Component* sender,
+static void propertiesrenderer_ondraw(PropertiesRenderer*, psy_ui_Component* sender,
 	psy_ui_Graphics*);
-static int settingsview_onpropertiesdrawenum(SettingsView*, psy_Properties*,
+static int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer*, psy_Properties*,
 	int level);
-static int settingsview_onpropertieshittestenum(SettingsView*, psy_Properties*,
+static int propertiesrenderer_onpropertieshittestenum(PropertiesRenderer*, psy_Properties*,
 	int level);
-static int settingsview_onenumpropertyposition(SettingsView*, psy_Properties*,
+static int propertiesrenderer_onenumpropertyposition(PropertiesRenderer*, psy_Properties*,
 	int level);
-static void settingsview_preparepropertiesenum(SettingsView* self);
-static void settingsview_onmousedown(SettingsView*, psy_ui_Component* sender,
+static void propertiesrenderer_preparepropertiesenum(PropertiesRenderer* self);
+static void propertiesrenderer_onmousedown(PropertiesRenderer*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void settingsview_onmousedoubleclick(SettingsView*, psy_ui_Component* sender,
+static void propertiesrenderer_onmousedoubleclick(PropertiesRenderer*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
-static void settingsview_oneditchange(SettingsView*, psy_ui_Edit* sender);
-static void settingsview_oneditkeydown(SettingsView*, psy_ui_Component* sender,
+static void propertiesrenderer_oneditchange(PropertiesRenderer*, psy_ui_Edit* sender);
+static void propertiesrenderer_oneditkeydown(PropertiesRenderer*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
-static void settingsview_oninputdefinerchange(SettingsView*,
+static void propertiesrenderer_oninputdefinerchange(PropertiesRenderer*,
 	InputDefiner* sender);
-static void settingsview_ondestroy(SettingsView*, psy_ui_Component* sender);
-static void settingsview_onsize(SettingsView*, psy_ui_Component* sender, psy_ui_Size*);
-static void settingsview_onscroll(SettingsView*, psy_ui_Component* sender,
+static void propertiesrenderer_ondestroy(PropertiesRenderer*, psy_ui_Component* sender);
+static void propertiesrenderer_onsize(PropertiesRenderer*, psy_ui_Component* sender, psy_ui_Size*);
+static void propertiesrenderer_onscroll(PropertiesRenderer*, psy_ui_Component* sender,
 	int stepx, int stepy);
-static void settingsview_drawlinebackground(SettingsView*,psy_Properties*);
-static void settingsview_drawkey(SettingsView*, psy_Properties*, int column);
-static void settingsview_drawvalue(SettingsView*, psy_Properties*, int column);
-static void settingsview_drawstring(SettingsView*, psy_Properties*,
+static void propertiesrenderer_drawlinebackground(PropertiesRenderer*,psy_Properties*);
+static void propertiesrenderer_drawkey(PropertiesRenderer*, psy_Properties*, int column);
+static void propertiesrenderer_drawvalue(PropertiesRenderer*, psy_Properties*, int column);
+static void propertiesrenderer_drawstring(PropertiesRenderer*, psy_Properties*,
 	int column);
-static void settingsview_drawinteger(SettingsView*, psy_Properties*,
+static void propertiesrenderer_drawinteger(PropertiesRenderer*, psy_Properties*,
 	int column);
-static void settingsview_drawbutton(SettingsView*, psy_Properties*,
+static void propertiesrenderer_drawbutton(PropertiesRenderer*, psy_Properties*,
 	int column);
-static void settingsview_drawcheckbox(SettingsView*, psy_Properties*,
+static void propertiesrenderer_drawcheckbox(PropertiesRenderer*, psy_Properties*,
 	int column);
-static void settingsview_advanceline(SettingsView*);
-static void settingsview_countblocklines(SettingsView*, psy_Properties*);
-static void settingsview_addremoveident(SettingsView*, int level);
-static void settingsview_addident(SettingsView*);
-static void settingsview_removeident(SettingsView*);
-static int settingsview_intersectsvalue(SettingsView*, psy_Properties*,
+static void propertiesrenderer_advanceline(PropertiesRenderer*);
+static void propertiesrenderer_countblocklines(PropertiesRenderer*, psy_Properties*, int column);
+static void propertiesrenderer_addremoveident(PropertiesRenderer*, int level);
+static void propertiesrenderer_addident(PropertiesRenderer*);
+static void propertiesrenderer_removeident(PropertiesRenderer*);
+static int propertiesrenderer_intersectsvalue(PropertiesRenderer*, psy_Properties*,
 	int column);
-static int settingsview_intersectskey(SettingsView*, psy_Properties*,
+static int propertiesrenderer_intersectskey(PropertiesRenderer*, psy_Properties*,
 	int column);
-static void settingsview_appendtabbarsections(SettingsView*);
-static void settingsview_ontabbarchange(SettingsView*, psy_ui_Component* sender,
-	int tabindex);
-static void settingsview_selectsection(SettingsView*, psy_ui_Component* sender, uintptr_t section);
-static void settingsview_adjustscroll(SettingsView*);
+static void propertiesrenderer_adjustscroll(PropertiesRenderer*);
+static int propertiesrenderer_columnwidth(PropertiesRenderer*, int column);
+static int propertiesrenderer_columnstart(PropertiesRenderer*, int column);
+static void propertiesrenderer_computecolumns(PropertiesRenderer* self, psy_ui_Size*);
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 
-void settingsview_init(SettingsView* self, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Properties* properties)
-{
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_init(&self->viewtabbar, tabbarparent);
+void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
+	psy_Properties* properties)
+{	
 	self->properties = properties;
-	psy_ui_component_init(&self->client, &self->component);
-	psy_ui_component_doublebuffer(&self->client);	
-	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_setwheelscroll(&self->client, 4);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);	
+	psy_ui_component_init(&self->client, parent);
+	psy_ui_component_doublebuffer(&self->client);		
+	psy_ui_component_setwheelscroll(&self->client, 4);		
 	psy_ui_component_showverticalscrollbar(&self->client);	
 	psy_signal_connect(&self->client.signal_destroy, self,
-		settingsview_ondestroy);
-	psy_signal_connect(&self->client.signal_draw, self, settingsview_ondraw);
+		propertiesrenderer_ondestroy);
+	psy_signal_connect(&self->client.signal_draw, self, propertiesrenderer_ondraw);
 	psy_signal_connect(&self->client.signal_scroll, self,
-		settingsview_onscroll);		
+		propertiesrenderer_onscroll);		
 	psy_signal_connect(&self->client.signal_mousedown, self,
-		settingsview_onmousedown);
+		propertiesrenderer_onmousedown);
 	psy_signal_connect(&self->client.signal_mousedoubleclick, self,
-		settingsview_onmousedoubleclick);
-	psy_signal_connect(&self->component.signal_size, self,
-		settingsview_onsize);
+		propertiesrenderer_onmousedoubleclick);	
 	self->selected = 0;
 	self->keyselected = 0;
 	self->choiceproperty = 0;
 	self->dy = 0;
 	self->button = 0;
+	self->col_perc[0] = 0.4f;
+	self->col_perc[1] = 0.4f;
+	self->col_perc[2] = 0.2f;
 	psy_ui_edit_init(&self->edit, &self->client);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
-		settingsview_oneditkeydown);
+		propertiesrenderer_oneditkeydown);
 	psy_ui_component_hide(&self->edit.component);
 	inputdefiner_init(&self->inputdefiner, &self->client);	
 	psy_ui_component_hide(&self->inputdefiner.component);		
 	psy_signal_init(&self->signal_changed);
-	psy_signal_init(&self->signal_selected);
-	tabbar_init(&self->tabbar, &self->component);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
-	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
-	settingsview_appendtabbarsections(self);
-	psy_signal_connect(&self->component.signal_selectsection, self, settingsview_selectsection);
+	psy_signal_init(&self->signal_selected);	
+	psy_signal_connect(&self->client.signal_size, self,
+		propertiesrenderer_onsize);
 }
 
-void settingsview_appendtabbarsections(SettingsView* self)
-{	
-	psy_Properties* p;	
-	
-	for (p = self->properties->children; p != NULL;
-			p = psy_properties_next(p)) {
-		if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
-			tabbar_append(&self->tabbar, psy_properties_translation(p));
-		}		
-	}
-	tabbar_select(&self->tabbar, 0);			
-	psy_signal_connect(&self->tabbar.signal_change, self,
-		settingsview_ontabbarchange);
-}
-
-void settingsview_selectsection(SettingsView* self, psy_ui_Component* sender, uintptr_t section)
-{
-	tabbar_select(&self->tabbar, (int)section);
-}
-
-void settingsview_ondestroy(SettingsView* self, psy_ui_Component* sender)
+void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
 }
 
-void settingsview_ondraw(SettingsView* self, psy_ui_Component* sender,
+void propertiesrenderer_ondraw(PropertiesRenderer* self, psy_ui_Component* sender,
 	psy_ui_Graphics* g)
 {	
 	self->g = g;
 	psy_ui_setcolor(g, 0x00EAEAEA);
 	psy_ui_settextcolor(g, 0x00CACACA);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	settingsview_preparepropertiesenum(self);
+	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
-		settingsview_onpropertiesdrawenum);
+		propertiesrenderer_onpropertiesdrawenum);
 }
 
-void settingsview_preparepropertiesenum(SettingsView* self)
+void propertiesrenderer_preparepropertiesenum(PropertiesRenderer* self)
 {
 	psy_ui_TextMetric tm;
 	
 	tm = psy_ui_component_textmetric(&self->client);
 	self->lineheight = (int) (tm.tmHeight * 1.5);
-	self->columnwidth = tm.tmAveCharWidth * 50;
+	// self->columnwidth = tm.tmAveCharWidth * 50, self->columnwidth);
 	self->identwidth = tm.tmAveCharWidth * 4;
 	self->cpx = 0;
 	self->cpy = 0;
@@ -164,13 +136,15 @@ void settingsview_preparepropertiesenum(SettingsView* self)
 	self->lastlevel = 0;
 }
 
-int settingsview_onpropertiesdrawenum(SettingsView* self,
+int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	psy_Properties* property, int level)
-{				
-	settingsview_addremoveident(self, level);
+{			
+	psy_ui_Size size;
+
+	propertiesrenderer_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && psy_properties_type(property) ==
 			PSY_PROPERTY_TYP_SECTION) {
-		settingsview_advanceline(self);
+		propertiesrenderer_advanceline(self);
 	}
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_HIDE) {		
 		return 2;
@@ -179,39 +153,40 @@ int settingsview_onpropertiesdrawenum(SettingsView* self,
 		self->currchoice = psy_properties_value(property);
 		self->choicecount = 0;					
 	}			
-	settingsview_drawlinebackground(self, property);						
-	settingsview_drawkey(self, property, 0);	
-	settingsview_drawvalue(self, property, 1);
+	propertiesrenderer_drawlinebackground(self, property);						
+	propertiesrenderer_drawkey(self, property, 0);	
+	propertiesrenderer_drawvalue(self, property, 1);
 	if (psy_properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
-	settingsview_advanceline(self);
-	return 1;
+	propertiesrenderer_advanceline(self);
+	size = psy_ui_component_size(&self->client);	
+	return self->cpy + self->dy < size.height;
 }
 
-void settingsview_addremoveident(SettingsView* self, int level)
+void propertiesrenderer_addremoveident(PropertiesRenderer* self, int level)
 {
 	if (self->lastlevel < level) {
-		settingsview_addident(self);
+		propertiesrenderer_addident(self);
 		self->lastlevel = level;
 	} else
 	while (self->lastlevel > level) {
-		settingsview_removeident(self);
+		propertiesrenderer_removeident(self);
 		--self->lastlevel;
 	}	
 }
 
-void settingsview_addident(SettingsView* self)
+void propertiesrenderer_addident(PropertiesRenderer* self)
 {
 	self->cpx += self->identwidth;
 }
 
-void settingsview_removeident(SettingsView* self)
+void propertiesrenderer_removeident(PropertiesRenderer* self)
 {
 	self->cpx -= self->identwidth;
 }
 
-void settingsview_drawlinebackground(SettingsView* self,
+void propertiesrenderer_drawlinebackground(PropertiesRenderer* self,
 	psy_Properties* property)
 {	
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_SECTION) {
@@ -228,11 +203,11 @@ void settingsview_drawlinebackground(SettingsView* self,
 	}
 }
 
-void settingsview_drawkey(SettingsView* self, psy_Properties* property,
+void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {	
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {
-		settingsview_drawbutton(self, property, column + 1);
+		propertiesrenderer_drawbutton(self, property, column + 1);
 	} else {
 		uintptr_t count;
 		const char* str;
@@ -243,7 +218,7 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 		str = psy_properties_translation(property);
 		tm = psy_ui_component_textmetric(&self->client);
 		
-		numcolumnavgchars = (uintptr_t)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
+		numcolumnavgchars = (uintptr_t)(propertiesrenderer_columnwidth(self, column) / (int)(tm.tmAveCharWidth * 1.70));
 		while (count > 0) {
 			uintptr_t numoutput;
 			char* wrap;
@@ -256,7 +231,7 @@ void settingsview_drawkey(SettingsView* self, psy_Properties* property,
 					numoutput = wrap - str;
 				}
 			}
-			psy_ui_textout(self->g, self->cpx + column * self->columnwidth,
+			psy_ui_textout(self->g, self->cpx + column * propertiesrenderer_columnwidth(self, column),
 				self->cpy + self->dy + (self->numblocklines - 1) * self->lineheight, str, numoutput);
 			count -= numoutput;
 			str += numoutput;
@@ -287,30 +262,30 @@ char* strrchrpos(char* str, char c, uintptr_t pos)
 	return 0;
 }
 
-void settingsview_drawvalue(SettingsView* self, psy_Properties* property,
+void propertiesrenderer_drawvalue(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {	
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_BOOL ||
 			psy_properties_ischoiceitem(property)) {
-		settingsview_drawcheckbox(self, property, column);
+		propertiesrenderer_drawcheckbox(self, property, column);
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_STRING) {
-		settingsview_drawstring(self, property, column);		
+		propertiesrenderer_drawstring(self, property, column);		
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
-		settingsview_drawstring(self, property, column);		
+		propertiesrenderer_drawstring(self, property, column);		
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
-		settingsview_drawinteger(self, property, column);
+		propertiesrenderer_drawinteger(self, property, column);
 	}
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT ||
 			psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 			psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
-		settingsview_drawbutton(self, property, column + 1);
+		propertiesrenderer_drawbutton(self, property, column + 1);
 	}
 }
 
-void settingsview_drawstring(SettingsView* self, psy_Properties* property,
+void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {
 	psy_ui_Rectangle r;
@@ -319,10 +294,10 @@ void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 		psy_ui_setbackgroundcolor(self->g, 0x009B7800);
 		psy_ui_settextcolor(self->g, 0x00FFFFFF);
 	}				
-	psy_ui_setrectangle(&r, self->columnwidth * column, self->cpy + self->dy,
-		self->columnwidth, self->lineheight);
+	psy_ui_setrectangle(&r, propertiesrenderer_columnwidth(self, column) * column, self->cpy + self->dy,
+		propertiesrenderer_columnstart(self, column), self->lineheight);
 	psy_ui_rectangle_expand(&r, 0, -5, 0, 0);
-	psy_ui_textoutrectangle(self->g, self->columnwidth * column, self->cpy + self->dy,
+	psy_ui_textoutrectangle(self->g, propertiesrenderer_columnstart(self, column), self->cpy + self->dy,
 		psy_ui_ETO_CLIPPED, r,
 		psy_properties_valuestring(property),
 		strlen(psy_properties_valuestring(property)));
@@ -334,7 +309,7 @@ void settingsview_drawstring(SettingsView* self, psy_Properties* property,
 //	}		
 }
 
-void settingsview_drawinteger(SettingsView* self, psy_Properties* property,
+void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {	
 	char text[40];
@@ -353,23 +328,23 @@ void settingsview_drawinteger(SettingsView* self, psy_Properties* property,
 		psy_ui_TextMetric tm;
 
 		tm = psy_ui_component_textmetric(&self->client);		
-		r.left = self->columnwidth * (column + 1) - tm.tmAveCharWidth * 6;
+		r.left = propertiesrenderer_columnstart(self, column + 1) - tm.tmAveCharWidth * 6;
 		r.top = self->cpy + self->dy;
 		r.right = r.left + tm.tmAveCharWidth * 4;
 		r.bottom = r.top + tm.tmHeight + 2;
 		psy_ui_drawsolidrectangle(self->g, r, psy_properties_value(property));		
 	}
-	psy_ui_textout(self->g, self->columnwidth * column, self->cpy + self->dy,
+	psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column), self->cpy + self->dy,
 		text, strlen(text));	
 }
 
-void settingsview_advanceline(SettingsView* self)
+void propertiesrenderer_advanceline(PropertiesRenderer* self)
 {
 	self->cpy += (self->lineheight * self->numblocklines);
 	self->numblocklines = 1;
 }
 
-void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
+void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {
 	psy_ui_Size size;
@@ -377,14 +352,14 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 		psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
-			psy_ui_textout(self->g, self->columnwidth * column + 3,
+			psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 				self->cpy + self->dy, "...", 3);
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
-		psy_ui_textout(self->g, self->columnwidth * column + 3,
+		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy + self->dy, "Choose Font", strlen("Choose Font"));
 	} else {
-		psy_ui_textout(self->g, self->columnwidth * column + 3,
+		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy + self->dy, psy_properties_translation(property),
 			strlen(psy_properties_translation(property)));
 	}
@@ -401,14 +376,14 @@ void settingsview_drawbutton(SettingsView* self, psy_Properties* property,
 		size = psy_ui_component_textsize(&self->client,
 			psy_properties_translation(property));
 	}
-	r.left = self->columnwidth * column ;
+	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy + self->dy ;
 	r.right = r.left + size.width + 6;
 	r.bottom = r.top + size.height + 2;	
 	psy_ui_drawrectangle(self->g, r);
 }
 
-void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
+void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {
 	psy_ui_Rectangle r;
@@ -418,14 +393,14 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
 		
-	tm = psy_ui_component_textmetric(&self->component);
+	tm = psy_ui_component_textmetric(&self->client);
 	size.width = tm.tmAveCharWidth * 4;
 	size.height = tm.tmHeight;
 	knobsize.width = (int) (tm.tmAveCharWidth * 2);
 	knobsize.height = (int) (tm.tmHeight * 0.7 + 0.5);
 	cornersize.width = (int) (tm.tmAveCharWidth * 0.6);
 	cornersize.height = (int) (tm.tmHeight * 0.6);
-	r.left = self->columnwidth * column;
+	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy + self->dy + (self->lineheight - size.height) / 2;
 	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
 	r.bottom = r.top + size.height;
@@ -437,13 +412,13 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 		checked = psy_properties_value(property) != 0;
 	}
 	if (!checked) {
-		r.left = self->columnwidth * column + (int)(tm.tmAveCharWidth * 0.4);
+		r.left = propertiesrenderer_columnstart(self, column) + (int)(tm.tmAveCharWidth * 0.4);
 		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
 		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00555555);
 	} else {
-		r.left = self->columnwidth * column + tm.tmAveCharWidth * 2;
+		r.left = propertiesrenderer_columnstart(self, column) + tm.tmAveCharWidth * 2;
 		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
@@ -451,16 +426,16 @@ void settingsview_drawcheckbox(SettingsView* self, psy_Properties* property,
 	}	
 }
 
-void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
+void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_setfocus(&self->client);
 	if (psy_ui_component_visible(&self->edit.component)) {
-		settingsview_oneditchange(self, &self->edit);
+		propertiesrenderer_oneditchange(self, &self->edit);
 		psy_ui_component_hide(&self->edit.component);
 	}	
 	if (psy_ui_component_visible(&self->inputdefiner.component)) {
-		settingsview_oninputdefinerchange(self, &self->inputdefiner);
+		propertiesrenderer_oninputdefinerchange(self, &self->inputdefiner);
 		psy_ui_component_hide(&self->inputdefiner.component);
 	}	
 	self->selected = 0;
@@ -469,9 +444,9 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 	self->my = ev->y;
 	self->choiceproperty = 0;
 	self->button = 0;	
-	settingsview_preparepropertiesenum(self);
+	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
-		settingsview_onpropertieshittestenum);
+		propertiesrenderer_onpropertieshittestenum);
 	if (self->selected) {
 		if (self->button &&
 				psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
@@ -490,7 +465,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 		if (self->button && psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITCOLOR) {
 			psy_ui_ColorDialog colordialog;
 
-			psy_ui_colordialog_init(&colordialog, &self->component);
+			psy_ui_colordialog_init(&colordialog, &self->client);
 			if (psy_ui_colordialog_execute(&colordialog)) {
 				psy_ui_Color color;
 
@@ -506,7 +481,7 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 		if (self->button && psy_properties_type(self->selected) == PSY_PROPERTY_TYP_FONT) {
 			psy_ui_FontDialog fontdialog;
 
-			psy_ui_fontdialog_init(&fontdialog, &self->component);
+			psy_ui_fontdialog_init(&fontdialog, &self->client);
 			if (psy_ui_fontdialog_execute(&fontdialog)) {				
 				psy_ui_FontInfo fontinfo;
 				
@@ -539,19 +514,19 @@ void settingsview_onmousedown(SettingsView* self, psy_ui_Component* sender,
 	psy_ui_component_invalidate(&self->client);
 }
 
-int settingsview_intersects(psy_ui_Rectangle* r, int x, int y)
+int propertiesrenderer_intersects(psy_ui_Rectangle* r, int x, int y)
 {
 	return x >= r->left && x < r->right && y >= r->top && y < r->bottom;
 }
 
-int settingsview_onpropertieshittestenum(SettingsView* self,
+int propertiesrenderer_onpropertieshittestenum(PropertiesRenderer* self,
 	psy_Properties* property, int level)
 {
 	if (self->cpy != 0 && level == 0 && psy_properties_type(property) == 
 			PSY_PROPERTY_TYP_SECTION) {
-		settingsview_advanceline(self);
+		propertiesrenderer_advanceline(self);
 	}
-	settingsview_addremoveident(self, level);
+	propertiesrenderer_addremoveident(self, level);
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_HIDE) {
 		return 2;
 	}
@@ -559,30 +534,30 @@ int settingsview_onpropertieshittestenum(SettingsView* self,
 		self->currchoice = psy_properties_value(property);
 		self->choicecount = 0;					
 	}	
-	settingsview_countblocklines(self, property);
-	if (settingsview_intersectskey(self, property, 0)) {
+	propertiesrenderer_countblocklines(self, property, 0);
+	if (propertiesrenderer_intersectskey(self, property, 0)) {
 		self->selected = property;
 		self->keyselected = 1;
 		return 0;
 	}
-	if (settingsview_intersectsvalue(self, property, 1)) {
+	if (propertiesrenderer_intersectsvalue(self, property, 1)) {
 		self->selected = property;		
 		return 0;
 	}
 	if (psy_properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
-	settingsview_advanceline(self);
+	propertiesrenderer_advanceline(self);
 	return 1;	
 }
 
-int settingsview_onenumpropertyposition(SettingsView* self,
+int propertiesrenderer_onenumpropertyposition(PropertiesRenderer* self,
 	psy_Properties* property, int level)
 {
-	settingsview_addremoveident(self, level);
+	propertiesrenderer_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 &&
 			psy_properties_type(property) ==  PSY_PROPERTY_TYP_SECTION) {
-		settingsview_advanceline(self);
+		propertiesrenderer_advanceline(self);
 	}
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_HIDE) {
 		return 2;
@@ -594,26 +569,31 @@ int settingsview_onenumpropertyposition(SettingsView* self,
 		self->currchoice = psy_properties_value(property);
 		self->choicecount = 0;					
 	}
-	settingsview_countblocklines(self, property);
+	propertiesrenderer_countblocklines(self, property, 0);
 	if (psy_properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
-	settingsview_advanceline(self);
+	propertiesrenderer_advanceline(self);
 	return 1;	
 }
 
-void settingsview_countblocklines(SettingsView* self, psy_Properties* property)
+void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Properties* property, int column)
 {
 	unsigned int count;
 	const char* str;
 	uintptr_t numcolumnavgchars;
 	psy_ui_TextMetric tm;
 
+	if (propertiesrenderer_columnwidth(self, column) == 0) {
+		++self->numblocklines;
+		return;
+	}
+
 	count = strlen(psy_properties_translation(property));
 	str = psy_properties_translation(property);
 	tm = psy_ui_component_textmetric(&self->client);
 
-	numcolumnavgchars = (uintptr_t)(self->columnwidth / (int)(tm.tmAveCharWidth * 1.70));
+	numcolumnavgchars = (uintptr_t)(propertiesrenderer_columnwidth(self, column) / (int)(tm.tmAveCharWidth * 1.70));	
 	while (count > 0) {
 		uintptr_t numoutput;
 		char* wrap;
@@ -634,7 +614,7 @@ void settingsview_countblocklines(SettingsView* self, psy_Properties* property)
 	}
 }
 
-int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
+int propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Properties* property,
 	int column)
 {
 	int rv = 0;	
@@ -646,32 +626,32 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 		
-		tm = psy_ui_component_textmetric(&self->component);
+		tm = psy_ui_component_textmetric(&self->client);
 		size = psy_ui_component_textsize(&self->client, "x");
-		r.left = self->columnwidth * column;
+		r.left = propertiesrenderer_columnstart(self, column);
 		r.top = self->cpy + self->dy;
 		r.right = r.left + tm.tmAveCharWidth * 4;;
 		r.bottom = r.top + size.height + 2;
 	
-		rv = settingsview_intersects(&r, self->mx, self->my);
+		rv = propertiesrenderer_intersects(&r, self->mx, self->my);
 	} else
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER ||
 		psy_properties_type(property) == PSY_PROPERTY_TYP_STRING ||
 		psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION ||
 		psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
 		psy_ui_Rectangle r;		
-		psy_ui_setrectangle(&r, self->columnwidth * column, 
-			self->cpy + self->dy, self->columnwidth, self->lineheight);
+		psy_ui_setrectangle(&r, propertiesrenderer_columnstart(self, column),
+			self->cpy + self->dy, propertiesrenderer_columnwidth(self, column), self->lineheight);
 		self->selrect = r;
-		rv = settingsview_intersects(&r, self->mx, self->my);
+		rv = propertiesrenderer_intersects(&r, self->mx, self->my);
 		if (!rv && (
 				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 				psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR ||
 				psy_properties_type(property) == PSY_PROPERTY_TYP_FONT)) {
-			psy_ui_setrectangle(&r, (self->columnwidth * (column + 1)), 
-				self->cpy + self->dy, self->columnwidth, self->lineheight);
+			psy_ui_setrectangle(&r, (propertiesrenderer_columnstart(self, column + 1)),
+				self->cpy + self->dy, propertiesrenderer_columnstart(self, column + 1), self->lineheight);
 			self->selrect = r;
-			rv = settingsview_intersects(&r, self->mx, self->my);
+			rv = propertiesrenderer_intersects(&r, self->mx, self->my);
 			if (rv) {
 				self->button = 1;
 			}
@@ -680,20 +660,20 @@ int settingsview_intersectsvalue(SettingsView* self, psy_Properties* property,
 	return rv;
 }
 
-int settingsview_intersectskey(SettingsView* self, psy_Properties* property, int column)
+int propertiesrenderer_intersectskey(PropertiesRenderer* self, psy_Properties* property, int column)
 {
 	int rv = 0;
 	psy_ui_Rectangle r;
 
 	self->button = 0;
-	psy_ui_setrectangle(&r, self->columnwidth * column,
-		self->cpy + self->dy, self->columnwidth, self->lineheight * self->numblocklines);
+	psy_ui_setrectangle(&r, propertiesrenderer_columnstart(self, column),
+		self->cpy + self->dy, propertiesrenderer_columnwidth(self, column), self->lineheight * self->numblocklines);
 	self->selrect = r;
-	rv = settingsview_intersects(&r, self->mx, self->my);
+	rv = propertiesrenderer_intersects(&r, self->mx, self->my);
 	return rv;
 }
 
-void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sender,
+void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	if (self->selected) {
@@ -734,7 +714,7 @@ void settingsview_onmousedoubleclick(SettingsView* self, psy_ui_Component* sende
 	}
 }
 
-void settingsview_oninputdefinerchange(SettingsView* self,
+void propertiesrenderer_oninputdefinerchange(PropertiesRenderer* self,
 	InputDefiner* sender)
 {
 	if (self->selected && self->selected->parent) {
@@ -746,7 +726,7 @@ void settingsview_oninputdefinerchange(SettingsView* self,
 	}
 }
 
-void settingsview_oneditchange(SettingsView* self, psy_ui_Edit* sender)
+void propertiesrenderer_oneditchange(PropertiesRenderer* self, psy_ui_Edit* sender)
 {
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_STRING) {
@@ -761,13 +741,13 @@ void settingsview_oneditchange(SettingsView* self, psy_ui_Edit* sender)
 	}
 }
 
-void settingsview_oneditkeydown(SettingsView* self, psy_ui_Component* sender,
+void propertiesrenderer_oneditkeydown(PropertiesRenderer* self, psy_ui_Component* sender,
 	psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN) {
 		psy_ui_component_hide(&self->edit.component);
 		psy_ui_component_setfocus(&self->client);
-		settingsview_oneditchange(self, &self->edit);
+		propertiesrenderer_oneditchange(self, &self->edit);
 	} else
 	if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		psy_ui_component_hide(&self->edit.component);
@@ -775,71 +755,58 @@ void settingsview_oneditkeydown(SettingsView* self, psy_ui_Component* sender,
 	}
 }
 
-void settingsview_onscroll(SettingsView* self, psy_ui_Component* sender,
+void propertiesrenderer_onscroll(PropertiesRenderer* self, psy_ui_Component* sender,
 	int stepx, int stepy)
 {
 	self->dy += (stepy * sender->scrollstepy);
 }
 
-void settingsview_onsize(SettingsView* self, psy_ui_Component* sender,
+void propertiesrenderer_onsize(PropertiesRenderer* self, psy_ui_Component* sender,
 	psy_ui_Size* size)
 {	
-	settingsview_adjustscroll(self);
+	propertiesrenderer_computecolumns(self, size);
+	propertiesrenderer_adjustscroll(self);
 }
 
-void settingsview_ontabbarchange(SettingsView* self, psy_ui_Component* sender,
-	int tabindex)
-{		
-	psy_Properties* p = 0;	
-	Tab* tab;
+void propertiesrenderer_computecolumns(PropertiesRenderer* self, psy_ui_Size* size)
+{
+	int column;
 
-	self->search = 0;
-	if (self->properties) {
-		p = self->properties->children;
-		tab = tabbar_tab(&self->tabbar, tabindex);
-		if (tab) {		
-			while (p) {
-				if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {				
-					if (strcmp(psy_properties_translation(p), tab->text) == 0) {
-						break;
-					}				
-				}		
-				p = psy_properties_next(p);
-			}
-		}
-		self->search = p;
-		if (self->search) {			
-			int scrollposition;
-			int scrollmin;
-			int scrollmax;
-
-			settingsview_preparepropertiesenum(self);
-			psy_properties_enumerate(self->properties->children, self,
-				settingsview_onenumpropertyposition);
-			psy_ui_component_verticalscrollrange(&self->client, &scrollmin,
-				&scrollmax);
-			scrollposition = self->cpy / self->lineheight;
-			if (scrollposition > scrollmax) {
-				scrollposition = scrollmax;
-			}
-			self->dy = -scrollposition * self->lineheight;			
-			psy_ui_component_setverticalscrollposition(&self->client,
-				scrollposition);
-		}	
-		psy_ui_component_invalidate(&self->client);
-	}
+	for (column = 0; column < PROPERTIESRENDERER_NUMCOLS; ++column) {
+		self->col_width[column] = self->col_perc[column] * size->width;
+		if (column == 0) {
+			self->col_start[column] = 0;
+		} else {
+			self->col_start[column] = self->col_start[column - 1] +
+				self->col_width[column - 1];
+		} 
+	}	
 }
 
-void settingsview_adjustscroll(SettingsView* self)
+int propertiesrenderer_columnwidth(PropertiesRenderer* self, int column)
+{
+	return (column < PROPERTIESRENDERER_NUMCOLS)
+		? self->col_width[column]
+		: 0;
+}
+
+int propertiesrenderer_columnstart(PropertiesRenderer* self, int column)
+{
+	return (column < PROPERTIESRENDERER_NUMCOLS)
+		? self->col_start[column]
+		: 0;
+}
+
+void propertiesrenderer_adjustscroll(PropertiesRenderer* self)
 {
 	psy_ui_Size size;
 	int scrollmax;
 
 	size = psy_ui_component_size(&self->client);
 	self->search = 0;
-	settingsview_preparepropertiesenum(self);
+	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
-		settingsview_onenumpropertyposition);
+		propertiesrenderer_onenumpropertyposition);
 	self->client.scrollstepy = self->lineheight;
 	scrollmax =  (self->cpy - size.height) / self->lineheight + 1;
 	if (scrollmax < 0) {
@@ -850,4 +817,121 @@ void settingsview_adjustscroll(SettingsView* self)
 		self->dy = -(scrollmax) * self->lineheight;
 		psy_ui_component_setverticalscrollposition(&self->client, scrollmax);
 	}	
+}
+
+static void propertiesview_ondestroy(PropertiesView*, psy_ui_Component* sender);
+static void propertiesview_selectsection(PropertiesView*, psy_ui_Component* sender, uintptr_t section);
+static void propertiesview_appendtabbarsections(PropertiesView*);
+static void propertiesview_ontabbarchange(PropertiesView*, psy_ui_Component* sender,
+	int tabindex);
+static void propertiesview_onpropertiesrendererchanged(PropertiesView*,
+	PropertiesRenderer* sender, psy_Properties*);
+static void propertiesview_onpropertiesrendererselected(PropertiesView*,
+	PropertiesRenderer* sender, psy_Properties*);
+
+void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, psy_Properties* properties)
+{
+	psy_ui_component_init(&self->component, parent);
+	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_selected);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		propertiesview_ondestroy);
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_init(&self->viewtabbar, tabbarparent);
+	propertiesrenderer_init(&self->renderer, &self->component, properties);
+	psy_ui_component_setalign(&self->renderer.client, psy_ui_ALIGN_CLIENT);
+	psy_signal_connect(&self->component.signal_selectsection, self,
+		propertiesview_selectsection);
+	tabbar_init(&self->tabbar, &self->component);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
+		propertiesview_appendtabbarsections(self);
+	psy_signal_connect(&self->renderer.signal_changed, self,
+		propertiesview_onpropertiesrendererchanged);
+	psy_signal_connect(&self->renderer.signal_selected, self,
+		propertiesview_onpropertiesrendererselected);	
+}
+
+void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
+{
+	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_selected);
+}
+
+void propertiesview_selectsection(PropertiesView* self, psy_ui_Component* sender, uintptr_t section)
+{
+	tabbar_select(&self->tabbar, (int)section);
+}
+
+void propertiesview_appendtabbarsections(PropertiesView* self)
+{
+	psy_Properties* p;
+
+	for (p = self->renderer.properties->children; p != NULL;
+		p = psy_properties_next(p)) {
+		if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
+			tabbar_append(&self->tabbar, psy_properties_translation(p));
+		}
+	}
+	tabbar_select(&self->tabbar, 0);
+	psy_signal_connect(&self->tabbar.signal_change, self,
+		propertiesview_ontabbarchange);
+}
+
+void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sender,
+	int tabindex)
+{
+	psy_Properties* p = 0;
+	Tab* tab;
+
+	self->renderer.search = 0;
+	if (self->renderer.properties) {
+		p = self->renderer.properties->children;
+		tab = tabbar_tab(&self->tabbar, tabindex);
+		if (tab) {
+			while (p) {
+				if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
+					if (strcmp(psy_properties_translation(p), tab->text) == 0) {
+						break;
+					}
+				}
+				p = psy_properties_next(p);
+			}
+		}
+		self->renderer.search = p;
+		if (self->renderer.search) {
+			int scrollposition;
+			int scrollmin;
+			int scrollmax;
+
+			propertiesrenderer_preparepropertiesenum(&self->renderer);
+			psy_properties_enumerate(self->renderer.properties->children, &self->renderer,
+				propertiesrenderer_onenumpropertyposition);
+			psy_ui_component_verticalscrollrange(&self->renderer.client, &scrollmin,
+				&scrollmax);
+			scrollposition = self->renderer.cpy / self->renderer.lineheight;
+			if (scrollposition > scrollmax) {
+				scrollposition = scrollmax;
+			}
+			self->renderer.dy = -scrollposition * self->renderer.lineheight;
+			psy_ui_component_setverticalscrollposition(&self->renderer.client,
+				scrollposition);
+		}
+		psy_ui_component_invalidate(&self->renderer.client);
+	}
+}
+
+void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
+	PropertiesRenderer* sender, psy_Properties* selected)
+{
+	psy_signal_emit(&self->signal_changed, self, 1,
+		selected);
+}
+
+void propertiesview_onpropertiesrendererselected(PropertiesView* self,
+	PropertiesRenderer* sender, psy_Properties* selected)
+{
+	psy_signal_emit(&self->signal_selected, self, 1, selected);
 }

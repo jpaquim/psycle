@@ -41,7 +41,7 @@
 
 #include "../../detail/psydef.h"
 #include <stddef.h>
-#include "multiresampler.h"
+#include "linear.h"
 
 /**
 * This is the function you will use the most often.
@@ -120,7 +120,7 @@ typedef struct FFTClass {
 	/* fft state */
 	float* state_real;
 	float* state_imag;
-	psy_dsp_MultiResampler resampler;
+	psy_dsp_LinearResampler resampler;
 
 	//fftLog is initialized in setup, and can be used to scale the frequency, like is done in FillBandsFromFFT:
 	float* fftLog;

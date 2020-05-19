@@ -10,17 +10,14 @@
 #include <operations.h>
 #include <alignedalloc.h>
 
-void double_setvalue(Double* self, double value)
-{
-	self->QuadPart = (uint64_t)(value * 4294967296.0f);
-}
 
 void sampleiterator_init(SampleIterator* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	self->forward = 1;
 	double_setvalue(&self->pos, 0.0);
-	self->speed = (int64_t) 4294967296.0f;	
+	self->speed = (int64_t) 4294967296.0f;
+	self->resampler_data = 0;
 }
 
 SampleIterator* sampleiterator_alloc(void)

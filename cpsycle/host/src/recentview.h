@@ -11,7 +11,7 @@
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Button clear;
-	SettingsView view;
+	PropertiesView view;
 	Workspace* workspace;
 } RecentView;
 

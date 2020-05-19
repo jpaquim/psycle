@@ -8,6 +8,10 @@
 
 #include "mersennetwister.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef	enum {
 	psy_dsp_DITHER_PDF_TRIANGULAR = 0,
 	psy_dsp_DITHER_PDF_RECTANGULAR,
@@ -66,5 +70,9 @@ INLINE void psy_dsp_dither_setnoiseshaping(psy_dsp_Dither* self,
 {
 	self->settings.noiseshape = newns;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_dsp_DITHER_H */
