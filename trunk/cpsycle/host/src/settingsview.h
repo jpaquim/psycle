@@ -11,9 +11,9 @@
 #include "inputdefiner.h"
 #include "tabbar.h"
 
+#define PROPERTIESRENDERER_NUMCOLS 3
+
 typedef struct {
-	psy_ui_Component component;
-	psy_ui_Component viewtabbar;
 	psy_ui_Component client;
 	psy_Properties* properties;
 	psy_ui_Graphics* g;
@@ -21,28 +21,49 @@ typedef struct {
 	psy_Properties* selected;
 	int keyselected;
 	psy_Properties* search;
-	psy_ui_Rectangle selrect;	
+	psy_ui_Rectangle selrect;
 	int button;
 	int dy;
 	int mx;
 	int my;
 	int cpy;
-	int cpx;	
+	int cpx;
 	int currchoice;
 	int choicecount;
 	int lineheight;
-	int numblocklines;
-	int columnwidth;
-	int identwidth;	
+	int numblocklines;	
+	int identwidth;
+	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
+	int col_width[PROPERTIESRENDERER_NUMCOLS];	
+	int col_start[PROPERTIESRENDERER_NUMCOLS];
 	psy_Properties* choiceproperty;
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
-	TabBar tabbar;	
-} SettingsView;
+} PropertiesRenderer;
 
-void settingsview_init(SettingsView* Settingsview, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Properties* properties);
+void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
+	psy_Properties*);
+
+typedef struct {
+	psy_ui_Component component;
+	psy_ui_Component viewtabbar;	
+	TabBar tabbar;
+	PropertiesRenderer renderer;
+	psy_Signal signal_changed;
+	psy_Signal signal_selected;
+} PropertiesView;
+
+void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
+	psy_ui_Component* tabbarparent, psy_Properties*);
+
+INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
+	float col0_perc, float col1_perc, float col2_perc)
+{
+	self->renderer.col_perc[0] = col0_perc;
+	self->renderer.col_perc[1] = col1_perc;
+	self->renderer.col_perc[2] = col2_perc;	
+}
 
 #endif

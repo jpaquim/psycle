@@ -484,6 +484,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->effval = 0;
 	self->dooffset = 0;
 	self->maxvolume = maxvolume;
+	self->positions = 0;
 	if (instrument) {
 		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
 		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
@@ -608,7 +609,10 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 			SampleIterator* iterator;			
 			
 			iterator = sampleiterator_alloc();
-			*iterator = sample_begin(sample);			
+			*iterator = sample_begin(sample);
+			iterator->resampler_data =
+				psy_dsp_multiresampler_base(&self->resampler)->vtable->getresamplerdata(
+					psy_dsp_multiresampler_base(&self->resampler));
 			psy_list_append(&self->positions, iterator);
 			if (self->instrument->loop && self->sampler) {
 				psy_dsp_beat_t bpl;
@@ -626,8 +630,10 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 							((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
 					((psy_dsp_beat_t)sample->samplerate / 44100));
 			}
-			self->resampler.resampler.vtable->setspeed(&
-				self->resampler.resampler, iterator->speed);
+			psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
+				&self->resampler),
+				iterator->resampler_data,
+				iterator->speed * 1/ 4294967296.0f);
 		}
 	}	
 	psy_list_free(entries);	
@@ -660,11 +666,16 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, doubl
 
 			iterator = sampleiterator_alloc();
 			*iterator = sample_begin(sample);
+			iterator->resampler_data =
+				psy_dsp_multiresampler_base(&self->resampler)->vtable->getresamplerdata(
+					psy_dsp_multiresampler_base(&self->resampler));
 			psy_list_append(&self->positions, iterator);
 			iterator->speed = (int64_t)(4294967296.0f *
 				frequency / 440);
-			self->resampler.resampler.vtable->setspeed(&
-				self->resampler.resampler, iterator->speed);
+			psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
+				&self->resampler),
+				iterator->resampler_data,
+				iterator->speed * 1 / 4294967296.0f);
 		}
 	}
 	psy_list_free(entries);
@@ -683,7 +694,13 @@ void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice* self)
 	psy_List* p;
 
 	for (p = self->positions; p != NULL; p = p->next) {
-		free(p->entry);
+		SampleIterator* iterator;
+
+		iterator = (SampleIterator*)p->entry;
+		psy_dsp_multiresampler_base(&self->resampler)->vtable->disposeresamplerdata(
+			psy_dsp_multiresampler_base(&self->resampler),
+			iterator->resampler_data);
+		free(iterator);
 	}
 	psy_list_free(self->positions);
 	self->positions = 0;
@@ -795,11 +812,14 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer*
 					}
 					dst = psy_audio_buffer_at(output, c);
 					frame = sampleiterator_frameposition(position);					
-					val = self->resampler.resampler.vtable->work(
-						&self->resampler.resampler,
-						&src[frame], position->pos.HighPart,
-						position->pos.LowPart, position->sample->numframes,
-						0);
+					val = psy_dsp_resampler_work_float(
+						psy_dsp_multiresampler_base(&self->resampler),
+						src,
+						(float)double_real(&position->pos),
+						position->sample->numframes,
+						position->resampler_data,
+						src,
+						src + (position->sample->numframes - 1));
 					if (c == 0) {
 						if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
 							psy_dsp_filter_setcutoff(
@@ -834,9 +854,10 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer*
 					} else {
 						position->speed = 
 							(int64_t) (position->speed * portaspeed);
-						self->resampler.resampler.vtable->setspeed(
-							&self->resampler.resampler,
-							position->speed);
+						psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
+							&self->resampler),
+							position->resampler_data,
+							position->speed * 1 / 4294967296.0f);
 					}
 				}
 				if (!sampleiterator_inc(position)) {			

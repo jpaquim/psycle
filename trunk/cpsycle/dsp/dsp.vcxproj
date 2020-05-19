@@ -130,6 +130,10 @@
     <ClCompile Include="src\resampler.c" />
     <ClCompile Include="src\rms.c" />
     <ClCompile Include="src\scale.c" />
+    <ClCompile Include="src\sinc-sse2.c" />
+    <ClCompile Include="src\sinc.c" />
+    <ClCompile Include="src\spline-sse2.c" />
+    <ClCompile Include="src\spline.c" />
     <ClCompile Include="src\valuemapper.c" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +159,11 @@
     <ClInclude Include="src\rintclip.h" />
     <ClInclude Include="src\rms.h" />
     <ClInclude Include="src\scale.h" />
+    <ClInclude Include="src\sinc-sse2.h" />
+    <ClInclude Include="src\sinc.h" />
+    <ClInclude Include="src\spline-sse2.h" />
+    <ClInclude Include="src\spline.h" />
+    <ClInclude Include="src\sse_mathfun.h" />
     <ClInclude Include="src\valuemapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

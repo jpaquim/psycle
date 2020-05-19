@@ -1531,9 +1531,14 @@ void workspace_loadsong(Workspace* self, const char* path)
 void workspace_addrecentsong(Workspace* self, const char* path)
 {
 	if (workspace_saverecentsongs(self) && !psy_properties_find(self->recentfiles, path)) {
-		psy_properties_sethint(
+		char prefix[_MAX_PATH];
+		char name[_MAX_PATH];
+		char ext[_MAX_PATH];
+
+		psy_dir_extract_path(path, prefix, name, ext);
+		psy_properties_settext(psy_properties_sethint(
 			psy_properties_append_string(self->recentfiles, path, ""),
-			PSY_PROPERTY_HINT_READONLY);
+			PSY_PROPERTY_HINT_READONLY), name);
 		workspace_save_recentsongs(self);
 	}
 }
@@ -1656,6 +1661,12 @@ void workspace_load_recentsongs(Workspace* self)
 	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
 	propertiesio_load(self->recentsongs, path, 1);
 	for (p = self->recentfiles->children; p != NULL; p = psy_properties_next(p)) {
+		char prefix[_MAX_PATH];
+		char name[_MAX_PATH];
+		char ext[_MAX_PATH];
+
+		psy_dir_extract_path(psy_properties_key(p), prefix, name, ext);
+		psy_properties_settext(p, name);
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_READONLY);
 	}
 }

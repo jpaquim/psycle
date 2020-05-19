@@ -7,6 +7,7 @@
 #include "dsptypes.h"
 
 #include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,17 +19,53 @@ extern "C" {
 struct psy_dsp_Resampler;
 
 typedef void(*psy_dsp_fp_resampler_setspeed)(struct psy_dsp_Resampler*,
-	int64_t speed);
+	void* resampler_data, double speed);
+typedef void* (*psy_dsp_fp_resampler_getresamplerdata)(struct psy_dsp_Resampler*);
+typedef void(*psy_dsp_fp_resampler_disposeresamplerdata)(struct psy_dsp_Resampler*,
+	void* resampler_data);
+/// interpolator work function types
+
+// data = input signal to be resampled already pointing at the offset indicated by offset.
+// offset = sample offset (integer) [info to avoid go out of bounds on sample reading]
+// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
+// length = sample length [info to avoid go out of bounds on sample reading]
+// resampler_data = resampler specific data. Needed for sinc and sox resamplers. 
+// Obtain it by calling at GetResamplerData(speed), and call at UpdateSpeed(speed) when the same sample changes speed.
+// when done with the sample, call DispodeResamplerData(resampler_data)
 typedef psy_dsp_amp_t (*psy_dsp_fp_resampler_work)(struct psy_dsp_Resampler*,
-	float const * data,
+	const int16_t* data,
 	uint64_t offset,
 	uint32_t res,
 	uint64_t length,
-	void* /*resampler_data*/ );
+	void* resampler_data);
+// Version without checks in data limits. Use only when you guarantee that data has enough samples for the resampling algorithm.
+// data = input signal to be resampled already pointing at the integer offset.
+// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
+typedef float (*psy_dsp_fp_resampler_work_unchecked)(struct psy_dsp_Resampler*,
+	int16_t const* data, uint32_t res, void* resampler_data);
+// Float version with limits
+// data = input signal to be resampled (pointing at the start of data)
+// offset = exact sample offset including decimal part of the offset (between point y0 and y1) to get (i.e. 3.41).
+// length = sample length [info to avoid go out of bounds on sample reading]
+// loopBeg pointer to the start of the loop (if no loop, use same pointer than data)
+// loopEnd pointer to the end of the loop (i.e. if 10 positions, then (array+9)) (if no loop use data[length-1])
+typedef float (*psy_dsp_fp_resampler_work_float)(struct psy_dsp_Resampler*,
+	const float* data, float offset, uint64_t length, void* resampler_data,
+	const float* loopBeg, const float* loopEnd);
+// Float version without checks in data limits. Use only when you guarantee that data has enough samples for the resampling algorithm.
+// data = input signal to be resampled already pointing at the integer offset.
+// res = decimal part of the offset (between point y0 and y1) to get, as a 32bit int.
+typedef float (*psy_dsp_fp_resampler_work_float_unchecked)(struct psy_dsp_Resampler*,
+	float const* data, uint32_t res, void* resampler_data);
 
 typedef struct resampler_vtable {
 	psy_dsp_fp_resampler_work work;
+	psy_dsp_fp_resampler_work_unchecked work_unchecked;
+	psy_dsp_fp_resampler_work_float work_float;
+	psy_dsp_fp_resampler_work_float_unchecked work_float_unchecked;
 	psy_dsp_fp_resampler_setspeed setspeed;
+	psy_dsp_fp_resampler_getresamplerdata getresamplerdata;
+	psy_dsp_fp_resampler_disposeresamplerdata disposeresamplerdata;
 } resampler_vtable;
 
 typedef struct psy_dsp_Resampler {
@@ -36,6 +73,48 @@ typedef struct psy_dsp_Resampler {
 } psy_dsp_Resampler;
 
 void psy_dsp_resampler_init(psy_dsp_Resampler*);
+
+
+INLINE void psy_dsp_resampler_setspeed(psy_dsp_Resampler* self, void* resampler_data, double speed)
+{
+	self->vtable->setspeed(self, resampler_data, speed);
+}
+
+INLINE psy_dsp_amp_t psy_dsp_resampler_work(psy_dsp_Resampler* self,
+	const int16_t* data,
+	uint64_t offset,
+	uint32_t res,
+	uint64_t length,
+	void* resampler_data)
+{
+	return self->vtable->work(self, data, offset, res, length, resampler_data);
+}
+
+INLINE psy_dsp_amp_t psy_dsp_resampler_work_unchecked(psy_dsp_Resampler* self,
+	const int16_t* data,
+	uint32_t res,
+	void* resampler_data)
+{
+	return self->vtable->work_unchecked(self, data, res, resampler_data);
+}
+
+INLINE float psy_dsp_resampler_work_float(psy_dsp_Resampler* self,
+	const float* data,
+	float offset,
+	uint64_t length,
+	void* resampler_data,
+	const float* loopBeg,
+	const float* loopEnd)
+{
+	return self->vtable->work_float(self, data, offset, length, resampler_data,
+		loopBeg, loopEnd);
+}
+
+INLINE float psy_dsp_resampler_work_float_unchecked(psy_dsp_Resampler* self,
+	float const* data, uint32_t res, void* resampler_data)
+{
+	return self->vtable->work_float_unchecked(self, data, res, resampler_data);
+}
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@
 
 static void renderview_ondestroy(RenderView*, psy_ui_Component* sender);
 static void renderview_makeproperties(RenderView*);
-static void renderview_onsettingsviewchanged(RenderView*, SettingsView* sender,
+static void renderview_onsettingsviewchanged(RenderView*, PropertiesView* sender,
 	psy_Properties*);
 static void renderview_render(RenderView*);
 static void renderview_onstoprendering(RenderView*, psy_AudioDriver* sender);
@@ -25,7 +25,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 		renderview_ondestroy);
 	psy_ui_component_enablealign(&self->component);
 	renderview_makeproperties(self);
-	settingsview_init(&self->view, &self->component, tabbarparent,
+	propertiesview_init(&self->view, &self->component, tabbarparent,
 		self->properties);
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
@@ -176,7 +176,7 @@ void renderview_makeproperties(RenderView* self)
 		"High-Pass Contour");
 }
 
-void renderview_onsettingsviewchanged(RenderView* self, SettingsView* sender,
+void renderview_onsettingsviewchanged(RenderView* self, PropertiesView* sender,
 	psy_Properties* property)
 {
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_ACTION) {

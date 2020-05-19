@@ -74,7 +74,7 @@ typedef struct {
 	InstrumentView instrumentsview;
 	SongPropertiesView songpropertiesview;
 	RenderView renderview;
-	SettingsView settingsview;
+	PropertiesView settingsview;
 	HelpView helpview;	
 	KbdHelp kbdhelp;
 	Gear gear;
