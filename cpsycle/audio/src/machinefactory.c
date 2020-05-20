@@ -31,7 +31,7 @@ void machinefactory_init(psy_audio_MachineFactory* self, MachineCallback callbac
 {
 	self->machinecallback = callback;	
 	self->catcher = catcher;
-	self->options = 0;// MACHINEFACTORY_CREATEASPROXY;
+	self->options = MACHINEFACTORY_CREATEASPROXY;
 	self->loadnewgamefxblitz = 0;
 }
 

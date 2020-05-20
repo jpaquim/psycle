@@ -270,7 +270,7 @@ void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
 		uintptr_t outputslot, uintptr_t inputslot)
 {
-	vuscope_stop(&self->vuscope);
+	vuscope_disconnect(&self->vuscope);
 }
 
 int wireview_wireexists(WireView* self)
@@ -294,8 +294,10 @@ void wireview_ontabbarchanged(WireView* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
 	if (tabindex == 0) {
+		vuscope_start(&self->vuscope);
 		psy_ui_component_hide(&self->modeslider.component);
-	} else {		
+	} else {
+		vuscope_stop(&self->vuscope);
 		psy_ui_component_show(&self->modeslider.component);		
 	}
 	psy_ui_component_align(&self->component);

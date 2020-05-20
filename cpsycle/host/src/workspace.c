@@ -460,7 +460,9 @@ void workspace_onscanprogress(Workspace* self, psy_audio_PluginCatcher* sender, 
 
 void workspace_makerecentsongs(Workspace* self)
 {
-	self->recentsongs = psy_properties_create();
+	self->recentsongs = psy_properties_setcomment(
+		psy_properties_create(),
+		"Psycle Recent Song History created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	self->recentfiles = psy_properties_settext(
 		psy_properties_create_section(self->recentsongs, "files"),
 		"Recent Songs");
@@ -482,7 +484,9 @@ void workspace_makegeneral(Workspace* self)
 {
 	psy_Properties* p;
 
-	self->config = psy_properties_create();
+	self->config = psy_properties_setcomment(
+		psy_properties_create(),
+		"Psycle Configuration File created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	self->general = psy_properties_create_section(self->config, "general");
 	psy_properties_settext(self->general, "General");
 	p = psy_properties_append_string(self->general, "version", "alpha");

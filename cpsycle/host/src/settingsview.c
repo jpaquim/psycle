@@ -128,7 +128,6 @@ void propertiesrenderer_preparepropertiesenum(PropertiesRenderer* self)
 	
 	tm = psy_ui_component_textmetric(&self->client);
 	self->lineheight = (int) (tm.tmHeight * 1.5);
-	// self->columnwidth = tm.tmAveCharWidth * 50, self->columnwidth);
 	self->identwidth = tm.tmAveCharWidth * 4;
 	self->cpx = 0;
 	self->cpy = 0;
@@ -773,7 +772,7 @@ void propertiesrenderer_computecolumns(PropertiesRenderer* self, psy_ui_Size* si
 	int column;
 
 	for (column = 0; column < PROPERTIESRENDERER_NUMCOLS; ++column) {
-		self->col_width[column] = self->col_perc[column] * size->width;
+		self->col_width[column] = (int)(self->col_perc[column] * size->width);
 		if (column == 0) {
 			self->col_start[column] = 0;
 		} else {
@@ -832,6 +831,8 @@ static void propertiesview_onpropertiesrendererselected(PropertiesView*,
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Properties* properties)
 {
+	psy_ui_Margin tabmargin;
+
 	psy_ui_component_init(&self->component, parent);
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
@@ -847,6 +848,11 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
+	psy_ui_margin_init(&tabmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(4),
+		psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeew(2));
+	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 		propertiesview_appendtabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,
 		propertiesview_onpropertiesrendererchanged);
