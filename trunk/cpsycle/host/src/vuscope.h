@@ -15,7 +15,8 @@ typedef struct {
 	float invol;
 	float mult;
 	int scope_peak_rate;
-	int hold;	
+	int hold;
+	int running;
 	// memories for vu-meter
 	psy_dsp_amp_t peakL, peakR;
 	int peakLifeL, peakLifeR;
@@ -23,6 +24,8 @@ typedef struct {
 } VuScope;
 
 void vuscope_init(VuScope*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);
+void vuscope_start(VuScope*);
 void vuscope_stop(VuScope*);
+void vuscope_disconnect(VuScope*);
 
 #endif

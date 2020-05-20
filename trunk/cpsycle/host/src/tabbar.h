@@ -15,7 +15,7 @@ typedef struct {
 	psy_ui_Margin margin;
 } Tab;
 
-void tab_init(Tab*, const char* text, psy_ui_Size* size);
+void tab_init(Tab*, const char* text, psy_ui_Size*, const psy_ui_Margin*);
 void tab_settext(Tab*, const char* text);
 
 typedef struct {
@@ -26,6 +26,7 @@ typedef struct {
 	int hover;
 	int hoverindex;
 	int tabalignment;
+	psy_ui_Margin defaulttabmargin;
 } TabBar;
 
 void tabbar_init(TabBar*, psy_ui_Component* parent);
@@ -35,6 +36,7 @@ void tabbar_rename_tabs(TabBar*, const char* label, ...);
 void tabbar_select(TabBar*, int tabindex);
 int tabbar_selected(TabBar*);
 void tabbar_settabmargin(TabBar*, int tab, const psy_ui_Margin*);
+void tabbar_setdefaulttabmargin(TabBar*, const psy_ui_Margin*);
 Tab* tabbar_tab(TabBar*, int tabindex);
 psy_ui_Component* tabbar_base(TabBar*);
 

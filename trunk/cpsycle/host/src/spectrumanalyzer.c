@@ -36,7 +36,7 @@ static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*,
 static void spectrumanalyzer_connectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer*, Workspace*);
 static void FillLinearFromCircularBuffer(SpectrumAnalyzer*,
-	float inBuffer[], float outBuffer[], float vol);
+	float inBuffer[], float outBuffer[], float vol, uintptr_t writepos);
 static psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer*,
 	uintptr_t* numsamples);
 
@@ -65,16 +65,21 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	self->scope_peak_rate = 20;
 	self->hold = 0;
 	self->scope_spec_mode = 2;
-	self->scope_spec_samples = 256;
+	self->scope_spec_samples = 2048;
 	self->scope_spec_rate = 20;	
 	self->workspace = workspace;
+	self->phi = 0.f;
+	memset(self->db_left, 0, sizeof(self->db_left));
+	memset(self->db_right, 0, sizeof(self->db_right));
+	self->lastwritepos = 0;
+	self->lastprocessed = 0;
 	psy_signal_connect(&self->component.signal_destroy, self, spectrumanalyzer_ondestroy);
 	psy_signal_connect(&self->component.signal_timer, self, spectrumanalyzer_ontimer);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		spectrumanalyzer_onsongchanged);
-	spectrumanalyzer_connectmachinessignals(self, workspace);
 	fftclass_init(&self->fftSpec);
 	fftclass_setup(&self->fftSpec, hann, self->scope_spec_samples, SCOPE_SPEC_BANDS);
+	spectrumanalyzer_connectmachinessignals(self, workspace);
 	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
 }
 
@@ -166,40 +171,38 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 
 void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 {	
-	const float multleft = self->invol * self->mult; // *srcMachine._lVol;
-	const float multright = self->invol * self->mult; // *srcMachine._rVol;
+	const float multleft = 1/32768.f * self->invol * self->mult; // *srcMachine._lVol;
+	const float multright = 1 / 32768.f * self->invol * self->mult; // *srcMachine._rVol;
 	unsigned int scopesamples;
 	psy_audio_Buffer* buffer;
 	int DCBar;
 	psy_ui_Rectangle rect;
 	char buf[64];
-	float db_left[SCOPE_SPEC_BANDS];
-	float db_right[SCOPE_SPEC_BANDS];
-	int i;	
-
+	int writepos;
+	float temp[SCOPE_BUF_SIZE];
+	float tempout[SCOPE_BUF_SIZE >> 1];	
+	int i;
+	
 	buffer = spectrumanalyzer_buffer(self, &scopesamples);
 	if (!buffer) {
 		return;
-	}
-	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
-	scopesamples = min(scopesamples, (unsigned int)(psy_audio_player_samplerate(&self->workspace->player) *
-		self->scope_peak_rate * 0.001)) & (~3);
+	}	
+	writepos = buffer->writepos;
 #if 0
 	if (FFTMethod == 0)
 #endif
 	{
-		//schism mod FFT
-		float temp[SCOPE_BUF_SIZE];
-		float tempout[SCOPE_BUF_SIZE >> 1];
+		if (writepos != self->lastprocessed) {
+			FillLinearFromCircularBuffer(self, buffer->samples[0], temp, multleft, self->lastprocessed);
+			fftclass_calculatespectrum(&self->fftSpec, temp, tempout);
+			fftclass_fillbandsfromfft(&self->fftSpec, tempout, self->db_left);
 
-		FillLinearFromCircularBuffer(self, buffer->samples[0], temp, multleft);
-		fftclass_calculatespectrum(&self->fftSpec, temp, tempout);
-		fftclass_fillbandsfromfft(&self->fftSpec, tempout, db_left);
-
-		FillLinearFromCircularBuffer(self, buffer->samples[1], temp, multright);
-		fftclass_calculatespectrum(&self->fftSpec, temp, tempout);
-		fftclass_fillbandsfromfft(&self->fftSpec, tempout, db_right);
-	}
+			FillLinearFromCircularBuffer(self, buffer->samples[1], temp, multright, writepos);
+			fftclass_calculatespectrum(&self->fftSpec, temp, tempout);			
+			fftclass_fillbandsfromfft(&self->fftSpec, tempout, self->db_right);
+			self->lastprocessed = writepos;
+		}
+	}	
 #if 0
 	else if (FFTMethod == 1)
 	{
@@ -259,8 +262,8 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		//Remember, 0 -> top of spectrum, 128 bottom of spectrum.
 		int curpeak, halfpeak;
 		uint32_t colour;
-		int aml = (int) (-db_left[i] * 2); // Reducing visible range from 128dB to 64dB.
-		int amr = (int) (-db_right[i] * 2); // Reducing visible range from 128dB to 64dB.
+		int aml = (int) (-self->db_left[i] * 2); // Reducing visible range from 128dB to 64dB.
+		int amr = (int) (-self->db_right[i] * 2); // Reducing visible range from 128dB to 64dB.
 		//int aml = - db_left[i];
 		//int amr = - db_right[i];
 		aml = (aml < 0) ? 0 : (aml > 128) ? 128 : aml;
@@ -317,7 +320,7 @@ void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, 
 void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
 	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
-{		
+{	
 	self->invol = connections_wirevolume(&self->workspace->song->machines.connections,
 		self->wire.src, self->wire.dst);	
 }
@@ -369,7 +372,7 @@ void spectrumanalyzer_stop(SpectrumAnalyzer* self)
 	}
 }
 
-void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], float outBuffer[], float vol)
+void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], float outBuffer[], float vol, uintptr_t writepos)
 {
 	psy_audio_Buffer* buffer;
 	uintptr_t buffersize;
@@ -378,10 +381,10 @@ void FillLinearFromCircularBuffer(SpectrumAnalyzer* self, float inBuffer[], floa
 	if (buffer) {
 		uintptr_t index;
 
-		if (buffer->writepos > (uintptr_t) self->scope_spec_samples) {
-			index = buffer->writepos - self->scope_spec_samples;
+		if (writepos > (uintptr_t) self->scope_spec_samples) {
+			index = writepos - self->scope_spec_samples;
 		} else {
-			index = buffersize - 1 - (self->scope_spec_samples - buffer->writepos);
+			index = buffersize - 1 - (self->scope_spec_samples - writepos);
 		}
 		//scopeBufferIndex is the position where it will write new data. 
 		if (index + self->scope_spec_samples < buffersize) {

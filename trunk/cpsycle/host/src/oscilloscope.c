@@ -71,6 +71,7 @@ void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_W
 	self->hold_buffer = 0;
 	self->channelmode = OSCILLOSCOPE_CHMODE_LEFT;
 	self->ampzoom = (psy_dsp_amp_t)1.0f;
+	self->running = TRUE;
 	psy_signal_connect(&self->component.signal_destroy, self,
 		oscilloscope_ondestroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
@@ -139,63 +140,65 @@ void oscilloscope_deallocate_holdbuffer(Oscilloscope* self)
 
 void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 {
-	psy_ui_Size size;
-	int centery;
-	psy_audio_Buffer* buffer;
-	uintptr_t numsamples;
-	bool active = FALSE;
-	
-	size = psy_ui_component_size(&self->component);
-	centery = size.height / 2;
-	buffer = oscilloscope_buffer(self, &numsamples);
-	if (buffer && numsamples > 0) {		
-		bool zero = FALSE;
-		
-		if (!zero) {			
-			uintptr_t readpos;
-			uintptr_t i;
-			float px;
-			float py;
-			int x1, y1, x2, y2;			
-			uintptr_t frame;
-			uintptr_t channel;
+	if (self->running) {
+		psy_ui_Size size;
+		int centery;
+		psy_audio_Buffer* buffer;
+		uintptr_t numsamples;
+		bool active = FALSE;
 
-			channel = oscilloscope_channel(self);			
-			active = TRUE;
-			px = size.width / (float)self->scope_view_samples;
-			py = size.height * psy_audio_buffer_rangefactor(buffer,
-				PSY_DSP_AMP_RANGE_VST) / 3 * self->invol * self->ampzoom;
-			readpos = buffer->writepos;
-			if (readpos >= self->scope_begin) {
-				readpos -= self->scope_begin;
-			} else {
-				readpos = numsamples - 1 - (self->scope_begin - readpos);
-			}
-			if (readpos >= self->scope_view_samples) {
-				frame = readpos - self->scope_view_samples;
-			} else {
-				frame = numsamples - 1 - (self->scope_view_samples - readpos);
-			}
-			frame = min(frame, numsamples - 1);
-			x1 = x2 = 0;
-			y1 = y2 = (int)(buffer->samples[channel][frame] * py);			
-			for (i = 1; i < self->scope_view_samples; ++i) {
-				x1 = x2;
-				x2 = (int)(i * px);
-				if (x1 != x2) {
-					y1 = y2;
-					y2 = (int)(buffer->samples[channel][frame] * py);					
-					psy_ui_drawline(g, x1, centery + y1, x2, centery + y2);
+		size = psy_ui_component_size(&self->component);
+		centery = size.height / 2;
+		buffer = oscilloscope_buffer(self, &numsamples);
+		if (buffer && numsamples > 0) {
+			bool zero = FALSE;
+
+			if (!zero) {
+				uintptr_t readpos;
+				uintptr_t i;
+				float px;
+				float py;
+				int x1, y1, x2, y2;
+				uintptr_t frame;
+				uintptr_t channel;
+
+				channel = oscilloscope_channel(self);
+				active = TRUE;
+				px = size.width / (float)self->scope_view_samples;
+				py = size.height * psy_audio_buffer_rangefactor(buffer,
+					PSY_DSP_AMP_RANGE_VST) / 3 * self->invol * self->ampzoom;
+				readpos = buffer->writepos;
+				if (readpos >= self->scope_begin) {
+					readpos -= self->scope_begin;
+				} else {
+					readpos = numsamples - 1 - (self->scope_begin - readpos);
 				}
-				frame++;
-				if (frame >= numsamples) {
-					frame = 0;
+				if (readpos >= self->scope_view_samples) {
+					frame = readpos - self->scope_view_samples;
+				} else {
+					frame = numsamples - 1 - (self->scope_view_samples - readpos);
+				}
+				frame = min(frame, numsamples - 1);
+				x1 = x2 = 0;
+				y1 = y2 = (int)(buffer->samples[channel][frame] * py);
+				for (i = 1; i < self->scope_view_samples; ++i) {
+					x1 = x2;
+					x2 = (int)(i * px);
+					if (x1 != x2) {
+						y1 = y2;
+						y2 = (int)(buffer->samples[channel][frame] * py);
+						psy_ui_drawline(g, x1, centery + y1, x2, centery + y2);
+					}
+					frame++;
+					if (frame >= numsamples) {
+						frame = 0;
+					}
 				}
 			}
-		} 		
-	}
-	if (!active) {
-		psy_ui_drawline(g, 0, centery, size.width, centery);
+		}
+		if (!active) {
+			psy_ui_drawline(g, 0, centery, size.width, centery);
+		}
 	}
 }
 
@@ -440,3 +443,12 @@ void oscilloscopeview_init(OscilloscopeView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_TOP);
 }
 
+void oscilloscopeview_start(OscilloscopeView* self)
+{
+	self->oscilloscope.running = TRUE;
+}
+
+void oscilloscopeview_stop(OscilloscopeView* self)
+{
+	self->oscilloscope.running = FALSE;
+}

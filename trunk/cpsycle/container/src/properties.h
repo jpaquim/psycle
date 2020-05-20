@@ -20,7 +20,7 @@ typedef enum {
 	PSY_PROPERTY_TYP_CHOICE,
 	PSY_PROPERTY_TYP_USERDATA,
 	PSY_PROPERTY_TYP_SECTION,
-	PSY_PROPERTY_TYP_ACTION
+	PSY_PROPERTY_TYP_ACTION,
 } psy_PropertyType;
 
 typedef enum {
@@ -40,6 +40,7 @@ typedef struct {
 	char* text;
 	char* shorttext;
 	char* translation;
+	char* comment;
 	union {
 		char* s;
 		int i;
@@ -113,9 +114,11 @@ const char* psy_properties_valuestring(psy_Properties*);
 psy_Properties* psy_properties_settext(psy_Properties*, const char* text);
 psy_Properties* psy_properties_settranslation(psy_Properties*, const char* text);
 psy_Properties* psy_properties_setshorttext(psy_Properties*, const char* text);
-const char* psy_properties_text(psy_Properties* self);
-const char* psy_properties_translation(psy_Properties* self);
-const char* psy_properties_shorttext(psy_Properties* self);
+psy_Properties* psy_properties_setcomment(psy_Properties*, const char* text);
+const char* psy_properties_text(psy_Properties*);
+const char* psy_properties_translation(psy_Properties*);
+const char* psy_properties_shorttext(psy_Properties*);
+const char* psy_properties_comment(psy_Properties*);
 psy_Properties* psy_properties_setid(psy_Properties*, int id);
 int psy_properties_id(psy_Properties* self);
 psy_Properties* psy_properties_sethint(psy_Properties*, psy_PropertyHint);

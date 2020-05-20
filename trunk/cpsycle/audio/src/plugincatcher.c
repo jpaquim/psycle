@@ -57,9 +57,11 @@ static psy_Properties* searchresult;
 void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Properties* dirconfig)
 {
 	char inipath[_MAX_PATH];
-	self->plugins = psy_properties_create();
-	plugincatcher_makeinternals(self);
-	
+
+	self->plugins = psy_properties_setcomment(
+	psy_properties_create(),
+	"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
+	plugincatcher_makeinternals(self);	
 	strcpy(inipath, psy_dir_config());
 	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
 	self->inipath = strdup(inipath);
@@ -81,7 +83,9 @@ void plugincatcher_dispose(psy_audio_PluginCatcher* self)
 void plugincatcher_clear(psy_audio_PluginCatcher* self)
 {
 	properties_free(self->plugins);
-	self->plugins = psy_properties_create();
+	self->plugins = psy_properties_setcomment(
+		psy_properties_create(),
+		"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	plugincatcher_makeinternals(self);
 }
 

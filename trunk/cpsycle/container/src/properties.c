@@ -34,6 +34,7 @@ void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType
 	self->item.text = NULL;
 	self->item.translation = NULL;
 	self->item.shorttext = NULL;
+	self->item.comment = NULL;
 	self->item.typ = typ;
 	self->item.hint = PSY_PROPERTY_HINT_EDIT;
 	self->item.disposechildren = 1;	
@@ -61,6 +62,7 @@ void properties_free(psy_Properties* self)
 			free(p->item.text);
 			free(p->item.translation);
 			free(p->item.shorttext);
+			free(p->item.comment);
 			if (p->item.typ == PSY_PROPERTY_TYP_STRING) {
 				free(p->item.value.s);
 			}
@@ -120,6 +122,7 @@ psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 		rv->item.text = p->item.text ? strdup(p->item.text) : 0;
 		rv->item.translation = p->item.translation ? strdup(p->item.translation) : 0;
 		rv->item.shorttext = p->item.shorttext ? strdup(p->item.shorttext) : 0;
+		rv->item.comment = p->item.comment ? strdup(p->item.comment) : 0;
 		rv->item.min = p->item.min;
 		rv->item.max = p->item.max;		
 		if (rv->item.typ == PSY_PROPERTY_TYP_STRING) {
@@ -669,6 +672,15 @@ psy_Properties* psy_properties_settranslation(psy_Properties* self, const char* 
 	return self;
 }
 
+psy_Properties* psy_properties_setcomment(psy_Properties* self, const char* text)
+{
+	if (self) {
+		free(self->item.comment);
+		self->item.comment = strdup(text);
+	}
+	return self;
+}
+
 const char* psy_properties_translation(psy_Properties* self)
 {
 	return self->item.translation ? self->item.translation : psy_properties_text(self);
@@ -688,6 +700,11 @@ const char* psy_properties_shorttext(psy_Properties* self)
 	return self->item.shorttext ? self->item.shorttext : 
 		self->item.text ? self->item.text :
 		self->item.key ? self->item.key : "";
+}
+
+const char* psy_properties_comment(psy_Properties* self)
+{
+	return self->item.comment ? self->item.comment : "";
 }
 
 psy_Properties* psy_properties_setid(psy_Properties* self, int id)

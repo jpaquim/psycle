@@ -32,6 +32,7 @@ typedef struct {
 	psy_audio_Buffer* hold_buffer;
 	uintptr_t hold_buffer_numsamples;
 	OscilloscopeChannelMode channelmode;
+	bool running;
 } Oscilloscope;
 
 void oscilloscope_init(Oscilloscope*, psy_ui_Component* parent,
@@ -64,5 +65,7 @@ typedef struct OscilloscopeView {
 
 void oscilloscopeview_init(OscilloscopeView*, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace*);
+void oscilloscopeview_start(OscilloscopeView*);
+void oscilloscopeview_stop(OscilloscopeView*);
 
 #endif /* Oscilloscope */

@@ -20,6 +20,7 @@ typedef enum {
 	PROPERTIESIO_STATE_ADDPROPERTY = 2,
 	PROPERTIESIO_STATE_READSECTION = 3,
 	PROPERTIESIO_STATE_ADDSECTION = 4,
+	PROPERTIESIO_STATE_READCOMMENT = 5
 } PropertiesIOState;
 
 static int reallocstr(char** str, size_t size, size_t* cap);
@@ -51,6 +52,9 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 				} else
 				if (c == '\n') {
 					state = PROPERTIESIO_STATE_READKEY;
+				} else
+				if (c == ';') {
+					state = PROPERTIESIO_STATE_READCOMMENT;
 				} else
 				if (c == '[') {
 					state = PROPERTIESIO_STATE_READSECTION;
@@ -89,6 +93,14 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 					key[cp] = c;
 				}
 				++cp;
+			} else
+			if (state == PROPERTIESIO_STATE_READCOMMENT) {
+				if (c == '\r') {
+					state = PROPERTIESIO_STATE_READKEY;
+				} else
+					if (c == '\n') {
+						state = PROPERTIESIO_STATE_READKEY;
+					}
 			}
 			if (state == PROPERTIESIO_STATE_ADDPROPERTY) {
 				psy_Properties* p = psy_properties_read(curr, key);
@@ -195,7 +207,13 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 	if (property->item.key) {
 		char text[40];
 		char sections[MAXSTRINGSIZE];
-		
+			
+		if (property->item.comment) {
+			fwrite("; ", sizeof(char), 2, fp);
+			fwrite(property->item.comment, sizeof(char),
+				strlen(property->item.comment), fp);
+			fwrite("\n", sizeof(char), 1, fp);
+		}
 		if (property->item.typ == PSY_PROPERTY_TYP_ROOT) {
 			fwrite("[root]", sizeof(char), 6, fp);			
 		} else
@@ -206,7 +224,7 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 				fwrite(sections, sizeof(char), strlen(sections), fp);
 			}			
 			fwrite("]", sizeof(char), 1, fp);
-		} else 
+		} else		
 		if (property->item.typ != PSY_PROPERTY_TYP_ACTION) {
 			fwrite(psy_properties_key(property), sizeof(char),
 				strlen(psy_properties_key(property)), fp);
@@ -221,7 +239,7 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
-				break;
+				break;				
 				case PSY_PROPERTY_TYP_CHOICE:
 					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
