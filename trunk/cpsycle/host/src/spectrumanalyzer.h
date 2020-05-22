@@ -23,7 +23,6 @@ typedef struct {
 	int scope_spec_samples;
 	float db_left[SCOPE_SPEC_BANDS];
 	float db_right[SCOPE_SPEC_BANDS];
-	double phi;
 	FFTClass fftSpec;
 	Workspace* workspace;
 	int lastprocessed;
@@ -32,5 +31,9 @@ typedef struct {
 
 void spectrumanalyzer_init(SpectrumAnalyzer*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);
 void spectrumanalyzer_stop(SpectrumAnalyzer*);
+
+void spectrumanalyzer_hold(SpectrumAnalyzer*);
+void spectrumanalyzer_continue(SpectrumAnalyzer*);
+bool spectrumanalyzer_stopped(SpectrumAnalyzer*);
 
 #endif /* SPECTRUMANALYZER_H */

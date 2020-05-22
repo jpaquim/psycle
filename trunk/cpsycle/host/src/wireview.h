@@ -5,6 +5,8 @@
 #define WIREVIEW_H
 
 #include "channelmappingview.h"
+#include <uibutton.h>
+#include <uilabel.h>
 #include <uinotebook.h>
 #include <uislider.h>
 #include "tabbar.h"
@@ -16,6 +18,9 @@
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Component top;
+	psy_ui_Button togglevu;
+	psy_ui_Label vulabel;
 	TabBar tabbar;
 	psy_ui_Notebook notebook;
 	psy_ui_Component slidergroup;

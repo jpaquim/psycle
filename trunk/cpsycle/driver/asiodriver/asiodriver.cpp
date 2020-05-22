@@ -1351,7 +1351,7 @@ static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
-static unsigned int driver_samplerate(psy_AudioDriver*);
+static uintptr_t driver_samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
@@ -1513,7 +1513,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 	}
 }
 
-unsigned int driver_samplerate(psy_AudioDriver* self)
+uintptr_t driver_samplerate(psy_AudioDriver* self)
 {
 	return psy_audiodriversettings_samplespersec(&ASIOInterface::settings_);
 }

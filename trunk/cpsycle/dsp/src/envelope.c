@@ -103,7 +103,7 @@ void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 }
 
 void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope* self,
-	unsigned int samplerate)
+	uintptr_t samplerate)
 {
 	self->samplerate = samplerate;
 }

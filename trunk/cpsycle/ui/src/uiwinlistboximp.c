@@ -163,14 +163,14 @@ void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
 		component,
 		parent,
 		TEXT("LISTBOX"),
-		0, 0, 100, 20,
+		0, 0, 100, 200,
 		(WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY) & ~WS_BORDER,
 		1);
 	imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;
 	psy_ui_listboximp_init(&self->imp);
 	listboximp_imp_vtable_init(self);
-	self->imp.vtable = &listboximp_vtable;
+	self->imp.vtable = &listboximp_vtable;	
 	psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
 }
 
@@ -262,8 +262,14 @@ void dev_clear(psy_ui_win_ListBoxImp* self)
 }
 
 void dev_setcursel(psy_ui_win_ListBoxImp* self, intptr_t index)
-{
+{	
+	RECT rect;
+
+	GetClientRect(self->win_component_imp.hwnd, &rect);
 	SendMessage(self->win_component_imp.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
+	if (rect.bottom - rect.top < 20) {
+		SendMessage(self->win_component_imp.hwnd, LB_SETTOPINDEX, (WPARAM)0, (LPARAM)0);
+	}
 }
 
 intptr_t dev_cursel(psy_ui_win_ListBoxImp* self)

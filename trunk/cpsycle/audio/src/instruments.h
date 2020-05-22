@@ -5,15 +5,22 @@
 #define psy_audio_INSTRUMENTS_H
 
 #include "instrument.h"
+
 #include <hashtbl.h>
 #include <signal.h>
+
 #include "../../detail/stdint.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define NOINSTRUMENT_INDEX UINTPTR_MAX
+// psy_audio_Instruments
+// 
+// Aim: Container of instruments
+// Structure:
+// psy_audio_Instruments <@>----- psy_audio_Instrument
+//                              *                          
 
 typedef struct psy_audio_Instruments {
 	psy_Table container;

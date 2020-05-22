@@ -39,7 +39,7 @@ typedef enum {
 } psy_audio_NewNoteAction;
 
 typedef struct {
-	SampleIndex sampleindex;
+	psy_audio_SampleIndex sampleindex;
 	psy_audio_FrequencyRange freqrange;
 	psy_audio_ParameterRange keyrange;
 	psy_audio_ParameterRange velocityrange;	

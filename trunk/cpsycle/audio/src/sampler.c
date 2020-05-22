@@ -465,7 +465,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	psy_audio_Instrument* instrument,
 	psy_audio_SamplerChannel* channel,
 	uintptr_t channelnum,
-	unsigned int samplerate,
+	uintptr_t samplerate,
 	int resamplingmethod,
 	int maxvolume) 
 {	

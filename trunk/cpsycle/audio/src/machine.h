@@ -19,10 +19,8 @@
 extern "C" {
 #endif
 
-#define NOMACHINE_INDEX UINTPTR_MAX
-
-typedef unsigned int (*fp_mcb_samplerate)(void*);
-typedef	unsigned int (*fp_mcb_bpm)(void*);
+typedef uintptr_t (*fp_mcb_samplerate)(void*);
+typedef	psy_dsp_beat_t (*fp_mcb_bpm)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_beatspertick)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_beatspersample)(void*);
 typedef	psy_dsp_beat_t (*fp_mcb_currbeatsperline)(void*);
@@ -144,8 +142,8 @@ typedef int (*fp_machine_numbanks)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, int bnkIdx);
 typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
 // machine callbacks
-typedef	unsigned int (*fp_machine_samplerate)(struct psy_audio_Machine*);
-typedef unsigned int (*fp_machine_bpm)(struct psy_audio_Machine*);
+typedef	uintptr_t (*fp_machine_samplerate)(struct psy_audio_Machine*);
+typedef psy_dsp_beat_t (*fp_machine_bpm)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_beatspertick)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_beatspersample)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t(*fp_machine_currbeatsperline)(struct psy_audio_Machine*);
@@ -472,7 +470,7 @@ INLINE const char* psy_audio_machine_editname(psy_audio_Machine* self)
 	return self->vtable->editname(self);
 }
 
-INLINE unsigned int psy_audio_machine_bpm(psy_audio_Machine* self)
+INLINE psy_dsp_beat_t psy_audio_machine_bpm(psy_audio_Machine* self)
 {
 	return self->vtable->bpm(self);
 }
@@ -492,7 +490,7 @@ INLINE psy_dsp_beat_t psy_audio_machine_currbeatsperline(psy_audio_Machine* self
 	return self->vtable->currbeatsperline(self);
 }
 
-INLINE unsigned int psy_audio_machine_samplerate(psy_audio_Machine* self)
+INLINE uintptr_t psy_audio_machine_samplerate(psy_audio_Machine* self)
 {
 	return self->vtable->samplerate(self);
 }

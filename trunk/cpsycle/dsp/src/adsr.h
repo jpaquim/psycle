@@ -36,15 +36,15 @@ void adsr_settings_setfastrelease(psy_dsp_ADSRSettings*, psy_dsp_seconds_t);
 typedef struct {
 	psy_dsp_amp_t value;
 	psy_dsp_amp_t step;	
-	unsigned int samplerate;
+	uintptr_t samplerate;
 	psy_dsp_ADSRSettings settings;
 	psy_dsp_EnvelopeStage stage;
 } psy_dsp_ADSR;
 
-void psy_dsp_adsr_initdefault(psy_dsp_ADSR*, unsigned int samplerate);
-void psy_dsp_adsr_init(psy_dsp_ADSR*, const psy_dsp_ADSRSettings*, unsigned int samplerate);
+void psy_dsp_adsr_initdefault(psy_dsp_ADSR*, uintptr_t samplerate);
+void psy_dsp_adsr_init(psy_dsp_ADSR*, const psy_dsp_ADSRSettings*, uintptr_t samplerate);
 void psy_dsp_adsr_reset(psy_dsp_ADSR*);
-void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR*, unsigned int samplerate);
+void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR*, uintptr_t samplerate);
 void psy_dsp_adsr_tick(psy_dsp_ADSR*);
 void psy_dsp_adsr_start(psy_dsp_ADSR*);
 void psy_dsp_adsr_release(psy_dsp_ADSR*);

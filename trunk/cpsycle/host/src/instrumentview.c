@@ -4,9 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "instrumentview.h"
-#include <math.h>
-#include <songio.h>
 
+#include <songio.h>
+#include <math.h>
 #include "../../detail/portable.h"
 
 static void instrumentview_oncreateinstrument(InstrumentView*,
@@ -105,11 +105,6 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->left, &self->component);
 	psy_ui_component_enablealign(&self->left);	
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->left, &margin);
-	// psy_ui_label_init(&self->label, &self->left);
-	// psy_ui_label_settext(&self->label, "Instruments");
-	// psy_ui_label_setcharnumber(&self->label, 25);
-	// ui_component_setalign(&self->label.component, UI_ALIGN_TOP);
 	instrumentviewbuttons_init(&self->buttons, &self->left);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
@@ -119,11 +114,11 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	{
 		psy_ui_Margin margin;
 
-		psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
-			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+			psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
-		psy_ui_component_setmargin(&self->instrumentsbox.instrumentlist.component,
-			&margin);
+		psy_ui_component_setmargin(&self->left,
+			&margin);		
 	}
 	// client
 	psy_ui_component_init(&self->client, &self->component);
@@ -158,7 +153,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		OnMachinesRemoved);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
+	samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples,
 		&workspace->song->instruments);
 	psy_signal_connect(&self->buttons.create.signal_clicked, self,
 		instrumentview_oncreateinstrument);
@@ -210,7 +205,7 @@ void instrumentview_setinstrument(InstrumentView* self, int slot)
 	instrumentvolumeview_setinstrument(&self->volume, instrument);
 	instrumentpanview_setinstrument(&self->pan, instrument);
 	instrumentfilterview_setinstrument(&self->filter, instrument);
-	instrumentpitchview_setinstrument(&self->pitch, instrument);	
+	instrumentpitchview_setinstrument(&self->pitch, instrument);
 }
 
 void OnSongChanged(InstrumentView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
@@ -231,11 +226,11 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace, int flag, psy_aud
 			OnMachinesRemoved);
 		instrumentsbox_setinstruments(&self->instrumentsbox,
 			&workspace->song->instruments);	
-		samplesbox_setsamples(&self->general.samplesbox, &workspace->song->samples,
+		samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples,
 			&workspace->song->instruments);
 	} else {
 		instrumentsbox_setinstruments(&self->instrumentsbox, 0);	
-		samplesbox_setsamples(&self->general.samplesbox,
+		samplesbox_setsamples(&self->general.notemapview.samplesbox,
 			&workspace->song->samples, 0);
 	}
 	instrumentview_setinstrument(self, 0);
@@ -368,11 +363,10 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	// psy_ui_component_init(&self->left, &self->component);
 	// psy_ui_component_enablealign(&self->left);	
 	// psy_ui_component_setalign(&self->left, UI_ALIGN_LEFT);
-	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
-	self->samplesbox.changeinstrumentslot = 0;
-	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_setmargin(&self->samplesbox.component, &margin);
-	psy_ui_component_resize(&self->samplesbox.component, 150, 0);
+	
+	self->notemapview.samplesbox.changeinstrumentslot = 0;
+	psy_ui_component_setalign(&self->notemapview.samplesbox.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setmargin(&self->notemapview.samplesbox.component, &margin);
 	// nna
 	psy_ui_component_init(&self->nna, &self->component);
 	psy_ui_component_enablealign(&self->nna);
@@ -976,7 +970,7 @@ void instrumentview_onaddentry(InstrumentView* self, psy_ui_Component* sender)
 		psy_audio_InstrumentEntry entry;
 		
 		instrumententry_init(&entry);
-		entry.sampleindex = samplesbox_selected(&self->general.samplesbox);
+		entry.sampleindex = samplesbox_selected(&self->general.notemapview.samplesbox);
 		instrument_addentry(self->general.instrument, &entry);
 		instrumentnotemapview_update(&self->general.notemapview);
 	}
@@ -988,7 +982,7 @@ void instrumentview_onremoveentry(InstrumentView* self, psy_ui_Component* sender
 		instrument_removeentry(
 			self->general.instrument,
 				self->general.notemapview.entryview.selected);
-		self->general.notemapview.entryview.selected = NOINSTRUMENT_INDEX;
+		self->general.notemapview.entryview.selected = UINTPTR_MAX;
 		instrumentnotemapview_update(&self->general.notemapview);
 	}
 }

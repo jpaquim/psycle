@@ -126,9 +126,9 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 			psy_table_at(&self->workspace->player.sequencer.lastmachine,
 				track);
 	} else {
-		lastmachine = NOMACHINE_INDEX;
+		lastmachine = UINTPTR_MAX;
 	}	
-	if (lastmachine != NOMACHINE_INDEX) {
+	if (lastmachine != UINTPTR_MAX) {
 		char text[40];
 
 		psy_snprintf(text, 40, "%X", lastmachine);

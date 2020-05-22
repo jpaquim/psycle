@@ -72,6 +72,7 @@ void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments* 
 {
 	self->instruments = instruments;	
 	BuildInstrumentList(self);
+	psy_ui_listbox_setcursel(&self->instrumentlist, 0);
 	psy_signal_connect(&instruments->signal_insert, self,
 		OnInstrumentInsert);
 	psy_signal_connect(&instruments->signal_removed, self,

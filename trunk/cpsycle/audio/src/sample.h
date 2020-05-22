@@ -75,8 +75,8 @@ unsigned int sampleiterator_frameposition(SampleIterator*);
 
 typedef struct psy_audio_Sample {
 	psy_audio_Buffer channels;
-	unsigned int numframes;
-	unsigned int samplerate;
+	uintptr_t numframes;
+	uintptr_t samplerate;
 	char* name;
 	/// Difference between Glob volume and defVolume is that defVolume 
 	///	determines the volume if no volume is specified in the pattern, while

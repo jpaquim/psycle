@@ -8,6 +8,7 @@
 #include "instrumentsbox.h"
 #include "samplesbox.h"
 #include "tabbar.h"
+#include "samplesbox.h"
 #include "workspace.h"
 
 #include <uibutton.h>
@@ -69,6 +70,7 @@ typedef struct {
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 	InstrumentNoteMapMetrics metrics;
+	SamplesBox samplesbox;
 } InstrumentNoteMapView;
 
 void instrumentnotemapview_init(InstrumentNoteMapView*,

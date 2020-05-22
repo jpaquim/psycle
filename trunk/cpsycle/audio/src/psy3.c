@@ -289,7 +289,7 @@ void readsngi(psy_audio_SongFile* self)
 		if (temp >= 0) {
 			self->machinesoloed = (uint32_t) temp;			
 		} else {
-			self->machinesoloed = NOMACHINE_INDEX;			
+			self->machinesoloed = UINTPTR_MAX;
 		}
 		// tracksoloed
 		psyfile_read(self->file, &temp, sizeof temp);
@@ -1768,11 +1768,11 @@ int psy3_write_sngi(psy_audio_SongFile* self)
 		return status;
 	}
 	// machinesoloed
-	if (psy_audio_machines_soloed(&self->song->machines) != NOMACHINE_INDEX) {
+	if (psy_audio_machines_soloed(&self->song->machines) != UINTPTR_MAX) {
 
 	}
 	if (status = psyfile_write_int32(self->file,
-		(psy_audio_machines_soloed(&self->song->machines) != NOMACHINE_INDEX)
+		(psy_audio_machines_soloed(&self->song->machines) != UINTPTR_MAX)
 		? (int)psy_audio_machines_soloed(&self->song->machines)
 		: -1)) {
 		return status;

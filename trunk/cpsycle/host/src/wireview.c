@@ -4,10 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "wireview.h"
-#include "math.h"
 #include "resources/resource.h"
-#include "../../detail/portable.h"
 #include <uiframe.h>
+
+#include <math.h>
+
+#include "../../detail/portable.h"
 
 static void wireview_ondestroy(WireView*);
 static void wireview_initvolumeslider(WireView*);
@@ -29,10 +31,23 @@ static void wireview_onaddeffect(WireView*, psy_ui_Component* sender);
 static void wireview_ondisconnected(WireView*, psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
 static void wireview_ontabbarchanged(WireView*, psy_ui_Component* sender,
 	uintptr_t tabindex);
+static void wireview_dockscope(WireView*, int index);
+static void wireview_movescope(WireView* self, int index,
+	psy_ui_AlignType align, int width);
+static psy_ui_Component* wireview_scope(WireView*, int index);
+static bool wireview_scopedocked(WireView* self, int index);
+static void wireview_ontogglevu(WireView*, psy_ui_Component* sender);
+static int wireview_currscope(WireView*);
 
 static void wireframe_ondestroy(WireFrame*, psy_ui_Component* frame);
 static void wireframe_onsize(WireFrame*, psy_ui_Component* sender, psy_ui_Size*);
 
+enum {
+	TABPAGE_VUMETER = 0,
+	TABPAGE_OSCILLOSCOPE = 1,
+	TABPAGE_SPECTRUM = 2,
+	TABPAGE_PHASE = 3,	
+};
 
 void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	Workspace* workspace)
@@ -52,24 +67,28 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&wireview_base(self)->signal_destroy, self,
 		wireview_ondestroy);
-	wireview_connectmachinessignals(self, workspace);
+	wireview_connectmachinessignals(self, workspace);	
 	vuscope_init(&self->vuscope, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
-	oscilloscopeview_init(&self->oscilloscopeview, psy_ui_notebook_base(&self->notebook), wire,
-		workspace);
+	psy_ui_component_setalign(&self->vuscope.component, psy_ui_ALIGN_CLIENT);
+	oscilloscopeview_init(&self->oscilloscopeview,
+		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	oscilloscope_setzoom(&self->oscilloscopeview.oscilloscope, 0.2f);
+	psy_ui_component_setalign(&self->oscilloscopeview.component, psy_ui_ALIGN_CLIENT);
 	spectrumanalyzer_init(&self->spectrumanalyzer,
 		psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
+	psy_ui_component_setalign(&self->spectrumanalyzer.component, psy_ui_ALIGN_CLIENT);
 	stereophase_init(&self->stereophase, psy_ui_notebook_base(&self->notebook), wire,
 		workspace);
+	psy_ui_component_setalign(&self->stereophase.component, psy_ui_ALIGN_CLIENT);
 	channelmappingview_init(&self->channelmappingview,
 		psy_ui_notebook_base(&self->notebook), wire, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		wireview_ontabbarchanged);
-	tabbar_select(&self->tabbar, 0);	
+	tabbar_select(&self->tabbar, TABPAGE_VUMETER);	
 }
 
 void wireview_ondestroy(WireView* self)
@@ -83,10 +102,30 @@ void wireview_ondestroy(WireView* self)
 
 void wireview_inittabbar(WireView* self)
 {
-	tabbar_init(&self->tabbar, wireview_base(self));
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
+	psy_ui_Margin margin;
+
+	psy_ui_component_init(&self->top, &self->component);
+	psy_ui_component_enablealign(&self->top);
+	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);
+	psy_ui_button_init(&self->togglevu, &self->top);
+	psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
+	psy_ui_component_setalign(&self->togglevu.component, psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->togglevu.signal_clicked, self,
+		wireview_ontogglevu);
+	psy_ui_label_init(&self->vulabel, &self->top);
+	psy_ui_label_settext(&self->vulabel, "Vu");
+	psy_ui_label_settextalignment(&self->vulabel, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
+	psy_ui_component_setmargin(&self->vulabel.component, &margin);
+	psy_ui_component_setalign(&self->vulabel.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_hide(&self->vulabel.component);
+	tabbar_init(&self->tabbar, &self->top);	
 	tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
 		"Channel Mapping", NULL);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
 }
 
 void wireview_initvolumeslider(WireView* self)
@@ -138,12 +177,11 @@ void wireview_initrategroup(WireView* self)
 		wireview_onhold);
 	psy_ui_slider_init(&self->modeslider, &self->rategroup);
 	psy_ui_slider_showhorizontal(&self->modeslider);
-	psy_ui_slider_showhorizontal(&self->modeslider);
 	psy_ui_slider_hidevaluelabel(&self->modeslider);
+	psy_ui_component_setmargin(&self->modeslider.component, &margin);
 	psy_ui_component_setalign(&self->modeslider.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->modeslider, self, NULL,
 		wireview_ontweakmode, wireview_onvaluemode);
-	psy_ui_component_hide(&self->modeslider.component);
 	psy_ui_slider_init(&self->rateslider, &self->rategroup);
 	psy_ui_slider_showhorizontal(&self->rateslider);	
 	psy_ui_slider_showhorizontal(&self->rateslider);
@@ -239,16 +277,36 @@ void wireview_onvaluerate(WireView* self, psy_ui_Slider* slider, float* value)
 }
 
 void wireview_onhold(WireView* self, psy_ui_Component* sender)
-{
-	if (tabbar_selected(&self->tabbar) == 1) {
-		if (oscilloscope_stopped(&self->oscilloscopeview.oscilloscope)) {
-			oscilloscope_continue(&self->oscilloscopeview.oscilloscope);
-		} else {
-			self->scope_spec_rate = 0.0;
-			oscilloscope_setbegin(&self->oscilloscopeview.oscilloscope,
-				self->scope_spec_rate);
-			oscilloscope_hold(&self->oscilloscopeview.oscilloscope);
-		}
+{	
+	switch (tabbar_selected(&self->tabbar)) {
+		case TABPAGE_VUMETER:
+		break;
+		case TABPAGE_OSCILLOSCOPE:
+			if (oscilloscope_stopped(&self->oscilloscopeview.oscilloscope)) {
+				oscilloscope_continue(&self->oscilloscopeview.oscilloscope);
+			} else {
+				self->scope_spec_rate = 0.0;
+				oscilloscope_setbegin(&self->oscilloscopeview.oscilloscope,
+					self->scope_spec_rate);
+				oscilloscope_hold(&self->oscilloscopeview.oscilloscope);
+			}
+		break;
+		case TABPAGE_SPECTRUM:
+			if (spectrumanalyzer_stopped(&self->spectrumanalyzer)) {
+				spectrumanalyzer_continue(&self->spectrumanalyzer);
+			} else {								
+				spectrumanalyzer_hold(&self->spectrumanalyzer);
+			}
+		break;
+		case TABPAGE_PHASE:
+		break;
+		default:
+		break;
+	}
+	if (psy_ui_button_highlighted(&self->hold)) {
+		psy_ui_button_disablehighlight(&self->hold);
+	} else {
+		psy_ui_button_highlight(&self->hold);
 	}
 }
 
@@ -292,15 +350,113 @@ void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 
 void wireview_ontabbarchanged(WireView* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
-{
-	if (tabindex == 0) {
+{		
+	/*if (wireview_currscope(self) == TABPAGE_VUMETER) {
 		vuscope_start(&self->vuscope);
 		psy_ui_component_hide(&self->modeslider.component);
 	} else {
 		vuscope_stop(&self->vuscope);
-		psy_ui_component_show(&self->modeslider.component);		
+		psy_ui_component_show(&self->modeslider.component);
+	}*/
+	//psy_ui_component_align(&self->component);
+
+}
+
+void wireview_dockscope(WireView* self, int index)
+{
+	psy_ui_Component* scope;
+
+	scope = wireview_scope(self, index);
+	if (scope == NULL) {
+		return;
+	}	
+	if (psy_ui_component_parent(scope) != psy_ui_notebook_base(&self->notebook)) {
+		psy_ui_component_setparent(scope, psy_ui_notebook_base(&self->notebook));
+		psy_ui_component_setalign(scope, psy_ui_ALIGN_CLIENT);
 	}
-	psy_ui_component_align(&self->component);
+}
+
+bool wireview_scopedocked(WireView* self, int index)
+{
+	psy_ui_Component* scope;
+
+	scope = wireview_scope(self, index);
+	if (scope == NULL) {
+		return FALSE;
+	}	
+	return (psy_ui_component_parent(scope) == psy_ui_notebook_base(&self->notebook));
+}
+
+void wireview_movescope(WireView* self, int index, psy_ui_AlignType align, int width)
+{
+	psy_ui_Component* scope;
+
+	scope = wireview_scope(self, index);
+	if (scope == NULL) {
+		return;
+	}	
+	if (psy_ui_component_parent(scope) == psy_ui_notebook_base(&self->notebook)) {
+		psy_ui_component_setparent(scope, &self->component);		
+		psy_ui_component_resize(scope, width, 0);
+		psy_ui_component_show(scope);
+	}
+	psy_ui_component_setalign(scope, align);
+}
+
+psy_ui_Component* wireview_scope(WireView* self, int index)
+{
+	psy_ui_Component* rv;
+
+	switch (index) {
+		case TABPAGE_VUMETER:
+			rv = &self->vuscope.component;
+		break;
+		case TABPAGE_OSCILLOSCOPE:
+			rv = &self->oscilloscopeview.component;
+		break;
+		case TABPAGE_SPECTRUM:
+			rv = &self->spectrumanalyzer.component;
+		break;
+		case TABPAGE_PHASE:
+			rv = &self->stereophase.component;
+		break;
+		default:
+			rv = 0;
+		break;
+	}
+	return rv;
+}
+
+void wireview_ontogglevu(WireView* self, psy_ui_Component* sender)
+{
+	int oldtabindex;
+
+	oldtabindex = tabbar_selected(&self->tabbar);
+	tabbar_clear(&self->tabbar);
+	if (wireview_scopedocked(self, TABPAGE_VUMETER)) {
+		wireview_movescope(self, TABPAGE_VUMETER, psy_ui_ALIGN_RIGHT, 150);
+		psy_ui_component_show(&self->vulabel.component);
+		tabbar_append_tabs(&self->tabbar, "Osc", "Spectrum", "Stereo Phase",
+			"Channel Mapping", NULL);
+		psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_LESS);
+		tabbar_select(&self->tabbar, (oldtabindex - 1 > 0) ? oldtabindex - 1 : 0);
+	} else {
+		wireview_dockscope(self, TABPAGE_VUMETER);
+		tabbar_append_tabs(&self->tabbar, "Vu", "Osc", "Spectrum", "Stereo Phase",
+			"Channel Mapping", NULL);
+		psy_ui_component_hide(&self->vulabel.component);
+		psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
+		tabbar_select(&self->tabbar, oldtabindex + 1);
+	}
+	psy_ui_component_align(wireview_base(self));
+}
+
+int wireview_currscope(WireView* self)
+{
+	int index;
+
+	index = tabbar_selected(&self->tabbar);
+	return (wireview_scopedocked(self, 0)) ? index + 1 : index;
 }
 
 void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
@@ -309,7 +465,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 	self->wireview = view;
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
 	psy_ui_component_move(wireframe_base(self), 200, 150);
-	psy_ui_component_resize(wireframe_base(self), 400, 400);
+	psy_ui_component_resize(wireframe_base(self), 500, 450);
 	psy_signal_connect(&wireframe_base(self)->signal_destroy, self,
 		wireframe_ondestroy);
 	psy_signal_connect(&wireframe_base(self)->signal_size, self,

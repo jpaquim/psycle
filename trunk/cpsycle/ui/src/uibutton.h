@@ -34,6 +34,7 @@ void psy_ui_button_settext(psy_ui_Button*, const char* text);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
 void psy_ui_button_highlight(psy_ui_Button*);
 void psy_ui_button_disablehighlight(psy_ui_Button*);
+bool psy_ui_button_highlighted(psy_ui_Button*);
 void psy_ui_button_setcharnumber(psy_ui_Button*, int number);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
 

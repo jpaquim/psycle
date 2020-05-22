@@ -88,7 +88,7 @@ void constructtable(psy_audio_WaveOscTables* self,
     void (*func)(float*, int, int),
     int sr)
 {
-    SampleIndex index;
+    psy_audio_SampleIndex index;
     psy_audio_Sample* w;
     psy_audio_InstrumentEntry* entry;
 
