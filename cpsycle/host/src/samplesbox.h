@@ -24,6 +24,7 @@ typedef struct {
 
 void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*, psy_audio_Instruments*);
 void samplesbox_setsamples(SamplesBox*, psy_audio_Samples*, psy_audio_Instruments*);
-SampleIndex samplesbox_selected(SamplesBox*);
+psy_audio_SampleIndex samplesbox_selected(SamplesBox*);
+void samplesbox_select(SamplesBox*, psy_audio_SampleIndex);
 
 #endif

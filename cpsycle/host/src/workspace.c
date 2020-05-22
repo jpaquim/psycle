@@ -71,8 +71,8 @@ static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelectio
 static void workspace_updatenavigation(Workspace*);
 /// Machinecallback
 static MachineCallback machinecallback(Workspace*);
-static unsigned int machinecallback_samplerate(Workspace*);
-static unsigned int machinecallback_bpm(Workspace*);
+static uintptr_t machinecallback_samplerate(Workspace*);
+static psy_dsp_beat_t machinecallback_bpm(Workspace*);
 static psy_dsp_beat_t machinecallback_beatspertick(Workspace*);
 static psy_dsp_beat_t machinecallback_beatspersample(Workspace*);
 static psy_dsp_beat_t machinecallback_currbeatsperline(Workspace*);
@@ -2095,14 +2095,14 @@ psy_audio_Samples* machinecallback_samples(Workspace* self)
 	return (self->songcbk) ? &self->songcbk->samples : 0;
 }
 
-unsigned int machinecallback_samplerate(Workspace* self)
+uintptr_t machinecallback_samplerate(Workspace* self)
 {
 	return self->player.driver->samplerate(self->player.driver);
 }
 
-unsigned int machinecallback_bpm(Workspace* self)
+psy_dsp_beat_t machinecallback_bpm(Workspace* self)
 {
-	return (unsigned int) psy_audio_player_bpm(&self->player);
+	return psy_audio_player_bpm(&self->player);
 }
 
 psy_dsp_beat_t machinecallback_beatspertick(Workspace* self)

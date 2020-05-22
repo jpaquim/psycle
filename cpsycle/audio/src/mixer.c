@@ -846,7 +846,7 @@ void returnchannel_computepath(psy_audio_ReturnChannel* self)
 		uintptr_t slot;
 		
 		slot = (uintptr_t)path->entry;
-		if (slot == NOMACHINE_INDEX) {			
+		if (slot == UINTPTR_MAX) {
 			continue;
 		}
 		machines_addmixersend(machines, slot);
@@ -864,7 +864,7 @@ psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel* self)
 		uintptr_t slot;
 
 		slot = (uintptr_t)(self->path->entry);
-		if (slot != NOMACHINE_INDEX) {
+		if (slot != UINTPTR_MAX) {
 			psy_audio_Machine* firstmachine;
 			psy_audio_Machines* machines;
 
@@ -1187,7 +1187,7 @@ void workreturn(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		
 		for (path = channel->path; path != 0; path = path->next) {
 			slot = (uintptr_t) path->entry;
-			if (slot == NOMACHINE_INDEX) {
+			if (slot == UINTPTR_MAX) {
 				// delimits the machines that could be processed parallel
 				// todo: add thread functions
 				continue;
@@ -1238,7 +1238,7 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 						uintptr_t slot;
 
 						slot = (size_t)path->entry;
-						if (slot == NOMACHINE_INDEX) {
+						if (slot == UINTPTR_MAX) {
 							// delimits the machines that could be processed parallel
 							// todo: add thread functions
 							continue;
@@ -1341,7 +1341,7 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 								uintptr_t slot;
 
 								slot = (size_t)path->entry;
-								if (slot == NOMACHINE_INDEX) {
+								if (slot == UINTPTR_MAX) {
 									// delimits the machines that could be processed parallel
 									// todo: add thread functions
 									continue;
@@ -1993,7 +1993,7 @@ void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 			// work fx chain
 			for (; path != 0; path = path->next) {				
 				sendslot = (size_t)path->entry;
-				if (sendslot == NOMACHINE_INDEX) {
+				if (sendslot == UINTPTR_MAX) {
 					// delimits the machines that could be processed parallel					
 					continue;
 				}

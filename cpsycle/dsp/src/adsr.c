@@ -34,7 +34,8 @@ psy_dsp_seconds_t adsr_settings_attack(psy_dsp_ADSRSettings* self)
 	return self->attack;
 }
 
-void adsr_settings_setattack(psy_dsp_ADSRSettings* self, psy_dsp_seconds_t value)
+void adsr_settings_setattack(psy_dsp_ADSRSettings* self,
+	psy_dsp_seconds_t value)
 {
 	self->attack = value;
 }
@@ -44,7 +45,8 @@ psy_dsp_seconds_t adsr_settings_decay(psy_dsp_ADSRSettings* self)
 	return self->decay;
 }
 
-void adsr_settings_setdecay(psy_dsp_ADSRSettings* self, psy_dsp_seconds_t value)
+void adsr_settings_setdecay(psy_dsp_ADSRSettings* self,
+	psy_dsp_seconds_t value)
 {
 	self->decay = value;
 }
@@ -54,7 +56,8 @@ psy_dsp_percent_t adsr_settings_sustain(psy_dsp_ADSRSettings* self)
 	return self->sustain;
 }
 
-void adsr_settings_setsustain(psy_dsp_ADSRSettings* self, psy_dsp_percent_t value)
+void adsr_settings_setsustain(psy_dsp_ADSRSettings* self,
+	psy_dsp_percent_t value)
 {
 	self->sustain = value;
 }
@@ -64,7 +67,8 @@ psy_dsp_seconds_t adsr_settings_release(psy_dsp_ADSRSettings* self)
 	return self->release;
 }
 
-void adsr_settings_setrelease(psy_dsp_ADSRSettings* self, psy_dsp_seconds_t value)
+void adsr_settings_setrelease(psy_dsp_ADSRSettings* self,
+	psy_dsp_seconds_t value)
 {
 	self->release = value;
 }
@@ -75,12 +79,13 @@ psy_dsp_seconds_t adsr_settings_fastrelease(psy_dsp_ADSRSettings* self)
 	return self->fastrelease;
 }
 
-void adsr_settings_setfastrelease(psy_dsp_ADSRSettings* self, psy_dsp_seconds_t value)
+void adsr_settings_setfastrelease(psy_dsp_ADSRSettings* self,
+	psy_dsp_seconds_t value)
 {
 	self->fastrelease = value;
 }
 
-void psy_dsp_adsr_initdefault(psy_dsp_ADSR* self, unsigned int samplerate)
+void psy_dsp_adsr_initdefault(psy_dsp_ADSR* self, uintptr_t samplerate)
 {	
 	self->stage = ENV_OFF;
 	self->value = 0.f;
@@ -89,7 +94,8 @@ void psy_dsp_adsr_initdefault(psy_dsp_ADSR* self, unsigned int samplerate)
 	adsr_settings_initdefault(&self->settings);
 }
 
-void psy_dsp_adsr_init(psy_dsp_ADSR* self, const psy_dsp_ADSRSettings* settings, unsigned int samplerate)
+void psy_dsp_adsr_init(psy_dsp_ADSR* self,
+	const psy_dsp_ADSRSettings* settings, uintptr_t samplerate)
 {
 	self->stage = ENV_OFF;
 	self->value = 0.f;
@@ -109,7 +115,7 @@ void psy_dsp_adsr_reset(psy_dsp_ADSR* self)
 	self->step = 0.f;	
 }
 
-void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR* self, unsigned int samplerate)
+void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR* self, uintptr_t samplerate)
 {
 	self->samplerate = samplerate;	
 }

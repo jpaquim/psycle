@@ -902,11 +902,17 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 		case audioMasterIdle:            
         break;
 		case audioMasterGetSampleRate:
-			result = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
-				self));
+			if (self) {
+				result = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
+					self));
+			} else {
+				result = 44100;
+			}
 		break;
 		case audioMasterOpenFileSelector :
-			vstplugin_onfileselect(self, (struct VstFileSelect*) ptr);
+			if (self) {
+				vstplugin_onfileselect(self, (struct VstFileSelect*)ptr);
+			}
 		break;		
 		default:
 		break;

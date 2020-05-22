@@ -65,7 +65,7 @@ static int driver_open(psy_AudioDriver*);
 static void driver_configure(FileOutDriver*, psy_Properties*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static unsigned int samplerate(psy_AudioDriver*);
+static uintptr_t samplerate(psy_AudioDriver*);
 static void PollerThread(void *fileoutdriver);
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
@@ -174,7 +174,7 @@ void driver_configure(FileOutDriver* self, psy_Properties* config)
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 
-unsigned int samplerate(psy_AudioDriver* self)
+uintptr_t samplerate(psy_AudioDriver* self)
 {
 	return 44100;
 }

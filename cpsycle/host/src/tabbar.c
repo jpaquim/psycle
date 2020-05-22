@@ -18,6 +18,7 @@ static void tabbar_onmouseleave(TabBar*);
 static int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab);
 static void tabbar_onalign(TabBar*);
 static void tabbar_onpreferredsize(TabBar*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void tabbar_resettabcheckstates(TabBar*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -43,6 +44,7 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 {
 	self->text = strdup(text);
 	self->istoggle = FALSE;
+	self->mode = TABMODE_SINGLESEL;
 	self->checkstate = 0;
 	if (size) {
 		self->size = *size;
@@ -77,7 +79,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	self->tabs = 0;
 	self->selected = 0;
 	self->hover = 0;
-	self->hoverindex = -1;	
+	self->hoverindex = -1;
 	psy_signal_init(&self->signal_change);	
 	psy_signal_connect(&tabbar_base(self)->signal_destroy, self,
 		tabbar_ondestroy);
@@ -204,12 +206,12 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 }
 
 void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
-{
+{	
 	int tabindex;
 	Tab* tab = 0;
-	
+
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);
-	if (tab && tabindex != -1 && (tabindex != self->selected || tab->istoggle))  {
+	if (tab && tabindex != -1 && (tabindex != self->selected || tab->istoggle)) {
 		if (!tab->istoggle) {
 			self->selected = tabindex;
 		} else {
@@ -217,7 +219,8 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 		}
 		psy_ui_component_invalidate(tabbar_base(self));
 		psy_signal_emit(&self->signal_change, self, 1, tabindex);
-	}		
+	}
+
 }
 
 int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
@@ -305,9 +308,15 @@ void tabbar_onmouseleave(TabBar* self)
 	psy_ui_component_invalidate(tabbar_base(self));
 }
 
-void tabbar_select(TabBar* self, int tab)
+void tabbar_select(TabBar* self, int tabindex)
 {
-	self->selected = tab;
+	Tab* tab;
+
+	self->selected = tabindex;
+	tab = tabbar_tab(self, tabindex);
+	if (tab) {
+		tab->checkstate = 1;
+	}
 	psy_ui_component_invalidate(tabbar_base(self));
 	psy_signal_emit(&self->signal_change, self, 1, self->selected);
 }
@@ -350,6 +359,19 @@ void tabbar_append_tabs(TabBar* self, const char* label, ...)
 	va_end(ap);
 }
 
+void tabbar_clear(TabBar* self)
+{
+	psy_List* p;
+
+	for (p = self->tabs; p != NULL; p = p->next) {
+		tab_dispose((Tab*)(p->entry));
+		free(p->entry);
+	}
+	psy_list_free(self->tabs);
+	self->tabs = 0;
+	self->selected = 0;
+}
+
 void tabbar_rename_tabs(TabBar* self, const char* label, ...)
 {
 	const char* currlabel;
@@ -370,25 +392,27 @@ void tabbar_rename_tabs(TabBar* self, const char* label, ...)
 void tabbar_settabmargin(TabBar* self, int tabindex,
 	const psy_ui_Margin* margin)
 {
-	psy_List* tabs;
-	int c = 0;
-	
-	if (!margin) {
-		return;
-	}
+	Tab* tab;
 
-	tabs = self->tabs;
-	while (tabs) {
-		Tab* tab;
-
-		tab = (Tab*)tabs->entry;		
-		if (c == tabindex) {
+	tab = tabbar_tab(self, tabindex);
+	if (tab) {
+		if (margin) {
 			tab->margin = *margin;
-			break;
+		} else {
+			tab->margin = self->defaulttabmargin;
 		}
-		tabs = tabs->next;
-		++c;
 	}		
+}
+
+void tabbar_settabmode(TabBar* self, int tabindex, TabMode mode)
+{
+	Tab* tab;
+
+	tab = tabbar_tab(self, tabindex);
+	if (tab) {
+		tab->mode = mode;
+		tab->istoggle = (mode == TABMODE_MULTISEL);
+	}
 }
 
 void tabbar_onalign(TabBar* self)
@@ -488,12 +512,49 @@ Tab* tabbar_tab(TabBar* self, int tabindex)
 	return rv;
 }
 
-psy_ui_Component* tabbar_base(TabBar* self)
-{
-	return &self->component;
-}
-
 void tabbar_setdefaulttabmargin(TabBar* self, const psy_ui_Margin* margin)
 {
 	self->defaulttabmargin = *margin;
+}
+
+int tabbar_checkstate(TabBar* self, int tabindex)
+{	
+	Tab* tab;
+
+	tab = tabbar_tab(self, tabindex);
+	if (tab) {
+		return tab->checkstate;		
+	}
+	return 0;
+}
+
+int tabbar_numchecked(TabBar* self)
+{
+	int rv;
+	psy_List* tabs;
+	
+	for (rv = 0, tabs = self->tabs; tabs != NULL; tabs = tabs->next) {
+		Tab* tab;
+
+		tab = (Tab*)tabs->entry;
+		if (tab != NULL && tab->checkstate != 0) {
+			++rv;
+		}		
+	}
+	return rv;
+}
+
+void tabbar_resettabcheckstates(TabBar* self)
+{
+	int rv;
+	psy_List* tabs;
+
+	for (rv = 0, tabs = self->tabs; tabs != NULL; tabs = tabs->next) {
+		Tab* tab;
+
+		tab = (Tab*)tabs->entry;
+		if (tab != NULL) {
+			tab->checkstate = 0;
+		}
+	}
 }

@@ -8,7 +8,6 @@
 #include "tabbar.h"
 #include "instrumentsbox.h"
 #include "instnotemapview.h"
-#include "samplesbox.h"
 #include "workspace.h"
 
 #include <uibutton.h>
@@ -54,8 +53,7 @@ typedef struct {
 	psy_ui_Edit fitrowedit;
 	psy_ui_Label fitrowlabel;
 	psy_ui_Component left;
-	psy_ui_Slider globalvolume;
-	SamplesBox samplesbox;
+	psy_ui_Slider globalvolume;	
 	InstrumentNoteMapView notemapview;
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;

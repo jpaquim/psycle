@@ -68,7 +68,7 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	self->scope_spec_samples = 2048;
 	self->scope_spec_rate = 20;	
 	self->workspace = workspace;
-	self->phi = 0.f;
+	self->hold = FALSE;
 	memset(self->db_left, 0, sizeof(self->db_left));
 	memset(self->db_right, 0, sizeof(self->db_right));
 	self->lastwritepos = 0;
@@ -192,7 +192,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	if (FFTMethod == 0)
 #endif
 	{
-		if (writepos != self->lastprocessed) {
+		if (!spectrumanalyzer_stopped(self) && writepos != self->lastprocessed) {
 			FillLinearFromCircularBuffer(self, buffer->samples[0], temp, multleft, self->lastprocessed);
 			fftclass_calculatespectrum(&self->fftSpec, temp, tempout);
 			fftclass_fillbandsfromfft(&self->fftSpec, tempout, self->db_left);
@@ -421,3 +421,18 @@ psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer * self,
 	return buffer;
 } 
 
+void spectrumanalyzer_continue(SpectrumAnalyzer* self)
+{
+	self->hold = FALSE;
+}
+
+void spectrumanalyzer_hold(SpectrumAnalyzer* self)
+{
+	self->hold = TRUE;
+}
+
+
+bool spectrumanalyzer_stopped(SpectrumAnalyzer* self)
+{
+	return self->hold;
+}

@@ -48,7 +48,7 @@ typedef struct {
 	psy_audio_Sequence* sequence;
 	psy_audio_Machines* machines;
 	psy_dsp_beat_t bpm;
-	unsigned int samplerate;
+	uintptr_t samplerate;
 	psy_dsp_beat_t beatspersample;	
 	unsigned int lpb; // global
 	psy_dsp_beat_t lpbspeed; // pattern	

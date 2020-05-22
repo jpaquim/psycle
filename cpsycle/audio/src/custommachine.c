@@ -65,7 +65,7 @@ void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 	self->ismuted = 0;
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
-	self->slot = NOMACHINE_INDEX;
+	self->slot = UINTPTR_MAX;
 	custommachine_init_memory(self, MAX_STREAM_SIZE);
 }
 

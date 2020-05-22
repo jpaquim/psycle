@@ -48,8 +48,8 @@ static MachineCallback machinecallback(CmdPlayer*);
 static void cmdplayer_idle(void);
 /// Machinecallback
 static MachineCallback machinecallback(CmdPlayer*);
-static unsigned int machinecallback_samplerate(CmdPlayer*);
-static unsigned int machinecallback_bpm(CmdPlayer*);
+static uintptr_t machinecallback_samplerate(CmdPlayer*);
+static psy_dsp_beat_t machinecallback_bpm(CmdPlayer*);
 static psy_dsp_beat_t machinecallback_beatspersample(CmdPlayer*);
 static psy_dsp_beat_t machinecallback_currbeatsperline(CmdPlayer*);
 static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
@@ -370,14 +370,14 @@ MachineCallback machinecallback(CmdPlayer* self)
 	return rv;
 }
 
-unsigned int machinecallback_samplerate(CmdPlayer* self)
+uintptr_t machinecallback_samplerate(CmdPlayer* self)
 {
     return self->player.driver->samplerate(self->player.driver);
 }
 
-unsigned int machinecallback_bpm(CmdPlayer* self)
+psy_dsp_beat_t machinecallback_bpm(CmdPlayer* self)
 {
-    return (unsigned int) psy_audio_player_bpm(&self->player);
+    return psy_audio_player_bpm(&self->player);
 }
 
 psy_dsp_beat_t machinecallback_beatspersample(CmdPlayer* self)

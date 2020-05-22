@@ -141,7 +141,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	self->numparams = 0;
 	paramskin_init(self);	
 	psy_table_init(&self->positions);
-	self->tweak = NOMACHINE_INDEX;
+	self->tweak = UINTPTR_MAX;
 	self->sizechanged = 1;
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);		
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
@@ -672,7 +672,7 @@ psy_audio_MachineParam* tweakparam(ParamView* self)
 {
 	psy_audio_MachineParam* rv = NULL;
 
-	if (self->machine && self->tweak != NOMACHINE_INDEX) {
+	if (self->machine && self->tweak != UINTPTR_MAX) {
 		rv = psy_audio_machine_parameter(self->machine, self->tweak);
 	}
 	return rv;
@@ -680,7 +680,7 @@ psy_audio_MachineParam* tweakparam(ParamView* self)
 
 uintptr_t hittest(ParamView* self, int x, int y)
 {
-	uintptr_t rv = NOMACHINE_INDEX;
+	uintptr_t rv = UINTPTR_MAX;
 
 	if (self->machine) {
 		uintptr_t paramnum;
@@ -729,7 +729,7 @@ void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 void onmouseup(ParamView* self, psy_ui_MouseEvent* ev)
 {	
 	psy_ui_component_releasecapture(&self->component);
-	self->tweak = NOMACHINE_INDEX;
+	self->tweak = UINTPTR_MAX;
 }
 
 void onmousewheel(ParamView* self, psy_ui_Component* sender,
@@ -770,7 +770,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 		}
 	}
 	ev->preventdefault = 1;
-	self->tweak = NOMACHINE_INDEX;
+	self->tweak = UINTPTR_MAX;
 }
 
 void ontimer(ParamView* self, psy_ui_Component* sender, int timerid)

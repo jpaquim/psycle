@@ -12,8 +12,8 @@ static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot);
 static void samplesbox_oninstrumentinsert(SamplesBox*, psy_ui_Component* sender, int slot);
 static void samplesbox_oninstrumentremoved(SamplesBox*, psy_ui_Component* sender, int slot);
-static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender, SampleIndex* index);
-static void samplesbox_onsampleremoved(SamplesBox*, psy_ui_Component* sender, SampleIndex* index);
+static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender, psy_audio_SampleIndex*);
+static void samplesbox_onsampleremoved(SamplesBox*, psy_ui_Component* sender, psy_audio_SampleIndex*);
 static void samplesbox_onsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
 	int slot);
 static void samplesbox_onsubsamplelistchanged(SamplesBox*, psy_ui_Component* sender,
@@ -122,20 +122,22 @@ void samplesbox_onsubsamplelistchanged(SamplesBox* self, psy_ui_Component* sende
 void samplesbox_oninstrumentinsert(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
-	samplesbox_buildsamplelist(self);
-	samplesbox_buildsubsamplelist(self, slot);
-	psy_ui_listbox_setcursel(&self->samplelist, slot);
+	if (self->changeinstrumentslot) {
+		samplesbox_buildsamplelist(self);
+		samplesbox_buildsubsamplelist(self, slot);
+		psy_ui_listbox_setcursel(&self->samplelist, slot);
+	}
 }
 
 void samplesbox_onsampleinsert(SamplesBox* self, psy_ui_Component* sender,
-	SampleIndex* index)
+	psy_audio_SampleIndex* index)
 {
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, index->subslot);
 }
 
 void samplesbox_onsampleremoved(SamplesBox* self, psy_ui_Component* sender,
-	SampleIndex* index)
+	psy_audio_SampleIndex* index)
 {
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, index->subslot);
@@ -144,18 +146,22 @@ void samplesbox_onsampleremoved(SamplesBox* self, psy_ui_Component* sender,
 void samplesbox_oninstrumentremoved(SamplesBox* self, psy_ui_Component* sender,
 	int slot)
 {
-	samplesbox_buildsamplelist(self);
-	samplesbox_buildsubsamplelist(self, slot);
-	psy_ui_listbox_setcursel(&self->samplelist, slot);
+	if (self->changeinstrumentslot) {
+		samplesbox_buildsamplelist(self);
+		samplesbox_buildsubsamplelist(self, slot);	
+		psy_ui_listbox_setcursel(&self->samplelist, slot);
+	}
 }
 
 void samplesbox_oninstrumentsslotchanged(SamplesBox* self, psy_audio_Instrument* sender,
 	int slot)
 {
-	psy_ui_listbox_setcursel(&self->samplelist, slot);
-	if ((uintptr_t)slot != samplesbox_selected(self).slot) {
-		samplesbox_buildsubsamplelist(self, slot);
-	}		
+	if (self->changeinstrumentslot) {
+		psy_ui_listbox_setcursel(&self->samplelist, slot);
+		if ((uintptr_t)slot != samplesbox_selected(self).slot) {
+			samplesbox_buildsubsamplelist(self, slot);
+		}
+	}
 }
 
 void samplesbox_setsamples(SamplesBox* self, psy_audio_Samples* samples,
@@ -165,6 +171,8 @@ void samplesbox_setsamples(SamplesBox* self, psy_audio_Samples* samples,
 	self->instruments = instruments;
 	samplesbox_buildsamplelist(self);
 	samplesbox_buildsubsamplelist(self, 0);
+	psy_ui_listbox_setcursel(&self->samplelist, 0);
+	psy_ui_listbox_setcursel(&self->subsamplelist, 0);
 	if (self->instruments) {
 		psy_signal_connect(&instruments->signal_insert, self,
 			samplesbox_oninstrumentinsert);
@@ -181,11 +189,17 @@ void samplesbox_setsamples(SamplesBox* self, psy_audio_Samples* samples,
 	}
 }
 
-SampleIndex samplesbox_selected(SamplesBox* self)
+psy_audio_SampleIndex samplesbox_selected(SamplesBox* self)
 {
-	SampleIndex rv;
+	psy_audio_SampleIndex rv;
 
 	rv.slot = psy_ui_listbox_cursel(&self->samplelist);
 	rv.subslot = psy_ui_listbox_cursel(&self->subsamplelist);
 	return rv;	
+}
+
+void samplesbox_select(SamplesBox* self, psy_audio_SampleIndex index)
+{
+	psy_ui_listbox_setcursel(&self->samplelist, index.slot);
+	psy_ui_listbox_setcursel(&self->subsamplelist, index.subslot);
 }

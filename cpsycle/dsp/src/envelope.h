@@ -58,7 +58,7 @@ void psy_dsp_envelopesettings_addpoint(psy_dsp_EnvelopeSettings*,
 typedef struct psy_dsp_Envelope {
 	int rsvd;
 	psy_dsp_EnvelopeSettings settings;	
-	unsigned int samplerate;
+	uintptr_t samplerate;
 	int stage;
 	int sustainstage;
 	psy_List* currstage;
@@ -73,7 +73,7 @@ typedef struct psy_dsp_Envelope {
 void psy_dsp_envelope_init(psy_dsp_Envelope*);
 void psy_dsp_envelope_dispose(psy_dsp_Envelope*);
 void psy_dsp_envelope_reset(psy_dsp_Envelope*);
-void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, unsigned int samplerate);
+void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, uintptr_t samplerate);
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope*);
 void psy_dsp_envelope_start(psy_dsp_Envelope*);
 void psy_dsp_envelope_release(psy_dsp_Envelope*);

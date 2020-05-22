@@ -183,7 +183,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	int rmsL, rmsR;
 	const float multleft = self->invol * self->mult * 1.0f; // self->srcMachine._lVol;
 	const float multright = self->invol * self->mult * 1.0f; // srcMachine._rVol;
-	unsigned int samplerate = 44100;
+	uintptr_t samplerate = 44100;
 	unsigned int index = 0;
 	int centerx;
 	int right;

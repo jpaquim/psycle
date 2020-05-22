@@ -6,18 +6,18 @@
 #include "samples.h"
 #include <stdlib.h>
 
-static void samplesgroup_init(SamplesGroup*);
-static void samplesgroup_dispose(SamplesGroup*);
-static SamplesGroup* samplesgroup_alloc(void);
-static SamplesGroup* samplesgroup_allocinit(void);
-static void samplesgroup_insert(SamplesGroup*, psy_audio_Sample*,
+static void samplesgroup_init(psy_audio_SamplesGroup*);
+static void samplesgroup_dispose(psy_audio_SamplesGroup*);
+static psy_audio_SamplesGroup* samplesgroup_alloc(void);
+static psy_audio_SamplesGroup* samplesgroup_allocinit(void);
+static void samplesgroup_insert(psy_audio_SamplesGroup*, psy_audio_Sample*,
 	uintptr_t slot);
-static void samplesgroup_remove(SamplesGroup*, uintptr_t slot);
-static psy_audio_Sample* samplesgroup_at(SamplesGroup*, uintptr_t slot);
+static void samplesgroup_remove(psy_audio_SamplesGroup*, uintptr_t slot);
+static psy_audio_Sample* samplesgroup_at(psy_audio_SamplesGroup*, uintptr_t slot);
 
-SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
+psy_audio_SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
 {
-	SampleIndex rv;
+	psy_audio_SampleIndex rv;
 
 	rv.slot = slot;
 	rv.subslot = subslot;
@@ -25,12 +25,12 @@ SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot)
 }
 
 // SamplesGroup
-void samplesgroup_init(SamplesGroup* self)
+void samplesgroup_init(psy_audio_SamplesGroup* self)
 {
 	psy_table_init(&self->container);	
 }
 
-void samplesgroup_dispose(SamplesGroup* self)
+void samplesgroup_dispose(psy_audio_SamplesGroup* self)
 {
 	psy_TableIterator it;
 
@@ -45,14 +45,14 @@ void samplesgroup_dispose(SamplesGroup* self)
 	psy_table_dispose(&self->container);
 }
 
-SamplesGroup* samplesgroup_alloc(void)
+psy_audio_SamplesGroup* samplesgroup_alloc(void)
 {	
-	return (SamplesGroup*) malloc(sizeof(SamplesGroup));
+	return (psy_audio_SamplesGroup*) malloc(sizeof(psy_audio_SamplesGroup));
 }
 
-SamplesGroup* samplesgroup_allocinit(void)
+psy_audio_SamplesGroup* samplesgroup_allocinit(void)
 {	
-	SamplesGroup* rv;
+	psy_audio_SamplesGroup* rv;
 
 	rv = samplesgroup_alloc();
 	if (rv) {
@@ -61,14 +61,14 @@ SamplesGroup* samplesgroup_allocinit(void)
 	return rv;
 }
 
-void samplesgroup_insert(SamplesGroup* self, psy_audio_Sample* sample, uintptr_t slot)
+void samplesgroup_insert(psy_audio_SamplesGroup* self, psy_audio_Sample* sample, uintptr_t slot)
 {
 	if (sample) {		
 		psy_table_insert(&self->container, slot, sample);
 	}
 }
 
-void samplesgroup_remove(SamplesGroup* self, uintptr_t slot)
+void samplesgroup_remove(psy_audio_SamplesGroup* self, uintptr_t slot)
 {
 	psy_audio_Sample* sample;
 	
@@ -80,12 +80,12 @@ void samplesgroup_remove(SamplesGroup* self, uintptr_t slot)
 	}
 }
 
-psy_audio_Sample* samplesgroup_at(SamplesGroup* self, uintptr_t slot)
+psy_audio_Sample* samplesgroup_at(psy_audio_SamplesGroup* self, uintptr_t slot)
 {
 	return psy_table_at(&self->container, slot);
 }
 
-uintptr_t samplesgroup_size(SamplesGroup* self)
+uintptr_t samplesgroup_size(psy_audio_SamplesGroup* self)
 {
 	return psy_table_size(&self->container);
 }
@@ -104,9 +104,9 @@ void psy_audio_samples_dispose(psy_audio_Samples* self)
 
 	for (it = psy_table_begin(&self->groups);
 			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		SamplesGroup* group;
+		psy_audio_SamplesGroup* group;
 		
-		group = (SamplesGroup*) psy_tableiterator_value(&it);
+		group = (psy_audio_SamplesGroup*) psy_tableiterator_value(&it);
 		samplesgroup_dispose(group);
 		free(group);
 	}	
@@ -116,9 +116,9 @@ void psy_audio_samples_dispose(psy_audio_Samples* self)
 }
 
 void psy_audio_samples_insert(psy_audio_Samples* self,
-	psy_audio_Sample* sample, SampleIndex index)
+	psy_audio_Sample* sample, psy_audio_SampleIndex index)
 {
-	SamplesGroup* group;
+	psy_audio_SamplesGroup* group;
 
 	group = psy_table_at(&self->groups, index.slot);
 	if (!group) {
@@ -133,9 +133,10 @@ void psy_audio_samples_insert(psy_audio_Samples* self,
 	}
 }
 
-void psy_audio_samples_remove(psy_audio_Samples* self, SampleIndex index)
+void psy_audio_samples_remove(psy_audio_Samples* self,
+	psy_audio_SampleIndex index)
 {
-	SamplesGroup* group;
+	psy_audio_SamplesGroup* group;
 
 	group = psy_table_at(&self->groups, index.slot);
 	if (group) {
@@ -150,9 +151,9 @@ void psy_audio_samples_remove(psy_audio_Samples* self, SampleIndex index)
 }
 
 psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples* self,
-	SampleIndex index)
+	psy_audio_SampleIndex index)
 {
-	SamplesGroup* group;
+	psy_audio_SamplesGroup* group;
 
 	group = psy_table_at(&self->groups, index.slot);
 	if (group) {
@@ -174,7 +175,7 @@ psy_TableIterator psy_audio_samples_begin(psy_audio_Samples* self)
 psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples* self,
 	uintptr_t slot)
 {
-	SamplesGroup* group;
+	psy_audio_SamplesGroup* group;
 
 	group = psy_table_at(&self->groups, slot);
 	if (group) {

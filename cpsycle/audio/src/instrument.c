@@ -26,8 +26,7 @@ static void instrument_disposeentries(psy_audio_Instrument*);
 
 void instrumententry_init(psy_audio_InstrumentEntry* self)
 {	
-	self->sampleindex = sampleindex_make(NOSAMPLES_INDEX,
-		NOSAMPLES_INDEX);
+	self->sampleindex = sampleindex_make(UINTPTR_MAX, UINTPTR_MAX);
 	parameterrange_init(&self->keyrange, 0, NOTECOMMANDS_RELEASE - 1, 0,
 		NOTECOMMANDS_RELEASE - 1);
 	parameterrange_init(&self->velocityrange, 0, 0xFF, 0, 0xFF);
@@ -70,7 +69,7 @@ int instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
 
 void instrument_init(psy_audio_Instrument* self)
 {	
-	self->index = NOINSTRUMENT_INDEX;
+	self->index = UINTPTR_MAX;
 	self->entries = 0;	
 	self->name = strdup("");
 	self->loop = FALSE;

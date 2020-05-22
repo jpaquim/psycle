@@ -52,10 +52,12 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	self->metrics.keysize = 8;
-	self->metrics.lineheight = 15;
+	self->metrics.lineheight = 15;	
 	psy_ui_label_init(&self->label, &self->component);
 	psy_ui_label_settext(&self->label, "Notemap");
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
+	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
+	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->label.component, &margin);
 	instrumentnotemapbuttons_init(&self->buttons, &self->component);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
@@ -68,6 +70,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	instrumentkeyboardview_init(&self->keyboard, &self->component);
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_BOTTOM);
 	instrumentnotemapview_setmetrics(self, self->metrics);
+	
 }
 
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView* self,
@@ -99,7 +102,7 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	self->dy = 0;
 	self->metrics.keysize = 6;
 	self->metrics.lineheight = 15;
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_resize(&self->component, 0, 40);
 	psy_signal_connect(&self->component.signal_draw, self,
 		instrumentkeyboardview_ondraw);
@@ -118,18 +121,26 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 {		
 	int keymin = 0;
 	int keymax = NOTECOMMANDS_RELEASE;
-	int key;	
-	int keyboardsize;
-	int keysize = self->metrics.keysize;
-	int cp = 0;
+	int key;
+	int numwhitekeys;
+	double keysize;
+	double cp = 0;
 	float top = 0.50;
 	float bottom = 1 - top;
 	psy_ui_TextMetric tm;
 	psy_ui_Size size;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	keyboardsize = (keymax - keymin) * keysize;
+	
 	size = psy_ui_component_size(&self->component);
+	numwhitekeys = 0;
+	for (key = keymin; key < keymax; ++key) {
+		if (!isblack(key)) {
+			++numwhitekeys;
+		}
+	}
+
+	keysize = size.width / (double)numwhitekeys;
 	psy_ui_setcolor(g, 0x00333333);
 
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
@@ -139,10 +150,10 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 		if (!isblack(key)) {
 			psy_ui_Rectangle r;
 
-			psy_ui_setrectangle(&r, cp, 0, keysize, size.height);
+			psy_ui_setrectangle(&r, cp, 0, (int)(keysize + 0.5), size.height);
 			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
 			psy_ui_drawline(g, cp, 0, cp, size.height);			
-			cp += keysize;			
+			cp += keysize;
 			psy_ui_drawline(g, cp, 0, cp, size.height);			
 		}
 	}
@@ -173,7 +184,7 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;
-	self->selected = NOINSTRUMENT_INDEX;
+	self->selected = UINTPTR_MAX;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_doublebuffer(&self->component);
 	self->component.scrollstepy = 45;	
@@ -302,10 +313,10 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 			if (numentry < psy_list_size(instrument_entries(self->instrument))) {
 				self->selected = numentry;
 			} else {
-				self->selected = NOINSTRUMENT_INDEX;
+				self->selected = UINTPTR_MAX;
 			}
 		} else {
-			self->selected = NOINSTRUMENT_INDEX;
+			self->selected = UINTPTR_MAX;
 		}
 		self->dragmode = 1;
 			
@@ -380,7 +391,6 @@ int screentokey(int x, int keysize)
 	}
 	return rv;
 }
-
 
 void instrumentparameterview_init(InstrumentParameterView* self,
 	psy_ui_Component* parent)

@@ -101,7 +101,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
 	psy_audio_Samples*,
 	psy_audio_Instrument*,
 	psy_audio_SamplerChannel* channel,
-	uintptr_t channelnum, unsigned int samplerate, int resamplingmethod,
+	uintptr_t channelnum, uintptr_t samplerate, int resamplingmethod,
 	int maxvolume);
 void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice*);
 psy_audio_SamplerVoice* psy_audio_samplervoice_alloc(void);

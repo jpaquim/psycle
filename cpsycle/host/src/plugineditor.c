@@ -36,7 +36,7 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_component_enablealign(&self->component);
 	self->workspace = workspace;
 	self->basepath = 0;	
-	self->instanceidx = NOMACHINE_INDEX;
+	self->instanceidx = UINTPTR_MAX;
 	psy_ui_component_init(&self->bar, &self->component);
 	psy_ui_component_enablealign(&self->bar);
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_TOP);
@@ -173,7 +173,7 @@ void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender,
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
 				psy_ui_editor_load(&self->editor, path);
 				self->basepath = path;
-				self->instanceidx = NOMACHINE_INDEX;
+				self->instanceidx = UINTPTR_MAX;
 				plugineditor_buildfilelist(self);
 			}
 		}

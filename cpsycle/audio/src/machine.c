@@ -21,8 +21,8 @@
 #include "../../detail/portable.h"
 
 /// Machinecallback
-static unsigned int machinecallback_samplerate(void* self) { return 44100;  }
-static unsigned int machinecallback_bpm(void* self) { return 125; }
+static uintptr_t machinecallback_samplerate(void* self) { return 44100;  }
+static psy_dsp_beat_t machinecallback_bpm(void* self) { return 125.f; }
 static psy_dsp_beat_t machinecallback_beatspertick(void* self) { return 1 / (psy_dsp_beat_t) 24.f; }
 static psy_dsp_beat_t machinecallback_beatspersample(void* self) { return 512; }
 static psy_dsp_beat_t machinecallback_currbeatsperline(void* self) { return 4096; }
@@ -139,7 +139,7 @@ static void savespecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 static void postload(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static unsigned int numparametercols(psy_audio_Machine* self) { return 0; }
-static uintptr_t slot(psy_audio_Machine* self) { return NOMACHINE_INDEX; }
+static uintptr_t slot(psy_audio_Machine* self) { return UINTPTR_MAX; }
 static void setslot(psy_audio_Machine* self, uintptr_t slot) { }
 static int haseditor(psy_audio_Machine* self) { return 0; }
 static void seteditorhandle(psy_audio_Machine* self, void* handle) { }
@@ -187,8 +187,8 @@ static int currbank(psy_audio_Machine* self)
 	return 0;
 }
 /// machinecallback
-static unsigned int samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
-static unsigned int bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
+static uintptr_t samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
+static psy_dsp_beat_t bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
 static psy_dsp_beat_t beatspertick(psy_audio_Machine* self) { return self->callback.beatspertick(self->callback.context); }
 static psy_dsp_beat_t beatspersample(psy_audio_Machine* self) { return self->callback.beatspersample(self->callback.context); }
 static psy_dsp_beat_t currbeatsperline(psy_audio_Machine* self) { return self->callback.currbeatsperline(self->callback.context); }

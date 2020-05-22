@@ -43,7 +43,7 @@ void machines_init(psy_audio_Machines* self)
 	self->currsamplebuffer = 0;
 	self->slot = 0;
 	self->tweakparam = 0;
-	self->soloed = NOMACHINE_INDEX;
+	self->soloed = UINTPTR_MAX;
 	self->buffers = 0;
 	self->filemode = 0;
 	self->master = 0;
@@ -290,7 +290,7 @@ void machines_sortpath(psy_audio_Machines* self)
 				slot = (uintptr_t)q->entry;
 				psy_table_insert(&worked, slot, 0);				
 			}
-			psy_list_append(&sorted, (void*)(uintptr_t)NOMACHINE_INDEX);
+			psy_list_append(&sorted, (void*)(uintptr_t)UINTPTR_MAX);
 		}
 		psy_table_dispose(&worked);
 		psy_list_free(self->path);
@@ -532,7 +532,7 @@ void psy_audio_machines_solo(psy_audio_Machines* self, uintptr_t slot)
 	if (self->soloed == slot) {
 		psy_TableIterator it;
 
-		self->soloed = NOMACHINE_INDEX;
+		self->soloed = UINTPTR_MAX;
 		for (it = machines_begin(self); !psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 			psy_audio_Machine* machine;

@@ -58,8 +58,8 @@ static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFil
 	uintptr_t slot);
 static void machineproxy_postload(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
-static unsigned int machineproxy_samplerate(psy_audio_MachineProxy*);
-static unsigned int machineproxy_bpm(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_samplerate(psy_audio_MachineProxy*);
+static psy_dsp_beat_t machineproxy_bpm(psy_audio_MachineProxy*);
 static psy_dsp_beat_t machineproxy_beatspertick(psy_audio_MachineProxy*);
 static psy_dsp_beat_t machineproxy_beatspersample(psy_audio_MachineProxy*);
 static psy_dsp_beat_t machineproxy_currbeatsperline(psy_audio_MachineProxy*);
@@ -788,9 +788,9 @@ void machineproxy_postload(psy_audio_MachineProxy* self,
 	}
 }
 
-unsigned int machineproxy_samplerate(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_samplerate(psy_audio_MachineProxy* self)
 {
-	unsigned int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -808,9 +808,9 @@ unsigned int machineproxy_samplerate(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-unsigned int machineproxy_bpm(psy_audio_MachineProxy* self)
+psy_dsp_beat_t machineproxy_bpm(psy_audio_MachineProxy* self)
 {
-	unsigned int rv = 0;
+	psy_dsp_beat_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
