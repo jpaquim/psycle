@@ -10,18 +10,29 @@
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Sample* sample;
-	int hasselection;
+	bool hasselection;
 	uintptr_t selectionstart;
 	uintptr_t selectionend;
 	float zoomleft;
 	float zoomright;
-	float offsetstep;	
+	double offsetstep;	
 	int dragmode;
 	int dragoffset;
+	psy_Signal selectionchanged;
+	char* nowavetext;
+	bool preventdrawonselect;
 } WaveBox;
 
 void wavebox_init(WaveBox*, psy_ui_Component* parent);
+void wavebox_setnowavetext(WaveBox*, const char* text);
 void wavebox_setsample(WaveBox*, psy_audio_Sample*);
-void wavebox_setzoom(WaveBox*, float left, float right);
+void wavebox_setzoom(WaveBox*, psy_dsp_beat_t left, psy_dsp_beat_t right);
+void wavebox_setselection(WaveBox* self, uintptr_t selectionstart,
+	uintptr_t selectionend);
+void wavebox_clearselection(WaveBox* self);
+INLINE bool wavebox_hasselection(WaveBox* self)
+{
+	return self->hasselection != FALSE;
+}
 
 #endif

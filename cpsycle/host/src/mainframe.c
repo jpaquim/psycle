@@ -353,6 +353,9 @@ void mainframe_initstatusbar(MainFrame* self)
 	patternviewbar_init(&self->patternbar, &self->viewstatusbars.component,
 		&self->workspace);
 	psy_ui_component_setalign(&self->patternbar.component, psy_ui_ALIGN_LEFT);
+	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar, &self->viewstatusbars.component,
+		&self->workspace);	
+	psy_ui_component_setalign(&self->samplesview.sampleeditor.sampleeditortbar.component, psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_setpageindex(&self->viewstatusbars, 0);
 //	psy_ui_notebook_connectcontroller(&self->viewstatusbars,
 	//	&self->tabbar.signal_change);
@@ -821,7 +824,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 				self->machineview.wireview.randominsert = 0;
 				self->machineview.wireview.addeffect = 1;
 			}
-		}
+		} 
 	}
 }
 
@@ -829,8 +832,12 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
 	psy_ui_Component* component;
-	workspace_onviewchanged(&self->workspace, tabindex);		
-	psy_ui_notebook_setpageindex(&self->viewstatusbars, tabindex);
+	workspace_onviewchanged(&self->workspace, tabindex);			
+	if (tabindex == TABPAGE_SAMPLESVIEW) {	
+		psy_ui_notebook_setpageindex(&self->viewstatusbars, 2);
+	} else {
+		psy_ui_notebook_setpageindex(&self->viewstatusbars, tabindex);
+	}
 	psy_ui_notebook_setpageindex(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {

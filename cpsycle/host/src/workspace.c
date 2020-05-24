@@ -1208,6 +1208,8 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Show As Window", "Mostrar como una ventana");
 	psy_properties_write_string(self->lang, "Gear Rack", "Estante del Equipo");	
 	psy_properties_write_string(self->lang, "Tracks", "Pistas");
+	psy_properties_write_string(self->lang, "Process", "Procesar");
+	psy_properties_write_string(self->lang, "No wave loaded", "Una onda no se ha cargado");
 }
 
 const char* workspace_translate(Workspace* self, const char* key)
