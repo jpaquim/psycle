@@ -321,7 +321,7 @@ void erase_all_nans_infinities_and_denormals(float* sample) {
 //same method, for a single buffer (allowing to calculate max for each buffer). samples need to be aligned by 16 in optimized paths.
 float dsp_maxvol(const float* pSamples, uintptr_t numSamples)
 {
-	if (is_aligned(pSamples, 16) && (numSamples % 4 == 0)) {
+	if (!is_aligned(pSamples, 16) || (numSamples % 4 != 0)) {
 		return noopt.maxvol(pSamples, numSamples);
 	} else {
 #if defined DIVERSALIS__CPU__X86__SSE && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS

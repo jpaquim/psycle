@@ -5,6 +5,10 @@
 
 #include "uialigner.h"
 
+static uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner*);
+static void psy_ui_align_alignclients(psy_ui_Aligner*, psy_List* children,
+	psy_ui_Point cp_topleft, psy_ui_Point cp_bottomright);
+
 void psy_ui_aligner_init(psy_ui_Aligner* self, psy_ui_Component* component)
 {
 	self->component = component;
@@ -21,7 +25,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 	psy_List* q;
 	psy_List* wrap = 0;	
 	psy_ui_Component* client = 0;
-		
+	
 	size = psy_ui_component_size(self->component);
 	tm = psy_ui_component_textmetric(self->component);
 	cp_bottomright.x = size.width;
@@ -130,17 +134,60 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			}				
 		}
 	}
-	if (client) {		
-		psy_ui_component_setposition(client,
-			cp_topleft.x + psy_ui_value_px(&client->margin.left, &tm),
-			cp_topleft.y + psy_ui_value_px(&client->margin.top, &tm),
-			cp_bottomright.x - cp_topleft.x -
-				psy_ui_margin_width_px(&client->margin, &tm),
-			cp_bottomright.y - cp_topleft.y -
-				psy_ui_margin_height_px(&client->margin, &tm));
-	}
+	psy_ui_align_alignclients(self, q, cp_topleft, cp_bottomright);
 	psy_list_free(q);
 	psy_list_free(wrap);	
+}
+
+void psy_ui_align_alignclients(psy_ui_Aligner* self, psy_List* children,
+	psy_ui_Point cp_topleft, psy_ui_Point cp_bottomright)
+{
+	psy_List* p;
+	uintptr_t curr;
+	double height;
+	psy_ui_TextMetric tm;	
+	uintptr_t numclients;
+
+	numclients = psy_ui_aligner_numclients(self);
+	if (numclients != 0) {
+		tm = psy_ui_component_textmetric(self->component);
+		height = (cp_bottomright.y - cp_topleft.y) / numclients;
+		for (curr = 0, p = children; p != NULL; p = p->next) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)p->entry;
+			if (component->align == psy_ui_ALIGN_CLIENT) {
+				cp_topleft.y += psy_ui_value_px(&component->margin.top, &tm);
+				psy_ui_component_setposition(component,
+					cp_topleft.x + psy_ui_value_px(&component->margin.left, &tm),
+					cp_topleft.y,
+					cp_bottomright.x - cp_topleft.x -
+					psy_ui_margin_width_px(&component->margin, &tm),
+					(int)height);
+				cp_topleft.y += psy_ui_value_px(&component->margin.bottom, &tm);
+				cp_topleft.y += (int)height;
+				++curr;
+			}
+		}
+	}
+}
+
+uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner* self)
+{
+	uintptr_t rv = 0;
+	psy_List* p;
+		
+	for (p = psy_ui_component_children(self->component, 0); p != NULL;
+		p = p->next) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		if (component->align == psy_ui_ALIGN_CLIENT) {
+			++rv;
+		}
+	}
+	psy_list_free(p);
+	return rv;
 }
 
 void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,

@@ -46,6 +46,7 @@ static void vtable_init(PatternViewStatus* self)
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
 			patternviewstatus_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) patternviewstatus_ondraw;
+		vtable_initialized = 1;
 	}
 }
 

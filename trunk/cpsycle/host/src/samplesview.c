@@ -567,7 +567,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->numsampleslabel, 10);
 	psy_ui_label_init(&self->channellabel, &self->component);
 	psy_ui_label_settext(&self->channellabel, "");
-	psy_ui_label_setcharnumber(&self->channellabel, 6);						
+	psy_ui_label_setcharnumber(&self->channellabel, 7);	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, 0),
 		psy_ui_ALIGN_LEFT,

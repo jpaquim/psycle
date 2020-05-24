@@ -49,7 +49,7 @@ static void OnNNARelease(InstrumentGeneralView*);
 static void OnNNAFadeOut(InstrumentGeneralView*);
 static void OnNNANone(InstrumentGeneralView*);
 static void NNAHighlight(InstrumentGeneralView*, psy_ui_Button* highlight);
-static void OnGeneralViewDescribe(InstrumentGeneralView*, psy_ui_Slider*, char* txt);
+static void OnGeneralViewDescribe(InstrumentGeneralView*, psy_ui_Slider*, char* text);
 static void OnGeneralViewTweak(InstrumentGeneralView*, psy_ui_Slider*, float value);
 static void OnGeneralViewValue(InstrumentGeneralView*, psy_ui_Slider*, float* value);
 // InstrumentVolumeView
@@ -535,17 +535,17 @@ void OnGeneralViewValue(InstrumentGeneralView* self, psy_ui_Slider* slider,
 }
 
 void OnGeneralViewDescribe(InstrumentGeneralView* self, psy_ui_Slider* slider,
-	char* txt)
+	char* text)
 {			
 	if (slider == &self->globalvolume) {		
 		if (!self->instrument) {
-			psy_snprintf(txt, 10, "0.0dB");
+			psy_snprintf(text, 10, "0.0dB");
 		} else
 		if (self->instrument->globalvolume == 0) {
-			psy_snprintf(txt, 10, "-inf. dB");
+			psy_snprintf(text, 10, "-inf. dB");
 		} else {
 			float db = (float)(20 * log10(self->instrument->globalvolume));
-			psy_snprintf(txt, 10, "%.1f dB", db);
+			psy_snprintf(text, 10, "%.1f dB", db);
 		}
 	}
 }

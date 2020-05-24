@@ -17,6 +17,7 @@ typedef struct {
 	int tweakbase;
 	char label[128];
 	char valuedescription[128];
+	float step;
 	int labelsize;
 	int slidersize;
 	int valuelabelsize;
@@ -49,7 +50,6 @@ void psy_ui_slider_showlabel(psy_ui_Slider*);
 void psy_ui_slider_hidelabel(psy_ui_Slider*);
 void psy_ui_slider_showvaluelabel(psy_ui_Slider*);
 void psy_ui_slider_hidevaluelabel(psy_ui_Slider*);
-void psy_ui_slider_showhorizontal(psy_ui_Slider*);
 psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider*);
 void psy_ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,
 	ui_slider_fptweak, ui_slider_fpvalue);
