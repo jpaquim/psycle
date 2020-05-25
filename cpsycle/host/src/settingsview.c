@@ -839,7 +839,8 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesview_ondestroy);
 	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
 	propertiesrenderer_init(&self->renderer, &self->component, properties);
 	psy_ui_component_setalign(&self->renderer.client, psy_ui_ALIGN_CLIENT);
@@ -848,7 +849,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	tabbar_init(&self->tabbar, &self->component);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
-	psy_ui_margin_init(&tabmargin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(4),
 		psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2));

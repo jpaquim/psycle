@@ -128,10 +128,10 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		patternproperties_onsongchanged);
 	patternproperties_connectsongsignals(self);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2),
 		psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 }

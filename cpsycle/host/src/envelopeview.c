@@ -86,7 +86,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->component.vtable = &envelopebox_vtable;
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
-	psy_ui_margin_init(&self->spacing, 
+	psy_ui_margin_init_all(&self->spacing,
 		psy_ui_value_makepx(30),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(4),

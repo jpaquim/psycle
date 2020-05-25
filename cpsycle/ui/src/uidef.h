@@ -88,7 +88,8 @@ typedef struct {
 	psy_ui_Value left;
 } psy_ui_Margin;
 
-void psy_ui_margin_init(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
+void psy_ui_margin_init(psy_ui_Margin*);
+void psy_ui_margin_init_all(psy_ui_Margin*, psy_ui_Value top, psy_ui_Value right,
 	psy_ui_Value bottom, psy_ui_Value left);
 void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
@@ -106,7 +107,6 @@ typedef enum {
 	psy_ui_JUSTIFY_NONE,	
 	psy_ui_JUSTIFY_EXPAND	
 } psy_ui_JustifyType;
-
 
 typedef enum {
 	psy_ui_NOEXPAND = 1,	
@@ -288,4 +288,3 @@ typedef uint32_t psy_ui_Color;
 #endif
 
 #endif /* psy_ui_DEF_H */
-

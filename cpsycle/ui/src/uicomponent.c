@@ -448,20 +448,16 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->alignchildren = 0;
 	self->alignexpandmode = psy_ui_NOEXPAND;
 	psy_ui_style_init(&self->style);
-	psy_ui_margin_init(&self->margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_ui_margin_init(&self->spacing, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init(&self->margin);
+	psy_ui_margin_init(&self->spacing);
 	self->debugflag = 0;	
 	self->visible = 1;
-	self->doublebuffered = 0;
+	self->doublebuffered = FALSE;
 	self->wheelscroll = 0;
 	self->accumwheeldelta = 0;
-	self->handlevscroll = 1;
-	self->handlehscroll = 1;
-	self->backgroundmode = BACKGROUND_SET;
+	self->handlevscroll = TRUE;
+	self->handlehscroll = TRUE;
+	self->backgroundmode = psy_ui_BACKGROUND_SET;
 	self->backgroundcolor = psy_ui_defaults_backgroundcolor(&app.defaults);	
 	self->mousetracking = 0;
 	self->color = psy_ui_defaults_color(&app.defaults);
@@ -721,7 +717,8 @@ void enableinput(psy_ui_Component* self, int enable, int recursive)
 	}
 }
 
-void psy_ui_component_setbackgroundmode(psy_ui_Component* self, BackgroundMode mode)
+void psy_ui_component_setbackgroundmode(psy_ui_Component* self,
+	psy_ui_BackgroundMode mode)
 {
 	self->backgroundmode = mode;	
 }

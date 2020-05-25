@@ -75,11 +75,11 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 		newmachinebar_onrescan);
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
 		newmachinebar_onselectdirectories);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));
 }
@@ -123,7 +123,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->compatlabel,
 		"Song loading compatibility");	
 	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2), psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setmargin(
@@ -428,7 +428,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	newmachine_vtable_init(self);
 	self->component.vtable = &newmachine_vtable;
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);	
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);	

@@ -36,11 +36,11 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->selendedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selendedit, 10);
 	sampleeditorbar_clearselection(self);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 }
@@ -91,12 +91,12 @@ void sampleeditoroperations_initalign(SampleEditorOperations* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.5));
 	psy_ui_component_enablealign(&self->component);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 
@@ -214,7 +214,7 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->process, &self->component);	
 	psy_ui_component_setalign(&self->process.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(1.5),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
@@ -311,6 +311,7 @@ static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onstop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onprocess(SampleEditor*, psy_ui_Component* sender);
+static void sampleeditor_oncrop(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
 	uintptr_t slot, psy_audio_BufferContext*);
 static void sampleeditor_onselectionchanged(SampleEditor*, WaveBox*);
@@ -318,13 +319,18 @@ static void sampleeditor_onscrollzoom_customdraw(SampleEditor*,
 	ScrollZoom* sender, psy_ui_Graphics*);
 void sampleeditor_onlanguagechanged(SampleEditor*,
 	Workspace* workspace);
-void sampleeditor_amplify(SampleEditor*, uintptr_t framestart, uintptr_t frameend,
+void sampleeditor_amplify(SampleEditor*, uintptr_t channel,
+	uintptr_t framestart, uintptr_t frameend,
 	psy_dsp_amp_t gain);
-void sampleeditor_fade(SampleEditor*, uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t startvol,
+void sampleeditor_fade(SampleEditor*, uintptr_t channel,
+	uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t startvol,
 	psy_dsp_amp_t endvol);
-void sampleeditor_removeDC(SampleEditor*, uintptr_t framestart, uintptr_t frameend);
-void sampleeditor_normalize(SampleEditor*, uintptr_t framestart, uintptr_t frameend);
-void sampleeditor_reverse(SampleEditor*, uintptr_t framestart, uintptr_t frameend);
+void sampleeditor_removeDC(SampleEditor*, uintptr_t channel,
+	uintptr_t framestart, uintptr_t frameend);
+void sampleeditor_normalize(SampleEditor*, uintptr_t channel,
+	uintptr_t framestart, uintptr_t frameend);
+void sampleeditor_reverse(SampleEditor*, uintptr_t channel,
+	uintptr_t framestart, uintptr_t frameend);
 
 enum {
 	SAMPLEEDITOR_DRAG_NONE,
@@ -354,14 +360,14 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 
@@ -494,13 +500,15 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_ui_component_enablealign(&self->component);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);
 	psy_ui_component_setalign(&self->processview.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5));
 	psy_ui_component_setmargin(&self->processview.component, &margin);
 	psy_signal_connect(&self->processview.process.signal_clicked, self,
 		sampleeditor_onprocess);
+	psy_signal_connect(&self->processview.copypaste.crop.signal_clicked, self,
+		sampleeditor_oncrop);
 	sampleeditorplaybar_init(&self->playbar, &self->component, workspace);
 	psy_signal_connect(&self->playbar.play.signal_clicked, self,
 		sampleeditor_onplay);
@@ -509,7 +517,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);	
 	sampleeditorheader_init(&self->header, &self->component, self);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.2),
 		psy_ui_value_makepx(0));
@@ -517,13 +525,14 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_table_init(&self->waveboxes);
 	psy_ui_component_init(&self->samplebox, &self->component);
 	psy_ui_component_enablealign(&self->samplebox);
-	psy_ui_component_setbackgroundmode(&self->samplebox, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->samplebox,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_setalign(&self->samplebox, psy_ui_ALIGN_CLIENT);	
 	scrollzoom_init(&self->zoom, &self->component);
 	psy_signal_connect(&self->zoom.signal_customdraw, self,
 		sampleeditor_onscrollzoom_customdraw);
 	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);	
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.2),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.2),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
@@ -536,6 +545,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	sampleeditor_connectmachinessignals(self, workspace);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		sampleeditor_onlanguagechanged);
+	psy_signal_init(&self->signal_samplemodified);
 }
 
 void sampleeditor_initsampler(SampleEditor* self)
@@ -562,6 +572,7 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 	psy_audio_buffer_dispose(&self->samplerbuffer);
 	sampleeditor_clearwaveboxes(self);
 	psy_table_dispose(&self->waveboxes);
+	psy_signal_dispose(&self->signal_samplemodified);
 }
 
 void sampleeditor_clearwaveboxes(SampleEditor* self)
@@ -582,30 +593,33 @@ void sampleeditor_clearwaveboxes(SampleEditor* self)
 
 void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 {
-	self->sample = sample;
-	sampleeditor_buildwaveboxes(self, sample);
-	sampleeditor_computemetrics(self, &self->metrics);
-	psy_ui_component_align(&self->samplebox);
-	psy_ui_component_invalidate(&self->component);
+	if (self->sample != NULL || sample != NULL) {
+		self->sample = sample;
+		sampleeditor_buildwaveboxes(self, sample);
+		sampleeditor_computemetrics(self, &self->metrics);
+		psy_ui_component_align(&self->samplebox);
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void sampleeditor_buildwaveboxes(SampleEditor* self, psy_audio_Sample* sample)
 {
 	sampleeditor_clearwaveboxes(self);
 	if (self->sample) {
-		uintptr_t c;
+		uintptr_t channel;
 
-		for (c = 0; c < psy_audio_buffer_numchannels(&self->sample->channels); ++c) {
+		for (channel = 0; channel <	psy_audio_buffer_numchannels(
+				&self->sample->channels); ++channel) {
 			WaveBox* wavebox;
 
 			wavebox = (WaveBox*)malloc(sizeof(WaveBox));
 			wavebox_init(wavebox, &self->samplebox);
 			wavebox->preventdrawonselect = TRUE;
-			wavebox_setsample(wavebox, sample);
+			wavebox_setsample(wavebox, sample, channel);
 			psy_ui_component_setalign(&wavebox->component, psy_ui_ALIGN_CLIENT);
 			psy_signal_connect(&wavebox->selectionchanged, self,
 				sampleeditor_onselectionchanged);
-			psy_table_insert(&self->waveboxes, c, (void*)wavebox);
+			psy_table_insert(&self->waveboxes, channel, (void*)wavebox);
 		}
 	}
 }
@@ -726,41 +740,43 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 	psy_TableIterator it;
 
 	for (it = psy_table_begin(&self->waveboxes);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
 		WaveBox* wavebox;
 
 		wavebox = (WaveBox*)psy_tableiterator_value(&it);
 		if (wavebox_hasselection(wavebox)) {
 			int selected;
+			uintptr_t channel;
 
 			selected = psy_ui_listbox_cursel(&self->processview.processors);
+			channel = psy_tableiterator_key(&it);
 			switch (selected) {
 			case 0: // Amplify
 			{
 				double ratio;
 
 				ratio = pow(10.0, (double)((double)(self->processview.amplify.gainvalue) - 2 / (double)3) / (1 / (double)7));
-				sampleeditor_amplify(self, wavebox->selectionstart, wavebox->selectionend,
+				sampleeditor_amplify(self, channel, wavebox->selectionstart, wavebox->selectionend,
 					(psy_dsp_amp_t)ratio);				
 			}
 			break;
 			case 1: // FadeIn
-				sampleeditor_fade(self, wavebox->selectionstart, wavebox->selectionend,
+				sampleeditor_fade(self, channel, wavebox->selectionstart, wavebox->selectionend,
 					0.f, 1.f);
 				break;
 			case 2: // FadeOut
-				sampleeditor_fade(self, wavebox->selectionstart, wavebox->selectionend,
+				sampleeditor_fade(self, channel, wavebox->selectionstart, wavebox->selectionend,
 					1.f, 0.f);
 				break;
 			case 4:
-				sampleeditor_normalize(self, wavebox->selectionstart, wavebox->selectionend);
+				sampleeditor_normalize(self, channel, wavebox->selectionstart, wavebox->selectionend);
 				break;
 			case 5:
-				sampleeditor_removeDC(self, wavebox->selectionstart, wavebox->selectionend);				
+				sampleeditor_removeDC(self, channel, wavebox->selectionstart, wavebox->selectionend);
 				break;
 			case 6:
-				sampleeditor_reverse(self, wavebox->selectionstart, wavebox->selectionend);
+				sampleeditor_reverse(self, channel, wavebox->selectionstart, wavebox->selectionend);
 				break;
 			default:
 				break;
@@ -772,12 +788,52 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 	psy_ui_component_invalidate(&self->samplebox);
 }
 
-void sampleeditor_amplify(SampleEditor* self, uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t gain)
-{	
-	dsp.mul(self->sample->channels.samples[0] + framestart, frameend - framestart + 1, gain);
+void sampleeditor_oncrop(SampleEditor* self, psy_ui_Component* sender)
+{
+	if (self->sample && self->sample->numframes > 0) {
+		psy_TableIterator it;
+		uintptr_t framestart;
+		uintptr_t frameend;
+
+		framestart = self->sample->numframes;
+		frameend = 0;
+		for (it = psy_table_begin(&self->waveboxes);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			WaveBox* wavebox;
+
+			wavebox = (WaveBox*)psy_tableiterator_value(&it);
+			if (wavebox->selectionstart < framestart) {
+				framestart = wavebox->selectionstart;
+			}
+			if (wavebox->selectionend > frameend) {
+				frameend = wavebox->selectionend;
+			}
+		}
+		if (framestart < self->sample->numframes) {			
+			self->sample->numframes = frameend - framestart + 1;
+			for (it = psy_table_begin(&self->waveboxes);
+					!psy_tableiterator_equal(&it, psy_table_end());
+					psy_tableiterator_inc(&it)) {
+				WaveBox* wavebox;
+
+				wavebox = (WaveBox*)psy_tableiterator_value(&it);
+				self->sample->channels.samples[psy_tableiterator_key(&it)] = 
+					dsp.crop(self->sample->channels.samples[psy_tableiterator_key(&it)]
+						, framestart, self->sample->numframes);
+				wavebox_clearselection(wavebox);
+			}			
+		}
+	}
+	psy_signal_emit(&self->signal_samplemodified, self, 0);
 }
 
-void sampleeditor_fade(SampleEditor* self, uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t startvol,
+void sampleeditor_amplify(SampleEditor* self, uintptr_t channel, uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t gain)
+{	
+	dsp.mul(self->sample->channels.samples[channel] + framestart, frameend - framestart + 1, gain);
+}
+
+void sampleeditor_fade(SampleEditor* self, uintptr_t channel, uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t startvol,
 	psy_dsp_amp_t endvol)
 {
 	uintptr_t frame;
@@ -786,11 +842,11 @@ void sampleeditor_fade(SampleEditor* self, uintptr_t framestart, uintptr_t frame
 	
 	slope = (endvol - startvol) / (double)(frameend - framestart + 1);
 	for (frame = framestart, j = 0; frame <= frameend; ++frame, ++j) {
-		self->sample->channels.samples[0][frame] *= (psy_dsp_amp_t)(startvol + j * slope);
+		self->sample->channels.samples[channel][frame] *= (psy_dsp_amp_t)(startvol + j * slope);
 	}
 }
 
-void sampleeditor_reverse(SampleEditor* self, uintptr_t framestart, uintptr_t frameend)
+void sampleeditor_reverse(SampleEditor* self, uintptr_t channel, uintptr_t framestart, uintptr_t frameend)
 {
 	uintptr_t j;
 	uintptr_t halved;
@@ -800,31 +856,31 @@ void sampleeditor_reverse(SampleEditor* self, uintptr_t framestart, uintptr_t fr
 	for (j = 0; j < halved; ++j) {
 		psy_dsp_amp_t temp;
 
-		temp = self->sample->channels.samples[0][framestart + j];
-		self->sample->channels.samples[0][framestart + j] = self->sample->channels.samples[0][frameend - j];
-		self->sample->channels.samples[0][frameend - j] = temp;
+		temp = self->sample->channels.samples[channel][framestart + j];
+		self->sample->channels.samples[channel][framestart + j] = self->sample->channels.samples[channel][frameend - j];
+		self->sample->channels.samples[channel][frameend - j] = temp;
 	}
 }
 
 // (Fideloop's)
-void sampleeditor_normalize(SampleEditor* self, uintptr_t framestart, uintptr_t frameend) 
+void sampleeditor_normalize(SampleEditor* self, uintptr_t channel, uintptr_t framestart, uintptr_t frameend)
 {
 	psy_dsp_amp_t maxL = 0;
 	double ratio = 0;
 	uintptr_t numframes;
 
 	numframes = frameend - framestart + 1;	
-	maxL = dsp.maxvol(self->sample->channels.samples[0] + framestart, numframes);
+	maxL = dsp.maxvol(self->sample->channels.samples[channel] + framestart, numframes);
 	if (maxL > 0.0) {
 		ratio = (double)32767 / maxL;
 	}
 	if (ratio != 1) {
-		dsp.mul(self->sample->channels.samples[0] + framestart, numframes,
+		dsp.mul(self->sample->channels.samples[channel] + framestart, numframes,
 			(psy_dsp_amp_t)ratio);	
 	}
 }
 
-void sampleeditor_removeDC(SampleEditor* self, uintptr_t framestart, uintptr_t frameend)
+void sampleeditor_removeDC(SampleEditor* self, uintptr_t channel, uintptr_t framestart, uintptr_t frameend)
 {
 	uintptr_t c;
 	uintptr_t numframes;
@@ -834,7 +890,7 @@ void sampleeditor_removeDC(SampleEditor* self, uintptr_t framestart, uintptr_t f
 	psy_dsp_amp_t* wdRight;
 	psy_dsp_amp_t buf;
 
-	wdLeft = self->sample->channels.samples[0];
+	wdLeft = self->sample->channels.samples[channel];
 	wdRight = NULL;
 
 	numframes = frameend - framestart + 1;

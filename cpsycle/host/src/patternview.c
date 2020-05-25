@@ -170,11 +170,11 @@ void patternviewbar_initalign(PatternViewBar* self)
 {		
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));			
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));		
 }
@@ -184,18 +184,22 @@ void patternview_init(PatternView* self,
 		psy_ui_Component* tabbarparent,		
 		Workspace* workspace)
 {
+	psy_ui_Margin margin;
+
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_focus, self, patternview_onfocus);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
-		BACKGROUND_NONE);
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_notebook_init(&self->editnotebook, psy_ui_notebook_base(&self->notebook));
-	psy_ui_component_setbackgroundmode(&self->editnotebook.component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->editnotebook.component,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_notebook_setpageindex(&self->editnotebook, 0);
 	trackerview_init(&self->trackerview, &self->editnotebook.component, workspace);	
 	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
@@ -219,14 +223,11 @@ void patternview_init(PatternView* self,
 	tabbar_select(&self->tabbar, 0);
 	psy_ui_button_init(&self->contextbutton, &self->sectionbar);
 	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
-	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton), psy_ui_ALIGN_RIGHT);
-	{
-		psy_ui_Margin margin;
-
-		psy_ui_margin_init(&margin, psy_ui_value_makeeh(-1), psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0), psy_ui_value_makeew(1));
-		psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);
-	}
+	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton), psy_ui_ALIGN_RIGHT);	
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(-1.0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1));
+	psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);	
 	psy_signal_connect(&self->contextbutton.signal_clicked,
 		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,

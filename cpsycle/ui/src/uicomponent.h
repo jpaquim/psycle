@@ -58,10 +58,10 @@ typedef enum {
 } psy_ui_CursorStyle;
 
 typedef enum {
-	BACKGROUND_NONE,
-	BACKGROUND_SET,
-	BACKGROUND_PARENT,
-} BackgroundMode;
+	psy_ui_BACKGROUND_NONE,
+	psy_ui_BACKGROUND_SET,
+	psy_ui_BACKGROUND_PARENT,
+} psy_ui_BackgroundMode;
 
 struct psy_ui_Component;
 
@@ -195,22 +195,22 @@ typedef struct psy_ui_Component {
 	int alignchildren;
 	psy_ui_Margin margin;
 	psy_ui_Margin spacing;
-	int doublebuffered;	
-	int preventdefault;
-	int preventpreferredsize;
+	bool doublebuffered;	
+	bool preventdefault;
+	bool preventpreferredsize;
 	int scrollstepx;
 	int scrollstepy;
 	int debugflag;
 	unsigned int backgroundcolor;
 	unsigned int color;
-	BackgroundMode backgroundmode;
-	int visible;	
+	psy_ui_BackgroundMode backgroundmode;
+	bool visible;	
 	int accumwheeldelta;
 	int wheelscroll;
-	int handlevscroll;
-	int handlehscroll;
+	bool handlevscroll;
+	bool handlehscroll;
 	int cursor;	
-	int mousetracking;
+	bool mousetracking;
 	psy_ui_Style style;
 } psy_ui_Component;
 
@@ -275,7 +275,7 @@ void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
 void psy_ui_component_preventalign(psy_ui_Component*);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
-void psy_ui_component_setbackgroundmode(psy_ui_Component*, BackgroundMode);
+void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);

@@ -20,6 +20,7 @@ typedef struct {
 	void (*movmul)(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num,
 		psy_dsp_amp_t mul);
 	void (*clear)(psy_dsp_amp_t *dst, uintptr_t num);
+	psy_dsp_amp_t* (*crop)(psy_dsp_amp_t* src, uintptr_t offset, uintptr_t num);
 	void (*interleave)(psy_dsp_amp_t* dst, psy_dsp_amp_t* left,
 		psy_dsp_amp_t* right, uintptr_t num);
 	void (*erase_all_nans_infinities_and_denormals)(psy_dsp_amp_t* dst,
@@ -29,7 +30,7 @@ typedef struct {
 		psy_dsp_big_amp_t* accumright, 
 		const psy_dsp_amp_t* __restrict pSamplesL,
 		const psy_dsp_amp_t* __restrict pSamplesR,
-		int count);
+		int count);	
 } psy_dsp_Operations;
 
 extern psy_dsp_Operations dsp;

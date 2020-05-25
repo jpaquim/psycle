@@ -871,28 +871,28 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 	wave->defaultvolume = temp16 / (psy_dsp_amp_t) 255;
 	// wave loop start
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->loopstart = temp;
+	wave->loop.start = temp;
 	// wave loop end
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->loopend = temp;
+	wave->loop.end = temp;
 	// wave loop type				
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->looptype = (LoopType) temp;
+	wave->loop.type = (LoopType) temp;
 	// wave sustain loop start
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->sustainloopstart = temp;
+	wave->sustainloop.start = temp;
 	// wave sustain loop end
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->sustainloopend = temp;
+	wave->sustainloop.end = temp;
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->sustainlooptype = (LoopType) temp;			
+	wave->sustainloop.type = (LoopType) temp;			
 	// "bigger than" insted of "bigger or equal", because that means 
 	// interpolate between loopend and loopstart
-	if (wave->loopend > wave->numframes) {
-		wave->loopend = wave->numframes;
+	if (wave->loop.end > wave->numframes) {
+		wave->loop.end = wave->numframes;
 	}
-	if (wave->sustainloopend > wave->numframes) {
-		wave->sustainloopend = wave->numframes;
+	if (wave->sustainloop.end > wave->numframes) {
+		wave->sustainloop.end = wave->numframes;
 	} 
 	if (self->file->currchunk.version == 0) {
 		wave->samplerate = 8363;
@@ -1279,28 +1279,28 @@ void readsmsb(psy_audio_SongFile* self)
 			wave->defaultvolume = temp16 / (psy_dsp_amp_t) 255;
 			// wave loop start
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->loopstart = temp;
+			wave->loop.start = temp;
 			// wave loop end
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->loopend = temp;
+			wave->loop.end = temp;
 			// wave loop type				
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->looptype = (LoopType) temp;
+			wave->loop.type = (LoopType) temp;
 			// wave sustain loop start
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->sustainloopstart = temp;
+			wave->sustainloop.start = temp;
 			// wave sustain loop end
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->sustainloopend = temp;
+			wave->sustainloop.end = temp;
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->sustainlooptype = (LoopType) temp;			
+			wave->sustainloop.type = (LoopType) temp;			
 			// "bigger than" insted of "bigger or equal", because that means 
 			// interpolate between loopend and loopstart
-			if (wave->loopend > wave->numframes) {
-				wave->loopend = wave->numframes;
+			if (wave->loop.end > wave->numframes) {
+				wave->loop.end = wave->numframes;
 			}
-			if (wave->sustainloopend > wave->numframes) {
-				wave->sustainloopend = wave->numframes;
+			if (wave->sustainloop.end > wave->numframes) {
+				wave->sustainloop.end = wave->numframes;
 			} 
 			if (self->file->currchunk.version == 0) {
 				wave->samplerate = 8363;
@@ -1425,14 +1425,14 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 		sample->numframes = psyfile_read_uint32(self->file);
 		volume = psyfile_read_uint16(self->file);
 		sample->globalvolume = volume * 0.01f;
-		sample->loopstart = psyfile_read_uint32(self->file);
-		sample->loopend = psyfile_read_uint32(self->file);		
+		sample->loop.start = psyfile_read_uint32(self->file);
+		sample->loop.end = psyfile_read_uint32(self->file);		
 		sample->tune = psyfile_read_uint32(self->file);		
 		psyfile_read(self->file, &tmp, sizeof(tmp));
 		//Current sampler uses 100 cents. Older used +-256		
 		sample->finetune = (int16_t)(tmp / 2.56f);		
 		doloop = psyfile_read_uint8(self->file);
-		sample->looptype = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
+		sample->loop.type = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
 		stereo = psyfile_read_uint8(self->file);
 		sample->stereo = stereo != 0;
 		// Old sample name, never used.
@@ -2551,36 +2551,36 @@ int psy3_save_sample(psy_audio_SongFile* self, psy_audio_Sample* sample)
 		return status;
 	}
 	if (status = psyfile_write_uint32(self->file, (uint32_t)
-			sample->loopstart)) {
+			sample->loop.start)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
 	}
 	if (status = psyfile_write_uint32(self->file, (uint32_t)
-			sample->loopend)) {
+			sample->loop.end)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
 	}
 	if (status = psyfile_write_int32(self->file,
-			sample->looptype)) {
+			sample->loop.type)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
 	}
 	if (status = psyfile_write_uint32(self->file, (uint32_t)
-			sample->sustainloopstart)) {
+			sample->sustainloop.start)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
 	}
 	if (status = psyfile_write_uint32(self->file, (uint32_t)
-			sample->sustainloopend)) {
+			sample->sustainloop.end)) {
 		free(data1);
 		free(wavedata_left);
 		return status;
 	}
-	if (status = psyfile_write_int32(self->file, sample->sustainlooptype)) {
+	if (status = psyfile_write_int32(self->file, sample->sustainloop.type)) {
 		free(data1);
 		free(wavedata_left);
 		return status;

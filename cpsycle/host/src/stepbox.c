@@ -11,9 +11,7 @@ static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,
 	int index);
 
 void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
-{		
-	psy_ui_Margin margin;
-
+{
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_enablealign(&self->component);
@@ -26,12 +24,11 @@ void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_combobox_setcharnumber(&self->combobox, 3);
 	stepbox_build(self);
 	psy_ui_combobox_setcursel(&self->combobox,
-		workspace_cursorstep(workspace) - 1);	
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+		workspace_cursorstep(workspace) - 1);		
 	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_LEFT, &margin));	
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		NULL));	
 }
 
 void stepbox_build(StepBox* self)

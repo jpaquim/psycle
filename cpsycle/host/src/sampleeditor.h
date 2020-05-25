@@ -122,6 +122,7 @@ typedef struct SampleEditor {
 	psy_List* samplerevents;
 	Workspace* workspace;
 	SampleEditorBar sampleeditortbar;
+	psy_Signal signal_samplemodified;
 } SampleEditor;
 
 void sampleeditor_init(SampleEditor*, psy_ui_Component* parent, Workspace*);

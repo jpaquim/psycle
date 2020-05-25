@@ -7,6 +7,17 @@
 #include "uicomponent.h"
 #include <sample.h>
 
+typedef enum {
+	WAVEBOX_DRAG_NONE,
+	WAVEBOX_DRAG_LEFT,
+	WAVEBOX_DRAG_RIGHT,
+	WAVEBOX_DRAG_MOVE,
+	WAVEBOX_DRAG_LOOP_CONT_LEFT,
+	WAVEBOX_DRAG_LOOP_CONT_RIGHT,
+	WAVEBOX_DRAG_LOOP_SUSTAIN_LEFT,
+	WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT
+} WaveBoxDragMode;
+
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Sample* sample;
@@ -16,16 +27,17 @@ typedef struct {
 	float zoomleft;
 	float zoomright;
 	double offsetstep;	
-	int dragmode;
+	WaveBoxDragMode dragmode;
 	int dragoffset;
 	psy_Signal selectionchanged;
 	char* nowavetext;
 	bool preventdrawonselect;
+	uintptr_t channel;
 } WaveBox;
 
 void wavebox_init(WaveBox*, psy_ui_Component* parent);
 void wavebox_setnowavetext(WaveBox*, const char* text);
-void wavebox_setsample(WaveBox*, psy_audio_Sample*);
+void wavebox_setsample(WaveBox*, psy_audio_Sample*, uintptr_t channel);
 void wavebox_setzoom(WaveBox*, psy_dsp_beat_t left, psy_dsp_beat_t right);
 void wavebox_setselection(WaveBox* self, uintptr_t selectionstart,
 	uintptr_t selectionend);

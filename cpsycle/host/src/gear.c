@@ -26,11 +26,11 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* wo
 	gearbuttons_updatetext(self, workspace);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		gearbuttons_onlanguagechanged);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));				
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(gearbuttons_base(self), 0),
+		psy_ui_component_children(gearbuttons_base(self), psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));
 }
@@ -93,7 +93,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_notebook_base(&self->notebook), 
 		&workspace->song->instruments);
 	samplesbox_init(&self->samplesbox, psy_ui_notebook_base(&self->notebook),
-		&workspace->song->samples, &workspace->song->instruments);
+		&workspace->song->samples);
 	gear_connectsongsignals(self);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
@@ -151,8 +151,7 @@ void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_So
 	SetMachines(&self->machinesboxfx, &workspace->song->machines);
 	instrumentsbox_setinstruments(&self->instrumentsbox,
 		&workspace->song->instruments);
-	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
-		&workspace->song->instruments);
+	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
 	gear_connectsongsignals(self);
 	psy_ui_component_invalidate(gear_base(self));
 }

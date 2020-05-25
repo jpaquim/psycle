@@ -94,7 +94,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;
 	self->selection = &workspace->sequenceselection;		
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);
 	playlisteditor_init(&self->playlisteditor, &self->component,
 		workspace);
@@ -335,7 +336,8 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 {
 	self->view = view;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_SET);	
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_SET);
 	psy_signal_connect(&self->component.signal_draw, self,
 		sequenceviewtrackheader_ondraw);
 	psy_ui_component_resize(&self->component, 0, 10);
@@ -1031,7 +1033,7 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(1.0));
 	self->sequence = sequence;
@@ -1085,11 +1087,11 @@ void sequencelistview_onpatternnamechanged(SequenceListView* self, psy_audio_Pat
 	psy_ui_component_invalidate(&self->component);
 }
 
-
 static void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar*, Workspace* sender);
 static void sequenceroptionsbar_updatetext(SequencerOptionsBar*);
 
-void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent, Workspace* workspace)
+void sequenceroptionsbar_init(SequencerOptionsBar* self,
+	psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
@@ -1114,11 +1116,11 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		sequenceroptionsbar_onlanguagechanged);
 	sequenceroptionsbar_updatetext(self);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.2),
 		psy_ui_value_makeew(1.0));
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));
 }
@@ -1126,15 +1128,15 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 void sequenceroptionsbar_updatetext(SequencerOptionsBar* self)
 {
 	psy_ui_checkbox_settext(&self->followsong,
-		workspace_translate(self->workspace, "Follow Song"));
+		workspace_translate(self->workspace, "sequencerview.Follow Song"));
 	psy_ui_checkbox_settext(&self->shownames,
-		workspace_translate(self->workspace, "Show pattern names"));
+		workspace_translate(self->workspace, "sequencerview.Show pattern names"));
 	psy_ui_checkbox_settext(&self->showplaylist,
-		workspace_translate(self->workspace, "Show playlist"));
+		workspace_translate(self->workspace, "sequencerview.Show playlist"));
 	psy_ui_checkbox_settext(&self->recordtweaks,
-		workspace_translate(self->workspace, "Record tweaks"));
+		workspace_translate(self->workspace, "sequencerview.Record tweaks"));
 	psy_ui_checkbox_settext(&self->multichannelaudition,
-		workspace_translate(self->workspace, "Multichannel Audition"));
+		workspace_translate(self->workspace, "sequencerview.Multichannel Audition"));
 }
 
 void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar* self, Workspace* sender)

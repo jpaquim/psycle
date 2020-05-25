@@ -77,7 +77,7 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
@@ -90,7 +90,7 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	psy_ui_button_init(&self->removesong, &self->row1);
 	psy_ui_button_settext(&self->removesong, "- Song");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->row1, 0),
+		psy_ui_component_children(&self->row1, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 			&margin));	
 	psy_ui_component_init(&self->row2, &self->component);

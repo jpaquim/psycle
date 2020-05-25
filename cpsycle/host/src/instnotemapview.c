@@ -46,7 +46,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
@@ -56,7 +56,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_label_init(&self->label, &self->component);
 	psy_ui_label_settext(&self->label, "Notemap");
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
-	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
+	samplesbox_init(&self->samplesbox, &self->component, NULL);
 	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->label.component, &margin);
 	instrumentnotemapbuttons_init(&self->buttons, &self->component);
@@ -146,15 +146,15 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00333333);
 	for (key = keymin; key < keymax; ++key) {					
-		psy_ui_drawline(g, cp, 0, cp, size.height);
+		psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
 		if (!isblack(key)) {
 			psy_ui_Rectangle r;
 
-			psy_ui_setrectangle(&r, cp, 0, (int)(keysize + 0.5), size.height);
+			psy_ui_setrectangle(&r, (int)cp, 0, (int)(keysize + 0.5), size.height);
 			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
-			psy_ui_drawline(g, cp, 0, cp, size.height);			
+			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
 			cp += keysize;
-			psy_ui_drawline(g, cp, 0, cp, size.height);			
+			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
 		}
 	}
 	psy_ui_settextcolor(g, 0x00CACACA);
@@ -166,7 +166,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 			int x;
 			int width;
 
-			x = cp - (int)(keysize * 0.8 / 2);
+			x = (int)cp - (int)(keysize * 0.8 / 2);
 			width = (int)(keysize * 0.8);
 			psy_ui_setrectangle(&r, x, 0, width, (int)(size.height * top));
 			psy_ui_drawsolidrectangle(g, r, 0x00444444);
@@ -451,7 +451,7 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
@@ -461,7 +461,7 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_button_init(&self->remove, &self->component);
 	psy_ui_button_settext(&self->remove, "Remove");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 			&margin));
 }

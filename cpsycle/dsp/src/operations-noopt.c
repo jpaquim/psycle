@@ -14,6 +14,7 @@ static void dsp_add(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_d
 static void dsp_mul(psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul);
 static void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_amp_t mul);
 static void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num);
+static psy_dsp_amp_t* dsp_crop(psy_dsp_amp_t* src, uintptr_t offset, uintptr_t num);
 static void dsp_interleave(psy_dsp_amp_t* dst, psy_dsp_amp_t* left, psy_dsp_amp_t* right, uintptr_t num);
 static void dsp_erase_all_nans_infinities_and_denormals(psy_dsp_amp_t* dst,
 		uintptr_t num);
@@ -32,6 +33,7 @@ void psy_dsp_noopt_init(psy_dsp_Operations* self)
 	self->mul = dsp_mul;
 	self->movmul = dsp_movmul;
 	self->clear = dsp_clear;
+	self->crop = dsp_crop;
 	self->interleave = dsp_interleave;
 	self->erase_all_nans_infinities_and_denormals = dsp_erase_all_nans_infinities_and_denormals;
 	self->maxvol = dsp_maxvol;
@@ -76,6 +78,26 @@ void dsp_movmul(psy_dsp_amp_t *src, psy_dsp_amp_t *dst, uintptr_t num, psy_dsp_a
 void dsp_clear(psy_dsp_amp_t *dst, uintptr_t num)
 {
 	memset(dst, 0, num * sizeof(psy_dsp_amp_t));
+}
+
+psy_dsp_amp_t* dsp_crop(psy_dsp_amp_t* src, uintptr_t offset, uintptr_t num)
+{
+	psy_dsp_amp_t* rv;
+
+	if (num > 0) {
+		uintptr_t i;
+		psy_dsp_amp_t* frame;
+		psy_dsp_amp_t* dst;
+
+		dst = rv = dsp_memory_alloc(num, sizeof(psy_dsp_amp_t));
+		for (frame = src + offset, i = 0; i < num; ++i) {
+			*(dst++) = *(frame++);
+		}
+	} else {
+		rv = NULL;
+	}
+	dsp.memory_dealloc(src);
+	return rv;
 }
 
 void dsp_interleave(psy_dsp_amp_t* dst, psy_dsp_amp_t* left, psy_dsp_amp_t* right, uintptr_t num)
