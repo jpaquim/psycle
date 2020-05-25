@@ -52,7 +52,7 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 	if (margin) {
 		self->margin = *margin;
 	} else {
-		psy_ui_margin_init(&self->margin,
+		psy_ui_margin_init_all(&self->margin,
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	}
@@ -84,7 +84,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	psy_signal_connect(&tabbar_base(self)->signal_destroy, self,
 		tabbar_ondestroy);
 	self->tabalignment = psy_ui_ALIGN_TOP;
-	psy_ui_margin_init(&self->defaulttabmargin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&self->defaulttabmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 }

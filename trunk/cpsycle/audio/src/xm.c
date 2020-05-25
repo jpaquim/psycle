@@ -312,19 +312,19 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 				//		 4: 16-bit sampledata
 				if (xmsamples[s].looplen > 0) {
 					if (xmsamples[s].type & 0x01) {
-						sample->looptype = LOOP_NORMAL;
+						sample->loop.type = LOOP_NORMAL;
 					} else
 					if (xmsamples[s].type & 0x02) {
-						sample->looptype = LOOP_NORMAL; // LOOP_BIDI;
+						sample->loop.type = LOOP_NORMAL; // LOOP_BIDI;
 					} else {
-						sample->looptype = LOOP_DO_NOT;
+						sample->loop.type = LOOP_DO_NOT;
 					}
 				} else {
-					sample->looptype = LOOP_DO_NOT;
+					sample->loop.type = LOOP_DO_NOT;
 				}				
-				if (sample->looptype != LOOP_DO_NOT) {
-					sample->loopstart = xmsamples[s].loopstart / (is16bit ? 2 : 1);
-					sample->loopend = (xmsamples[s].loopstart + xmsamples[s].looplen) /
+				if (sample->loop.type != LOOP_DO_NOT) {
+					sample->loop.start = xmsamples[s].loopstart / (is16bit ? 2 : 1);
+					sample->loop.end = (xmsamples[s].loopstart + xmsamples[s].looplen) /
 						(is16bit ? 2 : 1);
 				}
 				sample->numframes = xmsamples[s].samplen / (is16bit ? 2 : 1);

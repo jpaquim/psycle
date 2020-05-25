@@ -134,6 +134,7 @@ static void machinewireview_setcoords(MachineWireView*, psy_Properties*);
 static void machinewireview_onsize(MachineWireView*, psy_ui_Component* sender,
 	psy_ui_Size* size);
 static psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slot);
+static void machineview_updatetext(MachineView*, Workspace* workspace);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag, psy_audio_SongFile*);
 static void machineview_onmousedown(MachineView*,
 	psy_ui_Component* sender, psy_ui_MouseEvent*);
@@ -143,6 +144,7 @@ static void machineview_onkeydown(MachineView*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
 static void machineview_onskinchanged(MachineView*, Workspace*);
+static void machineview_onlanguagechanged(MachineView*, Workspace* workspace);
 static void selectsection(MachineView*, psy_ui_Component* sender, uintptr_t section);
 
 static psy_ui_ComponentVtable vtable;
@@ -2030,7 +2032,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setposition(&self->component, 0, 0, 0, 0);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
@@ -2044,10 +2047,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar,
-		workspace_translate(self->workspace, "Wires"),
-		workspace_translate(self->workspace, "New Machine"),
-		NULL);
+	tabbar_append_tabs(&self->tabbar, "", "", NULL); // Wires, New Machine
 	psy_signal_connect(&self->component.signal_selectsection, self, selectsection);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
@@ -2064,7 +2064,24 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		machineview_onskinchanged);	
+	machineview_updatetext(self, workspace);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		machineview_onlanguagechanged);
 	self->wireview.firstsize = 1;
+}
+
+void machineview_updatetext(MachineView* self, Workspace* workspace)
+{
+	tabbar_rename_tabs(&self->tabbar,
+		workspace_translate(self->workspace, "machineview.Wires"),
+		workspace_translate(self->workspace, "machineview.New Machine"),
+		NULL);
+}
+
+void machineview_onlanguagechanged(MachineView* self, Workspace* workspace)
+{
+	machineview_updatetext(self, workspace);
+	psy_ui_component_align(&self->component);
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_Component* sender,

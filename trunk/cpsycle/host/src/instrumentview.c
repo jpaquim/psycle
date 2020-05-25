@@ -94,7 +94,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
 	self->player = &workspace->player;
 	self->workspace = workspace;
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));	
 	// header
@@ -114,7 +114,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	{
 		psy_ui_Margin margin;
 
-		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 			psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
 		psy_ui_component_setmargin(&self->left,
@@ -153,8 +153,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		OnMachinesRemoved);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
-	samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples,
-		&workspace->song->instruments);
+	samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples
+		/* ,&workspace->song->instruments */);
 	psy_signal_connect(&self->buttons.create.signal_clicked, self,
 		instrumentview_oncreateinstrument);
 	psy_signal_connect(&self->general.notemapview.buttons.add.signal_clicked, self,
@@ -226,12 +226,12 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace, int flag, psy_aud
 			OnMachinesRemoved);
 		instrumentsbox_setinstruments(&self->instrumentsbox,
 			&workspace->song->instruments);	
-		samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples,
-			&workspace->song->instruments);
+		samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples
+			/*,&workspace->song->instruments*/);
 	} else {
 		instrumentsbox_setinstruments(&self->instrumentsbox, 0);	
 		samplesbox_setsamples(&self->general.notemapview.samplesbox,
-			&workspace->song->samples, 0);
+			&workspace->song->samples);
 	}
 	instrumentview_setinstrument(self, 0);
 }
@@ -242,7 +242,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 {	
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	self->view = view;
@@ -265,7 +265,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
 		OnNextInstrument);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 			&margin));
 }
@@ -274,7 +274,11 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
+	psy_signal_prevent(&self->nameedit.signal_change, self,
+		OnEditInstrumentName);
 	psy_ui_edit_settext(&self->nameedit, instrument ? instrument->name : "");
+	psy_signal_enable(&self->nameedit.signal_change, self,
+		OnEditInstrumentName);
 }
 
 void OnEditInstrumentName(InstrumentHeaderView* self, psy_ui_Edit* sender)
@@ -316,7 +320,7 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
@@ -334,8 +338,9 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_button_init(&self->duplicate, &self->row1);
 	psy_ui_button_settext(&self->duplicate, "Duplicate");	
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->row1, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_component_children(&self->row1, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));
 	psy_ui_component_init(&self->row2, &self->component);
 	psy_ui_component_enablealign(&self->row2);
 	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
@@ -343,8 +348,9 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 	psy_ui_button_init(&self->del, &self->row2);
 	psy_ui_button_settext(&self->del, "Delete");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->row2, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_component_children(&self->row2, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));
 }
 
 // GeneralView
@@ -352,7 +358,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2), psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0));
 	self->instruments = instruments;
@@ -364,7 +370,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	// psy_ui_component_enablealign(&self->left);	
 	// psy_ui_component_setalign(&self->left, UI_ALIGN_LEFT);
 	
-	self->notemapview.samplesbox.changeinstrumentslot = 0;
+	// self->notemapview.samplesbox.changeinstrumentslot = 0;
 	psy_ui_component_setalign(&self->notemapview.samplesbox.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->notemapview.samplesbox.component, &margin);
 	// nna
@@ -389,8 +395,9 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	psy_signal_connect(&self->nnafadeout.signal_clicked, self,
 		OnNNAFadeOut);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->nna, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_component_children(&self->nna, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));
 	// fitrow
 	psy_ui_component_init(&self->fitrow, &self->component);
 	psy_ui_component_enablealign(&self->fitrow);
@@ -403,8 +410,9 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	psy_ui_label_init(&self->fitrowlabel, &self->fitrow);
 	psy_ui_label_settext(&self->fitrowlabel, "pattern rows");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->fitrow, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_component_children(&self->fitrow, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_settext(&self->globalvolume, "Global Volume");
 	psy_ui_component_resize(&self->globalvolume.component, 0, 20);
@@ -569,7 +577,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "Amplitude envelope");
 	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init(&margin,
+	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(20),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
@@ -586,7 +594,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 	psy_ui_slider_init(&self->release, &self->component);
 	psy_ui_slider_settext(&self->release, "Release");
 	
-	psy_ui_margin_init(&margin,
+	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
@@ -698,7 +706,7 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent, p
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0));
 	self->instrument = 0;
@@ -710,8 +718,9 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent, p
 	psy_signal_connect(&self->randompanning.signal_clicked, self,
 		instrumentview_onrandompanning);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_TOP, &margin));
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_TOP,
+		&margin));
 }
 
 void instrumentpanview_setinstrument(InstrumentPanView* self,
@@ -754,7 +763,7 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "Filter envelope");
 	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
-	psy_ui_margin_init(&margin,
+	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(20),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),
@@ -776,7 +785,7 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 	psy_ui_slider_init(&self->modamount, &self->component);
 	psy_ui_slider_settext(&self->modamount, "Mod. Amount");
 	
-	psy_ui_margin_init(&margin,
+	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5),

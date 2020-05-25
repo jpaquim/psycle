@@ -24,8 +24,7 @@ static void cpuview_ontimer(CPUView*, psy_ui_Component* sender,
 
 void cpuview_init(CPUView* self, psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_margin_init(&self->topmargin, psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	psy_ui_margin_init(&self->topmargin);
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_init(&self->top, &self->component);
@@ -68,7 +67,7 @@ void cpuview_initresources(CPUView* self)
 	labelpair_init(&self->resources_swap, &self->resources, "Page File (Swap)");
 	labelpair_init(&self->resources_vmem, &self->resources, "Virtual Memory");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->resources, 0),
+		psy_ui_component_children(&self->resources, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP, &self->topmargin));
 }
 
@@ -84,8 +83,9 @@ void cpuview_initperformance(CPUView* self)
 	labelpair_init(&self->machines, &self->performance, "Machines");
 	labelpair_init(&self->routing, &self->performance, "Routing");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->performance, 0),
-		psy_ui_ALIGN_TOP, &self->topmargin));
+		psy_ui_component_children(&self->performance, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_TOP,
+		&self->topmargin));
 }
 
 void cpuview_initperformancelist(CPUView* self)

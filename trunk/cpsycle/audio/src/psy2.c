@@ -378,11 +378,11 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 						tmpFineTune = (int32_t)((float)tmpFineTune/2.56f);
 						wave->finetune = tmpFineTune;						
 
-						psyfile_read(songfile->file, &wave->loopstart, sizeof wave->loopstart);
-						psyfile_read(songfile->file, &wave->loopend, sizeof wave->loopend);
+						psyfile_read(songfile->file, &wave->loop.start, sizeof wave->loop.start);
+						psyfile_read(songfile->file, &wave->loop.end, sizeof wave->loop.end);
 
 						psyfile_read(songfile->file, &doloop, sizeof(doloop));
-						wave->looptype = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
+						wave->loop.type = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
 						psyfile_read(songfile->file, &wave->stereo, sizeof(wave->stereo));
 																	
 						pData = malloc(wltemp*sizeof(short)+4);// +4 to avoid any attempt at buffer overflow by the code

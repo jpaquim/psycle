@@ -35,7 +35,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	int charnum;
 
 	charnum = 12;
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makeeh(1.0),
 		psy_ui_value_makepx(0));
 	self->song = workspace->song;	
@@ -83,7 +83,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit_tpb.signal_change, self,
 		songpropertiesview_ontpbchanged);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->speed, 0),
+		psy_ui_component_children(&self->speed, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	// Comments
@@ -111,17 +111,13 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 }
 
 void songpropertiesview_initalign(SongPropertiesView* self)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+{	
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_TOP, &margin));
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_TOP,
+		NULL));
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 }
 

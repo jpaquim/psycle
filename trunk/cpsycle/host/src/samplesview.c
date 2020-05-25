@@ -30,6 +30,7 @@ static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	psy_audio_Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
+static void samplesview_onsamplemodified(SamplesView*, SampleEditor* sender);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
@@ -59,6 +60,8 @@ static void samplesloopview_init(SamplesLoopView*, psy_ui_Component* parent,
 static void samplesloopview_setsample(SamplesLoopView*, psy_audio_Sample*);
 static int LoopTypeToComboBox(LoopType looptype);
 static LoopType ComboBoxToLoopType(int combobox_index);
+static void samplesloopview_samplecontloopchanged(SamplesLoopView*, psy_audio_Sample* sender);
+static void samplesloopview_samplesustainloopchanged(SamplesLoopView*, psy_audio_Sample* sender);
 static void samplesloopview_onlooptypechange(SamplesLoopView*,
 	psy_ui_ComboBox* sender, int sel);
 static void samplesloopview_onsustainlooptypechange(SamplesLoopView*,
@@ -86,7 +89,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
@@ -102,7 +105,7 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent)
 	psy_ui_button_init(&self->del, &self->component);
 	psy_ui_button_settext(&self->del, "Delete");
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
 }
 
@@ -111,7 +114,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 {	
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
 		psy_ui_value_makepx(0));
 	self->view = view;
@@ -132,7 +135,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_signal_connect(&self->browse.signal_clicked, self,
 		samplessongimportview_onloadsong);	
 	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->header, 0),
+		psy_ui_component_children(&self->header, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	// bar
@@ -145,7 +148,7 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_signal_connect(&self->add.signal_clicked, self,
 		samplessongimportview_oncopy);
 	// samplesbox
-	samplesbox_init(&self->samplesbox, &self->component, 0, 0);
+	samplesbox_init(&self->samplesbox, &self->component, NULL);
 	psy_ui_component_setalign(&self->samplesbox.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->samplesbox.signal_changed, self,
@@ -198,8 +201,7 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 		if (!songfile.err) {
 			psy_ui_label_settext(&self->songname,
 				self->source->properties.title);
-			samplesbox_setsamples(&self->samplesbox, &self->source->samples,
-				&self->source->instruments);			
+			samplesbox_setsamples(&self->samplesbox, &self->source->samples);			
 		} else {
 			psy_ui_label_settext(&self->songname,
 				"No source song loaded");
@@ -249,7 +251,7 @@ void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
 	sample = self->source
 		? psy_audio_samples_at(&self->source->samples, index)
 		: 0;
-	wavebox_setsample(&self->samplebox, sample);
+	wavebox_setsample(&self->samplebox, sample, 0);
 }
 
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
@@ -258,10 +260,10 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 	psy_ui_Margin waveboxmargin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_margin_init(&waveboxmargin, psy_ui_value_makeeh(0.5),
+	psy_ui_margin_init_all(&waveboxmargin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(1.0), psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.5));
 	self->workspace = workspace;	
@@ -283,7 +285,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_hide(&self->clienttabbar.component);
 	tabbar_append_tabs(&self->clienttabbar, "Properties", "Import", "Editor", NULL);
 	samplesbox_init(&self->samplesbox, &self->left,
-		&workspace->song->samples, &workspace->song->instruments);	
+		&workspace->song->samples);	
 	psy_ui_component_setalign(&self->samplesbox.component,
 		psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->buttons.load.signal_clicked, self,
@@ -311,7 +313,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_TOP);	
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
-		BACKGROUND_SET);
+		psy_ui_BACKGROUND_SET);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	initsamplesgeneralview(&self->general, psy_ui_notebook_base(
@@ -342,6 +344,8 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_notebook_connectcontroller(&self->clientnotebook,
 		&self->clienttabbar.signal_change);
 	samplesview_setsample(self, sampleindex_make(0, 0));
+	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
+		samplesview_onsamplemodified);
 }
 
 void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender)
@@ -351,11 +355,11 @@ void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender
 	index = samplesbox_selected(&self->samplesbox);
 	samplesview_setsample(self, index);
 	if (self->workspace->song) {
-		psy_signal_prevent(&self->workspace->song->instruments.signal_slotchange,
+		psy_signal_disconnect(&self->workspace->song->instruments.signal_slotchange,
 			self, samplesview_oninstrumentslotchanged);		
 		instruments_changeslot(&self->workspace->song->instruments,
 			index.slot);
-		psy_signal_enable(
+		psy_signal_connect(
 			&self->workspace->song->instruments.signal_slotchange,
 			self, samplesview_oninstrumentslotchanged);		
 	}
@@ -382,7 +386,7 @@ void samplesview_setsample(SamplesView* self, psy_audio_SampleIndex index)
 	sample = self->workspace->song
 		? psy_audio_samples_at(&self->workspace->song->samples, index)
 		: 0;
-	wavebox_setsample(&self->wavebox, sample);
+	wavebox_setsample(&self->wavebox, sample, 0);
 	sampleeditor_setsample(&self->sampleeditor, sample);
 	samplesheaderview_setsample(&self->header, sample);
 	setsamplesamplesgeneralview(&self->general, sample);
@@ -522,12 +526,17 @@ uintptr_t samplesview_freesampleslot(SamplesView* self, uintptr_t startslot,
 	return rv;
 }
 
-void samplesview_onsongchanged(SamplesView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
+void samplesview_onsamplemodified(SamplesView* self, SampleEditor* sender)
+{
+	samplesview_setsample(self, samplesbox_selected(&self->samplesbox));
+}
+
+void samplesview_onsongchanged(SamplesView* self, Workspace* workspace, int flag,
+	psy_audio_SongFile* songfile)
 {	
 	psy_signal_connect(&workspace->song->instruments.signal_slotchange, self,
 		samplesview_oninstrumentslotchanged);	
-	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples,
-		&workspace->song->instruments);
+	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
 	samplesview_setsample(self, sampleindex_make(0, 0));
 }
 
@@ -538,7 +547,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 
 	self->view = view;
 	self->instruments = instruments;
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
@@ -569,7 +578,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->channellabel, "");
 	psy_ui_label_setcharnumber(&self->channellabel, 7);	
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 			&margin));	
 }
@@ -579,7 +588,11 @@ void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* samp
 	char text[20];
 
 	self->sample = sample;
+	psy_signal_prevent(&self->nameedit.signal_change, self,
+		oneditsamplename);
 	psy_ui_edit_settext(&self->nameedit, self->sample ? sample->name : "");	
+	psy_signal_enable(&self->nameedit.signal_change, self,
+		oneditsamplename);
 	psy_snprintf(text, 20, "%d", self->sample ? self->sample->samplerate : 0);
 	psy_ui_edit_settext(&self->sredit, text);
 	psy_snprintf(text, 20, "%d", self->sample ? self->sample->numframes : 0);
@@ -660,7 +673,7 @@ void initsamplesgeneralview(SamplesGeneralView* self, psy_ui_Component* parent)
 	int i;
 		
 	self->sample = 0;
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(1),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
@@ -827,7 +840,7 @@ void initsamplesvibratoview(SamplesVibratoView* self, psy_ui_Component* parent, 
 	// header
 	{
 		psy_ui_Margin header_margin;
-		psy_ui_margin_init(&header_margin, psy_ui_value_makepx(0),
+		psy_ui_margin_init_all(&header_margin, psy_ui_value_makepx(0),
 			psy_ui_value_makeew(2), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
 		psy_ui_component_init(&self->header, &self->component);
@@ -858,7 +871,7 @@ void initsamplesvibratoview(SamplesVibratoView* self, psy_ui_Component* parent, 
 	psy_ui_slider_settext(&self->speed,"Speed");
 	psy_ui_slider_init(&self->depth, &self->component);
 	psy_ui_slider_settext(&self->depth, "Depth");
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(1),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	for (i = 0; i < 3; ++i) {				
@@ -991,6 +1004,9 @@ WaveForms comboboxtowaveform(int combobox_index)
 	return rv;
 }
 
+#define TIMERID_SAMPLESLOOPVIEW 15000
+static void samplesloopview_ontimer(SamplesLoopView*, psy_ui_Component* sender, int timerid);
+
 void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	SamplesView* view)
 {
@@ -998,10 +1014,10 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_Margin rowmargin;
 	
 	self->view = view;
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_margin_init(&rowmargin, psy_ui_value_makeew(1.5),
+	psy_ui_margin_init_all(&rowmargin, psy_ui_value_makeew(1.5),
 		psy_ui_value_makepx(0), psy_ui_value_makeew(1.5),
 		psy_ui_value_makepx(0));
 	self->sample = 0;
@@ -1028,7 +1044,7 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->loopendedit, &self->cont);
 	psy_ui_edit_setcharnumber(&self->loopendedit, 10);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->cont, 0),
+		psy_ui_component_children(&self->cont, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	psy_ui_component_init(&self->sustain, &self->component);
@@ -1051,13 +1067,13 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->sustainloopendedit, &self->sustain);
 	psy_ui_edit_setcharnumber(&self->sustainloopendedit, 10);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->sustain, 0),
+		psy_ui_component_children(&self->sustain, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
-		0));
+		NULL));
 	psy_signal_connect(&self->loopdir.signal_selchanged, self,
 		samplesloopview_onlooptypechange);
 	psy_signal_connect(&self->sustainloopdir.signal_selchanged, self,
@@ -1070,6 +1086,10 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 		samplesloopview_oneditchangedsustainstart);
 	psy_signal_connect(&self->sustainloopendedit.signal_change, self,
 		samplesloopview_oneditchangedsustainend);
+	psy_signal_connect(&self->component.signal_timer, self,
+		samplesloopview_ontimer);
+	psy_audio_sampleloop_init(&self->currloop);
+	psy_audio_sampleloop_init(&self->currsustainloop);
 }
 
 void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
@@ -1078,19 +1098,22 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 
 	self->sample = sample;
 	if (self->sample) {
+		psy_ui_component_starttimer(&self->component, TIMERID_SAMPLESLOOPVIEW, 200);
 		psy_ui_component_enableinput(&self->component, 1);
-		sprintf(tmp, "%d", sample->loopstart);
+		sprintf(tmp, "%d", (int)sample->loop.start);
 		psy_ui_edit_settext(&self->loopstartedit, tmp);
-		sprintf(tmp, "%d", sample->loopend);
+		sprintf(tmp, "%d", (int)sample->loop.end);
 		psy_ui_edit_settext(&self->loopendedit, tmp);
-		sprintf(tmp, "%d", sample->sustainloopstart);
+		sprintf(tmp, "%d", (int)sample->sustainloop.start);
 		psy_ui_edit_settext(&self->sustainloopstartedit, tmp);
-		sprintf(tmp, "%d", sample->sustainloopend);
+		sprintf(tmp, "%d", (int)sample->sustainloop.end);
 		psy_ui_edit_settext(&self->sustainloopendedit, tmp);
 		psy_ui_combobox_setcursel(&self->loopdir,
-			LoopTypeToComboBox(self->sample->looptype));
+			LoopTypeToComboBox(self->sample->loop.type));
 		psy_ui_combobox_setcursel(&self->sustainloopdir,
-			LoopTypeToComboBox(self->sample->sustainlooptype));
+			LoopTypeToComboBox(self->sample->sustainloop.type));
+		self->currloop = self->sample->loop;
+		self->currsustainloop = self->sample->sustainloop;
 	} else {
 		psy_ui_component_preventinput(&self->component, 1);
 		sprintf(tmp, "%d", 0);
@@ -1101,7 +1124,10 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 		psy_ui_combobox_setcursel(&self->loopdir,
 			LoopTypeToComboBox(LOOP_DO_NOT));
 		psy_ui_combobox_setcursel(&self->sustainloopdir,
-			LoopTypeToComboBox(LOOP_DO_NOT));		
+			LoopTypeToComboBox(LOOP_DO_NOT));
+		psy_ui_component_stoptimer(&self->component, TIMERID_SAMPLESLOOPVIEW);
+		psy_audio_sampleloop_init(&self->currloop);
+		psy_audio_sampleloop_init(&self->currsustainloop);
 	}
 	samplesloopview_looptypeenablepreventinput(self);
 }
@@ -1120,11 +1146,21 @@ int LoopTypeToComboBox(LoopType looptype)
 	return rv;
 }
 
+void samplesloopview_ontimer(SamplesLoopView* self, psy_ui_Component* sender,
+	int timerid)
+{
+	if (!psy_audio_sampleloop_equal(&self->currloop, &self->sample->loop) ||
+			!psy_audio_sampleloop_equal(&self->currsustainloop,
+			&self->sample->sustainloop)) {			
+		samplesloopview_setsample(self, self->sample);
+	}		
+}
+
 void samplesloopview_onlooptypechange(SamplesLoopView* self,
 	psy_ui_ComboBox* sender, int sel)
 {
 	if (self->sample) {
-		self->sample->looptype = ComboBoxToLoopType(sel);
+		self->sample->loop.type = ComboBoxToLoopType(sel);
 		psy_ui_component_invalidate(&self->view->wavebox.component);
 		samplesloopview_looptypeenablepreventinput(self);
 	}
@@ -1134,7 +1170,7 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 	psy_ui_ComboBox* sender, int sel)
 {
 	if (self->sample) {
-		self->sample->sustainlooptype = ComboBoxToLoopType(sel);
+		self->sample->sustainloop.type = ComboBoxToLoopType(sel);
 		psy_ui_component_invalidate(&self->view->wavebox.component);
 		samplesloopview_looptypeenablepreventinput(self);
 	}
@@ -1143,14 +1179,14 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 {
 	if (self->sample) {
-		if (self->sample->looptype == LOOP_DO_NOT) {
+		if (self->sample->loop.type == LOOP_DO_NOT) {
 			psy_ui_component_preventinput(&self->loopstartedit.component, 0);
 			psy_ui_component_preventinput(&self->loopendedit.component, 0);
 		} else {
 			psy_ui_component_enableinput(&self->loopstartedit.component, 0);
 			psy_ui_component_enableinput(&self->loopendedit.component, 0);
 		}
-		if (self->sample->sustainlooptype == LOOP_DO_NOT) {
+		if (self->sample->sustainloop.type == LOOP_DO_NOT) {
 			psy_ui_component_preventinput(&self->sustainloopstartedit.component, 0);
 			psy_ui_component_preventinput(&self->sustainloopendedit.component, 0);
 		} else {
@@ -1183,7 +1219,7 @@ void samplesloopview_oneditchangedloopstart(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->sample) {
-		self->sample->loopstart = atoi(psy_ui_edit_text(sender));
+		self->sample->loop.start = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
 	}
 }
@@ -1192,7 +1228,7 @@ void samplesloopview_oneditchangedloopend(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {				
 	if (self->sample) {
-		self->sample->loopend = atoi(psy_ui_edit_text(sender));
+		self->sample->loop.end = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
 	}
 }
@@ -1201,7 +1237,7 @@ void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->sample) {
-		self->sample->sustainloopstart = atoi(psy_ui_edit_text(sender));
+		self->sample->sustainloop.start = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
 	}
 }
@@ -1210,7 +1246,7 @@ void samplesloopview_oneditchangedsustainend(SamplesLoopView* self,
 	psy_ui_Edit* sender)
 {
 	if (self->sample) {
-		self->sample->sustainloopend = atoi(psy_ui_edit_text(sender));		
+		self->sample->sustainloop.end = atoi(psy_ui_edit_text(sender));		
 		psy_ui_component_invalidate(&self->view->wavebox.component);
 	}
 }

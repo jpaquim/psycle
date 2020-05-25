@@ -15,5 +15,5 @@ void psy_ui_frame_init(psy_ui_Frame* self, psy_ui_Component* parent)
 
 	imp = psy_ui_impfactory_allocinit_frameimp(psy_ui_app_impfactory(&app), self, parent);
 	psy_ui_component_init_imp(self, parent, imp);
-	psy_ui_component_setbackgroundmode(self, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(self, psy_ui_BACKGROUND_NONE);
 }

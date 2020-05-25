@@ -232,14 +232,22 @@ int dev_addtext(psy_ui_win_ListBoxImp* self, const char* text)
 void dev_settext(psy_ui_win_ListBoxImp* self, const char* text, intptr_t index)
 {
 	intptr_t sel;
-	
-	sel = SendMessage(self->win_component_imp.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
-	if (sel != -1) {
-		SendMessage(self->win_component_imp.hwnd, LB_DELETESTRING, (WPARAM)index, (LPARAM)text);
-		SendMessage(self->win_component_imp.hwnd, LB_INSERTSTRING, (WPARAM)index, (LPARAM)text);
-		SendMessage(self->win_component_imp.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
-		SetWindowText(self->win_component_imp.hwnd, text);
+	char* currtext;
+	int numchars;
+
+	numchars = SendMessage(self->win_component_imp.hwnd, LB_GETTEXTLEN, (WPARAM)index, (LPARAM)0);
+	currtext = malloc(sizeof(char) * (numchars + 1));
+	SendMessage(self->win_component_imp.hwnd, LB_GETTEXT, (WPARAM)index, (LPARAM)currtext);
+	if (strcmp(currtext, text) != 0) {
+		sel = SendMessage(self->win_component_imp.hwnd, LB_GETCURSEL, (WPARAM)0, (LPARAM)0);
+		if (sel != -1) {
+			SendMessage(self->win_component_imp.hwnd, LB_DELETESTRING, (WPARAM)index, (LPARAM)text);
+			SendMessage(self->win_component_imp.hwnd, LB_INSERTSTRING, (WPARAM)index, (LPARAM)text);
+			SendMessage(self->win_component_imp.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
+			SetWindowText(self->win_component_imp.hwnd, text);
+		}
 	}
+	free(currtext);
 }
 
 void dev_setstyle(psy_ui_win_ListBoxImp* self, int style)

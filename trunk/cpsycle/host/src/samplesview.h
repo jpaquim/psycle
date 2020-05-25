@@ -73,7 +73,9 @@ typedef struct {
 	psy_ui_Label sustainloopstartlabel;
 	psy_ui_Edit sustainloopstartedit;
 	psy_ui_Label sustainloopendlabel;
-	psy_ui_Edit sustainloopendedit;		
+	psy_ui_Edit sustainloopendedit;
+	psy_audio_SampleLoop currloop;
+	psy_audio_SampleLoop currsustainloop;
 } SamplesLoopView;
 
 typedef struct {

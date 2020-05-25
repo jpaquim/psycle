@@ -53,16 +53,11 @@ void linesperbeatbar_updatetext(LinesPerBeatBar* self)
 }
 
 void linesperbeatbar_initalign(LinesPerBeatBar* self)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+{	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-		&margin));
+		NULL));
 }
 
 void linesperbeatbar_onlessclicked(LinesPerBeatBar* self, psy_ui_Component* sender)

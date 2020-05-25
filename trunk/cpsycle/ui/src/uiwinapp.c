@@ -256,7 +256,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				if (imp && imp->component) {					
 					SetTextColor((HDC) wParam, imp->component->color);
 					SetBkColor((HDC) wParam, imp->component->backgroundcolor);
-					if ((imp->component->backgroundmode & BACKGROUND_SET) == BACKGROUND_SET) {
+					if ((imp->component->backgroundmode & psy_ui_BACKGROUND_SET) == psy_ui_BACKGROUND_SET) {
 						return (intptr_t) psy_ui_win_component_details(imp->component)->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
@@ -299,7 +299,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			break;
 			case WM_PAINT :			
 				if (imp->component->vtable->ondraw || imp->component->signal_draw.slots ||
-						imp->component->backgroundmode != BACKGROUND_NONE) {
+						imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
 					HDC bufferDC;
 					HBITMAP bufferBmp;
 					HBITMAP oldBmp;
@@ -325,7 +325,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_setrectangle(&g.clip,
 						ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
 						ps.rcPaint.bottom - ps.rcPaint.top);				
-					if (imp->component->backgroundmode == BACKGROUND_SET) {
+					if (imp->component->backgroundmode == psy_ui_BACKGROUND_SET) {
 						psy_ui_Rectangle r;
 
 						psy_ui_setrectangle(&r,

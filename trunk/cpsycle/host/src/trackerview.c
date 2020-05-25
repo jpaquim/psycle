@@ -2372,7 +2372,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerview_vtable_init(self);
 	self->component.vtable = &trackerview_vtable;
 	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		trackerview_ondestroy);
 	psy_signal_connect(&self->component.signal_timer, self,
@@ -2651,7 +2651,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->view = view;
 	self->skin = &view->skin;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setbackgroundmode(&self->component, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_draw, self,
 		trackerheader_ondraw);
 	psy_signal_connect(&self->component.signal_mousedown, self,
@@ -3542,8 +3542,9 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent)
 	psy_ui_button_settext(&self->export, "Export (psb)");
 	
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0), 
-		psy_ui_ALIGN_TOP, 0));	
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_TOP,
+		NULL));	
 }
 
 void trackerview_onpatterneditpositionchanged(TrackerView* self, Workspace* sender)

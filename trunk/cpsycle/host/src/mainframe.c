@@ -91,7 +91,7 @@ void mainframe_init(MainFrame* self)
 {			
 	psy_ui_Margin tabbardividemargin;
 	
-	psy_ui_margin_init(&tabbardividemargin,
+	psy_ui_margin_init_all(&tabbardividemargin,
 		psy_ui_value_makepx(0), psy_ui_value_makeew(4.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	psy_ui_frame_init(&self->component, 0);
@@ -135,7 +135,8 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_enablealign(&self->top);	
 	// client
 	psy_ui_component_init(&self->client, &self->component);	
-	psy_ui_component_setbackgroundmode(&self->client, BACKGROUND_NONE);
+	psy_ui_component_setbackgroundmode(&self->client,
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->client);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);		
 	psy_ui_component_init(&self->paramviews, &self->client);
@@ -146,7 +147,7 @@ void mainframe_init(MainFrame* self)
 	{
 		psy_ui_Margin spacing;
 
-		psy_ui_margin_init(&spacing, psy_ui_value_makepx(0),
+		psy_ui_margin_init_all(&spacing, psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 			psy_ui_value_makepx(0));
 		psy_ui_component_init(&self->tabbars, &self->client);		
@@ -324,7 +325,7 @@ void mainframe_initstatusbar(MainFrame* self)
 {	
 	psy_ui_Margin margin;
 		
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));	
 	// zoom
@@ -374,10 +375,10 @@ void mainframe_initbars(MainFrame* self)
 	psy_ui_Margin row0margin;
 	psy_ui_Margin rowmargin;	
 
-	psy_ui_margin_init(&row0margin, psy_ui_value_makeeh(0.5),
+	psy_ui_margin_init_all(&row0margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeeh(0.5));
-	psy_ui_margin_init(&rowmargin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&rowmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeeh(0.5));	
 	psy_ui_component_setalign(&self->toprow0, psy_ui_ALIGN_TOP);
@@ -417,12 +418,13 @@ void mainframe_initbars(MainFrame* self)
 	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
 	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);	
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->toprow0, 0),
-		psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_component_children(&self->toprow0, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));
 	margin.right = psy_ui_value_makepx(0);
 	psy_ui_component_setmargin(&self->playposbar.component, &margin);	
 	// row1

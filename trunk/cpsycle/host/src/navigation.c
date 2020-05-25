@@ -20,7 +20,7 @@ void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_button_settextalignment(&self->prev,
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL | psy_ui_ALIGNMENT_TOP);
 	psy_ui_component_setalign(&self->prev.component, psy_ui_ALIGN_LEFT);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->prev.component, &margin);

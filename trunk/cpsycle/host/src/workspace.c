@@ -1137,6 +1137,9 @@ void workspace_makelang(Workspace* self)
 
 void workspace_makelanges(Workspace* self)
 {
+	psy_Properties* machineview;
+	psy_Properties* sequencerview;
+		
 	psy_properties_write_string(self->lang, "Load", "Cargar");
 	psy_properties_write_string(self->lang, "Save", "Guardar");
 	psy_properties_write_string(self->lang, "New", "Nuevo");
@@ -1148,9 +1151,7 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "About", "Acerca de");
 	psy_properties_write_string(self->lang, "Machines", "Máquinas");
 	psy_properties_write_string(self->lang, "Instrument", "Instrumento");
-	psy_properties_write_string(self->lang, "Instruments", "Instrumentos");
-	psy_properties_write_string(self->lang, "New Machine", "Nueva Máquina");
-	psy_properties_write_string(self->lang, "Wires", "Cables");
+	psy_properties_write_string(self->lang, "Instruments", "Instrumentos");	
 	psy_properties_write_string(self->lang, "Settings", "Opciones");
 	psy_properties_write_string(self->lang, "Copy", "Copiar");
 	psy_properties_write_string(self->lang, "Del", "Eliminar");
@@ -1159,15 +1160,9 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Clear", "Borrar");
 	psy_properties_write_string(self->lang, "New Trk", "Nuevo Trk");
 	psy_properties_write_string(self->lang, "Del Trk", "Eliminar Trk");
-	psy_properties_write_string(self->lang, "Clone", "Clonar");
-	psy_properties_write_string(self->lang, "Follow Song", "Seguir Song");
-	psy_properties_write_string(self->lang, "Show playlist", "Mostrar lista de reproducción");
-	psy_properties_write_string(self->lang, "Show pattern names", "Mostrar nombres del patterns");
-	psy_properties_write_string(self->lang, "Record tweaks", "Grabar tweaks");
+	psy_properties_write_string(self->lang, "Clone", "Clonar");	
 	psy_properties_write_string(self->lang, "Greetings", "Saludos");	
-	psy_properties_write_string(self->lang, "Octave", "Octava");
-	psy_properties_write_string(self->lang, "No Machines Loaded", "No Máquinas cargado");
-	psy_properties_write_string(self->lang, "No Machine", "No Máquina");
+	psy_properties_write_string(self->lang, "Octave", "Octava");	
 	psy_properties_write_string(self->lang, "OK", "¡vale!");
 	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");	
 	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");
@@ -1198,7 +1193,6 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Font", "Tipo de letra");
 	psy_properties_write_string(self->lang, "Name", "Nombre");
 	psy_properties_write_string(self->lang, "Show About at Startup", "Muestra 'Acerca de' en startup");
-
 	psy_properties_write_string(self->lang, "Show song info on Load", "Muestra song información después de carga");
 	psy_properties_write_string(self->lang, "Show Maximized at Startup", "Muestra maximizado en startup");
 	psy_properties_write_string(self->lang, "Show Playlist Editor", "Muestra lista de reproducción");
@@ -1210,11 +1204,34 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Tracks", "Pistas");
 	psy_properties_write_string(self->lang, "Process", "Procesar");
 	psy_properties_write_string(self->lang, "No wave loaded", "Una onda no se ha cargado");
+	machineview = psy_properties_create_section(self->lang, "machineview");
+	psy_properties_write_string(machineview, "New Machine", "Nueva Máquina");
+	psy_properties_write_string(machineview, "Wires", "Cables");
+	psy_properties_write_string(machineview, "No Machines Loaded", "No Máquinas cargado");
+	psy_properties_write_string(machineview, "No Machine", "No Máquina");
+	sequencerview = psy_properties_create_section(self->lang, "sequencerview");
+	psy_properties_write_string(sequencerview, "Follow Song", "Seguir Song");
+	psy_properties_write_string(sequencerview, "Show playlist", "Mostrar lista de reproducción");
+	psy_properties_write_string(sequencerview, "Show pattern names", "Mostrar nombres del patterns");
+	psy_properties_write_string(sequencerview, "Record tweaks", "Grabar tweaks");
 }
 
 const char* workspace_translate(Workspace* self, const char* key)
-{
-	return psy_properties_readstring(self->lang, key, key);	
+{			
+	const char* rv;
+
+	rv = psy_properties_readstring(self->lang, key, key);
+	if (rv == key && rv != NULL) {
+		// removes section from defaulttext
+		rv = strrchr(key, '.');
+		rv = (rv != NULL)
+			? rv + 1
+			: key;
+	}
+	if (rv == NULL) {
+		rv = "";
+	}
+	return rv;
 }
 
 void workspace_configchanged(Workspace* self, psy_Properties* property, 

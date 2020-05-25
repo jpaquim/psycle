@@ -45,12 +45,13 @@ void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* pl
 	{
 		psy_ui_Margin margin;
 
-		psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 			psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
 		psy_list_free(psy_ui_components_setalign(
-			psy_ui_component_children(&self->component, 0),
-			psy_ui_ALIGN_LEFT, &margin));
+			psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+			psy_ui_ALIGN_LEFT,
+			&margin));
 	}	
 	psy_ui_component_starttimer(&self->component, TIMERID_TIMERBAR, 50);
 	psy_signal_connect(&self->component.signal_timer, self,

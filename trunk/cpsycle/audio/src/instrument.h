@@ -15,6 +15,17 @@
 extern "C" {
 #endif
 
+// psy_audio_Instrument, psy_audio_InstrumentEntry
+//
+// aim: an instrument is a selection of samples with some extra features added
+//      around it. Samples are composed with help of instrument entries.
+//  	A 'psy_audio_InstrumentEntry' stores a 'psy_audio_SampleIndex', the
+//      note and the velocity range to allow a dynamically choice.
+//
+// Structure:
+// psy_audio_Instrument <@>----- psy_audio_InstrumentEntry
+//                             * 
+
 typedef struct {
 	double low;
 	double high; // including

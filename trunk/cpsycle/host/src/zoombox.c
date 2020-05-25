@@ -31,8 +31,9 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_button_settext(&self->zoomin, "+");	
 	psy_ui_button_setcharnumber(&self->zoomin, 2);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_LEFT, 0));
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		NULL));
 	psy_signal_init(&self->signal_changed);
 	self->zoomrate = 1.0;
 	self->zoomstep = 0.25;

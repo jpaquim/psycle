@@ -73,6 +73,35 @@ SampleIterator* sampleiterator_allocinit(struct psy_audio_Sample*);
 int sampleiterator_inc(SampleIterator*);
 unsigned int sampleiterator_frameposition(SampleIterator*);
 
+typedef struct psy_audio_SampleLoop {
+	uintptr_t start;
+	uintptr_t end;
+	LoopType type;	
+} psy_audio_SampleLoop;
+
+INLINE void psy_audio_sampleloop_init(psy_audio_SampleLoop* self)
+{
+	self->start = 0;
+	self->end = 0;
+	self->type = LOOP_DO_NOT;	
+}
+
+INLINE void psy_audio_sampleloop_init_all(psy_audio_SampleLoop* self,
+	LoopType type, uintptr_t loopstart, uintptr_t loopend)
+{
+	self->start = loopstart;
+	self->end = loopend;
+	self->type = type;
+}
+
+INLINE bool psy_audio_sampleloop_equal(psy_audio_SampleLoop* self,
+	psy_audio_SampleLoop* other)
+{
+	return (self->type == other->type &&
+		self->start == other->start &&
+		self->end == other->end);
+}
+
 typedef struct psy_audio_Sample {
 	psy_audio_Buffer channels;
 	uintptr_t numframes;
@@ -84,12 +113,8 @@ typedef struct psy_audio_Sample {
 	psy_dsp_amp_t defaultvolume;
 	/// range ( 0..4 ) (-inf to +12dB)
 	psy_dsp_amp_t globalvolume;
-	uintptr_t loopstart;
-	uintptr_t loopend;
-	LoopType looptype;
-	uintptr_t sustainloopstart;
-	uintptr_t sustainloopend;
-	LoopType sustainlooptype;
+	psy_audio_SampleLoop loop;
+	psy_audio_SampleLoop sustainloop;
 	/// Tuning for the center note (value that is added to the note received).
 	/// values from -60 to 59.
 	/// 0 = C-5 (middle C, i.e. play at original speed with note C-5);
@@ -112,6 +137,10 @@ void sample_save(psy_audio_Sample*, const char* path);
 void sample_setname(psy_audio_Sample*, const char* name);
 SampleIterator sample_begin(psy_audio_Sample*);
 const char* sample_name(psy_audio_Sample*);
+void sample_setcontloop(psy_audio_Sample*, LoopType, uintptr_t loopstart,
+	uintptr_t loopend);
+void sample_setsustainloop(psy_audio_Sample*, LoopType, uintptr_t loopstart,
+	uintptr_t loopend);
 
 #ifdef __cplusplus
 }

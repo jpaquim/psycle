@@ -38,7 +38,7 @@ SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
 
 int sampleiterator_inc(SampleIterator* self)
 {			
-	if (self->sample->looptype == LOOP_DO_NOT) {
+	if (self->sample->loop.type == LOOP_DO_NOT) {
 		self->pos.QuadPart += self->speed;
 		if (self->pos.HighPart >= self->sample->numframes) {
 			self->pos.LowPart = 0;
@@ -46,22 +46,22 @@ int sampleiterator_inc(SampleIterator* self)
 			return 0;			
 		}
 	} else
-	if (self->sample->looptype == LOOP_NORMAL) {
+	if (self->sample->loop.type == LOOP_NORMAL) {
 		self->pos.QuadPart += self->speed;
-		if (self->pos.HighPart >= self->sample->loopend) {
-			self->pos.HighPart = self->sample->loopstart +
-				self->sample->loopend - self->pos.HighPart;
+		if (self->pos.HighPart >= self->sample->loop.end) {
+			self->pos.HighPart = self->sample->loop.start +
+				self->sample->loop.end - self->pos.HighPart;
 		}
 	} else
-	if (self->sample->looptype == LOOP_BIDI) {
+	if (self->sample->loop.type == LOOP_BIDI) {
 		if (self->forward) {
 			self->pos.QuadPart += self->speed;
-			if (self->pos.HighPart >= self->sample->loopend) {
+			if (self->pos.HighPart >= self->sample->loop.end) {
 				Double loopend;
 				Double delta;
 				
 				loopend.LowPart = 0;
-				loopend.HighPart = self->sample->loopend;
+				loopend.HighPart = self->sample->loop.end;
 				delta.QuadPart = self->pos.QuadPart - loopend.QuadPart;
 				self->pos.QuadPart = loopend.QuadPart - delta.QuadPart;
 				self->forward = 0;
@@ -69,12 +69,12 @@ int sampleiterator_inc(SampleIterator* self)
 		} else {
 			// todo check negative values first
 			self->pos.QuadPart -= self->speed;
-			if (self->pos.HighPart <= self->sample->loopstart) {
+			if (self->pos.HighPart <= self->sample->loop.start) {
 				Double loopstart;
 				Double delta;
 				
 				loopstart.LowPart = 0;
-				loopstart.HighPart = self->sample->loopstart;
+				loopstart.HighPart = self->sample->loop.start;
 				delta.QuadPart = loopstart.QuadPart - self->pos.QuadPart;
 				self->pos.QuadPart = loopstart.QuadPart + delta.QuadPart;
 				self->forward = 1;
@@ -105,18 +105,18 @@ void sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 	self->samplerate = 44100;
 	self->defaultvolume = 1.f;
 	self->globalvolume = 1.f;
-	self->loopstart = 0;
-	self->loopend = 0;
-	self->looptype  = LOOP_DO_NOT;
-	self->sustainloopstart = 0;
-	self->sustainloopend = 0;
-	self->sustainlooptype = LOOP_DO_NOT;
+	self->loop.start = 0;
+	self->loop.end = 0;
+	self->loop.type  = LOOP_DO_NOT;
+	self->sustainloop.start = 0;
+	self->sustainloop.end = 0;
+	self->sustainloop.type = LOOP_DO_NOT;
 	self->tune = 0;
 	self->finetune = 0;
 	self->panfactor = 0.5f;
 	self->panenabled = 0;
 	self->surround = 0;
-	self->name = strdup("");
+	self->name = strdup("");	
 	vibrato_init(&self->vibrato);
 }
 
@@ -160,12 +160,12 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 		rv->samplerate = src->samplerate;
 		rv->defaultvolume = src->defaultvolume;
 		rv->globalvolume = src->globalvolume;
-		rv->loopstart = src->loopstart;
-		rv->loopend = src->loopend;
-		rv->looptype = src->looptype;
-		rv->sustainloopstart = src->sustainloopstart;
-		rv->sustainloopend = src->sustainloopend;
-		rv->sustainlooptype = src->sustainlooptype;
+		rv->loop.start = src->loop.start;
+		rv->loop.end = src->loop.end;
+		rv->loop.type = src->loop.type;
+		rv->sustainloop.start = src->sustainloop.start;
+		rv->sustainloop.end = src->sustainloop.end;
+		rv->sustainloop.type = src->sustainloop.type;
 		rv->tune = src->tune;
 		rv->finetune = src->finetune;
 		rv->panfactor = src->panfactor;
@@ -220,4 +220,18 @@ SampleIterator sample_begin(psy_audio_Sample* self)
 
 	sampleiterator_init(&rv, self);
 	return rv;
+}
+
+void sample_setcontloop(psy_audio_Sample* self, LoopType looptype,
+	uintptr_t loopstart, uintptr_t loopend)
+{
+	psy_audio_sampleloop_init_all(&self->loop, looptype, loopstart,
+		loopend);
+}
+
+void sample_setsustainloop(psy_audio_Sample* self, LoopType looptype,
+	uintptr_t loopstart, uintptr_t loopend)
+{
+	psy_audio_sampleloop_init_all(&self->sustainloop, looptype, loopstart,
+		loopend);
 }

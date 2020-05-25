@@ -116,7 +116,7 @@ void wireview_inittabbar(WireView* self)
 	psy_ui_label_init(&self->vulabel, &self->top);
 	psy_ui_label_settext(&self->vulabel, "Vu");
 	psy_ui_label_settextalignment(&self->vulabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->vulabel.component, &margin);
@@ -132,7 +132,7 @@ void wireview_initvolumeslider(WireView* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2));
 	psy_ui_component_init(&self->slidergroup, wireview_base(self));
@@ -163,7 +163,7 @@ void wireview_initrategroup(WireView* self)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init(&margin, psy_ui_value_makeeh(0.5),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->rategroup, wireview_base(self));

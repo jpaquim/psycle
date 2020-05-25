@@ -41,7 +41,7 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_Margin margin;
 
 	self->workspace = workspace;
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));				
 	self->selchange = 0;	
 	self->player = &workspace->player;
@@ -80,8 +80,9 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	ConnectSongSignals(self);
 	machinebar_updatetext(self);
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
-		psy_ui_ALIGN_LEFT, &margin));	
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		&margin));	
 }
 
 void machinebar_updatetext(MachineBar* self)
@@ -147,7 +148,7 @@ void BuildMachineBox(MachineBar* self)
 	ClearMachineBox(self);	
 	if (machines_size(self->machines) == 1) {
 		psy_ui_combobox_addtext(&self->machinebox,
-			workspace_translate(self->workspace, "No Machines Loaded"));
+			workspace_translate(self->workspace, "machineview.No Machines Loaded"));
 		psy_ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
 		psy_TableIterator it;
@@ -247,7 +248,7 @@ void BuildParamList(MachineBar* self)
 		}
 	} else {
 		psy_ui_combobox_addtext(&self->instparambox,
-			workspace_translate(self->workspace, "No Machine"));
+			workspace_translate(self->workspace, "machineview.No Machine"));
 	}
 }
 

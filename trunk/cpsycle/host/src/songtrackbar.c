@@ -23,8 +23,6 @@ static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*,
 void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	workspace)
 {	
-	psy_ui_Margin margin;
-
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
@@ -39,13 +37,11 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songtrackbar_onsongchanged);
-	songtrackbar_updatetext(self);
-	psy_ui_margin_init(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(1),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));		
+	songtrackbar_updatetext(self);		
 	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, 0),
+		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-		&margin));	
+		NULL));	
 }
 
 void songtrackbar_updatetext(SongTrackBar* self)
