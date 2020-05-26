@@ -9,6 +9,8 @@
 #include <signal.h>
 #include <dsptypes.h>
 
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -44,6 +46,24 @@ typedef struct {
 	uintptr_t src;
 	uintptr_t dst;
 } psy_audio_Wire;
+
+INLINE void psy_audio_wire_init(psy_audio_Wire* self)
+{
+	self->src = UINTPTR_MAX;
+	self->dst = UINTPTR_MAX;
+}
+
+INLINE void psy_audio_wire_set(psy_audio_Wire* self, uintptr_t src,
+	uintptr_t dst)
+{
+	self->src = src;
+	self->dst = dst;
+}
+
+INLINE bool psy_audio_wire_valid(psy_audio_Wire* self)
+{
+	return self->src != UINTPTR_MAX && self->dst != UINTPTR_MAX;
+}
 
 typedef struct {
 	psy_Table container;

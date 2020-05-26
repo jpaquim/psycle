@@ -7,11 +7,24 @@
 #include <uibutton.h>
 #include "workspace.h"
 
+typedef enum {
+	PINEDIT_DRAG_NONE,
+	PINEDIT_DRAG_DST,
+	PINEDIT_DRAG_SRC,
+	PINEDIT_DRAG_NEW_DST,
+	PINEDIT_DRAG_NEW_SRC
+} PinEditDragMode;
+
 typedef struct {	
-	psy_ui_Component component;	
-	Workspace* workspace;
+	psy_ui_Component component;		
 	psy_audio_Wire wire;
-	int lineheight;
+	Workspace* workspace;
+	PinEditDragMode dragmode;
+	int drag_src;
+	int drag_dst;
+	int mx;
+	int my;
+	psy_List* pindragnode;
 } PinEdit;
 
 void pinedit_init(PinEdit*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
@@ -22,9 +35,10 @@ typedef struct {
 	psy_ui_Component buttongroup;
 	psy_ui_Button autowire;
 	psy_ui_Button unselectall;
+	Workspace* workspace;
 } ChannelMappingView;
 
-
-void channelmappingview_init(ChannelMappingView*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
+void channelmappingview_init(ChannelMappingView*, psy_ui_Component* parent,
+	psy_audio_Wire, Workspace*);
 
 #endif

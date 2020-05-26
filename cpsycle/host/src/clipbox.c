@@ -27,6 +27,7 @@ static void vtable_init(ClipBox* self)
 		vtable.ondraw = (psy_ui_fp_ondraw) clipbox_ondraw;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) clipbox_onmousedown;
 		vtable.ontimer = (psy_ui_fp_ontimer) clipbox_ontimer;
+		vtable_initialized = 1;
 	}
 }
 

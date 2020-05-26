@@ -142,7 +142,9 @@ typedef enum {
 } psy_ui_Alignment;
 
 void psy_ui_setrectangle(psy_ui_Rectangle*, int left, int top, int width, int height);
-int psy_ui_rectangle_intersect(psy_ui_Rectangle*, int x, int y);
+int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, int x, int y);
+bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle*,
+	int x1, int y1, int x2, int y2);
 int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 	const psy_ui_Rectangle* other);
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);

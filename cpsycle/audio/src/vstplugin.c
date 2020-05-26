@@ -356,7 +356,7 @@ int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 			if (mainentry) {
 				AEffect* effect;
 				
-				effect = mainentry(hostcallback);
+				effect = mainentry(hostcallback);				
 				vst = effect && makemachineinfo(effect, rv, path, 0) == 0;
 			}	
 		}

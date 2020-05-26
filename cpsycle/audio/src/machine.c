@@ -470,9 +470,9 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 					input_socket != 0; input_socket = input_socket->next) {
 				psy_audio_WireSocketEntry* source = (psy_audio_WireSocketEntry*)
 					input_socket->entry;
-				psy_audio_buffer_addsamples(output,
+				psy_audio_buffer_mixsamples(output,
 					machines_outputs(machines, source->slot),
-					amount, source->volume);				
+					amount, source->volume, source->mapping);
 			}							
 		}
 	}

@@ -36,6 +36,7 @@ typedef struct {
 	unsigned int colour;
 	unsigned int wirecolour;
 	unsigned int selwirecolour;
+	unsigned int hoverwirecolour;
 	unsigned int wireaacolour;
 	unsigned int wireaacolour2;
 	unsigned int polycolour;
@@ -99,6 +100,7 @@ typedef struct {
 	uintptr_t selectedslot;	
 	psy_audio_Wire dragwire;	
 	psy_audio_Wire selectedwire;
+	psy_audio_Wire hoverwire;
 	int drawvumeters;	
 	psy_audio_PluginCatcher plugincatcher;
 	MachineSkin skin;	   
@@ -109,6 +111,7 @@ typedef struct {
 	int randominsert;
 	int addeffect;
 	bool mousemoved;
+	bool showwirehover;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
