@@ -152,6 +152,7 @@ int workspace_showlinenumbersinhex(Workspace*);
 int workspace_showwideinstcolumn(Workspace*);
 int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
+int workspace_showwirehover(Workspace*);
 int workspace_showparamviewaswindow(Workspace*);
 void workspace_configchanged(Workspace*, psy_Properties* property,
 	psy_Properties* choice);

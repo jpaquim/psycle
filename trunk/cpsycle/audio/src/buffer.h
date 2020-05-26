@@ -8,6 +8,7 @@
 #include "../../detail/psydef.h"
 
 #include "array.h"
+#include <list.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +41,9 @@ uintptr_t psy_audio_buffer_offset(psy_audio_Buffer*);
 psy_dsp_amp_t* psy_audio_buffer_at(psy_audio_Buffer*, uintptr_t channel);
 void psy_audio_buffer_clearsamples(psy_audio_Buffer*, uintptr_t numsamples);
 void psy_audio_buffer_addsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
-	uintptr_t numsamples, float vol);
+	uintptr_t numsamples, psy_dsp_amp_t vol);
+void psy_audio_buffer_mixsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
+	uintptr_t numsamples, psy_dsp_amp_t vol, psy_List* mapping);
 void psy_audio_buffer_mulsamples(psy_audio_Buffer*, uintptr_t numsamples,
 	psy_dsp_amp_t mul);
 	uintptr_t psy_audio_buffer_numchannels(psy_audio_Buffer*);

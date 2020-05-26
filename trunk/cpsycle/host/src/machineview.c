@@ -515,9 +515,9 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->dragslot = UINTPTR_MAX;
 	self->dragmode = MACHINEWIREVIEW_DRAG_MACHINE;
 	self->selectedslot = MASTER_INDEX;
-	self->selectedwire.src = UINTPTR_MAX;
-	self->selectedwire.dst = UINTPTR_MAX;	
-
+	self->showwirehover = FALSE;
+	psy_audio_wire_init(&self->selectedwire);
+	psy_audio_wire_init(&self->hoverwire);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinewireview_onsongchanged);	
 	machinewireview_connectmachinessignals(self);
@@ -681,6 +681,7 @@ void machinewireview_readconfig(MachineWireView* self)
 		}
 		self->skin.drawmachineindexes = psy_properties_bool(mv,
 			"drawmachineindexes", 1);
+		self->showwirehover = workspace_showwirehover(self->workspace);
 	}
 }
 
@@ -691,7 +692,8 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);
 	self->skin.colour = psy_properties_int(p, "mv_colour", 0x00232323);
 	self->skin.wirecolour = psy_properties_int(p, "mv_wirecolour", 0x005F5F5F);
-	self->skin.selwirecolour = psy_properties_int(p, "mv_wirecolour", 0x007F7F7F);
+	self->skin.selwirecolour = psy_properties_int(p, "mv_selwirecolour", 0x007F7F7F);
+	self->skin.hoverwirecolour = psy_properties_int(p, "mv_hoverwirecolour", 0x007F7F7F);
 	self->skin.polycolour = psy_properties_int(p, "mv_wireaacolour2", 0x005F5F5F);
 	self->skin.polycolour = psy_properties_int(p, "mv_polycolour", 0x00B1C8B0);
 	self->skin.generator_fontcolour = 
@@ -907,6 +909,10 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 
 					out = machineui_position(inmachineui);
 					in = machineui_position(outmachineui);
+					if (self->hoverwire.src == slot &&
+						self->hoverwire.dst == entry->slot) {
+						psy_ui_setcolor(g, self->skin.hoverwirecolour);
+					} else
 					if (self->selectedwire.src == slot &&
 							self->selectedwire.dst == entry->slot) {
 						psy_ui_setcolor(g, self->skin.selwirecolour);
@@ -1402,6 +1408,45 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 			self->my = ev->y - self->dy;
 			psy_ui_component_invalidate(&self->component);			
 		}		
+	} else 
+	if (self->showwirehover) {
+		psy_audio_Wire hoverwire;
+		
+		hoverwire = machinewireview_hittestwire(self, ev->x - self->dx,
+			ev->y - self->dy);
+		if (psy_audio_wire_valid(&hoverwire)) {
+			MachineUi* machineui;
+
+			machineui = machineuis_at(self, hoverwire.dst);
+			if (machineui) {
+				psy_ui_Rectangle position;
+
+				position = machineui_position(machineui);
+				if (psy_ui_rectangle_intersect(&position, ev->x - self->dx,
+					ev->y - self->dy)) {
+					psy_audio_wire_init(&self->hoverwire);
+					psy_ui_component_invalidate(&self->component);
+					return;
+				}
+			}
+			machineui = machineuis_at(self, hoverwire.src);
+			if (machineui) {
+				psy_ui_Rectangle position;
+
+				position = machineui_position(machineui);
+				if (psy_ui_rectangle_intersect(&position, ev->x - self->dx,
+					ev->y - self->dy)) {
+					psy_audio_wire_init(&self->hoverwire);
+					psy_ui_component_invalidate(&self->component);
+					return;
+				}
+			}
+		}
+		if (hoverwire.dst != self->hoverwire.dst &&
+			hoverwire.src != self->hoverwire.src) {
+			self->hoverwire = hoverwire;
+			psy_ui_component_invalidate(&self->component);
+		}		
 	}
 }
 
@@ -1463,63 +1508,45 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 	psy_audio_Wire rv;
 	psy_TableIterator it;
 	
-	rv.dst = UINTPTR_MAX;
-	rv.src = UINTPTR_MAX;
+	psy_audio_wire_init(&rv);
 	for (it = machines_begin(self->machines); it.curr != 0; 
 			psy_tableiterator_inc(&it)) {
 		psy_audio_MachineSockets* sockets;
 		WireSocket* p;			
 		uintptr_t slot = it.curr->key;
-		int done = 0;
 	
 		sockets	= connections_at(&self->machines->connections, slot);
 		if (sockets) {
 			p = sockets->outputs;	
 			while (p != NULL) {
-				psy_audio_WireSocketEntry* entry =
-					(psy_audio_WireSocketEntry*) p->entry;
-				if (entry->slot != UINTPTR_MAX) {
-					psy_ui_Size out;
-					psy_ui_Size in;								
-					int x1, x2, y1, y2;
-					float m;
-					int b;
-					int y3;				
+				psy_audio_WireSocketEntry* entry;
+
+				entry =	(psy_audio_WireSocketEntry*) p->entry;
+				if (entry->slot != UINTPTR_MAX) {					
 					MachineUi* inmachineui;
 					MachineUi* outmachineui;
 
 					inmachineui = machineuis_at(self, entry->slot);
 					outmachineui = machineuis_at(self, slot);
 					if (inmachineui && outmachineui) {
+						psy_ui_Rectangle r;
+						psy_ui_Size out;
+						psy_ui_Size in;
+						int d = 4;
+
 						out = machineui_size(outmachineui);
 						in = machineui_size(inmachineui);
-
-						x1 = outmachineui->x + out.width / 2;
-						y1 = outmachineui->y + out.height / 2;
-						x2 = inmachineui->x + in.width / 2;
-						y2 = inmachineui->y + in.height / 2;							
-						if (x2 - x1 != 0) {
-							m = (y2 - y1) / (float)(x2 - x1);
-							b = y1 - (int) (m * x1);
-							y3 = (int)(m * x) + b;
-						} else {											
-							if (abs(x - x1) < 10 &&
-								y >= y1 && y <= y2) {						
-								rv.src = slot;
-								rv.dst = entry->slot;												
-							} 
-							done = 1;
-							break;
-						}
-						if (abs(y - y3) < 10) {					
-							rv.src = slot;
-							rv.dst = entry->slot;
-							done = 1;
-							break;
-						}
+						psy_ui_setrectangle(&r, x - d, y - d, 2 * d, 2 * d);
+						if (psy_ui_rectangle_intersect_segment(&r,
+							outmachineui->x + out.width / 2,
+							outmachineui->y + out.height / 2,
+							inmachineui->x + in.width / 2,
+							inmachineui->y + in.height / 2)) {
+							psy_audio_wire_set(&rv, slot, entry->slot);							
+						}						
 					}
 				}
-				if (done) {
+				if (psy_audio_wire_valid(&rv)) {
 					break;
 				}
 				p = p->next;
@@ -2067,6 +2094,9 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_updatetext(self, workspace);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		machineview_onlanguagechanged);
+	if (workspace_showwirehover(workspace)) {
+		self->wireview.showwirehover = TRUE;
+	}
 	self->wireview.firstsize = 1;
 }
 

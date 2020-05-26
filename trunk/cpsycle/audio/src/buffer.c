@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "buffer.h"
+#include "connections.h"
 #include <operations.h>
 #include <rms.h>
 #include <math.h>
@@ -120,6 +121,32 @@ void psy_audio_buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* sourc
 				dsp.erase_all_nans_infinities_and_denormals(
 					self->samples[channel] + self->offset, numsamples);
 		}
+	}
+}
+
+void psy_audio_buffer_mixsamples(psy_audio_Buffer* self, psy_audio_Buffer* source,
+	uintptr_t numsamples, psy_dsp_amp_t vol, psy_List* mapping)
+{
+	if (source) {
+		psy_dsp_amp_t factor;
+		psy_List* pinpair;
+
+		factor = psy_audio_buffer_rangefactor(source, self->range) * vol;
+		for (pinpair = mapping; pinpair != 0; pinpair = pinpair->next) {
+			psy_audio_PinConnection* connection;
+
+			connection = (psy_audio_PinConnection*)(pinpair->entry);
+			if (connection->dst < self->numchannels &&
+				connection->src < source->numchannels) {
+				dsp.add(
+					source->samples[connection->src] + source->offset,
+					self->samples[connection->dst] + self->offset,
+					numsamples,
+					factor);
+				dsp.erase_all_nans_infinities_and_denormals(
+					self->samples[connection->dst] + self->offset, numsamples);
+			}
+		}		
 	}
 }
 

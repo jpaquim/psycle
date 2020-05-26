@@ -43,10 +43,88 @@ int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle* self,
 		other->bottom < self->top);
 }
 
-int psy_ui_rectangle_intersect(psy_ui_Rectangle* self, int x, int y)
+int psy_ui_rectangle_intersect(const psy_ui_Rectangle* self, int x, int y)
 {
 	return (x >= self->left && x < self->right && 
 			y >= self->top && y < self->bottom);
+}
+
+// from stackoverflow by metamal
+// todo: use liang-barsky algorithm
+bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
+	int a_p1x, int a_p1y, int a_p2x, int a_p2y)
+{
+	// Find min and max X for the segment
+	int a_rectangleMinX = self->left;
+	int a_rectangleMinY = self->top;
+	int a_rectangleMaxX = self->right;
+	int a_rectangleMaxY = self->bottom;
+	double minX = a_p1x;
+	double maxX = a_p2x;
+
+	if (a_p1x > a_p2x)
+	{
+		minX = a_p2x;
+		maxX = a_p1x;
+	}
+
+	// Find the intersection of the segment's and rectangle's x-projections
+
+	if (maxX > a_rectangleMaxX)
+	{
+		maxX = a_rectangleMaxX;
+	}
+
+	if (minX < a_rectangleMinX)
+	{
+		minX = a_rectangleMinX;
+	}
+
+	if (minX > maxX) // If their projections do not intersect return false
+	{
+		return FALSE;
+	}
+
+	// Find corresponding min and max Y for min and max X we found before
+
+	double minY = a_p1y;
+	double maxY = a_p2y;
+
+	double dx = a_p2x - a_p1x;
+
+	if (abs(dx) > 0.0000001)
+	{
+		double a = (a_p2y - a_p1y) / dx;
+		double b = a_p1y - a * a_p1x;
+		minY = a * minX + b;
+		maxY = a * maxX + b;
+	}
+
+	if (minY > maxY)
+	{
+		double tmp = maxY;
+		maxY = minY;
+		minY = tmp;
+	}
+
+	// Find the intersection of the segment's and rectangle's y-projections
+
+	if (maxY > a_rectangleMaxY)
+	{
+		maxY = a_rectangleMaxY;
+	}
+
+	if (minY < a_rectangleMinY)
+	{
+		minY = a_rectangleMinY;
+	}
+
+	if (minY > maxY) // If Y-projections do not intersect return false
+	{
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 void psy_ui_rectangle_union(psy_ui_Rectangle* self,

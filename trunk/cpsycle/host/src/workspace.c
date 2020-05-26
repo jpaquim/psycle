@@ -761,6 +761,9 @@ void workspace_makemachineview(Workspace* self, psy_Properties* visual)
 	psy_properties_settext(
 		psy_properties_append_bool(mvc, "drawvumeters", 1),
 		"Draw VU Meters");
+	psy_properties_settext(
+		psy_properties_append_bool(mvc, "drawwirehover", 0),
+		"Draw Wire Hover");
 	workspace_makemachineviewtheme(self, mvc);
 }
 
@@ -1494,6 +1497,11 @@ int workspace_doublemidline(Workspace* self)
 int workspace_showmachineindexes(Workspace* self)
 {
 	return psy_properties_bool(self->config, "visual.machineview.drawmachineindexes", 1);
+}
+
+int workspace_showwirehover(Workspace* self)
+{
+	return psy_properties_bool(self->config, "visual.machineview.drawwirehover", 1);
 }
 
 int workspace_showparamviewaswindow(Workspace* self)
