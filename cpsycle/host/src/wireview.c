@@ -313,7 +313,7 @@ void wireview_onhold(WireView* self, psy_ui_Component* sender)
 void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && self->workspace->song) {		
-		machines_disconnect(&self->workspace->song->machines, self->wire.src,
+		psy_audio_machines_disconnect(&self->workspace->song->machines, self->wire.src,
 			self->wire.dst);		
 	}
 }
@@ -334,7 +334,7 @@ void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
 int wireview_wireexists(WireView* self)
 {
 	return (self->workspace && self->workspace->song)
-		   ? machines_connected(&self->workspace->song->machines,
+		   ? psy_audio_machines_connected(&self->workspace->song->machines,
 				self->wire.src, self->wire.dst)
 		   : 0;
 }

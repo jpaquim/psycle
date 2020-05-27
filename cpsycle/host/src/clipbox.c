@@ -82,8 +82,8 @@ void clipbox_onsongchanged(ClipBox* self, Workspace* workspace, int flag, psy_au
 void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 {
 	if (workspace && workspace->song &&
-			machines_master(&workspace->song->machines)) {
-		psy_signal_connect(&machines_master(
+			psy_audio_machines_master(&workspace->song->machines)) {
+		psy_signal_connect(&psy_audio_machines_master(
 			&workspace->song->machines)->signal_worked, self,
 			clipbox_onmasterworked);
 	}

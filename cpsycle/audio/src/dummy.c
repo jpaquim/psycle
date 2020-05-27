@@ -53,7 +53,7 @@ static void vtable_init(psy_audio_DummyMachine* self)
 	}
 }
 
-void dummymachine_init(psy_audio_DummyMachine* self, MachineCallback callback)
+void dummymachine_init(psy_audio_DummyMachine* self, psy_audio_MachineCallback callback)
 {	
 	self->mode = MACHMODE_FX;
 	custommachine_init(&self->custommachine, callback);

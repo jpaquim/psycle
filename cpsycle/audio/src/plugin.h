@@ -20,7 +20,7 @@ typedef struct psy_audio_Plugin {
 	psy_Table parameters;
 } psy_audio_Plugin;
 
-void psy_audio_plugin_init(psy_audio_Plugin*, MachineCallback, const char* path);
+void psy_audio_plugin_init(psy_audio_Plugin*, psy_audio_MachineCallback, const char* path);
 int psy_audio_plugin_psycle_test(const char* path, psy_audio_MachineInfo*);
 
 INLINE psy_audio_Machine* psy_audio_plugin_base(psy_audio_Plugin* self)

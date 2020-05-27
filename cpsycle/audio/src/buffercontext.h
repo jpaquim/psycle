@@ -11,6 +11,12 @@
 extern "C" {
 #endif
 
+// psy_audio_BufferContext
+// Parameter Object
+//
+// aim: merges all parameters a machine needs to perform a work or similiar
+//      calls
+
 typedef struct {
 	psy_audio_Buffer* input;
 	psy_audio_Buffer* output;

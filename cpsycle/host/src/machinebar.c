@@ -146,14 +146,14 @@ void OnMachinesRemoved(MachineBar* self, psy_audio_Machines* machines, int slot)
 void BuildMachineBox(MachineBar* self)
 {
 	ClearMachineBox(self);	
-	if (machines_size(self->machines) == 1) {
+	if (psy_audio_machines_size(self->machines) == 1) {
 		psy_ui_combobox_addtext(&self->machinebox,
 			workspace_translate(self->workspace, "machineview.No Machines Loaded"));
 		psy_ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
 		psy_TableIterator it;
 	
-		for (it = machines_begin(self->machines); !psy_tableiterator_equal(&it, psy_table_end());
+		for (it = psy_audio_machines_begin(self->machines); !psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {			
 			psy_audio_Machine* machine;
 
@@ -165,7 +165,7 @@ void BuildMachineBox(MachineBar* self)
 
 int insertmachine(MachineBar* self, size_t slot, psy_audio_Machine* machine)
 {			
-	if (slot != MASTER_INDEX && psy_audio_machine_info(machine) &&
+	if (slot != psy_audio_MASTER_INDEX && psy_audio_machine_info(machine) &&
 			psy_audio_machine_info(machine)->ShortName) {
 		intptr_t comboboxindex;
 
@@ -186,7 +186,7 @@ void OnMachineBoxSelChange(MachineBar* self, psy_ui_Component* sender, int sel)
 	psy_List* slots = self->machinebox.signal_selchanged.slots;
 	self->machinebox.signal_selchanged.slots = 0;
 	slot = (size_t)psy_table_at(&self->comboboxslots, sel);
-	machines_changeslot(self->machines, slot);	
+	psy_audio_machines_changeslot(self->machines, slot);	
 	self->machinebox.signal_selchanged.slots = slots;
 }
 
@@ -197,7 +197,7 @@ void OnMachinesSlotChange(MachineBar* self, psy_audio_Machines* machines, int sl
 
 	comboboxindex = (intptr_t) psy_table_at(&self->slotscombobox, slot);
 	psy_ui_combobox_setcursel(&self->machinebox, comboboxindex);
-	machine = self->machines ? machines_at(self->machines, machines_slot(self->machines)) : NULL;
+	machine = self->machines ? psy_audio_machines_at(self->machines, psy_audio_machines_slot(self->machines)) : NULL;
 	if (machine && machine_supports(machine, MACH_SUPPORTS_INSTRUMENTS)) {
 		psy_ui_combobox_setcursel(&self->selectinstparam, 1);
 	} else {
@@ -221,7 +221,7 @@ void BuildParamList(MachineBar* self)
 	psy_audio_Machine* machine;
 
 	psy_ui_combobox_clear(&self->instparambox);
-	machine = self->machines ? machines_at(self->machines, machines_slot(self->machines)) : NULL;
+	machine = self->machines ? psy_audio_machines_at(self->machines, psy_audio_machines_slot(self->machines)) : NULL;
 	if (machine) {
 		uintptr_t i;
 
@@ -283,7 +283,7 @@ void OnInstParamBoxSelChange(MachineBar* self, psy_ui_Component* sender, int sel
 		psy_signal_enable(&self->instruments->signal_slotchange, self,
 			OnInstrumentSlotChanged);
 	} else {
-		machines_changetweakparam(self->machines, sel);
+		psy_audio_machines_changetweakparam(self->machines, sel);
 	}
 }
 
@@ -330,15 +330,15 @@ void ConnectInstrumentSignals(MachineBar* self)
 
 void OnNextMachine(MachineBar* self, psy_ui_Component* sender)
 {
-	if (self->machines && machines_slot(self->machines) > 0) {
-		machines_changeslot(self->machines, machines_slot(self->machines) - 1);
+	if (self->machines && psy_audio_machines_slot(self->machines) > 0) {
+		psy_audio_machines_changeslot(self->machines, psy_audio_machines_slot(self->machines) - 1);
 	}
 }
 
 void OnPrevMachine(MachineBar* self, psy_ui_Component* sender)
 {
 	if (self->machines) {
-		machines_changeslot(self->machines, machines_slot(self->machines) + 1);
+		psy_audio_machines_changeslot(self->machines, psy_audio_machines_slot(self->machines) + 1);
 	}
 }
 

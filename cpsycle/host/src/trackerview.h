@@ -200,7 +200,7 @@ typedef struct {
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	struct TrackerView*, psy_audio_Player*);
 
-typedef Inputs TrackerInputs;
+typedef psy_audio_Inputs TrackerInputs;
 
 typedef struct TrackerView {
 	psy_ui_Component component;	

@@ -116,10 +116,10 @@ void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender,
 
 void volslider_onsliderchanged(VolSlider* self, psy_ui_Component* sender)
 {	
-	if (self->machines && machines_master(self->machines)) {
+	if (self->machines && psy_audio_machines_master(self->machines)) {
 		psy_audio_MachineParam* param;
 
-		param = psy_audio_machine_tweakparameter(machines_master(self->machines), 0);
+		param = psy_audio_machine_tweakparameter(psy_audio_machines_master(self->machines), 0);
 		if (param) {
 			psy_audio_machineparam_tweak(param, (float) self->value);
 		}
@@ -134,10 +134,10 @@ void volslider_onsongchanged(VolSlider* self, Workspace* workspace, int flag,
 
 void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, int timerid)
 {		
-	if (self->machines && machines_master(self->machines)) {
+	if (self->machines && psy_audio_machines_master(self->machines)) {
 		psy_audio_MachineParam* param;
 
-		param = psy_audio_machine_tweakparameter(machines_master(self->machines), 0);
+		param = psy_audio_machine_tweakparameter(psy_audio_machines_master(self->machines), 0);
 		if (param) {
 			double oldvalue;
 

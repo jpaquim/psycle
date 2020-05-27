@@ -1033,7 +1033,7 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		} else {
 			int cmd;
 
-			cmd = inputs_cmd(&self->view->inputs, encodeinput(ev->keycode, ev->shift,
+			cmd = psy_audio_inputs_cmd(&self->view->inputs, psy_audio_encodeinput(ev->keycode, ev->shift,
 				ev->ctrl));
 			if (cmd == CMD_NAVLEFT) {
 				trackergrid_prevcol(self);
@@ -1068,7 +1068,7 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 					cmd.id = -1;
 					kbd = workspace_kbddriver(self->view->workspace);
 					input.message = EVENTDRIVER_KEYDOWN;
-					input.param1 = encodeinput(ev->keycode, 0, ev->ctrl);
+					input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
 					kbd->cmd(kbd, input, &cmd);
 					trackergrid_inputnote(self,
 						(psy_dsp_note_t)(cmd.id + workspace_octave(self->view->workspace) * 12),
@@ -1508,7 +1508,7 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 		}
 	} else {
 		int cmd;
-		cmd = inputs_cmd(&self->inputs, encodeinput(ev->keycode, ev->shift,
+		cmd = psy_audio_inputs_cmd(&self->inputs, psy_audio_encodeinput(ev->keycode, ev->shift,
 			ev->ctrl));
 		trackerview_handlecommand(self, ev, cmd);
 	}
@@ -1633,7 +1633,7 @@ void trackergrid_enterevent(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		cmd.id = -1;
 		kbd = workspace_kbddriver(self->view->workspace);
 		input.message = EVENTDRIVER_KEYDOWN;
-		input.param1 = encodeinput(ev->keycode, 0, ev->ctrl);
+		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
 		kbd->cmd(kbd, input, &cmd);
 		if (cmd.id == NOTECOMMANDS_RELEASE) {
 			trackergrid_inputnote(self, NOTECOMMANDS_RELEASE,
@@ -1840,11 +1840,11 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	patternevent_init_all(&event,
 		note,
 		NOTECOMMANDS_INST_EMPTY,
-		(unsigned char) machines_slot(&self->view->workspace->song->machines),
+		(unsigned char) psy_audio_machines_slot(&self->view->workspace->song->machines),
 		NOTECOMMANDS_VOL_EMPTY,
 		0,
 		0);
-	machine = machines_at(&self->view->workspace->song->machines, event.mach);
+	machine = psy_audio_machines_at(&self->view->workspace->song->machines, event.mach);
 	if (machine && 
 			machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
 		event.inst = self->view->workspace->song->instruments.slot;
@@ -2503,7 +2503,7 @@ void trackerview_connectworkspace(TrackerView* self)
 
 void trackerview_ondestroy(TrackerView* self, psy_ui_Component* sender)
 {
-	inputs_dispose(&self->inputs);
+	psy_audio_inputs_dispose(&self->inputs);
 	{
 		psy_TableIterator it;	
 	
@@ -3084,42 +3084,42 @@ void trackerview_setcentermode(TrackerView* self, int mode)
 
 void trackerview_initinputs(TrackerView* self)
 {
-	inputs_init(&self->inputs);	
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_DOWN, 0, 0),CMD_NAVDOWN);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_LEFT, 0, 0),CMD_NAVLEFT);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_RIGHT, 0, 0),CMD_NAVRIGHT);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_PRIOR, 0, 0),CMD_NAVPAGEUP);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_NEXT, 0, 0),CMD_NAVPAGEDOWN);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_HOME, 0, 0), CMD_NAVTOP);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_END, 0, 0), CMD_NAVBOTTOM);	
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_TAB, 1, 0), CMD_COLUMNPREV);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_TAB, 0, 0), CMD_COLUMNNEXT);	
+	psy_audio_inputs_init(&self->inputs);	
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 0),CMD_NAVDOWN);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_LEFT, 0, 0),CMD_NAVLEFT);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_RIGHT, 0, 0),CMD_NAVRIGHT);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_PRIOR, 0, 0),CMD_NAVPAGEUP);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_NEXT, 0, 0),CMD_NAVPAGEDOWN);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_HOME, 0, 0), CMD_NAVTOP);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_END, 0, 0), CMD_NAVBOTTOM);	
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_TAB, 1, 0), CMD_COLUMNPREV);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 0), CMD_COLUMNNEXT);	
 		
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_INSERT, 0, 0), CMD_ROWINSERT);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_BACK, 0, 0), CMD_ROWDELETE);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_DELETE, 0, 0), CMD_ROWCLEAR);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_INSERT, 0, 0), CMD_ROWINSERT);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_BACK, 0, 0), CMD_ROWDELETE);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_DELETE, 0, 0), CMD_ROWCLEAR);
 
-	inputs_define(&self->inputs, encodeinput('B', 0, 1), CMD_BLOCKSTART);
-	inputs_define(&self->inputs, encodeinput('E', 0, 1), CMD_BLOCKEND);
-	inputs_define(&self->inputs, encodeinput('U', 0, 1), CMD_BLOCKUNMARK);
-	inputs_define(&self->inputs, encodeinput('X', 0, 1), CMD_BLOCKCUT);
-	inputs_define(&self->inputs, encodeinput('C', 0, 1), CMD_BLOCKCOPY);
-	inputs_define(&self->inputs, encodeinput('V', 0, 1), CMD_BLOCKPASTE);
-	inputs_define(&self->inputs, encodeinput('M', 0, 1), CMD_BLOCKMIX);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('B', 0, 1), CMD_BLOCKSTART);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('E', 0, 1), CMD_BLOCKEND);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('U', 0, 1), CMD_BLOCKUNMARK);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('X', 0, 1), CMD_BLOCKCUT);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('C', 0, 1), CMD_BLOCKCOPY);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('V', 0, 1), CMD_BLOCKPASTE);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('M', 0, 1), CMD_BLOCKMIX);
 	
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F12, 0, 1), CMD_TRANSPOSEBLOCKINC);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12);
-	inputs_define(&self->inputs, encodeinput(psy_ui_KEY_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_F12, 0, 1), CMD_TRANSPOSEBLOCKINC);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput(psy_ui_KEY_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12);
 	
-	inputs_define(&self->inputs, encodeinput('A', 0, 1), CMD_SELECTALL);
-	inputs_define(&self->inputs, encodeinput('R', 0, 1), CMD_SELECTCOL);
-	inputs_define(&self->inputs, encodeinput('K', 0, 1), CMD_SELECTBAR);	
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('A', 0, 1), CMD_SELECTALL);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('R', 0, 1), CMD_SELECTCOL);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('K', 0, 1), CMD_SELECTBAR);	
 		
-	inputs_define(&self->inputs, encodeinput('Z', 0, 1), CMD_UNDO);
-	inputs_define(&self->inputs, encodeinput('Z', 1, 1), CMD_REDO);
-	inputs_define(&self->inputs, encodeinput('F', 0, 1), CMD_FOLLOWSONG);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('Z', 1, 1), CMD_REDO);
+	psy_audio_inputs_define(&self->inputs, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG);
 }
 
 void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)
@@ -3597,7 +3597,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 		psy_audio_Machine* machine;
 		int value;
 
-		machine = machines_at(&self->workspace->song->machines, slot);
+		machine = psy_audio_machines_at(&self->workspace->song->machines, slot);
 		assert(machine);
 		value = 0; // machine_parametervalue_scaled(machine, tweak, normvalue);
 		patternevent_init_all(&event,
@@ -3606,7 +3606,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 				? NOTECOMMANDS_TWEAKSLIDE
 				: NOTECOMMANDS_TWEAK),
 			NOTECOMMANDS_INST_EMPTY,
-			(unsigned char) machines_slot(&self->workspace->song->machines),
+			(unsigned char) psy_audio_machines_slot(&self->workspace->song->machines),
 			NOTECOMMANDS_VOL_EMPTY,
 			(unsigned char) ((value & 0xFF00) >> 8),
 			(unsigned char) (value & 0xFF));

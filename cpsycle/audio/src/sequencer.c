@@ -395,7 +395,7 @@ void psy_audio_sequencer_notifysequencertick(psy_audio_Sequencer* self,
 {
 	psy_TableIterator it;	
 	
-	for (it = machines_begin(self->machines);
+	for (it = psy_audio_machines_begin(self->machines);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {		
 		psy_audio_machine_sequencertick((psy_audio_Machine*)
@@ -446,7 +446,7 @@ int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer* self) {
 		if (patternentry_front(entry)->mach != NOTECOMMANDS_EMPTY) {
 			psy_audio_Machine* machine;				
 				
-			machine = machines_at(self->machines,
+			machine = psy_audio_machines_at(self->machines,
 				patternentry_front(entry)->mach);
 			if (machine) {
 				psy_List* events;
@@ -722,7 +722,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			patternentry_front(patternentry)->note == NOTECOMMANDS_EMPTY) {
 		psy_audio_Machine* machine;
 
-		machine = machines_at(self->machines, patternentry_front(patternentry)->mach);
+		machine = psy_audio_machines_at(self->machines, patternentry_front(patternentry)->mach);
 		// Does this machine really exist and is not muted?
 		if (machine && !psy_audio_machine_muted(machine)) {
 			if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
@@ -745,10 +745,10 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			entry = patternentry_clone(patternentry);			
 			patternentry_front(entry)->vol = 
 				(patternentry_front(entry)->mach == NOTECOMMANDS_MACH_EMPTY)
-				? MASTER_INDEX
+				? psy_audio_MASTER_INDEX
 				: patternentry_front(entry)->mach;
 			// because master handles all wires volumes
-			patternentry_front(entry)->mach = MASTER_INDEX;
+			patternentry_front(entry)->mach = psy_audio_MASTER_INDEX;
 			patternentry_setbpm(entry, self->bpm);
 			entry->delta = offset - self->position;
 			psy_list_append(&self->events, entry);				
@@ -878,7 +878,7 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 	uintptr_t framesperslide = 64;
 	uintptr_t numslides;
 	
-	machine = machines_at(self->machines, patternentry_front(entry)->mach);
+	machine = psy_audio_machines_at(self->machines, patternentry_front(entry)->mach);
 	if (!machine) {
 		return;
 	}

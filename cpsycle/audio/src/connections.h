@@ -15,18 +15,49 @@
 extern "C" {
 #endif
 
-#define MASTER_INDEX 128
-#define MAX_STREAM_SIZE 256
+#define psy_audio_MASTER_INDEX 128
+#define psy_audio_MAX_STREAM_SIZE 256
 
 typedef struct {
 	uintptr_t src;
 	uintptr_t dst;
 } psy_audio_PinConnection;
 
+INLINE void psy_audio_pinconnection_init(psy_audio_PinConnection* self)
+{
+	self->src = UINTPTR_MAX;
+	self->dst = UINTPTR_MAX;
+}
+
+INLINE void psy_audio_pinconnection_init_all(psy_audio_PinConnection* self,
+	uintptr_t src, uintptr_t dst)
+{
+	self->src = src;
+	self->dst = dst;
+}
+
+psy_audio_PinConnection* psy_audio_pinconnection_alloc(void);
+psy_audio_PinConnection* psy_audio_pinconnection_allocinit_all(uintptr_t src,
+	uintptr_t dst);
+
+typedef struct psy_audio_PinMapping {
+	psy_List* container;
+} psy_audio_PinMapping;
+
+void psy_audio_pinmapping_init(psy_audio_PinMapping*, uintptr_t numchannels);
+void psy_audio_pinmapping_dispose(psy_audio_PinMapping*);
+void psy_audio_pinmapping_clear(psy_audio_PinMapping*);
+void psy_audio_pinmapping_autowire(psy_audio_PinMapping*,
+	uintptr_t numchannels);
+void psy_audio_pinmapping_connect(psy_audio_PinMapping*, uintptr_t src,
+	uintptr_t dst);
+void psy_audio_pinmapping_disconnect(psy_audio_PinMapping*, uintptr_t src,
+	uintptr_t dst);
+
 typedef struct {
 	uintptr_t slot;	
 	psy_dsp_amp_t volume;
-	psy_List* mapping;
+	psy_audio_PinMapping mapping;
 	intptr_t id;
 } psy_audio_WireSocketEntry;
 

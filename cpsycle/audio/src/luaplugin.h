@@ -53,7 +53,7 @@ typedef struct {
 	struct psy_audio_Lock* lock;
 } psy_audio_LuaPlugin;
 
-void psy_audio_luaplugin_init(psy_audio_LuaPlugin*, MachineCallback,
+void psy_audio_luaplugin_init(psy_audio_LuaPlugin*, psy_audio_MachineCallback,
 	const char* path);
 int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo*);
 

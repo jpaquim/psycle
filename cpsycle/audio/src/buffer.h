@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 struct psy_dsp_RMSVol;
+struct psy_audio_PinMapping;
 
 typedef struct psy_audio_Buffer {
 	psy_dsp_amp_t** samples;
@@ -43,7 +44,8 @@ void psy_audio_buffer_clearsamples(psy_audio_Buffer*, uintptr_t numsamples);
 void psy_audio_buffer_addsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
 	uintptr_t numsamples, psy_dsp_amp_t vol);
 void psy_audio_buffer_mixsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
-	uintptr_t numsamples, psy_dsp_amp_t vol, psy_List* mapping);
+	uintptr_t numsamples, psy_dsp_amp_t vol,
+	const struct psy_audio_PinMapping* mapping);
 void psy_audio_buffer_mulsamples(psy_audio_Buffer*, uintptr_t numsamples,
 	psy_dsp_amp_t mul);
 	uintptr_t psy_audio_buffer_numchannels(psy_audio_Buffer*);

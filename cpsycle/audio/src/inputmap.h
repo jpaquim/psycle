@@ -6,21 +6,32 @@
 
 #include <hashtbl.h>
 
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
 	psy_Table map;	
-} Inputs;
+} psy_audio_Inputs;
 
-void inputs_init(Inputs*);
-void inputs_dispose(Inputs*);
-void inputs_define(Inputs*, int input, int cmd);
-int inputs_cmd(Inputs*, int input);
+void psy_audio_inputs_init(psy_audio_Inputs*);
+void psy_audio_inputs_dispose(psy_audio_Inputs*);
+void psy_audio_inputs_define(psy_audio_Inputs*, int input, int cmd);
+int psy_audio_inputs_cmd(psy_audio_Inputs*, int input);
 
-unsigned int encodeinput(unsigned int keycode, int shift, int ctrl);
-void decodeinput(unsigned int input, unsigned int* keycode, int* shift, int* ctrl);
+INLINE uintptr_t psy_audio_encodeinput(uintptr_t keycode, bool shift, bool ctrl)
+{	
+	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9);
+}
+
+INLINE void psy_audio_decodeinput(uintptr_t input, uintptr_t* keycode, bool* shift, bool* ctrl)
+{
+	*keycode = input & 0xFF;
+	*shift = ((input >> 8) & 0x01) == 0x01;
+	*ctrl = ((input >> 9) & 0x01) == 0x01;
+}
 
 #ifdef __cplusplus
 }

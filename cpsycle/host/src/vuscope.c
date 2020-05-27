@@ -196,7 +196,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
 
-	machine = machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
 	if (!machine) {
 		return;
 	}
@@ -322,7 +322,7 @@ void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsign
 		psy_audio_Machine* machine;
 		psy_audio_Buffer* memory;
 
-		machine = machines_at(&self->workspace->song->machines, self->wire.src);
+		machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
 		if (machine) {
 			memory = psy_audio_machine_buffermemory(machine);
 			if (memory && memory->rms) {
@@ -352,7 +352,7 @@ void vuscope_connectmachinessignals(VuScope* self, Workspace* workspace)
 	if (workspace->song) {
 		psy_audio_Machine* srcmachine;
 
-		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
+		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
 			psy_signal_connect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
@@ -365,7 +365,7 @@ void vuscope_disconnectmachinessignals(VuScope* self, Workspace* workspace)
 	if (workspace->song) {
 		psy_audio_Machine* srcmachine;
 
-		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
+		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
 			psy_signal_disconnect(&srcmachine->signal_worked, self,
 				vuscope_onsrcmachineworked);
@@ -387,7 +387,7 @@ void vuscope_disconnect(VuScope* self)
 {
 	if (self->workspace && self->workspace->song) {
 		psy_audio_Machine* srcmachine;
-		srcmachine = machines_at(&self->workspace->song->machines,
+		srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
 			self->wire.src);
 		if (srcmachine) {
 			psy_audio_exclusivelock_enter();

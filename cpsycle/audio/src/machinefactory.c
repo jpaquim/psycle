@@ -26,31 +26,34 @@
 #define _MAX_PATH 4096
 #endif
 
-void machinefactory_init(psy_audio_MachineFactory* self, MachineCallback callback,
+void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_MachineCallback callback,
 	psy_audio_PluginCatcher* catcher)
 {
-	self->machinecallback = callback;	
+	self->machinecallback = callback;
 	self->catcher = catcher;
-	self->options = MACHINEFACTORY_CREATEASPROXY;
+#ifdef PSYCLE_USE_MACHINEPROXY
+	self->createasproxy = TRUE;
+#else
+	self->createasproxy = FALSE;
+#endif
 	self->loadnewgamefxblitz = 0;
 }
 
-void machinefactory_dispose(psy_audio_MachineFactory* self)
+void psy_audio_machinefactory_dispose(psy_audio_MachineFactory* self)
 {	
 }
 
-void machinefactory_setoptions(psy_audio_MachineFactory* self, 
-	MachineFactoryOptions options)
+void psy_audio_machinefactory_createasproxy(psy_audio_MachineFactory* self)
 {
-	self->options = options;
+	self->createasproxy = TRUE;
 }
 
-MachineFactoryOptions machinefactory_options(psy_audio_MachineFactory* self)
+void psy_audio_machinefactory_createwithoutproxy(psy_audio_MachineFactory* self)
 {
-	return self->options;
+	self->createasproxy = FALSE;
 }
 
-psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, MachineType type,
+psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory* self, MachineType type,
 	const char* plugincatchername)
 {
 	char fullpath[_MAX_PATH];
@@ -58,18 +61,17 @@ psy_audio_Machine* machinefactory_makemachine(psy_audio_MachineFactory* self, Ma
 	if (!self->catcher) {
 		return 0;
 	}
-	return machinefactory_makemachinefrompath(self, type,
+	return psy_audio_machinefactory_makemachinefrompath(self, type,
 		plugincatcher_modulepath(self->catcher, type,
 		self->loadnewgamefxblitz,
 		plugincatchername, fullpath),
 		plugincatcher_extractshellidx(plugincatchername));
 }
 
-psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
+psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
 	MachineType type, const char* path, uintptr_t shellidx)
 {
 	psy_audio_Machine* rv = 0;
-	psy_audio_MachineProxy* proxy = 0;
 
 	switch (type) {
 		case MACH_MASTER:
@@ -157,6 +159,7 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			
 			sampler = psy_audio_sampler_allocinit(self->machinecallback);
 			if (sampler) {
+				sampler->clipmax = 0.5f;
 				rv = psy_audio_sampler_base(sampler);
 			} else {
 				rv = 0;
@@ -256,12 +259,12 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 			rv = 0;
 		break;
 	}
-	if ((rv && ((self->options & MACHINEFACTORY_CREATEASPROXY)
-			== MACHINEFACTORY_CREATEASPROXY))) {
-		proxy = malloc(sizeof(psy_audio_MachineProxy));
+	if (rv && self->createasproxy) {
+		psy_audio_MachineProxy* proxy;
+
+		proxy = psy_audio_machineproxy_allocinit(rv);
 		if (proxy) {
-			machineproxy_init(proxy, rv);
-			rv = &proxy->machine;
+			rv = psy_audio_machineproxy_base(proxy);
 		} else {
 			machine_dispose(rv);
 			free(rv);
@@ -271,12 +274,14 @@ psy_audio_Machine* machinefactory_makemachinefrompath(psy_audio_MachineFactory* 
 	return rv;
 }
 
-void machinefactory_loadnewgamefxandblitzifversionunknown(psy_audio_MachineFactory* self)
+void psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(
+	psy_audio_MachineFactory* self)
 {
-	self->loadnewgamefxblitz = 1;
+	self->loadnewgamefxblitz = TRUE;
 }
 
-void machinefactory_loadoldgamefxandblitzifversionunknown(psy_audio_MachineFactory* self)
+void psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
+	psy_audio_MachineFactory* self)
 {
-	self->loadnewgamefxblitz = 0;
+	self->loadnewgamefxblitz = FALSE;
 }

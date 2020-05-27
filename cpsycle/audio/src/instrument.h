@@ -109,6 +109,11 @@ psy_audio_InstrumentEntry* instrument_entryat(psy_audio_Instrument*,
 	uintptr_t numentry);
 const psy_List* instrument_entries(psy_audio_Instrument*);
 
+INLINE psy_dsp_amp_t psy_audio_instrument_volume(psy_audio_Instrument* self)
+{
+	return self->globalvolume;
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -16,6 +16,10 @@
 #define _MAX_PATH 4096
 #endif
 
+static void help_ondestroy(Help*, psy_ui_Component* sender);
+static void help_registerfiles(Help*);
+static void help_clearfiles(Help*);
+static void help_updatefiles(Help*);
 static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void help_loadpage(Help*, uintptr_t index);
@@ -23,24 +27,76 @@ static void help_load(Help*, const char* path);
 
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
+	psy_ui_Margin margin;
+	psy_ui_Margin tabmargin;
+
 	psy_ui_component_init(help_base(self), parent);	
 	self->workspace = workspace;
-	psy_ui_component_enablealign(help_base(self));
-	psy_ui_notebook_init(&self->notebook, help_base(self));	
-	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
-		psy_ui_ALIGN_CLIENT);
+	psy_ui_component_enablealign(help_base(self));	
 	tabbar_init(&self->tabbar, help_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
-	tabbar_append_tabs(&self->tabbar, "./docs/readme.txt", "./docs/keys.txt",
-		"./docs/tweaking.txt", "./docs/whatsnew.txt", "./docs/luascripting.txt", NULL);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(1.5));
+	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
+	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
+	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_editor_preventedit(&self->editor);
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
-	psy_ui_notebook_setpageindex(&self->notebook, 0);
+	psy_table_init(&self->files);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		help_ondestroy);
+	help_registerfiles(self);
 	help_loadpage(self, 0);
+}
+
+void help_ondestroy(Help* self, psy_ui_Component* sender)
+{
+	help_clearfiles(self);
+	psy_table_dispose(&self->files);
+}
+
+void help_registerfiles(Help* self)
+{
+	uintptr_t page = 0;
+
+	psy_table_insert(&self->files, page++, strdup("./docs/readme.txt"));
+	psy_table_insert(&self->files, page++, strdup("./docs/keys.txt"));
+	psy_table_insert(&self->files, page++, strdup("./docs/tweaking.txt"));
+	psy_table_insert(&self->files, page++, strdup("./docs/whatsnew.txt"));
+	psy_table_insert(&self->files, page++, strdup("./docs/luascripting.txt"));
+	help_updatefiles(self);
+}
+
+void help_clearfiles(Help* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->files);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		free(psy_tableiterator_value(&it));
+	}
+	psy_table_clear(&self->files);
+}
+
+void help_updatefiles(Help* self)
+{
+	psy_TableIterator it;
+
+	tabbar_clear(&self->tabbar);
+	for (it = psy_table_begin(&self->files);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		tabbar_append(&self->tabbar, (char*)psy_tableiterator_value(&it));
+	}
 }
 
 void help_ontabbarchanged(Help* self, psy_ui_Component* sender,
@@ -109,9 +165,4 @@ void help_load(Help* self, const char* path)
 		}
 		psy_ui_editor_preventedit(&self->editor);
 	}
-}
-
-psy_ui_Component* help_base(Help* self)
-{
-	return &self->component;
 }

@@ -19,17 +19,23 @@
 #include <sampler.h>
 #include <sample.h>
 
+struct SampleEditor;
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_CheckBox selecttogether;
+	psy_ui_CheckBox doublecontloop;
+	psy_ui_CheckBox doublesustainloop;
 	psy_ui_Label selstartlabel;
 	psy_ui_Edit selstartedit;
 	psy_ui_Label selendlabel;
 	psy_ui_Edit selendedit;
-	Workspace* workspace;	
+	struct SampleEditor* editor;
+	Workspace* workspace;
 } SampleEditorBar;
 
 void  sampleeditorbar_init(SampleEditorBar*, psy_ui_Component* parent,
+	struct SampleEditor* editor,
 	Workspace*);
 void sampleeditorbar_setselection(SampleEditorBar* self, uintptr_t selectionstart,
 	uintptr_t selectionend);
@@ -123,9 +129,12 @@ typedef struct SampleEditor {
 	Workspace* workspace;
 	SampleEditorBar sampleeditortbar;
 	psy_Signal signal_samplemodified;
+	bool showdoubleloop;
 } SampleEditor;
 
 void sampleeditor_init(SampleEditor*, psy_ui_Component* parent, Workspace*);
 void sampleeditor_setsample(SampleEditor*, psy_audio_Sample*);
+void sampleeditor_showdoubleloop(SampleEditor*);
+void sampleeditor_showsingleloop(SampleEditor*);
 
 #endif

@@ -84,7 +84,7 @@ static void vtable_init(psy_audio_AudioRecorder* self)
 	}
 }
 
-void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, MachineCallback callback)
+void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, psy_audio_MachineCallback callback)
 {		
 	custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
@@ -154,7 +154,7 @@ int describevalue(psy_audio_AudioRecorder* self, char* text, uintptr_t param,
 			return 1;
 		}
 	}
-	psy_snprintf(text, 128, "No Inputs Available");
+	psy_snprintf(text, 128, "No psy_audio_Inputs Available");
 	return 1;
 }
 

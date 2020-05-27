@@ -207,7 +207,7 @@ static void loadspecific(psy_audio_LadspaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_LadspaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
-static void setcallback(psy_audio_LadspaPlugin*, MachineCallback);
+static void setcallback(psy_audio_LadspaPlugin*, psy_audio_MachineCallback);
 
 LADSPA_Handle instantiate(const LADSPA_Descriptor* psDescriptor);
 void preparebuffers(psy_audio_LadspaPlugin*, psy_audio_BufferContext*);
@@ -243,7 +243,7 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 	}
 }
 
-void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, MachineCallback callback,
+void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_MachineCallback callback,
 	const char* path, uintptr_t shellidx)
 {
 	LADSPA_Descriptor_Function pfDescriptorFunction;
@@ -504,7 +504,7 @@ uintptr_t numoutputs(psy_audio_LadspaPlugin* self)
 	return info(self) ? 2 : 0;
 }
 
-void setcallback(psy_audio_LadspaPlugin* self, MachineCallback callback)
+void setcallback(psy_audio_LadspaPlugin* self, psy_audio_MachineCallback callback)
 {	
 }
 

@@ -53,11 +53,11 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	{
 		psy_audio_Machine* machine;
 
-		machine = machinefactory_makemachine(self->song->machinefactory,
+		machine = psy_audio_machinefactory_makemachine(self->song->machinefactory,
 			MACH_SAMPLER, "");
 		if (machine) {
-			machines_insert(&self->song->machines, 0, machine);
-			machines_connect(&self->song->machines, 0, MASTER_INDEX);
+			psy_audio_machines_insert(&self->song->machines, 0, machine);
+			psy_audio_machines_connect(&self->song->machines, 0, psy_audio_MASTER_INDEX);
 		}
 	}
 }

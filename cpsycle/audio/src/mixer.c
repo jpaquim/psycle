@@ -740,7 +740,7 @@ void inputchannel_level_normvalue(psy_audio_InputChannel* self,
 
 	*rv = 0.f;
 	machines = psy_audio_machine_machines(psy_audio_mixer_base(self->mixer));
-	machine = machines_at(machines, self->inputslot);
+	machine = psy_audio_machines_at(machines, self->inputslot);
 	if (machine) {
 		memory = psy_audio_machine_buffermemory(machine);
 		if (memory) {
@@ -837,7 +837,7 @@ void returnchannel_computepath(psy_audio_ReturnChannel* self)
 	psy_audio_Machines* machines;
 
 	machines = psy_audio_machine_machines(psy_audio_mixer_base(self->mixer));
-	path = compute_path(machines, self->fxslot, FALSE);
+	path = psy_audio_compute_path(machines, self->fxslot, FALSE);
 	if (self->path) {
 		psy_list_free(self->path);
 	}
@@ -849,7 +849,7 @@ void returnchannel_computepath(psy_audio_ReturnChannel* self)
 		if (slot == UINTPTR_MAX) {
 			continue;
 		}
-		machines_addmixersend(machines, slot);
+		psy_audio_machines_addmixersend(machines, slot);
 	}
 }
 
@@ -871,9 +871,9 @@ psy_audio_Buffer* returnchannel_firstbuffer(psy_audio_ReturnChannel* self)
 			machines = psy_audio_machine_machines(
 				psy_audio_mixer_base(self->mixer));
 			if (machines) {
-				firstmachine = machines_at(machines, slot);
+				firstmachine = psy_audio_machines_at(machines, slot);
 				if (firstmachine) {
-					rv = machines_outputs(machines, slot);
+					rv = psy_audio_machines_outputs(machines, slot);
 				}
 			}
 		}
@@ -890,7 +890,7 @@ void returnchannel_level_normvalue(psy_audio_ReturnChannel* self,
 
 	*rv = 0.f;
 	machines = psy_audio_machine_machines(psy_audio_mixer_base(self->mixer));
-	machine = machines_at(machines, self->fxslot);
+	machine = psy_audio_machines_at(machines, self->fxslot);
 	if (machine) {
 		memory = psy_audio_machine_buffermemory(machine);
 		if (memory) {
@@ -935,7 +935,7 @@ static void vtable_init(psy_audio_Mixer* self)
 	}
 }
 
-void psy_audio_mixer_init(psy_audio_Mixer* self, MachineCallback callback)
+void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback callback)
 {
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	psy_audio_Machines* machines;
@@ -986,7 +986,7 @@ void psy_audio_mixer_dispose_channels(psy_audio_Mixer* self)
 		psy_audio_Machine* machine;
 
 		channel = (psy_audio_InputChannel*)psy_tableiterator_value(&it);
-		machine = machines_at(psy_audio_machine_machines(
+		machine = psy_audio_machines_at(psy_audio_machine_machines(
 			&self->custommachine.machine),
 			channel->inputslot);
 		inputchannel_dispose(channel);
@@ -1055,7 +1055,7 @@ void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines,
 {
 	psy_TableIterator iter;
 
-	self->master.buffer = machines_outputs(machines,
+	self->master.buffer = psy_audio_machines_outputs(machines,
 		psy_audio_machine_slot(psy_audio_mixer_base(self)));
 	psy_audio_buffer_clearsamples(self->master.buffer, amount);
 	for (iter = psy_table_begin(&self->returns);
@@ -1069,8 +1069,8 @@ void preparemix(psy_audio_Mixer* self, psy_audio_Machines* machines,
 		buffer = returnchannel_firstbuffer(channel); 
 		psy_audio_buffer_clearsamples(buffer, amount);
 		buffer->preventmixclear = TRUE;		
-		channel->buffer = machines_outputs(machines, channel->fxslot);
-		channel->fx = machines_at(machines, channel->fxslot);		
+		channel->buffer = psy_audio_machines_outputs(machines, channel->fxslot);
+		channel->fx = psy_audio_machines_at(machines, channel->fxslot);		
 	}
 }
 
@@ -1090,7 +1090,7 @@ void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines,
 			psy_dsp_amp_t wirevol;
 
 			// mix input to master
-			input->buffer = machines_outputs(machines, input->inputslot);			
+			input->buffer = psy_audio_machines_outputs(machines, input->inputslot);			
 			wirevol = connections_wirevolume(&machines->connections, input->inputslot, 
 				psy_audio_machine_slot(psy_audio_mixer_base(self)));			
 			psy_audio_buffer_addsamples(self->master.buffer, input->buffer,
@@ -1195,7 +1195,7 @@ void workreturn(psy_audio_Mixer* self, psy_audio_Machines* machines,
 			psy_audio_player_workmachine(player, amount, slot);
 		}
 	}
-	channel->buffer = machines_outputs(machines, channel->fxslot);
+	channel->buffer = psy_audio_machines_outputs(machines, channel->fxslot);
 }
 
 void levelmaster(psy_audio_Mixer* self, uintptr_t amount)
@@ -1214,9 +1214,9 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 			psy_audio_Machines* machines;
 
 			machines = psy_audio_machine_machines(base);
-			machine = machines_at(machines, outputslot);
+			machine = psy_audio_machines_at(machines, outputslot);
 			if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR ||
-					!machines_isconnectasmixersend(machines)) {
+					!psy_audio_machines_isconnectasmixersend(machines)) {
 				uintptr_t inputnum;
 				
 				inputnum = freeinputchannel(self);				
@@ -1231,7 +1231,7 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 					psy_audio_mixersend_allocinit(outputslot));
 				psy_audio_mixer_insertreturn(self, numreturncolumns(self),
 					returnchannel_allocinit(self, numreturncolumns(self), outputslot));
-				path = compute_path(machines, outputslot, FALSE);
+				path = psy_audio_compute_path(machines, outputslot, FALSE);
 				if (path) {
 					// work fx chain
 					for (; path != 0; path = path->next) {
@@ -1243,7 +1243,7 @@ void onconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 							// todo: add thread functions
 							continue;
 						}
-						machines_addmixersend(machines, slot);
+						psy_audio_machines_addmixersend(machines, slot);
 					}
 					psy_list_free(path);
 				}
@@ -1277,7 +1277,7 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(base);
-		machine = machines_at(machines, outputslot);
+		machine = psy_audio_machines_at(machines, outputslot);
 		if (psy_audio_machine_mode(machine) == MACHMODE_GENERATOR) {
 			psy_TableIterator it;
 
@@ -1335,7 +1335,7 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 					if (returnchannel) {
 						MachineList* path;
 
-						path = compute_path(machines, returnchannel->fxslot, FALSE);
+						path = psy_audio_compute_path(machines, returnchannel->fxslot, FALSE);
 						if (path) {							
 							for (; path != 0; path = path->next) {
 								uintptr_t slot;
@@ -1346,7 +1346,7 @@ void ondisconnected(psy_audio_Mixer* self, psy_audio_Connections* connections,
 									// todo: add thread functions
 									continue;
 								}
-								machines_removemixersend(machines, slot);
+								psy_audio_machines_removemixersend(machines, slot);
 							}
 							psy_list_free(path);
 						}
@@ -1397,7 +1397,7 @@ void mixer_describeeditname(psy_audio_Mixer* self, char* text, uintptr_t slot)
 {
 	psy_audio_Machine* machine;
 
-	machine = machines_at(psy_audio_machine_machines(&self->custommachine.machine),
+	machine = psy_audio_machines_at(psy_audio_machine_machines(&self->custommachine.machine),
 		slot);
 	if (machine) {
 		psy_snprintf(text, 128, "%s",
@@ -1985,9 +1985,9 @@ void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 		c = psy_tableiterator_key(&it);
 		send = (psy_audio_MixerSend*)psy_tableiterator_value(&it);
 		sendslot = (send) ? send->slot : 0;
-		machines_disconnect(psy_audio_machine_machines(
+		psy_audio_machines_disconnect(psy_audio_machine_machines(
 			&self->custommachine.machine), slot, sendslot);
-		path = compute_path(psy_audio_machine_machines(
+		path = psy_audio_compute_path(psy_audio_machine_machines(
 			&self->custommachine.machine), sendslot, FALSE);
 		if (path) {
 			// work fx chain
@@ -1997,9 +1997,9 @@ void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 					// delimits the machines that could be processed parallel					
 					continue;
 				}
-				machines_disconnect(psy_audio_machine_machines(
+				psy_audio_machines_disconnect(psy_audio_machine_machines(
 					&self->custommachine.machine), slot, sendslot);
-				machines_addmixersend(psy_audio_machine_machines(
+				psy_audio_machines_addmixersend(psy_audio_machine_machines(
 					&self->custommachine.machine), sendslot);				
 			}
 			psy_list_free(path);
@@ -2044,7 +2044,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 				wire->_inputCon = FALSE;
 			}
 		}
-		inputmachine = machines_at(&songfile->song->machines, wire->_inputMachine);
+		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->_inputMachine);
 		if (wire->_inputCon
 			&& wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
 			&& slot != wire->_inputMachine && inputmachine)
@@ -2069,7 +2069,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 					//wire->_inputConVol *= 32768.f;
 				//}
 				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
-				machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+				psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
 				connections_setwirevolume(&songfile->song->machines.connections,
 					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
 				channel = psy_audio_mixer_Channel(self, c);
@@ -2095,7 +2095,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			continue;
 		}
 		//inputCon is not used in legacyReturn.
-		inputmachine = machines_at(&songfile->song->machines, wire->_inputMachine);
+		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->_inputMachine);
 		if (wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
 			&& slot != wire->_inputMachine && inputmachine)
 		{
@@ -2106,7 +2106,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			if (channel) {
 				channel->fxslot = wire->_inputMachine;
 			}
-			machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+			psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
 			connections_setwirevolume(&songfile->song->machines.connections,
 				wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
 			/*if (wire.pinMapping.size() > 0) {

@@ -40,7 +40,7 @@ typedef int (*fp_mcb_numcaptures)(void*);
 typedef const char* (*fp_mcb_playbackname)(void*, int index);
 typedef int (*fp_mcb_numplaybacks)(void*);
 
-typedef struct MachineCallback {	
+typedef struct psy_audio_MachineCallback {	
 	fp_mcb_samplerate samplerate;
 	fp_mcb_bpm bpm;
 	fp_mcb_beatspertick beatspertick;
@@ -62,9 +62,9 @@ typedef struct MachineCallback {
 	fp_mcb_playbackname playbackname;
 	fp_mcb_numplaybacks numplaybacks;
 	void* context;	
-} MachineCallback;
+} psy_audio_MachineCallback;
 
-void machinecallback_initempty(MachineCallback* self);
+void machinecallback_initempty(psy_audio_MachineCallback* self);
 
 typedef enum {
 	MACHINE_PARAMVIEW_COMPACT = 1
@@ -111,7 +111,7 @@ typedef	psy_audio_MachineParam* (*fp_machine_tweakparameter)(struct psy_audio_Ma
 typedef	uintptr_t (*fp_machine_numparameters)(struct psy_audio_Machine*);
 typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
 typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
-typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, MachineCallback);
+typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, psy_audio_MachineCallback);
 typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*,
@@ -246,13 +246,13 @@ typedef struct MachineVtable {
 
 typedef struct psy_audio_Machine {
 	MachineVtable* vtable;
-	MachineCallback callback;	
+	psy_audio_MachineCallback callback;	
 	psy_Signal signal_worked;
 	int err;
 	psy_audio_CpuTimeClock accumulated_processing_time_;
 } psy_audio_Machine;
 
-void machine_init(psy_audio_Machine*, MachineCallback);
+void machine_init(psy_audio_Machine*, psy_audio_MachineCallback);
 void machine_dispose(psy_audio_Machine*);
 int machine_supports(psy_audio_Machine*, int option);
 
@@ -395,7 +395,7 @@ INLINE void psy_audio_machine_setslot(psy_audio_Machine* self, uintptr_t slot)
 	self->vtable->setslot(self, slot);
 }
 
-INLINE void psy_audio_machine_setcallback(psy_audio_Machine* self, MachineCallback callback)
+INLINE void psy_audio_machine_setcallback(psy_audio_Machine* self, psy_audio_MachineCallback callback)
 {
 	self->vtable->setcallback(self, callback);
 }

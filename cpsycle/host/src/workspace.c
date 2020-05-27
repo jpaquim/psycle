@@ -70,7 +70,7 @@ static void workspace_onscanprogress(Workspace*, psy_audio_PluginCatcher*, int p
 static void workspace_onsequenceeditpositionchanged(Workspace*, SequenceSelection*);
 static void workspace_updatenavigation(Workspace*);
 /// Machinecallback
-static MachineCallback machinecallback(Workspace*);
+static psy_audio_MachineCallback machinecallback(Workspace*);
 static uintptr_t machinecallback_samplerate(Workspace*);
 static psy_dsp_beat_t machinecallback_bpm(Workspace*);
 static psy_dsp_beat_t machinecallback_beatspertick(Workspace*);
@@ -191,7 +191,7 @@ void workspace_initplugincatcherandmachinefactory(Workspace* self)
 	psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 		workspace_onscanprogress);
 	self->hasplugincache = plugincatcher_load(&self->plugincatcher);
-	machinefactory_init(&self->machinefactory, machinecallback(self), 
+	psy_audio_machinefactory_init(&self->machinefactory, machinecallback(self), 
 		&self->plugincatcher);
 }
 
@@ -233,7 +233,7 @@ void workspace_dispose(Workspace* self)
 	free(self->filename);
 	self->filename = 0;
 	plugincatcher_dispose(&self->plugincatcher);
-	machinefactory_dispose(&self->machinefactory);
+	psy_audio_machinefactory_dispose(&self->machinefactory);
 	undoredo_dispose(&self->undoredo);
 	history_dispose(&self->history);
 	workspace_disposesignals(self);
@@ -1207,6 +1207,11 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Tracks", "Pistas");
 	psy_properties_write_string(self->lang, "Process", "Procesar");
 	psy_properties_write_string(self->lang, "No wave loaded", "Una onda no se ha cargado");
+	psy_properties_write_string(self->lang, "Auowire", "Autoconexíon");
+	psy_properties_write_string(self->lang, "Unselect all", "Deselectar todos");
+	psy_properties_write_string(self->lang, "Unselect all", "Deselectar todos");
+	psy_properties_write_string(self->lang, "Remove connection with right click",
+		"Borrar conexíon con clic derecho");
 	machineview = psy_properties_create_section(self->lang, "machineview");
 	psy_properties_write_string(machineview, "New Machine", "Nueva Máquina");
 	psy_properties_write_string(machineview, "Wires", "Cables");
@@ -1668,9 +1673,9 @@ void workspace_load_configuration(Workspace* self)
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
 	if (workspace_loadnewblitz(self)) {
-		machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
+		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
 	} else {
-		machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
+		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
 	}
 	psy_signal_emit(&self->signal_configchanged, self, 1, self->config);
 	psy_signal_emit(&self->signal_skinchanged, self, 0);
@@ -2055,9 +2060,9 @@ const char* workspace_config_directory(Workspace* self)
 	return psy_dir_config();
 }
 
-MachineCallback machinecallback(Workspace* self)
+psy_audio_MachineCallback machinecallback(Workspace* self)
 {
-	MachineCallback rv;	
+	psy_audio_MachineCallback rv;	
 
 	rv.context = self;
 	rv.samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
@@ -2257,9 +2262,9 @@ void workspace_setloadnewblitz(Workspace* self, int mode)
 	psy_properties_write_bool(self->compatibility,
 		"loadnewgamefxblitz", mode != 0);
 	if (mode == 1) {
-		machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
+		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
 	} else {
-		machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
+		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
 	}
 }
 
@@ -2271,17 +2276,17 @@ int workspace_loadnewblitz(Workspace* self)
 
 void workspace_connectasmixersend(Workspace* self)
 {
-	machines_connectasmixersend(&self->song->machines);
+	psy_audio_machines_connectasmixersend(&self->song->machines);
 }
 
 void workspace_connectasmixerinput(Workspace* self)
 {
-	machines_connectasmixerinput(&self->song->machines);
+	psy_audio_machines_connectasmixerinput(&self->song->machines);
 }
 
 bool workspace_isconnectasmixersend(Workspace* self)
 {
-	return machines_isconnectasmixersend(&self->song->machines);
+	return psy_audio_machines_isconnectasmixersend(&self->song->machines);
 }
 
 void workspace_showgear(Workspace* self)

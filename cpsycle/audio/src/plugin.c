@@ -155,7 +155,7 @@ typedef CMachineInfo * (*GETINFO)(void);
 typedef CMachineInterface * (*CREATEMACHINE)(void);
 
 // virtual methods
-static void setcallback(psy_audio_Plugin*, MachineCallback);
+static void setcallback(psy_audio_Plugin*, psy_audio_MachineCallback);
 static psy_audio_Machine* clone(psy_audio_Plugin*);
 static int hostevent(psy_audio_Plugin*, int const eventNr, int val1, float val2);
 static void generateaudio(psy_audio_Plugin*, psy_audio_BufferContext*);
@@ -215,7 +215,7 @@ static void vtable_init(psy_audio_Plugin* self)
 	}
 }
 
-void psy_audio_plugin_init(psy_audio_Plugin* self, MachineCallback callback,
+void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback callback,
 	const char* path)
 {
 	GETINFO GetInfo;
@@ -305,7 +305,7 @@ void clearparameters(psy_audio_Plugin* self)
 	psy_table_clear(&self->parameters);
 }
 
-void setcallback(psy_audio_Plugin* self, MachineCallback callback)
+void setcallback(psy_audio_Plugin* self, psy_audio_MachineCallback callback)
 {
 	if (self->mi) {
 		mi_setcallback(self->mi, &callback);

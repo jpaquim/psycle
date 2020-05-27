@@ -11,6 +11,7 @@
 #include <adsr.h>
 #include <multifilter.h>
 #include <hashtbl.h>
+#include <valuemapper.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,7 +94,7 @@ typedef struct {
 	int dopan;
 	int dooffset;
 	uint8_t offset;
-	int maxvolume;
+	int maxvolume;	
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
@@ -125,6 +126,22 @@ void psy_audio_samplervoice_release(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice*);
 
+INLINE psy_dsp_amp_t psy_audio_samplervoice_volume(
+	psy_audio_SamplerVoice* self, psy_audio_Sample* sample)
+{
+	psy_dsp_amp_t rv;
+	psy_dsp_amp_t currrandvol = (psy_dsp_amp_t)1.f;
+
+	// Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
+	// This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
+	// Instrument Global Volume [0..1.0f] Global volume affecting all samples of the instrument.
+	rv = psy_audio_instrument_volume(self->instrument) * currrandvol * psy_audio_sample_volume(sample);
+	if (rv > psy_audio_sample_volume(sample)) {
+		rv = psy_audio_sample_volume(sample);
+	}
+	return rv;
+}
+
 typedef struct ZxxMacro {
 	int mode;
 	int value;
@@ -149,11 +166,13 @@ typedef struct psy_audio_Sampler {
 	psy_audio_ChoiceMachineParam param_panpersistent;
 	psy_Table channels;
 	uint8_t basec;
+	// Sampler PS1 with max amp = 0.5.
+	psy_dsp_amp_t clipmax;
 } psy_audio_Sampler;
 
-void psy_audio_sampler_init(psy_audio_Sampler*, MachineCallback);
+void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback);
 psy_audio_Sampler* psy_audio_sampler_alloc(void);
-psy_audio_Sampler* psy_audio_sampler_allocinit(MachineCallback);
+psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback);
 const psy_audio_MachineInfo* psy_audio_sampler_info(void);
 
 INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)

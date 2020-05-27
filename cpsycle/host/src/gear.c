@@ -200,7 +200,7 @@ void gear_onparameters(Gear* self, psy_ui_Component* sender)
 
 void gear_onmaster(Gear* self, psy_ui_Component* sender)
 {
-	workspace_showparameters(self->workspace, MASTER_INDEX);
+	workspace_showparameters(self->workspace, psy_audio_MASTER_INDEX);
 }
 
 void gear_onlanguagechanged(Gear* self, Workspace* sender)

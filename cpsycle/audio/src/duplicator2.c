@@ -26,7 +26,7 @@ static void initparameters(psy_audio_Duplicator2*);
 static void disposeparameters(psy_audio_Duplicator2*);
 static uintptr_t numparameters(psy_audio_Duplicator2*);
 static uintptr_t numparametercols(psy_audio_Duplicator2*);
-// Inputs
+// psy_audio_Inputs
 static uintptr_t numinputs(psy_audio_Duplicator2* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Duplicator2* self) { return 0; }
 // SongIO
@@ -83,7 +83,7 @@ static void vtable_init(psy_audio_Duplicator2* self)
 }
 
 void psy_audio_duplicator2_init(psy_audio_Duplicator2* self,
-	MachineCallback callback)
+	psy_audio_MachineCallback callback)
 {
 	custommachine_init(&self->custommachine, callback);
 	vtable_init(self);

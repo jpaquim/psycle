@@ -88,7 +88,7 @@ void oscilloscope_init_memory(Oscilloscope* self)
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* memory;
 
-	machine = machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
 	if (machine) {
 		memory = psy_audio_machine_buffermemory(machine);
 		if (memory) {
@@ -109,13 +109,13 @@ void oscilloscope_ondestroy(Oscilloscope* self)
 	oscilloscope_disconnectmachinessignals(self, self->workspace);
 	oscilloscope_deallocate_holdbuffer(self);
 	if (self->workspace->song) {
-		machine = machines_at(&self->workspace->song->machines, self->wire.src);
+		machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
 		if (machine) {
 			memory = psy_audio_machine_buffermemory(machine);
 			if (memory) {
 				psy_audio_exclusivelock_enter();
 				psy_audio_machine_setbuffermemorysize(machine,
-					MAX_STREAM_SIZE);
+					psy_audio_MAX_STREAM_SIZE);
 				psy_audio_exclusivelock_leave();
 			}
 		}
@@ -208,7 +208,7 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
 
-	machine = machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
 	if (!machine) {
 		*numsamples = 0;
 		return NULL;
@@ -274,7 +274,7 @@ void oscilloscope_connectmachinessignals(Oscilloscope* self, Workspace* workspac
 	if (workspace->song) {
 		psy_audio_Machine* srcmachine;
 
-		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
+		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
 			psy_signal_connect(&srcmachine->signal_worked, self,
 				oscilloscope_onsrcmachineworked);
@@ -287,7 +287,7 @@ void oscilloscope_disconnectmachinessignals(Oscilloscope* self, Workspace* works
 	if (workspace->song) {
 		psy_audio_Machine* srcmachine;
 
-		srcmachine = machines_at(&workspace->song->machines, self->wire.src);
+		srcmachine = psy_audio_machines_at(&workspace->song->machines, self->wire.src);
 		if (srcmachine) {
 			psy_signal_disconnect(&srcmachine->signal_worked, self,
 				oscilloscope_onsrcmachineworked);
@@ -299,7 +299,7 @@ void oscilloscope_stop(Oscilloscope* self)
 {
 	if (self->workspace && self->workspace->song) {
 		psy_audio_Machine* srcmachine;		
-		srcmachine = machines_at(&self->workspace->song->machines,
+		srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
 			self->wire.src);
 		if (srcmachine) {
 			psy_audio_exclusivelock_enter();

@@ -44,7 +44,7 @@ class PluginFxCallback : public CFxCallback
 	inline virtual float * unused1(int, int) { return NULL;}
 
 	public: ///\todo private:
-		MachineCallback callback;
+		psy_audio_MachineCallback callback;
 };
 
 void mi_resetcallback(CMachineInterface* mi)
@@ -52,7 +52,7 @@ void mi_resetcallback(CMachineInterface* mi)
 	mi->pCB = 0;
 }
 
-void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback)
+void mi_setcallback(CMachineInterface* mi, const struct psy_audio_MachineCallback* callback)
 {
 	PluginFxCallback* pCB;
 
@@ -64,7 +64,7 @@ void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callbac
 		if (callback) {								
 			pCB->callback = *callback;
 		} else {
-			memset(&mi->pCB, 0, sizeof(MachineCallback));
+			memset(&mi->pCB, 0, sizeof(psy_audio_MachineCallback));
 		}	
 	}
 }

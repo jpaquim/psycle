@@ -32,13 +32,27 @@ static HMODULE scimodule = 0;
 
 static int loadscilexer(void);
 static void onappdestroy(void*, psy_ui_App* sender);
+static void psy_ui_editor_setfont(psy_ui_Editor*, psy_ui_Font*);
 static void psy_ui_editor_styleclearall(psy_ui_Editor*);
 static void psy_ui_editor_setcaretcolor(psy_ui_Editor*, uint32_t color);
 static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam);
 
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+static psy_ui_fp_component_setfont super_setfont;
+
+static void vtable_init(psy_ui_Editor* self)
+{
+	if (!vtable_initialized) {		
+		vtable = *(self->component.vtable);
+		super_setfont = vtable.setfont;
+		vtable.setfont = (psy_ui_fp_component_setfont)psy_ui_editor_setfont;
+		vtable_initialized = 1;
+	}
+}
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
-{  		
+{  					
 #ifdef SCI_ENABLED
 	int err;
 
@@ -55,12 +69,15 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 				WS_CHILD | WS_VISIBLE,
 				0);
 			if (imp->hwnd) {
-				psy_ui_component_init_imp(&self->component, parent, &imp->imp);				
+				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
+				vtable_init(self);
+				self->component.vtable = &vtable;
 				psy_ui_editor_setcolor(self, psy_ui_defaults_color(&app.defaults));
 				psy_ui_editor_setcaretcolor(self, psy_ui_defaults_color(&app.defaults));
 				psy_ui_editor_setbackgroundcolor(self,
 					psy_ui_defaults_backgroundcolor(&app.defaults));
-				psy_ui_editor_styleclearall(self);
+				psy_ui_editor_setfont(self, NULL);
+				psy_ui_editor_styleclearall(self);				
 			}
 		}
 	} else
@@ -70,7 +87,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 		
 		imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(&app), &self->component, parent);
 		psy_ui_component_init_imp(&self->component, parent, &imp->component_imp);
-		imp->vtable->dev_setstyle(imp, SS_CENTER);				
+		imp->vtable->dev_setstyle(imp, SS_CENTER);		
 #ifdef SCI_ENABLED
 		imp->vtable->dev_settext(imp,		
 			"Editor can't be used.\n"
@@ -196,6 +213,30 @@ void psy_ui_editor_preventedit(psy_ui_Editor* self)
 void psy_ui_editor_enableedit(psy_ui_Editor* self)
 {
 	sci(self, SCI_SETREADONLY, 0, 0);	
+}
+
+void psy_ui_editor_setfont(psy_ui_Editor* self, psy_ui_Font* source)
+{
+	psy_ui_FontInfo fontinfo;
+	psy_ui_Font* font;
+
+	if (source) {
+		super_setfont(&self->component, source);
+	}
+	font = psy_ui_component_font(&self->component);
+	fontinfo = psy_ui_font_fontinfo(font);
+	if (fontinfo.lfHeight < 0) {
+		HDC hdc;
+		int devcap;
+
+		hdc = GetDC(NULL);
+		devcap = GetDeviceCaps(hdc, LOGPIXELSY);
+		fontinfo.lfHeight = -fontinfo.lfHeight * 72 / devcap;
+		ReleaseDC(NULL, hdc);
+	}
+	sci(self, SCI_STYLESETSIZE, STYLE_DEFAULT, fontinfo.lfHeight);
+	sci(self, SCI_STYLESETFONT, STYLE_DEFAULT, (LPARAM)fontinfo.lfFaceName);
+	psy_ui_editor_styleclearall(self);
 }
 
 #else

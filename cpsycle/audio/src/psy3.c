@@ -877,7 +877,7 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 	wave->loop.end = temp;
 	// wave loop type				
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->loop.type = (LoopType) temp;
+	wave->loop.type = (psy_audio_SampleLoopType) temp;
 	// wave sustain loop start
 	psyfile_read(self->file, &temp, sizeof(temp));
 	wave->sustainloop.start = temp;
@@ -885,7 +885,7 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 	psyfile_read(self->file, &temp, sizeof(temp));
 	wave->sustainloop.end = temp;
 	psyfile_read(self->file, &temp, sizeof(temp));
-	wave->sustainloop.type = (LoopType) temp;			
+	wave->sustainloop.type = (psy_audio_SampleLoopType) temp;			
 	// "bigger than" insted of "bigger or equal", because that means 
 	// interpolate between loopend and loopstart
 	if (wave->loop.end > wave->numframes) {
@@ -938,10 +938,10 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 	wave->vibrato.depth = temp8;			
 	// vibrato type
 	psyfile_read(self->file, &temp8, sizeof(temp8));				
-	if (temp8 <= WAVEFORMS_RANDOM) {
-		// wave->vibratotype = (WaveForms) temp8;
+	if (temp8 <= psy_audio_WAVEFORMS_RANDOM) {
+		// wave->vibratotype = (psy_audio_WaveForms) temp8;
 	} else { 
-		// wave->vibratotype = (WaveForms) WAVEFORMS_SINUS;
+		// wave->vibratotype = (psy_audio_WaveForms) psy_audio_WAVEFORMS_SINUS;
 	}														
 	{ // wave data
 		byte* pData;
@@ -1285,7 +1285,7 @@ void readsmsb(psy_audio_SongFile* self)
 			wave->loop.end = temp;
 			// wave loop type				
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->loop.type = (LoopType) temp;
+			wave->loop.type = (psy_audio_SampleLoopType) temp;
 			// wave sustain loop start
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->sustainloop.start = temp;
@@ -1293,7 +1293,7 @@ void readsmsb(psy_audio_SongFile* self)
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->sustainloop.end = temp;
 			psyfile_read(self->file, &temp, sizeof(temp));
-			wave->sustainloop.type = (LoopType) temp;			
+			wave->sustainloop.type = (psy_audio_SampleLoopType) temp;			
 			// "bigger than" insted of "bigger or equal", because that means 
 			// interpolate between loopend and loopstart
 			if (wave->loop.end > wave->numframes) {
@@ -1346,10 +1346,10 @@ void readsmsb(psy_audio_SongFile* self)
 			wave->vibrato.depth = temp8;			
 			// vibrato type
 			psyfile_read(self->file, &temp8, sizeof(temp8));				
-			if (temp8 <= WAVEFORMS_RANDOM) {
-				// wave->vibratotype = (WaveForms) temp8;
+			if (temp8 <= psy_audio_WAVEFORMS_RANDOM) {
+				// wave->vibratotype = (psy_audio_WaveForms) temp8;
 			} else { 
-				// wave->vibratotype = (WaveForms) WAVEFORMS_SINUS;
+				// wave->vibratotype = (psy_audio_WaveForms) psy_audio_WAVEFORMS_SINUS;
 			}														
 			{ // wave data
 				byte* pData;
@@ -1432,7 +1432,7 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 		//Current sampler uses 100 cents. Older used +-256		
 		sample->finetune = (int16_t)(tmp / 2.56f);		
 		doloop = psyfile_read_uint8(self->file);
-		sample->loop.type = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
+		sample->loop.type = doloop ? psy_audio_SAMPLE_LOOP_NORMAL : psy_audio_SAMPLE_LOOP_DO_NOT;
 		stereo = psyfile_read_uint8(self->file);
 		sample->stereo = stereo != 0;
 		// Old sample name, never used.
@@ -1504,7 +1504,7 @@ void readmacd(psy_audio_SongFile* self)
 			
 			machine = machineloadchunk(self, index);
 			if (machine) {
-				machines_insert(&self->song->machines, index, machine);
+				psy_audio_machines_insert(&self->song->machines, index, machine);
 			}
 		}
 	}	
@@ -1526,10 +1526,10 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 	plugincatcher_catchername(self->song->machinefactory->catcher,
 		modulename, plugincatchername, 0);
 	// todo shellidx;
-	machine = machinefactory_makemachine(self->song->machinefactory, type,
+	machine = psy_audio_machinefactory_makemachine(self->song->machinefactory, type,
 		plugincatchername);
 	if (!machine) {
-		machine = machinefactory_makemachine(self->song->machinefactory, MACH_DUMMY, 
+		machine = psy_audio_machinefactory_makemachine(self->song->machinefactory, MACH_DUMMY, 
 			plugincatchername);
 		type = MACH_DUMMY;		
 	}	
@@ -1583,12 +1583,12 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		// Incoming connections activated
 		psyfile_read(self->file, &incon, sizeof(incon));
 		//if (connection && output != -1) {
-			//machines_connect(&self->song->machines, index, output);			
+			//psy_audio_machines_connect(&self->song->machines, index, output);			
 		//}
 		/*if (incon && input != -1) {
 			psy_audio_WireSocketEntry* entry;
 			
-			machines_connect(&self->song->machines, input, index);			
+			psy_audio_machines_connect(&self->song->machines, input, index);			
 			entry = connection_input(&self->song->machines.connections, input, index);
 			if (entry) {
 				entry->id = i;
@@ -1676,7 +1676,7 @@ uint32_t psy3_chunkcount(psy_audio_Song* song)
 	// PATD
 	rv += (uint32_t) patterns_size(&song->patterns);
 	// MACD
-	rv += (uint32_t) machines_size(&song->machines);
+	rv += (uint32_t) psy_audio_machines_size(&song->machines);
 	// INSD
 	rv += (uint32_t) instruments_size(&song->instruments);
 	// SMSB
@@ -2125,7 +2125,7 @@ int psy3_write_macd(psy_audio_SongFile* self)
 	for (i = 0; i < MAX_MACHINES; ++i) {
 		psy_audio_Machine* machine;
 
-		machine = machines_at(&self->song->machines, i);
+		machine = psy_audio_machines_at(&self->song->machines, i);
 		if (machine) {
 			int32_t index;
 			uint32_t sizepos;

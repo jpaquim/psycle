@@ -4,23 +4,26 @@
 #if !defined(HELP_H)
 #define HELP_H
 
+#include "about.h"
+#include "greet.h"
 #include "tabbar.h"
 #include "workspace.h"
-#include "greet.h"
-#include "about.h"
 
 #include <uieditor.h>
-#include <uinotebook.h>
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_Notebook notebook;
 	psy_ui_Editor editor;
 	TabBar tabbar;
 	Workspace* workspace;
+	psy_Table files;
 } Help;
 
 void help_init(Help*, psy_ui_Component* parent, Workspace*);
-psy_ui_Component* help_base(Help*);
+
+INLINE psy_ui_Component* help_base(Help* self)
+{
+	return &self->component;
+}
 
 #endif

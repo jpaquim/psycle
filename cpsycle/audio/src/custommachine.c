@@ -56,7 +56,7 @@ static void vtable_init(psy_audio_CustomMachine* self)
 	}
 }
 
-void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
+void custommachine_init(psy_audio_CustomMachine* self, psy_audio_MachineCallback callback)
 {	
 	machine_init(&self->machine, callback);
 	vtable_init(self);
@@ -66,7 +66,7 @@ void custommachine_init(psy_audio_CustomMachine* self, MachineCallback callback)
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
 	self->slot = UINTPTR_MAX;
-	custommachine_init_memory(self, MAX_STREAM_SIZE);
+	custommachine_init_memory(self, psy_audio_MAX_STREAM_SIZE);
 }
 
 void custommachine_init_memory(psy_audio_CustomMachine* self, uintptr_t numframes)

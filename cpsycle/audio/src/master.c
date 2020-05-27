@@ -35,7 +35,7 @@ static const char* master_editname(psy_audio_Master* self)
 }
 static uintptr_t numinputs(psy_audio_Master* self) { return 2; }
 static uintptr_t numoutputs(psy_audio_Master* self) { return 2; }
-static uintptr_t slot(psy_audio_Master* self) { return MASTER_INDEX; }
+static uintptr_t slot(psy_audio_Master* self) { return psy_audio_MASTER_INDEX; }
 // Parameters
 static psy_audio_MachineParam* parameter(psy_audio_Master* self,
 	uintptr_t param);
@@ -125,7 +125,7 @@ static void vtable_init(psy_audio_Master* self)
 	}
 }
 
-void master_init(psy_audio_Master* self, MachineCallback callback)
+void master_init(psy_audio_Master* self, psy_audio_MachineCallback callback)
 {
 	memset(self, 0, sizeof(psy_audio_Master));
 	machine_init(&self->machine, callback);	
@@ -158,7 +158,7 @@ void master_init_memory(psy_audio_Master* self)
 	uintptr_t channel;
 
 	psy_audio_buffer_init(&self->memorybuffer, 2);
-	self->memorybuffersize = MAX_STREAM_SIZE;
+	self->memorybuffersize = psy_audio_MAX_STREAM_SIZE;
 	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
 		self->memorybuffer.samples[channel] = dsp.memory_alloc(
 			self->memorybuffersize, sizeof(psy_dsp_amp_t));
@@ -206,7 +206,7 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 		machines = psy_audio_machine_machines(&self->machine);
 		if (machines) {
 			if (ev->inst == NOTECOMMANDS_INST_EMPTY &&
-				ev->vol == MASTER_INDEX) {
+				ev->vol == psy_audio_MASTER_INDEX) {
 				psy_dsp_amp_t nv;
 
 				nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
@@ -241,7 +241,7 @@ void master_describeeditname(psy_audio_Master* self, char* text, uintptr_t slot)
 {
 	psy_audio_Machine* machine;
 
-	machine = machines_at(psy_audio_machine_machines(&self->machine), slot);
+	machine = psy_audio_machines_at(psy_audio_machine_machines(&self->machine), slot);
 	psy_snprintf(text, 128, "%s", (machine != NULL) ?
 		psy_audio_machine_editname(machine) : "");
 }
@@ -258,7 +258,7 @@ unsigned int numparametercols(psy_audio_Master* self)
 	psy_audio_Machines* machines;
 
 	machines = psy_audio_machine_machines(&self->machine);
-	sockets = connections_at(&machines->connections, MASTER_INDEX);
+	sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 	if (sockets) {
 		input_socket = sockets->inputs;
 		if (input_socket) {
@@ -291,7 +291,7 @@ void master_title_describe(psy_audio_Master* self,
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != NULL && c != sender->index;
 				p = p->next, ++c);
@@ -323,7 +323,7 @@ void master_slider_tweak(psy_audio_Master* self,
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != NULL && c != sender->index; p = p->next, ++c);
 			if (p) {
@@ -349,7 +349,7 @@ void master_slider_normvalue(psy_audio_Master* self,
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
 			for (input_socket = sockets->inputs; input_socket != 0 && c != sender->index;
 				input_socket = input_socket->next, ++c);
@@ -373,7 +373,7 @@ void master_level_normvalue(psy_audio_Master* self,
 		psy_audio_Buffer* memory;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		machine = machines_at(machines, MASTER_INDEX);
+		machine = psy_audio_machines_at(machines, psy_audio_MASTER_INDEX);
 		memory = psy_audio_machine_buffermemory(machine);
 		if (memory) {
 			*rv = psy_audio_buffer_rmsdisplay(memory);
@@ -385,7 +385,7 @@ void master_level_normvalue(psy_audio_Master* self,
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
 			for (input_socket = sockets->inputs; input_socket != 0 &&
 				c != sender->index;
@@ -396,7 +396,7 @@ void master_level_normvalue(psy_audio_Master* self,
 				psy_audio_Buffer* memory;
 
 				input_entry = (psy_audio_WireSocketEntry*)input_socket->entry;				
-				machine = machines_at(machines, input_entry->slot);
+				machine = psy_audio_machines_at(machines, input_entry->slot);
 				if (machine) {
 					memory = psy_audio_machine_buffermemory(machine);
 					if (memory) {
@@ -422,7 +422,7 @@ void master_level_describe(psy_audio_Master* self,
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
-		sockets = connections_at(&machines->connections, MASTER_INDEX);
+		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		*active = 0;
 		if (sockets) {
 			for (p = sockets->inputs; p != NULL && c != sender->index;

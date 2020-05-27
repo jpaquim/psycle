@@ -20,7 +20,7 @@ typedef struct {
 	psy_dsp_amp_t volume;
 } psy_audio_Master;
 
-void master_init(psy_audio_Master* self, MachineCallback);
+void master_init(psy_audio_Master* self, psy_audio_MachineCallback);
 const psy_audio_MachineInfo* master_info(void);
 
 #ifdef __cplusplus

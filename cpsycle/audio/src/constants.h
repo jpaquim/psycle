@@ -14,7 +14,7 @@
 /// Max number of machines+ virtual instruments ( sampled instrument used as a generator). 255 is not usable because it is the empty value.
 #define MAX_VIRTUALINSTS		255
 /// Index of MasterMachine
-//		#define MASTER_INDEX			128
+//		#define psy_audio_MASTER_INDEX			128
 /// Max number of instruments.
 #define MAX_INSTRUMENTS			256
 /// psy_audio_Instrument index of the wave preview.

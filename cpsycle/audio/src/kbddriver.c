@@ -76,7 +76,7 @@ enum {
 
 typedef struct {
 	psy_EventDriver driver;
-	Inputs noteinputs;
+	psy_audio_Inputs noteinputs;
 	int (*error)(int, const char*);
 	EventDriverData lastinput;	
 } KbdDriver;
@@ -134,11 +134,11 @@ int driver_init(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
 	
-	inputs_init(&self->noteinputs);
+	psy_audio_inputs_init(&self->noteinputs);
 	self->driver.properties = 0;
 //	init_properties(driver);
 	psy_signal_init(&driver->signal_input);
-	inputs_init(&self->noteinputs);
+	psy_audio_inputs_init(&self->noteinputs);
 	return 0;
 }
 
@@ -147,7 +147,7 @@ int driver_dispose(psy_EventDriver* driver)
 	KbdDriver* self = (KbdDriver*) driver;
 	properties_free(self->driver.properties);
 	self->driver.properties = 0;
-	inputs_dispose(&self->noteinputs);
+	psy_audio_inputs_dispose(&self->noteinputs);
 	psy_signal_dispose(&driver->signal_input);
 	return 1;
 }
@@ -183,7 +183,7 @@ void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* 
 	self = (KbdDriver*)(driver);
 	cmd->id = -1;	
 	if (input.message == EVENTDRIVER_KEYDOWN) {
-		kbcmd.id = inputs_cmd(&self->noteinputs, input.param1);		
+		kbcmd.id = psy_audio_inputs_cmd(&self->noteinputs, input.param1);		
 		if (kbcmd.id == CMD_NOTE_STOP) {
 			cmd->id = kbcmd.id;
 			cmd->data.param1 = NOTECOMMANDS_RELEASE;			
@@ -205,7 +205,7 @@ void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* 
 			cmd->data.param1 = kbcmd.id + input.param2;
 		}
 	} else {
-		kbcmd.id = inputs_cmd(&self->noteinputs, input.param1);
+		kbcmd.id = psy_audio_inputs_cmd(&self->noteinputs, input.param1);
 		if (kbcmd.id <= NOTECOMMANDS_RELEASE) {
 			cmd->id = NOTECOMMANDS_RELEASE;
 			cmd->data.param1 = NOTECOMMANDS_RELEASE;
@@ -229,7 +229,7 @@ void driver_makeinputs(KbdDriver* self, psy_Properties* notes)
 	
 	for (p = notes->children; p != NULL; p = psy_properties_next(p)) {				
 		if (psy_properties_id(p) != -1) {
-			inputs_define(&self->noteinputs, psy_properties_value(p),
+			psy_audio_inputs_define(&self->noteinputs, psy_properties_value(p),
 				psy_properties_id(p));
 		}
 	}

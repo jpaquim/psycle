@@ -112,7 +112,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 // driver callbacks
 
 // sound driver callback
-// - splits work to MAX_STREAM_SIZE parts or to let work begin on a line tick
+// - splits work to psy_audio_MAX_STREAM_SIZE parts or to let work begin on a line tick
 // - player_workamount processes each spltted part
 // - updates the sequencer line tick count
 psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
@@ -125,7 +125,7 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 	
 	samples = bufferdriver;
 	numsamplex = *numsamples;
-	maxamount = numsamplex > MAX_STREAM_SIZE ? MAX_STREAM_SIZE : numsamplex;
+	maxamount = numsamplex > psy_audio_MAX_STREAM_SIZE ? psy_audio_MAX_STREAM_SIZE : numsamplex;
 	psy_audio_exclusivelock_enter();
 	do {		
 		amount = maxamount;
@@ -167,7 +167,7 @@ void psy_audio_player_notifylinetick(psy_audio_Player* self)
 	if (self->song) {
 		psy_TableIterator it;
 		
-		for (it = machines_begin(&self->song->machines); 
+		for (it = psy_audio_machines_begin(&self->song->machines); 
 				!psy_tableiterator_equal(&it, psy_table_end());		
 				psy_tableiterator_inc(&it)) {			
 			psy_audio_machine_sequencerlinetick((psy_audio_Machine*)
@@ -180,7 +180,7 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 {
 	MachinePath* path;
 
-	path = machines_path(&self->song->machines);
+	path = psy_audio_machines_path(&self->song->machines);
 	if (path) {		
 		for ( ; path != 0; path = path->next) {
 			size_t slot;			
@@ -191,7 +191,7 @@ void psy_audio_player_workpath(psy_audio_Player* self, uintptr_t amount)
 				// todo: add thread functions
 				continue;				
 			}
-			if (!machines_ismixersend(&self->song->machines, slot)) {
+			if (!psy_audio_machines_ismixersend(&self->song->machines, slot)) {
 				psy_audio_player_workmachine(self, amount, slot);
 			}
 		}		
@@ -203,7 +203,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 {
 	psy_audio_Machine* machine;
 
-	machine = machines_at(&self->song->machines, slot);
+	machine = psy_audio_machines_at(&self->song->machines, slot);
 	if (machine) {
 		psy_audio_Buffer* output;
 
@@ -255,7 +255,7 @@ void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 	uintptr_t amount)
 {
 	psy_audio_Buffer* masteroutput;	
-	masteroutput = machines_outputs(&self->song->machines, MASTER_INDEX);
+	masteroutput = psy_audio_machines_outputs(&self->song->machines, psy_audio_MASTER_INDEX);
 	if (masteroutput) {
 		psy_audio_buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
 		if (self->dodither) {
@@ -300,8 +300,8 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 		} else {
 			note = cmd.data.param1;
 		}
-		machine = machines_at(&self->song->machines,
-			machines_slot(&self->song->machines));
+		machine = psy_audio_machines_at(&self->song->machines,
+			psy_audio_machines_slot(&self->song->machines));
 		patternevent_init_all(&event,
 			note,
 			(note == NOTECOMMANDS_TWEAK)
@@ -311,7 +311,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 				? instruments_slot(&self->song->instruments)
 				: NOTECOMMANDS_INST_EMPTY),
 			(uint8_t) (self->song
-				? machines_slot(&self->song->machines)
+				? psy_audio_machines_slot(&self->song->machines)
 				: 0),
 			(uint8_t) NOTECOMMANDS_VOL_EMPTY,
 			0, 0);		
@@ -417,7 +417,7 @@ void psy_audio_player_dostop(psy_audio_Player* self)
 	if (self->song) {
 		psy_TableIterator it;
 		
-		for (it = machines_begin(&self->song->machines);
+		for (it = psy_audio_machines_begin(&self->song->machines);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
 			psy_audio_Machine* machine;

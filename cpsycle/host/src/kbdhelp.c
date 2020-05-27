@@ -34,10 +34,10 @@ void kbdhelp_markpatterncmds(KbdHelp* self)
 		if (p && p->children) {
 			for (p = p->children; p != NULL; p = p->next) {
 				uintptr_t keycode;
-				int shift;
-				int ctrl;
+				bool shift;
+				bool ctrl;
 
-				decodeinput(p->item.value.i, &keycode, &shift, &ctrl);
+				psy_audio_decodeinput(p->item.value.i, &keycode, &shift, &ctrl);
 				kbdbox_setcolor(&self->kbdbox, keycode, 0x00B1C8B0);
 				kbdbox_setdescription(&self->kbdbox, keycode, shift,
 					ctrl, psy_properties_shorttext(p));
@@ -47,10 +47,10 @@ void kbdhelp_markpatterncmds(KbdHelp* self)
 		if (p && p->children) {
 			for (p = p->children; p != NULL; p = p->next) {
 				uintptr_t keycode;
-				int shift;
-				int ctrl;
+				bool shift;
+				bool ctrl;
 
-				decodeinput(p->item.value.i, &keycode, &shift, &ctrl);
+				psy_audio_decodeinput(p->item.value.i, &keycode, &shift, &ctrl);
 				kbdbox_setcolor(&self->kbdbox, keycode, 0x00D1C5B6);
 				kbdbox_setdescription(&self->kbdbox, keycode, shift,
 					ctrl, psy_properties_shorttext(p));

@@ -142,7 +142,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 		bool active = FALSE;
 
 		centery = height / 2 + y;
-		machine = machines_at(&self->workspace->song->machines, lastmachine);
+		machine = psy_audio_machines_at(&self->workspace->song->machines, lastmachine);
 		if (machine) {
 			psy_audio_Buffer* memory;
 			
@@ -157,7 +157,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 				static float epsilon = 0.0001f;
 				
 				numsamples = psy_audio_machine_buffermemorysize(machine);
-				numsamples = min(numsamples, MAX_STREAM_SIZE);
+				numsamples = min(numsamples, psy_audio_MAX_STREAM_SIZE);
 				if (numsamples > 0) {
 					bool zero;
 					uintptr_t writepos;

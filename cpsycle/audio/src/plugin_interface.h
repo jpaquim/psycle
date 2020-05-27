@@ -205,10 +205,10 @@ extern "C" {
 #endif
 
 #if defined __STDC__ || __cplusplus
-struct MachineCallback;
+struct psy_audio_MachineCallback;
 
 extern void mi_resetcallback(CMachineInterface* mi);
-extern void mi_setcallback(CMachineInterface* mi, const struct MachineCallback* callback);
+extern void mi_setcallback(CMachineInterface* mi, const struct psy_audio_MachineCallback* callback);
 extern CMachineInterface* mi_create(void* module);
 extern void mi_init(CMachineInterface* mi);
 extern void mi_dispose(CMachineInterface* mi);
