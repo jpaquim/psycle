@@ -24,6 +24,7 @@ typedef struct {
 
 int psyclescript_init(psy_audio_PsycleScript*);
 int psyclescript_load(psy_audio_PsycleScript*, const char* path);
+int psyclescript_loadstring(psy_audio_PsycleScript*, const char* script);
 int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
 	void* host);
 int psyclescript_run(psy_audio_PsycleScript*);

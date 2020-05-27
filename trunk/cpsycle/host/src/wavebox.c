@@ -175,7 +175,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			} else {
 				psy_ui_setcolor(g, 0x00B1C8B0);
 			}
-			psy_ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
+			psy_ui_drawline(g, x, centery, x, centery - (int)(framevalue * scaley));
 		}
 		if (self->sample && self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolor(g, 0x00D1C5B6);

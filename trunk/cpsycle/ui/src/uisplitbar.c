@@ -66,7 +66,8 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 
 		prev = splitbar_prevcomponent(self);
 		if (prev) {
-			if (prev->align == psy_ui_ALIGN_LEFT) {
+			if (prev->align == psy_ui_ALIGN_LEFT ||
+					prev->align == psy_ui_ALIGN_RIGHT) {
 				psy_ui_component_resize(prev, 0,
 					psy_ui_component_size(prev).height);
 			} else
@@ -90,7 +91,8 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		psy_ui_Rectangle position;
 			
 		position = psy_ui_component_position(&self->component);
-		if (self->component.align == psy_ui_ALIGN_LEFT) {
+		if (self->component.align == psy_ui_ALIGN_LEFT ||
+			self->component.align == psy_ui_ALIGN_RIGHT) {
 			psy_ui_component_move(&self->component, position.left + ev->x, position.top);
 		} else {
 			psy_ui_component_move(&self->component, position.left, position.top + ev->y);
@@ -118,6 +120,13 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 
 			prev_position = psy_ui_component_position(prev);
 			psy_ui_component_resize(prev, position.left - prev_position.left,
+				psy_ui_component_size(prev).height);
+		} else
+		if (prev->align == psy_ui_ALIGN_RIGHT) {
+			psy_ui_Rectangle prev_position;
+
+			prev_position = psy_ui_component_position(prev);
+			psy_ui_component_resize(prev, prev_position.right - position.right,
 				psy_ui_component_size(prev).height);
 		} else
 		if (prev->align == psy_ui_ALIGN_TOP) {			
@@ -176,7 +185,8 @@ psy_ui_Component* splitbar_prevcomponent(psy_ui_SplitBar* self)
 
 void splitbar_setcursor(psy_ui_SplitBar* self)
 {
-	if (self->component.align == psy_ui_ALIGN_LEFT) {
+	if (self->component.align == psy_ui_ALIGN_LEFT ||
+			self->component.align == psy_ui_ALIGN_RIGHT) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 	} else
 	if (self->component.align == psy_ui_ALIGN_TOP ||
@@ -191,7 +201,8 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	
 	size = psy_ui_component_size(&self->component);
-	if (self->component.align == psy_ui_ALIGN_LEFT) {
+	if (self->component.align == psy_ui_ALIGN_LEFT ||
+		self->component.align == psy_ui_ALIGN_RIGHT) {
 		psy_ui_setrectangle(&r, (int) (size.width * 0.1), 0,
 			(int) (size.width * 0.8), size.height);
 	} else {

@@ -180,6 +180,23 @@ void psy_ui_editor_addtext(psy_ui_Editor* self, const char* text)
 	sci(self, SCI_ADDTEXT, strlen(text), (uintptr_t) text);
 }
 
+char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* text)
+{
+	uintptr_t length;
+	
+	length = psy_ui_editor_length(self);
+	if (length > maxlength) {
+		length = maxlength;
+	}
+	sci(self, SCI_GETTEXT, length, (LPARAM)text);
+	return text;
+}
+
+uintptr_t psy_ui_editor_length(psy_ui_Editor* self)
+{
+	return (uintptr_t)sci(self, SCI_GETLENGTH, 0, 0);
+}
+
 void psy_ui_editor_clear(psy_ui_Editor* self)
 {
 	sci(self, SCI_CLEARALL, 0, 0);
