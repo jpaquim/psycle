@@ -164,7 +164,7 @@ void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
 		parent,
 		TEXT("LISTBOX"),
 		0, 0, 100, 200,
-		(WS_CHILD | WS_VISIBLE | LBS_STANDARD | LBS_NOTIFY) & ~WS_BORDER,
+		(WS_CHILD | WS_VISIBLE | LBS_STANDARD & ~LBS_SORT | LBS_NOTIFY) & ~WS_BORDER,
 		1);
 	imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;
@@ -183,7 +183,7 @@ void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
 		parent,
 		TEXT("LISTBOX"),
 		0, 0, 100, 20,
-		(WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL | LBS_NOTIFY)
+		(WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_EXTENDEDSEL & ~LBS_SORT | LBS_NOTIFY)
 		& ~WS_BORDER,
 		1);
 	imp_vtable_init();

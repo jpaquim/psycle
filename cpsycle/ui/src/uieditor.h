@@ -19,6 +19,8 @@ void psy_ui_editor_load(psy_ui_Editor*, const char* path);
 void psy_ui_editor_save(psy_ui_Editor*, const char* path);
 void psy_ui_editor_settext(psy_ui_Editor*, const char* text);
 void psy_ui_editor_addtext(psy_ui_Editor*, const char* text);
+char* psy_ui_editor_text(psy_ui_Editor*, uintptr_t maxlength, char* text);
+uintptr_t psy_ui_editor_length(psy_ui_Editor*);
 void psy_ui_editor_clear(psy_ui_Editor*);
 void psy_ui_editor_setcolor(psy_ui_Editor*, uint32_t color);
 void psy_ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);

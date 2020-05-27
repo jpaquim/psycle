@@ -66,6 +66,20 @@ int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
 	return status;
 }
 
+int psyclescript_loadstring(psy_audio_PsycleScript* self, const char* script)
+{
+	int status;
+
+	status = luaL_loadstring(self->L, script);
+	if (status) {
+		const char* msg = lua_tostring(self->L, -1);
+#if defined DIVERSALIS__OS__MICROSOFT    
+		MessageBox(0, msg, "Lua Error", MB_ICONERROR);
+#endif
+	}
+	return status;
+}
+
 int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
 	void* host)
 {

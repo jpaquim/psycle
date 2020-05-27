@@ -7,8 +7,10 @@
 #include <uibutton.h>
 #include <uicheckbox.h>
 #include <uiedit.h>
+#include <uieditor.h>
 #include <uilabel.h>
 #include <uislider.h>
+#include <uisplitbar.h>
 #include <uinotebook.h>
 #include "scrollzoom.h"
 #include "wavebox.h"
@@ -67,6 +69,17 @@ void sampleeditoramplify_init(SampleEditorAmplify*, psy_ui_Component* parent,
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Label header;
+	psy_ui_Editor editor;
+	psy_ui_Editor console;
+	Workspace* workspace;
+} SampleEditLuaProcessor;
+
+void sampleeditluaprocessor_init(SampleEditLuaProcessor*, psy_ui_Component* parent,
+	Workspace* workspace);
+
+typedef struct {
+	psy_ui_Component component;
 	SampleEditorOperations copypaste;
 	psy_ui_Button process;
 	psy_ui_ListBox processors;
@@ -79,6 +92,8 @@ typedef struct {
 	psy_ui_Component emptypage5;
 	psy_ui_Component emptypage6;
 	SampleEditorAmplify amplify;
+	SampleEditLuaProcessor luaprocessor;
+	int start;
 } SampleEditorProcessView;
 
 void sampleprocessview_init(SampleEditorProcessView*, psy_ui_Component* parent,
@@ -116,6 +131,7 @@ typedef struct SampleEditor {
 	psy_ui_Component component;
 	SampleEditorPlayBar playbar;
 	SampleEditorHeader header;
+	psy_ui_SplitBar splitbar;
 	SampleEditorProcessView processview;
 	psy_ui_Component samplebox;
 	psy_Table waveboxes;
@@ -129,7 +145,7 @@ typedef struct SampleEditor {
 	Workspace* workspace;
 	SampleEditorBar sampleeditortbar;
 	psy_Signal signal_samplemodified;
-	bool showdoubleloop;
+	bool showdoubleloop;	
 } SampleEditor;
 
 void sampleeditor_init(SampleEditor*, psy_ui_Component* parent, Workspace*);
