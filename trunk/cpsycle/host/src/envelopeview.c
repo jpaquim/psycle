@@ -143,7 +143,7 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	double i;		
 
-	psy_ui_setcolor(g, 0xFF666666);
+	psy_ui_setcolor(g, 0x00333333);
 	for (i = 0; i <= 1.0; i += 0.1 ) {
 		psy_ui_drawline(g,
 			self->spacing.left.quantity.integer,

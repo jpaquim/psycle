@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 typedef struct {
-	psy_ui_Component component;	
+	psy_ui_Component component;
 } psy_ui_Editor;
 
 void psy_ui_editor_init(psy_ui_Editor*, psy_ui_Component* parent);

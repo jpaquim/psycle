@@ -79,7 +79,7 @@ psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontImp* self)
 	if (ret == 0) {
 		psy_ui_fontinfo_init(&rv, "", 0);
 	} else {
-		rv = psy_ui_fontinfo(lf);
+		rv = psy_ui_fontinfo(lf);		
 	}
 	return rv;
 }

@@ -5,6 +5,7 @@
 #define CHANNELMAPPINGVIEW_H
 
 #include <uibutton.h>
+#include <uilabel.h>
 #include "workspace.h"
 
 typedef enum {
@@ -18,16 +19,20 @@ typedef enum {
 typedef struct {	
 	psy_ui_Component component;		
 	psy_audio_Wire wire;
-	Workspace* workspace;
 	PinEditDragMode dragmode;
 	int drag_src;
 	int drag_dst;
 	int mx;
 	int my;
-	psy_List* pindragnode;
+	psy_ui_Color pincolor;
+	psy_ui_Color wirecolor;
+	Workspace* workspace;
 } PinEdit;
 
-void pinedit_init(PinEdit*, psy_ui_Component* parent, psy_audio_Wire, Workspace*);
+void pinedit_init(PinEdit*, psy_ui_Component* parent, psy_audio_Wire,
+	Workspace*);
+void pinedit_autowire(PinEdit*);
+void pinedit_unselectall(PinEdit*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -35,10 +40,11 @@ typedef struct {
 	psy_ui_Component buttongroup;
 	psy_ui_Button autowire;
 	psy_ui_Button unselectall;
+	psy_ui_Label help;
 	Workspace* workspace;
 } ChannelMappingView;
 
 void channelmappingview_init(ChannelMappingView*, psy_ui_Component* parent,
 	psy_audio_Wire, Workspace*);
 
-#endif
+#endif /* CHANNELMAPPINGVIEW_H */

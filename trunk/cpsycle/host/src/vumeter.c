@@ -101,9 +101,9 @@ void vumeter_onsongchanged(Vumeter* self, Workspace* workspace)
 void vumeter_connectmachinessignals(Vumeter* self, Workspace* workspace)
 {
 	if (workspace && workspace->song &&
-			machines_master(&workspace->song->machines)) {
+			psy_audio_machines_master(&workspace->song->machines)) {
 		psy_signal_connect(
-			&machines_master(&workspace->song->machines)->signal_worked, self,
+			&psy_audio_machines_master(&workspace->song->machines)->signal_worked, self,
 			vumeter_onmasterworked);
 	}
 }

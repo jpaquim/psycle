@@ -55,12 +55,12 @@ void BuildMachinesList(MachinesBox* self)
 		end = self->mode == MACHINEBOX_ALL ? 0xFF : start + 0x3F;
 
 		for (slot = start; slot <= end; ++slot) {
-			InsertSlot(self, slot, machines_at(self->machines, slot));
+			InsertSlot(self, slot, psy_audio_machines_at(self->machines, slot));
 		}
 	} else {
 		psy_TableIterator it;
 	
-		for (it = machines_begin(self->machines); 
+		for (it = psy_audio_machines_begin(self->machines); 
 				!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {			
 			psy_audio_Machine* machine;
@@ -130,14 +130,14 @@ void OnMachinesListChanged(MachinesBox* self, psy_ui_Component* sender, int sel)
 	psy_List* slots = self->machinelist.signal_selchanged.slots;
 	self->machinelist.signal_selchanged.slots = 0;
 	slot = (int)psy_table_at(&self->listboxslots, sel);
-	machines_changeslot(self->machines, slot);	
+	psy_audio_machines_changeslot(self->machines, slot);	
 	self->machinelist.signal_selchanged.slots = slots;
 
 }
 
 void OnMachinesInsert(MachinesBox* self, psy_audio_Machines* machines, int slot)
 {	
-	if (CheckMachineMode(self, machines_at(self->machines, slot))) {
+	if (CheckMachineMode(self, psy_audio_machines_at(self->machines, slot))) {
 		int boxindex;
 
 		BuildMachinesList(self);
@@ -179,7 +179,7 @@ void MachinesBoxClone(MachinesBox* self)
 				
 				slot = (int) psy_table_at(&self->listboxslots,
 					selection[i]);
-				machine = machines_at(self->machines, slot);
+				machine = psy_audio_machines_at(self->machines, slot);
 				if (machine && srcmachine == 0) {
 					srcmachine = machine;
 					break;
@@ -195,13 +195,13 @@ void MachinesBoxClone(MachinesBox* self)
 					
 					slot = (int) psy_table_at(&self->listboxslots,
 						selection[i]);
-					machine = machines_at(self->machines, slot);
+					machine = psy_audio_machines_at(self->machines, slot);
 					if (machine != srcmachine) {
 						psy_audio_Machine* clone;
 
 						clone = psy_audio_machine_clone(srcmachine);
 						if (clone) {
-							machines_insert(self->machines, slot, clone);
+							psy_audio_machines_insert(self->machines, slot, clone);
 						}
 					}
 				}
@@ -227,7 +227,7 @@ void MachinesBoxRemove(MachinesBox* self)
 				
 				slot = (int) psy_table_at(&self->listboxslots,
 					selection[i]);
-				machines_remove(self->machines, slot);			
+				psy_audio_machines_remove(self->machines, slot);			
 			}
 		}
 		free(selection);
@@ -260,7 +260,7 @@ void MachinesBoxExchange(MachinesBox* self)
 					slot = (int) psy_table_at(&self->listboxslots,
 						selection[i]);				
 					if (slot != srcslot) {		
-						machines_exchange(self->machines, srcslot, slot);
+						psy_audio_machines_exchange(self->machines, srcslot, slot);
 						break;
 					}
 				}
@@ -285,7 +285,7 @@ void MachinesBoxShowParameters(MachinesBox* self)
 				psy_audio_Machine* machine;
 				
 				slot = (int) psy_table_at(&self->listboxslots, selection[i]);
-				machine = machines_at(self->machines, slot);
+				machine = psy_audio_machines_at(self->machines, slot);
 				if (machine) {					
 					workspace_showparameters(self->workspace, slot);
 				}

@@ -850,7 +850,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
 	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(4),
+		psy_ui_value_makeew(1),
 		psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2));
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);

@@ -30,7 +30,7 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 		psy_ui_component_updatefont(main);
 		for (p = q = psy_ui_component_children(main, 1); p != NULL; p = p->next) {
 			psy_ui_Component* child;			
-			child = (psy_ui_Component*) p->entry;		
+			child = (psy_ui_Component*) p->entry;			
 			psy_ui_component_updatefont(child);						
 		}
 		// align
@@ -62,14 +62,6 @@ void psy_ui_updatealign(psy_ui_Component* main, psy_List* children)
 		}
 		psy_list_free(q);
 	}
-}
-
-void psy_ui_component_updatefont(psy_ui_Component* self)
-{	 
-    // assert(self->imp);   
-    if (self->imp) {
-        self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));
-    }
 }
 
 psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
@@ -263,6 +255,18 @@ void destroy(psy_ui_Component* self)
 	self->imp->vtable->dev_destroy(self->imp);
 }
 
+void psy_ui_component_updatefont(psy_ui_Component* self)
+{
+	// assert(self->imp);   
+	if (self->imp) {
+		self->imp->vtable->dev_setfont(self->imp,
+			psy_ui_component_font(self));
+		if (self->vtable->setfont != setfont) {
+			self->vtable->setfont(self, NULL);
+		}
+	}
+}
+
 void show(psy_ui_Component* self)
 {
 	self->visible = 1;
@@ -335,6 +339,7 @@ void setfont(psy_ui_Component* self, psy_ui_Font* font)
 		dispose = self->style.use_font;
 		self->style.use_font = 0;
 		psy_ui_component_updatefont(self);
+		self->imp->vtable->dev_setfont(self->imp, psy_ui_component_font(self));		
 		if (dispose) {
 			psy_ui_font_dispose(&self->style.font);
 		}

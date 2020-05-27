@@ -222,7 +222,7 @@ static void vtable_init(psy_audio_VstPlugin* self)
 	}
 }
 
-void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, MachineCallback callback,
+void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, psy_audio_MachineCallback callback,
 	const char* path)
 {		
 	PluginEntryProc mainproc;

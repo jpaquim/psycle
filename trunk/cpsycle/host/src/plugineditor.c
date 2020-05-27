@@ -82,7 +82,7 @@ void plugineditor_onmachineschangeslot(PluginEditor* self,
 {
 	psy_audio_Machine* machine;
 
-	machine = machines_at(machines, slot);
+	machine = psy_audio_machines_at(machines, slot);
 	if (machine && psy_audio_machine_info(machine) &&
 			psy_audio_machine_info(machine)->type == MACH_LUA) {
 		const char* path;
@@ -121,7 +121,7 @@ void plugineditor_onreload(PluginEditor* self, psy_ui_Component* sender)
 	if (self->workspace->song && self->instanceidx) {
 		psy_audio_Machine* machine;
 
-		machine = machines_at(&self->workspace->song->machines, self->instanceidx);
+		machine = psy_audio_machines_at(&self->workspace->song->machines, self->instanceidx);
 		if (machine) {			
 			psy_audio_exclusivelock_enter();
 			psy_audio_machine_reload(machine);

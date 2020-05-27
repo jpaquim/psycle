@@ -12,10 +12,10 @@ typedef enum {
 	WAVEBOX_DRAG_LEFT,
 	WAVEBOX_DRAG_RIGHT,
 	WAVEBOX_DRAG_MOVE,
-	WAVEBOX_DRAG_LOOP_CONT_LEFT,
-	WAVEBOX_DRAG_LOOP_CONT_RIGHT,
-	WAVEBOX_DRAG_LOOP_SUSTAIN_LEFT,
-	WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT
+	WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_LEFT,
+	WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_RIGHT,
+	WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_LEFT,
+	WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_RIGHT
 } WaveBoxDragMode;
 
 typedef struct {	
@@ -33,6 +33,7 @@ typedef struct {
 	char* nowavetext;
 	bool preventdrawonselect;
 	uintptr_t channel;
+	bool doubleloop;
 } WaveBox;
 
 void wavebox_init(WaveBox*, psy_ui_Component* parent);

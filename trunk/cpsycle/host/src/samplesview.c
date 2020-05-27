@@ -47,19 +47,19 @@ static void ongeneralviewtweak(SamplesGeneralView*, psy_ui_Slider*, float value)
 static void ongeneralviewvalue(SamplesGeneralView*, psy_ui_Slider*, float* value);
 static void initsamplesvibratoview(SamplesVibratoView*, psy_ui_Component* parent, psy_audio_Player* player);
 static void setsamplesamplesvibratoview(SamplesVibratoView*, psy_audio_Sample* sample);
-/// Vibrato Settings View
+/// psy_audio_Vibrato Settings View
 static void onvibratoviewdescribe(SamplesVibratoView*, psy_ui_Slider*, char* txt);
 static void onvibratoviewtweak(SamplesVibratoView*, psy_ui_Slider*, float value);
 static void onvibratoviewvalue(SamplesVibratoView*, psy_ui_Slider*, float* value);
 static void onwaveformchange(SamplesVibratoView*, psy_ui_ComboBox* sender, int sel);
-static WaveForms comboboxtowaveform(int combobox_index);
-static int waveformtocombobox(WaveForms waveform);
+static psy_audio_WaveForms comboboxtowaveform(int combobox_index);
+static int waveformtocombobox(psy_audio_WaveForms waveform);
 /// Waveloop Setting View
 static void samplesloopview_init(SamplesLoopView*, psy_ui_Component* parent,
 	SamplesView*);
 static void samplesloopview_setsample(SamplesLoopView*, psy_audio_Sample*);
-static int LoopTypeToComboBox(LoopType looptype);
-static LoopType ComboBoxToLoopType(int combobox_index);
+static int LoopTypeToComboBox(psy_audio_SampleLoopType looptype);
+static psy_audio_SampleLoopType ComboBoxToLoopType(int combobox_index);
 static void samplesloopview_samplecontloopchanged(SamplesLoopView*, psy_audio_Sample* sender);
 static void samplesloopview_samplesustainloopchanged(SamplesLoopView*, psy_audio_Sample* sender);
 static void samplesloopview_onlooptypechange(SamplesLoopView*,
@@ -306,7 +306,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
 	tabbar_append(&self->tabbar, "General");
-	tabbar_append(&self->tabbar, "Vibrato");
+	tabbar_append(&self->tabbar, "psy_audio_Vibrato");
 
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_enablealign(psy_ui_notebook_base(&self->notebook));
@@ -894,7 +894,7 @@ void setsamplesamplesvibratoview(SamplesVibratoView* self, psy_audio_Sample* sam
 	} else {
 		psy_ui_component_preventinput(&self->component, 1);
 		psy_ui_combobox_setcursel(&self->waveformbox,
-			waveformtocombobox(WAVEFORMS_SINUS));
+			waveformtocombobox(psy_audio_WAVEFORMS_SINUS));
 	}
 }
 
@@ -972,32 +972,32 @@ void onwaveformchange(SamplesVibratoView* self, psy_ui_ComboBox* sender,
 	}
 }
 
-int waveformtocombobox(WaveForms waveform)
+int waveformtocombobox(psy_audio_WaveForms waveform)
 {
 	int rv = 0;
 
 	switch (waveform) {
-		case WAVEFORMS_SINUS: rv = 0; break;		
-		case WAVEFORMS_SQUARE: rv = 1; break;					
-		case WAVEFORMS_SAWUP: rv = 2; break;					
-		case WAVEFORMS_SAWDOWN: rv = 3; break;					
-		case WAVEFORMS_RANDOM: rv = 4; break;					
+		case psy_audio_WAVEFORMS_SINUS: rv = 0; break;		
+		case psy_audio_WAVEFORMS_SQUARE: rv = 1; break;					
+		case psy_audio_WAVEFORMS_SAWUP: rv = 2; break;					
+		case psy_audio_WAVEFORMS_SAWDOWN: rv = 3; break;					
+		case psy_audio_WAVEFORMS_RANDOM: rv = 4; break;					
 		default:
 		break;		
 	}
 	return rv;
 }
 
-WaveForms comboboxtowaveform(int combobox_index)
+psy_audio_WaveForms comboboxtowaveform(int combobox_index)
 {
-	WaveForms rv = WAVEFORMS_SINUS;			
+	psy_audio_WaveForms rv = psy_audio_WAVEFORMS_SINUS;			
 	
 	switch (combobox_index) {					
-		case 0: rv = WAVEFORMS_SINUS; break;
-		case 1: rv = WAVEFORMS_SQUARE; break;
-		case 2: rv = WAVEFORMS_SAWUP; break;
-		case 3: rv = WAVEFORMS_SAWDOWN; break;
-		case 4: rv = WAVEFORMS_RANDOM; break;
+		case 0: rv = psy_audio_WAVEFORMS_SINUS; break;
+		case 1: rv = psy_audio_WAVEFORMS_SQUARE; break;
+		case 2: rv = psy_audio_WAVEFORMS_SAWUP; break;
+		case 3: rv = psy_audio_WAVEFORMS_SAWDOWN; break;
+		case 4: rv = psy_audio_WAVEFORMS_RANDOM; break;
 		default:
 		break;				
 	}
@@ -1122,9 +1122,9 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 		psy_ui_edit_settext(&self->sustainloopstartedit, tmp);		
 		psy_ui_edit_settext(&self->sustainloopendedit, tmp);
 		psy_ui_combobox_setcursel(&self->loopdir,
-			LoopTypeToComboBox(LOOP_DO_NOT));
+			LoopTypeToComboBox(psy_audio_SAMPLE_LOOP_DO_NOT));
 		psy_ui_combobox_setcursel(&self->sustainloopdir,
-			LoopTypeToComboBox(LOOP_DO_NOT));
+			LoopTypeToComboBox(psy_audio_SAMPLE_LOOP_DO_NOT));
 		psy_ui_component_stoptimer(&self->component, TIMERID_SAMPLESLOOPVIEW);
 		psy_audio_sampleloop_init(&self->currloop);
 		psy_audio_sampleloop_init(&self->currsustainloop);
@@ -1132,14 +1132,14 @@ void samplesloopview_setsample(SamplesLoopView* self, psy_audio_Sample* sample)
 	samplesloopview_looptypeenablepreventinput(self);
 }
 
-int LoopTypeToComboBox(LoopType looptype)
+int LoopTypeToComboBox(psy_audio_SampleLoopType looptype)
 {
 	int rv = 0;
 
 	switch (looptype) {
-		case LOOP_DO_NOT: rv = 0; break;
-		case LOOP_NORMAL: rv = 1; break;
-		case LOOP_BIDI: rv = 2; break;
+		case psy_audio_SAMPLE_LOOP_DO_NOT: rv = 0; break;
+		case psy_audio_SAMPLE_LOOP_NORMAL: rv = 1; break;
+		case psy_audio_SAMPLE_LOOP_BIDI: rv = 2; break;
 		default:
 		break;
 	}
@@ -1179,14 +1179,14 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 {
 	if (self->sample) {
-		if (self->sample->loop.type == LOOP_DO_NOT) {
+		if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_component_preventinput(&self->loopstartedit.component, 0);
 			psy_ui_component_preventinput(&self->loopendedit.component, 0);
 		} else {
 			psy_ui_component_enableinput(&self->loopstartedit.component, 0);
 			psy_ui_component_enableinput(&self->loopendedit.component, 0);
 		}
-		if (self->sample->sustainloop.type == LOOP_DO_NOT) {
+		if (self->sample->sustainloop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_component_preventinput(&self->sustainloopstartedit.component, 0);
 			psy_ui_component_preventinput(&self->sustainloopendedit.component, 0);
 		} else {
@@ -1201,14 +1201,14 @@ void samplesloopview_looptypeenablepreventinput(SamplesLoopView* self)
 	}
 }
 
-LoopType ComboBoxToLoopType(int combobox_index)
+psy_audio_SampleLoopType ComboBoxToLoopType(int combobox_index)
 {
-	LoopType rv = 0;
+	psy_audio_SampleLoopType rv = 0;
 			
 	switch (combobox_index) {			
-		case 0: rv = LOOP_DO_NOT; break;
-		case 1: rv = LOOP_NORMAL; break;
-		case 2: rv = LOOP_BIDI; break;
+		case 0: rv = psy_audio_SAMPLE_LOOP_DO_NOT; break;
+		case 1: rv = psy_audio_SAMPLE_LOOP_NORMAL; break;
+		case 2: rv = psy_audio_SAMPLE_LOOP_BIDI; break;
 		default:
 		break;
 	}

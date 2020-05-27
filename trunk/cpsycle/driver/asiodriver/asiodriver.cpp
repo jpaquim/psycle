@@ -684,7 +684,7 @@ ASIOTime* ASIOInterface::bufferSwitchTimeInfo(ASIOTime* timeInfo, long index, AS
 
 	const unsigned int _ASIObufferSamples = psy_audiodriversettings_blockframes(&settings_);
 	//////////////////////////////////////////////////////////////////////////
-	// Inputs
+	// psy_audio_Inputs
 	unsigned int counter(0);
 	for (; counter < _selectedins.size(); ++counter)
 	{

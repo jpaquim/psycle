@@ -78,7 +78,7 @@ static int machineproxy_numcaptures(psy_audio_MachineProxy*);
 static const char* machineproxy_playbackname(psy_audio_MachineProxy*, int index);
 static int machineproxy_numplaybacks(psy_audio_MachineProxy*);
 
-static void machineproxy_setcallback(psy_audio_MachineProxy*, MachineCallback);
+static void machineproxy_setcallback(psy_audio_MachineProxy*, psy_audio_MachineCallback);
 static int machineproxy_haseditor(psy_audio_MachineProxy*);
 static void machineproxy_seteditorhandle(psy_audio_MachineProxy*, void* handle);
 static void machineproxy_editorsize(psy_audio_MachineProxy*, int* width, int* height);
@@ -226,7 +226,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 	}
 }
 
-void machineproxy_init(psy_audio_MachineProxy* self, psy_audio_Machine* client)
+void psy_audio_machineproxy_init(psy_audio_MachineProxy* self, psy_audio_Machine* client)
 {
 	machine_init(&self->machine, client->callback);
 	vtable_init(self);
@@ -234,6 +234,22 @@ void machineproxy_init(psy_audio_MachineProxy* self, psy_audio_Machine* client)
 	self->machine.vtable = &vtable;
 	self->crashed = 0;
 	self->client = client;	
+}
+
+psy_audio_MachineProxy* psy_audio_machineproxy_alloc(void)
+{
+	return (psy_audio_MachineProxy*)malloc(sizeof(psy_audio_MachineProxy));
+}
+
+psy_audio_MachineProxy* psy_audio_machineproxy_allocinit(psy_audio_Machine* client)
+{
+	psy_audio_MachineProxy* rv;
+
+	rv = psy_audio_machineproxy_alloc();
+	if (rv) {
+		psy_audio_machineproxy_init(rv, client);
+	}
+	return rv;
 }
 
 psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy* self, uintptr_t slot,
@@ -1042,7 +1058,7 @@ void machineproxy_readbuffers(psy_audio_MachineProxy* self, int index, float**pl
 	}	
 }
 
-void machineproxy_setcallback(psy_audio_MachineProxy* self, MachineCallback callback)
+void machineproxy_setcallback(psy_audio_MachineProxy* self, psy_audio_MachineCallback callback)
 { 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

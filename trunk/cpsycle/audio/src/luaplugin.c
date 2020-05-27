@@ -97,7 +97,7 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 	}
 }
 		
-void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, MachineCallback callback,
+void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallback callback,
 	const char* path)
 {
 	int err = 0;	
@@ -151,7 +151,7 @@ void reload(psy_audio_LuaPlugin* self)
 {	
 	if (self->script.L && psyclescript_modulepath(&self->script)) {
 		char path[4096];
-		MachineCallback mcb;
+		psy_audio_MachineCallback mcb;
 
 		psy_snprintf(path, 4096, "%s", psyclescript_modulepath(&self->script));
 		mcb = self->custommachine.machine.callback;		
@@ -183,7 +183,7 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 	err = psyclescript_machineinfo(&script, machineinfo);
 	if (err != 0) {
 		psy_audio_LuaPlugin plugin;
-		MachineCallback mcb;
+		psy_audio_MachineCallback mcb;
 		
 		machinecallback_initempty(&mcb);
 		psy_audio_luaplugin_init(&plugin, mcb, path);
@@ -594,7 +594,7 @@ int luamachine_create(lua_State* L)
 			if (!host) {
 				return luaL_error(L, "host not found");
 			}
-			mac = machines_at(psy_audio_machine_machines(
+			mac = psy_audio_machines_at(psy_audio_machine_machines(
 				psy_audio_luaplugin_base(host)), idx);
 			if (mac) {
 				ud = malloc(sizeof(psy_audio_LuaMachine));
@@ -617,7 +617,7 @@ int luamachine_create(lua_State* L)
 			}
 			machinefactory = psy_audio_machine_machinefactory(psy_audio_luaplugin_base(host));
 			if (machinefactory) {
-				machine = machinefactory_makemachine(machinefactory, MACH_PLUGIN,
+				machine = psy_audio_machinefactory_makemachine(machinefactory, MACH_PLUGIN,
 					plug_name);
 				if (machine) {
 					ud = malloc(sizeof(psy_audio_LuaMachine));
@@ -821,11 +821,11 @@ int luamachine_channel(lua_State* L)
 void psy_audio_luamachine_init(psy_audio_LuaMachine* self)
 {	
 	psy_audio_CustomMachine* custommachine;
-	MachineCallback callback;
+	psy_audio_MachineCallback callback;
 		
 	custommachine = (psy_audio_CustomMachine*) malloc(sizeof(psy_audio_CustomMachine));
 	if (custommachine) {
-		memset(&callback, 0, sizeof(MachineCallback));
+		memset(&callback, 0, sizeof(psy_audio_MachineCallback));
 		custommachine_init(custommachine, callback);
 		self->machine = &custommachine->machine;
 	} else {

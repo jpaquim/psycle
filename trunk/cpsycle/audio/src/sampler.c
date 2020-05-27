@@ -93,6 +93,7 @@ static psy_audio_SamplerChannel* sampler_channel(psy_audio_Sampler*, uintptr_t c
 static int currslot(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 
+
 static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
 	0x0250,
@@ -142,7 +143,7 @@ static void sampler_vtable_init(psy_audio_Sampler* self)
 	}
 }
 
-void psy_audio_sampler_init(psy_audio_Sampler* self, MachineCallback callback)
+void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback callback)
 {	
 	uintptr_t i;
 
@@ -158,6 +159,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, MachineCallback callback)
 	self->panpersistent = 0;
 	self->xmsamplerload = 0;
 	self->basec = 48;
+	self->clipmax = (psy_dsp_amp_t)4.0f;
 	psy_table_init(&self->channels);
 	psy_table_init(&self->lastinst);
 	psy_audio_intmachineparam_init(&self->param_numvoices,
@@ -237,7 +239,7 @@ psy_audio_Sampler* psy_audio_sampler_alloc(void)
 	return (psy_audio_Sampler*) malloc(sizeof(psy_audio_Sampler));
 }
 
-psy_audio_Sampler* psy_audio_sampler_allocinit(MachineCallback callback)
+psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback callback)
 {
 	psy_audio_Sampler* rv;
 
@@ -606,7 +608,7 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 		entry = (psy_audio_InstrumentEntry*) p->entry;
 		sample = psy_audio_samples_at(self->samples, entry->sampleindex);
 		if (sample) {
-			SampleIterator* iterator;			
+			psy_audio_SampleIterator* iterator;			
 			
 			iterator = sampleiterator_alloc();
 			*iterator = sample_begin(sample);
@@ -662,7 +664,7 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, doubl
 		entry = (psy_audio_InstrumentEntry*)p->entry;
 		sample = psy_audio_samples_at(self->samples, entry->sampleindex);
 		if (sample) {
-			SampleIterator* iterator;
+			psy_audio_SampleIterator* iterator;
 
 			iterator = sampleiterator_alloc();
 			*iterator = sample_begin(sample);
@@ -694,9 +696,9 @@ void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice* self)
 	psy_List* p;
 
 	for (p = self->positions; p != NULL; p = p->next) {
-		SampleIterator* iterator;
+		psy_audio_SampleIterator* iterator;
 
-		iterator = (SampleIterator*)p->entry;
+		iterator = (psy_audio_SampleIterator*)p->entry;
 		psy_dsp_multiresampler_base(&self->resampler)->vtable->disposeresamplerdata(
 			psy_dsp_multiresampler_base(&self->resampler),
 			iterator->resampler_data);
@@ -755,7 +757,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer*
 		}
 		
 		for (p = self->positions; p != NULL; p = p->next) {
-			SampleIterator* position;
+			psy_audio_SampleIterator* position;
 			uintptr_t i;
 			psy_dsp_amp_t panning;
 			psy_dsp_amp_t svol;
@@ -763,7 +765,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer*
 			psy_dsp_amp_t rvol;
 			psy_dsp_amp_t lvol;
 		
-			position = (SampleIterator*) p->entry;
+			position = (psy_audio_SampleIterator*) p->entry;
 			if (self->dooffset) {
 				uint64_t w_offset;
 
@@ -774,7 +776,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer*
 					double_setvalue(&position->pos, 0.0);
 				}
 			}
-			svol = position->sample->globalvolume *
+			svol = psy_audio_samplervoice_volume(self, position->sample) *
 						(self->usedefaultvolume
 							? position->sample->defaultvolume
 							: self->vol);
@@ -785,12 +787,15 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, psy_audio_Buffer*
 				panning = self->dopan ? self->pan : position->sample->panfactor;
 			}
 			rvol = panning * svol * cvol;
-			lvol = ((psy_dsp_amp_t) 1 - panning) * svol * cvol;
+			lvol = ((psy_dsp_amp_t) 1.f - panning) * svol * cvol;
 			
 			//FT2 Style (Two slides) mode, but with max amp = 0.5.
-			if (rvol > 0.5f) { rvol = (psy_dsp_amp_t) 0.5f; }
-			if (lvol > 0.5f) { lvol = (psy_dsp_amp_t) 0.5f; }			
-
+			if (rvol > self->sampler->clipmax) {
+				rvol = (psy_dsp_amp_t)self->sampler->clipmax;
+			}
+			if (lvol > self->sampler->clipmax) {
+				lvol = (psy_dsp_amp_t)self->sampler->clipmax;
+			}
 			if (self->effcmd == SAMPLER_CMD_PORTAUP ||
 					self->effcmd == SAMPLER_CMD_PORTADOWN) {
 				portaframe = self->portacurrframe;

@@ -16,12 +16,16 @@
 
 #include "../../detail/portable.h"
 
+static void sampleeditorbar_ondoubleloop(SampleEditorBar*, psy_ui_Component* sender);
+
 void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
+	SampleEditor* editor,
 	Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
 	self->workspace = workspace;
+	self->editor = editor;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_checkbox_init(&self->selecttogether, &self->component);
@@ -35,6 +39,12 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->selendlabel, "Selection End");
 	psy_ui_edit_init(&self->selendedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selendedit, 10);
+	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
+	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop View");
+	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
+		sampleeditorbar_ondoubleloop);
+	psy_ui_checkbox_init(&self->doublesustainloop, &self->component);
+	psy_ui_checkbox_settext(&self->doublesustainloop, "Double Sustain Loop View");
 	sampleeditorbar_clearselection(self);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
@@ -64,6 +74,15 @@ void sampleeditorbar_clearselection(SampleEditorBar* self)
 	psy_ui_edit_preventedit(&self->selendedit);
 	psy_ui_edit_settext(&self->selstartedit, "");
 	psy_ui_edit_settext(&self->selendedit, "");
+}
+
+void sampleeditorbar_ondoubleloop(SampleEditorBar* self, psy_ui_Component* sender)
+{
+	if (psy_ui_checkbox_checked(&self->doublecontloop)) {
+		sampleeditor_showdoubleloop(self->editor);
+	} else {
+		sampleeditor_showsingleloop(self->editor);
+	}
 }
 
 static void sampleeditoroperations_updatetext(SampleEditorOperations*,
@@ -317,19 +336,19 @@ static void sampleeditor_onmasterworked(SampleEditor*, psy_audio_Machine*,
 static void sampleeditor_onselectionchanged(SampleEditor*, WaveBox*);
 static void sampleeditor_onscrollzoom_customdraw(SampleEditor*,
 	ScrollZoom* sender, psy_ui_Graphics*);
-void sampleeditor_onlanguagechanged(SampleEditor*,
+static void sampleeditor_onlanguagechanged(SampleEditor*,
 	Workspace* workspace);
-void sampleeditor_amplify(SampleEditor*, uintptr_t channel,
+static void sampleeditor_amplify(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend,
 	psy_dsp_amp_t gain);
-void sampleeditor_fade(SampleEditor*, uintptr_t channel,
+static void sampleeditor_fade(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend, psy_dsp_amp_t startvol,
 	psy_dsp_amp_t endvol);
-void sampleeditor_removeDC(SampleEditor*, uintptr_t channel,
+static void sampleeditor_removeDC(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend);
-void sampleeditor_normalize(SampleEditor*, uintptr_t channel,
+static void sampleeditor_normalize(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend);
-void sampleeditor_reverse(SampleEditor*, uintptr_t channel,
+static void sampleeditor_reverse(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend);
 
 enum {
@@ -494,6 +513,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->sample = 0;
 	self->samplerevents = 0;
 	self->workspace = workspace;
+	self->showdoubleloop = FALSE;
 	psy_ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);
@@ -545,7 +565,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	sampleeditor_connectmachinessignals(self, workspace);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		sampleeditor_onlanguagechanged);
-	psy_signal_init(&self->signal_samplemodified);
+	psy_signal_init(&self->signal_samplemodified);	
 }
 
 void sampleeditor_initsampler(SampleEditor* self)
@@ -556,7 +576,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 		self->workspace->machinefactory.machinecallback);
 	psy_audio_buffer_init(&self->samplerbuffer, 2);
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
-		self->samplerbuffer.samples[c] = dsp.memory_alloc(MAX_STREAM_SIZE,
+		self->samplerbuffer.samples[c] = dsp.memory_alloc(psy_audio_MAX_STREAM_SIZE,
 			sizeof(float));
 	}	
 }
@@ -614,6 +634,7 @@ void sampleeditor_buildwaveboxes(SampleEditor* self, psy_audio_Sample* sample)
 
 			wavebox = (WaveBox*)malloc(sizeof(WaveBox));
 			wavebox_init(wavebox, &self->samplebox);
+			wavebox->doubleloop = self->showdoubleloop;
 			wavebox->preventdrawonselect = TRUE;
 			wavebox_setsample(wavebox, sample, channel);
 			psy_ui_component_setalign(&wavebox->component, psy_ui_ALIGN_CLIENT);
@@ -674,9 +695,9 @@ void sampleeditor_connectmachinessignals(SampleEditor* self,
 	Workspace* workspace)
 {
 	if (workspace && workspace->song &&
-			machines_master(&workspace->song->machines)) {
+			psy_audio_machines_master(&workspace->song->machines)) {
 		psy_signal_connect(
-			&machines_master(&workspace->song->machines)->signal_worked, self,
+			&psy_audio_machines_master(&workspace->song->machines)->signal_worked, self,
 			sampleeditor_onmasterworked);
 	}
 }
@@ -952,4 +973,36 @@ void sampleeditor_onlanguagechanged(SampleEditor* self,
 	Workspace* workspace)
 {
 	psy_ui_component_align(&self->component);
+}
+
+void sampleeditor_showdoubleloop(SampleEditor* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->waveboxes);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		WaveBox* wavebox;
+
+		wavebox = (WaveBox*)psy_tableiterator_value(&it);
+		wavebox->doubleloop = TRUE;
+	}
+	self->showdoubleloop = TRUE;
+	psy_ui_component_invalidate(&self->samplebox);
+}
+
+void sampleeditor_showsingleloop(SampleEditor* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->waveboxes);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		WaveBox* wavebox;
+
+		wavebox = (WaveBox*)psy_tableiterator_value(&it);
+		wavebox->doubleloop = FALSE;
+	}
+	self->showdoubleloop = FALSE;
+	psy_ui_component_invalidate(&self->samplebox);
 }

@@ -382,7 +382,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 						psyfile_read(songfile->file, &wave->loop.end, sizeof wave->loop.end);
 
 						psyfile_read(songfile->file, &doloop, sizeof(doloop));
-						wave->loop.type = doloop ? LOOP_NORMAL : LOOP_DO_NOT;
+						wave->loop.type = doloop ? psy_audio_SAMPLE_LOOP_NORMAL : psy_audio_SAMPLE_LOOP_DO_NOT;
 						psyfile_read(songfile->file, &wave->stereo, sizeof(wave->stereo));
 																	
 						pData = malloc(wltemp*sizeof(short)+4);// +4 to avoid any attempt at buffer overflow by the code
@@ -495,12 +495,12 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 				switch (type)
 				{
 				case MACH_MASTER:
-					pMac[i] = machinefactory_makemachine(factory, MACH_MASTER, "");
-					machines_insert(&songfile->song->machines, MASTER_INDEX, pMac[i]);
+					pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_MASTER, "");
+					psy_audio_machines_insert(&songfile->song->machines, psy_audio_MASTER_INDEX, pMac[i]);
 					master_load(songfile, i);					
 				break;
 				case MACH_SAMPLER:
-					pMac[i] = machinefactory_makemachine(factory, MACH_SAMPLER, "");
+					pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_SAMPLER, "");
 					sampler_load(songfile, i);
 				break;
 				case MACH_PLUGIN:
@@ -516,11 +516,11 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 					} else {
 						plugincatcher_catchername(songfile->song->machinefactory->catcher,
 							sDllName, plugincatchername, 0);
-						pMac[i] = machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername);
+						pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername);
 						if (pMac[i]) {
 							plugin_load(songfile, pMac[i], i);
 						} else {
-							pMac[i] = machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername);
+							pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername);
 							plugin_skipload(songfile, i);
 							// Warning: It cannot be known if the missing plugin is a generator
 							// or an effect. This will be guessed from the busMachine array.
@@ -683,7 +683,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 				if (busMachine[i] < 128 && busMachine[i] != 255) invmach[busMachine[i]] = i;
 				if (busEffect[i] < 128 && busEffect[i] != 255) invmach[busEffect[i]] = i + 64;
 			}
-			invmach[0] = MASTER_INDEX;
+			invmach[0] = psy_audio_MASTER_INDEX;
 			
 			for (i = 0; i < 128; i++)
 			{
@@ -692,7 +692,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 					psy_audio_Machine* cMac = pMac[i];
 					psy_audio_MachineUi* machineui;
 					
-					machines_insert(&songfile->song->machines, invmach[i], pMac[i]);
+					psy_audio_machines_insert(&songfile->song->machines, invmach[i], pMac[i]);
 					machineui = psy_audio_songfile_machineui(songfile, invmach[i]);
 					machineui->x = machineuis[i].x;
 					machineui->y = machineuis[i].y;
@@ -710,8 +710,8 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 					{
 						psy_audio_MachineUi* machineui;
 
-						while (machines_at(&songfile->song->machines, j) && j < 64) j++;
-						machines_insert(&songfile->song->machines, j, pMac[i]);
+						while (psy_audio_machines_at(&songfile->song->machines, j) && j < 64) j++;
+						psy_audio_machines_insert(&songfile->song->machines, j, pMac[i]);
 						invmach[i] = j;
 						machineui = psy_audio_songfile_machineui(songfile, j);
 						machineui->x = machineuis[i].x;
@@ -720,8 +720,8 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 					{
 						psy_audio_MachineUi* machineui;
 
-						while (machines_at(&songfile->song->machines, j) && k < 128) k++;
-						machines_insert(&songfile->song->machines, k, pMac[i]);
+						while (psy_audio_machines_at(&songfile->song->machines, j) && k < 128) k++;
+						psy_audio_machines_insert(&songfile->song->machines, k, pMac[i]);
 						invmach[i] = k;
 						machineui = psy_audio_songfile_machineui(songfile, k);
 						machineui->x = machineuis[i].x;
@@ -791,7 +791,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 										//	pMac[i]->inWires[c].ConnectSource(*pSourceMac, 0, d);
 										//}
 										//pMac[i]->inWires[c].SetVolume(val * wire._wireMultiplier); */
-											machines_connect(&songfile->song->machines, invmach[wire->_inputMachine], invmach[i]);
+											psy_audio_machines_connect(&songfile->song->machines, invmach[wire->_inputMachine], invmach[i]);
 										connections_setwirevolume(&songfile->song->machines.connections,
 											invmach[wire->_inputMachine], invmach[i], val* wire->_wireMultiplier);
 									}

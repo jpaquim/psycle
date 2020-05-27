@@ -44,10 +44,10 @@ static const char* cmdplayer_driverpath(CmdPlayer*);
 static void cmdplayer_setdriverlist(CmdPlayer*);
 static void cmdplayer_loadsong(CmdPlayer*, const char* path);
 static void cmdplayer_applysongproperties(CmdPlayer*);
-static MachineCallback machinecallback(CmdPlayer*);
+static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void cmdplayer_idle(void);
 /// Machinecallback
-static MachineCallback machinecallback(CmdPlayer*);
+static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static uintptr_t machinecallback_samplerate(CmdPlayer*);
 static psy_dsp_beat_t machinecallback_bpm(CmdPlayer*);
 static psy_dsp_beat_t machinecallback_beatspersample(CmdPlayer*);
@@ -216,7 +216,7 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
 	}
-	machinefactory_init(&self->machinefactory, machinecallback(self), 
+	psy_audio_machinefactory_init(&self->machinefactory, machinecallback(self), 
 		&self->plugincatcher);
 }
 
@@ -289,7 +289,7 @@ void cmdplayer_dispose(CmdPlayer* self)
 	properties_free(self->config);
 	self->config = 0;	
 	plugincatcher_dispose(&self->plugincatcher);
-	machinefactory_dispose(&self->machinefactory);	
+	psy_audio_machinefactory_dispose(&self->machinefactory);	
 	psy_audio_exclusivelock_dispose();
 }
 
@@ -348,9 +348,9 @@ void cmdplayer_applysongproperties(CmdPlayer* self)
 }
 
 // callbacks
-MachineCallback machinecallback(CmdPlayer* self)
+psy_audio_MachineCallback machinecallback(CmdPlayer* self)
 {
-	MachineCallback rv;
+	psy_audio_MachineCallback rv;
 
 	rv.context = self;	
     rv.samplerate = (fp_mcb_samplerate) machinecallback_samplerate;

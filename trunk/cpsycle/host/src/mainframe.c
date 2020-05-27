@@ -355,8 +355,10 @@ void mainframe_initstatusbar(MainFrame* self)
 		&self->workspace);
 	psy_ui_component_setalign(&self->patternbar.component, psy_ui_ALIGN_LEFT);
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar, &self->viewstatusbars.component,
+		&self->samplesview.sampleeditor,
 		&self->workspace);	
-	psy_ui_component_setalign(&self->samplesview.sampleeditor.sampleeditortbar.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->samplesview.sampleeditor.sampleeditortbar.component,
+		psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_setpageindex(&self->viewstatusbars, 0);
 //	psy_ui_notebook_connectcontroller(&self->viewstatusbars,
 	//	&self->tabbar.signal_change);
@@ -545,7 +547,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	} else
 	if (cmd.id == CMD_IMM_INFOMACHINE) {
 		workspace_showparameters(&self->workspace,
-			machines_slot(&self->workspace.song->machines));
+			psy_audio_machines_slot(&self->workspace.song->machines));
 	} else
 	if (cmd.id == CMD_IMM_EDITINSTR) {
 		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0, 0);
@@ -578,7 +580,7 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 		
 		input.message = EVENTDRIVER_KEYDOWN;
 		kbd = workspace_kbddriver(&self->workspace);		
-		input.param1 = encodeinput(ev->keycode, 
+		input.param1 = psy_audio_encodeinput(ev->keycode, 
 			self->workspace.chordmode ? 0 : ev->shift, ev->ctrl);		
 		input.param2 = workspace_octave(&self->workspace) * 12;
 		kbd->write(kbd, input);
@@ -593,10 +595,10 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 		
 		input.message = EVENTDRIVER_KEYUP;
 #if defined DIVERSALIS__OS__MICROSOFT_        
-		input.param1 = encodeinput(ev->keycode, GetKeyState(psy_ui_KEY_SHIFT) < 0,
+		input.param1 = psy_audio_encodeinput(ev->keycode, GetKeyState(psy_ui_KEY_SHIFT) < 0,
 			GetKeyState(psy_ui_KEY_CONTROL) < 0);
 #else
-        input.param1 = encodeinput(ev->keycode, ev->shift, ev->ctrl);
+        input.param1 = psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl);
 #endif          
 		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);

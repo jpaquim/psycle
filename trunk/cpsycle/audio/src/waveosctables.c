@@ -121,7 +121,7 @@ void constructwave(double fh, psy_audio_Sample* wave,
     wave->samplerate = sr;    
     wave->loop.start = 0;
     wave->loop.end = num;
-    wave->loop.type = LOOP_NORMAL;    
+    wave->loop.type = psy_audio_SAMPLE_LOOP_NORMAL;    
     func(wave->channels.samples[0], num, hmax);
 }
 

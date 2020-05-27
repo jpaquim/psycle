@@ -164,7 +164,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 	_strlwr(sDllName);
 	plugincatcher_catchername(songfile->song->machinefactory->catcher,
 		sDllName, plugincatchername, 0);
-	machine = machinefactory_makemachine(songfile->song->machinefactory,
+	machine = psy_audio_machinefactory_makemachine(songfile->song->machinefactory,
 		MACH_PLUGIN, plugincatchername);
 
 	psyfile_read(songfile->file, _editName, 16);

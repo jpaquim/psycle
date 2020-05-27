@@ -25,6 +25,9 @@ static uintptr_t wavebox_screentoframe(WaveBox*, int x);
 static int wavebox_frametoscreen(WaveBox*, uintptr_t frame);
 static void wavebox_swapselection(WaveBox*);
 static void  wavebox_onsize(WaveBox*, psy_ui_Size*);
+static uintptr_t wavebox_numframes(WaveBox*);
+static uintptr_t wavebox_numloopframes(WaveBox*);
+static psy_dsp_amp_t wavebox_amp(WaveBox*, uintptr_t frame);
 
 
 
@@ -56,6 +59,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent)
 	self->zoomright = 1.f;
 	self->offsetstep = 0;
 	self->nowavetext = 0;
+	self->doubleloop = FALSE;
 	self->preventdrawonselect = FALSE;
 	wavebox_setnowavetext(self, "No wave loaded");
 	psy_signal_init(&self->selectionchanged);
@@ -87,7 +91,7 @@ void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample, uintptr_t channe
 	size = psy_ui_component_size(&self->component);
 	self->sample = sample;
 	self->channel = channel;
-	self->offsetstep = sample ? (double)self->sample->numframes / size.width *
+	self->offsetstep = sample ? (double)wavebox_numframes(self) / size.width *
 		((double)self->zoomright - (double)self->zoomleft) : 0.0;
 	psy_ui_component_invalidate(&self->component);
 }
@@ -113,21 +117,33 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		int x;
 		int centery = size.height / 2;
 		psy_ui_Rectangle cont_loop_rc;
-		psy_ui_Rectangle sustain_loop_rc;
+		psy_ui_Rectangle cont_doubleloop_rc;
+		psy_ui_Rectangle sustain_loop_rc;		
 
-		if (self->sample->loop.type != LOOP_DO_NOT) {
+		if (self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			cont_loop_rc = wavebox_framerangetoscreen(self,
-				self->sample->loop.start, self->sample->loop.end);
+				self->sample->loop.start,
+				self->sample->loop.end);
+			if (self->doubleloop) {
+				cont_doubleloop_rc =
+					wavebox_framerangetoscreen(self,
+						self->sample->loop.end + 1,
+						self->sample->loop.end + 1 +
+							wavebox_numloopframes(self));
+			}			
 		}
-		if (self->sample->sustainloop.type != LOOP_DO_NOT) {
+		if (self->sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			sustain_loop_rc = wavebox_framerangetoscreen(self,
 				self->sample->sustainloop.start,
 				self->sample->sustainloop.end);
 		}
 		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;	
 
-		if (self->sample && self->sample->loop.type != LOOP_DO_NOT) {			
-			psy_ui_drawsolidrectangle(g, cont_loop_rc, 0x00292929);
+		if (self->sample && self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {			
+			psy_ui_drawsolidrectangle(g, cont_loop_rc, 0x00333333);
+			if (self->doubleloop) {
+				psy_ui_drawsolidrectangle(g, cont_doubleloop_rc, 0x00292929);
+			}
 		}		
 		if (self->hasselection) {			
 			psy_ui_drawsolidrectangle(g, wavebox_framerangetoscreen(self,
@@ -135,13 +151,13 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		}		
 		for (x = 0; x < size.width; ++x) {			
 			uintptr_t frame = (int)(self->offsetstep * x + 
-				(int)(self->sample->numframes * self->zoomleft));
+				(int)(wavebox_numframes(self) * self->zoomleft));
 			float framevalue;
 			
-			if (frame >= self->sample->numframes) {
+			if (frame >= wavebox_numframes(self)) {
 				break;
 			}
-			framevalue = self->sample->channels.samples[self->channel][frame];
+			framevalue = wavebox_amp(self, frame);
 			if (self->hasselection &&
 				frame >= self->selectionstart &&
 				frame < self->selectionend) {
@@ -153,7 +169,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 				psy_ui_drawline(g, x, 0, x, size.height);
 				psy_ui_setcolor(g, 0x00FF2288);
 			} else
-			if (self->sample->loop.type != LOOP_DO_NOT &&
+			if (self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT &&
 					psy_ui_rectangle_intersect(&cont_loop_rc, x, 0)) {
 				psy_ui_setcolor(g, 0x00D1C5B6);
 			} else {
@@ -161,14 +177,14 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			}
 			psy_ui_drawline(g, x, centery, x, centery + (int)(framevalue * scaley));
 		}
-		if (self->sample && self->sample->loop.type != LOOP_DO_NOT) {
+		if (self->sample && self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolor(g, 0x00D1C5B6);
 			psy_ui_drawline(g, cont_loop_rc.left, 0, cont_loop_rc.left + 1,
 				size.height);
 			psy_ui_drawline(g, cont_loop_rc.right, 0, cont_loop_rc.right + 1,
 				size.height);
 		}
-		if (self->sample && self->sample->sustainloop.type != LOOP_DO_NOT) {
+		if (self->sample && self->sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolor(g, 0x00B6C5D1);
 			psy_ui_drawline(g, sustain_loop_rc.left, 0, sustain_loop_rc.left + 1,
 				size.height);
@@ -202,7 +218,7 @@ psy_ui_Rectangle wavebox_framerangetoscreen(WaveBox* self, uintptr_t framebegin,
 void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	if (self->sample && self->sample->numframes > 0) {
+	if (self->sample && wavebox_numframes(self) > 0) {
 		if (self->hasselection) {
 			if (wavebox_hittest(self, self->selectionstart, ev->x, 5)) {
 				self->dragmode = WAVEBOX_DRAG_LEFT;
@@ -223,26 +239,26 @@ void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
 			}
 		} 
 		if (!self->hasselection) {
-			if (self->sample->loop.type != LOOP_DO_NOT) {
+			if (self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 				if (wavebox_hittest(self, self->sample->loop.start, ev->x, 5)) {
-					self->dragmode = WAVEBOX_DRAG_LOOP_CONT_LEFT;
+					self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_LEFT;
 					psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 					return;
 				} else
 				if (wavebox_hittest(self, self->sample->loop.end, ev->x, 5)) {
-					self->dragmode = WAVEBOX_DRAG_LOOP_CONT_RIGHT;
+					self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_RIGHT;
 					psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 					return;
 				}
 			}
-			if (self->sample->sustainloop.type != LOOP_DO_NOT) {
+			if (self->sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 				if (wavebox_hittest(self, self->sample->sustainloop.start, ev->x, 5)) {
-					self->dragmode = WAVEBOX_DRAG_LOOP_SUSTAIN_LEFT;
+					self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_LEFT;
 					psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 					return;
 				} else
 				if (wavebox_hittest(self, self->sample->sustainloop.end, ev->x, 5)) {
-					self->dragmode = WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT;
+					self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_RIGHT;
 					psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 					return;
 				}
@@ -259,7 +275,7 @@ void wavebox_onmousedown(WaveBox* self, psy_ui_Component* sender,
 void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {	
-	if (self->sample && self->sample->numframes > 0) {
+	if (self->sample && wavebox_numframes(self) > 0) {
 		uintptr_t frame;
 		bool changed;
 
@@ -292,15 +308,15 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			}
 			self->selectionstart = start;
 			self->selectionend = self->selectionstart + length;
-			if (self->selectionend >= self->sample->numframes) {
-				self->selectionend = self->sample->numframes - 1;				
-				self->selectionstart = self->sample->numframes - 1 - length;			
+			if (self->selectionend >= wavebox_numframes(self)) {
+				self->selectionend = wavebox_numframes(self) - 1;
+				self->selectionstart = wavebox_numframes(self) - 1 - length;
 			}
 			changed = TRUE;			
 		} else
-		if (self->dragmode == WAVEBOX_DRAG_LOOP_CONT_LEFT) {
+		if (self->dragmode == WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_LEFT) {
 			if (frame > self->sample->loop.end) {
-				self->dragmode = WAVEBOX_DRAG_LOOP_CONT_RIGHT;
+				self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_RIGHT;
 				sample_setcontloop(self->sample,
 					self->sample->loop.type,
 					self->sample->loop.end, frame);
@@ -311,12 +327,12 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			}
 			changed = TRUE;			
 		} else
-		if (self->dragmode == WAVEBOX_DRAG_LOOP_CONT_RIGHT) {
+		if (self->dragmode == WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_RIGHT) {
 			if (frame < self->sample->loop.start) {
 				sample_setcontloop(self->sample,
 					self->sample->loop.type,
 					frame, self->sample->loop.start);
-				self->dragmode = WAVEBOX_DRAG_LOOP_CONT_LEFT;
+				self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_CONT_LEFT;
 			} else {
 				sample_setcontloop(self->sample,
 					self->sample->loop.type,
@@ -324,9 +340,9 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			}
 			changed = TRUE;			
 		} else
-		if (self->dragmode == WAVEBOX_DRAG_LOOP_SUSTAIN_LEFT) {												
+		if (self->dragmode == WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_LEFT) {												
 			if (frame > self->sample->sustainloop.end) {
-				self->dragmode = WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT;
+				self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_RIGHT;
 				sample_setsustainloop(self->sample,
 					self->sample->sustainloop.type,
 					self->sample->sustainloop.end, frame);
@@ -337,12 +353,12 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			}
 			changed = TRUE;			
 		} else
-		if (self->dragmode == WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT) {			
+		if (self->dragmode == WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_RIGHT) {			
 			if (frame < self->sample->sustainloop.start) {
 				sample_setsustainloop(self->sample,
 					self->sample->sustainloop.type,
 					frame, self->sample->sustainloop.start);
-				self->dragmode = WAVEBOX_DRAG_LOOP_SUSTAIN_LEFT;
+				self->dragmode = WAVEBOX_DRAG_psy_audio_SAMPLE_LOOP_SUSTAIN_LEFT;
 			} else {
 				sample_setsustainloop(self->sample,
 					self->sample->sustainloop.type,
@@ -357,13 +373,13 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			psy_ui_component_setcursor(&self->component,
 				psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else
-		if (self->sample->loop.type != LOOP_DO_NOT &&
+		if (self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT &&
 			(wavebox_hittest(self, self->sample->loop.start, ev->x, 5) ||
 				wavebox_hittest(self, self->sample->loop.end, ev->x, 5))) {
 			psy_ui_component_setcursor(&self->component,
 				psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else
-		if (self->sample->sustainloop.type != LOOP_DO_NOT &&
+		if (self->sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT &&
 			(wavebox_hittest(self, self->sample->sustainloop.start, ev->x, 5) ||
 				wavebox_hittest(self, self->sample->sustainloop.end, ev->x, 5))) {
 			psy_ui_component_setcursor(&self->component,
@@ -417,13 +433,13 @@ uintptr_t wavebox_screentoframe(WaveBox* self, int x)
 		
 		size = psy_ui_component_size(&self->component);			
 		frame = (int)(self->offsetstep * x) + 
-			(int)(self->sample->numframes * self->zoomleft);
+			(int)(wavebox_numframes(self) * self->zoomleft);
 		if (frame < 0) {
 			frame = 0;
 		} else
-		if (frame >= (intptr_t) self->sample->numframes) {
-			if (self->sample->numframes > 0) {
-				frame = self->sample->numframes - 1;
+		if (frame >= (intptr_t)wavebox_numframes(self)) {
+			if (wavebox_numframes(self) > 0) {
+				frame = wavebox_numframes(self) - 1;
 			} else {
 				frame = 0;
 			}
@@ -441,16 +457,56 @@ int wavebox_frametoscreen(WaveBox* self, uintptr_t frame)
 		psy_ui_Size size;		
 		
 		size = psy_ui_component_size(&self->component);		
-		rv = (int)((frame - (intptr_t)(self->sample->numframes *
+		rv = (int)((frame - (intptr_t)(wavebox_numframes(self) *
 				self->zoomleft)) / self->offsetstep);
 	}
 	return rv;
 }
 
+uintptr_t wavebox_numframes(WaveBox* self)
+{
+	if (self->sample) {
+		if (self->doubleloop) {
+			return self->sample->numframes + wavebox_numloopframes(self);
+		} else {
+			return self->sample->numframes;
+		}		
+	}
+	return 0;
+}
+
+uintptr_t wavebox_numloopframes(WaveBox* self)
+{
+	if (self->sample) {
+		if (self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
+			return self->sample->loop.end - self->sample->loop.start + 1;
+		}
+	}
+	return 0;
+}
+
+static psy_dsp_amp_t wavebox_amp(WaveBox* self, uintptr_t frame)
+{
+	if (self->sample) {
+		if (self->doubleloop) {
+			if (self->sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
+				if (frame <= self->sample->loop.end) {
+					return self->sample->channels.samples[self->channel][frame];
+				} else {
+					return self->sample->channels.samples[self->channel]
+						[frame - wavebox_numloopframes(self)];
+				}
+			} 
+		}
+		return self->sample->channels.samples[self->channel][frame];		
+	}
+	return 0.f;
+}
+
 void wavebox_onmouseup(WaveBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
-	if (self->sample && self->sample->numframes > 0) {
+	if (self->sample && wavebox_numframes(self) > 0) {
 		psy_ui_component_releasecapture(&self->component);
 		self->dragmode = WAVEBOX_DRAG_NONE;
 		if (self->selectionstart == self->selectionend) {
@@ -470,7 +526,7 @@ void wavebox_setzoom(WaveBox* self, psy_dsp_beat_t zoomleft,
 		psy_ui_Size size;		
 
 		size = psy_ui_component_size(&self->component);
-		self->offsetstep = (float)self->sample->numframes / size.width *
+		self->offsetstep = (float)wavebox_numframes(self) / size.width *
 			(self->zoomright - self->zoomleft);
 		psy_ui_component_invalidate(&self->component);
 		psy_ui_component_update(&self->component);
@@ -493,7 +549,7 @@ void wavebox_clearselection(WaveBox* self)
 void  wavebox_onsize(WaveBox* self, psy_ui_Size* size)
 {	
 	if (self->sample) {
-		self->offsetstep = (float)self->sample->numframes / size->width *
+		self->offsetstep = (double)wavebox_numframes(self) / size->width *
 			(self->zoomright - self->zoomleft);
 	} else {
 		self->offsetstep = 1.f;

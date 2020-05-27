@@ -42,7 +42,7 @@ static int machinecallback_numcaptures(void* self) { return 0; }
 static const char* machinecallback_playbackname(void* self, int index) { return ""; }
 static int machinecallback_numplaybacks(void* self) { return 0; }
 
-void machinecallback_initempty(MachineCallback* self)
+void machinecallback_initempty(psy_audio_MachineCallback* self)
 {
 	self->samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
 	self->bpm = (fp_mcb_bpm) machinecallback_bpm;
@@ -130,7 +130,7 @@ static void dispose(psy_audio_Machine*);
 static int mode(psy_audio_Machine*);
 static uintptr_t numinputs(psy_audio_Machine* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Machine* self) { return 0; }	
-static void setcallback(psy_audio_Machine* self, MachineCallback callback) { self->callback = callback; }
+static void setcallback(psy_audio_Machine* self, psy_audio_MachineCallback callback) { self->callback = callback; }
 static void updatesamplerate(psy_audio_Machine* self, unsigned int samplerate) { }
 static void loadspecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
@@ -308,7 +308,7 @@ static void vtable_init(void)
 	}
 }
 
-void machine_init(psy_audio_Machine* self, MachineCallback callback)
+void machine_init(psy_audio_Machine* self, psy_audio_MachineCallback callback)
 {		
 	memset(self, 0, sizeof(psy_audio_Machine));
 	vtable_init();
@@ -458,7 +458,7 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 {			
 	psy_audio_Buffer* output;
 
-	output = machines_outputs(machines, slot);
+	output = psy_audio_machines_outputs(machines, slot);
 	if (output) {
 		if (output->preventmixclear == FALSE) {
 			psy_audio_buffer_clearsamples(output, amount);
@@ -471,8 +471,8 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 				psy_audio_WireSocketEntry* source = (psy_audio_WireSocketEntry*)
 					input_socket->entry;
 				psy_audio_buffer_mixsamples(output,
-					machines_outputs(machines, source->slot),
-					amount, source->volume, source->mapping);
+					psy_audio_machines_outputs(machines, source->slot),
+					amount, source->volume, &source->mapping);
 			}							
 		}
 	}
@@ -565,7 +565,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 				wire->_inputCon = FALSE;
 			}
 		}
-		inputmachine = machines_at(&songfile->song->machines, wire->_inputMachine);
+		inputmachine = psy_audio_machines_at(&songfile->song->machines, wire->_inputMachine);
 		if (wire->_inputCon
 			&& wire->_inputMachine >= 0 && wire->_inputMachine < MAX_MACHINES
 			&& slot != wire->_inputMachine && inputmachine)
@@ -588,7 +588,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 					//wire->_inputConVol *= 32768.f;
 				//}
 				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
-				machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+				psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
 				connections_setwirevolume(&songfile->song->machines.connections,
 					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
 			}

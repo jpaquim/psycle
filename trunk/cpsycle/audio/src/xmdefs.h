@@ -20,9 +20,9 @@ enum
 	XMCMD_PORTAUP             = 0x01, ///< Portamento Up (*)
 	XMCMD_PORTADOWN           = 0x02, ///< Portamento Down (*)
 	XMCMD_PORTA2NOTE          = 0x03, ///< Tone Portamento (*)
-	XMCMD_VIBRATO             = 0x04, ///< Do Vibrato (*)
+	XMCMD_VIBRATO             = 0x04, ///< Do psy_audio_Vibrato (*)
 	XMCMD_TONEPORTAVOL        = 0x05, ///< Tone Portament & Volume Slide (*)
-	XMCMD_VIBRATOVOL          = 0x06, ///< Vibrato & Volume Slide (*)
+	XMCMD_VIBRATOVOL          = 0x06, ///< psy_audio_Vibrato & Volume Slide (*)
 	XMCMD_TREMOLO             = 0x07, ///< Tremolo (*)
 	XMCMD_PANNING             = 0x08, ///< Set Panning Position
 	XMCMD_OFFSET              = 0x09, ///< Set Sample Offset

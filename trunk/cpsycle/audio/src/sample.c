@@ -11,7 +11,7 @@
 #include <alignedalloc.h>
 
 
-void sampleiterator_init(SampleIterator* self, psy_audio_Sample* sample)
+void sampleiterator_init(psy_audio_SampleIterator* self, psy_audio_Sample* sample)
 {
 	self->sample = sample;
 	self->forward = 1;
@@ -20,14 +20,14 @@ void sampleiterator_init(SampleIterator* self, psy_audio_Sample* sample)
 	self->resampler_data = 0;
 }
 
-SampleIterator* sampleiterator_alloc(void)
+psy_audio_SampleIterator* sampleiterator_alloc(void)
 {
-	return malloc(sizeof(SampleIterator));
+	return malloc(sizeof(psy_audio_SampleIterator));
 }
 
-SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
+psy_audio_SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
 {
-	SampleIterator* rv;
+	psy_audio_SampleIterator* rv;
 
 	rv = sampleiterator_alloc();
 	if (rv) {		
@@ -36,9 +36,9 @@ SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
 	return rv;
 }
 
-int sampleiterator_inc(SampleIterator* self)
+int sampleiterator_inc(psy_audio_SampleIterator* self)
 {			
-	if (self->sample->loop.type == LOOP_DO_NOT) {
+	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
 		self->pos.QuadPart += self->speed;
 		if (self->pos.HighPart >= self->sample->numframes) {
 			self->pos.LowPart = 0;
@@ -46,14 +46,14 @@ int sampleiterator_inc(SampleIterator* self)
 			return 0;			
 		}
 	} else
-	if (self->sample->loop.type == LOOP_NORMAL) {
+	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_NORMAL) {
 		self->pos.QuadPart += self->speed;
 		if (self->pos.HighPart >= self->sample->loop.end) {
 			self->pos.HighPart = self->sample->loop.start +
 				self->sample->loop.end - self->pos.HighPart;
 		}
 	} else
-	if (self->sample->loop.type == LOOP_BIDI) {
+	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_BIDI) {
 		if (self->forward) {
 			self->pos.QuadPart += self->speed;
 			if (self->pos.HighPart >= self->sample->loop.end) {
@@ -84,17 +84,17 @@ int sampleiterator_inc(SampleIterator* self)
 	return 1;
 }
 
-unsigned int sampleiterator_frameposition(SampleIterator* self)
+unsigned int sampleiterator_frameposition(psy_audio_SampleIterator* self)
 {
 	return self->pos.HighPart;
 }
 
-void vibrato_init(Vibrato* self)
+void vibrato_init(psy_audio_Vibrato* self)
 {
 	self->attack = 0;
 	self->depth = 0;
 	self->speed = 0;
-	self->type = WAVEFORMS_SINUS;
+	self->type = psy_audio_WAVEFORMS_SINUS;
 }
 
 void sample_init(psy_audio_Sample* self, uintptr_t numchannels)
@@ -107,10 +107,10 @@ void sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 	self->globalvolume = 1.f;
 	self->loop.start = 0;
 	self->loop.end = 0;
-	self->loop.type  = LOOP_DO_NOT;
+	self->loop.type  = psy_audio_SAMPLE_LOOP_DO_NOT;
 	self->sustainloop.start = 0;
 	self->sustainloop.end = 0;
-	self->sustainloop.type = LOOP_DO_NOT;
+	self->sustainloop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
 	self->tune = 0;
 	self->finetune = 0;
 	self->panfactor = 0.5f;
@@ -214,22 +214,22 @@ const char* sample_name(psy_audio_Sample* self)
 	return self->name;
 }
 
-SampleIterator sample_begin(psy_audio_Sample* self)
+psy_audio_SampleIterator sample_begin(psy_audio_Sample* self)
 {
-	SampleIterator rv;
+	psy_audio_SampleIterator rv;
 
 	sampleiterator_init(&rv, self);
 	return rv;
 }
 
-void sample_setcontloop(psy_audio_Sample* self, LoopType looptype,
+void sample_setcontloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
 	uintptr_t loopstart, uintptr_t loopend)
 {
 	psy_audio_sampleloop_init_all(&self->loop, looptype, loopstart,
 		loopend);
 }
 
-void sample_setsustainloop(psy_audio_Sample* self, LoopType looptype,
+void sample_setsustainloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
 	uintptr_t loopstart, uintptr_t loopend)
 {
 	psy_audio_sampleloop_init_all(&self->sustainloop, looptype, loopstart,

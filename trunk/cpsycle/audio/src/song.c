@@ -89,9 +89,9 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machine
 
 void song_initmachines(psy_audio_Song* self)
 {
-	machines_init(&self->machines);
-	machines_insertmaster(&self->machines,
-		machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0));
+	psy_audio_machines_init(&self->machines);
+	psy_audio_machines_insertmaster(&self->machines,
+		psy_audio_machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0));
 }
 
 void song_initpatterns(psy_audio_Song* self)
@@ -120,7 +120,7 @@ void song_initsignals(psy_audio_Song* self)
 void psy_audio_song_dispose(psy_audio_Song* self)
 {
 	songproperties_dispose(&self->properties);
-	machines_dispose(&self->machines);
+	psy_audio_machines_dispose(&self->machines);
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		
 	psy_audio_samples_dispose(&self->samples);
@@ -162,7 +162,7 @@ void psy_audio_song_clear(psy_audio_Song* self)
 {
 	sequence_clear(&self->sequence);
 	patterns_clear(&self->patterns);
-	machines_clear(&self->machines);
+	psy_audio_machines_clear(&self->machines);
 }
 
 void psy_audio_song_setproperties(psy_audio_Song* self,

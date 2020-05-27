@@ -32,8 +32,8 @@ static int count = 0;
 static void keynames_init(void);
 static void keynames_release(void);
 static void keynames_dispose(void);
-static void keynames_add(int keycode, const char* name);
-static const char* keynames_at(int keycode);
+static void keynames_add(uintptr_t keycode, const char* name);
+static const char* keynames_at(uintptr_t keycode);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -74,12 +74,12 @@ void inputdefiner_setinput(InputDefiner* self, unsigned int input)
 void inputdefiner_text(InputDefiner* self, char* text)
 {
 	
-	int keycode;
-	int shift;
-	int ctrl;
+	uintptr_t keycode;
+	bool shift;
+	bool ctrl;
 	
 	text[0] = '\0';
-	decodeinput(self->input, &keycode, &shift, &ctrl);
+	psy_audio_decodeinput(self->input, &keycode, &shift, &ctrl);
 	if (shift) {
 		strcat(text, "Shift + ");		
 	}
@@ -114,25 +114,25 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 
 	if ((ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL)) {
 		if (self->regularkey == 0) {
-			self->input = encodeinput(0, shift, ctrl);
+			self->input = psy_audio_encodeinput(0, shift, ctrl);
 		} else {
-			self->input = encodeinput(self->regularkey, shift, ctrl);
+			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
 		}
 	}
 	if (ev->keycode >= 0x30) {
 		self->regularkey = ev->keycode;
-		self->input = encodeinput(self->regularkey, shift, ctrl);
+		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
 	}
 	psy_ui_component_invalidate(&self->component);
 }
 
 void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 {
-	int shift;
-	int ctrl;
-	int inputkeycode;
-	int inputshift;
-	int inputctrl;
+	bool shift;
+	bool ctrl;
+	uintptr_t inputkeycode;
+	bool inputshift;
+	bool inputctrl;
 
 #if defined DIVERSALIS__OS__MICROSOFT
 	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
@@ -141,15 +141,15 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
     shift = ev->shift;
     ctrl = ev->ctrl;
 #endif        
-	decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl);
+	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl);
 	if (self->regularkey) {		
-		self->input = encodeinput(inputkeycode, shift, ctrl);
+		self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl);
 	}
 	if (ev->keycode >= 0x30) {
 		self->regularkey = 0;
 	}
 	if (inputkeycode <= 0x30) {
-		self->input = encodeinput(0, shift, ctrl);
+		self->input = psy_audio_encodeinput(0, shift, ctrl);
 	}
 	psy_ui_component_invalidate(&self->component);
 }
@@ -157,7 +157,7 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 void keynames_init(void)
 {
 	if (count == 0) {
-		int key;
+		uintptr_t key;
 		
 		psy_table_init(&keynames);
 		keynames_add(psy_ui_KEY_LEFT,"LEFT");	
@@ -206,14 +206,14 @@ void keynames_dispose(void)
 	psy_table_dispose(&keynames);
 }
 
-void keynames_add(int keycode, const char* name)
+void keynames_add(uintptr_t keycode, const char* name)
 {		
 	if (!psy_table_exists(&keynames, keycode)) {
 		psy_table_insert(&keynames, (uintptr_t) keycode, strdup(name));
 	}
 }
 
-const char* keynames_at(int keycode)
+const char* keynames_at(uintptr_t keycode)
 {
 	return psy_table_exists(&keynames, keycode)
 		? (const char*) psy_table_at(&keynames, keycode)

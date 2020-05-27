@@ -8,6 +8,96 @@
 #include "connections.h"
 #include <assert.h>
 
+static psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping*, uintptr_t src,
+	uintptr_t dst);
+
+psy_audio_PinConnection* psy_audio_pinconnection_alloc(void)
+{
+	return (psy_audio_PinConnection*)malloc(sizeof(psy_audio_PinConnection));
+}
+
+psy_audio_PinConnection* psy_audio_pinconnection_allocinit_all(uintptr_t src,
+	uintptr_t dst)
+{
+	psy_audio_PinConnection* rv;
+
+	rv = psy_audio_pinconnection_alloc();
+	if (rv) {
+		psy_audio_pinconnection_init_all(rv, src, dst);
+	}
+	return rv;
+}
+
+void psy_audio_pinmapping_init(psy_audio_PinMapping* self, uintptr_t numchannels)
+{
+	self->container = NULL;
+	psy_audio_pinmapping_autowire(self, numchannels);
+}
+
+void psy_audio_pinmapping_dispose(psy_audio_PinMapping* self)
+{
+	psy_audio_pinmapping_clear(self);
+}
+
+void psy_audio_pinmapping_clear(psy_audio_PinMapping* self)
+{
+	psy_List* p;
+
+	for (p = self->container; p != NULL; p = p->next) {
+		free(p->entry);
+	}
+	psy_list_free(self->container);
+	self->container = NULL;
+}
+
+void psy_audio_pinmapping_autowire(psy_audio_PinMapping* self,
+	uintptr_t numchannels)
+{
+	uintptr_t channel;
+
+	psy_audio_pinmapping_clear(self);
+	for (channel = 0; channel < numchannels; ++channel) {		
+		psy_list_append(&self->container,
+			psy_audio_pinconnection_allocinit_all(channel, channel));		
+	}
+}
+
+void psy_audio_pinmapping_connect(psy_audio_PinMapping* self, uintptr_t src,
+	uintptr_t dst)
+{
+	psy_audio_pinmapping_disconnect(self, src, dst);
+	psy_list_append(&self->container,
+		psy_audio_pinconnection_allocinit_all(src, dst));	
+}
+
+void psy_audio_pinmapping_disconnect(psy_audio_PinMapping* self, uintptr_t src,
+	uintptr_t dst)
+{
+	psy_List* pair;
+
+	pair = psy_audio_pinmapping_findnode(self, src, dst);
+	if (pair) {
+		free(pair->entry);
+		psy_list_remove(&self->container, pair);
+	}
+}
+
+psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping* self, uintptr_t src,
+	uintptr_t dst)
+{
+	psy_List* rv;
+
+	for (rv = self->container; rv != NULL; rv = rv->next) {
+		psy_audio_PinConnection* pinconnection;
+
+		pinconnection = (psy_audio_PinConnection*)rv->entry;
+		if (pinconnection->src == src && pinconnection->dst == dst) {
+			break;
+		}
+	}
+	return rv;	
+}
+
 static psy_audio_WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
 	psy_dsp_amp_t volume);
 static void wiresocketentry_dispose(psy_audio_WireSocketEntry*);
@@ -60,37 +150,17 @@ psy_audio_WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
 		
 	rv = (psy_audio_WireSocketEntry*) malloc(sizeof(psy_audio_WireSocketEntry));
 	if (rv) {
-		psy_audio_PinConnection* pins;
-
 		rv->slot = slot;
-		rv->volume = 1.0;
+		rv->volume = 1.0f;
 		rv->id = -1;
-		rv->mapping = 0;
-		pins = (psy_audio_PinConnection*)malloc(sizeof(psy_audio_PinConnection));
-		if (pins) {
-			pins->src = 0;
-			pins->dst = 0;
-			rv->mapping = psy_list_create(pins);
-		}
-		pins = (psy_audio_PinConnection*)malloc(sizeof(psy_audio_PinConnection));
-		if (pins) {
-			pins->src = 1;
-			pins->dst = 1;
-			psy_list_append(&rv->mapping, pins);
-		}
+		psy_audio_pinmapping_init(&rv->mapping, 2);		
 	}
 	return rv;
 }
 
 void wiresocketentry_dispose(psy_audio_WireSocketEntry* self)
 {	
-	psy_List* p;
-
-	for (p = self->mapping; p != NULL; p = p->next) {
-		free(p->entry);
-	}
-	psy_list_free(self->mapping);
-	self->mapping = 0;
+	psy_audio_pinmapping_dispose(&self->mapping);
 }
 
 WireSocket* connection_at(WireSocket* socket, uintptr_t slot)
@@ -136,7 +206,8 @@ void connections_dispose(psy_audio_Connections* self)
 	psy_TableIterator it;
 
 	for (it = psy_table_begin(&self->container);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {		
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {		
 		psy_audio_MachineSockets* sockets;
 
 		sockets = (psy_audio_MachineSockets*)psy_tableiterator_value(&it);

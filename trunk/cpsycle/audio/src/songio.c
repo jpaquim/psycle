@@ -84,7 +84,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		psy_audio_songfile_message(self, path);
 		psy_audio_songfile_message(self, "\n");
 		psy_audio_song_clear(self->song);		
-		machines_startfilemode(&self->song->machines);
+		psy_audio_machines_startfilemode(&self->song->machines);
 		psyfile_read(self->file, header, 8);
 		header[8] = '\0';
 		strncpy(riff, header, 4);
@@ -117,7 +117,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			}
 			psyfile_close(self->file);
 		}
-		if (!machines_at(&self->song->machines, MASTER_INDEX)) {
+		if (!psy_audio_machines_at(&self->song->machines, psy_audio_MASTER_INDEX)) {
 			psy_audio_songfile_createmaster(self);
 		}				
 		psy_audio_machines_solo(&self->song->machines,
@@ -125,7 +125,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		{
 			psy_TableIterator it;
 			// notify machines postload	
-			for (it = machines_begin(&self->song->machines);
+			for (it = psy_audio_machines_begin(&self->song->machines);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
 				psy_audio_Machine* machine;
@@ -134,7 +134,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 				psy_audio_machine_postload(machine, self, psy_tableiterator_key(&it));
 			}
 		}
-		machines_endfilemode(&self->song->machines);		
+		psy_audio_machines_endfilemode(&self->song->machines);		
 	} else {
 		status = psy_audio_songfile_errfile(self);
 	}
@@ -177,10 +177,10 @@ void psy_audio_songfile_createmaster(psy_audio_SongFile* self)
 {
 	psy_audio_MachineUi* machineui;	
 
-	machines_insertmaster(&self->song->machines,
-		machinefactory_makemachine(self->song->machinefactory,
+	psy_audio_machines_insertmaster(&self->song->machines,
+		psy_audio_machinefactory_makemachine(self->song->machinefactory,
 		MACH_MASTER, 0));	
-	machineui = psy_audio_songfile_machineui(self, MASTER_INDEX);
+	machineui = psy_audio_songfile_machineui(self, psy_audio_MASTER_INDEX);
 	machineui->x = 320;
 	machineui->y = 200;
 }
