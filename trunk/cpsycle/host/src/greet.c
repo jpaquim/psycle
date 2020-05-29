@@ -5,27 +5,37 @@
 
 #include "greet.h"
 
-static void greet_onsize(Greet*, psy_ui_Component* sender, psy_ui_Size*);
 static void greet_addstring(Greet*, const char* text);
 static void greet_build(Greet*);
 static void greet_buildoriginal(Greet*);
 static void greet_onoriginal(Greet*, psy_ui_Component* sender);
 
 void greet_init(Greet* self, psy_ui_Component* parent)
-{	
+{
+	psy_ui_Margin margin;
+
 	psy_ui_component_init(&self->component, parent);	
-	psy_signal_connect(&self->component.signal_size, self, greet_onsize);
+	psy_ui_component_enablealign(&self->component);
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
 	psy_ui_label_init(&self->header, &self->component);	
 	psy_ui_label_settextalignment(&self->header, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
-	psy_ui_listbox_init(&self->greetz, &self->component);	
-	psy_ui_label_init(&self->thanks, &self->component);
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
+	psy_ui_label_init(&self->thanks, &self->component);	
 	psy_ui_label_settextalignment(&self->thanks, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_label_settext(&self->thanks, "Thanks!");
+	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_TOP);
+	psy_ui_listbox_init(&self->greetz, &self->component);
+	psy_ui_component_setalign(&self->greetz.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeew(2));
+	psy_ui_component_setmargin(&self->greetz.component, &margin);
 	psy_ui_button_init(&self->original, &self->component);
 	psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");
+	psy_ui_component_setalign(&self->original.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->original.signal_clicked, self, greet_onoriginal);	
 /*
 	//Original Arguru's Greetings.
@@ -121,7 +131,6 @@ void greet_buildoriginal(Greet* self)
 	greet_addstring(self, "All #track at Irc-Hispano");
 }
 
-
 void greet_addstring(Greet* self, const char* text)
 {
 	psy_ui_listbox_addtext(&self->greetz, text);
@@ -138,12 +147,4 @@ void greet_onoriginal(Greet* self, psy_ui_Component* sender)
 		greet_buildoriginal(self);
 		psy_ui_button_settext(&self->original, "Show Current Greetings");
 	}	
-}
-
-void greet_onsize(Greet* self, psy_ui_Component* sender, psy_ui_Size* size)
-{
-	psy_ui_component_setposition(&self->header.component, 0, 10, size->width, 40);
-	psy_ui_component_setposition(&self->thanks.component, 0, 45, size->width - 10, 15);
-	psy_ui_component_setposition(&self->greetz.component, 10, 65, size->width - 30, size->height - 100);
-	psy_ui_component_setposition(&self->original.component, 0, size->height - 25, size->width, 20);
 }

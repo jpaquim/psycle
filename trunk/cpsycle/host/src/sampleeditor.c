@@ -32,7 +32,8 @@
 "end""\n"\
 "\n"
 
-static void sampleeditorbar_ondoubleloop(SampleEditorBar*, psy_ui_Component* sender);
+static void sampleeditorbar_ondoublecontloop(SampleEditorBar*, psy_ui_Component* sender);
+static void sampleeditorbar_ondoublesustainloop(SampleEditorBar*, psy_ui_Component* sender);
 
 void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	SampleEditor* editor,
@@ -58,9 +59,11 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
 	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop View");
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
-		sampleeditorbar_ondoubleloop);
+		sampleeditorbar_ondoublecontloop);
 	psy_ui_checkbox_init(&self->doublesustainloop, &self->component);
 	psy_ui_checkbox_settext(&self->doublesustainloop, "Double Sustain Loop View");
+	psy_signal_connect(&self->doublesustainloop.signal_clicked, self,
+		sampleeditorbar_ondoublesustainloop);
 	sampleeditorbar_clearselection(self);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
@@ -92,13 +95,24 @@ void sampleeditorbar_clearselection(SampleEditorBar* self)
 	psy_ui_edit_settext(&self->selendedit, "");
 }
 
-void sampleeditorbar_ondoubleloop(SampleEditorBar* self, psy_ui_Component* sender)
+void sampleeditorbar_ondoublecontloop(SampleEditorBar* self, psy_ui_Component* sender)
 {
 	if (psy_ui_checkbox_checked(&self->doublecontloop)) {
-		sampleeditor_showdoubleloop(self->editor);
+		sampleeditor_showdoublecontloop(self->editor);
 	} else {
-		sampleeditor_showsingleloop(self->editor);
+		sampleeditor_showsinglecontloop(self->editor);
 	}
+	psy_ui_checkbox_disablecheck(&self->doublesustainloop);
+}
+
+void sampleeditorbar_ondoublesustainloop(SampleEditorBar* self, psy_ui_Component* sender)
+{
+	if (psy_ui_checkbox_checked(&self->doublesustainloop)) {
+		sampleeditor_showdoublesustainloop(self->editor);
+	} else {
+		sampleeditor_showsinglesustainloop(self->editor);		
+	}
+	psy_ui_checkbox_disablecheck(&self->doublecontloop);
 }
 
 static void sampleeditoroperations_updatetext(SampleEditorOperations*,
@@ -357,20 +371,12 @@ void sampleeditorprocessview_onpreferredsize(SampleEditorProcessView* self, psy_
 }
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);
-static void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent,
-	SampleEditor*);
-static void sampleeditorheader_ondraw(SampleEditorHeader*, psy_ui_Graphics*);
-static void sampleeditorheader_onpreferredsize(SampleEditorHeader*,
-	psy_ui_Size* limit, psy_ui_Size* size);
-static void sampleeditorheader_drawruler(SampleEditorHeader*, psy_ui_Graphics*);
 static void sampleeditor_initsampler(SampleEditor*);
 static void sampleeditor_ondestroy(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_clearwaveboxes(SampleEditor*);
 static void sampleeditor_buildwaveboxes(SampleEditor*, psy_audio_Sample*);
-static void sampleeditor_onsize(SampleEditor*, psy_ui_Component* sender, psy_ui_Size*);
 static void sampleeditor_onzoom(SampleEditor*, psy_ui_Component* sender);
 static void sampleeditor_setsampleboxzoom(SampleEditor*);
-static void sampleeditor_computemetrics(SampleEditor*, SampleEditorMetrics* rv);
 static void sampleeditor_onsongchanged(SampleEditor*, Workspace* workspace, int flag, psy_audio_SongFile*);
 static void sampleeditor_connectmachinessignals(SampleEditor*, Workspace*);
 static void sampleeditor_onplay(SampleEditor*, psy_ui_Component* sender);
@@ -384,6 +390,8 @@ static void sampleeditor_onscrollzoom_customdraw(SampleEditor*,
 	ScrollZoom* sender, psy_ui_Graphics*);
 static void sampleeditor_onlanguagechanged(SampleEditor*,
 	Workspace* workspace);
+static void sampleeditor_setloopviewmode(SampleEditor*,
+	WaveBoxLoopViewMode mode);
 static void sampleeditor_amplify(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend,
 	psy_dsp_amp_t gain);
@@ -398,6 +406,7 @@ static void sampleeditor_reverse(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend);
 static void sampleeditor_processlua(SampleEditor*, uintptr_t channel,
 	uintptr_t framestart, uintptr_t frameend);
+
 
 enum {
 	SAMPLEEDITOR_DRAG_NONE,
@@ -439,7 +448,13 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 }
 
 // Header
-// pianoroll vtable
+static void sampleeditorheader_ondraw(SampleEditorHeader*, psy_ui_Graphics*);
+static void sampleeditorheader_onpreferredsize(SampleEditorHeader*,
+	psy_ui_Size* limit, psy_ui_Size* size);
+static void sampleeditorheader_drawruler(SampleEditorHeader*, psy_ui_Graphics*);
+static void sampleeditorheader_setwaveboxmetric(SampleEditorHeader*,
+	WaveBoxContext* metric);
+
 static psy_ui_ComponentVtable sampleeditorheader_vtable;
 static int sampleeditorheader_vtable_initialized = 0;
 
@@ -456,19 +471,24 @@ static void sampleeditorheader_vtable_init(SampleEditorHeader* self)
 }
 
 void sampleeditorheader_init(SampleEditorHeader* self,
-	psy_ui_Component* parent, SampleEditor* view)
+	psy_ui_Component* parent)
 {
-	self->view = view;
-	self->scrollpos = 0;
+	self->metric = 0;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	sampleeditorheader_vtable_init(self);
 	self->component.vtable = &sampleeditorheader_vtable;
+	psy_ui_component_enablealign(&self->component);	
 	psy_ui_component_doublebuffer(&self->component);	
 }
 
+void sampleeditorheader_setwaveboxmetric(SampleEditorHeader* self,
+	WaveBoxContext* metric)
+{
+	self->metric = metric;
+}
+
 void sampleeditorheader_ondraw(SampleEditorHeader* self, psy_ui_Graphics* g)
-{	
+{		
 	sampleeditorheader_drawruler(self, g);	
 }
 
@@ -486,29 +506,36 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;	
 	int baseline;		
-	psy_dsp_beat_t cpx;	
-	int c;
 	psy_ui_TextMetric tm;
+	uintptr_t frame;
+	uintptr_t step;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	baseline = size.height - 1;
-	psy_ui_setcolor(g, 0x00CACACA); 
+	psy_ui_setcolor(g, 0x00666666); 
 	psy_ui_drawline(g, 0, baseline, size.width, baseline);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00CACACA);
-	for (c = 0, cpx = 0; c <= self->view->metrics.visisteps; 
-			cpx += self->view->metrics.stepwidth, ++c) {
-		char txt[40];
-		int frame;
-		
-		psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
-		frame = (int)((c - self->scrollpos) * 
-			(self->view->sample
-				? (self->view->sample->numframes / self->view->metrics.visisteps)
-				: 0));
-		psy_snprintf(txt, 40, "%d", frame);		
-		psy_ui_textout(g, (int)cpx + (int)(tm.tmAveCharWidth * 0.75), baseline - tm.tmHeight - tm.tmHeight/6, txt, strlen(txt));
+	psy_ui_settextcolor(g, 0x00999999);
+	if (self->metric) {
+		step = waveboxcontext_numframes(self->metric) / 10;
+		step = (int)(step * (self->metric->zoomright - self->metric->zoomleft));
+		if (step == 0) {
+			step = 1;
+		}
+		for (frame = 0; frame < waveboxcontext_numframes(self->metric); frame += step) {
+			int cpx;
+
+			cpx = waveboxcontext_frametoscreen(self->metric, frame);
+			if (cpx >= 0 && cpx < size.width) {
+				char txt[40];
+
+				psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
+				psy_snprintf(txt, 40, "%d", (int)waveboxcontext_realframe(self->metric, frame));
+				psy_ui_textout(g, (int)cpx + (int)(tm.tmAveCharWidth * 0.75),
+					baseline - tm.tmHeight - tm.tmHeight / 6, txt, strlen(txt));
+			}
+		}
 	}
 }
 
@@ -561,7 +588,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->sample = 0;
 	self->samplerevents = 0;
 	self->workspace = workspace;
-	self->showdoubleloop = FALSE;
+	self->loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -580,7 +607,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->playbar.stop.signal_clicked, self,
 		sampleeditor_onstop);
 	psy_ui_component_setalign(&self->playbar.component, psy_ui_ALIGN_TOP);	
-	sampleeditorheader_init(&self->header, &self->component, self);
+	sampleeditorheader_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
@@ -602,7 +629,6 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->zoom.component, &margin);
-	sampleeditor_computemetrics(self, &self->metrics);
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		sampleeditor_onsongchanged);	
@@ -644,6 +670,7 @@ void sampleeditor_clearwaveboxes(SampleEditor* self)
 {
 	psy_TableIterator it;
 
+	sampleeditorheader_setwaveboxmetric(&self->header, 0);
 	for (it = psy_table_begin(&self->waveboxes);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
@@ -661,7 +688,6 @@ void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
 	if (self->sample != NULL || sample != NULL) {
 		self->sample = sample;
 		sampleeditor_buildwaveboxes(self, sample);
-		sampleeditor_computemetrics(self, &self->metrics);
 		psy_ui_component_align(&self->samplebox);
 		psy_ui_component_invalidate(&self->component);
 	}
@@ -677,9 +703,10 @@ void sampleeditor_buildwaveboxes(SampleEditor* self, psy_audio_Sample* sample)
 				&self->sample->channels); ++channel) {
 			WaveBox* wavebox;
 
-			wavebox = (WaveBox*)malloc(sizeof(WaveBox));
-			wavebox_init(wavebox, &self->samplebox);
-			wavebox->doubleloop = self->showdoubleloop;
+			wavebox = wavebox_allocinit(&self->samplebox);
+			sampleeditorheader_setwaveboxmetric(&self->header,
+				wavebox_metric(wavebox));
+			wavebox_setloopviewmode(wavebox, self->loopviewmode);
 			wavebox->preventdrawonselect = TRUE;
 			wavebox_setsample(wavebox, sample, channel);
 			psy_ui_component_setalign(&wavebox->component, psy_ui_ALIGN_CLIENT);
@@ -688,12 +715,6 @@ void sampleeditor_buildwaveboxes(SampleEditor* self, psy_audio_Sample* sample)
 			psy_table_insert(&self->waveboxes, channel, (void*)wavebox);
 		}
 	}
-}
-
-void sampleeditor_onsize(SampleEditor* self, psy_ui_Component* sender,
-	psy_ui_Size* size)
-{
-	sampleeditor_computemetrics(self, &self->metrics);
 }
 
 void sampleeditor_onzoom(SampleEditor* self, psy_ui_Component* sender)
@@ -713,21 +734,8 @@ void sampleeditor_setsampleboxzoom(SampleEditor* self)
 		wavebox = (WaveBox*)psy_tableiterator_value(&it);
 		wavebox_setzoom(wavebox, self->zoom.zoomleft,
 			self->zoom.zoomright);
-	}	
-}
-
-void sampleeditor_computemetrics(SampleEditor* self, SampleEditorMetrics* rv)
-{	
-	psy_ui_Size sampleboxsize;
-
-	sampleboxsize = psy_ui_component_size(&self->samplebox);
-	rv->samplewidth = self->sample
-		? (float) sampleboxsize.width / self->sample->numframes
-		: 0;	
-	rv->visisteps = 10;	
-	rv->stepwidth = self->sample
-		? rv->samplewidth * (self->sample->numframes / 10)
-		: sampleboxsize.width;	
+	}
+	psy_ui_component_invalidate(&self->header.component);
 }
 
 void sampleeditor_onsongchanged(SampleEditor* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
@@ -825,29 +833,29 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 				double ratio;
 
 				ratio = pow(10.0, (double)((double)(self->processview.amplify.gainvalue) - 2 / (double)3) / (1 / (double)7));
-				sampleeditor_amplify(self, channel, wavebox->selectionstart, wavebox->selectionend,
+				sampleeditor_amplify(self, channel, wavebox->context.selection.start, wavebox->context.selection.end,
 					(psy_dsp_amp_t)ratio);				
 			}
 			break;
 			case 1: // FadeIn
-				sampleeditor_fade(self, channel, wavebox->selectionstart, wavebox->selectionend,
+				sampleeditor_fade(self, channel, wavebox->context.selection.start, wavebox->context.selection.end,
 					0.f, 1.f);
 				break;
 			case 2: // FadeOut
-				sampleeditor_fade(self, channel, wavebox->selectionstart, wavebox->selectionend,
+				sampleeditor_fade(self, channel, wavebox->context.selection.start, wavebox->context.selection.end,
 					1.f, 0.f);
 				break;
 			case 4:
-				sampleeditor_normalize(self, channel, wavebox->selectionstart, wavebox->selectionend);
+				sampleeditor_normalize(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
 				break;
 			case 5:
-				sampleeditor_removeDC(self, channel, wavebox->selectionstart, wavebox->selectionend);
+				sampleeditor_removeDC(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
 				break;
 			case 6:
-				sampleeditor_reverse(self, channel, wavebox->selectionstart, wavebox->selectionend);
+				sampleeditor_reverse(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
 				break;
 			case 7:
-				sampleeditor_processlua(self, channel, wavebox->selectionstart, wavebox->selectionend);
+				sampleeditor_processlua(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
 				break;
 			default:
 				break;
@@ -886,11 +894,11 @@ void sampleeditor_oncrop(SampleEditor* self, psy_ui_Component* sender)
 			WaveBox* wavebox;
 
 			wavebox = (WaveBox*)psy_tableiterator_value(&it);
-			if (wavebox->selectionstart < framestart) {
-				framestart = wavebox->selectionstart;
+			if (wavebox->context.selection.start < framestart) {
+				framestart = wavebox->context.selection.start;
 			}
-			if (wavebox->selectionend > frameend) {
-				frameend = wavebox->selectionend;
+			if (wavebox->context.selection.end > frameend) {
+				frameend = wavebox->context.selection.end;
 			}
 		}
 		if (framestart < self->sample->numframes) {			
@@ -1055,8 +1063,9 @@ void sampleeditor_removeDC(SampleEditor* self, uintptr_t channel, uintptr_t fram
 void sampleeditor_onselectionchanged(SampleEditor* self, WaveBox* sender)
 {
 	if (wavebox_hasselection(sender)) {
-		sampleeditorbar_setselection(&self->sampleeditortbar, sender->selectionstart,
-			sender->selectionend);
+		sampleeditorbar_setselection(&self->sampleeditortbar,
+			sender->context.selection.start,
+			sender->context.selection.end);
 	} else {
 		sampleeditorbar_clearselection(&self->sampleeditortbar);
 	}
@@ -1070,8 +1079,8 @@ void sampleeditor_onselectionchanged(SampleEditor* self, WaveBox* sender)
 			wavebox = (WaveBox*)psy_tableiterator_value(&it);
 			if (wavebox != sender) {
 				if (wavebox_hasselection(sender)) {
-					wavebox_setselection(wavebox, sender->selectionstart,
-						sender->selectionend);
+					wavebox_setselection(wavebox, sender->context.selection.start,
+						sender->context.selection.end);
 				} else {
 					wavebox_clearselection(wavebox);
 				}				
@@ -1091,35 +1100,40 @@ void sampleeditor_onlanguagechanged(SampleEditor* self,
 	psy_ui_component_align(&self->component);
 }
 
-void sampleeditor_showdoubleloop(SampleEditor* self)
+void sampleeditor_showdoublecontloop(SampleEditor* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->waveboxes);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		WaveBox* wavebox;
-
-		wavebox = (WaveBox*)psy_tableiterator_value(&it);
-		wavebox->doubleloop = TRUE;
-	}
-	self->showdoubleloop = TRUE;
-	psy_ui_component_invalidate(&self->samplebox);
+	sampleeditor_setloopviewmode(self, WAVEBOX_LOOPVIEW_CONT_DOUBLE);
 }
 
-void sampleeditor_showsingleloop(SampleEditor* self)
+void sampleeditor_showsinglecontloop(SampleEditor* self)
+{
+	sampleeditor_setloopviewmode(self, WAVEBOX_LOOPVIEW_CONT_SINGLE);
+}
+
+void sampleeditor_showdoublesustainloop(SampleEditor* self)
+{
+	sampleeditor_setloopviewmode(self, WAVEBOX_LOOPVIEW_SUSTAIN_DOUBLE);
+}
+
+void sampleeditor_showsinglesustainloop(SampleEditor* self)
+{
+	sampleeditor_setloopviewmode(self, WAVEBOX_LOOPVIEW_SUSTAIN_SINGLE);
+}
+
+void sampleeditor_setloopviewmode(SampleEditor* self, WaveBoxLoopViewMode mode)
 {
 	psy_TableIterator it;
 
 	for (it = psy_table_begin(&self->waveboxes);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
 		WaveBox* wavebox;
 
 		wavebox = (WaveBox*)psy_tableiterator_value(&it);
-		wavebox->doubleloop = FALSE;
+		wavebox_setloopviewmode(wavebox, mode);
 	}
-	self->showdoubleloop = FALSE;
+	self->loopviewmode = mode;
 	psy_ui_component_invalidate(&self->samplebox);
+	psy_ui_component_invalidate(&self->header.component);
 }
 

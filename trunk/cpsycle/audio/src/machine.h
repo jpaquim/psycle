@@ -114,7 +114,11 @@ typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_setcallback)(struct psy_audio_Machine*, psy_audio_MachineCallback);
 typedef	void (*fp_machine_loadspecific)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
+typedef	void (*fp_machine_loadwiremapping)(struct psy_audio_Machine*,
+	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	void (*fp_machine_savespecific)(struct psy_audio_Machine*,
+	struct psy_audio_SongFile*, uintptr_t slot);
+typedef	void (*fp_machine_savewiremapping)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
 typedef	void (*fp_machine_postload)(struct psy_audio_Machine*,
 	struct psy_audio_SongFile*, uintptr_t slot);
@@ -203,7 +207,9 @@ typedef struct MachineVtable {
 
 	fp_machine_setcallback setcallback;
 	fp_machine_loadspecific loadspecific;
+	fp_machine_loadwiremapping loadwiremapping;
 	fp_machine_savespecific savespecific;
+	fp_machine_loadwiremapping savewiremapping;
 	fp_machine_postload postload;
 	fp_machine_haseditor haseditor;
 	fp_machine_seteditorhandle seteditorhandle;
@@ -581,10 +587,22 @@ INLINE void psy_audio_machine_loadspecific(psy_audio_Machine* self,
 	self->vtable->loadspecific(self, songfile, slot);
 }
 
+INLINE void psy_audio_machine_loadwiremapping(psy_audio_Machine* self,
+	struct psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	self->vtable->loadwiremapping(self, songfile, slot);
+}
+
 INLINE void psy_audio_machine_savespecific(psy_audio_Machine* self,
 	struct psy_audio_SongFile* songfile, uintptr_t slot)
 {
 	self->vtable->savespecific(self, songfile, slot);
+}
+
+INLINE void psy_audio_machine_savewiremapping(psy_audio_Machine* self,
+	struct psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	self->vtable->savewiremapping(self, songfile, slot);
 }
 
 INLINE void psy_audio_machine_postload(psy_audio_Machine* self,

@@ -112,20 +112,11 @@ void sampleeditorplaybar_init(SampleEditorPlayBar*, psy_ui_Component* parent,
 	Workspace*);
 
 typedef struct {
-	float samplewidth;	
-	int visisteps;	
-	int visiwidth;	
-	psy_dsp_beat_t stepwidth;
-} SampleEditorMetrics;
-
-typedef struct {
-	psy_ui_Component component;           	
-	psy_dsp_beat_t bpl;
-	int lpb;
-	struct SampleEditor* view;   
-	int scrollpos;	
+	psy_ui_Component component;
+	WaveBoxContext* metric;
 } SampleEditorHeader;
 
+void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent);
 
 typedef struct SampleEditor {	
 	psy_ui_Component component;
@@ -136,7 +127,6 @@ typedef struct SampleEditor {
 	psy_ui_Component samplebox;
 	psy_Table waveboxes;
 	ScrollZoom zoom;
-	SampleEditorMetrics metrics;
 	psy_audio_Sample* sample;
 	psy_audio_Sampler sampler;
 	psy_audio_Buffer samplerbuffer;
@@ -145,12 +135,14 @@ typedef struct SampleEditor {
 	Workspace* workspace;
 	SampleEditorBar sampleeditortbar;
 	psy_Signal signal_samplemodified;
-	bool showdoubleloop;	
+	WaveBoxLoopViewMode loopviewmode;	
 } SampleEditor;
 
 void sampleeditor_init(SampleEditor*, psy_ui_Component* parent, Workspace*);
 void sampleeditor_setsample(SampleEditor*, psy_audio_Sample*);
-void sampleeditor_showdoubleloop(SampleEditor*);
-void sampleeditor_showsingleloop(SampleEditor*);
+void sampleeditor_showdoublecontloop(SampleEditor*);
+void sampleeditor_showsinglecontloop(SampleEditor*);
+void sampleeditor_showdoublesustainloop(SampleEditor*);
+void sampleeditor_showsinglesustainloop(SampleEditor*);
 
 #endif
