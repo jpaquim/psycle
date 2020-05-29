@@ -448,8 +448,9 @@ void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 		filter,
 		"WAV",
 		workspace_samples_directory(self->workspace));
-	if (self->wavebox.sample && psy_ui_savedialog_execute(&dialog)) {
-		sample_save(self->wavebox.sample, psy_ui_savedialog_filename(&dialog));
+	if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {
+		sample_save(wavebox_sample(&self->wavebox),
+			psy_ui_savedialog_filename(&dialog));
 	}
 	psy_ui_savedialog_dispose(&dialog);
 }
@@ -1034,7 +1035,7 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_combobox_addtext(&self->loopdir, "Forward");
 	psy_ui_combobox_addtext(&self->loopdir, "Bidirection");
 	psy_ui_combobox_setcursel(&self->loopdir, 0);
-	psy_ui_combobox_setcharnumber(&self->loopdir, 10);
+	psy_ui_combobox_setcharnumber(&self->loopdir, 12);
 	psy_ui_label_init(&self->loopstartlabel, &self->cont);
 	psy_ui_label_settext(&self->loopstartlabel, "Start ");	
 	psy_ui_edit_init(&self->loopstartedit, &self->cont);
@@ -1057,7 +1058,7 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	psy_ui_combobox_addtext(&self->sustainloopdir, "Forward");
 	psy_ui_combobox_addtext(&self->sustainloopdir, "Bidirection");
 	psy_ui_combobox_setcursel(&self->sustainloopdir, 0);
-	psy_ui_combobox_setcharnumber(&self->sustainloopdir, 10);
+	psy_ui_combobox_setcharnumber(&self->sustainloopdir, 12);
 	psy_ui_label_init(&self->sustainloopstartlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopstartlabel, "Start ");	
 	psy_ui_edit_init(&self->sustainloopstartedit, &self->sustain);		
@@ -1162,7 +1163,8 @@ void samplesloopview_onlooptypechange(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->loop.type = ComboBoxToLoopType(sel);
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		samplesloopview_looptypeenablepreventinput(self);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		samplesloopview_looptypeenablepreventinput(self);		
 	}
 }
 
@@ -1172,6 +1174,7 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->sustainloop.type = ComboBoxToLoopType(sel);
 		psy_ui_component_invalidate(&self->view->wavebox.component);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
 		samplesloopview_looptypeenablepreventinput(self);
 	}
 }
@@ -1221,6 +1224,7 @@ void samplesloopview_oneditchangedloopstart(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->loop.start = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
 	}
 }
 
@@ -1230,6 +1234,7 @@ void samplesloopview_oneditchangedloopend(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->loop.end = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
 	}
 }
 
@@ -1239,6 +1244,7 @@ void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->sustainloop.start = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
 	}
 }
 
@@ -1248,5 +1254,6 @@ void samplesloopview_oneditchangedsustainend(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->sustainloop.end = atoi(psy_ui_edit_text(sender));		
 		psy_ui_component_invalidate(&self->view->wavebox.component);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
 	}
 }

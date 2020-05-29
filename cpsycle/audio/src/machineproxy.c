@@ -54,7 +54,11 @@ static uintptr_t machineproxy_numtweakparameters(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numparametercols(psy_audio_MachineProxy*);
 static void machineproxy_loadspecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
+static void machineproxy_loadwiremapping(psy_audio_MachineProxy*, psy_audio_SongFile*,
+	uintptr_t slot);
 static void machineproxy_savespecific(psy_audio_MachineProxy*, psy_audio_SongFile*,
+	uintptr_t slot);
+static void machineproxy_savewiremapping(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void machineproxy_postload(psy_audio_MachineProxy*, psy_audio_SongFile*,
 	uintptr_t slot);
@@ -167,8 +171,12 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_numparametercols;		
 		vtable.loadspecific = (fp_machine_loadspecific)
 			machineproxy_loadspecific;
+		vtable.loadwiremapping = (fp_machine_loadwiremapping)
+			machineproxy_loadwiremapping;
 		vtable.savespecific = (fp_machine_savespecific)
 			machineproxy_savespecific;
+		vtable.savewiremapping = (fp_machine_savewiremapping)
+			machineproxy_savewiremapping;
 		vtable.postload = (fp_machine_postload)
 			machineproxy_postload;
 		vtable.samplerate = (fp_machine_samplerate)
@@ -768,6 +776,24 @@ void machineproxy_loadspecific(psy_audio_MachineProxy* self,
 	}
 }
 
+void machineproxy_loadwiremapping(psy_audio_MachineProxy* self,
+	psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_loadwiremapping(self->client, songfile, slot);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "loadwiremapping", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
 void machineproxy_savespecific(psy_audio_MachineProxy* self,
 	psy_audio_SongFile* songfile, uintptr_t slot)
 {
@@ -780,6 +806,24 @@ void machineproxy_savespecific(psy_audio_MachineProxy* self,
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self,"loadspecific",  GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_savewiremapping(psy_audio_MachineProxy* self,
+	psy_audio_SongFile* songfile, uintptr_t slot)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_savewiremapping(self->client, songfile, slot);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "savewiremapping", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

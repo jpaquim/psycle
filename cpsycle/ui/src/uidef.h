@@ -81,6 +81,12 @@ typedef struct {
 	int height;
 } psy_ui_Size;
 
+INLINE void psy_ui_size_init_all(psy_ui_Size* self, int width, int height)
+{
+	self->width = width;
+	self->height = height;
+}
+
 typedef struct {
 	psy_ui_Value top;
 	psy_ui_Value right;

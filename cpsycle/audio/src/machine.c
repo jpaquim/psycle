@@ -134,7 +134,11 @@ static void setcallback(psy_audio_Machine* self, psy_audio_MachineCallback callb
 static void updatesamplerate(psy_audio_Machine* self, unsigned int samplerate) { }
 static void loadspecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
+static void loadwiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
+	uintptr_t slot);
 static void savespecific(psy_audio_Machine*, struct psy_audio_SongFile*,
+	uintptr_t slot);
+static void savewiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void postload(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
@@ -262,7 +266,9 @@ static void vtable_init(void)
 		vtable.setcallback = setcallback;
 		vtable.updatesamplerate = updatesamplerate;
 		vtable.loadspecific = loadspecific;
+		vtable.loadwiremapping = loadwiremapping;
 		vtable.savespecific = savespecific;
+		vtable.savewiremapping = savewiremapping;
 		vtable.postload = postload;
 		vtable.bpm = bpm;
 		vtable.beatspertick = beatspertick;
@@ -479,7 +485,7 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 	return output;
 }
 
-void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
+void loadspecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	uint32_t size;
@@ -509,7 +515,37 @@ void loadspecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 	psyfile_skip(songfile->file, size - sizeof(numparams) - (numparams * sizeof(uint32_t)));
 }
 
-void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
+void loadwiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
+	uintptr_t slot)
+{
+	/* int32_t numWires = 0;
+	int32_t i;
+	for (int i = 0; i < MAX_CONNECTIONS; i++) {
+		if (legacyWires[i]._inputCon) numWires++;
+	}
+	for (int countWires = 0; countWires < numWires; countWires++)
+	{
+		int wireIdx, numPairs;
+		Wire::PinConnection::first_type src;
+		Wire::PinConnection::second_type dst;
+		pFile->Read(wireIdx);
+		if (wireIdx >= MAX_CONNECTIONS) {
+			//We cannot ensure correctness from now onwards.
+			return false;
+		}
+		pFile->Read(numPairs);
+		Wire::Mapping& pinMapping = legacyWires[wireIdx].pinMapping;
+		pinMapping.reserve(numPairs);
+		for (int j = 0; j < numPairs; j++) {
+			pFile->Read(src);
+			pFile->Read(dst);
+			pinMapping.push_back(Wire::PinConnection(src, dst));
+		}
+	}
+	return true;*/
+}
+
+void savespecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {		
 	uint32_t numparams;
@@ -529,6 +565,41 @@ void savespecific(psy_audio_Machine* self, struct psy_audio_SongFile* songfile,
 			scaled = psy_audio_machineparam_scaledvalue(param);
 		}		
 		psyfile_write_int32(songfile->file, scaled);
+	}
+}
+
+void savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
+	uintptr_t slot)
+{
+	psy_audio_Connections* connections;
+	psy_audio_MachineSockets* connected_sockets;	
+	int i;
+
+	connections = &songfile->song->machines.connections;
+	connected_sockets = connections_at(connections, slot);
+	if (connected_sockets) {
+		WireSocket* p;
+
+		for (i = 0, p = connected_sockets->inputs; p != NULL && i < MAX_CONNECTIONS; p = p->next, ++i) {
+			psy_audio_WireSocketEntry* entry;
+
+			entry = (psy_audio_WireSocketEntry*)p->entry;
+			if (entry) {
+				psy_List* node;
+				int32_t numPairs;
+
+				numPairs = (int32_t)psy_list_size(entry->mapping.container);
+				psyfile_write_int32(songfile->file, i);
+				psyfile_write_int32(songfile->file, numPairs);
+				for (node = entry->mapping.container; node != NULL; node = node->next) {
+					psy_audio_PinConnection* pin;
+
+					pin = (psy_audio_PinConnection*)node->entry;
+					psyfile_write_int16(songfile->file, (int16_t)pin->src);
+					psyfile_write_int16(songfile->file, (int16_t)pin->dst);
+				}
+			}
+		}	
 	}
 }
 

@@ -2182,7 +2182,7 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 		psyfile_writestring(self->file, psy_audio_machine_editname(machine)
 			? psy_audio_machine_editname(machine) : "");
 		psy_audio_machine_savespecific(machine, self, slot);
-		// SaveWireMapping(pFile);
+		psy_audio_machine_savewiremapping(machine, self, slot);
 		// SaveParamMapping(pFile);
 	}
 	return status;
