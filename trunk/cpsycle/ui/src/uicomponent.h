@@ -252,7 +252,7 @@ void psy_ui_component_setverticalscrollposition(psy_ui_Component*, int position)
 void psy_ui_component_sethorizontalscrollposition(psy_ui_Component*, int position);
 int psy_ui_component_horizontalscrollposition(psy_ui_Component*);
 void psy_ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
-void psy_ui_component_move(psy_ui_Component*, int left, int top);
+void psy_ui_component_move(psy_ui_Component*, psy_ui_Value left, psy_ui_Value top);
 void psy_ui_component_resize(psy_ui_Component*, psy_ui_Value width,
 	psy_ui_Value height);
 void psy_ui_component_clientresize(psy_ui_Component*, int width, int height);

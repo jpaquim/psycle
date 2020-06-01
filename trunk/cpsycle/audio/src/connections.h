@@ -46,7 +46,7 @@ typedef struct psy_audio_PinMapping {
 
 void psy_audio_pinmapping_init(psy_audio_PinMapping*, uintptr_t numchannels);
 void psy_audio_pinmapping_dispose(psy_audio_PinMapping*);
-void psy_audio_pinmapping_copy(psy_audio_PinMapping*, psy_audio_PinMapping* src);
+void psy_audio_pinmapping_copy(psy_audio_PinMapping*, const psy_audio_PinMapping* src);
 void psy_audio_pinmapping_clear(psy_audio_PinMapping*);
 void psy_audio_pinmapping_autowire(psy_audio_PinMapping*,
 	uintptr_t numchannels);

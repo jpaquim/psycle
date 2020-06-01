@@ -455,11 +455,11 @@ void wireview_ontogglevu(WireView* self, psy_ui_Component* sender)
 }
 
 int wireview_currscope(WireView* self)
-{
-	int index;
-
-	index = tabbar_selected(&self->tabbar);
-	return (wireview_scopedocked(self, 0)) ? index + 1 : index;
+{	
+	return tabbar_selected(&self->tabbar) +
+		(wireview_scopedocked(self, 0))
+		? 1
+		: 0;
 }
 
 void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
@@ -467,7 +467,8 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 	psy_ui_frame_init(wireframe_base(self), parent);
 	self->wireview = view;
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
-	psy_ui_component_move(wireframe_base(self), 200, 150);
+	psy_ui_component_move(wireframe_base(self), psy_ui_value_makepx(200),
+		psy_ui_value_makepx(150));
 	psy_ui_component_resize(wireframe_base(self),
 		psy_ui_value_makeew(80), psy_ui_value_makeeh(25));
 	psy_signal_connect(&wireframe_base(self)->signal_destroy, self,

@@ -90,9 +90,13 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		position = psy_ui_component_position(&self->component);
 		if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
-			psy_ui_component_move(&self->component, position.left + ev->x, position.top);
+			psy_ui_component_move(&self->component,
+				psy_ui_value_makepx(position.left + ev->x),
+				psy_ui_value_makepx(position.top));
 		} else {
-			psy_ui_component_move(&self->component, position.left, position.top + ev->y);
+			psy_ui_component_move(&self->component,
+				psy_ui_value_makepx(position.left),
+				psy_ui_value_makepx(position.top + ev->y));
 		}
 		psy_ui_component_invalidate(&self->component);
 		psy_ui_component_update(&self->component);
