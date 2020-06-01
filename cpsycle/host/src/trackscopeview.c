@@ -64,7 +64,6 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
 	if (self->workspace->song) {
-		psy_ui_Size size;
 		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 		int c;
 		int maxcolumns = 16;		
@@ -73,10 +72,13 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		int line = 0;		
 		int cpx = 0;
 		int cpy = 0;
-		int width;		
-		
+		int width;
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
+
 		size = psy_ui_component_size(&self->component);
-		width = size.width / maxcolumns;
+		tm = psy_ui_component_textmetric(&self->component);		
+		width = psy_ui_value_px(&size.width, &tm) / maxcolumns;
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00444444);
 		for (c = 0; c < numtracks; ++c) {
@@ -241,14 +243,12 @@ void trackscopeview_onalign(TrackScopeView* self)
 void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;	
 	int maxcolumns = 16;	
 	int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 	int rows = ((numtracks - 1) / maxcolumns) + 1;
 
-	tm = psy_ui_component_textmetric(&self->component);	
-	rv->width = 16 * 30;
-	rv->height = (int)(rows * tm.tmHeight * 2.75f);
+	rv->width = psy_ui_value_makeew(2 * 30);
+	rv->height = psy_ui_value_makeeh(rows * 2.75);
 }
 
 void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
@@ -256,15 +256,17 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 	if (self->workspace->song) {
 		int columns;
 		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		int track;
 		int trackwidth;
 		int maxcolumns = 16;
 		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 
+
 		columns = numtracks < maxcolumns ? numtracks : maxcolumns;
 		size = psy_ui_component_size(&self->component);
-		trackwidth = size.width / columns;
-		
+		tm = psy_ui_component_textmetric(&self->component);
+		trackwidth = psy_ui_value_px(&size.width, &tm) / columns;		
 		track = (ev->x / trackwidth) + (ev->y / self->trackheight) * columns;
 		if (ev->button == 1) {
 			if (!patternstrackstate_istrackmuted(

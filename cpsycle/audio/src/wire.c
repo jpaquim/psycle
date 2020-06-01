@@ -27,8 +27,10 @@ void psy_audio_legacywires_dispose(psy_audio_LegacyWires* self)
 		for (it_wires = psy_table_begin(legacywiretable);
 				!psy_tableiterator_equal(&it_wires, psy_table_end());
 				psy_tableiterator_inc(&it_wires)) {
-			LegacyWire* legacywire;
-			legacywire = (LegacyWire*)psy_tableiterator_value(&it_wires);
+			psy_audio_LegacyWire* legacywire;
+
+			legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it_wires);
+			psy_audio_legacywire_dispose(legacywire);
 			free(legacywire);
 		}
 		psy_table_dispose(legacywiretable);
@@ -55,7 +57,7 @@ int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires* self,
 	for (it = psy_table_begin(legacywiretable);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 		
 		if (psy_tableiterator_key(&it) >= MAX_CONNECTIONS) {
 			continue;
@@ -86,7 +88,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 	// Incoming connections Machine number
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		int32_t input;
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 
 		psyfile_read(songfile->file, &input, sizeof(input));
 		legacywire = psy_table_at(legacywiretable, i);
@@ -97,7 +99,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 	// Outgoing connections Machine number
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		int32_t output;
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 
 		psyfile_read(songfile->file, &output, sizeof(output));
 		legacywire = psy_table_at(legacywiretable, i);
@@ -108,7 +110,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 	// Incoming connections Machine vol
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		float _inputConVol;
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 
 		psyfile_read(songfile->file, &_inputConVol, sizeof(_inputConVol));
 		legacywire = psy_table_at(legacywiretable, i);
@@ -119,7 +121,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 	// Outgoing connections activated
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		uint8_t connection;
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 
 		psyfile_read(songfile->file, &connection, sizeof(connection));
 		legacywire = psy_table_at(legacywiretable, i);
@@ -130,7 +132,7 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 	// Incoming connections activated
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		uint8_t _inputCon;
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 
 		psyfile_read(songfile->file, &_inputCon, sizeof(_inputCon));
 		legacywire = psy_table_at(legacywiretable, i);

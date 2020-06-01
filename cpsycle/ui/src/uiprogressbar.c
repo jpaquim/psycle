@@ -48,14 +48,16 @@ void ondestroy(psy_ui_ProgressBar* self, psy_ui_Component* sender)
 void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;
 	int height;
 		
 	height = 10;
-	size = psy_ui_component_size(&self->component);	
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, 0, 
-		(size.height - height) / 2, 
-		(int)(self->progress * size.width),
+		(psy_ui_value_px(&size.height, &tm) - height) / 2, 
+		(int)(self->progress * psy_ui_value_px(&size.width, &tm)),
 		height);
 	psy_ui_drawsolidrectangle(g, r, 0x00D1C5B6);
 }
@@ -64,8 +66,8 @@ void onpreferredsize(psy_ui_ProgressBar* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
 	if (rv) {
-		rv->width = 100;
-		rv->height = 20;
+		rv->width = psy_ui_value_makeew(20);
+		rv->height = psy_ui_value_makeeh(1);
 	}
 }
 

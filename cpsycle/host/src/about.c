@@ -83,10 +83,14 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->steincopyright, &self->component);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 	
-	psy_ui_component_resize(&self->contrib.component, 0, 150);
-	psy_ui_component_resize(&self->psycledelics.component, 0, 20);
-	psy_ui_component_resize(&self->sourceforge.component, 0, 20);
-	psy_ui_component_resize(&self->steincopyright.component, 0, 20);
+	psy_ui_component_resize(&self->contrib.component, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(150));
+	psy_ui_component_resize(&self->psycledelics.component, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(20));
+	psy_ui_component_resize(&self->sourceforge.component, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(20));
+	psy_ui_component_resize(&self->steincopyright.component, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(20));
 	{
 		psy_ui_Margin margin;
 
@@ -106,7 +110,8 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->versioninfo, &self->component);
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
-	psy_ui_component_resize(&self->versioninfo.component, 500, 300);	
+	psy_ui_component_resize(&self->versioninfo.component, psy_ui_value_makepx(500),
+		psy_ui_value_makepx(300));
 	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
@@ -146,7 +151,7 @@ void about_initbuttons(About* self)
 void about_onalign(About* self)
 {
 	psy_ui_Size size;
-	psy_ui_Size bitmapsize;
+	psy_ui_Size bitmapsize;	
 	psy_ui_TextMetric tm;
 	int centerx;
 	int centery;
@@ -161,34 +166,45 @@ void about_onalign(About* self)
 	size = psy_ui_component_size(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
 	bitmapsize = psy_ui_bitmap_size(&self->image.bitmap);
-	bitmapsize.height += tm.tmHeight * 4;
-	centerx = (size.width - bitmapsize.width) / 2;
-	centery = (size.height - bitmapsize.height) / 2;	
+	bitmapsize.height = psy_ui_value_makepx(
+		psy_ui_value_px(&bitmapsize.height, &tm) + tm.tmHeight * 4);
+	centerx = (psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&bitmapsize.width, &tm)) / 2;
+	centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;
 	contribbuttonsize = psy_ui_component_preferredsize(&self->contribbutton.component, &size);
 	versionbuttonsize = psy_ui_component_preferredsize(&self->versionbutton.component, &size);
 	okbuttonsize = psy_ui_component_preferredsize(&self->okbutton.component, &size);
-	if (centery + bitmapsize.height + okbuttonsize.height > size.height) {
-		bitmapsize.height = size.height - okbuttonsize.height * 2;
-		centery = (size.height - bitmapsize.height) / 2;
+	if (centery + psy_ui_value_px(&bitmapsize.height, &tm) +
+			psy_ui_value_px(&okbuttonsize.height, &tm) > psy_ui_value_px(&size.height, &tm)) {
+		bitmapsize.height = psy_ui_value_makepx(psy_ui_value_px(&size.height, &tm) -
+			psy_ui_value_px(&okbuttonsize.height, &tm) * 2);
+		centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;
 	}
 	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
-		centerx, centery, bitmapsize.width, bitmapsize.height);	
+		centerx, centery, bitmapsize.width,
+		bitmapsize.height);
 	do {
 		margin = tm.tmAveCharWidth * charmargin;
-		width = contribbuttonsize.width + versionbuttonsize.width + okbuttonsize.width + margin * 2;
+		width = psy_ui_value_px(&contribbuttonsize.width, &tm) +
+			psy_ui_value_px(&versionbuttonsize.width, &tm) +
+			psy_ui_value_px(&okbuttonsize.width, &tm) + margin * 2;
 		--charmargin;
-	} while (width > size.width && charmargin > 0);	
-	cpx = (size.width - width) / 2;
+	} while (width > psy_ui_value_px(&size.width, &tm) && charmargin > 0);
+	cpx = (psy_ui_value_px(&size.width, &tm) - width) / 2;
 	psy_ui_component_setposition(&self->contribbutton.component,
-		cpx, centery + bitmapsize.height,
-		contribbuttonsize.width, contribbuttonsize.height);
+		cpx, centery + psy_ui_value_px(&bitmapsize.height, &tm),
+		contribbuttonsize.width,
+		contribbuttonsize.height);
 	psy_ui_component_setposition(&self->versionbutton.component,
-		cpx + contribbuttonsize.width + margin, centery + bitmapsize.height,
-		versionbuttonsize.width, versionbuttonsize.height);
+		cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) + margin,
+		centery + psy_ui_value_px(&bitmapsize.height, &tm),
+		versionbuttonsize.width,
+		versionbuttonsize.height);
 	psy_ui_component_setposition(&self->okbutton.component,
-		cpx + contribbuttonsize.width + versionbuttonsize.width + margin * 2,
-		centery + bitmapsize.height,
-		okbuttonsize.width, okbuttonsize.height);
+		cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) +
+		psy_ui_value_px(&versionbuttonsize.width, &tm) + margin * 2,
+		centery + psy_ui_value_px(&bitmapsize.height, &tm),
+		okbuttonsize.width,
+		okbuttonsize.height);
 }
 
 void about_oncontributors(About* self, psy_ui_Component* sender) 

@@ -232,8 +232,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					if (imp->component->alignchildren) {
 						psy_ui_component_align(imp->component);
 					}
-					size.width = LOWORD(lParam);
-					size.height = HIWORD(lParam);
+					size.width = psy_ui_value_makepx(LOWORD(lParam));
+					size.height = psy_ui_value_makepx(HIWORD(lParam));
 					imp->component->vtable->onsize(imp->component, &size);
 					psy_signal_emit(&imp->component->signal_size, imp->component, 1,
 						(void*)&size);

@@ -6,11 +6,13 @@
 
 #include "help.h"
 
+#include <dir.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#define MAXREADBUFFER 4096
+#include "../../detail/portable.h"
 
 #if defined DIVERSALIS__OS__UNIX
 #define _MAX_PATH 4096
@@ -18,12 +20,11 @@
 
 static void help_ondestroy(Help*, psy_ui_Component* sender);
 static void help_registerfiles(Help*);
-static void help_clearfiles(Help*);
-static void help_updatefiles(Help*);
+static void help_clearfilenames(Help*);
+static void help_buildtabs(Help*);
 static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void help_loadpage(Help*, uintptr_t index);
-static void help_load(Help*, const char* path);
 
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
@@ -50,7 +51,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);
-	psy_table_init(&self->files);
+	psy_table_init(&self->filenames);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		help_ondestroy);
 	help_registerfiles(self);
@@ -59,44 +60,50 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 
 void help_ondestroy(Help* self, psy_ui_Component* sender)
 {
-	help_clearfiles(self);
-	psy_table_dispose(&self->files);
+	help_clearfilenames(self);
+	psy_table_dispose(&self->filenames);
 }
 
 void help_registerfiles(Help* self)
 {
 	uintptr_t page = 0;
 
-	psy_table_insert(&self->files, page++, strdup("./docs/readme.txt"));
-	psy_table_insert(&self->files, page++, strdup("./docs/keys.txt"));
-	psy_table_insert(&self->files, page++, strdup("./docs/tweaking.txt"));
-	psy_table_insert(&self->files, page++, strdup("./docs/whatsnew.txt"));
-	psy_table_insert(&self->files, page++, strdup("./docs/luascripting.txt"));
-	help_updatefiles(self);
+	psy_table_insert(&self->filenames, page++, strdup("readme.txt"));
+	psy_table_insert(&self->filenames, page++, strdup("keys.txt"));
+	psy_table_insert(&self->filenames, page++, strdup("tweaking.txt"));
+	psy_table_insert(&self->filenames, page++, strdup("whatsnew.txt"));
+	psy_table_insert(&self->filenames, page++, strdup("luascripting.txt"));
+	help_buildtabs(self);
 }
 
-void help_clearfiles(Help* self)
-{
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->files);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		free(psy_tableiterator_value(&it));
-	}
-	psy_table_clear(&self->files);
-}
-
-void help_updatefiles(Help* self)
+void help_buildtabs(Help* self)
 {
 	psy_TableIterator it;
 
 	tabbar_clear(&self->tabbar);
-	for (it = psy_table_begin(&self->files);
+	for (it = psy_table_begin(&self->filenames);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		tabbar_append(&self->tabbar, (char*)psy_tableiterator_value(&it));
+		char prefix[_MAX_PATH];
+		char ext[_MAX_PATH];
+		char name[_MAX_PATH];
+
+		psy_dir_extract_path((char*)psy_tableiterator_value(&it), prefix, name,
+			ext);
+		tabbar_append(&self->tabbar, name);
 	}
+}
+
+void help_clearfilenames(Help* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->filenames);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		free(psy_tableiterator_value(&it));
+	}
+	psy_table_clear(&self->filenames);
 }
 
 void help_ontabbarchanged(Help* self, psy_ui_Component* sender,
@@ -107,62 +114,15 @@ void help_ontabbarchanged(Help* self, psy_ui_Component* sender,
 
 void help_loadpage(Help* self, uintptr_t index)
 {
-	char path[_MAX_PATH];
+	psy_ui_editor_enableedit(&self->editor);
+	psy_ui_editor_clear(&self->editor);
+	if (psy_table_at(&self->filenames, index) != NULL) {
+		char path[_MAX_PATH];
 
-	strcpy(path, workspace_doc_directory(self->workspace));
-	strcat(path, "\\");
-	switch (index) {
-		case 0:
-			strcat(path, "readme.txt");
-			help_load(self, path);
-		break;
-		case 1:
-			strcat(path, "keys.txt");
-			help_load(self, path);
-		break;
-		case 2:
-			strcat(path, "tweaking.txt");
-			help_load(self, path);
-		break;
-		case 3:
-			strcat(path, "whatsnew.txt");
-			help_load(self, path);
-		break;
-		case 4:
-			strcat(path, "luascripting.txt");
-			help_load(self, path);
-		break;
-		default:
-		break;
+		psy_snprintf(path, _MAX_PATH, "%s\\%s",
+			workspace_doc_directory(self->workspace),
+			psy_table_at(&self->filenames, index));
+		psy_ui_editor_load(&self->editor, path);				
 	}
-}
-
-void help_load(Help* self, const char* path)
-{
-	FILE* fp;
-
-	fp = fopen(path, "rb");
-	if (fp) {		
-		char c;
-		int pos = 0;		
-		char text[MAXREADBUFFER];
-
-		psy_ui_editor_clear(&self->editor);
-		psy_ui_editor_enableedit(&self->editor);
-		memset(text, 0, MAXREADBUFFER);
-		while ((c = fgetc(fp)) != EOF) {
-			if (pos < MAXREADBUFFER) {
-				text[pos] = c;
-				++pos;
-			} else {
-				psy_ui_editor_addtext(&self->editor, text);
-				pos = 0;
-			}
-		}		
-		fclose(fp);
-		if (pos > 0) {
-			psy_ui_editor_addtext(&self->editor, text);
-		}
-		psy_ui_editor_preventedit(&self->editor);
-	}
+	psy_ui_editor_preventedit(&self->editor);
 }

@@ -73,6 +73,11 @@ void ontimer(Vst2View* self, int timerid)
 void onpreferredsize(Vst2View* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	if (rv) {		
-		psy_audio_machine_editorsize(self->machine, &rv->width, &rv->height);		
+		int width;
+		int height;
+
+		psy_audio_machine_editorsize(self->machine, &width, &height);
+		rv->width = psy_ui_value_makepx(width);
+		rv->height = psy_ui_value_makepx(height);
 	}
 }

@@ -88,11 +88,11 @@ void onpreferredsize(psy_ui_Edit* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			
 			size = psy_ui_component_textsize(&self->component,
 				psy_ui_edit_text(self));
-			rv->width = size.width + 2;
-			rv->height = (int)(tm.tmHeight * self->linenumber);
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 2);
+			rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linenumber));
 		} else {				
-			rv->width = tm.tmAveCharWidth * self->charnumber + 2;
-			rv->height = (int)(tm.tmHeight * self->linenumber);
+			rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber + 2);
+			rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linenumber));
 		}
 	}
 }

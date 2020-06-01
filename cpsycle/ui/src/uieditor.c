@@ -7,6 +7,8 @@
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 
+#define BLOCKSIZE 128 * 1024
+
 #include "uiapp.h"
 #include "uilabel.h"
 #include "uiwincomponentimp.h"
@@ -37,9 +39,12 @@ static void psy_ui_editor_styleclearall(psy_ui_Editor*);
 static void psy_ui_editor_setcaretcolor(psy_ui_Editor*, uint32_t color);
 static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam);
+static void psy_ui_editor_getrange(psy_ui_Editor*, int start, int end, char* text);
+static void setstyle(psy_ui_Editor*, int style, COLORREF fore, COLORREF back,
+	int size, const char* face);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 static psy_ui_fp_component_setfont super_setfont;
 
 static void vtable_init(psy_ui_Editor* self)
@@ -48,8 +53,9 @@ static void vtable_init(psy_ui_Editor* self)
 		vtable = *(self->component.vtable);
 		super_setfont = vtable.setfont;
 		vtable.setfont = (psy_ui_fp_component_setfont)psy_ui_editor_setfont;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
+	self->component.vtable = &vtable;
 }
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 {  					
@@ -70,13 +76,18 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 				0);
 			if (imp->hwnd) {
 				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
-				vtable_init(self);
-				self->component.vtable = &vtable;
+				vtable_init(self);				
 				psy_ui_editor_setcolor(self, psy_ui_defaults_color(&app.defaults));
 				psy_ui_editor_setcaretcolor(self, psy_ui_defaults_color(&app.defaults));
 				psy_ui_editor_setbackgroundcolor(self,
 					psy_ui_defaults_backgroundcolor(&app.defaults));
 				psy_ui_editor_setfont(self, NULL);
+				sci(self, SCI_SETMARGINWIDTHN, 0, 0);
+				sci(self, SCI_SETMARGINWIDTHN, 1, 0);
+				sci(self, SCI_SETMARGINWIDTHN, 2, 0);
+				sci(self, SCI_SETMARGINWIDTHN, 3, 0);
+				sci(self, SCI_SETMARGINWIDTHN, 4, 0);
+				sci(self, SCI_SETMARGINWIDTHN, 5, 0);
 				psy_ui_editor_styleclearall(self);				
 			}
 		}
@@ -131,43 +142,73 @@ intptr_t sci(psy_ui_Editor* self, uintptr_t msg, uintptr_t wparam,
 		msg, (WPARAM) wparam, (LPARAM) lparam);
 }
 
+void setstyle(psy_ui_Editor* self, int style, COLORREF fore, COLORREF back,
+	int size, const char* face)
+{
+	sci(self, SCI_STYLESETFORE, (uintptr_t)style, (uintptr_t)fore);
+	sci(self, SCI_STYLESETBACK, (uintptr_t)style, (uintptr_t)back);
+	if (size >= 1)
+		sci(self, SCI_STYLESETSIZE, (uintptr_t)style, (uintptr_t)size);
+	if (face)
+		sci(self, SCI_STYLESETFONT, (uintptr_t)style, (uintptr_t)face);
+}
+
 void psy_ui_editor_load(psy_ui_Editor* self, const char* path)
 {	
 	FILE* fp;
-
+	
+	sci(self, SCI_CANCEL, 0, 0);
+	sci(self, SCI_SETUNDOCOLLECTION, 0, 0);
 	fp = fopen(path, "rb");
 	if (fp) {
-		char c;
-		int pos = 0;
-		char text[MAXTEXTLENGTH];
-
-		memset(text, 0, MAXTEXTLENGTH);
-		while ((c = fgetc(fp)) != EOF && pos < MAXTEXTLENGTH) {
-			text[pos] = c;
-			++pos;
-		}		
-		fclose(fp);		
-		psy_ui_editor_settext(self, text);		
-	}
+		char data[BLOCKSIZE];
+		int lenfile;
+		
+		lenfile = fread(data, 1, sizeof(data), fp);
+		while (lenfile > 0) {
+			sci(self, SCI_ADDTEXT, lenfile, (LPARAM)(char*)data);
+			lenfile = fread(data, 1, sizeof(data), fp);
+		}
+		fclose(fp);
+	}	
+	sci(self, SCI_SETUNDOCOLLECTION, 1, 0);
+	sci(self, EM_EMPTYUNDOBUFFER, 0, 0);
+	sci(self, SCI_SETSAVEPOINT, 0, 0);
+	sci(self, SCI_GOTOPOS, 0, 0);
 }
 
 void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 {
 	FILE* fp;
-	
-	int size = sci(self, SCI_GETLENGTH, 0, 0) + 1;
-	fp = fopen(path, "wb");
-	if (fp) {		
-		char* buffer;		
 
-		buffer = malloc(sizeof(char) * (size + 1));
-		if (buffer) {
-			sci(self, SCI_GETTEXT, size, (LPARAM)buffer);			
-			fwrite(buffer, sizeof(char), (size - 1) / sizeof(char), fp);
-		}				
+	fp = fopen(path, "wb");
+	if (fp) {
+		char data[BLOCKSIZE + 1];
+		int lengthdoc;
+
+		lengthdoc = sci(self, SCI_GETLENGTH, 0, 0);
+		for (int i = 0; i < lengthdoc; i += BLOCKSIZE) {
+			int grabsize;
+			
+			grabsize = lengthdoc - i;
+			if (grabsize > BLOCKSIZE)
+				grabsize = BLOCKSIZE;
+			psy_ui_editor_getrange(self, i, i + grabsize, data);
+			fwrite(data, grabsize, 1, fp);
+		}
 		fclose(fp);
-		free(buffer);
-	}	
+		sci(self, SCI_SETSAVEPOINT, 0, 0);
+	}
+}
+
+void psy_ui_editor_getrange(psy_ui_Editor* self, int start, int end, char* text)
+{
+	struct TextRange tr;
+
+	tr.chrg.cpMin = start;
+	tr.chrg.cpMax = end;
+	tr.lpstrText = text;
+	sci(self, SCI_GETTEXTRANGE, 0, (LPARAM)(&tr));
 }
 
 void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)

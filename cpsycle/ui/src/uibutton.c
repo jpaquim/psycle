@@ -66,14 +66,16 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Size textsize;
+	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;
 	int centerx = 0;
 	int centery = 0;
 
 	size = psy_ui_component_size(psy_ui_button_base(self));
 	textsize = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
-   
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	tm = psy_ui_component_textmetric(&self->component);   
+	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.height, &tm));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->hover) {
 		psy_ui_settextcolor(g, 0x00FFFFFF);
@@ -86,11 +88,11 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-		centerx = (size.width - textsize.width) / 2;		
+		centerx = (psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&textsize.width, &tm)) / 2;
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (size.height - textsize.height) / 2;
+		centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&textsize.height, &tm)) / 2;
 	}   
 	psy_ui_textoutrectangle(g, 
 		centerx,
@@ -107,18 +109,20 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_ui_Point arrow[4];
 	int centerx = 4;
 	int centery = 0;
 	
 	size = psy_ui_component_size(psy_ui_button_base(self));
+	tm = psy_ui_component_textmetric(&self->component);
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
-		centerx = (size.width - 4) / 2;		
+		centerx = (psy_ui_value_px(&size.width, &tm) - 4) / 2;
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) ==
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
-		centery = (size.height - 8) / 2;
+		centery = (psy_ui_value_px(&size.height, &tm) - 8) / 2;
 	}
 	if (self->icon == psy_ui_ICON_LESSLESS) {
 		makearrow(arrow,
@@ -196,23 +200,28 @@ void psy_ui_button_setcharnumber(psy_ui_Button* self, int number)
 void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	psy_ui_TextMetric tm;	
-	psy_ui_Size size;		
+	psy_ui_Size size;
 		
 	tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 	if (self->charnumber == 0) {
 		size = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
 		if (self->icon) {
 			if (self->icon == psy_ui_ICON_LESS || self->icon == psy_ui_ICON_MORE) {
-				size.width += psy_ui_component_textsize(psy_ui_button_base(self), "<").width;
+				psy_ui_Size textsize;
+
+				textsize = psy_ui_component_textsize(psy_ui_button_base(self), "<");
+				size.width = psy_ui_value_makepx(
+					psy_ui_value_px(&size.width, &tm) + 
+					psy_ui_value_px(&textsize.width, &tm));
 			} else {
 				size.width = psy_ui_component_textsize(psy_ui_button_base(self), "<<").width;
 			}
 		}		
-		rv->width = size.width + 4;				
+		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4);
 	} else {
-		rv->width = tm.tmAveCharWidth * self->charnumber;
+		rv->width = psy_ui_value_makeew(self->charnumber);
 	}
-	rv->height = tm.tmHeight;	
+	rv->height = psy_ui_value_makepx(tm.tmHeight);
 }
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)

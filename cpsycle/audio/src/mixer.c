@@ -2022,7 +2022,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 	}
 
 	for (c = 0; c < numinputcolumns(self); ++c) {
-		LegacyWire* wire;
+		psy_audio_LegacyWire* wire;
 		psy_audio_Machine* inputmachine;
 		uintptr_t f;
 
@@ -2033,7 +2033,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 		}
 		//load bugfix: Ensure no duplicate wires could be created.
 		for (f = 0; f < c; f++) {
-			LegacyWire* legacywire;
+			psy_audio_LegacyWire* legacywire;
 
 			legacywire = psy_table_at(legacywiretable, f);
 			if (!legacywire) {
@@ -2089,7 +2089,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 	for (j = 0; j <= numreturncolumns(self); ++j)
 	{
 		psy_audio_Machine* inputmachine;
-		LegacyWire* wire = (LegacyWire*) psy_table_at(&self->legacyreturn_, j);
+		psy_audio_LegacyWire* wire = (psy_audio_LegacyWire*) psy_table_at(&self->legacyreturn_, j);
 		if (!wire) {
 			psy_audio_mixer_discardreturn(self, j);
 			continue;
@@ -2100,7 +2100,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			&& slot != wire->_inputMachine && inputmachine)
 		{
 			psy_audio_ReturnChannel* channel;
-			LegacyWire* wire2;
+			psy_audio_LegacyWire* wire2;
 
 			channel = psy_audio_mixer_Return(self, j);
 			if (channel) {
@@ -2119,7 +2119,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			}
 			Return(j).GetWire().SetVolume(wire._inputConVol);
 			*/
-			wire2 = (LegacyWire*) psy_table_at(&self->legacysend_, j);
+			wire2 = (psy_audio_LegacyWire*) psy_table_at(&self->legacysend_, j);
 			if (wire2) {
 				psy_audio_MixerSend* send;
 
@@ -2146,8 +2146,8 @@ void psy_audio_mixer_clearlegacywires(psy_audio_Mixer* self)
 		for (it = psy_table_begin(&self->legacyreturn_);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
-			LegacyWire* legacywire;
-			legacywire = (LegacyWire*)psy_tableiterator_value(&it);
+			psy_audio_LegacyWire* legacywire;
+			legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it);
 			free(legacywire);
 		}
 		psy_table_clear(&self->legacyreturn_);
@@ -2158,8 +2158,8 @@ void psy_audio_mixer_clearlegacywires(psy_audio_Mixer* self)
 		for (it = psy_table_begin(&self->legacysend_);
 				!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
-			LegacyWire* legacywire;
-			legacywire = (LegacyWire*)psy_tableiterator_value(&it);
+			psy_audio_LegacyWire* legacywire;
+			legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it);
 			free(legacywire);
 		}
 		psy_table_clear(&self->legacysend_);

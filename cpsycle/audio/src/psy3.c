@@ -51,6 +51,8 @@ static void loadwavesubchunk(psy_audio_SongFile*, int32_t instrIdx,
 	int32_t pan, char * instrum_name, int32_t fullopen, int32_t loadIdx);
 static psy_audio_Machine* machineloadchunk(psy_audio_SongFile*,
 	int32_t index);
+static psy_audio_Machine* machineloadchunk_createmachine(psy_audio_SongFile*,
+	int32_t index, char* modulename, char* catchername, bool* replaced);
 static void buildsequence(psy_audio_SongFile*, unsigned char* playorder,
 	int playlength);
 static void psy3_setinstrumentnames(psy_audio_SongFile*);
@@ -1512,27 +1514,15 @@ void readmacd(psy_audio_SongFile* self)
 
 psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 {
-	// assume version 0 for now	
 	psy_audio_Machine* machine;
-	int32_t type;
+	bool replaced;
+	char catchername[512];
 	char modulename[256];
-	char plugincatchername[256];
 	char editname[32];	
 	int32_t i;
 	psy_Table* legacywiretable;
 	
-	psyfile_read(self->file, &type,sizeof(type));
-	psyfile_readstring(self->file, modulename, 256);
-	plugincatcher_catchername(self->song->machinefactory->catcher,
-		modulename, plugincatchername, 0);
-	// todo shellidx;
-	machine = psy_audio_machinefactory_makemachine(self->song->machinefactory, type,
-		plugincatchername);
-	if (!machine) {
-		machine = psy_audio_machinefactory_makemachine(self->song->machinefactory, MACH_DUMMY, 
-			plugincatchername);
-		type = MACH_DUMMY;		
-	}	
+	machine = machineloadchunk_createmachine(self, index, modulename, catchername, &replaced);
 	{
 		unsigned char bypass;
 		unsigned char mute;
@@ -1568,7 +1558,7 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		float wiremultiplier;
 		unsigned char connection;
 		unsigned char incon;
-		LegacyWire* legacywire;
+		psy_audio_LegacyWire* legacywire;
 						
 		// Incoming connections psy_audio_Machine number
 		psyfile_read(self->file, &input ,sizeof(input));		
@@ -1581,34 +1571,16 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		// Outgoing connections activated
 		psyfile_read(self->file, &connection, sizeof(connection));
 		// Incoming connections activated
-		psyfile_read(self->file, &incon, sizeof(incon));
-		//if (connection && output != -1) {
-			//psy_audio_machines_connect(&self->song->machines, index, output);			
-		//}
-		/*if (incon && input != -1) {
-			psy_audio_WireSocketEntry* entry;
-			
-			psy_audio_machines_connect(&self->song->machines, input, index);			
-			entry = connection_input(&self->song->machines.connections, input, index);
-			if (entry) {
-				entry->id = i;
-			}
-			connections_setwirevolume(&self->song->machines.connections,
-				input, index, inconvol * wiremultiplier);
-			
-		}*/
-		legacywire = (LegacyWire*)malloc(sizeof(LegacyWire));
-		legacywire->_inputMachine = input;
-		legacywire->_outputMachine = output;
-		legacywire->_connection = connection;
-		legacywire->_inputCon = incon;
-		legacywire->_inputConVol = inconvol;
-		legacywire->_wireMultiplier = wiremultiplier;
-		psy_table_insert(legacywiretable, (uintptr_t)i, (void*)legacywire);
+		psyfile_read(self->file, &incon, sizeof(incon));		
+		legacywire = psy_audio_legacywire_allocinit_all(input, incon, inconvol,
+			wiremultiplier, output, connection);
+		if (legacywire) {
+			psy_table_insert(legacywiretable, (uintptr_t)i, (void*)legacywire);
+		}
 	}
 	psy_table_insert(&self->legacywires.legacywires, index, legacywiretable);
 	psyfile_readstring(self->file, editname, 32);
-	if (type == MACH_DUMMY) {
+	if (replaced) {
 		char text[256];
 
 		strcpy(text, "X!");
@@ -1619,12 +1591,39 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		psy_audio_songfile_warn(self, " aka ");
 		psy_audio_songfile_warn(self, editname);
 		psy_audio_songfile_warn(self, " with dummy-plug\n");
-
 	} else {
 		psy_audio_machine_seteditname(machine, editname);
 	}	
 	psy_audio_machine_loadspecific(machine, self, index);
+	if (self->file->currchunk.version >= 1) {
+		//TODO: What to do on possibly wrong wire load?
+		psy_audio_machine_loadwiremapping(machine, self, index);
+	}
 	return machine;	
+}
+
+psy_audio_Machine* machineloadchunk_createmachine(psy_audio_SongFile* self,
+	int32_t index, char* modulename, char* catchername, bool* replaced)
+{
+	psy_audio_Machine* machine;
+	int32_t type;	
+
+	*replaced = FALSE;
+	modulename[0] = '\0';
+	catchername[0] = '\0';
+	psyfile_read(self->file, &type, sizeof(type));
+	psyfile_readstring(self->file, modulename, 256);
+	plugincatcher_catchername(self->song->machinefactory->catcher,
+		modulename, catchername, 0);
+	// todo shellidx;
+	machine = psy_audio_machinefactory_makemachine(self->song->machinefactory, type,
+		catchername);
+	if (!machine) {
+		machine = psy_audio_machinefactory_makemachine(self->song->machinefactory, MACH_DUMMY,
+			catchername);
+		*replaced = TRUE;
+	}
+	return machine;
 }
 
 //	===================

@@ -4,10 +4,9 @@
 #ifndef psy_audio_WIRE_H
 #define psy_audio_WIRE_H
 
+#include "connections.h"
 #include <hashtbl.h>
-
 #include <stdlib.h>
-
 #include "../../detail/psydef.h"
 
 #ifdef __cplusplus
@@ -17,7 +16,7 @@ extern "C" {
 // typedef std::pair<short, short> PinConnection;
 // typedef std::vector<PinConnection> Mapping;
 
-typedef struct LegacyWire
+typedef struct psy_audio_LegacyWire
 {
 	///\name input ports
 	///\{
@@ -44,10 +43,12 @@ typedef struct LegacyWire
 		int _outputMachine;
 		/// Outgoing connections activated
 		bool _connection;
+		/// PinMapping
+		psy_audio_PinMapping pinmapping;
 	///\}
-} LegacyWire;
+} psy_audio_LegacyWire;
 
-INLINE void psy_audio_legacywire_init(LegacyWire* self)
+INLINE void psy_audio_legacywire_init(psy_audio_LegacyWire* self)
 {
 	self->_inputMachine = -1;
 	self->_inputCon = FALSE;
@@ -55,9 +56,10 @@ INLINE void psy_audio_legacywire_init(LegacyWire* self)
 	self->_wireMultiplier = 1.f;
 	self->_outputMachine = -1;
 	self->_connection = FALSE;
+	psy_audio_pinmapping_init(&self->pinmapping, 2);
 }
 
-INLINE void psy_audio_legacywire_init_all(LegacyWire* self,
+INLINE void psy_audio_legacywire_init_all(psy_audio_LegacyWire* self,
 	int inputmachine,
 	bool inputcon,
 	float inputconvol,
@@ -71,16 +73,22 @@ INLINE void psy_audio_legacywire_init_all(LegacyWire* self,
 	self->_wireMultiplier = wiremultiplier;
 	self->_outputMachine = outputmachine;
 	self->_connection = connection;
+	psy_audio_pinmapping_init(&self->pinmapping, 2);
 }
 
-INLINE LegacyWire* psy_audio_legacywire_alloc(void)
+INLINE void psy_audio_legacywire_dispose(psy_audio_LegacyWire* self)
 {
-	return (LegacyWire*) malloc(sizeof(LegacyWire));
+	psy_audio_pinmapping_dispose(&self->pinmapping);
 }
 
-INLINE LegacyWire* psy_audio_legacywire_allocinit(void)
+INLINE psy_audio_LegacyWire* psy_audio_legacywire_alloc(void)
 {
-	LegacyWire* rv;
+	return (psy_audio_LegacyWire*) malloc(sizeof(psy_audio_LegacyWire));
+}
+
+INLINE psy_audio_LegacyWire* psy_audio_legacywire_allocinit(void)
+{
+	psy_audio_LegacyWire* rv;
 
 	rv = psy_audio_legacywire_alloc();
 	if (rv) {
@@ -89,7 +97,7 @@ INLINE LegacyWire* psy_audio_legacywire_allocinit(void)
 	return rv;
 }
 
-INLINE LegacyWire* psy_audio_legacywire_allocinit_all(
+INLINE psy_audio_LegacyWire* psy_audio_legacywire_allocinit_all(
 	int inputmachine,
 	bool inputcon,
 	float inputconvol,
@@ -97,7 +105,7 @@ INLINE LegacyWire* psy_audio_legacywire_allocinit_all(
 	int outputmachine,
 	bool connection)
 {
-	LegacyWire* rv;
+	psy_audio_LegacyWire* rv;
 
 	rv = psy_audio_legacywire_alloc();
 	if (rv) {
@@ -113,6 +121,7 @@ INLINE LegacyWire* psy_audio_legacywire_allocinit_all(
 }
 
 typedef struct psy_audio_LegacyWires {
+	// ConnectionID X psy_audio_LegacyWire*
 	psy_Table legacywires;
 } psy_audio_LegacyWires;
 

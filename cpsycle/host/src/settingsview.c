@@ -139,7 +139,8 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	psy_Properties* property, int level)
 {			
 	psy_ui_Size size;
-
+	psy_ui_TextMetric tm;
+	
 	propertiesrenderer_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && psy_properties_type(property) ==
 			PSY_PROPERTY_TYP_SECTION) {
@@ -159,8 +160,9 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 		++self->choicecount;	
 	}
 	propertiesrenderer_advanceline(self);
-	size = psy_ui_component_size(&self->client);	
-	return self->cpy + self->dy < size.height;
+	size = psy_ui_component_size(&self->client);
+	tm = psy_ui_component_textmetric(&self->client);
+	return self->cpy + self->dy < psy_ui_value_px(&size.height, &tm);
 }
 
 void propertiesrenderer_addremoveident(PropertiesRenderer* self, int level)
@@ -347,6 +349,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* pro
 	int column)
 {
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;	
 	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
@@ -375,10 +378,11 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* pro
 		size = psy_ui_component_textsize(&self->client,
 			psy_properties_translation(property));
 	}
+	tm = psy_ui_component_textmetric(&self->client);
 	r.left = propertiesrenderer_columnstart(self, column);
 	r.top = self->cpy + self->dy ;
-	r.right = r.left + size.width + 6;
-	r.bottom = r.top + size.height + 2;	
+	r.right = r.left + psy_ui_value_px(&size.width, &tm) + 6;
+	r.bottom = r.top + psy_ui_value_px(&size.height, &tm) + 2;
 	psy_ui_drawrectangle(self->g, r);
 }
 
@@ -391,18 +395,19 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* p
 	psy_ui_Size size;
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
-		
+	
 	tm = psy_ui_component_textmetric(&self->client);
-	size.width = tm.tmAveCharWidth * 4;
-	size.height = tm.tmHeight;
-	knobsize.width = (int) (tm.tmAveCharWidth * 2);
-	knobsize.height = (int) (tm.tmHeight * 0.7 + 0.5);
-	cornersize.width = (int) (tm.tmAveCharWidth * 0.6);
-	cornersize.height = (int) (tm.tmHeight * 0.6);
+	size.width = psy_ui_value_makeew(4);
+	size.height = psy_ui_value_makeeh(1);
+	knobsize.width = psy_ui_value_makeew(2);
+	knobsize.height = psy_ui_value_makeeh(0.7);
+	cornersize.width = psy_ui_value_makeew(0.6);
+	cornersize.height = psy_ui_value_makeeh(0.6);
 	r.left = propertiesrenderer_columnstart(self, column);
-	r.top = self->cpy + self->dy + (self->lineheight - size.height) / 2;
+	r.top = self->cpy + self->dy + (self->lineheight -
+		psy_ui_value_px(&size.height, &tm)) / 2;
 	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
-	r.bottom = r.top + size.height;
+	r.bottom = r.top + psy_ui_value_px(&size.height, &tm);
 	psy_ui_setcolor(self->g, 0x00555555);
 	psy_ui_drawroundrectangle(self->g, r, cornersize);
 	if (psy_properties_ischoiceitem(property)) {
@@ -412,15 +417,17 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* p
 	}
 	if (!checked) {
 		r.left = propertiesrenderer_columnstart(self, column) + (int)(tm.tmAveCharWidth * 0.4);
-		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
+		r.top = self->cpy + self->dy + (self->lineheight -
+			psy_ui_value_px(&knobsize.height, &tm)) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
-		r.bottom = r.top + knobsize.height;
+		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
 		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00555555);
 	} else {
 		r.left = propertiesrenderer_columnstart(self, column) + tm.tmAveCharWidth * 2;
-		r.top = self->cpy + self->dy + (self->lineheight - knobsize.height) / 2;
+		r.top = self->cpy + self->dy + (self->lineheight -
+			psy_ui_value_px(&knobsize.height, &tm)) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
-		r.bottom = r.top + knobsize.height;
+		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
 		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00CACACA);
 	}	
 }
@@ -630,7 +637,7 @@ int propertiesrenderer_intersectsvalue(PropertiesRenderer* self, psy_Properties*
 		r.left = propertiesrenderer_columnstart(self, column);
 		r.top = self->cpy + self->dy;
 		r.right = r.left + tm.tmAveCharWidth * 4;;
-		r.bottom = r.top + size.height + 2;
+		r.bottom = r.top + psy_ui_value_px(&size.height, &tm) + 2;
 	
 		rv = propertiesrenderer_intersects(&r, self->mx, self->my);
 	} else
@@ -702,8 +709,8 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Comp
 			psy_ui_component_setposition(edit,
 				self->selrect.left,
 				self->selrect.top,
-				self->selrect.right - self->selrect.left, 
-				self->selrect.bottom - self->selrect.top);
+				psy_ui_value_makepx(self->selrect.right - self->selrect.left),
+				psy_ui_value_makepx(self->selrect.bottom - self->selrect.top));
 			if (psy_properties_hint(self->selected) !=
 					PSY_PROPERTY_HINT_READONLY) {				
 				psy_ui_component_show(edit);
@@ -770,9 +777,12 @@ void propertiesrenderer_onsize(PropertiesRenderer* self, psy_ui_Component* sende
 void propertiesrenderer_computecolumns(PropertiesRenderer* self, psy_ui_Size* size)
 {
 	int column;
+	psy_ui_TextMetric tm;
+	tm = psy_ui_component_textmetric(&self->client);
 
 	for (column = 0; column < PROPERTIESRENDERER_NUMCOLS; ++column) {
-		self->col_width[column] = (int)(self->col_perc[column] * size->width);
+		self->col_width[column] = (int)(self->col_perc[column] *
+			psy_ui_value_px(&size->width, &tm));
 		if (column == 0) {
 			self->col_start[column] = 0;
 		} else {
@@ -798,16 +808,18 @@ int propertiesrenderer_columnstart(PropertiesRenderer* self, int column)
 
 void propertiesrenderer_adjustscroll(PropertiesRenderer* self)
 {
-	psy_ui_Size size;
+	psy_ui_Size size;	
+	psy_ui_TextMetric tm;
 	int scrollmax;
-
-	size = psy_ui_component_size(&self->client);
+	
+	size = psy_ui_component_size(&self->client);	
+	tm = psy_ui_component_textmetric(&self->client);
 	self->search = 0;
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
 		propertiesrenderer_onenumpropertyposition);
 	self->client.scrollstepy = self->lineheight;
-	scrollmax =  (self->cpy - size.height) / self->lineheight + 1;
+	scrollmax =  (self->cpy - psy_ui_value_px(&size.height, &tm)) / self->lineheight + 1;
 	if (scrollmax < 0) {
 		scrollmax = 0;
 	}

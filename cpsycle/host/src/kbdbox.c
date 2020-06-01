@@ -72,8 +72,8 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent)
 	psy_ui_component_doublebuffer(kbdbox_base(self));
 	psy_signal_connect(&kbdbox_base(self)->signal_destroy, self,
 		kbdbox_ondestroy);	
-	self->corner.width = 5;
-	self->corner.height = 5;
+	self->corner.width = psy_ui_value_makepx(5);
+	self->corner.height = psy_ui_value_makepx(5);
 	self->ident = 3;
 	self->keyheight = (9 + self->ident) * 3 + 2;
 	self->keywidth = 115;
@@ -119,21 +119,26 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 {
 	int centerx;
 	psy_ui_Size textsize;
-	
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);	
 	textsize = psy_ui_component_textsize(kbdbox_base(self), key->label);
-	centerx = (key->position.right - key->position.left - textsize.width) / 2;
-	
+	centerx = (key->position.right - key->position.left -
+		psy_ui_value_px(&textsize.width, &tm)) / 2;	
 	psy_ui_setcolor(g, key->color);
 	psy_ui_drawroundrectangle(g, key->position, self->corner);
 	psy_ui_settextcolor(g, 0x00666666);
 	psy_ui_textout(g, key->position.left + centerx, key->position.top + 1,
 		key->label, strlen(key->label));
 	psy_ui_settextcolor(g, key->color);
-	psy_ui_textout(g, key->position.left + 4, key->position.top -3 + textsize.height,
+	psy_ui_textout(g, key->position.left + 4, key->position.top -3 +
+		psy_ui_value_px(&textsize.height, &tm),
 		key->desc0, strlen(key->desc0));
-	psy_ui_textout(g, key->position.left + 4 + 40, key->position.top - 3 + textsize.height,
+	psy_ui_textout(g, key->position.left + 4 + 40, key->position.top - 3 +
+		psy_ui_value_px(&textsize.height, &tm),
 		key->desc1, strlen(key->desc1));
-	psy_ui_textout(g, key->position.left + 4 + 80, key->position.top - 3 + textsize.height,
+	psy_ui_textout(g, key->position.left + 4 + 80, key->position.top - 3 +
+		psy_ui_value_px(&textsize.height, &tm),
 		key->desc2, strlen(key->desc2));
 }
 
@@ -143,7 +148,7 @@ void kbdbox_onpreferredsize(KbdBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		psy_ui_Size size;
 
 		size = psy_ui_component_size(kbdbox_base(self));
-		size.height = 250;
+		size.height = psy_ui_value_makeeh(14);
 		*rv = size;
 	}
 }

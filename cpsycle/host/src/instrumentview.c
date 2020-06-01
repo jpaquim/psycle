@@ -381,7 +381,9 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	psy_ui_label_settext(&self->nnaheader, "New Note Action ");
 	psy_ui_button_init(&self->nnacut, &self->nna);
 	psy_ui_button_settext(&self->nnacut, "Note Cut");
-	psy_ui_component_setposition(&self->nnacut.component, 5, 30, 70, 20);
+	psy_ui_component_setposition(&self->nnacut.component, 5, 30,
+		psy_ui_value_makepx(70),
+		psy_ui_value_makepx(20));
 	psy_signal_connect(&self->nnacut.signal_clicked, self, OnNNACut);
 	psy_ui_button_init(&self->nnarelease, &self->nna);
 	psy_ui_button_settext(&self->nnarelease, "Note Release");
@@ -415,7 +417,9 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 		&margin));
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_settext(&self->globalvolume, "Global Volume");
-	psy_ui_component_resize(&self->globalvolume.component, 0, 20);
+	psy_ui_component_resize(&self->globalvolume.component,
+		psy_ui_value_makepx(0),
+		psy_ui_value_makepx(20));
 	psy_ui_component_setalign(&self->globalvolume.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->globalvolume, self, OnGeneralViewDescribe,
 			OnGeneralViewTweak, OnGeneralViewValue);
@@ -583,8 +587,9 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
 	psy_ui_component_setmargin(&self->envelopeview.component, &margin);	
-	psy_ui_component_resize(&self->envelopeview.component, 0, 200);
-
+	psy_ui_component_resize(&self->envelopeview.component,
+		psy_ui_value_makepx(0),
+		psy_ui_value_makepx(200));
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "Attack");
 	psy_ui_slider_init(&self->decay, &self->component);
@@ -600,7 +605,9 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
 	for (i = 0; i < 4; ++i) {		
-		psy_ui_component_resize(&sliders[i]->component, 100, 20);		
+		psy_ui_component_resize(&sliders[i]->component,
+			psy_ui_value_makeew(10),
+			psy_ui_value_makeeh(2));
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_connect(sliders[i], self, OnVolumeViewDescribe,
@@ -769,7 +776,9 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
 	psy_ui_component_setmargin(&self->envelopeview.component, &margin);	
-	psy_ui_component_resize(&self->envelopeview.component, 0, 200);
+	psy_ui_component_resize(&self->envelopeview.component,
+		psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(20));
 	psy_ui_slider_init(&self->attack, &self->component);
 	psy_ui_slider_settext(&self->attack, "Attack");
 	psy_ui_slider_init(&self->decay, &self->component);
@@ -791,7 +800,9 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5),
 		psy_ui_value_makepx(5));
 	for (i = 0; i < 7; ++i) {		
-		psy_ui_component_resize(&sliders[i]->component, 100, 20);		
+		psy_ui_component_resize(&sliders[i]->component,
+			psy_ui_value_makeew(10),
+			psy_ui_value_makeeh(2));
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_connect(sliders[i], self, OnFilterViewDescribe,

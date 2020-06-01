@@ -93,12 +93,14 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Rectangle r;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
 	size = psy_ui_component_size(&self->component);
-	if (size.height > 40) {
-		size.height = 40;
+	tm = psy_ui_component_textmetric(&self->component);
+	if (psy_ui_value_px(&size.height, &tm) > 40) {
+		size.height = psy_ui_value_makepx(40);
 	}
-	psy_ui_setrectangle(&r, 1, 5, size.width - 1, size.height - 5);
+	psy_ui_setrectangle(&r, 1, 5, psy_ui_value_px(&size.width, &tm) - 1, psy_ui_value_px(&size.height, &tm) - 5);
 	if (self->clip) {
 		psy_ui_drawsolidrectangle(g, r, 0x000000FF);
 	}	
@@ -107,7 +109,7 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 }
 
 void clipbox_onpreferredsize(ClipBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{	
-	rv->width = 10;
-	rv->height = 20;
+{
+	rv->width = psy_ui_value_makeew(2);
+	rv->height = psy_ui_value_makeeh(1.5);	
 }

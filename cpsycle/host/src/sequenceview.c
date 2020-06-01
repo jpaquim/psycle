@@ -167,7 +167,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_onsequenceselectionchanged);
 	psy_signal_connect(&workspace->signal_followsongchanged, self,
 		sequenceview_onfollowsongchanged);
-	psy_ui_component_resize(&self->component, 160, 0);
+	psy_ui_component_resize(&self->component, psy_ui_value_makeew(16),
+		psy_ui_value_makepx(0));
 }
 
 static void sequencebuttons_updatetext(SequenceButtons*);
@@ -264,15 +265,17 @@ void sequencebuttons_onalign(SequenceButtons* self)
 	int c = 0;
 	int margin = 5;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_List* p;
 	psy_List* q;
 	
 	size = psy_ui_component_size(&self->component);
 	size = psy_ui_component_preferredsize(&self->component, &size);
-	colwidth = size.width / numparametercols;
+	tm = psy_ui_component_textmetric(&self->component);
+	colwidth = psy_ui_value_px(&size.width, &tm) / numparametercols;
 	p = q = psy_ui_component_children(&self->component, 0);	
 	numrows = (psy_list_size(p) / numparametercols) + 1;
-	rowheight = size.height / numrows - margin;	
+	rowheight = psy_ui_value_px(&size.height, &tm) / numrows - margin;
 	for ( ; p != NULL; p = p->next, ++c, cpx += colwidth + margin) {
 		psy_ui_Component* component;
 
@@ -282,7 +285,9 @@ void sequencebuttons_onalign(SequenceButtons* self)
 			cpy += rowheight + margin;
 			c = 0;
 		}		
-		psy_ui_component_setposition(component, cpx, cpy, colwidth, rowheight);
+		psy_ui_component_setposition(component, cpx, cpy,
+			psy_ui_value_makepx(colwidth),
+			psy_ui_value_makepx(rowheight));
 	}
 	psy_list_free(q);
 }
@@ -300,10 +305,12 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 		int cpymax = 0;
 		int colmax = 0;
 		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		psy_List* p;
 		psy_List* q;
 		
-		size = psy_ui_component_size(&self->component);	
+		size = psy_ui_component_size(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		for (p = q = psy_ui_component_children(&self->component, 0); p != NULL;
 				p = p->next, ++c) {
 			psy_ui_Component* component;
@@ -315,18 +322,18 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 			}
 			component = (psy_ui_Component*)p->entry;
 			componentsize = psy_ui_component_preferredsize(component, &size);
-			if (colmax < componentsize.width + margin) {
-				colmax = componentsize.width + margin;
+			if (colmax < psy_ui_value_px(&componentsize.width, &tm) + margin) {
+				colmax = psy_ui_value_px(&componentsize.width, &tm) + margin;
 			}
-			cpx += componentsize.width + margin;		
-			if (cpymax < cpy + componentsize.height + margin) {
-				cpymax = cpy + componentsize.height + margin;
+			cpx += psy_ui_value_px(&componentsize.width, &tm) + margin;
+			if (cpymax < cpy + psy_ui_value_px(&componentsize.height, &tm) + margin) {
+				cpymax = cpy + psy_ui_value_px(&componentsize.height, &tm) + margin;
 			}		
 		}
 		psy_list_free(q);
 		cpxmax = numparametercols * colmax;	
-		rv->width = cpxmax;
-		rv->height = cpymax;
+		rv->width = psy_ui_value_makepx(cpxmax);
+		rv->height = psy_ui_value_makepx(cpymax);
 	}
 }
 
@@ -340,7 +347,8 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 		psy_ui_BACKGROUND_SET);
 	psy_signal_connect(&self->component.signal_draw, self,
 		sequenceviewtrackheader_ondraw);
-	psy_ui_component_resize(&self->component, 0, 10);
+	psy_ui_component_resize(&self->component, psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(1));
 }
 
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
@@ -351,9 +359,13 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 	int centery;
 	int lineheight = 1;
 	int c = 0;
-	psy_ui_Rectangle r;	
+	psy_ui_Rectangle r;
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
-	centery = (psy_ui_component_size(&self->component).height - lineheight) / 2;
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	centery = (psy_ui_value_px(&size.height, &tm) - lineheight) / 2;
 	sequencelistview_computetextsizes(&self->view->listview);
 	for (p = self->view->sequence->tracks; p != NULL; p = p->next, 
 			cpx += self->view->listview.trackwidth, ++c) {
@@ -472,11 +484,13 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 	unsigned int c = 0;
 	int cpy = 0;	
 	char text[20];
-	psy_ui_Rectangle r;
+	psy_ui_Rectangle r;	
 	psy_ui_Size size;
-	
-	size = psy_ui_component_size(&self->component);		
-	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);
+	psy_ui_TextMetric tm;
+
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, psy_ui_value_px(&size.height, &tm));
 	psy_ui_settextcolor(g, 0);
 	p = track->entries;
 	for (; p != NULL; p = p->next, ++c, cpy += self->lineheight) {
@@ -906,10 +920,13 @@ void sequencelistview_limitverticalscroll(SequenceListView* self)
 	int visi;
 	int top;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
-	size = psy_ui_component_size(&self->component);	
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+
 	num = sequence_maxtracksize(self->sequence);
-	visi = size.height / self->lineheight;
+	visi = psy_ui_value_px(&size.height, &tm) / self->lineheight;
 	if (visi > 0) {
 		top = -self->dy / self->lineheight;
 		self->component.scrollstepy = self->lineheight;
@@ -931,10 +948,12 @@ void sequencelistview_limithorizontalscroll(SequenceListView* self)
 	int num;
 	int visi;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	num = sequence_sizetracks(self->sequence);
-	visi = size.width / self->trackwidth;
+	visi = psy_ui_value_px(&size.width, &tm) / self->trackwidth;
 	self->component.scrollstepx = self->trackwidth;
 	if (visi - num >= 0) {
 		self->dx = 0;
@@ -971,6 +990,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	int visilines;
 	int listviewtop;
 	psy_ui_Size listviewsize;
+	psy_ui_TextMetric tm;
 	
 	position = sender->sequenceselection.editposition;	
 	p = sender->song->sequence.tracks;
@@ -995,7 +1015,8 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	}
 	self->listview.selected = c;
 	listviewsize = psy_ui_component_size(&self->listview.component);
-	visilines = (listviewsize.height - listviewmargin) / self->listview.lineheight;
+	tm = psy_ui_component_textmetric(&self->listview.component);
+	visilines = (psy_ui_value_px(&listviewsize.height, &tm) - listviewmargin) / self->listview.lineheight;
 	listviewtop = -self->listview.dy / self->listview.lineheight;
 	if (c < listviewtop) {
 		self->listview.dy = -c * self->listview.lineheight;

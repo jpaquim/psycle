@@ -18,7 +18,8 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_resize(&self->component, 0, 20);
+	psy_ui_component_resize(&self->component, psy_ui_value_makeew(2),
+		psy_ui_value_makeeh(2));
 	psy_ui_button_init(&self->zoomout, &self->component);
 	psy_ui_button_settext(&self->zoomout, "-");
 	psy_ui_button_setcharnumber(&self->zoomout, 2);

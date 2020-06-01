@@ -138,12 +138,12 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 		if (self->selected == c) {
 			psy_ui_settextcolor(g, 0x00B1C8B0);
 			cpxsel = cpx + psy_ui_value_px(&tab->margin.left, &tm);
-			selwidth = tab->size.width;
+			selwidth = psy_ui_value_px(&tab->size.width, &tm);
 		}
 		if (self->hover && self->hoverindex == c && self->hoverindex != self->selected) {
 			psy_ui_settextcolor(g, 0x00EAEAEA);
 			cpxhover = cpx + psy_ui_value_px(&tab->margin.left, &tm);
-			hoverwidth = tab->size.width;
+			hoverwidth = psy_ui_value_px(&tab->size.width, &tm);
 		} else
 		if (tab->istoggle) {
 			if (tab->checkstate) {
@@ -160,7 +160,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {			
 			cpx += psy_ui_value_px(&tab->margin.left, &tm);
 			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
-			cpx += tab->size.width + psy_ui_value_px(&tab->margin.right, &tm);
+			cpx += psy_ui_value_px(&tab->size.width, &tm) + psy_ui_value_px(&tab->margin.right, &tm);
 		} else
 		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 				self->tabalignment == psy_ui_ALIGN_RIGHT) {
@@ -178,13 +178,13 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 				psy_ui_setcolor(g, 0x00FFFFFF);
 				psy_ui_drawline(g,
 					cpx,
-					cpy + tab->size.height + psy_ui_value_px(&tab->margin.top, &tm),
+					cpy + psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.top, &tm),
 					cpx + hoverwidth,
-					cpy + tab->size.height + psy_ui_value_px(&tab->margin.top, &tm));
+					cpy + psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.top, &tm));
 			}			
 			cpy += psy_ui_value_px(&tab->margin.top, &tm);
 			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));			
-			cpy += tab->size.height + psy_ui_value_px(&tab->margin.bottom, &tm);			
+			cpy += psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.bottom, &tm);
 		}
 	}
 	psy_ui_setcolor(g, 0x005F5F5F);		
@@ -200,7 +200,8 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 		}
 	} else
 	if (self->tabalignment == psy_ui_ALIGN_LEFT) {
-		psy_ui_drawline(g, size.width - 2, cpx, size.width - 2, cpy);
+		psy_ui_drawline(g, psy_ui_value_px(&size.width, &tm) - 2, cpx,
+			psy_ui_value_px(&size.width, &tm) - 2, cpy);
 	}
 	
 }
@@ -250,7 +251,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
 
 		tab = (Tab*)tabs->entry;
 		if (self->tabalignment == psy_ui_ALIGN_TOP && x >= cpx &&
-			x < cpx + tab->size.width +
+			x < cpx + psy_ui_value_px(&tab->size.width, &tm) +
 				psy_ui_value_px(&tab->margin.left, &tm) +
 				psy_ui_value_px(&tab->margin.right, &tm)) {
 			*rvtab = tab;
@@ -259,7 +260,7 @@ int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
 		} else
 		if ((self->tabalignment == psy_ui_ALIGN_LEFT ||
 				self->tabalignment == psy_ui_ALIGN_RIGHT) &&
-			y >= cpy && y < cpy + tab->size.height +
+			y >= cpy && y < cpy + psy_ui_value_px(&tab->size.height, &tm) +
 				psy_ui_value_px(&tab->margin.top, &tm) +
 				psy_ui_value_px(&tab->margin.bottom, &tm)) {
 			*rvtab = tab;
@@ -267,13 +268,13 @@ int tabbar_tabhittest(TabBar* self, int x, int y, Tab** rvtab)
 			break;
 		}
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {
-			cpx += tab->size.width +
+			cpx += psy_ui_value_px(&tab->size.width, &tm) +
 				psy_ui_value_px(&tab->margin.left, &tm) +
 				psy_ui_value_px(&tab->margin.right, &tm);
 		} else
 		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 			self->tabalignment == psy_ui_ALIGN_RIGHT) {
-			cpy += tab->size.height +
+			cpy += psy_ui_value_px(&tab->size.height, &tm) +
 				psy_ui_value_px(&tab->margin.top, &tm) +
 				psy_ui_value_px(&tab->margin.bottom, &tm);
 		}
@@ -342,7 +343,7 @@ Tab* tabbar_append(TabBar* self, const char* label)
 		}
 		psy_list_append(&self->tabs, tab);
 		tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
-		tab->size.height = 20;
+		tab->size.height = psy_ui_value_makeeh(1.5);
 	}
 	return tab;
 }
@@ -456,16 +457,15 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 			tab = (Tab*) tabs->entry;
 			tabsize = psy_ui_component_textsize(tabbar_base(self), tab->text);
-			tabsize.height = (int) (tabsize.height * 1.5);
-			tabsize.width = (int) tabsize.width;
+			tabsize.height = psy_ui_value_makeeh(1.5);
 			if (self->tabalignment == psy_ui_ALIGN_TOP) {								
-				cpx += tabsize.width;				
+				cpx += psy_ui_value_px(&tabsize.width, &tm);
 				cpx += psy_ui_value_px(&tab->margin.left, &tm) +
 						psy_ui_value_px(&tab->margin.right, &tm);
-				if (cpymax < cpy + tabsize.height +
+				if (cpymax < cpy + psy_ui_value_px(&tabsize.height, &tm) +
 						psy_ui_value_px(&tab->margin.top, &tm) +
 						psy_ui_value_px(&tab->margin.bottom, &tm)) {
-					cpymax = cpy + tabsize.height +
+					cpymax = cpy + psy_ui_value_px(&tabsize.height, &tm) +
 						psy_ui_value_px(&tab->margin.top, &tm) +
 						psy_ui_value_px(&tab->margin.bottom, &tm);
 				}
@@ -476,26 +476,26 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 			if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 				self->tabalignment == psy_ui_ALIGN_RIGHT) {
 										
-				cpy += tabsize.height;
-				if (cpxmax < cpx + tabsize.width +
+				cpy += psy_ui_value_px(&tabsize.height, &tm);
+				if (cpxmax < cpx + psy_ui_value_px(&tabsize.width, &tm) +
 						psy_ui_value_px(&tab->margin.left, &tm) +
 						psy_ui_value_px(&tab->margin.right, &tm)) {
-					cpxmax = cpx + tabsize.width +
+					cpxmax = cpx + psy_ui_value_px(&tabsize.width, &tm) +
 						psy_ui_value_px(&tab->margin.left, &tm) +
 						psy_ui_value_px(&tab->margin.right, &tm);
 				}
-				if (cpymax < cpy + tabsize.height +
+				if (cpymax < cpy + psy_ui_value_px(&tabsize.height, &tm) +
 						psy_ui_value_px(&tab->margin.top, &tm) +
 						psy_ui_value_px(&tab->margin.bottom, &tm)) {
-					cpymax = cpy + tabsize.height +
+					cpymax = cpy + psy_ui_value_px(&tabsize.height, &tm) +
 						psy_ui_value_px(&tab->margin.top, &tm) +
 						psy_ui_value_px(&tab->margin.bottom, &tm);
 				}
 			}
 		}
 
-		rv->width = cpxmax;
-		rv->height = cpymax;
+		rv->width = psy_ui_value_makepx(cpxmax);
+		rv->height = psy_ui_value_makepx(cpymax);
 	}
 }
 

@@ -314,10 +314,12 @@ void oncommand(psy_ui_ComboBox* self, psy_ui_Component* sender, WPARAM wParam,
 void dev_showdropdown(psy_ui_win_ComboBoxImp* self)
 {
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
 	size = dev_size(self);
+	tm = psy_ui_component_textmetric(self->component);
 	self->win_combo_imp.imp.vtable->dev_resize(&self->win_combo_imp.imp,
-		size.width, 90);	
+		psy_ui_value_px(&size.width, &tm), 90);
 	SendMessage(self->win_combo_imp.hwnd, CB_SHOWDROPDOWN,
 		(WPARAM)TRUE, (LPARAM)0);
 }

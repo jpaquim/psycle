@@ -118,14 +118,22 @@ typedef struct {
 
 void sampleeditorheader_init(SampleEditorHeader*, psy_ui_Component* parent);
 
+
+typedef struct SampleBox {
+	psy_ui_Component component;
+	psy_Table waveboxes;
+	psy_Signal signal_selectionchanged;
+} SampleBox;
+
+void samplebox_init(SampleBox*, psy_ui_Component* parent);
+
 typedef struct SampleEditor {	
 	psy_ui_Component component;
 	SampleEditorPlayBar playbar;
 	SampleEditorHeader header;
 	psy_ui_SplitBar splitbar;
 	SampleEditorProcessView processview;
-	psy_ui_Component samplebox;
-	psy_Table waveboxes;
+	SampleBox samplebox;	
 	ScrollZoom zoom;
 	psy_audio_Sample* sample;
 	psy_audio_Sampler sampler;

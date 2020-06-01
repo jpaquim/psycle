@@ -85,8 +85,8 @@ void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 void onpreferredsize(psy_ui_Knob* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	if (rv) {		
-		rv->width = 28 + 50;
-		rv->height = 28;
+		rv->width = psy_ui_value_makepx(28 + 50);
+		rv->height = psy_ui_value_makepx(28);
 	} else {
 		*rv = psy_ui_component_size(&self->component);
 	}

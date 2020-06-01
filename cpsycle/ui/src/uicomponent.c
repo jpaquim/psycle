@@ -454,7 +454,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->alignexpandmode = psy_ui_NOEXPAND;
 	psy_ui_style_init(&self->style);
 	psy_ui_margin_init(&self->margin);
-	psy_ui_margin_init(&self->spacing);
+	psy_ui_margin_init(&self->spacing);	
 	self->debugflag = 0;	
 	self->visible = 1;
 	self->doublebuffered = FALSE;
@@ -588,14 +588,38 @@ void psy_ui_component_move(psy_ui_Component* self, int left, int top)
 	self->vtable->move(self, left, top);
 }
 
-void psy_ui_component_resize(psy_ui_Component* self, int width, int height)
+void psy_ui_component_resize(psy_ui_Component* self, psy_ui_Value width,
+	psy_ui_Value height)
 {	
-	self->vtable->resize(self, width, height);
+	psy_ui_TextMetric tm;
+	bool tm_initialized;
+
+	if (width.unit != psy_ui_UNIT_PX || height.unit != psy_ui_UNIT_PX) {
+		tm = psy_ui_component_textmetric(self);
+		tm_initialized = TRUE;
+	} else {
+		tm_initialized = FALSE;
+	}
+	self->vtable->resize(self,
+		psy_ui_value_px(&width, (tm_initialized) ? &tm : NULL),
+		psy_ui_value_px(&height, (tm_initialized) ? &tm : NULL));
 }
 
-void psy_ui_component_setposition(psy_ui_Component* self, int x, int y, int width, int height)
+void psy_ui_component_setposition(psy_ui_Component* self, int x, int y,
+	psy_ui_Value width, psy_ui_Value height)
 {	
-	self->vtable->setposition(self, x, y, width, height);
+	psy_ui_TextMetric tm;
+	bool tm_initialized;
+
+	if (width.unit != psy_ui_UNIT_PX || height.unit != psy_ui_UNIT_PX) {
+		tm = psy_ui_component_textmetric(self);
+		tm_initialized = TRUE;
+	} else {
+		tm_initialized = FALSE;
+	}
+	self->vtable->setposition(self, x, y,
+		psy_ui_value_px(&width, (tm_initialized) ? &tm : NULL),
+		psy_ui_value_px(&height, (tm_initialized) ? &tm : NULL));
 }
 
 psy_List* psy_ui_component_children(psy_ui_Component* self, int recursive)
@@ -630,13 +654,10 @@ void psy_ui_component_align(psy_ui_Component* self)
 
 void onpreferredsize(psy_ui_Component* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{			
+{		
 	psy_ui_Aligner aligner;
 
 	psy_ui_aligner_init(&aligner, self);
-	if (self->debugflag == 65) {
-		self = self;
-	}
 	psy_ui_aligner_preferredsize(&aligner, limit, rv);
 	
 }

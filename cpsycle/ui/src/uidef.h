@@ -11,6 +11,10 @@
 #include <stddef.h>
 #include "uifont.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined min
 #undef min
 #endif
@@ -60,7 +64,7 @@ typedef struct {
 psy_ui_Value psy_ui_value_makepx(intptr_t px);
 psy_ui_Value psy_ui_value_makeew(double em);
 psy_ui_Value psy_ui_value_makeeh(double em);
-intptr_t psy_ui_value_px(psy_ui_Value*, const psy_ui_TextMetric*);
+intptr_t psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*);
 
 typedef struct { 
 	int x;
@@ -77,11 +81,11 @@ typedef struct {
 } psy_ui_Rectangle;
 
 typedef struct {
-	int width;
-	int height;
+	psy_ui_Value width;
+	psy_ui_Value height;
 } psy_ui_Size;
 
-INLINE void psy_ui_size_init_all(psy_ui_Size* self, int width, int height)
+INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width, psy_ui_Value height)
 {
 	self->width = width;
 	self->height = height;

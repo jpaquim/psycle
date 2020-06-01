@@ -259,7 +259,7 @@ void pluginsview_computetextsizes(PluginsView* self)
 	self->lineheight = (int) (tm.tmHeight * 1.5);
 	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
-	self->numparametercols = max(1, size.width / self->columnwidth);
+	self->numparametercols = max(1, psy_ui_value_px(&size.width, &tm) / self->columnwidth);
 }
 
 void plugindisplayname(psy_Properties* property, char* text)
@@ -323,12 +323,14 @@ void pluginsview_adjustscroll(PluginsView* self)
 	p = self->plugins;
 	if (p) {
 		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		int visilines;
 		int currlines;
 
 		pluginsview_computetextsizes(self);
 		size = psy_ui_component_size(&self->component);
-		visilines = size.height / self->lineheight;
+		tm = psy_ui_component_textmetric(&self->component);
+		visilines = psy_ui_value_px(&size.height, &tm) / self->lineheight;
 		currlines = (int) (psy_properties_size(p) /
 			(float) self->numparametercols + 0.5f);
 		self->component.scrollstepy = self->lineheight;

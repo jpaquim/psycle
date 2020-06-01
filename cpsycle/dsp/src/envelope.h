@@ -38,6 +38,8 @@ void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint*,
 	psy_dsp_amp_t minvalue,
 	psy_dsp_amp_t maxvalue);
 
+psy_dsp_EnvelopePoint* psy_dsp_envelopepoint_alloc(void);
+
 psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 	psy_dsp_seconds_t time,
 	psy_dsp_amp_t value,

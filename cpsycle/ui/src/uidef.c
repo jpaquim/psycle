@@ -230,7 +230,7 @@ psy_ui_Value psy_ui_value_makeeh(double em)
 	return rv;
 }
 
-intptr_t psy_ui_value_px(psy_ui_Value* self, const psy_ui_TextMetric* tm)
+intptr_t psy_ui_value_px(const psy_ui_Value* self, const psy_ui_TextMetric* tm)
 {
 	intptr_t rv = self->quantity.integer;
 

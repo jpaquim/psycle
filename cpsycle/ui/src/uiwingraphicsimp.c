@@ -47,6 +47,8 @@ static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
 static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, unsigned int width);
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self);
 
+static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
+
 // VTable init
 static psy_ui_GraphicsImpVTable win_imp_vtable;
 static int win_imp_vtable_initialized = 0;
@@ -136,11 +138,11 @@ psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* 
 		SIZE size;
 				
 		GetTextExtentPoint(self->hdc, text, (int)strlen(text), &size) ;	
-		rv.width = size.cx; 
-		rv.height = size.cy;
+		rv.width = psy_ui_value_makepx(size.cx);
+		rv.height = psy_ui_value_makepx(size.cy);
 	} else {
-		rv.width = 0; 
-		rv.height = 0;
+		rv.width = psy_ui_value_makepx(0);
+		rv.height = psy_ui_value_makepx(0);
 	}
 	return rv;
 }
@@ -160,11 +162,16 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
-
+	psy_ui_TextMetric tm;
+	TEXTMETRIC win_tm;
+	
 	hBrush = GetStockObject (NULL_BRUSH);
 	hOldBrush = SelectObject(self->hdc, hBrush);
-	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom, cornersize.width,
-		cornersize.height);
+	GetTextMetrics(self->hdc, &win_tm);
+	tm = converttextmetric(&win_tm);
+	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom,
+		psy_ui_value_px(&cornersize.width, &tm),
+		psy_ui_value_px(&cornersize.height, &tm));
 	SelectObject(self->hdc, hOldBrush);
 }
 
@@ -186,13 +193,18 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 	HBRUSH hOldBrush;
 	HPEN hPen;
 	HPEN hOldPen;
+	psy_ui_TextMetric tm;
+	TEXTMETRIC win_tm;
 
 	hBrush = CreateSolidBrush(color);
 	hOldBrush = SelectObject (self->hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, color);
 	hOldPen = SelectObject(self->hdc, hPen);
-	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom, cornersize.width,
-		cornersize.height);
+	GetTextMetrics(self->hdc, &win_tm);
+	tm = converttextmetric(&win_tm);
+	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom,
+		psy_ui_value_px(&cornersize.width, &tm),
+		psy_ui_value_px(&cornersize.height, &tm));
 	SelectObject(self->hdc, hOldBrush);
 	SelectObject(self->hdc, hOldPen);
 	DeleteObject(hBrush) ;
@@ -231,12 +243,17 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap
 	HDC hdcmem;
 	psy_ui_Size size;
 	HBITMAP wbitmap;
+	psy_ui_TextMetric tm;
+	TEXTMETRIC win_tm;
 
 	hdcmem = CreateCompatibleDC(self->hdc);
 	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
 	SelectObject (hdcmem, wbitmap);
 	size = psy_ui_bitmap_size(bitmap);
-	BitBlt(self->hdc, x, y, size.width, size.height, hdcmem, 0, 0, SRCCOPY);
+	GetTextMetrics(self->hdc, &win_tm);
+	tm = converttextmetric(&win_tm);
+	BitBlt(self->hdc, x, y, psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.height, &tm), hdcmem, 0, 0, SRCCOPY);
 	DeleteDC(hdcmem);
 }
 
@@ -353,6 +370,33 @@ unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self)
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
 	return currpen.lopnWidth.x;
+}
+
+psy_ui_TextMetric converttextmetric(const TEXTMETRIC* tm)
+{
+	psy_ui_TextMetric rv;
+
+	rv.tmHeight = tm->tmHeight;
+	rv.tmAscent = tm->tmAscent;
+	rv.tmDescent = tm->tmDescent;
+	rv.tmInternalLeading = tm->tmInternalLeading;
+	rv.tmExternalLeading = tm->tmExternalLeading;
+	rv.tmAveCharWidth = tm->tmAveCharWidth;
+	rv.tmMaxCharWidth = tm->tmMaxCharWidth;
+	rv.tmWeight = tm->tmWeight;
+	rv.tmOverhang = tm->tmOverhang;
+	rv.tmDigitizedAspectX = tm->tmDigitizedAspectX;
+	rv.tmDigitizedAspectY = tm->tmDigitizedAspectY;
+	rv.tmFirstChar = tm->tmFirstChar;
+	rv.tmLastChar = tm->tmLastChar;
+	rv.tmDefaultChar = tm->tmDefaultChar;
+	rv.tmBreakChar = tm->tmBreakChar;
+	rv.tmItalic = tm->tmItalic;
+	rv.tmUnderlined = tm->tmUnderlined;
+	rv.tmStruckOut = tm->tmStruckOut;
+	rv.tmPitchAndFamily = tm->tmPitchAndFamily;
+	rv.tmCharSet = tm->tmCharSet;
+	return rv;
 }
 
 #endif

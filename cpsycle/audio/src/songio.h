@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <hashtbl.h>
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -32,8 +33,8 @@ typedef struct psy_audio_SongFile {
 	const char* path;
 	uintptr_t machinesoloed;
 	psy_Table machineuis;
-	// MachineID X [psy_Table* LegacyWires (ConnectionID X LegacyWire*)]
-	psy_audio_LegacyWires legacywires;
+	// MachineID X [psy_Table* LegacyWires (ConnectionID X psy_audio_LegacyWire*)]
+	psy_audio_LegacyWires legacywires;	
 } psy_audio_SongFile;
 
 void psy_audio_songfile_init(psy_audio_SongFile*);

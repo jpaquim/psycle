@@ -24,6 +24,7 @@ static void dsp_accumulate(psy_dsp_big_amp_t* accumleft,
 					psy_dsp_big_amp_t* accumright, 
 					const psy_dsp_amp_t* __restrict pSamplesL,
 					const psy_dsp_amp_t* __restrict pSamplesR, int count);
+static void dsp_reverse(psy_dsp_amp_t* dst, uintptr_t num);
 
 void psy_dsp_noopt_init(psy_dsp_Operations* self)
 {	
@@ -38,6 +39,7 @@ void psy_dsp_noopt_init(psy_dsp_Operations* self)
 	self->erase_all_nans_infinities_and_denormals = dsp_erase_all_nans_infinities_and_denormals;
 	self->maxvol = dsp_maxvol;
 	self->accumulate = dsp_accumulate;
+	self->reverse = dsp_reverse;
 }
 
 void* dsp_memory_alloc(size_t count, size_t size)
@@ -182,4 +184,22 @@ void dsp_accumulate(psy_dsp_big_amp_t* accumleft,
 	}
 	*accumleft = acleft;
 	*accumright = acright;
+}
+
+void dsp_reverse(psy_dsp_amp_t* dst, uintptr_t num)
+{
+	if (num > 0) {
+		uintptr_t j;
+		uintptr_t halved;
+
+		halved = (uintptr_t)floor(num / 2.0f);
+
+		for (j = 0; j < halved; ++j) {
+			psy_dsp_amp_t temp;
+
+			temp = dst[j];
+			dst[j] = dst[num - 1 - j];
+			dst[num - 1 - j] = temp;
+		}
+	}
 }

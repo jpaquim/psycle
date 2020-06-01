@@ -30,7 +30,8 @@ static void samplesview_oninstrumentslotchanged(SamplesView* self,
 	psy_audio_Instrument* sender, int slot);
 static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
-static void samplesview_onsamplemodified(SamplesView*, SampleEditor* sender);
+static void samplesview_onsamplemodified(SamplesView*, SampleEditor* sender,
+	psy_audio_Sample*);
 /// Header View
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
 	psy_audio_Instruments*, struct SamplesView*);
@@ -157,7 +158,9 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	wavebox_init(&self->samplebox, &self->component);
 	psy_ui_component_setalign(&self->samplebox.component,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(&self->samplebox.component, 0, 150);
+	psy_ui_component_resize(&self->samplebox.component,
+		psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(15));
 }
 
 void samplessongimportview_ondestroy(SamplesSongImportView* self,
@@ -306,7 +309,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
 	tabbar_append(&self->tabbar, "General");
-	tabbar_append(&self->tabbar, "psy_audio_Vibrato");
+	tabbar_append(&self->tabbar, "Vibrato");
 
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_enablealign(psy_ui_notebook_base(&self->notebook));
@@ -527,9 +530,12 @@ uintptr_t samplesview_freesampleslot(SamplesView* self, uintptr_t startslot,
 	return rv;
 }
 
-void samplesview_onsamplemodified(SamplesView* self, SampleEditor* sender)
+void samplesview_onsamplemodified(SamplesView* self, SampleEditor* sender, psy_audio_Sample* sample)
 {
-	samplesview_setsample(self, samplesbox_selected(&self->samplesbox));
+	samplesheaderview_setsample(&self->header, sample);
+	setsamplesamplesgeneralview(&self->general, sample);
+	setsamplesamplesvibratoview(&self->vibrato, sample);
+	samplesloopview_setsample(&self->waveloop, sample);
 }
 
 void samplesview_onsongchanged(SamplesView* self, Workspace* workspace, int flag,
@@ -1163,7 +1169,7 @@ void samplesloopview_onlooptypechange(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->loop.type = ComboBoxToLoopType(sel);
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox.component);
 		samplesloopview_looptypeenablepreventinput(self);		
 	}
 }
@@ -1174,7 +1180,7 @@ void samplesloopview_onsustainlooptypechange(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->sustainloop.type = ComboBoxToLoopType(sel);
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox.component);
 		samplesloopview_looptypeenablepreventinput(self);
 	}
 }
@@ -1224,7 +1230,7 @@ void samplesloopview_oneditchangedloopstart(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->loop.start = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox.component);
 	}
 }
 
@@ -1234,7 +1240,7 @@ void samplesloopview_oneditchangedloopend(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->loop.end = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox.component);
 	}
 }
 
@@ -1244,7 +1250,7 @@ void samplesloopview_oneditchangedsustainstart(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->sustainloop.start = atoi(psy_ui_edit_text(sender));
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox.component);
 	}
 }
 
@@ -1254,6 +1260,6 @@ void samplesloopview_oneditchangedsustainend(SamplesLoopView* self,
 	if (self->sample) {
 		self->sample->sustainloop.end = atoi(psy_ui_edit_text(sender));		
 		psy_ui_component_invalidate(&self->view->wavebox.component);
-		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox);
+		psy_ui_component_invalidate(&self->view->sampleeditor.samplebox.component);
 	}
 }

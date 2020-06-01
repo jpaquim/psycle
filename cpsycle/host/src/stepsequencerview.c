@@ -164,8 +164,10 @@ void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 {
 	int cpx;
 	psy_ui_Rectangle r;
-	psy_ui_Size corner = { 5, 5 };
+	psy_ui_Size corner;
 
+	corner.width = psy_ui_value_makepx(5);
+	corner.height = psy_ui_value_makepx(5);
 	cpx = step * self->stepwidth;
 	psy_ui_setrectangle(&r, cpx, 0, (int)(self->stepwidth * 0.8),
 		self->stepheight);
@@ -316,20 +318,17 @@ void stepsequencerbar_onsize(StepsequencerBar* self, psy_ui_Size* size)
 
 	tm = psy_ui_component_textmetric(&self->component);
 	self->stepwidth = tm.tmAveCharWidth * 4;
-	if (self->stepwidth > size->width / 16) {
-		self->stepwidth = size->width / 16;
+	if (self->stepwidth > psy_ui_value_px(&size->width, &tm) / 16) {
+		self->stepwidth = psy_ui_value_px(&size->width, &tm) / 16;
 	}
 	self->stepheight = (int)(tm.tmHeight * 1.5);
 }
 
 void stepsequencerbar_onpreferredsize(StepsequencerBar* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);	
-	rv->height = (int)(tm.tmHeight * 1.5);
-	rv->width = tm.tmAveCharWidth * 4 * 16;
+{	
+	rv->height = psy_ui_value_makeeh(1.5);
+	rv->width = psy_ui_value_makeew(4 * 16);
 }
 
 // barselect
@@ -465,16 +464,9 @@ void stepsequencerbarselect_onsize(StepsequencerBarSelect* self,
 
 void stepsequencerbarselect_onpreferredsize(StepsequencerBarSelect* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{
-	psy_ui_TextMetric tm;	
-	int colwidth;
-	int lineheight;	
-
-	tm = psy_ui_component_textmetric(&self->component);	
-	colwidth = tm.tmAveCharWidth * 4;	
-	lineheight = (int)(0.8 * tm.tmHeight);
-	rv->width = colwidth * 4 + tm.tmAveCharWidth;
-	rv->height = lineheight * 2;	
+{	
+	rv->width = psy_ui_value_makeew(16);
+	rv->height = psy_ui_value_makeeh(1.6);
 }
 
 void stepsequencerbarselect_onmousedown(StepsequencerBarSelect* self,

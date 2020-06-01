@@ -140,7 +140,8 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setmargin(&self->slidergroup, &margin);
 	psy_ui_component_enablealign(&self->slidergroup);
-	psy_ui_component_resize(&self->slidergroup, 20, 0);
+	psy_ui_component_resize(&self->slidergroup, psy_ui_value_makeew(2),
+		psy_ui_value_makepx(0));
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
 	psy_ui_button_settext(&self->percvol, "100%");
 	psy_ui_button_setcharnumber(&self->percvol, 10);	
@@ -153,7 +154,8 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_slider_init(&self->volslider, &self->slidergroup);
 	psy_ui_slider_setcharnumber(&self->volslider, 4);
 	psy_ui_slider_showvertical(&self->volslider);
-	psy_ui_component_resize(&self->volslider.component, 20, 0);
+	psy_ui_component_resize(&self->volslider.component, psy_ui_value_makeew(2),
+		psy_ui_value_makepx(0));
 	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
 	psy_ui_slider_connect(&self->volslider, self, wireview_ondescribevolume,
 		wireview_ontweakvolume, wireview_onvaluevolume);
@@ -397,7 +399,8 @@ void wireview_movescope(WireView* self, int index, psy_ui_AlignType align, int w
 	}	
 	if (psy_ui_component_parent(scope) == psy_ui_notebook_base(&self->notebook)) {
 		psy_ui_component_setparent(scope, &self->component);		
-		psy_ui_component_resize(scope, width, 0);
+		psy_ui_component_resize(scope, psy_ui_value_makepx(width),
+			psy_ui_value_makepx(0));
 		psy_ui_component_show(scope);
 	}
 	psy_ui_component_setalign(scope, align);
@@ -465,7 +468,8 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 	self->wireview = view;
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
 	psy_ui_component_move(wireframe_base(self), 200, 150);
-	psy_ui_component_resize(wireframe_base(self), 500, 450);
+	psy_ui_component_resize(wireframe_base(self),
+		psy_ui_value_makeew(50), psy_ui_value_makepx(45));
 	psy_signal_connect(&wireframe_base(self)->signal_destroy, self,
 		wireframe_ondestroy);
 	psy_signal_connect(&wireframe_base(self)->signal_size, self,
@@ -479,7 +483,7 @@ void wireframe_ondestroy(WireFrame* self, psy_ui_Component* frame)
 void wireframe_onsize(WireFrame* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
 	if (self->wireview) {
-		psy_ui_component_resize(wireview_base(self->wireview), size->width,
-			size->height);
+		psy_ui_component_resize(wireview_base(self->wireview), 
+			size->width, size->height);
 	}
 }

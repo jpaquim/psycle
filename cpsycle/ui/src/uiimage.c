@@ -33,29 +33,39 @@ void ondraw(psy_ui_Image* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Size bmpsize;
+	psy_ui_TextMetric tm;
 	int x;
 	int y;
-	
+	int width;
+	int height;
+	int bmpwidth;
+	int bmpheight;
+
 	size = psy_ui_component_size(&self->component);	
+	tm = psy_ui_component_textmetric(&self->component);
+	width = psy_ui_value_px(&size.width, &tm);
+	height = psy_ui_value_px(&size.height, &tm);
 	bmpsize = psy_ui_bitmap_size(&self->bitmap);
+	bmpwidth = psy_ui_value_px(&bmpsize.width, &tm);
+	bmpheight = psy_ui_value_px(&bmpsize.height, &tm);
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_HORIZONTAL)) {
-		x = (size.width - bmpsize.width) / 2;
+		x = (width - bmpwidth) / 2;
 	} else 		
 	if (checkalignment(self, psy_ui_ALIGNMENT_RIGHT)) {
-		x = size.width - bmpsize.width;		
+		x = width - bmpwidth;
 	} else {		
 		x = 0;		
 	}
 	if (checkalignment(self, psy_ui_ALIGNMENT_CENTER_VERTICAL)) {								
-		y = (size.height - bmpsize.height) / 2;
+		y = (height - bmpheight) / 2;
 	} else 		
 	if (checkalignment(self, psy_ui_ALIGNMENT_BOTTOM)) {
-		y = size.height - bmpsize.height;
+		y = height - bmpheight;
 	} else {		
 		y = 0;		
 	}	
 	psy_ui_drawbitmap(g, &self->bitmap, 
-		x, y, bmpsize.width, bmpsize.height, 0, 0);
+		x, y, bmpwidth, bmpheight, 0, 0);
 }
 
 int checkalignment(psy_ui_Image* self, psy_ui_Alignment alignment)
