@@ -16,7 +16,7 @@ typedef struct {
 	psy_ui_Editor editor;
 	TabBar tabbar;
 	Workspace* workspace;
-	psy_Table files;
+	psy_Table filenames;
 } Help;
 
 void help_init(Help*, psy_ui_Component* parent, Workspace*);

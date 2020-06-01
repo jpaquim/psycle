@@ -164,17 +164,26 @@ void pianoroll_onsize(Pianoroll* self, psy_ui_Size* size)
 {	
 	int keyboardwidth;
 	int headerheight;
+	psy_ui_Size headersize;
+	psy_ui_TextMetric tm;
 		
 	keyboardwidth = 40;
-	headerheight = psy_ui_component_preferredsize(&self->header.component, size).height;
-	psy_ui_component_setposition(&self->keyboardheader, 0, 0, keyboardwidth,
-		headerheight);
+	tm = psy_ui_component_textmetric(&self->component);
+	headersize = psy_ui_component_preferredsize(&self->header.component, size);
+	headerheight = psy_ui_value_px(&headersize.height, &tm);
+	psy_ui_component_setposition(&self->keyboardheader, 0, 0,
+		psy_ui_value_makepx(keyboardwidth),
+		psy_ui_value_makepx(headerheight));
 	psy_ui_component_setposition(&self->keyboard.component, 0, headerheight,
-		keyboardwidth, size->height - headerheight);
+		psy_ui_value_makepx(keyboardwidth),
+		psy_ui_value_makepx(psy_ui_value_px(&size->height, &tm) - headerheight));
 	psy_ui_component_setposition(&self->header.component, keyboardwidth, 0,
-		size->width - keyboardwidth, headerheight);
+		psy_ui_value_makepx(psy_ui_value_px(&size->width, &tm) - keyboardwidth),
+		psy_ui_value_makepx(headerheight));
 	psy_ui_component_setposition(&self->grid.component, keyboardwidth,
-		headerheight, size->width - keyboardwidth, size->height - headerheight);	
+		headerheight,
+		psy_ui_value_makepx(psy_ui_value_px(&size->width, &tm) - keyboardwidth),
+		psy_ui_value_makepx(psy_ui_value_px(&size->height, &tm) - headerheight));
 	pianoroll_updatemetrics(self);
 }
 
@@ -572,32 +581,34 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 	int key;	
 	int keyboardheight;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 		
 	keyboardheight = (keymax - keymin) * self->metrics.keyheight;
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolor(g, 0x00333333);
 	for (key = keymin; key < keymax; ++key) {	
 		int cpy;
 
 		cpy = keyboardheight - (key + 1) * self->metrics.keyheight + self->dy;
-		psy_ui_drawline(g, 0, cpy, size.width, cpy);
+		psy_ui_drawline(g, 0, cpy, psy_ui_value_px(&size.width, &tm), cpy);
 		if (isblack(key)) {
 			psy_ui_Rectangle r;			
-			psy_ui_setrectangle(&r, (int)(size.width * 0.75), cpy, 
-				(int)(size.width * 0.25), self->metrics.keyheight);
+			psy_ui_setrectangle(&r, (int)(psy_ui_value_px(&size.width, &tm) * 0.75), cpy,
+				(int)(psy_ui_value_px(&size.width, &tm) * 0.25), self->metrics.keyheight);
 			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
-			psy_ui_drawline(g, 0, cpy + self->metrics.keyheight/2, size.width, 
+			psy_ui_drawline(g, 0, cpy + self->metrics.keyheight/2, psy_ui_value_px(&size.width, &tm),
 					cpy + self->metrics.keyheight/2);
-			psy_ui_setrectangle(&r, 0, cpy, (int)(size.width * 0.75), 
+			psy_ui_setrectangle(&r, 0, cpy, (int)(psy_ui_value_px(&size.width, &tm) * 0.75),
 				self->metrics.keyheight);
 			psy_ui_drawsolidrectangle(g, r, 0x00444444);						
 		} else {
 			psy_ui_Rectangle r;
 			
-			psy_ui_setrectangle(&r, 0, cpy, size.width, self->metrics.keyheight);
+			psy_ui_setrectangle(&r, 0, cpy, psy_ui_value_px(&size.width, &tm), self->metrics.keyheight);
 			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
 			if (key % 12 == 0 || ((key % 12) == 5)) {
-				psy_ui_drawline(g, 0, cpy + self->metrics.keyheight, size.width, 
+				psy_ui_drawline(g, 0, cpy + self->metrics.keyheight, psy_ui_value_px(&size.width, &tm),
 					cpy + self->metrics.keyheight);
 			}			
 		}
@@ -662,9 +673,9 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	baseline = size.height - 1;	
+	baseline = psy_ui_value_px(&size.height, &tm) - 1;
 	psy_ui_setcolor(g, 0x00555555);
-	psy_ui_drawline(g, 0, baseline, size.width, baseline);	
+	psy_ui_drawline(g, 0, baseline, psy_ui_value_px(&size.width, &tm), baseline);
 	
 	for (c = 0, cpx = 0; c <= self->metrics.visisteps; 
 			cpx += self->metrics.stepwidth, ++c) {		
@@ -684,11 +695,10 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 void pianoheader_onpreferredsize(PianoHeader* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	rv->width = limit->width;
-	rv->height = tm.tmHeight;
+	if (rv) {
+		rv->width = limit->width;
+		rv->height = psy_ui_value_makeeh(1);
+	}
 }
 
 void pianoroll_updatemetrics(Pianoroll* self)
@@ -704,8 +714,10 @@ void pianoroll_updatemetrics(Pianoroll* self)
 void pianoroll_computemetrics(Pianoroll* self, PianoMetrics* rv)
 {	
 	psy_ui_Size gridsize;	
+	psy_ui_TextMetric tm;
 
-	gridsize = psy_ui_component_size(&self->grid.component);		
+	gridsize = psy_ui_component_size(&self->grid.component);
+	tm = psy_ui_component_textmetric(&self->grid.component);
 	rv->lpb = psy_audio_player_lpb(&self->workspace->player);
 	rv->beatwidth = 80;
 	rv->keyheight = 12;
@@ -713,12 +725,12 @@ void pianoroll_computemetrics(Pianoroll* self, PianoMetrics* rv)
 	rv->keymax = 88;	
 	rv->visibeats = self->pattern
 		? min(max(0, self->pattern->length + self->grid.beatscrollpos),
-			  gridsize.width / (psy_dsp_beat_t) rv->beatwidth)
+			psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_beat_t) rv->beatwidth)
 		: 0;
 	rv->visisteps = (int)(rv->visibeats * rv->lpb + 0.5);
 	rv->visiwidth = (int)(rv->visibeats * rv->beatwidth + 0.5);
 	rv->stepwidth = rv->beatwidth / (psy_dsp_beat_t) rv->lpb;
-	rv->visikeys = (int)(gridsize.height / (float)rv->keyheight + 0.5);
+	rv->visikeys = (int)(psy_ui_value_px(&gridsize.height, &tm) / (float)rv->keyheight + 0.5);
 }
 
 void pianogrid_adjustscroll(Pianogrid* self)

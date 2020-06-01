@@ -194,7 +194,7 @@ typedef struct psy_ui_Component {
 	int alignexpandmode;
 	int alignchildren;
 	psy_ui_Margin margin;
-	psy_ui_Margin spacing;
+	psy_ui_Margin spacing;	
 	bool doublebuffered;	
 	bool preventdefault;
 	bool preventpreferredsize;
@@ -253,9 +253,11 @@ void psy_ui_component_sethorizontalscrollposition(psy_ui_Component*, int positio
 int psy_ui_component_horizontalscrollposition(psy_ui_Component*);
 void psy_ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
 void psy_ui_component_move(psy_ui_Component*, int left, int top);
-void psy_ui_component_resize(psy_ui_Component*, int width, int height);
+void psy_ui_component_resize(psy_ui_Component*, psy_ui_Value width,
+	psy_ui_Value height);
 void psy_ui_component_clientresize(psy_ui_Component*, int width, int height);
-void psy_ui_component_setposition(psy_ui_Component*, int x, int y, int width, int height);
+void psy_ui_component_setposition(psy_ui_Component*, int x, int y,
+	psy_ui_Value width, psy_ui_Value height);
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);

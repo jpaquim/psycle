@@ -754,7 +754,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 							continue;
 						}
 						for (c = 0; c < MAX_CONNECTIONS; ++c) {
-							LegacyWire* wire;
+							psy_audio_LegacyWire* wire;
 
 							wire = psy_table_at(legacywiretable, c);
 							if (!wire) {
@@ -772,7 +772,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 								d = psy_audio_legacywires_findlegacyoutput(&songfile->legacywires, wire->_inputMachine, i);
 								if (d != -1)
 								{
-									LegacyWire* outputwire;
+									psy_audio_LegacyWire* outputwire;
 
 									outputwire = psy_table_at(legacywiretable, d);
 									if (outputwire) {

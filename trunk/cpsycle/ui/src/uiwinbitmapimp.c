@@ -89,12 +89,11 @@ psy_ui_Size size(psy_ui_win_BitmapImp* self)
 
 	if (self->bitmap) {
 		GetObject(self->bitmap, sizeof(BITMAP), &bitmap);
-		size.width = bitmap.bmWidth;
-		size.height = bitmap.bmHeight;
-	}
-	else {
-		size.width = 0;
-		size.height = 0;
+		size.width = psy_ui_value_makepx(bitmap.bmWidth);
+		size.height = psy_ui_value_makepx(bitmap.bmHeight);
+	} else {
+		size.width = psy_ui_value_makepx(0);
+		size.height = psy_ui_value_makepx(0);
 	}
 	return size;
 }

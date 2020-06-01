@@ -52,12 +52,12 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	psy_ui_Size cornersize;
 	psy_ui_Size knobsize;
 		
-	switchsize = psy_ui_component_size(&self->component);
+	/*switchsize = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	size.width = tm.tmAveCharWidth * 4;
-	size.height = tm.tmHeight;
-	knobsize.width = (int) (tm.tmAveCharWidth * 2);
-	knobsize.height = (int) (tm.tmHeight * 0.7 + 0.5);
+	size.width = psy_ui_value_makeew(4);
+	size.height = psy_ui_value_makeeh(1);
+	knobsize.width = psy_ui_value_makeew(2);
+	knobsize.height = psy_ui_value_makeeh(4); (int)(tm.tmHeight * 0.7 + 0.5);
 	cornersize.width = (int) (tm.tmAveCharWidth * 0.6);
 	cornersize.height = (int) (tm.tmHeight * 0.6);
 	r.left = 0;
@@ -78,19 +78,14 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + knobsize.height;
 		psy_ui_drawsolidroundrectangle(g, r, cornersize, 0x00CACACA);
-	}	
+	}*/	
 }
 
 void onpreferredsize(psy_ui_Switch* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
-	if (rv) {		
-		psy_ui_TextMetric tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		rv->height = (int) (1.5 * tm.tmHeight);
-		rv->width = 4 * tm.tmAveCharWidth;
-	} else {
-		*rv = psy_ui_component_size(&self->component);
+	if (rv) {				
+		rv->height = psy_ui_value_makeeh(1.5);
+		rv->width = psy_ui_value_makeew(4);
 	}
 }
 

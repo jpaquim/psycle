@@ -103,7 +103,8 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	self->metrics.keysize = 6;
 	self->metrics.lineheight = 15;
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_resize(&self->component, 0, 40);
+	psy_ui_component_resize(&self->component, psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(4));
 	psy_signal_connect(&self->component.signal_draw, self,
 		instrumentkeyboardview_ondraw);
 }
@@ -140,21 +141,21 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 		}
 	}
 
-	keysize = size.width / (double)numwhitekeys;
+	keysize = psy_ui_value_px(&size.width, &tm) / (double)numwhitekeys;
 	psy_ui_setcolor(g, 0x00333333);
 
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00333333);
 	for (key = keymin; key < keymax; ++key) {					
-		psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
+		psy_ui_drawline(g, (int)cp, 0, (int)cp, psy_ui_value_px(&size.height, &tm));
 		if (!isblack(key)) {
 			psy_ui_Rectangle r;
 
-			psy_ui_setrectangle(&r, (int)cp, 0, (int)(keysize + 0.5), size.height);
+			psy_ui_setrectangle(&r, (int)cp, 0, (int)(keysize + 0.5), psy_ui_value_px(&size.height, &tm));
 			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
-			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
+			psy_ui_drawline(g, (int)cp, 0, (int)cp, psy_ui_value_px(&size.height, &tm));
 			cp += keysize;
-			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
+			psy_ui_drawline(g, (int)cp, 0, (int)cp, psy_ui_value_px(&size.height, &tm));
 		}
 	}
 	psy_ui_settextcolor(g, 0x00CACACA);
@@ -168,7 +169,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 
 			x = (int)cp - (int)(keysize * 0.8 / 2);
 			width = (int)(keysize * 0.8);
-			psy_ui_setrectangle(&r, x, 0, width, (int)(size.height * top));
+			psy_ui_setrectangle(&r, x, 0, width, (int)(psy_ui_value_px(&size.height, &tm) * top));
 			psy_ui_drawsolidrectangle(g, r, 0x00444444);
 		}
 	}
@@ -291,12 +292,14 @@ void instrumententryview_adjustscroll(InstrumentEntryView* self)
 	int vscrollmax;
 	int numentries;
 	int visientries;
+	psy_ui_TextMetric tm;
 
+	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_component_size(&self->component);
 	numentries = self->instrument
 		? psy_list_size(instrument_entries(self->instrument))
 		: 0;	
-	visientries = size.height / (self->metrics.lineheight * 3);
+	visientries = psy_ui_value_px(&size.height, &tm) / (self->metrics.lineheight * 3);
 	vscrollmax = numentries < visientries ? 0 : numentries - visientries;
 	psy_ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
 }
@@ -401,7 +404,8 @@ void instrumentparameterview_init(InstrumentParameterView* self,
 	self->dy = 0;		
 	psy_signal_connect(&self->component.signal_draw, self,
 		instrumentparameterview_ondraw);
-	psy_ui_component_resize(&self->component, 100, 200);
+	psy_ui_component_resize(&self->component,
+		psy_ui_value_makeew(10), psy_ui_value_makeeh(20));
 }
 
 void instrumentparameterview_setinstrument(InstrumentParameterView* self,

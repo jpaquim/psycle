@@ -73,12 +73,13 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
 	if (rv) {
-		psy_ui_Size size;	
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		char text[256];
 
 		psy_ui_checkbox_text(self, text);
 		size = psy_ui_component_textsize(&self->component, text);	
-		rv->width = size.width + 20;
+		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 20);
 		rv->height = size.height;
 	}
 }

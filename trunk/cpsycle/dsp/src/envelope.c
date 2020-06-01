@@ -24,6 +24,11 @@ void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint* self,
 	self->maxvalue = maxvalue;
 }
 
+psy_dsp_EnvelopePoint* psy_dsp_envelopepoint_alloc(void)
+{
+	return (psy_dsp_EnvelopePoint*)malloc(sizeof(psy_dsp_EnvelopePoint));
+}
+
 psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 	psy_dsp_seconds_t time,
 	psy_dsp_amp_t value,

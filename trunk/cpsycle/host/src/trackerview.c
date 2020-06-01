@@ -743,9 +743,11 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g, PatternSe
 	psy_ui_Rectangle r;
 	unsigned int track;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	int trackswidth;
 
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	for (track = clip->topleft.track; track < clip->bottomright.track;
 			++track) {
 		trackergrid_drawtrackbackground(self, g, track);
@@ -754,8 +756,8 @@ void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g, PatternSe
 		trackerview_trackwidth(self->view, self->numtracks - 1);
 	psy_ui_setrectangle(&r,
 		trackswidth + self->dx, 0, 
-		size.width - trackswidth + self->dx,
-		size.height);
+		psy_ui_value_px(&size.width, &tm) - trackswidth + self->dx,
+		psy_ui_value_px(&size.height, &tm));
 	psy_ui_drawsolidrectangle(g, r, self->view->skin.background);
 }
 
@@ -763,10 +765,12 @@ void trackergrid_drawtrackbackground(TrackerGrid* self, psy_ui_Graphics* g, int 
 {
 	psy_ui_Rectangle r;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;	
 
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, trackerview_track_x(self->view, track) + self->dx,
-		0, trackerview_trackwidth(self->view, track), size.height);
+		0, trackerview_trackwidth(self->view, track), psy_ui_value_px(&size.height, &tm));
 	psy_ui_drawsolidrectangle(g, r, self->view->skin.background);	
 }
 
@@ -992,10 +996,12 @@ void trackergrid_adjustscroll(TrackerGrid* self)
 		psy_ui_Size size;	
 		int vscrollmax;
 		uintptr_t visitracks;
+		psy_ui_TextMetric tm;
 
 		size = psy_ui_component_size(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		visitracks = trackerview_screentotrack(self->view,
-			psy_ui_component_size(&self->component).width - self->dx) -
+			psy_ui_value_px(&size.width, &tm) - self->dx) -
 			trackerview_screentotrack(self->view, -self->dx);		
 		psy_ui_component_sethorizontalscrollrange(&self->component, 0,
 			self->numtracks - visitracks);
@@ -1335,8 +1341,12 @@ int trackerview_scrollup(TrackerView* self, psy_audio_PatternEditPosition cursor
 		trackerview_trackwidth(self, cursor.track),
 		self->metrics.lineheight);
 	if (self->grid.midline) {
-		topline = psy_ui_component_size(&self->grid.component).height  
-			/ self->metrics.lineheight / 2;		
+		psy_ui_Size gridsize;
+		psy_ui_TextMetric tm;
+
+		tm = psy_ui_component_textmetric(&self->grid.component);
+		gridsize = psy_ui_component_size(&self->grid.component);
+		topline = psy_ui_value_px(&gridsize.height, &tm) / self->metrics.lineheight / 2;		
 	} else {
 		topline = 0;
 	}
@@ -1461,7 +1471,10 @@ int trackerview_scrollright(TrackerView* self, psy_audio_PatternEditPosition cur
 	int invalidate = 1;
 	uintptr_t visitracks;
 	uintptr_t tracks;
+	psy_ui_Size size;
 	psy_ui_Size gridsize;
+	psy_ui_TextMetric tm;
+	psy_ui_TextMetric gridtm;
 	int trackright;
 	int trackleft;
 	int minrange;
@@ -1469,10 +1482,14 @@ int trackerview_scrollright(TrackerView* self, psy_audio_PatternEditPosition cur
 	uintptr_t newscrollposition;
 
 	gridsize = psy_ui_component_size(&self->grid.component);
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	gridtm = psy_ui_component_textmetric(&self->grid.component);
 	trackleft = trackerview_screentotrack(self, -self->grid.dx);
 	trackright = trackerview_screentotrack(self,
-		psy_ui_component_size(&self->component).width - self->grid.dx);
-	if (trackerview_track_x(self, trackright) + trackerview_trackwidth(self, trackright) > gridsize.width) {
+		psy_ui_value_px(&size.width, &tm) - self->grid.dx);
+	if (trackerview_track_x(self, trackright) + trackerview_trackwidth(self, trackright) > psy_ui_value_px(&gridsize.width,
+		&gridtm)) {
 		--trackright;
 	}
 	visitracks = trackright - trackleft;	
@@ -2025,16 +2042,21 @@ void trackerview_invalidatecursor(TrackerView* self, const psy_audio_PatternEdit
 void trackerview_invalidateline(TrackerView* self, psy_dsp_beat_t offset)
 {
 	int line;	
-	psy_ui_Rectangle r;	
+	psy_ui_Rectangle r;
 	
 	if (offset >= self->sequenceentryoffset &&
 			offset < self->sequenceentryoffset + self->grid.pattern->length) {
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
+
+		size = psy_ui_component_size(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		line = (int) ((offset - self->sequenceentryoffset) 
 			/ self->grid.bpl);
 		psy_ui_setrectangle(&r,
 			self->grid.dx,
 			self->metrics.lineheight * line + self->grid.dy,
-			psy_ui_component_size(&self->component).width - self->grid.dx,
+			psy_ui_value_px(&size.width, &tm) - self->grid.dx,
 			self->metrics.lineheight);
 		psy_ui_component_invalidaterect(&self->grid.component, &r);
 	}
@@ -2065,17 +2087,19 @@ void trackergrid_onscroll(TrackerGrid* self, psy_ui_Component* sender, int stepx
 	if (self->dx > 0) {
 		self->dx = 0;
 	}	
-	if (self->midline) {
-		psy_ui_Size size;
+	if (self->midline) {		
 		int halfvisilines;	
 		int restoremidline;		
-		psy_ui_Rectangle r;		
+		psy_ui_Rectangle r;
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 			
-		size = psy_ui_component_size(&self->component);		
+		size = psy_ui_component_size(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		halfvisilines = self->view->metrics.visilines / 2;
 		psy_ui_setrectangle(&r,
 			0, halfvisilines * self->view->metrics.lineheight,
-			size.width, self->view->metrics.lineheight * 2);
+			psy_ui_value_px(&size.width, &tm), self->view->metrics.lineheight * 2);
 		restoremidline = self->midline;
 		self->midline = 0;
 		psy_ui_component_invalidaterect(&self->component, &r);
@@ -2577,7 +2601,10 @@ void trackerview_setheadertextcoords(TrackerView* self)
 void trackerview_onalign(TrackerView* self)
 {
 	psy_ui_Size size;
-	psy_ui_Size menusize;	
+	psy_ui_TextMetric tm;
+	psy_ui_Size menusize;
+	psy_ui_Size zoomboxsize;
+
 	int headerheight = 30;
 	int interpolateviewheight =
 		psy_ui_component_visible(&self->interpolatecurveview.component) ? 300 : 0;
@@ -2590,55 +2617,60 @@ void trackerview_onalign(TrackerView* self)
 		(workspace_showbeatoffset(self->workspace) ? 8 : 5)	:0;
 	int zoomboxheight;
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	menusize = psy_ui_component_preferredsize(&self->blockmenu.component, &size);
 	menusize.width = self->blockmenu.component.visible
-		? psy_ui_component_preferredsize(&self->blockmenu.component, &size).width
-		: 0;	
+		? menusize.width
+		: psy_ui_value_makepx(0);
 	menusize.height = size.height;	
 	psy_ui_component_setposition(&self->blockmenu.component,
-		size.width - menusize.width,
-		0, menusize.width,
-		size.height - interpolateviewheight);
-	zoomboxheight = psy_ui_component_size(&self->zoombox.component).height;
+		psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&menusize.width, &tm),
+		0,
+		menusize.width,
+		psy_ui_value_makepx(psy_ui_value_px(&size.height, &tm) - interpolateviewheight));
+	zoomboxsize = psy_ui_component_size(&self->zoombox.component);
+	zoomboxheight = psy_ui_value_px(&zoomboxsize.height, &tm);
 	// header
 	psy_ui_component_setposition(&self->header.component,
 		linenumberwidth, 0,
-		size.width - linenumberwidth - menusize.width,
-		headerheight);
+		psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) - linenumberwidth - psy_ui_value_px(&menusize.width, &tm)),
+		psy_ui_value_makepx(headerheight));
 	// grid defaults
 	if (workspace_showgriddefaults(self->workspace)) {
 		psy_ui_component_setposition(&self->griddefaults.component,
 			linenumberwidth, headerheight,
-			size.width - linenumberwidth - menusize.width,
-			griddefaultheight);
+			psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) - linenumberwidth - 
+				psy_ui_value_px(&menusize.width, &tm)),
+			psy_ui_value_makepx(griddefaultheight));
 	}
 	// grid
 	psy_ui_component_setposition(&self->grid.component,
 		linenumberwidth,
 		headerheight + griddefaultheight,
-		size.width - linenumberwidth - menusize.width,
-		size.height - headerheight - griddefaultheight - interpolateviewheight);
+		psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) - linenumberwidth - psy_ui_value_px(&menusize.width, &tm)),
+		psy_ui_value_makepx(psy_ui_value_px(&size.height, &tm) - headerheight - griddefaultheight - interpolateviewheight));
 	// line numbers
 	psy_ui_component_setposition(&self->linenumbers.component,
 		0, headerheight + griddefaultheight,
-		linenumberwidth,
-		size.height - headerheight - griddefaultheight -
-		zoomboxheight - interpolateviewheight);
+		psy_ui_value_makepx(linenumberwidth),
+		psy_ui_value_makepx(psy_ui_value_px(&size.height, &tm) - headerheight - griddefaultheight -
+		zoomboxheight - interpolateviewheight));
 	// line number label
 	psy_ui_component_resize(&self->linenumberslabel.component,
-		linenumberwidth, headerheight +
-		griddefaultheight);
+		psy_ui_value_makepx(linenumberwidth),
+		psy_ui_value_makepx(headerheight + griddefaultheight));
 	// zoombox	
 	psy_ui_component_setposition(&self->zoombox.component,
 		0,
-		size.height - zoomboxheight - interpolateviewheight,
-		linenumberwidth,
-		zoomboxheight);
+		psy_ui_value_px(&size.height, &tm) - zoomboxheight - interpolateviewheight,
+		psy_ui_value_makepx(linenumberwidth),
+		psy_ui_value_makepx(zoomboxheight));
 	// interpolatecurveview	
 	psy_ui_component_setposition(&self->interpolatecurveview.component,
 		0,
-		size.height - interpolateviewheight,
-		size.width,
-		interpolateviewheight);
+		psy_ui_value_px(&size.height, &tm) - interpolateviewheight,
+		psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm)),
+		psy_ui_value_makepx(interpolateviewheight));
 	trackerview_computemetrics(self);
 	trackergrid_adjustscroll(&self->grid);
 }
@@ -2665,12 +2697,15 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Component* sender,
 	psy_ui_Graphics* g)
 {	
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;
 	int cpx = self->dx;
 	uintptr_t track;
 
 	size = psy_ui_component_size(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
+	tm = psy_ui_component_textmetric(&self->component);
+	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.height, &tm));
 	psy_ui_drawsolidrectangle(g, r, self->skin->background);
 	
 	for (track = 0; track < self->numtracks; ++track) {		
@@ -2764,6 +2799,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Component* sende
 {	
 	if (self->view->grid.pattern) {
 		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		char buffer[20];		
 		int cpy = self->dy;
 		int line;		
@@ -2771,6 +2807,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Component* sende
 		PatternSelection clip;
 
 		size = psy_ui_component_size(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		trackergrid_clipblock(&self->view->grid, &g->clip, &clip);		
 		cpy = (clip.topleft.line) *
 			self->view->metrics.lineheight + self->dy;
@@ -2808,7 +2845,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Component* sende
 					psy_snprintf(buffer, 10, "%.2d", line);
 				}
 			}
-			psy_ui_setrectangle(&r, 0, cpy, size.width - 2,
+			psy_ui_setrectangle(&r, 0, cpy, psy_ui_value_px(&size.width - 2, &tm),
 				self->view->metrics.tm.tmHeight);
 			psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_OPAQUE, r, buffer,
 				strlen(buffer));		
@@ -2824,13 +2861,17 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	const psy_audio_PatternEditPosition* cursor)
 {
 	int line;		
-	psy_ui_Rectangle r;		
+	psy_ui_Rectangle r;
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	line = trackerview_offsettoscreenline(self->view, cursor->offset);	
 	psy_ui_setrectangle(&r,
 		0,
 		self->view->metrics.lineheight * line + self->view->grid.dy,
-		psy_ui_component_size(&self->component).width,
+		psy_ui_value_px(&size.width, &tm),
 		self->view->metrics.lineheight);
 	psy_ui_component_invalidaterect(&self->component, &r);	
 }
@@ -2842,12 +2883,17 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_beat_t 
 	
 	if (offset >= self->view->sequenceentryoffset &&
 			offset < self->view->sequenceentryoffset + self->view->grid.pattern->length) {
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
+		
+		size = psy_ui_component_size(&self->component);
+		tm = psy_ui_component_textmetric(&self->component);
 		line = (int) ((offset - self->view->sequenceentryoffset) 
 			/ self->view->grid.bpl);	
 		psy_ui_setrectangle(&r,
 			self->view->grid.dx,
 			self->view->metrics.lineheight * line + self->view->grid.dy,
-			psy_ui_component_size(&self->component).width - self->view->grid.dx,
+			psy_ui_value_px(&size.width, &tm) - self->view->grid.dx,
 			self->view->metrics.lineheight);
 		psy_ui_component_invalidaterect(&self->component, &r);
 	}
@@ -2879,10 +2925,13 @@ void OnLineNumbersLabelMouseDown(TrackerLineNumbersLabel* self,
 void OnLineNumbersLabelDraw(TrackerLineNumbersLabel* self, psy_ui_Component* sender, psy_ui_Graphics* g)
 {	
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;
-
+	
 	size = psy_ui_component_size(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);	
+	tm = psy_ui_component_textmetric(&self->component);
+	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.height, &tm));
 	psy_ui_setbackgroundcolor(g, self->view->skin.background);
 	psy_ui_settextcolor(g, self->view->skin.font);	
 	psy_ui_textoutrectangle(g, r.left, r.top, 0, r, "Line", strlen("Line"));
@@ -3651,9 +3700,11 @@ void trackerview_initmetrics(TrackerView* self)
 void trackerview_computemetrics(TrackerView* self)
 {
 	psy_ui_Size gridsize;	
+	psy_ui_TextMetric gridtm;
 	int trackwidth;
 
 	gridsize = psy_ui_component_size(&self->grid.component);	
+	gridtm = psy_ui_component_textmetric(&self->grid.component);
 	self->metrics.tm = psy_ui_component_textmetric(&self->component);	
 	self->metrics.textwidth = (int)(self->metrics.tm.tmAveCharWidth * 1.5) + 2;
 	self->metrics.textleftedge = 2;
@@ -3669,7 +3720,8 @@ void trackerview_computemetrics(TrackerView* self)
 		self->metrics.patterntrackident = 0;
 	}	
 	self->metrics.headertrackident = 0;	
-	self->metrics.visilines = gridsize.height / self->metrics.lineheight;
+	self->metrics.visilines = psy_ui_value_px(&gridsize.height, &gridtm) /
+		self->metrics.lineheight;
 }
 
 void trackerview_setfont(TrackerView* self, psy_ui_Font* font, bool iszoombase)

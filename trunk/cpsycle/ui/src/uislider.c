@@ -132,7 +132,9 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 {
 	psy_ui_Rectangle r;
 	extern psy_ui_App app;
+	psy_ui_TextMetric tm;
 	
+	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));	
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		psy_ui_Size size;	
@@ -140,27 +142,31 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		size = psy_ui_component_size(&self->component);
 		if (self->labelvisible) {
 			psy_ui_setrectangle(&r, 0, 0,
-				self->labelsize, size.height);
+				self->labelsize, psy_ui_value_px(&size.height, &tm));
 			psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_textoutrectangle(g, 0, 0, 0, r,
 				self->label, strlen(self->label));
-			size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
+			size.width = psy_ui_value_makepx(
+				psy_ui_value_px(&size.width, &tm) - (self->valuelabelsize + self->labelsize + 2 * self->margin));
 
-			psy_ui_setrectangle(&r, self->labelsize + self->margin, 0, size.width, size.height);
+			psy_ui_setrectangle(&r, self->labelsize + self->margin, 0,
+				psy_ui_value_px(&size.width, &tm),
+				psy_ui_value_px(&size.height, &tm));
 			psy_ui_drawrectangle(g, r);
 		}
 		psy_ui_setrectangle(&r,
-			self->labelsize + self->margin + (int)((size.width - self->slidersize) * self->value),
-			2, self->slidersize, size.height - 4);
+			self->labelsize + self->margin + (int)((psy_ui_value_px(&size.width, &tm) - self->slidersize) * self->value),
+			2, self->slidersize, psy_ui_value_px(&size.height, &tm) - 4);
 		psy_ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
 		if (self->valuelabelvisible) {
 			size = psy_ui_component_size(&self->component);
-			psy_ui_setrectangle(&r, size.width - self->valuelabelsize, 0,
-				self->valuelabelsize, size.height);
+			psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, &tm) - self->valuelabelsize, 0,
+				self->valuelabelsize, psy_ui_value_px(&size.height, &tm));
 			psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-			psy_ui_textoutrectangle(g, size.width - self->valuelabelsize, 0, 0, r,
+			psy_ui_textoutrectangle(g, psy_ui_value_px(&size.width, &tm) -
+				self->valuelabelsize, 0, 0, r,
 				self->valuedescription, strlen(self->valuedescription));
 		}
 	} else {
@@ -168,25 +174,28 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_Size size;
 		psy_ui_Size slidersize;
 		int centerx = 0;
-		size = psy_ui_component_size(&self->component);
+		psy_ui_TextMetric tm;
 
+		tm = psy_ui_component_textmetric(&self->component);
+		size = psy_ui_component_size(&self->component);
 		if (self->charnumber != 0) {
-			psy_ui_TextMetric tm;			
-		
-			tm = psy_ui_component_textmetric(&self->component);
-			slidersize.width = tm.tmAveCharWidth * self->charnumber;
+			
+			slidersize.width = psy_ui_value_makeew(self->charnumber);
 			slidersize.height = size.height;
-			centerx = (size.width - slidersize.width) / 2;
+			centerx = (psy_ui_value_px(&size.width, &tm) -
+				psy_ui_value_px(&slidersize.width, &tm)) / 2;
 		} else {
 			slidersize = size;
 		}
 		
 		psy_ui_slider_drawverticalruler(self, g);
-		psy_ui_setrectangle(&r, centerx, 0, slidersize.width, size.height);
+		psy_ui_setrectangle(&r, centerx, 0,
+			psy_ui_value_px(&slidersize.width, &tm),
+			psy_ui_value_px(&size.height, &tm));
 		psy_ui_drawrectangle(g, r);
 		psy_ui_setrectangle(&r, 2 + centerx,
-			(int)((size.height - sliderheight) * (1 - self->value)),
-			slidersize.width - 4, sliderheight);
+			(int)((psy_ui_value_px(&size.height, &tm) - sliderheight) * (1 - self->value)),
+			psy_ui_value_px(&slidersize.width, &tm) - 4, sliderheight);
 		psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
 	}	
 }
@@ -200,24 +209,34 @@ void psy_ui_slider_drawverticalruler(psy_ui_Slider* self, psy_ui_Graphics* g)
 	size = psy_ui_component_size(&self->component);
 	for (step = 0; step <= 1.0; step += self->rulerstep) {
 		int cpy;
+		psy_ui_TextMetric tm;
 
-		cpy = (int)(step * size.height);
+		tm = psy_ui_component_textmetric(&self->component);
+		cpy = (int)(step * psy_ui_value_px(&size.height, &tm));
 		psy_ui_drawline(g, 0, cpy, markwidth, cpy);
-		psy_ui_drawline(g, size.width - markwidth, cpy, size.width, cpy);
+		psy_ui_drawline(g, psy_ui_value_px(&size.width, &tm) - markwidth, cpy,
+			psy_ui_value_px(&size.width, &tm), cpy);
 	}
 }
 
 void psy_ui_slider_onmousedown(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
+	psy_ui_TextMetric tm;
 	psy_ui_Size size;
+	int width;
+	int height;
+
 	size = psy_ui_component_size(&self->component);
-	size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
+	tm = psy_ui_component_textmetric(&self->component);
+	width = psy_ui_value_px(&size.width, &tm);
+	height = psy_ui_value_px(&size.height, &tm);	
+	width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		self->tweakbase = (ev->x - self->labelsize - self->margin) -
-			(int)(self->value * (size.width - self->slidersize));
+			(int)(self->value * (width - self->slidersize));
 	} else
 	if (self->orientation == psy_ui_VERTICAL) {
-		self->tweakbase = ev->y - (int)((1.0 - self->value) * (size.height - self->slidersize));
+		self->tweakbase = ev->y - (int)((1.0 - self->value) * (height - self->slidersize));
 	}
 	psy_ui_component_capture(&self->component);
 }
@@ -226,17 +245,21 @@ void psy_ui_slider_onmousemove(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 {
 	if (self->tweakbase != -1) {
 		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 
+		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_size(&self->component);
-		size.width -= (self->valuelabelsize + self->labelsize + 2 * self->margin);
+		size.width = psy_ui_value_makepx(
+			psy_ui_value_px(&size.width, &tm) - (self->valuelabelsize + self->labelsize + 2 * self->margin));
 		if (self->orientation == psy_ui_HORIZONTAL) {
 			self->value = max(0.f,
 				min(1.f, (ev->x - self->tweakbase - self->labelsize - self->margin) 
-					/ (float)(size.width - self->slidersize)));
+					/ (float)(psy_ui_value_px(&size.width, &tm) - self->slidersize)));
 		}
 		else {
 			self->value = max(0.f,
-				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(size.height - self->slidersize)));
+				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(
+					psy_ui_value_px(&size.height, &tm) - self->slidersize)));
 		}
 		psy_signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
 		psy_signal_emit(&self->signal_changed, self, 0);
@@ -373,15 +396,12 @@ void psy_ui_slider_onalign(psy_ui_Slider* self)
 
 void psy_ui_slider_onpreferredsize(psy_ui_Slider* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
+{	
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		rv->height = (int)(tm.tmHeight * 1.3f);
-		rv->width = 200;
+		rv->width = psy_ui_value_makeew(20);
+		rv->height = psy_ui_value_makeeh(1.3);
 	} else {
-		rv->width = (int)(tm.tmAveCharWidth * self->charnumber);
-		rv->height = 200;
+		rv->width = psy_ui_value_makeew(self->charnumber);
+		rv->height = psy_ui_value_makeeh(20);
 	}
 }

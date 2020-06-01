@@ -137,10 +137,12 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 		playlisteditor_onprev);
 	psy_signal_connect(&self->buttons.next.signal_clicked, self, 
 		playlisteditor_onnext);
-	psy_ui_component_resize(&self->component, 150, 0);
+	psy_ui_component_resize(&self->component,
+		psy_ui_value_makeew(15), psy_ui_value_makepx(0));
 	psy_signal_connect(&self->listbox.signal_selchanged, self,
 		playlisteditor_onlistchanged);
-	psy_ui_component_resize(&self->component, 200, 120);
+	psy_ui_component_resize(&self->component, psy_ui_value_makeew(20),
+		psy_ui_value_makeeh(12));
 }
 
 void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)

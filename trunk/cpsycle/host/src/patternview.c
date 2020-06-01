@@ -104,18 +104,15 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 		editposition.track,
 		editposition.column,
 		editposition.digit);
-	psy_ui_textout(g, 0, (size.height - tm.tmHeight) / 2, text, strlen(text));
+	psy_ui_textout(g, 0, (psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2, text, strlen(text));
 }
 
 void patternviewstatus_onpreferredsize(PatternViewStatus* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {				
-	if (rv) {
-		psy_ui_TextMetric tm;
-	
-		tm = psy_ui_component_textmetric(&self->component);
-		rv->width = tm.tmAveCharWidth * 40;
-		rv->height = (int)(tm.tmHeight);
+	if (rv) {	
+		rv->width = psy_ui_value_makeew(40);
+		rv->height = psy_ui_value_makeeh(1);
 	}
 }
 

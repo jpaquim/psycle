@@ -270,7 +270,7 @@ void cmdplayer_setdriverlist(CmdPlayer* self)
 	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
 	drivers = psy_properties_append_choice(self->inputoutput, "driver", 1); 
-	psy_properties_settext(drivers, "psy_AudioDriver");
+	psy_properties_settext(drivers, "Audio Driver");
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(_DEBUG)
 	psy_properties_append_string(drivers, "mme", "..\\driver\\mme\\Debug\\mme.dll");

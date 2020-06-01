@@ -37,6 +37,13 @@ void waveboxselection_setrange(WaveBoxSelection*, uintptr_t start,
 void waveboxselection_setstart(WaveBoxSelection*, uintptr_t start, bool* swapped);
 void waveboxselection_setend(WaveBoxSelection*, uintptr_t end, bool* swapped);
 
+INLINE uintptr_t waveboxselection_numframes(WaveBoxSelection* self)
+{
+	return (self->hasselection)
+		? self->end - self->start + 1
+		: 0;	
+}
+
 typedef struct {
 	double offsetstep;
 	psy_ui_Size size;
@@ -44,10 +51,11 @@ typedef struct {
 	psy_dsp_beat_t zoomright;
 	WaveBoxLoopViewMode loopviewmode;	
 	WaveBoxSelection selection;
-	psy_audio_Sample* sample;	
+	psy_audio_Sample* sample;
+	psy_ui_Component* component;
 } WaveBoxContext;
 
-void waveboxcontext_init(WaveBoxContext*);
+void waveboxcontext_init(WaveBoxContext*, psy_ui_Component* component);
 void waveboxcontext_setsample(WaveBoxContext*, psy_audio_Sample*);
 
 INLINE psy_audio_Sample* waveboxcontext_sample(WaveBoxContext* self)
@@ -87,6 +95,7 @@ void wavebox_setzoom(WaveBox*, psy_dsp_beat_t left, psy_dsp_beat_t right);
 void wavebox_setselection(WaveBox*, uintptr_t selectionstart,
 	uintptr_t selectionend);
 void wavebox_clearselection(WaveBox*);
+void wavebox_refresh(WaveBox*);
 
 INLINE WaveBoxContext* wavebox_metric(WaveBox* self)
 {

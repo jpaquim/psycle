@@ -10,8 +10,8 @@
 
 typedef struct {
 	psy_ui_Component component;
-	float zoomleft;
-	float zoomright;	
+	float start;
+	float end;	
 	int dragmode;
 	int dragoffset;
 	psy_Signal signal_zoom;
@@ -19,5 +19,15 @@ typedef struct {
 } ScrollZoom;
 
 void scrollzoom_init(ScrollZoom*, psy_ui_Component* parent);
+
+INLINE float scrollzoom_start(ScrollZoom* self)
+{
+	return self->start;
+}
+
+INLINE float scrollzoom_end(ScrollZoom* self)
+{
+	return self->end;
+}
 
 #endif

@@ -803,10 +803,12 @@ void paramview_computepositions(ParamView* self)
 		int colmax = 0;
 		int cpx = 0;
 		int cpy = 0;
-		int cpy_slidercheck;		
+		int cpy_slidercheck;
+		psy_ui_TextMetric tm;
 
+		tm = psy_ui_component_textmetric(&self->component);
 		numrows = paramview_numrows(self);
-		self->cpmax.width = 0;
+		self->cpmax.width = psy_ui_value_makepx(0);
 		for (param = 0; param < psy_audio_machine_numparameters(self->machine);
 				++param) {
 			psy_ui_Rectangle* position;
@@ -867,8 +869,8 @@ void paramview_computepositions(ParamView* self)
 					}
 				}
 				cpx += colmax;
-				if (self->cpmax.width < cpx) {
-					self->cpmax.width = cpx;
+				if (psy_ui_value_px(&self->cpmax.width, &tm) < cpx) {
+					self->cpmax.width = psy_ui_value_makepx(cpx);
 				}
 				++col;
 				row = 0;				
@@ -877,7 +879,7 @@ void paramview_computepositions(ParamView* self)
 		}
 		cpy_slidercheck = 0;	
 		row = 0;
-		self->cpmax.height = 0;
+		self->cpmax.height = psy_ui_value_makepx(0);
 		for (param = 0; param < psy_audio_machine_numparameters(self->machine);
 				++param) {
 			psy_ui_Rectangle* position;
@@ -907,8 +909,8 @@ void paramview_computepositions(ParamView* self)
 			} else {
 				position->bottom = cpy + height;				
 			}
-			if (self->cpmax.height < (int) (cpy + height)) {
-				self->cpmax.height = (int) (cpy + height);
+			if (psy_ui_value_px(&self->cpmax.height, &tm) < (int) (cpy + height)) {
+				self->cpmax.height = psy_ui_value_makepx((int) (cpy + height));
 			}
 			if (paramtype != MPF_IGNORE && paramtype != MPF_SLIDER &&
 					paramtype != MPF_SLIDERCHECK) {

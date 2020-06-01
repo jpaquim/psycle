@@ -382,8 +382,8 @@ psy_ui_Size dev_size(psy_ui_win_ComponentImp* self)
 	RECT rect;
 
 	GetClientRect(self->hwnd, &rect);
-	rv.width = rect.right;
-	rv.height = rect.bottom;
+	rv.width = psy_ui_value_makepx(rect.right);
+	rv.height = psy_ui_value_makepx(rect.bottom);
 	return rv;
 }
 
@@ -393,8 +393,8 @@ psy_ui_Size dev_framesize(psy_ui_win_ComponentImp* self)
 	RECT rect;
 
 	GetWindowRect(self->hwnd, &rect);
-	rv.width = rect.right;
-	rv.height = rect.bottom;
+	rv.width = psy_ui_value_makepx(rect.right);
+	rv.height = psy_ui_value_makepx(rect.bottom);
 	return rv;
 }
 

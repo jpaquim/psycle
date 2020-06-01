@@ -136,6 +136,9 @@ static void loadspecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void loadwiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
+static uintptr_t machine_countinputlegacywires(psy_audio_Machine*, psy_Table* legacywiretable);
+static void machine_readpinmapping(psy_audio_Machine*, psy_audio_SongFile*,
+	psy_audio_PinMapping*);
 static void savespecific(psy_audio_Machine*, struct psy_audio_SongFile*,
 	uintptr_t slot);
 static void savewiremapping(psy_audio_Machine*, struct psy_audio_SongFile*,
@@ -518,31 +521,68 @@ void loadspecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 void loadwiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
-	/* int32_t numWires = 0;
-	int32_t i;
-	for (int i = 0; i < MAX_CONNECTIONS; i++) {
-		if (legacyWires[i]._inputCon) numWires++;
+	uintptr_t numwires = 0;
+	uintptr_t countwires;
+	psy_Table* legacywiretable;
+
+	legacywiretable = psy_audio_legacywires_at(&songfile->legacywires, slot);
+	if (!legacywiretable) {
+		return;
 	}
-	for (int countWires = 0; countWires < numWires; countWires++)
-	{
-		int wireIdx, numPairs;
-		Wire::PinConnection::first_type src;
-		Wire::PinConnection::second_type dst;
-		pFile->Read(wireIdx);
-		if (wireIdx >= MAX_CONNECTIONS) {
-			//We cannot ensure correctness from now onwards.
-			return false;
+	numwires = machine_countinputlegacywires(self, legacywiretable);	
+	for (countwires = 0; countwires < numwires; ++countwires) {
+		psy_audio_LegacyWire* wire;
+		int32_t wireidx;
+		
+		psyfile_read(songfile->file, &wireidx, sizeof(wireidx));
+		wire = psy_table_at(legacywiretable, wireidx);
+		if (!wire) {
+			// we cannot ensure correctness from now onwards.
+			psy_audio_songfile_warn(songfile,
+				"loadwiremapping wire not found");
+			return;
 		}
-		pFile->Read(numPairs);
-		Wire::Mapping& pinMapping = legacyWires[wireIdx].pinMapping;
-		pinMapping.reserve(numPairs);
-		for (int j = 0; j < numPairs; j++) {
-			pFile->Read(src);
-			pFile->Read(dst);
-			pinMapping.push_back(Wire::PinConnection(src, dst));
+		if (wireidx >= MAX_CONNECTIONS) {
+			psy_audio_songfile_warn(songfile,
+				"loadwiremapping old psy3 max connections limit reached");
+		}
+		machine_readpinmapping(self, songfile, &wire->pinmapping);
+	}
+}
+
+uintptr_t machine_countinputlegacywires(psy_audio_Machine* self, psy_Table* legacywiretable)
+{	
+	uintptr_t rv = 0;
+	psy_TableIterator it;
+	
+	for (it = psy_table_begin(legacywiretable);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_LegacyWire* legacywire;
+
+		legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it);
+		if (legacywire->_inputCon) {
+			++rv;
 		}
 	}
-	return true;*/
+	return rv;
+}
+
+void machine_readpinmapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
+	psy_audio_PinMapping* pinmapping)
+{
+	int32_t numpairs;
+
+	psyfile_read(songfile->file, &numpairs, sizeof(numpairs));
+	psy_audio_pinmapping_clear(pinmapping);
+	for (int j = 0; j < numpairs; ++j) {
+		int16_t src;
+		int16_t dst;
+
+		psyfile_read(songfile->file, &src, sizeof(src));
+		psyfile_read(songfile->file, &dst, sizeof(dst));
+		psy_audio_pinmapping_connect(pinmapping, src, dst);
+	}
 }
 
 void savespecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
@@ -573,30 +613,58 @@ void savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 {
 	psy_audio_Connections* connections;
 	psy_audio_MachineSockets* connected_sockets;	
-	int i;
+	uintptr_t i;
 
 	connections = &songfile->song->machines.connections;
 	connected_sockets = connections_at(connections, slot);
 	if (connected_sockets) {
 		WireSocket* p;
 
-		for (i = 0, p = connected_sockets->inputs; p != NULL && i < MAX_CONNECTIONS; p = p->next, ++i) {
+		for (i = 0, p = connected_sockets->inputs; p != NULL; p = p->next, ++i) {
 			psy_audio_WireSocketEntry* entry;
 
+			if (i >= MAX_CONNECTIONS) {
+				psy_audio_songfile_warn(songfile,
+					"savewiremapping old psy3 max connections limit reached");
+			}
 			entry = (psy_audio_WireSocketEntry*)p->entry;
 			if (entry) {
 				psy_List* node;
-				int32_t numPairs;
+				uint32_t numPairs;
 
-				numPairs = (int32_t)psy_list_size(entry->mapping.container);
-				psyfile_write_int32(songfile->file, i);
-				psyfile_write_int32(songfile->file, numPairs);
+				numPairs = psy_list_size(entry->mapping.container);
+				if (i <= INT32_MAX) {
+					psyfile_write_int32(songfile->file, (int32_t)i);
+				} else {
+					psy_audio_songfile_warn(songfile,
+						"savewiremapping connection id reached 32 bit limit");
+					return;
+				}
+				if (i <= INT32_MAX) {
+					psyfile_write_int32(songfile->file, (int32_t)numPairs);
+				} else {
+					psy_audio_songfile_warn(songfile,
+						"savewiremapping number of pinconnections reached 32 bit limit");
+					return;
+				}
 				for (node = entry->mapping.container; node != NULL; node = node->next) {
-					psy_audio_PinConnection* pin;
+					psy_audio_PinConnection* pair;
 
-					pin = (psy_audio_PinConnection*)node->entry;
-					psyfile_write_int16(songfile->file, (int16_t)pin->src);
-					psyfile_write_int16(songfile->file, (int16_t)pin->dst);
+					pair = (psy_audio_PinConnection*)node->entry;
+					if (pair->src <= INT16_MAX) {
+						psyfile_write_int16(songfile->file, (int16_t)pair->src);
+					} else {
+						psy_audio_songfile_warn(songfile,
+							"savewiremapping src pin number reached 16 bit limit");
+						return;
+					}
+					if (pair->dst <= INT16_MAX) {
+						psyfile_write_int16(songfile->file, (int16_t)pair->dst);
+					} else {
+						psy_audio_songfile_warn(songfile,
+							"savewiremapping dst pin number reached 16 bit limit");
+						return;
+					}
 				}
 			}
 		}	
@@ -615,7 +683,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	}
 
 	for (c = 0; c < MAX_CONNECTIONS; ++c) {
-		LegacyWire* wire;
+		psy_audio_LegacyWire* wire;
 		psy_audio_Machine* inputmachine;
 		uintptr_t f;
 				
@@ -625,7 +693,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 		}
 		//load bugfix: Ensure no duplicate wires could be created.
 		for (f = 0; f < c; f++) {
-			LegacyWire* legacywire;
+			psy_audio_LegacyWire* legacywire;
 
 			legacywire = psy_table_at(legacywiretable, f);
 			if (!legacywire) {
@@ -662,7 +730,9 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 				psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
 				connections_setwirevolume(&songfile->song->machines.connections,
 					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
+				connections_setpinmapping(&songfile->song->machines.connections,
+					wire->_inputMachine, slot, &wire->pinmapping);
 			}
 		}
-	}
+	}	
 }

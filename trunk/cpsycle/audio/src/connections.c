@@ -31,12 +31,33 @@ psy_audio_PinConnection* psy_audio_pinconnection_allocinit_all(uintptr_t src,
 void psy_audio_pinmapping_init(psy_audio_PinMapping* self, uintptr_t numchannels)
 {
 	self->container = NULL;
-	psy_audio_pinmapping_autowire(self, numchannels);
+	if (numchannels > 0) {
+		psy_audio_pinmapping_autowire(self, numchannels);
+	}
 }
 
 void psy_audio_pinmapping_dispose(psy_audio_PinMapping* self)
 {
 	psy_audio_pinmapping_clear(self);
+}
+
+void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, psy_audio_PinMapping* other)
+{
+	if (other) {
+		psy_List* p;
+
+		psy_audio_pinmapping_clear(self);
+		for (p = other->container; p != NULL; p = p->next) {
+			psy_audio_PinConnection* pair;
+			psy_audio_PinConnection* paircopy;
+
+			pair = (psy_audio_PinConnection*)p->entry;
+			paircopy = psy_audio_pinconnection_allocinit_all(pair->src, pair->dst);
+			if (paircopy) {
+				psy_list_append(&self->container, paircopy);
+			}
+		}		
+	}
 }
 
 void psy_audio_pinmapping_clear(psy_audio_PinMapping* self)
@@ -364,6 +385,19 @@ int connections_connected(psy_audio_Connections* self, uintptr_t outputslot, uin
 #endif
 	}
 	return p != NULL;
+}
+
+void connections_setpinmapping(psy_audio_Connections* self,
+	uintptr_t outputslot,
+	uintptr_t inputslot,
+	const psy_audio_PinMapping* mapping)
+{
+	psy_audio_WireSocketEntry* input_entry;
+
+	input_entry = connection_input(self, outputslot, inputslot);
+	if (input_entry) {
+		psy_audio_pinmapping_copy(&input_entry->mapping, mapping);
+	}
 }
 
 void connections_setwirevolume(psy_audio_Connections* self, uintptr_t outputslot,

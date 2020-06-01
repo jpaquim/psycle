@@ -53,20 +53,23 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle left;
 	psy_ui_Rectangle right;
 	psy_ui_Size size = psy_ui_component_size(&self->component);
-	psy_ui_setrectangle(&left, 0, 5, size.width, 5);
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	psy_ui_setrectangle(&left, 0, 5, psy_ui_value_px(&size.width, &tm), 5);
 	right = left;
 	right.top += 6;
 	right.bottom += 6;
 	psy_ui_drawsolidrectangle(g, left, 0x00000000);
 	psy_ui_drawsolidrectangle(g, right, 0x00000000);
 	
-	left.right = (int) (self->leftavg * size.width);
-	right.right = (int) (self->rightavg * size.width);
+	left.right = (int) (self->leftavg * psy_ui_value_px(&size.width, &tm));
+	right.right = (int) (self->rightavg * psy_ui_value_px(&size.width, &tm));
 	psy_ui_drawsolidrectangle(g, left, 0x0000FF00);
 	psy_ui_drawsolidrectangle(g, right, 0x0000FF00);
 
-	psy_ui_setrectangle(&left, left.right, left.top, size.width - left.right, 5);
-	psy_ui_setrectangle(&right, right.right, right.top, size.width - right.right, 5);
+	psy_ui_setrectangle(&left, left.right, left.top, psy_ui_value_px(&size.width, &tm) - left.right, 5);
+	psy_ui_setrectangle(&right, right.right, right.top, psy_ui_value_px(&size.width, &tm) - right.right, 5);
 	psy_ui_drawsolidrectangle(g, left, 0x003E3E3E);
 	psy_ui_drawsolidrectangle(g, right, 0x003E3E3E);
 }
@@ -110,7 +113,7 @@ void vumeter_connectmachinessignals(Vumeter* self, Workspace* workspace)
 
 void vumeter_onpreferredsize(Vumeter* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {	
-	rv->width = 180;
-	rv->height = 20;
+	rv->width = psy_ui_value_makeew(25);
+	rv->height = psy_ui_value_makeeh(1);
 }
 

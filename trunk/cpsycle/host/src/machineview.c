@@ -223,11 +223,11 @@ psy_ui_Size machineui_size(MachineUi* self)
 	psy_ui_Size rv;
 
 	if (self->coords) {
-		rv.width = self->coords->background.destwidth;
-		rv.height = self->coords->background.destheight;
+		rv.width = psy_ui_value_makepx(self->coords->background.destwidth);
+		rv.height = psy_ui_value_makepx(self->coords->background.destheight);
 	} else {
-		rv.width = 200;
-		rv.height = 20;		
+		rv.width = psy_ui_value_makepx(200);
+		rv.height = psy_ui_value_makepx(20);
 	}
 	return rv;
 }
@@ -271,7 +271,9 @@ void machineui_editname(MachineUi* self, psy_ui_Edit* edit)
 		r.right = r.left + self->coords->name.destwidth;
 		r.bottom = r.top + self->coords->name.destheight;
 		psy_ui_component_setposition(&edit->component, r.left, 
-			r.top, r.right - r.left, r.bottom - r.top);
+			r.top,
+			psy_ui_value_makepx(r.right - r.left),
+			psy_ui_value_makepx(r.bottom - r.top));
 		psy_ui_component_show(&edit->component);
 	}
 }
@@ -554,12 +556,12 @@ void machinewireview_adjustscroll(MachineWireView* self)
 	size = psy_ui_component_size(&self->component);		
 	self->component.scrollstepx = tm.tmAveCharWidth;
 	self->component.scrollstepy = tm.tmHeight / 2;
-	maxstepx = (int)((bounds.right - size.width + tm.tmAveCharWidth * 2)
+	maxstepx = (int)((bounds.right - psy_ui_value_px(&size.width, &tm) + tm.tmAveCharWidth * 2)
 		/ (float)self->component.scrollstepx + 0.5f);
 	if (maxstepx <= 0) {
 		maxstepx = 0;		
 	}
-	maxstepy = (int)((bounds.bottom - size.height + tm.tmHeight * 2) 
+	maxstepy = (int)((bounds.bottom - psy_ui_value_px(&size.height, &tm) + tm.tmHeight * 2)
 		/ (float)self->component.scrollstepy + 0.5f);
 	if (maxstepy <= 0) {
 		maxstepy = 0;		
@@ -937,6 +939,7 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 {
 	psy_ui_Size out;
 	psy_ui_Size in;	
+	psy_ui_TextMetric tm;
 	int x1,	y1;
 	int x2, y2;		
 	double phi;	
@@ -952,10 +955,11 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 
 	out = machineui_size(outmachineui);
 	in = machineui_size(inmachineui);
-	x1 = self->dx + outmachineui->x + out.width/2;
-	y1 = self->dy + outmachineui->y + out.height /2;
-	x2 = self->dx + inmachineui->x + in.width/2;
-	y2 = self->dy + inmachineui->y + in.height/2;
+	tm = psy_ui_component_textmetric(&self->component);
+	x1 = self->dx + outmachineui->x + psy_ui_value_px(&out.width, &tm) / 2;
+	y1 = self->dy + outmachineui->y + psy_ui_value_px(&out.height, &tm) / 2;
+	x2 = self->dx + inmachineui->x + psy_ui_value_px(&in.width, &tm) / 2;
+	y2 = self->dy + inmachineui->y + psy_ui_value_px(&in.height, &tm) / 2;
 
 	center.x = (x2 - x1) / 2 + x1;
 	center.y = (y2 - y1) / 2 + y1;
@@ -1007,12 +1011,14 @@ void machinewireview_drawdragwire(MachineWireView* self, psy_ui_Graphics* g)
 		machineui = machineuis_at(self, self->dragslot);
 		if (machineui) {
 			psy_ui_Size machinesize;
+			psy_ui_TextMetric tm;
 
+			tm = psy_ui_component_textmetric(&self->component);
 			machinesize = machineui_size(machineui);
 			psy_ui_setcolor(g, self->skin.wirecolour);
 			psy_ui_drawline(g, 
-				self->dx + machineui->x + machinesize.width/2,
-				self->dy + machineui->y + machinesize.height/2,
+				self->dx + machineui->x + psy_ui_value_px(&machinesize.width, &tm) / 2,
+				self->dy + machineui->y + psy_ui_value_px(&machinesize.height, &tm) / 2,
 				self->dx + self->mx,
 				self->dy + self->my);		
 		}
@@ -1074,7 +1080,10 @@ void drawmachineline(psy_ui_Graphics* g, int xdir, int ydir, int x, int y)
 void machinewireview_onsize(MachineWireView* self, psy_ui_Component* sender,
 	psy_ui_Size* size)
 {
-	if (self->firstsize && size->width > 0) {
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	if (self->firstsize && psy_ui_value_px(&size->width, &tm) > 0) {
 		self->firstsize = 0;
 		machinewireview_align(self);
 	}
@@ -1094,9 +1103,14 @@ void machinewireview_align(MachineWireView* self)
 
 	machineui = machineuis_at(self, psy_audio_MASTER_INDEX);
 	if (machineui) {
+		psy_ui_TextMetric tm;
+
+		tm = psy_ui_component_textmetric(&self->component);
 		machinesize = machineui_size(machineui);
-		machineui->x = (size.width - machinesize.width) / 2 ;
-		machineui->y = (size.height - machinesize.height) / 2;
+		machineui->x = (psy_ui_value_px(&size.width, &tm) -
+			psy_ui_value_px(&machinesize.width, &tm)) / 2 ;
+		machineui->y = (psy_ui_value_px(&size.height, &tm) -
+			psy_ui_value_px(&machinesize.height, &tm)) / 2;
 	}
 }
 
@@ -1507,7 +1521,9 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 {		
 	psy_audio_Wire rv;
 	psy_TableIterator it;
-	
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(&self->component);	
 	psy_audio_wire_init(&rv);
 	for (it = psy_audio_machines_begin(self->machines); it.curr != 0; 
 			psy_tableiterator_inc(&it)) {
@@ -1538,10 +1554,10 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 						in = machineui_size(inmachineui);
 						psy_ui_setrectangle(&r, x - d, y - d, 2 * d, 2 * d);
 						if (psy_ui_rectangle_intersect_segment(&r,
-							outmachineui->x + out.width / 2,
-							outmachineui->y + out.height / 2,
-							inmachineui->x + in.width / 2,
-							inmachineui->y + in.height / 2)) {
+							outmachineui->x + psy_ui_value_px(&out.width, &tm) / 2,
+							outmachineui->y + psy_ui_value_px(&out.height, &tm) / 2,
+							inmachineui->x + psy_ui_value_px(&in.width, &tm) / 2,
+							inmachineui->y + psy_ui_value_px(&in.height, &tm) / 2)) {
 							psy_audio_wire_set(&rv, slot, entry->slot);							
 						}						
 					}
@@ -2007,7 +2023,9 @@ void machineviewbar_drawstatus(MachineViewBar* self, psy_ui_Component* sender,
 	size = psy_ui_component_size(&self->component);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00D1C5B6);
-	psy_ui_textout(g, tm.tmAveCharWidth * 4, (size.height - tm.tmHeight) / 2, self->text, strlen(self->text));
+	psy_ui_textout(g, tm.tmAveCharWidth * 4,
+		(psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2,
+		self->text, strlen(self->text));
 }
 
 void machineviewbar_ondestroy(MachineViewBar* self, psy_ui_Component* sender)
@@ -2025,12 +2043,16 @@ void machineviewbar_settext(MachineViewBar* self, const char* text)
 void machineviewbar_onpreferredsize(MachineViewBar* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;
+	if (rv) {
+		psy_ui_TextMetric tm;
+		psy_ui_Size mixersize;
 
-	tm = psy_ui_component_textmetric(&self->component);
-	rv->width = tm.tmAveCharWidth * 44 +
-		psy_ui_component_preferredsize(&self->mixersend.component, rv).width;
-	rv->height = (int)(tm.tmHeight);
+		tm = psy_ui_component_textmetric(&self->component);
+		mixersize = psy_ui_component_preferredsize(&self->mixersend.component, rv);
+		rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * 44 +
+			psy_ui_value_px(&mixersize.width, &tm));
+		rv->height = psy_ui_value_makeeh(1);
+	}
 }
 
 void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self, psy_ui_Component* sender)
@@ -2058,7 +2080,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setposition(&self->component, 0, 0, 0, 0);
+	psy_ui_component_setposition(&self->component, 0, 0,
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);

@@ -4,17 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "scrollzoom.h"
-#include "../../detail/portable.h"
 
-static void scrollzoom_ondestroy(ScrollZoom*, psy_ui_Component* sender);
-static void scrollzoom_ondraw(ScrollZoom*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
-static void scrollzoom_onmousedown(ScrollZoom*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void scrollzoom_onmouseup(ScrollZoom*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void scrollzoom_onmousemove(ScrollZoom*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
+#include "../../detail/portable.h"
 
 enum {
 	SCROLLZOOM_DRAG_NONE,
@@ -23,27 +14,44 @@ enum {
 	SCROLLZOOM_DRAG_MOVE
 };
 
+static void scrollzoom_ondestroy(ScrollZoom*, psy_ui_Component* sender);
+static void scrollzoom_ondraw(ScrollZoom*, psy_ui_Graphics*);
+static void scrollzoom_onmousedown(ScrollZoom*, psy_ui_MouseEvent*);
+static void scrollzoom_onmouseup(ScrollZoom*, psy_ui_MouseEvent*);
+static void scrollzoom_onmousemove(ScrollZoom*, psy_ui_MouseEvent*);
+
+static psy_ui_ComponentVtable scrollzoom_vtable;
+static bool scrollzoom_vtable_initialized = FALSE;
+
+static void scrollzoomvtable_init(ScrollZoom* self)
+{
+	if (!scrollzoom_vtable_initialized) {
+		scrollzoom_vtable = *(self->component.vtable);		
+		scrollzoom_vtable.ondraw = (psy_ui_fp_ondraw)scrollzoom_ondraw;
+		scrollzoom_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			scrollzoom_onmousedown;
+		scrollzoom_vtable.onmousemove = (psy_ui_fp_onmousemove)
+			scrollzoom_onmousemove;
+		scrollzoom_vtable.onmouseup = (psy_ui_fp_onmouseup)
+			scrollzoom_onmouseup;
+		scrollzoom_vtable_initialized = TRUE;
+	}
+	self->component.vtable = &scrollzoom_vtable;
+}
+
 void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
-{	
-	self->zoomleft = 0.f;
-	self->zoomright = 1.f;	
-	self->dragmode = SCROLLZOOM_DRAG_NONE;
-	self->dragoffset = 00;
+{		
 	psy_ui_component_init(&self->component, parent);
+	scrollzoomvtable_init(self);
 	psy_ui_component_doublebuffer(&self->component);
+	self->start = 0.f;
+	self->end = 1.f;
+	self->dragmode = SCROLLZOOM_DRAG_NONE;
+	self->dragoffset = 0;	
 	psy_signal_init(&self->signal_customdraw);
 	psy_signal_init(&self->signal_zoom);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		scrollzoom_ondestroy);
-	psy_signal_connect(&self->component.signal_draw, self,
-		scrollzoom_ondraw);
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		scrollzoom_onmousedown);
-	psy_signal_connect(&self->component.signal_mouseup, self,
-		scrollzoom_onmouseup);
-	psy_signal_connect(&self->component.signal_mousemove, self,
-		scrollzoom_onmousemove);
-	psy_ui_component_resize(&self->component, 100, 50);
 }
 
 void scrollzoom_ondestroy(ScrollZoom* self, psy_ui_Component* sender)
@@ -52,41 +60,44 @@ void scrollzoom_ondestroy(ScrollZoom* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_zoom);	
 }
 
-void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
 {
 	psy_ui_Rectangle r;
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	int zoomleftx;
 	int zoomrightx;
 
 	size = psy_ui_component_size(&self->component);
-	zoomleftx = (int)(size.width * self->zoomleft);
-	zoomrightx = (int)(size.width * self->zoomright);
+	tm = psy_ui_component_textmetric(&self->component);
+	zoomleftx = (int)(psy_ui_value_px(&size.width, &tm) * self->start);
+	zoomrightx = (int)(psy_ui_value_px(&size.width, &tm) * self->end);
 	if (zoomleftx == zoomrightx) {
 		++zoomrightx;
 	}	
 	psy_ui_setcolor(g, 0x00666666);
-	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx, size.height);
+	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx,
+		psy_ui_value_px(&size.height, &tm));
 	psy_ui_drawrectangle(g, r);
 	psy_signal_emit(&self->signal_customdraw, self, 1, g);
 }
 
-void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 	int zoomleftx;
 	int zoomrightx;
 	
 	size = psy_ui_component_size(&self->component);
-	zoomrightx = (int)(size.width * self->zoomright);
+	tm = psy_ui_component_textmetric(&self->component);
+	zoomrightx = (int)(psy_ui_value_px(&size.width, &tm) * self->end);
 	if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		self->dragmode = SCROLLZOOM_DRAG_RIGHT;
 		self->dragoffset = ev->x - zoomrightx;
 	} else {	
-		zoomleftx = (int)(size.width * self->zoomleft);
+		zoomleftx = (int)(psy_ui_value_px(&size.width, &tm) * self->start);
 		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			self->dragmode = SCROLLZOOM_DRAG_LEFT;
@@ -100,21 +111,22 @@ void scrollzoom_onmousedown(ScrollZoom* self, psy_ui_Component* sender,
 	psy_ui_component_capture(&self->component);
 }
 
-void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {	
-	psy_ui_Size size;	
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;
 
 	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
 	if (self->dragmode == SCROLLZOOM_DRAG_NONE) {
 		int zoomleftx;
 		int zoomrightx;
 
-		zoomleftx = (int)(size.width * self->zoomleft);
+		zoomleftx = (int)(psy_ui_value_px(&size.width, &tm) * self->start);
 		if (ev->x >= zoomleftx - 5 && ev->x < zoomleftx + 5) {
 			psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 		} else {
-			zoomrightx = (int)(size.width * self->zoomright);
+			zoomrightx = (int)(psy_ui_value_px(&size.width, &tm) * self->end);
 			if (ev->x >= zoomrightx - 5 && ev->x < zoomrightx + 5) {
 				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
@@ -124,18 +136,19 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 		float zoomold;
 
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
-		zoomold = self->zoomleft;
-		self->zoomleft = (ev->x - self->dragoffset) / (float) size.width;
-		if (self->zoomleft > self->zoomright) {
-			self->zoomleft = self->zoomright;
+		zoomold = self->start;
+		self->start = (ev->x - self->dragoffset) /
+			(float)psy_ui_value_px(&size.width, &tm);
+		if (self->start > self->end) {
+			self->start = self->end;
 		} else
-		if (self->zoomleft < 0.f) {
-			self->zoomleft = 0.f;
+		if (self->start < 0.f) {
+			self->start = 0.f;
 		} else
-		if (self->zoomleft > 1.f) {
-			self->zoomleft = 1.f;
+		if (self->start > 1.f) {
+			self->start = 1.f;
 		}
-		if (zoomold != self->zoomright) {
+		if (zoomold != self->end) {
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
@@ -145,18 +158,19 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 		float zoomold;
 
 		psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
-		zoomold = self->zoomright;
-		self->zoomright = (ev->x - self->dragoffset) / (float) size.width;
-		if (self->zoomright < self->zoomleft) {
-			self->zoomright = self->zoomleft;
+		zoomold = self->end;
+		self->end = (ev->x - self->dragoffset) /
+			(float)psy_ui_value_px(&size.width, &tm);
+		if (self->end < self->start) {
+			self->end = self->start;
 		} else
-		if (self->zoomright < 0.f) {
-			self->zoomright = 0.f;
+		if (self->end < 0.f) {
+			self->end = 0.f;
 		} else
-		if (self->zoomright > 1.f) {
-			self->zoomright = 1.f;
+		if (self->end > 1.f) {
+			self->end = 1.f;
 		}
-		if (zoomold != self->zoomright) {
+		if (zoomold != self->end) {
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
@@ -166,20 +180,21 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 		float zoomold;
 		float length;
 		
-		zoomold = self->zoomleft;
-		length = self->zoomright - self->zoomleft;
-		self->zoomleft = (ev->x - self->dragoffset) / (float) size.width;
-		if (self->zoomleft < 0.f) {
-			self->zoomleft = 0.f;			
+		zoomold = self->start;
+		length = self->end - self->start;
+		self->start = (ev->x - self->dragoffset) /
+			(float)psy_ui_value_px(&size.width, &tm);
+		if (self->start < 0.f) {
+			self->start = 0.f;			
 		}
-		if (self->zoomleft + length > 1.f) {
-			self->zoomleft = 1.f - length;
-			if (self->zoomleft < 0.f) {
-				self->zoomleft = 0.f;			
+		if (self->start + length > 1.f) {
+			self->start = 1.f - length;
+			if (self->start < 0.f) {
+				self->start = 0.f;			
 			}
 		}
-		if (self->zoomleft != zoomold) {
-			self->zoomright = self->zoomleft + length;
+		if (self->start != zoomold) {
+			self->end = self->start + length;
 			psy_ui_component_invalidate(&self->component);
 			psy_ui_component_update(&self->component);
 			psy_signal_emit(&self->signal_zoom, self, 0);
@@ -187,8 +202,7 @@ void scrollzoom_onmousemove(ScrollZoom* self, psy_ui_Component* sender,
 	}
 }
 
-void scrollzoom_onmouseup(ScrollZoom* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void scrollzoom_onmouseup(ScrollZoom* self, psy_ui_MouseEvent* ev)
 {
 	self->dragmode = SCROLLZOOM_DRAG_NONE;
 	psy_ui_component_releasecapture(&self->component);

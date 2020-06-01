@@ -65,13 +65,13 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 			psy_ui_label_text(self, text);			
 			size = psy_ui_component_textsize(psy_ui_label_base(self), text);
-			rv->width = size.width + 2 +
-				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm);
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 2 +
+				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
 		} else {		
-			rv->width = tm.tmAveCharWidth * self->charnumber;
+			rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
 		}
-		rv->height = tm.tmHeight +
-			psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm);
+		rv->height = psy_ui_value_makepx(tm.tmHeight +
+			psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm));
 	}
 }
 

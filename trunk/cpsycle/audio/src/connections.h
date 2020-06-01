@@ -46,6 +46,7 @@ typedef struct psy_audio_PinMapping {
 
 void psy_audio_pinmapping_init(psy_audio_PinMapping*, uintptr_t numchannels);
 void psy_audio_pinmapping_dispose(psy_audio_PinMapping*);
+void psy_audio_pinmapping_copy(psy_audio_PinMapping*, psy_audio_PinMapping* src);
 void psy_audio_pinmapping_clear(psy_audio_PinMapping*);
 void psy_audio_pinmapping_autowire(psy_audio_PinMapping*,
 	uintptr_t numchannels);
@@ -114,6 +115,8 @@ int connections_connected(psy_audio_Connections*, uintptr_t outputslot, uintptr_
 void connections_disconnectall(psy_audio_Connections*, uintptr_t slot);
 void connections_setwirevolume(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot,
 	psy_dsp_amp_t factor);
+void connections_setpinmapping(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot,
+	const psy_audio_PinMapping*);
 psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, uintptr_t outputslot, 
 	uintptr_t inputslot);
 psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self, uintptr_t outputslot,

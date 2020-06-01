@@ -142,13 +142,15 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 {
 	if (self->running) {
 		psy_ui_Size size;
+		psy_ui_TextMetric tm;
 		int centery;
 		psy_audio_Buffer* buffer;
 		uintptr_t numsamples;
 		bool active = FALSE;
 
 		size = psy_ui_component_size(&self->component);
-		centery = size.height / 2;
+		tm = psy_ui_component_textmetric(&self->component);
+		centery = psy_ui_value_px(&size.height, &tm) / 2;
 		buffer = oscilloscope_buffer(self, &numsamples);
 		if (buffer && numsamples > 0) {
 			bool zero = FALSE;
@@ -164,8 +166,8 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 
 				channel = oscilloscope_channel(self);
 				active = TRUE;
-				px = size.width / (float)self->scope_view_samples;
-				py = size.height * psy_audio_buffer_rangefactor(buffer,
+				px = psy_ui_value_px(&size.width, &tm) / (float)self->scope_view_samples;
+				py = psy_ui_value_px(&size.height, &tm) * psy_audio_buffer_rangefactor(buffer,
 					PSY_DSP_AMP_RANGE_VST) / 3 * self->invol * self->ampzoom;
 				readpos = buffer->writepos;
 				if (readpos >= self->scope_begin) {
@@ -197,7 +199,7 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 			}
 		}
 		if (!active) {
-			psy_ui_drawline(g, 0, centery, size.width, centery);
+			psy_ui_drawline(g, 0, centery, psy_ui_value_px(&size.width, &tm), centery);
 		}
 	}
 }
