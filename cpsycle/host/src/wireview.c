@@ -469,7 +469,7 @@ void wireframe_init(WireFrame* self, psy_ui_Component* parent, WireView* view)
 	psy_ui_component_seticonressource(wireframe_base(self), IDI_MACPARAM);
 	psy_ui_component_move(wireframe_base(self), 200, 150);
 	psy_ui_component_resize(wireframe_base(self),
-		psy_ui_value_makeew(50), psy_ui_value_makepx(45));
+		psy_ui_value_makeew(80), psy_ui_value_makeeh(25));
 	psy_signal_connect(&wireframe_base(self)->signal_destroy, self,
 		wireframe_ondestroy);
 	psy_signal_connect(&wireframe_base(self)->signal_size, self,
