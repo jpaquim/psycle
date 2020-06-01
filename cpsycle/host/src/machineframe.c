@@ -116,7 +116,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floate
 	self->workspace = workspace;
 	if (floated) {
 		psy_ui_frame_init(&self->component, parent);
-		psy_ui_component_move(&self->component, 200, 150);
+		psy_ui_component_move(&self->component, psy_ui_value_makepx(200),
+			psy_ui_value_makepx(150));
 	} else {
 		psy_ui_component_init(&self->component, parent);		
 	}
@@ -124,7 +125,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floate
 	psy_ui_component_enablealign(&self->component);	
 	parameterbar_init(&self->parameterbar, &self->component);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
-	parameterlistbox_init(&self->parameterbox, &self->component, 0);
+	parameterlistbox_init(&self->parameterbox, &self->component, NULL);
 	psy_ui_component_setalign(&self->parameterbox.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_enablealign(&self->notebook.component);

@@ -41,7 +41,7 @@ void psy_audio_pinmapping_dispose(psy_audio_PinMapping* self)
 	psy_audio_pinmapping_clear(self);
 }
 
-void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, psy_audio_PinMapping* other)
+void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, const psy_audio_PinMapping* other)
 {
 	if (other) {
 		psy_List* p;

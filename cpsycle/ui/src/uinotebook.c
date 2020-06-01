@@ -177,8 +177,8 @@ void onmouseup(psy_ui_Notebook* self, psy_ui_Component* sender,
 		size = psy_ui_component_size(psy_ui_notebook_base(self));
 		tm = psy_ui_component_textmetric(&self->component);
 		position = psy_ui_component_position(sender);
-		psy_ui_component_move(sender, position.left + ev->x,
-			psy_ui_value_px(&size.height, &tm));
+		psy_ui_component_move(sender, psy_ui_value_makepx(position.left + ev->x),
+			size.height);
 		self->splitx = position.left + ev->x;
 		align_split(self, self->splitx);
 		psy_ui_component_releasecapture(&self->component);

@@ -88,6 +88,8 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 		&margin));	
 }
 
+static void interpolatecurvebox_onpreferredsize(InterpolateCurveBox*, psy_ui_Size* limit, psy_ui_Size* rv);
+
 static psy_ui_ComponentVtable interpolatecurvebox_vtable;
 static int interpolatecurvebox_vtable_initialized = 0;
 
@@ -103,6 +105,9 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 			interpolatecurvebox_onmousemove;
 		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_onmouseup)
 			interpolatecurvebox_onmouseup;
+		interpolatecurvebox_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			interpolatecurvebox_onpreferredsize;
+		interpolatecurvebox_vtable_initialized = 1;
 	}
 }
 
@@ -311,7 +316,13 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 	}
 }
 
-static void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y)
+void interpolatecurvebox_onpreferredsize(InterpolateCurveBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	rv->width = psy_ui_value_makepx(0);
+	rv->height = psy_ui_value_makeeh(10);
+}
+
+void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y)
 {
 	psy_ui_Size size;
 	double scalex;
@@ -445,11 +456,11 @@ void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component* par
 	int startsel, int endsel, int lpb, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);	
 	interpolatecurvebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	interpolatecurvebox_init(&self->box, &self->component, self, workspace);
-	psy_ui_component_setalign(&self->box.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->box.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_init(&self->signal_cancel);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		interpolatecurveview_ondestroy);
@@ -458,7 +469,7 @@ void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component* par
 	psy_signal_connect(&self->bar.ok.signal_clicked, self,
 		interpolatecurveview_oninterpolate);
 	psy_signal_connect(&self->bar.curvetype.signal_selchanged, self,
-		interpolatecurveview_oncurvetypechanged);
+		interpolatecurveview_oncurvetypechanged);	
 }
 
 void interpolatecurveview_ondestroy(InterpolateCurveView* self,

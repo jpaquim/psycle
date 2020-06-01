@@ -195,15 +195,18 @@ typedef struct {
    psy_audio_Pattern* pattern;
    TrackerGridEditMode editmode;
    int drawcursor;
+   psy_ui_TextMetric tm;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
 	struct TrackerView*, psy_audio_Player*);
+void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 
 typedef psy_audio_Inputs TrackerInputs;
 
 typedef struct TrackerView {
 	psy_ui_Component component;	
+	psy_ui_Component left;
 	TrackerHeader header;
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
@@ -217,6 +220,7 @@ typedef struct TrackerView {
 	int showlinenumbersinhex;
 	int wraparound;
 	int showemptydata;
+	int showdefaultline;
 	Workspace* workspace;
 	unsigned int opcount;
 	TrackerInputs inputs;
@@ -231,7 +235,7 @@ typedef struct TrackerView {
 	TrackDef defaulttrackdef;
 	ZoomBox zoombox;
 	int doseqtick;
-	int zoomheightbase;
+	int zoomheightbase;	
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);

@@ -583,9 +583,13 @@ void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* scrollm
 	self->vtable->horizontalscrollrange(self, scrollmin, scrollmax);
 }
 
-void psy_ui_component_move(psy_ui_Component* self, int left, int top)
+void psy_ui_component_move(psy_ui_Component* self, psy_ui_Value left, psy_ui_Value top)
 {
-	self->vtable->move(self, left, top);
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(self);
+	self->vtable->move(self, psy_ui_value_px(&left, &tm),
+		psy_ui_value_px(&top, &tm));
 }
 
 void psy_ui_component_resize(psy_ui_Component* self, psy_ui_Value width,
