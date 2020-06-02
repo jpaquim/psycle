@@ -53,13 +53,17 @@ extern "C" {
 #define SAMPLER_CMD_EE                 0xE0
 #define SAMPLER_CMD_E_SET_MIDI_MACRO   0xF0  //                                    (p)
 
-typedef enum
-{
+typedef enum {
 	INTERPOL_NONE = 0,
 	INTERPOL_LINEAR = 1,
 	INTERPOL_SPLINE = 2
-}
-InterpolationType;
+} InterpolationType;
+
+typedef enum {
+	psy_audio_PANNING_LINEAR = 0,
+	psy_audio_PANNING_TWOWAY = 1,
+	psy_audio_PANNING_EQUALPOWER = 2
+} psy_audio_SamplerPanningMode;
 
 typedef struct psy_audio_SamplerChannel {
 	// (0..1.0f) value used for Playback (channel volume)
@@ -94,7 +98,8 @@ typedef struct {
 	int dopan;
 	int dooffset;
 	uint8_t offset;
-	int maxvolume;	
+	int maxvolume;
+	bool stopping;
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
@@ -168,6 +173,7 @@ typedef struct psy_audio_Sampler {
 	uint8_t basec;
 	// Sampler PS1 with max amp = 0.5.
 	psy_dsp_amp_t clipmax;
+	psy_audio_SamplerPanningMode panningmode;
 } psy_audio_Sampler;
 
 void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback);

@@ -201,7 +201,7 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 		sample = psy_audio_samples_at(&self->song->samples,
 			sampleindex_make(psy_tableiterator_key(&it), 0));
 		if (sample) {
-			instrument_setname(instrument, sample_name(sample));
+			instrument_setname(instrument, psy_audio_sample_name(sample));
 		}
 	}
 }
@@ -859,9 +859,9 @@ psy_audio_Sample* xmloadwav(psy_audio_SongFile* self)
 	unsigned char btemp;
 	psy_audio_Sample* wave;
 
-	wave = sample_allocinit(2);
+	wave = psy_audio_sample_allocinit(2);
 	psyfile_readstring(self->file, wavename, sizeof(wavename));
-	sample_setname(wave, wavename);
+	psy_audio_sample_setname(wave, wavename);
 	// wavelength
 	psyfile_read(self->file, &temp, sizeof(temp));
 	wave->numframes = temp;
@@ -1267,9 +1267,9 @@ void readsmsb(psy_audio_SongFile* self)
 			unsigned char btemp;
 			psy_audio_Sample* wave;
 
-			wave = sample_allocinit(2);
+			wave = psy_audio_sample_allocinit(2);
 			psyfile_readstring(self->file, wavename, sizeof(wavename));
-			sample_setname(wave, wavename);
+			psy_audio_sample_setname(wave, wavename);
 			// wavelength
 			psyfile_read(self->file, &temp, sizeof(temp));
 			wave->numframes = temp;
@@ -1420,7 +1420,7 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 		byte* pData;
 		int16_t* pDest;
 		
-		sample = sample_allocinit(2);
+		sample = psy_audio_sample_allocinit(2);
 		sample->panfactor = (float) pan / 256.f ; //(value_mapper::map_256_1(pan));
 		sample->samplerate = 44100;				
 		legacyindex = psyfile_read_uint32(self->file);
@@ -1439,7 +1439,7 @@ void loadwavesubchunk(psy_audio_SongFile* self, int32_t instrIdx, int32_t pan, c
 		sample->stereo = stereo != 0;
 		// Old sample name, never used.
 		psyfile_readstring(self->file, dummy,sizeof(dummy));
-		sample_setname(sample, instrum_name);
+		psy_audio_sample_setname(sample, instrum_name);
 		psyfile_read(self->file, &packedsize,sizeof(packedsize));		
 		if (fullopen) {
 			uint32_t i;

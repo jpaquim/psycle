@@ -5,39 +5,11 @@
 #define psy_audio_SAMPLE_H
 
 #include "buffer.h"
+#include "sampleiterator.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef union _Double { 
-    struct {
-        uint32_t LowPart;
-        uint32_t HighPart; 
-    };	
-    uint64_t QuadPart;
-} Double;
-
-
-INLINE void double_setvalue(Double* self, double value)
-{
-	self->QuadPart = (uint64_t)(value * 4294967296.0f);
-}
-
-INLINE double double_real(Double* self)
-{
-	return self->QuadPart * 1 / 4294967296.0;
-}
-
-/// psy_audio_Sample Loop Types
-typedef enum {
-	/// < Do Nothing
-	psy_audio_SAMPLE_LOOP_DO_NOT	= 0x0,
-	/// < normal Start --> End ,Start --> End ...
-	psy_audio_SAMPLE_LOOP_NORMAL	= 0x1,
-	/// < bidirectional Start --> End, End --> Start ...
-	psy_audio_SAMPLE_LOOP_BIDI		= 0x2
-} psy_audio_SampleLoopType;
 
 /// Wave Form Types
 typedef enum {
@@ -62,19 +34,6 @@ typedef struct {
 
 void vibrato_init(psy_audio_Vibrato*);
 
-typedef struct {
-	struct psy_audio_Sample* sample;
-	Double pos;
-	int64_t speed;	
-	int forward;
-	void* resampler_data;
-} psy_audio_SampleIterator;
-
-void sampleiterator_init(psy_audio_SampleIterator*, struct psy_audio_Sample*);
-psy_audio_SampleIterator* sampleiterator_alloc(void);
-psy_audio_SampleIterator* sampleiterator_allocinit(struct psy_audio_Sample*);
-int sampleiterator_inc(psy_audio_SampleIterator*);
-unsigned int sampleiterator_frameposition(psy_audio_SampleIterator*);
 
 typedef struct psy_audio_SampleLoop {
 	uintptr_t start;
@@ -130,24 +89,29 @@ typedef struct psy_audio_Sample {
 	psy_audio_Vibrato vibrato;
 } psy_audio_Sample;
 
-void sample_init(psy_audio_Sample*, uintptr_t numchannels);
-psy_audio_Sample* sample_alloc(void);
-psy_audio_Sample* sample_allocinit(uintptr_t numchannels);
-psy_audio_Sample* sample_clone(psy_audio_Sample*);
-void sample_dispose(psy_audio_Sample*);
-void sample_load(psy_audio_Sample*, const char* path);
-void sample_save(psy_audio_Sample*, const char* path);
-void sample_setname(psy_audio_Sample*, const char* name);
-psy_audio_SampleIterator sample_begin(psy_audio_Sample*);
-const char* sample_name(psy_audio_Sample*);
-void sample_setcontloop(psy_audio_Sample*, psy_audio_SampleLoopType, uintptr_t loopstart,
+void psy_audio_sample_init(psy_audio_Sample*, uintptr_t numchannels);
+psy_audio_Sample* psy_audio_sample_alloc(void);
+psy_audio_Sample* psy_audio_sample_allocinit(uintptr_t numchannels);
+psy_audio_Sample* psy_audio_sample_clone(psy_audio_Sample*);
+void psy_audio_sample_dispose(psy_audio_Sample*);
+void psy_audio_sample_load(psy_audio_Sample*, const char* path);
+void psy_audio_sample_save(psy_audio_Sample*, const char* path);
+void psy_audio_sample_setname(psy_audio_Sample*, const char* name);
+psy_audio_SampleIterator psy_audio_sample_begin(psy_audio_Sample*);
+const char* psy_audio_sample_name(psy_audio_Sample*);
+void psy_audio_sample_setcontloop(psy_audio_Sample*, psy_audio_SampleLoopType, uintptr_t loopstart,
 	uintptr_t loopend);
-void sample_setsustainloop(psy_audio_Sample*, psy_audio_SampleLoopType, uintptr_t loopstart,
+void psy_audio_sample_setsustainloop(psy_audio_Sample*, psy_audio_SampleLoopType, uintptr_t loopstart,
 	uintptr_t loopend);
 /// return attenuator for all notes of this sample. range (0..4)(-inf to +12dB)
 INLINE psy_dsp_amp_t psy_audio_sample_volume(psy_audio_Sample* self)
 {
 	return self->globalvolume;
+}
+
+INLINE uintptr_t psy_audio_sample_numchannels(psy_audio_Sample* self)
+{
+	return psy_audio_buffer_numchannels(&self->channels);
 }
 
 #ifdef __cplusplus

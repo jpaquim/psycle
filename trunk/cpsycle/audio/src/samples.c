@@ -39,7 +39,7 @@ void samplesgroup_dispose(psy_audio_SamplesGroup* self)
 		psy_audio_Sample* sample;
 		
 		sample = (psy_audio_Sample*)psy_tableiterator_value(&it);
-		sample_dispose(sample);
+		psy_audio_sample_dispose(sample);
 		free(sample);
 	}
 	psy_table_dispose(&self->container);
@@ -75,7 +75,7 @@ void samplesgroup_remove(psy_audio_SamplesGroup* self, uintptr_t slot)
 	sample = psy_table_at(&self->container, slot);
 	if (sample) {
 		psy_table_remove(&self->container, slot);
-		sample_dispose(sample);
+		psy_audio_sample_dispose(sample);
 		free(sample);
 	}
 }

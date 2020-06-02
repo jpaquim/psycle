@@ -2461,7 +2461,7 @@ void trackerview_computefontheight(TrackerView* self)
 void trackerview_initblockmenu(TrackerView* self)
 {
 	patternblockmenu_init(&self->blockmenu, &self->component);
-	psy_ui_component_setalign(&self->blockmenu, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(&self->blockmenu.component, psy_ui_ALIGN_RIGHT);
 	trackerview_connectblockmenu(self);
 	psy_ui_component_hide(&self->blockmenu.component);
 }

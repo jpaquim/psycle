@@ -177,11 +177,6 @@ void psy_audio_buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan, uintptr_t a
 	}
 }
 
-uintptr_t psy_audio_buffer_numchannels(psy_audio_Buffer* self)
-{
-	return self->numchannels;
-}
-
 int psy_audio_buffer_mono(psy_audio_Buffer* self)
 {
 	return self->numchannels == 1;
@@ -377,4 +372,15 @@ psy_dsp_amp_t psy_audio_buffer_rmsscale(psy_audio_Buffer* self,
 		temp = 97;
 	}
 	return (temp > 0) ? temp / (psy_dsp_amp_t)97.f : (psy_dsp_amp_t)0.f;
+}
+
+void psy_audio_buffer_make_monoaureal(psy_audio_Buffer* self,
+	uintptr_t numsamples)
+{
+	if (psy_audio_buffer_numchannels(self) > 1) {
+		dsp.add(psy_audio_buffer_at(self, 0),
+			psy_audio_buffer_at(self, 1),
+			numsamples,
+			1.f);
+	}
 }
