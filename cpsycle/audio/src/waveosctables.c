@@ -93,7 +93,7 @@ void constructtable(psy_audio_WaveOscTables* self,
     psy_audio_InstrumentEntry* entry;
 
     index = sampleindex_make(shape, i);
-    w = sample_allocinit(1);
+    w = psy_audio_sample_allocinit(1);
     constructwave(f_hi, w, func, sr);
     psy_audio_samples_insert(&self->container, w, index);
     entry = instrumententry_allocinit();

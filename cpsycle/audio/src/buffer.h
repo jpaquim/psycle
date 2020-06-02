@@ -48,7 +48,12 @@ void psy_audio_buffer_mixsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
 	const struct psy_audio_PinMapping* mapping);
 void psy_audio_buffer_mulsamples(psy_audio_Buffer*, uintptr_t numsamples,
 	psy_dsp_amp_t mul);
-	uintptr_t psy_audio_buffer_numchannels(psy_audio_Buffer*);
+
+INLINE uintptr_t psy_audio_buffer_numchannels(psy_audio_Buffer* self)
+{	
+	return self->numchannels;	
+}
+
 void psy_audio_buffer_pan(psy_audio_Buffer* self, psy_dsp_amp_t pan,
 	uintptr_t amount);
 int psy_audio_buffer_mono(psy_audio_Buffer*);
@@ -68,7 +73,8 @@ psy_dsp_amp_t psy_audio_buffer_rmsscale(psy_audio_Buffer*,
 	psy_dsp_amp_t rms_volume);
 psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
 	psy_dsp_amp_range_t);
-
+void psy_audio_buffer_make_monoaureal(psy_audio_Buffer*,
+	uintptr_t numsamples);
 
 #ifdef __cplusplus
 }

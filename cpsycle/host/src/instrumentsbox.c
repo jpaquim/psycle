@@ -33,7 +33,8 @@ void BuildInstrumentList(InstrumentsBox* self)
 	psy_ui_listbox_clear(&self->instrumentlist);
 	for ( ; slot < 256; ++slot) {		
 		if (instrument = instruments_at(self->instruments, slot)) {
-			psy_snprintf(buffer, 20, "%02X:%s", slot, instrument_name(instrument));
+			psy_snprintf(buffer, 20, "%02X*:%s", slot,
+				instrument_name(instrument));
 		} else {
 			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
 		}

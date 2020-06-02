@@ -364,7 +364,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 						short* pData;
 						uint32_t f;
 
-						wave = sample_allocinit(2);						
+						wave = psy_audio_sample_allocinit(2);
 						//Old format assumed 44Khz
 						wave->samplerate = 44100;
 						wave->panfactor = (float) pans[i] / 256.f ; //(value_mapper::map_256_1(pan));

@@ -100,5 +100,8 @@ float work_float_unchecked(psy_dsp_LinearResampler* self,
 {
 	const float y0 = *data;
 	const float y1 = *(data + 1);
+	uintptr_t debug;
+
+	debug = res >> (32 - CUBIC_RESOLUTION_LOG);
 	return y0 + (y1 - y0) * l_table[res >> (32 - CUBIC_RESOLUTION_LOG)];
 }

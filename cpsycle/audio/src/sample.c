@@ -10,86 +10,7 @@
 #include <operations.h>
 #include <alignedalloc.h>
 
-
-void sampleiterator_init(psy_audio_SampleIterator* self, psy_audio_Sample* sample)
-{
-	self->sample = sample;
-	self->forward = 1;
-	double_setvalue(&self->pos, 0.0);
-	self->speed = (int64_t) 4294967296.0f;
-	self->resampler_data = 0;
-}
-
-psy_audio_SampleIterator* sampleiterator_alloc(void)
-{
-	return malloc(sizeof(psy_audio_SampleIterator));
-}
-
-psy_audio_SampleIterator* sampleiterator_allocinit(psy_audio_Sample* sample)
-{
-	psy_audio_SampleIterator* rv;
-
-	rv = sampleiterator_alloc();
-	if (rv) {		
-		sampleiterator_init(rv, sample);
-	}
-	return rv;
-}
-
-int sampleiterator_inc(psy_audio_SampleIterator* self)
-{			
-	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_DO_NOT) {
-		self->pos.QuadPart += self->speed;
-		if (self->pos.HighPart >= self->sample->numframes) {
-			self->pos.LowPart = 0;
-			self->pos.HighPart = 0;			
-			return 0;			
-		}
-	} else
-	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_NORMAL) {
-		self->pos.QuadPart += self->speed;
-		if (self->pos.HighPart >= self->sample->loop.end) {
-			self->pos.HighPart = self->sample->loop.start +
-				self->sample->loop.end - self->pos.HighPart;
-		}
-	} else
-	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_BIDI) {
-		if (self->forward) {
-			self->pos.QuadPart += self->speed;
-			if (self->pos.HighPart >= self->sample->loop.end) {
-				Double loopend;
-				Double delta;
-				
-				loopend.LowPart = 0;
-				loopend.HighPart = self->sample->loop.end;
-				delta.QuadPart = self->pos.QuadPart - loopend.QuadPart;
-				self->pos.QuadPart = loopend.QuadPart - delta.QuadPart;
-				self->forward = 0;
-			}
-		} else {
-			// todo check negative values first
-			self->pos.QuadPart -= self->speed;
-			if (self->pos.HighPart <= self->sample->loop.start) {
-				Double loopstart;
-				Double delta;
-				
-				loopstart.LowPart = 0;
-				loopstart.HighPart = self->sample->loop.start;
-				delta.QuadPart = loopstart.QuadPart - self->pos.QuadPart;
-				self->pos.QuadPart = loopstart.QuadPart + delta.QuadPart;
-				self->forward = 1;
-			}
-		}
-	}	
-	return 1;
-}
-
-unsigned int sampleiterator_frameposition(psy_audio_SampleIterator* self)
-{
-	return self->pos.HighPart;
-}
-
-void vibrato_init(psy_audio_Vibrato* self)
+void psy_audio_vibrato_init(psy_audio_Vibrato* self)
 {
 	self->attack = 0;
 	self->depth = 0;
@@ -97,7 +18,7 @@ void vibrato_init(psy_audio_Vibrato* self)
 	self->type = psy_audio_WAVEFORMS_SINUS;
 }
 
-void sample_init(psy_audio_Sample* self, uintptr_t numchannels)
+void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 {
 	psy_audio_buffer_init(&self->channels, numchannels);
 	self->stereo = 1;
@@ -117,10 +38,10 @@ void sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 	self->panenabled = 0;
 	self->surround = 0;
 	self->name = strdup("");	
-	vibrato_init(&self->vibrato);
+	psy_audio_vibrato_init(&self->vibrato);
 }
 
-void sample_dispose(psy_audio_Sample* self)
+void psy_audio_sample_dispose(psy_audio_Sample* self)
 {
 	uintptr_t channel;
 
@@ -133,27 +54,27 @@ void sample_dispose(psy_audio_Sample* self)
 	free(self->name);
 }
 
-psy_audio_Sample* sample_alloc(void)
+psy_audio_Sample* psy_audio_sample_alloc(void)
 {
 	return (psy_audio_Sample*) malloc(sizeof(psy_audio_Sample));
 }
 
-psy_audio_Sample* sample_allocinit(uintptr_t numchannels)
+psy_audio_Sample* psy_audio_sample_allocinit(uintptr_t numchannels)
 {
 	psy_audio_Sample* rv;
 
-	rv = sample_alloc();
+	rv = psy_audio_sample_alloc();
 	if (rv) {
-		sample_init(rv, numchannels);
+		psy_audio_sample_init(rv, numchannels);
 	}
 	return rv;
 }
 
-psy_audio_Sample* sample_clone(psy_audio_Sample* src)
+psy_audio_Sample* psy_audio_sample_clone(psy_audio_Sample* src)
 {
 	psy_audio_Sample* rv = 0;
 	
-	rv = sample_alloc();
+	rv = psy_audio_sample_alloc();
 	if (rv) {
 		uintptr_t channel;
 
@@ -189,47 +110,47 @@ psy_audio_Sample* sample_clone(psy_audio_Sample* src)
 	return rv;
 }
 
-void sample_load(psy_audio_Sample* self, const char* path)
+void psy_audio_sample_load(psy_audio_Sample* self, const char* path)
 {
 	char* delim;
 
 	psy_audio_wave_load(self, path);
 	delim = strrchr(path, '\\');	
-	sample_setname(self, delim ? delim + 1 : path);	
+	psy_audio_sample_setname(self, delim ? delim + 1 : path);
 }
 
-void sample_save(psy_audio_Sample* self, const char* path)
+void psy_audio_sample_save(psy_audio_Sample* self, const char* path)
 {
 	psy_audio_wave_save(self, path);
 }
 
-void sample_setname(psy_audio_Sample* self, const char* name)
+void psy_audio_sample_setname(psy_audio_Sample* self, const char* name)
 {
 	free(self->name);
 	self->name = strdup(name);
 }
 
-const char* sample_name(psy_audio_Sample* self)
+const char* psy_audio_sample_name(psy_audio_Sample* self)
 {
 	return self->name;
 }
 
-psy_audio_SampleIterator sample_begin(psy_audio_Sample* self)
+psy_audio_SampleIterator psy_audio_sample_begin(psy_audio_Sample* self)
 {
 	psy_audio_SampleIterator rv;
 
-	sampleiterator_init(&rv, self);
+	psy_audio_sampleiterator_init(&rv, self);
 	return rv;
 }
 
-void sample_setcontloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
+void psy_audio_sample_setcontloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
 	uintptr_t loopstart, uintptr_t loopend)
 {
 	psy_audio_sampleloop_init_all(&self->loop, looptype, loopstart,
 		loopend);
 }
 
-void sample_setsustainloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
+void psy_audio_sample_setsustainloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
 	uintptr_t loopstart, uintptr_t loopend)
 {
 	psy_audio_sampleloop_init_all(&self->sustainloop, looptype, loopstart,

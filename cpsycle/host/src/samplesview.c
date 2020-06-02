@@ -226,12 +226,12 @@ void samplessongimportview_oncopy(SamplesSongImportView* self,
 	dst = samplesbox_selected(&self->view->samplesbox);	
 	sample = psy_audio_samples_at(&self->source->samples, src);
 	if (sample) {
-		samplecopy = sample_clone(sample);
+		samplecopy = psy_audio_sample_clone(sample);
 		psy_audio_samples_insert(&self->workspace->song->samples, samplecopy,
 			dst);
 		instrument = (psy_audio_Instrument*)malloc(sizeof(psy_audio_Instrument));		
 		instrument_init(instrument);
-		instrument_setname(instrument, sample_name(samplecopy));
+		instrument_setname(instrument, psy_audio_sample_name(samplecopy));
 		instruments_insert(&self->workspace->song->instruments, instrument,
 			dst.slot);
 		samplesview_setsample(self->view, dst);
@@ -414,13 +414,13 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			psy_audio_SampleIndex index;
 			psy_audio_Instrument* instrument;
 
-			sample = sample_allocinit(2);
-			sample_load(sample, psy_ui_opendialog_filename(&dialog));
+			sample = psy_audio_sample_allocinit(2);
+			psy_audio_sample_load(sample, psy_ui_opendialog_filename(&dialog));
 			index = samplesbox_selected(&self->samplesbox);
 			psy_audio_samples_insert(&self->workspace->song->samples, sample,
 				index);
 			instrument = instrument_allocinit();
-			instrument_setname(instrument, sample_name(sample));
+			instrument_setname(instrument, psy_audio_sample_name(sample));
 			instruments_insert(&self->workspace->song->instruments, instrument,
 				index.slot);
 			samplesview_setsample(self, index);
@@ -452,7 +452,7 @@ void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 		"WAV",
 		workspace_samples_directory(self->workspace));
 	if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {
-		sample_save(wavebox_sample(&self->wavebox),
+		psy_audio_sample_save(wavebox_sample(&self->wavebox),
 			psy_ui_savedialog_filename(&dialog));
 	}
 	psy_ui_savedialog_dispose(&dialog);
@@ -491,11 +491,11 @@ void samplesview_onduplicatesample(SamplesView* self, psy_ui_Component* sender)
 				psy_audio_Sample* copy;
 				psy_audio_Instrument* instrument;
 
-				copy = sample_clone(source);
+				copy = psy_audio_sample_clone(source);
 				psy_audio_samples_insert(&self->workspace->song->samples, copy,
 					dst);
 				instrument = instrument_allocinit();
-				instrument_setname(instrument, sample_name(copy));
+				instrument_setname(instrument, psy_audio_sample_name(copy));
 				instruments_insert(&self->workspace->song->instruments,
 					instrument, dst.slot);
 				samplesview_setsample(self, sampleindex_make(dst.slot, 0));
@@ -638,15 +638,15 @@ void oneditsamplename(SamplesHeaderView* self, psy_ui_Edit* sender)
 		psy_audio_SampleIndex index;
 
 		index = samplesbox_selected(&self->view->samplesbox);
-		sample_setname(self->sample, psy_ui_edit_text(sender));		
+		psy_audio_sample_setname(self->sample, psy_ui_edit_text(sender));
 		if (index.subslot == 0) {
 			psy_snprintf(text, 20, "%02X:%s", 
-			(int)index.slot, sample_name(self->sample));
+			(int)index.slot, psy_audio_sample_name(self->sample));
 			psy_ui_listbox_settext(&self->view->samplesbox.samplelist, text, 
 				index.slot);
 		}
 		psy_snprintf(text, 20, "%02X:%s", 
-			(int)index.subslot, sample_name(self->sample));
+			(int)index.subslot, psy_audio_sample_name(self->sample));
 		psy_ui_listbox_settext(&self->view->samplesbox.subsamplelist, text,
 			index.subslot);
 	}

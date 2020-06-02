@@ -212,6 +212,9 @@
     <ClCompile Include="src\wire.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\sampleiterator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -419,6 +422,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\wire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sampleiterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

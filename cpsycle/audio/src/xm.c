@@ -302,8 +302,8 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 				psy_audio_Sample* sample;
 				int is16bit;
 				
-				sample = sample_allocinit(1);
-				sample_setname(sample, xmsamples[s].name);
+				sample = psy_audio_sample_allocinit(1);
+				psy_audio_sample_setname(sample, xmsamples[s].name);
 				
 				is16bit = (xmsamples[s].type & 0x10) == 0x10;
 				sample->panfactor =  xmsamples[s].pan / (psy_dsp_amp_t) 255.f;
@@ -315,7 +315,7 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 						sample->loop.type = psy_audio_SAMPLE_LOOP_NORMAL;
 					} else
 					if (xmsamples[s].type & 0x02) {
-						sample->loop.type = psy_audio_SAMPLE_LOOP_NORMAL; // psy_audio_SAMPLE_LOOP_BIDI;
+						sample->loop.type = psy_audio_SAMPLE_LOOP_BIDI;
 					} else {
 						sample->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
 					}

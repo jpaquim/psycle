@@ -203,6 +203,7 @@
     <ClCompile Include="src\sample.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\sampleiterator.c" />
     <ClCompile Include="src\sampler.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -289,6 +290,7 @@
     <ClInclude Include="src\psy3.h" />
     <ClInclude Include="src\psyclescript.h" />
     <ClInclude Include="src\sample.h" />
+    <ClInclude Include="src\sampleiterator.h" />
     <ClInclude Include="src\sampler.h" />
     <ClInclude Include="src\samples.h" />
     <ClInclude Include="src\sequence.h" />

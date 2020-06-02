@@ -69,8 +69,8 @@ void samplesbox_buildsamplelist(SamplesBox* self)
 		sample = self->samples ? psy_audio_samples_at(self->samples,
 			sampleindex_make(slot, 0)) : 0;
 		if (sample) {
-			psy_snprintf(text, 20, "%02X:%s", slot,
-				sample_name(sample));
+			psy_snprintf(text, 20, "%02X*:%s", slot,
+				psy_audio_sample_name(sample));
 		} else {
 			psy_snprintf(text, 20, "%02X:%s", slot, "");
 		}
@@ -95,7 +95,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot, bool create
 			: 0;
 		if (sample != 0) {
 			psy_snprintf(text, 20, "%02X:%s", subslot,
-				sample_name(sample));
+				psy_audio_sample_name(sample));
 		} else {
 			psy_snprintf(text, 20, "%02X:%s", subslot, "");
 		}
