@@ -351,7 +351,7 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 	const int thirdbegin = 128; // start of third window = secbegin+(totalsamples*2)
 
 	int32_t max;
-	ULARGE_INTEGER amount;
+	Double amount;
 	amount.QuadPart = self->pos.QuadPart + self->speedinternal * numSamples;
 	int32_t pos = self->pos.HighPart;
 
