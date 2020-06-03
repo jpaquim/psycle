@@ -200,9 +200,6 @@
     <ClCompile Include="src\volslider.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\vst2view.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\vubar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -442,9 +439,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\volslider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vst2view.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\vubar.h">
