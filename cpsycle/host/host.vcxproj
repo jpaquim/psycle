@@ -218,7 +218,6 @@
     <ClCompile Include="src\undoredo.c" />
     <ClCompile Include="src\undoredobar.c" />
     <ClCompile Include="src\volslider.c" />
-    <ClCompile Include="src\vst2view.c" />
     <ClCompile Include="src\vubar.c" />
     <ClCompile Include="src\vumeter.c" />
     <ClCompile Include="src\vuscope.c" />
@@ -305,7 +304,6 @@
     <ClInclude Include="src\undoredo.h" />
     <ClInclude Include="src\undoredobar.h" />
     <ClInclude Include="src\volslider.h" />
-    <ClInclude Include="src\vst2view.h" />
     <ClInclude Include="src\vubar.h" />
     <ClInclude Include="src\vumeter.h" />
     <ClInclude Include="src\vuscope.h" />
