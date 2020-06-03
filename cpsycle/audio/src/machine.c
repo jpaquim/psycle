@@ -165,6 +165,42 @@ static psy_dsp_amp_range_t amprange(psy_audio_Machine* self)
 {
 	return PSY_DSP_AMP_RANGE_NATIVE;
 }
+// MachineParameter calls
+static void param_tweak(psy_audio_Machine* self, psy_audio_MachineParam* param, float val)
+{
+	psy_audio_machineparam_tweak(param, val);
+}
+
+static float param_normvalue(psy_audio_Machine* self, psy_audio_MachineParam* param)
+{
+	return psy_audio_machineparam_normvalue(param);
+}
+
+static void param_range(psy_audio_Machine* self, psy_audio_MachineParam* param,
+	intptr_t* minval, intptr_t* maxval)
+{
+	psy_audio_machineparam_range(param, minval, maxval);
+}
+
+static int param_type(psy_audio_Machine* self, psy_audio_MachineParam* param)
+{
+	return psy_audio_machineparam_type(param);
+}
+
+static int param_label(psy_audio_Machine* self, psy_audio_MachineParam* param, char* text)
+{
+	return psy_audio_machineparam_label(param, text);
+}
+
+static int param_name(psy_audio_Machine* self, psy_audio_MachineParam* param, char* text)
+{
+	return psy_audio_machineparam_name(param, text);
+}
+
+static int param_describe(psy_audio_Machine* self, psy_audio_MachineParam* param, char* text)
+{
+	return psy_audio_machineparam_describe(param, text);
+}
 // data
 static void putdata(psy_audio_Machine* self, uint8_t* data) { }
 static uint8_t* data(psy_audio_Machine* self) { return NULL; }
@@ -238,7 +274,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.clone = clone;
-		vtable.dispose = machine_dispose;
+		vtable.dispose = machine_base_dispose;
 		vtable.reload = reload;
 		vtable.mix = mix;
 		vtable.work = work;
@@ -313,11 +349,19 @@ static void vtable_init(void)
 		vtable.numbanks = numbanks;
 		vtable.setcurrbank = setcurrbank;
 		vtable.currbank = currbank;
+		vtable.parameter_tweak = param_tweak;;
+		vtable.parameter_normvalue = param_normvalue;
+		vtable.parameter_range = param_range;
+		vtable.parameter_type = param_type;
+		vtable.parameter_label = param_label;
+		vtable.parameter_name = param_name;
+		vtable.parameter_describe = param_describe;
 		vtable_initialized = 1;
 	}
 }
 
-void machine_init(psy_audio_Machine* self, psy_audio_MachineCallback callback)
+void psy_audio_machine_init(psy_audio_Machine* self, psy_audio_MachineCallback
+	callback)
 {		
 	memset(self, 0, sizeof(psy_audio_Machine));
 	vtable_init();
@@ -328,7 +372,7 @@ void machine_init(psy_audio_Machine* self, psy_audio_MachineCallback callback)
 	psy_signal_init(&self->signal_worked);	
 }
 
-void machine_dispose(psy_audio_Machine* self)
+void machine_base_dispose(psy_audio_Machine* self)
 {
 	psy_signal_dispose(&self->signal_worked);
 }
@@ -393,15 +437,15 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 						int32_t step;
 						int32_t nv;
 
-						curr = psy_audio_machineparam_patternvalue(param);
+						curr = psy_audio_machine_parameter_patternvalue(self, param);
 						step = (v - curr) / ev->vol;
 						nv = curr + step;						
 						if (nv < 0) {
 							nv = 0;
 						}
-						psy_audio_machineparam_tweak_pattern(param, (uint16_t) nv);
+						psy_audio_machine_parameter_tweak_pattern(self, param, (uint16_t) nv);
 					} else {
-						psy_audio_machineparam_tweak_pattern(param, v);
+						psy_audio_machine_parameter_tweak_pattern(self, param, v);
 					}
 				}
 			}
@@ -602,7 +646,7 @@ void savespecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 
 		param = psy_audio_machine_tweakparameter(self, i);
 		if (param) {
-			scaled = psy_audio_machineparam_scaledvalue(param);
+			scaled = psy_audio_machine_parameter_scaledvalue(self, param);
 		}		
 		psyfile_write_int32(songfile->file, scaled);
 	}

@@ -637,7 +637,7 @@ int luamachine_create(lua_State* L)
 void psy_audio_luamachine_dispose(psy_audio_LuaMachine* self)
 {
 	if (self->machine && !luamachine_shared(self)) {
-		machine_dispose(self->machine);
+		machine_base_dispose(self->machine);
 		free(self->machine);
 		self->machine = 0;
 	}

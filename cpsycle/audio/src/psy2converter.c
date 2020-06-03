@@ -321,7 +321,7 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 		retweak_parameters(songfile, machine, type, name, Vals, 15, 0);
 		param = psy_audio_machine_parameter(machine, 19);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 		retweak_parameters(songfile, machine, type, name, Vals + 15, 1, 15);
 		if (numParameters > 16) {
@@ -329,11 +329,11 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 		} else {
 			param = psy_audio_machine_parameter(machine, 24);
 			if (param) {
-				psy_audio_machineparam_tweak_scaled(param, 0);
+				psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 			}
 			param = psy_audio_machine_parameter(machine, 25);
 			if (param) {
-				psy_audio_machineparam_tweak_scaled(param, 0);
+				psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 			}
 		}
 	} else
@@ -341,36 +341,36 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 25);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 27);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 1);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 1);
 		}
 	} else if (strcmp(name, asynth2) == 0) {
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 25);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 	} else  if (strcmp(name, asynth21) == 0) {
 		//I am unsure which was the diference between asynth2 and asynth21 (need to chech sources in the cvs)
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 1);
 		param = psy_audio_machine_parameter(machine, 24);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 		param = psy_audio_machine_parameter(machine, 25);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param, 0);
+			psy_audio_machine_parameter_tweak_scaled(machine, param, 0);
 		}
 	} else if (strcmp(name, asynth22) == 0) {
 		retweak_parameters(songfile, machine, type, name, Vals, numParameters, 0);
@@ -452,7 +452,7 @@ void retweak_parameters(psy_audio_SongFile* songfile, psy_audio_Machine* machine
 			&new_value);
 		param = psy_audio_machine_parameter(machine, new_parameter);
 		if (param) {
-			psy_audio_machineparam_tweak_scaled(param,  new_value);
+			psy_audio_machine_parameter_tweak_scaled(machine, param,  new_value);
 		}
 	}
 }

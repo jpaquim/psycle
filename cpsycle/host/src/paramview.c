@@ -211,7 +211,7 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 void drawparameter(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param,
 	uintptr_t paramnum, uintptr_t row, uintptr_t col)
 {		
-	switch (psy_audio_machineparam_type(param) & ~MPF_SMALL) {
+	switch (psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL) {
 		case MPF_HEADER:
 			drawheader(self, g, param, paramnum, row, col);
 		break;
@@ -267,12 +267,12 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	psy_ui_setrectangle(&r_bottom, left + knob_cx, top + height / 2,
 		width - knob_cx, height / 2);				
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
-	if (!psy_audio_machineparam_name(param, label)) {
-		if (!psy_audio_machineparam_label(param, label)) {
+	if (!psy_audio_machine_parameter_name(self->machine, param, label)) {
+		if (!psy_audio_machine_parameter_label(self->machine, param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
-	if (psy_audio_machineparam_describe(param, str) == FALSE) {
+	if (psy_audio_machine_parameter_describe(self->machine, param, str) == FALSE) {
 		psy_snprintf(str, 128, "%d",
 			(int) psy_audio_machineparam_scaledvalue(param));
 	}
@@ -292,7 +292,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 		int knob_frame;
 
 		knob_frame = (int)
-			(psy_audio_machineparam_normvalue(param) * 63.f);
+			(psy_audio_machine_parameter_normvalue(self->machine, param) * 63.f);
 		psy_ui_drawbitmap(g, &self->skin->knobbitmap, r.left, r.top, knob_cx,
 			knob_cy, knob_frame * knob_cx, 0);
 	}
@@ -323,8 +323,8 @@ void drawheader(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	psy_ui_drawsolidrectangle(g, r, self->skin->topcolor);
 	psy_ui_setrectangle(&r, left, top+ half + quarter, width, quarter);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
-	if (!psy_audio_machineparam_name(param, str)) {
-		if (!psy_audio_machineparam_label(param, str)) {
+	if (!psy_audio_machine_parameter_name(self->machine, param, str)) {
+		if (!psy_audio_machine_parameter_label(self->machine, param, str)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}	
@@ -355,15 +355,15 @@ void drawinfolabel(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* 
 	psy_ui_setrectangle(&r, left, top, width, top + half);
 	psy_ui_setbackgroundcolor(g, self->skin->titlecolor);
 	psy_ui_settextcolor(g, self->skin->fonttitlecolor);
-	if (!psy_audio_machineparam_name(param, str)) {
-		if (!psy_audio_machineparam_label(param, str)) {
+	if (!psy_audio_machine_parameter_name(self->machine, param, str)) {
+		if (!psy_audio_machine_parameter_label(self->machine, param, str)) {
 			psy_snprintf(str, 128, "%s", "");
 		}
 	}
 	psy_ui_textoutrectangle(g, 
 		left, top, psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED,
 		r, str, strlen(str));	
-	if (psy_audio_machineparam_describe(param, str) == FALSE) {
+	if (psy_audio_machine_parameter_describe(self->machine, param, str) == FALSE) {
 		psy_snprintf(str, 128, "%s", "");
 	}
 	psy_ui_setbackgroundcolor(g, self->skin->bottomcolor);
@@ -395,13 +395,13 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
 	skin_blitpart(g, &self->skin->mixerbitmap, left, top, &self->skin->slider);
 	xoffset = (self->skin->slider.destwidth - self->skin->knob.destwidth) / 2;
-	value =	psy_audio_machineparam_normvalue(param);
+	value =	psy_audio_machine_parameter_normvalue(self->machine, param);
 	yoffset = (int)((1 - value) *
 		(self->skin->slider.destheight - self->skin->sliderknob.destheight));
 	skin_blitpart(g, &self->skin->mixerbitmap, left + xoffset, top + yoffset,
 		&self->skin->sliderknob);
 			
-	if (psy_audio_machineparam_name(param, str) != FALSE) {
+	if (psy_audio_machine_parameter_name(self->machine, param, str) != FALSE) {
 		psy_ui_setbackgroundcolor(g, self->skin->topcolor);
 		psy_ui_settextcolor(g, self->skin->fonttopcolor);
 		psy_ui_setrectangle(&r, left + 32, top + self->skin->slider.destheight - 48, width - 32, 24);
@@ -411,8 +411,9 @@ void drawslider(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	}	
 	psy_ui_setrectangle(&r, left + 32, top + self->skin->slider.destheight - 24,
 		width - 32, 24);
-	if (psy_audio_machineparam_describe(param, str) == FALSE) {
-		psy_snprintf(str, 128, "%d", psy_audio_machineparam_normvalue(param));
+	if (psy_audio_machine_parameter_describe(self->machine, param, str) == FALSE) {
+		psy_snprintf(str, 128, "%d",
+			psy_audio_machine_parameter_normvalue(self->machine, param));
 	}
 	psy_ui_setbackgroundcolor(g, self->skin->bottomcolor);
 	psy_ui_settextcolor(g, self->skin->fontbottomcolor);
@@ -478,7 +479,7 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
 	centery = (height - self->skin->checkoff.destheight) / 2;
-	if (psy_audio_machineparam_normvalue(param) == 0.f) {
+	if (psy_audio_machine_parameter_normvalue(self->machine, param) == 0.f) {
 		skin_blitpart(g, &self->skin->mixerbitmap, left,
 			top + centery, &self->skin->checkoff);
 	} else {
@@ -486,7 +487,7 @@ void drawslidercheck(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam
 			top + centery, & self->skin->checkon);
 	}
 	psy_ui_setrectangle(&r, left + 20, top, width, height);
-	if (!psy_audio_machineparam_name(param, label)) {
+	if (!psy_audio_machine_parameter_name(self->machine, param, label)) {
 		if (!psy_audio_machineparam_label(param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
@@ -512,7 +513,7 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
 	psy_ui_drawsolidrectangle(g, r, self->skin->bottomcolor);
-	if (psy_audio_machineparam_normvalue(param) == 0.f) {
+	if (psy_audio_machine_parameter_normvalue(self->machine, param) == 0.f) {
 		skin_blitpart(g, &self->skin->mixerbitmap, left,
 			top, &self->skin->switchoff);
 	}
@@ -520,8 +521,8 @@ void drawswitch(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* par
 		skin_blitpart(g, &self->skin->mixerbitmap, left,
 			top, &self->skin->switchon);
 	}	
-	if (!psy_audio_machineparam_name(param, label)) {
-		if (!psy_audio_machineparam_label(param, label)) {
+	if (!psy_audio_machine_parameter_name(self->machine, param, label)) {
+		if (!psy_audio_machine_parameter_label(self->machine, param, label)) {
 			psy_snprintf(label, 128, "%s", "");
 		}
 	}
@@ -655,13 +656,13 @@ void onmousedown(ParamView* self, psy_ui_MouseEvent* ev)
 		uintptr_t paramtype;
 				
 		self->tweakbase = ev->y;		
-		self->tweakval = psy_audio_machineparam_normvalue(param);
-		paramtype = psy_audio_machineparam_type(param) & ~MPF_SMALL;
+		self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
+		paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
 		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
 			if (self->tweakval == 0.f) {
-				psy_audio_machineparam_tweak(param, 1.f);
+				psy_audio_machine_parameter_tweak(self->machine, param, 1.f);
 			} else {
-				psy_audio_machineparam_tweak(param, 0.f);
+				psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
 			}			
 		}
 		psy_ui_component_capture(&self->component);
@@ -690,7 +691,7 @@ uintptr_t hittest(ParamView* self, int x, int y)
 			psy_audio_MachineParam* param;
 			
 			param = psy_audio_machine_parameter(self->machine, paramnum);
-			if (param && ((psy_audio_machineparam_type(param) & MPF_IGNORE)
+			if (param && ((psy_audio_machine_parameter_type(self->machine, param) & MPF_IGNORE)
 					!= MPF_IGNORE)) {
 				psy_ui_Rectangle* position;
 
@@ -721,7 +722,7 @@ void onmousemove(ParamView* self, psy_ui_MouseEvent* ev)
 		if (val < 0.f) {
 			val = 0.f;
 		}		
-		psy_audio_machineparam_tweak(param, val);
+		psy_audio_machine_parameter_tweak(self->machine, param, val);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -740,7 +741,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 	self->tweak = hittest(self, ev->x, ev->y);
 	param = tweakparam(self);
 	if (param != NULL) {
-		self->tweakval = psy_audio_machineparam_normvalue(param);
+		self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
 		if (ev->delta > 0) {
 			float val;
 			
@@ -752,7 +753,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 				if (val < 0.f) {
 					val = 0.f;
 				}
-			psy_audio_machineparam_tweak(param, val);			
+			psy_audio_machine_parameter_tweak(self->machine, param, val);			
 			psy_ui_component_invalidate(&self->component);
 		} else
 		if (ev->delta < 0) {
@@ -765,7 +766,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 			if (val < 0.f) {
 				val = 0.f;
 			}
-			psy_audio_machineparam_tweak(param, val);			
+			psy_audio_machine_parameter_tweak(self->machine, param, val);			
 			psy_ui_component_invalidate(&self->component);
 		}
 	}
@@ -779,8 +780,7 @@ void ontimer(ParamView* self, psy_ui_Component* sender, int timerid)
 }
 
 void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	assert(rv);	
+{	
 	if (self->machine && psy_audio_machine_numparameters(self->machine) > 0) {				
 		paramview_computepositions(self);
 		*rv = self->cpmax;
@@ -821,8 +821,8 @@ void paramview_computepositions(ParamView* self)
 
 			machineparam = psy_audio_machine_parameter(self->machine, param);
 			if (machineparam) {
-				paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
-				small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
+				paramtype = psy_audio_machine_parameter_type(self->machine, machineparam) & ~MPF_SMALL;
+				small = (psy_audio_machine_parameter_type(self->machine, machineparam) & MPF_SMALL) == MPF_SMALL;
 			} else {
 				paramtype = MPF_IGNORE;
 				small = TRUE;
@@ -857,10 +857,10 @@ void paramview_computepositions(ParamView* self)
 					machineparam = psy_audio_machine_parameter(self->machine, i);
 					position = psy_table_at(&self->positions, i);
 					if (machineparam) {
-						if (psy_audio_machineparam_type(machineparam)
-							== MPF_SLIDERCHECK ||
-							psy_audio_machineparam_type(machineparam)
-							== MPF_SLIDERLEVEL) {
+						if (psy_audio_machine_parameter_type(self->machine, machineparam)
+								== MPF_SLIDERCHECK ||
+							psy_audio_machine_parameter_type(self->machine, machineparam)
+								== MPF_SLIDERLEVEL) {
 							cellsize(self, i, col, &width, &height);
 							position->right = position->left + width;
 						} else {
@@ -894,8 +894,8 @@ void paramview_computepositions(ParamView* self)
 			position = psy_table_at(&self->positions, param);
 			firstrow = psy_table_at(&self->positions, row);
 			if (machineparam) {
-				paramtype = psy_audio_machineparam_type(machineparam) & ~MPF_SMALL;
-				small = (psy_audio_machineparam_type(machineparam) & MPF_SMALL) == MPF_SMALL;
+				paramtype = psy_audio_machine_parameter_type(self->machine, machineparam) & ~MPF_SMALL;
+				small = (psy_audio_machine_parameter_type(self->machine, machineparam) & MPF_SMALL) == MPF_SMALL;
 			} else {
 				paramtype = MPF_IGNORE;
 				small = TRUE;

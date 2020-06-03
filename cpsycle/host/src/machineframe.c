@@ -302,7 +302,7 @@ void machineframe_onpresetchange(MachineFrame* self, psy_ui_Component* sender, i
 					param = psy_audio_machine_tweakparameter(self->machine,
 						psy_tableiterator_key(&it));
 					if (param) {
-						psy_audio_machineparam_tweak_scaled(param,
+						psy_audio_machine_parameter_tweak_scaled(self->machine, param,
 							(intptr_t)psy_tableiterator_value(&it));
 					}					
 				}		

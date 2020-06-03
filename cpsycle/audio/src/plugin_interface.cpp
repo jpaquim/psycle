@@ -26,7 +26,7 @@ class PluginFxCallback : public CFxCallback
 	}
 	inline virtual int GetBPM() const { 
 		return callback.bpm && callback.context
-			? callback.bpm(callback.context) 
+			? (int)callback.bpm(callback.context) 
 			: 125;		
 	}
 	inline virtual int GetTPB() const { return 4; }

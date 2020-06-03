@@ -19,39 +19,83 @@ extern "C" {
 
 #define SAMPLER_DEFAULT_POLYPHONY	8
 
+	
+
 /*
 	* = remembers its last value when called with param 00.
 	t = slides/changes each tick. (or is applied in a specific tick != 0 )
 	p = persistent ( a new note doesn't reset it )
 	n = they need to appear next to a note.
 */
+#define	SAMPLER_CMD_NONE                 0x00	
+#define SAMPLER_CMD_PORTAMENTO_UP        0x01 // Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
+#define SAMPLER_CMD_PORTAMENTO_DOWN      0x02 // Portamento Down, Fine porta (02Fx), and Extra fine porta (02Ex) (*t)
+#define SAMPLER_CMD_PORTA2NOTE           0x03 // Tone Portamento						(*tn)
+#define SAMPLER_CMD_VIBRATO              0x04 // Do Vibrato							(*t)
+#define SAMPLER_CMD_TONEPORTAVOL         0x05 // Tone Portament & Volume Slide		(*t)
+#define SAMPLER_CMD_VIBRATOVOL           0x06 // Vibrato & Volume Slide				(*t)
+#define SAMPLER_CMD_TREMOLO              0x07 // Tremolo								(*t)
+#define SAMPLER_CMD_PANNING              0x08 // Set Panning Position				(p)
+#define SAMPLER_CMD_PANNINGSLIDE         0x09 // Panning slide						(*t)
+#define SAMPLER_CMD_SET_CHANNEL_VOLUME   0x0A // Set channel's volume				(p)
+#define SAMPLER_CMD_CHANNEL_VOLUME_SLIDE 0x0B // channel Volume Slide up (0By0) down (0B0x), Fine slide up(0BFy) down(0BxF)	 (*tp)
+#define SAMPLER_CMD_VOLUME               0x0C // Set Volume
+#define SAMPLER_CMD_VOLUMESLIDE          0x0D // Volume Slide up (0Dy0), down (0D0x), Fine slide up(0DyF), down(0DFy)	 (*t)
+#define SAMPLER_CMD_FINESLIDEUP          0x0F // Part of the value that indicates it is a fine slide up
+#define SAMPLER_CMD_FINESLIDEDOWN        0xF0 // Part of the value that indicates it is a fine slide down
+#define SAMPLER_CMD_EXTENDED             0x0E // Extend Command
+#define SAMPLER_CMD_MIDI_MACRO           0x0F // Impulse Tracker MIDI macro			(p)
+#define SAMPLER_CMD_ARPEGGIO             0x10 // Arpeggio							(*t)
+#define SAMPLER_CMD_RETRIG               0x11 // Retrigger Note						(*t)
+#define SAMPLER_CMD_FINE_VIBRATO         0x14 // Vibrato 4 times finer				(*t)
+#define SAMPLER_CMD_TREMOR               0x17 // Tremor								(*t)
+#define SAMPLER_CMD_PANBRELLO            0x18 // Panbrello							(*t)
+#define SAMPLER_CMD_SET_ENV_POSITION     0x19 // Set Envelope Position
+#define SAMPLER_CMD_SET_GLOBAL_VOLUME    0x1C // Sets Global Volume
+#define SAMPLER_CMD_GLOBAL_VOLUME_SLIDE  0x1D // Slides Global Volume				(*t)
+#define SAMPLER_CMD_SENDTOVOLUME         0x1E // Interprets this as a volume command	()
+#define SAMPLER_CMD_OFFSET               0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)		PORTAMENTO_UP = 0x01,// Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
 
-#define SAMPLER_CMD_NONE			   0x00
-#define SAMPLER_CMD_PORTAUP			   0x01
-#define SAMPLER_CMD_PORTADOWN		   0x02
-#define SAMPLER_CMD_PORTA2NOTE		   0x03
-#define SAMPLER_CMD_PANNING			   0x08
-#define SAMPLER_CMD_OFFSET			   0x09
-#define SET_CHANNEL_VOLUME			   0x0A  //                                    (p)
-#define SAMPLER_CMD_VOLUME			   0x0c
-#define SAMPLER_CMD_RETRIG			   0x15
-#define SAMPLER_CMD_EXTENDED		   0x0e
-#define SAMPLER_CMD_EXT_NOTEOFF		   0xc0
-#define SAMPLER_CMD_EXT_NOTEDELAY	   0xd0
-
-#define SAMPLER_CMD_E_GLISSANDO_TYPE   0x30  // E3     Set gliss control           (p)
-#define SAMPLER_CMD_E_VIBRATO_WAVE     0x40  // E4     Set vibrato control         (p)
-#define SAMPLER_CMD_E_PANBRELLO_WAVE   0x50  //                                    (p)
+#define SAMPLER_CMD_E_GLISSANDO_TYPE     0x30 // E3     Set gliss control           (p)
+#define SAMPLER_CMD_E_VIBRATO_WAVE       0x40 // E4     Set vibrato control         (p)
+#define SAMPLER_CMD_E_PANBRELLO_WAVE     0x50 //                                    (p)
 //0x60
-#define SAMPLER_CMD_E_TREMOLO_WAVE     0x70  // E7     Set tremolo control         (p)
-#define SAMPLER_CMD_E_SET_PAN          0x80  //                                    (p)
-#define SAMPLER_CMD_E9                 0x90
+#define SAMPLER_CMD_E_TREMOLO_WAVE       0x70 // E7     Set tremolo control         (p)
+#define SAMPLER_CMD_E_SET_PAN            0x80 //                                    (p)
+#define SAMPLER_CMD_E9                   0x90
 //0xA0,
 //0xB0,
-#define SAMPLER_CMD_E_DELAYED_NOTECUT  0xC0  // EC     Note cut                    (t)
-#define SAMPLER_CMD_E_NOTE_DELAY       0xD0  // ED     Note delay                  (tn)
-#define SAMPLER_CMD_EE                 0xE0
-#define SAMPLER_CMD_E_SET_MIDI_MACRO   0xF0  //                                    (p)
+#define SAMPLER_CMD_E_DELAYED_NOTECUT    0xC0 // EC     Note cut                    (t)
+#define SAMPLER_CMD_E_NOTE_DELAY         0xD0 // ED     Note delay                  (tn)
+#define SAMPLER_CMD_EE                   0xE0
+#define SAMPLER_CMD_E_SET_MIDI_MACRO     0xF0 //                                    (p)
+
+
+typedef enum psy_audio_SamplerCmdMode {
+	// *= remembers its last value when called with param 00.
+	psy_audio_SAMPLERCMDMODE_MEM0 = 1,
+	// t = slides / changes each tick. (or is applied in a specific tick != 0)
+	psy_audio_SAMPLERCMDMODE_TICK = 2,
+	// p = persistent(a new note doesn't reset it )	
+	psy_audio_SAMPLERCMDMODE_PERS = 4,
+	// n = they need to appear next to a note.
+	psy_audio_SAMPLERCMDMODE_NEXT = 8  
+} psy_audio_SamplerCmdMode;
+
+typedef struct SamplerCmd {
+	int id;
+	int patternid;
+	psy_audio_SamplerCmdMode mode;
+	char* name;
+} psy_audio_SamplerCmd;
+
+void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd*,
+	int id, int patternid, int mask, const char* name);
+void psy_audio_samplercmd_dispose(psy_audio_SamplerCmd*);
+
+psy_audio_SamplerCmd* psy_audio_samplercmd_alloc(void);
+psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
+	int patternid, int mask, const char* name);
 
 typedef enum {
 	INTERPOL_NONE = 0,
@@ -174,6 +218,8 @@ typedef struct psy_audio_Sampler {
 	// Sampler PS1 with max amp = 0.5.
 	psy_dsp_amp_t clipmax;
 	psy_audio_SamplerPanningMode panningmode;
+	psy_List* cmds;
+	psy_Table cmdmap;
 } psy_audio_Sampler;
 
 void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback);
@@ -195,6 +241,8 @@ INLINE bool psy_audio_sampler_isdefaultC4(psy_audio_Sampler* self)
 {
 	return self->basec == NOTECOMMANDS_MIDDLEC;
 }
+
+
 
 
 #ifdef __cplusplus

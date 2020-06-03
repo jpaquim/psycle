@@ -15,6 +15,13 @@
 extern "C" {
 #endif
 
+// psy_audio_Connections, psy_audio_PinMapping, psy_audio_PinConnection
+//
+// aim: defines the wire mapping (psy_audio_Connections) and pinmapping
+// (psy_audio_PinMapping) inside a wire. No special wire class has been
+// implemented like in mfc psycle. LegacyWire and Wire are only helpers
+// for song loading and the machineview ui.
+
 #define psy_audio_MASTER_INDEX 128
 #define psy_audio_MAX_STREAM_SIZE 256
 

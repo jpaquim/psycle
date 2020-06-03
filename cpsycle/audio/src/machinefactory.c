@@ -266,7 +266,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 		if (proxy) {
 			rv = psy_audio_machineproxy_base(proxy);
 		} else {
-			machine_dispose(rv);
+			machine_base_dispose(rv);
 			free(rv);
 			rv = 0;
 		}		

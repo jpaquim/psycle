@@ -13,7 +13,7 @@
 #include "newmachine.h"
 #include "machineframe.h"
 #include "paramview.h"
-#include "vst2view.h"
+#include "machineeditorview.h"
 #include "machinebar.h"
 #include "skincoord.h"
 #include "tabbar.h"
@@ -72,7 +72,7 @@ typedef struct {
 	uintptr_t slot;
 	MachineFrame* frame;
 	ParamView* paramview;
-	Vst2View* vst2view;
+	MachineEditorView* editorview;
 	char* restorename;
 	Workspace* workspace;
 } MachineUi;

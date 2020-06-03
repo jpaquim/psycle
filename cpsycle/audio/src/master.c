@@ -128,7 +128,7 @@ static void vtable_init(psy_audio_Master* self)
 void master_init(psy_audio_Master* self, psy_audio_MachineCallback callback)
 {
 	memset(self, 0, sizeof(psy_audio_Master));
-	machine_init(&self->machine, callback);	
+	psy_audio_machine_init(&self->machine, callback);	
 	vtable_init(self);
 	self->machine.vtable = &vtable;
 	self->volume = (psy_dsp_amp_t) 1.f;
@@ -169,12 +169,12 @@ void master_init_memory(psy_audio_Master* self)
 
 void master_dispose(psy_audio_Master* self)
 {		
-	machine_dispose(&self->machine);
+	machine_base_dispose(&self->machine);
 	psy_audio_custommachineparam_dispose(&self->param_info);
 	psy_audio_custommachineparam_dispose(&self->param_slider);
 	psy_audio_custommachineparam_dispose(&self->param_level);
 	master_dispose_memory(self);
-	machine_dispose(&self->machine);
+	machine_base_dispose(&self->machine);
 }
 
 void master_dispose_memory(psy_audio_Master* self)

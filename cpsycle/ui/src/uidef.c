@@ -92,7 +92,7 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 
 	double dx = a_p2x - a_p1x;
 
-	if (abs(dx) > 0.0000001)
+	if (fabs(dx) > 0.0000001)
 	{
 		double a = (a_p2y - a_p1y) / dx;
 		double b = a_p1y - a * a_p1x;

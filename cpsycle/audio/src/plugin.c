@@ -542,7 +542,7 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 
 		param = psy_audio_machine_parameter(psy_audio_plugin_base(self), i);
 		if (param) {
-			scaled = psy_audio_machineparam_scaledvalue(param);
+			scaled = psy_audio_machine_parameter_scaledvalue(psy_audio_plugin_base(self), param);
 		}
 		psyfile_write_int32(songfile->file, scaled);
 	}
