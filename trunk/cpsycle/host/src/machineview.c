@@ -186,7 +186,7 @@ void machineui_init(MachineUi* self, int x, int y, psy_audio_Machine* machine,
 	self->slot = slot;
 	self->frame = 0;
 	self->paramview = 0;
-	self->vst2view = 0;
+	self->editorview = 0;
 	self->restorename = 0;
 }
 
@@ -450,12 +450,12 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 			psy_signal_connect(&self->frame->component.signal_destroy, self,
 				machineui_onframedestroyed);
 			if (psy_audio_machine_haseditor(self->machine)) {
-				Vst2View* vst2view;
+				MachineEditorView* editorview;
 
-				vst2view = vst2view_allocinit(&self->frame->notebook.component,
+				editorview = machineeditorview_allocinit(&self->frame->notebook.component,
 					self->machine, self->workspace);
-				if (vst2view) {
-					view = &vst2view->component;
+				if (editorview) {
+					view = &editorview->component;
 				}
 			} else {
 				ParamView* paramview;

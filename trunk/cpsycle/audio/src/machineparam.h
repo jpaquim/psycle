@@ -10,6 +10,7 @@
 
 #include "../../detail/psydef.h"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,6 +43,7 @@ typedef struct psy_audio_MachineParam {
 	psy_Signal signal_describe;
 	psy_Signal signal_name;
 	psy_Signal signal_label;
+	int crashed;
 } psy_audio_MachineParam;
 
 void psy_audio_machineparam_init(psy_audio_MachineParam*);
@@ -49,53 +51,6 @@ void psy_audio_machineparam_dispose(psy_audio_MachineParam*);
 
 INLINE void psy_audio_machineparam_tweak(psy_audio_MachineParam* self, float value)
 {
-	self->vtable->tweak(self, value);
-}
-
-INLINE void psy_audio_machineparam_tweak_pattern(
-	psy_audio_MachineParam* self, uintptr_t patternvalue)
-{
-	intptr_t minval;
-	intptr_t maxval;
-	intptr_t range;
-	float value;
-
-	self->vtable->range(self, &minval, &maxval);
-	range = maxval - minval;
-	if (range == 0) {
-		value = 0.f;
-	} else {
-		value = patternvalue / (float) range;
-	}
-	if (value > 1.f) {
-		value = 1.f;
-	}
-	if (value < 0.f) {
-		value = 0.f;
-	}
-	self->vtable->tweak(self, value);
-}
-
-INLINE void psy_audio_machineparam_tweak_scaled(psy_audio_MachineParam* self, intptr_t scaledvalue)
-{
-	intptr_t minval;
-	intptr_t maxval;
-	intptr_t range;
-	float value;
-
-	self->vtable->range(self, &minval, &maxval);
-	range = maxval - minval;
-	if (range == 0) {
-		value = 0.f;
-	} else {
-		value = (scaledvalue - minval) / (float)range;
-	}
-	if (value > 1.f) {
-		value = 1.f;
-	}
-	if (value < 0.f) {
-		value = 0.f;
-	}
 	self->vtable->tweak(self, value);
 }
 
@@ -110,36 +65,6 @@ INLINE void psy_audio_machineparam_range(psy_audio_MachineParam* self,
 	intptr_t* minval, intptr_t* maxval)
 {
 	self->vtable->range(self, minval, maxval);
-}
-
-// converts normvalue(0.f .. 1.f) -> scaled integer value 
-INLINE intptr_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
-{
-	intptr_t rv;
-	intptr_t minval;
-	intptr_t maxval;
-	intptr_t range;
-
-	self->vtable->range(self, &minval, &maxval);
-	range = maxval - minval;
-	rv = (int)(self->vtable->normvalue(self) * range) + minval;
-	return rv;
-}
-
-// converts normvalue(0.f .. 1.f) -> pattern integer value
-// difference to scaledvalue: starting always at 0 (offseted by minvalue)
-// returning the pattern tweak value
-INLINE intptr_t psy_audio_machineparam_patternvalue(psy_audio_MachineParam* self)
-{
-	intptr_t rv;
-	intptr_t minval;
-	intptr_t maxval;
-	intptr_t range;
-
-	self->vtable->range(self, &minval, &maxval);
-	range = maxval - minval;
-	rv = (intptr_t)(self->vtable->normvalue(self) * range);
-	return rv;
 }
 
 INLINE int psy_audio_machineparam_name(psy_audio_MachineParam* self, char* text)
@@ -160,6 +85,20 @@ INLINE int psy_audio_machineparam_type(psy_audio_MachineParam* self)
 INLINE int psy_audio_machineparam_describe(psy_audio_MachineParam* self, char* text)
 {
 	return self->vtable->describe(self, text);
+}
+
+// converts normvalue(0.f .. 1.f) -> scaled integer value 
+INLINE intptr_t psy_audio_machineparam_scaledvalue(psy_audio_MachineParam* self)
+{
+	intptr_t rv;
+	intptr_t minval;
+	intptr_t maxval;
+	intptr_t range;
+
+	self->vtable->range(self, & minval, & maxval);
+	range = maxval - minval;
+	rv = (int)(self->vtable->normvalue(self) * range) + minval;
+	return rv;
 }
 
 struct psy_audio_CustomMachineParam;
@@ -343,6 +282,8 @@ INLINE psy_audio_MachineParam* psy_audio_gainmachineparam_base(psy_audio_GainMac
 {
 	return &(self->machineparam);
 }
+
+
 
 #ifdef __cplusplus
 }

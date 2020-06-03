@@ -27,6 +27,40 @@
 // Version Sampler PS1
 #define SAMPLERVERSION 0x00000002
 
+
+// Sampler Configuration
+void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd* self,
+	int id, int patternid, int mask, const char* name)
+{
+	self->id = id;
+	self->patternid = patternid;
+	self->mode = mask;
+	self->name = strdup(name);
+}
+
+void psy_audio_samplercmd_dispose(psy_audio_SamplerCmd* self)
+{
+	free(self->name);
+	self->name = NULL;
+}
+
+psy_audio_SamplerCmd* psy_audio_samplercmd_alloc(void)
+{
+	return (psy_audio_SamplerCmd*)malloc(sizeof(psy_audio_SamplerCmd));
+}
+
+psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
+	int patternid, int mask, const char* name)
+{
+	psy_audio_SamplerCmd* rv;
+	
+	rv = psy_audio_samplercmd_alloc();
+	if (rv) {
+		psy_audio_samplercmd_init_all(rv, id, patternid, mask, name);
+	}
+	return rv;
+}
+
 // SamplerChannel
 static void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*);
 static void psy_audio_samplerchannel_dispose(psy_audio_SamplerChannel*);
@@ -47,7 +81,7 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 	const psy_audio_PatternEvent* ev)
 {
 	switch (ev->cmd) {
-		case SET_CHANNEL_VOLUME:
+		case SAMPLER_CMD_SET_CHANNEL_VOLUME:
 			self->volume = (psy_dsp_amp_t) ((ev->parameter < 64)
 				? (ev->parameter / 64.0f)
 				: 1.0f);
@@ -74,6 +108,7 @@ static uintptr_t numparameters(psy_audio_Sampler*);
 static psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
 	uintptr_t param);
 static void dispose(psy_audio_Sampler*);
+static void disposecmds(psy_audio_Sampler*);
 static int alloc_voice(psy_audio_Sampler*);
 static void releaseallvoices(psy_audio_Sampler*);
 static psy_audio_SamplerVoice* activevoice(psy_audio_Sampler*, uintptr_t channel);
@@ -92,7 +127,12 @@ static void disposechannels(psy_audio_Sampler*);
 static psy_audio_SamplerChannel* sampler_channel(psy_audio_Sampler*, uintptr_t channelnum);
 static int currslot(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
-
+static void psy_audio_sampler_initps1(psy_audio_Sampler*);
+static void psy_audio_sampler_initsampulse(psy_audio_Sampler*);
+static void psy_audio_sampler_addcmd(psy_audio_Sampler*, int cmd,
+	int patternid, int mask, const char* name);
+static void psy_audio_sampler_updatecmdmap(psy_audio_Sampler* self);
+static psy_audio_SamplerCmd* psy_audio_sampler_cmd(psy_audio_Sampler*, int patternid);
 
 static psy_audio_MachineInfo const macinfo = {
 	MI_VERSION,
@@ -195,6 +235,141 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 		"reset on new note");
 	psy_audio_choicemachineparam_setdescription(&self->param_panpersistent, 1,
 		"keep on channel");
+	self->cmds = NULL;
+	psy_table_init(&self->cmdmap);
+	psy_audio_sampler_initsampulse(self);	
+}
+
+void psy_audio_sampler_initps1(psy_audio_Sampler* self)
+{
+	// Old version had default C4 as false
+	psy_audio_sampler_defaultC4(self, FALSE);
+	disposecmds(self);
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PORTAMENTO_UP,
+		SAMPLER_CMD_PORTAMENTO_UP,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"PORTAMENTO_UP");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PORTAMENTO_DOWN,
+		SAMPLER_CMD_PORTAMENTO_DOWN,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"PORTAMENTO_DOWN");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PORTA2NOTE,
+		SAMPLER_CMD_PORTA2NOTE,
+		psy_audio_SAMPLERCMDMODE_TICK |
+		psy_audio_SAMPLERCMDMODE_MEM0,
+		"SAMPLER_CMD_PORTA2NOTE");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_VIBRATO,
+		SAMPLER_CMD_VIBRATO,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_VIBRATO");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_TONEPORTAVOL,
+		SAMPLER_CMD_TONEPORTAVOL,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_TONEPORTAVOL");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_VIBRATOVOL,
+		SAMPLER_CMD_VIBRATOVOL,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_VIBRATOVOL");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_TREMOLO,
+		SAMPLER_CMD_TREMOLO,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_TREMOLO");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PANNING,
+		SAMPLER_CMD_PANNING,
+		psy_audio_SAMPLERCMDMODE_PERS,
+		"SAMPLER_CMD_PANNING");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_SET_CHANNEL_VOLUME,
+		SAMPLER_CMD_SET_CHANNEL_VOLUME,
+		psy_audio_SAMPLERCMDMODE_PERS,
+		"SET_CHANNEL_VOLUME");
+	psy_audio_sampler_updatecmdmap(self);
+}
+
+void psy_audio_sampler_initsampulse(psy_audio_Sampler* self)
+{
+	psy_audio_sampler_defaultC4(self, TRUE);
+	self->panpersistent = TRUE;
+	disposecmds(self);
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PORTAMENTO_UP,
+		SAMPLER_CMD_PORTAMENTO_UP,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"PORTAMENTO_UP");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PORTAMENTO_DOWN,
+		SAMPLER_CMD_PORTAMENTO_DOWN,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"PORTAMENTO_DOWN");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PORTA2NOTE,
+		SAMPLER_CMD_PORTA2NOTE,
+		psy_audio_SAMPLERCMDMODE_TICK |
+		psy_audio_SAMPLERCMDMODE_MEM0,
+		"SAMPLER_CMD_PORTA2NOTE");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_VIBRATO,
+		SAMPLER_CMD_VIBRATO,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_VIBRATO");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_TONEPORTAVOL,
+		SAMPLER_CMD_TONEPORTAVOL,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_TONEPORTAVOL");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_VIBRATOVOL,
+		SAMPLER_CMD_VIBRATOVOL,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_VIBRATOVOL");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_TREMOLO,
+		SAMPLER_CMD_TREMOLO,
+		psy_audio_SAMPLERCMDMODE_TICK,
+		"SAMPLER_CMD_TREMOLO");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_PANNING,
+		SAMPLER_CMD_PANNING,
+		psy_audio_SAMPLERCMDMODE_PERS,
+		"SAMPLER_CMD_PANNING");
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_SET_CHANNEL_VOLUME,
+		SAMPLER_CMD_SET_CHANNEL_VOLUME,
+		psy_audio_SAMPLERCMDMODE_PERS,
+		"SET_CHANNEL_VOLUME");
+	psy_audio_sampler_updatecmdmap(self);
+}
+
+void psy_audio_sampler_addcmd(psy_audio_Sampler* self, int cmdid, int patternid, int mask,
+	const char* name)
+{		
+	psy_list_append(&self->cmds, (void*)psy_audio_samplercmd_allocinit_all(cmdid,
+		patternid, mask, name));
+}
+
+psy_audio_SamplerCmd* psy_audio_sampler_cmd(psy_audio_Sampler* self, int patternid)
+{	
+	return (psy_audio_SamplerCmd*)psy_table_at(&self->cmdmap, patternid);
+}
+
+void psy_audio_sampler_updatecmdmap(psy_audio_Sampler* self)
+{
+	psy_List* p;
+
+	psy_table_clear(&self->cmdmap);	
+	for (p = self->cmds; p != NULL; p = p->next) {
+		psy_audio_SamplerCmd* cmd;
+		cmd = (psy_audio_SamplerCmd*)(p->entry);
+		psy_table_insert(&self->cmdmap, (uintptr_t)cmd->patternid, cmd);
+	}
 }
 
 void dispose(psy_audio_Sampler* self)
@@ -215,7 +390,9 @@ void dispose(psy_audio_Sampler* self)
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
 	psy_audio_intmachineparam_dispose(&self->param_maxvolume);
 	disposechannels(self);
-	custommachine_dispose(&self->custommachine);	
+	custommachine_dispose(&self->custommachine);
+	disposecmds(self);
+	psy_table_dispose(&self->cmdmap);
 }
 
 void disposechannels(psy_audio_Sampler* self)
@@ -232,6 +409,18 @@ void disposechannels(psy_audio_Sampler* self)
 		free(channel);
 	}
 	psy_table_dispose(&self->channels);
+}
+
+void disposecmds(psy_audio_Sampler* self)
+{
+	psy_List* p;
+
+	for (p = self->cmds; p != NULL; p = p->next) {		
+		psy_audio_samplercmd_dispose((psy_audio_SamplerCmd*)p->entry);
+		free(p->entry);
+	}
+	psy_list_free(self->cmds);
+	self->cmds = NULL;
 }
 
 psy_audio_Sampler* psy_audio_sampler_alloc(void)
@@ -285,7 +474,7 @@ void seqtick(psy_audio_Sampler* self, uintptr_t channelnum,
 	psy_audio_SamplerChannel* channel = 0;
 
 	if (event->cmd == SAMPLER_CMD_EXTENDED) {
-		if ((event->parameter & 0xF0) == SAMPLER_CMD_EXT_NOTEDELAY) {
+		if ((event->parameter & 0xF0) == SAMPLER_CMD_E_NOTE_DELAY) {
 			// skip for now and reinsert in sequencerinsert
 			// with delayed offset
 			return;
@@ -579,40 +768,53 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(psy_audio_Sampler* samp
 void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event, double samplesprobeat)
 {
 	self->dopan = 0;	
-	if (event->cmd == SAMPLER_CMD_VOLUME) {
-		 self->usedefaultvolume = 0;
-		 self->vol = event->parameter / 
-			 (psy_dsp_amp_t) self->maxvolume;
-	} else
-	if (event->cmd == SAMPLER_CMD_PANNING) {
-		self->dopan = 1;
-		self->pan = event->parameter / (psy_dsp_amp_t) 255;
-	} else
-	if (event->cmd == SAMPLER_CMD_OFFSET) {
-		self->dooffset = 1;
-		self->offset = event->parameter;
-	} else
-	if (event->cmd == SAMPLER_CMD_PORTAUP) {
-		self->effval = event->parameter;
-		self->effcmd = event->cmd;
-		self->portanumframes = (uintptr_t) samplesprobeat;
-		self->portacurrframe = 0;
-		self->portaspeed = pow(2.0f, event->parameter / 12.0 *
-			1.0 / samplesprobeat);
-	} else
-	if (event->cmd == SAMPLER_CMD_PORTADOWN) {
-		self->effval = event->parameter;
-		self->effcmd = event->cmd;
-		self->portanumframes = (uintptr_t) samplesprobeat;
-		self->portacurrframe = 0;
-		self->portaspeed = pow(2.0f, -event->parameter / 12.0 * 1.0 / samplesprobeat);
-	}	
+	psy_audio_SamplerCmd* cmd;
+	int cmdid;
+	
+	cmd = psy_audio_sampler_cmd(self->sampler, event->cmd);
+	cmdid = (cmd)
+		? cmd->patternid
+		: event->cmd;	
+	switch (cmdid) {
+		case SAMPLER_CMD_VOLUME:
+			self->usedefaultvolume = 0;
+			self->vol = event->parameter /
+				(psy_dsp_amp_t)self->maxvolume;
+
+			break;
+		case SAMPLER_CMD_PANNING:
+			self->dopan = 1;
+			self->pan = event->parameter / (psy_dsp_amp_t)255;
+			break;
+		case SAMPLER_CMD_OFFSET:
+			self->dooffset = 1;
+			self->offset = event->parameter;
+			break;
+		case SAMPLER_CMD_PORTAMENTO_UP:
+			self->effval = event->parameter;
+			self->effcmd = cmdid;
+			self->portanumframes = (uintptr_t)samplesprobeat;
+			self->portacurrframe = 0;
+			self->portaspeed = pow(2.0f, event->parameter / 12.0 *
+				1.0 / samplesprobeat);
+			break;
+		case SAMPLER_CMD_PORTAMENTO_DOWN:
+			self->effval = event->parameter;
+			self->effcmd = cmdid;
+			self->portanumframes = (uintptr_t)samplesprobeat;
+			self->portacurrframe = 0;
+			self->portaspeed = pow(2.0f, -event->parameter / 12.0 * 1.0 / samplesprobeat);
+			break;
+		default:
+			break;
+	}
 	if (event->note < NOTECOMMANDS_RELEASE) {		
 		psy_audio_samplervoice_noteon(self, event, samplesprobeat);
 	}
 }
 
-void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event, double samplesprobeat)
+void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio_PatternEvent* event,
+	double samplesprobeat)
 {	
 	psy_audio_Sample* sample;
 	psy_List* entries;
@@ -801,8 +1003,8 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 			if (self->dooffset) {
 				psy_audio_sampleiterator_dooffset(position, self->offset);
 			}			
-			if (self->effcmd == SAMPLER_CMD_PORTAUP ||
-				self->effcmd == SAMPLER_CMD_PORTADOWN) {
+			if (self->effcmd == SAMPLER_CMD_PORTAMENTO_UP ||
+				self->effcmd == SAMPLER_CMD_PORTAMENTO_DOWN) {
 				portaframe = self->portacurrframe;
 				portaspeed = self->portaspeed;
 			}
@@ -814,7 +1016,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 				uintptr_t channel;
 				intptr_t diff;
 
-				int nextsamples = min(psy_audio_sampleiterator_prework(position,
+				intptr_t nextsamples = min(psy_audio_sampleiterator_prework(position,
 					numsamples, FALSE), numsamples);
 				numsamples -= nextsamples;
 				while (nextsamples)
@@ -830,8 +1032,8 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 						psy_audio_samplervoice_adddatatosamplerbuffer(self, channel,
 							val, dstpos, output);
 					}
-					if (self->effcmd == SAMPLER_CMD_PORTAUP ||
-						self->effcmd == SAMPLER_CMD_PORTADOWN) {
+					if (self->effcmd == SAMPLER_CMD_PORTAMENTO_UP ||
+						self->effcmd == SAMPLER_CMD_PORTAMENTO_DOWN) {
 						++portaframe;
 						if (portaframe >= self->portanumframes) {
 							portaspeed = 1.0;
@@ -863,8 +1065,8 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 				psy_audio_buffer_make_monoaureal(output, amount);				
 			}			
 		}
-		if (self->effcmd == SAMPLER_CMD_PORTAUP ||
-			self->effcmd == SAMPLER_CMD_PORTADOWN) {
+		if (self->effcmd == SAMPLER_CMD_PORTAMENTO_UP ||
+			self->effcmd == SAMPLER_CMD_PORTAMENTO_DOWN) {
 			self->portacurrframe += amount;
 			if (portadone) {
 				self->effcmd = SAMPLER_CMD_NONE;
@@ -1018,7 +1220,7 @@ psy_List* sequencerinsert(psy_audio_Sampler* self, psy_List* events)
 		entry = p->entry;
 		event = patternentry_front(entry);
 		if (event->cmd == SAMPLER_CMD_EXTENDED) {
-			if ((event->parameter & 0xf0) == SAMPLER_CMD_EXT_NOTEOFF) {
+			if ((event->parameter & 0xf0) == SAMPLER_CMD_E_DELAYED_NOTECUT) {
 				psy_audio_PatternEntry* noteoff;
 
 				// This means there is always 6 ticks per row whatever number of rows.
@@ -1031,7 +1233,7 @@ psy_List* sequencerinsert(psy_audio_Sampler* self, psy_List* events)
 						psy_audio_sampler_base(self));
 				psy_list_append(&insert, noteoff);
 			} else 
-			if ((event->parameter & 0xF0) == SAMPLER_CMD_EXT_NOTEDELAY) {
+			if ((event->parameter & 0xF0) == SAMPLER_CMD_E_NOTE_DELAY) {
 				psy_audio_PatternEntry* newentry;
 				psy_audio_PatternEvent* ev;
 				int numticks;
@@ -1061,8 +1263,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 		size_t filepos;
 		uint32_t size=0;
 
-		psy_audio_sampler_defaultC4(self, TRUE);
-		self->panpersistent = TRUE;
+		psy_audio_sampler_initsampulse(self);		
 		psyfile_read(songfile->file, &size,sizeof(size));
 		filepos = psyfile_getpos(songfile->file);
 		psyfile_read(songfile->file, &filevers, sizeof(filevers));
@@ -1117,9 +1318,8 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 		}
 	} else {
 		uint32_t size;
-
-		// Old version had default C4 as false
-		psy_audio_sampler_defaultC4(self, FALSE);
+		
+		psy_audio_sampler_initps1(self);
 		// LinearSlide(false);
 		size = 0;
 		psyfile_read(songfile->file, &size, sizeof(size));

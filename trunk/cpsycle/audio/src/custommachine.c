@@ -56,9 +56,10 @@ static void vtable_init(psy_audio_CustomMachine* self)
 	}
 }
 
-void custommachine_init(psy_audio_CustomMachine* self, psy_audio_MachineCallback callback)
+void custommachine_init(psy_audio_CustomMachine* self,
+	psy_audio_MachineCallback callback)
 {	
-	machine_init(&self->machine, callback);
+	psy_audio_machine_init(&self->machine, callback);
 	vtable_init(self);
 	self->machine.vtable = &vtable;
 	self->editname = 0;
@@ -88,7 +89,7 @@ void custommachine_dispose(psy_audio_CustomMachine* self)
 	free(self->editname);
 	self->editname = 0;
 	custommachine_dispose_memory(self);
-	machine_dispose(&self->machine);
+	machine_base_dispose(&self->machine);
 }
 
 void custommachine_dispose_memory(psy_audio_CustomMachine* self)

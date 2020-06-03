@@ -914,7 +914,7 @@ void plugin_load(psy_audio_SongFile* songfile, psy_audio_Machine* machine, uintp
 
 			param = psy_audio_machine_parameter(machine, i);
 			if (param) {
-				psy_audio_machineparam_tweak_scaled(param, Vals[i]);
+				psy_audio_machine_parameter_tweak_scaled(machine, param, Vals[i]);
 			}
 		}
 	} else {

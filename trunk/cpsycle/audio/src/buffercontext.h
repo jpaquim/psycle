@@ -12,10 +12,9 @@ extern "C" {
 #endif
 
 // psy_audio_BufferContext
-// Parameter Object
 //
 // aim: merges all parameters a machine needs to perform a work or similiar
-//      calls
+//      calls. For now a pure parameter object with no additional operations.
 
 typedef struct {
 	psy_audio_Buffer* input;
@@ -32,23 +31,26 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext*,
 	uintptr_t numsamples,
 	uintptr_t numtracks);
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext*);
-void psy_audio_buffercontext_setoffset(psy_audio_BufferContext* self, uintptr_t offset);
+void psy_audio_buffercontext_setoffset(psy_audio_BufferContext* self,
+	uintptr_t offset);
 
-INLINE void psy_audio_buffercontext_setnumsamples(psy_audio_BufferContext* self, uintptr_t amount)
+INLINE void psy_audio_buffercontext_setnumsamples(
+	psy_audio_BufferContext* self, uintptr_t amount)
 {
 	self->numsamples = amount;
 }
 
-INLINE uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext* self)
+INLINE uintptr_t psy_audio_buffercontext_numsamples(psy_audio_BufferContext*
+	self)
 {
 	return self->numsamples;
 }
 
-INLINE uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext* self)
+INLINE uintptr_t psy_audio_buffercontext_numtracks(psy_audio_BufferContext*
+	self)
 {
 	return self->numtracks;
 }
-
 
 #ifdef __cplusplus
 }

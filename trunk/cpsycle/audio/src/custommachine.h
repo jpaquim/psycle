@@ -10,6 +10,12 @@
 extern "C" {
 #endif
 
+// psy_audio_CustomMachine
+//	
+// aim:	more specialized base class for "Machines", the audio producing
+// elements, offering more default implementations than psy_audio_Machine
+// Most plugins inherit from this class instead from Machine.
+
 typedef struct {
 	psy_audio_Machine machine;
 	psy_dsp_amp_t pan;

@@ -4,8 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "instnotemapview.h"
+
 #include <math.h>
 #include <string.h>
+
 #include "../../detail/portable.h"
 
 static void instrumententryview_init(InstrumentEntryView*, psy_ui_Component* parent,
@@ -37,9 +39,7 @@ static void instrumentparameterview_ondraw(InstrumentParameterView*,
 	psy_ui_Component* sender, psy_ui_Graphics*);
 static void instrumentnotemapbuttons_init(InstrumentNoteMapButtons*,
 	psy_ui_Component* parent);
-// keyboardview
-static void instrumentkeyboardview_ondraw(InstrumentKeyboardView*,
-	psy_ui_Component* sender, psy_ui_Graphics*);
+
 
 void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_Component* parent)
@@ -96,17 +96,34 @@ void instrumentnotemapview_update(InstrumentNoteMapView* self)
 	psy_ui_component_invalidate(&self->component);
 }
 
+// keyboardview
+static void instrumentkeyboardview_ondraw(InstrumentKeyboardView*,
+	psy_ui_Graphics*);
+
+
+static psy_ui_ComponentVtable instrumentkeyboardview_vtable;
+static int instrumentkeyboardview_vtable_initialized = 0;
+
+static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
+{
+	if (!instrumentkeyboardview_vtable_initialized) {
+		instrumentkeyboardview_vtable = *(self->component.vtable);
+		instrumentkeyboardview_vtable.ondraw = (psy_ui_fp_ondraw)instrumentkeyboardview_ondraw;		
+		instrumentkeyboardview_vtable_initialized = 1;
+	}
+}
+
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
 {
 	self->dy = 0;
 	self->metrics.keysize = 6;
 	self->metrics.lineheight = 15;
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
+	instrumentkeyboardview_vtable_init(self);
+	self->component.vtable = &instrumentkeyboardview_vtable;
 	psy_ui_component_resize(&self->component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(4));
-	psy_signal_connect(&self->component.signal_draw, self,
-		instrumentkeyboardview_ondraw);
+		psy_ui_value_makeeh(3));	
 }
 
 int isblack(int key)
@@ -118,7 +135,7 @@ int isblack(int key)
 		|| offset == 10);	
 }
 
-void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Component* sender, psy_ui_Graphics* g)
+void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics* g)
 {		
 	int keymin = 0;
 	int keymax = NOTECOMMANDS_RELEASE;
@@ -131,8 +148,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 	psy_ui_TextMetric tm;
 	psy_ui_Size size;
 
-	tm = psy_ui_component_textmetric(&self->component);
-	
+	tm = psy_ui_component_textmetric(&self->component);	
 	size = psy_ui_component_size(&self->component);
 	numwhitekeys = 0;
 	for (key = keymin; key < keymax; ++key) {
@@ -140,7 +156,6 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Componen
 			++numwhitekeys;
 		}
 	}
-
 	keysize = psy_ui_value_px(&size.width, &tm) / (double)numwhitekeys;
 	psy_ui_setcolor(g, 0x00333333);
 
@@ -236,13 +251,25 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Component* sen
 {	
 	if (self->instrument) {
 		int cpy = 0;
-		psy_List* p;
+		psy_List* p;		
+		uintptr_t c = 0;		
+		psy_ui_TextMetric tm;
 		psy_ui_Size size;
-		int keysize = self->metrics.keysize;
-		uintptr_t c = 0;
-		int width = keysize * numwhitekey(NOTECOMMANDS_RELEASE);		
+		int keysize;
+		int keymin = 0;
+		int keymax = NOTECOMMANDS_RELEASE;
+		int key;
+		int numwhitekeys;
 
+		numwhitekeys = 0;
+		for (key = keymin; key < keymax;  ++key) {
+			if (!isblack(key)) {
+				++numwhitekeys;
+			}
+		}
+		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_size(&self->component);		
+		keysize = (int)(psy_ui_value_px(&size.width, &tm) / (double)numwhitekeys);
 		for (p = self->instrument->entries; p != NULL; p = p->next, ++c) {
 			psy_audio_InstrumentEntry* entry;
 			int startx;
@@ -250,15 +277,15 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Component* sen
 
 			entry = (psy_audio_InstrumentEntry*) p->entry;			
 			startx = (int)(
-				(float) numwhitekey(entry->keyrange.low) / 
-					numwhitekey(NOTECOMMANDS_RELEASE) * width) +
-					(int) (isblack(entry->keyrange.low)
-							 ? self->metrics.keysize / 2 : 0);
+				(float)numwhitekey(entry->keyrange.low) /
+				numwhitekeys * psy_ui_value_px(&size.width, &tm)) +
+				(int)(isblack(entry->keyrange.low)
+					? keysize / 2 : 0);
 			endx = (int)(
 				(float)numwhitekey(entry->keyrange.high + 1) / 
-					numwhitekey(NOTECOMMANDS_RELEASE) * width) +
+					numwhitekeys * psy_ui_value_px(&size.width, &tm)) +
 					(int) (isblack(entry->keyrange.high + 1)
-							 ? self->metrics.keysize / 2 : 0);
+							 ? keysize / 2 : 0);
 			if (c == self->selected) {
 				psy_ui_setcolor(g, 0x00EAEAEA);
 			} else {
@@ -308,6 +335,24 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
 {
 	if (self->instrument) {
+		int keysize;
+		int keymin = 0;
+		int keymax = NOTECOMMANDS_RELEASE;
+		int key;
+		int numwhitekeys;
+		psy_ui_TextMetric tm;
+		psy_ui_Size size;
+
+		numwhitekeys = 0;
+		for (key = keymin; key < keymax; ++key) {
+			if (!isblack(key)) {
+				++numwhitekeys;
+			}
+		}
+		tm = psy_ui_component_textmetric(&self->component);
+		size = psy_ui_component_size(&self->component);
+		keysize = (int)(psy_ui_value_px(&size.width, &tm) / (double)numwhitekeys);
+
 		psy_audio_InstrumentEntry* entry;
 		if (self->instrument) {
 			uintptr_t numentry;	
@@ -326,9 +371,9 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 		entry = instrument_entryat(self->instrument, self->selected);
 		if (entry) {
 			if (abs(entry->keyrange.low  - screentokey(ev->x,
-					self->metrics.keysize)) < 
+					keysize)) < 
 				abs(entry->keyrange.high  - screentokey(ev->x,
-					self->metrics.keysize))) {
+					keysize))) {
 				self->dragmode = INSTVIEW_DRAG_LEFT;
 			} else {
 				self->dragmode = INSTVIEW_DRAG_RIGHT;
@@ -344,18 +389,34 @@ void instrumententryview_onmousemove(InstrumentEntryView* self,
 {	
 	if (self->dragmode != INSTVIEW_DRAG_NONE && self->instrument) {
 		psy_audio_InstrumentEntry* entry;
-		
+		int keysize;
+		int keymin = 0;
+		int keymax = NOTECOMMANDS_RELEASE;
+		int key;
+		int numwhitekeys;
+		psy_ui_TextMetric tm;
+		psy_ui_Size size;
+
+		numwhitekeys = 0;
+		for (key = keymin; key < keymax; ++key) {
+			if (!isblack(key)) {
+				++numwhitekeys;
+			}
+		}
+		tm = psy_ui_component_textmetric(&self->component);
+		size = psy_ui_component_size(&self->component);
+		keysize = (int)(psy_ui_value_px(&size.width, &tm) / (double)numwhitekeys);		
 		entry = instrument_entryat(self->instrument, self->selected);
 		if (entry) {
 			if (self->dragmode == INSTVIEW_DRAG_LEFT) {
 				entry->keyrange.low = screentokey(ev->x,
-					self->metrics.keysize);
+					keysize);
 				if (entry->keyrange.low > entry->keyrange.high) {
 					entry->keyrange.low = entry->keyrange.high;
 				}
 			} else {
 				entry->keyrange.high = screentokey(ev->x,
-					self->metrics.keysize);
+					keysize);
 				if (entry->keyrange.high < entry->keyrange.low) {
 					entry->keyrange.high = entry->keyrange.low;
 				}
@@ -405,7 +466,7 @@ void instrumentparameterview_init(InstrumentParameterView* self,
 	psy_signal_connect(&self->component.signal_draw, self,
 		instrumentparameterview_ondraw);
 	psy_ui_component_resize(&self->component,
-		psy_ui_value_makeew(10), psy_ui_value_makeeh(20));
+		psy_ui_value_makeew(20), psy_ui_value_makeeh(20));
 }
 
 void instrumentparameterview_setinstrument(InstrumentParameterView* self,

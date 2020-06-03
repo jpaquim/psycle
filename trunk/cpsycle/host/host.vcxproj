@@ -173,6 +173,7 @@
     <ClCompile Include="src\labelpair.c" />
     <ClCompile Include="src\linesperbeatbar.c" />
     <ClCompile Include="src\machinebar.c" />
+    <ClCompile Include="src\machineeditorview.c" />
     <ClCompile Include="src\machineframe.c" />
     <ClCompile Include="src\machinesbox.c" />
     <ClCompile Include="src\machineview.c" />
@@ -259,6 +260,7 @@
     <ClInclude Include="src\labelpair.h" />
     <ClInclude Include="src\linesperbeatbar.h" />
     <ClInclude Include="src\machinebar.h" />
+    <ClInclude Include="src\machineeditorview.h" />
     <ClInclude Include="src\machineframe.h" />
     <ClInclude Include="src\machinesbox.h" />
     <ClInclude Include="src\machineview.h" />

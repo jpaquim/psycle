@@ -456,12 +456,12 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					int32_t step;
 					int32_t nv;
 
-					curr = psy_audio_machineparam_patternvalue(param);
+					curr = psy_audio_machine_parameter_patternvalue(psy_audio_vstplugin_base(self), param);
 					step = (v - curr) / patternentry_front(entry)->vol;
 					nv = curr + step;
-					psy_audio_machineparam_tweak_pattern(param, nv);
+					psy_audio_machine_parameter_tweak_pattern(psy_audio_vstplugin_base(self), param, nv);
 				} else {
-					psy_audio_machineparam_tweak_pattern(param, v);
+					psy_audio_machine_parameter_tweak_pattern(psy_audio_vstplugin_base(self), param, v);
 				}
 			}			
 			for (i = 0; i < count; ++i) {		
@@ -849,8 +849,13 @@ int haseditor(psy_audio_VstPlugin* self)
 
 void seteditorhandle(psy_audio_VstPlugin* self, void* handle)
 {		
-	self->editorhandle = handle;
-	self->effect->dispatcher(self->effect, effEditOpen, 0, 0, handle, 0);	
+	if (self->editorhandle && handle == 0) {
+		self->editorhandle = 0;
+		self->effect->dispatcher(self->effect, effEditClose, 0, 0, handle, 0);
+	} else {
+		self->editorhandle = handle;
+		self->effect->dispatcher(self->effect, effEditOpen, 0, 0, handle, 0);
+	}
 }
 
 void editorsize(psy_audio_VstPlugin* self, int* width, int* height)
