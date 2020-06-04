@@ -21,11 +21,13 @@ typedef struct {
 	int ctrl;
 	int repeat;
 	bool bubble;
+	bool preventdefault;
 } psy_ui_KeyEvent;
 
 void psy_ui_keyevent_init(psy_ui_KeyEvent*, int keycode, int keydata,
 	int shift, int ctrl, int repeat);
 void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent*);
+void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent*);
 
 typedef struct {	
 	int x;

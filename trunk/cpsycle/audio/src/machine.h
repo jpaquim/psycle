@@ -829,6 +829,16 @@ INLINE psy_dsp_beat_t psy_audio_machine_beatspertick(psy_audio_Machine* self)
 	return self->vtable->beatspertick(self);
 }
 
+INLINE psy_dsp_beat_t psy_audio_machine_samplespertick(psy_audio_Machine* self)
+{
+	return 1.f / self->vtable->beatspersample(self) * self->vtable->beatspertick(self);
+}
+
+INLINE uintptr_t psy_audio_machine_ticksperbeat(psy_audio_Machine* self)
+{
+	return (uintptr_t)(1 / self->vtable->beatspertick(self));
+}
+
 INLINE psy_dsp_beat_t psy_audio_machine_beatspersample(psy_audio_Machine* self)
 {
 	return self->vtable->beatspersample(self);
@@ -838,6 +848,12 @@ INLINE psy_dsp_beat_t psy_audio_machine_currbeatsperline(psy_audio_Machine*
 	self)
 {
 	return self->vtable->currbeatsperline(self);
+}
+
+INLINE psy_dsp_beat_t psy_audio_machine_currlinesperbeat(psy_audio_Machine*
+	self)
+{
+	return 1.f / self->vtable->currbeatsperline(self);
 }
 
 INLINE uintptr_t psy_audio_machine_samplerate(psy_audio_Machine* self)

@@ -124,6 +124,7 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
 	}
 	psy_ui_component_invalidate(&self->component);
+	psy_ui_keyevent_stoppropagation(ev);
 }
 
 void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
@@ -152,6 +153,7 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 		self->input = psy_audio_encodeinput(0, shift, ctrl);
 	}
 	psy_ui_component_invalidate(&self->component);
+	psy_ui_keyevent_stoppropagation(ev);
 }
 
 void keynames_init(void)

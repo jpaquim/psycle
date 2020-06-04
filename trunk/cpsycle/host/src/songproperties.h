@@ -4,6 +4,7 @@
 #if !defined(SONGPROPERTIES_H)
 #define SONGPROPERTIES_H
 
+#include <uibutton.h>
 #include <uilabel.h>
 #include <uiedit.h>
 #include "workspace.h"
@@ -22,6 +23,8 @@ typedef struct {
 	psy_ui_Label label_speed;	
 	psy_ui_Label label_tpb;
 	psy_ui_Edit edit_tpb;
+	psy_ui_Button tpblessbutton;
+	psy_ui_Button tpbmorebutton;
 	psy_ui_Component comments;
 	psy_ui_Label label_comments;
 	psy_ui_Edit edit_comments;			

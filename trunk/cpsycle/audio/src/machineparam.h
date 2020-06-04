@@ -15,6 +15,14 @@
 extern "C" {
 #endif
 
+// psy_audio_MachineParam
+// 
+// Aim: Base class for various parameter classes (e.g. int, choice, gain).
+//      Enables reuse of repeating parameter classes. Instead tweaking with
+//      a parameter index, the machine is asked with a index for a parameter
+//      object. On the parameter object operations can be done, either direct
+//      or using the machine interface having proxy exception handling
+
 struct psy_audio_MachineParam;
 
 typedef	void (*fp_machineparam_tweak)(struct psy_audio_MachineParam*, float val);

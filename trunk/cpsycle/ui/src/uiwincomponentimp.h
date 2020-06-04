@@ -32,6 +32,7 @@ typedef struct psy_ui_win_ComponentImp {
 	int vscrollmax;
 	int hscrollmin;
 	int hscrollmax;
+	int preventwmchar;
 } psy_ui_win_ComponentImp;
 
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,

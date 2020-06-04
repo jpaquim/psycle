@@ -10,6 +10,21 @@
 extern "C" {
 #endif
 
+// psy_audio_Mixer
+// 
+// Aim: Send Return Mixer and chain sheduling. Psycle has two different mix
+// systems, the Buzz wire and the newer send return mixer. To handle both,
+// Machine implements the method mix for the wires. Mixer overwrites mix to 
+// implement the chain mixing. Mainly the player is doing the machine
+// sheduling, but the mixer can exclude them by marking them in
+// machines as "sent" and doing its own work calls.
+//
+// Structure:
+//      psy_audio_CustomMachine
+//            ^
+//            |
+//      psy_audio_Mixer
+
 struct psy_audio_Mixer;
 struct psy_audio_ReturnChannel;
 struct psy_audio_InputChannel;
@@ -190,7 +205,7 @@ typedef struct psy_audio_Mixer {
 } psy_audio_Mixer;
 
 void psy_audio_mixer_init(psy_audio_Mixer*, psy_audio_MachineCallback);
-const psy_audio_MachineInfo* mixer_info(void);
+const psy_audio_MachineInfo* psy_audio_mixer_info(void);
 
 INLINE psy_audio_InputChannel* psy_audio_mixer_Channel(psy_audio_Mixer* self,
 	uintptr_t i)

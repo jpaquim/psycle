@@ -85,7 +85,7 @@ static psy_audio_MachineInfo const MacInfo = {
 	0
 };
 
-const psy_audio_MachineInfo* master_info(void) { return &MacInfo; }
+const psy_audio_MachineInfo* psy_audio_master_info(void) { return &MacInfo; }
 
 #define NUMROWS 3
 
@@ -125,7 +125,7 @@ static void vtable_init(psy_audio_Master* self)
 	}
 }
 
-void master_init(psy_audio_Master* self, psy_audio_MachineCallback callback)
+void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback callback)
 {
 	memset(self, 0, sizeof(psy_audio_Master));
 	psy_audio_machine_init(&self->machine, callback);	
