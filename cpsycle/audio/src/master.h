@@ -10,7 +10,21 @@
 extern "C" {
 #endif
 
-typedef struct {
+// psy_audio_Master
+// 
+// Aim: root node of Machines and mini mixer. Any machine that wants to produce
+//      sound must be connected to the master. The player copies the output
+//      buffer of the master to the current audio driver buffer. The master
+//      handles global volume changes redirected by the Sequencer and the
+// 	    connected input wires can be tweaked
+//
+// Structure:
+//      psy_audio_Machine
+//            ^
+//            |
+//      psy_audio_Master
+
+typedef struct psy_audio_Master {
 	psy_audio_Machine machine;
 	psy_audio_CustomMachineParam param_info;
 	psy_audio_CustomMachineParam param_slider;
@@ -20,8 +34,8 @@ typedef struct {
 	psy_dsp_amp_t volume;
 } psy_audio_Master;
 
-void master_init(psy_audio_Master* self, psy_audio_MachineCallback);
-const psy_audio_MachineInfo* master_info(void);
+void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback);
+const psy_audio_MachineInfo* psy_audio_master_info(void);
 
 #ifdef __cplusplus
 }

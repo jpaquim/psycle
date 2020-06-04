@@ -80,7 +80,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			
 			master = (psy_audio_Master*)malloc(sizeof(psy_audio_Master));
 			if (master) {
-				master_init(master, self->machinecallback);
+				psy_audio_master_init(master, self->machinecallback);
 				rv = (psy_audio_Machine*) master;
 			} else {
 				rv = 0;

@@ -283,7 +283,7 @@ int routemachineparam_name(psy_audio_RouteMachineParam* self, char* text)
 	return 1;
 }
 
-const psy_audio_MachineInfo* mixer_info(void)
+const psy_audio_MachineInfo* psy_audio_mixer_info(void)
 {
 	static psy_audio_MachineInfo const macinfo = {
 		MI_VERSION,
@@ -305,7 +305,7 @@ const psy_audio_MachineInfo* mixer_info(void)
 // virtual prototypes
 static const psy_audio_MachineInfo* info(psy_audio_Mixer* self)
 {
-	return mixer_info();
+	return psy_audio_mixer_info();
 }
 static void psy_audio_mixer_dispose(psy_audio_Mixer*);
 static void psy_audio_mixer_dispose_channels(psy_audio_Mixer*);

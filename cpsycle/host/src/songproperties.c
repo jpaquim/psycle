@@ -9,6 +9,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "../../detail/portable.h"
 
@@ -23,10 +24,22 @@ static void songpropertiesview_ontitlechanged(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_oncreditschanged(SongPropertiesView*,
 	psy_ui_Component* sender);
-static void songpropertiesview_ontpbchanged(SongPropertiesView*,
+static void songpropertiesview_ontpbeditkeydown(SongPropertiesView*,
+	psy_ui_Component* sender, psy_ui_KeyEvent*);
+static void songpropertiesview_ontpbeditonfocuslost(SongPropertiesView*,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev);
+static void songpropertiesview_updatetpbedit(SongPropertiesView*);
+static void songpropertiesview_updateedit(SongPropertiesView*);
+static void songpropertiesview_ontpblessclicked(SongPropertiesView*,
+	psy_ui_Component* sender);
+static void songpropertiesview_ontpbmoreclicked(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_oncommentschanged(SongPropertiesView*,
 	psy_ui_Component* sender);
+static void songpropertiesview_onkeydown(SongPropertiesView*,
+	psy_ui_Component* sender, psy_ui_KeyEvent*);
+static void songpropertiesview_onkeyup(SongPropertiesView*,
+	psy_ui_Component* sender, psy_ui_KeyEvent*);
 
 void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -79,13 +92,26 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->label_tpb, &self->speed);
 	psy_ui_label_settext(&self->label_tpb, "Ticks Per Beat");
 	psy_ui_edit_init(&self->edit_tpb, &self->speed);
-	psy_ui_edit_setcharnumber(&self->edit_tpb, 4);
-	psy_signal_connect(&self->edit_tpb.signal_change, self,
-		songpropertiesview_ontpbchanged);
+	psy_ui_edit_setcharnumber(&self->edit_tpb, 6);
+	psy_signal_connect(&self->edit_tpb.component.signal_keydown, self,
+		songpropertiesview_ontpbeditkeydown);
+	psy_signal_connect(&self->edit_tpb.component.signal_focuslost, self,
+		songpropertiesview_ontpbeditonfocuslost);
+	psy_ui_button_init(&self->tpblessbutton, &self->speed);
+	psy_ui_button_seticon(&self->tpblessbutton, psy_ui_ICON_LESS);
+	psy_signal_connect(&self->tpblessbutton.signal_clicked, self,
+		songpropertiesview_ontpblessclicked);
+	psy_ui_button_init(&self->tpbmorebutton, &self->speed);
+	psy_ui_button_seticon(&self->tpbmorebutton, psy_ui_ICON_MORE);
+	psy_signal_connect(&self->tpbmorebutton.signal_clicked, self,
+		songpropertiesview_ontpbmoreclicked);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->speed, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
+	psy_ui_margin_setright(&margin, psy_ui_value_makepx(0));
+	psy_ui_component_setmargin(&self->tpblessbutton.component, &margin);
+	psy_ui_component_setmargin(&self->tpbmorebutton.component, &margin);
 	// Comments
 	psy_ui_component_init(&self->comments, &self->component);
 	psy_ui_component_enablealign(&self->comments);
@@ -107,6 +133,10 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 		songpropertiesview_onsongchanged);
 	psy_signal_connect(&self->component.signal_hide, self,
 		songpropertiesview_onhide);
+	psy_signal_connect(&self->component.signal_keydown, self,
+		songpropertiesview_onkeydown);
+	psy_signal_connect(&self->component.signal_keyup, self,
+		songpropertiesview_onkeyup);
 	songpropertiesview_initalign(self);	
 }
 
@@ -201,16 +231,71 @@ void songpropertiesview_oncreditschanged(SongPropertiesView* self,
 		&self->edit_credits));
 }
 
-void songpropertiesview_ontpbchanged(SongPropertiesView* self,
-	psy_ui_Component* sender)
+void songpropertiesview_ontpbeditkeydown(SongPropertiesView* self,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+{
+	if (ev->keycode == psy_ui_KEY_RETURN) {
+		int tpb;
+		psy_ui_component_setfocus(&self->component);
+		psy_ui_keyevent_preventdefault(ev);	
+		songpropertiesview_updatetpbedit(self);
+	} else
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		songpropertiesview_updateedit(self);
+		psy_ui_keyevent_preventdefault(ev);
+	} else
+	if (isalpha(ev->keycode)) {
+		psy_ui_keyevent_preventdefault(ev);
+	}	
+}
+
+void songpropertiesview_ontpbeditonfocuslost(SongPropertiesView* self,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+{	
+	psy_ui_keyevent_preventdefault(ev);
+	songpropertiesview_updatetpbedit(self);	
+}
+
+void songpropertiesview_updatetpbedit(SongPropertiesView* self)
 {
 	int tpb;
-	
+
 	tpb = atoi(psy_ui_edit_text(&self->edit_tpb));
-	if (tpb == 0) {
-		tpb = 24;
+	if (tpb < 1) {
+		tpb = 1;
+	}
+	if (tpb > 99) {
+		tpb = 99;
 	}
 	self->song->properties.tpb = tpb;
+}
+
+void songpropertiesview_updateedit(SongPropertiesView* self)
+{
+	char text[128];
+
+	psy_snprintf(text, 128, "%d", (int)self->song->properties.tpb);
+	psy_ui_edit_settext(&self->edit_tpb, text);
+	psy_ui_component_setfocus(&self->component);
+}
+
+void songpropertiesview_ontpblessclicked(SongPropertiesView* self,
+	psy_ui_Component* sender)
+{	
+	songpropertiesview_updatetpbedit(self);
+	if (self->song->properties.tpb > 1) {	
+		--self->song->properties.tpb;
+		songpropertiesview_updateedit(self);
+	}
+}
+
+void songpropertiesview_ontpbmoreclicked(SongPropertiesView* self, psy_ui_Component* sender)
+{	
+	songpropertiesview_updatetpbedit(self);
+	if (self->song->properties.tpb < 99) {		
+		++self->song->properties.tpb;
+		songpropertiesview_updateedit(self);
+	}	
 }
 
 void songpropertiesview_oncommentschanged(SongPropertiesView* self,
@@ -219,4 +304,16 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 	free(self->song->properties.comments);
 	self->song->properties.comments = strdup(
 		psy_ui_edit_text(&self->edit_comments));
+}
+
+void songpropertiesview_onkeydown(SongPropertiesView* self,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+{
+	psy_ui_keyevent_stoppropagation(ev);
+}
+
+void songpropertiesview_onkeyup(SongPropertiesView* self,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+{
+	psy_ui_keyevent_stoppropagation(ev);
 }

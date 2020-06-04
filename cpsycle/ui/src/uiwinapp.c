@@ -115,11 +115,13 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	psy_ui_win_ComponentImp* imp;
 	psy_ui_WinApp* winapp;
 	psy_ui_fp_winproc winproc;
+	bool preventdefault;
 
+	preventdefault = 0;
 	winapp = (psy_ui_WinApp*) app.platform;
 	imp = (psy_ui_win_ComponentImp*) psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
 	if (imp) {		
-		winproc = imp->wndproc;		
+		winproc = imp->wndproc;
 		switch (message)
 		{
 			case WM_NCDESTROY:
@@ -152,6 +154,12 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 						(int)wParam);
 				}
 			break;
+			case WM_CHAR:
+				if (imp->preventwmchar) {
+					imp->preventwmchar = 0;
+					preventdefault = 1;
+				}
+			break;
 			case WM_KEYDOWN:								
 			{
 				psy_ui_KeyEvent ev;
@@ -162,6 +170,10 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				imp->component->vtable->onkeydown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_keydown, imp->component, 1,
 					&ev);
+				preventdefault = ev.preventdefault;
+				if (preventdefault) {
+					imp->preventwmchar = 1;
+				}
 				if (ev.bubble != FALSE &&
 						psy_table_at(&winapp->selfmap,
 						(uintptr_t) GetParent (hwnd))) {
@@ -195,6 +207,9 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 			break;
 			default:
 			break;
+		}
+		if (preventdefault) {
+			return 0;
 		}
 		return CallWindowProc(winproc, hwnd, message, wParam, lParam);
 	}

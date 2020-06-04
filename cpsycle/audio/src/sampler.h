@@ -18,9 +18,7 @@ extern "C" {
 #endif
 
 #define SAMPLER_DEFAULT_POLYPHONY	8
-
 	
-
 /*
 	* = remembers its last value when called with param 00.
 	t = slides/changes each tick. (or is applied in a specific tick != 0 )
@@ -85,17 +83,32 @@ typedef enum psy_audio_SamplerCmdMode {
 typedef struct SamplerCmd {
 	int id;
 	int patternid;
-	psy_audio_SamplerCmdMode mode;
-	char* name;
+	int mode;
 } psy_audio_SamplerCmd;
 
 void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd*,
-	int id, int patternid, int mask, const char* name);
+	int id, int patternid, int mask);
 void psy_audio_samplercmd_dispose(psy_audio_SamplerCmd*);
+
+INLINE psy_audio_SamplerCmd psy_audio_samplercmd_make(int id, int patternid, int mask)
+{
+	psy_audio_SamplerCmd rv;
+
+	rv.id = id;
+	rv.patternid = patternid;
+	rv.mode = mask;
+	return rv;
+}
+
+INLINE bool psy_audio_samplercmd_hasticktime(const psy_audio_SamplerCmd* self)
+{
+	return ((self->mode & psy_audio_SAMPLERCMDMODE_TICK)
+		== psy_audio_SAMPLERCMDMODE_TICK);
+}
 
 psy_audio_SamplerCmd* psy_audio_samplercmd_alloc(void);
 psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
-	int patternid, int mask, const char* name);
+	int patternid, int mask);
 
 typedef enum {
 	INTERPOL_NONE = 0,
@@ -116,6 +129,38 @@ typedef struct psy_audio_SamplerChannel {
 	float panfactor;
 } psy_audio_SamplerChannel;
 
+
+typedef struct {
+	double factor;
+	uintptr_t counter;
+	uintptr_t numframes;
+	uintptr_t currframe;
+} psy_audio_TriggerPorta;
+
+INLINE void psy_audio_triggerporta_init_all(psy_audio_TriggerPorta* self,
+	double factor, uintptr_t counter, uintptr_t numframes)
+{
+	self->factor = factor;	
+	self->counter = counter;	
+	self->numframes = numframes;
+	self->currframe = 0;
+}
+
+INLINE bool psy_audio_triggerporta_inc(psy_audio_TriggerPorta* self)
+{
+	if (self->counter > 0) {
+		if (self->currframe >= self->numframes) {
+			self->counter--;
+			self->currframe = 0;
+			return TRUE;
+		} else {
+			++self->currframe;
+			return FALSE;
+		}
+	}
+	return FALSE;
+}
+
 struct psy_audio_Sampler;
 
 typedef struct {
@@ -133,11 +178,9 @@ typedef struct {
 
 	psy_dsp_amp_t vol;
 	psy_dsp_amp_t pan;
-	int usedefaultvolume;	
-	double portaspeed;
-	uintptr_t portanumframes;
-	uintptr_t portacurrframe;
-	int effcmd;
+	int usedefaultvolume;
+	psy_audio_SamplerCmd effcmd;
+	psy_audio_TriggerPorta porta;
 	int effval;
 	int dopan;
 	int dooffset;

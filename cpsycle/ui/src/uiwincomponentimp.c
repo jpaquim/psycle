@@ -167,6 +167,7 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->vscrollmax = 100;
 	self->hscrollmin = 0;
 	self->hscrollmax = 100;
+	self->preventwmchar = 0;
 	parent_imp = parent ? (psy_ui_win_ComponentImp*)parent : 0;	
 	psy_ui_win_component_create_window(self, parent_imp, classname, x, y, width, height,
 		dwStyle, usecommand);

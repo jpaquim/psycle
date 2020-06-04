@@ -14,11 +14,17 @@ void psy_ui_keyevent_init(psy_ui_KeyEvent* self, int keycode, int keydata,
 	self->ctrl = ctrl;
 	self->repeat = repeat;
 	self->bubble = 1;
+	self->preventdefault = FALSE;
 }
 
 void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent* self)
 {
 	self->bubble = 0;
+}
+
+void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
+{
+	self->preventdefault = TRUE;
 }
 
 void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, int x, int y, int button,
