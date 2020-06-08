@@ -10,6 +10,8 @@
 #include <uieditor.h>
 #include <uinotebook.h>
 
+// aim: keyboard shortcut helpview for general and note commands.
+
 typedef struct KbdHelp {
 	psy_ui_Component component;
 	KbdBox kbdbox;	

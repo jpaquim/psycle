@@ -6,7 +6,6 @@
 #include "machines.h"
 #include "exclusivelock.h"
 #include <operations.h>
-#include <alignedalloc.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +26,7 @@ static psy_audio_Buffer* machines_nextbuffer(psy_audio_Machines*,
 	uintptr_t channels);
 static void machines_freebuffers(psy_audio_Machines*);
 static bool isleaf(psy_audio_Machines*, uintptr_t slot, psy_Table* worked);
+static uintptr_t machines_findmaxindex(psy_audio_Machines*);
 
 void psy_audio_machines_init(psy_audio_Machines* self)
 {
@@ -47,6 +47,7 @@ void psy_audio_machines_init(psy_audio_Machines* self)
 	self->buffers = 0;
 	self->filemode = 0;
 	self->master = 0;
+	self->maxindex = 0;
 	machines_initsignals(self);
 }
 
@@ -101,6 +102,11 @@ void psy_audio_machines_clear(psy_audio_Machines* self)
 	psy_audio_machines_init(self);
 }
 
+uintptr_t psy_audio_machines_maxindex(psy_audio_Machines* self)
+{
+	return self->maxindex;	
+}
+
 void psy_audio_machines_insert(psy_audio_Machines* self, uintptr_t slot,
 	psy_audio_Machine* machine)
 {	
@@ -110,6 +116,9 @@ void psy_audio_machines_insert(psy_audio_Machines* self, uintptr_t slot,
 			self->master = machine;
 		}
 		machine->vtable->setslot(machine, slot);
+		if (slot > self->maxindex) {
+			self->maxindex = slot;
+		}
 		psy_signal_emit(&self->signal_insert, self, 1, slot);
 		if (!self->filemode) {		
 			psy_audio_exclusivelock_enter();
@@ -139,8 +148,29 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 	psy_table_remove(&self->slots, slot);
 	machines_setpath(self, psy_audio_compute_path(self, psy_audio_MASTER_INDEX,
 		TRUE));
+	if (slot == self->maxindex) {
+		slot = machines_findmaxindex(self);
+	}
 	psy_signal_emit(&self->signal_removed, self, 1, slot);
 	psy_audio_exclusivelock_leave();	
+}
+
+uintptr_t machines_findmaxindex(psy_audio_Machines* self)
+{
+	uintptr_t rv = 0;
+	psy_TableIterator it;
+
+	for (it = psy_audio_machines_begin(self);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_Machine* machine;
+
+		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+		if (psy_audio_machine_slot(machine) > rv) {
+			rv = psy_audio_machine_slot(machine);
+		}		
+	}
+	return rv;
 }
 
 void psy_audio_machines_remove(psy_audio_Machines* self, uintptr_t slot)

@@ -192,7 +192,7 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 {
 	psy_TableIterator it;
 
-	for (it = psy_table_begin(&self->song->instruments.container);
+	for (it = psy_audio_instruments_groupbegin(&self->song->instruments, 0);
 			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
 		psy_audio_Instrument* instrument;
 		psy_audio_Sample* sample;
@@ -201,7 +201,7 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 		sample = psy_audio_samples_at(&self->song->samples,
 			sampleindex_make(psy_tableiterator_key(&it), 0));
 		if (sample) {
-			instrument_setname(instrument, psy_audio_sample_name(sample));
+			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
 		}
 	}
 }
@@ -627,7 +627,7 @@ void readinsd(psy_audio_SongFile* self)
 			int32_t lines;
 			psy_audio_NewNoteAction nna;
 
-			instrument = instrument_allocinit();
+			instrument = psy_audio_instrument_allocinit();
 			psyfile_read(self->file, &loop, sizeof(loop));
 			instrument->loop = loop;
 			psyfile_read(self->file, &lines, sizeof(lines));
@@ -654,7 +654,7 @@ void readinsd(psy_audio_SongFile* self)
 					nna = psy_audio_NNA_STOP;
 				break;
 			}			
-			instrument_setnna(instrument, nna);
+			psy_audio_instrument_setnna(instrument, nna);
 
 			psyfile_read(self->file, &ENV_AT, sizeof(ENV_AT));
 			psyfile_read(self->file, &ENV_DT, sizeof(ENV_DT));
@@ -676,7 +676,7 @@ void readinsd(psy_audio_SongFile* self)
 			psyfile_read(self->file, &ENV_F_RT, sizeof(ENV_F_RT));
 
 			adsr_settings_setattack(
-				&instrument->filterenvelope, ENV_AT * 1.f/44100);
+				&instrument->filterenvelope, ENV_F_AT * 1.f/44100);
 			adsr_settings_setdecay(
 				&instrument->filterenvelope, ENV_F_DT * 1.f/44100);
 			adsr_settings_setsustain(
@@ -730,8 +730,10 @@ void readinsd(psy_audio_SongFile* self)
 			ENV_F_AT = (ENV_F_AT/220)*220; if (ENV_F_AT <=0) ENV_F_AT=1;
 			ENV_F_DT = (ENV_F_DT/220)*220; if (ENV_F_DT <=0) ENV_F_DT=1;
 			ENV_F_RT = (ENV_F_RT/220)*220; if (ENV_F_RT <=0) ENV_F_RT=1;			
-			instrument_setname(instrument, instrum_name);
-			instruments_insert(&self->song->instruments, instrument, index);			
+			psy_audio_instrument_setname(instrument, instrum_name);
+			psy_audio_instrument_setindex(instrument, index);
+			instruments_insert(&self->song->instruments, instrument,
+				instrumentindex_make(0, index));
 		}
 	}	
 }
@@ -784,9 +786,7 @@ void readeins(psy_audio_SongFile* self)
 				psyfile_seek(self->file, filepos + sizeINST);
 				filepos = psyfile_getpos(self->file);
 			}
-		}
-		
-
+		}		
 		psyfile_read(self->file, &numSamples, sizeof(numSamples));
 		for(i = 0;i < numSamples && filepos <
 			self->file->currchunk.begins + self->file->currchunk.size;i++)
@@ -835,12 +835,13 @@ void readsmid(psy_audio_SongFile* self)
 		if (index < MAX_INSTRUMENTS) {
 			psy_audio_Instrument* instrument;
 
-			if (!instruments_at(&self->song->instruments, index)) {
-				instrument = instrument_allocinit();
+			if (!instruments_at(&self->song->instruments, instrumentindex_make(1, index))) {
+				instrument = psy_audio_instrument_allocinit();
+				psy_audio_instrument_setindex(instrument, index);
 				instruments_insert(&self->song->instruments, instrument,
-					index);
+					instrumentindex_make(1, index));
 			}
-			instrument = instruments_at(&self->song->instruments, index);
+			instrument = instruments_at(&self->song->instruments, instrumentindex_make(1, index));
 			loadxminstrument(self, instrument, 0, self->file->currchunk.version &
 				0xFFFF);
 		}
@@ -1030,6 +1031,7 @@ void loadxminstrument(psy_audio_SongFile* self, psy_audio_Instrument* instrument
 	legacyeins = 0;
 
 	psyfile_readstring(self->file, name, 256);
+	psy_audio_instrument_setname(instrument, name);
 	psyfile_read(self->file, &m_Lines, sizeof(m_Lines));
 	if (islegacy) m_Lines = 0;
 
@@ -1094,7 +1096,7 @@ void loadxminstrument(psy_audio_SongFile* self, psy_audio_Instrument* instrument
 					nna = psy_audio_NNA_STOP;
 				break;
 			}
-			instrument_setnna(instrument, nna);
+			psy_audio_instrument_setnna(instrument, nna);
 		}
 		psyfile_read(self->file, &i, sizeof(i));
 		m_DCT = i; // static_cast<DupeCheck::Type>(i);
@@ -1109,10 +1111,10 @@ void loadxminstrument(psy_audio_SongFile* self, psy_audio_Instrument* instrument
 		uint8_t sampleslot;
 		psy_audio_InstrumentEntry instentry;		
 
-		instrumententry_init(&instentry);
+		psy_audio_instrumententry_init(&instentry);
 		instentry.sampleindex = sampleindex_make(0, 0);
 		if (instrument) {
-			instrument_clearentries(instrument);
+			psy_audio_instrument_clearentries(instrument);
 		}
 		for(i = 0; i < note_map_size; i++) {
 			int note;
@@ -1128,7 +1130,7 @@ void loadxminstrument(psy_audio_SongFile* self, psy_audio_Instrument* instrument
 				} else
 				if (sampleslot != instentry.sampleindex.slot) {
 					instentry.keyrange.high = note - 1;				
-					instrument_addentry(instrument, &instentry);
+					psy_audio_instrument_addentry(instrument, &instentry);
 					instentry.keyrange.low = note;
 					instentry.sampleindex.slot = sampleslot;
 				}
@@ -1136,11 +1138,10 @@ void loadxminstrument(psy_audio_SongFile* self, psy_audio_Instrument* instrument
 		}
 		if (instrument) {
 			instentry.keyrange.high = 119;
-			instrument_addentry(instrument, &instentry);
+			psy_audio_instrument_addentry(instrument, &instentry);
 		}
 	}
 	xminstrumentenvelopeload(self, 0, 0);
-
 	if (islegacy && legacyeins==0) {
 		//Workaround for a bug in that version
 		xminstrumentenvelopeload(self, islegacy, self->file->currchunk.version);  // islegacy, version
@@ -1677,7 +1678,7 @@ uint32_t psy3_chunkcount(psy_audio_Song* song)
 	// MACD
 	rv += (uint32_t) psy_audio_machines_size(&song->machines);
 	// INSD
-	rv += (uint32_t) instruments_size(&song->instruments);
+	rv += (uint32_t)instruments_size(&song->instruments, 0);
 	// SMSB
 	rv += (uint32_t) psy_audio_samples_groupsize(&song->samples);
 	return rv;
@@ -2326,7 +2327,9 @@ int psy3_write_insd(psy_audio_SongFile* self)
 	uint32_t sizepos;	
 	int status = PSY_OK;
 
-	for (it = psy_table_begin(&self->song->instruments.container);
+	;
+
+	for (it = psy_audio_instruments_groupbegin(&self->song->instruments, 0);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 		psy_audio_Instrument* instrument;

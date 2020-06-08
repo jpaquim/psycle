@@ -21,6 +21,8 @@
 #include <sampler.h>
 #include <sample.h>
 
+// aim: Wave editor and loop point definer.
+
 struct SampleEditor;
 
 typedef struct {

@@ -406,7 +406,7 @@ static void masterchannel_dw_describe(psy_audio_MasterChannel*,
 static void channel_pan_describe(psy_audio_MachineParam*,
 	psy_audio_MachineParam* sender, int* active, char* text);
 // Slider/Level
-static void masterchannel_level_normvalue(psy_audio_MasterChannel* self,
+static void masterchannel_level_normvalue(psy_audio_MasterChannel*,
 	psy_audio_CustomMachineParam* sender, float* rv);
 // InputChannel
 static void inputchannel_init(psy_audio_InputChannel*, uintptr_t id,

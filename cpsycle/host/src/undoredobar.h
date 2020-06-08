@@ -7,6 +7,8 @@
 #include "uibutton.h"
 #include "workspace.h"
 
+// aim: ToolBar for the workspace undo redo handler.
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Button undobutton;

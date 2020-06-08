@@ -10,6 +10,8 @@
 
 #include "workspace.h"
 
+// aim: ide for lua plugins
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Editor editor;
@@ -22,7 +24,6 @@ typedef struct {
 	const char* basepath;	
 	uintptr_t instanceidx;
 	psy_Table pluginmappping;
-
 } PluginEditor;
 
 void plugineditor_init(PluginEditor*, psy_ui_Component* parent, Workspace*);

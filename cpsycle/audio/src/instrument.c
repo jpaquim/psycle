@@ -22,9 +22,9 @@ int frequencyrange_intersect(psy_audio_FrequencyRange* self, double value)
 	return value >= self->low && value <= self->high;
 }
 
-static void instrument_disposeentries(psy_audio_Instrument*);
+static void psy_audio_instrument_disposeentries(psy_audio_Instrument*);
 
-void instrumententry_init(psy_audio_InstrumentEntry* self)
+void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 {	
 	self->sampleindex = sampleindex_make(UINTPTR_MAX, UINTPTR_MAX);
 	parameterrange_init(&self->keyrange, 0, NOTECOMMANDS_RELEASE - 1, 0,
@@ -36,23 +36,23 @@ void instrumententry_init(psy_audio_InstrumentEntry* self)
 	self->use_freqrange = 0;
 }
 
-psy_audio_InstrumentEntry* instrumententry_alloc(void)
+psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void)
 {
 	return (psy_audio_InstrumentEntry*) malloc(sizeof(psy_audio_InstrumentEntry));
 }
 
-psy_audio_InstrumentEntry* instrumententry_allocinit(void)
+psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void)
 {
 	psy_audio_InstrumentEntry* rv;
 
-	rv = instrumententry_alloc();
+	rv = psy_audio_instrumententry_alloc();
 	if (rv) {
-		instrumententry_init(rv);
+		psy_audio_instrumententry_init(rv);
 	}
 	return rv;
 }
 
-int instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
+int psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
 	uintptr_t velocity, double frequency)
 {
 	if (self->use_keyrange && !parameterrange_intersect(&self->keyrange, key)) {
@@ -67,7 +67,7 @@ int instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
 	return 1;
 }
 
-void instrument_init(psy_audio_Instrument* self)
+void psy_audio_instrument_init(psy_audio_Instrument* self)
 {	
 	self->index = UINTPTR_MAX;
 	self->entries = 0;	
@@ -84,14 +84,14 @@ void instrument_init(psy_audio_Instrument* self)
 	psy_signal_init(&self->signal_namechanged);
 }
 
-void instrument_dispose(psy_audio_Instrument* self)
+void psy_audio_instrument_dispose(psy_audio_Instrument* self)
 {	
-	instrument_disposeentries(self);
+	psy_audio_instrument_disposeentries(self);
 	psy_signal_dispose(&self->signal_namechanged);
 	free(self->name);
 }
 
-void instrument_disposeentries(psy_audio_Instrument* self)
+void psy_audio_instrument_disposeentries(psy_audio_Instrument* self)
 {
 	psy_List* p;
 
@@ -102,64 +102,64 @@ void instrument_disposeentries(psy_audio_Instrument* self)
 	self->entries = 0;
 }
 
-psy_audio_Instrument* instrument_alloc(void)
+psy_audio_Instrument* psy_audio_instrument_alloc(void)
 {
 	return (psy_audio_Instrument*) malloc(sizeof(psy_audio_Instrument));
 }
 
-psy_audio_Instrument* instrument_allocinit(void)
+psy_audio_Instrument* psy_audio_instrument_allocinit(void)
 {
 	psy_audio_Instrument* rv;
 
-	rv = instrument_alloc();
+	rv = psy_audio_instrument_alloc();
 	if (rv) {
-		instrument_init(rv);
+		psy_audio_instrument_init(rv);
 	}
 	return rv;
 }
 
-void instrument_load(psy_audio_Instrument* self, const char* path)
+void psy_audio_instrument_load(psy_audio_Instrument* self, const char* path)
 {	
 }
 
-void instrument_setname(psy_audio_Instrument* self, const char* name)
+void psy_audio_instrument_setname(psy_audio_Instrument* self, const char* name)
 {
 	free(self->name);
 	self->name = strdup(name);
 	psy_signal_emit(&self->signal_namechanged, self, 0);
 }
 
-void instrument_setindex(psy_audio_Instrument* self, uintptr_t index)
+void psy_audio_instrument_setindex(psy_audio_Instrument* self, uintptr_t index)
 {
 	psy_audio_InstrumentEntry entry;
 
-	instrumententry_init(&entry);	
+	psy_audio_instrumententry_init(&entry);	
 	entry.sampleindex = sampleindex_make(index, 0);	
-	instrument_addentry(self, &entry);
+	psy_audio_instrument_addentry(self, &entry);
 	self->index = index;
 }
 
-uintptr_t instrument_index(psy_audio_Instrument* self)
+uintptr_t psy_audio_instrument_index(psy_audio_Instrument* self)
 {
 	return self->index;
 }
 
-const char* instrument_name(psy_audio_Instrument* self)
+const char* psy_audio_instrument_name(psy_audio_Instrument* self)
 {
 	return self->name;
 }
 
-void instrument_setnna(psy_audio_Instrument* self, psy_audio_NewNoteAction nna)
+void psy_audio_instrument_setnna(psy_audio_Instrument* self, psy_audio_NewNoteAction nna)
 {
 	self->nna = nna;
 }
 
-psy_audio_NewNoteAction instrument_nna(psy_audio_Instrument* self)
+psy_audio_NewNoteAction psy_audio_instrument_nna(psy_audio_Instrument* self)
 {
 	return self->nna;
 }
 
-psy_List* instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
+psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
 	uintptr_t velocity, double frequency)
 {
 	psy_List* rv = 0;
@@ -171,7 +171,7 @@ psy_List* instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
 			psy_audio_InstrumentEntry* entry;
 
 			entry = (psy_audio_InstrumentEntry*) p->entry;
-			if (instrumententry_intersect(entry, key, velocity, frequency)) {
+			if (psy_audio_instrumententry_intersect(entry, key, velocity, frequency)) {
 				psy_list_append(&rv, entry);
 			}			
 		}		
@@ -179,18 +179,18 @@ psy_List* instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
 	return rv;
 }
 
-void instrument_addentry(psy_audio_Instrument* self, const psy_audio_InstrumentEntry* entry)
+void psy_audio_instrument_addentry(psy_audio_Instrument* self, const psy_audio_InstrumentEntry* entry)
 {	
 	if (entry) {
 		psy_audio_InstrumentEntry* newentry;
 
-		newentry = instrumententry_alloc();
+		newentry = psy_audio_instrumententry_alloc();
 		*newentry = *entry;
 		psy_list_append(&self->entries, newentry);
 	}
 }
 
-void instrument_removeentry(psy_audio_Instrument* self, uintptr_t numentry)
+void psy_audio_instrument_removeentry(psy_audio_Instrument* self, uintptr_t numentry)
 {
 	psy_List* node;
 
@@ -201,12 +201,12 @@ void instrument_removeentry(psy_audio_Instrument* self, uintptr_t numentry)
 	}
 }
 
-void instrument_clearentries(psy_audio_Instrument* self)
+void psy_audio_instrument_clearentries(psy_audio_Instrument* self)
 {	
-	instrument_disposeentries(self);	
+	psy_audio_instrument_disposeentries(self);	
 }
 
-psy_audio_InstrumentEntry* instrument_entryat(psy_audio_Instrument* self, uintptr_t numentry)
+psy_audio_InstrumentEntry* psy_audio_instrument_entryat(psy_audio_Instrument* self, uintptr_t numentry)
 {	
 	psy_audio_InstrumentEntry* rv = 0;
 	psy_List* node;
@@ -218,7 +218,7 @@ psy_audio_InstrumentEntry* instrument_entryat(psy_audio_Instrument* self, uintpt
 	return rv;
 }
 
-const psy_List* instrument_entries(psy_audio_Instrument* self)
+const psy_List* psy_audio_instrument_entries(psy_audio_Instrument* self)
 {
 	return self->entries;
 }

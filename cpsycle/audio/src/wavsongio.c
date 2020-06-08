@@ -24,10 +24,11 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	psy_audio_sample_load(sample, self->path);
 	index = index = sampleindex_make(0, 0);
 	psy_audio_samples_insert(&self->song->samples, sample, index);
-	instrument = instrument_allocinit();
-	instrument_setname(instrument, psy_audio_sample_name(sample));
+	instrument = psy_audio_instrument_allocinit();
+	psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
+	psy_audio_instrument_setindex(instrument, index.slot);
 	instruments_insert(&self->song->instruments, instrument,
-		index.slot);	
+		instrumentindex_make(0, index.slot));
 	{
 		psy_audio_Pattern* pattern;
 		psy_audio_PatternEvent patternevent;		

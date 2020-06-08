@@ -71,7 +71,6 @@ PlayListEntry* playlistentry_allocinit(const char* title, const char* path)
 	return rv;
 }
 
-
 void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	psy_ui_Component* parent)
 {

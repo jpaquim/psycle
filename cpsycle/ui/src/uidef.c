@@ -196,11 +196,29 @@ intptr_t psy_ui_margin_width_px(psy_ui_Margin* self,
 		psy_ui_value_px(&self->right, tm);
 }
 
+psy_ui_Value psy_ui_margin_width(psy_ui_Margin* self,
+	const psy_ui_TextMetric* tm)
+{
+	return psy_ui_add_values(self->left, self->right, tm);
+}
+
 intptr_t psy_ui_margin_height_px(psy_ui_Margin* self,
 	const psy_ui_TextMetric* tm)
 {
 	return psy_ui_value_px(&self->top, tm) +
 		psy_ui_value_px(&self->bottom, tm);
+}
+
+psy_ui_Value psy_ui_margin_height(psy_ui_Margin* self,
+	const psy_ui_TextMetric* tm)
+{
+	return psy_ui_add_values(self->top, self->bottom, tm);
+}
+
+// psy_ui_Value
+void psy_ui_value_init(psy_ui_Value* self)
+{
+	*self = psy_ui_value_makepx(0);
 }
 
 psy_ui_Value psy_ui_value_makepx(intptr_t px)
@@ -252,6 +270,32 @@ intptr_t psy_ui_value_px(const psy_ui_Value* self, const psy_ui_TextMetric* tm)
 		break;
 	}
 	return rv;
+}
+
+void psy_ui_value_add(psy_ui_Value* self, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm)
+{	
+	if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW)) {
+		self->quantity.real += other->quantity.real;
+	} else {
+		self->quantity.integer = psy_ui_value_px(self, tm) +
+			psy_ui_value_px(other, tm);
+		self->unit = psy_ui_UNIT_PX;	
+	}
+}
+
+void psy_ui_value_sub(psy_ui_Value* self, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm)
+{
+	if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW)) {
+		self->quantity.real -= other->quantity.real;
+	} else {
+		self->quantity.integer = psy_ui_value_px(self, tm) -
+			psy_ui_value_px(other, tm);
+		self->unit = psy_ui_UNIT_PX;
+	}
 }
 
 void psy_ui_error(const char* err, const char* shorterr)

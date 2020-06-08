@@ -8,6 +8,11 @@
 #include "uicombobox.h"
 #include "workspace.h"
 
+// aim: Select Machine – Select the machine to be used
+//      Opens Gear Rack, CPU, MIDI, Lua Plugin Editor View
+//      Sampler : Select Instrument – Selects the instrument to be used or
+//      other Generator/Effect: Select Tweak Parameter
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_ComboBox machinebox;	

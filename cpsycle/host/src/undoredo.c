@@ -62,7 +62,7 @@ Command* swap(psy_List** first, psy_List** second)
 }
 
 void undoredo_execute(UndoRedo* self, Command* command)
-{	
+{		
 	psy_list_append(&self->undo, command);	
 	command->execute(command);
 	clear_redo(self);

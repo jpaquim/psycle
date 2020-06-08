@@ -8,6 +8,10 @@
 #include "uilabel.h"
 #include "workspace.h"
 
+// aim: sets the number of tracks for your patterns. This is a global setting
+//      affecting all patterns. The player will only play the tracks upto this
+//      number.
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label headerlabel;

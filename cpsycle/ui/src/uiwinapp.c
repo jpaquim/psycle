@@ -146,7 +146,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					psy_signal_emit(&imp->component->signal_destroy,
 						imp->component, 0);
 				}								
-			break;
+			break;			
 			case WM_TIMER:								
 				imp->component->vtable->ontimer(imp->component, (int) wParam);
 				if (imp->component->signal_timer.slots) {
@@ -386,6 +386,19 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 				return 0;
 			break;
+			case WM_CLOSE: {
+				bool close;
+
+				close = imp->component->vtable->onclose(imp->component);
+				if (imp->component->signal_close.slots) {
+					psy_signal_emit(&imp->component->signal_close, imp->component, 1,
+						(void*)&close);
+				}
+				if (!close) {
+					return 0;
+				}				
+				break;
+			}
 			case WM_SYSKEYDOWN:
 				if (wParam >= VK_F10 && wParam <= VK_F12) {					
 					if (imp->component->signal_keydown.slots) {
@@ -851,6 +864,11 @@ int psy_ui_winapp_run(psy_ui_WinApp* self)
 void psy_ui_winapp_stop(psy_ui_WinApp* self)
 {
 	PostQuitMessage(0);
+}
+
+void psy_ui_winapp_close(psy_ui_WinApp* self, psy_ui_Component* main)
+{	
+	PostMessage(((psy_ui_win_ComponentImp*)(main->imp))->hwnd, WM_CLOSE, 0, 0);	
 }
 
 #endif

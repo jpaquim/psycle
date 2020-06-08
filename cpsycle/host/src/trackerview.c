@@ -1843,7 +1843,7 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	machine = psy_audio_machines_at(&self->view->workspace->song->machines, event.mach);
 	if (machine && 
 			machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
-		event.inst = self->view->workspace->song->instruments.slot;
+		event.inst = self->view->workspace->song->instruments.slot.subslot;
 	}
 	trackergrid_inputevent(self, &event, chordmode);
 }
@@ -2412,8 +2412,9 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerlinenumbers_init(&self->linenumbers, &self->left, self);
 	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_CLIENT);
 	zoombox_init(&self->zoombox, &self->left);
-	psy_ui_component_resize(&self->zoombox.component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(1));
+	psy_ui_component_setpreferredsize(&self->zoombox.component,
+		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(1)));
 	psy_ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_BOTTOM);
 	psy_signal_connect(&self->zoombox.signal_changed, self,
 		trackerview_onzoomboxchanged);	
@@ -2426,8 +2427,9 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	// pattern default line
 	trackergrid_init(&self->griddefaults, &self->component, self, &workspace->player);	
 	psy_ui_component_setalign(&self->griddefaults.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_resize(&self->griddefaults.component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(1.1));
+	psy_ui_component_setpreferredsize(&self->griddefaults.component, 
+		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(1.1)));
 	self->griddefaults.editmode = TRACKERGRID_EDITMODE_LOCAL;
 	self->griddefaults.columnresize = 1;
 	trackergrid_setpattern(&self->griddefaults, &self->workspace->player.patterndefaults);	
@@ -2896,11 +2898,11 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	psy_ui_Component* parent, TrackerView* view)
-{		
-	self->view = view;
+{			
 	psy_ui_component_init(&self->component, parent);
 	trackerlinenumberslabel_vtable_init(self);
-	self->component.vtable = &trackerlinenumberslabel_vtable;	
+	self->component.vtable = &trackerlinenumberslabel_vtable;
+	self->view = view;
 }
 
 void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel* self,
@@ -2934,14 +2936,15 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	rv->width = psy_ui_value_makeew(12);	
+	rv->height = psy_ui_value_makepx(30);
 	if (self->view->showdefaultline) {
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 
-		size = psy_ui_component_preferredsize(&self->view->griddefaults.component, limit);
-		rv->height = psy_ui_value_makepx(30 + psy_ui_value_px(&size.height, &tm));
-	} else {
-		rv->height = psy_ui_value_makepx(30);
+		tm = psy_ui_component_textmetric(&self->view->griddefaults.component);
+		size = psy_ui_component_preferredsize(&
+			self->view->griddefaults.component, limit);
+		psy_ui_value_add(&rv->height, &size.height, &tm);
 	}
 }
 
@@ -3244,7 +3247,7 @@ void trackergrid_onchangeinstrument(TrackerGrid* self)
 		psy_audio_pattern_changeinstrument(self->pattern,
 			self->selection.topleft,
 			self->selection.bottomright,
-			self->view->workspace->song->instruments.slot);
+			self->view->workspace->song->instruments.slot.subslot);
 		psy_ui_component_invalidate(&self->view->component);
 	}
 }

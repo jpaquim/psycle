@@ -11,6 +11,10 @@
 
 #include <uieditor.h>
 
+// aim: displays the help files with the Scintilla component, an open source
+//      source editor component, first used with psycle 1.12 and avoids the
+//      opening of an external text editor viewer like notepad.
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Editor editor;

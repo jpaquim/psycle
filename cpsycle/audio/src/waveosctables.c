@@ -32,22 +32,22 @@ static void constructwave(double fh, psy_audio_Sample* wave,
 void psy_audio_waveosctables_init(psy_audio_WaveOscTables* self)
 {
     psy_audio_samples_init(&self->container);
-    instrument_init(&self->sin_tbl);
-    instrument_init(&self->saw_tbl);
-    instrument_init(&self->sqr_tbl);
-    instrument_init(&self->tri_tbl);
-    instrument_init(&self->rnd_tbl);
+    psy_audio_instrument_init(&self->sin_tbl);
+    psy_audio_instrument_init(&self->saw_tbl);
+    psy_audio_instrument_init(&self->sqr_tbl);
+    psy_audio_instrument_init(&self->tri_tbl);
+    psy_audio_instrument_init(&self->rnd_tbl);
     psy_audio_waveosctables_makeall(self, 44100);
 }
 
 void psy_audio_waveosctables_dispose(psy_audio_WaveOscTables* self)
 {
     psy_audio_samples_dispose(&self->container);
-    instrument_dispose(&self->sin_tbl);
-    instrument_dispose(&self->saw_tbl);
-    instrument_dispose(&self->sqr_tbl);
-    instrument_dispose(&self->tri_tbl);
-    instrument_dispose(&self->rnd_tbl);
+    psy_audio_instrument_dispose(&self->sin_tbl);
+    psy_audio_instrument_dispose(&self->saw_tbl);
+    psy_audio_instrument_dispose(&self->sqr_tbl);
+    psy_audio_instrument_dispose(&self->tri_tbl);
+    psy_audio_instrument_dispose(&self->rnd_tbl);
 }
 
 void psy_audio_waveosctables_clear(psy_audio_WaveOscTables* self)
@@ -96,13 +96,13 @@ void constructtable(psy_audio_WaveOscTables* self,
     w = psy_audio_sample_allocinit(1);
     constructwave(f_hi, w, func, sr);
     psy_audio_samples_insert(&self->container, w, index);
-    entry = instrumententry_allocinit();
+    entry = psy_audio_instrumententry_allocinit();
     entry->use_keyrange = 0;
     entry->use_freqrange = 1;
     entry->freqrange.low = f_lo;
     entry->freqrange.high = f_hi;
     entry->sampleindex = index;
-    instrument_addentry(table, entry);
+    psy_audio_instrument_addentry(table, entry);
 }
 
 void constructwave(double fh, psy_audio_Sample* wave,

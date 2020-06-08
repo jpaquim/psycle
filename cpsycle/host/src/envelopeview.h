@@ -9,6 +9,11 @@
 #include <list.h>
 #include <adsr.h>
 
+// aim: This modifies the ADSR (Attack-Decay-Sustain-Release) envelope for the
+//      volume and filters, which is shown on a graph.
+//
+// todo: add point free form envelopes
+
 typedef struct {	
 	psy_dsp_EnvelopePoint start;
 	psy_dsp_EnvelopePoint attack;

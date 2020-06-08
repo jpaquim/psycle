@@ -8,7 +8,7 @@
 #include "samples.h"
 
 #include <adsr.h>
-#include <multifilter.h>
+#include <filter.h>
 #include <list.h>
 
 #ifdef __cplusplus
@@ -59,9 +59,9 @@ typedef struct {
 	int use_freqrange;
 } psy_audio_InstrumentEntry;
 
-void instrumententry_init(psy_audio_InstrumentEntry*);
-psy_audio_InstrumentEntry* instrumententry_alloc(void);
-psy_audio_InstrumentEntry* instrumententry_allocinit(void);
+void psy_audio_instrumententry_init(psy_audio_InstrumentEntry*);
+psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void);
+psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void);
 
 typedef struct psy_audio_Instrument {	
 	char* name;
@@ -87,27 +87,27 @@ typedef struct psy_audio_Instrument {
 	psy_Signal signal_namechanged;
 } psy_audio_Instrument;
 
-void instrument_init(psy_audio_Instrument*);
-void instrument_dispose(psy_audio_Instrument*);
-psy_audio_Instrument* instrument_alloc(void);
-psy_audio_Instrument* instrument_allocinit(void);
-void instrument_load(psy_audio_Instrument*, const char* path);
-void instrument_setname(psy_audio_Instrument*, const char* name);
-void instrument_setindex(psy_audio_Instrument*, uintptr_t index);
-uintptr_t instrument_index(psy_audio_Instrument*);
-const char* instrument_name(psy_audio_Instrument*);
-void instrument_setnna(psy_audio_Instrument*, psy_audio_NewNoteAction nna);
-psy_audio_NewNoteAction instrument_nna(psy_audio_Instrument*);
-psy_List* instrument_entriesintersect(psy_audio_Instrument*, uintptr_t key,
+void psy_audio_instrument_init(psy_audio_Instrument*);
+void psy_audio_instrument_dispose(psy_audio_Instrument*);
+psy_audio_Instrument* psy_audio_instrument_alloc(void);
+psy_audio_Instrument* psy_audio_instrument_allocinit(void);
+void psy_audio_instrument_load(psy_audio_Instrument*, const char* path);
+void psy_audio_instrument_setname(psy_audio_Instrument*, const char* name);
+void psy_audio_instrument_setindex(psy_audio_Instrument*, uintptr_t index);
+uintptr_t psy_audio_instrument_index(psy_audio_Instrument*);
+const char* psy_audio_instrument_name(psy_audio_Instrument*);
+void psy_audio_instrument_setnna(psy_audio_Instrument*, psy_audio_NewNoteAction nna);
+psy_audio_NewNoteAction psy_audio_instrument_nna(psy_audio_Instrument*);
+psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument*, uintptr_t key,
 	uintptr_t velocity, double frequency);
-void instrument_clearentries(psy_audio_Instrument*);
-void instrument_addentry(psy_audio_Instrument*,
+void psy_audio_instrument_clearentries(psy_audio_Instrument*);
+void psy_audio_instrument_addentry(psy_audio_Instrument*,
 	const psy_audio_InstrumentEntry* entry);
-void instrument_removeentry(psy_audio_Instrument*,
+void psy_audio_instrument_removeentry(psy_audio_Instrument*,
 	uintptr_t numentry);
-psy_audio_InstrumentEntry* instrument_entryat(psy_audio_Instrument*,
+psy_audio_InstrumentEntry* psy_audio_instrument_entryat(psy_audio_Instrument*,
 	uintptr_t numentry);
-const psy_List* instrument_entries(psy_audio_Instrument*);
+const psy_List* psy_audio_instrument_entries(psy_audio_Instrument*);
 
 INLINE psy_dsp_amp_t psy_audio_instrument_volume(psy_audio_Instrument* self)
 {

@@ -8,6 +8,10 @@
 #include <machines.h>
 #include "workspace.h"
 
+// aim: Master Volume slider
+//
+// todo: replace with psy_ui_Slider
+
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Machines* machines;

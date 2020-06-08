@@ -35,6 +35,7 @@ void psy_ui_app_dispose(psy_ui_App*);
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App*);
 int psy_ui_app_run(psy_ui_App*);
 void psy_ui_app_stop(psy_ui_App*);
+void psy_ui_app_close(psy_ui_App*);
 
 INLINE struct psy_ui_ImpFactory* psy_ui_app_impfactory(psy_ui_App* self)
 {

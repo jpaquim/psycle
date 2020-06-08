@@ -8,6 +8,9 @@
 #include "uilabel.h"
 #include "workspace.h"
 
+// aim: Current octave, ranging from 0 to 8, when entering notes with the PC
+//      keyboard
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label headerlabel;

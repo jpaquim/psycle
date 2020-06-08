@@ -41,6 +41,13 @@
 #include "kbdhelp.h"
 #include "stepbox.h"
 #include "zoombox.h"
+#include "checkunsaved.h"
+
+// MainFrame
+//
+// aim: The root component of all other components of psycle. Initializes the
+//      workspace. First component created at program start by psycle.c and
+//      last destroyed at program termination.
 
 typedef struct {
 	psy_ui_Component component;
@@ -94,6 +101,7 @@ typedef struct {
 	psy_ui_Label statusbarlabel;
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
+	CheckUnsavedBox checkunsavedbox;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

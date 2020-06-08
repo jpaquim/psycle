@@ -51,11 +51,10 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				psy_ui_component_setposition(component,
 					psy_ui_value_px(&component->margin.left, &c_tm),
 					psy_ui_value_px(&component->margin.top, &c_tm),
-					psy_ui_value_makepx(
-						psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&component->margin.left, &c_tm)
-						- psy_ui_value_px(&component->margin.right, &c_tm)),
-					psy_ui_value_makepx(psy_ui_value_px(&size.height, &c_tm) -
-						psy_ui_margin_height_px(&component->margin, &c_tm)));
+				psy_ui_sub_values(size.width,
+					psy_ui_margin_width(&component->margin, &c_tm), &c_tm),
+				psy_ui_sub_values(size.height,
+					psy_ui_margin_height(&component->margin, &c_tm), &c_tm));
 			} else
 			if (component->align == psy_ui_ALIGN_TOP) {
 				cp_topleft.y += psy_ui_value_px(&component->margin.top, &c_tm);
@@ -206,7 +205,7 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
 		psy_ui_TextMetric tm;
 		psy_ui_Component* client = 0;
 
-		size = psy_ui_component_size(self->component);
+		size = *rv;
 		tm = psy_ui_component_textmetric(self->component);
 		if (self->component->alignchildren && !self->component->preventpreferredsize) {
 			psy_List* p;

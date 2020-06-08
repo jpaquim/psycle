@@ -7,6 +7,8 @@
 #include <uicomponent.h>
 #include <uilabel.h>
 
+// aim: Combines two labels to display a label pair
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label desc;

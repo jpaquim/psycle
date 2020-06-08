@@ -48,6 +48,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	psy_ui_editor_init(&self->editor, help_base(self));
 	psy_ui_editor_preventedit(&self->editor);
+	psy_ui_editor_enablewrap(&self->editor);
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		help_ontabbarchanged);

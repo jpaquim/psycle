@@ -10,25 +10,34 @@
 
 #define TIMERID_MASTERVU 400
 
+static void vumeter_ondestroy(Vumeter*, psy_ui_Component* sender);
 static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
 static void vumeter_ontimer(Vumeter*, psy_ui_Component* sender, int timerid);
-static void vumeter_onmasterworked(Vumeter*, psy_audio_Machine*,
-	uintptr_t slot, psy_audio_BufferContext*);
-static void vumeter_onsongchanged(Vumeter*, Workspace*);
-static void vumeter_connectmachinessignals(Vumeter*, Workspace*);
-static void vumeter_onpreferredsize(Vumeter*, psy_ui_Size* limit,
-	psy_ui_Size* rv);
 
-static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static VumeterSkin vumeterdefaultskin;
+static int vumeterdefaultskin_initialized = 0;
 
-static void vtable_init(Vumeter* self)
+static void vumeterskin_init(Vumeter* self)
 {
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			vumeter_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_ondraw) vumeter_ondraw;
+	if (!vumeterdefaultskin_initialized) {
+		vumeterdefaultskin.background = 0x00000000;
+		vumeterdefaultskin.rms = 0x0000FF00;
+		vumeterdefaultskin.peak = 0x00333333;
+		vumeterdefaultskin.border = 0x003E3E3E;
+		vumeterdefaultskin_initialized = 1;
+	}
+	self->skin = vumeterdefaultskin;
+}
+
+static psy_ui_ComponentVtable vumeter_vtable;
+static int vumeter_vtable_initialized = 0;
+
+static void vumeter_vtable_init(Vumeter* self)
+{
+	if (!vumeter_vtable_initialized) {
+		vumeter_vtable = *(self->component.vtable);
+		vumeter_vtable.ondraw = (psy_ui_fp_ondraw)vumeter_ondraw;
+		vumeter_vtable_initialized = 1;
 	}
 }
 
@@ -36,84 +45,79 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {					
 	psy_ui_component_init(&self->component, parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	vumeter_vtable_init(self);
+	self->component.vtable = &vumeter_vtable;	
 	self->leftavg = 0;
 	self->rightavg = 0;
+	self->workspace = workspace;
+	vumeterskin_init(self);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(25),
+			psy_ui_value_makeeh(1)));
 	psy_ui_component_doublebuffer(&self->component);
 	psy_signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		vumeter_onsongchanged);
-	vumeter_connectmachinessignals(self, workspace);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		vumeter_ondestroy);
 	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+}
+
+void vumeter_ondestroy(Vumeter* self, psy_ui_Component* sender)
+{	
+	psy_ui_component_stoptimer(&self->component, TIMERID_MASTERVU);
 }
 
 void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle left;
 	psy_ui_Rectangle right;
-	psy_ui_Size size = psy_ui_component_size(&self->component);
+	psy_ui_IntSize size;
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setrectangle(&left, 0, 5, psy_ui_value_px(&size.width, &tm), 5);
+	size = psy_ui_intsize_init_size(
+		psy_ui_component_size(&self->component), &tm);
+	psy_ui_setrectangle(&left, 0, 5, size.width, 5);
 	right = left;
 	right.top += 6;
 	right.bottom += 6;
-	psy_ui_drawsolidrectangle(g, left, 0x00000000);
-	psy_ui_drawsolidrectangle(g, right, 0x00000000);
-	
-	left.right = (int) (self->leftavg * psy_ui_value_px(&size.width, &tm));
-	right.right = (int) (self->rightavg * psy_ui_value_px(&size.width, &tm));
-	psy_ui_drawsolidrectangle(g, left, 0x0000FF00);
-	psy_ui_drawsolidrectangle(g, right, 0x0000FF00);
-
-	psy_ui_setrectangle(&left, left.right, left.top, psy_ui_value_px(&size.width, &tm) - left.right, 5);
-	psy_ui_setrectangle(&right, right.right, right.top, psy_ui_value_px(&size.width, &tm) - right.right, 5);
-	psy_ui_drawsolidrectangle(g, left, 0x003E3E3E);
-	psy_ui_drawsolidrectangle(g, right, 0x003E3E3E);
+	psy_ui_drawsolidrectangle(g, left, self->skin.background);
+	psy_ui_drawsolidrectangle(g, right, self->skin.background);	
+	left.right = (int) (self->leftavg * size.width);
+	right.right = (int) (self->rightavg * size.width);
+	psy_ui_drawsolidrectangle(g, left, self->skin.rms);
+	psy_ui_drawsolidrectangle(g, right, self->skin.rms);
+	psy_ui_setrectangle(&left, left.right, left.top,
+		size.width - left.right, 5);
+	psy_ui_setrectangle(&right, right.right, right.top,
+		size.width - right.right, 5);
+	psy_ui_drawsolidrectangle(g, left, self->skin.border);
+	psy_ui_drawsolidrectangle(g, right, self->skin.border);
 }
 
 void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, int timerid)
 {	
-	if (timerid == TIMERID_MASTERVU) {
-		psy_ui_component_invalidate(&self->component);
+	if (timerid == TIMERID_MASTERVU && self->workspace->song) {
+		psy_audio_Machine* master;
+		psy_audio_Buffer* memory;
+		psy_dsp_amp_t leftavg;
+		psy_dsp_amp_t rightavg;
+
+		master = psy_audio_machines_master(&self->workspace->song->machines);
+		if (master) {
+			memory = psy_audio_machine_buffermemory(master);
+			if (memory && memory->rms) {
+				leftavg = memory->rms->data.previousLeft / 32768;
+				rightavg = memory->rms->data.previousRight / 32768;
+				if (leftavg != self->leftavg || rightavg != self->rightavg) {
+					self->leftavg = memory->rms->data.previousLeft / 32768;
+					self->rightavg = memory->rms->data.previousRight / 32768;
+					psy_ui_component_invalidate(&self->component);
+				}
+			}
+		} else if (self->leftavg != 0.f || self->rightavg != 0.f) {
+			self->leftavg = 0;
+			self->rightavg = 0;
+			psy_ui_component_invalidate(&self->component);
+		}
 	}
 }
-
-void vumeter_onmasterworked(Vumeter* self, psy_audio_Machine* master,
-	uintptr_t slot,
-	psy_audio_BufferContext* bc)
-{
-	psy_audio_Buffer* memory;
-	
-	memory = psy_audio_machine_buffermemory(master);
-	if (memory && memory->rms) {
-		self->leftavg = memory->rms->data.previousLeft / 32768;
-		self->rightavg = memory->rms->data.previousRight / 32768;
-	}	
-}
-
-void vumeter_onsongchanged(Vumeter* self, Workspace* workspace)
-{	
-	self->leftavg = 0;
-	self->rightavg = 0;
-	vumeter_connectmachinessignals(self, workspace);
-}
-
-void vumeter_connectmachinessignals(Vumeter* self, Workspace* workspace)
-{
-	if (workspace && workspace->song &&
-			psy_audio_machines_master(&workspace->song->machines)) {
-		psy_signal_connect(
-			&psy_audio_machines_master(&workspace->song->machines)->signal_worked, self,
-			vumeter_onmasterworked);
-	}
-}
-
-void vumeter_onpreferredsize(Vumeter* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{	
-	rv->width = psy_ui_value_makeew(25);
-	rv->height = psy_ui_value_makeeh(1);
-}
-

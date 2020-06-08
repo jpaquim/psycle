@@ -4,14 +4,52 @@
 #if !defined(CLIPBOX_H)
 #define CLIPBOX_H
 
-#include <uicomponent.h>
 #include "workspace.h"
 
+#include <uicomponent.h>
+
+// aim: When the peak amplitude goes above 0 dB, the box on the right will turn
+//      red to indicate that digital clipping has occurred(and that the volume
+//      needs to be lowered).
+//
+// Structure:
+//  psy_ui_ComponentImp
+//          ^
+//          |        <<send>>
+//       ClipBox  -------------> psy_audio_Machine (signal_worked)
+//                |
+//                |  <<send>>
+//                -------------> Workspace (signal_songchanged)
+
 typedef struct {
-	psy_ui_Component component;	
-	int clip;
+	psy_ui_Color on;
+	psy_ui_Color off;
+	psy_ui_Color borderon;
+	psy_ui_Color borderoff;
+} ClipBoxSkin;
+
+typedef struct {
+	psy_ui_Component component;
+	ClipBoxSkin skin;
+	bool isclipon;
+	Workspace* workspace;
 } ClipBox;
 
 void clipbox_init(ClipBox*, psy_ui_Component* parent, Workspace* workspace);
+
+INLINE bool clipbox_isclipon(ClipBox* self)
+{
+	return self->isclipon;
+}
+
+INLINE void clipbox_activate(ClipBox* self)
+{
+	self->isclipon = TRUE;
+}
+
+INLINE void clipbox_deactivate(ClipBox* self)
+{
+	self->isclipon = FALSE;
+}
 
 #endif

@@ -4,11 +4,21 @@
 #if !defined(VUBAR_H)
 #define VUBAR_H
 
-#include <uicomponent.h>
-#include "vumeter.h"
-#include "volslider.h"
 #include "clipbox.h"
+#include "volslider.h"
+#include "vumeter.h"
 #include "workspace.h"
+
+// aim: The VU Bar combines a Vumeter, a VolumeSlider and a ClipBox
+//      to display and control the Master volume
+//
+// Structure:
+//  psy_ui_ComponentImp
+//          ^
+//          |     
+//        VuBar <>------ Vumeter
+//               |------ VolSlider
+//               |------ ClipBox
 
 typedef struct {
 	psy_ui_Component component;

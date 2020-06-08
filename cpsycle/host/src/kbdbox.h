@@ -9,6 +9,8 @@
 #include <properties.h>
 #include <hashtbl.h>
 
+// aim: shows a keyboard with annotations
+
 typedef struct KbdBoxKey {
 	char* label;
 	char* desc0;

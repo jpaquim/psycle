@@ -9,6 +9,9 @@
 #include "uibutton.h"
 #include "workspace.h"
 
+// aim: Sets the Lines per beat – Number of lines per beat, ranging from
+//      1 to 31.
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label lpbdesclabel;

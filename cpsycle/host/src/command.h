@@ -4,6 +4,9 @@
 #if !defined(COMMAND_H)
 #define COMMAND_H
 
+// aim: Interface that implements the Command Pattern used
+//      for undo/redo operations
+
 typedef struct {
 	void (*dispose)(void*);
 	void (*execute)(void*);	

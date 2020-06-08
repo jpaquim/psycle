@@ -10,6 +10,8 @@
 #include "uilabel.h"
 #include "zoombox.h"
 
+// aim: displays the Left and Right signals as a realtime waveform graph.
+
 typedef enum {
 	OSCILLOSCOPE_CHMODE_LEFT = 0,
 	OSCILLOSCOPE_CHMODE_RIGHT = 1

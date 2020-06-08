@@ -729,8 +729,9 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->zoom.signal_customdraw, self,
 		sampleeditor_onscrollzoom_customdraw);
 	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(&self->zoom.component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(2));
+	psy_ui_component_setpreferredsize(&self->zoom.component,
+		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(2)));
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.2),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
@@ -769,6 +770,13 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 	}
 	psy_audio_buffer_dispose(&self->samplerbuffer);	
 	psy_signal_dispose(&self->signal_samplemodified);
+	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
+		sampleeditor_onsongchanged);
+	if (self->workspace->song) {
+		psy_signal_disconnect(&psy_audio_machines_master(
+			&self->workspace->song->machines)->signal_worked, self,
+			sampleeditor_onmasterworked);
+	}
 }
 
 void sampleeditor_setsample(SampleEditor* self, psy_audio_Sample* sample)
@@ -827,7 +835,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 		psy_list_free(self->samplerevents);
 		patternevent_init_all(&event,
 			(unsigned char) 48,
-			(unsigned char) instruments_slot(&self->workspace->song->instruments),
+			(unsigned char) instruments_slot(&self->workspace->song->instruments).subslot,
 			NOTECOMMANDS_MACH_EMPTY,
 			NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	
@@ -886,51 +894,49 @@ void sampleeditor_onprocess(SampleEditor* self, psy_ui_Component* sender)
 		WaveBox* wavebox;
 
 		wavebox = (WaveBox*)psy_tableiterator_value(&it);
-
 		if (wavebox_hasselection(wavebox)) {
 			uintptr_t channel;
 
 			channel = psy_tableiterator_key(&it);
 			switch (selected) {
-			case 0: // Amplify
-			{
-				double ratio;
+				case 0: { // Amplify			
+					double ratio;
 
-				ratio = pow(10.0, (double)((double)(self->processview.amplify.gainvalue) - 2 / (double)3) / (1 / (double)7));
-				sampleeditor_amplify(self, channel, wavebox->context.selection.start, wavebox->context.selection.end,
-					(psy_dsp_amp_t)ratio);				
-			}
-			break;
-			case 1:
-				// FadeIn
-				psy_dsp_fade(&dsp, self->sample->channels.samples[channel] +
-					wavebox->context.selection.start,
-					waveboxselection_numframes(&wavebox->context.selection), 0.f, 1.f);				
-			break;
-			case 2:
-				// FadeOut
-				psy_dsp_fade(&dsp, self->sample->channels.samples[channel] +
-					wavebox->context.selection.start,
-					waveboxselection_numframes(&wavebox->context.selection), 1.f, 0.f);				
-			break;
-			case 4:
-				psy_dsp_normalize(&dsp, self->sample->channels.samples[channel] +
-					wavebox->context.selection.start,
-					waveboxselection_numframes(&wavebox->context.selection));
-			break;
-			case 5:
-				sampleeditor_removeDC(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
-			break;
-			case 6:
-				dsp.reverse(self->sample->channels.samples[channel] +
-					wavebox->context.selection.start,
-					waveboxselection_numframes(&wavebox->context.selection));				
-			break;
-			case 7:
-				sampleeditor_processlua(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
-			break;
-			default:
-			break;
+					ratio = pow(10.0, (double)((double)(self->processview.amplify.gainvalue) - 2 / (double)3) / (1 / (double)7));
+					sampleeditor_amplify(self, channel, wavebox->context.selection.start, wavebox->context.selection.end,
+						(psy_dsp_amp_t)ratio);
+					break;
+				}				
+				case 1:
+					// FadeIn
+					psy_dsp_fade(&dsp, self->sample->channels.samples[channel] +
+						wavebox->context.selection.start,
+						waveboxselection_numframes(&wavebox->context.selection), 0.f, 1.f);				
+					break;
+				case 2:
+					// FadeOut
+					psy_dsp_fade(&dsp, self->sample->channels.samples[channel] +
+						wavebox->context.selection.start,
+						waveboxselection_numframes(&wavebox->context.selection), 1.f, 0.f);				
+					break;
+				case 4:
+					psy_dsp_normalize(&dsp, self->sample->channels.samples[channel] +
+						wavebox->context.selection.start,
+						waveboxselection_numframes(&wavebox->context.selection));
+					break;
+				case 5:
+					sampleeditor_removeDC(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
+					break;
+				case 6:
+					dsp.reverse(self->sample->channels.samples[channel] +
+						wavebox->context.selection.start,
+						waveboxselection_numframes(&wavebox->context.selection));				
+					break;
+				case 7:
+					sampleeditor_processlua(self, channel, wavebox->context.selection.start, wavebox->context.selection.end);
+					break;
+				default:
+					break;
 			}
 		} else			
 		if (selected == 7) {

@@ -15,14 +15,13 @@ static void instrumentview_onaddentry(InstrumentView*, psy_ui_Component* sender)
 static void instrumentview_onremoveentry(InstrumentView*,
 	psy_ui_Component* sender);
 static void OnInstrumentInsert(InstrumentView*, psy_audio_Instruments* sender,
-	int slot);
+	const psy_audio_InstrumentIndex* index);
 static void OnInstrumentRemoved(InstrumentView*, psy_audio_Instruments* sender,
-	int slot);
+	const psy_audio_InstrumentIndex* index);
 static void OnInstrumentSlotChanged(InstrumentView*,
-	psy_audio_Instrument* sender, int slot);
-static void OnInstrumentListChanged(InstrumentView*, psy_ui_Component* sender,
-	int slot);
-static void instrumentview_setinstrument(InstrumentView*, int slot);
+	psy_audio_Instrument* sender, const psy_audio_InstrumentIndex* slot);
+static void instrumentview_setinstrument(InstrumentView*,
+	psy_audio_InstrumentIndex index);
 static void OnMachinesInsert(InstrumentView* self, psy_audio_Machines* sender,
 	int slot);
 static void OnMachinesRemoved(InstrumentView* self, psy_audio_Machines* sender,
@@ -67,14 +66,7 @@ static void instrumentpanview_setinstrument(InstrumentPanView* self,
 	psy_audio_Instrument* instrument);
 static void instrumentview_onrandompanning(InstrumentPanView* self,
 	psy_ui_CheckBox* sender);
-// InstrumentFilterView
-static void instrumentfilterview_init(InstrumentFilterView*,
-	psy_ui_Component* parent, psy_audio_Instruments*);
-static void instrumentfilterview_setinstrument(InstrumentFilterView*,
-	psy_audio_Instrument*);
-static void OnFilterViewDescribe(InstrumentFilterView*, psy_ui_Slider*, char* txt);
-static void OnFilterViewTweak(InstrumentFilterView*, psy_ui_Slider*, float value);
-static void OnFilterViewValue(InstrumentFilterView*, psy_ui_Slider*, float* value);
+
 // InstrumentPitchView
 static void instrumentpitchview_init(InstrumentPitchView*,
 	psy_ui_Component* parent, psy_audio_Instruments*);
@@ -109,7 +101,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);	
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
 		&workspace->song->instruments);
-	psy_ui_component_setalign(&self->instrumentsbox.instrumentlist.component,
+	psy_ui_component_setalign(&self->instrumentsbox.component,
 		psy_ui_ALIGN_CLIENT);
 	{
 		psy_ui_Margin margin;
@@ -145,8 +137,6 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		OnInstrumentRemoved);	
 	psy_signal_connect(&self->player->song->instruments.signal_slotchange, self,
 		OnInstrumentSlotChanged);
-	psy_signal_connect(&self->instrumentsbox.instrumentlist.signal_selchanged, self,
-		OnInstrumentListChanged);
 	psy_signal_connect(&self->player->song->machines.signal_insert, self,
 		OnMachinesInsert);
 	psy_signal_connect(&self->player->song->machines.signal_removed, self,
@@ -164,25 +154,27 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 }
 
 void OnInstrumentInsert(InstrumentView* self, psy_audio_Instruments* sender,
-	int slot)
+	const psy_audio_InstrumentIndex* index)
 {
-	instrumentview_setinstrument(self, slot);
+	if (index) {
+		instrumentview_setinstrument(self, *index);
+	}
 }
 
 void OnInstrumentRemoved(InstrumentView* self, psy_audio_Instruments* sender,
-	int slot)
+	const psy_audio_InstrumentIndex* index)
 {
-	instrumentview_setinstrument(self, slot);
+	if (index) {
+		instrumentview_setinstrument(self, *index);
+	}
 }
 
-void OnInstrumentSlotChanged(InstrumentView* self, psy_audio_Instrument* sender, int slot)
+void OnInstrumentSlotChanged(InstrumentView* self, psy_audio_Instrument* sender,
+	const psy_audio_InstrumentIndex* index)
 {	
-	instrumentview_setinstrument(self, slot);
-}
-
-void OnInstrumentListChanged(InstrumentView* self, psy_ui_Component* sender, int slot)
-{
-	instruments_changeslot(&self->player->song->instruments, slot);
+	if (index) {
+		instrumentview_setinstrument(self, *index);
+	}
 }
 
 void OnMachinesInsert(InstrumentView* self, psy_audio_Machines* sender,
@@ -195,11 +187,11 @@ void OnMachinesRemoved(InstrumentView* self, psy_audio_Machines* sender,
 {
 }
 
-void instrumentview_setinstrument(InstrumentView* self, int slot)
+void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentIndex index)
 {
 	psy_audio_Instrument* instrument;
 	
-	instrument = instruments_at(&self->player->song->instruments, slot);
+	instrument = instruments_at(&self->player->song->instruments, index);
 	instrumentheaderview_setinstrument(&self->header, instrument);
 	instrumentgeneralview_setinstrument(&self->general, instrument);
 	instrumentvolumeview_setinstrument(&self->volume, instrument);
@@ -233,7 +225,7 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace, int flag, psy_aud
 		samplesbox_setsamples(&self->general.notemapview.samplesbox,
 			&workspace->song->samples);
 	}
-	instrumentview_setinstrument(self, 0);
+	instrumentview_setinstrument(self, instrumentindex_make(0, 0));
 }
 
 // instrument header
@@ -288,9 +280,9 @@ void OnEditInstrumentName(InstrumentHeaderView* self, psy_ui_Edit* sender)
 		int index;
 		
 		index = instrumentsbox_selected(&self->view->instrumentsbox);
-		instrument_setname(self->instrument, psy_ui_edit_text(sender));
+		psy_audio_instrument_setname(self->instrument, psy_ui_edit_text(sender));
 		psy_snprintf(text, 20, "%02X:%s", 
-			(int) index, instrument_name(self->instrument));
+			(int) index, psy_audio_instrument_name(self->instrument));
 		psy_ui_listbox_settext(&self->view->instrumentsbox.instrumentlist, text,
 			index);		
 	}
@@ -298,16 +290,16 @@ void OnEditInstrumentName(InstrumentHeaderView* self, psy_ui_Edit* sender)
 
 void OnPrevInstrument(InstrumentHeaderView* self, psy_ui_Component* sender)
 {
-	instruments_changeslot(self->instruments,
+	/*instruments_changeslot(self->instruments,
 		instruments_slot(self->instruments) > 0 ?
-		instruments_slot(self->instruments) - 1 : 0);
+		instruments_slot(self->instruments) - 1 : 0);*/
 }
 
 void OnNextInstrument(InstrumentHeaderView* self, psy_ui_Component* sender)
 {
-	instruments_changeslot(self->instruments,
+	/*instruments_changeslot(self->instruments,
 		instruments_slot(self->instruments) < 255 ?
-		instruments_slot(self->instruments) + 1 : 255);
+		instruments_slot(self->instruments) + 1 : 255);*/
 }
 
 void OnDeleteInstrument(InstrumentHeaderView* self, psy_ui_Component* sender)
@@ -478,7 +470,7 @@ void OnFitRow(InstrumentGeneralView* self, psy_ui_Component* sender)
 void OnNNACut(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, psy_audio_NNA_STOP);
+		psy_audio_instrument_setnna(self->instrument, psy_audio_NNA_STOP);
 		NNAHighlight(self, &self->nnacut);
 	}
 }
@@ -486,7 +478,7 @@ void OnNNACut(InstrumentGeneralView* self)
 void OnNNARelease(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, psy_audio_NNA_NOTEOFF);
+		psy_audio_instrument_setnna(self->instrument, psy_audio_NNA_NOTEOFF);
 		NNAHighlight(self, &self->nnarelease);
 	}
 }
@@ -494,7 +486,7 @@ void OnNNARelease(InstrumentGeneralView* self)
 void OnNNAFadeOut(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, psy_audio_NNA_FADEOUT);		
+		psy_audio_instrument_setnna(self->instrument, psy_audio_NNA_FADEOUT);		
 		NNAHighlight(self, &self->nnafadeout);
 	}
 }
@@ -502,7 +494,7 @@ void OnNNAFadeOut(InstrumentGeneralView* self)
 void OnNNANone(InstrumentGeneralView* self)
 {
 	if (self->instrument) {
-		instrument_setnna(self->instrument, psy_audio_NNA_CONTINUE);
+		psy_audio_instrument_setnna(self->instrument, psy_audio_NNA_CONTINUE);
 		NNAHighlight(self, &self->nnanone);		
 	}
 }
@@ -749,6 +741,12 @@ void instrumentview_onrandompanning(InstrumentPanView* self, psy_ui_CheckBox* se
 }
 
 // InstrumentFilterView
+static void fillfiltercombobox(InstrumentFilterView* self);
+static void OnFilterViewDescribe(InstrumentFilterView*, psy_ui_Slider*, char* txt);
+static void OnFilterViewTweak(InstrumentFilterView*, psy_ui_Slider*, float value);
+static void OnFilterViewValue(InstrumentFilterView*, psy_ui_Slider*, float* value);
+static void OnFilterComboBoxChanged(InstrumentFilterView*, psy_ui_ComboBox* sender, int index);
+
 void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* parent, psy_audio_Instruments* instruments)
 {
 	psy_ui_Margin margin;
@@ -765,8 +763,25 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 
 	self->instruments = instruments;
 	self->instrument = 0;
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->filter, &self->component);
+	psy_ui_component_enablealign(&self->filter);
+	psy_ui_component_setalign(&self->filter, psy_ui_ALIGN_TOP);	
+	psy_ui_label_init(&self->filtertypeheader, &self->filter);
+	psy_ui_label_settext(&self->filtertypeheader, "Filter type");	
+	psy_ui_component_setalign(&self->filtertypeheader.component, psy_ui_ALIGN_LEFT);
+	psy_ui_margin_init_all(&margin,
+		psy_ui_value_makepx(0), psy_ui_value_makeew(2),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	psy_ui_component_setmargin(&self->filtertypeheader.component, &margin);
+	psy_ui_combobox_init(&self->filtertype, &self->filter);
+	psy_ui_combobox_setcharnumber(&self->filtertype, 20);
+	psy_ui_component_setalign(&self->filtertype.component, psy_ui_ALIGN_LEFT);	
+	fillfiltercombobox(self);
+	psy_ui_combobox_setcursel(&self->filtertype, (int)F_NONE);
+	psy_signal_connect(&self->filtertype.signal_selchanged, self,
+		OnFilterComboBoxChanged);
 	envelopeview_init(&self->envelopeview, &self->component);
 	envelopeview_settext(&self->envelopeview, "Filter envelope");
 	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
@@ -810,13 +825,30 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 	}	
 }
 
+void fillfiltercombobox(InstrumentFilterView* self)
+{
+	uintptr_t ft;
+	for (ft = 0; ft < filter_numfilters(); ++ft) {
+		psy_ui_combobox_addtext(&self->filtertype, filter_name((FilterType)ft));
+	}
+}
+
+void OnFilterComboBoxChanged(InstrumentFilterView* self, psy_ui_ComboBox* sender, int index)
+{
+	self->instrument->filtertype = (FilterType)index;
+}
+
 void instrumentfilterview_setinstrument(InstrumentFilterView* self, psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;
-	envelopeview_setadsrenvelope(&self->envelopeview,
-		instrument
-		? &instrument->filterenvelope
-		: 0);
+	if (self->instrument) {
+		envelopeview_setadsrenvelope(&self->envelopeview,
+			&instrument->filterenvelope);
+		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)instrument->filtertype);
+	} else {
+		envelopeview_setadsrenvelope(&self->envelopeview, NULL);
+		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)F_NONE);
+	}	
 }
 
 void OnFilterViewDescribe(InstrumentFilterView* self, psy_ui_Slider* slidergroup, char* txt)
@@ -974,13 +1006,14 @@ void instrumentview_oncreateinstrument(InstrumentView* self, psy_ui_Component* s
 		int selected;
 		
 		selected = instrumentsbox_selected(&self->instrumentsbox);
-		if (instruments_at(&self->workspace->song->instruments, selected)) {						
-			instruments_remove(&self->workspace->song->instruments, selected);
+		if (instruments_at(&self->workspace->song->instruments, instrumentindex_make(0, selected))) {
+			instruments_remove(&self->workspace->song->instruments, instrumentindex_make(0, selected));
 		}
-		instrument = instrument_allocinit();
-		instrument_setname(instrument, "Untitled");
+		instrument = psy_audio_instrument_allocinit();
+		psy_audio_instrument_setname(instrument, "Untitled");
+		psy_audio_instrument_setindex(instrument, selected);
 		instruments_insert(&self->workspace->song->instruments, instrument,
-			selected);
+			instrumentindex_make(0, selected));
 	}
 }
 
@@ -989,9 +1022,9 @@ void instrumentview_onaddentry(InstrumentView* self, psy_ui_Component* sender)
 	if (self->general.instrument) {
 		psy_audio_InstrumentEntry entry;
 		
-		instrumententry_init(&entry);
+		psy_audio_instrumententry_init(&entry);
 		entry.sampleindex = samplesbox_selected(&self->general.notemapview.samplesbox);
-		instrument_addentry(self->general.instrument, &entry);
+		psy_audio_instrument_addentry(self->general.instrument, &entry);
 		instrumentnotemapview_update(&self->general.notemapview);
 	}
 }
@@ -999,7 +1032,7 @@ void instrumentview_onaddentry(InstrumentView* self, psy_ui_Component* sender)
 void instrumentview_onremoveentry(InstrumentView* self, psy_ui_Component* sender)
 {
 	if (self->general.instrument) {
-		instrument_removeentry(
+		psy_audio_instrument_removeentry(
 			self->general.instrument,
 				self->general.notemapview.entryview.selected);
 		self->general.notemapview.entryview.selected = UINTPTR_MAX;

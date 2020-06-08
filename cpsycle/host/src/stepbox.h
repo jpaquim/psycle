@@ -8,6 +8,8 @@
 #include "uilabel.h"
 #include "workspace.h"
 
+// aim: Select how many lines the cursor moves after a note is entered (1-16). 
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label header;

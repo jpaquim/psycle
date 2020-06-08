@@ -17,6 +17,9 @@
 
 #include <pattern.h>
 
+// aim: The TrackerView is where you enter notes. It displays a Pattern
+//      selected by the SequenceView as a tracker grid.
+
 typedef struct {
 	SkinCoord background;	
 	SkinCoord record;

@@ -25,8 +25,8 @@ static void volslider_onmousewheel(VolSlider*, psy_ui_Component* sender,
 static void volslider_ontimer(VolSlider*, psy_ui_Component* sender,
 	int timerid);
 static void volslider_onsliderchanged(VolSlider*, psy_ui_Component* sender);
-static void volslider_onsongchanged(VolSlider*, Workspace*, int flag, psy_audio_SongFile* songfile);
-static void volslider_onpreferredsize(VolSlider*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void volslider_onsongchanged(VolSlider*, Workspace*, int flag,
+	psy_audio_SongFile* songfile);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -34,9 +34,7 @@ static int vtable_initialized = 0;
 static void vtable_init(VolSlider* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			volslider_onpreferredsize;
+		vtable = *(self->component.vtable);	
 		vtable.ondraw = (psy_ui_fp_ondraw) volslider_ondraw;
 		vtable_initialized = 1;
 	}
@@ -50,7 +48,10 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	self->component.vtable = &vtable;
 	self->value = 0.f;
 	self->dragx = -1;
-	self->machines = &workspace->song->machines;			
+	self->machines = &workspace->song->machines;
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(18),
+			psy_ui_value_makeeh(1)));
 	psy_signal_connect(&self->component.signal_mousedown, self,
 		volslider_onmousedown);
 	psy_signal_connect(&self->component.signal_mousemove, self,
@@ -157,12 +158,6 @@ void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, int timerid)
 			}
 		}
 	}	
-}
-
-void volslider_onpreferredsize(VolSlider* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{	
-	rv->width = psy_ui_value_makeew(18);
-	rv->height = psy_ui_value_makeeh(1);
 }
 
 void volslider_onmousewheel(VolSlider* self, psy_ui_Component* sender, psy_ui_MouseEvent* ev)

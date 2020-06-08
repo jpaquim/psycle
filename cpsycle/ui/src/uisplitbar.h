@@ -14,6 +14,8 @@ typedef struct {
 	psy_ui_Component component;
 	int resize;
 	int hover;
+	psy_ui_Size restoresize;
+	bool hasrestore;
 } psy_ui_SplitBar;
 
 void psy_ui_splitbar_init(psy_ui_SplitBar*, psy_ui_Component* parent);

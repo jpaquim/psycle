@@ -90,3 +90,10 @@ void psy_ui_app_stop(psy_ui_App* self)
 	psy_ui_winapp_stop((psy_ui_WinApp*)self->platform);
 #endif	
 }
+
+void psy_ui_app_close(psy_ui_App* self)
+{
+#if PSYCLE_USE_TK == PSYCLE_TK_WIN32
+	psy_ui_winapp_close((psy_ui_WinApp*)self->platform, self->main);
+#endif	
+}

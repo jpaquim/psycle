@@ -4,6 +4,10 @@
 #if !defined(CMDSNOTES)
 #define CMDNOTES
 
+// aim: Defines a set of note command ids to define keyboard shortcuts.
+//      Editor and general shortcut ids are defined in cmdsgeneral.h
+//      See also cmdproperties.h for the keyboard mapping
+
 enum {
 	CMD_NOTE_C_0,
 	CMD_NOTE_CS0,

@@ -8,6 +8,11 @@
 #include <uibutton.h>
 #include <uilistbox.h>
 
+// aim: In this dialog, Psycledelics, the Community, wants to thank the people
+//      for their contributions in the developement of Psycle.
+//      Psycle's development began in May 2000. It was designed by Arguru and
+//      the dialog can display his original greetings, aswell.
+
 typedef struct {
 	psy_ui_Component component;	
 	psy_ui_Label header;

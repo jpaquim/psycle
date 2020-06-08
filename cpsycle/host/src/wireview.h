@@ -16,6 +16,9 @@
 #include "stereophase.h"
 #include "workspace.h"
 
+// aim: displays the connection volume, signal analyser and
+//      channel mappings
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component top;

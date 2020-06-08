@@ -7,6 +7,9 @@
 #include "uicomponent.h"
 #include "list.h"
 
+// aim: Tabbar showing tabs. Can be used with a psy_ui_Notebook or
+//      independently.
+
 typedef enum {
 	TABMODE_SINGLESEL,
 	TABMODE_MULTISEL,

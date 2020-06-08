@@ -308,7 +308,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			? (uint16_t) self->song->machines.tweakparam
 			: (uint16_t) (machine && machine_supports(machine,
 					MACH_SUPPORTS_INSTRUMENTS)
-				? instruments_slot(&self->song->instruments)
+				? instruments_slot(&self->song->instruments).subslot
 				: NOTECOMMANDS_INST_EMPTY),
 			(uint8_t) (self->song
 				? psy_audio_machines_slot(&self->song->machines)
@@ -481,7 +481,6 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 	psy_audio_sequencer_setsamplerate(&self->sequencer, driver->samplerate(
 		driver));
 	psy_dsp_rmsvol_setsamplerate(driver->samplerate(driver));
-	psy_dsp_multifilter_inittables(driver->samplerate(driver));
 	self->driver = driver;
 	if (self->driver && config) {
 		self->driver->configure(self->driver, config);

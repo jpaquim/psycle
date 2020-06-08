@@ -11,6 +11,8 @@
 #include "inputdefiner.h"
 #include "tabbar.h"
 
+// aim: Displays psy_Properties and allows to edit them.
+
 #define PROPERTIESRENDERER_NUMCOLS 3
 
 typedef struct {
