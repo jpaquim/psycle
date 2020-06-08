@@ -26,6 +26,8 @@ void psy_ui_editor_setcolor(psy_ui_Editor*, uint32_t color);
 void psy_ui_editor_setbackgroundcolor(psy_ui_Editor*, uint32_t color);
 void psy_ui_editor_enableedit(psy_ui_Editor*);
 void psy_ui_editor_preventedit(psy_ui_Editor*);
+void psy_ui_editor_enablewrap(psy_ui_Editor*);
+void psy_ui_editor_disablewrap(psy_ui_Editor*);
 
 #ifdef __cplusplus
 }

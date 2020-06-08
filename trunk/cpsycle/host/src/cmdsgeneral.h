@@ -4,6 +4,10 @@
 #if !defined(CMDSGENERAL)
 #define CMDSGENERAL
 
+// aim: Defines a set of command ids to define keyboard shortcuts.
+//      Note shortcut ids are defined in cmdsnotes.h
+//      See also cmdproperties.h for the keyboard mapping
+
 /// Start index for note input (corresponds to note C-0)
 #define CS_KEY_START 0
 /// Start index of inmediate commands (play, stop, change view,...)

@@ -12,6 +12,8 @@
 #include <uilabel.h>
 #include <uinotebook.h>
 
+// aim: Shows information about Psycle
+
 typedef struct {	
 	psy_ui_Component component;		
 	psy_ui_Label asio;

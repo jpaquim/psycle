@@ -13,6 +13,10 @@
 #include "tabbar.h"
 #include "workspace.h"
 
+// aim: The Gear Rack is a convenient way to organise your machines. Use the
+//      buttons "Generators", "Effects" and "Instruments" to switch between the
+//      different tabs
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Button createreplace;

@@ -61,10 +61,31 @@ typedef struct {
 	psy_ui_Unit unit;
 } psy_ui_Value;
 
+void psy_ui_value_init(psy_ui_Value*);
+
 psy_ui_Value psy_ui_value_makepx(intptr_t px);
 psy_ui_Value psy_ui_value_makeew(double em);
 psy_ui_Value psy_ui_value_makeeh(double em);
 intptr_t psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*);
+
+void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
+	const psy_ui_TextMetric*);
+void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
+	const psy_ui_TextMetric*);
+
+INLINE psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm)
+{	
+	psy_ui_value_add(&lhs, &rhs, tm);
+	return lhs;
+}
+
+INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
+	const psy_ui_TextMetric* tm)
+{
+	psy_ui_value_sub(&lhs, &rhs, tm);
+	return lhs;
+}
 
 typedef struct { 
 	int x;
@@ -81,14 +102,44 @@ typedef struct {
 } psy_ui_Rectangle;
 
 typedef struct {
+	int width;
+	int height;
+} psy_ui_IntSize;
+
+typedef struct {
 	psy_ui_Value width;
 	psy_ui_Value height;
 } psy_ui_Size;
+
+INLINE void psy_ui_size_init(psy_ui_Size* self)
+{
+	psy_ui_value_init(&self->width);
+	psy_ui_value_init(&self->height);
+}
 
 INLINE void psy_ui_size_init_all(psy_ui_Size* self, psy_ui_Value width, psy_ui_Value height)
 {
 	self->width = width;
 	self->height = height;
+}
+
+INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
+{
+	psy_ui_Size rv;
+
+	rv.width = width;
+	rv.height = height;
+	return rv;
+}
+
+INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
+	const psy_ui_TextMetric* tm)
+{
+	psy_ui_IntSize rv;
+
+	rv.width = psy_ui_value_px(&size.width, tm);
+	rv.height = psy_ui_value_px(&size.height, tm);
+	return rv;
 }
 
 typedef struct {
@@ -105,7 +156,9 @@ void psy_ui_margin_settop(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setright(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setbottom(psy_ui_Margin*, psy_ui_Value value);
 void psy_ui_margin_setleft(psy_ui_Margin*, psy_ui_Value value);
+psy_ui_Value psy_ui_margin_width(psy_ui_Margin*, const psy_ui_TextMetric*);
 intptr_t psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
+psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*);
 intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 
 typedef enum {

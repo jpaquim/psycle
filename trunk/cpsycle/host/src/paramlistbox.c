@@ -8,8 +8,6 @@
 #include "../../detail/portable.h"
 
 static void parameterlistbox_build(ParameterListBox*);
-static void parameterlistbox_onpreferredsize(ParameterListBox*, psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static void parameterlistbox_ondescribe(ParameterListBox*, psy_ui_Slider*,
 	char* txt);
 static void parameterlistbox_ontweak(ParameterListBox*, psy_ui_Slider*,
@@ -17,36 +15,22 @@ static void parameterlistbox_ontweak(ParameterListBox*, psy_ui_Slider*,
 static void parameterlistbox_onvalue(ParameterListBox*, psy_ui_Slider*,
 	float* value);
 
-static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
-
-static void vtable_init(ParameterListBox* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			parameterlistbox_onpreferredsize;
-	}
-}
-
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine)
 {	
 	psy_ui_component_init(&self->component, parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_listbox_init(&self->listbox, &self->component);
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setpreferredsize(&self->listbox.component,
+		psy_ui_size_make(psy_ui_value_makeew(40),
+			psy_ui_value_makeeh(20)));
 	psy_ui_slider_init(&self->slider, &self->component);
 	psy_ui_slider_setcharnumber(&self->slider, 4);
 	psy_ui_slider_showvertical(&self->slider);
-	psy_ui_component_resize(&self->slider.component, 
-		psy_ui_value_makeew(2), psy_ui_value_makepx(0));
-	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);
-	psy_ui_component_resize(&self->component,
-		psy_ui_value_makepx(15),
-		psy_ui_value_makeeh(20));
+	psy_ui_component_setpreferredsize(&self->slider.component,
+		psy_ui_size_make(psy_ui_value_makeew(2), psy_ui_value_makepx(0)));
+	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);	
 	parameterlistbox_setmachine(self, machine);	
 	psy_ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
 		parameterlistbox_ontweak, parameterlistbox_onvalue);
@@ -99,15 +83,6 @@ void parameterlistbox_setmachine(ParameterListBox* self,
 int parameterlistbox_selected(ParameterListBox* self)
 {
 	return psy_ui_listbox_cursel(&self->listbox);
-}
-
-void parameterlistbox_onpreferredsize(ParameterListBox* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{
-	if (rv) {
-		*rv = psy_ui_component_size(&self->component);
-
-	}
 }
 
 void parameterlistbox_ondescribe(ParameterListBox* self, psy_ui_Slider* slider, char* txt)

@@ -70,29 +70,36 @@ void filebar_initalign(FileBar* self)
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
-	workspace_newsong(self->workspace);
-	// todo update statustbar with song title 
+	if (workspace_songmodified(self->workspace)) {
+		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_NEW);
+	} else {
+		workspace_newsong(self->workspace);
+	}
 }
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
-	psy_ui_OpenDialog dialog;
-	static char filter[] =
-				"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
-				"Songs (*.psy)"				        "|*.psy|"
-				"FastTracker II Songs (*.xm)"       "|*.xm|"
-				"Impulse Tracker Songs (*.it)"      "|*.it|"
-				"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
-				"Original Mod Format Songs (*.mod)" "|*.mod|"
-				"Wav Format Songs (*.wav)"			"|*.wav";
+	if (workspace_songmodified(self->workspace)) {
+		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
+	} else {
+		psy_ui_OpenDialog dialog;
+		static char filter[] =
+			"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+			"Songs (*.psy)"				        "|*.psy|"
+			"FastTracker II Songs (*.xm)"       "|*.xm|"
+			"Impulse Tracker Songs (*.it)"      "|*.it|"
+			"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
+			"Original Mod Format Songs (*.mod)" "|*.mod|"
+			"Wav Format Songs (*.wav)"			"|*.wav";
 
-	psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
-		workspace_songs_directory(self->workspace));
-	if (psy_ui_opendialog_execute(&dialog)) {
-		workspace_loadsong(self->workspace,
-			psy_ui_opendialog_filename(&dialog));
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+			workspace_songs_directory(self->workspace));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			workspace_loadsong(self->workspace,
+				psy_ui_opendialog_filename(&dialog));
+		}
+		psy_ui_opendialog_dispose(&dialog);
 	}
-	psy_ui_opendialog_dispose(&dialog);
 }
 
 void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)

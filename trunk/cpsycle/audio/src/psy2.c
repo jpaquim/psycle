@@ -417,10 +417,11 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 						{
 							psy_audio_Instrument* instrument;
 
-							instrument = instrument_allocinit();
-							instrument_setname(instrument, names[i]);
+							instrument = psy_audio_instrument_allocinit();
+							psy_audio_instrument_setname(instrument, names[i]);
+							psy_audio_instrument_setindex(instrument, i);
 							instruments_insert(&songfile->song->instruments,
-								instrument, i);
+								instrument, instrumentindex_make(0, i));
 						}
 
 					}

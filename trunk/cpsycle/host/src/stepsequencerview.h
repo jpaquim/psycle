@@ -9,6 +9,9 @@
 
 #include <pattern.h>
 
+// aim: A classical stepsequencer view for entering notes in the patterneditor
+//      The Left StepBar component selects the current pattern bar.
+
 typedef struct {
 	int line;
 	int steprow;	

@@ -8,6 +8,8 @@
 #include "uibutton.h"
 #include "player.h"
 
+// aim: displays a playback counter in beats unit
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label header;

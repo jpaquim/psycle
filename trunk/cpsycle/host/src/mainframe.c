@@ -9,6 +9,8 @@
 #include "settingsview.h"
 #include "resources/resource.h"
 #include "paramview.h"
+#include <uiopendialog.h>
+#include <uisavedialog.h>
 
 #include <dir.h>
 #include <uiapp.h>
@@ -25,7 +27,7 @@ static void mainframe_initvubar(MainFrame*);
 static void mainframe_updatetext(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
-static void mainframe_destroy(MainFrame*, psy_ui_Component* component);
+static void mainframe_destroyed(MainFrame*, psy_ui_Component* component);
 static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onmousedown(MainFrame*, psy_ui_MouseEvent*);
@@ -70,6 +72,8 @@ static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
 	psy_ui_Component* view);
 static void mainframe_onlanguagechanged(MainFrame*, Workspace* sender);
+static bool mainframe_onclose(MainFrame*);
+static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender, int option, int mode);
 
 #define GEARVIEW 10
 
@@ -84,6 +88,7 @@ static void vtable_init(MainFrame* self)
 		vtable.onkeyup = (psy_ui_fp_onkeyup) mainframe_onkeyup;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) mainframe_onmousedown;
 		vtable.ontimer = (psy_ui_fp_ontimer) mainframe_ontimer;
+		vtable.onclose = (psy_ui_fp_onclose)mainframe_onclose;
 	}
 }
 
@@ -129,8 +134,8 @@ void mainframe_init(MainFrame* self)
 	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
 	psy_ui_component_setalign(&self->splitbarterminal.component,
 		psy_ui_ALIGN_BOTTOM);	
-	psy_signal_connect(&self->component.signal_destroy, self,
-		mainframe_destroy);
+	psy_signal_connect(&self->component.signal_destroyed, self,
+		mainframe_destroyed);
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_enablealign(&self->top);	
@@ -219,16 +224,19 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->filebar.renderbutton.signal_clicked, self,
 		mainframe_onrender);
 	psy_signal_connect(&self->workspace.signal_viewselected, self,
-		mainframe_onviewselected);
+		mainframe_onviewselected);	
+	checkunsavedbox_init(&self->checkunsavedbox,
+		psy_ui_notebook_base(&self->notebook),
+		&self->workspace);
 	// gear
 	gear_init(&self->gear, &self->client, &self->workspace);
 	psy_ui_component_setalign(&self->gear.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->gear.component);
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ongear);
-	// cpuview
+	// cpuview	
 	cpuview_init(&self->cpuview, &self->client, &self->workspace);
-	psy_ui_component_setalign(&self->cpuview.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(&self->cpuview.component, psy_ui_ALIGN_RIGHT);				
 	psy_ui_component_hide(&self->cpuview.component);
 	psy_signal_connect(&self->machinebar.cpu.signal_clicked, self,
 		mainframe_oncpu);
@@ -254,7 +262,7 @@ void mainframe_init(MainFrame* self)
 		mainframe_ontabbarchanged);
 	workspace_addhistory(&self->workspace);	
 	psy_signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
-		mainframe_oneventdriverinput);
+		mainframe_oneventdriverinput);	
 	// stepsequencerview
 	stepsequencerview_init(&self->stepsequencerview, &self->client,
 		&self->workspace);
@@ -295,6 +303,8 @@ void mainframe_init(MainFrame* self)
 	mainframe_updatetext(self);
 	psy_signal_connect(&self->workspace.signal_languagechanged, self,
 		mainframe_onlanguagechanged);
+	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
+		mainframe_oncheckunsaved);
 }
 
 void mainframe_updatetext(MainFrame* self)
@@ -450,7 +460,7 @@ void mainframe_setstartpage(MainFrame* self)
 	}	
 }
 
-void mainframe_destroy(MainFrame* self, psy_ui_Component* component)
+void mainframe_destroyed(MainFrame* self, psy_ui_Component* component)
 {
 	extern psy_ui_App app;
 
@@ -829,10 +839,33 @@ void mainframe_ontimer(MainFrame* self, int timerid)
 
 void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 	uintptr_t section, int option)
-{
+{	
 	if (index != GEARVIEW) {
 		psy_ui_Component* view;
 
+		if (index == TABPAGE_CHECKUNSAVED) {
+			if (option == CHECKUNSAVE_CLOSE) {
+				self->checkunsavedbox.mode = option;
+				checkunsavedbox_setlabels(&self->checkunsavedbox,
+					"Exit Psycle Request, but your Song is not saved!",
+					"Save and Exit",
+					"Exit (no save)");
+			} else
+			if (option == CHECKUNSAVE_NEW) {				
+				self->checkunsavedbox.mode = option;
+				checkunsavedbox_setlabels(&self->checkunsavedbox,
+					"New Song Request, but your Song is not saved!",
+					"Save and Create New Song",
+					"Create New Song (no save)");
+			} else
+			if (option == CHECKUNSAVE_LOAD) {
+				self->checkunsavedbox.mode = option;
+				checkunsavedbox_setlabels(&self->checkunsavedbox,
+					"Song Load Request, but your Song is not saved!",
+					"Save and Load Song",
+					"Load Song (no save)");
+			}
+		}
 		tabbar_select(&self->tabbar, index);
 		view = psy_ui_notebook_activepage(&self->notebook);
 		if (view) {
@@ -843,7 +876,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 				self->machineview.wireview.randominsert = 0;
 				self->machineview.wireview.addeffect = 1;
 			}
-		} 
+		}
 	}
 }
 
@@ -934,4 +967,89 @@ void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 void mainframe_onlanguagechanged(MainFrame* self, Workspace* sender)
 {
 	mainframe_updatetext(self);
+}
+
+bool mainframe_onclose(MainFrame* self)
+{
+	if (workspace_songmodified(&self->workspace)) {		
+		workspace_selectview(&self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_CLOSE);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+// this is called if a button is clicked in the checkunsavedbox
+// option : which button pressed
+// mode : source of request(app close, song load, song new)
+void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
+	int option, int mode)
+{	
+	bool load;
+
+	load = FALSE;
+	switch (option) {			
+		case CHECKUNSAVE_SAVE: {
+			psy_ui_SaveDialog dialog;
+
+			psy_ui_savedialog_init_all(&dialog, 0,
+				"Save Song",
+				"Songs (*.psy)|*.psy", "PSY",
+				workspace_songs_directory(&self->workspace));
+			if (psy_ui_savedialog_execute(&dialog)) {
+				workspace_savesong(&self->workspace,
+					psy_ui_savedialog_filename(&dialog));
+				if (mode == CHECKUNSAVE_CLOSE) {
+					psy_ui_app_close(&app);
+				} else
+				if (mode == CHECKUNSAVE_LOAD) {
+					load = TRUE;
+				} else
+				if (mode == CHECKUNSAVE_NEW) {										
+					workspace_newsong(&self->workspace);					
+				}
+			}
+			psy_ui_savedialog_dispose(&dialog);
+			break;
+		}
+		case CHECKUNSAVE_NOSAVE: {
+			extern psy_ui_App app;
+
+			self->workspace.undosavepoint = psy_list_size(
+				self->workspace.undoredo.undo);
+			if (mode == CHECKUNSAVE_CLOSE) {
+				psy_ui_app_close(&app);
+			} else
+			if (mode == CHECKUNSAVE_LOAD) {
+				load = TRUE;
+			} else
+			if (mode == CHECKUNSAVE_NEW) {
+				workspace_newsong(&self->workspace);
+			}
+			break;
+		}
+		case CHECKUNSAVE_CONTINUE:
+			workspace_updatecurrview(&self->workspace);
+			break;
+		default:		
+			break;
+	}
+	if (load) {
+		psy_ui_OpenDialog dialog;
+		static char filter[] =
+			"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+			"Songs (*.psy)"				        "|*.psy|"
+			"FastTracker II Songs (*.xm)"       "|*.xm|"
+			"Impulse Tracker Songs (*.it)"      "|*.it|"
+			"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
+			"Original Mod Format Songs (*.mod)" "|*.mod|"
+			"Wav Format Songs (*.wav)"			"|*.wav";
+
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+			workspace_songs_directory(&self->workspace));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			workspace_loadsong(&self->workspace,
+				psy_ui_opendialog_filename(&dialog));			
+		}
+		psy_ui_opendialog_dispose(&dialog);		
+	}
 }

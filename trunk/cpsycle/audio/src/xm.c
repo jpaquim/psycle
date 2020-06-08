@@ -207,13 +207,14 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 		psy_audio_Instrument* instrument;
 
 		start = psyfile_seek(self->file, start);
-		instrument = instrument_allocinit();
-			instruments_insert(&self->song->instruments, instrument, slot + 1);
+		instrument = psy_audio_instrument_allocinit();
+		psy_audio_instrument_setindex(instrument, slot + 1);
+		instruments_insert(&self->song->instruments, instrument, instrumentindex_make(0, slot + 1));
 		instrumentheader.size = psyfile_read_uint32(self->file);
 		psyfile_read(self->file, &instrumentheader.name,
 			sizeof(instrumentheader.name));
 		instrumentheader.name[sizeof(instrumentheader.name) - 1] = '\0';
-		instrument_setname(instrument, instrumentheader.name);
+		psy_audio_instrument_setname(instrument, instrumentheader.name);
 		instrumentheader.type = psyfile_read_uint8(self->file);
 		instrumentheader.samples = psyfile_read_uint16(self->file);
 
@@ -262,20 +263,20 @@ void xm_readinstruments(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader,
 			xmsamples = (XMSAMPLESTRUCT*) malloc(sizeof(
 				XMSAMPLESTRUCT) * (int)instrumentheader.samples);
 			// create instrument entries
-			instrument_clearentries(instrument);
-			instrumententry_init(&instentry);
+			psy_audio_instrument_clearentries(instrument);
+			psy_audio_instrumententry_init(&instentry);
 			instentry.sampleindex =
 				sampleindex_make(slot + 1, sampleheader.snum[0]);
 			for (note = 1; note < 96; ++note) {
 				if (sampleheader.snum[note] != instentry.sampleindex.subslot) {
 					instentry.keyrange.high = note - 1;
-					instrument_addentry(instrument, &instentry);
+					psy_audio_instrument_addentry(instrument, &instentry);
 					instentry.keyrange.low = note;
 					instentry.sampleindex.subslot = sampleheader.snum[note];
 				}
 			}
 			instentry.keyrange.high = 119;
-			instrument_addentry(instrument, &instentry);
+			psy_audio_instrument_addentry(instrument, &instentry);
 			psyfile_seek(self->file, start);
 			for (s = 0; s < instrumentheader.samples; ++s) {
 				psyfile_seek(self->file, start);

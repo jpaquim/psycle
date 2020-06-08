@@ -12,6 +12,9 @@
 
 #include <uinotebook.h>
 
+// aim: Helpview combines the About, Greet and textfile help in
+//      a tabbed notebook. 
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Notebook notebook;

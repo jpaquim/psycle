@@ -7,6 +7,9 @@
 #include "uicomponent.h"
 #include "workspace.h"
 
+// aim: displays the Left (coloured blue) and Right (green) volumes in
+//      decibels.
+
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Wire wire;

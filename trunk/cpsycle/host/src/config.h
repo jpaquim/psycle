@@ -4,5 +4,6 @@
 #if !defined(CONFIG)
 #define CONFIG
 
+// not used, workspace handles the configuration of the host
 
 #endif

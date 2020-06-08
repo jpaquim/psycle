@@ -8,6 +8,14 @@
 #include <uilabel.h>
 #include "workspace.h"
 
+// aim: The channel mapping view allows accessing to the audio mappings of
+//      a wire. Usually, machines have just one stereo output (and one
+//      stereo input, if they are effects). But several types of machines
+//      have multiple inputs and/or multiple outputs. In this case, a side
+//      chain compressor is showing one stereo input, and one stereo side
+//      chain. With the help of this screen, audio can be routed exactly to
+//      the pins that are intended to be used.
+
 typedef enum {
 	PINEDIT_DRAG_NONE,
 	PINEDIT_DRAG_DST,

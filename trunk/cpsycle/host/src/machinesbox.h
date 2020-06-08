@@ -9,6 +9,11 @@
 #include "machines.h"
 #include "workspace.h"
 
+// aim: displays the machines of the current song and  machine slot used
+//      by the pattern and machine view inside a listbox. The view is
+//      synchronized with 'psy_audio_Machines', which stores the machines
+//      and the selected machine slot of the song.
+
 typedef enum {
 	MACHINEBOX_ALL,
 	MACHINEBOX_FX,

@@ -18,6 +18,8 @@
 #include <uinotebook.h>
 #include <uislider.h>
 
+// Instrument Editor for the sampulse ps1
+
 typedef struct {	
 	psy_ui_Component component;	
 	psy_ui_Label namelabel;
@@ -79,7 +81,10 @@ typedef struct {
 } InstrumentPanView;
 
 typedef struct {
-	psy_ui_Component component;	
+	psy_ui_Component component;
+	psy_ui_Component filter;
+	psy_ui_Label filtertypeheader;
+	psy_ui_ComboBox filtertype;
 	EnvelopeView envelopeview;
 	psy_ui_Slider attack;
 	psy_ui_Slider decay;
@@ -92,6 +97,11 @@ typedef struct {
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 } InstrumentFilterView;
+
+void instrumentfilterview_init(InstrumentFilterView*,
+	psy_ui_Component* parent, psy_audio_Instruments*);
+void instrumentfilterview_setinstrument(InstrumentFilterView*,
+	psy_audio_Instrument*);
 
 typedef struct {
 	psy_ui_Component component;		

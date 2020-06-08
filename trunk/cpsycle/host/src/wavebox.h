@@ -7,6 +7,9 @@
 #include "uicomponent.h"
 #include <sample.h>
 
+// aim: Shows PCM Wave data, allows frame and loop point sselection.
+//      The view can optionally doubled at the loop slice points.
+
 typedef enum {
 	WAVEBOX_DRAG_NONE,
 	WAVEBOX_DRAG_LEFT,

@@ -17,6 +17,10 @@
 #include <presets.h>
 #include <machine.h>
 
+// aim: Wraps a Parameterview or Machineeditorview inside a frame. A Frame
+//      can be docked at the bottom of the Machineview or floated to
+//      a window.
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component titlerow;

@@ -10,9 +10,15 @@
 #include <uicheckbox.h>
 #include <uicombobox.h>
 #include <uiedit.h>
+
 #include <list.h>
 
 #include <pattern.h>
+
+// aim: specifies how the values of the parameters column will change from line
+//      to line. Clicking the 'Interpolate' Button fills the parameters column
+//      from the beginning to the end of a selection according to the curve in
+//      this view.
 
 typedef enum {
 	INTERPOLATECURVETYPE_LINEAR,

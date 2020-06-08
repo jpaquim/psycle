@@ -11,6 +11,7 @@
 #include <plugincatcher.h>
 #include <hashtbl.h>
 
+// aim: adding machines
 
 typedef struct {
 	psy_ui_Component component;	

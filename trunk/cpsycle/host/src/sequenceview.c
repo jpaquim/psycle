@@ -337,7 +337,6 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 	}
 }
 
-
 void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	psy_ui_Component* parent, SequenceView* view)
 {
@@ -347,8 +346,9 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 		psy_ui_BACKGROUND_SET);
 	psy_signal_connect(&self->component.signal_draw, self,
 		sequenceviewtrackheader_ondraw);
-	psy_ui_component_resize(&self->component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(1));
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(1)));
 }
 
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,

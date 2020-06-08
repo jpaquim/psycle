@@ -88,8 +88,6 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 		&margin));	
 }
 
-static void interpolatecurvebox_onpreferredsize(InterpolateCurveBox*, psy_ui_Size* limit, psy_ui_Size* rv);
-
 static psy_ui_ComponentVtable interpolatecurvebox_vtable;
 static int interpolatecurvebox_vtable_initialized = 0;
 
@@ -104,9 +102,7 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_onmousemove)
 			interpolatecurvebox_onmousemove;
 		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_onmouseup)
-			interpolatecurvebox_onmouseup;
-		interpolatecurvebox_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			interpolatecurvebox_onpreferredsize;
+			interpolatecurvebox_onmouseup;		
 		interpolatecurvebox_vtable_initialized = 1;
 	}
 }
@@ -115,24 +111,24 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	psy_ui_Component* parent, InterpolateCurveView* view,
 	Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);	
 	interpolatecurvebox_vtable_init(self);
 	self->view = view;
 	self->component.vtable = &interpolatecurvebox_vtable;
-	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		interpolatecurvebox_ondestroy);
 	self->keyframes = 0;
-	self->range = (psy_dsp_amp_t) 0.f;
+	self->range = (psy_dsp_amp_t)0.f;
 	self->valuerange = 0xFF;
 	self->minval = 0;
 	self->maxval = 0xFF;
 	self->pattern = 0;
 	self->dragkeyframe = 0;
-	self->selected = 0;	
-	psy_ui_component_resize(&self->component, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(255));
+	self->selected = 0;
+	psy_signal_connect(&self->component.signal_destroy, self,
+		interpolatecurvebox_ondestroy);
+	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makepx(0),
+			psy_ui_value_makeeh(10)));			
 }
 
 void interpolatecurvebox_ondestroy(InterpolateCurveBox* self,
@@ -314,12 +310,6 @@ void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEven
 			psy_ui_component_invalidate(&self->component);
 		}
 	}
-}
-
-void interpolatecurvebox_onpreferredsize(InterpolateCurveBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	rv->width = psy_ui_value_makepx(0);
-	rv->height = psy_ui_value_makeeh(10);
 }
 
 void interpolatecurvebox_insertkeyframe(InterpolateCurveBox* self, int x, int y)

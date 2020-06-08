@@ -7,6 +7,9 @@
 #include <uibutton.h>
 #include <uilabel.h>
 
+// aim: Contains a plus minus button setting a zoomfactor displayed in the
+//      middle of the box.
+
 typedef struct ZoomBox {
 	psy_ui_Component component;
 	psy_ui_Button zoomin;

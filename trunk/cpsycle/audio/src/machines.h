@@ -41,6 +41,7 @@ typedef struct psy_audio_Machines {
 	uintptr_t tweakparam;
 	uintptr_t soloed;
 	int filemode;
+	uintptr_t maxindex;
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
@@ -90,6 +91,7 @@ void psy_audio_machines_removemixersend(psy_audio_Machines* self, uintptr_t slot
 void psy_audio_machines_connectasmixersend(psy_audio_Machines*);
 void psy_audio_machines_connectasmixerinput(psy_audio_Machines*);
 bool psy_audio_machines_isconnectasmixersend(psy_audio_Machines*);
+uintptr_t psy_audio_machines_maxindex(psy_audio_Machines*);
 
 #ifdef __cplusplus
 }

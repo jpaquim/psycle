@@ -8,6 +8,8 @@
 
 #include <uicomponent.h>
 
+// aim: a scrollbar with zoom
+
 typedef struct {
 	psy_ui_Component component;
 	float start;

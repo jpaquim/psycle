@@ -4,9 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "envelopeview.h"
+
+#include <math.h>
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
 
 static psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value,
 	psy_dsp_seconds_t mintime,
@@ -30,6 +31,8 @@ void adsrpointmapper_updatepoints(ADSRPointMapper* self)
 		self->release.time = self->settings->attack + self->settings->decay +
 			self->settings->release;
 		self->decay.value = self->settings->sustain;
+	} else {
+		adsrpointmapper_init(self);
 	}
 }
 
@@ -88,42 +91,46 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->component.vtable = &envelopebox_vtable;
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
+	self->cx = 0;
+	self->cy = 0;
+	self->dragpoint = 0;
+	self->points = 0;
+	self->sustainstage = 2;
+	self->dragrelative = 1;
+	self->text = strdup("");
 	psy_ui_margin_init_all(&self->spacing,
 		psy_ui_value_makepx(30),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(4),
 		psy_ui_value_makepx(0));
-	self->text = strdup("");
-	psy_ui_component_doublebuffer(&self->component);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		envelopebox_ondestroy);	
-	self->cx = 0;
-	self->cy = 0;
-	self->dragpoint = 0;	
-	self->points = 0;
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(20),
+			psy_ui_value_makeeh(15)));	
+	psy_ui_component_doublebuffer(&self->component);		
 	adsr_settings_init(&self->dummysettings, 0.2f, 0.4f, 0.8f, 0.3f);
 	adsrpointmapper_init(&self->pointmapper);
 	self->points = psy_list_create(&self->pointmapper.start);
 	psy_list_append(&self->points, &self->pointmapper.attack);
 	psy_list_append(&self->points, &self->pointmapper.decay);
 	psy_list_append(&self->points, &self->pointmapper.release);
-	self->sustainstage = 2;
-	self->dragrelative = 1;
+	psy_signal_connect(&self->component.signal_destroy, self,
+		envelopebox_ondestroy);	
 }
 
 void envelopebox_setadsrenvelope(EnvelopeBox* self,
 	psy_dsp_ADSRSettings* adsr_settings)
-{		
+{			
 	self->pointmapper.settings = adsr_settings;
 	adsrpointmapper_updatepoints(&self->pointmapper);
+	psy_ui_component_invalidate(&self->component);
 }
 
 void envelopebox_ondestroy(EnvelopeBox* self, psy_ui_Component* sender)
 {	
 	psy_list_free(self->points);
-	free(self->text);
-	self->text = 0;
 	self->points = 0;
+	free(self->text);
+	self->text = 0;	
 }
 
 void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
@@ -171,10 +178,10 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_dsp_EnvelopePoint* q = 0;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	ptsize.width = psy_ui_value_makepx(5);
-	ptsize.height = psy_ui_value_makepx(5);
-	ptsize2.width = psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, &tm) / 2);
-	ptsize2.height = psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, &tm) / 2);
+	ptsize = psy_ui_size_make(psy_ui_value_makepx(5), psy_ui_value_makepx(5));
+	ptsize2 = psy_ui_size_make(
+		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, &tm) / 2),
+		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, &tm) / 2));
 	for (p = self->points; p !=0; p = p->next) {
 		psy_ui_Rectangle r;
 		psy_dsp_EnvelopePoint* pt;
@@ -194,7 +201,7 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	psy_List* p;
 	psy_dsp_EnvelopePoint* q = 0;
-	int count = 0;
+	uintptr_t count = 0;
 
 	psy_ui_setcolor(g, 0x00B1C8B0);	
 	for (p = self->points; p !=0; p = p->next, ++count) {		
@@ -391,19 +398,15 @@ void envelopebox_settext(EnvelopeBox* self, const char* text)
 
 
 // EnvelopeView
+static void envelopeview_onzoom(EnvelopeView*, ScrollZoom* sender);
 
-static void envelopeview_onzoom(EnvelopeView*, psy_ui_Component* sender);
-static void envelopeview_onpreferredsize(EnvelopeView*, psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static psy_ui_ComponentVtable envelopeview_vtable;
 static int envelopeview_vtable_initialized = 0;
 
 static void envelopeview_vtable_init(EnvelopeView* self)
 {
 	if (!envelopeview_vtable_initialized) {
-		envelopeview_vtable = *(self->component.vtable);
-		envelopeview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			envelopeview_onpreferredsize;
+		envelopeview_vtable = *(self->component.vtable);	
 		envelopeview_vtable_initialized = 1;
 	}
 }
@@ -417,11 +420,10 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 	envelopebox_init(&self->envelopebox, &self->component);
 	psy_ui_component_setalign(&self->envelopebox.component, psy_ui_ALIGN_CLIENT);
 	scrollzoom_init(&self->zoom, &self->component);
-	self->zoom.component.debugflag = 9000;
-	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(&self->zoom.component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(1));
+	psy_ui_component_setpreferredsize(&self->zoom.component,
+		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(1)));
 	psy_signal_connect(&self->zoom.signal_zoom, self, envelopeview_onzoom);	
 }
 
@@ -441,15 +443,8 @@ void envelopeview_update(EnvelopeView* self)
 	envelopebox_update(&self->envelopebox);
 }
 
-void envelopeview_onpreferredsize(EnvelopeView* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
+void envelopeview_onzoom(EnvelopeView* self, ScrollZoom* sender)
 {
-	rv->width = psy_ui_value_makeew(20);
-	rv->height = psy_ui_value_makeeh(15);
-}
-
-void envelopeview_onzoom(EnvelopeView* self, psy_ui_Component* sender)
-{
-	envelopebox_setzoom(&self->envelopebox, scrollzoom_start(&self->zoom),
-		scrollzoom_end(&self->zoom));
+	envelopebox_setzoom(&self->envelopebox, scrollzoom_start(sender),
+		scrollzoom_end(sender));
 }

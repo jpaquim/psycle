@@ -18,6 +18,12 @@
 #include "skincoord.h"
 #include "tabbar.h"
 
+// MachineWireView
+// aim: Editor for the machines and their connections
+
+// MachineView
+// aim: tabbed view for MachineWireView and NewMachine 
+
 typedef struct {
 	SkinCoord background;
 	SkinCoord vu0;

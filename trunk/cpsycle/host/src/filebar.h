@@ -9,6 +9,8 @@
 #include <uibutton.h>
 #include <uilabel.h>
 
+// aim: button panel to create, load, save and render a song
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label header;
@@ -27,4 +29,4 @@ INLINE psy_ui_Component* filebar_base(FileBar* self)
 	return &self->component;
 }
 
-#endif
+#endif /* FILEBAR_H */

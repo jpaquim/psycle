@@ -8,6 +8,10 @@
 #include "workspace.h"
 #include <fft.h>
 
+// aim: Displays a realtime frequency band analysis, alternating left and
+//      right across the display, the blue lines are the left channel and the
+//      green lines are the right channel. 
+
 #define SCOPE_SPEC_BANDS 256
 
 typedef struct {	

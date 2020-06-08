@@ -11,6 +11,15 @@
 
 #define TIMERID_PIANOROLL 640
 
+static int isblack(int key)
+{
+	int offset = key % 12;
+	// 0 1 2 3 4 5 6 7 8 9 10 11
+	// c   d   e f   g   a    h 
+	return (offset == 1 || offset == 3 || offset == 6 || offset == 8
+		|| offset == 10);
+}
+
 static void pianoheader_ondraw(PianoHeader*, psy_ui_Graphics*);
 static void pianoheader_drawruler(PianoHeader*, psy_ui_Graphics*);
 static void pianoheader_onpreferredsize(PianoHeader*,
@@ -563,15 +572,6 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent)
 	psy_ui_component_doublebuffer(&self->component);
 	self->dy = 0;
 	self->textheight = 12;		
-}
-
-int isblack(int key)
-{	
-	int offset = key % 12;
-	// 0 1 2 3 4 5 6 7 8 9 10 11
-	// c   d   e f   g   a    h
-	return (offset == 1 || offset == 3 || offset == 6 || offset == 8 
-		|| offset == 10);	
 }
 
 void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)

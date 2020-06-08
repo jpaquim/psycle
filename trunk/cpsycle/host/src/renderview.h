@@ -13,6 +13,8 @@
 #include <uicheckbox.h>
 #include "workspace.h"
 
+// aim: View for saving a song as a Windows PCM Wav.
+
 typedef struct {
 	psy_ui_Component component;
 	PropertiesView view;

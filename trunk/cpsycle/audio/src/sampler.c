@@ -27,7 +27,6 @@
 // Version Sampler PS1
 #define SAMPLERVERSION 0x00000002
 
-
 // Sampler Configuration
 void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd* self,
 	int id, int patternid, int mask)
@@ -58,20 +57,91 @@ psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
 	return rv;
 }
 
+// SamplerMasterChannel
+static void psy_audio_samplermasterchannel_init(psy_audio_SamplerMasterChannel*,
+	psy_audio_Sampler*);
+static void psy_audio_samplermasterchannel_dispose(psy_audio_SamplerMasterChannel*);
+// Slider/Level
+static void psy_audio_samplermasterchannel_level_normvalue(psy_audio_SamplerMasterChannel*,
+	psy_audio_CustomMachineParam* sender, float* rv);
+
+void psy_audio_samplermasterchannel_init(psy_audio_SamplerMasterChannel* self,
+	psy_audio_Sampler* sampler)
+{	
+	self->sampler = sampler;
+	self->volume = 1.f;
+	psy_audio_infomachineparam_init(&self->param_channel, "Master", "", MPF_SMALL);	
+	psy_audio_volumemachineparam_init(&self->slider_param,
+		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->volume);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
+		psy_audio_samplermasterchannel_level_normvalue);
+}
+
+void psy_audio_samplermasterchannel_dispose(psy_audio_SamplerMasterChannel* self)
+{
+	psy_audio_infomachineparam_dispose(&self->param_channel);
+	psy_audio_volumemachineparam_dispose(&self->slider_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);
+}
+
+void psy_audio_samplermasterchannel_level_normvalue(psy_audio_SamplerMasterChannel* self,
+	psy_audio_CustomMachineParam* sender, float* rv)
+{
+	psy_audio_Buffer* memory;
+
+	memory = psy_audio_machine_buffermemory(psy_audio_sampler_base(self->sampler));
+	if (memory) {
+		*rv = psy_audio_buffer_rmsdisplay(memory);
+	} else {
+		*rv = 0.f;
+	}
+}
+
+
 // SamplerChannel
-static void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*);
+static void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*, uintptr_t index,
+	psy_audio_Sampler* sampler);
 static void psy_audio_samplerchannel_dispose(psy_audio_SamplerChannel*);
 static void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel*,
 	const psy_audio_PatternEvent*);
 
-void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self)
+void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t index,
+	psy_audio_Sampler* sampler)
 {
+	char text[127];
+
+	self->sampler = sampler;
 	self->volume = 1.f;
 	self->panfactor = (psy_dsp_amp_t) 0.5f;
+	self->m_DefaultPanFactor = 100;
+	self->m_DefaultCutoff = 127;
+	self->m_DefaultRessonance = 0;
+	psy_snprintf(text, 127, "Channel %d", (int)index);
+	psy_audio_infomachineparam_init(&self->param_channel, text, "", MPF_SMALL);
+	psy_audio_intmachineparam_init(&self->filter_cutoff,
+		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultCutoff, 0, 200);
+	psy_audio_intmachineparam_init(&self->filter_res,
+		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultRessonance, 0, 200);
+	psy_audio_intmachineparam_init(&self->pan,
+		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);
+	psy_audio_volumemachineparam_init(&self->slider_param,
+		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->volume);
+	psy_audio_intmachineparam_init(&self->level_param,
+		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
+	//psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
+	//	inputchannel_level_normvalue);
 }
 
 void psy_audio_samplerchannel_dispose(psy_audio_SamplerChannel* self)
 {
+	psy_audio_infomachineparam_dispose(&self->param_channel);
+	psy_audio_intmachineparam_dispose(&self->filter_cutoff);
+	psy_audio_intmachineparam_dispose(&self->filter_res);
+	psy_audio_intmachineparam_dispose(&self->pan);
+	psy_audio_volumemachineparam_dispose(&self->slider_param);
+	psy_audio_intmachineparam_dispose(&self->level_param);
 }
 
 void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
@@ -116,13 +186,13 @@ static uintptr_t numinputs(psy_audio_Sampler*);
 static uintptr_t numoutputs(psy_audio_Sampler*);
 static void loadspecific(psy_audio_Sampler*, psy_audio_SongFile*,
 	uintptr_t slot);
-static bool loadxmsamplerchannel(psy_audio_Sampler*, psy_audio_SongFile*);
+static bool loadxmsamplerchannel(psy_audio_Sampler*, psy_audio_SongFile*, int i);
 static void savespecific(psy_audio_Sampler*, psy_audio_SongFile*,
 	uintptr_t slot);
 
 static void disposechannels(psy_audio_Sampler*);
 static psy_audio_SamplerChannel* sampler_channel(psy_audio_Sampler*, uintptr_t channelnum);
-static int currslot(psy_audio_Sampler*, uintptr_t channel,
+static psy_audio_InstrumentIndex currslot(psy_audio_Sampler*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void psy_audio_sampler_initps1(psy_audio_Sampler*);
 static void psy_audio_sampler_initsampulse(psy_audio_Sampler*);
@@ -181,30 +251,31 @@ static void sampler_vtable_init(psy_audio_Sampler* self)
 }
 
 void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback callback)
-{	
+{
 	uintptr_t i;
 
-	custommachine_init(&self->custommachine, callback);	
+	custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
 	psy_audio_sampler_base(self)->vtable = &sampler_vtable;
 	psy_audio_machine_seteditname(psy_audio_sampler_base(self), "Sampler");
-	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;	
-	self->voices = 0;	
+	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;
+	self->voices = 0;
 	self->resamplingmethod = RESAMPLERTYPE_LINEAR;
-	self->defaultspeed = 1;	
+	self->defaultspeed = 1;
 	self->maxvolume = 0xFF;
 	self->panpersistent = 0;
 	self->xmsamplerload = 0;
 	self->basec = 48;
 	self->clipmax = (psy_dsp_amp_t)4.0f;
+	self->instrumentbank = 0;
 	psy_table_init(&self->channels);
 	psy_table_init(&self->lastinst);
 	psy_audio_intmachineparam_init(&self->param_numvoices,
-		"Polyphony", "Polyphony", MPF_STATE,
+		"Polyphony", "Polyphony", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->numvoices,
 		1, 64);
 	psy_audio_choicemachineparam_init(&self->param_resamplingmethod,
-		"Resampling", "Resampling", MPF_STATE,
+		"Resampling", "Resampling", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->resamplingmethod,
 		0, 3);
 	for (i = 0; i < RESAMPLERTYPE_NUMRESAMPLERS; ++i) {
@@ -212,7 +283,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 			psy_dsp_multiresampler_name((ResamplerType)i));
 	}
 	psy_audio_choicemachineparam_init(&self->param_defaultspeed,
-		"Default speed", "Default speed", MPF_STATE,
+		"Default speed", "Default speed", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->defaultspeed,
 		0, 1);	
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 0,
@@ -220,18 +291,29 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 1,
 		"played by C4");
 	psy_audio_intmachineparam_init(&self->param_maxvolume,
-		"Max volume", "Max volume", MPF_STATE,
+		"Max volume", "Max volume", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->maxvolume,
 		0, 255);
 	psy_audio_intmachineparam_setmask(&self->param_maxvolume, "%0X");
 	psy_audio_choicemachineparam_init(&self->param_panpersistent,
-		"Pan Persistence", "Pan Persistence", MPF_STATE,
+		"Pan Persistence", "Pan Persistence", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->panpersistent,
 		0, 1);
 	psy_audio_choicemachineparam_setdescription(&self->param_panpersistent, 0,
 		"reset on new note");
 	psy_audio_choicemachineparam_setdescription(&self->param_panpersistent, 1,
 		"keep on channel");
+	psy_audio_intmachineparam_init(&self->param_instrumentbank,
+		"InstrumentBank", "InstrumentBank", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->instrumentbank,
+		0, 1);
+	psy_audio_custommachineparam_init(&self->param_blank, "", "",
+		MPF_NULL | MPF_SMALL, 0, 0);
+	psy_audio_infomachineparam_init(&self->param_filter_cutoff, "Filter Cutoff", "", MPF_SMALL);
+	psy_audio_infomachineparam_init(&self->param_filter_res, "Filter Q (Res)", "", MPF_SMALL);
+	psy_audio_infomachineparam_init(&self->param_pan, "Panning", "", MPF_SMALL);
+	psy_audio_samplermasterchannel_init(&self->masterchannel, self);
+	psy_audio_custommachineparam_init(&self->ignore_param, "-", "-", MPF_IGNORE | MPF_SMALL, 0, 0);
 	self->cmds = NULL;
 	psy_table_init(&self->cmdmap);
 	psy_audio_sampler_initsampulse(self);	
@@ -241,6 +323,7 @@ void psy_audio_sampler_initps1(psy_audio_Sampler* self)
 {
 	// Old version had default C4 as false
 	psy_audio_sampler_defaultC4(self, FALSE);
+	self->instrumentbank = 0;
 	disposecmds(self);
 	psy_audio_sampler_addcmd(self,
 		SAMPLER_CMD_PORTAMENTO_UP,
@@ -286,6 +369,7 @@ void psy_audio_sampler_initsampulse(psy_audio_Sampler* self)
 {
 	psy_audio_sampler_defaultC4(self, TRUE);
 	self->panpersistent = TRUE;
+	self->instrumentbank = 1;
 	disposecmds(self);
 	psy_audio_sampler_addcmd(self,
 		SAMPLER_CMD_PORTAMENTO_UP,
@@ -367,6 +451,12 @@ void dispose(psy_audio_Sampler* self)
 	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
 	psy_audio_intmachineparam_dispose(&self->param_maxvolume);
+	psy_audio_intmachineparam_dispose(&self->param_instrumentbank);
+	psy_audio_custommachineparam_dispose(&self->param_blank);
+	psy_audio_infomachineparam_dispose(&self->param_filter_cutoff);
+	psy_audio_infomachineparam_dispose(&self->param_filter_res);
+	psy_audio_infomachineparam_dispose(&self->param_pan);
+	psy_audio_custommachineparam_dispose(&self->ignore_param);
 	disposechannels(self);
 	custommachine_dispose(&self->custommachine);
 	disposecmds(self);
@@ -387,6 +477,7 @@ void disposechannels(psy_audio_Sampler* self)
 		free(channel);
 	}
 	psy_table_dispose(&self->channels);
+	psy_audio_samplermasterchannel_dispose(&self->masterchannel);
 }
 
 void disposecmds(psy_audio_Sampler* self)
@@ -424,7 +515,7 @@ psy_audio_SamplerChannel* sampler_channel(psy_audio_Sampler* self, uintptr_t tra
 	rv = psy_table_at(&self->channels, track);
 	if (rv == NULL) {
 		rv = malloc(sizeof(psy_audio_SamplerChannel));
-		psy_audio_samplerchannel_init(rv);
+		psy_audio_samplerchannel_init(rv, track, self);
 		psy_table_insert(&self->channels, track, (void*) rv);
 	}
 	return rv;
@@ -510,7 +601,7 @@ void stop(psy_audio_Sampler* self)
 	releaseallvoices(self);
 }
 
-int currslot(psy_audio_Sampler* self, uintptr_t channel,
+psy_audio_InstrumentIndex currslot(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* event)
 {
 	int rv;
@@ -524,7 +615,7 @@ int currslot(psy_audio_Sampler* self, uintptr_t channel,
 	} else { 
 		rv = NOTECOMMANDS_EMPTY;
 	}
-	return rv;
+	return instrumentindex_make(self->instrumentbank, rv);
 }
 
 void releaseallvoices(psy_audio_Sampler* self)
@@ -610,12 +701,92 @@ const psy_audio_MachineInfo* info(psy_audio_Sampler* self)
 
 uintptr_t numparameters(psy_audio_Sampler* self)
 {
-	return 5;
+	return 10 * 7;
 }
 
 unsigned int numparametercols(psy_audio_Sampler* self)
 {
-	return 5;
+	return 10;
+}
+
+psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
+	uintptr_t param)
+{
+	uintptr_t col;
+	uintptr_t row;
+	uintptr_t rows;
+
+	rows = numparameters(self) / numparametercols(self);
+	row = param % rows;
+	col = param / rows;
+	if (col == 0) {
+		switch (row) {
+		case 2: return &self->param_filter_cutoff.machineparam; break;
+		case 3: return &self->param_filter_res.machineparam; break;
+		case 4: return &self->param_pan.machineparam;  break;
+		case 7: return &self->ignore_param.machineparam;  break;
+		default:
+			return &self->param_blank.machineparam; break;
+			break;
+		}
+	} else
+	if (col == 1) {
+		if (row == 1) {
+			return &self->masterchannel.param_channel.machineparam;
+		} else		
+		if (row == 5) {
+			return &self->masterchannel.slider_param.machineparam;
+		} else
+		if (row == 6) {
+			return &self->masterchannel.level_param.machineparam;
+		} else
+		if (row == 7) {
+			return &self->ignore_param.machineparam;
+		} else {
+			return &self->param_blank.machineparam;
+		}
+	} else
+	if (row == 0) {
+		switch (col) {
+		case 2: return &self->param_numvoices.machineparam; break;
+		case 3: return &self->param_resamplingmethod.machineparam; break;
+		case 4: return &self->param_defaultspeed.machineparam;  break;
+		case 5: return &self->param_maxvolume.machineparam; break;
+		case 6: return &self->param_panpersistent.machineparam; break;
+		case 7: return &self->param_instrumentbank.machineparam; break;
+		default:
+			return &self->param_blank.machineparam; break;
+			break;
+		}
+	} else {			
+		psy_audio_SamplerChannel* channel;
+		
+		channel = sampler_channel(self, col - 2);
+		if (channel) {
+			if (row == 1) {
+				return &channel->param_channel.machineparam;
+			} else
+			if (row == 2) {
+				return &channel->filter_cutoff.machineparam;
+			} else
+			if (row == 3) {
+				return &channel->filter_res.machineparam;
+			} else
+			if (row == 4) {
+				return &channel->pan.machineparam;
+			} else
+			if (row == 5) {
+				return &channel->slider_param.machineparam;
+			} else
+			if (row == 6) {
+				return &channel->level_param.machineparam;
+			} else
+			if (row == 7) {
+				return &self->ignore_param.machineparam;
+			}
+		}
+	}
+	return NULL;
 }
 
 uintptr_t numinputs(psy_audio_Sampler* self)
@@ -630,8 +801,10 @@ uintptr_t numoutputs(psy_audio_Sampler* self)
 
 // psy_audio_SamplerVoice
 
+static void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
+	psy_audio_Instrument* instrument);
 static psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice*,
-	uintptr_t channel, psy_dsp_amp_t input);
+	uintptr_t channel, psy_dsp_amp_t input, psy_dsp_amp_t* filterenv, uintptr_t pos);
 static void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice* self,
 	psy_audio_Sample* sample, psy_dsp_amp_t* svol, psy_dsp_amp_t* lvol,
 	psy_dsp_amp_t* rvol);
@@ -644,6 +817,7 @@ static psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVo
 static void psy_audio_samplervoice_adddatatosamplerbuffer(psy_audio_SamplerVoice*,
 	uintptr_t channel, psy_dsp_amp_t input, uintptr_t pos,
 	psy_audio_Buffer* output);
+static int alteRand(int x) { return (x * rand()) / 32768; }
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	psy_audio_Sampler* sampler,
@@ -655,6 +829,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	int resamplingmethod,
 	int maxvolume) 
 {	
+	filter_init_samplerate(&self->_filter, samplerate);
 	self->sampler = sampler;
 	self->samples = samples;
 	self->instrument = instrument;
@@ -677,23 +852,27 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	} else {
 		psy_dsp_adsr_initdefault(&self->env, samplerate);
 		psy_dsp_adsr_initdefault(&self->filterenv, samplerate);
-	}	
-	psy_dsp_multifilter_init(&self->filter_l);
-	psy_dsp_multifilter_init(&self->filter_r);			
+	}		
 	psy_dsp_multiresampler_init(&self->resampler);
 	psy_dsp_multiresampler_settype(&self->resampler,
 		resamplingmethod);
+	psy_audio_samplervoice_initfilter(self, instrument);
+}
+
+void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
+	psy_audio_Instrument* instrument)
+{
 	if (instrument) {
-		psy_dsp_filter_setcutoff(psy_dsp_multifilter_base(&self->filter_l),
-			self->instrument->filtercutoff);
-		psy_dsp_filter_setcutoff(psy_dsp_multifilter_base(&self->filter_r),
-			self->instrument->filtercutoff);	
-		psy_dsp_filter_setressonance(psy_dsp_multifilter_base(
-			&self->filter_l), self->instrument->filterres);
-		psy_dsp_filter_setressonance(psy_dsp_multifilter_base(
-			&self->filter_r), self->instrument->filterres);
-		psy_dsp_multifilter_settype(&self->filter_l, instrument->filtertype);
-		psy_dsp_multifilter_settype(&self->filter_r, instrument->filtertype);
+		filter_settype(&self->_filter, instrument->filtertype);
+		filter_setressonance(&self->_filter,
+			(instrument->_RRES)
+			? alteRand((int)(instrument->filterres * 127))
+			: (int)(instrument->filterres * 127));
+		self->_cutoff = (instrument->_RCUT)
+			? alteRand((int)(instrument->filtercutoff * 127))
+			: (int)instrument->filtercutoff * 127;
+		self->_coModify = (instrument->filtermodamount - 0.5f) * 255.f;
+		filter_setcutoff(&self->_filter, self->_cutoff);
 	}
 }
 
@@ -702,9 +881,7 @@ void psy_audio_samplervoice_reset(psy_audio_SamplerVoice* self)
 	self->effcmd = psy_audio_samplercmd_make(SAMPLER_CMD_NONE, 0, 0);
 	self->stopping = FALSE;
 	psy_dsp_adsr_reset(&self->env);
-	psy_dsp_adsr_reset(&self->filterenv);
-	psy_dsp_filter_reset(psy_dsp_multifilter_base(&self->filter_l));
-	psy_dsp_filter_reset(psy_dsp_multifilter_base(&self->filter_r));
+	psy_dsp_adsr_reset(&self->filterenv);	
 }
 
 void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
@@ -812,9 +989,10 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 	psy_audio_Sample* sample;
 	psy_List* entries;
 	psy_List* p;
-						
+
+	psy_audio_samplervoice_initfilter(self, self->instrument);
 	psy_audio_samplervoice_clearpositions(self);
-	entries = instrument_entriesintersect(self->instrument,
+	entries = psy_audio_instrument_entriesintersect(self->instrument,
 		event->note, 127, 0);
 	for (p = entries; p != NULL; p = p->next) {
 		psy_audio_InstrumentEntry* entry;
@@ -871,7 +1049,7 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, doubl
 	psy_List* p;
 
 	psy_audio_samplervoice_clearpositions(self);
-	entries = instrument_entriesintersect(self->instrument,
+	entries = psy_audio_instrument_entriesintersect(self->instrument,
 		0, 0, frequency);
 	for (p = entries; p != NULL; p = p->next) {
 		psy_audio_InstrumentEntry* entry;
@@ -927,7 +1105,7 @@ void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_nna(psy_audio_SamplerVoice* self)
 {
 	if (self->instrument) {
-		switch (instrument_nna(self->instrument)) {
+		switch (psy_audio_instrument_nna(self->instrument)) {
 			case psy_audio_NNA_STOP:
 				psy_audio_samplervoice_fastnoteoff(self);
 			break;
@@ -976,7 +1154,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 			env[i] = self->env.value;
 		}
 		filterenv = NULL;
-		if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
+		if (filter_type(&self->_filter) != F_NONE) {
 			filterenv = malloc(amount * sizeof(psy_dsp_amp_t));
 			for (i = 0; i < amount; ++i) {
 				psy_dsp_adsr_tick(&self->filterenv);
@@ -1072,15 +1250,7 @@ psy_dsp_amp_t psy_audio_samplervoice_unprocessed_wavedata(psy_audio_SamplerVoice
 {
 	psy_dsp_amp_t* src;
 
-	src = psy_audio_buffer_at(&it->sample->channels, channel);
-	//return psy_dsp_resampler_work_float(
-		//psy_dsp_multiresampler_base(&self->resampler),
-		//src,
-		//(float)double_real(&it->pos),
-		//it->sample->numframes,
-		//it->resampler_data,
-		//src,
-		//src + (it->sample->numframes - 1));
+	src = psy_audio_buffer_at(&it->sample->channels, channel);	
 	return psy_dsp_resampler_work_float_unchecked(
 		psy_dsp_multiresampler_base(&self->resampler),
 		(channel == 0) ? it->m_pL : it->m_pR,
@@ -1096,7 +1266,7 @@ psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice* se
 	psy_dsp_amp_t rv;
 	psy_dsp_amp_t volume;
 
-	rv = psy_audio_samplervoice_workfilter(self, channel, input);
+	rv = psy_audio_samplervoice_workfilter(self, channel, input, filterenv, pos);
 	volume = env[pos] * self->instrument->globalvolume;
 	if (filterenv) {
 		volume *= filterenv[pos];
@@ -1154,27 +1324,18 @@ void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice* self,
 }
 
 psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice* self,
-	uintptr_t channel, psy_dsp_amp_t input)
-{	
-	if (channel == 0) {
-		if (psy_dsp_multifilter_type(&self->filter_l) != F_NONE) {
-			psy_dsp_filter_setcutoff(
-				psy_dsp_multifilter_base(&self->filter_l),
-				self->filterenv.value);
-			return  psy_dsp_filter_work(
-				psy_dsp_multifilter_base(&self->filter_l),
-				input);
+	uintptr_t channel, psy_dsp_amp_t input, psy_dsp_amp_t* filterenv, uintptr_t pos)
+{		
+	if (filter_type(&self->_filter) != F_NONE)
+	{
+		int newcutoff = (int)(self->_cutoff + (filterenv[pos] * self->_coModify + 0.5f));
+		if (newcutoff < 0) {
+			newcutoff = 0;
+		} else if (newcutoff > 127) {
+			newcutoff = 127;
 		}
-	} else
-	if (channel == 1) {
-		if (psy_dsp_multifilter_type(&self->filter_r) != F_NONE) {
-			psy_dsp_filter_setcutoff(
-				psy_dsp_multifilter_base(&self->filter_r),
-				self->filterenv.value);
-			return psy_dsp_filter_work(
-				psy_dsp_multifilter_base(&self->filter_r),
-				input);
-		}
+		filter_setcutoff(&self->_filter, newcutoff);		
+		return input = self->_filter.vtable->work(&self->_filter, input);
 	}
 	return input;
 }
@@ -1289,7 +1450,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 			psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode));
 
 			for (i = 0; i < MAX_TRACKS; ++i) {
-				loadxmsamplerchannel(self, songfile);
+				loadxmsamplerchannel(self, songfile, i);
 				// m_Channel[i].Load(*riffFile);
 			}
 		} else {
@@ -1344,9 +1505,10 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	}
 }
 
-bool loadxmsamplerchannel(psy_audio_Sampler* self, psy_audio_SongFile* songfile)
+bool loadxmsamplerchannel(psy_audio_Sampler* self, psy_audio_SongFile* songfile, int index)
 {
 	char temp[8];
+	psy_audio_SamplerChannel* channel;
 	int32_t size = 0;
 	///< (0..200)   &0x100 = Mute. // value used for Storage and reset
 	int32_t m_ChannelDefVolume;
@@ -1355,6 +1517,7 @@ bool loadxmsamplerchannel(psy_audio_Sampler* self, psy_audio_SongFile* songfile)
 	int32_t m_DefaultCutoff;
 	int32_t m_DefaultRessonance;
 
+	channel = sampler_channel(self, index);
 	psyfile_read(songfile->file, &temp, 4);
 	temp[4]='\0';
 	psyfile_read(songfile->file, &size, sizeof(size));
@@ -1362,12 +1525,16 @@ bool loadxmsamplerchannel(psy_audio_Sampler* self, psy_audio_SongFile* songfile)
 	///< (0..200)   &0x100 = Mute.
 	psyfile_read(songfile->file, &m_ChannelDefVolume,
 		sizeof(m_ChannelDefVolume));
+	channel->volume = m_ChannelDefVolume / 200.f;
 	//<  0..200 .  &0x100 = Surround.
 	psyfile_read(songfile->file, &m_DefaultPanFactor,
 		sizeof(m_DefaultPanFactor));
+	channel->m_DefaultPanFactor = m_DefaultPanFactor;
 	psyfile_read(songfile->file, &m_DefaultCutoff, sizeof(m_DefaultCutoff));
+	channel->m_DefaultCutoff = m_DefaultCutoff;
 	psyfile_read(songfile->file, &m_DefaultRessonance,
 		sizeof(m_DefaultRessonance));
+	channel->m_DefaultCutoff = m_DefaultRessonance;
 	{ 
 		uint32_t i = 0;
 
@@ -1406,16 +1573,3 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	psyfile_write(songfile->file, &slidemode, sizeof(slidemode)); // correct slide
 }
 
-psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
-	uintptr_t param)
-{
-	switch (param) {
-		case 0: return &self->param_numvoices.machineparam; break;
-		case 1: return &self->param_resamplingmethod.machineparam; break;
-		case 2: return &self->param_defaultspeed.machineparam;  break;
-		case 3: return &self->param_maxvolume.machineparam; break;
-		case 4: return &self->param_panpersistent.machineparam; break;
-		default:;
-	}
-	return 0;
-}

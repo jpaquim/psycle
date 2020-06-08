@@ -164,6 +164,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->currview = 0;
 	self->dialbitmappath = 0;
 	self->lang = NULL;
+	self->undosavepoint = 0;
 	history_init(&self->history);
 	workspace_makerecentsongs(self);
 	workspace_makeconfig(self);	
@@ -1521,31 +1522,32 @@ void workspace_newsong(Workspace* self)
 	song = psy_audio_song_allocinit(&self->machinefactory);
 	free(self->filename);
 	self->filename = strdup("Untitled.psy");
-	workspace_setsong(self, song, WORKSPACE_NEWSONG, 0);		
+	workspace_setsong(self, song, WORKSPACE_NEWSONG, 0);
+	workspace_selectview(self, TABPAGE_MACHINEVIEW, 0, 0);
 }
 
 void workspace_loadsong(Workspace* self, const char* path)
 {	
 	psy_audio_Song* song;
-	psy_audio_SongFile songfile;	
-		
+	psy_audio_SongFile songfile;
+
 	song = psy_audio_song_allocinit(&self->machinefactory);
-	if (song) {		
+	if (song) {
 		psy_signal_connect(&song->signal_loadprogress, self,
-			workspace_onloadprogress);	
+			workspace_onloadprogress);
 		psy_signal_emit(&song->signal_loadprogress, self, 1, -1);
 		psy_audio_songfile_init(&songfile);
 		psy_signal_connect(&songfile.signal_warning, self,
-			workspace_onterminalwarning);		
+			workspace_onterminalwarning);
 		psy_signal_connect(&songfile.signal_output, self,
 			workspace_onterminaloutput);
 		songfile.song = song;
-		songfile.file = 0;		
+		songfile.file = 0;
 		psy_audio_exclusivelock_enter();
 		self->songcbk = song;
 		if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
 			self->songcbk = self->song;
-			psy_audio_exclusivelock_leave();			
+			psy_audio_exclusivelock_leave();
 			psy_audio_song_deallocate(song);
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
@@ -1553,7 +1555,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 		} else {
 			free(self->filename);
 			self->filename = strdup(path);
-			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);						
+			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
 			psy_audio_songfile_dispose(&songfile);
 			psy_audio_exclusivelock_leave();
 			workspace_addrecentsong(self, path);
@@ -1561,7 +1563,7 @@ void workspace_loadsong(Workspace* self, const char* path)
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
-	}
+	}	
 }
 
 void workspace_addrecentsong(Workspace* self, const char* path)
@@ -1616,6 +1618,8 @@ void workspace_savesong(Workspace* self, const char* path)
 	if (psy_audio_songfile_save(&songfile, path)) {
 		psy_signal_emit(&self->signal_terminal_error, self, 1,
 			songfile.serr);
+	} else {
+		self->undosavepoint = psy_list_size(self->undoredo.undo);
 	}
 	psy_audio_songfile_dispose(&songfile);
 	psy_signal_emit(&self->signal_terminal_out, self, 1,
@@ -1789,7 +1793,7 @@ void workspace_setsequenceselection(Workspace* self,
 
 void workspace_addhistory(Workspace* self)
 {
-	if (!self->navigating && !self->history.prevented) {
+	if (self->currview != TABPAGE_CHECKUNSAVED && !self->navigating && !self->history.prevented) {
 		int sequencentryid = -1;
 
 		if (self->sequenceselection.editposition.trackposition.tracknode) {
@@ -1801,6 +1805,38 @@ void workspace_addhistory(Workspace* self)
 		history_add(&self->history, self->currview, sequencentryid);
 		self->currnavigation = self->history.container->tail;
 	}
+}
+
+void workspace_updatecurrview(Workspace* self)
+{	
+	if (self->currnavigation) {
+		HistoryEntry* entry;
+
+		entry = (HistoryEntry*)(self->currnavigation->entry);
+		self->navigating = 1;
+		workspace_selectview(self, entry->viewid, 0, 0);
+		if (entry->sequenceentryid != -1 &&
+			self->sequenceselection.editposition.trackposition.tracknode) {
+			SequencePosition position;
+
+			position = sequence_positionfromid(&self->song->sequence,
+				entry->sequenceentryid);
+			sequenceselection_seteditposition(&self->sequenceselection, position);
+			workspace_setsequenceselection(self, self->sequenceselection);
+		}
+		self->navigating = 0;
+	}
+}
+
+int workspace_currview(Workspace* self)
+{
+	if (self->currnavigation) {
+		HistoryEntry* entry;
+
+		entry = (HistoryEntry*)(self->currnavigation->entry);
+		return entry->viewid;		
+	}
+	return 0;
 }
 
 SequenceSelection workspace_sequenceselection(Workspace* self)
@@ -1961,7 +1997,9 @@ int workspace_advancelineonrecordtweak(Workspace* self)
 void workspace_onviewchanged(Workspace* self, int view)
 {
 	self->currview = view;
-	workspace_addhistory(self);
+	if (view != TABPAGE_CHECKUNSAVED) {
+		workspace_addhistory(self);
+	}
 }
 
 void workspace_back(Workspace* self)
@@ -2306,4 +2344,9 @@ int workspace_onchangelanguageenum(Workspace* self,
 	psy_properties_settranslation(property, workspace_translate(self,
 		psy_properties_text(property)));
 	return TRUE;
+}
+
+bool workspace_songmodified(Workspace* self)
+{
+	return psy_list_size(self->undoredo.undo) != self->undosavepoint;
 }

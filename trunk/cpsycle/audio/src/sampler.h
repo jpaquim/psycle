@@ -9,7 +9,7 @@
 #include "sample.h"
 #include "multiresampler.h"
 #include <adsr.h>
-#include <multifilter.h>
+#include <filter.h>
 #include <hashtbl.h>
 #include <valuemapper.h>
 
@@ -122,13 +122,38 @@ typedef enum {
 	psy_audio_PANNING_EQUALPOWER = 2
 } psy_audio_SamplerPanningMode;
 
+struct psy_audio_Sampler;
+
+typedef struct psy_audio_SamplerMasterChannel {
+	struct psy_audio_Sampler* sampler;
+	// (0..1.0f) value used for Playback (channel volume)
+	psy_dsp_amp_t volume;
+	psy_audio_InfoMachineParam param_channel;
+	psy_audio_VolumeMachineParam slider_param;
+	psy_audio_IntMachineParam level_param;
+} psy_audio_SamplerMasterChannel;
+
 typedef struct psy_audio_SamplerChannel {
+	struct psy_audio_Sampler* sampler;
 	// (0..1.0f) value used for Playback (channel volume)
 	psy_dsp_amp_t volume;
 	// (0..1.0f) value used for Playback (pan factor)
 	float panfactor;
+	int m_DefaultCutoff;
+	int m_DefaultRessonance;
+	int m_DefaultPanFactor;  //  0..200 .  &0x100 == Surround. // value used for Storage and reset
+	psy_audio_InfoMachineParam param_channel;
+	psy_audio_IntMachineParam filter_cutoff;
+	psy_audio_IntMachineParam filter_res;
+	psy_audio_IntMachineParam pan;
+	psy_audio_VolumeMachineParam slider_param;
+	psy_audio_IntMachineParam level_param;	
 } psy_audio_SamplerChannel;
 
+INLINE float psy_audio_samplerchannel_defaultpanfactorfloat(psy_audio_SamplerChannel* self)
+{
+	return (self->m_DefaultPanFactor & 0xFF) / 200.0f;
+}
 
 typedef struct {
 	double factor;
@@ -171,11 +196,9 @@ typedef struct {
 	psy_audio_Samples* samples;
 	psy_dsp_ADSR env;
 	psy_dsp_ADSR filterenv;
-	psy_dsp_MultiFilter filter_l;
-	psy_dsp_MultiFilter filter_r;
+	Filter _filter;	
 	psy_dsp_MultiResampler resampler;
-	psy_List* positions;	
-
+	psy_List* positions;
 	psy_dsp_amp_t vol;
 	psy_dsp_amp_t pan;
 	int usedefaultvolume;
@@ -187,6 +210,8 @@ typedef struct {
 	uint8_t offset;
 	int maxvolume;
 	bool stopping;
+	int _cutoff;
+	float _coModify;	
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
@@ -256,10 +281,19 @@ typedef struct psy_audio_Sampler {
 	psy_audio_ChoiceMachineParam param_defaultspeed;
 	psy_audio_IntMachineParam param_maxvolume;
 	psy_audio_ChoiceMachineParam param_panpersistent;
+	psy_audio_IntMachineParam param_instrumentbank;
+	psy_audio_CustomMachineParam param_blank;
+	psy_audio_InfoMachineParam param_filter_cutoff;
+	psy_audio_InfoMachineParam param_filter_res;
+	psy_audio_InfoMachineParam param_pan;
+	psy_audio_SamplerMasterChannel masterchannel;
+	psy_audio_CustomMachineParam ignore_param;
 	psy_Table channels;
 	uint8_t basec;
 	// Sampler PS1 with max amp = 0.5.
 	psy_dsp_amp_t clipmax;
+	// Instrument Bank 0: PS1 1: Sampulse
+	int32_t instrumentbank;
 	psy_audio_SamplerPanningMode panningmode;
 	psy_List* cmds;
 	psy_Table cmdmap;

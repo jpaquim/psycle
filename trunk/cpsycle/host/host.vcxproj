@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="src\about.c" />
     <ClCompile Include="src\channelmappingview.c" />
+    <ClCompile Include="src\checkunsaved.c" />
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\cmdproperties.c" />
     <ClCompile Include="src\command.c" />
@@ -235,6 +236,7 @@
   <ItemGroup>
     <ClInclude Include="src\about.h" />
     <ClInclude Include="src\channelmappingview.h" />
+    <ClInclude Include="src\checkunsaved.h" />
     <ClInclude Include="src\clipbox.h" />
     <ClInclude Include="src\cmdproperties.h" />
     <ClInclude Include="src\cmdsgeneral.h" />

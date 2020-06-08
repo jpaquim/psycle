@@ -100,6 +100,7 @@ typedef void (*psy_ui_fp_onpreferredsize)(struct psy_ui_Component*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
 typedef void (*psy_ui_fp_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
+typedef bool (*psy_ui_fp_onclose)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onmousedown)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmousemove)(struct psy_ui_Component*, psy_ui_MouseEvent*);
 typedef void (*psy_ui_fp_onmousewheel)(struct psy_ui_Component*, psy_ui_MouseEvent*);
@@ -141,6 +142,7 @@ typedef struct psy_ui_ComponentVTable {
 	// events
 	psy_ui_fp_ondraw ondraw;
 	psy_ui_fp_onsize onsize;
+	psy_ui_fp_onclose onclose;
 	psy_ui_fp_onalign onalign;
 	psy_ui_fp_onpreferredsize onpreferredsize;
 	psy_ui_fp_onmousedown onmousedown;
@@ -177,6 +179,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_mouseleave;
 	psy_Signal signal_scroll;
 	psy_Signal signal_create;
+	psy_Signal signal_close;
 	psy_Signal signal_destroy;
 	psy_Signal signal_destroyed;
 	psy_Signal signal_childenum;
@@ -212,6 +215,7 @@ typedef struct psy_ui_Component {
 	int cursor;	
 	bool mousetracking;
 	psy_ui_Style style;
+	psy_ui_Size preferredsize;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -278,6 +282,7 @@ void psy_ui_component_preventalign(psy_ui_Component*);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
+void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
@@ -286,6 +291,7 @@ void psy_ui_component_setcursor(psy_ui_Component*, psy_ui_CursorStyle);
 psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
 	const psy_ui_Margin*);
 psy_List* psy_ui_components_setmargin(psy_List*, const psy_ui_Margin*);
+void psy_ui_component_close(psy_ui_Component*);
 
 // uicomponentimp
 

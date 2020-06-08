@@ -10,15 +10,17 @@
 
 #include "workspace.h"
 
+// Displays a plugin custom ui. So far only vsts use this view.
+
 typedef struct {
    psy_ui_Component component;   
    psy_audio_Machine* machine;      
 } MachineEditorView;
 
-void machineeditorview_init(MachineEditorView*, psy_ui_Component* parent, psy_audio_Machine*,
-	Workspace* workspace);
+void machineeditorview_init(MachineEditorView*, psy_ui_Component* parent,
+	psy_audio_Machine*, Workspace* workspace);
 MachineEditorView* machineeditorview_alloc(void);
-MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
-	Workspace*);
+MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
+	psy_audio_Machine*, Workspace*);
 
 #endif /* MACHINEEDITORVIEW_H */

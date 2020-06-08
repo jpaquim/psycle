@@ -4,17 +4,39 @@
 #include "../../detail/prefix.h"
 
 #include "clipbox.h"
+
 #include <rms.h>
+
 #include <songio.h>
 
+#define TIMER_ID_CLIPBOX 700
+
+static void clipbox_ondestroy(ClipBox*, psy_ui_Component* sender);
 static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
+static void clipbox_currclipcolors(ClipBox*, psy_ui_Color* currbackground,
+	psy_ui_Color* currborder);
 static void clipbox_ontimer(ClipBox*, int timerid);
 static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
 static void clipbox_onmasterworked(ClipBox*, psy_audio_Machine* master, uintptr_t slot,
-	psy_audio_BufferContext* bc);
+	psy_audio_BufferContext*);
+static bool clipbox_clipoccurred(ClipBox* self, psy_audio_Machine*);
 static void clipbox_onsongchanged(ClipBox*, Workspace*, int flag, psy_audio_SongFile*);
 static void clipbox_connectmachinessignals(ClipBox*, Workspace*);
-static void clipbox_onpreferredsize(ClipBox*, psy_ui_Size* limit, psy_ui_Size* rv);
+
+static ClipBoxSkin clipboxdefaultskin;
+static int clipboxdefaultskin_initialized = 0;
+
+static void clipboxdefaultskin_init(ClipBox* self)
+{
+	if (!clipboxdefaultskin_initialized) {
+		clipboxdefaultskin.on = 0x000000FF;
+		clipboxdefaultskin.off = 0x00232323;
+		clipboxdefaultskin.borderon = 0x00333333;
+		clipboxdefaultskin.borderoff = 0x00333333;
+		clipboxdefaultskin_initialized = 1;
+	}
+	self->skin = clipboxdefaultskin;
+}
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -23,7 +45,6 @@ static void vtable_init(ClipBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) clipbox_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) clipbox_ondraw;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) clipbox_onmousedown;
 		vtable.ontimer = (psy_ui_fp_ontimer) clipbox_ontimer;
@@ -31,46 +52,67 @@ static void vtable_init(ClipBox* self)
 	}
 }
 
-#define TIMER_ID_CLIPBOX 700
-
 void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
-{
-	self->clip = 0;	
+{	
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_signal_connect(&workspace->signal_songchanged, self, clipbox_onsongchanged);	
-	clipbox_connectmachinessignals(self, workspace);	
+	self->workspace = workspace;
+	self->isclipon = FALSE;
+	clipboxdefaultskin_init(self);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(2),
+			psy_ui_value_makeeh(1.5)));
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		clipbox_onsongchanged);	
+	clipbox_connectmachinessignals(self, workspace);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		clipbox_ondestroy);
+}
+
+void clipbox_ondestroy(ClipBox* self, psy_ui_Component* sender)
+{
+	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
+		clipbox_onsongchanged);
+	if (self->workspace->song) {
+		psy_signal_disconnect(&psy_audio_machines_master(
+			&self->workspace->song->machines)->signal_worked, self,
+			clipbox_onmasterworked);
+	}
 }
 
 void clipbox_ontimer(ClipBox* self, int timerid)
 {	
-	if (self->clip) {		
-		psy_ui_component_invalidate(&self->component);
+	if (clipbox_isclipon(self)) {
 		psy_ui_component_stoptimer(&self->component, TIMER_ID_CLIPBOX);
+		psy_ui_component_invalidate(&self->component);		
 	}
 }
 
 void clipbox_onmasterworked(ClipBox* self, psy_audio_Machine* master,
 	uintptr_t slot, psy_audio_BufferContext* bc)
-{	
-	if (bc->output->rms) {		
-		if (bc->output->rms->data.previousLeft >= 32767.f ||
-			bc->output->rms->data.previousLeft < -32768.f) {
-			self->clip = 1;
-			psy_ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);
-		}
-		if (bc->output->rms->data.previousRight >= 32767.f ||
-			bc->output->rms->data.previousRight < -32768.f) {
-			self->clip = 1;
-			psy_ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);
-		}
+{		
+	if (clipbox_clipoccurred(self, master)) {
+		clipbox_activate(self);
+		psy_ui_component_starttimer(&self->component, TIMER_ID_CLIPBOX, 50);		
 	}
+}
+
+bool clipbox_clipoccurred(ClipBox* self, psy_audio_Machine* machine)
+{
+	psy_audio_Buffer * memory;
+
+	memory = psy_audio_machine_buffermemory(machine);
+	return (memory && memory->rms &&
+		(memory->rms->data.previousLeft >= 32767.f ||
+		memory->rms->data.previousLeft < -32768.f ||
+		memory->rms->data.previousRight >= 32767.f ||
+		memory->rms->data.previousRight < -32768.f));
 }
 
 void clipbox_onmousedown(ClipBox* self, psy_ui_MouseEvent* ev)
 {
-	self->clip = 0;	
+	clipbox_deactivate(self);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -90,26 +132,34 @@ void clipbox_connectmachinessignals(ClipBox* self, Workspace* workspace)
 }
 
 void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
-{
-	psy_ui_Rectangle r;
+{	
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
+	psy_ui_Rectangle rc;
+	psy_ui_Color currbackground;
+	psy_ui_Color currborder;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	if (psy_ui_value_px(&size.height, &tm) > 40) {
 		size.height = psy_ui_value_makepx(40);
 	}
-	psy_ui_setrectangle(&r, 1, 5, psy_ui_value_px(&size.width, &tm) - 1, psy_ui_value_px(&size.height, &tm) - 5);
-	if (self->clip) {
-		psy_ui_drawsolidrectangle(g, r, 0x000000FF);
-	}	
-	psy_ui_setcolor(g, 0x00333333);
-	psy_ui_drawrectangle(g, r);
+	psy_ui_setrectangle(&rc, 1, 5, psy_ui_value_px(&size.width, &tm) - 1,
+		psy_ui_value_px(&size.height, &tm) - 5);
+	clipbox_currclipcolors(self, &currbackground, &currborder);
+	psy_ui_drawsolidrectangle(g, rc, currbackground);
+	psy_ui_setcolor(g, currborder);			
+	psy_ui_drawrectangle(g, rc);
 }
 
-void clipbox_onpreferredsize(ClipBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
+void clipbox_currclipcolors(ClipBox* self, psy_ui_Color* currbackground,
+	psy_ui_Color* currborder)
 {
-	rv->width = psy_ui_value_makeew(2);
-	rv->height = psy_ui_value_makeeh(1.5);	
+	if (clipbox_isclipon(self)) {
+		*currbackground = self->skin.on;
+		*currborder = self->skin.borderon;
+	} else {
+		*currbackground = self->skin.off;
+		*currborder = self->skin.borderoff;
+	}
 }

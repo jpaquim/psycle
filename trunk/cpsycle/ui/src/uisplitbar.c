@@ -41,6 +41,8 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->resize = 0;
+	psy_ui_size_init(&self->restoresize);
+	self->hasrestore = FALSE;
 	self->hover = 0;	
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_resize(&self->component, psy_ui_value_makeew(0.5),
@@ -57,21 +59,38 @@ void splitbar_onpreferredsize(psy_ui_SplitBar* self, psy_ui_Size* limit, psy_ui_
 
 void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 {	
-	if (ev->button == 2) {
+	if (ev->button == 2) {		
 		psy_ui_Component* prev;
 
 		prev = splitbar_prevcomponent(self);
 		if (prev) {
 			if (prev->align == psy_ui_ALIGN_LEFT ||
 					prev->align == psy_ui_ALIGN_RIGHT) {
-				psy_ui_component_resize(prev, psy_ui_value_makepx(0),
-					psy_ui_component_size(prev).height);
+				if (!self->hasrestore) {
+					self->restoresize = psy_ui_component_size(prev);
+					self->hasrestore = TRUE;
+					psy_ui_component_resize(prev, psy_ui_value_makepx(0),
+						psy_ui_component_size(prev).height);
+				} else {
+					self->hasrestore = FALSE;
+					psy_ui_component_resize(prev, self->restoresize.width,
+						psy_ui_component_size(prev).height);
+				}
 			} else
 			if (prev->align == psy_ui_ALIGN_TOP ||
 					prev->align == psy_ui_ALIGN_BOTTOM) {
-				psy_ui_component_resize(prev,
-					psy_ui_component_size(prev).width,
-					psy_ui_value_makepx(0));
+				if (!self->hasrestore) {
+					self->hasrestore = TRUE;
+					self->restoresize = psy_ui_component_size(prev);					
+					psy_ui_component_resize(prev,
+						psy_ui_component_size(prev).width,
+						psy_ui_value_makepx(0));
+				} else {
+					self->hasrestore = FALSE;
+					psy_ui_component_resize(prev,
+						psy_ui_component_size(prev).width,
+						self->restoresize.height);
+				}
 			}
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
 		}

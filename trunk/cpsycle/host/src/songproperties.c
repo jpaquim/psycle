@@ -235,7 +235,6 @@ void songpropertiesview_ontpbeditkeydown(SongPropertiesView* self,
 	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode == psy_ui_KEY_RETURN) {
-		int tpb;
 		psy_ui_component_setfocus(&self->component);
 		psy_ui_keyevent_preventdefault(ev);	
 		songpropertiesview_updatetpbedit(self);

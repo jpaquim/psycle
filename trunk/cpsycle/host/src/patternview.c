@@ -22,8 +22,6 @@ static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
 static void patternview_oncontextmenu(PatternView*,
 	psy_ui_Component* sender);
 static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Graphics*);
-static void patternviewstatus_onpreferredsize(PatternViewStatus*,
-	psy_ui_Size* limit, psy_ui_Size* rv);
 static void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus*,
 	Workspace* sender);
 static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
@@ -42,9 +40,7 @@ static int vtable_initialized = 0;
 static void vtable_init(PatternViewStatus* self)
 {
 	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			patternviewstatus_onpreferredsize;
+		vtable = *(self->component.vtable);		
 		vtable.ondraw = (psy_ui_fp_ondraw) patternviewstatus_ondraw;
 		vtable_initialized = 1;
 	}
@@ -57,7 +53,10 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	psy_ui_component_doublebuffer(&self->component);		
+	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(40),
+			psy_ui_value_makeeh(1)));
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		patternviewstatus_onpatterneditpositionchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -105,15 +104,6 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 		editposition.column,
 		editposition.digit);
 	psy_ui_textout(g, 0, (psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2, text, strlen(text));
-}
-
-void patternviewstatus_onpreferredsize(PatternViewStatus* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{				
-	if (rv) {	
-		rv->width = psy_ui_value_makeew(40);
-		rv->height = psy_ui_value_makeeh(1);
-	}
 }
 
 void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,

@@ -7,6 +7,8 @@
 #include "uibutton.h"
 #include "workspace.h"
 
+// aim: browser like navigation for the previous selected views.
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Button prev;

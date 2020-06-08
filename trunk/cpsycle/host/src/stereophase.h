@@ -7,6 +7,8 @@
 #include "uicomponent.h"
 #include "workspace.h"
 
+// aim: Displays the stereo phase of the signal 
+
 typedef struct {	
 	psy_ui_Component component;
 	psy_audio_Wire wire;

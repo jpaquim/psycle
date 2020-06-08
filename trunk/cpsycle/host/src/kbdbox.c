@@ -45,33 +45,34 @@ static void kbdbox_makekeys(KbdBox*);
 static void kbdbox_ondestroy(KbdBox*, psy_ui_Component* sender);
 static void kbdbox_ondraw(KbdBox*, psy_ui_Graphics*);
 static void kbdbox_drawkey(KbdBox*, psy_ui_Graphics*, KbdBoxKey*);
-static void kbdbox_onpreferredsize(KbdBox*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void kbdbox_addsmallkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addmediumkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addlargerkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addlargekey(KbdBox*, uintptr_t keycode, const char* label);
 
-static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static psy_ui_ComponentVtable kbdbox_vtable;
+static int kbdbox_vtable_initialized = 0;
 
-static void vtable_init(KbdBox* self)
+static void kbdbox_vtable_init(KbdBox* self)
 {
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);		
-		vtable.ondraw = (psy_ui_fp_ondraw) kbdbox_ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)kbdbox_onpreferredsize;
-		vtable_initialized = 1;
+	if (!kbdbox_vtable_initialized) {
+		kbdbox_vtable = *(self->component.vtable);
+		kbdbox_vtable.ondraw = (psy_ui_fp_ondraw)kbdbox_ondraw;
+		kbdbox_vtable_initialized = 1;
 	}
 }
 
 void kbdbox_init(KbdBox* self, psy_ui_Component* parent)
 {			
 	psy_ui_component_init(kbdbox_base(self), parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	kbdbox_vtable_init(self);
+	self->component.vtable = &kbdbox_vtable;
 	psy_ui_component_doublebuffer(kbdbox_base(self));
 	psy_signal_connect(&kbdbox_base(self)->signal_destroy, self,
 		kbdbox_ondestroy);	
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(80),
+			psy_ui_value_makeeh(14)));
 	self->corner.width = psy_ui_value_makepx(5);
 	self->corner.height = psy_ui_value_makepx(5);
 	self->ident = 3;
@@ -140,17 +141,6 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 	psy_ui_textout(g, key->position.left + 4 + 80, key->position.top - 3 +
 		psy_ui_value_px(&textsize.height, &tm),
 		key->desc2, strlen(key->desc2));
-}
-
-void kbdbox_onpreferredsize(KbdBox* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{
-	if (rv) {
-		psy_ui_Size size;
-
-		size = psy_ui_component_size(kbdbox_base(self));
-		size.height = psy_ui_value_makeeh(14);
-		*rv = size;
-	}
 }
 
 void kbdbox_makekeys(KbdBox* self)

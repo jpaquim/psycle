@@ -8,6 +8,9 @@
 #include <uilabel.h>
 #include <player.h>
 
+// aim: Sets the speed of the track in beats per minute, ranging from 33 to
+//      999 BPM
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label bpmdesc;

@@ -22,8 +22,15 @@ enum {
 	TABPAGE_PROPERTIESVIEW = 4,
 	TABPAGE_SETTINGSVIEW = 5,
 	TABPAGE_HELPVIEW = 6,
-	TABPAGE_RENDERVIEW = 7
+	TABPAGE_RENDERVIEW = 7,
+	TABPAGE_CHECKUNSAVED = 8
 };
+
+typedef enum {
+	CHECKUNSAVE_CLOSE,
+	CHECKUNSAVE_LOAD,
+	CHECKUNSAVE_NEW
+} CheckUnsaveMode;
 
 enum {
 	WORKSPACE_NEWSONG,
@@ -117,6 +124,7 @@ typedef struct {
 	int chordmode;
 	int fontheight;
 	char* dialbitmappath;
+	uintptr_t undosavepoint;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -184,6 +192,8 @@ int workspace_advancelineonrecordtweak(Workspace*);
 void workspace_onviewchanged(Workspace*, int view);
 void workspace_back(Workspace*);
 void workspace_forward(Workspace*);
+void workspace_updatecurrview(Workspace*);
+int workspace_currview(Workspace*);
 void workspace_addhistory(Workspace*);
 void workspace_setloadnewblitz(Workspace*, int mode);
 int workspace_loadnewblitz(Workspace*);
@@ -206,5 +216,6 @@ void workspace_connectasmixersend(Workspace*);
 void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(Workspace*);
 void workspace_showgear(Workspace*);
+bool workspace_songmodified(Workspace*);
 
 #endif

@@ -126,6 +126,7 @@ static psy_List* children(psy_ui_Component* self, int recursive);
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
+static bool onclose(psy_ui_Component* self) { return TRUE; }
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousewheel(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
@@ -174,6 +175,7 @@ static void vtable_init(void)
 		vtable.onalign = onalign;
 		vtable.onpreferredsize = onpreferredsize;
 		vtable.onsize = onsize;
+		vtable.onclose = onclose;
 		vtable.onmousedown = onmousedown;
 		vtable.onmousemove = onmousemove;
 		vtable.onmousewheel = onmousewheel;
@@ -188,33 +190,6 @@ static void vtable_init(void)
 		vtable_initialized = 1;
 	}
 }
-
-/*
-
-int psy_ui_win32_component_init(psy_ui_Component* self, psy_ui_Component* parent,
-		const char* classname, 
-		int x, int y, int width, int height,
-		uint32_t dwStyle,
-		int usecommand)
-{	
-	psy_ui_win_ComponentImp* imp;
-
-	vtable_init();
-	self->vtable = &vtable;	
-	if (!parent) {
-		app.main = self;
-	}
-	imp = psy_ui_win_componentimp_allocinit(self,
-		parent ? parent->imp : 0,
-		classname,
-		x, y, width, height,
-		dwStyle,
-		usecommand);
-	self->imp = (psy_ui_ComponentImp*) imp;
-	psy_ui_component_init_base(self);
-	psy_ui_component_init_signals(self);
-	return imp->hwnd == 0;
-}*/
 
 void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	psy_ui_ComponentImp* imp)
@@ -430,6 +405,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_mouseleave);
 	psy_signal_init(&self->signal_scroll);
 	psy_signal_init(&self->signal_create);
+	psy_signal_init(&self->signal_close);
 	psy_signal_init(&self->signal_destroy);
 	psy_signal_init(&self->signal_destroyed);
 	psy_signal_init(&self->signal_show);
@@ -452,6 +428,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
 	self->alignexpandmode = psy_ui_NOEXPAND;
+	self->preferredsize = psy_ui_component_size(self);
 	psy_ui_style_init(&self->style);
 	psy_ui_margin_init(&self->margin);
 	psy_ui_margin_init(&self->spacing);	
@@ -493,6 +470,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_mouseleave);
 	psy_signal_dispose(&self->signal_scroll);
 	psy_signal_dispose(&self->signal_create);
+	psy_signal_dispose(&self->signal_close);
 	psy_signal_dispose(&self->signal_destroy);
 	psy_signal_dispose(&self->signal_destroyed);
 	psy_signal_dispose(&self->signal_show);
@@ -777,10 +755,20 @@ psy_List* psy_ui_components_setmargin(psy_List* list, const psy_ui_Margin* margi
 	return list;
 }
 
+void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
+{
+	self->preferredsize = size;
+}
+
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	psy_ui_Size* limit)
 {
-	psy_ui_Size rv;	
+	psy_ui_Size rv;
+
+	rv = self->preferredsize;
+	if (self->debugflag == 7500) {
+		self = self;
+	}
 	self->vtable->onpreferredsize(self, limit, &rv);
 	// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
 	return rv;	

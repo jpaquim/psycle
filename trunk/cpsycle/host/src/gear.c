@@ -60,7 +60,6 @@ void gearbuttons_onlanguagechanged(GearButtons* self, Workspace* sender)
 }
 
 static void gear_updatetext(Gear*, Workspace*);
-static void gear_connectsongsignals(Gear*);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
 static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
@@ -94,7 +93,6 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		&workspace->song->instruments);
 	samplesbox_init(&self->samplesbox, psy_ui_notebook_base(&self->notebook),
 		&workspace->song->samples);
-	gear_connectsongsignals(self);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);
@@ -124,10 +122,10 @@ void gear_updatetext(Gear* self, Workspace* workspace)
 		NULL);
 }
 
-void gear_connectsongsignals(Gear* self)
+void gear_onlanguagechanged(Gear* self, Workspace* sender)
 {
-	// psy_signal_connect(&self->instruments->signal_insert, self, OnInstrumentInsert);
-	// psy_signal_connect(&self->instruments->signal_slotchange, self, OnInstrumentSlotChanged);	
+	gear_updatetext(self, sender);
+	psy_ui_component_align(gear_base(self));
 }
 
 void gear_ondelete(Gear* self, psy_ui_Component* sender)
@@ -152,7 +150,6 @@ void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_So
 	instrumentsbox_setinstruments(&self->instrumentsbox,
 		&workspace->song->instruments);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
-	gear_connectsongsignals(self);
 	psy_ui_component_invalidate(gear_base(self));
 }
 
@@ -203,8 +200,3 @@ void gear_onmaster(Gear* self, psy_ui_Component* sender)
 	workspace_showparameters(self->workspace, psy_audio_MASTER_INDEX);
 }
 
-void gear_onlanguagechanged(Gear* self, Workspace* sender)
-{
-	gear_updatetext(self, sender);
-	psy_ui_component_align(gear_base(self));
-}

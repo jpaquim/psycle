@@ -297,6 +297,16 @@ void psy_ui_editor_setfont(psy_ui_Editor* self, psy_ui_Font* source)
 	psy_ui_editor_styleclearall(self);
 }
 
+void psy_ui_editor_enablewrap(psy_ui_Editor* self)
+{
+	sci(self, SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
+}
+
+void psy_ui_editor_disablewrap(psy_ui_Editor* self)
+{
+	sci(self, SCI_SETWRAPMODE, SC_WRAP_NONE, 0);
+}
+
 #else
 
 void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)

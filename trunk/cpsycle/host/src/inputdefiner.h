@@ -6,6 +6,9 @@
 
 #include <uicomponent.h>
 
+// aim: Component to define a keyboard shortcut. It is used by the
+//      SettingsView to edit the keyboard settings.
+
 typedef struct {
    psy_ui_Component component;   
    unsigned int input;

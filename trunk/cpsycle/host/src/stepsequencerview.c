@@ -206,7 +206,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		patternevent_clear(&event);
 		event.note = 48;
 		event.inst = (uint16_t) instruments_slot(
-			&self->workspace->song->instruments);
+			&self->workspace->song->instruments).subslot;
 		event.mach = (uint8_t) psy_audio_machines_slot(&self->workspace->song->machines);
 		// event.cmd = GATE;
 		// event.parameter = 0x80;

@@ -47,6 +47,7 @@ void psy_ui_winapp_init(psy_ui_WinApp*, HINSTANCE instance);
 void psy_ui_winapp_dispose(psy_ui_WinApp*);
 int psy_ui_winapp_run(psy_ui_WinApp*);
 void psy_ui_winapp_stop(psy_ui_WinApp*);
+void psy_ui_winapp_close(psy_ui_WinApp*, struct psy_ui_Component* main);
 
 #ifdef __cplusplus
 }
