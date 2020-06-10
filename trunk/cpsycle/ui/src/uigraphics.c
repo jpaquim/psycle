@@ -24,7 +24,7 @@ static void drawsolidrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
 	unsigned int color);
 static void drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
 	psy_ui_Size cornersize, unsigned int color);
-static void drawsolidpolygon(psy_ui_Graphics*, psy_ui_Point* points,
+static void drawsolidpolygon(psy_ui_Graphics*, psy_ui_IntPoint* points,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 static void drawline(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
 static void drawfullbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y);
@@ -36,9 +36,9 @@ static void settextcolor(psy_ui_Graphics*, unsigned int color);
 static void settextalign(psy_ui_Graphics*, unsigned int align);
 static void setcolor(psy_ui_Graphics*, unsigned int color);
 static void setfont(psy_ui_Graphics*, psy_ui_Font* font);
-static void moveto(psy_ui_Graphics*, psy_ui_Point point);
-static void curveto(psy_ui_Graphics*, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p);
+static void moveto(psy_ui_Graphics*, psy_ui_IntPoint point);
+static void curveto(psy_ui_Graphics*, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 static void drawarc(psy_ui_Graphics*,
 	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
 static void setlinewidth(psy_ui_Graphics*, unsigned int width);
@@ -128,7 +128,7 @@ static void drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangl
 {
 		self->imp->vtable->dev_drawsolidroundrectangle(self->imp, r, cornersize, color);
 }
-static void drawsolidpolygon(psy_ui_Graphics* self, psy_ui_Point* points,
+static void drawsolidpolygon(psy_ui_Graphics* self, psy_ui_IntPoint* points,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter)
 {
 	self->imp->vtable->dev_drawsolidpolygon(self->imp, points, numpoints, inner, outter);
@@ -180,13 +180,13 @@ static void setfont(psy_ui_Graphics* self, psy_ui_Font* font)
 	self->imp->vtable->dev_setfont(self->imp, font);
 }
 
-static void moveto(psy_ui_Graphics* self, psy_ui_Point point)
+static void moveto(psy_ui_Graphics* self, psy_ui_IntPoint point)
 {
 	self->imp->vtable->dev_moveto(self->imp, point);
 }
 
-static void curveto(psy_ui_Graphics* self, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p)
+static void curveto(psy_ui_Graphics* self, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
 {
 	self->imp->vtable->dev_curveto(self->imp, control_p1, control_p2, p);
 }
@@ -225,7 +225,7 @@ static void dev_drawsolidrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectan
 	unsigned int color) { }
 static void dev_drawsolidroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color) { }
-static void dev_drawsolidpolygon(psy_ui_GraphicsImp* self, psy_ui_Point* pt,
+static void dev_drawsolidpolygon(psy_ui_GraphicsImp* self, psy_ui_IntPoint* pt,
 	unsigned int numpoints, unsigned int inner, unsigned int outter) { }
 static void dev_drawline(psy_ui_GraphicsImp* self, int x1, int y1, int x2, int y2) { }
 static void dev_drawfullbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y) { }
@@ -237,9 +237,9 @@ static void dev_settextcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
 static void dev_settextalign(psy_ui_GraphicsImp* self, unsigned int align) { }
 static void dev_setcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
 static void dev_setfont(psy_ui_GraphicsImp* self, psy_ui_Font* font) { }
-static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_Point pt) { }
-static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p) { }
+static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_IntPoint pt) { }
+static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p) { }
 static void dev_drawarc(psy_ui_GraphicsImp* self,
 	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4) { }
 static void dev_setlinewidth(psy_ui_GraphicsImp* self, unsigned int width) { }

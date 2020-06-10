@@ -28,7 +28,7 @@
 //      layering for one note.
 
 typedef struct {
-	int keysize;
+	double keysize;
 	int lineheight;
 } InstrumentNoteMapMetrics;
 

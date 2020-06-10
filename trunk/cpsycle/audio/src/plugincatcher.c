@@ -90,7 +90,7 @@ void plugincatcher_clear(psy_audio_PluginCatcher* self)
 }
 
 void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
-{		
+{			
 	plugincatcher_makeplugininfo(self, "sampler", "", MACH_SAMPLER,
 		psy_audio_sampler_info());
 	plugincatcher_makeplugininfo(self, "dummy", "", MACH_DUMMY,

@@ -357,7 +357,6 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerbarselect_vtable_init(self);
 	self->component.vtable = &stepsequencerbarselect_vtable;
-	self->component.debugflag = 98;
 	self->steptimer = steptimer;
 	self->workspace = workspace;	
 	self->pattern = 0;

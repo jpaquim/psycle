@@ -47,10 +47,10 @@ static void dev_showstate(psy_ui_xt_ComponentImp*, int state);
 static void dev_hide(psy_ui_xt_ComponentImp*);
 static int dev_visible(psy_ui_xt_ComponentImp*);
 static void dev_move(psy_ui_xt_ComponentImp*, int left, int top);
-static void dev_resize(psy_ui_xt_ComponentImp*, int width, int height);
+static void dev_resize(psy_ui_xt_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_xt_ComponentImp*, int width, int height);
 static psy_ui_Rectangle dev_position(psy_ui_xt_ComponentImp*);
-static void dev_setposition(psy_ui_xt_ComponentImp*, int x, int y, int width, int height);
+static void dev_setposition(psy_ui_xt_ComponentImp*, psy_ui_Point topleft, psy_ui_Size);
 static psy_ui_Size dev_size(psy_ui_xt_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_xt_ComponentImp*);
 static void dev_scrollto(psy_ui_xt_ComponentImp*, intptr_t dx, intptr_t dy);
@@ -367,7 +367,7 @@ void dev_move(psy_ui_xt_ComponentImp* self, int left, int top)
     }
 }
 
-void dev_resize(psy_ui_xt_ComponentImp* self, int width, int height)
+void dev_resize(psy_ui_xt_ComponentImp* self, psy_ui_Size size)
 {
     if (self->hwnd && height > 0 && width > 0) {
         XtResizeWidget(self->hwnd, width, height, 0);
@@ -388,8 +388,7 @@ void dev_clientresize(psy_ui_xt_ComponentImp* self, int width, int height)
 	//dev_resize(self, rc.right - rc.left, rc.bottom - rc.top);
 }
 
-void dev_setposition(psy_ui_xt_ComponentImp* self, int x, int y, int width,
-	int height)
+void dev_setposition(psy_ui_xt_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size)
 {
     if (self->hwnd) {
         dev_move(self, x, y);

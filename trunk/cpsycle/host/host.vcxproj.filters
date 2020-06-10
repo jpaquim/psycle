@@ -35,9 +35,6 @@
     <ClCompile Include="src\envelopeview.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\file.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\filebar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -277,9 +274,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\envelopeview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\filebar.h">

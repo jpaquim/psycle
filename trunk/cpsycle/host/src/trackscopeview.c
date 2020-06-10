@@ -213,17 +213,17 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 {	
 	int ident = (int)(width * 0.25);
 	psy_ui_setcolor(g, app.defaults.defaultcolor);
-	psy_ui_moveto(g, psy_ui_point_make(x + ident, y + (int)(height * 0.2)));
+	psy_ui_moveto(g, psy_ui_intpoint_make(x + ident, y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
-		psy_ui_point_make(x + width - ident * 2, y + (int)(height * 0.3)),
-		psy_ui_point_make(x + width - ident, y + (int)(height * 0.6)),
-		psy_ui_point_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
+		psy_ui_intpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),
+		psy_ui_intpoint_make(x + width - ident, y + (int)(height * 0.6)),
+		psy_ui_intpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.9)));
 	psy_ui_moveto(g,
-		psy_ui_point_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
+		psy_ui_intpoint_make(x + ident + (int)(width * 0.1), y + (int)(height * 0.8)));
 	psy_ui_curveto(g,
-		psy_ui_point_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
-		psy_ui_point_make(x + width - ident * 2, y + (int)(height * 0.2)),
-		psy_ui_point_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
+		psy_ui_intpoint_make(x + ident + (int)(width * 0.3), y + (int)(height * 0.4)),
+		psy_ui_intpoint_make(x + width - ident * 2, y + (int)(height * 0.2)),
+		psy_ui_intpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
 }
 
 void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, int timerid)

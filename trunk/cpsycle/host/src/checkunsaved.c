@@ -18,7 +18,7 @@ static void checkunsavedbox_oncontinue(CheckUnsavedBox*, psy_ui_Component* sende
 static void checkunsavedbox_ondestroy(CheckUnsavedBox*, psy_ui_Component* sender);
 
 void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Workspace* workspace)
-{
+{	
 	self->workspace = workspace;
 	self->mode = CHECKUNSAVE_CLOSE;
 	self->titlestr = strdup("");
@@ -26,13 +26,12 @@ void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Works
 	self->savestr = strdup("");
 	self->nosavestr = strdup("");
 	psy_ui_component_init(checkunsavedbox_base(self), parent);
-	psy_ui_component_enablealign(checkunsavedbox_base(self));
-	psy_ui_component_init(&self->spacertop, checkunsavedbox_base(self));
-	psy_ui_component_setalign(&self->spacertop, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_enablealign(checkunsavedbox_base(self));	
 	psy_ui_component_init(&self->view, checkunsavedbox_base(self));
 	psy_ui_component_enablealign(&self->view);
-	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CENTER);	
 	psy_ui_label_init(&self->title, &self->view);
+	self->title.component.debugflag = 7000;
 	psy_ui_label_init(&self->header, &self->view);
 	psy_ui_button_init(&self->saveandexit, &self->view);
 	psy_signal_connect(&self->saveandexit.signal_clicked, self,
@@ -44,9 +43,7 @@ void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Works
 	psy_signal_connect(&self->cont.signal_clicked, self,
 		checkunsavedbox_oncontinue);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		checkunsavedbox_onlanguagechanged);
-	psy_ui_component_init(&self->spacerbottom, checkunsavedbox_base(self));
-	psy_ui_component_setalign(&self->spacerbottom, psy_ui_ALIGN_CLIENT);
+		checkunsavedbox_onlanguagechanged);	
 	checkunsavedbox_updatetext(self);
 	checkunsavedbox_initalign(self);
 	psy_signal_init(&self->signal_execute);
@@ -59,7 +56,7 @@ void checkunsavedbox_ondestroy(CheckUnsavedBox* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_execute);
 	free(self->titlestr);
 	free(self->savestr);
-	free(self->nosavestr);
+	free(self->nosavestr);	
 }
 
 void checkunsavedbox_updatetext(CheckUnsavedBox* self)
@@ -71,7 +68,8 @@ void checkunsavedbox_updatetext(CheckUnsavedBox* self)
 	psy_ui_button_settext(&self->exit,
 		workspace_translate(self->workspace, self->nosavestr)); // "Exit (no save)"));
 	psy_ui_button_settext(&self->cont,
-		workspace_translate(self->workspace, "Continue"));		
+		workspace_translate(self->workspace, "Continue"));
+	psy_ui_component_align(&self->component);
 }
 
 void checkunsavedbox_initalign(CheckUnsavedBox* self)

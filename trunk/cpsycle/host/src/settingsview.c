@@ -707,10 +707,12 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Comp
 		}		
 		if (edit) {
 			psy_ui_component_setposition(edit,
-				self->selrect.left,
-				self->selrect.top,
-				psy_ui_value_makepx(self->selrect.right - self->selrect.left),
-				psy_ui_value_makepx(self->selrect.bottom - self->selrect.top));
+				psy_ui_point_make(
+					psy_ui_value_makepx(self->selrect.left),
+					psy_ui_value_makepx(self->selrect.top)),
+				psy_ui_size_make(
+					psy_ui_value_makepx(self->selrect.right - self->selrect.left),
+					psy_ui_value_makepx(self->selrect.bottom - self->selrect.top)));
 			if (psy_properties_hint(self->selected) !=
 					PSY_PROPERTY_HINT_READONLY) {				
 				psy_ui_component_show(edit);

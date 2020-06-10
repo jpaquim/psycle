@@ -162,6 +162,17 @@ psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples* self,
 	return 0;
 }
 
+uintptr_t psy_audio_samples_size(psy_audio_Samples* self, uintptr_t slot)
+{
+	psy_audio_SamplesGroup* group;
+
+	group = psy_table_at(&self->groups, slot);
+	if (group) {
+		return psy_table_size(&group->container);
+	}
+	return 0;
+}
+
 uintptr_t psy_audio_samples_groupsize(psy_audio_Samples* self)
 {		
 	return psy_table_size(&self->groups);

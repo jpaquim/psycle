@@ -62,7 +62,7 @@ void onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		tm = psy_ui_component_textmetric(psy_ui_label_base(self));	
 		if (self->charnumber == 0) {
 			psy_ui_Size size;
-
+			
 			psy_ui_label_text(self, text);			
 			size = psy_ui_component_textsize(psy_ui_label_base(self), text);
 			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 2 +

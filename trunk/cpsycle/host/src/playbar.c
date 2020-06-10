@@ -48,9 +48,7 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	
 	psy_signal_connect(&self->play.signal_clicked, self, playbar_onplayclicked);
 	// playmode
-	psy_ui_combobox_init(&self->playmode, &self->component);
-	self->playmode.component.debugflag = 60;
-	
+	psy_ui_combobox_init(&self->playmode, &self->component);	
 	psy_ui_combobox_setcharnumber(&self->playmode, 6);	
 	// play beat num
 	psy_ui_edit_init(&self->loopbeatsedit, &self->component);

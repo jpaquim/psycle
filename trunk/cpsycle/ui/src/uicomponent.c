@@ -100,10 +100,10 @@ static void show(psy_ui_Component*);
 static void showstate(psy_ui_Component*, int state);
 static void hide(psy_ui_Component*);
 static int visible(psy_ui_Component*);
-static void move(psy_ui_Component*, int x, int y);
-static void resize(psy_ui_Component*, int width, int height);
-static void clientresize(psy_ui_Component*, int width, int height);
-static void setposition(psy_ui_Component*, int x, int y, int width, int height);
+static void move(psy_ui_Component*, psy_ui_Point);
+static void resize(psy_ui_Component*, psy_ui_Size);
+static void clientresize(psy_ui_Component*, psy_ui_Size);
+static void setposition(psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 static psy_ui_Size framesize(psy_ui_Component*);
 static void scrollto(psy_ui_Component*, intptr_t dx, intptr_t dy);
 static void setfont(psy_ui_Component*, psy_ui_Font*);
@@ -265,24 +265,35 @@ int visible(psy_ui_Component* self)
 	return self->imp->vtable->dev_visible(self->imp);
 }
 
-void move(psy_ui_Component* self, int x, int y)
+void move(psy_ui_Component* self, psy_ui_Point topleft)
 {
-	self->imp->vtable->dev_move(self->imp, x, y);
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(self);
+	self->imp->vtable->dev_move(self->imp, 
+		psy_ui_value_px(&topleft.x, &tm),
+		psy_ui_value_px(&topleft.y, &tm));
 }
 
-void resize(psy_ui_Component* self, int width, int height)
-{
-	self->imp->vtable->dev_resize(self->imp, width, height);
+void resize(psy_ui_Component* self, psy_ui_Size size)
+{			
+	self->imp->vtable->dev_resize(self->imp, size);	
 }
 
-void clientresize(psy_ui_Component* self, int width, int height)
+void clientresize(psy_ui_Component* self, psy_ui_Size size)
 {
-	self->imp->vtable->dev_clientresize(self->imp, width, height);
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(self);
+	self->imp->vtable->dev_clientresize(self->imp,
+		psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.height, &tm));
 }
 
-void setposition(psy_ui_Component* self, int x, int y, int width, int height)
-{
-	self->imp->vtable->dev_setposition(self->imp, x, y, width, height);
+void setposition(psy_ui_Component* self, psy_ui_Point topleft,
+	psy_ui_Size size)
+{	
+	self->imp->vtable->dev_setposition(self->imp, topleft, size);
 }
 
 psy_ui_Size framesize(psy_ui_Component* self)
@@ -427,8 +438,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->align = psy_ui_ALIGN_NONE;
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
-	self->alignexpandmode = psy_ui_NOEXPAND;
-	self->preferredsize = psy_ui_component_size(self);
+	self->alignexpandmode = psy_ui_NOEXPAND;	
+	self->preferredsize = psy_ui_component_size(self);	
 	psy_ui_style_init(&self->style);
 	psy_ui_margin_init(&self->margin);
 	psy_ui_margin_init(&self->spacing);	
@@ -561,47 +572,23 @@ void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* scrollm
 	self->vtable->horizontalscrollrange(self, scrollmin, scrollmax);
 }
 
-void psy_ui_component_move(psy_ui_Component* self, psy_ui_Value left, psy_ui_Value top)
+void psy_ui_component_move(psy_ui_Component* self, psy_ui_Point topleft)
 {
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(self);
-	self->vtable->move(self, psy_ui_value_px(&left, &tm),
-		psy_ui_value_px(&top, &tm));
+	self->vtable->move(self, topleft);
 }
 
-void psy_ui_component_resize(psy_ui_Component* self, psy_ui_Value width,
-	psy_ui_Value height)
-{	
-	psy_ui_TextMetric tm;
-	bool tm_initialized;
-
-	if (width.unit != psy_ui_UNIT_PX || height.unit != psy_ui_UNIT_PX) {
-		tm = psy_ui_component_textmetric(self);
-		tm_initialized = TRUE;
-	} else {
-		tm_initialized = FALSE;
-	}
-	self->vtable->resize(self,
-		psy_ui_value_px(&width, (tm_initialized) ? &tm : NULL),
-		psy_ui_value_px(&height, (tm_initialized) ? &tm : NULL));
+void psy_ui_component_resize(psy_ui_Component* self, psy_ui_Size size)
+{		
+	self->vtable->resize(self, size);	
 }
 
-void psy_ui_component_setposition(psy_ui_Component* self, int x, int y,
-	psy_ui_Value width, psy_ui_Value height)
-{	
-	psy_ui_TextMetric tm;
-	bool tm_initialized;
-
-	if (width.unit != psy_ui_UNIT_PX || height.unit != psy_ui_UNIT_PX) {
-		tm = psy_ui_component_textmetric(self);
-		tm_initialized = TRUE;
-	} else {
-		tm_initialized = FALSE;
-	}
-	self->vtable->setposition(self, x, y,
-		psy_ui_value_px(&width, (tm_initialized) ? &tm : NULL),
-		psy_ui_value_px(&height, (tm_initialized) ? &tm : NULL));
+void psy_ui_component_setposition(psy_ui_Component* self, psy_ui_Point topleft,
+	psy_ui_Size size)
+{		
+	self->vtable->setposition(self, topleft, size);	
 }
 
 psy_List* psy_ui_component_children(psy_ui_Component* self, int recursive)
@@ -765,10 +752,7 @@ psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 {
 	psy_ui_Size rv;
 
-	rv = self->preferredsize;
-	if (self->debugflag == 7500) {
-		self = self;
-	}
+	rv = self->preferredsize;	
 	self->vtable->onpreferredsize(self, limit, &rv);
 	// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
 	return rv;	
@@ -779,9 +763,9 @@ void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
 	self->imp->vtable->dev_seticonressource(self->imp, ressourceid);
 }
 
-void psy_ui_component_clientresize(psy_ui_Component* self, int width, int height)
+void psy_ui_component_clientresize(psy_ui_Component* self, psy_ui_Size size)
 {
-	self->vtable->clientresize(self, width, height);
+	self->vtable->clientresize(self, size);
 }
 
 void psy_ui_component_setcursor(psy_ui_Component* self, psy_ui_CursorStyle style)
@@ -798,11 +782,11 @@ static void dev_hide(psy_ui_ComponentImp* self) { }
 static int dev_visible(psy_ui_ComponentImp* self) { return 0; }
 static psy_ui_Rectangle dev_position(psy_ui_ComponentImp* self) { psy_ui_Rectangle rv = { 0, 0, 0, 0 }; return rv; }
 static void dev_move(psy_ui_ComponentImp* self, int x, int y) { }
-static void dev_resize(psy_ui_ComponentImp* self, int width, int height) { }
+static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, int width, int height) { }
-static void dev_setposition(psy_ui_ComponentImp* self, int x, int y, int width, int height) { }
-static psy_ui_Size dev_size(psy_ui_ComponentImp* self) { psy_ui_Size rv = { 0, 0 }; return rv; }
-static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { psy_ui_Size rv = { 0, 0 }; return rv; }
+static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size) { }
+static psy_ui_Size dev_size(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
+static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
 static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { }
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
 static void dev_setparent(psy_ui_ComponentImp* self, psy_ui_Component* parent) { }

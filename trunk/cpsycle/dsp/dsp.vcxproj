@@ -118,9 +118,7 @@
     <ClCompile Include="src\filter.c" />
     <ClCompile Include="src\filtercoeff.c" />
     <ClCompile Include="src\linear.c" />
-    <ClCompile Include="src\lowpass12e.c" />
     <ClCompile Include="src\mersennetwister.c" />
-    <ClCompile Include="src\multifilter.c" />
     <ClCompile Include="src\multiresampler.c" />
     <ClCompile Include="src\notestab.c" />
     <ClCompile Include="src\operations-noopt.c" />
@@ -147,9 +145,7 @@
     <ClInclude Include="src\filter.h" />
     <ClInclude Include="src\filtercoeff.h" />
     <ClInclude Include="src\linear.h" />
-    <ClInclude Include="src\lowpass12e.h" />
     <ClInclude Include="src\mersennetwister.h" />
-    <ClInclude Include="src\multifilter.h" />
     <ClInclude Include="src\multiresampler.h" />
     <ClInclude Include="src\notestab.h" />
     <ClInclude Include="src\operations.h" />

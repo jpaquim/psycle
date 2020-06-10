@@ -217,18 +217,18 @@ void pinedit_drawconnections(PinEdit* self, psy_ui_Graphics* g)
 		psy_audio_PinConnection* pinconnection;
 		psy_ui_Rectangle out;
 		psy_ui_Rectangle in;
-		psy_ui_Point p0;
-		psy_ui_Point c1;
-		psy_ui_Point c2;
-		psy_ui_Point p1;
+		psy_ui_IntPoint p0;
+		psy_ui_IntPoint c1;
+		psy_ui_IntPoint c2;
+		psy_ui_IntPoint p1;
 
 		pinconnection = (psy_audio_PinConnection*)(pinpair->entry);
 		out = pinedit_pinposition_output(self, pinconnection->src);
 		in = pinedit_pinposition_input(self, pinconnection->dst);		
 		psy_ui_setcolor(g, self->wirecolor);
-		p0 = psy_ui_point_make(out.left + (out.right - out.left) / 2,
+		p0 = psy_ui_intpoint_make(out.left + (out.right - out.left) / 2,
 			out.top + (out.bottom - out.top) / 2);
-		p1 = psy_ui_point_make(in.left + (in.right - in.left) / 2,
+		p1 = psy_ui_intpoint_make(in.left + (in.right - in.left) / 2,
 			in.top + (in.bottom - in.top) / 2);
 		c1.x = p0.x + (p1.x - p0.x) / 3;
 		c1.y = p0.y;

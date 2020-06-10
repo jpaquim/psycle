@@ -72,10 +72,10 @@ typedef void (*psy_ui_fp_component_show)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_showstate)(struct psy_ui_Component*, int state);
 typedef void (*psy_ui_fp_component_hide)(struct psy_ui_Component*);
 typedef int (*psy_ui_fp_component_visible)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_move)(struct psy_ui_Component*, int left, int top);
-typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, int width, int height);
-typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, int width, int height);
-typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, int x, int y, int width, int height);
+typedef void (*psy_ui_fp_component_move)(struct psy_ui_Component*, psy_ui_Point);
+typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, psy_ui_Size size);
+typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_ui_Size size);
+typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size(*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy);
 typedef void (*psy_ui_fp_component_setfont)(struct psy_ui_Component*, psy_ui_Font*);
@@ -215,7 +215,7 @@ typedef struct psy_ui_Component {
 	int cursor;	
 	bool mousetracking;
 	psy_ui_Style style;
-	psy_ui_Size preferredsize;
+	psy_ui_Size preferredsize;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -256,12 +256,11 @@ void psy_ui_component_setverticalscrollposition(psy_ui_Component*, int position)
 void psy_ui_component_sethorizontalscrollposition(psy_ui_Component*, int position);
 int psy_ui_component_horizontalscrollposition(psy_ui_Component*);
 void psy_ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
-void psy_ui_component_move(psy_ui_Component*, psy_ui_Value left, psy_ui_Value top);
-void psy_ui_component_resize(psy_ui_Component*, psy_ui_Value width,
-	psy_ui_Value height);
-void psy_ui_component_clientresize(psy_ui_Component*, int width, int height);
-void psy_ui_component_setposition(psy_ui_Component*, int x, int y,
-	psy_ui_Value width, psy_ui_Value height);
+void psy_ui_component_move(psy_ui_Component*, psy_ui_Point topleft);
+void psy_ui_component_resize(psy_ui_Component*, psy_ui_Size);
+void psy_ui_component_clientresize(psy_ui_Component*, psy_ui_Size);
+void psy_ui_component_setposition(psy_ui_Component*, psy_ui_Point,
+	psy_ui_Size);
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
@@ -303,10 +302,10 @@ typedef void (*psy_ui_fp_componentimp_dev_showstate)(struct psy_ui_ComponentImp*
 typedef void (*psy_ui_fp_componentimp_dev_hide)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_visible)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_move)(struct psy_ui_ComponentImp*, int left, int top);
-typedef void (*psy_ui_fp_componentimp_dev_resize)(struct psy_ui_ComponentImp*, int width, int height);
+typedef void (*psy_ui_fp_componentimp_dev_resize)(struct psy_ui_ComponentImp*, psy_ui_Size);
 typedef void (*psy_ui_fp_componentimp_dev_clientresize)(struct psy_ui_ComponentImp*, int width, int height);
 typedef psy_ui_Rectangle (*psy_ui_fp_componentimp_dev_position)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_setposition)(struct psy_ui_ComponentImp*, int x, int y, int width, int height);
+typedef void (*psy_ui_fp_componentimp_dev_setposition)(struct psy_ui_ComponentImp*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(struct psy_ui_ComponentImp*);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy);
@@ -358,7 +357,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_visible dev_visible;
 	psy_ui_fp_componentimp_dev_move dev_move;
 	psy_ui_fp_componentimp_dev_resize dev_resize;
-	psy_ui_fp_componentimp_dev_resize dev_clientresize;
+	psy_ui_fp_componentimp_dev_clientresize dev_clientresize;
 	psy_ui_fp_componentimp_dev_position dev_position;
 	psy_ui_fp_componentimp_dev_setposition dev_setposition;
 	psy_ui_fp_componentimp_dev_size dev_size;
@@ -425,8 +424,8 @@ INLINE void psy_ui_component_update(psy_ui_Component* self)
 }
 
 INLINE psy_ui_Size psy_ui_component_size(psy_ui_Component* self)
-{
-	return self->imp->vtable->dev_size(self->imp);
+{	
+	return self->imp->vtable->dev_size(self->imp);	
 }
 
 INLINE psy_ui_Rectangle psy_ui_component_position(psy_ui_Component* self)

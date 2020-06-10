@@ -180,19 +180,31 @@ void pianoroll_onsize(Pianoroll* self, psy_ui_Size* size)
 	tm = psy_ui_component_textmetric(&self->component);
 	headersize = psy_ui_component_preferredsize(&self->header.component, size);
 	headerheight = psy_ui_value_px(&headersize.height, &tm);
-	psy_ui_component_setposition(&self->keyboardheader, 0, 0,
-		psy_ui_value_makepx(keyboardwidth),
-		psy_ui_value_makepx(headerheight));
-	psy_ui_component_setposition(&self->keyboard.component, 0, headerheight,
-		psy_ui_value_makepx(keyboardwidth),
-		psy_ui_value_makepx(psy_ui_value_px(&size->height, &tm) - headerheight));
-	psy_ui_component_setposition(&self->header.component, keyboardwidth, 0,
-		psy_ui_value_makepx(psy_ui_value_px(&size->width, &tm) - keyboardwidth),
-		psy_ui_value_makepx(headerheight));
-	psy_ui_component_setposition(&self->grid.component, keyboardwidth,
-		headerheight,
-		psy_ui_value_makepx(psy_ui_value_px(&size->width, &tm) - keyboardwidth),
-		psy_ui_value_makepx(psy_ui_value_px(&size->height, &tm) - headerheight));
+	psy_ui_component_setposition(&self->keyboardheader, psy_ui_point_zero(),
+		psy_ui_size_make(
+			psy_ui_value_makepx(keyboardwidth),
+			psy_ui_value_makepx(headerheight)));
+	psy_ui_component_setposition(&self->keyboard.component,
+		psy_ui_point_make(
+			psy_ui_value_makepx(0),
+			psy_ui_value_makepx(headerheight)),
+		psy_ui_size_make(
+			psy_ui_value_makepx(keyboardwidth),
+			psy_ui_value_makepx(psy_ui_value_px(&size->height, &tm) - headerheight)));
+	psy_ui_component_setposition(&self->header.component,
+		psy_ui_point_make(
+			psy_ui_value_makepx(keyboardwidth),
+			psy_ui_value_makepx(0)),
+		psy_ui_size_make(
+			psy_ui_value_makepx(psy_ui_value_px(&size->width, &tm) - keyboardwidth),
+			psy_ui_value_makepx(headerheight)));
+	psy_ui_component_setposition(&self->grid.component,
+		psy_ui_point_make(
+			psy_ui_value_makepx(keyboardwidth),
+			psy_ui_value_makepx(headerheight)),
+		psy_ui_size_make(
+			psy_ui_value_makepx(psy_ui_value_px(&size->width, &tm) - keyboardwidth),
+			psy_ui_value_makepx(psy_ui_value_px(&size->height, &tm) - headerheight)));
 	pianoroll_updatemetrics(self);
 }
 

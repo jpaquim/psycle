@@ -126,7 +126,8 @@ void mainframe_init(MainFrame* self)
 		mainframe_onterminalerror);
 	psy_ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_resize(&self->terminal.component,
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+		psy_ui_size_make(
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0)));
 	kbdhelp_init(&self->kbdhelp, &self->component, &self->workspace);
 	psy_ui_component_setalign(kbdhelp_base(&self->kbdhelp),
 		psy_ui_ALIGN_BOTTOM);
@@ -148,7 +149,6 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_init(&self->paramviews, &self->client);
 	psy_ui_component_enablealign(&self->paramviews);
 	psy_ui_component_setalign(&self->paramviews, psy_ui_ALIGN_BOTTOM);
-	//psy_ui_component_resize(&self->paramviews, 100, 100);
 	// tabbars			
 	{
 		psy_ui_Margin spacing;
@@ -248,9 +248,7 @@ void mainframe_init(MainFrame* self)
 		mainframe_onmidi);
 	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
 	psy_ui_component_setalign(&self->plugineditor.component,
-		psy_ui_ALIGN_LEFT);
-	psy_ui_component_resize(&self->plugineditor.component,
-		psy_ui_value_makeew(80), psy_ui_value_makepx(0));
+		psy_ui_ALIGN_LEFT);	
 	psy_ui_component_hide(&self->plugineditor.component);
 	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
 		mainframe_onplugineditor);
@@ -578,12 +576,14 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 
 		tm = psy_ui_component_textmetric(&self->component);
 		if (psy_ui_value_px(&size.height, &tm) > 0) {
-			psy_ui_component_resize(&self->terminal.component, psy_ui_value_makepx(0),
-				psy_ui_value_makepx(0));
+			psy_ui_component_resize(&self->terminal.component,
+				psy_ui_size_make(psy_ui_value_makepx(0),
+				psy_ui_value_makepx(0)));
 			psy_ui_component_align(&self->component);
 		} else {								
 			psy_ui_component_resize(&self->terminal.component,
-				psy_ui_value_makepx(0), psy_ui_value_makeeh(10));
+				psy_ui_size_make(
+				psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 			psy_ui_component_align(&self->component);		
 		}
 	}
@@ -636,9 +636,10 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		if (self->workspace.maximizeview.row2) {
 			psy_ui_component_show(&self->toprow2);
 		}
-		psy_ui_component_resize(&self->sequenceview.component, 
+		psy_ui_component_resize(&self->sequenceview.component,
+			psy_ui_size_make(
 			psy_ui_value_makepx(self->workspace.maximizeview.sequenceviewrestorewidth),
-			psy_ui_value_makepx(0));
+			psy_ui_value_makepx(0)));
 	} else {
 		psy_ui_Size sequenceviewsize;
 		psy_ui_TextMetric tm;
@@ -654,8 +655,9 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		psy_ui_component_hide(&self->toprow0);
 		psy_ui_component_hide(&self->toprow1);
 		psy_ui_component_resize(&self->sequenceview.component,
+			psy_ui_size_make(
 			psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0));
+			psy_ui_value_makepx(0)));
 	}
 	psy_ui_component_align(&self->component);
 }
@@ -948,8 +950,9 @@ void mainframe_ondockview(MainFrame* self, Workspace* sender,
 
 	size = psy_ui_component_size(view);
 	psy_ui_component_resize(view,
+		psy_ui_size_make(
 		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+		psy_ui_value_makepx(0)));
 	psy_ui_component_setparent(view, &self->paramviews);	
 	psy_ui_component_setalign(view, psy_ui_ALIGN_LEFT);	
 	psy_ui_component_align(&self->client);	

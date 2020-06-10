@@ -22,7 +22,7 @@ static void dev_showstate(psy_ui_xt_ComboBoxImp* self, int state) { self->xt_com
 static void dev_hide(psy_ui_xt_ComboBoxImp* self) { self->xt_component_imp.imp.vtable->dev_hide(&self->xt_component_imp.imp); }
 static int dev_visible(psy_ui_xt_ComboBoxImp* self) { return self->xt_component_imp.imp.vtable->dev_visible(&self->xt_component_imp.imp); }
 static void dev_move(psy_ui_xt_ComboBoxImp* self, int left, int top) { self->xt_component_imp.imp.vtable->dev_move(&self->xt_component_imp.imp, left, top); }
-static void dev_resize(psy_ui_xt_ComboBoxImp* self, int width, int height) { self->xt_component_imp.imp.vtable->dev_resize(&self->xt_component_imp.imp, width, height); }
+static void dev_resize(psy_ui_xt_ComboBoxImp* self, psy_ui_Size size) { self->xt_component_imp.imp.vtable->dev_resize(&self->xt_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_xt_ComboBoxImp* self, int width, int height) { self->xt_component_imp.imp.vtable->dev_clientresize(&self->xt_component_imp.imp, width, height); }
 static psy_ui_Rectangle dev_position(psy_ui_xt_ComboBoxImp* self) { return self->xt_component_imp.imp.vtable->dev_position(&self->xt_component_imp.imp); }
 static void dev_setposition(psy_ui_xt_ComboBoxImp* self, int x, int y, int width, int height) { self->xt_component_imp.imp.vtable->dev_setposition(&self->xt_component_imp.imp, x, y, width, height); }

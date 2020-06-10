@@ -22,10 +22,10 @@ static void dev_showstate(psy_ui_win_ComboBoxImp* self, int state) { self->win_c
 static void dev_hide(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_hide(&self->win_component_imp.imp); }
 static int dev_visible(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_visible(&self->win_component_imp.imp); }
 static void dev_move(psy_ui_win_ComboBoxImp* self, int left, int top) { self->win_component_imp.imp.vtable->dev_move(&self->win_component_imp.imp, left, top); }
-static void dev_resize(psy_ui_win_ComboBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_resize(&self->win_component_imp.imp, width, height); }
+static void dev_resize(psy_ui_win_ComboBoxImp* self, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_resize(&self->win_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_win_ComboBoxImp* self, int width, int height) { self->win_component_imp.imp.vtable->dev_clientresize(&self->win_component_imp.imp, width, height); }
 static psy_ui_Rectangle dev_position(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
-static void dev_setposition(psy_ui_win_ComboBoxImp* self, int x, int y, int width, int height) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, x, y, width, height); }
+static void dev_setposition(psy_ui_win_ComboBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_win_ComboBoxImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
 static void dev_scrollto(psy_ui_win_ComboBoxImp* self, intptr_t dx, intptr_t dy) { self->win_component_imp.imp.vtable->dev_scrollto(&self->win_component_imp.imp, dx, dy); }
@@ -319,7 +319,7 @@ void dev_showdropdown(psy_ui_win_ComboBoxImp* self)
 	size = dev_size(self);
 	tm = psy_ui_component_textmetric(self->component);
 	self->win_combo_imp.imp.vtable->dev_resize(&self->win_combo_imp.imp,
-		psy_ui_value_px(&size.width, &tm), 90);
+		psy_ui_size_make(size.width, psy_ui_value_makeeh(10)));
 	SendMessage(self->win_combo_imp.hwnd, CB_SHOWDROPDOWN,
 		(WPARAM)TRUE, (LPARAM)0);
 }

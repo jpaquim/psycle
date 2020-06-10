@@ -158,7 +158,6 @@
     <ClCompile Include="src\config.c" />
     <ClCompile Include="src\cpuview.c" />
     <ClCompile Include="src\envelopeview.c" />
-    <ClCompile Include="src\file.c" />
     <ClCompile Include="src\filebar.c" />
     <ClCompile Include="src\gear.c" />
     <ClCompile Include="src\greet.c" />
@@ -245,7 +244,6 @@
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\cpuview.h" />
     <ClInclude Include="src\envelopeview.h" />
-    <ClInclude Include="src\file.h" />
     <ClInclude Include="src\filebar.h" />
     <ClInclude Include="src\gear.h" />
     <ClInclude Include="src\greet.h" />

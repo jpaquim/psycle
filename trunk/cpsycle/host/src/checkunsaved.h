@@ -16,9 +16,7 @@ typedef enum {
 } CheckUnsaveButton;
 
 typedef struct {
-	psy_ui_Component component;
-	psy_ui_Component spacertop;
-	psy_ui_Component spacerbottom;
+	psy_ui_Component component;	
 	psy_ui_Component view;
 	psy_ui_Label title;
 	psy_ui_Label header;

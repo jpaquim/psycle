@@ -10,14 +10,12 @@ static void splitbar_onmousemove(psy_ui_SplitBar*, psy_ui_MouseEvent*);
 static void splitbar_onmouseup(psy_ui_SplitBar*, psy_ui_MouseEvent*);
 static void splitbar_onmouseenter(psy_ui_SplitBar*);
 static void splitbar_onmouseleave(psy_ui_SplitBar*);
-static void splitbar_onpreferredsize(psy_ui_SplitBar*, psy_ui_Size* limit,
-	psy_ui_Size* size);
 static void splitbar_ondraw(psy_ui_SplitBar*, psy_ui_Graphics*);
 static psy_ui_Component* splitbar_prevcomponent(psy_ui_SplitBar*);
 static void splitbar_setcursor(psy_ui_SplitBar*);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_SplitBar* self)
 {
@@ -28,10 +26,8 @@ static void vtable_init(psy_ui_SplitBar* self)
 		vtable.onmouseup = (psy_ui_fp_onmouseup) splitbar_onmouseup;
 		vtable.onmouseenter = (psy_ui_fp_onmouseenter) splitbar_onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_onmouseleave) splitbar_onmouseleave;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			splitbar_onpreferredsize;
 		vtable.ondraw = (psy_ui_fp_ondraw) splitbar_ondraw;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -39,22 +35,16 @@ void psy_ui_splitbar_init(psy_ui_SplitBar* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;
+	psy_ui_component_doublebuffer(&self->component);
+	self->component.vtable = &vtable;	
+	self->hover = 0;
 	self->resize = 0;
-	psy_ui_size_init(&self->restoresize);
 	self->hasrestore = FALSE;
-	self->hover = 0;	
+	psy_ui_size_init(&self->restoresize);
 	psy_ui_component_setalign(&self->component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_resize(&self->component, psy_ui_value_makeew(0.5),
-		psy_ui_value_makeeh(0.5));
-}
-
-void splitbar_onpreferredsize(psy_ui_SplitBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
-{		
-	if (rv) {				
-		rv->width = psy_ui_value_makeew(0.8);
-		rv->height = psy_ui_value_makeeh(1.5);
-	}
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(0.8),
+		psy_ui_value_makeeh(1.5)));
 }
 
 void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
@@ -69,12 +59,14 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 				if (!self->hasrestore) {
 					self->restoresize = psy_ui_component_size(prev);
 					self->hasrestore = TRUE;
-					psy_ui_component_resize(prev, psy_ui_value_makepx(0),
-						psy_ui_component_size(prev).height);
+					psy_ui_component_resize(prev,
+						psy_ui_size_make(psy_ui_value_makepx(0),
+							psy_ui_component_size(prev).height));
 				} else {
 					self->hasrestore = FALSE;
-					psy_ui_component_resize(prev, self->restoresize.width,
-						psy_ui_component_size(prev).height);
+					psy_ui_component_resize(prev,
+						psy_ui_size_make(self->restoresize.width,
+						psy_ui_component_size(prev).height));
 				}
 			} else
 			if (prev->align == psy_ui_ALIGN_TOP ||
@@ -83,13 +75,15 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 					self->hasrestore = TRUE;
 					self->restoresize = psy_ui_component_size(prev);					
 					psy_ui_component_resize(prev,
-						psy_ui_component_size(prev).width,
-						psy_ui_value_makepx(0));
+						psy_ui_size_make(
+							psy_ui_component_size(prev).width,
+							psy_ui_value_makepx(0)));
 				} else {
 					self->hasrestore = FALSE;
 					psy_ui_component_resize(prev,
-						psy_ui_component_size(prev).width,
-						self->restoresize.height);
+						psy_ui_size_make(
+							psy_ui_component_size(prev).width,
+							self->restoresize.height));
 				}
 			}
 			psy_ui_component_align(psy_ui_component_parent(&self->component));
@@ -110,12 +104,14 @@ void splitbar_onmousemove(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		if (self->component.align == psy_ui_ALIGN_LEFT ||
 			self->component.align == psy_ui_ALIGN_RIGHT) {
 			psy_ui_component_move(&self->component,
-				psy_ui_value_makepx(position.left + ev->x),
-				psy_ui_value_makepx(position.top));
+				psy_ui_point_make(
+					psy_ui_value_makepx(position.left + ev->x),
+					psy_ui_value_makepx(position.top)));
 		} else {
 			psy_ui_component_move(&self->component,
-				psy_ui_value_makepx(position.left),
-				psy_ui_value_makepx(position.top + ev->y));
+				psy_ui_point_make(
+					psy_ui_value_makepx(position.left),
+					psy_ui_value_makepx(position.top + ev->y)));
 		}
 		psy_ui_component_invalidate(&self->component);
 		psy_ui_component_update(&self->component);
@@ -140,28 +136,33 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 
 			prev_position = psy_ui_component_position(prev);
 			psy_ui_component_resize(prev,
-				psy_ui_value_makepx(position.left - prev_position.left),
-				psy_ui_component_size(prev).height);
+				psy_ui_size_make(
+					psy_ui_value_makepx(position.left - prev_position.left),
+					psy_ui_component_size(prev).height));
 		} else
 		if (prev->align == psy_ui_ALIGN_RIGHT) {
 			psy_ui_Rectangle prev_position;
 
 			prev_position = psy_ui_component_position(prev);
-			psy_ui_component_resize(prev, psy_ui_value_makepx(prev_position.right - position.right),
-				psy_ui_component_size(prev).height);
+			psy_ui_component_resize(prev,
+				psy_ui_size_make(
+					psy_ui_value_makepx(prev_position.right - position.right),
+					psy_ui_component_size(prev).height));
 		} else
 		if (prev->align == psy_ui_ALIGN_TOP) {			
 			psy_ui_component_resize(prev,
-				psy_ui_component_size(prev).width,
-				psy_ui_value_makepx(position.top));
+				psy_ui_size_make(
+					psy_ui_component_size(prev).width,
+					psy_ui_value_makepx(position.top)));
 		} else
 		if (prev->align == psy_ui_ALIGN_BOTTOM) {
 			psy_ui_Rectangle prev_position;
 
 			prev_position = psy_ui_component_position(prev);
 			psy_ui_component_resize(prev,
-				psy_ui_component_size(prev).width,
-				psy_ui_value_makepx(prev_position.bottom - position.bottom));
+				psy_ui_size_make(
+					psy_ui_component_size(prev).width,
+					psy_ui_value_makepx(prev_position.bottom - position.bottom)));
 		}
 		psy_ui_component_align(psy_ui_component_parent(&self->component));
 	}

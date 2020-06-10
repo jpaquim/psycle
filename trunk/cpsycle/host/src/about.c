@@ -83,14 +83,14 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->steincopyright, &self->component);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 	
-	psy_ui_component_resize(&self->contrib.component, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(150));
-	psy_ui_component_resize(&self->psycledelics.component, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(20));
-	psy_ui_component_resize(&self->sourceforge.component, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(20));
-	psy_ui_component_resize(&self->steincopyright.component, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(20));
+	psy_ui_component_resize(&self->contrib.component,
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(150)));
+	psy_ui_component_resize(&self->psycledelics.component,
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(20)));
+	psy_ui_component_resize(&self->sourceforge.component,
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(20)));
+	psy_ui_component_resize(&self->steincopyright.component,
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(20)));
 	{
 		psy_ui_Margin margin;
 
@@ -110,18 +110,18 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_init(&self->versioninfo, &self->component);
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
-	psy_ui_component_resize(&self->versioninfo.component, psy_ui_value_makepx(500),
-		psy_ui_value_makepx(300));
+	psy_ui_component_resize(&self->versioninfo.component,
+		psy_ui_size_make(psy_ui_value_makepx(500), psy_ui_value_makepx(300)));
 	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323);
 }
 
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
-{			
-	self->workspace = workspace;
+{				
 	psy_ui_component_init(&self->component, parent);	
 	about_vtable_init(self);
 	self->component.vtable = &about_vtable;
-	psy_ui_component_enablealign(&self->component);	
+	self->workspace = workspace;
+	psy_ui_component_enablealign(&self->component);
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
@@ -180,8 +180,10 @@ void about_onalign(About* self)
 		centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;
 	}
 	psy_ui_component_setposition(psy_ui_notebook_base(&self->notebook),
-		centerx, centery, bitmapsize.width,
-		bitmapsize.height);
+		psy_ui_point_make(
+			psy_ui_value_makepx(centerx),
+			psy_ui_value_makepx(centery)),
+		bitmapsize);
 	do {
 		margin = tm.tmAveCharWidth * charmargin;
 		width = psy_ui_value_px(&contribbuttonsize.width, &tm) +
@@ -191,20 +193,23 @@ void about_onalign(About* self)
 	} while (width > psy_ui_value_px(&size.width, &tm) && charmargin > 0);
 	cpx = (psy_ui_value_px(&size.width, &tm) - width) / 2;
 	psy_ui_component_setposition(&self->contribbutton.component,
-		cpx, centery + psy_ui_value_px(&bitmapsize.height, &tm),
-		contribbuttonsize.width,
-		contribbuttonsize.height);
+		psy_ui_point_make(
+			psy_ui_value_makepx(cpx),
+			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+			contribbuttonsize);
 	psy_ui_component_setposition(&self->versionbutton.component,
-		cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) + margin,
-		centery + psy_ui_value_px(&bitmapsize.height, &tm),
-		versionbuttonsize.width,
-		versionbuttonsize.height);
+		psy_ui_point_make(
+			psy_ui_value_makepx(cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) + margin),
+			psy_ui_value_makepx(centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+		versionbuttonsize);
 	psy_ui_component_setposition(&self->okbutton.component,
-		cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) +
-		psy_ui_value_px(&versionbuttonsize.width, &tm) + margin * 2,
-		centery + psy_ui_value_px(&bitmapsize.height, &tm),
-		okbuttonsize.width,
-		okbuttonsize.height);
+		psy_ui_point_make(
+			psy_ui_value_makepx(
+				cpx + psy_ui_value_px(&contribbuttonsize.width, &tm) +
+				psy_ui_value_px(&versionbuttonsize.width, &tm) + margin * 2),
+			psy_ui_value_makepx(
+				centery + psy_ui_value_px(&bitmapsize.height, &tm))),
+		okbuttonsize);
 }
 
 void about_oncontributors(About* self, psy_ui_Component* sender) 

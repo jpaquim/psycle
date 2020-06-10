@@ -850,6 +850,11 @@ INLINE psy_dsp_beat_t psy_audio_machine_currbeatsperline(psy_audio_Machine*
 	return self->vtable->currbeatsperline(self);
 }
 
+INLINE uintptr_t psy_audio_machine_currsamplesperrow(psy_audio_Machine* self)
+{
+	return (uintptr_t)(self->vtable->currbeatsperline(self) * 1.f / self->vtable->beatspersample(self));
+}
+
 INLINE psy_dsp_beat_t psy_audio_machine_currlinesperbeat(psy_audio_Machine*
 	self)
 {

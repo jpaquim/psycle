@@ -51,7 +51,7 @@ typedef void (*psy_ui_fp_graphics_drawsolidrectangle)(struct psy_ui_Graphics*, c
 	unsigned int color);
 typedef void (*psy_ui_fp_graphics_drawsolidroundrectangle)(struct psy_ui_Graphics*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-typedef void (*psy_ui_fp_graphics_drawsolidpolygon)(struct psy_ui_Graphics*, psy_ui_Point*,
+typedef void (*psy_ui_fp_graphics_drawsolidpolygon)(struct psy_ui_Graphics*, psy_ui_IntPoint*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 typedef void (*psy_ui_fp_graphics_drawline)(struct psy_ui_Graphics*, int x1, int y1, int x2, int y2);
 typedef void (*psy_ui_fp_graphics_drawfullbitmap)(struct psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y);
@@ -63,9 +63,9 @@ typedef void (*psy_ui_fp_graphics_settextcolor)(struct psy_ui_Graphics*, unsigne
 typedef void (*psy_ui_fp_graphics_settextalign)(struct psy_ui_Graphics*, unsigned int color);
 typedef void (*psy_ui_fp_graphics_setcolor)(struct psy_ui_Graphics*, unsigned int color);
 typedef void (*psy_ui_fp_graphics_setfont)(struct psy_ui_Graphics*, psy_ui_Font* font);
-typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*, psy_ui_Point pt);
-typedef void (*psy_ui_fp_graphics_curveto)(struct psy_ui_Graphics*, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p);
+typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*, psy_ui_IntPoint pt);
+typedef void (*psy_ui_fp_graphics_curveto)(struct psy_ui_Graphics*, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 typedef void (*psy_ui_fp_graphics_drawarc)(struct psy_ui_Graphics*,
 	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
 typedef void (*psy_ui_fp_graphics_setlinewidth)(struct psy_ui_Graphics*, unsigned int width);
@@ -150,7 +150,7 @@ INLINE void psy_ui_drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_R
 	self->vtable->drawsolidroundrectangle(self, r, cornersize, color);
 }
 
-INLINE void psy_ui_drawsolidpolygon(psy_ui_Graphics* self, psy_ui_Point* pts,
+INLINE void psy_ui_drawsolidpolygon(psy_ui_Graphics* self, psy_ui_IntPoint* pts,
 	unsigned int numpoints, unsigned int inner, unsigned int outter)
 {
 	self->vtable->drawsolidpolygon(self, pts, numpoints, inner, outter);	
@@ -202,13 +202,13 @@ INLINE void psy_ui_drawline(psy_ui_Graphics* self, int x1, int y1, int x2, int y
 	self->vtable->drawline(self, x1, y1, x2, y2);
 }
 
-INLINE void psy_ui_moveto(psy_ui_Graphics* self, psy_ui_Point pt)
+INLINE void psy_ui_moveto(psy_ui_Graphics* self, psy_ui_IntPoint pt)
 {		
 	self->vtable->moveto(self, pt);
 }
 
-INLINE void psy_ui_curveto(psy_ui_Graphics* self, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p)
+INLINE void psy_ui_curveto(psy_ui_Graphics* self, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
 {
 	self->vtable->curveto(self, control_p1, control_p2, p);
 }
@@ -243,7 +243,7 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidrectangle)(struct psy_ui_Graph
 	unsigned int color);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidpolygon)(struct psy_ui_GraphicsImp*, psy_ui_Point*,
+typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidpolygon)(struct psy_ui_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawline)(struct psy_ui_GraphicsImp*, int x1, int y1, int x2, int y2);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawfullbitmap)(struct psy_ui_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
@@ -255,9 +255,9 @@ typedef void (*psy_ui_fp_graphicsimp_dev_settextcolor)(struct psy_ui_GraphicsImp
 typedef void (*psy_ui_fp_graphicsimp_dev_settextalign)(struct psy_ui_GraphicsImp*, unsigned int align);
 typedef void (*psy_ui_fp_graphicsimp_dev_setcolor)(struct psy_ui_GraphicsImp*, unsigned int color);
 typedef void (*psy_ui_fp_graphicsimp_dev_setfont)(struct psy_ui_GraphicsImp*, psy_ui_Font* font);
-typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*, psy_ui_Point pt);
-typedef void (*psy_ui_fp_graphicsimp_dev_curveto)(struct psy_ui_GraphicsImp*, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p);
+typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*, psy_ui_IntPoint pt);
+typedef void (*psy_ui_fp_graphicsimp_dev_curveto)(struct psy_ui_GraphicsImp*, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawarc)(struct psy_ui_GraphicsImp*,
 	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
 typedef void (*psy_ui_fp_graphicsimp_dev_setlinewidth)(struct psy_ui_GraphicsImp*, unsigned int width);

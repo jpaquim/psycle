@@ -166,6 +166,17 @@ psy_audio_Instrument* instruments_at(psy_audio_Instruments* self,
 	return NULL;
 }
 
+uintptr_t instruments_size(psy_audio_Instruments* self, uintptr_t slot)
+{
+	psy_audio_InstrumentsGroup* group;
+
+	group = psy_table_at(&self->groups, slot);
+	if (group) {
+		return psy_table_size(&group->container);
+	}
+	return 0;
+}
+
 uintptr_t psy_audio_instruments_groupsize(psy_audio_Instruments* self)
 {
 	return psy_table_size(&self->groups);
@@ -186,15 +197,4 @@ psy_TableIterator psy_audio_instruments_groupbegin(psy_audio_Instruments* self,
 		return psy_table_begin(&group->container);
 	}
 	return tableend;
-}
-
-uintptr_t instruments_size(psy_audio_Instruments* self, uintptr_t slot)
-{
-	psy_audio_InstrumentsGroup* group;
-
-	group = psy_table_at(&self->groups, slot);
-	if (group) {
-		return psy_table_size(&group->container);
-	}
-	return 0;
 }
