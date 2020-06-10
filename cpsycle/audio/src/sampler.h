@@ -186,8 +186,6 @@ INLINE bool psy_audio_triggerporta_inc(psy_audio_TriggerPorta* self)
 	return FALSE;
 }
 
-struct psy_audio_Sampler;
-
 typedef struct {
 	uintptr_t channelnum;
 	psy_audio_SamplerChannel* channel;	
@@ -227,7 +225,7 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(struct psy_audio_Sample
 	psy_audio_Instrument*,
 	psy_audio_SamplerChannel* channel,
 	uintptr_t channelnum,
-	unsigned int samplerate);
+	uintptr_t samplerate);
 void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice*,
 	const psy_audio_PatternEvent*, double samplesprobeat);
 void psy_audio_samplervoice_nna(psy_audio_SamplerVoice*);

@@ -237,8 +237,9 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self, psy_ui_Component*
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_editor_init(&self->console, &self->component);	
 	psy_ui_component_setalign(&self->console.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(&self->console.component, psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(10));
+	psy_ui_component_setpreferredsize(&self->console.component,
+		psy_ui_size_make(psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(10)));
 }
 
 static void sampleprocessview_updatetext(SampleEditorProcessView*,

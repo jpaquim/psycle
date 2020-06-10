@@ -167,8 +167,9 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_onsequenceselectionchanged);
 	psy_signal_connect(&workspace->signal_followsongchanged, self,
 		sequenceview_onfollowsongchanged);
-	psy_ui_component_resize(&self->component, psy_ui_value_makeew(16),
-		psy_ui_value_makepx(0));
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(16),
+		psy_ui_value_makepx(0)));
 }
 
 static void sequencebuttons_updatetext(SequenceButtons*);
@@ -285,9 +286,13 @@ void sequencebuttons_onalign(SequenceButtons* self)
 			cpy += rowheight + margin;
 			c = 0;
 		}		
-		psy_ui_component_setposition(component, cpx, cpy,
-			psy_ui_value_makepx(colwidth),
-			psy_ui_value_makepx(rowheight));
+		psy_ui_component_setposition(component,
+			psy_ui_point_make(
+				psy_ui_value_makepx(cpx),
+				psy_ui_value_makepx(cpy)),
+			psy_ui_size_make(
+				psy_ui_value_makepx(colwidth),
+				psy_ui_value_makepx(rowheight)));
 	}
 	psy_list_free(q);
 }

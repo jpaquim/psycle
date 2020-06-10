@@ -64,8 +64,9 @@ void psy_audio_samples_insert(psy_audio_Samples*, psy_audio_Sample*,
 	psy_audio_SampleIndex);
 void psy_audio_samples_remove(psy_audio_Samples*, psy_audio_SampleIndex);
 psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples*, psy_audio_SampleIndex);
-uintptr_t psy_audio_samples_groupsize(psy_audio_Samples*);
+uintptr_t psy_audio_samples_size(psy_audio_Samples*, uintptr_t slot);
 
+uintptr_t psy_audio_samples_groupsize(psy_audio_Samples*);
 psy_TableIterator psy_audio_samples_begin(psy_audio_Samples*);
 psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples*,
 	uintptr_t slot);

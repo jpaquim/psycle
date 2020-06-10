@@ -5,6 +5,7 @@
 
 #include "uidef.h"
 #include "uiapp.h"
+
 #include <math.h>
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
@@ -16,9 +17,9 @@
 
 extern psy_ui_App app;
 
-psy_ui_Point psy_ui_point_make(int x, int y)
+psy_ui_IntPoint psy_ui_intpoint_make(int x, int y)
 {
-	psy_ui_Point rv;
+	psy_ui_IntPoint rv;
 
 	rv.x = x;
 	rv.y = y;
@@ -219,33 +220,6 @@ psy_ui_Value psy_ui_margin_height(psy_ui_Margin* self,
 void psy_ui_value_init(psy_ui_Value* self)
 {
 	*self = psy_ui_value_makepx(0);
-}
-
-psy_ui_Value psy_ui_value_makepx(intptr_t px)
-{
-	psy_ui_Value rv;
-
-	rv.quantity.integer = px;
-	rv.unit = psy_ui_UNIT_PX;
-	return rv;
-}
-
-psy_ui_Value psy_ui_value_makeew(double em)
-{
-	psy_ui_Value rv;
-
-	rv.quantity.real = em;
-	rv.unit = psy_ui_UNIT_EW;
-	return rv;
-}
-
-psy_ui_Value psy_ui_value_makeeh(double em)
-{
-	psy_ui_Value rv;
-
-	rv.quantity.real = em;
-	rv.unit = psy_ui_UNIT_EH;
-	return rv;
 }
 
 intptr_t psy_ui_value_px(const psy_ui_Value* self, const psy_ui_TextMetric* tm)

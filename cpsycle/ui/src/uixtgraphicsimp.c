@@ -27,7 +27,7 @@ static void psy_ui_xt_g_imp_drawsolidrectangle(psy_ui_xt_GraphicsImp*, const psy
 	unsigned int color);
 static void psy_ui_xt_g_imp_drawsolidroundrectangle(psy_ui_xt_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-static void psy_ui_xt_g_imp_drawsolidpolygon(psy_ui_xt_GraphicsImp*, psy_ui_Point*,
+static void psy_ui_xt_g_imp_drawsolidpolygon(psy_ui_xt_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints, unsigned int inner, unsigned int outter);
 static void psy_ui_xt_g_imp_drawline(psy_ui_xt_GraphicsImp*, int x1, int y1, int x2, int y2);
 static void psy_ui_xt_g_imp_drawfullbitmap(psy_ui_xt_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
@@ -38,9 +38,9 @@ static void psy_ui_xt_g_imp_setbackgroundmode(psy_ui_xt_GraphicsImp*, unsigned i
 static void psy_ui_xt_g_imp_settextcolor(psy_ui_xt_GraphicsImp*, unsigned int color);
 static void psy_ui_xt_g_imp_setcolor(psy_ui_xt_GraphicsImp*, unsigned int color);
 static void psy_ui_xt_g_imp_setfont(psy_ui_xt_GraphicsImp*, psy_ui_Font* font);
-static void psy_ui_xt_g_imp_moveto(psy_ui_xt_GraphicsImp*, psy_ui_Point pt);
-static void psy_ui_xt_g_imp_devcurveto(psy_ui_xt_GraphicsImp*, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p);
+static void psy_ui_xt_g_imp_moveto(psy_ui_xt_GraphicsImp*, psy_ui_IntPoint pt);
+static void psy_ui_xt_g_imp_devcurveto(psy_ui_xt_GraphicsImp*, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 
 // VTable init
 static psy_ui_GraphicsImpVTable xt_imp_vtable;
@@ -219,7 +219,7 @@ void psy_ui_xt_g_imp_drawsolidroundrectangle(psy_ui_xt_GraphicsImp* self,
 }
 
 void psy_ui_xt_g_imp_drawsolidpolygon(psy_ui_xt_GraphicsImp* self,
-    psy_ui_Point* pts, unsigned int numpoints, unsigned int inner,
+    psy_ui_IntPoint* pts, unsigned int numpoints, unsigned int inner,
     unsigned int outter)
 {
 //	HBRUSH hBrush;     
@@ -317,13 +317,13 @@ void psy_ui_xt_g_imp_drawline(psy_ui_xt_GraphicsImp* self, int x1, int y1,
 	XDrawLine(self->display, self->window, self->gc, x1, y1, x2, y2);
 }
 
-void psy_ui_xt_g_imp_moveto(psy_ui_xt_GraphicsImp* self, psy_ui_Point pt)
+void psy_ui_xt_g_imp_moveto(psy_ui_xt_GraphicsImp* self, psy_ui_IntPoint pt)
 {	
 //	MoveToEx(self->hdc, pt.x, pt.y, NULL);
 }
 
 void psy_ui_xt_g_imp_devcurveto(psy_ui_xt_GraphicsImp* self,
-    psy_ui_Point control_p1, psy_ui_Point control_p2, psy_ui_Point p)
+    psy_ui_IntPoint control_p1, psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
 {
 	/* POINT pts[3];
    

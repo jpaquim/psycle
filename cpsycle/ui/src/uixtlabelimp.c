@@ -25,7 +25,7 @@ static void dev_move(psy_ui_xt_LabelImp* self, int left, int top) { self->xt_com
 static void dev_resize(psy_ui_xt_LabelImp* self, int width, int height) { self->xt_component_imp.imp.vtable->dev_resize(&self->xt_component_imp.imp, width, height); }
 static void dev_clientresize(psy_ui_xt_LabelImp* self, int width, int height) { self->xt_component_imp.imp.vtable->dev_clientresize(&self->xt_component_imp.imp, width, height); }
 static psy_ui_Rectangle dev_position(psy_ui_xt_LabelImp* self) { return self->xt_component_imp.imp.vtable->dev_position(&self->xt_component_imp.imp); }
-static void dev_setposition(psy_ui_xt_LabelImp* self, int x, int y, int width, int height) { self->xt_component_imp.imp.vtable->dev_setposition(&self->xt_component_imp.imp, x, y, width, height); }
+static void dev_setposition(psy_ui_xt_LabelImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->xt_component_imp.imp.vtable->dev_setposition(&self->xt_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(psy_ui_xt_LabelImp* self) { return self->xt_component_imp.imp.vtable->dev_size(&self->xt_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_xt_LabelImp* self) { return self->xt_component_imp.imp.vtable->dev_framesize(&self->xt_component_imp.imp); }
 static void dev_scrollto(psy_ui_xt_LabelImp* self, intptr_t dx, intptr_t dy) { self->xt_component_imp.imp.vtable->dev_scrollto(&self->xt_component_imp.imp, dx, dy); }

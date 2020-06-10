@@ -158,9 +158,10 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	wavebox_init(&self->samplebox, &self->component);
 	psy_ui_component_setalign(&self->samplebox.component,
 		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(&self->samplebox.component,
+	psy_ui_component_setpreferredsize(&self->samplebox.component,
+		psy_ui_size_make(
 		psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(15));
+		psy_ui_value_makeeh(15)));
 }
 
 void samplessongimportview_ondestroy(SamplesSongImportView* self,

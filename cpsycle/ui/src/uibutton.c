@@ -14,8 +14,8 @@ static unsigned int arrowhighlightcolor = 0x00FFFFFF;
 static void ondestroy(psy_ui_Button*, psy_ui_Component* sender);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
 static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
-static void drawarrow(psy_ui_Button*, psy_ui_Point* arrow, psy_ui_Graphics*);
-static void makearrow(psy_ui_Point*, psy_ui_ButtonIcon icon, int x, int y);
+static void drawarrow(psy_ui_Button*, psy_ui_IntPoint* arrow, psy_ui_Graphics*);
+static void makearrow(psy_ui_IntPoint*, psy_ui_ButtonIcon icon, int x, int y);
 static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Button*);
 static void onmouseleave(psy_ui_Button*);
@@ -110,7 +110,7 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	psy_ui_Point arrow[4];
+	psy_ui_IntPoint arrow[4];
 	int centerx = 4;
 	int centery = 0;
 	
@@ -156,7 +156,7 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 	}
 }
 
-void drawarrow(psy_ui_Button* self, psy_ui_Point* arrow, psy_ui_Graphics* g)
+void drawarrow(psy_ui_Button* self, psy_ui_IntPoint* arrow, psy_ui_Graphics* g)
 {
 	if (self->hover == 1) {
 		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
@@ -166,7 +166,7 @@ void drawarrow(psy_ui_Button* self, psy_ui_Point* arrow, psy_ui_Graphics* g)
 	}		
 }
 
-void makearrow(psy_ui_Point* arrow, psy_ui_ButtonIcon icon, int x, int y)
+void makearrow(psy_ui_IntPoint* arrow, psy_ui_ButtonIcon icon, int x, int y)
 {
 	switch (icon) {
 		case psy_ui_ICON_LESS:		

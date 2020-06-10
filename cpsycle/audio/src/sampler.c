@@ -170,7 +170,7 @@ static psy_List* sequencerinsert(psy_audio_Sampler*, psy_List* events);
 static void stop(psy_audio_Sampler*);
 static const psy_audio_MachineInfo* info(psy_audio_Sampler*);
 // Parameters
-static unsigned int numparametercols(psy_audio_Sampler*);
+static uintptr_t numparametercols(psy_audio_Sampler*);
 static uintptr_t numparameters(psy_audio_Sampler*);
 static psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
 	uintptr_t param);
@@ -214,7 +214,7 @@ static psy_audio_MachineInfo const macinfo = {
 	"Sampler",
 	"Psycledelics",
 	"help",	
-	MACH_SAMPLER,
+	MACH_XMSAMPLER,
 	0,
 	0
 };
@@ -257,7 +257,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 	custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
 	psy_audio_sampler_base(self)->vtable = &sampler_vtable;
-	psy_audio_machine_seteditname(psy_audio_sampler_base(self), "Sampler");
+	psy_audio_machine_seteditname(psy_audio_sampler_base(self), "XMSampler");
 	self->numvoices = SAMPLER_DEFAULT_POLYPHONY;
 	self->voices = 0;
 	self->resamplingmethod = RESAMPLERTYPE_LINEAR;
@@ -704,7 +704,7 @@ uintptr_t numparameters(psy_audio_Sampler* self)
 	return 10 * 7;
 }
 
-unsigned int numparametercols(psy_audio_Sampler* self)
+uintptr_t numparametercols(psy_audio_Sampler* self)
 {
 	return 10;
 }
@@ -899,7 +899,7 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(psy_audio_Sampler* samp
 	psy_audio_Instrument* instrument,
 	psy_audio_SamplerChannel* channel,
 	uintptr_t channelnum,
-	unsigned int samplerate)
+	uintptr_t samplerate)
 {
 	psy_audio_SamplerVoice* rv;
 
@@ -972,6 +972,22 @@ void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self, const psy_audi
 					// numframes of each retrigger
 					(uintptr_t)psy_audio_machine_samplespertick(
 						psy_audio_sampler_base(self->sampler)));
+			break;
+		case SAMPLER_CMD_PORTA2NOTE: {
+			//if (_envelope._stage != ENV_OFF) {
+				//effCmd = ite->_cmd;
+				//effVal = ite->_parameter;
+				//if (pEntry->_note < notecommands::release) {
+					//const XMInstrument::WaveData<>& wave = Global::song().samples[_instrument];
+					//float const finetune = (float)wave.WaveFineTune() * 0.01f;
+					//double speeddouble = pow(2.0f, (pEntry->_note + wave.WaveTune() - baseC + finetune) / 12.0f) * ((float)wave.WaveSampleRate() / Global::player().SampleRate());
+					//_effPortaSpeed = static_cast<int64_t>(speeddouble * 4294967296.0f);
+				//}
+				//if (_effPortaSpeed < controller._speed) {
+					//effVal *= -1;
+				//}
+				//doporta = true;
+			}
 			break;
 		}
 		default:

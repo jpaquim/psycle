@@ -116,8 +116,10 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent, bool floate
 	self->workspace = workspace;
 	if (floated) {
 		psy_ui_frame_init(&self->component, parent);
-		psy_ui_component_move(&self->component, psy_ui_value_makepx(200),
-			psy_ui_value_makepx(150));
+		psy_ui_component_move(&self->component,
+			psy_ui_point_make(
+				psy_ui_value_makepx(200),
+				psy_ui_value_makepx(150)));
 	} else {
 		psy_ui_component_init(&self->component, parent);		
 	}
@@ -392,9 +394,10 @@ void machineframe_resize(MachineFrame* self)
 	}	
 	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 		&viewsize);	
-	psy_ui_component_clientresize(&self->component,		
-		psy_ui_value_px(&viewsize.width, &tm),
-		psy_ui_value_px(&bar.height, &tm) + psy_ui_value_px(&viewsize.height, &tm));
+	psy_ui_component_clientresize(&self->component,
+		psy_ui_size_make(
+			viewsize.width,
+			psy_ui_add_values(bar.height, viewsize.height, &tm)));
 }
 
 void machineframe_preferredviewsizechanged(MachineFrame* self, psy_ui_Component* sender)

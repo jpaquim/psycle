@@ -27,7 +27,7 @@ static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const p
 	unsigned int color);
 static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_Point*,
+static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints, unsigned int inner, unsigned int outter);
 static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, int x1, int y1, int x2, int y2);
 static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
@@ -39,9 +39,9 @@ static void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp*, unsigned int 
 static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, unsigned int align);
 static void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp*, unsigned int color);
 static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
-static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_Point pt);
-static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p);
+static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint pt);
+static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
 	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
 static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, unsigned int width);
@@ -211,7 +211,7 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 	DeleteObject(hPen) ;
 }
 
-void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_Point* pts,
+void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint* pts,
 	unsigned int numpoints, unsigned int inner, unsigned int outter)
 {
 	HBRUSH hBrush;     
@@ -324,13 +324,13 @@ void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, int x1, int y1, int
 	LineTo(self->hdc, x2, y2);
 }
 
-void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_Point pt)
+void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint pt)
 {	
 	MoveToEx(self->hdc, pt.x, pt.y, NULL);
 }
 
-void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p)
+void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
 {
 	POINT pts[3];
    

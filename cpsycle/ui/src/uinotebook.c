@@ -50,9 +50,7 @@ void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
 		} else {
 			if (c == pageindex) {						
 				psy_ui_component_show(component);
-				psy_ui_component_setposition(component, 0, 0,
-					size.width,
-					size.height);
+				psy_ui_component_setposition(component, psy_ui_point_zero(), size);
 			} else {		
 				psy_ui_component_hide(component);
 			}
@@ -91,9 +89,9 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
-			component = (psy_ui_Component*)p->entry;		
-				psy_ui_component_setposition(component,
-					0, 0, size->width, size->height);
+			component = (psy_ui_Component*)p->entry;			
+			psy_ui_component_setposition(component,
+				psy_ui_point_zero(), *size);
 		}	
 		psy_list_free(q);
 	}
@@ -157,9 +155,13 @@ void onmousemove(psy_ui_Notebook* self, psy_ui_Component* sender,
 	
 		size = psy_ui_component_size(psy_ui_notebook_base(self));
 		position = psy_ui_component_position(sender);
-		psy_ui_component_setposition(sender, position.left + ev->x, 0,
-			psy_ui_value_makepx(4),
-			size.height);
+		psy_ui_component_setposition(sender, 
+			psy_ui_point_make(
+				psy_ui_value_makepx(position.left + ev->x),
+				psy_ui_value_makepx(0)),
+			psy_ui_size_make(
+				psy_ui_value_makepx(4),
+				size.height));
 		align_split(self, position.left + ev->x);
 		psy_ui_component_invalidate(psy_ui_notebook_base(self));
 		psy_ui_component_update(psy_ui_notebook_base(self));		
@@ -177,8 +179,9 @@ void onmouseup(psy_ui_Notebook* self, psy_ui_Component* sender,
 		size = psy_ui_component_size(psy_ui_notebook_base(self));
 		tm = psy_ui_component_textmetric(&self->component);
 		position = psy_ui_component_position(sender);
-		psy_ui_component_move(sender, psy_ui_value_makepx(position.left + ev->x),
-			size.height);
+		psy_ui_component_move(sender, psy_ui_point_make(
+			psy_ui_value_makepx(position.left + ev->x),
+			size.height));
 		self->splitx = position.left + ev->x;
 		align_split(self, self->splitx);
 		psy_ui_component_releasecapture(&self->component);
@@ -210,20 +213,31 @@ void align_split(psy_ui_Notebook* self, int x) {
 		component = (psy_ui_Component*) p->entry;
 		if (component == &self->splitbar) {
 			psy_ui_component_setposition(&self->splitbar,
-				x, 0, psy_ui_value_makepx(4), size.height);
+				psy_ui_point_make(
+					psy_ui_value_makepx(x),
+					psy_ui_value_makepx(0)),
+				psy_ui_size_make(
+					psy_ui_value_makepx(4),
+					size.height));
 		} else {
 			if (c == 0) {
 				psy_ui_component_setposition((psy_ui_Component*)p->entry,
-					0, 0, psy_ui_value_makepx(x), size.height);
+					psy_ui_point_zero(),
+					psy_ui_size_make(
+						psy_ui_value_makepx(x),
+						size.height));
 				++c;
 			} else {
 				psy_ui_TextMetric tm;
 				
 				tm = psy_ui_component_textmetric(&self->component);
 				psy_ui_component_setposition((psy_ui_Component*)p->entry,
-					x + 4, 0,
-					psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) - x - 4), 
-					size.height);
+					psy_ui_point_make(
+						psy_ui_value_makepx(x + 4),
+						psy_ui_value_makepx(0)),
+					psy_ui_size_make(
+						psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) - x - 4),
+						size.height));
 			}			
 		}		
 	}	

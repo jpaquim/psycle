@@ -35,7 +35,7 @@ static void psy_ui_curses_g_imp_drawsolidrectangle(psy_ui_curses_GraphicsImp*, c
 	unsigned int color);
 static void psy_ui_curses_g_imp_drawsolidroundrectangle(psy_ui_curses_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, unsigned int color);
-static void psy_ui_curses_g_imp_drawsolidpolygon(psy_ui_curses_GraphicsImp*, psy_ui_Point*,
+static void psy_ui_curses_g_imp_drawsolidpolygon(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 static void psy_ui_curses_g_imp_drawline(psy_ui_curses_GraphicsImp*, int x1, int y1, int x2, int y2);
 static void psy_ui_curses_g_imp_drawfullbitmap(psy_ui_curses_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
@@ -46,9 +46,9 @@ static void psy_ui_curses_g_imp_setbackgroundmode(psy_ui_curses_GraphicsImp*, un
 static void psy_ui_curses_g_imp_settextcolor(psy_ui_curses_GraphicsImp*, unsigned int color);
 static void psy_ui_curses_g_imp_setcolor(psy_ui_curses_GraphicsImp*, unsigned int color);
 static void psy_ui_curses_g_imp_setfont(psy_ui_curses_GraphicsImp*, psy_ui_Font* font);
-static void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp*, psy_ui_Point pt);
-static void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp*, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p);
+static void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint pt);
+static void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 
 // VTable init
 static psy_ui_GraphicsImpVTable win_imp_vtable;
@@ -141,7 +141,7 @@ void psy_ui_curses_g_imp_drawsolidroundrectangle(psy_ui_curses_GraphicsImp* self
 {
 }
 
-void psy_ui_curses_g_imp_drawsolidpolygon(psy_ui_curses_GraphicsImp* self, psy_ui_Point* pts,
+void psy_ui_curses_g_imp_drawsolidpolygon(psy_ui_curses_GraphicsImp* self, psy_ui_IntPoint* pts,
 	unsigned int numpoints, unsigned int inner, unsigned int outter)
 {
 }
@@ -179,12 +179,12 @@ void psy_ui_curses_g_imp_drawline(psy_ui_curses_GraphicsImp* self, int x1, int y
 {
 }
 
-void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp* self, psy_ui_Point pt)
+void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp* self, psy_ui_IntPoint pt)
 {	
 }
 
-void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp* self, psy_ui_Point control_p1,
-	psy_ui_Point control_p2, psy_ui_Point p)
+void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp* self, psy_ui_IntPoint control_p1,
+	psy_ui_IntPoint control_p2, psy_ui_IntPoint p)
 {
 }
 

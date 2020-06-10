@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <multifilter.h>
 #include "../../detail/portable.h"
 #include "fileio.h"
 #include "../../detail/psyconf.h"

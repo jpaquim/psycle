@@ -63,9 +63,42 @@ typedef struct {
 
 void psy_ui_value_init(psy_ui_Value*);
 
-psy_ui_Value psy_ui_value_makepx(intptr_t px);
-psy_ui_Value psy_ui_value_makeew(double em);
-psy_ui_Value psy_ui_value_makeeh(double em);
+INLINE psy_ui_Value psy_ui_value_makepx(intptr_t px)
+{
+	psy_ui_Value rv;
+
+	rv.quantity.integer = px;
+	rv.unit = psy_ui_UNIT_PX;
+	return rv;
+}
+
+INLINE psy_ui_Value psy_ui_value_makeew(double em)
+{	
+	psy_ui_Value rv;
+
+	rv.quantity.real = em;
+	rv.unit = psy_ui_UNIT_EW;
+	return rv;
+}
+
+INLINE psy_ui_Value psy_ui_value_makeeh(double em)
+{
+	psy_ui_Value rv;
+
+	rv.quantity.real = em;
+	rv.unit = psy_ui_UNIT_EH;
+	return rv;
+}
+
+INLINE psy_ui_Value psy_ui_value_makepe(double pe)
+{
+	psy_ui_Value rv;
+
+	rv.quantity.real = pe;
+	rv.unit = psy_ui_UNIT_PE;
+	return rv;
+}
+
 intptr_t psy_ui_value_px(const psy_ui_Value*, const psy_ui_TextMetric*);
 
 void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
@@ -87,12 +120,35 @@ INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	return lhs;
 }
 
+typedef struct {
+	psy_ui_Value x;
+	psy_ui_Value y;
+} psy_ui_Point;
+
+INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
+{
+	psy_ui_Point rv;
+
+	rv.x = x;
+	rv.y = y;
+	return rv;
+}
+
+INLINE psy_ui_Point psy_ui_point_zero(void)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_makepx(0);
+	rv.y = psy_ui_value_makepx(0);
+	return rv;
+}
+
 typedef struct { 
 	int x;
 	int y;
-} psy_ui_Point;
+} psy_ui_IntPoint;
 
-psy_ui_Point psy_ui_point_make(int x, int y);
+psy_ui_IntPoint psy_ui_intpoint_make(int x, int y);
 
 typedef struct {
 	int left;
@@ -129,6 +185,15 @@ INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
 
 	rv.width = width;
 	rv.height = height;
+	return rv;
+}
+
+INLINE psy_ui_Size psy_ui_size_zero(void)
+{
+	psy_ui_Size rv;
+
+	rv.width = psy_ui_value_makepx(0);
+	rv.height = psy_ui_value_makepx(0);
 	return rv;
 }
 
@@ -189,7 +254,8 @@ typedef enum {
 	psy_ui_ALIGN_LEFT,
 	psy_ui_ALIGN_BOTTOM,
 	psy_ui_ALIGN_RIGHT,
-	psy_ui_ALIGN_FILL
+	psy_ui_ALIGN_FILL,
+	psy_ui_ALIGN_CENTER
 } psy_ui_AlignType;
 
 typedef enum {

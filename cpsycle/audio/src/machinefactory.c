@@ -159,13 +159,13 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			
 			sampler = psy_audio_sampler_allocinit(self->machinecallback);
 			if (sampler) {
-				sampler->clipmax = 0.5f;
+				sampler->xmsamplerload = 0;
 				rv = psy_audio_sampler_base(sampler);
 			} else {
 				rv = 0;
 			}
 		}
-		break;
+		break;		
 		case MACH_XMSAMPLER:
 		{
 			psy_audio_Sampler* sampler;

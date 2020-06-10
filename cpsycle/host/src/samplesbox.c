@@ -36,8 +36,9 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->header.component, &margin);
 	psy_ui_listbox_init(&self->subsamplelist, &self->component);
 	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_resize(&self->subsamplelist.component,
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(10));
+	psy_ui_component_setpreferredsize(&self->subsamplelist.component,
+		psy_ui_size_make(
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 	psy_ui_label_init(&self->group, &self->component);
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_settext(&self->group, "Group samples");

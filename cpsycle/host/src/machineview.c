@@ -79,8 +79,8 @@ static void machinewireview_drawwire(MachineWireView*, psy_ui_Graphics*,
 	uintptr_t slot, MachineUi*);
 static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
 	MachineUi* out, MachineUi* in);
-static psy_ui_Point rotate_point(psy_ui_Point, double phi);
-static psy_ui_Point move_point(psy_ui_Point pt, psy_ui_Point d);
+static psy_ui_IntPoint rotate_point(psy_ui_IntPoint, double phi);
+static psy_ui_IntPoint move_point(psy_ui_IntPoint pt, psy_ui_IntPoint d);
 static void machinewireview_ondestroy(MachineWireView*,
 	psy_ui_Component* component);
 static void machinewireview_onmousedown(MachineWireView*, psy_ui_MouseEvent*);
@@ -270,10 +270,13 @@ void machineui_editname(MachineUi* self, psy_ui_Edit* edit)
 		r.top += self->coords->name.desty;
 		r.right = r.left + self->coords->name.destwidth;
 		r.bottom = r.top + self->coords->name.destheight;
-		psy_ui_component_setposition(&edit->component, r.left, 
-			r.top,
-			psy_ui_value_makepx(r.right - r.left),
-			psy_ui_value_makepx(r.bottom - r.top));
+		psy_ui_component_setposition(&edit->component,
+			psy_ui_point_make(
+				psy_ui_value_makepx(r.left), 
+				psy_ui_value_makepx(r.top)),
+			psy_ui_size_make(
+				psy_ui_value_makepx(r.right - r.left),
+				psy_ui_value_makepx(r.bottom - r.top)));
 		psy_ui_component_show(&edit->component);
 	}
 }
@@ -943,9 +946,9 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	int x1,	y1;
 	int x2, y2;		
 	double phi;	
-	psy_ui_Point center;
-	psy_ui_Point a, b, c;	
-	psy_ui_Point tri[4];
+	psy_ui_IntPoint center;
+	psy_ui_IntPoint a, b, c;	
+	psy_ui_IntPoint tri[4];
 	int polysize;
 	float deltaColR = ((self->skin.polycolour     & 0xFF) / 510.0f) + .45f;
 	float deltaColG = ((self->skin.polycolour>>8  & 0xFF) / 510.0f) + .45f;
@@ -982,18 +985,18 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	psy_ui_drawsolidpolygon(g, tri, 4, polyInnards, self->skin.wireaacolour);
 }
 
-psy_ui_Point rotate_point(psy_ui_Point pt, double phi)
+psy_ui_IntPoint rotate_point(psy_ui_IntPoint pt, double phi)
 {
-	psy_ui_Point rv;
+	psy_ui_IntPoint rv;
 	
 	rv.x = (int) (cos(phi) * pt.x - sin(phi) * pt.y);
 	rv.y = (int) (sin(phi) * pt.x + cos(phi) * pt.y);
 	return rv;
 }
 
-psy_ui_Point move_point(psy_ui_Point pt, psy_ui_Point d)
+psy_ui_IntPoint move_point(psy_ui_IntPoint pt, psy_ui_IntPoint d)
 {
-	psy_ui_Point rv;
+	psy_ui_IntPoint rv;
 	
 	rv.x = pt.x + d.x;
 	rv.y = pt.y + d.y;
@@ -2080,8 +2083,9 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setposition(&self->component, 0, 0,
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	//psy_ui_component_setposition(&self->component, 0, 0,
+		//psy_ui_size_make(
+			//psy_ui_value_makepx(0), psy_ui_value_makepx(0)));
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_enablealign(&self->component);

@@ -106,9 +106,9 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_Rectangle r;
-	psy_ui_Point arrow_down[4];
-	psy_ui_Point arrow_left[4];
-	psy_ui_Point arrow_right[4];
+	psy_ui_IntPoint arrow_down[4];
+	psy_ui_IntPoint arrow_left[4];
+	psy_ui_IntPoint arrow_right[4];
 	int ax;
 	int ay;
 	intptr_t sel;

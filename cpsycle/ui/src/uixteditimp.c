@@ -22,10 +22,10 @@ static void dev_showstate(psy_ui_xt_EditImp* self, int state) { self->xt_compone
 static void dev_hide(psy_ui_xt_EditImp* self) { self->xt_component_imp.imp.vtable->dev_hide(&self->xt_component_imp.imp); }
 static int dev_visible(psy_ui_xt_EditImp* self) { return self->xt_component_imp.imp.vtable->dev_visible(&self->xt_component_imp.imp); }
 static void dev_move(psy_ui_xt_EditImp* self, int left, int top) { self->xt_component_imp.imp.vtable->dev_move(&self->xt_component_imp.imp, left, top); }
-static void dev_resize(psy_ui_xt_EditImp* self, int width, int height) { self->xt_component_imp.imp.vtable->dev_resize(&self->xt_component_imp.imp, width, height); }
+static void dev_resize(psy_ui_xt_EditImp* self, psy_ui_Size size) { self->xt_component_imp.imp.vtable->dev_resize(&self->xt_component_imp.imp, size); }
 static void dev_clientresize(psy_ui_xt_EditImp* self, int width, int height) { self->xt_component_imp.imp.vtable->dev_clientresize(&self->xt_component_imp.imp, width, height); }
 static psy_ui_Rectangle dev_position(psy_ui_xt_EditImp* self) { return self->xt_component_imp.imp.vtable->dev_position(&self->xt_component_imp.imp); }
-static void dev_setposition(psy_ui_xt_EditImp* self, int x, int y, int width, int height) { self->xt_component_imp.imp.vtable->dev_setposition(&self->xt_component_imp.imp, x, y, width, height); }
+static void dev_setposition(psy_ui_xt_EditImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->xt_component_imp.imp.vtable->dev_setposition(&self->xt_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(psy_ui_xt_EditImp* self) { return self->xt_component_imp.imp.vtable->dev_size(&self->xt_component_imp.imp); }
 static psy_ui_Size dev_framesize(psy_ui_xt_EditImp* self) { return self->xt_component_imp.imp.vtable->dev_framesize(&self->xt_component_imp.imp); }
 static void dev_scrollto(psy_ui_xt_EditImp* self, intptr_t dx, intptr_t dy) { self->xt_component_imp.imp.vtable->dev_scrollto(&self->xt_component_imp.imp, dx, dy); }
