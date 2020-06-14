@@ -72,6 +72,7 @@ typedef struct {
 	psy_dsp_beat_t numplaybeats;
 	psy_Signal signal_linetick;
 	uintptr_t playcounter;
+	bool calcduration;
 } psy_audio_Sequencer;
 
 void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,

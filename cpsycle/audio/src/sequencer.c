@@ -154,8 +154,9 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->position = (psy_dsp_beat_t)0.f;
 	self->playcounter = 0;
 	self->window = (psy_dsp_beat_t)0.f;
-	self->linetickcount = (psy_dsp_beat_t)0.f;	
+	self->linetickcount = (psy_dsp_beat_t)0.f;		
 	self->mode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
+	self->calcduration = FALSE;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -596,11 +597,15 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 					done = TRUE;
 				break;
 				case JUMP_TO_ORDER:
-					psy_audio_sequencer_jumptoorder(self, ev);
+					if (!self->calcduration) {
+						psy_audio_sequencer_jumptoorder(self, ev);
+					}
 					done = TRUE;
 				break;
 				case BREAK_TO_LINE:
-					psy_audio_sequencer_breaktoline(self, track->iterator, ev);
+					if (!self->calcduration) {
+						psy_audio_sequencer_breaktoline(self, track->iterator, ev);						
+					}
 					done = TRUE;
 				break;
 				default:

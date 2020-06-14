@@ -668,6 +668,7 @@ float psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 	psy_audio_sequencer_init(&sequencer, self, NULL);
 	psy_audio_sequencer_stoploop(&sequencer);
 	psy_audio_sequencer_start(&sequencer);
+	sequencer.calcduration = TRUE;
 	while (psy_audio_sequencer_playing(&sequencer)) {
 		numsamplex = psy_audio_MAX_STREAM_SIZE;
 		maxamount = numsamplex;
