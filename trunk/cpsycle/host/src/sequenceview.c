@@ -1105,54 +1105,11 @@ void sequenceduration_update(SequenceViewDuration* self)
 	char text[40];
 	float songlength;
 	
-	if (self->sequence) {
-		self->duration_ms = sequenceduration_calcdurationms(self);
-	} else {
-		self->duration_ms = 0.f;
-	}
 	songlength = psy_audio_sequence_calcdurationinms(self->sequence);
 	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
 		(int)(songlength / 60), ((int)songlength % 60),
 		sequence_duration(self->sequence));
 	psy_ui_label_settext(&self->duration, text);
-}
-
-float sequenceduration_calcdurationms(SequenceViewDuration* self)
-{
-	psy_audio_Sequencer sequencer;
-	uintptr_t samplecount;	
-	uintptr_t maxamount;
-	uintptr_t amount;
-	uintptr_t numsamplex;
-
-	psy_audio_sequencer_init(&sequencer, self->sequence, NULL);
-	psy_audio_sequencer_stoploop(&sequencer);
-	psy_audio_sequencer_start(&sequencer);
-	samplecount = 0;
-	while (psy_audio_sequencer_playing(&sequencer)) {
-		numsamplex = psy_audio_MAX_STREAM_SIZE;
-		maxamount = numsamplex;
-		do {
-			amount = maxamount;
-			if (amount > numsamplex) {
-				amount = numsamplex;
-			}
-			if (psy_audio_sequencer_playing(&sequencer)) {
-				amount = psy_audio_sequencer_updatelinetickcount(&sequencer,
-					amount);
-			}
-			if (amount > 0) {
-				psy_audio_sequencer_frametick(&sequencer, amount);
-				samplecount += 256;
-				numsamplex -= amount;
-			}
-			if (sequencer.linetickcount <= 0) {				
-				psy_audio_sequencer_onlinetick(&sequencer);
-			}
-		} while (numsamplex > 0);		
-	}
-	psy_audio_sequencer_dispose(&sequencer);
-	return (float)(samplecount / 44100.f);
 }
 
 void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
