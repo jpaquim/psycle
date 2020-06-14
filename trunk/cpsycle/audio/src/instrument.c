@@ -81,6 +81,8 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	adsr_settings_initdefault(&self->volumeenvelope);
 	adsr_settings_init(&self->filterenvelope, 0.005f, 0.370f, 0.5f, 0.370f);
 	self->filtermodamount = 1.0f;
+	self->filtercutoff = 1.f;
+	self->filterres = 0.f;
 	psy_signal_init(&self->signal_namechanged);
 }
 

@@ -100,7 +100,7 @@ static void seqtick(psy_audio_Machine* self, uintptr_t channel,
 static void stop(psy_audio_Machine* self) { }
 static void sequencertick(psy_audio_Machine* self) { }
 static psy_List* sequencerinsert(psy_audio_Machine* self, psy_List* events) { return 0; }
-static void sequencerlinetick(psy_audio_Machine* self) { }
+static void newline(psy_audio_Machine* self) { }
 static const psy_audio_MachineInfo* info(psy_audio_Machine* self) { return &macinfo; }
 // parameters
 static psy_audio_MachineParam* parameter(psy_audio_Machine* self,
@@ -283,7 +283,7 @@ static void vtable_init(void)
 		vtable.seqtick = seqtick;
 		vtable.stop = stop;
 		vtable.sequencertick = sequencertick;
-		vtable.sequencerlinetick = sequencerlinetick;
+		vtable.newline = newline;
 		vtable.sequencerinsert = sequencerinsert;
 		vtable.info = info;
 		vtable.parameter = parameter;
@@ -411,6 +411,7 @@ uintptr_t work_dogenerateaudio(psy_audio_Machine* self, psy_audio_BufferContext*
 		psy_audio_buffercontext_setoffset(bc, position);
 		psy_audio_machine_generateaudio(self, bc);		
 		psy_audio_buffercontext_setnumsamples(bc, restorenumsamples);
+		psy_audio_buffercontext_setoffset(bc, 0);
 	}
 	return amount;
 }

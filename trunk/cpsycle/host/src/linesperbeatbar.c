@@ -11,7 +11,7 @@ static void linesperbeatbar_initalign(LinesPerBeatBar*);
 static void linesperbeatbar_updatetext(LinesPerBeatBar*);
 static void linesperbeatbar_onlessclicked(LinesPerBeatBar*, psy_ui_Component* sender);
 static void linesperbeatbar_onmoreclicked(LinesPerBeatBar*, psy_ui_Component* sender);
-static void linesperbeatbar_ontimer(LinesPerBeatBar*, psy_ui_Component* sender, int timerid);
+static void linesperbeatbar_ontimer(LinesPerBeatBar*, psy_ui_Component* sender, uintptr_t timerid);
 static void linesperbeatbar_onlanguagechanged(LinesPerBeatBar*, Workspace* sender);
 
 void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
@@ -72,7 +72,7 @@ void linesperbeatbar_onmoreclicked(LinesPerBeatBar* self, psy_ui_Component* send
 		psy_audio_player_lpb(self->player) + 1);
 }
 
-void linesperbeatbar_ontimer(LinesPerBeatBar* self, psy_ui_Component* sender, int timerid)
+void linesperbeatbar_ontimer(LinesPerBeatBar* self, psy_ui_Component* sender, uintptr_t timerid)
 {		
 	if (self->lpb != psy_audio_player_lpb(self->player)) {
 		char text[20];

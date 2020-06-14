@@ -124,7 +124,7 @@ typedef	int (*fp_machine_hostevent)(struct psy_audio_Machine*,
 typedef	void (*fp_machine_seqtick)(struct psy_audio_Machine*,
 	uintptr_t channel, const psy_audio_PatternEvent*);
 typedef	void (*fp_machine_sequencertick)(struct psy_audio_Machine*);
-typedef	void (*fp_machine_sequencerlinetick)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_newline)(struct psy_audio_Machine*);
 typedef	psy_List* (*fp_machine_sequencerinsert)(struct psy_audio_Machine*,
 	psy_List* events);
 typedef	void (*fp_machine_stop)(struct psy_audio_Machine*);
@@ -248,7 +248,7 @@ typedef struct {
 	fp_machine_mix mix;
 	fp_machine_generateaudio generateaudio;
 	fp_machine_sequencertick sequencertick;
-	fp_machine_sequencerlinetick sequencerlinetick;
+	fp_machine_newline newline;
 	fp_machine_seqtick seqtick;
 	fp_machine_stop stop;
 	fp_machine_hostevent hostevent;	
@@ -421,9 +421,9 @@ INLINE void psy_audio_machine_sequencertick(psy_audio_Machine* self)
 	self->vtable->sequencertick(self);
 }
 
-INLINE void psy_audio_machine_sequencerlinetick(psy_audio_Machine* self)
+INLINE void psy_audio_machine_newline(psy_audio_Machine* self)
 {
-	self->vtable->sequencerlinetick(self);
+	self->vtable->newline(self);
 }
 
 INLINE void psy_audio_machine_seqtick(psy_audio_Machine* self, uintptr_t

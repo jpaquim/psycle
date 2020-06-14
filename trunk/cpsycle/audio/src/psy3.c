@@ -2408,12 +2408,12 @@ int psy3_save_instrument(psy_audio_SongFile* self,
 	}
 	// env_f_co	
 	if (status = psyfile_write_int32(self->file,
-		(int32_t) instrument->filtercutoff)) {
+		(int32_t) (instrument->filtercutoff * 127.f))) {
 		return status;
 	}
 	// env_f_rq	
 	if (status = psyfile_write_int32(self->file,
-		(int32_t) instrument->filterres)) {
+		(int32_t) (instrument->filterres * 127))) {
 		return status;
 	}
 	// env_f_ea	
@@ -2421,7 +2421,8 @@ int psy3_save_instrument(psy_audio_SongFile* self,
 		return status;
 	}
 	// env_f_tp	
-	if (status = psyfile_write_int32(self->file, 0)) {
+	if (status = psyfile_write_int32(self->file, (int32_t)
+		instrument->filtertype)) {
 		return status;
 	}
 	// No longer saving pan in version 2

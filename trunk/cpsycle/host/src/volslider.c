@@ -23,7 +23,7 @@ static void volslider_onmousemove(VolSlider*, psy_ui_Component* sender,
 static void volslider_onmousewheel(VolSlider*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static void volslider_ontimer(VolSlider*, psy_ui_Component* sender,
-	int timerid);
+	uintptr_t timerid);
 static void volslider_onsliderchanged(VolSlider*, psy_ui_Component* sender);
 static void volslider_onsongchanged(VolSlider*, Workspace*, int flag,
 	psy_audio_SongFile* songfile);
@@ -142,7 +142,7 @@ void volslider_onsongchanged(VolSlider* self, Workspace* workspace, int flag,
 	self->machines = &workspace->song->machines;
 }
 
-void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, int timerid)
+void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, uintptr_t timerid)
 {		
 	if (self->machines && psy_audio_machines_master(self->machines)) {
 		psy_audio_MachineParam* param;

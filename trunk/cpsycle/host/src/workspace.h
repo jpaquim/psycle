@@ -13,6 +13,7 @@
 #include <uicomponent.h>
 #include "undoredo.h"
 #include <sequence.h>
+#include <notestab.h>
 
 enum {
 	TABPAGE_MACHINEVIEW = 0,
@@ -217,5 +218,6 @@ void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(Workspace*);
 void workspace_showgear(Workspace*);
 bool workspace_songmodified(Workspace*);
+psy_dsp_NotesTabMode workspace_notetabmode(Workspace*);
 
 #endif

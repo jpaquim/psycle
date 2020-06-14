@@ -1223,6 +1223,7 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(sequencerview, "Show playlist", "Mostrar lista de reproducción");
 	psy_properties_write_string(sequencerview, "Show pattern names", "Mostrar nombres del patterns");
 	psy_properties_write_string(sequencerview, "Record tweaks", "Grabar tweaks");
+	psy_properties_write_string(sequencerview, "Duration", "Duración");	
 }
 
 const char* workspace_translate(Workspace* self, const char* key)
@@ -2349,4 +2350,11 @@ int workspace_onchangelanguageenum(Workspace* self,
 bool workspace_songmodified(Workspace* self)
 {
 	return psy_list_size(self->undoredo.undo) != self->undosavepoint;
+}
+
+psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
+{
+	return (psy_properties_bool(self->config, "visual.patternview.notetab", 0))
+		? psy_dsp_NOTESTAB_A440
+		: psy_dsp_NOTESTAB_A220;
 }

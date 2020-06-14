@@ -162,7 +162,7 @@ static void generateaudio(psy_audio_Plugin*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_Plugin*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void stop(psy_audio_Plugin*);
-static void sequencerlinetick(psy_audio_Plugin*);
+static void newline(psy_audio_Plugin*);
 static psy_audio_MachineInfo* info(psy_audio_Plugin*);
 static psy_audio_MachineParam* parameter(psy_audio_Plugin*, uintptr_t param);
 static unsigned int numparametercols(psy_audio_Plugin*);
@@ -195,8 +195,8 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.hostevent = (fp_machine_hostevent) hostevent;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
 		vtable.stop = (fp_machine_stop) stop;
-		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
-			sequencerlinetick;
+		vtable.newline = (fp_machine_newline)
+			newline;
 		vtable.info = (fp_machine_info) info;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
@@ -228,7 +228,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback cal
 	psy_library_load(&self->library, path);			
 	self->mi = 0;
 	self->plugininfo = 0;
-	self->preventsequencerlinetick = 0;	
+	self->preventnewline = 0;	
 	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
 		psy_library_dispose(&self->library);		
@@ -249,7 +249,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback cal
 				psy_audio_machine_seteditname(psy_audio_plugin_base(self),
 					pInfo->ShortName);
 				if (strcmp(self->plugininfo->ShortName, "BexPhase!") == 0) {
-					self->preventsequencerlinetick = 1;
+					self->preventnewline = 1;
 				}
 			}
 		}
@@ -385,10 +385,10 @@ int hostevent(psy_audio_Plugin* self, int const eventNr, int val1, float val2)
 	return mi_hostevent(self->mi, eventNr, val1, val2);
 }
 
-void sequencerlinetick(psy_audio_Plugin* self)
+void newline(psy_audio_Plugin* self)
 {	
 	// prevent bexphase from crash
-	if (!self->preventsequencerlinetick) {
+	if (!self->preventnewline) {
 		mi_sequencertick(self->mi);	
 	}	
 }
@@ -496,17 +496,7 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			
 			psyfile_read(songfile->file, &temp, sizeof(temp));			
 			param = psy_audio_machine_parameter(psy_audio_plugin_base(self), i);
-			if (param) {
-				int32_t minval;
-				int32_t maxval;
-				float value;
-
-				psy_audio_machineparam_range(param, &minval, &maxval);
-				value = ((maxval - minval) != 0)
-					? (temp - minval) / (float)(maxval - minval)
-					: 0.f;
-				psy_audio_machineparam_tweak(param, value);
-			}			
+			psy_audio_machine_parameter_tweak_scaled(psy_audio_plugin_base(self), param, temp);			
 		}
 		size -= sizeof(numparams) + sizeof(int) * numparams;
 		if(size) {

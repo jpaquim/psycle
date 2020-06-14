@@ -90,7 +90,7 @@ static void trackerview_onscroll(TrackerView*, psy_ui_Component* sender,
 	int stepx, int stepy);
 static void trackerview_onzoomboxchanged(TrackerView*, ZoomBox* sender);
 static void trackerview_ontimer(TrackerView*, psy_ui_Component* sender, 
-	int timerid);
+	uintptr_t timerid);
 static void trackerview_onseqlinetick(TrackerView*, psy_audio_Sequencer*);
 static void trackergrid_inputevent(TrackerGrid*, const psy_audio_PatternEvent*,
 	int chordmode);
@@ -2948,7 +2948,7 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	}
 }
 
-void trackerview_ontimer(TrackerView* self, psy_ui_Component* sender, int timerid)
+void trackerview_ontimer(TrackerView* self, psy_ui_Component* sender, uintptr_t timerid)
 {
 	if (timerid == TIMERID_TRACKERVIEW && self->grid.pattern) {
 		if (self->doseqtick && psy_audio_player_playing(self->grid.player)) {
@@ -3048,6 +3048,10 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	if (strcmp(psy_properties_key(property), "centercursoronscreen") == 0) {
 		trackerview_setcentermode(self, psy_properties_value(property));
 	} else
+	if (strcmp(psy_properties_key(property), "notetab") == 0) {
+		self->grid.notestabmode = self->griddefaults.notestabmode =
+			workspace_notetabmode(self->workspace);
+	} else
 	if (strcmp(psy_properties_key(property), "font") == 0) {
 		psy_ui_FontInfo fontinfo;
 		psy_ui_Font font;		
@@ -3080,6 +3084,10 @@ void trackerview_readconfig(TrackerView* self)
 		self->wraparound = psy_properties_bool(pv, "wraparound", 1);
 		trackerview_showemptydata(self, psy_properties_bool(pv, "drawemptydata", 1));
 		trackerview_setcentermode(self, psy_properties_bool(pv, "centercursoronscreen", 1));
+		self->grid.notestabmode = self->griddefaults.notestabmode =
+			(psy_properties_bool(pv, "notetab", 0))
+			? psy_dsp_NOTESTAB_A440
+			: psy_dsp_NOTESTAB_A220;
 		{
 			psy_ui_FontInfo fontinfo;
 			psy_ui_Font font;

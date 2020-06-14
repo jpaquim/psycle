@@ -668,6 +668,7 @@ void choicemachineparam_tweak(psy_audio_ChoiceMachineParam* self, float value)
 		scaled = (int)(value * (self->maxval - self->minval) + 0.5f) +
 			self->minval;
 		*self->data = scaled;
+		psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
 	}
 }
 

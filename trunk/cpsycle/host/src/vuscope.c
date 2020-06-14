@@ -35,7 +35,7 @@ static void vuscope_ondestroy(VuScope*);
 static void vuscope_ondraw(VuScope*, psy_ui_Component* sender, psy_ui_Graphics*);
 static void vuscope_drawscale(VuScope*, psy_ui_Graphics*);
 static void vuscope_drawbars(VuScope*, psy_ui_Graphics*);
-static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, int timerid);
+static void vuscope_ontimer(VuScope*, psy_ui_Component* sender, uintptr_t timerid);
 static void vuscope_onsrcmachineworked(VuScope*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void vuscope_onsongchanged(VuScope*, Workspace*,
 	int flag, psy_audio_SongFile* songfile);
@@ -312,7 +312,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	// bufDC.SelectObject(oldFont);
 }
 
-void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, int timerid)
+void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		psy_ui_component_invalidate(&self->component);

@@ -132,7 +132,7 @@ static void cpuview_initresources(CPUView*);
 static void cpuview_initperformance(CPUView*);
 static void cpuview_initmodules(CPUView*, Workspace* workspace);
 static void cpuview_ontimer(CPUView*, psy_ui_Component* sender,
-	int timerid);
+	uintptr_t timerid);
 
 void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -214,7 +214,7 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 }
 
 void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
-	int timerid)
+	uintptr_t timerid)
 {
 	uintptr_t nummachines;
 #if defined(DIVERSALIS__OS__MICROSOFT) && WINVER >= 0x600

@@ -7,17 +7,18 @@
 #include "uilabel.h"
 #include "uibutton.h"
 #include "player.h"
+#include "workspace.h"
 
 // aim: displays a playback counter in beats unit
 
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label header;
-	psy_ui_Label position;		
-	psy_dsp_beat_t lastposition;
-	psy_audio_Player* player;
+	psy_ui_Label position;
+	Workspace* workspace;
 } PlayPosBar;
 
-void playposbar_init(PlayPosBar*, psy_ui_Component* parent,psy_audio_Player* player);
+void playposbar_init(PlayPosBar*, psy_ui_Component* parent,
+	Workspace* workspace);
 
 #endif

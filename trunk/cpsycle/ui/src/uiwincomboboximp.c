@@ -52,8 +52,8 @@ static psy_List* dev_children(psy_ui_win_ComboBoxImp* self, int recursive) { ret
 static void dev_enableinput(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_enableinput(&self->win_component_imp.imp); }
 static void dev_preventinput(psy_ui_win_ComboBoxImp* self) { self->win_component_imp.imp.vtable->dev_preventinput(&self->win_component_imp.imp); }
 static void dev_setcursor(psy_ui_win_ComboBoxImp* self, psy_ui_CursorStyle style) { self->win_component_imp.imp.vtable->dev_setcursor(&self->win_component_imp.imp, style); }
-static void dev_starttimer(psy_ui_win_ComboBoxImp* self, unsigned int id, unsigned int interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
-static void dev_stoptimer(psy_ui_win_ComboBoxImp* self, unsigned int id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }
+static void dev_starttimer(psy_ui_win_ComboBoxImp* self, uintptr_t id, uintptr_t interval) { self->win_component_imp.imp.vtable->dev_starttimer(&self->win_component_imp.imp, id, interval); }
+static void dev_stoptimer(psy_ui_win_ComboBoxImp* self, uintptr_t id) { self->win_component_imp.imp.vtable->dev_stoptimer(&self->win_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_win_ComboBoxImp* self, int ressourceid) { self->win_component_imp.imp.vtable->dev_seticonressource(&self->win_component_imp.imp, ressourceid); }
 static psy_ui_TextMetric dev_textmetric(psy_ui_win_ComboBoxImp* self, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp, font); }
 static psy_ui_Size dev_textsize(psy_ui_win_ComboBoxImp* self, const char* text, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textsize(&self->win_component_imp.imp, text, font); }

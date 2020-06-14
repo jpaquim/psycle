@@ -127,8 +127,8 @@ void psy_audio_sequencer_dispose(psy_audio_Sequencer* self)
 	psy_audio_sequencer_clearcurrtracks(self);	
 	psy_table_dispose(&self->lastmachine);
 	psy_signal_dispose(&self->signal_linetick);
-	self->sequence = 0;
-	self->machines = 0;
+	self->sequence = NULL;
+	self->machines = NULL;
 }
 
 void psy_audio_sequencer_reset(psy_audio_Sequencer* self, psy_audio_Sequence*
@@ -152,6 +152,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->looping = TRUE;
 	self->numplaybeats = (psy_dsp_beat_t)4.0f;
 	self->position = (psy_dsp_beat_t)0.f;
+	self->playcounter = 0;
 	self->window = (psy_dsp_beat_t)0.f;
 	self->linetickcount = (psy_dsp_beat_t)0.f;	
 	self->mode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
@@ -178,13 +179,14 @@ void psy_audio_sequencer_setposition(psy_audio_Sequencer* self,
 }
 
 void psy_audio_sequencer_start(psy_audio_Sequencer* self)
-{	
-	self->linetickcount = 0;
+{		
+	self->playcounter = 0;
 	psy_audio_sequencerjump_init(&self->jump);
 	psy_audio_sequencerrowdelay_init(&self->rowdelay);
 	psy_audio_sequencerloop_init(&self->loop);
 	self->lpbspeed = (psy_dsp_beat_t)1.f;
 	psy_audio_sequencer_compute_beatspersample(self);
+	self->linetickcount = 0.f;
 	if (self->mode == psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 		psy_audio_sequencer_setbarloop(self);
 	}
@@ -340,6 +342,9 @@ void freeentries(psy_List* events)
 void psy_audio_sequencer_frametick(psy_audio_Sequencer* self, uintptr_t
 	numframes)
 {	
+	if (self->playing) {
+		self->playcounter += numframes;
+	}
 	psy_audio_sequencer_tick(self, psy_audio_sequencer_frametooffset(self,
 		numframes));
 }
@@ -393,13 +398,15 @@ void psy_audio_sequencer_updateplaymodeposition(psy_audio_Sequencer* self)
 void psy_audio_sequencer_notifysequencertick(psy_audio_Sequencer* self,
 	psy_dsp_beat_t width)
 {
-	psy_TableIterator it;	
-	
-	for (it = psy_audio_machines_begin(self->machines);
+	if (self->machines) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_machines_begin(self->machines);
 			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {		
-		psy_audio_machine_sequencertick((psy_audio_Machine*)
-			psy_tableiterator_value(&it));
+			psy_tableiterator_inc(&it)) {
+			psy_audio_machine_sequencertick((psy_audio_Machine*)
+				psy_tableiterator_value(&it));
+		}
 	}
 }
 
@@ -443,7 +450,7 @@ int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer* self) {
 		psy_audio_PatternEntry* entry;			
 		
 		entry = psy_audio_patternnode_entry(p);
-		if (patternentry_front(entry)->mach != NOTECOMMANDS_EMPTY) {
+		if (patternentry_front(entry)->mach != NOTECOMMANDS_EMPTY && self->machines) {
 			psy_audio_Machine* machine;				
 				
 			machine = psy_audio_machines_at(self->machines,
@@ -714,28 +721,27 @@ INLINE int psy_audio_sequencer_isoffsetinwindow(psy_audio_Sequencer* self,
 void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 	psy_audio_PatternEntry* patternentry,
 	psy_audio_SequencerTrack* track, psy_dsp_beat_t offset)
-{		
+{			
 	if (patternentry_front(patternentry)->note == NOTECOMMANDS_TWEAKSLIDE) {
 		psy_audio_sequencer_maketweakslideevents(self, patternentry, offset);
 	} else
 	if (patternentry_front(patternentry)->note < NOTECOMMANDS_TWEAK ||
 			patternentry_front(patternentry)->note == NOTECOMMANDS_EMPTY) {
-		psy_audio_Machine* machine;
+		if (self->machines) {
+			psy_audio_Machine* machine;
 
-		machine = psy_audio_machines_at(self->machines, patternentry_front(patternentry)->mach);
-		// Does this machine really exist and is not muted?
-		if (machine && !psy_audio_machine_muted(machine)) {
-			if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
-				psy_audio_sequencer_notedelay(self, patternentry, offset);
-			} else
-			if (patternentry_front(patternentry)->cmd == RETRIGGER) {
-				psy_audio_sequencer_retrigger(self, patternentry, track, offset);
-			} else
-			if (patternentry_front(patternentry)->cmd == RETR_CONT) {
-				psy_audio_sequencer_retriggercont(self, patternentry, track, offset);
-			} else
-			if (patternentry_front(patternentry)->cmd != SET_VOLUME) {
-				psy_audio_sequencer_note(self, patternentry, offset);
+			machine = psy_audio_machines_at(self->machines, patternentry_front(patternentry)->mach);
+			// Does this machine really exist and is not muted?
+			if (machine && !psy_audio_machine_muted(machine)) {
+				if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
+					psy_audio_sequencer_notedelay(self, patternentry, offset);
+				} else if (patternentry_front(patternentry)->cmd == RETRIGGER) {
+					psy_audio_sequencer_retrigger(self, patternentry, track, offset);
+				} else if (patternentry_front(patternentry)->cmd == RETR_CONT) {
+					psy_audio_sequencer_retriggercont(self, patternentry, track, offset);
+				} else if (patternentry_front(patternentry)->cmd != SET_VOLUME) {
+					psy_audio_sequencer_note(self, patternentry, offset);
+				}
 			}
 		}
 		if (patternentry_front(patternentry)->cmd == SET_VOLUME) {
@@ -878,6 +884,9 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 	uintptr_t framesperslide = 64;
 	uintptr_t numslides;
 	
+	if (!self->machines) {
+		return;
+	}
 	machine = psy_audio_machines_at(self->machines, patternentry_front(entry)->mach);
 	if (!machine) {
 		return;

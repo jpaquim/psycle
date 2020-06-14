@@ -40,7 +40,8 @@ static void onprevsample(SamplesHeaderView*, psy_ui_Component* sender);
 static void onnextsample(SamplesHeaderView*, psy_ui_Component* sender);
 static void oneditsamplename(SamplesHeaderView*, psy_ui_Edit* sender);
 /// General Settings View
-static void initsamplesgeneralview(SamplesGeneralView*, psy_ui_Component* parent);
+static void initsamplesgeneralview(SamplesGeneralView*, psy_ui_Component* parent,
+	Workspace* workspace);
 static void setsamplesamplesgeneralview(SamplesGeneralView*, psy_audio_Sample* sample);
 static void generalviewfillpandescription(SamplesGeneralView*, char* txt);
 static void ongeneralviewdescribe(SamplesGeneralView*, psy_ui_Slider*, char* txt);
@@ -234,6 +235,7 @@ void samplessongimportview_oncopy(SamplesSongImportView* self,
 		psy_audio_instrument_init(instrument);
 		psy_audio_instrument_setname(instrument, psy_audio_sample_name(samplecopy));
 		psy_audio_instrument_setindex(instrument, dst.slot);
+
 		instruments_insert(&self->workspace->song->instruments, instrument,
 			instrumentindex_make(0, dst.slot));
 		samplesview_setsample(self->view, dst);
@@ -258,6 +260,10 @@ void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
 		: 0;
 	wavebox_setsample(&self->samplebox, sample, 0);
 }
+
+// SamplesView
+static void samplesview_onconfigchanged(SamplesView*, Workspace*,
+	psy_Properties*);
 
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -322,7 +328,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	initsamplesgeneralview(&self->general, psy_ui_notebook_base(
-		&self->notebook));
+		&self->notebook), workspace);
 	psy_ui_component_setalign(&self->general.component, psy_ui_ALIGN_TOP);
 	initsamplesvibratoview(&self->vibrato, psy_ui_notebook_base(&self->notebook),
 		&workspace->player);
@@ -351,6 +357,14 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	samplesview_setsample(self, sampleindex_make(0, 0));
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
 		samplesview_onsamplemodified);
+	psy_signal_connect(&self->workspace->signal_configchanged, self,
+		samplesview_onconfigchanged);
+}
+
+void samplesview_onconfigchanged(SamplesView* self, Workspace* sender,
+	psy_Properties* property)
+{
+	self->general.notestabmode = workspace_notetabmode(sender);
 }
 
 void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender)
@@ -415,13 +429,17 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			psy_audio_Sample* sample;
 			psy_audio_SampleIndex index;
 			psy_audio_Instrument* instrument;
+			psy_audio_InstrumentEntry entry;
 
 			sample = psy_audio_sample_allocinit(2);
 			psy_audio_sample_load(sample, psy_ui_opendialog_filename(&dialog));
 			index = samplesbox_selected(&self->samplesbox);
 			psy_audio_samples_insert(&self->workspace->song->samples, sample,
 				index);
-			instrument = psy_audio_instrument_allocinit();
+			instrument = psy_audio_instrument_allocinit();			
+			psy_audio_instrumententry_init(&entry);
+			entry.sampleindex = index;
+			psy_audio_instrument_addentry(instrument, &entry);
 			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
 			instruments_insert(&self->workspace->song->instruments, instrument,
 				instrumentindex_make(0, index.slot));
@@ -672,7 +690,8 @@ void onnextsample(SamplesHeaderView* self, psy_ui_Component* sender)
 		instruments_slot(self->instruments) + 1 : 255);*/
 }
 
-void initsamplesgeneralview(SamplesGeneralView* self, psy_ui_Component* parent)
+void initsamplesgeneralview(SamplesGeneralView* self, psy_ui_Component* parent,
+	Workspace* workspace)
 {	
 	psy_ui_Margin margin;
 	psy_ui_Slider* sliders[] = {
@@ -689,7 +708,7 @@ void initsamplesgeneralview(SamplesGeneralView* self, psy_ui_Component* parent)
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	self->notestabmode = psy_dsp_NOTESTAB_DEFAULT;
+	self->notestabmode = workspace_notetabmode(workspace);
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_slider_init(&self->defaultvolume, &self->component);
@@ -1018,7 +1037,7 @@ psy_audio_WaveForms comboboxtowaveform(int combobox_index)
 }
 
 #define TIMERID_SAMPLESLOOPVIEW 15000
-static void samplesloopview_ontimer(SamplesLoopView*, psy_ui_Component* sender, int timerid);
+static void samplesloopview_ontimer(SamplesLoopView*, psy_ui_Component* sender, uintptr_t timerid);
 
 void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	SamplesView* view)
@@ -1160,7 +1179,7 @@ int LoopTypeToComboBox(psy_audio_SampleLoopType looptype)
 }
 
 void samplesloopview_ontimer(SamplesLoopView* self, psy_ui_Component* sender,
-	int timerid)
+	uintptr_t timerid)
 {
 	if (!psy_audio_sampleloop_equal(&self->currloop, &self->sample->loop) ||
 			!psy_audio_sampleloop_equal(&self->currsustainloop,

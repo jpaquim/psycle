@@ -81,8 +81,8 @@ static psy_List* dev_children(psy_ui_xt_ComponentImp*, int recursive);
 static void dev_enableinput(psy_ui_xt_ComponentImp*);
 static void dev_preventinput(psy_ui_xt_ComponentImp*);
 static void dev_setcursor(psy_ui_xt_ComponentImp*, psy_ui_CursorStyle);
-static void dev_starttimer(psy_ui_xt_ComponentImp*, unsigned int id, unsigned int interval);
-static void dev_stoptimer(psy_ui_xt_ComponentImp*, unsigned int id);
+static void dev_starttimer(psy_ui_xt_ComponentImp*, uintptr_t id, uintptr_t interval);
+static void dev_stoptimer(psy_ui_xt_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_xt_ComponentImp*, int ressourceid);
 static psy_ui_TextMetric dev_textmetric(psy_ui_xt_ComponentImp*, psy_ui_Font*);
 static psy_ui_Size dev_textsize(psy_ui_xt_ComponentImp*, const char* text, psy_ui_Font*);
@@ -867,8 +867,8 @@ void dev_setcursor(psy_ui_xt_ComponentImp* self, psy_ui_CursorStyle cursorstyle)
 	//}
 }
 
-void dev_starttimer(psy_ui_xt_ComponentImp* self, unsigned int id,
-	unsigned int interval)
+void dev_starttimer(psy_ui_xt_ComponentImp* self, uintptr_t id,
+	uintptr_t interval)
 {
 //	SetTimer(self->hwnd, id, interval, 0);
 }

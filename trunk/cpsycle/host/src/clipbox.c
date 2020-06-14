@@ -15,7 +15,7 @@ static void clipbox_ondestroy(ClipBox*, psy_ui_Component* sender);
 static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
 static void clipbox_currclipcolors(ClipBox*, psy_ui_Color* currbackground,
 	psy_ui_Color* currborder);
-static void clipbox_ontimer(ClipBox*, int timerid);
+static void clipbox_ontimer(ClipBox*, uintptr_t timerid);
 static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
 static void clipbox_onmasterworked(ClipBox*, psy_audio_Machine* master, uintptr_t slot,
 	psy_audio_BufferContext*);
@@ -81,7 +81,7 @@ void clipbox_ondestroy(ClipBox* self, psy_ui_Component* sender)
 	}
 }
 
-void clipbox_ontimer(ClipBox* self, int timerid)
+void clipbox_ontimer(ClipBox* self, uintptr_t timerid)
 {	
 	if (clipbox_isclipon(self)) {
 		psy_ui_component_stoptimer(&self->component, TIMER_ID_CLIPBOX);

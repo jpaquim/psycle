@@ -72,10 +72,13 @@ typedef struct {
 	psy_ui_Label desc;
 	psy_ui_Label duration;	
 	psy_audio_Sequence* sequence;
+	float duration_ms;
+	Workspace* workspace;
 } SequenceViewDuration;
 
 void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
-	psy_audio_Sequence*);
+	psy_audio_Sequence*, Workspace* workspace);
+float sequenceduration_calcdurationms(SequenceViewDuration*);
 
 typedef struct {
 	psy_ui_Component component;	

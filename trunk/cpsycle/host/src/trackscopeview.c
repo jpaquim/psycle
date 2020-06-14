@@ -24,7 +24,7 @@ void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
 void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, int x,
 	int y, int width, int height, int track);
 static void trackscopeview_ontimer(TrackScopeView*, psy_ui_Component* sender,
-	int timerid);
+	uintptr_t timerid);
 static void trackscopeview_onalign(TrackScopeView*);
 static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -226,7 +226,7 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 		psy_ui_intpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
 }
 
-void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, int timerid)
+void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, uintptr_t timerid)
 {
 	psy_ui_component_invalidate(&self->component);	
 }

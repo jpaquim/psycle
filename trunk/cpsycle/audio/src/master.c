@@ -194,7 +194,7 @@ const psy_audio_MachineInfo* info(psy_audio_Master* self)
 
 void master_generateaudio(psy_audio_Master* self, psy_audio_BufferContext* bc)
 {
-	psy_audio_buffer_mulsamples(bc->output, bc->numsamples, self->volume);
+	psy_audio_buffer_mulsamples(bc->output, bc->numsamples, self->volume);	
 }
 
 void master_seqtick(psy_audio_Master* self, uintptr_t channel,

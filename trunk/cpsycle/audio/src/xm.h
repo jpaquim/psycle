@@ -4,13 +4,36 @@
 #ifndef psy_audio_XM_H
 #define psy_audio_XM_H
 
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct psy_audio_SongFile;
 
+struct MODHEADER
+{
+	uint8_t songlength;
+	uint8_t unused;
+	uint8_t order[128];
+	uint8_t pID[4];
+};
+
+struct MODSAMPLEHEADER
+{
+	char sampleName[22];
+	uint16_t sampleLength;
+	uint8_t finetune;
+	uint8_t volume;
+	uint16_t loopStart;
+	uint16_t loopLength;
+};
+
 void psy_audio_xm_load(struct psy_audio_SongFile*);
+void psy_audio_xi_load(struct psy_audio_SongFile*, uintptr_t slot);
+bool psy_audio_mod_load(struct psy_audio_SongFile*);
+bool psy_audio_mod_isvalid(struct psy_audio_SongFile*);
 
 #ifdef __cplusplus
 }

@@ -55,7 +55,7 @@ static void stepsequencerbar_onpreferredsize(StepsequencerBar*, psy_ui_Size* lim
 	psy_ui_Size* rv);
 
 // view
-static void stepsequencerview_ontimer(StepsequencerView*, int timerid);
+static void stepsequencerview_ontimer(StepsequencerView*, uintptr_t timerid);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
 	Workspace* sender, int flag, psy_audio_SongFile* songfile);
 static void stepsequencerview_onsteprowselected(StepsequencerView*,
@@ -545,7 +545,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_starttimer(&self->component, TIMERID_STEPSEQUENCERVIEW, 50);
 }
 
-void stepsequencerview_ontimer(StepsequencerView* self, int timerid)
+void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 {
 	if (timerid == TIMERID_STEPSEQUENCERVIEW) {
 		steptimer_tick(&self->steptimer);

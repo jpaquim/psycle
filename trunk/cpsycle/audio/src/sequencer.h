@@ -71,6 +71,7 @@ typedef struct {
 	psy_dsp_beat_t playbeatloopend;
 	psy_dsp_beat_t numplaybeats;
 	psy_Signal signal_linetick;
+	uintptr_t playcounter;
 } psy_audio_Sequencer;
 
 void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,
@@ -203,6 +204,13 @@ INLINE psy_dsp_beat_t psy_audio_sequencer_currbeatsperline(psy_audio_Sequencer* 
 }
 
 void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, const PatternNode*);
+
+// elapsed playtime in seconds
+INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
+	psy_audio_Sequencer* self)
+{
+	return self->playcounter / (psy_dsp_seconds_t)self->samplerate;
+}
 
 #ifdef __cplusplus
 }

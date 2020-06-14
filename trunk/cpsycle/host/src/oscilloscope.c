@@ -30,7 +30,7 @@ static void oscilloscope_init_memory(Oscilloscope*);
 static void oscilloscope_ondestroy(Oscilloscope*);
 static void oscilloscope_deallocate_holdbuffer(Oscilloscope*);
 static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Graphics*);
-static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, int timerid);
+static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, uintptr_t timerid);
 static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*,
 	uintptr_t slot, psy_audio_BufferContext*);
 static void oscilloscope_onsongchanged(Oscilloscope*, Workspace*, int flag, psy_audio_SongFile*);
@@ -226,7 +226,7 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
 }
 
 void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender,
-	int timerid)
+	uintptr_t timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		psy_ui_component_invalidate(&self->component);

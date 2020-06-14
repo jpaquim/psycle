@@ -7,14 +7,15 @@
 
 #include <uiwincomponentimp.h>
 
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TIMERID_MACHINEEDITORVIEW 420
 
-static void machineeditorview_ondestroy(MachineEditorView* self, psy_ui_Component* sender);
-static void onpreferredsize(MachineEditorView* self, psy_ui_Size* limit, psy_ui_Size* rv);
-static void ontimer(MachineEditorView*, int id);
+static void machineeditorview_ondestroy(MachineEditorView*, psy_ui_Component* sender);
+static void machineeditorview_onpreferredsize(MachineEditorView*,
+	psy_ui_Size* limit, psy_ui_Size* rv);
+static void machineeditorview_ontimer(MachineEditorView*, uintptr_t id);
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
@@ -23,25 +24,26 @@ static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* s
 }
 #endif
 
-static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static psy_ui_ComponentVtable machineeditorview_vtable;
+static int machineeditorview_vtable_initialized = 0;
 
-static void vtable_init(MachineEditorView* self)
+static void machineeditorview_vtable_init(MachineEditorView* self)
 {
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)onpreferredsize;
-		vtable.ontimer = (psy_ui_fp_ontimer)ontimer;
+	if (!machineeditorview_vtable_initialized) {
+		machineeditorview_vtable = *(self->component.vtable);
+		machineeditorview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			machineeditorview_onpreferredsize;
+		machineeditorview_vtable.ontimer = (psy_ui_fp_ontimer)machineeditorview_ontimer;
 	}
 }
 
-void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent, psy_audio_Machine* machine,
-	Workspace* workspace)
-{		
-	self->machine = machine;
+void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
+	psy_audio_Machine* machine, Workspace* workspace)
+{			
 	psy_ui_component_init(&self->component, parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	machineeditorview_vtable_init(self);
+	self->component.vtable = &machineeditorview_vtable;
+	self->machine = machine;
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_audio_machine_seteditorhandle(machine,
 		(void*) psy_ui_win_component_details(&self->component)->hwnd);
@@ -63,8 +65,8 @@ MachineEditorView* machineeditorview_alloc(void)
 	return (MachineEditorView*) malloc(sizeof(MachineEditorView));
 }
 
-MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent, psy_audio_Machine* machine,
-	Workspace* workspace)
+MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
+	psy_audio_Machine* machine, Workspace* workspace)
 {
 	MachineEditorView* rv;
 
@@ -75,12 +77,13 @@ MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent, psy_aud
 	return rv;	
 }
 
-void ontimer(MachineEditorView* self, int timerid)
+void machineeditorview_ontimer(MachineEditorView* self, uintptr_t timerid)
 {	
 	psy_audio_machine_editoridle(self->machine);
 }
 
-void onpreferredsize(MachineEditorView* self, psy_ui_Size* limit, psy_ui_Size* rv)
+void machineeditorview_onpreferredsize(MachineEditorView* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
 	if (rv) {		
 		int width;

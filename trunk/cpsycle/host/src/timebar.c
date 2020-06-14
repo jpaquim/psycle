@@ -10,7 +10,7 @@ static void timerbar_onlesslessclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onlessclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onmoreclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onmoremoreclicked(TimeBar*, psy_ui_Component* sender);
-static void timerbar_ontimer(TimeBar*, psy_ui_Component* sender, int timerid);
+static void timerbar_ontimer(TimeBar*, psy_ui_Component* sender, uintptr_t timerid);
 static void timerbar_offsetbpm(TimeBar*, psy_dsp_beat_t bpm);
 
 void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* player)
@@ -88,7 +88,7 @@ void timerbar_offsetbpm(TimeBar* self, psy_dsp_beat_t delta)
 	}
 }
 
-void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, int timerid)
+void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, uintptr_t timerid)
 {		
 	if (self->bpm != psy_audio_player_bpm(self->player)) {
 		char txt[20];
