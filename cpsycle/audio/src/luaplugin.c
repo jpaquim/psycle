@@ -27,7 +27,7 @@
 static void generateaudio(psy_audio_LuaPlugin*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_LuaPlugin*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
-static void sequencerlinetick(psy_audio_LuaPlugin*);
+static void newline(psy_audio_LuaPlugin*);
 static psy_audio_MachineInfo* info(psy_audio_LuaPlugin*);
 static uintptr_t numparameters(psy_audio_LuaPlugin*);
 static unsigned int numparametercols(psy_audio_LuaPlugin*);
@@ -83,8 +83,8 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 		vtable = *self->custommachine.machine.vtable;
 		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
-		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
-			sequencerlinetick;
+		vtable.newline = (fp_machine_newline)
+			newline;
 		vtable.info = (fp_machine_info) info;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
@@ -263,7 +263,7 @@ void seqtick(psy_audio_LuaPlugin* self, uintptr_t channel,
 	psy_audio_lock_leave(self->lock);
 }
 
-void sequencerlinetick(psy_audio_LuaPlugin* self)
+void newline(psy_audio_LuaPlugin* self)
 {	
 	psy_LuaImport in;
 	

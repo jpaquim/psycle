@@ -119,18 +119,16 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 	psy_ui_setcolor(g, 0x00333333);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, 0x00333333);
-	for (key = keymin; key < keymax; ++key) {					
-		psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
+	for (key = keymin; key < keymax; ++key) {
 		if (!isblack(key)) {
 			psy_ui_Rectangle r;
 
 			psy_ui_setrectangle(&r,
-				(int)cp, 0,
-				(int)(self->metrics.keysize + 0.5), size.height);
+				(int)(cp), 0,
+				(int)(self->metrics.keysize + 1), size.height);
 			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
 			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
-			cp += self->metrics.keysize;
-			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
+			cp += self->metrics.keysize;			
 		}
 	}
 	psy_ui_settextcolor(g, 0x00CACACA);
@@ -588,7 +586,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_label_settext(&self->label, "Notemap");
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
 	samplesbox_init(&self->samplesbox, &self->component, NULL);
-	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0));

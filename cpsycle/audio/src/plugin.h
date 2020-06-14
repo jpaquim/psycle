@@ -16,7 +16,7 @@ typedef struct psy_audio_Plugin {
 	struct CMachineInterface* mi;
 	psy_Library library;	
 	psy_audio_MachineInfo* plugininfo;
-	unsigned int preventsequencerlinetick;
+	unsigned int preventnewline;
 	psy_Table parameters;
 } psy_audio_Plugin;
 

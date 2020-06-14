@@ -119,6 +119,7 @@ unsigned int sequence_maxtracksize(psy_audio_Sequence*);
 int sequence_patternused(psy_audio_Sequence*, unsigned int patternslot);
 void sequence_setpatternslot(psy_audio_Sequence*, SequencePosition, unsigned int slot);
 psy_dsp_beat_t sequence_duration(psy_audio_Sequence*);
+float psy_audio_sequence_calcdurationinms(psy_audio_Sequence*);
 SequencePosition sequence_makeposition(psy_audio_Sequence*, SequenceTracks*, psy_List* entries);
 SequencePosition sequence_positionfromid(psy_audio_Sequence*, int id);
 void sequence_setplayselection(psy_audio_Sequence*, struct SequenceSelection*);

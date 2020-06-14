@@ -33,6 +33,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_settext(&self->header, "Groups first sample");
+	psy_ui_label_setcharnumber(&self->header, 25);
 	psy_ui_component_setmargin(&self->header.component, &margin);
 	psy_ui_listbox_init(&self->subsamplelist, &self->component);
 	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);

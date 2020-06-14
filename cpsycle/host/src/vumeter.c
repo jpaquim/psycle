@@ -12,7 +12,7 @@
 
 static void vumeter_ondestroy(Vumeter*, psy_ui_Component* sender);
 static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
-static void vumeter_ontimer(Vumeter*, psy_ui_Component* sender, int timerid);
+static void vumeter_ontimer(Vumeter*, psy_ui_Component* sender, uintptr_t timerid);
 
 static VumeterSkin vumeterdefaultskin;
 static int vumeterdefaultskin_initialized = 0;
@@ -94,7 +94,7 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	psy_ui_drawsolidrectangle(g, right, self->skin.border);
 }
 
-void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, int timerid)
+void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
 	if (timerid == TIMERID_MASTERVU && self->workspace->song) {
 		psy_audio_Machine* master;

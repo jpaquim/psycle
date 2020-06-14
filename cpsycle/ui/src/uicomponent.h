@@ -110,7 +110,7 @@ typedef void (*psy_ui_fp_onmouseenter)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onmouseleave)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onkeydown)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
-typedef void (*psy_ui_fp_ontimer)(struct psy_ui_Component*, int);
+typedef void (*psy_ui_fp_ontimer)(struct psy_ui_Component*, uintptr_t);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -283,6 +283,8 @@ void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
+void psy_ui_component_preventpreferredsize(psy_ui_Component*);
+void psy_ui_component_enablepreferredsize(psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
 void psy_ui_component_doublebuffer(psy_ui_Component*);
 void psy_ui_component_setcursor(psy_ui_Component*, psy_ui_CursorStyle);
@@ -336,9 +338,9 @@ typedef psy_List* (*psy_ui_fp_componentimp_dev_children)(struct psy_ui_Component
 typedef void (*psy_ui_fp_componentimp_dev_enableinput)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_preventinput)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setcursor)(struct psy_ui_ComponentImp*, psy_ui_CursorStyle);
-typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp*, unsigned int id,
+typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp*, uintptr_t id,
 	unsigned int interval);
-typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, unsigned int id);
+typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
 typedef psy_ui_TextMetric (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*, psy_ui_Font* font);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(struct psy_ui_ComponentImp*, const char* text, psy_ui_Font*);
@@ -433,13 +435,13 @@ INLINE psy_ui_Rectangle psy_ui_component_position(psy_ui_Component* self)
 	return self->imp->vtable->dev_position(self->imp);
 }
 
-INLINE void psy_ui_component_starttimer(psy_ui_Component* self, unsigned int id,
-	unsigned int interval)
+INLINE void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
+	uintptr_t interval)
 {
 	self->imp->vtable->dev_starttimer(self->imp, id, interval);
 }
 
-INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, unsigned int id)
+INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
 {
 	self->imp->vtable->dev_stoptimer(self->imp, id);
 }

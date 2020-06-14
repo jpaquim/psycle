@@ -28,7 +28,7 @@ static void spectrumanalyzer_ondestroy(SpectrumAnalyzer*);
 static void spectrumanalyzer_ondraw(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawbackground(SpectrumAnalyzer*, psy_ui_Graphics*);
 static void spectrumanalyzer_drawspectrum(SpectrumAnalyzer*, psy_ui_Graphics*);
-static void spectrumanalyzer_ontimer(SpectrumAnalyzer*, psy_ui_Component* sender, int timerid);
+static void spectrumanalyzer_ontimer(SpectrumAnalyzer*, psy_ui_Component* sender, uintptr_t timerid);
 static void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer*,
 	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
 static void spectrumanalyzer_onsongchanged(SpectrumAnalyzer*, Workspace*,
@@ -310,7 +310,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, 4, 128 - 14, buf, strlen(buf));
 }
 
-void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, int timerid)
+void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		psy_ui_component_invalidate(&self->component);

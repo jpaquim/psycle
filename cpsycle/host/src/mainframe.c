@@ -27,7 +27,7 @@ static void mainframe_initvubar(MainFrame*);
 static void mainframe_updatetext(MainFrame*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
-static void mainframe_destroyed(MainFrame*, psy_ui_Component* component);
+static void mainframe_destroyed(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onmousedown(MainFrame*, psy_ui_MouseEvent*);
@@ -54,7 +54,7 @@ static void mainframe_onviewselected(MainFrame*, Workspace*, int view,
 static void mainframe_onrender(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onshowgear(MainFrame*, Workspace* sender);
 static void mainframe_updatetitle(MainFrame*);
-static void mainframe_ontimer(MainFrame*, int timerid);
+static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 
@@ -127,14 +127,14 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(&self->terminal.component, psy_ui_ALIGN_BOTTOM);	
 	psy_ui_component_resize(&self->terminal.component,
 		psy_ui_size_make(
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0)));
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0)));	
+	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
+	psy_ui_component_setalign(&self->splitbarterminal.component,
+		psy_ui_ALIGN_BOTTOM);
 	kbdhelp_init(&self->kbdhelp, &self->component, &self->workspace);
 	psy_ui_component_setalign(kbdhelp_base(&self->kbdhelp),
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
-	psy_ui_splitbar_init(&self->splitbarterminal, &self->component);
-	psy_ui_component_setalign(&self->splitbarterminal.component,
-		psy_ui_ALIGN_BOTTOM);	
 	psy_signal_connect(&self->component.signal_destroyed, self,
 		mainframe_destroyed);
 	psy_ui_component_init(&self->top, &self->component);
@@ -429,7 +429,7 @@ void mainframe_initbars(MainFrame* self)
 	filebar_init(&self->filebar, &self->toprow0, &self->workspace);	
 	undoredobar_init(&self->undoredobar, &self->toprow0, &self->workspace);	
 	playbar_init(&self->playbar, &self->toprow0, &self->workspace);	
-	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace.player);	
+	playposbar_init(&self->playposbar, &self->toprow0, &self->workspace);	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
@@ -834,7 +834,7 @@ void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 	psy_ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
 }
 
-void mainframe_ontimer(MainFrame* self, int timerid)
+void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 {
 	workspace_idle(&self->workspace);
 }

@@ -27,7 +27,7 @@ static void playbar_onnumplaybeatsmore(PlayBar*, psy_ui_Button* sender);
 static void playbar_onplayclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_startplay(PlayBar*);
 static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
-static void playbar_ontimer(PlayBar*, psy_ui_Component* sender, int timerid);
+static void playbar_ontimer(PlayBar*, psy_ui_Component* sender, uintptr_t timerid);
 static void playbar_onlanguagechanged(PlayBar*, psy_ui_Component* sender);
 
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
@@ -243,7 +243,7 @@ void playbar_onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 	}
 }
 
-void playbar_ontimer(PlayBar* self, psy_ui_Component* sender, int timerid)
+void playbar_ontimer(PlayBar* self, psy_ui_Component* sender, uintptr_t timerid)
 {
 	if (psy_audio_player_playing(self->player)) {
 		psy_ui_button_highlight(&self->play);

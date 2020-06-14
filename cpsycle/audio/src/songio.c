@@ -95,12 +95,10 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 				psy_audio_songfile_errfile(self);
 			}
 			psyfile_close(self->file);
-		} else
-		if (strcmp(header,"PSY2SONG") == 0) {
+		} else if (strcmp(header,"PSY2SONG") == 0) {
 			psy_audio_psy2_load(self);
 			psyfile_close(self->file);
-		} else 
-		if (strcmp(riff, "RIFF") == 0) {			
+		} else if (strcmp(riff, "RIFF") == 0) {			
 			psyfile_read(&file, header, 8);
 			header[8] = 0;
 			if (strcmp(&header[0], "WAVEfmt ") == 0) {
@@ -113,7 +111,13 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			if (strcmp(header, XM_HEADER) == 0) {
 				psy_audio_xm_load(self);
 			} else {
-				self->err = 2;
+				psyfile_seek(self->file, 0);
+				if (psy_audio_mod_isvalid(self)) {
+					psyfile_seek(self->file, 0);
+					psy_audio_mod_load(self);
+				} else {
+					self->err = 2;
+				}
 			}
 			psyfile_close(self->file);
 		}

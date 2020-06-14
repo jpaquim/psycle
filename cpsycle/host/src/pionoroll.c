@@ -44,7 +44,7 @@ static PatternNode* pianogrid_nextnode(Pianogrid*, PatternNode*,
 	uintptr_t track);
 static void pianogrid_ondestroy(Pianogrid*);
 
-static void pianoroll_ontimer(Pianoroll*, int timerid);
+static void pianoroll_ontimer(Pianoroll*, uintptr_t timerid);
 static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static void pianoroll_updatemetrics(Pianoroll*);
@@ -114,7 +114,7 @@ void pianoroll_ondestroy(Pianoroll* self, psy_ui_Component* component)
 {	
 }
 
-void pianoroll_ontimer(Pianoroll* self, int timerid)
+void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
 {
 	if (timerid == TIMERID_PIANOROLL && self->pattern) {		
 		if (psy_audio_player_playing(&self->workspace->player)) {

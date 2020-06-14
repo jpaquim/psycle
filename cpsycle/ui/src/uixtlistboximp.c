@@ -52,8 +52,8 @@ static psy_List* dev_children(psy_ui_xt_ListBoxImp* self, int recursive) { retur
 static void dev_enableinput(psy_ui_xt_ListBoxImp* self) { self->xt_component_imp.imp.vtable->dev_enableinput(&self->xt_component_imp.imp); }
 static void dev_preventinput(psy_ui_xt_ListBoxImp* self) { self->xt_component_imp.imp.vtable->dev_preventinput(&self->xt_component_imp.imp); }
 static void dev_setcursor(psy_ui_xt_ListBoxImp* self, psy_ui_CursorStyle style) { self->xt_component_imp.imp.vtable->dev_setcursor(&self->xt_component_imp.imp, style); }
-static void dev_starttimer(psy_ui_xt_ListBoxImp* self, unsigned int id, unsigned int interval) { self->xt_component_imp.imp.vtable->dev_starttimer(&self->xt_component_imp.imp, id, interval); }
-static void dev_stoptimer(psy_ui_xt_ListBoxImp* self, unsigned int id) { self->xt_component_imp.imp.vtable->dev_stoptimer(&self->xt_component_imp.imp, id); }
+static void dev_starttimer(psy_ui_xt_ListBoxImp* self, uintptr_t id, uintptr_t interval) { self->xt_component_imp.imp.vtable->dev_starttimer(&self->xt_component_imp.imp, id, interval); }
+static void dev_stoptimer(psy_ui_xt_ListBoxImp* self, uintptr_t id) { self->xt_component_imp.imp.vtable->dev_stoptimer(&self->xt_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_xt_ListBoxImp* self, int ressourceid) { self->xt_component_imp.imp.vtable->dev_seticonressource(&self->xt_component_imp.imp, ressourceid); }
 static psy_ui_TextMetric dev_textmetric(psy_ui_xt_ListBoxImp* self, psy_ui_Font* font) { return self->xt_component_imp.imp.vtable->dev_textmetric(&self->xt_component_imp.imp, font); }
 static psy_ui_Size dev_textsize(psy_ui_xt_ListBoxImp* self, const char* text, psy_ui_Font* font) { return self->xt_component_imp.imp.vtable->dev_textsize(&self->xt_component_imp.imp, text, font); }

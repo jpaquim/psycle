@@ -18,6 +18,8 @@
 #include "../../detail/portable.h"
 #include "fileio.h"
 #include "../../detail/psyconf.h"
+#include "stdlib.h"
+#include "../../detail/trace.h"
 
 static psy_dsp_amp_t bufferdriver[65535];
 static void* mainframe;
@@ -130,18 +132,32 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 		amount = maxamount;
 		if (amount > numsamplex) {
 			amount = numsamplex;
-		}
-		if (self->sequencer.playing) {			
-			amount = psy_audio_sequencer_updatelinetickcount(&self->sequencer,
-				amount);
+		}		
+		if (self->sequencer.playing) {
+			psy_dsp_beat_t t;			
+			
+			t = psy_audio_sequencer_frametooffset(&self->sequencer, amount);			
+			if (self->sequencer.linetickcount <= t) {
+				uintptr_t pre;
+				psy_dsp_beat_t diff;
+
+				pre = psy_audio_sequencer_frames(&self->sequencer,
+					self->sequencer.linetickcount);
+				diff = t - self->sequencer.linetickcount;
+				if (pre) {
+					psy_audio_player_workamount(self, pre, &numsamplex, &samples);
+					amount -= pre;
+				}				
+				psy_audio_player_notifylinetick(self);
+				psy_audio_sequencer_onlinetick(&self->sequencer);										
+				self->sequencer.linetickcount -= diff;
+			} else {
+				self->sequencer.linetickcount -= t;
+			}
 		}
 		if (amount > 0) {
 			psy_audio_player_workamount(self, amount, &numsamplex, &samples);
-		}
-		if (self->sequencer.linetickcount <= 0) {
-			psy_audio_player_notifylinetick(self);
-			psy_audio_sequencer_onlinetick(&self->sequencer);			
-		}
+		}		
 	} while (numsamplex > 0);
 	psy_audio_exclusivelock_leave();
 	*hostisplaying = psy_audio_sequencer_playing(&self->sequencer);
@@ -169,7 +185,7 @@ void psy_audio_player_notifylinetick(psy_audio_Player* self)
 		for (it = psy_audio_machines_begin(&self->song->machines); 
 				!psy_tableiterator_equal(&it, psy_table_end());		
 				psy_tableiterator_inc(&it)) {			
-			psy_audio_machine_sequencerlinetick((psy_audio_Machine*)
+			psy_audio_machine_newline((psy_audio_Machine*)
 				psy_tableiterator_value(&it));
 		}
 	}
@@ -255,11 +271,11 @@ void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 {
 	psy_audio_Buffer* masteroutput;	
 	masteroutput = psy_audio_machines_outputs(&self->song->machines, psy_audio_MASTER_INDEX);
-	if (masteroutput) {
+	if (masteroutput) {		
 		psy_audio_buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
 		if (self->dodither) {
 			psy_audio_player_ditherbuffer(self, masteroutput, amount);			
-		}
+		}		
 		dsp.interleave(buffer, masteroutput->samples[0],
 			masteroutput->samples[1], amount);
 	}

@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "sequence.h"
+#include "sequencer.h" // calculate duration
 #include <stdlib.h>
 
 static sequenceentryid = 1;
@@ -657,3 +658,37 @@ void sequence_clearplayselection(psy_audio_Sequence* self)
 	}
 }
 
+float psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
+{
+	psy_audio_Sequencer sequencer;	
+	uintptr_t maxamount;
+	uintptr_t amount;
+	uintptr_t numsamplex;
+
+	psy_audio_sequencer_init(&sequencer, self, NULL);
+	psy_audio_sequencer_stoploop(&sequencer);
+	psy_audio_sequencer_start(&sequencer);
+	while (psy_audio_sequencer_playing(&sequencer)) {
+		numsamplex = psy_audio_MAX_STREAM_SIZE;
+		maxamount = numsamplex;
+		do {
+			amount = maxamount;
+			if (amount > numsamplex) {
+				amount = numsamplex;
+			}
+			if (psy_audio_sequencer_playing(&sequencer)) {
+				amount = psy_audio_sequencer_updatelinetickcount(&sequencer,
+					amount);
+			}
+			if (amount > 0) {
+				psy_audio_sequencer_frametick(&sequencer, amount);
+				numsamplex -= amount;
+			}
+			if (sequencer.linetickcount <= 0) {
+				psy_audio_sequencer_onlinetick(&sequencer);
+			}
+		} while (numsamplex > 0);
+	}
+	psy_audio_sequencer_dispose(&sequencer);
+	return (float)(sequencer.playcounter / (float)sequencer.samplerate);
+}

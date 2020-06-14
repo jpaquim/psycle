@@ -866,7 +866,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 	uintptr_t slot, psy_audio_BufferContext* bc)
 {
-	psy_audio_BufferContext samplerbc;
+	/*psy_audio_BufferContext samplerbc;
 		
 	psy_audio_buffercontext_init(&samplerbc, self->samplerevents, 0,
 		&self->samplerbuffer, bc->numsamples, 16);
@@ -878,7 +878,7 @@ void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 		patternentry_dispose(&self->samplerentry);
 	}
 	psy_list_free(self->samplerevents);
-	self->samplerevents = 0;
+	self->samplerevents = 0;*/
 	
 }
 

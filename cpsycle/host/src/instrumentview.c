@@ -4,6 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "instrumentview.h"
+#include <xm.h>
+
+#include <uiopendialog.h>
+#include <uisavedialog.h>
 
 #include <songio.h>
 
@@ -13,6 +17,7 @@
 
 static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);
+static void instrumentview_onloadinstrument(InstrumentView*, psy_ui_Component* sender);
 static void instrumentview_onaddentry(InstrumentView*, psy_ui_Component* sender);
 static void instrumentview_onremoveentry(InstrumentView*,
 	psy_ui_Component* sender);
@@ -148,6 +153,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		/* ,&workspace->song->instruments */);
 	psy_signal_connect(&self->buttons.create.signal_clicked, self,
 		instrumentview_oncreateinstrument);
+	psy_signal_connect(&self->buttons.load.signal_clicked, self,
+		instrumentview_onloadinstrument);
 	psy_signal_connect(&self->general.notemapview.buttons.add.signal_clicked, self,
 		instrumentview_onaddentry);
 	psy_signal_connect(&self->general.notemapview.buttons.remove.signal_clicked, self,
@@ -995,6 +1002,36 @@ void instrumentview_oncreateinstrument(InstrumentView* self, psy_ui_Component* s
 		psy_audio_instrument_setindex(instrument, selected);
 		instruments_insert(&self->workspace->song->instruments, instrument,
 			instrumentindex_make(0, selected));
+	}
+}
+
+void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sender)
+{
+	if (self->workspace->song) {
+		psy_ui_OpenDialog dialog;
+		static char filter[] =
+			"Instrument (*.xi)|*.xi";		
+
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Instrument", filter, "XI",
+			workspace_samples_directory(self->workspace));
+		if (psy_ui_opendialog_execute(&dialog)) {
+			psy_audio_Sample* sample;
+			psy_audio_SampleIndex index;
+			psy_audio_SongFile songfile;
+			PsyFile file;
+
+			psy_audio_songfile_init(&songfile);
+			songfile.song = self->workspace->song;
+			songfile.file = &file;
+			if (psyfile_open(&file, psy_ui_opendialog_filename(&dialog))) {
+				psy_audio_xi_load(&songfile, instruments_slot(
+					&self->workspace->song->instruments).subslot);
+			}
+			psyfile_close(&file);			
+			psy_audio_songfile_dispose(&songfile);	
+			instrumentsbox_rebuild(&self->instrumentsbox);
+		}
+		psy_ui_opendialog_dispose(&dialog);
 	}
 }
 

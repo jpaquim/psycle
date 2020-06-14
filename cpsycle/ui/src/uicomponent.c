@@ -136,7 +136,7 @@ static void onmouseenter(psy_ui_Component* self) { }
 static void onmouseleave(psy_ui_Component* self) { }
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
-static void ontimer(psy_ui_Component* self, int timerid) { }
+static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -627,8 +627,7 @@ void onpreferredsize(psy_ui_Component* self, psy_ui_Size* limit,
 	psy_ui_Aligner aligner;
 
 	psy_ui_aligner_init(&aligner, self);
-	psy_ui_aligner_preferredsize(&aligner, limit, rv);
-	
+	psy_ui_aligner_preferredsize(&aligner, limit, rv);	
 }
 
 void psy_ui_component_doublebuffer(psy_ui_Component* self)
@@ -750,12 +749,26 @@ void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
 	psy_ui_Size* limit)
 {
-	psy_ui_Size rv;
+	if (self->preventpreferredsize) {
+		return psy_ui_component_size(self);
+	} else {
+		psy_ui_Size rv;
 
-	rv = self->preferredsize;	
-	self->vtable->onpreferredsize(self, limit, &rv);
-	// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
-	return rv;	
+		rv = self->preferredsize;
+		self->vtable->onpreferredsize(self, limit, &rv);
+		// psy_signal_emit(&self->signal_preferredsize, self, 2, limit, &rv);	
+		return rv;
+	}
+}
+
+void psy_ui_component_preventpreferredsize(psy_ui_Component* self)
+{
+	self->preventpreferredsize = TRUE;
+}
+
+void psy_ui_component_enablepreferredsize(psy_ui_Component* self)
+{
+	self->preventpreferredsize = FALSE;
 }
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
@@ -813,8 +826,8 @@ static psy_List* dev_children(psy_ui_ComponentImp* self, int recursive) { return
 static void dev_enableinput(psy_ui_ComponentImp* self) { }
 static void dev_preventinput(psy_ui_ComponentImp* self) { }
 static void dev_setcursor(psy_ui_ComponentImp* self, psy_ui_CursorStyle cursorstyle) { }
-static void dev_starttimer(psy_ui_ComponentImp* self, unsigned int id, unsigned int interval) { }
-static void dev_stoptimer(psy_ui_ComponentImp* self, unsigned int id) { }
+static void dev_starttimer(psy_ui_ComponentImp* self, uintptr_t id, uintptr_t interval) { }
+static void dev_stoptimer(psy_ui_ComponentImp* self, uintptr_t id) { }
 static void dev_seticonressource(psy_ui_ComponentImp* self, int ressourceid) { }
 static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self, psy_ui_Font* font) { psy_ui_TextMetric tm; memset(&tm, 0, sizeof(tm));  return tm; }
 static psy_ui_Size dev_textsize(psy_ui_ComponentImp* self, const char* text, psy_ui_Font* font) { psy_ui_Size rv = { 0, 0 }; return rv; }

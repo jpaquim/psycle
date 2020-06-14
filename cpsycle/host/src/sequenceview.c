@@ -30,7 +30,7 @@ static void sequencelistview_onscroll(SequenceListView*,
 	psy_ui_Component* sender, int stepx, int stepy);
 static void sequencelistview_limitverticalscroll(SequenceListView*);
 static void sequencelistview_limithorizontalscroll(SequenceListView*);
-static void sequencelistview_ontimer(SequenceListView*, int timerid);
+static void sequencelistview_ontimer(SequenceListView*, uintptr_t timerid);
 static void sequencelistview_onpatternnamechanged(SequenceListView*,
 	psy_audio_Patterns*, uintptr_t slot);
 
@@ -120,7 +120,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		psy_ui_checkbox_check(&self->options.showplaylist);
 	}
 	psy_ui_component_setalign(&self->options.component, psy_ui_ALIGN_BOTTOM);
-	sequenceduration_init(&self->duration, &self->component, self->sequence);
+	sequenceduration_init(&self->duration, &self->component, self->sequence, workspace);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);
 
 	psy_signal_connect(&self->buttons.newentry.signal_clicked, self,
@@ -1054,8 +1054,12 @@ void sequenceview_onpreferredsize(SequenceView* self, psy_ui_Size* limit,
 	}
 }
 
+// SequenceViewDuration
+static void sequencedurationbar_updatetext(SequenceViewDuration* self);
+static void sequencedurationbar_onlanguagechanged(SequenceViewDuration*, Workspace* sender);
+
 void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
-	psy_audio_Sequence* sequence)
+	psy_audio_Sequence* sequence, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
@@ -1063,33 +1067,95 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(1.0));
 	self->sequence = sequence;
+	self->workspace = workspace;
+	self->duration_ms = 0;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);	
 	psy_ui_label_init(&self->desc, &self->component);	
-	psy_ui_label_settext(&self->desc, "Duration");
-	psy_ui_label_setcharnumber(&self->desc, 10);
+	
+	psy_ui_label_setcharnumber(&self->desc, 9);
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
-	self->desc.component.debugflag = 45;
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->duration, &self->component);
-	psy_ui_label_settextalignment(&self->duration, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
+	psy_ui_label_settextalignment(&self->duration, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_setcharnumber(&self->duration, 10);	
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
+	sequencedurationbar_updatetext(self);
 	sequenceduration_update(self);
+	psy_signal_connect(&self->workspace->signal_languagechanged, self,
+		sequencedurationbar_onlanguagechanged);
+}
+
+void sequencedurationbar_updatetext(SequenceViewDuration* self)
+{
+	psy_ui_label_settext(&self->desc, workspace_translate(self->workspace,
+		"sequencerview.Duration"));
+}
+
+void sequencedurationbar_onlanguagechanged(SequenceViewDuration* self, Workspace* sender)
+{
+	sequencedurationbar_updatetext(self);
 }
 
 void sequenceduration_update(SequenceViewDuration* self)
 {
 	char text[40];
+	float songlength;
 	
-	psy_snprintf(text, 40, "%.2f", sequence_duration(self->sequence));
+	if (self->sequence) {
+		self->duration_ms = sequenceduration_calcdurationms(self);
+	} else {
+		self->duration_ms = 0.f;
+	}
+	songlength = psy_audio_sequence_calcdurationinms(self->sequence);
+	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
+		(int)(songlength / 60), ((int)songlength % 60),
+		sequence_duration(self->sequence));
 	psy_ui_label_settext(&self->duration, text);
 }
 
-void sequencelistview_ontimer(SequenceListView* self, int timerid)
+float sequenceduration_calcdurationms(SequenceViewDuration* self)
+{
+	psy_audio_Sequencer sequencer;
+	uintptr_t samplecount;	
+	uintptr_t maxamount;
+	uintptr_t amount;
+	uintptr_t numsamplex;
+
+	psy_audio_sequencer_init(&sequencer, self->sequence, NULL);
+	psy_audio_sequencer_stoploop(&sequencer);
+	psy_audio_sequencer_start(&sequencer);
+	samplecount = 0;
+	while (psy_audio_sequencer_playing(&sequencer)) {
+		numsamplex = psy_audio_MAX_STREAM_SIZE;
+		maxamount = numsamplex;
+		do {
+			amount = maxamount;
+			if (amount > numsamplex) {
+				amount = numsamplex;
+			}
+			if (psy_audio_sequencer_playing(&sequencer)) {
+				amount = psy_audio_sequencer_updatelinetickcount(&sequencer,
+					amount);
+			}
+			if (amount > 0) {
+				psy_audio_sequencer_frametick(&sequencer, amount);
+				samplecount += 256;
+				numsamplex -= amount;
+			}
+			if (sequencer.linetickcount <= 0) {				
+				psy_audio_sequencer_onlinetick(&sequencer);
+			}
+		} while (numsamplex > 0);		
+	}
+	psy_audio_sequencer_dispose(&sequencer);
+	return (float)(samplecount / 44100.f);
+}
+
+void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
 {			
 	SequenceTrackIterator it;
 	
@@ -1124,21 +1190,11 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
-	psy_ui_checkbox_init(&self->followsong, &self->component);
-	psy_ui_checkbox_settext(&self->followsong,
-		workspace_translate(self->workspace, "Follow Song"));
-	psy_ui_checkbox_init(&self->shownames, &self->component);
-	psy_ui_checkbox_settext(&self->shownames,
-		workspace_translate(self->workspace, "Show pattern names"));
-	psy_ui_checkbox_init(&self->showplaylist, &self->component);	
-	psy_ui_checkbox_settext(&self->showplaylist,
-		workspace_translate(self->workspace, "Show playlist"));
-	psy_ui_checkbox_init(&self->recordtweaks, &self->component);
-	psy_ui_checkbox_settext(&self->recordtweaks,
-		workspace_translate(self->workspace, "Record tweaks"));
-	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
-	psy_ui_checkbox_settext(&self->multichannelaudition,
-		workspace_translate(self->workspace, "Multichannel Audition"));
+	psy_ui_checkbox_init(&self->followsong, &self->component);	
+	psy_ui_checkbox_init(&self->shownames, &self->component);	
+	psy_ui_checkbox_init(&self->showplaylist, &self->component);		
+	psy_ui_checkbox_init(&self->recordtweaks, &self->component);	
+	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);	
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		sequenceroptionsbar_onlanguagechanged);
 	sequenceroptionsbar_updatetext(self);

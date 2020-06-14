@@ -34,7 +34,7 @@ static void stereophase_drawbackground(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawphase(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawscale(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawbars(StereoPhase*, psy_ui_Graphics*);
-static void stereophase_ontimer(StereoPhase*, psy_ui_Component* sender, int timerid);
+static void stereophase_ontimer(StereoPhase*, psy_ui_Component* sender, uintptr_t timerid);
 static void stereophase_onsrcmachineworked(StereoPhase*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
 static void stereophase_onsongchanged(StereoPhase*, Workspace*, int flag, psy_audio_SongFile*);
 static void stereophase_connectmachinessignals(StereoPhase*, Workspace*);
@@ -321,7 +321,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	// bufDC.SelectObject(oldFont);
 }
 
-void stereophase_ontimer(StereoPhase* self, psy_ui_Component* sender, int timerid)
+void stereophase_ontimer(StereoPhase* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
 	if (timerid == TIMERID_MASTERVU) {
 		psy_ui_component_invalidate(&self->component);

@@ -35,7 +35,7 @@ static void onmousemove(ParamView*, psy_ui_MouseEvent*);
 static void onmousewheel(ParamView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static uintptr_t hittest(ParamView*, int x, int y);
-static void ontimer(ParamView*, psy_ui_Component* sender, int timerid);
+static void ontimer(ParamView*, psy_ui_Component* sender, uintptr_t timerid);
 static uintptr_t paramview_numrows(ParamView*);
 static void paramview_computepositions(ParamView*);
 static void paramview_clearpositions(ParamView*);
@@ -774,7 +774,7 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 	self->tweak = UINTPTR_MAX;
 }
 
-void ontimer(ParamView* self, psy_ui_Component* sender, int timerid)
+void ontimer(ParamView* self, psy_ui_Component* sender, uintptr_t timerid)
 {
 	psy_ui_component_invalidate(&self->component);
 }

@@ -117,7 +117,7 @@ static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
 	uintptr_t slot);
 static void machinewireview_onmachineworked(MachineWireView*,
 	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
-static void machinewireview_ontimer(MachineWireView*, int timerid);
+static void machinewireview_ontimer(MachineWireView*, uintptr_t timerid);
 static void machinewireview_preparedrawallmacvus(MachineWireView*);
 static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
 	psy_Properties*);
@@ -1706,7 +1706,7 @@ void machinewireview_onmachineworked(MachineWireView* self,
 	}
 }
 
-void machinewireview_ontimer(MachineWireView* self, int timerid)
+void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 {	
 	psy_List* p;
 	psy_List* q;

@@ -56,6 +56,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 	self->winid = 20000;
 	self->eventretarget = 0;
 	psy_ui_winapp_registerclasses(self);
+	CoInitialize(NULL);
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
@@ -67,6 +68,7 @@ void psy_ui_winapp_dispose(psy_ui_WinApp* self)
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
 	DeleteObject(self->defaultbackgroundbrush);
+	CoUninitialize();
 }
 
 void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
@@ -106,7 +108,7 @@ void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
 	// Ensure that the common control DLL is loaded.     		
 	icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     icex.dwICC = ICC_USEREX_CLASSES;
-    succ = InitCommonControlsEx(&icex);
+    succ = InitCommonControlsEx(&icex);	
 }
 
 LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
@@ -139,7 +141,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				if (imp->component) {
 					psy_ui_component_dispose(imp->component);
 				}
-				psy_table_remove(&winapp->selfmap, (uintptr_t) hwnd);
+				psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 			break;
 			case WM_DESTROY:
 				if (imp->component && imp->component->signal_destroy.slots) {
@@ -148,10 +150,10 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				}								
 			break;			
 			case WM_TIMER:								
-				imp->component->vtable->ontimer(imp->component, (int) wParam);
+				imp->component->vtable->ontimer(imp->component, (uintptr_t)wParam);
 				if (imp->component->signal_timer.slots) {
 					psy_signal_emit(&imp->component->signal_timer, imp->component, 1,
-						(int)wParam);
+						(uintptr_t)wParam);
 				}
 			break;
 			case WM_CHAR:

@@ -185,7 +185,7 @@ static void generateaudio(psy_audio_LadspaPlugin*, psy_audio_BufferContext*);
 static void seqtick(psy_audio_LadspaPlugin*, uintptr_t channel,
 	const psy_audio_PatternEvent*);
 static void stop(psy_audio_LadspaPlugin*);
-static void sequencerlinetick(psy_audio_LadspaPlugin*);
+static void newline(psy_audio_LadspaPlugin*);
 static psy_audio_MachineInfo* info(psy_audio_LadspaPlugin*);
 static int parametertype(psy_audio_LadspaPlugin* self, uintptr_t par);
 static unsigned int numparametercols(psy_audio_LadspaPlugin*);
@@ -226,8 +226,8 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 		vtable.hostevent = (fp_machine_hostevent)hostevent;
 		vtable.seqtick = (fp_machine_seqtick)seqtick;
 		vtable.stop = (fp_machine_stop)stop;
-		vtable.sequencerlinetick = (fp_machine_sequencerlinetick)
-			sequencerlinetick;
+		vtable.newline = (fp_machine_newline)
+			newline;
 		vtable.info = (fp_machine_info)info;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
@@ -436,7 +436,7 @@ int hostevent(psy_audio_LadspaPlugin* self, int const eventNr, int val1, float v
 	return 0;
 }
 
-void sequencerlinetick(psy_audio_LadspaPlugin* self)
+void newline(psy_audio_LadspaPlugin* self)
 {	
 }
 

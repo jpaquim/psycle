@@ -14,7 +14,7 @@
 
 #define TIMERID_PLAYLIST 4000
 
-static void playlisteditor_ontimer(PlayListEditor*, int timerid);
+static void playlisteditor_ontimer(PlayListEditor*, uintptr_t timerid);
 
 static void playlisteditor_onaddsong(PlayListEditor*, psy_ui_Component* sender);
 static void playlisteditor_onremovesong(PlayListEditor*, psy_ui_Component* sender);
@@ -235,7 +235,7 @@ void playlisteditor_onnext(PlayListEditor* self, psy_ui_Component* sender)
 	}
 }
 
-void playlisteditor_ontimer(PlayListEditor* self, int timerid)
+void playlisteditor_ontimer(PlayListEditor* self, uintptr_t timerid)
 {		
 	if (!psy_audio_player_playing(&self->workspace->player)) {
 		if (self->nextentry) {

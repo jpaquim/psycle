@@ -4,48 +4,72 @@
 #include "../../detail/prefix.h"
 
 #include "playposbar.h"
+
+#include <songio.h>
+
 #include <stdio.h>
+
 #include "../../detail/portable.h"
 
 #define TIMERID_PLAYPOSBAR 500
 
-static void playposbar_ontimer(PlayPosBar*, psy_ui_Component* sender, int timerid);
+static void playposbar_ontimer(PlayPosBar*, psy_ui_Component* sender,
+	uintptr_t timerid);
+static void playposbar_updatelabel(PlayPosBar*);
+static void playposbar_onsongchanged(PlayPosBar*, Workspace*,
+	int flag, psy_audio_SongFile*);
 
 void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
-	psy_audio_Player* player)
+	Workspace* workspace)
 {		
 	psy_ui_Margin margin;
 
+	psy_ui_component_init(&self->component, parent);
+	self->workspace = workspace;	
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);	
+	psy_ui_label_init(&self->position, &self->component);
+	psy_ui_label_setcharnumber(&self->position, 20);
+	psy_ui_label_settextalignment(&self->position, psy_ui_ALIGNMENT_LEFT);
+	psy_signal_connect(&self->component.signal_timer, self,
+		playposbar_ontimer);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
-	self->player = player;		
-	//psy_ui_label_init(&self->header, &self->component);		
-	//psy_ui_label_settext(&self->header, "");	
-	psy_ui_label_init(&self->position, &self->component);
-	psy_ui_label_setcharnumber(&self->position, 10);
-	self->lastposition = -1.0f;
-	psy_signal_connect(&self->component.signal_timer, self,
-		playposbar_ontimer);
 	psy_list_free(psy_ui_components_setalign(		
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
+	playposbar_updatelabel(self);
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		playposbar_onsongchanged);
 	psy_ui_component_starttimer(&self->component, TIMERID_PLAYPOSBAR, 50);
 }
 
-void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender, int timerid)
+void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender,
+	uintptr_t timerid)
 {		
-	if (self->lastposition != psy_audio_player_position(self->player)) {
-		char text[20];
-
-		psy_snprintf(text, 10, "%.3f",
-			(float) psy_audio_player_position(self->player));
-		psy_ui_label_settext(&self->position, text);
-		self->lastposition = psy_audio_player_position(self->player);
+	if (psy_audio_player_playing(&self->workspace->player)) {
+		playposbar_updatelabel(self);
 	}
+}
+
+void playposbar_updatelabel(PlayPosBar* self)
+{
+	psy_dsp_seconds_t currplaytime;
+	char text[80];
+
+	currplaytime = psy_audio_sequencer_currplaytime(
+		&self->workspace->player.sequencer);
+	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
+		(int)(currplaytime / 60), ((int)currplaytime % 60),
+		(float)psy_audio_player_position(&self->workspace->player));
+	psy_ui_label_settext(&self->position, text);
+}
+
+void playposbar_onsongchanged(PlayPosBar* self, Workspace* sender, int flag,
+	psy_audio_SongFile* songfile)
+{
+	playposbar_updatelabel(self);
 }

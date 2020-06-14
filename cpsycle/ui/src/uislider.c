@@ -24,7 +24,7 @@ static void psy_ui_slider_onmousemove(psy_ui_Slider*, psy_ui_MouseEvent* ev);
 static void psy_ui_slider_onmousewheel(psy_ui_Slider*, psy_ui_MouseEvent*);
 static void psy_ui_slider_ondestroy(psy_ui_Slider*, psy_ui_Component* sender);
 static void psy_ui_slider_ontimer(psy_ui_Slider*, psy_ui_Component* sender,
-	int timerid);
+	uintptr_t timerid);
 static void psy_ui_slider_updatevalue(psy_ui_Slider*);
 static void psy_ui_slider_describevalue(psy_ui_Slider*);
 static void psy_ui_slider_onalign(psy_ui_Slider*);
@@ -324,7 +324,7 @@ psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider* self)
 }
 
 void psy_ui_slider_ontimer(psy_ui_Slider* self, psy_ui_Component* sender,
-	int timerid)
+	uintptr_t timerid)
 {	
 	psy_ui_slider_updatevalue(self);
 	psy_ui_slider_describevalue(self);

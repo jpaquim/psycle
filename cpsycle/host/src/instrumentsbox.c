@@ -147,3 +147,15 @@ int instrumentsbox_selected(InstrumentsBox* self)
 {
 	return psy_ui_listbox_cursel(&self->instrumentlist);	
 }
+
+void instrumentsbox_rebuild(InstrumentsBox* self)
+{
+	samplesbox_buildinstrumentgroup(self);
+	BuildInstrumentList(self);
+	if (self->instruments) {
+		psy_ui_listbox_setcursel(&self->grouplist,
+			self->instruments->slot.slot);
+		psy_ui_listbox_setcursel(&self->instrumentlist,
+			self->instruments->slot.subslot);
+	}
+}
