@@ -148,8 +148,8 @@ void parameterbar_setprogram(ParameterBar* self, psy_audio_Presets* presets,
 			} else {
 				psy_snprintf(text, 20, "%02X:%s", index, "");
 			}
-			psy_ui_combobox_addtext(&self->programbox, text);
-			if (index == prog) {
+			psy_ui_combobox_addtext(&self->programbox, text);			
+			if (preset && index == prog) {
 				psy_ui_edit_settext(&self->savename,
 					psy_audio_preset_name(preset));
 			}
