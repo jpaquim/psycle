@@ -137,15 +137,15 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	instrumentpitchview_init(&self->pitch, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);	
-	psy_signal_connect(&self->player->song->instruments.signal_insert, self,
+	psy_signal_connect(&self->workspace->song->instruments.signal_insert, self,
 		OnInstrumentInsert);
-	psy_signal_connect(&self->player->song->instruments.signal_removed, self,
+	psy_signal_connect(&self->workspace->song->instruments.signal_removed, self,
 		OnInstrumentRemoved);	
-	psy_signal_connect(&self->player->song->instruments.signal_slotchange, self,
+	psy_signal_connect(&self->workspace->song->instruments.signal_slotchange, self,
 		OnInstrumentSlotChanged);
-	psy_signal_connect(&self->player->song->machines.signal_insert, self,
+	psy_signal_connect(&self->workspace->song->machines.signal_insert, self,
 		OnMachinesInsert);
-	psy_signal_connect(&self->player->song->machines.signal_removed, self,
+	psy_signal_connect(&self->workspace->song->machines.signal_removed, self,
 		OnMachinesRemoved);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, OnSongChanged);
@@ -199,7 +199,7 @@ void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentInde
 {
 	psy_audio_Instrument* instrument;
 	
-	instrument = instruments_at(&self->player->song->instruments, index);
+	instrument = instruments_at(&self->workspace->song->instruments, index);
 	instrumentheaderview_setinstrument(&self->header, instrument);
 	instrumentgeneralview_setinstrument(&self->general, instrument);
 	instrumentvolumeview_setinstrument(&self->volume, instrument);
@@ -220,9 +220,9 @@ void OnSongChanged(InstrumentView* self, Workspace* workspace, int flag, psy_aud
 		psy_signal_connect(&workspace->song->instruments.signal_slotchange, self, OnInstrumentSlotChanged);
 		psy_signal_connect(&workspace->song->instruments.signal_insert, self, OnInstrumentInsert);
 		psy_signal_connect(&workspace->song->instruments.signal_removed, self, OnInstrumentRemoved);
-		psy_signal_connect(&self->player->song->machines.signal_insert, self,
+		psy_signal_connect(&self->workspace->song->machines.signal_insert, self,
 			OnMachinesInsert);
-		psy_signal_connect(&self->player->song->machines.signal_removed, self,
+		psy_signal_connect(&self->workspace->song->machines.signal_removed, self,
 			OnMachinesRemoved);
 		instrumentsbox_setinstruments(&self->instrumentsbox,
 			&workspace->song->instruments);	

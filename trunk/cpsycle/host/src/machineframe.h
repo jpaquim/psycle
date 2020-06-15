@@ -8,10 +8,12 @@
 #include "paramlistbox.h"
 #include "workspace.h"
 
+#include <dir.h>
 #include <presets.h>
 #include <uinotebook.h>
 #include <uibutton.h>
 #include <uieditor.h>
+#include <uiedit.h>
 #include <uilabel.h>
 #include <uicombobox.h>
 #include <presets.h>
@@ -34,10 +36,17 @@ typedef struct {
 	psy_ui_Button parameters;
 	psy_ui_Button help;
 	psy_ui_Button dock;
-	psy_ui_ComboBox presetsbox;
+	psy_ui_Label bank;
 	psy_ui_ComboBox bankselector;
+	psy_ui_Label program;
 	psy_ui_ComboBox programbox;
+	psy_ui_Button importpresets;
+	psy_ui_Button exportpresets;
+	psy_ui_Button savepresets;
+	psy_ui_Edit savename;
 	psy_audio_Presets* presets;
+	bool userpreset;
+	psy_Path presetpath;
 } ParameterBar;
 
 typedef struct {

@@ -8,18 +8,23 @@
 
 void psy_audio_presets_init(psy_audio_Presets* self)
 {	
-	self->container = 0;
+	psy_table_init(&self->container);
 }
 
 void psy_audio_presets_dispose(psy_audio_Presets* self)
 {
-	psy_List* p;
+	psy_TableIterator it;
 
-	for (p = self->container; p != NULL; p = p->next) {
-		free(p->entry);
+	for (it = psy_audio_presets_begin(self);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_Preset* preset;
+
+		preset = (psy_audio_Preset*)psy_tableiterator_value(&it);
+		psy_audio_preset_dispose(preset);
+		free(preset);
 	}
-	free(self->container);
-	self->container = 0;
+	psy_table_dispose(&self->container);	
 }
 
 psy_audio_Presets* psy_audio_presets_alloc(void)
@@ -40,6 +45,26 @@ psy_audio_Presets* psy_audio_presets_allocinit(void)
 
 void psy_audio_presets_append(psy_audio_Presets* self,
 	psy_audio_Preset* preset)
+{		
+	psy_table_insert(&self->container,
+		(psy_table_empty(&self->container))
+		? 0
+		: psy_table_maxkey(&self->container) + 1, preset);	
+}
+
+void psy_audio_presets_insert(psy_audio_Presets* self, uintptr_t index,
+	psy_audio_Preset* preset)
 {
-	psy_list_append(&self->container, preset);
+	psy_audio_Preset* oldpreset;
+
+	oldpreset = psy_table_at(&self->container, index);
+	if (oldpreset) {
+		psy_audio_preset_dispose(oldpreset);
+	}
+	psy_table_insert(&self->container, index, preset);
+}
+
+psy_TableIterator psy_audio_presets_begin(psy_audio_Presets* self)
+{
+	return psy_table_begin(&self->container);
 }

@@ -16,7 +16,7 @@ void psy_ui_terminal_init(psy_ui_Terminal* self, psy_ui_Component* parent)
 	psy_ui_component_resize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(20.0),
 		psy_ui_value_makeeh(20.0)));
-	psy_ui_component_preventpreferredsize(self);
+	psy_ui_component_preventpreferredsize(&self->component);
 }
 
 void psy_ui_terminal_output(psy_ui_Terminal* self, const char* text)

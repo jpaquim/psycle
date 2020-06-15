@@ -44,12 +44,15 @@
 #endif
 #define PSYCLE_SKINS_DEFAULT_DIR PSYCLE_USER_DIR "\\Skins"
 #define PSYCLE_DOC_DEFAULT_DIR PSYCLE_APP_DIR "\\Docs"
+#define PSYCLE_USERPRESETS_DEFAULT_DIR PSYCLE_APP_DIR "\\Presets"
 
 #if defined(_MSC_VER) && _MSC_VER > 1200
 #define PSYCLE_DEFAULT_FONT "tahoma;-16"
 #else
 #define PSYCLE_DEFAULT_FONT "tahoma;-12"
 #endif
+
+#define PSYCLE_RECENT_SONG_INI "psycle-recentsongs.ini"
 
 #define PSYCLE_USE_MACHINEPROXY
 

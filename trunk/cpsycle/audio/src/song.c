@@ -69,11 +69,6 @@ void songproperties_setbpm(SongProperties* self, psy_dsp_beat_t bpm)
 	}	
 }
 
-psy_dsp_beat_t songproperties_bpm(SongProperties* self)
-{
-	return self->bpm;
-}
-
 void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machinefactory)
 {		
 	self->machinefactory = machinefactory;	
@@ -179,4 +174,9 @@ void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_beat_t bpm)
 psy_dsp_beat_t psy_audio_song_bpm(psy_audio_Song* self)
 {
 	return songproperties_bpm(&self->properties);
+}
+
+uintptr_t psy_audio_song_lpb(psy_audio_Song* self)
+{
+	return songproperties_lpb(&self->properties);
 }

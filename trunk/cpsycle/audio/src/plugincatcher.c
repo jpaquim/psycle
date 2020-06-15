@@ -237,16 +237,18 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	return 1;
 }
 
-void plugincatcher_catchername(psy_audio_PluginCatcher* self, const char* path, char* rv, uintptr_t shellidx)
+void plugincatcher_catchername(psy_audio_PluginCatcher* self,
+	const char* filename, char* rv, uintptr_t shellidx)
 {	
-	char prefix[_MAX_PATH];
-	char ext[_MAX_PATH];	
+	psy_Path path;	
 	
-	psy_dir_extract_path(path, prefix, rv, ext);
+	psy_path_init(&path, filename);
+	psy_snprintf(rv, _MAX_PATH, psy_path_name(&path));	
 	psy_strlwr(rv);	
 	psy_replacechar(rv, ' ', '-');
 	psy_replacechar(rv, '_', '-');
 	psy_snprintf(rv, 256, "%s:%d", rv, (int) shellidx);
+	psy_path_dispose(&path);
 }
 
 int plugincatcher_load(psy_audio_PluginCatcher* self)

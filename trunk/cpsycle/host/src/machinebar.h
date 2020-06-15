@@ -23,8 +23,7 @@ typedef struct {
 	psy_ui_Button cpu;
 	psy_ui_Button midi;
 	psy_ui_ComboBox selectinstparam;
-	psy_ui_ComboBox instparambox;	
-	psy_audio_Player* player;	
+	psy_ui_ComboBox instparambox;
 	void (*selchange)(void*, int);
 	void* eventcontext;
 	psy_audio_Machines* machines;
@@ -35,6 +34,6 @@ typedef struct {
 	Workspace* workspace;
 } MachineBar;
 
-void machinebar_init(MachineBar*, psy_ui_Component* parent, Workspace* );
+void machinebar_init(MachineBar*, psy_ui_Component* parent, Workspace*);
 
 #endif

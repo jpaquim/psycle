@@ -6,6 +6,7 @@
 #include "plugin.h"
 #include "pattern.h"
 #include "plugin_interface.h"
+#include "preset.h"
 #include "songio.h"
 
 #include <stdlib.h>
@@ -178,6 +179,7 @@ static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
 static void putdata(psy_audio_Plugin*, uint8_t* data);
 static uint8_t* data(psy_audio_Plugin*);
 static uintptr_t datasize(psy_audio_Plugin*);
+static void currentpreset(psy_audio_Plugin*, psy_audio_Preset*);
 // private methods
 static void disposeparameters(psy_audio_Plugin*);
 static void tweakdefaults(psy_audio_Plugin*, CMachineInfo* info);
@@ -209,6 +211,7 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.putdata = (fp_machine_putdata)putdata;
 		vtable.data = (fp_machine_data)data;
 		vtable.datasize = (fp_machine_datasize)datasize;
+		vtable.currentpreset = (fp_machine_currentpreset)currentpreset;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) savespecific;			
 		vtable_initialized = 1;
@@ -474,6 +477,32 @@ uint8_t* data(psy_audio_Plugin* self)
 uintptr_t datasize(psy_audio_Plugin* self)
 {
 	return mi_getdatasize(self->mi);
+}
+
+void currentpreset(psy_audio_Plugin* self, psy_audio_Preset* preset)
+{
+	CMachineInfo* info;
+	GETINFO GetInfo;
+
+	psy_audio_preset_clear(preset);
+	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
+	info = GetInfo();
+	if (info) {
+		uintptr_t gbp;		
+		uintptr_t size;		
+		unsigned char* pData;
+
+		for (gbp = 0; gbp < (uintptr_t)info->numParameters; ++gbp) {
+			psy_audio_preset_setvalue(preset, gbp, mi_val(self->mi, gbp));
+		}		
+		size = mi_getdatasize(self->mi);
+		if (size > 0) {
+			pData = (unsigned char*)malloc(size);
+			mi_getdata(self->mi);
+			psy_audio_preset_putdata(preset, size, pData);
+			free(pData);
+		}
+	}
 }
 
 void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,

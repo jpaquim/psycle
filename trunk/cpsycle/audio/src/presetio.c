@@ -9,55 +9,61 @@
 #include <stdio.h>
 
 #include <dir.h>
+
 #include "../../detail/portable.h"
 
-static void presetio_loadversion0(FILE*, int numpresets, int numparameters, psy_audio_Presets*);
-static void presetio_loadversion1(FILE*, int numParameters, uintptr_t datasizestruct, psy_audio_Presets*);
+static int presetio_loadversion0(FILE*, int numpresets, int numparameters,
+	psy_audio_Presets*);
+static int presetio_loadversion1(FILE*, int numParameters,
+	uintptr_t datasizestruct, psy_audio_Presets*);
+static int psy_audio_presetsio_saveversion1(FILE*, psy_audio_Presets*);
 
-void psy_audio_presetsio_load(const char* path, psy_audio_Presets* presets,
+int psy_audio_presetsio_load(const char* filename, psy_audio_Presets* presets,
 	uintptr_t numparameters, uintptr_t datasizestruct, const char* pluginroot)
-{
-	FILE* fp;	
-	
-	fp = fopen(path, "rb");
+{	
+	int status;
+	FILE* fp;
+		
+	status = psy_audio_PRESETIO_OK;
+	fp = fopen(filename, "rb");
 	// if not found, check if it is in the root plugin dir
 	if (!fp) {
-		char prefix[_MAX_PATH];
-		char ext[_MAX_PATH];
-		char name[_MAX_PATH];
-		char plugin_root_path[_MAX_PATH];
+		psy_Path path;
 
-		psy_dir_extract_path(path, prefix, name, ext);
-		psy_snprintf(plugin_root_path, _MAX_PATH, "%s\\%s.%s", pluginroot,
-			name, ext);
-		fp = fopen(plugin_root_path, "rb");
+		psy_path_init(&path, filename);
+		psy_path_setprefix(&path, pluginroot);		
+		fp = fopen(psy_path_path(&path), "rb");
+		psy_path_dispose(&path);
 	}
 	// if not found, check if it finds underscore names
 	if (!fp) {
-		char prefix[_MAX_PATH];
-		char ext[_MAX_PATH];
-		char name[_MAX_PATH];
-		char under_score_path[_MAX_PATH];
+		psy_Path path;
+		char* name;
 
-		psy_dir_extract_path(path, prefix, name, ext);
+		psy_path_init(&path, filename);
+		name = strdup(psy_path_name(&path));
 		psy_replacechar(name, '-', '_');
-		psy_snprintf(under_score_path, _MAX_PATH, "%s\\%s.%s", prefix, name, ext);	
-		fp = fopen(under_score_path, "rb");
-	}
-	if (fp != 0) {
+		psy_path_setname(&path, name);				
+		free(name);
+		fp = fopen(psy_path_path(&path), "rb");
+		psy_path_dispose(&path);
+	}	
+	if (fp != NULL) {
 		int numpresets;
 		int filenumpars;
+
 		if (fread(&numpresets,sizeof(int), 1, fp) != 1 ||
-			fread(&filenumpars,sizeof(int), 1, fp) != 1 ) {
-			// ::MessageBox(0,"Couldn't read from file. Operation aborted","Preset File Error",MB_OK);
+			fread(&filenumpars,sizeof(int), 1, fp) != 1) {
+			status = psy_audio_PRESETIO_ERROR_READ;			
 		} else if (numpresets >= 0) {
-			// ok so we still support old file format by checking for a positive numpresets
-			if ((filenumpars != numparameters)  || (datasizestruct))
-			{
-//				// ::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
+			// ok so we still support old file format by checking for a
+			// positive numpresets
+			if ((filenumpars != numparameters)  || (datasizestruct)) {
+				status = psy_audio_PRESETIO_ERROR_UPTODATE;
 			} else {
 				// presets.clear();
-				presetio_loadversion0(fp, numpresets, filenumpars, presets);
+				status = presetio_loadversion0(fp, numpresets, filenumpars,
+					presets);
 				// presets.sort();
 			}
 		} else {
@@ -65,29 +71,29 @@ void psy_audio_presetsio_load(const char* path, psy_audio_Presets* presets,
 			// we will use filenumpars already read as version #
 			if (filenumpars == 1) {
 				// presets.clear();
-				presetio_loadversion1(fp, numparameters, datasizestruct, presets);
+				status = presetio_loadversion1(fp, numparameters,
+					datasizestruct, presets);
 				// presets.sort();
 			} else {
-				// ::MessageBox(0,"The current preset file is from a newer version of psycle than you are currently running.","Preset File Error",MB_OK);
+				status = psy_audio_PRESETIO_ERROR_NEWVERSION;				
 			}
 		}
 		fclose(fp);
 	} else {
-		//::MessageBox(0,"Couldn't open file. Operation aborted","Preset File Error",MB_OK);
-	}	
+		status = psy_audio_PRESETIO_ERROR_OPEN;		
+	}
+	return status;
 }
 
-void psy_audio_presetsio_save(const char* path, psy_audio_Presets* presets)
-{
-
-}
-
-void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, psy_audio_Presets* presets)
+int presetio_loadversion0(FILE* fp, int numpresets, int numparameters,
+	psy_audio_Presets* presets)
 {	
+	int status;
 	char name[32];
 	int* ibuf;
 	int i;
 	
+	status = psy_audio_PRESETIO_OK;
 	ibuf = malloc(sizeof(int) * numparameters);
 	for (i = 0; i < numpresets && !feof(fp) && !ferror(fp); ++i) {		
 		psy_audio_Preset* preset;
@@ -100,13 +106,16 @@ void presetio_loadversion0(FILE* fp, int numpresets, int numparameters, psy_audi
 		for (j = 0; j < numparameters; ++j) {
 			psy_audio_preset_setvalue(preset, j, (intptr_t) ibuf[j]);
 		}		
-		psy_audio_presets_append(presets, preset);
+		psy_audio_presets_insert(presets, i, preset);
 	}
 	free(ibuf);
+	return status;
 }
 
-void presetio_loadversion1(FILE* fp, int numparameters, uintptr_t datasizestruct, psy_audio_Presets* presets)
+int presetio_loadversion1(FILE* fp, int numparameters,
+	uintptr_t datasizestruct, psy_audio_Presets* presets)
 {
+	int status;
 	int numpresets;
 	int filenumpars;
 	int filepresetsize;
@@ -115,6 +124,7 @@ void presetio_loadversion1(FILE* fp, int numparameters, uintptr_t datasizestruct
 	char name[32];
 	int i;
 
+	status = psy_audio_PRESETIO_OK;
 	// new preset format version 1
 	fread(&numpresets, sizeof(int), 1, fp);
 	fread(&filenumpars, sizeof(int), 1, fp);
@@ -122,8 +132,8 @@ void presetio_loadversion1(FILE* fp, int numparameters, uintptr_t datasizestruct
 	// now it is time to check our file for compatability
 	if (filenumpars != numparameters || (filepresetsize != datasizestruct))
 	{
-		//::MessageBox(0,"The current preset File is not up-to-date with the plugin.","Preset File Error",MB_OK);
-		return;
+		status = psy_audio_PRESETIO_ERROR_UPTODATE;
+		return status;
 	}
 	// ok that works, so we should now load the names of all of the presets	
 	ibuf= malloc(sizeof(int) * numparameters);
@@ -144,10 +154,138 @@ void presetio_loadversion1(FILE* fp, int numparameters, uintptr_t datasizestruct
 		}
 		if (datasizestruct > 0) {
 			fread(dbuf, datasizestruct, 1, fp);
-			psy_audio_preset_setdatastruct(preset, numparameters,name, ibuf, datasizestruct,dbuf);
+			psy_audio_preset_setdatastruct(preset, numparameters,name, ibuf,
+				datasizestruct,dbuf);
 		}
-		psy_audio_presets_append(presets, preset);
+		psy_audio_presets_insert(presets, i, preset);
 	}
 	free(ibuf);
 	free(dbuf);
+	return status;
+}
+
+int psy_audio_presetsio_save(const char* path, psy_audio_Presets* presets)
+{
+	int status;
+	FILE* fp;
+
+	status = psy_audio_PRESETIO_OK;
+	if (presets && !psy_audio_presets_empty(presets)) {
+		if (!(fp = fopen(path, "wb")))
+		{
+			status = psy_audio_PRESETIO_ERROR_WRITEOPEN;			
+			return status;
+		}		
+		psy_audio_presetsio_saveversion1(fp, presets);
+		fclose(fp);
+	}
+	return status;
+}
+
+int psy_audio_presetsio_saveversion1(FILE* fp, psy_audio_Presets* presets)
+{
+	int status;
+	int32_t temp1 = -1;
+	int32_t fileversion = 1;
+	// psy_TableIterator preset_iterator;
+	int32_t numpresets;
+	int32_t numparameters;
+	int32_t datasizestruct;	
+
+	status = psy_audio_PRESETIO_OK;
+	if (fwrite(&temp1, sizeof(int32_t), 1, fp) != 1 ||
+		fwrite(&fileversion, sizeof(int32_t), 1, fp) != 1)
+	{
+		status = psy_audio_PRESETIO_ERROR_WRITE;		
+		return status;
+	}
+	// preset_iterator = presets->container;
+	numpresets = (psy_table_empty(&presets->container))
+		? 0
+		: psy_table_maxkey(&presets->container) + 1;
+
+	if (numpresets != 0) {
+		psy_audio_Preset* preset;
+
+		preset = (psy_audio_Preset*)psy_audio_presets_at(presets, numpresets - 1);
+		numparameters = psy_table_size(&preset->parameters);
+		datasizestruct = preset->datasize;
+	} else {
+		numparameters = 0;
+		datasizestruct = 0;
+	}	
+	fwrite(&numpresets, sizeof(int), 1, fp);
+	fwrite(&numparameters, sizeof(int), 1, fp);
+	fwrite(&datasizestruct, sizeof(int), 1, fp);
+
+	if (numparameters > 0) {
+		char cbuf[32];
+		int* ibuf;
+		unsigned char* dbuf = 0;
+		int32_t i;
+
+		ibuf = malloc(sizeof(int32_t) * numparameters);
+		dbuf = NULL;
+		if (datasizestruct > 0) {
+			dbuf = malloc(datasizestruct);
+		}
+		for (i = 0; i < numpresets && !feof(fp) && !ferror(fp); i++) {
+			psy_audio_Preset* preset;
+			int32_t j;
+			bool empty;
+
+			preset = (psy_audio_Preset*)psy_audio_presets_at(presets, (uintptr_t)i);
+			empty = (preset == NULL);
+			if (!preset) {				
+				preset = (psy_audio_Preset*)psy_audio_presets_at(presets, numpresets - 1);
+			}
+			for (j = 0; j < numparameters; ++j) {
+				ibuf[j] = (int32_t)psy_audio_preset_value(preset, j);
+			}
+			memset(cbuf, 0, sizeof(cbuf));
+			if (empty) {
+				psy_snprintf(cbuf, 32, "%s", "");
+			} else {
+				psy_snprintf(cbuf, 32, "%s", psy_audio_preset_name(preset));
+			}
+			fwrite(cbuf, sizeof(cbuf), 1, fp);
+			fwrite(ibuf, numparameters * sizeof(int32_t), 1, fp);
+			if (datasizestruct > 0) {
+				fwrite(dbuf, datasizestruct, 1, fp);
+			}
+		}
+		free(ibuf);
+		free(dbuf);
+	}
+	return status;
+}
+
+const char* psy_audio_presetsio_statusstr(int status)
+{	
+	switch (status) {
+		case psy_audio_PRESETIO_OK:
+			return "Preset File OK";
+			break;
+		case psy_audio_PRESETIO_ERROR_OPEN:
+			return "Couldn't open file. Operation aborted";
+			break;
+		case psy_audio_PRESETIO_ERROR_READ:
+			return "Couldn't read from file. Operation aborted";
+			break;
+		case psy_audio_PRESETIO_ERROR_UPTODATE:
+			return "The current preset File is not up-to-date with the plugin.";
+			break;
+		case psy_audio_PRESETIO_ERROR_NEWVERSION:
+			return "The current preset file is from a newer version of psycle than you are currently running.";
+			break;
+		case psy_audio_PRESETIO_ERROR_WRITEOPEN:
+			return "The File couldn't be opened for Writing. Operation Aborted";
+			break;
+		case psy_audio_PRESETIO_ERROR_WRITE:
+			return "Couldn't write to File. Operation Aborted";
+			break;
+		default:
+			break;
+	}
+	return "Preset File Error";
 }

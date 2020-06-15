@@ -6,6 +6,8 @@
 
 #include "../../detail/stdint.h"
 
+#include "../../detail/psydef.h" // INLINE
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -48,11 +50,17 @@ void psy_table_remove(psy_Table*, uintptr_t key);
 void* psy_table_at(psy_Table*, uintptr_t key);
 void* psy_table_at_strhash(psy_Table*, const char* strkey);
 uintptr_t psy_table_size(psy_Table*);
+uintptr_t psy_table_maxkey(psy_Table*);
 int psy_table_exists(psy_Table*, uintptr_t key);
 int psy_table_exists_strhash(psy_Table*, const char* strkey);
 void psy_table_clear(psy_Table*);
 psy_TableIterator psy_table_begin(psy_Table*);
 const psy_TableIterator* psy_table_end(void);
+
+INLINE bool psy_table_empty(psy_Table* self)
+{
+	return self->count == 0;
+}
 
 uintptr_t psy_table_freetableentry(void*, void*, psy_TableHashEntry*);
 

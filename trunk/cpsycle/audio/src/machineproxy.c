@@ -18,6 +18,8 @@
 #include "../../detail/portable.h"
 #include "plugin_interface.h"
 
+struct psy_audio_Preset;
+
 // proxy
 static psy_audio_Buffer* machineproxy_mix(psy_audio_MachineProxy*,
 	uintptr_t slot, uintptr_t amount, psy_audio_MachineSockets*,
@@ -114,6 +116,7 @@ static void machineproxy_bankname(psy_audio_MachineProxy*, int bnkidx, char* val
 static int machineproxy_numbanks(psy_audio_MachineProxy*);
 static void machineproxy_setcurrbank(psy_audio_MachineProxy*, int prgIdx);
 static int machineproxy_currbank(psy_audio_MachineProxy*);
+static void machineproxy_currentpreset(psy_audio_MachineProxy*, struct psy_audio_Preset*);
 
 #if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
@@ -238,6 +241,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.numbanks = (fp_machine_numbanks) machineproxy_numbanks;
 		vtable.setcurrbank = (fp_machine_setcurrbank) machineproxy_setcurrbank;
 		vtable.currbank = (fp_machine_currbank) machineproxy_currbank;
+		vtable.currentpreset = (fp_machine_currentpreset)machineproxy_currentpreset;
 		vtable.parameter_tweak = (fp_machine_param_tweak)machineproxy_param_tweak;;
 		vtable.parameter_normvalue = (fp_machine_param_normvalue)machineproxy_param_normvalue;
 		vtable.parameter_range = (fp_machine_param_range)machineproxy_param_range;
@@ -1583,6 +1587,23 @@ int machineproxy_currbank(psy_audio_MachineProxy* self)
 #endif		
 	}
 	return rv;
+}
+
+void machineproxy_currentpreset(psy_audio_MachineProxy* self, struct psy_audio_Preset* preset)
+{	
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_currentpreset(self->client, preset);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "currentpreset", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
 }
 
 const char* machineproxy_capturename(psy_audio_MachineProxy* self, int index)

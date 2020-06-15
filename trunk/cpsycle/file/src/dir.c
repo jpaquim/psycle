@@ -6,8 +6,136 @@
 #include "../../detail/compiler.h"
 
 #include "dir.h"
+
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "../../detail/portable.h"
+
+static void psy_path_extract_path(psy_Path*);
+static void psy_path_update(psy_Path*);
+
+void psy_path_init(psy_Path* self, const char* path)
+{
+	self->path = strdup(path ? path : "");
+	self->name = strdup("");
+	self->prefix = strdup("");
+	self->ext = strdup("");
+	psy_path_extract_path(self);
+}
+
+void psy_path_dispose(psy_Path* self)
+{
+	free(self->path);
+	free(self->name);
+	free(self->prefix);
+	free(self->ext);
+}
+
+void psy_path_setpath(psy_Path* self, const char* path)
+{
+	free(self->path);
+	free(self->name);
+	free(self->prefix);
+	free(self->ext);
+	self->path = strdup(path ? path : "");
+	self->name = strdup("");
+	self->prefix = strdup("");
+	self->ext = strdup("");
+	psy_path_extract_path(self);
+}
+
+void psy_path_setname(psy_Path* self, const char* name)
+{
+	free(self->name);
+	self->name = strdup((name) ? name : "");	
+	psy_path_update(self);	
+}
+
+void psy_path_setprefix(psy_Path* self, const char* prefix)
+{
+	free(self->prefix);
+	self->prefix = strdup((prefix) ? prefix : "");
+	psy_path_update(self);
+}
+
+void psy_path_setext(psy_Path* self, const char* ext)
+{
+	free(self->ext);
+	self->ext = strdup((ext) ? ext : "");
+	psy_path_update(self);
+}
+
+void psy_path_update(psy_Path* self)
+{
+	static const char* path_delim = "\\";
+	free(self->path);
+
+	self->path = malloc(strlen(self->prefix) + 1 + strlen(self->name) + 1 +
+		strlen(self->ext) + 1);
+	self->path[0] = '\0';
+	if (psy_path_hasprefix(self)) {
+		strcat(self->path, self->prefix);
+	}
+	if (psy_path_hasname(self)) {
+		if (psy_path_hasprefix) {
+			strcat(self->path, path_delim);
+		}
+		strcat(self->path, self->name);
+	}
+	if (psy_path_hasext(self)) {
+		strcat(self->path, ".");
+		strcat(self->path, self->ext);		
+	}
+}
+
+bool psy_path_hasprefix(psy_Path* self)
+{
+	return strcmp(self->prefix, "") != 0;
+}
+
+bool psy_path_hasext(psy_Path* self)
+{
+	return strcmp(self->ext, "") != 0;
+}
+
+bool psy_path_hasname(psy_Path* self)
+{
+	return strcmp(self->name, "") != 0;
+}
+
+void psy_path_extract_path(psy_Path* self)
+{
+	char* p;
+	
+	p = strrchr(self->path, '\\');
+	if (p) {
+		free(self->prefix);
+		self->prefix = (char*)malloc(p - self->path + 1);
+		self->prefix = strncpy(self->prefix, self->path, p - self->path);
+		self->prefix[p - self->path] = '\0';
+		free(self->name);
+		self->name = strdup(p + 1);		
+	} else {
+		free(self->prefix);
+		self->prefix = strdup("");
+		free(self->name);
+		self->name = strdup(self->path);
+	}
+	p = strrchr(self->name, '.');
+	if (p) {
+		free(self->ext);
+		self->ext = malloc(strlen(self->name) - (p - self->name) + 1);
+		self->ext = strncpy(self->ext, p + 1, strlen(self->name) -
+			(p - self->name));
+		self->name[p - self->name] = '\0';
+	} else {
+		free(self->ext);
+		self->ext = strdup("");
+	}
+}
+
 
 #if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
 
@@ -287,6 +415,27 @@ void setpathenv(const char* path)
 const char* psy_dir_config(void)
 {
 	static TCHAR achDevice[MAX_PATH];	
+#if WINVER >= 0x600
+	HRESULT  hr;
+	// include file ShlObj.h contains list of CSIDL defines however only a subset
+	// are supported with Windows 7 and later.
+	// for the 3rd argument, hToken, can be a specified Access Token or SSID for
+	// a user other than the current user. Using NULL gives us the current user.
+
+	if (SUCCEEDED(hr = SHGetFolderPath(NULL, CSIDL_PERSONAL, NULL, 0, achDevice))) {
+		// append a folder name to the user's Documents directory.
+		// the Path Handling functions are pretty handy.
+		// PathAppend(achDevice, L"xxx");
+	}
+#else	
+	strcpy(achDevice, PSYCLE_APP_DIR);
+#endif
+	return achDevice;
+}
+
+const char* psy_dir_home(void)
+{
+	static TCHAR achDevice[MAX_PATH];
 #if WINVER >= 0x600
 	HRESULT  hr;
 	// include file ShlObj.h contains list of CSIDL defines however only a subset

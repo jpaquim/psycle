@@ -10,9 +10,19 @@
 extern "C" {
 #endif
 
-void psy_audio_presetsio_load(const char* path, psy_audio_Presets*,
+#define psy_audio_PRESETIO_OK 0
+#define psy_audio_PRESETIO_ERROR_OPEN 1
+#define psy_audio_PRESETIO_ERROR_READ 2
+#define psy_audio_PRESETIO_ERROR_UPTODATE 3
+#define psy_audio_PRESETIO_ERROR_NEWVERSION 4
+#define psy_audio_PRESETIO_ERROR_WRITEOPEN 5
+#define psy_audio_PRESETIO_ERROR_WRITE 6
+
+
+int psy_audio_presetsio_load(const char* path, psy_audio_Presets*,
 	uintptr_t numparameters, uintptr_t datasizestruct, const char* pluginroot);
-void psy_audio_presetsio_save(const char* path, psy_audio_Presets*);
+int psy_audio_presetsio_save(const char* path, psy_audio_Presets*);
+const char* psy_audio_presetsio_statusstr(int status);
 
 #ifdef __cplusplus
 }

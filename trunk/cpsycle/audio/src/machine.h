@@ -105,6 +105,7 @@ typedef enum {
 struct psy_audio_Machine;
 struct psy_audio_Player;
 struct psy_audio_SongFile;
+struct psy_audio_Preset;
 
 // machine vtable function pointers
 typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
@@ -208,6 +209,7 @@ typedef void (*fp_machine_bankname)(struct psy_audio_Machine*, int bnkidx,
 typedef int (*fp_machine_numbanks)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, int bnkIdx);
 typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
+typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*, struct psy_audio_Preset*);
 // machine callbacks
 typedef	uintptr_t (*fp_machine_samplerate)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_bpm)(struct psy_audio_Machine*);
@@ -313,6 +315,7 @@ typedef struct {
 	fp_machine_bankname bankname;		
 	fp_machine_currbank currbank;
 	fp_machine_numbanks numbanks;
+	fp_machine_currentpreset currentpreset;
 ///\}
 ///\name gui stuff
 ///\{
@@ -744,6 +747,11 @@ INLINE void psy_audio_machine_setcurrbank(psy_audio_Machine* self, int prgIdx)
 INLINE int psy_audio_machine_currbank(psy_audio_Machine* self)
 {
 	return self->vtable->currbank(self);
+}
+
+INLINE void psy_audio_machine_currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset)
+{
+	self->vtable->currentpreset(self, preset);
 }
 
 INLINE int psy_audio_machine_haseditor(psy_audio_Machine* self)

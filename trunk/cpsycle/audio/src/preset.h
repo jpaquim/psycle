@@ -21,13 +21,14 @@ void psy_audio_preset_init(psy_audio_Preset*);
 void psy_audio_preset_dispose(psy_audio_Preset*);
 psy_audio_Preset* psy_audio_preset_alloc(void);
 psy_audio_Preset* psy_audio_preset_allocinit(void);
-
+void psy_audio_preset_clear(psy_audio_Preset*);
 void psy_audio_preset_setname(psy_audio_Preset*, const char* name);
 const char* psy_audio_preset_name(psy_audio_Preset*);
 void psy_audio_preset_setvalue(psy_audio_Preset*, uintptr_t param, intptr_t value);
 intptr_t psy_audio_preset_value(psy_audio_Preset*, uintptr_t param);
 void psy_audio_preset_setdatastruct(psy_audio_Preset* self,
     int num, const char* newname, int const* parameters, int size, void* newdata);
+void psy_audio_preset_putdata(psy_audio_Preset*, int size, void* newdata);
 
 #ifdef __cplusplus
 }

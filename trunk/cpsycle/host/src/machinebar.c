@@ -45,7 +45,6 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));				
 	self->selchange = 0;	
-	self->player = &workspace->player;
 	self->machines = &workspace->song->machines;	
 	self->instruments = &workspace->song->instruments;
 	psy_table_init(&self->comboboxslots);
@@ -262,7 +261,7 @@ void BuildInstrumentList(MachineBar* self)
 
 	psy_ui_combobox_clear(&self->instparambox);
 	for ( ; slot < 256; ++slot) {		
-		if (instrument = instruments_at(&self->player->song->instruments, instrumentindex_make(0, slot))) {
+		if (instrument = instruments_at(&self->workspace->song->instruments, instrumentindex_make(0, slot))) {
 			psy_snprintf(text, 20, "%02X:%s", slot, psy_audio_instrument_name(instrument));
 		} else {
 			psy_snprintf(text, 20, "%02X:%s", slot, "");

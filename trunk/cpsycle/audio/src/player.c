@@ -52,6 +52,10 @@ static void psy_audio_player_notifylinetick(psy_audio_Player*);
 void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	void* handle)
 {			
+	machinecallback_initempty(&self->machinecallback);
+	psy_audio_machinefactory_init(&self->machinefactory, self->machinecallback,
+		NULL);
+	psy_audio_song_init(&self->emptysong, &self->machinefactory);
 	self->song = song;	
 	self->numsongtracks = 16;
 	self->recordingnotes = 0;
@@ -108,6 +112,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_close(&logfile);
 #endif
+	psy_audio_song_dispose(&self->emptysong);
 }
 
 // driver callbacks
@@ -575,4 +580,12 @@ psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player* self, int id)
 unsigned int psy_audio_player_numeventdrivers(psy_audio_Player* self)
 {
 	return eventdrivers_size(&self->eventdrivers);
+}
+
+void psy_audio_player_setemptysong(psy_audio_Player* self)
+{	
+	psy_audio_exclusivelock_enter();
+	psy_audio_player_setsong(self, &self->emptysong);
+	dsp.clear(bufferdriver, 65535);
+	psy_audio_exclusivelock_leave();
 }
