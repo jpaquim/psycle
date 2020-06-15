@@ -176,6 +176,24 @@ uintptr_t psy_table_size(psy_Table* self)
 	return self->count;
 }
 
+uintptr_t psy_table_maxkey(psy_Table* self)
+{	
+	psy_TableIterator it;
+	uintptr_t rv;
+
+	if (self->count == 0) {
+		return UINTPTR_MAX;
+	}	
+	for (rv = 0, it = psy_table_begin(self);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		if (rv < psy_tableiterator_key(&it)) {
+			rv = psy_tableiterator_key(&it);
+		}
+	}	
+	return rv;
+}
+
 uintptr_t psy_table_freetableentry(void* context, void* param, psy_TableHashEntry* entry)
 {
 	free(entry->value);

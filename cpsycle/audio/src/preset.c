@@ -25,6 +25,12 @@ void psy_audio_preset_dispose(psy_audio_Preset* self)
 	self->datasize = 0;	
 }
 
+void psy_audio_preset_clear(psy_audio_Preset* self)
+{
+	psy_audio_preset_dispose(self);
+	psy_audio_preset_init(self);
+}
+
 psy_audio_Preset* psy_audio_preset_alloc(void)
 {
 	return malloc(sizeof(psy_audio_Preset));
@@ -81,18 +87,22 @@ void psy_audio_preset_setdatastruct(psy_audio_Preset* self,
 	{
 		psy_table_dispose(&self->parameters);
 	}
+	psy_audio_preset_putdata(self, size, newdata);
+	free(self->name);
+	self->name = strdup(newname);
+}
+
+void psy_audio_preset_putdata(psy_audio_Preset* self, int size, void* newdata)
+{	
 	if (size > 0)
 	{
 		free(self->data);
 		self->data = (unsigned char*)malloc(size);
 		memcpy(self->data, newdata, size);
 		self->datasize = size;
-	} else
-	{
+	} else {
 		free(self->data);
 		self->data = 0;
 		self->datasize = 0;
-	}
-	free(self->name);
-	self->name = strdup(newname);
+	}	
 }

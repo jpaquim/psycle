@@ -208,6 +208,7 @@ const char* workspace_ladspas_directory(Workspace*);
 const char* workspace_skins_directory(Workspace*);
 const char* workspace_doc_directory(Workspace*);
 const char* workspace_config_directory(Workspace*);
+const char* workspace_userpresets_directory(Workspace*);
 void workspace_changedefaultfontsize(Workspace*, int size);
 const char* workspace_dialbitmap_path(Workspace*);
 void workspace_dockview(Workspace*, psy_ui_Component* view);
@@ -219,5 +220,8 @@ bool workspace_isconnectasmixersend(Workspace*);
 void workspace_showgear(Workspace*);
 bool workspace_songmodified(Workspace*);
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace*);
+void workspace_outputwarning(Workspace*, const char* text);
+void workspace_outputerror(Workspace*, const char* text);
+void workspace_output(Workspace*, const char* text);
 
 #endif

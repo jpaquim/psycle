@@ -35,7 +35,16 @@ void songproperties_init(SongProperties*, const char* title,
 void songproperties_copy(SongProperties*, const SongProperties* other);
 void songproperties_dispose(SongProperties*);
 void songproperties_setbpm(SongProperties*, psy_dsp_beat_t bpm);
-psy_dsp_beat_t songproperties_pm(SongProperties*);
+
+INLINE psy_dsp_beat_t songproperties_bpm(SongProperties* self)
+{
+	return self->bpm;
+}
+
+INLINE uintptr_t songproperties_lpb(SongProperties* self)
+{
+	return self->lpb;
+}
 
 typedef struct psy_audio_Song {
 	SongProperties properties;
@@ -74,6 +83,8 @@ INLINE const char* psy_audio_song_title(psy_audio_Song* self)
 void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_beat_t bpm);
 /// return song properties bpm
 psy_dsp_beat_t psy_audio_song_bpm(psy_audio_Song*);
+/// return song properties lpb
+uintptr_t psy_audio_song_lpb(psy_audio_Song*);
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,7 @@
 #include "../../driver/driver.h"
 #include "eventdrivers.h"
 #include "song.h"
+#include "machinefactory.h"
 #include "sequencer.h"
 #include <signal.h>
 #include "library.h"
@@ -26,6 +27,11 @@ typedef enum {
 typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;
+	// empty song for lock minimized
+	// song switching
+	psy_audio_MachineFactory machinefactory;
+	psy_audio_MachineCallback machinecallback;
+	psy_audio_Song emptysong;
 	psy_audio_Sequencer sequencer;	
 	uintptr_t numsongtracks;
 	psy_Signal signal_numsongtrackschanged;
@@ -124,6 +130,7 @@ psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
 psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, int id);
 unsigned int psy_audio_player_numeventdrivers(psy_audio_Player*);
 void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount, uintptr_t slot);
+void psy_audio_player_setemptysong(psy_audio_Player*);
 
 #ifdef __cplusplus
 }

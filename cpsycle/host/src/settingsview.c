@@ -232,6 +232,9 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Properties* proper
 					numoutput = wrap - str;
 				}
 			}
+			if (numoutput == 0) {
+				break;
+			}
 			psy_ui_textout(self->g, self->cpx + column * propertiesrenderer_columnwidth(self, column),
 				self->cpy + self->dy + (self->numblocklines - 1) * self->lineheight, str, numoutput);
 			count -= numoutput;

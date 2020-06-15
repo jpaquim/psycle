@@ -229,6 +229,8 @@ static int currbank(psy_audio_Machine* self)
 {
 	return 0;
 }
+static void currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset) {}
+
 /// machinecallback
 static uintptr_t samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
 static psy_dsp_beat_t bpm(psy_audio_Machine* self) { return self->callback.bpm(self->callback.context); }
@@ -349,6 +351,7 @@ static void vtable_init(void)
 		vtable.numbanks = numbanks;
 		vtable.setcurrbank = setcurrbank;
 		vtable.currbank = currbank;
+		vtable.currentpreset = currentpreset;
 		vtable.parameter_tweak = param_tweak;;
 		vtable.parameter_normvalue = param_normvalue;
 		vtable.parameter_range = param_range;

@@ -41,6 +41,7 @@ static void workspace_makeparamview(Workspace*, psy_Properties*);
 static void workspace_makeparamtheme(Workspace*, psy_Properties*);
 static void workspace_makekeyboard(Workspace*);
 static void workspace_makedirectories(Workspace*);
+static void workspace_makedefaultuserpresetpath(Workspace*);
 static void workspace_makedirectory(Workspace*, const char* key,
 	const char* label, const char* defaultdir);
 static void workspace_makenotes(Workspace*);
@@ -967,7 +968,19 @@ void workspace_makedirectories(Workspace* self)
 	workspace_makedirectory(self, "ladspas", "LADSPA directories",
 		PSYCLE_LADSPAS_DEFAULT_DIR);
 	workspace_makedirectory(self, "skin", "Skin directory",
-		"C:\\Programme\\Psycle\\Skins");	
+		"C:\\Programme\\Psycle\\Skins");
+	workspace_makedefaultuserpresetpath(self);
+}
+
+void workspace_makedefaultuserpresetpath(Workspace* self)
+{
+	psy_Path defaultuserpresetpath;
+
+	psy_path_init(&defaultuserpresetpath, psy_dir_home());
+	psy_path_setname(&defaultuserpresetpath, "Presets");
+	workspace_makedirectory(self, "presets", "User Presets directory",
+		psy_path_path(&defaultuserpresetpath));
+	psy_path_dispose(&defaultuserpresetpath);
 }
 
 void workspace_makecompatibility(Workspace* self)
@@ -1522,7 +1535,7 @@ void workspace_newsong(Workspace* self)
 	
 	song = psy_audio_song_allocinit(&self->machinefactory);
 	free(self->filename);
-	self->filename = strdup("Untitled.psy");
+	self->filename = strdup("Untitled.psy");	
 	workspace_setsong(self, song, WORKSPACE_NEWSONG, 0);
 	workspace_selectview(self, TABPAGE_MACHINEVIEW, 0, 0);
 }
@@ -1544,11 +1557,10 @@ void workspace_loadsong(Workspace* self, const char* path)
 			workspace_onterminaloutput);
 		songfile.song = song;
 		songfile.file = 0;
-		psy_audio_exclusivelock_enter();
+		psy_audio_player_setemptysong(&self->player);		
 		self->songcbk = song;
 		if (psy_audio_songfile_load(&songfile, path) != PSY_OK) {
-			self->songcbk = self->song;
-			psy_audio_exclusivelock_leave();
+			self->songcbk = self->song;			
 			psy_audio_song_deallocate(song);
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
@@ -1558,7 +1570,6 @@ void workspace_loadsong(Workspace* self, const char* path)
 			self->filename = strdup(path);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
 			psy_audio_songfile_dispose(&songfile);
-			psy_audio_exclusivelock_leave();
 			workspace_addrecentsong(self, path);
 			psy_audio_songfile_dispose(&songfile);
 		}
@@ -1567,18 +1578,19 @@ void workspace_loadsong(Workspace* self, const char* path)
 	}	
 }
 
-void workspace_addrecentsong(Workspace* self, const char* path)
+void workspace_addrecentsong(Workspace* self, const char* filename)
 {
-	if (workspace_saverecentsongs(self) && !psy_properties_find(self->recentfiles, path)) {
-		char prefix[_MAX_PATH];
-		char name[_MAX_PATH];
-		char ext[_MAX_PATH];
+	if (workspace_saverecentsongs(self) &&
+			!psy_properties_find(self->recentfiles, filename)) {
+		psy_Path path;		
 
-		psy_dir_extract_path(path, prefix, name, ext);
+		psy_path_init(&path, filename);
 		psy_properties_settext(psy_properties_sethint(
-			psy_properties_append_string(self->recentfiles, path, ""),
-			PSY_PROPERTY_HINT_READONLY), name);
+			psy_properties_append_string(self->recentfiles,
+				filename, ""),
+			PSY_PROPERTY_HINT_READONLY), psy_path_name(&path));
 		workspace_save_recentsongs(self);
+		psy_path_dispose(&path);
 	}
 }
 
@@ -1590,22 +1602,23 @@ void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender, int progr
 void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag, psy_audio_SongFile* songfile)
 {
 	psy_audio_Song* oldsong;
-
-	history_clear(&self->history);
+	
 	oldsong = self->song;
 	psy_audio_player_stop(&self->player);
-	psy_audio_exclusivelock_enter();	
+	psy_audio_player_setemptysong(&self->player);
+	applysongproperties(self);
+	workspace_disposesequencepaste(self);
+	sequenceselection_setsequence(&self->sequenceselection
+		, &song->sequence);
+	history_clear(&self->history);
+	workspace_addhistory(self);
+	self->lastentry = 0;
+	psy_audio_exclusivelock_enter();
 	self->song = song;
 	self->songcbk = song;
 	psy_audio_player_setsong(&self->player, self->song);
-	applysongproperties(self);
-	sequenceselection_setsequence(&self->sequenceselection
-		,&self->song->sequence);
-	workspace_addhistory(self);
-	psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);
-	self->lastentry = 0;
-	workspace_disposesequencepaste(self);
 	psy_audio_exclusivelock_leave();
+	psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);			
 	psy_audio_song_deallocate(oldsong);	
 }
 
@@ -1650,8 +1663,8 @@ void workspace_loadcontrolskin(Workspace* self, const char* path)
 void applysongproperties(Workspace* self)
 {	
 	if (self->song) {	
-		psy_audio_player_setbpm(&self->player, self->song->properties.bpm);
-		psy_audio_player_setlpb(&self->player, self->song->properties.lpb);
+		psy_audio_player_setbpm(&self->player, psy_audio_song_bpm(self->song));
+		psy_audio_player_setlpb(&self->player, psy_audio_song_lpb(self->song));
 	}
 }
 
@@ -1669,7 +1682,8 @@ void workspace_load_configuration(Workspace* self)
 {
 	char path[_MAX_PATH];
 	
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini",
+		workspace_config_directory(self));
 	propertiesio_load(self->config, path, 0);
 	workspace_configlanguage(self);
 	workspace_configaudio(self);	
@@ -1678,9 +1692,11 @@ void workspace_load_configuration(Workspace* self)
 	workspace_configvisual(self);
 	workspace_configkeyboard(self);
 	if (workspace_loadnewblitz(self)) {
-		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(&self->machinefactory);
+		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(
+			&self->machinefactory);
 	} else {
-		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(&self->machinefactory);
+		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
+			&self->machinefactory);
 	}
 	psy_signal_emit(&self->signal_configchanged, self, 1, self->config);
 	psy_signal_emit(&self->signal_skinchanged, self, 0);
@@ -1690,7 +1706,8 @@ void workspace_save_configuration(Workspace* self)
 {
 	char path[_MAX_PATH];
 
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini",
+		workspace_config_directory(self));
 	propertiesio_save(self->config, path);	
 }
 
@@ -1699,16 +1716,17 @@ void workspace_load_recentsongs(Workspace* self)
 	char path[_MAX_PATH];
 	psy_Properties* p;
 
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\"PSYCLE_RECENT_SONG_INI,
+		workspace_config_directory(self));
 	propertiesio_load(self->recentsongs, path, 1);
-	for (p = self->recentfiles->children; p != NULL; p = psy_properties_next(p)) {
-		char prefix[_MAX_PATH];
-		char name[_MAX_PATH];
-		char ext[_MAX_PATH];
+	for (p = self->recentfiles->children; p != NULL;
+			p = psy_properties_next(p)) {
+		psy_Path path;
 
-		psy_dir_extract_path(psy_properties_key(p), prefix, name, ext);
-		psy_properties_settext(p, name);
+		psy_path_init(&path, psy_properties_key(p));		
+		psy_properties_settext(p, psy_path_name(&path));
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_READONLY);
+		psy_path_dispose(&path);
 	}
 }
 
@@ -1716,7 +1734,8 @@ void workspace_save_recentsongs(Workspace* self)
 {
 	char path[_MAX_PATH];
 
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\"PSYCLE_RECENT_SONG_INI,
+		workspace_config_directory(self));
 	propertiesio_save(self->recentsongs, path);
 }
 
@@ -1724,7 +1743,8 @@ void workspace_clearrecentsongs(Workspace* self)
 {
 	char path[_MAX_PATH];
 
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle-recentsongs.ini", workspace_config_directory(self));
+	psy_snprintf(path, _MAX_PATH, "%s\\"PSYCLE_RECENT_SONG_INI,
+		workspace_config_directory(self));
 	psy_properties_clear(self->recentfiles);
 	propertiesio_save(self->recentsongs, path);
 }
@@ -2099,6 +2119,12 @@ const char* workspace_config_directory(Workspace* self)
 	return psy_dir_config();
 }
 
+const char* workspace_userpresets_directory(Workspace* self)
+{
+	return psy_properties_readstring(self->directories, "presets",
+		PSYCLE_USERPRESETS_DEFAULT_DIR);
+}
+
 psy_audio_MachineCallback machinecallback(Workspace* self)
 {
 	psy_audio_MachineCallback rv;	
@@ -2209,19 +2235,34 @@ psy_audio_MachineFactory* machinecallback_machinefactory(Workspace* self)
 }
 
 void workspace_onterminalwarning(Workspace* self, psy_audio_SongFile* sender,
-	const char* text)	
+	const char* text)
 {
-	psy_signal_emit(&self->signal_terminal_warning, self, 1, text);
+	workspace_outputwarning(self, text);
 }
 
 void workspace_onterminalerror(Workspace* self, psy_audio_SongFile* sender,
 	const char* text)	
 {
-	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
+	workspace_outputerror(self, text);	
 }
 
 void workspace_onterminaloutput(Workspace* self, psy_audio_SongFile* sender,
 	const char* text)	
+{
+	workspace_output(self, text);	
+}
+
+void workspace_outputwarning(Workspace* self, const char* text)
+{
+	psy_signal_emit(&self->signal_terminal_warning, self, 1, text);
+}
+
+void workspace_outputerror(Workspace* self, const char* text)
+{
+	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
+}
+
+void workspace_output(Workspace* self, const char* text)
 {
 	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
 }
