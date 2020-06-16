@@ -162,7 +162,6 @@ INLINE float psy_audio_samplerchannel_defaultpanfactorfloat(psy_audio_SamplerCha
 	return (self->m_DefaultPanFactor & 0xFF) / 200.0f;
 }
 
-
 typedef struct {
 	uintptr_t channelnum;
 	psy_audio_SamplerChannel* channel;	
@@ -187,6 +186,7 @@ typedef struct {
 	int _cutoff;
 	float _coModify;
 	double portaspeed;
+	int period;
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
@@ -285,6 +285,7 @@ typedef struct psy_audio_Sampler {
 	psy_audio_InfoMachineParam param_pan;
 	psy_audio_SamplerMasterChannel masterchannel;
 	psy_audio_CustomMachineParam ignore_param;
+	psy_audio_ChoiceMachineParam param_amigaslides;
 	psy_Table channels;
 	uint8_t basec;
 	// Sampler PS1 with max amp = 0.5.
@@ -297,7 +298,7 @@ typedef struct psy_audio_Sampler {
 	ResamplerType resamplerquality;
 	psy_audio_SamplerTickTimer ticktimer;
 	int samplecounter;
-	bool amigaslides; // using linear or amiga slides.
+	int32_t amigaslides; // using linear or amiga slides.
 	bool usefilters;
 } psy_audio_Sampler;
 

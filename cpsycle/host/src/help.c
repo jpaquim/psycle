@@ -9,14 +9,7 @@
 #include <dir.h>
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
-
-#include "../../detail/portable.h"
-
-#if defined DIVERSALIS__OS__UNIX
-#define _MAX_PATH 4096
-#endif
 
 static void help_ondestroy(Help*, psy_ui_Component* sender);
 static void help_registerfiles(Help*);
@@ -85,13 +78,11 @@ void help_buildtabs(Help* self)
 	for (it = psy_table_begin(&self->filenames);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
-		char prefix[_MAX_PATH];
-		char ext[_MAX_PATH];
-		char name[_MAX_PATH];
+		psy_Path path;
 
-		psy_dir_extract_path((char*)psy_tableiterator_value(&it), prefix, name,
-			ext);
-		tabbar_append(&self->tabbar, name);
+		psy_path_init(&path, (char*)psy_tableiterator_value(&it));		
+		tabbar_append(&self->tabbar, psy_path_name(&path));
+		psy_path_dispose(&path);
 	}
 }
 
@@ -118,12 +109,13 @@ void help_loadpage(Help* self, uintptr_t index)
 	psy_ui_editor_enableedit(&self->editor);
 	psy_ui_editor_clear(&self->editor);
 	if (psy_table_at(&self->filenames, index) != NULL) {
-		char path[_MAX_PATH];
+		psy_Path path;
 
-		psy_snprintf(path, _MAX_PATH, "%s\\%s",
-			workspace_doc_directory(self->workspace),
-			psy_table_at(&self->filenames, index));
-		psy_ui_editor_load(&self->editor, path);				
+		psy_path_init(&path, NULL);
+		psy_path_setprefix(&path, workspace_doc_directory(self->workspace));
+		psy_path_setname(&path, psy_table_at(&self->filenames, index));
+		psy_ui_editor_load(&self->editor, psy_path_path(&path));
+		psy_path_dispose(&path);
 	}
 	psy_ui_editor_preventedit(&self->editor);
 }

@@ -636,7 +636,7 @@ static int FilterException(int code, struct _EXCEPTION_POINTERS *ep)
 }
 #endif
 
-static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* path,
+static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const char* filename,
 	int shellidx)
 {
 	char effectName[256] = {0};
@@ -677,16 +677,15 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			psy_snprintf(productNameShort, 256, "%s", effectName);
 		} else {
 			// neither effect nor productString, extract name from dll path
-			char prefix[_MAX_PATH];
-			char ext[_MAX_PATH];
-			char name[_MAX_PATH];
-			
-			psy_dir_extract_path(path, prefix, name, ext);
-			psy_strlwr(name);
-			psy_replacechar(name, ' ', '-');
-			psy_replacechar(name, '_', '-');
-			psy_snprintf(productName, 256, "%s", name);
-			psy_snprintf(productNameShort, 256, "%s", name);
+			psy_Path path;			
+
+			psy_path_init(&path, filename);
+			psy_snprintf(productName, 256, psy_path_name(&path));
+			psy_strlwr(productName);
+			psy_replacechar(productName, ' ', '-');
+			psy_replacechar(productName, '_', '-');
+			psy_snprintf(productNameShort, 256, "%s", productName);
+			psy_path_dispose(&path);
 		}				
 		mode = ((effect->flags & effFlagsIsSynth) == effFlagsIsSynth)
 			? MACHMODE_GENERATOR
@@ -702,7 +701,7 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			(int16_t) 0, 
 			(int16_t) 0,
 			(mode == MACHMODE_GENERATOR) ? MACH_VST : MACH_VSTFX,
-			path,
+			filename,
 			shellidx);		
 	}
 #if defined DIVERSALIS__OS__MICROSOFT        	

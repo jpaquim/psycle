@@ -83,6 +83,9 @@
     <ClCompile Include="src\sinc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\noteperiods.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\adsr.h">
@@ -161,6 +164,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\sse_mathfun.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\noteperiods.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

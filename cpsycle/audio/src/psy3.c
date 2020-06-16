@@ -2283,22 +2283,21 @@ int psy3_write_connections(psy_audio_SongFile* self, uintptr_t slot)
 	return status;
 }
 
-void psy3_savedllnameandindex(PsyFile* file, const char* path,
+void psy3_savedllnameandindex(PsyFile* file, const char* filename,
 	int32_t shellindex)
 {
-	char str[256];
-	char prefix[_MAX_PATH];
-	char name[_MAX_PATH];
-	char ext[_MAX_PATH];
+	char str[256];	
 	char idxtext[8];
 	int32_t index;
 
 	str[0] = '\0';
-	if (path) {
+	if (filename) {
+		psy_Path path;
 		idxtext[0] = '\0';
-		psy_dir_extract_path(path, prefix, name, ext);
-		if (strcmp(ext, "so") == 0) {
-			psy_snprintf(ext, 256, "dll");
+
+		psy_path_init(&path, filename);		
+		if (strcmp(psy_path_ext(&path), "so") == 0) {
+			psy_path_setext(&path, "dll");			
 		}
 		index = shellindex;
 		if (index != 0) {
@@ -2312,7 +2311,9 @@ void psy3_savedllnameandindex(PsyFile* file, const char* path,
 				divisor = divisor / 256;
 			}
 		}
-		psy_snprintf(str, 256, "%s.%s%s", name, ext, idxtext);
+		psy_snprintf(str, 256, "%s.%s%s", psy_path_name(&path),
+			psy_path_ext(&path), idxtext);
+		psy_path_dispose(&path);
 	}
 	psyfile_write(file, str, strlen(str) + 1);
 }

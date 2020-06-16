@@ -1680,11 +1680,13 @@ psy_Properties* workspace_recentsongs(Workspace* self)
 
 void workspace_load_configuration(Workspace* self)
 {
-	char path[_MAX_PATH];
-	
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini",
-		workspace_config_directory(self));
-	propertiesio_load(self->config, path, 0);
+	psy_Path path;
+
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, workspace_config_directory(self));
+	psy_path_setname(&path, PSYCLE_INI);		
+	propertiesio_load(self->config, psy_path_path(&path), 0);
+	psy_path_dispose(&path);
 	workspace_configlanguage(self);
 	workspace_configaudio(self);	
 	eventdrivers_restartall(&self->player.eventdrivers);
@@ -1704,21 +1706,25 @@ void workspace_load_configuration(Workspace* self)
 
 void workspace_save_configuration(Workspace* self)
 {
-	char path[_MAX_PATH];
+	psy_Path path;
 
-	psy_snprintf(path, _MAX_PATH, "%s\\psycle.ini",
-		workspace_config_directory(self));
-	propertiesio_save(self->config, path);	
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, workspace_config_directory(self));
+	psy_path_setname(&path, PSYCLE_INI);	
+	propertiesio_save(self->config, psy_path_path(&path));
+	psy_path_dispose(&path);
 }
 
 void workspace_load_recentsongs(Workspace* self)
-{
-	char path[_MAX_PATH];
+{	
 	psy_Properties* p;
+	psy_Path path;
 
-	psy_snprintf(path, _MAX_PATH, "%s\\"PSYCLE_RECENT_SONG_INI,
-		workspace_config_directory(self));
-	propertiesio_load(self->recentsongs, path, 1);
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, workspace_config_directory(self));
+	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);	
+	propertiesio_load(self->recentsongs, psy_path_path(&path), 1);
+	psy_path_dispose(&path);
 	for (p = self->recentfiles->children; p != NULL;
 			p = psy_properties_next(p)) {
 		psy_Path path;
@@ -1732,21 +1738,25 @@ void workspace_load_recentsongs(Workspace* self)
 
 void workspace_save_recentsongs(Workspace* self)
 {
-	char path[_MAX_PATH];
+	psy_Path path;
 
-	psy_snprintf(path, _MAX_PATH, "%s\\"PSYCLE_RECENT_SONG_INI,
-		workspace_config_directory(self));
-	propertiesio_save(self->recentsongs, path);
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, workspace_config_directory(self));
+	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);	
+	propertiesio_save(self->recentsongs, psy_path_path(&path));
+	psy_path_dispose(&path);
 }
 
 void workspace_clearrecentsongs(Workspace* self)
 {
-	char path[_MAX_PATH];
-
-	psy_snprintf(path, _MAX_PATH, "%s\\"PSYCLE_RECENT_SONG_INI,
-		workspace_config_directory(self));
+	psy_Path path;
+	
+	psy_path_init(&path, NULL);
+	psy_path_setprefix(&path, workspace_config_directory(self));
+	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);
 	psy_properties_clear(self->recentfiles);
-	propertiesio_save(self->recentsongs, path);
+	propertiesio_save(self->recentsongs, psy_path_path(&path));
+	psy_path_dispose(&path);
 }
 
 void workspace_setoctave(Workspace* self, int octave)
