@@ -276,17 +276,17 @@ void psyclescript_require(psy_audio_PsycleScript* self, const char* name,
 
 void psyclescript_setsearchpath(psy_audio_PsycleScript* self, const char* modulepath)
 {    
-  char prefix[_MAX_PATH];
-  char fname[_MAX_PATH];
-  char ext[_MAX_PATH];  
-  char path[_MAX_PATH];
+	psy_Path path;  
+	char luapath[_MAX_PATH];
 
-  psy_dir_extract_path(modulepath, prefix, fname, ext);  
-  psy_snprintf(path, _MAX_PATH, "%s/?.lua;%s/%s/?.lua;%s/psycle/?.lua", prefix, prefix, fname, prefix);
-  psy_replacechar(path, '/', '\\');
-  lua_getglobal(self->L, "package");
-  lua_pushstring(self->L, path);
-  lua_setfield(self->L, -2, "path");  
+	psy_path_init(&path, modulepath);	
+	psy_snprintf(luapath, _MAX_PATH, "%s/?.lua;%s/%s/?.lua;%s/psycle/?.lua",
+		psy_path_prefix(&path), psy_path_name(&path), psy_path_prefix(&path));
+	psy_replacechar(luapath, '/', '\\');
+	lua_getglobal(self->L, "package");
+	lua_pushstring(self->L, luapath);
+	lua_setfield(self->L, -2, "path");
+	psy_path_dispose(&path);
 }
 
 void psyclescript_register_weakuserdata(lua_State* L, void* ud)

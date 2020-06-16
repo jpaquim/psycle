@@ -536,4 +536,49 @@ void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext)
 	}
 }
 
+void psy_mkdir(const char* path)
+{
+#if defined _MSC_VER
+	_mkdir(path);
+#elif defined __GNUC__
+	mkdir(path, 0777);
+#endif
+}
 
+bool psy_direxists(const char* path)
+{
+#if defined _MSC_VER
+	DWORD ftyp = GetFileAttributesA(path);
+	if (ftyp == INVALID_FILE_ATTRIBUTES)
+		return FALSE;  //something is wrong with your path!
+
+	if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+		return TRUE;   // this is a directory!
+
+	return FALSE;    // this is not a directory!
+#elif defined __GNUC__
+	DIR* dir = opendir(path);
+	if (dir) {
+		/* Directory exists. */
+		closedir(dir);
+		return TRUE;
+	} else if (ENOENT == errno) {
+		/* Directory does not exist. */
+		return FALSE;
+	} else {
+		/* opendir() failed for some other reason. */
+		return FALSE;
+	}
+#endif
+}
+
+bool psy_filereadable(const char* fname)
+{
+	FILE* file;
+	if ((file = fopen(fname, "r")))
+	{
+		fclose(file);
+		return TRUE;
+	}
+	return FALSE;
+}

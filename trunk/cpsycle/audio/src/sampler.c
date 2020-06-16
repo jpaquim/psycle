@@ -9,6 +9,7 @@
 #include "instruments.h"
 #include "samples.h"
 #include "songio.h"
+#include <noteperiods.h>
 #include <operations.h>
 #include <linear.h>
 #include <math.h>
@@ -414,6 +415,14 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 		"played by C3"); 
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 1,
 		"played by C4");
+	psy_audio_choicemachineparam_init(&self->param_amigaslides,
+		"Amiga Freqtable", "Amiga Freqtable", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->amigaslides,
+		0, 1);
+	psy_audio_choicemachineparam_setdescription(&self->param_amigaslides, 0,
+		"Linear");
+	psy_audio_choicemachineparam_setdescription(&self->param_amigaslides, 1,
+		"Amiga");
 	psy_audio_intmachineparam_init(&self->param_maxvolume,
 		"Max volume", "Max volume", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->maxvolume,
@@ -585,6 +594,7 @@ void dispose(psy_audio_Sampler* self)
 	psy_audio_intmachineparam_dispose(&self->param_numvoices);
 	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
+	psy_audio_choicemachineparam_dispose(&self->param_amigaslides);
 	psy_audio_intmachineparam_dispose(&self->param_maxvolume);
 	psy_audio_intmachineparam_dispose(&self->param_instrumentbank);
 	psy_audio_custommachineparam_dispose(&self->param_blank);
@@ -909,9 +919,10 @@ psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
 		case 2: return &self->param_numvoices.machineparam; break;
 		case 3: return &self->param_resamplingmethod.machineparam; break;
 		case 4: return &self->param_defaultspeed.machineparam;  break;
-		case 5: return &self->param_maxvolume.machineparam; break;
-		case 6: return &self->param_panpersistent.machineparam; break;
-		case 7: return &self->param_instrumentbank.machineparam; break;
+		case 5: return &self->param_amigaslides.machineparam;  break;
+		case 6: return &self->param_maxvolume.machineparam; break;
+		case 7: return &self->param_panpersistent.machineparam; break;
+		case 8: return &self->param_instrumentbank.machineparam; break;
 		default:
 			return &self->param_blank.machineparam; break;
 			break;
@@ -967,7 +978,10 @@ uintptr_t numoutputs(psy_audio_Sampler* self)
 
 // psy_audio_SamplerVoice
 
-static void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
+static void psy_audio_samplervoice_updatespeed(psy_audio_SamplerVoice*);
+static void psy_audio_samplervoice_updateiteratorspeed(psy_audio_SamplerVoice*,
+	psy_audio_SampleIterator*);
+static void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice*,
 	psy_audio_Instrument* instrument);
 static psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice*,
 	uintptr_t channel, psy_dsp_amp_t input, psy_dsp_amp_t* filterenv, uintptr_t pos);
@@ -1012,6 +1026,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->maxvolume = maxvolume;
 	self->positions = 0;
 	self->stopping = FALSE;
+	self->period = 0;
 	if (instrument) {
 		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
 		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
@@ -1100,7 +1115,7 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 			}
 			break;		
 		case SAMPLER_CMD_PORTAMENTO_UP: {
-			double factor;
+			/*double factor;
 			psy_List* p;
 
 			factor = 1.0 / (12.0 * psy_audio_machine_ticksperbeat(
@@ -1112,11 +1127,12 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 				iterator->speed *= pow(2.0, self->effval * factor);
 				iterator->speedinternal *= pow(2.0, self->effval * factor);
 				self = self;
-			}
+			}*/
+			self->period -= self->effval;
 			break;
 		}
 		case SAMPLER_CMD_PORTAMENTO_DOWN: {
-			double factor;
+			/*double factor;
 			psy_List* p;
 			
 			factor = 1.0 / (12.0 * psy_audio_machine_ticksperbeat(
@@ -1126,12 +1142,14 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 
 				iterator = (psy_audio_SampleIterator*)p->entry;
 				iterator->speed *= pow(2.0, -self->effval * factor);
-			}
+			}*/
+			self->period += self->effval;
 			break;
 		}
 		default:
 		break;
 	}
+	psy_audio_samplervoice_updatespeed(self);
 }
 
 void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self,
@@ -1216,13 +1234,20 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 					psy_audio_sampler_base(self->sampler));		
 				totalsamples = samplesprobeat * bpl * self->instrument->lines;
 				psy_audio_sampleiterator_setspeed(iterator,
-					sample->numframes / (double)totalsamples);				
+					sample->numframes / (double)totalsamples);
 			} else {
-				psy_audio_sampleiterator_setspeed(iterator,
-					pow(2.0f,
-						(event->note + sample->tune - self->sampler->basec +
-						((psy_dsp_amp_t)sample->finetune * 0.01f)) / 12.0f) *
-						((psy_dsp_beat_t)sample->samplerate / 44100));				
+				if (self->sampler->amigaslides) {
+					self->period = (int)psy_dsp_notetoamigaperiod(event->note,
+						sample->samplerate,
+						sample->tune +
+						NOTECOMMANDS_MIDDLEC - self->sampler->basec,
+						sample->finetune);
+				} else {
+					self->period = (int)psy_dsp_notetoperiod(event->note, sample->tune +
+						NOTECOMMANDS_MIDDLEC - self->sampler->basec,
+						sample->finetune);
+				}
+				psy_audio_samplervoice_updateiteratorspeed(self, iterator);
 			}
 			psy_audio_sampleiterator_play(iterator);
 			psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
@@ -1240,6 +1265,39 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 		self->dopan = 1; 
 		self->pan = rand() / (psy_dsp_amp_t) 32768.f;
 	}	
+}
+
+void psy_audio_samplervoice_updatespeed(psy_audio_SamplerVoice* self)
+{
+	if (self->positions && self->env.stage != ENV_OFF) {
+		psy_List* p;
+
+		for (p = self->positions; p != NULL; p = p->next) {
+			psy_audio_SampleIterator* it;
+
+			it = (psy_audio_SampleIterator*)p->entry;
+			psy_audio_samplervoice_updateiteratorspeed(self, it);
+		}
+	}
+}
+
+void psy_audio_samplervoice_updateiteratorspeed(psy_audio_SamplerVoice* self,
+	psy_audio_SampleIterator* it)
+{
+	int period;
+	double speed;
+	
+	period = self->period;
+	speed = self->sampler->amigaslides
+		? psy_dsp_amigaperiodtospeed(period,
+			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)),
+			0)
+		: psy_dsp_periodtospeed(period,
+			psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)),
+			it->sample->samplerate, 0);
+	//\todo: Attention, AutoVibrato always use linear slides with IT, but in FT2 it depends on amigaslides switch.	
+	// speed *= pow(2.0, ((-AutoVibratoAmount()) / 768.0));	
+	psy_audio_sampleiterator_setspeed(it, speed);	
 }
 
 void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, double frequency)
@@ -1626,6 +1684,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 			}
 
 			psyfile_read(songfile->file, &m_bAmigaSlides, sizeof(m_bAmigaSlides));
+			self->amigaslides = m_bAmigaSlides;
 			psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters));
 			psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume));
 			psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode));
@@ -1724,7 +1783,7 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].mode);
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].value);
 	}
-	psyfile_write_uint8(songfile->file, self->amigaslides);
+	psyfile_write_uint8(songfile->file, (uint8_t)(self->amigaslides != 0));
 	psyfile_write_uint8(songfile->file, self->usefilters);
 	psyfile_write_int32(songfile->file, 128);
 	psyfile_write_int32(songfile->file, psy_audio_PANNING_LINEAR);

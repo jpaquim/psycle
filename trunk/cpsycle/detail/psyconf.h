@@ -52,6 +52,7 @@
 #define PSYCLE_DEFAULT_FONT "tahoma;-12"
 #endif
 
+#define PSYCLE_INI "psycle.ini"
 #define PSYCLE_RECENT_SONG_INI "psycle-recentsongs.ini"
 
 #define PSYCLE_USE_MACHINEPROXY

@@ -6,6 +6,7 @@
 
 #include "paramview.h"
 #include "paramlistbox.h"
+#include "presetsbar.h"
 #include "workspace.h"
 
 #include <dir.h>
@@ -26,9 +27,7 @@
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component titlerow;
-	psy_ui_Component row0;
-	psy_ui_Component row1;
-	psy_ui_Component row2;
+	psy_ui_Component row0;	
 	psy_ui_Label title;
 	psy_ui_Button floatview;
 	psy_ui_Button close;
@@ -36,17 +35,8 @@ typedef struct {
 	psy_ui_Button parameters;
 	psy_ui_Button help;
 	psy_ui_Button dock;
-	psy_ui_Label bank;
-	psy_ui_ComboBox bankselector;
-	psy_ui_Label program;
-	psy_ui_ComboBox programbox;
-	psy_ui_Button importpresets;
-	psy_ui_Button exportpresets;
-	psy_ui_Button savepresets;
-	psy_ui_Edit savename;
-	psy_audio_Presets* presets;
-	bool userpreset;
-	psy_Path presetpath;
+	PresetsBar presetsbar;	
+	psy_audio_Machine* machine;
 } ParameterBar;
 
 typedef struct {
@@ -56,8 +46,7 @@ typedef struct {
 	psy_ui_Notebook notebook;
 	psy_ui_Editor help;
 	psy_ui_Component* view;
-	psy_ui_Component* machineview;
-	psy_audio_Presets* presets;
+	psy_ui_Component* machineview;	
 	psy_audio_Machine* machine;	
 	int dofloat;
 	int dodock;
@@ -66,7 +55,7 @@ typedef struct {
 	Workspace* workspace;
 } MachineFrame;
 
-void parameterbar_init(ParameterBar*, psy_ui_Component* parent);
+void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace* workspace);
 
 void machineframe_init(MachineFrame*, psy_ui_Component* parent, bool floated, Workspace* workspace);
 MachineFrame* machineframe_alloc(void);

@@ -120,6 +120,7 @@
     <ClCompile Include="src\linear.c" />
     <ClCompile Include="src\mersennetwister.c" />
     <ClCompile Include="src\multiresampler.c" />
+    <ClCompile Include="src\noteperiods.c" />
     <ClCompile Include="src\notestab.c" />
     <ClCompile Include="src\operations-noopt.c" />
     <ClCompile Include="src\operations-sse2.c" />
@@ -147,6 +148,7 @@
     <ClInclude Include="src\linear.h" />
     <ClInclude Include="src\mersennetwister.h" />
     <ClInclude Include="src\multiresampler.h" />
+    <ClInclude Include="src\noteperiods.h" />
     <ClInclude Include="src\notestab.h" />
     <ClInclude Include="src\operations.h" />
     <ClInclude Include="src\quantize.h" />

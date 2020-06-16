@@ -239,6 +239,9 @@
     <ClCompile Include="src\checkunsaved.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\presetsbar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -478,6 +481,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\checkunsaved.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\presetsbar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

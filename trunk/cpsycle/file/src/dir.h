@@ -64,6 +64,9 @@ const char* pathenv(void);
 void setpathenv(const char* path);
 void insertpathenv(const char* path);
 void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext);
+void psy_mkdir(const char* path);
+bool psy_direxists(const char* path);
+bool psy_filereadable(const char* fname);
 
 #ifdef __cplusplus
 }
