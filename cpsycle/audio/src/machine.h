@@ -106,6 +106,7 @@ struct psy_audio_Machine;
 struct psy_audio_Player;
 struct psy_audio_SongFile;
 struct psy_audio_Preset;
+struct psy_audio_Presets;
 
 // machine vtable function pointers
 typedef	void (*fp_machine_init)(struct psy_audio_Machine*);
@@ -210,6 +211,11 @@ typedef int (*fp_machine_numbanks)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, int bnkIdx);
 typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
 typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*, struct psy_audio_Preset*);
+typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*, struct psy_audio_Presets*);
+typedef struct psy_audio_Presets* (*fp_machine_presets)(struct psy_audio_Machine*);
+typedef bool (*fp_machine_acceptpresets)(struct psy_audio_Machine*);
+typedef const char* (*fp_machine_modulepath)(struct psy_audio_Machine*);
+typedef uintptr_t (*fp_machine_shellidx)(struct psy_audio_Machine*);
 // machine callbacks
 typedef	uintptr_t (*fp_machine_samplerate)(struct psy_audio_Machine*);
 typedef psy_dsp_beat_t (*fp_machine_bpm)(struct psy_audio_Machine*);
@@ -283,6 +289,8 @@ typedef struct {
 	fp_machine_seteditname seteditname;
 	fp_machine_editname editname;
 	fp_machine_mode mode;
+	fp_machine_modulepath modulepath;
+	fp_machine_shellidx shellidx;
 ///\}
 ///\name parameters
 ///\{
@@ -316,6 +324,9 @@ typedef struct {
 	fp_machine_currbank currbank;
 	fp_machine_numbanks numbanks;
 	fp_machine_currentpreset currentpreset;
+	fp_machine_setpresets setpresets;
+	fp_machine_presets presets;
+	fp_machine_acceptpresets acceptpresets;
 ///\}
 ///\name gui stuff
 ///\{
@@ -532,6 +543,16 @@ INLINE const char* psy_audio_machine_editname(psy_audio_Machine* self)
 INLINE int psy_audio_machine_mode(psy_audio_Machine* self)
 {
 	return self->vtable->mode(self);
+}
+
+INLINE const char* psy_audio_machine_modulepath(psy_audio_Machine* self)
+{
+	return self->vtable->modulepath(self);
+}
+
+INLINE uintptr_t psy_audio_machine_shellidx(psy_audio_Machine* self)
+{
+	return self->vtable->shellidx(self);
 }
 
 INLINE uintptr_t psy_audio_machine_numparametercols(psy_audio_Machine* self)
@@ -754,6 +775,21 @@ INLINE void psy_audio_machine_currentpreset(psy_audio_Machine* self, struct psy_
 	self->vtable->currentpreset(self, preset);
 }
 
+INLINE void psy_audio_machine_setpresets(psy_audio_Machine* self, struct psy_audio_Presets* presets)
+{
+	self->vtable->setpresets(self, presets);
+}
+
+INLINE struct psy_audio_Presets* psy_audio_machine_presets(psy_audio_Machine* self)
+{
+	return self->vtable->presets(self);
+}
+
+INLINE bool psy_audio_machine_acceptpresets(psy_audio_Machine* self)
+{
+	return self->vtable->acceptpresets(self);
+}
+
 INLINE int psy_audio_machine_haseditor(psy_audio_Machine* self)
 {
 	return self->vtable->haseditor(self);
@@ -939,6 +975,11 @@ INLINE int psy_audio_machine_numplaybacks(psy_audio_Machine* self)
 INLINE void psy_audio_machine_output(psy_audio_Machine* self, const char* text)
 {
 	self->vtable->output(self, text);
+}
+
+INLINE psy_audio_CpuTimeClock psy_audio_machine_accumulated_processing_time(psy_audio_Machine* self)
+{
+	return self->accumulated_processing_time_;
 }
 
 #ifdef __cplusplus

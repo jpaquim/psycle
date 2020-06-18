@@ -64,6 +64,7 @@ int psy_audio_machines_connect(psy_audio_Machines*, uintptr_t outputslot, uintpt
 void psy_audio_machines_disconnect(psy_audio_Machines*, uintptr_t outputslot, uintptr_t inputslot);
 void psy_audio_machines_disconnectall(psy_audio_Machines*, uintptr_t slot);
 int psy_audio_machines_connected(psy_audio_Machines*, uintptr_t outputslot, uintptr_t inputslot);
+void psy_audio_machines_updatepath(psy_audio_Machines*);
 
 INLINE MachineList* psy_audio_machines_path(psy_audio_Machines* self)
 {

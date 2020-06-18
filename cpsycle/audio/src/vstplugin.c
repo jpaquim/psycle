@@ -17,6 +17,7 @@
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "songio.h"
+#include "preset.h"
 
 #include <dir.h>
 
@@ -179,6 +180,7 @@ static void bankname(psy_audio_VstPlugin*, int bnkidx, char* val);
 static int numbanks(psy_audio_VstPlugin*);
 static void setcurrbank(psy_audio_VstPlugin*, int bnkIdx);
 static int currbank(psy_audio_VstPlugin*);
+static void currentpreset(psy_audio_VstPlugin*, psy_audio_Preset*);
 
 static void vstplugin_onfileselect(psy_audio_VstPlugin*, struct VstFileSelect*);
 
@@ -218,6 +220,7 @@ static void vtable_init(psy_audio_VstPlugin* self)
 		vtable.numbanks = (fp_machine_numbanks) numbanks;
 		vtable.setcurrbank = (fp_machine_setcurrbank) setcurrbank;
 		vtable.currbank = (fp_machine_currbank) currbank;
+		vtable.currentpreset = (fp_machine_currentpreset)currentpreset;
 		vtable_initialized = 1;
 	}
 }
@@ -988,4 +991,35 @@ void setcurrbank(psy_audio_VstPlugin* self, int bnkIdx)
 int currbank(psy_audio_VstPlugin* self)
 {
 	return currprogram(self) / 128;
+}
+
+void currentpreset(psy_audio_VstPlugin* self, psy_audio_Preset* preset)
+{	
+	uintptr_t gbp;
+
+	for (gbp = 0; gbp < numparameters(self); ++gbp) {
+		psy_audio_MachineParam* param;
+
+		param = parameter(self, gbp);
+		if (param) {
+			float value;
+			
+			value = psy_audio_machineparam_normvalue(param);
+			psy_audio_preset_setvalue(preset, gbp, (intptr_t)(value * 0xFFFF));
+			preset->isfloat = TRUE;
+		}		
+	}
+	if (self->effect->flags & effFlagsProgramChunks) {
+		VstInt32 size;
+		bool onlyCurrentProgram;
+		void* ptr;		
+
+		ptr = 0;
+		onlyCurrentProgram = TRUE;		
+		size = self->effect->dispatcher(self->effect, effGetChunk, onlyCurrentProgram, 0, &ptr, 0);		
+		psy_audio_preset_putdata(preset, size, ptr);		
+	}
+	preset->id = self->effect->uniqueID;
+	preset->magic = self->effect->magic;
+	preset->version = self->effect->version;
 }

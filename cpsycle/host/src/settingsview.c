@@ -489,8 +489,12 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_Component* 
 		} else
 		if (self->button && psy_properties_type(self->selected) == PSY_PROPERTY_TYP_FONT) {
 			psy_ui_FontDialog fontdialog;
+			psy_ui_FontInfo fontinfo;
 
 			psy_ui_fontdialog_init(&fontdialog, &self->client);
+			psy_ui_fontinfo_init_string(&fontinfo,
+				psy_properties_valuestring(self->selected));
+			psy_ui_fontdialog_setfontinfo(&fontdialog, fontinfo);
 			if (psy_ui_fontdialog_execute(&fontdialog)) {				
 				psy_ui_FontInfo fontinfo;
 				

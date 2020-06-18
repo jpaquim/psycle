@@ -68,9 +68,13 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 				slot);
 			if (machine) {
 				if (cpy + self->dy >= 0) {
-					char text[20];
+					char text[40];
 					const psy_audio_MachineInfo* info;
+					float percent;
+					float real_time_duration;
+					psy_audio_CpuTimeClock clock;
 
+					real_time_duration = 100;
 					info = psy_audio_machine_info(machine);
 					psy_snprintf(text, 20, "%d", (int)slot);
 					psy_ui_textout(g, 0, cpy + self->dy, text, strlen(text));
@@ -78,7 +82,15 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 						psy_audio_machine_editname(machine),
 						min(strlen(psy_audio_machine_editname(machine)), 14));
 					psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy + self->dy,
-						info->Name, strlen(info->Name));					
+						info->Name, strlen(info->Name));
+					clock = psy_audio_machine_accumulated_processing_time(machine);
+					percent = 100.0f *
+						psy_audio_cputimeclock_cputime_count(&clock) /
+						real_time_duration;
+					percent = 0.f;
+					psy_snprintf(text, 40, "%.1f%%", percent);
+					psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy + self->dy,
+						text, strlen(text));
 					if (cpy + self->dy > size.height) {
 						//break;
 					}

@@ -463,6 +463,11 @@ INLINE void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color
 	self->color = color;
 }
 
+INLINE  psy_ui_Color psy_ui_component_color(psy_ui_Component* self)
+{
+	return self->color;
+}
+
 INLINE void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
 {
 	self->backgroundcolor = color;

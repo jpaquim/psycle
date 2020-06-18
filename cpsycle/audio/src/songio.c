@@ -21,6 +21,18 @@
 #include <errno.h>
 #endif
 
+static char load_filter[] =
+"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
+"Songs (*.psy)"				        "|*.psy|"
+"FastTracker II Songs (*.xm)"       "|*.xm|"
+"Impulse Tracker Songs (*.it)"      "|*.it|"
+"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
+"Original Mod Format Songs (*.mod)" "|*.mod|"
+"Wav Format Songs (*.wav)"			"|*.wav";
+
+static char save_filter[] =
+"Songs (*.psy)|*.psy";
+
 static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
 static int psy_audio_songfile_errfile(psy_audio_SongFile* self);
 static void psy_audio_songfile_machineuis_dispose(psy_audio_SongFile*);
@@ -211,4 +223,14 @@ psy_audio_MachineUi* psy_audio_songfile_machineui(psy_audio_SongFile* self,
 		rv = psy_table_at(&self->machineuis, index);
 	}
 	return rv;
+}
+
+const char* psy_audio_songfile_loadfilter(void)
+{
+	return load_filter;
+}
+
+const char* psy_audio_songfile_savefilter(void)
+{
+	return save_filter;
 }

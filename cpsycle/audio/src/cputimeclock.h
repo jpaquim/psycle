@@ -12,10 +12,12 @@
 typedef struct psy_audio_CpuTimeClock {
 	clock_t start, end;
 	double cpu_time_used;
+	unsigned int count;
 } psy_audio_CpuTimeClock;
 
 INLINE void psy_audio_cputimeclock_init(psy_audio_CpuTimeClock* self)
 {
+	self->count = 0;
 	self->start = 0;
 	self->end = 0;
 	self->cpu_time_used = 0.0;
@@ -40,6 +42,11 @@ INLINE void psy_audio_cputimeclock_reset(psy_audio_CpuTimeClock* self)
 INLINE double psy_audio_cputimeclock_cputime(psy_audio_CpuTimeClock* self)
 {
 	return self->cpu_time_used;
+}
+
+INLINE unsigned int psy_audio_cputimeclock_cputime_count(psy_audio_CpuTimeClock* self)
+{
+	return self->count;
 }
 
 #endif /* psy_audio_CPUTIMECLOCK_H */

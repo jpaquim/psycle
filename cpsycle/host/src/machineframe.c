@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -19,12 +20,11 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 	
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_enablealign(&self->component);	
 	// titlerow
 	psy_ui_component_init(&self->titlerow, &self->component);
 	psy_ui_component_enablealign(&self->titlerow);
-	psy_ui_label_init(&self->title, &self->titlerow);
-	psy_ui_label_settext(&self->title, "");		
+	psy_ui_label_init(&self->title, &self->titlerow);	
 	psy_ui_component_setalign(&self->floatview.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init(&self->close, &self->titlerow);
 	psy_ui_button_settext(&self->close, "X");
@@ -38,6 +38,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	// row0
 	psy_ui_component_init(&self->row0, &self->component);
 	psy_ui_component_enablealign(&self->row0);
+	zoombox_init(&self->zoombox, &self->row0);
+	self->zoombox.zoomstep = 0.10;
 	psy_ui_button_init(&self->mute, &self->row0);	
 	psy_ui_button_settext(&self->mute, "Mute");
 	psy_ui_button_init(&self->parameters, &self->row0);
@@ -61,8 +63,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->presetsbar.component, &margin);
 }
 
-static void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame);
-static void machineframe_onpresetchanged(MachineFrame*, PresetsBar* sender, int index);
+static void machineframe_ondestroyed(MachineFrame* self,
+	psy_ui_Component* frame);
 static void machineframe_toggleparameterbox(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_togglehelp(MachineFrame*,
@@ -74,22 +76,25 @@ static void machineframe_onfloatview(MachineFrame*,
 static void machineframe_onclose(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_resize(MachineFrame*);
-static void machineframe_preferredviewsizechanged(MachineFrame*, psy_ui_Component* sender);
+static void machineframe_preferredviewsizechanged(MachineFrame*,
+	psy_ui_Component* sender);
 static void machineframe_setfloatbar(MachineFrame*);
 static void machineframe_setdockbar(MachineFrame*);
 static void ondefaultfontchanged(MachineFrame*, Workspace* sender);
+static void machineframe_onzoomboxchanged(MachineFrame*, ZoomBox* sender);
 
 void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	bool floated, Workspace* workspace)
 {
-	self->view = 0;
-	self->machine = 0;
+	self->view = NULL;
+	self->paramview = NULL;
+	self->machine = NULL;
 	self->machineview = parent;
 	self->dofloat = 0;
 	self->dodock = 0;
 	self->doclose = 0;
 	self->floated = floated;
-	self->workspace = workspace;
+	self->workspace = workspace;	
 	if (floated) {
 		psy_ui_frame_init(&self->component, parent);
 		psy_ui_component_move(&self->component,
@@ -104,7 +109,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	parameterlistbox_init(&self->parameterbox, &self->component, NULL);
-	psy_ui_component_setalign(&self->parameterbox.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setalign(&self->parameterbox.component,
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_enablealign(&self->notebook.component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
@@ -129,19 +135,26 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		machineframe_setfloatbar(self);
 	} else {
 		machineframe_setdockbar(self);
-	}
-	psy_signal_connect(&self->parameterbar.presetsbar.signal_presetchanged, self,
-		machineframe_onpresetchanged);
+	}	
 	psy_signal_connect(&self->workspace->signal_defaultfontchanged, self,
-		ondefaultfontchanged);
+		ondefaultfontchanged);	
+	psy_signal_connect(&self->parameterbar.zoombox.signal_changed, self,
+		machineframe_onzoomboxchanged);
+}
+
+void machineframe_setparamview(MachineFrame* self, ParamView* view,
+	psy_audio_Machine* machine)
+{
+	self->paramview = view;
+	machineframe_setview(self, &view->component, machine);
 }
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	psy_audio_Machine* machine)
 {	
 	char text[128];
-
-	self->view = (psy_ui_Component*) view;
+	
+	self->view = view;
 	self->machine = machine;
 	psy_ui_component_setalign(self->view, psy_ui_ALIGN_CLIENT);	
 	parameterlistbox_setmachine(&self->parameterbox, machine);
@@ -177,37 +190,13 @@ void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
 		ondefaultfontchanged);
 }
 
-void machineframe_onpresetchanged(MachineFrame* self, PresetsBar* sender, int index)
-{
-	if (sender->presets && sender->machine) {		
-		psy_audio_Preset* preset;
-
-		preset = psy_table_at(&sender->presets->container, (uintptr_t)index);
-		if (preset) {			
-			psy_TableIterator it;
-
-			for (it = psy_table_begin(&preset->parameters); 
-					!psy_tableiterator_equal(&it, psy_table_end());
-					psy_tableiterator_inc(&it)) {
-				psy_audio_MachineParam* param;
-
-				param = psy_audio_machine_tweakparameter(self->machine,
-					psy_tableiterator_key(&it));
-				if (param) {
-					psy_audio_machine_parameter_tweak_scaled(self->machine, param,
-						(intptr_t)psy_tableiterator_value(&it));
-				}				
-			}			
-		}
-	}
-}
-
 MachineFrame* machineframe_alloc(void)
 {
 	return (MachineFrame*) malloc(sizeof(MachineFrame));
 }
 
-MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Workspace* workspace)
+MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated,
+	Workspace* workspace)
 {
 	MachineFrame* rv;
 
@@ -276,7 +265,8 @@ void machineframe_resize(MachineFrame* self)
 	tm = psy_ui_component_textmetric(&self->component);	
 	viewsize = psy_ui_component_preferredsize(self->view, 0);	
 	if (psy_ui_component_visible(&self->parameterbox.component)) {				
-		viewsize.width = psy_ui_value_makepx(psy_ui_value_px(&viewsize.width, &tm) + 150);
+		viewsize.width = psy_ui_value_makepx(
+			psy_ui_value_px(&viewsize.width, &tm) + 150);
 	}	
 	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
 		&viewsize);	
@@ -286,9 +276,10 @@ void machineframe_resize(MachineFrame* self)
 			psy_ui_add_values(bar.height, viewsize.height, &tm)));
 }
 
-void machineframe_preferredviewsizechanged(MachineFrame* self, psy_ui_Component* sender)
-{
-	machineframe_resize(self);
+void machineframe_preferredviewsizechanged(MachineFrame* self,
+	psy_ui_Component* sender)
+{	
+	machineframe_resize(self);	
 }
 
 void ondefaultfontchanged(MachineFrame* self, Workspace* sender)
@@ -312,4 +303,12 @@ void machineframe_setdockbar(MachineFrame* self)
 	}
 	psy_ui_component_hide(&self->parameterbar.dock.component);
 	psy_ui_component_show(&self->parameterbar.titlerow);
+}
+
+void machineframe_onzoomboxchanged(MachineFrame* self, ZoomBox* sender)
+{
+	if (self->paramview) {		
+		paramview_setzoom(self->paramview, sender->zoomrate);
+		machineframe_resize(self);
+	}
 }

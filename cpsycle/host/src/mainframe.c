@@ -102,7 +102,7 @@ void mainframe_init(MainFrame* self)
 	psy_ui_frame_init(&self->component, 0);
 	vtable_init(self);
 	self->component.vtable = &vtable;
-	
+	self->startpage = FALSE;
 	psy_ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	psy_ui_component_enablealign(&self->component);	
 	workspace_init(&self->workspace, &self->component);	
@@ -452,10 +452,11 @@ void mainframe_initbars(MainFrame* self)
 void mainframe_setstartpage(MainFrame* self)
 {		
 	if (workspace_showaboutatstart(&self->workspace)) {
-		workspace_selectview(&self->workspace, TABPAGE_HELPVIEW, 1, 0);	
+		workspace_selectview(&self->workspace, TABPAGE_HELPVIEW, 1, 0);
 	} else {
 		workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW, 0, 0);
-	}	
+	}
+	self->startpage = TRUE;
 }
 
 void mainframe_destroyed(MainFrame* self, psy_ui_Component* component)
@@ -886,11 +887,21 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	uintptr_t tabindex)
 {
 	psy_ui_Component* component;
+
+	if (self->startpage) {
+		tabbar_select(&self->helpview.tabbar, 0);
+		self->startpage = 0;
+	}
 	workspace_onviewchanged(&self->workspace, tabindex);			
 	if (tabindex == TABPAGE_SAMPLESVIEW) {	
 		psy_ui_notebook_setpageindex(&self->viewstatusbars, 2);
 	} else {
+		psy_ui_Component* page;
 		psy_ui_notebook_setpageindex(&self->viewstatusbars, tabindex);
+		page = psy_ui_notebook_activepage(&self->viewstatusbars);
+		if (page) {
+			psy_ui_component_align(page);
+		}
 	}
 	psy_ui_notebook_setpageindex(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
@@ -972,15 +983,6 @@ void mainframe_onlanguagechanged(MainFrame* self, Workspace* sender)
 	mainframe_updatetext(self);
 }
 
-bool mainframe_onclose(MainFrame* self)
-{
-	if (workspace_songmodified(&self->workspace)) {		
-		workspace_selectview(&self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_CLOSE);
-		return FALSE;
-	}
-	return TRUE;
-}
-
 // this is called if a button is clicked in the checkunsavedbox
 // option : which button pressed
 // mode : source of request(app close, song load, song new)
@@ -1019,6 +1021,8 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 
 			self->workspace.undosavepoint = psy_list_size(
 				self->workspace.undoredo.undo);
+			self->workspace.machines_undosavepoint = psy_list_size(
+				self->workspace.machines_undoredo.undo);
 			if (mode == CHECKUNSAVE_CLOSE) {
 				psy_ui_app_close(&app);
 			} else
@@ -1051,8 +1055,17 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 			workspace_songs_directory(&self->workspace));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			workspace_loadsong(&self->workspace,
-				psy_ui_opendialog_filename(&dialog));			
+				psy_ui_opendialog_filename(&dialog), TRUE);			
 		}
 		psy_ui_opendialog_dispose(&dialog);		
 	}
+}
+
+bool mainframe_onclose(MainFrame* self)
+{
+	if (workspace_songmodified(&self->workspace)) {
+		workspace_selectview(&self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_CLOSE);
+		return FALSE;
+	}
+	return TRUE;
 }

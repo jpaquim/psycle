@@ -329,3 +329,8 @@ void psyfile_seekchunkend(PsyFile* self)
 {
 	psyfile_seek(self, self->currchunk.begins + self->currchunk.size);	
 }
+
+int psyfile_error(PsyFile* self)
+{
+	return ferror(self->_file);
+}

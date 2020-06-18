@@ -166,6 +166,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->dialbitmappath = 0;
 	self->lang = NULL;
 	self->undosavepoint = 0;
+	self->machines_undosavepoint = 0;
 	history_init(&self->history);
 	workspace_makerecentsongs(self);
 	workspace_makeconfig(self);	
@@ -176,7 +177,8 @@ void workspace_init(Workspace* self, void* handle)
 	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
 	psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
 		workspace_onsequenceeditpositionchanged);
-	undoredo_init(&self->undoredo);	
+	undoredo_init(&self->undoredo);
+	undoredo_init(&self->machines_undoredo);
 	self->navigating = 0;
 	workspace_initsignals(self);	
 	workspace_initplayer(self);		
@@ -237,6 +239,7 @@ void workspace_dispose(Workspace* self)
 	plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
 	undoredo_dispose(&self->undoredo);
+	undoredo_dispose(&self->machines_undoredo);
 	history_dispose(&self->history);
 	workspace_disposesignals(self);
 	psy_audio_pattern_dispose(&self->patternpaste);
@@ -865,8 +868,12 @@ void workspace_makeparamview(Workspace* self, psy_Properties* visual)
 {	
 	psy_Properties* paramview;
 
-	paramview = psy_properties_create_section(visual, "paramview");
-	psy_properties_settext(paramview, "Native Machine Parameter Window");
+	paramview = psy_properties_settext(
+		psy_properties_create_section(visual, "paramview"),
+		"Native Machine Parameter Window");
+	psy_properties_settext(
+		psy_properties_append_font(paramview, "font", PSYCLE_DEFAULT_FONT),
+		"Font");
 	psy_properties_settext(
 		psy_properties_append_action(paramview, "loadcontrolskin"),
 		"Load Dial Bitmap");
@@ -1540,7 +1547,7 @@ void workspace_newsong(Workspace* self)
 	workspace_selectview(self, TABPAGE_MACHINEVIEW, 0, 0);
 }
 
-void workspace_loadsong(Workspace* self, const char* path)
+void workspace_loadsong(Workspace* self, const char* path, bool play)
 {	
 	psy_audio_Song* song;
 	psy_audio_SongFile songfile;
@@ -1575,6 +1582,9 @@ void workspace_loadsong(Workspace* self, const char* path)
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
 			"ready\n");
+		if (play) {
+			psy_audio_player_start(&self->player);
+		}
 	}	
 }
 
@@ -1634,6 +1644,7 @@ void workspace_savesong(Workspace* self, const char* path)
 			songfile.serr);
 	} else {
 		self->undosavepoint = psy_list_size(self->undoredo.undo);
+		self->machines_undosavepoint = psy_list_size(self->undoredo.undo);
 	}
 	psy_audio_songfile_dispose(&songfile);
 	psy_signal_emit(&self->signal_terminal_out, self, 1,
@@ -1772,12 +1783,20 @@ int workspace_octave(Workspace* self)
 
 void workspace_undo(Workspace* self)
 {
-	undoredo_undo(&self->undoredo);
+	if (workspace_currview(self) == TABPAGE_PATTERNVIEW) {
+		undoredo_undo(&self->undoredo);
+	} else if (workspace_currview(self) == TABPAGE_MACHINEVIEW) {
+		undoredo_undo(&self->machines_undoredo);
+	}
 }
 
 void workspace_redo(Workspace* self)
 {
-	undoredo_redo(&self->undoredo);
+	if (workspace_currview(self) == TABPAGE_PATTERNVIEW) {
+		undoredo_redo(&self->undoredo);
+	} else if (workspace_currview(self) == TABPAGE_MACHINEVIEW) {
+		undoredo_redo(&self->machines_undoredo);
+	}
 }
 
 void workspace_changedefaultfontsize(Workspace* self, int size)
@@ -2400,7 +2419,8 @@ int workspace_onchangelanguageenum(Workspace* self,
 
 bool workspace_songmodified(Workspace* self)
 {
-	return psy_list_size(self->undoredo.undo) != self->undosavepoint;
+	return psy_list_size(self->undoredo.undo) != self->undosavepoint ||
+		psy_list_size(self->machines_undoredo.undo) != self->machines_undosavepoint;
 }
 
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)

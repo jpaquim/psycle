@@ -27,9 +27,7 @@ typedef struct PresetsBar {
 	psy_ui_Button exportpresets;
 	psy_ui_Button savepresets;
 	psy_ui_Edit savename;
-	psy_Signal signal_presetchanged;
 	psy_audio_Machine* machine;
-	psy_audio_Presets* presets;		
 	bool userpreset;
 	psy_Path presetpath;	
 	Workspace* workspace;

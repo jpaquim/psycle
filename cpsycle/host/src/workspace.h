@@ -107,6 +107,7 @@ typedef struct {
 	psy_Signal signal_languagechanged;
 	psy_ui_Component* mainhandle;
 	UndoRedo undoredo;
+	UndoRedo machines_undoredo;
 	History history;
 	psy_audio_PatternEditPosition patterneditposition;
 	SequenceSelection sequenceselection;
@@ -126,13 +127,14 @@ typedef struct {
 	int fontheight;
 	char* dialbitmappath;
 	uintptr_t undosavepoint;
+	uintptr_t machines_undosavepoint;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
 void workspace_disposesequencepaste(Workspace*);
 void workspace_newsong(Workspace*);
-void workspace_loadsong(Workspace*, const char* path);
+void workspace_loadsong(Workspace*, const char* path, bool play);
 void workspace_savesong(Workspace*, const char* path);
 INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
 void workspace_loadskin(Workspace*, const char* path);

@@ -16,6 +16,7 @@
 #include <exclusivelock.h>
 #include "../../detail/portable.h"
 #include <songio.h>
+#include <stdlib.h>
 
 #if defined DIVERSALIS__OS__UNIX
 #define _MAX_PATH 4096
@@ -24,15 +25,6 @@
 #define RGB(r,g,b)  ((uint32_t)(((uint16_t)(r)|((uint16_t)((uint8_t)(g))<<8))|(((uint16_t)(uint8_t)(b))<<16)))
 
 #define TIMERID_UPDATEVUMETERS 300
-
-static void machineviewbar_settext(MachineViewBar*, const char* text);
-static void machineviewbar_ondestroy(MachineViewBar*, psy_ui_Component* sender);
-static void machineviewbar_ondraw(MachineViewBar* self, psy_ui_Graphics*);
-static void machineviewbar_onpreferredsize(MachineViewBar*, psy_ui_Size* limit,
-	psy_ui_Size* rv);
-static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
-	int flag, psy_audio_SongFile*);
-
 
 static MachineUi* machineuis_insert(MachineWireView*, uintptr_t slot, int x, int y,
 	MachineSkin*);
@@ -445,8 +437,6 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 {
 	if (self->machine) {		
 		if (!self->frame) {
-			psy_ui_Component* view = 0;
-
 			self->frame = machineframe_alloc();
 			machineframe_init(self->frame, parent, workspace_showparamviewaswindow(self->workspace),
 				self->workspace);
@@ -458,7 +448,7 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 				editorview = machineeditorview_allocinit(&self->frame->notebook.component,
 					self->machine, self->workspace);
 				if (editorview) {
-					view = &editorview->component;
+					machineframe_setview(self->frame, &editorview->component, self->machine);
 				}
 			} else {
 				ParamView* paramview;
@@ -466,12 +456,9 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 				paramview = paramview_allocinit(&self->frame->notebook.component,
 					self->machine, self->workspace);
 				if (paramview) {
-					view = &paramview->component;
+					machineframe_setparamview(self->frame, paramview, self->machine);
 				}
-			}
-			if (view) {				
-				machineframe_setview(self->frame, view, self->machine);
-			}
+			}			
 		}
 		if (self->frame) {
 			psy_ui_component_show(&self->frame->component);
@@ -485,6 +472,286 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 void machineui_onframedestroyed(MachineUi* self, psy_ui_Component* sender)
 {	
 	self->frame = 0;	
+}
+
+// Commands
+typedef struct {
+	Command command;
+	psy_audio_Machines* machines;
+	psy_audio_MachineFactory* machinefactory;
+	char* path;
+	char* editname;
+	int shellidx;
+	int type;
+	uintptr_t slot;
+	psy_audio_Preset preset;
+	MachineWireView* view;
+	int x;
+	int y;
+	bool positionset;
+	psy_audio_Connections connections;
+} InsertMachineCommand;
+
+static void InsertMachineCommandDispose(InsertMachineCommand*);
+static void InsertMachineCommandExecute(InsertMachineCommand*);
+static void InsertMachineCommandRevert(InsertMachineCommand*);
+
+InsertMachineCommand* InsertMachineCommandAlloc(psy_audio_Machines* machines,
+	psy_audio_MachineFactory* machinefactory,
+	MachineWireView* view,
+	const char* path,
+	int shellidx,
+	int type)	
+{
+	InsertMachineCommand* rv;
+
+	rv = malloc(sizeof(InsertMachineCommand));
+	rv->command.dispose = InsertMachineCommandDispose;
+	rv->command.execute = InsertMachineCommandExecute;
+	rv->command.revert = InsertMachineCommandRevert;
+	psy_audio_preset_init(&rv->preset);
+	rv->machines = machines;
+	rv->machinefactory = machinefactory;
+	rv->view = view;
+	rv->path = (path) ? strdup(path) : NULL;
+	rv->editname = NULL;
+	rv->type = type;
+	rv->slot = UINTPTR_MAX;
+	rv->shellidx = shellidx;
+	rv->positionset = FALSE;
+	rv->x = 0;
+	rv->y = 0;	
+	connections_init(&rv->connections);
+	return rv;
+}
+
+void InsertMachineCommandDispose(InsertMachineCommand* self)
+{
+	free(self->path);
+	free(self->editname);
+	psy_audio_preset_dispose(&self->preset);
+	connections_dispose(&self->connections);
+}
+
+void InsertMachineCommandExecute(InsertMachineCommand* self)
+{	
+	psy_audio_Machine* machine;
+
+	machine = psy_audio_machinefactory_makemachinefrompath(
+		self->machinefactory,
+		self->type,
+		self->path,
+		self->shellidx);
+	if (machine && self->editname) {
+		psy_audio_machine_seteditname(machine, self->editname);
+	}
+	if (machine) {
+		self->slot = psy_audio_machines_append(self->machines,
+			machine);
+		psy_audio_machines_changeslot(self->machines, self->slot);			
+		if (psy_audio_preset_numparameters(&self->preset)) {
+			psy_TableIterator it;
+
+			for (it = psy_table_begin(&self->preset.parameters);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+				psy_audio_MachineParam* param;
+
+				param = psy_audio_machine_tweakparameter(machine,
+					psy_tableiterator_key(&it));
+				if (param) {
+					psy_audio_machine_parameter_tweak_scaled(machine,
+						param,
+						(intptr_t)psy_tableiterator_value(&it));
+				}
+			}
+			if (self->preset.data && self->preset.datasize ==
+				psy_audio_machine_datasize(machine)) {
+				psy_audio_machine_putdata(machine, self->preset.data);
+			}
+		}
+		if (self->positionset) {
+			MachineUi* machineui;
+
+			machineui = machineuis_at(self->view, self->slot);
+			if (machineui) {
+				machineui->x = self->x;
+				machineui->y = self->y;
+			}
+		}
+		psy_audio_exclusivelock_enter();			
+		connections_copy(&self->machines->connections,
+			&self->connections);
+		psy_audio_machines_updatepath(self->machines);
+		psy_audio_exclusivelock_leave();		
+	}
+}
+
+void InsertMachineCommandRevert(InsertMachineCommand* self)
+{
+	psy_audio_Machine* machine;
+
+	machine = psy_audio_machines_at(self->machines, self->slot);
+	if (machine) {		
+		MachineUi* machineui;		
+		
+		machineui = machineuis_at(self->view, self->slot);
+		if (machineui) {
+			self->x = machineui->x;
+			self->y = machineui->y;
+			self->positionset = TRUE;
+		}
+		free(self->editname);
+		self->editname = strdup(psy_audio_machine_editname(machine));
+		psy_audio_preset_clear(&self->preset);
+		psy_audio_machine_currentpreset(machine, &self->preset);
+		connections_dispose(&self->connections);
+		connections_init(&self->connections);			
+		connections_copy(&self->connections, &self->machines->connections);
+		psy_audio_machines_remove(self->machines, self->slot);
+	}
+}
+
+// Commands
+typedef struct {
+	Command command;
+	psy_audio_Machines* machines;
+	psy_audio_MachineFactory* machinefactory;
+	char* path;
+	char* editname;
+	int shellidx;
+	int type;
+	uintptr_t slot;
+	psy_audio_Preset preset;
+	MachineWireView* view;
+	int x;
+	int y;
+	bool positionset;
+	psy_audio_Connections connections;
+} DeleteMachineCommand;
+
+static void DeleteMachineCommandDispose(DeleteMachineCommand*);
+static void DeleteMachineCommandExecute(DeleteMachineCommand*);
+static void DeleteMachineCommandRevert(DeleteMachineCommand*);
+
+DeleteMachineCommand* DeleteMachineCommandAlloc(psy_audio_Machines* machines,
+	psy_audio_MachineFactory* machinefactory,
+	MachineWireView* view,
+	int slot)
+{
+	DeleteMachineCommand* rv;
+
+	rv = malloc(sizeof(DeleteMachineCommand));
+	rv->command.dispose = DeleteMachineCommandDispose;
+	rv->command.execute = DeleteMachineCommandExecute;
+	rv->command.revert = DeleteMachineCommandRevert;
+	psy_audio_preset_init(&rv->preset);
+	rv->machines = machines;
+	rv->machinefactory = machinefactory;
+	rv->view = view;
+	rv->path = NULL;
+	rv->editname = NULL;
+	rv->type = UINTPTR_MAX;
+	rv->slot = slot;
+	rv->shellidx = UINTPTR_MAX;
+	rv->positionset = FALSE;
+	rv->x = 0;
+	rv->y = 0;	
+	connections_init(&rv->connections);
+	return rv;
+}
+
+void DeleteMachineCommandDispose(DeleteMachineCommand* self)
+{
+	free(self->path);
+	free(self->editname);
+	psy_audio_preset_dispose(&self->preset);
+	connections_dispose(&self->connections);
+}
+
+void DeleteMachineCommandExecute(DeleteMachineCommand* self)
+{
+	psy_audio_Machine* machine;
+
+	machine = psy_audio_machines_at(self->machines, self->slot);
+	if (machine) {
+		MachineUi* machineui;
+
+		machineui = machineuis_at(self->view, self->slot);
+		if (machineui) {
+			self->x = machineui->x;
+			self->y = machineui->y;
+			self->positionset = TRUE;
+		}
+		free(self->path);
+		self->path = (psy_audio_machine_modulepath(machine))
+			? strdup(psy_audio_machine_modulepath(machine))
+			: NULL;
+		self->shellidx = psy_audio_machine_shellidx(machine);
+		self->type = psy_audio_machine_type(machine);
+		free(self->editname);
+		self->editname = strdup(psy_audio_machine_editname(machine));
+		psy_audio_preset_clear(&self->preset);
+		psy_audio_machine_currentpreset(machine, &self->preset);
+		connections_dispose(&self->connections);
+		connections_init(&self->connections);
+		connections_copy(&self->connections, &self->machines->connections);
+		psy_audio_machines_remove(self->machines, self->slot);
+	}
+}
+
+void DeleteMachineCommandRevert(DeleteMachineCommand* self)
+{
+	psy_audio_Machine* machine;
+
+	machine = psy_audio_machinefactory_makemachinefrompath(
+		self->machinefactory,
+		self->type,
+		self->path,
+		self->shellidx);
+	if (machine) {
+		if (self->editname) {
+			psy_audio_machine_seteditname(machine, self->editname);
+		}
+		psy_audio_machines_insert(self->machines, self->slot,
+			machine);
+		psy_audio_machines_changeslot(self->machines, self->slot);
+		if (psy_audio_preset_numparameters(&self->preset)) {
+			psy_TableIterator it;
+
+			for (it = psy_table_begin(&self->preset.parameters);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+				psy_audio_MachineParam* param;
+
+				param = psy_audio_machine_tweakparameter(machine,
+					psy_tableiterator_key(&it));
+				if (param) {
+					psy_audio_machine_parameter_tweak_scaled(machine,
+						param,
+						(intptr_t)psy_tableiterator_value(&it));
+				}
+			}
+			if (self->preset.data && self->preset.datasize ==
+					psy_audio_machine_datasize(machine)) {
+				psy_audio_machine_putdata(machine, self->preset.data);
+			}
+		}
+		if (self->positionset) {
+			MachineUi* machineui;
+
+			machineui = machineuis_at(self->view, self->slot);
+			if (machineui) {
+				machineui->x = self->x;
+				machineui->y = self->y;
+			}
+		}
+		psy_audio_exclusivelock_enter();
+		connections_copy(&self->machines->connections,
+			&self->connections);
+		psy_audio_machines_updatepath(self->machines);
+		psy_audio_exclusivelock_leave();		
+	}
 }
 
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
@@ -1511,8 +1778,14 @@ void machinewireview_onkeydown(MachineWireView* self, psy_ui_KeyEvent* ev)
 		psy_ui_component_invalidate(&self->component);
 	} else 
 	if (ev->keycode == psy_ui_KEY_DELETE && self->selectedslot != - 1 &&
-			self->selectedslot != psy_audio_MASTER_INDEX) {		
-		psy_audio_machines_remove(self->machines, self->selectedslot);
+			self->selectedslot != psy_audio_MASTER_INDEX) {
+		undoredo_execute(&self->workspace->machines_undoredo,
+			&DeleteMachineCommandAlloc(
+				self->machines,
+				&self->workspace->machinefactory,
+				self,
+				self->selectedslot
+			)->command);		
 		self->selectedslot = UINTPTR_MAX;
 	} else 
 	if (ev->repeat) {
@@ -1735,12 +2008,14 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				MachineFrame* frame;
 				psy_ui_Component temp;
 				psy_ui_Component* view;
+				ParamView* paramview;
 				psy_audio_Machine* machine;
 				psy_ui_Component* dockparent;
 
 				frame = machineui->frame;
 				psy_ui_component_init(&temp, &self->component);
 				view = frame->view;
+				paramview = frame->paramview;
 				dockparent = psy_ui_component_parent(&frame->component);
 				machine = frame->machine;
 				psy_ui_component_setparent(frame->view, &temp);
@@ -1750,7 +2025,11 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				frame = machineframe_alloc();
 				machineframe_init(frame, &self->component, TRUE, self->workspace);
 				psy_ui_component_insert(&frame->notebook.component, view, &frame->help.component);
-				machineframe_setview(frame, view, machine);
+				if (paramview) {
+					machineframe_setparamview(frame, paramview, machine);
+				} else {
+					machineframe_setview(frame, view, machine);
+				}
 				psy_ui_component_show(&frame->component);
 				psy_ui_component_destroy(&temp);					
 				machineui->frame = frame;
@@ -1763,11 +2042,13 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				MachineFrame* frame;
 				psy_ui_Component temp;
 				psy_ui_Component* view;
+				ParamView* paramview;
 				psy_audio_Machine* machine;
 
 				frame = machineui->frame;
 				psy_ui_component_init(&temp, &self->component);
 				view = frame->view;
+				paramview = frame->paramview;
 				machine = frame->machine;
 				psy_ui_component_setparent(frame->view, &temp);
 				frame->view = 0;
@@ -1776,7 +2057,11 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				frame = machineframe_alloc();
 				machineframe_init(frame, &self->component, FALSE, self->workspace);
 				psy_ui_component_insert(&frame->notebook.component, view, &frame->help.component);
-				machineframe_setview(frame, view, machine);
+				if (paramview) {
+					machineframe_setparamview(frame, paramview, machine);
+				} else {
+					machineframe_setview(frame, view, machine);
+				}
 				psy_ui_component_show(&frame->component);
 				psy_ui_component_destroy(&temp);
 				machineui->frame = frame;
@@ -1889,21 +2174,24 @@ WireFrame* machinewireview_wireframe(MachineWireView* self,
 
 void machinewireview_onnewmachineselected(MachineView* self,
 	psy_ui_Component* sender, psy_Properties* plugininfo)
-{	
-	psy_audio_Machine* machine;
-	const char* path;
+{		
+	const char* path;	
 		
 	path = psy_properties_readstring(plugininfo, "path", "");
-	machine = psy_audio_machinefactory_makemachinefrompath(
-		&self->workspace->machinefactory, 
-		psy_properties_int(plugininfo, "type", UINTPTR_MAX),
-		path,
-		psy_properties_int(plugininfo, "shellidx", 0));
-	if (machine) {		
+	undoredo_execute(&self->workspace->machines_undoredo,
+		&InsertMachineCommandAlloc(
+			self->wireview.machines,
+			&self->workspace->machinefactory,
+			&self->wireview,
+			path,
+			psy_properties_int(plugininfo, "shellidx", 0),
+			psy_properties_int(plugininfo, "type", UINTPTR_MAX)		
+		)->command);	
+	tabbar_select(&self->tabbar, 0);
+	/*if (machine) {		
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
-
-			slot = psy_audio_machines_append(self->wireview.machines, machine);		
+			
 			psy_audio_machines_disconnect(self->wireview.machines, self->wireview.selectedwire.src, self->wireview.selectedwire.dst);
 			psy_audio_machines_connect(self->wireview.machines, self->wireview.selectedwire.src, slot);
 			psy_audio_machines_connect(self->wireview.machines, slot, self->wireview.selectedwire.dst);
@@ -1917,8 +2205,7 @@ void machinewireview_onnewmachineselected(MachineView* self,
 			psy_audio_machines_changeslot(self->wireview.machines,
 				psy_audio_machines_append(self->wireview.machines, machine));			
 		}
-		tabbar_select(&self->tabbar, 0);
-	}	
+		} */			
 }
 
 MachineUi* machineuis_insert(MachineWireView* self, uintptr_t slot, int x, int y,
@@ -1974,91 +2261,47 @@ void machineuis_removeall(MachineWireView* self)
 	psy_table_init(&self->machineuis);
 }
 
-static psy_ui_ComponentVtable machineviewbar_vtable;
-static int machineviewbar_vtable_initialized = 0;
-
-static void machineviewbar_drawstatus(MachineViewBar*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
-static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*, psy_ui_Component* sender);
-
-static void machineviewbar_vtable_init(MachineViewBar* self)
-{
-	if (!machineviewbar_vtable_initialized) {
-		machineviewbar_vtable = *(self->component.vtable);
-		machineviewbar_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			machineviewbar_onpreferredsize;
-		machineviewbar_vtable_initialized = 1;
-	}
-}
+// MachineViewBar
+static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
+	int flag, psy_audio_SongFile*);
+static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
+	psy_ui_Component* sender);
 
 void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{		
+{	
+	psy_ui_Margin margin;
+
 	psy_ui_component_init(&self->component, parent);
-	machineviewbar_vtable_init(self);
-	self->component.vtable = &machineviewbar_vtable;;
+	self->workspace = workspace;
 	psy_ui_component_enablealign(&self->component);	
 	psy_ui_checkbox_init(&self->mixersend, &self->component);
 	psy_ui_checkbox_settext(&self->mixersend,
 		"Connect to Mixer Send/Return Input");
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(4), psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0));
+	psy_ui_component_setmargin(&self->mixersend.component, &margin);
 	psy_ui_checkbox_check(&self->mixersend);
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
-		machineviewbar_onmixerconnectmodeclick);
+		machineviewbar_onmixerconnectmodeclick);	
 	psy_ui_component_setalign(&self->mixersend.component, psy_ui_ALIGN_LEFT);
-	psy_ui_component_init(&self->status, &self->component);
-	psy_ui_component_setalign(&self->status, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_doublebuffer(&self->status);
-	psy_signal_connect(&self->status.signal_draw, self,
-		machineviewbar_drawstatus);
-	self->text = strdup("");
+	psy_ui_label_init(&self->status, &self->component);
+	psy_ui_label_setcharnumber(&self->status, 44);		
+	psy_ui_component_setalign(psy_ui_label_base(&self->status),
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineviewbar_onsongchanged);
-	self->workspace = workspace;
-}
-
-void machineviewbar_drawstatus(MachineViewBar* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
-{
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_size(&self->component);
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00D1C5B6);
-	psy_ui_textout(g, tm.tmAveCharWidth * 4,
-		(psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2,
-		self->text, strlen(self->text));
-}
-
-void machineviewbar_ondestroy(MachineViewBar* self, psy_ui_Component* sender)
-{
-	free(self->text);
 }
 
 void machineviewbar_settext(MachineViewBar* self, const char* text)
-{
-	free(self->text);
-	self->text = strdup(text);
-	psy_ui_component_invalidate(&self->status);
+{	
+	psy_ui_label_settext(&self->status, text);
 }
 
-void machineviewbar_onpreferredsize(MachineViewBar* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{
-	if (rv) {
-		psy_ui_TextMetric tm;
-		psy_ui_Size mixersize;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		mixersize = psy_ui_component_preferredsize(&self->mixersend.component, rv);
-		rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * 44 +
-			psy_ui_value_px(&mixersize.width, &tm));
-		rv->height = psy_ui_value_makeeh(1);
-	}
-}
-
-void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self, psy_ui_Component* sender)
+void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self,
+	psy_ui_Component* sender)
 {
 	if (psy_ui_checkbox_checked(&self->mixersend)) {
 		workspace_connectasmixersend(self->workspace);

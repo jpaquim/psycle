@@ -70,6 +70,8 @@ int psyfile_writestring(PsyFile*, const char* str);
 uint32_t psyfile_updatesize(PsyFile*, uint32_t startpos);
 int psyfile_readchunkbegin(PsyFile*);
 void psyfile_seekchunkend(PsyFile*);
+int psyfile_error(PsyFile*);
+
 
 static uint32_t FourCC(char *psName);
 

@@ -22,6 +22,8 @@ extern psy_ui_App app;
 static void dev_dispose(psy_ui_win_FontDialogImp*);
 static int dev_execute(psy_ui_win_FontDialogImp*);
 static const char* dev_path(psy_ui_win_FontDialogImp*);
+static void dev_setfontinfo(psy_ui_win_FontDialogImp*,
+	psy_ui_FontInfo);
 psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontDialogImp*);
 static psy_ui_FontInfo psy_ui_fontinfo(LOGFONT);
 static LOGFONT logfont(psy_ui_FontInfo);
@@ -37,6 +39,7 @@ static void imp_vtable_init(psy_ui_win_FontDialogImp* self)
 		imp_vtable.dev_dispose = (psy_ui_fp_fontdialogimp_dev_dispose) dev_dispose;
 		imp_vtable.dev_execute = (psy_ui_fp_fontdialogimp_dev_execute) dev_execute;		
 		imp_vtable.dev_fontinfo = (psy_ui_fp_fontdialogimp_dev_fontinfo) dev_fontinfo;
+		imp_vtable.dev_setfontinfo = (psy_ui_fp_fontdialogimp_dev_setfontinfo)dev_setfontinfo;
 		imp_vtable_initialized = 1;
 	}
 }
@@ -86,6 +89,12 @@ int dev_execute(psy_ui_win_FontDialogImp* self)
 psy_ui_FontInfo dev_fontinfo(psy_ui_win_FontDialogImp* self)
 {
 	return self->fontinfo;	
+}
+
+void dev_setfontinfo(psy_ui_win_FontDialogImp* self,
+	psy_ui_FontInfo fontinfo)
+{
+	self->fontinfo = fontinfo;
 }
 
 psy_ui_FontInfo psy_ui_fontinfo(LOGFONT lf)

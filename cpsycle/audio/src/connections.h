@@ -69,6 +69,9 @@ typedef struct {
 	intptr_t id;
 } psy_audio_WireSocketEntry;
 
+void psy_audio_wiresocketentry_copy(psy_audio_WireSocketEntry*,
+	psy_audio_WireSocketEntry* src);
+
 typedef psy_List WireSocket;
 
 typedef struct {	
@@ -78,6 +81,8 @@ typedef struct {
 
 void machinesockets_init(psy_audio_MachineSockets*);
 void machinesockets_dispose(psy_audio_MachineSockets*);
+void machinesockets_copy(psy_audio_MachineSockets*,
+	psy_audio_MachineSockets* src);
 
 WireSocket* connection_at(WireSocket*, uintptr_t slot);
 
@@ -114,6 +119,7 @@ typedef struct {
 
 void connections_init(psy_audio_Connections*);
 void connections_dispose(psy_audio_Connections*);
+void connections_copy(psy_audio_Connections*, psy_audio_Connections* src);
 psy_audio_MachineSockets* connections_initslot(psy_audio_Connections*, uintptr_t slot);
 psy_audio_MachineSockets* connections_at(psy_audio_Connections*, uintptr_t slot);
 int connections_connect(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);

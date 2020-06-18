@@ -30,6 +30,8 @@ static void drawline(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
 static void drawfullbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y);
 static void drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y, int width,
 	int height, int xsrc, int ysrc);
+static void drawstretchedbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc);
 static void setbackgroundcolor(psy_ui_Graphics*, unsigned int color);
 static void setbackgroundmode(psy_ui_Graphics*, unsigned int mode);
 static void settextcolor(psy_ui_Graphics*, unsigned int color);
@@ -63,6 +65,7 @@ static void vtable_init(void)
 		vtable.drawline = drawline;		
 		vtable.drawfullbitmap = drawfullbitmap;
 		vtable.drawbitmap = drawbitmap;
+		vtable.drawstretchedbitmap = drawstretchedbitmap;
 		vtable.setbackgroundcolor = setbackgroundcolor;
 		vtable.setbackgroundmode = setbackgroundmode;
 		vtable.settextcolor = settextcolor;
@@ -150,6 +153,13 @@ static void drawbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bmp, int x, int y, 
 	self->imp->vtable->dev_drawbitmap(self->imp, bmp, x, y, width, height, xsrc, ysrc);
 }
 
+static void drawstretchedbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bmp, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc)
+{	
+	self->imp->vtable->dev_drawstretchedbitmap(self->imp, bmp, x, y, width,
+		height, xsrc, ysrc, wsrc, hsrc);
+}
+
 static void setbackgroundcolor(psy_ui_Graphics* self, unsigned int color)
 {
 	self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
@@ -231,6 +241,8 @@ static void dev_drawline(psy_ui_GraphicsImp* self, int x1, int y1, int x2, int y
 static void dev_drawfullbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y) { }
 static void dev_drawbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y, int width,
 	int height, int xsrc, int ysrc) { }
+static void dev_drawstretchedbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc) { }
 static void dev_setbackgroundcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
 static void dev_setbackgroundmode(psy_ui_GraphicsImp* self, unsigned int mode) { }
 static void dev_settextcolor(psy_ui_GraphicsImp* self, unsigned int color) { }
@@ -263,6 +275,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_drawline = dev_drawline;		
 		imp_vtable.dev_drawfullbitmap = dev_drawfullbitmap;
 		imp_vtable.dev_drawbitmap = dev_drawbitmap;
+		imp_vtable.dev_drawstretchedbitmap = dev_drawstretchedbitmap;
 		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
 		imp_vtable.dev_setbackgroundmode = dev_setbackgroundmode;
 		imp_vtable.dev_settextcolor = dev_settextcolor;

@@ -102,6 +102,7 @@ typedef struct {
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	CheckUnsavedBox checkunsavedbox;
+	bool startpage;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

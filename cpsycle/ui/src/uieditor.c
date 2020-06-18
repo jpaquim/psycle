@@ -93,8 +93,9 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 		}
 	} else
 #endif	
-	{
-		psy_ui_LabelImp* imp;
+	{	
+		psy_ui_component_init(&self->component, parent);
+		/*psy_ui_LabelImp* imp;
 		
 		imp = psy_ui_impfactory_allocinit_labelimp(psy_ui_app_impfactory(&app), &self->component, parent);
 		psy_ui_component_init_imp(&self->component, parent, &imp->component_imp);
@@ -110,7 +111,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 #else
 		imp->vtable->dev_settext(imp,
 			"Editor can't be used. Scintilla disabled in build\n");
-#endif
+#endif*/
 	}
 }
 
