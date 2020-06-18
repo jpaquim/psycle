@@ -33,6 +33,8 @@ static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, int x1, int y1, i
 static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
 static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
+static void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc);
 static void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp*, unsigned int color);
 static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, unsigned int mode);
 static void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp*, unsigned int color);
@@ -69,6 +71,7 @@ static void win_imp_vtable_init(psy_ui_win_GraphicsImp* self)
 		win_imp_vtable.dev_drawline = (psy_ui_fp_graphicsimp_dev_drawline) psy_ui_win_g_imp_drawline;
 		win_imp_vtable.dev_drawfullbitmap = (psy_ui_fp_graphicsimp_dev_drawfullbitmap) psy_ui_win_g_imp_drawfullbitmap;
 		win_imp_vtable.dev_drawbitmap = (psy_ui_fp_graphicsimp_dev_drawbitmap) psy_ui_win_g_imp_drawbitmap;
+		win_imp_vtable.dev_drawstretchedbitmap = (psy_ui_fp_graphicsimp_dev_drawstretchedbitmap)psy_ui_win_g_imp_drawstretchedbitmap;
 		win_imp_vtable.dev_setbackgroundcolor = (psy_ui_fp_graphicsimp_dev_setbackgroundcolor) psy_ui_win_g_imp_setbackgroundcolor;
 		win_imp_vtable.dev_setbackgroundmode = (psy_ui_fp_graphicsimp_dev_setbackgroundmode) psy_ui_win_g_imp_setbackgroundmode;
 		win_imp_vtable.dev_settextcolor = (psy_ui_fp_graphicsimp_dev_settextcolor) psy_ui_win_g_imp_settextcolor;
@@ -96,6 +99,7 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	self->penprev = SelectObject(self->hdc, self->pen);
 	self->hFontPrev = SelectObject(self->hdc,
 		((psy_ui_win_FontImp*) app.defaults.style_common.font.imp)->hfont);
+	SetStretchBltMode(self->hdc, STRETCH_HALFTONE);
 }
 
 // win32 implementation method for psy_ui_Graphics
@@ -269,6 +273,21 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 	SelectObject (hdcmem, wbitmap) ;
 	BitBlt(self->hdc, x, y, width, height, hdcmem, xsrc, ysrc, SRCCOPY);
 	DeleteDC (hdcmem);
+}
+
+void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
+	psy_ui_Bitmap* bitmap, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc)
+{
+	HDC hdcmem;
+	HBITMAP wbitmap;
+
+	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
+	hdcmem = CreateCompatibleDC(self->hdc);
+	SelectObject(hdcmem, wbitmap);
+	StretchBlt(self->hdc, x, y, width, height, hdcmem, xsrc, ysrc, wsrc, hsrc,
+		SRCCOPY);
+	DeleteDC(hdcmem);
 }
 
 void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color)

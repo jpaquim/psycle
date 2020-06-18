@@ -31,11 +31,6 @@ struct psy_ui_ComponentImp* psy_ui_impfactory_allocinit_frameimp(psy_ui_ImpFacto
 	return self->vtable->allocinit_frameimp(self, component, parent);
 }
 
-struct psy_ui_LabelImp* psy_ui_impfactory_allocinit_labelimp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	return self->vtable->allocinit_labelimp(self, component, parent);
-}
-
 struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_listboximp(self, component, parent);
@@ -172,8 +167,7 @@ static void vtable_init(void)
 		vtable.allocinit_componentimp = allocinit_componentimp;
 		vtable.allocinit_frameimp = allocinit_frameimp;
 		vtable.allocinit_editimp = allocinit_editimp;
-		vtable.allocinit_editimp_multiline = allocinit_editimp_multiline;
-		vtable.allocinit_labelimp = allocinit_labelimp;
+		vtable.allocinit_editimp_multiline = allocinit_editimp_multiline;		
 		vtable.allocinit_listboximp = allocinit_listboximp;
 		vtable.allocinit_listboximp_multiselect = allocinit_listboximp_multiselect;
 		vtable.allocinit_comboboximp = allocinit_comboboximp;

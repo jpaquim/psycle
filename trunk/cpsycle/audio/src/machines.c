@@ -282,6 +282,12 @@ int psy_audio_machines_connected(psy_audio_Machines* self, uintptr_t outputslot,
 	return connections_connected(&self->connections, outputslot, inputslot);
 }
 
+void psy_audio_machines_updatepath(psy_audio_Machines* self)
+{
+	machines_setpath(self, psy_audio_compute_path(self,
+		psy_audio_MASTER_INDEX, TRUE));
+}
+
 void machines_setpath(psy_audio_Machines* self, MachineList* path)
 {	
 	machines_preparebuffers(self, path, psy_audio_MAX_STREAM_SIZE);

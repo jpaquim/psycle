@@ -17,7 +17,6 @@
 #include "uiwincheckboximp.h"
 #include "uiwincomponentimp.h"
 #include "uiwineditimp.h"
-#include "uiwinlabelimp.h"
 #include "uiwinlistboximp.h"
 #include "uiwincomboboximp.h"
 #include "uiwincolordialogimp.h"
@@ -37,7 +36,6 @@ static struct psy_ui_ComponentImp* allocinit_componentimp(psy_ui_win_ImpFactory*
 static struct psy_ui_ComponentImp* allocinit_frameimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_EditImp* allocinit_editimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_LabelImp* allocinit_labelimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
@@ -76,7 +74,6 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 		vtable.allocinit_frameimp = (psy_ui_fp_impfactory_allocinit_frameimp) allocinit_frameimp;
 		vtable.allocinit_editimp = (psy_ui_fp_impfactory_allocinit_editimp) allocinit_editimp;
 		vtable.allocinit_editimp_multiline = (psy_ui_fp_impfactory_allocinit_editimp_multiline) allocinit_editimp_multiline;
-		vtable.allocinit_labelimp = (psy_ui_fp_impfactory_allocinit_labelimp) allocinit_labelimp;
 		vtable.allocinit_listboximp = (psy_ui_fp_impfactory_allocinit_listboximp) allocinit_listboximp;
 		vtable.allocinit_listboximp_multiselect = (psy_ui_fp_impfactory_allocinit_listboximp_multiselect) allocinit_listboximp_multiselect;
 		vtable.allocinit_checkboximp = (psy_ui_fp_impfactory_allocinit_checkboximp) allocinit_checkboximp;
@@ -220,22 +217,6 @@ psy_ui_EditImp* allocinit_editimp_multiline(psy_ui_win_ImpFactory* self, struct 
 		rv = 0;
 	}
 	return (psy_ui_EditImp*)rv;
-}
-
-psy_ui_LabelImp* allocinit_labelimp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
-{
-	psy_ui_win_LabelImp* rv;
-	psy_ui_WinApp* winapp;
-
-	winapp = (psy_ui_WinApp*)app.platform;
-	rv = psy_ui_win_labelimp_allocinit(
-		component,
-		parent ? parent->imp : 0);
-	if (rv->win_component_imp.hwnd == 0) {
-		free(rv);
-		rv = 0;
-	}
-	return (psy_ui_LabelImp*)rv;
 }
 
 psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)

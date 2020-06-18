@@ -8,6 +8,7 @@
 #include "paramlistbox.h"
 #include "presetsbar.h"
 #include "workspace.h"
+#include "zoombox.h"
 
 #include <dir.h>
 #include <presets.h>
@@ -27,7 +28,8 @@
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component titlerow;
-	psy_ui_Component row0;	
+	psy_ui_Component row0;
+	ZoomBox zoombox;
 	psy_ui_Label title;
 	psy_ui_Button floatview;
 	psy_ui_Button close;
@@ -53,6 +55,7 @@ typedef struct {
 	int doclose;
 	int floated;
 	Workspace* workspace;
+	ParamView* paramview;
 } MachineFrame;
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace* workspace);
@@ -62,5 +65,6 @@ MachineFrame* machineframe_alloc(void);
 MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Workspace* workspace);
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
+void machineframe_setparamview(MachineFrame* self, ParamView* view, psy_audio_Machine*);
 
 #endif

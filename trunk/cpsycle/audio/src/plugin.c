@@ -7,6 +7,7 @@
 #include "pattern.h"
 #include "plugin_interface.h"
 #include "preset.h"
+#include "presets.h"
 #include "songio.h"
 
 #include <stdlib.h>
@@ -175,15 +176,29 @@ static void loadspecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_Plugin*, psy_audio_SongFile*,
 	uintptr_t slot);
+static const char* modulepath(psy_audio_Plugin*);
+static uintptr_t shellidx(psy_audio_Plugin*);
 // data
 static void putdata(psy_audio_Plugin*, uint8_t* data);
 static uint8_t* data(psy_audio_Plugin*);
 static uintptr_t datasize(psy_audio_Plugin*);
 static void currentpreset(psy_audio_Plugin*, psy_audio_Preset*);
+static void setpresets(psy_audio_Plugin*, psy_audio_Presets*);
+static psy_audio_Presets* presets(psy_audio_Plugin*);
+static bool acceptpresets(psy_audio_Plugin*);
 // private methods
 static void disposeparameters(psy_audio_Plugin*);
 static void tweakdefaults(psy_audio_Plugin*, CMachineInfo* info);
 static void clearparameters(psy_audio_Plugin* self);
+// programs
+static void programname(psy_audio_Plugin*, int bnkidx, int prgIdx, char* val);
+static int numprograms(psy_audio_Plugin*);
+static void setcurrprogram(psy_audio_Plugin*, int prgIdx);
+static int currprogram(psy_audio_Plugin*);
+static void bankname(psy_audio_Plugin*, int bnkidx, char* val);
+static int numbanks(psy_audio_Plugin*);
+static void setcurrbank(psy_audio_Plugin*, int bnkIdx);
+static int currbank(psy_audio_Plugin*);
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -193,13 +208,15 @@ static void vtable_init(psy_audio_Plugin* self)
 	if (!vtable_initialized) {
 		vtable = *(psy_audio_plugin_base(self)->vtable);
 		vtable.setcallback = (fp_machine_setcallback)setcallback;
-		vtable.clone = (fp_machine_clone) clone;
+		vtable.clone = (fp_machine_clone)clone;
 		vtable.hostevent = (fp_machine_hostevent) hostevent;
 		vtable.seqtick = (fp_machine_seqtick) seqtick;
 		vtable.stop = (fp_machine_stop) stop;
 		vtable.newline = (fp_machine_newline)
 			newline;
 		vtable.info = (fp_machine_info) info;
+		vtable.modulepath = (fp_machine_modulepath)modulepath;
+		vtable.shellidx = (fp_machine_shellidx)shellidx;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
 		vtable.numparameters = (fp_machine_numparameters) numparameters;
@@ -212,8 +229,19 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.data = (fp_machine_data)data;
 		vtable.datasize = (fp_machine_datasize)datasize;
 		vtable.currentpreset = (fp_machine_currentpreset)currentpreset;
+		vtable.setpresets = (fp_machine_setpresets)setpresets;
+		vtable.presets = (fp_machine_presets)presets;
+		vtable.acceptpresets = (fp_machine_acceptpresets)acceptpresets;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;			
+		vtable.savespecific = (fp_machine_savespecific) savespecific;
+		vtable.programname = (fp_machine_programname)programname;
+		vtable.numprograms = (fp_machine_numprograms)numprograms;
+		vtable.setcurrprogram = (fp_machine_setcurrprogram)setcurrprogram;
+		vtable.currprogram = (fp_machine_currprogram)currprogram;
+		vtable.bankname = (fp_machine_bankname)bankname;
+		vtable.numbanks = (fp_machine_numbanks)numbanks;
+		vtable.setcurrbank = (fp_machine_setcurrbank)setcurrbank;
+		vtable.currbank = (fp_machine_currbank)currbank;
 		vtable_initialized = 1;
 	}
 }
@@ -231,7 +259,9 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback cal
 	psy_library_load(&self->library, path);			
 	self->mi = 0;
 	self->plugininfo = 0;
-	self->preventnewline = 0;	
+	self->preventnewline = 0;
+	self->presets = NULL;
+	self->currprog = 0;
 	GetInfo = (GETINFO)psy_library_functionpointer(&self->library, "GetInfo");
 	if (!GetInfo) {
 		psy_library_dispose(&self->library);		
@@ -283,6 +313,10 @@ void dispose(psy_audio_Plugin* self)
 		free(self->plugininfo);
 		self->plugininfo = 0;
 	}
+	if (self->presets) {
+		psy_audio_presets_dispose(self->presets);
+		free(self->presets);
+	}
 	disposeparameters(self);
 	custommachine_dispose(&self->custommachine);
 }
@@ -323,6 +357,19 @@ psy_audio_Machine* clone(psy_audio_Plugin* self)
 	if (rv) {
 		psy_audio_plugin_init(rv, self->custommachine.machine.callback,
 			self->library.path);
+		if (rv->library.module) {
+			psy_audio_Preset preset;
+
+			psy_audio_preset_init(&preset);
+			currentpreset(self, &preset);
+			psy_audio_plugin_tweakpreset(rv, &preset);
+			psy_audio_preset_dispose(&preset);
+		} else {
+			psy_audio_machine_dispose(psy_audio_plugin_base(rv));
+			free(rv);
+			rv = 0;
+		}
+
 	}
 	return rv ? &rv->custommachine.machine : 0;
 }
@@ -574,4 +621,120 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		free(pData);
 		pData = 0;
 	}
+}
+
+void setpresets(psy_audio_Plugin* self, psy_audio_Presets* presets)
+{
+	if (self->presets) {
+		psy_audio_presets_dispose(self->presets);
+		free(self->presets);		
+	}
+	self->presets = presets;
+}
+
+psy_audio_Presets* presets(psy_audio_Plugin* self)
+{
+	return self->presets;
+}
+
+bool acceptpresets(psy_audio_Plugin* self)
+{
+	return TRUE;
+}
+
+void programname(psy_audio_Plugin* self, int bnkidx, int prgIdx, char* val)
+{
+	if (self->presets && bnkidx == 0) {
+		psy_audio_Preset* preset;
+
+		preset = psy_audio_presets_at(self->presets, prgIdx);
+		if (preset) {
+			psy_snprintf(val, 256, "%s", psy_audio_preset_name(preset));
+			return;
+		}
+	}
+	val[0] = '\0';
+}
+
+int numprograms(psy_audio_Plugin* self)
+{
+	if (self->presets) {
+		return psy_audio_presets_size(self->presets);
+	}
+	return 0;
+}
+
+void setcurrprogram(psy_audio_Plugin* self, int prgIdx)
+{
+	self->currprog = prgIdx;
+	if (self->presets) {
+		psy_audio_Preset* preset;
+
+		preset = psy_table_at(&self->presets->container, (uintptr_t)self->currprog);
+		psy_audio_plugin_tweakpreset(self, preset);
+	}
+}
+
+void psy_audio_plugin_tweakpreset(psy_audio_Plugin* self, psy_audio_Preset* preset)
+{
+	if (preset) {
+		psy_TableIterator it;
+
+		for (it = psy_table_begin(&preset->parameters);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			psy_audio_MachineParam* param;
+
+			param = psy_audio_machine_tweakparameter(psy_audio_plugin_base(self),
+				psy_tableiterator_key(&it));
+			if (param) {
+				psy_audio_machine_parameter_tweak_scaled(psy_audio_plugin_base(self),
+					param,
+					(intptr_t)psy_tableiterator_value(&it));
+			}
+		}
+		if (preset->data && preset->datasize == datasize(self)) {
+			putdata(self, preset->data);
+		}
+	}
+}
+
+int currprogram(psy_audio_Plugin* self)
+{
+	return  (self->currprog != UINTPTR_MAX)
+		? (int)self->currprog
+		: 0;
+}
+
+void bankname(psy_audio_Plugin* self, int bnkidx, char* val)
+{
+	if (bnkidx < numbanks(self)) {
+		psy_snprintf(val, 256, "Internal %d", bnkidx + 1);
+	} else {
+		val[0] = '\0';
+	}
+}
+
+int numbanks(psy_audio_Plugin* self)
+{
+	return 1;
+}
+
+void setcurrbank(psy_audio_Plugin* self, int bnkIdx)
+{	
+}
+
+int currbank(psy_audio_Plugin* self)
+{
+	return 0;
+}
+
+const char* modulepath(psy_audio_Plugin* self)
+{
+	return self->library.path;
+}
+
+uintptr_t shellidx(psy_audio_Plugin* self)
+{
+	return 0;
 }

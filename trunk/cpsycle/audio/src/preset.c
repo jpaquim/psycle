@@ -13,6 +13,10 @@ void psy_audio_preset_init(psy_audio_Preset* self)
 	psy_table_init(&self->parameters);
 	self->datasize = 0;
 	self->data = 0;
+	self->isfloat = 0;
+	self->magic = 0;
+	self->id = 0;
+	self->version = 0;
 }
 
 void psy_audio_preset_dispose(psy_audio_Preset* self)

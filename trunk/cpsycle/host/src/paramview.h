@@ -33,10 +33,10 @@ typedef struct {
     SkinCoord switchon;
     SkinCoord switchoff;
     SkinCoord checkon;
-    SkinCoord checkoff;
+    SkinCoord checkoff;    
 } ParamSkin;
 
-typedef struct {
+typedef struct ParamView {
    psy_ui_Component component;
    psy_audio_Machine* machine;
    int cx;
@@ -50,6 +50,7 @@ typedef struct {
    psy_ui_Size cpmax;
    uintptr_t numparams;
    int sizechanged;
+   psy_ui_FontInfo fontinfo;
 } ParamView;
 
 void paramview_init(ParamView*, psy_ui_Component* parent, psy_audio_Machine*,
@@ -58,6 +59,6 @@ ParamView* paramview_alloc(void);
 ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace*);
 void paramview_changecontrolskin(const char* path);
-
+void paramview_setzoom(ParamView*, double zoomrate);
 
 #endif

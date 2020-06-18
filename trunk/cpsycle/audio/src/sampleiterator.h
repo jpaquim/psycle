@@ -76,7 +76,7 @@ intptr_t psy_audio_sampleiterator_inc(psy_audio_SampleIterator*);
 int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamples, bool released);
 void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator*);
 
-INLINE psy_audio_sampleiterator_currentloopdirection(psy_audio_SampleIterator* self)
+INLINE int psy_audio_sampleiterator_currentloopdirection(psy_audio_SampleIterator* self)
 {
 	return self->currentloopdirection;
 }

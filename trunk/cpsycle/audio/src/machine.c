@@ -128,6 +128,8 @@ static void unbypass(psy_audio_Machine* self) { }
 static int bypassed(psy_audio_Machine* self) { return 0; }
 static void dispose(psy_audio_Machine*);
 static int mode(psy_audio_Machine*);
+static const char* modulepath(psy_audio_Machine* self) { return NULL; }
+static uintptr_t shellidx(psy_audio_Machine* self) { return 0; }
 static uintptr_t numinputs(psy_audio_Machine* self) { return 0; }
 static uintptr_t numoutputs(psy_audio_Machine* self) { return 0; }	
 static void setcallback(psy_audio_Machine* self, psy_audio_MachineCallback callback) { self->callback = callback; }
@@ -230,6 +232,9 @@ static int currbank(psy_audio_Machine* self)
 	return 0;
 }
 static void currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset) {}
+static void setpresets(psy_audio_Machine* self, struct psy_audio_Presets* presets) {}
+static struct psy_audio_Presets* presets(psy_audio_Machine* self) { return NULL; }
+static bool acceptpresets(psy_audio_Machine* self) { return FALSE; }
 
 /// machinecallback
 static uintptr_t samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
@@ -281,6 +286,8 @@ static void vtable_init(void)
 		vtable.mix = mix;
 		vtable.work = work;
 		vtable.mode = mode;
+		vtable.modulepath = modulepath;
+		vtable.shellidx = shellidx;
 		vtable.hostevent = hostevent;
 		vtable.seqtick = seqtick;
 		vtable.stop = stop;
@@ -352,6 +359,9 @@ static void vtable_init(void)
 		vtable.setcurrbank = setcurrbank;
 		vtable.currbank = currbank;
 		vtable.currentpreset = currentpreset;
+		vtable.setpresets = setpresets;
+		vtable.presets = presets;
+		vtable.acceptpresets = acceptpresets;
 		vtable.parameter_tweak = param_tweak;;
 		vtable.parameter_normvalue = param_normvalue;
 		vtable.parameter_range = param_range;

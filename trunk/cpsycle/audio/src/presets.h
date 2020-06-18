@@ -13,7 +13,7 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct psy_audio_Presets {
 	psy_Table container;
 } psy_audio_Presets;
 

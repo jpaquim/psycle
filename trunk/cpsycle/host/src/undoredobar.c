@@ -47,8 +47,8 @@ void undoredobar_initalign(UndoRedoBar* self)
 }
 
 void undoredobar_onundo(UndoRedoBar* self, psy_ui_Component* sender)
-{
-	workspace_undo(self->workspace);
+{	
+	workspace_undo(self->workspace);	
 }
 
 void undoredobar_onredo(UndoRedoBar* self, psy_ui_Component* sender)

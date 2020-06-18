@@ -74,8 +74,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 	psy_audio_Machine* rv = 0;
 
 	switch (type) {
-		case MACH_MASTER:
-		{
+		case MACH_MASTER: {
 			psy_audio_Master* master;
 			
 			master = (psy_audio_Master*)malloc(sizeof(psy_audio_Master));
@@ -84,11 +83,10 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 				rv = (psy_audio_Machine*) master;
 			} else {
 				rv = 0;
-			}
+			}		
+			break;
 		}
-		break;
-		case MACH_DUMMY:
-		{
+		case MACH_DUMMY: {
 			psy_audio_DummyMachine* dummy;
 			
 			dummy = (psy_audio_DummyMachine*)malloc(sizeof(psy_audio_DummyMachine));
@@ -97,11 +95,10 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 				rv = (psy_audio_Machine*) dummy;
 			} else {
 				rv = 0;
-			}
+			}		
+			break;
 		}
-		break;
-		case MACH_DUPLICATOR:
-		{
+		case MACH_DUPLICATOR: {
 			psy_audio_Duplicator* duplicator;
 			
 			duplicator = (psy_audio_Duplicator*)malloc(sizeof(psy_audio_Duplicator));
@@ -110,11 +107,10 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 				rv = (psy_audio_Machine*) duplicator;
 			} else {
 				rv = 0;
-			}
+			}		
+			break;
 		}
-		break;
-		case MACH_DUPLICATOR2:
-		{
+		case MACH_DUPLICATOR2: {
 			psy_audio_Duplicator2* duplicator2;
 			
 			duplicator2 = (psy_audio_Duplicator2*)malloc(sizeof(psy_audio_Duplicator2));
@@ -123,9 +119,9 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 				rv = (psy_audio_Machine*) duplicator2;
 			} else {
 				rv = 0;
-			}
+			}		
+			break;
 		}
-		break;
 		case MACH_MIXER:
 		{
 			psy_audio_Mixer* mixer;
@@ -139,8 +135,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			}
 		}
 		break;
-		case MACH_RECORDER:
-		{
+		case MACH_RECORDER: {
 			psy_audio_AudioRecorder* recorder;
 			
 			recorder = (psy_audio_AudioRecorder*)malloc(sizeof(psy_audio_AudioRecorder));
@@ -150,24 +145,22 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			}
 			else {
 				rv = 0;
-			}
+			}		
+			break;
 		}
-		break;
-		case MACH_SAMPLER:
-		{
+		case MACH_SAMPLER: {
 			psy_audio_Sampler* sampler;
-			
+
 			sampler = psy_audio_sampler_allocinit(self->machinecallback);
 			if (sampler) {
-				sampler->xmsamplerload = 0;				
+				sampler->xmsamplerload = 0;
 				rv = psy_audio_sampler_base(sampler);
 			} else {
 				rv = 0;
 			}
+			break;
 		}
-		break;		
-		case MACH_XMSAMPLER:
-		{
+		case MACH_XMSAMPLER: {
 			psy_audio_Sampler* sampler;
 			
 			sampler = psy_audio_sampler_allocinit(self->machinecallback);
@@ -176,12 +169,11 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 				rv = psy_audio_sampler_base(sampler);
 			} else {
 				rv = 0;
-			}
+			}		
+			break;
 		}
-		break;
 		case MACH_VST:
-		case MACH_VSTFX:
-		{
+		case MACH_VSTFX: {
 			psy_audio_Machine* plugin;			
 
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_VstPlugin));
@@ -195,13 +187,12 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 				}
 			} else {
 				rv = 0;
-			}
+			}		
+			break;	
 		}
-		break;		
-		case MACH_PLUGIN:
-		{
-			psy_audio_Machine* plugin;			
-									
+		case MACH_PLUGIN: {
+			psy_audio_Machine* plugin;
+
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_Plugin));
 			if (plugin) {
 				psy_audio_plugin_init((psy_audio_Plugin*)plugin,
@@ -215,12 +206,11 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			} else {
 				rv = 0;
 			}
+			break;
 		}
-		break;
-		case MACH_LUA:
-		{
-			psy_audio_Machine* plugin;			
-									
+		case MACH_LUA: {
+			psy_audio_Machine* plugin;
+
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LuaPlugin));
 			if (plugin) {
 				psy_audio_luaplugin_init((psy_audio_LuaPlugin*)plugin, self->machinecallback, path);
@@ -233,13 +223,12 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			} else {
 				rv = 0;
 			}
+			break;
 		}
-		break;
-		case MACH_LADSPA:
-		{
+		case MACH_LADSPA: {
 			psy_audio_Machine* plugin;
 
-			plugin = (psy_audio_Machine*) malloc(sizeof(psy_audio_LadspaPlugin));
+			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LadspaPlugin));
 			if (plugin) {
 				psy_audio_ladspaplugin_init((psy_audio_LadspaPlugin*)plugin,
 					self->machinecallback, path, shellidx);
@@ -249,12 +238,11 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 					psy_audio_machine_dispose(plugin);
 					free(plugin);
 				}
-			}
-			else {
+			} else {
 				rv = 0;
 			}
-		}
-		break;
+			break;
+		}		
 		default:
 			rv = 0;
 		break;

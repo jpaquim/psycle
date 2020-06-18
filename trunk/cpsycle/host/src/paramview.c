@@ -129,16 +129,30 @@ static void vtable_init(ParamView* self)
 
 void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine* machine,
 	Workspace* workspace)
-{	
+{
+	psy_Properties* pv;
+
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_ui_component_doublebuffer(&self->component);
+	self->component.vtable = &vtable;	
 	++paramview_refcount;
 	self->workspace = workspace;
 	self->machine = machine;
 	self->numparams = 0;
+	psy_ui_component_doublebuffer(&self->component);
+	pv = psy_properties_findsection(self->workspace->config, "visual.paramview");
+	if (pv) {
+		psy_ui_Font font;
+
+		psy_ui_fontinfo_init_string(&self->fontinfo,
+			psy_properties_readstring(pv, "font", "tahoma;-16"));
+		psy_ui_font_init(&font, &self->fontinfo);
+		psy_ui_component_setfont(&self->component, &font);
+		psy_ui_font_dispose(&font);
+	} else {
+		psy_ui_fontinfo_init_string(&self->fontinfo, "tahoma;-16");
+	}
 	paramskin_init(self);	
 	psy_table_init(&self->positions);
 	self->tweak = UINTPTR_MAX;
@@ -255,9 +269,12 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	int height;
 	int knob_cx;
 	int knob_cy;
+	int w;
+	int h;
 	
 	knob_cx = self->skin->knob.destwidth;
-	knob_cy = self->skin->knob.destheight;		
+	knob_cy = self->skin->knob.destheight;	
+	mpfsize(self, MPF_STATE, FALSE, &w, &h);
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
@@ -293,8 +310,18 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 
 		knob_frame = (int)
 			(psy_audio_machine_parameter_normvalue(self->machine, param) * 63.f);
-		psy_ui_drawbitmap(g, &self->skin->knobbitmap, r.left, r.top, knob_cx,
-			knob_cy, knob_frame * knob_cx, 0);
+		if (h < knob_cy) {
+			double ratio;
+
+			ratio = h / (double)knob_cy;
+			w = (int)(ratio * knob_cx);
+			psy_ui_drawstretchedbitmap(g, &self->skin->knobbitmap, r.left, r.top, w,
+				h, knob_frame * knob_cx, 0, knob_cx, knob_cy);
+		} else {
+			psy_ui_drawbitmap(g, &self->skin->knobbitmap, r.left, r.top, knob_cx,
+				knob_cy, knob_frame * knob_cx, 0);
+		}
+
 	}
 	psy_ui_setcolor(g, 0x00232323);
 	psy_ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
@@ -560,7 +587,6 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* 
 		break;
 	case MPF_SLIDERCHECK:
 		tm = psy_ui_component_textmetric(&self->component);
-
 		*height = max(self->skin->checkoff.destheight,
 			tm.tmHeight);
 		*width = self->skin->checkoff.destwidth +
@@ -593,8 +619,8 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* 
 		break;
 		case MPF_STATE:
 			tm = psy_ui_component_textmetric(&self->component);
-			*height = self->skin->knob.destheight;
-			*width = self->skin->knob.destwidth;
+			// *height = self->skin->knob.destheight;
+			// *width = self->skin->knob.destwidth;
 			if (*width < tm.tmAveCharWidth * 30) {
 				*width = tm.tmAveCharWidth * 30;
 			}
@@ -960,4 +986,17 @@ void paramview_changecontrolskin(const char* path)
 		psy_ui_bitmap_dispose(&paramskin.knobbitmap);
 	}
 	paramskin_initialized = 0;
+}
+
+void paramview_setzoom(ParamView* self, double zoomrate)
+{
+	psy_ui_Font font;				
+	psy_ui_FontInfo fontinfo;
+
+	fontinfo = self->fontinfo;
+	fontinfo.lfHeight = (int)(self->fontinfo.lfHeight * zoomrate);
+	psy_ui_font_init(&font, &fontinfo);
+	psy_ui_component_setfont(&self->component, &font);
+	psy_ui_font_dispose(&font);
+	paramview_computepositions(self);
 }

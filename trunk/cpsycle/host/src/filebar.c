@@ -5,6 +5,8 @@
 
 #include "filebar.h"
 
+#include <songio.h>
+
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 
@@ -82,21 +84,14 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 	if (workspace_songmodified(self->workspace)) {
 		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
 	} else {
-		psy_ui_OpenDialog dialog;
-		static char filter[] =
-			"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
-			"Songs (*.psy)"				        "|*.psy|"
-			"FastTracker II Songs (*.xm)"       "|*.xm|"
-			"Impulse Tracker Songs (*.it)"      "|*.it|"
-			"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
-			"Original Mod Format Songs (*.mod)" "|*.mod|"
-			"Wav Format Songs (*.wav)"			"|*.wav";
+		psy_ui_OpenDialog dialog;		
 
-		psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+		psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
+			psy_audio_songfile_loadfilter(), "PSY",
 			workspace_songs_directory(self->workspace));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			workspace_loadsong(self->workspace,
-				psy_ui_opendialog_filename(&dialog));
+				psy_ui_opendialog_filename(&dialog), TRUE);
 		}
 		psy_ui_opendialog_dispose(&dialog);
 	}
@@ -106,9 +101,8 @@ void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 {	
 	psy_ui_SaveDialog dialog;
 
-	psy_ui_savedialog_init_all(&dialog, 0,
-		"Save Song",
-		"Songs (*.psy)|*.psy", "PSY",
+	psy_ui_savedialog_init_all(&dialog, 0, "Save Song",
+		psy_audio_songfile_loadfilter(), "PSY",
 		workspace_songs_directory(self->workspace));
 	if (psy_ui_savedialog_execute(&dialog)) {
 		workspace_savesong(self->workspace,

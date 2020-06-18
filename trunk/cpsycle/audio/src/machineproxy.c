@@ -34,7 +34,10 @@ static psy_List* machineproxy_sequencerinsert(psy_audio_MachineProxy*, psy_List*
 static void machineproxy_stop(psy_audio_MachineProxy*);
 static void machineproxy_dispose(psy_audio_MachineProxy*);
 static void machineproxy_reload(psy_audio_MachineProxy*);
+static psy_audio_Machine* machineproxy_clone(psy_audio_MachineProxy*);
 static int machineproxy_mode(psy_audio_MachineProxy*);
+static const char* machineproxy_modulepath(psy_audio_MachineProxy*);
+static uintptr_t machineproxy_shellidx(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numinputs(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_numoutputs(psy_audio_MachineProxy*);
 // parameter
@@ -117,6 +120,9 @@ static int machineproxy_numbanks(psy_audio_MachineProxy*);
 static void machineproxy_setcurrbank(psy_audio_MachineProxy*, int prgIdx);
 static int machineproxy_currbank(psy_audio_MachineProxy*);
 static void machineproxy_currentpreset(psy_audio_MachineProxy*, struct psy_audio_Preset*);
+static void machineproxy_setpresets(psy_audio_MachineProxy*, struct psy_audio_Presets*);
+static struct psy_audio_Presets* machineproxy_presets(psy_audio_MachineProxy*);
+static bool machineproxy_acceptpresets(psy_audio_MachineProxy*);
 
 #if defined DIVERSALIS__OS__MICROSOFT
 static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
@@ -158,7 +164,10 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.stop = (fp_machine_stop) machineproxy_stop;
 		vtable.dispose = (fp_machine_dispose) machineproxy_dispose;
 		vtable.reload = (fp_machine_reload) machineproxy_reload;
+		vtable.clone = (fp_machine_clone)machineproxy_clone;
 		vtable.mode = (fp_machine_mode) machineproxy_mode;
+		vtable.modulepath = (fp_machine_modulepath)machineproxy_modulepath;
+		vtable.shellidx = (fp_machine_shellidx)machineproxy_shellidx;
 		vtable.numinputs = (fp_machine_numinputs) machineproxy_numinputs;
 		vtable.numoutputs = (fp_machine_numoutputs) machineproxy_numoutputs;
 		vtable.setpanning = (fp_machine_setpanning) machineproxy_setpanning;
@@ -242,6 +251,9 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.setcurrbank = (fp_machine_setcurrbank) machineproxy_setcurrbank;
 		vtable.currbank = (fp_machine_currbank) machineproxy_currbank;
 		vtable.currentpreset = (fp_machine_currentpreset)machineproxy_currentpreset;
+		vtable.setpresets = (fp_machine_setpresets)machineproxy_setpresets;
+		vtable.presets = (fp_machine_presets)machineproxy_presets;
+		vtable.acceptpresets = (fp_machine_acceptpresets)machineproxy_acceptpresets;
 		vtable.parameter_tweak = (fp_machine_param_tweak)machineproxy_param_tweak;;
 		vtable.parameter_normvalue = (fp_machine_param_normvalue)machineproxy_param_normvalue;
 		vtable.parameter_range = (fp_machine_param_range)machineproxy_param_range;
@@ -468,6 +480,46 @@ int machineproxy_mode(psy_audio_MachineProxy* self)
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "mode", GetExceptionCode(),
 			GetExceptionInformation())) {			
+		}
+#endif		
+	}
+	return rv;
+}
+
+const char* machineproxy_modulepath(psy_audio_MachineProxy* self)
+{
+	const char* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_modulepath(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "modulepath", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+uintptr_t machineproxy_shellidx(psy_audio_MachineProxy* self)
+{
+	uintptr_t rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_shellidx(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "shellidx", GetExceptionCode(),
+			GetExceptionInformation())) {
 		}
 #endif		
 	}
@@ -1606,6 +1658,63 @@ void machineproxy_currentpreset(psy_audio_MachineProxy* self, struct psy_audio_P
 	}
 }
 
+void machineproxy_setpresets(psy_audio_MachineProxy* self, struct psy_audio_Presets* presets)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_setpresets(self->client, presets);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "setpresets", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+struct psy_audio_Presets* machineproxy_presets(psy_audio_MachineProxy* self)
+{
+	struct psy_audio_Presets* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_presets(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "presets", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+bool machineproxy_acceptpresets(psy_audio_MachineProxy* self)
+{
+	bool rv = FALSE;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			return psy_audio_machine_acceptpresets(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "acceptpresets", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
 const char* machineproxy_capturename(psy_audio_MachineProxy* self, int index)
 {
 	const char* rv = 0;
@@ -1816,6 +1925,38 @@ int machineproxy_param_describe(psy_audio_MachineProxy* self, psy_audio_MachineP
 			GetExceptionInformation())) {
 		}
 #endif		
+	}
+	return rv;
+}
+
+psy_audio_Machine* machineproxy_clone(psy_audio_MachineProxy* self)
+{
+	psy_audio_Machine* rv = NULL;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_clone(self->client);
+			if (rv) {
+				psy_audio_MachineProxy* proxy;
+
+				proxy = psy_audio_machineproxy_allocinit(rv);
+				if (proxy) {
+					rv = psy_audio_machineproxy_base(proxy);
+				} else {
+					machine_base_dispose(rv);
+					free(rv);
+					rv = 0;
+				}
+			}
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "machine clone", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif	
 	}
 	return rv;
 }

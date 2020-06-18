@@ -57,6 +57,8 @@ typedef void (*psy_ui_fp_graphics_drawline)(struct psy_ui_Graphics*, int x1, int
 typedef void (*psy_ui_fp_graphics_drawfullbitmap)(struct psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y);
 typedef void (*psy_ui_fp_graphics_drawbitmap)(struct psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
+typedef void (*psy_ui_fp_graphics_drawstretchedbitmap)(struct psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc);
 typedef void (*psy_ui_fp_graphics_setbackgroundcolor)(struct psy_ui_Graphics*, unsigned int color);
 typedef void (*psy_ui_fp_graphics_setbackgroundmode)(struct psy_ui_Graphics*, unsigned int mode);
 typedef void (*psy_ui_fp_graphics_settextcolor)(struct psy_ui_Graphics*, unsigned int color);
@@ -84,6 +86,7 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_drawline drawline;	
 	psy_ui_fp_graphics_drawfullbitmap drawfullbitmap;
 	psy_ui_fp_graphics_drawbitmap drawbitmap;
+	psy_ui_fp_graphics_drawstretchedbitmap drawstretchedbitmap;
 	psy_ui_fp_graphics_setbackgroundcolor setbackgroundcolor;
 	psy_ui_fp_graphics_setbackgroundmode setbackgroundmode;
 	psy_ui_fp_graphics_settextcolor settextcolor;
@@ -165,6 +168,12 @@ INLINE void psy_ui_drawbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap, int 
 	int height, int xsrc, int ysrc)
 {	
 	self->vtable->drawbitmap(self, bitmap, x, y, width, height, xsrc, ysrc);
+}
+
+INLINE void psy_ui_drawstretchedbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bitmap, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc)
+{
+	self->vtable->drawstretchedbitmap(self, bitmap, x, y, width, height, xsrc, ysrc, wsrc, hsrc);
 }
 
 INLINE void psy_ui_setcolor(psy_ui_Graphics* self, unsigned int color)
@@ -249,6 +258,8 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawline)(struct psy_ui_GraphicsImp*, i
 typedef void (*psy_ui_fp_graphicsimp_dev_drawfullbitmap)(struct psy_ui_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawbitmap)(struct psy_ui_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
+typedef void (*psy_ui_fp_graphicsimp_dev_drawstretchedbitmap)(struct psy_ui_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
+	int height, int xsrc, int ysrc, int wsrc, int hsrc);
 typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundcolor)(struct psy_ui_GraphicsImp*, unsigned int color);
 typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundmode)(struct psy_ui_GraphicsImp*, unsigned int mode);
 typedef void (*psy_ui_fp_graphicsimp_dev_settextcolor)(struct psy_ui_GraphicsImp*, unsigned int color);
@@ -276,6 +287,7 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_drawline dev_drawline;	
 	psy_ui_fp_graphicsimp_dev_drawfullbitmap dev_drawfullbitmap;
 	psy_ui_fp_graphicsimp_dev_drawbitmap dev_drawbitmap;
+	psy_ui_fp_graphicsimp_dev_drawstretchedbitmap dev_drawstretchedbitmap;
 	psy_ui_fp_graphicsimp_dev_setbackgroundcolor dev_setbackgroundcolor;
 	psy_ui_fp_graphicsimp_dev_setbackgroundmode dev_setbackgroundmode;
 	psy_ui_fp_graphicsimp_dev_settextcolor dev_settextcolor;

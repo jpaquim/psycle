@@ -127,12 +127,12 @@ void machinewireview_align(MachineWireView*);
 typedef struct MachineViewBar {
 	psy_ui_Component component;
 	psy_ui_CheckBox mixersend;
-	psy_ui_Component status;
-	char* text;
+	psy_ui_Label status;
 	Workspace* workspace;
 } MachineViewBar;
 
 void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
+void machineviewbar_settext(MachineViewBar*, const char* text);
 
 typedef struct {
 	psy_ui_Component component;

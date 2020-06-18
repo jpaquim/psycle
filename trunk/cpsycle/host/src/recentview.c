@@ -40,7 +40,8 @@ void recentview_onselected(RecentView* self, PropertiesView* sender,
 	if (psy_properties_insection(property, self->workspace->recentfiles)) {
 		if (!self->workspace->filename || strcmp(self->workspace->filename,
 				psy_properties_key(property)) != 0) {
-			workspace_loadsong(self->workspace, psy_properties_key(property));
+			workspace_loadsong(self->workspace, psy_properties_key(property),
+				TRUE);
 		}
 	}
 }

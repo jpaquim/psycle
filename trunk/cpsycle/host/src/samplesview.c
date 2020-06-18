@@ -179,16 +179,9 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 	psy_ui_Component* sender)
 {
 	psy_ui_OpenDialog dialog;
-	static char filter[] =
-				"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
-				"Songs (*.psy)"				        "|*.psy|"
-				"FastTracker II Songs (*.xm)"       "|*.xm|"
-				"Impulse Tracker Songs (*.it)"      "|*.it|"
-				"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
-				"Original Mod Format Songs (*.mod)" "|*.mod|"
-				"Wav Format Songs (*.wav)"			"|*.wav";
-
-	psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+	
+	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
+		psy_audio_songfile_loadfilter(), "PSY",
 		workspace_songs_directory(self->workspace));
 	if (psy_ui_opendialog_execute(&dialog)) {
 		psy_audio_SongFile songfile;

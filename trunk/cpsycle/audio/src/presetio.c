@@ -18,6 +18,36 @@ static int presetio_loadversion1(FILE*, int numParameters,
 	uintptr_t datasizestruct, psy_audio_Presets*);
 static int psy_audio_presetsio_saveversion1(FILE*, psy_audio_Presets*);
 
+const char* psy_audio_presetsio_statusstr(int status)
+{
+	switch (status) {
+	case psy_audio_PRESETIO_OK:
+		return "Preset File OK";
+		break;
+	case psy_audio_PRESETIO_ERROR_OPEN:
+		return "Couldn't open file. Operation aborted";
+		break;
+	case psy_audio_PRESETIO_ERROR_READ:
+		return "Couldn't read from file. Operation aborted";
+		break;
+	case psy_audio_PRESETIO_ERROR_UPTODATE:
+		return "The current preset File is not up-to-date with the plugin.";
+		break;
+	case psy_audio_PRESETIO_ERROR_NEWVERSION:
+		return "The current preset file is from a newer version of psycle than you are currently running.";
+		break;
+	case psy_audio_PRESETIO_ERROR_WRITEOPEN:
+		return "The File couldn't be opened for Writing. Operation Aborted";
+		break;
+	case psy_audio_PRESETIO_ERROR_WRITE:
+		return "Couldn't write to File. Operation Aborted";
+		break;
+	default:
+		break;
+	}
+	return "Preset File Error";
+}
+
 int psy_audio_presetsio_load(const char* filename, psy_audio_Presets* presets,
 	uintptr_t numparameters, uintptr_t datasizestruct, const char* pluginroot)
 {	
@@ -260,32 +290,82 @@ int psy_audio_presetsio_saveversion1(FILE* fp, psy_audio_Presets* presets)
 	return status;
 }
 
-const char* psy_audio_presetsio_statusstr(int status)
-{	
-	switch (status) {
-		case psy_audio_PRESETIO_OK:
-			return "Preset File OK";
-			break;
-		case psy_audio_PRESETIO_ERROR_OPEN:
-			return "Couldn't open file. Operation aborted";
-			break;
-		case psy_audio_PRESETIO_ERROR_READ:
-			return "Couldn't read from file. Operation aborted";
-			break;
-		case psy_audio_PRESETIO_ERROR_UPTODATE:
-			return "The current preset File is not up-to-date with the plugin.";
-			break;
-		case psy_audio_PRESETIO_ERROR_NEWVERSION:
-			return "The current preset file is from a newer version of psycle than you are currently running.";
-			break;
-		case psy_audio_PRESETIO_ERROR_WRITEOPEN:
-			return "The File couldn't be opened for Writing. Operation Aborted";
-			break;
-		case psy_audio_PRESETIO_ERROR_WRITE:
-			return "Couldn't write to File. Operation Aborted";
-			break;
-		default:
-			break;
+// preset io
+
+static int psy_audio_presetio_savefxpversion0(FILE*, psy_audio_Preset*);
+
+int psy_audio_presetio_savefxp(const char* path, psy_audio_Preset* preset)
+{
+	int status;
+	FILE* fp;
+
+	status = psy_audio_PRESETIO_OK;
+	if (preset) {
+		if (!(fp = fopen(path, "wb")))
+		{
+			status = psy_audio_PRESETIO_ERROR_WRITEOPEN;
+			return status;
+		}
+		psy_audio_presetio_savefxpversion0(fp, preset);
+		fclose(fp);
 	}
-	return "Preset File Error";
+	return status;
+}
+
+int psy_audio_presetio_savefxpversion0(FILE* fp, psy_audio_Preset* preset)
+{		
+	int32_t temp32;
+	char name[28];
+	int32_t param;
+	const char chnk[] = "CcnK";
+	intptr_t sizepos;
+	intptr_t currpos;
+	
+	fwrite(chnk, 4, 1, fp);
+	sizepos = ftell(fp);
+	// sizepos is filled at save end
+	temp32 = 0;
+	fwrite(&temp32, sizeof(temp32), 1, fp);
+	temp32 = preset->magic;
+	fwrite(&temp32, sizeof(temp32), 1, fp);
+	// version
+	temp32 = 1;
+	fwrite(&temp32, sizeof(temp32), 1, fp);
+	temp32 = preset->id;
+	fwrite(&temp32, sizeof(temp32), 1, fp);
+	temp32 = preset->version;
+	fwrite(&temp32, sizeof(temp32), 1, fp);
+	if (preset->datasize > 0) {
+		temp32 = 0;
+	} else {
+		temp32 = psy_audio_preset_numparameters(preset);
+	}
+	fwrite(&temp32, sizeof(temp32), 1, fp);
+	memset(&name, 0, sizeof(name));
+	psy_snprintf(name, 28, psy_audio_preset_name(preset));
+	if (fwrite(&name, sizeof(char), 28, fp) != 28) {
+		return psy_audio_PRESETIO_ERROR_WRITE;
+	}	
+	if (preset->datasize > 0) {
+		temp32 = preset->datasize;
+		fwrite(&temp32, sizeof(temp32), 1, fp);		
+		if (fwrite(&preset->data, 1, preset->datasize, fp) != preset->datasize) {
+			return psy_audio_PRESETIO_ERROR_WRITE;
+		}				
+	} else {
+		for (param = 0; param < psy_audio_preset_numparameters(preset); ++param) {
+			float value;
+
+			value = psy_audio_preset_value(preset, param) / (float)0xFFFF;
+			if (fwrite(&value, sizeof(float), 1, fp) != sizeof(float)) {
+				return psy_audio_PRESETIO_ERROR_WRITE;
+			}
+		}
+	}
+	currpos = ftell(fp);
+	fseek(fp, sizepos, SEEK_SET);
+	temp32 = sizepos - currpos;
+	fwrite(&temp32, sizeof(int32_t), 1, fp);	
+	fseek(fp, currpos, SEEK_SET);
+	return psy_audio_PRESETIO_OK;
 }

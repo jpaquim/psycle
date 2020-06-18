@@ -24,6 +24,8 @@ int psy_audio_presetsio_load(const char* path, psy_audio_Presets*,
 int psy_audio_presetsio_save(const char* path, psy_audio_Presets*);
 const char* psy_audio_presetsio_statusstr(int status);
 
+int psy_audio_presetio_savefxp(const char* path, psy_audio_Preset*);
+
 #ifdef __cplusplus
 }
 #endif

@@ -6,6 +6,7 @@
 #include "playlisteditor.h"
 #include <dir.h>
 #include <exclusivelock.h>
+#include <songio.h>
 
 #include <uiopendialog.h>
 
@@ -145,17 +146,10 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 
 void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 {
-	psy_ui_OpenDialog dialog;
-	static char filter[] =
-				"All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
-				"Songs (*.psy)"				        "|*.psy|"
-				"FastTracker II Songs (*.xm)"       "|*.xm|"
-				"Impulse Tracker Songs (*.it)"      "|*.it|"
-				"Scream Tracker Songs (*.s3m)"      "|*.s3m|"
-				"Original Mod Format Songs (*.mod)" "|*.mod|"
-				"Wav Format Songs (*.wav)"			"|*.wav";
+	psy_ui_OpenDialog dialog;	
 
-	psy_ui_opendialog_init_all(&dialog, 0, "Load Song", filter, "PSY",
+	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
+		psy_audio_songfile_loadfilter(), "PSY",
 		workspace_songs_directory(self->workspace));
 	if (psy_ui_opendialog_execute(&dialog)) {	
 		char name[4096];
@@ -245,7 +239,7 @@ void playlisteditor_ontimer(PlayListEditor* self, uintptr_t timerid)
 			
 			self->currentry = self->nextentry;
 			entry = (PlayListEntry*) self->currentry->entry;			
-			workspace_loadsong(self->workspace, entry->path);		
+			workspace_loadsong(self->workspace, entry->path, FALSE);		
 			psy_audio_sequencer_stoploop(&self->workspace->player.sequencer);
 			psy_audio_player_setposition(&self->workspace->player, 0);
 			psy_audio_player_start(&self->workspace->player);

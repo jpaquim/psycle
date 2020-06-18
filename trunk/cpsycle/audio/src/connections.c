@@ -41,13 +41,13 @@ void psy_audio_pinmapping_dispose(psy_audio_PinMapping* self)
 	psy_audio_pinmapping_clear(self);
 }
 
-void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, const psy_audio_PinMapping* other)
+void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, const psy_audio_PinMapping* src)
 {
-	if (other) {
+	if (src) {
 		psy_List* p;
 
 		psy_audio_pinmapping_clear(self);
-		for (p = other->container; p != NULL; p = p->next) {
+		for (p = src->container; p != NULL; p = p->next) {
 			psy_audio_PinConnection* pair;
 			psy_audio_PinConnection* paircopy;
 
@@ -153,6 +153,33 @@ void machinesockets_dispose(psy_audio_MachineSockets* self)
 	self->outputs = 0;
 }
 
+void machinesockets_copy(psy_audio_MachineSockets* self,
+	psy_audio_MachineSockets* src)
+{
+	WireSocket* p;
+
+	machinesockets_dispose(self);
+	machinesockets_init(self);
+	for (p = src->inputs; p != NULL; p = p->next) {
+		psy_audio_WireSocketEntry* entry;
+		psy_audio_WireSocketEntry* newentry;
+
+		entry = (psy_audio_WireSocketEntry*)p->entry;
+		newentry = wiresocketentry_allocinit(entry->slot, entry->volume);
+		psy_audio_wiresocketentry_copy(newentry, entry);
+		psy_list_append(&self->inputs, newentry);
+	}	
+	for (p = src->outputs; p != NULL; p = p->next) {
+		psy_audio_WireSocketEntry* entry;
+		psy_audio_WireSocketEntry* newentry;
+
+		entry = (psy_audio_WireSocketEntry*)p->entry;
+		newentry = wiresocketentry_allocinit(entry->slot, entry->volume);
+		psy_audio_wiresocketentry_copy(newentry, entry);
+		psy_list_append(&self->outputs, newentry);
+	}
+}
+
 psy_audio_MachineSockets* machinesockets_allocinit(void)
 {	
 	psy_audio_MachineSockets* rv;
@@ -182,6 +209,15 @@ psy_audio_WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
 void wiresocketentry_dispose(psy_audio_WireSocketEntry* self)
 {	
 	psy_audio_pinmapping_dispose(&self->mapping);
+}
+
+void psy_audio_wiresocketentry_copy(psy_audio_WireSocketEntry* self,
+	psy_audio_WireSocketEntry* src)
+{
+	self->id = src->id;
+	self->slot = src->slot;
+	self->volume = src->volume;
+	psy_audio_pinmapping_copy(&self->mapping, &src->mapping);
 }
 
 WireSocket* connection_at(WireSocket* socket, uintptr_t slot)
@@ -241,6 +277,41 @@ void connections_dispose(psy_audio_Connections* self)
 	psy_signal_dispose(&self->signal_disconnected);
 }
 
+void connections_copy(psy_audio_Connections* self, psy_audio_Connections* src)
+{	
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->container);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_MachineSockets* sockets;
+
+		sockets = (psy_audio_MachineSockets*)psy_tableiterator_value(&it);
+		machinesockets_dispose(sockets);
+		free(sockets);
+	}
+	psy_table_dispose(&self->container);
+	psy_table_dispose(&self->sends);
+	psy_table_init(&self->container); 
+	psy_table_init(&self->sends);	
+	for (it = psy_table_begin(&src->container);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_MachineSockets* sockets;
+		psy_audio_MachineSockets* newsockets;
+
+		sockets = (psy_audio_MachineSockets*)psy_tableiterator_value(&it);
+		newsockets = machinesockets_allocinit();
+		machinesockets_copy(newsockets, sockets);
+		psy_table_insert(&self->container, psy_tableiterator_key(&it), newsockets);		
+	}
+	for (it = psy_table_begin(&src->sends);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {				
+		psy_table_insert(&self->sends, psy_tableiterator_key(&it), (void*)(uintptr_t)1);
+	}
+}
+
 psy_audio_MachineSockets* connections_at(psy_audio_Connections* self, uintptr_t slot)
 {
 	return psy_table_at(&self->container, slot);	
@@ -255,7 +326,8 @@ psy_audio_MachineSockets* connections_initslot(psy_audio_Connections* self, uint
 	return sockets;
 }
 
-int connections_connect(psy_audio_Connections* self, uintptr_t outputslot, uintptr_t inputslot)
+int connections_connect(psy_audio_Connections* self, uintptr_t outputslot,
+	uintptr_t inputslot)
 {
 	if (outputslot != inputslot && 
 			!connections_connected(self, outputslot, inputslot)) {
