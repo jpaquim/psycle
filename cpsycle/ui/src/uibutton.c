@@ -20,6 +20,8 @@ static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Button*);
 static void onmouseleave(psy_ui_Button*);
 static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void enableinput(psy_ui_Button*);
+static void preventinput(psy_ui_Button*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -28,11 +30,13 @@ static void vtable_init(psy_ui_Button* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(psy_ui_button_base(self)->vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
+		vtable.enableinput = (psy_ui_fp_component_enableinput)enableinput;
+		vtable.preventinput = (psy_ui_fp_component_preventinput)preventinput;
+		vtable.ondraw = (psy_ui_fp_ondraw)ondraw;
 		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
 		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;		
 		vtable_initialized = 1;
 	}
 }
@@ -49,6 +53,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->charnumber = 0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
+	self->enabled = TRUE;
 	self->text = strdup("");
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&psy_ui_button_base(self)->signal_destroy, self,
@@ -77,13 +82,13 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
 		psy_ui_value_px(&size.height, &tm));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	if (self->hover) {
+	if (self->enabled == FALSE) {
+		psy_ui_settextcolor(g, 0x00777777);
+	} else if (self->hover) {
 		psy_ui_settextcolor(g, 0x00FFFFFF);
-	} else 
-	if (psy_ui_button_highlighted(self)) {
+	} else if (psy_ui_button_highlighted(self)) {
 		psy_ui_settextcolor(g, 0x00FFFFFF);
-	} else
-	{
+	} else {
 		psy_ui_settextcolor(g, 0x00CACACA);
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
@@ -226,19 +231,25 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
-	psy_signal_emit(&self->signal_clicked, self, 0);
+	if (self->enabled) {
+		psy_signal_emit(&self->signal_clicked, self, 0);
+	}
 }
 
 void onmouseenter(psy_ui_Button* self)
 {
-	self->hover = 1;
-	psy_ui_component_invalidate(psy_ui_button_base(self));
+	if (self->enabled) {
+		self->hover = 1;
+		psy_ui_component_invalidate(psy_ui_button_base(self));
+	}
 }
 
 void onmouseleave(psy_ui_Button* self)
 {		
+	if (self->enabled) {		
+		psy_ui_component_invalidate(psy_ui_button_base(self));
+	}
 	self->hover = 0;
-	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)
@@ -282,4 +293,20 @@ void psy_ui_button_settextalignment(psy_ui_Button* self,
 	psy_ui_Alignment alignment)
 {
 	self->textalignment = alignment;
+}
+
+void enableinput(psy_ui_Button* self)
+{
+	if (self->enabled == FALSE) {
+		self->enabled = TRUE;
+		psy_ui_component_invalidate(psy_ui_button_base(self));
+	}
+}
+
+void preventinput(psy_ui_Button* self)
+{
+	if (self->enabled == TRUE) {
+		self->enabled = FALSE;
+		psy_ui_component_invalidate(psy_ui_button_base(self));
+	}
 }

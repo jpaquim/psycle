@@ -79,7 +79,10 @@ static psy_audio_MachineInfo const macinfo = {
 	"Machine",
 	"Psycledelics",
 	"help",
-	MACH_UNDEFINED
+	MACH_UNDEFINED,
+	0,
+	0,	
+	""
 };
 
 struct psy_audio_Player;
@@ -158,6 +161,8 @@ static void editorsize(psy_audio_Machine* self, int* width, int* height)
 	*height = 0;
 }
 static void editoridle(psy_audio_Machine* self) { }
+static void setposition(psy_audio_Machine* self, intptr_t x, intptr_t y) { }
+static void position(psy_audio_Machine* self, intptr_t* x, intptr_t* y) { *x = *y = 0; }
 static const char* editname(psy_audio_Machine* self) { return ""; }
 static void seteditname(psy_audio_Machine* self, const char* name) { }
 static psy_audio_Buffer* buffermemory(psy_audio_Machine* self) { return 0; }
@@ -341,6 +346,8 @@ static void vtable_init(void)
 		vtable.seteditorhandle = seteditorhandle;
 		vtable.editorsize = editorsize;
 		vtable.editoridle = editoridle;
+		vtable.setposition = setposition;
+		vtable.position = position;
 		vtable.editname = editname;
 		vtable.seteditname = seteditname;
 		vtable.buffermemory = buffermemory;
@@ -785,7 +792,8 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 					//wire->_inputConVol *= 32768.f;
 				//}
 				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
-				psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+				psy_audio_machines_connect(&songfile->song->machines,
+					psy_audio_wire_make(wire->_inputMachine, slot));
 				connections_setwirevolume(&songfile->song->machines.connections,
 					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
 				connections_setpinmapping(&songfile->song->machines.connections,

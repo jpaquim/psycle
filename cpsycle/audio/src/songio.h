@@ -31,8 +31,7 @@ typedef struct psy_audio_SongFile {
 	psy_Signal signal_output;
 	psy_Signal signal_warning;	
 	const char* path;
-	uintptr_t machinesoloed;
-	psy_Table machineuis;
+	uintptr_t machinesoloed;	
 	// MachineID X [psy_Table* LegacyWires (ConnectionID X psy_audio_LegacyWire*)]
 	psy_audio_LegacyWires legacywires;	
 } psy_audio_SongFile;
@@ -43,8 +42,6 @@ int psy_audio_songfile_load(psy_audio_SongFile*, const char* path);
 int psy_audio_songfile_save(psy_audio_SongFile*, const char* path);
 void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
-psy_audio_MachineUi* psy_audio_songfile_machineui(psy_audio_SongFile*,
-	uintptr_t index);
 const char* psy_audio_songfile_loadfilter(void);
 const char* psy_audio_songfile_savefilter(void);
 

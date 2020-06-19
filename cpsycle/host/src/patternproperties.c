@@ -11,7 +11,7 @@
 
 // Commands
 typedef struct {
-	Command command;
+	psy_Command command;
 	psy_audio_Pattern* pattern;
 	char* newname;
 	char* oldname;
@@ -23,15 +23,30 @@ static void PatternPropertiesApplyCommandDispose(PatternPropertiesApplyCommand*)
 static void PatternPropertiesApplyCommandExecute(PatternPropertiesApplyCommand*);
 static void PatternPropertiesApplyCommandRevert(PatternPropertiesApplyCommand*);
 
+// vtable
+static psy_CommandVtable patternpropertiesapplycommand_vtable;
+static int patternpropertiesapplycommand_vtable_initialized = 0;
+
+static void patternpropertiesapplycommand_vtable_init(PatternPropertiesApplyCommand* self)
+{
+	if (!patternpropertiesapplycommand_vtable_initialized) {
+		patternpropertiesapplycommand_vtable = *(self->command.vtable);
+		patternpropertiesapplycommand_vtable.dispose = (psy_fp_command)PatternPropertiesApplyCommandDispose;
+		patternpropertiesapplycommand_vtable.execute = (psy_fp_command)PatternPropertiesApplyCommandExecute;
+		patternpropertiesapplycommand_vtable.revert = (psy_fp_command)PatternPropertiesApplyCommandRevert;
+		patternpropertiesapplycommand_vtable_initialized = 1;
+	}
+}
+
 PatternPropertiesApplyCommand* PatternPropertiesApplyCommandAlloc(psy_audio_Pattern* pattern,
 	const char* name, psy_dsp_beat_t length)
 {
 	PatternPropertiesApplyCommand* rv;
 
-	rv = malloc(sizeof(PatternPropertiesApplyCommand));
-	rv->command.dispose = PatternPropertiesApplyCommandDispose;
-	rv->command.execute = PatternPropertiesApplyCommandExecute;
-	rv->command.revert = PatternPropertiesApplyCommandRevert;	
+	rv = malloc(sizeof(PatternPropertiesApplyCommand));		
+	psy_command_init(&rv->command);
+	patternpropertiesapplycommand_vtable_init(rv);
+	rv->command.vtable = &patternpropertiesapplycommand_vtable;
 	rv->pattern = pattern;
 	rv->newname = strdup(name);
 	rv->newlength = length;
@@ -159,7 +174,7 @@ void patternproperties_onapply(PatternProperties* self,
 			self, patternproperties_onpatternnamechanged);
 		psy_signal_prevent(&self->workspace->song->patterns.signal_namechanged,
 			self, patternproperties_onpatternlengthchanged);
-		undoredo_execute(&self->workspace->undoredo,
+		psy_undoredo_execute(&self->workspace->undoredo,
 			&PatternPropertiesApplyCommandAlloc(self->pattern,
 				psy_ui_edit_text(&self->nameedit),
 				(psy_dsp_beat_t)atof(psy_ui_edit_text(&self->lengthedit))

@@ -298,7 +298,10 @@ const psy_audio_MachineInfo* psy_audio_mixer_info(void)
 		"Mixer",
 		"Psycledelics",
 		"help",
-		MACH_MIXER
+		MACH_MIXER,
+		0,
+		0,
+		""
 	};
 	return &macinfo;
 }
@@ -1986,7 +1989,8 @@ void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 		send = (psy_audio_MixerSend*)psy_tableiterator_value(&it);
 		sendslot = (send) ? send->slot : 0;
 		psy_audio_machines_disconnect(psy_audio_machine_machines(
-			&self->custommachine.machine), slot, sendslot);
+			&self->custommachine.machine),
+			psy_audio_wire_make(slot, sendslot));
 		path = psy_audio_compute_path(psy_audio_machine_machines(
 			&self->custommachine.machine), sendslot, FALSE);
 		if (path) {
@@ -1998,7 +2002,8 @@ void postload(psy_audio_Mixer* self, psy_audio_SongFile* songfile,
 					continue;
 				}
 				psy_audio_machines_disconnect(psy_audio_machine_machines(
-					&self->custommachine.machine), slot, sendslot);
+					&self->custommachine.machine),
+					psy_audio_wire_make(slot, sendslot));
 				psy_audio_machines_addmixersend(psy_audio_machine_machines(
 					&self->custommachine.machine), sendslot);				
 			}
@@ -2069,7 +2074,8 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 					//wire->_inputConVol *= 32768.f;
 				//}
 				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
-				psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+				psy_audio_machines_connect(&songfile->song->machines,
+					psy_audio_wire_make(wire->_inputMachine, slot));
 				connections_setwirevolume(&songfile->song->machines.connections,
 					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
 				channel = psy_audio_mixer_Channel(self, c);
@@ -2106,7 +2112,8 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			if (channel) {
 				channel->fxslot = wire->_inputMachine;
 			}
-			psy_audio_machines_connect(&songfile->song->machines, wire->_inputMachine, slot);
+			psy_audio_machines_connect(&songfile->song->machines,
+				psy_audio_wire_make(wire->_inputMachine, slot));
 			connections_setwirevolume(&songfile->song->machines.connections,
 				wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
 			/*if (wire.pinMapping.size() > 0) {

@@ -178,7 +178,15 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 	psy_ui_label_settext(&self->parameterbar.title,
 		(self->machine)
 		? psy_audio_machine_editname(self->machine)
-		: "");	
+		: "");
+	if (self->machine && psy_audio_machine_info(machine)) {
+		psy_ui_editor_settext(&self->help,
+			(psy_audio_machine_info(machine)->helptext)
+			? psy_audio_machine_info(machine)->helptext
+			: "");
+	} else {
+		psy_ui_editor_settext(&self->help, "");
+	}
 }
 
 void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)

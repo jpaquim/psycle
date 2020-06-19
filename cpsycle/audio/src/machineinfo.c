@@ -22,35 +22,38 @@ void machineinfo_init(psy_audio_MachineInfo* self)
 	self->type = 0;	
 	self->modulepath = strdup("");
 	self->shellidx = 0;
+	self->helptext = strdup("");
 }
 
-void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* other)
+void machineinfo_init_copy(psy_audio_MachineInfo* self, psy_audio_MachineInfo* src)
 {
-	self->Author = strdup(other->Author ? other->Author : "");
-	self->Command = strdup(other->Command ? other->Command : "");
-	self->Flags = other->Flags;
-	self->Name = strdup(other->Name ? other->Name : "");
-	self->ShortName = strdup(other->ShortName ? other->ShortName : "");
-	self->APIVersion = other->APIVersion;
-	self->PlugVersion = other->PlugVersion;
-	self->type = other->type;
-	self->modulepath = strdup(other->modulepath ? other->modulepath : "");
-	self->shellidx = other->shellidx;
+	self->Author = strdup(src->Author ? src->Author : "");
+	self->Command = strdup(src->Command ? src->Command : "");
+	self->Flags = src->Flags;
+	self->Name = strdup(src->Name ? src->Name : "");
+	self->ShortName = strdup(src->ShortName ? src->ShortName : "");
+	self->APIVersion = src->APIVersion;
+	self->PlugVersion = src->PlugVersion;
+	self->type = src->type;
+	self->modulepath = strdup(src->modulepath ? src->modulepath : "");
+	self->shellidx = src->shellidx;
+	self->helptext = strdup(src->helptext ? src->helptext : "");
 }
 
-void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* other)
+void machineinfo_copy(psy_audio_MachineInfo* self, const psy_audio_MachineInfo* src)
 {
 	machineinfo_dispose(self);
-	self->Author = strdup(other->Author ? other->Author : "");
-	self->Command = strdup(other->Command ? other->Command : "");
-	self->Flags = other->Flags;
-	self->Name = strdup(other->Name ? other->Name : "");
-	self->ShortName = strdup(other->ShortName ? other->ShortName : "");
-	self->APIVersion = other->APIVersion;
-	self->PlugVersion = other->PlugVersion;
-	self->type = other->type;
-	self->modulepath = strdup(other->modulepath ? other->modulepath : "");
-	self->shellidx = other->shellidx;
+	self->Author = strdup(src->Author ? src->Author : "");
+	self->Command = strdup(src->Command ? src->Command : "");
+	self->Flags = src->Flags;
+	self->Name = strdup(src->Name ? src->Name : "");
+	self->ShortName = strdup(src->ShortName ? src->ShortName : "");
+	self->APIVersion = src->APIVersion;
+	self->PlugVersion = src->PlugVersion;
+	self->type = src->type;
+	self->modulepath = strdup(src->modulepath ? src->modulepath : "");
+	self->shellidx = src->shellidx;
+	self->helptext = strdup(src->helptext ? src->helptext : "");	
 }
 
 void machineinfo_set(psy_audio_MachineInfo* self,
@@ -64,7 +67,8 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 		int16_t plugversion,
 		int type,		
 		const char* modulepath,
-		int shellidx)
+		int shellidx,
+		const char* helptext)
 {	
 	self->Author = strdup(author);
 	self->Command = strdup(command);
@@ -76,7 +80,8 @@ void machineinfo_set(psy_audio_MachineInfo* self,
 	self->PlugVersion = plugversion;
 	self->type = type;
 	self->modulepath = strdup(modulepath);
-	self->shellidx = shellidx;	
+	self->shellidx = shellidx;
+	self->helptext = strdup(helptext);
 }
 
 void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
@@ -97,6 +102,7 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 	self->type = type;	
 	self->modulepath = strdup(modulepath);
 	self->shellidx = shellidx;
+	self->helptext = info->Command ? strdup(info->Command) : strdup("");
 }
 
 void machineinfo_dispose(psy_audio_MachineInfo* self)
@@ -109,6 +115,8 @@ void machineinfo_dispose(psy_audio_MachineInfo* self)
 	self->Command = 0;
 	free(self->modulepath);	
 	self->modulepath = 0;
+	free(self->helptext);
+	self->helptext = 0;
 }
 
 psy_audio_MachineInfo* machineinfo_alloc(void)
@@ -143,6 +151,7 @@ psy_audio_MachineInfo* machineinfo_clone(const psy_audio_MachineInfo* self)
 		rv->type = self->type;
 		rv->modulepath = strdup(self->modulepath ? self->modulepath : "");
 		rv->shellidx = self->shellidx;
+		rv->helptext = strdup(self->helptext ? self->helptext : "");
 	}
 	return rv;
 }

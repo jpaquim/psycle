@@ -283,7 +283,8 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 					0, // short plugversion,
 					MACH_LADSPA,
 					path, //const char* modulepath,
-					shellidx);
+					shellidx,
+					"");
 				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.						
 				psy_audio_machine_seteditname(psy_audio_ladspaplugin_base(self),
 					self->plugininfo->ShortName);
@@ -356,7 +357,8 @@ int psy_audio_plugin_ladspa_test(const char* path, psy_audio_MachineInfo* info, 
 					0, // short plugversion,
 					MACH_LADSPA, // int type,
 					path, //const char* modulepath,
-					shellidx);
+					shellidx,
+					"");
 				// TODO: for LADSPA, it is more correct to use psDescriptor->Label to identify it.										
 				rv = 1;
 			}

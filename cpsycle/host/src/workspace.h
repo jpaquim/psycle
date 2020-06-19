@@ -11,6 +11,7 @@
 #include <plugincatcher.h>
 #include <machinefactory.h>
 #include <uicomponent.h>
+#include <undoredo.h>
 #include "undoredo.h"
 #include <sequence.h>
 #include <notestab.h>
@@ -106,8 +107,7 @@ typedef struct {
 	psy_Signal signal_showgear;
 	psy_Signal signal_languagechanged;
 	psy_ui_Component* mainhandle;
-	UndoRedo undoredo;
-	UndoRedo machines_undoredo;
+	psy_UndoRedo undoredo;	
 	History history;
 	psy_audio_PatternEditPosition patterneditposition;
 	SequenceSelection sequenceselection;
@@ -153,6 +153,7 @@ int workspace_showsonginfoonload(Workspace*);
 int workspace_showaboutatstart(Workspace*);
 int workspace_showmaximizedatstart(Workspace*);
 int workspace_saverecentsongs(Workspace*);
+int workspace_playsongafterload(Workspace*);
 int workspace_showplaylisteditor(Workspace*);
 int workspace_showstepsequencer(Workspace*);
 int workspace_showgriddefaults(Workspace*);
@@ -221,6 +222,8 @@ void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(Workspace*);
 void workspace_showgear(Workspace*);
 bool workspace_songmodified(Workspace*);
+bool workspace_currview_hasundo(Workspace*);
+bool workspace_currview_hasredo(Workspace*);
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace*);
 void workspace_outputwarning(Workspace*, const char* text);
 void workspace_outputerror(Workspace*, const char* text);

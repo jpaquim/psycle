@@ -91,7 +91,8 @@ void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 			workspace_songs_directory(self->workspace));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			workspace_loadsong(self->workspace,
-				psy_ui_opendialog_filename(&dialog), TRUE);
+				psy_ui_opendialog_filename(&dialog),
+				workspace_playsongafterload(self->workspace));
 		}
 		psy_ui_opendialog_dispose(&dialog);
 	}

@@ -190,6 +190,8 @@ typedef	void (*fp_machine_editoridle)(struct psy_audio_Machine*);
 typedef	const char* (*fp_machine_editname)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditname)(struct psy_audio_Machine*, const char*
 	name);
+typedef void (*fp_machine_setposition)(struct psy_audio_Machine*, intptr_t x, intptr_t y);
+typedef void (*fp_machine_position)(struct psy_audio_Machine*, intptr_t* x, intptr_t* y);
 typedef	struct psy_audio_Buffer* (*fp_machine_buffermemory)(struct
 	psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
@@ -290,7 +292,7 @@ typedef struct {
 	fp_machine_editname editname;
 	fp_machine_mode mode;
 	fp_machine_modulepath modulepath;
-	fp_machine_shellidx shellidx;
+	fp_machine_shellidx shellidx;	
 ///\}
 ///\name parameters
 ///\{
@@ -334,6 +336,8 @@ typedef struct {
 	fp_machine_seteditorhandle seteditorhandle;
 	fp_machine_editorsize editorsize;
 	fp_machine_editoridle editoridle;
+	fp_machine_setposition setposition;
+	fp_machine_position position;
 ///\}
 ///\name states
 ///\{
@@ -810,6 +814,18 @@ INLINE void psy_audio_machine_editorsize(psy_audio_Machine* self, int* width,
 INLINE void psy_audio_machine_editoridle(psy_audio_Machine* self)
 {
 	self->vtable->editoridle(self);
+}
+
+INLINE void psy_audio_machine_setposition(psy_audio_Machine* self, intptr_t x,
+	intptr_t y)
+{
+	self->vtable->setposition(self, x, y);
+}
+
+INLINE void psy_audio_machine_position(psy_audio_Machine* self, intptr_t* x,
+	intptr_t* y)
+{
+	self->vtable->position(self, x, y);
 }
 
 INLINE void psy_audio_machine_mute(psy_audio_Machine* self)

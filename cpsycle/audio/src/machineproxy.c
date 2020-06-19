@@ -92,6 +92,8 @@ static int machineproxy_haseditor(psy_audio_MachineProxy*);
 static void machineproxy_seteditorhandle(psy_audio_MachineProxy*, void* handle);
 static void machineproxy_editorsize(psy_audio_MachineProxy*, int* width, int* height);
 static void machineproxy_editoridle(psy_audio_MachineProxy*);
+static void machineproxy_setposition(psy_audio_MachineProxy*, intptr_t x, intptr_t y);
+static void machineproxy_position(psy_audio_MachineProxy*, intptr_t* x, intptr_t* y);
 static const char* machineproxy_editname(psy_audio_MachineProxy*);
 static void machineproxy_seteditname(psy_audio_MachineProxy*, const char* name);
 static psy_audio_Buffer* machineproxy_buffermemory(psy_audio_MachineProxy*);
@@ -231,6 +233,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_seteditorhandle;
 		vtable.editorsize = (fp_machine_editorsize) machineproxy_editorsize;
 		vtable.editoridle = (fp_machine_editoridle) machineproxy_editoridle;
+		vtable.setposition = (fp_machine_setposition)machineproxy_setposition;
+		vtable.position = (fp_machine_position)machineproxy_position;
 		vtable.seteditname = (fp_machine_seteditname) machineproxy_seteditname;
 		vtable.editname = (fp_machine_editname) machineproxy_editname;
 		vtable.buffermemory = (fp_machine_buffermemory) machineproxy_buffermemory;
@@ -1295,6 +1299,40 @@ static void machineproxy_editoridle(psy_audio_MachineProxy* self)
 		}		
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except(FilterException(self, "editoridle", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_setposition(psy_audio_MachineProxy* self, intptr_t x, intptr_t y)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->setposition(self->client, x, y);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "setposition", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+}
+
+void machineproxy_position(psy_audio_MachineProxy* self, intptr_t* x, intptr_t* y)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			self->client->vtable->position(self->client, x, y);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "position", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

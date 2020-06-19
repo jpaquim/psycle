@@ -21,7 +21,10 @@ const psy_audio_MachineInfo* dummymachine_info(void)
 		"Dummy Plug",
 		"Psycledelics",
 		"help",		
-		MACH_DUMMY
+		MACH_DUMMY,
+		0,
+		0,		
+		""
 	};
 	return &macinfo;
 }

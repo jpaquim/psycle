@@ -58,7 +58,8 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 			MACH_SAMPLER, "");
 		if (machine) {
 			psy_audio_machines_insert(&self->song->machines, 0, machine);
-			psy_audio_machines_connect(&self->song->machines, 0, psy_audio_MASTER_INDEX);
+			psy_audio_machines_connect(&self->song->machines,
+				psy_audio_wire_make(0, psy_audio_MASTER_INDEX));
 		}
 	}
 }

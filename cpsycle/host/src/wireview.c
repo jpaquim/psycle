@@ -316,8 +316,8 @@ void wireview_onhold(WireView* self, psy_ui_Component* sender)
 void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 {
 	if (self->workspace && self->workspace->song) {		
-		psy_audio_machines_disconnect(&self->workspace->song->machines, self->wire.src,
-			self->wire.dst);		
+		psy_audio_machines_disconnect(&self->workspace->song->machines,
+			self->wire);
 	}
 }
 

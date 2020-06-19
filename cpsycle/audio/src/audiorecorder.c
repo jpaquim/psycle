@@ -28,7 +28,10 @@ const psy_audio_MachineInfo* psy_audio_audiorecorder_info(void)
 		"AudioRecorder",
 		"Psycledelics",
 		"help",
-		MACH_RECORDER
+		MACH_RECORDER,
+		0,
+		0,
+		""
 	};
 	return &macinfo;
 }

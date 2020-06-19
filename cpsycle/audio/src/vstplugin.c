@@ -705,7 +705,8 @@ static int makemachineinfo(AEffect* effect, psy_audio_MachineInfo* info, const c
 			(int16_t) 0,
 			(mode == MACHMODE_GENERATOR) ? MACH_VST : MACH_VSTFX,
 			filename,
-			shellidx);		
+			shellidx,
+			"");		
 	}
 #if defined DIVERSALIS__OS__MICROSOFT        	
 	__except(FilterException(GetExceptionCode(), GetExceptionInformation())) {		

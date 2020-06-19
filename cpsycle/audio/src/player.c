@@ -374,11 +374,13 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 {
 	self->song = song;
-	if (self->song) {
+	if (self->song) {		
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, self->driver->samplerate(self->driver));		
 		psy_audio_player_setnumsongtracks(self,
 			patterns_songtracks(&song->patterns));
+		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
+		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
 	}
 }
 

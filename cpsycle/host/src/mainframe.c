@@ -1022,7 +1022,7 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 			self->workspace.undosavepoint = psy_list_size(
 				self->workspace.undoredo.undo);
 			self->workspace.machines_undosavepoint = psy_list_size(
-				self->workspace.machines_undoredo.undo);
+				self->workspace.song->machines.undoredo.undo);
 			if (mode == CHECKUNSAVE_CLOSE) {
 				psy_ui_app_close(&app);
 			} else
@@ -1055,7 +1055,8 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 			workspace_songs_directory(&self->workspace));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			workspace_loadsong(&self->workspace,
-				psy_ui_opendialog_filename(&dialog), TRUE);			
+				psy_ui_opendialog_filename(&dialog),
+				workspace_playsongafterload(&self->workspace));
 		}
 		psy_ui_opendialog_dispose(&dialog);		
 	}
