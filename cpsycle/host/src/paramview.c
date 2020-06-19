@@ -945,16 +945,8 @@ void paramview_computepositions(ParamView* self)
 
 void paramview_clearpositions(ParamView* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->positions); !psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		psy_ui_Rectangle* position;
-
-		position = (psy_ui_Rectangle*) psy_tableiterator_value(&it);
-		free(position);		
-	}
-	psy_table_clear(&self->positions);
+	psy_table_disposeall(&self->positions, (psy_fp_disposefunc)NULL);	
+	psy_table_init(&self->positions);
 }
 
 uintptr_t paramview_numrows(ParamView* self)

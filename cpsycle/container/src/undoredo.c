@@ -14,8 +14,8 @@ static psy_Command* psy_undoredo_swap(psy_List** first, psy_List** second);
 
 void psy_undoredo_init(psy_UndoRedo* self)
 {
-	self->undo = 0;
-	self->redo = 0;
+	self->undo = NULL;
+	self->redo = NULL;
 }
 
 void psy_undoredo_dispose(psy_UndoRedo* self)
@@ -59,7 +59,7 @@ psy_Command* psy_undoredo_swap(psy_List** first, psy_List** second)
 			return rv;
 		}
 	} 
-	return 0;
+	return NULL;
 }
 
 void psy_undoredo_execute(psy_UndoRedo* self, psy_Command* command)
@@ -72,13 +72,13 @@ void psy_undoredo_execute(psy_UndoRedo* self, psy_Command* command)
 void psy_undoredo_clear_undo(psy_UndoRedo* self)
 {
 	psy_undoredo_clear_list(self->undo);
-	self->undo = 0;
+	self->undo = NULL;
 }
 
 void psy_undoredo_clear_redo(psy_UndoRedo* self)
 {
 	psy_undoredo_clear_list(self->redo);
-	self->redo = 0;
+	self->redo = NULL;
 }
 
 void psy_undoredo_clear_list(psy_List* list)

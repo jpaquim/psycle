@@ -47,11 +47,11 @@ void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, const psy_audio_PinMa
 		psy_List* p;
 
 		psy_audio_pinmapping_clear(self);
-		for (p = src->container; p != NULL; p = p->next) {
+		for (p = src->container; p != NULL; psy_list_next(&p)) {
 			psy_audio_PinConnection* pair;
 			psy_audio_PinConnection* paircopy;
 
-			pair = (psy_audio_PinConnection*)p->entry;
+			pair = (psy_audio_PinConnection*)psy_list_entry(p);
 			paircopy = psy_audio_pinconnection_allocinit_all(pair->src, pair->dst);
 			if (paircopy) {
 				psy_list_append(&self->container, paircopy);
@@ -62,13 +62,7 @@ void psy_audio_pinmapping_copy(psy_audio_PinMapping* self, const psy_audio_PinMa
 
 void psy_audio_pinmapping_clear(psy_audio_PinMapping* self)
 {
-	psy_List* p;
-
-	for (p = self->container; p != NULL; p = p->next) {
-		free(p->entry);
-	}
-	psy_list_free(self->container);
-	self->container = NULL;
+	psy_list_deallocate(&self->container, (psy_fp_disposefunc)NULL);
 }
 
 void psy_audio_pinmapping_autowire(psy_audio_PinMapping* self,
@@ -131,26 +125,10 @@ void machinesockets_init(psy_audio_MachineSockets* self)
 
 void machinesockets_dispose(psy_audio_MachineSockets* self)
 {
-	WireSocket* p;
-
-	for (p = self->inputs; p != NULL; p = p->next) {
-		psy_audio_WireSocketEntry* entry;
-
-		entry = (psy_audio_WireSocketEntry*)p->entry;
-		wiresocketentry_dispose(entry);
-		free(entry);
-	}
-	psy_list_free(self->inputs);
-	self->inputs = 0;
-	for (p = self->outputs; p != NULL; p = p->next) {
-		psy_audio_WireSocketEntry* entry;
-
-		entry = (psy_audio_WireSocketEntry*)p->entry;
-		wiresocketentry_dispose(entry);
-		free(entry);
-	}
-	psy_list_free(self->outputs);
-	self->outputs = 0;
+	psy_list_deallocate(&self->inputs, (psy_fp_disposefunc)
+		wiresocketentry_dispose);
+	psy_list_deallocate(&self->outputs, (psy_fp_disposefunc)
+		wiresocketentry_dispose);
 }
 
 void machinesockets_copy(psy_audio_MachineSockets* self,
@@ -160,20 +138,20 @@ void machinesockets_copy(psy_audio_MachineSockets* self,
 
 	machinesockets_dispose(self);
 	machinesockets_init(self);
-	for (p = src->inputs; p != NULL; p = p->next) {
+	for (p = src->inputs; p != NULL; psy_list_next(&p)) {
 		psy_audio_WireSocketEntry* entry;
 		psy_audio_WireSocketEntry* newentry;
 
-		entry = (psy_audio_WireSocketEntry*)p->entry;
+		entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 		newentry = wiresocketentry_allocinit(entry->slot, entry->volume);
 		psy_audio_wiresocketentry_copy(newentry, entry);
 		psy_list_append(&self->inputs, newentry);
 	}	
-	for (p = src->outputs; p != NULL; p = p->next) {
+	for (p = src->outputs; p != NULL; psy_list_next(&p)) {
 		psy_audio_WireSocketEntry* entry;
 		psy_audio_WireSocketEntry* newentry;
 
-		entry = (psy_audio_WireSocketEntry*)p->entry;
+		entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 		newentry = wiresocketentry_allocinit(entry->slot, entry->volume);
 		psy_audio_wiresocketentry_copy(newentry, entry);
 		psy_list_append(&self->outputs, newentry);
@@ -226,7 +204,7 @@ WireSocket* connection_at(WireSocket* socket, uintptr_t slot)
 	
 	p = socket;
 	while (p && ((psy_audio_WireSocketEntry*)(p->entry))->slot != slot) {
-		p = p->next;
+		psy_list_next(&p);
 	}
 	return p;
 }
@@ -260,18 +238,8 @@ void connections_init(psy_audio_Connections* self)
 
 void connections_dispose(psy_audio_Connections* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->container);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {		
-		psy_audio_MachineSockets* sockets;
-
-		sockets = (psy_audio_MachineSockets*)psy_tableiterator_value(&it);
-		machinesockets_dispose(sockets);
-		free(sockets);
-	}
-	psy_table_dispose(&self->container);
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+		machinesockets_dispose);	
 	psy_table_dispose(&self->sends);
 	psy_signal_dispose(&self->signal_connected);
 	psy_signal_dispose(&self->signal_disconnected);
@@ -281,16 +249,8 @@ void connections_copy(psy_audio_Connections* self, psy_audio_Connections* src)
 {	
 	psy_TableIterator it;
 
-	for (it = psy_table_begin(&self->container);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		psy_audio_MachineSockets* sockets;
-
-		sockets = (psy_audio_MachineSockets*)psy_tableiterator_value(&it);
-		machinesockets_dispose(sockets);
-		free(sockets);
-	}
-	psy_table_dispose(&self->container);
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+		machinesockets_dispose);	
 	psy_table_dispose(&self->sends);
 	psy_table_init(&self->container); 
 	psy_table_init(&self->sends);	
@@ -368,14 +328,14 @@ void connections_disconnect(psy_audio_Connections* self, uintptr_t outputslot, u
 
 		p = connection_at(connections->outputs, inputslot);		
 		if (p) {
-			free(p->entry);
+			free(psy_list_entry(p));
 			psy_list_remove(&connections->outputs, p);			
 		}		
 		connections = connections_at(self, inputslot);
 		if (connections) {
 			p = connection_at(connections->inputs, outputslot);
 			if (p) {
-				free(p->entry);
+				free(psy_list_entry(p));
 				psy_list_remove(&connections->inputs, p);
 			}
 			if (!self->filemode) {

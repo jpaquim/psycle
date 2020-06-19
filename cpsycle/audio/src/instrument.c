@@ -70,7 +70,7 @@ int psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr
 void psy_audio_instrument_init(psy_audio_Instrument* self)
 {	
 	self->index = UINTPTR_MAX;
-	self->entries = 0;	
+	self->entries = NULL;	
 	self->name = strdup("");
 	self->loop = FALSE;
 	self->lines = 16;
@@ -95,13 +95,7 @@ void psy_audio_instrument_dispose(psy_audio_Instrument* self)
 
 void psy_audio_instrument_disposeentries(psy_audio_Instrument* self)
 {
-	psy_List* p;
-
-	for (p = self->entries; p != NULL; p = p->next) {
-		free(p->entry);
-	}
-	psy_list_free(self->entries);
-	self->entries = 0;
+	psy_list_deallocate(&self->entries, (psy_fp_disposefunc)NULL);
 }
 
 psy_audio_Instrument* psy_audio_instrument_alloc(void)
@@ -169,10 +163,10 @@ psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument* self, uint
 	if (self->entries) {
 		psy_List* p;
 		
-		for (p = self->entries; p != NULL; p = p->next) {
+		for (p = self->entries; p != NULL; psy_list_next(&p)) {
 			psy_audio_InstrumentEntry* entry;
 
-			entry = (psy_audio_InstrumentEntry*) p->entry;
+			entry = (psy_audio_InstrumentEntry*)psy_list_entry(p);
 			if (psy_audio_instrumententry_intersect(entry, key, velocity, frequency)) {
 				psy_list_append(&rv, entry);
 			}			

@@ -12,8 +12,8 @@ psy_List* psy_list_create(void* entry)
 	psy_List* list;
 
 	list = (psy_List*) malloc(sizeof(psy_List));
-	list->prev = 0;
-	list->next = 0;
+	list->prev = NULL;
+	list->next = NULL;
 	list->tail = list;
 	list->size = 1;
 	list->entry = entry;
@@ -37,7 +37,7 @@ void psy_list_free(psy_List* list)
 
 psy_List* psy_list_append(psy_List** self, void* entry)
 {		
-	if (*self == 0) {
+	if (*self == NULL) {
 		*self = psy_list_create(entry);
 	} else {
 		(*self)->tail->next = psy_list_create(entry);
@@ -59,7 +59,7 @@ psy_List* psy_list_cat(psy_List** self, psy_List* list)
 		(*self)->tail = list->tail;
 		(*self)->size += list->size;
 	}
-	return *self ? (*self)->tail : 0;
+	return *self ? (*self)->tail : NULL;
 }
 
 psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
@@ -70,7 +70,7 @@ psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 		(*self)->prev = ptr;
 		ptr->next = *self;
 		ptr->tail = (*self)->tail;
-		(*self)->tail = 0;
+		(*self)->tail = NULL;
 		*self = ptr;		
 		return ptr;
 	}	
@@ -117,32 +117,12 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 		free(ptr);
 		--(*self)->size;
 	} else {
-		rv = 0;
+		rv = NULL;
 	}
 	return rv;
 }
 
-uintptr_t psy_list_size(const psy_List* self)
-{	
-	return self? self->size : 0;
-	/*
-	uintptr_t rv = 0;
-	const psy_List* p;
-
-	for (p = self; p != NULL; p = p->next, ++rv);
-	if (self) {
-		assert(self->size == rv);
-	}
-	return rv;
-	*/
-}
-
-psy_List* psy_list_last(psy_List* self)
-{
-	return self ? self->tail : 0;
-}
-
-int psy_list_check(psy_List* self, psy_List* node)
+bool psy_list_check(psy_List* self, psy_List* node)
 {
 	psy_List* p = self;
 			
@@ -181,4 +161,24 @@ psy_List* psy_list_at(psy_List* self, uintptr_t numentry)
 		++c;
 	}
 	return p;
+}
+
+void psy_list_deallocate(psy_List** self, psy_fp_disposefunc disposefunc)
+{
+	if (*self) {
+		psy_List* p = *self;		
+
+		if (disposefunc) {
+			for (p = *self; p != NULL; psy_list_next(&p)) {
+				disposefunc(psy_list_entry(p));
+				free(psy_list_entry(p));
+			}
+		} else {
+			for (p = *self; p != NULL; psy_list_next(&p)) {				
+				free(psy_list_entry(p));
+			}
+		}
+		psy_list_free(*self);
+		*self = NULL;
+	}
 }

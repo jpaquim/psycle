@@ -13,18 +13,8 @@ void psy_audio_presets_init(psy_audio_Presets* self)
 
 void psy_audio_presets_dispose(psy_audio_Presets* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_audio_presets_begin(self);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		psy_audio_Preset* preset;
-
-		preset = (psy_audio_Preset*)psy_tableiterator_value(&it);
-		psy_audio_preset_dispose(preset);
-		free(preset);
-	}
-	psy_table_dispose(&self->container);	
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+		psy_audio_preset_dispose);	
 }
 
 psy_audio_Presets* psy_audio_presets_alloc(void)

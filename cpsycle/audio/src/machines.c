@@ -655,12 +655,12 @@ void machines_sortpath(psy_audio_Machines* self)
 			p = self->path;			
 			while (p != NULL) {
 				uintptr_t slot;
-				slot = (uintptr_t)p->entry;
+				slot = (uintptr_t)psy_list_entry(p);
 				if (isleaf(self, slot, &worked)) {
 					psy_list_append(&sorted, (void*)(uintptr_t)slot);
 					p = psy_list_remove(&self->path, p);
 				} else {
-					p = p->next;
+					psy_list_next(&p);
 				}
 			}						
 			for (q = sorted; q != 0;  q = q->next) {
@@ -689,7 +689,7 @@ bool isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
 		bool rv = TRUE;
 		psy_List* p;
 
-		for (p = sockets->inputs; p != NULL; p = p->next) {
+		for (p = sockets->inputs; p != NULL; psy_list_next(&p)) {
 			psy_audio_WireSocketEntry* source;
 
 			source = (psy_audio_WireSocketEntry*) p->entry;
@@ -745,7 +745,7 @@ MachineList* psy_audio_compute_path(psy_audio_Machines* self, uintptr_t slot, bo
 	// if (rv) {
 	// 	psy_List* p;
 
-	// 	for (p = rv; p != NULL; p = p->next) {
+	// 	for (p = rv; p != NULL; psy_list_next(&p)) {
 	// 		TRACE_INT((int)(p->entry));
 	// 	}
 	// 	OutputDebugString("\n");
@@ -765,10 +765,10 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 	if (connected_sockets) {
 		WireSocket* p;
 
-		for (p = connected_sockets->inputs; p != NULL; p = p->next) {
+		for (p = connected_sockets->inputs; p != NULL; psy_list_next(&p)) {
 			psy_audio_WireSocketEntry* entry;
 
-			entry = (psy_audio_WireSocketEntry*) p->entry;
+			entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 			if (!psy_table_exists(&self->colors, entry->slot)) {
 				psy_table_insert(&self->colors, entry->slot, (void*) 1);
 				compute_slotpath(self, entry->slot, path);
@@ -842,10 +842,10 @@ void machines_freebuffers(psy_audio_Machines* self)
 	psy_List* p;
 	psy_List* q;
 
-	for (p = q = self->buffers; p != NULL; p = p->next) {
+	for (p = q = self->buffers; p != NULL; psy_list_next(&p)) {
 		psy_audio_Buffer* buffer;
 
-		buffer = (psy_audio_Buffer*) p->entry;
+		buffer = (psy_audio_Buffer*)psy_list_entry(p);
 		psy_audio_buffer_dispose(buffer);
 		free(buffer);	
 	}

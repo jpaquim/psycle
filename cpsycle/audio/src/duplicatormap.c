@@ -64,18 +64,8 @@ void psy_audio_duplicatormap_init(psy_audio_DuplicatorMap* self,
 
 void psy_audio_duplicatormap_dispose(psy_audio_DuplicatorMap* self)
 {
-	psy_TableIterator it;
-	
-	for (it = psy_table_begin(&self->outputs);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {			
-		psy_audio_DuplicatorOutput* output;
-
-		output = (psy_audio_DuplicatorOutput*) psy_tableiterator_value(&it);
-		duplicatoroutput_dispose(output);
-		free(output);
-	}	
-	psy_table_dispose(&self->outputs);
+	psy_table_disposeall(&self->outputs, (psy_fp_disposefunc)
+		duplicatoroutput_dispose);	
 	psy_table_dispose(&self->unavail);		
 }
 

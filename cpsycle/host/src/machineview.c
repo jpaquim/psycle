@@ -2003,18 +2003,8 @@ void machineuis_remove(MachineWireView* self, uintptr_t slot)
 
 void machineuis_removeall(MachineWireView* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-		MachineUi* machineui;
-
-		machineui = (MachineUi*)psy_tableiterator_value(&it);
-		machineui_dispose(machineui);
-		free(machineui);
-	}
-	psy_table_dispose(&self->machineuis);
+	psy_table_disposeall(&self->machineuis, (psy_fp_disposefunc)
+		machineui_dispose);	
 	psy_table_init(&self->machineuis);
 }
 

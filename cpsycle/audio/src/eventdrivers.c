@@ -41,11 +41,11 @@ void eventdrivers_dispose(EventDrivers* self)
 {
 	psy_List* p;	
 
-	for (p = self->eventdrivers; p != NULL; p = p->next) {
+	for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
 		EventDriverEntry* eventdriverentry;
 		psy_EventDriver* eventdriver;
 		
-		eventdriverentry = (EventDriverEntry*)p->entry;
+		eventdriverentry = (EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
 		eventdriver->close(eventdriver);
 		eventdriver->dispose(eventdriver);
@@ -120,11 +120,11 @@ void eventdrivers_restartall(EventDrivers* self)
 {
 	psy_List* p;	
 
-	for (p = self->eventdrivers; p != NULL; p = p->next) {
+	for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
 		EventDriverEntry* eventdriverentry;
 		psy_EventDriver* eventdriver;
 		
-		eventdriverentry = (EventDriverEntry*)p->entry;
+		eventdriverentry = (EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			eventdriver->close(eventdriver);	
@@ -156,7 +156,7 @@ void eventdrivers_remove(EventDrivers* self, int id)
 			psy_library_deallocate(eventdriverentry->library);			
 			eventdriverentry->library = 0;
 		}
-		for (p = self->eventdrivers; p != NULL; p = p->next) {
+		for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
 			if (((EventDriverEntry*)p->entry)->eventdriver == eventdriver) {
 				psy_list_remove(&self->eventdrivers, p);
 				break;
@@ -171,7 +171,7 @@ unsigned int eventdrivers_size(EventDrivers* self)
 	int rv = 0;
 	psy_List* p;
 	
-	for (p = self->eventdrivers; p != NULL; p = p->next, ++rv);
+	for (p = self->eventdrivers; p != NULL; psy_list_next(&p), ++rv);
 	return rv;
 }
 
@@ -180,7 +180,7 @@ EventDriverEntry* eventdrivers_entry(EventDrivers* self, int id)
 	psy_List* p;
 	int c = 0;
 
-	for (p = self->eventdrivers; p != NULL && id != c; p = p->next, ++c);
+	for (p = self->eventdrivers; p != NULL && id != c; psy_list_next(&p), ++c);
 	
 	return p ? ((EventDriverEntry*) (p->entry)) : 0;
 }
@@ -190,7 +190,7 @@ psy_EventDriver* eventdrivers_driver(EventDrivers* self, int id)
 	psy_List* p;
 	int c = 0;
 
-	for (p = self->eventdrivers; p != NULL && id != c; p = p->next, ++c);
+	for (p = self->eventdrivers; p != NULL && id != c; psy_list_next(&p), ++c);
 	
 	return p ? ((EventDriverEntry*) (p->entry))->eventdriver : 0;
 }
@@ -205,11 +205,11 @@ void eventdrivers_setcmds(EventDrivers* self, psy_Properties* cmds)
 	psy_List* p;
 
 	self->cmds = cmds;
-	for (p = self->eventdrivers; p != NULL; p = p->next) {
+	for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
 		EventDriverEntry* eventdriverentry;
 		psy_EventDriver* eventdriver;
 		
-		eventdriverentry = (EventDriverEntry*)p->entry;
+		eventdriverentry = (EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			eventdriver->setcmddef(eventdriver, cmds);

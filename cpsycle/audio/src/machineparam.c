@@ -643,15 +643,8 @@ void psy_audio_choicemachineparam_dispose(psy_audio_ChoiceMachineParam* self)
 
 	psy_audio_machineparam_dispose(&self->machineparam);
 	free(self->name);
-	free(self->label);	
-	for (it = psy_table_begin(&self->descriptions);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		char* desc;
-
-		desc = (char*)psy_tableiterator_value(&it);
-		free(desc);
-	}
-	psy_table_dispose(&self->descriptions);
+	free(self->label);
+	psy_table_disposeall(&self->descriptions, (psy_fp_disposefunc)NULL);
 }
 
 void choicemachineparam_range(psy_audio_ChoiceMachineParam* self,

@@ -6,6 +6,10 @@
 
 #include "../../detail/psydef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Interface that implements the Command Pattern used
 //      for undo/redo operations
 
@@ -39,5 +43,9 @@ INLINE void psy_command_revert(psy_Command* self)
 {
 	self->vtable->revert(self);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_Command */

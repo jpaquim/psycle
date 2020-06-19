@@ -236,12 +236,12 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 						uintptr_t c = 0;
 
 						for (p = sockets->outputs; p != NULL && c != ev->inst;
-							p = p->next, ++c);
+							psy_list_next(&p), ++c);
 						if (p) {
 							psy_audio_WireSocketEntry* output_entry;
 							psy_dsp_amp_t nv;
 
-							output_entry = (psy_audio_WireSocketEntry*)p->entry;
+							output_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 							nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
 							connections_setwirevolume(&machines->connections, ev->vol,
 								output_entry->slot, nv * nv * 4.f);
@@ -309,11 +309,11 @@ void master_title_describe(psy_audio_Master* self,
 		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
 			for (p = sockets->inputs; p != NULL && c != sender->index;
-				p = p->next, ++c);
+				psy_list_next(&p), ++c);
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;
 
-				input_entry = (psy_audio_WireSocketEntry*)p->entry;
+				input_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 				master_describeeditname(self, text, input_entry->slot);
 				*active = 1;
 			}
@@ -340,11 +340,11 @@ void master_slider_tweak(psy_audio_Master* self,
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
-			for (p = sockets->inputs; p != NULL && c != sender->index; p = p->next, ++c);
+			for (p = sockets->inputs; p != NULL && c != sender->index; psy_list_next(&p), ++c);
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;
 
-				input_entry = (psy_audio_WireSocketEntry*)p->entry;
+				input_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 				input_entry->volume = value * value * 4.f;
 			}
 		}
@@ -441,11 +441,11 @@ void master_level_describe(psy_audio_Master* self,
 		*active = 0;
 		if (sockets) {
 			for (p = sockets->inputs; p != NULL && c != sender->index;
-				p = p->next, ++c);
+				psy_list_next(&p), ++c);
 			if (p) {
 				psy_audio_WireSocketEntry* input_entry;
 
-				input_entry = (psy_audio_WireSocketEntry*)p->entry;
+				input_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 				psy_snprintf(text, 10, "%.2f dB",
 					(float)psy_dsp_convert_amp_to_db(input_entry->volume));
 				*active = 1;

@@ -37,8 +37,8 @@ void patternentry_dispose(psy_audio_PatternEntry* self)
 {
 	psy_List* p;
 
-	for (p = self->events; p != NULL; p = p->next) {
-		free(p->entry);
+	for (p = self->events; p != NULL; psy_list_next(&p)) {
+		free(psy_list_entry(p));
 	}
 	psy_list_free(self->events);
 	self->events = 0;
@@ -88,7 +88,7 @@ psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
 		rv->track = entry->track;
 		rv->events = 0;
 		rv->priority = 0;
-		for (p = entry->events; p != NULL; p = p->next) {
+		for (p = entry->events; p != NULL; psy_list_next(&p)) {
 			psy_audio_PatternEvent* copy;
 
 			copy = (psy_audio_PatternEvent*)
