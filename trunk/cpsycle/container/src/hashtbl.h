@@ -62,7 +62,7 @@ INLINE bool psy_table_empty(psy_Table* self)
 	return self->count == 0;
 }
 
-uintptr_t psy_table_freetableentry(void*, void*, psy_TableHashEntry*);
+void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc);
 
 #ifdef __cplusplus
 }

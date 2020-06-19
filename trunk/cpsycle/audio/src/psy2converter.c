@@ -395,11 +395,11 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 		if (psy_audio_pattern_empty(pattern)) {
 			continue;
 		}
-		for (p = pattern->events; p != NULL; p = p->next) {			
+		for (p = pattern->events; p != NULL; psy_list_next(&p)) {
 			psy_audio_PatternEntry* entry;
 			psy_audio_PatternEvent* event;
 
-			entry = (psy_audio_PatternEntry*)p->entry;
+			entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 			event = patternentry_front(entry);
 
 			if (event->note == NOTECOMMANDS_TWEAKEFFECT)

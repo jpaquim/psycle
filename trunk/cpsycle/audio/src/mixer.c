@@ -979,53 +979,20 @@ void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 }
 
 void psy_audio_mixer_dispose_channels(psy_audio_Mixer* self)
-{
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->inputs);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		psy_audio_InputChannel* channel;
-		psy_audio_Machine* machine;
-
-		channel = (psy_audio_InputChannel*)psy_tableiterator_value(&it);
-		machine = psy_audio_machines_at(psy_audio_machine_machines(
-			&self->custommachine.machine),
-			channel->inputslot);
-		inputchannel_dispose(channel);
-		free(channel);
-	}
-	psy_table_dispose(&self->inputs);	
+{	
+	psy_table_disposeall(&self->inputs, (psy_fp_disposefunc)
+		inputchannel_dispose);
 }
 
 void psy_audio_mixer_dispose_sends(psy_audio_Mixer* self)
 {	
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->sends);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		psy_audio_MixerSend* send;
-
-		send = (psy_audio_MixerSend*)psy_tableiterator_value(&it);
-		free(send);
-	}
-	psy_table_dispose(&self->sends);	
+	psy_table_disposeall(&self->sends, (psy_fp_disposefunc)NULL);
 }
 
 void psy_audio_mixer_dispose_returns(psy_audio_Mixer* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->returns);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_ReturnChannel* channel;
-
-		channel = (psy_audio_ReturnChannel*)psy_tableiterator_value(&it);
-		returnchannel_dispose(channel);
-		free(channel);
-	}
-	psy_table_dispose(&self->returns);
+	psy_table_disposeall(&self->returns, (psy_fp_disposefunc)
+		returnchannel_dispose);	
 }
 
 void psy_audio_mixer_dispose_legacywires(psy_audio_Mixer* self)
@@ -2148,28 +2115,12 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 void psy_audio_mixer_clearlegacywires(psy_audio_Mixer* self)
 {
 	{ // return
-		psy_TableIterator it;
-
-		for (it = psy_table_begin(&self->legacyreturn_);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-			psy_audio_LegacyWire* legacywire;
-			legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it);
-			free(legacywire);
-		}
-		psy_table_clear(&self->legacyreturn_);
+		psy_table_disposeall(&self->legacyreturn_, (psy_fp_disposefunc)NULL);	
+		psy_table_init(&self->legacyreturn_);
 	}
 	{ // send
-		psy_TableIterator it;
-
-		for (it = psy_table_begin(&self->legacysend_);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-			psy_audio_LegacyWire* legacywire;
-			legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it);
-			free(legacywire);
-		}
-		psy_table_clear(&self->legacysend_);
+		psy_table_disposeall(&self->legacysend_, (psy_fp_disposefunc) NULL);
+		psy_table_init(&self->legacysend_);
 	}
 }
 

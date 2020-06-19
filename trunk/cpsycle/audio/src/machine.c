@@ -404,10 +404,10 @@ void work(psy_audio_Machine* self, psy_audio_BufferContext* bc)
 	uintptr_t pos;
 
 	amount = psy_audio_buffercontext_numsamples(bc);
-	for (pos = 0, p = bc->events; p != NULL; p = p->next) {
+	for (pos = 0, p = bc->events; p != NULL; psy_list_next(&p)) {
 		psy_audio_PatternEntry* entry;
 
-		entry = (psy_audio_PatternEntry*)p->entry;		
+		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 		if (((uintptr_t)entry->delta) >= pos) {
 			amount -= work_dogenerateaudio(self, bc, pos,
 				(uintptr_t)entry->delta - pos);
@@ -440,10 +440,10 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 {
 	psy_List* p;
 
-	for (p = entry->events; p != NULL; p = p->next) {
+	for (p = entry->events; p != NULL; psy_list_next(&p)) {
 		psy_audio_PatternEvent* ev;
 
-		ev = (psy_audio_PatternEvent*) p->entry;
+		ev = (psy_audio_PatternEvent*)psy_list_entry(p);
 		if (ev->note == NOTECOMMANDS_TWEAK) {
 			if (ev->inst < psy_audio_machine_numparameters(self)) {
 				psy_audio_MachineParam* param;				
@@ -685,14 +685,14 @@ void savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	if (connected_sockets) {
 		WireSocket* p;
 
-		for (i = 0, p = connected_sockets->inputs; p != NULL; p = p->next, ++i) {
+		for (i = 0, p = connected_sockets->inputs; p != NULL; psy_list_next(&p), ++i) {
 			psy_audio_WireSocketEntry* entry;
 
 			if (i >= MAX_CONNECTIONS) {
 				psy_audio_songfile_warn(songfile,
 					"savewiremapping old psy3 max connections limit reached");
 			}
-			entry = (psy_audio_WireSocketEntry*)p->entry;
+			entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 			if (entry) {
 				psy_List* node;
 				uint32_t numPairs;

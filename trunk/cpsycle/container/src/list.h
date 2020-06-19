@@ -4,7 +4,9 @@
 #ifndef psy_LIST_H
 #define psy_LIST_H
 
-#include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
+
+#include <assert.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,10 +21,31 @@ typedef struct psy_List {
 	uintptr_t size;		   /// first node only, keeps track of the size
 } psy_List;
 
-/// constructs a list
+/// constructs a list with one node
 psy_List* psy_list_create(void* entry);
 /// frees the list structure, the entry pointer is not freed
 void psy_list_free(psy_List* list);
+/// deallocates the list: frees the list structure, calls
+/// the dispose func, if not NULL, and frees all entries
+void psy_list_deallocate(psy_List**, psy_fp_disposefunc disposefunc);
+/// returns the entry of a node (!= NULL)
+INLINE void* psy_list_entry(psy_List* self)
+{
+	assert(self);
+	return self->entry;
+}
+/// returns the next node or NULL
+INLINE void psy_list_next(psy_List** self)
+{
+	assert(self != NULL && (*self) != NULL);
+	*self = (*self)->next;
+}
+/// returns the previous node or NULL
+INLINE void psy_list_prev(psy_List** self)
+{
+	assert(self != NULL && (*self) != NULL);
+	*self = (*self)->prev;
+}
 /// constructs a node or new list and appends it to the tail of the list
 ///\return constructed node appended at the tail of the list
 psy_List* psy_list_append(psy_List**, void* entry);
@@ -37,11 +60,21 @@ psy_List* psy_list_insert(psy_List**, psy_List* node, void* entry);
 ///\return next node of the removed node or last node, if next is null
 psy_List* psy_list_remove(psy_List**, psy_List* node);
 /// returns the tail node or null
-psy_List* psy_list_last(psy_List*);
-/// counts the nodes of the list
-uintptr_t psy_list_size(const psy_List*);
+INLINE psy_List* psy_list_last(psy_List* self)
+{
+	return (self)
+		? self->tail
+		: NULL;
+}
+/// returns the node number of the list
+INLINE uintptr_t psy_list_size(const psy_List* self)
+{
+	return (self)
+		? self->size
+		: 0;
+}
 /// checks if the list has the node
-int psy_list_check(psy_List*, psy_List* node);
+bool psy_list_check(psy_List*, psy_List* node);
 /// returns the node for the entry
 psy_List* psy_list_findentry(psy_List*, void* entry);
 /// returns the node at numentry position

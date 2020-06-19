@@ -543,17 +543,9 @@ LadspaParam* valueat(psy_audio_LadspaPlugin* self, uintptr_t index)
 
 void clearparams(psy_audio_LadspaPlugin* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->values_); !psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		LadspaParam* param;
-
-		param = (LadspaParam*)psy_tableiterator_value(&it);
-		ladspaparam_dispose(param);
-		free(param);
-	}
-	psy_table_clear(&self->values_);
+	psy_table_disposeall(&self->values_, (psy_fp_disposefunc)
+		ladspaparam_dispose);	
+	psy_table_init(&self->values_);
 }
 
 void savespecific(psy_audio_LadspaPlugin* self, psy_audio_SongFile* songfile,

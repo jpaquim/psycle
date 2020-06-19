@@ -23,17 +23,8 @@ void instrumentsgroup_init(psy_audio_InstrumentsGroup* self)
 
 void instrumentsgroup_dispose(psy_audio_InstrumentsGroup* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->container);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_Instrument* instrument;
-
-		instrument = (psy_audio_Instrument*)psy_tableiterator_value(&it);
-		psy_audio_instrument_dispose(instrument);
-		free(instrument);
-	}
-	psy_table_dispose(&self->container);
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+		psy_audio_instrument_dispose);	
 }
 
 psy_audio_InstrumentsGroup* instrumentsgroup_alloc(void)
@@ -93,17 +84,8 @@ void instruments_init(psy_audio_Instruments* self)
 
 void instruments_dispose(psy_audio_Instruments* self)
 {	
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->groups);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_InstrumentsGroup* group;
-
-		group = (psy_audio_InstrumentsGroup*)psy_tableiterator_value(&it);
-		instrumentsgroup_dispose(group);
-		free(group);
-	}
-	psy_table_dispose(&self->groups);
+	psy_table_disposeall(&self->groups, (psy_fp_disposefunc)
+		instrumentsgroup_dispose);	
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
 	psy_signal_dispose(&self->signal_slotchange);

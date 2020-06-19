@@ -2557,16 +2557,7 @@ void trackerview_connectworkspace(TrackerView* self)
 void trackerview_ondestroy(TrackerView* self, psy_ui_Component* sender)
 {
 	psy_audio_inputs_dispose(&self->inputs);
-	{
-		psy_TableIterator it;	
-	
-		for (it = psy_table_begin(&self->trackconfigs); 
-				!psy_tableiterator_equal(&it, psy_table_end());		
-					psy_tableiterator_inc(&it)) {
-			free(psy_tableiterator_value(&it));
-		}			
-		psy_table_dispose(&self->trackconfigs);
-	}
+	psy_table_disposeall(&self->trackconfigs, (psy_fp_disposefunc) NULL);	
 }
 
 void trackerview_initdefaultskin(TrackerView* self)

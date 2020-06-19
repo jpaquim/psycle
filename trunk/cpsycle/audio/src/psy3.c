@@ -2080,10 +2080,10 @@ int psy3_write_epat(psy_audio_SongFile* self)
 					return status;
 				}				
 				entry = (psy_audio_PatternEntry*) node->entry;				
-				for (p = entry->events; p != NULL; p = p->next) {
+				for (p = entry->events; p != NULL; psy_list_next(&p)) {
 					psy_audio_PatternEvent* ev;
 
-					ev = (psy_audio_PatternEvent*) p->entry;
+					ev = (psy_audio_PatternEvent*)psy_list_entry(p);
 					if (status = psyfile_write_int32(self->file, ev->note)) {
 						return status;
 					}

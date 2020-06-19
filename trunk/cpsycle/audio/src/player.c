@@ -260,7 +260,7 @@ void log_workevents(psy_List* events)
 		psy_List* p;
 		char text[256];
 		char temp;
-		for (p = events; p != NULL; p = p->next) {
+		for (p = events; p != NULL; psy_list_next(&p)) {
 			psy_audio_PatternEntry* entry;			
 			
 			entry = psy_audio_patternnode_entry(p);

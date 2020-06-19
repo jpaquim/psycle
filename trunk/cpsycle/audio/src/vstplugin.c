@@ -320,17 +320,8 @@ void initparameters(psy_audio_VstPlugin* self)
 
 void disposeparameters(psy_audio_VstPlugin* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->parameters);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_VstPluginMachineParam* param;
-
-		param = (psy_audio_VstPluginMachineParam*) psy_tableiterator_value(&it);
-		psy_audio_vstpluginmachineparam_dispose(param);
-		free(param);
-	}
-	psy_table_dispose(&self->parameters);
+	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+		psy_audio_vstpluginmachineparam_dispose);	
 }
 
 PluginEntryProc getmainentry(psy_Library* library)
@@ -383,7 +374,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	uintptr_t amount = bc->numsamples;
 	uintptr_t pos = 0;
 		
-	for (p = bc->events; p != NULL && count < self->eventcap; p = p->next) {
+	for (p = bc->events; p != NULL && count < self->eventcap; psy_list_next(&p)) {
 		int numworksamples;
 		int midichannel;
 		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;

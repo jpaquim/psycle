@@ -39,7 +39,27 @@ void psy_table_dispose(psy_Table* self)
   self->count = 0;
 }
 
-void psy_table_clear(psy_Table* self)
+void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
+{
+	psy_TableIterator it;
+
+	if (disposefunc) {
+		for (it = psy_table_begin(self);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			disposefunc(psy_tableiterator_value(&it));
+			free(psy_tableiterator_value(&it));
+		}
+	} else {
+		for (it = psy_table_begin(self);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+			free(psy_tableiterator_value(&it));
+		}
+	}
+	psy_table_dispose(self);
+}
+void psy_table_clear(psy_Table * self)
 {
 	psy_table_dispose(self);
 	psy_table_init(self);
@@ -192,12 +212,6 @@ uintptr_t psy_table_maxkey(psy_Table* self)
 		}
 	}	
 	return rv;
-}
-
-uintptr_t psy_table_freetableentry(void* context, void* param, psy_TableHashEntry* entry)
-{
-	free(entry->value);
-	return 1;
 }
 
 psy_TableIterator psy_table_begin(psy_Table* self)

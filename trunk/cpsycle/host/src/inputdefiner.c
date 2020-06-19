@@ -198,14 +198,7 @@ void keynames_release(void)
 
 void keynames_dispose(void)
 {			
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&keynames);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {		
-		free(psy_tableiterator_value(&it));		
-	}
-	psy_table_dispose(&keynames);
+	psy_table_disposeall(&keynames, (psy_fp_disposefunc)NULL);	
 }
 
 void keynames_add(uintptr_t keycode, const char* name)

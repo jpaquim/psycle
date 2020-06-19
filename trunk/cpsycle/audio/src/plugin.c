@@ -323,23 +323,15 @@ void dispose(psy_audio_Plugin* self)
 
 void disposeparameters(psy_audio_Plugin* self)
 {
-	clearparameters(self);
-	psy_table_dispose(&self->parameters);
+	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+		psy_audio_pluginmachineparam_dispose);
 }
 
 void clearparameters(psy_audio_Plugin* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->parameters);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_PluginMachineParam* param;
-
-		param = (psy_audio_PluginMachineParam*)psy_tableiterator_value(&it);
-		psy_audio_pluginmachineparam_dispose(param);
-		free(param);
-	}
-	psy_table_clear(&self->parameters);
+	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+		psy_audio_pluginmachineparam_dispose);	
+	psy_table_init(&self->parameters);
 }
 
 void setcallback(psy_audio_Plugin* self, psy_audio_MachineCallback callback)

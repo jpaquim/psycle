@@ -86,18 +86,8 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent)
 
 void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->keys);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		KbdBoxKey* key;
-
-		key = (KbdBoxKey*)psy_tableiterator_value(&it);
-		kbdboxkey_dispose(key);
-		free(key);
-	}
-	psy_table_dispose(&self->keys);
+	psy_table_disposeall(&self->keys, (psy_fp_disposefunc)
+		kbdboxkey_dispose);	
 	properties_free(self->keyset);
 }
 

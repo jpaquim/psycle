@@ -600,14 +600,7 @@ void samplebox_ondestroy(SampleBox* self, psy_ui_Component* sender)
 
 void samplebox_ondestroyed(SampleBox* self, psy_ui_Component* sender)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->waveboxes);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {		
-		free(psy_tableiterator_value(&it));
-	}
-	psy_table_dispose(&self->waveboxes);
+	psy_table_disposeall(&self->waveboxes, (psy_fp_disposefunc)NULL);	
 }
 
 void samplebox_clearwaveboxes(SampleBox* self)

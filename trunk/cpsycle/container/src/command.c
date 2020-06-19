@@ -5,12 +5,12 @@
 
 #include "command.h"
 
+static void dispose(psy_Command* self) { }
+static void execute(psy_Command* self) { }
+static void revert(psy_Command* self) { }
+
 static psy_CommandVtable vtable;
 static int vtable_initialized = 0;
-
-void dispose(psy_Command* self) {}
-void execute(psy_Command* self) {}
-void revert(psy_Command* self) {}
 
 static void vtable_init(void)
 {

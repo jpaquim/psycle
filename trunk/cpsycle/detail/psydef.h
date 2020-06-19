@@ -36,5 +36,6 @@ typedef uint8_t bool;
 # endif
 #endif /* INLINE */
 
+typedef void (*psy_fp_disposefunc)(void*);
 
 #endif

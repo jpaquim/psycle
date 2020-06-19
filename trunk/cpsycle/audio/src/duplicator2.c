@@ -145,17 +145,8 @@ void initparameters(psy_audio_Duplicator2* self)
 
 void disposeparameters(psy_audio_Duplicator2* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->parameters);
-		!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_CustomMachineParam* param;
-
-		param = (psy_audio_CustomMachineParam*)psy_tableiterator_value(&it);
-		psy_audio_custommachineparam_dispose(param);
-		free(param);
-	}
-	psy_table_dispose(&self->parameters);
+	psy_table_disposeall(&self->parameters, (psy_fp_disposefunc)
+		psy_audio_custommachineparam_dispose);
 }
 
 void sequencertick(psy_audio_Duplicator2* self)
@@ -174,7 +165,7 @@ psy_List* sequencerinsert(psy_audio_Duplicator2* self, PatternNode* events)
 		// isticking = 1, prevents for this tick duplicator to insert further
 		// notes than these ones to avoid possible loops of duplicators
 		self->isticking = 1;
-		for (p = events; p != NULL; p = p->next) {
+		for (p = events; p != NULL; psy_list_next(&p)) {
 			psy_TableIterator it;
 
 			for (it = psy_audio_duplicatormap_begin(&self->map);

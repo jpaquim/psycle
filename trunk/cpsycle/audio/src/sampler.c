@@ -696,9 +696,9 @@ void psy_audio_sampler_updatecmdmap(psy_audio_Sampler* self)
 	psy_List* p;
 
 	psy_table_clear(&self->cmdmap);	
-	for (p = self->cmds; p != NULL; p = p->next) {
+	for (p = self->cmds; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerCmd* cmd;
-		cmd = (psy_audio_SamplerCmd*)(p->entry);
+		cmd = (psy_audio_SamplerCmd*)psy_list_entry(p);
 		psy_table_insert(&self->cmdmap, (uintptr_t)cmd->patternid, cmd);
 	}
 }
@@ -707,10 +707,10 @@ void dispose(psy_audio_Sampler* self)
 {
 	psy_List* p;
 	
-	for (p = self->voices; p != NULL; p = p->next) {
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
-		voice = (psy_audio_SamplerVoice*) p->entry;
+		voice = (psy_audio_SamplerVoice*)psy_list_entry(p);
 		psy_audio_samplervoice_dispose(voice);		
 		free(voice);
 	}
@@ -740,31 +740,15 @@ void dispose(psy_audio_Sampler* self)
 
 void disposechannels(psy_audio_Sampler* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->channels);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		psy_audio_SamplerChannel* channel;
-
-		channel = (psy_audio_SamplerChannel*) psy_tableiterator_value(&it);
-		psy_audio_samplerchannel_dispose(channel);
-		free(channel);
-	}
-	psy_table_dispose(&self->channels);
+	psy_table_disposeall(&self->channels, (psy_fp_disposefunc)
+		psy_audio_samplerchannel_dispose);
 	psy_audio_samplermasterchannel_dispose(&self->masterchannel);
 }
 
 void disposecmds(psy_audio_Sampler* self)
 {
-	psy_List* p;
-
-	for (p = self->cmds; p != NULL; p = p->next) {		
-		psy_audio_samplercmd_dispose((psy_audio_SamplerCmd*)p->entry);
-		free(p->entry);
-	}
-	psy_list_free(self->cmds);
-	self->cmds = NULL;
+	psy_list_deallocate(&self->cmds, (psy_fp_disposefunc)
+		psy_audio_samplercmd_dispose);	
 }
 
 psy_audio_Sampler* psy_audio_sampler_alloc(void)
@@ -809,7 +793,7 @@ void psy_audio_sampler_ontimertick(psy_audio_Sampler* self)
 	psy_List* p;
 	uintptr_t c = 0;
 	
-	for (p = self->voices; p != NULL && c < self->numvoices; p = p->next) {
+	for (p = self->voices; p != NULL && c < self->numvoices; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*)p->entry;
@@ -823,7 +807,7 @@ void psy_audio_sampler_ontimerwork(psy_audio_Sampler* self, psy_audio_BufferCont
 	uintptr_t c = 0;
 	
 	// psy_audio_buffer_clearsamples(bc->output, bc->numsamples);
-	for (p = self->voices; p != NULL && c < self->numvoices; p = p->next, ++c) {
+	for (p = self->voices; p != NULL && c < self->numvoices; psy_list_next(&p), ++c) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*)p->entry;
@@ -884,7 +868,7 @@ void newline(psy_audio_Sampler* self)
 	psy_List* p;
 	
 	self->samplecounter = 0;
-	for (p = self->voices; p != NULL; p = p->next) {
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*) p->entry;
@@ -921,7 +905,7 @@ void releaseallvoices(psy_audio_Sampler* self)
 {
 	psy_List* p;
 	
-	for (p = self->voices; p != NULL; p = p->next) {
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*) p->entry;		
@@ -933,7 +917,7 @@ void releasevoices(psy_audio_Sampler* self, uintptr_t channel)
 {
 	psy_List* p;
 	
-	for (p = self->voices; p != NULL; p = p->next) {
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*) p->entry;
@@ -947,7 +931,7 @@ void nnavoices(psy_audio_Sampler* self, uintptr_t channel)
 {
 	psy_List* p;
 	
-	for (p = self->voices; p != NULL; p = p->next) {
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*) p->entry;
@@ -962,7 +946,7 @@ psy_audio_SamplerVoice* activevoice(psy_audio_Sampler* self, uintptr_t channel)
 	psy_audio_SamplerVoice* rv = 0;	
 	psy_List* p = 0;
 	
-	for (p = self->voices; p != NULL; p = p->next) {
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*) p->entry;
@@ -1262,7 +1246,7 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 
 			factor = 1.0 / (12.0 * psy_audio_machine_ticksperbeat(
 				psy_audio_sampler_base(self->sampler)));
-			for (p = self->positions; p != NULL; p = p->next) {
+			for (p = self->positions; p != NULL; psy_list_next(&p)) {
 				psy_audio_SampleIterator* iterator;
 
 				iterator = (psy_audio_SampleIterator*)p->entry;
@@ -1279,7 +1263,7 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 			
 			factor = 1.0 / (12.0 * psy_audio_machine_ticksperbeat(
 				psy_audio_sampler_base(self->sampler)));
-			for (p = self->positions; p != NULL; p = p->next) {
+			for (p = self->positions; p != NULL; psy_list_next(&p)) {
 				psy_audio_SampleIterator* iterator;
 
 				iterator = (psy_audio_SampleIterator*)p->entry;
@@ -1354,7 +1338,7 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self, const psy_audio
 	psy_audio_samplervoice_clearpositions(self);
 	entries = psy_audio_instrument_entriesintersect(self->instrument,
 		event->note, 127, 0);
-	for (p = entries; p != NULL; p = p->next) {
+	for (p = entries; p != NULL; psy_list_next(&p)) {
 		psy_audio_InstrumentEntry* entry;
 		
 		entry = (psy_audio_InstrumentEntry*) p->entry;
@@ -1414,7 +1398,7 @@ void psy_audio_samplervoice_updatespeed(psy_audio_SamplerVoice* self)
 	if (self->positions && self->env.stage != ENV_OFF) {
 		psy_List* p;
 
-		for (p = self->positions; p != NULL; p = p->next) {
+		for (p = self->positions; p != NULL; psy_list_next(&p)) {
 			psy_audio_SampleIterator* it;
 
 			it = (psy_audio_SampleIterator*)p->entry;
@@ -1451,7 +1435,7 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self, doubl
 	psy_audio_samplervoice_clearpositions(self);
 	entries = psy_audio_instrument_entriesintersect(self->instrument,
 		0, 0, frequency);
-	for (p = entries; p != NULL; p = p->next) {
+	for (p = entries; p != NULL; psy_list_next(&p)) {
 		psy_audio_InstrumentEntry* entry;
 
 		entry = (psy_audio_InstrumentEntry*)p->entry;
@@ -1488,7 +1472,7 @@ void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice* self)
 {
 	psy_List* p;
 
-	for (p = self->positions; p != NULL; p = p->next) {
+	for (p = self->positions; p != NULL; psy_list_next(&p)) {
 		psy_audio_SampleIterator* iterator;
 
 		iterator = (psy_audio_SampleIterator*)p->entry;
@@ -1559,7 +1543,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 			}
 		}
 
-		for (p = self->positions; p != NULL; p = p->next) {
+		for (p = self->positions; p != NULL; psy_list_next(&p)) {
 			psy_audio_SampleIterator* position;
 			psy_dsp_amp_t svol;
 			psy_dsp_amp_t rvol;
@@ -1738,7 +1722,7 @@ psy_List* sequencerinsert(psy_audio_Sampler* self, psy_List* events)
 	psy_List* p;
 	psy_List* insert = 0;
 
-	for (p = events; p != NULL; p = p->next) {
+	for (p = events; p != NULL; psy_list_next(&p)) {
 		psy_audio_PatternEntry* entry;
 		psy_audio_PatternEvent* event;
 

@@ -54,8 +54,7 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 
 void help_ondestroy(Help* self, psy_ui_Component* sender)
 {
-	help_clearfilenames(self);
-	psy_table_dispose(&self->filenames);
+	psy_table_disposeall(&self->filenames, (psy_fp_disposefunc)NULL);
 }
 
 void help_registerfiles(Help* self)
@@ -88,14 +87,8 @@ void help_buildtabs(Help* self)
 
 void help_clearfilenames(Help* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->filenames);
-		!psy_tableiterator_equal(&it, psy_table_end());
-		psy_tableiterator_inc(&it)) {
-		free(psy_tableiterator_value(&it));
-	}
-	psy_table_clear(&self->filenames);
+	psy_table_disposeall(&self->filenames, (psy_fp_disposefunc)NULL);	
+	psy_table_init(&self->filenames);
 }
 
 void help_ontabbarchanged(Help* self, psy_ui_Component* sender,

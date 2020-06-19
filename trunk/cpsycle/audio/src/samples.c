@@ -32,17 +32,8 @@ void samplesgroup_init(psy_audio_SamplesGroup* self)
 
 void samplesgroup_dispose(psy_audio_SamplesGroup* self)
 {
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->container);
-			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_Sample* sample;
-		
-		sample = (psy_audio_Sample*)psy_tableiterator_value(&it);
-		psy_audio_sample_dispose(sample);
-		free(sample);
-	}
-	psy_table_dispose(&self->container);
+	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
+		psy_audio_sample_dispose);	
 }
 
 psy_audio_SamplesGroup* samplesgroup_alloc(void)
@@ -100,17 +91,8 @@ void psy_audio_samples_init(psy_audio_Samples* self)
 
 void psy_audio_samples_dispose(psy_audio_Samples* self)
 {	
-	psy_TableIterator it;
-
-	for (it = psy_table_begin(&self->groups);
-			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
-		psy_audio_SamplesGroup* group;
-		
-		group = (psy_audio_SamplesGroup*) psy_tableiterator_value(&it);
-		samplesgroup_dispose(group);
-		free(group);
-	}	
-	psy_table_dispose(&self->groups);
+	psy_table_disposeall(&self->groups, (psy_fp_disposefunc)
+		samplesgroup_dispose);	
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
 }
