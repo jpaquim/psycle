@@ -274,7 +274,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 	
 	knob_cx = self->skin->knob.destwidth;
 	knob_cy = self->skin->knob.destheight;	
-	mpfsize(self, MPF_STATE, FALSE, &w, &h);
+	mpfsize(self, MPF_STATE, FALSE, &w, &h);	
 	cellposition(self, row, col, &left, &top);
 	cellsize(self, row, col, &width, &height);
 	psy_ui_setrectangle(&r, left, top, width, height);
@@ -579,6 +579,7 @@ void drawblank(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* para
 void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* height)
 {	
 	psy_ui_TextMetric tm;
+	static float SMALLDIV = 2.f;
 
 	switch (paramtype) {
 	case MPF_IGNORE:
@@ -600,7 +601,7 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* 
 			*width = tm.tmAveCharWidth * 30;
 		}
 		if (small) {
-			*width /= 2;
+			*width = (int)(*width / SMALLDIV);
 		}
 		if (*width < self->skin->vuon.destwidth +
 			self->skin->checkoff.destwidth + 50 +
@@ -614,29 +615,15 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* 
 			*height = self->skin->vuon.destheight;
 			*width = self->skin->slider.destwidth;
 			if (small) {
-				*width /= 2;
+				*width = (int)(*width / SMALLDIV);
 			}
-		break;
-		case MPF_STATE:
-			tm = psy_ui_component_textmetric(&self->component);
-			// *height = self->skin->knob.destheight;
-			// *width = self->skin->knob.destwidth;
-			if (*width < tm.tmAveCharWidth * 30) {
-				*width = tm.tmAveCharWidth * 30;
-			}
-			if (*height < tm.tmHeight * 2) {
-				*height = tm.tmHeight * 2;
-			}
-			if (small) {
-				*width /= 2;
-			}			
-		break;
+		break;		
 		default:
 			tm = psy_ui_component_textmetric(&self->component);
 			*width = tm.tmAveCharWidth * 30;			
 			*height = tm.tmHeight * 2;			
 			if (small) {
-				*width /= 2;
+				*width = (int)(*width / SMALLDIV);
 			}			
 		break;
 	}

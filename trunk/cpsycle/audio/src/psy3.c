@@ -1530,7 +1530,6 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		int32_t panning;
 		int32_t x;
 		int32_t y;
-		psy_audio_MachineUi* machineui;
 		
 		psyfile_read(self->file, &bypass, sizeof(bypass));
 		psyfile_read(self->file, &mute, sizeof(mute));
@@ -1539,9 +1538,7 @@ psy_audio_Machine* machineloadchunk(psy_audio_SongFile* self, int32_t index)
 		psyfile_read(self->file, &y, sizeof(y));
 		psyfile_skip(self->file, 2*sizeof(int32_t));	// numInputs, numOutputs
 		
-		machineui = psy_audio_songfile_machineui(self, index);
-		machineui->x = x;
-		machineui->y = y;
+		psy_audio_machine_setposition(machine, x, y);		
 		if (bypass) {
 			psy_audio_machine_bypass(machine);
 		}
@@ -2148,11 +2145,11 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 {
 	const psy_audio_MachineInfo* info;
 	int status = PSY_OK;
+	intptr_t x;
+	intptr_t y;
 
 	info = psy_audio_machine_info(machine);
-	if (info) {
-		psy_audio_MachineUi* machineui;
-			
+	if (info) {			
 		if (status =psyfile_write_int32(self->file, (int32_t)info->type)) {
 			return status;
 		}
@@ -2169,11 +2166,11 @@ int psy3_write_machine(psy_audio_SongFile* self, psy_audio_Machine* machine,
 			(psy_audio_machine_panning(machine) * 128.f))) {
 			return status;
 		}
-		machineui = psy_audio_songfile_machineui(self, slot);
-		if (status = psyfile_write_int32(self->file, machineui->x)) {
+		psy_audio_machine_position(machine, &x, &y);
+		if (status = psyfile_write_int32(self->file, (int32_t)x)) {
 			return status;
 		}
-		if (status = psyfile_write_int32(self->file, machineui->y)) {
+		if (status = psyfile_write_int32(self->file, (int32_t)y)) {
 			return status;
 		}
 		if (status = psy3_write_connections(self, slot)) {

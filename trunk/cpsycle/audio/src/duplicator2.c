@@ -49,7 +49,10 @@ static psy_audio_MachineInfo const macinfo = {
 	"Duplicator 2",
 	"Psycledelics",
 	"help",	
-	MACH_DUPLICATOR2
+	MACH_DUPLICATOR2,
+	0,
+	0,
+	""
 };
 
 const psy_audio_MachineInfo* psy_audio_duplicator2_info(void)

@@ -154,7 +154,6 @@
     <ClCompile Include="src\checkunsaved.c" />
     <ClCompile Include="src\clipbox.c" />
     <ClCompile Include="src\cmdproperties.c" />
-    <ClCompile Include="src\command.c" />
     <ClCompile Include="src\config.c" />
     <ClCompile Include="src\cpuview.c" />
     <ClCompile Include="src\envelopeview.c" />
@@ -216,7 +215,6 @@
     <ClCompile Include="src\timebar.c" />
     <ClCompile Include="src\trackerview.c" />
     <ClCompile Include="src\trackscopeview.c" />
-    <ClCompile Include="src\undoredo.c" />
     <ClCompile Include="src\undoredobar.c" />
     <ClCompile Include="src\volslider.c" />
     <ClCompile Include="src\vubar.c" />
@@ -241,7 +239,6 @@
     <ClInclude Include="src\cmdproperties.h" />
     <ClInclude Include="src\cmdsgeneral.h" />
     <ClInclude Include="src\cmdsnotes.h" />
-    <ClInclude Include="src\command.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\cpuview.h" />
     <ClInclude Include="src\envelopeview.h" />
@@ -303,7 +300,6 @@
     <ClInclude Include="src\timebar.h" />
     <ClInclude Include="src\trackerview.h" />
     <ClInclude Include="src\trackscopeview.h" />
-    <ClInclude Include="src\undoredo.h" />
     <ClInclude Include="src\undoredobar.h" />
     <ClInclude Include="src\volslider.h" />
     <ClInclude Include="src\vubar.h" />

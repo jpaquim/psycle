@@ -359,17 +359,20 @@ psy_audio_Machine* clone(psy_audio_Plugin* self)
 			self->library.path);
 		if (rv->library.module) {
 			psy_audio_Preset preset;
+			intptr_t x;
+			intptr_t y;
 
 			psy_audio_preset_init(&preset);
 			currentpreset(self, &preset);
 			psy_audio_plugin_tweakpreset(rv, &preset);
 			psy_audio_preset_dispose(&preset);
+			psy_audio_machine_position(psy_audio_plugin_base(self), &x, &y);
+			psy_audio_machine_setposition(psy_audio_plugin_base(rv), x, y);
 		} else {
 			psy_audio_machine_dispose(psy_audio_plugin_base(rv));
 			free(rv);
 			rv = 0;
 		}
-
 	}
 	return rv ? &rv->custommachine.machine : 0;
 }

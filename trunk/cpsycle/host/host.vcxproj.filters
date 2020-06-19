@@ -23,9 +23,6 @@
     <ClCompile Include="src\cmdproperties.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\command.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\config.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -188,9 +185,6 @@
     <ClCompile Include="src\trackscopeview.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\undoredo.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\undoredobar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -265,9 +259,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\cmdsnotes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\command.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\config.h">
@@ -430,9 +421,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\trackscopeview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\undoredo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\undoredobar.h">

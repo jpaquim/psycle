@@ -31,7 +31,8 @@ typedef struct {
 	/// module path
 	char* modulepath;
 	/// shellidx
-	int shellidx;	
+	int shellidx;
+	char* helptext;
 } psy_audio_MachineInfo;
 
 void machineinfo_init(psy_audio_MachineInfo*);
@@ -51,7 +52,8 @@ void machineinfo_set(psy_audio_MachineInfo*,
 		int16_t plugversion,
 		int type,		
 		const char* modulepath,
-		int shellidx);
+		int shellidx,
+		const char* helptext);
 struct CMachineInfo;		
 void machineinfo_setnativeinfo(psy_audio_MachineInfo*,
 		struct CMachineInfo*,

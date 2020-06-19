@@ -689,14 +689,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 			for (i = 0; i < 128; i++)
 			{
 				if (invmach[i] != 255)
-				{
-					psy_audio_Machine* cMac = pMac[i];
-					psy_audio_MachineUi* machineui;
-					
-					psy_audio_machines_insert(&songfile->song->machines, invmach[i], pMac[i]);
-					machineui = psy_audio_songfile_machineui(songfile, invmach[i]);
-					machineui->x = machineuis[i].x;
-					machineui->y = machineuis[i].y;
+				{					
 					_machineActive[i] = FALSE; // mark as "converted"
 				}
 			}
@@ -709,24 +702,14 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 				{
 					if (psy_audio_machine_mode(pMac[i]) == MACHMODE_GENERATOR)
 					{
-						psy_audio_MachineUi* machineui;
-
 						while (psy_audio_machines_at(&songfile->song->machines, j) && j < 64) j++;
 						psy_audio_machines_insert(&songfile->song->machines, j, pMac[i]);
-						invmach[i] = j;
-						machineui = psy_audio_songfile_machineui(songfile, j);
-						machineui->x = machineuis[i].x;
-						machineui->y = machineuis[i].y;
+						invmach[i] = j;						
 					} else
 					{
-						psy_audio_MachineUi* machineui;
-
 						while (psy_audio_machines_at(&songfile->song->machines, j) && k < 128) k++;
 						psy_audio_machines_insert(&songfile->song->machines, k, pMac[i]);
-						invmach[i] = k;
-						machineui = psy_audio_songfile_machineui(songfile, k);
-						machineui->x = machineuis[i].x;
-						machineui->y = machineuis[i].y;
+						invmach[i] = k;						
 					}
 				}
 			}
@@ -792,7 +775,8 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 										//	pMac[i]->inWires[c].ConnectSource(*pSourceMac, 0, d);
 										//}
 										//pMac[i]->inWires[c].SetVolume(val * wire._wireMultiplier); */
-											psy_audio_machines_connect(&songfile->song->machines, invmach[wire->_inputMachine], invmach[i]);
+											psy_audio_machines_connect(&songfile->song->machines,
+												psy_audio_wire_make(invmach[wire->_inputMachine], invmach[i]));
 										connections_setwirevolume(&songfile->song->machines.connections,
 											invmach[wire->_inputMachine], invmach[i], val* wire->_wireMultiplier);
 									}

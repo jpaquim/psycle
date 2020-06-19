@@ -97,6 +97,22 @@ INLINE void psy_audio_wire_init(psy_audio_Wire* self)
 	self->dst = UINTPTR_MAX;
 }
 
+INLINE void psy_audio_wire_init_all(psy_audio_Wire* self, uintptr_t src,
+	uintptr_t dst)
+{
+	self->src = src;
+	self->dst = dst;
+}
+
+INLINE psy_audio_Wire psy_audio_wire_make(uintptr_t src, uintptr_t dst)
+{
+	psy_audio_Wire rv;
+
+	rv.src = src;
+	rv.dst = dst;
+	return rv;
+}
+
 INLINE void psy_audio_wire_set(psy_audio_Wire* self, uintptr_t src,
 	uintptr_t dst)
 {
@@ -107,6 +123,12 @@ INLINE void psy_audio_wire_set(psy_audio_Wire* self, uintptr_t src,
 INLINE bool psy_audio_wire_valid(psy_audio_Wire* self)
 {
 	return self->src != UINTPTR_MAX && self->dst != UINTPTR_MAX;
+}
+
+INLINE void psy_audio_wire_invalidate(psy_audio_Wire* self)
+{
+	self->src = UINTPTR_MAX;
+	self->dst = UINTPTR_MAX;
 }
 
 typedef struct {

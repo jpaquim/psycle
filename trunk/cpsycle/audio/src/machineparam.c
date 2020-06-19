@@ -7,6 +7,7 @@
 #include "plugin_interface.h"
 
 #include <convert.h>
+#include <valuemapper.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -785,6 +786,7 @@ void psy_audio_volumemachineparam_init(psy_audio_VolumeMachineParam* self,
 	self->maxval = 0x1000;
 	self->type = type;
 	self->data = data;
+	self->mode = psy_audio_VOLUME_MIXER;
 }
 
 void psy_audio_volumemachineparam_dispose(psy_audio_VolumeMachineParam* self)
@@ -815,19 +817,24 @@ psy_audio_VolumeMachineParam* psy_audio_volumemachineparam_allocinit(
 void volumemachineparam_range(psy_audio_VolumeMachineParam* self,
 	intptr_t* minval, intptr_t* maxval)
 {
-	*minval = 0;
-	*maxval = 0x1000;
+	*minval = self->minval;
+	*maxval = self->maxval;
 }
 
 void volumemachineparam_tweak(psy_audio_VolumeMachineParam* self, float value)
 {
-	if (self->data) {
-		float dbs;
-		int scaled;
+	if (self->data) {				
+		if (self->mode == psy_audio_VOLUME_MIXER) {
+			float dbs;
+			int scaled;
 
-		scaled = (int)(value * 0x1000);
-		dbs = (scaled / 42.67f) - 96.0f;
-		*self->data = psy_dsp_convert_db_to_amp(dbs);
+			scaled = (int)(value * self->maxval);
+			dbs = (scaled / 42.67f) - 96.0f;
+			*self->data = psy_dsp_convert_db_to_amp(dbs);
+		} else {
+			// psy_audio_VOLUME_LINEAR
+			*self->data = (int)(value * self->maxval) / (float)self->maxval;
+		}
 	}
 }
 
@@ -835,16 +842,21 @@ float volumemachineparam_normvalue(psy_audio_VolumeMachineParam* self)
 {
 	float rv = 0.f;
 
-	if (self->data) {	
-		float dbs;
-		int value;
-		int scaled;
+	if (self->data) {
+		if (self->mode == psy_audio_VOLUME_MIXER) {
+			float dbs;
+			int value;
+			int scaled;
 
-		value = (int)(*self->data * 0x1000);
+			value = (int)(*self->data * 0x1000);
 
-		dbs = psy_dsp_convert_amp_to_db(*self->data);
-		scaled = (int)((dbs + 96.0f) * 42.67); // *(0x1000 / 96.0f)		
-		rv = scaled / (float)0x1000;
+			dbs = psy_dsp_convert_amp_to_db(*self->data);
+			scaled = (int)((dbs + 96.0f) * 42.67); // *(0x1000 / 96.0f)		
+			rv = scaled / (float)0x1000;
+		} else {
+			// psy_audio_VOLUME_LINEAR
+			rv = *self->data;
+		}
 	}
 	return rv;
 }
@@ -855,10 +867,14 @@ int volumemachineparam_describe(psy_audio_VolumeMachineParam* self, char* text)
 		if (*self->data < 0.00002f) {
 			psy_snprintf(text, 20, "%s", "-inf");
 		} else {
-			float dbs;
+			if (self->mode == psy_audio_VOLUME_MIXER) {
+				float dbs;
 
-			dbs = psy_dsp_convert_amp_to_db(*self->data);
-			psy_snprintf(text, 20, "%.01fdB", (float) dbs);			
+				dbs = psy_dsp_convert_amp_to_db(*self->data);
+				psy_snprintf(text, 20, "%.01fdB", (float)dbs);
+			} else {
+				psy_snprintf(text, 20, "%d", (int)(*self->data * self->maxval));
+			}
 		}
 	}
 	return self->data != NULL;
@@ -887,6 +903,19 @@ int volumemachineparam_name(psy_audio_VolumeMachineParam* self, char* text)
 int volumemachineparam_type(psy_audio_VolumeMachineParam* self)
 {
 	return self->type;
+}
+
+void psy_audio_volumemachineparam_setmode(psy_audio_VolumeMachineParam* self,
+	psy_audio_VolumeMode mode)
+{
+	self->mode = mode;
+}
+
+void psy_audio_volumemachineparam_setrange(psy_audio_VolumeMachineParam* self, intptr_t minval,
+	intptr_t maxval)
+{
+	self->minval = minval;
+	self->maxval = maxval;
 }
 
 void psy_audio_volumemachineparam_setmask(psy_audio_VolumeMachineParam* self, const char* mask)

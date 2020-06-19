@@ -15,7 +15,7 @@
 
 #include "../../detail/portable.h"
 
-static void enableinput(psy_ui_Component*, int enable, int recursive);
+static void enableinput_internal(psy_ui_Component*, int enable, int recursive);
 static void psy_ui_updatesyles(psy_ui_Component* main);
 static void psy_ui_component_updatefont(psy_ui_Component*);
 static void psy_ui_component_dispose_signals(psy_ui_Component*);
@@ -110,18 +110,20 @@ static void setfont(psy_ui_Component*, psy_ui_Font*);
 static void showhorizontalscrollbar(psy_ui_Component*);
 static void hidehorizontalscrollbar(psy_ui_Component*);
 static void sethorizontalscrollrange(psy_ui_Component*, int min, int max);
-static void horizontalscrollrange(psy_ui_Component* self, int* scrollmin,
+static void horizontalscrollrange(psy_ui_Component*, int* scrollmin,
 	int* scrollmax);
 static int horizontalscrollposition(psy_ui_Component*);
 static void sethorizontalscrollposition(psy_ui_Component*, int position);
 static void showverticalscrollbar(psy_ui_Component*);
 static void hideverticalscrollbar(psy_ui_Component*);
 static void setverticalscrollrange(psy_ui_Component*, int min, int max);
-static void verticalscrollrange(psy_ui_Component* self, int* scrollmin,
+static void verticalscrollrange(psy_ui_Component*, int* scrollmin,
 	int* scrollmax);
 static int verticalscrollposition(psy_ui_Component*);
 static void setverticalscrollposition(psy_ui_Component*, int position);
-static psy_List* children(psy_ui_Component* self, int recursive);
+static psy_List* children(psy_ui_Component*, int recursive);
+static void enableinput(psy_ui_Component*);
+static void preventinput(psy_ui_Component*);
 // events
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, psy_ui_Size* limit, psy_ui_Size* rv);
@@ -137,6 +139,7 @@ static void onmouseleave(psy_ui_Component* self) { }
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
+
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -187,6 +190,8 @@ static void vtable_init(void)
 		vtable.onkeydown = onkeydown;
 		vtable.onkeydown = onkeyup;
 		vtable.ontimer = ontimer;
+		vtable.enableinput = enableinput;
+		vtable.preventinput = preventinput;
 		vtable_initialized = 1;
 	}
 }
@@ -677,20 +682,20 @@ void psy_ui_component_preventalign(psy_ui_Component* self)
 
 void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)
 {
-	enableinput(self, TRUE, recursive);
+	enableinput_internal(self, TRUE, recursive);
 }
 
 void psy_ui_component_preventinput(psy_ui_Component* self, int recursive)
 {
-	enableinput(self, FALSE, recursive);
+	enableinput_internal(self, FALSE, recursive);
 }
 
-void enableinput(psy_ui_Component* self, int enable, int recursive)
+void enableinput_internal(psy_ui_Component* self, int enable, int recursive)
 {	
 	if (enable) {
-		self->imp->vtable->dev_enableinput(self->imp);
+		self->vtable->enableinput(self);
 	} else {
-		self->imp->vtable->dev_preventinput(self->imp);
+		self->vtable->preventinput(self);
 	}	
 	if (recursive) {
 		psy_List* p;
@@ -702,13 +707,23 @@ void enableinput(psy_ui_Component* self, int enable, int recursive)
 
 			child = (psy_ui_Component*) p->entry;
 			if (enable) {
-				child->imp->vtable->dev_enableinput(child->imp);
+				child->vtable->enableinput(child);
 			} else {
-				child->imp->vtable->dev_preventinput(child->imp);
+				child->vtable->preventinput(child);
 			}			
 		}
 		psy_list_free(q);
 	}
+}
+
+static void enableinput(psy_ui_Component* self)
+{
+	self->imp->vtable->dev_enableinput(self->imp);
+}
+
+static void preventinput(psy_ui_Component* self)
+{
+	self->imp->vtable->dev_preventinput(self->imp);
 }
 
 void psy_ui_component_setbackgroundmode(psy_ui_Component* self,

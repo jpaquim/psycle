@@ -10,6 +10,7 @@ static void undoredobar_initalign(UndoRedoBar* self);
 static void undoredobar_onundo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onredo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onlanguagechanged(UndoRedoBar*, psy_ui_Component* sender);
+static void undoredobar_ontimer(UndoRedoBar*, psy_ui_Component* sender, uintptr_t timerid);
 
 void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -28,6 +29,9 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		undoredobar_onlanguagechanged);
 	undoredobar_updatetext(self);
+	psy_signal_connect(&self->component.signal_timer, self,
+		undoredobar_ontimer);
+	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
 void undoredobar_updatetext(UndoRedoBar* self)
@@ -60,4 +64,23 @@ void undoredobar_onlanguagechanged(UndoRedoBar* self, psy_ui_Component* sender)
 {
 	undoredobar_updatetext(self);
 	psy_ui_component_align(undoredobar_base(self));
+}
+
+void undoredobar_ontimer(UndoRedoBar* self, psy_ui_Component* sender,
+	uintptr_t timerid)
+{
+	if (workspace_currview_hasundo(self->workspace)) {
+		psy_ui_component_enableinput(psy_ui_button_base(&self->undobutton),
+			psy_ui_NONRECURSIVE);
+	} else {
+		psy_ui_component_preventinput(psy_ui_button_base(&self->undobutton),
+			psy_ui_NONRECURSIVE);
+	}
+	if (workspace_currview_hasredo(self->workspace)) {
+		psy_ui_component_enableinput(psy_ui_button_base(&self->redobutton),
+			psy_ui_NONRECURSIVE);
+	} else {
+		psy_ui_component_preventinput(psy_ui_button_base(&self->redobutton),
+			psy_ui_NONRECURSIVE);
+	}
 }

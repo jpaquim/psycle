@@ -32,6 +32,8 @@ typedef struct psy_audio_Master {
 	psy_audio_Buffer memorybuffer;
 	uintptr_t memorybuffersize;
 	psy_dsp_amp_t volume;
+	intptr_t x;
+	intptr_t y;
 } psy_audio_Master;
 
 void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback);

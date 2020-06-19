@@ -63,8 +63,6 @@ typedef struct {
 } MachineSkin;
 
 typedef struct {	
-	int x;
-	int y;	
 	int mode;
 	/// output level for display (0 .. 1.f)	
 	psy_dsp_amp_t volumedisplay;

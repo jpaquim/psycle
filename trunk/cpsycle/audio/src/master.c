@@ -33,6 +33,16 @@ static const char* master_editname(psy_audio_Master* self)
 {
 	return "Psycle Master and Minimixer";
 }
+static void setposition(psy_audio_Master* self, intptr_t x, intptr_t y)
+{
+	self->x = x;
+	self->y = y;
+}
+static void position(psy_audio_Master* self, intptr_t* x, intptr_t* y)
+{
+	*x = self->x;
+	*y = self->y;
+}
 static uintptr_t numinputs(psy_audio_Master* self) { return 2; }
 static uintptr_t numoutputs(psy_audio_Master* self) { return 2; }
 static uintptr_t slot(psy_audio_Master* self) { return psy_audio_MASTER_INDEX; }
@@ -82,7 +92,8 @@ static psy_audio_MachineInfo const MacInfo = {
 	"help",
 	MACH_MASTER,
 	0,
-	0
+	0,
+	""
 };
 
 const psy_audio_MachineInfo* psy_audio_master_info(void) { return &MacInfo; }
@@ -109,6 +120,8 @@ static void vtable_init(psy_audio_Master* self)
 		vtable.loadspecific = (fp_machine_loadspecific) master_loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) master_savespecific;
 		vtable.editname = (fp_machine_editname) master_editname;
+		vtable.setposition = (fp_machine_setposition)setposition;
+		vtable.position = (fp_machine_position)position;
 		// Parameter
 		vtable.parameter = (fp_machine_parameter) parameter;
 		vtable.tweakparameter = (fp_machine_tweakparameter) tweakparameter;
@@ -151,6 +164,8 @@ void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback cal
 	psy_signal_connect(&self->param_level.machineparam.signal_normvalue, self,
 		master_level_normvalue);
 	master_init_memory(self);
+	self->x = 320;
+	self->y = 320;
 }
 
 void master_init_memory(psy_audio_Master* self)

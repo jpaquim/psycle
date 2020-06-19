@@ -237,6 +237,11 @@ INLINE psy_audio_MachineParam* psy_audio_choicemachineparam_base(psy_audio_Choic
 	return &(self->machineparam);
 }
 
+typedef enum {
+	psy_audio_VOLUME_LINEAR,
+	psy_audio_VOLUME_MIXER
+} psy_audio_VolumeMode;
+
 // psy_audio_VolumeMachineParam [0 .. 1]
 typedef struct psy_audio_VolumeMachineParam {
 	psy_audio_MachineParam machineparam;
@@ -247,11 +252,16 @@ typedef struct psy_audio_VolumeMachineParam {
 	char* mask;
 	int type;
 	float* data;
+	int scale;
+	psy_audio_VolumeMode mode;
 } psy_audio_VolumeMachineParam;
 
 void psy_audio_volumemachineparam_init(psy_audio_VolumeMachineParam*,
 	const char* name, const char* label, int type, float* data);
 void psy_audio_volumemachineparam_dispose(psy_audio_VolumeMachineParam*);
+void psy_audio_volumemachineparam_setmode(psy_audio_VolumeMachineParam*, psy_audio_VolumeMode);
+void psy_audio_volumemachineparam_setrange(psy_audio_VolumeMachineParam*, intptr_t minval,
+intptr_t maxval);
 void psy_audio_volumemachineparam_setmask(psy_audio_VolumeMachineParam*, const char* mask);
 
 psy_audio_VolumeMachineParam* psy_audio_volumemachineparam_alloc(void);

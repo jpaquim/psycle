@@ -302,7 +302,7 @@ void trackdef_init(TrackDef* self)
 
 // Commands
 typedef struct {
-	Command command;
+	psy_Command command;
 	psy_audio_PatternEditPosition cursor;
 	psy_audio_Pattern* pattern;
 	double bpl;	
@@ -316,6 +316,21 @@ static void InsertCommandDispose(InsertCommand*);
 static void InsertCommandExecute(InsertCommand*);
 static void InsertCommandRevert(InsertCommand*);
 
+// vtable
+static psy_CommandVtable insertcommandcommand_vtable;
+static int insertcommandcommand_vtable_initialized = 0;
+
+static void insertcommandcommand_vtable_init(InsertCommand* self)
+{
+	if (!insertcommandcommand_vtable_initialized) {
+		insertcommandcommand_vtable = *(self->command.vtable);
+		insertcommandcommand_vtable.dispose = (psy_fp_command)InsertCommandDispose;
+		insertcommandcommand_vtable.execute = (psy_fp_command)InsertCommandExecute;
+		insertcommandcommand_vtable.revert = (psy_fp_command)InsertCommandRevert;
+		insertcommandcommand_vtable_initialized = 1;
+	}
+}
+
 InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
 	psy_audio_PatternEditPosition cursor, psy_audio_PatternEvent event,
 	Workspace* workspace)
@@ -323,9 +338,9 @@ InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
 	InsertCommand* rv;
 	
 	rv = malloc(sizeof(InsertCommand));
-	rv->command.dispose = InsertCommandDispose;
-	rv->command.execute = InsertCommandExecute;
-	rv->command.revert = InsertCommandRevert;
+	psy_command_init(&rv->command);
+	insertcommandcommand_vtable_init(rv);
+	rv->command.vtable = &insertcommandcommand_vtable;
 	rv->cursor = cursor;	
 	rv->bpl = bpl;
 	rv->event = event;	
@@ -385,7 +400,7 @@ void InsertCommandRevert(InsertCommand* self)
 
 // BlockTranspose
 typedef struct {
-	Command command;
+	psy_Command command;
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
 	psy_audio_PatternEditPosition cursor;
@@ -398,6 +413,21 @@ static void BlockTransposeCommandDispose(BlockTransposeCommand*);
 static void BlockTransposeCommandExecute(BlockTransposeCommand*);
 static void BlockTransposeCommandRevert(BlockTransposeCommand*);
 
+// vtable
+static psy_CommandVtable blocktransposecommand_vtable;
+static int blocktransposecommand_vtable_initialized = 0;
+
+static void blocktransposecommandcommand_vtable_init(BlockTransposeCommand* self)
+{
+	if (!blocktransposecommand_vtable_initialized) {
+		blocktransposecommand_vtable = *(self->command.vtable);
+		blocktransposecommand_vtable.dispose = (psy_fp_command)BlockTransposeCommandDispose;
+		blocktransposecommand_vtable.execute = (psy_fp_command)BlockTransposeCommandExecute;
+		blocktransposecommand_vtable.revert = (psy_fp_command)BlockTransposeCommandRevert;
+		blocktransposecommand_vtable_initialized = 1;
+	}
+}
+
 BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
 	PatternSelection block, psy_audio_PatternEditPosition cursor, int transposeoffset,
 	Workspace* workspace)
@@ -405,9 +435,9 @@ BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
 	BlockTransposeCommand* rv;
 	
 	rv = malloc(sizeof(BlockTransposeCommand));
-	rv->command.dispose = BlockTransposeCommandDispose;
-	rv->command.execute = BlockTransposeCommandExecute;
-	rv->command.revert = BlockTransposeCommandRevert;	
+	psy_command_init(&rv->command);
+	blocktransposecommandcommand_vtable_init(rv);
+	rv->command.vtable = &blocktransposecommand_vtable;
 	rv->pattern = pattern;
 	psy_audio_pattern_init(&rv->oldpattern);
 	rv->block = block;
@@ -1815,7 +1845,7 @@ void trackergrid_inputevent(TrackerGrid* self,
 	const psy_audio_PatternEvent* event, int chordmode)
 {	
 	trackerview_preventsync(self->view);
-	undoredo_execute(&self->view->workspace->undoredo,
+	psy_undoredo_execute(&self->view->workspace->undoredo,
 		&InsertCommandAlloc(self->pattern, self->bpl,
 			self->cursor, *event, self->view->workspace)->command);
 	if (chordmode) {
@@ -1881,7 +1911,7 @@ void trackergrid_inputvalue(TrackerGrid* self, int value, int digit)
 			entervaluecolumn(entry, self->cursor.column, value);
 		}
 		trackerview_preventsync(self->view);
-		undoredo_execute(&self->view->workspace->undoredo,
+		psy_undoredo_execute(&self->view->workspace->undoredo,
 				&InsertCommandAlloc(self->pattern, self->bpl,
 					self->cursor, 
 					*patternentry_front(entry),
@@ -3453,7 +3483,7 @@ void trackergrid_blockunmark(TrackerGrid* self)
 void trackergrid_onblocktransposeup(TrackerGrid* self)
 {
 	if (self->hasselection) {		
-		undoredo_execute(&self->view->workspace->undoredo,
+		psy_undoredo_execute(&self->view->workspace->undoredo,
 			&BlockTransposeCommandAlloc(self->pattern,
 				self->selection,
 				self->cursor, +1, self->view->workspace)->command);
@@ -3463,7 +3493,7 @@ void trackergrid_onblocktransposeup(TrackerGrid* self)
 void trackergrid_onblocktransposedown(TrackerGrid* self)
 {
 	if (self->hasselection) {		
-		undoredo_execute(&self->view->workspace->undoredo,
+		psy_undoredo_execute(&self->view->workspace->undoredo,
 			&BlockTransposeCommandAlloc(self->pattern,
 				self->selection,
 				self->cursor, -1, self->view->workspace)->command);
@@ -3473,7 +3503,7 @@ void trackergrid_onblocktransposedown(TrackerGrid* self)
 void trackergrid_onblocktransposeup12(TrackerGrid* self)
 {
 	if (self->hasselection) {		
-		undoredo_execute(&self->view->workspace->undoredo,
+		psy_undoredo_execute(&self->view->workspace->undoredo,
 			&BlockTransposeCommandAlloc(self->pattern,
 				self->selection,
 				self->cursor, 12, self->view->workspace)->command);
@@ -3483,7 +3513,7 @@ void trackergrid_onblocktransposeup12(TrackerGrid* self)
 void trackergrid_onblocktransposedown12(TrackerGrid* self)
 {
 	if (self->hasselection) {		
-		undoredo_execute(&self->view->workspace->undoredo,
+		psy_undoredo_execute(&self->view->workspace->undoredo,
 			&BlockTransposeCommandAlloc(self->pattern,
 				self->selection,
 				self->cursor, -12, self->view->workspace)->command);
@@ -3685,7 +3715,7 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 			(unsigned char) (value & 0xFF));
 		event.inst = (unsigned char) tweak;
 		trackerview_preventsync(self);
-		undoredo_execute(&self->workspace->undoredo,
+		psy_undoredo_execute(&self->workspace->undoredo,
 			&InsertCommandAlloc(self->grid.pattern, self->grid.bpl,
 				self->grid.cursor, event, self->workspace)->command);
 		if (workspace_advancelineonrecordtweak(sender) &&

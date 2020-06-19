@@ -25,6 +25,16 @@ static uintptr_t custommachine_buffermemorysize(psy_audio_CustomMachine*);
 static void custommachine_setbuffermemorysize(psy_audio_CustomMachine*, uintptr_t size);
 static uintptr_t custommachine_slot(psy_audio_CustomMachine*);
 static void custommachine_setslot(psy_audio_CustomMachine*, uintptr_t slot);
+static void setposition(psy_audio_CustomMachine* self, intptr_t x, intptr_t y)
+{
+	self->x = x;
+	self->y = y;
+}
+static void position(psy_audio_CustomMachine* self, intptr_t* x, intptr_t* y)
+{
+	*x = self->x;
+	*y = self->y;
+}
 
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -52,6 +62,8 @@ static void vtable_init(psy_audio_CustomMachine* self)
 			custommachine_setbuffermemorysize;
 		vtable.setslot = (fp_machine_setslot) custommachine_setslot;
 		vtable.slot = (fp_machine_slot) custommachine_slot;
+		vtable.setposition = (fp_machine_setposition)setposition;
+		vtable.position = (fp_machine_position)position;
 		vtable_initialized = 1;
 	}
 }
@@ -67,6 +79,8 @@ void custommachine_init(psy_audio_CustomMachine* self,
 	self->isbypassed = 0;
 	self->pan = (psy_dsp_amp_t) 0.5f;
 	self->slot = UINTPTR_MAX;
+	self->x = 0;
+	self->y = 0;
 	custommachine_init_memory(self, psy_audio_MAX_STREAM_SIZE);
 }
 

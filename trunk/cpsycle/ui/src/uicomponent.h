@@ -111,6 +111,8 @@ typedef void (*psy_ui_fp_onmouseleave)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onkeydown)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_ontimer)(struct psy_ui_Component*, uintptr_t);
+typedef void (*psy_ui_fp_component_enableinput)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_preventinput)(struct psy_ui_Component*);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -139,6 +141,8 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_verticalscrollposition verticalscrollposition;
 	psy_ui_fp_component_setverticalscrollposition setverticalscrollposition;
 	psy_ui_fp_component_children children;
+	psy_ui_fp_component_enableinput enableinput;
+	psy_ui_fp_component_preventinput preventinput;
 	// events
 	psy_ui_fp_ondraw ondraw;
 	psy_ui_fp_onsize onsize;
@@ -154,7 +158,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_onmouseleave onmouseleave;
 	psy_ui_fp_onkeydown onkeydown;
 	psy_ui_fp_onkeydown onkeyup;
-	psy_ui_fp_ontimer ontimer;
+	psy_ui_fp_ontimer ontimer;	
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;

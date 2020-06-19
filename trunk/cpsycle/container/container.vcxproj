@@ -107,18 +107,22 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\command.c" />
     <ClCompile Include="src\hashtbl.c" />
     <ClCompile Include="src\list.c" />
     <ClCompile Include="src\properties.c" />
     <ClCompile Include="src\qsort.c" />
     <ClCompile Include="src\signal.c" />
+    <ClCompile Include="src\undoredo.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\command.h" />
     <ClInclude Include="src\hashtbl.h" />
     <ClInclude Include="src\list.h" />
     <ClInclude Include="src\properties.h" />
     <ClInclude Include="src\qsort.h" />
     <ClInclude Include="src\signal.h" />
+    <ClInclude Include="src\undoredo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

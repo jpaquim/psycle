@@ -8,6 +8,7 @@
 #include "connections.h"
 #include <signal.h>
 #include "../../detail/stdint.h"
+#include <undoredo.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,6 +48,8 @@ typedef struct psy_audio_Machines {
 	psy_Signal signal_slotchange;
 	psy_audio_Machine* master;
 	bool mixersendconnect;
+	psy_UndoRedo undoredo;
+	bool preventundoredo;
 } psy_audio_Machines;
 
 void psy_audio_machines_init(psy_audio_Machines*);
@@ -60,8 +63,8 @@ void psy_audio_machines_exchange(psy_audio_Machines*, uintptr_t srcslot, uintptr
 uintptr_t psy_audio_machines_append(psy_audio_Machines*, psy_audio_Machine*);
 psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines*, uintptr_t slot);
 uintptr_t psy_audio_machines_size(psy_audio_Machines*);
-int psy_audio_machines_connect(psy_audio_Machines*, uintptr_t outputslot, uintptr_t inputslot);
-void psy_audio_machines_disconnect(psy_audio_Machines*, uintptr_t outputslot, uintptr_t inputslot);
+void psy_audio_machines_connect(psy_audio_Machines*, psy_audio_Wire wire);
+void psy_audio_machines_disconnect(psy_audio_Machines*, psy_audio_Wire wire);
 void psy_audio_machines_disconnectall(psy_audio_Machines*, uintptr_t slot);
 int psy_audio_machines_connected(psy_audio_Machines*, uintptr_t outputslot, uintptr_t inputslot);
 void psy_audio_machines_updatepath(psy_audio_Machines*);

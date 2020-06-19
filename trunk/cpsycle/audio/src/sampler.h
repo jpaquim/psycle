@@ -126,7 +126,7 @@ struct psy_audio_Sampler;
 
 typedef struct psy_audio_SamplerMasterChannel {
 	struct psy_audio_Sampler* sampler;
-	// (0..1.0f) value used for Playback (channel volume)
+	// (0..1.0f) value used for Playback (channel volume)	
 	psy_dsp_amp_t volume;
 	psy_audio_InfoMachineParam param_channel;
 	psy_audio_VolumeMachineParam slider_param;
@@ -273,7 +273,9 @@ typedef struct psy_audio_Sampler {
 	// ps1 FALSE, sampulse TRUE
 	int panpersistent;
 	int xmsamplerload;
-	psy_audio_IntMachineParam param_numvoices;
+	int channelbank;
+	psy_audio_CustomMachineParam param_general;
+	psy_audio_IntMachineParam param_numvoices;	
 	psy_audio_ChoiceMachineParam param_resamplingmethod;
 	psy_audio_ChoiceMachineParam param_defaultspeed;
 	psy_audio_IntMachineParam param_maxvolume;
@@ -286,20 +288,24 @@ typedef struct psy_audio_Sampler {
 	psy_audio_SamplerMasterChannel masterchannel;
 	psy_audio_CustomMachineParam ignore_param;
 	psy_audio_ChoiceMachineParam param_amigaslides;
+	psy_audio_ChoiceMachineParam param_usefilters;
+	psy_audio_ChoiceMachineParam param_panningmode;
+	psy_audio_CustomMachineParam param_channels;
+	psy_audio_ChoiceMachineParam param_channelview;	
 	psy_Table channels;
 	uint8_t basec;
 	// Sampler PS1 with max amp = 0.5.
 	psy_dsp_amp_t clipmax;
 	// Instrument Bank 0: PS1 1: Sampulse
-	int32_t instrumentbank;
-	psy_audio_SamplerPanningMode panningmode;
+	int32_t instrumentbank;	
 	psy_List* cmds;
 	psy_Table cmdmap;
 	ResamplerType resamplerquality;
 	psy_audio_SamplerTickTimer ticktimer;
 	int samplecounter;
 	int32_t amigaslides; // using linear or amiga slides.
-	bool usefilters;
+	int32_t usefilters;
+	int32_t panningmode;
 } psy_audio_Sampler;
 
 void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback);

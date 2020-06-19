@@ -65,6 +65,9 @@ static void psy_audio_samplermasterchannel_dispose(psy_audio_SamplerMasterChanne
 // Slider/Level
 static void psy_audio_samplermasterchannel_level_normvalue(psy_audio_SamplerMasterChannel*,
 	psy_audio_CustomMachineParam* sender, float* rv);
+// processing
+void psy_audio_samplermasterchannel_work(psy_audio_SamplerMasterChannel*,
+	psy_audio_BufferContext*);
 
 void psy_audio_samplermasterchannel_init(psy_audio_SamplerMasterChannel* self,
 	psy_audio_Sampler* sampler)
@@ -74,6 +77,8 @@ void psy_audio_samplermasterchannel_init(psy_audio_SamplerMasterChannel* self,
 	psy_audio_infomachineparam_init(&self->param_channel, "Master", "", MPF_SMALL);	
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->volume);
+	psy_audio_volumemachineparam_setmode(&self->slider_param, psy_audio_VOLUME_LINEAR);
+	psy_audio_volumemachineparam_setrange(&self->slider_param, 0, 127);
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
@@ -98,6 +103,12 @@ void psy_audio_samplermasterchannel_level_normvalue(psy_audio_SamplerMasterChann
 	} else {
 		*rv = 0.f;
 	}
+}
+
+void psy_audio_samplermasterchannel_work(psy_audio_SamplerMasterChannel* self,
+	psy_audio_BufferContext* bc)
+{
+	psy_audio_buffer_mulsamples(bc->output, bc->numsamples, self->volume);
 }
 
 // SamplerChannel
@@ -130,6 +141,8 @@ void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t ind
 		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);
 	psy_audio_volumemachineparam_init(&self->slider_param,
 		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->volume);
+	psy_audio_volumemachineparam_setmode(&self->slider_param, psy_audio_VOLUME_LINEAR);
+	psy_audio_volumemachineparam_setrange(&self->slider_param, 0, 127);
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	//psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
@@ -253,7 +266,75 @@ static psy_audio_MachineInfo const macinfo = {
 	"help",	
 	MACH_XMSAMPLER,
 	0,
-	0
+	0,
+	// help text
+	""
+	"Track Commands :""\n"
+	"	01xx : Portamento Up(Fx : fine, Ex : Extra fine)""\n"
+	"	02xx : Portamento Down(Fx : fine, Ex : Extra fine)""\n"
+	"	03xx : Tone Portamento""\n"
+	"	04xy : Vibrato with speed y and depth x""\n"
+	"	05xx : Continue Portamento and Volume Slide with speed xx""\n"
+	"	06xx : Continue Vibrato and Volume Slide with speed xx""\n"
+	"	07xx : Tremolo""\n"
+	"	08xx : Pan. 0800 Left 08FF right""\n"
+	"	09xx: Panning slide x0 Left, 0x Right""\n"
+	"	0Axx: Channel Volume, 00 = Min, 40 = Max""\n"
+	"	0Bxx : Channel VolSlide x0 Up(xF fine), 0x Down(Fx Fine)""\n"
+	"	0Cxx: Volume(0C80 : 100 %)""\n"
+	"	0Dxx : Volume Slide x0 Up(xF fine), 0x Down(Fx Fine)""\n"
+	"	0Exy: Extended(see below).""\n"
+	"	0Fxx : Filter.""\n"
+	"	10xy : Arpeggio with note, note + x and note + y""\n"
+	"	11xy : Retrig note after y ticks""\n"
+	"	14xx : Fine Vibrato with speed y and depth x""\n"
+	"	17xy : Tremor Effect(ontime x, offtime y)""\n"
+	"	18xx : Panbrello""\n"
+	"	19xx : Set Envelope position(in ticks)""\n"
+	"	1Cxx : Global Volume, 00 = Min, 80 = Max""\n"
+	"	1Dxx : Global Volume Slide x0 Up(xF fine), 0x Down(Fx Fine)""\n"
+	"	1Exx: Send xx to volume colum(see below)""\n"
+	"	9xxx : Sample Offset x * 256"
+	"""\n"
+	"Extended Commands :""\n"
+	"	30 / 1 : Glissando mode Off / on""\n"
+	"	4x : Vibrato Wave""\n"
+	"	5x : Panbrello Wave""\n"
+	"	7x : Tremolo Wave""\n"
+	"	Waves : 0 : Sinus, 1 : Square""\n"
+	"	2 : Ramp Up, 3 : Ramp Down, 4 : Random""\n"
+	"	8x : Panning""\n"
+	"	90 : Surround Off""\n"
+	"	91 : Surround On""\n"
+	"	9E : Play Forward""\n"
+	"	9F : Play Backward""\n"
+	"	Cx : Delay NoteCut by x ticks""\n"
+	"	Dx : Delay New Note by x ticks""\n"
+	"	E0 : Notecut background notes""\n"
+	"	E1 : Noteoff background notes""\n"
+	"	E2 : NoteFade background notes""\n"
+	"	E3 : Set NNA NoteCut for this voice""\n"
+	"	E4 : Set NNA NoteContinue for this voice""\n"
+	"	E5 : Set NNA Noteoff for this voice""\n"
+	"	E6 : Set NNA NoteFade for this channel""\n"
+	"	E7 / 8 : Disable / Enable Volume Envelope""\n"
+	"	E9 / A : Disable / Enable Pan Envelope""\n"
+	"	EB / C : Disable / Enable Pitch / Filter Envelope""\n"
+	"	Fx : Set Filter Mode.""\n"
+	"	""\n"
+	"Volume Column : ""\n"
+	"	00..3F : Set volume to x * 2""\n"
+	"	4x : Volume slide up""\n"
+	"	5x : Volume slide down""\n"
+	"	6x : Fine Volslide up""\n"
+	"	7x : Fine Volslide down""\n"
+	"	8x : Panning(0:Left, F : Right)""\n"
+	"	9x : PanSlide Left""\n"
+	"	Ax : PanSlide Right""\n"
+	"	Bx : Vibrato""\n"
+	"	Cx : TonePorta""\n"
+	"	Dx : Pitch slide up""\n"
+	"	Ex : Pitch slide down""\n"
 };
 
 const psy_audio_MachineInfo* psy_audio_sampler_info(void)
@@ -387,18 +468,22 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 	self->samplecounter = 0;
 	self->amigaslides = FALSE;
 	self->usefilters = TRUE;
+	self->channelbank = 0;
+	self->panningmode = psy_audio_PANNING_LINEAR;
 	psy_audio_samplerticktimer_init(&self->ticktimer,
 		self,
 		psy_audio_sampler_ontimertick,
 		psy_audio_sampler_ontimerwork);
 	psy_table_init(&self->channels);
 	psy_table_init(&self->lastinst);
+	psy_audio_custommachineparam_init(&self->param_general, "General", "General",
+		MPF_HEADER | MPF_SMALL, 0, 0);
 	psy_audio_intmachineparam_init(&self->param_numvoices,
-		"Polyphony", "Polyphony", MPF_STATE | MPF_SMALL,
+		"limit voices", "limit voices", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->numvoices,
 		1, 64);
 	psy_audio_choicemachineparam_init(&self->param_resamplingmethod,
-		"Resampling", "Resampling", MPF_STATE | MPF_SMALL,
+		"resample", "resample", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->resamplerquality,
 		0, 3);
 	psy_signal_connect(&self->param_resamplingmethod.machineparam.signal_tweak, self,
@@ -408,7 +493,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 			psy_dsp_multiresampler_name((ResamplerType)i));
 	}
 	psy_audio_choicemachineparam_init(&self->param_defaultspeed,
-		"Default speed", "Default speed", MPF_STATE | MPF_SMALL,
+		"Default Speed", "Default Speed", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->defaultspeed,
 		0, 1);	
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 0,
@@ -416,13 +501,53 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 	psy_audio_choicemachineparam_setdescription(&self->param_defaultspeed, 1,
 		"played by C4");
 	psy_audio_choicemachineparam_init(&self->param_amigaslides,
-		"Amiga Freqtable", "Amiga Freqtable", MPF_STATE | MPF_SMALL,
+		"slide", "slide", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->amigaslides,
 		0, 1);
 	psy_audio_choicemachineparam_setdescription(&self->param_amigaslides, 0,
-		"Linear");
+		"linear");
 	psy_audio_choicemachineparam_setdescription(&self->param_amigaslides, 1,
 		"Amiga");
+	psy_audio_choicemachineparam_init(&self->param_usefilters,
+		"use filters", "use filters", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->usefilters,
+		0, 1);
+	psy_audio_choicemachineparam_setdescription(&self->param_usefilters, 0,
+		"disabled");
+	psy_audio_choicemachineparam_setdescription(&self->param_usefilters, 1,
+		"enabled");
+	psy_audio_choicemachineparam_init(&self->param_panningmode,
+		"panning", "panning", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->panningmode,
+		0, 2);
+	psy_audio_choicemachineparam_setdescription(&self->param_panningmode, 0,
+		"linear"); // (Cross)
+	psy_audio_choicemachineparam_setdescription(&self->param_panningmode, 1,
+		"2-sliders"); // ft2
+	psy_audio_choicemachineparam_setdescription(&self->param_panningmode, 2,
+		"equal pwr"); // power
+	psy_audio_custommachineparam_init(&self->param_channels, "Channels",
+		"Channels", MPF_HEADER | MPF_SMALL, 0, 0);
+	psy_audio_choicemachineparam_init(&self->param_channelview,
+		"display", "display", MPF_STATE | MPF_SMALL,
+		(int32_t*)&self->channelbank,
+		0, 7);
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 0,
+		"00 - 07");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 1,
+		"08 - 15");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 2,
+		"16 - 23");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 3,
+		"24 - 31");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 4,
+		"32 - 39");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 5,
+		"40 - 47");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 6,
+		"48 - 55");
+	psy_audio_choicemachineparam_setdescription(&self->param_channelview, 7,
+		"56 - 64");
 	psy_audio_intmachineparam_init(&self->param_maxvolume,
 		"Max volume", "Max volume", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->maxvolume,
@@ -437,7 +562,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self, psy_audio_MachineCallback c
 	psy_audio_choicemachineparam_setdescription(&self->param_panpersistent, 1,
 		"keep on channel");
 	psy_audio_intmachineparam_init(&self->param_instrumentbank,
-		"InstrumentBank", "InstrumentBank", MPF_STATE | MPF_SMALL,
+		"instr. bank", "instr. bank", MPF_STATE | MPF_SMALL,
 		(int32_t*)&self->instrumentbank,
 		0, 1);
 	psy_audio_custommachineparam_init(&self->param_blank, "", "",
@@ -591,12 +716,17 @@ void dispose(psy_audio_Sampler* self)
 	}
 	psy_list_free(self->voices);
 	self->voices = 0;
+	psy_audio_custommachineparam_dispose(&self->param_general);
 	psy_audio_intmachineparam_dispose(&self->param_numvoices);
 	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
 	psy_audio_choicemachineparam_dispose(&self->param_amigaslides);
+	psy_audio_choicemachineparam_dispose(&self->param_usefilters);
+	psy_audio_choicemachineparam_dispose(&self->param_panningmode);
+	psy_audio_choicemachineparam_dispose(&self->param_channelview);
 	psy_audio_intmachineparam_dispose(&self->param_maxvolume);
 	psy_audio_intmachineparam_dispose(&self->param_instrumentbank);
+	psy_audio_custommachineparam_dispose(&self->param_channels);
 	psy_audio_custommachineparam_dispose(&self->param_blank);
 	psy_audio_infomachineparam_dispose(&self->param_filter_cutoff);
 	psy_audio_infomachineparam_dispose(&self->param_filter_res);
@@ -670,7 +800,8 @@ void generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 {	
 	self->samplecounter += bc->numsamples;
 	psy_audio_samplerticktimer_update(&self->ticktimer, bc->numsamples, bc);		
-	removeunusedvoices(self);
+	removeunusedvoices(self);	
+	psy_audio_samplermasterchannel_work(&self->masterchannel, bc);
 }
 
 void psy_audio_sampler_ontimertick(psy_audio_Sampler* self)
@@ -869,13 +1000,15 @@ const psy_audio_MachineInfo* info(psy_audio_Sampler* self)
 
 uintptr_t numparameters(psy_audio_Sampler* self)
 {
-	return 10 * 7;
+	return numparametercols(self) * 8;
 }
 
 uintptr_t numparametercols(psy_audio_Sampler* self)
 {
 	return 10;
 }
+
+#define CHANNELROW 2
 
 psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
 	uintptr_t param)
@@ -889,69 +1022,78 @@ psy_audio_MachineParam* parameter(psy_audio_Sampler* self,
 	col = param / rows;
 	if (col == 0) {
 		switch (row) {
-		case 2: return &self->param_filter_cutoff.machineparam; break;
-		case 3: return &self->param_filter_res.machineparam; break;
-		case 4: return &self->param_pan.machineparam;  break;
-		case 7: return &self->ignore_param.machineparam;  break;
+		case 0: return &self->param_general.machineparam; break;
+		case 1: return &self->param_channels.machineparam; break;
+		case CHANNELROW + 1: return &self->param_filter_cutoff.machineparam; break;
+		case CHANNELROW + 2: return &self->param_filter_res.machineparam; break;
+		case CHANNELROW + 3: return &self->param_pan.machineparam;  break;
+		case CHANNELROW + 5: return &self->ignore_param.machineparam;  break;
 		default:
 			return &self->param_blank.machineparam; break;
 			break;
 		}
 	} else
-	if (col == 1) {
-		if (row == 1) {
-			return &self->masterchannel.param_channel.machineparam;
-		} else		
-		if (row == 5) {
-			return &self->masterchannel.slider_param.machineparam;
-		} else
-		if (row == 6) {
-			return &self->masterchannel.level_param.machineparam;
-		} else
-		if (row == 7) {
-			return &self->ignore_param.machineparam;
-		} else {
+	if (col == 9) {
+		switch (row) {		
+		case CHANNELROW + 0: return &self->masterchannel.param_channel.machineparam; break;
+		case CHANNELROW + 4: return &self->masterchannel.slider_param.machineparam; break;
+		case CHANNELROW + 5: return &self->masterchannel.level_param.machineparam; break;
+		default:
 			return &self->param_blank.machineparam;
+			break;
 		}
-	} else
-	if (row == 0) {
-		switch (col) {
-		case 2: return &self->param_numvoices.machineparam; break;
-		case 3: return &self->param_resamplingmethod.machineparam; break;
-		case 4: return &self->param_defaultspeed.machineparam;  break;
-		case 5: return &self->param_amigaslides.machineparam;  break;
-		case 6: return &self->param_maxvolume.machineparam; break;
-		case 7: return &self->param_panpersistent.machineparam; break;
-		case 8: return &self->param_instrumentbank.machineparam; break;
+	} else if (row == 0) {
+		switch (col) {		
+		case 1: return &self->param_resamplingmethod.machineparam; break;
+		case 2: return &self->param_numvoices.machineparam; break;	
+		case 3: return &self->param_amigaslides.machineparam;  break;
+		case 4: return &self->param_usefilters.machineparam;  break;
+		case 5: return &self->param_panningmode.machineparam;  break;
+		case 6: return &self->param_defaultspeed.machineparam;  break;		
+		case 7: return &self->param_maxvolume.machineparam; break;
+		case 8: return &self->param_panpersistent.machineparam; break;
+		case 9: return &self->param_instrumentbank.machineparam; break;
 		default:
 			return &self->param_blank.machineparam; break;
 			break;
 		}
-	} else {			
+	} else if (row == 1) {
+		switch (col) {		
+		case 1: return &self->param_channelview.machineparam; break;
+		default:
+			return &self->param_blank.machineparam; break;
+			break;
+		}
+	} else {	
 		psy_audio_SamplerChannel* channel;
 		
-		channel = sampler_channel(self, col - 2);
+		channel = sampler_channel(self, col - 1 + self->channelbank * 8);
 		if (channel) {
-			if (row == 1) {
+			switch (row) {
+				case CHANNELROW + 0:
 				return &channel->param_channel.machineparam;
-			} else
-			if (row == 2) {
-				return &channel->filter_cutoff.machineparam;
-			} else
-			if (row == 3) {
-				return &channel->filter_res.machineparam;
-			} else
-			if (row == 4) {
-				return &channel->pan.machineparam;
-			} else
-			if (row == 5) {
-				return &channel->slider_param.machineparam;
-			} else
-			if (row == 6) {
+					break;
+				case CHANNELROW + 1:
+					return &channel->filter_cutoff.machineparam;
+					break;
+				case CHANNELROW + 2:
+					return &channel->filter_res.machineparam;
+					break;
+				case CHANNELROW + 3:
+					return &channel->pan.machineparam;
+					break;
+				case CHANNELROW + 4:
+					return &channel->slider_param.machineparam;
+					break;
+				case CHANNELROW + 5:
 				return &channel->level_param.machineparam;
-			} else
-			if (row == 7) {
-				return &self->ignore_param.machineparam;
+					break;
+				case CHANNELROW + 6:
+					return &self->ignore_param.machineparam;
+					break;
+				default:
+					return &self->param_blank.machineparam; break;
+				break;
 			}
 		}
 	}
@@ -1688,7 +1830,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 			psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters));
 			psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume));
 			psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode));
-
+			self->masterchannel.volume = m_GlobalVolume / 127.f;
 			for (i = 0; i < MAX_TRACKS; ++i) {				
 				psy_audio_samplerchannel_load(sampler_channel(self, i),
 					songfile);

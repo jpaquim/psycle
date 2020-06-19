@@ -49,7 +49,6 @@ static void workspace_makeinputoutput(Workspace*);
 static void workspace_makemidi(Workspace*);
 static void workspace_makelang(Workspace*);
 static void workspace_makelanges(Workspace*);
-static void applysongproperties(Workspace*);
 static void workspace_makedriverlist(Workspace*);
 static void workspace_makedriverconfigurations(Workspace*);
 static void workspace_driverconfig(Workspace*);
@@ -177,8 +176,7 @@ void workspace_init(Workspace* self, void* handle)
 	sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
 	psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
 		workspace_onsequenceeditpositionchanged);
-	undoredo_init(&self->undoredo);
-	undoredo_init(&self->machines_undoredo);
+	psy_undoredo_init(&self->undoredo);	
 	self->navigating = 0;
 	workspace_initsignals(self);	
 	workspace_initplayer(self);		
@@ -238,8 +236,7 @@ void workspace_dispose(Workspace* self)
 	self->filename = 0;
 	plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_machinefactory_dispose(&self->machinefactory);
-	undoredo_dispose(&self->undoredo);
-	undoredo_dispose(&self->machines_undoredo);
+	psy_undoredo_dispose(&self->undoredo);	
 	history_dispose(&self->history);
 	workspace_disposesignals(self);
 	psy_audio_pattern_dispose(&self->patternpaste);
@@ -486,31 +483,38 @@ void workspace_makeconfig(Workspace* self)
 }
 
 void workspace_makegeneral(Workspace* self)
-{
-	psy_Properties* p;
-
+{	
 	self->config = psy_properties_setcomment(
 		psy_properties_create(),
 		"Psycle Configuration File created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	self->general = psy_properties_create_section(self->config, "general");
 	psy_properties_settext(self->general, "General");
-	p = psy_properties_append_string(self->general, "version", "alpha");
-	psy_properties_settext(p, "Version");
-	psy_properties_sethint(p, PSY_PROPERTY_HINT_HIDE);
+	psy_properties_sethint(psy_properties_settext(
+		psy_properties_append_string(self->general, "version", "alpha"),
+		"Version"),
+		PSY_PROPERTY_HINT_HIDE);
 	workspace_makelanguagelist(self, self->general);
-	p = psy_properties_append_bool(self->general, "showaboutatstart", 1);
-	psy_properties_settext(p, "Show About at Startup");
-	p = psy_properties_append_bool(self->general, "showsonginfoonload", 1);
-	psy_properties_settext(p, "Show song info on Load");
-	p = psy_properties_append_bool(self->general, "showmaximizedatstart", 1);
-	psy_properties_settext(p, "Show Maximized at Startup");
-	p = psy_properties_append_bool(self->general, "showplaylisteditor", 0);
-	psy_properties_settext(p, "Show Playlist Editor");
-	p = psy_properties_append_bool(self->general, "showstepsequencer", 1);
-	psy_properties_settext(p, "Show Sequencestepbar");
 	psy_properties_settext(
-		psy_properties_append_bool(self->general, "saverecentsongs", 1),
+		psy_properties_append_bool(self->general, "showaboutatstart", TRUE),
+		"Show About at Startup");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "showsonginfoonload", TRUE),
+		"Show song info on Load");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "showmaximizedatstart", TRUE),
+		"Show Maximized at Startup");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "showplaylisteditor", FALSE),
+		"Show Playlist Editor");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "showstepsequencer", TRUE),
+		"Show Sequencestepbar");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "saverecentsongs", TRUE),
 		"Save Recent Songs");
+	psy_properties_settext(
+		psy_properties_append_bool(self->general, "playsongafterload", TRUE),
+		"Play Song After Load");
 }
 
 void workspace_makelanguagelist(Workspace* self, psy_Properties* parent)
@@ -1455,6 +1459,11 @@ int workspace_saverecentsongs(Workspace* self)
 	return psy_properties_bool(self->general, "saverecentsongs", 1);
 }
 
+int workspace_playsongafterload(Workspace* self)
+{
+	return psy_properties_bool(self->general, "playsongafterload", 1);
+}
+
 int workspace_showplaylisteditor(Workspace* self)
 {	
 	return psy_properties_bool(self->config, "general.showplaylisteditor", 0);
@@ -1615,8 +1624,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag, psy_audi
 	
 	oldsong = self->song;
 	psy_audio_player_stop(&self->player);
-	psy_audio_player_setemptysong(&self->player);
-	applysongproperties(self);
+	psy_audio_player_setemptysong(&self->player);	
 	workspace_disposesequencepaste(self);
 	sequenceselection_setsequence(&self->sequenceselection
 		, &song->sequence);
@@ -1626,7 +1634,7 @@ void workspace_setsong(Workspace* self, psy_audio_Song* song, int flag, psy_audi
 	psy_audio_exclusivelock_enter();
 	self->song = song;
 	self->songcbk = song;
-	psy_audio_player_setsong(&self->player, self->song);
+	psy_audio_player_setsong(&self->player, self->song);	
 	psy_audio_exclusivelock_leave();
 	psy_signal_emit(&self->signal_songchanged, self, 2, flag, songfile);			
 	psy_audio_song_deallocate(oldsong);	
@@ -1669,14 +1677,6 @@ void workspace_loadcontrolskin(Workspace* self, const char* path)
 	free(self->dialbitmappath);
 	self->dialbitmappath = strdup(path);
 	psy_signal_emit(&self->signal_changecontrolskin, self, 1, path);
-}
-
-void applysongproperties(Workspace* self)
-{	
-	if (self->song) {	
-		psy_audio_player_setbpm(&self->player, psy_audio_song_bpm(self->song));
-		psy_audio_player_setlpb(&self->player, psy_audio_song_lpb(self->song));
-	}
 }
 
 psy_Properties* workspace_pluginlist(Workspace* self)
@@ -1784,19 +1784,39 @@ int workspace_octave(Workspace* self)
 void workspace_undo(Workspace* self)
 {
 	if (workspace_currview(self) == TABPAGE_PATTERNVIEW) {
-		undoredo_undo(&self->undoredo);
+		psy_undoredo_undo(&self->undoredo);
 	} else if (workspace_currview(self) == TABPAGE_MACHINEVIEW) {
-		undoredo_undo(&self->machines_undoredo);
+		psy_undoredo_undo(&self->song->machines.undoredo);
 	}
 }
 
 void workspace_redo(Workspace* self)
 {
 	if (workspace_currview(self) == TABPAGE_PATTERNVIEW) {
-		undoredo_redo(&self->undoredo);
+		psy_undoredo_redo(&self->undoredo);
 	} else if (workspace_currview(self) == TABPAGE_MACHINEVIEW) {
-		undoredo_redo(&self->machines_undoredo);
+		psy_undoredo_redo(&self->song->machines.undoredo);
 	}
+}
+
+bool workspace_currview_hasundo(Workspace* self)
+{
+	if (workspace_currview(self) == TABPAGE_PATTERNVIEW) {
+		return psy_list_size(self->undoredo.undo) != 0;
+	} else if (workspace_currview(self) == TABPAGE_MACHINEVIEW) {
+		return psy_list_size(self->song->machines.undoredo.undo) != 0;
+	}
+	return FALSE;
+}
+
+bool workspace_currview_hasredo(Workspace* self)
+{
+	if (workspace_currview(self) == TABPAGE_PATTERNVIEW) {
+		return psy_list_size(self->undoredo.redo) != 0;
+	} else if (workspace_currview(self) == TABPAGE_MACHINEVIEW) {
+		return psy_list_size(self->song->machines.undoredo.redo) != 0;
+	}
+	return FALSE;
 }
 
 void workspace_changedefaultfontsize(Workspace* self, int size)
@@ -2420,7 +2440,7 @@ int workspace_onchangelanguageenum(Workspace* self,
 bool workspace_songmodified(Workspace* self)
 {
 	return psy_list_size(self->undoredo.undo) != self->undosavepoint ||
-		psy_list_size(self->machines_undoredo.undo) != self->machines_undosavepoint;
+		psy_list_size(self->song->machines.undoredo.undo) != self->machines_undosavepoint;
 }
 
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
