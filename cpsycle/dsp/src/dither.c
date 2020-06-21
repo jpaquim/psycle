@@ -22,7 +22,7 @@ void psy_dsp_dither_process(psy_dsp_Dither* self, float * inSamps,
 	uintptr_t length)
 {
 	// gaussian rand returns two values, this tells us which we're on
-	bool newgauss = TRUE;;
+	bool newgauss = TRUE;
 	// our random number, and an extra variable for the gaussian distribution
 	double gauss = 0.0;
 	double randval = 0.0;

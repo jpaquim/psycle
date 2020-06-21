@@ -25,7 +25,8 @@ scintilla       plugin editor, help file viewer
 
 helper libs				
 container       list, hashtable, properties, signals
-dsp             buffer operations, adsr, notetab defines, sse2 optimizations
+dsp             buffer operations, adsr, notetab defines, sse2 optimizations,
+		dither, resampler, filter
 file            file/dir routines
 
 Additional includes
@@ -46,6 +47,9 @@ SDK and add the include/lib sdk directories (Tools/Options/Directories).
 Copy the appropiate vc runtime and universalis dlls from an existing psycle
 installation, copy bwltbl.dll from the existing psycle plugin path,
 to the output dir(cpsycle/debug and cpsycle/release).
+Only in VC6 set the working dir (host project settings) to
+your-path\cpsycle\debug or your-path\cpsycle\release) that the host can
+find the audio driver dlls.
 
 List of runtime files to be copied:
 

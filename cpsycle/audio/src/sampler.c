@@ -200,14 +200,19 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 	const psy_audio_PatternEvent* ev)
 {
 	switch (ev->cmd) {
+		case SAMPLER_CMD_SET_CHANNEL_VOLUME:
+			self->volume = (psy_dsp_amp_t)((ev->parameter < 64)
+			? (ev->parameter / 64.0f)
+			: 1.0f);
+			break;
 		case SAMPLER_CMD_CHANNEL_VOLUME_SLIDE:
 			psy_audio_samplerchannel_setchannelvolumeslide(self, ev->parameter);			
-		break;
+			break;
 		case SAMPLER_CMD_PANNING:
 			self->panfactor = ev->parameter / (psy_dsp_amp_t) 255;
-		break;
+			break;
 		default:
-		;
+			break;
 	}
 }
 
@@ -989,10 +994,9 @@ void seqtick(psy_audio_Sampler* self, uintptr_t channelnum,
 void newline(psy_audio_Sampler* self)
 {
 	psy_List* p;
+	psy_TableIterator it;
 	
 	self->samplecounter = 0;
-	psy_TableIterator it;
-
 	// first notify channels
 	for (it = psy_table_begin(&self->channels);
 		!psy_tableiterator_equal(&it, psy_table_end());
@@ -1015,9 +1019,9 @@ void newline(psy_audio_Sampler* self)
 
 void stop(psy_audio_Sampler* self)
 {
-	releaseallvoices(self);
 	psy_TableIterator it;
 
+	releaseallvoices(self);
 	// first notify channels
 	for (it = psy_table_begin(&self->channels);
 		!psy_tableiterator_equal(&it, psy_table_end());
@@ -1431,9 +1435,9 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self,
 	const psy_audio_PatternEvent* event, double samplesprobeat)
 {
+	psy_audio_SamplerCmd* cmd;
+
 	self->dopan = 0;	
-	psy_audio_SamplerCmd* cmd;	
-	
 	cmd = psy_audio_sampler_cmd(self->sampler, event->cmd);
 	if (cmd != NULL) {
 		switch (cmd->id) {
@@ -2043,6 +2047,9 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	int32_t temp;
+	int i;
+	size_t endpos;
+
 	// we cannot calculate the size previous to save, so we write a placeholder
 	// and seek back to write the correct value.
 	uint32_t size = 0;
@@ -2060,7 +2067,7 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	}
 	psyfile_write_int32(songfile->file, temp); // quality
 	//TODO: zxxMap cannot be edited right now.
-	for (int i = 0; i < 128; i++) {
+	for (i = 0; i < 128; i++) {
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].mode);
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].value);
 	}
@@ -2068,12 +2075,12 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	psyfile_write_uint8(songfile->file, (uint8_t) self->usefilters);
 	psyfile_write_int32(songfile->file, 128);
 	psyfile_write_int32(songfile->file, psy_audio_PANNING_LINEAR);
-	for (int i = 0; i < MAX_TRACKS; i++) {		
+	for (i = 0; i < MAX_TRACKS; i++) {		
 		psy_audio_samplerchannel_save(sampler_channel(self, i),
 			songfile);
 	}
 	psyfile_write_uint32(songfile->file, (uint32_t)self->instrumentbank);
-	size_t endpos = psyfile_getpos(songfile->file);
+	endpos = psyfile_getpos(songfile->file);
 	psyfile_seek(songfile->file, filepos);
 	size = (uint32_t)(endpos - filepos - sizeof(size));
 	psyfile_write_uint32(songfile->file, size);

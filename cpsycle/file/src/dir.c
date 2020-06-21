@@ -79,7 +79,7 @@ void psy_path_update(psy_Path* self)
 		strcat(self->path, self->prefix);
 	}
 	if (psy_path_hasname(self)) {
-		if (psy_path_hasprefix) {
+		if (psy_path_hasprefix(self)) {
 			strcat(self->path, path_delim);
 		}
 		strcat(self->path, self->name);
@@ -549,8 +549,8 @@ bool psy_direxists(const char* path)
 {
 #if defined _MSC_VER
 	DWORD ftyp = GetFileAttributesA(path);
-	if (ftyp == INVALID_FILE_ATTRIBUTES)
-		return FALSE;  //something is wrong with your path!
+//	if (ftyp == INVALID_FILE_ATTRIBUTES)
+//		return FALSE;  //something is wrong with your path!
 
 	if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
 		return TRUE;   // this is a directory!

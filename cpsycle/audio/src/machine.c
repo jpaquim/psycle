@@ -637,10 +637,11 @@ void machine_readpinmapping(psy_audio_Machine* self, psy_audio_SongFile* songfil
 	psy_audio_PinMapping* pinmapping)
 {
 	int32_t numpairs;
+	int32_t j;
 
 	psyfile_read(songfile->file, &numpairs, sizeof(numpairs));
 	psy_audio_pinmapping_clear(pinmapping);
-	for (int j = 0; j < numpairs; ++j) {
+	for (j = 0; j < numpairs; ++j) {
 		int16_t src;
 		int16_t dst;
 

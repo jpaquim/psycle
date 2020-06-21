@@ -22,6 +22,7 @@ extern "C" {
 // implemented like in mfc psycle. LegacyWire and Wire are only helpers
 // for song loading and the machineview ui.
 
+
 #define psy_audio_MASTER_INDEX 128
 #define psy_audio_MAX_STREAM_SIZE 256
 
@@ -30,11 +31,7 @@ typedef struct {
 	uintptr_t dst;
 } psy_audio_PinConnection;
 
-INLINE void psy_audio_pinconnection_init(psy_audio_PinConnection* self)
-{
-	self->src = UINTPTR_MAX;
-	self->dst = UINTPTR_MAX;
-}
+void psy_audio_pinconnection_init(psy_audio_PinConnection* self);
 
 INLINE void psy_audio_pinconnection_init_all(psy_audio_PinConnection* self,
 	uintptr_t src, uintptr_t dst)
@@ -91,11 +88,7 @@ typedef struct {
 	uintptr_t dst;
 } psy_audio_Wire;
 
-INLINE void psy_audio_wire_init(psy_audio_Wire* self)
-{
-	self->src = UINTPTR_MAX;
-	self->dst = UINTPTR_MAX;
-}
+void psy_audio_wire_init(psy_audio_Wire* self);
 
 INLINE void psy_audio_wire_init_all(psy_audio_Wire* self, uintptr_t src,
 	uintptr_t dst)
@@ -120,16 +113,9 @@ INLINE void psy_audio_wire_set(psy_audio_Wire* self, uintptr_t src,
 	self->dst = dst;
 }
 
-INLINE bool psy_audio_wire_valid(const psy_audio_Wire* self)
-{
-	return self->src != UINTPTR_MAX && self->dst != UINTPTR_MAX;
-}
+bool psy_audio_wire_valid(const psy_audio_Wire*);
+void psy_audio_wire_invalidate(psy_audio_Wire*);
 
-INLINE void psy_audio_wire_invalidate(psy_audio_Wire* self)
-{
-	self->src = UINTPTR_MAX;
-	self->dst = UINTPTR_MAX;
-}
 
 INLINE bool psy_audio_wire_equal(const psy_audio_Wire* self,
 	const psy_audio_Wire* other)

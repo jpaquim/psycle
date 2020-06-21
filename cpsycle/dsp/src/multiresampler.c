@@ -75,8 +75,8 @@ void psy_dsp_multiresampler_initresamplers(psy_dsp_MultiResampler* self)
 	psy_dsp_spline_sse2_resampler_init(&self->spline);
 	psy_dsp_sinc_sse2_resampler_init(&self->sinc);
 #else
-	psy_dsp_splineresampler_init(&self->spline);
-	psy_dsp_sincresampler_init(&self->sinc);
+	psy_dsp_spline_resampler_init(&self->spline);
+	psy_dsp_sinc_resampler_init(&self->sinc);
 #endif	
 }
 
@@ -103,7 +103,7 @@ void psy_dsp_multiresampler_settype(psy_dsp_MultiResampler* self,
 			base = psy_dsp_spline_resampler_base(&self->spline);
 		break;
 		case RESAMPLERTYPE_SINC:
-			base = psy_dsp_sincresampler_base(&self->sinc);
+			base = psy_dsp_sinc_resampler_base(&self->sinc);
 		break;
 #endif
 		default:

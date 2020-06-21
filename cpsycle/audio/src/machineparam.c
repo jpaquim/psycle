@@ -639,8 +639,6 @@ void psy_audio_choicemachineparam_init(psy_audio_ChoiceMachineParam* self,
 
 void psy_audio_choicemachineparam_dispose(psy_audio_ChoiceMachineParam* self)
 {
-	psy_TableIterator it;
-
 	psy_audio_machineparam_dispose(&self->machineparam);
 	free(self->name);
 	free(self->label);

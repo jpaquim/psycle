@@ -8,8 +8,31 @@
 #include "connections.h"
 #include <assert.h>
 
+void psy_audio_wire_init(psy_audio_Wire* self)
+{
+	self->src = UINTPTR_MAX;
+	self->dst = UINTPTR_MAX;
+}
+
+bool psy_audio_wire_valid(const psy_audio_Wire* self)
+{
+	return self->src != UINTPTR_MAX && self->dst != UINTPTR_MAX;
+}
+
+void psy_audio_wire_invalidate(psy_audio_Wire* self)
+{
+	self->src = UINTPTR_MAX;
+	self->dst = UINTPTR_MAX;
+}
+
 static psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping*, uintptr_t src,
 	uintptr_t dst);
+
+void psy_audio_pinconnection_init(psy_audio_PinConnection* self)
+{
+	self->src = UINTPTR_MAX;
+	self->dst = UINTPTR_MAX;
+}
 
 psy_audio_PinConnection* psy_audio_pinconnection_alloc(void)
 {

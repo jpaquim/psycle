@@ -290,7 +290,8 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
 		if (loopend - loopstart < totalsamples) {
 			int startpos = loopstart;
 			int endpos = loopend;
-			for (int i = 0; i < totalsamples; i++) {
+			int i;
+			for (i = 0; i < totalsamples; i++) {
 				buffer[secbegin + totalsamples - i] = data[endpos];
 				buffer[secbegin + totalsamples + i] = data[startpos];
 				endpos--;
@@ -309,7 +310,9 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
 			//Ping pong loop (end and start).
 			int pos = loopend;
 			bool forward = FALSE;
-			for (int i = 0; i < totalsamples; i++) {
+			int i;
+
+			for (i = 0; i < totalsamples; i++) {
 				buffer[secbegin + totalsamples - i] = data[pos];
 				buffer[secbegin + totalsamples + i] = data[pos];
 				if (forward) {
@@ -327,10 +330,12 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
 				}
 			}
 		} else {
+			int i;
+
 			//Ping pong loop (end and start).
 			memcpy(buffer + secbegin, data + loopend - totalsamples, totalsamples * sizeof(psy_dsp_amp_t));
 			memcpy(buffer + thirdbegin + totalsamples, data + loopstart, totalsamples * sizeof(psy_dsp_amp_t));
-			for (int i = 0; i < totalsamples; i++) {
+			for (i = 0; i < totalsamples; i++) {
 				buffer[secbegin + totalsamples + i] = data[loopend - i - 1];
 				buffer[thirdbegin + i] = data[loopstart + totalsamples - i];
 			}
@@ -352,9 +357,10 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 
 	int32_t max;
 	Double amount;
-	amount.QuadPart = self->pos.QuadPart + self->speedinternal * numSamples;
-	int32_t pos = self->pos.HighPart;
+	int32_t pos;
 
+	amount.QuadPart = self->pos.QuadPart + self->speedinternal * numSamples;
+	pos = self->pos.HighPart;
 	//TRACE("RealPos %d\n",pos);
 	if (psy_audio_sampleiterator_currentloopdirection(self) == psy_audio_LOOPDIRECTION_FORWARD) {
 		if (pos < presamples && !self->looped) {
