@@ -134,6 +134,15 @@ INLINE psy_ui_Point psy_ui_point_make(psy_ui_Value x, psy_ui_Value y)
 	return rv;
 }
 
+INLINE psy_ui_Point psy_ui_point_makepx(intptr_t x, intptr_t y)
+{
+	psy_ui_Point rv;
+
+	rv.x = psy_ui_value_makepx(x);
+	rv.y = psy_ui_value_makepx(y);
+	return rv;
+}
+
 INLINE psy_ui_Point psy_ui_point_zero(void)
 {
 	psy_ui_Point rv;
@@ -162,6 +171,15 @@ typedef struct {
 	int height;
 } psy_ui_IntSize;
 
+INLINE psy_ui_IntSize psy_ui_intsize_make(int width, int height)
+{
+	psy_ui_IntSize rv;
+
+	rv.width = width;
+	rv.height = height;
+	return rv;
+}
+
 typedef struct {
 	psy_ui_Value width;
 	psy_ui_Value height;
@@ -185,6 +203,15 @@ INLINE psy_ui_Size psy_ui_size_make(psy_ui_Value width, psy_ui_Value height)
 
 	rv.width = width;
 	rv.height = height;
+	return rv;
+}
+
+INLINE psy_ui_Size psy_ui_size_makepx(intptr_t width, intptr_t height)
+{
+	psy_ui_Size rv;
+
+	rv.width = psy_ui_value_makepx(width);
+	rv.height = psy_ui_value_makepx(height);
 	return rv;
 }
 
@@ -410,6 +437,11 @@ typedef enum {
 } psy_ui_Key;
 
 typedef uint32_t psy_ui_Color;
+
+INLINE uint32_t psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
+{
+	return (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));	
+}
 
 #define psy_ui_ETO_OPAQUE	0x0002
 #define psy_ui_ETO_CLIPPED	0x0004

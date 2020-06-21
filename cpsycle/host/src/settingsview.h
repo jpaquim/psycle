@@ -24,8 +24,7 @@ typedef struct {
 	int keyselected;
 	psy_Properties* search;
 	psy_ui_Rectangle selrect;
-	int button;
-	int dy;
+	int button;	
 	int mx;
 	int my;
 	int cpy;

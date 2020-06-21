@@ -120,7 +120,7 @@ INLINE void psy_audio_wire_set(psy_audio_Wire* self, uintptr_t src,
 	self->dst = dst;
 }
 
-INLINE bool psy_audio_wire_valid(psy_audio_Wire* self)
+INLINE bool psy_audio_wire_valid(const psy_audio_Wire* self)
 {
 	return self->src != UINTPTR_MAX && self->dst != UINTPTR_MAX;
 }
@@ -129,6 +129,12 @@ INLINE void psy_audio_wire_invalidate(psy_audio_Wire* self)
 {
 	self->src = UINTPTR_MAX;
 	self->dst = UINTPTR_MAX;
+}
+
+INLINE bool psy_audio_wire_equal(const psy_audio_Wire* self,
+	const psy_audio_Wire* other)
+{
+	return (self->src == other->src) && (self->dst == other->dst);
 }
 
 typedef struct {

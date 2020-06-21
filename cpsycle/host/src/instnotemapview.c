@@ -62,8 +62,7 @@ static int screentokey(int x, double keysize)
 	if (rv >= NOTECOMMANDS_RELEASE) {
 		rv = NOTECOMMANDS_RELEASE - 1;
 	}
-	return rv;
-	
+	return rv;	
 }
 
 // keyboardview
@@ -91,7 +90,6 @@ static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
 {
-	self->dy = 0;
 	self->metrics.keysize = 6;
 	self->metrics.lineheight = 15;
 	psy_ui_component_init(&self->component, parent);
@@ -218,7 +216,6 @@ void instrumententryview_init(InstrumentEntryView* self,
 	self->component.vtable = &instrumententryview_vtable;
 	self->parameterview = parameterview;
 	self->instrument = 0;
-	self->dy = 0;
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;
@@ -230,10 +227,12 @@ void instrumententryview_init(InstrumentEntryView* self,
 		instrumententryview_onscroll);	
 }
 
-void instrumententryview_setinstrument(InstrumentEntryView* self, psy_audio_Instrument* instrument)
+void instrumententryview_setinstrument(InstrumentEntryView* self,
+	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	self->dy = 0;
+	self->selected = UINTPTR_MAX;
+	psy_ui_component_setscrolltop(&self->component, 0);
 	instrumententryview_adjustscroll(self);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -241,7 +240,7 @@ void instrumententryview_setinstrument(InstrumentEntryView* self, psy_audio_Inst
 void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 {	
 	if (self->instrument) {
-		int cpy = 0;
+		int cpy;
 		psy_List* p;		
 		uintptr_t c = 0;		
 		psy_ui_TextMetric tm;
@@ -258,7 +257,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			}
 		}
 		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component), &tm);
+		size = psy_ui_intsize_init_size(
+			psy_ui_component_size(&self->component), &tm);
+		cpy = 0;
 		if (self->selected != UINTPTR_MAX && self->instrument) {
 			psy_audio_InstrumentEntry* entry;
 			int startx;
@@ -267,55 +268,58 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 
 			entry = (psy_audio_InstrumentEntry*)psy_audio_instrument_entryat(
 				self->instrument, self->selected);
-			startx = (int)(
-				(float)numwhitekey(entry->keyrange.low) /
-				numwhitekeys * size.width) +
-				(int)(isblack(entry->keyrange.low)
-					? self->metrics.keysize / 2 : 0);
-			endx = (int)(
-				(float)numwhitekey(entry->keyrange.low + 1) /
-				numwhitekeys * size.width) +
-				(int)(isblack(entry->keyrange.low + 1)
-					? self->metrics.keysize / 2 : 0);
-			psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
-			psy_ui_drawsolidrectangle(g, r, 0x00272727);
-			startx = (int)(
-				(float)numwhitekey(entry->keyrange.high) /
-				numwhitekeys * size.width) +
-				(int)(isblack(entry->keyrange.high)
-					? self->metrics.keysize / 2 : 0);
-			endx = (int)(
-				(float)numwhitekey(entry->keyrange.high + 1) /
-				numwhitekeys * size.width) +
-				(int)(isblack(entry->keyrange.high + 1)
-					? self->metrics.keysize / 2 : 0);
-			psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
-			psy_ui_drawsolidrectangle(g, r, 0x00272727);
+			if (entry) {
+				startx = (int)(
+					(float)numwhitekey(entry->keyrange.low) /
+					numwhitekeys * size.width) +
+					(int)(isblack(entry->keyrange.low)
+						? self->metrics.keysize / 2 : 0);
+				endx = (int)(
+					(float)numwhitekey(entry->keyrange.low + 1) /
+					numwhitekeys * size.width) +
+					(int)(isblack(entry->keyrange.low + 1)
+						? self->metrics.keysize / 2 : 0);
+				psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
+				psy_ui_drawsolidrectangle(g, r, 0x00272727);
+				startx = (int)(
+					(float)numwhitekey(entry->keyrange.high) /
+					numwhitekeys * size.width) +
+					(int)(isblack(entry->keyrange.high)
+						? self->metrics.keysize / 2 : 0);
+				endx = (int)(
+					(float)numwhitekey(entry->keyrange.high + 1) /
+					numwhitekeys * size.width) +
+					(int)(isblack(entry->keyrange.high + 1)
+						? self->metrics.keysize / 2 : 0);
+				psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
+				psy_ui_drawsolidrectangle(g, r, 0x00272727);
+			}
 		}
 		for (p = self->instrument->entries; p != NULL; p = p->next, ++c) {
 			psy_audio_InstrumentEntry* entry;
 			int startx;
 			int endx;			
 
-			entry = (psy_audio_InstrumentEntry*) p->entry;			
+			entry = (psy_audio_InstrumentEntry*) p->entry;
+			assert(entry);
 			startx = (int)(
 				(float)numwhitekey(entry->keyrange.low) /
 				numwhitekeys * size.width) +
 				(int)(isblack(entry->keyrange.low)
 					? self->metrics.keysize / 2 : 0);
 			endx = (int)(
-				(float)numwhitekey(entry->keyrange.high + 1) / 
-					numwhitekeys * size.width) +
-					(int) (isblack(entry->keyrange.high + 1)
-							 ? self->metrics.keysize / 2 : 0) - 1;
+				(float)numwhitekey(entry->keyrange.high + 1) /
+				numwhitekeys * size.width) +
+				(int)(isblack(entry->keyrange.high + 1)
+					? self->metrics.keysize / 2 : 0) - 1;
 			if (c == self->selected) {
 				psy_ui_setcolor(g, 0x00EAEAEA);
 			} else {
 				psy_ui_setcolor(g, 0x00CACACA);
 			}
-			psy_ui_drawline(g, startx, cpy + 5 + self->dy, endx, cpy + 5 + self->dy);
-			psy_ui_drawline(g, startx, cpy + self->dy, startx, cpy + self->dy + 10);
-			psy_ui_drawline(g, endx, cpy + self->dy, endx, cpy + self->dy + 10);
+			psy_ui_drawline(g, startx, cpy + 5, endx, cpy + 5);
+			psy_ui_drawline(g, startx, cpy, startx, cpy + 10);
+			psy_ui_drawline(g, endx, cpy, endx, cpy + 10);			
 			cpy += self->metrics.lineheight * 3;
 		}		
 	}
@@ -348,11 +352,11 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	self->metrics.keysize = size.width / (double)numwhitekeys;
 }
 
-void instrumententryview_onscroll(InstrumentEntryView* self, psy_ui_Component* sender,
-	int stepx, int stepy)
+void instrumententryview_onscroll(InstrumentEntryView* self,
+	psy_ui_Component* sender, int stepx, int stepy)
 {
-	self->dy += (stepy * self->metrics.lineheight * 3);
-	self->parameterview->dy = self->dy;
+	psy_ui_component_setscrolltop(&self->parameterview->component,
+		psy_ui_component_scrolltop(&self->component));
 	psy_ui_component_invalidate(&self->parameterview->component);
 }
 
@@ -383,8 +387,9 @@ void instrumententryview_onmousedown(InstrumentEntryView* self,
 		if (self->instrument) {
 			uintptr_t numentry;	
 
-			numentry = (ev->y - self->dy) / (self->metrics.lineheight * 3);
-			if (numentry < psy_list_size(psy_audio_instrument_entries(self->instrument))) {
+			numentry = ev->y / (self->metrics.lineheight * 3);
+			if (numentry < psy_list_size(
+					psy_audio_instrument_entries(self->instrument))) {
 				self->selected = numentry;
 			} else {
 				self->selected = UINTPTR_MAX;
@@ -503,7 +508,6 @@ void instrumentparameterview_init(InstrumentParameterView* self,
 	instrumentparameterview_vtable_init(self);
 	self->component.vtable = &instrumentparameterview_vtable;
 	self->instrument = NULL;
-	self->dy = 0;
 	psy_ui_component_doublebuffer(&self->component);		
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(20),
@@ -514,7 +518,7 @@ void instrumentparameterview_setinstrument(InstrumentParameterView* self,
 		psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
-	self->dy = 0;	
+	psy_ui_component_setscrolltop(&self->component, 0);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -535,14 +539,17 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 			entry = (psy_audio_InstrumentEntry*) p->entry;
 			psy_snprintf(text, 40, "Sample %0X:%0X", entry->sampleindex.slot,
 				entry->sampleindex.subslot);
-			psy_ui_textout(g, 0, cpy + self->dy, text, strlen(text));
+			psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component)),
+				text, strlen(text));
 			psy_snprintf(text, 40, "Notes %.3d - %.3d", entry->keyrange.low,
 				entry->keyrange.high);
-			psy_ui_textout(g, 0, cpy + self->dy + self->metrics.lineheight, text,
+			psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component))
+				+ self->metrics.lineheight, text,
 				strlen(text));
 			psy_snprintf(text, 40, "Volume %.2X - %.2X", entry->velocityrange.low,
 				entry->velocityrange.high);
-			psy_ui_textout(g, 0, cpy + self->dy + self->metrics.lineheight * 2,
+			psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component)) +
+				self->metrics.lineheight * 2,
 				text, strlen(text));
 			cpy += (self->metrics.lineheight * 3);
 		}

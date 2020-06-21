@@ -459,7 +459,9 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->backgroundcolor = psy_ui_defaults_backgroundcolor(&app.defaults);	
 	self->mousetracking = 0;
 	self->color = psy_ui_defaults_color(&app.defaults);
-	self->cursor = psy_ui_CURSOR_DEFAULT;	
+	self->cursor = psy_ui_CURSOR_DEFAULT;
+	self->scroll.x = 0;
+	self->scroll.y = 0;
 	psy_ui_component_updatefont(self);
 	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);	
 }

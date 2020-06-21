@@ -646,7 +646,6 @@ void psy_audio_mod_loadinstrument(psy_audio_SongFile* self, int idx,
 	{
 		psy_audio_Sample* sample;
 		psy_audio_InstrumentEntry instentry;
-		int note;
 
 		sample = psy_audio_samples_at(&self->song->samples, sampleindex_make(idx, 0));
 		psy_audio_mod_loadsampledata(self, sample, m_Samples[idx].sampleLength);
@@ -979,7 +978,7 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 			}						
 			if (!patternevent_empty(&e)) {
 				e.mach = 0;
-				node = psy_audio_pattern_insert(pattern, node, col, row * 0.25, &e);
+				node = psy_audio_pattern_insert(pattern, node, col, (psy_dsp_beat_t)(row * 0.25), &e);
 			}
 		}		
 	}

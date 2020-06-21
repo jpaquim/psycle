@@ -50,9 +50,7 @@ typedef struct {
 	int textheight;
 	int trackwidth;
 	int identwidth;   
-	int avgcharwidth;
-	int dx;
-	int dy;
+	int avgcharwidth;	
 	int showpatternnames;
 	psy_dsp_beat_t lastplayposition;
 	psy_audio_Player* player;

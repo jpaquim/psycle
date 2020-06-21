@@ -253,8 +253,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent, Pianoroll* roll)
 	psy_ui_component_doublebuffer(&self->component);
 	self->component.wheelscroll = 4;	
 	self->view = roll;	
-	self->beatscrollpos = 0;
-	self->dy = 0;
+	self->beatscrollpos = 0;	
 	self->hover = 0;
 	psy_table_init(&self->channel);	
 	for (track = 0; track < 64; ++track) {
@@ -321,7 +320,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 			psy_dsp_beat_t cpx;
 			int cpy;
 			
-			cpy = self->metrics.visikeys * self->metrics.keyheight;				
+			cpy = self->metrics.visikeys * self->metrics.keyheight;
 			for (c = 0, cpx = 0; c <= self->metrics.visisteps;
 					cpx += self->metrics.stepwidth, ++c) {
 				psy_ui_drawline(g, (int) cpx, 0, (int) cpx, cpy);
@@ -414,7 +413,7 @@ void pianogrid_drawevent(Pianogrid* self, psy_ui_Graphics* g,
 	int width = (int)(length * self->metrics.beatwidth);
 	psy_ui_setrectangle(&r, left,
 		(self->metrics.keymax - event->note - 1) * self->metrics.keyheight
-		+ 1 + self->dy, width, self->metrics.keyheight - 2);
+		+ 1, width, self->metrics.keyheight - 2);
 	if (hover) {
 		psy_ui_drawsolidrectangle(g, r, 0x00D1E8D0);
 	} else {
@@ -435,9 +434,9 @@ void pianogrid_onscroll(Pianogrid* self, psy_ui_Component* sender, int stepx,
 		psy_ui_component_invalidate(&self->view->header.component);
 		psy_ui_component_update(&self->view->header.component);		
 	}
-	if (stepy != 0) {
-		self->dy += (stepy * sender->scrollstepy);
-		self->view->keyboard.dy = self->dy;
+	if (stepy != 0) {		
+		psy_ui_component_setscrolltop(&self->view->keyboard.component,
+			psy_ui_component_scrolltop(&self->component));
 		psy_ui_component_invalidate(&self->view->keyboard.component);
 		psy_ui_component_update(&self->view->keyboard.component);
 	}	
@@ -455,8 +454,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 		PatternNode* prev = 0;
 
 		patternevent_clear(&event);
-		event.note = self->metrics.keymax - 1 - (ev->y - self->dy) /
-			self->metrics.keyheight;
+		event.note = self->metrics.keymax - 1 - ev->y / self->metrics.keyheight;
 		node = psy_audio_pattern_findnode(self->view->pattern, 0, offset,
 			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 		if (node) {				
@@ -502,7 +500,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 	PatternNode* prev;
 	psy_audio_PatternEntry* hover;
 		
-	offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x));
+	offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x - self->component.scroll.x));
 	node = psy_audio_pattern_findnode(self->view->pattern, 0, offset,
 			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
 	hover = self->hover;
@@ -582,7 +580,6 @@ void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent)
 	pianokeyboard_vtable_init(self);
 	self->component.vtable = &pianokeyboard_vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	self->dy = 0;
 	self->textheight = 12;		
 }
 
@@ -602,7 +599,7 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 	for (key = keymin; key < keymax; ++key) {	
 		int cpy;
 
-		cpy = keyboardheight - (key + 1) * self->metrics.keyheight + self->dy;
+		cpy = keyboardheight - (key + 1) * self->metrics.keyheight;
 		psy_ui_drawline(g, 0, cpy, psy_ui_value_px(&size.width, &tm), cpy);
 		if (isblack(key)) {
 			psy_ui_Rectangle r;			
@@ -630,8 +627,8 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 void pianoroll_setpattern(Pianoroll* self, psy_audio_Pattern* pattern)
 {	
 	self->pattern = pattern;
-	self->grid.dy = 0;
-	self->keyboard.dy = 0;
+	psy_ui_component_setscrolltop(&self->grid.component, 0);
+	psy_ui_component_setscrolltop(&self->keyboard.component, 0);
 	pianoroll_updatemetrics(self);
 	pianogrid_adjustscroll(&self->grid);
 	psy_ui_component_invalidate(&self->grid.component);

@@ -72,7 +72,6 @@ typedef struct {
 
 typedef struct {
 	psy_ui_Component component;
-	int dx;	
 	unsigned int numtracks;
 	int classic;
 	TrackerSkin* skin;
@@ -92,8 +91,7 @@ void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*,
 
 typedef struct {
 	psy_ui_Component component;
-	TrackerSkin* skin;
-	int dy;
+	TrackerSkin* skin;	
 	struct TrackerView* view;
 } TrackerLineNumbers;
 
@@ -173,9 +171,7 @@ typedef enum {
 } TrackerGridEditMode;
 
 typedef struct {
-   psy_ui_Component component;   
-   int dx;
-   int dy;      
+   psy_ui_Component component;
    unsigned int numtracks;   
    int lpb;
    double bpl;

@@ -35,8 +35,7 @@ typedef struct {
 void pianoheader_init(PianoHeader*, psy_ui_Component* parent, struct Pianoroll*);
 
 typedef struct {
-	psy_ui_Component component;	
-	int dy;
+	psy_ui_Component component;
 	int textheight;		
 	struct TrackerView* view;
 	PianoMetrics metrics;
@@ -50,7 +49,6 @@ typedef struct {
    psy_dsp_beat_t bpl;
    int lpb;
    struct Pianoroll* view;
-   int dy;
    int beatscrollpos;
    PianoMetrics metrics;
    psy_audio_PatternEntry* hover;

@@ -68,6 +68,20 @@ extern "C" {
 #define SAMPLER_CMD_EE                   0xE0
 #define SAMPLER_CMD_E_SET_MIDI_MACRO     0xF0 //                                    (p)
 
+#define SAMPLER_EFFECT_VIBRATO  0x00000001
+#define SAMPLER_EFFECT_PITCHSLIDE  0x00000002
+#define SAMPLER_EFFECT_CHANNELVOLSLIDE  0x00000004
+#define SAMPLER_EFFECT_SLIDE2NOTE  0x00000008
+#define SAMPLER_EFFECT_VOLUMESLIDE  0x00000010
+#define SAMPLER_EFFECT_PANSLIDE  0x00000020
+#define SAMPLER_EFFECT_TREMOLO  0x00000040
+#define SAMPLER_EFFECT_ARPEGGIO  0x00000080
+#define SAMPLER_EFFECT_NOTECUT  0x00000100
+#define SAMPLER_EFFECT_PANBRELLO  0x00000200
+#define SAMPLER_EFFECT_RETRIG  0x00000400
+#define SAMPLER_EFFECT_TREMOR  0x00000800
+#define SAMPLER_EFFECT_NOTEDELAY  0x00001000
+#define SAMPLER_EFFECT_GLOBALVOLSLIDE  0x00002000
 
 typedef enum psy_audio_SamplerCmdMode {
 	// *= remembers its last value when called with param 00.
@@ -136,22 +150,28 @@ typedef struct psy_audio_SamplerMasterChannel {
 typedef struct psy_audio_SamplerChannel {
 	struct psy_audio_Sampler* sampler;
 	// (0..1.0f) value used for Playback (channel volume)
-	psy_dsp_amp_t volume;
-	// (0..1.0f) value used for Playback (pan factor)
+	psy_dsp_amp_t volume;	
+	// (0..1.0f) value used for Playback (pan factor)	
 	float panfactor;
-	int m_ChannelDefVolume;
+	float channeldefvolume; // (0..1.0f) <-> (0..200)
 	int m_DefaultCutoff;
 	int m_DefaultRessonance;
 	int m_DefaultPanFactor;  //  0..200 .  &0x100 == Surround. // value used for Storage and reset
 	FilterType defaultfiltertype;
+	psy_List* effects;
 	psy_audio_InfoMachineParam param_channel;
 	psy_audio_IntMachineParam filter_cutoff;
 	psy_audio_IntMachineParam filter_res;
 	psy_audio_IntMachineParam pan;
 	psy_audio_VolumeMachineParam slider_param;
 	psy_audio_IntMachineParam level_param;	
+	// effects	
+	float chanvolslidespeed;
+	int chanvolslidemem;
 } psy_audio_SamplerChannel;
 
+void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*, uintptr_t index,
+	struct psy_audio_Sampler*);
 bool  psy_audio_samplerchannel_load(psy_audio_SamplerChannel*,
 	struct psy_audio_SongFile*);
 void psy_audio_samplerchannel_save(psy_audio_SamplerChannel*,
@@ -219,7 +239,9 @@ void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_setresamplerquality(psy_audio_SamplerVoice*,
 	ResamplerType quality);
+void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_tick(psy_audio_SamplerVoice*);
+
 
 INLINE psy_dsp_amp_t psy_audio_samplervoice_volume(
 	psy_audio_SamplerVoice* self, psy_audio_Sample* sample)
@@ -248,7 +270,7 @@ typedef void (*fp_samplerticktimer_onwork)(void* context, psy_audio_BufferContex
 typedef struct psy_audio_SamplerTickTimer {	
 	uintptr_t counter;
 	uintptr_t samplesprotick;
-	int tickcount;
+	uintptr_t tickcount;
 	fp_samplerticktimer_ontick tick;
 	fp_samplerticktimer_onwork work;
 	void* context;
@@ -261,6 +283,11 @@ void psy_audio_samplerticktimer_init(psy_audio_SamplerTickTimer*,
 void psy_audio_samplerticktimer_reset(psy_audio_SamplerTickTimer*, uintptr_t samplesprotick);
 void psy_audio_samplerticktimer_update(psy_audio_SamplerTickTimer*, uintptr_t amount,
 	psy_audio_BufferContext* bc);
+
+INLINE uintptr_t psy_audio_samplerticktimer_tickcount(psy_audio_SamplerTickTimer* self)
+{
+	return self->tickcount;
+}
 
 typedef struct psy_audio_Sampler {
 	psy_audio_CustomMachine custommachine;		
@@ -334,6 +361,11 @@ void psy_audio_sampler_setresamplerquality(psy_audio_Sampler* self,
 INLINE ResamplerType psy_audio_sampler_resamplerquality(psy_audio_Sampler* self)
 {
 	return self->resamplerquality;
+}
+
+INLINE bool psy_audio_sampler_usefilters(psy_audio_Sampler* self)
+{
+	return self->usefilters != FALSE;
 }
 
 #ifdef __cplusplus

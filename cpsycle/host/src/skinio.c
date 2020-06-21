@@ -734,6 +734,8 @@ void skin_loadpsh(psy_Properties* properties, const char* path)
 	fclose(hfile);
 }
 
+#endif
+
 void skin_psh_values(const char* str, int maxcount, int* values)
 {
 	char s[512];
@@ -741,7 +743,7 @@ void skin_psh_values(const char* str, int maxcount, int* values)
 	int c = 0;
 
 	strcpy(s, str);
-	token = strtok(s, ",");	
+	token = strtok(s, ",");
 	while (token != 0 && (c < maxcount)) {
 		values[c] = atoi(token);
 		token = strtok(NULL, ",");
@@ -749,7 +751,3 @@ void skin_psh_values(const char* str, int maxcount, int* values)
 	}
 
 }
-
-#endif
-
-

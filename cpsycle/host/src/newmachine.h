@@ -38,8 +38,7 @@ void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
 	Workspace*);
 
 typedef struct {
-   psy_ui_Component component;   
-   int dy;
+   psy_ui_Component component;
    int count;
    int lineheight;
    int columnwidth;
