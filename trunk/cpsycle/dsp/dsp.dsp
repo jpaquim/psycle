@@ -95,6 +95,10 @@ SOURCE=.\src\alignedalloc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\dither.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\envelope.c
 # End Source File
 # Begin Source File
@@ -115,15 +119,15 @@ SOURCE=.\src\linear.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\lowpass12e.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\multifilter.c
+SOURCE=.\src\mersennetwister.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\multiresampler.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\noteperiods.c
 # End Source File
 # Begin Source File
 
@@ -153,6 +157,22 @@ SOURCE=.\src\resampler.c
 
 SOURCE=.\src\rms.c
 # End Source File
+# Begin Source File
+
+SOURCE=".\src\sinc-sse2.c"
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sinc.c
+# End Source File
+# Begin Source File
+
+SOURCE=".\src\spline-sse2.c"
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\spline.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -164,6 +184,10 @@ SOURCE=.\src\adsr.h
 # Begin Source File
 
 SOURCE=.\src\alignedalloc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\dither.h
 # End Source File
 # Begin Source File
 
@@ -191,15 +215,15 @@ SOURCE=.\src\linear.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\lowpass12e.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\multifilter.h
+SOURCE=.\src\mersennetwister.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\multiresampler.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\noteperiods.h
 # End Source File
 # Begin Source File
 
@@ -220,6 +244,26 @@ SOURCE=.\src\resampler.h
 # Begin Source File
 
 SOURCE=.\src\rms.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\src\sinc-sse2.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sinc.h
+# End Source File
+# Begin Source File
+
+SOURCE=".\src\spline-sse2.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\spline.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sse_mathfun.h
 # End Source File
 # End Group
 # End Target

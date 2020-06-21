@@ -65,16 +65,22 @@ void filtercoeff_setsamplerate(FilterCoeff* self, float samplerate)
 {
 	if (samplerate != self->samplerate)
 	{
+		int t;
+
 		self->samplerate = samplerate;
-		for (int t = 0; t < F_NUMFILTERS; t++)
+		for (t = 0; t < F_NUMFILTERS; t++)
 		{
 			int tdest = t;
+			int f;
+
 			if (t == F_NONE) continue;//Skip filter F_NONE.
 			else if (t > F_NONE) tdest--;
 
-			for (int f = 0; f < 128; f++)
+			for (f = 0; f < 128; f++)
 			{
-				for (int q = 0; q < 128; q++)
+				int q;
+
+				for (q = 0; q < 128; q++)
 				{
 					filtercoeff_computecoeffs(self, (FilterType)(t), f, q);
 					self->_coeffs[tdest][f][q][0] = (float)self->_coeff[0];
@@ -178,18 +184,24 @@ double filtercoeff_resonancempt(int resonance)
 
 void filtercoeff_computecoeffs(FilterCoeff* self, FilterType t, int freq, int r)
 {
-	double frequency = filtercoeff_cutoff(t, freq);
-	const double samplerate_d = (double)(self->samplerate);
-	if (frequency * 2.0 > samplerate_d) { frequency = samplerate_d * 0.5; }
-	double omega = (float)(TPI * frequency) / self->samplerate;
-	float sn = (float)sin(omega);
-	float cs = (float)cos(omega);
+	double frequency;
+	double samplerate_d;
+	double omega;
+	float sn;
+	float cs;
 	float alpha;
+	float a0, a1, a2, b0, b1, b2;
+
+	frequency = filtercoeff_cutoff(t, freq);
+	samplerate_d = (double)(self->samplerate);
+	if (frequency * 2.0 > samplerate_d) { frequency = samplerate_d * 0.5; }
+	omega = (float)(TPI * frequency) / self->samplerate;
+	sn = (float)sin(omega);
+	cs = (float)cos(omega);
 	if (t == F_LOWPASS12 || t == F_HIGHPASS12) alpha = (float)(sn * 0.5f / filtercoeff_resonanceinternal(r * (freq + 70) / (127.0f + 70.f)));
 	else if (t == F_LOWPASS12E || t == F_HIGHPASS12E) alpha = (float)(sn * 0.5f / filtercoeff_resonanceinternalext((float)r));
 	else if (t == F_BANDPASS12E || t == F_BANDREJECT12E) alpha = (float)(sinh(filtercoeff_bandwidthinternalext(r) * omega));
-	else alpha = (float)(sinh(filtercoeff_bandwidthinternal(r) * omega));
-	float a0, a1, a2, b0, b1, b2;
+	else alpha = (float)(sinh(filtercoeff_bandwidthinternal(r) * omega));	
 	switch (t)
 	{
 	case F_LOWPASS12:
@@ -382,11 +394,14 @@ float filter_work(Filter* self, float x)
 
 void filter_workstereo(Filter* self, float* l, float* r)
 {
-	float y = *l * self->_coeff0 + self->_x1 * self->_coeff1 + self->_x2 * self->_coeff2 + self->_y1 * self->_coeff3 + self->_y2 * self->_coeff4;
+	float y;
+	float b;
+
+	y = *l * self->_coeff0 + self->_x1 * self->_coeff1 + self->_x2 * self->_coeff2 + self->_y1 * self->_coeff3 + self->_y2 * self->_coeff4;
 	self->_y2 = self->_y1;  self->_y1 = y;
 	self->_x2 = self->_x1;  self->_x1 = *l;
 	*l = y;
-	float b = *r * self->_coeff0 + self->_a1 * self->_coeff1 + self->_a2 * self->_coeff2 + self->_b1 * self->_coeff3 + self->_b2 * self->_coeff4;
+	b = *r * self->_coeff0 + self->_a1 * self->_coeff1 + self->_a2 * self->_coeff2 + self->_b1 * self->_coeff3 + self->_b2 * self->_coeff4;
 	self->_b2 = self->_b1;  self->_b1 = b;
 	self->_a2 = self->_a1;  self->_a1 = *r;
 	*r = b;

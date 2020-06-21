@@ -102,15 +102,15 @@ SOURCE=.\src\channelmappingview.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\checkunsaved.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\clipbox.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\cmdproperties.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\command.c
 # End Source File
 # Begin Source File
 
@@ -123,10 +123,6 @@ SOURCE=.\src\cpuview.c
 # Begin Source File
 
 SOURCE=.\src\envelopeview.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\file.c
 # End Source File
 # Begin Source File
 
@@ -187,6 +183,10 @@ SOURCE=.\src\linesperbeatbar.c
 # Begin Source File
 
 SOURCE=.\src\machinebar.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machineeditorview.c
 # End Source File
 # Begin Source File
 
@@ -259,6 +259,10 @@ SOURCE=.\src\playposbar.c
 # Begin Source File
 
 SOURCE=.\src\plugineditor.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\presetsbar.c
 # End Source File
 # Begin Source File
 
@@ -358,19 +362,11 @@ SOURCE=.\src\trackscopeview.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\undoredo.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\undoredobar.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\volslider.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\vst2view.c
 # End Source File
 # Begin Source File
 
@@ -414,6 +410,10 @@ SOURCE=.\src\channelmappingview.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\checkunsaved.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\clipbox.h
 # End Source File
 # Begin Source File
@@ -430,10 +430,6 @@ SOURCE=.\src\cmdsnotes.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\command.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\config.h
 # End Source File
 # Begin Source File
@@ -443,10 +439,6 @@ SOURCE=.\src\cpuview.h
 # Begin Source File
 
 SOURCE=.\src\envelopeview.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\file.h
 # End Source File
 # Begin Source File
 
@@ -507,6 +499,10 @@ SOURCE=.\src\linesperbeatbar.h
 # Begin Source File
 
 SOURCE=.\src\machinebar.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\machineeditorview.h
 # End Source File
 # Begin Source File
 
@@ -579,6 +575,10 @@ SOURCE=.\src\playposbar.h
 # Begin Source File
 
 SOURCE=.\src\plugineditor.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\presetsbar.h
 # End Source File
 # Begin Source File
 
@@ -678,19 +678,11 @@ SOURCE=.\src\trackscopeview.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\undoredo.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\undoredobar.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\volslider.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\vst2view.h
 # End Source File
 # Begin Source File
 

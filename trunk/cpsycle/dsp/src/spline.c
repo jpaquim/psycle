@@ -47,7 +47,7 @@ static void vtable_init(psy_dsp_SplineResampler* self)
 	}
 }
 
-void psy_dsp_splineresampler_init(psy_dsp_SplineResampler* self)
+void psy_dsp_spline_resampler_init(psy_dsp_SplineResampler* self)
 {
 	psy_dsp_resampler_init(&self->resampler);
 	vtable_init(self);

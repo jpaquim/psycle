@@ -14,10 +14,10 @@ typedef struct psy_dsp_SplineResampler {
 	psy_dsp_Resampler resampler;
 } psy_dsp_SplineResampler;
 
-void psy_dsp_splineresampler_init(psy_dsp_SplineResampler*);
+void psy_dsp_spline_resampler_init(psy_dsp_SplineResampler*);
 
 
-INLINE psy_dsp_Resampler* psy_dsp_splineresampler_base(psy_dsp_SplineResampler* self)
+INLINE psy_dsp_Resampler* psy_dsp_spline_resampler_base(psy_dsp_SplineResampler* self)
 {
 	return &self->resampler;
 }

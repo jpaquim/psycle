@@ -186,9 +186,10 @@ void psy_ui_editor_save(psy_ui_Editor* self, const char* path)
 	if (fp) {
 		char data[BLOCKSIZE + 1];
 		int lengthdoc;
+		int i;
 
 		lengthdoc = sci(self, SCI_GETLENGTH, 0, 0);
-		for (int i = 0; i < lengthdoc; i += BLOCKSIZE) {
+		for (i = 0; i < lengthdoc; i += BLOCKSIZE) {
 			int grabsize;
 			
 			grabsize = lengthdoc - i;

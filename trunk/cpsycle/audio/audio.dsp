@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\file\src" /I "..\container\src" /I "..\dsp\src" /I "..\lua53\src" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
@@ -475,6 +475,10 @@ SOURCE=.\src\sample.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\sampleiterator.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\sampler.c
 
 !IF  "$(CFG)" == "audio - Win32 Release"
@@ -820,6 +824,10 @@ SOURCE=.\src\psyclescript.h
 # Begin Source File
 
 SOURCE=.\src\sample.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\sampleiterator.h
 # End Source File
 # Begin Source File
 

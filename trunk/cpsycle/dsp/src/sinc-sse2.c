@@ -486,8 +486,8 @@ float sinc_sse2_float_internal(float const* data, uint32_t res, int leftExtent, 
 #else
 #include <string.h>
 
-void psy_dsp_sinc_sse2_resampler_init(psy_dsp_SincSEE2Resampler* self)
-{
-	memset(self, 0, sizeof(psy_dsp_SincSEE2Resampler));
-}
+// void psy_dsp_sinc_sse2_resampler_init(psy_dsp_SincSSE2Resampler* self)
+// {
+//	memset(self, 0, sizeof(psy_dsp_SincSEE2Resampler));
+// }
 #endif

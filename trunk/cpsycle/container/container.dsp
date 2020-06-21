@@ -87,6 +87,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\src\command.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\hashtbl.c
 # End Source File
 # Begin Source File
@@ -105,10 +109,18 @@ SOURCE=.\src\qsort.c
 
 SOURCE=.\src\signal.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\undoredo.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=.\src\command.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\src\hashtbl.h
@@ -128,6 +140,10 @@ SOURCE=.\src\qsort.h
 # Begin Source File
 
 SOURCE=.\src\signal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\undoredo.h
 # End Source File
 # End Group
 # End Target

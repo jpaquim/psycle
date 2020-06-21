@@ -61,7 +61,10 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 	int a_rectangleMaxX = self->right;
 	int a_rectangleMaxY = self->bottom;
 	double minX = a_p1x;
+	double minY;
 	double maxX = a_p2x;
+	double maxY;
+	double dx;
 
 	if (a_p1x > a_p2x)
 	{
@@ -88,10 +91,10 @@ bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle* self,
 
 	// Find corresponding min and max Y for min and max X we found before
 
-	double minY = a_p1y;
-	double maxY = a_p2y;
+	minY = a_p1y;
+	maxY = a_p2y;
 
-	double dx = a_p2x - a_p1x;
+	dx = a_p2x - a_p1x;
 
 	if (fabs(dx) > 0.0000001)
 	{

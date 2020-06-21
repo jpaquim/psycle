@@ -493,6 +493,8 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 	struct MODSAMPLEHEADER m_Samples[32];
 	struct MODHEADER m_Header;
 	char pID[5];
+	char* pSongName;
+	int i;
 
 	// check validity
 	if (!psy_audio_mod_isvalid(self)) {
@@ -505,7 +507,7 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 	// m_pSampler->XMSampler::PanningMode(XMSampler::PanningMode::TwoWay);
 	// get song name
 
-	char* pSongName = AllocReadStr(self->file, 20, 0);
+	pSongName = AllocReadStr(self->file, 20, 0);
 	if (pSongName == NULL)
 		return FALSE;
 
@@ -517,7 +519,7 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 
 	// get data
 	psyfile_seek(self->file, 20);
-	for (int i = 0; i < 31; i++) {
+	for (i = 0; i < 31; i++) {
 		psy_audio_Sample* wave;
 
 		wave = psy_audio_sample_allocinit(1);		
@@ -557,7 +559,7 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 	self->song->properties.extraticksperbeat = 0;
 	
 	if (self->song->properties.tracks <= 8) {
-		for (int i = 0; i < self->song->properties.tracks; i++)
+		for (i = 0; i < self->song->properties.tracks; i++)
 		{
 			if (i % 4 == 0 || i % 4 == 3) {
 				// m_pSampler->rChannel(i).DefaultPanFactorFloat(0.25f, true);
@@ -566,7 +568,7 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 			}
 		}
 	} else {
-		for (int i = 0; i < self->song->properties.tracks; i++)
+		for (i = 0; i < self->song->properties.tracks; i++)
 		{
 			//m_pSampler->rChannel(i).DefaultPanFactorFloat(0.5f, true);
 		}
@@ -580,7 +582,7 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 		}
 	}*/
 	psy_audio_mod_loadpatterns(self, &m_Header, NULL); // , modtovirtual);
-	for (int i = 0; i < 31; i++) {
+	for (i = 0; i < 31; i++) {
 		psy_audio_mod_loadinstrument(self, i, m_Samples);
 		//if (song.xminstruments.IsEnabled(i)) {
 			//song.SetVirtualInstrument(modtovirtual[i], 0, i);
@@ -665,6 +667,7 @@ void psy_audio_mod_loadsampleheader(psy_audio_SongFile* self, psy_audio_Sample* 
 {
 	unsigned short smpLen[32];
 	bool bLoop;
+	char tmpfine;
 
 	psyfile_read(self->file, m_Samples[iInstrIdx].sampleName, 22);
 	m_Samples[iInstrIdx].sampleName[21] = '\0';
@@ -699,7 +702,7 @@ void psy_audio_mod_loadsampleheader(psy_audio_SongFile* self, psy_audio_Sample* 
 
 	_wave->defaultvolume = 1.0f; // m_Samples[iInstrIdx].volume * 2;
 	_wave->samplerate = 8363;
-	char tmpfine = (char)m_Samples[iInstrIdx].finetune;
+	tmpfine = (char)m_Samples[iInstrIdx].finetune;
 	if (tmpfine > 7) tmpfine -= 16;
 	_wave->finetune = (uint16_t)(tmpfine * 12.5);// finetune has +-100 range in Psycle
 	psy_audio_sample_setname(_wave, m_Samples[iInstrIdx].sampleName);
@@ -709,16 +712,18 @@ void psy_audio_mod_loadsampledata(psy_audio_SongFile* self, psy_audio_Sample* _w
 {
 	// parse
 	short wNew = 0;	
+	int sampleCnt;
+	int j;
 
 	// cache sample data
 	unsigned char* smpbuf = malloc(smplen); // new unsigned char[smpLen[iInstrIdx]];
 	psyfile_read(self->file, smpbuf, smplen);
 
-	int sampleCnt = smplen;
+	sampleCnt = smplen;
 	_wave->channels.samples[0] = dsp.memory_alloc(smplen, sizeof(psy_dsp_amp_t));
 	_wave->numframes = smplen;
 	// 8 bit mono sample
-	for (int j = 0; j < sampleCnt; j++)
+	for (j = 0; j < sampleCnt; j++)
 	{
 		//In mods, samples are signed integer, so we can simply left shift
 		wNew = (smpbuf[j] << 8);
@@ -769,17 +774,20 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 	unsigned char lastmach[64];
 	psy_audio_PatternEvent e;
 	unsigned char mentry[4];
+	PatternNode* node;
+	int row;
+	int col;
 
 	memset(lastmach, 255, sizeof(char) * 64);
 	pattern = psy_audio_pattern_allocinit();	
 	//psy_audio_pattern_setname(pattern, "unnamed");
 	//psy_audio_pattern_setlength(pattern, 0.25 * iNumRows);
 	patterns_insert(&self->song->patterns, patIdx, pattern);
-	PatternNode* node = 0;
+	node = 0;
 	// get next values
-	for (int row = 0; row < iNumRows; row++)
+	for (row = 0; row < iNumRows; row++)
 	{
-		for (int col = 0; col < iTracks; col++)
+		for (col = 0; col < iTracks; col++)
 		{
 			// reset
 			unsigned char note = NOTECOMMANDS_EMPTY;
