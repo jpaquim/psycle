@@ -58,6 +58,13 @@ psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
 	return rv;
 }
 
+#define ISSLIDEUP(val) !((val)&0x0F)
+#define ISSLIDEDOWN(val) !((val)&0xF0)
+#define ISFINESLIDEUP(val) (((val)&0x0F)==SAMPLER_CMD_FINESLIDEUP)
+#define ISFINESLIDEDOWN(val) (((val)&0xF0)==SAMPLER_CMD_FINESLIDEDOWN)
+#define GETSLIDEUPVAL(val) (((val)&0xF0)>>4)
+#define GETSLIDEDOWNVAL(val) ((val)&0x0F)
+
 // SamplerMasterChannel
 static void psy_audio_samplermasterchannel_init(psy_audio_SamplerMasterChannel*,
 	psy_audio_Sampler*);
@@ -117,6 +124,12 @@ static void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*, uintptr_t i
 static void psy_audio_samplerchannel_dispose(psy_audio_SamplerChannel*);
 static void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel*,
 	const psy_audio_PatternEvent*);
+static void psy_audio_samplerchannel_performfx(psy_audio_SamplerChannel*);
+// effects
+static void psy_audio_samplerchannel_effectinit(psy_audio_SamplerChannel*);
+static void psy_audio_samplerchannel_setchannelvolumeslide(psy_audio_SamplerChannel*,
+	int speed);
+static void psy_audio_samplerchannel_perform_channelvolumeslide(psy_audio_SamplerChannel*);
 
 void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t index,
 	psy_audio_Sampler* sampler)
@@ -126,11 +139,13 @@ void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t ind
 	self->sampler = sampler;
 	self->volume = 1.f;
 	self->panfactor = (psy_dsp_amp_t) 0.5f;
-	self->m_ChannelDefVolume = 200;	
+	self->channeldefvolume =  1.f;	
 	self->m_DefaultPanFactor = 100;
 	self->m_DefaultCutoff = 127;
 	self->m_DefaultRessonance = 0;
 	self->defaultfiltertype = F_NONE;
+	self->effects = NULL;
+	psy_audio_samplerchannel_effectinit(self);
 	psy_snprintf(text, 127, "Channel %d", (int)index);
 	psy_audio_infomachineparam_init(&self->param_channel, text, "", MPF_SMALL);
 	psy_audio_intmachineparam_init(&self->filter_cutoff,
@@ -140,9 +155,9 @@ void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t ind
 	psy_audio_intmachineparam_init(&self->pan,
 		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultPanFactor, 0, 200);
 	psy_audio_volumemachineparam_init(&self->slider_param,
-		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->volume);
+		"Volume", "", MPF_SLIDER | MPF_SMALL, &self->channeldefvolume);
 	psy_audio_volumemachineparam_setmode(&self->slider_param, psy_audio_VOLUME_LINEAR);
-	psy_audio_volumemachineparam_setrange(&self->slider_param, 0, 127);
+	psy_audio_volumemachineparam_setrange(&self->slider_param, 0, 200);
 	psy_audio_intmachineparam_init(&self->level_param,
 		"Level", "Level", MPF_SLIDERLEVEL | MPF_SMALL, NULL, 0, 100);
 	//psy_signal_connect(&self->level_param.machineparam.signal_normvalue, self,
@@ -157,16 +172,36 @@ void psy_audio_samplerchannel_dispose(psy_audio_SamplerChannel* self)
 	psy_audio_intmachineparam_dispose(&self->pan);
 	psy_audio_volumemachineparam_dispose(&self->slider_param);
 	psy_audio_intmachineparam_dispose(&self->level_param);
+	psy_list_free(self->effects);
+	self->effects = NULL;
+}
+
+void psy_audio_samplerchannel_restore(psy_audio_SamplerChannel* self)
+{
+	self->volume = self->channeldefvolume;
+	psy_audio_samplerchannel_effectinit(self);	
+}
+
+void psy_audio_samplerchannel_newline(psy_audio_SamplerChannel* self)
+{
+	psy_list_free(self->effects);
+	self->effects = NULL;
+}
+
+void psy_audio_samplerchannel_effectinit(psy_audio_SamplerChannel* self)
+{
+	psy_list_free(self->effects);
+	self->effects = NULL;
+	self->chanvolslidespeed = 0.0f;
+	self->chanvolslidemem = 0;
 }
 
 void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 	const psy_audio_PatternEvent* ev)
 {
 	switch (ev->cmd) {
-		case SAMPLER_CMD_SET_CHANNEL_VOLUME:
-			self->volume = (psy_dsp_amp_t) ((ev->parameter < 64)
-				? (ev->parameter / 64.0f)
-				: 1.0f);
+		case SAMPLER_CMD_CHANNEL_VOLUME_SLIDE:
+			psy_audio_samplerchannel_setchannelvolumeslide(self, ev->parameter);			
 		break;
 		case SAMPLER_CMD_PANNING:
 			self->panfactor = ev->parameter / (psy_dsp_amp_t) 255;
@@ -175,6 +210,73 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 		;
 	}
 }
+
+void psy_audio_samplerchannel_addeffect(psy_audio_SamplerChannel* self, int cmd)
+{
+	psy_list_append(&self->effects, (void*)(uintptr_t)cmd);
+}
+
+void psy_audio_samplerchannel_performfx(psy_audio_SamplerChannel* self)
+{
+	psy_List* p;
+
+	for (p = self->effects; p != NULL; psy_list_next(&p)) {
+		int effect = (int)psy_list_entry(p);
+		
+		switch (effect) {
+			case SAMPLER_EFFECT_CHANNELVOLSLIDE:
+				psy_audio_samplerchannel_perform_channelvolumeslide(self);
+				break;
+			default:
+				break;
+		}
+	}	
+}
+
+void psy_audio_samplerchannel_setchannelvolumeslide(psy_audio_SamplerChannel* self,
+	int speed)
+{
+	if (speed == 0) {
+		if (self->chanvolslidemem == 0) {
+			return;
+		}
+		speed = self->chanvolslidemem;
+	} else self->chanvolslidemem = speed;
+
+	if (ISSLIDEUP(speed)) { // Slide up
+		speed = GETSLIDEUPVAL(speed);
+		psy_audio_samplerchannel_addeffect(self, SAMPLER_EFFECT_CHANNELVOLSLIDE);
+		self->chanvolslidespeed = speed / 64.0f;
+		if (speed == 0xF) {
+			psy_audio_samplerchannel_perform_channelvolumeslide(self);
+		}
+	} else if (ISSLIDEDOWN(speed)) { // Slide down
+		speed = GETSLIDEDOWNVAL(speed);
+		psy_audio_samplerchannel_addeffect(self, SAMPLER_EFFECT_CHANNELVOLSLIDE);
+		self->chanvolslidespeed = -speed / 64.0f;
+		if (speed == 0xF) {
+			psy_audio_samplerchannel_perform_channelvolumeslide(self);
+		}
+	} else if (ISFINESLIDEUP(speed)) { // FineSlide up
+		self->chanvolslidespeed = (GETSLIDEUPVAL(speed)) / 64.0f;
+		psy_audio_samplerchannel_perform_channelvolumeslide(self);
+	} else if (ISFINESLIDEDOWN(speed)) { // FineSlide down
+		self->chanvolslidespeed = -GETSLIDEDOWNVAL(speed) / 64.0f;
+		psy_audio_samplerchannel_perform_channelvolumeslide(self);
+	}
+}
+
+void psy_audio_samplerchannel_perform_channelvolumeslide(psy_audio_SamplerChannel* self)
+{
+	self->volume += self->chanvolslidespeed;
+	if (self->volume < 0.0f) {
+		self->volume = 0.0f;
+	} else if (self->volume > 1.0f) {
+		self->volume = 1.0f;
+	}
+}
+
+
 
 bool  psy_audio_samplerchannel_load(psy_audio_SamplerChannel* self,
 	psy_audio_SongFile* songfile)
@@ -187,7 +289,7 @@ bool  psy_audio_samplerchannel_load(psy_audio_SamplerChannel* self,
 	if (strcmp(chan, "CHAN")) return FALSE;
 
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));///< (0..200)   &0x100 = Mute.
-	self->m_ChannelDefVolume = temp32;
+	self->channeldefvolume = temp32 / 200.f;
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));//<  0..200 .  &0x100 = Surround.
 	self->m_DefaultPanFactor = temp32;
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));
@@ -205,7 +307,7 @@ void psy_audio_samplerchannel_save(psy_audio_SamplerChannel* self,
 	int size = 5 * sizeof(int);
 	psyfile_write(songfile->file, "CHAN", 4);
 	psyfile_write_int32(songfile->file, size);
-	psyfile_write_int32(songfile->file, self->m_ChannelDefVolume);
+	psyfile_write_int32(songfile->file, (int32_t)(self->channeldefvolume * 200));
 	psyfile_write_int32(songfile->file, self->m_DefaultPanFactor);
 	psyfile_write_int32(songfile->file, self->m_DefaultCutoff);
 	psyfile_write_int32(songfile->file, self->m_DefaultRessonance);	
@@ -413,7 +515,6 @@ void psy_audio_samplerticktimer_dowork(psy_audio_SamplerTickTimer* self,
 	psy_audio_buffercontext_setnumsamples(bc, restorenumsamples);
 	psy_audio_buffercontext_setoffset(bc, restoreoffset);
 }
-
 
 // Sampler
 static void resamplingmethod_tweak(psy_audio_Sampler*,
@@ -627,6 +728,10 @@ void psy_audio_sampler_initps1(psy_audio_Sampler* self)
 		SAMPLER_CMD_VOLUMESLIDE,
 		SAMPLER_CMD_VOLUMESLIDE,
 		psy_audio_SAMPLERCMDMODE_PERS);
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_CHANNEL_VOLUME_SLIDE,
+		SAMPLER_CMD_CHANNEL_VOLUME_SLIDE,
+		psy_audio_SAMPLERCMDMODE_PERS);
 	psy_audio_sampler_updatecmdmap(self);
 }
 
@@ -676,6 +781,10 @@ void psy_audio_sampler_initsampulse(psy_audio_Sampler* self)
 	psy_audio_sampler_addcmd(self,
 		SAMPLER_CMD_VOLUMESLIDE,
 		SAMPLER_CMD_VOLUMESLIDE,
+		psy_audio_SAMPLERCMDMODE_PERS);
+	psy_audio_sampler_addcmd(self,
+		SAMPLER_CMD_CHANNEL_VOLUME_SLIDE,
+		SAMPLER_CMD_CHANNEL_VOLUME_SLIDE,
 		psy_audio_SAMPLERCMDMODE_PERS);
 	psy_audio_sampler_updatecmdmap(self);
 }
@@ -792,7 +901,21 @@ void psy_audio_sampler_ontimertick(psy_audio_Sampler* self)
 {
 	psy_List* p;
 	uintptr_t c = 0;
-	
+	psy_TableIterator it;
+
+	// first notify channels
+	for (it = psy_table_begin(&self->channels);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_SamplerChannel* channel;
+
+		channel = (psy_audio_SamplerChannel*)psy_tableiterator_value(&it);
+		// SetEffect is called by seqtick
+		if (psy_audio_samplerticktimer_tickcount(&self->ticktimer) != 0) {		
+			psy_audio_samplerchannel_performfx(channel);
+		}
+	}
+	// secondly notify voices
 	for (p = self->voices; p != NULL && c < self->numvoices; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
@@ -868,11 +991,22 @@ void newline(psy_audio_Sampler* self)
 	psy_List* p;
 	
 	self->samplecounter = 0;
+	psy_TableIterator it;
+
+	// first notify channels
+	for (it = psy_table_begin(&self->channels);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_SamplerChannel* channel;
+
+		channel = (psy_audio_SamplerChannel*)psy_tableiterator_value(&it);		
+		psy_audio_samplerchannel_newline(channel);		
+	}
 	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
-		voice = (psy_audio_SamplerVoice*) p->entry;
-		voice->effcmd.id = SAMPLER_CMD_NONE;
+		voice = (psy_audio_SamplerVoice*) p->entry;		
+		psy_audio_samplervoice_newline(voice);
 	}
 	psy_audio_samplerticktimer_reset(&self->ticktimer,	
 		(uintptr_t)
@@ -882,6 +1016,17 @@ void newline(psy_audio_Sampler* self)
 void stop(psy_audio_Sampler* self)
 {
 	releaseallvoices(self);
+	psy_TableIterator it;
+
+	// first notify channels
+	for (it = psy_table_begin(&self->channels);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_SamplerChannel* channel;
+
+		channel = (psy_audio_SamplerChannel*)psy_tableiterator_value(&it);
+		psy_audio_samplerchannel_restore(channel);
+	}
 }
 
 psy_audio_InstrumentIndex currslot(psy_audio_Sampler* self, uintptr_t channel,
@@ -1225,6 +1370,11 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(psy_audio_Sampler* samp
 	return rv;
 }
 
+void psy_audio_samplervoice_newline(psy_audio_SamplerVoice* self)
+{
+	self->effcmd.id = SAMPLER_CMD_NONE;
+}
+
 void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 {
 	switch (self->effcmd.id) {
@@ -1274,7 +1424,7 @@ void psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self)
 		}
 		default:
 		break;
-	}
+	}	
 	psy_audio_samplervoice_updatespeed(self);
 }
 
@@ -1586,7 +1736,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 					if (psy_audio_buffer_numchannels(&position->sample->channels) > 1) {
 						position->m_pR += diff;
 					}
-				}				
+				}
 				psy_audio_sampleiterator_postwork(position);
 				if (!psy_audio_sampleiterator_playing(position)) {
 					psy_audio_samplervoice_reset(self);
@@ -1630,10 +1780,14 @@ psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice* se
 	psy_dsp_amp_t rv;
 	psy_dsp_amp_t volume;
 
-	rv = psy_audio_samplervoice_workfilter(self, channel, input, filterenv, pos);
 	volume = env[pos] * self->instrument->globalvolume;
-	if (filterenv) {
-		volume *= filterenv[pos];
+	if (psy_audio_sampler_usefilters(self->sampler)) {
+		rv = psy_audio_samplervoice_workfilter(self, channel, input, filterenv, pos);
+		if (filterenv) {
+			volume *= filterenv[pos];
+		}
+	} else {
+		rv = input;
 	}
 	if (channel == 0) {
 		volume *= lvol;
@@ -1641,7 +1795,7 @@ psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice* se
 		volume *= rvol;
 	} else {
 		volume *= svol;
-	}
+	}	
 	rv *= volume;
 	return rv;
 }
@@ -1666,9 +1820,10 @@ void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice* self,
 	psy_dsp_amp_t panning;
 
 	*svol = psy_audio_samplervoice_volume(self, sample) *
-		//(self->usedefaultvolume || self->effcmd.id == SAMPLER_CMD_VOLUMESLIDE)
-			//? sample->defaultvolume 
-			self->vol;
+		(self->usedefaultvolume || self->effcmd.id == SAMPLER_CMD_VOLUMESLIDE)
+			? sample->defaultvolume 
+			: self->vol;
+	*svol *= sample->globalvolume;
 	cvol = self->channel ? self->channel->volume : (psy_dsp_amp_t)1.f;
 	if (self->channel && self->sampler->panpersistent) {
 		panning = self->channel->panfactor;
@@ -1677,7 +1832,7 @@ void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice* self,
 	}
 	*rvol = panning * *svol * cvol;
 	*lvol = ((psy_dsp_amp_t)1.f - panning) * *svol * cvol;
-	//FT2 Style (Two slides) mode, but with max amp = 0.5.
+	// FT2 Style (Two slides) mode, but with max amp = 0.5.
 	if (*rvol > self->sampler->clipmax) {
 		*rvol = (psy_dsp_amp_t)self->sampler->clipmax;
 	}
@@ -1783,8 +1938,8 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 		{
 			ZxxMacro zxxMap[128];
 			int i;
-			bool m_bAmigaSlides;// Using Linear or Amiga Slides.
-			bool m_UseFilters;
+			uint8_t m_bAmigaSlides;// Using Linear or Amiga Slides.
+			uint8_t m_UseFilters;
 			int32_t m_GlobalVolume;
 			int32_t m_PanningMode;
 
@@ -1812,6 +1967,7 @@ void loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 			psyfile_read(songfile->file, &m_bAmigaSlides, sizeof(m_bAmigaSlides));
 			self->amigaslides = m_bAmigaSlides;
 			psyfile_read(songfile->file, &m_UseFilters, sizeof(m_UseFilters));
+			self->usefilters = m_UseFilters;
 			psyfile_read(songfile->file, &m_GlobalVolume, sizeof(m_GlobalVolume));
 			psyfile_read(songfile->file, &m_PanningMode, sizeof(m_PanningMode));
 			self->masterchannel.volume = m_GlobalVolume / 127.f;
@@ -1903,22 +2059,19 @@ void savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
 	default: temp = 1;
 	}
 	psyfile_write_int32(songfile->file, temp); // quality
-
 	//TODO: zxxMap cannot be edited right now.
 	for (int i = 0; i < 128; i++) {
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].mode);
 		psyfile_write_int32(songfile->file, 0); // zxxMap[i].value);
 	}
 	psyfile_write_uint8(songfile->file, (uint8_t)(self->amigaslides != 0));
-	psyfile_write_uint8(songfile->file, self->usefilters);
+	psyfile_write_uint8(songfile->file, (uint8_t) self->usefilters);
 	psyfile_write_int32(songfile->file, 128);
 	psyfile_write_int32(songfile->file, psy_audio_PANNING_LINEAR);
-
 	for (int i = 0; i < MAX_TRACKS; i++) {		
 		psy_audio_samplerchannel_save(sampler_channel(self, i),
 			songfile);
 	}
-
 	psyfile_write_uint32(songfile->file, (uint32_t)self->instrumentbank);
 	size_t endpos = psyfile_getpos(songfile->file);
 	psyfile_seek(songfile->file, filepos);

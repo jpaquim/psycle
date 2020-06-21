@@ -28,9 +28,7 @@ static void pluginsview_onsize(PluginsView*, psy_ui_Component* sender,
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, int x, int y);
-static void pluginsview_computetextsizes(PluginsView* self);
-static void pluginsview_onscroll(PluginsView*, psy_ui_Component* sender,
-	int stepx, int stepy);
+static void pluginsview_computetextsizes(PluginsView*);
 static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
 static void pluginsview_adjustscroll(PluginsView*);
@@ -181,10 +179,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 		pluginsview_ondestroy);	
 	psy_signal_connect(&self->component.signal_size, self,
 		pluginsview_onsize);
-	psy_signal_connect(&self->component.signal_scroll, self,
-		pluginsview_onscroll);	
-	self->selectedplugin = 0;	
-	self->dy = 0;	
+	self->selectedplugin = 0;
 	self->calledby = 0;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);
@@ -235,17 +230,17 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 		psy_ui_settextcolor(g, 0x00CACACA);		
 	}		
 	plugindisplayname(property, text);	
-	psy_ui_textout(g, x, y + self->dy + 2, text, strlen(text));
+	psy_ui_textout(g, x, y + 2, text, strlen(text));
 	plugintype(property, text);
 	psy_ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
-		y + self->dy + 2, text, strlen(text));
+		y + 2, text, strlen(text));
 	if (pluginmode(property, text) == MACHMODE_FX) {
 		psy_ui_settextcolor(g, 0x00B1C8B0);
 	} else {		
 		psy_ui_settextcolor(g, 0x00D1C5B6);	
 	}
 	psy_ui_textout(g, x + self->columnwidth - 10 * self->avgcharwidth,
-		y + self->dy + 2, text, strlen(text));	
+		y + 2, text, strlen(text));
 }
 
 void pluginsview_computetextsizes(PluginsView* self)
@@ -339,12 +334,6 @@ void pluginsview_adjustscroll(PluginsView* self)
 	}
 }
 
-void pluginsview_onscroll(PluginsView* self, psy_ui_Component* sender, 
-	int stepx, int stepy)
-{
-	self->dy += sender->scrollstepy * stepy;
-}
-
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1) {
@@ -371,7 +360,7 @@ void pluginsview_hittest(PluginsView* self, int x, int y)
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
-			if (psy_ui_rectangle_intersect(&r, x, y - self->dy)) {
+			if (psy_ui_rectangle_intersect(&r, x, y)) {
 				self->selectedplugin = p;
 				break;
 			}		
@@ -397,7 +386,7 @@ void pluginsview_onmousedoubleclick(PluginsView* self, psy_ui_MouseEvent* ev)
 void pluginsview_onplugincachechanged(PluginsView* self,
 	psy_audio_PluginCatcher* sender)
 {
-	self->dy = 0;
+	psy_ui_component_setscrolltop(&self->component, 0);
 	self->selectedplugin = 0;
 	if (self->plugins) {
 		properties_free(self->plugins);
@@ -406,7 +395,9 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 		self->plugins = psy_properties_clone(sender->plugins, 1);
 	} else {
 		self->plugins = 0;
-	}	
+	}
+	psy_ui_component_setscrolltop(&self->component, 0);
+	psy_ui_component_setverticalscrollposition(&self->component, 0);	
 	pluginsview_adjustscroll(self);
 	psy_ui_component_invalidate(&self->component);
 }
@@ -483,7 +474,8 @@ void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 		properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		self->pluginsview.dy = 0;
+		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setverticalscrollposition(&self->pluginsview.component, 0);
 		pluginsview_adjustscroll(&self->pluginsview);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
@@ -499,7 +491,8 @@ void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
 		properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		self->pluginsview.dy = 0;
+		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setverticalscrollposition(&self->pluginsview.component, 0);
 		pluginsview_adjustscroll(&self->pluginsview);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
@@ -515,7 +508,8 @@ void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
 		properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
-		self->pluginsview.dy = 0;
+		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
+		psy_ui_component_setverticalscrollposition(&self->pluginsview.component, 0);
 		pluginsview_adjustscroll(&self->pluginsview);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}

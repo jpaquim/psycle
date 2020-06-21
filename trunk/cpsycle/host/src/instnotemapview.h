@@ -33,8 +33,7 @@ typedef struct {
 } InstrumentNoteMapMetrics;
 
 typedef struct {
-	psy_ui_Component component;	
-	int dy;
+	psy_ui_Component component;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentKeyboardView;
 
@@ -57,8 +56,7 @@ enum {
 };
 
 typedef struct {
-	psy_ui_Component component;	
-	int dy;
+	psy_ui_Component component;
 	psy_audio_Instrument* instrument;
 	InstrumentNoteMapMetrics metrics;
 } InstrumentParameterView;
@@ -71,7 +69,6 @@ void instrumentparameterview_init(InstrumentParameterView*,
 
 typedef struct {
 	psy_ui_Component component;	
-	int dy;
 	psy_audio_Instrument* instrument;
 	uintptr_t selected;
 	int dragmode;

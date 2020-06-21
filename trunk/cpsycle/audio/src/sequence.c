@@ -634,7 +634,7 @@ void sequence_clearplayselection(psy_audio_Sequence* self)
 	}
 }
 
-float psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
+psy_dsp_beat_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 {
 	psy_audio_Sequencer sequencer;	
 	uintptr_t maxamount;
@@ -667,5 +667,5 @@ float psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 		} while (numsamplex > 0);
 	}
 	psy_audio_sequencer_dispose(&sequencer);
-	return (float)(sequencer.playcounter / (float)sequencer.samplerate);
+	return sequencer.playcounter / (psy_dsp_beat_t)sequencer.samplerate;
 }

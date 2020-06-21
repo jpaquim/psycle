@@ -17,8 +17,6 @@
 static void cpumoduleview_ondraw(CPUModuleView*, psy_ui_Graphics*);
 static void cpumoduleview_onsize(CPUModuleView*, psy_ui_Size*);
 static void cpumoduleview_adjustscroll(CPUModuleView*);
-static void cpumoduleview_onscroll(CPUModuleView*, psy_ui_Component* sender,
-	int stepx, int stepy);
 
 static psy_ui_ComponentVtable cpumoduleview_vtable;
 static int cpumoduleview_vtable_initialized = 0;
@@ -40,11 +38,8 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	cpumoduleview_vtable_init(self);
 	self->component.vtable = &cpumoduleview_vtable;
 	self->workspace = workspace;
-	self->dy = 0;
 	psy_ui_component_showverticalscrollbar(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
-	psy_signal_connect(&self->component.signal_scroll, self,
-		cpumoduleview_onscroll);
 }
 
 void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
@@ -67,7 +62,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 			machine = psy_audio_machines_at(&self->workspace->song->machines,
 				slot);
 			if (machine) {
-				if (cpy + self->dy >= 0) {
+				if (cpy + (-psy_ui_component_scrolltop(&self->component)) >= 0) {
 					char text[40];
 					const psy_audio_MachineInfo* info;
 					float percent;
@@ -77,11 +72,11 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 					real_time_duration = 100;
 					info = psy_audio_machine_info(machine);
 					psy_snprintf(text, 20, "%d", (int)slot);
-					psy_ui_textout(g, 0, cpy + self->dy, text, strlen(text));
-					psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy + self->dy,
+					psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component)), text, strlen(text));
+					psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy + (-psy_ui_component_scrolltop(&self->component)),
 						psy_audio_machine_editname(machine),
 						min(strlen(psy_audio_machine_editname(machine)), 14));
-					psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy + self->dy,
+					psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy + (-psy_ui_component_scrolltop(&self->component)),
 						info->Name, strlen(info->Name));
 					clock = psy_audio_machine_accumulated_processing_time(machine);
 					percent = 100.0f *
@@ -89,9 +84,9 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 						real_time_duration;
 					percent = 0.f;
 					psy_snprintf(text, 40, "%.1f%%", percent);
-					psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy + self->dy,
+					psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy + (-psy_ui_component_scrolltop(&self->component)),
 						text, strlen(text));
-					if (cpy + self->dy > size.height) {
+					if (cpy + (-psy_ui_component_scrolltop(&self->component)) > size.height) {
 						//break;
 					}
 				}
@@ -126,16 +121,10 @@ void cpumoduleview_adjustscroll(CPUModuleView* self)
 		psy_ui_component_setverticalscrollrange(&self->component,
 			0, currlines - visilines);
 	} else {
-		self->dy = 0;
+		psy_ui_component_setscrolltop(&self->component, 0);
 		psy_ui_component_setverticalscrollrange(&self->component,
 			0, 0);
 	}
-}
-
-void cpumoduleview_onscroll(CPUModuleView* self, psy_ui_Component* sender,
-	int stepx, int stepy)
-{
-	self->dy += sender->scrollstepy * stepy;	
 }
 
 static void cpuview_initcoreinfo(CPUView*);

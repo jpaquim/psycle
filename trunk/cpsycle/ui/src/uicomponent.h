@@ -219,7 +219,8 @@ typedef struct psy_ui_Component {
 	int cursor;	
 	bool mousetracking;
 	psy_ui_Style style;
-	psy_ui_Size preferredsize;	
+	psy_ui_Size preferredsize;
+	psy_ui_IntPoint scroll;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -530,6 +531,38 @@ INLINE void psy_ui_component_setwheelscroll(psy_ui_Component* self, int lines)
 INLINE void psy_ui_component_selectsection(psy_ui_Component* self, uintptr_t section)
 {
 	psy_signal_emit(&self->signal_selectsection, self, 1, section);
+}
+
+INLINE psy_ui_IntPoint psy_ui_component_scroll(psy_ui_Component* self)
+{
+	return self->scroll;
+}
+
+INLINE void psy_ui_component_setscroll(psy_ui_Component* self,
+	psy_ui_IntPoint position)
+{
+	self->scroll = position;
+}
+
+INLINE void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
+{
+	self->scroll.x = left;
+}
+
+INLINE int psy_ui_component_scrollleft(psy_ui_Component* self)
+{
+	return self->scroll.x;
+}
+
+INLINE void psy_ui_component_setscrolltop(psy_ui_Component* self,
+	int top)
+{
+	self->scroll.y = top;
+}
+
+INLINE int psy_ui_component_scrolltop(psy_ui_Component* self)
+{
+	return self->scroll.y;
 }
 
 #ifdef __cplusplus

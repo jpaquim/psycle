@@ -18,7 +18,6 @@
 typedef struct {
 	psy_ui_Component component;
 	Workspace* workspace;
-	int dy;	
 } CPUModuleView;
 
 void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,

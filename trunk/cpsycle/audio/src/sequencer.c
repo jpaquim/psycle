@@ -722,6 +722,13 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			psy_audio_Machine* machine;
 
 			machine = psy_audio_machines_at(self->machines, patternentry_front(patternentry)->mach);
+			if (!machine) {
+				if (patternentry_front(patternentry)->mach == NOTECOMMANDS_MACH_EMPTY) {
+					uintptr_t lastmachine;
+					lastmachine = (uintptr_t)psy_table_at(&self->lastmachine, patternentry->track);
+					machine = psy_audio_machines_at(self->machines, lastmachine);
+				}
+			}
 			// Does this machine really exist and is not muted?
 			if (machine && !psy_audio_machine_muted(machine)) {
 				if (patternentry_front(patternentry)->cmd == NOTE_DELAY) {
@@ -733,7 +740,7 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 				} else if (patternentry_front(patternentry)->cmd != SET_VOLUME) {
 					psy_audio_sequencer_note(self, patternentry, offset);
 				}
-			}
+			} 
 		}
 		if (patternentry_front(patternentry)->cmd == SET_VOLUME) {
 			psy_audio_PatternEntry* entry;
@@ -813,6 +820,13 @@ void psy_audio_sequencer_note(psy_audio_Sequencer* self,
 	psy_audio_PatternEntry* entry;
 
 	entry = patternentry_clone(patternentry);
+	if (patternentry_front(entry)->mach == NOTECOMMANDS_MACH_EMPTY) {
+		uintptr_t lastmachine;
+
+		lastmachine = (uintptr_t)psy_table_at(&self->lastmachine,
+			patternentry->track);
+		patternentry_front(entry)->mach = (uint8_t)lastmachine;
+	}
 	patternentry_setbpm(entry, self->bpm);
 	entry->delta = offset - self->position;
 	if (patternentry_front(patternentry)->note <

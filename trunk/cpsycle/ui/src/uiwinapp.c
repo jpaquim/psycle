@@ -198,9 +198,11 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				pt_client.y = (SHORT)HIWORD(lParam);
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init(&ev,
-					pt_client.x, pt_client.y, (short)LOWORD(wParam),
+					pt_client.x + imp->component->scroll.x,
+					pt_client.y + imp->component->scroll.y,
+					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);				
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
@@ -317,59 +319,97 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_PAINT :			
 				if (imp->component->vtable->ondraw || imp->component->signal_draw.slots ||
 						imp->component->backgroundmode != psy_ui_BACKGROUND_NONE) {
-					HDC bufferDC;
-					HBITMAP bufferBmp;
-					HBITMAP oldBmp;
-					HDC hdc;				
-					RECT rect;
-					HFONT hPrevFont = 0;
-					HFONT hfont = 0;
-					psy_ui_win_GraphicsImp* win_g = 0;
+					HDC hdc;					
+					POINT clipsize;														
 
-					hdc = BeginPaint (hwnd, &ps);
-					GetClientRect(hwnd, &rect);
-					if (imp->component->doublebuffered) {					
-						bufferDC = CreateCompatibleDC(hdc);					
-						bufferBmp = CreateCompatibleBitmap(hdc, rect.right,
-							rect.bottom);
-						oldBmp = SelectObject(bufferDC, bufferBmp);					
-						psy_ui_graphics_init(&g, bufferDC);
-						win_g = (psy_ui_win_GraphicsImp*) g.imp;
-					} else {
-						psy_ui_graphics_init(&g, hdc);
-						win_g = (psy_ui_win_GraphicsImp*) g.imp;
-					}
-					psy_ui_setrectangle(&g.clip,
-						ps.rcPaint.left, ps.rcPaint.top, ps.rcPaint.right - ps.rcPaint.left,
-						ps.rcPaint.bottom - ps.rcPaint.top);				
-					if (imp->component->backgroundmode == psy_ui_BACKGROUND_SET) {
-						psy_ui_Rectangle r;
+					hdc = BeginPaint(hwnd, &ps);
+					// store clip/repaint size of paint request
+					clipsize.x = ps.rcPaint.right - ps.rcPaint.left;
+					clipsize.y = ps.rcPaint.bottom - ps.rcPaint.top;
+					// anything to paint?
+					if (clipsize.x > 0 && clipsize.y > 0) {
+						HDC bufferDC;
+						HBITMAP bufferBmp;
+						HBITMAP oldBmp;
+						psy_ui_win_GraphicsImp* win_g;
+						POINT dblbuffer_offset;
+						HFONT hfont = 0;
+						HFONT hPrevFont = 0;																		
 
-						psy_ui_setrectangle(&r,
-						rect.left, rect.top, rect.right - rect.left,
-						rect.bottom - rect.top);
-						psy_ui_rectangle_union(&r, &g.clip);
-						psy_ui_drawsolidrectangle(&g, r, imp->component->backgroundcolor);
-					}					
-					hfont = ((psy_ui_win_FontImp*)
-						psy_ui_component_font(imp->component)->imp)->hfont;
-					hPrevFont = SelectObject(win_g->hdc, hfont);					
-					if (imp->component->vtable->ondraw) {
-						imp->component->vtable->ondraw(imp->component, &g);
+						if (imp->component->doublebuffered) {
+							// create a graphics context with back buffer bitmap with
+							// origin (0; 0) and size of the paint request
+							bufferDC = CreateCompatibleDC(hdc);
+							bufferBmp = CreateCompatibleBitmap(hdc, clipsize.x,
+								clipsize.y);
+							oldBmp = SelectObject(bufferDC, bufferBmp);
+							psy_ui_graphics_init(&g, bufferDC);
+							win_g = (psy_ui_win_GraphicsImp*)g.imp;
+							// back buffer bitmap starts at 0, 0
+							// set offset to paint request origin
+							// to translate it to the buffer DC 0, 0 origin
+							dblbuffer_offset.x = ps.rcPaint.left;
+							dblbuffer_offset.y = ps.rcPaint.top;
+						} else {
+							// create graphics handle with the paint hdc
+							psy_ui_graphics_init(&g, hdc);
+							win_g = (psy_ui_win_GraphicsImp*)g.imp;
+							// no translation needed
+							dblbuffer_offset.x = 0;
+							dblbuffer_offset.y = 0;
+						}
+						if (imp->component->backgroundmode ==
+								psy_ui_BACKGROUND_SET) {
+							// draw background
+							psy_ui_Rectangle r;
+							psy_ui_setrectangle(&r,
+								ps.rcPaint.left - dblbuffer_offset.x,
+								ps.rcPaint.top - dblbuffer_offset.y,
+								clipsize.x, clipsize.y);
+							psy_ui_drawsolidrectangle(&g, r, imp->component->backgroundcolor);
+						}
+						// prepare a clip rect that can be used by a component to
+						// optimize the draw amount
+						psy_ui_setrectangle(&g.clip,
+							ps.rcPaint.left + imp->component->scroll.x,
+							ps.rcPaint.top + imp->component->scroll.y,
+							clipsize.x, clipsize.y);
+						// translate coordinates 
+						// 1. to fit bufferDC bitmap if used
+						// 2. to handle scroll coords
+						// DPtoLP ?
+						SetWindowOrgEx(win_g->hdc,
+							dblbuffer_offset.x + imp->component->scroll.x,
+							dblbuffer_offset.y + imp->component->scroll.y,
+							NULL);
+						// update graphics font with component font 
+						hfont = ((psy_ui_win_FontImp*)
+							psy_ui_component_font(imp->component)->imp)->hfont;
+						hPrevFont = SelectObject(win_g->hdc, hfont);
+						// call specialization methods (first vtable, then signals)
+						if (imp->component->vtable->ondraw) {
+							imp->component->vtable->ondraw(imp->component, &g);
+						}
+						psy_signal_emit(&imp->component->signal_draw, imp->component, 1, &g);
+						// clean up font
+						if (hPrevFont) {
+							SelectObject(win_g->hdc, hPrevFont);
+						}
+						if (imp->component->doublebuffered) {
+							// copy the double buffer bitmap to the paint hdc
+							win_g->hdc = hdc;
+							// DPtoLP ?
+							SetWindowOrgEx(bufferDC, 0, 0, NULL);
+							SetWindowOrgEx(hdc, 0, 0, NULL);
+							BitBlt(hdc, ps.rcPaint.left, ps.rcPaint.top, clipsize.x,
+								clipsize.y, bufferDC, 0, 0, SRCCOPY);
+							// clean the double buffer bitmap
+							SelectObject(bufferDC, oldBmp);
+							DeleteObject(bufferBmp);
+							DeleteDC(bufferDC);
+						}
+						psy_ui_graphics_dispose(&g);
 					}
-					psy_signal_emit(&imp->component->signal_draw, imp->component, 1, &g);
-					if (hPrevFont) {
-						SelectObject(win_g->hdc, hPrevFont);
-					}
-					if (imp->component->doublebuffered) {
-						win_g->hdc = hdc;
-						BitBlt(hdc, ps.rcPaint.left,ps.rcPaint.top, ps.rcPaint.right, ps.rcPaint.bottom,
-							bufferDC, ps.rcPaint.left, ps.rcPaint.top, SRCCOPY);				
-						SelectObject(bufferDC, oldBmp);
-						DeleteObject(bufferBmp);
-						DeleteDC(bufferDC);					
-					}
-					psy_ui_graphics_dispose(&g);
 					EndPaint(hwnd, &ps);
 					return 0 ;
 				}
@@ -456,9 +496,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{
 				psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD (lParam) + imp->component->scroll.x, 
+					(SHORT)HIWORD (lParam) + imp->component->scroll.y,
+					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -471,10 +513,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_RBUTTONUP:							
 			{
 				psy_ui_MouseEvent ev;
-
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+			
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -487,10 +531,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_MBUTTONUP:			
 			{			
 				psy_ui_MouseEvent ev;
-
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_MBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+		
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -504,9 +550,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{
 				psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -520,9 +568,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{
 				psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				psy_ui_mouseevent_settarget(&ev, winapp->eventretarget);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
@@ -537,9 +587,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{		
 				psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_MBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -553,9 +605,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{
 				psy_ui_MouseEvent ev;
 				
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam),
-					(SHORT)HIWORD (lParam), MK_LBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);				
@@ -569,9 +623,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{
 				psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_MBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
@@ -585,9 +641,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			{				
 				psy_ui_MouseEvent ev;
 
-				psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-					(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				psy_ui_mouseevent_init(&ev,
+					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
+					GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
@@ -615,9 +673,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				{
 					psy_ui_MouseEvent ev;
 
-					psy_ui_mouseevent_init(&ev, (SHORT)LOWORD (lParam), 
-						(SHORT)HIWORD (lParam), wParam, 0,
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+					psy_ui_mouseevent_init(&ev,
+						(SHORT)LOWORD(lParam) + imp->component->scroll.x,
+						(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+						wParam, 0, GetKeyState(VK_SHIFT) < 0,
+						GetKeyState(VK_CONTROL) < 0);
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 						&ev);
@@ -649,7 +709,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				pt_client.y = (SHORT)HIWORD(lParam);
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init(&ev,
-					pt_client.x, pt_client.y, (short)LOWORD(wParam),
+					pt_client.x + imp->component->scroll.x,
+					pt_client.y + imp->component->scroll.y,
+					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
 				imp->component->vtable->onmousewheel(imp->component, &ev);
@@ -770,12 +832,17 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		psy_ui_WinApp* winapp;
 
 		winapp = (psy_ui_WinApp*) app.platform;
-		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);	
+		if (imp->component->handlevscroll) {
+			psy_ui_component_setscrolltop(imp->component,
+				psy_ui_component_scrolltop(imp->component) -
+				imp->component->scrollstepy * (iPos - si.nPos));
+		}
 		if (imp->component && imp->component->signal_scroll.slots) {
 			psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
 				0, (iPos - si.nPos));			
 		}
-		if (imp->component->handlevscroll) {
+		if (imp->component->handlevscroll) {			
 			psy_ui_component_scrollstep(imp->component, 0, (iPos - si.nPos));
 		}
 	}
@@ -807,11 +874,16 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 		winapp = (psy_ui_WinApp*) app.platform;
 		imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
+		if (imp->component->handlehscroll) {
+			psy_ui_component_setscrollleft(imp->component,
+				psy_ui_component_scrollleft(imp->component) -
+				imp->component->scrollstepx * (iPos - si.nPos));
+		}
 		if (imp->component && imp->component->signal_scroll.slots) {
 			psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
 				(iPos - si.nPos), 0);			
 		}
-		if (imp->component->handlehscroll) {
+		if (imp->component->handlehscroll) {		
 			psy_ui_component_scrollstep(imp->component, (iPos - si.nPos), 0);
 		}
 	}

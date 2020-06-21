@@ -94,9 +94,7 @@ typedef struct {
 	psy_ui_Component component;	
 	psy_audio_Machines* machines;
 	psy_Table machineuis;
-	psy_List* wireframes;
-	int dx;
-	int dy;
+	psy_List* wireframes;	
 	int mx;
 	int my;
 	uintptr_t dragslot;

@@ -484,10 +484,10 @@ void dev_invalidaterect(psy_ui_win_ComponentImp* self, const psy_ui_Rectangle* r
 {
 	RECT rc;
 
-	rc.left = r->left;
-	rc.top = r->top;
-	rc.right = r->right;
-	rc.bottom = r->bottom;
+	rc.left = r->left - self->component->scroll.x;
+	rc.top = r->top - self->component->scroll.y;
+	rc.right = r->right - self->component->scroll.x;
+	rc.bottom = r->bottom - self->component->scroll.y;
 	InvalidateRect(self->hwnd, &rc, FALSE);
 }
 

@@ -427,9 +427,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->selected = 0;
 	self->selectedtrack = 0;	
 	self->lineheight = 12;
-	self->trackwidth = 100;
-	self->dx = 0;
-	self->dy = 0;
+	self->trackwidth = 100;	
 	self->lastplayposition = -1.f;
 	self->lastentry = 0;
 	self->showpatternnames = 0;
@@ -449,15 +447,14 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 	sequencelistview_computetextsizes(self);
 	for (p = self->sequence->tracks; p != NULL; p = p->next, 
 			cpx += self->trackwidth, ++c) {
-		sequencelistview_drawtrack(self, g, (SequenceTrack*)p->entry, c, cpx +
-			self->dx + listviewmargin);
+		sequencelistview_drawtrack(self, g, (SequenceTrack*)p->entry, c, cpx -
+			psy_ui_component_scrollleft(&self->component) + listviewmargin);
 	}
 	if (!self->foundselected) {
 		int cpy;
 		psy_ui_Rectangle r;
 
-		cpx = self->selectedtrack * self->trackwidth + self->dx +
-			listviewmargin + 5;
+		cpx = self->selectedtrack * self->trackwidth + listviewmargin + 5;
 		cpy = self->selected * self->lineheight + listviewmargin;
 		psy_ui_setrectangle(&r, cpx,
 			cpy, self->trackwidth - 5 - 2 * listviewmargin,
@@ -542,7 +539,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 			psy_ui_setbackgroundcolor(g, 0x00232323);
 			psy_ui_settextcolor(g, 0x00CACACA);
 		}
-		psy_ui_textout(g, x + 5, cpy + self->dy + listviewmargin, text,
+		psy_ui_textout(g, x + 5, cpy + listviewmargin, text,
 			strlen(text));
 	}	
 }
@@ -866,8 +863,8 @@ void sequencelistview_onmousedown(SequenceListView* self,
 	unsigned int selectedtrack;	
 
 	sequencelistview_computetextsizes(self);
-	selected = (ev->y - listviewmargin - self->dy) / self->lineheight;
-	selectedtrack = (ev->x - self->dx) / self->trackwidth;
+	selected = (ev->y - listviewmargin) / self->lineheight;
+	selectedtrack = ev->x / self->trackwidth;
 	if (selectedtrack < sequence_sizetracks(self->sequence)) {		
 		sequenceselection_seteditposition(self->selection,
 			sequence_at(self->sequence, selectedtrack, selected));		
@@ -883,8 +880,8 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 	unsigned int selectedtrack;
 
 	sequencelistview_computetextsizes(self);
-	selected = (ev->y - listviewmargin - self->dy) / self->lineheight;
-	selectedtrack = (ev->x - self->dx) / self->trackwidth;
+	selected = (ev->y - listviewmargin) / self->lineheight;
+	selectedtrack = ev->x / self->trackwidth;
 	if (selectedtrack < sequence_sizetracks(self->sequence)) {
 		sequenceselection_seteditposition(self->selection,
 			sequence_at(self->sequence, selectedtrack, selected));
@@ -895,16 +892,9 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 
 void sequencelistview_onscroll(SequenceListView* self,
 	psy_ui_Component* sender, int stepx, int stepy)
-{
-	int olddy;
-
-	olddy = self->dy;
-	self->dx += (stepx * self->component.scrollstepx);
-	self->dy += (stepy * self->component.scrollstepy);	
+{	
 	sequencelistview_limitverticalscroll(self);
-	if (olddy != self->dy) {
-		psy_ui_component_invalidate(&self->view->trackheader.component);
-	}
+	psy_ui_component_invalidate(&self->view->trackheader.component);	
 }
 
 void sequencelistview_adjustscroll(SequenceListView* self)
@@ -933,15 +923,15 @@ void sequencelistview_limitverticalscroll(SequenceListView* self)
 	num = sequence_maxtracksize(self->sequence);
 	visi = psy_ui_value_px(&size.height, &tm) / self->lineheight;
 	if (visi > 0) {
-		top = -self->dy / self->lineheight;
+		top = -(-psy_ui_component_scrolltop(&self->component)) / self->lineheight;
 		self->component.scrollstepy = self->lineheight;
 		if (visi - num >= 0) {
-			self->dy = 0;
+			psy_ui_component_setscrolltop(&self->component, 0);
 		} else
 			if (top + visi > num) {
-				self->dy = -(num - visi) * self->lineheight;
-				if (self->dy > 0) {
-					self->dy = 0;
+				psy_ui_component_setscrolltop(&self->component, (num - visi) * self->lineheight);
+				if ((-psy_ui_component_scrolltop(&self->component)) > 0) {
+					psy_ui_component_setscrolltop(&self->component, 0);
 				}
 			}
 		psy_ui_component_setverticalscrollrange(&self->component, 0, num - visi);
@@ -961,7 +951,7 @@ void sequencelistview_limithorizontalscroll(SequenceListView* self)
 	visi = psy_ui_value_px(&size.width, &tm) / self->trackwidth;
 	self->component.scrollstepx = self->trackwidth;
 	if (visi - num >= 0) {
-		self->dx = 0;
+		psy_ui_component_setscrollleft(&self->component, 0);
 	}
 	psy_ui_component_sethorizontalscrollrange(&self->component, 0, num - visi);
 }
@@ -973,8 +963,6 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 	self->listview.sequence = &workspace->song->sequence;
 	self->listview.patterns = &workspace->song->patterns;
 	self->listview.selected = 0;
-	self->listview.dx = 0;
-	self->listview.dy = 0;
 	self->duration.sequence = &workspace->song->sequence;
 	if (self->sequence && self->sequence->patterns) {
 		psy_signal_connect(&self->sequence->patterns->signal_namechanged,
@@ -1022,16 +1010,16 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	listviewsize = psy_ui_component_size(&self->listview.component);
 	tm = psy_ui_component_textmetric(&self->listview.component);
 	visilines = (psy_ui_value_px(&listviewsize.height, &tm) - listviewmargin) / self->listview.lineheight;
-	listviewtop = -self->listview.dy / self->listview.lineheight;
+	listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
 	if (c < listviewtop) {
-		self->listview.dy = -c * self->listview.lineheight;
-		listviewtop = -self->listview.dy / self->listview.lineheight;
+		psy_ui_component_setscrolltop(&self->listview.component, c * self->listview.lineheight);
+		listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
 		psy_ui_component_setverticalscrollposition(&self->listview.component,
 			listviewtop);
 	} else
 	if (c > listviewtop + visilines - 1) {
-		self->listview.dy = -(c - visilines + 1) * self->listview.lineheight;
-		listviewtop = -self->listview.dy / self->listview.lineheight;
+		psy_ui_component_setscrolltop(&self->listview.component, (c - visilines + 1) * self->listview.lineheight);
+		listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
 		psy_ui_component_setverticalscrollposition(&self->listview.component,
 			listviewtop);
 	}
@@ -1101,9 +1089,9 @@ void sequencedurationbar_onlanguagechanged(SequenceViewDuration* self, Workspace
 }
 
 void sequenceduration_update(SequenceViewDuration* self)
-{
+{	
+	psy_dsp_beat_t songlength;
 	char text[40];
-	float songlength;
 	
 	songlength = psy_audio_sequence_calcdurationinms(self->sequence);
 	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
