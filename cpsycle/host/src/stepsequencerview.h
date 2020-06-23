@@ -20,14 +20,14 @@ typedef struct {
 typedef struct {
 	StepSequencerPosition position;
 	psy_audio_Player* player;	
-	psy_dsp_beat_t sequenceentryoffset;
+	psy_dsp_big_beat_t sequenceentryoffset;
 	psy_Signal signal_linetick;
 	int doseqtick;
 }  StepTimer;
 
 void steptimer_init(StepTimer*, psy_audio_Player*);
 void steptimer_dispose(StepTimer*, psy_audio_Player*);
-void steptimer_reset(StepTimer*, psy_dsp_beat_t entryoffset);
+void steptimer_reset(StepTimer*, psy_dsp_big_beat_t entryoffset);
 void steptimer_tick(StepTimer*);
 StepSequencerPosition steptimer_position(StepTimer*);
 

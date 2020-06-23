@@ -72,11 +72,11 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 					real_time_duration = 100;
 					info = psy_audio_machine_info(machine);
 					psy_snprintf(text, 20, "%d", (int)slot);
-					psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component)), text, strlen(text));
-					psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy + (-psy_ui_component_scrolltop(&self->component)),
+					psy_ui_textout(g, 0, cpy, text, strlen(text));
+					psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy,
 						psy_audio_machine_editname(machine),
 						min(strlen(psy_audio_machine_editname(machine)), 14));
-					psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy + (-psy_ui_component_scrolltop(&self->component)),
+					psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
 						info->Name, strlen(info->Name));
 					clock = psy_audio_machine_accumulated_processing_time(machine);
 					percent = 100.0f *
@@ -84,8 +84,8 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 						real_time_duration;
 					percent = 0.f;
 					psy_snprintf(text, 40, "%.1f%%", percent);
-					psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy + (-psy_ui_component_scrolltop(&self->component)),
-						text, strlen(text));
+					psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
+						strlen(text));
 					if (cpy + (-psy_ui_component_scrolltop(&self->component)) > size.height) {
 						//break;
 					}

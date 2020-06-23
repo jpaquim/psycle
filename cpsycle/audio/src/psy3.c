@@ -380,7 +380,7 @@ void readpatd(psy_audio_SongFile* self)
 		int32_t index;
 		int32_t temp;
 		int32_t lpb;
-		psy_dsp_beat_t bpl;
+		psy_dsp_big_beat_t bpl;
 		char patternname[MAX_PATTERNS][32];
 		/// number of lines of each pattern
 		int32_t patternlines[MAX_PATTERNS];
@@ -388,7 +388,7 @@ void readpatd(psy_audio_SongFile* self)
 		// index
 
 		lpb = self->song->properties.lpb;
-		bpl = 1 / (psy_dsp_beat_t) lpb;
+		bpl = 1 / (psy_dsp_big_beat_t) lpb;
 		psyfile_read(self->file, &index, sizeof index);
 		if (index < MAX_PATTERNS)
 		{
@@ -425,7 +425,7 @@ void readpatd(psy_audio_SongFile* self)
 					for (y = 0; y < patternlines[index]; ++y) {
 						unsigned char* ptrack = psource;
 						uint32_t track;
-						psy_dsp_beat_t offset;
+						psy_dsp_big_beat_t offset;
 
 						offset = bpl * y;
 						for (track = 0; track < patterns_songtracks(&self->song->patterns);
@@ -2047,7 +2047,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 				return status;
 			}
 			// length
-			if (status = psyfile_write_float(self->file, pattern->length)) {
+			if (status = psyfile_write_float(self->file, (float)pattern->length)) {
 				return status;
 			}
 			// num songtracks, eventually this may be variable per pattern
@@ -2071,7 +2071,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 				if (status = psyfile_write_int32(self->file, entry->track)) {
 					return status;
 				}
-				if (status = psyfile_write_float(self->file, entry->offset)) {
+				if (status = psyfile_write_float(self->file, (float)entry->offset)) {
 					return status;
 				}				
 				// num events

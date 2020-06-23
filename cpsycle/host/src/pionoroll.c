@@ -29,7 +29,7 @@ static void pianogrid_ondraw(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawevents(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawevent(Pianogrid*, psy_ui_Graphics*,
-	psy_audio_PatternEvent*, int track, float offset, float length,
+	psy_audio_PatternEvent*, int track, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length,
 	int hover);
 static void pianogrid_onsize(Pianogrid*, const psy_ui_Size*);
 static void pianogrid_adjustscroll(Pianogrid*);
@@ -37,9 +37,9 @@ static void pianogrid_onscroll(Pianogrid*, psy_ui_Component* sender, int stepx,
 	int stepy);
 static void pianogrid_onmousedown(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_onmousemove(Pianogrid*, psy_ui_MouseEvent*);
-static psy_dsp_beat_t pianogrid_pxtobeat(Pianogrid*, int x);
-static psy_dsp_beat_t pianogrid_quantizise(Pianogrid*,
-	psy_dsp_beat_t offset);
+static psy_dsp_big_beat_t pianogrid_pxtobeat(Pianogrid*, int x);
+static psy_dsp_big_beat_t pianogrid_quantizise(Pianogrid*,
+	psy_dsp_big_beat_t offset);
 static PatternNode* pianogrid_nextnode(Pianogrid*, PatternNode*,
 	uintptr_t track);
 static void pianogrid_ondestroy(Pianogrid*);
@@ -52,7 +52,7 @@ static void pianoroll_computemetrics(Pianoroll*, PianoMetrics*);
 static int pianorolld_testplaybar(Pianoroll*, psy_dsp_big_beat_t offset);
 static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t width);
-static void pianoroll_invalidateline(Pianoroll*, psy_dsp_beat_t offset);
+static void pianoroll_invalidateline(Pianoroll*, psy_dsp_big_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
 static void pianoroll_onsize(Pianoroll*, psy_ui_Size*);
 static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
@@ -150,7 +150,7 @@ int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	return position >= offset && position < offset + width;
 }
 
-void pianoroll_invalidateline(Pianoroll* self, psy_dsp_beat_t offset)
+void pianoroll_invalidateline(Pianoroll* self, psy_dsp_big_beat_t offset)
 {
 	int line;
 	psy_ui_Rectangle r;
@@ -317,7 +317,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 
 		{												
 			int c;
-			psy_dsp_beat_t cpx;
+			psy_dsp_big_beat_t cpx;
 			int cpy;
 			
 			cpy = self->metrics.visikeys * self->metrics.keyheight;
@@ -405,10 +405,11 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 }
 
 void pianogrid_drawevent(Pianogrid* self, psy_ui_Graphics* g,
-	psy_audio_PatternEvent* event, int track, float offset, float length,
+	psy_audio_PatternEvent* event, int track, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length,
 	int hover)
 {
-	psy_ui_Rectangle r;	
+	psy_ui_Rectangle r;
+
 	int left = (int)((offset + self->beatscrollpos) * self->metrics.beatwidth);
 	int width = (int)(length * self->metrics.beatwidth);
 	psy_ui_setrectangle(&r, left,
@@ -444,7 +445,7 @@ void pianogrid_onscroll(Pianogrid* self, psy_ui_Component* sender, int stepx,
 
 void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
-	psy_dsp_beat_t offset;	
+	psy_dsp_big_beat_t offset;	
 
 	psy_ui_component_setfocus(&self->component);
 	offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x));
@@ -456,7 +457,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 		patternevent_clear(&event);
 		event.note = self->metrics.keymax - 1 - ev->y / self->metrics.keyheight;
 		node = psy_audio_pattern_findnode(self->view->pattern, 0, offset,
-			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
+			1 / (psy_dsp_big_beat_t) self->metrics.lpb, &prev);
 		if (node) {				
 			psy_audio_pattern_setevent(self->view->pattern, node, &event);
 		} else {
@@ -467,7 +468,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 		PatternNode* prev;
 
 		PatternNode* node = psy_audio_pattern_findnode(self->view->pattern, 0,
-			offset, 1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
+			offset, 1 / (psy_dsp_big_beat_t) self->metrics.lpb, &prev);
 		if (!node) {
 			node = prev;
 		}
@@ -494,7 +495,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 
 void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
-	psy_dsp_beat_t offset;
+	psy_dsp_big_beat_t offset;
 	PatternNode* node;
 	PatternNode* next = 0;
 	PatternNode* prev;
@@ -502,7 +503,7 @@ void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 		
 	offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x - self->component.scroll.x));
 	node = psy_audio_pattern_findnode(self->view->pattern, 0, offset,
-			1 / (psy_dsp_beat_t) self->metrics.lpb, &prev);
+			1 / (psy_dsp_big_beat_t) self->metrics.lpb, &prev);
 	hover = self->hover;
 	if (!node) {
 		node = prev;
@@ -547,16 +548,16 @@ PatternNode* pianogrid_nextnode(Pianogrid* self, PatternNode* node,
 	return rv;
 }
 
-psy_dsp_beat_t pianogrid_pxtobeat(Pianogrid* self, int px)
+psy_dsp_big_beat_t pianogrid_pxtobeat(Pianogrid* self, int px)
 {
-	return (px  / (psy_dsp_beat_t) self->metrics.beatwidth) +
+	return (px  / (psy_dsp_big_beat_t) self->metrics.beatwidth) +
 		self->beatscrollpos;	
 }
 
-psy_dsp_beat_t pianogrid_quantizise(Pianogrid* self, psy_dsp_beat_t offset)
+psy_dsp_big_beat_t pianogrid_quantizise(Pianogrid* self, psy_dsp_big_beat_t offset)
 {
-	return (int)(offset * (psy_dsp_beat_t)self->metrics.lpb) /
-		(psy_dsp_beat_t)self->metrics.lpb;
+	return (int)(offset * (psy_dsp_big_beat_t)self->metrics.lpb) /
+		(psy_dsp_big_beat_t)self->metrics.lpb;
 }
 
 // PianoKeyboard
@@ -677,7 +678,7 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 	psy_ui_TextMetric tm;
 	psy_ui_Margin margin = { 0, 0, 5, 0 };
 	int baseline;		
-	psy_dsp_beat_t cpx;	
+	psy_dsp_big_beat_t cpx;	
 	int c;	
 
 	size = psy_ui_component_size(&self->component);
@@ -734,11 +735,11 @@ void pianoroll_computemetrics(Pianoroll* self, PianoMetrics* rv)
 	rv->keymax = 88;	
 	rv->visibeats = self->pattern
 		? min(max(0, self->pattern->length + self->grid.beatscrollpos),
-			psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_beat_t) rv->beatwidth)
+			psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_big_beat_t) rv->beatwidth)
 		: 0;
 	rv->visisteps = (int)(rv->visibeats * rv->lpb + 0.5);
 	rv->visiwidth = (int)(rv->visibeats * rv->beatwidth + 0.5);
-	rv->stepwidth = rv->beatwidth / (psy_dsp_beat_t) rv->lpb;
+	rv->stepwidth = rv->beatwidth / (psy_dsp_big_beat_t) rv->lpb;
 	rv->visikeys = (int)(psy_ui_value_px(&gridsize.height, &tm) / (float)rv->keyheight + 0.5);
 }
 

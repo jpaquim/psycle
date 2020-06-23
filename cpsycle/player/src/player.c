@@ -49,9 +49,9 @@ static void cmdplayer_idle(void);
 /// Machinecallback
 static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static uintptr_t machinecallback_samplerate(CmdPlayer*);
-static psy_dsp_beat_t machinecallback_bpm(CmdPlayer*);
-static psy_dsp_beat_t machinecallback_beatspersample(CmdPlayer*);
-static psy_dsp_beat_t machinecallback_currbeatsperline(CmdPlayer*);
+static psy_dsp_big_beat_t machinecallback_bpm(CmdPlayer*);
+static psy_dsp_big_beat_t machinecallback_beatspersample(CmdPlayer*);
+static psy_dsp_big_beat_t machinecallback_currbeatsperline(CmdPlayer*);
 static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
 static psy_audio_Machines* machinecallback_machines(CmdPlayer*);
 struct psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 		cmdplayer_loadsong(&cmdplayer, argv[1]);		
 		printf("psycle: player: press q to stop.\n");
 		psy_audio_sequencer_stoploop(&cmdplayer.player.sequencer);
-		psy_audio_player_setposition(&cmdplayer.player, (psy_dsp_beat_t) 0.f);
+		psy_audio_player_setposition(&cmdplayer.player, (psy_dsp_big_beat_t) 0.f);
 		psy_audio_player_start(&cmdplayer.player);
 #if !defined _WIN32
 		set_conio_terminal_mode();
@@ -375,17 +375,17 @@ uintptr_t machinecallback_samplerate(CmdPlayer* self)
     return self->player.driver->samplerate(self->player.driver);
 }
 
-psy_dsp_beat_t machinecallback_bpm(CmdPlayer* self)
+psy_dsp_big_beat_t machinecallback_bpm(CmdPlayer* self)
 {
     return psy_audio_player_bpm(&self->player);
 }
 
-psy_dsp_beat_t machinecallback_beatspersample(CmdPlayer* self)
+psy_dsp_big_beat_t machinecallback_beatspersample(CmdPlayer* self)
 {
     return psy_audio_sequencer_beatspersample(&self->player.sequencer);
 }
 
-psy_dsp_beat_t machinecallback_currbeatsperline(CmdPlayer* self)
+psy_dsp_big_beat_t machinecallback_currbeatsperline(CmdPlayer* self)
 {
     return psy_audio_sequencer_currbeatsperline(&self->player.sequencer);
 }

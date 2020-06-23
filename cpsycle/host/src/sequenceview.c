@@ -1090,7 +1090,7 @@ void sequencedurationbar_onlanguagechanged(SequenceViewDuration* self, Workspace
 
 void sequenceduration_update(SequenceViewDuration* self)
 {	
-	psy_dsp_beat_t songlength;
+	psy_dsp_big_beat_t songlength;
 	char text[40];
 	
 	songlength = psy_audio_sequence_calcdurationinms(self->sequence);
@@ -1183,7 +1183,7 @@ void sequenceview_changeplayposition(SequenceView* self)
 {
 	SequencePosition editposition;
 	SequenceEntry* entry;
-	psy_dsp_beat_t startposition;
+	psy_dsp_big_beat_t startposition;
 
 	editposition = self->workspace->sequenceselection.editposition;
 	entry = sequenceposition_entry(&editposition);

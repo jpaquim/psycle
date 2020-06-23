@@ -20,7 +20,7 @@ typedef struct {
 	psy_ui_Button more;
 	psy_ui_Button moremore;
 	psy_audio_Player* player;
-	psy_dsp_beat_t bpm;
+	psy_dsp_big_beat_t bpm;
 } TimeBar;
 
 void timerbar_init(TimeBar*, psy_ui_Component* parent, psy_audio_Player*);

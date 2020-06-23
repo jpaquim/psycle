@@ -20,9 +20,9 @@ void patternentry_init(psy_audio_PatternEntry* self)
 
 void patternentry_init_all(psy_audio_PatternEntry* self,
 	const psy_audio_PatternEvent* event,
-	psy_dsp_beat_t offset,
-	psy_dsp_beat_t delta,
-	psy_dsp_beat_t bpm,
+	psy_dsp_big_beat_t offset,
+	psy_dsp_big_beat_t delta,
+	psy_dsp_big_beat_t bpm,
 	uintptr_t track)	
 {
 	self->events = 0;
@@ -62,9 +62,9 @@ psy_audio_PatternEntry* patternentry_allocinit(void)
 
 psy_audio_PatternEntry* patternentry_allocinit_all(
 	const psy_audio_PatternEvent* event,
-	psy_dsp_beat_t offset,
-	psy_dsp_beat_t delta,
-	psy_dsp_beat_t bpm,
+	psy_dsp_big_beat_t offset,
+	psy_dsp_big_beat_t delta,
+	psy_dsp_big_beat_t bpm,
 	uintptr_t track)
 {
 	psy_audio_PatternEntry* rv;

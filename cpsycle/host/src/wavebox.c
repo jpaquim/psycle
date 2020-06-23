@@ -291,24 +291,24 @@ void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample, uintptr_t channe
 void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 {	
 	psy_ui_Rectangle r;
-	psy_ui_Size size = psy_ui_component_size(&self->component);	
+	psy_ui_IntSize size;
 	psy_ui_TextMetric tm;
-
+	
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
+	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component), &tm);
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_setcolor(g, 0x00B1C8B0);
 	if (!self->context.sample) {		
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, 0x00D1C5B6);
 		psy_ui_textout(g,
-			(psy_ui_value_px(&size.width, &tm) - tm.tmAveCharWidth * strlen(self->nowavetext)) / 2,
-			(psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2,
+			(size.width - tm.tmAveCharWidth * strlen(self->nowavetext)) / 2,
+			(size.height - tm.tmHeight) / 2,
 			self->nowavetext, strlen(self->nowavetext));
 	} else {
 		psy_dsp_amp_t scaley;		
 		int x;
-		int centery = psy_ui_value_px(&size.height, &tm) / 2;
+		int centery = size.height / 2;
 		psy_ui_Rectangle cont_loop_rc;
 		psy_ui_Rectangle cont_doubleloop_rc;
 		psy_ui_Rectangle sustain_loop_rc;		
@@ -339,8 +339,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 						waveboxcontext_numsustainloopframes(&self->context));
 			}
 		}
-		scaley = (psy_ui_value_px(&size.height, &tm) / 2) / (psy_dsp_amp_t)32768;
-
+		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;
 		if (self->context.sample && self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_drawsolidrectangle(g, cont_loop_rc, 0x00333333);
 			if (self->context.loopviewmode == WAVEBOX_LOOPVIEW_CONT_DOUBLE) {
@@ -357,7 +356,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			psy_ui_drawsolidrectangle(g, wavebox_framerangetoscreen(self,
 				self->context.selection.end, self->context.selection.end), 0x00B1C8B0);
 		}		
-		for (x = 0; x < psy_ui_value_px(&size.width, &tm); ++x) {
+		for (x = g->clip.left; x < g->clip.right; ++x) {
 			uintptr_t frame = (int)(self->context.offsetstep * x +
 				(int)(waveboxcontext_numframes(&self->context) * self->context.zoomleft));
 			uintptr_t realframe;
@@ -381,7 +380,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 					psy_ui_setcolor(g, 0x00262626);
 				}
 				r.top = 0;
-				r.bottom = psy_ui_value_px(&size.height, &tm);
+				r.bottom = size.height;
 				if (firstselstart || self->dragstarted == FALSE) {
 					psy_ui_drawrectangle(g, r);
 					firstselstart = FALSE;
@@ -409,16 +408,16 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		if (self->context.sample && self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolor(g, 0x00D1C5B6);
 			psy_ui_drawline(g, cont_loop_rc.left, 0, cont_loop_rc.left + 1,
-				psy_ui_value_px(&size.height, &tm));
+				size.height);
 			psy_ui_drawline(g, cont_loop_rc.right, 0, cont_loop_rc.right + 1,
-				psy_ui_value_px(&size.height, &tm));
+				size.height);
 		}
 		if (self->context.sample && self->context.sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolor(g, 0x00B6C5D1);
 			psy_ui_drawline(g, sustain_loop_rc.left, 0, sustain_loop_rc.left + 1,
-				psy_ui_value_px(&size.height, &tm));
+				size.height);
 			psy_ui_drawline(g, sustain_loop_rc.right, 0, sustain_loop_rc.right + 1,
-				psy_ui_value_px(&size.height, &tm));
+				size.height);
 		}
 	}
 }
@@ -518,11 +517,14 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 		uintptr_t realframe;
 		bool changed;
 		bool swapped;
+		int olddragmode;
 
 		self->dragstarted = FALSE;
 		changed = FALSE;
 		frame = wavebox_screentoframe(self, ev->x);
 		realframe = waveboxcontext_realframe(&self->context, frame);
+		self->context.oldselection = self->context.selection;		
+		olddragmode = self->dragmode;
 		if (self->dragmode == WAVEBOX_DRAG_LEFT) {	
 			waveboxselection_setstart(&self->context.selection, realframe, &swapped);
 			if (swapped) {
@@ -640,7 +642,49 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 					psy_ui_CURSORSTYLE_COL_RESIZE);
 			}
 			if (!self->preventdrawonselect) {
-				psy_ui_component_invalidate(&self->component);
+				psy_ui_Rectangle rold;
+				psy_ui_Rectangle rnew;
+				
+				if (olddragmode == WAVEBOX_DRAG_RIGHT &&
+						self->dragmode == WAVEBOX_DRAG_RIGHT) {
+					if (self->context.oldselection.end < self->context.selection.end) {
+						rnew = wavebox_framerangetoscreen(self,
+							self->context.oldselection.end,
+							self->context.selection.end);
+						psy_ui_component_invalidaterect(&self->component, &rnew);
+					} else {
+						rnew = wavebox_framerangetoscreen(self,
+							self->context.selection.end,
+							self->context.oldselection.end);
+						psy_ui_rectangle_expand(&rnew, 0, 2, 0, 2);
+						psy_ui_component_invalidaterect(&self->component, &rnew);
+					}												
+				} else
+				if (olddragmode == WAVEBOX_DRAG_LEFT &&
+					self->dragmode == WAVEBOX_DRAG_LEFT) {
+					if (self->context.oldselection.start < self->context.selection.start) {
+						rnew = wavebox_framerangetoscreen(self,
+							self->context.oldselection.start,
+							self->context.selection.start);
+						psy_ui_component_invalidaterect(&self->component, &rnew);
+					} else {
+						rnew = wavebox_framerangetoscreen(self,
+							self->context.selection.start,
+							self->context.oldselection.start);
+						psy_ui_rectangle_expand(&rnew, 0, 2, 0, 2);
+						psy_ui_component_invalidaterect(&self->component, &rnew);
+					}
+				} else {
+					rold = wavebox_framerangetoscreen(self,
+						self->context.oldselection.start,
+						self->context.oldselection.end);
+					rnew = wavebox_framerangetoscreen(self,
+						self->context.selection.start,
+						self->context.selection.end);
+					psy_ui_rectangle_expand(&rold, 0, 2, 0, 2);					
+					psy_ui_rectangle_union(&rnew, &rold);
+					psy_ui_component_invalidaterect(&self->component, &rnew);
+				}
 			}
 			psy_signal_emit(&self->selectionchanged, self, 0);
 		}

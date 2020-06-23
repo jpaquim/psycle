@@ -75,7 +75,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
 	psy_audio_pattern_init(&self->patterndefaults);
-	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_beat_t) 0.25f);
+	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_big_beat_t) 0.25f);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
@@ -131,37 +131,41 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 	
 	samples = bufferdriver;
 	numsamplex = *numsamples;
-	maxamount = numsamplex > psy_audio_MAX_STREAM_SIZE ? psy_audio_MAX_STREAM_SIZE : numsamplex;
+	maxamount = (numsamplex > psy_audio_MAX_STREAM_SIZE)
+		? psy_audio_MAX_STREAM_SIZE
+		: numsamplex;
 	psy_audio_exclusivelock_enter();
 	do {		
 		amount = maxamount;
 		if (amount > numsamplex) {
 			amount = numsamplex;
-		}		
-		if (self->sequencer.playing) {
-			psy_dsp_beat_t t;			
-			
-			t = psy_audio_sequencer_frametooffset(&self->sequencer, amount);			
-			if (self->sequencer.linetickcount <= t) {
+		}							
+		if (self->sequencer.linetickcount <=
+				psy_audio_sequencer_frametooffset(&self->sequencer, amount)) {
+			if (self->sequencer.linetickcount > 0) {
 				uintptr_t pre;
-				psy_dsp_beat_t diff;
 
 				pre = psy_audio_sequencer_frames(&self->sequencer,
 					self->sequencer.linetickcount);
-				diff = t - self->sequencer.linetickcount;
 				if (pre) {
-					psy_audio_player_workamount(self, pre, &numsamplex, &samples);
-					amount -= pre;
-				}				
-				psy_audio_player_notifylinetick(self);
-				psy_audio_sequencer_onlinetick(&self->sequencer);										
-				self->sequencer.linetickcount -= diff;
-			} else {
-				self->sequencer.linetickcount -= t;
+					pre--;
+					if (pre) {
+						psy_audio_player_workamount(self, pre, &numsamplex,
+							&samples);
+						amount -= pre;
+						self->sequencer.linetickcount -=
+							psy_audio_sequencer_frametooffset(
+								&self->sequencer, pre);
+					}
+				}
 			}
-		}
-		if (amount > 0) {
+			psy_audio_player_notifylinetick(self);
+			psy_audio_sequencer_onlinetick(&self->sequencer);
+		}		
+		if (amount > 0) {			
 			psy_audio_player_workamount(self, amount, &numsamplex, &samples);
+			self->sequencer.linetickcount -=
+				psy_audio_sequencer_frametooffset(&self->sequencer, amount);			
 		}		
 	} while (numsamplex > 0);
 	psy_audio_exclusivelock_leave();
@@ -452,7 +456,7 @@ void psy_audio_player_dostop(psy_audio_Player* self)
 	}
 }
 
-void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_beat_t offset)
+void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_big_beat_t offset)
 {
 	psy_audio_sequencer_setposition(&self->sequencer, offset);
 }

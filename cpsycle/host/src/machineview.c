@@ -2066,8 +2066,9 @@ void machineview_onkeydown(MachineView* self, psy_ui_Component* sender,
 	if (ev->keycode == psy_ui_KEY_ESCAPE &&
 			tabbar_selected(&self->tabbar) == 1) {
 		tabbar_select(&self->tabbar, 0);
-	}
-	psy_ui_keyevent_stoppropagation(ev);	
+		psy_ui_component_setfocus(&self->wireview.component);
+		psy_ui_keyevent_stoppropagation(ev);
+	}	
 }
 
 void machineview_applyproperties(MachineView* self, psy_Properties* p)
@@ -2155,6 +2156,9 @@ psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slo
 void selectsection(MachineView* self, psy_ui_Component* sender, uintptr_t section)
 {
 	tabbar_select(&self->tabbar, (int) section);
+	if (psy_ui_notebook_activepage(&self->notebook)) {
+		psy_ui_component_setfocus(psy_ui_notebook_activepage(&self->notebook));
+	}
 }
 
 void machineview_onsongchanged(MachineView* self, Workspace* workspace,

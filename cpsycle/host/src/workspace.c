@@ -72,10 +72,10 @@ static void workspace_updatenavigation(Workspace*);
 /// Machinecallback
 static psy_audio_MachineCallback machinecallback(Workspace*);
 static uintptr_t machinecallback_samplerate(Workspace*);
-static psy_dsp_beat_t machinecallback_bpm(Workspace*);
-static psy_dsp_beat_t machinecallback_beatspertick(Workspace*);
-static psy_dsp_beat_t machinecallback_beatspersample(Workspace*);
-static psy_dsp_beat_t machinecallback_currbeatsperline(Workspace*);
+static psy_dsp_big_beat_t machinecallback_bpm(Workspace*);
+static psy_dsp_big_beat_t machinecallback_beatspertick(Workspace*);
+static psy_dsp_big_beat_t machinecallback_beatspersample(Workspace*);
+static psy_dsp_big_beat_t machinecallback_currbeatsperline(Workspace*);
 static psy_audio_Samples* machinecallback_samples(Workspace*);
 static psy_audio_Machines* machinecallback_machines(Workspace*);
 static psy_audio_Instruments* machinecallback_instruments(Workspace*);
@@ -1999,7 +1999,7 @@ void workspace_idle(Workspace* self)
 					psy_audio_player_position(&self->player) - self->lastentry->offset;
 				self->patterneditposition.offset = 
 					self->patterneditposition.line / 
-					(psy_dsp_beat_t) psy_audio_player_lpb(&self->player);
+					(psy_dsp_big_beat_t) psy_audio_player_lpb(&self->player);
 				workspace_setpatterneditposition(self, 
 					self->patterneditposition);				
 			}
@@ -2012,7 +2012,7 @@ void workspace_idle(Workspace* self)
 				psy_audio_player_position(&self->player) - self->lastentry->offset;
 			self->patterneditposition.offset = 
 				self->patterneditposition.line / 
-				(psy_dsp_beat_t)psy_audio_player_lpb(&self->player);
+				(psy_dsp_big_beat_t)psy_audio_player_lpb(&self->player);
 			workspace_setpatterneditposition(self, 
 				self->patterneditposition);
 			self->lastentry = 0;
@@ -2246,24 +2246,24 @@ uintptr_t machinecallback_samplerate(Workspace* self)
 	return self->player.driver->samplerate(self->player.driver);
 }
 
-psy_dsp_beat_t machinecallback_bpm(Workspace* self)
+psy_dsp_big_beat_t machinecallback_bpm(Workspace* self)
 {
 	return psy_audio_player_bpm(&self->player);
 }
 
-psy_dsp_beat_t machinecallback_beatspertick(Workspace* self)
+psy_dsp_big_beat_t machinecallback_beatspertick(Workspace* self)
 {
 	return (self->songcbk)
-		? 1 / (psy_dsp_beat_t) self->songcbk->properties.tpb
-		: 1 / (psy_dsp_beat_t) 24.f;
+		? 1 / (psy_dsp_big_beat_t) self->songcbk->properties.tpb
+		: 1 / (psy_dsp_big_beat_t) 24.f;
 }
 
-psy_dsp_beat_t machinecallback_beatspersample(Workspace* self)
+psy_dsp_big_beat_t machinecallback_beatspersample(Workspace* self)
 {
 	return psy_audio_sequencer_beatspersample(&self->player.sequencer);
 }
 
-psy_dsp_beat_t machinecallback_currbeatsperline(Workspace* self)
+psy_dsp_big_beat_t machinecallback_currbeatsperline(Workspace* self)
 {
 	return psy_audio_sequencer_currbeatsperline(&self->player.sequencer);
 }

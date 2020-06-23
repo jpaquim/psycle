@@ -120,7 +120,7 @@ SequenceTrack* sequencetrack_allocinit(void)
 	return rv;
 }
 
-void sequenceentry_init(SequenceEntry* self, uintptr_t pattern, psy_dsp_beat_t offset)
+void sequenceentry_init(SequenceEntry* self, uintptr_t pattern, psy_dsp_big_beat_t offset)
 {
 	self->pattern = pattern;
 	self->offset = offset;
@@ -133,7 +133,7 @@ SequenceEntry* sequenceentry_alloc(void)
 	return (SequenceEntry*) malloc(sizeof(SequenceEntry));
 }
 
-SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, psy_dsp_beat_t offset)
+SequenceEntry* sequenceentry_allocinit(uintptr_t pattern, psy_dsp_big_beat_t offset)
 {
 	SequenceEntry* rv;
 
@@ -187,7 +187,7 @@ SequenceTrackNode* sequence_insert(psy_audio_Sequence* self, SequencePosition po
 		SequenceEntry* entry;
 		SequenceTrack* track;
 
-		entry = sequenceentry_allocinit(pattern, (psy_dsp_beat_t) 0.f);	
+		entry = sequenceentry_allocinit(pattern, (psy_dsp_big_beat_t) 0.f);	
 		track = (SequenceTrack*) position.track->entry;						
 		if (track->entries) {		
 			if (position.trackposition.tracknode) {			
@@ -263,7 +263,7 @@ SequenceTrackIterator sequence_last(psy_audio_Sequence* self,
 
 void sequence_reposition(psy_audio_Sequence* self, SequenceTrack* track)
 {
-	psy_dsp_beat_t curroffset = 0.0f;	
+	psy_dsp_big_beat_t curroffset = 0.0f;	
 	psy_List* p;	
 			
 	for (p = track->entries; p != NULL; psy_list_next(&p)) {
@@ -336,9 +336,9 @@ SequencePosition sequence_at(psy_audio_Sequence* self, unsigned int trackindex,
 }
 
 psy_List* sequenceentry_at_offset(psy_audio_Sequence* self,
-	SequenceTracks* tracknode, psy_dsp_beat_t offset)
+	SequenceTracks* tracknode, psy_dsp_big_beat_t offset)
 {
-	psy_dsp_beat_t curroffset = 0.0f;	
+	psy_dsp_big_beat_t curroffset = 0.0f;	
 	psy_List* p = 0;
 
 	if (tracknode) {		
@@ -363,7 +363,7 @@ psy_List* sequenceentry_at_offset(psy_audio_Sequence* self,
 }
 
 SequenceTrackIterator sequence_begin(psy_audio_Sequence* self, psy_List* track,
-	psy_dsp_beat_t pos)
+	psy_dsp_big_beat_t pos)
 {		
 	SequenceTrackIterator rv;		
 	SequenceEntry* entry;	
@@ -557,10 +557,10 @@ void sequence_setpatternslot(psy_audio_Sequence* self, SequencePosition position
 	}
 }
 
-psy_dsp_beat_t sequence_duration(psy_audio_Sequence* self)
+psy_dsp_big_beat_t sequence_duration(psy_audio_Sequence* self)
 {	
 	SequenceTracks* t;
-	psy_dsp_beat_t duration = 0.f;
+	psy_dsp_big_beat_t duration = 0.f;
 
 	t = self->tracks;
 	while (t) {
@@ -634,38 +634,56 @@ void sequence_clearplayselection(psy_audio_Sequence* self)
 	}
 }
 
-psy_dsp_beat_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
+psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence* self)
 {
+	psy_dsp_big_seconds_t rv;
 	psy_audio_Sequencer sequencer;	
 	uintptr_t maxamount;
 	uintptr_t amount;
 	uintptr_t numsamplex;
-
+	
 	psy_audio_sequencer_init(&sequencer, self, NULL);
 	psy_audio_sequencer_stoploop(&sequencer);
 	psy_audio_sequencer_start(&sequencer);
 	sequencer.calcduration = TRUE;
 	while (psy_audio_sequencer_playing(&sequencer)) {
 		numsamplex = psy_audio_MAX_STREAM_SIZE;
-		maxamount = numsamplex;
+		maxamount = numsamplex;		
 		do {
 			amount = maxamount;
 			if (amount > numsamplex) {
 				amount = numsamplex;
 			}
-			if (psy_audio_sequencer_playing(&sequencer)) {
-				amount = psy_audio_sequencer_updatelinetickcount(&sequencer,
-					amount);
-			}
+			if (sequencer.linetickcount <=
+				psy_audio_sequencer_frametooffset(&sequencer, amount)) {
+				if (sequencer.linetickcount > 0) {
+					uintptr_t pre;
+
+					pre = psy_audio_sequencer_frames(&sequencer,
+						sequencer.linetickcount);
+					if (pre) {
+						pre--;
+						if (pre) {
+							psy_audio_sequencer_frametick(&sequencer, pre);
+							numsamplex -= pre;
+							amount -= pre;
+							sequencer.linetickcount -=
+								psy_audio_sequencer_frametooffset(
+									&sequencer, pre);
+						}
+					}
+				}					
+				psy_audio_sequencer_onlinetick(&sequencer);
+			}			
 			if (amount > 0) {
 				psy_audio_sequencer_frametick(&sequencer, amount);
 				numsamplex -= amount;
-			}
-			if (sequencer.linetickcount <= 0) {
-				psy_audio_sequencer_onlinetick(&sequencer);
+				sequencer.linetickcount -=
+					psy_audio_sequencer_frametooffset(&sequencer, amount);				
 			}
 		} while (numsamplex > 0);
 	}
-	psy_audio_sequencer_dispose(&sequencer);
-	return sequencer.playcounter / (psy_dsp_beat_t)sequencer.samplerate;
+	rv = psy_audio_sequencer_currplaytime(&sequencer);
+	psy_audio_sequencer_dispose(&sequencer);	
+	return rv;
 }

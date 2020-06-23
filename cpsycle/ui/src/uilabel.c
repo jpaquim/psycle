@@ -14,6 +14,8 @@ static void psy_ui_label_ondestroy(psy_ui_Label*, psy_ui_Component* sender);
 static void psy_ui_label_ondraw(psy_ui_Label*, psy_ui_Graphics*);
 static void psy_ui_label_onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
 
+static char* strrchrpos(char* str, char c, uintptr_t pos);
+
 static psy_ui_ComponentVtable psy_ui_label_vtable;
 static int psy_ui_label_vtable_initialized = 0;
 
@@ -79,27 +81,61 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 {
-	psy_ui_Size size;
-	psy_ui_Size textsize;
-	psy_ui_TextMetric tm;
-	psy_ui_Rectangle r;
+	psy_ui_IntSize size;
+	psy_ui_TextMetric tm;	
 	int centerx = 0;
 	int centery = 0;
-
-	size = psy_ui_component_size(psy_ui_label_base(self));
-	textsize = psy_ui_component_textsize(psy_ui_label_base(self), self->text);
-	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
+	uintptr_t count;
+	char seps[] = "\n";
+	char* token;
+	char* string;
+	uintptr_t numcolumnavgchars;
+		
+	if (strlen(self->text) == 0) {
+		return;
+	}
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(g, psy_ui_component_color(&self->component));
-	psy_ui_textoutrectangle(g,
-		centerx,
-		centery,
-		psy_ui_ETO_CLIPPED,
-		r,
-		self->text,
-		strlen(self->text));
+	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_intsize_init_size(
+		psy_ui_component_size(psy_ui_label_base(self)), &tm);		
+	if (size.height >= tm.tmHeight * 2) {
+		numcolumnavgchars = (int)(size.width / (int)(tm.tmAveCharWidth * 1.2));
+	} else {
+		numcolumnavgchars = UINTPTR_MAX;
+	}
+
+	string = malloc(strlen(self->text) + 1);
+	psy_snprintf(string, strlen(self->text) + 1, "%s", self->text);
+	token = strtok(string, seps);
+	while (token != NULL) {
+		count = strlen(token);
+		while (count > 0) {
+			uintptr_t numoutput;
+			char* wrap;
+
+			numoutput = min(numcolumnavgchars, count);
+			if (numoutput < count) {
+				wrap = strrchrpos((char*)token, ' ', numoutput);
+				if (wrap) {
+					++wrap;
+					numoutput = wrap - token;
+				}
+			}
+			if (numoutput == 0) {
+				break;
+			}
+			psy_ui_textout(g, centerx, centery, token, numoutput);
+			centery += tm.tmHeight;
+			count -= numoutput;
+			token += numoutput;
+			if (centery + tm.tmHeight >= size.height) {
+				numcolumnavgchars = UINTPTR_MAX;
+			}
+		}
+		token = strtok(NULL, seps);
+	}
+	free(string);
 }
 
 void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
@@ -110,4 +146,24 @@ void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
 void psy_ui_label_settextalignment(psy_ui_Label* self, psy_ui_Alignment alignment)
 {
 	self->textalignment = alignment;
+}
+
+char* strrchrpos(char* str, char c, uintptr_t pos)
+{
+	uintptr_t count;
+
+	if (pos >= strlen(str)) {
+		return 0;
+	}
+	count = pos;
+	while (1) {
+		if (str[count] == c) {
+			return str + count;
+		}
+		if (count == 0) {
+			break;
+		}
+		--count;
+	}
+	return 0;
 }

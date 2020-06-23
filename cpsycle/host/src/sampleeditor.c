@@ -1180,7 +1180,7 @@ void sampleeditor_onselectionchanged(SampleEditor* self, SampleBox* sender, Wave
 		}
 		psy_ui_component_invalidate(&self->samplebox.component);
 		psy_ui_component_update(&self->samplebox.component);
-	} else {
+	} else {		
 		psy_ui_component_invalidate(&sender->component);
 		psy_ui_component_update(&sender->component);
 	}	

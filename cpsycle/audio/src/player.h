@@ -83,19 +83,19 @@ INLINE int psy_audio_player_playing(psy_audio_Player* self)
 	return psy_audio_sequencer_playing(&self->sequencer);
 }
 
-void psy_audio_player_setposition(psy_audio_Player*, psy_dsp_beat_t offset);
+void psy_audio_player_setposition(psy_audio_Player*, psy_dsp_big_beat_t offset);
 
-INLINE psy_dsp_beat_t psy_audio_player_position(psy_audio_Player* self)
+INLINE psy_dsp_big_beat_t psy_audio_player_position(psy_audio_Player* self)
 {
 	return psy_audio_sequencer_position(&self->sequencer);
 }
 
-INLINE psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_beat_t bpm)
+INLINE psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_big_beat_t bpm)
 {
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
 }
 
-INLINE psy_dsp_beat_t psy_audio_player_bpm(psy_audio_Player* self)
+INLINE psy_dsp_big_beat_t psy_audio_player_bpm(psy_audio_Player* self)
 {
 	return psy_audio_sequencer_bpm(&self->sequencer);
 }
