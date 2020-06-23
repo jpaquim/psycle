@@ -38,7 +38,7 @@ typedef struct {
 
 typedef struct psy_audio_Pattern {
 	PatternNode* events;
-	psy_dsp_beat_t length;
+	psy_dsp_big_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns
 	uintptr_t maxsongtracks;
 	char* name;
@@ -67,16 +67,16 @@ psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern*);
 /// inserts an event by copy
 ///\return the pattern node containing the inserted event
 PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, PatternNode* prev, int track,
-	psy_dsp_beat_t offset, const psy_audio_PatternEvent*);
+	psy_dsp_big_beat_t offset, const psy_audio_PatternEvent*);
 /// removes a pattern node
 void psy_audio_pattern_remove(psy_audio_Pattern*, PatternNode*);
 /// finds the pattern node greater or equal than the offset
 ///\return the pattern node greater or equal than the offset
-PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern*, psy_dsp_beat_t offset);
+PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern*, psy_dsp_big_beat_t offset);
 /// finds a pattern node
 ///\return the pattern node
 PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
-	psy_dsp_beat_t offset, psy_dsp_beat_t bpl, PatternNode** prev);
+	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, PatternNode** prev);
 /// finds the last pattern
 ///\return finds the last pattern node
 PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
@@ -85,9 +85,9 @@ void psy_audio_pattern_setname(psy_audio_Pattern*, const char*);
 ///\return pattern description
 INLINE const char* psy_audio_pattern_name(psy_audio_Pattern* self) { return self->name; }
 /// sets the pattern length
-void psy_audio_pattern_setlength(psy_audio_Pattern*, psy_dsp_beat_t length);
+void psy_audio_pattern_setlength(psy_audio_Pattern*, psy_dsp_big_beat_t length);
 /// return length of the pattern
-INLINE psy_dsp_beat_t psy_audio_pattern_length(psy_audio_Pattern* self)
+INLINE psy_dsp_big_beat_t psy_audio_pattern_length(psy_audio_Pattern* self)
 {
 	return self->length;
 }
@@ -114,11 +114,11 @@ void psy_audio_pattern_blockremove(psy_audio_Pattern*, psy_audio_PatternEditPosi
 	psy_audio_PatternEditPosition end);
 /// interpolates linear all entries of the block
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, psy_dsp_beat_t bpl);
+	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl);
 void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, psy_dsp_beat_t bpl, intptr_t startval, intptr_t endval);
+	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, psy_dsp_beat_t bpl, intptr_t startval, intptr_t endval);
+	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 /// transposes all entries of the block with the offset
 void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
 	psy_audio_PatternEditPosition end, int offset);

@@ -118,7 +118,7 @@ typedef struct psy_audio_CustomMachineParam {
 	char* name;
 	char* label;
 	int type;	
-	intptr_t index;
+	uintptr_t index;
 	intptr_t row;
 } psy_audio_CustomMachineParam;
 

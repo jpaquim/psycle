@@ -22,7 +22,7 @@ typedef struct {
 	char* title;
 	char* credits;
 	char* comments;
-	psy_dsp_beat_t bpm;
+	psy_dsp_big_beat_t bpm;
 	uintptr_t lpb;
 	uintptr_t tracks;
 	int octave;
@@ -34,9 +34,9 @@ void songproperties_init(SongProperties*, const char* title,
 	const char* credits, const char* comments);
 void songproperties_copy(SongProperties*, const SongProperties* other);
 void songproperties_dispose(SongProperties*);
-void songproperties_setbpm(SongProperties*, psy_dsp_beat_t bpm);
+void songproperties_setbpm(SongProperties*, psy_dsp_big_beat_t bpm);
 
-INLINE psy_dsp_beat_t songproperties_bpm(SongProperties* self)
+INLINE psy_dsp_big_beat_t songproperties_bpm(SongProperties* self)
 {
 	return self->bpm;
 }
@@ -80,9 +80,9 @@ INLINE const char* psy_audio_song_title(psy_audio_Song* self)
 	return self->properties.title;
 }
 /// set song properties bpm
-void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_beat_t bpm);
+void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_big_beat_t bpm);
 /// return song properties bpm
-psy_dsp_beat_t psy_audio_song_bpm(psy_audio_Song*);
+psy_dsp_big_beat_t psy_audio_song_bpm(psy_audio_Song*);
 /// return song properties lpb
 uintptr_t psy_audio_song_lpb(psy_audio_Song*);
 

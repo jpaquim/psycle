@@ -15,8 +15,8 @@ typedef struct {
 	psy_audio_Pattern* pattern;
 	char* newname;
 	char* oldname;
-	psy_dsp_beat_t newlength;
-	psy_dsp_beat_t oldlength;
+	psy_dsp_big_beat_t newlength;
+	psy_dsp_big_beat_t oldlength;
 } PatternPropertiesApplyCommand;
 
 static void PatternPropertiesApplyCommandDispose(PatternPropertiesApplyCommand*);
@@ -39,7 +39,7 @@ static void patternpropertiesapplycommand_vtable_init(PatternPropertiesApplyComm
 }
 
 PatternPropertiesApplyCommand* PatternPropertiesApplyCommandAlloc(psy_audio_Pattern* pattern,
-	const char* name, psy_dsp_beat_t length)
+	const char* name, psy_dsp_big_beat_t length)
 {
 	PatternPropertiesApplyCommand* rv;
 
@@ -177,7 +177,7 @@ void patternproperties_onapply(PatternProperties* self,
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&PatternPropertiesApplyCommandAlloc(self->pattern,
 				psy_ui_edit_text(&self->nameedit),
-				(psy_dsp_beat_t)atof(psy_ui_edit_text(&self->lengthedit))
+				(psy_dsp_big_beat_t)atof(psy_ui_edit_text(&self->lengthedit))
 				)->command);
 		psy_signal_enable(&self->workspace->song->patterns.signal_namechanged,
 			self, patternproperties_onpatternnamechanged);

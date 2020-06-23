@@ -16,7 +16,7 @@ extern "C" {
 // aim: merges all parameters a machine needs to perform a work or similiar
 //      calls. For now a pure parameter object with no additional operations.
 
-typedef struct {
+typedef struct psy_audio_BufferContext {
 	psy_audio_Buffer* input;
 	psy_audio_Buffer* output;
 	psy_List* events;

@@ -295,7 +295,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 				psy_ui_drawsolidrectangle(g, r, 0x00272727);
 			}
 		}
-		for (p = self->instrument->entries; p != NULL; p = p->next, ++c) {
+		for (p = self->instrument->entries; p != NULL; psy_list_next(&p), ++c) {
 			psy_audio_InstrumentEntry* entry;
 			int startx;
 			int endx;			
@@ -539,18 +539,15 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 			entry = (psy_audio_InstrumentEntry*) p->entry;
 			psy_snprintf(text, 40, "Sample %0X:%0X", entry->sampleindex.slot,
 				entry->sampleindex.subslot);
-			psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component)),
-				text, strlen(text));
+			psy_ui_textout(g, 0, cpy, text, strlen(text));
 			psy_snprintf(text, 40, "Notes %.3d - %.3d", entry->keyrange.low,
 				entry->keyrange.high);
-			psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component))
-				+ self->metrics.lineheight, text,
+			psy_ui_textout(g, 0, cpy + self->metrics.lineheight, text,
 				strlen(text));
 			psy_snprintf(text, 40, "Volume %.2X - %.2X", entry->velocityrange.low,
 				entry->velocityrange.high);
-			psy_ui_textout(g, 0, cpy + (-psy_ui_component_scrolltop(&self->component)) +
-				self->metrics.lineheight * 2,
-				text, strlen(text));
+			psy_ui_textout(g, 0, cpy + self->metrics.lineheight * 2, text,
+				strlen(text));
 			cpy += (self->metrics.lineheight * 3);
 		}
 	}

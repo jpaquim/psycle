@@ -497,8 +497,8 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	if (cmd.id == CMD_IMM_ADDMACHINE) {
 		self->machineview.newmachine.pluginsview.calledby =
 			self->tabbar.selected;
-		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
-		tabbar_select(&self->machineview.tabbar, 1);
+		workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW,
+			1, 0);
 	} else
 	if (cmd.id == CMD_IMM_PLAYSONG) {
 		psy_audio_player_setposition(&self->workspace.player, 0);
@@ -513,12 +513,12 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		psy_audio_player_start(&self->workspace.player);
 	} else
 	if (cmd.id == CMD_IMM_PLAYFROMPOS) {
-		psy_dsp_beat_t playposition = 0;
+		psy_dsp_big_beat_t playposition = 0;
 		SequenceEntry* entry;
 
 		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
 		playposition = (entry ? entry->offset : 0) + 
-			(psy_dsp_beat_t) self->workspace.patterneditposition.offset;
+			(psy_dsp_big_beat_t) self->workspace.patterneditposition.offset;
 		psy_audio_player_setposition(&self->workspace.player, playposition);
 		psy_audio_player_start(&self->workspace.player);
 	} else
@@ -872,6 +872,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 		tabbar_select(&self->tabbar, index);
 		view = psy_ui_notebook_activepage(&self->notebook);
 		if (view) {
+			psy_ui_component_setfocus(view);
 			psy_ui_component_selectsection(view, section);
 		}
 		if (index == TABPAGE_MACHINEVIEW && section == 1) {

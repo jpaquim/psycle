@@ -19,8 +19,8 @@ typedef enum {
 } psy_audio_SequencerPlayMode;
 
 typedef struct {
-	psy_dsp_beat_t retriggeroffset;
-	psy_dsp_beat_t retriggerstep;
+	psy_dsp_big_beat_t retriggeroffset;
+	psy_dsp_big_beat_t retriggerstep;
 } psy_audio_SequencerTrackState;
 
 typedef struct {
@@ -31,30 +31,30 @@ typedef struct {
 typedef struct {
 	bool active;
 	int count;	
-	psy_dsp_beat_t offset;	
+	psy_dsp_big_beat_t offset;
 } psy_audio_SequencerLoop;
 
 typedef struct {
 	bool active;	
-	psy_dsp_beat_t offset;
+	psy_dsp_big_beat_t offset;
 } psy_audio_SequencerJump;
 
 typedef struct {
 	bool active;
-	psy_dsp_beat_t rowspeed; // line delay
+	psy_dsp_big_beat_t rowspeed; // line delay
 } psy_audio_SequencerRowDelay;
 
 typedef struct {
 	psy_audio_Sequence* sequence;
 	psy_audio_Machines* machines;
-	psy_dsp_beat_t bpm;
+	psy_dsp_big_beat_t bpm;
 	uintptr_t samplerate;
-	psy_dsp_beat_t beatspersample;	
+	psy_dsp_big_beat_t beatspersample;	
 	unsigned int lpb; // global
-	psy_dsp_beat_t lpbspeed; // pattern	
+	psy_dsp_big_beat_t lpbspeed; // pattern	
 	bool playing;
-	psy_dsp_beat_t position;	
-	psy_dsp_beat_t window;	
+	psy_dsp_big_beat_t position;
+	psy_dsp_big_beat_t window;
 	psy_List* currtracks;
 	psy_List* events;
 	psy_List* globalevents;
@@ -62,14 +62,14 @@ typedef struct {
 	psy_List* inputevents;	
 	psy_audio_SequencerPlayMode mode;	
 	bool looping;	
-	psy_dsp_beat_t linetickcount;
+	psy_dsp_big_beat_t linetickcount;
 	psy_audio_SequencerJump jump;
 	psy_audio_SequencerRowDelay rowdelay;
 	psy_audio_SequencerLoop loop;
 	psy_Table lastmachine;
-	psy_dsp_beat_t playbeatloopstart;
-	psy_dsp_beat_t playbeatloopend;
-	psy_dsp_beat_t numplaybeats;
+	psy_dsp_big_beat_t playbeatloopstart;
+	psy_dsp_big_beat_t playbeatloopend;
+	psy_dsp_big_beat_t numplaybeats;
 	psy_Signal signal_linetick;
 	uintptr_t playcounter;
 	bool calcduration;
@@ -83,12 +83,12 @@ void psy_audio_sequencer_reset(psy_audio_Sequencer*, psy_audio_Sequence*,
 void psy_audio_sequencer_frametick(psy_audio_Sequencer*,
 	uintptr_t numsamples);
 void psy_audio_sequencer_tick(psy_audio_Sequencer*,
-	psy_dsp_beat_t offset);
+	psy_dsp_big_beat_t offset);
 uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*, uintptr_t amount);
 void psy_audio_sequencer_onlinetick(psy_audio_Sequencer*);
 void psy_audio_sequencer_setposition(psy_audio_Sequencer*,
-	psy_dsp_beat_t position);
-INLINE psy_dsp_beat_t psy_audio_sequencer_position(psy_audio_Sequencer* self)
+	psy_dsp_big_beat_t position);
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(psy_audio_Sequencer* self)
 {
 	return self->position;
 }
@@ -100,7 +100,7 @@ INLINE void psy_audio_sequencer_stop(psy_audio_Sequencer* self)
 }
 
 void psy_audio_sequencer_setnumplaybeats(psy_audio_Sequencer*,
-	psy_dsp_beat_t);
+	psy_dsp_big_beat_t);
 
 INLINE psy_List* psy_audio_sequencer_tickevents(psy_audio_Sequencer* self)
 {
@@ -119,9 +119,9 @@ INLINE uintptr_t psy_audio_sequencer_samplerate(psy_audio_Sequencer* self)
 {
 	return self->samplerate;
 }
-void psy_audio_sequencer_setbpm(psy_audio_Sequencer*, psy_dsp_beat_t bpm);
+void psy_audio_sequencer_setbpm(psy_audio_Sequencer*, psy_dsp_big_beat_t bpm);
 
-INLINE psy_dsp_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_bpm(psy_audio_Sequencer* self)
 {
 	return self->bpm;
 }
@@ -134,12 +134,12 @@ INLINE uintptr_t psy_audio_sequencer_lpb(psy_audio_Sequencer* self)
 }
 
 INLINE uintptr_t psy_audio_sequencer_frames(psy_audio_Sequencer* self,
-	psy_dsp_beat_t offset)
+	psy_dsp_big_beat_t offset)
 {
 	return (uintptr_t)(offset / self->beatspersample);
 }
 
-INLINE psy_dsp_beat_t psy_audio_sequencer_frametooffset(psy_audio_Sequencer* self,
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_frametooffset(psy_audio_Sequencer* self,
 	uintptr_t numsamples)
 {
 	return numsamples * self->beatspersample;
@@ -153,7 +153,7 @@ INLINE int psy_audio_sequencer_playing(psy_audio_Sequencer* self)
 void psy_audio_sequencer_addinputevent(psy_audio_Sequencer*,
 	const psy_audio_PatternEvent*, uintptr_t track);
 void psy_audio_sequencer_recordinputevent(psy_audio_Sequencer*,
-	const psy_audio_PatternEvent*, uintptr_t track, psy_dsp_beat_t
+	const psy_audio_PatternEvent*, uintptr_t track, psy_dsp_big_beat_t
 	playposition);
 
 INLINE void psy_audio_sequencer_setplaymode(psy_audio_Sequencer* self,
@@ -183,9 +183,9 @@ INLINE psy_audio_SequencerPlayMode psy_audio_sequencer_playmode(
 	return self->mode;
 }
 
-INLINE psy_dsp_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 {
-	psy_dsp_beat_t rv;
+	psy_dsp_big_beat_t rv;
 
 	rv = self->lpbspeed;
 	if (self->rowdelay.active) {
@@ -194,14 +194,14 @@ INLINE psy_dsp_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 	return rv;
 }
 
-INLINE psy_dsp_beat_t psy_audio_sequencer_beatspersample(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_beatspersample(psy_audio_Sequencer* self)
 {
 	return self->beatspersample;
 }
 
-INLINE psy_dsp_beat_t psy_audio_sequencer_currbeatsperline(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(psy_audio_Sequencer* self)
 {
-	return 1 / (self->lpb * psy_audio_sequencer_speed(self));
+	return 1.0 / (self->lpb * psy_audio_sequencer_speed(self));
 }
 
 void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, const PatternNode*);

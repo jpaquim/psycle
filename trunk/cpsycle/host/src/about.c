@@ -82,15 +82,6 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
 	psy_ui_label_init(&self->steincopyright, &self->component);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
-	
-	psy_ui_component_resize(&self->contrib.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(150)));
-	psy_ui_component_resize(&self->psycledelics.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(20)));
-	psy_ui_component_resize(&self->sourceforge.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(20)));
-	psy_ui_component_resize(&self->steincopyright.component,
-		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makepx(20)));
 	{
 		psy_ui_Margin margin;
 

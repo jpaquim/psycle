@@ -54,6 +54,7 @@ typedef struct {
 	psy_dsp_beat_t zoomright;
 	WaveBoxLoopViewMode loopviewmode;	
 	WaveBoxSelection selection;
+	WaveBoxSelection oldselection;
 	psy_audio_Sample* sample;
 	psy_ui_Component* component;
 } WaveBoxContext;

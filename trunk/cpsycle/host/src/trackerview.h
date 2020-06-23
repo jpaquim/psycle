@@ -80,6 +80,10 @@ typedef struct {
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
 	struct TrackerView* view);
+int trackerheader_scrollleft(TrackerHeader*,
+	psy_audio_PatternEditPosition);
+int trackerheader_scrollright(TrackerHeader*,
+	psy_audio_PatternEditPosition);
 
 typedef struct {
 	psy_ui_Component component;
@@ -178,8 +182,7 @@ typedef struct {
    double cbpl;   
    psy_dsp_NotesTabMode notestabmode;
    psy_audio_PatternEditPosition cursor;
-   psy_dsp_beat_t cursorstep;   
-   psy_audio_Player* player;   
+   psy_dsp_big_beat_t cursorstep;   
    struct TrackerView* view;
    PatternSelection selection;
    psy_audio_PatternEditPosition dragselectionbase;
@@ -195,10 +198,11 @@ typedef struct {
    TrackerGridEditMode editmode;
    int drawcursor;
    psy_ui_TextMetric tm;
+   Workspace* workspace;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
-	struct TrackerView*, psy_audio_Player*);
+	struct TrackerView*, Workspace*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 
 typedef psy_audio_Inputs TrackerInputs;
@@ -225,8 +229,8 @@ typedef struct TrackerView {
 	TrackerInputs inputs;
 	unsigned int cursorstep;
 	int syncpattern;
-	psy_dsp_beat_t lastplayposition;
-	psy_dsp_beat_t sequenceentryoffset;
+	psy_dsp_big_beat_t lastplayposition;
+	psy_dsp_big_beat_t sequenceentryoffset;
 	psy_List* sublines;
 	psy_Table screenlines;
 	TrackerMetrics metrics;

@@ -23,7 +23,7 @@ void songproperties_init(SongProperties* self, const char* title,
 	self->title = strdup(title);
 	self->credits = strdup(credits);
 	self->comments = strdup(comments);
-	self->bpm = (psy_dsp_beat_t) 125.0;
+	self->bpm = (psy_dsp_big_beat_t) 125.0;
 	self->lpb = 4;
 	self->tracks = 16;
 	self->octave = 4;
@@ -57,7 +57,7 @@ void songproperties_copy(SongProperties* self, const SongProperties* other)
 	}
 }
 
-void songproperties_setbpm(SongProperties* self, psy_dsp_beat_t bpm)
+void songproperties_setbpm(SongProperties* self, psy_dsp_big_beat_t bpm)
 {
 	if (bpm < 32) {
 		self->bpm = 32;
@@ -166,12 +166,12 @@ void psy_audio_song_setproperties(psy_audio_Song* self,
 	songproperties_copy(&self->properties, properties);
 }
 
-void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_beat_t bpm)
+void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_big_beat_t bpm)
 {
 	songproperties_setbpm(&self->properties, bpm);		
 }
 
-psy_dsp_beat_t psy_audio_song_bpm(psy_audio_Song* self)
+psy_dsp_big_beat_t psy_audio_song_bpm(psy_audio_Song* self)
 {
 	return songproperties_bpm(&self->properties);
 }

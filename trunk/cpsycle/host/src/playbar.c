@@ -135,10 +135,10 @@ void playbar_onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int se
 
 void playbar_onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 {
-	psy_dsp_beat_t playbeats;
+	psy_dsp_big_beat_t playbeats;
 	char text[40];
 	
-	playbeats = (psy_dsp_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));
+	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));
 	if (playbeats > 1) {
 		playbeats -= 1;
 	}
@@ -149,10 +149,10 @@ void playbar_onnumplaybeatsless(PlayBar* self, psy_ui_Button* sender)
 
 void playbar_onnumplaybeatsmore(PlayBar* self, psy_ui_Button* sender)
 {
-	psy_dsp_beat_t playbeats;
+	psy_dsp_big_beat_t playbeats;
 	char text[40];
 	
-	playbeats = (psy_dsp_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));	
+	playbeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(&self->loopbeatsedit));	
 	playbeats += 1;		
 	psy_audio_sequencer_setnumplaybeats(&self->player->sequencer, playbeats);
 	psy_snprintf(text, 40, "%f", (double) playbeats);
@@ -189,8 +189,8 @@ void playbar_startplay(PlayBar* self)
 	psy_audio_Sequence* sequence;
 	SequencePosition editposition;
 	SequenceEntry* entry;
-	psy_dsp_beat_t startposition;
-	psy_dsp_beat_t numplaybeats;
+	psy_dsp_big_beat_t startposition;
+	psy_dsp_big_beat_t numplaybeats;
 	
 	psy_ui_button_highlight(&self->play);
 	sequence = self->player->sequencer.sequence;
@@ -205,8 +205,8 @@ void playbar_startplay(PlayBar* self)
 			psy_audio_PatternEditPosition editposition;
 
 			editposition = workspace_patterneditposition(self->workspace);			
-			startposition += (psy_dsp_beat_t) editposition.offset;
-			numplaybeats = (psy_dsp_beat_t) atof(psy_ui_edit_text(
+			startposition += (psy_dsp_big_beat_t) editposition.offset;
+			numplaybeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(
 				&self->loopbeatsedit));
 			self->player->sequencer.numplaybeats = numplaybeats;
 		}

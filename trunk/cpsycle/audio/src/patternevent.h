@@ -76,7 +76,7 @@ typedef	enum {
 	NOTECOMMANDS_GATE_EMPTY = 0xFF
 } NoteCommands;
 
-typedef struct {
+typedef struct psy_audio_PatternEvent {
 	uint8_t note;	
 	uint16_t inst;	
 	uint8_t mach;

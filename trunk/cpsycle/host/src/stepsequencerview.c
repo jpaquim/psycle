@@ -43,7 +43,7 @@ static void stepsequencerbar_setdefaultevent(StepsequencerBar*,
 	uintptr_t track,
 	psy_audio_Pattern* patterndefaults,
 	psy_audio_PatternEvent*);
-static int offsettoline(psy_audio_Player*, psy_dsp_beat_t offset);
+static int offsettoline(psy_audio_Player*, psy_dsp_big_beat_t offset);
 void stepsequencerbar_onsize(StepsequencerBar*, psy_ui_Size* size);
 static void stepsequencerbar_onlpbchanged(StepsequencerBar*, psy_audio_Player* sender,
 	uintptr_t lpb);
@@ -195,13 +195,13 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		PatternNode* node;
 		PatternNode* prev;
 		psy_audio_PatternEditPosition cursor;
-		psy_dsp_beat_t bpl;
+		psy_dsp_big_beat_t bpl;
 
-		bpl = (psy_dsp_beat_t) 1 / psy_audio_player_lpb(&self->workspace->player);
+		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(&self->workspace->player);
 		step = ev->x / self->stepwidth + self->position.steprow * 16;
 		cursor = workspace_patterneditposition(self->workspace);
 		cursor.column = 0;	
-		cursor.offset = step / (psy_dsp_beat_t) psy_audio_player_lpb(
+		cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
 			&self->workspace->player);		
 		patternevent_clear(&event);
 		event.note = 48;
@@ -215,8 +215,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 			&self->workspace->player.patterndefaults, &event);
 		node = psy_audio_pattern_findnode(self->pattern,
 			cursor.track,
-			(psy_dsp_beat_t) cursor.offset,
-			(psy_dsp_beat_t) bpl, &prev);
+			(psy_dsp_big_beat_t) cursor.offset,
+			(psy_dsp_big_beat_t) bpl, &prev);
 		if (node) {								
 			psy_audio_exclusivelock_enter();
 			psy_audio_sequencer_checkiterators(
@@ -228,7 +228,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 			node = psy_audio_pattern_insert(self->pattern,
 				prev,
 				cursor.track, 
-				(psy_dsp_beat_t) cursor.offset,
+				(psy_dsp_big_beat_t) cursor.offset,
 				&event);		
 		}
 		psy_ui_component_invalidate(&self->component);
@@ -243,7 +243,7 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 	PatternNode* node;
 	PatternNode* prev;	
 				
-	node = psy_audio_pattern_findnode(patterndefaults, track, 0, (psy_dsp_beat_t) 0.25f,
+	node = psy_audio_pattern_findnode(patterndefaults, track, 0, (psy_dsp_big_beat_t) 0.25f,
 		&prev);
 	if (node) {
 		psy_audio_PatternEntry* entry;
@@ -278,7 +278,7 @@ void stepsequencerbar_oneditpositionchanged(StepsequencerBar* self,
 
 	cursor = workspace_patterneditposition(self->workspace);
 	position.line = offsettoline(&self->workspace->player,
-		(psy_dsp_beat_t) cursor.offset);
+		(psy_dsp_big_beat_t) cursor.offset);
 	position.steprow = position.line / 16;
 	stepsequencerbar_setposition(self, position);
 }
@@ -291,7 +291,7 @@ void stepsequencerview_oneditpositionchanged(StepsequencerView* self,
 
 	cursor = workspace_patterneditposition(self->workspace);
 	position.line = offsettoline(&self->workspace->player,
-		(psy_dsp_beat_t) cursor.offset);
+		(psy_dsp_big_beat_t) cursor.offset);
 	position.steprow = position.line / 16;
 	stepsequencerbar_setposition(&self->stepsequencerbar, position);
 	stepsequencerbarselect_setposition(&self->stepsequencerbarselect,
@@ -401,7 +401,7 @@ void stepsequencerbarselect_oneditpositionchanged(StepsequencerBarSelect* self,
 
 	cursor = workspace_patterneditposition(self->workspace);
 	position.line = offsettoline(&self->workspace->player,
-		(psy_dsp_beat_t) cursor.offset);
+		(psy_dsp_big_beat_t) cursor.offset);
 	position.steprow = position.line / 16;
 	stepsequencerbarselect_setposition(self, position);	
 }
@@ -653,7 +653,7 @@ void steptimer_onseqlinetick(StepTimer* self, psy_audio_Sequencer* sender)
 	}
 }
 
-int offsettoline(psy_audio_Player* player, psy_dsp_beat_t offset)
+int offsettoline(psy_audio_Player* player, psy_dsp_big_beat_t offset)
 {		
 	return (int)(offset * psy_audio_player_lpb(player));
 }
@@ -663,7 +663,7 @@ StepSequencerPosition steptimer_position(StepTimer* self)
 	return self->position;
 }
 
-void steptimer_reset(StepTimer* self, psy_dsp_beat_t entryoffset)
+void steptimer_reset(StepTimer* self, psy_dsp_big_beat_t entryoffset)
 {
 	stepsequencerposition_init(&self->position);
 	self->sequenceentryoffset = entryoffset;

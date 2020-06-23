@@ -22,6 +22,8 @@ static void songpropertiesview_onhide(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_ontitlechanged(SongPropertiesView*,
 	psy_ui_Component* sender);
+static void songpropertiesview_onfilterkeys(SongPropertiesView*,
+	psy_ui_Component* sender, psy_ui_KeyEvent*);
 static void songpropertiesview_oncreditschanged(SongPropertiesView*,
 	psy_ui_Component* sender);
 static void songpropertiesview_ontpbeditkeydown(SongPropertiesView*,
@@ -40,6 +42,7 @@ static void songpropertiesview_onkeydown(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyEvent*);
 static void songpropertiesview_onkeyup(SongPropertiesView*,
 	psy_ui_Component* sender, psy_ui_KeyEvent*);
+static bool songpropertiesview_haseditfocus(SongPropertiesView*);
 
 void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -67,7 +70,9 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->edit_title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_title.component, &margin);
 	psy_signal_connect(&self->edit_title.signal_change, self,
-		songpropertiesview_ontitlechanged);	
+		songpropertiesview_ontitlechanged);
+	psy_signal_connect(&self->edit_title.component.signal_keydown, self,
+		songpropertiesview_onfilterkeys);
 	// credits
 	psy_ui_component_init(&self->credits, &self->component);
 	psy_ui_component_enablealign(&self->credits);
@@ -81,7 +86,9 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->edit_credits.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_credits.component, &margin);
 	psy_signal_connect(&self->edit_credits.signal_change, self,
-		songpropertiesview_oncreditschanged);	
+		songpropertiesview_oncreditschanged);
+	psy_signal_connect(&self->edit_credits.component.signal_keydown, self,
+		songpropertiesview_onfilterkeys);
 	// Speed
 	psy_ui_component_init(&self->speed, &self->component);
 	psy_ui_component_enablealign(&self->speed);
@@ -122,12 +129,13 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	//psy_ui_label_setcharnumber(&self->label_comments, charnum);
 	psy_ui_component_setalign(&self->label_comments.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(&self->label_comments.component, &margin);
-
 	psy_ui_edit_multiline_init(&self->edit_comments, &self->component);
 	psy_ui_component_setalign(&self->edit_comments.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->edit_comments.component, &margin);
 	psy_signal_connect(&self->edit_comments.signal_change, self,
 		songpropertiesview_oncommentschanged);
+	psy_signal_connect(&self->edit_comments.component.signal_keydown, self,
+		songpropertiesview_onfilterkeys);
 	songpropertiesview_read(self);	
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songpropertiesview_onsongchanged);
@@ -223,6 +231,19 @@ void songpropertiesview_ontitlechanged(SongPropertiesView* self,
 	self->song->properties.title = strdup(psy_ui_edit_text(&self->edit_title));
 }
 
+void songpropertiesview_onfilterkeys(SongPropertiesView* self,
+	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
+{
+	if (ev->keycode == psy_ui_KEY_RETURN && sender != &self->edit_comments.component) {
+		psy_ui_component_setfocus(&self->component);		
+		psy_ui_keyevent_preventdefault(ev);
+	} else
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		psy_ui_component_setfocus(&self->component);
+		psy_ui_keyevent_preventdefault(ev);
+	}	
+}
+
 void songpropertiesview_oncreditschanged(SongPropertiesView* self,
 	psy_ui_Component* sender)
 {
@@ -308,7 +329,17 @@ void songpropertiesview_oncommentschanged(SongPropertiesView* self,
 void songpropertiesview_onkeydown(SongPropertiesView* self,
 	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
 {
-	psy_ui_keyevent_stoppropagation(ev);
+	if (songpropertiesview_haseditfocus(self)) {		
+		psy_ui_keyevent_stoppropagation(ev);
+	}
+}
+
+bool songpropertiesview_haseditfocus(SongPropertiesView* self)
+{
+	return (psy_ui_component_hasfocus(&self->edit_comments.component) ||
+		psy_ui_component_hasfocus(&self->edit_credits.component) ||
+		psy_ui_component_hasfocus(&self->edit_title.component) ||
+		psy_ui_component_hasfocus(&self->edit_tpb.component));
 }
 
 void songpropertiesview_onkeyup(SongPropertiesView* self,

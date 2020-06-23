@@ -215,6 +215,9 @@
     <ClCompile Include="src\sampler.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\samplerchannel.c" />
+    <ClCompile Include="src\samplerdefs.c" />
+    <ClCompile Include="src\samplervoice.c" />
     <ClCompile Include="src\samples.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -231,6 +234,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
     <ClCompile Include="src\songio.c" />
+    <ClCompile Include="src\ticktimer.c" />
     <ClCompile Include="src\vstplugin.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -300,12 +304,16 @@
     <ClInclude Include="src\sample.h" />
     <ClInclude Include="src\sampleiterator.h" />
     <ClInclude Include="src\sampler.h" />
+    <ClInclude Include="src\samplerchannel.h" />
+    <ClInclude Include="src\samplerdefs.h" />
+    <ClInclude Include="src\samplervoice.h" />
     <ClInclude Include="src\samples.h" />
     <ClInclude Include="src\sequence.h" />
     <ClInclude Include="src\sequencer.h" />
     <ClInclude Include="src\silentdriver.h" />
     <ClInclude Include="src\song.h" />
     <ClInclude Include="src\songio.h" />
+    <ClInclude Include="src\ticktimer.h" />
     <ClInclude Include="src\vstplugin.h" />
     <ClInclude Include="src\waveio.h" />
     <ClInclude Include="src\waveosc.h" />

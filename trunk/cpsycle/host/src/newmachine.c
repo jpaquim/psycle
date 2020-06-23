@@ -18,6 +18,7 @@ static void newmachine_onkeydown(NewMachine*, psy_ui_KeyEvent*);
 static void newmachine_onsortbyname(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbytype(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbymode(NewMachine*, psy_ui_Component* sender);
+static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
 // pluginsview
 static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
@@ -25,6 +26,11 @@ static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Properties*
 	int x, int y);
 static void pluginsview_onsize(PluginsView*, psy_ui_Component* sender,
 	psy_ui_Size* size);
+static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
+static void pluginsview_cursorposition(PluginsView*, psy_Properties* plugin,
+	int* col, int* row);
+static psy_Properties* pluginsview_pluginbycursorposition(PluginsView*,
+	int col, int row);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_hittest(PluginsView*, int x, int y);
@@ -79,7 +85,7 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
-		&margin));
+		&margin));	
 }
 
 void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
@@ -153,6 +159,8 @@ static void pluginsview_vtable_init(PluginsView* self)
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);				
 		pluginsview_vtable.ondraw = (psy_ui_fp_ondraw) pluginsview_ondraw;		
+		pluginsview_vtable.onkeydown = (psy_ui_fp_onkeydown)
+			pluginsview_onkeydown;
 		pluginsview_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			pluginsview_onmousedown;
 		pluginsview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
@@ -334,13 +342,129 @@ void pluginsview_adjustscroll(PluginsView* self)
 	}
 }
 
+void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
+{
+	if (self->selectedplugin) {
+		psy_Properties* plugin;
+		int col;
+		int row;
+
+		col = 0;
+		row = 0;
+		plugin = NULL;
+		pluginsview_cursorposition(self, self->selectedplugin, &col, &row);
+		switch (ev->keycode) {
+			case psy_ui_KEY_RETURN:
+				if (self->selectedplugin) {
+					psy_signal_emit(&self->signal_selected, self, 1,
+						self->selectedplugin);
+					workspace_selectview(self->workspace, self->calledby, 0, 0);
+					psy_ui_keyevent_stoppropagation(ev);
+				}
+				break;
+			case psy_ui_KEY_DOWN: 
+				++row;
+				psy_ui_keyevent_stoppropagation(ev);
+				break;		
+			case psy_ui_KEY_UP:
+				if (row > 0) {
+					--row;				
+				}
+				psy_ui_keyevent_stoppropagation(ev);
+				break;		
+			case psy_ui_KEY_LEFT:			
+				if (col > 0) {
+					--col;		
+				}
+				psy_ui_keyevent_stoppropagation(ev);
+				break;
+			case psy_ui_KEY_RIGHT: {					
+				++col;				
+				psy_ui_keyevent_stoppropagation(ev);
+				break;
+			}
+			default:			
+				break;
+		}		
+		plugin = pluginsview_pluginbycursorposition(self, col, row);
+		if (plugin) {
+			self->selectedplugin = plugin;
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selectedplugin);
+			psy_ui_component_invalidate(&self->component);
+		}
+	} else
+	if (ev->keycode >= psy_ui_KEY_LEFT && ev->keycode <= psy_ui_KEY_DOWN) {
+		if (self->plugins->children)
+		self->selectedplugin = self->plugins->children;
+		psy_signal_emit(&self->signal_changed, self, 1,
+			self->selectedplugin);
+		psy_ui_component_invalidate(&self->component);			
+	}	
+}
+
+void pluginsview_cursorposition(PluginsView* self, psy_Properties* plugin,
+	int* col, int* row)
+{		
+	*col = 0;
+	*row = 0;
+	if (plugin) {
+		psy_Properties* p;
+		pluginsview_computetextsizes(self);
+		p = self->plugins;
+		if (p) {
+			for (p = p->children; p != NULL; p = p->next) {
+				if (p == plugin) {
+					break;
+				}
+				++(*col);
+				if (*col >= self->numparametercols) {
+					*col = 0;
+					++(*row);
+				}
+			}
+		}
+	}	
+}
+
+psy_Properties* pluginsview_pluginbycursorposition(PluginsView* self, int col, int row)
+{		
+	psy_Properties* rv;	
+	int currcol;
+	int currrow;
+
+	rv = NULL;
+	currcol = 0;
+	currrow = 0;
+	pluginsview_computetextsizes(self);	
+	if (self->plugins) {
+		psy_Properties* p;
+
+		p = self->plugins;
+		for (p = p->children; p != NULL; p = p->next) {
+			if (currcol == col && currrow == row) {
+				rv = p;
+				break;
+			}
+			++currcol;
+			if (currcol >= self->numparametercols) {
+				currcol = 0;
+				++currrow;
+			}
+		}		
+	}
+	return rv;
+}
+
+
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1) {
 		psy_ui_component_setfocus(&self->component);
 		pluginsview_hittest(self, ev->x, ev->y);
 		psy_ui_component_invalidate(&self->component);
-		psy_signal_emit(&self->signal_changed, self, 1, self->selectedplugin);
+		psy_signal_emit(&self->signal_changed, self, 1,
+			self->selectedplugin);
 		psy_ui_component_setfocus(&self->component);
 		psy_ui_mouseevent_stoppropagation(ev);
 	}
@@ -438,6 +562,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onsortbytype);
 	psy_signal_connect(&self->detail.bar.sortbymode.signal_clicked, self,
 		newmachine_onsortbymode);
+	psy_signal_connect(&self->component.signal_focus, self,
+		newmachine_onfocus);
 }
 
 void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
@@ -592,4 +718,9 @@ int newmachine_comp_mode(psy_Properties* p, psy_Properties* q)
 {	
 	return psy_properties_int(p, "mode", 128) -
 		psy_properties_int(q, "mode", 128);	
+}
+
+void newmachine_onfocus(NewMachine* self, psy_ui_Component* sender)
+{
+	psy_ui_component_setfocus(&self->pluginsview.component);
 }

@@ -174,7 +174,7 @@ void psy_ui_win_editimp_multiline_init(psy_ui_win_EditImp* self,
 		parent,
 		TEXT("EDIT"),
 		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_LEFT,
+		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_LEFT,
 		1);
 	imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;

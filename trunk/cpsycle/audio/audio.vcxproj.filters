@@ -215,6 +215,18 @@
     <ClCompile Include="src\sampleiterator.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\samplerchannel.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\samplerdefs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ticktimer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\samplervoice.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -425,6 +437,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\sampleiterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplerchannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplerdefs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ticktimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplervoice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
