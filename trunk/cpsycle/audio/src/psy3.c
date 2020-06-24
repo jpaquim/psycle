@@ -416,7 +416,7 @@ void readpatd(psy_audio_SongFile* self)
 				// songtracks = patternlines[index] > 0 ? destsize / ((size_t)patternlines[index] * EVENT_SIZE) : 0;
 				{
 					psy_audio_Pattern* pattern;
-					PatternNode* node = 0;
+					psy_audio_PatternNode* node = 0;
 
 					psource = pdest;
 					pattern = psy_audio_pattern_allocinit();
@@ -1907,7 +1907,7 @@ int psy3_write_patd(psy_audio_SongFile* self)
 			int32_t y;
 			uint32_t t;
 			int32_t index;
-			PatternNode* node;
+			psy_audio_PatternNode* node;
 			int32_t size77;
 			size_t patsize;
 			uint32_t sizepos;
@@ -2038,7 +2038,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 				psy_tableiterator_key(&it))) {			
 			psy_audio_Pattern* pattern;										
 			int32_t index;
-			PatternNode* node;						
+			psy_audio_PatternNode* node;						
 		
 			// ok save it
 			pattern = (psy_audio_Pattern*) psy_tableiterator_value(&it);

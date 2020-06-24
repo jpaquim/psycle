@@ -1242,12 +1242,14 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(machineview, "Wires", "Cables");
 	psy_properties_write_string(machineview, "No Machines Loaded", "No Máquinas cargado");
 	psy_properties_write_string(machineview, "No Machine", "No Máquina");
+	psy_properties_write_string(machineview, "Connect to Mixer Send/Return Input",
+		"Conectar a Mezclador Remitente/Vuelta Entrada");
 	sequencerview = psy_properties_create_section(self->lang, "sequencerview");
 	psy_properties_write_string(sequencerview, "Follow Song", "Seguir Song");
 	psy_properties_write_string(sequencerview, "Show playlist", "Mostrar lista de reproducción");
 	psy_properties_write_string(sequencerview, "Show pattern names", "Mostrar nombres del patterns");
 	psy_properties_write_string(sequencerview, "Record tweaks", "Grabar tweaks");
-	psy_properties_write_string(sequencerview, "Duration", "Duración");	
+	psy_properties_write_string(sequencerview, "Duration", "Duración");		
 }
 
 const char* workspace_translate(Workspace* self, const char* key)
@@ -1903,7 +1905,7 @@ int workspace_currview(Workspace* self)
 	if (self->currnavigation) {
 		HistoryEntry* entry;
 
-		entry = (HistoryEntry*)(self->currnavigation->entry);
+		entry = (HistoryEntry*)(self->currnavigation->entry);		
 		return entry->viewid;		
 	}
 	return 0;

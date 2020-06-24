@@ -19,8 +19,7 @@
 #define _MAX_PATH 4096
 #endif
 
-static void propertiesrenderer_ondraw(PropertiesRenderer*, psy_ui_Component* sender,
-	psy_ui_Graphics*);
+static void propertiesrenderer_ondraw(PropertiesRenderer*, psy_ui_Graphics*);
 static int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer*, psy_Properties*,
 	int level);
 static int propertiesrenderer_onpropertieshittestenum(PropertiesRenderer*, psy_Properties*,
@@ -28,10 +27,8 @@ static int propertiesrenderer_onpropertieshittestenum(PropertiesRenderer*, psy_P
 static int propertiesrenderer_onenumpropertyposition(PropertiesRenderer*, psy_Properties*,
 	int level);
 static void propertiesrenderer_preparepropertiesenum(PropertiesRenderer* self);
-static void propertiesrenderer_onmousedown(PropertiesRenderer*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void propertiesrenderer_onmousedoubleclick(PropertiesRenderer*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
+static void propertiesrenderer_onmousedown(PropertiesRenderer*, psy_ui_MouseEvent*);
+static void propertiesrenderer_onmousedoubleclick(PropertiesRenderer*, psy_ui_MouseEvent*);
 static void propertiesrenderer_oneditchange(PropertiesRenderer*, psy_ui_Edit* sender);
 static void propertiesrenderer_oneditkeydown(PropertiesRenderer*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
@@ -59,27 +56,42 @@ static int propertiesrenderer_intersectsvalue(PropertiesRenderer*, psy_Propertie
 	int column);
 static int propertiesrenderer_intersectskey(PropertiesRenderer*, psy_Properties*,
 	int column);
-static void propertiesrenderer_adjustscroll(PropertiesRenderer*);
 static int propertiesrenderer_columnwidth(PropertiesRenderer*, int column);
 static int propertiesrenderer_columnstart(PropertiesRenderer*, int column);
-static void propertiesrenderer_computecolumns(PropertiesRenderer* self, psy_ui_Size*);
+static void propertiesrenderer_computecolumns(PropertiesRenderer* self, const psy_ui_Size*);
 static char* strrchrpos(char* str, char c, uintptr_t pos);
+static void propertiesrenderer_onpreferredsize(PropertiesRenderer*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
+
+static psy_ui_ComponentVtable propertiesrenderer_vtable;
+static int propertiesrenderer_vtable_initialized = 0;
+
+static void propertiesrenderer_vtable_init(PropertiesRenderer* self)
+{
+	if (!propertiesrenderer_vtable_initialized) {
+		propertiesrenderer_vtable = *(self->client.vtable);
+		propertiesrenderer_vtable.ondraw = (psy_ui_fp_ondraw)propertiesrenderer_ondraw;
+		propertiesrenderer_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			propertiesrenderer_onmousedown;
+		propertiesrenderer_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+			propertiesrenderer_onmousedoubleclick;
+		propertiesrenderer_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			propertiesrenderer_onpreferredsize;
+	}
+}
 
 void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	psy_Properties* properties)
-{	
+{
 	self->properties = properties;
 	psy_ui_component_init(&self->client, parent);
-	psy_ui_component_doublebuffer(&self->client);		
-	psy_ui_component_setwheelscroll(&self->client, 4);		
-	psy_ui_component_showverticalscrollbar(&self->client);	
+	propertiesrenderer_vtable_init(self);
+	self->client.vtable = &propertiesrenderer_vtable;
+	psy_ui_component_doublebuffer(&self->client);
+	psy_ui_component_setwheelscroll(&self->client, 4);
+	psy_ui_component_showverticalscrollbar(&self->client);
 	psy_signal_connect(&self->client.signal_destroy, self,
 		propertiesrenderer_ondestroy);
-	psy_signal_connect(&self->client.signal_draw, self, propertiesrenderer_ondraw);	
-	psy_signal_connect(&self->client.signal_mousedown, self,
-		propertiesrenderer_onmousedown);
-	psy_signal_connect(&self->client.signal_mousedoubleclick, self,
-		propertiesrenderer_onmousedoubleclick);	
 	self->selected = 0;
 	self->keyselected = 0;
 	self->choiceproperty = 0;
@@ -87,16 +99,18 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	self->col_perc[0] = 0.4f;
 	self->col_perc[1] = 0.4f;
 	self->col_perc[2] = 0.2f;
+	self->usefixedwidth = FALSE;
 	psy_ui_edit_init(&self->edit, &self->client);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		propertiesrenderer_oneditkeydown);
 	psy_ui_component_hide(&self->edit.component);
-	inputdefiner_init(&self->inputdefiner, &self->client);	
-	psy_ui_component_hide(&self->inputdefiner.component);		
+	inputdefiner_init(&self->inputdefiner, &self->client);
+	psy_ui_component_hide(&self->inputdefiner.component);
 	psy_signal_init(&self->signal_changed);
-	psy_signal_init(&self->signal_selected);	
+	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->client.signal_size, self,
 		propertiesrenderer_onsize);
+	self->client.overflow = psy_ui_OVERFLOW_VSCROLL;
 }
 
 void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* sender)
@@ -105,8 +119,13 @@ void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* se
 	psy_signal_dispose(&self->signal_selected);
 }
 
-void propertiesrenderer_ondraw(PropertiesRenderer* self, psy_ui_Component* sender,
-	psy_ui_Graphics* g)
+void propertiesrenderer_setfixedwidth(PropertiesRenderer* self, psy_ui_Value width)
+{
+	self->fixedwidth = width;
+	self->usefixedwidth = TRUE;
+}
+
+void propertiesrenderer_ondraw(PropertiesRenderer* self, psy_ui_Graphics* g)
 {	
 	self->g = g;
 	psy_ui_setcolor(g, 0x00EAEAEA);
@@ -149,8 +168,10 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 		self->choicecount = 0;					
 	}			
 	propertiesrenderer_drawlinebackground(self, property);						
-	propertiesrenderer_drawkey(self, property, 0);	
-	propertiesrenderer_drawvalue(self, property, 1);
+	propertiesrenderer_drawkey(self, property, 0);
+	if (self->col_perc[1] > 0.0) {
+		propertiesrenderer_drawvalue(self, property, 1);
+	}
 	if (psy_properties_ischoiceitem(property)) {
 		++self->choicecount;	
 	}
@@ -430,8 +451,7 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* p
 	}	
 }
 
-void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_component_setfocus(&self->client);
 	if (psy_ui_component_visible(&self->edit.component)) {
@@ -682,8 +702,7 @@ int propertiesrenderer_intersectskey(PropertiesRenderer* self, psy_Properties* p
 	return rv;
 }
 
-void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_MouseEvent* ev)
 {
 	if (self->selected) {
 		psy_ui_Component* edit = 0;
@@ -770,10 +789,9 @@ void propertiesrenderer_onsize(PropertiesRenderer* self, psy_ui_Component* sende
 	psy_ui_Size* size)
 {	
 	propertiesrenderer_computecolumns(self, size);
-	propertiesrenderer_adjustscroll(self);
 }
 
-void propertiesrenderer_computecolumns(PropertiesRenderer* self, psy_ui_Size* size)
+void propertiesrenderer_computecolumns(PropertiesRenderer* self, const psy_ui_Size* size)
 {
 	int column;
 	psy_ui_TextMetric tm;
@@ -805,28 +823,36 @@ int propertiesrenderer_columnstart(PropertiesRenderer* self, int column)
 		: 0;
 }
 
-void propertiesrenderer_adjustscroll(PropertiesRenderer* self)
+void  propertiesrenderer_onpreferredsize(PropertiesRenderer* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
-	psy_ui_Size size;	
-	psy_ui_TextMetric tm;
-	int scrollmax;
-	
-	size = psy_ui_component_size(&self->client);	
-	tm = psy_ui_component_textmetric(&self->client);
+	float col_perc[PROPERTIESRENDERER_NUMCOLS];
+	int col_width[PROPERTIESRENDERER_NUMCOLS];
+	int col_start[PROPERTIESRENDERER_NUMCOLS];
+
+	memcpy(col_perc, self->col_perc, sizeof(col_perc));
+	memcpy(col_width, self->col_width, sizeof(col_width));
+	memcpy(col_start, self->col_start, sizeof(col_start));	
+	if (!self->usefixedwidth) {
+		propertiesrenderer_computecolumns(self, limit);
+		rv->width = limit->width;
+	} else {
+		psy_ui_Size fixedsize;
+
+		fixedsize.width = self->fixedwidth;
+		fixedsize.height = limit->width;
+		rv->width = self->fixedwidth;
+		propertiesrenderer_computecolumns(self, limit);
+	}	
 	self->search = 0;
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
 		propertiesrenderer_onenumpropertyposition);
 	self->client.scrollstepy = self->lineheight;
-	scrollmax =  (self->cpy - psy_ui_value_px(&size.height, &tm)) / self->lineheight + 1;
-	if (scrollmax < 0) {
-		scrollmax = 0;
-	}
-	psy_ui_component_setverticalscrollrange(&self->client, 0, scrollmax);
-	if (-(-psy_ui_component_scrolltop(&self->client)) / self->lineheight > scrollmax - 1) {
-		psy_ui_component_setscrolltop(&self->client, (scrollmax)*self->lineheight);
-		psy_ui_component_setverticalscrollposition(&self->client, scrollmax);
-	}	
+	rv->height = psy_ui_value_makepx(self->cpy);	
+	memcpy(self->col_perc, col_perc, sizeof(col_perc));
+	memcpy(self->col_width, col_width, sizeof(col_width));
+	memcpy(self->col_start, col_start, sizeof(col_start));
 }
 
 static void propertiesview_ondestroy(PropertiesView*, psy_ui_Component* sender);
@@ -934,9 +960,7 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 				scrollposition = scrollmax;
 			}
 			psy_ui_component_setscrolltop(&self->renderer.client,
-				scrollposition * self->renderer.lineheight);
-			psy_ui_component_setverticalscrollposition(&self->renderer.client,
-				scrollposition);
+				scrollposition * self->renderer.lineheight);			
 		}
 		psy_ui_component_invalidate(&self->renderer.client);
 	}

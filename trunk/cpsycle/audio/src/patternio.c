@@ -31,7 +31,7 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl)
 	fread(&nt, sizeof(int32_t), 1, fp);
 	fread(&nl, sizeof(int32_t), 1, fp);	
 	if ((nt > 0) && (nl > 0)) {	
-		PatternNode* node = 0;		
+		psy_audio_PatternNode* node = 0;		
 		unsigned char* source;
 		int track;
 		int line;
@@ -97,7 +97,7 @@ void saveblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl, uintptr
 	unsigned char* dest;
 	uintptr_t track;
 	int line;
-	PatternNode* node;
+	psy_audio_PatternNode* node;
 	
 	nlines = (int)(pattern->length / bpl + (psy_dsp_beat_t) 0.5f);	
 	fwrite(&songtracks, sizeof(int32_t), 1, fp);
@@ -115,12 +115,13 @@ void saveblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl, uintptr
 			ptrack[4] = 0;			
 		}
 	}
-	for (node = pattern->events; node != 0; node = node->next) {
+	for (node = psy_audio_pattern_begin(pattern); node != NULL;
+			psy_audio_patternnode_next(&node)) {
 		psy_audio_PatternEntry* entry;
 		psy_audio_PatternEvent* ev;		
 		unsigned char* ptrack;
 
-		entry = (psy_audio_PatternEntry*) node->entry;
+		entry = psy_audio_patternnode_entry(node->entry);
 		if (entry->track < songtracks) {
 			ev = patternentry_front(entry);
 			line = (int)(entry->offset / bpl);

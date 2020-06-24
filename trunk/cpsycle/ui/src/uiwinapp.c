@@ -252,8 +252,11 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_component_align(imp->component);
 					}
 					size.width = psy_ui_value_makepx(LOWORD(lParam));
-					size.height = psy_ui_value_makepx(HIWORD(lParam));
+					size.height = psy_ui_value_makepx(HIWORD(lParam));					
 					imp->component->vtable->onsize(imp->component, &size);
+					if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
+						psy_ui_component_updateoverflow(imp->component);						
+					}
 					psy_signal_emit(&imp->component->signal_size, imp->component, 1,
 						(void*)&size);
 
@@ -911,7 +914,7 @@ void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 		   si->nPos += si->nPage ;
 		break ;
 		case SB_THUMBTRACK:
-		   si->nPos = HIWORD(wParam);
+		   si->nPos = (short)HIWORD(wParam);
 		break ;
 		default:
 		break ;         

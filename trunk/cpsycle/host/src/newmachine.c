@@ -19,25 +19,6 @@ static void newmachine_onsortbyname(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbytype(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbymode(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
-// pluginsview
-static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
-static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
-static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Properties*,
-	int x, int y);
-static void pluginsview_onsize(PluginsView*, psy_ui_Component* sender,
-	psy_ui_Size* size);
-static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
-static void pluginsview_cursorposition(PluginsView*, psy_Properties* plugin,
-	int* col, int* row);
-static psy_Properties* pluginsview_pluginbycursorposition(PluginsView*,
-	int col, int row);
-static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
-static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
-static void pluginsview_hittest(PluginsView*, int x, int y);
-static void pluginsview_computetextsizes(PluginsView*);
-static void pluginsview_onplugincachechanged(PluginsView*,
-	psy_audio_PluginCatcher* sender);
-static void pluginsview_adjustscroll(PluginsView*);
 
 static void plugindisplayname(psy_Properties*, char* text);
 static int plugintype(psy_Properties*, char* text);
@@ -150,7 +131,25 @@ void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* s
 	}
 }
 
-// PluginsView
+// pluginsview
+static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
+static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
+static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Properties*,
+	int x, int y);
+static void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
+static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
+static void pluginsview_cursorposition(PluginsView*, psy_Properties* plugin,
+	int* col, int* row);
+static psy_Properties* pluginsview_pluginbycursorposition(PluginsView*,
+	int col, int row);
+static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
+static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
+static void pluginsview_hittest(PluginsView*, int x, int y);
+static void pluginsview_computetextsizes(PluginsView*);
+static void pluginsview_onplugincachechanged(PluginsView*,
+	psy_audio_PluginCatcher* sender);
+
 static psy_ui_ComponentVtable pluginsview_vtable;
 static int pluginsview_vtable_initialized = 0;
 
@@ -165,6 +164,8 @@ static void pluginsview_vtable_init(PluginsView* self)
 			pluginsview_onmousedown;
 		pluginsview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
 			pluginsview_onmousedoubleclick;
+		pluginsview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			pluginsview_onpreferredsize;		
 	}
 }
 
@@ -173,26 +174,26 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent);
 	pluginsview_vtable_init(self);
+	self->component.vtable = &pluginsview_vtable;
 	self->workspace = workspace;
 	if (workspace_pluginlist(workspace)) {
 		self->plugins = psy_properties_clone(workspace_pluginlist(workspace), 1);
 	} else {
 		self->plugins = 0;
-	}
-	self->component.vtable = &pluginsview_vtable;
+	}	
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_showverticalscrollbar(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		pluginsview_ondestroy);	
-	psy_signal_connect(&self->component.signal_size, self,
-		pluginsview_onsize);
+		pluginsview_ondestroy);
 	self->selectedplugin = 0;
 	self->calledby = 0;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
 		pluginsview_onplugincachechanged);
+	pluginsview_computetextsizes(self);
+	self->component.overflow = psy_ui_OVERFLOW_VSCROLL;
 }
 
 void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
@@ -263,6 +264,7 @@ void pluginsview_computetextsizes(PluginsView* self)
 	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
 	self->numparametercols = max(1, psy_ui_value_px(&size.width, &tm) / self->columnwidth);
+	self->component.scrollstepy = self->lineheight;
 }
 
 void plugindisplayname(psy_Properties* property, char* text)
@@ -313,32 +315,19 @@ int pluginmode(psy_Properties* property, char* text)
 	return rv;
 }
 
-void pluginsview_onsize(PluginsView* self, psy_ui_Component* sender,
-	psy_ui_Size* size)
+void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
-	pluginsview_adjustscroll(self);
-}
-
-void pluginsview_adjustscroll(PluginsView* self)
-{
-	psy_Properties* p;
-
-	p = self->plugins;
-	if (p) {
+	if (self->plugins) {
 		psy_ui_Size size;
-		psy_ui_TextMetric tm;
-		int visilines;
 		int currlines;
 
 		pluginsview_computetextsizes(self);
 		size = psy_ui_component_size(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);
-		visilines = psy_ui_value_px(&size.height, &tm) / self->lineheight;
-		currlines = (int) (psy_properties_size(p) /
-			(float) self->numparametercols + 0.5f);
-		self->component.scrollstepy = self->lineheight;
-		psy_ui_component_setverticalscrollrange(&self->component,
-			0, currlines - visilines);
+		currlines = (int)(psy_properties_size(self->plugins) /
+			(float)self->numparametercols + 0.5f);
+		rv->height = psy_ui_value_makepx(self->component.scrollstepy * currlines);
+		rv->width = size.width;		
 	}
 }
 
@@ -520,9 +509,8 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 	} else {
 		self->plugins = 0;
 	}
-	psy_ui_component_setscrolltop(&self->component, 0);
-	psy_ui_component_setverticalscrollposition(&self->component, 0);	
-	pluginsview_adjustscroll(self);
+	psy_ui_component_setscrolltop(&self->component, 0);	
+	psy_ui_component_updateoverflow(&self->component);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -601,8 +589,7 @@ void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
-		psy_ui_component_setverticalscrollposition(&self->pluginsview.component, 0);
-		pluginsview_adjustscroll(&self->pluginsview);
+		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
 }
@@ -618,8 +605,7 @@ void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
-		psy_ui_component_setverticalscrollposition(&self->pluginsview.component, 0);
-		pluginsview_adjustscroll(&self->pluginsview);
+		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
 }
@@ -635,8 +621,7 @@ void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
-		psy_ui_component_setverticalscrollposition(&self->pluginsview.component, 0);
-		pluginsview_adjustscroll(&self->pluginsview);
+		psy_ui_component_updateoverflow(&self->pluginsview.component);
 		psy_ui_component_invalidate(&self->pluginsview.component);
 	}
 }

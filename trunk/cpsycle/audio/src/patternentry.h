@@ -67,11 +67,16 @@ void patternentry_addevent(psy_audio_PatternEntry*,
 
 
 /// a list of event entries ordered by position in beat unit
-typedef psy_List PatternNode;
+typedef psy_List psy_audio_PatternNode;
 
-INLINE psy_audio_PatternEntry* psy_audio_patternnode_entry(PatternNode* self)
+INLINE psy_audio_PatternEntry* psy_audio_patternnode_entry(psy_audio_PatternNode* self)
 {
 	return (psy_audio_PatternEntry*)self->entry;
+}
+
+INLINE void psy_audio_patternnode_next(psy_audio_PatternNode** self)
+{
+	psy_list_next(self);
 }
 
 #ifdef __cplusplus

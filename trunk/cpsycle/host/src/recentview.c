@@ -25,10 +25,9 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 	propertiesview_init(&self->view, &self->component, tabbarparent,
 		workspace_recentsongs(workspace));
 	propertiesview_setcolumnwidth(&self->view, 1.f, 0.f, 0.f);
-	psy_ui_component_hide(&self->view.tabbar.component);	
-	psy_ui_component_setpreferredsize(&self->view.renderer.client,
-		psy_ui_size_make(psy_ui_value_makeew(40),
-			psy_ui_value_makepx(0)));
+	psy_ui_component_hide(&self->view.tabbar.component);
+	propertiesrenderer_setfixedwidth(&self->view.renderer,
+		psy_ui_value_makeew(40));	
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->view.signal_selected, self,
 		recentview_onselected);

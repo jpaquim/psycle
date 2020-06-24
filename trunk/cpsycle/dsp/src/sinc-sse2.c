@@ -54,25 +54,24 @@ static float sinc_sse2_internal(int16_t const* data, uint32_t res, int leftExten
 static float sinc_sse2_float_filtered(float const* data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data);
 static float sinc_sse2_float_internal(float const* data, uint32_t res, int leftExtent, int rightExtent);
 
+
+static void dispose(psy_dsp_SincSSE2Resampler*);
 static psy_dsp_amp_t work(psy_dsp_SincSSE2Resampler*,
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* /*resampler_data*/ );
+	uint64_t length);
 static psy_dsp_amp_t work_unchecked(psy_dsp_SincSSE2Resampler*,
 	const int16_t* data,
-	uint32_t res,
-	void* resampler_data);
+	uint32_t res);
 static float work_float(psy_dsp_SincSSE2Resampler*,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd);
 static float work_float_unchecked(psy_dsp_SincSSE2Resampler*,
-	float const* data, uint32_t res, void* resampler_data);
+	float const* data, uint32_t res);
 
 static void* getresamplerdata(psy_dsp_SincSSE2Resampler* self)
 {
@@ -84,9 +83,9 @@ static void disposeresamplerdata(psy_dsp_SincSSE2Resampler* self, void* resample
 	free(resampler_data);
 }
 
-static void setspeed(psy_dsp_SincSSE2Resampler* self, void* resampler_data, double speed)
+static void setspeed(psy_dsp_SincSSE2Resampler* self, double speed)
 {
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (speed > 1.0) {
 		t->enabled = TRUE;
 		t->fcpi = cutoffoffset * psy_dsp_PI / speed;
@@ -103,12 +102,9 @@ static void vtable_init(psy_dsp_SincSSE2Resampler* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->resampler.vtable;
+		vtable.dispose = (psy_dsp_fp_resampler_dispose)dispose;
 		vtable.setspeed =
-			(psy_dsp_fp_resampler_setspeed)setspeed;
-		vtable.getresamplerdata =
-			(psy_dsp_fp_resampler_getresamplerdata)getresamplerdata;
-		vtable.disposeresamplerdata =
-			(psy_dsp_fp_resampler_disposeresamplerdata)disposeresamplerdata;
+			(psy_dsp_fp_resampler_setspeed)setspeed;		
 		vtable.work = (psy_dsp_fp_resampler_work)work;
 		vtable.work_unchecked = (psy_dsp_fp_resampler_work_unchecked)
 			work_unchecked;
@@ -125,6 +121,7 @@ void psy_dsp_sinc_sse2_resampler_init(psy_dsp_SincSSE2Resampler* self)
 	vtable_init(self);
 	self->resampler.vtable = &vtable;
 	psy_dsp_sinc_sse2_resampler_initstatictables();
+	self->resampler_data = getresamplerdata(self);
 }
 
 void psy_dsp_sinc_sse2_resampler_initstatictables(void)
@@ -199,16 +196,20 @@ void psy_dsp_sinc_sse2_resampler_initstatictables(void)
 	}
 }
 
+void dispose(psy_dsp_SincSSE2Resampler* self)
+{
+	disposeresamplerdata(self, self->resampler_data);
+}
+
 psy_dsp_amp_t work(psy_dsp_SincSSE2Resampler* self,
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* resampler_data)
+	uint64_t length)
 {		
 	const int leftExtent = (offset < SINC_ZEROS) ? offset + 1 : SINC_ZEROS;
 	const int rightExtent = (length - offset - 1 < SINC_ZEROS) ? length - offset - 1 : SINC_ZEROS;
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_sse2_filtered(data, res, leftExtent, rightExtent, t);
 	}
@@ -217,10 +218,9 @@ psy_dsp_amp_t work(psy_dsp_SincSSE2Resampler* self,
 
 psy_dsp_amp_t work_unchecked(psy_dsp_SincSSE2Resampler* self,
 	const int16_t* data,
-	uint32_t res,
-	void* resampler_data)
+	uint32_t res)
 {
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_sse2_filtered(data, res, SINC_ZEROS, SINC_ZEROS, t);
 	}
@@ -231,7 +231,6 @@ float work_float(psy_dsp_SincSSE2Resampler* self,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd)
 {
@@ -243,7 +242,7 @@ float work_float(psy_dsp_SincSSE2Resampler* self,
 	const int leftExtent = (ioffset < SINC_ZEROS) ? ioffset + 1 : SINC_ZEROS;
 	const int rightExtent = (int)((length - ioffset - 1 < SINC_ZEROS) ? length - ioffset - 1 : SINC_ZEROS);
 	data += ioffset;
-	t = (sinc_data_t*)(resampler_data);
+	t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_sse2_float_filtered(data, res, leftExtent, rightExtent, t);
 	}
@@ -251,9 +250,9 @@ float work_float(psy_dsp_SincSSE2Resampler* self,
 }
 
 float work_float_unchecked(psy_dsp_SincSSE2Resampler* self,
-	float const* data, uint32_t res, void* resampler_data)
+	float const* data, uint32_t res)
 {
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_sse2_float_filtered(data, res, SINC_ZEROS, SINC_ZEROS, t);
 	}

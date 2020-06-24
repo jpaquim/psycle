@@ -120,7 +120,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 			if(numlines > 0)
 			{				
 				///\todo: tweak_effect should be converted to normal tweaks!				
-				PatternNode* node = 0;
+				psy_audio_PatternNode* node = 0;
 				float offset = 0.f;
 				unsigned char* pData;
 				int32_t c;

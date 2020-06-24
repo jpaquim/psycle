@@ -154,7 +154,7 @@ uint32_t xm_readpatterns(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader
 			int insert = 0;
 			psy_dsp_beat_t bpl = 0.25;
 			psy_audio_PatternEvent ev;
-			PatternNode* node = 0;
+			psy_audio_PatternNode* node = 0;
 
 			nextstart += patternheader.packedsize;
 			patternevent_clear(&ev);
@@ -774,7 +774,7 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 	unsigned char lastmach[64];
 	psy_audio_PatternEvent e;
 	unsigned char mentry[4];
-	PatternNode* node;
+	psy_audio_PatternNode* node;
 	int row;
 	int col;
 

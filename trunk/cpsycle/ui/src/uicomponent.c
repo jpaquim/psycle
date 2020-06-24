@@ -125,9 +125,9 @@ static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
 // events
-static void onalign(psy_ui_Component* self) { }
-static void onpreferredsize(psy_ui_Component*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
+static void onalign(psy_ui_Component* self) { }
+static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
 static bool onclose(psy_ui_Component* self) { return TRUE; }
 static void onmousedown(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
 static void onmousemove(psy_ui_Component* self, psy_ui_MouseEvent* ev) { }
@@ -139,7 +139,6 @@ static void onmouseleave(psy_ui_Component* self) { }
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
-
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -437,7 +436,8 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
 	self->scrollstepx = 100;
-	self->scrollstepy = 12;	
+	self->scrollstepy = 12;
+	self->overflow = psy_ui_OVERFLOW_HIDDEN;
 	self->preventdefault = 0;
 	self->preventpreferredsize = 0;
 	self->align = psy_ui_ALIGN_NONE;
@@ -628,7 +628,7 @@ void psy_ui_component_align(psy_ui_Component* self)
 	self->vtable->onalign(self);
 }
 
-void onpreferredsize(psy_ui_Component* self, psy_ui_Size* limit,
+void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
 	psy_ui_Aligner aligner;
@@ -764,7 +764,7 @@ void psy_ui_component_setpreferredsize(psy_ui_Component* self, psy_ui_Size size)
 }
 
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component* self,
-	psy_ui_Size* limit)
+	const psy_ui_Size* limit)
 {
 	if (self->preventpreferredsize) {
 		return psy_ui_component_size(self);
@@ -942,4 +942,91 @@ psy_ui_Component* psy_ui_component_at(psy_ui_Component* self, uintptr_t index)
 	}
 	psy_list_free(q);
 	return rv;
+}
+
+void psy_ui_component_setscroll(psy_ui_Component* self,
+	psy_ui_IntPoint position)
+{
+	psy_ui_component_setscrollleft(self, position.x);
+	psy_ui_component_setscrolltop(self, position.y);
+}
+
+void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
+{
+	int npos;
+	int scrollmin;
+	int scrollmax;
+
+	self->scroll.x = left;
+	psy_ui_component_horizontalscrollrange(self, &scrollmin, &scrollmax);
+	npos = self->scroll.x / self->scrollstepx;
+	if (npos > scrollmax) {
+		npos = scrollmax;
+	}
+	if (npos < scrollmin) {
+		npos = scrollmin;
+	}
+	psy_ui_component_sethorizontalscrollposition(self, npos);
+}
+
+void psy_ui_component_setscrolltop(psy_ui_Component* self, int top)
+{
+	int npos;
+	int scrollmin;
+	int scrollmax;
+
+	self->scroll.y = top;
+	psy_ui_component_verticalscrollrange(self, &scrollmin, &scrollmax);
+	npos = self->scroll.y / self->scrollstepy;
+	if (npos > scrollmax) {
+		npos = scrollmax;
+	}
+	if (npos < scrollmin) {
+		npos = scrollmin;
+	}
+	psy_ui_component_setverticalscrollposition(self, npos);
+}
+
+void psy_ui_component_updateoverflow(psy_ui_Component* self)
+{
+	if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
+		psy_ui_Size preferredsize;
+		psy_ui_TextMetric tm;
+		int maxlines;
+		int visilines;
+		int currline;		
+		psy_ui_Size size;
+
+		tm = psy_ui_component_textmetric(self);
+		size = psy_ui_component_size(self);
+		preferredsize = psy_ui_component_preferredsize(self, &size);
+		maxlines = (psy_ui_value_px(&preferredsize.height, &tm) / (double)self->scrollstepy + 0.5);
+		visilines = psy_ui_value_px(&size.height, &tm) / self->scrollstepy;
+		currline = psy_ui_component_scrolltop(self) / self->scrollstepy;
+		psy_ui_component_setverticalscrollrange(self, 0, maxlines - visilines);		
+		if (currline > maxlines - visilines) {
+			currline = max(0, maxlines - visilines);
+			psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
+		}
+	}
+	if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
+		psy_ui_Size preferredsize;
+		psy_ui_TextMetric tm;
+		int maxrows;
+		int visirows;
+		int currrow;
+		psy_ui_Size size;
+
+		tm = psy_ui_component_textmetric(self);
+		size = psy_ui_component_size(self);
+		preferredsize = psy_ui_component_preferredsize(self, &size);
+		maxrows = (psy_ui_value_px(&preferredsize.width, &tm) / (double)self->scrollstepx + 0.5);
+		visirows = psy_ui_value_px(&size.width, &tm) / self->scrollstepx;
+		currrow = psy_ui_component_scrollleft(self) / self->scrollstepx;		
+		psy_ui_component_sethorizontalscrollrange(self, 0, maxrows - visirows);			
+		if (currrow > maxrows - visirows) {
+			currrow = max(0, maxrows - visirows);
+			psy_ui_component_setscrollleft(self, currrow * self->scrollstepx);
+		}		
+	}
 }

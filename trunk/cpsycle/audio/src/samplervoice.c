@@ -129,8 +129,6 @@ static psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice*,
 static void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice*,
 	psy_audio_Sample*, psy_dsp_amp_t* svol, psy_dsp_amp_t* lvol,
 	psy_dsp_amp_t* rvol);
-psy_dsp_amp_t psy_audio_samplervoice_unprocessed_wavedata(psy_audio_SamplerVoice*,
-	psy_audio_SampleIterator* it, uintptr_t channel);
 static psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice*,
 	uintptr_t channel, psy_dsp_amp_t input, uintptr_t pos,
 	psy_dsp_amp_t* env, psy_dsp_amp_t* filterenv,
@@ -177,7 +175,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	psy_audio_SamplerChannel* channel,
 	uintptr_t channelnum,
 	uintptr_t samplerate,
-	int resamplingmethod,
+	int quality,
 	int maxvolume) 
 {	
 	filter_init_samplerate(&self->_filter, samplerate);
@@ -196,16 +194,14 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->positions = 0;
 	self->stopping = FALSE;
 	self->period = 0;
+	self->resamplertype = quality;
 	if (instrument) {
 		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
 		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
 	} else {
 		psy_dsp_adsr_initdefault(&self->env, samplerate);
 		psy_dsp_adsr_initdefault(&self->filterenv, samplerate);
-	}		
-	psy_dsp_multiresampler_init(&self->resampler);
-	psy_dsp_multiresampler_settype(&self->resampler,
-		resamplingmethod);
+	}	
 	psy_audio_samplervoice_initfilter(self, instrument);
 	self->effects = NULL;
 	psy_audio_samplervoice_reseteffects(self);
@@ -308,11 +304,7 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self,
 		if (sample) {
 			psy_audio_SampleIterator* iterator;			
 			
-			iterator = psy_audio_sampleiterator_alloc();
-			*iterator = psy_audio_sample_begin(sample);
-			iterator->resampler_data =
-				psy_dsp_multiresampler_base(&self->resampler)->vtable->getresamplerdata(
-					psy_dsp_multiresampler_base(&self->resampler));
+			iterator = psy_audio_sample_allociterator(sample, self->resamplertype);
 			psy_list_append(&self->positions, iterator);
 			if (self->instrument->loop && self->sampler) {
 				psy_dsp_big_beat_t bpl;
@@ -335,13 +327,9 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self,
 						NOTECOMMANDS_MIDDLEC - self->sampler->basec,
 						sample->finetune);
 				}
-				psy_audio_samplervoice_updateiteratorspeed(self, iterator);
+				psy_audio_samplervoice_updateiteratorspeed(self, iterator);				
 			}
-			psy_audio_sampleiterator_play(iterator);
-			psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
-				&self->resampler),
-				iterator->resampler_data,
-				iterator->speed * 1/ 4294967296.0f);
+			psy_audio_sampleiterator_play(iterator);			
 		}
 	}	
 	psy_list_free(entries);	
@@ -408,18 +396,11 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self,
 		if (sample) {
 			psy_audio_SampleIterator* iterator;
 
-			iterator = psy_audio_sampleiterator_alloc();
-			*iterator = psy_audio_sample_begin(sample);
-			iterator->resampler_data =
-				psy_dsp_multiresampler_base(&self->resampler)->vtable->getresamplerdata(
-					psy_dsp_multiresampler_base(&self->resampler));
+			iterator = psy_audio_sample_allociterator(sample,
+				self->resamplertype);
 			psy_list_append(&self->positions, iterator);
 			psy_audio_sampleiterator_setspeed(iterator, frequency / 440);
-			psy_audio_sampleiterator_play(iterator);
-			psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
-				&self->resampler),
-				iterator->resampler_data,
-				iterator->speed * 1 / 4294967296.0f);
+			psy_audio_sampleiterator_play(iterator);			
 		}
 	}
 	psy_list_free(entries);
@@ -431,20 +412,8 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self,
 
 void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice* self)
 {
-	psy_List* p;
-
-	for (p = self->positions; p != NULL; psy_list_next(&p)) {
-		psy_audio_SampleIterator* iterator;
-
-		iterator = (psy_audio_SampleIterator*)p->entry;
-		psy_dsp_multiresampler_base(&self->resampler)->vtable->disposeresamplerdata(
-			psy_dsp_multiresampler_base(&self->resampler),
-			iterator->resampler_data);
-		psy_audio_sampleiterator_dispose(iterator);
-		free(iterator);
-	}
-	psy_list_free(self->positions);
-	self->positions = 0;
+	psy_list_deallocate(&self->positions, (psy_fp_disposefunc)
+		psy_audio_sampleiterator_dispose);	
 }
 
 void psy_audio_samplervoice_nna(psy_audio_SamplerVoice* self)
@@ -533,8 +502,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 							channel < psy_audio_buffer_numchannels(output); ++channel) {
 						psy_dsp_amp_t val;
 
-						val = psy_audio_samplervoice_unprocessed_wavedata(self,
-							position, channel);
+						val = psy_audio_sampleiterator_work(position, channel);
 						val = psy_audio_samplervoice_processenvelopes(self,
 							channel, val, dstpos, env, filterenv, svol, lvol, rvol);
 						psy_audio_samplervoice_adddatatosamplerbuffer(self, channel,
@@ -564,23 +532,19 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 	self->dooffset = 0;
 }
 
-psy_dsp_amp_t psy_audio_samplervoice_unprocessed_wavedata(psy_audio_SamplerVoice* self,
-	psy_audio_SampleIterator* it, uintptr_t channel)
-{
-	psy_dsp_amp_t* src;
-
-	src = psy_audio_buffer_at(&it->sample->channels, channel);	
-	return psy_dsp_resampler_work_float_unchecked(
-		psy_dsp_multiresampler_base(&self->resampler),
-		(channel == 0) ? it->m_pL : it->m_pR,
-		it->pos.LowPart,
-		it->resampler_data);
-}
-
 void psy_audio_samplervoice_setresamplerquality(psy_audio_SamplerVoice* self, 
 	ResamplerType quality)
 {
-	psy_dsp_multiresampler_settype(&self->resampler, quality);
+	self->resamplertype = quality;
+	if (self->positions && self->env.stage != ENV_OFF) {
+		psy_List* p;
+		for (p = self->positions; p != NULL; psy_list_next(&p)) {
+			psy_audio_SampleIterator* iterator;
+
+			iterator = (psy_audio_SampleIterator*)p->entry;
+			psy_dsp_multiresampler_settype(&iterator->resampler, quality);
+		}
+	}
 }
 
 psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice* self,
@@ -818,9 +782,9 @@ void psy_audio_samplervoice_effectinit(psy_audio_SamplerVoice* self)
 
 void psy_audio_samplervoice_reseteffects(psy_audio_SamplerVoice* self)
 {
-	//m_Slide2NoteDestPeriod = 0;
-	//m_PitchSlideSpeed = 0;
-
+	// pitch slide
+	self->slide2notedestperiod = 0;
+	self->pitchslidespeed = 0;
 	// volume slide
 	self->volumefadespeed = 0;
 	self->volumefadeamount = 1;

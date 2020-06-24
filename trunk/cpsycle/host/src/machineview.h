@@ -141,7 +141,5 @@ typedef struct {
 
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
-void machineview_applyproperties(MachineView*, psy_Properties*);
-void machineview_align(MachineView*);
 
 #endif

@@ -56,10 +56,10 @@ typedef struct {
 	psy_dsp_big_beat_t position;
 	psy_dsp_big_beat_t window;
 	psy_List* currtracks;
-	psy_List* events;
-	psy_List* globalevents;
-	psy_List* delayedevents;
-	psy_List* inputevents;	
+	psy_audio_PatternNode* events;
+	psy_audio_PatternNode* globalevents;
+	psy_audio_PatternNode* delayedevents;
+	psy_audio_PatternNode* inputevents;
 	psy_audio_SequencerPlayMode mode;	
 	bool looping;	
 	psy_dsp_big_beat_t linetickcount;
@@ -204,7 +204,7 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(psy_audio_Sequenc
 	return 1.0 / (self->lpb * psy_audio_sequencer_speed(self));
 }
 
-void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, const PatternNode*);
+void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, const psy_audio_PatternNode*);
 
 // elapsed playtime in seconds
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(

@@ -10,7 +10,7 @@
 static sequenceentryid = 1;
 
 static void sequenceselection_addeditposition(SequenceSelection*);
-static PatternNode* SequenceTrackIterator_next(SequenceTrackIterator*);
+static psy_audio_PatternNode* SequenceTrackIterator_next(SequenceTrackIterator*);
 static void SequenceTrackIterator_unget(SequenceTrackIterator*);
 static void sequence_reposition(psy_audio_Sequence* self, SequenceTrack*);
 static SequenceTrackIterator sequence_makeiterator(psy_audio_Sequence*, psy_List* entries);

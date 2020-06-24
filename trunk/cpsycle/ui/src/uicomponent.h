@@ -97,7 +97,7 @@ typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component* self,
 // vtable events function pointers 
 typedef void (*psy_ui_fp_onalign)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_onpreferredsize)(struct psy_ui_Component*,
-	psy_ui_Size* limit, psy_ui_Size* rv);
+	const psy_ui_Size* limit, psy_ui_Size* rv);
 typedef void (*psy_ui_fp_ondraw)(struct psy_ui_Component*, psy_ui_Graphics*);
 typedef void (*psy_ui_fp_onsize)(struct psy_ui_Component*, const psy_ui_Size*);
 typedef bool (*psy_ui_fp_onclose)(struct psy_ui_Component*);
@@ -220,7 +220,8 @@ typedef struct psy_ui_Component {
 	bool mousetracking;
 	psy_ui_Style style;
 	psy_ui_Size preferredsize;
-	psy_ui_IntPoint scroll;	
+	psy_ui_IntPoint scroll;
+	psy_ui_Overflow overflow;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -287,7 +288,7 @@ void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
-psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, psy_ui_Size* limit);
+psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
 void psy_ui_component_preventpreferredsize(psy_ui_Component*);
 void psy_ui_component_enablepreferredsize(psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
@@ -420,9 +421,9 @@ INLINE void psy_ui_component_invalidate(psy_ui_Component* self)
 	self->imp->vtable->dev_invalidate(self->imp);
 }
 
-INLINE void psy_ui_component_invalidaterect(psy_ui_Component* self, const psy_ui_Rectangle* r)
+INLINE void psy_ui_component_invalidaterect(psy_ui_Component* self, psy_ui_Rectangle r)
 {
-	self->imp->vtable->dev_invalidaterect(self->imp, r);
+	self->imp->vtable->dev_invalidaterect(self->imp, &r);
 }
 
 INLINE void psy_ui_component_update(psy_ui_Component* self)
@@ -538,32 +539,22 @@ INLINE psy_ui_IntPoint psy_ui_component_scroll(psy_ui_Component* self)
 	return self->scroll;
 }
 
-INLINE void psy_ui_component_setscroll(psy_ui_Component* self,
-	psy_ui_IntPoint position)
-{
-	self->scroll = position;
-}
-
-INLINE void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
-{
-	self->scroll.x = left;
-}
+void psy_ui_component_setscroll(psy_ui_Component*, psy_ui_IntPoint);
+void psy_ui_component_setscrollleft(psy_ui_Component*, int left);
 
 INLINE int psy_ui_component_scrollleft(psy_ui_Component* self)
 {
 	return self->scroll.x;
 }
 
-INLINE void psy_ui_component_setscrolltop(psy_ui_Component* self,
-	int top)
-{
-	self->scroll.y = top;
-}
+void psy_ui_component_setscrolltop(psy_ui_Component*, int top);
 
 INLINE int psy_ui_component_scrolltop(psy_ui_Component* self)
 {
 	return self->scroll.y;
 }
+
+void psy_ui_component_updateoverflow(psy_ui_Component*);
 
 #ifdef __cplusplus
 }

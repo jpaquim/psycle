@@ -14,21 +14,18 @@ static psy_dsp_amp_t work(psy_dsp_LinearResampler*,
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* /*resampler_data*/ );
+	uint64_t length);
 static psy_dsp_amp_t work_unchecked(psy_dsp_LinearResampler*,
 	int16_t const* data,
-	uint32_t res,
-	void* resampler_data);
+	uint32_t res);
 static float work_float(psy_dsp_LinearResampler*,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd);
 static float work_float_unchecked(psy_dsp_LinearResampler*,
-	float const* data, uint32_t res, void* resampler_data);
+	float const* data, uint32_t res);
 
 static resampler_vtable vtable;
 static int vtable_initialized = 0;
@@ -58,8 +55,7 @@ psy_dsp_amp_t work(psy_dsp_LinearResampler* self,
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* resampler_data)
+	uint64_t length)
 {
 	const float y0 = (float)*data;
 	const float y1 = (float)((offset >= length-1) ? 0 : *(data + 1));
@@ -68,8 +64,7 @@ psy_dsp_amp_t work(psy_dsp_LinearResampler* self,
 
 psy_dsp_amp_t work_unchecked(psy_dsp_LinearResampler* self,
 	int16_t const* data,
-	uint32_t res,
-	void* resampler_data)
+	uint32_t res)
 {
 	const float y0 = (float)*data;
 	const float y1 = (float)(*(data + 1));
@@ -80,7 +75,6 @@ float work_float(psy_dsp_LinearResampler* self,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd)
 {
@@ -96,7 +90,7 @@ float work_float(psy_dsp_LinearResampler* self,
 }
 
 float work_float_unchecked(psy_dsp_LinearResampler* self,
-	float const* data, uint32_t res, void* resampler_data)
+	float const* data, uint32_t res)
 {
 	const float y0 = *data;
 	const float y1 = *(data + 1);

@@ -662,7 +662,7 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 			else*/ if (afloat +1.0f > self->fftLog[h+1]) {
 				j = psy_dsp_resampler_work_float(
 					psy_dsp_linearresampler_base(&self->resampler),
-					calculatedfftIn, afloat, self->outputSize, NULL,
+					calculatedfftIn, afloat, self->outputSize,
 					calculatedfftIn, calculatedfftIn + self->outputSize - 1);				
 				j = calculatedfftIn[(int)afloat];
 				a = psy_dsp_fround(afloat);
@@ -682,5 +682,5 @@ void WindowFunc(int whichFunction, int NumSamples, float *in)
 	{
 		return psy_dsp_resampler_work_float(
 			psy_dsp_linearresampler_base(&self->resampler),
-			data, offset, length, NULL, data, data + length - 1);
+			data, offset, length, data, data + length - 1);
 	}

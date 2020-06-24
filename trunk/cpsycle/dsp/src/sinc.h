@@ -18,6 +18,7 @@ typedef struct sinc_data_t {
 
 typedef struct psy_dsp_SincResampler {
 	psy_dsp_Resampler resampler;
+	void* resampler_data;
 } psy_dsp_SincResampler;
 
 void psy_dsp_sinc_resampler_init(psy_dsp_SincResampler*);

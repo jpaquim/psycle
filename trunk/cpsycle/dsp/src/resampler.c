@@ -38,24 +38,23 @@ static void cubic_table_initialize(void)
 }
 
 // vtable
-static void setspeed(psy_dsp_Resampler* self, void* resampler_data, double speed) { }
+static void dispose(psy_dsp_Resampler* self) { }
+static void setspeed(psy_dsp_Resampler* self, double speed) { }
 static void* getresamplerdata(psy_dsp_Resampler* self) { return 0; }
-static void disposeresamplerdata(psy_dsp_Resampler* self, void* resampler_data) { }
+static void disposeresamplerdata(psy_dsp_Resampler* self) { }
 
 static psy_dsp_amp_t work(psy_dsp_Resampler* self, 
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* resampler_data)
+	uint64_t length)
 {
 	return *data;
 }
 
 static psy_dsp_amp_t work_unchecked(psy_dsp_Resampler* self,
 	int16_t const* data,
-	uint32_t res,
-	void* resampler_data)
+	uint32_t res)
 {
 	return *data;
 }
@@ -65,7 +64,6 @@ static float work_float(psy_dsp_Resampler* self,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd)
 {
@@ -73,7 +71,7 @@ static float work_float(psy_dsp_Resampler* self,
 }
 
 static float work_float_unchecked(psy_dsp_Resampler* self,
-	float const* data, uint32_t res, void* resampler_data)
+	float const* data, uint32_t res)
 {
 	return *data;
 }
@@ -83,14 +81,14 @@ static int vtable_initialized = 0;
 
 static void vtable_init(void)
 {
-	if (!vtable_initialized) {		
+	if (!vtable_initialized) {	
+		vtable.dispose = dispose;
 		vtable.work = work;
+		vtable.setspeed = setspeed;
 		vtable.work_unchecked = work_unchecked;
 		vtable.work_float = work_float;
 		vtable.work_float_unchecked = work_float_unchecked;
-		vtable.setspeed = setspeed;
-		vtable.getresamplerdata = getresamplerdata;
-		vtable.disposeresamplerdata = disposeresamplerdata;
+		vtable.setspeed = setspeed;		
 		vtable_initialized = 1;
 	}
 }

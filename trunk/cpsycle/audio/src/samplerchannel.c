@@ -54,8 +54,8 @@ void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t ind
 	self->panfactor = (psy_dsp_amp_t) 0.5f;
 	self->channeldefvolume =  1.f;	
 	self->defaultpanfactor = 100;
-	self->m_DefaultCutoff = 127;
-	self->m_DefaultRessonance = 0;
+	self->defaultcutoff = 127;
+	self->defaultressonance = 0;
 	self->defaultfiltertype = F_NONE;
 	self->effects = NULL;
 	self->index = index;
@@ -67,9 +67,9 @@ void psy_audio_samplerchannel_init(psy_audio_SamplerChannel* self, uintptr_t ind
 	}
 	psy_audio_infomachineparam_init(&self->param_channel, text, "", MPF_SMALL);
 	psy_audio_intmachineparam_init(&self->filter_cutoff,
-		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultCutoff, 0, 200);
+		"", "", MPF_STATE | MPF_SMALL, &self->defaultcutoff, 0, 200);
 	psy_audio_intmachineparam_init(&self->filter_res,
-		"", "", MPF_STATE | MPF_SMALL, &self->m_DefaultRessonance, 0, 200);
+		"", "", MPF_STATE | MPF_SMALL, &self->defaultressonance, 0, 200);
 	psy_audio_intmachineparam_init(&self->pan,
 		"", "", MPF_STATE | MPF_SMALL, &self->defaultpanfactor, 0, 200);
 	psy_audio_volumemachineparam_init(&self->slider_param,
@@ -183,24 +183,154 @@ void psy_audio_samplerchannel_effectinit(psy_audio_SamplerChannel* self)
 void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 	const psy_audio_PatternEvent* ev)
 {
+	int realset = 0;
+	int	realvalue = 0;	
+
 	switch (ev->cmd) {
-		case SAMPLER_CMD_VOLUMESLIDE:
-			psy_audio_samplerchannel_setvolumeslide(self, ev->parameter);
+		case SAMPLER_CMD_PANNING:
+			self->surround = FALSE;
+			self->panfactor = ev->parameter / (psy_dsp_amp_t)255;
 		break;
 		case SAMPLER_CMD_SET_CHANNEL_VOLUME:
 			self->volume = (psy_dsp_amp_t)((ev->parameter < 64)
-			? (ev->parameter / 64.0f)
-			: 1.0f);
-			break;
-		case SAMPLER_CMD_CHANNEL_VOLUMESLIDE:
-			psy_audio_samplerchannel_setchannelvolumeslide(self, ev->parameter);
-			break;		
-		case SAMPLER_CMD_PANNING:
-			self->panfactor = ev->parameter / (psy_dsp_amp_t) 255;		
+				? (ev->parameter / 64.0f)
+				: 1.0f);
 			break;
 		case SAMPLER_CMD_PANNINGSLIDE:
 			psy_audio_samplerchannel_setpanningslide(self, ev->parameter);
 			break;
+		case SAMPLER_CMD_CHANNEL_VOLUMESLIDE:
+			psy_audio_samplerchannel_setchannelvolumeslide(self, ev->parameter);
+			break;
+		case SAMPLER_CMD_SET_GLOBAL_VOLUME:			
+			// m_pSampler->GlobalVolume(parameter < 0x80 ? parameter : 0x80);
+			break;
+		case SAMPLER_CMD_VOLUMESLIDE:
+			psy_audio_samplerchannel_setvolumeslide(self, ev->parameter);
+			break;
+		case SAMPLER_CMD_GLOBAL_VOLUME_SLIDE:
+			break;		
+		case SAMPLER_CMD_EXTENDED:
+			switch (ev->parameter & 0xF0) {
+				case SAMPLER_CMD_E9:
+					switch (ev->parameter & 0x0F) {
+						case SAMPLER_CMD_E9_SURROUND_OFF:
+							self->surround = FALSE;
+							break;
+						case SAMPLER_CMD_E9_SURROUND_ON:
+							self->surround = TRUE;
+							break;
+						case SAMPLER_CMD_E9_REVERB_OFF:
+							break;
+						case SAMPLER_CMD_E9_REVERB_FORCE:
+							break;
+						case SAMPLER_CMD_E9_STANDARD_SURROUND:
+							break;
+						case SAMPLER_CMD_E9_QUAD_SURROUND:
+							break;
+						case SAMPLER_CMD_E9_GLOBAL_FILTER:
+							break;
+						case SAMPLER_CMD_E9_LOCAL_FILTER:
+							break;
+						default:
+							break;
+						}
+					break;
+				case SAMPLER_CMD_E_SET_PAN:
+					//PanFactor(XMSampler::E8VolMap[(parameter & 0xf)] / 64.0f);
+					break;
+				case SAMPLER_CMD_E_SET_MIDI_MACRO:
+					//\todo : implement. For now, it maps directly to internal Filter commands
+					self->midi_set = ev->parameter & 0x0F;
+					break;
+				case SAMPLER_CMD_E_GLISSANDO_TYPE:
+					self->grissando = ev->parameter != 0;
+					break;
+				case SAMPLER_CMD_E_VIBRATO_WAVE:
+					if (ev->parameter <= psy_audio_WAVEFORMS_RANDOM) {
+						self->vibratotype = (psy_audio_WaveForms)(ev->parameter);
+					} else { self->vibratotype = psy_audio_WAVEFORMS_SINUS; }
+					break;
+				case SAMPLER_CMD_E_PANBRELLO_WAVE:
+					if (ev->parameter <= psy_audio_WAVEFORMS_RANDOM) {
+						self->panbrellotype = (psy_audio_WaveForms)(ev->parameter);
+					} else { self->panbrellotype = psy_audio_WAVEFORMS_SINUS; }
+					break;
+				case SAMPLER_CMD_E_TREMOLO_WAVE:
+					if (ev->parameter <= psy_audio_WAVEFORMS_RANDOM) {
+						self->tremolotype = (psy_audio_WaveForms)(ev->parameter);
+					} else { self->tremolotype = psy_audio_WAVEFORMS_SINUS; }
+					break;
+				default:
+				break;
+			}
+			break;
+		case SAMPLER_CMD_MIDI_MACRO:
+			if (ev->parameter < 0x80) {
+				realset = self->midi_set;
+				realvalue = ev->parameter;
+			} else {
+				//realset = m_pSampler->GetMap(ev->parameter - 0x80).mode;
+				//realvalue = m_pSampler->GetMap(ev->parameter - 0x80).value;
+			}
+			switch (realset) {
+				case 0:
+					self->cutoff = realvalue;
+					//if (voice)
+					//{
+					//	if (voice->FilterType() == F_NONE) voice->FilterType(self->defaultfiltertype);
+					//	voice->CutOff(m_Cutoff);
+					//}
+					break;
+				case 1:
+					self->ressonance = realvalue;
+					//if (voice)
+					//{
+					//	if (voice->FilterType() == F_NONE) voice->FilterType(m_DefaultFilterType);
+					//	voice->Ressonance(m_Ressonance);
+					//}
+					break;
+				case 2:
+					//Set filter mode. OpenMPT only says 0..F lowpass and 10..1F highpass.
+					// It also has a macro default setup where 0 and 8 set the lowpass and 10 an 18 set the highpass
+					// From there, I adapted the following table for Psycle.
+					if (realvalue < 0x20) {
+						if (realvalue < 4) { //0..3
+							self->defaultfiltertype = F_ITLOWPASS;
+						} else if (realvalue < 6) { //4..5
+							self->defaultfiltertype = F_LOWPASS12;
+						} else if (realvalue < 8) { //6..7
+							self->defaultfiltertype = F_BANDPASS12;
+						} else if (realvalue < 0xC) { //8..B
+							self->defaultfiltertype = F_MPTLOWPASSE;
+						} else if (realvalue < 0xE) { //C..D
+							self->defaultfiltertype = F_LOWPASS12E;
+						} else if (realvalue < 0x10) { //E..F
+							self->defaultfiltertype = F_BANDPASS12E;
+						} else if (realvalue < 0x14) { //10..13
+							self->defaultfiltertype = F_MPTHIGHPASSE;
+						} else if (realvalue < 0x16) { //14..15
+							self->defaultfiltertype = F_HIGHPASS12;
+						} else if (realvalue < 0x18) { //16..17
+							self->defaultfiltertype = F_BANDREJECT12;
+						} else if (realvalue < 0x1C) { //18..1B
+							self->defaultfiltertype = F_MPTHIGHPASSE;
+						} else if (realvalue < 0x1E) { //1C..1D
+							self->defaultfiltertype = F_HIGHPASS12E;
+						} else { // 1E..1F
+							self->defaultfiltertype = F_BANDREJECT12E;
+						}
+						// if (voice) { voice->FilterType(m_DefaultFilterType); }
+					}
+					break;
+				default:
+					break;
+			}
+			break;
+		default:
+			break;
+	}
+	switch (ev->cmd) {
 		case SAMPLER_CMD_VIBRATO:
 			psy_audio_samplerchannel_setvibrato(self,
 				((ev->parameter >> 4) & 0x0F),
@@ -215,10 +345,10 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 			psy_audio_samplerchannel_settremolo(self,
 				((ev->parameter >> 4) & 0x0F),
 				(ev->parameter & 0x0F));
-			break;		
+			break;
 		case SAMPLER_CMD_PANBRELLO:
 			psy_audio_samplerchannel_setpanbrello(self,
-			((ev->parameter >> 4) & 0x0F),
+				((ev->parameter >> 4) & 0x0F),
 				(ev->parameter & 0x0F));
 			break;
 		case SAMPLER_CMD_RETRIG:
@@ -441,20 +571,25 @@ bool  psy_audio_samplerchannel_load(psy_audio_SamplerChannel* self,
 	char chan[8];
 	int32_t size = 0;
 	int32_t temp32;
-	psyfile_read(songfile->file, chan, 4); chan[4] = '\0';
-	psyfile_read(songfile->file, &size, sizeof(int32_t));
-	if (strcmp(chan, "CHAN")) return FALSE;
 
-	psyfile_read(songfile->file, &temp32, sizeof(temp32));///< (0..200)   &0x100 = Mute.
+	psyfile_read(songfile->file, chan, 4);
+	chan[4] = '\0';
+	psyfile_read(songfile->file, &size, sizeof(int32_t));
+	if (strcmp(chan, "CHAN")) {
+		return FALSE;
+	}
+	psyfile_read(songfile->file, &temp32, sizeof(temp32));
+	///< (0..200)   &0x100 = Mute.
 	self->channeldefvolume = temp32 / 200.f;
-	psyfile_read(songfile->file, &temp32, sizeof(temp32));//<  0..200 .  &0x100 = Surround.
+	psyfile_read(songfile->file, &temp32, sizeof(temp32));
+	//<  0..200 .  &0x100 = Surround.
 	self->defaultpanfactor = temp32;
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	self->m_DefaultCutoff = temp32;
+	self->defaultcutoff = temp32;
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	self->m_DefaultRessonance = temp32;
+	self->defaultressonance = temp32;
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	// self->m_DefaultFilterType = (FilterType)temp32;
+	self->defaultfiltertype = (FilterType)temp32;
 	return TRUE;
 }
 
@@ -466,7 +601,7 @@ void psy_audio_samplerchannel_save(psy_audio_SamplerChannel* self,
 	psyfile_write_int32(songfile->file, size);
 	psyfile_write_int32(songfile->file, (int32_t)(self->channeldefvolume * 200));
 	psyfile_write_int32(songfile->file, self->defaultpanfactor);
-	psyfile_write_int32(songfile->file, self->m_DefaultCutoff);
-	psyfile_write_int32(songfile->file, self->m_DefaultRessonance);	
+	psyfile_write_int32(songfile->file, self->defaultcutoff);
+	psyfile_write_int32(songfile->file, self->defaultressonance);
 	psyfile_write_uint32(songfile->file, self->defaultfiltertype);	
 }
