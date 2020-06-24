@@ -496,8 +496,8 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 {
 	interpolatecurvebox_clear(self);
 	if (self->pattern) {
-		PatternNode* p;
-		PatternNode* q;
+		psy_audio_PatternNode* p;
+		psy_audio_PatternNode* q;
 		int insertlast = 1;
 
 		p = psy_audio_pattern_greaterequal(self->pattern,
@@ -505,7 +505,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 		if (p) {
 			psy_audio_PatternEntry* entry;
 
-			entry = (psy_audio_PatternEntry*) p->entry;
+			entry = psy_audio_patternnode_entry(p);
 			if (entry->offset > self->selection.topleft.offset) {
 				KeyFrame* keyframe;
 
@@ -520,7 +520,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 			psy_audio_PatternEntry* entry;
 			q = p->next;
 
-			entry = (psy_audio_PatternEntry*)p->entry;
+			entry = psy_audio_patternnode_entry(p);
 			if (entry->offset < self->selection.bottomright.offset) {
 				if (entry->track == self->selection.topleft.track) {
 					KeyFrame* keyframe;

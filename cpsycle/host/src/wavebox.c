@@ -651,13 +651,13 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.oldselection.end,
 							self->context.selection.end);
-						psy_ui_component_invalidaterect(&self->component, &rnew);
+						psy_ui_component_invalidaterect(&self->component, rnew);
 					} else {
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.selection.end,
 							self->context.oldselection.end);
 						psy_ui_rectangle_expand(&rnew, 0, 2, 0, 2);
-						psy_ui_component_invalidaterect(&self->component, &rnew);
+						psy_ui_component_invalidaterect(&self->component, rnew);
 					}												
 				} else
 				if (olddragmode == WAVEBOX_DRAG_LEFT &&
@@ -666,13 +666,13 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.oldselection.start,
 							self->context.selection.start);
-						psy_ui_component_invalidaterect(&self->component, &rnew);
+						psy_ui_component_invalidaterect(&self->component, rnew);
 					} else {
 						rnew = wavebox_framerangetoscreen(self,
 							self->context.selection.start,
 							self->context.oldselection.start);
 						psy_ui_rectangle_expand(&rnew, 0, 2, 0, 2);
-						psy_ui_component_invalidaterect(&self->component, &rnew);
+						psy_ui_component_invalidaterect(&self->component, rnew);
 					}
 				} else {
 					rold = wavebox_framerangetoscreen(self,
@@ -683,7 +683,7 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 						self->context.selection.end);
 					psy_ui_rectangle_expand(&rold, 0, 2, 0, 2);					
 					psy_ui_rectangle_union(&rnew, &rold);
-					psy_ui_component_invalidaterect(&self->component, &rnew);
+					psy_ui_component_invalidaterect(&self->component, rnew);
 				}
 			}
 			psy_signal_emit(&self->selectionchanged, self, 0);

@@ -41,30 +41,27 @@ static float sinc_internal(int16_t const* data, uint32_t res, int leftExtent, in
 static float sinc_float_filtered(float const* data, uint32_t res, int leftExtent, int rightExtent, sinc_data_t* resampler_data);
 static float sinc_float_internal(float const* data, uint32_t res, int leftExtent, int rightExtent);
 
-
+static void dispose(psy_dsp_SincResampler*);
 static psy_dsp_amp_t work(psy_dsp_SincResampler*,
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* /*resampler_data*/ );
+	uint64_t length);
 static psy_dsp_amp_t work_unchecked(psy_dsp_SincResampler*,
 	const int16_t* data,
-	uint32_t res,
-	void* resampler_data);
+	uint32_t res);
 static float work_float(psy_dsp_SincResampler*,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd);
 static float work_float_unchecked(psy_dsp_SincResampler*,
-	float const* data, uint32_t res, void* resampler_data);
+	float const* data, uint32_t res);
 
-static void setspeed(psy_dsp_SincResampler* self, void* resampler_data, double speed)
+static void setspeed(psy_dsp_SincResampler* self, double speed)
 {
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (speed > 1.0) {
 		t->enabled = TRUE;
 		t->fcpi = cutoffoffset * psy_dsp_PI / speed;
@@ -92,11 +89,7 @@ static void vtable_init(psy_dsp_SincResampler* self)
 	if (!vtable_initialized) {
 		vtable = *self->resampler.vtable;
 		vtable.setspeed =
-			(psy_dsp_fp_resampler_setspeed)setspeed;
-		vtable.getresamplerdata =
-			(psy_dsp_fp_resampler_getresamplerdata)getresamplerdata;
-		vtable.disposeresamplerdata =
-			(psy_dsp_fp_resampler_disposeresamplerdata)disposeresamplerdata;
+			(psy_dsp_fp_resampler_setspeed)setspeed;		
 		vtable.work = (psy_dsp_fp_resampler_work)work;
 		vtable.work_unchecked = (psy_dsp_fp_resampler_work_unchecked)
 			work_unchecked;
@@ -113,6 +106,12 @@ void psy_dsp_sinc_resampler_init(psy_dsp_SincResampler* self)
 	vtable_init(self);
 	self->resampler.vtable = &vtable;
 	psy_dsp_sincresampler_initstatictables();
+	self->resampler_data = getresamplerdata(self);
+}
+
+void dispose(psy_dsp_SincResampler* self)
+{
+	disposeresamplerdata(self, self->resampler_data);
 }
 
 void psy_dsp_sincresampler_initstatictables(void)
@@ -191,12 +190,11 @@ psy_dsp_amp_t work(psy_dsp_SincResampler* self,
 	int16_t const* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* resampler_data)
+	uint64_t length)
 {		
 	const int64_t leftExtent = (offset < SINC_ZEROS) ? offset + 1 : SINC_ZEROS;
 	const int64_t rightExtent = (length - offset - 1 < SINC_ZEROS) ? length - offset - 1 : SINC_ZEROS;
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_filtered(data, res, (int)leftExtent, (int)rightExtent, t);
 	}
@@ -205,10 +203,9 @@ psy_dsp_amp_t work(psy_dsp_SincResampler* self,
 
 psy_dsp_amp_t work_unchecked(psy_dsp_SincResampler* self,
 	const int16_t* data,
-	uint32_t res,
-	void* resampler_data)
+	uint32_t res)
 {
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_filtered(data, res, SINC_ZEROS, SINC_ZEROS, t);
 	}
@@ -219,7 +216,6 @@ float work_float(psy_dsp_SincResampler* self,
 	float const* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd)
 {
@@ -231,7 +227,7 @@ float work_float(psy_dsp_SincResampler* self,
 	const int leftExtent = (ioffset < SINC_ZEROS) ? ioffset + 1 : SINC_ZEROS;
 	const int rightExtent = (int)((length - ioffset - 1 < SINC_ZEROS) ? length - ioffset - 1 : SINC_ZEROS);
 	data += ioffset;
-	t = (sinc_data_t*)(resampler_data);
+	t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_float_filtered(data, res, leftExtent, rightExtent, t);
 	}
@@ -239,9 +235,9 @@ float work_float(psy_dsp_SincResampler* self,
 }
 
 float work_float_unchecked(psy_dsp_SincResampler* self,
-	float const* data, uint32_t res, void* resampler_data)
+	float const* data, uint32_t res)
 {
-	sinc_data_t* t = (sinc_data_t*)(resampler_data);
+	sinc_data_t* t = (sinc_data_t*)(self->resampler_data);
 	if (t->enabled) {
 		return sinc_float_filtered(data, res, SINC_ZEROS, SINC_ZEROS, t);
 	}

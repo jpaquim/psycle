@@ -135,11 +135,16 @@ const char* psy_audio_sample_name(psy_audio_Sample* self)
 	return self->name;
 }
 
-psy_audio_SampleIterator psy_audio_sample_begin(psy_audio_Sample* self)
-{
-	psy_audio_SampleIterator rv;
 
-	psy_audio_sampleiterator_init(&rv, self);
+psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample* self,
+	ResamplerType quality)
+{
+	psy_audio_SampleIterator* rv;
+
+	rv = psy_audio_sampleiterator_alloc();
+	if (rv) {
+		psy_audio_sampleiterator_init(rv, self, quality);
+	}
 	return rv;
 }
 

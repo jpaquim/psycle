@@ -24,3 +24,20 @@ void skincoord_setall(SkinCoord* self,
 	self->destheight = destheight;
 	self->range = range;
 }
+
+void skincoord_setsource(SkinCoord* coord, int vals[4])
+{
+	coord->srcx = vals[0];
+	coord->srcy = vals[1];
+	coord->srcwidth = vals[2];
+	coord->srcheight = vals[3];
+	coord->destwidth = vals[2];
+	coord->destheight = vals[3];
+}
+
+void skincoord_setdest(SkinCoord* coord, int vals[4])
+{
+	coord->destx = vals[0];
+	coord->desty = vals[1];
+	coord->range = vals[2];
+}

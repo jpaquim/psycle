@@ -11,10 +11,13 @@
 #include "workspace.h"
 
 typedef struct {
-	int beatwidth;
-	int keyheight;
 	int keymin;
 	int keymax;
+	int keyheight;
+} KeyboardConfig;
+
+typedef struct {
+	int beatwidth;	
 	int lpb;
 	psy_dsp_big_beat_t visibeats;
 	int visisteps;	
@@ -22,6 +25,11 @@ typedef struct {
 	psy_dsp_big_beat_t stepwidth;
 	int visikeys;
 } PianoMetrics;
+
+struct Pianogrid;
+
+void pianometrics_update(PianoMetrics* rv, struct Pianogrid* grid,
+	psy_audio_Pattern* pattern, int lpb);
 
 typedef struct {
 	psy_ui_Component component;           	
@@ -36,30 +44,38 @@ void pianoheader_init(PianoHeader*, psy_ui_Component* parent, struct Pianoroll*)
 
 typedef struct {
 	psy_ui_Component component;
-	int textheight;		
-	struct TrackerView* view;
-	PianoMetrics metrics;
+	KeyboardConfig* keyboardconfig;
 } PianoKeyboard;
 
-void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent);
+void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent,
+	KeyboardConfig*);
+void pianokeyboard_setkeyboardconfig(PianoKeyboard*, KeyboardConfig*);
 
-typedef struct {
+typedef struct Pianogrid {
    psy_ui_Component component;   
-   int keyheight;   
    psy_dsp_big_beat_t bpl;
-   int lpb;
-   struct Pianoroll* view;
+   int lpb;   
    int beatscrollpos;
    PianoMetrics metrics;
    psy_audio_PatternEntry* hover;
    psy_Table channel;
+   KeyboardConfig* keyboardconfig;
+   psy_audio_Pattern* pattern;
+   Workspace* workspace;
+   psy_dsp_big_beat_t sequenceentryoffset;
+   psy_dsp_big_beat_t lastplayposition;
 } Pianogrid;
 
-void pianogrid_init(Pianogrid*, psy_ui_Component* parent, struct Pianoroll*);
+void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardConfig*,
+	Workspace*);
+void pianogrid_setkeyboardconfig(Pianogrid*, KeyboardConfig*);
+void pianogrid_setpattern(Pianogrid*, psy_audio_Pattern*);
 
 typedef struct Pianoroll {
    psy_ui_Component component;
+   psy_ui_Component top;   
    PianoHeader header;
+   psy_ui_Component left;
    psy_ui_Component keyboardheader;
    PianoKeyboard keyboard;
    Pianogrid grid;
@@ -67,13 +83,13 @@ typedef struct Pianoroll {
    int cy;
    psy_audio_Pattern* pattern;
    unsigned int opcount;
-   int syncpattern;
-   psy_dsp_big_beat_t sequenceentryoffset;
-   psy_dsp_big_beat_t lastplayposition;   
+   int syncpattern;   
    Workspace* workspace;
+   KeyboardConfig keyboardconfig;
 } Pianoroll;
 
-void pianoroll_init(Pianoroll*, psy_ui_Component* parent, Workspace* workspace);
+void pianoroll_init(Pianoroll*, psy_ui_Component* parent, Workspace*);
 void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
+void pianoroll_updatemetrics(Pianoroll*);
 
 #endif

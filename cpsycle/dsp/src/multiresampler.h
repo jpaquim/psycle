@@ -42,7 +42,7 @@ typedef struct {
 	psy_dsp_Resampler* selectedresampler;	
 } psy_dsp_MultiResampler;
 
-void psy_dsp_multiresampler_init(psy_dsp_MultiResampler*);
+void psy_dsp_multiresampler_init(psy_dsp_MultiResampler*, ResamplerType type);
 void psy_dsp_multiresampler_settype(psy_dsp_MultiResampler*, ResamplerType type);
 ResamplerType psy_dsp_multiresampler_type(psy_dsp_MultiResampler*);
 const char* psy_dsp_multiresampler_name(ResamplerType);

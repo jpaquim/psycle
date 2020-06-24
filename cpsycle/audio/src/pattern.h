@@ -37,7 +37,7 @@ typedef struct {
 } PatternSelection;
 
 typedef struct psy_audio_Pattern {
-	PatternNode* events;
+	psy_audio_PatternNode* events;
 	psy_dsp_big_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns
 	uintptr_t maxsongtracks;
@@ -66,20 +66,26 @@ psy_audio_Pattern* psy_audio_pattern_allocinit(void);
 psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern*);
 /// inserts an event by copy
 ///\return the pattern node containing the inserted event
-PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, PatternNode* prev, int track,
+psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, psy_audio_PatternNode* prev, int track,
 	psy_dsp_big_beat_t offset, const psy_audio_PatternEvent*);
 /// removes a pattern node
-void psy_audio_pattern_remove(psy_audio_Pattern*, PatternNode*);
+void psy_audio_pattern_remove(psy_audio_Pattern*, psy_audio_PatternNode*);
 /// finds the pattern node greater or equal than the offset
 ///\return the pattern node greater or equal than the offset
-PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern*, psy_dsp_big_beat_t offset);
+psy_audio_PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern*, psy_dsp_big_beat_t offset);
 /// finds a pattern node
 ///\return the pattern node
-PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
-	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, PatternNode** prev);
+psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
+	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev);
+/// gets the first pattern
+///\return the first pattern node
+INLINE psy_audio_PatternNode* psy_audio_pattern_begin(psy_audio_Pattern* self)
+{
+	return self->events;
+}
 /// finds the last pattern
 ///\return finds the last pattern node
-PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
+psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
 /// sets the pattern description
 void psy_audio_pattern_setname(psy_audio_Pattern*, const char*);
 ///\return pattern description
@@ -98,10 +104,10 @@ INLINE int psy_audio_pattern_empty(psy_audio_Pattern* self)
 	return self->events == NULL;
 }
 /// sets the event or an empty event if event is 0
-void psy_audio_pattern_setevent(psy_audio_Pattern*, PatternNode*, const psy_audio_PatternEvent*);
+void psy_audio_pattern_setevent(psy_audio_Pattern*, psy_audio_PatternNode*, const psy_audio_PatternEvent*);
 /// gets the event or an empty event if node is 0
 ///\return gets the event or an empty event if node is 0
-psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*, PatternNode*);
+psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*, psy_audio_PatternNode*);
 /// gets the op count to determine changes
 INLINE uintptr_t psy_audio_pattern_opcount(psy_audio_Pattern* self)
 {

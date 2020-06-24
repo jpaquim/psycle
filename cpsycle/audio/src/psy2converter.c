@@ -389,7 +389,7 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 		psy_audio_Pattern* pattern;
-		PatternNode* p;
+		psy_audio_PatternNode* p;
 
 		pattern = (psy_audio_Pattern*)psy_tableiterator_value(&it);
 		if (psy_audio_pattern_empty(pattern)) {

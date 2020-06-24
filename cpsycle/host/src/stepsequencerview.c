@@ -122,23 +122,23 @@ void stepsequencerbar_ondraw(StepsequencerBar* self, psy_ui_Graphics* g)
 	stepsequencerbar_drawbackground(self, g);
 	if (self->pattern) {
 		psy_audio_PatternEditPosition cursor;
-		PatternNode* curr;
+		psy_audio_PatternNode* curr;
 				
 		cursor = workspace_patterneditposition(self->workspace);
-		curr = self->pattern->events;
+		curr = psy_audio_pattern_begin(self->pattern);
 		while (curr) {			
 			psy_audio_PatternEntry* entry;
 			int line;
 			
-			entry = (psy_audio_PatternEntry*)(curr->entry);
+			entry = psy_audio_patternnode_entry(curr);
 			line = offsettoline(&self->workspace->player, entry->offset);
 			if (entry->track == cursor.track) {
 				if (line >= self->position.steprow * 16 &&
-						line < self->position.steprow * 16 + 16) {
+					line < self->position.steprow * 16 + 16) {
 					stepsequencerbar_drawstep(self, g, line % 16, 2);
 				}
-			}			
-			curr = curr->next;
+			}
+			psy_audio_patternnode_next(&curr);
 		}
 	}
 	if (psy_audio_player_playing(&self->workspace->player)) {
@@ -192,8 +192,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 	if (self->pattern && self->workspace->song) {
 		int step;
 		psy_audio_PatternEvent event;
-		PatternNode* node;
-		PatternNode* prev;
+		psy_audio_PatternNode* node;
+		psy_audio_PatternNode* prev;
 		psy_audio_PatternEditPosition cursor;
 		psy_dsp_big_beat_t bpl;
 
@@ -240,8 +240,8 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 	psy_audio_Pattern* patterndefaults,
 	psy_audio_PatternEvent* event)
 {
-	PatternNode* node;
-	PatternNode* prev;	
+	psy_audio_PatternNode* node;
+	psy_audio_PatternNode* prev;	
 				
 	node = psy_audio_pattern_findnode(patterndefaults, track, 0, (psy_dsp_big_beat_t) 0.25f,
 		&prev);

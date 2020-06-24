@@ -62,7 +62,7 @@ static void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator*,
 	psy_dsp_amp_t buffer[192], psy_dsp_amp_t* data, bool released);
 
 void psy_audio_sampleiterator_init(psy_audio_SampleIterator* self,
-	psy_audio_Sample* sample)
+	psy_audio_Sample* sample, ResamplerType quality)
 {
 	self->sample = sample;
 	self->looped = FALSE;
@@ -70,11 +70,11 @@ void psy_audio_sampleiterator_init(psy_audio_SampleIterator* self,
 	self->forward = 1;
 	self->pos.QuadPart = 0;
 	self->speed = (int64_t) 4294967296.0f;
-	self->speedinternal = self->speed;
-	self->resampler_data = NULL;	
+	self->speedinternal = self->speed;	
 	psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(self, sample);
 	//psy_audio_buffer_init(&self->buffer, 2);
 	psy_audio_sampleiterator_initbuffer(self);
+	psy_dsp_multiresampler_init(&self->resampler, quality);	
 }
 
 void psy_audio_sampleiterator_initbuffer(psy_audio_SampleIterator* self)
@@ -102,6 +102,7 @@ void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator* self)
 	//psy_audio_buffer_dispose(&self->buffer);
 	dsp.memory_dealloc(self->lBuffer);
 	dsp.memory_dealloc(self->rBuffer);
+	psy_dsp_resampler_dispose(psy_dsp_multiresampler_base(&self->resampler));	
 }
 
 void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
@@ -147,7 +148,7 @@ psy_audio_SampleIterator* psy_audio_sampleiterator_allocinit(psy_audio_Sample*
 
 	rv = psy_audio_sampleiterator_alloc();
 	if (rv) {		
-		psy_audio_sampleiterator_init(rv, sample);
+		psy_audio_sampleiterator_init(rv, sample, RESAMPLERTYPE_LINEAR);
 	}
 	return rv;
 }
@@ -163,6 +164,17 @@ intptr_t psy_audio_sampleiterator_inc(psy_audio_SampleIterator* self)
 	// Note: pos might be poiting at an erroneous place here. (like in looped
 	// samples). Let Postwork take care of this.	
 	return diff;
+}
+
+psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator* self, uintptr_t channel)
+{
+	psy_dsp_amp_t* src;
+
+	src = psy_audio_buffer_at(&self->sample->channels, channel);
+	return psy_dsp_resampler_work_float_unchecked(
+		psy_dsp_multiresampler_base(&self->resampler),
+		(channel == 0) ? self->m_pL : self->m_pR,
+		self->pos.LowPart);
 }
 
 void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator* self)

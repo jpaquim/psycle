@@ -25,23 +25,30 @@ typedef struct psy_audio_SamplerChannel {
 	// // Channel Index. UINTPTR_MAX used for master
 	uintptr_t index;
 	// (0..1.0f) value used for Playback (channel volume)
-	psy_dsp_amp_t volume;	
+	psy_dsp_amp_t volume;
+	//  0..200 .  &0x100 == Surround. // value used for Storage and reset
+	float channeldefvolume;
+	// memory of note volume of last voice played.
+	int lastvoicevolume; 
+	// memory of note volume of last voice played.
+	float lastvoicerandvol;
+	// value used for playback.
+	bool mute;
 	// (0..1.0f) value used for Playback (pan factor)	
 	float panfactor;
 	int defaultpanfactor;  //  0..200 .  &0x100 == Surround. // value used for Storage and reset
 	float lastvoicepanfactor;
 	// (0..1.0f) <-> (0..200)
-	float channeldefvolume;
-	int m_DefaultCutoff;
-	int m_DefaultRessonance;
-	//  0..200 .  &0x100 == Surround. // value used for Storage and reset
+	bool surround;// value used for playback (is channel set to surround?)
+	
 	FilterType defaultfiltertype;	
 	psy_audio_InfoMachineParam param_channel;
 	psy_audio_IntMachineParam filter_cutoff;
 	psy_audio_IntMachineParam filter_res;
 	psy_audio_IntMachineParam pan;
 	psy_audio_VolumeMachineParam slider_param;
-	psy_audio_IntMachineParam level_param;	
+	psy_audio_IntMachineParam level_param;
+
 	// effects
 	psy_List* effects;
 	// volume slide
@@ -78,6 +85,8 @@ typedef struct psy_audio_SamplerChannel {
 	// arpeggio
 	double arpeggioperiod[2];
 	int arpeggiomem;
+	// grissando
+	bool grissando;
 	// retrig
 	int retrigoperation;
 	int retrigvol;
@@ -85,6 +94,13 @@ typedef struct psy_audio_SamplerChannel {
 	int ticks;
 	// offset	
 	int offsetMem;
+	//TODO: some way to let the user know the value set to this.
+	int midi_set;
+	int cutoff;
+	int ressonance;
+	int defaultcutoff;
+	int defaultressonance;
+	FilterType m_DefaultFilterType;
 } psy_audio_SamplerChannel;
 
 void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*, uintptr_t index);

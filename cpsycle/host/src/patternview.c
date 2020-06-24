@@ -275,8 +275,8 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 	}
 	patternview_setpattern(self, pattern);
 	self->trackerview.sequenceentryoffset = 0.f;
-	self->pianoroll.sequenceentryoffset = 0.f;
-	self->pianoroll.pattern = pattern;
+	self->pianoroll.grid.sequenceentryoffset = 0.f;
+	pianoroll_setpattern(&self->pianoroll, pattern);	
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -295,11 +295,11 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 			entry->pattern);
 		patternview_setpattern(self, pattern);
 		self->trackerview.sequenceentryoffset = entry->offset;
-		self->pianoroll.sequenceentryoffset = entry->offset;
+		self->pianoroll.grid.sequenceentryoffset = entry->offset;
 	} else {
 		patternview_setpattern(self, 0);		
 		self->trackerview.sequenceentryoffset = 0.f;
-		self->pianoroll.sequenceentryoffset = 0.f;
+		self->pianoroll.grid.sequenceentryoffset = 0.f;
 	}
 	psy_ui_component_invalidate(&self->component);
 }

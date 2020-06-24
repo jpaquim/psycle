@@ -8,7 +8,6 @@
 #include "samplerdefs.h"
 #include "ticktimer.h"
 // dsp
-#include <multiresampler.h>
 #include <adsr.h>
 #include <filter.h>
 #include <valuemapper.h>
@@ -30,8 +29,8 @@ typedef struct {
 	struct psy_audio_Samples* samples;
 	psy_dsp_ADSR env;
 	psy_dsp_ADSR filterenv;
-	Filter _filter;	
-	psy_dsp_MultiResampler resampler;
+	Filter _filter;
+	ResamplerType resamplertype;
 	psy_List* positions;
 	psy_dsp_amp_t vol;
 	int m_Volume;
@@ -49,6 +48,9 @@ typedef struct {
 	int note;
 	// effects		
 	psy_List* effects;
+	// pitchslide
+	int slide2notedestperiod;
+	int pitchslidespeed;
 	// volumeslide
 	int volumeslidespeed;
 	float volumefadespeed;
@@ -91,7 +93,8 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
 	psy_audio_Samples*,
 	psy_audio_Instrument*,
 	psy_audio_SamplerChannel* channel,
-	uintptr_t channelnum, uintptr_t samplerate, int resamplingmethod,
+	uintptr_t channelnum, uintptr_t samplerate,
+	ResamplerType quality,
 	int maxvolume);
 void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice*);
 psy_audio_SamplerVoice* psy_audio_samplervoice_alloc(void);

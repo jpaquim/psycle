@@ -22,6 +22,7 @@
 #include <dir.h>
 
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 static const VstInt32 kBlockSize = 512;
 static const VstInt32 kNumProcessCycles = 5;
@@ -377,11 +378,10 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 	for (p = bc->events; p != NULL && count < self->eventcap; psy_list_next(&p)) {
 		int numworksamples;
 		int midichannel;
-		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)p->entry;
+		psy_audio_PatternEntry* entry = psy_audio_patternnode_entry(p);
 		psy_audio_PatternEvent* ev = patternentry_front(entry);
 
 		numworksamples = (unsigned int)entry->delta - pos;
-
 		if (ev->note == NOTECOMMANDS_EMPTY && ev->cmd == EXTENDED) {
 			if ((ev->parameter & 0xF0) == SET_BYPASS) {
 				if ((ev->parameter & 0x0F) == 0) {
@@ -427,7 +427,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		} else
 		if (patternentry_front(entry)->note == NOTECOMMANDS_TWEAK) {
 			psy_audio_MachineParam* param;
-			
+						
 			if (numworksamples > 0) {				
 				int restorenumsamples = bc->numsamples;
 		
@@ -435,9 +435,11 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				bc->numsamples = numworksamples;
 				self->events->numEvents = count;
 				self->events->reserved = 0;
-				generateaudio(self, bc);
+				generateaudio(self, bc);				
 				amount -= numworksamples;
+				pos = (unsigned int)entry->delta;
 				bc->numsamples = restorenumsamples;
+				psy_audio_buffercontext_setoffset(bc, 0);
 			}
 			param = psy_audio_machine_tweakparameter(psy_audio_vstplugin_base(self),
 				patternentry_front(entry)->inst);			
@@ -530,7 +532,7 @@ void generateaudio(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			for (c = 0; c < bc->output->numchannels; ++c) {
 				bc->output->samples[c] = bc->output->samples[c] + bc->output->offset;
 			}
-		}
+		}		
 		self->effect->dispatcher(self->effect, effProcessEvents, 0, 0,
 			self->events, 0);
 		if (bc->output->numchannels > 0) {

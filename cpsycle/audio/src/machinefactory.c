@@ -31,11 +31,11 @@ void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_Mac
 {
 	self->machinecallback = callback;
 	self->catcher = catcher;
-#ifdef PSYCLE_USE_MACHINEPROXY
+//#ifdef PSYCLE_USE_MACHINEPROXY
 	self->createasproxy = TRUE;
-#else
-	self->createasproxy = FALSE;
-#endif
+//#else
+	//self->createasproxy = FALSE;
+//#endif
 	self->loadnewgamefxblitz = 0;
 }
 

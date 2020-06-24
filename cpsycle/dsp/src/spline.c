@@ -14,21 +14,18 @@ static psy_dsp_amp_t work(psy_dsp_SplineResampler*,
 	const int16_t* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* /*resampler_data*/ );
+	uint64_t length);
 static psy_dsp_amp_t work_unchecked(psy_dsp_SplineResampler*,
 	const int16_t* data,
-	uint32_t res,
-	void* resampler_data);
+	uint32_t res);
 static float work_float(psy_dsp_SplineResampler*,
 	const float* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	float const* loopBeg,
 	float const* loopEnd);
 static float work_float_unchecked(psy_dsp_SplineResampler*,
-	const float* data, uint32_t res, void* resampler_data);
+	const float* data, uint32_t res);
 
 static resampler_vtable vtable;
 static int vtable_initialized = 0;
@@ -58,8 +55,7 @@ psy_dsp_amp_t work(psy_dsp_SplineResampler* self,
 	const int16_t* data,
 	uint64_t offset,
 	uint32_t res,
-	uint64_t length,
-	void* resampler_data)
+	uint64_t length)
 {		
 	float yo = (float)((offset == 0) ? 0 : *(data - 1));
 	float y0 = (float)(*data);
@@ -75,8 +71,7 @@ psy_dsp_amp_t work(psy_dsp_SplineResampler* self,
 
 psy_dsp_amp_t work_unchecked(psy_dsp_SplineResampler* self,
 	const int16_t* data,	
-	uint32_t res,
-	void* resampler_data)
+	uint32_t res)
 {
 	const float yo = (float)(*(data - 1));
 	const float y0 = (float)*data;
@@ -94,7 +89,6 @@ float work_float(psy_dsp_SplineResampler* self,
 	const float* data,
 	float offset,
 	uint64_t length,
-	void* resampler_data,
 	const float* loopBeg,
 	const float* loopEnd)
 {
@@ -115,7 +109,7 @@ float work_float(psy_dsp_SplineResampler* self,
 }
 
 float work_float_unchecked(psy_dsp_SplineResampler* self,
-	const float* data, uint32_t res, void* resampler_data)
+	const float* data, uint32_t res)
 {
 	const float yo = *(data - 1);
 	const float y0 = *data;

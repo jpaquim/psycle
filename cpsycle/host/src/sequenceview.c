@@ -1012,16 +1012,10 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	visilines = (psy_ui_value_px(&listviewsize.height, &tm) - listviewmargin) / self->listview.lineheight;
 	listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
 	if (c < listviewtop) {
-		psy_ui_component_setscrolltop(&self->listview.component, c * self->listview.lineheight);
-		listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
-		psy_ui_component_setverticalscrollposition(&self->listview.component,
-			listviewtop);
+		psy_ui_component_setscrolltop(&self->listview.component, c * self->listview.lineheight);	
 	} else
 	if (c > listviewtop + visilines - 1) {
 		psy_ui_component_setscrolltop(&self->listview.component, (c - visilines + 1) * self->listview.lineheight);
-		listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
-		psy_ui_component_setverticalscrollposition(&self->listview.component,
-			listviewtop);
 	}
 	psy_ui_component_invalidate(&self->listview.component);
 	psy_ui_component_invalidate(&self->trackheader.component);

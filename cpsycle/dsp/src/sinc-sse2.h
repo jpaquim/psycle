@@ -12,6 +12,7 @@ extern "C" {
 
 typedef struct psy_dsp_SincSSE2Resampler {
 	psy_dsp_Resampler resampler;
+	void* resampler_data;
 } psy_dsp_SincSSE2Resampler;
 
 void psy_dsp_sinc_sse2_resampler_init(psy_dsp_SincSSE2Resampler*);

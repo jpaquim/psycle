@@ -5,6 +5,7 @@
 #define psy_audio_SAMPLEITERATOR_H
 
 #include "buffer.h"
+#include <multiresampler.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +53,7 @@ typedef struct {
 	// + forward - backward
 	int64_t speedinternal;
 	int forward;
-	void* resampler_data;
+	psy_dsp_MultiResampler resampler;
 	psy_audio_SampleLoopType currentlooptype;
 	int32_t currentloopend;
 	int32_t currentloopstart;
@@ -68,12 +69,15 @@ typedef struct {
 	psy_dsp_amp_t* m_pR;
 } psy_audio_SampleIterator;
 
-void psy_audio_sampleiterator_init(psy_audio_SampleIterator*, struct psy_audio_Sample*);
+void psy_audio_sampleiterator_init(psy_audio_SampleIterator*, struct psy_audio_Sample*,
+	ResamplerType);
 void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator*);
 psy_audio_SampleIterator* psy_audio_sampleiterator_alloc(void);
 psy_audio_SampleIterator* psy_audio_sampleiterator_allocinit(struct psy_audio_Sample*);
 intptr_t psy_audio_sampleiterator_inc(psy_audio_SampleIterator*);
-int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamples, bool released);
+int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamples,
+	bool released);
+psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator*, uintptr_t channel);
 void psy_audio_sampleiterator_postwork(psy_audio_SampleIterator*);
 
 INLINE int psy_audio_sampleiterator_currentloopdirection(psy_audio_SampleIterator* self)
@@ -100,6 +104,8 @@ INLINE void psy_audio_sampleiterator_setspeed(psy_audio_SampleIterator* self, do
 			psy_audio_LOOPDIRECTION_FORWARD)
 		? self->speed
 		: -1 * self->speed;
+	psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
+		&self->resampler), value);
 }
 
 INLINE bool psy_audio_sampleiterator_playing(psy_audio_SampleIterator* self)

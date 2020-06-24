@@ -42,10 +42,14 @@ typedef struct {
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
+	psy_ui_Value fixedwidth;
+	bool usefixedwidth;
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
 	psy_Properties*);
+
+void propertiesrenderer_setfixedwidth(PropertiesRenderer*, psy_ui_Value width);
 
 typedef struct {
 	psy_ui_Component component;

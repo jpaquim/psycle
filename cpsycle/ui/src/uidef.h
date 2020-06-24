@@ -166,6 +166,36 @@ typedef struct {
 	int bottom;
 } psy_ui_Rectangle;
 
+
+INLINE psy_ui_Rectangle psy_ui_rectangle_zero(void)
+{
+	psy_ui_Rectangle rv = { 0, 0, 0, 0 };
+	return rv;
+}
+
+INLINE psy_ui_Rectangle psy_ui_rectangle_make(int left, int top, int width, int height)
+{
+	psy_ui_Rectangle rv;
+
+	rv.left = left;
+	rv.top = top;
+	rv.right = left + width;
+	rv.bottom = top + height;
+	return rv;
+}
+
+void psy_ui_setrectangle(psy_ui_Rectangle*, int left, int top, int width, int height);
+int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, int x, int y);
+bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle*,
+	int x1, int y1, int x2, int y2);
+int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
+	const psy_ui_Rectangle* other);
+void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
+void psy_ui_rectangle_expand(psy_ui_Rectangle*, int top, int right, int bottom, int left);
+void psy_ui_rectangle_move(psy_ui_Rectangle*, int dx, int dy);
+void psy_ui_error(const char* err, const char* shorterr);
+
+
 typedef struct {
 	int width;
 	int height;
@@ -254,6 +284,13 @@ psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*);
 intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 
 typedef enum {
+	psy_ui_OVERFLOW_HIDDEN = 0,
+	psy_ui_OVERFLOW_VSCROLL = 1,
+	psy_ui_OVERFLOW_HSCROLL = 2,
+	psy_ui_OVERFLOW_SCROLL = psy_ui_OVERFLOW_VSCROLL | psy_ui_OVERFLOW_HSCROLL
+} psy_ui_Overflow;
+
+typedef enum {
 	psy_ui_CURSOR_DEFAULT,
 	psy_ui_CURSOR_COLRESIZE
 } psy_ui_Cursor;
@@ -296,17 +333,6 @@ typedef enum {
 	psy_ui_ALIGNMENT_CENTER_VERTICAL = psy_ui_ALIGNMENT_TOP |
 	psy_ui_ALIGNMENT_BOTTOM
 } psy_ui_Alignment;
-
-void psy_ui_setrectangle(psy_ui_Rectangle*, int left, int top, int width, int height);
-int psy_ui_rectangle_intersect(const psy_ui_Rectangle*, int x, int y);
-bool psy_ui_rectangle_intersect_segment(const psy_ui_Rectangle*,
-	int x1, int y1, int x2, int y2);
-int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
-	const psy_ui_Rectangle* other);
-void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
-void psy_ui_rectangle_expand(psy_ui_Rectangle*, int top, int right, int bottom, int left);
-void psy_ui_rectangle_move(psy_ui_Rectangle*, int dx, int dy);
-void psy_ui_error(const char* err, const char* shorterr);
 
 typedef enum {
 	psy_ui_KEY_LBUTTON         = 0x01,

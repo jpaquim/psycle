@@ -97,7 +97,7 @@ void psy_audio_sample_dispose(psy_audio_Sample*);
 void psy_audio_sample_load(psy_audio_Sample*, const char* path);
 void psy_audio_sample_save(psy_audio_Sample*, const char* path);
 void psy_audio_sample_setname(psy_audio_Sample*, const char* name);
-psy_audio_SampleIterator psy_audio_sample_begin(psy_audio_Sample*);
+psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample* self, ResamplerType quality);
 const char* psy_audio_sample_name(psy_audio_Sample*);
 void psy_audio_sample_setcontloop(psy_audio_Sample*, psy_audio_SampleLoopType, uintptr_t loopstart,
 	uintptr_t loopend);

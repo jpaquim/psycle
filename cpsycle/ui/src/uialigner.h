@@ -16,7 +16,7 @@ typedef struct {
 
 void psy_ui_aligner_init(psy_ui_Aligner*, psy_ui_Component*);
 void psy_ui_aligner_align(psy_ui_Aligner*);
-void psy_ui_aligner_preferredsize(psy_ui_Aligner*, psy_ui_Size* limit,
+void psy_ui_aligner_preferredsize(psy_ui_Aligner*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
 #ifdef __cplusplus

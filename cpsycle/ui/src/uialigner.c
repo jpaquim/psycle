@@ -219,7 +219,7 @@ uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner* self)
 	return rv;
 }
 
-void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, psy_ui_Size* limit,
+void psy_ui_aligner_preferredsize(psy_ui_Aligner* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {			
 	if (rv) {

@@ -133,7 +133,7 @@ extern "C" {
 //0x60
 #define SAMPLER_CMD_E_TREMOLO_WAVE       0x70 // E7     Set tremolo control         (p)
 #define SAMPLER_CMD_E_SET_PAN            0x80 //                                    (p)
-#define SAMPLER_CMD_E9                   0x90
+#define SAMPLER_CMD_E9	                 0x90
 //0xA0,
 //0xB0,
 #define SAMPLER_CMD_E_DELAYED_NOTECUT    0xC0 // EC     Note cut                    (t)
@@ -141,6 +141,17 @@ extern "C" {
 #define SAMPLER_CMD_EE                   0xE0
 #define SAMPLER_CMD_E_SET_MIDI_MACRO     0xF0 //                                    (p)
 
+#define	SAMPLER_CMD_E9_SURROUND_OFF      0x00 //									(p)
+#define	SAMPLER_CMD_E9_SURROUND_ON       0x01 //									(p)
+#define	SAMPLER_CMD_E9_REVERB_OFF        0x08 //									(p)
+#define	SAMPLER_CMD_E9_REVERB_FORCE      0x09 //									(p)
+#define	SAMPLER_CMD_E9_STANDARD_SURROUND 0x0A //									(p)
+#define	SAMPLER_CMD_E9_QUAD_SURROUND     0x0B // (p)Select quad surround mode: this allows you to pan in the rear channels, especially useful for 4-speakers playback. Note that S9A and S9B do not activate the surround for the current channel, it is a global setting that will affect the behavior of the surround for all channels. You can enable or disable the surround for individual channels by using the S90 and S91 effects. In quad surround mode, the channel surround will stay active until explicitely disabled by a S90 effect
+#define	SAMPLER_CMD_E9_GLOBAL_FILTER     0x0C // (p)Select global filter mode (IT compatibility). This is the default, when resonant filters are enabled with a Zxx effect, they will stay active until explicitely disabled by setting the cutoff frequency to the maximum (Z7F), and the resonance to the minimum (Z80).
+#define	SAMPLER_CMD_E9_LOCAL_FILTER      0x0D // (p)Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
+#define	SAMPLER_CMD_E9_PLAY_FORWARD      0x0E // Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
+#define	SAMPLER_CMD_E9_PLAY_BACKWARD     0x0F // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward. 
+	
 #define ISSLIDEUP(val) !((val)&0x0F)
 #define ISSLIDEDOWN(val) !((val)&0xF0)
 #define ISFINESLIDEUP(val) (((val)&0x0F)==SAMPLER_CMD_FINESLIDEUP)

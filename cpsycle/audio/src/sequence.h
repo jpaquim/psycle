@@ -38,14 +38,14 @@ SequenceTrack* sequencetrack_allocinit(void);
 typedef struct {
 	psy_audio_Patterns* patterns;	
 	SequenceTrackNode* tracknode;
-	PatternNode* patternnode;	
+	psy_audio_PatternNode* patternnode;	
 } SequenceTrackIterator;
 
 void sequencetrackiterator_inc(SequenceTrackIterator*);
 void sequencetrackiterator_incentry(SequenceTrackIterator*);
 void sequencetrackiterator_decentry(SequenceTrackIterator*);
 
-INLINE PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator* self)
+INLINE psy_audio_PatternNode* sequencetrackiterator_patternnode(SequenceTrackIterator* self)
 {
 	return self->patternnode;
 }

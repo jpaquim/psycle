@@ -18,7 +18,7 @@
 static void dispose(psy_audio_Duplicator2*);
 static void work(psy_audio_Duplicator2* self, psy_audio_BufferContext* bc) { }
 static void sequencertick(psy_audio_Duplicator2*);
-static psy_List* sequencerinsert(psy_audio_Duplicator2*, PatternNode* events);
+static psy_List* sequencerinsert(psy_audio_Duplicator2*, psy_audio_PatternNode* events);
 static const psy_audio_MachineInfo* info(psy_audio_Duplicator2*);
 static void stop(psy_audio_Duplicator2*);
 static psy_audio_MachineParam* parameter(psy_audio_Duplicator2*, uintptr_t param);
@@ -156,7 +156,7 @@ void sequencertick(psy_audio_Duplicator2* self)
 	self->isticking = 0;
 }
 
-psy_List* sequencerinsert(psy_audio_Duplicator2* self, PatternNode* events)
+psy_List* sequencerinsert(psy_audio_Duplicator2* self, psy_audio_PatternNode* events)
 {			
 	psy_List* p;	
 	psy_List* insert = 0;
