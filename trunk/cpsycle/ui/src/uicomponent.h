@@ -220,8 +220,8 @@ typedef struct psy_ui_Component {
 	bool mousetracking;
 	psy_ui_Style style;
 	psy_ui_Size preferredsize;
-	psy_ui_IntPoint scroll;
-	psy_ui_Overflow overflow;
+	psy_ui_IntPoint scroll;	
+	psy_ui_Overflow overflow;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -316,6 +316,7 @@ typedef psy_ui_Rectangle (*psy_ui_fp_componentimp_dev_position)(struct psy_ui_Co
 typedef void (*psy_ui_fp_componentimp_dev_setposition)(struct psy_ui_ComponentImp*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(struct psy_ui_ComponentImp*);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_updatesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy);
 typedef struct psy_ui_Component* (*psy_ui_fp_componentimp_dev_parent)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setparent)(struct psy_ui_ComponentImp*, struct psy_ui_Component*);
@@ -369,6 +370,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_position dev_position;
 	psy_ui_fp_componentimp_dev_setposition dev_setposition;
 	psy_ui_fp_componentimp_dev_size dev_size;
+	psy_ui_fp_componentimp_dev_updatesize dev_updatesize;
 	psy_ui_fp_componentimp_dev_framesize dev_framesize;
 	psy_ui_fp_componentimp_dev_scrollto dev_scrollto;
 	psy_ui_fp_componentimp_dev_parent dev_parent;

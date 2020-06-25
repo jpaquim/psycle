@@ -10,19 +10,6 @@
 
 #include "../../detail/portable.h"
 
-static KeyboardConfig defaultkeyboardconfig;
-static bool defaultkeyboardconfig_initialized = FALSE;
-
-void defaultkeyboardconfig_init()
-{
-	if (!defaultkeyboardconfig_initialized) {
-		defaultkeyboardconfig.keymin = 0;
-		defaultkeyboardconfig.keymax = 88;
-		defaultkeyboardconfig.keyheight = 12;
-		defaultkeyboardconfig_initialized = TRUE;
-	}
-}
-
 static int isblack(int key)
 {
 	int offset = key % 12;
@@ -35,6 +22,8 @@ static int isblack(int key)
 // Header
 static void pianoheader_ondraw(PianoHeader*, psy_ui_Graphics*);
 static void pianoheader_drawruler(PianoHeader*, psy_ui_Graphics*);
+static void pianoheader_onpreferredsize(PianoHeader*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 // vtable
 static psy_ui_ComponentVtable pianoheader_vtable;
@@ -46,28 +35,43 @@ static void pianoheader_vtable_init(PianoHeader* self)
 		pianoheader_vtable = *(self->component.vtable);
 		pianoheader_vtable.ondraw = (psy_ui_fp_ondraw)
 			pianoheader_ondraw;
+		pianoheader_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			pianoheader_onpreferredsize;
 		pianoheader_vtable_initialized = 1;
 	}
 }
 
 void pianoheader_init(PianoHeader* self, psy_ui_Component* parent,
-	Pianoroll* roll)
+	GridState* gridstate)
 {
 	psy_ui_component_init(&self->component, parent);
 	pianoheader_vtable_init(self);
+	pianoheader_setsharedgridstate(self, gridstate);
 	self->component.vtable = &pianoheader_vtable;
-	self->view = roll;
-	self->scrollpos = 0;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1)));
 }
 
-void pianoheader_ondraw(PianoHeader* self, psy_ui_Graphics* g)
+void pianoheader_setsharedgridstate(PianoHeader* self, GridState* gridstate)
 {
-	if (self->view->pattern) {
-		pianoheader_drawruler(self, g);
+	if (gridstate) {
+		self->gridstate = gridstate;
+	} else {
+		gridstate_init(&self->defaultgridstate);
+		self->gridstate = &self->defaultgridstate;
 	}
+}
+
+void pianoheader_onpreferredsize(PianoHeader* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	rv->width = psy_ui_value_makepx(self->gridstate->visiwidth);
+}
+
+void pianoheader_ondraw(PianoHeader* self, psy_ui_Graphics* g)
+{	
+	pianoheader_drawruler(self, g);	
 }
 
 void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
@@ -80,29 +84,45 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	baseline = psy_ui_value_px(&size.height, &tm) - 1;
-	psy_ui_setcolor(g, 0x00555555);
-	psy_ui_drawline(g, 0, baseline, psy_ui_value_px(&size.width, &tm), baseline);
-
-	for (c = 0, cpx = 0; c <= self->metrics.visisteps;
-		cpx += self->metrics.stepwidth, ++c) {
-		psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
-	}
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00666666);
-	for (c = 0, cpx = 0; c <= self->metrics.visibeats;
-		cpx += self->metrics.beatwidth, ++c) {
-		char txt[40];
-		psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 2);
-		psy_snprintf(txt, 40, "%d", (int)(c - self->scrollpos));
-		psy_ui_textout(g, (int)cpx + 3, baseline - tm.tmHeight, txt, strlen(txt));
+	baseline = psy_ui_value_px(&size.height, &tm) - 1;	
+	psy_ui_setcolor(g, self->gridstate->rulerbaselinecolour);
+	psy_ui_drawline(g, psy_ui_component_scrollleft(&self->component), baseline,
+		psy_ui_value_px(&size.width, &tm) + psy_ui_component_scrollleft(&self->component),
+		baseline);
+	if (self->gridstate->visiwidth > 0) {
+		for (c = 0, cpx = 0; c <= self->gridstate->visisteps;
+			cpx += self->gridstate->stepwidth, ++c) {
+			psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
+		}
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+		psy_ui_settextcolor(g, self->gridstate->rulermarkcolour);
+		for (c = 0, cpx = psy_ui_component_scrollleft(&self->component);
+				c <= self->gridstate->visibeats;
+				cpx += self->gridstate->beatwidth, ++c) {
+			char txt[40];
+			psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 2);
+			psy_snprintf(txt, 40, "%d",
+				(int)(c + psy_ui_component_scrollleft(&self->component) /
+					self->gridstate->beatwidth));
+			psy_ui_textout(g, (int)cpx + 3, baseline - tm.tmHeight, txt, strlen(txt));
+		}
 	}
 }
 
 // PianoKeyboard
 
+// KeyboardState
+void keyboardstate_init(KeyboardState* self)
+{	
+	self->keymin = 0;
+	self->keymax = 88;
+	self->keyheight = 12;
+	self->keyblackcolour = 0x00444444;
+	self->keywhitecolour = 0x00CACACA;
+	self->keyseparatorcolour = 0x00333333;
+}
+// prototypes
 static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Graphics*);
-
 // vtable
 static psy_ui_ComponentVtable pianokeyboard_vtable;
 static int pianokeyboard_vtable_initialized = 0;
@@ -116,27 +136,27 @@ static void pianokeyboard_vtable_init(PianoKeyboard* self)
 		pianokeyboard_vtable_initialized = 1;
 	}
 }
-
+// implementation
 void pianokeyboard_init(PianoKeyboard* self, psy_ui_Component* parent,
-	KeyboardConfig* keyboardconfig)
+	KeyboardState* keyboardstate)
 {
 	psy_ui_component_init(&self->component, parent);
 	pianokeyboard_vtable_init(self);
 	self->component.vtable = &pianokeyboard_vtable;
-	pianokeyboard_setkeyboardconfig(self, keyboardconfig);
+	pianokeyboard_setsharedkeyboardstate(self, keyboardstate);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
 		psy_ui_value_makeew(8), psy_ui_value_makepx(0)));
 }
 
-void pianokeyboard_setkeyboardconfig(PianoKeyboard* self,
-	KeyboardConfig* keyboardconfig)
+void pianokeyboard_setsharedkeyboardstate(PianoKeyboard* self,
+	KeyboardState* keyboardstate)
 {
-	if (self->keyboardconfig) {
-		self->keyboardconfig = keyboardconfig;
+	if (keyboardstate) {
+		self->keyboardstate = keyboardstate;
 	} else {
-		defaultkeyboardconfig_init();
-		self->keyboardconfig = &defaultkeyboardconfig;
+		keyboardstate_init(&self->defaultkeyboardstate);
+		self->keyboardstate = &self->defaultkeyboardstate;
 	}
 }
 
@@ -149,48 +169,80 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 
-	keyboardheight = (keymax - keymin) * self->keyboardconfig->keyheight;
+	keyboardheight = (keymax - keymin) * self->keyboardstate->keyheight;
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setcolor(g, 0x00333333);
+	psy_ui_setcolor(g, self->keyboardstate->keyseparatorcolour);
 	for (key = keymin; key < keymax; ++key) {
 		int cpy;
 
-		cpy = keyboardheight - (key + 1) * self->keyboardconfig->keyheight;
+		cpy = keyboardheight - (key + 1) * self->keyboardstate->keyheight;
 		psy_ui_drawline(g, 0, cpy, psy_ui_value_px(&size.width, &tm), cpy);
-		if (isblack(key)) {
-			psy_ui_Rectangle r;
-			psy_ui_setrectangle(&r, (int)(psy_ui_value_px(&size.width, &tm) * 0.75), cpy,
-				(int)(psy_ui_value_px(&size.width, &tm) * 0.25), self->keyboardconfig->keyheight);
-			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
-			psy_ui_drawline(g, 0, cpy + self->keyboardconfig->keyheight / 2, psy_ui_value_px(&size.width, &tm),
-				cpy + self->keyboardconfig->keyheight / 2);
-			psy_ui_setrectangle(&r, 0, cpy, (int)(psy_ui_value_px(&size.width, &tm) * 0.75),
-				self->keyboardconfig->keyheight);
-			psy_ui_drawsolidrectangle(g, r, 0x00444444);
-		} else {
-			psy_ui_Rectangle r;
-
-			psy_ui_setrectangle(&r, 0, cpy, psy_ui_value_px(&size.width, &tm), self->keyboardconfig->keyheight);
-			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
+		if (isblack(key)) {			
+			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+					(int)(psy_ui_value_px(&size.width, &tm) * 0.75), cpy,
+					(int)(psy_ui_value_px(&size.width, &tm) * 0.25),
+					self->keyboardstate->keyheight),
+				self->keyboardstate->keywhitecolour);
+			psy_ui_drawline(g,
+				0, cpy + self->keyboardstate->keyheight / 2,
+				psy_ui_value_px(&size.width, &tm),
+				cpy + self->keyboardstate->keyheight / 2);			
+			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+					0, cpy, (int)(psy_ui_value_px(&size.width, &tm) * 0.75),
+					self->keyboardstate->keyheight),
+				self->keyboardstate->keyblackcolour);
+		} else {			
+			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+					0, cpy, psy_ui_value_px(&size.width, &tm),
+					self->keyboardstate->keyheight),
+				self->keyboardstate->keywhitecolour);
 			if (key % 12 == 0 || ((key % 12) == 5)) {
-				psy_ui_drawline(g, 0, cpy + self->keyboardconfig->keyheight, psy_ui_value_px(&size.width, &tm),
-					cpy + self->keyboardconfig->keyheight);
+				psy_ui_drawline(g,
+					0, cpy + self->keyboardstate->keyheight, psy_ui_value_px(&size.width, &tm),
+					cpy + self->keyboardstate->keyheight);
 			}
 		}
 	}
 }
 
-// grid
+// PianoGrid
+// default state
+void gridstate_init(GridState* self)
+{
+	self->beatwidth = 80;
+	self->lpb = 4;
+	self->eventcolour = 0x00999999;
+	self->eventcurrchannelcolour = 0x00CACACA;	
+	self->eventhovercolour = 0x00DADADA;
+	self->grid12separatorcolour = 0x00292929;
+	self->gridseparatorcolour = 0x00363636;
+	self->playbarcolour = 0x009F7B00;
+	self->row4beatcolour = 0x00595959;
+	self->row4beat2colour = 0x00595959;
+	self->rowbeatcolour = 0x00363636;
+	self->rowbeat2colour = 0x00363636;
+	self->rowcolour = 0x003E3E3E;
+	self->row2colour = 0x003E3E3E;
+	self->rulerbaselinecolour = 0x00555555;
+	self->rulermarkcolour = 0x00666666;
+	self->visibeats = 16.0;
+	self->visisteps = 64;
+	self->visiwidth = 1280;
+	self->stepwidth = 20.0;
+	psy_audio_patterneditposition_init(&self->cursor);
+}
+// prototypes
+static void pianogrid_ondestroy(Pianogrid*);
 static void pianogrid_ondraw(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics*);
-static void pianogrid_drawevents(Pianogrid*, psy_ui_Graphics*);
-static void pianogrid_drawevent(Pianogrid*, psy_ui_Graphics*,
-	psy_audio_PatternEvent*, int track, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length,
+static void pianogrid_drawentries(Pianogrid*, psy_ui_Graphics*);
+static void pianogrid_drawentry(Pianogrid*, psy_ui_Graphics*,
+	psy_audio_PatternEntry*, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length,
 	int hover);
-static void pianogrid_onsize(Pianogrid*, const psy_ui_Size*);
-static void pianogrid_adjustscroll(Pianogrid*);
+static void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 static void pianogrid_onscroll(Pianogrid*, psy_ui_Component* sender, int stepx,
 	int stepy);
 static void pianogrid_onmousedown(Pianogrid*, psy_ui_MouseEvent*);
@@ -200,132 +252,166 @@ static psy_dsp_big_beat_t pianogrid_quantizise(Pianogrid*,
 	psy_dsp_big_beat_t offset);
 static psy_audio_PatternNode* pianogrid_nextnode(Pianogrid*, psy_audio_PatternNode*,
 	uintptr_t track);
-static void pianogrid_ondestroy(Pianogrid*);
+static void pianogrid_onpatterneditpositionchanged(Pianogrid*,
+	Workspace* sender);
 
 static psy_ui_ComponentVtable pianogrid_vtable;
 static int pianogrid_vtable_initialized = 0;
-
+// vtable
 static void pianogrid_vtable_init(Pianogrid* self)
 {
 	if (!pianogrid_vtable_initialized) {
 		pianogrid_vtable = *(self->component.vtable);
-		pianogrid_vtable.ondraw = (psy_ui_fp_ondraw)pianogrid_ondraw;
-		pianogrid_vtable.onsize = (psy_ui_fp_onsize)pianogrid_onsize;
+		pianogrid_vtable.ondraw = (psy_ui_fp_ondraw)pianogrid_ondraw;	
 		pianogrid_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			pianogrid_onmousedown;
 		pianogrid_vtable.onmousemove = (psy_ui_fp_onmousemove)
-			pianogrid_onmousemove;		
+			pianogrid_onmousemove;
+		pianogrid_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			pianogrid_onpreferredsize;
 		pianogrid_vtable_initialized = 1;
 	}
 }
-
+// implementation
 void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
-	KeyboardConfig* keyboardconfig, Workspace* workspace)
+	KeyboardState* keyboardstate, GridState* gridstate,
+	Workspace* workspace)
 {
 	int track;
 
 	psy_ui_component_init(&self->component, parent);
 	pianogrid_vtable_init(self);
 	self->component.vtable = &pianogrid_vtable;
-	self->keyboardconfig = keyboardconfig;
 	psy_ui_component_doublebuffer(&self->component);
-	pianogrid_setkeyboardconfig(self, keyboardconfig);
+	pianogrid_setsharedgridstate(self, gridstate);
+	pianogrid_setsharedkeyboardstate(self, keyboardstate);
 	self->workspace = workspace;
 	self->component.wheelscroll = 4;	
 	self->pattern = NULL;
-	self->beatscrollpos = 0;	
 	self->hover = 0;
 	self->lastplayposition = 0.f;
 	self->sequenceentryoffset = 0.f;
-	psy_table_init(&self->channel);	
+	self->component.overflow = psy_ui_OVERFLOW_SCROLL;
+	psy_table_init(&self->channel);
 	for (track = 0; track < 64; ++track) {
 		psy_audio_PatternEntry* channelentry;
 
 		channelentry = patternentry_allocinit();
 		channelentry->offset = -1.0f;
+		channelentry->track = track;
 		psy_table_insert(&self->channel, track, channelentry);
 	}
 	psy_signal_connect(&self->component.signal_scroll, self,
 		pianogrid_onscroll);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pianogrid_ondestroy);
-	psy_ui_component_showhorizontalscrollbar(&self->component);
-	psy_ui_component_showverticalscrollbar(&self->component);	
-	psy_ui_component_sethorizontalscrollrange(&self->component, 0, 16);
-	psy_ui_component_setverticalscrollrange(&self->component, 0, 88);
+	psy_signal_connect(&self->workspace->signal_patterneditpositionchanged, self,
+		pianogrid_onpatterneditpositionchanged);
 }
 
-void pianogrid_setkeyboardconfig(Pianogrid* self, KeyboardConfig*
-	keyboardconfig)
+void pianogrid_setsharedgridstate(Pianogrid* self, GridState* gridstate)
 {
-	if (self->keyboardconfig) {
-		self->keyboardconfig = keyboardconfig;
+	if (gridstate) {
+		self->gridstate = gridstate;
 	} else {
-		defaultkeyboardconfig_init();
-		self->keyboardconfig = &defaultkeyboardconfig;
+		gridstate_init(&self->defaultgridstate);
+		self->gridstate = &self->defaultgridstate;
+	}
+}
+
+void pianogrid_setsharedkeyboardstate(Pianogrid* self, KeyboardState*
+	keyboardstate)
+{
+	if (keyboardstate) {
+		self->keyboardstate = keyboardstate;
+	} else {
+		keyboardstate_init(&self->defaultkeyboardstate);
+		self->keyboardstate = &self->defaultkeyboardstate;
 	}
 }
 
 void pianogrid_setpattern(Pianogrid* self, psy_audio_Pattern* pattern)
 {
 	self->pattern = pattern;
+	pianogrid_updategridstate(self);
+	psy_ui_component_updateoverflow(&self->component);
 }
 
 void pianogrid_ondestroy(Pianogrid* self)
 {
 	psy_table_disposeall(&self->channel, (psy_fp_disposefunc)
-		patternentry_dispose);	
-}
-
-void pianogrid_onsize(Pianogrid* self, const psy_ui_Size* size)
-{		
-	pianogrid_adjustscroll(self);	
+		patternentry_dispose);
 }
 
 void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
-{	   		
+{
 	if (self->pattern) {
 		pianogrid_drawgrid(self, g);
 		pianogrid_drawplaybar(self, g);
-		pianogrid_drawevents(self, g);
+		pianogrid_drawentries(self, g);
 	}
 }
 
 void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 {
-	if (self->pattern) {
-		int key;
-		int numkeys;
-		int keymin;
-		int keymax;
-		int cpy;
-		int keyboardheight;
-						
-		psy_ui_setcolor(g, 0x00333333);
-		numkeys = self->keyboardconfig->keymax - self->keyboardconfig->keymin;
-		keyboardheight = numkeys * self->keyboardconfig->keyheight;
-		keymin = (keyboardheight - g->clip.bottom) / self->keyboardconfig->keyheight;
-		keymax = (keyboardheight - g->clip.top) / self->keyboardconfig->keyheight;
-		for (key = keymin; key <= keymax; ++key) {
-			cpy = keyboardheight - (key + 1) * self->keyboardconfig->keyheight;
-			psy_ui_drawline(g,
-				psy_ui_component_scrollleft(&self->component), cpy,
-				self->metrics.visiwidth, cpy);
+	int keyboardheight;
+	int key;
+	int keymin;
+	int keymax;
+	psy_dsp_big_beat_t cpx;
+	int cpy;
+	int beatstart;
+	int c;
+
+	psy_ui_setcolor(g, self->gridstate->gridseparatorcolour);
+	keyboardheight = keyboardstate_height(self->keyboardstate);	
+	cpy = keyboardheight;
+	psy_ui_drawline(g,
+		psy_ui_component_scrollleft(&self->component),
+		cpy,
+		psy_ui_component_scrollleft(&self->component) +
+		self->gridstate->visiwidth,
+		cpy);
+	beatstart = psy_ui_component_scrollleft(&self->component) / self->gridstate->beatwidth;
+	for (c = 0, cpx = psy_ui_component_scrollleft(&self->component);
+			c < self->gridstate->visisteps;
+			cpx += self->gridstate->stepwidth, ++c) {
+		psy_ui_Color linecolor;
+		if ((c % (self->gridstate->lpb * 4)) == 0) {
+			linecolor = self->gridstate->row4beatcolour;
+		} else
+		if ((c % self->gridstate->lpb) == 0) {
+			linecolor = self->gridstate->rowbeatcolour;
+		} else {
+			linecolor = self->gridstate->rowcolour;
 		}
-		{												
-			int c;
-			psy_dsp_big_beat_t cpx;
-			int cpy;
-			
-			cpy = self->metrics.visikeys * self->keyboardconfig->keyheight;
-			for (c = 0, cpx = 0; c <= self->metrics.visisteps;
-					cpx += self->metrics.stepwidth, ++c) {
-				psy_ui_drawline(g, 
-					(int) cpx, psy_ui_component_scrolltop(&self->component),
-					(int) cpx, keyboardheight);
-			}		
-		}		
-	}	
+		psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+			(int)cpx, psy_ui_component_scrolltop(&self->component),
+			(int)self->gridstate->stepwidth, keyboardheight),
+			linecolor);
+		psy_ui_drawline(g,
+			(int)cpx, psy_ui_component_scrolltop(&self->component),
+			(int)cpx, keyboardheight);		
+	}
+	
+	keymin = max(self->keyboardstate->keymin,
+		(keyboardheight - g->clip.bottom) / self->keyboardstate->keyheight);
+	keymax = min(self->keyboardstate->keymax,
+		(keyboardheight - g->clip.top) / self->keyboardstate->keyheight);
+	for (key = keymin; key <= keymax; ++key) {
+		cpy = keyboardheight - (key + 1) * self->keyboardstate->keyheight;
+		if (((key + 1) % 12) == 0) {
+			psy_ui_setcolor(g, self->gridstate->grid12separatorcolour);
+		} else {
+			psy_ui_setcolor(g, self->gridstate->gridseparatorcolour);
+		}
+		psy_ui_drawline(g,
+			psy_ui_component_scrollleft(&self->component),
+			cpy,
+			psy_ui_component_scrollleft(&self->component) +
+			self->gridstate->visiwidth,
+			cpy);
+	}
 }
 
 void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g)
@@ -337,23 +423,22 @@ void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g)
 		if (offset >= self->sequenceentryoffset &&
 			offset < self->sequenceentryoffset +
 			self->pattern->length) {
-			int line;
-			psy_ui_Rectangle r;
+			int line;			
 
 			line = (int)((offset - self->sequenceentryoffset) *
-				self->metrics.lpb);
-			psy_ui_setrectangle(&r,
-				(int)(self->metrics.stepwidth * line +
-					self->beatscrollpos * self->metrics.beatwidth),
-				0,
-				(int)self->metrics.stepwidth,
-				self->metrics.visikeys * self->keyboardconfig->keyheight);
-			psy_ui_drawsolidrectangle(g, r, 0x009F7B00);
+				self->gridstate->lpb);
+			psy_ui_drawsolidrectangle(g,
+				psy_ui_rectangle_make(
+					(int)(self->gridstate->stepwidth * line),
+					0,
+					(int)self->gridstate->stepwidth,
+					keyboardstate_height(self->keyboardstate)),
+				self->gridstate->playbarcolour);
 		}
 	}
 }
 
-void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
+void pianogrid_drawentries(Pianogrid* self, psy_ui_Graphics* g)
 {	
 	
 	if (self->pattern) {
@@ -369,9 +454,8 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 			channelentry = (psy_audio_PatternEntry*)psy_table_at(&self->channel,
 				entry->track);
 			if (channelentry->offset != -1.0f) {
-				pianogrid_drawevent(self, g,
-					patternentry_front(channelentry),
-					entry->track,
+				pianogrid_drawentry(self, g,
+					channelentry,					
 					channelentry->offset,
 					entry->offset - channelentry->offset,
 					channelentry->delta > 0);
@@ -395,8 +479,7 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 
 			channelentry = (psy_audio_PatternEntry*)psy_table_at(&self->channel, track);
 			if (channelentry->offset != -1.0f) {
-				pianogrid_drawevent(self, g, patternentry_front(channelentry),
-					track,
+				pianogrid_drawentry(self, g, channelentry,					
 					channelentry->offset,
 					self->pattern->length - channelentry->offset,
 					channelentry->delta > 0);
@@ -406,45 +489,71 @@ void pianogrid_drawevents(Pianogrid* self, psy_ui_Graphics* g)
 	}
 }
 
-void pianogrid_drawevent(Pianogrid* self, psy_ui_Graphics* g,
-	psy_audio_PatternEvent* event, int track, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length,
+void pianogrid_drawentry(Pianogrid* self, psy_ui_Graphics* g,
+	psy_audio_PatternEntry* entry, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t length,
 	int hover)
 {
 	psy_ui_Rectangle r;
+	psy_audio_PatternEvent* event;
+	psy_ui_Color colour;
+	psy_audio_PatternEditPosition editposition;
 
-	int left = (int)((offset + self->beatscrollpos) * self->metrics.beatwidth);
-	int width = (int)(length * self->metrics.beatwidth);
+	editposition = workspace_patterneditposition(self->workspace);
+	event = patternentry_front(entry);
+	int left = (int)((offset) * self->gridstate->beatwidth);
+	int width = (int)(length * self->gridstate->beatwidth);
 	psy_ui_setrectangle(&r, left,
-		(self->keyboardconfig->keymax - event->note - 1) * self->keyboardconfig->keyheight
-		+ 1, width, self->keyboardconfig->keyheight - 2);
+		(self->keyboardstate->keymax - event->note - 1) * self->keyboardstate->keyheight
+		+ 1, width, self->keyboardstate->keyheight - 2);	
 	if (hover) {
-		psy_ui_drawsolidrectangle(g, r, 0x00D1E8D0);
+		colour = self->gridstate->eventhovercolour;
+	} else
+	if (entry->track == editposition.track) {
+		colour = self->gridstate->eventcurrchannelcolour;
 	} else {
-		psy_ui_drawsolidrectangle(g, r, 0x00B1C8B0);
+		colour = self->gridstate->eventcolour;
 	}
+	psy_ui_drawsolidrectangle(g, r, colour);	
 }
 
 void pianogrid_onscroll(Pianogrid* self, psy_ui_Component* sender, int stepx,
 	int stepy)
 {	
-	if (stepx != 0) {		
-		self->beatscrollpos += stepx;
-		pianometrics_update(&self->metrics, self, self->pattern, self->lpb);		
+	if (stepx != 0) {
+		pianogrid_updategridstate(self);
 	}		
 }
 
-void pianogrid_adjustscroll(Pianogrid* self)
+void pianogrid_updategridstate(Pianogrid* self)
 {
-	PianoMetrics metrics;
+	psy_ui_Size gridsize;
+	psy_ui_TextMetric tm;
 
-	pianometrics_update(&metrics, self, self->pattern, self->lpb);
-	self->component.scrollstepx = metrics.beatwidth;
-	self->component.scrollstepy = self->keyboardconfig->keyheight;
-	psy_ui_component_sethorizontalscrollrange(&self->component, 0,
-		(int)((self->pattern ?
-			self->pattern->length : 0) - metrics.visibeats + 0.5));
-	psy_ui_component_setverticalscrollrange(&self->component, 0,
-		self->keyboardconfig->keymax - self->keyboardconfig->keymin - metrics.visikeys);
+	gridsize = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);
+	self->gridstate->visibeats = (self->pattern)
+		? min(max(0, self->pattern->length - psy_ui_component_scrollleft(&self->component) / self->gridstate->beatwidth),
+			psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_big_beat_t)self->gridstate->beatwidth)
+		: 0;
+	self->gridstate->visisteps = (int)(self->gridstate->visibeats * self->gridstate->lpb + 0.5);
+	self->gridstate->visiwidth = (self->pattern)
+		? (int)(self->gridstate->visibeats * self->gridstate->beatwidth + 0.5)
+		: 0;
+	self->gridstate->stepwidth = self->gridstate->beatwidth / (psy_dsp_big_beat_t)self->gridstate->lpb;
+}
+
+
+void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	rv->height = psy_ui_value_makepx((self->keyboardstate->keymax - self->keyboardstate->keymin) *
+		self->keyboardstate->keyheight);
+	if (self->pattern) {
+		rv->width = psy_ui_value_makepx((int)(
+			self->gridstate->beatwidth * psy_audio_pattern_length(self->pattern)));
+	} else {
+		rv->width = psy_ui_value_makepx(0);
+	}
 }
 
 void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
@@ -460,26 +569,26 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 			psy_audio_PatternNode* prev = 0;
 
 			patternevent_clear(&event);
-			event.note = self->keyboardconfig->keymax - 1 - ev->y / self->keyboardconfig->keyheight;
-			node = psy_audio_pattern_findnode(self->pattern, 0, offset,
-				1 / (psy_dsp_big_beat_t)self->metrics.lpb, &prev);
+			event.note = self->keyboardstate->keymax - 1 - ev->y / self->keyboardstate->keyheight;
+			node = psy_audio_pattern_findnode(self->pattern, self->gridstate->cursor.track, offset,
+				1 / (psy_dsp_big_beat_t)self->gridstate->lpb, &prev);
 			if (node) {
 				psy_audio_pattern_setevent(self->pattern, node, &event);
 			} else {
-				psy_audio_pattern_insert(self->pattern, prev, 0, offset, &event);
+				psy_audio_pattern_insert(self->pattern, prev, self->gridstate->cursor.track, offset, &event);
 			}
 		} else if (ev->button == 2) {
 			psy_audio_PatternNode* prev;
 
-			psy_audio_PatternNode* node = psy_audio_pattern_findnode(self->pattern, 0,
-				offset, 1 / (psy_dsp_big_beat_t)self->metrics.lpb, &prev);
+			psy_audio_PatternNode* node = psy_audio_pattern_findnode(self->pattern, self->gridstate->cursor.track,
+				offset, 1 / (psy_dsp_big_beat_t)self->gridstate->lpb, &prev);
 			if (!node) {
 				node = prev;
 			}
 			if (node) {
 				psy_audio_PatternNode* next;
 
-				next = pianogrid_nextnode(self, node, 0);
+				next = pianogrid_nextnode(self, node, self->gridstate->cursor.track);
 				if (self->hover == psy_audio_patternnode_entry(node)) {
 					self->hover = 0;
 				}
@@ -500,32 +609,34 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 
 void pianogrid_onmousemove(Pianogrid* self, psy_ui_MouseEvent* ev)
 {
-	psy_dsp_big_beat_t offset;
-	psy_audio_PatternNode* node;
-	psy_audio_PatternNode* next = 0;
-	psy_audio_PatternNode* prev;
-	psy_audio_PatternEntry* hover;
-		
-	offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x - self->component.scroll.x));
-	node = psy_audio_pattern_findnode(self->pattern, 0, offset,
-			1 / (psy_dsp_big_beat_t) self->metrics.lpb, &prev);
-	hover = self->hover;
-	if (!node) {
-		node = prev;
-	}		
-	if (node) {
-		self->hover = psy_audio_patternnode_entry(node);
-	} else {	
-		self->hover = 0;
-	}
-	if (self->hover != hover) {
-		psy_ui_component_invalidate(&self->component);
-	}
-	if (node) {
-		next = pianogrid_nextnode(self, node, 0);
-		if (next) {
-			if (psy_audio_patternnode_entry(next)->offset - offset == 0.25) {
-				psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
+	if (self->pattern) {
+		psy_dsp_big_beat_t offset;
+		psy_audio_PatternNode* node;
+		psy_audio_PatternNode* next = 0;
+		psy_audio_PatternNode* prev;
+		psy_audio_PatternEntry* hover;
+
+		offset = pianogrid_quantizise(self, pianogrid_pxtobeat(self, ev->x - self->component.scroll.x));
+		node = psy_audio_pattern_findnode(self->pattern, self->gridstate->cursor.track, offset,
+			1 / (psy_dsp_big_beat_t)self->gridstate->lpb, &prev);
+		hover = self->hover;
+		if (!node) {
+			node = prev;
+		}
+		if (node) {
+			self->hover = psy_audio_patternnode_entry(node);
+		} else {
+			self->hover = 0;
+		}
+		if (self->hover != hover) {
+			psy_ui_component_invalidate(&self->component);
+		}
+		if (node) {
+			next = pianogrid_nextnode(self, node, self->gridstate->cursor.track);
+			if (next) {
+				if (psy_audio_patternnode_entry(next)->offset - offset == 0.25) {
+					psy_ui_component_setcursor(&self->component, psy_ui_CURSORSTYLE_COL_RESIZE);
+				}
 			}
 		}
 	}
@@ -555,17 +666,29 @@ psy_audio_PatternNode* pianogrid_nextnode(Pianogrid* self, psy_audio_PatternNode
 
 psy_dsp_big_beat_t pianogrid_pxtobeat(Pianogrid* self, int px)
 {
-	return (px  / (psy_dsp_big_beat_t) self->metrics.beatwidth) +
-		self->beatscrollpos;	
+	return (px / (psy_dsp_big_beat_t)self->gridstate->beatwidth);
 }
 
 psy_dsp_big_beat_t pianogrid_quantizise(Pianogrid* self, psy_dsp_big_beat_t offset)
 {
-	return (int)(offset * (psy_dsp_big_beat_t)self->metrics.lpb) /
-		(psy_dsp_big_beat_t)self->metrics.lpb;
+	return (int)(offset * (psy_dsp_big_beat_t)self->gridstate->lpb) /
+		(psy_dsp_big_beat_t)self->gridstate->lpb;
 }
 
-// pianoroll
+void pianogrid_onpatterneditpositionchanged(Pianogrid* self,
+	Workspace* sender)
+{
+	psy_audio_PatternEditPosition oldcursor;
+
+	oldcursor = self->gridstate->cursor;
+	self->gridstate->cursor = workspace_patterneditposition(sender);
+	if (self->gridstate->cursor.track != oldcursor.track) {
+		psy_ui_component_invalidate(&self->component);
+	}
+}
+
+// Pianoroll
+// protoypes
 static void pianoroll_ontimer(Pianoroll*, uintptr_t timerid);
 static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender,
 	uintptr_t lpb);
@@ -576,11 +699,9 @@ static void pianoroll_invalidateline(Pianoroll*, psy_dsp_big_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
 static void pianoroll_onsize(Pianoroll*, psy_ui_Size*);
 static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
-static void pianoroll_onmouseup(Pianoroll*, psy_ui_MouseEvent*);
-static void pianoroll_onmousemove(Pianoroll*, psy_ui_MouseEvent*);
-static void pianoroll_onmousedoubleclick(Pianoroll*, psy_ui_MouseEvent*);
 static void pianoroll_ongridscroll(Pianoroll*, psy_ui_Component* sender, int stepx, int stepy);
-
+static void pianoroll_onzoomboxbeatwidthchanged(Pianoroll*, ZoomBox* sender);
+static void pianoroll_onzoomboxkeyheightchanged(Pianoroll*, ZoomBox* sender);
 // vtable
 static psy_ui_ComponentVtable pianoroll_vtable;
 static int pianoroll_vtable_initialized = 0;
@@ -591,27 +712,19 @@ static void pianoroll_vtable_init(Pianoroll* self)
 		pianoroll_vtable = *(self->component.vtable);
 		pianoroll_vtable.onsize = (psy_ui_fp_onsize)pianoroll_onsize;
 		pianoroll_vtable.onmousedown = (psy_ui_fp_onmousedown)
-			pianoroll_onmousedown;
-		pianoroll_vtable.onmouseup = (psy_ui_fp_onmouseup)
-			pianoroll_onmouseup;
-		pianoroll_vtable.onmousemove = (psy_ui_fp_onmousemove)
-			pianoroll_onmousemove;
-		pianoroll_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
-			pianoroll_onmousedoubleclick;
+			pianoroll_onmousedown;		
 		pianoroll_vtable.ontimer = (psy_ui_fp_ontimer)
 			pianoroll_ontimer;
 		pianoroll_vtable_initialized = 1;
 	}
 }
-
+// implenentation
 void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	pianoroll_vtable_init(self);
-	self->component.vtable = &pianoroll_vtable;
-	defaultkeyboardconfig_init();
-	self->keyboardconfig = defaultkeyboardconfig;
+	self->component.vtable = &pianoroll_vtable;	
 	self->workspace = workspace;
 	self->opcount = 0;
 	self->syncpattern = 1;
@@ -621,30 +734,37 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pianoroll_ondestroy);
+	// shared states
+	keyboardstate_init(&self->keyboardstate);
+	gridstate_init(&self->gridstate);
 	// left area (keyboardheader, keyboard)
 	psy_ui_component_init(&self->left, &self->component);
 	psy_ui_component_enablealign(&self->left);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	psy_ui_component_init(&self->keyboardheader, &self->left);
-	psy_ui_component_setalign(&self->keyboardheader, psy_ui_ALIGN_TOP);
-	psy_ui_component_setpreferredsize(&self->keyboardheader, psy_ui_size_make(
-		psy_ui_value_makeew(8), psy_ui_value_makeeh(1)));
-	pianokeyboard_init(&self->keyboard, &self->left, &self->keyboardconfig);
+	zoombox_init(&self->zoombox_beatwidth, &self->left);
+	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
+		pianoroll_onzoomboxbeatwidthchanged);
+	psy_ui_component_setalign(&self->zoombox_beatwidth.component, psy_ui_ALIGN_TOP);
+	pianokeyboard_init(&self->keyboard, &self->left, &self->keyboardstate);
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_CLIENT);
+	zoombox_init(&self->zoombox_keyheight, &self->left);
+	psy_signal_connect(&self->zoombox_keyheight.signal_changed, self,
+		pianoroll_onzoomboxkeyheightchanged);
+	psy_ui_component_setalign(&self->zoombox_keyheight.component, psy_ui_ALIGN_BOTTOM);
 	// top area (beatruler)
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
-	pianoheader_init(&self->header, &self->top, self);
+	pianoheader_init(&self->header, &self->top, &self->gridstate);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// client area (event grid)
-	pianogrid_init(&self->grid, &self->component, &self->keyboardconfig, self->workspace);
+	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
+		&self->gridstate, self->workspace);
 	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_onlpbchanged);
 	psy_signal_connect(&self->grid.component.signal_scroll, self,
 		pianoroll_ongridscroll);
-	pianoroll_updatemetrics(self);
 	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
@@ -656,12 +776,9 @@ void pianoroll_setpattern(Pianoroll* self, psy_audio_Pattern* pattern)
 {
 	self->pattern = pattern;
 	pianogrid_setpattern(&self->grid, pattern);
-	psy_ui_component_setscrolltop(&self->grid.component, 0);
-	psy_ui_component_setscrolltop(&self->keyboard.component, 0);
-	pianoroll_updatemetrics(self);
-	pianogrid_adjustscroll(&self->grid);
-	psy_ui_component_invalidate(&self->grid.component);
-	psy_ui_component_invalidate(&self->keyboard.component);
+	psy_ui_component_setscroll(&self->grid.component, psy_ui_intpoint_make(0, 0));
+	psy_ui_component_setscroll(&self->header.component, psy_ui_intpoint_make(0, 0));
+	pianoroll_updatescroll(self);	
 }
 
 void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
@@ -691,7 +808,7 @@ int pianoroll_testplaybar(Pianoroll* self, psy_dsp_big_beat_t offset)
 	return psy_audio_player_playing(&self->workspace->player) &&
 		testrange(self->grid.lastplayposition -
 			self->grid.sequenceentryoffset,
-			offset, 1 / (psy_dsp_big_beat_t)self->grid.metrics.lpb);
+			offset, 1 / (psy_dsp_big_beat_t)self->grid.gridstate->lpb);
 }
 
 int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
@@ -707,20 +824,19 @@ void pianoroll_invalidateline(Pianoroll* self, psy_dsp_big_beat_t offset)
 		int line;
 
 		line = (int)((offset - self->grid.sequenceentryoffset) *
-			self->grid.metrics.lpb);
+			self->gridstate.lpb);
 		psy_ui_component_invalidaterect(&self->grid.component,
 			psy_ui_rectangle_make(
-				(int)(self->grid.metrics.stepwidth * line +
-					self->grid.beatscrollpos * self->grid.metrics.beatwidth),
+				(int)(self->gridstate.stepwidth * line),
 				0,
-				(int)self->grid.metrics.stepwidth,
-				self->grid.metrics.visikeys * self->keyboardconfig.keyheight));
+				(int)self->gridstate.stepwidth,
+				keyboardstate_height(&self->keyboardstate)));
 	}
 }
 
 void pianoroll_onsize(Pianoroll* self, psy_ui_Size* size)
 {
-	pianoroll_updatemetrics(self);
+	pianoroll_updatescroll(self);
 }
 
 void pianoroll_onmousedown(Pianoroll* self, psy_ui_MouseEvent* ev)
@@ -728,43 +844,31 @@ void pianoroll_onmousedown(Pianoroll* self, psy_ui_MouseEvent* ev)
 	psy_ui_component_setfocus(&self->grid.component);
 }
 
-void pianoroll_onmouseup(Pianoroll* self, psy_ui_MouseEvent* ev)
+void pianoroll_updatescroll(Pianoroll* self)
 {
-}
-
-void pianoroll_onmousemove(Pianoroll* self, psy_ui_MouseEvent* ev)
-{
-}
-
-void pianoroll_onmousedoubleclick(Pianoroll* self, psy_ui_MouseEvent* ev)
-{
-}
-
-
-void pianoroll_updatemetrics(Pianoroll* self)
-{
-	PianoMetrics metrics;
-
-	pianometrics_update(&metrics, &self->grid, self->pattern, self->grid.lpb);
-	self->grid.metrics = metrics;
-	self->header.metrics = metrics;
+	pianogrid_updategridstate(&self->grid);	
+	self->grid.component.scrollstepx = self->gridstate.beatwidth;
+	self->grid.component.scrollstepy = self->keyboardstate.keyheight;
+	self->keyboard.component.scrollstepy = self->keyboardstate.keyheight;
+	self->header.component.scrollstepx = self->gridstate.beatwidth;
+	psy_ui_component_updateoverflow(&self->grid.component);
+	psy_ui_component_invalidate(&self->grid.component);
+	psy_ui_component_invalidate(&self->header.component);
+	psy_ui_component_invalidate(&self->keyboard.component);
 }
 
 void pianoroll_onlpbchanged(Pianoroll* self, psy_audio_Player* sender,
 	uintptr_t lpb)
 {
-	pianoroll_updatemetrics(self);
-	pianogrid_adjustscroll(&self->grid);
-	psy_ui_component_invalidate(&self->grid.component);
-	psy_ui_component_invalidate(&self->header.component);	
+	self->gridstate.lpb = lpb;
+	pianoroll_updatescroll(self);	
 }
 
 void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender, int stepx, int stepy)
 {
 	if (stepx != 0) {
-		self->header.scrollpos = self->grid.beatscrollpos;
-		self->header.scrollpos = self->grid.beatscrollpos;
-		self->header.metrics = self->grid.metrics;
+		psy_ui_component_setscrollleft(&self->header.component,
+			psy_ui_component_scrollleft(&self->grid.component));
 		psy_ui_component_invalidate(&self->header.component);
 		psy_ui_component_update(&self->header.component);
 	}
@@ -776,24 +880,23 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender, int stepx
 	}
 }
 
-// Piano Metrics
-void pianometrics_update(PianoMetrics* rv, Pianogrid* grid,
-	psy_audio_Pattern* pattern, int lpb)
+void pianoroll_onzoomboxbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
 {
-	psy_ui_Size gridsize;
-	psy_ui_TextMetric tm;
+	gridstate_setbeatwidth(&self->gridstate, (int)(80 * sender->zoomrate));
+	pianoroll_updatescroll(self);
+	psy_ui_component_setscrollleft(&self->header.component,
+		psy_ui_component_scrollleft(&self->grid.component));
+	psy_ui_component_invalidate(&self->header.component);
+	psy_ui_component_update(&self->header.component);
+}
 
-	gridsize = psy_ui_component_size(&grid->component);
-	tm = psy_ui_component_textmetric(&grid->component);
-	rv->lpb = 4;
-	rv->beatwidth = 80;
-	rv->visibeats = pattern
-		? min(max(0, pattern->length + grid->beatscrollpos),
-			psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_big_beat_t)rv->beatwidth)
-		: 0;
-	rv->visisteps = (int)(rv->visibeats * rv->lpb + 0.5);
-	rv->visiwidth = (int)(rv->visibeats * rv->beatwidth + 0.5);
-	rv->stepwidth = rv->beatwidth / (psy_dsp_big_beat_t)rv->lpb;
-	rv->visikeys = (int)(psy_ui_value_px(&gridsize.height, &tm) /
-		(float)grid->keyboardconfig->keyheight + 0.5);
+void pianoroll_onzoomboxkeyheightchanged(Pianoroll* self, ZoomBox* sender)
+{
+	keyboardstate_setkeyheight(&self->keyboardstate,
+		(int)(12 * sender->zoomrate));
+	pianoroll_updatescroll(self);
+	psy_ui_component_setscrolltop(&self->keyboard.component,
+		psy_ui_component_scrolltop(&self->grid.component));
+	psy_ui_component_invalidate(&self->keyboard.component);
+	psy_ui_component_update(&self->keyboard.component);
 }

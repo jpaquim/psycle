@@ -76,10 +76,12 @@ typedef struct {
 	int classic;
 	TrackerSkin* skin;
 	struct TrackerView* view;
+	Workspace* workspace;
+	uintptr_t currtrack;
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
-	struct TrackerView* view);
+	struct TrackerView* view, Workspace*);
 int trackerheader_scrollleft(TrackerHeader*,
 	psy_audio_PatternEditPosition);
 int trackerheader_scrollright(TrackerHeader*,
@@ -241,7 +243,8 @@ typedef struct TrackerView {
 	int zoomheightbase;	
 } TrackerView;
 
-void trackerview_init(TrackerView*, psy_ui_Component* parent, Workspace*);
+void trackerview_init(TrackerView*, psy_ui_Component* parent,
+	psy_ui_Component* headerparent, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
 void TrackerViewApplyProperties(TrackerView*, psy_Properties*);

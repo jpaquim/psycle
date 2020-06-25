@@ -461,7 +461,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->color = psy_ui_defaults_color(&app.defaults);
 	self->cursor = psy_ui_CURSOR_DEFAULT;
 	self->scroll.x = 0;
-	self->scroll.y = 0;
+	self->scroll.y = 0;	
 	psy_ui_component_updatefont(self);
 	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);	
 }
@@ -816,6 +816,7 @@ static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, int width, int height) { }
 static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size) { }
 static psy_ui_Size dev_size(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
+static void dev_updatesize(psy_ui_ComponentImp* self) { }
 static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
 static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { }
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
@@ -872,6 +873,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_position = dev_position;
 		imp_vtable.dev_setposition = dev_setposition;
 		imp_vtable.dev_size = dev_size;
+		imp_vtable.dev_updatesize = dev_updatesize;
 		imp_vtable.dev_framesize = dev_framesize;
 		imp_vtable.dev_scrollto = dev_scrollto;
 		imp_vtable.dev_parent = dev_parent;
@@ -903,18 +905,18 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_stoptimer = dev_stoptimer;
 		imp_vtable.dev_seticonressource = dev_seticonressource;
 		imp_vtable.dev_textmetric = dev_textmetric;
-		imp_vtable.dev_textsize = dev_textsize;
-		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
-		imp_vtable.dev_settitle = dev_settitle;
-		imp_vtable.dev_setfocus = dev_setfocus;
-		imp_vtable.dev_hasfocus = dev_hasfocus;
-		imp_vtable.dev_platform = dev_platform;
+imp_vtable.dev_textsize = dev_textsize;
+imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
+imp_vtable.dev_settitle = dev_settitle;
+imp_vtable.dev_setfocus = dev_setfocus;
+imp_vtable.dev_hasfocus = dev_hasfocus;
+imp_vtable.dev_platform = dev_platform;
 	}
 }
 
 void psy_ui_componentimp_init(psy_ui_ComponentImp* self)
 {
-	imp_vtable_init();	
+	imp_vtable_init();
 	self->vtable = &imp_vtable;
 	psy_signal_init(&self->signal_command);
 }
@@ -934,7 +936,7 @@ psy_ui_Component* psy_ui_component_at(psy_ui_Component* self, uintptr_t index)
 	p = q = psy_ui_component_children(self, 0);
 	while (p) {
 		if (c == index) {
-			rv = (psy_ui_Component*) p->entry;
+			rv = (psy_ui_Component*)p->entry;
 			break;
 		}
 		p = p->next;
@@ -952,39 +954,43 @@ void psy_ui_component_setscroll(psy_ui_Component* self,
 }
 
 void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
-{
-	int npos;
-	int scrollmin;
-	int scrollmax;
-
+{	
 	self->scroll.x = left;
-	psy_ui_component_horizontalscrollrange(self, &scrollmin, &scrollmax);
-	npos = self->scroll.x / self->scrollstepx;
-	if (npos > scrollmax) {
-		npos = scrollmax;
-	}
-	if (npos < scrollmin) {
-		npos = scrollmin;
-	}
-	psy_ui_component_sethorizontalscrollposition(self, npos);
+	if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
+		int scrollmin;
+		int scrollmax;
+		int npos;
+
+		psy_ui_component_horizontalscrollrange(self, &scrollmin, &scrollmax);
+		npos = self->scroll.x / self->scrollstepx;
+		if (npos > scrollmax) {
+			npos = scrollmax;
+		}
+		if (npos < scrollmin) {
+			npos = scrollmin;
+		}
+		psy_ui_component_sethorizontalscrollposition(self, npos);
+	}	
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component* self, int top)
 {
-	int npos;
-	int scrollmin;
-	int scrollmax;
-
 	self->scroll.y = top;
-	psy_ui_component_verticalscrollrange(self, &scrollmin, &scrollmax);
-	npos = self->scroll.y / self->scrollstepy;
-	if (npos > scrollmax) {
-		npos = scrollmax;
+	if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
+		int npos;
+		int scrollmin;
+		int scrollmax;
+
+		psy_ui_component_verticalscrollrange(self, &scrollmin, &scrollmax);
+		npos = self->scroll.y / self->scrollstepy;
+		if (npos > scrollmax) {
+			npos = scrollmax;
+		}
+		if (npos < scrollmin) {
+			npos = scrollmin;
+		}
+		psy_ui_component_setverticalscrollposition(self, npos);
 	}
-	if (npos < scrollmin) {
-		npos = scrollmin;
-	}
-	psy_ui_component_setverticalscrollposition(self, npos);
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component* self)
@@ -994,20 +1000,30 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		psy_ui_TextMetric tm;
 		int maxlines;
 		int visilines;
-		int currline;		
+		int currline;
 		psy_ui_Size size;
 
 		tm = psy_ui_component_textmetric(self);
 		size = psy_ui_component_size(self);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
-		maxlines = (psy_ui_value_px(&preferredsize.height, &tm) / (double)self->scrollstepy + 0.5);
-		visilines = psy_ui_value_px(&size.height, &tm) / self->scrollstepy;
+		maxlines = (int)(psy_ui_value_px(&preferredsize.height, &tm) / (double)self->scrollstepy);
+		visilines = (psy_ui_value_px(&size.height, &tm) / self->scrollstepy);
 		currline = psy_ui_component_scrolltop(self) / self->scrollstepy;
-		psy_ui_component_setverticalscrollrange(self, 0, maxlines - visilines);		
-		if (currline > maxlines - visilines) {
-			currline = max(0, maxlines - visilines);
-			psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
-		}
+		if ((self->overflow & psy_ui_OVERFLOW_VSCROLLCENTER) ==
+				psy_ui_OVERFLOW_VSCROLLCENTER) {
+			psy_ui_component_setverticalscrollrange(self, -visilines / 2,
+				maxlines - visilines / 2 - 1);
+			if (currline > maxlines - visilines / 2) {
+				currline = max(-visilines / 2, maxlines -visilines / 2);
+				psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
+			}
+		} else {
+			psy_ui_component_setverticalscrollrange(self, 0, maxlines - visilines);
+			if (currline > maxlines - visilines) {
+				currline = max(0, maxlines - visilines);
+				psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
+			}
+		}		
 	}
 	if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
 		psy_ui_Size preferredsize;

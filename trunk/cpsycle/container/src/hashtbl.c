@@ -5,6 +5,7 @@
 
 #include "hashtbl.h"
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 psy_TableIterator tableend;
@@ -17,9 +18,7 @@ void psy_table_init(psy_Table* self)
   uintptr_t i;
 
   self->arraysize = psy_TABLEKEYS;
-  for (i = 0; i < self->arraysize; ++i) {
-    self->keys[i] = 0;
-  }
+  memset(self->keys, 0, sizeof(self->keys));
   self->count = 0; 
 }
 

@@ -46,6 +46,7 @@ static void dev_clientresize(psy_ui_win_ComponentImp*, int width, int height);
 static psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp*);
 static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft, psy_ui_Size);
 static psy_ui_Size dev_size(psy_ui_win_ComponentImp*);
+static void dev_updatesize(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_win_ComponentImp*);
 static void dev_scrollto(psy_ui_win_ComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* dev_parent(psy_ui_win_ComponentImp*);
@@ -104,7 +105,8 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize) dev_clientresize;
 		vtable.dev_position = (psy_ui_fp_componentimp_dev_position) dev_position;
 		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition) dev_setposition;
-		vtable.dev_size = (psy_ui_fp_componentimp_dev_size) dev_size;
+		vtable.dev_size = (psy_ui_fp_componentimp_dev_size)dev_size;
+		vtable.dev_updatesize = (psy_ui_fp_componentimp_dev_size)dev_updatesize;
 		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
 		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;
 		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent) dev_parent;
@@ -395,8 +397,7 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft, psy_ui
 		psy_ui_value_px(&topleft.y, &tm),
 		psy_ui_value_px(&size.width, &tm), psy_ui_value_px(&size.height, &tm),
 		SWP_NOZORDER);	
-	self->sizecachevalid = TRUE;
-	self->sizecache = size;
+	dev_updatesize(self);
 }
 
 psy_ui_Size dev_size(psy_ui_win_ComponentImp* self)
@@ -412,6 +413,18 @@ psy_ui_Size dev_size(psy_ui_win_ComponentImp* self)
 		rv.height = psy_ui_value_makepx(rect.bottom);		
 		return rv;
 	}
+}
+
+void dev_updatesize(psy_ui_win_ComponentImp* self)
+{
+	psy_ui_Size size;
+	RECT rect;
+
+	GetClientRect(self->hwnd, &rect);
+	size.width = psy_ui_value_makepx(rect.right);
+	size.height = psy_ui_value_makepx(rect.bottom);
+	self->sizecache = size;
+	self->sizecachevalid = TRUE;
 }
 
 psy_ui_Size dev_framesize(psy_ui_win_ComponentImp* self)
@@ -563,7 +576,8 @@ void dev_setverticalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, in
 		self->vscrollmax = si.nMax;
 		si.nPage = 0;
 		self->sizecachevalid = FALSE;
-		SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);		
+		SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
+		dev_updatesize(self);
 	}
 }
 
@@ -616,6 +630,7 @@ void dev_sethorizontalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, 
 		self->hscrollmax = si.nMax;
 		self->sizecachevalid = FALSE;
 		SetScrollInfo(self->hwnd, SB_HORZ, &si, TRUE);
+		dev_updatesize(self);
 	}
 }
 
