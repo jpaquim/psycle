@@ -462,9 +462,9 @@ static void vtable_init(MachineWireView* self)
 
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
-{	
+{
 	psy_ui_FontInfo fontinfo;
-	
+
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;

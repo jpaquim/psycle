@@ -188,11 +188,12 @@ void patternview_init(PatternView* self,
 	psy_ui_component_setbackgroundmode(&self->editnotebook.component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_notebook_setpageindex(&self->editnotebook, 0);
-	trackerview_init(&self->trackerview, &self->editnotebook.component, workspace);	
-	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);
 	patternproperties_init(&self->properties, &self->component, NULL, workspace);
 	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->properties.component);
+	trackerview_init(&self->trackerview, &self->editnotebook.component,
+		&self->component, workspace);	
+	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);	
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self,
 		patternview_onpropertiesapply);	
@@ -229,17 +230,33 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 	if (tabindex < 2) {
 		if (psy_ui_notebook_splitactivated(&self->editnotebook)) {
 			psy_ui_notebook_full(&self->editnotebook);						
+		}		
+		if (tabindex == 0) {
+			if (workspace_showlinenumbers(self->workspace)) {
+				psy_ui_component_show(&self->trackerview.left);
+				psy_ui_component_align(&self->component);
+			}
+		} else {
+			if (workspace_showlinenumbers(self->workspace)) {
+				psy_ui_component_hide(&self->trackerview.left);
+				psy_ui_component_align(&self->component);
+			}
 		}
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);
+		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);		
 	} else 
-	if (tabindex == 2) {
+	if (tabindex == 2) {		
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
+		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {			
+			if (workspace_showlinenumbers(self->workspace)) {
+				psy_ui_component_show(&self->trackerview.left);
+				psy_ui_component_align(&self->component);
+			}			
 			psy_ui_notebook_split(&self->editnotebook);			
 		}
 	} else
 	if (tabindex == 3) {
+		// Properties
 		if (psy_ui_component_visible(&self->properties.component)) {
 			psy_ui_component_hide(&self->properties.component);			
 		} else {
