@@ -51,7 +51,7 @@ typedef struct {
 	int trackwidth;
 	int identwidth;   
 	int avgcharwidth;	
-	int showpatternnames;
+	bool showpatternnames;
 	psy_dsp_beat_t lastplayposition;
 	psy_audio_Player* player;
 	SequenceEntry* lastentry;	
@@ -61,9 +61,9 @@ typedef struct {
 
 void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
 	struct SequenceView*, psy_audio_Sequence*, psy_audio_Patterns*, Workspace*);
-
 void sequencelistview_showpatternnames(SequenceListView*);
 void sequencelistview_showpatternslots(SequenceListView*);
+void sequencelistview_computetextsizes(SequenceListView*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -75,8 +75,8 @@ typedef struct {
 } SequenceViewDuration;
 
 void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
-	psy_audio_Sequence*, Workspace* workspace);
-float sequenceduration_calcdurationms(SequenceViewDuration*);
+	psy_audio_Sequence*, Workspace*);
+void sequenceduration_update(SequenceViewDuration*);
 
 typedef struct {
 	psy_ui_Component component;	
@@ -112,10 +112,12 @@ typedef struct SequenceView {
 	psy_audio_Sequence* sequence;
 	SequenceSelection* selection;
 	Workspace* workspace;
-	int start;
 } SequenceView;
 
 void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);
+void sequenceview_updateplayposition(SequenceView*);
+void sequenceview_changeplayposition(SequenceView*);
+
 
 
 #endif

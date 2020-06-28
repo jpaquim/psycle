@@ -490,7 +490,10 @@ void psy_audio_sampler_ontimerwork(psy_audio_Sampler* self,
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*)p->entry;
-		psy_audio_samplervoice_work(voice, bc->output, bc->numsamples);
+		if (psy_audio_samplervoice_isplaying(voice)) {
+			psy_audio_samplervoice_work(voice, bc->output,
+				bc->numsamples);
+		}
 	}
 }
 
@@ -565,8 +568,10 @@ void newline(psy_audio_Sampler* self)
 	for (p = self->voices; p != NULL; psy_list_next(&p)) {
 		psy_audio_SamplerVoice* voice;
 
-		voice = (psy_audio_SamplerVoice*) p->entry;		
-		psy_audio_samplervoice_newline(voice);
+		voice = (psy_audio_SamplerVoice*) p->entry;	
+		if (psy_audio_samplervoice_isplaying(voice)) {
+			psy_audio_samplervoice_newline(voice);
+		}
 	}
 	psy_audio_samplerticktimer_reset(&self->ticktimer,	
 		(uintptr_t)
@@ -655,8 +660,8 @@ psy_audio_SamplerVoice* activevoice(psy_audio_Sampler* self, uintptr_t channel)
 		psy_audio_SamplerVoice* voice;
 
 		voice = (psy_audio_SamplerVoice*) p->entry;
-		if (voice->channelnum == channel && voice->env.stage != ENV_RELEASE
-				&& voice->env.stage != ENV_OFF) {
+		if (voice->channelnum == channel && voice->amplitudeenvelope.stage != ENV_RELEASE
+				&& voice->amplitudeenvelope.stage != ENV_OFF) {
 			rv = voice;
 			break;
 		}
@@ -674,7 +679,8 @@ void removeunusedvoices(psy_audio_Sampler* self)
 
 		q = p->next;
 		voice = (psy_audio_SamplerVoice*) p->entry;				
-		if (voice->env.stage == ENV_OFF) {
+		if (voice->amplitudeenvelope.stage == ENV_OFF ||
+				!psy_audio_samplervoice_isplaying(voice)) {
 			psy_audio_samplervoice_dispose(voice);
 			free(voice);
 			psy_list_remove(&self->voices, p);

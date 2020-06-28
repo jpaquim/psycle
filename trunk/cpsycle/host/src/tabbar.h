@@ -13,6 +13,7 @@
 typedef enum {
 	TABMODE_SINGLESEL,
 	TABMODE_MULTISEL,
+	TABMODE_LABEL,
 } TabMode;
 
 typedef struct {

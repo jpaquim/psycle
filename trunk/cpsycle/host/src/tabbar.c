@@ -130,7 +130,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	for (tabs = self->tabs; tabs != 0; tabs = tabs->next, ++c) {
 		Tab* tab;
 
-		tab = (Tab*)tabs->entry;
+		tab = (Tab*)tabs->entry;	
 		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 			self->tabalignment == psy_ui_ALIGN_RIGHT) {
 			cpx = psy_ui_value_px(&tab->margin.left, &tm);
@@ -159,6 +159,9 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 		}		
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {			
 			cpx += psy_ui_value_px(&tab->margin.left, &tm);
+			if (tab->mode == TABMODE_LABEL) {
+				psy_ui_settextcolor(g, 0x00B1A596);
+			}
 			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
 			cpx += psy_ui_value_px(&tab->size.width, &tm) + psy_ui_value_px(&tab->margin.right, &tm);
 		} else
@@ -183,6 +186,9 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 					cpy + psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.top, &tm));
 			}			
 			cpy += psy_ui_value_px(&tab->margin.top, &tm);
+			if (tab->mode == TABMODE_LABEL) {
+				psy_ui_settextcolor(g, 0x00666666);
+			}			
 			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));			
 			cpy += psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.bottom, &tm);
 		}
@@ -212,6 +218,9 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 	Tab* tab = 0;
 
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);
+	if (tab && tab->mode == TABMODE_LABEL) {
+		return;
+	}
 	if (tab && tabindex != -1 && (tabindex != self->selected || tab->istoggle)) {
 		if (!tab->istoggle) {
 			self->selected = tabindex;
@@ -290,6 +299,11 @@ void tabbar_onmousemove(TabBar* self, psy_ui_MouseEvent* ev)
 	Tab* tab = 0;
 
 	tabindex = tabbar_tabhittest(self, ev->x, ev->y, &tab);	
+	if (tab && tab->mode == TABMODE_LABEL) {
+		self->hoverindex = -1;
+		psy_ui_component_invalidate(tabbar_base(self));
+		return;
+	} else
 	if (tabindex != self->hoverindex) {
 		self->hoverindex = tabindex;
 		psy_ui_component_invalidate(tabbar_base(self));

@@ -169,7 +169,6 @@ int workspace_showparamviewaswindow(Workspace*);
 void workspace_configchanged(Workspace*, psy_Properties* property,
 	psy_Properties* choice);
 int workspace_wraparound(Workspace*);
-int workspace_doublemidline(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
 void workspace_setpatterneditposition(Workspace*, psy_audio_PatternEditPosition);

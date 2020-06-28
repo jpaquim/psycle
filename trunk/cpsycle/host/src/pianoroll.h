@@ -13,6 +13,8 @@ typedef struct {
 	int keymin;
 	int keymax;
 	int keyheight;
+	int defaultkeyheight;
+	double zoom;
 	psy_ui_Color keywhitecolour;
 	psy_ui_Color keyblackcolour;
 	psy_ui_Color keyseparatorcolour;
@@ -37,6 +39,8 @@ INLINE int keyboardstate_height(KeyboardState* self)
 
 typedef struct {
 	int beatwidth;
+	int defaultbeatwidth;
+	double zoom;
 	int lpb;
 	psy_ui_Color eventcolour;
 	psy_ui_Color eventhovercolour;
@@ -63,7 +67,7 @@ void gridstate_init(GridState*);
 
 INLINE void gridstate_setbeatwidth(GridState* self, int width)
 {
-	self->beatwidth = width;
+	//self->beatwidth = width;
 }
 
 // Header (Beatruler)
@@ -117,14 +121,14 @@ typedef struct Pianoroll {
    ZoomBox zoombox_keyheight;
    PianoKeyboard keyboard;
    Pianogrid grid;
+   KeyboardState keyboardstate;
+   GridState gridstate;
    int cx;
    int cy;
    psy_audio_Pattern* pattern;
    unsigned int opcount;
    int syncpattern;   
-   Workspace* workspace;
-   KeyboardState keyboardstate;
-   GridState gridstate;
+   Workspace* workspace;  
 } Pianoroll;
 
 void pianoroll_init(Pianoroll*, psy_ui_Component* parent, Workspace*);

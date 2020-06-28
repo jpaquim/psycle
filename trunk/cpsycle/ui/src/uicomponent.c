@@ -440,6 +440,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->overflow = psy_ui_OVERFLOW_HIDDEN;
 	self->preventdefault = 0;
 	self->preventpreferredsize = 0;
+	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
@@ -631,10 +632,18 @@ void psy_ui_component_align(psy_ui_Component* self)
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {		
-	psy_ui_Aligner aligner;
+	
+	if (!self->preventpreferredsize) {
+		psy_ui_Aligner aligner;
 
-	psy_ui_aligner_init(&aligner, self);
-	psy_ui_aligner_preferredsize(&aligner, limit, rv);	
+		psy_ui_aligner_init(&aligner, self);
+		psy_ui_aligner_preferredsize(&aligner, limit, rv);
+	} else {
+		psy_ui_Size size;
+		
+		size = psy_ui_component_size(self);
+		*rv = size;
+	}
 }
 
 void psy_ui_component_doublebuffer(psy_ui_Component* self)
@@ -822,6 +831,7 @@ static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { 
 static psy_ui_Component* dev_parent(psy_ui_ComponentImp* self) { return 0;  }
 static void dev_setparent(psy_ui_ComponentImp* self, psy_ui_Component* parent) { }
 static void dev_insert(psy_ui_ComponentImp* self, psy_ui_ComponentImp* child, psy_ui_ComponentImp* insertafter) { }
+static void dev_setorder(psy_ui_ComponentImp* self, psy_ui_ComponentImp* insertafter) { }
 static void dev_capture(psy_ui_ComponentImp* self) { }
 static void dev_releasecapture(psy_ui_ComponentImp* self) { }
 static void dev_invalidate(psy_ui_ComponentImp* self) { }
@@ -879,6 +889,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_parent = dev_parent;
 		imp_vtable.dev_setparent = dev_setparent;
 		imp_vtable.dev_insert = dev_insert;
+		imp_vtable.dev_setorder = dev_setorder;
 		imp_vtable.dev_capture = dev_capture;
 		imp_vtable.dev_releasecapture = dev_releasecapture;
 		imp_vtable.dev_invalidate = dev_invalidate;

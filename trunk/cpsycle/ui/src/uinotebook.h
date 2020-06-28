@@ -4,7 +4,7 @@
 #ifndef psy_ui_NOTEBOOK_H
 #define psy_ui_NOTEBOOK_H
 
-#include "uicomponent.h"
+#include "uisplitbar.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,17 +12,16 @@ extern "C" {
 
 typedef struct {
    psy_ui_Component component;
-   psy_ui_Component splitbar;
+   psy_ui_SplitBar splitbar;
    int pageindex;
    int split;
-   int splitx;
 } psy_ui_Notebook;
 
 void psy_ui_notebook_init(psy_ui_Notebook*, psy_ui_Component* parent);
 void psy_ui_notebook_setpageindex(psy_ui_Notebook*, int page);
 int psy_ui_notebook_pageindex(psy_ui_Notebook*);
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook*);
-void psy_ui_notebook_split(psy_ui_Notebook*);
+void psy_ui_notebook_split(psy_ui_Notebook*, psy_ui_Orientation);
 int psy_ui_notebook_splitactivated(psy_ui_Notebook*);
 void psy_ui_notebook_full(psy_ui_Notebook*);
 void psy_ui_notebook_connectcontroller(psy_ui_Notebook*, 

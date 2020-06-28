@@ -166,15 +166,34 @@ void patternviewbar_initalign(PatternViewBar* self)
 		&margin));		
 }
 
+
+static void patternview_onpreferredsize(PatternView*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
+
+static psy_ui_ComponentVtable patternview_vtable;
+static int patternview_vtable_initialized = 0;
+
+static void patternview_vtable_init(PatternView* self)
+{
+	if (!patternview_vtable_initialized) {
+		patternview_vtable = *(self->component.vtable);
+		patternview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			patternview_onpreferredsize;
+		patternview_vtable_initialized = 1;
+	}
+}
+
 void patternview_init(PatternView* self, 
 		psy_ui_Component* parent,
 		psy_ui_Component* tabbarparent,		
 		Workspace* workspace)
 {
 	psy_ui_Margin margin;
-
-	self->workspace = workspace;
+	
 	psy_ui_component_init(&self->component, parent);
+	patternview_vtable_init(self);
+	self->component.vtable = &patternview_vtable;
+	self->workspace = workspace;
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
@@ -203,9 +222,10 @@ void patternview_init(PatternView* self,
 	psy_ui_component_setalign(&self->sectionbar, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->sectionbar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);	
-	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split",
+	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split", "Vertical", "Horizontal",
 		"Properties", NULL);
-	tabbar_tab(&self->tabbar, 3)->istoggle = TRUE;
+	tabbar_tab(&self->tabbar, 2)->mode = TABMODE_LABEL;
+	tabbar_tab(&self->tabbar, 5)->istoggle = TRUE;
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		patternview_ontabbarchange);	
 	tabbar_select(&self->tabbar, 0);
@@ -245,17 +265,27 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
 		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);		
 	} else 
-	if (tabindex == 2) {		
+	if (tabindex == 3) {		
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
 		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {			
 			if (workspace_showlinenumbers(self->workspace)) {
 				psy_ui_component_show(&self->trackerview.left);
 				psy_ui_component_align(&self->component);
-			}			
-			psy_ui_notebook_split(&self->editnotebook);			
+			}								
 		}
+		psy_ui_notebook_split(&self->editnotebook, psy_ui_VERTICAL);
 	} else
-	if (tabindex == 3) {
+	if (tabindex == 4) {
+		psy_ui_notebook_setpageindex(&self->notebook, 0);
+		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
+			if (workspace_showlinenumbers(self->workspace)) {
+				psy_ui_component_show(&self->trackerview.left);
+				psy_ui_component_align(&self->component);
+			}
+		}
+		psy_ui_notebook_split(&self->editnotebook, psy_ui_HORIZONTAL);
+	} else
+	if (tabindex == 5) {
 		// Properties
 		if (psy_ui_component_visible(&self->properties.component)) {
 			psy_ui_component_hide(&self->properties.component);			
@@ -291,7 +321,7 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 		pattern = 0;
 	}
 	patternview_setpattern(self, pattern);
-	self->trackerview.sequenceentryoffset = 0.f;
+	self->trackerview.linestate.sequenceentryoffset = 0.f;
 	self->pianoroll.grid.sequenceentryoffset = 0.f;
 	pianoroll_setpattern(&self->pianoroll, pattern);	
 	psy_ui_component_invalidate(&self->component);
@@ -311,11 +341,11 @@ void patternview_onsequenceselectionchanged(PatternView* self,
 		pattern = patterns_at(&workspace->song->patterns, 
 			entry->pattern);
 		patternview_setpattern(self, pattern);
-		self->trackerview.sequenceentryoffset = entry->offset;
+		self->trackerview.linestate.sequenceentryoffset = entry->offset;
 		self->pianoroll.grid.sequenceentryoffset = entry->offset;
 	} else {
-		patternview_setpattern(self, 0);		
-		self->trackerview.sequenceentryoffset = 0.f;
+		patternview_setpattern(self, NULL);		
+		self->trackerview.linestate.sequenceentryoffset = 0.f;
 		self->pianoroll.grid.sequenceentryoffset = 0.f;
 	}
 	psy_ui_component_invalidate(&self->component);
@@ -353,4 +383,10 @@ void patternviewbar_onconfigchanged(PatternViewBar* self, Workspace* workspace,
 	} else {
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
 	}
+}
+
+void patternview_onpreferredsize(PatternView* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{	
+	*rv = psy_ui_component_size(&self->component);
 }

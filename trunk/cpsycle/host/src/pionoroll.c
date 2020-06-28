@@ -78,8 +78,7 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	int baseline;
-	psy_dsp_big_beat_t cpx;
+	int baseline;	
 	int c;
 
 	size = psy_ui_component_size(&self->component);
@@ -90,20 +89,27 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 		psy_ui_value_px(&size.width, &tm) + psy_ui_component_scrollleft(&self->component),
 		baseline);
 	if (self->gridstate->visiwidth > 0) {
-		for (c = 0, cpx = 0; c <= self->gridstate->visisteps;
-			cpx += self->gridstate->stepwidth, ++c) {
-			psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 3);
+		int beatstart;
+		
+		for (c = 0; c <= self->gridstate->visisteps; ++c) {
+			int cpx;
+
+			cpx = (int)((c * self->gridstate->stepwidth) +
+				psy_ui_component_scrollleft(&self->component));
+			psy_ui_drawline(g, cpx, baseline, cpx, baseline - tm.tmHeight / 3);
 		}
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolor(g, self->gridstate->rulermarkcolour);
-		for (c = 0, cpx = psy_ui_component_scrollleft(&self->component);
-				c <= self->gridstate->visibeats;
-				cpx += self->gridstate->beatwidth, ++c) {
+		beatstart = psy_ui_component_scrollleft(&self->component) /
+			self->gridstate->beatwidth;
+		for (c = 0; c <= self->gridstate->visibeats; ++c) {
 			char txt[40];
+			int cpx;
+
+			cpx = ((c * self->gridstate->beatwidth) +
+				psy_ui_component_scrollleft(&self->component));
 			psy_ui_drawline(g, (int)cpx, baseline, (int)cpx, baseline - tm.tmHeight / 2);
-			psy_snprintf(txt, 40, "%d",
-				(int)(c + psy_ui_component_scrollleft(&self->component) /
-					self->gridstate->beatwidth));
+			psy_snprintf(txt, 40, "%d", (int)(c + beatstart));
 			psy_ui_textout(g, (int)cpx + 3, baseline - tm.tmHeight, txt, strlen(txt));
 		}
 	}
@@ -116,7 +122,9 @@ void keyboardstate_init(KeyboardState* self)
 {	
 	self->keymin = 0;
 	self->keymax = 88;
-	self->keyheight = 12;
+	self->keyheight = 12;	
+	self->defaultkeyheight = 12;
+	self->zoom = 1.0;
 	self->keyblackcolour = 0x00444444;
 	self->keywhitecolour = 0x00CACACA;
 	self->keyseparatorcolour = 0x00333333;
@@ -211,6 +219,8 @@ void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
 void gridstate_init(GridState* self)
 {
 	self->beatwidth = 80;
+	self->defaultbeatwidth = 80;
+	self->zoom = 1.0;
 	self->lpb = 4;
 	self->eventcolour = 0x00999999;
 	self->eventcurrchannelcolour = 0x00CACACA;	
@@ -358,7 +368,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 	int key;
 	int keymin;
 	int keymax;
-	psy_dsp_big_beat_t cpx;
+	int cpx;
 	int cpy;
 	int beatstart;
 	int c;
@@ -373,11 +383,12 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 		self->gridstate->visiwidth,
 		cpy);
 	beatstart = psy_ui_component_scrollleft(&self->component) / self->gridstate->beatwidth;
-	for (c = 0, cpx = psy_ui_component_scrollleft(&self->component);
-			c < self->gridstate->visisteps;
-			cpx += self->gridstate->stepwidth, ++c) {
+	for (c = 0; c < self->gridstate->visisteps; ++c) {
 		psy_ui_Color linecolor;
-		if ((c % (self->gridstate->lpb * 4)) == 0) {
+
+		cpx = (int)(c * self->gridstate->stepwidth);
+		cpx += psy_ui_component_scrollleft(&self->component);
+		if (((beatstart * self->gridstate->lpb + c)  % (self->gridstate->lpb * 4)) == 0) {
 			linecolor = self->gridstate->row4beatcolour;
 		} else
 		if ((c % self->gridstate->lpb) == 0) {
@@ -386,12 +397,12 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 			linecolor = self->gridstate->rowcolour;
 		}
 		psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
-			(int)cpx, psy_ui_component_scrolltop(&self->component),
-			(int)self->gridstate->stepwidth, keyboardheight),
+			cpx, psy_ui_component_scrolltop(&self->component),
+			(int)(self->gridstate->stepwidth) + 1, keyboardheight),
 			linecolor);
 		psy_ui_drawline(g,
-			(int)cpx, psy_ui_component_scrolltop(&self->component),
-			(int)cpx, keyboardheight);		
+			cpx, psy_ui_component_scrolltop(&self->component),
+			cpx, keyboardheight);
 	}
 	
 	keymin = max(self->keyboardstate->keymin,
@@ -531,9 +542,11 @@ void pianogrid_updategridstate(Pianogrid* self)
 
 	gridsize = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
+
+	self->gridstate->beatwidth = (int)(self->gridstate->defaultbeatwidth * self->gridstate->zoom);
 	self->gridstate->visibeats = (self->pattern)
 		? min(max(0, self->pattern->length - psy_ui_component_scrollleft(&self->component) / self->gridstate->beatwidth),
-			psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_big_beat_t)self->gridstate->beatwidth)
+			(psy_ui_value_px(&gridsize.width, &tm) / (psy_dsp_big_beat_t)self->gridstate->beatwidth) + 0.5)
 		: 0;
 	self->gridstate->visisteps = (int)(self->gridstate->visibeats * self->gridstate->lpb + 0.5);
 	self->gridstate->visiwidth = (self->pattern)
@@ -541,7 +554,6 @@ void pianogrid_updategridstate(Pianogrid* self)
 		: 0;
 	self->gridstate->stepwidth = self->gridstate->beatwidth / (psy_dsp_big_beat_t)self->gridstate->lpb;
 }
-
 
 void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
@@ -697,7 +709,7 @@ static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t width);
 static void pianoroll_invalidateline(Pianoroll*, psy_dsp_big_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
-static void pianoroll_onsize(Pianoroll*, psy_ui_Size*);
+static void pianoroll_onalign(Pianoroll*);
 static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
 static void pianoroll_ongridscroll(Pianoroll*, psy_ui_Component* sender, int stepx, int stepy);
 static void pianoroll_onzoomboxbeatwidthchanged(Pianoroll*, ZoomBox* sender);
@@ -710,7 +722,7 @@ static void pianoroll_vtable_init(Pianoroll* self)
 {
 	if (!pianoroll_vtable_initialized) {
 		pianoroll_vtable = *(self->component.vtable);
-		pianoroll_vtable.onsize = (psy_ui_fp_onsize)pianoroll_onsize;
+		pianoroll_vtable.onalign = (psy_ui_fp_onalign)pianoroll_onalign;
 		pianoroll_vtable.onmousedown = (psy_ui_fp_onmousedown)
 			pianoroll_onmousedown;		
 		pianoroll_vtable.ontimer = (psy_ui_fp_ontimer)
@@ -834,7 +846,7 @@ void pianoroll_invalidateline(Pianoroll* self, psy_dsp_big_beat_t offset)
 	}
 }
 
-void pianoroll_onsize(Pianoroll* self, psy_ui_Size* size)
+void pianoroll_onalign(Pianoroll* self)
 {
 	pianoroll_updatescroll(self);
 }
@@ -845,7 +857,14 @@ void pianoroll_onmousedown(Pianoroll* self, psy_ui_MouseEvent* ev)
 }
 
 void pianoroll_updatescroll(Pianoroll* self)
-{
+{	
+	psy_ui_TextMetric tm;
+	
+	tm = psy_ui_component_textmetric(&self->component);
+	self->gridstate.defaultbeatwidth = tm.tmAveCharWidth * 14;
+	self->keyboardstate.defaultkeyheight = tm.tmHeight + 1;
+	self->keyboardstate.keyheight =
+		(int)(self->keyboardstate.defaultkeyheight *self->keyboardstate.zoom);
 	pianogrid_updategridstate(&self->grid);	
 	self->grid.component.scrollstepx = self->gridstate.beatwidth;
 	self->grid.component.scrollstepy = self->keyboardstate.keyheight;
@@ -882,7 +901,7 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender, int stepx
 
 void pianoroll_onzoomboxbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
 {
-	gridstate_setbeatwidth(&self->gridstate, (int)(80 * sender->zoomrate));
+	self->gridstate.zoom = sender->zoomrate;
 	pianoroll_updatescroll(self);
 	psy_ui_component_setscrollleft(&self->header.component,
 		psy_ui_component_scrollleft(&self->grid.component));
@@ -892,11 +911,13 @@ void pianoroll_onzoomboxbeatwidthchanged(Pianoroll* self, ZoomBox* sender)
 
 void pianoroll_onzoomboxkeyheightchanged(Pianoroll* self, ZoomBox* sender)
 {
-	keyboardstate_setkeyheight(&self->keyboardstate,
-		(int)(12 * sender->zoomrate));
+	self->keyboardstate.zoom = sender->zoomrate;
+	self->keyboardstate.keyheight = (int)(self->keyboardstate.defaultkeyheight *
+		self->keyboardstate.zoom);	
 	pianoroll_updatescroll(self);
 	psy_ui_component_setscrolltop(&self->keyboard.component,
 		psy_ui_component_scrolltop(&self->grid.component));
 	psy_ui_component_invalidate(&self->keyboard.component);
 	psy_ui_component_update(&self->keyboard.component);
 }
+

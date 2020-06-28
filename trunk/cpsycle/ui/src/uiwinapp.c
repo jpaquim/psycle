@@ -23,7 +23,7 @@ extern psy_ui_App app;
 static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
-static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
+static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
 
 LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
@@ -509,7 +509,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					&ev);
 				if (ev.bubble != FALSE) {
 					sendmessagetoparent(imp, message, wParam, lParam);
-				}
+				}				
 				return 0;
 			}
 			break;
@@ -683,7 +683,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						GetKeyState(VK_CONTROL) < 0);
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
-						&ev);
+						&ev);					
 					return 0 ;
 				}
 			break;			
@@ -777,7 +777,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			}				
 			break;
-			case WM_VSCROLL:
+			case WM_VSCROLL:				
 				handle_vscroll(hwnd, wParam, lParam);
 				return 0;
 			break;
@@ -823,7 +823,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	// Save the position for comparison later on
 	iPos = si.nPos ;
 
-	handle_scrollparam(&si, wParam);	
+	handle_scrollparam(hwnd, &si, wParam);	
 	// Set the position and then retrieve it.  Due to adjustments
 	//   by Windows it may not be the same as the value set.
 	si.fMask = SIF_POS ;
@@ -847,7 +847,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 		}
 		if (imp->component->handlevscroll) {			
 			psy_ui_component_scrollstep(imp->component, 0, (iPos - si.nPos));
-		}
+		}		
 	}
 }
 void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -862,7 +862,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	// Save the position for comparison later on
 	iPos = si.nPos ;
-	handle_scrollparam(&si, wParam);
+	handle_scrollparam(hwnd, &si, wParam);
 	// Set the position and then retrieve it.  Due to adjustments
 	// by Windows it may not be the same as the value set.
 	si.fMask = SIF_POS ;
@@ -892,7 +892,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	}
 }
 
-void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
+void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam)
 {
 	switch (LOWORD (wParam)) {
 		case SB_TOP:
@@ -917,8 +917,8 @@ void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
 		   si->nPos = (short)HIWORD(wParam);
 		break ;
 		default:
-		break ;         
-	}
+		break ;   		
+	}	
 }
 
 int psy_ui_winapp_run(psy_ui_WinApp* self) 
@@ -947,5 +947,7 @@ void psy_ui_winapp_close(psy_ui_WinApp* self, psy_ui_Component* main)
 {	
 	PostMessage(((psy_ui_win_ComponentImp*)(main->imp))->hwnd, WM_CLOSE, 0, 0);	
 }
+
+
 
 #endif

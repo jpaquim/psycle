@@ -50,8 +50,9 @@ static void dev_updatesize(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_win_ComponentImp*);
 static void dev_scrollto(psy_ui_win_ComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* dev_parent(psy_ui_win_ComponentImp*);
-static void dev_setparent(psy_ui_win_ComponentImp* self, psy_ui_Component* parent);
-static void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child, psy_ui_win_ComponentImp* insertafter);
+static void dev_setparent(psy_ui_win_ComponentImp*, psy_ui_Component* parent);
+static void dev_insert(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child, psy_ui_win_ComponentImp* insertafter);
+static void dev_setorder(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* insertafter);
 static void dev_capture(psy_ui_win_ComponentImp*);
 static void dev_releasecapture(psy_ui_win_ComponentImp*);
 static void dev_invalidate(psy_ui_win_ComponentImp*);
@@ -472,6 +473,16 @@ void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child, p
 	SetParent(child->hwnd, self->hwnd);
 	SetWindowPos(
 		child->hwnd,
+		insertafter->hwnd,
+		0, 0, 0, 0,
+		SWP_NOMOVE | SWP_NOSIZE
+	);
+}
+
+void dev_setorder(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* insertafter)
+{
+	SetWindowPos(
+		self->hwnd,
 		insertafter->hwnd,
 		0, 0, 0, 0,
 		SWP_NOMOVE | SWP_NOSIZE

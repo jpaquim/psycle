@@ -20,6 +20,8 @@
 #include "constants.h"
 
 
+static const char E8VolMap[16] = { 0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64 };
+
 // SamplerChannel (master index: UINTPTR_MAX)
 
 static void psy_audio_samplerchannel_level_normvalue(psy_audio_SamplerChannel*,
@@ -237,7 +239,8 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 						}
 					break;
 				case SAMPLER_CMD_E_SET_PAN:
-					//PanFactor(XMSampler::E8VolMap[(parameter & 0xf)] / 64.0f);
+					psy_audio_samplerchannel_setpanfactor(self,
+						E8VolMap[(ev->parameter & 0xf)] / 64.0f);
 					break;
 				case SAMPLER_CMD_E_SET_MIDI_MACRO:
 					//\todo : implement. For now, it maps directly to internal Filter commands

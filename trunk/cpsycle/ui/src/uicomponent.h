@@ -221,7 +221,8 @@ typedef struct psy_ui_Component {
 	psy_ui_Style style;
 	psy_ui_Size preferredsize;
 	psy_ui_IntPoint scroll;	
-	psy_ui_Overflow overflow;	
+	psy_ui_Overflow overflow;
+	int preventpreferredsizeatalign;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -321,6 +322,7 @@ typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*,
 typedef struct psy_ui_Component* (*psy_ui_fp_componentimp_dev_parent)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setparent)(struct psy_ui_ComponentImp*, struct psy_ui_Component*);
 typedef void (*psy_ui_fp_componentimp_dev_insert)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
+typedef void (*psy_ui_fp_componentimp_dev_setorder)(struct psy_ui_ComponentImp*, struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_capture)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_releasecapture)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_invalidate)(struct psy_ui_ComponentImp*);
@@ -376,6 +378,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_parent dev_parent;
 	psy_ui_fp_componentimp_dev_setparent dev_setparent;
 	psy_ui_fp_componentimp_dev_insert dev_insert;
+	psy_ui_fp_componentimp_dev_setorder dev_setorder;
 	psy_ui_fp_componentimp_dev_capture dev_capture;
 	psy_ui_fp_componentimp_dev_releasecapture dev_releasecapture;
 	psy_ui_fp_componentimp_dev_invalidate dev_invalidate;	
@@ -524,6 +527,11 @@ INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* ch
 	psy_ui_Component* insertafter)
 {
 	self->imp->vtable->dev_insert(self->imp, child->imp, insertafter->imp);
+}
+
+INLINE void psy_ui_component_setorder(psy_ui_Component* self, psy_ui_Component* insertafter)
+{
+	self->imp->vtable->dev_setorder(self->imp, insertafter->imp);
 }
 
 INLINE void psy_ui_component_setwheelscroll(psy_ui_Component* self, int lines)
