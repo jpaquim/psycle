@@ -61,48 +61,104 @@ typedef struct {
 } TrackerSkin;
 
 typedef struct {
-	psy_ui_TextMetric tm;
+	psy_ui_TextMetric tm;	
+} TrackerMetrics;
+
+enum {
+	TRACKER_COLUMN_NONE = -1,
+	TRACKER_COLUMN_NOTE = 0,
+	TRACKER_COLUMN_INST = 1,
+	TRACKER_COLUMN_MACH = 2,
+	TRACKER_COLUMN_VOL = 3,
+	TRACKER_COLUMN_CMD = 4,
+	TRACKER_COLUMN_PARAM = 5,
+	TRACKER_COLUMN_END = 6
+};
+
+typedef struct {
+	uintptr_t numdigits;
+	uintptr_t numchars;
+	uintptr_t marginright;
+	int wrapeditcolumn;
+	int wrapclearcolumn;
+	uintptr_t emptyvalue;
+} TrackColumnDef;
+
+typedef struct {
+	TrackColumnDef note;
+	TrackColumnDef inst;
+	TrackColumnDef mach;
+	TrackColumnDef vol;
+	TrackColumnDef cmd;
+	TrackColumnDef param;
+	int numfx;
+} TrackDef;
+
+void trackdef_init(TrackDef*);
+
+void trackercolumndef_init(TrackColumnDef*, int numdigits, int numchars,
+	int marginright, int wrapeditcol, int wrapclearcol, int emptyvalue);
+
+
+typedef struct {
+	TrackerSkin* skin;
+	psy_audio_Pattern* pattern;
+	psy_Table trackconfigs;
+	TrackDef defaulttrackdef;
 	int textwidth;
 	int textleftedge;
-	int lineheight;	
 	int patterntrackident;
 	int headertrackident;
-	int visilines;	
-} TrackerMetrics;
+	uintptr_t numtracks;
+} TrackerGridState;
+
+void trackergridstate_init(TrackerGridState*);
+void trackergridstate_dispose(TrackerGridState*);
 
 typedef struct {
 	psy_ui_Component component;
-	unsigned int numtracks;
-	int classic;
-	TrackerSkin* skin;
-	struct TrackerView* view;
+	TrackerGridState* gridstate;
+	TrackerGridState defaultgridstate;
+	int classic;		
 	Workspace* workspace;
 	uintptr_t currtrack;
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
-	struct TrackerView* view, Workspace*);
-int trackerheader_scrollleft(TrackerHeader*,
-	psy_audio_PatternEditPosition);
-int trackerheader_scrollright(TrackerHeader*,
-	psy_audio_PatternEditPosition);
+	TrackerGridState*, Workspace*);
+void trackerheader_setsharedgridstate(TrackerHeader*, TrackerGridState*);
+
+typedef struct {
+	int lineheight;
+	int lpb;
+	int drawcursor;
+	psy_dsp_big_beat_t lastplayposition;
+	psy_dsp_big_beat_t sequenceentryoffset;
+	TrackerSkin* skin;
+	psy_audio_Pattern* pattern;
+	// precomputed
+	int visilines;
+} TrackerViewLineState;
+
+void trackerviewlinestate_init(TrackerViewLineState*);
+int trackerviewlinestate_offsettoscreenline(TrackerViewLineState*,
+	psy_dsp_big_beat_t);
 
 typedef struct {
 	psy_ui_Component component;
 	struct TrackerView* view;
 } TrackerLineNumbersLabel;
 
-void InitTrackerLineNumbersLabel(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, struct TrackerView*);
-
 typedef struct {
 	psy_ui_Component component;
-	TrackerSkin* skin;	
-	struct TrackerView* view;
+	TrackerViewLineState* linestate;
+	TrackerViewLineState defaultlinestate;
+	Workspace* workspace;
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
-	struct TrackerView*);
+	TrackerViewLineState*, Workspace* workspace);
+void trackerlinenumbers_setsharedlinestate(TrackerLineNumbers*, TrackerViewLineState*);
 
 #define TRACKERGRID_numparametercols 10
 
@@ -127,40 +183,6 @@ typedef struct {
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
 
-enum {
-	TRACKER_COLUMN_NONE  = -1,
-	TRACKER_COLUMN_NOTE	 = 0,
-	TRACKER_COLUMN_INST	 = 1,
-	TRACKER_COLUMN_MACH	 = 2,
-	TRACKER_COLUMN_VOL	 = 3,
-	TRACKER_COLUMN_CMD	 = 4,
-	TRACKER_COLUMN_PARAM = 5,
-	TRACKER_COLUMN_END	 = 6
-};
-
-typedef struct {
-	uintptr_t numdigits;
-	uintptr_t numchars;	
-	uintptr_t marginright;
-	int wrapeditcolumn;
-	int wrapclearcolumn;
-	uintptr_t emptyvalue;
-} TrackColumnDef;
-
-typedef struct {
-	TrackColumnDef note;
-	TrackColumnDef inst;
-	TrackColumnDef mach;
-	TrackColumnDef vol;
-	TrackColumnDef cmd;
-	TrackColumnDef param;	
-	int numfx;
-} TrackDef;
-
-void trackdef_init(TrackDef*);
-
-void trackercolumndef_init(TrackColumnDef*, int numdigits, int numchars,
-	int marginright, int wrapeditcol, int wrapclearcol, int emptyvalue);
 
 typedef struct {
 	int playbar;
@@ -178,7 +200,10 @@ typedef enum {
 
 typedef struct {
    psy_ui_Component component;
-   unsigned int numtracks;   
+   TrackerGridState* gridstate;
+   TrackerGridState defaultgridstate;
+   TrackerViewLineState* linestate;
+   TrackerViewLineState defaultlinestate;
    int lpb;
    double bpl;
    double cbpl;   
@@ -191,20 +216,19 @@ typedef struct {
    psy_audio_PatternEditPosition lastdragcursor;
    int hasselection;
    int midline;
-   int doublemidline;
    int chordbegin;
    int columnresize;
    int dragcolumn;
    int dragcolumnbase;
-   psy_audio_Pattern* pattern;
    TrackerGridEditMode editmode;
-   int drawcursor;
    psy_ui_TextMetric tm;
    Workspace* workspace;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
-	struct TrackerView*, Workspace*);
+	struct TrackerView*, TrackerGridState*, TrackerViewLineState*, Workspace*);
+void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*);
+void trackergrid_setsharedlinestate(TrackerGrid*, TrackerViewLineState*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 
 typedef psy_audio_Inputs TrackerInputs;
@@ -220,6 +244,8 @@ typedef struct TrackerView {
 	PatternBlockMenu blockmenu;
 	InterpolateCurveView interpolatecurveview;
 	TrackerSkin skin;	
+	TrackerViewLineState linestate;
+	TrackerGridState gridstate;
 	int showlinenumbers;
 	int showlinenumbercursor;
 	int showlinenumbersinhex;
@@ -230,21 +256,18 @@ typedef struct TrackerView {
 	unsigned int opcount;
 	TrackerInputs inputs;
 	unsigned int cursorstep;
-	int syncpattern;
-	psy_dsp_big_beat_t lastplayposition;
-	psy_dsp_big_beat_t sequenceentryoffset;
+	int syncpattern;	
 	psy_List* sublines;
 	psy_Table screenlines;
-	TrackerMetrics metrics;
-	psy_Table trackconfigs;	
-	TrackDef defaulttrackdef;
+	TrackerMetrics metrics;	
 	ZoomBox zoombox;
 	int doseqtick;
-	int zoomheightbase;	
+	int zoomheightbase;
+	psy_ui_Component* patternview;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent,
-	psy_ui_Component* headerparent, Workspace*);
+	psy_ui_Component* patternview, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
 void TrackerViewApplyProperties(TrackerView*, psy_Properties*);

@@ -6,59 +6,71 @@
 
 #include "samplerchannel.h"
 #include "samplerdefs.h"
-#include "ticktimer.h"
 // dsp
 #include <adsr.h>
 #include <filter.h>
+#include <dspslide.h>
 #include <valuemapper.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+struct psy_audio_Sampler;
 struct psy_audio_Samples;
 struct psy_audio_Instrument;
-struct psy_audio_Sampler;
-struct psy_audio_SamplerChannel;
 
 typedef struct {
-	uintptr_t channelnum;	
-	psy_audio_SamplerChannel* channel;	
+	uintptr_t channelnum;
+	psy_audio_SamplerChannel* channel;
 	struct psy_audio_Sampler* sampler;
-	struct psy_audio_Instrument* instrument;
 	struct psy_audio_Samples* samples;
-	psy_dsp_ADSR env;
+
+	struct psy_audio_Instrument* instrument;
+	psy_audio_NewNoteAction nna;
+
+	psy_dsp_ADSR amplitudeenvelope;
+	psy_dsp_ADSR panenvelope;
+	psy_dsp_ADSR pitchenvelope;
 	psy_dsp_ADSR filterenv;
-	Filter _filter;
-	ResamplerType resamplertype;
+
+	// SampleIterator (WaveDataController)
 	psy_List* positions;
-	psy_dsp_amp_t vol;
-	int m_Volume;
-	int usedefaultvolume;
-	psy_audio_SamplerCmd effcmd;
-	int effval;
-	int dooffset;
-	uint8_t offset;
-	int maxvolume;
-	bool stopping;
+
+	ResamplerType resamplertype;
+	// todo
+	//dsp::ITFilter m_FilterIT;
+	//dsp::Filter m_FilterClassic;
+	Filter _filter;
 	int _cutoff;
+	int m_Ressonance;
 	float _coModify;
-	double portaspeed;
-	int period;
+
+	bool play;
+	bool stopping;
 	int note;
+	int period;
+	int m_Volume;
+	psy_dsp_amp_t realvolume;
+	psy_dsp_amp_t currrandvol;
+	// Volume/Panning ramping 
+	psy_dsp_Slider rampl;
+	psy_dsp_Slider rampr;
+
 	// effects		
 	psy_List* effects;
+	// pan
+	float panfactor;
+	//float m_CurRandPan;
+	float panrange;
+	bool surround;
 	// pitchslide
 	int slide2notedestperiod;
 	int pitchslidespeed;
 	// volumeslide
 	int volumeslidespeed;
 	float volumefadespeed;
-	float volumefadeamount;
-	// pan
-	float panfactor;
-	//float m_CurRandPan;
-	float panrange;
+	float volumefadeamount;	
 	// vibrato
 	int vibratospeed;
 	int vibratodepth;
@@ -86,6 +98,15 @@ typedef struct {
 	int autovibratopos;
 	// retrig
 	int retrigticks;
+
+	// sampulse ps1
+	int usedefaultvolume;
+	psy_audio_SamplerCmd effcmd;
+	int effval;
+	int dooffset;
+	uint8_t offset;
+	// configuration
+	int maxvolume;
 } psy_audio_SamplerVoice;
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
@@ -143,6 +164,43 @@ INLINE psy_dsp_amp_t psy_audio_samplervoice_volume(
 	return rv;
 }
 
+// Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
+INLINE float psy_audio_samplervoice_realvolume(psy_audio_SamplerVoice* self)
+{
+	return (!self->tremormute)
+		? (self->realvolume + self->tremoloamount)
+		: 0;
+}
+
+void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice* self);
+
+INLINE bool psy_audio_isplaying(psy_audio_SamplerVoice* self)
+{
+	return self->play;
+
+}
+
+INLINE bool psy_audio_samplervoice_isplaying(psy_audio_SamplerVoice* self)
+{
+	return self->play;
+}
+
+INLINE void psy_audio_samplervoice_setisplaying(psy_audio_SamplerVoice* self,
+	bool value)
+{
+	self->play = value;
+}
+
+INLINE bool psy_audio_samplervoice_isstopping(psy_audio_SamplerVoice* self)
+{
+	return self->stopping;
+}
+
+INLINE void psy_audio_samplervoice_setstopping(psy_audio_SamplerVoice* self,
+	bool stop)
+{
+	self->stopping = stop;
+}
 
 #ifdef __cplusplus
 }

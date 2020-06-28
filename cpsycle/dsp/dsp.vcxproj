@@ -113,6 +113,7 @@
     <ClCompile Include="src\alignedalloc.c" />
     <ClCompile Include="src\convert.c" />
     <ClCompile Include="src\dither.c" />
+    <ClCompile Include="src\dspslide.c" />
     <ClCompile Include="src\envelope.c" />
     <ClCompile Include="src\fft.c" />
     <ClCompile Include="src\filter.c" />
@@ -140,6 +141,7 @@
     <ClInclude Include="src\alignedalloc.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\dither.h" />
+    <ClInclude Include="src\dspslide.h" />
     <ClInclude Include="src\dsptypes.h" />
     <ClInclude Include="src\envelope.h" />
     <ClInclude Include="src\fft.h" />

@@ -4,18 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "uinotebook.h"
+#include "uiapp.h"
+
+extern psy_ui_App app;
 
 static void onsize(psy_ui_Notebook*, psy_ui_Component* sender, psy_ui_Size* size);
-static void align_split(psy_ui_Notebook* self, int x);
 static void ontabbarchange(psy_ui_Notebook*, psy_ui_Component* sender, int tabindex);
-static void onmousedown(psy_ui_Notebook*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void onmousemove(psy_ui_Notebook*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void onmouseup(psy_ui_Notebook*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void onmouseentersplitbar(psy_ui_Notebook*, psy_ui_Component* sender);
-static void onmouseleavesplitbar(psy_ui_Notebook*, psy_ui_Component* sender);
 
 void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 {  
@@ -25,7 +19,6 @@ void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 	psy_signal_connect(&psy_ui_notebook_base(self)->signal_size, self, onsize);
 	self->pageindex = 0;
 	self->split = 0;
-	self->splitx = -1;	
 }
 
 void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
@@ -36,33 +29,35 @@ void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
 	psy_ui_Size size;
 	
 	self->pageindex = pageindex;
-	size = psy_ui_component_size(psy_ui_notebook_base(self));
-	if (self->component.align == psy_ui_ALIGN_LEFT) {
-		size = psy_ui_component_preferredsize(psy_ui_notebook_base(self), &size);
-	}	
-	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL;
-			p = p->next, ++c) {		
-		psy_ui_Component* component;
+	if (!self->split) {
+		size = psy_ui_component_size(psy_ui_notebook_base(self));
+		if (self->component.align == psy_ui_ALIGN_LEFT) {
+			size = psy_ui_component_preferredsize(psy_ui_notebook_base(self), &size);
+		}
+		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL;
+			p = p->next, ++c) {
+			psy_ui_Component* component;
 
-		component = (psy_ui_Component*)p->entry;
-		if (self->split) {
-			psy_ui_component_show(component);
-		} else {
-			if (c == pageindex) {						
+			component = (psy_ui_Component*)p->entry;
+			if (self->split) {
 				psy_ui_component_show(component);
-				psy_ui_component_setposition(component, psy_ui_point_zero(), size);
-			} else {		
-				psy_ui_component_hide(component);
+			} else {
+				if (c == pageindex) {
+					psy_ui_component_show(component);
+					psy_ui_component_setposition(component, psy_ui_point_zero(), size);
+				} else {
+					psy_ui_component_hide(component);
+				}
 			}
 		}
-	}
-	psy_list_free(q);		
-	if (self->component.align == psy_ui_ALIGN_LEFT) {
-        if (psy_ui_component_parent(psy_ui_notebook_base(
-                self))) {
-            psy_ui_component_align(psy_ui_component_parent(psy_ui_notebook_base(
-                self)));
-        }        
+		psy_list_free(q);
+		if (self->component.align == psy_ui_ALIGN_LEFT) {
+			if (psy_ui_component_parent(psy_ui_notebook_base(
+				self))) {
+				psy_ui_component_align(psy_ui_component_parent(psy_ui_notebook_base(
+					self)));
+			}
+		}
 	}
 }
 
@@ -79,21 +74,21 @@ void psy_ui_notebook_connectcontroller(psy_ui_Notebook* self, psy_Signal*
 
 void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 {
-	psy_List* p;
-	psy_List* q;
+	if (!self->split) {
+		psy_List* p;
+		psy_List* q;
 
-	if (self->split) {
-		align_split(self, self->splitx);
-	} else {
-		int cpx = 0;	
+		int cpx = 0;
 		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; p = p->next) {
 			psy_ui_Component* component;
 
-			component = (psy_ui_Component*)p->entry;			
+			component = (psy_ui_Component*)p->entry;
 			psy_ui_component_setposition(component,
 				psy_ui_point_zero(), *size);
-		}	
+		}
 		psy_list_free(q);
+	} else {
+		psy_ui_component_align(&self->component);
 	}
 }
 
@@ -102,25 +97,69 @@ void ontabbarchange(psy_ui_Notebook* self, psy_ui_Component* sender, int tabinde
 	psy_ui_notebook_setpageindex(self, tabindex);
 }
 
-void psy_ui_notebook_split(psy_ui_Notebook* self)
-{
-	if (!self->split) {
-		self->split = 1;
-		self->splitx = 400;
-		psy_ui_component_init(&self->splitbar, psy_ui_notebook_base(self));
-		psy_signal_connect(&self->splitbar.signal_mouseenter, self,
-			onmouseentersplitbar);
-		psy_signal_connect(&self->splitbar.signal_mouseleave, self,
-			onmouseleavesplitbar);
-		psy_signal_connect(&self->splitbar.signal_mousedown, self,
-			onmousedown);
-		psy_signal_connect(&self->splitbar.signal_mousemove, self,
-			onmousemove);
-		psy_signal_connect(&self->splitbar.signal_mouseup, self,
-			onmouseup);
-		psy_ui_notebook_setpageindex(self, 0);
-		align_split(self, self->splitx);
+void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation)
+{	
+	int c = 0;		
+	psy_List* p;
+	psy_List* q;
+
+	
+	q = psy_ui_component_children(psy_ui_notebook_base(self), 0);			
+	for (p = q;  p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		psy_ui_component_hide(component);
+		component->visible = 1;
 	}
+	for (p = q, c = 0; p != NULL; psy_list_next(&p), ++c) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;
+		if (component == &self->splitbar.component) {
+			continue;
+		}
+		//psy_ui_component_hide(component);
+		if (c == 0) {
+			psy_ui_Size size;
+			psy_ui_TextMetric tm;
+				
+			size = psy_ui_component_size(psy_ui_notebook_base(self));
+			tm = psy_ui_component_textmetric(psy_ui_notebook_base(self));
+			component->preventpreferredsizeatalign = 1;				
+			if (orientation == psy_ui_VERTICAL) {
+				psy_ui_component_resize(component,
+					psy_ui_size_makepx(psy_ui_value_px(&size.width, &tm) / 2, 0));
+				if (!self->split) {
+					psy_ui_splitbar_init(&self->splitbar, psy_ui_notebook_base(self));
+					self->split = 1;
+					psy_ui_component_setorder(&self->splitbar.component, component);
+				}
+				psy_ui_component_setalign(component, psy_ui_ALIGN_LEFT);
+				psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_LEFT);
+			} else {
+				psy_ui_component_resize(component,
+					psy_ui_size_makepx(0, psy_ui_value_px(&size.height, &tm) / 2));
+				if (!self->split) {
+					psy_ui_splitbar_init(&self->splitbar, psy_ui_notebook_base(self));
+					self->split = 1;
+					psy_ui_component_setorder(&self->splitbar.component, component);
+				}
+				psy_ui_component_setalign(component, psy_ui_ALIGN_TOP);
+				psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_TOP);
+			}							
+		} else {
+			psy_ui_component_setalign(component, psy_ui_ALIGN_CLIENT);
+		}
+	}
+	psy_ui_component_align(&self->component);
+	for (p = q; p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)p->entry;			
+		psy_ui_component_show(component);
+	}
+	psy_list_free(q);
 }
 
 int psy_ui_notebook_splitactivated(psy_ui_Notebook* self)
@@ -131,117 +170,10 @@ int psy_ui_notebook_splitactivated(psy_ui_Notebook* self)
 void psy_ui_notebook_full(psy_ui_Notebook* self)
 {
 	if (self->split) {
+		psy_ui_component_destroy(&self->splitbar.component);
 		self->split = 0;
-		psy_ui_component_destroy(&self->splitbar);
 		psy_ui_notebook_setpageindex(self, self->pageindex);		
 	}
-}
-
-void onmousedown(psy_ui_Notebook* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{	
-	if (self->split) {
-		psy_ui_component_capture(sender);
-		self->splitx = -1;
-	}
-}
-
-void onmousemove(psy_ui_Notebook* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{
-	if (self->split && self->splitx == -1) {				
-		psy_ui_Size size;
-		psy_ui_Rectangle position;		
-	
-		size = psy_ui_component_size(psy_ui_notebook_base(self));
-		position = psy_ui_component_position(sender);
-		psy_ui_component_setposition(sender, 
-			psy_ui_point_make(
-				psy_ui_value_makepx(position.left + ev->x),
-				psy_ui_value_makepx(0)),
-			psy_ui_size_make(
-				psy_ui_value_makepx(4),
-				size.height));
-		align_split(self, position.left + ev->x);
-		psy_ui_component_invalidate(psy_ui_notebook_base(self));
-		psy_ui_component_update(psy_ui_notebook_base(self));		
-	}
-}
-
-void onmouseup(psy_ui_Notebook* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{	
-	if (self->split) {
-		psy_ui_Size size;
-		psy_ui_TextMetric tm;
-		psy_ui_Rectangle position;		
-	
-		size = psy_ui_component_size(psy_ui_notebook_base(self));
-		tm = psy_ui_component_textmetric(&self->component);
-		position = psy_ui_component_position(sender);
-		psy_ui_component_move(sender, psy_ui_point_make(
-			psy_ui_value_makepx(position.left + ev->x),
-			size.height));
-		self->splitx = position.left + ev->x;
-		align_split(self, self->splitx);
-		psy_ui_component_releasecapture(&self->component);
-	}
-}
-
-void onmouseentersplitbar(psy_ui_Notebook* self, psy_ui_Component* sender)
-{	
-	psy_ui_component_setbackgroundcolor(sender, 0x00666666);
-	psy_ui_component_invalidate(sender);
-}
-
-void onmouseleavesplitbar(psy_ui_Notebook* self, psy_ui_Component* sender)
-{			
-	psy_ui_component_setbackgroundcolor(sender, 0x00232323);
-	psy_ui_component_invalidate(sender);
-}
-
-void align_split(psy_ui_Notebook* self, int x) {
-	psy_List* p;
-	psy_List* q;
-	int c = 0;
-	psy_ui_Size size;
-
-	size = psy_ui_component_size(psy_ui_notebook_base(self));
-	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL; p = p->next) {
-		psy_ui_Component* component;
-		
-		component = (psy_ui_Component*) p->entry;
-		if (component == &self->splitbar) {
-			psy_ui_component_setposition(&self->splitbar,
-				psy_ui_point_make(
-					psy_ui_value_makepx(x),
-					psy_ui_value_makepx(0)),
-				psy_ui_size_make(
-					psy_ui_value_makepx(4),
-					size.height));
-		} else {
-			if (c == 0) {
-				psy_ui_component_setposition((psy_ui_Component*)p->entry,
-					psy_ui_point_zero(),
-					psy_ui_size_make(
-						psy_ui_value_makepx(x),
-						size.height));
-				++c;
-			} else {
-				psy_ui_TextMetric tm;
-				
-				tm = psy_ui_component_textmetric(&self->component);
-				psy_ui_component_setposition((psy_ui_Component*)p->entry,
-					psy_ui_point_make(
-						psy_ui_value_makepx(x + 4),
-						psy_ui_value_makepx(0)),
-					psy_ui_size_make(
-						psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) - x - 4),
-						size.height));
-			}			
-		}		
-	}	
-	psy_list_free(q);
 }
 
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)

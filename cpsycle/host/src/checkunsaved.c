@@ -31,7 +31,6 @@ void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Works
 	psy_ui_component_enablealign(&self->view);
 	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CENTER);	
 	psy_ui_label_init(&self->title, &self->view);
-	self->title.component.debugflag = 7000;
 	psy_ui_label_init(&self->header, &self->view);
 	psy_ui_button_init(&self->saveandexit, &self->view);
 	psy_signal_connect(&self->saveandexit.signal_clicked, self,

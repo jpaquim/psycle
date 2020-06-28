@@ -591,10 +591,7 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 		"Wrap Around");
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "centercursoronscreen", 1),
-		"Center cursor on screen");
-	psy_properties_settext(
-		psy_properties_append_bool(pvc, "doublemidline", 0),
-		"Double Midline Height");
+		"Center cursor on screen");	
 	psy_properties_settext(
 		psy_properties_append_int(pvc, "beatsperbar", 4, 1, 16),
 		"Bar highlighting: (beats/bar)");
@@ -1525,11 +1522,6 @@ void workspace_movecursorwhenpaste(Workspace* self, bool on)
 {
 	psy_properties_write_bool(self->config,
 		"visual.patternview.movecursorwhenpaste", on);
-}
-
-int workspace_doublemidline(Workspace* self)
-{
-	return psy_properties_bool(self->config, "visual.patternview.doublemidline", 1);
 }
 
 int workspace_showmachineindexes(Workspace* self)

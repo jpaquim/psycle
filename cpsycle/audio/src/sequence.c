@@ -503,9 +503,9 @@ psy_List* sequence_removetrack(psy_audio_Sequence* self, SequenceTracks* trackno
 	return psy_list_remove(&self->tracks, tracknode);
 }
 
-unsigned int sequence_sizetracks(psy_audio_Sequence* self)
+uintptr_t sequence_sizetracks(psy_audio_Sequence* self)
 {
-	unsigned int c = 0;	
+	uintptr_t c = 0;	
 	SequenceTracks* p;
 	
 	for (p = self->tracks; p != NULL; psy_list_next(&p), ++c);
@@ -587,9 +587,9 @@ psy_dsp_big_beat_t sequence_duration(psy_audio_Sequence* self)
 	return duration;
 }
 
-unsigned int sequence_maxtracksize(psy_audio_Sequence* self)
+uintptr_t sequence_maxtracksize(psy_audio_Sequence* self)
 {
-	unsigned int rv = 0;	
+	uintptr_t rv = 0;
 	SequenceTracks* t;
 		 
 	for (t = self->tracks; t != 0; t = t->next) {

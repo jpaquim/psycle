@@ -95,7 +95,6 @@ typedef struct {
 	psy_ui_Component emptypage6;
 	SampleEditorAmplify amplify;
 	SampleEditLuaProcessor luaprocessor;
-	int start;
 } SampleEditorProcessView;
 
 void sampleprocessview_init(SampleEditorProcessView*, psy_ui_Component* parent,

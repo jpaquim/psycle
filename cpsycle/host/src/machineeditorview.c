@@ -84,13 +84,11 @@ void machineeditorview_ontimer(MachineEditorView* self, uintptr_t timerid)
 
 void machineeditorview_onpreferredsize(MachineEditorView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{
-	if (rv) {		
-		int width;
-		int height;
+{		
+	int width;
+	int height;
 
-		psy_audio_machine_editorsize(self->machine, &width, &height);
-		rv->width = psy_ui_value_makepx(width);
-		rv->height = psy_ui_value_makepx(height);
-	}
+	psy_audio_machine_editorsize(self->machine, &width, &height);
+	rv->width = psy_ui_value_makepx(width);
+	rv->height = psy_ui_value_makepx(height);	
 }

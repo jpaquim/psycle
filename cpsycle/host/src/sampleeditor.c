@@ -247,34 +247,18 @@ static void sampleprocessview_updatetext(SampleEditorProcessView*,
 static void sampleprocessview_onlanguagechanged(SampleEditorProcessView*,
 	Workspace* workspace);
 static void sampleprocessview_buildprocessorlist(SampleEditorProcessView*);
-static void sampleeditorprocessview_onpreferredsize(SampleEditorProcessView*, psy_ui_Size* limit,
-	psy_ui_Size* rv);
 static void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView*,
 	psy_ui_Component* sender, int index);
 static void sampleeditor_selectionbound(SampleEditor*, uintptr_t* framestart,
 	uintptr_t* frameend, bool* hasselection);
 
-static psy_ui_ComponentVtable sampleeditorprocess_vtable;
-static int sampleeditorprocess_vtable_initialized = 0;
-
-static void sampleeditorprocess_vtable_init(SampleEditorProcessView* self)
-{
-	if (!sampleeditorprocess_vtable_initialized) {
-		sampleeditorprocess_vtable = *(self->component.vtable);
-		sampleeditorprocess_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
-			sampleeditorprocessview_onpreferredsize;
-		sampleeditorprocess_vtable_initialized = 1;
-	}
-}
-
 void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_Margin margin;
-
-	self->workspace = workspace;
-	self->start = 1;
+	
 	psy_ui_component_init(&self->component, parent);
+	self->workspace = workspace;
 	psy_ui_component_enablealign(&self->component);
 	sampleeditoroperations_init(&self->copypaste, &self->component, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
@@ -283,9 +267,7 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1.5),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
-	sampleeditorprocess_vtable_init(self);
-	self->component.vtable = &sampleeditorprocess_vtable;
+		psy_ui_value_makepx(0));	
 	psy_ui_component_setmargin(&self->process.component, &margin);
 	psy_ui_listbox_init(&self->processors, &self->component);
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
@@ -317,6 +299,9 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 		sampleprocessview_onlanguagechanged);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
 		sampleeditorprocessview_onprocessorselected);
+	psy_ui_component_setpreferredsize(&self->component,
+		psy_ui_size_make(psy_ui_value_makeew(20),
+			psy_ui_value_makeeh(10)));
 }
 
 void sampleprocessview_updatetext(SampleEditorProcessView* self,
@@ -351,22 +336,6 @@ void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView* self,
 	psy_ui_Component* sender, int index)
 {
 	psy_ui_notebook_setpageindex(&self->notebook, index);
-}
-
-void sampleeditorprocessview_onpreferredsize(SampleEditorProcessView* self, psy_ui_Size* limit,
-	psy_ui_Size* rv)
-{
-	if (self->start) {
-		rv->width = psy_ui_value_makeew(20);
-		rv->height = psy_ui_value_makeeh(10);
-		/*psy_ui_Aligner aligner;
-
-		psy_ui_aligner_init(&aligner, &self->component);
-		psy_ui_aligner_preferredsize(&aligner, limit, rv);*/
-		self->start = 0;
-	} else {
-		*rv = psy_ui_component_size(&self->component);
-	}
 }
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);

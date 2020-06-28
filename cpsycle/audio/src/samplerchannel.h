@@ -118,6 +118,25 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel*,
 	const struct psy_audio_PatternEvent*);
 void psy_audio_samplerchannel_performfx(psy_audio_SamplerChannel*);
 
+
+INLINE void psy_audio_samplerchannel_setpanfactor(psy_audio_SamplerChannel*
+	self, psy_dsp_amp_t value)
+{
+	self->panfactor = value;
+}
+
+INLINE psy_dsp_amp_t psy_audio_samplerchannel_panfactor(
+	psy_audio_SamplerChannel* self)
+{
+	return self->panfactor;
+}
+
+INLINE int psy_audio_samplerchannel_defaultpanfactor(
+	psy_audio_SamplerChannel* self)
+{
+	return self->defaultpanfactor;
+}
+
 #ifdef __cplusplus
 }
 #endif

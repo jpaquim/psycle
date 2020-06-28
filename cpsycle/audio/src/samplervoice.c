@@ -129,10 +129,6 @@ static psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice*,
 static void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice*,
 	psy_audio_Sample*, psy_dsp_amp_t* svol, psy_dsp_amp_t* lvol,
 	psy_dsp_amp_t* rvol);
-static psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice*,
-	uintptr_t channel, psy_dsp_amp_t input, uintptr_t pos,
-	psy_dsp_amp_t* env, psy_dsp_amp_t* filterenv,
-	psy_dsp_amp_t svol, psy_dsp_amp_t lvol, psy_dsp_amp_t rvol);
 static void psy_audio_samplervoice_adddatatosamplerbuffer(psy_audio_SamplerVoice*,
 	uintptr_t channel, psy_dsp_amp_t input, uintptr_t pos,
 	psy_audio_Buffer* output);
@@ -168,6 +164,7 @@ static void psy_audio_samplervoice_performtremor(psy_audio_SamplerVoice*);
 static void psy_audio_samplervoice_setretrigger(psy_audio_SamplerVoice*);
 static void psy_audio_samplervoice_performretrig(psy_audio_SamplerVoice*);
 
+// implementation
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	psy_audio_Sampler* sampler,
 	psy_audio_Samples* samples,
@@ -185,26 +182,59 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->channelnum = channelnum;
 	self->channel = channel;
 	self->usedefaultvolume = 1;
-	self->vol = 1.f;
+	self->realvolume = 1.f;
 	self->positions = 0;
 	self->effcmd = psy_audio_samplercmd_make(SAMPLER_CMD_NONE, 0, 0);
 	self->effval = 0;
 	self->dooffset = 0;
 	self->maxvolume = maxvolume;
 	self->positions = 0;
+	self->play = FALSE;
 	self->stopping = FALSE;
 	self->period = 0;
 	self->resamplertype = quality;
+	psy_dsp_slider_init(&self->rampl);
+	psy_dsp_slider_init(&self->rampr);
 	if (instrument) {
-		psy_dsp_adsr_init(&self->env, &instrument->volumeenvelope, samplerate);
+		psy_dsp_adsr_init(&self->amplitudeenvelope, &instrument->volumeenvelope, samplerate);
 		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
 	} else {
-		psy_dsp_adsr_initdefault(&self->env, samplerate);
+		psy_dsp_adsr_initdefault(&self->amplitudeenvelope, samplerate);
 		psy_dsp_adsr_initdefault(&self->filterenv, samplerate);
 	}	
 	psy_audio_samplervoice_initfilter(self, instrument);
 	self->effects = NULL;
 	psy_audio_samplervoice_reseteffects(self);
+}
+
+void psy_audio_samplervoice_reset(psy_audio_SamplerVoice* self)
+{
+	self->channelnum = -1;
+	self->channel = NULL;
+	self->instrument = NULL;
+
+	psy_dsp_adsr_reset(&self->amplitudeenvelope);
+	psy_dsp_adsr_reset(&self->filterenv);
+
+	self->_cutoff = 127;
+	self->m_Ressonance = 0;
+	self->_coModify = 0;
+	
+	self->play = FALSE;
+	self->stopping = FALSE;
+	self->period = 0;
+	self->note = NOTECOMMANDS_EMPTY;
+	self->m_Volume = 128;
+	self->realvolume = 1.0f;
+	psy_dsp_slider_resetto(&self->rampl, 0.f);
+	psy_dsp_slider_resetto(&self->rampr, 0.f);
+
+	self->panfactor = 0.5f;
+	self->panrange = 0.5f;
+	self->surround = FALSE;
+	psy_audio_samplervoice_reseteffects(self);
+	// ps1
+	self->effcmd = psy_audio_samplercmd_make(SAMPLER_CMD_NONE, 0, 0);
 }
 
 void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
@@ -224,14 +254,7 @@ void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
 	}
 }
 
-void psy_audio_samplervoice_reset(psy_audio_SamplerVoice* self)
-{
-	self->effcmd = psy_audio_samplercmd_make(SAMPLER_CMD_NONE, 0, 0);
-	self->stopping = FALSE;
-	psy_dsp_adsr_reset(&self->env);
-	psy_dsp_adsr_reset(&self->filterenv);
-	psy_audio_samplervoice_reseteffects(self);	
-}
+
 
 void psy_audio_samplervoice_addeffect(psy_audio_SamplerVoice* self, int cmd)
 {
@@ -334,9 +357,11 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self,
 	}	
 	psy_list_free(entries);	
 	if (self->positions) {		
-		psy_dsp_adsr_start(&self->env);		
+		psy_dsp_adsr_start(&self->amplitudeenvelope);
 		psy_dsp_adsr_start(&self->filterenv);
 	}
+	psy_audio_samplervoice_setisplaying(self,
+		TRUE);
 	// if (!self->dopan && self->instrument->randompan) {
 	//	self->dopan = 1; 
 	//	self->pan = rand() / (psy_dsp_amp_t) 32768.f;
@@ -345,7 +370,7 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self,
 
 void psy_audio_samplervoice_updatespeed(psy_audio_SamplerVoice* self)
 {
-	if (self->positions && self->env.stage != ENV_OFF) {
+	if (self->positions && self->amplitudeenvelope.stage != ENV_OFF) {
 		psy_List* p;
 
 		for (p = self->positions; p != NULL; psy_list_next(&p)) {
@@ -405,7 +430,7 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self,
 	}
 	psy_list_free(entries);
 	if (self->positions) {
-		psy_dsp_adsr_start(&self->env);
+		psy_dsp_adsr_start(&self->amplitudeenvelope);
 		psy_dsp_adsr_start(&self->filterenv);
 	}	
 }
@@ -438,22 +463,38 @@ void psy_audio_samplervoice_nna(psy_audio_SamplerVoice* self)
 
 void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 {
-	psy_dsp_adsr_release(&self->env);
+	if (!psy_audio_samplervoice_isplaying(self)) {
+		return;
+	}
+	psy_audio_samplervoice_setstopping(self, TRUE);
+	psy_dsp_adsr_release(&self->amplitudeenvelope);
 	psy_dsp_adsr_release(&self->filterenv);
 	self->stopping = TRUE;
 }
 
 void psy_audio_samplervoice_fastnoteoff(psy_audio_SamplerVoice* self)
 {
-	psy_dsp_adsr_fastrelease(&self->env);
+	if (!psy_audio_samplervoice_isplaying(self)) {
+		return;
+	}
+	psy_audio_samplervoice_setstopping(self, TRUE);
+	psy_dsp_adsr_fastrelease(&self->amplitudeenvelope);
 	psy_dsp_adsr_fastrelease(&self->filterenv);
+	// Fade Out Volume
+	self->volumefadespeed = 1000.0f / (3.f * psy_audio_machine_samplerate(
+		psy_audio_sampler_base(self->sampler))); // 3 milliseconds of samples. (same as volume ramping)
+	self->volumefadeamount = 1.0f;
 	self->stopping = TRUE;
 }
 
 void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
-	psy_audio_Buffer* output, uintptr_t amount)
+	psy_audio_Buffer* dstbuffer, uintptr_t amount)
 {
-	if (self->positions && self->env.stage != ENV_OFF) {
+	if (!self->instrument) {
+		psy_audio_samplervoice_setisplaying(self, FALSE);
+		return;
+	}
+	if (self->positions && self->amplitudeenvelope.stage != ENV_OFF) {
 		psy_List* p;
 		psy_dsp_amp_t* env;
 		psy_dsp_amp_t* filterenv;
@@ -461,8 +502,8 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 		
 		env = malloc(amount * sizeof(psy_dsp_amp_t));
 		for (i = 0; i < amount; ++i) {
-			psy_dsp_adsr_tick(&self->env);
-			env[i] = self->env.value;
+			psy_dsp_adsr_tick(&self->amplitudeenvelope);
+			env[i] = self->amplitudeenvelope.value;
 		}
 		filterenv = NULL;
 		if (filter_type(&self->_filter) != F_NONE) {
@@ -474,7 +515,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 		}
 
 		for (p = self->positions; p != NULL; psy_list_next(&p)) {
-			psy_audio_SampleIterator* position;
+			psy_audio_SampleIterator* position;			
 			psy_dsp_amp_t svol;
 			psy_dsp_amp_t rvol;
 			psy_dsp_amp_t lvol;
@@ -498,16 +539,115 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 				numsamples -= nextsamples;
 				while (nextsamples)
 				{
-					for (channel = 0; channel < psy_audio_buffer_numchannels(&position->sample->channels) &&
-							channel < psy_audio_buffer_numchannels(output); ++channel) {
-						psy_dsp_amp_t val;
+					//////////////////////////////////////////////////////////////////////////
+					//  Step 0 : Process Volume.
 
-						val = psy_audio_sampleiterator_work(position, channel);
-						val = psy_audio_samplervoice_processenvelopes(self,
-							channel, val, dstpos, env, filterenv, svol, lvol, rvol);
+					// Amplitude Envelope 
+					// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
+					float volume = psy_audio_samplervoice_realvolume(self) *
+						((self->channel)
+							? self->channel->volume
+							: 1.0f);
+					if (env[dstpos] <= 0.0f) {
+						psy_audio_samplervoice_setisplaying(self, FALSE);
+						if (psy_audio_buffer_mono(&position->sample->channels)) {
+							psy_audio_buffer_make_monoaureal(dstbuffer, amount);
+						}
+						return;
+					}
+					volume *= env[dstpos];
+					// Volume Fade Out
+					if (self->volumefadespeed > 0.0f)
+					{
+						psy_audio_samplervoice_updatefadeout(self);
+						if (self->volumefadeamount <= 0) {
+							psy_audio_samplervoice_setisplaying(self, FALSE);
+							if (psy_audio_buffer_mono(&position->sample->channels)) {
+								psy_audio_buffer_make_monoaureal(dstbuffer, amount);
+							}
+							return;
+						}
+						volume *= self->volumefadeamount;
+					}
+					float lVolDest = 0.f;
+					float rVolDest = 0.f;
+					if (self->surround) {
+						if (self->sampler->panningmode == psy_audio_PANNING_LINEAR) {
+							lVolDest = 0.5f * volume;
+							rVolDest = -0.5f * volume;
+						} else if (self->sampler->panningmode == psy_audio_PANNING_TWOWAY) {
+							lVolDest = volume;
+							rVolDest = -1.f * volume;
+						} else if (self->sampler->panningmode == psy_audio_PANNING_EQUALPOWER) {
+							lVolDest = 0.705f * volume;
+							rVolDest = -0.705f * volume;
+						}
+					} else {
+						// Panning Envelope 
+						// (actually, the correct word for panning is panoramization. "panning" comes from the diminutive "pan")
+						// PanFactor() contains the pan calculated at note start ( pan of note, wave pan, instrument pan, NoteModPan sep, and channel pan)
+						float lvol = 0;
+						float rvol = self->panfactor + self->panbrelloamount;
+
+						//if (m_PanEnvelope.Stage() & EnvelopeController::EnvelopeStage::DOSTEP) {
+							//m_PanEnvelope.Work();
+						//}
+						// PanRange() is a Range delimiter for the envelope, which is set whenever the pan is changed.
+						//rvol += (m_PanEnvelope.ModulationAmount() * PanRange());
+
+						if (self->sampler->panningmode == psy_audio_PANNING_LINEAR) {
+							lvol = (1.0f - rvol);
+							// PanningMode::Linear is already on rvol, so we omit the case.
+						} else if (self->sampler->panningmode == psy_audio_PANNING_TWOWAY) {
+							lvol = min(1.0f, (1.0f - rvol) * 2);
+							rvol = min(1.0f, rvol * 2.0f);
+						} else if (self->sampler->panningmode == psy_audio_PANNING_EQUALPOWER) {
+							//lvol = powf((1.0f-rvol),0.5f); // This is the commonly used one
+							lvol = log10f(((1.0f - rvol) * 9.0f) + 1.0f); // This is a faster approximation
+							//rvol = powf(rvol, 0.5f);// This is the commonly used one
+							rvol = log10f((rvol * 9.0f) + 1.0f); // This is a faster approximation.
+						}
+						lVolDest = lvol * volume;
+						rVolDest = rvol * volume;
+					}
+					//Volume Ramping.
+					psy_dsp_slider_settarget(&self->rampl, lVolDest);
+					psy_dsp_slider_settarget(&self->rampr, rVolDest);					
+
+					for (channel = 0; channel < psy_audio_buffer_numchannels(&position->sample->channels) &&
+							channel < psy_audio_buffer_numchannels(dstbuffer); ++channel) {
+						psy_dsp_amp_t output;
+						//////////////////////////////////////////////////////////////////////////
+						//  Step 1 : Get the unprocessed wave data.
+
+						output = psy_audio_sampleiterator_work(position, channel);					
+
+						//////////////////////////////////////////////////////////////////////////
+						//  Step 2 : processed filter
+
+						if (psy_audio_sampler_usefilters(self->sampler)) {
+							output = psy_audio_samplervoice_workfilter(self, channel,
+								output, filterenv, dstpos);							
+						}
+						//Volume after the filter, like schism/IT.
+						//If placed before the filter, 303.IT sounds bad (uncontrolled ressonance, replicable in schism if removing the volume changes).
+						if (channel == 0) {
+							output *= psy_dsp_slider_getnext(&self->rampl);
+						} else
+						if (channel == 1) {
+							output *= psy_dsp_slider_getnext(&self->rampr);
+						}						
+
+						// Pitch Envelope.Currently, the pitch envelope Amount is only updated on NewLine().
+						//	if (m_PitchEnvelope.Stage() & EnvelopeController::EnvelopeStage::DOSTEP) {
+						//		m_PitchEnvelope.Work();
+						//	}
+
+						//////////////////////////////////////////////////////////////////////////
+						//  Step 3: Add the processed data to the sampler's buffer.
 						psy_audio_samplervoice_adddatatosamplerbuffer(self, channel,
-							val, dstpos, output);
-					}					
+							output, dstpos, dstbuffer);
+					}	
 					++dstpos;
 					nextsamples--;
 					diff = psy_audio_sampleiterator_inc(position);
@@ -518,12 +658,13 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 				}
 				psy_audio_sampleiterator_postwork(position);
 				if (!psy_audio_sampleiterator_playing(position)) {
+					psy_audio_samplervoice_setisplaying(self, FALSE);
 					psy_audio_samplervoice_reset(self);
 					break;
 				}
 			}
 			if (psy_audio_buffer_mono(&position->sample->channels)) {
-				psy_audio_buffer_make_monoaureal(output, amount);				
+				psy_audio_buffer_make_monoaureal(dstbuffer, amount);
 			}			
 		}		
 		free(env);
@@ -532,11 +673,24 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 	self->dooffset = 0;
 }
 
+void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice* self)
+{
+	if (self->realvolume == 0.0f) {
+		//IsPlaying(false);
+		self->stopping = TRUE;
+	}
+	self->volumefadeamount -= self->volumefadespeed;
+	if (self->volumefadeamount <= 0) {
+		self->stopping = TRUE;
+		//IsPlaying(false);
+	}
+}
+
 void psy_audio_samplervoice_setresamplerquality(psy_audio_SamplerVoice* self, 
 	ResamplerType quality)
 {
 	self->resamplertype = quality;
-	if (self->positions && self->env.stage != ENV_OFF) {
+	if (self->positions && self->amplitudeenvelope.stage != ENV_OFF) {
 		psy_List* p;
 		for (p = self->positions; p != NULL; psy_list_next(&p)) {
 			psy_audio_SampleIterator* iterator;
@@ -545,34 +699,6 @@ void psy_audio_samplervoice_setresamplerquality(psy_audio_SamplerVoice* self,
 			psy_dsp_multiresampler_settype(&iterator->resampler, quality);
 		}
 	}
-}
-
-psy_dsp_amp_t psy_audio_samplervoice_processenvelopes(psy_audio_SamplerVoice* self,
-	uintptr_t channel, psy_dsp_amp_t input, uintptr_t pos,
-	psy_dsp_amp_t* env, psy_dsp_amp_t* filterenv,
-	psy_dsp_amp_t svol, psy_dsp_amp_t lvol, psy_dsp_amp_t rvol)
-{
-	psy_dsp_amp_t rv;
-	psy_dsp_amp_t volume;
-
-	volume = env[pos] * self->instrument->globalvolume;
-	if (psy_audio_sampler_usefilters(self->sampler)) {
-		rv = psy_audio_samplervoice_workfilter(self, channel, input, filterenv, pos);
-		if (filterenv) {
-			volume *= filterenv[pos];
-		}
-	} else {
-		rv = input;
-	}
-	if (channel == 0) {
-		volume *= lvol;
-	} else if (channel == 1) {
-		volume *= rvol;
-	} else {
-		volume *= svol;
-	}	
-	rv *= volume;
-	return rv;
 }
 
 void psy_audio_samplervoice_adddatatosamplerbuffer(psy_audio_SamplerVoice* self,
@@ -596,7 +722,7 @@ void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice* self,
 	*svol = psy_audio_samplervoice_volume(self, sample) *
 		(self->usedefaultvolume || self->effcmd.id == SAMPLER_CMD_VOLUMESLIDE)
 			? sample->defaultvolume 
-			: self->vol;
+			: self->realvolume;
 	*svol *= sample->globalvolume;
 	cvol = self->channel ? self->channel->volume : (psy_dsp_amp_t)1.f;	
 	*rvol = self->panfactor * (*svol) * cvol + self->panbrelloamount;
@@ -631,14 +757,14 @@ psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice* self,
 void psy_audio_samplervoice_release(psy_audio_SamplerVoice* self)
 {
 	self->effcmd.id = SAMPLER_CMD_NONE;
-	psy_dsp_adsr_release(&self->env);	
+	psy_dsp_adsr_release(&self->amplitudeenvelope);
 	psy_dsp_adsr_release(&self->filterenv);
 }
 
 void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice* self)
 {
 	self->effcmd.id = SAMPLER_CMD_NONE;
-	psy_dsp_adsr_fastrelease(&self->env);	
+	psy_dsp_adsr_fastrelease(&self->amplitudeenvelope);
 	psy_dsp_adsr_fastrelease(&self->filterenv);
 }
 
@@ -660,7 +786,7 @@ psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice* self,
 		switch (psy_audio_samplercmd_id(cmd)) {
 			case SAMPLER_CMD_VOLUME:
 				self->usedefaultvolume = 0;
-				self->vol = ev->parameter /
+				self->realvolume = ev->parameter /
 					(psy_dsp_amp_t)self->maxvolume;
 
 				break;
@@ -691,6 +817,52 @@ psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice* self,
 				psy_audio_samplervoice_setvolumeslide(self,
 					ev->parameter);
 				break;
+			case SAMPLER_CMD_EXTENDED:
+				switch (ev->parameter & 0xF0) {
+				case SAMPLER_CMD_E9:
+					switch (ev->parameter & 0x0F) {
+					case SAMPLER_CMD_E9_SURROUND_OFF:
+						self->surround = FALSE;
+						break;
+					case SAMPLER_CMD_E9_SURROUND_ON:
+						self->surround = TRUE;
+						break;
+					case SAMPLER_CMD_E9_REVERB_OFF:
+						break;
+					case SAMPLER_CMD_E9_REVERB_FORCE:
+						break;
+					case SAMPLER_CMD_E9_STANDARD_SURROUND:
+						break;
+					case SAMPLER_CMD_E9_QUAD_SURROUND:
+						break;
+					case SAMPLER_CMD_E9_GLOBAL_FILTER:
+						break;
+					case SAMPLER_CMD_E9_LOCAL_FILTER:
+						break;
+					default:
+						break;
+					}
+					break;
+				case SAMPLER_CMD_E_SET_PAN:
+					if (self->channel) {
+						psy_audio_samplerchannel_setpanfactor(self,
+							psy_audio_samplerchannel_panfactor(self->channel));
+					}
+					break;
+				case SAMPLER_CMD_E_SET_MIDI_MACRO:				
+					break;
+				case SAMPLER_CMD_E_GLISSANDO_TYPE:					
+					break;
+				case SAMPLER_CMD_E_VIBRATO_WAVE:					
+					break;
+				case SAMPLER_CMD_E_PANBRELLO_WAVE:					
+					break;
+				case SAMPLER_CMD_E_TREMOLO_WAVE:					
+					break;
+				default:
+					break;
+				}
+			break;
 			case SAMPLER_CMD_PANNINGSLIDE:
 				psy_audio_samplervoice_setpanningslide(self,
 					ev->parameter);
@@ -862,20 +1034,20 @@ void psy_audio_samplervoice_performvolumeslide(psy_audio_SamplerVoice * self)
 
 void psy_audio_samplervoice_volumedown(psy_audio_SamplerVoice* self, int value)
 {	
-	int vol = (int)(self->vol * 128) + value;
+	int vol = (int)(self->realvolume * 128) + value;
 	if (vol < 0) {
 		vol = 0;
 	}	
-	self->vol = vol / 128.f;
+	self->realvolume = vol / 128.f;
 }
 
 void psy_audio_samplervoice_volumeup(psy_audio_SamplerVoice* self, int value)
 {
-	int vol = (int)(self->vol * 128) + value;
+	int vol = (int)(self->realvolume * 128) + value;
 	if (vol > 0x80) {
 		vol = 0x80;
 	}
-	self->vol = vol / 128.f;
+	self->realvolume = vol / 128.f;
 }
 
 void psy_audio_samplervoice_setpanningslide(psy_audio_SamplerVoice* self,

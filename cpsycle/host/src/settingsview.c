@@ -323,10 +323,7 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Properties* pro
 		strlen(psy_properties_valuestring(property)));
 	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
 	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(self->g, 0x00CACACA);
-//	if (property->item.hint == PSY_PROPERTY_HINT_EDITDIR) {
-//		ui_textout(self->g, 500, 20 + self->cpy, "...", strlen("..."));
-//	}		
+	psy_ui_settextcolor(self->g, 0x00CACACA);		
 }
 
 void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Properties* property,
