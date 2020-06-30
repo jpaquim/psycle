@@ -22,6 +22,7 @@ typedef struct {
 	int repeat;
 	bool bubble;
 	bool preventdefault;
+	struct psy_ui_Component* target;
 } psy_ui_KeyEvent;
 
 void psy_ui_keyevent_init(psy_ui_KeyEvent*, int keycode, int keydata,

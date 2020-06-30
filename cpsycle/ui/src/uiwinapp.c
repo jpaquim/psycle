@@ -61,12 +61,14 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
 		app.defaults.defaultbackgroundcolor);
+	self->targetids = NULL;
 }
 
 void psy_ui_winapp_dispose(psy_ui_WinApp* self)
 {
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
+	psy_list_free(self->targetids);
 	DeleteObject(self->defaultbackgroundbrush);
 	CoUninitialize();
 }
@@ -470,12 +472,28 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
+				if (winapp->targetids) {
+					HWND targethwnd;
+					psy_ui_win_ComponentImp* targetimp;
+
+					targethwnd = (winapp->targetids->tail)
+						? (HWND)(uintptr_t)(winapp->targetids->tail->entry)
+						: 0;
+					targetimp = (psy_ui_win_ComponentImp*)psy_table_at(&winapp->selfmap,
+						(uintptr_t)targethwnd);
+					if (targetimp) {
+						ev.target = targetimp->component;
+					}
+				}
 				imp->component->vtable->onkeydown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_keydown, imp->component, 1,
 					&ev);
-				if (ev.bubble != FALSE) {
+				if (ev.bubble != FALSE) {										
 					sendmessagetoparent(imp, message, wParam, lParam);
-				}							
+				} else {
+					psy_list_free(winapp->targetids);
+					winapp->targetids = NULL;
+				}
 				return 0;
 			}
 			break;
@@ -805,8 +823,12 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 	winapp = (psy_ui_WinApp*)app.platform;	
 	if (psy_table_at(&winapp->selfmap,
 			(uintptr_t)GetParent(imp->hwnd))) {
+		psy_list_append(&winapp->targetids, imp->hwnd);
 		winapp->eventretarget = imp->component;
 		SendMessage(GetParent(imp->hwnd), message, wparam, lparam);
+	} else {
+		psy_list_free(winapp->targetids);
+		winapp->targetids = NULL;
 	}
 	winapp->eventretarget = 0;
 }
@@ -825,7 +847,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	handle_scrollparam(hwnd, &si, wParam);	
 	// Set the position and then retrieve it.  Due to adjustments
-	//   by Windows it may not be the same as the value set.
+	// by Windows it may not be the same as the value set.
 	si.fMask = SIF_POS ;
 	SetScrollInfo (hwnd, SB_VERT, &si, TRUE) ;
 	GetScrollInfo (hwnd, SB_VERT, &si) ;
@@ -840,14 +862,7 @@ void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 			psy_ui_component_setscrolltop(imp->component,
 				psy_ui_component_scrolltop(imp->component) -
 				imp->component->scrollstepy * (iPos - si.nPos));
-		}
-		if (imp->component && imp->component->signal_scroll.slots) {
-			psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
-				0, (iPos - si.nPos));			
-		}
-		if (imp->component->handlevscroll) {			
-			psy_ui_component_scrollstep(imp->component, 0, (iPos - si.nPos));
-		}		
+		}			
 	}
 }
 void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -859,7 +874,6 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	si.cbSize = sizeof (si) ;
     si.fMask  = SIF_ALL ;
     GetScrollInfo (hwnd, SB_HORZ, &si) ;	
-
 	// Save the position for comparison later on
 	iPos = si.nPos ;
 	handle_scrollparam(hwnd, &si, wParam);
@@ -868,9 +882,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 	si.fMask = SIF_POS ;
 	SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
 	GetScrollInfo (hwnd, SB_HORZ, &si) ;
-
 	// If the position has changed, scroll the window and update it
-
 	if (si.nPos != iPos)
 	{                    
 		psy_ui_WinApp* winapp;
@@ -881,14 +893,7 @@ void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
 			psy_ui_component_setscrollleft(imp->component,
 				psy_ui_component_scrollleft(imp->component) -
 				imp->component->scrollstepx * (iPos - si.nPos));
-		}
-		if (imp->component && imp->component->signal_scroll.slots) {
-			psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
-				(iPos - si.nPos), 0);			
-		}
-		if (imp->component->handlehscroll) {		
-			psy_ui_component_scrollstep(imp->component, (iPos - si.nPos), 0);
-		}
+		}		
 	}
 }
 

@@ -566,6 +566,17 @@ INLINE int psy_ui_component_scrolltop(psy_ui_Component* self)
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
 
+INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
+{
+	self->overflow = overflow;
+	psy_ui_component_updateoverflow(self);
+}
+
+INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
+{
+	return self->overflow;
+}
+
 #ifdef __cplusplus
 }
 #endif

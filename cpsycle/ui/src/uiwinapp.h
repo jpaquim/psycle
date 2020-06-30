@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/psyconf.h"
+#include <list.h>
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #ifndef psy_ui_WINAPP_H
@@ -41,6 +42,7 @@ typedef struct {
 	uintptr_t winid;
 	HBRUSH defaultbackgroundbrush;
 	struct psy_ui_Component* eventretarget;
+	psy_List* targetids;
 } psy_ui_WinApp;
 
 void psy_ui_winapp_init(psy_ui_WinApp*, HINSTANCE instance);

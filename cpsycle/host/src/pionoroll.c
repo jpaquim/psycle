@@ -253,8 +253,7 @@ static void pianogrid_drawentry(Pianogrid*, psy_ui_Graphics*,
 	int hover);
 static void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void pianogrid_onscroll(Pianogrid*, psy_ui_Component* sender, int stepx,
-	int stepy);
+static void pianogrid_onscroll(Pianogrid*, psy_ui_Component* sender);
 static void pianogrid_onmousedown(Pianogrid*, psy_ui_MouseEvent*);
 static void pianogrid_onmousemove(Pianogrid*, psy_ui_MouseEvent*);
 static psy_dsp_big_beat_t pianogrid_pxtobeat(Pianogrid*, int x);
@@ -301,7 +300,6 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 	self->hover = 0;
 	self->lastplayposition = 0.f;
 	self->sequenceentryoffset = 0.f;
-	self->component.overflow = psy_ui_OVERFLOW_SCROLL;
 	psy_table_init(&self->channel);
 	for (track = 0; track < 64; ++track) {
 		psy_audio_PatternEntry* channelentry;
@@ -315,6 +313,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 		pianogrid_onscroll);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pianogrid_ondestroy);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	psy_signal_connect(&self->workspace->signal_patterneditpositionchanged, self,
 		pianogrid_onpatterneditpositionchanged);
 }
@@ -527,10 +526,9 @@ void pianogrid_drawentry(Pianogrid* self, psy_ui_Graphics* g,
 	psy_ui_drawsolidrectangle(g, r, colour);	
 }
 
-void pianogrid_onscroll(Pianogrid* self, psy_ui_Component* sender, int stepx,
-	int stepy)
+void pianogrid_onscroll(Pianogrid* self, psy_ui_Component* sender)
 {	
-	if (stepx != 0) {
+	if (psy_ui_component_scrollleft(&self->component) != 0) {
 		pianogrid_updategridstate(self);
 	}		
 }
@@ -705,13 +703,11 @@ static void pianoroll_ontimer(Pianoroll*, uintptr_t timerid);
 static void pianoroll_onlpbchanged(Pianoroll*, psy_audio_Player* sender,
 	uintptr_t lpb);
 static int pianoroll_testplaybar(Pianoroll*, psy_dsp_big_beat_t offset);
-static int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
-	psy_dsp_big_beat_t width);
 static void pianoroll_invalidateline(Pianoroll*, psy_dsp_big_beat_t offset);
 static void pianoroll_ondestroy(Pianoroll*, psy_ui_Component* component);
 static void pianoroll_onalign(Pianoroll*);
 static void pianoroll_onmousedown(Pianoroll*, psy_ui_MouseEvent*);
-static void pianoroll_ongridscroll(Pianoroll*, psy_ui_Component* sender, int stepx, int stepy);
+static void pianoroll_ongridscroll(Pianoroll*, psy_ui_Component* sender);
 static void pianoroll_onzoomboxbeatwidthchanged(Pianoroll*, ZoomBox* sender);
 static void pianoroll_onzoomboxkeyheightchanged(Pianoroll*, ZoomBox* sender);
 // vtable
@@ -818,15 +814,9 @@ void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
 int pianoroll_testplaybar(Pianoroll* self, psy_dsp_big_beat_t offset)
 {
 	return psy_audio_player_playing(&self->workspace->player) &&
-		testrange(self->grid.lastplayposition -
+		psy_dsp_testrange(self->grid.lastplayposition -
 			self->grid.sequenceentryoffset,
 			offset, 1 / (psy_dsp_big_beat_t)self->grid.gridstate->lpb);
-}
-
-int testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
-	psy_dsp_big_beat_t width)
-{
-	return position >= offset && position < offset + width;
 }
 
 void pianoroll_invalidateline(Pianoroll* self, psy_dsp_big_beat_t offset)
@@ -883,19 +873,17 @@ void pianoroll_onlpbchanged(Pianoroll* self, psy_audio_Player* sender,
 	pianoroll_updatescroll(self);	
 }
 
-void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender, int stepx, int stepy)
+void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
 {
-	if (stepx != 0) {
+	if (psy_ui_component_scrollleft(&self->grid.component) !=
+			psy_ui_component_scrollleft(&self->header.component)) {
 		psy_ui_component_setscrollleft(&self->header.component,
-			psy_ui_component_scrollleft(&self->grid.component));
-		psy_ui_component_invalidate(&self->header.component);
-		psy_ui_component_update(&self->header.component);
+			psy_ui_component_scrollleft(&self->grid.component));		
 	}
-	if (stepy != 0) {
+	if (psy_ui_component_scrolltop(&self->grid.component) !=
+			psy_ui_component_scrolltop(&self->header.component)) {
 		psy_ui_component_setscrolltop(&self->keyboard.component,
-			psy_ui_component_scrolltop(&self->grid.component));
-		psy_ui_component_invalidate(&self->keyboard.component);
-		psy_ui_component_update(&self->keyboard.component);
+			psy_ui_component_scrolltop(&self->grid.component));		
 	}
 }
 

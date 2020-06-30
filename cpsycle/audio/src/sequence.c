@@ -673,7 +673,7 @@ psy_dsp_big_seconds_t psy_audio_sequence_calcdurationinms(psy_audio_Sequence* se
 						}
 					}
 				}					
-				psy_audio_sequencer_onlinetick(&sequencer);
+				psy_audio_sequencer_onnewline(&sequencer);
 			}			
 			if (amount > 0) {
 				psy_audio_sequencer_frametick(&sequencer, amount);

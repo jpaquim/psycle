@@ -615,7 +615,7 @@ void stepsequencerposition_init(StepSequencerPosition* self)
 
 // steptimer
 
-static void steptimer_onseqlinetick(StepTimer*, psy_audio_Sequencer* sender);
+static void steptimer_onnewline(StepTimer*, psy_audio_Sequencer* sender);
 
 void steptimer_init(StepTimer* self, psy_audio_Player* player)
 {
@@ -624,8 +624,8 @@ void steptimer_init(StepTimer* self, psy_audio_Player* player)
 	self->doseqtick = 0;
 	stepsequencerposition_init(&self->position);
 	psy_signal_init(&self->signal_linetick);
-	psy_signal_connect(&self->player->sequencer.signal_linetick,
-		self, steptimer_onseqlinetick);	
+	psy_signal_connect(&self->player->sequencer.signal_newline,
+		self, steptimer_onnewline);
 }
 
 void steptimer_dispose(StepTimer* self, psy_audio_Player* player)
@@ -646,7 +646,7 @@ void steptimer_tick(StepTimer* self)
 }
 
 // audio thread
-void steptimer_onseqlinetick(StepTimer* self, psy_audio_Sequencer* sender)
+void steptimer_onnewline(StepTimer* self, psy_audio_Sequencer* sender)
 {	
 	if (psy_audio_sequencer_playing(sender)) {
 		self->doseqtick = 1;

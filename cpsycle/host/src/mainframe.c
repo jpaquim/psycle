@@ -571,22 +571,17 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
 		tabbar_select(&self->samplesview.clienttabbar, 2);
 	} else
-	if (cmd.id == CMD_IMM_TERMINAL) {
-		psy_ui_Size size = psy_ui_component_size(&self->terminal.component);
-		psy_ui_TextMetric tm;
-
-		tm = psy_ui_component_textmetric(&self->component);
-		if (psy_ui_value_px(&size.height, &tm) > 0) {
+	if (cmd.id == CMD_IMM_TERMINAL) {		
+		if (!psy_ui_isvaluezero(psy_ui_component_size(
+				&self->terminal.component).height)) {
 			psy_ui_component_resize(&self->terminal.component,
-				psy_ui_size_make(psy_ui_value_makepx(0),
-				psy_ui_value_makepx(0)));
-			psy_ui_component_align(&self->component);
+				psy_ui_size_zero());
 		} else {								
 			psy_ui_component_resize(&self->terminal.component,
-				psy_ui_size_make(
-				psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
-			psy_ui_component_align(&self->component);		
+				psy_ui_size_make(psy_ui_value_makepx(0),
+					psy_ui_value_makeeh(10)));	
 		}
+		psy_ui_component_align(&self->component);
 	}
 }
 
@@ -599,7 +594,7 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 		input.message = EVENTDRIVER_KEYDOWN;
 		kbd = workspace_kbddriver(&self->workspace);		
 		input.param1 = psy_audio_encodeinput(ev->keycode, 
-			self->workspace.chordmode ? 0 : ev->shift, ev->ctrl);		
+			self->patternview.trackerview.grid.chordmode ? 0 : ev->shift, ev->ctrl);		
 		input.param2 = workspace_octave(&self->workspace) * 12;
 		kbd->write(kbd, input);
 	}
@@ -612,12 +607,7 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 		EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYUP;
-#if defined DIVERSALIS__OS__MICROSOFT_        
-		input.param1 = psy_audio_encodeinput(ev->keycode, GetKeyState(psy_ui_KEY_SHIFT) < 0,
-			GetKeyState(psy_ui_KEY_CONTROL) < 0);
-#else
         input.param1 = psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl);
-#endif          
 		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);
 		kbd->write(kbd, input);
@@ -639,26 +629,22 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		}
 		psy_ui_component_resize(&self->sequenceview.component,
 			psy_ui_size_make(
-			psy_ui_value_makepx(self->workspace.maximizeview.sequenceviewrestorewidth),
+			self->workspace.maximizeview.sequenceviewrestorewidth,
 			psy_ui_value_makepx(0)));
 	} else {
-		psy_ui_Size sequenceviewsize;
-		psy_ui_TextMetric tm;
+		psy_ui_Size sequenceviewsize;		
 
-		self->workspace.maximizeview.maximized = 1;
+		self->workspace.maximizeview.maximized = TRUE;
 		self->workspace.maximizeview.row0 = self->toprow0.visible;
 		self->workspace.maximizeview.row1 = self->toprow1.visible;
 		self->workspace.maximizeview.row2 = self->toprow2.visible;
 		sequenceviewsize = psy_ui_component_size(&self->sequenceview.component);
-		tm = psy_ui_component_textmetric(&self->sequenceview.component);
 		self->workspace.maximizeview.sequenceviewrestorewidth =
-			psy_ui_value_px(&sequenceviewsize.width, &tm);
+			sequenceviewsize.width;
 		psy_ui_component_hide(&self->toprow0);
 		psy_ui_component_hide(&self->toprow1);
 		psy_ui_component_resize(&self->sequenceview.component,
-			psy_ui_size_make(
-			psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0)));
+			psy_ui_size_zero());
 	}
 	psy_ui_component_align(&self->component);
 }

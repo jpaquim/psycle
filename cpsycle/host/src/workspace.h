@@ -56,8 +56,8 @@ typedef struct {
 	int row0;
 	int row1;
 	int row2;
-	int sequenceviewrestorewidth;
-	int maximized;
+	psy_ui_Value sequenceviewrestorewidth;
+	bool maximized;
 } MaximizedView;
 
 typedef struct {	
@@ -123,7 +123,6 @@ typedef struct {
 	int currview;
 	psy_List* currnavigation;
 	int navigating;
-	int chordmode;
 	int fontheight;
 	char* dialbitmappath;
 	uintptr_t undosavepoint;

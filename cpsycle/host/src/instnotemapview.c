@@ -175,8 +175,7 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 // entry view
 static void instrumententryview_ondraw(InstrumentEntryView*, psy_ui_Graphics*);
 static void instrumententryview_onsize(InstrumentEntryView*, psy_ui_Size*);
-static void instrumententryview_onscroll(InstrumentEntryView*, psy_ui_Component* sender,
-	int stepx, int stepy);
+static void instrumententryview_onscroll(InstrumentEntryView*, psy_ui_Component* sender);
 static void instrumententryview_onmousedown(InstrumentEntryView*,
 	psy_ui_MouseEvent*);
 static void instrumententryview_onmousemove(InstrumentEntryView*,
@@ -353,11 +352,10 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 }
 
 void instrumententryview_onscroll(InstrumentEntryView* self,
-	psy_ui_Component* sender, int stepx, int stepy)
+	psy_ui_Component* sender)
 {
 	psy_ui_component_setscrolltop(&self->parameterview->component,
 		psy_ui_component_scrolltop(&self->component));
-	psy_ui_component_invalidate(&self->parameterview->component);
 }
 
 void instrumententryview_adjustscroll(InstrumentEntryView* self)

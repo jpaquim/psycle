@@ -284,7 +284,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	sequencelistview_vtable_init(self);	
 	self->component.vtable = &sequencelistview_vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 1);
+	psy_ui_component_setwheelscroll(&self->component, 1);	
 	self->view = view;
 	self->sequence = sequence;
 	self->patterns = patterns;
@@ -302,7 +302,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 			sequencelistview_onpatternnamechanged);
 	}
 	sequencelistview_computetextsizes(self);
-	self->component.overflow = psy_ui_OVERFLOW_SCROLL;
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	psy_ui_component_starttimer(&self->component, 0, 200);
 }
 

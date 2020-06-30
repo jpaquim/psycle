@@ -127,7 +127,7 @@ typedef struct Pianoroll {
    int cy;
    psy_audio_Pattern* pattern;
    unsigned int opcount;
-   int syncpattern;   
+   bool syncpattern;   
    Workspace* workspace;  
 } Pianoroll;
 
