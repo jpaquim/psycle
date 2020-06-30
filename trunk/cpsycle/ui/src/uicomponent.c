@@ -510,7 +510,9 @@ void psy_ui_component_destroy(psy_ui_Component* self)
 
 void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t stepy)
 {
-	self->vtable->scrollto(self, self->scrollstepx * stepx, self->scrollstepy * stepy);	
+	if (stepy != 0 || stepx != 0) {
+		self->vtable->scrollto(self, self->scrollstepx * stepx, self->scrollstepy * stepy);
+	}
 }
 
 void psy_ui_component_showstate(psy_ui_Component* self, int state)
@@ -966,41 +968,39 @@ void psy_ui_component_setscroll(psy_ui_Component* self,
 
 void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
 {	
-	self->scroll.x = left;
-	if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
-		int scrollmin;
-		int scrollmax;
-		int npos;
+	int oldscrollx;
 
-		psy_ui_component_horizontalscrollrange(self, &scrollmin, &scrollmax);
-		npos = self->scroll.x / self->scrollstepx;
-		if (npos > scrollmax) {
-			npos = scrollmax;
+	oldscrollx = self->scroll.x;
+	self->scroll.x = left;
+	if (self->scroll.x != oldscrollx) {		
+		if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
+			psy_ui_component_sethorizontalscrollposition(self,
+				self->scroll.x / self->scrollstepx);
 		}
-		if (npos < scrollmin) {
-			npos = scrollmin;
+		if (self->signal_scroll.slots) {
+			psy_signal_emit(&self->signal_scroll, self, 0);
 		}
-		psy_ui_component_sethorizontalscrollposition(self, npos);
-	}	
+		psy_ui_component_scrollstep(self, (oldscrollx - self->scroll.x) /
+			self->scrollstepx, 0);
+	}
 }
 
 void psy_ui_component_setscrolltop(psy_ui_Component* self, int top)
 {
+	int oldscrolly;
+	
+	oldscrolly = self->scroll.y;
 	self->scroll.y = top;
-	if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
-		int npos;
-		int scrollmin;
-		int scrollmax;
-
-		psy_ui_component_verticalscrollrange(self, &scrollmin, &scrollmax);
-		npos = self->scroll.y / self->scrollstepy;
-		if (npos > scrollmax) {
-			npos = scrollmax;
+	if (self->scroll.y != oldscrolly) {
+		if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
+			psy_ui_component_setverticalscrollposition(self,
+				self->scroll.y / self->scrollstepy);
 		}
-		if (npos < scrollmin) {
-			npos = scrollmin;
+		if (self->signal_scroll.slots) {			
+			psy_signal_emit(&self->signal_scroll, self, 0);
 		}
-		psy_ui_component_setverticalscrollposition(self, npos);
+		psy_ui_component_scrollstep(self, 0, (oldscrolly - self->scroll.y) /
+			self->scrollstepy);
 	}
 }
 
@@ -1047,7 +1047,8 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		tm = psy_ui_component_textmetric(self);
 		size = psy_ui_component_size(self);
 		preferredsize = psy_ui_component_preferredsize(self, &size);
-		maxrows = (psy_ui_value_px(&preferredsize.width, &tm) / (double)self->scrollstepx + 0.5);
+		maxrows = (int)(psy_ui_value_px(&preferredsize.width, &tm) /
+			(double)self->scrollstepx + 0.5);
 		visirows = psy_ui_value_px(&size.width, &tm) / self->scrollstepx;
 		currrow = psy_ui_component_scrollleft(self) / self->scrollstepx;		
 		psy_ui_component_sethorizontalscrollrange(self, 0, maxrows - visirows);			

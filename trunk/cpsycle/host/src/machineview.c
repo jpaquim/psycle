@@ -476,9 +476,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->wireframes = 0;
 	self->randominsert = 1;
 	self->addeffect = 0;
-	self->component.overflow = psy_ui_OVERFLOW_SCROLL;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_setwheelscroll(&self->component, 4);	
 	// skin init
 	psy_ui_bitmap_init(&self->skin.skinbmp);
 	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
@@ -487,7 +486,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	machinewireview_initmachinecoords(self);	
 	psy_table_init(&self->machineuis);
 	machineuis_insert(self, psy_audio_MASTER_INDEX);
-	psy_ui_component_setfont(&self->component, &self->skin.font);	
+	psy_ui_component_setfont(&self->component, &self->skin.font);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
 	machinewireview_connectuisignals(self);	
 	self->dragslot = UINTPTR_MAX;
 	self->dragmode = MACHINEWIREVIEW_DRAG_MACHINE;

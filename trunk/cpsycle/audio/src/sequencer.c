@@ -117,7 +117,7 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	self->inputevents = NULL;
 	self->currtracks = NULL;
 	psy_table_init(&self->lastmachine);
-	psy_signal_init(&self->signal_linetick);
+	psy_signal_init(&self->signal_newline);
 	psy_audio_sequencer_reset_common(self, sequence, machines, 44100);	
 }
 
@@ -128,7 +128,7 @@ void psy_audio_sequencer_dispose(psy_audio_Sequencer* self)
 	psy_audio_sequencer_clearinputevents(self);
 	psy_audio_sequencer_clearcurrtracks(self);	
 	psy_table_dispose(&self->lastmachine);
-	psy_signal_dispose(&self->signal_linetick);
+	psy_signal_dispose(&self->signal_newline);
 	self->sequence = NULL;
 	self->machines = NULL;
 }
@@ -414,7 +414,7 @@ uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer* self, uin
 	return rv;
 }
 
-void psy_audio_sequencer_onlinetick(psy_audio_Sequencer* self)
+void psy_audio_sequencer_onnewline(psy_audio_Sequencer* self)
 {
 	if (self->jump.active) {
 		psy_audio_sequencer_executejump(self);
@@ -423,7 +423,7 @@ void psy_audio_sequencer_onlinetick(psy_audio_Sequencer* self)
 		self->rowdelay.active = 0;
 		psy_audio_sequencer_compute_beatspersample(self);
 	}
-	psy_signal_emit(&self->signal_linetick, self, 0);	
+	psy_signal_emit(&self->signal_newline, self, 0);	
 	self->linetickcount += psy_audio_sequencer_currbeatsperline(self);
 }
 

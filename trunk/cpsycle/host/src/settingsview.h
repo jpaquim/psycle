@@ -16,7 +16,7 @@
 #define PROPERTIESRENDERER_NUMCOLS 3
 
 typedef struct {
-	psy_ui_Component client;
+	psy_ui_Component component;
 	psy_Properties* properties;
 	psy_ui_Graphics* g;
 	int lastlevel;

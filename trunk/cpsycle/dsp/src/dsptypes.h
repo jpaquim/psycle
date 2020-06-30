@@ -4,6 +4,8 @@
 #ifndef psy_dsp_TYPES_H
 #define psy_dsp_TYPES_H
 
+#include "../../detail/psydef.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,7 +30,20 @@ typedef enum {
 	PSY_DSP_AMP_RANGE_IGNORE
 } psy_dsp_amp_range_t;
 
-#define psy_dsp_epsilon 0.001;
+#define psy_dsp_epsilon 0.001
+
+INLINE int psy_dsp_testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
+	psy_dsp_big_beat_t width)
+{
+	return position >= offset && position < offset + width;
+}
+
+INLINE bool psy_dsp_testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
+	psy_dsp_big_beat_t width)
+{
+	return position + psy_dsp_epsilon * 2 >= offset &&
+		position < offset + width - psy_dsp_epsilon;
+}
 
 #ifdef __cplusplus
 }

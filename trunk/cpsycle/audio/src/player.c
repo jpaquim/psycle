@@ -160,7 +160,7 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 				}
 			}
 			psy_audio_player_notifylinetick(self);
-			psy_audio_sequencer_onlinetick(&self->sequencer);
+			psy_audio_sequencer_onnewline(&self->sequencer);
 		}		
 		if (amount > 0) {			
 			psy_audio_player_workamount(self, amount, &numsamplex, &samples);

@@ -70,7 +70,7 @@ typedef struct {
 	psy_dsp_big_beat_t playbeatloopstart;
 	psy_dsp_big_beat_t playbeatloopend;
 	psy_dsp_big_beat_t numplaybeats;
-	psy_Signal signal_linetick;
+	psy_Signal signal_newline;
 	uintptr_t playcounter;
 	bool calcduration;
 } psy_audio_Sequencer;
@@ -85,7 +85,7 @@ void psy_audio_sequencer_frametick(psy_audio_Sequencer*,
 void psy_audio_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);
 uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*, uintptr_t amount);
-void psy_audio_sequencer_onlinetick(psy_audio_Sequencer*);
+void psy_audio_sequencer_onnewline(psy_audio_Sequencer*);
 void psy_audio_sequencer_setposition(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position);
 INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(psy_audio_Sequencer* self)

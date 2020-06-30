@@ -184,6 +184,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_showverticalscrollbar(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pluginsview_ondestroy);
 	self->selectedplugin = 0;
@@ -192,8 +193,7 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&workspace->plugincatcher.signal_changed, self,
 		pluginsview_onplugincachechanged);
-	pluginsview_computetextsizes(self);
-	self->component.overflow = psy_ui_OVERFLOW_VSCROLL;
+	pluginsview_computetextsizes(self);	
 }
 
 void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)

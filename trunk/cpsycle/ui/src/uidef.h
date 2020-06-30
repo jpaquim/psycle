@@ -120,6 +120,18 @@ INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	return lhs;
 }
 
+INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)
+{
+	return (self->unit == psy_ui_UNIT_PX)
+		? self->quantity.integer == 0
+		: self->quantity.real == 0.0;	
+}
+
+INLINE bool psy_ui_isvaluezero(psy_ui_Value value)
+{
+	return psy_ui_value_iszero(&value);
+}
+
 typedef struct {
 	psy_ui_Value x;
 	psy_ui_Value y;
@@ -252,6 +264,17 @@ INLINE psy_ui_Size psy_ui_size_zero(void)
 	rv.width = psy_ui_value_makepx(0);
 	rv.height = psy_ui_value_makepx(0);
 	return rv;
+}
+
+INLINE bool psy_ui_size_iszero(const psy_ui_Size* self)
+{		
+	return psy_ui_value_iszero(&self->width) &&
+		psy_ui_value_iszero(&self->height);
+}
+
+INLINE bool psy_ui_issizezero(psy_ui_Size size)
+{
+	return psy_ui_size_iszero(&size);
 }
 
 INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
