@@ -445,7 +445,9 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->justify = psy_ui_JUSTIFY_EXPAND;
 	self->alignchildren = 0;
 	self->alignexpandmode = psy_ui_NOEXPAND;	
-	self->preferredsize = psy_ui_component_size(self);	
+	self->preferredsize = psy_ui_component_size(self);
+	self->maxsize = psy_ui_size_zero();
+	self->minsize = psy_ui_size_zero();
 	psy_ui_style_init(&self->style);
 	psy_ui_margin_init(&self->margin);
 	psy_ui_margin_init(&self->spacing);	
@@ -464,7 +466,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->scroll.x = 0;
 	self->scroll.y = 0;	
 	psy_ui_component_updatefont(self);
-	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);	
+	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);
+	psy_ui_border_init(&self->border);
 }
 
 void psy_ui_component_dispose(psy_ui_Component* self)
@@ -622,19 +625,18 @@ int psy_ui_component_visible(psy_ui_Component* self)
 }
 
 void psy_ui_component_align(psy_ui_Component* self)
-{	
+{		
 	psy_ui_Aligner aligner;
-	
+
 	psy_ui_aligner_init(&aligner, self);
-	psy_ui_aligner_align(&aligner);	
+	psy_ui_aligner_align(&aligner);
 	psy_signal_emit(&self->signal_align, self, 0);
 	self->vtable->onalign(self);
 }
 
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{		
-	
+{	
 	if (!self->preventpreferredsize) {
 		psy_ui_Aligner aligner;
 
@@ -797,6 +799,26 @@ void psy_ui_component_preventpreferredsize(psy_ui_Component* self)
 void psy_ui_component_enablepreferredsize(psy_ui_Component* self)
 {
 	self->preventpreferredsize = FALSE;
+}
+
+void psy_ui_component_setmaximumsize(psy_ui_Component* self, psy_ui_Size size)
+{
+	self->maxsize = size;
+}
+
+psy_ui_Size psy_ui_component_maximumsize(psy_ui_Component* self)
+{
+	return self->maxsize;
+}
+
+void psy_ui_component_setminimumsize(psy_ui_Component* self, psy_ui_Size size)
+{
+	self->minsize = size;
+}
+
+psy_ui_Size psy_ui_component_minimumsize(psy_ui_Component* self)
+{
+	return self->minsize;
 }
 
 void psy_ui_component_seticonressource(psy_ui_Component* self, int ressourceid)
@@ -1005,7 +1027,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, int top)
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component* self)
-{
+{		
 	if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
 		psy_ui_Size preferredsize;
 		psy_ui_TextMetric tm;

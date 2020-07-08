@@ -31,6 +31,7 @@
 
 static void sampleeditorbar_ondoublecontloop(SampleEditorBar*, psy_ui_Component* sender);
 static void sampleeditorbar_ondoublesustainloop(SampleEditorBar*, psy_ui_Component* sender);
+static void sampleeditorbar_ondrawlines(SampleEditorBar*, psy_ui_Component* sender);
 
 void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	SampleEditor* editor,
@@ -54,13 +55,17 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->selendedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selendedit, 10);
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop View");
+	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop View");		
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
 		sampleeditorbar_ondoublecontloop);
 	psy_ui_checkbox_init(&self->doublesustainloop, &self->component);
 	psy_ui_checkbox_settext(&self->doublesustainloop, "Double Sustain Loop View");
 	psy_signal_connect(&self->doublesustainloop.signal_clicked, self,
 		sampleeditorbar_ondoublesustainloop);
+	psy_ui_checkbox_init(&self->drawlines, &self->component);
+	psy_ui_checkbox_settext(&self->drawlines, "Draw Lines");
+	psy_signal_connect(&self->drawlines.signal_clicked, self,
+		sampleeditorbar_ondrawlines);
 	sampleeditorbar_clearselection(self);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
@@ -111,6 +116,16 @@ void sampleeditorbar_ondoublesustainloop(SampleEditorBar* self, psy_ui_Component
 	}
 	psy_ui_checkbox_disablecheck(&self->doublecontloop);
 }
+
+void sampleeditorbar_ondrawlines(SampleEditorBar* self, psy_ui_Component* sender)
+{
+	if (psy_ui_checkbox_checked(&self->drawlines)) {
+		sampleeditor_drawlines(self->editor);
+	} else {
+		sampleeditor_drawbars(self->editor);
+	}	
+}
+
 
 static void sampleeditoroperations_updatetext(SampleEditorOperations*,
 	Workspace*);
@@ -545,12 +560,15 @@ static void samplebox_clearwaveboxes(SampleBox*);
 static void samplebox_buildwaveboxes(SampleBox*, psy_audio_Sample*,
 	WaveBoxLoopViewMode);
 static void samplebox_setzoom(SampleBox*, float zoomleft, float zoomright);
-void samplebox_setloopviewmode(SampleBox*, WaveBoxLoopViewMode);
+static void samplebox_setloopviewmode(SampleBox*, WaveBoxLoopViewMode);
+static void samplebox_drawlines(SampleBox*);
+static void samplebox_drawbars(SampleBox*);
 static void samplebox_onselectionchanged(SampleBox*, WaveBox* sender);
 
-void samplebox_init(SampleBox* self, psy_ui_Component* parent)
+void samplebox_init(SampleBox* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
+	self->workspace = workspace;
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
@@ -600,7 +618,7 @@ void samplebox_buildwaveboxes(SampleBox* self, psy_audio_Sample* sample,
 			&sample->channels); ++channel) {
 			WaveBox* wavebox;
 
-			wavebox = wavebox_allocinit(&self->component);			
+			wavebox = wavebox_allocinit(&self->component, self->workspace);			
 			wavebox_setloopviewmode(wavebox, loopviewmode);
 			wavebox->preventdrawonselect = TRUE;
 			wavebox_setsample(wavebox, sample, channel);
@@ -642,6 +660,36 @@ void samplebox_setloopviewmode(SampleBox* self, WaveBoxLoopViewMode mode)
 	psy_ui_component_invalidate(&self->component);
 }
 
+void samplebox_drawlines(SampleBox* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->waveboxes);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		WaveBox* wavebox;
+
+		wavebox = (WaveBox*)psy_tableiterator_value(&it);
+		wavebox_drawlines(wavebox);
+	}
+	psy_ui_component_invalidate(&self->component);
+}
+
+void samplebox_drawbars(SampleBox* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->waveboxes);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		WaveBox* wavebox;
+
+		wavebox = (WaveBox*)psy_tableiterator_value(&it);
+		wavebox_drawbars(wavebox);
+	}
+	psy_ui_component_invalidate(&self->component);
+}
+
 
 void samplebox_onselectionchanged(SampleBox* self, WaveBox* sender)
 {
@@ -658,11 +706,16 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0),
+		psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0));
 	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);
-	psy_ui_component_setalign(&self->processview.component, psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_setalign(&self->processview.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_setmargin(&self->processview.component, &margin);
 	psy_signal_connect(&self->processview.process.signal_clicked, self,
 		sampleeditor_onprocess);
 	psy_signal_connect(&self->processview.copypaste.crop.signal_clicked, self,
@@ -680,12 +733,13 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	sampleeditorheader_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0),
 		psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(0.2),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->header.component, &margin);	
-	samplebox_init(&self->samplebox, &self->component);	
-	psy_ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);
+	samplebox_init(&self->samplebox, &self->component, workspace);
+	psy_ui_component_setmargin(&self->samplebox.component, &margin);
+	psy_ui_component_setalign(&self->samplebox.component, psy_ui_ALIGN_CLIENT);	
 	psy_signal_connect(&self->samplebox.signal_selectionchanged, self,
 		sampleeditor_onselectionchanged);
 	scrollzoom_init(&self->zoom, &self->component);
@@ -694,11 +748,7 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setpreferredsize(&self->zoom.component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(2)));
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.2),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+		psy_ui_value_makeeh(2)));	
 	psy_ui_component_setmargin(&self->zoom.component, &margin);
 	psy_signal_connect(&self->zoom.signal_zoom, self, sampleeditor_onzoom);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -1186,4 +1236,14 @@ void sampleeditor_setloopviewmode(SampleEditor* self, WaveBoxLoopViewMode mode)
 	self->loopviewmode = mode;
 	samplebox_setloopviewmode(&self->samplebox, mode);		
 	psy_ui_component_invalidate(&self->header.component);
+}
+
+void sampleeditor_drawlines(SampleEditor* self)
+{
+	samplebox_drawlines(&self->samplebox);
+}
+
+void sampleeditor_drawbars(SampleEditor* self)
+{
+	samplebox_drawbars(&self->samplebox);
 }

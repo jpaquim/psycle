@@ -45,8 +45,6 @@ static void OnNextInstrument(InstrumentHeaderView*, psy_ui_Component* sender);
 static void OnDeleteInstrument(InstrumentHeaderView*, psy_ui_Component* sender);
 static void OnEditInstrumentName(InstrumentHeaderView*, psy_ui_Edit* sender);
 // InstrumentGeneralView
-static void instrumentgeneralview_init(InstrumentGeneralView*,
-	psy_ui_Component* parent, psy_audio_Instruments*);
 static void instrumentgeneralview_setinstrument(InstrumentGeneralView*,
 	psy_audio_Instrument* instrument);
 static void OnFitRow(InstrumentGeneralView*, psy_ui_Component* sender);
@@ -87,6 +85,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
 	psy_ui_Margin margin;
+	psy_ui_Margin leftmargin;
 
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
@@ -94,11 +93,16 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	self->player = &workspace->player;
 	self->workspace = workspace;
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));	
+	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(3));
 	// header
 	instrumentheaderview_init(&self->header, &self->component,
 		&workspace->song->instruments, self);
+	psy_ui_component_setmargin(&self->header.component,
+		&leftmargin);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
 	psy_ui_component_init(&self->left, &self->component);
@@ -117,11 +121,15 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 			psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
 		psy_ui_component_setmargin(&self->left,
-			&margin);		
+			&leftmargin);		
 	}
 	// client
 	psy_ui_component_init(&self->client, &self->component);
-	psy_ui_component_enablealign(&self->client);	
+	psy_ui_component_enablealign(&self->client);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0));
+	psy_ui_component_setmargin(&self->client, &margin);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
@@ -130,7 +138,8 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);	
-	instrumentgeneralview_init(&self->general, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments);
+	instrumentgeneralview_init(&self->general, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments,
+		workspace);
 	instrumentvolumeview_init(&self->volume, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments);
 	instrumentpanview_init(&self->pan, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments);
 	instrumentfilterview_init(&self->filter, psy_ui_notebook_base(&self->notebook), &workspace->song->instruments);
@@ -354,7 +363,8 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 }
 
 // GeneralView
-void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* parent, psy_audio_Instruments* instruments)
+void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* parent,
+	psy_audio_Instruments* instruments, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
@@ -412,7 +422,7 @@ void instrumentgeneralview_init(InstrumentGeneralView* self, psy_ui_Component* p
 	psy_ui_component_setalign(&self->globalvolume.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->globalvolume, self, OnGeneralViewDescribe,
 			OnGeneralViewTweak, OnGeneralViewValue);
-	instrumentnotemapview_init(&self->notemapview, &self->component);
+	instrumentnotemapview_init(&self->notemapview, &self->component, workspace);
 	psy_ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
 }
 

@@ -12,12 +12,14 @@
 typedef struct {
 	int keymin;
 	int keymax;
+	psy_dsp_NotesTabMode notemode;
+	bool drawpianokeys;
 	int keyheight;
 	int defaultkeyheight;
 	double zoom;
 	psy_ui_Color keywhitecolour;
 	psy_ui_Color keyblackcolour;
-	psy_ui_Color keyseparatorcolour;
+	psy_ui_Color keyseparatorcolour;	
 } KeyboardState;
 
 void keyboardstate_init(KeyboardState*);

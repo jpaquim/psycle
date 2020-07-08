@@ -56,6 +56,9 @@ typedef struct psy_audio_SamplerChannel {
 	// volume channel slide
 	float chanvolslidespeed;
 	int chanvolslidemem;
+	// pitchslide
+	int	pitchslidespeed;
+	int pitchslidemem;
 	// pan
 	float panslidespeed;
 	int panslidemem;

@@ -175,6 +175,9 @@ psy_Properties* psy_properties_sync(psy_Properties* self, psy_Properties* src)
 				psy_properties_write_font(self, psy_properties_key(p),
 					psy_properties_valuestring(p));
 			}
+			if (q->children && p->children) {
+				psy_properties_sync(q, p);
+			}
 		}
 	}
 	return self;
@@ -779,7 +782,8 @@ psy_Properties* psy_properties_remove(psy_Properties* self, psy_Properties* prop
 			if (p == property) {
 				if (q) {
 					q->next = p->next;
-				}
+				}				
+				p->next = NULL;
 				properties_free(p);
 				break;
 			}

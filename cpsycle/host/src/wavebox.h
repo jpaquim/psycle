@@ -4,8 +4,10 @@
 #if !defined(WAVEBOX_H)
 #define WAVEBOX_H
 
-#include "uicomponent.h"
+#include "workspace.h"
+
 #include <sample.h>
+#include <uicomponent.h>
 
 // aim: Shows PCM Wave data, allows frame and loop point sselection.
 //      The view can optionally doubled at the loop slice points.
@@ -86,12 +88,13 @@ typedef struct {
 	char* nowavetext;
 	bool preventdrawonselect;
 	uintptr_t channel;
+	bool drawline;
 	WaveBoxContext context;
 } WaveBox;
 
-void wavebox_init(WaveBox*, psy_ui_Component* parent);
+void wavebox_init(WaveBox*, psy_ui_Component* parent, Workspace*);
 WaveBox* wavebox_alloc(void);
-WaveBox* wavebox_allocinit(psy_ui_Component* parent);
+WaveBox* wavebox_allocinit(psy_ui_Component* parent, Workspace*);
 
 void wavebox_setnowavetext(WaveBox*, const char* text);
 void wavebox_setsample(WaveBox*, psy_audio_Sample*, uintptr_t channel);
@@ -114,6 +117,16 @@ INLINE bool wavebox_hasselection(WaveBox* self)
 INLINE void wavebox_setloopviewmode(WaveBox* self, WaveBoxLoopViewMode mode)
 {
 	self->context.loopviewmode = mode;
+}
+
+INLINE void wavebox_drawlines(WaveBox* self)
+{
+	self->drawline = TRUE;
+}
+
+INLINE void wavebox_drawbars(WaveBox* self)
+{
+	self->drawline = FALSE;
 }
 
 INLINE psy_audio_Sample* wavebox_sample(WaveBox* self)

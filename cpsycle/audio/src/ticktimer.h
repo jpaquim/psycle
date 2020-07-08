@@ -15,7 +15,8 @@ struct psy_audio_BufferContext;
 typedef void (*fp_samplerticktimer_ontick)(void* context);
 typedef void (*fp_samplerticktimer_onwork)(void* context, struct psy_audio_BufferContext*);
 
-typedef struct psy_audio_SamplerTickTimer {	
+typedef struct psy_audio_SamplerTickTimer {
+	// read-only
 	uintptr_t counter;
 	uintptr_t samplesprotick;
 	uintptr_t tickcount;

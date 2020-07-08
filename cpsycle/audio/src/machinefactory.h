@@ -38,6 +38,7 @@ typedef struct psy_audio_MachineFactory {
 	psy_audio_PluginCatcher* catcher;
 	bool loadnewgamefxblitz;
 	bool createasproxy;
+	char* errstr;
 } psy_audio_MachineFactory;
 
 void psy_audio_machinefactory_init(psy_audio_MachineFactory*, psy_audio_MachineCallback, psy_audio_PluginCatcher*);

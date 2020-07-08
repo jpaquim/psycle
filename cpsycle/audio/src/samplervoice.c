@@ -144,7 +144,10 @@ static void psy_audio_samplervoice_setpanningslide(psy_audio_SamplerVoice*,
 static void psy_audio_samplervoice_performpanningslide(psy_audio_SamplerVoice*);
 static void psy_audio_samplervoice_setvibrato(psy_audio_SamplerVoice*,
 	int speed, int depth);
+static void psy_audio_samplervoice_setpitchslide(psy_audio_SamplerVoice*,
+	bool bUp, int speed, int note);
 static void psy_audio_samplervoice_performvibrato(psy_audio_SamplerVoice*);
+static void psy_audio_samplervoice_performpitchslide(psy_audio_SamplerVoice*);
 static void psy_audio_samplervoice_setvolumeslide(psy_audio_SamplerVoice*,
 	int speed);
 static void psy_audio_samplervoice_performvolumeslide(psy_audio_SamplerVoice*);
@@ -174,17 +177,29 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	uintptr_t samplerate,
 	int quality,
 	int maxvolume) 
-{	
-	filter_init_samplerate(&self->_filter, samplerate);
+{		
 	self->sampler = sampler;
 	self->samples = samples;
 	self->instrument = instrument;
 	self->channelnum = channelnum;
 	self->channel = channel;
+	// Init Envelopes
+	if (instrument) {
+		psy_dsp_adsr_init(&self->amplitudeenvelope, &instrument->volumeenvelope, samplerate);
+		psy_dsp_adsr_initdefault(&self->panenvelope, samplerate);
+		psy_dsp_adsr_initdefault(&self->pitchenvelope, samplerate);
+		psy_dsp_adsr_init(&self->filterenvelope, &instrument->filterenvelope, samplerate);
+	} else {
+		psy_dsp_adsr_initdefault(&self->amplitudeenvelope, samplerate);
+		psy_dsp_adsr_initdefault(&self->panenvelope, samplerate);
+		psy_dsp_adsr_initdefault(&self->pitchenvelope, samplerate);
+		psy_dsp_adsr_initdefault(&self->filterenvelope, samplerate);
+	}
+	// Init Filter
+	filter_init_samplerate(&self->_filter, samplerate);
 	self->usedefaultvolume = 1;
-	self->realvolume = 1.f;
 	self->positions = 0;
-	self->effcmd = psy_audio_samplercmd_make(SAMPLER_CMD_NONE, 0, 0);
+	self->effcmd = SAMPLER_CMD_NONE;
 	self->effval = 0;
 	self->dooffset = 0;
 	self->maxvolume = maxvolume;
@@ -193,48 +208,32 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->stopping = FALSE;
 	self->period = 0;
 	self->resamplertype = quality;
-	psy_dsp_slider_init(&self->rampl);
-	psy_dsp_slider_init(&self->rampr);
-	if (instrument) {
-		psy_dsp_adsr_init(&self->amplitudeenvelope, &instrument->volumeenvelope, samplerate);
-		psy_dsp_adsr_init(&self->filterenv, &instrument->filterenvelope, samplerate);	
-	} else {
-		psy_dsp_adsr_initdefault(&self->amplitudeenvelope, samplerate);
-		psy_dsp_adsr_initdefault(&self->filterenv, samplerate);
-	}	
-	psy_audio_samplervoice_initfilter(self, instrument);
-	self->effects = NULL;
-	psy_audio_samplervoice_reseteffects(self);
-}
-
-void psy_audio_samplervoice_reset(psy_audio_SamplerVoice* self)
-{
-	self->channelnum = -1;
-	self->channel = NULL;
-	self->instrument = NULL;
-
-	psy_dsp_adsr_reset(&self->amplitudeenvelope);
-	psy_dsp_adsr_reset(&self->filterenv);
-
+	self->currrandvol = 1.f;
+	self->volume = 128;
+	self->note = NOTECOMMANDS_EMPTY;
 	self->_cutoff = 127;
 	self->m_Ressonance = 0;
 	self->_coModify = 0;
-	
+
 	self->play = FALSE;
 	self->stopping = FALSE;
 	self->period = 0;
 	self->note = NOTECOMMANDS_EMPTY;
-	self->m_Volume = 128;
-	self->realvolume = 1.0f;
+	self->volume = 128;
 	psy_dsp_slider_resetto(&self->rampl, 0.f);
 	psy_dsp_slider_resetto(&self->rampr, 0.f);
 
 	self->panfactor = 0.5f;
 	self->panrange = 0.5f;
 	self->surround = FALSE;
+	psy_dsp_slider_init(&self->rampl);
+	psy_dsp_slider_init(&self->rampr);
+	
+	psy_audio_samplervoice_initfilter(self, instrument);
+	self->effects = NULL;
 	psy_audio_samplervoice_reseteffects(self);
 	// ps1
-	self->effcmd = psy_audio_samplercmd_make(SAMPLER_CMD_NONE, 0, 0);
+	self->effcmd = SAMPLER_CMD_NONE, 0, 0;
 }
 
 void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
@@ -253,8 +252,6 @@ void psy_audio_samplervoice_initfilter(psy_audio_SamplerVoice* self,
 		filter_setcutoff(&self->_filter, self->_cutoff);
 	}
 }
-
-
 
 void psy_audio_samplervoice_addeffect(psy_audio_SamplerVoice* self, int cmd)
 {
@@ -298,23 +295,26 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(psy_audio_Sampler* samp
 }
 
 void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice* self,
-	const psy_audio_PatternEvent* ev, double samplesprobeat)
+	const psy_audio_PatternEvent* ev)
 {
 	psy_audio_samplervoice_seteffect(self, ev);
 	if (ev->note < NOTECOMMANDS_RELEASE) {		
-		psy_audio_samplervoice_noteon(self, ev->note, samplesprobeat);
+		psy_audio_samplervoice_noteon(self, ev->note);
 	}
 }
 
 
 void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self,
-	int note, double samplesprobeat)
+	int note)
 {	
 	psy_audio_Sample* sample;
 	psy_List* entries;
 	psy_List* p;
+	double samplesprobeat;
 
 	self->note = note;
+	samplesprobeat = 1.0 / psy_audio_machine_beatspersample(
+		psy_audio_sampler_base(self->sampler));
 	psy_audio_samplervoice_initfilter(self, self->instrument);
 	psy_audio_samplervoice_clearpositions(self);
 	entries = psy_audio_instrument_entriesintersect(self->instrument,
@@ -358,7 +358,7 @@ void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice* self,
 	psy_list_free(entries);	
 	if (self->positions) {		
 		psy_dsp_adsr_start(&self->amplitudeenvelope);
-		psy_dsp_adsr_start(&self->filterenv);
+		psy_dsp_adsr_start(&self->filterenvelope);
 	}
 	psy_audio_samplervoice_setisplaying(self,
 		TRUE);
@@ -431,7 +431,7 @@ void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice* self,
 	psy_list_free(entries);
 	if (self->positions) {
 		psy_dsp_adsr_start(&self->amplitudeenvelope);
-		psy_dsp_adsr_start(&self->filterenv);
+		psy_dsp_adsr_start(&self->filterenvelope);
 	}	
 }
 
@@ -468,7 +468,7 @@ void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 	}
 	psy_audio_samplervoice_setstopping(self, TRUE);
 	psy_dsp_adsr_release(&self->amplitudeenvelope);
-	psy_dsp_adsr_release(&self->filterenv);
+	psy_dsp_adsr_release(&self->filterenvelope);
 	self->stopping = TRUE;
 }
 
@@ -479,7 +479,7 @@ void psy_audio_samplervoice_fastnoteoff(psy_audio_SamplerVoice* self)
 	}
 	psy_audio_samplervoice_setstopping(self, TRUE);
 	psy_dsp_adsr_fastrelease(&self->amplitudeenvelope);
-	psy_dsp_adsr_fastrelease(&self->filterenv);
+	psy_dsp_adsr_fastrelease(&self->filterenvelope);
 	// Fade Out Volume
 	self->volumefadespeed = 1000.0f / (3.f * psy_audio_machine_samplerate(
 		psy_audio_sampler_base(self->sampler))); // 3 milliseconds of samples. (same as volume ramping)
@@ -509,8 +509,8 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 		if (filter_type(&self->_filter) != F_NONE) {
 			filterenv = malloc(amount * sizeof(psy_dsp_amp_t));
 			for (i = 0; i < amount; ++i) {
-				psy_dsp_adsr_tick(&self->filterenv);
-				filterenv[i] = self->filterenv.value;
+				psy_dsp_adsr_tick(&self->filterenvelope);
+				filterenv[i] = self->filterenvelope.value;
 			}
 		}
 
@@ -544,7 +544,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 
 					// Amplitude Envelope 
 					// Voice::RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-					float volume = psy_audio_samplervoice_realvolume(self) *
+					float volume = psy_audio_samplervoice_realvolume(self, position->sample) *
 						((self->channel)
 							? self->channel->volume
 							: 1.0f);
@@ -559,7 +559,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 					// Volume Fade Out
 					if (self->volumefadespeed > 0.0f)
 					{
-						psy_audio_samplervoice_updatefadeout(self);
+						psy_audio_samplervoice_updatefadeout(self, position->sample);
 						if (self->volumefadeamount <= 0) {
 							psy_audio_samplervoice_setisplaying(self, FALSE);
 							if (psy_audio_buffer_mono(&position->sample->channels)) {
@@ -658,8 +658,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 				}
 				psy_audio_sampleiterator_postwork(position);
 				if (!psy_audio_sampleiterator_playing(position)) {
-					psy_audio_samplervoice_setisplaying(self, FALSE);
-					psy_audio_samplervoice_reset(self);
+					psy_audio_samplervoice_setisplaying(self, FALSE);					
 					break;
 				}
 			}
@@ -673,9 +672,9 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 	self->dooffset = 0;
 }
 
-void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice* self)
+void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice* self, psy_audio_Sample* sample)
 {
-	if (self->realvolume == 0.0f) {
+	if (psy_audio_samplervoice_realvolume(self, sample) == 0.0f) {
 		//IsPlaying(false);
 		self->stopping = TRUE;
 	}
@@ -719,10 +718,10 @@ void psy_audio_samplervoice_currvolume(psy_audio_SamplerVoice* self,
 {
 	psy_dsp_amp_t cvol;
 
-	*svol = psy_audio_samplervoice_volume(self, sample) *
-		(self->usedefaultvolume || self->effcmd.id == SAMPLER_CMD_VOLUMESLIDE)
+	*svol = psy_audio_samplervoice_volume(self) *
+		(self->usedefaultvolume || self->effcmd == SAMPLER_CMD_VOLUMESLIDE)
 			? sample->defaultvolume 
-			: self->realvolume;
+			: psy_audio_samplervoice_realvolume(self, sample);
 	*svol *= sample->globalvolume;
 	cvol = self->channel ? self->channel->volume : (psy_dsp_amp_t)1.f;	
 	*rvol = self->panfactor * (*svol) * cvol + self->panbrelloamount;
@@ -756,148 +755,275 @@ psy_dsp_amp_t psy_audio_samplervoice_workfilter(psy_audio_SamplerVoice* self,
 
 void psy_audio_samplervoice_release(psy_audio_SamplerVoice* self)
 {
-	self->effcmd.id = SAMPLER_CMD_NONE;
+	self->effcmd = SAMPLER_CMD_NONE;
 	psy_dsp_adsr_release(&self->amplitudeenvelope);
-	psy_dsp_adsr_release(&self->filterenv);
+	psy_dsp_adsr_release(&self->filterenvelope);
 }
 
 void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice* self)
 {
-	self->effcmd.id = SAMPLER_CMD_NONE;
+	self->effcmd = SAMPLER_CMD_NONE;
 	psy_dsp_adsr_fastrelease(&self->amplitudeenvelope);
-	psy_dsp_adsr_fastrelease(&self->filterenv);
+	psy_dsp_adsr_fastrelease(&self->filterenvelope);
 }
 
 // Voice Effects
 void psy_audio_samplervoice_newline(psy_audio_SamplerVoice* self)
 {
-	self->effcmd.id = SAMPLER_CMD_NONE;
+	self->effcmd = SAMPLER_CMD_NONE;
 	psy_list_free(self->effects);
 	self->effects = NULL;
 }
 
-psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice* self,
+void psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice* self,
 	const psy_audio_PatternEvent* ev)
-{
-	psy_audio_SamplerCmd* cmd;
+{	
+	int cmd;
+	int realset = 0;
+	int	realvalue = 0;
+	int volcmd = 0;
+	int slidval = 0;
 
-	cmd = psy_audio_sampler_cmd(self->sampler, ev->cmd);
-	if (cmd != NULL) {
-		switch (psy_audio_samplercmd_id(cmd)) {
-			case SAMPLER_CMD_VOLUME:
-				self->usedefaultvolume = 0;
-				self->realvolume = ev->parameter /
-					(psy_dsp_amp_t)self->maxvolume;
+	cmd = ev->cmd;
 
-				break;
-			case SAMPLER_CMD_PANNING:
-				if (self->channel) {
-					psy_audio_samplervoice_setpanfactor(self,
-						self->channel->panfactor);
-				}
-				break;
-			case SAMPLER_CMD_OFFSET:
-				self->dooffset = 1;
-				self->offset = ev->parameter;
-				break;
-			case SAMPLER_CMD_PORTAMENTO_UP: {
-				self->effval = ev->parameter;
-				self->effcmd = *cmd;
-				break;
-			}
-			case  SAMPLER_CMD_PORTAMENTO_DOWN: {
-				self->effval = ev->parameter;
-				self->effcmd = *cmd;
-				break;
-			}
-			case SAMPLER_CMD_PORTA2NOTE: {
+	/*
+	switch (volcmd & 0xF0)
+	{
+		case SAMPLER_CMD_VOL_VOLUME0:
+		case SAMPLER_CMD_VOL_VOLUME1:
+		case SAMPLER_CMD_VOL_VOLUME2:
+		case SAMPLER_CMD_VOL_VOLUME3:
+			psy_audio_samplervoice_setvolume(self,
+				volcmd << 1);			
+			break;
+		case SAMPLER_CMD_VOL_VOLSLIDEUP:
+			psy_audio_samplervoice_setvolumeslide(self,
+				(volcmd & 0x0F) << 4);
+			break;
+		case SAMPLER_CMD_VOL_VOLSLIDEDOWN:
+			psy_audio_samplervoice_setvolumeslide(self,
+				volcmd & 0x0F);
+			break;
+		case SAMPLER_CMD_VOL_FINEVOLSLIDEUP:
+			self->volumeslidespeed = (volcmd & 0x0F) << 1;
+			psy_audio_samplervoice_performvolumeslide(self);
+			break;
+		case SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN:
+			self->volumeslidespeed = -((volcmd & 0x0F) << 1);
+			psy_audio_samplervoice_performvolumeslide(self);
+			break;
+			//				case CMD_VOL::VOL_VIBRATO_SPEED:
+			//					Vibrato(volcmd&0x0F,0); //\todo: vibrato_speed does not activate the vibrato if it isn't running.
+			//					break;
+			//
+		case SAMPLER_CMD_VOL_VIBRATO:
+			psy_audio_samplervoice_setvibrato(self,
+				0, (volcmd & 0x0F) << 2);
+			break;
+		case SAMPLER_CMD_VOL_TONEPORTAMENTO:
+			// Portamento to (Gx) affects the memory for Gxx and has the equivalent
+			// slide given by this table:
+			// SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
+			if ((volcmd & 0x0F) == 0) slidval = 0;
+			else if ((volcmd & 0x0F) == 1)  slidval = 1;
+			else if ((volcmd & 0x0F) < 9) slidval = powf(2.0f, volcmd & 0x0F);
+			else slidval = 255;
+			//psy_audio_samplervoice_setpitchslide(self,
+			// PitchSlide(voice->Period() > voice->NoteToPeriod(Note()), slidval, Note());
+			break;
+		case SAMPLER_CMD_VOL_PITCH_SLIDE_DOWN:
+			// Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
+			// up/down of x is equivalent to a normal slide by x*4
+			//psy_audio_samplervoice_setpitchslide(self,
+				//FALSE, (volcmd & 0x0F) << 2));
+			break;
+		case SAMPLER_CMD_VOL_PITCH_SLIDE_UP:
+			//PitchSlide(true, (volcmd & 0x0F) << 2);
+			break;
+		default:
+			break;
+	}*/
 
+	switch (cmd) {
+		case SAMPLER_CMD_VOLUME:
+			self->usedefaultvolume = 0;
+			psy_audio_samplervoice_setvolume(self, ev->parameter);
+			break;
+		case SAMPLER_CMD_PANNING:
+			if (self->channel) {
+				psy_audio_samplervoice_setpanfactor(self,
+					self->channel->panfactor);
 			}
-			case SAMPLER_CMD_VOLUMESLIDE:
-				psy_audio_samplervoice_setvolumeslide(self,
-					ev->parameter);
-				break;
-			case SAMPLER_CMD_EXTENDED:
-				switch (ev->parameter & 0xF0) {
-				case SAMPLER_CMD_E9:
-					switch (ev->parameter & 0x0F) {
-					case SAMPLER_CMD_E9_SURROUND_OFF:
-						self->surround = FALSE;
-						break;
-					case SAMPLER_CMD_E9_SURROUND_ON:
-						self->surround = TRUE;
-						break;
-					case SAMPLER_CMD_E9_REVERB_OFF:
-						break;
-					case SAMPLER_CMD_E9_REVERB_FORCE:
-						break;
-					case SAMPLER_CMD_E9_STANDARD_SURROUND:
-						break;
-					case SAMPLER_CMD_E9_QUAD_SURROUND:
-						break;
-					case SAMPLER_CMD_E9_GLOBAL_FILTER:
-						break;
-					case SAMPLER_CMD_E9_LOCAL_FILTER:
-						break;
-					default:
-						break;
-					}
+			break;
+		case SAMPLER_CMD_OFFSET:
+			self->dooffset = 1;
+			self->offset = ev->parameter;
+			break;
+		case SAMPLER_CMD_PORTAMENTO_UP: {
+			self->effval = ev->parameter;
+			self->effcmd = cmd;
+			break;
+		}
+		case  SAMPLER_CMD_PORTAMENTO_DOWN: {
+			self->effval = ev->parameter;
+			self->effcmd = cmd;
+			break;
+		}
+		case SAMPLER_CMD_PORTA2NOTE: {
+
+		}
+		case SAMPLER_CMD_VOLUMESLIDE:
+			psy_audio_samplervoice_setvolumeslide(self,
+				ev->parameter);
+			break;
+		case SAMPLER_CMD_EXTENDED:
+			switch (ev->parameter & 0xF0) {
+			case SAMPLER_CMD_E9:
+				switch (ev->parameter & 0x0F) {
+				case SAMPLER_CMD_E9_SURROUND_OFF:
+					self->surround = FALSE;
 					break;
-				case SAMPLER_CMD_E_SET_PAN:
-					if (self->channel) {
-						psy_audio_samplerchannel_setpanfactor(self,
-							psy_audio_samplerchannel_panfactor(self->channel));
-					}
+				case SAMPLER_CMD_E9_SURROUND_ON:
+					self->surround = TRUE;
 					break;
-				case SAMPLER_CMD_E_SET_MIDI_MACRO:				
+				case SAMPLER_CMD_E9_REVERB_OFF:
 					break;
-				case SAMPLER_CMD_E_GLISSANDO_TYPE:					
+				case SAMPLER_CMD_E9_REVERB_FORCE:
 					break;
-				case SAMPLER_CMD_E_VIBRATO_WAVE:					
+				case SAMPLER_CMD_E9_STANDARD_SURROUND:
 					break;
-				case SAMPLER_CMD_E_PANBRELLO_WAVE:					
+				case SAMPLER_CMD_E9_QUAD_SURROUND:
 					break;
-				case SAMPLER_CMD_E_TREMOLO_WAVE:					
+				case SAMPLER_CMD_E9_GLOBAL_FILTER:
+					break;
+				case SAMPLER_CMD_E9_LOCAL_FILTER:
 					break;
 				default:
 					break;
 				}
-			break;
-			case SAMPLER_CMD_PANNINGSLIDE:
-				psy_audio_samplervoice_setpanningslide(self,
-					ev->parameter);
 				break;
-			case SAMPLER_CMD_VIBRATO:
-				psy_audio_samplervoice_setvibrato(self,
-					((ev->parameter >> 4) & 0x0F),
-					(ev->parameter & 0x0F) << 2);
+			case SAMPLER_CMD_E_SET_PAN:
+				if (self->channel) {
+					psy_audio_samplervoice_setpanfactor(self,
+						psy_audio_samplerchannel_panfactor(self->channel));
+				}
 				break;
-			case SAMPLER_CMD_FINE_VIBRATO:
-				psy_audio_samplervoice_setvibrato(self,
-					((ev->parameter >> 4) & 0x0F),
-					(ev->parameter & 0x0F));
+			case SAMPLER_CMD_E_SET_MIDI_MACRO:				
 				break;
-			case SAMPLER_CMD_TREMOR:
-				psy_audio_samplervoice_settremor(self,				
-					ev->parameter);
+			case SAMPLER_CMD_E_GLISSANDO_TYPE:					
 				break;
-			case SAMPLER_CMD_TREMOLO:
-				psy_audio_samplervoice_settremolo(self,
-					((ev->parameter >> 4) & 0x0F),
-					(ev->parameter & 0x0F));
+			case SAMPLER_CMD_E_VIBRATO_WAVE:					
 				break;
-			case SAMPLER_CMD_PANBRELLO:
-				psy_audio_samplervoice_setpanbrello(self,
-					((ev->parameter >> 4) & 0x0F),
-					(ev->parameter & 0x0F));
+			case SAMPLER_CMD_E_PANBRELLO_WAVE:					
 				break;
-			case SAMPLER_CMD_RETRIG:
-				psy_audio_samplervoice_setretrigger(self);
+			case SAMPLER_CMD_E_TREMOLO_WAVE:					
 				break;
 			default:
 				break;
-		}
-	}
+			}
+		break;
+		case SAMPLER_CMD_MIDI_MACRO:
+			if (ev->parameter < 0x80) {
+				if (self->channel) {
+					realset = self->channel->midi_set;
+				}
+				realvalue = ev->parameter;
+			} else {
+				//realset = m_pSampler->GetMap(ev->parameter - 0x80).mode;
+				//realvalue = m_pSampler->GetMap(ev->parameter - 0x80).value;
+			}
+			switch (realset) {
+			case 0:				
+				if (self->channel) {
+					if (psy_audio_samplervoice_filtertype(self) == F_NONE) {
+						filter_settype(&self->_filter, self->channel->defaultfiltertype);					
+					}
+					self->_cutoff = self->channel->cutoff;
+				}
+				break;
+			case 1:
+				if (self->channel) {
+					if (psy_audio_samplervoice_filtertype(self) == F_NONE) {
+						filter_settype(&self->_filter, self->channel->defaultfiltertype);
+					}
+					self->m_Ressonance = self->channel->ressonance;				
+				}
+				break;
+			case 2:
+				// Set filter mode. OpenMPT only says 0..F lowpass and 10..1F highpass.
+				// It also has a macro default setup where 0 and 8 set the lowpass and 10 an 18 set the highpass
+				// From there, I adapted the following table for Psycle.
+				if (self->channel) {
+					filter_settype(&self->_filter,
+						self->channel->m_DefaultFilterType);
+				} else
+				if (realvalue < 0x20) {
+					if (realvalue < 4) { //0..3
+						filter_settype(&self->_filter, F_ITLOWPASS);
+					} else if (realvalue < 6) { //4..5
+						filter_settype(&self->_filter, F_LOWPASS12);
+					} else if (realvalue < 8) { //6..7
+						filter_settype(&self->_filter, F_BANDPASS12);
+					} else if (realvalue < 0xC) { //8..B
+						filter_settype(&self->_filter, F_MPTLOWPASSE);
+					} else if (realvalue < 0xE) { //C..D
+						filter_settype(&self->_filter, F_LOWPASS12E);
+					} else if (realvalue < 0x10) { //E..F
+						filter_settype(&self->_filter, F_BANDPASS12E);
+					} else if (realvalue < 0x14) { //10..13
+						filter_settype(&self->_filter, F_MPTHIGHPASSE);
+					} else if (realvalue < 0x16) { //14..15
+						filter_settype(&self->_filter, F_HIGHPASS12);
+					} else if (realvalue < 0x18) { //16..17
+						filter_settype(&self->_filter, F_BANDREJECT12);
+					} else if (realvalue < 0x1C) { //18..1B
+						filter_settype(&self->_filter, F_MPTHIGHPASSE);
+					} else if (realvalue < 0x1E) { //1C..1D
+						filter_settype(&self->_filter, F_HIGHPASS12E);
+					} else { // 1E..1F
+						filter_settype(&self->_filter, F_BANDREJECT12E);
+					}
+				}
+				break;
+			default:
+				break;
+			}
+			break;
+		case SAMPLER_CMD_PANNINGSLIDE:
+			psy_audio_samplervoice_setpanningslide(self,
+				ev->parameter);
+			break;
+		case SAMPLER_CMD_VIBRATO:
+			psy_audio_samplervoice_setvibrato(self,
+				((ev->parameter >> 4) & 0x0F),
+				(ev->parameter & 0x0F) << 2);
+			break;
+		case SAMPLER_CMD_FINE_VIBRATO:
+			psy_audio_samplervoice_setvibrato(self,
+				((ev->parameter >> 4) & 0x0F),
+				(ev->parameter & 0x0F));
+			break;
+		case SAMPLER_CMD_TREMOR:
+			psy_audio_samplervoice_settremor(self,				
+				ev->parameter);
+			break;
+		case SAMPLER_CMD_TREMOLO:
+			psy_audio_samplervoice_settremolo(self,
+				((ev->parameter >> 4) & 0x0F),
+				(ev->parameter & 0x0F));
+			break;
+		case SAMPLER_CMD_PANBRELLO:
+			psy_audio_samplervoice_setpanbrello(self,
+				((ev->parameter >> 4) & 0x0F),
+				(ev->parameter & 0x0F));
+			break;
+		case SAMPLER_CMD_RETRIG:
+			psy_audio_samplervoice_setretrigger(self);
+			break;
+
+		default:
+			break;
+	}	
 }
 
 void psy_audio_samplervoice_performfx(psy_audio_SamplerVoice* self)
@@ -933,7 +1059,7 @@ void psy_audio_samplervoice_performfx(psy_audio_SamplerVoice* self)
 				break;
 		}
 	}
-	switch (psy_audio_samplercmd_id(&self->effcmd)) {	
+	switch (self->effcmd) {	
 		case SAMPLER_CMD_PORTAMENTO_UP: {
 			self->period -= self->effval;
 			break;
@@ -1034,20 +1160,20 @@ void psy_audio_samplervoice_performvolumeslide(psy_audio_SamplerVoice * self)
 
 void psy_audio_samplervoice_volumedown(psy_audio_SamplerVoice* self, int value)
 {	
-	int vol = (int)(self->realvolume * 128) + value;
+	int vol = psy_audio_samplervoice_volume(self) + value;
 	if (vol < 0) {
 		vol = 0;
-	}	
-	self->realvolume = vol / 128.f;
+	}
+	psy_audio_samplervoice_setvolume(self, vol);
 }
 
 void psy_audio_samplervoice_volumeup(psy_audio_SamplerVoice* self, int value)
 {
-	int vol = (int)(self->realvolume * 128) + value;
+	int vol = psy_audio_samplervoice_volume(self) + value;
 	if (vol > 0x80) {
 		vol = 0x80;
 	}
-	self->realvolume = vol / 128.f;
+	psy_audio_samplervoice_setvolume(self, vol);
 }
 
 void psy_audio_samplervoice_setpanningslide(psy_audio_SamplerVoice* self,
@@ -1093,6 +1219,54 @@ void psy_audio_samplervoice_setvibrato(psy_audio_SamplerVoice* self, int speed,
 	psy_audio_samplervoice_addeffect(self, SAMPLER_EFFECT_VIBRATO);
 }
 
+void psy_audio_samplervoice_setpitchslide(psy_audio_SamplerVoice* self,
+	bool bUp, int speed, int note)
+{
+	return;
+
+	if (!self->channel) {
+		return;
+	}
+	if (speed == 0) {
+		if (self->channel->pitchslidemem == 0) return;
+		speed = self->channel->pitchslidemem;
+	}
+	if (speed < 0xE0 || note != NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+	{									// Porta to note does not have Fine.
+		speed <<= 2;
+		//if (ForegroundVoice()) { ForegroundVoice()->
+		self->pitchslidespeed = bUp ? -speed : speed;
+		if (note != NOTECOMMANDS_EMPTY)
+		{
+			if (note != NOTECOMMANDS_RELEASE) {
+				//	if (ForegroundVoice()) { ForegroundVoice()
+				// self->slide2notedestperiod = NoteToPeriod(note); }
+				psy_audio_samplervoice_addeffect(self, SAMPLER_EFFECT_SLIDE2NOTE);
+			}
+		} else {
+			psy_audio_samplervoice_addeffect(self, SAMPLER_EFFECT_PITCHSLIDE);
+		}
+	} else if (speed < 0xF0) {
+		speed = speed & 0xf;
+		// if (ForegroundVoice())
+		// {
+			//ForegroundVoice()->
+			self->pitchslidespeed = bUp ? -speed : speed;			
+			////ForegroundVoice()->PitchSlide();
+			psy_audio_samplervoice_performpitchslide(self);
+		//}
+	} else {
+		speed = (speed & 0xf) << 2;
+		//if (ForegroundVoice())
+		//{
+			//ForegroundVoice()->m_PitchSlideSpeed = bUp ? -speed : speed;
+			self->pitchslidespeed = bUp ? -speed : speed;
+			//ForegroundVoice()->PitchSlide();
+			psy_audio_samplervoice_performpitchslide(self);
+		//}
+	}
+}
+
 void psy_audio_samplervoice_performvibrato(psy_audio_SamplerVoice* self)
 {
 	if (self->channel) {
@@ -1104,6 +1278,13 @@ void psy_audio_samplervoice_performvibrato(psy_audio_SamplerVoice* self)
 		self->vibratopos = (self->vibratopos - self->vibratospeed) & 0xff;		
 	}
 }// Vibrato() -------------------------------------
+
+void psy_audio_samplervoice_performpitchslide(psy_audio_SamplerVoice* self)
+{
+	return; 
+	self->period += self->pitchslidespeed;
+	psy_audio_samplervoice_updatespeed(self);
+} // PitchSlide() -------------------------------------
 
 void psy_audio_samplervoice_settremolo(psy_audio_SamplerVoice* self, int speed,
 	int depth)
@@ -1203,8 +1384,6 @@ void psy_audio_samplervoice_performretrig(psy_audio_SamplerVoice* self)
 {
 	if (self->sampler->ticktimer.tickcount % self->retrigticks == 0)
 	{
-		psy_audio_samplervoice_noteon(self, self->note,
-			1.0 / psy_audio_machine_beatspersample(
-				psy_audio_sampler_base(self->sampler)));
+		psy_audio_samplervoice_noteon(self, self->note);
 	}
 }

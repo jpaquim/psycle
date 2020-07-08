@@ -47,6 +47,26 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			} else {
 				componentsize = psy_ui_component_size(component);
 			}
+			if (!psy_ui_value_iszero(&component->maxsize.width)) {
+				if (psy_ui_value_comp(&componentsize.width, &component->maxsize.width, &tm) > 0) {
+					componentsize.width = component->maxsize.width;
+				}
+			}
+			if (!psy_ui_value_iszero(&component->maxsize.height)) {
+				if (psy_ui_value_comp(&componentsize.height, &component->maxsize.height, &tm) > 0) {
+					componentsize.height = component->maxsize.height;
+				}
+			}
+			if (!psy_ui_value_iszero(&component->minsize.width)) {
+				if (psy_ui_value_comp(&componentsize.width, &component->minsize.width, &tm) < 0) {
+					componentsize.width = component->minsize.width;
+				}
+			}
+			if (!psy_ui_value_iszero(&component->minsize.height)) {
+				if (psy_ui_value_comp(&componentsize.height, &component->minsize.height, &tm) < 0) {
+					componentsize.height = component->minsize.height;
+				}
+			}
 			c_tm = psy_ui_component_textmetric(self->component);
 			if (component->align == psy_ui_ALIGN_CLIENT) {
 				client = component;

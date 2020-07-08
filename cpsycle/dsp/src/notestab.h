@@ -12,7 +12,8 @@ typedef unsigned char psy_dsp_note_t;
 
 typedef enum {
 	psy_dsp_NOTESTAB_A440,
-	psy_dsp_NOTESTAB_A220	
+	psy_dsp_NOTESTAB_A220,	
+	psy_dsp_NOTESTAB_GMPERCUSSION, // General MIDI Level 1
 } psy_dsp_NotesTabMode;
 
 #define psy_dsp_NOTESTAB_DEFAULT psy_dsp_NOTESTAB_A220

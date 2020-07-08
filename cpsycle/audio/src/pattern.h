@@ -37,16 +37,18 @@ typedef struct {
 } PatternSelection;
 
 typedef struct psy_audio_Pattern {
+	// public
+	psy_Signal signal_namechanged;
+	psy_Signal signal_lengthchanged;
+	// incremented by each operation, the ui is using
+	// this flag to synchronize its views
+	uintptr_t opcount;
+	// private
 	psy_audio_PatternNode* events;
 	psy_dsp_big_beat_t length;
 	// used by the paste pattern, player uses songtracks of patterns
 	uintptr_t maxsongtracks;
 	char* name;
-	// incremented by each operation, the ui is using
-	// this flag to synchronize its views
-	uintptr_t opcount;
-	psy_Signal signal_namechanged;
-	psy_Signal signal_lengthchanged;
 } psy_audio_Pattern;
 
 /// initializes a pattern

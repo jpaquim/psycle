@@ -227,6 +227,15 @@
     <ClCompile Include="src\samplervoice.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\luafilter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\luadspmath.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\luamidinotes.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -449,6 +458,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\samplervoice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luafilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luadspmath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\luamidinotes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

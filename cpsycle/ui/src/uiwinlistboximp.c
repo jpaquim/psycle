@@ -63,6 +63,8 @@ static void dev_setfocus(psy_ui_win_ListBoxImp* self) { self->win_component_imp.
 static int dev_hasfocus(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_hasfocus(&self->win_component_imp.imp); }
 static void* dev_platform(psy_ui_win_ListBoxImp* self) { return (void*) &self->win_component_imp; }
 
+static int windowstyle(HWND hwnd);
+
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
 static int vtable_initialized = 0;
@@ -171,7 +173,7 @@ void psy_ui_win_listboximp_init(psy_ui_win_ListBoxImp* self,
 	psy_ui_listboximp_init(&self->imp);
 	listboximp_imp_vtable_init(self);
 	self->imp.vtable = &listboximp_vtable;	
-	psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
+psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
 }
 
 void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
@@ -195,7 +197,7 @@ void psy_ui_win_listboximp_multiselect_init(psy_ui_win_ListBoxImp* self,
 
 psy_ui_win_ListBoxImp* psy_ui_win_listboximp_alloc(void)
 {
-	return (psy_ui_win_ListBoxImp*) malloc(sizeof(psy_ui_win_ListBoxImp));
+	return (psy_ui_win_ListBoxImp*)malloc(sizeof(psy_ui_win_ListBoxImp));
 }
 
 psy_ui_win_ListBoxImp* psy_ui_win_listboximp_allocinit(
@@ -226,7 +228,7 @@ psy_ui_win_ListBoxImp* psy_ui_win_listboximp_multiselect_allocinit(
 
 int dev_addtext(psy_ui_win_ListBoxImp* self, const char* text)
 {
-	return SendMessage(self->win_component_imp.hwnd, LB_ADDSTRING, 0, (LPARAM) text);
+	return SendMessage(self->win_component_imp.hwnd, LB_ADDSTRING, 0, (LPARAM)text);
 }
 
 void dev_settext(psy_ui_win_ListBoxImp* self, const char* text, intptr_t index)
@@ -260,7 +262,7 @@ void dev_setstyle(psy_ui_win_ListBoxImp* self, int style)
 }
 
 void dev_text(psy_ui_win_ListBoxImp* self, char* text, intptr_t index)
-{	
+{
 	SendMessage(self->win_component_imp.hwnd, LB_GETTEXT, (WPARAM)index, (LPARAM)text);
 }
 
@@ -270,11 +272,16 @@ void dev_clear(psy_ui_win_ListBoxImp* self)
 }
 
 void dev_setcursel(psy_ui_win_ListBoxImp* self, intptr_t index)
-{	
+{
 	RECT rect;
 
+	if ((windowstyle(self->win_component_imp.hwnd) & LBS_EXTENDEDSEL) == LBS_EXTENDEDSEL) {
+		SendMessage(self->win_component_imp.hwnd, LB_SETSEL, (WPARAM)0, (LPARAM)-1);
+		SendMessage(self->win_component_imp.hwnd, LB_SETSEL, (WPARAM)1, (LPARAM)index);
+	} else {				
+		SendMessage(self->win_component_imp.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);		
+	}
 	GetClientRect(self->win_component_imp.hwnd, &rect);
-	SendMessage(self->win_component_imp.hwnd, LB_SETCURSEL, (WPARAM)index, (LPARAM)0);
 	if (rect.bottom - rect.top < 20) {
 		SendMessage(self->win_component_imp.hwnd, LB_SETTOPINDEX, (WPARAM)0, (LPARAM)0);
 	}
@@ -312,6 +319,17 @@ void oncommand(psy_ui_ListBox* self, psy_ui_Component* sender, WPARAM wParam,
 	default:
 		break;
 	}
+}
+
+int windowstyle(HWND hwnd)
+{
+	int rv;
+#if defined(_WIN64)		
+	rv = (int)GetWindowLongPtr(hwnd, GWLP_STYLE);
+#else
+	rv = (int)GetWindowLong(hwnd, GWL_STYLE);
+#endif
+	return rv;
 }
 
 #endif

@@ -576,7 +576,7 @@ static void instrumentnotemapview_setmetrics(InstrumentNoteMapView*,
 	InstrumentNoteMapMetrics);
 
 void instrumentnotemapview_init(InstrumentNoteMapView* self,
-	psy_ui_Component* parent)
+	psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
@@ -587,7 +587,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_label_init(&self->label, &self->component);
 	psy_ui_label_settext(&self->label, "Notemap");
 	psy_ui_component_setalign(&self->label.component, psy_ui_ALIGN_TOP);
-	samplesbox_init(&self->samplesbox, &self->component, NULL);
+	samplesbox_init(&self->samplesbox, &self->component, NULL, workspace);
 	psy_ui_component_setalign(&self->samplesbox.component, psy_ui_ALIGN_LEFT);	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1.5),

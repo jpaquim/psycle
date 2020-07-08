@@ -42,6 +42,7 @@
 #include "stepbox.h"
 #include "zoombox.h"
 #include "checkunsaved.h"
+#include "interpreter.h"
 
 // MainFrame
 //
@@ -62,6 +63,7 @@ typedef struct {
 	psy_ui_SplitBar splitbar;
 	psy_ui_SplitBar splitbarterminal;
 	psy_ui_ProgressBar progressbar;
+	psy_ui_Button toggleterminal;
 	Navigation navigation;
 	TabBar tabbar;	
 	psy_ui_Notebook notebook;
@@ -86,6 +88,7 @@ typedef struct {
 	KbdHelp kbdhelp;
 	Gear gear;
 	PluginEditor plugineditor;
+	psy_ui_SplitBar splitbarplugineditor;
 	VuBar vubar;
 	CPUView cpuview;
 	MidiView midiview;
@@ -103,6 +106,10 @@ typedef struct {
 	MachineViewBar machineviewbar;
 	CheckUnsavedBox checkunsavedbox;
 	bool startpage;
+	bool terminalhasmessage;
+	bool terminalhaswarning;
+	bool terminalhaserror;
+	Interpreter interpreter;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

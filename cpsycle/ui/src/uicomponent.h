@@ -220,9 +220,12 @@ typedef struct psy_ui_Component {
 	bool mousetracking;
 	psy_ui_Style style;
 	psy_ui_Size preferredsize;
+	psy_ui_Size minsize;
+	psy_ui_Size maxsize;
 	psy_ui_IntPoint scroll;	
 	psy_ui_Overflow overflow;
-	int preventpreferredsizeatalign;	
+	int preventpreferredsizeatalign;
+	psy_ui_Border border;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -244,6 +247,7 @@ INLINE void psy_ui_component_show(psy_ui_Component* self)
 
 INLINE void psy_ui_component_hide(psy_ui_Component* self)
 {
+	self->visible = 0;
 	self->vtable->hide(self);
 }
 
@@ -281,6 +285,17 @@ int psy_ui_component_visible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
 void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
+
+INLINE void psy_ui_component_setborder(psy_ui_Component* self, psy_ui_Border border)
+{
+	self->border = border;
+}
+
+INLINE psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
+{
+	return self->border;
+}
+
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 void psy_ui_component_enablealign(psy_ui_Component*);
 void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
@@ -290,6 +305,10 @@ void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);
 void psy_ui_component_setpreferredsize(psy_ui_Component*, psy_ui_Size size);
 psy_ui_Size psy_ui_component_preferredsize(psy_ui_Component*, const psy_ui_Size* limit);
+void psy_ui_component_setmaximumsize(psy_ui_Component*, psy_ui_Size size);
+psy_ui_Size psy_ui_component_maximumsize(psy_ui_Component*);
+void psy_ui_component_setminimumsize(psy_ui_Component*, psy_ui_Size size);
+psy_ui_Size psy_ui_component_minimumsize(psy_ui_Component*);
 void psy_ui_component_preventpreferredsize(psy_ui_Component*);
 void psy_ui_component_enablepreferredsize(psy_ui_Component*);
 void psy_ui_component_seticonressource(psy_ui_Component*, int ressourceid);
@@ -568,8 +587,15 @@ void psy_ui_component_updateoverflow(psy_ui_Component*);
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {
-	self->overflow = overflow;
-	psy_ui_component_updateoverflow(self);
+	if (self->overflow != overflow) {
+		self->overflow = overflow;
+		if (overflow == psy_ui_OVERFLOW_HIDDEN) {
+			psy_ui_component_sethorizontalscrollrange(self, 0, 0);
+			psy_ui_component_setverticalscrollrange(self, 0, 0);
+		} else {			
+			psy_ui_component_updateoverflow(self);
+		}
+	}
 }
 
 INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)

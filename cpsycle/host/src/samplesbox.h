@@ -4,6 +4,8 @@
 #if !defined(SAMPLESBOX_H)
 #define SAMPLESBOX_H
 
+#include "workspace.h"
+
 #include <uilabel.h>
 #include <uilistbox.h>
 
@@ -23,7 +25,8 @@ typedef struct {
 	psy_Signal signal_changed;
 } SamplesBox;
 
-void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*);
+void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*,
+	Workspace*);
 void samplesbox_setsamples(SamplesBox*, psy_audio_Samples*);
 psy_audio_SampleIndex samplesbox_selected(SamplesBox*);
 void samplesbox_select(SamplesBox*, psy_audio_SampleIndex);

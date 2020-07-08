@@ -19,7 +19,9 @@
 
 #include "../../detail/portable.h"
 
-#define TIMERID_MAINFRAME 20
+#define terminalmessagecolor 0x0000FF00
+#define terminalwarningcolor 0x0000FFFF
+#define terminalerrorcolor 0x000000FF
 
 static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initbars(MainFrame*);
@@ -57,6 +59,7 @@ static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
+static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
 	const char* text);
@@ -112,7 +115,10 @@ void mainframe_init(MainFrame* self)
 		workspace_scanplugins(&self->workspace);
 	}	
 	psy_signal_connect(&self->workspace.signal_songchanged, self,
-		mainframe_onsongchanged);	
+		mainframe_onsongchanged);
+	self->terminalhasmessage = FALSE;
+	self->terminalhaswarning = FALSE;
+	self->terminalhaserror = FALSE;
 	// create empty status bar
 	psy_ui_component_init(&self->statusbar, &self->component);
 	psy_ui_component_setalign(&self->statusbar, psy_ui_ALIGN_BOTTOM);
@@ -167,6 +173,7 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
 	psy_ui_component_enablealign(&self->tabbars);
 	navigation_init(&self->navigation, &self->tabbars, &self->workspace);
+	self->navigation.component.margin.left = psy_ui_value_makeew(2.0);
 	self->navigation.component.margin.right = psy_ui_value_makeew(2.0);
 	psy_ui_component_setalign(&self->navigation.component, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->tabbars);
@@ -245,13 +252,7 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(&self->midiview.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->midiview.component);	
 	psy_signal_connect(&self->machinebar.midi.signal_clicked, self,
-		mainframe_onmidi);
-	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
-	psy_ui_component_setalign(&self->plugineditor.component,
-		psy_ui_ALIGN_LEFT);	
-	psy_ui_component_hide(&self->plugineditor.component);
-	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
-		mainframe_onplugineditor);
+		mainframe_onmidi);	
 	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
 		mainframe_ongearcreate);
 	psy_signal_emit(&self->workspace.signal_configchanged,
@@ -281,9 +282,20 @@ void mainframe_init(MainFrame* self)
 		psy_ui_ALIGN_LEFT);
 	// splitbar
 	psy_ui_splitbar_init(&self->splitbar, &self->component);
+	// plugineditor
+	plugineditor_init(&self->plugineditor, &self->component, &self->workspace);
+	psy_ui_component_setalign(&self->plugineditor.component,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_hide(&self->plugineditor.component);
+	psy_signal_connect(&self->machinebar.editor.signal_clicked, self,
+		mainframe_onplugineditor);
+	psy_ui_splitbar_init(&self->splitbarplugineditor, &self->component);
+	psy_ui_component_setalign(&self->splitbarplugineditor.component,
+		psy_ui_ALIGN_LEFT);
+	psy_ui_component_hide(&self->splitbarplugineditor.component);
 	// create statusbar components
 	mainframe_initstatusbar(self);
-	psy_ui_component_starttimer(&self->component, TIMERID_MAINFRAME, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 	if (self->workspace.song) {
 		mainframe_setstatusbartext(self,
 			self->workspace.song->properties.title);
@@ -303,6 +315,8 @@ void mainframe_init(MainFrame* self)
 		mainframe_onlanguagechanged);
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_oncheckunsaved);
+	interpreter_init(&self->interpreter, &self->workspace);
+	interpreter_start(&self->interpreter);
 }
 
 void mainframe_updatetext(MainFrame* self)
@@ -335,9 +349,9 @@ void mainframe_initstatusbar(MainFrame* self)
 {	
 	psy_ui_Margin margin;
 		
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));	
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.25),
+		psy_ui_value_makeew(1.0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeew(1.0));	
 	// zoom
 	zoombox_init(&self->zoombox, &self->statusbar);
 	psy_ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_LEFT);
@@ -372,9 +386,15 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_ui_notebook_setpageindex(&self->viewstatusbars, 0);
 //	psy_ui_notebook_connectcontroller(&self->viewstatusbars,
 	//	&self->tabbar.signal_change);
+	psy_ui_button_init(&self->toggleterminal, &self->statusbar);
+	psy_ui_button_settext(&self->toggleterminal, "Terminal");	
+	psy_ui_component_setalign(&self->toggleterminal.component,
+		psy_ui_ALIGN_RIGHT);
+	psy_signal_connect(&self->toggleterminal.signal_clicked, self,
+		mainframe_ontoggleterminal);
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
 	psy_ui_component_setalign(&self->progressbar.component,
-		psy_ui_ALIGN_RIGHT);
+		psy_ui_ALIGN_RIGHT);	
 	psy_signal_connect(&self->workspace.signal_loadprogress, self, 
 		mainframe_onsongloadprogress);
 	psy_signal_connect(&self->workspace.signal_scanprogress, self, 
@@ -465,6 +485,7 @@ void mainframe_destroyed(MainFrame* self, psy_ui_Component* component)
 
 	workspace_save_configuration(&self->workspace);
 	workspace_dispose(&self->workspace);
+	interpreter_dispose(&self->interpreter);
 	psy_ui_app_stop(&app);
 }
 
@@ -572,16 +593,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		tabbar_select(&self->samplesview.clienttabbar, 2);
 	} else
 	if (cmd.id == CMD_IMM_TERMINAL) {		
-		if (!psy_ui_isvaluezero(psy_ui_component_size(
-				&self->terminal.component).height)) {
-			psy_ui_component_resize(&self->terminal.component,
-				psy_ui_size_zero());
-		} else {								
-			psy_ui_component_resize(&self->terminal.component,
-				psy_ui_size_make(psy_ui_value_makepx(0),
-					psy_ui_value_makeeh(10)));	
-		}
-		psy_ui_component_align(&self->component);
+		mainframe_ontoggleterminal(self, &self->component);		
 	}
 }
 
@@ -652,7 +664,8 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace, int progress)
 {	
 	if (progress == -1) {
-		psy_ui_terminal_clear(&self->terminal);
+		//psy_ui_terminal_clear(&self->terminal);
+		psy_ui_terminal_output(&self->terminal, "\n");
 	}
 	psy_ui_progressbar_setprogress(&self->progressbar, progress / 100.f);
 }
@@ -698,9 +711,10 @@ void mainframe_updatetitle(MainFrame* self)
 void mainframe_onshowgear(MainFrame* self, Workspace* sender)
 {
 	if (!psy_ui_component_visible(&self->gear.component)) {
-		psy_ui_button_highlight(&self->machinebar.gear);
-		psy_ui_component_show(&self->gear.component);
+		self->gear.component.visible = 1;
+		psy_ui_button_highlight(&self->machinebar.gear);		
 		psy_ui_component_align(&self->client);
+		psy_ui_component_show(&self->gear.component);
 	}
 }
 
@@ -712,8 +726,9 @@ void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_component_align(&self->client);
 	} else {						
 		psy_ui_button_highlight(&self->machinebar.gear);
-		psy_ui_component_show(&self->gear.component);
+		self->gear.component.visible = 1;		
 		psy_ui_component_align(&self->client);
+		psy_ui_component_show(&self->gear.component);
 	}	
 }
 
@@ -764,11 +779,15 @@ void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 	if (psy_ui_component_visible(&self->plugineditor.component)) {
 		psy_ui_button_disablehighlight(&self->machinebar.editor);
 		psy_ui_component_hide(&self->plugineditor.component);
-		psy_ui_component_align(&self->component);
+		psy_ui_component_hide(&self->splitbarplugineditor.component);
+		psy_ui_component_align(&self->component);		
 	} else {						
 		psy_ui_button_highlight(&self->machinebar.editor);
+		self->plugineditor.component.visible = 1;
+		self->splitbarplugineditor.component.visible = 1;
+		psy_ui_component_align(&self->component);
+		psy_ui_component_show(&self->splitbarplugineditor.component);
 		psy_ui_component_show(&self->plugineditor.component);
-		psy_ui_component_align(&self->component);		
 	}	
 }
 
@@ -900,27 +919,29 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 	const char* text)
 {
+	self->terminalhasmessage = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
+	if (!self->terminalhaswarning || self->terminalhaserror) {
+		psy_ui_button_settextcolor(&self->toggleterminal, terminalmessagecolor);
+	}
 }
 
 void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	if (!psy_ui_component_visible(&self->terminal.component)) {
-		psy_ui_component_show(&self->terminal.component);
-		psy_ui_component_align(&self->component);		
-	}	
+	self->terminalhaswarning = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
+	if (!self->terminalhaserror) {
+		psy_ui_button_settextcolor(&self->toggleterminal, terminalwarningcolor);
+	}
 }
 
 void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 	const char* text)
 {
-	if (!psy_ui_component_visible(&self->terminal.component)) {		
-		psy_ui_component_show(&self->terminal.component);
-		psy_ui_component_align(&self->component);		
-	}	
+	self->terminalhaserror = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
+	psy_ui_button_settextcolor(&self->toggleterminal, terminalerrorcolor);
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
@@ -1056,4 +1077,22 @@ bool mainframe_onclose(MainFrame* self)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
+{
+	if (!psy_ui_isvaluezero(psy_ui_component_size(
+		&self->terminal.component).height)) {
+		psy_ui_component_resize(&self->terminal.component,
+			psy_ui_size_zero());
+		self->terminalhaserror = FALSE;
+		self->terminalhaswarning = FALSE;
+		self->terminalhasmessage = FALSE;
+		psy_ui_button_settextcolor(&self->toggleterminal, 0x00CACACA);
+	} else {
+		psy_ui_component_resize(&self->terminal.component,
+			psy_ui_size_make(psy_ui_value_makepx(0),
+				psy_ui_value_makeeh(10)));		
+	}
+	psy_ui_component_align(&self->component);
 }

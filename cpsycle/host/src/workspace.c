@@ -1164,6 +1164,8 @@ void workspace_makelanges(Workspace* self)
 {
 	psy_Properties* machineview;
 	psy_Properties* sequencerview;
+	psy_Properties* newmachine;
+	psy_Properties* samplesview;
 		
 	psy_properties_write_string(self->lang, "Load", "Cargar");
 	psy_properties_write_string(self->lang, "Save", "Guardar");
@@ -1183,12 +1185,15 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Delete", "Eliminar");
 	psy_properties_write_string(self->lang, "Paste", "Pegar");
 	psy_properties_write_string(self->lang, "Clear", "Borrar");
+	psy_properties_write_string(self->lang, "Duplicate", "Duplicar");
 	psy_properties_write_string(self->lang, "New Trk", "Nuevo Trk");
 	psy_properties_write_string(self->lang, "Del Trk", "Eliminar Trk");
 	psy_properties_write_string(self->lang, "Clone", "Clonar");	
 	psy_properties_write_string(self->lang, "Greetings", "Saludos");	
 	psy_properties_write_string(self->lang, "Octave", "Octava");	
 	psy_properties_write_string(self->lang, "OK", "¡vale!");
+	psy_properties_write_string(self->lang, "All", "Todos");
+	psy_properties_write_string(self->lang, "Favorites", "Favoritos");
 	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");	
 	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");
 	psy_properties_write_string(self->lang, "Machine View", "Vista de las Máquinas");
@@ -1246,7 +1251,33 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(sequencerview, "Show playlist", "Mostrar lista de reproducción");
 	psy_properties_write_string(sequencerview, "Show pattern names", "Mostrar nombres del patterns");
 	psy_properties_write_string(sequencerview, "Record tweaks", "Grabar tweaks");
-	psy_properties_write_string(sequencerview, "Duration", "Duración");		
+	psy_properties_write_string(sequencerview, "Duration", "Duración");
+	newmachine = psy_properties_create_section(self->lang, "newmachine");
+	psy_properties_write_string(newmachine,
+		"Load new gamefx and Blitz if version unknown",
+		"Cargar gamefx y blitz nuevo si versión desconocido");
+	psy_properties_write_string(newmachine,
+		"Song loading compatibility",
+		"Compatibilidad de carga de canción");
+	psy_properties_write_string(newmachine, "Rescan", "Reexplorar");
+	psy_properties_write_string(newmachine, "Select plugin directories", "Seleccionar directorios de plugins");
+	psy_properties_write_string(newmachine, "Sort By Favorite", "Ordenar Por Favorito");
+	psy_properties_write_string(newmachine, "Sort By Name", "Ordenar Por Nombre");
+	psy_properties_write_string(newmachine, "Sort By Type", "Ordenar Por Tipo");
+	psy_properties_write_string(newmachine, "Sort By Mode", "Ordenar Por Modo");
+	psy_properties_write_string(newmachine, "Select a plugin to view its description",
+		"Selecciona una máquina para mirar su descripción");	
+	samplesview = psy_properties_create_section(self->lang, "samplesview");
+	psy_properties_write_string(samplesview, "Sample Name", "Nombre de Onda");
+	psy_properties_write_string(samplesview, "Sample Rate", "Frecuencia de Muestreo");		
+	psy_properties_write_string(samplesview, "Samples", "Número de Muestras");
+	psy_properties_write_string(samplesview, "Group samples", "Grupo de ondas");
+	psy_properties_write_string(samplesview, "Groups first sample", "Primera onda de los grupos");
+	psy_properties_write_string(samplesview, "Default Volume", "Vol por defecto");	
+	psy_properties_write_string(samplesview, "Global Volume", "Volumen global");	
+	psy_properties_write_string(samplesview, "Pan Position", "Panoramización");	
+	psy_properties_write_string(samplesview, "Sampled Note", "Nota de muestra");	
+	psy_properties_write_string(samplesview, "Pitch Finetune", "Altura afinado");
 }
 
 const char* workspace_translate(Workspace* self, const char* key)
@@ -2121,7 +2152,7 @@ const char* workspace_plugins_directory(Workspace* self)
 		PSYCLE_PLUGINS_DEFAULT_DIR);
 }
 
-const char* workspace_lusscripts_directory(Workspace* self)
+const char* workspace_luascripts_directory(Workspace* self)
 {
 	return psy_properties_readstring(self->directories, "luascripts",
 		PSYCLE_LUASCRIPTS_DEFAULT_DIR);

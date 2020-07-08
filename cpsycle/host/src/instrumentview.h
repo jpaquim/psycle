@@ -61,6 +61,10 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 } InstrumentGeneralView;
 
+void instrumentgeneralview_init(InstrumentGeneralView*,
+	psy_ui_Component* parent, psy_audio_Instruments*,
+	Workspace*);
+
 typedef struct {
 	psy_ui_Component component;	
 	EnvelopeView envelopeview;

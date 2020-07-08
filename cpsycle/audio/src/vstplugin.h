@@ -7,8 +7,6 @@
 #include "custommachine.h"
 #include "library.h"
 
-struct psy_audio_VstPluginMachineParam;
-
 typedef struct psy_audio_VstPluginMachineParam {
 	psy_audio_CustomMachineParam custommachineparam;
 	struct AEffect* effect;

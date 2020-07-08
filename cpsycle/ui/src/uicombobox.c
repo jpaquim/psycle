@@ -18,6 +18,8 @@ static void onmousedown(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 static void onmousemove(psy_ui_ComboBox*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_ComboBox*);
 static void onmouseleave(psy_ui_ComboBox*);
+static bool haspreventry(psy_ui_ComboBox*);
+static bool hasnextentry(psy_ui_ComboBox*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -121,7 +123,7 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, 
-		psy_ui_value_px(&size.width, &tm),
+		psy_ui_value_px(&size.width, &tm) - 42,
 		psy_ui_value_px(&size.height, &tm));	
 	vcenter = (psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2;
 	varrowcenter = (psy_ui_value_px(&size.height, &tm) - 10) / 2;
@@ -159,40 +161,44 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	} else {
 		psy_ui_drawsolidpolygon(g, arrow_down, 4, arrowcolor, arrowcolor);
 	}
-	ax = psy_ui_value_px(&size.width, &tm) - 25;
-	ay = 2 + varrowcenter;
+	if (hasnextentry(self)) {
+		ax = psy_ui_value_px(&size.width, &tm) - 25;
+		ay = 2 + varrowcenter;
 
-	arrow_right[0].x = 0 + ax;
-	arrow_right[0].y = 0 + ay;
-	arrow_right[1].x = 0 + ax;
-	arrow_right[1].y = 8 + ay;
-	arrow_right[2].x = 4 + ax;
-	arrow_right[2].y = 4 + ay;
-	arrow_right[3] = arrow_right[0];
+		arrow_right[0].x = 0 + ax;
+		arrow_right[0].y = 0 + ay;
+		arrow_right[1].x = 0 + ax;
+		arrow_right[1].y = 8 + ay;
+		arrow_right[2].x = 4 + ax;
+		arrow_right[2].y = 4 + ay;
+		arrow_right[3] = arrow_right[0];
 
-	if (self->hover == 3) {
-		psy_ui_drawsolidpolygon(g, arrow_right, 4, arrowhighlightcolor,
-			arrowhighlightcolor);
-	} else {
-		psy_ui_drawsolidpolygon(g, arrow_right, 4, arrowcolor, arrowcolor);
+		if (self->hover == 3) {
+			psy_ui_drawsolidpolygon(g, arrow_right, 4, arrowhighlightcolor,
+				arrowhighlightcolor);
+		} else {
+			psy_ui_drawsolidpolygon(g, arrow_right, 4, arrowcolor, arrowcolor);
+		}
 	}
 
-	ax = psy_ui_value_px(&size.width, &tm) - 40;
-	ay = 2 + varrowcenter;
+	if (haspreventry(self)) {
+		ax = psy_ui_value_px(&size.width, &tm) - 40;
+		ay = 2 + varrowcenter;
 
-	arrow_left[0].x = 4 + ax;
-	arrow_left[0].y = 0 + ay;
-	arrow_left[1].x = 4 + ax;
-	arrow_left[1].y = 8 + ay;
-	arrow_left[2].x = 0 + ax;
-	arrow_left[2].y = 4 + ay;
-	arrow_left[3] = arrow_left[0];
+		arrow_left[0].x = 4 + ax;
+		arrow_left[0].y = 0 + ay;
+		arrow_left[1].x = 4 + ax;
+		arrow_left[1].y = 8 + ay;
+		arrow_left[2].x = 0 + ax;
+		arrow_left[2].y = 4 + ay;
+		arrow_left[3] = arrow_left[0];
 
-	if (self->hover == 2) {
-		psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor,
-			arrowhighlightcolor);
-	} else {
-		psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowcolor, arrowcolor);
+		if (self->hover == 2) {
+			psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowhighlightcolor,
+				arrowhighlightcolor);
+		} else {
+			psy_ui_drawsolidpolygon(g, arrow_left, 4, arrowcolor, arrowcolor);
+		}
 	}
 }
 
@@ -270,6 +276,24 @@ void onmouseleave(psy_ui_ComboBox* self)
 {
 	self->hover = 0;
 	psy_ui_component_invalidate(&self->component);
+}
+
+bool haspreventry(psy_ui_ComboBox* self)
+{
+	intptr_t index;
+
+	index = psy_ui_combobox_cursel(self);
+	return (index > 0);
+}
+
+bool hasnextentry(psy_ui_ComboBox* self)
+{
+	intptr_t count;
+	intptr_t index;
+
+	index = psy_ui_combobox_cursel(self);
+	count = self->imp->vtable->dev_count(self->imp);
+	return (index < count - 1);
 }
 
 // psy_ui_ComboBoxImp vtable

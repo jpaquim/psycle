@@ -6,10 +6,10 @@
 #include "zoombox.h"
 #include "../../detail/portable.h"
 
+static void zoombox_ondestroy(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_updatelabel(ZoomBox*);
-static void zoombox_ondestroy(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onmousewheel(ZoomBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 
@@ -90,7 +90,10 @@ void zoombox_onmousewheel(ZoomBox* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
 {
 	if (ev->delta != 0) {
-		zoombox_setrate(self, self->zoomrate + ((ev->delta > 0) ? 1 : -1) *
+		zoombox_setrate(self, self->zoomrate +
+			((ev->delta > 0)
+			? 1
+			: -1) *
 			self->zoomstep);
 	}
 	ev->preventdefault = 1;

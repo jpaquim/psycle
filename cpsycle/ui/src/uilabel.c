@@ -104,7 +104,9 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	} else {
 		numcolumnavgchars = UINTPTR_MAX;
 	}
-
+	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_VERTICAL) == psy_ui_ALIGNMENT_CENTER_VERTICAL) {
+		centery = (size.height - tm.tmHeight) / 2;
+	}
 	string = malloc(strlen(self->text) + 1);
 	psy_snprintf(string, strlen(self->text) + 1, "%s", self->text);
 	token = strtok(string, seps);

@@ -43,14 +43,29 @@ INLINE int luamachine_numparameters(psy_audio_LuaMachine* self)
 	return self->numparameters_;
 }
 
+struct psy_audio_LuaPlugin;
+
+typedef struct psy_audio_LuaPluginMachineParam {
+	psy_audio_CustomMachineParam custommachineparam;
+	struct psy_audio_LuaPlugin* plugin;
+	uintptr_t index;
+} psy_audio_LuaPluginMachineParam;
+
+void psy_audio_luapluginmachineparam_init(psy_audio_LuaPluginMachineParam*, struct psy_audio_LuaPlugin* plugin,
+	uintptr_t index);
+void psy_audio_luapluginmachineparam_dispose(psy_audio_LuaPluginMachineParam*);
+psy_audio_LuaPluginMachineParam* psy_audio_luapluginmachineparam_alloc(void);
+
 struct psy_audio_Lock;
 
-typedef struct {
+typedef struct psy_audio_LuaPlugin {
 	psy_audio_CustomMachine custommachine;
 	psy_audio_PsycleScript script;
 	psy_audio_LuaMachine* client;
 	psy_audio_MachineInfo* plugininfo;
 	struct psy_audio_Lock* lock;
+	psy_audio_LuaPluginMachineParam parameter;
+	bool usenoteon;
 } psy_audio_LuaPlugin;
 
 void psy_audio_luaplugin_init(psy_audio_LuaPlugin*, psy_audio_MachineCallback,

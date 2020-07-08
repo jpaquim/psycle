@@ -98,14 +98,12 @@ INLINE int64_t psy_audio_sampleiterator_speed(psy_audio_SampleIterator* self)
 INLINE void psy_audio_sampleiterator_setspeed(psy_audio_SampleIterator* self, double value)
 {
 	// 4294967296 is a left shift of 32bits
-	self->speed = (int64_t)(value * 4294967296.0);	
+	self->speed = (int64_t)(value * 4294967296.0);
 	self->speedinternal =
-		(psy_audio_sampleiterator_currentloopdirection(self) ==
-			psy_audio_LOOPDIRECTION_FORWARD)
+		(!self->sample || psy_audio_sampleiterator_currentloopdirection(self) ==
+				psy_audio_LOOPDIRECTION_FORWARD)
 		? self->speed
-		: -1 * self->speed;
-	psy_dsp_resampler_setspeed(psy_dsp_multiresampler_base(
-		&self->resampler), value);
+		: -1 * self->speed;	
 }
 
 INLINE bool psy_audio_sampleiterator_playing(psy_audio_SampleIterator* self)
@@ -125,6 +123,10 @@ INLINE void psy_audio_sampleiterator_stop(psy_audio_SampleIterator* self)
 
 void psy_audio_sampleiterator_dooffset(psy_audio_SampleIterator*,
 	uint8_t offset);
+
+void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self, ResamplerType quality);
+
+void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator*, struct psy_audio_Sample*);
 
 
 #ifdef __cplusplus

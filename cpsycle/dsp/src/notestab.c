@@ -49,6 +49,36 @@ static char* notes_tab_a220[256] = {
 	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
 };
 
+static char* notes_tab_gmpercussion[] = {
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ", // 0..15
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ", // 16..31
+	"   ","   ","   ",																				 // 32..34
+	"Acoustic Bass Drum","Bass Drum 1","Side Stick","Acoustic Snare",								 // 35..81
+	"Hand Clap","Electric Snare","Low Floor Tom","Closed Hi Hat",
+	"High Floor Tom","Pedal Hi-Hat","Low Tom","Open Hi-Hat",
+	"Low-Mid Tom", "Hi Mid Tom", "Crash Cymbal 1", "High Tom",
+	"Ride Cymbal 1", "Chinese Cymbal", "Ride Bell", "Tambourine",
+	"Splash Cymbal", "Cowbell", "Crash Cymbal 2", "Vibraslap",
+	"Ride Cymbal 2", "Hi Bongo", "Low Bongo", "Mute Hi Conga",
+	"Open Hi Conga", "Low Conga", "High Timbale", "Low Timbale",
+	"High Agogo", "Low Agogo", "Cabasa", "Maracas",
+	"Short Whistle", "Long Whistle", "Short Guiro", "Long Guiro",
+	"Claves", "Hi Wood Block", "Low Wood Block", "Mute Cuica",
+	"Open Cuica", "Mute Triangle", "Open Triangle"
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ", // 81..96
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ", // 97..112
+	"   ","   ","   ","   ", "   ", "   ", "   ",													 // 113..119
+	"off","twk","twf","mcm","tws","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ",
+	"   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   ","   "
+};
+
 const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode)
 {
 	const char* rv;
@@ -60,6 +90,9 @@ const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode)
 		case psy_dsp_NOTESTAB_A220:
 			rv = notes_tab_a220[note];
 		break;
+		case psy_dsp_NOTESTAB_GMPERCUSSION:
+			rv = notes_tab_gmpercussion[note];
+			break;
 		default:
 			rv = notes_tab_a220[255];
 		break;
@@ -77,6 +110,9 @@ const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode)
 		break;
 		case psy_dsp_NOTESTAB_A220:
 			rv = (const char* const *)notes_tab_a220;
+		break;
+		case psy_dsp_NOTESTAB_GMPERCUSSION:
+			rv = (const char* const*)notes_tab_gmpercussion;
 		break;
 		default:
 			rv = (const char* const *)notes_tab_a220;

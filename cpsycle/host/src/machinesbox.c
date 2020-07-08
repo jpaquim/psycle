@@ -149,7 +149,8 @@ void OnMachinesInsert(MachinesBox* self, psy_audio_Machines* machines, int slot)
 void OnMachineSlotChanged(MachinesBox* self, psy_audio_Machines* sender, int slot)
 {
 	if (psy_table_exists(&self->slotslistbox, slot)) {
-		psy_ui_listbox_setcursel(&self->machinelist, slot);	
+		psy_ui_listbox_setcursel(&self->machinelist, 0);
+		psy_ui_component_invalidate(&self->machinelist.component);
 	}
 }
 

@@ -275,9 +275,51 @@ void psy_ui_value_sub(psy_ui_Value* self, const psy_ui_Value* other,
 	}
 }
 
+int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm)
+{
+	if ((self->unit == psy_ui_UNIT_EH && other->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EW && other->unit == psy_ui_UNIT_EW)) {
+		double diff;
+		
+		diff = self->quantity.real - other->quantity.real;
+		if (diff == 0.0) {
+			return 0;
+		}
+		if (diff < 0.0) {
+			return -1;
+		}
+		return 1;
+	} else if ((self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX) ||
+			(self->unit == psy_ui_UNIT_PX && other->unit == psy_ui_UNIT_PX)) {
+		int diff;
+
+		diff = self->quantity.integer - other->quantity.integer;
+		if (diff == 0) {
+			return 0;
+		}
+		if (diff < 0) {
+			return -1;
+		}
+		return 1;
+	} else {
+		int diff;
+
+		diff = psy_ui_value_px(self, tm)  - psy_ui_value_px(other, tm);
+		if (diff == 0) {
+			return 0;
+		}
+		if (diff < 0) {
+			return -1;
+		}
+		return 1;
+	}
+}
+
 void psy_ui_error(const char* err, const char* shorterr)
 {
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	MessageBox(NULL, err, shorterr, MB_OK | MB_ICONERROR);
 #endif
 }
+

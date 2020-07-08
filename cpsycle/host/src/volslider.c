@@ -5,174 +5,78 @@
 
 #include "volslider.h"
 
+#include "convert.h"
+
 #include <songio.h>
 #include <uiapp.h>
 #include <stdio.h>
 #include <math.h>
 #include "../../detail/portable.h"
 
-static int TIMERID_VOLSLIDER = 700;
-
-static void volslider_ondraw(VolSlider*, psy_ui_Graphics*);
-static void volslider_onmousedown(VolSlider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void volslider_onmouseup(VolSlider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void volslider_onmousemove(VolSlider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void volslider_onmousewheel(VolSlider*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
-static void volslider_ontimer(VolSlider*, psy_ui_Component* sender,
-	uintptr_t timerid);
-static void volslider_onsliderchanged(VolSlider*, psy_ui_Component* sender);
-static void volslider_onsongchanged(VolSlider*, Workspace*, int flag,
-	psy_audio_SongFile* songfile);
-
-static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
-
-static void vtable_init(VolSlider* self)
-{
-	if (!vtable_initialized) {
-		vtable = *(self->component.vtable);	
-		vtable.ondraw = (psy_ui_fp_ondraw) volslider_ondraw;
-		vtable_initialized = 1;
-	}
-}
+static void volslider_onviewdescribe(VolSlider*, psy_ui_Slider*, char* text);
+static void volslider_onviewtweak(VolSlider*, psy_ui_Slider*, float value);
+static void volslider_onviewvalue(VolSlider*, psy_ui_Slider*, float* value);
 
 void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
-	self->value = 0.f;
-	self->dragx = -1;
-	self->machines = &workspace->song->machines;
-	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(18),
-			psy_ui_value_makeeh(1)));
-	psy_signal_connect(&self->component.signal_mousedown, self,
-		volslider_onmousedown);
-	psy_signal_connect(&self->component.signal_mousemove, self,
-		volslider_onmousemove);
-	psy_signal_connect(&self->component.signal_mouseup, self,
-		volslider_onmouseup);
-	psy_signal_connect(&self->component.signal_timer, self,
-		volslider_ontimer);	
-	psy_signal_connect(&workspace->signal_songchanged, self,
-		volslider_onsongchanged);
-	psy_signal_connect(&self->component.signal_mousewheel, self,
-		volslider_onmousewheel);
-	psy_ui_component_starttimer(&self->component, TIMERID_VOLSLIDER, 50);
+	self->workspace = workspace;
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_enablealign(&self->component);
+	psy_ui_slider_init(&self->slider, &self->component);
+	psy_ui_slider_settext(&self->slider, "VU");
+	psy_ui_slider_setvaluecharnumber(&self->slider, 10);
+	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_TOP);
+	psy_ui_slider_connect(&self->slider, self, volslider_onviewdescribe,
+		volslider_onviewtweak, volslider_onviewvalue);	
 }
 
-void volslider_ondraw(VolSlider* self, psy_ui_Graphics* g)
+void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender, char* text)
 {
-	psy_ui_Rectangle r;
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-	int sliderwidth;
-	extern psy_ui_App app;
+	if (self->workspace->song && psy_audio_machines_master(
+			&self->workspace->song->machines)) {
+		psy_audio_MachineParam* param;
 
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
-	psy_ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));
-	psy_ui_drawrectangle(g, r);
-	sliderwidth = 6;	
-	psy_ui_setrectangle(&r, (int)((psy_ui_value_px(&size.width, &tm) - sliderwidth) * self->value),
-		2, sliderwidth, psy_ui_value_px(&size.height, &tm) - 4);
-	psy_ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
-	
-}
+		param = psy_audio_machine_tweakparameter(
+			psy_audio_machines_master(&self->workspace->song->machines), 0);
+		if (param) {
+			float normvalue;
+			float volume;
 
-void volslider_onmousedown(VolSlider* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	self->dragx = ev->x - (int)(self->value * (psy_ui_value_px(&size.width, &tm) - 6));
-	psy_ui_component_capture(&self->component);
-}
-
-void volslider_onmousemove(VolSlider* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
-{
-	if (self->dragx != -1) {
-		psy_ui_Size size;
-		psy_ui_TextMetric tm;
-
-		size = psy_ui_component_size(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);
-		self->value = max(0.f, 
-			min(1.f, (ev->x - self->dragx) /
-				(float)(psy_ui_value_px(&size.width, &tm) - 6)));
-		volslider_onsliderchanged(self, sender);
-		psy_ui_component_invalidate(&self->component);
+			normvalue = psy_audio_machineparam_normvalue(param);
+			volume = (normvalue * 2) * (normvalue * 2);			
+			psy_snprintf(text, 10, "%.2f dB",
+				(float)psy_dsp_convert_amp_to_db(volume));
+		}
 	}
 }
 
-void volslider_onmouseup(VolSlider* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void volslider_onviewtweak(VolSlider* self, psy_ui_Slider* sender, float value)
 {
-	self->dragx = -1;
-	psy_ui_component_releasecapture(&self->component);
+	if (self->workspace->song &&
+			psy_audio_machines_master(&self->workspace->song->machines)) {
+		psy_audio_MachineParam* param;
+
+		param = psy_audio_machine_tweakparameter(
+			psy_audio_machines_master(&self->workspace->song->machines), 0);
+		if (param) {
+			psy_audio_machineparam_tweak(param, value);
+		}
+	}
 }
 
-void volslider_onsliderchanged(VolSlider* self, psy_ui_Component* sender)
+void volslider_onviewvalue(VolSlider* self, psy_ui_Slider* sender, float* rv)
 {	
-	if (self->machines && psy_audio_machines_master(self->machines)) {
+	if (self->workspace->song && psy_audio_machines_master(
+			&self->workspace->song->machines)) {
 		psy_audio_MachineParam* param;
 
-		param = psy_audio_machine_tweakparameter(psy_audio_machines_master(self->machines), 0);
+		param = psy_audio_machine_tweakparameter(
+			psy_audio_machines_master(&self->workspace->song->machines), 0);
 		if (param) {
-			psy_audio_machineparam_tweak(param, (float) self->value);
+			*rv = psy_audio_machineparam_normvalue(param);
+			return;
 		}
 	}
-}
-
-void volslider_onsongchanged(VolSlider* self, Workspace* workspace, int flag,
-	psy_audio_SongFile* songfile)
-{
-	self->machines = &workspace->song->machines;
-}
-
-void volslider_ontimer(VolSlider* self, psy_ui_Component* sender, uintptr_t timerid)
-{		
-	if (self->machines && psy_audio_machines_master(self->machines)) {
-		psy_audio_MachineParam* param;
-
-		param = psy_audio_machine_tweakparameter(psy_audio_machines_master(self->machines), 0);
-		if (param) {
-			double oldvalue;
-
-			oldvalue = self->value;
-			self->value = psy_audio_machineparam_normvalue(param);
-			if (oldvalue != self->value) {
-				psy_ui_component_invalidate(&self->component);
-			}
-		}
-	}	
-}
-
-void volslider_onmousewheel(VolSlider* self, psy_ui_Component* sender, psy_ui_MouseEvent* ev)
-{
-	if (ev->delta > 0) {
-		self->value = max(0.f,
-			min(1.f, self->value + 0.1));
-		volslider_onsliderchanged(self, sender);
-		psy_ui_component_invalidate(&self->component);
-	} else
-	if (ev->delta < 0) {
-		self->value = max(0.f,
-			min(1.f, self->value - 0.1));
-		volslider_onsliderchanged(self, sender);
-		psy_ui_component_invalidate(&self->component);
-	}
-	ev->preventdefault = 1;
+	*rv = 0.f;
 }

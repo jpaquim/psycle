@@ -10,6 +10,8 @@
 #include <math.h>
 #include <operations.h>
 
+#include "../../detail/trace.h"
+
 #define MIDDLEA 69
 
 static void psy_audio_waveosctables_makesaw(float* data, int num, int maxharmonic);
@@ -175,6 +177,8 @@ void psy_audio_waveosctables_makesin(float* data, int num, int maxharmonic)
 
     for (i = 0; i < num; ++i) {
         data[i] = (float)(sin(i * to_angle));
+        TRACE_FLOAT(data[i]);
+        TRACE("\n");
     }
 }
 

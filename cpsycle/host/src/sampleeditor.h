@@ -30,6 +30,7 @@ typedef struct {
 	psy_ui_CheckBox selecttogether;
 	psy_ui_CheckBox doublecontloop;
 	psy_ui_CheckBox doublesustainloop;
+	psy_ui_CheckBox drawlines;
 	psy_ui_Label selstartlabel;
 	psy_ui_Edit selstartedit;
 	psy_ui_Label selendlabel;
@@ -124,9 +125,10 @@ typedef struct SampleBox {
 	psy_ui_Component component;
 	psy_Table waveboxes;
 	psy_Signal signal_selectionchanged;
+	Workspace* workspace;
 } SampleBox;
 
-void samplebox_init(SampleBox*, psy_ui_Component* parent);
+void samplebox_init(SampleBox*, psy_ui_Component* parent, Workspace*);
 
 typedef struct SampleEditor {	
 	psy_ui_Component component;
@@ -153,5 +155,7 @@ void sampleeditor_showdoublecontloop(SampleEditor*);
 void sampleeditor_showsinglecontloop(SampleEditor*);
 void sampleeditor_showdoublesustainloop(SampleEditor*);
 void sampleeditor_showsinglesustainloop(SampleEditor*);
+void sampleeditor_drawlines(SampleEditor*);
+void sampleeditor_drawbars(SampleEditor*);
 
 #endif

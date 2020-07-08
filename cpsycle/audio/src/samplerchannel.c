@@ -43,6 +43,8 @@ static void psy_audio_samplerchannel_setpanningslide(psy_audio_SamplerChannel*,
 	int speed);
 static void psy_audio_samplerchannel_performpanningslide(psy_audio_SamplerChannel*);
 static void psy_audio_samplerchannel_setvibrato(psy_audio_SamplerChannel*, int speed, int depth);
+static void psy_audio_samplerchannel_setpitchslide(psy_audio_SamplerChannel*,
+	bool bUp, int speed, int note);
 static void psy_audio_samplerchannel_settremolo(psy_audio_SamplerChannel*, int speed, int depth);
 static void psy_audio_samplerchannel_setpanbrello(psy_audio_SamplerChannel*, int speed, int depth);
 static void  psy_audio_samplerchannel_setretrigger(psy_audio_SamplerChannel*, const int parameter);
@@ -148,6 +150,9 @@ void psy_audio_samplerchannel_effectinit(psy_audio_SamplerChannel* self)
 	// channel volume slide
 	self->chanvolslidespeed = 0.0f;
 	self->chanvolslidemem = 0;
+	// pitchslide
+	self->pitchslidespeed = 0.0f;
+	self->pitchslidemem = 0;
 	// pan
 	self->panslidespeed = 0.0f;
 	self->panslidemem = 0;
@@ -186,8 +191,34 @@ void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel* self,
 	const psy_audio_PatternEvent* ev)
 {
 	int realset = 0;
-	int	realvalue = 0;	
-
+	int	realvalue = 0;
+	int volcmd = 0;
+	
+	//1st check: Channel ( They can appear without an existing playing note and are persistent when a new one comes)
+	switch (volcmd & 0xF0)
+	{
+		case SAMPLER_CMD_VOL_PANNING:
+			psy_audio_samplerchannel_setpanfactor(self,
+				(volcmd & 0x0F) / 15.0f);
+			break;
+		case SAMPLER_CMD_VOL_PANSLIDELEFT:
+			// this command is actually fine pan slide
+			psy_audio_samplerchannel_setpanningslide(self,
+				(volcmd & 0x0F) << 4);
+			break;
+		case SAMPLER_CMD_VOL_PANSLIDERIGHT:
+			// this command is actually fine pan slide
+			psy_audio_samplerchannel_setpanningslide(self,
+				volcmd & 0x0F);
+			break;
+		case SAMPLER_CMD_VOL_VIBRATO:
+			psy_audio_samplerchannel_setvibrato(self,
+				0, (volcmd & 0x0F) << 2);
+			break;
+		default:
+			break;
+	}
+	
 	switch (ev->cmd) {
 		case SAMPLER_CMD_PANNING:
 			self->surround = FALSE;
@@ -494,6 +525,45 @@ void psy_audio_samplerchannel_setvibrato(psy_audio_SamplerChannel* self, int spe
 		speed = self->vibratospeedmem;
 	} else self->vibratospeedmem = speed;	
 	psy_audio_samplerchannel_addeffect(self, SAMPLER_EFFECT_VIBRATO);
+}
+
+void psy_audio_samplerchannel_setpitchslide(psy_audio_SamplerChannel* self,
+	bool bUp, int speed, int note)
+{
+	return;
+
+	if (speed == 0) {
+		if (self->pitchslidemem == 0) return;
+		speed = self->pitchslidemem;
+	} else self->pitchslidemem = speed & 0xff;
+	if (speed < 0xE0 || note != NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+	{									// Porta to note does not have Fine.
+		speed <<= 2;
+		//if (ForegroundVoice()) { ForegroundVoice()->m_PitchSlideSpeed = bUp ? -speed : speed; }
+		if (note != NOTECOMMANDS_EMPTY)
+		{
+			if (note != NOTECOMMANDS_RELEASE) {
+			//	if (ForegroundVoice()) { ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
+				psy_audio_samplerchannel_addeffect(self, SAMPLER_EFFECT_SLIDE2NOTE);
+			}
+		} else {
+			psy_audio_samplerchannel_addeffect(self, SAMPLER_EFFECT_PITCHSLIDE);
+		}
+	} else if (speed < 0xF0) {
+		speed = speed & 0xf;
+		// if (ForegroundVoice())
+		// {
+			//ForegroundVoice()->m_PitchSlideSpeed = bUp ? -speed : speed;
+			//ForegroundVoice()->PitchSlide();
+		//}
+	} else {
+		speed = (speed & 0xf) << 2;
+		//if (ForegroundVoice())
+		//{
+			//ForegroundVoice()->m_PitchSlideSpeed = bUp ? -speed : speed;
+			//ForegroundVoice()->PitchSlide();
+		//}
+	}
 }
 
 void psy_audio_samplerchannel_settremolo(psy_audio_SamplerChannel* self, int speed, int depth)

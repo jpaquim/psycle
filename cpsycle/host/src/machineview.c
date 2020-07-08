@@ -1741,6 +1741,10 @@ void machinewireview_onnewmachineselected(MachineView* self,
 		psy_properties_readstring(plugininfo, "path", ""),
 		psy_properties_int(plugininfo, "shellidx", 0));
 	if (machine) {
+		int favorite;
+
+		favorite = psy_properties_int(plugininfo, "favorite", 0);
+		psy_properties_write_int(plugininfo, "favorite", ++favorite);
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
 
@@ -1761,6 +1765,8 @@ void machinewireview_onnewmachineselected(MachineView* self,
 					psy_audio_machines_append(self->wireview.machines, machine));
 			}
 		tabbar_select(&self->tabbar, 0);
+	} else {
+		workspace_outputerror(self->workspace, self->workspace->machinefactory.errstr);
 	}
 }
 
@@ -1914,22 +1920,26 @@ static void machineview_vtable_init(MachineView* self)
 void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
+	psy_ui_Margin leftmargin;
+	
 	psy_ui_component_init(&self->component, parent);
 	machineview_vtable_init(self);
 	self->component.vtable = &machineview_vtable;
-	self->workspace = workspace;
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
+	self->workspace = workspace;	
 	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
 	psy_ui_notebook_init(&self->notebook, &self->component);	
+	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(3));
+	psy_ui_component_setmargin(&self->notebook.component, &leftmargin);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);	
 	machinewireview_init(&self->wireview,psy_ui_notebook_base(&self->notebook),
 		tabbarparent, workspace);
 	psy_ui_component_setalign(&self->wireview.component, psy_ui_ALIGN_CLIENT);
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
-		self->workspace);
+		self->workspace);		
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
@@ -1938,7 +1948,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_notebook_setpageindex(&self->notebook, 0);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	psy_signal_connect(&self->newmachine.pluginsview.signal_selected, self,
+	psy_signal_connect(&self->newmachine.signal_selected, self,
 		machinewireview_onnewmachineselected);			
 	psy_signal_connect(&self->component.signal_focus, self,
 		machineview_onfocus);

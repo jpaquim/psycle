@@ -548,14 +548,10 @@ void psy_mkdir(const char* path)
 bool psy_direxists(const char* path)
 {
 #if defined _MSC_VER
-	DWORD ftyp = GetFileAttributesA(path);
-//	if (ftyp == INVALID_FILE_ATTRIBUTES)
-//		return FALSE;  //something is wrong with your path!
+	DWORD dwAttrib = GetFileAttributes(path);
 
-	if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
-		return TRUE;   // this is a directory!
-
-	return FALSE;    // this is not a directory!
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+		(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 #elif defined __GNUC__
 	DIR* dir = opendir(path);
 	if (dir) {
