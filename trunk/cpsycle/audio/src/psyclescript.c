@@ -12,7 +12,9 @@
 #endif
 
 #include "psyclescript.h"
+#include "luaimport.h"
 #include "machinedefs.h"
+#include "lock.h"
 
 #include <dir.h>
 
@@ -23,12 +25,14 @@
 #include <stdlib.h>
 
 static void psyclescript_setsearchpath(psy_audio_PsycleScript*, const char* modulepath);
+static void psyclescript_seterrorstr(psy_audio_PsycleScript*, const char* str);
 
 int psyclescript_init(psy_audio_PsycleScript* self)
 {
 	self->L = luaL_newstate();
 	luaL_openlibs(self->L);
 	self->modulepath = strdup("");
+	self->errstr = strdup("");
 	return 0;
 }
 
@@ -41,8 +45,16 @@ int psyclescript_dispose(psy_audio_PsycleScript* self)
   }
   self->L = 0;
   free(self->modulepath);
-  self->modulepath = 0;
+  self->modulepath = NULL;
+  free(self->errstr);
+  self->errstr = NULL;
   return err;
+}
+
+void psyclescript_seterrorstr(psy_audio_PsycleScript* self, const char* str)
+{
+	free(self->errstr);
+	self->errstr = strdup(str);
 }
 
 int psyclescript_load(psy_audio_PsycleScript* self, const char* path)
@@ -138,8 +150,9 @@ int psyclescript_start(psy_audio_PsycleScript* self)
   if (!lua_isnil(self->L, -1)) {
     int status = lua_pcall(self->L, 0, 0, 0);
     if (status) {         
-      const char* msg = lua_tostring(self->L, -1);      
-      return 1;
+      const char* msg = lua_tostring(self->L, -1);
+	  psyclescript_seterrorstr(self, msg);
+      return status;
     }
   }
   return 0;
@@ -231,7 +244,8 @@ int psyclescript_parse_machineinfo(psy_audio_PsycleScript* self, psy_audio_Machi
 				apiversion = (int) luaL_checkinteger(self->L, -1);			
 			} else
 			if (strcmp(key, "noteon") == 0) {
-				noteon = (int) luaL_checkinteger(self->L, -1);			
+				noteon = (int) luaL_checkinteger(self->L, -1);
+				rv->Flags = noteon;
 			}
 		}
 	}	     

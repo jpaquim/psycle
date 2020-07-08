@@ -13,16 +13,22 @@ static void greet_onoriginal(Greet*, psy_ui_Component* sender);
 void greet_init(Greet* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin margin;
+	psy_ui_Margin leftmargin;
 
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_enablealign(&self->component);
+	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(3));
 	self->current = 1;
 	psy_ui_component_settitle(&self->component, "Greetings and info");	
 	psy_ui_label_init(&self->header, &self->component);	
+	psy_ui_component_setmargin(&self->header.component, &leftmargin);
 	psy_ui_label_settextalignment(&self->header, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->header, "Psycledelics, the Community, wants to thank the following people\nfor their contributions in the developement of Psycle");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->thanks, &self->component);	
+	psy_ui_component_setmargin(&self->thanks.component, &leftmargin);
 	psy_ui_label_settextalignment(&self->thanks, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_label_settext(&self->thanks, "Thanks!");
 	psy_ui_component_setalign(&self->thanks.component, psy_ui_ALIGN_TOP);
@@ -30,8 +36,8 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_component_setalign(&self->greetz.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(2));
+		psy_ui_value_makeeh(2),
+		psy_ui_value_makeew(6));
 	psy_ui_component_setmargin(&self->greetz.component, &margin);
 	psy_ui_button_init(&self->original, &self->component);
 	psy_ui_button_settext(&self->original, "Show Original Arguru's Greetings");

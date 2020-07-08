@@ -120,6 +120,9 @@ INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	return lhs;
 }
 
+int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
+	const psy_ui_TextMetric* tm);
+
 INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)
 {
 	return (self->unit == psy_ui_UNIT_PX)
@@ -287,6 +290,24 @@ INLINE psy_ui_IntSize psy_ui_intsize_init_size(psy_ui_Size size,
 	return rv;
 }
 
+INLINE psy_ui_Size psy_ui_max_size(psy_ui_Size lhs, psy_ui_Size rhs,
+	const psy_ui_TextMetric* tm)
+{
+	psy_ui_Size rv;
+
+	if (psy_ui_value_comp(&lhs.width, &rhs.width, tm) > 0) {
+		rv.width = lhs.width;
+	} else {
+		rv.width = rhs.width;
+	}
+	if (psy_ui_value_comp(&lhs.height, &rhs.height, tm) > 0) {
+		rv.height = lhs.height;
+	} else {
+		rv.height = rhs.height;
+	}
+	return rv;
+}
+
 typedef struct {
 	psy_ui_Value top;
 	psy_ui_Value right;
@@ -359,6 +380,35 @@ typedef enum {
 	psy_ui_ALIGNMENT_CENTER_VERTICAL = psy_ui_ALIGNMENT_TOP |
 	psy_ui_ALIGNMENT_BOTTOM
 } psy_ui_Alignment;
+
+typedef enum {
+	psy_ui_BORDER_NONE,
+	psy_ui_BORDER_SOLID
+} psy_ui_BorderStyle;
+
+typedef struct {
+	psy_ui_BorderStyle top;
+	psy_ui_BorderStyle right;
+	psy_ui_BorderStyle bottom;
+	psy_ui_BorderStyle left;
+} psy_ui_Border;
+
+INLINE void psy_ui_border_init(psy_ui_Border* self)
+{
+	self->top = psy_ui_BORDER_NONE;
+	self->right = psy_ui_BORDER_NONE;
+	self->bottom = psy_ui_BORDER_NONE;
+	self->left = psy_ui_BORDER_NONE;
+}
+
+INLINE void psy_ui_border_init_all(psy_ui_Border* self, psy_ui_BorderStyle top,
+	psy_ui_BorderStyle right, psy_ui_BorderStyle bottom, psy_ui_BorderStyle left)
+{
+	self->top = top;
+	self->right = right;
+	self->bottom = bottom;
+	self->left = left;
+}
 
 typedef enum {
 	psy_ui_KEY_LBUTTON         = 0x01,

@@ -19,15 +19,17 @@ extern "C" {
 #endif
 
 typedef struct {
+	// public
+	uintptr_t tracks;
+	int octave;
+	uintptr_t lpb;
+	int tpb;
+	int extraticksperbeat;	
+	// read-only
 	char* title;
 	char* credits;
 	char* comments;
 	psy_dsp_big_beat_t bpm;
-	uintptr_t lpb;
-	uintptr_t tracks;
-	int octave;
-	int tpb;
-	int extraticksperbeat;
 } SongProperties;
 
 void songproperties_init(SongProperties*, const char* title,

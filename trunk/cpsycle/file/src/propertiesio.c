@@ -226,6 +226,12 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 			fwrite("]", sizeof(char), 1, fp);
 		} else		
 		if (property->item.typ != PSY_PROPERTY_TYP_ACTION) {
+			if (strcmp(psy_properties_key(property), "favorite") == 0) {
+				property = property;
+				if (psy_properties_value(property) > 0) {
+					property = property;
+				}
+			}
 			fwrite(psy_properties_key(property), sizeof(char),
 				strlen(psy_properties_key(property)), fp);
 			fwrite("=", sizeof(char), 1, fp);

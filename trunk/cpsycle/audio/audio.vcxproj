@@ -155,8 +155,11 @@
     </ClCompile>
     <ClCompile Include="src\lock.c" />
     <ClCompile Include="src\luaarray.c" />
+    <ClCompile Include="src\luadspmath.c" />
     <ClCompile Include="src\luaenvelope.c" />
+    <ClCompile Include="src\luafilter.c" />
     <ClCompile Include="src\luaimport.c" />
+    <ClCompile Include="src\luamidinotes.c" />
     <ClCompile Include="src\luaplugin.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -271,8 +274,11 @@
     <ClInclude Include="src\library.h" />
     <ClInclude Include="src\lock.h" />
     <ClInclude Include="src\luaarray.h" />
+    <ClInclude Include="src\luadspmath.h" />
     <ClInclude Include="src\luaenvelope.h" />
+    <ClInclude Include="src\luafilter.h" />
     <ClInclude Include="src\luaimport.h" />
+    <ClInclude Include="src\luamidinotes.h" />
     <ClInclude Include="src\luaplugin.h" />
     <ClInclude Include="src\luawaveosc.h" />
     <ClInclude Include="src\machine.h" />

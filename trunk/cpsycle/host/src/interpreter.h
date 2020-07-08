@@ -1,23 +1,21 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(VOLSLIDER_H)
-#define VOLSLIDER_H
+#if !defined(INTERPRETER_H)
+#define INTERPRETER_H
 
-#include <uislider.h>
-#include <machines.h>
 #include "workspace.h"
 
-// aim: Master Volume slider
-//
-// todo: replace with psy_ui_Slider
+// aim: terminal host control
 
-typedef struct {	
-	psy_ui_Component component;
-	psy_ui_Slider slider;
+typedef struct {
 	Workspace* workspace;
-} VolSlider;
+} Interpreter;
 
-void volslider_init(VolSlider*, psy_ui_Component* parent, Workspace*);
+int interpreter_init(Interpreter*, Workspace*);
+void interpreter_dispose(Interpreter*);
+int interpreter_start(Interpreter*);
+int interpreter_onidle(Interpreter*);
+
 
 #endif

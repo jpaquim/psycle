@@ -199,7 +199,7 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 		uintptr_t paramnum;		
 						
 		if (self->numparams != psy_audio_machine_numparameters(self->machine)) {
-			self->numparams = psy_audio_machine_numparameters(self->machine);
+				self->numparams = psy_audio_machine_numparameters(self->machine);
 			paramview_computepositions(self);
 			self->sizechanged = 1;
 			psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
@@ -207,6 +207,9 @@ void ondraw(ParamView* self, psy_ui_Graphics* g)
 		numrows = paramview_numrows(self);
 		for (paramnum = 0; paramnum < psy_audio_machine_numparameters(self->machine);
 				++paramnum) {
+			if (paramnum == 42) {
+				self = self;
+			}
 			psy_audio_MachineParam* machineparam;
 
 			machineparam = psy_audio_machine_parameter(self->machine, paramnum);
@@ -807,7 +810,7 @@ void onpreferredsize(ParamView* self, psy_ui_Size* limit, psy_ui_Size* rv)
 void paramview_computepositions(ParamView* self)
 {
 	paramview_clearpositions(self);
-	if (self->machine) {				
+	if (self->machine) {
 		uintptr_t param;
 		uintptr_t numrows;
 		uintptr_t row = 0;
@@ -823,7 +826,7 @@ void paramview_computepositions(ParamView* self)
 		numrows = paramview_numrows(self);
 		self->cpmax.width = psy_ui_value_makepx(0);
 		for (param = 0; param < psy_audio_machine_numparameters(self->machine);
-				++param) {
+			++param) {
 			psy_ui_Rectangle* position;
 			psy_ui_Rectangle* firstrow;
 			uintptr_t paramtype;
@@ -840,14 +843,14 @@ void paramview_computepositions(ParamView* self)
 				paramtype = MPF_IGNORE;
 				small = TRUE;
 			}
-			position = (psy_ui_Rectangle*) malloc(sizeof(psy_ui_Rectangle));
-			psy_ui_setrectangle(position, cpx, 0, 0, 0);			
+			position = (psy_ui_Rectangle*)malloc(sizeof(psy_ui_Rectangle));
+			psy_ui_setrectangle(position, cpx, 0, 0, 0);
 			if (paramtype == MPF_SLIDERLEVEL) {
 				position->left += self->skin->slider.destwidth;
 			} else
-			if (paramtype == MPF_SLIDERCHECK) {
-				position->left += 50;
-			}
+				if (paramtype == MPF_SLIDERCHECK) {
+					position->left += 50;
+				}
 			psy_table_insert(&self->positions, param, position);
 			mpfsize(self, paramtype, small, &width, &height);
 			if (colmax < width) {
@@ -855,13 +858,13 @@ void paramview_computepositions(ParamView* self)
 			}
 			firstrow = psy_table_at(&self->positions, row);
 			if (paramtype != MPF_IGNORE && paramtype != MPF_SLIDERLEVEL &&
-					paramtype != MPF_SLIDERCHECK) {
+				paramtype != MPF_SLIDERCHECK) {
 				if (height > (firstrow->bottom - firstrow->top)) {
 					firstrow->bottom = firstrow->top + height;
-				}				
-			}			
+				}
+			}
 			++row;
-			if (row >= numrows) {
+			if (row >= numrows || param == psy_audio_machine_numparameters(self->machine) - 1) {
 				uintptr_t i;
 
 				for (i = paramrowbegin; i <= param; ++i) {

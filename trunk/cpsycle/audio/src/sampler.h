@@ -55,8 +55,6 @@ typedef struct psy_audio_Sampler {
 	psy_dsp_amp_t clipmax;
 	// Instrument Bank 0: PS1 1: Sampulse
 	int32_t instrumentbank;	
-	psy_List* cmds;
-	psy_Table cmdmap;
 	ResamplerType resamplerquality;
 	psy_audio_SamplerTickTimer ticktimer;
 	uintptr_t samplerowcounter;
@@ -69,7 +67,6 @@ void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback);
 psy_audio_Sampler* psy_audio_sampler_alloc(void);
 psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback);
 const psy_audio_MachineInfo* psy_audio_sampler_info(void);
-psy_audio_SamplerCmd* psy_audio_sampler_cmd(psy_audio_Sampler*, int patternid);
 
 INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
 {

@@ -151,6 +151,25 @@ extern "C" {
 #define	SAMPLER_CMD_E9_LOCAL_FILTER      0x0D // (p)Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
 #define	SAMPLER_CMD_E9_PLAY_FORWARD      0x0E // Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
 #define	SAMPLER_CMD_E9_PLAY_BACKWARD     0x0F // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward. 
+
+
+#define	SAMPLER_CMD_VOL_VOLUME0			0x00  // 0x00..0x0F (63)  ||
+#define	SAMPLER_CMD_VOL_VOLUME1			0x10  // 0x10..0x1F (63)  || All are the same command.
+#define	SAMPLER_CMD_VOL_VOLUME2			0x20  // 0x20..0x2F (63)  ||
+#define	SAMPLER_CMD_VOL_VOLUME3			0x30  // 0x30..0x3F (63)  ||
+#define	SAMPLER_CMD_VOL_VOLSLIDEUP		0x40  // 0x40..0x4F (16)
+#define	SAMPLER_CMD_VOL_VOLSLIDEDOWN	0x50  // 0x50..0x5F (16)
+#define	SAMPLER_CMD_VOL_FINEVOLSLIDEUP	0x60  // 0x60..0x6F (16)
+#define	SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN 0x70 // 0x70..0x7F (16)
+#define	SAMPLER_CMD_VOL_PANNING			0x80  // 0x80..0x8F (16)
+#define	SAMPLER_CMD_VOL_PANSLIDELEFT	0x90  // 0x90..0x9F (16)
+#define	SAMPLER_CMD_VOL_PANSLIDERIGHT	0xA0  // 0xA0..0xAF (16)
+#define	SAMPLER_CMD_VOL_VIBRATO			0xB0  // 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy 
+#define	SAMPLER_CMD_VOL_TONEPORTAMENTO	0xC0  // 0xC0..0xCF (16) Linked to Porta2Note 
+#define	SAMPLER_CMD_VOL_PITCH_SLIDE_UP	0xD0  // 0xD0..0xDF (16)
+#define	SAMPLER_CMD_VOL_PITCH_SLIDE_DOWN 0xE0 // 0xE0..0xEF (16)
+											   // 0xFF -> Blank.
+	
 	
 #define ISSLIDEUP(val) !((val)&0x0F)
 #define ISSLIDEDOWN(val) !((val)&0xF0)

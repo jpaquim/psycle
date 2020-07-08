@@ -88,7 +88,9 @@ void psy_audio_sampleiterator_initbuffer(psy_audio_SampleIterator* self)
 	//psy_audio_buffer_clearsamples(&self->buffer, size);
 	self->lBuffer = dsp.memory_alloc(REFILLBUFFERSIZE, sizeof(psy_dsp_amp_t));
 	self->rBuffer = dsp.memory_alloc(REFILLBUFFERSIZE, sizeof(psy_dsp_amp_t));
-	psy_audio_sampleiterator_refillbuffers(self, FALSE);
+	if (self->sample) {
+		psy_audio_sampleiterator_refillbuffers(self, FALSE);
+	}
 }
 
 void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator* self)
@@ -108,29 +110,35 @@ void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator* self)
 void psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(
 	psy_audio_SampleIterator* self, psy_audio_Sample* sample)
 {
-	if (psy_audio_sampleiterator_sustainlooptype(self)
+	if (sample) {
+		if (psy_audio_sampleiterator_sustainlooptype(self)
 			!= psy_audio_SAMPLE_LOOP_DO_NOT) {
-		self->currentlooptype = psy_audio_sampleiterator_sustainlooptype(self);
-		self->currentloopstart =
-			psy_audio_sampleiterator_sustainloopstart(self);
-		self->currentloopend = psy_audio_sampleiterator_sustainloopend(self);
+			self->currentlooptype = psy_audio_sampleiterator_sustainlooptype(self);
+			self->currentloopstart =
+				psy_audio_sampleiterator_sustainloopstart(self);
+			self->currentloopend = psy_audio_sampleiterator_sustainloopend(self);
 
-	} else
-	if (psy_audio_sampleiterator_looptype(self)
-			!= psy_audio_SAMPLE_LOOP_DO_NOT) {
-		self->currentlooptype = psy_audio_sampleiterator_looptype(self);
-		self->currentloopstart = psy_audio_sampleiterator_loopstart(self);
-		self->currentloopend = psy_audio_sampleiterator_loopend(self);
+		} else
+			if (psy_audio_sampleiterator_looptype(self)
+				!= psy_audio_SAMPLE_LOOP_DO_NOT) {
+				self->currentlooptype = psy_audio_sampleiterator_looptype(self);
+				self->currentloopstart = psy_audio_sampleiterator_loopstart(self);
+				self->currentloopend = psy_audio_sampleiterator_loopend(self);
+			} else {
+				// No loop is considered a loop that stops at the end.
+				// This way, it is not needed to check if a loop is enabled when
+				// checking if end loop is reached.
+				self->currentlooptype = psy_audio_SAMPLE_LOOP_DO_NOT;
+				self->currentloopstart = 0;
+				self->currentloopend = psy_audio_sampleiterator_length(self);
+			}
+		if (self->currentloopstart >= self->currentloopend) {
+			self->currentloopstart = self->currentloopend - 1;
+		}		
 	} else {
-		// No loop is considered a loop that stops at the end.
-		// This way, it is not needed to check if a loop is enabled when
-		// checking if end loop is reached.
 		self->currentlooptype = psy_audio_SAMPLE_LOOP_DO_NOT;
 		self->currentloopstart = 0;
-		self->currentloopend = psy_audio_sampleiterator_length(self);
-	}
-	if (self->currentloopstart >= self->currentloopend) {
-		self->currentloopstart = self->currentloopend - 1;
+		self->currentloopend = 0;
 	}
 	self->currentloopdirection = psy_audio_LOOPDIRECTION_FORWARD;
 	self->speedinternal = self->speed;
@@ -447,6 +455,32 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 		// TRACE("368 ERROR. Samples differ! %d - %d (%d,%d)\n", *m_pL, *(m_pWave->pWaveDataL() + pos), (m_pL - lBuffer), pos);
 	// }
 #endif
-	amount.QuadPart /= psy_audio_sampleiterator_speed(self);
+	if (psy_audio_sampleiterator_speed(self) != 0) {
+		amount.QuadPart /= psy_audio_sampleiterator_speed(self);
+	} else {
+		amount.QuadPart = 0;
+	}
 	return amount.LowPart + 1;
+}
+
+void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self,
+	ResamplerType quality)
+{
+	psy_dsp_multiresampler_settype(&self->resampler, quality);
+}
+
+ResamplerType psy_audio_sampleiterator_quality(psy_audio_SampleIterator* self)
+{
+	return psy_dsp_multiresampler_type(&self->resampler);	
+}
+
+void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator* self,
+	psy_audio_Sample* sample)
+{
+	self->sample = sample;
+	psy_audio_sampleiterator_psy_audio_sampleiterator_initloop(self, sample);
+	self->pos.QuadPart = 0;
+	if (self->sample) {
+		psy_audio_sampleiterator_refillbuffers(self, FALSE);
+	}
 }

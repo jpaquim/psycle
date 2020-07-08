@@ -61,15 +61,15 @@ typedef struct psy_dsp_Envelope {
 	int rsvd;
 	psy_dsp_EnvelopeSettings settings;	
 	uintptr_t samplerate;
-	int stage;
 	int sustainstage;
 	psy_List* currstage;
+	psy_List* susstage;
 	psy_dsp_amp_t startpeak;
 	psy_dsp_amp_t value;
-	psy_dsp_amp_t step;
-	int tickcount;
-	psy_dsp_seconds_t nexttime; // unit frames
-	int susdone;
+	psy_dsp_amp_t step;	
+	uintptr_t samplecount;
+	uintptr_t nexttime;
+	bool susdone;
 } psy_dsp_Envelope;
 
 void psy_dsp_envelope_init(psy_dsp_Envelope*);
@@ -79,6 +79,11 @@ void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, uintptr_t samplerate);
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope*);
 void psy_dsp_envelope_start(psy_dsp_Envelope*);
 void psy_dsp_envelope_release(psy_dsp_Envelope*);
+
+INLINE bool psy_dsp_envelope_playing(psy_dsp_Envelope* self)
+{
+	return self->currstage != NULL;	
+}
 
 #ifdef __cplusplus
 }

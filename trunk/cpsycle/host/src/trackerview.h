@@ -242,7 +242,7 @@ typedef struct {
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
-	TrackerGridState*, TrackerLineState*, Workspace*);
+	TrackerGridState*, TrackerLineState*, TrackerGridEditMode, Workspace*);
 void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*);
 void trackergrid_setsharedlinestate(TrackerGrid*, TrackerLineState*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);

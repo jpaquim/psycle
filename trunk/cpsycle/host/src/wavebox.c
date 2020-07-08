@@ -192,6 +192,9 @@ void waveboxcontext_updateoffsetstep(WaveBoxContext* self)
 	}
 }
 
+
+static void wavebox_updatetext(WaveBox*, Workspace*);
+static void wavebox_onlanguagechanged(WaveBox*, Workspace*);
 static void wavebox_ondraw(WaveBox*, psy_ui_Graphics*);
 static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
 static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender,
@@ -225,19 +228,19 @@ static void vtable_init(WaveBox* self)
 	}
 }
 
-void wavebox_init(WaveBox* self, psy_ui_Component* parent)
+void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	self->channel = 0;	
-	self->nowavetext = 0;
+	self->nowavetext = strdup("No wave loaded");
 	self->context.loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	self->preventdrawonselect = FALSE;
 	self->dragstarted = FALSE;
+	self->drawline = FALSE;
 	waveboxcontext_init(&self->context, &self->component);
-	wavebox_setnowavetext(self, "No wave loaded");
 	psy_signal_init(&self->selectionchanged);
 	psy_signal_connect(&self->component.signal_destroy, self, wavebox_ondestroy);
 	psy_signal_connect(&self->component.signal_mousedown, self,
@@ -248,6 +251,9 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent)
 		wavebox_onmouseup);
 	psy_signal_connect(&self->component.signal_mousedoubleclick, self,
 		wavebox_onmousedoubleclick);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		wavebox_onlanguagechanged);
+	wavebox_updatetext(self, workspace);
 }
 
 void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
@@ -256,26 +262,39 @@ void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
 	free(self->nowavetext);
 }
 
+void wavebox_updatetext(WaveBox* self, Workspace* workspace)
+{
+	wavebox_setnowavetext(self,
+		workspace_translate(workspace, self->nowavetext));
+}
+
+void wavebox_onlanguagechanged(WaveBox* self, Workspace* sender)
+{
+	wavebox_updatetext(self, sender);
+}
+
 WaveBox* wavebox_alloc(void)
 {
 	return (WaveBox*)malloc(sizeof(WaveBox));
 }
 
-WaveBox* wavebox_allocinit(psy_ui_Component* parent)
+WaveBox* wavebox_allocinit(psy_ui_Component* parent, Workspace* workspace)
 {
 	WaveBox* rv;
 
 	rv = wavebox_alloc();
 	if (rv) {
-		wavebox_init(rv, parent);
+		wavebox_init(rv, parent, workspace);
 	}
 	return rv;
 }
 
 void wavebox_setnowavetext(WaveBox* self, const char* text)
 {
-	free(self->nowavetext);
-	self->nowavetext = strdup(text);
+	if (text != self->nowavetext) {
+		free(self->nowavetext);
+		self->nowavetext = strdup(text);
+	}
 }
 
 void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample, uintptr_t channel)
@@ -293,6 +312,8 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle r;
 	psy_ui_IntSize size;
 	psy_ui_TextMetric tm;
+	uintptr_t prevframe = 0;
+	psy_dsp_amp_t lastframevalue = 0;
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component), &tm);
@@ -355,10 +376,19 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		if (self->context.selection.hasselection) {
 			psy_ui_drawsolidrectangle(g, wavebox_framerangetoscreen(self,
 				self->context.selection.end, self->context.selection.end), 0x00B1C8B0);
-		}		
+		}	
+		if (self->drawline) {
+			if (g->clip.left > 0) {
+				prevframe = (int)(self->context.offsetstep * (g->clip.left - 1) +
+					(int)(waveboxcontext_numframes(&self->context) * self->context.zoomleft));
+			} else {
+				prevframe = 0;
+			}
+			lastframevalue = wavebox_amp(self, prevframe);
+		}
 		for (x = g->clip.left; x < g->clip.right; ++x) {
 			uintptr_t frame = (int)(self->context.offsetstep * x +
-				(int)(waveboxcontext_numframes(&self->context) * self->context.zoomleft));
+				(int)(waveboxcontext_numframes(&self->context) * self->context.zoomleft));			
 			uintptr_t realframe;
 			psy_dsp_amp_t framevalue;
 			psy_ui_Rectangle r;
@@ -369,7 +399,7 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			if (frame >= waveboxcontext_numframes(&self->context)) {
 				break;
 			}
-			framevalue = wavebox_amp(self, frame);
+			framevalue = wavebox_amp(self, frame);			
 			if (self->context.selection.hasselection &&
 				realframe >= self->context.selection.start &&
 				realframe <= self->context.selection.end) {
@@ -397,13 +427,23 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			}
 			r.top = centery - (int)(framevalue * scaley);
 			r.bottom = centery;
-			if (r.top > r.bottom) {
-				int temp;
-				temp = r.top;
-				r.top = r.bottom;
-				r.bottom = temp;
+			if (self->drawline) {
+				psy_ui_drawline(g, r.left - 1, centery - (int)(lastframevalue * scaley),
+					r.left, r.top);
+				lastframevalue = framevalue;
+			} else {
+				if (r.top > r.bottom) {
+					int temp;
+					temp = r.top;
+					r.top = r.bottom;
+					r.bottom = temp;
+				}
+				psy_ui_drawrectangle(g, r); // x, centery, x, centery - (int)(framevalue * scaley));
 			}
-			psy_ui_drawrectangle(g, r); // x, centery, x, centery - (int)(framevalue * scaley));
+			
+			if (frame >= waveboxcontext_numframes(&self->context)) {
+				break;
+			}
 		}
 		if (self->context.sample && self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 			psy_ui_setcolor(g, 0x00D1C5B6);

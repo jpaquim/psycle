@@ -54,17 +54,6 @@ static void stepsequencerbar_oneditpositionchanged(StepsequencerBar*,
 static void stepsequencerbar_onpreferredsize(StepsequencerBar*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
-// view
-static void stepsequencerview_ontimer(StepsequencerView*, uintptr_t timerid);
-static void stepsequencerview_onsongchanged(StepsequencerView*,
-	Workspace* sender, int flag, psy_audio_SongFile* songfile);
-static void stepsequencerview_onsteprowselected(StepsequencerView*,
-	psy_ui_Component* sender);
-static void stepsequencerview_setpattern(StepsequencerView*,
-	psy_audio_Pattern*);
-static void stepsequencerview_onsequenceselectionchanged(StepsequencerView*,
-	Workspace* sender);
-
 // bar vtable
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -490,10 +479,19 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect* self,
 }
 
 // stepsequencerview
-// pianoroll vtable
+// view
+static void stepsequencerview_ontimer(StepsequencerView*, uintptr_t timerid);
+static void stepsequencerview_onsongchanged(StepsequencerView*,
+	Workspace* sender, int flag, psy_audio_SongFile* songfile);
+static void stepsequencerview_onsteprowselected(StepsequencerView*,
+	psy_ui_Component* sender);
+static void stepsequencerview_setpattern(StepsequencerView*,
+	psy_audio_Pattern*);
+static void stepsequencerview_onsequenceselectionchanged(StepsequencerView*,
+	Workspace* sender);
 static psy_ui_ComponentVtable stepsequencerview_vtable;
 static int stepsequencerview_vtable_initialized = 0;
-
+// vtable
 static void stepsequencerview_vtable_init(StepsequencerView* self)
 {
 	if (!stepsequencerview_vtable_initialized) {
@@ -503,13 +501,14 @@ static void stepsequencerview_vtable_init(StepsequencerView* self)
 		stepsequencerview_vtable_initialized = 1;
 	}
 }
+// implementation
 void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(2.0));
 	self->workspace = workspace;	
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerview_vtable_init(self);

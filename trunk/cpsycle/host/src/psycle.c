@@ -7,6 +7,9 @@
 #include "mainframe.h"
 #include <uiapp.h>
 #include <dir.h>
+#include <notestab.h>
+
+#include "../../detail/trace.h"
 
 
 // aim: initial entry point for psycle startup
@@ -58,6 +61,14 @@ int psycle_run(uintptr_t instance, int options)
 	extern psy_ui_App app;
 	MainFrame mainframe;
 
+
+	for (int i = 0; i < 256; ++i)
+	{
+		TRACE_INT(i);
+		TRACE(": ");
+		TRACE(psy_dsp_notetostr(i, psy_dsp_NOTESTAB_GMPERCUSSION));
+		TRACE("\n");
+	}
 	// Adds the app path to the environment path to find some
 	// modules (scilexer, for plugins: universalis, vcredist dlls, ...)
 	env = pathenv();

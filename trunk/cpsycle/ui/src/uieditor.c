@@ -88,6 +88,7 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 				sci(self, SCI_SETMARGINWIDTHN, 3, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 4, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 5, 0);
+				// sci(self, SCI_SETCARETSTYLE, CARETSTYLE_BLOCK, 0);
 				psy_ui_editor_styleclearall(self);				
 			}
 		}

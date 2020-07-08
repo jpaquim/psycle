@@ -189,10 +189,14 @@ void patternview_init(PatternView* self,
 		Workspace* workspace)
 {
 	psy_ui_Margin margin;
+	psy_ui_Margin leftmargin;
 	
 	psy_ui_component_init(&self->component, parent);
 	patternview_vtable_init(self);
 	self->component.vtable = &patternview_vtable;
+	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(3));
 	self->workspace = workspace;
 	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component,
@@ -241,7 +245,11 @@ void patternview_init(PatternView* self,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		patternview_onsongchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
-		self, patternview_onsequenceselectionchanged);	
+		self, patternview_onsequenceselectionchanged);
+	psy_ui_component_setmargin(&self->trackerview.linenumbers.component,
+		&leftmargin);
+	psy_ui_component_setmargin(&self->trackerview.linenumberslabel.component,
+		&leftmargin);
 }
 
 void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,

@@ -6,9 +6,7 @@
 #include "envelope.h"
 #include <stdlib.h>
 
-void calcstage(psy_dsp_Envelope* self,
-	psy_dsp_amp_t peakstart, psy_dsp_amp_t peakend,
-	psy_dsp_seconds_t time);
+#include "../../detail/trace.h"
 
 // envelope point
 void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint* self, 
@@ -52,7 +50,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 // envelope settings
 void psy_dsp_envelopesettings_init(psy_dsp_EnvelopeSettings* self)
 {
-	self->points = 0;
+	self->points = NULL;
 }
 
 void psy_dsp_envelopesettings_dispose(psy_dsp_EnvelopeSettings* self)
@@ -72,20 +70,15 @@ void psy_dsp_envelopesettings_addpoint(psy_dsp_EnvelopeSettings* self,
 	}
 }
 
-// envelope
+// psy_dsp_Envelope
+// prototypes
+static void psy_dsp_envelope_startstage(psy_dsp_Envelope*);
+static psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_Envelope*);
+
+// implementation
 void psy_dsp_envelope_init(psy_dsp_Envelope* self)
 {
 	psy_dsp_envelopesettings_init(&self->settings);	
-	self->samplerate = 44100;
-	self->stage = 0;
-	self->sustainstage = 0;
-	self->currstage = 0;
-	self->value = 0;
-	self->step = 0;
-	self->nexttime = 0;
-	self->startpeak = 0;
-	self->tickcount = 0;
-    self->susdone = 0;
 	psy_dsp_envelope_reset(self);
 }
 
@@ -96,15 +89,16 @@ void psy_dsp_envelope_dispose(psy_dsp_Envelope* self)
 
 void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 {
-	psy_dsp_EnvelopePoint* pt;
-
-	self->susdone = 0;
-	self->value = self->startpeak;
-	self->currstage = self->settings.points;
-	if (self->currstage) {
-		pt = (psy_dsp_EnvelopePoint*) self->currstage->entry;
-		calcstage(self, self->startpeak, pt->value, pt->time);
-	}	
+	self->samplerate = 44100;
+	self->sustainstage = 0;
+	self->value = 0.f;
+	self->step = 0;
+	self->nexttime = 0;
+	self->startpeak = 0;
+	self->samplecount = 0;
+	self->susdone = FALSE;
+	self->currstage = NULL;
+	self->susstage = NULL;
 }
 
 void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope* self,
@@ -114,59 +108,72 @@ void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope* self,
 }
 
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
-{	
-	psy_dsp_amp_t rv;
-
-    if (self->currstage && self->nexttime == self->tickcount) {
-		psy_dsp_EnvelopePoint* pt0;
-		psy_dsp_EnvelopePoint* pt1;
-
-		pt0 = (psy_dsp_EnvelopePoint*) self->currstage->entry;
-		++self->stage;
-		self->currstage = self->currstage->next;
-		if (!self->currstage || (!self->susdone && 
-			self->stage == self->sustainstage)) {
-			self->value = pt0->value;
-			self->step = 0;
-			rv = self->value;
-			return rv;
-		}
-		pt1 = (psy_dsp_EnvelopePoint*) self->currstage->entry;      
-		calcstage(self, pt0->value, pt1->value, pt1->time);
-		rv = self->value;
-		self->value += self->step;      
-		++self->tickcount;
-	} else {
-		rv = 0;
+{
+	if (!psy_dsp_envelope_playing(self)) {
+		return 0.f;
 	}
-	return rv;
+	if (self->currstage == self->susstage && !self->susdone) {
+		return self->value;
+	}
+	if (self->nexttime == self->samplecount) {
+		if (self->currstage->next == NULL ||
+				(!self->susdone && self->currstage->next == self->susstage)) {						
+			self->value = psy_dsp_envelope_stagevalue(self);
+			self->step = 0;
+			psy_list_next(&self->currstage);			
+			return self->value;			
+		}
+		self->value = psy_dsp_envelope_stagevalue(self);
+		psy_list_next(&self->currstage);				
+		psy_dsp_envelope_startstage(self);
+	}
+	self->value += self->step;	
+	++self->samplecount;
+	return self->value;
 }
 
 void psy_dsp_envelope_start(psy_dsp_Envelope* self)
-{
-	psy_dsp_envelope_reset(self);
+{	
+	if (self->settings.points) {
+		self->currstage = self->settings.points;
+		self->susstage = psy_list_at(self->settings.points,
+			self->sustainstage);
+		self->value = self->startpeak;
+		self->susdone = FALSE;
+		psy_dsp_envelope_startstage(self);
+	}
 }
 
 void psy_dsp_envelope_release(psy_dsp_Envelope* self)
 {
-	if (self->currstage) {    
-		psy_dsp_EnvelopePoint* pt;
-
-		pt = (psy_dsp_EnvelopePoint*) self->currstage->entry;
-		self->susdone = 1;
-		if (self->stage != self->sustainstage) {
-			pt = (psy_dsp_EnvelopePoint*) self->currstage->tail->entry;
-		}    
-		calcstage(self, self->value, pt->value, pt->time);
+	if (psy_dsp_envelope_playing(self)) {
+		self->susdone = TRUE;
+		if (self->currstage != self->susstage) {
+			self->currstage = psy_list_last(self->settings.points);
+		}	
+		psy_dsp_envelope_startstage(self);
 	}
 }
 
-void calcstage(psy_dsp_Envelope* self,
-	psy_dsp_amp_t peakstart, psy_dsp_amp_t peakend,
-	psy_dsp_seconds_t time)
+void psy_dsp_envelope_startstage(psy_dsp_Envelope* self)
 {
-	self->nexttime = time * self->samplerate;
-	self->value = (float) peakstart;
-	self->tickcount = 0;
-	self->step = (peakend - peakstart) / self->nexttime;
+	if (self->currstage) {
+		psy_dsp_EnvelopePoint* pt;
+
+		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage);
+		self->nexttime = (uintptr_t)(pt->time * self->samplerate);
+		self->samplecount = 0;
+		self->step = (pt->value - self->value) / self->nexttime;
+	}
+}
+
+psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_Envelope* self)
+{
+	if (self->currstage) {
+		psy_dsp_EnvelopePoint* pt;
+
+		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage);
+		return pt->value;
+	}
+	return 0.f;
 }

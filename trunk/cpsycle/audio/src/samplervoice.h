@@ -32,7 +32,7 @@ typedef struct {
 	psy_dsp_ADSR amplitudeenvelope;
 	psy_dsp_ADSR panenvelope;
 	psy_dsp_ADSR pitchenvelope;
-	psy_dsp_ADSR filterenv;
+	psy_dsp_ADSR filterenvelope;
 
 	// SampleIterator (WaveDataController)
 	psy_List* positions;
@@ -50,8 +50,7 @@ typedef struct {
 	bool stopping;
 	int note;
 	int period;
-	int m_Volume;
-	psy_dsp_amp_t realvolume;
+	int volume;	
 	psy_dsp_amp_t currrandvol;
 	// Volume/Panning ramping 
 	psy_dsp_Slider rampl;
@@ -101,7 +100,7 @@ typedef struct {
 
 	// sampulse ps1
 	int usedefaultvolume;
-	psy_audio_SamplerCmd effcmd;
+	int effcmd;
 	int effval;
 	int dooffset;
 	uint8_t offset;
@@ -125,10 +124,9 @@ psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(struct psy_audio_Sample
 	uintptr_t channelnum,
 	uintptr_t samplerate);
 void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice*,
-	const psy_audio_PatternEvent*, double samplesprobeat);
+	const psy_audio_PatternEvent*);
 void psy_audio_samplervoice_nna(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice*,
-	int note, double samplesprobeat);
+void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice*, int note);
 void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice*,
 	double frequency);
 void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
@@ -142,37 +140,41 @@ void psy_audio_samplervoice_setresamplerquality(psy_audio_SamplerVoice*,
 	ResamplerType quality);
 void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_tick(psy_audio_SamplerVoice*);
-psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice*,
+void psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice*,
 	const struct psy_audio_PatternEvent*);
 void psy_audio_samplervoice_performfx(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_effectinit(psy_audio_SamplerVoice*);
 void psy_audio_samplervoice_reseteffects(psy_audio_SamplerVoice*);
 
-INLINE psy_dsp_amp_t psy_audio_samplervoice_volume(
-	psy_audio_SamplerVoice* self, psy_audio_Sample* sample)
+// Volume of the current note.
+INLINE uint16_t psy_audio_samplervoice_volume(psy_audio_SamplerVoice* self)
 {
-	psy_dsp_amp_t rv;
-	psy_dsp_amp_t currrandvol = (psy_dsp_amp_t)1.f;
+	return self->volume;
+}
 
-	// Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
-	// This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
-	// Instrument Global Volume [0..1.0f] Global volume affecting all samples of the instrument.
-	rv = psy_audio_instrument_volume(self->instrument) * currrandvol * psy_audio_sample_volume(sample);
-	if (rv > psy_audio_sample_volume(sample)) {
-		rv = psy_audio_sample_volume(sample);
-	}
-	return rv;
+INLINE void psy_audio_samplervoice_setvolume(psy_audio_SamplerVoice* self, uint16_t vol)
+{
+	self->volume = vol;	
 }
 
 // Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-INLINE float psy_audio_samplervoice_realvolume(psy_audio_SamplerVoice* self)
+INLINE float psy_audio_samplervoice_realvolume(psy_audio_SamplerVoice* self, psy_audio_Sample* sample)
 {
+	float realvolume;
+
+	//Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
+	//This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
+	float tmp_rand = psy_audio_instrument_volume(self->instrument) * self->currrandvol * psy_audio_sample_volume(sample);
+	if (tmp_rand > psy_audio_sample_volume(sample)) {
+		tmp_rand = psy_audio_sample_volume(sample);
+	}
+	realvolume = psy_dsp_map_128_1(self->volume) * tmp_rand;
 	return (!self->tremormute)
-		? (self->realvolume + self->tremoloamount)
+		? (realvolume + self->tremoloamount)
 		: 0;
 }
 
-void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice* self);
+void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice*, psy_audio_Sample*);
 
 INLINE bool psy_audio_isplaying(psy_audio_SamplerVoice* self)
 {
@@ -200,6 +202,11 @@ INLINE void psy_audio_samplervoice_setstopping(psy_audio_SamplerVoice* self,
 	bool stop)
 {
 	self->stopping = stop;
+}
+
+INLINE FilterType psy_audio_samplervoice_filtertype(psy_audio_SamplerVoice* self)
+{
+	return filter_type(&self->_filter);
 }
 
 #ifdef __cplusplus

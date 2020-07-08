@@ -17,6 +17,8 @@
 #include "notestab.h"
 #include "workspace.h"
 
+struct SamplesView;
+
 typedef struct {
 	psy_ui_Component component;
 	struct SamplesView* view;
@@ -32,6 +34,10 @@ typedef struct {
 	psy_ui_Label numsampleslabel;
 	psy_ui_Label channellabel;
 } SamplesHeaderView;
+
+static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
+	psy_audio_Instruments*, struct SamplesView*, Workspace* workspace);
+void samplesheaderview_setsample(SamplesHeaderView*, psy_audio_Sample*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -86,7 +92,8 @@ typedef struct {
 	psy_ui_Button del;
 } SamplesViewButtons;
 
-void samplesviewbuttons_init(SamplesViewButtons*, psy_ui_Component* parent);
+void samplesviewbuttons_init(SamplesViewButtons*, psy_ui_Component* parent,
+	Workspace*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -127,6 +134,7 @@ typedef struct SamplesView {
 } SamplesView;
 
 void samplesview_init(SamplesView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, Workspace* workspace);
+	psy_ui_Component* tabbarparent, Workspace*);
+void samplesview_setsample(SamplesView*, psy_audio_SampleIndex);
 
 #endif

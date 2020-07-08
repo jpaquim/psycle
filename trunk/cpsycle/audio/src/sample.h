@@ -82,7 +82,7 @@ typedef struct psy_audio_Sample {
 	/// 0 = C-5 (middle C, i.e. play at original speed with note C-5);
 	short tune;
 	short finetune;
-	float panfactor;
+	float panfactor;	
 	int panenabled;
 	unsigned char surround;
 	unsigned char stereo;

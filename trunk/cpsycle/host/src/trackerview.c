@@ -531,6 +531,7 @@ static void trackergrid_vtable_init(TrackerGrid* self)
 // implementation
 void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	TrackerGridState* gridstate, TrackerLineState* linestate,
+	TrackerGridEditMode editmode,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
@@ -543,9 +544,12 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->opcount = 0;
 	self->syncpattern = TRUE;
-	self->editmode = TRACKERGRID_EDITMODE_SONG;
 	self->hasselection = FALSE;
-	self->midline = TRUE;
+	if (editmode == TRACKERGRID_EDITMODE_SONG) {
+		self->midline = TRUE;
+	} else {
+		self->midline = FALSE;
+	}
 	self->columnresize = 0;
 	self->dragcolumn = -1;
 	self->dragcolumnbase = 0;
@@ -553,8 +557,11 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->chordbegin = 0;
 	self->wraparound = TRUE;
 	self->showemptydata = FALSE;
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL |
-		psy_ui_OVERFLOW_VSCROLLCENTER);
+	self->editmode = editmode;
+	if (editmode == TRACKERGRID_EDITMODE_SONG) {
+		psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL
+			| psy_ui_OVERFLOW_VSCROLLCENTER);
+	}
 	self->tm = psy_ui_component_textmetric(&self->component);	
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);
@@ -3121,19 +3128,18 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// pattern default line
 	trackergrid_init(&self->griddefaults, &self->component,
-		&self->gridstate, &self->linestate, workspace);
+		&self->gridstate, &self->linestate, TRACKERGRID_EDITMODE_LOCAL, workspace);
 	psy_ui_component_setoverflow(&self->griddefaults.component,
 		psy_ui_OVERFLOW_HIDDEN);
 	psy_ui_component_setalign(&self->griddefaults.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_setpreferredsize(&self->griddefaults.component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 			psy_ui_value_makeeh(1.1)));
-	self->griddefaults.editmode = TRACKERGRID_EDITMODE_LOCAL;
 	self->griddefaults.columnresize = 1;
 	trackergrid_setpattern(&self->griddefaults, &self->workspace->player.patterndefaults);
 	// pattern main grid
 	trackergrid_init(&self->grid, &self->component, &self->gridstate,
-		&self->linestate, workspace);
+		&self->linestate, TRACKERGRID_EDITMODE_SONG, workspace);
 	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->grid.component.signal_scroll, self,
 		trackerview_ongridscroll);
@@ -3475,9 +3481,10 @@ void trackerview_onpatternexport(TrackerView* self)
 }
 
 void trackerview_showblockmenu(TrackerView* self)
-{
-	psy_ui_component_show(&self->blockmenu.component);
+{	
+	self->blockmenu.component.visible = 1;
 	psy_ui_component_align(&self->component);
+	psy_ui_component_show(&self->blockmenu.component);
 	psy_ui_component_invalidate(&self->linenumbers.component);
 }
 

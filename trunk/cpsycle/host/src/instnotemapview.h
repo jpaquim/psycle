@@ -97,7 +97,7 @@ typedef struct {
 } InstrumentNoteMapView;
 
 void instrumentnotemapview_init(InstrumentNoteMapView*,
-	psy_ui_Component* parent);
+	psy_ui_Component* parent, Workspace*);
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, psy_audio_Instrument*);
 void instrumentnotemapview_update(InstrumentNoteMapView*);
 

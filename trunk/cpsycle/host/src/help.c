@@ -22,6 +22,7 @@ static void help_loadpage(Help*, uintptr_t index);
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_Margin margin;
+	psy_ui_Margin leftmargin;
 	psy_ui_Margin tabmargin;
 
 	psy_ui_component_init(help_base(self), parent);	
@@ -39,7 +40,11 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeew(3));
 	psy_ui_editor_init(&self->editor, help_base(self));
+	psy_ui_component_setmargin(&self->editor.component, &leftmargin);
 	psy_ui_editor_preventedit(&self->editor);
 	psy_ui_editor_enablewrap(&self->editor);
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);	

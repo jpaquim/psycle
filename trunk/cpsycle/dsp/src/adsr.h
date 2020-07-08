@@ -43,6 +43,7 @@ typedef struct {
 
 void psy_dsp_adsr_initdefault(psy_dsp_ADSR*, uintptr_t samplerate);
 void psy_dsp_adsr_init(psy_dsp_ADSR*, const psy_dsp_ADSRSettings*, uintptr_t samplerate);
+INLINE void psy_dsp_adsr_dispose(psy_dsp_ADSR* self) { }
 void psy_dsp_adsr_reset(psy_dsp_ADSR*);
 void psy_dsp_adsr_setsamplerate(psy_dsp_ADSR*, uintptr_t samplerate);
 void psy_dsp_adsr_tick(psy_dsp_ADSR*);

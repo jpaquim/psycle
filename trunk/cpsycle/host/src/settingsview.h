@@ -32,6 +32,8 @@ typedef struct {
 	int currchoice;
 	int choicecount;
 	int lineheight;
+	int textheight;
+	int centery;
 	int numblocklines;	
 	int identwidth;
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];	

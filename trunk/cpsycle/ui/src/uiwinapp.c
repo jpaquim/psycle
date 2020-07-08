@@ -373,6 +373,14 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 								clipsize.x, clipsize.y);
 							psy_ui_drawsolidrectangle(&g, r, imp->component->backgroundcolor);
 						}
+						if (imp->component->border.top != psy_ui_BORDER_NONE) {
+							psy_ui_setcolor(&g, 0x00333333);
+							psy_ui_drawline(&g,
+								ps.rcPaint.left - dblbuffer_offset.x,
+								ps.rcPaint.top - dblbuffer_offset.y,
+								ps.rcPaint.left + ps.rcPaint.right - dblbuffer_offset.x,
+								ps.rcPaint.top - dblbuffer_offset.y);
+						}
 						// prepare a clip rect that can be used by a component to
 						// optimize the draw amount
 						psy_ui_setrectangle(&g.clip,
@@ -395,6 +403,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						if (imp->component->vtable->ondraw) {
 							imp->component->vtable->ondraw(imp->component, &g);
 						}
+						// set default color
+						psy_ui_setcolor(&g, app.defaults.defaultcolor);
 						psy_signal_emit(&imp->component->signal_draw, imp->component, 1, &g);
 						// clean up font
 						if (hPrevFont) {

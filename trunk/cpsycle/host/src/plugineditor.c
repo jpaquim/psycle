@@ -3,6 +3,8 @@
 
 #include "../../detail/prefix.h"
 
+#define BLOCKSIZE 128 * 1024
+
 #include "plugineditor.h"
 
 #include <string.h>
@@ -15,12 +17,59 @@
 
 #include "../../detail/portable.h"
 
+static const char* pluginsource =
+"function psycle.info()""\n"
+"  local machinemodes = require('psycle.machinemodes')""\n"
+"  return  {""\n"
+"	 vendor = 'psycle',""\n"
+"	 name = 'newplugin',""\n"
+"	 generator = 1, --machine.GENERATOR,""\n"
+"	 mode = machinemodes.GENERATOR,""\n"
+"	 version = 0,""\n"
+"	 api = 0 --noteon = 1""\n"
+"  }""\n"
+"end""\n"
+"""\n"
+"function psycle.start()""\n"
+"  psycle.setmachine(require('newplugin.machine'))""\n"
+"end""\n"
+"""\n";
+
+static const char* machinesource =
+"machine = require('psycle.machine'):new()""\n"
+"""\n"
+"function machine:init(samplerate)""\n"
+"end""\n"
+"""\n"
+"function machine:work(num)""\n"
+"end""\n"
+"""\n"
+"return machine""\n";
+
+void plugineditorcreatebar_init(PluginEditorCreateBar* self,
+	psy_ui_Component* parent, Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	self->workspace = workspace;
+	psy_ui_label_init(&self->desc, &self->component);
+	psy_ui_label_settext(&self->desc, "Plugin Name");
+	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_edit_init(&self->name, &self->component);
+	psy_ui_component_setalign(&self->name.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_edit_settext(&self->name, "newplugin");
+	psy_ui_button_init(&self->create, &self->component);
+	psy_ui_component_setalign(&self->create.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_button_settext(&self->create, "Create");
+}
+
 static void plugineditor_onmachineschangeslot(PluginEditor*,
 	psy_audio_Machines*, uintptr_t slot);
 static void plugineditor_onsongchanged(PluginEditor*, Workspace*, int flag,
 	psy_audio_SongFile*);
 static void plugineditor_connectmachinesignals(PluginEditor*, Workspace*);
 static void plugineditor_ondestroy(PluginEditor*, psy_ui_Component* sender);
+static void plugineditor_onnewplugin(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onreload(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_onsave(PluginEditor*, psy_ui_Component* sender);
 static void plugineditor_buildpluginlist(PluginEditor*);
@@ -28,11 +77,14 @@ static void plugineditor_buildfilelist(PluginEditor*);
 static void plugineditor_onpluginselected(PluginEditor*, psy_ui_Component* sender, int slot);
 static void plugineditor_onfileselected(PluginEditor*, psy_ui_Component* sender, int slot);
 static int plugineditor_onenumdir(PluginEditor*, const char* path, int flag);
+static void plugineditor_oncreatenewplugin(PluginEditor*, psy_ui_Component* sender);
+static void writetext(const char* path, const char* text);
 
 void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);
+	self->component.debugflag = 9000;
 	psy_ui_component_enablealign(&self->component);
 	self->workspace = workspace;
 	self->basepath = 0;	
@@ -42,6 +94,11 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->reload, &self->bar);
 	psy_ui_component_setalign(&self->reload.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_init(&self->newplugin, &self->bar);
+	psy_ui_button_settext(&self->newplugin, "New Plugin");
+	psy_ui_component_setalign(&self->newplugin.component, psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->newplugin.signal_clicked, self,
+		&plugineditor_onnewplugin);
 	psy_ui_button_settext(&self->reload, "Reload");
 	psy_signal_connect(&self->reload.signal_clicked, self,
 		&plugineditor_onreload);
@@ -50,12 +107,31 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->save, "Save");
 	psy_signal_connect(&self->save.signal_clicked, self,
 		&plugineditor_onsave);	
-	psy_ui_combobox_init(&self->pluginselector, &self->bar);
-	psy_ui_combobox_setcharnumber(&self->pluginselector, 32);
-	psy_ui_component_setalign(&self->pluginselector.component, psy_ui_ALIGN_LEFT);
-	psy_ui_combobox_init(&self->fileselector, &self->bar);
-	psy_ui_combobox_setcharnumber(&self->fileselector, 32);
-	psy_ui_component_setalign(&self->fileselector.component, psy_ui_ALIGN_LEFT);
+	// Plugin select
+	psy_ui_component_init(&self->row0, &self->component);
+	psy_ui_component_enablealign(&self->row0);
+	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
+	psy_ui_label_init(&self->plugindesc, &self->row0);
+	psy_ui_label_settext(&self->plugindesc, "Plugin");
+	psy_ui_component_setalign(&self->plugindesc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_combobox_init(&self->pluginselector, &self->row0);
+	//psy_ui_combobox_setcharnumber(&self->pluginselector, 32);
+	psy_ui_component_setalign(&self->pluginselector.component, psy_ui_ALIGN_CLIENT);
+	// File Select
+	psy_ui_component_init(&self->row1, &self->component);
+	psy_ui_component_enablealign(&self->row1);
+	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_label_init(&self->filedesc, &self->row1);
+	psy_ui_label_settext(&self->filedesc, "File");
+	psy_ui_component_setalign(&self->filedesc.component, psy_ui_ALIGN_LEFT);
+	psy_ui_combobox_init(&self->fileselector, &self->row1);
+	//psy_ui_combobox_setcharnumber(&self->fileselector, 32);
+	psy_ui_component_setalign(&self->fileselector.component, psy_ui_ALIGN_CLIENT);
+	plugineditorcreatebar_init(&self->createbar, &self->component, workspace);
+	psy_signal_connect(&self->createbar.create.signal_clicked, self,
+		plugineditor_oncreatenewplugin);
+	psy_ui_component_setalign(&self->createbar.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->createbar.component);
 	psy_ui_editor_init(&self->editor, &self->component);
 	psy_ui_component_setalign(&self->editor.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -118,6 +194,12 @@ void plugineditor_connectmachinesignals(PluginEditor* self,
 	}
 }
 
+void plugineditor_onnewplugin(PluginEditor* self, psy_ui_Component* sender)
+{
+	psy_ui_component_show(&self->createbar.component);
+	psy_ui_component_align(&self->component);
+}
+
 void plugineditor_onreload(PluginEditor* self, psy_ui_Component* sender)
 {
 	if (self->workspace->song && self->instanceidx) {
@@ -173,10 +255,13 @@ void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender,
 		path = psy_properties_readstring(p, "path", 0);
 		if (path) {
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
+				psy_ui_editor_clear(&self->editor);
 				psy_ui_editor_load(&self->editor, path);
 				self->basepath = path;
 				self->instanceidx = UINTPTR_MAX;
 				plugineditor_buildfilelist(self);
+				psy_ui_combobox_setcursel(&self->fileselector, 1);
+				plugineditor_onfileselected(self, &self->fileselector.component, 1);
 			}
 		}
 	}	
@@ -187,6 +272,7 @@ void plugineditor_onfileselected(PluginEditor* self, psy_ui_Component* sender, i
 	char path[4096];
 
 	psy_psy_ui_combobox_text(&self->fileselector, path);
+	psy_ui_editor_clear(&self->editor);
 	psy_ui_editor_load(&self->editor, path);	
 }
 
@@ -203,7 +289,7 @@ void plugineditor_buildfilelist(PluginEditor* self)
 		psy_dir_extract_path(self->basepath, prefix, name, ext);		
 		psy_snprintf(path, 4096, "%s\\%s", prefix, name);		
 		psy_dir_enumerate_recursive(self, path, "*.lua",
-			MACH_PLUGIN, plugineditor_onenumdir);
+			MACH_PLUGIN, plugineditor_onenumdir);		
 	}
 }
 
@@ -211,4 +297,53 @@ int plugineditor_onenumdir(PluginEditor* self, const char* path, int type)
 {
 	psy_ui_combobox_addtext(&self->fileselector, path);
 	return 1;
+}
+
+void plugineditor_oncreatenewplugin(PluginEditor* self, psy_ui_Component* sender)
+{
+	const char* dir;
+	psy_Path path;	
+	psy_Path plugindir;
+	
+	dir = workspace_luascripts_directory(self->workspace);
+	psy_path_init(&path, "");
+	psy_path_setprefix(&path, dir);
+	psy_path_setname(&path, "newplugin.lua");
+	writetext(psy_path_path(&path), pluginsource);
+	psy_path_dispose(&path);
+	psy_path_init(&plugindir, "");
+	psy_path_setprefix(&plugindir, dir);
+	psy_path_setname(&plugindir, "newplugin");
+	if (!psy_direxists(psy_path_path(&plugindir))) {
+		psy_mkdir(psy_path_path(&plugindir));
+	}
+	psy_path_init(&path, "");
+	psy_path_setprefix(&path, psy_path_path(&plugindir));
+	psy_path_dispose(&plugindir);	
+	psy_path_setname(&path, "machine.lua");
+	writetext(psy_path_path(&path), machinesource);
+	psy_path_dispose(&path);
+}
+
+void writetext(const char* path, const char* text)
+{
+	FILE* fp;
+
+	fp = fopen(path, "wb");
+	if (fp) {		
+		int lengthdoc;
+		int i;
+
+		lengthdoc = strlen(text);
+		for (i = 0; i < lengthdoc; i += BLOCKSIZE) {
+			int grabsize;
+
+			grabsize = lengthdoc - i;
+			if (grabsize > BLOCKSIZE) {
+				grabsize = BLOCKSIZE;
+			}
+			fwrite(&text[i], grabsize, 1, fp);
+		}
+		fclose(fp);
+	}
 }

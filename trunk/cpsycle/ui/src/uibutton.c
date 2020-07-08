@@ -55,6 +55,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
 	self->text = strdup("");
+	self->textcolor = 0x00CACACA;
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&psy_ui_button_base(self)->signal_destroy, self,
 		ondestroy);
@@ -89,7 +90,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	} else if (psy_ui_button_highlighted(self)) {
 		psy_ui_settextcolor(g, 0x00FFFFFF);
 	} else {
-		psy_ui_settextcolor(g, 0x00CACACA);
+		psy_ui_settextcolor(g, self->textcolor);
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
@@ -287,6 +288,14 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 bool psy_ui_button_highlighted(psy_ui_Button* self)
 {
 	return self->highlight != FALSE;
+}
+
+void psy_ui_button_settextcolor(psy_ui_Button* self, psy_ui_Color color)
+{
+	if (self->textcolor != color) {
+		self->textcolor = color;
+		psy_ui_component_invalidate(&self->component);
+	}
 }
 
 void psy_ui_button_settextalignment(psy_ui_Button* self,

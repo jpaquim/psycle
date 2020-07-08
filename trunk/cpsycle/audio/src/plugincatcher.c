@@ -135,6 +135,7 @@ void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
 			psy_properties_append_string(p, "desc", "");
 		}
 		psy_properties_append_int(p, "shellidx", info->shellidx, 0, 0);
+		psy_properties_append_int(p, "favorite", 0, 0, 0);
 	}
 }
 

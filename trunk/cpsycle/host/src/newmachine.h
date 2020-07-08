@@ -17,6 +17,7 @@ typedef struct {
 	psy_ui_Component component;	
 	psy_ui_Button rescan;
     psy_ui_Button selectdirectories;
+	psy_ui_Button sortbyfavorite;
 	psy_ui_Button sortbyname;
 	psy_ui_Button sortbytype;
 	psy_ui_Button sortbymode;
@@ -32,6 +33,7 @@ typedef struct {
     psy_ui_Label compatlabel;
     psy_ui_CheckBox compatblitzgamefx;
     Workspace* workspace;
+	bool empty;
 } NewMachineDetail;
 
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
@@ -52,14 +54,19 @@ typedef struct {
    psy_Signal signal_changed;
    Workspace* workspace;
    int calledby;
+   bool onlyfavorites;
 } PluginsView;
 
-void pluginsview_init(PluginsView*, psy_ui_Component* parent, Workspace*);
+void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites, Workspace*);
 
 typedef struct {
-   psy_ui_Component component;   
+   psy_ui_Component component;
+   psy_ui_Label favoriteheader;
+   PluginsView favoriteview;
+   psy_ui_Label pluginsheader;
    PluginsView pluginsview;
-   NewMachineDetail detail;   
+   NewMachineDetail detail;
+   psy_Signal signal_selected;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);

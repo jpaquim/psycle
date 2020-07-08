@@ -20,20 +20,28 @@ typedef struct {
 	int id;
 	lua_State* L;
 	char* modulepath;
+	char* errstr;
 } psy_audio_PsycleScript;
 
 int psyclescript_init(psy_audio_PsycleScript*);
 int psyclescript_load(psy_audio_PsycleScript*, const char* path);
 int psyclescript_loadstring(psy_audio_PsycleScript*, const char* script);
-int psyclescript_preparestate(psy_audio_PsycleScript* self, const luaL_Reg methods[],
+int psyclescript_preparestate(psy_audio_PsycleScript*, const luaL_Reg methods[],
 	void* host);
 int psyclescript_run(psy_audio_PsycleScript*);
 int psyclescript_start(psy_audio_PsycleScript*);
 int psyclescript_dispose(psy_audio_PsycleScript*);
+
+INLINE bool psyclescript_empty(psy_audio_PsycleScript* self)
+{
+	return self->L == NULL || self->modulepath == NULL;
+}
+
 INLINE const char* psyclescript_modulepath(psy_audio_PsycleScript* self)
 {
 	return self->modulepath;
 }
+
 int psyclescript_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 int psyclescript_parse_machineinfo(psy_audio_PsycleScript*, psy_audio_MachineInfo*);
 int psyclescript_open(lua_State*, const char* meta, const luaL_Reg methods[],
@@ -49,6 +57,7 @@ INLINE int psyclescript_chaining(lua_State* L)
 	return 1;
 }
 void* psyclescript_host(lua_State*);
+
 
 #ifdef __cplusplus
 }

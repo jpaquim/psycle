@@ -115,8 +115,6 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 	}
 }
 
-// PianoKeyboard
-
 // KeyboardState
 void keyboardstate_init(KeyboardState* self)
 {	
@@ -128,9 +126,12 @@ void keyboardstate_init(KeyboardState* self)
 	self->keyblackcolour = 0x00444444;
 	self->keywhitecolour = 0x00CACACA;
 	self->keyseparatorcolour = 0x00333333;
+	self->notemode = psy_dsp_NOTESTAB_A220;
+	self->drawpianokeys = TRUE;
 }
 // prototypes
 static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Graphics*);
+static void pianokeyboard_onmousedown(PianoKeyboard*, psy_ui_MouseEvent*);
 // vtable
 static psy_ui_ComponentVtable pianokeyboard_vtable;
 static int pianokeyboard_vtable_initialized = 0;
@@ -141,6 +142,8 @@ static void pianokeyboard_vtable_init(PianoKeyboard* self)
 		pianokeyboard_vtable = *(self->component.vtable);
 		pianokeyboard_vtable.ondraw = (psy_ui_fp_ondraw)
 			pianokeyboard_ondraw;
+		pianokeyboard_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			pianokeyboard_onmousedown;
 		pianokeyboard_vtable_initialized = 1;
 	}
 }
@@ -169,49 +172,90 @@ void pianokeyboard_setsharedkeyboardstate(PianoKeyboard* self,
 }
 
 void pianokeyboard_ondraw(PianoKeyboard* self, psy_ui_Graphics* g)
-{
-	int keymin = 0;
-	int keymax = 88;
+{	
 	int key;
 	int keyboardheight;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 
-	keyboardheight = (keymax - keymin) * self->keyboardstate->keyheight;
+	keyboardheight = keyboardstate_numkeys(self->keyboardstate) * self->keyboardstate->keyheight;
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolor(g, self->keyboardstate->keyseparatorcolour);
-	for (key = keymin; key < keymax; ++key) {
+	if (!self->keyboardstate->drawpianokeys) {
+		psy_ui_settextcolor(g, self->keyboardstate->keywhitecolour);
+	}
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+	for (key = self->keyboardstate->keymin; key < self->keyboardstate->keymax; ++key) {
 		int cpy;
 
 		cpy = keyboardheight - (key + 1) * self->keyboardstate->keyheight;
 		psy_ui_drawline(g, 0, cpy, psy_ui_value_px(&size.width, &tm), cpy);
-		if (isblack(key)) {			
-			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+		if (self->keyboardstate->drawpianokeys) {
+			if (isblack(key)) {
+				psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
 					(int)(psy_ui_value_px(&size.width, &tm) * 0.75), cpy,
 					(int)(psy_ui_value_px(&size.width, &tm) * 0.25),
 					self->keyboardstate->keyheight),
-				self->keyboardstate->keywhitecolour);
-			psy_ui_drawline(g,
-				0, cpy + self->keyboardstate->keyheight / 2,
-				psy_ui_value_px(&size.width, &tm),
-				cpy + self->keyboardstate->keyheight / 2);			
-			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+					self->keyboardstate->keywhitecolour);
+				psy_ui_drawline(g,
+					0, cpy + self->keyboardstate->keyheight / 2,
+					psy_ui_value_px(&size.width, &tm),
+					cpy + self->keyboardstate->keyheight / 2);
+				psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
 					0, cpy, (int)(psy_ui_value_px(&size.width, &tm) * 0.75),
 					self->keyboardstate->keyheight),
-				self->keyboardstate->keyblackcolour);
-		} else {			
-			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
-					0, cpy, psy_ui_value_px(&size.width, &tm),
-					self->keyboardstate->keyheight),
-				self->keyboardstate->keywhitecolour);
-			if (key % 12 == 0 || ((key % 12) == 5)) {
-				psy_ui_drawline(g,
-					0, cpy + self->keyboardstate->keyheight, psy_ui_value_px(&size.width, &tm),
-					cpy + self->keyboardstate->keyheight);
+					self->keyboardstate->keyblackcolour);
+			} else {
+				psy_ui_Rectangle r;
+
+				r = psy_ui_rectangle_make(0, cpy, psy_ui_value_px(&size.width, &tm),
+					self->keyboardstate->keyheight);
+				psy_ui_drawsolidrectangle(g, r, self->keyboardstate->keywhitecolour);
+				if (key % 12 == 0 || ((key % 12) == 5)) {
+					psy_ui_drawline(g,
+						0, cpy + self->keyboardstate->keyheight, psy_ui_value_px(&size.width, &tm),
+						cpy + self->keyboardstate->keyheight);
+					if (key % 12 == 0) {
+						psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_CLIPPED, r,
+							psy_dsp_notetostr(key, self->keyboardstate->notemode),
+							strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
+					}
+				}
 			}
+		} else {
+			psy_ui_Rectangle r;
+
+			r = psy_ui_rectangle_make(0, cpy, psy_ui_value_px(&size.width, &tm),
+				self->keyboardstate->keyheight);
+			psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_CLIPPED, r,
+				psy_dsp_notetostr(key, self->keyboardstate->notemode),
+				strlen(psy_dsp_notetostr(key, self->keyboardstate->notemode)));
+			psy_ui_drawline(g,
+				0, cpy + self->keyboardstate->keyheight, psy_ui_value_px(&size.width, &tm),
+				cpy + self->keyboardstate->keyheight);
 		}
 	}
+}
+
+void pianokeyboard_onmousedown(PianoKeyboard* self, psy_ui_MouseEvent* ev)
+{
+	if (ev->button == 2) {
+		if (self->keyboardstate->notemode != psy_dsp_NOTESTAB_GMPERCUSSION) {
+			self->keyboardstate->drawpianokeys = FALSE;
+			self->keyboardstate->notemode = psy_dsp_NOTESTAB_GMPERCUSSION;
+			psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
+				psy_ui_value_makeew(21), psy_ui_value_makepx(0)));			
+		} else {
+			self->keyboardstate->drawpianokeys = TRUE;
+			self->keyboardstate->notemode = psy_dsp_NOTESTAB_A220;
+			psy_ui_component_setpreferredsize(&self->component, psy_ui_size_make(
+				psy_ui_value_makeew(8), psy_ui_value_makepx(0)));			
+		}
+		psy_ui_component_align(psy_ui_component_parent(
+			psy_ui_component_parent(&self->component)));
+	}
+	psy_ui_mouseevent_stoppropagation(ev);
 }
 
 // PianoGrid
@@ -753,8 +797,9 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
 		pianoroll_onzoomboxbeatwidthchanged);
 	psy_ui_component_setalign(&self->zoombox_beatwidth.component, psy_ui_ALIGN_TOP);
+	// Keyboard
 	pianokeyboard_init(&self->keyboard, &self->left, &self->keyboardstate);
-	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_CLIENT);	
 	zoombox_init(&self->zoombox_keyheight, &self->left);
 	psy_signal_connect(&self->zoombox_keyheight.signal_changed, self,
 		pianoroll_onzoomboxkeyheightchanged);

@@ -32,15 +32,24 @@ void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_Mac
 	self->machinecallback = callback;
 	self->catcher = catcher;
 //#ifdef PSYCLE_USE_MACHINEPROXY
-	self->createasproxy = TRUE;
+	//self->createasproxy = TRUE;
 //#else
-	//self->createasproxy = FALSE;
+	self->createasproxy = FALSE;
 //#endif
 	self->loadnewgamefxblitz = 0;
+	self->errstr = strdup("");
 }
 
 void psy_audio_machinefactory_dispose(psy_audio_MachineFactory* self)
-{	
+{
+	free(self->errstr);
+	self->errstr = NULL;
+}
+
+void psy_audio_machinefactory_seterrorstr(psy_audio_MachineFactory* self, const char* str)
+{
+	free(self->errstr);
+	self->errstr = strdup(str);
 }
 
 void psy_audio_machinefactory_createasproxy(psy_audio_MachineFactory* self)
@@ -209,15 +218,16 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			break;
 		}
 		case MACH_LUA: {
-			psy_audio_Machine* plugin;
+			psy_audio_LuaPlugin* plugin;
 
-			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_LuaPlugin));
+			plugin = (psy_audio_LuaPlugin*)malloc(sizeof(psy_audio_LuaPlugin));
 			if (plugin) {
-				psy_audio_luaplugin_init((psy_audio_LuaPlugin*)plugin, self->machinecallback, path);
-				if (psy_audio_machine_info(plugin)) {
-					rv = plugin;
+				psy_audio_luaplugin_init(plugin, self->machinecallback, path);
+				if (psy_audio_machine_info(psy_audio_luaplugin_base(plugin))) {
+					rv = psy_audio_luaplugin_base(plugin);
 				} else {
-					psy_audio_machine_dispose(plugin);
+					psy_audio_machinefactory_seterrorstr(self, plugin->script.errstr);
+					psy_audio_machine_dispose(psy_audio_luaplugin_base(plugin));
 					free(plugin);
 				}
 			} else {
