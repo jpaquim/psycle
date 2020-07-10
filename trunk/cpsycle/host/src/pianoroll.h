@@ -4,6 +4,7 @@
 #if !defined(PIANOROLL)
 #define PIANOROLL
 
+#include "patternviewskin.h"
 #include "workspace.h"
 #include "zoombox.h"
 
@@ -19,10 +20,11 @@ typedef struct {
 	double zoom;
 	psy_ui_Color keywhitecolour;
 	psy_ui_Color keyblackcolour;
-	psy_ui_Color keyseparatorcolour;	
+	psy_ui_Color keyseparatorcolour;
+	PatternViewSkin* skin;
 } KeyboardState;
 
-void keyboardstate_init(KeyboardState*);
+void keyboardstate_init(KeyboardState*, PatternViewSkin* skin);
 
 INLINE int keyboardstate_numkeys(KeyboardState* self)
 {
@@ -53,8 +55,8 @@ typedef struct {
 	psy_ui_Color row4beat2colour;
 	psy_ui_Color rowbeatcolour;
 	psy_ui_Color rowbeat2colour;
-	psy_ui_Color rowcolour;
-	psy_ui_Color row2colour;
+	//psy_ui_Color rowcolour;
+	//psy_ui_Color row2colour;
 	psy_ui_Color playbarcolour;
 	psy_ui_Color rulerbaselinecolour;
 	psy_ui_Color rulermarkcolour;
@@ -63,9 +65,10 @@ typedef struct {
 	int visiwidth;	
 	psy_dsp_big_beat_t stepwidth;
 	psy_audio_PatternEditPosition cursor;
+	PatternViewSkin* skin;
 } GridState;
 
-void gridstate_init(GridState*);
+void gridstate_init(GridState*, PatternViewSkin* skin);
 
 INLINE void gridstate_setbeatwidth(GridState* self, int width)
 {
@@ -130,10 +133,11 @@ typedef struct Pianoroll {
    psy_audio_Pattern* pattern;
    unsigned int opcount;
    bool syncpattern;   
-   Workspace* workspace;  
+   Workspace* workspace;
 } Pianoroll;
 
-void pianoroll_init(Pianoroll*, psy_ui_Component* parent, Workspace*);
+void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewSkin*,
+	Workspace*);
 void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 void pianoroll_updatescroll(Pianoroll*);
 

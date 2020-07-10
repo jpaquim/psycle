@@ -26,6 +26,7 @@ typedef struct {
 	int highlight;
 	psy_ui_ButtonIcon icon;
 	int charnumber;
+	double linespacing;
 	psy_ui_Alignment textalignment;
 	bool enabled;
 	psy_ui_Color textcolor;
@@ -39,6 +40,7 @@ void psy_ui_button_disablehighlight(psy_ui_Button*);
 bool psy_ui_button_highlighted(psy_ui_Button*);
 void psy_ui_button_settextcolor(psy_ui_Button*, psy_ui_Color);
 void psy_ui_button_setcharnumber(psy_ui_Button*, int number);
+void psy_ui_button_setlinespacing(psy_ui_Button*, double spacing);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
 
 INLINE psy_ui_Component* psy_ui_button_base(psy_ui_Button* self)

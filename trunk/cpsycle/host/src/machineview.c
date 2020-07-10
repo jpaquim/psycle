@@ -288,9 +288,9 @@ void machineui_drawvupeak(MachineUi* self, psy_ui_Graphics* g,
 		vu = &self->coords->vu0;
 		psy_audio_machine_position(self->machine, &x, &y);
 		psy_ui_drawbitmap(g, &wireview->skin.skinbmp,
-			x + vupeak->destx + (int)(self->volumemaxdisplay * vu->destwidth),
-			y + vupeak->desty,
-			vupeak->destwidth, vupeak->destheight,
+			x + vu->destx + (int)(self->volumemaxdisplay * vu->destwidth),
+			y + vu->desty,
+			vupeak->srcwidth, vupeak->srcheight,
 			vupeak->srcx, vupeak->srcy);
 	}
 }
@@ -483,7 +483,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
 	psy_ui_fontinfo_init(&fontinfo, "Tahoma", 16);
 	psy_ui_font_init(&self->skin.font, &fontinfo);
-	machinewireview_initmachinecoords(self);	
+	machinewireview_initmachinecoords(self);
+	machinewireview_applyproperties(self, 0);
 	psy_table_init(&self->machineuis);
 	machineuis_insert(self, psy_audio_MASTER_INDEX);
 	psy_ui_component_setfont(&self->component, &self->skin.font);
@@ -579,8 +580,7 @@ void machinewireview_initmachinecoords(MachineWireView* self)
 	};									
 	self->skin.master = master;
 	self->skin.generator = generator;
-	self->skin.effect = effect;		
-	machinewireview_applyproperties(self, 0);
+	self->skin.effect = effect;			
 }
 
 void machinewireview_onconfigchanged(MachineWireView* self,
@@ -668,6 +668,11 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 			machinewireview_setcoords(self, coords);
 			properties_free(coords);
 		}
+	} else {
+		psy_ui_bitmap_dispose(&self->skin.skinbmp);
+		psy_ui_bitmap_init(&self->skin.skinbmp);
+		psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
+		machinewireview_initmachinecoords(self);
 	}
 }
 
@@ -708,7 +713,8 @@ void machinewireview_setcoords(MachineWireView* self, psy_Properties* p)
 	}
 	if (s = psy_properties_readstring(p, "generator_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->skin.generator.vu0, vals);		
+		skincoord_setdest(&self->skin.generator.vu0, vals);
+		self->skin.generator.vu0.destwidth = vals[2];
 	}
 	if (s = psy_properties_readstring(p, "generator_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
@@ -753,7 +759,8 @@ void machinewireview_setcoords(MachineWireView* self, psy_Properties* p)
 	}
 	if (s = psy_properties_readstring(p, "effect_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->skin.effect.vu0, vals);		
+		skincoord_setdest(&self->skin.effect.vu0, vals);
+		self->skin.generator.vu0.destwidth = vals[2];
 	}
 	if (s = psy_properties_readstring(p, "effect_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);

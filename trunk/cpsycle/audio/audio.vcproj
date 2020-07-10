@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\file\src,..\container\src,..\dsp\src,..\lua53\src"
+				AdditionalIncludeDirectories="..\file\src,..\container\src,..\dsp\src,..\lua54\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -120,7 +120,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\file\src,..\container\src,..\dsp\src,..\lua53\src,..\vst-2.4\vst2.x"
+				AdditionalIncludeDirectories="..\file\src,..\container\src,..\dsp\src,..\lua54\src,..\vst-2.4\vst2.x"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"

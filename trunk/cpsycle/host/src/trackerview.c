@@ -539,6 +539,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->component.vtable = &trackergrid_vtable;
 	trackergrid_setsharedgridstate(self, gridstate);
 	trackergrid_setsharedlinestate(self, linestate);
+	psy_ui_component_setbackgroundmode(&self->component, 
+		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	self->workspace = workspace;
@@ -607,7 +609,7 @@ void trackergrid_ondraw(TrackerGrid* self, psy_ui_Graphics* g)
 
 	if (self->gridstate->pattern) {
 		trackergrid_clipblock(self, &g->clip, &clip);
-		// trackergrid_drawbackground(self, g, &clip);
+		trackergrid_drawbackground(self, g, &clip);
 		trackergrid_drawentries(self, g, &clip);
 	} else {
 		psy_ui_drawsolidrectangle(g, g->clip, self->gridstate->skin->background);
@@ -641,6 +643,23 @@ void trackergrid_clipblock(TrackerGrid* self, const psy_ui_Rectangle* clip,
 
 void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g, PatternSelection* clip)
 {
+	uintptr_t track;
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(&self->component);
+	for (track = clip->topleft.track; track < clip->bottomright.track;
+		++track) {
+		int cpx;
+		int width;
+
+		cpx = trackergridstate_track_x(self->gridstate, track);
+		width = trackergridstate_trackwidth(self->gridstate, track);
+		psy_ui_drawsolidrectangle(g,
+			psy_ui_rectangle_make(cpx, psy_ui_component_scrolltop(&self->component), width,
+				psy_ui_value_px(&size.height, &self->tm)),
+			patternviewskin_separatorcolor(self->gridstate->skin, track, self->gridstate->numtracks));
+	}
+
 	/*psy_ui_Rectangle r;
 	unsigned int track;
 	psy_ui_Size size;
@@ -770,35 +789,48 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, PatternSelec
 }
 
 
-void setcolumncolor(TrackerSkin* skin, psy_ui_Graphics* g,
-	TrackerColumnFlags flags)
+void setcolumncolor(PatternViewSkin* skin, psy_ui_Graphics* g,
+	TrackerColumnFlags flags, uintptr_t track, uintptr_t numtracks)
 {
 	if (flags.cursor != 0) {
 		psy_ui_setbackgroundcolor(g, skin->cursor);
-		psy_ui_settextcolor(g, skin->fontCur);
+		psy_ui_settextcolor(g,
+			patternviewskin_fontcurcolor(skin, track, numtracks));
 	} else if (flags.playbar) {
-		psy_ui_setbackgroundcolor(g, skin->playbar);
-		psy_ui_settextcolor(g, skin->fontPlay);
+		psy_ui_setbackgroundcolor(g,
+			patternviewskin_playbarcolor(skin, track, numtracks));
+		psy_ui_settextcolor(g,
+			patternviewskin_fontplaycolor(skin, track, numtracks));
 	} else if (flags.selection != 0) {
-		psy_ui_setbackgroundcolor(g, skin->cursor);
-		psy_ui_settextcolor(g, skin->fontCur);
+		psy_ui_setbackgroundcolor(g,
+			patternviewskin_cursorcolor(skin, track, numtracks));
+		psy_ui_settextcolor(g,
+			patternviewskin_fontcurcolor(skin, track, numtracks));
 	} else if (flags.mid) {
-		psy_ui_setbackgroundcolor(g, skin->midline);
+		psy_ui_setbackgroundcolor(g,
+			patternviewskin_midlinecolor(skin, track, numtracks));
 		if (flags.cursor != 0) {
-			psy_ui_settextcolor(g, skin->fontCur);
+			psy_ui_settextcolor(g,
+				patternviewskin_fontcurcolor(skin, track, numtracks));
 		} else {
-			psy_ui_settextcolor(g, skin->font);
+			psy_ui_settextcolor(g,
+				patternviewskin_fontcolor(skin, track, numtracks));
 		}
 	} else {
 		if (flags.beat4) {
-			psy_ui_setbackgroundcolor(g, skin->row4beat);
+			psy_ui_setbackgroundcolor(g,
+				patternviewskin_row4beatcolor(skin, track, numtracks));
 			psy_ui_settextcolor(g, skin->font);
 		} else if (flags.beat) {
-			psy_ui_setbackgroundcolor(g, skin->rowbeat);
-			psy_ui_settextcolor(g, skin->font);
+			psy_ui_setbackgroundcolor(g,
+				patternviewskin_rowbeatcolor(skin, track, numtracks));
+			psy_ui_settextcolor(g,
+				patternviewskin_fontcolor(skin, track, numtracks));
 		} else {
-			psy_ui_setbackgroundcolor(g, skin->row);
-			psy_ui_settextcolor(g, skin->font);
+			psy_ui_setbackgroundcolor(g,
+				patternviewskin_rowcolor(skin, track, numtracks));
+			psy_ui_settextcolor(g,
+				patternviewskin_fontcolor(skin, track, numtracks));
 		}
 	}
 }
@@ -1884,7 +1916,12 @@ void trackergrid_onfocuslost(TrackerGrid* self, psy_ui_Component* sender)
 // TrackerHeader
 // prototypes
 static int trackerheader_preferredtrackwidth(TrackerHeader*);
-static void trackerheader_ondraw(TrackerHeader*, psy_ui_Graphics* g);
+static void trackerheader_ondraw(TrackerHeader*, psy_ui_Graphics*);
+static void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track);
+static void trackerheader_drawtrackbackground(TrackerHeader*, psy_ui_Graphics*, int x);
+static void trackerheader_drawtracknumber(TrackerHeader*, psy_ui_Graphics*, int x, uintptr_t track);
+static void trackerheader_drawtrackleds(TrackerHeader*, psy_ui_Graphics*, int x, uintptr_t track);
+static void trackerheader_drawtrackselection(TrackerHeader*, psy_ui_Graphics*, int x, uintptr_t track);
 static void trackerheader_onmousedown(TrackerHeader*, psy_ui_MouseEvent*);
 static void trackerheader_onpreferredsize(TrackerHeader*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void trackerheader_onpatterneditpositionchanged(TrackerHeader*,
@@ -1937,50 +1974,87 @@ void trackerheader_ondraw(TrackerHeader* self, psy_ui_Graphics* g)
 {
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	int cpx = 0;
-	uintptr_t track;
-	psy_audio_PatternEditPosition editposition;
+	int cpx;
+	int centerx;
+	uintptr_t track;	
 
 	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);	
-	cpx = 0;
-	editposition = workspace_patterneditposition(self->workspace);
+	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_drawsolidrectangle(g,
 		psy_ui_rectangle_make(psy_ui_component_scrollleft(&self->component), 0,
 			psy_ui_value_px(&size.width, &tm), psy_ui_value_px(&size.height, &tm)),
 		self->gridstate->skin->background);
-	for (track = 0; track < self->gridstate->numtracks; ++track) {
-		int trackx0 = track / 10;
-		int track0x = track % 10;
-		SkinCoord digitx0 = self->gridstate->skin->headercoords.digitx0;
-		SkinCoord digit0x = self->gridstate->skin->headercoords.digit0x;
-		digitx0.srcx += trackx0 * digitx0.srcwidth;
-		digit0x.srcx += track0x * digit0x.srcwidth;
-		skin_blitpart(g, &self->gridstate->skin->bitmap, cpx, 0,
-			&self->gridstate->skin->headercoords.background);
-		skin_blitpart(g, &self->gridstate->skin->bitmap, cpx, 0, &digitx0);
-		skin_blitpart(g, &self->gridstate->skin->bitmap, cpx, 0, &digit0x);
-		if (self->workspace->song) {
-			if (patterns_istrackmuted(&self->workspace->song->patterns,
-				track)) {
-				skin_blitpart(g, &self->gridstate->skin->bitmap, cpx, 0,
-					&self->gridstate->skin->headercoords.mute);
-			}
-			if (patterns_istracksoloed(&self->workspace->song->patterns,
-				track)) {
-				skin_blitpart(g, &self->gridstate->skin->bitmap, cpx, 0,
-					&self->gridstate->skin->headercoords.solo);
-			}
-		}
-		if (track == editposition.track) {
-			
-			psy_ui_setcolor(g, self->gridstate->skin->font);
-			psy_ui_drawline(g, cpx, 0,
-				min(cpx + self->gridstate->skin->headercoords.background.destwidth,
-					cpx + trackergridstate_trackwidth(self->gridstate, track)), 0);
-		}
+	for (track = 0, cpx = 0; track < self->gridstate->numtracks; ++track) {
+		centerx = max(0, (trackergridstate_trackwidth(self->gridstate, track) -
+			self->gridstate->skin->headercoords.background.destwidth) / 2);
+		trackerheader_drawtrackseparator(self, g, cpx, track);
+		trackerheader_drawtrackbackground(self, g, cpx + centerx);
+		trackerheader_drawtracknumber(self, g, cpx + centerx, track);
+		trackerheader_drawtrackleds(self, g, cpx + centerx, track);
+		trackerheader_drawtrackselection(self, g, cpx + centerx, track);
 		cpx += trackergridstate_trackwidth(self->gridstate, track);
-	}	
+	}
+}
+
+void trackerheader_drawtrackseparator(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track)
+{
+	int trackwidth;
+	psy_ui_Size size;
+	psy_ui_TextMetric tm;		
+
+	size = psy_ui_component_size(&self->component);
+	tm = psy_ui_component_textmetric(&self->component);	
+	trackwidth = trackergridstate_trackwidth(self->gridstate, track);
+	psy_ui_setcolor(g, self->gridstate->skin->separator);
+	psy_ui_drawline(g, x + trackwidth - 1, 0, x + trackwidth - 1,
+		psy_ui_value_px(&size.height, &tm));	
+}
+
+void trackerheader_drawtrackbackground(TrackerHeader* self, psy_ui_Graphics* g, int x)
+{		
+	skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
+		&self->gridstate->skin->headercoords.background);
+}
+
+void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track)
+{
+	int trackx0 = track / 10;
+	int track0x = track % 10;
+	SkinCoord digitx0 = self->gridstate->skin->headercoords.digitx0;
+	SkinCoord digit0x = self->gridstate->skin->headercoords.digit0x;
+	digitx0.srcx += trackx0 * digitx0.srcwidth;
+	digit0x.srcx += track0x * digit0x.srcwidth;
+	skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0, &digitx0);
+	skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0, &digit0x);
+}
+
+void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track)
+{
+	if (self->workspace->song) {
+		if (patterns_istrackmuted(&self->workspace->song->patterns,
+			track)) {
+			skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
+				&self->gridstate->skin->headercoords.mute);
+		}
+		if (patterns_istracksoloed(&self->workspace->song->patterns,
+			track)) {
+			skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
+				&self->gridstate->skin->headercoords.solo);
+		}
+	}
+}
+
+void trackerheader_drawtrackselection(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track)
+{
+	psy_audio_PatternEditPosition editposition;
+
+	editposition = workspace_patterneditposition(self->workspace);
+	if (track == editposition.track) {
+		psy_ui_setcolor(g, self->gridstate->skin->font);
+		psy_ui_drawline(g, x, 0,
+			min(x + self->gridstate->skin->headercoords.background.destwidth,
+				x + trackergridstate_trackwidth(self->gridstate, track)), 0);
+	}
 }
 
 void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
@@ -1989,11 +2063,14 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 		psy_ui_Rectangle r;
 		uintptr_t track;
 		int track_x;		
+		int centerx;
 
 		track = trackergridstate_screentotrack(self->gridstate,
 			ev->x + psy_ui_component_scrollleft(&self->component),
-			psy_audio_player_numsongtracks(&self->workspace->player));
-		track_x = trackergridstate_track_x(self->gridstate, track);
+			psy_audio_player_numsongtracks(&self->workspace->player));		
+		centerx = max(0, (trackergridstate_trackwidth(self->gridstate, track) -
+			self->gridstate->skin->headercoords.background.destwidth) / 2);
+		track_x = trackergridstate_track_x(self->gridstate, track) + centerx;
 		psy_ui_setrectangle(&r,
 			self->gridstate->skin->headercoords.mute.destx + track_x,
 			self->gridstate->skin->headercoords.mute.desty,
@@ -2059,7 +2136,7 @@ void trackerheader_onpatterneditpositionchanged(TrackerHeader* self,
 // TrackerLineNumbers
 // prototypes
 static void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, TrackerView*);
+	psy_ui_Component* parent, TrackerLineState*, TrackerView*);
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*, psy_ui_Graphics*);
 static void trackerlinenumbers_onpreferredsize(TrackerLineNumbers*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -2151,7 +2228,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			columnflags.beat = fmod(offset, 1.0f) == 0.0f;
 			columnflags.beat4 = fmod(offset, 4.0f) == 0.0f;
 			columnflags.selection = 0;
-			setcolumncolor(self->linestate->skin, g, columnflags);			
+			setcolumncolor(self->linestate->skin, g, columnflags, 0, 0);			
 			if (workspace_showlinenumbersinhex(self->workspace)) {
 				if (drawbeat) {
 					psy_snprintf(buffer, 10, "%.2X %.3f", line, offset);
@@ -2250,6 +2327,9 @@ void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* l
 }
 
 // LineNumbersLabel
+// prototypes
+static void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel* self,
+	TrackerLineState* linestate);
 static void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel*,
 	psy_ui_MouseEvent* ev);
 static void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel*, psy_ui_Graphics*);
@@ -2273,12 +2353,24 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 }
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
-	psy_ui_Component* parent, TrackerView* view)
+	psy_ui_Component* parent, TrackerLineState* linestate, TrackerView* view)
 {
 	psy_ui_component_init(&self->component, parent);
 	trackerlinenumberslabel_vtable_init(self);
 	self->component.vtable = &trackerlinenumberslabel_vtable;
+	trackerlinenumberslabel_setsharedlinestate(self, linestate);
 	self->view = view;
+}
+
+void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel* self,
+	TrackerLineState* linestate)
+{
+	if (linestate) {
+		self->linestate = linestate;
+	} else {
+		trackerlinestate_init(&self->defaultlinestate);
+		self->linestate = &self->defaultlinestate;
+	}
 }
 
 void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel* self,
@@ -2307,8 +2399,9 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
 		psy_ui_value_px(&size.height, &tm));
-	psy_ui_setbackgroundcolor(g, self->view->skin.background);
-	psy_ui_settextcolor(g, self->view->skin.font);
+	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
+	psy_ui_setbackgroundcolor(g, self->linestate->skin->background);
+	psy_ui_settextcolor(g, self->linestate->skin->font);
 	psy_ui_textoutrectangle(g, r.left, 0, 0, r, "Line", strlen("Line"));
 	if (self->view->showdefaultline) {
 		psy_ui_textoutrectangle(g, r.left, headersize.height, 0,
@@ -2735,7 +2828,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 	focus = psy_ui_component_hasfocus(&self->component);
 	currcolumnflags.cursor = self->linestate->drawcursor && focus &&
 		columnflags.cursor && self->cursor.column == 0;
-	setcolumncolor(self->gridstate->skin, g, currcolumnflags);
+	setcolumncolor(self->gridstate->skin, g, currcolumnflags, entry->track, self->gridstate->numtracks);
 	cpx = 0;
 	// draw note	
 	psy_ui_setrectangle(&r, x + cpx, y,
@@ -2777,7 +2870,8 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 			currcolumnflags.cursor = self->linestate->drawcursor && focus &&
 				columnflags.cursor && self->cursor.column == column &&
 				self->cursor.digit == digit;
-			setcolumncolor(self->gridstate->skin, g, currcolumnflags);
+			setcolumncolor(self->gridstate->skin, g, currcolumnflags, entry->track,
+				self->gridstate->numtracks);
 			trackergrid_drawdigit(self, g, x + cpx + digit *
 				self->gridstate->textwidth, y, digitvalue,
 				empty, currcolumnflags.mid);
@@ -3071,6 +3165,7 @@ static void trackerview_vtable_init(TrackerView* self)
 // implementation
 void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_Component* patternview,
+	PatternViewSkin* skin,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
@@ -3090,12 +3185,12 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	self->showlinenumbercursor = 1;
 	self->showlinenumbersinhex = 1;	
 	self->showdefaultline = 1;
-	trackerview_initdefaultskin(self);
 	// shared states
 	trackerlinestate_init(&self->linestate);
-	self->linestate.skin = &self->skin;
+	self->linestate.skin = skin;
 	trackergridstate_init(&self->gridstate);
-	self->gridstate.skin = &self->skin;
+	self->gridstate.skin = skin;
+	trackerview_initdefaultskin(self);
 	trackerview_initcolumns(self);
 	trackerview_initmetrics(self);	
 	// Interpolate View
@@ -3108,7 +3203,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->left, patternview);
 	psy_ui_component_enablealign(&self->left);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	trackerlinenumberslabel_init(&self->linenumberslabel, &self->left, self);
+	trackerlinenumberslabel_init(&self->linenumberslabel, &self->left, &self->linestate, self);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
 	trackerlinenumbers_init(&self->linenumbers, &self->left, &self->linestate,
 		workspace);
@@ -3230,13 +3325,13 @@ void trackerview_connectworkspace(TrackerView* self)
 
 void trackerview_ondestroy(TrackerView* self, psy_ui_Component* sender)
 {	
-	trackergridstate_dispose(&self->gridstate);
+	trackergridstate_dispose(&self->gridstate);	
 }
 
 void trackerview_initdefaultskin(TrackerView* self)
 {
-	psy_ui_bitmap_init(&self->skin.bitmap);
-	psy_ui_bitmap_loadresource(&self->skin.bitmap, IDB_HEADERSKIN);
+	psy_ui_bitmap_init(&self->gridstate.skin->bitmap);
+	psy_ui_bitmap_loadresource(&self->gridstate.skin->bitmap, IDB_HEADERSKIN);
 	trackerview_setclassicheadercoords(self);
 }
 
@@ -3249,12 +3344,12 @@ void trackerview_setheadercoords(TrackerView* self)
 	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
 	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
 
-	self->skin.headercoords.background = background;
-	self->skin.headercoords.record = record;
-	self->skin.headercoords.mute = mute;
-	self->skin.headercoords.solo = solo;
-	self->skin.headercoords.digit0x = digit0x;
-	self->skin.headercoords.digitx0 = digitx0;
+	self->gridstate.skin->headercoords.background = background;
+	self->gridstate.skin->headercoords.record = record;
+	self->gridstate.skin->headercoords.mute = mute;
+	self->gridstate.skin->headercoords.solo = solo;
+	self->gridstate.skin->headercoords.digit0x = digit0x;
+	self->gridstate.skin->headercoords.digitx0 = digitx0;
 }
 
 void trackerview_setclassicheadercoords(TrackerView* self)
@@ -3266,12 +3361,12 @@ void trackerview_setclassicheadercoords(TrackerView* self)
 	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
 	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
 
-	self->skin.headercoords.background = background;
-	self->skin.headercoords.record = record;
-	self->skin.headercoords.mute = mute;
-	self->skin.headercoords.solo = solo;
-	self->skin.headercoords.digit0x = digit0x;
-	self->skin.headercoords.digitx0 = digitx0;
+	self->gridstate.skin->headercoords.background = background;
+	self->gridstate.skin->headercoords.record = record;
+	self->gridstate.skin->headercoords.mute = mute;
+	self->gridstate.skin->headercoords.solo = solo;
+	self->gridstate.skin->headercoords.digit0x = digit0x;
+	self->gridstate.skin->headercoords.digitx0 = digitx0;
 }
 
 void trackerview_setheadertextcoords(TrackerView* self)
@@ -3283,12 +3378,12 @@ void trackerview_setheadertextcoords(TrackerView* self)
 	SkinCoord digitx0 = { 0, 80, 6, 12, 5, 8, 6, 12, 0 };
 	SkinCoord digit0x = { 0, 80, 6, 12, 11, 8, 6, 12, 0 };
 
-	self->skin.headercoords.background = background;
-	self->skin.headercoords.record = record;
-	self->skin.headercoords.mute = mute;
-	self->skin.headercoords.solo = solo;
-	self->skin.headercoords.digit0x = digit0x;
-	self->skin.headercoords.digitx0 = digitx0;
+	self->gridstate.skin->headercoords.background = background;
+	self->gridstate.skin->headercoords.record = record;
+	self->gridstate.skin->headercoords.mute = mute;
+	self->gridstate.skin->headercoords.solo = solo;
+	self->gridstate.skin->headercoords.digit0x = digit0x;
+	self->gridstate.skin->headercoords.digitx0 = digitx0;
 }
 
 void trackerview_onalign(TrackerView* self)
@@ -3549,35 +3644,44 @@ void trackerview_initcolumns(TrackerView* self)
 void TrackerViewApplyProperties(TrackerView* self, psy_Properties* p)
 {
 	const char* pattern_header_skin_name;
+	PatternViewSkin* skin;
 
-	self->skin.separator = psy_properties_int(p, "pvc_separator", 0x00292929);
-	self->skin.separator2 = psy_properties_int(p, "pvc_separator2", 0x00292929);
-	self->skin.background = psy_properties_int(p, "pvc_background", 0x00292929);
-	self->skin.background2 = psy_properties_int(p, "pvc_background2", 0x00292929);
-	self->skin.row4beat = psy_properties_int(p, "pvc_row4beat", 0x00595959);
-	self->skin.row4beat2 = psy_properties_int(p, "pvc_row4beat2", 0x00595959);
-	self->skin.rowbeat = psy_properties_int(p, "pvc_rowbeat", 0x00363636);
-	self->skin.rowbeat2 = psy_properties_int(p, "pvc_rowbeat2", 0x00363636);
-	self->skin.row = psy_properties_int(p, "pvc_row", 0x003E3E3E);
-	self->skin.row2 = psy_properties_int(p, "pvc_row2", 0x003E3E3E);
-	self->skin.font = psy_properties_int(p, "pvc_font", 0x00CACACA);
-	self->skin.font2 = psy_properties_int(p, "pvc_font2", 0x00CACACA);
-	self->skin.fontPlay = psy_properties_int(p, "pvc_fontplay", 0x00FFFFFF);
-	self->skin.fontCur2 = psy_properties_int(p, "pvc_fontcur2", 0x00FFFFFF);
-	self->skin.fontSel = psy_properties_int(p, "pvc_fontsel", 0x00FFFFFF);
-	self->skin.fontSel2 = psy_properties_int(p, "pvc_fontsel2", 0x00FFFFFF);
-	self->skin.selection = psy_properties_int(p, "pvc_selection", 0x009B7800);
-	self->skin.selection2 = psy_properties_int(p, "pvc_selection2", 0x009B7800);
-	self->skin.playbar = psy_properties_int(p, "pvc_playbar", 0x009F7B00);
-	self->skin.playbar2 = psy_properties_int(p, "pvc_playbar2", 0x009F7B00);
-	self->skin.cursor = psy_properties_int(p, "pvc_cursor", 0x009F7B00);
-	self->skin.cursor2 = psy_properties_int(p, "pvc_cursor2", 0x009F7B00);
-	self->skin.midline = psy_properties_int(p, "pvc_midline", 0x007D6100);
-	self->skin.midline2 = psy_properties_int(p, "pvc_midline2", 0x007D6100);
+	skin = self->gridstate.skin;
+	patternviewskin_clear(skin);
+	skin->separator = psy_properties_int(p, "pvc_separator", 0x00292929);
+	skin->separator2 = psy_properties_int(p, "pvc_separator2", 0x00292929);
+	skin->background = psy_properties_int(p, "pvc_background", 0x00292929);
+	skin->background2 = psy_properties_int(p, "pvc_background2", 0x00292929);
+	skin->row4beat = psy_properties_int(p, "pvc_row4beat", 0x00595959);
+	skin->row4beat2 = psy_properties_int(p, "pvc_row4beat2", 0x00595959);
+	skin->rowbeat = psy_properties_int(p, "pvc_rowbeat", 0x00363636);
+	skin->rowbeat2 = psy_properties_int(p, "pvc_rowbeat2", 0x00363636);
+	skin->row = psy_properties_int(p, "pvc_row", 0x003E3E3E);
+	skin->row2 = psy_properties_int(p, "pvc_row2", 0x003E3E3E);
+	skin->font = psy_properties_int(p, "pvc_font", 0x00CACACA);
+	skin->font2 = psy_properties_int(p, "pvc_font2", 0x00CACACA);
+	skin->fontPlay = psy_properties_int(p, "pvc_fontplay", 0x00FFFFFF);
+	skin->fontCur2 = psy_properties_int(p, "pvc_fontcur2", 0x00FFFFFF);
+	skin->fontSel = psy_properties_int(p, "pvc_fontsel", 0x00FFFFFF);
+	skin->fontSel2 = psy_properties_int(p, "pvc_fontsel2", 0x00FFFFFF);
+	skin->selection = psy_properties_int(p, "pvc_selection", 0x009B7800);
+	skin->selection2 = psy_properties_int(p, "pvc_selection2", 0x009B7800);
+	skin->playbar = psy_properties_int(p, "pvc_playbar", 0x009F7B00);
+	skin->playbar2 = psy_properties_int(p, "pvc_playbar2", 0x009F7B00);
+	skin->cursor = psy_properties_int(p, "pvc_cursor", 0x009F7B00);
+	skin->cursor2 = psy_properties_int(p, "pvc_cursor2", 0x009F7B00);
+	skin->midline = psy_properties_int(p, "pvc_midline", 0x007D6100);
+	skin->midline2 = psy_properties_int(p, "pvc_midline2", 0x007D6100);
 	psy_ui_component_setbackgroundcolor(
-		&self->linenumbers.component, self->skin.background);
+		&self->linenumbers.component, skin->background);
 	pattern_header_skin_name = psy_properties_readstring(p, "pattern_header_skin",
-		0);
+		"");
+	if (strcmp(pattern_header_skin_name, "") == 0) {
+		psy_ui_bitmap_dispose(&skin->bitmap);
+		psy_ui_bitmap_init(&skin->bitmap);
+		psy_ui_bitmap_loadresource(&skin->bitmap, IDB_HEADERSKIN);
+		trackerview_setclassicheadercoords(self);
+	} else
 	if (pattern_header_skin_name) {
 		char path[_MAX_PATH];
 		char filename[_MAX_PATH];
@@ -3591,8 +3695,8 @@ void TrackerViewApplyProperties(TrackerView* self, psy_Properties* p)
 
 			psy_ui_bitmap_init(&bmp);
 			if (psy_ui_bitmap_load(&bmp, path) == 0) {
-				psy_ui_bitmap_dispose(&self->skin.bitmap);
-				self->skin.bitmap = bmp;
+				psy_ui_bitmap_dispose(&skin->bitmap);
+				skin->bitmap = bmp;
 			}
 		}
 		strcpy(filename, pattern_header_skin_name);
@@ -3618,67 +3722,67 @@ void trackerview_setcoords(TrackerView* self, psy_Properties* p)
 
 	if (s = psy_properties_readstring(p, "background_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->skin.headercoords.background.srcx = vals[0];
-		self->skin.headercoords.background.srcy = vals[1];
-		self->skin.headercoords.background.destwidth = vals[2];
-		self->skin.headercoords.background.destheight = vals[3];
+		self->gridstate.skin->headercoords.background.srcx = vals[0];
+		self->gridstate.skin->headercoords.background.srcy = vals[1];
+		self->gridstate.skin->headercoords.background.destwidth = vals[2];
+		self->gridstate.skin->headercoords.background.destheight = vals[3];
 	}
 	if (s = psy_properties_readstring(p, "number_0_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->skin.headercoords.digitx0.srcx = vals[0];
-		self->skin.headercoords.digitx0.srcy = vals[1];
-		self->skin.headercoords.digit0x.srcx = vals[0];
-		self->skin.headercoords.digit0x.srcy = vals[1];
-		self->skin.headercoords.digitx0.srcwidth = vals[2];
-		self->skin.headercoords.digitx0.srcheight = vals[3];
-		self->skin.headercoords.digit0x.srcwidth = vals[2];
-		self->skin.headercoords.digit0x.srcheight = vals[3];
+		self->gridstate.skin->headercoords.digitx0.srcx = vals[0];
+		self->gridstate.skin->headercoords.digitx0.srcy = vals[1];
+		self->gridstate.skin->headercoords.digit0x.srcx = vals[0];
+		self->gridstate.skin->headercoords.digit0x.srcy = vals[1];
+		self->gridstate.skin->headercoords.digitx0.srcwidth = vals[2];
+		self->gridstate.skin->headercoords.digitx0.srcheight = vals[3];
+		self->gridstate.skin->headercoords.digit0x.srcwidth = vals[2];
+		self->gridstate.skin->headercoords.digit0x.srcheight = vals[3];
 	}
 	if (s = psy_properties_readstring(p, "record_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->skin.headercoords.record.srcx = vals[0];
-		self->skin.headercoords.record.srcy = vals[1];
-		self->skin.headercoords.record.destwidth = vals[2];
-		self->skin.headercoords.record.destheight = vals[3];
+		self->gridstate.skin->headercoords.record.srcx = vals[0];
+		self->gridstate.skin->headercoords.record.srcy = vals[1];
+		self->gridstate.skin->headercoords.record.destwidth = vals[2];
+		self->gridstate.skin->headercoords.record.destheight = vals[3];
 	}
 	if (s = psy_properties_readstring(p, "mute_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->skin.headercoords.mute.srcx = vals[0];
-		self->skin.headercoords.mute.srcy = vals[1];
-		self->skin.headercoords.mute.destwidth = vals[2];
-		self->skin.headercoords.mute.destheight = vals[3];
+		self->gridstate.skin->headercoords.mute.srcx = vals[0];
+		self->gridstate.skin->headercoords.mute.srcy = vals[1];
+		self->gridstate.skin->headercoords.mute.destwidth = vals[2];
+		self->gridstate.skin->headercoords.mute.destheight = vals[3];
 	}
 	if (s = psy_properties_readstring(p, "solo_on_source", 0)) {
 		skin_psh_values(s, 4, vals);
-		self->skin.headercoords.solo.srcx = vals[0];
-		self->skin.headercoords.solo.srcy = vals[1];
-		self->skin.headercoords.solo.destwidth = vals[2];
-		self->skin.headercoords.solo.destheight = vals[3];
+		self->gridstate.skin->headercoords.solo.srcx = vals[0];
+		self->gridstate.skin->headercoords.solo.srcy = vals[1];
+		self->gridstate.skin->headercoords.solo.destwidth = vals[2];
+		self->gridstate.skin->headercoords.solo.destheight = vals[3];
 	}
 	if (s = psy_properties_readstring(p, "digit_x0_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->skin.headercoords.digitx0.destx = vals[0];
-		self->skin.headercoords.digitx0.desty = vals[1];
+		self->gridstate.skin->headercoords.digitx0.destx = vals[0];
+		self->gridstate.skin->headercoords.digitx0.desty = vals[1];
 	}
 	if (s = psy_properties_readstring(p, "digit_0x_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->skin.headercoords.digit0x.destx = vals[0];
-		self->skin.headercoords.digit0x.desty = vals[1];
+		self->gridstate.skin->headercoords.digit0x.destx = vals[0];
+		self->gridstate.skin->headercoords.digit0x.desty = vals[1];
 	}
 	if (s = psy_properties_readstring(p, "record_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->skin.headercoords.record.destx = vals[0];
-		self->skin.headercoords.record.desty = vals[1];
+		self->gridstate.skin->headercoords.record.destx = vals[0];
+		self->gridstate.skin->headercoords.record.desty = vals[1];
 	}
 	if (s = psy_properties_readstring(p, "mute_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->skin.headercoords.mute.destx = vals[0];
-		self->skin.headercoords.mute.desty = vals[1];
+		self->gridstate.skin->headercoords.mute.destx = vals[0];
+		self->gridstate.skin->headercoords.mute.desty = vals[1];
 	}
 	if (s = psy_properties_readstring(p, "solo_on_dest", 0)) {
 		skin_psh_values(s, 2, vals);
-		self->skin.headercoords.solo.destx = vals[0];
-		self->skin.headercoords.solo.desty = vals[1];
+		self->gridstate.skin->headercoords.solo.destx = vals[0];
+		self->gridstate.skin->headercoords.solo.desty = vals[1];
 	}
 }
 

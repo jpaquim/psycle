@@ -34,6 +34,7 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape, 
 	self->fm = NULL;
 	self->am = NULL;
 	self->pm = NULL;
+	self->phase = 0;
 	psy_audio_sampleiterator_init(&self->sampleiterator,
 		psy_audio_waveosc_sample(self, frequency), RESAMPLERTYPE_LINEAR);
 	psy_audio_sampleiterator_setspeed(&self->sampleiterator, frequency / self->basefrequency);
@@ -86,7 +87,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 			intptr_t nextsamples;
 			
 			nextsamples = min(psy_audio_sampleiterator_prework(
-				&self->sampleiterator, numsamples, FALSE), numsamples);
+				&self->sampleiterator, 1, FALSE), 1);
 			numsamples -= nextsamples;
 			while (nextsamples) {
 				intptr_t diff;
@@ -97,12 +98,12 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 					double f;
 					
 					f = (self->frequency + *(self->fm++));
-					if (f > 0) {
+					if (f >= 0) {
 						double speed;
 
 						speed = f / self->basefrequency;
-						//psy_audio_sampleiterator_setspeed(&self->sampleiterator,
-							//speed);
+						psy_audio_sampleiterator_setspeed(&self->sampleiterator,
+							speed);
 					}
 				}
 				output = psy_audio_sampleiterator_work(&self->sampleiterator, 0);
@@ -110,7 +111,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 					output *= self->am[dstpos];
 				}
 				
-				data[dstpos] = output * 32768 * self->gain;
+				data[dstpos] += output * self->gain;
 				nextsamples--;
 				++dstpos;				
 				diff = psy_audio_sampleiterator_inc(&self->sampleiterator);				
@@ -135,7 +136,11 @@ void psy_audio_waveosc_setfrequency(psy_audio_WaveOsc* self, double frequency)
 
 void psy_audio_waveosc_start(psy_audio_WaveOsc* self, double phase)
 {
-	self->playing = TRUE;
+	if (self->sampleiterator.sample) {
+		psy_audio_sampleiterator_setposition(&self->sampleiterator,
+			phase * self->sampleiterator.sample->numframes);
+		self->playing = TRUE;
+	}
 }
 
 void psy_audio_waveosc_stop(psy_audio_WaveOsc* self, double phase)

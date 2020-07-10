@@ -208,8 +208,6 @@ typedef struct psy_ui_Component {
 	int scrollstepx;
 	int scrollstepy;
 	int debugflag;
-	unsigned int backgroundcolor;
-	unsigned int color;
 	psy_ui_BackgroundMode backgroundmode;
 	bool visible;	
 	int accumwheeldelta;
@@ -488,24 +486,10 @@ INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char*
 		psy_ui_component_font(self));
 }
 
-INLINE void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color)
-{
-	self->color = color;
-}
-
-INLINE  psy_ui_Color psy_ui_component_color(psy_ui_Component* self)
-{
-	return self->color;
-}
-
-INLINE void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
-{
-	self->backgroundcolor = color;
-    // assert(self->imp);   
-    if (self->imp) {
-        self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
-    }
-}
+void psy_ui_component_setcolor(psy_ui_Component*, psy_ui_Color);
+psy_ui_Color psy_ui_component_color(psy_ui_Component*);
+void psy_ui_component_setbackgroundcolor(psy_ui_Component*, psy_ui_Color);
+psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component*);
 
 INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)
 {	

@@ -78,6 +78,50 @@ psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
 	return rv;
 }
 
+void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
+{	
+	self->style.backgroundcolor = color;
+	self->style.use_backgroundcolor = 1;
+	// assert(self->imp);   
+	if (self->imp) {
+		self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
+	}
+}
+
+psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component* self)
+{
+	psy_ui_Color rv;
+	psy_ui_Style* common;
+
+	common = &app.defaults.style_common;
+	if (self->style.use_backgroundcolor) {
+		rv = self->style.backgroundcolor;
+	} else {
+		rv = app.defaults.style_common.backgroundcolor;
+	}
+	return rv;
+}
+
+void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color)
+{
+	self->style.color = color;
+	self->style.use_color = 1;	
+}
+
+psy_ui_Color psy_ui_component_color(psy_ui_Component* self)
+{
+	psy_ui_Color rv;
+	psy_ui_Style* common;
+
+	common = &app.defaults.style_common;
+	if (self->style.use_color) {
+		rv = self->style.color;
+	} else {
+		rv = app.defaults.style_common.color;
+	}
+	return rv;
+}
+
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
 {		
 	if (main) {
@@ -459,14 +503,14 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->handlevscroll = TRUE;
 	self->handlehscroll = TRUE;
 	self->backgroundmode = psy_ui_BACKGROUND_SET;
-	self->backgroundcolor = psy_ui_defaults_backgroundcolor(&app.defaults);	
 	self->mousetracking = 0;
-	self->color = psy_ui_defaults_color(&app.defaults);
 	self->cursor = psy_ui_CURSOR_DEFAULT;
-	self->scroll.x = 0;
-	self->scroll.y = 0;	
+	psy_ui_intpoint_init(&self->scroll);	
 	psy_ui_component_updatefont(self);
-	psy_ui_component_setbackgroundcolor(self, self->backgroundcolor);
+	if (self->imp) {
+		self->imp->vtable->dev_setbackgroundcolor(self->imp,
+			psy_ui_component_backgroundcolor(self));
+	}	
 	psy_ui_border_init(&self->border);
 }
 

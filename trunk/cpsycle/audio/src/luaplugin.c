@@ -274,6 +274,10 @@ static void loadspecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
 static void savespecific(psy_audio_LuaPlugin*, psy_audio_SongFile*,
 	uintptr_t slot);
+static psy_dsp_amp_range_t amprange(psy_audio_LuaPlugin* self)
+{
+	return PSY_DSP_AMP_RANGE_VST;
+}
 
 int luascript_setmachine(lua_State*);
 int luascript_terminal_output(lua_State*);
@@ -307,22 +311,24 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
-		vtable.seqtick = (fp_machine_seqtick) seqtick;
+		vtable.amprange = (fp_machine_amprange)amprange;
+		vtable.generateaudio = (fp_machine_generateaudio)generateaudio;
+		vtable.seqtick = (fp_machine_seqtick)seqtick;
 		vtable.newline = (fp_machine_newline)
 			newline;
 		vtable.stop = (fp_machine_stop)
 			stop;
-		vtable.info = (fp_machine_info) info;
+		vtable.info = (fp_machine_info)info;
 		vtable.parameter = (fp_machine_parameter)parameter;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;		
-		vtable.dispose =(fp_machine_dispose) dispose;
-		vtable.reload = (fp_machine_reload) reload;
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.numparameters = (fp_machine_numparameters)numparameters;
+		vtable.dispose =(fp_machine_dispose)dispose;
+		vtable.reload = (fp_machine_reload)reload;
+		vtable.numinputs = (fp_machine_numinputs)numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
 		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
+		vtable.savespecific = (fp_machine_savespecific)savespecific;
 		vtable_initialized = 1;
 	}
 }
@@ -361,6 +367,8 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 	if (psyclescript_machineinfo(&self->script, self->plugininfo) != 0) {
 		psy_audio_luaplugin_getinfo(self);
 	}
+	free(self->plugininfo->modulepath);
+	self->plugininfo->modulepath = strdup(path);
 	self->usenoteon = self->plugininfo->Flags;
 	luaplugin_initmachine(self);	
 	psy_audio_machine_seteditname(psy_audio_luaplugin_base(self),
@@ -618,7 +626,7 @@ int luascript_terminal_output(lua_State* L)
 			s = lua_tolstring(L, -1, &l);  /* get result */
 			if (s == NULL)
 				return luaL_error(L,
-			LUA_QL("tostring") " must return a string to " LUA_QL("print"));
+			"tostring" " must return a string to " "print");
 			lua_pop(L, 1);  /* pop result */
 			psy_audio_machine_output(&proxy->custommachine.machine, s);
 		}
@@ -1151,7 +1159,88 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 void savespecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
+	//if (proxy_.prsmode() == MachinePresetType::NATIVE) {
+		uint32_t count = self->client->numparameters_;
+		uint32_t size2 = 0;
+		//unsigned char* pData = 0;
+		//try
+		//{
+			//size2 = proxy().GetData(&pData, false);
+		//}
+		//catch (const std::exception&)
+		//{
+			// data won't be saved
+		//}
+		uint32_t size = size2 + sizeof(count) + sizeof(int) * count;
+		uint32_t i;
 
+		for (i = 0; i < count; i++) {
+			const char* id = luaplugin_id(self, i);
+			size += strlen(id) + 1;
+		}
+		psyfile_write(songfile->file, &size, sizeof(size));
+		psyfile_write(songfile->file, &count, sizeof(count));
+		for (i = 0; i < count; i++)
+		{
+			psy_audio_MachineParam* param;
+
+			param = psy_audio_machine_tweakparameter(&self->custommachine.machine, i);
+			if (param) {
+				int32_t temp;
+
+				temp = (int32_t) psy_audio_machineparam_scaledvalue(param);
+				psyfile_write(songfile->file, &temp, sizeof(temp));
+			}
+		}
+		// ids
+		for (i = 0; i < count; i++) {
+			const char* id = luaplugin_id(self, i);
+
+			psyfile_writestring(songfile->file, id);
+		}
+		psyfile_write(songfile->file, &size2, sizeof(size2));
+		if (size2)
+		{
+			// psyfile_writes(songfile->file, pData, size2); // Number of parameters
+			// zapArray(pData);
+		}			 
+/*else {
+		try {
+			UINT count(GetNumParams());
+			unsigned char _program = 0;
+			UINT size(sizeof _program + sizeof count);
+			UINT chunksize(0);
+			unsigned char* pData(0);
+			bool b = proxy_.prsmode() == MachinePresetType::CHUNK;
+			if (b)
+			{
+				count = 0;
+				chunksize = proxy().GetData(&pData, true);
+				size += chunksize;
+			} else
+			{
+				size += sizeof(float) * count;
+			}
+			pFile->Write(&size, sizeof size);
+			// _program = static_cast<unsigned char>(GetProgram());
+			pFile->Write(&_program, sizeof _program);
+			pFile->Write(&count, sizeof count);
+
+			if (b)
+			{
+				pFile->Write(pData, chunksize);
+			} else
+			{
+				for (UINT i(0); i < count; ++i)
+				{
+					float temp = proxy_.Val(i);
+					pFile->Write(&temp, sizeof temp);
+				}
+			}
+		}
+		catch (...) {
+		}
+	}*/
 }
 
 const char* luaplugin_id(psy_audio_LuaPlugin* self, int index)

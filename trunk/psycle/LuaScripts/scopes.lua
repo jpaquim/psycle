@@ -26,7 +26,8 @@ function psycle.info()
   }
 end
 
-function psycle.start()  
-  psycle.setmachine(require("scopes.machine"))
+function psycle.start()
+  mac = require("scopes.machine")
+  psycle.setmachine(mac)
 end
 

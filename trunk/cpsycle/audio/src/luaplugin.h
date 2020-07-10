@@ -33,7 +33,7 @@ INLINE bool luamachine_shared(psy_audio_LuaMachine* self)
 	return self->shared_;
 }
 
-INLINE void luamachine_setnumparameters(psy_audio_LuaMachine* self, int num)
+INLINE void luamachine_setnumparameters(psy_audio_LuaMachine* self, uintptr_t num)
 {
 	self->numparameters_ = num;
 }

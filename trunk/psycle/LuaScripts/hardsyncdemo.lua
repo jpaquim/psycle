@@ -21,5 +21,6 @@ function psycle.info()
 end
 
 function psycle.start()
-  psycle.setmachine(require("hardsyncdemo.machine"))
+  mac = require("hardsyncdemo.machine")
+  psycle.setmachine(mac)
 end

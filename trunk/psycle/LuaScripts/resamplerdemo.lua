@@ -21,5 +21,6 @@ function psycle.info()
 end
 
 function psycle.start()
-  psycle.setmachine(require("resamplerdemo.machine"))
+  mac = require("resamplerdemo.machine")
+  psycle.setmachine(mac)
 end

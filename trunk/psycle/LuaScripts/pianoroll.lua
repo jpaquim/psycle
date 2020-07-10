@@ -25,7 +25,8 @@ function psycle.info()
   }
 end
 
-function psycle.start()  
-  psycle.setmachine(require("pianoroll.machine"))
+function psycle.start()
+  mac = require("pianoroll.machine") 
+  psycle.setmachine(mac)
 end
 

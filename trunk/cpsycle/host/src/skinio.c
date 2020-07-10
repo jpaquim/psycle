@@ -2,95 +2,31 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
 
+#include "../../detail/psydef.h"
 #include "skinio.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#if defined DIVERSALIS__OS__UNIX
-
-void skin_load(psy_Properties* properties, const char* path)
-{
-}
-
-void skin_loadpsh(psy_Properties* properties, const char* path)
-{
-}
-
-void skin_psh_values(const char* str, int maxcount, int* values)
-{
-}
-
-#else
-
-#include <windows.h>
-
-#define HexMapL 16
-
-struct CHexMap
-  {
-    TCHAR chr;
-    int value;
-  };
-
-
-struct CHexMap HexMap[HexMapL] =
-  {
-    {'0', 0}, {'1', 1},
-    {'2', 2}, {'3', 3},
-    {'4', 4}, {'5', 5},
-    {'6', 6}, {'7', 7},
-    {'8', 8}, {'9', 9},
-    {'A', 10}, {'B', 11},
-    {'C', 12}, {'D', 13},
-    {'E', 14}, {'F', 15}
-  };
-
-int _httoi(const TCHAR *value)
+int _httoi(const char *value)
 {  
-  TCHAR *mstr = _strupr(_strdup(value));
-  TCHAR *s = mstr;
-  BOOL firsttime;
-  int result = 0;
-  if (*s == '0' && *(s + 1) == 'X') s += 2;
-  firsttime = TRUE;
-  while (*s != '\0')
-  {
-    BOOL found = FALSE;
-	int i;
-    for (i = 0; i < HexMapL; i++)
-    {
-      if (*s == HexMap[i].chr)
-      {
-        if (!firsttime) result <<= 4;
-        result |= HexMap[i].value;
-        found = TRUE;
-        break;
-      }
-    }
-    if (!found) break;
-    s++;
-    firsttime = FALSE;
-  }
-  free(mstr);
-  return result;
+	return (int)strtol(value, 0, 16);
 }
 
-
-void skin_load(psy_Properties* properties, const char* path)
+int skin_load(psy_Properties* properties, const char* path)
 {
-	FILE* hfile;
+	FILE* fp;
 	char buf[512];
 
-	if ((hfile=fopen(path,"rb")) == NULL )
+	if ((fp = fopen(path, "rb")) == NULL )
 	{
 //		MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
-		return;
+		return PSY_ERRFILE;
 	}
-	while (fgets(buf, 512, hfile))
+	while (fgets(buf, 512, fp))
 	{
-		if (strstr(buf,"\"pattern_fontface\"=\""))
+		if (strstr(buf, "\"pattern_fontface\"=\""))
 		{
 			char *q = strchr(buf,61); // =
 			if (q)
@@ -667,21 +603,22 @@ void skin_load(psy_Properties* properties, const char* path)
 		}
 		}
 	}
-	fclose(hfile);
+	fclose(fp);
+	return PSY_OK;
 }
 
-void skin_loadpsh(psy_Properties* properties, const char* path)
+int skin_loadpsh(psy_Properties* properties, const char* path)
 {
 	char buf[1 << 10];
 	int loaded = 0;
-	FILE* hfile;	
+	FILE* fp;	
 
-	if ((hfile=fopen(path,"r")) == NULL )
+	if ((fp = fopen(path, "r")) == NULL )
 	{
 //		MessageBox("Couldn't open File for Reading. Operation Aborted","File Open Error",MB_OK);
-		return;
+		return PSY_ERRFILE;
 	}
-	while(fgets(buf, sizeof buf, hfile))
+	while(fgets(buf, sizeof buf, fp))
 	{
 		char* equal;
 
@@ -728,13 +665,12 @@ void skin_loadpsh(psy_Properties* properties, const char* path)
 	}
 	if(!loaded)
 	{
-		MessageBox(0, "No settings found in the specified file",
-			"File Load Error", MB_ICONERROR | MB_OK);		
+		//MessageBox(0, "No settings found in the specified file",
+		//	"File Load Error", MB_ICONERROR | MB_OK);		
 	}
-	fclose(hfile);
+	fclose(fp);
+	return PSY_OK;
 }
-
-#endif
 
 void skin_psh_values(const char* str, int maxcount, int* values)
 {

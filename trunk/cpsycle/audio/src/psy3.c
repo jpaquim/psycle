@@ -1507,7 +1507,8 @@ void readmacd(psy_audio_SongFile* self)
 			
 			machine = machineloadchunk(self, index);
 			if (machine) {
-				psy_audio_machines_insert(&self->song->machines, index, machine);
+				psy_audio_machines_insert(&self->song->machines, index,
+					machine);
 			}
 		}
 	}	

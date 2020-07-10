@@ -19,6 +19,7 @@ function psycle.info()
   }
 end
 
-function psycle.start()  
-  psycle.setmachine(require("generatortest.machine"))
+function psycle.start()
+  mac = require("generatortest.machine");
+  psycle.setmachine(mac)
 end

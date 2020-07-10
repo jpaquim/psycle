@@ -484,3 +484,37 @@ void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator* self,
 		psy_audio_sampleiterator_refillbuffers(self, FALSE);
 	}
 }
+
+// Set Current sample position 
+void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uint32_t value)
+{
+	if (!self->sample) {
+		return;
+	}
+	self->looped = FALSE;
+	if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_NORMAL) {
+		int val = value;
+		while (val >= psy_audio_sampleiterator_loopend(self) && psy_audio_sampleiterator_loopend(self) != psy_audio_sampleiterator_loopend(self)) {
+			val -= psy_audio_sampleiterator_loopend(self) - psy_audio_sampleiterator_loopend(self);
+			self->looped = TRUE;
+		}
+		self->pos.HighPart = val;
+	} else if (self->sample->loop.type == psy_audio_SAMPLE_LOOP_BIDI) {
+		int loopsize = psy_audio_sampleiterator_loopend(self) -
+			psy_audio_sampleiterator_loopend(self);
+		bool forward = FALSE;
+		int val = value;
+		while (val >= psy_audio_sampleiterator_loopend(self) && loopsize != 0) {
+			if (val >= psy_audio_sampleiterator_loopend(self) + loopsize || forward) {
+				val -= loopsize;
+			} else {
+				val = psy_audio_sampleiterator_loopend(self) -
+					(value - psy_audio_sampleiterator_loopend(self));
+			}
+			forward = !forward;
+			self->looped = TRUE;
+		}
+		self->pos.HighPart = val;
+	} else if (value < self->sample->numframes) self->pos.HighPart = value;
+	else self->pos.HighPart = psy_audio_sampleiterator_length(self) - 1;
+}

@@ -132,14 +132,16 @@ int luawaveosc_work(lua_State* L)
 		self = psyclescript_checkself(L, 1, luawaveosc_meta);
 		buffer = *(psy_audio_Array**)luaL_checkudata(L, 2, luaarraybind_meta);		
 		// float* pwm = 0;
-		//if (n > 2 && (!lua_isnil(L, 3))) {
-		//	psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 3, luaarraybind_meta);
-		//	fm = arr->data();
-		//}
-		//if (n > 3 && (!lua_isnil(L, 4))) {
-		//	psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 4, luaarraybind_meta);
-		//	env = arr->data();
-		//}
+		if (n > 2 && (!lua_isnil(L, 3))) {
+			psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 3, luaarraybind_meta);
+			fm = psy_audio_array_data(arr);
+			psy_audio_waveosc_setfm(self, fm);
+		}
+		if (n > 3 && (!lua_isnil(L, 4))) {
+			psy_audio_Array* arr = *(psy_audio_Array**)luaL_checkudata(L, 4, luaarraybind_meta);
+			env = psy_audio_array_data(arr); 
+			psy_audio_waveosc_setam(self, env);
+		}
 		// check for master
 		//std::auto_ptr<LuaSingleWorker> master;
 		//lua_getfield(L, 1, "sync");
@@ -152,9 +154,11 @@ int luawaveosc_work(lua_State* L)
 		//}
 		psy_audio_waveosc_work(self, psy_audio_array_len(buffer), psy_audio_array_data(buffer));
 		lua_pushinteger(L, psy_audio_array_len(buffer)); // return processed samples
+		//psy_audio_waveosc_setfm(self, NULL);
+		//psy_audio_waveosc_setam(self, NULL);
 	} else {
 		luaL_error(L, "Got %d arguments expected 2 or 3 (self, num, fm)", n);
-	}
+	}	
 	return 1;
 }
 
@@ -181,9 +185,15 @@ int luawaveosc_setbasefrequency(lua_State* L)
 int luawaveosc_start(lua_State* L)
 {
 	psy_audio_WaveOsc* self;
-	
-	self = psyclescript_checkself(L, 1, luawaveosc_meta);
-	psy_audio_waveosc_start(self, 0);
+	lua_Number phase = 0.0;
+	int n;
+
+	n = lua_gettop(L);	
+	self = psyclescript_checkself(L, 1, luawaveosc_meta);	
+	if (n == 2) {
+		phase = luaL_checknumber(L, 2);
+	}
+	psy_audio_waveosc_start(self, phase);
 	return psyclescript_chaining(L);
 }
 

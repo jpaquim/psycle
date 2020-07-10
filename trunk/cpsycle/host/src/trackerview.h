@@ -14,51 +14,12 @@
 #include <uilabel.h>
 #include "zoombox.h"
 #include "interpolatecurveview.h"
+#include "patternviewskin.h"
 
 #include <pattern.h>
 
 // aim: The TrackerView is where you enter notes. It displays a Pattern
 //      selected by the SequenceView as a tracker grid.
-
-typedef struct {
-	SkinCoord background;	
-	SkinCoord record;
-	SkinCoord mute;
-	SkinCoord solo;
-	SkinCoord digitx0;
-	SkinCoord digit0x;	
-} TrackerHeaderCoords;
-
-typedef struct {
-	unsigned int separator;
-	unsigned int separator2;
-	unsigned int background;
-	unsigned int background2;
-	unsigned int row4beat;
-	unsigned int row4beat2;
-	unsigned int rowbeat;
-	unsigned int rowbeat2;
-	unsigned int row;
-	unsigned int row2;
-	unsigned int font;
-	unsigned int font2;
-	unsigned int fontPlay;
-	unsigned int fontPlay2;
-	unsigned int fontCur;
-	unsigned int fontCur2;
-	unsigned int fontSel;
-	unsigned int fontSel2;
-	unsigned int selection;
-	unsigned int selection2;
-	unsigned int playbar;
-	unsigned int playbar2;
-	unsigned int cursor;
-	unsigned int cursor2;
-	unsigned int midline;
-	unsigned int midline2;
-	TrackerHeaderCoords headercoords;
-	psy_ui_Bitmap bitmap;
-} TrackerSkin;
 
 typedef struct {
 	psy_ui_TextMetric tm;	
@@ -102,7 +63,7 @@ void trackercolumndef_init(TrackColumnDef*, int numdigits, int numchars,
 typedef psy_audio_Inputs TrackerInputs;
 
 typedef struct {
-	TrackerSkin* skin;
+	PatternViewSkin* skin;
 	psy_audio_Pattern* pattern;
 	psy_Table trackconfigs;
 	TrackDef defaulttrackdef;
@@ -142,7 +103,7 @@ typedef struct {
 	int drawcursor;
 	psy_dsp_big_beat_t lastplayposition;
 	psy_dsp_big_beat_t sequenceentryoffset;
-	TrackerSkin* skin;
+	PatternViewSkin* skin;
 	psy_audio_Pattern* pattern;
 	// precomputed
 	int visilines;
@@ -156,6 +117,8 @@ int trackerlinestate_offsettoscreenline(TrackerLineState*,
 typedef struct {
 	psy_ui_Component component;
 	struct TrackerView* view;
+	TrackerLineState* linestate;
+	TrackerLineState defaultlinestate;
 } TrackerLineNumbersLabel;
 
 typedef struct {
@@ -259,8 +222,7 @@ typedef struct TrackerView {
 	TrackerGrid griddefaults;
 	TrackerGrid grid;
 	PatternBlockMenu blockmenu;
-	InterpolateCurveView interpolatecurveview;
-	TrackerSkin skin;	
+	InterpolateCurveView interpolatecurveview;	
 	TrackerLineState linestate;
 	TrackerGridState gridstate;
 	int showlinenumbers;
@@ -278,7 +240,7 @@ typedef struct TrackerView {
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent,
-	psy_ui_Component* patternview, Workspace*);
+	 psy_ui_Component* patternview, PatternViewSkin*, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
 void TrackerViewApplyProperties(TrackerView*, psy_Properties*);
