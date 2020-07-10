@@ -44,7 +44,8 @@ typedef struct PatternView {
 	psy_ui_Notebook editnotebook;
 	TrackerView trackerview;
 	Pianoroll pianoroll;	
-	PatternProperties properties;	
+	PatternProperties properties;
+	PatternViewSkin skin;
 	Workspace* workspace;	
 } PatternView;
 

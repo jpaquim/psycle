@@ -31,6 +31,7 @@ function psycle.info()
   }
 end
 
-function psycle.start()  
-  psycle.setmachine(require("plugineditor.machine"))
+function psycle.start()
+  mac = require("plugineditor.machine")
+  psycle.setmachine(mac)
 end

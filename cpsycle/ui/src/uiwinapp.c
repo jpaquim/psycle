@@ -278,8 +278,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLOREDIT:
 				imp = psy_table_at(&winapp->selfmap, (uintptr_t) lParam);
 				if (imp && imp->component) {					
-					SetTextColor((HDC) wParam, imp->component->color);
-					SetBkColor((HDC) wParam, imp->component->backgroundcolor);
+					SetTextColor((HDC) wParam, psy_ui_component_color(imp->component));
+					SetBkColor((HDC) wParam, psy_ui_component_backgroundcolor(imp->component));
 					if ((imp->component->backgroundmode & psy_ui_BACKGROUND_SET) == psy_ui_BACKGROUND_SET) {
 						return (intptr_t) psy_ui_win_component_details(imp->component)->background;
 					} else {
@@ -371,7 +371,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 								ps.rcPaint.left - dblbuffer_offset.x,
 								ps.rcPaint.top - dblbuffer_offset.y,
 								clipsize.x, clipsize.y);
-							psy_ui_drawsolidrectangle(&g, r, imp->component->backgroundcolor);
+							psy_ui_drawsolidrectangle(&g, r,
+								psy_ui_component_backgroundcolor(imp->component));
 						}
 						if (imp->component->border.top != psy_ui_BORDER_NONE) {
 							psy_ui_setcolor(&g, 0x00333333);

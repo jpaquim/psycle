@@ -20,6 +20,7 @@ typedef struct psy_audio_WaveOsc {
 	psy_audio_WaveShape shape;
 	ResamplerType quality;
 	float *pm, *fm, *am;
+	float phase;
 } psy_audio_WaveOsc;
 
 void psy_audio_waveosc_init(psy_audio_WaveOsc*, psy_audio_WaveShape, int frequency);

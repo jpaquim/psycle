@@ -13,7 +13,8 @@ function psycle.info()
   }
 end
 
-function psycle.start()  
-  psycle.setmachine(require("miditest.machine"))
+function psycle.start()
+  mac = require("miditest.machine")  
+  psycle.setmachine(mac)
 end
 

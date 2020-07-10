@@ -167,6 +167,8 @@ void patternviewbar_initalign(PatternViewBar* self)
 }
 
 
+// PatternView
+static void patternview_ondestroy(PatternView* self, psy_ui_Component* sender);
 static void patternview_onpreferredsize(PatternView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 
@@ -214,9 +216,14 @@ void patternview_init(PatternView* self,
 	patternproperties_init(&self->properties, &self->component, NULL, workspace);
 	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->properties.component);
+	// Skin
+	patternviewskin_init(&self->skin);
+	// TrackerView
 	trackerview_init(&self->trackerview, &self->editnotebook.component,
-		&self->component, workspace);	
-	pianoroll_init(&self->pianoroll, &self->editnotebook.component, workspace);	
+		&self->component, &self->skin, workspace);
+	// PianoRoll
+	pianoroll_init(&self->pianoroll, &self->editnotebook.component, &self->skin,
+		workspace);	
 	patternview_setpattern(self, patterns_at(&workspace->song->patterns, 0));	
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self,
 		patternview_onpropertiesapply);	
@@ -239,7 +246,9 @@ void patternview_init(PatternView* self,
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(-1.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1));
-	psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);	
+	psy_ui_component_setmargin(psy_ui_button_base(&self->contextbutton), &margin);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		patternview_ondestroy);
 	psy_signal_connect(&self->contextbutton.signal_clicked,
 		self, patternview_oncontextmenu);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -250,6 +259,11 @@ void patternview_init(PatternView* self,
 		&leftmargin);
 	psy_ui_component_setmargin(&self->trackerview.linenumberslabel.component,
 		&leftmargin);
+}
+
+void patternview_ondestroy(PatternView* self, psy_ui_Component* sender)
+{
+	patternviewskin_dispose(&self->skin);
 }
 
 void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,

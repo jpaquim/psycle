@@ -58,7 +58,7 @@ void pianoheader_setsharedgridstate(PianoHeader* self, GridState* gridstate)
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		gridstate_init(&self->defaultgridstate);
+		gridstate_init(&self->defaultgridstate, NULL);
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -116,7 +116,7 @@ void pianoheader_drawruler(PianoHeader* self, psy_ui_Graphics* g)
 }
 
 // KeyboardState
-void keyboardstate_init(KeyboardState* self)
+void keyboardstate_init(KeyboardState* self, PatternViewSkin* skin)
 {	
 	self->keymin = 0;
 	self->keymax = 88;
@@ -128,6 +128,7 @@ void keyboardstate_init(KeyboardState* self)
 	self->keyseparatorcolour = 0x00333333;
 	self->notemode = psy_dsp_NOTESTAB_A220;
 	self->drawpianokeys = TRUE;
+	self->skin = skin;
 }
 // prototypes
 static void pianokeyboard_ondraw(PianoKeyboard*, psy_ui_Graphics*);
@@ -166,7 +167,7 @@ void pianokeyboard_setsharedkeyboardstate(PianoKeyboard* self,
 	if (keyboardstate) {
 		self->keyboardstate = keyboardstate;
 	} else {
-		keyboardstate_init(&self->defaultkeyboardstate);
+		keyboardstate_init(&self->defaultkeyboardstate, NULL);
 		self->keyboardstate = &self->defaultkeyboardstate;
 	}
 }
@@ -260,7 +261,7 @@ void pianokeyboard_onmousedown(PianoKeyboard* self, psy_ui_MouseEvent* ev)
 
 // PianoGrid
 // default state
-void gridstate_init(GridState* self)
+void gridstate_init(GridState* self, PatternViewSkin* skin)
 {
 	self->beatwidth = 80;
 	self->defaultbeatwidth = 80;
@@ -276,14 +277,15 @@ void gridstate_init(GridState* self)
 	self->row4beat2colour = 0x00595959;
 	self->rowbeatcolour = 0x00363636;
 	self->rowbeat2colour = 0x00363636;
-	self->rowcolour = 0x003E3E3E;
-	self->row2colour = 0x003E3E3E;
+	//self->rowcolour = 0x003E3E3E;
+	//self->row2colour = 0x003E3E3E;
 	self->rulerbaselinecolour = 0x00555555;
 	self->rulermarkcolour = 0x00666666;
 	self->visibeats = 16.0;
 	self->visisteps = 64;
 	self->visiwidth = 1280;
 	self->stepwidth = 20.0;
+	self->skin = skin;
 	psy_audio_patterneditposition_init(&self->cursor);
 }
 // prototypes
@@ -367,7 +369,7 @@ void pianogrid_setsharedgridstate(Pianogrid* self, GridState* gridstate)
 	if (gridstate) {
 		self->gridstate = gridstate;
 	} else {
-		gridstate_init(&self->defaultgridstate);
+		gridstate_init(&self->defaultgridstate, NULL);
 		self->gridstate = &self->defaultgridstate;
 	}
 }
@@ -378,7 +380,7 @@ void pianogrid_setsharedkeyboardstate(Pianogrid* self, KeyboardState*
 	if (keyboardstate) {
 		self->keyboardstate = keyboardstate;
 	} else {
-		keyboardstate_init(&self->defaultkeyboardstate);
+		keyboardstate_init(&self->defaultkeyboardstate, NULL);
 		self->keyboardstate = &self->defaultkeyboardstate;
 	}
 }
@@ -416,7 +418,8 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 	int beatstart;
 	int c;
 
-	psy_ui_setcolor(g, self->gridstate->gridseparatorcolour);
+	psy_ui_setcolor(g, patternviewskin_separatorcolor(self->gridstate->skin,
+		0, self->workspace->song->properties.tracks));
 	keyboardheight = keyboardstate_height(self->keyboardstate);	
 	cpy = keyboardheight;
 	psy_ui_drawline(g,
@@ -432,33 +435,49 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 		cpx = (int)(c * self->gridstate->stepwidth);
 		cpx += psy_ui_component_scrollleft(&self->component);
 		if (((beatstart * self->gridstate->lpb + c)  % (self->gridstate->lpb * 4)) == 0) {
-			linecolor = self->gridstate->row4beatcolour;
+			linecolor = patternviewskin_row4beatcolor(self->gridstate->skin,
+				0, self->workspace->song->properties.tracks);
 		} else
 		if ((c % self->gridstate->lpb) == 0) {
-			linecolor = self->gridstate->rowbeatcolour;
+			linecolor = patternviewskin_rowbeatcolor(self->gridstate->skin,
+				0, self->workspace->song->properties.tracks);
 		} else {
-			linecolor = self->gridstate->rowcolour;
+			linecolor = patternviewskin_rowcolor(self->gridstate->skin,
+				0, self->workspace->song->properties.tracks);
 		}
 		psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
 			cpx, psy_ui_component_scrolltop(&self->component),
 			(int)(self->gridstate->stepwidth) + 1, keyboardheight),
-			linecolor);
-		psy_ui_drawline(g,
-			cpx, psy_ui_component_scrolltop(&self->component),
-			cpx, keyboardheight);
+			linecolor);	
 	}
 	
 	keymin = max(self->keyboardstate->keymin,
 		(keyboardheight - g->clip.bottom) / self->keyboardstate->keyheight);
 	keymax = min(self->keyboardstate->keymax,
 		(keyboardheight - g->clip.top) / self->keyboardstate->keyheight);
+	for (key = keymin; key <= keymax; ++key) {		
+		if (((key + 1) % 12) == 0) {
+			cpy = keyboardheight - (key + 1) * self->keyboardstate->keyheight;
+			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
+					psy_ui_component_scrollleft(&self->component),
+					cpy - self->keyboardstate->keyheight,
+					self->gridstate->visiwidth,
+					self->keyboardstate->keyheight),
+				patternviewskin_row4beatcolor(self->gridstate->skin,
+					0, self->workspace->song->properties.tracks));
+		}
+	}
+	psy_ui_setcolor(g, patternviewskin_separatorcolor(self->gridstate->skin,
+		0, self->workspace->song->properties.tracks));
+	for (c = 0; c < self->gridstate->visisteps; ++c) {
+		cpx = (int)(c * self->gridstate->stepwidth);
+		cpx += psy_ui_component_scrollleft(&self->component);
+		psy_ui_drawline(g,
+			cpx, psy_ui_component_scrolltop(&self->component),
+			cpx, keyboardheight);
+	}
 	for (key = keymin; key <= keymax; ++key) {
 		cpy = keyboardheight - (key + 1) * self->keyboardstate->keyheight;
-		if (((key + 1) % 12) == 0) {
-			psy_ui_setcolor(g, self->gridstate->grid12separatorcolour);
-		} else {
-			psy_ui_setcolor(g, self->gridstate->gridseparatorcolour);
-		}
 		psy_ui_drawline(g,
 			psy_ui_component_scrollleft(&self->component),
 			cpy,
@@ -466,6 +485,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 			self->gridstate->visiwidth,
 			cpy);
 	}
+
 }
 
 void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g)
@@ -487,7 +507,8 @@ void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g)
 					0,
 					(int)self->gridstate->stepwidth,
 					keyboardstate_height(self->keyboardstate)),
-				self->gridstate->playbarcolour);
+				patternviewskin_playbarcolor(self->gridstate->skin,
+					0, self->workspace->song->properties.tracks));
 		}
 	}
 }
@@ -772,7 +793,7 @@ static void pianoroll_vtable_init(Pianoroll* self)
 }
 // implenentation
 void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	PatternViewSkin* skin, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	pianoroll_vtable_init(self);
@@ -787,8 +808,8 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pianoroll_ondestroy);
 	// shared states
-	keyboardstate_init(&self->keyboardstate);
-	gridstate_init(&self->gridstate);
+	keyboardstate_init(&self->keyboardstate, skin);
+	gridstate_init(&self->gridstate, skin);
 	// left area (keyboardheader, keyboard)
 	psy_ui_component_init(&self->left, &self->component);
 	psy_ui_component_enablealign(&self->left);

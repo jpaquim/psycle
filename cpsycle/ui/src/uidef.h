@@ -172,6 +172,12 @@ typedef struct {
 	int y;
 } psy_ui_IntPoint;
 
+INLINE void psy_ui_intpoint_init(psy_ui_IntPoint* self)
+{
+	self->x = 0;
+	self->y = 0;
+}
+
 psy_ui_IntPoint psy_ui_intpoint_make(int x, int y);
 
 typedef struct {
@@ -544,6 +550,8 @@ INLINE uint32_t psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
 	return (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));	
 }
+
+void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b);
 
 #define psy_ui_ETO_OPAQUE	0x0002
 #define psy_ui_ETO_CLIPPED	0x0004

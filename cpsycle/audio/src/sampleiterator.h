@@ -89,6 +89,10 @@ INLINE uint32_t psy_audio_sampleiterator_position(psy_audio_SampleIterator* self
 {
 	return self->pos.HighPart;
 }
+
+// Set Current sample position 
+void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator*, uint32_t value);
+
 // Current sample Speed
 INLINE int64_t psy_audio_sampleiterator_speed(psy_audio_SampleIterator* self)
 {

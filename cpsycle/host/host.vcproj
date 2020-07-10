@@ -48,7 +48,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\lua53\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
+				AdditionalIncludeDirectories="..\lua54\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -77,11 +77,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lua53.lib ui.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib"
+				AdditionalDependencies="lua54.lib ui.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib"
 				OutputFile=".\Debug/host.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\lua53\Debug,..\ui\Debug,..\file\Debug,..\audio\Debug,..\container\Debug,..\dsp\Debug"
+				AdditionalLibraryDirectories="..\lua54\Debug,..\ui\Debug,..\file\Debug,..\audio\Debug,..\container\Debug,..\dsp\Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/host.pdb"
 				SubSystem="2"
@@ -148,7 +148,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\lua53\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
+				AdditionalIncludeDirectories="..\lua54\src\,..\ui\src,..\file\src,..\audio\src,..\container\src,..\dsp\src"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -175,11 +175,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="lua53.lib ui.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib"
+				AdditionalDependencies="lua54.lib ui.lib odbc32.lib odbccp32.lib comctl32.lib file.lib winmm.lib container.lib dsp.lib"
 				OutputFile=".\Release/host.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="..\lua53\Release,..\ui\Release,..\file\Release,..\audio\Release,..\container\Release,..\dsp\Release"
+				AdditionalLibraryDirectories="..\lua54\Release,..\ui\Release,..\file\Release,..\audio\Release,..\container\Release,..\dsp\Release"
 				ProgramDatabaseFile=".\Release/host.pdb"
 				SubSystem="2"
 				RandomizedBaseAddress="1"

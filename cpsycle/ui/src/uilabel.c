@@ -35,6 +35,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	psy_ui_label_vtable_init(self);
 	self->component.vtable = &psy_ui_label_vtable;
 	self->charnumber = 0;
+	self->linespacing = 1.0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;
 	self->text = strdup("");
@@ -69,12 +70,12 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui
 			psy_ui_Size size;
 			
 			size = psy_ui_component_textsize(psy_ui_label_base(self), self->text);
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 2 +
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4 +
 				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
 		} else {
 			rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
 		}
-		rv->height = psy_ui_value_makepx(tm.tmHeight +
+		rv->height = psy_ui_value_makepx((tm.tmHeight * self->linespacing) +
 			psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm));
 	}
 }
@@ -100,7 +101,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(psy_ui_label_base(self)), &tm);		
 	if (size.height >= tm.tmHeight * 2) {
-		numcolumnavgchars = (int)(size.width / (int)(tm.tmAveCharWidth * 1.2));
+		numcolumnavgchars = (int)(size.width / (int)(tm.tmAveCharWidth));
 	} else {
 		numcolumnavgchars = UINTPTR_MAX;
 	}
@@ -143,6 +144,11 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 void psy_ui_label_setcharnumber(psy_ui_Label* self, int number)
 {
 	self->charnumber = number;
+}
+
+void psy_ui_label_setlinespacing(psy_ui_Label* self, double spacing)
+{
+	self->linespacing = spacing;
 }
 
 void psy_ui_label_settextalignment(psy_ui_Label* self, psy_ui_Alignment alignment)

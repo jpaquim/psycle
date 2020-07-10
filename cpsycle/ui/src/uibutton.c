@@ -42,8 +42,7 @@ static void vtable_init(psy_ui_Button* self)
 }
 
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
-{	
-    TRACE("button init\n");
+{	    
 	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
@@ -51,6 +50,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->highlight = FALSE;
 	self->icon = psy_ui_ICON_NONE;
 	self->charnumber = 0;
+	self->linespacing = 1.0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
@@ -203,6 +203,11 @@ void psy_ui_button_setcharnumber(psy_ui_Button* self, int number)
 	self->charnumber = number;
 }
 
+void psy_ui_button_setlinespacing(psy_ui_Button* self, double spacing)
+{
+	self->linespacing = spacing;
+}
+
 void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	psy_ui_TextMetric tm;	
@@ -227,7 +232,7 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 	} else {
 		rv->width = psy_ui_value_makeew(self->charnumber);
 	}
-	rv->height = psy_ui_value_makepx(tm.tmHeight);
+	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linespacing));
 }
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)

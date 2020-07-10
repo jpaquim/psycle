@@ -8,5 +8,10 @@
 #include <uigraphics.h>
 
 void skin_blitpart(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, SkinCoord*);
+void skin_blitpartstretched(psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y,
+	double ratiowidth, double ratioheight,
+	SkinCoord*);
+void skin_stretchratio(SkinCoord*, int width, int height,
+	double* ratiowidth, double* ratioheight);
 
 #endif

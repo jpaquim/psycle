@@ -21,5 +21,6 @@ function psycle.info()
 end
 
 function psycle.start()
-  psycle.setmachine(require("plugloaddemo.machine"))
+  mac = require("plugloaddemo.machine")
+  psycle.setmachine(mac)
 end

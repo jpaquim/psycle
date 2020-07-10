@@ -7,8 +7,8 @@
 
 #include <properties.h>
 
-void skin_load(psy_Properties*, const char* path);
-void skin_loadpsh(psy_Properties*, const char* path);
+int skin_load(psy_Properties*, const char* path);
+int skin_loadpsh(psy_Properties*, const char* path);
 void skin_psh_values(const char* str, int maxcount, int* values);
 
 #endif

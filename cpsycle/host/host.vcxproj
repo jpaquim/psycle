@@ -63,7 +63,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua53\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -82,10 +82,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lua53.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lua53\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lua54\Debug;$(SolutionDir)ui\Debug;$(SolutionDir)audio\Debug;$(SolutionDir)file\Debug;$(SolutionDir)container\Debug;$(SolutionDir)dsp\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -113,7 +113,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>$(SolutionDir)lua53\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)lua54\src\;$(SolutionDir)ui\src;$(SolutionDir)audio\src;$(SolutionDir)file\src;$(SolutionDir)container\src;$(SolutionDir)dsp\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -130,10 +130,10 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>lua53.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lua54.lib;ui.lib;odbc32.lib;odbccp32.lib;comctl32.lib;file.lib;winmm.lib;container.lib;dsp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)host.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(SolutionDir)lua53\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lua54\Release;$(SolutionDir)ui\Release;$(SolutionDir)audio\Release;$(SolutionDir)file\Release;$(SolutionDir)container\Release;$(SolutionDir)dsp\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(IntDir)host.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -187,6 +187,7 @@
     <ClCompile Include="src\paramview.c" />
     <ClCompile Include="src\patternproperties.c" />
     <ClCompile Include="src\patternview.c" />
+    <ClCompile Include="src\patternviewskin.c" />
     <ClCompile Include="src\pionoroll.c" />
     <ClCompile Include="src\playbar.c" />
     <ClCompile Include="src\playlisteditor.c" />
@@ -273,6 +274,7 @@
     <ClInclude Include="src\paramview.h" />
     <ClInclude Include="src\patternproperties.h" />
     <ClInclude Include="src\patternview.h" />
+    <ClInclude Include="src\patternviewskin.h" />
     <ClInclude Include="src\pianoroll.h" />
     <ClInclude Include="src\playbar.h" />
     <ClInclude Include="src\playlisteditor.h" />
@@ -333,10 +335,6 @@
     </ProjectReference>
     <ProjectReference Include="$(SolutionDir)file\file.vcxproj">
       <Project>{205ce71c-faa1-4310-89f5-f29a9b023433}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="$(SolutionDir)lua53\lua53.vcxproj">
-      <Project>{d0152a83-ce76-4f9b-82e4-595326255abf}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="$(SolutionDir)ui\ui.vcxproj">

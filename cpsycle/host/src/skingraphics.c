@@ -12,3 +12,19 @@ void skin_blitpart(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y,
 		coord->destwidth, coord->destheight, coord->srcx, coord->srcy);
 }
 
+void skin_blitpartstretched(psy_ui_Graphics* g, psy_ui_Bitmap* bitmap, int x, int y,
+	double ratiowidth, double ratioheight,
+	SkinCoord* coord)
+{
+	psy_ui_drawstretchedbitmap(g, bitmap, x + coord->destx, y + coord->desty,
+		(int)(coord->destwidth * ratiowidth), (int)(coord->destheight * ratioheight),
+		coord->srcx, coord->srcy, coord->destwidth, coord->destheight);
+}
+
+void skin_stretchratio(SkinCoord* coord, int width, int height,
+	double* ratiowidth, double* ratioheight)
+{
+	*ratiowidth = width / (double)coord->destwidth;
+	*ratioheight = height / (double)coord->destheight;
+}
+

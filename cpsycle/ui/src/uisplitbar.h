@@ -17,7 +17,6 @@ typedef struct {
 	int hover;
 	psy_ui_Size restoresize;
 	bool hasrestore;
-	int restoreparentbgmode;
 } psy_ui_SplitBar;
 
 void psy_ui_splitbar_init(psy_ui_SplitBar*, psy_ui_Component* parent);
