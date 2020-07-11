@@ -4,6 +4,19 @@
 #include "../../detail/prefix.h"
 
 #include "patternviewskin.h"
+#include "skinio.h"
+#include "resources/resource.h"
+
+#include <dir.h>
+
+#include <stdlib.h>
+
+#include "../../detail/os.h"
+#include "../../detail/portable.h"
+
+#if defined DIVERSALIS__OS__UNIX
+#define _MAX_PATH 4096
+#endif
 
 // PatternViewSkin
 // prototypes
@@ -25,7 +38,10 @@ void patternviewskin_init(PatternViewSkin* self)
 	psy_table_init(&self->selectioncolors);
 	psy_table_init(&self->playbarcolors);
 	psy_table_init(&self->cursorcolors);
-	psy_table_init(&self->midlinecolors);
+	psy_table_init(&self->midlinecolors);	
+	psy_ui_bitmap_init(&self->bitmap);
+	psy_ui_bitmap_loadresource(&self->bitmap, IDB_HEADERSKIN);
+	patternviewskin_setclassicheadercoords(self);
 }
 
 void patternviewskin_dispose(PatternViewSkin* self)
@@ -42,6 +58,7 @@ void patternviewskin_dispose(PatternViewSkin* self)
 	psy_table_dispose(&self->playbarcolors);
 	psy_table_dispose(&self->cursorcolors);
 	psy_table_dispose(&self->midlinecolors);
+	psy_ui_bitmap_dispose(&self->bitmap);
 }
 
 void patternviewskin_clear(PatternViewSkin* self)
@@ -194,4 +211,192 @@ psy_ui_Color patternviewskin_calculatetrackcolor(uintptr_t track, uintptr_t numt
 		| ((int32_t)(p1 * 0x100) & 0xff00)
 		| ((int32_t)(p2) & 0xff);
 	return rv;
+}
+
+void patternviewskin_settheme(PatternViewSkin* self, psy_Properties* p, const char* skindir)
+{
+	const char* pattern_header_skin_name;
+
+	patternviewskin_clear(self);
+	self->separator = psy_properties_int(p, "pvc_separator", 0x00292929);
+	self->separator2 = psy_properties_int(p, "pvc_separator2", 0x00292929);
+	self->background = psy_properties_int(p, "pvc_background", 0x00292929);
+	self->background2 = psy_properties_int(p, "pvc_background2", 0x00292929);
+	self->row4beat = psy_properties_int(p, "pvc_row4beat", 0x00595959);
+	self->row4beat2 = psy_properties_int(p, "pvc_row4beat2", 0x00595959);
+	self->rowbeat = psy_properties_int(p, "pvc_rowbeat", 0x00363636);
+	self->rowbeat2 = psy_properties_int(p, "pvc_rowbeat2", 0x00363636);
+	self->row = psy_properties_int(p, "pvc_row", 0x003E3E3E);
+	self->row2 = psy_properties_int(p, "pvc_row2", 0x003E3E3E);
+	self->font = psy_properties_int(p, "pvc_font", 0x00CACACA);
+	self->font2 = psy_properties_int(p, "pvc_font2", 0x00CACACA);
+	self->fontPlay = psy_properties_int(p, "pvc_fontplay", 0x00FFFFFF);
+	self->fontCur2 = psy_properties_int(p, "pvc_fontcur2", 0x00FFFFFF);
+	self->fontSel = psy_properties_int(p, "pvc_fontsel", 0x00FFFFFF);
+	self->fontSel2 = psy_properties_int(p, "pvc_fontsel2", 0x00FFFFFF);
+	self->selection = psy_properties_int(p, "pvc_selection", 0x009B7800);
+	self->selection2 = psy_properties_int(p, "pvc_selection2", 0x009B7800);
+	self->playbar = psy_properties_int(p, "pvc_playbar", 0x009F7B00);
+	self->playbar2 = psy_properties_int(p, "pvc_playbar2", 0x009F7B00);
+	self->cursor = psy_properties_int(p, "pvc_cursor", 0x009F7B00);
+	self->cursor2 = psy_properties_int(p, "pvc_cursor2", 0x009F7B00);
+	self->midline = psy_properties_int(p, "pvc_midline", 0x007D6100);
+	self->midline2 = psy_properties_int(p, "pvc_midline2", 0x007D6100);	
+	pattern_header_skin_name = psy_properties_readstring(p, "pattern_header_skin",
+		"");
+	if (strcmp(pattern_header_skin_name, "") == 0) {
+		psy_ui_bitmap_dispose(&self->bitmap);
+		psy_ui_bitmap_init(&self->bitmap);
+		psy_ui_bitmap_loadresource(&self->bitmap, IDB_HEADERSKIN);
+		patternviewskin_setclassicheadercoords(self);
+	} else if (pattern_header_skin_name) {
+		char path[_MAX_PATH];
+		char filename[_MAX_PATH];
+
+		strcpy(filename, pattern_header_skin_name);
+		strcat(filename, ".bmp");
+		psy_dir_findfile(skindir, filename, path);
+		if (path[0] != '\0') {
+			psy_ui_Bitmap bmp;
+
+			psy_ui_bitmap_init(&bmp);
+			if (psy_ui_bitmap_load(&bmp, path) == 0) {
+				psy_ui_bitmap_dispose(&self->bitmap);
+				self->bitmap = bmp;
+			}
+		}
+		strcpy(filename, pattern_header_skin_name);
+		strcat(filename, ".psh");
+		psy_dir_findfile(skindir, filename, path);
+		if (path[0] != '\0') {
+			psy_Properties* coords;
+
+			coords = psy_properties_create();
+			skin_loadpsh(coords, path);
+			patternviewskin_setcoords(self, coords);
+			properties_free(coords);
+		}
+	}
+}
+
+void patternviewskin_setclassicheadercoords(PatternViewSkin* self)
+{
+	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };
+	static SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
+	static SkinCoord mute = { 79, 40, 17, 17, 66, 3, 17, 17, 0 };
+	static SkinCoord solo = { 62, 40, 17, 17, 47, 3, 17, 17, 0 };
+	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
+	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
+
+	self->headercoords.background = background;
+	self->headercoords.record = record;
+	self->headercoords.mute = mute;
+	self->headercoords.solo = solo;
+	self->headercoords.digit0x = digit0x;
+	self->headercoords.digitx0 = digitx0;
+}
+
+void patternviewskin_setheadercoords(PatternViewSkin* self)
+{
+	static SkinCoord background = { 2, 0, 102, 23, 0, 0, 102, 23, 0 };
+	static SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
+	static SkinCoord mute = { 79, 40, 17, 17, 75, 66, 3, 17, 17 };
+	static SkinCoord solo = { 92, 18, 11, 11, 97, 3, 11, 11, 0 };
+	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
+	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
+
+	self->headercoords.background = background;
+	self->headercoords.record = record;
+	self->headercoords.mute = mute;
+	self->headercoords.solo = solo;
+	self->headercoords.digit0x = digit0x;
+	self->headercoords.digitx0 = digitx0;
+}
+
+void patternviewskin_setheadertextcoords(PatternViewSkin* self)
+{
+	SkinCoord background = { 2, 57, 103, 23, 0, 0, 103, 23, 0 };
+	SkinCoord record = { 0, 18, 7, 12, 52, 3, 7, 12, 0 };
+	SkinCoord mute = { 81, 18, 11, 11, 75, 3, 11, 11, 0 };
+	SkinCoord solo = { 92, 18, 11, 11, 97, 3, 11, 11, 0 };
+	SkinCoord digitx0 = { 0, 80, 6, 12, 5, 8, 6, 12, 0 };
+	SkinCoord digit0x = { 0, 80, 6, 12, 11, 8, 6, 12, 0 };
+
+	self->headercoords.background = background;
+	self->headercoords.record = record;
+	self->headercoords.mute = mute;
+	self->headercoords.solo = solo;
+	self->headercoords.digit0x = digit0x;
+	self->headercoords.digitx0 = digitx0;
+}
+
+void patternviewskin_setcoords(PatternViewSkin* self, psy_Properties* p)
+{
+	const char* s;
+	int vals[4];
+
+	if (s = psy_properties_readstring(p, "background_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		self->headercoords.background.srcx = vals[0];
+		self->headercoords.background.srcy = vals[1];
+		self->headercoords.background.destwidth = vals[2];
+		self->headercoords.background.destheight = vals[3];
+	}
+	if (s = psy_properties_readstring(p, "number_0_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		self->headercoords.digitx0.srcx = vals[0];
+		self->headercoords.digitx0.srcy = vals[1];
+		self->headercoords.digit0x.srcx = vals[0];
+		self->headercoords.digit0x.srcy = vals[1];
+		self->headercoords.digitx0.srcwidth = vals[2];
+		self->headercoords.digitx0.srcheight = vals[3];
+		self->headercoords.digit0x.srcwidth = vals[2];
+		self->headercoords.digit0x.srcheight = vals[3];
+	}
+	if (s = psy_properties_readstring(p, "record_on_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		self->headercoords.record.srcx = vals[0];
+		self->headercoords.record.srcy = vals[1];
+		self->headercoords.record.destwidth = vals[2];
+		self->headercoords.record.destheight = vals[3];
+	}
+	if (s = psy_properties_readstring(p, "mute_on_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		self->headercoords.mute.srcx = vals[0];
+		self->headercoords.mute.srcy = vals[1];
+		self->headercoords.mute.destwidth = vals[2];
+		self->headercoords.mute.destheight = vals[3];
+	}
+	if (s = psy_properties_readstring(p, "solo_on_source", 0)) {
+		skin_psh_values(s, 4, vals);
+		self->headercoords.solo.srcx = vals[0];
+		self->headercoords.solo.srcy = vals[1];
+		self->headercoords.solo.destwidth = vals[2];
+		self->headercoords.solo.destheight = vals[3];
+	}
+	if (s = psy_properties_readstring(p, "digit_x0_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		self->headercoords.digitx0.destx = vals[0];
+		self->headercoords.digitx0.desty = vals[1];
+	}
+	if (s = psy_properties_readstring(p, "digit_0x_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		self->headercoords.digit0x.destx = vals[0];
+		self->headercoords.digit0x.desty = vals[1];
+	}
+	if (s = psy_properties_readstring(p, "record_on_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		self->headercoords.record.destx = vals[0];
+		self->headercoords.record.desty = vals[1];
+	}
+	if (s = psy_properties_readstring(p, "mute_on_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		self->headercoords.mute.destx = vals[0];
+		self->headercoords.mute.desty = vals[1];
+	}
+	if (s = psy_properties_readstring(p, "solo_on_dest", 0)) {
+		skin_psh_values(s, 2, vals);
+		self->headercoords.solo.destx = vals[0];
+		self->headercoords.solo.desty = vals[1];
+	}
 }

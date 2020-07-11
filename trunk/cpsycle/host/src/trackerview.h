@@ -73,7 +73,6 @@ typedef struct {
 	int headertrackident;
 	uintptr_t numtracks;
 	double zoom;
-	TrackerInputs inputs;
 } TrackerGridState;
 
 void trackergridstate_init(TrackerGridState*);
@@ -251,8 +250,7 @@ void trackerview_initcolumns(TrackerView*);
 void trackerview_computemetrics(TrackerView*);
 void trackerview_setfont(TrackerView*, psy_ui_Font*, bool iszoombase);
 void trackerview_invalidateline(TrackerView*, psy_dsp_big_beat_t offset);
-void trackerview_setclassicheadercoords(TrackerView*);
-void trackerview_setheadercoords(TrackerView*);
+void trackerview_makecmds(psy_Properties* parent);
 
 INLINE trackerview_blockmenuvisible(TrackerView* self)
 {

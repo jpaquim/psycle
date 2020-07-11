@@ -60,6 +60,7 @@ static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
 
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
 	const char* text);
@@ -386,12 +387,18 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_ui_notebook_setpageindex(&self->viewstatusbars, 0);
 //	psy_ui_notebook_connectcontroller(&self->viewstatusbars,
 	//	&self->tabbar.signal_change);
+	psy_ui_button_init(&self->togglekbdhelp, &self->statusbar);
+	psy_ui_button_settext(&self->togglekbdhelp, "Kbd");
+	psy_ui_component_setalign(&self->togglekbdhelp.component,
+		psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init(&self->toggleterminal, &self->statusbar);
-	psy_ui_button_settext(&self->toggleterminal, "Terminal");	
+	psy_ui_button_settext(&self->toggleterminal, "  Terminal");	
 	psy_ui_component_setalign(&self->toggleterminal.component,
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->toggleterminal.signal_clicked, self,
 		mainframe_ontoggleterminal);
+	psy_signal_connect(&self->togglekbdhelp.signal_clicked, self,
+		mainframe_ontogglekbdhelp);
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
 	psy_ui_component_setalign(&self->progressbar.component,
 		psy_ui_ALIGN_RIGHT);	
@@ -501,13 +508,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);		
 	} else
 	if (cmd.id == CMD_IMM_HELPSHORTCUT) {
-		if (psy_ui_component_visible(kbdhelp_base(&self->kbdhelp))) {
-			psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
-			psy_ui_component_align(&self->component);
-		} else {
-			psy_ui_component_show(kbdhelp_base(&self->kbdhelp));
-			psy_ui_component_align(&self->component);
-		}
+		mainframe_ontogglekbdhelp(self, &self->component);		
 	} else
 	if (cmd.id == CMD_IMM_EDITMACHINE) {
 		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
@@ -1095,4 +1096,15 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 				psy_ui_value_makeeh(10)));		
 	}
 	psy_ui_component_align(&self->component);
+}
+
+void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
+{
+	if (psy_ui_component_visible(kbdhelp_base(&self->kbdhelp))) {
+		psy_ui_component_hide(kbdhelp_base(&self->kbdhelp));
+		psy_ui_component_align(&self->component);
+	} else {
+		psy_ui_component_show(kbdhelp_base(&self->kbdhelp));
+		psy_ui_component_align(&self->component);
+	}
 }

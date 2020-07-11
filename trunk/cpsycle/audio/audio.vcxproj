@@ -207,6 +207,7 @@
     <ClCompile Include="src\preset.c" />
     <ClCompile Include="src\presetio.c" />
     <ClCompile Include="src\presets.c" />
+    <ClCompile Include="src\ps1.c" />
     <ClCompile Include="src\psy2.c" />
     <ClCompile Include="src\psy2converter.c" />
     <ClCompile Include="src\psy3.c" />
@@ -303,6 +304,7 @@
     <ClInclude Include="src\preset.h" />
     <ClInclude Include="src\presetio.h" />
     <ClInclude Include="src\presets.h" />
+    <ClInclude Include="src\ps1.h" />
     <ClInclude Include="src\psy2.h" />
     <ClInclude Include="src\psy2converter.h" />
     <ClInclude Include="src\psy3.h" />

@@ -24,6 +24,7 @@ static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
 static void handle_scrollparam(HWND hwnd, SCROLLINFO* si, WPARAM wParam);
+static void adjustcoordinates(psy_ui_Component*, int* x, int* y);
 
 LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
 	WPARAM wParam, LPARAM lParam);
@@ -340,6 +341,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						POINT dblbuffer_offset;
 						HFONT hfont = 0;
 						HFONT hPrevFont = 0;																		
+						psy_ui_TextMetric tm;
 
 						if (imp->component->doublebuffered) {
 							// create a graphics context with back buffer bitmap with
@@ -387,15 +389,48 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						psy_ui_setrectangle(&g.clip,
 							ps.rcPaint.left + imp->component->scroll.x,
 							ps.rcPaint.top + imp->component->scroll.y,
-							clipsize.x, clipsize.y);
+							clipsize.x, clipsize.y);												
 						// translate coordinates 
 						// 1. to fit bufferDC bitmap if used
 						// 2. to handle scroll coords
-						// DPtoLP ?
-						SetWindowOrgEx(win_g->hdc,
-							dblbuffer_offset.x + imp->component->scroll.x,
-							dblbuffer_offset.y + imp->component->scroll.y,
-							NULL);
+						// DPtoLP ?												
+						if (!psy_ui_margin_iszero(&imp->component->spacing)) {
+							tm = psy_ui_component_textmetric(imp->component);
+
+							/*if (!psy_ui_value_iszero(&imp->component->spacing.top)) {
+								ExcludeClipRect(win_g->hdc,
+									0, 0, clipsize.x,
+									psy_ui_value_px(&imp->component->spacing.top, &tm));
+							}
+							if (!psy_ui_value_iszero(&imp->component->spacing.bottom)) {
+								ExcludeClipRect(win_g->hdc,
+									0, clipsize.y - psy_ui_value_px(&imp->component->spacing.bottom, &tm),
+									clipsize.x, clipsize.y);
+							}
+							if (!psy_ui_value_iszero(&imp->component->spacing.left)) {
+								ExcludeClipRect(win_g->hdc,
+									0, 0,
+									psy_ui_value_px(&imp->component->spacing.left, &tm), clipsize.y);
+							}
+							if (!psy_ui_value_iszero(&imp->component->spacing.right)) {
+								ExcludeClipRect(win_g->hdc,
+									psy_ui_value_px(&imp->component->spacing.right, &tm), 0,
+									clipsize.x, clipsize.y);
+							}*/
+							SetWindowOrgEx(win_g->hdc,
+								dblbuffer_offset.x + imp->component->scroll.x -
+								psy_ui_value_px(&imp->component->spacing.left, &tm),
+								dblbuffer_offset.y + imp->component->scroll.y
+								- psy_ui_value_px(&imp->component->spacing.top, &tm),
+								NULL);
+							
+						} else {
+							SetWindowOrgEx(win_g->hdc,
+								dblbuffer_offset.x + imp->component->scroll.x,
+								dblbuffer_offset.y + imp->component->scroll.y,
+								NULL);
+						}
+
 						// update graphics font with component font 
 						hfont = ((psy_ui_win_FontImp*)
 							psy_ui_component_font(imp->component)->imp)->hfont;
@@ -529,10 +564,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD (lParam) + imp->component->scroll.x, 
-					(SHORT)HIWORD (lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD (lParam), (SHORT)HIWORD (lParam),
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -547,10 +582,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 			
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -565,10 +600,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 		
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -583,10 +618,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -601,10 +636,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				psy_ui_mouseevent_settarget(&ev, winapp->eventretarget);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
@@ -620,10 +655,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -638,10 +673,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 				
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);				
@@ -656,10 +691,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
@@ -674,10 +709,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_MouseEvent ev;
 
 				psy_ui_mouseevent_init(&ev,
-					(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-					(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+					(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
 					&ev);
@@ -706,10 +741,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					psy_ui_MouseEvent ev;
 
 					psy_ui_mouseevent_init(&ev,
-						(SHORT)LOWORD(lParam) + imp->component->scroll.x,
-						(SHORT)HIWORD(lParam) + imp->component->scroll.y,
+						(SHORT)LOWORD(lParam), (SHORT)HIWORD(lParam),
 						wParam, 0, GetKeyState(VK_SHIFT) < 0,
 						GetKeyState(VK_CONTROL) < 0);
+					adjustcoordinates(imp->component, &ev.x, &ev.y);
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 						&ev);					
@@ -741,11 +776,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				pt_client.y = (SHORT)HIWORD(lParam);
 				ScreenToClient(imp->hwnd, &pt_client);
 				psy_ui_mouseevent_init(&ev,
-					pt_client.x + imp->component->scroll.x,
-					pt_client.y + imp->component->scroll.y,
+					pt_client.x,
+					pt_client.y,
 					(short)LOWORD(wParam),
 					(short)HIWORD(wParam),
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+				adjustcoordinates(imp->component, &ev.x, &ev.y);
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
@@ -842,6 +878,19 @@ void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM
 		winapp->targetids = NULL;
 	}
 	winapp->eventretarget = 0;
+}
+
+void adjustcoordinates(psy_ui_Component* component, int* x, int* y)
+{		
+	*x += component->scroll.x;
+	*y += component->scroll.y;
+	if (!psy_ui_margin_iszero(&component->spacing)) {
+		psy_ui_TextMetric tm;
+
+		tm = psy_ui_component_textmetric(component);
+		*x -= psy_ui_value_px(&component->spacing.left, &tm);
+		*y -= psy_ui_value_px(&component->spacing.top, &tm);
+	}
 }
 
 void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)

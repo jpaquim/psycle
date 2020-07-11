@@ -30,6 +30,7 @@ typedef struct KbdBox{
 	int cpx;
 	int cpy;
 	int ident;
+	int descident;
 	int keyheight;
 	int keywidth;
 	psy_ui_Size corner;
@@ -38,6 +39,7 @@ typedef struct KbdBox{
 
 void kbdbox_init(KbdBox*, psy_ui_Component* parent);
 void kbdbox_setcolor(KbdBox*, uintptr_t keycode, psy_ui_Color color);
+void kbdbox_cleardescriptions(KbdBox*);
 void kbdbox_setdescription(KbdBox*, uintptr_t keycode, int shift, int ctrl, const char* desc);
 
 INLINE psy_ui_Component* kbdbox_base(KbdBox* self)

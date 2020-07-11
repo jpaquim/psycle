@@ -333,6 +333,14 @@ intptr_t psy_ui_margin_width_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 psy_ui_Value psy_ui_margin_height(psy_ui_Margin*, const psy_ui_TextMetric*);
 intptr_t psy_ui_margin_height_px(psy_ui_Margin*, const psy_ui_TextMetric*);
 
+INLINE bool psy_ui_margin_iszero(const psy_ui_Margin* self)
+{
+	return psy_ui_value_iszero(&self->left) &&
+		psy_ui_value_iszero(&self->top) &&
+		psy_ui_value_iszero(&self->right) &&
+		psy_ui_value_iszero(&self->bottom);
+}
+
 typedef enum {
 	psy_ui_OVERFLOW_HIDDEN = 0,
 	psy_ui_OVERFLOW_VSCROLL = 1,

@@ -204,9 +204,7 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	psy_ui_Component* parent, SequenceView* view)
 {
 	self->view = view;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_SET);
+	psy_ui_component_init(&self->component, parent);	
 	psy_signal_connect(&self->component.signal_draw, self,
 		sequenceviewtrackheader_ondraw);
 	psy_ui_component_setpreferredsize(&self->component,

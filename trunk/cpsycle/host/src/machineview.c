@@ -29,7 +29,7 @@
 #endif
 
 static void machineui_init(MachineUi*, psy_audio_Machine* machine,
-	uintptr_t slot, MachineSkin*, Workspace*);
+	uintptr_t slot, MachineViewSkin*, Workspace*);
 static void machineui_updatecoords(MachineUi*);
 static void machineui_dispose(MachineUi*);
 static void machineui_onframedestroyed(MachineUi*, psy_ui_Component* sender);
@@ -52,7 +52,7 @@ static void machineui_invalidate(MachineUi*, MachineWireView*);
 
 // MachineUi
 void machineui_init(MachineUi* self, psy_audio_Machine* machine,
-	uintptr_t slot, MachineSkin* skin, Workspace* workspace)
+	uintptr_t slot, MachineViewSkin* skin, Workspace* workspace)
 {	
 	assert(machine);
 	self->machine = machine;	
@@ -477,7 +477,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->randominsert = 1;
 	self->addeffect = 0;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 4);	
+	psy_ui_component_setwheelscroll(&self->component, 4);
 	// skin init
 	psy_ui_bitmap_init(&self->skin.skinbmp);
 	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
@@ -637,7 +637,7 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 			+ ((self->skin.colour&0x00ff00)))/2)&0x00ff00) +
 		  (((((self->skin.wirecolour&0x00ff))
 			+ ((self->skin.colour&0x00ff)))/2)&0x00ff);
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour);
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour, psy_ui_NONRECURSIVE);
 	machine_skin_name = psy_properties_readstring(p, "machine_skin", 0);
 	if (machine_skin_name && strlen(machine_skin_name)) {
 		char path[_MAX_PATH];
@@ -1946,7 +1946,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		tabbarparent, workspace);
 	psy_ui_component_setalign(&self->wireview.component, psy_ui_ALIGN_CLIENT);
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
-		self->workspace);		
+		&self->wireview.skin, self->workspace);		
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
@@ -2016,7 +2016,8 @@ void machineview_onfocus(MachineView* self, psy_ui_Component* sender)
 void machineview_onskinchanged(MachineView* self, Workspace* sender)
 {			
 	machinewireview_applyproperties(&self->wireview,
-		sender->machineviewtheme);	
+		sender->machineviewtheme);
+	newmachine_updateskin(&self->newmachine);
 }
 
 psy_ui_Rectangle machinewireview_bounds(MachineWireView* self)

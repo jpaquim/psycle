@@ -275,6 +275,7 @@ void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
 	if (p) {
 		p = p->children;
 	}
+	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	for (; p != NULL; p = psy_properties_next(p)) {		
 		pluginsview_drawitem(self, g, p, cpx, cpy);
 		cpx += self->columnwidth;
@@ -627,7 +628,7 @@ static void newmachine_vtable_init(NewMachine* self)
 }
 // implementation
 void newmachine_init(NewMachine* self, psy_ui_Component* parent,
-	Workspace* workspace)
+	MachineViewSkin* skin, Workspace* workspace)
 {
 	psy_ui_Margin margin;
 	psy_ui_Border sectionborder;
@@ -635,6 +636,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	newmachine_vtable_init(self);
 	self->component.vtable = &newmachine_vtable;
+	self->skin = skin;
 	psy_ui_component_enablealign(&self->component);	
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);	
@@ -699,11 +701,18 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		newmachine_onlanguagechanged);
 	newmachine_updatetext(self, workspace);
+	newmachine_updateskin(self);
 }
 
 void newmachine_ondestroy(NewMachine* self, psy_ui_Component* component)
 {
 	psy_signal_dispose(&self->signal_selected);
+}
+
+void newmachine_updateskin(NewMachine* self)
+{
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin->colour, psy_ui_RECURSIVE);
+	psy_ui_component_setcolor(&self->component, self->skin->effect_fontcolour, psy_ui_RECURSIVE);
 }
 
 void newmachine_updatetext(NewMachine* self, Workspace* sender)

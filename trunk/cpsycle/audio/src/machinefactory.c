@@ -15,6 +15,7 @@
 #include "plugin.h"
 #include "luaplugin.h"
 #include "sampler.h"
+#include "ps1.h"
 #include "vstplugin.h"
 #include "ladspaplugin.h"
 #include "machineproxy.h"
@@ -158,6 +159,15 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			break;
 		}
 		case MACH_SAMPLER: {
+			/*psy_audio_SamplerPS1* sampler;
+
+			sampler = psy_audio_samplerps1_allocinit(self->machinecallback);
+			if (sampler) {
+				rv = psy_audio_samplerps1_base(sampler);
+			} else {
+				rv = 0;
+			}
+			break; */
 			psy_audio_Sampler* sampler;
 
 			sampler = psy_audio_sampler_allocinit(self->machinecallback);

@@ -136,7 +136,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolor(&self->component,
-			0x00333333);
+			0x00333333, psy_ui_NONRECURSIVE);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -281,7 +281,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolor(&self->component,
-			psy_ui_defaults_backgroundcolor(&app.defaults));
+			psy_ui_defaults_backgroundcolor(&app.defaults), psy_ui_NONRECURSIVE);
 		psy_ui_component_invalidate(&self->component);
 		self->resize = 0;
 	}

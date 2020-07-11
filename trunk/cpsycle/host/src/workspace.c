@@ -113,19 +113,14 @@ void history_init(History* self)
 
 void history_dispose(History* self)
 {
-	psy_List* p;
-
-	for (p = self->container; p != NULL; p = p->next) {
-		free(p->entry);
-	}
-	psy_list_free(self->container);
-	self->container = 0;
+	psy_list_deallocate(&self->container, (psy_fp_disposefunc)NULL);
 	self->prevented = 0;
 }
 
 void history_clear(History* self)
 {
-	history_dispose(self);
+	psy_list_deallocate(&self->container, (psy_fp_disposefunc)NULL);
+	self->prevented = 0;
 }
 
 void history_add(History* self, int viewid, int sequenceentryid)

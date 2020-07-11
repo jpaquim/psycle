@@ -7,6 +7,7 @@
 #include "skincoord.h"
 #include <uibitmap.h>
 #include <hashtbl.h>
+#include <properties.h>
 
 typedef struct {
 	SkinCoord background;	
@@ -63,6 +64,11 @@ typedef struct {
 void patternviewskin_init(PatternViewSkin*);
 void patternviewskin_dispose(PatternViewSkin*);
 void patternviewskin_clear(PatternViewSkin*);
+void patternviewskin_settheme(PatternViewSkin*, psy_Properties*, const char* skindir);
+void patternviewskin_setclassicheadercoords(PatternViewSkin*);
+void trackerview_setheadercoords(PatternViewSkin*);
+void patternviewskin_setheadertextcoords(PatternViewSkin*);
+void patternviewskin_setcoords(PatternViewSkin*, psy_Properties*);
 psy_ui_Color patternviewskin_separatorcolor(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Color patternviewskin_row4beatcolor(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Color patternviewskin_rowbeatcolor(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
