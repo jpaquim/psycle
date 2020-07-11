@@ -8,6 +8,7 @@
 #include "cmdsgeneral.h"
 #include "inputmap.h"
 #include "uidef.h"
+#include "trackerview.h"
 
 static void cmdproperties_makenotes(psy_Properties*);
 static void cmdproperties_makegeneral(psy_Properties*);
@@ -20,6 +21,7 @@ psy_Properties* cmdproperties_create(void)
 	if (rv) {
 		cmdproperties_makenotes(rv);
 		cmdproperties_makegeneral(rv);
+		trackerview_makecmds(rv);
 	}
 	return rv;
 }

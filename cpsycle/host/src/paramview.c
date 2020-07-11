@@ -100,7 +100,8 @@ void paramskin_init(ParamView* self)
 		psy_ui_bitmap_loadresource(&paramskin.mixerbitmap, IDB_MIXERSKIN);		
 	}
 	self->skin = &paramskin;
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin->bottomcolor);
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin->bottomcolor,
+		psy_ui_NONRECURSIVE);
 }
 
 void paramskin_release(ParamView* self)

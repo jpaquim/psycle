@@ -41,6 +41,7 @@ KbdBoxKey* kbdboxkey_allocinit_all(int x, int y, int width, int height, const ch
 	return rv;
 }
 
+static void kbdbox_initfont(KbdBox*);
 static void kbdbox_makekeys(KbdBox*);
 static void kbdbox_ondestroy(KbdBox*, psy_ui_Component* sender);
 static void kbdbox_ondraw(KbdBox*, psy_ui_Graphics*);
@@ -72,15 +73,11 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent)
 		kbdbox_ondestroy);	
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(80),
-			psy_ui_value_makeeh(14)));
-	self->corner.width = psy_ui_value_makepx(5);
-	self->corner.height = psy_ui_value_makepx(5);
-	self->ident = 3;
-	self->keyheight = (9 + self->ident) * 3 + 2;
-	self->keywidth = 115;
+			psy_ui_value_makeeh(23)));	
 	psy_table_init(&self->keys);
 	self->keyset = NULL;
-	kbdbox_makekeyproperties(self);
+	kbdbox_initfont(self);
+	kbdbox_makekeyproperties(self);	
 	kbdbox_makekeys(self);
 }
 
@@ -89,6 +86,31 @@ void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 	psy_table_disposeall(&self->keys, (psy_fp_disposefunc)
 		kbdboxkey_dispose);	
 	properties_free(self->keyset);
+}
+
+void kbdbox_initfont(KbdBox* self)
+{
+	psy_ui_Font* font;
+	psy_ui_TextMetric tm;
+	
+	font = psy_ui_component_font(&self->component);
+	if (font) {
+		psy_ui_FontInfo fontinfo;
+		psy_ui_Font newfont;
+
+		fontinfo = psy_ui_font_fontinfo(font);
+		fontinfo.lfHeight = (int)(fontinfo.lfHeight * 0.8);
+		psy_ui_font_init(&newfont, &fontinfo);
+		psy_ui_component_setfont(&self->component, &newfont);
+		psy_ui_font_dispose(&newfont);
+	}
+	tm = psy_ui_component_textmetric(&self->component);
+	self->corner.width = psy_ui_value_makepx(5);
+	self->corner.height = psy_ui_value_makepx(5);
+	self->descident = tm.tmAveCharWidth * 6;
+	self->ident = tm.tmHeight * 0.3;
+	self->keyheight = tm.tmHeight * 3.5;
+	self->keywidth = tm.tmAveCharWidth * 16;
 }
 
 void kbdbox_ondraw(KbdBox* self, psy_ui_Graphics* g)
@@ -108,28 +130,24 @@ void kbdbox_ondraw(KbdBox* self, psy_ui_Graphics* g)
 
 void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 {
-	int centerx;
-	psy_ui_Size textsize;
 	psy_ui_TextMetric tm;
+	int cpx;
+	int cpy;
 
-	tm = psy_ui_component_textmetric(&self->component);	
-	textsize = psy_ui_component_textsize(kbdbox_base(self), key->label);
-	centerx = (key->position.right - key->position.left -
-		psy_ui_value_px(&textsize.width, &tm)) / 2;	
+	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolor(g, key->color);
 	psy_ui_drawroundrectangle(g, key->position, self->corner);
 	psy_ui_settextcolor(g, 0x00666666);
-	psy_ui_textout(g, key->position.left + centerx, key->position.top + 1,
+	cpx = key->position.left + 4;
+	cpy = key->position.top + 4;
+	psy_ui_textout(g, cpx, cpy,
 		key->label, strlen(key->label));
 	psy_ui_settextcolor(g, key->color);
-	psy_ui_textout(g, key->position.left + 4, key->position.top -3 +
-		psy_ui_value_px(&textsize.height, &tm),
+	psy_ui_textout(g, cpx + self->descident, cpy,
 		key->desc0, strlen(key->desc0));
-	psy_ui_textout(g, key->position.left + 4 + 40, key->position.top - 3 +
-		psy_ui_value_px(&textsize.height, &tm),
+	psy_ui_textout(g, cpx, cpy + tm.tmHeight,
 		key->desc1, strlen(key->desc1));
-	psy_ui_textout(g, key->position.left + 4 + 80, key->position.top - 3 +
-		psy_ui_value_px(&textsize.height, &tm),
+	psy_ui_textout(g, cpx, cpy + tm.tmHeight * 2,
 		key->desc2, strlen(key->desc2));
 }
 
@@ -332,6 +350,26 @@ void kbdbox_setcolor(KbdBox* self, uintptr_t keycode, psy_ui_Color color)
 		key->color = color;
 		psy_ui_component_invalidate(kbdbox_base(self));
 	}
+}
+
+void kbdbox_cleardescriptions(KbdBox* self)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->keys);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		KbdBoxKey* key;
+
+		key = (KbdBoxKey*)psy_tableiterator_value(&it);
+		free(key->desc0);
+		free(key->desc1);
+		free(key->desc2);
+		key->desc0 = strdup("");
+		key->desc1 = strdup("");
+		key->desc2 = strdup("");
+	}
+	psy_ui_component_invalidate(kbdbox_base(self));
 }
 
 void kbdbox_setdescription(KbdBox* self, uintptr_t keycode, int shift, int ctrl,

@@ -15,6 +15,7 @@
 #include "paramview.h"
 #include "machineeditorview.h"
 #include "machinebar.h"
+#include "machineviewskin.h"
 #include "skincoord.h"
 #include "tabbar.h"
 
@@ -23,44 +24,6 @@
 
 // MachineView
 // aim: tabbed view for MachineWireView and NewMachine 
-
-typedef struct {
-	SkinCoord background;
-	SkinCoord vu0;
-	SkinCoord vupeak;
-	SkinCoord pan;
-	SkinCoord mute;
-	SkinCoord bypass;
-	SkinCoord solo;		
-	SkinCoord name;
-} MachineCoords;
-
-typedef struct {
-	MachineCoords master;
-	MachineCoords generator;
-	MachineCoords effect;
-	psy_ui_Color colour;
-	psy_ui_Color wirecolour;
-	psy_ui_Color selwirecolour;
-	psy_ui_Color hoverwirecolour;
-	psy_ui_Color wireaacolour;
-	psy_ui_Color wireaacolour2;
-	psy_ui_Color polycolour;
-	unsigned int wirewidth;
-	unsigned int wireaa;
-	unsigned int triangle_size;
-	const char* generator_fontface;
-	int generator_font_point;
-	unsigned int generator_font_flags;	
-	psy_ui_Color generator_fontcolour;
-	const char* effect_fontface;
-	int effect_font_point;
-	unsigned int effect_font_flags;	
-	psy_ui_Color effect_fontcolour;
-	psy_ui_Bitmap skinbmp;	
-	psy_ui_Font font;
-	int drawmachineindexes;
-} MachineSkin;
 
 typedef struct {	
 	int mode;
@@ -71,7 +34,7 @@ typedef struct {
 	/// output peak level display time (refreshrate * 60)
 	int volumemaxcounterlife;
 	MachineCoords* coords;
-	MachineSkin* skin;
+	MachineViewSkin* skin;
 	psy_audio_Machine* machine;
 	uintptr_t slot;
 	MachineFrame* frame;
@@ -105,7 +68,7 @@ typedef struct {
 	psy_audio_Wire hoverwire;
 	int drawvumeters;	
 	psy_audio_PluginCatcher plugincatcher;
-	MachineSkin skin;	   
+	MachineViewSkin skin;
 	Workspace* workspace;	
 	struct MachineViewBar* statusbar;
 	psy_ui_Edit editname;

@@ -242,6 +242,9 @@
     <ClCompile Include="src\patternviewskin.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\machineviewskin.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -484,6 +487,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\patternviewskin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewskin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

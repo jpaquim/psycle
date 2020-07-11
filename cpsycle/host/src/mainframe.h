@@ -64,6 +64,7 @@ typedef struct {
 	psy_ui_SplitBar splitbarterminal;
 	psy_ui_ProgressBar progressbar;
 	psy_ui_Button toggleterminal;
+	psy_ui_Button togglekbdhelp;
 	Navigation navigation;
 	TabBar tabbar;	
 	psy_ui_Notebook notebook;

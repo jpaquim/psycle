@@ -177,6 +177,7 @@
     <ClCompile Include="src\machineframe.c" />
     <ClCompile Include="src\machinesbox.c" />
     <ClCompile Include="src\machineview.c" />
+    <ClCompile Include="src\machineviewskin.c" />
     <ClCompile Include="src\mainframe.c" />
     <ClCompile Include="src\midiview.c" />
     <ClCompile Include="src\navigation.c" />
@@ -264,6 +265,7 @@
     <ClInclude Include="src\machineframe.h" />
     <ClInclude Include="src\machinesbox.h" />
     <ClInclude Include="src\machineview.h" />
+    <ClInclude Include="src\machineviewskin.h" />
     <ClInclude Include="src\mainframe.h" />
     <ClInclude Include="src\midiview.h" />
     <ClInclude Include="src\navigation.h" />

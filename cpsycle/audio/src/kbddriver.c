@@ -230,7 +230,7 @@ void driver_makeinputs(KbdDriver* self, psy_Properties* notes)
 	for (p = notes->children; p != NULL; p = psy_properties_next(p)) {				
 		if (psy_properties_id(p) != -1) {
 			psy_audio_inputs_define(&self->noteinputs, psy_properties_value(p),
-				psy_properties_id(p));
+				psy_properties_id(p), psy_properties_key(p));
 		}
 	}
 }
@@ -239,6 +239,7 @@ void driver_configure(psy_EventDriver* driver)
 {
 	psy_Properties* notes;
 	psy_Properties* general;
+	psy_Properties* trackerview;
 
 	notes = psy_properties_findsection(driver->properties, "notes");
 	if (notes) {
@@ -247,6 +248,10 @@ void driver_configure(psy_EventDriver* driver)
 	general = psy_properties_findsection(driver->properties, "generalcmds");
 	if (general) {
 		driver_makeinputs((KbdDriver*)driver, general);
+	}
+	trackerview = psy_properties_findsection(driver->properties, "trackercmds");
+	if (trackerview) {
+		driver_makeinputs((KbdDriver*)driver, trackerview);
 	}
 }
 

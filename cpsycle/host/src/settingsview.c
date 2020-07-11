@@ -896,7 +896,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2));
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
-		propertiesview_appendtabbarsections(self);
+	propertiesview_appendtabbarsections(self);
 	psy_signal_connect(&self->renderer.signal_changed, self,
 		propertiesview_onpropertiesrendererchanged);
 	psy_signal_connect(&self->renderer.signal_selected, self,

@@ -5,6 +5,7 @@
 #define KBDHELP_H
 
 #include "kbdbox.h"
+#include "tabbar.h"
 #include "workspace.h"
 
 #include <uieditor.h>
@@ -14,13 +15,13 @@
 
 typedef struct KbdHelp {
 	psy_ui_Component component;
+	TabBar tabbar;
 	KbdBox kbdbox;	
 	Workspace* workspace;
+	psy_Properties* search;
 } KbdHelp;
 
 void kbdhelp_init(KbdHelp*, psy_ui_Component* parent, Workspace*);
-
-void kbdhelp_markpatterncmds(KbdHelp*);
 
 INLINE psy_ui_Component* kbdhelp_base(KbdHelp* self) { return &self->component; }
 

@@ -78,13 +78,26 @@ psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
+void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color, bool recursive)
 {	
 	self->style.backgroundcolor = color;
 	self->style.use_backgroundcolor = 1;
 	// assert(self->imp);   
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
+	}
+	if (recursive) {
+		psy_List* p;
+		psy_List* q;
+
+		for (q = p = psy_ui_component_children(self, psy_ui_RECURSIVE); p != NULL;
+				psy_list_next(&p)) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			psy_ui_component_setbackgroundcolor(component, color, psy_ui_NONRECURSIVE);
+		}
+		psy_list_free(q);
 	}
 }
 
@@ -102,10 +115,23 @@ psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color)
+void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color, bool recursive)
 {
 	self->style.color = color;
-	self->style.use_color = 1;	
+	self->style.use_color = 1;
+	if (recursive) {
+		psy_List* p;
+		psy_List* q;
+
+		for (q = p = psy_ui_component_children(self, psy_ui_RECURSIVE); p != NULL;
+			psy_list_next(&p)) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			psy_ui_component_setcolor(component, color, psy_ui_NONRECURSIVE);
+		}
+		psy_list_free(q);
+	}
 }
 
 psy_ui_Color psy_ui_component_color(psy_ui_Component* self)

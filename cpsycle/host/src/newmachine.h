@@ -4,6 +4,7 @@
 #if !defined(NEWMACHINE_H)
 #define NEWMACHINE_H
 
+#include "machineviewskin.h"
 #include "workspace.h"
 #include <uibutton.h>
 #include <uilabel.h>
@@ -67,8 +68,10 @@ typedef struct {
    PluginsView pluginsview;
    NewMachineDetail detail;
    psy_Signal signal_selected;
+   MachineViewSkin* skin;
 } NewMachine;
 
-void newmachine_init(NewMachine*, psy_ui_Component* parent, Workspace*);
+void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
+void newmachine_updateskin(NewMachine*);
 
 #endif

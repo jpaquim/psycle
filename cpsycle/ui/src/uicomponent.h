@@ -486,9 +486,9 @@ INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char*
 		psy_ui_component_font(self));
 }
 
-void psy_ui_component_setcolor(psy_ui_Component*, psy_ui_Color);
+void psy_ui_component_setcolor(psy_ui_Component*, psy_ui_Color, bool recursive);
 psy_ui_Color psy_ui_component_color(psy_ui_Component*);
-void psy_ui_component_setbackgroundcolor(psy_ui_Component*, psy_ui_Color);
+void psy_ui_component_setbackgroundcolor(psy_ui_Component*, psy_ui_Color, bool recursive);
 psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component*);
 
 INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)
