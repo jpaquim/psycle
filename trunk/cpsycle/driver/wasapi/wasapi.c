@@ -792,7 +792,7 @@ void FillPortList(WasapiDriver* self, psy_List** portList, IMMDeviceCollection* 
 			EXIT_ON_ERROR(hr)
 
 			wcscpy_s(pEnum->szDeviceID, MAX_STR_LEN - 1, pszDeviceId);
-			// wcstombs(pEnum->portName, vars.pwszVal, MAX_STR_LEN - 1);
+			wcstombs(pEnum->portName, vars.pwszVal, MAX_STR_LEN - 1);
 
 			PropVariantClear(&vars);
 			if (wcscmp(pEnum->szDeviceID, defaultID) == 0) {
