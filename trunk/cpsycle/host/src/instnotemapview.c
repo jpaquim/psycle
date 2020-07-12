@@ -114,9 +114,9 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 	tm = psy_ui_component_textmetric(&self->component);	
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
 		&tm);	
-	psy_ui_setcolor(g, 0x00333333);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00333333);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00333333));
 	for (key = keymin; key < keymax; ++key) {
 		if (!isblack(key)) {
 			psy_ui_Rectangle r;
@@ -124,12 +124,12 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 			psy_ui_setrectangle(&r,
 				(int)(cp), 0,
 				(int)(self->metrics.keysize + 1), size.height);
-			psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
+			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00CACACA));
 			psy_ui_drawline(g, (int)cp, 0, (int)cp, size.height);
 			cp += self->metrics.keysize;			
 		}
 	}
-	psy_ui_settextcolor(g, 0x00CACACA);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
 	for (cp = 0, key = keymin; key < keymax; ++key) {							
 		if (!isblack(key)) {			
 			cp += self->metrics.keysize;
@@ -141,7 +141,7 @@ void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics
 			x = (int)cp - (int)(self->metrics.keysize * 0.8 / 2);
 			width = (int)(self->metrics.keysize * 0.8);
 			psy_ui_setrectangle(&r, x, 0, width, (int)(size.height * top));
-			psy_ui_drawsolidrectangle(g, r, 0x00444444);
+			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00444444));
 		}
 	}
 }
@@ -279,7 +279,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					(int)(isblack(entry->keyrange.low + 1)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
-				psy_ui_drawsolidrectangle(g, r, 0x00272727);
+				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00272727));
 				startx = (int)(
 					(float)numwhitekey(entry->keyrange.high) /
 					numwhitekeys * size.width) +
@@ -291,7 +291,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					(int)(isblack(entry->keyrange.high + 1)
 						? self->metrics.keysize / 2 : 0);
 				psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
-				psy_ui_drawsolidrectangle(g, r, 0x00272727);
+				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00272727));
 			}
 		}
 		for (p = self->instrument->entries; p != NULL; psy_list_next(&p), ++c) {
@@ -312,9 +312,9 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 				(int)(isblack(entry->keyrange.high + 1)
 					? self->metrics.keysize / 2 : 0) - 1;
 			if (c == self->selected) {
-				psy_ui_setcolor(g, 0x00EAEAEA);
+				psy_ui_setcolor(g, psy_ui_color_make(0x00EAEAEA));
 			} else {
-				psy_ui_setcolor(g, 0x00CACACA);
+				psy_ui_setcolor(g, psy_ui_color_make(0x00CACACA));
 			}
 			psy_ui_drawline(g, startx, cpy + 5, endx, cpy + 5);
 			psy_ui_drawline(g, startx, cpy, startx, cpy + 10);
@@ -527,9 +527,9 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 		int cpy = 0;
 		psy_List* p;
 
-		psy_ui_setcolor(g, 0x00CACACA);
+		psy_ui_setcolor(g, psy_ui_color_make(0x00CACACA));
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolor(g, 0x00CACACA);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
 		for (p = self->instrument->entries; p != NULL; p = p->next) {
 			psy_audio_InstrumentEntry* entry;
 			char text[40];

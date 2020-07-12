@@ -93,7 +93,7 @@ void ondraw(InputDefiner* self, psy_ui_Graphics* g)
 {
 	char text[40];	
 	
-	psy_ui_settextcolor(g, 0x00FFFFFF);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
 	psy_ui_textout(g, 0, 0, text, strlen(text));

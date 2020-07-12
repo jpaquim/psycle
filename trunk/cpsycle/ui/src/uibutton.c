@@ -55,7 +55,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
 	self->text = strdup("");
-	self->textcolor = 0x00CACACA;
+	self->textcolor = psy_ui_color_make(0x00CACACA);
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&psy_ui_button_base(self)->signal_destroy, self,
 		ondestroy);
@@ -84,11 +84,11 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_value_px(&size.height, &tm));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->enabled == FALSE) {
-		psy_ui_settextcolor(g, 0x00777777);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00777777));
 	} else if (self->hover) {
-		psy_ui_settextcolor(g, 0x00FFFFFF);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 	} else if (psy_ui_button_highlighted(self)) {
-		psy_ui_settextcolor(g, 0x00FFFFFF);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 	} else {
 		psy_ui_settextcolor(g, self->textcolor);
 	}
@@ -297,7 +297,7 @@ bool psy_ui_button_highlighted(psy_ui_Button* self)
 
 void psy_ui_button_settextcolor(psy_ui_Button* self, psy_ui_Color color)
 {
-	if (self->textcolor != color) {
+	if (self->textcolor.value != color.value) {
 		self->textcolor = color;
 		psy_ui_component_invalidate(&self->component);
 	}

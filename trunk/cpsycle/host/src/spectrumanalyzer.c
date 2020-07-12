@@ -111,7 +111,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	}
 	
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x505050);	
+	psy_ui_settextcolor(g, psy_ui_color_make(0x505050));
 	rect.left = 0;
 	rect.right = 256;
 	psy_snprintf(buf, sizeof(buf), "db");
@@ -120,7 +120,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	for (i = 1; i < 6; i++) {
 		rect.top = 20 * i;
 		rect.bottom = rect.top + 1;
-		psy_ui_drawsolidrectangle(g, rect, 0x00505050);
+		psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(0x00505050));
 
 		psy_snprintf(buf, sizeof(buf), "-%d0", i);
 		psy_ui_textout(g, 0, rect.top - 10, buf, strlen(buf));
@@ -130,7 +130,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	rect.right = 256;
 	rect.top = 120;
 	rect.bottom = rect.top + 1;
-	psy_ui_drawsolidrectangle(g, rect, 0x00505050);
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(0x00505050));
 
 	psy_snprintf(buf, sizeof(buf), "-60");
 	psy_ui_textout(g, 256 - 16, rect.top - 10, buf, strlen(buf));
@@ -143,7 +143,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	else if (self->scope_spec_mode == 2) rect.left = (int)(16 * sqrt(thebar));
 	else if (self->scope_spec_mode == 3) rect.left = (int)(32 * log10(1 + thebar) * invlog2);
 	rect.right = rect.left + 1;
-	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(0x00606060));
 	psy_snprintf(buf, sizeof(buf), "440");
 	psy_ui_textout(g, rect.left, 0, buf, strlen(buf));
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
@@ -153,7 +153,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	else if (self->scope_spec_mode == 2) rect.left = (int) (16 * sqrt(thebar));
 	else if (self->scope_spec_mode == 3) rect.left = (int) (32 * log10(1 + thebar) * invlog2);
 	rect.right = rect.left + 1;
-	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(0x00606060));
 	psy_snprintf(buf, sizeof(buf), "7K");
 	psy_ui_textout(g, rect.left, 0, buf, strlen(buf));
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
@@ -163,7 +163,7 @@ void spectrumanalyzer_drawbackground(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 	else if (self->scope_spec_mode == 2) rect.left = (int)(16 * sqrt(thebar));
 	else if (self->scope_spec_mode == 3) rect.left = (int)(32 * log10(1 + thebar) * invlog2);
 	rect.right = rect.left + 1;
-	psy_ui_drawsolidrectangle(g, rect, 0x00606060);
+	psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(0x00606060));
 	sprintf(buf, "16K");
 	psy_ui_textout(g, rect.left, 0, buf, strlen(buf));
 	psy_ui_textout(g, rect.left, 128 - 12, buf, strlen(buf));
@@ -292,21 +292,21 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 
 		rect.top = curpeak;
 		rect.bottom = halfpeak;
-		psy_ui_drawsolidrectangle(g, rect, colour);
+		psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(colour));
 
 		rect.top = rect.bottom;
 		rect.bottom = 128;
-		psy_ui_drawsolidrectangle(g, rect, CLBOTH);
+		psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(CLBOTH));
 
 		rect.top = self->bar_heights[i];
 		rect.bottom = self->bar_heights[i] + 1;
-		psy_ui_drawsolidrectangle(g, rect, CLBARPEAK);
+		psy_ui_drawsolidrectangle(g, rect, psy_ui_color_make(CLBARPEAK));
 	}
 	psy_snprintf(buf, sizeof(buf), "%d Samples Refresh %.2fhz",
 		self->scope_spec_samples, 1000.0f / self->scope_spec_rate);
 	//sprintf(buf,"%d Samples Refresh %.2fhz Window %d",scope_spec_samples,1000.0f/scope_spec_rate, FFTMethod);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x505050);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x505050));
 	psy_ui_textout(g, 4, 128 - 14, buf, strlen(buf));
 }
 

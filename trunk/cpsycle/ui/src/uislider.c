@@ -135,7 +135,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 	psy_ui_TextMetric tm;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setcolor(g, psy_ui_defaults_bordercolor(&app.defaults));	
+	psy_ui_setcolor(g, app.defaults.style_common.border.color_top);	
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		psy_ui_Size size;	
 
@@ -143,7 +143,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		if (self->labelvisible) {
 			psy_ui_setrectangle(&r, 0, 0,
 				self->labelsize, psy_ui_value_px(&size.height, &tm));
-			psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
+			psy_ui_settextcolor(g, app.defaults.style_common.color);
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_textoutrectangle(g, 0, 0, 0, r,
 				self->label, strlen(self->label));
@@ -158,12 +158,12 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r,
 			self->labelsize + self->margin + (int)((psy_ui_value_px(&size.width, &tm) - self->slidersize) * self->value),
 			2, self->slidersize, psy_ui_value_px(&size.height, &tm) - 4);
-		psy_ui_drawsolidrectangle(g, r, psy_ui_defaults_color(&app.defaults));
+		psy_ui_drawsolidrectangle(g, r, app.defaults.style_common.color);
 		if (self->valuelabelvisible) {
 			size = psy_ui_component_size(&self->component);
 			psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, &tm) - self->valuelabelsize, 0,
 				self->valuelabelsize, psy_ui_value_px(&size.height, &tm));
-			psy_ui_settextcolor(g, psy_ui_defaults_color(&app.defaults));
+			psy_ui_settextcolor(g, app.defaults.style_common.color);
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_textoutrectangle(g, psy_ui_value_px(&size.width, &tm) -
 				self->valuelabelsize, 0, 0, r,
@@ -196,7 +196,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r, 2 + centerx,
 			(int)((psy_ui_value_px(&size.height, &tm) - sliderheight) * (1 - self->value)),
 			psy_ui_value_px(&slidersize.width, &tm) - 4, sliderheight);
-		psy_ui_drawsolidrectangle(g, r, 0x00CACACA);
+		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00CACACA));
 	}	
 }
 

@@ -2143,7 +2143,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 	trackerlinenumbers_setsharedlinestate(self, linestate);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setbackgroundcolor(&self->component,
-		self->linestate->skin->background, psy_ui_NONRECURSIVE);
+		self->linestate->skin->background);
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackerlinenumbers_onscroll);
 	psy_signal_connect(&self->workspace->signal_patterneditpositionchanged, self,
@@ -3553,13 +3553,13 @@ void TrackerViewApplyProperties(TrackerView* self, psy_Properties* p)
 	patternviewskin_settheme(self->gridstate.skin, p,
 		workspace_skins_directory(self->workspace));	
 	psy_ui_component_setbackgroundcolor(&self->linenumbers.component,
-		self->gridstate.skin->background, psy_ui_NONRECURSIVE);
+		self->gridstate.skin->background);
 	psy_ui_component_setbackgroundcolor(&self->blockmenu.component,
-		self->gridstate.skin->background, psy_ui_RECURSIVE);
+		self->gridstate.skin->background);
 	psy_ui_component_setbackgroundcolor(&self->interpolatecurveview.component,
-		self->gridstate.skin->background, psy_ui_RECURSIVE);
+		self->gridstate.skin->background);
 	psy_ui_component_setcolor(&self->interpolatecurveview.component,
-		self->gridstate.skin->font, psy_ui_RECURSIVE);
+		self->gridstate.skin->font);
 	psy_ui_component_invalidate(&self->component);
 }
 

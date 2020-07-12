@@ -57,8 +57,8 @@ void pinedit_init(PinEdit* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->dragmode = PINEDIT_DRAG_NONE;
 	self->mx = 0;
 	self->my = 0;
-	self->pincolor = 0x00444444;
-	self->wirecolor = 0x00999999;
+	self->pincolor = psy_ui_color_make(0x00444444);
+	self->wirecolor = psy_ui_color_make(0x00999999);
 }
 
 void pinedit_ondraw(PinEdit* self, psy_ui_Graphics* g)

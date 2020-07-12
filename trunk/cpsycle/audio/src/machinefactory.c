@@ -32,11 +32,11 @@ void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_Mac
 {
 	self->machinecallback = callback;
 	self->catcher = catcher;
-//#ifdef PSYCLE_USE_MACHINEPROXY
-	//self->createasproxy = TRUE;
-//#else
+#ifdef PSYCLE_USE_MACHINEPROXY
+	self->createasproxy = TRUE;
+#else
 	self->createasproxy = FALSE;
-//#endif
+#endif
 	self->loadnewgamefxblitz = 0;
 	self->errstr = strdup("");
 }
@@ -159,7 +159,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			break;
 		}
 		case MACH_SAMPLER: {
-			/*psy_audio_SamplerPS1* sampler;
+			psy_audio_SamplerPS1* sampler;
 
 			sampler = psy_audio_samplerps1_allocinit(self->machinecallback);
 			if (sampler) {
@@ -167,17 +167,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			} else {
 				rv = 0;
 			}
-			break; */
-			psy_audio_Sampler* sampler;
-
-			sampler = psy_audio_sampler_allocinit(self->machinecallback);
-			if (sampler) {
-				sampler->xmsamplerload = 0;
-				rv = psy_audio_sampler_base(sampler);
-			} else {
-				rv = 0;
-			}
-			break;
+			break;			
 		}
 		case MACH_XMSAMPLER: {
 			psy_audio_Sampler* sampler;

@@ -292,11 +292,11 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	char text[128];
 
 	if (property == self->selectedplugin) {
-		psy_ui_setbackgroundcolor(g, 0x009B7800);
-		psy_ui_settextcolor(g, 0x00FFFFFF);		
+		psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x009B7800));
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 	} else {
-		psy_ui_setbackgroundcolor(g, 0x00232323);
-		psy_ui_settextcolor(g, 0x00CACACA);		
+		psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
 	}		
 	plugindisplayname(property, text);	
 	psy_ui_textout(g, x, y + 2, text, strlen(text));
@@ -304,9 +304,9 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
 		y + 2, text, strlen(text));
 	if (pluginmode(property, text) == MACHMODE_FX) {
-		psy_ui_settextcolor(g, 0x00B1C8B0);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));
 	} else {		
-		psy_ui_settextcolor(g, 0x00D1C5B6);	
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
 	}
 	psy_ui_textout(g, x + self->columnwidth - 10 * self->avgcharwidth,
 		y + 2, text, strlen(text));
@@ -711,8 +711,8 @@ void newmachine_ondestroy(NewMachine* self, psy_ui_Component* component)
 
 void newmachine_updateskin(NewMachine* self)
 {
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin->colour, psy_ui_RECURSIVE);
-	psy_ui_component_setcolor(&self->component, self->skin->effect_fontcolour, psy_ui_RECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin->colour);
+	psy_ui_component_setcolor(&self->component, self->skin->effect_fontcolour);
 }
 
 void newmachine_updatetext(NewMachine* self, Workspace* sender)

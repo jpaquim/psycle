@@ -75,7 +75,7 @@ void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
 	if (zoomleftx == zoomrightx) {
 		++zoomrightx;
 	}	
-	psy_ui_setcolor(g, 0x00666666);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00666666));
 	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx,
 		psy_ui_value_px(&size.height, &tm));
 	psy_ui_drawrectangle(g, r);

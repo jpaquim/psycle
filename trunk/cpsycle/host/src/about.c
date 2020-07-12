@@ -103,7 +103,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	psy_ui_component_resize(&self->versioninfo.component,
 		psy_ui_size_make(psy_ui_value_makepx(500), psy_ui_value_makepx(300)));
-	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, 0x00232323, psy_ui_NONRECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, psy_ui_color_make(0x00232323));
 }
 
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)

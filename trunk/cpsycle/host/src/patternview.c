@@ -95,7 +95,7 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 	} else {
 		pattern = -1;
 	}	
-	psy_ui_settextcolor(g, 0x00D1C5B6);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_snprintf(text, 256, "Pat %d  Ln %d  Trk %d  Col %d:%d Edit",
 		pattern,

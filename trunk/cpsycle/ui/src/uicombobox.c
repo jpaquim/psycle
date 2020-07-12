@@ -136,10 +136,10 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 		if (strlen(text)) {		
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			if (self->hover) {
-				psy_ui_settextcolor(g, 0x00FFFFFF);
+				psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 			}
 			else {
-				psy_ui_settextcolor(g, 0x00CACACA);
+				psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
 			}
 			psy_ui_textoutrectangle(g, 0, vcenter, psy_ui_ETO_CLIPPED, r,
 				text, strlen(text));			

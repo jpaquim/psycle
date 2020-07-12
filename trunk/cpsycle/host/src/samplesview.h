@@ -36,7 +36,7 @@ typedef struct {
 } SamplesHeaderView;
 
 static void samplesheaderview_init(SamplesHeaderView*, psy_ui_Component* parent,
-	psy_audio_Instruments*, struct SamplesView*, Workspace* workspace);
+	psy_audio_Instruments*, struct SamplesView*, Workspace*);
 void samplesheaderview_setsample(SamplesHeaderView*, psy_audio_Sample*);
 
 typedef struct {
@@ -50,6 +50,9 @@ typedef struct {
 	psy_ui_Slider pitchfinetune;
 } SamplesGeneralView;
 
+void samplesgeneralview_init(SamplesGeneralView*, psy_ui_Component* parent,
+	Workspace*);
+
 typedef struct {
 	psy_ui_Component component;
 	psy_audio_Sample* sample;	
@@ -61,6 +64,11 @@ typedef struct {
 	psy_ui_Slider depth;
 	psy_audio_Player* player;
 } SamplesVibratoView;
+
+void samplesvibratoview_init(SamplesVibratoView*, psy_ui_Component* parent,
+	psy_audio_Player* player);
+
+struct SamplesView;
 
 typedef struct {
 	psy_ui_Component component;
@@ -83,6 +91,9 @@ typedef struct {
 	psy_audio_SampleLoop currloop;
 	psy_audio_SampleLoop currsustainloop;
 } SamplesLoopView;
+
+void samplesloopview_init(SamplesLoopView*, psy_ui_Component* parent,
+	struct SamplesView*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -109,6 +120,9 @@ typedef struct {
 	struct SamplesView* view;
 	Workspace* workspace;
 } SamplesSongImportView;
+
+void samplessongimportview_init(SamplesSongImportView*, psy_ui_Component* parent,
+	struct SamplesView* view, Workspace*);
 
 typedef struct SamplesView {
 	psy_ui_Component component;	

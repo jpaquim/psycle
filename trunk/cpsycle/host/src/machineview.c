@@ -612,32 +612,32 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 	const char* machine_skin_name;
 
 	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);
-	self->skin.colour = psy_properties_int(p, "mv_colour", 0x00232323);
-	self->skin.wirecolour = psy_properties_int(p, "mv_wirecolour", 0x005F5F5F);
-	self->skin.selwirecolour = psy_properties_int(p, "mv_selwirecolour", 0x007F7F7F);
-	self->skin.hoverwirecolour = psy_properties_int(p, "mv_hoverwirecolour", 0x007F7F7F);
-	self->skin.polycolour = psy_properties_int(p, "mv_wireaacolour2", 0x005F5F5F);
-	self->skin.polycolour = psy_properties_int(p, "mv_polycolour", 0x00B1C8B0);
+	self->skin.colour = psy_ui_color_make(psy_properties_int(p, "mv_colour", 0x00232323));
+	self->skin.wirecolour = psy_ui_color_make(psy_properties_int(p, "mv_wirecolour", 0x005F5F5F));
+	self->skin.selwirecolour = psy_ui_color_make(psy_properties_int(p, "mv_selwirecolour", 0x007F7F7F));
+	self->skin.hoverwirecolour = psy_ui_color_make(psy_properties_int(p, "mv_hoverwirecolour", 0x007F7F7F));
+	self->skin.polycolour = psy_ui_color_make(psy_properties_int(p, "mv_wireaacolour2", 0x005F5F5F));
+	self->skin.polycolour = psy_ui_color_make(psy_properties_int(p, "mv_polycolour", 0x00B1C8B0));
 	self->skin.generator_fontcolour = 
-		psy_properties_int(p, "mv_generator_fontcolour", 0x00B1C8B0); // 0x00B1C8B0
+		psy_ui_color_make(psy_properties_int(p, "mv_generator_fontcolour", 0x00B1C8B0)); // 0x00B1C8B0
 	self->skin.effect_fontcolour = 
-		psy_properties_int(p, "mv_effect_fontcolour", 0x00D1C5B6);
+		psy_ui_color_make(psy_properties_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
 	self->skin.triangle_size = psy_properties_int(p, "mv_triangle_size", 10);
-	self->skin.wireaacolour 
-		= ((((self->skin.wirecolour&0x00ff0000) 
-			+ ((self->skin.colour&0x00ff0000)*4))/5)&0x00ff0000) +
-		  ((((self->skin.wirecolour&0x00ff00)
-			+ ((self->skin.colour&0x00ff00)*4))/5)&0x00ff00) +
-		  ((((self->skin.wirecolour&0x00ff) 
-			+ ((self->skin.colour&0x00ff)*4))/5)&0x00ff);
-	self->skin.wireaacolour2
-		= (((((self->skin.wirecolour&0x00ff0000))
-			+ ((self->skin.colour&0x00ff0000)))/2)&0x00ff0000) +
-		  (((((self->skin.wirecolour&0x00ff00))
-			+ ((self->skin.colour&0x00ff00)))/2)&0x00ff00) +
-		  (((((self->skin.wirecolour&0x00ff))
-			+ ((self->skin.colour&0x00ff)))/2)&0x00ff);
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour, psy_ui_NONRECURSIVE);
+	self->skin.wireaacolour =
+		psy_ui_color_make(((((self->skin.wirecolour.value&0x00ff0000) 
+			+ ((self->skin.colour.value&0x00ff0000)*4))/5)&0x00ff0000) +
+		  ((((self->skin.wirecolour.value &0x00ff00)
+			+ ((self->skin.colour.value &0x00ff00)*4))/5)&0x00ff00) +
+		  ((((self->skin.wirecolour.value &0x00ff)
+			+ ((self->skin.colour.value &0x00ff)*4))/5)&0x00ff));
+	self->skin.wireaacolour2 =
+		psy_ui_color_make((((((self->skin.wirecolour.value &0x00ff0000))
+			+ ((self->skin.colour.value &0x00ff0000)))/2)&0x00ff0000) +
+		  (((((self->skin.wirecolour.value &0x00ff00))
+			+ ((self->skin.colour.value &0x00ff00)))/2)&0x00ff00) +
+		  (((((self->skin.wirecolour.value &0x00ff))
+			+ ((self->skin.colour.value &0x00ff)))/2)&0x00ff));
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour);
 	machine_skin_name = psy_properties_readstring(p, "machine_skin", 0);
 	if (machine_skin_name && strlen(machine_skin_name)) {
 		char path[_MAX_PATH];
@@ -850,14 +850,14 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	psy_ui_IntPoint a, b, c;	
 	psy_ui_IntPoint tri[4];
 	int polysize;
-	float deltaColR = ((self->skin.polycolour     & 0xFF) / 510.0f) + .45f;
-	float deltaColG = ((self->skin.polycolour>>8  & 0xFF) / 510.0f) + .45f;
-	float deltaColB = ((self->skin.polycolour>>16 & 0xFF) / 510.0f) + .45f;	
+	float deltaColR = ((self->skin.polycolour.value     & 0xFF) / 510.0f) + .45f;
+	float deltaColG = ((self->skin.polycolour.value >>8  & 0xFF) / 510.0f) + .45f;
+	float deltaColB = ((self->skin.polycolour.value>>16 & 0xFF) / 510.0f) + .45f;	
 	unsigned int polyInnards;
 	double phi;
 	
 	polyInnards = psy_ui_color_make_rgb((uint8_t)(192 * deltaColR),
-		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB));
+		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB)).value;
 			
 	center.x = (x2 - x1) / 2 + x1;
 	center.y = (y2 - y1) / 2 + y1;
@@ -877,7 +877,7 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	tri[2] = move_point(rotate_point(c, phi), center);
 	tri[3] = tri[0];
 	
-	psy_ui_drawsolidpolygon(g, tri, 4, polyInnards, self->skin.wireaacolour);
+	psy_ui_drawsolidpolygon(g, tri, 4, polyInnards, self->skin.wireaacolour.value);
 }
 
 psy_ui_IntPoint rotate_point(psy_ui_IntPoint pt, double phi)

@@ -144,7 +144,7 @@ void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
 void envelopebox_drawlabel(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00D1C5B6);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
 	psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
 }
 
@@ -152,7 +152,7 @@ void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
 {
 	double i;		
 
-	psy_ui_setcolor(g, 0x00333333);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
 	for (i = 0; i <= 1.0; i += 0.1 ) {
 		psy_ui_drawline(g,
 			self->spacing.left.quantity.integer,
@@ -192,7 +192,7 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 			envelopebox_pxvalue(self, pt->value) - psy_ui_value_px(&ptsize2.height, &tm),
 			psy_ui_value_px(&ptsize.width, &tm),
 			psy_ui_value_px(&ptsize.height, &tm));
-		psy_ui_drawsolidrectangle(g, r, 0x00B1C8B0);
+		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00B1C8B0));
 		q = pt;
 	}
 }
@@ -203,7 +203,7 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_dsp_EnvelopePoint* q = 0;
 	uintptr_t count = 0;
 
-	psy_ui_setcolor(g, 0x00B1C8B0);	
+	psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
 	for (p = self->points; p !=0; p = p->next, ++count) {		
 		psy_dsp_EnvelopePoint* pt;
 

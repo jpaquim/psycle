@@ -113,12 +113,17 @@ void trackerlinestate_init(TrackerLineState*);
 int trackerlinestate_offsettoscreenline(TrackerLineState*,
 	psy_dsp_big_beat_t);
 
+struct TrackerView;
+
 typedef struct {
 	psy_ui_Component component;
-	struct TrackerView* view;
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
+	struct TrackerView* view;
 } TrackerLineNumbersLabel;
+
+void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
+	psy_ui_Component* parent, TrackerLineState*, struct TrackerView*);
 
 typedef struct {
 	psy_ui_Component component;

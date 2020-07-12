@@ -76,7 +76,7 @@ void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 	if (self->bitmap) {
 		psy_ui_drawbitmap(g, self->bitmap, 0, 0, 28, 28, 0, 0);
 	}
-	psy_ui_settextcolor(g, 0x00CACACA);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_textout(g, 30, 0, self->label, strlen(self->label));
 	psy_ui_textout(g, 30, 28 / 2, self->desc, strlen(self->desc));

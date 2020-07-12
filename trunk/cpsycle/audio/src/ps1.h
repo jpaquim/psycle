@@ -4,12 +4,15 @@
 #ifndef psy_audio_PS1_H
 #define psy_audio_PS1_H
 
-#include "custommachine.h"
-#include "samplerdefs.h"
-#include "samplerchannel.h"
-#include "samplervoice.h"
-#include "ticktimer.h"
 #include "constants.h"
+#include "custommachine.h"
+#include "sampleiterator.h"
+#include "samplerdefs.h"
+#include "ticktimer.h"
+#include "instrument.h"
+
+#include <adsr.h>
+#include <filter.h>
 
 // Internal Psycle Sampler
 
@@ -38,16 +41,7 @@ extern "C" {
 struct psy_audio_SamplerPS1;
 
 typedef struct SamplerPS1Voice
-{
-	/*void Init();
-	void NoteOff();
-	void NoteOffFast();
-	void NewLine();
-	void Work(int numsamples, helpers::dsp::resampler::work_func_type pResamplerWork, float* pSamplesL, float* pSamplesR);
-	int Tick(PatternEntry* pData, int channelNum, dsp::resampler& resampler, int baseC, std::vector<PatternEntry>& multicmdMem);
-	void PerformFxOld(dsp::resampler& resampler);
-	void PerformFxNew(dsp::resampler& resampler);*/
-		
+{		
 	struct psy_audio_SamplerPS1* sampler;
 	psy_audio_SampleIterator controller;	
 	psy_dsp_ADSR _envelope;
@@ -74,6 +68,13 @@ typedef struct SamplerPS1Voice
 	float effretVol; // volume change amount
 	int effretMode;  // volume change mode (multipler or sum)
 	// } retrig
+	// WaveDataController
+	float _vol; // 0..1 value of this voice volume,
+	float _pan;
+	float _lVolDest;
+	float _rVolDest;
+	float _lVolCurr;
+	float _rVolCurr;
 } PS1SamplerVoice;
 
 void ps1samplervoice_init(PS1SamplerVoice*, struct psy_audio_SamplerPS1*);
@@ -93,35 +94,23 @@ typedef struct psy_audio_SamplerPS1 {
 	psy_List* voices;
 	uintptr_t numvoices;
 	int defaultspeed;	
-	psy_Table lastinst;
-	// psycle 0CFF, xm 0C80
-	int maxvolume;
-	// ps1 FALSE, sampulse TRUE
-	int panpersistent;
-	int channelbank;
 	psy_audio_IntMachineParam param_numvoices;	
 	psy_audio_ChoiceMachineParam param_resamplingmethod;
 	psy_audio_ChoiceMachineParam param_defaultspeed;
 	psy_audio_IntMachineParam param_instrumentbank;	
-	psy_Table channels;
-	uint8_t basec;
-	// Sampler PS1 with max amp = 0.5.
-	psy_dsp_amp_t clipmax;
 	// Instrument Bank 0: PS1 1: Sampulse
 	int32_t instrumentbank;	
 	ResamplerType resamplerquality;
 	psy_audio_SamplerTickTimer ticktimer;
 	uintptr_t samplerowcounter;
-	int32_t amigaslides; // using linear or amiga slides.
 	int32_t usefilters;
 	int32_t panningmode;
 	
-	unsigned char lastInstrument[MAX_TRACKS];
+	uint16_t lastInstrument[MAX_TRACKS];
 	int _numVoices;
 	PS1SamplerVoice _voices[PS1_SAMPLER_MAX_POLYPHONY];
 	// psycle::helpers::dsp::cubic_resampler _resampler;
 	psy_List* multicmdMem; // PatternEvent
-	int baseC;
 	bool linearslide;
 } psy_audio_SamplerPS1;
 
@@ -137,12 +126,12 @@ INLINE psy_audio_Machine* psy_audio_samplerps1_base(psy_audio_SamplerPS1* self)
 
 INLINE void psy_audio_samplerps1_defaultC4(psy_audio_SamplerPS1* self, bool correct)
 {
-	self->basec = correct ? NOTECOMMANDS_MIDDLEC : 48;
+	self->defaultspeed = correct;
 }
 			
 INLINE bool psy_audio_samplerps1_isdefaultC4(psy_audio_SamplerPS1* self)
-{
-	return self->basec == NOTECOMMANDS_MIDDLEC;
+{	
+	return self->defaultspeed;
 }
 
 void psy_audio_samplerps1_setresamplerquality(psy_audio_SamplerPS1* self,

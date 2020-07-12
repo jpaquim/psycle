@@ -23,39 +23,13 @@
 // Backreference imp to component for imp/component mapping and events
 //
 // psy_ui_Component <>--------<> psy_ui_ComponentImp
-//     imp->dev_invalidate           ^
-//     ...                           |
-//                          psy_ui_win_ComponentImp
+//     imp->dev_invalidate                ^
+//     ...                                |
+//                             psy_ui_win_ComponentImp
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-	psy_ui_CURSORSTYLE_AUTO,
-	psy_ui_CURSORSTYLE_MOVE,
-	psy_ui_CURSORSTYLE_NODROP,
-	psy_ui_CURSORSTYLE_COL_RESIZE,
-	psy_ui_CURSORSTYLE_ALL_SCROLL,
-	psy_ui_CURSORSTYLE_POINTER,
-	psy_ui_CURSORSTYLE_NOT_ALLOWED,
-	psy_ui_CURSORSTYLE_ROW_RESIZE,
-	psy_ui_CURSORSTYLE_CROSSHAIR,
-	psy_ui_CURSORSTYLE_PROGRESS,
-	psy_ui_CURSORSTYLE_E_RESIZE,
-	psy_ui_CURSORSTYLE_NE_RESIZE,
-	psy_ui_CURSORSTYLE_DEFAULT_TEXT,
-	psy_ui_CURSORSTYLE_N_RESIZE,
-	psy_ui_CURSORSTYLE_NW_RESIZE,
-	psy_ui_CURSORSTYLE_HELP,
-	psy_ui_CURSORSTYLE_VERTICAL_TEXT,
-	psy_ui_CURSORSTYLE_S_RESIZE,
-	psy_ui_CURSORSTYLE_SE_RESIZE,
-	psy_ui_CURSORSTYLE_INHERIT,
-	psy_ui_CURSORSTYLE_WAIT,
-	psy_ui_CURSORSTYLE_W_RESIZE,
-	psy_ui_CURSORSTYLE_SW_RESIZE
-} psy_ui_CursorStyle;
 
 typedef enum {
 	psy_ui_BACKGROUND_NONE,
@@ -222,8 +196,7 @@ typedef struct psy_ui_Component {
 	psy_ui_Size maxsize;
 	psy_ui_IntPoint scroll;	
 	psy_ui_Overflow overflow;
-	int preventpreferredsizeatalign;
-	psy_ui_Border border;
+	int preventpreferredsizeatalign;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -234,9 +207,6 @@ void psy_ui_component_init_imp(psy_ui_Component*, psy_ui_Component* parent,
 	struct psy_ui_ComponentImp*);
 void psy_ui_component_dispose(psy_ui_Component*);
 void psy_ui_component_destroy(psy_ui_Component*);
-/*int psy_ui_win32_component_init(psy_ui_Component*, psy_ui_Component* parent,
-	const char* classname, int x, int y, int width, int height,
-	uint32_t dwStyle, int usecommand);*/
 
 INLINE void psy_ui_component_show(psy_ui_Component* self)
 {
@@ -286,14 +256,11 @@ void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
 
 INLINE void psy_ui_component_setborder(psy_ui_Component* self, psy_ui_Border border)
 {
-	self->border = border;
+	self->style.border = border;
+	self->style.border.mode.set = TRUE;
 }
 
-INLINE psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
-{
-	return self->border;
-}
-
+psy_ui_Border psy_ui_component_border(psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 void psy_ui_component_enablealign(psy_ui_Component*);
 void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
@@ -318,8 +285,7 @@ psy_List* psy_ui_components_setalign(psy_List*, psy_ui_AlignType,
 psy_List* psy_ui_components_setmargin(psy_List*, const psy_ui_Margin*);
 void psy_ui_component_close(psy_ui_Component*);
 
-// uicomponentimp
-
+// psy_ui_ComponentImp
 // vtable function pointers
 typedef void (*psy_ui_fp_componentimp_dev_dispose)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_destroy)(struct psy_ui_ComponentImp*);
@@ -486,9 +452,9 @@ INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char*
 		psy_ui_component_font(self));
 }
 
-void psy_ui_component_setcolor(psy_ui_Component*, psy_ui_Color, bool recursive);
+void psy_ui_component_setcolor(psy_ui_Component*, psy_ui_Color);
 psy_ui_Color psy_ui_component_color(psy_ui_Component*);
-void psy_ui_component_setbackgroundcolor(psy_ui_Component*, psy_ui_Color, bool recursive);
+void psy_ui_component_setbackgroundcolor(psy_ui_Component*, psy_ui_Color);
 psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component*);
 
 INLINE void psy_ui_component_settitle(psy_ui_Component* self, const char* text)

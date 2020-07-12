@@ -52,9 +52,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_enablealign(&self->component);
-	//psy_ui_component_setbackgroundcolor(self, 
-	//	psy_ui_defaults_backgroundcolor(&app.defaults, 0));
+	psy_ui_component_enablealign(&self->component);	
 	self->workspace = workspace;
 	self->trackheight = 30;
 	self->textheight = 12;
@@ -82,7 +80,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		tm = psy_ui_component_textmetric(&self->component);		
 		width = psy_ui_value_px(&size.width, &tm) / maxcolumns;
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolor(g, 0x00444444);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00444444));
 		for (c = 0; c < numtracks; ++c) {
 			trackscopeview_drawtrackindex(self, g, cpx, cpy, width,
 					self->trackheight, c);
@@ -113,7 +111,7 @@ void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
 	char text[40];
 	extern psy_ui_App app;
 
-	psy_ui_setcolor(g, app.defaults.defaultcolor);
+	psy_ui_setcolor(g, app.defaults.style_common.color);
 	psy_snprintf(text, 40, "%X", track);
 	psy_ui_textout(g, x + 3, y, text, strlen(text));
 }
@@ -139,7 +137,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 		psy_ui_textout(g, x + width - 10, y + height - self->textheight, text,
 			strlen(text));
 	}
-	psy_ui_setcolor(g, 0x00888888);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00888888));
 	if (self->workspace->song) {
 		psy_audio_Machine* machine;
 		int centery;
@@ -214,7 +212,7 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 	int y, int width, int height, int track)
 {	
 	int ident = (int)(width * 0.25);
-	psy_ui_setcolor(g, app.defaults.defaultcolor);
+	psy_ui_setcolor(g, app.defaults.style_common.color);
 	psy_ui_moveto(g, psy_ui_intpoint_make(x + ident, y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
 		psy_ui_intpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),

@@ -15,19 +15,12 @@ extern "C" {
 #endif
 
 typedef struct {
-	uint32_t defaultbackgroundcolor;	
-	uint32_t defaultcolor;
-	uint32_t default_color_border;
 	uint32_t errorcolor;
 	psy_ui_Style style_common;
 } psy_ui_Defaults;
 
 void psy_ui_defaults_init(psy_ui_Defaults*);
 void psy_ui_defaults_dispose(psy_ui_Defaults*);
-
-uint32_t psy_ui_defaults_color(psy_ui_Defaults*);
-uint32_t psy_ui_defaults_backgroundcolor(psy_ui_Defaults*);
-uint32_t psy_ui_defaults_bordercolor(psy_ui_Defaults*);
 
 #ifdef __cplusplus
 }

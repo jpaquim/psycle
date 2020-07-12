@@ -22,6 +22,11 @@ extern "C" {
 #define	psy_ui_NONRECURSIVE 0
 #define	psy_ui_RECURSIVE 1
 
+typedef struct psy_ui_PropertyMode {
+	bool inherited;
+	bool set;
+} psy_ui_PropertyMode;
+
 typedef struct psy_ui_TextMetric
 {
     int32_t tmHeight;
@@ -395,34 +400,119 @@ typedef enum {
 	psy_ui_ALIGNMENT_BOTTOM
 } psy_ui_Alignment;
 
+typedef struct psy_ui_Color
+{
+	psy_ui_PropertyMode mode;
+	uint32_t value;
+} psy_ui_Color;
+
+INLINE void psy_ui_color_init(psy_ui_Color* self)
+{
+	self->mode.inherited = TRUE;
+	self->mode.set = FALSE;
+	self->value = 0x00000000;
+}
+
+INLINE psy_ui_Color psy_ui_color_make(uint32_t value)
+{
+	psy_ui_Color rv;
+
+	rv.mode.inherited = TRUE;
+	rv.mode.set = TRUE;
+	rv.value = value;
+	return rv;
+}
+
+INLINE void psy_ui_color_set(psy_ui_Color* self, psy_ui_Color color)
+{
+	self->mode.inherited = TRUE;
+	self->mode.set = TRUE;
+	self->value = color.value;
+}
+
+INLINE psy_ui_Color psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
+{
+	psy_ui_Color rv;
+
+	rv.mode.inherited = TRUE;
+	rv.mode.set = TRUE;
+	rv.value = (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));
+	return rv;
+}
+
+void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b);
+
 typedef enum {
 	psy_ui_BORDER_NONE,
 	psy_ui_BORDER_SOLID
 } psy_ui_BorderStyle;
 
 typedef struct {
+	psy_ui_PropertyMode mode;
 	psy_ui_BorderStyle top;
 	psy_ui_BorderStyle right;
 	psy_ui_BorderStyle bottom;
 	psy_ui_BorderStyle left;
+	psy_ui_Color color_top;
+	psy_ui_Color color_right;
+	psy_ui_Color color_bottom;
+	psy_ui_Color color_left;
 } psy_ui_Border;
 
 INLINE void psy_ui_border_init(psy_ui_Border* self)
 {
+	self->mode.inherited = FALSE;
+	self->mode.set = FALSE;
 	self->top = psy_ui_BORDER_NONE;
 	self->right = psy_ui_BORDER_NONE;
 	self->bottom = psy_ui_BORDER_NONE;
 	self->left = psy_ui_BORDER_NONE;
+	psy_ui_color_init(&self->color_top);
+	psy_ui_color_init(&self->color_right);
+	psy_ui_color_init(&self->color_bottom);
+	psy_ui_color_init(&self->color_left);
 }
 
 INLINE void psy_ui_border_init_all(psy_ui_Border* self, psy_ui_BorderStyle top,
 	psy_ui_BorderStyle right, psy_ui_BorderStyle bottom, psy_ui_BorderStyle left)
 {
+	self->mode.inherited = FALSE;
+	self->mode.set = TRUE;
 	self->top = top;
 	self->right = right;
 	self->bottom = bottom;
 	self->left = left;
+	psy_ui_color_init(&self->color_top);
+	psy_ui_color_init(&self->color_right);
+	psy_ui_color_init(&self->color_bottom);
+	psy_ui_color_init(&self->color_left);
 }
+
+typedef enum {
+	psy_ui_CURSORSTYLE_AUTO,
+	psy_ui_CURSORSTYLE_MOVE,
+	psy_ui_CURSORSTYLE_NODROP,
+	psy_ui_CURSORSTYLE_COL_RESIZE,
+	psy_ui_CURSORSTYLE_ALL_SCROLL,
+	psy_ui_CURSORSTYLE_POINTER,
+	psy_ui_CURSORSTYLE_NOT_ALLOWED,
+	psy_ui_CURSORSTYLE_ROW_RESIZE,
+	psy_ui_CURSORSTYLE_CROSSHAIR,
+	psy_ui_CURSORSTYLE_PROGRESS,
+	psy_ui_CURSORSTYLE_E_RESIZE,
+	psy_ui_CURSORSTYLE_NE_RESIZE,
+	psy_ui_CURSORSTYLE_DEFAULT_TEXT,
+	psy_ui_CURSORSTYLE_N_RESIZE,
+	psy_ui_CURSORSTYLE_NW_RESIZE,
+	psy_ui_CURSORSTYLE_HELP,
+	psy_ui_CURSORSTYLE_VERTICAL_TEXT,
+	psy_ui_CURSORSTYLE_S_RESIZE,
+	psy_ui_CURSORSTYLE_SE_RESIZE,
+	psy_ui_CURSORSTYLE_INHERIT,
+	psy_ui_CURSORSTYLE_WAIT,
+	psy_ui_CURSORSTYLE_W_RESIZE,
+	psy_ui_CURSORSTYLE_SW_RESIZE
+} psy_ui_CursorStyle;
 
 typedef enum {
 	psy_ui_KEY_LBUTTON         = 0x01,
@@ -551,15 +641,6 @@ typedef enum {
 	psy_ui_KEY_QUOTE           = 0xDE,
 	psy_ui_KEY_BRACKETRIGHT    = 0xDD
 } psy_ui_Key;
-
-typedef uint32_t psy_ui_Color;
-
-INLINE uint32_t psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
-{
-	return (uint32_t)(((uint16_t)r) | (((uint16_t)g) << 8) | (((uint16_t)b) << 16));	
-}
-
-void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b);
 
 #define psy_ui_ETO_OPAQUE	0x0002
 #define psy_ui_ETO_CLIPPED	0x0004

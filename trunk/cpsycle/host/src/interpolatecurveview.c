@@ -158,7 +158,7 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		size = psy_ui_component_size(&self->component);
 		lines = (uintptr_t)(self->range / 0.25f);
 		scalex = psy_ui_value_px(&size.width, &tm) / self->range;
-		psy_ui_setcolor(g, 0x00333333);
+		psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
 		for (i = 0; i < lines; i += 0.25) {
 			int x;
 
@@ -202,7 +202,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	lines = (uintptr_t)(self->range / 0.25f);
 	scalex = psy_ui_value_px(&size.width, &tm) / self->range;
 	scaley = psy_ui_value_px(&size.height, &tm) / (double) 0xFF;
-	psy_ui_setcolor(g, 0x00B1C8B0);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
 	interpolatecurvebox_drawselector(self, g, (int)(lastoffset * scalex),
 		(int)(psy_ui_value_px(&size.height, &tm) - (int)(lastcurveval * scaley)), self->keyframes);
 	curve = entry->curve;
@@ -277,9 +277,9 @@ void interpolatecurvebox_drawselector(InterpolateCurveBox* self,
 
 	psy_ui_setrectangle(&r, x - half, y - half, half * 2, half * 2);
 	if (self->selected == keyframe) {
-		color = 0x000000FF;
+		color = psy_ui_color_make(0x000000FF);
 	} else {
-		color = 0x00FFFFFF;
+		color = psy_ui_color_make(0x00FFFFFF);
 	}
 	psy_ui_drawsolidrectangle(g, r, color);
 }

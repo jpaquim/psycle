@@ -36,7 +36,7 @@ static int loadscilexer(void);
 static void onappdestroy(void*, psy_ui_App* sender);
 static void psy_ui_editor_setfont(psy_ui_Editor*, psy_ui_Font*);
 static void psy_ui_editor_styleclearall(psy_ui_Editor*);
-static void psy_ui_editor_setcaretcolor(psy_ui_Editor*, uint32_t color);
+static void psy_ui_editor_setcaretcolor(psy_ui_Editor*, psy_ui_Color color);
 static intptr_t sci(psy_ui_Editor*, uintptr_t msg, uintptr_t wparam,
 	uintptr_t lparam);
 static void psy_ui_editor_getrange(psy_ui_Editor*, int start, int end, char* text);
@@ -77,10 +77,11 @@ void psy_ui_editor_init(psy_ui_Editor* self, psy_ui_Component* parent)
 			if (imp->hwnd) {
 				psy_ui_component_init_imp(&self->component, parent, &imp->imp);
 				vtable_init(self);				
-				psy_ui_editor_setcolor(self, psy_ui_defaults_color(&app.defaults));
-				psy_ui_editor_setcaretcolor(self, psy_ui_defaults_color(&app.defaults));
+				psy_ui_editor_setcolor(self, app.defaults.style_common.color);
+				psy_ui_editor_setcaretcolor(self,
+					app.defaults.style_common.color);
 				psy_ui_editor_setbackgroundcolor(self,
-					psy_ui_defaults_backgroundcolor(&app.defaults));
+					app.defaults.style_common.backgroundcolor);
 				psy_ui_editor_setfont(self, NULL);
 				sci(self, SCI_SETMARGINWIDTHN, 0, 0);
 				sci(self, SCI_SETMARGINWIDTHN, 1, 0);
@@ -246,14 +247,14 @@ void psy_ui_editor_clear(psy_ui_Editor* self)
 	sci(self, SCI_CLEARALL, 0, 0);
 }
 
-void psy_ui_editor_setcolor(psy_ui_Editor* self, uint32_t color)
+void psy_ui_editor_setcolor(psy_ui_Editor* self, psy_ui_Color color)
 {
-	sci(self, SCI_STYLESETFORE, STYLE_DEFAULT, color);  
+	sci(self, SCI_STYLESETFORE, STYLE_DEFAULT, color.value);  
 }
 
-void psy_ui_editor_setbackgroundcolor(psy_ui_Editor* self, uint32_t color)
+void psy_ui_editor_setbackgroundcolor(psy_ui_Editor* self, psy_ui_Color color)
 {
-	sci(self, SCI_STYLESETBACK, STYLE_DEFAULT, color);  
+	sci(self, SCI_STYLESETBACK, STYLE_DEFAULT, color.value);  
 }
 
 void psy_ui_editor_styleclearall(psy_ui_Editor* self)
@@ -261,9 +262,9 @@ void psy_ui_editor_styleclearall(psy_ui_Editor* self)
 	sci(self, SCI_STYLECLEARALL, 0, 0);
 }
 
-void psy_ui_editor_setcaretcolor(psy_ui_Editor* self, uint32_t color)
+void psy_ui_editor_setcaretcolor(psy_ui_Editor* self, psy_ui_Color color)
 {
-	sci(self, SCI_SETCARETFORE, color, 0);	
+	sci(self, SCI_SETCARETFORE, color.value, 0);	
 }
 
 void psy_ui_editor_preventedit(psy_ui_Editor* self)

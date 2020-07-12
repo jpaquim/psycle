@@ -37,7 +37,7 @@ psy_ui_Color psy_ui_colordialog_color(psy_ui_ColorDialog* self)
 // psy_ui_ColorImp
 static void dev_dispose(psy_ui_ColorDialogImp* self) { }
 static int dev_execute(psy_ui_ColorDialogImp* self) { return 0; }
-static psy_ui_Color dev_color(psy_ui_ColorDialogImp* self) { return 0; }
+static psy_ui_Color dev_color(psy_ui_ColorDialogImp* self) { return psy_ui_color_make(0); }
 
 static psy_ui_ColorDialogImpVTable imp_vtable;
 static int imp_vtable_initialized = 0;
