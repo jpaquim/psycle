@@ -65,7 +65,7 @@ void ondestroy(psy_ui_Button* self, psy_ui_Component* sender)
 {	
 	free(self->text);
 	self->text = 0;
-	psy_signal_dispose(&self->signal_clicked);
+	psy_signal_dispose(&self->signal_clicked);	
 }
 
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)

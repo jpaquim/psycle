@@ -130,7 +130,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		switch (message)
 		{
 			case WM_NCDESTROY:
-				// restore default winproc
+				// restore default winproc				
 				if (imp->component && imp->component->signal_destroyed.slots) {
 					psy_signal_emit(&imp->component->signal_destroyed, imp->component,
 						0);
@@ -143,6 +143,8 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 #endif				
 				if (imp->component) {
 					psy_ui_component_dispose(imp->component);
+				} else {
+					imp->imp.vtable->dev_dispose(&imp->imp);
 				}
 				psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 			break;

@@ -352,7 +352,8 @@ void workspace_configvisual(Workspace* self)
 		psy_ui_font_init(&font, &fontinfo);
 		fontinfo = psy_ui_font_fontinfo(&font);
 		self->fontheight = fontinfo.lfHeight;
-		psy_ui_replacedefaultfont(self->mainhandle, &font);		
+		psy_ui_replacedefaultfont(self->mainhandle, &font);
+		psy_ui_font_dispose(&font);
 	}
 }
 

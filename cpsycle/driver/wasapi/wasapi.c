@@ -86,6 +86,8 @@ const IID IID_IAudioRenderClient = { 0xf294acfc, 0x3146, 0x4483,
 
 #define MAX_STR_LEN 512
 
+#define _CRT_SECURE_NO_WARNINGS
+
 interface IMMDevice;
 interface IMMDeviceEnumerator;
 interface IMMDeviceCollection;
@@ -790,7 +792,7 @@ void FillPortList(WasapiDriver* self, psy_List** portList, IMMDeviceCollection* 
 			EXIT_ON_ERROR(hr)
 
 			wcscpy_s(pEnum->szDeviceID, MAX_STR_LEN - 1, pszDeviceId);
-			wcstombs(pEnum->portName, vars.pwszVal, MAX_STR_LEN - 1);
+			// wcstombs(pEnum->portName, vars.pwszVal, MAX_STR_LEN - 1);
 
 			PropVariantClear(&vars);
 			if (wcscmp(pEnum->szDeviceID, defaultID) == 0) {

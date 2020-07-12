@@ -28,12 +28,12 @@ static void vtable_init(psy_ui_ProgressBar* self)
 void psy_ui_progressbar_init(psy_ui_ProgressBar* self,
 	psy_ui_Component* parent)
 {	
-	self->text = strdup("");
-	self->progress = 0.f;
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;	
-	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);	
+	self->component.vtable = &vtable;
+	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
+	self->text = strdup("");
+	self->progress = 0.f;
 }
 
 void psy_ui_progressbar_settext(psy_ui_ProgressBar* self, const char* text)

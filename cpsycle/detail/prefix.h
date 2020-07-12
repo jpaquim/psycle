@@ -9,6 +9,18 @@
 */
 #if defined(_WIN32) 	/* { */
 
+// For Leakdetection decomment this lines, rebuild the solution and start
+// with F5. Now study after programm termination the output window.
+// Each leak has a memory allocation number in curly braces e.g {14672}.
+// Copy this line to the clipboard.
+// set a breakpoint in psycle.c at the first possible line in main and start
+// again with F5. At break open a Watch Window (Debugger, Window, Watch) and
+// insert _crtBreakAlloc and press Return. Replace -1 with the leak id from
+// the clipboard and continue the execution with F5. At Break study the
+// callstack to determine the allocation of the leak
+// https://docs.microsoft.com/en-us/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2019
+// (Set breakpoints on a memory allocation number)
+
 // #define _CRTDBG_MAP_ALLOC
 // #include <crtdbg.h>
 

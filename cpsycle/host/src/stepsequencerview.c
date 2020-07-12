@@ -10,8 +10,6 @@
 #include "resources/resource.h"
 #include "../../detail/portable.h"
 
-#define TIMERID_STEPSEQUENCERVIEW 9000
-
 // barselect
 static void stepsequencerbarselect_ondestroy(StepsequencerBarSelect*,
 	psy_ui_Component* sender);
@@ -480,6 +478,7 @@ void stepsequencerbarselect_setpattern(StepsequencerBarSelect* self,
 
 // stepsequencerview
 // view
+static void stepsequencerview_ondestroy(StepsequencerView*, psy_ui_Component* sender);
 static void stepsequencerview_ontimer(StepsequencerView*, uintptr_t timerid);
 static void stepsequencerview_onsongchanged(StepsequencerView*,
 	Workspace* sender, int flag, psy_audio_SongFile* songfile);
@@ -541,14 +540,20 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->steptimer.signal_linetick,
 		&self->stepsequencerbarselect,
 		stepsequencerbarselect_onlinetick);
-	psy_ui_component_starttimer(&self->component, TIMERID_STEPSEQUENCERVIEW, 50);
+	psy_signal_connect(&self->stepsequencerbar.component.signal_destroy,
+		self, stepsequencerview_ondestroy);
+	psy_ui_component_starttimer(&self->component, 0, 50);
+}
+
+void stepsequencerview_ondestroy(StepsequencerView* self, psy_ui_Component* sender)
+{
+	psy_ui_component_stoptimer(&self->component, 0);
+	steptimer_dispose(&self->steptimer);
 }
 
 void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 {
-	if (timerid == TIMERID_STEPSEQUENCERVIEW) {
-		steptimer_tick(&self->steptimer);
-	}
+	steptimer_tick(&self->steptimer);	
 }
 
 void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
@@ -627,7 +632,7 @@ void steptimer_init(StepTimer* self, psy_audio_Player* player)
 		self, steptimer_onnewline);
 }
 
-void steptimer_dispose(StepTimer* self, psy_audio_Player* player)
+void steptimer_dispose(StepTimer* self)
 {
 	psy_signal_dispose(&self->signal_linetick);
 }

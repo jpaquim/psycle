@@ -26,7 +26,7 @@ typedef struct {
 }  StepTimer;
 
 void steptimer_init(StepTimer*, psy_audio_Player*);
-void steptimer_dispose(StepTimer*, psy_audio_Player*);
+void steptimer_dispose(StepTimer*);
 void steptimer_reset(StepTimer*, psy_dsp_big_beat_t entryoffset);
 void steptimer_tick(StepTimer*);
 StepSequencerPosition steptimer_position(StepTimer*);

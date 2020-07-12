@@ -229,8 +229,9 @@ uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner* self)
 {
 	uintptr_t rv = 0;
 	psy_List* p;
+	psy_List* q;
 		
-	for (p = psy_ui_component_children(self->component, 0); p != NULL;
+	for (q = p = psy_ui_component_children(self->component, 0); p != NULL;
 		p = p->next) {
 		psy_ui_Component* component;
 
@@ -241,7 +242,7 @@ uintptr_t psy_ui_aligner_numclients(psy_ui_Aligner* self)
 			}
 		}
 	}
-	psy_list_free(p);
+	psy_list_free(q);
 	return rv;
 }
 

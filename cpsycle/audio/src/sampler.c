@@ -374,6 +374,7 @@ void disposeparameters(psy_audio_Sampler* self)
 	psy_audio_choicemachineparam_dispose(&self->param_panningmode);
 	psy_audio_choicemachineparam_dispose(&self->param_channelview);
 	psy_audio_intmachineparam_dispose(&self->param_maxvolume);
+	psy_audio_choicemachineparam_dispose(&self->param_panpersistent);
 	psy_audio_intmachineparam_dispose(&self->param_instrumentbank);
 	psy_audio_custommachineparam_dispose(&self->param_channels);
 	psy_audio_custommachineparam_dispose(&self->param_blank);

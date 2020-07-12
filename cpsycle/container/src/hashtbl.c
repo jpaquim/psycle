@@ -44,15 +44,15 @@ void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
 
 	if (disposefunc) {
 		for (it = psy_table_begin(self);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
 			disposefunc(psy_tableiterator_value(&it));
 			free(psy_tableiterator_value(&it));
 		}
 	} else {
 		for (it = psy_table_begin(self);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
 			free(psy_tableiterator_value(&it));
 		}
 	}

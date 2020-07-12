@@ -29,16 +29,7 @@ void psy_signal_init(psy_Signal* self)
 
 void psy_signal_dispose(psy_Signal* self)
 {
-	if (self->slots) {
-		psy_List* p;
-
-		for (p = self->slots; p != NULL; p = p->next) {
-			psy_Slot* slot = (psy_Slot*) p->entry;
-			free(slot);			
-		}
-		psy_list_free(self->slots);
-	}
-	self->slots = 0;	
+	psy_list_deallocate(&self->slots, (psy_fp_disposefunc)NULL);	
 }
 
 void psy_signal_connect(psy_Signal* self, void* context, void* fp)

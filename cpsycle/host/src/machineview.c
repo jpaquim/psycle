@@ -8,25 +8,16 @@
 
 // host imports
 #include "skingraphics.h"
-#include "skinio.h"
-#include "resources/resource.h"
 #include "wireview.h"
 // audio imports
 #include <exclusivelock.h>
 #include <songio.h>
-// helper imports
-#include <dir.h>
 // standard c imports
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
 // platform tweaks
-#include "../../detail/os.h"
 #include "../../detail/portable.h"
-
-#if defined DIVERSALIS__OS__UNIX
-#define _MAX_PATH 4096
-#endif
 
 static void machineui_init(MachineUi*, psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin*, Workspace*);
@@ -394,7 +385,6 @@ static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, int x, int y,
 	uintptr_t slot);
 static void machinewireview_onnewmachineselected(MachineView*,
 	psy_ui_Component* sender, psy_Properties*);
-static void machinewireview_initmachinecoords(MachineWireView*);
 static void machinewireview_onmachineschangeslot(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onmachinesinsert(MachineWireView*,
@@ -424,7 +414,6 @@ static void machinewireview_onwireframedestroyed(MachineWireView*,
 	psy_ui_Component* sender);
 static WireFrame* machinewireview_wireframe(MachineWireView*,
 	psy_audio_Wire wire);
-static void machinewireview_setcoords(MachineWireView*, psy_Properties*);
 static void machinewireview_onsize(MachineWireView*, psy_ui_Component* sender,
 	psy_ui_Size* size);
 static psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self,
@@ -463,8 +452,6 @@ static void vtable_init(MachineWireView* self)
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {
-	psy_ui_FontInfo fontinfo;
-
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
@@ -479,11 +466,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	// skin init
-	psy_ui_bitmap_init(&self->skin.skinbmp);
-	psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
-	psy_ui_fontinfo_init(&fontinfo, "Tahoma", 16);
-	psy_ui_font_init(&self->skin.font, &fontinfo);
-	machinewireview_initmachinecoords(self);
+	machineviewskin_init(&self->skin);
 	machinewireview_applyproperties(self, 0);
 	psy_table_init(&self->machineuis);
 	machineuis_insert(self, psy_audio_MASTER_INDEX);
@@ -542,45 +525,8 @@ void machinewireview_ondestroy(MachineWireView* self, psy_ui_Component* sender)
 	machineuis_removeall(self);
 	psy_table_dispose(&self->machineuis);
 	psy_list_deallocate(&self->wireframes, (psy_fp_disposefunc)
-		psy_ui_component_destroy);	
-	psy_ui_font_dispose(&self->skin.font);
-}
-
-void machinewireview_initmachinecoords(MachineWireView* self)
-{	
-	MachineCoords master = {
-		{ 0, 52, 138, 35, 0, 0, 138, 35, 0 },		// background
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 },
-		{ 0,  0,   0,  0, 0, 0,   0,  0, 0 }
-	};
-	MachineCoords generator = {
-		{ 0, 87, 138, 52, 0, 0, 138, 52, 0 },		// background
-		{ 0, 156, 0, 7, 4, 20, 129, 7, 129},		// vu0
-		{ 108, 156, 1, 7, 4, 20, 1, 7, 82 },		// vupeak
-		{ 0, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
-		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// bypass
-		{ 6, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
-		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name
-	};			
-	MachineCoords effect = {
-		{ 0, 0, 138, 52, 0, 0, 138, 52, 0 },		// background
-		{ 0, 163, 0, 7, 4, 20, 129, 7, 129 },		// vu0
-		{ 96, 144, 1, 7, 4, 20, 1, 7, 0 },			// vupeak
-		{ 57, 139, 6, 13, 6, 33, 6, 13, 82 },		// pan
-		{ 23, 139, 17, 17, 117, 31, 17, 17, 0 },	// mute
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// bypass
-		{ 40, 139, 17, 17, 98, 31, 17, 17, 0 },		// solo
-		{ 0, 0, 0, 0, 20, 3, 117, 15, 0 },			// name 
-	};									
-	self->skin.master = master;
-	self->skin.generator = generator;
-	self->skin.effect = effect;			
+		psy_ui_component_destroy);		
+	machineviewskin_dispose(&self->skin);
 }
 
 void machinewireview_onconfigchanged(MachineWireView* self,
@@ -609,175 +555,9 @@ void machinewireview_readconfig(MachineWireView* self)
 
 void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
 {
-	const char* machine_skin_name;
-
-	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);
-	self->skin.colour = psy_ui_color_make(psy_properties_int(p, "mv_colour", 0x00232323));
-	self->skin.wirecolour = psy_ui_color_make(psy_properties_int(p, "mv_wirecolour", 0x005F5F5F));
-	self->skin.selwirecolour = psy_ui_color_make(psy_properties_int(p, "mv_selwirecolour", 0x007F7F7F));
-	self->skin.hoverwirecolour = psy_ui_color_make(psy_properties_int(p, "mv_hoverwirecolour", 0x007F7F7F));
-	self->skin.polycolour = psy_ui_color_make(psy_properties_int(p, "mv_wireaacolour2", 0x005F5F5F));
-	self->skin.polycolour = psy_ui_color_make(psy_properties_int(p, "mv_polycolour", 0x00B1C8B0));
-	self->skin.generator_fontcolour = 
-		psy_ui_color_make(psy_properties_int(p, "mv_generator_fontcolour", 0x00B1C8B0)); // 0x00B1C8B0
-	self->skin.effect_fontcolour = 
-		psy_ui_color_make(psy_properties_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
-	self->skin.triangle_size = psy_properties_int(p, "mv_triangle_size", 10);
-	self->skin.wireaacolour =
-		psy_ui_color_make(((((self->skin.wirecolour.value&0x00ff0000) 
-			+ ((self->skin.colour.value&0x00ff0000)*4))/5)&0x00ff0000) +
-		  ((((self->skin.wirecolour.value &0x00ff00)
-			+ ((self->skin.colour.value &0x00ff00)*4))/5)&0x00ff00) +
-		  ((((self->skin.wirecolour.value &0x00ff)
-			+ ((self->skin.colour.value &0x00ff)*4))/5)&0x00ff));
-	self->skin.wireaacolour2 =
-		psy_ui_color_make((((((self->skin.wirecolour.value &0x00ff0000))
-			+ ((self->skin.colour.value &0x00ff0000)))/2)&0x00ff0000) +
-		  (((((self->skin.wirecolour.value &0x00ff00))
-			+ ((self->skin.colour.value &0x00ff00)))/2)&0x00ff00) +
-		  (((((self->skin.wirecolour.value &0x00ff))
-			+ ((self->skin.colour.value &0x00ff)))/2)&0x00ff));
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour);
-	machine_skin_name = psy_properties_readstring(p, "machine_skin", 0);
-	if (machine_skin_name && strlen(machine_skin_name)) {
-		char path[_MAX_PATH];
-		char filename[_MAX_PATH];
-
-		strcpy(filename, machine_skin_name);
-		strcat(filename, ".bmp");
-		psy_dir_findfile(workspace_skins_directory(self->workspace),
-			filename, path);
-		if (path[0] != '\0') {
-			psy_ui_Bitmap bmp;
-
-			psy_ui_bitmap_init(&bmp);
-			if (psy_ui_bitmap_load(&bmp, path) == 0) {
-				psy_ui_bitmap_dispose(&self->skin.skinbmp);
-				self->skin.skinbmp = bmp; 
-			}
-		}
-		strcpy(filename, machine_skin_name);
-		strcat(filename, ".psm");
-		psy_dir_findfile(workspace_skins_directory(self->workspace),
-			filename, path);
-		if (path[0] != '\0') {
-			psy_Properties* coords;
-
-			coords = psy_properties_create();
-			skin_loadpsh(coords, path);
-			machinewireview_setcoords(self, coords);
-			properties_free(coords);
-		}
-	} else {
-		psy_ui_bitmap_dispose(&self->skin.skinbmp);
-		psy_ui_bitmap_init(&self->skin.skinbmp);
-		psy_ui_bitmap_loadresource(&self->skin.skinbmp, IDB_MACHINESKIN);
-		machinewireview_initmachinecoords(self);
-	}
-}
-
-void machinewireview_setcoords(MachineWireView* self, psy_Properties* p)
-{
-	const char* s;
-	int vals[4];	
-	
-	// master
-	if (s = psy_properties_readstring(p, "master_source", 0)) {	
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.master.background, vals);
-	}
-	// generator
-	if (s = psy_properties_readstring(p, "generator_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.generator.background, vals);		
-	}
-	if (s = psy_properties_readstring(p, "generator_vu0_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.generator.vu0, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_vu_peak_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.generator.vupeak, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_pan_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.generator.pan, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_mute_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.generator.mute, vals);		
-	}
-	if (s = psy_properties_readstring(p, "generator_solo_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.generator.solo, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_vu_dest", 0)) {
-		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->skin.generator.vu0, vals);
-		self->skin.generator.vu0.destwidth = vals[2];
-	}
-	if (s = psy_properties_readstring(p, "generator_pan_dest", 0)) {
-		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->skin.generator.pan, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_mute_dest", 0)) {
-		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->skin.generator.mute, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_solo_dest", 0)) {
-		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->skin.generator.solo, vals);
-	}
-	if (s = psy_properties_readstring(p, "generator_name_dest", 0)) {
-		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->skin.generator.name, vals);
-	}
-	// effect
-	if (s = psy_properties_readstring(p, "effect_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.effect.background, vals);		
-	}
-	if (s = psy_properties_readstring(p, "effect_vu0_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.effect.vu0, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_vu_peak_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.effect.vupeak, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_pan_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.effect.pan, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_mute_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.effect.mute, vals);		
-	}
-	if (s = psy_properties_readstring(p, "effect_bypass_source", 0)) {
-		skin_psh_values(s, 4, vals);
-		skincoord_setsource(&self->skin.effect.bypass, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_vu_dest", 0)) {
-		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->skin.effect.vu0, vals);
-		self->skin.generator.vu0.destwidth = vals[2];
-	}
-	if (s = psy_properties_readstring(p, "effect_pan_dest", 0)) {
-		skin_psh_values(s, 3, vals);
-		skincoord_setdest(&self->skin.effect.pan, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_mute_dest", 0)) {
-		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->skin.effect.mute, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_bypass_dest", 0)) {
-		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->skin.effect.bypass, vals);
-	}
-	if (s = psy_properties_readstring(p, "effect_name_dest", 0)) {
-		skin_psh_values(s, 2, vals);
-		skincoord_setdest(&self->skin.effect.name, vals);
-	}
+	machineviewskin_settheme(&self->skin, p, workspace_skins_directory(self->workspace));
+	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);	
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour);	
 }
 
 void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)

@@ -49,8 +49,10 @@ void psy_audio_machinefactory_dispose(psy_audio_MachineFactory* self)
 
 void psy_audio_machinefactory_seterrorstr(psy_audio_MachineFactory* self, const char* str)
 {
-	free(self->errstr);
-	self->errstr = strdup(str);
+	if (str != self->errstr) {
+		free(self->errstr);
+		self->errstr = strdup(str);
+	}
 }
 
 void psy_audio_machinefactory_createasproxy(psy_audio_MachineFactory* self)
