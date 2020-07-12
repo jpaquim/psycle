@@ -7,6 +7,7 @@
 #include "skincoord.h"
 #include <uibitmap.h>
 #include <hashtbl.h>
+#include <properties.h>
 
 typedef struct {
 	SkinCoord background;
@@ -45,5 +46,10 @@ typedef struct {
 	psy_ui_Font font;
 	int drawmachineindexes;
 } MachineViewSkin;
+
+void machineviewskin_init(MachineViewSkin*);
+void machineviewskin_dispose(MachineViewSkin*);
+void machineviewskin_settheme(MachineViewSkin*, psy_Properties* p,
+	const char* skindir);
 
 #endif /* MACHINEVIEWSKIN_H */

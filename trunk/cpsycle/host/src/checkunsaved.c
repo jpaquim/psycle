@@ -23,7 +23,6 @@ void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Works
 	self->mode = CHECKUNSAVE_CLOSE;
 	self->titlestr = strdup("");
 	self->savestr = strdup("");
-	self->savestr = strdup("");
 	self->nosavestr = strdup("");
 	psy_ui_component_init(checkunsavedbox_base(self), parent);
 	psy_ui_component_enablealign(checkunsavedbox_base(self));	

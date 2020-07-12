@@ -49,7 +49,11 @@ void eventdrivers_dispose(EventDrivers* self)
 		eventdriver = eventdriverentry->eventdriver;
 		eventdriver->close(eventdriver);
 		eventdriver->dispose(eventdriver);
+#if defined _CRTDBG_MAP_ALLOC
+		free(eventdriver);
+#else
 		eventdriver->free(eventdriver);
+#endif		
 //		free(eventdriver);
 		if (eventdriverentry && eventdriverentry->library) {
 			psy_library_unload(eventdriverentry->library);
@@ -145,7 +149,11 @@ void eventdrivers_remove(EventDrivers* self, int id)
 
 		eventdriver->close(eventdriver);
 		eventdriver->dispose(eventdriver);
+#if defined _CRTDBG_MAP_ALLOC
+		free(eventdriver);
+#else
 		eventdriver->free(eventdriver);
+#endif
 //		free(eventdriver);
 		if (eventdriver == self->kbddriver) {
 			self->kbddriver = 0;

@@ -304,41 +304,49 @@ void kbdbox_addkeyproperties(KbdBox* self, psy_Properties* section,
 
 void kbdbox_addsmallkey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	KbdBoxKey* key;
+	if (!psy_table_exists(&self->keys, keycode)) {
+		KbdBoxKey* key;
 
-	key = kbdboxkey_allocinit_all(self->cpx, self->cpy, self->keywidth, self->keyheight, label);
-	psy_table_insert(&self->keys, keycode, key);
-	self->cpx += self->keywidth + self->ident;
+		key = kbdboxkey_allocinit_all(self->cpx, self->cpy, self->keywidth, self->keyheight, label);
+		psy_table_insert(&self->keys, keycode, key);
+		self->cpx += self->keywidth + self->ident;
+	}
 }
 
 void kbdbox_addmediumkey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	KbdBoxKey* key;
+	if (!psy_table_exists(&self->keys, keycode)) {
+		KbdBoxKey* key;
 
-	key = kbdboxkey_allocinit_all(self->cpx, self->cpy, 
-		(int)(self->keywidth * 1.3), self->keyheight, label);
-	psy_table_insert(&self->keys, keycode, key);
-	self->cpx += (int)(self->keywidth * 1.3) + self->ident;
+		key = kbdboxkey_allocinit_all(self->cpx, self->cpy,
+			(int)(self->keywidth * 1.3), self->keyheight, label);
+		psy_table_insert(&self->keys, keycode, key);
+		self->cpx += (int)(self->keywidth * 1.3) + self->ident;
+	}
 }
 
 void kbdbox_addlargerkey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	KbdBoxKey* key;
+	if (!psy_table_exists(&self->keys, keycode)) {
+		KbdBoxKey* key;
 
-	key = kbdboxkey_allocinit_all(self->cpx, self->cpy,
-		(int)(self->keywidth * 1.5), self->keyheight, label);
-	psy_table_insert(&self->keys, keycode, key);
-	self->cpx += (int)(self->keywidth * 1.5 + self->ident);
+		key = kbdboxkey_allocinit_all(self->cpx, self->cpy,
+			(int)(self->keywidth * 1.5), self->keyheight, label);
+		psy_table_insert(&self->keys, keycode, key);
+		self->cpx += (int)(self->keywidth * 1.5 + self->ident);
+	}
 }
 
 void kbdbox_addlargekey(KbdBox* self, uintptr_t keycode, const char* label)
 {
-	KbdBoxKey* key;
+	if (!psy_table_exists(&self->keys, keycode)) {
+		KbdBoxKey* key;
 
-	key = kbdboxkey_allocinit_all(self->cpx, self->cpy,
-		self->keywidth * 6, self->keyheight, label);
-	psy_table_insert(&self->keys, keycode, key);
-	self->cpx += self->keywidth * 6 + self->ident;
+		key = kbdboxkey_allocinit_all(self->cpx, self->cpy,
+			self->keywidth * 6, self->keyheight, label);
+		psy_table_insert(&self->keys, keycode, key);
+		self->cpx += self->keywidth * 6 + self->ident;
+	}
 }
 
 void kbdbox_setcolor(KbdBox* self, uintptr_t keycode, psy_ui_Color color)
@@ -393,12 +401,11 @@ void kbdbox_setdescription(KbdBox* self, uintptr_t keycode, int shift, int ctrl,
 		}		
 		free(*desc);
 		maxchars = 12;
-		*desc = strdup(text);
-		numchars = min(strlen(*desc), maxchars);
-		if (numchars < strlen(*desc)) {
-			*desc = strdup(*desc + (strlen(*desc) - maxchars));
+		numchars = min(strlen(text), maxchars);
+		if (numchars < strlen(text)) {
+			*desc = strdup(text + (strlen(text) - maxchars));
 		} else {
-			*desc = strdup(*desc);
+			*desc = strdup(text);
 		}
 		psy_ui_component_invalidate(kbdbox_base(self));
 	}

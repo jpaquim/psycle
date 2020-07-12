@@ -425,6 +425,7 @@ void mainframe_initstatusbar(MainFrame* self)
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->toggleterminal.signal_clicked, self,
 		mainframe_ontoggleterminal);
+	self->togglekbdhelp.component.debugflag = 4321;
 	psy_signal_connect(&self->togglekbdhelp.signal_clicked, self,
 		mainframe_ontogglekbdhelp);
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
@@ -668,6 +669,9 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		if (self->workspace.maximizeview.row2) {
 			psy_ui_component_show(&self->toprow2);
 		}
+		if (self->workspace.maximizeview.trackscopes) {
+			psy_ui_component_show(&self->trackscopeview.component);
+		}
 		psy_ui_component_resize(&self->sequenceview.component,
 			psy_ui_size_make(
 			self->workspace.maximizeview.sequenceviewrestorewidth,
@@ -679,11 +683,14 @@ void mainframe_maximizeorminimizeview(MainFrame* self)
 		self->workspace.maximizeview.row0 = self->toprow0.visible;
 		self->workspace.maximizeview.row1 = self->toprow1.visible;
 		self->workspace.maximizeview.row2 = self->toprow2.visible;
+		self->workspace.maximizeview.trackscopes = self->trackscopeview.component.visible;
 		sequenceviewsize = psy_ui_component_size(&self->sequenceview.component);
 		self->workspace.maximizeview.sequenceviewrestorewidth =
 			sequenceviewsize.width;
 		psy_ui_component_hide(&self->toprow0);
 		psy_ui_component_hide(&self->toprow1);
+		psy_ui_component_hide(&self->trackscopeview.component);
+		self->sequenceview.component.preventpreferredsizeatalign = TRUE;
 		psy_ui_component_resize(&self->sequenceview.component,
 			psy_ui_size_zero());
 	}

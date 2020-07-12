@@ -41,7 +41,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	// call the platform independend startup code with
 	// instance and startup show options
 	err = psycle_run((uintptr_t)hInstance, iCmdShow);
-	//	_CrtDumpMemoryLeaks();
+#if defined _CRTDBG_MAP_ALLOC
+	_CrtDumpMemoryLeaks();
+#endif
 	return err;
 }
 #else

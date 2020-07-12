@@ -532,6 +532,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 void psy_ui_component_dispose(psy_ui_Component* self)
 {
 	self->vtable->dispose(self);
+	psy_ui_component_dispose_signals(self);
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)

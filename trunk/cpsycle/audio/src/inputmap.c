@@ -35,6 +35,11 @@ const char* psy_audio_inputs_cmdname(psy_audio_Inputs* self, int cmd)
 void psy_audio_inputs_define(psy_audio_Inputs* self, int input, int cmd,
 	const char* cmdname)
 {
+	char* oldcmdname;
 	psy_table_insert(&self->map, input, (void*)(uintptr_t)cmd);
-	psy_table_insert(&self->cmdnames, cmd, cmdname ? strdup(cmdname) : "cmd");
+	oldcmdname = psy_table_at(&self->cmdnames, cmd);
+	if (oldcmdname) {
+		free(oldcmdname);
+	}
+	psy_table_insert(&self->cmdnames, cmd, cmdname ? strdup(cmdname) : strdup("cmd"));
 }

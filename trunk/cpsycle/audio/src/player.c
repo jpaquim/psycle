@@ -113,6 +113,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psyfile_close(&logfile);
 #endif
 	psy_audio_song_dispose(&self->emptysong);
+	psy_audio_machinefactory_dispose(&self->machinefactory);
 }
 
 // driver callbacks

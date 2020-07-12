@@ -53,9 +53,10 @@ void history_init(History*);
 void history_dispose(History*);
 
 typedef struct {
-	int row0;
-	int row1;
-	int row2;
+	bool row0;
+	bool row1;
+	bool row2;
+	bool trackscopes;
 	psy_ui_Value sequenceviewrestorewidth;
 	bool maximized;
 } MaximizedView;

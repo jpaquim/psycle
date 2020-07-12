@@ -68,6 +68,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	self->platform = 0;
 	free(self->imp_factory);
 	self->imp_factory = 0;
+	psy_ui_defaults_dispose(&self->defaults);
 }
 
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)
