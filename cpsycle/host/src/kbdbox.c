@@ -19,7 +19,7 @@ void kbdboxkey_init_all(KbdBoxKey* self, int x, int y, int width, int height, co
 	self->desc0 = strdup("");
 	self->desc1 = strdup("");
 	self->desc2 = strdup("");
-	self->color = 0x00666666;
+	self->color = psy_ui_color_make(0x00666666);
 }
 
 void kbdboxkey_dispose(KbdBoxKey* self)
@@ -137,7 +137,7 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setcolor(g, key->color);
 	psy_ui_drawroundrectangle(g, key->position, self->corner);
-	psy_ui_settextcolor(g, 0x00666666);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00666666));
 	cpx = key->position.left + 4;
 	cpy = key->position.top + 4;
 	psy_ui_textout(g, cpx, cpy,

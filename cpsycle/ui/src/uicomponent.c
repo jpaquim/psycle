@@ -78,74 +78,64 @@ psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color, bool recursive)
+void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
 {	
-	self->style.backgroundcolor = color;
-	self->style.use_backgroundcolor = 1;
-	// assert(self->imp);   
-	if (self->imp) {
-		self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
-	}
-	if (recursive) {
-		psy_List* p;
-		psy_List* q;
-
-		for (q = p = psy_ui_component_children(self, psy_ui_RECURSIVE); p != NULL;
-				psy_list_next(&p)) {
-			psy_ui_Component* component;
-
-			component = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_setbackgroundcolor(component, color, psy_ui_NONRECURSIVE);
-		}
-		psy_list_free(q);
-	}
+	psy_ui_color_set(&self->style.backgroundcolor, color);
 }
 
 psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component* self)
 {
-	psy_ui_Color rv;
-	psy_ui_Style* common;
+	psy_ui_Component* curr;
 
-	common = &app.defaults.style_common;
-	if (self->style.use_backgroundcolor) {
-		rv = self->style.backgroundcolor;
-	} else {
-		rv = app.defaults.style_common.backgroundcolor;
+	curr = self;
+	while (curr) {
+		if (curr->style.backgroundcolor.mode.set) {
+			break;
+		}
+		if (self->style.backgroundcolor.mode.inherited == FALSE) {
+			curr = NULL;
+			break;
+		}
+		curr = psy_ui_component_parent(curr);
 	}
-	return rv;
+	if (curr) {
+		return curr->style.backgroundcolor;
+	}
+	return app.defaults.style_common.backgroundcolor;
 }
 
-void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color, bool recursive)
+void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color)
 {
-	self->style.color = color;
-	self->style.use_color = 1;
-	if (recursive) {
-		psy_List* p;
-		psy_List* q;
-
-		for (q = p = psy_ui_component_children(self, psy_ui_RECURSIVE); p != NULL;
-			psy_list_next(&p)) {
-			psy_ui_Component* component;
-
-			component = (psy_ui_Component*)psy_list_entry(p);
-			psy_ui_component_setcolor(component, color, psy_ui_NONRECURSIVE);
-		}
-		psy_list_free(q);
-	}
+	psy_ui_color_set(&self->style.color, color);
 }
 
 psy_ui_Color psy_ui_component_color(psy_ui_Component* self)
-{
-	psy_ui_Color rv;
-	psy_ui_Style* common;
+{	
+	psy_ui_Component* curr;
 
-	common = &app.defaults.style_common;
-	if (self->style.use_color) {
-		rv = self->style.color;
-	} else {
-		rv = app.defaults.style_common.color;
+	curr = self;
+	while (curr) {
+		if (curr->style.color.mode.set) {
+			break;
+		}
+		if (self->style.color.mode.inherited == FALSE) {
+			curr = NULL;
+			break;
+		}
+		curr = psy_ui_component_parent(curr);
 	}
-	return rv;
+	if (curr) {
+		return curr->style.color;
+	}
+	return app.defaults.style_common.color;
+}
+
+psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
+{
+	if (self->style.border.mode.set) {
+		return self->style.border;
+	}
+	return app.defaults.style_common.border;
 }
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font* font)
@@ -536,8 +526,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	if (self->imp) {
 		self->imp->vtable->dev_setbackgroundcolor(self->imp,
 			psy_ui_component_backgroundcolor(self));
-	}	
-	psy_ui_border_init(&self->border);
+	}
 }
 
 void psy_ui_component_dispose(psy_ui_Component* self)
@@ -953,7 +942,7 @@ static void dev_stoptimer(psy_ui_ComponentImp* self, uintptr_t id) { }
 static void dev_seticonressource(psy_ui_ComponentImp* self, int ressourceid) { }
 static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self, psy_ui_Font* font) { psy_ui_TextMetric tm; memset(&tm, 0, sizeof(tm));  return tm; }
 static psy_ui_Size dev_textsize(psy_ui_ComponentImp* self, const char* text, psy_ui_Font* font) { psy_ui_Size rv = { 0, 0 }; return rv; }
-static void dev_setbackgroundcolor(psy_ui_ComponentImp* self, uint32_t color) { }
+static void dev_setbackgroundcolor(psy_ui_ComponentImp* self, psy_ui_Color color) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }
 static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }

@@ -24,9 +24,9 @@ static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const p
 	psy_ui_Size cornersize);
 static psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp*, const char*);
 static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
-	unsigned int color);
+	psy_ui_Color color);
 static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, unsigned int color);
+	psy_ui_Size cornersize, psy_ui_Color color);
 static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints, unsigned int inner, unsigned int outter);
 static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, int x1, int y1, int x2, int y2);
@@ -35,11 +35,11 @@ static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*,
 	int height, int xsrc, int ysrc);
 static void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc, int wsrc, int hsrc);
-static void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp*, unsigned int color);
+static void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp*, psy_ui_Color color);
 static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, unsigned int mode);
-static void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp*, unsigned int color);
+static void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp*, psy_ui_Color color);
 static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, unsigned int align);
-static void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp*, unsigned int color);
+static void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp*, psy_ui_Color color);
 static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
 static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint pt);
 static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint control_p1,
@@ -93,7 +93,7 @@ void psy_ui_win_graphicsimp_init(psy_ui_win_GraphicsImp* self, HDC hdc)
 	win_imp_vtable_init(self);
 	self->imp.vtable = &win_imp_vtable;
 	self->hdc = hdc;
-	self->pen = CreatePen(PS_SOLID, 1, app.defaults.defaultcolor);
+	self->pen = CreatePen(PS_SOLID, 1, app.defaults.style_common.color.value);
 	self->brush = 0;
 	self->hBrushPrev = 0;
 	self->penprev = SelectObject(self->hdc, self->pen);
@@ -179,19 +179,19 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy
 	SelectObject(self->hdc, hOldBrush);
 }
 
-void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r, unsigned int color)
+void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r, psy_ui_Color color)
 {
      HBRUSH hBrush;     
      RECT   rect;	 
 	                
      SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     
-     hBrush = CreateSolidBrush(color);
+     hBrush = CreateSolidBrush(color.value);
      FillRect (self->hdc, &rect, hBrush);     
      DeleteObject (hBrush) ;
 }
 
 void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, unsigned int color)
+	psy_ui_Size cornersize, psy_ui_Color color)
 {
 	HBRUSH hBrush;
 	HBRUSH hOldBrush;
@@ -200,9 +200,9 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 	psy_ui_TextMetric tm;
 	TEXTMETRIC win_tm;
 
-	hBrush = CreateSolidBrush(color);
+	hBrush = CreateSolidBrush(color.value);
 	hOldBrush = SelectObject (self->hdc, hBrush);
-	hPen = CreatePen(PS_SOLID, 1, color);
+	hPen = CreatePen(PS_SOLID, 1, color.value);
 	hOldPen = SelectObject(self->hdc, hPen);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
@@ -290,13 +290,13 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 	DeleteDC(hdcmem);
 }
 
-void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
+void psy_ui_win_g_imp_setcolor(psy_ui_win_GraphicsImp* self, psy_ui_Color color)
 {
 	LOGPEN currpen;
 	HPEN pen;
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
-	currpen.lopnColor = color;
+	currpen.lopnColor = color.value;
 	pen = CreatePenIndirect(&currpen);
 	SelectObject(self->hdc, pen);
 	if (self->pen) {
@@ -315,14 +315,14 @@ void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, unsigned i
 	}
 }
 
-void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
+void psy_ui_win_g_imp_setbackgroundcolor(psy_ui_win_GraphicsImp* self, psy_ui_Color color)
 {
-	SetBkColor(self->hdc, color);
+	SetBkColor(self->hdc, color.value);
 }
 
-void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp* self, unsigned int color)
+void psy_ui_win_g_imp_settextcolor(psy_ui_win_GraphicsImp* self, psy_ui_Color color)
 {
-	SetTextColor(self->hdc, color);
+	SetTextColor(self->hdc, color.value);
 }
 
 void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, unsigned int align)

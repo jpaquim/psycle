@@ -325,9 +325,9 @@ void psy_ui_error(const char* err, const char* shorterr)
 
 void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b)
 {
-	float p0 = (float)((*self >> 16) & 0xff) + r;
-	float p1 = (float)((*self >> 8) & 0xff) + g;
-	float p2 = (float)(*self & 0xff) + b;
+	float p0 = (float)((self->value >> 16) & 0xff) + r;
+	float p1 = (float)((self->value >> 8) & 0xff) + g;
+	float p2 = (float)(self->value & 0xff) + b;
 
 	if (p0 < 0)
 	{
@@ -352,7 +352,7 @@ void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b)
 	{
 		p2 = 255;
 	}
-	*self = ((int32_t)(p0 * 0x10000) & 0xff0000)
+	self->value = ((int32_t)(p0 * 0x10000) & 0xff0000)
 		| ((int32_t)(p1 * 0x100) & 0xff00)
 		| ((int32_t)(p2) & 0xff);
 }

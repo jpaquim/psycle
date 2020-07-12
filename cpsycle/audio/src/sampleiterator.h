@@ -107,7 +107,8 @@ INLINE void psy_audio_sampleiterator_setspeed(psy_audio_SampleIterator* self, do
 		(!self->sample || psy_audio_sampleiterator_currentloopdirection(self) ==
 				psy_audio_LOOPDIRECTION_FORWARD)
 		? self->speed
-		: -1 * self->speed;	
+		: -1 * self->speed;
+	psy_dsp_resampler_setspeed(&self->resampler.resampler, value);
 }
 
 INLINE bool psy_audio_sampleiterator_playing(psy_audio_SampleIterator* self)

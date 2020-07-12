@@ -126,9 +126,7 @@ void propertiesrenderer_setfixedwidth(PropertiesRenderer* self, psy_ui_Value wid
 
 void propertiesrenderer_ondraw(PropertiesRenderer* self, psy_ui_Graphics* g)
 {	
-	self->g = g;
-	psy_ui_setcolor(g, 0x00EAEAEA);
-	psy_ui_settextcolor(g, 0x00CACACA);
+	self->g = g;	
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
@@ -175,7 +173,7 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	
 		intsize = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
 			&tm);
-		psy_ui_setcolor(self->g, 0x00333333);
+		psy_ui_setcolor(self->g, psy_ui_color_make(0x00333333));
 		psy_ui_drawline(self->g, self->cpx, self->cpy, intsize.width, self->cpy);
 	}
 	propertiesrenderer_drawkey(self, property, 0);
@@ -219,9 +217,9 @@ void propertiesrenderer_drawlinebackground(PropertiesRenderer* self,
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_SECTION) {		
 		psy_ui_Rectangle r;		
 		//psy_ui_drawsolidrectangle(self->g, r, 0x00292929);*/
-		psy_ui_settextcolor(self->g, 0x00D1C5B6);
+		psy_ui_settextcolor(self->g, psy_ui_component_color(&self->component)); // 0x00D1C5B6);
 	} else {
-		psy_ui_settextcolor(self->g, 0x00CACACA);
+		psy_ui_settextcolor(self->g, psy_ui_component_color(&self->component));
 	}
 }
 
@@ -316,8 +314,8 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Properties* pro
 	psy_ui_Rectangle r;
 	if (self->selected == property) {					
 		psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
-		psy_ui_setbackgroundcolor(self->g, 0x009B7800);
-		psy_ui_settextcolor(self->g, 0x00FFFFFF);
+		psy_ui_setbackgroundcolor(self->g, psy_ui_color_make(0x009B7800));
+		psy_ui_settextcolor(self->g, psy_ui_color_make(0x00FFFFFF));
 	}				
 	psy_ui_setrectangle(&r, propertiesrenderer_columnwidth(self, column) * column,
 		self->cpy + self->centery,
@@ -328,9 +326,9 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Properties* pro
 		psy_ui_ETO_CLIPPED, r,
 		psy_properties_valuestring(property),
 		strlen(psy_properties_valuestring(property)));
-	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
+	psy_ui_setbackgroundcolor(self->g, psy_ui_color_make(0x003E3E3E));
 	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(self->g, 0x00CACACA);		
+	psy_ui_settextcolor(self->g, psy_ui_color_make(0x00CACACA));
 }
 
 void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Properties* property,
@@ -356,7 +354,7 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Properties* pr
 		r.top = self->cpy + self->centery;
 		r.right = r.left + tm.tmAveCharWidth * 4;
 		r.bottom = r.top + self->textheight + 2;
-		psy_ui_drawsolidrectangle(self->g, r, psy_properties_value(property));		
+		psy_ui_drawsolidrectangle(self->g, r, psy_ui_color_make(psy_properties_value(property)));
 	}
 	psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column),
 		self->cpy + self->centery,
@@ -376,6 +374,11 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* pro
 	psy_ui_TextMetric tm;
 	psy_ui_Rectangle r;	
 	
+	psy_ui_setcolor(self->g, psy_ui_component_color(&self->component));
+	psy_ui_setbackgroundcolor(self->g, psy_ui_component_backgroundcolor(&self->component));
+	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
+	psy_ui_settextcolor(self->g, psy_ui_component_color(&self->component));
+
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 		psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
 			psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
@@ -388,10 +391,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* pro
 		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy, psy_properties_translation(property),
 			strlen(psy_properties_translation(property)));
-	}
-	psy_ui_setbackgroundcolor(self->g, 0x003E3E3E);
-	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(self->g, 0x00CACACA);
+	}	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITDIR ||
 		(psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR)) {
 		size = psy_ui_component_textsize(&self->component, "...");
@@ -432,7 +432,7 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* p
 		psy_ui_value_px(&size.height, &tm)) / 2;
 	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
 	r.bottom = r.top + psy_ui_value_px(&size.height, &tm);
-	psy_ui_setcolor(self->g, 0x00555555);
+	psy_ui_setcolor(self->g, psy_ui_color_make(0x00555555));
 	psy_ui_drawroundrectangle(self->g, r, cornersize);
 	if (psy_properties_ischoiceitem(property)) {
 		checked = self->currchoice == self->choicecount;
@@ -445,14 +445,14 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* p
 			psy_ui_value_px(&knobsize.height, &tm)) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
-		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00555555);
+		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, psy_ui_color_make(0x00555555));
 	} else {
 		r.left = propertiesrenderer_columnstart(self, column) + tm.tmAveCharWidth * 2;
 		r.top = self->cpy + (self->lineheight -
 			psy_ui_value_px(&knobsize.height, &tm)) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
-		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, 0x00CACACA);
+		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, psy_ui_color_make(0x00CACACA));
 	}	
 }
 
@@ -501,7 +501,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 				color = psy_ui_colordialog_color(&colordialog);
 				psy_properties_write_int(self->selected->parent,
 					self->selected->item.key,
-					color);
+					color.value);
 			}
 			psy_ui_colordialog_dispose(&colordialog);
 			psy_signal_emit(&self->signal_changed, self, 1,

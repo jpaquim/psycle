@@ -236,9 +236,9 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 			self->view->listview.trackwidth - 5,
 			lineheight);
 		if (self->view->listview.selectedtrack == c) {
-			psy_ui_drawsolidrectangle(g, r, 0x00B1C8B0);
+			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00B1C8B0));
 		} else {
-			psy_ui_drawsolidrectangle(g, r, 0x00444444);
+			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00444444));
 		}
 	}	
 }
@@ -330,7 +330,7 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r, cpx,
 			cpy, self->trackwidth - 5 - 2 * listviewmargin,
 			self->textheight);
-		psy_ui_drawsolidrectangle(g, r, 0x009B7800);		
+		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x009B7800));
 	}
 }
 
@@ -375,7 +375,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, psy_ui_value_px(&size.height, &tm));
-	psy_ui_settextcolor(g, 0);
+	psy_ui_settextcolor(g, psy_ui_color_make(0));
 	p = track->entries;
 	for (; p != NULL; p = p->next, ++c, cpy += self->lineheight) {
 		SequenceEntry* entry;
@@ -409,15 +409,15 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 			(self->selection->editposition.trackposition.tracknode == p
 				 || (psy_list_findentry(self->selection->entries, entry))				 
 				 )) {
-			psy_ui_setbackgroundcolor(g, 0x009B7800);
-			psy_ui_settextcolor(g, 0x00FFFFFF);
+			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x009B7800));
+			psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 			self->foundselected = 1;				
 		} else if (playing) {
-			psy_ui_setbackgroundcolor(g, 0x00232323);
-			psy_ui_settextcolor(g, 0x00D1C5B6);
+			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
+			psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
 		} else {
-			psy_ui_setbackgroundcolor(g, 0x00232323);
-			psy_ui_settextcolor(g, 0x00CACACA);
+			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
+			psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
 		}
 		psy_ui_textout(g, x + 5, cpy + listviewmargin, text,
 			strlen(text));

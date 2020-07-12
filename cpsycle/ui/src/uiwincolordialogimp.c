@@ -44,7 +44,7 @@ void psy_ui_win_colordialogimp_init(psy_ui_win_ColorDialogImp* self)
 	psy_ui_colordialogimp_init(&self->imp);
 	imp_vtable_init(self);	
 	self->imp.vtable = &imp_vtable;
-	self->color = 0x00000000;
+	self->color = psy_ui_color_make(0x00000000);
 }
 
 // win32 implementation method for psy_ui_ColorDialog
@@ -70,7 +70,7 @@ int dev_execute(psy_ui_win_ColorDialogImp* self)
 
 	rv = ChooseColor(&cc);
 	if (rv) {
-		self->color = cc.rgbResult;
+		self->color = psy_ui_color_make(cc.rgbResult);
 	}
 	return rv;
 }

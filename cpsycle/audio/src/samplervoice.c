@@ -647,7 +647,8 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self,
 						//  Step 3: Add the processed data to the sampler's buffer.
 						psy_audio_samplervoice_adddatatosamplerbuffer(self, channel,
 							output, dstpos, dstbuffer);
-					}	
+					}
+					// Move sample position
 					++dstpos;
 					nextsamples--;
 					diff = psy_audio_sampleiterator_inc(position);

@@ -8,7 +8,9 @@
 #include "../../detail/psydef.h"
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
+
 #include "uidefaults.h"
+#include "uistyle.h"
 
 #include <hashtbl.h>
 #include <signal.h>

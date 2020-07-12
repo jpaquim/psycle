@@ -24,19 +24,19 @@ static void psy_ui_xt_g_imp_drawroundrectangle(psy_ui_xt_GraphicsImp*, const psy
 	psy_ui_Size cornersize);
 static psy_ui_Size psy_ui_xt_g_imp_textsize(psy_ui_xt_GraphicsImp*, const char*);
 static void psy_ui_xt_g_imp_drawsolidrectangle(psy_ui_xt_GraphicsImp*, const psy_ui_Rectangle r,
-	unsigned int color);
+	psy_ui_Color color);
 static void psy_ui_xt_g_imp_drawsolidroundrectangle(psy_ui_xt_GraphicsImp*, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, unsigned int color);
+	psy_ui_Size cornersize, psy_ui_Color color);
 static void psy_ui_xt_g_imp_drawsolidpolygon(psy_ui_xt_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints, unsigned int inner, unsigned int outter);
 static void psy_ui_xt_g_imp_drawline(psy_ui_xt_GraphicsImp*, int x1, int y1, int x2, int y2);
 static void psy_ui_xt_g_imp_drawfullbitmap(psy_ui_xt_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
 static void psy_ui_xt_g_imp_drawbitmap(psy_ui_xt_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
-static void psy_ui_xt_g_imp_setbackgroundcolor(psy_ui_xt_GraphicsImp*, unsigned int color);
+static void psy_ui_xt_g_imp_setbackgroundcolor(psy_ui_xt_GraphicsImp*, psy_ui_Color color);
 static void psy_ui_xt_g_imp_setbackgroundmode(psy_ui_xt_GraphicsImp*, unsigned int mode);
-static void psy_ui_xt_g_imp_settextcolor(psy_ui_xt_GraphicsImp*, unsigned int color);
-static void psy_ui_xt_g_imp_setcolor(psy_ui_xt_GraphicsImp*, unsigned int color);
+static void psy_ui_xt_g_imp_settextcolor(psy_ui_xt_GraphicsImp*, psy_ui_Color color);
+static void psy_ui_xt_g_imp_setcolor(psy_ui_xt_GraphicsImp*, psy_ui_Color color);
 static void psy_ui_xt_g_imp_setfont(psy_ui_xt_GraphicsImp*, psy_ui_Font* font);
 static void psy_ui_xt_g_imp_moveto(psy_ui_xt_GraphicsImp*, psy_ui_IntPoint pt);
 static void psy_ui_xt_g_imp_devcurveto(psy_ui_xt_GraphicsImp*, psy_ui_IntPoint control_p1,
@@ -185,7 +185,7 @@ void psy_ui_xt_g_imp_drawroundrectangle(psy_ui_xt_GraphicsImp* self,
 }
 
 void psy_ui_xt_g_imp_drawsolidrectangle(psy_ui_xt_GraphicsImp* self,
-	const psy_ui_Rectangle r, unsigned int color)
+	const psy_ui_Rectangle r, psy_ui_Color color)
 {
 	XGCValues xgcv;
 	
@@ -199,7 +199,7 @@ void psy_ui_xt_g_imp_drawsolidrectangle(psy_ui_xt_GraphicsImp* self,
 }
 
 void psy_ui_xt_g_imp_drawsolidroundrectangle(psy_ui_xt_GraphicsImp* self,
-    const psy_ui_Rectangle r, psy_ui_Size cornersize, unsigned int color)
+    const psy_ui_Rectangle r, psy_ui_Size cornersize, psy_ui_Color color)
 {
 //	HBRUSH hBrush;
 //	HBRUSH hOldBrush;
@@ -276,7 +276,7 @@ void psy_ui_xt_g_imp_drawbitmap(psy_ui_xt_GraphicsImp* self,
     }
 }
 
-void psy_ui_xt_g_imp_setcolor(psy_ui_xt_GraphicsImp* self, unsigned int color)
+void psy_ui_xt_g_imp_setcolor(psy_ui_xt_GraphicsImp* self, psy_ui_Color color)
 {
 	XSetForeground(self->display, self->gc, color);
 }
@@ -293,13 +293,13 @@ void psy_ui_xt_g_imp_setbackgroundmode(psy_ui_xt_GraphicsImp* self,
 }
 
 void psy_ui_xt_g_imp_setbackgroundcolor(psy_ui_xt_GraphicsImp* self,
-    unsigned int color)
+    psy_ui_Color color)
 {
 	XSetBackground(self->display, self->gc, color);
 }
 
 void psy_ui_xt_g_imp_settextcolor(psy_ui_xt_GraphicsImp* self,
-    unsigned int color)
+    psy_ui_Color color)
 {
 //	SetTextColor(self->hdc, color);
 }

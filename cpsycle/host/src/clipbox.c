@@ -29,10 +29,10 @@ static int clipboxdefaultskin_initialized = 0;
 static void clipboxdefaultskin_init(ClipBox* self)
 {
 	if (!clipboxdefaultskin_initialized) {
-		clipboxdefaultskin.on = 0x000000FF;
-		clipboxdefaultskin.off = 0x00232323;
-		clipboxdefaultskin.borderon = 0x00333333;
-		clipboxdefaultskin.borderoff = 0x00333333;
+		clipboxdefaultskin.on = psy_ui_color_make(0x000000FF);
+		clipboxdefaultskin.off = psy_ui_color_make(0x00232323);
+		clipboxdefaultskin.borderon = psy_ui_color_make(0x00333333);
+		clipboxdefaultskin.borderoff = psy_ui_color_make(0x00333333);
 		clipboxdefaultskin_initialized = 1;
 	}
 	self->skin = clipboxdefaultskin;

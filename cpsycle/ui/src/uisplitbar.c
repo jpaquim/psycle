@@ -69,12 +69,12 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 			self->component.align == psy_ui_ALIGN_RIGHT) {
 		center = size.height / 2 - thumbsize / 2;
 		ident = size.width / 2;
-		psy_ui_setcolor(g, 0x00333333);
+		psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
 		psy_ui_drawline(g, ident, center, ident, center + thumbsize);
 	} else {
 		center = size.width / 2 - thumbsize / 2;
 		ident = size.height / 2;
-		psy_ui_setcolor(g, 0x00333333);
+		psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
 		psy_ui_drawline(g, center, ident, center + thumbsize, ident);
 	}
 }
@@ -136,7 +136,7 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolor(&self->component,
-			0x00333333, psy_ui_NONRECURSIVE);
+			psy_ui_color_make(0x00333333));
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -281,7 +281,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 	}
 	if (self->resize) {
 		psy_ui_component_setbackgroundcolor(&self->component,
-			psy_ui_defaults_backgroundcolor(&app.defaults), psy_ui_NONRECURSIVE);
+			app.defaults.style_common.backgroundcolor);
 		psy_ui_component_invalidate(&self->component);
 		self->resize = 0;
 	}

@@ -82,7 +82,7 @@ static void dev_stoptimer(psy_ui_win_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
 static psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp*, psy_ui_Font*);
 static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text, psy_ui_Font*);
-static void dev_setbackgroundcolor(psy_ui_win_ComponentImp*, uint32_t color);
+static void dev_setbackgroundcolor(psy_ui_win_ComponentImp*, psy_ui_Color color);
 static void dev_settitle(psy_ui_win_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
@@ -894,12 +894,12 @@ psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text, psy_ui
 	return rv;
 }
 
-void dev_setbackgroundcolor(psy_ui_win_ComponentImp* self, uint32_t color)
+void dev_setbackgroundcolor(psy_ui_win_ComponentImp* self, psy_ui_Color color)
 {	
 	if (self->background) {
 		DeleteObject(self->background);
 	}
-	self->background = CreateSolidBrush(color);
+	self->background = CreateSolidBrush(color.value);
 }
 
 void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)

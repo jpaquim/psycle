@@ -61,7 +61,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		app.defaults.defaultbackgroundcolor);
+		app.defaults.style_common.backgroundcolor.value);
 	self->targetids = NULL;
 }
 
@@ -279,17 +279,17 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLOREDIT:
 				imp = psy_table_at(&winapp->selfmap, (uintptr_t) lParam);
 				if (imp && imp->component) {					
-					SetTextColor((HDC) wParam, psy_ui_component_color(imp->component));
-					SetBkColor((HDC) wParam, psy_ui_component_backgroundcolor(imp->component));
+					SetTextColor((HDC) wParam, psy_ui_component_color(imp->component).value);
+					SetBkColor((HDC) wParam, psy_ui_component_backgroundcolor(imp->component).value);
 					if ((imp->component->backgroundmode & psy_ui_BACKGROUND_SET) == psy_ui_BACKGROUND_SET) {
 						return (intptr_t) psy_ui_win_component_details(imp->component)->background;
 					} else {
 						return (intptr_t) GetStockObject(NULL_BRUSH);
 					}
 				} else {				
-					SetTextColor((HDC) wParam, psy_ui_defaults_color(&app.defaults));
-					SetBkColor((HDC) wParam,
-						psy_ui_defaults_backgroundcolor(&app.defaults));
+					SetTextColor((HDC) wParam, app.defaults.style_common.color.value);
+					SetBkColor((HDC)wParam,
+						app.defaults.style_common.backgroundcolor.value);
 					return (intptr_t) winapp->defaultbackgroundbrush;
 				}
 			break;
@@ -342,6 +342,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						HFONT hfont = 0;
 						HFONT hPrevFont = 0;																		
 						psy_ui_TextMetric tm;
+						psy_ui_Border border;
 
 						if (imp->component->doublebuffered) {
 							// create a graphics context with back buffer bitmap with
@@ -376,13 +377,20 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							psy_ui_drawsolidrectangle(&g, r,
 								psy_ui_component_backgroundcolor(imp->component));
 						}
-						if (imp->component->border.top != psy_ui_BORDER_NONE) {
-							psy_ui_setcolor(&g, 0x00333333);
-							psy_ui_drawline(&g,
-								ps.rcPaint.left - dblbuffer_offset.x,
-								ps.rcPaint.top - dblbuffer_offset.y,
-								ps.rcPaint.left + ps.rcPaint.right - dblbuffer_offset.x,
-								ps.rcPaint.top - dblbuffer_offset.y);
+						border = psy_ui_component_border(imp->component);
+						if (border.mode.set) {
+							if (border.top != psy_ui_BORDER_NONE) {
+								if (border.color_top.mode.set) {
+									psy_ui_setcolor(&g, border.color_top);
+								} else {
+									psy_ui_setcolor(&g, app.defaults.style_common.border.color_top);
+								}
+								psy_ui_drawline(&g,
+									ps.rcPaint.left - dblbuffer_offset.x,
+									ps.rcPaint.top - dblbuffer_offset.y,
+									ps.rcPaint.left + ps.rcPaint.right - dblbuffer_offset.x,
+									ps.rcPaint.top - dblbuffer_offset.y);
+							}
 						}
 						// prepare a clip rect that can be used by a component to
 						// optimize the draw amount
@@ -396,8 +404,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						// DPtoLP ?												
 						if (!psy_ui_margin_iszero(&imp->component->spacing)) {
 							tm = psy_ui_component_textmetric(imp->component);
-
-							/*if (!psy_ui_value_iszero(&imp->component->spacing.top)) {
+							
+							/*
+							// exclude padding from the clipping region
+							if (!psy_ui_value_iszero(&imp->component->spacing.top)) {
 								ExcludeClipRect(win_g->hdc,
 									0, 0, clipsize.x,
 									psy_ui_value_px(&imp->component->spacing.top, &tm));
@@ -434,13 +444,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						// update graphics font with component font 
 						hfont = ((psy_ui_win_FontImp*)
 							psy_ui_component_font(imp->component)->imp)->hfont;
-						hPrevFont = SelectObject(win_g->hdc, hfont);
+						hPrevFont = SelectObject(win_g->hdc, hfont);						
+						// prepare colors
+						psy_ui_setcolor(&g, psy_ui_component_color(imp->component));
+						psy_ui_settextcolor(&g, psy_ui_component_color(imp->component));
+						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);
 						// call specialization methods (first vtable, then signals)
 						if (imp->component->vtable->ondraw) {
 							imp->component->vtable->ondraw(imp->component, &g);
 						}
-						// set default color
-						psy_ui_setcolor(&g, app.defaults.defaultcolor);
 						psy_signal_emit(&imp->component->signal_draw, imp->component, 1, &g);
 						// clean up font
 						if (hPrevFont) {

@@ -485,10 +485,10 @@ void sampleeditorheader_drawruler(SampleEditorHeader* self, psy_ui_Graphics* g)
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
 	baseline = psy_ui_value_px(&size.height, &tm) - 1;
-	psy_ui_setcolor(g, 0x00666666); 
+	psy_ui_setcolor(g, psy_ui_color_make(0x00666666));
 	psy_ui_drawline(g, 0, baseline, psy_ui_value_px(&size.width, &tm), baseline);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x00999999);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x00999999));
 	if (self->metric) {
 		step = waveboxcontext_numframes(self->metric) / 10;
 		step = (int)(step * (self->metric->zoomright - self->metric->zoomleft));
@@ -522,12 +522,12 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 		tm = psy_ui_component_textmetric(&sender->component);
 		psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
 			psy_ui_value_px(&size.height, &tm));
-		psy_ui_setcolor(g, 0x00B1C8B0);
+		psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
 		if (!self->sample) {			
 			static const char* txt = "No wave loaded";
 			
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-			psy_ui_settextcolor(g, 0x00D1C5B6);
+			psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
 			psy_ui_textout(g, (psy_ui_value_px(&size.width, &tm) - tm.tmAveCharWidth * strlen(txt)) / 2,
 				(psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2, txt, strlen(txt));
 		} else {
@@ -538,7 +538,7 @@ void sampleeditor_onscrollzoom_customdraw(SampleEditor* self, ScrollZoom* sender
 
 			scaley = (psy_ui_value_px(&size.height, &tm) / 2) / (psy_dsp_amp_t) 32768;
 			offsetstep = (float) self->sample->numframes / psy_ui_value_px(&size.width, &tm);
-			psy_ui_setcolor(g, 0x00B1C8B0);
+			psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
 			for (x = 0; x < psy_ui_value_px(&size.width, &tm); ++x) {
 				uintptr_t frame = (int)(offsetstep * x);
 				float framevalue;

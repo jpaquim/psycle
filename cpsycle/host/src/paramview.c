@@ -76,18 +76,18 @@ void paramskin_init(ParamView* self)
 		paramskin.checkoff = checkoff;
 		paramskin_initialized = 1;		
 		theme = self->workspace->paramtheme;
-		paramskin.topcolor = psy_properties_int(theme, "machineguitopcolor", 0x00555555);
-		paramskin.fonttopcolor = psy_properties_int(theme, "machineguifonttopcolor", 0x00CDCDCD);
-		paramskin.bottomcolor = psy_properties_int(theme, "machineguibottomcolor", 0x00444444);
-		paramskin.fontbottomcolor = psy_properties_int(theme, "machineguifontbottomcolor", 0x00E7BD18);
+		paramskin.topcolor = psy_ui_color_make(psy_properties_int(theme, "machineguitopcolor", 0x00555555));
+		paramskin.fonttopcolor = psy_ui_color_make(psy_properties_int(theme, "machineguifonttopcolor", 0x00CDCDCD));
+		paramskin.bottomcolor = psy_ui_color_make(psy_properties_int(theme, "machineguibottomcolor", 0x00444444));
+		paramskin.fontbottomcolor = psy_ui_color_make(psy_properties_int(theme, "machineguifontbottomcolor", 0x00E7BD18));
 		//highlighted param colours
-		paramskin.htopcolor = psy_properties_int(theme, "machineguihtopcolor", 0x00555555);
-		paramskin.fonthtopcolor = psy_properties_int(theme, "machineguihfonttopcolor", 0x00CDCDCD);
-		paramskin.hbottomcolor = psy_properties_int(theme, "machineguihbottomcolor", 0x00292929);
-		paramskin.fonthbottomcolor = psy_properties_int(theme, "machineguihfontbottomcolor", 0x00E7BD18);
+		paramskin.htopcolor = psy_ui_color_make(psy_properties_int(theme, "machineguihtopcolor", 0x00555555));
+		paramskin.fonthtopcolor = psy_ui_color_make(psy_properties_int(theme, "machineguihfonttopcolor", 0x00CDCDCD));
+		paramskin.hbottomcolor = psy_ui_color_make(psy_properties_int(theme, "machineguihbottomcolor", 0x00292929));
+		paramskin.fonthbottomcolor = psy_ui_color_make(psy_properties_int(theme, "machineguihfontbottomcolor", 0x00E7BD18));
 
-		paramskin.titlecolor = psy_properties_int(theme, "machineguititlecolor", 0x00292929);
-		paramskin.fonttitlecolor = psy_properties_int(theme, "machineguititlefontcolor", 0x00B4B4B4);
+		paramskin.titlecolor = psy_ui_color_make(psy_properties_int(theme, "machineguititlecolor", 0x00292929));
+		paramskin.fonttitlecolor = psy_ui_color_make(psy_properties_int(theme, "machineguititlefontcolor", 0x00B4B4B4));
 		psy_ui_bitmap_init(&paramskin.knobbitmap);
 		if (!workspace_dialbitmap_path(self->workspace)) {
 			psy_ui_bitmap_loadresource(&paramskin.knobbitmap, IDB_PARAMKNOB);
@@ -100,8 +100,7 @@ void paramskin_init(ParamView* self)
 		psy_ui_bitmap_loadresource(&paramskin.mixerbitmap, IDB_MIXERSKIN);		
 	}
 	self->skin = &paramskin;
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin->bottomcolor,
-		psy_ui_NONRECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->component, self->skin->bottomcolor);
 }
 
 void paramskin_release(ParamView* self)
@@ -327,7 +326,7 @@ void drawknob(ParamView* self, psy_ui_Graphics* g, psy_audio_MachineParam* param
 		}
 
 	}
-	psy_ui_setcolor(g, 0x00232323);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00232323));
 	psy_ui_drawline(g, r.left, r.bottom - 1, r.right, r.bottom - 1);
 	psy_ui_drawline(g, r.right - 1, r.top, r.right - 1, r.bottom - 1);
 }

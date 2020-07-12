@@ -5,11 +5,13 @@
 
 #include "uistyle.h"
 
+
 void psy_ui_style_init(psy_ui_Style* self)
 {
+	psy_ui_color_init(&self->color);
+	psy_ui_color_init(&self->backgroundcolor);
+	psy_ui_border_init(&self->border);
 	self->use_font = 0;
-	self->use_color = 0;
-	self->use_backgroundcolor = 0;
 }
 
 void psy_ui_style_dispose(psy_ui_Style* self)
@@ -17,9 +19,4 @@ void psy_ui_style_dispose(psy_ui_Style* self)
 	if (self->use_font) {
 		psy_ui_font_dispose(&self->font);
 	}
-}
-
-int psy_ui_style_active(psy_ui_Style* self)
-{
-	return self->use_color || self->use_color || self->use_font;
 }

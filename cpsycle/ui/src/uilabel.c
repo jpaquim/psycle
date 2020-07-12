@@ -94,9 +94,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 		
 	if (strlen(self->text) == 0) {
 		return;
-	}
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, psy_ui_component_color(&self->component));
+	}	
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(psy_ui_label_base(self)), &tm);		

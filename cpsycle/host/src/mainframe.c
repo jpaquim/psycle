@@ -27,6 +27,8 @@ static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initbars(MainFrame*);
 static void mainframe_initvubar(MainFrame*);
 static void mainframe_updatetext(MainFrame*);
+static void mainframe_updatetheme(MainFrame*);
+static void mainframe_onskinchanged(MainFrame*, Workspace*);
 static void mainframe_setstatusbartext(MainFrame*, const char* text);
 static const char* mainframe_statusbaridletext(MainFrame*);
 static void mainframe_destroyed(MainFrame*, psy_ui_Component* sender);
@@ -220,7 +222,7 @@ void mainframe_init(MainFrame* self)
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		&self->viewtabbars.component,
-		self->workspace.config);
+		self->workspace.config);	
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
@@ -318,6 +320,32 @@ void mainframe_init(MainFrame* self)
 		mainframe_oncheckunsaved);
 	interpreter_init(&self->interpreter, &self->workspace);
 	interpreter_start(&self->interpreter);
+	psy_signal_connect(&self->workspace.signal_skinchanged, self,
+		mainframe_onskinchanged);
+	mainframe_updatetheme(self);
+}
+
+void mainframe_updatetheme(MainFrame* self)
+{
+	/*psy_ui_component_setbackgroundcolor(&self->settingsview.component,
+		self->machineview.wireview.skin.colour, psy_ui_RECURSIVE);
+	psy_ui_component_setcolor(&self->settingsview.component,
+		self->patternview.skin.font, psy_ui_RECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->helpview.component,
+		self->machineview.wireview.skin.colour, psy_ui_RECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->samplesview.component,
+		self->patternview.skin.background, psy_ui_RECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->instrumentsview.component,
+		self->patternview.skin.background, psy_ui_RECURSIVE);
+	psy_ui_component_setcolor(&self->instrumentsview.component,
+		self->patternview.skin.font, psy_ui_RECURSIVE);
+	psy_ui_component_setbackgroundcolor(&self->songpropertiesview.component,
+		self->patternview.skin.background, psy_ui_RECURSIVE);*/
+}
+
+void mainframe_onskinchanged(MainFrame* self, Workspace* sender)
+{
+	mainframe_updatetheme(self);
 }
 
 void mainframe_updatetext(MainFrame* self)
@@ -923,7 +951,7 @@ void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 	self->terminalhasmessage = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
 	if (!self->terminalhaswarning || self->terminalhaserror) {
-		psy_ui_button_settextcolor(&self->toggleterminal, terminalmessagecolor);
+		psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(terminalmessagecolor));
 	}
 }
 
@@ -933,7 +961,7 @@ void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 	self->terminalhaswarning = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
 	if (!self->terminalhaserror) {
-		psy_ui_button_settextcolor(&self->toggleterminal, terminalwarningcolor);
+		psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(terminalwarningcolor));
 	}
 }
 
@@ -942,7 +970,7 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 {
 	self->terminalhaserror = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
-	psy_ui_button_settextcolor(&self->toggleterminal, terminalerrorcolor);
+	psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(terminalerrorcolor));
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
@@ -1089,7 +1117,7 @@ void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)
 		self->terminalhaserror = FALSE;
 		self->terminalhaswarning = FALSE;
 		self->terminalhasmessage = FALSE;
-		psy_ui_button_settextcolor(&self->toggleterminal, 0x00CACACA);
+		psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(0x00CACACA));
 	} else {
 		psy_ui_component_resize(&self->terminal.component,
 			psy_ui_size_make(psy_ui_value_makepx(0),

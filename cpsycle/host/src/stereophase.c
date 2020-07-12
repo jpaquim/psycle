@@ -101,7 +101,7 @@ void stereophase_ondraw(StereoPhase* self, psy_ui_Component* sender, psy_ui_Grap
 void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 {
 	psy_ui_setlinewidth(g, 8);
-	psy_ui_setcolor(g, 0x00303030);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00303030));
 
 	psy_ui_drawline(g, 32, 32, 128, 128);
 	psy_ui_drawline(g, 128, 128, 128, 0);
@@ -113,7 +113,7 @@ void stereophase_drawbackground(StereoPhase* self, psy_ui_Graphics* g)
 	psy_ui_drawarc(g, 48, 48, 256 - 48, 256 - 48, 256 - 48, 128, 48, 128);
 
 	psy_ui_setlinewidth(g, 4);
-	psy_ui_setcolor(g, 0x00404040);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00404040));
 	psy_ui_drawline(g, 32, 32, 128, 128);
 	psy_ui_drawline(g, 128, 128, 128, 0);
 	psy_ui_drawline(g, 128, 128, 256 - 32, 32);
@@ -249,7 +249,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 		self->o_mvdr = mvdr;
 	}
 
-	psy_ui_setcolor(g, 0x00FF0000);
+	psy_ui_setcolor(g, psy_ui_color_make(0x00FF0000));
 	//CPen* oldpen = bufDC.SelectObject(&linepenbL);
 	quarterpi = psy_dsp_PI_F * 0.25f;
 
@@ -315,7 +315,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	// bufDC.SetBkMode(TRANSPARENT);
 	// bufDC.SetTextColor(0x505050);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(g, 0x606060);
+	psy_ui_settextcolor(g, psy_ui_color_make(0x606060));
 	psy_ui_textout(g, 4, 128 - 14, buf, strlen(buf));
 	// bufDC.TextOut(4, 128 - 14, buf);
 	// bufDC.SelectObject(oldFont);

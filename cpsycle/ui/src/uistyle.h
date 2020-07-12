@@ -5,6 +5,7 @@
 #define psy_ui_STYLE_H
 
 #include "uifont.h"
+#include "uidef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -12,16 +13,14 @@ extern "C" {
 
 typedef struct psy_ui_Style {
 	psy_ui_Font font;
-	uint32_t color;
-	uint32_t backgroundcolor;
+	psy_ui_Color color;
+	psy_ui_Color backgroundcolor;
+	psy_ui_Border border;
 	bool use_font;
-	bool use_color;
-	bool use_backgroundcolor;
 } psy_ui_Style;
 
 void psy_ui_style_init(psy_ui_Style*);
 void psy_ui_style_dispose(psy_ui_Style*);
-int psy_ui_style_active(psy_ui_Style*);
 
 #ifdef __cplusplus
 }

@@ -11,10 +11,18 @@ static void psy_ui_defaults_initcolors(psy_ui_Defaults*);
 void psy_ui_defaults_init(psy_ui_Defaults* self)
 {	
 	psy_ui_defaults_initcolors(self);
-	self->style_common.use_color = 1;
-	self->style_common.color = 0x00D1C5B6;
-	self->style_common.use_backgroundcolor = 1;
-	self->style_common.backgroundcolor = self->defaultbackgroundcolor;
+	psy_ui_color_set(&self->style_common.color, psy_ui_color_make(0x00D1C5B6));
+	psy_ui_color_set(&self->style_common.backgroundcolor,
+		psy_ui_color_make(0x00232323));
+	psy_ui_border_init(&self->style_common.border);
+	psy_ui_color_set(&self->style_common.border.color_top,
+		psy_ui_color_make(0x00333333));
+	psy_ui_color_set(&self->style_common.border.color_right,
+		self->style_common.border.color_top);
+	psy_ui_color_set(&self->style_common.border.color_bottom,
+		self->style_common.border.color_top);
+	psy_ui_color_set(&self->style_common.border.color_left,
+		self->style_common.border.color_top);
 	self->style_common.use_font = 1;
 	{
 		psy_ui_FontInfo fontinfo;
@@ -26,9 +34,6 @@ void psy_ui_defaults_init(psy_ui_Defaults* self)
 
 void psy_ui_defaults_initcolors(psy_ui_Defaults* self)
 {
-	self->defaultbackgroundcolor = 0x00232323;
-	self->defaultcolor = 0x00D1C5B6;
-	self->default_color_border = 0x00333333;
 	self->errorcolor = 0xCF6679;
 }
 
@@ -37,17 +42,3 @@ void psy_ui_defaults_dispose(psy_ui_Defaults* self)
 	psy_ui_style_dispose(&self->style_common);
 }
 
-uint32_t psy_ui_defaults_color(psy_ui_Defaults* self)
-{
-	return self->defaultcolor;
-}
-
-uint32_t psy_ui_defaults_backgroundcolor(psy_ui_Defaults* self)
-{	
-	return self->defaultbackgroundcolor;
-}
-
-uint32_t psy_ui_defaults_bordercolor(psy_ui_Defaults* self)
-{
-	return self->default_color_border;
-}
