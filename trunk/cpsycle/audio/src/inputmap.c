@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "inputmap.h"
+
+#include <stdlib.h>
 #include <string.h>
 
 void psy_audio_inputs_init(psy_audio_Inputs* self)

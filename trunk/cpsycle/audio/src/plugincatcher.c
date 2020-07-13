@@ -95,7 +95,7 @@ void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 	plugincatcher_makeplugininfo(self, "sampler", "", MACH_XMSAMPLER,
 		psy_audio_sampler_info());
 	plugincatcher_makeplugininfo(self, "samplerps1", "", MACH_SAMPLER,
-		psy_audio_samplerps1_info());
+		psy_audio_ps1sampler_info());
 	plugincatcher_makeplugininfo(self, "dummy", "", MACH_DUMMY,
 		dummymachine_info());
 	plugincatcher_makeplugininfo(self, "master", "", MACH_MASTER,

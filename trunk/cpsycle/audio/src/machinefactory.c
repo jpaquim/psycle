@@ -161,11 +161,11 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			break;
 		}
 		case MACH_SAMPLER: {
-			psy_audio_SamplerPS1* sampler;
+			psy_audio_PS1Sampler* sampler;
 
-			sampler = psy_audio_samplerps1_allocinit(self->machinecallback);
+			sampler = psy_audio_ps1sampler_allocinit(self->machinecallback);
 			if (sampler) {
-				rv = psy_audio_samplerps1_base(sampler);
+				rv = psy_audio_ps1sampler_base(sampler);
 			} else {
 				rv = 0;
 			}
