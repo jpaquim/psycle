@@ -286,7 +286,7 @@ void cmdplayer_dispose(CmdPlayer* self)
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
-	properties_free(self->config);
+	psy_properties_free(self->config);
 	self->config = 0;	
 	plugincatcher_dispose(&self->plugincatcher);
 	psy_audio_machinefactory_dispose(&self->machinefactory);	

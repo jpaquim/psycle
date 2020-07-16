@@ -38,4 +38,6 @@ typedef uint8_t bool;
 
 typedef void (*psy_fp_disposefunc)(void*);
 
+typedef char char_dyn_t;
+
 #endif

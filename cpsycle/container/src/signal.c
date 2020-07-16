@@ -68,6 +68,7 @@ void psy_signal_disconnect(psy_Signal* self, void* context, void* fp)
 	while (p != NULL) {		
 		psy_Slot* slot = (psy_Slot*) p->entry;
 		if (slot->context == context && slot->fp == fp) {
+			free(slot);
 			psy_list_remove(&self->slots, p);
 			break;
 		}

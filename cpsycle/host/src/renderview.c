@@ -35,7 +35,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 
 void renderview_ondestroy(RenderView* self, psy_ui_Component* sender)
 {
-	properties_free(self->properties);	
+	psy_properties_free(self->properties);	
 	self->fileoutdriver->deallocate(self->fileoutdriver);
 }
 
@@ -204,7 +204,7 @@ void renderview_render(RenderView* self)
 		psy_properties_int(self->properties, "quality.channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 	self->fileoutdriver->configure(self->fileoutdriver, driverconfig);
-	properties_free(driverconfig);
+	psy_properties_free(driverconfig);
 	self->restoreloopmode = self->workspace->player.sequencer.looping;
 	self->workspace->player.sequencer.looping = 0;
 	self->restoredither = psy_dsp_dither_settings(&self->workspace->player.dither);

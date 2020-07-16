@@ -676,9 +676,9 @@ void dev_sethorizontalscrollposition(psy_ui_win_ComponentImp* self, int position
 
 psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 {	
-	psy_List* children = 0;
+	psy_List* rv = 0;
 	if (recursive == 1) {
-		EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &children);
+		EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &rv);
 	}
 	else {
 		uintptr_t hwnd = (uintptr_t)GetWindow(self->hwnd, GW_CHILD);
@@ -691,7 +691,7 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 			imp = psy_table_at(&winapp->selfmap, hwnd);
 			child = imp ? imp->component : 0;
 			if (child) {
-				children = psy_list_create(child);
+				rv = psy_list_create(child);
 			}
 		}
 		while (hwnd) {
@@ -705,12 +705,12 @@ psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 				imp = psy_table_at(&winapp->selfmap, hwnd);
 				child = imp ? imp->component : 0;
 				if (child) {
-					psy_list_append(&children, child);
+					psy_list_append(&rv, child);
 				}
 			}
 		}
 	}
-	return children;	
+	return rv;
 }
 
 void dev_enableinput(psy_ui_win_ComponentImp* self)

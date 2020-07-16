@@ -85,7 +85,7 @@ void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 {
 	psy_table_disposeall(&self->keys, (psy_fp_disposefunc)
 		kbdboxkey_dispose);	
-	properties_free(self->keyset);
+	psy_properties_free(self->keyset);
 }
 
 void kbdbox_initfont(KbdBox* self)

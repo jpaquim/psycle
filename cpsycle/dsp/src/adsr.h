@@ -51,6 +51,11 @@ void psy_dsp_adsr_start(psy_dsp_ADSR*);
 void psy_dsp_adsr_release(psy_dsp_ADSR*);
 void psy_dsp_adsr_fastrelease(psy_dsp_ADSR*);
 
+INLINE bool psy_dsp_adsr_playing(psy_dsp_ADSR* self)
+{
+	return self->stage != ENV_OFF;
+}
+
 #ifdef __cplusplus
 }
 #endif

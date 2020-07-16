@@ -258,7 +258,7 @@ void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
 	if (self->plugins) {
-		properties_free(self->plugins);
+		psy_properties_free(self->plugins);
 	}
 }
 
@@ -581,7 +581,7 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 	psy_ui_component_setscrolltop(&self->component, 0);
 	self->selectedplugin = 0;
 	if (self->plugins) {
-		properties_free(self->plugins);
+		psy_properties_free(self->plugins);
 	}
 	if (sender->plugins) {
 		if (self->onlyfavorites) {
@@ -754,7 +754,7 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	if (self->favoriteview.plugins) {
 		sorted = newmachine_sort(self->favoriteview.plugins,
 			newmachine_comp_favorite);
-		properties_free(self->favoriteview.plugins);
+		psy_properties_free(self->favoriteview.plugins);
 		self->favoriteview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->favoriteview.component, 0);
@@ -794,7 +794,7 @@ void newmachine_onsortbyfavorite(NewMachine* self, psy_ui_Component* sender)
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_favorite);
-		properties_free(self->pluginsview.plugins);
+		psy_properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -810,7 +810,7 @@ void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_name);
-		properties_free(self->pluginsview.plugins);
+		psy_properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -826,7 +826,7 @@ void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_type);
-		properties_free(self->pluginsview.plugins);
+		psy_properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -842,7 +842,7 @@ void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_mode);
-		properties_free(self->pluginsview.plugins);
+		psy_properties_free(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -863,21 +863,19 @@ psy_Properties* newmachine_favorites(psy_Properties* source)
 	psy_Properties* rv = 0;
 
 	if (source) {
-		int num;
 		psy_Properties* p;
 
 		p = source->children;
 		if (p) {
-			num = psy_properties_size(p);
 			rv = psy_properties_create();
-			for (p = source->children; p != NULL; p = p->next) {
+			for (; p != NULL; p = psy_properties_next(p)) {
 				if (psy_properties_int(p, "favorite", 0) != FALSE) {
 					psy_properties_append_property(rv, psy_properties_clone(
 						p, 0));
 				}
-			}
+			}			
 		}
-	}	
+	}
 	return rv;
 }
 

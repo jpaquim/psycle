@@ -134,7 +134,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Properties* p, const ch
 			coords = psy_properties_create();
 			skin_loadpsh(coords, path);
 			machineviewskin_setcoords(self, coords);
-			properties_free(coords);
+			psy_properties_free(coords);
 		}
 	} else {
 		psy_ui_bitmap_dispose(&self->skinbmp);

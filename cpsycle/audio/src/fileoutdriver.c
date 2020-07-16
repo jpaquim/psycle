@@ -115,7 +115,7 @@ int driver_dispose(psy_AudioDriver* driver)
 	FileOutDriver* self;
 
 	self = (FileOutDriver*) driver;
-	properties_free(driver->properties);
+	psy_properties_free(driver->properties);
 	driver->properties = 0;
 	psy_signal_dispose(&driver->signal_stop);
 	free(self->filecontext.path);

@@ -73,7 +73,7 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Properties* dirconfig
 
 void plugincatcher_dispose(psy_audio_PluginCatcher* self)
 {
-	properties_free(self->plugins);
+	psy_properties_free(self->plugins);
 	self->plugins = 0;
 	free(self->inipath);	
 	self->dirconfig = 0;	
@@ -83,7 +83,7 @@ void plugincatcher_dispose(psy_audio_PluginCatcher* self)
 
 void plugincatcher_clear(psy_audio_PluginCatcher* self)
 {
-	properties_free(self->plugins);
+	psy_properties_free(self->plugins);
 	self->plugins = psy_properties_setcomment(
 		psy_properties_create(),
 		"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));

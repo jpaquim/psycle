@@ -91,7 +91,7 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;
-	properties_free(self->driver.properties);
+	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
 	psy_signal_dispose(&driver->signal_input);

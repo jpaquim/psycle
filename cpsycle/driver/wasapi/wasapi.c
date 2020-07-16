@@ -411,7 +411,7 @@ int driver_init(psy_AudioDriver* driver)
 int driver_dispose(psy_AudioDriver* driver)
 {
 	WasapiDriver* self = (WasapiDriver*) driver;
-	properties_free(self->driver.properties);
+	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
 	clearplayenums(self);
@@ -468,7 +468,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 	self = (WasapiDriver*) driver;
 
 	if (config) {
-		properties_free(self->driver.properties);
+		psy_properties_free(self->driver.properties);
 		self->driver.properties = psy_properties_clone(config, 1);
 	} else {
 	property = psy_properties_read(self->driver.properties, "device");
@@ -792,7 +792,9 @@ void FillPortList(WasapiDriver* self, psy_List** portList, IMMDeviceCollection* 
 			EXIT_ON_ERROR(hr)
 
 			wcscpy_s(pEnum->szDeviceID, MAX_STR_LEN - 1, pszDeviceId);
+#if !defined _CRTDBG_MAP_ALLOC
 			wcstombs(pEnum->portName, vars.pwszVal, MAX_STR_LEN - 1);
+#endif
 
 			PropVariantClear(&vars);
 			if (wcscmp(pEnum->szDeviceID, defaultID) == 0) {

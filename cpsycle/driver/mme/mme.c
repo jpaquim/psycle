@@ -240,7 +240,7 @@ int driver_init(psy_AudioDriver* driver)
 int driver_dispose(psy_AudioDriver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
-	properties_free(self->driver.properties);
+	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
 	psy_table_dispose(&self->_portMapping);
@@ -316,7 +316,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 
 	self = (MmeDriver*) driver;
 	if (config) {
-		properties_free(self->driver.properties);
+		psy_properties_free(self->driver.properties);
 		self->driver.properties = psy_properties_clone(config, 1);
 	} else {
 		property = psy_properties_read(self->driver.properties, "device");

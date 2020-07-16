@@ -223,9 +223,9 @@ void workspace_dispose(Workspace* self)
 	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
 	self->songcbk = 0;
-	properties_free(self->config);
+	psy_properties_free(self->config);
 	self->config = 0;
-	properties_free(self->lang);
+	psy_properties_free(self->lang);
 	self->lang = NULL;
 	free(self->filename);
 	self->filename = 0;
@@ -236,9 +236,10 @@ void workspace_dispose(Workspace* self)
 	workspace_disposesignals(self);
 	psy_audio_pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);
-	properties_free(self->cmds);
+	psy_properties_free(self->cmds);
 	sequenceselection_dispose(&self->sequenceselection);
 	free(self->dialbitmappath);
+	psy_properties_free(self->recentsongs);
 	psy_audio_exclusivelock_dispose();
 }
 
@@ -320,14 +321,14 @@ void workspace_configlanguage(Workspace* self)
 	lang = workspace_languagekey(self);
 	if (lang) {
 		if (strcmp(lang, "en") == 0) {
-			properties_free(self->lang);
+			psy_properties_free(self->lang);
 			self->lang = psy_properties_create();
 			psy_signal_emit(&self->signal_languagechanged, self,
 				0);
 			psy_ui_updatealign(self->mainhandle, NULL);
 		} else
 		if (strcmp(lang, "es") == 0) {
-			properties_free(self->lang);
+			psy_properties_free(self->lang);
 			self->lang = psy_properties_create();
 			workspace_makelanges(self);
 			psy_signal_emit(&self->signal_languagechanged, self,
@@ -1068,18 +1069,14 @@ void workspace_makedriverconfigurations(Workspace* self)
 							psy_AudioDriver* driver;							
 
 							driver = fpdrivercreate();
-							if (driver && driver->properties) {
-								psy_Properties* driverconfig;
+							if (driver && driver->properties && driver->properties->children) {
 								psy_Properties* driversection;
-								
-								driverconfig = psy_properties_clone(driver->properties, 1);
+
 								driversection = psy_properties_create_section(
 									self->driverconfigurations,
-									psy_properties_key(p));	
-								if (driverconfig) {									
-									driversection->children = driverconfig->children;
-									driverconfig->parent = driversection;
-								}
+									psy_properties_key(p));
+								psy_properties_append_property(driversection,
+									psy_properties_clone(driver->properties->children, 1));
 								driver->dispose(driver);
 							}
 						}
@@ -1398,7 +1395,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 		if (driversection) {
 			if (driversection->children) {
 				psy_Properties* driverconfig;
-				properties_free(driversection->children);
+				psy_properties_free(driversection->children);
 
 				driverconfig = 
 					psy_properties_clone(self->player.driver->properties, 1);
@@ -1690,7 +1687,7 @@ void workspace_loadskin(Workspace* self, const char* path)
 	psy_properties_sync(self->machineviewtheme, properties);
 	psy_properties_sync(self->patternviewtheme, properties);
 	psy_signal_emit(&self->signal_skinchanged, self, 0);
-	properties_free(properties);
+	psy_properties_free(properties);
 }
 
 void workspace_loadcontrolskin(Workspace* self, const char* path)
