@@ -145,7 +145,7 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
-	properties_free(self->driver.properties);
+	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	psy_audio_inputs_dispose(&self->noteinputs);
 	psy_signal_dispose(&driver->signal_input);

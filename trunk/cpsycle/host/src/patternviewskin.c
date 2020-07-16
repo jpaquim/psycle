@@ -275,7 +275,7 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Properties* p, const ch
 			coords = psy_properties_create();
 			skin_loadpsh(coords, path);
 			patternviewskin_setcoords(self, coords);
-			properties_free(coords);
+			psy_properties_free(coords);
 		}
 	}
 }

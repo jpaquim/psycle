@@ -55,7 +55,6 @@ const psy_audio_MachineInfo* psy_audio_ps1sampler_info(void)
 // Voice
 static void psy_audio_ps1samplervoice_rampvolume(psy_audio_PS1SamplerVoice* self);
 // implementation
-
 // psycle-mfc: Voice::Voice()
 void psy_audio_ps1samplervoice_init(psy_audio_PS1SamplerVoice* self, psy_audio_PS1Sampler* sampler)
 {
@@ -123,73 +122,80 @@ void psy_audio_ps1samplervoice_newline(psy_audio_PS1SamplerVoice* self)
 // psycle-mfc: Sampler.hpp class
 // Sampler Prototypes
 static void psy_audio_ps1sampler_dispose(psy_audio_PS1Sampler*);
-static const psy_audio_MachineInfo* psy_audio_ps1sampler_vinfo(psy_audio_PS1Sampler*);
-static void psy_audio_ps1sampler_generateaudio(psy_audio_PS1Sampler*, psy_audio_BufferContext*);
-static void psy_audio_ps1sampler_seqtick(psy_audio_PS1Sampler*, uintptr_t channel,
-	const psy_audio_PatternEvent*);
-static void psy_audio_ps1sampler_newline(psy_audio_PS1Sampler*);
-static void psy_audio_ps1sampler_postnewline(psy_audio_PS1Sampler*);
-static psy_List* psy_audio_ps1sampler_sequencerinsert(psy_audio_PS1Sampler*, psy_List* events);
 static void psy_audio_ps1sampler_stop(psy_audio_PS1Sampler*);
-static const psy_audio_MachineInfo* info(psy_audio_PS1Sampler*);
-static uintptr_t psy_audio_ps1sampler_numparametercols(psy_audio_PS1Sampler*);
-static uintptr_t psy_audio_ps1sampler_numparameters(psy_audio_PS1Sampler*);
-static psy_audio_MachineParam* psy_audio_ps1sampler_parameter(psy_audio_PS1Sampler*,
-	uintptr_t param);
-static void psy_audio_ps1sampler_dispose(psy_audio_PS1Sampler*);
-static void psy_audio_ps1sampler_disposeparameters(psy_audio_PS1Sampler*);
-static int psy_audio_ps1sampler_alloc_voice(psy_audio_PS1Sampler*);
-static uintptr_t psy_audio_ps1sampler_numinputs(psy_audio_PS1Sampler*);
-static uintptr_t psy_audio_ps1sampler_numoutputs(psy_audio_PS1Sampler*);
-static void psy_audio_ps1sampler_loadspecific(psy_audio_PS1Sampler*, psy_audio_SongFile*,
-	uintptr_t slot);
-static void psy_audio_ps1sampler_savespecific(psy_audio_PS1Sampler*, psy_audio_SongFile*,
-	uintptr_t slot);
 static void psy_audio_ps1sampler_stopinstrument(psy_audio_PS1Sampler*,
 	int insIdx);
 static void psy_audio_ps1sampler_setsamplerate(psy_audio_PS1Sampler*, int sr);
 static bool psy_audio_ps1sampler_playstrack(psy_audio_PS1Sampler*, int track);
 static int psy_audio_ps1sampler_getcurrentvoice(psy_audio_PS1Sampler*, int track);
-static void psy_audio_ps1sampler_initparameters(psy_audio_PS1Sampler*);
-static void psy_audio_ps1sampler_resamplingmethod_tweak(psy_audio_PS1Sampler*,
-	psy_audio_ChoiceMachineParam* sender, float value);
+static void psy_audio_ps1sampler_newline(psy_audio_PS1Sampler*);
+static void psy_audio_ps1sampler_clearmulticmdmem(psy_audio_PS1Sampler*);
+static int psy_audio_ps1sampler_getfreevoice(psy_audio_PS1Sampler*);
+static void psy_audio_ps1sampler_generateaudio(psy_audio_PS1Sampler*, psy_audio_BufferContext*);
 static void psy_audio_ps1sampler_ontimertick(psy_audio_PS1Sampler*);
 static void psy_audio_ps1sampler_ontimerwork(psy_audio_PS1Sampler*,
 	psy_audio_BufferContext*);
-static int psy_audio_ps1sampler_getfreevoice(psy_audio_PS1Sampler*);
+static psy_List* psy_audio_ps1sampler_sequencerinsert(psy_audio_PS1Sampler*, psy_List* events);
+static void psy_audio_ps1sampler_seqtick(psy_audio_PS1Sampler*, uintptr_t channel,
+	const psy_audio_PatternEvent*);
+static void psy_audio_ps1sampler_loadspecific(psy_audio_PS1Sampler*, psy_audio_SongFile*,
+	uintptr_t slot);
+static void psy_audio_ps1sampler_savespecific(psy_audio_PS1Sampler*, psy_audio_SongFile*,
+	uintptr_t slot);
+static void psy_audio_ps1sampler_initparameters(psy_audio_PS1Sampler*);
+static void psy_audio_ps1sampler_disposeparameters(psy_audio_PS1Sampler*);
+static uintptr_t psy_audio_ps1sampler_numparametercols(psy_audio_PS1Sampler*);
+static uintptr_t psy_audio_ps1sampler_numparameters(psy_audio_PS1Sampler*);
+static psy_audio_MachineParam* psy_audio_ps1sampler_parameter(psy_audio_PS1Sampler*,
+	uintptr_t param);
+static void psy_audio_ps1sampler_resamplingmethod_tweak(psy_audio_PS1Sampler*,
+	psy_audio_ChoiceMachineParam* sender, float value);
+static const psy_audio_MachineInfo* psy_audio_ps1sampler_vinfo(psy_audio_PS1Sampler*);
+static uintptr_t psy_audio_ps1sampler_numinputs(psy_audio_PS1Sampler*);
+static uintptr_t psy_audio_ps1sampler_numoutputs(psy_audio_PS1Sampler*);
 // vtable
 static MachineVtable sampler_vtable;
-static int sampler_vtable_initialized = 0;
-
+static bool sampler_vtable_initialized = FALSE;
+// implementation
 static void sampler_vtable_init(psy_audio_PS1Sampler* self)
 {
 	if (!sampler_vtable_initialized) {
 		sampler_vtable = *(psy_audio_ps1sampler_base(self)->vtable);
-		sampler_vtable.generateaudio = (fp_machine_generateaudio)psy_audio_ps1sampler_generateaudio;
-		sampler_vtable.seqtick = (fp_machine_seqtick)psy_audio_ps1sampler_seqtick;
-		sampler_vtable.newline = (fp_machine_newline)psy_audio_ps1sampler_newline;
+		sampler_vtable.generateaudio = (fp_machine_generateaudio)
+			psy_audio_ps1sampler_generateaudio;
+		sampler_vtable.seqtick = (fp_machine_seqtick)
+			psy_audio_ps1sampler_seqtick;
+		sampler_vtable.newline = (fp_machine_newline)
+			psy_audio_ps1sampler_newline;
 		sampler_vtable.sequencerinsert = (fp_machine_sequencerinsert)
 			psy_audio_ps1sampler_sequencerinsert;
 		sampler_vtable.stop = (fp_machine_stop)psy_audio_ps1sampler_stop;
 		sampler_vtable.info = (fp_machine_info)psy_audio_ps1sampler_vinfo;
-		sampler_vtable.dispose = (fp_machine_dispose)psy_audio_ps1sampler_dispose;
-		sampler_vtable.numinputs = (fp_machine_numinputs)psy_audio_ps1sampler_numinputs;
-		sampler_vtable.numoutputs = (fp_machine_numoutputs)psy_audio_ps1sampler_numoutputs;
-		sampler_vtable.loadspecific = (fp_machine_loadspecific)psy_audio_ps1sampler_loadspecific;
-		sampler_vtable.savespecific = (fp_machine_savespecific)psy_audio_ps1sampler_savespecific;
+		sampler_vtable.dispose = (fp_machine_dispose)
+			psy_audio_ps1sampler_dispose;
+		sampler_vtable.numinputs = (fp_machine_numinputs)
+			psy_audio_ps1sampler_numinputs;
+		sampler_vtable.numoutputs = (fp_machine_numoutputs)
+			psy_audio_ps1sampler_numoutputs;
+		sampler_vtable.loadspecific = (fp_machine_loadspecific)
+			psy_audio_ps1sampler_loadspecific;
+		sampler_vtable.savespecific = (fp_machine_savespecific)
+			psy_audio_ps1sampler_savespecific;
 		sampler_vtable.numparametercols = (fp_machine_numparametercols)
 			psy_audio_ps1sampler_numparametercols;
-		sampler_vtable.numparameters = (fp_machine_numparameters)psy_audio_ps1sampler_numparameters;
-		sampler_vtable.parameter = (fp_machine_parameter)psy_audio_ps1sampler_parameter;
-		sampler_vtable_initialized = 1;
+		sampler_vtable.numparameters = (fp_machine_numparameters)
+			psy_audio_ps1sampler_numparameters;
+		sampler_vtable.parameter = (fp_machine_parameter)
+			psy_audio_ps1sampler_parameter;
+		sampler_vtable_initialized = TRUE;
 	}
 }
 
 // psycle-mfc: Sampler::Sampler(int index) and Sampler::Init(void)
 // called by the MachineFactory
 // psy_audio_MachineCallback provides callbacks to the host
-// for samplerate samples and instruments
-// This avoids the static Global calls of mfc psycle
+// for samplerate, samples and instruments.
+// This avoids the static global::player calls of psycle-mfc
 void psy_audio_ps1sampler_init(psy_audio_PS1Sampler* self,
 	psy_audio_MachineCallback callback)
 {
@@ -231,11 +237,12 @@ void psy_audio_ps1sampler_dispose(psy_audio_PS1Sampler* self)
 {
 	int i;
 
+	psy_audio_ps1sampler_clearmulticmdmem(self);
 	psy_audio_ps1sampler_disposeparameters(self);
 	for (i = 0; i < PS1_SAMPLER_MAX_POLYPHONY; i++) {
 		psy_audio_ps1samplervoice_dispose(&self->_voices[i]);
 	}
-	custommachine_dispose(&self->custommachine);
+	custommachine_dispose(&self->custommachine);	
 }
 
 // psycle-mfc: Sampler::Stop(void)
@@ -299,7 +306,8 @@ int psy_audio_ps1sampler_getcurrentvoice(psy_audio_PS1Sampler* self, int track)
 
 // mfc-psycle: Sampler::NewLine()
 void psy_audio_ps1sampler_newline(psy_audio_PS1Sampler* self)
-{
+{	
+	psy_audio_ps1sampler_clearmulticmdmem(self);
 	for (int voice = 0; voice < self->_numVoices; voice++)
 	{
 		psy_audio_ps1samplervoice_newline(&self->_voices[voice]);
@@ -317,7 +325,13 @@ void psy_audio_ps1sampler_newline(psy_audio_PS1Sampler* self)
 }
 
 // mfc-psycle: Sampler::PostNewLine()
-void psy_audio_ps1sampler_postnewline(psy_audio_PS1Sampler* self)
+//			   Event Order in mfc-psycle is newline; executeline; postnewline
+//			   Sequencer can execute notes at every time, so a postnewline
+//			   can't be implemented in this way. Instead multicmds are cleared
+//			   before notifyline. clearmulticmdmem; notifynewline;
+//             Problems may occur if notes are inside a line.
+//             Multicmds may be called twice
+void psy_audio_ps1sampler_clearmulticmdmem(psy_audio_PS1Sampler* self)
 {
 	psy_list_deallocate(&self->multicmdMem, (psy_fp_disposefunc)NULL);
 }
@@ -428,7 +442,7 @@ void psy_audio_ps1sampler_seqtick(psy_audio_PS1Sampler* self, uintptr_t channel,
 			if (useVoice == -1) { useVoice = idx; }
 		}
 		if (useVoice == -1)	// No free voices. Assign first one.
-		{						// This algorithm should be replace by a LRU lookup
+		{					// This algorithm should be replace by a LRU lookup
 			useVoice = 0;
 		}
 		self->_voices[useVoice]._channel = channel;
@@ -438,11 +452,13 @@ void psy_audio_ps1sampler_seqtick(psy_audio_PS1Sampler* self, uintptr_t channel,
 			if (data.note == NOTECOMMANDS_RELEASE) psy_audio_ps1samplervoice_noteoff(&self->_voices[idx]);  //  Handle Note Off
 			useVoice = idx;
 		}
-		if (useVoice == -1) return;   // No playing note on this channel. Just go out.
-										// Change it if you have channel commands.
+		if (useVoice == -1) return; // No playing note on this channel. Just go out.
+									// Change it if you have channel commands.
 	}
 	// If you want to make a command that controls more than one voice (the entire channel, for
 	// example) you'll need to change this. Otherwise, add it to Voice.Tick().
+	// Todo: mfc-psycle: Event Order newline; executeline; postnewline;
+	// Sequencer can emit notes inside a line aswell. This may execute multicmds twice.
 	psy_audio_ps1samplervoice_tick(&self->_voices[useVoice], &data, channel,
 		self->defaultspeed ? NOTECOMMANDS_MIDDLEC : 48, self->multicmdMem);
 }
@@ -653,7 +669,7 @@ int psy_audio_ps1samplervoice_tick(psy_audio_PS1SamplerVoice* self, psy_audio_Pa
 
 // mfc-psycle: void Sampler::EnablePerformFx()
 // cpsycle: none
-//			Ticks are always generated from the sampler
+//			Ticks are generated from the sampler
 //			(see psy_audio_ps1sampler_newline)
 
 // mfc-psycle: GenerateAudioInTicks(int /*startSample*/,  int numSamples)
@@ -674,6 +690,34 @@ void psy_audio_ps1sampler_generateaudio(psy_audio_PS1Sampler* self, psy_audio_Bu
 	//             cpsycle adds them in sequenceinsert
 	self->samplerowcounter += bc->numsamples;
 	psy_audio_samplerticktimer_update(&self->ticktimer, bc->numsamples, bc);
+}
+
+void psy_audio_ps1sampler_ontimertick(psy_audio_PS1Sampler* self)
+{
+	if (self->linearslide) {
+		int voice;
+
+		for (voice = 0; voice < self->_numVoices; voice++)
+		{
+			if (psy_audio_samplerticktimer_tickcount(&self->ticktimer) != 0) {
+				psy_audio_ps1samplervoice_performfxnew(&self->_voices[voice]);
+			}
+		}
+	}
+}
+
+void psy_audio_ps1sampler_ontimerwork(psy_audio_PS1Sampler* self,
+	psy_audio_BufferContext* bc)
+{
+	int voice;
+
+	for (voice = 0; voice < self->_numVoices; voice++)
+	{
+		psy_audio_ps1samplervoice_work(&self->_voices[voice],
+			bc->numsamples,
+			psy_audio_buffer_at(bc->output, 0),
+			psy_audio_buffer_at(bc->output, 1));
+	}
 }
 
 // mfc-psycle: none
@@ -724,8 +768,8 @@ psy_List* psy_audio_ps1sampler_sequencerinsert(psy_audio_PS1Sampler* self, psy_L
 }
 
 // mfc-psycle: void Voice::Work(int numsamples, helpers::dsp::resampler::work_func_type pResamplerWork, float* pSamplesL, float* pSamplesR)
-// cpsycle:	Resampler is part of the sampleiterator. WaveDataController and
-//          doesn't need to be passed
+// cpsycle:	Resampler is part of the sampleiterator (WaveDataController) and
+//          doesn't need to be passed to work
 void psy_audio_ps1samplervoice_work(psy_audio_PS1SamplerVoice* self, int numsamples, float* pSamplesL, float* pSamplesR)
 {
 	float left_output;
@@ -863,28 +907,18 @@ void psy_audio_ps1samplervoice_rampvolume(psy_audio_PS1SamplerVoice* self)
 
 // mfc-psycle: Voice::NoteOff()
 void psy_audio_ps1samplervoice_noteoff(psy_audio_PS1SamplerVoice* self)
-{
-	if (self->_envelope.stage != ENV_OFF)
-	{
-		psy_dsp_adsr_release(&self->_envelope);
-		psy_dsp_adsr_release(&self->_filterEnv);
-		//_envelope._step = (_envelope._value / inst->ENV_RT) * _envelope.sratefactor;
-		//_filterEnv._step = (_filterEnv._value / inst->ENV_F_RT) * _envelope.sratefactor;
-	}
+{	
+	psy_dsp_adsr_release(&self->_envelope);
+	psy_dsp_adsr_release(&self->_filterEnv);		
 	self->_triggerNoteDelay = 0;
 	self->_triggerNoteOff = 0;
 }
 
 // mfc-psycle: Voice::NoteOffFast()
 void psy_audio_ps1samplervoice_noteofffast(psy_audio_PS1SamplerVoice* self)
-{
-	if (self->_envelope.stage != ENV_OFF)
-	{
-		psy_dsp_adsr_fastrelease(&self->_envelope);
-		psy_dsp_adsr_fastrelease(&self->_filterEnv);
-		//_envelope._step = (_envelope._value / inst->ENV_RT) * _envelope.sratefactor;
-		//_filterEnv._step = (_filterEnv._value / inst->ENV_F_RT) * _envelope.sratefactor;
-	}
+{	
+	psy_dsp_adsr_fastrelease(&self->_envelope);
+	psy_dsp_adsr_fastrelease(&self->_filterEnv);		
 	self->_triggerNoteDelay = 0;
 	self->_triggerNoteOff = 0;
 }
@@ -1101,6 +1135,41 @@ void psy_audio_ps1sampler_disposeparameters(psy_audio_PS1Sampler* self)
 	psy_audio_intmachineparam_dispose(&self->param_instrumentbank);
 }
 
+uintptr_t psy_audio_ps1sampler_numparameters(psy_audio_PS1Sampler* self)
+{
+	return 4;
+}
+
+uintptr_t psy_audio_ps1sampler_numparametercols(psy_audio_PS1Sampler* self)
+{
+	return 4;
+}
+
+psy_audio_MachineParam* psy_audio_ps1sampler_parameter(psy_audio_PS1Sampler* self, uintptr_t param)
+{
+	switch (param) {
+	case 0: return &self->param_numvoices.machineparam;
+		break;
+	case 1: return &self->param_resamplingmethod.machineparam;
+		break;
+	case 2: return &self->param_defaultspeed.machineparam;
+		break;
+	case 3: return &self->param_instrumentbank.machineparam;
+		break;
+	default:
+		break;
+	}
+	return NULL;
+}
+
+void psy_audio_ps1sampler_resamplingmethod_tweak(psy_audio_PS1Sampler* self,
+	psy_audio_ChoiceMachineParam* sender, float value)
+{
+	psy_audio_ps1sampler_setresamplerquality(self,
+		(int)(value * (sender->maxval - sender->minval) + 0.5f) +
+		sender->minval);
+}
+
 psy_audio_PS1Sampler* psy_audio_ps1sampler_alloc(void)
 {
 	return (psy_audio_PS1Sampler*)malloc(sizeof(psy_audio_PS1Sampler));
@@ -1117,73 +1186,9 @@ psy_audio_PS1Sampler* psy_audio_ps1sampler_allocinit(psy_audio_MachineCallback c
 	return rv;
 }
 
-void psy_audio_ps1sampler_ontimertick(psy_audio_PS1Sampler* self)
-{
-	if (self->linearslide) {
-		int voice;
-
-		for (voice = 0; voice < self->_numVoices; voice++)
-		{
-			if (psy_audio_samplerticktimer_tickcount(&self->ticktimer) != 0) {
-				psy_audio_ps1samplervoice_performfxnew(&self->_voices[voice]);
-			}
-		}
-	}
-}
-
-void psy_audio_ps1sampler_ontimerwork(psy_audio_PS1Sampler* self,
-	psy_audio_BufferContext* bc)
-{
-	int voice;
-
-	for (voice = 0; voice < self->_numVoices; voice++)
-	{
-		psy_audio_ps1samplervoice_work(&self->_voices[voice],
-			bc->numsamples,
-			psy_audio_buffer_at(bc->output, 0),
-			psy_audio_buffer_at(bc->output, 1));
-	}
-}
-
-
 const psy_audio_MachineInfo* psy_audio_ps1sampler_vinfo(psy_audio_PS1Sampler* self)
 {	
 	return &macinfo;
-}
-
-uintptr_t psy_audio_ps1sampler_numparameters(psy_audio_PS1Sampler* self)
-{
-	return 4;
-}
-
-uintptr_t psy_audio_ps1sampler_numparametercols(psy_audio_PS1Sampler* self)
-{
-	return 4;
-}
-
-psy_audio_MachineParam* psy_audio_ps1sampler_parameter(psy_audio_PS1Sampler* self, uintptr_t param)
-{
-	switch (param) {
-		case 0: return &self->param_numvoices.machineparam;
-			break;
-		case 1: return &self->param_resamplingmethod.machineparam;
-			break;
-		case 2: return &self->param_defaultspeed.machineparam;
-			break;
-		case 3: return &self->param_instrumentbank.machineparam;
-			break;
-		default:
-			break;
-	}
-	return NULL;
-}
-
-void psy_audio_ps1sampler_resamplingmethod_tweak(psy_audio_PS1Sampler* self,
-	psy_audio_ChoiceMachineParam* sender, float value)
-{	
-	psy_audio_ps1sampler_setresamplerquality(self,
-		(int)(value * (sender->maxval - sender->minval) + 0.5f) +
-			sender->minval);	
 }
 
 uintptr_t psy_audio_ps1sampler_numinputs(psy_audio_PS1Sampler* self)

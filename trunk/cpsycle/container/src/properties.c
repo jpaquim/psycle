@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "properties.h"
+#include "list.h"
 #include <malloc.h>
 #include <string.h>
 #include <stdio.h>
@@ -21,7 +22,40 @@ static void* target;
 static psy_PropertiesCallback callback;
 static int level;
 
-#define MAXSTRINGSIZE 4096
+void psy_property_copy(psy_Property* self, psy_Property* src)
+{
+	self->key = src->key ? strdup(src->key) : NULL;
+	self->text = src->text ? strdup(src->text) : NULL;
+	self->shorttext = src->shorttext ? strdup(src->shorttext) : NULL;
+	self->translation = src->translation ? strdup(src->translation) : NULL;
+	self->comment = src->comment ? strdup(src->comment) : NULL;
+	if (src->typ == PSY_PROPERTY_TYP_STRING ||
+			src->typ == PSY_PROPERTY_TYP_FONT) {
+		self->value.s = (src->value.s) ? strdup(src->value.s) : NULL;
+	} else {
+		self->value = src->value;
+	}	
+	self->min = src->min;
+	self->max = src->max;
+	self->typ = src->typ;
+	self->hint = src->hint;
+	self->disposechildren = src->disposechildren;
+	self->save = src->save;
+	self->id = src->id;
+}
+
+void psy_property_dispose(psy_Property* self)
+{
+	free(self->key);
+	free(self->text);
+	free(self->shorttext);
+	free(self->translation);
+	free(self->comment);
+	if (self->typ == PSY_PROPERTY_TYP_STRING ||
+			self->typ == PSY_PROPERTY_TYP_FONT) {
+		free(self->value.s);
+	}	
+}
 
 void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType typ)
 {		
@@ -42,7 +76,7 @@ void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType
 	self->item.save = 1;    
 }
 
-void properties_free(psy_Properties* self)
+void psy_properties_free(psy_Properties* self)
 {
 	psy_Properties* p;
 	psy_Properties* q;
@@ -50,22 +84,14 @@ void properties_free(psy_Properties* self)
 	if (self) {
 		p = self;
 		for (p = self; p != NULL; p = q) {
-			q = p->next;
+			q = p->next;			
 			if (p->dispose) {
 				p->dispose(&p->item);
+			} else
+			if (p->children && p->item.disposechildren) {
+				psy_properties_free(p->children);
 			}
-			else
-				if (p->children && p->item.disposechildren) {
-					properties_free(p->children);
-				}			
-			free(p->item.key);
-			free(p->item.text);
-			free(p->item.translation);
-			free(p->item.shorttext);
-			free(p->item.comment);
-			if (p->item.typ == PSY_PROPERTY_TYP_STRING) {
-				free(p->item.value.s);
-			}
+			psy_property_dispose(&p->item);
 			free(p);			
 		}
 	}	
@@ -96,47 +122,30 @@ psy_Properties* psy_properties_create_section(psy_Properties* self, const char* 
 
 psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 {
-	psy_Properties* first = 0;
-	psy_Properties* rv = 0;
-	psy_Properties* p = 0;
-	psy_Properties* q = 0;
+	psy_Properties* first = NULL;
+	psy_Properties* rv = NULL;
+	psy_Properties* p = NULL;
+	psy_Properties* q = NULL;
 	
 	p = self;
-	while (p) {		
-		rv = (psy_Properties*) malloc(sizeof(psy_Properties));
-		if (!first) {
-			first = rv;			
-		} else
-		if (!all) {
+	while (p) {
+		if (first != NULL && !all) {
 			break;
-		} else {
+		}
+		rv = (psy_Properties*) malloc(sizeof(psy_Properties));
+		if (!rv) {
+			break;
+		}
+		if (first == NULL) {
+			first = rv;			
+		} else {		
 			q->next = rv;
 		}
-		rv->next = 0;		
-		rv->parent = 0;
-		rv->children = 0;
-		rv->dispose = 0;			
-		rv->item = p->item;
-
-		rv->item.key = p->item.key ? strdup(p->item.key) : 0;
-		rv->item.text = p->item.text ? strdup(p->item.text) : 0;
-		rv->item.translation = p->item.translation ? strdup(p->item.translation) : 0;
-		rv->item.shorttext = p->item.shorttext ? strdup(p->item.shorttext) : 0;
-		rv->item.comment = p->item.comment ? strdup(p->item.comment) : 0;
-		rv->item.min = p->item.min;
-		rv->item.max = p->item.max;		
-		if (rv->item.typ == PSY_PROPERTY_TYP_STRING) {
-			rv->item.value.s = rv->item.value.s 
-				? strdup(rv->item.value.s)
-				: 0;
-		} else {
-			rv->item.value = p->item.value;
-		}
-		rv->item.typ = p->item.typ;
-		rv->item.hint = p->item.hint;
-		rv->item.id = p->item.id;
-		rv->item.disposechildren = 1;
-		rv->item.save = p->item.save;
+		rv->next = NULL;		
+		rv->parent = NULL;
+		rv->children = NULL;
+		rv->dispose = NULL;
+		psy_property_copy(&rv->item, &p->item);				
 		if (p->children) {
 			psy_Properties* i;
 			rv->children = psy_properties_clone(p->children, 1);
@@ -589,13 +598,13 @@ psy_Properties* psy_properties_findsectionex(psy_Properties* self, const char* k
 	psy_Properties** prev)
 {	
 	psy_Properties* p;	
-	char text[MAXSTRINGSIZE];
+	char* text;
 	char seps[]   = " .";
 	char *token;
 
 	p = self;
 	*prev = p;
-	strcpy(text, key);
+	text = strdup(key);
 	token = strtok(text, seps );
 	while(token != 0) {
 		p = psy_properties_find(p, token);	
@@ -604,7 +613,8 @@ psy_Properties* psy_properties_findsectionex(psy_Properties* self, const char* k
 		}		
 		*prev = p;
 		token = strtok(0, seps );		
-	}	
+	}
+	free(text);
 	return p;
 }
 
@@ -628,28 +638,37 @@ const char* psy_properties_valuestring(psy_Properties* self)
 	return (self && self->item.value.s) ? self->item.value.s : "";
 }
 
-void psy_properties_sections(psy_Properties* self, char* text)
+char_dyn_t* psy_properties_sections(psy_Properties* self)
 {	
+	char_dyn_t* rv;
 	psy_Properties* p;
-
-	text[0] = '\0';
+	psy_List* tokens;
+	psy_List* q;
+	uintptr_t size;
+	
 	p = self;
-	while (p) {
-		if (p->item.typ == PSY_PROPERTY_TYP_SECTION &&
-			 (strlen(text) + 1 + strlen(psy_properties_key(p))) < MAXSTRINGSIZE) {
-			char buffer[MAXSTRINGSIZE];
-			
-			strcpy(buffer, text);
-			if (p->parent && p->parent->item.typ == PSY_PROPERTY_TYP_SECTION) {
-				strcpy(text, ".");
-			} else {
-				text[0] = '\0';
+	tokens = NULL;
+	size = 1;
+	while (p != NULL) {
+		if (p->item.typ == PSY_PROPERTY_TYP_SECTION) {
+			psy_list_insert(&tokens, NULL, psy_properties_key(p));
+			size += strlen(psy_properties_key(p));
+			if (p->parent) {
+				++size;
 			}
-			strcat(text, psy_properties_key(p));			
-			strcat(text, buffer);			
-		}
+		}		
 		p = p->parent;
-	}	
+	}
+	rv = (char_dyn_t*) malloc(size);
+	*rv = '\0';
+	for (q = tokens; q != NULL; psy_list_next(&q)) {
+		if (q->prev != NULL) {
+			strcat(rv, ".");
+		}
+		strcat(rv, (char*)(q->entry));
+	}
+	psy_list_free(tokens);
+	return rv;
 }
 
 psy_Properties* psy_properties_settext(psy_Properties* self, const char* text)
@@ -784,7 +803,7 @@ psy_Properties* psy_properties_remove(psy_Properties* self, psy_Properties* prop
 					q->next = p->next;
 				}				
 				p->next = NULL;
-				properties_free(p);
+				psy_properties_free(p);
 				break;
 			}
 			q = p;
@@ -797,7 +816,7 @@ psy_Properties* psy_properties_remove(psy_Properties* self, psy_Properties* prop
 void psy_properties_clear(psy_Properties* self)
 {			
 	if (self) {
-		properties_free(self->children);
+		psy_properties_free(self->children);
 		self->children = 0;
 	}
 }

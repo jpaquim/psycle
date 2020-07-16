@@ -1435,7 +1435,7 @@ int driver_dispose(psy_AudioDriver* driver)
 	AsioDriver* self = (AsioDriver*)driver;
 	delete self->asioif;
 	self->asioif = 0;
-	properties_free(self->driver.properties);
+	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseAVRT();
 	return 0;
@@ -1486,7 +1486,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 
 	self = (AsioDriver*)driver;
 	if (config) {
-		properties_free(self->driver.properties);
+		psy_properties_free(self->driver.properties);
 		self->driver.properties = psy_properties_clone(config, 1);
 	}
 	else {

@@ -65,6 +65,11 @@ psy_List* psy_list_cat(psy_List** self, psy_List* list)
 psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 {
 	psy_List* next;
+	if (*self == NULL) {
+		assert(ptr == NULL);
+		*self = psy_list_create(entry);
+		return (*self)->tail;
+	} else
 	if (ptr == NULL) {
 		ptr = psy_list_create(entry);
 		(*self)->prev = ptr;

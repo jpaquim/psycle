@@ -108,15 +108,17 @@ void machineinfo_setnativeinfo(psy_audio_MachineInfo* self,
 void machineinfo_dispose(psy_audio_MachineInfo* self)
 {
 	free(self->Author);
-	self->Author = 0;
+	self->Author = NULL;
 	free(self->Name);
-	self->Name = 0;
+	self->Name = NULL;
+	free(self->ShortName);
+	self->ShortName = NULL;
 	free(self->Command);
-	self->Command = 0;
+	self->Command = NULL;
 	free(self->modulepath);	
-	self->modulepath = 0;
+	self->modulepath = NULL;
 	free(self->helptext);
-	self->helptext = 0;
+	self->helptext = NULL;
 }
 
 psy_audio_MachineInfo* machineinfo_alloc(void)

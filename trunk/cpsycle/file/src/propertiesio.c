@@ -206,7 +206,6 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 	}
 	if (property->item.key) {
 		char text[40];
-		char sections[MAXSTRINGSIZE];
 			
 		if (property->item.comment) {
 			fwrite("; ", sizeof(char), 2, fp);
@@ -218,12 +217,15 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 			fwrite("[root]", sizeof(char), 6, fp);			
 		} else
 		if (property->item.typ == PSY_PROPERTY_TYP_SECTION) {
-			psy_properties_sections(property, sections);
+			char_dyn_t* sections;
+
+			sections = psy_properties_sections(property);
 			fwrite("[", sizeof(char), 1, fp);
 			if (sections[0] != '\0') {
 				fwrite(sections, sizeof(char), strlen(sections), fp);
 			}			
 			fwrite("]", sizeof(char), 1, fp);
+			free(sections);
 		} else		
 		if (property->item.typ != PSY_PROPERTY_TYP_ACTION) {
 			if (strcmp(psy_properties_key(property), "favorite") == 0) {

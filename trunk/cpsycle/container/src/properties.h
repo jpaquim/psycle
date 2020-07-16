@@ -4,7 +4,7 @@
 #ifndef psy_PROPERTIES_H
 #define psy_PROPERTIES_H
 
-#include "../../detail/stdint.h"
+#include "../../detail/psydef.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -56,12 +56,15 @@ typedef struct {
 	int id;
 } psy_Property;
 
+void psy_property_dispose(psy_Property*);
+void psy_property_copy(psy_Property*, psy_Property* src);
+
 typedef struct psy_Properties {
 	psy_Property item;	
 	struct psy_Properties* next;
 	struct psy_Properties* children;
 	struct psy_Properties* parent;
-	void (*dispose)(psy_Property*);
+	void (*dispose)(psy_Property*);	
 } psy_Properties;
 
 typedef int (*psy_PropertiesCallback)(void* , psy_Properties*, int level);
@@ -71,7 +74,7 @@ psy_Properties* psy_properties_create(void);
 psy_Properties* psy_properties_clone(psy_Properties*, int all);
 psy_Properties* psy_properties_sync(psy_Properties*, psy_Properties* src);
 psy_Properties* psy_properties_create_section(psy_Properties*, const char* name);
-void properties_free(psy_Properties* );
+void psy_properties_free(psy_Properties* );
 psy_Properties* psy_properties_create_string(const char* key, const char* value);
 psy_Properties* psy_properties_create_font(const char* key, const char* value);
 psy_Properties* psy_properties_create_int(const char* key, int value, int min, int max);
@@ -104,7 +107,7 @@ psy_Properties* psy_properties_find(psy_Properties*, const char* key);
 psy_Properties* psy_properties_findsection(psy_Properties*, const char* key);
 psy_Properties* psy_properties_findsectionex(psy_Properties*, const char* key,
 	psy_Properties** prev);
-void psy_properties_sections(psy_Properties*, char* text);
+char_dyn_t* psy_properties_sections(psy_Properties*);
 int psy_properties_insection(psy_Properties*, psy_Properties* section);
 const char* psy_properties_key(psy_Properties*);
 int psy_properties_type(psy_Properties*);

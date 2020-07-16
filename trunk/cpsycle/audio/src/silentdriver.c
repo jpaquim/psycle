@@ -58,7 +58,7 @@ int driver_init(psy_AudioDriver* driver)
 
 int driver_dispose(psy_AudioDriver* driver)
 {
-	properties_free(driver->properties);
+	psy_properties_free(driver->properties);
 	driver->properties = 0;
 	return 0;
 }
