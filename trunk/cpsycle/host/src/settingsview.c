@@ -773,6 +773,7 @@ void propertiesrenderer_oneditchange(PropertiesRenderer* self, psy_ui_Edit* send
 				self->selected->item.key, atoi(psy_ui_edit_text(&self->edit)));
 		}
 		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
+		self->selected = NULL;
 	}
 }
 

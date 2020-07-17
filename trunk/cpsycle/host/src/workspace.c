@@ -237,9 +237,11 @@ void workspace_dispose(Workspace* self)
 	psy_audio_pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);
 	psy_properties_free(self->cmds);
+	self->cmds = NULL;
 	sequenceselection_dispose(&self->sequenceselection);
 	free(self->dialbitmappath);
 	psy_properties_free(self->recentsongs);
+	self->recentsongs = NULL;
 	psy_audio_exclusivelock_dispose();
 }
 
@@ -427,9 +429,11 @@ const char* workspace_eventdriverpath(Workspace* self)
 }
 
 void workspace_driverconfig(Workspace* self)
-{		
-	self->driverconfigure->item.disposechildren = 0;
-	self->driverconfigure->children = self->player.driver->properties->children;	
+{
+	psy_properties_free(self->driverconfigure->children);
+	self->driverconfigure->children = NULL;
+	psy_properties_append_property(self->driverconfigure,
+		psy_properties_clone(self->player.driver->properties, TRUE));
 }
 
 void workspace_mididriverconfig(Workspace* self, int driverid)
@@ -1389,23 +1393,28 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 	if (psy_properties_insection(property, self->driverconfigure)) {		
 		psy_Properties* driversection;
 
-		psy_audio_player_restartdriver(&self->player, 0);
+		// Properties driverconfigure: current driver, not saved in psycle.ini
+		// Set the changed driver settings and restart the driver
+		psy_audio_player_restartdriver(&self->player, self->driverconfigure->children);
+		// Due to restrictions by the driver it may not be the same as the value set.
+		// Reset displayed driver properties to the current driver ones
+		psy_properties_free(self->driverconfigure->children);
+		self->driverconfigure->children = NULL;
+		if (self->player.driver->properties) {
+			psy_properties_append_property(self->driverconfigure,
+				psy_properties_clone(self->player.driver->properties, 1));
+		}
+		// Properties driversections: settings for all in/out drivers, saved in psycle.ini
+		// Update the driversection aswell
 		driversection = psy_properties_find(self->driverconfigurations, 
 			workspace_driverkey(self));
 		if (driversection) {
-			if (driversection->children) {
-				psy_Properties* driverconfig;
-				psy_properties_free(driversection->children);
-
-				driverconfig = 
-					psy_properties_clone(self->player.driver->properties, 1);
-				if (driverconfig) {
-					driversection->children = driverconfig->children;					
-					if (driversection->children) {
-						driversection->children->parent =
-							driversection->children;
-					}
-				}
+			psy_Properties* driverconfig;
+			psy_properties_free(driversection->children);
+			driversection->children = NULL;
+			if (self->player.driver->properties) {
+				psy_properties_append_property(driversection,
+					psy_properties_clone(self->player.driver->properties, 1));			
 			}
 		}
 		return;
