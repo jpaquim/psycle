@@ -90,6 +90,7 @@ void psy_properties_free(psy_Properties* self)
 			} else
 			if (p->children && p->item.disposechildren) {
 				psy_properties_free(p->children);
+				p->children = NULL;
 			}
 			psy_property_dispose(&p->item);
 			free(p);			
@@ -687,7 +688,7 @@ const char* psy_properties_text(psy_Properties* self)
 
 psy_Properties* psy_properties_settranslation(psy_Properties* self, const char* text)
 {
-	if (self) {
+	if (self && self->item.translation != text) {
 		free(self->item.translation);
 		self->item.translation = strdup(text);
 	}

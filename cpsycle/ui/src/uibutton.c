@@ -262,10 +262,7 @@ void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 {	
 	free(self->text);
 	self->text = strdup(text);
-	psy_ui_component_invalidate(psy_ui_button_base(self));
-    TRACE("button text:");
-    TRACE(self->text);
-    TRACE("\n");
+	psy_ui_component_invalidate(psy_ui_button_base(self));    
 }
 
 void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
