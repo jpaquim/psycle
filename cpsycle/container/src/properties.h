@@ -56,6 +56,7 @@ typedef struct {
 	int id;
 } psy_Property;
 
+void psy_property_init(psy_Property*);
 void psy_property_dispose(psy_Property*);
 void psy_property_copy(psy_Property*, psy_Property* src);
 

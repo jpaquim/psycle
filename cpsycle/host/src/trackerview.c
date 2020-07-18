@@ -68,23 +68,23 @@ static void entervaluecolumn(psy_audio_PatternEntry* entry, int column, int valu
 
 	ev = patternentry_front(entry);
 	switch (column) {
-	case TRACKER_COLUMN_INST:
-		ev->inst = value;
-		break;
-	case TRACKER_COLUMN_MACH:
-		ev->mach = value;
-		break;
-	case TRACKER_COLUMN_VOL:
-		ev->vol = value;
-		break;
-	case TRACKER_COLUMN_CMD:
-		ev->cmd = value;
-		break;
-	case TRACKER_COLUMN_PARAM:
-		ev->parameter = value;
-		break;
-	default:
-		break;
+		case TRACKER_COLUMN_INST:
+			ev->inst = value;
+			break;
+		case TRACKER_COLUMN_MACH:
+			ev->mach = value;
+			break;
+		case TRACKER_COLUMN_VOL:
+			ev->vol = value;
+			break;
+		case TRACKER_COLUMN_CMD:
+			ev->cmd = value;
+			break;
+		case TRACKER_COLUMN_PARAM:
+			ev->parameter = value;
+			break;
+		default:
+			break;
 	}
 }
 
@@ -427,7 +427,8 @@ static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmouseup(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousedoubleclick(TrackerGrid*, psy_ui_MouseEvent*);
-static void trackergrid_onmousewheel(TrackerGrid*, psy_ui_Component* sender, psy_ui_MouseEvent*);
+static void trackergrid_onmousewheel(TrackerGrid*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 static psy_audio_PatternEditPosition trackergrid_makecursor(TrackerGrid*, int x, int y);
 static int trackergrid_resizecolumn(TrackerGrid*, int x, int y);
 static void trackergrid_dragcolumn(TrackerGrid*, psy_ui_MouseEvent*);
@@ -445,7 +446,7 @@ static void trackergrid_drawdigit(TrackerGrid*, psy_ui_Graphics*,
 static void trackergrid_onpreferredsize(TrackerGrid*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void trackergrid_inputevent(TrackerGrid*, const psy_audio_PatternEvent*,
-	int chordmode);
+	bool chordmode);
 static void trackergrid_enterdigitcolumn(TrackerGrid*, psy_audio_PatternEntry* entry,
 	int track, int column, int digit, int digitvalue);
 static void trackergrid_invalidatecursor(TrackerGrid*,
@@ -466,7 +467,7 @@ static void trackergrid_onblocktransposeup(TrackerGrid*);
 static void trackergrid_onblocktransposedown(TrackerGrid*);
 static void trackergrid_onblocktransposeup12(TrackerGrid*);
 static void trackergrid_onblocktransposedown12(TrackerGrid*);
-static void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, int chordmode);
+static void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, bool chordmode);
 static void trackergrid_inputvalue(TrackerGrid*, int value, int digit);
 static void trackergrid_prevtrack(TrackerGrid*);
 static void trackergrid_nexttrack(TrackerGrid*);
@@ -1461,13 +1462,13 @@ void trackergrid_rowclear(TrackerGrid* self)
 }
 
 void trackergrid_inputevent(TrackerGrid* self,
-	const psy_audio_PatternEvent* ev, int chordmode)
+	const psy_audio_PatternEvent* ev, bool chordmode)
 {
 	trackergrid_preventsync(self);
 	psy_undoredo_execute(&self->workspace->undoredo,
 		&InsertCommandAlloc(self->gridstate->pattern, self->bpl,
 			self->cursor, *ev, self->workspace)->command);
-	if (chordmode) {
+	if (chordmode != FALSE) {
 		trackergrid_nexttrack(self);
 	} else {
 		trackergrid_advanceline(self);
@@ -1475,26 +1476,25 @@ void trackergrid_inputevent(TrackerGrid* self,
 	trackergrid_enablesync(self);
 }
 
-
 void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
-	int chordmode)
+	bool chordmode)
 {
 	psy_audio_Machine* machine;
-	psy_audio_PatternEvent event;
+	psy_audio_PatternEvent ev;
 
-	patternevent_init_all(&event,
+	patternevent_init_all(&ev,
 		note,
 		NOTECOMMANDS_INST_EMPTY,
 		(unsigned char)psy_audio_machines_slot(&self->workspace->song->machines),
 		NOTECOMMANDS_VOL_EMPTY,
 		0,
 		0);
-	machine = psy_audio_machines_at(&self->workspace->song->machines, event.mach);
+	machine = psy_audio_machines_at(&self->workspace->song->machines, ev.mach);
 	if (machine &&
 		machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
-		event.inst = self->workspace->song->instruments.slot.subslot;
+		ev.inst = self->workspace->song->instruments.slot.subslot;
 	}
-	trackergrid_inputevent(self, &event, chordmode);
+	trackergrid_inputevent(self, &ev, chordmode);
 }
 
 void trackergrid_inputvalue(TrackerGrid* self, int value, int digit)
@@ -2989,14 +2989,14 @@ uintptr_t trackdef_value(TrackDef* self, uintptr_t column,
 			++c;
 		}
 		if (p) {
-			psy_audio_PatternEvent* event;
+			psy_audio_PatternEvent* ev;
 
-			event = (psy_audio_PatternEvent*)p->entry;
-			assert(event);
+			ev = (psy_audio_PatternEvent*)p->entry;
+			assert(ev);
 			if ((column % 2) == 0) {
-				rv = event->cmd;
+				rv = ev->cmd;
 			} else {
-				rv = event->parameter;
+				rv = ev->parameter;
 			}
 		} else {
 			rv = 0;
@@ -3045,34 +3045,33 @@ TrackColumnDef* trackdef_columndef(TrackDef* self, int column)
 		}
 	}
 	switch (column) {
-	case TRACKER_COLUMN_NOTE:
-		rv = &self->note;
-		break;
-	case TRACKER_COLUMN_INST:
-		rv = &self->inst;
-		break;
-	case TRACKER_COLUMN_MACH:
-		rv = &self->mach;
-		break;
-	case TRACKER_COLUMN_VOL:
-		rv = &self->vol;
-		break;
-	case TRACKER_COLUMN_CMD:
-		rv = &self->cmd;
-		break;
-	case TRACKER_COLUMN_PARAM:
-		rv = &self->param;
-		break;
-	default:
-		rv = 0;
-		break;
+		case TRACKER_COLUMN_NOTE:
+			rv = &self->note;
+			break;
+		case TRACKER_COLUMN_INST:
+			rv = &self->inst;
+			break;
+		case TRACKER_COLUMN_MACH:
+			rv = &self->mach;
+			break;
+		case TRACKER_COLUMN_VOL:
+			rv = &self->vol;
+			break;
+		case TRACKER_COLUMN_CMD:
+			rv = &self->cmd;
+			break;
+		case TRACKER_COLUMN_PARAM:
+			rv = &self->param;
+			break;
+		default:
+			rv = 0;
+			break;
 	}
 	return rv;
 }
 
 // TrackerView
 // prototypes
-
 static void trackerview_computefontheight(TrackerView*);
 static void trackerview_initblockmenu(TrackerView*);
 static void trackerview_connectblockmenu(TrackerView*);
@@ -3090,7 +3089,7 @@ static void trackerview_ontimer(TrackerView*, psy_ui_Component* sender,
 	uintptr_t timerid);
 static void trackerview_onnewline(TrackerView*, psy_audio_Sequencer*);
 static void trackerview_numtrackschanged(TrackerView* self, psy_audio_Player*,
-	unsigned int numsongtracks);
+	uintptr_t numsongtracks);
 static bool trackerview_handlecommand(TrackerView*, psy_ui_KeyEvent*, int cmd);
 static void trackerview_onalign(TrackerView*);
 static void trackerview_togglefollowsong(TrackerView*);
@@ -3309,7 +3308,7 @@ void trackerview_onalign(TrackerView* self)
 }
 
 void trackerview_numtrackschanged(TrackerView* self, psy_audio_Player* player,
-	unsigned int numsongtracks)
+	uintptr_t numsongtracks)
 {
 	self->gridstate.numtracks = numsongtracks;
 	psy_ui_component_updateoverflow(&self->grid.component);

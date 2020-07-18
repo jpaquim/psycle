@@ -694,6 +694,27 @@ void psy_ui_component_align(psy_ui_Component* self)
 	self->vtable->onalign(self);
 }
 
+void psy_ui_component_alignall(psy_ui_Component* self)
+{
+	psy_List* p;
+	psy_List* q;
+
+	// align
+	psy_ui_Aligner aligner;
+
+	psy_ui_aligner_init(&aligner, self);
+	psy_ui_aligner_align(&aligner);
+	psy_signal_emit(&self->signal_align, self, 0);
+	self->vtable->onalign(self);
+	for (p = q = psy_ui_component_children(self, 1); p != NULL; psy_list_next(&p)) {
+		psy_ui_Component* child;
+
+		child = (psy_ui_Component*)psy_list_entry(p);
+		psy_ui_component_align(child);
+	}	
+	psy_list_free(q);
+}
+
 void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	

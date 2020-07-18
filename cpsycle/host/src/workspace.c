@@ -1164,6 +1164,7 @@ void workspace_makelanges(Workspace* self)
 	psy_Properties* newmachine;
 	psy_Properties* samplesview;
 		
+	psy_properties_write_string(self->lang, "Song", "Canción");
 	psy_properties_write_string(self->lang, "Load", "Cargar");
 	psy_properties_write_string(self->lang, "Save", "Guardar");
 	psy_properties_write_string(self->lang, "New", "Nuevo");
@@ -1174,9 +1175,12 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Help", "Ayuda");
 	psy_properties_write_string(self->lang, "About", "Acerca de");
 	psy_properties_write_string(self->lang, "Machines", "Máquinas");
+	psy_properties_write_string(self->lang, "Patterns", "Patrones");
+	psy_properties_write_string(self->lang, "Pattern", "Patron");
 	psy_properties_write_string(self->lang, "Instrument", "Instrumento");
 	psy_properties_write_string(self->lang, "Instruments", "Instrumentos");	
 	psy_properties_write_string(self->lang, "Settings", "Opciones");
+	psy_properties_write_string(self->lang, "Render", "Renderizar");
 	psy_properties_write_string(self->lang, "Copy", "Copiar");
 	psy_properties_write_string(self->lang, "Del", "Eliminar");
 	psy_properties_write_string(self->lang, "Delete", "Eliminar");
@@ -1190,6 +1194,16 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Octave", "Octava");	
 	psy_properties_write_string(self->lang, "OK", "¡vale!");
 	psy_properties_write_string(self->lang, "All", "Todos");
+	psy_properties_write_string(self->lang, "Quality", "Calidad");
+	psy_properties_write_string(self->lang, "Dither", "Difuminado");
+	psy_properties_write_string(self->lang, "Selection", "Selección");
+	psy_properties_write_string(self->lang, "Record", "Grabar");
+	psy_properties_write_string(self->lang, "Enable", "Posibilitar");
+	psy_properties_write_string(self->lang, "from", "desde");
+	psy_properties_write_string(self->lang, "to", "hasta");
+	psy_properties_write_string(self->lang, "Number", "Número");
+	psy_properties_write_string(self->lang, "Save Wave", "Guardar Onda");
+	psy_properties_write_string(self->lang, "the entire song", "toda la canción");
 	psy_properties_write_string(self->lang, "Favorites", "Favoritos");
 	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");	
 	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");
@@ -1236,6 +1250,33 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(self->lang, "Unselect all", "Deselectar todos");
 	psy_properties_write_string(self->lang, "Remove connection with right click",
 		"Borrar conexíon con clic derecho");
+	psy_properties_write_string(self->lang, "sequence positions",
+		"posiciones de secuencia");
+	psy_properties_write_string(self->lang, "Samplerate",
+		"Frecuencia de muestreo");
+	psy_properties_write_string(self->lang, "Gaussian",
+		"Función del Gauss");
+	psy_properties_write_string(self->lang, "Bit Depth",
+		"Profundidad de bits");
+	psy_properties_write_string(self->lang, "None",
+		"Ninguno");
+	psy_properties_write_string(self->lang, "Noise-shaping",
+		"Forma del ruido");
+	psy_properties_write_string(self->lang, "Output Path",
+		"Trayectoria de salida");	
+	psy_properties_write_string(self->lang, "Save each unmuted",
+		"Guardar cada no mudo");
+	psy_properties_write_string(self->lang, "Kbd",
+		"Tecl");
+	psy_properties_write_string(self->lang, "Load Skin",
+		"Cargar Tema");
+	psy_properties_write_string(self->lang, "Default Skin",
+		"Tema por defecto");
+	psy_properties_write_string(self->lang, "Load Dial Bitmap",
+		"Cargar mapa de bits de dial");
+	psy_properties_write_string(self->lang, "Choose Font",
+		"Seleccionar Tipo de Letra");
+
 	machineview = psy_properties_create_section(self->lang, "machineview");
 	psy_properties_write_string(machineview, "New Machine", "Nueva Máquina");
 	psy_properties_write_string(machineview, "Wires", "Cables");
@@ -1244,7 +1285,7 @@ void workspace_makelanges(Workspace* self)
 	psy_properties_write_string(machineview, "Connect to Mixer Send/Return Input",
 		"Conectar a Mezclador Remitente/Vuelta Entrada");
 	sequencerview = psy_properties_create_section(self->lang, "sequencerview");
-	psy_properties_write_string(sequencerview, "Follow Song", "Seguir Song");
+	psy_properties_write_string(sequencerview, "Follow Song", "Seguir Canción");
 	psy_properties_write_string(sequencerview, "Show playlist", "Mostrar lista de reproducción");
 	psy_properties_write_string(sequencerview, "Show pattern names", "Mostrar nombres del patterns");
 	psy_properties_write_string(sequencerview, "Record tweaks", "Grabar tweaks");
@@ -1409,7 +1450,6 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 		driversection = psy_properties_find(self->driverconfigurations, 
 			workspace_driverkey(self));
 		if (driversection) {
-			psy_Properties* driverconfig;
 			psy_properties_free(driversection->children);
 			driversection->children = NULL;
 			if (self->player.driver->properties) {

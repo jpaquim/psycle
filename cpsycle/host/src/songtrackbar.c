@@ -16,7 +16,7 @@ static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
 static void songtrackbar_onsongtracknumchanged(SongTrackBar*, Workspace*,
-	unsigned int numsongtracks);
+	uintptr_t numsongtracks);
 static void songtrackbar_onsongchanged(SongTrackBar*, Workspace*,
 	int flag, psy_audio_SongFile* songfile);
 
@@ -78,7 +78,7 @@ void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 }
 
 void songtrackbar_onsongtracknumchanged(SongTrackBar* self,
-	Workspace* workspace, unsigned int numsongtracks)
+	Workspace* workspace, uintptr_t numsongtracks)
 {
 	psy_ui_combobox_setcursel(&self->trackbox, numsongtracks - MIN_TRACKS);
 }

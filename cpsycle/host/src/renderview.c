@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+#include "../../detail/trace.h"
+
 static void renderview_ondestroy(RenderView*, psy_ui_Component* sender);
 static void renderview_makeproperties(RenderView*);
 static void renderview_onsettingsviewchanged(RenderView*, PropertiesView* sender,
@@ -26,11 +28,11 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_component_enablealign(&self->component);
 	renderview_makeproperties(self);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
-		self->properties);
+		self->properties, workspace);
 	psy_signal_connect(&self->view.signal_changed, self,
 		renderview_onsettingsviewchanged);
 	psy_ui_component_setalign(&self->view.component, psy_ui_ALIGN_CLIENT);
-	self->fileoutdriver = psy_audio_create_fileout_driver();
+	self->fileoutdriver = psy_audio_create_fileout_driver();	
 }
 
 void renderview_ondestroy(RenderView* self, psy_ui_Component* sender)
@@ -60,7 +62,7 @@ void renderview_makeproperties(RenderView* self)
 		"Render");
 	psy_properties_settext(
 		psy_properties_append_action(actions, "savewave"),
-		"Save wave");
+		"Save Wave");
 	filesave = psy_properties_settext(
 		psy_properties_create_section(self->properties, "filesave"),
 		"File");
@@ -80,13 +82,13 @@ void renderview_makeproperties(RenderView* self)
 		"track as a separated"
 		"wav (track number will be appended to filename) ** may suffer from"
 		"'delay bleed' - insert silence at the end of your file if this is a "
-		"problem."
+		"problem"
 	);
 	psy_properties_settext(
 		psy_properties_append_string(savechoice, "filesave-generator", ""),
 		"generator as a separated wav (generator number will"
 		"be appended to filename) ** may suffer from 'delay bleed' - insert"
-		" silence at the end of your file if this is a problem."
+		" silence at the end of your file if this is a problem"
 	);
 	record = psy_properties_settext(
 		psy_properties_create_section(self->properties, "record"),
@@ -100,11 +102,11 @@ void renderview_makeproperties(RenderView* self)
 	);
 	recordpatnum = psy_properties_settext(
 		psy_properties_append_string(recordchoice, "record-pattern", ""),
-		"pattern"
+		"Pattern"
 	);
 	psy_properties_settext(
 		psy_properties_append_int(recordpatnum, "record-pattern-number", 0, 0, 256),
-		"number"
+		"Number"
 	);
 	recordseqpos = psy_properties_settext(
 		psy_properties_append_string(recordchoice, "record-seqpos", ""),
