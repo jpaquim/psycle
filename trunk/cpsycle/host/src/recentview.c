@@ -23,7 +23,7 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->clear.signal_clicked, self,
 		recentview_onclear);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
-		workspace_recentsongs(workspace));
+		workspace_recentsongs(workspace), workspace);
 	propertiesview_setcolumnwidth(&self->view, 1.f, 0.f, 0.f);
 	psy_ui_component_hide(&self->view.tabbar.component);
 	propertiesrenderer_setfixedwidth(&self->view.renderer,

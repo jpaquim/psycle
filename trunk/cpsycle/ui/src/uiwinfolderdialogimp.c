@@ -53,8 +53,8 @@ void psy_ui_win_folderdialogimp_init_all(psy_ui_win_FolderDialogImp* self,
 	imp_vtable_init(self);
 	self->imp.vtable = &imp_vtable;
 	self->parent = parent;
-	self->title = strdup(title);
-	self->initialdir = strdup(initialdir);
+	self->title = strdup(title ? title : "");
+	self->initialdir = strdup(initialdir ? initialdir : "");
 	self->path = strdup("");
 }
 
@@ -64,9 +64,9 @@ void dev_dispose(psy_ui_win_FolderDialogImp* self)
 	free(self->title);
 	free(self->initialdir);
 	free(self->path);
-	self->title = 0;
-	self->initialdir = 0;
-	self->path = 0;
+	self->title = NULL;
+	self->initialdir = NULL;
+	self->path = NULL;
 }
 
 int dev_execute(psy_ui_win_FolderDialogImp* self)

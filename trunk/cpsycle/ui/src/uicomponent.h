@@ -251,6 +251,7 @@ void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);
 int psy_ui_component_visible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
+void psy_ui_component_alignall(psy_ui_Component*);
 void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
 void psy_ui_component_setspacing(psy_ui_Component*, const psy_ui_Margin*);
 

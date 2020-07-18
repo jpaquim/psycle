@@ -19,9 +19,9 @@
 
 #include "../../detail/portable.h"
 
-#define terminalmessagecolor 0x0000FF00
-#define terminalwarningcolor 0x0000FFFF
-#define terminalerrorcolor 0x000000FF
+#define TERMINALMESSAGECOLOR 0x0000FF00
+#define TERMINALWARNINGCOLOR 0x0000FFFF
+#define TERMINALERRORCOLOR 0x000000FF
 
 static void mainframe_initstatusbar(MainFrame*);
 static void mainframe_initbars(MainFrame*);
@@ -72,7 +72,7 @@ static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
-	unsigned int numsongtracks);
+	uintptr_t numsongtracks);
 static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
@@ -222,7 +222,8 @@ void mainframe_init(MainFrame* self)
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		&self->viewtabbars.component,
-		self->workspace.config);	
+		self->workspace.config,
+		&self->workspace);	
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
 	helpview_init(&self->helpview, psy_ui_notebook_base(&self->notebook),
@@ -359,6 +360,10 @@ void mainframe_updatetext(MainFrame* self)
 		workspace_translate(&self->workspace, "Settings"),
 		workspace_translate(&self->workspace, "Help"),
 		NULL);
+	psy_ui_button_settext(&self->toggleterminal,
+		workspace_translate(&self->workspace, "Terminal"));
+	psy_ui_button_settext(&self->togglekbdhelp,
+		workspace_translate(&self->workspace, "Kbd"));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -958,7 +963,8 @@ void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
 	self->terminalhasmessage = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
 	if (!self->terminalhaswarning || self->terminalhaserror) {
-		psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(terminalmessagecolor));
+		psy_ui_button_settextcolor(&self->toggleterminal,
+			psy_ui_color_make(TERMINALMESSAGECOLOR));
 	}
 }
 
@@ -968,7 +974,8 @@ void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 	self->terminalhaswarning = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
 	if (!self->terminalhaserror) {
-		psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(terminalwarningcolor));
+		psy_ui_button_settextcolor(&self->toggleterminal,
+			psy_ui_color_make(TERMINALWARNINGCOLOR));
 	}
 }
 
@@ -977,7 +984,8 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 {
 	self->terminalhaserror = TRUE;
 	psy_ui_terminal_output(&self->terminal, text);
-	psy_ui_button_settextcolor(&self->toggleterminal, psy_ui_color_make(terminalerrorcolor));
+	psy_ui_button_settextcolor(&self->toggleterminal,
+		psy_ui_color_make(TERMINALERRORCOLOR));
 }
 
 void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
@@ -987,7 +995,7 @@ void mainframe_onzoomboxchanged(MainFrame* self, ZoomBox* sender)
 }
 
 void mainframe_onsongtrackschanged(MainFrame* self, psy_audio_Player* sender,
-	unsigned int numsongtracks)
+	uintptr_t numsongtracks)
 {
 	psy_ui_component_align(&self->component);
 }
@@ -1025,6 +1033,7 @@ void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 void mainframe_onlanguagechanged(MainFrame* self, Workspace* sender)
 {
 	mainframe_updatetext(self);
+	psy_ui_component_alignall(&self->top);
 }
 
 // this is called if a button is clicked in the checkunsavedbox

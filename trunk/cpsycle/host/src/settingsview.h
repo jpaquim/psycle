@@ -10,10 +10,24 @@
 #include <properties.h>
 #include "inputdefiner.h"
 #include "tabbar.h"
+#include "workspace.h"
+
+#include <hashtbl.h>
 
 // aim: Displays psy_Properties and allows to edit them.
 
 #define PROPERTIESRENDERER_NUMCOLS 3
+
+typedef struct PropertiesRenderLineState {
+	int cpy;
+	int cpx;
+	int level;
+	int numlines;
+	psy_Properties* properties;
+} PropertiesRenderLineState;
+
+void propertiesrenderlinestate_init(PropertiesRenderLineState*);
+void propertiesrenderlinestate_dispose(PropertiesRenderLineState*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -46,10 +60,14 @@ typedef struct {
 	psy_Signal signal_selected;
 	psy_ui_Value fixedwidth;
 	bool usefixedwidth;
+	PropertiesRenderLineState* linestate_clipstart;
+	uintptr_t currlinestatecount;
+	psy_Table linestates;
+	Workspace* workspace;
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
-	psy_Properties*);
+	psy_Properties*, Workspace*);
 
 void propertiesrenderer_setfixedwidth(PropertiesRenderer*, psy_ui_Value width);
 
@@ -60,10 +78,11 @@ typedef struct {
 	PropertiesRenderer renderer;
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
+	Workspace* workspace;
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Properties*);
+	psy_ui_Component* tabbarparent, psy_Properties*, Workspace*);
 
 INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
 	float col0_perc, float col1_perc, float col2_perc)

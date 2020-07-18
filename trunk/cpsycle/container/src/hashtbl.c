@@ -15,8 +15,6 @@ static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
 
 void psy_table_init(psy_Table* self)
 {
-  uintptr_t i;
-
   self->arraysize = psy_TABLEKEYS;
   memset(self->keys, 0, sizeof(self->keys));
   self->count = 0; 

@@ -769,7 +769,7 @@ int luamachine_setparameters(lua_State* L)
 	psy_audio_LuaMachine* self;
 
 	self = psyclescript_checkself(L, 1, luamachine_meta);
-	luamachine_setnumparameters(self, lua_rawlen(L, 2));
+	luamachine_setnumparameters(self, (uintptr_t)lua_rawlen(L, 2));
 	lua_pushvalue(L, 1);
 	lua_pushvalue(L, 2);
 	lua_setfield(L, -2, "params");
@@ -812,7 +812,7 @@ int luamachine_addparameters(lua_State* L)
 		lua_setfield(L, -2, "id_");
 		lua_rawseti(L, 3, lua_rawlen(L, 3) + 1); // params[#params+1] = newparam
 	}
-	luamachine_setnumparameters(self, lua_rawlen(L, 3));
+	luamachine_setnumparameters(self, (uintptr_t)lua_rawlen(L, 3));
 	lua_pushvalue(L, 1);
 	return 1;
 }
@@ -976,8 +976,8 @@ int luamachine_getparam(lua_State* L)
 	n = lua_gettop(L);
 	if (n == 2) {
 		psy_audio_LuaMachine* self;
-		size_t len;
-		size_t i;
+		lua_Unsigned len;
+		lua_Unsigned i;
 		const char* search;
 		const char* id;
 
