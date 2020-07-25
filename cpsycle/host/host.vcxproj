@@ -218,6 +218,7 @@
     <ClCompile Include="src\timebar.c" />
     <ClCompile Include="src\trackerview.c" />
     <ClCompile Include="src\trackscopeview.c" />
+    <ClCompile Include="src\translator.c" />
     <ClCompile Include="src\undoredobar.c" />
     <ClCompile Include="src\volslider.c" />
     <ClCompile Include="src\vubar.c" />
@@ -306,6 +307,7 @@
     <ClInclude Include="src\timebar.h" />
     <ClInclude Include="src\trackerview.h" />
     <ClInclude Include="src\trackscopeview.h" />
+    <ClInclude Include="src\translator.h" />
     <ClInclude Include="src\undoredobar.h" />
     <ClInclude Include="src\volslider.h" />
     <ClInclude Include="src\vubar.h" />

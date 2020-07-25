@@ -18,7 +18,9 @@
 #include <uinotebook.h>
 #include <uislider.h>
 
-// Instrument Editor for the sampulse ps1
+// Instrument Editor
+
+struct InstrumentView;
 
 typedef struct {	
 	psy_ui_Component component;	
@@ -31,6 +33,11 @@ typedef struct {
 	struct InstrumentView* view;
 } InstrumentHeaderView;
 
+void instrumentheaderview_init(InstrumentHeaderView*, psy_ui_Component* parent,
+	psy_audio_Instruments*, struct InstrumentView*, Workspace*);
+void instrumentheaderview_setinstrument(InstrumentHeaderView*,
+	psy_audio_Instrument*);
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component row1;
@@ -41,6 +48,9 @@ typedef struct {
 	psy_ui_Button duplicate;
 	psy_ui_Button del;
 } InstrumentViewButtons;
+
+void instrumentviewbuttons_init(InstrumentViewButtons*,
+	psy_ui_Component* parent, Workspace*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -64,6 +74,8 @@ typedef struct {
 void instrumentgeneralview_init(InstrumentGeneralView*,
 	psy_ui_Component* parent, psy_audio_Instruments*,
 	Workspace*);
+void instrumentgeneralview_setinstrument(InstrumentGeneralView*,
+	psy_audio_Instrument*);
 
 typedef struct {
 	psy_ui_Component component;	
@@ -77,12 +89,22 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 } InstrumentVolumeView;
 
+void instrumentvolumeview_init(InstrumentVolumeView*,
+	psy_ui_Component* parent, psy_audio_Instruments*, Workspace*);
+void instrumentvolumeview_setinstrument(InstrumentVolumeView*,
+	psy_audio_Instrument*);
+
 typedef struct {
 	psy_ui_Component component;		
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 	psy_ui_CheckBox randompanning;
 } InstrumentPanView;
+
+void instrumentpanview_init(InstrumentPanView*, psy_ui_Component* parent,
+	psy_audio_Instruments*, Workspace*);
+void instrumentpanview_setinstrument(InstrumentPanView* self,
+	psy_audio_Instrument*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -102,8 +124,8 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 } InstrumentFilterView;
 
-void instrumentfilterview_init(InstrumentFilterView*,
-	psy_ui_Component* parent, psy_audio_Instruments*);
+void instrumentfilterview_init(InstrumentFilterView*, psy_ui_Component* parent,
+	psy_audio_Instruments*, Workspace*);
 void instrumentfilterview_setinstrument(InstrumentFilterView*,
 	psy_audio_Instrument*);
 
@@ -112,6 +134,11 @@ typedef struct {
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 } InstrumentPitchView;
+
+void instrumentpitchview_init(InstrumentPitchView*, psy_ui_Component* parent,
+	psy_audio_Instruments*, Workspace*);
+void instrumentpitchview_setinstrument(InstrumentPitchView*,
+	psy_audio_Instrument*);
 
 typedef struct InstrumentView {
 	psy_ui_Component component;
@@ -135,5 +162,6 @@ typedef struct InstrumentView {
 
 void instrumentview_init(InstrumentView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
 
 #endif

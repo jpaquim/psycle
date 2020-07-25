@@ -30,8 +30,8 @@ static struct psy_audio_Samples* machinecallback_samples(void* self) { return 0;
 static psy_audio_Machines* machinecallback_machines(void* self) { return 0; }
 static struct psy_audio_Instruments* machinecallback_instruments(void* self) { return 0; }
 static struct psy_audio_MachineFactory* machinecallback_machinefactory(void* self) { return 0; }
-static void machinecallback_fileselect_load(void* self) { }
-static void machinecallback_fileselect_save(void* self) { }
+static bool machinecallback_fileselect_load(void* self) { return FALSE; }
+static bool machinecallback_fileselect_save(void* self) { return FALSE; }
 static void machinecallback_fileselect_directory(void* self) { }
 static void machinecallback_output(void* self, const char* text) { }
 static bool machinecallback_addcapture(void* self, int index) { return 0; }
@@ -240,6 +240,7 @@ static void currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* pres
 static void setpresets(psy_audio_Machine* self, struct psy_audio_Presets* presets) {}
 static struct psy_audio_Presets* presets(psy_audio_Machine* self) { return NULL; }
 static bool acceptpresets(psy_audio_Machine* self) { return FALSE; }
+static void command(psy_audio_Machine* self) { }
 
 /// machinecallback
 static uintptr_t samplerate(psy_audio_Machine* self) { return self->callback.samplerate(self->callback.context); }
@@ -369,6 +370,7 @@ static void vtable_init(void)
 		vtable.setpresets = setpresets;
 		vtable.presets = presets;
 		vtable.acceptpresets = acceptpresets;
+		vtable.command = command;
 		vtable.parameter_tweak = param_tweak;;
 		vtable.parameter_normvalue = param_normvalue;
 		vtable.parameter_range = param_range;

@@ -106,6 +106,10 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 	psy_ui_textout(g, 0, (psy_ui_value_px(&size.height, &tm) - tm.tmHeight) / 2, text, strlen(text));
 }
 
+// PatternViewBar
+static void patternviewbar_updatetext(PatternViewBar*, Translator*);
+static void patternviewbar_onlanguagechanged(PatternViewBar*, Translator* sender);
+
 void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
@@ -115,7 +119,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	stepbox_init(&self->step, &self->component, workspace);
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
 	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
-		"Move Cursor When Paste");
+		"move-cursor-when-paste");
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_onmovecursorwhenpaste);
 	psy_ui_checkbox_init(&self->defaultentries, &self->component);
@@ -135,6 +139,22 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	else {
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
 	}
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		patternviewbar_onlanguagechanged);
+	patternviewbar_updatetext(self, &self->workspace->translator);
+}
+
+void patternviewbar_updatetext(PatternViewBar* self, Translator* translator)
+{
+	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
+		translator_translate(translator, "move-cursor-when-paste"));
+	psy_ui_checkbox_settext(&self->defaultentries,
+		translator_translate(translator, "default-line"));
+}
+
+void patternviewbar_onlanguagechanged(PatternViewBar* self, Translator* sender)
+{
+	patternviewbar_updatetext(self, sender);
 }
 
 void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)

@@ -32,10 +32,10 @@ typedef struct {
 
 void machinesbox_init(MachinesBox*, psy_ui_Component* parent,
 	psy_audio_Machines*, MachineBoxMode, Workspace*);
-void MachinesBoxClone(MachinesBox*);
-void MachinesBoxRemove(MachinesBox*);
-void MachinesBoxExchange(MachinesBox*);
-void MachinesBoxShowParameters(MachinesBox*);
-void SetMachines(MachinesBox*, psy_audio_Machines*);
+void machinesbox_clone(MachinesBox*);
+void machinesbox_remove(MachinesBox*);
+void machinesbox_exchange(MachinesBox*);
+void machinesbox_showparameters(MachinesBox*);
+void machinesbox_setmachines(MachinesBox*, psy_audio_Machines*);
 
 #endif

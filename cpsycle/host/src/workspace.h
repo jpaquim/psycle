@@ -4,6 +4,7 @@
 #if !defined(WORKSPACE_H)
 #define WORKSPACE_H
 
+#include "translator.h"
 #include <song.h>
 #include <player.h>
 #include <propertiesio.h>
@@ -65,6 +66,7 @@ typedef struct {
 	psy_audio_Song* song;
 	psy_audio_Song* songcbk;
 	psy_audio_Player player;
+	psy_Properties* language;
 	psy_Properties* recentsongs;
 	psy_Properties* recentfiles;
 	psy_Properties* config;
@@ -74,7 +76,6 @@ typedef struct {
 	psy_Properties* keyboard;
 	psy_Properties* directories;
 	psy_Properties* compatibility;
-	psy_Properties* lang;	
 	psy_Properties* driverconfigure;
 	psy_Properties* driverconfigurations;
 	psy_Properties* midiconfigure;
@@ -128,6 +129,7 @@ typedef struct {
 	char* dialbitmappath;
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
+	Translator translator;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);

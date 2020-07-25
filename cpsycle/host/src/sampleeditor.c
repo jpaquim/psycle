@@ -128,9 +128,9 @@ void sampleeditorbar_ondrawlines(SampleEditorBar* self, psy_ui_Component* sender
 
 
 static void sampleeditoroperations_updatetext(SampleEditorOperations*,
-	Workspace*);
+	Translator*);
 static void sampleeditoroperations_initalign(SampleEditorOperations*);
-static void sampleeditorbar_onlanguagechanged(SampleEditorOperations*, Workspace*);
+static void sampleeditorbar_onlanguagechanged(SampleEditorOperations*, Translator* sender);
 
 void sampleeditoroperations_init(SampleEditorOperations* self,
 	psy_ui_Component* parent, Workspace* workspace)
@@ -143,7 +143,7 @@ void sampleeditoroperations_init(SampleEditorOperations* self,
 	psy_ui_button_init(&self->paste, &self->component);
 	psy_ui_button_init(&self->del, &self->component);
 	sampleeditoroperations_initalign(self);
-	sampleeditoroperations_updatetext(self, workspace);
+	sampleeditoroperations_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		sampleeditorbar_onlanguagechanged);
 }
@@ -162,25 +162,24 @@ void sampleeditoroperations_initalign(SampleEditorOperations* self)
 }
 
 void sampleeditoroperations_updatetext(SampleEditorOperations* self,
-	Workspace* workspace)
+	Translator* translator)
 {
-	psy_ui_button_settext(&self->cut, workspace_translate(workspace,
-		"Cut"));
-	psy_ui_button_settext(&self->crop, workspace_translate(workspace,
-		"Crop"));
-	psy_ui_button_settext(&self->copy, workspace_translate(workspace,
-		"Copy"));
-	psy_ui_button_settext(&self->paste, workspace_translate(workspace,
-		"Paste"));
-	psy_ui_button_settext(&self->del, workspace_translate(workspace,
-		"Delete"));
+	psy_ui_button_settext(&self->cut,
+		translator_translate(translator, "Cut"));
+	psy_ui_button_settext(&self->crop,
+		translator_translate(translator, "Crop"));
+	psy_ui_button_settext(&self->copy,
+		translator_translate(translator, "Copy"));
+	psy_ui_button_settext(&self->paste,
+		translator_translate(translator, "Paste"));
+	psy_ui_button_settext(&self->del,
+		translator_translate(translator, "Delete"));
 }
 
 void sampleeditorbar_onlanguagechanged(SampleEditorOperations* self,
-	Workspace* workspace)
+	Translator* translator)
 {
-	sampleeditoroperations_updatetext(self, workspace);
-	psy_ui_component_align(&self->component);
+	sampleeditoroperations_updatetext(self, translator);
 }
 
 static void sampleeditoramplify_ontweak(SampleEditorAmplify*, psy_ui_Slider*, float value);
@@ -258,9 +257,9 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self, psy_ui_Component*
 }
 
 static void sampleprocessview_updatetext(SampleEditorProcessView*,
-	Workspace*);
+	Translator*);
 static void sampleprocessview_onlanguagechanged(SampleEditorProcessView*,
-	Workspace* workspace);
+	Translator* translator);
 static void sampleprocessview_buildprocessorlist(SampleEditorProcessView*);
 static void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView*,
 	psy_ui_Component* sender, int index);
@@ -309,7 +308,7 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 		workspace);	
 	psy_ui_listbox_setcursel(&self->processors, 0);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);
-	sampleprocessview_updatetext(self, workspace);
+	sampleprocessview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		sampleprocessview_onlanguagechanged);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
@@ -320,18 +319,16 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 }
 
 void sampleprocessview_updatetext(SampleEditorProcessView* self,
-	Workspace* workspace)
+	Translator* translator)
 {
 	psy_ui_button_settext(&self->process,
-		workspace_translate(workspace,
-		"Process"));
+		translator_translate(translator, "process"));
 }
 
 void sampleprocessview_onlanguagechanged(SampleEditorProcessView* self,
-	Workspace* workspace)
+	Translator* translator)
 {
-	sampleprocessview_updatetext(self, workspace);
-	psy_ui_component_align(&self->component);
+	sampleprocessview_updatetext(self, translator);
 }
 
 void sampleprocessview_buildprocessorlist(SampleEditorProcessView* self)
@@ -1208,7 +1205,6 @@ void sampleeditor_onselectionchanged(SampleEditor* self, SampleBox* sender, Wave
 void sampleeditor_onlanguagechanged(SampleEditor* self,
 	Workspace* workspace)
 {
-	psy_ui_component_align(&self->component);
 }
 
 void sampleeditor_showdoublecontloop(SampleEditor* self)

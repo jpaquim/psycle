@@ -9,7 +9,7 @@ static void undoredobar_updatetext(UndoRedoBar*);
 static void undoredobar_initalign(UndoRedoBar* self);
 static void undoredobar_onundo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onredo(UndoRedoBar*, psy_ui_Component* sender);
-static void undoredobar_onlanguagechanged(UndoRedoBar*, psy_ui_Component* sender);
+static void undoredobar_onlanguagechanged(UndoRedoBar*, Translator* sender);
 static void undoredobar_ontimer(UndoRedoBar*, psy_ui_Component* sender, uintptr_t timerid);
 
 void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
@@ -37,9 +37,9 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 void undoredobar_updatetext(UndoRedoBar* self)
 {
 	psy_ui_button_settext(&self->undobutton,
-		workspace_translate(self->workspace, "Undo"));
+		workspace_translate(self->workspace, "undo"));
 	psy_ui_button_settext(&self->redobutton,
-		workspace_translate(self->workspace, "Redo"));
+		workspace_translate(self->workspace, "redo"));
 }
 
 void undoredobar_initalign(UndoRedoBar* self)
@@ -60,10 +60,9 @@ void undoredobar_onredo(UndoRedoBar* self, psy_ui_Component* sender)
 	workspace_redo(self->workspace);
 }
 
-void undoredobar_onlanguagechanged(UndoRedoBar* self, psy_ui_Component* sender)
+void undoredobar_onlanguagechanged(UndoRedoBar* self, Translator* sender)
 {
 	undoredobar_updatetext(self);
-	psy_ui_component_align(undoredobar_base(self));
 }
 
 void undoredobar_ontimer(UndoRedoBar* self, psy_ui_Component* sender,

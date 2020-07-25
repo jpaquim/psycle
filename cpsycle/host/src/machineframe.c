@@ -44,6 +44,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_button_settext(&self->mute, "Mute");
 	psy_ui_button_init(&self->parameters, &self->row0);
 	psy_ui_button_settext(&self->parameters, "Parameters");	
+	psy_ui_button_init(&self->command, &self->row0);
+	psy_ui_button_settext(&self->command, "Command");
 	psy_ui_button_init(&self->help, &self->row0);	
 	psy_ui_button_settext(&self->help, "Help");
 	psy_ui_button_init(&self->dock, &self->row0);
@@ -66,6 +68,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 static void machineframe_ondestroyed(MachineFrame* self,
 	psy_ui_Component* frame);
 static void machineframe_toggleparameterbox(MachineFrame*,
+	psy_ui_Component* sender);
+static void machineframe_oncommand(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_togglehelp(MachineFrame*,
 	psy_ui_Component* sender);
@@ -121,6 +125,8 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		machineframe_ondestroyed);
 	psy_signal_connect(&self->parameterbar.parameters.signal_clicked, self,
 		machineframe_toggleparameterbox);
+	psy_signal_connect(&self->parameterbar.command.signal_clicked, self,
+		machineframe_oncommand);
 	psy_signal_connect(&self->parameterbar.help.signal_clicked, self,
 		machineframe_togglehelp);
 	psy_signal_connect(&self->parameterbar.dock.signal_clicked, self,
@@ -186,7 +192,7 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 			: "");
 	} else {
 		psy_ui_editor_settext(&self->help, "");
-	}
+	}	
 }
 
 void machineframe_ondestroyed(MachineFrame* self, psy_ui_Component* frame)
@@ -229,6 +235,13 @@ void machineframe_toggleparameterbox(MachineFrame* self,
 		psy_ui_button_highlight(&self->parameterbar.parameters);
 	}
 	machineframe_resize(self);
+}
+
+void machineframe_oncommand(MachineFrame* self, psy_ui_Component* sender)
+{
+	if (self->machine) {
+		psy_audio_machine_command(self->machine);
+	}
 }
 
 void machineframe_togglehelp(MachineFrame* self,

@@ -108,8 +108,8 @@ void kbdbox_initfont(KbdBox* self)
 	self->corner.width = psy_ui_value_makepx(5);
 	self->corner.height = psy_ui_value_makepx(5);
 	self->descident = tm.tmAveCharWidth * 6;
-	self->ident = tm.tmHeight * 0.3;
-	self->keyheight = tm.tmHeight * 3.5;
+	self->ident = (int)(tm.tmHeight * 0.3);
+	self->keyheight = (tm.tmHeight * 3.5);
 	self->keywidth = tm.tmAveCharWidth * 16;
 }
 
@@ -159,7 +159,7 @@ void kbdbox_makekeys(KbdBox* self)
 		self->cpx = 0;
 		self->cpy = 0;
 
-		p = psy_properties_find(self->keyset, "main");
+		p = psy_properties_find(self->keyset, "main", PSY_PROPERTY_TYP_SECTION);
 		if (p && p->children) {
 			int currrow = 0;
 			for (p = p->children; p != NULL; p = p->next) {				

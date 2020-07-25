@@ -1605,9 +1605,9 @@ static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
 static void machineviewbar_onlanguagechanged(MachineViewBar*,
-	Workspace* sender);
+	Translator* sender);
 static void machineviewbar_updatetext(MachineViewBar* self,
-	Workspace* workspace);
+	Translator*);
 
 void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -1633,19 +1633,19 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineviewbar_onsongchanged);
-	machineviewbar_updatetext(self, workspace);
+	machineviewbar_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		machineviewbar_onlanguagechanged);	
 }
 
-void machineviewbar_updatetext(MachineViewBar* self, Workspace* workspace)
+void machineviewbar_updatetext(MachineViewBar* self, Translator* translator)
 {
 	psy_ui_checkbox_settext(&self->mixersend,
-		workspace_translate(workspace,
-			"machineview.Connect to Mixer Send/Return Input"));
+		translator_translate(translator,
+			"machineview.connect-to-mixer-send-return-input"));
 }
 
-void machineviewbar_onlanguagechanged(MachineViewBar* self, Workspace* sender)
+void machineviewbar_onlanguagechanged(MachineViewBar* self, Translator* sender)
 {
 	machineviewbar_updatetext(self, sender);
 }
@@ -1677,14 +1677,14 @@ void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
 }
 
 // MachineView
-static void machineview_updatetext(MachineView*, Workspace*);
+static void machineview_updatetext(MachineView*, Translator*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag, psy_audio_SongFile*);
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onkeydown(MachineView*, psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
 static void machineview_onskinchanged(MachineView*, Workspace*);
-static void machineview_onlanguagechanged(MachineView*, Workspace* workspace);
+static void machineview_onlanguagechanged(MachineView*, Translator* sender);
 static void selectsection(MachineView*, psy_ui_Component* sender, uintptr_t section);
 
 static psy_ui_ComponentVtable machineview_vtable;
@@ -1741,7 +1741,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		machineview_onskinchanged);	
-	machineview_updatetext(self, workspace);
+	machineview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		machineview_onlanguagechanged);
 	if (workspace_showwirehover(workspace)) {
@@ -1750,18 +1750,17 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	self->wireview.firstsize = 1;
 }
 
-void machineview_updatetext(MachineView* self, Workspace* workspace)
+void machineview_updatetext(MachineView* self, Translator* translator)
 {
 	tabbar_rename_tabs(&self->tabbar,
-		workspace_translate(self->workspace, "machineview.Wires"),
-		workspace_translate(self->workspace, "machineview.New Machine"),
+		translator_translate(translator, "machineview.wires"),
+		translator_translate(translator, "machineview.new-machine"),
 		NULL);
 }
 
-void machineview_onlanguagechanged(MachineView* self, Workspace* workspace)
+void machineview_onlanguagechanged(MachineView* self, Translator* sender)
 {
-	machineview_updatetext(self, workspace);
-	psy_ui_component_align(&self->component);
+	machineview_updatetext(self, sender);
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)

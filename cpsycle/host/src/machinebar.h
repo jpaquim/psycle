@@ -36,4 +36,9 @@ typedef struct {
 
 void machinebar_init(MachineBar*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* machinebar_base(MachineBar* self)
+{
+	return &self->component;
+}
+
 #endif

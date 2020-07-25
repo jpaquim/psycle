@@ -77,7 +77,7 @@ static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
 	psy_ui_Component* view);
-static void mainframe_onlanguagechanged(MainFrame*, Workspace* sender);
+static void mainframe_onlanguagechanged(MainFrame*, Translator* sender);
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender, int option, int mode);
 
@@ -352,18 +352,18 @@ void mainframe_onskinchanged(MainFrame* self, Workspace* sender)
 void mainframe_updatetext(MainFrame* self)
 {
 	tabbar_rename_tabs(&self->tabbar,
-		workspace_translate(&self->workspace, "Machines"),
-		workspace_translate(&self->workspace, "Patterns"),
-		workspace_translate(&self->workspace, "Samples"),
-		workspace_translate(&self->workspace, "Instruments"),
-		workspace_translate(&self->workspace, "Properties"),
-		workspace_translate(&self->workspace, "Settings"),
-		workspace_translate(&self->workspace, "Help"),
+		workspace_translate(&self->workspace, "machines"),
+		workspace_translate(&self->workspace, "patterns"),
+		workspace_translate(&self->workspace, "samples"),
+		workspace_translate(&self->workspace, "instruments"),
+		workspace_translate(&self->workspace, "properties"),
+		workspace_translate(&self->workspace, "settings"),
+		workspace_translate(&self->workspace, "help"),
 		NULL);
 	psy_ui_button_settext(&self->toggleterminal,
-		workspace_translate(&self->workspace, "Terminal"));
+		workspace_translate(&self->workspace, "terminal"));
 	psy_ui_button_settext(&self->togglekbdhelp,
-		workspace_translate(&self->workspace, "Kbd"));
+		workspace_translate(&self->workspace, "kbd"));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1030,10 +1030,10 @@ void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 	}
 }
 
-void mainframe_onlanguagechanged(MainFrame* self, Workspace* sender)
+void mainframe_onlanguagechanged(MainFrame* self, Translator* sender)
 {
 	mainframe_updatetext(self);
-	psy_ui_component_alignall(&self->top);
+	psy_ui_component_alignall(&self->component);
 }
 
 // this is called if a button is clicked in the checkunsavedbox

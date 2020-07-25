@@ -18,6 +18,7 @@ extern "C" {
 typedef struct {
 	psy_Properties* plugins;
 	char* inipath;
+	char* nativeroot;
 	psy_Properties* dirconfig;
 	psy_Signal signal_changed;
 	psy_Signal signal_scanprogress;

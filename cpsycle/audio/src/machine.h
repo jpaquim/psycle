@@ -59,8 +59,8 @@ typedef	struct psy_audio_Samples* (*fp_mcb_samples)(void*);
 typedef	struct psy_audio_Machines* (*fp_mcb_machines)(void*);
 typedef	struct psy_audio_Instruments* (*fp_mcb_instruments)(void*);
 typedef	struct psy_audio_MachineFactory* (*fp_mcb_machinefactory)(void*);
-typedef	void (*fp_mcb_fileselect_load)(void*);
-typedef	void (*fp_mcb_fileselect_save)(void*);
+typedef	bool (*fp_mcb_fileselect_load)(void*, char filter[], char inoutName[]);
+typedef	bool (*fp_mcb_fileselect_save)(void*, char filter[], char inoutName[]);
 typedef	void (*fp_mcb_fileselect_directory)(void*);
 typedef	void (*fp_mcb_output)(void*, const char* text);
 typedef	bool (*fp_mcb_addcapture)(void*, int index);
@@ -216,6 +216,7 @@ typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*, struct psy_a
 typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*, struct psy_audio_Presets*);
 typedef struct psy_audio_Presets* (*fp_machine_presets)(struct psy_audio_Machine*);
 typedef bool (*fp_machine_acceptpresets)(struct psy_audio_Machine*);
+typedef	void (*fp_machine_command)(struct psy_audio_Machine*);
 typedef const char* (*fp_machine_modulepath)(struct psy_audio_Machine*);
 typedef uintptr_t (*fp_machine_shellidx)(struct psy_audio_Machine*);
 // machine callbacks
@@ -329,6 +330,7 @@ typedef struct {
 	fp_machine_setpresets setpresets;
 	fp_machine_presets presets;
 	fp_machine_acceptpresets acceptpresets;
+	fp_machine_command command;	
 ///\}
 ///\name gui stuff
 ///\{
@@ -792,6 +794,11 @@ INLINE struct psy_audio_Presets* psy_audio_machine_presets(psy_audio_Machine* se
 INLINE bool psy_audio_machine_acceptpresets(psy_audio_Machine* self)
 {
 	return self->vtable->acceptpresets(self);
+}
+
+INLINE void psy_audio_machine_command(psy_audio_Machine* self)
+{
+	self->vtable->command(self);
 }
 
 INLINE int psy_audio_machine_haseditor(psy_audio_Machine* self)

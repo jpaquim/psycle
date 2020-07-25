@@ -15,7 +15,7 @@ static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
-static void filebar_onlanguagechanged(FileBar*, Workspace* sender);
+static void filebar_onlanguagechanged(FileBar*, Translator* sender);
 
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
@@ -46,15 +46,15 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 void filebar_updatetext(FileBar* self)
 {
 	psy_ui_label_settext(&self->header,
-		workspace_translate(self->workspace, "Song"));
+		workspace_translate(self->workspace, "song"));
 	psy_ui_button_settext(&self->newbutton,
-		workspace_translate(self->workspace, "New"));	
+		workspace_translate(self->workspace, "new"));	
 	psy_ui_button_settext(&self->loadbutton,
-		workspace_translate(self->workspace, "Load"));	
+		workspace_translate(self->workspace, "load"));	
 	psy_ui_button_settext(&self->savebutton,
-		workspace_translate(self->workspace, "Save"));	
+		workspace_translate(self->workspace, "save"));	
 	psy_ui_button_settext(&self->renderbutton,
-		workspace_translate(self->workspace, "Render"));	
+		workspace_translate(self->workspace, "render"));	
 }
 
 void filebar_initalign(FileBar* self)
@@ -112,8 +112,7 @@ void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 	psy_ui_savedialog_dispose(&dialog);
 }
 
-void filebar_onlanguagechanged(FileBar* self, Workspace* sender)
+void filebar_onlanguagechanged(FileBar* self, Translator* sender)
 {
 	filebar_updatetext(self);
-	psy_ui_component_align(filebar_base(self));
 }

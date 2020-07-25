@@ -311,7 +311,8 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 	psy_Properties* notes;
 	EventDriverCmd cmd;	
 	
-	notes = psy_properties_find(self->eventdrivers.cmds, "notes");
+	notes = psy_properties_find(self->eventdrivers.cmds, "notes",
+		PSY_PROPERTY_TYP_SECTION);
 	cmd = sender->getcmd(sender, notes);
 	if (cmd.id != -1 && cmd.data.param1 < 255) {		
 		unsigned char note;

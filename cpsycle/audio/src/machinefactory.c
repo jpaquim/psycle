@@ -207,7 +207,8 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			plugin = (psy_audio_Machine*)malloc(sizeof(psy_audio_Plugin));
 			if (plugin) {
 				psy_audio_plugin_init((psy_audio_Plugin*)plugin,
-					self->machinecallback, path);
+					self->machinecallback, path,
+					self->catcher->nativeroot);
 				if (psy_audio_machine_info(plugin)) {
 					rv = plugin;
 				} else {

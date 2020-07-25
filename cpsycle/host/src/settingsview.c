@@ -967,7 +967,7 @@ static void propertiesview_onpropertiesrendererchanged(PropertiesView*,
 	PropertiesRenderer* sender, psy_Properties*);
 static void propertiesview_onpropertiesrendererselected(PropertiesView*,
 	PropertiesRenderer* sender, psy_Properties*);
-static void propertiesview_onlanguagechanged(PropertiesView*, Workspace*);
+static void propertiesview_onlanguagechanged(PropertiesView*, Translator*);
 static void propertiesview_translate(PropertiesView*);
 static int propertiesview_onchangelanguageenum(PropertiesView*,
 	psy_Properties*, int level);
@@ -1092,7 +1092,7 @@ void propertiesview_onpropertiesrendererselected(PropertiesView* self,
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 }
 
-void propertiesview_onlanguagechanged(PropertiesView* self, Workspace* sender)
+void propertiesview_onlanguagechanged(PropertiesView* self, Translator* sender)
 {
 	propertiesview_translate(self);
 	propertiesview_updatetabbarsections(self);

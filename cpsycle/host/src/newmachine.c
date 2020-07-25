@@ -26,8 +26,8 @@ static int newmachine_comp_type(psy_Properties* p, psy_Properties* q);
 static int newmachine_comp_mode(psy_Properties* p, psy_Properties* q);
 static int newmachine_isplugin(int type);
 
-static void newmachinebar_updatetext(NewMachineBar*, Workspace* sender);
-static void newmachinebar_onlanguagechanged(NewMachineBar*, Workspace* sender);
+static void newmachinebar_updatetext(NewMachineBar*, Translator*);
+static void newmachinebar_onlanguagechanged(NewMachineBar*, Translator* sender);
 
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -62,28 +62,28 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));	
-	newmachinebar_updatetext(self, workspace);
+	newmachinebar_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		newmachinebar_onlanguagechanged);
 }
 
-void newmachinebar_updatetext(NewMachineBar* self, Workspace* sender)
+void newmachinebar_updatetext(NewMachineBar* self, Translator* translator)
 {
 	psy_ui_button_settext(&self->rescan,
-		workspace_translate(self->workspace, "newmachine.Rescan"));
+		translator_translate(translator, "newmachine.rescan"));
 	psy_ui_button_settext(&self->selectdirectories,
-		workspace_translate(self->workspace, "newmachine.Select plugin directories"));
+		translator_translate(translator, "newmachine.select-plugin-directories"));
 	psy_ui_button_settext(&self->sortbyfavorite,
-		workspace_translate(self->workspace, "newmachine.Sort By Favorite"));
+		translator_translate(translator, "newmachine.sort-by-favorite"));
 	psy_ui_button_settext(&self->sortbyname,
-		workspace_translate(self->workspace, "newmachine.Sort By Name"));
+		translator_translate(translator, "newmachine.sort-by-name"));
 	psy_ui_button_settext(&self->sortbytype,
-		workspace_translate(self->workspace, "newmachine.Sort By Type"));
+		translator_translate(translator, "newmachine.sort by type"));
 	psy_ui_button_settext(&self->sortbymode,
-		workspace_translate(self->workspace, "newmachine.Sort By Mode"));
+		translator_translate(translator, "newmachine.sort-by-mode"));
 }
 
-void newmachinebar_onlanguagechanged(NewMachineBar* self, Workspace* sender)
+void newmachinebar_onlanguagechanged(NewMachineBar* self, Translator* sender)
 {
 	newmachinebar_updatetext(self, sender);
 }
@@ -100,8 +100,8 @@ void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* se
 
 // NewMachineDetail
 static void newmachinedetail_reset(NewMachineDetail*);
-static void newmachinedetail_updatetext(NewMachineDetail*, Workspace* sender);
-static void newmachinedetail_onlanguagechanged(NewMachineDetail*, Workspace* sender);
+static void newmachinedetail_updatetext(NewMachineDetail*, Translator*);
+static void newmachinedetail_onlanguagechanged(NewMachineDetail*, Translator* sender);
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
 
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
@@ -138,27 +138,27 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
-	newmachinedetail_updatetext(self, workspace);
+	newmachinedetail_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		newmachinedetail_onlanguagechanged);
 }
 
-void newmachinedetail_updatetext(NewMachineDetail* self, Workspace* sender)
+void newmachinedetail_updatetext(NewMachineDetail* self, Translator* translator)
 {	
 	if (self->empty) {
 		psy_ui_label_settext(&self->desclabel,
-			workspace_translate(self->workspace,
-				"newmachine.Select a plugin to view its description"));
+			translator_translate(translator,
+				"newmachine.select-plugin-to-view-description"));
 	}
 	psy_ui_checkbox_settext(&self->compatblitzgamefx,
-		workspace_translate(self->workspace,
-			"newmachine.Load new gamefx and Blitz if version unknown"));
+		translator_translate(translator,
+			"newmachine.jme-version-unknown"));
 	psy_ui_label_settext(&self->compatlabel,
-		workspace_translate(self->workspace,
-			"newmachine.Song loading compatibility"));
+		translator_translate(translator,
+			"newmachine.song-loading-compatibility"));
 }
 
-void newmachinedetail_onlanguagechanged(NewMachineDetail* self, Workspace* sender)
+void newmachinedetail_onlanguagechanged(NewMachineDetail* self, Translator* sender)
 {
 	newmachinedetail_updatetext(self, sender);
 }
@@ -167,7 +167,7 @@ void newmachinedetail_reset(NewMachineDetail* self)
 {
 	psy_ui_label_settext(&self->desclabel,
 		workspace_translate(self->workspace,
-			"newmachine.Select a plugin to view its description"));
+			"newmachine.select-plugin-to-view-description"));
 	self->empty = TRUE;
 }
 
@@ -231,19 +231,21 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 	self->onlyfavorites = favorites;
 	if (workspace_pluginlist(workspace)) {
 		if (favorites) {
-			self->plugins = newmachine_favorites(workspace_pluginlist(workspace));
+			self->plugins = newmachine_favorites(
+				workspace_pluginlist(workspace));
 		} else {
-			self->plugins = psy_properties_clone(workspace_pluginlist(workspace), 1);
+			self->plugins = psy_properties_clone(
+				workspace_pluginlist(workspace), 1);
 		}
 	} else {
-		self->plugins = 0;
+		self->plugins = NULL;
 	}	
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		pluginsview_ondestroy);
-	self->selectedplugin = 0;
+	self->selectedplugin = NULL;
 	self->calledby = 0;
 	psy_signal_init(&self->signal_selected);
 	psy_signal_init(&self->signal_changed);
@@ -413,7 +415,8 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				if (self->selectedplugin) {
 					psy_Properties* p;
 					p = psy_properties_find(self->workspace->plugincatcher.plugins,
-						psy_properties_key(self->selectedplugin));
+							psy_properties_key(self->selectedplugin),
+							PSY_PROPERTY_TYP_NONE);
 					if (!self->onlyfavorites && p) {
 						psy_properties_remove(self->workspace->plugincatcher.plugins, p);
 					} else {						
@@ -611,8 +614,8 @@ static void newmachine_onsortbyname(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbytype(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbymode(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
-static void newmachine_updatetext(NewMachine*, Workspace* sender);
-static void newmachine_onlanguagechanged(NewMachine*, Workspace* sender);
+static void newmachine_updatetext(NewMachine*, Translator*);
+static void newmachine_onlanguagechanged(NewMachine*, Translator* sender);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -700,7 +703,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_ondestroy);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		newmachine_onlanguagechanged);
-	newmachine_updatetext(self, workspace);
+	newmachine_updatetext(self, &workspace->translator);
 	newmachine_updateskin(self);
 }
 
@@ -715,15 +718,15 @@ void newmachine_updateskin(NewMachine* self)
 	psy_ui_component_setcolor(&self->component, self->skin->effect_fontcolour);
 }
 
-void newmachine_updatetext(NewMachine* self, Workspace* sender)
+void newmachine_updatetext(NewMachine* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->favoriteheader,
-		workspace_translate(sender, "Favorites"));
+		translator_translate(translator, "Favorites"));
 	psy_ui_label_settext(&self->pluginsheader,
-		workspace_translate(sender, "All"));
+		translator_translate(translator, "All"));
 }
 
-void newmachine_onlanguagechanged(NewMachine* self, Workspace* sender)
+void newmachine_onlanguagechanged(NewMachine* self, Translator* sender)
 {
 	newmachine_updatetext(self, sender);
 }

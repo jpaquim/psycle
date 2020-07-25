@@ -31,6 +31,7 @@ static void workspace_makerecentsongs(Workspace*);
 static void workspace_makeconfig(Workspace*);
 static void workspace_makegeneral(Workspace*);
 static void workspace_makelanguagelist(Workspace*, psy_Properties*);
+static int workspace_onaddlanguage(Workspace*, const char* path, int flag);
 static void workspace_makenotes(Workspace*);
 static void workspace_makevisual(Workspace*);
 static void workspace_makepatternview(Workspace*, psy_Properties*);
@@ -47,8 +48,6 @@ static void workspace_makedirectory(Workspace*, const char* key,
 static void workspace_makenotes(Workspace*);
 static void workspace_makeinputoutput(Workspace*);
 static void workspace_makemidi(Workspace*);
-static void workspace_makelang(Workspace*);
-static void workspace_makelanges(Workspace*);
 static void workspace_makedriverlist(Workspace*);
 static void workspace_makedriverconfigurations(Workspace*);
 static void workspace_driverconfig(Workspace*);
@@ -80,8 +79,8 @@ static psy_audio_Samples* machinecallback_samples(Workspace*);
 static psy_audio_Machines* machinecallback_machines(Workspace*);
 static psy_audio_Instruments* machinecallback_instruments(Workspace*);
 static psy_audio_MachineFactory* machinecallback_machinefactory(Workspace*);
-static void machinecallback_fileselect_load(Workspace*);
-static void machinecallback_fileselect_save(Workspace*);
+static bool machinecallback_fileselect_load(Workspace*, char filter[], char inoutName[]);
+static bool machinecallback_fileselect_save(Workspace*, char filter[], char inoutName[]);
 static void machinecallback_fileselect_directory(Workspace*);
 static void machinecallback_output(Workspace*, const char* text);
 static bool machinecallback_addcapture(Workspace*, int index);
@@ -101,7 +100,7 @@ static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 // recent files
 static void workspace_addrecentsong(Workspace*, const char* path);
-static void workspace_onlanguagechanged(Workspace*);
+static void workspace_onlanguagechanged(Workspace*, Translator* sender);
 static int workspace_onchangelanguageenum(Workspace*, psy_Properties*,
 	int level);
 
@@ -158,7 +157,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->currnavigation = 0;
 	self->currview = 0;
 	self->dialbitmappath = 0;
-	self->lang = NULL;
+	translator_init(&self->translator);
 	self->undosavepoint = 0;
 	self->machines_undosavepoint = 0;
 	history_init(&self->history);
@@ -225,8 +224,7 @@ void workspace_dispose(Workspace* self)
 	self->songcbk = 0;
 	psy_properties_free(self->config);
 	self->config = 0;
-	psy_properties_free(self->lang);
-	self->lang = NULL;
+	translator_dispose(&self->translator);	
 	free(self->filename);
 	self->filename = 0;
 	plugincatcher_dispose(&self->plugincatcher);
@@ -306,7 +304,7 @@ void workspace_initplayer(Workspace* self)
 psy_Properties* workspace_driverconfiguration(Workspace* self)
 {		
 	return psy_properties_find(self->driverconfigurations,
-		workspace_driverkey(self));	
+		workspace_driverkey(self), PSY_PROPERTY_TYP_NONE);
 }
 	
 void workspace_configaudio(Workspace* self)
@@ -317,34 +315,25 @@ void workspace_configaudio(Workspace* self)
 }
 
 void workspace_configlanguage(Workspace* self)
-{
-	const char* lang;
-	
-	lang = workspace_languagekey(self);
-	if (lang) {
-		if (strcmp(lang, "en") == 0) {
-			psy_properties_free(self->lang);
-			self->lang = psy_properties_create();
-			psy_signal_emit(&self->signal_languagechanged, self,
-				0);
-			psy_ui_updatealign(self->mainhandle, NULL);
-		} else
-		if (strcmp(lang, "es") == 0) {
-			psy_properties_free(self->lang);
-			self->lang = psy_properties_create();
-			workspace_makelanges(self);
-			psy_signal_emit(&self->signal_languagechanged, self,
+{	
+	psy_Properties* langchoice;
+
+	langchoice = psy_properties_read_choice(self->language);
+	if (langchoice) {
+		if (translator_load(&self->translator,
+				psy_properties_valuestring(langchoice))) {
+			psy_signal_emit(&self->signal_languagechanged, &self->translator,
 				0);
 			psy_ui_updatealign(self->mainhandle, NULL);
 		}
-	}
+	}	
 }
 
 void workspace_configvisual(Workspace* self)
 {	
 	psy_Properties* visual;
 
-	visual = psy_properties_find(self->config, "visual");
+	visual = psy_properties_find(self->config, "visual", PSY_PROPERTY_TYP_SECTION);
 	if (visual) {
 		psy_ui_Font font;
 		psy_ui_FontInfo fontinfo;
@@ -473,7 +462,6 @@ void workspace_makerecentsongs(Workspace* self)
 
 void workspace_makeconfig(Workspace* self)
 {	
-	workspace_makelang(self);
 	workspace_makegeneral(self);
 	workspace_makevisual(self);	
 	workspace_makekeyboard(self);
@@ -488,49 +476,59 @@ void workspace_makegeneral(Workspace* self)
 	self->config = psy_properties_setcomment(
 		psy_properties_create(),
 		"Psycle Configuration File created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
-	self->general = psy_properties_create_section(self->config, "general");
-	psy_properties_settext(self->general, "General");
+	self->general = psy_properties_settext(
+		psy_properties_create_section(self->config, "general"),
+		"general");
 	psy_properties_sethint(psy_properties_settext(
 		psy_properties_append_string(self->general, "version", "alpha"),
-		"Version"),
+		"version"),
 		PSY_PROPERTY_HINT_HIDE);
 	workspace_makelanguagelist(self, self->general);
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "showaboutatstart", TRUE),
-		"Show About at Startup");
+		"show-about-at-startup");
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "showsonginfoonload", TRUE),
-		"Show song info on Load");
+		"show-song-info-on-load");
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "showmaximizedatstart", TRUE),
-		"Show Maximized at Startup");
+		"show-maximized-at-startup");
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "showplaylisteditor", FALSE),
-		"Show Playlist Editor");
+		"show-playlist-editor");
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "showstepsequencer", TRUE),
-		"Show Sequencestepbar");
+		"show-sequencestepbar");
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "saverecentsongs", TRUE),
-		"Save Recent Songs");
+		"save-recent-songs");
 	psy_properties_settext(
 		psy_properties_append_bool(self->general, "playsongafterload", TRUE),
-		"Play Song After Load");
+		"play-song-after-load");
 }
 
 void workspace_makelanguagelist(Workspace* self, psy_Properties* parent)
 {
-	psy_Properties* langchoice;
+	char currdir[4096];
+	
+	self->language = psy_properties_settext(
+		psy_properties_append_choice(self->general, "lang", 0),
+		"language");
+	if (workdir(currdir)) {
+		psy_dir_enumerate(self, currdir, "*.ini", 0, workspace_onaddlanguage);
+	}	
+}
 
-	langchoice = psy_properties_settext(
-		psy_properties_append_choice(parent, "lang", 0),
-		"Language");
-	psy_properties_settext(
-		psy_properties_append_string(langchoice, "en", "en"),
-		"english");
-	psy_properties_settext(
-		psy_properties_append_string(langchoice, "es", "es"),
-		"spanish");
+int workspace_onaddlanguage(Workspace* self, const char* path, int flag)
+{
+	char id[256];
+
+	if (translator_test(&self->translator, path, id)) {				
+		psy_properties_settext(
+			psy_properties_append_string(self->language, id, path),
+			id);
+	}	
+	return TRUE;
 }
 
 void workspace_makevisual(Workspace* self)
@@ -538,16 +536,16 @@ void workspace_makevisual(Workspace* self)
 	psy_Properties* visual;
 	
 	visual = psy_properties_create_section(self->config, "visual");	
-	psy_properties_settext(visual, "Visual");
+	psy_properties_settext(visual, "visual");
 	psy_properties_settext(
 		psy_properties_append_action(visual, "loadskin"),
-		"Load Skin");
+		"load-skin");
 	psy_properties_settext(
 		psy_properties_append_action(visual, "defaultskin"),
-		"Default Skin");
+		"default-skin");
 	psy_properties_settext(
 		psy_properties_append_font(visual, "defaultfont", PSYCLE_DEFAULT_FONT),
-		"Default Font");	
+		"default-font");	
 	workspace_makepatternview(self, visual);
 	workspace_makemachineview(self, visual);
 	workspace_makeparamview(self, visual);
@@ -559,7 +557,7 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 	
 	pvc = psy_properties_create_section(visual, "patternview");
 	psy_properties_settext(pvc,
-		"Pattern View");
+		"pattern-view");
 	psy_properties_settext(
 		psy_properties_append_font(pvc, "font", PSYCLE_DEFAULT_FONT),
 		"Font");
@@ -601,8 +599,7 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 		"A4 is 440Hz (Otherwise it is 220Hz)");
 	psy_properties_settext(
 		psy_properties_append_bool(pvc, "movecursorwhenpaste", 1),
-		"Move Cursor When Paste");
-	
+		"move-cursor-when-paste");	
 	workspace_makepatternviewtheme(self, pvc);
 }
 
@@ -761,7 +758,7 @@ void workspace_makemachineview(Workspace* self, psy_Properties* visual)
 	
 	mvc = psy_properties_settext(
 		psy_properties_create_section(visual, "machineview"),
-			"Machine View");
+			"machine-view");
 	psy_properties_settext(
 		psy_properties_append_bool(mvc, "drawmachineindexes", 1),
 		"Draw psy_audio_Machine Indexes");
@@ -961,22 +958,27 @@ void workspace_makedirectories(Workspace* self)
 {	
 	self->directories = psy_properties_settext(
 		psy_properties_create_section(self->config, "directories"),
-			"Directories");
-	workspace_makedirectory(self, "songs", "Song directory",
+			"directories");
+	psy_properties_sethint(
+		psy_properties_settext(
+			psy_properties_append_string(self->directories, "app", PSYCLE_APP_DIR),
+			"App directory"),
+		PSY_PROPERTY_HINT_HIDE);	
+	workspace_makedirectory(self, "songs", "song-directory",
 		PSYCLE_SONGS_DEFAULT_DIR);	
-	workspace_makedirectory(self, "samples", "Samples directory",
+	workspace_makedirectory(self, "samples", "samples-directory",
 		PSYCLE_SAMPLES_DEFAULT_DIR);	
-	workspace_makedirectory(self, "plugins", "Plug-in directory",
+	workspace_makedirectory(self, "plugins", "plug-in-directory",
 		PSYCLE_PLUGINS_DEFAULT_DIR);
-	workspace_makedirectory(self, "luascripts", "Lua scripts directory",
+	workspace_makedirectory(self, "luascripts", "lua-scripts-directory",
 		PSYCLE_LUASCRIPTS_DEFAULT_DIR);
-	workspace_makedirectory(self, "vsts32", "VST directories",
+	workspace_makedirectory(self, "vsts32", "vst-directories",
 		PSYCLE_VSTS32_DEFAULT_DIR);
-	workspace_makedirectory(self, "vsts64", "VST64 directories",
+	workspace_makedirectory(self, "vsts64", "vst64-directories",
 		PSYCLE_VSTS64_DEFAULT_DIR);
-	workspace_makedirectory(self, "ladspas", "LADSPA directories",
+	workspace_makedirectory(self, "ladspas", "ladspa-directories",
 		PSYCLE_LADSPAS_DEFAULT_DIR);
-	workspace_makedirectory(self, "skin", "Skin directory",
+	workspace_makedirectory(self, "skin", "skin-directory",
 		"C:\\Programme\\Psycle\\Skins");
 	workspace_makedefaultuserpresetpath(self);
 }
@@ -1149,191 +1151,9 @@ void workspace_updatemididriverlist(Workspace* self)
 	}
 }
 
-void workspace_makelang(Workspace* self)
-{
-	self->lang = psy_properties_create();
-#if defined(PSYCLE_DEFAULT_LANG_ES)	
-	workspace_makelanges(self);
-#endif
-}
-
-void workspace_makelanges(Workspace* self)
-{
-	psy_Properties* machineview;
-	psy_Properties* sequencerview;
-	psy_Properties* newmachine;
-	psy_Properties* samplesview;
-		
-	psy_properties_write_string(self->lang, "Song", "Canción");
-	psy_properties_write_string(self->lang, "Load", "Cargar");
-	psy_properties_write_string(self->lang, "Save", "Guardar");
-	psy_properties_write_string(self->lang, "New", "Nuevo");
-	psy_properties_write_string(self->lang, "Undo", "Deshacer");
-	psy_properties_write_string(self->lang, "Redo", "Rehacer");
-	psy_properties_write_string(self->lang, "Play", "Toca");
-	psy_properties_write_string(self->lang, "Stop", "Para");
-	psy_properties_write_string(self->lang, "Help", "Ayuda");
-	psy_properties_write_string(self->lang, "About", "Acerca de");
-	psy_properties_write_string(self->lang, "Machines", "Máquinas");
-	psy_properties_write_string(self->lang, "Patterns", "Patrones");
-	psy_properties_write_string(self->lang, "Pattern", "Patron");
-	psy_properties_write_string(self->lang, "Instrument", "Instrumento");
-	psy_properties_write_string(self->lang, "Instruments", "Instrumentos");	
-	psy_properties_write_string(self->lang, "Settings", "Opciones");
-	psy_properties_write_string(self->lang, "Render", "Renderizar");
-	psy_properties_write_string(self->lang, "Copy", "Copiar");
-	psy_properties_write_string(self->lang, "Del", "Eliminar");
-	psy_properties_write_string(self->lang, "Delete", "Eliminar");
-	psy_properties_write_string(self->lang, "Paste", "Pegar");
-	psy_properties_write_string(self->lang, "Clear", "Borrar");
-	psy_properties_write_string(self->lang, "Duplicate", "Duplicar");
-	psy_properties_write_string(self->lang, "New Trk", "Nuevo Trk");
-	psy_properties_write_string(self->lang, "Del Trk", "Eliminar Trk");
-	psy_properties_write_string(self->lang, "Clone", "Clonar");	
-	psy_properties_write_string(self->lang, "Greetings", "Saludos");	
-	psy_properties_write_string(self->lang, "Octave", "Octava");	
-	psy_properties_write_string(self->lang, "OK", "¡vale!");
-	psy_properties_write_string(self->lang, "All", "Todos");
-	psy_properties_write_string(self->lang, "Quality", "Calidad");
-	psy_properties_write_string(self->lang, "Dither", "Difuminado");
-	psy_properties_write_string(self->lang, "Selection", "Selección");
-	psy_properties_write_string(self->lang, "Record", "Grabar");
-	psy_properties_write_string(self->lang, "Enable", "Posibilitar");
-	psy_properties_write_string(self->lang, "from", "desde");
-	psy_properties_write_string(self->lang, "to", "hasta");
-	psy_properties_write_string(self->lang, "Number", "Número");
-	psy_properties_write_string(self->lang, "Save Wave", "Guardar Onda");
-	psy_properties_write_string(self->lang, "the entire song", "toda la canción");
-	psy_properties_write_string(self->lang, "Favorites", "Favoritos");
-	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");	
-	psy_properties_write_string(self->lang, "Contributors / Credits", "Participantes / Méritos");
-	psy_properties_write_string(self->lang, "Machine View", "Vista de las Máquinas");
-	psy_properties_write_string(self->lang, "Pattern View", "Vista del Pattern");
-	psy_properties_write_string(self->lang, "Keyboard and Misc", "Teclado y diverso");
-	psy_properties_write_string(self->lang, "Compatibility", "Compatibilidad");
-	psy_properties_write_string(self->lang, "Directories", "Directorios");
-	psy_properties_write_string(self->lang, "Configure", "Configurar");
-	psy_properties_write_string(self->lang, "Lines per beat", "Líneas por beat");
-	psy_properties_write_string(self->lang, "english", "inglés");
-	psy_properties_write_string(self->lang, "spanish", "español");
-	psy_properties_write_string(self->lang, "Language", "idioma");
-	psy_properties_write_string(self->lang, "Properties", "Propiedades");	
-	psy_properties_write_string(self->lang, "File", "Archivo");
-	psy_properties_write_string(self->lang, "Parameters", "Parámetros");
-	psy_properties_write_string(self->lang, "Exchange", "Cambiar");
-	psy_properties_write_string(self->lang, "Show Master", "Mostrar maestro");
-	psy_properties_write_string(self->lang, "Create/Replace", "Crear/Sustituir");
-	psy_properties_write_string(self->lang, "Effects", "Efectos");
-	psy_properties_write_string(self->lang, "Generators", "Generadores");
-	psy_properties_write_string(self->lang, "Waves", "Ondas");
-	psy_properties_write_string(self->lang, "Event Input", "Input de los Eventos");
-	psy_properties_write_string(self->lang, "Audio Drivers", "Drivers del Audio");
-	psy_properties_write_string(self->lang, "Load new gamefx and Blitz if version unknown",
-		"Carga nuevo gamefx y Blitz si la versión es desconocido");
-	psy_properties_write_string(self->lang, "Background", "Segundo plano");
-	psy_properties_write_string(self->lang, "Font", "Tipo de letra");
-	psy_properties_write_string(self->lang, "Name", "Nombre");
-	psy_properties_write_string(self->lang, "Show About at Startup", "Muestra 'Acerca de' en startup");
-	psy_properties_write_string(self->lang, "Show song info on Load", "Muestra song información después de carga");
-	psy_properties_write_string(self->lang, "Show Maximized at Startup", "Muestra maximizado en startup");
-	psy_properties_write_string(self->lang, "Show Playlist Editor", "Muestra lista de reproducción");
-	psy_properties_write_string(self->lang, "Show Sequencestepbar", "Muestra barra del secuenciador por pasos");
-	psy_properties_write_string(self->lang, "Save Recent Songs", "Guardar recientes songs");
-	psy_properties_write_string(self->lang, "Theme", "Tema");
-	psy_properties_write_string(self->lang, "Show As Window", "Mostrar como una ventana");
-	psy_properties_write_string(self->lang, "Gear Rack", "Estante del Equipo");	
-	psy_properties_write_string(self->lang, "Tracks", "Pistas");
-	psy_properties_write_string(self->lang, "Process", "Procesar");
-	psy_properties_write_string(self->lang, "No wave loaded", "Una onda no se ha cargado");
-	psy_properties_write_string(self->lang, "Auowire", "Autoconexíon");
-	psy_properties_write_string(self->lang, "Unselect all", "Deselectar todos");
-	psy_properties_write_string(self->lang, "Unselect all", "Deselectar todos");
-	psy_properties_write_string(self->lang, "Remove connection with right click",
-		"Borrar conexíon con clic derecho");
-	psy_properties_write_string(self->lang, "sequence positions",
-		"posiciones de secuencia");
-	psy_properties_write_string(self->lang, "Samplerate",
-		"Frecuencia de muestreo");
-	psy_properties_write_string(self->lang, "Gaussian",
-		"Función del Gauss");
-	psy_properties_write_string(self->lang, "Bit Depth",
-		"Profundidad de bits");
-	psy_properties_write_string(self->lang, "None",
-		"Ninguno");
-	psy_properties_write_string(self->lang, "Noise-shaping",
-		"Forma del ruido");
-	psy_properties_write_string(self->lang, "Output Path",
-		"Trayectoria de salida");	
-	psy_properties_write_string(self->lang, "Save each unmuted",
-		"Guardar cada no mudo");
-	psy_properties_write_string(self->lang, "Kbd",
-		"Tecl");
-	psy_properties_write_string(self->lang, "Load Skin",
-		"Cargar Tema");
-	psy_properties_write_string(self->lang, "Default Skin",
-		"Tema por defecto");
-	psy_properties_write_string(self->lang, "Load Dial Bitmap",
-		"Cargar mapa de bits de dial");
-	psy_properties_write_string(self->lang, "Choose Font",
-		"Seleccionar Tipo de Letra");
-
-	machineview = psy_properties_create_section(self->lang, "machineview");
-	psy_properties_write_string(machineview, "New Machine", "Nueva Máquina");
-	psy_properties_write_string(machineview, "Wires", "Cables");
-	psy_properties_write_string(machineview, "No Machines Loaded", "No Máquinas cargado");
-	psy_properties_write_string(machineview, "No Machine", "No Máquina");
-	psy_properties_write_string(machineview, "Connect to Mixer Send/Return Input",
-		"Conectar a Mezclador Remitente/Vuelta Entrada");
-	sequencerview = psy_properties_create_section(self->lang, "sequencerview");
-	psy_properties_write_string(sequencerview, "Follow Song", "Seguir Canción");
-	psy_properties_write_string(sequencerview, "Show playlist", "Mostrar lista de reproducción");
-	psy_properties_write_string(sequencerview, "Show pattern names", "Mostrar nombres del patterns");
-	psy_properties_write_string(sequencerview, "Record tweaks", "Grabar tweaks");
-	psy_properties_write_string(sequencerview, "Duration", "Duración");
-	newmachine = psy_properties_create_section(self->lang, "newmachine");
-	psy_properties_write_string(newmachine,
-		"Load new gamefx and Blitz if version unknown",
-		"Cargar gamefx y blitz nuevo si versión desconocido");
-	psy_properties_write_string(newmachine,
-		"Song loading compatibility",
-		"Compatibilidad de carga de canción");
-	psy_properties_write_string(newmachine, "Rescan", "Reexplorar");
-	psy_properties_write_string(newmachine, "Select plugin directories", "Seleccionar directorios de plugins");
-	psy_properties_write_string(newmachine, "Sort By Favorite", "Ordenar Por Favorito");
-	psy_properties_write_string(newmachine, "Sort By Name", "Ordenar Por Nombre");
-	psy_properties_write_string(newmachine, "Sort By Type", "Ordenar Por Tipo");
-	psy_properties_write_string(newmachine, "Sort By Mode", "Ordenar Por Modo");
-	psy_properties_write_string(newmachine, "Select a plugin to view its description",
-		"Selecciona una máquina para mirar su descripción");	
-	samplesview = psy_properties_create_section(self->lang, "samplesview");
-	psy_properties_write_string(samplesview, "Sample Name", "Nombre de Onda");
-	psy_properties_write_string(samplesview, "Sample Rate", "Frecuencia de Muestreo");		
-	psy_properties_write_string(samplesview, "Samples", "Número de Muestras");
-	psy_properties_write_string(samplesview, "Group samples", "Grupo de ondas");
-	psy_properties_write_string(samplesview, "Groups first sample", "Primera onda de los grupos");
-	psy_properties_write_string(samplesview, "Default Volume", "Vol por defecto");	
-	psy_properties_write_string(samplesview, "Global Volume", "Volumen global");	
-	psy_properties_write_string(samplesview, "Pan Position", "Panoramización");	
-	psy_properties_write_string(samplesview, "Sampled Note", "Nota de muestra");	
-	psy_properties_write_string(samplesview, "Pitch Finetune", "Altura afinado");
-}
-
 const char* workspace_translate(Workspace* self, const char* key)
 {			
-	const char* rv;
-
-	rv = psy_properties_readstring(self->lang, key, key);
-	if (rv == key && rv != NULL) {
-		// removes section from defaulttext
-		rv = strrchr(key, '.');
-		rv = (rv != NULL)
-			? rv + 1
-			: key;
-	}
-	if (rv == NULL) {
-		rv = "";
-	}
-	return rv;
+	return translator_translate(&self->translator, key);
 }
 
 void workspace_configchanged(Workspace* self, psy_Properties* property, 
@@ -1448,7 +1268,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 		// Properties driversections: settings for all in/out drivers, saved in psycle.ini
 		// Update the driversection aswell
 		driversection = psy_properties_find(self->driverconfigurations, 
-			workspace_driverkey(self));
+			workspace_driverkey(self), PSY_PROPERTY_TYP_NONE);
 		if (driversection) {
 			psy_properties_free(driversection->children);
 			driversection->children = NULL;
@@ -1465,7 +1285,7 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 		} else {		
 			psy_Properties* p;
 
-			p = psy_properties_find(self->midi, "mididriver");
+			p = psy_properties_find(self->midi, "mididriver", PSY_PROPERTY_TYP_SECTION);
 			if (p) {
 				psy_audio_player_restarteventdriver(&self->player, psy_properties_value(p));
 			}
@@ -1667,7 +1487,7 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 void workspace_addrecentsong(Workspace* self, const char* filename)
 {
 	if (workspace_saverecentsongs(self) &&
-			!psy_properties_find(self->recentfiles, filename)) {
+			!psy_properties_find(self->recentfiles, filename, PSY_PROPERTY_TYP_NONE)) {
 		psy_Path path;		
 
 		psy_path_init(&path, filename);
@@ -1890,7 +1710,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 {
 	psy_Properties* visual;
 
-	visual = psy_properties_find(self->config, "visual");
+	visual = psy_properties_find(self->config, "visual", PSY_PROPERTY_TYP_SECTION);
 	if (visual) {
 		psy_ui_FontInfo fontinfo;
 		psy_ui_Font font;
@@ -2269,38 +2089,42 @@ psy_audio_MachineCallback machinecallback(Workspace* self)
 	return rv;
 }
 
-void machinecallback_fileselect_load(Workspace* self)
+bool machinecallback_fileselect_load(Workspace* self, char filter[], char inoutName[])
 {
+	bool rv;
 	psy_ui_OpenDialog dialog;
 
 	psy_ui_opendialog_init_all(&dialog, 0,
 		"Plugin File Load",
-		"",
+		filter,
 		"",
 		workspace_vsts32_directory(self));
-	if (psy_ui_opendialog_execute(&dialog)) {		
-	}
+	rv = psy_ui_opendialog_execute(&dialog);
+	psy_snprintf(inoutName, _MAX_PATH, "%s",
+		psy_ui_opendialog_filename(&dialog));
 	psy_ui_opendialog_dispose(&dialog);
+	return rv;
 }
 
-void machinecallback_fileselect_save(Workspace* self)
+bool machinecallback_fileselect_save(Workspace* self, char filter[], char inoutName[])
 {	
+	bool rv;
 	psy_ui_SaveDialog dialog;
 
 	psy_ui_savedialog_init_all(&dialog, 0,
 		"Plugin File Save",
-		"",
+		filter,
 		"",
 		workspace_vsts32_directory(self));
-	if (psy_ui_savedialog_execute(&dialog)) {		
-	}
+	rv = psy_ui_savedialog_execute(&dialog);	
+	psy_snprintf(inoutName, _MAX_PATH, "%s",
+		psy_ui_savedialog_filename(&dialog));
 	psy_ui_savedialog_dispose(&dialog);
-
+	return rv;
 }
 
 void machinecallback_fileselect_directory(Workspace* self)
 {
-
 }
 
 psy_audio_Samples* machinecallback_samples(Workspace* self)
@@ -2490,7 +2314,7 @@ void workspace_showgear(Workspace* self)
 	psy_signal_emit(&self->signal_showgear, self, 0);
 }
 
-void workspace_onlanguagechanged(Workspace* self)
+void workspace_onlanguagechanged(Workspace* self, Translator* sender)
 {
 	psy_properties_enumerate(self->config->children, self,
 		workspace_onchangelanguageenum);

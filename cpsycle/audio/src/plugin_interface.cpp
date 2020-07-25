@@ -7,27 +7,36 @@
 
 #include <string.h>
 
-typedef CMachineInfo * (*GETINFO)(void);
-typedef CMachineInterface * (*CREATEMACHINE)(void);
+#include "../../detail/os.h"
+
+#if defined DIVERSALIS__OS__MICROSOFT
+#include <windows.h>
+#endif
+
+typedef CMachineInfo* (*GETINFO)(void);
+typedef CMachineInterface* (*CREATEMACHINE)(void);
 
 class PluginFxCallback : public CFxCallback
 {
 
-	inline virtual void MessBox(char const* ptxt,char const* caption,unsigned int type) const 
-	{ 		
+	inline virtual void MessBox(char const* ptxt, char const* caption, unsigned int type) const
+	{
+#if defined DIVERSALIS__OS__MICROSOFT
+		MessageBox(NULL, ptxt, caption, type);
+#endif
 	}
-	inline virtual int GetTickLength() const { 
+	inline virtual int GetTickLength() const {
 		return 256;
 	}
-	inline virtual int GetSamplingRate() const { 
+	inline virtual int GetSamplingRate() const {
 		return callback.samplerate && callback.context
-			? callback.samplerate(callback.context) 
+			? callback.samplerate(callback.context)
 			: 44100;
 	}
-	inline virtual int GetBPM() const { 
+	inline virtual int GetBPM() const {
 		return callback.bpm && callback.context
-			? (int)callback.bpm(callback.context) 
-			: 125;		
+			? (int)callback.bpm(callback.context)
+			: 125;
 	}
 	inline virtual int GetTPB() const { return 4; }
 	virtual int CallbackFunc(int /*cbkID*/, int /*par1*/, int /*par2*/, void* /*par3*/)
@@ -36,7 +45,10 @@ class PluginFxCallback : public CFxCallback
 	}
 	virtual bool FileBox(bool openMode, char filter[], char inoutName[])
 	{
-		return 0;
+		if (callback.fileselect_load&& callback.context) {
+			return callback.fileselect_load(callback.context, filter, inoutName) != FALSE;
+		}
+		return false;
 	}
 	/// unused slot kept for binary compatibility for (old) closed-source plugins on msvc++ on mswindows.
 	inline virtual float * unused0(int, int) { return NULL;}

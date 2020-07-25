@@ -18,11 +18,11 @@ static int listviewmargin = 5;
 
 // SequenceButtons
 // prototypes
-static void sequencebuttons_updatetext(SequenceButtons*);
+static void sequencebuttons_onlanguagechanged(SequenceButtons*, Translator* sender);
+static void sequencebuttons_updatetext(SequenceButtons*, Translator* translator);
 static void sequencebuttons_onalign(SequenceButtons*);
 static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void sequencebuttons_onlanguagechanged(SequenceButtons*, Workspace* sender);
 // vtable
 static psy_ui_ComponentVtable sequencebuttons_vtable;
 static int sequencebuttons_vtable_initialized = 0;
@@ -38,7 +38,7 @@ static void sequencebuttons_vtable_init(SequenceButtons* self)
 		sequencebuttons_vtable_initialized = 1;
 	}
 }
-
+// implementation
 void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	self->workspace = workspace;
@@ -62,43 +62,44 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 	psy_ui_button_init(&self->multisel, &self->component);		
 	psy_ui_button_highlight(&self->singlesel);
 	psy_ui_button_disablehighlight(&self->multisel);
-	sequencebuttons_updatetext(self);
+	sequencebuttons_updatetext(self, &workspace->translator);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		sequencebuttons_onlanguagechanged);
 }
 
-void sequencebuttons_updatetext(SequenceButtons* self)
+void sequencebuttons_updatetext(SequenceButtons* self, Translator* translator)
 {
 	psy_ui_button_settext(&self->incpattern, "+");
-	psy_ui_button_settext(&self->insertentry, "Ins");
+	psy_ui_button_settext(&self->insertentry,
+		translator_translate(translator, "sequencerview.ins"));
 	psy_ui_button_settext(&self->decpattern, "-");
 	psy_ui_button_settext(&self->newentry,
-		workspace_translate(self->workspace, "New"));
+		translator_translate(translator, "sequencerview.new"));
 	psy_ui_button_settext(&self->cloneentry,
-		workspace_translate(self->workspace, "Clone"));
+		translator_translate(translator, "sequencerview.clone"));
 	psy_ui_button_settext(&self->delentry,
-		workspace_translate(self->workspace, "Del"));
+		translator_translate(translator, "sequencerview.del"));
 	psy_ui_button_settext(&self->newtrack,
-		workspace_translate(self->workspace, "New Trk"));
+		translator_translate(translator, "sequencerview.new-trk"));
 	psy_ui_button_settext(&self->deltrack,
-		workspace_translate(self->workspace, "Del Trk"));
+		translator_translate(translator, "sequencerview.del-trk"));
 	psy_ui_button_settext(&self->clear,
-		workspace_translate(self->workspace, "Clear"));
+		translator_translate(translator, "sequencerview.clear"));
 	psy_ui_button_settext(&self->cut, "");
 	psy_ui_button_settext(&self->copy,
-		workspace_translate(self->workspace, "Copy"));
+		translator_translate(translator, "sequencerview.copy"));
 	psy_ui_button_settext(&self->paste,
-		workspace_translate(self->workspace, "Paste"));
+		translator_translate(translator, "sequencerview.paste"));
 	psy_ui_button_settext(&self->singlesel,
-		workspace_translate(self->workspace, "SingleSel"));
+		translator_translate(translator, "sequencerview.singlesel"));
 	psy_ui_button_settext(&self->multisel,
-		workspace_translate(self->workspace, "MultiSel"));
+		translator_translate(translator, "sequencerview.multisel"));
 }
 
 void sequencebuttons_onlanguagechanged(SequenceButtons* self,
-	Workspace* sender)
+	Translator* sender)
 {
-	sequencebuttons_updatetext(self);
+	sequencebuttons_updatetext(self, sender);
 }
 
 void sequencebuttons_onalign(SequenceButtons* self)
@@ -495,7 +496,7 @@ void sequencelistview_onpatternnamechanged(SequenceListView* self, psy_audio_Pat
 
 // SequenceViewDuration
 static void sequencedurationbar_updatetext(SequenceViewDuration* self);
-static void sequencedurationbar_onlanguagechanged(SequenceViewDuration*, Workspace* sender);
+static void sequencedurationbar_onlanguagechanged(SequenceViewDuration*, Translator* sender);
 // implementation
 void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_audio_Sequence* sequence, Workspace* workspace)
@@ -531,11 +532,11 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 void sequencedurationbar_updatetext(SequenceViewDuration* self)
 {
 	psy_ui_label_settext(&self->desc, workspace_translate(self->workspace,
-		"sequencerview.Duration"));
+		"sequencerview.duration"));
 }
 
 void sequencedurationbar_onlanguagechanged(SequenceViewDuration* self,
-	Workspace* sender)
+	Translator* sender)
 {
 	sequencedurationbar_updatetext(self);
 }
@@ -555,7 +556,7 @@ void sequenceduration_update(SequenceViewDuration* self)
 // SequencerOptionsBar
 // prototypes
 static void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar*,
-	Workspace* sender);
+	Translator* sender);
 static void sequenceroptionsbar_updatetext(SequencerOptionsBar*);
 // implementation
 void sequenceroptionsbar_init(SequencerOptionsBar* self,
@@ -590,18 +591,18 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 void sequenceroptionsbar_updatetext(SequencerOptionsBar* self)
 {
 	psy_ui_checkbox_settext(&self->followsong,
-		workspace_translate(self->workspace, "sequencerview.Follow Song"));
+		workspace_translate(self->workspace, "sequencerview.follow-song"));
 	psy_ui_checkbox_settext(&self->shownames,
-		workspace_translate(self->workspace, "sequencerview.Show pattern names"));
+		workspace_translate(self->workspace, "sequencerview.show-pattern-names"));
 	psy_ui_checkbox_settext(&self->showplaylist,
-		workspace_translate(self->workspace, "sequencerview.Show playlist"));
+		workspace_translate(self->workspace, "sequencerview.show-playlist"));
 	psy_ui_checkbox_settext(&self->recordtweaks,
-		workspace_translate(self->workspace, "sequencerview.Record tweaks"));
+		workspace_translate(self->workspace, "sequencerview.record-tweaks"));
 	psy_ui_checkbox_settext(&self->multichannelaudition,
-		workspace_translate(self->workspace, "sequencerview.Multichannel Audition"));
+		workspace_translate(self->workspace, "sequencerview.multichannel-audition"));
 }
 
-void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar* self, Workspace* sender)
+void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar* self, Translator* sender)
 {
 	sequenceroptionsbar_updatetext(self);
 }

@@ -7,8 +7,8 @@
 #include "songio.h"
 
 
-static void gearbuttons_updatetext(GearButtons*, Workspace* workspace);
-static void gearbuttons_onlanguagechanged(GearButtons*, Workspace* sender);
+static void gearbuttons_updatetext(GearButtons*, Translator*);
+static void gearbuttons_onlanguagechanged(GearButtons*, Translator* sender);
 
 void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* workspace)
 {
@@ -23,7 +23,7 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* wo
 	psy_ui_button_init(&self->exchange, gearbuttons_base(self));
 	psy_ui_button_init(&self->clone, gearbuttons_base(self));
 	psy_ui_button_init(&self->showmaster, gearbuttons_base(self));
-	gearbuttons_updatetext(self, workspace);
+	gearbuttons_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		gearbuttons_onlanguagechanged);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
@@ -35,38 +35,38 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* wo
 		&margin));
 }
 
-void gearbuttons_updatetext(GearButtons* self, Workspace* workspace)
+void gearbuttons_updatetext(GearButtons* self, Translator* translator)
 {
 	psy_ui_button_settext(&self->createreplace,
-		workspace_translate(workspace, "Create/Replace"));
+		translator_translate(translator, "Create/Replace"));
 	psy_ui_button_settext(&self->del,
-		workspace_translate(workspace, "Delete"));
+		translator_translate(translator, "Delete"));
 	psy_ui_button_settext(&self->parameters,
-		workspace_translate(workspace, "Parameters"));
+		translator_translate(translator, "Parameters"));
 	psy_ui_button_settext(&self->properties,
-		workspace_translate(workspace, "Properties"));
+		translator_translate(translator, "Properties"));
 	psy_ui_button_settext(&self->exchange,
-		workspace_translate(workspace, "Exchange"));
+		translator_translate(translator, "Exchange"));
 	psy_ui_button_settext(&self->clone,
-		workspace_translate(workspace, "Clone"));
+		translator_translate(translator, "Clone"));
 	psy_ui_button_settext(&self->showmaster,
-		workspace_translate(workspace, "Show Master"));
+		translator_translate(translator, "Show Master"));
 }
 
-void gearbuttons_onlanguagechanged(GearButtons* self, Workspace* sender)
+void gearbuttons_onlanguagechanged(GearButtons* self, Translator* sender)
 {
 	gearbuttons_updatetext(self, sender);
 	psy_ui_component_align(gearbuttons_base(self));
 }
 
-static void gear_updatetext(Gear*, Workspace*);
+static void gear_updatetext(Gear*, Translator*);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
 static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_onexchange(Gear* self, psy_ui_Component* sender);
 static void gear_onparameters(Gear*, psy_ui_Component* sender);
 static void gear_onmaster(Gear*, psy_ui_Component* sender);
-static void gear_onlanguagechanged(Gear*, Workspace* sender);
+static void gear_onlanguagechanged(Gear*, Translator* sender);
 
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
@@ -107,35 +107,34 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		gear_onmaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
 		gear_onexchange);
-	gear_updatetext(self, workspace);
+	gear_updatetext(self, &workspace->translator);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		gear_onlanguagechanged);
 }
 
-void gear_updatetext(Gear* self, Workspace* workspace)
+void gear_updatetext(Gear* self, Translator* translator)
 {
 	tabbar_rename_tabs(&self->tabbar,
-		workspace_translate(workspace, "Generators"),
-		workspace_translate(workspace, "Effects"),
-		workspace_translate(workspace, "Instruments"),
-		workspace_translate(workspace, "Waves"),
+		translator_translate(translator, "generators"),
+		translator_translate(translator, "effects"),
+		translator_translate(translator, "instruments"),
+		translator_translate(translator, "waves"),
 		NULL);
 }
 
-void gear_onlanguagechanged(Gear* self, Workspace* sender)
+void gear_onlanguagechanged(Gear* self, Translator* sender)
 {
 	gear_updatetext(self, sender);
-	psy_ui_component_align(gear_base(self));
 }
 
 void gear_ondelete(Gear* self, psy_ui_Component* sender)
 {
 	switch (self->tabbar.selected) {
 		case 0:
-			MachinesBoxRemove(&self->machinesboxgen);
+			machinesbox_remove(&self->machinesboxgen);
 		break;
 		case 1:
-			MachinesBoxRemove(&self->machinesboxfx);
+			machinesbox_remove(&self->machinesboxfx);
 		break;
 		default:
 		break;
@@ -145,8 +144,8 @@ void gear_ondelete(Gear* self, psy_ui_Component* sender)
 void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	self->machines = &workspace->song->machines;		
-	SetMachines(&self->machinesboxgen, &workspace->song->machines);
-	SetMachines(&self->machinesboxfx, &workspace->song->machines);
+	machinesbox_setmachines(&self->machinesboxgen, &workspace->song->machines);
+	machinesbox_setmachines(&self->machinesboxfx, &workspace->song->machines);
 	instrumentsbox_setinstruments(&self->instrumentsbox,
 		&workspace->song->instruments);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
@@ -155,43 +154,43 @@ void gear_onsongchanged(Gear* self, Workspace* workspace, int flag, psy_audio_So
 
 void gear_onclone(Gear* self, psy_ui_Component* sender)
 {
-	switch (self->tabbar.selected) {
+	switch (tabbar_selected(&self->tabbar)) {
 		case 0:
-			MachinesBoxClone(&self->machinesboxgen);
-		break;
+			machinesbox_clone(&self->machinesboxgen);
+			break;
 		case 1:
-			MachinesBoxClone(&self->machinesboxfx);
-		break;
+			machinesbox_clone(&self->machinesboxfx);
+			break;
 		default:
-		break;
+			break;
 	}
 }
 
 void gear_onexchange(Gear* self, psy_ui_Component* sender)
 {
-	switch (self->tabbar.selected) {
+	switch (tabbar_selected(&self->tabbar)) {
 		case 0:
-			MachinesBoxExchange(&self->machinesboxgen);
-		break;
+			machinesbox_exchange(&self->machinesboxgen);
+			break;
 		case 1:
-			MachinesBoxExchange(&self->machinesboxfx);
+			machinesbox_exchange(&self->machinesboxfx);
 		break;
 		default:
-		break;
+			break;
 	}
 }
 
 void gear_onparameters(Gear* self, psy_ui_Component* sender)
 {
-	switch (self->tabbar.selected) {
+	switch (tabbar_selected(&self->tabbar)) {
 		case 0:
-			MachinesBoxShowParameters(&self->machinesboxgen);
-		break;
+			machinesbox_showparameters(&self->machinesboxgen);
+			break;
 		case 1:
-			MachinesBoxShowParameters(&self->machinesboxfx);
-		break;
+			machinesbox_showparameters(&self->machinesboxfx);
+			break;
 		default:
-		break;
+			break;
 	}
 }
 

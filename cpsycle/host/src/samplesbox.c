@@ -8,8 +8,8 @@
 #include "../../detail/portable.h"
 
 static void samplesbox_ondestroy(SamplesBox*);
-static void samplesbox_updatetext(SamplesBox*, Workspace*);
-static void samplesbox_onlanguagechanged(SamplesBox*, Workspace*);
+static void samplesbox_updatetext(SamplesBox*, Translator*);
+static void samplesbox_onlanguagechanged(SamplesBox*, Translator* sender);
 static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot, bool create);
 static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender, psy_audio_SampleIndex*);
@@ -54,7 +54,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 		samplesbox_onsubsamplelistchanged);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		samplesbox_onlanguagechanged);
-	samplesbox_updatetext(self, workspace);
+	samplesbox_updatetext(self, &workspace->translator);
 }
 
 void samplesbox_ondestroy(SamplesBox* self)
@@ -62,15 +62,15 @@ void samplesbox_ondestroy(SamplesBox* self)
 	psy_signal_dispose(&self->signal_changed);
 }
 
-void samplesbox_updatetext(SamplesBox* self, Workspace* workspace)
+void samplesbox_updatetext(SamplesBox* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->header, 
-		workspace_translate(workspace, "samplesview.Groups first sample"));
+		translator_translate(translator, "samplesview.groupsfirstsample"));
 	psy_ui_label_settext(&self->group,
-		workspace_translate(workspace, "samplesview.Group samples"));
+		translator_translate(translator, "samplesview.groupsamples"));
 }
 
-void samplesbox_onlanguagechanged(SamplesBox* self, Workspace* sender)
+void samplesbox_onlanguagechanged(SamplesBox* self, Translator* sender)
 {
 	samplesbox_updatetext(self, sender);
 }

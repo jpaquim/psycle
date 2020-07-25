@@ -8,15 +8,13 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-#define TIMERID_PLAYBAR 400
-
 enum {
 	PLAY_SONG,
 	PLAY_SEL,
 	PLAY_BEATS
 };
 
-static void playbar_updatetext(PlayBar*);
+static void playbar_updatetext(PlayBar*, Translator*);
 static void playbar_initalign(PlayBar*);
 static void playbar_onloopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onrecordnotesclicked(PlayBar*, psy_ui_Component* sender);
@@ -28,7 +26,7 @@ static void playbar_onplayclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_startplay(PlayBar*);
 static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_ontimer(PlayBar*, psy_ui_Component* sender, uintptr_t timerid);
-static void playbar_onlanguagechanged(PlayBar*, psy_ui_Component* sender);
+static void playbar_onlanguagechanged(PlayBar*, Translator* sender);
 
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 {			
@@ -67,24 +65,31 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->stop.signal_clicked, self, playbar_onstopclicked);
 	psy_signal_connect(&self->component.signal_timer, self, playbar_ontimer);
 	playbar_initalign(self);
-	playbar_updatetext(self);
+	playbar_updatetext(self, &self->workspace->translator);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		playbar_onplaymodeselchanged);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		playbar_onlanguagechanged);
-	psy_ui_component_starttimer(&self->component, TIMERID_PLAYBAR, 100);
+	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
-void playbar_updatetext(PlayBar* self)
+void playbar_updatetext(PlayBar* self, Translator* translator)
 {
-	psy_ui_button_settext(&self->loop, workspace_translate(self->workspace, "Loop"));
-	psy_ui_button_settext(&self->recordnotes, workspace_translate(self->workspace, "Record Notes"));
-	psy_ui_button_settext(&self->play, workspace_translate(self->workspace, "Play"));
-	psy_ui_combobox_addtext(&self->playmode, workspace_translate(self->workspace, "Song"));
-	psy_ui_combobox_addtext(&self->playmode, workspace_translate(self->workspace, "Sel"));
-	psy_ui_combobox_addtext(&self->playmode, workspace_translate(self->workspace, "Beats"));
-	psy_ui_button_settext(&self->stop, workspace_translate(self->workspace, "Stop"));
+	psy_ui_button_settext(&self->loop,
+		translator_translate(translator, "loop"));
+	psy_ui_button_settext(&self->recordnotes,
+		translator_translate(translator, "record-notes"));
+	psy_ui_button_settext(&self->play,
+		translator_translate(translator, "play"));
+	psy_ui_combobox_addtext(&self->playmode,
+		translator_translate(translator, "song"));
+	psy_ui_combobox_addtext(&self->playmode,
+		translator_translate(translator, "sel"));
+	psy_ui_combobox_addtext(&self->playmode,
+		translator_translate(translator, "beats"));
+	psy_ui_button_settext(&self->stop,
+		translator_translate(translator, "stop"));
 }
 
 void playbar_initalign(PlayBar* self)
@@ -259,8 +264,7 @@ void playbar_ontimer(PlayBar* self, psy_ui_Component* sender, uintptr_t timerid)
 	}
 }
 
-void playbar_onlanguagechanged(PlayBar* self, psy_ui_Component* sender)
+void playbar_onlanguagechanged(PlayBar* self, Translator* sender)
 {
-	playbar_updatetext(self);
-	psy_ui_component_align(playbar_base(self));
+	playbar_updatetext(self, sender);
 }

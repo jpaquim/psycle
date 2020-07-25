@@ -22,9 +22,9 @@ TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, 
-		workspace_translate(self->workspace, "Help"),
-		workspace_translate(self->workspace, "About"),
-		workspace_translate(self->workspace, "Greetings"),
+		workspace_translate(self->workspace, "help"),
+		workspace_translate(self->workspace, "about"),
+		workspace_translate(self->workspace, "greetings"),
 		NULL);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);

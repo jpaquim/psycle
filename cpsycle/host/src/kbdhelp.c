@@ -46,7 +46,7 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* section)
 	kbdbox_cleardescriptions(&self->kbdbox);
 	kbd = workspace_kbddriver(self->workspace);
 	if (kbd) {
-		p = psy_properties_find(kbd->properties, section);
+		p = psy_properties_find(kbd->properties, section, PSY_PROPERTY_TYP_NONE);
 		if (p && p->children) {
 			for (p = p->children; p != NULL; p = p->next) {
 				uintptr_t keycode;

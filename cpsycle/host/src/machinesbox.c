@@ -9,16 +9,16 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-static void OnDestroy(MachinesBox*, psy_ui_Component*);
-static void ClearMachineBox(MachinesBox*);
-static void BuildMachinesList(MachinesBox*);
-static void InsertSlot(MachinesBox*, int slot, psy_audio_Machine* machine);
-static void insertmachine(MachinesBox*, int slot, psy_audio_Machine* machine);
-static int CheckMachineMode(MachinesBox*, psy_audio_Machine*);
-static void OnMachineSlotChanged(MachinesBox*, psy_audio_Machines* sender, int slot);
-static void OnMachinesInsert(MachinesBox*, psy_audio_Machines* sender, int slot);
-static void OnMachinesRemoved(MachinesBox*, psy_audio_Machines* machines, int slot);
-static void OnMachinesListChanged(MachinesBox*, psy_ui_Component* sender,
+static void machinesbox_ondestroy(MachinesBox*, psy_ui_Component*);
+static void machinesbox_clearmachinebox(MachinesBox*);
+static void machinesbox_buildmachineslist(MachinesBox*);
+static void machinesbox_insertslot(MachinesBox*, int slot, psy_audio_Machine* machine);
+static void machinesbox_insertmachine(MachinesBox*, int slot, psy_audio_Machine* machine);
+static int machinesbox_checkmachinemode(MachinesBox*, psy_audio_Machine*);
+static void machinesbox_onmachineslotchanged(MachinesBox*, psy_audio_Machines* sender, int slot);
+static void machinesbox_onmachinesinsert(MachinesBox*, psy_audio_Machines* sender, int slot);
+static void machinesbox_onmachinesremoved(MachinesBox*, psy_audio_Machines* machines, int slot);
+static void machinesbox_onmachineslistchanged(MachinesBox*, psy_ui_Component* sender,
 	int slot);
 
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
@@ -30,22 +30,22 @@ void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_table_init(&self->listboxslots);
 	psy_table_init(&self->slotslistbox);
 	psy_ui_listbox_init_multiselect(&self->machinelist, parent);	
-	SetMachines(self, machines);	
+	machinesbox_setmachines(self, machines);
 	psy_signal_connect(&self->machinelist.signal_selchanged, self,
-		OnMachinesListChanged);
+		machinesbox_onmachineslistchanged);
 	psy_signal_connect(&self->machinelist.component.signal_destroy, self,
-		OnDestroy);
+		machinesbox_ondestroy);
 }
 
-void OnDestroy(MachinesBox* self, psy_ui_Component* component)
+void machinesbox_ondestroy(MachinesBox* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->listboxslots);
 	psy_table_dispose(&self->slotslistbox);
 }
 
-void BuildMachinesList(MachinesBox* self)
+void machinesbox_buildmachineslist(MachinesBox* self)
 {
-	ClearMachineBox(self);	
+	machinesbox_clearmachinebox(self);
 	if (self->showslots) {
 		int slot;
 		int start;
@@ -55,7 +55,7 @@ void BuildMachinesList(MachinesBox* self)
 		end = self->mode == MACHINEBOX_ALL ? 0xFF : start + 0x3F;
 
 		for (slot = start; slot <= end; ++slot) {
-			InsertSlot(self, slot, psy_audio_machines_at(self->machines, slot));
+			machinesbox_insertslot(self, slot, psy_audio_machines_at(self->machines, slot));
 		}
 	} else {
 		psy_TableIterator it;
@@ -66,12 +66,12 @@ void BuildMachinesList(MachinesBox* self)
 			psy_audio_Machine* machine;
 
 			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-			insertmachine(self, psy_tableiterator_key(&it), machine);
+			machinesbox_insertmachine(self, psy_tableiterator_key(&it), machine);
 		}
 	}
 }
 
-void InsertSlot(MachinesBox* self, int slot, psy_audio_Machine* machine)
+void machinesbox_insertslot(MachinesBox* self, int slot, psy_audio_Machine* machine)
 {
 		int listboxindex;
 
@@ -87,15 +87,15 @@ void InsertSlot(MachinesBox* self, int slot, psy_audio_Machine* machine)
 		psy_table_insert(&self->slotslistbox, slot, (void*) listboxindex);
 }
 
-void insertmachine(MachinesBox* self, int slot, psy_audio_Machine* machine)
+void machinesbox_insertmachine(MachinesBox* self, int slot, psy_audio_Machine* machine)
 {	
-	if (CheckMachineMode(self, machine) && psy_audio_machine_info(machine) &&
+	if (machinesbox_checkmachinemode(self, machine) && psy_audio_machine_info(machine) &&
 			psy_audio_machine_info(machine)->ShortName) {
-		InsertSlot(self, slot, machine);
+		machinesbox_insertslot(self, slot, machine);
 	}	
 }
 
-int CheckMachineMode(MachinesBox* self, psy_audio_Machine* machine)
+int machinesbox_checkmachinemode(MachinesBox* self, psy_audio_Machine* machine)
 {
 	if (!machine) {
 		return 0;
@@ -114,7 +114,7 @@ int CheckMachineMode(MachinesBox* self, psy_audio_Machine* machine)
 	return 1;
 }
 
-void ClearMachineBox(MachinesBox* self)
+void machinesbox_clearmachinebox(MachinesBox* self)
 {
 	psy_ui_listbox_clear(&self->machinelist);
 	psy_table_dispose(&self->listboxslots);
@@ -123,7 +123,7 @@ void ClearMachineBox(MachinesBox* self)
 	psy_table_init(&self->slotslistbox);
 }
 
-void OnMachinesListChanged(MachinesBox* self, psy_ui_Component* sender, int sel)
+void machinesbox_onmachineslistchanged(MachinesBox* self, psy_ui_Component* sender, int sel)
 {
 	int slot;
 
@@ -135,18 +135,18 @@ void OnMachinesListChanged(MachinesBox* self, psy_ui_Component* sender, int sel)
 
 }
 
-void OnMachinesInsert(MachinesBox* self, psy_audio_Machines* machines, int slot)
+void machinesbox_onmachinesinsert(MachinesBox* self, psy_audio_Machines* machines, int slot)
 {	
-	if (CheckMachineMode(self, psy_audio_machines_at(self->machines, slot))) {
+	if (machinesbox_checkmachinemode(self, psy_audio_machines_at(self->machines, slot))) {
 		int boxindex;
 
-		BuildMachinesList(self);
+		machinesbox_buildmachineslist(self);
 		boxindex = (int)psy_table_at(&self->slotslistbox, slot);
 		psy_ui_listbox_setcursel(&self->machinelist, boxindex);
 	}
 }
 
-void OnMachineSlotChanged(MachinesBox* self, psy_audio_Machines* sender, int slot)
+void machinesbox_onmachineslotchanged(MachinesBox* self, psy_audio_Machines* sender, int slot)
 {
 	if (psy_table_exists(&self->slotslistbox, slot)) {
 		psy_ui_listbox_setcursel(&self->machinelist, 0);
@@ -154,15 +154,15 @@ void OnMachineSlotChanged(MachinesBox* self, psy_audio_Machines* sender, int slo
 	}
 }
 
-void OnMachinesRemoved(MachinesBox* self, psy_audio_Machines* machines, int slot)
+void machinesbox_onmachinesremoved(MachinesBox* self, psy_audio_Machines* machines, int slot)
 {	
 	if (psy_table_exists(&self->slotslistbox, slot)) {
-		BuildMachinesList(self);
+		machinesbox_buildmachineslist(self);
 		psy_ui_listbox_setcursel(&self->machinelist, machines->slot);
 	}
 }
 
-void MachinesBoxClone(MachinesBox* self)
+void machinesbox_clone(MachinesBox* self)
 {
 	int selcount;
 	
@@ -211,7 +211,7 @@ void MachinesBoxClone(MachinesBox* self)
 	}
 }
 
-void MachinesBoxRemove(MachinesBox* self)
+void machinesbox_remove(MachinesBox* self)
 {	
 	int selcount;	
 	
@@ -235,7 +235,7 @@ void MachinesBoxRemove(MachinesBox* self)
 	}
 }
 
-void MachinesBoxExchange(MachinesBox* self)
+void machinesbox_exchange(MachinesBox* self)
 {
 	int selcount;	
 
@@ -270,7 +270,7 @@ void MachinesBoxExchange(MachinesBox* self)
 	}
 }
 
-void MachinesBoxShowParameters(MachinesBox* self)
+void machinesbox_showparameters(MachinesBox* self)
 {	
 	int selcount;	
 	
@@ -295,14 +295,14 @@ void MachinesBoxShowParameters(MachinesBox* self)
 	}
 }
 
-void SetMachines(MachinesBox* self, psy_audio_Machines* machines)
+void machinesbox_setmachines(MachinesBox* self, psy_audio_Machines* machines)
 {
 	self->machines = machines;
-	BuildMachinesList(self);
+	machinesbox_buildmachineslist(self);
 	psy_signal_connect(&self->machines->signal_insert, self,
-		OnMachinesInsert);
+		machinesbox_onmachinesinsert);
 	psy_signal_connect(&self->machines->signal_removed, self,
-		OnMachinesRemoved);	
+		machinesbox_onmachinesremoved);
 	psy_signal_connect(&self->machines->signal_slotchange, self,
-		OnMachineSlotChanged);
+		machinesbox_onmachineslotchanged);
 }
