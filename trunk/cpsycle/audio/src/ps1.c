@@ -840,6 +840,9 @@ void psy_audio_ps1samplervoice_work(psy_audio_PS1SamplerVoice* self, int numsamp
 				intptr_t diff;
 
 				left_output = psy_audio_sampleiterator_work(&self->controller, 0);
+				if (self->controller.sample->stereo) {
+					right_output = psy_audio_sampleiterator_work(&self->controller, 1);
+				}
 				// Amplitude section
 				{
 					psy_dsp_adsr_tick(&self->_envelope);

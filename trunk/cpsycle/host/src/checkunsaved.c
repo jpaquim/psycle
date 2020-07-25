@@ -11,7 +11,7 @@
 static void checkunsavedbox_updatetext(CheckUnsavedBox*);
 static void checkunsavedbox_initalign(CheckUnsavedBox*);
 static void checkunsavedbox_onlanguagechanged(CheckUnsavedBox*,
-	Workspace* sender);
+	Translator* sender);
 static void checkunsavedbox_onsaveandexit(CheckUnsavedBox*, psy_ui_Component* sender);
 static void checkunsavedbox_onjustexit(CheckUnsavedBox*, psy_ui_Component* sender);
 static void checkunsavedbox_oncontinue(CheckUnsavedBox*, psy_ui_Component* sender);
@@ -66,7 +66,7 @@ void checkunsavedbox_updatetext(CheckUnsavedBox* self)
 	psy_ui_button_settext(&self->exit,
 		workspace_translate(self->workspace, self->nosavestr)); // "Exit (no save)"));
 	psy_ui_button_settext(&self->cont,
-		workspace_translate(self->workspace, "Continue"));
+		workspace_translate(self->workspace, "continue"));
 	psy_ui_component_align(&self->component);
 }
 
@@ -87,7 +87,7 @@ void checkunsavedbox_initalign(CheckUnsavedBox* self)
 	psy_ui_component_setmargin(&self->header.component, &margin);
 }
 
-void checkunsavedbox_onlanguagechanged(CheckUnsavedBox* self, Workspace* sender)
+void checkunsavedbox_onlanguagechanged(CheckUnsavedBox* self, Translator* sender)
 {
 	checkunsavedbox_updatetext(self);
 	psy_ui_component_align(checkunsavedbox_base(self));

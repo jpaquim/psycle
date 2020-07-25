@@ -127,7 +127,7 @@ void about_initbuttons(About* self)
 {
 	psy_ui_button_init(&self->contribbutton, &self->component);
 	psy_ui_button_settext(&self->contribbutton, 
-		workspace_translate(self->workspace, "Contributors / Credits"));
+		workspace_translate(self->workspace, "contributors-credits"));
 	psy_signal_connect(&self->contribbutton.signal_clicked, self,
 		about_oncontributors);
 	psy_ui_button_init(&self->versionbutton, &self->component);
@@ -136,7 +136,7 @@ void about_initbuttons(About* self)
 		about_onversion);
 	psy_ui_button_init(&self->okbutton, &self->component);
 	psy_ui_button_settext(&self->okbutton,
-		workspace_translate(self->workspace, "OK"));
+		workspace_translate(self->workspace, "ok"));
 }
 
 void about_onalign(About* self)

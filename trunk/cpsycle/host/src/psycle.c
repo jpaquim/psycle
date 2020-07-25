@@ -72,7 +72,8 @@ int psycle_run(uintptr_t instance, int options)
 		TRACE("\n");
 	}
 	// Adds the app path to the environment path to find some
-	// modules (scilexer, for plugins: universalis, vcredist dlls, ...)
+	// modules (scilexer ...)
+	// native-plugin env's are set in plugin.c (library_setenv)
 	env = pathenv();
 	if (env) {
 		insertpathenv(workdir(workpath));

@@ -5,6 +5,8 @@
 #include "../../detail/os.h"
 
 #include "library.h"
+
+#include <dir.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "../../detail/portable.h"
@@ -53,17 +55,88 @@ static int FilterException(const char* path, int code, struct _EXCEPTION_POINTER
 
 void psy_library_init(psy_Library* self)
 {
-	self->module = 0;
+	self->module = NULL;
 	self->err = 0;
-	self->path = _strdup("");
+	self->path = strdup("");
+	self->env = NULL;
+	self->root = NULL;
+}
+
+void psy_library_setenv(psy_Library* self, const char* path, const char* root)
+{	
+	char* temp;
+	const char* p;
+	char* env = NULL;	
+
+	temp = self->root;
+	self->root = strdup(root);
+	free(temp);
+	free(self->env);
+	self->env = strdup(getenv("PATH"));
+	p = strstr(path, root);
+	if (p) {
+		uintptr_t dest;
+
+		p = path + strlen(root);
+		dest = 0;
+		while (*p != '\0') {
+			if (*p == '\\') {
+				uintptr_t len;
+				
+				len = p - path;
+				if (dest == 0) {
+					env = malloc(len + 1);
+					if (!env) {
+						// error
+						break;
+					}
+				} else {
+					char* temp;
+					temp = realloc(env, strlen(env) + len + 2);
+					if (temp) {
+						env = temp;
+					} else {
+						free(env);
+						env = NULL;
+						// error
+						break;
+					}
+				}
+				if (dest == 0) {
+					psy_snprintf(env + dest, len + 1, "%s", path);
+					dest += len;
+				} else {
+					psy_snprintf(env + dest, len + 2, ";%s", path);
+					dest += len + 1;
+				}
+			}
+			++p;
+		}
+		if (env != NULL) {
+			if (!SetEnvironmentVariable("PATH", env)) {
+				//int const e(::GetLastError());
+				//throw exceptions::library_errors::loading_error("Could not alter PATH env var.");
+				// error
+			}			
+		}
+	}
+}
+
+void psy_library_restoreenv(psy_Library* self)
+{
+	if (!SetEnvironmentVariable("PATH", self->env)) {
+		// error
+	}
+	free(self->env);
+	self->env = NULL;
 }
 
 void psy_library_load(psy_Library* self, const char* path)
 {	
 	__try {						
 		free(self->path);
-		self->path = _strdup(path);
-		self->module = LoadLibrary(path);			
+		self->path = _strdup(path);				
+		self->module = LoadLibrary(path);		
 		if (self->module == NULL) {
 			// LPVOID lpMsgBuf;
 			self->err = GetLastError();
@@ -108,10 +181,14 @@ void psy_library_dispose(psy_Library* self)
 	if (self->module) {
 		FreeLibrary(self->module);
 		self->err = GetLastError();
-		self->module = 0;		
+		self->module = NULL;
 	}
 	free(self->path);
-	self->path = 0;
+	self->path = NULL;
+	free(self->env);
+	self->env = NULL;
+	free(self->root);
+	self->root = NULL;
 }
 
 #elif defined(DIVERSALIS__OS__APPLE)

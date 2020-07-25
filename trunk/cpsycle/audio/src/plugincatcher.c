@@ -58,6 +58,7 @@ static psy_Properties* searchresult;
 void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Properties* dirconfig)
 {
 	char inipath[_MAX_PATH];
+	psy_Properties* p;
 
 	self->plugins = psy_properties_setcomment(
 	psy_properties_create(),
@@ -67,8 +68,14 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Properties* dirconfig
 	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
 	self->inipath = strdup(inipath);
 	self->dirconfig = dirconfig;
+	p = psy_properties_find(self->dirconfig, "app", PSY_PROPERTY_TYP_NONE);
+	if (p) {
+		self->nativeroot = strdup(psy_properties_valuestring(p));
+	} else {
+		self->nativeroot = strdup(PSYCLE_APP_DIR);
+	}
 	psy_signal_init(&self->signal_changed);
-	psy_signal_init(&self->signal_scanprogress);	
+	psy_signal_init(&self->signal_scanprogress);
 }
 
 void plugincatcher_dispose(psy_audio_PluginCatcher* self)
@@ -76,7 +83,9 @@ void plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	psy_properties_free(self->plugins);
 	self->plugins = 0;
 	free(self->inipath);	
-	self->dirconfig = 0;	
+	self->dirconfig = 0;		
+	free(self->nativeroot);
+	self->nativeroot = NULL;
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_scanprogress);
 }
@@ -164,7 +173,7 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 	plugincatcher_clear(self);
 	if (self->dirconfig) {
 		p = psy_properties_findsection(self->dirconfig, "plugins");
-		if (p) {		
+		if (p) {			
 			psy_dir_enumerate_recursive(self, psy_properties_valuestring(p), "*"MODULEEXT,
 				MACH_PLUGIN, onenumdir);
 		}
@@ -203,7 +212,10 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 
 	machineinfo_init(&macinfo);	
 	if (type == MACH_PLUGIN) {		
-		if (psy_audio_plugin_psycle_test(path, &macinfo)) {
+		if (strstr(path, "fluidsynth.dll") != 0) {
+			self = self;
+		}
+		if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {
 			plugincatcher_catchername(self, path, name, macinfo.shellidx);
 			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
 				&macinfo);

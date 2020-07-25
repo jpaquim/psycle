@@ -562,12 +562,14 @@ int properties_enumerate_rec(psy_Properties* self)
 }
 
 static const char* searchkey;
+static psy_PropertyType searchtyp;
 static psy_Properties* keyfound;
 static psy_Properties* searchproperty;
 
-psy_Properties* psy_properties_find(psy_Properties* self, const char* key)
+psy_Properties* psy_properties_find(psy_Properties* self, const char* key, psy_PropertyType typ)
 {
 	searchkey = key;
+	searchtyp = typ;
 	keyfound = 0;
 	psy_properties_enumerate(self, self,
 	    (psy_PropertiesCallback) OnSearchPropertiesEnum);
@@ -576,7 +578,9 @@ psy_Properties* psy_properties_find(psy_Properties* self, const char* key)
 
 int OnSearchPropertiesEnum(psy_Properties* self, psy_Properties* property, int level)
 {
-	if (property->item.key && strcmp(property->item.key, searchkey) == 0) {
+	if (property->item.key && 
+			(searchtyp == PSY_PROPERTY_TYP_NONE || property->item.typ == searchtyp)  &&
+			strcmp(property->item.key, searchkey) == 0) {
 		keyfound = property;
 		return 0;
 	}
@@ -627,7 +631,7 @@ psy_Properties* psy_properties_findsectionex(psy_Properties* self, const char* k
 	text = strdup(key);
 	token = strtok(text, seps );
 	while(token != 0) {
-		p = psy_properties_find(p, token);	
+		p = psy_properties_find(p, token, PSY_PROPERTY_TYP_SECTION);
 		if (!p) {
 			break;
 		}		
@@ -694,8 +698,11 @@ char_dyn_t* psy_properties_sections(psy_Properties* self)
 psy_Properties* psy_properties_settext(psy_Properties* self, const char* text)
 {
 	if (self) {
-		free(self->item.text);
-		self->item.text = strdup(text);
+		char* temp;
+
+		temp = self->item.text;
+		self->item.text = (text) ? strdup(text) : strdup("");
+		free(temp);
 	}
 	return self;
 }
@@ -707,19 +714,24 @@ const char* psy_properties_text(psy_Properties* self)
 
 psy_Properties* psy_properties_settranslation(psy_Properties* self, const char* text)
 {
-	char* temp;
+	if (self) {
+		char* temp;
 
-	temp = self->item.translation;
-	self->item.translation = text ? strdup(text) : NULL;
-	free(temp);	
+		temp = self->item.translation;
+		self->item.translation = text ? strdup(text) : NULL;
+		free(temp);
+	}
 	return self;
 }
 
 psy_Properties* psy_properties_setcomment(psy_Properties* self, const char* text)
 {
 	if (self) {
-		free(self->item.comment);
-		self->item.comment = strdup(text);
+		char* temp;
+
+		temp = self->item.comment;
+		self->item.comment = (text) ? strdup(text) : strdup("");
+		free(temp);
 	}
 	return self;
 }
@@ -734,8 +746,11 @@ const char* psy_properties_translation(psy_Properties* self)
 psy_Properties* psy_properties_setshorttext(psy_Properties* self, const char* text)
 {
 	if (self) {
-		free(self->item.shorttext);
-		self->item.shorttext = strdup(text);
+		char* temp;
+
+		temp = self->item.shorttext;
+		self->item.shorttext = (text) ? strdup(text) : strdup("");
+		free(temp);
 	}
 	return self;
 }
@@ -840,7 +855,7 @@ void psy_properties_clear(psy_Properties* self)
 {			
 	if (self) {
 		psy_properties_free(self->children);
-		self->children = 0;
+		self->children = NULL;
 	}
 }
 

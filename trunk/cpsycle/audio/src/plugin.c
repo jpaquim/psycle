@@ -186,6 +186,7 @@ static void currentpreset(psy_audio_Plugin*, psy_audio_Preset*);
 static void setpresets(psy_audio_Plugin*, psy_audio_Presets*);
 static psy_audio_Presets* presets(psy_audio_Plugin*);
 static bool acceptpresets(psy_audio_Plugin*);
+static void command(psy_audio_Plugin*);
 // private methods
 static void disposeparameters(psy_audio_Plugin*);
 static void tweakdefaults(psy_audio_Plugin*, CMachineInfo* info);
@@ -232,6 +233,7 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.setpresets = (fp_machine_setpresets)setpresets;
 		vtable.presets = (fp_machine_presets)presets;
 		vtable.acceptpresets = (fp_machine_acceptpresets)acceptpresets;
+		vtable.command = (fp_machine_command)command;
 		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
 		vtable.savespecific = (fp_machine_savespecific) savespecific;
 		vtable.programname = (fp_machine_programname)programname;
@@ -247,7 +249,7 @@ static void vtable_init(psy_audio_Plugin* self)
 }
 
 void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback callback,
-	const char* path)
+	const char* path, const char* root)
 {
 	GETINFO GetInfo;
 			
@@ -256,7 +258,9 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback cal
 	psy_audio_plugin_base(self)->vtable = &vtable;
 	psy_table_init(&self->parameters);
 	psy_library_init(&self->library);
-	psy_library_load(&self->library, path);			
+	psy_library_setenv(&self->library, path, root);
+	psy_library_load(&self->library, path);
+	psy_library_restoreenv(&self->library);
 	self->mi = 0;
 	self->plugininfo = 0;
 	self->preventnewline = 0;
@@ -348,7 +352,8 @@ psy_audio_Machine* clone(psy_audio_Plugin* self)
 	rv = malloc(sizeof(psy_audio_Plugin));
 	if (rv) {
 		psy_audio_plugin_init(rv, self->custommachine.machine.callback,
-			self->library.path);
+			self->library.path,
+			self->library.root);
 		if (rv->library.module) {
 			psy_audio_Preset preset;
 			intptr_t x;
@@ -369,15 +374,16 @@ psy_audio_Machine* clone(psy_audio_Plugin* self)
 	return rv ? &rv->custommachine.machine : 0;
 }
 
-int psy_audio_plugin_psycle_test(const char* path, psy_audio_MachineInfo* info)
+int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_MachineInfo* info)
 {	
 	int rv = 0;
 
 	if (path && strcmp(path, "") != 0) {
 		GETINFO GetInfo;
-		psy_Library library;
+		psy_Library library;		
 
 		psy_library_init(&library);
+		psy_library_setenv(&library, path, root);
 		psy_library_load(&library, path);					
 		GetInfo =(GETINFO)psy_library_functionpointer(&library, "GetInfo");
 		if (GetInfo != NULL) {	
@@ -388,6 +394,7 @@ int psy_audio_plugin_psycle_test(const char* path, psy_audio_MachineInfo* info)
 				rv = 1;
 			}
 		}
+		psy_library_restoreenv(&library);
 		psy_library_dispose(&library);
 	}
 	return rv;	
@@ -635,6 +642,11 @@ psy_audio_Presets* presets(psy_audio_Plugin* self)
 bool acceptpresets(psy_audio_Plugin* self)
 {
 	return TRUE;
+}
+
+void command(psy_audio_Plugin* self)
+{
+	mi_command(self->mi);
 }
 
 void programname(psy_audio_Plugin* self, int bnkidx, int prgIdx, char* val)

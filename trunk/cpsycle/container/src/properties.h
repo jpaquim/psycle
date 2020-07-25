@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 typedef enum {
+	PSY_PROPERTY_TYP_NONE,
 	PSY_PROPERTY_TYP_ROOT,
 	PSY_PROPERTY_TYP_INTEGER,
 	PSY_PROPERTY_TYP_STRING,
@@ -104,7 +105,7 @@ psy_Properties* psy_properties_write_bool(psy_Properties*, const char* key, int 
 psy_Properties* psy_properties_write_choice(psy_Properties*, const char* key, int value);
 psy_Properties* psy_properties_write_double(psy_Properties*, const char* key, double value);
 void psy_properties_enumerate(psy_Properties*, void* target, psy_PropertiesCallback);
-psy_Properties* psy_properties_find(psy_Properties*, const char* key);
+psy_Properties* psy_properties_find(psy_Properties*, const char* key, psy_PropertyType);
 psy_Properties* psy_properties_findsection(psy_Properties*, const char* key);
 psy_Properties* psy_properties_findsectionex(psy_Properties*, const char* key,
 	psy_Properties** prev);

@@ -12,7 +12,7 @@ static void linesperbeatbar_updatetext(LinesPerBeatBar*);
 static void linesperbeatbar_onlessclicked(LinesPerBeatBar*, psy_ui_Component* sender);
 static void linesperbeatbar_onmoreclicked(LinesPerBeatBar*, psy_ui_Component* sender);
 static void linesperbeatbar_ontimer(LinesPerBeatBar*, psy_ui_Component* sender, uintptr_t timerid);
-static void linesperbeatbar_onlanguagechanged(LinesPerBeatBar*, Workspace* sender);
+static void linesperbeatbar_onlanguagechanged(LinesPerBeatBar*, Translator* sender);
 
 void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -26,7 +26,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	self->player = &workspace->player;		
 	psy_ui_label_init(&self->lpbdesclabel, &self->component);		
 	psy_ui_label_settext(&self->lpbdesclabel, 
-		workspace_translate(self->workspace, "Lines per beat"));	
+		workspace_translate(self->workspace, "lines-per-beat"));	
 	psy_ui_label_init(&self->lpblabel, &self->component);
 	psy_ui_label_setcharnumber(&self->lpblabel, 4);	
 	psy_ui_button_init(&self->lessbutton, &self->component);
@@ -49,7 +49,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 void linesperbeatbar_updatetext(LinesPerBeatBar* self)
 {
 	psy_ui_label_settext(&self->lpbdesclabel,
-		workspace_translate(self->workspace, "Lines per beat"));
+		workspace_translate(self->workspace, "lines-per-beat"));
 }
 
 void linesperbeatbar_initalign(LinesPerBeatBar* self)
@@ -83,8 +83,7 @@ void linesperbeatbar_ontimer(LinesPerBeatBar* self, psy_ui_Component* sender, ui
 	}
 }
 
-void linesperbeatbar_onlanguagechanged(LinesPerBeatBar* self, Workspace* sender)
+void linesperbeatbar_onlanguagechanged(LinesPerBeatBar* self, Translator* sender)
 {
 	linesperbeatbar_updatetext(self);
-	psy_ui_component_align(linesperbeatbar_base(self));
 }

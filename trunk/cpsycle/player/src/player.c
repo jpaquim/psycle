@@ -58,8 +58,8 @@ struct psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
 static bool machinecallback_addcapture(CmdPlayer*, int index);
 static bool machinecallback_removecapture(CmdPlayer*, int index);
 static void machinecallback_readbuffers(CmdPlayer*, int index, float** pleft, float** pright, int numsamples);
-static void machinecallback_fileselect_load(CmdPlayer*);
-static void machinecallback_fileselect_save(CmdPlayer*);
+static bool machinecallback_fileselect_load(CmdPlayer*, char filter[], char inoutName[]);
+static bool machinecallback_fileselect_save(CmdPlayer*, char filter[], char inoutName[]);
 static void machinecallback_fileselect_directory(CmdPlayer*);
 static void machinecallback_output(CmdPlayer*, const char* text);
 
@@ -405,12 +405,14 @@ psy_audio_Instruments* machinecallback_instruments(CmdPlayer* self)
     return self->song ? &self->song->instruments : 0;
 }
 
-void machinecallback_fileselect_load(CmdPlayer* self)
+bool machinecallback_fileselect_load(CmdPlayer* self, char filter[], char inoutName[])
 {
+	return FALSE;
 }
 
-void machinecallback_fileselect_save(CmdPlayer* self)
+bool machinecallback_fileselect_save(CmdPlayer* self, char filter[], char inoutName[])
 {
+	return FALSE;
 }
 
 void machinecallback_fileselect_directory(CmdPlayer* self)

@@ -928,11 +928,11 @@ void vstplugin_onfileselect(psy_audio_VstPlugin* self,
 	switch (select->command) {
 		case kVstFileLoad:
 			self->custommachine.machine.callback.fileselect_load(
-				self->custommachine.machine.callback.context);
+				self->custommachine.machine.callback.context, NULL, NULL);
 		break;
 		case kVstFileSave:
 			self->custommachine.machine.callback.fileselect_save(
-				self->custommachine.machine.callback.context);
+				self->custommachine.machine.callback.context, NULL, NULL);
 		break;
 		case kVstDirectorySelect:
 			self->custommachine.machine.callback.fileselect_directory(

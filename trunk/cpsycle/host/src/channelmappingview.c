@@ -538,8 +538,8 @@ uintptr_t pinedit_numoutputs(PinEdit* self)
 		: 0;
 }
 
-static void channelmappingview_updatetext(ChannelMappingView*, Workspace*);
-static void channelmappingview_onlanguagechanged(ChannelMappingView*, Workspace*);
+static void channelmappingview_updatetext(ChannelMappingView*, Translator*);
+static void channelmappingview_onlanguagechanged(ChannelMappingView*, Translator*);
 static void channelmappingview_onautowire(ChannelMappingView*,
 	psy_ui_Component* sender);
 static void channelmappingview_unselectall(ChannelMappingView*,
@@ -581,24 +581,24 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(2.0));
 	psy_ui_component_setmargin(&self->pinedit.component, &margin);
 	psy_ui_component_setmargin(&self->help.component, &margin);
-	channelmappingview_updatetext(self, workspace);
+	channelmappingview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		channelmappingview_onlanguagechanged);
 }
 
 void channelmappingview_updatetext(ChannelMappingView* self,
-	Workspace* workspace)
+	Translator* translator)
 {
-	psy_ui_label_settext(&self->help, workspace_translate(workspace,
-		"Remove connection with right click"));
-	psy_ui_button_settext(&self->autowire, workspace_translate(workspace,
-		"Autowire"));
-	psy_ui_button_settext(&self->unselectall, workspace_translate(workspace,
-		"Unselect all"));
+	psy_ui_label_settext(&self->help, translator_translate(translator,
+		"remove-connection-with-right-click"));
+	psy_ui_button_settext(&self->autowire, translator_translate(translator,
+		"autowire"));
+	psy_ui_button_settext(&self->unselectall, translator_translate(translator,
+		"unselect-all"));
 }
 
 void channelmappingview_onlanguagechanged(ChannelMappingView* self,
-	Workspace* sender)
+	Translator* sender)
 {
 	channelmappingview_updatetext(self, sender);
 	psy_ui_component_align(&self->component);

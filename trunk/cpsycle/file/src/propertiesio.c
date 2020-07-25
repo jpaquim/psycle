@@ -101,7 +101,7 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 					if (c == '\n') {
 						state = PROPERTIESIO_STATE_READKEY;
 					}
-			}
+			}			
 			if (state == PROPERTIESIO_STATE_ADDPROPERTY) {
 				psy_Properties* p = psy_properties_read(curr, key);
 				if (p) {					
@@ -151,7 +151,7 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 				if (p && p->item.typ == PSY_PROPERTY_TYP_SECTION) {
 					curr = p;
 				} else
-				if (allowappend) {									
+				if ((strcmp(key, "root") != 0) && allowappend) {
 					curr = psy_properties_create_section(prev, key);
 				} else {
 					curr = self;

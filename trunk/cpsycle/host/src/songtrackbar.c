@@ -52,7 +52,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 void songtrackbar_updatetext(SongTrackBar* self)
 {
 	psy_ui_label_settext(&self->headerlabel, 
-		workspace_translate(self->workspace, "Tracks"));
+		workspace_translate(self->workspace, "tracks"));
 }
 
 void songtrackbar_build(SongTrackBar* self)
