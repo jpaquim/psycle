@@ -984,13 +984,13 @@ void sequenceview_onshowplaylist(SequenceView* self, psy_ui_Button* sender)
 	if (psy_ui_component_visible(&self->playlisteditor.component)) {
 		psy_ui_component_hide(&self->playlisteditor.component);
 		psy_ui_component_hide(&self->splitbar.component);
-		psy_properties_write_bool(self->workspace->general,
+		psy_properties_set_bool(self->workspace->general,
 			"showplaylisteditor", 0);
 	} else {
 		self->playlisteditor.component.visible = 1;
 		psy_ui_component_show(&self->splitbar.component);
 		psy_ui_component_show(&self->playlisteditor.component);
-		psy_properties_write_bool(self->workspace->general,
+		psy_properties_set_bool(self->workspace->general,
 			"showplaylisteditor", 1);
 	}
 	psy_ui_component_align(&self->component);

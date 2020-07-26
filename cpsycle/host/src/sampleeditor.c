@@ -165,15 +165,15 @@ void sampleeditoroperations_updatetext(SampleEditorOperations* self,
 	Translator* translator)
 {
 	psy_ui_button_settext(&self->cut,
-		translator_translate(translator, "Cut"));
+		translator_translate(translator, "edit.cut"));
 	psy_ui_button_settext(&self->crop,
-		translator_translate(translator, "Crop"));
+		translator_translate(translator, "edit.crop"));
 	psy_ui_button_settext(&self->copy,
-		translator_translate(translator, "Copy"));
+		translator_translate(translator, "edit.copy"));
 	psy_ui_button_settext(&self->paste,
-		translator_translate(translator, "Paste"));
+		translator_translate(translator, "edit.paste"));
 	psy_ui_button_settext(&self->del,
-		translator_translate(translator, "Delete"));
+		translator_translate(translator, "edit.delete"));
 }
 
 void sampleeditorbar_onlanguagechanged(SampleEditorOperations* self,
@@ -322,7 +322,7 @@ void sampleprocessview_updatetext(SampleEditorProcessView* self,
 	Translator* translator)
 {
 	psy_ui_button_settext(&self->process,
-		translator_translate(translator, "process"));
+		translator_translate(translator, "samplesview.process"));
 }
 
 void sampleprocessview_onlanguagechanged(SampleEditorProcessView* self,

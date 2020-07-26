@@ -235,7 +235,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	self->channel = 0;	
-	self->nowavetext = strdup("No wave loaded");
+	self->nowavetext = strdup("");
 	self->context.loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	self->preventdrawonselect = FALSE;
 	self->dragstarted = FALSE;
@@ -265,7 +265,7 @@ void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
 void wavebox_updatetext(WaveBox* self, Translator* translator)
 {
 	wavebox_setnowavetext(self,
-		translator_translate(translator, self->nowavetext));
+		translator_translate(translator, "samplesview.no-wave-loaded"));
 }
 
 void wavebox_onlanguagechanged(WaveBox* self, Translator* sender)

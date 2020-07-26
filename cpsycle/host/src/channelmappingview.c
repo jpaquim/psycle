@@ -590,11 +590,11 @@ void channelmappingview_updatetext(ChannelMappingView* self,
 	Translator* translator)
 {
 	psy_ui_label_settext(&self->help, translator_translate(translator,
-		"remove-connection-with-right-click"));
+		"channelmapping.remove-connection-with-right-click"));
 	psy_ui_button_settext(&self->autowire, translator_translate(translator,
-		"autowire"));
+		"channelmapping.autowire"));
 	psy_ui_button_settext(&self->unselectall, translator_translate(translator,
-		"unselect-all"));
+		"channelmapping.unselect-all"));
 }
 
 void channelmappingview_onlanguagechanged(ChannelMappingView* self,

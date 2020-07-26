@@ -58,20 +58,20 @@ void renderview_makeproperties(RenderView* self)
 
 	self->properties = psy_properties_create();
 	actions = psy_properties_settext(
-		psy_properties_create_section(self->properties, "actions"),
-		"Render");
+		psy_properties_append_section(self->properties, "actions"),
+		"render.render");
 	psy_properties_settext(
 		psy_properties_append_action(actions, "savewave"),
-		"Save Wave");
+		"render.save-wave");
 	filesave = psy_properties_settext(
-		psy_properties_create_section(self->properties, "filesave"),
-		"File");
+		psy_properties_append_section(self->properties, "filesave"),
+		"render.file");
 	psy_properties_settext(
 		psy_properties_append_string(filesave, "outputpath", "Untitled.wav"),
-		"Output Path");
+		"render.output-path");
 	savechoice = psy_properties_settext(
 		psy_properties_append_choice(filesave, "filesave-choice", 0),
-		"Save each unmuted");
+		"render.save-each-unmuted");
 	psy_properties_settext(
 		psy_properties_append_string(savechoice, "filesave-channel", ""),
 		"input to master as a separated wav (wire number"
@@ -91,50 +91,50 @@ void renderview_makeproperties(RenderView* self)
 		" silence at the end of your file if this is a problem"
 	);
 	record = psy_properties_settext(
-		psy_properties_create_section(self->properties, "record"),
-		"Selection");	
+		psy_properties_append_section(self->properties, "record"),
+		"render.selection");	
 	recordchoice = psy_properties_settext(
 		psy_properties_append_choice(record, "record", 0),
-		"Record");
+		"render.record");
 	psy_properties_settext(
 		psy_properties_append_string(recordchoice, "record-entiresong", ""),
-		"the entire song"
+		"render.entire-song"
 	);
 	recordpatnum = psy_properties_settext(
 		psy_properties_append_string(recordchoice, "record-pattern", ""),
-		"Pattern"
+		"render.pattern"
 	);
 	psy_properties_settext(
 		psy_properties_append_int(recordpatnum, "record-pattern-number", 0, 0, 256),
-		"Number"
+		"render.number"
 	);
 	recordseqpos = psy_properties_settext(
 		psy_properties_append_string(recordchoice, "record-seqpos", ""),
-		"sequence positions"
+		"render.sequence-positions"
 	);
 	psy_properties_settext(
 		psy_properties_append_int(recordseqpos, "record-seqpos-from", 0, 0, 256),
-		"from"
+		"render.from"
 	);
 	psy_properties_settext(
 		psy_properties_append_int(recordseqpos, "record-seqpos-to", 0, 0, 256),
-		"to"
+		"render.to"
 	);
 	quality = psy_properties_settext(
-		psy_properties_create_section(self->properties, "quality"),
-		"Quality");	
+		psy_properties_append_section(self->properties, "quality"),
+		"render.quality");	
 	psy_properties_settext(
 		psy_properties_append_int(quality, "samplerate", 44100, 0, 96000),
-		"Samplerate"
+		"render.samplerate"
 	);
 	psy_properties_settext(
 		psy_properties_append_int(quality, "bitdepth", 16, 8, 16),
-		"Bit Depth"
+		"render.bitdepth"
 	);
 	channelchoice = psy_properties_settext(
 		psy_properties_append_choice(quality, "channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO),
-		"Channels"
+		"render.channels"
 	);
 	psy_properties_settext(
 		psy_properties_append_string(channelchoice, "mono_mix", ""),
@@ -149,7 +149,7 @@ void renderview_makeproperties(RenderView* self)
 		psy_properties_append_string(channelchoice, "stereo", ""),
 		"Stereo");
 	dither = psy_properties_settext(
-		psy_properties_create_section(self->properties, "dither"),
+		psy_properties_append_section(self->properties, "dither"),
 		"Dither");
 	psy_properties_settext(
 		psy_properties_append_bool(dither, "enable", FALSE),
@@ -157,25 +157,25 @@ void renderview_makeproperties(RenderView* self)
 	);
 	ditherpdf = psy_properties_settext(
 		psy_properties_append_choice(dither, "pdf", 0),
-		"Prob. Distribution");
+		"render.pdf");
 	psy_properties_settext(
 		psy_properties_append_string(ditherpdf, "triangular", ""),
-		"Triangular");
+		"render.triangular");
 	psy_properties_settext(
 		psy_properties_append_string(ditherpdf, "rectangular", ""),
-		"Rectangular");
+		"render.rectangular");
 	psy_properties_settext(
 		psy_properties_append_string(ditherpdf, "gaussian", ""),
-		"Gaussian");
+		"render.gaussian");
 	dithernoiseshape = psy_properties_settext(
 		psy_properties_append_choice(dither, "noiseshape", 0),
-		"Noise-shaping");
+		"render.noise-shaping");
 	psy_properties_settext(
 		psy_properties_append_string(dithernoiseshape, "none", ""),
-		"None");
+		"render.none");
 	psy_properties_settext(
 		psy_properties_append_string(dithernoiseshape, "highpass", ""),
-		"High-Pass Contour");
+		"render.high-pass-contour");
 }
 
 void renderview_onsettingsviewchanged(RenderView* self, PropertiesView* sender,
@@ -196,14 +196,14 @@ void renderview_render(RenderView* self)
 	self->curraudiodriver->close(self->curraudiodriver);
 	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);	
 	driverconfig = psy_properties_clone(self->fileoutdriver->properties, 1);
-	psy_properties_write_string(driverconfig, "outputpath",
-		psy_properties_readstring(self->properties, "filesave.outputpath", "Untitled.wav"));
-	psy_properties_write_int(driverconfig, "samplerate",
-		psy_properties_int(self->properties, "quality.samplerate", 44100));
-	psy_properties_write_int(driverconfig, "bitdepth",
-		psy_properties_int(self->properties, "quality.bitdepth", 16));
-	psy_properties_write_int(driverconfig, "channels",
-		psy_properties_int(self->properties, "quality.channels",
+	psy_properties_set_str(driverconfig, "outputpath",
+		psy_properties_at_str(self->properties, "filesave.outputpath", "Untitled.wav"));
+	psy_properties_set_int(driverconfig, "samplerate",
+		psy_properties_at_int(self->properties, "quality.samplerate", 44100));
+	psy_properties_set_int(driverconfig, "bitdepth",
+		psy_properties_at_int(self->properties, "quality.bitdepth", 16));
+	psy_properties_set_int(driverconfig, "channels",
+		psy_properties_at_int(self->properties, "quality.channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 	self->fileoutdriver->configure(self->fileoutdriver, driverconfig);
 	psy_properties_free(driverconfig);
@@ -211,18 +211,18 @@ void renderview_render(RenderView* self)
 	self->workspace->player.sequencer.looping = 0;
 	self->restoredither = psy_dsp_dither_settings(&self->workspace->player.dither);
 	self->restoredodither = self->workspace->player.dodither;
-	if (psy_properties_bool(self->properties, "dither.enable", FALSE) != FALSE) {
+	if (psy_properties_at_bool(self->properties, "dither.enable", FALSE) != FALSE) {
 		psy_Properties* pdf;
 		psy_Properties* noiseshaping;
 		psy_dsp_DitherPdf dither_pdf = psy_dsp_DITHER_PDF_TRIANGULAR;
 		psy_dsp_DitherNoiseShape dither_noiseshape = psy_dsp_DITHER_NOISESHAPE_NONE;
 		
-		pdf = psy_properties_read(self->properties, "dither.pdf");
+		pdf = psy_properties_at(self->properties, "dither.pdf", PSY_PROPERTY_TYP_NONE);
 		if (pdf) {
 			dither_pdf = (psy_dsp_DitherPdf)pdf->item.value.i;
 		}
-		noiseshaping = psy_properties_read(self->properties,
-			"dither.noiseshape");
+		noiseshaping = psy_properties_at(self->properties,
+			"dither.noiseshape", PSY_PROPERTY_TYP_NONE);
 		if (noiseshaping) {
 			dither_noiseshape = (psy_dsp_DitherNoiseShape)noiseshaping->item.value.i;
 		}

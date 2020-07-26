@@ -37,9 +37,9 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 void undoredobar_updatetext(UndoRedoBar* self)
 {
 	psy_ui_button_settext(&self->undobutton,
-		workspace_translate(self->workspace, "undo"));
+		workspace_translate(self->workspace, "undo.undo"));
 	psy_ui_button_settext(&self->redobutton,
-		workspace_translate(self->workspace, "redo"));
+		workspace_translate(self->workspace, "undo.redo"));
 }
 
 void undoredobar_initalign(UndoRedoBar* self)

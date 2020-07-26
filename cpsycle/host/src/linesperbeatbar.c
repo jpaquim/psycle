@@ -8,11 +8,11 @@
 #include "../../detail/portable.h"
 
 static void linesperbeatbar_initalign(LinesPerBeatBar*);
-static void linesperbeatbar_updatetext(LinesPerBeatBar*);
+static void linesperbeatbar_updatetext(LinesPerBeatBar*, Translator*);
+static void linesperbeatbar_onlanguagechanged(LinesPerBeatBar*, Translator* sender);
 static void linesperbeatbar_onlessclicked(LinesPerBeatBar*, psy_ui_Component* sender);
 static void linesperbeatbar_onmoreclicked(LinesPerBeatBar*, psy_ui_Component* sender);
 static void linesperbeatbar_ontimer(LinesPerBeatBar*, psy_ui_Component* sender, uintptr_t timerid);
-static void linesperbeatbar_onlanguagechanged(LinesPerBeatBar*, Translator* sender);
 
 void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -24,9 +24,7 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	self->player = &workspace->player;		
-	psy_ui_label_init(&self->lpbdesclabel, &self->component);		
-	psy_ui_label_settext(&self->lpbdesclabel, 
-		workspace_translate(self->workspace, "lines-per-beat"));	
+	psy_ui_label_init(&self->lpbdesclabel, &self->component);				
 	psy_ui_label_init(&self->lpblabel, &self->component);
 	psy_ui_label_setcharnumber(&self->lpblabel, 4);	
 	psy_ui_button_init(&self->lessbutton, &self->component);
@@ -39,17 +37,22 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 		linesperbeatbar_onmoreclicked);
 	psy_signal_connect(&self->component.signal_timer, self,
 		linesperbeatbar_ontimer);
+	linesperbeatbar_updatetext(self, &workspace->translator);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		linesperbeatbar_onlanguagechanged);
 	linesperbeatbar_initalign(self);
-	psy_ui_component_starttimer(&self->component, 500, 200);
-	
+	psy_ui_component_starttimer(&self->component, 0, 200);	
 }
 
-void linesperbeatbar_updatetext(LinesPerBeatBar* self)
+void linesperbeatbar_updatetext(LinesPerBeatBar* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->lpbdesclabel,
-		workspace_translate(self->workspace, "lines-per-beat"));
+		workspace_translate(self->workspace, "lpb.lines-per-beat"));
+}
+
+void linesperbeatbar_onlanguagechanged(LinesPerBeatBar* self, Translator* sender)
+{
+	linesperbeatbar_updatetext(self, sender);
 }
 
 void linesperbeatbar_initalign(LinesPerBeatBar* self)
@@ -81,9 +84,4 @@ void linesperbeatbar_ontimer(LinesPerBeatBar* self, psy_ui_Component* sender, ui
 		psy_snprintf(text, 10, "%2d", self->lpb);
 		psy_ui_label_settext(&self->lpblabel, text);		
 	}
-}
-
-void linesperbeatbar_onlanguagechanged(LinesPerBeatBar* self, Translator* sender)
-{
-	linesperbeatbar_updatetext(self);
 }

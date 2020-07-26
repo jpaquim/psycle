@@ -542,12 +542,12 @@ void machinewireview_readconfig(MachineWireView* self)
 	mv = psy_properties_findsection(self->workspace->config,
 		"visual.machineview");
 	if (mv) {		
-		self->drawvumeters = psy_properties_bool(mv, "drawvumeters", 1);
+		self->drawvumeters = psy_properties_at_bool(mv, "drawvumeters", 1);
 		psy_ui_component_stoptimer(&self->component, 0);
 		if (self->drawvumeters) {
 			psy_ui_component_starttimer(&self->component, 0, 50);
 		}
-		self->skin.drawmachineindexes = psy_properties_bool(mv,
+		self->skin.drawmachineindexes = psy_properties_at_bool(mv,
 			"drawmachineindexes", 1);
 		self->showwirehover = workspace_showwirehover(self->workspace);
 	}
@@ -1524,14 +1524,14 @@ void machinewireview_onnewmachineselected(MachineView* self,
 	
 	machine = psy_audio_machinefactory_makemachinefrompath(
 		&self->workspace->machinefactory,
-		psy_properties_int(plugininfo, "type", UINTPTR_MAX),
-		psy_properties_readstring(plugininfo, "path", ""),
-		psy_properties_int(plugininfo, "shellidx", 0));
+		psy_properties_at_int(plugininfo, "type", UINTPTR_MAX),
+		psy_properties_at_str(plugininfo, "path", ""),
+		psy_properties_at_int(plugininfo, "shellidx", 0));
 	if (machine) {
 		int favorite;
 
-		favorite = psy_properties_int(plugininfo, "favorite", 0);
-		psy_properties_write_int(plugininfo, "favorite", ++favorite);
+		favorite = psy_properties_at_int(plugininfo, "favorite", 0);
+		psy_properties_set_int(plugininfo, "favorite", ++favorite);
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
 

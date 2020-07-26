@@ -163,14 +163,14 @@ void driver_configure(FileOutDriver* self, psy_Properties* config)
 	}
 	free(self->filecontext.path);
 	self->filecontext.path = strdup(
-		psy_properties_readstring(driver->properties,
+		psy_properties_at_str(driver->properties,
 			"outputpath", "Untitled.wav"));
 	psy_audiodriversettings_setvalidbitdepth(&self->settings,
-		psy_properties_int(driver->properties, "bitdepth", 16));
+		psy_properties_at_int(driver->properties, "bitdepth", 16));
 	psy_audiodriversettings_setsamplespersec(&self->settings,
-		psy_properties_int(driver->properties, "samplerate", 44100));
+		psy_properties_at_int(driver->properties, "samplerate", 44100));
 	psy_audiodriversettings_setchannelmode(&self->settings,
-		psy_properties_int(driver->properties, "channels",
+		psy_properties_at_int(driver->properties, "channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 

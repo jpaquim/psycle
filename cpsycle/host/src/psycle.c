@@ -1,23 +1,22 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-
+// platform
 #include "../../detail/prefix.h"
 #include "../../detail/os.h"
+// host
 #include "mainframe.h"
+// ui
 #include <uiapp.h>
+// file
 #include <dir.h>
-#include <notestab.h>
 
-#include "../../detail/trace.h"
-
-
-// aim: initial entry point for psycle startup
+// Initial entry point for the startup of psycleo
 //
-//		Normally, main is the c entry point, but win32 uses WinMain, so we have
-//		to define for win32 a different entry point as the usual main method.
-//      We split the startup call with os defines of diversalis and call then
-//      psycle_run as main method
+// Normally, main is the c entry point, but win32 uses WinMain, so we have
+// to define for win32 a different entry point as the usual main method.
+// We split the startup call with os defines of diversalis and call then
+// psycle_run as main method
 
 // General app run method
 static int psycle_run(uintptr_t instance, int options);
@@ -62,18 +61,11 @@ int psycle_run(uintptr_t instance, int options)
 	const char* env = 0;
 	extern psy_ui_App app;
 	MainFrame mainframe;
-
-
-	for (int i = 0; i < 256; ++i)
-	{
-		TRACE_INT(i);
-		TRACE(": ");
-		TRACE(psy_dsp_notetostr(i, psy_dsp_NOTESTAB_GMPERCUSSION));
-		TRACE("\n");
-	}
+	
 	// Adds the app path to the environment path to find some
 	// modules (scilexer ...)
-	// native-plugin env's are set in plugin.c (library_setenv)
+	// native-plugin env's are not set here but in plugin.c for each plugin
+	// (library_setenv)
 	env = pathenv();
 	if (env) {
 		insertpathenv(workdir(workpath));

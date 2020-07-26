@@ -236,7 +236,7 @@ void plugineditor_buildpluginlist(PluginEditor* self)
 		p = p->children;
 	}
 	for (c = 0; p != NULL; p = psy_properties_next(p)) {
-		if (psy_properties_int(p, "type", -1) == MACH_LUA) {
+		if (psy_properties_at_int(p, "type", -1) == MACH_LUA) {
 			psy_ui_combobox_addtext(&self->pluginselector, psy_properties_key(p));
 			psy_table_insert(&self->pluginmappping, (uintptr_t) c, p);
 			++c;
@@ -252,7 +252,7 @@ void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender,
 	if (p) {
 		const char* path;
 
-		path = psy_properties_readstring(p, "path", 0);
+		path = psy_properties_at_str(p, "path", 0);
 		if (path) {
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
 				psy_ui_editor_clear(&self->editor);

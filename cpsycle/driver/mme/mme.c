@@ -319,31 +319,31 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 		psy_properties_free(self->driver.properties);
 		self->driver.properties = psy_properties_clone(config, 1);
 	} else {
-		property = psy_properties_read(self->driver.properties, "device");
+		property = psy_properties_at(self->driver.properties, "device", PSY_PROPERTY_TYP_NONE);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_CHOICE) {
 			psy_Properties* device;
 
-			device = psy_properties_read_choice(property);
+			device = psy_properties_at_choice(property);
 			if (device) {
-				self->_deviceId =  psy_properties_value(device);
+				self->_deviceId =  psy_properties_as_int(device);
 			}
 		}
-		property = psy_properties_read(self->driver.properties, "bitdepth");
+		property = psy_properties_at(self->driver.properties, "bitdepth", PSY_PROPERTY_TYP_NONE);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			psy_audiodriversettings_setvalidbitdepth(&self->settings,
 				property->item.value.i);
 		}
-		property = psy_properties_read(self->driver.properties, "samplerate");
+		property = psy_properties_at(self->driver.properties, "samplerate", PSY_PROPERTY_TYP_NONE);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			psy_audiodriversettings_setsamplespersec(&self->settings,
 				property->item.value.i);
 		}
-		property = psy_properties_read(self->driver.properties, "numbuf");
+		property = psy_properties_at(self->driver.properties, "numbuf", PSY_PROPERTY_TYP_NONE);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			psy_audiodriversettings_setblockcount(&self->settings,
 				property->item.value.i);
 		}
-		property = psy_properties_read(self->driver.properties, "numsamples");
+		property = psy_properties_at(self->driver.properties, "numsamples", PSY_PROPERTY_TYP_NONE);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_INTEGER) {
 			psy_audiodriversettings_setblockframes(&self->settings,
 				property->item.value.i);

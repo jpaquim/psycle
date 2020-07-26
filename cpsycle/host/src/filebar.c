@@ -10,12 +10,12 @@
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 
-static void filebar_updatetext(FileBar*);
+static void filebar_updatetext(FileBar*, Translator* translator);
+static void filebar_onlanguagechanged(FileBar*, Translator* sender);
 static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
-static void filebar_onlanguagechanged(FileBar*, Translator* sender);
 
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
@@ -40,21 +40,26 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	filebar_initalign(self);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		filebar_onlanguagechanged);
-	filebar_updatetext(self);
+	filebar_updatetext(self, &workspace->translator);
 }
 
-void filebar_updatetext(FileBar* self)
+void filebar_updatetext(FileBar* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->header,
-		workspace_translate(self->workspace, "song"));
+		translator_translate(translator, "file.song"));
 	psy_ui_button_settext(&self->newbutton,
-		workspace_translate(self->workspace, "new"));	
+		translator_translate(translator, "file.new"));
 	psy_ui_button_settext(&self->loadbutton,
-		workspace_translate(self->workspace, "load"));	
+		translator_translate(translator, "file.load"));
 	psy_ui_button_settext(&self->savebutton,
-		workspace_translate(self->workspace, "save"));	
+		translator_translate(translator, "file.save"));
 	psy_ui_button_settext(&self->renderbutton,
-		workspace_translate(self->workspace, "render"));	
+		translator_translate(translator, "file.render"));
+}
+
+void filebar_onlanguagechanged(FileBar* self, Translator* sender)
+{
+	filebar_updatetext(self, sender);
 }
 
 void filebar_initalign(FileBar* self)
@@ -110,9 +115,4 @@ void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
 			psy_ui_savedialog_filename(&dialog));
 	}
 	psy_ui_savedialog_dispose(&dialog);
-}
-
-void filebar_onlanguagechanged(FileBar* self, Translator* sender)
-{
-	filebar_updatetext(self);
 }

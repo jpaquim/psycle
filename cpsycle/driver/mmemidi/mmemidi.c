@@ -130,9 +130,9 @@ void apply_properties(MmeMidiDriver* self)
 	if (self->driver.properties) {
 		psy_Properties* p;
 
-		p = psy_properties_read(self->driver.properties, "device");
+		p = psy_properties_at(self->driver.properties, "device", PSY_PROPERTY_TYP_NONE);
 		if (p) {
-			self->deviceid = psy_properties_value(p);
+			self->deviceid = psy_properties_as_int(p);
 		}
 	}
 }

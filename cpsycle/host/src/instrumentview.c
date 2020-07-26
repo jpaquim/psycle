@@ -159,15 +159,15 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 void instrumentviewbuttons_updatetext(InstrumentViewButtons* self, Translator* translator)
 {
 	psy_ui_button_settext(&self->create,
-		translator_translate(translator, "new"));
+		translator_translate(translator, "file.new"));
 	psy_ui_button_settext(&self->load,
-		translator_translate(translator, "load"));
+		translator_translate(translator, "file.load"));
 	psy_ui_button_settext(&self->save,
-		translator_translate(translator, "save"));
+		translator_translate(translator, "file.save"));
 	psy_ui_button_settext(&self->duplicate,
-		translator_translate(translator, "duplicate"));
+		translator_translate(translator, "edit.duplicate"));
 	psy_ui_button_settext(&self->del,
-		translator_translate(translator, "delete"));
+		translator_translate(translator, "edit.delete"));
 }
 
 void instrumentviewbuttons_onlanguagechanged(InstrumentViewButtons* self, Translator* sender)

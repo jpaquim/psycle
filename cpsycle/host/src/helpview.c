@@ -5,6 +5,9 @@
 
 #include "helpview.h"
 
+// Prototypes
+static void helpview_updatetext(HelpView*, Translator*);
+static void helpview_onlanguagechanged(HelpView*, Translator* sender);
 static void selectsection(HelpView*, psy_ui_Component* sender, uintptr_t section);
 
 TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
@@ -21,16 +24,29 @@ TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
 	greet_init(&self->greet, psy_ui_notebook_base(&self->notebook));	
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, 
-		workspace_translate(self->workspace, "help"),
-		workspace_translate(self->workspace, "about"),
-		workspace_translate(self->workspace, "greetings"),
-		NULL);
+	tabbar_append_tabs(&self->tabbar, "", "", "", NULL);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->component.signal_selectsection, self, selectsection);
 	tabbar_select(&self->tabbar, 1);
+	helpview_updatetext(self, &workspace->translator);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		helpview_onlanguagechanged);
 	return &self->tabbar;
+}
+
+void helpview_updatetext(HelpView* self, Translator* translator)
+{
+	tabbar_rename_tabs(&self->tabbar,
+		translator_translate(translator, "help.help"),
+		translator_translate(translator, "help.about"),
+		translator_translate(translator, "help.greetings"),
+		NULL);
+}
+
+void helpview_onlanguagechanged(HelpView* self, Translator* sender)
+{
+	helpview_updatetext(self, sender);
 }
 
 void selectsection(HelpView* self, psy_ui_Component* sender, uintptr_t section)

@@ -331,7 +331,7 @@ void plugindisplayname(psy_Properties* property, char* text)
 {	
 	const char* label;
 
-	label = psy_properties_readstring(property, "shortname", "");
+	label = psy_properties_at_str(property, "shortname", "");
 	if (strcmp(label, "") == 0) {
 		label = psy_properties_key(property);
 	}
@@ -342,7 +342,7 @@ int plugintype(psy_Properties* property, char* text)
 {	
 	int rv;
 	
-	rv = psy_properties_int(property, "type", -1);
+	rv = psy_properties_at_int(property, "type", -1);
 	switch (rv) {
 		case MACH_PLUGIN:
 			strcpy(text, "psy");
@@ -370,7 +370,7 @@ int pluginmode(psy_Properties* property, char* text)
 {			
 	int rv;
 
-	rv = psy_properties_int(property, "mode", -1);
+	rv = psy_properties_at_int(property, "mode", -1);
 	strcpy(text, rv == MACHMODE_FX ? "fx" : "gn");
 	return rv;
 }
@@ -420,7 +420,7 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 					if (!self->onlyfavorites && p) {
 						psy_properties_remove(self->workspace->plugincatcher.plugins, p);
 					} else {						
-						psy_properties_write_int(p, "favorite", 0);
+						psy_properties_set_int(p, "favorite", 0);
 					}
 					plugincatcher_save(&self->workspace->plugincatcher);
 					psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
@@ -721,9 +721,9 @@ void newmachine_updateskin(NewMachine* self)
 void newmachine_updatetext(NewMachine* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->favoriteheader,
-		translator_translate(translator, "Favorites"));
+		translator_translate(translator, "newmachine.favorites"));
 	psy_ui_label_settext(&self->pluginsheader,
-		translator_translate(translator, "All"));
+		translator_translate(translator, "newmachine.all"));
 }
 
 void newmachine_onlanguagechanged(NewMachine* self, Translator* sender)
@@ -738,12 +738,12 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 	char detail[1024];
 	psy_Properties* sorted;
 
-	text = psy_properties_readstring(selected, "name", "");
+	text = psy_properties_at_str(selected, "name", "");
 	strcpy(detail, text);
-	// text = psy_properties_readstring(selected, "desc", "");
+	// text = psy_properties_at_str(selected, "desc", "");
 	// strcat(detail, "  ");
 	// strcat(detail, text);	
-	text = psy_properties_readstring(selected, "author", "");
+	text = psy_properties_at_str(selected, "author", "");
 	strcat(detail, "\n(");
 	strcat(detail, text);
 	strcat(detail, ")");
@@ -772,12 +772,12 @@ void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
 	const char* text;
 	char detail[1024];
 
-	text = psy_properties_readstring(selected, "name", "");
+	text = psy_properties_at_str(selected, "name", "");
 	strcpy(detail, text);
-	// text = psy_properties_readstring(selected, "desc", "");
+	// text = psy_properties_at_str(selected, "desc", "");
 	// strcat(detail, "  ");
 	// strcat(detail, text);	
-	text = psy_properties_readstring(selected, "author", "");
+	text = psy_properties_at_str(selected, "author", "");
 	strcat(detail, "\n(");
 	strcat(detail, text);
 	strcat(detail, ")");
@@ -872,7 +872,7 @@ psy_Properties* newmachine_favorites(psy_Properties* source)
 		if (p) {
 			rv = psy_properties_create();
 			for (; p != NULL; p = psy_properties_next(p)) {
-				if (psy_properties_int(p, "favorite", 0) != FALSE) {
+				if (psy_properties_at_int(p, "favorite", 0) != FALSE) {
 					psy_properties_append_property(rv, psy_properties_clone(
 						p, 0));
 				}
@@ -916,8 +916,8 @@ int newmachine_comp_favorite(psy_Properties* p, psy_Properties* q)
 	int left;
 	int right;
 	
-	left = psy_properties_int(p, "favorite", 0);
-	right = psy_properties_int(q, "favorite", 0);
+	left = psy_properties_at_int(p, "favorite", 0);
+	right = psy_properties_at_int(q, "favorite", 0);
 	return right - left;
 }
 
@@ -926,11 +926,11 @@ int newmachine_comp_name(psy_Properties* p, psy_Properties* q)
 	const char* left;
 	const char* right;
 
-	left = psy_properties_readstring(p, "name", "");
+	left = psy_properties_at_str(p, "name", "");
 	if (strlen(left) == 0) {
 		left = psy_properties_key(p);
 	}
-	right = psy_properties_readstring(q, "name", "");
+	right = psy_properties_at_str(q, "name", "");
 	if (strlen(right) == 0) {
 		right = psy_properties_key(q);
 	}
@@ -942,9 +942,9 @@ int newmachine_comp_type(psy_Properties* p, psy_Properties* q)
 	int left;
 	int right;
 	
-	left = psy_properties_int(p, "type", 128);
+	left = psy_properties_at_int(p, "type", 128);
 	left = newmachine_isplugin(left) ? left : 0;
-	right = psy_properties_int(q, "type", 128);
+	right = psy_properties_at_int(q, "type", 128);
 	right = newmachine_isplugin(right) ? right : 0;
 	return left - right;		
 }
@@ -960,8 +960,8 @@ int newmachine_isplugin(int type)
 
 int newmachine_comp_mode(psy_Properties* p, psy_Properties* q)
 {	
-	return psy_properties_int(p, "mode", 128) -
-		psy_properties_int(q, "mode", 128);	
+	return psy_properties_at_int(p, "mode", 128) -
+		psy_properties_at_int(q, "mode", 128);	
 }
 
 void newmachine_onfocus(NewMachine* self, psy_ui_Component* sender)
