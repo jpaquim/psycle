@@ -11,7 +11,8 @@
 
 #define MIN_TRACKS 4
 
-static void songtrackbar_updatetext(SongTrackBar*);
+static void songtrackbar_updatetext(SongTrackBar*, Translator*);
+static void songtrackbar_onlanguagechanged(SongTrackBar*, Translator* sender);
 static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
@@ -39,20 +40,27 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		songtrackbar_onsongchanged);
-	songtrackbar_updatetext(self);	
+	songtrackbar_updatetext(self, &workspace->translator);
+	psy_signal_connect(&self->workspace->signal_languagechanged, self,
+		songtrackbar_onlanguagechanged);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-		&margin));	
+		&margin));
 }
 
-void songtrackbar_updatetext(SongTrackBar* self)
+void songtrackbar_updatetext(SongTrackBar* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->headerlabel, 
-		workspace_translate(self->workspace, "tracks"));
+		translator_translate(translator, "trackbar.tracks"));
+}
+
+void songtrackbar_onlanguagechanged(SongTrackBar* self, Translator* sender)
+{
+	songtrackbar_updatetext(self, sender);
 }
 
 void songtrackbar_build(SongTrackBar* self)

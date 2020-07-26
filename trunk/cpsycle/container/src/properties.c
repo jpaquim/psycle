@@ -12,15 +12,24 @@
 #include <assert.h>
 #include <stddef.h>
 
-static int properties_enumerate_rec(psy_Properties*);
+typedef struct {
+	void* target;
+	psy_PropertiesCallback callback;
+	int level;
+} PropertiesCallbackContext;
+
+static int properties_enumerate_rec(psy_Properties*, PropertiesCallbackContext*);
 static int OnSearchPropertiesEnum(psy_Properties*, psy_Properties*, int level);
 static int OnPropertySearchPropertiesEnum(psy_Properties* self, 
 	psy_Properties* property, int level);
 static psy_Properties* tail(psy_Properties*);
 
-static void* target;
-static psy_PropertiesCallback callback;
-static int level;
+static psy_Properties* psy_properties_create_string(const char* key, const char* value);
+static psy_Properties* psy_properties_create_font(const char* key, const char* value);
+static psy_Properties* psy_properties_create_int(const char* key, int value, int min, int max);
+static psy_Properties* psy_properties_create_bool(const char* key, int value);
+static psy_Properties* psy_properties_create_choice(const char* key, int value);
+
 
 void psy_property_init(psy_Property* self)
 {
@@ -127,7 +136,7 @@ psy_Properties* psy_properties_create(void)
 	return rv;
 }
 
-psy_Properties* psy_properties_create_section(psy_Properties* self, const char* name)
+psy_Properties* psy_properties_append_section(psy_Properties* self, const char* name)
 {
 	psy_Properties* rv;
 	
@@ -186,23 +195,23 @@ psy_Properties* psy_properties_sync(psy_Properties* self, psy_Properties* src)
 	for (p = src->children; p != NULL; p = psy_properties_next(p)) {
 		psy_Properties* q;
 
-		q = psy_properties_read(self, psy_properties_key(p));
+		q = psy_properties_at(self, psy_properties_key(p), PSY_PROPERTY_TYP_NONE);
 		if (q) {
 			if (psy_properties_type(p) == PSY_PROPERTY_TYP_STRING) {
-				psy_properties_write_string(self, psy_properties_key(p),
-					psy_properties_valuestring(p));
+				psy_properties_set_str(self, psy_properties_key(p),
+					psy_properties_as_str(p));
 			} else
 			if (psy_properties_type(p) == PSY_PROPERTY_TYP_INTEGER) {
-				psy_properties_write_int(self, psy_properties_key(p),
-					psy_properties_value(p));
+				psy_properties_set_int(self, psy_properties_key(p),
+					psy_properties_as_int(p));
 			} else
 			if (psy_properties_type(p) == PSY_PROPERTY_TYP_BOOL) {
-				psy_properties_write_bool(self, psy_properties_key(p),
-					psy_properties_value(p));
+				psy_properties_set_bool(self, psy_properties_key(p),
+					psy_properties_as_int(p));
 			} else
 			if (psy_properties_type(p) == PSY_PROPERTY_TYP_FONT) {
-				psy_properties_write_font(self, psy_properties_key(p),
-					psy_properties_valuestring(p));
+				psy_properties_set_font(self, psy_properties_key(p),
+					psy_properties_as_str(p));
 			}
 			if (q->children && p->children) {
 				psy_properties_sync(q, p);
@@ -299,14 +308,17 @@ psy_Properties* psy_properties_create_bool(const char* key, int value)
 	return p;
 }
 
-psy_Properties* psy_properties_append_bool(psy_Properties* self, const char* key, int value)
+psy_Properties* psy_properties_append_bool(psy_Properties* self, const char* key, bool value)
 {
-	psy_Properties* p;
-	
-	p = psy_properties_append_int(self, key, value != 0, 0, 1);
-	p->item.typ = PSY_PROPERTY_TYP_BOOL;
-	p->item.hint = PSY_PROPERTY_HINT_CHECK;
-	return p;
+	psy_Properties* rv;
+
+	rv = (psy_Properties*)malloc(sizeof(psy_Properties));
+	if (rv) {
+		psy_properties_init(rv, key, PSY_PROPERTY_TYP_BOOL);
+		rv->item.value.i = (value != FALSE);
+		rv->item.hint = PSY_PROPERTY_HINT_CHECK;
+	}
+	return psy_properties_append_property(self, rv);
 }
 
 psy_Properties* psy_properties_append_double(psy_Properties* self, const char* key,
@@ -344,7 +356,7 @@ char* pathend(const char* path, char* section, char* key)
 	return p;
 }
 
-psy_Properties* psy_properties_read(psy_Properties* self, const char* key)
+psy_Properties* psy_properties_at(psy_Properties* self, const char* key, psy_PropertyType type)
 {
 	psy_Properties* p;	
 	char* c;
@@ -370,7 +382,9 @@ psy_Properties* psy_properties_read(psy_Properties* self, const char* key)
 		}
 	}
 	while (p != NULL) {		
-		if (p->item.key && strcmp(key, p->item.key) == 0) {
+		if ((p->item.key != NULL) &&
+				((type == PSY_PROPERTY_TYP_NONE) || (p->item.typ == type)) &&
+				strcmp(key, p->item.key) == 0) {
 			break;
 		}
 		p = p->next;		
@@ -378,12 +392,12 @@ psy_Properties* psy_properties_read(psy_Properties* self, const char* key)
 	return p;
 }
 
-int psy_properties_int(psy_Properties* properties, const char* key, int defaultvalue)
+int psy_properties_at_int(psy_Properties* properties, const char* key, int defaultvalue)
 {
 	int rv = defaultvalue;
 
 	if (properties) {
-		psy_Properties* property = psy_properties_read(properties, key);
+		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_NONE);
 		if (property &&
 			(property->item.typ == PSY_PROPERTY_TYP_INTEGER ||
 			 property->item.typ == PSY_PROPERTY_TYP_CHOICE)) {
@@ -395,17 +409,17 @@ int psy_properties_int(psy_Properties* properties, const char* key, int defaultv
 	return rv;
 }
 
-int psy_properties_bool(psy_Properties* properties, const char* key, int defaultvalue)
+bool psy_properties_at_bool(psy_Properties* properties, const char* key, bool defaultvalue)
 {
-	int rv;
+	bool rv;
 
 	if (!properties) {
-		rv = defaultvalue;
+		rv = defaultvalue != FALSE;
 	} else {
-		psy_Properties* property = psy_properties_read(properties, key);
+		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_NONE);
 		if (property && (property->item.typ == PSY_PROPERTY_TYP_BOOL ||
 				property->item.typ == PSY_PROPERTY_TYP_INTEGER)) {
-			rv = property->item.value.i != 0;
+			rv = property->item.value.i != FALSE;
 		} else {
 			rv = defaultvalue;
 		}
@@ -413,29 +427,32 @@ int psy_properties_bool(psy_Properties* properties, const char* key, int default
 	return rv;
 }
 
-void psy_properties_readdouble(psy_Properties* properties, const char* key,
-	double* value, double defaultvalue)
+double psy_properties_at_real(psy_Properties* properties, const char* key,
+	double defaultvalue)
 {
+	double rv;
+
 	if (!properties) {
-		*value = defaultvalue;
+		rv = defaultvalue;
 	} else {
-		psy_Properties* property = psy_properties_read(properties, key);
+		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_DOUBLE);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_DOUBLE) {
-			*value = property->item.value.d;
+			rv = property->item.value.d;
 		} else {
-			*value = defaultvalue;
+			rv = defaultvalue;
 		}
 	}
+	return rv;
 }
 
-const char* psy_properties_readstring(psy_Properties* properties, const char* key,
+const char* psy_properties_at_str(psy_Properties* properties, const char* key,
 	const char* defaulttext)
 {
 	const char* rv = 0;
 	if (!properties) {
 		rv = defaulttext;
 	} else {
-		psy_Properties* property = psy_properties_read(properties, key);
+		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_STRING);
 		if (property && property->item.typ == PSY_PROPERTY_TYP_STRING ||
 			property && property->item.typ == PSY_PROPERTY_TYP_FONT) {
 			rv = property->item.value.s;
@@ -446,12 +463,12 @@ const char* psy_properties_readstring(psy_Properties* properties, const char* ke
 	return rv;
 }
 
-psy_Properties* psy_properties_write_string(psy_Properties* self, const char* key,
+psy_Properties* psy_properties_set_str(psy_Properties* self, const char* key,
 	const char* value)
 {
 	psy_Properties* p;
 	
-	p = psy_properties_read(self, key);
+	p = psy_properties_at(self, key, PSY_PROPERTY_TYP_STRING);
 	if (p) {
 		if (p->item.typ == PSY_PROPERTY_TYP_STRING) {
 			free(p->item.value.s);
@@ -464,12 +481,12 @@ psy_Properties* psy_properties_write_string(psy_Properties* self, const char* ke
 	return p;
 }
 
-psy_Properties* psy_properties_write_font(psy_Properties* self, const char* key,
+psy_Properties* psy_properties_set_font(psy_Properties* self, const char* key,
 	const char* value)
 {
 	psy_Properties* p;
 	
-	p = psy_properties_read(self, key);
+	p = psy_properties_at(self, key, PSY_PROPERTY_TYP_FONT);
 	if (p) {
 		if (p->item.typ == PSY_PROPERTY_TYP_FONT) {
 			free(p->item.value.s);
@@ -482,9 +499,9 @@ psy_Properties* psy_properties_write_font(psy_Properties* self, const char* key,
 	return p;
 }
 
-psy_Properties* psy_properties_write_int(psy_Properties* self, const char* key, int value)
+psy_Properties* psy_properties_set_int(psy_Properties* self, const char* key, int value)
 {
-	psy_Properties* p = psy_properties_read(self, key);
+	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_INTEGER);
 	if (p) {		
 		p->item.value.i = value;
 		p->item.typ = PSY_PROPERTY_TYP_INTEGER;		
@@ -494,19 +511,22 @@ psy_Properties* psy_properties_write_int(psy_Properties* self, const char* key, 
 	return p;
 }
 
-psy_Properties* psy_properties_write_bool(psy_Properties* self, const char* key, int value)
-{
-	psy_Properties* p;
-	
-	p = psy_properties_write_int(self, key, value != 0);
-	p->item.typ = PSY_PROPERTY_TYP_BOOL;
-	p->item.hint = PSY_PROPERTY_HINT_CHECK;	
+psy_Properties* psy_properties_set_bool(psy_Properties* self, const char* key, bool value)
+{	
+	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_BOOL);
+	if (p) {
+		p->item.value.i = (value != FALSE);
+		p->item.typ = PSY_PROPERTY_TYP_BOOL;
+		p->item.hint = PSY_PROPERTY_HINT_CHECK;
+	} else {
+		p = psy_properties_append_int(self, key, value, 0, 0);
+	}
 	return p;
 }
 
-psy_Properties* psy_properties_write_choice(psy_Properties* self, const char* key, int value)
+psy_Properties* psy_properties_set_choice(psy_Properties* self, const char* key, int value)
 {
-	psy_Properties* p = psy_properties_read(self, key);
+	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_NONE);
 	if (p) {		
 		p->item.value.i = value;
 		p->item.typ = PSY_PROPERTY_TYP_CHOICE;
@@ -517,9 +537,9 @@ psy_Properties* psy_properties_write_choice(psy_Properties* self, const char* ke
 	return p;
 }
 
-psy_Properties* psy_properties_write_double(psy_Properties* self, const char* key, double value)
+psy_Properties* psy_properties_set_double(psy_Properties* self, const char* key, double value)
 {
-	psy_Properties* p = psy_properties_read(self, key);
+	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_NONE);
 	if (p) {		
 		p->item.value.d = value;
 		p->item.typ = PSY_PROPERTY_TYP_DOUBLE;		
@@ -529,34 +549,37 @@ psy_Properties* psy_properties_write_double(psy_Properties* self, const char* ke
 	return p;
 }
 
-void psy_properties_enumerate(psy_Properties* self, void* t, int (*enumproc)(void* self, psy_Properties* properties, int level))
+void psy_properties_enumerate(psy_Properties* self, void* target,
+	int (*enumproc)(void* self, psy_Properties* properties, int level))
 {
-	target = t;
-	level = 0;	
-	callback = enumproc;
-	properties_enumerate_rec(self);	
+	PropertiesCallbackContext context;
+
+	context.target = target;
+	context.callback = enumproc;
+	context.level = 0;	
+	properties_enumerate_rec(self, &context);	
 }
 
-int properties_enumerate_rec(psy_Properties* self)
+int properties_enumerate_rec(psy_Properties* self, PropertiesCallbackContext* context)
 {
 	psy_Properties* p;
 	p = self;
-	while (p != NULL) {
-		int walkoption = callback(target, p, level);
+	while (p != NULL) {		
+		int walkoption = context->callback(context->target, p, context->level);
 		if (walkoption == 0) {
 			return 0;
 		} else
 		if (walkoption == 1) {
 			if (p->children) {
-				++level;
-				if (!properties_enumerate_rec(p->children)) {
-					--level;
+				++context->level;
+				if (!properties_enumerate_rec(p->children, context)) {
+					--context->level;
 					return 0;
 				}			
-				--level;
+				--context->level;
 			}
 		}
-		p = p->next;		
+		p = p->next;
 	}	
 	return 1;
 }
@@ -566,13 +589,13 @@ static psy_PropertyType searchtyp;
 static psy_Properties* keyfound;
 static psy_Properties* searchproperty;
 
+
 psy_Properties* psy_properties_find(psy_Properties* self, const char* key, psy_PropertyType typ)
 {
-	searchkey = key;
 	searchtyp = typ;
+	searchkey = key;
 	keyfound = 0;
-	psy_properties_enumerate(self, self,
-	    (psy_PropertiesCallback) OnSearchPropertiesEnum);
+	psy_properties_enumerate(self, self, (psy_PropertiesCallback) OnSearchPropertiesEnum);
 	return keyfound;		
 }
 
@@ -652,12 +675,12 @@ const char* psy_properties_key(psy_Properties* self)
 	return (self) ? self->item.key : "";
 }
 
-int psy_properties_value(psy_Properties* self)
+int psy_properties_as_int(psy_Properties* self)
 {
 	return (self) ? self->item.value.i : 0;
 }
 
-const char* psy_properties_valuestring(psy_Properties* self)
+const char* psy_properties_as_str(psy_Properties* self)
 {
 	return (self && self->item.value.s) ? self->item.value.s : "";
 }
@@ -800,7 +823,7 @@ psy_Properties* tail(psy_Properties* self)
 
 psy_Properties* psy_properties_append_property(psy_Properties* self, psy_Properties* p)
 {	
-	if (self) {
+	if (self) {		
 		if (self->children) {
 			tail(self->children)->next = p;		
 		} else {
@@ -870,7 +893,7 @@ uintptr_t psy_properties_size(psy_Properties* self)
 	return rv;
 }
 
-psy_Properties* psy_properties_read_choice(psy_Properties* self)
+psy_Properties* psy_properties_at_choice(psy_Properties* self)
 {
 	psy_Properties* rv = 0;	
 		
@@ -879,7 +902,7 @@ psy_Properties* psy_properties_read_choice(psy_Properties* self)
 		psy_Properties* p;
 		int count = 0;		
 		
-		choice = psy_properties_value(self);
+		choice = psy_properties_as_int(self);
 		p = self->children;		
 		while (p) {
 			if (count == choice) {

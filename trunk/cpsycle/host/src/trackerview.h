@@ -162,7 +162,7 @@ typedef struct {
 	psy_ui_Button export;
 } PatternBlockMenu;
 
-void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*);
+void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*, Workspace*);
 
 typedef struct {
 	int playbar;

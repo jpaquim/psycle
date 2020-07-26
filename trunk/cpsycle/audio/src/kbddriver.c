@@ -229,7 +229,7 @@ void driver_makeinputs(KbdDriver* self, psy_Properties* notes)
 	
 	for (p = notes->children; p != NULL; p = psy_properties_next(p)) {				
 		if (psy_properties_id(p) != -1) {
-			psy_audio_inputs_define(&self->noteinputs, psy_properties_value(p),
+			psy_audio_inputs_define(&self->noteinputs, psy_properties_as_int(p),
 				psy_properties_id(p), psy_properties_key(p));
 		}
 	}

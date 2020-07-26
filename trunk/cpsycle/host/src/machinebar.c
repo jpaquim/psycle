@@ -99,13 +99,13 @@ void machinebar_ondestroy(MachineBar* self, psy_ui_Component* component)
 void machinebar_updatetext(MachineBar* self)
 {
 	psy_ui_button_settext(&self->gear,
-		workspace_translate(self->workspace, "gear"));
+		workspace_translate(self->workspace, "machinebar.gear"));
 	psy_ui_button_settext(&self->editor,
-		workspace_translate(self->workspace, "editor"));
+		workspace_translate(self->workspace, "machinebar.editor"));
 	psy_ui_button_settext(&self->cpu,
-		workspace_translate(self->workspace, "cpu"));
+		workspace_translate(self->workspace, "machinebar.cpu"));
 	psy_ui_button_settext(&self->midi,
-		workspace_translate(self->workspace, "midi"));
+		workspace_translate(self->workspace, "machinebar.midi"));
 }
 
 void machinebar_onlanguagechanged(MachineBar* self, Translator* sender)

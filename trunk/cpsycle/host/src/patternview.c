@@ -117,13 +117,10 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_enablealign(&self->component);	
 	stepbox_init(&self->step, &self->component, workspace);
-	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
-	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
-		"move-cursor-when-paste");
+	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_onmovecursorwhenpaste);
 	psy_ui_checkbox_init(&self->defaultentries, &self->component);
-	psy_ui_checkbox_settext(&self->defaultentries, "Default Line");
 	if (workspace_showgriddefaults(self->workspace)) {
 		psy_ui_checkbox_check(&self->defaultentries);
 	}
@@ -147,9 +144,9 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 void patternviewbar_updatetext(PatternViewBar* self, Translator* translator)
 {
 	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
-		translator_translate(translator, "move-cursor-when-paste"));
+		translator_translate(translator, "settingsview.move-cursor-when-paste"));
 	psy_ui_checkbox_settext(&self->defaultentries,
-		translator_translate(translator, "default-line"));
+		translator_translate(translator, "settingsview.default-line"));
 }
 
 void patternviewbar_onlanguagechanged(PatternViewBar* self, Translator* sender)
@@ -165,9 +162,9 @@ void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
 	if (pv) {
 		psy_Properties* p;
 		
-		p = psy_properties_read(pv, "griddefaults");
+		p = psy_properties_at(pv, "griddefaults", PSY_PROPERTY_TYP_NONE);
 		if (p) {			
-			psy_properties_write_bool(pv, "griddefaults", !psy_properties_value(p));
+			psy_properties_set_bool(pv, "griddefaults", !psy_properties_as_int(p));
 			psy_signal_emit(&self->workspace->signal_configchanged, self->workspace, 1, p);
 		}
 	}

@@ -9,13 +9,13 @@
 
 #include "../../detail/portable.h"
 
-static void octavebar_updatetext(OctaveBar*);
 static void octavebar_initalign(OctaveBar*);
+static void octavebar_updatetext(OctaveBar*, Translator*);
+static void octavebar_onlanguagechanged(OctaveBar*, Translator* sender);
 static void octavebar_buildoctavebox(OctaveBar*);
 static void octavebar_onoctaveboxselchange(OctaveBar*, psy_ui_Component* sender, int sel);
 static void octavebar_onoctavechanged(OctaveBar*, Workspace*, int octave);
 static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag, psy_audio_SongFile*);
-static void octavebar_onlanguagechanged(OctaveBar*, Translator* sender);
 
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
@@ -34,17 +34,22 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 		octavebar_onoctavechanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		octavebar_onsongchanged);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
+	psy_signal_connect(&workspace->signal_languagechanged, self,
 		octavebar_onlanguagechanged);
-	octavebar_updatetext(self);
+	octavebar_updatetext(self, &workspace->translator);
 	octavebar_initalign(self);
 }
 
-void octavebar_updatetext(OctaveBar* self)
+void octavebar_updatetext(OctaveBar* self, Translator* translator)
 {
 	psy_ui_label_settext(&self->headerlabel,
 		translator_translate(&self->workspace->translator,
-			"octave"));
+			"octavebar.octave"));
+}
+
+void octavebar_onlanguagechanged(OctaveBar* self, Translator* sender)
+{
+	octavebar_updatetext(self, sender);
 }
 
 void octavebar_initalign(OctaveBar* self)
@@ -85,9 +90,4 @@ void octavebar_onoctavechanged(OctaveBar* self, Workspace* workspace, int octave
 void octavebar_onsongchanged(OctaveBar* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
 {	
 	psy_ui_combobox_setcursel(&self->octavebox, workspace->octave);
-}
-
-void octavebar_onlanguagechanged(OctaveBar* self, Translator* sender)
-{
-	octavebar_updatetext(self);
 }

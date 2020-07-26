@@ -165,15 +165,15 @@ void kbdbox_makekeys(KbdBox* self)
 			for (p = p->children; p != NULL; p = p->next) {				
 				int keycode;
 
-				keycode = psy_properties_int(p, "keycode", -1);
+				keycode = psy_properties_at_int(p, "keycode", -1);
 				if (keycode != -1) {
 					const char* label;
 					int size;
 					int cr;
 
-					label = psy_properties_readstring(p, "label", "");
-					size = psy_properties_int(p, "size", 0);
-					cr = psy_properties_int(p, "cr", 0);
+					label = psy_properties_at_str(p, "label", "");
+					size = psy_properties_at_int(p, "size", 0);
+					cr = psy_properties_at_int(p, "cr", 0);
 
 					if (cr) {
 						self->cpy += self->keyheight + self->ident;
@@ -205,7 +205,7 @@ void kbdbox_makekeyproperties(KbdBox* self)
 	int col = 0;
 
 	self->keyset = psy_properties_create();
-	main = psy_properties_create_section(self->keyset, "main");
+	main = psy_properties_append_section(self->keyset, "main");
 		
 	kc = 0x1000;
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_ESCAPE, "ESC", 1, 0);
@@ -295,7 +295,7 @@ void kbdbox_addkeyproperties(KbdBox* self, psy_Properties* section,
 {
 	psy_Properties* key;
 
-	key = psy_properties_create_section(section, "key");
+	key = psy_properties_append_section(section, "key");
 	psy_properties_append_int(key, "keycode", keycode, 0, 0);	
 	psy_properties_append_string(key, "label", label);
 	psy_properties_append_int(key, "size", size, 0, 0);

@@ -31,7 +31,7 @@ void cmdproperties_makenotes(psy_Properties* self)
 	psy_Properties* notes;
 	psy_Properties* p;
 	
-	notes = psy_properties_create_section(self, "notes");	
+	notes = psy_properties_append_section(self, "notes");	
 	psy_properties_settext(notes, "Notes");
 	psy_properties_settext(
 		psy_properties_setid(psy_properties_append_int(notes, "cmd_note_c_0",
@@ -176,7 +176,7 @@ void cmdproperties_makegeneral(psy_Properties* self)
 	psy_Properties* general;
 	psy_Properties* p;
 
-	general = psy_properties_create_section(self, "generalcmds");	
+	general = psy_properties_append_section(self, "generalcmds");	
 	psy_properties_settext(general, "generalcmds");	
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_help",

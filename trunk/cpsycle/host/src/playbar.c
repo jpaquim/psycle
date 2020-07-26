@@ -77,19 +77,19 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 void playbar_updatetext(PlayBar* self, Translator* translator)
 {
 	psy_ui_button_settext(&self->loop,
-		translator_translate(translator, "loop"));
+		translator_translate(translator, "play.loop"));
 	psy_ui_button_settext(&self->recordnotes,
-		translator_translate(translator, "record-notes"));
+		translator_translate(translator, "play.record-notes"));
 	psy_ui_button_settext(&self->play,
-		translator_translate(translator, "play"));
+		translator_translate(translator, "play.play"));
 	psy_ui_combobox_addtext(&self->playmode,
-		translator_translate(translator, "song"));
+		translator_translate(translator, "play.song"));
 	psy_ui_combobox_addtext(&self->playmode,
-		translator_translate(translator, "sel"));
+		translator_translate(translator, "play.sel"));
 	psy_ui_combobox_addtext(&self->playmode,
-		translator_translate(translator, "beats"));
+		translator_translate(translator, "play.beats"));
 	psy_ui_button_settext(&self->stop,
-		translator_translate(translator, "stop"));
+		translator_translate(translator, "play.stop"));
 }
 
 void playbar_initalign(PlayBar* self)

@@ -224,7 +224,7 @@ int propertiesrenderer_onpropertiesupdatelinestates(PropertiesRenderer* self,
 		return 2;
 	}
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_CHOICE) {
-		self->currchoice = psy_properties_value(property);
+		self->currchoice = psy_properties_as_int(property);
 		self->choicecount = 0;
 	}
 	propertiesrenderer_countblocklines(self, property, 0);
@@ -260,7 +260,7 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 		return 2;
 	}	
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_CHOICE) {
-		self->currchoice = psy_properties_value(property);
+		self->currchoice = psy_properties_as_int(property);
 		self->choicecount = 0;					
 	}			
 	propertiesrenderer_setlinebackground(self, property);
@@ -418,8 +418,8 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Properties* pro
 	psy_ui_textoutrectangle(self->g, propertiesrenderer_columnstart(self, column),
 		self->cpy + self->centery,
 		psy_ui_ETO_CLIPPED, r,
-		psy_properties_valuestring(property),
-		strlen(psy_properties_valuestring(property)));
+		psy_properties_as_str(property),
+		strlen(psy_properties_as_str(property)));
 	psy_ui_setbackgroundcolor(self->g, psy_ui_color_make(0x003E3E3E));
 	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
 	psy_ui_settextcolor(self->g, psy_ui_color_make(0x00CACACA));
@@ -431,13 +431,13 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Properties* pr
 	char text[40];
 	
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_INPUT) {
-		inputdefiner_setinput(&self->inputdefiner, psy_properties_value(property));
+		inputdefiner_setinput(&self->inputdefiner, psy_properties_as_int(property));
 		inputdefiner_text(&self->inputdefiner, text);
 	} else
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
-		psy_snprintf(text, 20, "0x%d", psy_properties_value(property));
+		psy_snprintf(text, 20, "0x%d", psy_properties_as_int(property));
 	} else {
-		psy_snprintf(text, 20, "%d", psy_properties_value(property));
+		psy_snprintf(text, 20, "%d", psy_properties_as_int(property));
 	}
 	if (psy_properties_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
 		psy_ui_Rectangle r;
@@ -448,7 +448,7 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Properties* pr
 		r.top = self->cpy + self->centery;
 		r.right = r.left + tm.tmAveCharWidth * 4;
 		r.bottom = r.top + self->textheight + 2;
-		psy_ui_drawsolidrectangle(self->g, r, psy_ui_color_make(psy_properties_value(property)));
+		psy_ui_drawsolidrectangle(self->g, r, psy_ui_color_make(psy_properties_as_int(property)));
 	}
 	psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column),
 		self->cpy + self->centery,
@@ -481,7 +481,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* pro
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
 		const char* choosefonttext;
 
-		choosefonttext = workspace_translate(self->workspace, "Choose Font");
+		choosefonttext = workspace_translate(self->workspace, "settingsview.choose-font");
 		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy, choosefonttext, strlen(choosefonttext));
 	} else {
@@ -496,7 +496,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Properties* pro
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_FONT) {
 		const char* choosefonttext;
 
-		choosefonttext = workspace_translate(self->workspace, "Choose Font");
+		choosefonttext = workspace_translate(self->workspace, "settingsview.choose-font");
 		size = psy_ui_component_textsize(&self->component, choosefonttext);
 	} else {
 		size = psy_ui_component_textsize(&self->component,
@@ -537,7 +537,7 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Properties* p
 	if (psy_properties_ischoiceitem(property)) {
 		checked = self->currchoice == self->choicecount;
 	} else {
-		checked = psy_properties_value(property) != 0;
+		checked = psy_properties_as_int(property) != 0;
 	}
 	if (!checked) {
 		r.left = propertiesrenderer_columnstart(self, column) + (int)(tm.tmAveCharWidth * 0.4);
@@ -584,7 +584,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 			psy_ui_folderdialog_init_all(&dialog, 0,
 				psy_properties_translation(self->selected), "");
 			if (psy_ui_folderdialog_execute(&dialog)) {
-				psy_properties_write_string(self->selected->parent,
+				psy_properties_set_str(self->selected->parent,
 					self->selected->item.key, psy_ui_folderdialog_path(&dialog));
 			}
 			psy_ui_folderdialog_dispose(&dialog);							
@@ -597,7 +597,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 				psy_ui_Color color;
 
 				color = psy_ui_colordialog_color(&colordialog);
-				psy_properties_write_int(self->selected->parent,
+				psy_properties_set_int(self->selected->parent,
 					self->selected->item.key,
 					color.value);
 			}
@@ -611,13 +611,13 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 
 			psy_ui_fontdialog_init(&fontdialog, &self->component);
 			psy_ui_fontinfo_init_string(&fontinfo,
-				psy_properties_valuestring(self->selected));
+				psy_properties_as_str(self->selected));
 			psy_ui_fontdialog_setfontinfo(&fontdialog, fontinfo);
 			if (psy_ui_fontdialog_execute(&fontdialog)) {				
 				psy_ui_FontInfo fontinfo;
 				
 				fontinfo = psy_ui_fontdialog_fontinfo(&fontdialog);				
-				psy_properties_write_font(self->selected->parent,
+				psy_properties_set_font(self->selected->parent,
 					self->selected->item.key,
 					psy_ui_fontinfo_string(&fontinfo));
 			}
@@ -657,7 +657,7 @@ int propertiesrenderer_onpropertieshittestenum(PropertiesRenderer* self,
 		return 2;
 	}
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_CHOICE) {
-		self->currchoice = psy_properties_value(property);
+		self->currchoice = psy_properties_as_int(property);
 		self->choicecount = 0;					
 	}	
 	propertiesrenderer_countblocklines(self, property, 0);
@@ -692,7 +692,7 @@ int propertiesrenderer_onenumpropertyposition(PropertiesRenderer* self,
 		return 0;
 	}
 	if (psy_properties_type(property) == PSY_PROPERTY_TYP_CHOICE) {
-		self->currchoice = psy_properties_value(property);
+		self->currchoice = psy_properties_as_int(property);
 		self->choicecount = 0;					
 	}
 	propertiesrenderer_countblocklines(self, property, 0);
@@ -809,12 +809,12 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Mous
 			if (psy_properties_hint(self->selected) ==
 					PSY_PROPERTY_HINT_INPUT) {
 				inputdefiner_setinput(&self->inputdefiner,
-					psy_properties_value(self->selected));
+					psy_properties_as_int(self->selected));
 				edit = &self->inputdefiner.component;				
 			} else {
 				char text[40];
 				psy_snprintf(text, 40, "%d",
-					psy_properties_value(self->selected));
+					psy_properties_as_int(self->selected));
 				psy_ui_edit_settext(&self->edit, text);
 				edit = &self->edit.component;				
 			}
@@ -847,7 +847,7 @@ void propertiesrenderer_oninputdefinerchange(PropertiesRenderer* self,
 {
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			psy_properties_write_int(self->selected->parent,
+			psy_properties_set_int(self->selected->parent,
 				self->selected->item.key, self->inputdefiner.input);
 		}
 		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
@@ -858,11 +858,11 @@ void propertiesrenderer_oneditchange(PropertiesRenderer* self, psy_ui_Edit* send
 {
 	if (self->selected && self->selected->parent) {
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_STRING) {
-			psy_properties_write_string(self->selected->parent,
+			psy_properties_set_str(self->selected->parent,
 				self->selected->item.key, psy_ui_edit_text(&self->edit));
 		} else 
 		if (self->selected->item.typ == PSY_PROPERTY_TYP_INTEGER) {
-			psy_properties_write_int(self->selected->parent,
+			psy_properties_set_int(self->selected->parent,
 				self->selected->item.key, atoi(psy_ui_edit_text(&self->edit)));
 		}
 		psy_signal_emit(&self->signal_changed, self, 1, self->selected);
@@ -1108,6 +1108,7 @@ int propertiesview_onchangelanguageenum(PropertiesView* self,
 	psy_Properties* property, int level)
 {	
 	psy_properties_settranslation(property,
-		workspace_translate(self->workspace, psy_properties_text(property)));
+		translator_translate(&self->workspace->translator,
+			psy_properties_text(property)));
 	return TRUE;
 }

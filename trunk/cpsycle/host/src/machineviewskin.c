@@ -83,17 +83,17 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Properties* p, const ch
 {
 	const char* machine_skin_name;
 
-	self->colour = psy_ui_color_make(psy_properties_int(p, "mv_colour", 0x00232323));
-	self->wirecolour = psy_ui_color_make(psy_properties_int(p, "mv_wirecolour", 0x005F5F5F));
-	self->selwirecolour = psy_ui_color_make(psy_properties_int(p, "mv_selwirecolour", 0x007F7F7F));
-	self->hoverwirecolour = psy_ui_color_make(psy_properties_int(p, "mv_hoverwirecolour", 0x007F7F7F));
-	self->polycolour = psy_ui_color_make(psy_properties_int(p, "mv_wireaacolour2", 0x005F5F5F));
-	self->polycolour = psy_ui_color_make(psy_properties_int(p, "mv_polycolour", 0x00B1C8B0));
+	self->colour = psy_ui_color_make(psy_properties_at_int(p, "mv_colour", 0x00232323));
+	self->wirecolour = psy_ui_color_make(psy_properties_at_int(p, "mv_wirecolour", 0x005F5F5F));
+	self->selwirecolour = psy_ui_color_make(psy_properties_at_int(p, "mv_selwirecolour", 0x007F7F7F));
+	self->hoverwirecolour = psy_ui_color_make(psy_properties_at_int(p, "mv_hoverwirecolour", 0x007F7F7F));
+	self->polycolour = psy_ui_color_make(psy_properties_at_int(p, "mv_wireaacolour2", 0x005F5F5F));
+	self->polycolour = psy_ui_color_make(psy_properties_at_int(p, "mv_polycolour", 0x00B1C8B0));
 	self->generator_fontcolour =
-		psy_ui_color_make(psy_properties_int(p, "mv_generator_fontcolour", 0x00B1C8B0)); // 0x00B1C8B0
+		psy_ui_color_make(psy_properties_at_int(p, "mv_generator_fontcolour", 0x00B1C8B0)); // 0x00B1C8B0
 	self->effect_fontcolour =
-		psy_ui_color_make(psy_properties_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
-	self->triangle_size = psy_properties_int(p, "mv_triangle_size", 10);
+		psy_ui_color_make(psy_properties_at_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
+	self->triangle_size = psy_properties_at_int(p, "mv_triangle_size", 10);
 	self->wireaacolour =
 		psy_ui_color_make(((((self->wirecolour.value & 0x00ff0000)
 			+ ((self->colour.value & 0x00ff0000) * 4)) / 5) & 0x00ff0000) +
@@ -108,7 +108,7 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Properties* p, const ch
 				+ ((self->colour.value & 0x00ff00))) / 2) & 0x00ff00) +
 			(((((self->wirecolour.value & 0x00ff))
 				+ ((self->colour.value & 0x00ff))) / 2) & 0x00ff));
-	machine_skin_name = psy_properties_readstring(p, "machine_skin", 0);
+	machine_skin_name = psy_properties_at_str(p, "machine_skin", 0);
 	if (machine_skin_name && strlen(machine_skin_name)) {
 		char path[_MAX_PATH];
 		char filename[_MAX_PATH];
@@ -150,99 +150,99 @@ void machineviewskin_setcoords(MachineViewSkin* self, psy_Properties* p)
 	int vals[4];
 
 	// master
-	if (s = psy_properties_readstring(p, "master_source", 0)) {
+	if (s = psy_properties_at_str(p, "master_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->master.background, vals);
 	}
 	// generator
-	if (s = psy_properties_readstring(p, "generator_source", 0)) {
+	if (s = psy_properties_at_str(p, "generator_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->generator.background, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_vu0_source", 0)) {
+	if (s = psy_properties_at_str(p, "generator_vu0_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->generator.vu0, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_vu_peak_source", 0)) {
+	if (s = psy_properties_at_str(p, "generator_vu_peak_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->generator.vupeak, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_pan_source", 0)) {
+	if (s = psy_properties_at_str(p, "generator_pan_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->generator.pan, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_mute_source", 0)) {
+	if (s = psy_properties_at_str(p, "generator_mute_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->generator.mute, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_solo_source", 0)) {
+	if (s = psy_properties_at_str(p, "generator_solo_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->generator.solo, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_vu_dest", 0)) {
+	if (s = psy_properties_at_str(p, "generator_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->generator.vu0, vals);
 		self->generator.vu0.destwidth = vals[2];
 	}
-	if (s = psy_properties_readstring(p, "generator_pan_dest", 0)) {
+	if (s = psy_properties_at_str(p, "generator_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->generator.pan, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_mute_dest", 0)) {
+	if (s = psy_properties_at_str(p, "generator_mute_dest", 0)) {
 		skin_psh_values(s, 2, vals);
 		skincoord_setdest(&self->generator.mute, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_solo_dest", 0)) {
+	if (s = psy_properties_at_str(p, "generator_solo_dest", 0)) {
 		skin_psh_values(s, 2, vals);
 		skincoord_setdest(&self->generator.solo, vals);
 	}
-	if (s = psy_properties_readstring(p, "generator_name_dest", 0)) {
+	if (s = psy_properties_at_str(p, "generator_name_dest", 0)) {
 		skin_psh_values(s, 2, vals);
 		skincoord_setdest(&self->generator.name, vals);
 	}
 	// effect
-	if (s = psy_properties_readstring(p, "effect_source", 0)) {
+	if (s = psy_properties_at_str(p, "effect_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->effect.background, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_vu0_source", 0)) {
+	if (s = psy_properties_at_str(p, "effect_vu0_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->effect.vu0, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_vu_peak_source", 0)) {
+	if (s = psy_properties_at_str(p, "effect_vu_peak_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->effect.vupeak, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_pan_source", 0)) {
+	if (s = psy_properties_at_str(p, "effect_pan_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->effect.pan, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_mute_source", 0)) {
+	if (s = psy_properties_at_str(p, "effect_mute_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->effect.mute, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_bypass_source", 0)) {
+	if (s = psy_properties_at_str(p, "effect_bypass_source", 0)) {
 		skin_psh_values(s, 4, vals);
 		skincoord_setsource(&self->effect.bypass, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_vu_dest", 0)) {
+	if (s = psy_properties_at_str(p, "effect_vu_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->effect.vu0, vals);
 		self->generator.vu0.destwidth = vals[2];
 	}
-	if (s = psy_properties_readstring(p, "effect_pan_dest", 0)) {
+	if (s = psy_properties_at_str(p, "effect_pan_dest", 0)) {
 		skin_psh_values(s, 3, vals);
 		skincoord_setdest(&self->effect.pan, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_mute_dest", 0)) {
+	if (s = psy_properties_at_str(p, "effect_mute_dest", 0)) {
 		skin_psh_values(s, 2, vals);
 		skincoord_setdest(&self->effect.mute, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_bypass_dest", 0)) {
+	if (s = psy_properties_at_str(p, "effect_bypass_dest", 0)) {
 		skin_psh_values(s, 2, vals);
 		skincoord_setdest(&self->effect.bypass, vals);
 	}
-	if (s = psy_properties_readstring(p, "effect_name_dest", 0)) {
+	if (s = psy_properties_at_str(p, "effect_name_dest", 0)) {
 		skin_psh_values(s, 2, vals);
 		skincoord_setdest(&self->effect.name, vals);
 	}

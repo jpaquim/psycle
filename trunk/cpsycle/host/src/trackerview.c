@@ -2686,7 +2686,12 @@ void trackergrid_onblocktransposedown12(TrackerGrid* self)
 	}
 }
 
-void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent)
+// PatternBlockMenu
+// prototypes
+static void patternblockmenu_updatetext(PatternBlockMenu* self, Translator*);
+static void patternblockmenu_onlanguagechanged(PatternBlockMenu*, Translator* sender);
+// implementation
+void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_enablealign(&self->component);
@@ -2723,11 +2728,53 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent)
 	psy_ui_button_settext(&self->import, "Import (psb)");
 	psy_ui_button_init(&self->export, &self->component);
 	psy_ui_button_settext(&self->export, "Export (psb)");
-
+	patternblockmenu_updatetext(self, &workspace->translator);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		patternblockmenu_onlanguagechanged);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		NULL));
+}
+
+void patternblockmenu_updatetext(PatternBlockMenu* self, Translator* translator)
+{	
+	psy_ui_button_settext(&self->cut, 
+		translator_translate(translator, "edit.cut"));
+	psy_ui_button_settext(&self->copy,
+		translator_translate(translator, "edit.copy"));
+	psy_ui_button_settext(&self->paste,
+		translator_translate(translator, "edit.paste"));
+	psy_ui_button_settext(&self->mixpaste,
+		translator_translate(translator, "edit.mixpaste"));
+	psy_ui_button_settext(&self->del,
+		translator_translate(translator, "edit.delete"));
+	psy_ui_button_settext(&self->interpolatelinear,
+		translator_translate(translator, "Interpolate (Linear)"));
+	psy_ui_button_settext(&self->interpolatecurve,
+		translator_translate(translator, "Interpolate (Curve)"));
+	psy_ui_button_settext(&self->changegenerator,
+		translator_translate(translator, "Change Generator"));
+	psy_ui_button_settext(&self->changeinstrument,
+		translator_translate(translator, "Change Instrument"));
+	psy_ui_button_settext(&self->blocktransposeup,
+		translator_translate(translator, "Transpose +1"));
+	psy_ui_button_settext(&self->blocktransposedown,
+		translator_translate(translator, "Transpose -1"));
+	psy_ui_button_settext(&self->blocktransposeup12,
+		translator_translate(translator, "Transpose +12"));
+	psy_ui_button_settext(&self->blocktransposedown12,
+		translator_translate(translator, "Transpose -12"));
+	psy_ui_button_settext(&self->import,
+		translator_translate(translator, "Import (psb)"));
+	psy_ui_button_settext(&self->export,
+		translator_translate(translator, "Export (psb)"));
+
+}
+
+void patternblockmenu_onlanguagechanged(PatternBlockMenu* self, Translator* sender)
+{
+	patternblockmenu_updatetext(self, sender);
 }
 
 int trackergrid_preferredtrackwidth(TrackerGrid* self)
@@ -3234,7 +3281,7 @@ void trackerview_computefontheight(TrackerView* self)
 
 void trackerview_initblockmenu(TrackerView* self)
 {
-	patternblockmenu_init(&self->blockmenu, &self->component);
+	patternblockmenu_init(&self->blockmenu, &self->component, self->workspace);
 	psy_ui_component_setalign(&self->blockmenu.component, psy_ui_ALIGN_RIGHT);
 	trackerview_connectblockmenu(self);
 	psy_ui_component_hide(&self->blockmenu.component);
@@ -3809,12 +3856,12 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	} else if (psy_properties_insection(property, workspace->patternviewtheme)) {
 		TrackerViewApplyProperties(self, workspace->patternviewtheme);
 	} else if (strcmp(psy_properties_key(property), "wraparound") == 0) {
-		self->grid.wraparound = psy_properties_value(property);
+		self->grid.wraparound = psy_properties_as_int(property);
 		psy_ui_component_invalidate(&self->component);
 	} else if (strcmp(psy_properties_key(property), "beatoffset") == 0) {
 		psy_ui_component_align(&self->component);
 	} else if (strcmp(psy_properties_key(property), "griddefaults") == 0) {
-		if (psy_properties_value(property)) {
+		if (psy_properties_as_int(property)) {
 			psy_ui_component_show(&self->griddefaults.component);
 			self->showdefaultline = 1;
 		} else {
@@ -3824,18 +3871,18 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 		psy_ui_component_align(&self->left);
 		psy_ui_component_align(&self->component);
 	} else if (strcmp(psy_properties_key(property), "linenumbers") == 0) {
-		trackerview_showlinenumbers(self, psy_properties_value(property));
+		trackerview_showlinenumbers(self, psy_properties_as_int(property));
 	} else if (strcmp(psy_properties_key(property), "linenumberscursor") == 0) {
-		trackerview_showlinenumbercursor(self, psy_properties_value(property));
+		trackerview_showlinenumbercursor(self, psy_properties_as_int(property));
 	} else if (strcmp(psy_properties_key(property), "linenumbersinhex") == 0) {
-		trackerview_showlinenumbersinhex(self, psy_properties_value(property));
+		trackerview_showlinenumbersinhex(self, psy_properties_as_int(property));
 	} else if (strcmp(psy_properties_key(property), "wideinstcolumn") == 0) {
 		trackerview_initcolumns(self);
 		trackerview_computemetrics(self);
 	} else if (strcmp(psy_properties_key(property), "drawemptydata") == 0) {
-		trackergrid_showemptydata(&self->grid, psy_properties_value(property));
+		trackergrid_showemptydata(&self->grid, psy_properties_as_int(property));
 	} else if (strcmp(psy_properties_key(property), "centercursoronscreen") == 0) {
-		trackergrid_setcentermode(&self->grid, psy_properties_value(property));
+		trackergrid_setcentermode(&self->grid, psy_properties_as_int(property));
 	} else if (strcmp(psy_properties_key(property), "notetab") == 0) {
 		self->grid.notestabmode = self->griddefaults.notestabmode =
 			workspace_notetabmode(self->workspace);
@@ -3844,7 +3891,7 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 		psy_ui_Font font;
 
 		psy_ui_fontinfo_init_string(&fontinfo,
-			psy_properties_valuestring(property));
+			psy_properties_as_str(property));
 		psy_ui_font_init(&font, &fontinfo);
 		trackerview_setfont(self, &font, TRUE);
 		psy_ui_font_dispose(&font);
@@ -3858,21 +3905,21 @@ void trackerview_readconfig(TrackerView* self)
 
 	pv = psy_properties_findsection(self->workspace->config, "visual.patternview");
 	if (pv) {
-		if (psy_properties_bool(pv, "griddefaults", 1)) {
+		if (psy_properties_at_bool(pv, "griddefaults", 1)) {
 			self->showdefaultline = 1;
 			psy_ui_component_show(&self->griddefaults.component);
 		} else {
 			self->showdefaultline = 0;
 			psy_ui_component_hide(&self->griddefaults.component);
 		}
-		trackerview_showlinenumbers(self, psy_properties_bool(pv, "linenumbers", 1));
-		trackerview_showlinenumbercursor(self, psy_properties_bool(pv, "linenumberscursor", 1));
-		trackerview_showlinenumbersinhex(self, psy_properties_bool(pv, "linenumbersinhex", 1));
-		self->grid.wraparound = psy_properties_bool(pv, "wraparound", 1);
-		trackergrid_showemptydata(&self->grid, psy_properties_bool(pv, "drawemptydata", 1));
-		trackergrid_setcentermode(&self->grid, psy_properties_bool(pv, "centercursoronscreen", 1));
+		trackerview_showlinenumbers(self, psy_properties_at_bool(pv, "linenumbers", 1));
+		trackerview_showlinenumbercursor(self, psy_properties_at_bool(pv, "linenumberscursor", 1));
+		trackerview_showlinenumbersinhex(self, psy_properties_at_bool(pv, "linenumbersinhex", 1));
+		self->grid.wraparound = psy_properties_at_bool(pv, "wraparound", 1);
+		trackergrid_showemptydata(&self->grid, psy_properties_at_bool(pv, "drawemptydata", 1));
+		trackergrid_setcentermode(&self->grid, psy_properties_at_bool(pv, "centercursoronscreen", 1));
 		self->grid.notestabmode = self->griddefaults.notestabmode =
-			(psy_properties_bool(pv, "notetab", 0))
+			(psy_properties_at_bool(pv, "notetab", 0))
 			? psy_dsp_NOTESTAB_A440
 			: psy_dsp_NOTESTAB_A220;
 		{
@@ -3880,7 +3927,7 @@ void trackerview_readconfig(TrackerView* self)
 			psy_ui_Font font;
 
 			psy_ui_fontinfo_init_string(&fontinfo,
-				psy_properties_readstring(pv, "font", "tahoma;-16"));
+				psy_properties_at_str(pv, "font", "tahoma;-16"));
 			psy_ui_font_init(&font, &fontinfo);
 			trackerview_setfont(self, &font, TRUE);
 			psy_ui_font_dispose(&font);
@@ -3978,7 +4025,7 @@ void trackerview_makecmds(psy_Properties* parent)
 	psy_Properties* p;
 
 	cmds = psy_properties_settext(
-		psy_properties_create_section(parent, "trackercmds"),
+		psy_properties_append_section(parent, "trackercmds"),
 		"Tracker Inputs");
 	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP, "cmd_navup", "up");
 	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 0), CMD_NAVDOWN, "cmd_navdown", "down");

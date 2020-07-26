@@ -352,18 +352,18 @@ void mainframe_onskinchanged(MainFrame* self, Workspace* sender)
 void mainframe_updatetext(MainFrame* self)
 {
 	tabbar_rename_tabs(&self->tabbar,
-		workspace_translate(&self->workspace, "machines"),
-		workspace_translate(&self->workspace, "patterns"),
-		workspace_translate(&self->workspace, "samples"),
-		workspace_translate(&self->workspace, "instruments"),
-		workspace_translate(&self->workspace, "properties"),
-		workspace_translate(&self->workspace, "settings"),
-		workspace_translate(&self->workspace, "help"),
+		workspace_translate(&self->workspace, "main.machines"),
+		workspace_translate(&self->workspace, "main.patterns"),
+		workspace_translate(&self->workspace, "main.samples"),
+		workspace_translate(&self->workspace, "main.instruments"),
+		workspace_translate(&self->workspace, "main.properties"),
+		workspace_translate(&self->workspace, "main.settings"),
+		workspace_translate(&self->workspace, "help.help"),
 		NULL);
 	psy_ui_button_settext(&self->toggleterminal,
-		workspace_translate(&self->workspace, "terminal"));
+		workspace_translate(&self->workspace, "main.terminal"));
 	psy_ui_button_settext(&self->togglekbdhelp,
-		workspace_translate(&self->workspace, "kbd"));
+		workspace_translate(&self->workspace, "main.kbd"));
 	psy_ui_component_invalidate(&self->component);
 }
 

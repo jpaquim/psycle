@@ -70,7 +70,7 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Properties* dirconfig
 	self->dirconfig = dirconfig;
 	p = psy_properties_find(self->dirconfig, "app", PSY_PROPERTY_TYP_NONE);
 	if (p) {
-		self->nativeroot = strdup(psy_properties_valuestring(p));
+		self->nativeroot = strdup(psy_properties_as_str(p));
 	} else {
 		self->nativeroot = strdup(PSYCLE_APP_DIR);
 	}
@@ -128,7 +128,7 @@ void plugincatcher_makeplugininfo(psy_audio_PluginCatcher* self,
 	if (info) {
 		psy_Properties* p;		
 		
-		p = psy_properties_create_section(self->plugins, name);
+		p = psy_properties_append_section(self->plugins, name);
 		psy_properties_append_int(p, "type", type, 0, 0);
 		psy_properties_append_int(p, "flags", info->Flags, 0, 0);
 		psy_properties_append_int(p, "mode", info->mode, 0, 0);
@@ -174,22 +174,22 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 	if (self->dirconfig) {
 		p = psy_properties_findsection(self->dirconfig, "plugins");
 		if (p) {			
-			psy_dir_enumerate_recursive(self, psy_properties_valuestring(p), "*"MODULEEXT,
+			psy_dir_enumerate_recursive(self, psy_properties_as_str(p), "*"MODULEEXT,
 				MACH_PLUGIN, onenumdir);
 		}
 		p = psy_properties_findsection(self->dirconfig, "luascripts");
 		if (p) {		
-			psy_dir_enumerate(self, psy_properties_valuestring(p), "*.lua", MACH_LUA,
+			psy_dir_enumerate(self, psy_properties_as_str(p), "*.lua", MACH_LUA,
 				onenumdir);
 		}
 		p = psy_properties_findsection(self->dirconfig, "vsts32");
 		if (p) {		
-			plugincatcher_scan_multipath(self, psy_properties_valuestring(p),
+			plugincatcher_scan_multipath(self, psy_properties_as_str(p),
 				"*"MODULEEXT, MACH_VST);
 		}
 		p = psy_properties_findsection(self->dirconfig, "ladspas");
 		if (p) {
-			plugincatcher_scan_multipath(self, psy_properties_valuestring(p),
+			plugincatcher_scan_multipath(self, psy_properties_as_str(p),
 				"*"MODULEEXT, MACH_LADSPA);
 		}
 	}
@@ -212,9 +212,6 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 
 	machineinfo_init(&macinfo);	
 	if (type == MACH_PLUGIN) {		
-		if (strstr(path, "fluidsynth.dll") != 0) {
-			self = self;
-		}
 		if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {
 			plugincatcher_catchername(self, path, name, macinfo.shellidx);
 			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
@@ -400,7 +397,7 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 			}
 		}
 		if (searchresult) {			
-			strcpy(fullpath, psy_properties_readstring(searchresult, "path", ""));
+			strcpy(fullpath, psy_properties_at_str(searchresult, "path", ""));
 		} else {
 			strcpy(fullpath, path);
 		}
@@ -414,7 +411,7 @@ int onpropertiesenum(psy_audio_PluginCatcher* self, psy_Properties* property, in
 		const char* key = psy_properties_key(property);
 		key = key;
 		if ((strcmp(psy_properties_key(property), searchname) == 0) &&
-				psy_properties_int(property, "type", 0) == searchtype) {
+				psy_properties_at_int(property, "type", 0) == searchtype) {
 			searchresult = property;
 			return 0;			
 		}
@@ -434,5 +431,5 @@ const char* plugincatcher_searchpath(psy_audio_PluginCatcher* self, const char* 
 	searchtype = machtype;
 	searchresult = 0;
 	psy_properties_enumerate(self->plugins, self, onpropertiesenum);
-	return psy_properties_readstring(searchresult, "path", 0);
+	return psy_properties_at_str(searchresult, "path", 0);
 }

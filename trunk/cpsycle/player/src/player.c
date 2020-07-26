@@ -191,7 +191,7 @@ void cmdplayer_init(CmdPlayer* self)
     printf("load driver \n");
 	psy_audio_player_loaddriver(&self->player, cmdplayer_driverpath(self), 0);
 	printf("Audio driver %s \n", 
-		psy_properties_readstring(self->player.driver->properties, "name",
+		psy_properties_at_str(self->player.driver->properties, "name",
 		"no description"));
 }
 
@@ -229,7 +229,7 @@ void cmdplayer_scanplugins(CmdPlayer* self)
 void cmdplayer_makedirectories(CmdPlayer* self)
 {	
 	self->directories = psy_properties_settext(
-		psy_properties_create_section(self->config, "directories"),
+		psy_properties_append_section(self->config, "directories"),
 		"Directories");
 	psy_properties_sethint(psy_properties_settext(
 		psy_properties_append_string(
@@ -256,10 +256,10 @@ void cmdplayer_makedirectories(CmdPlayer* self)
 
 void cmdplayer_makeinputoutput(CmdPlayer* self)
 {		
-	self->inputoutput = psy_properties_create_section(self->config, "inputoutput");
+	self->inputoutput = psy_properties_append_section(self->config, "inputoutput");
 		cmdplayer_setdriverlist(self);
 	self->driverconfigure = psy_properties_settext(
-		psy_properties_create_section(self->inputoutput, "configure"),
+		psy_properties_append_section(self->inputoutput, "configure"),
 		"Configure");		
 }
 
@@ -298,17 +298,17 @@ const char* cmdplayer_driverpath(CmdPlayer* self)
 	psy_Properties* p;
 	const char* rv = 0;
 
-	p = psy_properties_read(self->inputoutput, "driver");
+	p = psy_properties_at(self->inputoutput, "driver", PSY_PROPERTY_TYP_NONE);
 	if (p) {
 		int choice;		
 		int count;
 		
-		choice = psy_properties_value(p);
+		choice = psy_properties_as_int(p);
 		p = p->children;
 		count = 0;
 		while (p) {
 			if (count == choice) {
-				rv = psy_properties_valuestring(p);
+				rv = psy_properties_as_str(p);
 				break;
 			}
 			p = psy_properties_next(p);

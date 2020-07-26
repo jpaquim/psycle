@@ -50,13 +50,13 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 void samplesviewbuttons_updatetext(SamplesViewButtons* self, Translator* translator)
 {
 	psy_ui_button_settext(&self->load, 
-		translator_translate(translator, "Load"));
+		translator_translate(translator, "file.load"));
 	psy_ui_button_settext(&self->save,
-		translator_translate(translator, "Save"));
+		translator_translate(translator, "file.save"));
 	psy_ui_button_settext(&self->duplicate,
-		translator_translate(translator, "Duplicate"));
+		translator_translate(translator, "edit.duplicate"));
 	psy_ui_button_settext(&self->del,
-		translator_translate(translator, "Delete"));
+		translator_translate(translator, "edit.delete"));
 }
 
 void samplesviewbuttons_onlanguagechanged(SamplesViewButtons* self, Translator* sender)
