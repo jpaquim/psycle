@@ -15,6 +15,7 @@
 #include <uilabel.h>
 #include <uinotebook.h>
 #include <uislider.h>
+#include <uiscroller.h>
 
 // aim: InstrumentNoteMapView plays the rule of the Sampulse Note mapping
 //      editor. Sampulse instruments can use more than one sample at a time,
@@ -94,6 +95,7 @@ typedef struct {
 	psy_audio_Instruments* instruments;
 	InstrumentNoteMapMetrics metrics;
 	SamplesBox samplesbox;
+	psy_ui_Scroller scroller;
 } InstrumentNoteMapView;
 
 void instrumentnotemapview_init(InstrumentNoteMapView*,

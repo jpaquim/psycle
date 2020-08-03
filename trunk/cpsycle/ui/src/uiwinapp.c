@@ -2,6 +2,7 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
+#include "../../detail/trace.h"
 
 #include "uiwinapp.h"
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
@@ -737,6 +738,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			}
 			break;
 			case WM_MOUSEMOVE:
+				TRACE("MOUSEMOVE\n");
 				if (!imp->component->mousetracking) {
 					TRACKMOUSEEVENT tme;
 					
@@ -799,7 +801,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				imp->component->vtable->onmousewheel(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousewheel, imp->component, 1,
 					&ev);
-				preventdefault = ev.preventdefault;				
+				preventdefault = ev.preventdefault;
 				if (!preventdefault && imp->component->wheelscroll > 0) {
 					if (iDeltaPerLine != 0) {
 						imp->component->accumwheeldelta += (short)HIWORD(wParam); // 120 or -120
@@ -810,15 +812,16 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							int scrollmax;
 
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);
-							iPos = psy_ui_component_verticalscrollposition(imp->component) -
+								&scrollmax);							
+							iPos = psy_ui_component_scrolltop(imp->component) / imp->component->scrollstepy -
 								imp->component->wheelscroll;
 							if (iPos < scrollmin) {
 								iPos = scrollmin;
 							}
-							SendMessage((HWND)psy_ui_win_component_details(imp->component)->hwnd,
-								WM_VSCROLL,
-								MAKELONG(SB_THUMBTRACK, iPos), 0);
+							if (imp->component->handlevscroll) {
+								psy_ui_component_setscrolltop(imp->component,
+									imp->component->scrollstepy * iPos);
+							}							
 							imp->component->accumwheeldelta -= iDeltaPerLine;
 						}
 						while (imp->component->accumwheeldelta <= -iDeltaPerLine)
@@ -828,14 +831,16 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							int scrollmax;
 
 							psy_ui_component_verticalscrollrange(imp->component, &scrollmin,
-								&scrollmax);
-							iPos = psy_ui_component_verticalscrollposition(imp->component) +
+								&scrollmax);							
+							iPos = psy_ui_component_scrolltop(imp->component) / imp->component->scrollstepy +
 								imp->component->wheelscroll;
 							if (iPos > scrollmax) {
 								iPos = scrollmax;
 							}
-							SendMessage((HWND)psy_ui_win_component_details(imp->component)->hwnd, WM_VSCROLL,
-								MAKELONG(SB_THUMBTRACK, iPos), 0);
+							if (imp->component->handlevscroll) {
+								psy_ui_component_setscrolltop(imp->component,									
+									imp->component->scrollstepy * (iPos));
+							}							
 							imp->component->accumwheeldelta += iDeltaPerLine;
 						}
 					}

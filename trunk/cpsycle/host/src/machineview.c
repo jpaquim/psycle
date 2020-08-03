@@ -450,7 +450,7 @@ static void vtable_init(MachineWireView* self)
 }
 
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, Workspace* workspace)
+	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
@@ -463,6 +463,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->wireframes = 0;
 	self->randominsert = 1;
 	self->addeffect = 0;
+	self->scroller = scroller;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	// skin init
@@ -539,7 +540,7 @@ void machinewireview_readconfig(MachineWireView* self)
 {
 	psy_Properties* mv;
 	
-	mv = psy_properties_findsection(self->workspace->config,
+	mv = psy_properties_findsection(&self->workspace->config,
 		"visual.machineview");
 	if (mv) {		
 		self->drawvumeters = psy_properties_at_bool(mv, "drawvumeters", 1);
@@ -1680,6 +1681,7 @@ void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
 static void machineview_updatetext(MachineView*, Translator*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag, psy_audio_SongFile*);
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
+static void machineview_onmouseup(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onkeydown(MachineView*, psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
@@ -1695,7 +1697,9 @@ static void machineview_vtable_init(MachineView* self)
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
 		machineview_vtable.onmousedown = (psy_ui_fp_onmousedown)
-			machineview_onmousedown;	
+			machineview_onmousedown;
+		machineview_vtable.onmouseup = (psy_ui_fp_onmouseup)
+			machineview_onmouseup;
 		machineview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
 			machineview_onmousedoubleclick;
 		machineview_vtable.onkeydown = (psy_ui_fp_onkeydown)
@@ -1722,9 +1726,14 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(3));
 	psy_ui_component_setmargin(&self->notebook.component, &leftmargin);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook), psy_ui_ALIGN_CLIENT);	
-	machinewireview_init(&self->wireview,psy_ui_notebook_base(&self->notebook),
-		tabbarparent, workspace);
-	psy_ui_component_setalign(&self->wireview.component, psy_ui_ALIGN_CLIENT);
+	//machinewireview_init(&self->wireview,psy_ui_notebook_base(&self->notebook),
+		//tabbarparent, workspace);
+	machinewireview_init(&self->wireview, psy_ui_notebook_base(&self->notebook),
+		tabbarparent, NULL, workspace);
+	psy_ui_scroller_init(&self->scroller, &self->wireview.component,
+		psy_ui_notebook_base(&self->notebook));
+	self->wireview.scroller = &self->scroller;
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	newmachine_init(&self->newmachine, psy_ui_notebook_base(&self->notebook),
 		&self->wireview.skin, self->workspace);		
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
@@ -1775,6 +1784,10 @@ void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
 		tabbar_select(&self->tabbar, 0);		
 	}
 	psy_ui_mouseevent_stoppropagation(ev);
+}
+
+void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
+{
 }
 
 void machineview_onkeydown(MachineView* self, psy_ui_KeyEvent* ev)

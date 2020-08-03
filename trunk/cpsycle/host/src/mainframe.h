@@ -46,9 +46,9 @@
 
 // MainFrame
 //
-// aim: The root component of all other components of psycle. Initializes the
-//      workspace. First component created at program start by psycle.c and
-//      last destroyed at program termination.
+// The root component of all other components of psycle. Initializes the
+// workspace. First component created after program start by psycle.c and
+// last destroyed at program termination.
 
 typedef struct {
 	psy_ui_Component component;

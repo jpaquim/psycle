@@ -61,18 +61,6 @@ static void dev_update(psy_ui_win_ComponentImp*);
 static void dev_setfont(psy_ui_win_ComponentImp*, psy_ui_Font*);
 static void dev_showhorizontalscrollbar(psy_ui_win_ComponentImp*);
 static void dev_hidehorizontalscrollbar(psy_ui_win_ComponentImp*);
-static void dev_sethorizontalscrollrange(psy_ui_win_ComponentImp*, int min, int max);
-static void dev_horizontalscrollrange(psy_ui_win_ComponentImp*, int* scrollmin,
-	int* scrollmax);
-static int dev_horizontalscrollposition(psy_ui_win_ComponentImp* self);
-static void dev_sethorizontalscrollposition(psy_ui_win_ComponentImp* self, int position);
-static void dev_showverticalscrollbar(psy_ui_win_ComponentImp*);
-static void dev_hideverticalscrollbar(psy_ui_win_ComponentImp*);
-static void dev_setverticalscrollrange(psy_ui_win_ComponentImp*, int min, int max);
-static void dev_verticalscrollrange(psy_ui_win_ComponentImp*, int* scrollmin,
-	int* scrollmax);
-static int dev_verticalscrollposition(psy_ui_win_ComponentImp*);
-static void dev_setverticalscrollposition(psy_ui_win_ComponentImp*, int position);
 static psy_List* dev_children(psy_ui_win_ComponentImp*, int recursive);
 static void dev_enableinput(psy_ui_win_ComponentImp*);
 static void dev_preventinput(psy_ui_win_ComponentImp*);
@@ -118,19 +106,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate) dev_invalidate;
 		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect) dev_invalidaterect;
 		vtable.dev_update = (psy_ui_fp_componentimp_dev_update) dev_update;
-		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont) dev_setfont;
-		vtable.dev_showhorizontalscrollbar = (psy_ui_fp_componentimp_dev_showhorizontalscrollbar) dev_showhorizontalscrollbar;
-		vtable.dev_hidehorizontalscrollbar = (psy_ui_fp_componentimp_dev_hidehorizontalscrollbar) dev_hidehorizontalscrollbar;
-		vtable.dev_sethorizontalscrollrange = (psy_ui_fp_componentimp_dev_sethorizontalscrollrange) dev_sethorizontalscrollrange;
-		vtable.dev_horizontalscrollrange = (psy_ui_fp_componentimp_dev_horizontalscrollrange) dev_horizontalscrollrange;
-		vtable.dev_horizontalscrollposition = (psy_ui_fp_componentimp_dev_horizontalscrollposition) dev_horizontalscrollposition;
-		vtable.dev_sethorizontalscrollposition = (psy_ui_fp_componentimp_dev_sethorizontalscrollposition) dev_sethorizontalscrollposition;
-		vtable.dev_showverticalscrollbar = (psy_ui_fp_componentimp_dev_showverticalscrollbar) dev_showverticalscrollbar;
-		vtable.dev_hideverticalscrollbar = (psy_ui_fp_componentimp_dev_hideverticalscrollbar) dev_hideverticalscrollbar;
-		vtable.dev_setverticalscrollrange = (psy_ui_fp_componentimp_dev_setverticalscrollrange) dev_setverticalscrollrange;
-		vtable.dev_verticalscrollrange = (psy_ui_fp_componentimp_dev_verticalscrollrange) dev_verticalscrollrange;
-		vtable.dev_verticalscrollposition = (psy_ui_fp_componentimp_dev_verticalscrollposition) dev_verticalscrollposition;
-		vtable.dev_setverticalscrollposition = (psy_ui_fp_componentimp_dev_setverticalscrollposition) dev_setverticalscrollposition;
+		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont) dev_setfont;		
 		vtable.dev_children = (psy_ui_fp_componentimp_dev_children) dev_children;
 		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput) dev_enableinput;
 		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput) dev_preventinput;
@@ -165,15 +141,13 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->background = 0;
 	self->winid = -1;
 	self->hwnd = 0;
-	self->wndproc = 0;
-	self->vscrollmin = 0;
-	self->vscrollmax = 100;
-	self->hscrollmin = 0;
-	self->hscrollmax = 100;
+	self->wndproc = 0;	
 	self->preventwmchar = 0;
 	self->sizecachevalid = FALSE;
 	self->dbg = 0;
-	parent_imp = parent ? (psy_ui_win_ComponentImp*)parent : 0;	
+	parent_imp = (parent)
+		? (psy_ui_win_ComponentImp*)parent
+		: NULL;	
 	psy_ui_win_component_create_window(self, parent_imp, classname, x, y, width, height,
 		dwStyle, usecommand);
 	if (self->hwnd) {
@@ -529,151 +503,6 @@ void dev_setfont(psy_ui_win_ComponentImp* self, psy_ui_Font* source)
 	}	
 }
 
-void dev_showhorizontalscrollbar(psy_ui_win_ComponentImp* self)
-{
-#if defined(_WIN64)
-	SetWindowLongPtr((HWND)self->hwnd, GWL_STYLE,
-		GetWindowLongPtr((HWND)self->hwnd, GWL_STYLE) | WS_HSCROLL);
-#else
-	SetWindowLong(self->hwnd, GWL_STYLE,
-		GetWindowLong(self->hwnd, GWL_STYLE) | WS_HSCROLL);
-#endif
-}
-
-void dev_hidehorizontalscrollbar(psy_ui_win_ComponentImp* self)
-{
-#if defined(_WIN64)
-	SetWindowLongPtr((HWND)self->hwnd, GWL_STYLE,
-		GetWindowLongPtr((HWND)self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
-#else
-	SetWindowLong(self->hwnd, GWL_STYLE,
-		GetWindowLong(self->hwnd, GWL_STYLE) & ~WS_HSCROLL);
-#endif
-}
-
-void dev_showverticalscrollbar(psy_ui_win_ComponentImp* self)
-{
-#if defined(_WIN64)
-	SetWindowLongPtr(self->hwnd, GWL_STYLE,
-		GetWindowLongPtr(self->hwnd, GWL_STYLE) | WS_VSCROLL);
-#else
-	SetWindowLong(self->hwnd, GWL_STYLE,
-		GetWindowLong(self->hwnd, GWL_STYLE) | WS_VSCROLL);
-#endif
-}
-
-void dev_hideverticalscrollbar(psy_ui_win_ComponentImp* self)
-{
-#if defined(_WIN64)
-	SetWindowLongPtr(self->hwnd, GWL_STYLE,
-		GetWindowLongPtr(self->hwnd, GWL_STYLE) & ~WS_VSCROLL);
-#else
-	SetWindowLong(self->hwnd, GWL_STYLE,
-		GetWindowLong(self->hwnd, GWL_STYLE) & ~WS_VSCROLL);
-#endif
-}
-
-void dev_setverticalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, int scrollmax)
-{			
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_RANGE;
-	si.nMin = scrollmin;
-	si.nMax = scrollmax;
-	self->vscrollmin = si.nMin;
-	self->vscrollmax = si.nMax;
-	si.nPage = 0;
-	self->sizecachevalid = FALSE;
-	SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
-	dev_updatesize(self);
-}
-
-void dev_verticalscrollrange(psy_ui_win_ComponentImp* self, int* scrollmin,
-	int* scrollmax)
-{
-	*scrollmin = self->vscrollmin;
-	*scrollmax = self->vscrollmax;
-}
-
-int dev_verticalscrollposition(psy_ui_win_ComponentImp* self)
-{
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_POS;
-	GetScrollInfo(self->hwnd, SB_VERT, &si);
-	return si.nPos;
-}
-
-void dev_setverticalscrollposition(psy_ui_win_ComponentImp* self, int position)
-{
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_RANGE | SIF_POS;
-	GetScrollInfo(self->hwnd, SB_VERT, &si);
-	if (si.nPos != position) {
-		if (position < si.nMax) {
-			si.nPos = (int)position;
-		} else {
-			si.nPos = si.nMax;
-		}
-		si.fMask = SIF_POS;
-		SetScrollInfo(self->hwnd, SB_VERT, &si, TRUE);
-	}
-}
-
-void dev_sethorizontalscrollrange(psy_ui_win_ComponentImp* self, int scrollmin, int scrollmax)
-{
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_RANGE;		
-	self->hscrollmin = scrollmin;
-	self->hscrollmax = scrollmax;
-	si.nMin = scrollmin;
-	si.nMax = scrollmax;
-	self->sizecachevalid = FALSE;
-	SetScrollInfo(self->hwnd, SB_HORZ, &si, TRUE);
-	dev_updatesize(self);
-}
-
-void dev_horizontalscrollrange(psy_ui_win_ComponentImp* self, int* scrollmin,
-	int* scrollmax)
-{
-	*scrollmin = self->hscrollmin;
-	*scrollmax = self->hscrollmax;
-}
-
-int dev_horizontalscrollposition(psy_ui_win_ComponentImp* self)
-{
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_POS;
-	GetScrollInfo(self->hwnd, SB_HORZ, &si);
-	return si.nPos;
-}
-
-void dev_sethorizontalscrollposition(psy_ui_win_ComponentImp* self, int position)
-{
-	SCROLLINFO si;
-
-	si.cbSize = sizeof(si);
-	si.fMask = SIF_RANGE | SIF_POS;
-	GetScrollInfo(self->hwnd, SB_HORZ, &si);
-	if (si.nPos != position) {
-		if (position < si.nMax) {
-			si.nPos = (int)position;
-		} else {
-			si.nPos = si.nMax;
-		}
-		si.fMask = SIF_POS;
-		SetScrollInfo(self->hwnd, SB_HORZ, &si, TRUE);
-	}
-}
-
 psy_List* dev_children(psy_ui_win_ComponentImp* self, int recursive)
 {	
 	psy_List* rv = 0;
@@ -859,7 +688,7 @@ void dev_starttimer(psy_ui_win_ComponentImp* self, uintptr_t id,
 	SetTimer(self->hwnd, id, interval, 0);
 }
 
-void dev_stoptimer(psy_ui_win_ComponentImp* self, unsigned int id)
+void dev_stoptimer(psy_ui_win_ComponentImp* self, uintptr_t id)
 {
 	KillTimer(self->hwnd, id);
 }

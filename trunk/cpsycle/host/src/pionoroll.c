@@ -834,7 +834,9 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	// client area (event grid)
 	pianogrid_init(&self->grid, &self->component, &self->keyboardstate,
 		&self->gridstate, self->workspace);
-	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_scroller_init(&self->scroller, &self->grid.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		pianoroll_onlpbchanged);
 	psy_signal_connect(&self->grid.component.signal_scroll, self,

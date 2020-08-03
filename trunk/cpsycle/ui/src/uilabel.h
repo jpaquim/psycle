@@ -41,7 +41,6 @@ INLINE psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
     return &self->component;
 }
 
-
 #ifdef __cplusplus
 }
 #endif

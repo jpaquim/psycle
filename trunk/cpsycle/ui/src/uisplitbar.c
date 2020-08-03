@@ -221,7 +221,7 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		psy_ui_Component* prev;
 		psy_ui_Component* next;
 
-		psy_ui_component_releasecapture(&self->component);		
+		psy_ui_component_releasecapture(&self->component);
 		prev = splitbar_prevcomponent(self);
 		next = splitbar_nextcomponent(self);
 		if (prev) {

@@ -141,7 +141,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	self->machine = machine;
 	self->numparams = 0;
 	psy_ui_component_doublebuffer(&self->component);
-	pv = psy_properties_findsection(self->workspace->config, "visual.paramview");
+	pv = psy_properties_findsection(&self->workspace->config, "visual.paramview");
 	if (pv) {
 		psy_ui_Font font;
 

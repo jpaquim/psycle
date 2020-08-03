@@ -989,7 +989,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
 	propertiesrenderer_init(&self->renderer, &self->component, properties, workspace);
-	psy_ui_component_setalign(&self->renderer.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);
 	propertiesview_translate(self);

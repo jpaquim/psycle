@@ -654,7 +654,14 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	}
 	sequencelistview_init(&self->listview, &self->component, self,
 		self->sequence, self->patterns, workspace);
+#if 1
+	// Use Custom Scrollbar
+	psy_ui_scroller_init(&self->scroller, &self->listview.component,
+	   &self->component);
+	 psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+#else
 	psy_ui_component_setalign(&self->listview.component, psy_ui_ALIGN_CLIENT);
+#endif
 	self->listview.player = &workspace->player;
 	self->buttons.context = &self->listview;
 	sequencebuttons_init(&self->buttons, &self->component, workspace);
@@ -750,7 +757,8 @@ void sequenceview_oninsertentry(SequenceView* self)
 			self->selection->editposition.track,
 			tracknode));
 	sequenceview_updateplayposition(self);
-	workspace_setsequenceselection(self->workspace, self->workspace->sequenceselection);
+	workspace_setsequenceselection(self->workspace,
+		self->workspace->sequenceselection);
 	sequenceduration_update(&self->duration);
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);
@@ -813,8 +821,8 @@ void sequenceview_ondelentry(SequenceView* self)
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);
 	sequenceview_updateplayposition(self);
-	sequenceduration_update(&self->duration);	
-	psy_ui_component_updateoverflow(&self->listview.component);
+	sequenceduration_update(&self->duration);
+	psy_ui_component_updateoverflow(&self->listview.component);	
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -865,7 +873,7 @@ void sequenceview_onnewtrack(SequenceView* self)
 	psy_audio_exclusivelock_enter();
 	sequence_appendtrack(self->sequence, sequencetrack_allocinit());
 	psy_audio_exclusivelock_leave();
-	psy_ui_component_updateoverflow(&self->listview.component);
+	psy_ui_component_updateoverflow(&self->listview.component);	
 	psy_ui_component_invalidate(&self->component);
 }
 

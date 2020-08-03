@@ -217,12 +217,16 @@ void psy_ui_editor_getrange(psy_ui_Editor* self, int start, int end, char* text)
 
 void psy_ui_editor_settext(psy_ui_Editor* self, const char* text)
 {
-	sci(self, SCI_SETTEXT, strlen(text), (uintptr_t) text);		
+	if (text) {
+		sci(self, SCI_SETTEXT, strlen(text), (uintptr_t)text);
+	}
 }
 
 void psy_ui_editor_addtext(psy_ui_Editor* self, const char* text)
 {
-	sci(self, SCI_ADDTEXT, strlen(text), (uintptr_t) text);
+	if (text) {
+		sci(self, SCI_ADDTEXT, strlen(text), (uintptr_t)text);
+	}
 }
 
 char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* text)

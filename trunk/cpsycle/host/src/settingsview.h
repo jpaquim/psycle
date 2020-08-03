@@ -8,6 +8,7 @@
 #include <uicomponent.h>
 #include <uiedit.h>
 #include <properties.h>
+#include <uiscroller.h>
 #include "inputdefiner.h"
 #include "tabbar.h"
 #include "workspace.h"
@@ -76,6 +77,7 @@ typedef struct {
 	psy_ui_Component viewtabbar;	
 	TabBar tabbar;
 	PropertiesRenderer renderer;
+	psy_ui_Scroller scroller;
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
 	Workspace* workspace;

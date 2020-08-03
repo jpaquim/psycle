@@ -2111,8 +2111,6 @@ void trackerheader_onpatterneditpositionchanged(TrackerHeader* self,
 
 // TrackerLineNumbers
 // prototypes
-static void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, TrackerLineState*, TrackerView*);
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*, psy_ui_Graphics*);
 static void trackerlinenumbers_onpreferredsize(TrackerLineNumbers*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -2149,7 +2147,7 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 		trackerlinenumbers_onscroll);
 	psy_signal_connect(&self->workspace->signal_patterneditpositionchanged, self,
 		trackerlinennumbers_onpatterneditpositionchanged);
-	psy_audio_patterneditposition_init(&self->lastcursor);
+	psy_audio_patterneditposition_init(&self->lastcursor);	
 }
 
 void trackerlinenumbers_setsharedlinestate(TrackerLineNumbers* self, TrackerLineState*
@@ -2304,10 +2302,13 @@ void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* l
 
 // LineNumbersLabel
 // prototypes
-static void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel* self,
-	TrackerLineState* linestate);
+static void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel*, psy_ui_Component* sender);
+static void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel*, Translator*);
+static void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel*, Translator*);
+static void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel*,
+	TrackerLineState*);
 static void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel*,
-	psy_ui_MouseEvent* ev);
+	psy_ui_MouseEvent*);
 static void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel*, psy_ui_Graphics*);
 static void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
@@ -2329,13 +2330,38 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 }
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
-	psy_ui_Component* parent, TrackerLineState* linestate, TrackerView* view)
+	psy_ui_Component* parent, TrackerLineState* linestate, TrackerView* view,
+	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	trackerlinenumberslabel_vtable_init(self);
 	self->component.vtable = &trackerlinenumberslabel_vtable;
 	trackerlinenumberslabel_setsharedlinestate(self, linestate);
 	self->view = view;
+	self->linestr = NULL;
+	self->defaultstr = NULL;
+	trackerlinenumberslabel_updatetext(self, &workspace->translator);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		trackerlinenumberslabel_onlanguagechanged);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		trackerlinenumberslabel_ondestroy);
+}
+
+void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel* self, psy_ui_Component* sender)
+{
+	free(self->linestr);
+	free(self->defaultstr);
+}
+
+void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel* self, Translator* translator)
+{
+	self->linestr = strdup(translator_translate(translator, "patternview.line"));
+	self->defaultstr = strdup(translator_translate(translator, "patternview.defaults"));
+}
+
+void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel* self, Translator* sender)
+{
+	trackerlinenumberslabel_updatetext(self, sender);
 }
 
 void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel* self,
@@ -2378,10 +2404,10 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
 	psy_ui_setbackgroundcolor(g, self->linestate->skin->background);
 	psy_ui_settextcolor(g, self->linestate->skin->font);
-	psy_ui_textoutrectangle(g, r.left, 0, 0, r, "Line", strlen("Line"));
+	psy_ui_textoutrectangle(g, r.left, 0, 0, r, self->linestr, strlen(self->linestr));
 	if (self->view->showdefaultline) {
 		psy_ui_textoutrectangle(g, r.left, headersize.height, 0,
-			r, "Defaults", strlen("Defaults"));
+			r, self->defaultstr, strlen(self->defaultstr));
 	}
 }
 
@@ -3221,7 +3247,8 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->left, patternview);
 	psy_ui_component_enablealign(&self->left);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
-	trackerlinenumberslabel_init(&self->linenumberslabel, &self->left, &self->linestate, self);
+	trackerlinenumberslabel_init(&self->linenumberslabel, &self->left, &self->linestate, self,
+		workspace);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
 	trackerlinenumbers_init(&self->linenumbers, &self->left, &self->linestate,
 		workspace);
@@ -3253,7 +3280,9 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	// pattern main grid
 	trackergrid_init(&self->grid, &self->component, &self->gridstate,
 		&self->linestate, TRACKERGRID_EDITMODE_SONG, workspace);
-	psy_ui_component_setalign(&self->grid.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_scroller_init(&self->scroller, &self->grid.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->grid.component.signal_scroll, self,
 		trackerview_ongridscroll);
 	trackerview_connectworkspace(self);
@@ -3578,7 +3607,7 @@ void trackerview_onzoomboxchanged(TrackerView* self, ZoomBox* sender)
 		psy_ui_font_dispose(&newfont);
 		psy_ui_component_align(self->patternview);
 		psy_ui_component_updateoverflow(&self->grid.component);
-		psy_ui_component_invalidate(&self->component);
+		psy_ui_component_invalidate(&self->grid.component);
 		psy_ui_component_invalidate(&self->header.component);
 		psy_ui_component_invalidate(&self->linenumbers.component);
 		psy_ui_component_invalidate(&self->linenumberslabel.component);
@@ -3851,7 +3880,7 @@ void trackerview_onlpbchanged(TrackerView* self, psy_audio_Player* sender, uintp
 void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	psy_Properties* property)
 {
-	if (property == workspace->config) {
+	if (property == &workspace->config) {
 		trackerview_readconfig(self);
 	} else if (psy_properties_insection(property, workspace->patternviewtheme)) {
 		TrackerViewApplyProperties(self, workspace->patternviewtheme);
@@ -3903,7 +3932,7 @@ void trackerview_readconfig(TrackerView* self)
 {
 	psy_Properties* pv;
 
-	pv = psy_properties_findsection(self->workspace->config, "visual.patternview");
+	pv = psy_properties_findsection(&self->workspace->config, "visual.patternview");
 	if (pv) {
 		if (psy_properties_at_bool(pv, "griddefaults", 1)) {
 			self->showdefaultline = 1;

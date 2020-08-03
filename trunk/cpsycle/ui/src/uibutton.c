@@ -183,7 +183,7 @@ void makearrow(psy_ui_IntPoint* arrow, psy_ui_ButtonIcon icon, int x, int y)
 			arrow[2].x = 0 + x;
 			arrow[2].y = 4 + y;
 			arrow[3] = arrow[0];
-		break;
+			break;
 		case psy_ui_ICON_MORE:
 			arrow[0].x = 0 + x;
 			arrow[0].y = 0 + y;
@@ -192,7 +192,25 @@ void makearrow(psy_ui_IntPoint* arrow, psy_ui_ButtonIcon icon, int x, int y)
 			arrow[2].x = 4 + x;
 			arrow[2].y = 4 + y;
 			arrow[3] = arrow[0];
-		break;
+			break;
+		case psy_ui_ICON_UP:
+			arrow[0].x = 0 + x;
+			arrow[0].y = 4 + y;
+			arrow[1].x = 8 + x;
+			arrow[1].y = 4 + y;
+			arrow[2].x = 4 + x;
+			arrow[2].y = 0 + y;
+			arrow[3] = arrow[0];
+			break;
+		case psy_ui_ICON_DOWN:
+			arrow[0].x = 0 + x;
+			arrow[0].y = 0 + y;
+			arrow[1].x = 8 + x;
+			arrow[1].y = 0 + y;
+			arrow[2].x = 4 + x;
+			arrow[2].y = 4 + y;
+			arrow[3] = arrow[0];
+			break;
 		default:
 		break;
 	}

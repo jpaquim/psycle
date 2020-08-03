@@ -5,8 +5,6 @@
 
 #include "cpuview.h"
 
-#define TIMERID_CPUVIEW 250
-
 #if defined(DIVERSALIS__OS__MICROSOFT)
 #include <windows.h>
 #endif
@@ -15,19 +13,20 @@
 #include "../../detail/os.h"
 
 static void cpumoduleview_ondraw(CPUModuleView*, psy_ui_Graphics*);
-static void cpumoduleview_onsize(CPUModuleView*, psy_ui_Size*);
-static void cpumoduleview_adjustscroll(CPUModuleView*);
+static void cpumoduleview_onpreferredsize(CPUModuleView*, const psy_ui_Size* limit,
+	psy_ui_Size* rv);
 
 static psy_ui_ComponentVtable cpumoduleview_vtable;
-static int cpumoduleview_vtable_initialized = 0;
+static bool cpumoduleview_vtable_initialized = FALSE;
 
 static void cpumoduleview_vtable_init(CPUModuleView* self)
 {
 	if (!cpumoduleview_vtable_initialized) {
 		cpumoduleview_vtable = *(self->component.vtable);
 		cpumoduleview_vtable.ondraw = (psy_ui_fp_ondraw)cpumoduleview_ondraw;
-		cpumoduleview_vtable.onsize = (psy_ui_fp_onsize)cpumoduleview_onsize;
-		cpumoduleview_vtable_initialized = 1;
+		cpumoduleview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			cpumoduleview_onpreferredsize;
+		cpumoduleview_vtable_initialized = TRUE;
 	}
 }
 
@@ -38,8 +37,8 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	cpumoduleview_vtable_init(self);
 	self->component.vtable = &cpumoduleview_vtable;
 	self->workspace = workspace;
-	psy_ui_component_showverticalscrollbar(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
 void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
@@ -62,7 +61,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 			machine = psy_audio_machines_at(&self->workspace->song->machines,
 				slot);
 			if (machine) {
-				if (cpy + (-psy_ui_component_scrolltop(&self->component)) >= 0) {
+				if ((cpy - psy_ui_component_scrolltop(&self->component)) >= 0) {
 					char text[40];
 					const psy_audio_MachineInfo* info;
 					float percent;
@@ -71,23 +70,25 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 
 					real_time_duration = 100;
 					info = psy_audio_machine_info(machine);
-					psy_snprintf(text, 20, "%d", (int)slot);
-					psy_ui_textout(g, 0, cpy, text, strlen(text));
-					psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy,
-						psy_audio_machine_editname(machine),
-						min(strlen(psy_audio_machine_editname(machine)), 14));
-					psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
-						info->Name, strlen(info->Name));
-					clock = psy_audio_machine_accumulated_processing_time(machine);
-					percent = 100.0f *
-						psy_audio_cputimeclock_cputime_count(&clock) /
-						real_time_duration;
-					percent = 0.f;
-					psy_snprintf(text, 40, "%.1f%%", percent);
-					psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
-						strlen(text));
-					if (cpy + (-psy_ui_component_scrolltop(&self->component)) > size.height) {
-						//break;
+					if (info) {
+						psy_snprintf(text, 20, "%d", (int)slot);
+						psy_ui_textout(g, 0, cpy, text, strlen(text));
+						psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy,
+							psy_audio_machine_editname(machine),
+							min(strlen(psy_audio_machine_editname(machine)), 14));
+						psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
+							info->Name, strlen(info->Name));
+						clock = psy_audio_machine_accumulated_processing_time(machine);
+						percent = 100.0f *
+							psy_audio_cputimeclock_cputime_count(&clock) /
+							real_time_duration;
+						percent = 0.f;
+						psy_snprintf(text, 40, "%.1f%%", percent);
+						psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
+							strlen(text));
+					}
+					if ((cpy - psy_ui_component_scrolltop(&self->component)) > size.height) {
+						break;
 					}
 				}
 				cpy += tm.tmHeight;
@@ -96,35 +97,20 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 	}
 }
 
-void cpumoduleview_onsize(CPUModuleView* self, psy_ui_Size* size)
+void cpumoduleview_onpreferredsize(CPUModuleView* self, const psy_ui_Size* limit,
+	psy_ui_Size* rv)
 {
-	cpumoduleview_adjustscroll(self);
-}
-
-void cpumoduleview_adjustscroll(CPUModuleView* self)
-{
+	uintptr_t currlines;
 	psy_ui_Size size;
-	psy_ui_TextMetric tm;
-	int visilines;
-	int currlines;
-
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	visilines = psy_ui_value_px(&size.height, &tm) / tm.tmHeight;
+	
 	if (self->workspace->song) {
 		currlines = psy_audio_machines_size(&self->workspace->song->machines);
 	} else {
 		currlines = 0;
-	}		
-	self->component.scrollstepy = tm.tmHeight;
-	if (currlines > visilines) {
-		psy_ui_component_setverticalscrollrange(&self->component,
-			0, currlines - visilines);
-	} else {
-		psy_ui_component_setscrolltop(&self->component, 0);
-		psy_ui_component_setverticalscrollrange(&self->component,
-			0, 0);
 	}
+	size = psy_ui_component_size(&self->component);
+	rv->height = psy_ui_value_makepx(self->component.scrollstepy * currlines);
+	rv->width = size.width;	
 }
 
 static void cpuview_initcoreinfo(CPUView*);
@@ -152,7 +138,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	cpuview_initmodules(self, workspace);
 	psy_signal_connect(&self->component.signal_timer, self,
 		cpuview_ontimer);
-	psy_ui_component_starttimer(&self->component, TIMERID_CPUVIEW, 200);
+	psy_ui_component_starttimer(&self->component, 0, 200);
 }
 
 void cpuview_inittitle(CPUView* self)
@@ -207,7 +193,9 @@ void cpuview_initmodules(CPUView* self, Workspace* workspace)
 	psy_ui_Margin margin;
 
 	cpumoduleview_init(&self->modules, &self->component, workspace);
-	psy_ui_component_setalign(&self->modules.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_scroller_init(&self->scroller, &self->modules.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(1),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
@@ -255,7 +243,7 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 	}
 	if (nummachines != self->lastnummachines) {
 		self->lastnummachines = nummachines;
-		cpumoduleview_adjustscroll(&self->modules);
+		psy_ui_component_updateoverflow(&self->modules.component);
 		psy_ui_component_invalidate(&self->modules.component);
 	}
 }

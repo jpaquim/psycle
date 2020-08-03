@@ -218,6 +218,12 @@
     <ClCompile Include="src\uixtsavedialogimp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiscrollbar.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uiscroller.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uialigner.h">
@@ -425,6 +431,12 @@
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\uixtsavedialogimp.h">
+      <Filter>Source Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiscrollbar.h">
+      <Filter>Source Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiscroller.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

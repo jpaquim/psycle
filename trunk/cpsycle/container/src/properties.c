@@ -84,7 +84,7 @@ void psy_property_dispose(psy_Property* self)
 	}	
 }
 
-void psy_properties_init(psy_Properties* self, const char* key, psy_PropertyType typ)
+void psy_properties_init_type(psy_Properties* self, const char* key, psy_PropertyType typ)
 {		
 	self->children = 0;
 	self->parent = 0;
@@ -131,9 +131,36 @@ psy_Properties* psy_properties_create(void)
         
 	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
     if (rv) {	    
-        psy_properties_init(rv, "root", PSY_PROPERTY_TYP_ROOT);
+        psy_properties_init_type(rv, "root", PSY_PROPERTY_TYP_ROOT);
     }
 	return rv;
+}
+
+void psy_properties_init(psy_Properties* self)
+{
+	psy_properties_init_type(self, "root", PSY_PROPERTY_TYP_ROOT);
+}
+
+void psy_properties_dispose(psy_Properties* self)
+{	
+	psy_property_dispose(&self->item);
+	if (self->children != NULL) {
+		psy_Properties* p;
+		psy_Properties* q;
+
+		for (p = self->children; p != NULL; p = q) {
+			q = p->next;
+			if (p->dispose) {
+				p->dispose(&p->item);
+			} else
+				if (p->children && p->item.disposechildren) {
+					psy_properties_free(p->children);
+					p->children = NULL;
+				}
+			psy_property_dispose(&p->item);
+			free(p);
+		}
+	}
 }
 
 psy_Properties* psy_properties_append_section(psy_Properties* self, const char* name)
@@ -143,7 +170,7 @@ psy_Properties* psy_properties_append_section(psy_Properties* self, const char* 
 	assert(self);
 	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
     if (rv) {
-        psy_properties_init(rv, name, PSY_PROPERTY_TYP_SECTION);
+        psy_properties_init_type(rv, name, PSY_PROPERTY_TYP_SECTION);
     }
 	return psy_properties_append_property(self, rv);
 }
@@ -231,7 +258,7 @@ psy_Properties* psy_properties_create_string(const char* key, const char* value)
 	psy_Properties* p;
 
 	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init(p, key, PSY_PROPERTY_TYP_STRING);	
+	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_STRING);	
 	p->item.value.s = strdup(value);	
 	return p;
 }
@@ -246,7 +273,7 @@ psy_Properties* psy_properties_create_font(const char* key, const char* value)
 	psy_Properties* p;
 
 	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init(p, key, PSY_PROPERTY_TYP_FONT);	
+	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_FONT);	
 	p->item.value.s = strdup(value);	
 	return p;
 }
@@ -266,7 +293,7 @@ psy_Properties* psy_properties_append_userdata(psy_Properties* self, const char*
 	}
 	p = tail(self);
 	p->next = (psy_Properties*) malloc(sizeof(psy_Properties));	
-	psy_properties_init(p->next, key, PSY_PROPERTY_TYP_USERDATA);
+	psy_properties_init_type(p->next, key, PSY_PROPERTY_TYP_USERDATA);
 	p->next->dispose = dispose;	
 	p->next->item.value.ud = value;	
 	return p->next;
@@ -277,7 +304,7 @@ psy_Properties* psy_properties_create_int(const char* key, int value, int min, i
 	psy_Properties* p;
 
 	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init(p, key, PSY_PROPERTY_TYP_INTEGER);	
+	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_INTEGER);	
 	p->item.value.i = value;
 	return p;
 }
@@ -314,7 +341,7 @@ psy_Properties* psy_properties_append_bool(psy_Properties* self, const char* key
 
 	rv = (psy_Properties*)malloc(sizeof(psy_Properties));
 	if (rv) {
-		psy_properties_init(rv, key, PSY_PROPERTY_TYP_BOOL);
+		psy_properties_init_type(rv, key, PSY_PROPERTY_TYP_BOOL);
 		rv->item.value.i = (value != FALSE);
 		rv->item.hint = PSY_PROPERTY_HINT_CHECK;
 	}
@@ -327,7 +354,7 @@ psy_Properties* psy_properties_append_double(psy_Properties* self, const char* k
 	psy_Properties* p;
 		
 	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init(p, key, PSY_PROPERTY_TYP_DOUBLE);	
+	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_DOUBLE);	
 	p->item.value.d = value;		
 	return psy_properties_append_property(self, p);	
 }
@@ -337,7 +364,7 @@ psy_Properties* psy_properties_create_choice(const char* key, int value)
 	psy_Properties* p;
 
 	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init(p, key, PSY_PROPERTY_TYP_CHOICE);	
+	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_CHOICE);	
 	p->item.value.i = value;		
 	p->item.hint = PSY_PROPERTY_HINT_LIST;
 	return p;

@@ -81,12 +81,20 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		riff[4] = '\0';
 		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
 		if (strcmp(header,"PSY3SONG") == 0) {
+#ifdef PSYCLE_USE_PSY3
 			if (status = psy_audio_psy3_load(self)) {
 				psy_audio_songfile_errfile(self);
 			}
+#else
+			status = PSY_ERRFILEFORMAT;
+#endif
 			psyfile_close(self->file);
 		} else if (strcmp(header,"PSY2SONG") == 0) {
-			psy_audio_psy2_load(self);
+#ifdef PSYCLE_USE_PSY2
+			psy_audio_psy2_load(self);			
+#else
+			status = PSY_ERRFILEFORMAT;
+#endif
 			psyfile_close(self->file);
 		} else if (strcmp(riff, "RIFF") == 0) {			
 			psyfile_read(&file, header, 8);
@@ -96,6 +104,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 				psy_audio_wav_songio_load(self);
 			}
 		} else {
+#ifdef PSYCLE_USE_XM
 			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);
 			header[strlen(XM_HEADER)] = '\0';
 			if (strcmp(header, XM_HEADER) == 0) {
@@ -109,6 +118,9 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 					self->err = 2;
 				}
 			}
+#else
+			status = PSY_ERRFILEFORMAT;
+#endif
 			psyfile_close(self->file);
 		}
 		if (!psy_audio_machines_at(&self->song->machines, psy_audio_MASTER_INDEX)) {

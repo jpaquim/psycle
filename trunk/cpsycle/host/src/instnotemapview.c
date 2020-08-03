@@ -604,7 +604,10 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_setmargin(&self->parameterview.component, &margin);
 	instrumententryview_init(&self->entryview,
 		&self->component, &self->parameterview);
-	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
+		&self->component);
+	psy_ui_component_setoverflow(&self->entryview.component, psy_ui_OVERFLOW_VSCROLL);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(0), psy_ui_value_makeew(2),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
