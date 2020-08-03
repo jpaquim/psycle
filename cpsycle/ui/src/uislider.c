@@ -18,9 +18,9 @@ static void psy_ui_slider_initsignals(psy_ui_Slider*);
 static void psy_ui_slider_disposesignals(psy_ui_Slider*);
 static void psy_ui_slider_ondraw(psy_ui_Slider*, psy_ui_Graphics*);
 static void psy_ui_slider_drawverticalruler(psy_ui_Slider*, psy_ui_Graphics*);
-static void psy_ui_slider_onmousedown(psy_ui_Slider*, psy_ui_MouseEvent* ev);
-static void psy_ui_slider_onmouseup(psy_ui_Slider*, psy_ui_MouseEvent* ev);
-static void psy_ui_slider_onmousemove(psy_ui_Slider*, psy_ui_MouseEvent* ev);
+static void psy_ui_slider_onmousedown(psy_ui_Slider*, psy_ui_MouseEvent*);
+static void psy_ui_slider_onmouseup(psy_ui_Slider*, psy_ui_MouseEvent*);
+static void psy_ui_slider_onmousemove(psy_ui_Slider*, psy_ui_MouseEvent*);
 static void psy_ui_slider_onmousewheel(psy_ui_Slider*, psy_ui_MouseEvent*);
 static void psy_ui_slider_ondestroy(psy_ui_Slider*, psy_ui_Component* sender);
 static void psy_ui_slider_ontimer(psy_ui_Slider*, psy_ui_Component* sender,

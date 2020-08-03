@@ -38,19 +38,13 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	psy_ui_component_enablealign(&self->component);
 	self->workspace = workspace;
 	psy_ui_button_init(&self->rescan, &self->component);
-	psy_ui_button_settext(&self->rescan, "Rescan");
 	psy_ui_button_setcharnumber(&self->rescan, 30);
 	psy_ui_button_init(&self->selectdirectories, &self->component);
-	psy_ui_button_settext(&self->selectdirectories, "Select plugin directories");
 	psy_ui_button_setcharnumber(&self->rescan, 30);
 	psy_ui_button_init(&self->sortbyfavorite, &self->component);
-	psy_ui_button_settext(&self->sortbyfavorite, "Sort By Favorite");
 	psy_ui_button_init(&self->sortbyname, &self->component);
-	psy_ui_button_settext(&self->sortbyname, "Sort By Name");	
 	psy_ui_button_init(&self->sortbytype, &self->component);
-	psy_ui_button_settext(&self->sortbytype, "Sort By Type");	
 	psy_ui_button_init(&self->sortbymode, &self->component);
-	psy_ui_button_settext(&self->sortbymode, "Sort By Mode");	
 	psy_signal_connect(&self->rescan.signal_clicked, self,
 		newmachinebar_onrescan);
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
@@ -78,7 +72,7 @@ void newmachinebar_updatetext(NewMachineBar* self, Translator* translator)
 	psy_ui_button_settext(&self->sortbyname,
 		translator_translate(translator, "newmachine.sort-by-name"));
 	psy_ui_button_settext(&self->sortbytype,
-		translator_translate(translator, "newmachine.sort by type"));
+		translator_translate(translator, "newmachine.sort-by-type"));
 	psy_ui_button_settext(&self->sortbymode,
 		translator_translate(translator, "newmachine.sort-by-mode"));
 }
@@ -664,7 +658,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	pluginsview_init(&self->favoriteview, &self->component, TRUE, workspace);
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(4.0)));
-	psy_ui_component_setalign(&self->favoriteview.component, psy_ui_ALIGN_TOP);
+	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
 	// plugin view
 	psy_ui_label_init(&self->pluginsheader, &self->component);
 	psy_ui_label_settextalignment(&self->pluginsheader,
@@ -677,7 +673,9 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
 	psy_ui_component_setborder(&self->pluginsheader.component, sectionborder);
 	pluginsview_init(&self->pluginsview, &self->component, FALSE, workspace);
-	psy_ui_component_setalign(&self->pluginsview.component, psy_ui_ALIGN_CLIENT);	
+	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
+		&self->component);
+	psy_ui_component_setalign(&self->scroller_main.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->pluginsview.signal_selected, self,
 		newmachine_onpluginselected);

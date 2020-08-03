@@ -152,7 +152,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 {
 	psy_audio_Machine* machine;
 	char sDllName[256];
-	char plugincatchername[256];
+	char plugincatchername[_MAX_PATH];
 	const char* convname;
 	char _editName[32];
 	cpoint_t connectionpoint[MAX_CONNECTIONS];
@@ -190,8 +190,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 			int32_t parameters[2];
 
 			psyfile_read(songfile->file, parameters, sizeof(parameters));
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 5);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 5);
 		}
 		break;
 		case flanger:
@@ -199,8 +199,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 			int32_t parameters[2];
 		
 			psyfile_read(songfile->file, parameters, sizeof(parameters));
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 7);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 7);
 		}
 		break;
 		case gainer:
@@ -209,8 +209,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 				int parameters[1];
 
 				psyfile_read(songfile->file, parameters, sizeof(parameters));
-				retweak_parameters(songfile, machine, type, name,
-					parameters, sizeof parameters / sizeof * parameters, 1);
+				//retweak_parameters(songfile, machine, type, name,
+				//	parameters, sizeof parameters / sizeof * parameters, 1);
 			}
 		break;
 		default:
@@ -223,8 +223,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 			int32_t parameters[4];
 
 			psyfile_read(songfile->file, parameters, sizeof(parameters));
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 1);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 1);
 			}
 		break;
 		default:
@@ -243,8 +243,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 		for (i = 0; i < 4; ++i) {
 			parameters[i] = parameters_uint8[i];
 		}
-		retweak_parameters(songfile, machine, type, name,
-			parameters, sizeof parameters / sizeof * parameters, 1);
+		//retweak_parameters(songfile, machine, type, name,
+		//	parameters, sizeof parameters / sizeof * parameters, 1);
 		psyfile_skip(songfile->file, 40);
 	}
 	break;
@@ -256,8 +256,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 			psyfile_read(songfile->file, &parameters[2], sizeof * parameters);
 			psyfile_read(songfile->file, &parameters[1], sizeof * parameters);
 			psyfile_read(songfile->file, &parameters[3], sizeof * parameters);
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 1);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 1);
 		}
 		psyfile_skip(songfile->file, 24);
 	break;
@@ -269,8 +269,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 			
 			psyfile_read(songfile->file, parameters_uint8, sizeof(parameters_uint8));			
 			parameters[0] = parameters_uint8[0];			
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 9);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 9);
 		}
 		{
 			int parameters[6];
@@ -282,8 +282,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 			psyfile_read(songfile->file, &parameters[2], sizeof * parameters);
 			psyfile_read(songfile->file, &parameters[1], sizeof * parameters);
 			psyfile_read(songfile->file, &parameters[4], sizeof * parameters);
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 1);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 1);
 		}
 		psyfile_skip(songfile->file, 4);
 	break;
@@ -294,8 +294,8 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 
 			psyfile_read(songfile->file, &parameters[1], sizeof parameters - sizeof * parameters);
 			psyfile_read(songfile->file, &parameters[0], sizeof * parameters);
-			retweak_parameters(songfile, machine, type, name,
-				parameters, sizeof parameters / sizeof * parameters, 1);
+			//retweak_parameters(songfile, machine, type, name,
+			//	parameters, sizeof parameters / sizeof * parameters, 1);
 		}
 		break;
 	default:

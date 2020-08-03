@@ -143,6 +143,8 @@
     <ClCompile Include="src\uiopendialog.c" />
     <ClCompile Include="src\uiprogressbar.c" />
     <ClCompile Include="src\uisavedialog.c" />
+    <ClCompile Include="src\uiscrollbar.c" />
+    <ClCompile Include="src\uiscroller.c" />
     <ClCompile Include="src\uislider.c" />
     <ClCompile Include="src\uisplitbar.c" />
     <ClCompile Include="src\uistyle.c" />
@@ -214,6 +216,8 @@
     <ClInclude Include="src\uiopendialog.h" />
     <ClInclude Include="src\uiprogressbar.h" />
     <ClInclude Include="src\uisavedialog.h" />
+    <ClInclude Include="src\uiscrollbar.h" />
+    <ClInclude Include="src\uiscroller.h" />
     <ClInclude Include="src\uislider.h" />
     <ClInclude Include="src\uisplitbar.h" />
     <ClInclude Include="src\uistyle.h" />

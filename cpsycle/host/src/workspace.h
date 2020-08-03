@@ -62,14 +62,18 @@ typedef struct {
 	bool maximized;
 } MaximizedView;
 
-typedef struct {	
+typedef struct {
 	psy_audio_Song* song;
 	psy_audio_Song* songcbk;
 	psy_audio_Player player;
+	psy_audio_PluginCatcher plugincatcher;
+	psy_audio_MachineFactory machinefactory;
+	// Psycle settings
+	psy_Properties config;
+	// Some sections of config
 	psy_Properties* language;
 	psy_Properties* recentsongs;
-	psy_Properties* recentfiles;
-	psy_Properties* config;
+	psy_Properties* recentfiles;	
 	psy_Properties* general;
 	psy_Properties* inputoutput;
 	psy_Properties* midi;
@@ -83,9 +87,7 @@ typedef struct {
 	psy_Properties* cmds;
 	psy_Properties* patternviewtheme;
 	psy_Properties* machineviewtheme;
-	psy_Properties* paramtheme;
-	psy_audio_PluginCatcher plugincatcher;
-	psy_audio_MachineFactory machinefactory;
+	psy_Properties* paramtheme;	
 	int octave;
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;	
@@ -108,8 +110,7 @@ typedef struct {
 	psy_Signal signal_defaultfontchanged;
 	psy_Signal signal_showgear;
 	psy_Signal signal_languagechanged;
-	psy_ui_Component* mainhandle;
-	psy_UndoRedo undoredo;	
+	psy_ui_Component* mainhandle;	
 	History history;
 	psy_audio_PatternEditPosition patterneditposition;
 	SequenceSelection sequenceselection;
@@ -120,13 +121,16 @@ typedef struct {
 	int recordtweaks;
 	SequenceEntry* lastentry;
 	psy_audio_Pattern patternpaste;
-	psy_List* sequencepaste;
-	MaximizedView maximizeview;
+	psy_List* sequencepaste;	
 	int currview;
 	psy_List* currnavigation;
 	int navigating;
+	// ui
+	MaximizedView maximizeview;
 	int fontheight;
 	char* dialbitmappath;
+	// UndoRedo
+	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
 	Translator translator;

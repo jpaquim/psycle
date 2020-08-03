@@ -71,7 +71,10 @@ typedef struct psy_Properties {
 
 typedef int (*psy_PropertiesCallback)(void* , psy_Properties*, int level);
 
-void psy_properties_init(psy_Properties*, const char* key, psy_PropertyType);
+void psy_properties_init(psy_Properties*);
+void psy_properties_dispose(psy_Properties*);
+
+void psy_properties_init_type(psy_Properties*, const char* key, psy_PropertyType);
 psy_Properties* psy_properties_create(void);
 void psy_properties_free(psy_Properties*);
 psy_Properties* psy_properties_clone(psy_Properties*, int all);

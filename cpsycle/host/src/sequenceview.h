@@ -11,6 +11,7 @@
 #include <uilabel.h>
 #include <uicheckbox.h>
 #include <uisplitbar.h>
+#include <uiscroller.h>
 
 #include "playlisteditor.h"
 #include "workspace.h"
@@ -79,7 +80,7 @@ void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
 void sequenceduration_update(SequenceViewDuration*);
 
 typedef struct {
-	psy_ui_Component component;	
+	psy_ui_Component component;
 	struct SequenceView* view;
 } SequenceViewTrackHeader;
 
@@ -102,6 +103,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 typedef struct SequenceView {
 	psy_ui_Component component;	
 	SequenceListView listview;
+	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
 	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;

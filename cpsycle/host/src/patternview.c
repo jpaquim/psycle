@@ -158,7 +158,7 @@ void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
 {
 	psy_Properties* pv;
 
-	pv = psy_properties_findsection(self->workspace->config, "visual.patternview");
+	pv = psy_properties_findsection(&self->workspace->config, "visual.patternview");
 	if (pv) {
 		psy_Properties* p;
 		

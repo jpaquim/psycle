@@ -5,39 +5,37 @@
 #include "../../detail/psyconf.h"
 
 #include "translator.h"
-#include "propertiesio.h"
-
+// file
+#include <propertiesio.h>
+// platform
 #include "../../detail/portable.h"
-#include "../../detail/os.h"
 
-static void translator_initdefault(Translator*);
 static void translator_definekeys(psy_Properties* lang);
-static void translator_setproperties(Translator*, psy_Properties* lang);
+static bool translator_hastranslation(Translator*, const char* key,
+	const char* translation);
+static const char* translator_remove_section(Translator*, const char* key);
 
 void translator_init(Translator* self)
 {
-	self->lang = NULL;
-	translator_initdefault(self);
-}
-
-void translator_initdefault(Translator* self)
-{
-	psy_Properties* lang;
-
-	lang = psy_properties_create();
-	translator_definekeys(lang);
-	translator_setproperties(self, lang);
+	psy_properties_init(&self->dictionary);
+	translator_definekeys(&self->dictionary);
 }
 
 void translator_dispose(Translator* self)
 {
-	psy_properties_free(self->lang);
-	self->lang = NULL;
+	psy_properties_dispose(&self->dictionary);
+}
+
+void translator_reset(Translator* self)
+{
+	psy_properties_clear(&self->dictionary);
+	translator_definekeys(&self->dictionary);
 }
 
 bool translator_load(Translator* self, const char* path)
 {	
-	return propertiesio_load(self->lang, path, FALSE);
+	translator_reset(self);
+	return propertiesio_load(&self->dictionary, path, FALSE);
 }
 
 bool translator_test(Translator* self, const char* path, char* id)
@@ -59,31 +57,39 @@ bool translator_test(Translator* self, const char* path, char* id)
 	return FALSE;
 }
 
-void translator_setproperties(Translator* self, psy_Properties* lang)
-{
-	psy_properties_free(self->lang);
-	self->lang = lang;
-}
-
 const char* translator_translate(Translator* self, const char* key)
 {	
-	if (self->lang) {
-		const char* rv;
+	const char* rv;
 
-		rv = psy_properties_at_str(self->lang, key, key);
-		if (rv == key && rv != NULL) {
-			// removes section from defaulttext
-			rv = strrchr(key, '.');
-			rv = (rv != NULL)
-				? rv + 1
-				: key;
-		}
-		if (rv == NULL) {
-			rv = "";
-		}
-		return rv;
+	rv = psy_properties_at_str(&self->dictionary, key, key);
+	if (!translator_hastranslation(self, rv, key)) {
+		return translator_remove_section(self, rv);
 	}
-	return key;	
+	return rv;
+}
+
+bool translator_hastranslation(Translator* self, const char* key,
+	const char* translation)
+{
+	return translation != key;
+}
+
+const char* translator_remove_section(Translator* self, const char* key)
+{
+	const char* rv;
+
+	if (key) {
+		rv = strrchr(key, '.');
+		rv = (rv != NULL)
+			? rv + 1
+			: key;
+	} else {
+		rv = NULL;
+	}
+	if (rv == NULL) {
+		rv = "";
+	}
+	return rv;
 }
 
 void translator_definekeys(psy_Properties* lang)
@@ -485,6 +491,14 @@ void translator_definekeys(psy_Properties* lang)
 	psy_properties_set_str(section,
 		"connect-to-mixer-send-return-input",
 		"Connect to Mixer-send/return-input");
+	// PatternView
+	section = psy_properties_append_section(lang, "patternview");
+	psy_properties_set_str(section,
+		"line", "Line");
+	psy_properties_set_str(section,
+		"defaults", "Defaults");
+	psy_properties_set_str(section,
+		"step", "Step");
 	// SequenceView
 	section = psy_properties_append_section(lang, "sequencerview");
 	psy_properties_set_str(section,
@@ -537,7 +551,7 @@ void translator_definekeys(psy_Properties* lang)
 	psy_properties_set_str(section,
 		"select-plugin-directories", "Select plugin directories");
 	psy_properties_set_str(section,
-		"sort-by-favorite", "sort by favorite");
+		"sort-by-favorite", "Sort by favorite");
 	psy_properties_set_str(section,
 		"sort-by-name", "Sort by name");
 	psy_properties_set_str(section,

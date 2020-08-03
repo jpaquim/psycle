@@ -15,7 +15,9 @@ typedef enum {
 	psy_ui_ICON_LESS,
 	psy_ui_ICON_MORE,
 	psy_ui_ICON_MOREMORE,
-	psy_ui_ICON_LESSLESS
+	psy_ui_ICON_LESSLESS,
+	psy_ui_ICON_UP,
+	psy_ui_ICON_DOWN
 } psy_ui_ButtonIcon;
 
 typedef struct {

@@ -222,7 +222,7 @@ void mainframe_init(MainFrame* self)
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		&self->viewtabbars.component,
-		self->workspace.config,
+		&self->workspace.config,
 		&self->workspace);	
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
@@ -260,7 +260,7 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->gear.buttons.createreplace.signal_clicked, self,
 		mainframe_ongearcreate);
 	psy_signal_emit(&self->workspace.signal_configchanged,
-		&self->workspace, 1, self->workspace.config);
+		&self->workspace, 1, &self->workspace.config);
 	psy_signal_connect(&self->tabbar.signal_change, self,
 		mainframe_ontabbarchanged);
 	workspace_addhistory(&self->workspace);	
@@ -322,7 +322,7 @@ void mainframe_init(MainFrame* self)
 	interpreter_init(&self->interpreter, &self->workspace);
 	interpreter_start(&self->interpreter);
 	psy_signal_connect(&self->workspace.signal_skinchanged, self,
-		mainframe_onskinchanged);
+		mainframe_onskinchanged);	
 	mainframe_updatetheme(self);
 }
 
@@ -972,7 +972,11 @@ void mainframe_onterminalwarning(MainFrame* self, Workspace* sender,
 	const char* text)
 {
 	self->terminalhaswarning = TRUE;
-	psy_ui_terminal_output(&self->terminal, text);
+	if (text) {
+		psy_ui_terminal_output(&self->terminal, text);
+	} else {
+		psy_ui_terminal_output(&self->terminal, "unknown warning\n");
+	}
 	if (!self->terminalhaserror) {
 		psy_ui_button_settextcolor(&self->toggleterminal,
 			psy_ui_color_make(TERMINALWARNINGCOLOR));
@@ -983,7 +987,11 @@ void mainframe_onterminalerror(MainFrame* self, Workspace* sender,
 	const char* text)
 {
 	self->terminalhaserror = TRUE;
-	psy_ui_terminal_output(&self->terminal, text);
+	if (text) {
+		psy_ui_terminal_output(&self->terminal, text);
+	} else {
+		psy_ui_terminal_output(&self->terminal, "unknown error\n");
+	}
 	psy_ui_button_settextcolor(&self->toggleterminal,
 		psy_ui_color_make(TERMINALERRORCOLOR));
 }

@@ -5,9 +5,10 @@
 #define MACHINEVIEW
 
 #include "workspace.h"
-#include <uinotebook.h>
 #include <uiedit.h>
 #include <uidef.h>
+#include <uinotebook.h>
+#include <uiscroller.h>
 #include <player.h>
 #include <plugincatcher.h>
 #include "newmachine.h"
@@ -54,7 +55,8 @@ enum {
 };
 
 typedef struct {
-	psy_ui_Component component;	
+	psy_ui_Component component;
+	psy_ui_Scroller* scroller;
 	psy_audio_Machines* machines;
 	psy_Table machineuis;
 	psy_List* wireframes;	
@@ -80,7 +82,7 @@ typedef struct {
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, Workspace*);
+	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller, Workspace*);
 void machinewireview_align(MachineWireView*);
 
 typedef struct MachineViewBar {
@@ -98,6 +100,7 @@ typedef struct {
 	TabBar tabbar;
 	psy_ui_Notebook notebook;	
 	MachineWireView wireview;
+	psy_ui_Scroller scroller;
 	NewMachine newmachine;
 	Workspace* workspace;
 } MachineView;

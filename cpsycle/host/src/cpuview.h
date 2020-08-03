@@ -6,6 +6,7 @@
 
 #include "labelpair.h"
 #include <uicheckbox.h>
+#include <uiscroller.h>
 #include "workspace.h"
 
 // aim: Displays information of the cpu and memory usage of the system and
@@ -44,6 +45,7 @@ typedef struct {
 	CPUModuleView modules;
 	Workspace* workspace;
 	uintptr_t lastnummachines;
+	psy_ui_Scroller scroller;
 } CPUView;
 
 void cpuview_init(CPUView*, psy_ui_Component* parent, Workspace*);

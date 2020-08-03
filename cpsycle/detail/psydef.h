@@ -25,6 +25,7 @@ typedef uint8_t bool;
 
 #define PSY_OK 0
 #define PSY_ERRFILE 1
+#define PSY_ERRFILEFORMAT 2
 
 #ifndef INLINE
 # if __GNUC__ && !__GNUC_STDC_INLINE__

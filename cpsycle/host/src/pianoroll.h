@@ -8,6 +8,8 @@
 #include "workspace.h"
 #include "zoombox.h"
 
+#include <uiscroller.h>
+
 #include <pattern.h>
 
 typedef struct {
@@ -132,7 +134,8 @@ typedef struct Pianoroll {
    int cy;
    psy_audio_Pattern* pattern;
    unsigned int opcount;
-   bool syncpattern;   
+   bool syncpattern;
+   psy_ui_Scroller scroller;
    Workspace* workspace;
 } Pianoroll;
 

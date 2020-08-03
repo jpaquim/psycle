@@ -223,8 +223,7 @@ void workspace_dispose(Workspace* self)
 	psy_audio_song_deallocate(self->song);	
 	self->song = 0;	
 	self->songcbk = 0;
-	psy_properties_free(self->config);
-	self->config = 0;
+	psy_properties_dispose(&self->config);
 	translator_dispose(&self->translator);	
 	free(self->filename);
 	self->filename = 0;
@@ -334,7 +333,7 @@ void workspace_configvisual(Workspace* self)
 {	
 	psy_Properties* visual;
 
-	visual = psy_properties_find(self->config, "visual", PSY_PROPERTY_TYP_SECTION);
+	visual = psy_properties_find(&self->config, "visual", PSY_PROPERTY_TYP_SECTION);
 	if (visual) {
 		psy_ui_Font font;
 		psy_ui_FontInfo fontinfo;
@@ -475,11 +474,11 @@ void workspace_makeconfig(Workspace* self)
 
 void workspace_makegeneral(Workspace* self)
 {	
-	self->config = psy_properties_setcomment(
-		psy_properties_create(),
+	psy_properties_init(&self->config);
+	psy_properties_setcomment(&self->config,
 		"Psycle Configuration File created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	self->general = psy_properties_settext(
-		psy_properties_append_section(self->config, "general"),
+		psy_properties_append_section(&self->config, "general"),
 		"settingsview.general");
 	psy_properties_sethint(psy_properties_settext(
 		psy_properties_append_string(self->general, "version", "alpha"),
@@ -538,7 +537,7 @@ void workspace_makevisual(Workspace* self)
 	psy_Properties* visual;
 	
 	visual = psy_properties_settext(
-		psy_properties_append_section(self->config, "visual"),
+		psy_properties_append_section(&self->config, "visual"),
 		"settingsview.visual");
 	psy_properties_settext(
 		psy_properties_append_action(visual, "loadskin"),
@@ -954,7 +953,7 @@ void workspace_makeparamtheme(Workspace* self, psy_Properties* view)
 void workspace_makekeyboard(Workspace* self)
 {	
 	self->keyboard = psy_properties_settext(
-		psy_properties_append_section(self->config, "keyboard"),
+		psy_properties_append_section(&self->config, "keyboard"),
 		"settingsview.keyboard-and-misc");
 	psy_properties_settext(
 		psy_properties_append_bool(self->keyboard, 
@@ -969,7 +968,7 @@ void workspace_makekeyboard(Workspace* self)
 void workspace_makedirectories(Workspace* self)
 {	
 	self->directories = psy_properties_settext(
-		psy_properties_append_section(self->config, "directories"),
+		psy_properties_append_section(&self->config, "directories"),
 			"settingsview.directories");
 	psy_properties_sethint(
 		psy_properties_settext(
@@ -1009,7 +1008,7 @@ void workspace_makedefaultuserpresetpath(Workspace* self)
 void workspace_makecompatibility(Workspace* self)
 {
 	self->compatibility = psy_properties_settext(
-		psy_properties_append_section(self->config, "compatibility"),
+		psy_properties_append_section(&self->config, "compatibility"),
 			"settingsview.compatibility");
 	psy_properties_settext(
 		psy_properties_append_bool(self->compatibility, "loadnewgamefxblitz", 0),
@@ -1028,7 +1027,7 @@ void workspace_makedirectory(Workspace* self, const char* key,
 
 void workspace_makeinputoutput(Workspace* self)
 {		
-	self->inputoutput = psy_properties_append_section(self->config, "inputoutput");
+	self->inputoutput = psy_properties_append_section(&self->config, "inputoutput");
 	workspace_makedriverlist(self);
 	self->driverconfigure = psy_properties_settext(
 		psy_properties_append_section(self->inputoutput, "configure"),
@@ -1114,7 +1113,7 @@ void workspace_makemidi(Workspace* self)
 {		
 	psy_Properties* installed;
 	self->midi = psy_properties_settext(
-		psy_properties_append_section(self->config, "midicontrollers"),
+		psy_properties_append_section(&self->config, "midicontrollers"),
 		"MIDI Controllers");		
 		
 
@@ -1193,19 +1192,19 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 			psy_Properties* view;
 			psy_Properties* theme;
 			
-			view = psy_properties_findsection(self->config, "visual.patternview");
+			view = psy_properties_findsection(&self->config, "visual.patternview");
 			theme = psy_properties_findsection(view, "theme");
 			if (theme) {
 				psy_properties_remove(view, theme);
 			}
 			workspace_makepatternviewtheme(self, view);
-			view = psy_properties_findsection(self->config, "visual.machineview");
+			view = psy_properties_findsection(&self->config, "visual.machineview");
 			theme = psy_properties_findsection(view, "theme");
 			if (theme) {
 				psy_properties_remove(view, theme);
 			}
 			workspace_makemachineviewtheme(self, view);
-			view = psy_properties_findsection(self->config, "visual.paramview");
+			view = psy_properties_findsection(&self->config, "visual.paramview");
 			theme = psy_properties_findsection(view, "theme");
 			if (theme) {
 				psy_properties_remove(view, theme);
@@ -1349,17 +1348,17 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 
 int workspace_showsonginfoonload(Workspace* self)
 {				
-	return psy_properties_at_bool(self->config, "general.showsonginfoonload", 1);
+	return psy_properties_at_bool(&self->config, "general.showsonginfoonload", 1);
 }
 
 int workspace_showaboutatstart(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "general.showaboutatstart", 1);	
+	return psy_properties_at_bool(&self->config, "general.showaboutatstart", 1);	
 }
 
 int workspace_showmaximizedatstart(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "general.showmaximizedatstart", 1);	
+	return psy_properties_at_bool(&self->config, "general.showmaximizedatstart", 1);	
 }
 
 int workspace_saverecentsongs(Workspace* self)
@@ -1374,78 +1373,78 @@ int workspace_playsongafterload(Workspace* self)
 
 int workspace_showplaylisteditor(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "general.showplaylisteditor", 0);
+	return psy_properties_at_bool(&self->config, "general.showplaylisteditor", 0);
 }
 
 int workspace_showstepsequencer(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "general.showstepsequencer", 0);
+	return psy_properties_at_bool(&self->config, "general.showstepsequencer", 0);
 }
 
 int workspace_showgriddefaults(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "visual.patternview.griddefaults", 1);	
+	return psy_properties_at_bool(&self->config, "visual.patternview.griddefaults", 1);	
 }
 
 int workspace_showlinenumbers(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "visual.patternview.linenumbers", 1);	
+	return psy_properties_at_bool(&self->config, "visual.patternview.linenumbers", 1);	
 }
 
 int workspace_showbeatoffset(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "visual.patternview.beatoffset", 1);	
+	return psy_properties_at_bool(&self->config, "visual.patternview.beatoffset", 1);	
 }
 
 int workspace_showlinenumbercursor(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "visual.patternview.linenumberscursor", 1);
+	return psy_properties_at_bool(&self->config, "visual.patternview.linenumberscursor", 1);
 }
 
 int workspace_showlinenumbersinhex(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.patternview.linenumbersinhex", 1);
+	return psy_properties_at_bool(&self->config, "visual.patternview.linenumbersinhex", 1);
 }
 
 int workspace_showwideinstcolumn(Workspace* self)
 {	
-	return psy_properties_at_bool(self->config, "visual.patternview.wideinstcolumn", 1);
+	return psy_properties_at_bool(&self->config, "visual.patternview.wideinstcolumn", 1);
 }
 
 int workspace_showtrackscopes(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.patternview.trackscopes", 1);
+	return psy_properties_at_bool(&self->config, "visual.patternview.trackscopes", 1);
 }
 
 int workspace_wraparound(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.patternview.wraparound", 1);
+	return psy_properties_at_bool(&self->config, "visual.patternview.wraparound", 1);
 }
 
 int workspace_ismovecursorwhenpaste(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.patternview.movecursorwhenpaste", 1);
+	return psy_properties_at_bool(&self->config, "visual.patternview.movecursorwhenpaste", 1);
 }
 
 void workspace_movecursorwhenpaste(Workspace* self, bool on)
 {
-	psy_properties_set_bool(self->config,
+	psy_properties_set_bool(&self->config,
 		"visual.patternview.movecursorwhenpaste", on);
 }
 
 int workspace_showmachineindexes(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.machineview.drawmachineindexes", 1);
+	return psy_properties_at_bool(&self->config, "visual.machineview.drawmachineindexes", 1);
 }
 
 int workspace_showwirehover(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.machineview.drawwirehover", 1);
+	return psy_properties_at_bool(&self->config, "visual.machineview.drawwirehover", 1);
 }
 
 int workspace_showparamviewaswindow(Workspace* self)
 {
-	return psy_properties_at_bool(self->config, "visual.paramview.showaswindow", 1);
+	return psy_properties_at_bool(&self->config, "visual.paramview.showaswindow", 1);
 }
 
 void workspace_newsong(Workspace* self)
@@ -1484,6 +1483,7 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 			psy_signal_emit(&self->signal_terminal_error, self, 1,
 				songfile.serr);
 			psy_audio_songfile_dispose(&songfile);
+			play = FALSE;
 		} else {
 			free(self->filename);
 			self->filename = strdup(path);
@@ -1599,7 +1599,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, workspace_config_directory(self));
 	psy_path_setname(&path, PSYCLE_INI);		
-	propertiesio_load(self->config, psy_path_path(&path), 0);
+	propertiesio_load(&self->config, psy_path_path(&path), 0);
 	psy_path_dispose(&path);
 	workspace_configlanguage(self);
 	workspace_configaudio(self);	
@@ -1625,7 +1625,7 @@ void workspace_save_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, workspace_config_directory(self));
 	psy_path_setname(&path, PSYCLE_INI);	
-	propertiesio_save(self->config, psy_path_path(&path));
+	propertiesio_save(&self->config, psy_path_path(&path));
 	psy_path_dispose(&path);
 }
 
@@ -1726,7 +1726,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 {
 	psy_Properties* visual;
 
-	visual = psy_properties_find(self->config, "visual", PSY_PROPERTY_TYP_SECTION);
+	visual = psy_properties_find(&self->config, "visual", PSY_PROPERTY_TYP_SECTION);
 	if (visual) {
 		psy_ui_FontInfo fontinfo;
 		psy_ui_Font font;
@@ -2332,7 +2332,7 @@ void workspace_showgear(Workspace* self)
 
 void workspace_onlanguagechanged(Workspace* self, Translator* sender)
 {
-	psy_properties_enumerate(self->config->children, self,
+	psy_properties_enumerate(self->config.children, self,
 		workspace_onchangelanguageenum);	
 }
 
@@ -2353,7 +2353,7 @@ bool workspace_songmodified(Workspace* self)
 
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
 {
-	return (psy_properties_at_bool(self->config, "visual.patternview.notetab", 0))
+	return (psy_properties_at_bool(&self->config, "visual.patternview.notetab", 0))
 		? psy_dsp_NOTESTAB_A440
 		: psy_dsp_NOTESTAB_A220;
 }

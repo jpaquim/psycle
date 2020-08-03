@@ -12,6 +12,7 @@
 #include <inputmap.h>
 #include <uibutton.h>
 #include <uilabel.h>
+#include <uiscroller.h>
 #include "zoombox.h"
 #include "interpolatecurveview.h"
 #include "patternviewskin.h"
@@ -120,10 +121,13 @@ typedef struct {
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
 	struct TrackerView* view;
+	char_dyn_t* linestr;
+	char_dyn_t* defaultstr;
 } TrackerLineNumbersLabel;
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, TrackerLineState*, struct TrackerView*);
+	psy_ui_Component* parent, TrackerLineState*, struct TrackerView*,
+	Workspace*);
 
 typedef struct {
 	psy_ui_Component component;
@@ -225,6 +229,7 @@ typedef struct TrackerView {
 	TrackerLineNumbers linenumbers;
 	TrackerGrid griddefaults;
 	TrackerGrid grid;
+	psy_ui_Scroller scroller;
 	PatternBlockMenu blockmenu;
 	InterpolateCurveView interpolatecurveview;	
 	TrackerLineState linestate;

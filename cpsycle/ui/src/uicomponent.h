@@ -53,20 +53,14 @@ typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, psy_ui
 typedef psy_ui_Size(*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy);
 typedef void (*psy_ui_fp_component_setfont)(struct psy_ui_Component*, psy_ui_Font*);
-typedef void (*psy_ui_fp_component_showhorizontalscrollbar)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_hidehorizontalscrollbar)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_sethorizontalscrollrange)(struct psy_ui_Component*, int min, int max);
 typedef void (*psy_ui_fp_component_horizontalscrollrange)(struct psy_ui_Component* self, int* scrollmin,
 	int* scrollmax);
-typedef int (*psy_ui_fp_component_horizontalscrollposition)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_sethorizontalscrollposition)(struct psy_ui_Component*, int position);
 typedef void (*psy_ui_fp_component_showverticalscrollbar)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_hideverticalscrollbar)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_setverticalscrollrange)(struct psy_ui_Component*, int min, int max);
 typedef void (*psy_ui_fp_component_verticalscrollrange)(struct psy_ui_Component* self, int* scrollmin,
 	int* scrollmax);
-typedef int (*psy_ui_fp_component_verticalscrollposition)(struct psy_ui_Component*);
-typedef void (*psy_ui_fp_component_setverticalscrollposition)(struct psy_ui_Component*, int position);
 typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component* self, int recursive);
 // vtable events function pointers 
 typedef void (*psy_ui_fp_onalign)(struct psy_ui_Component*);
@@ -102,18 +96,6 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_framesize framesize;
 	psy_ui_fp_component_scrollto scrollto;
 	psy_ui_fp_component_setfont setfont;
-	psy_ui_fp_component_showhorizontalscrollbar showhorizontalscrollbar;
-	psy_ui_fp_component_hidehorizontalscrollbar hidehorizontalscrollbar;
-	psy_ui_fp_component_sethorizontalscrollrange sethorizontalscrollrange;
-	psy_ui_fp_component_horizontalscrollrange horizontalscrollrange;
-	psy_ui_fp_component_horizontalscrollposition horizontalscrollposition;
-	psy_ui_fp_component_sethorizontalscrollposition sethorizontalscrollposition;
-	psy_ui_fp_component_showverticalscrollbar showverticalscrollbar;
-	psy_ui_fp_component_hideverticalscrollbar hideverticalscrollbar;
-	psy_ui_fp_component_setverticalscrollrange setverticalscrollrange;
-	psy_ui_fp_component_verticalscrollrange verticalscrollrange;
-	psy_ui_fp_component_verticalscrollposition verticalscrollposition;
-	psy_ui_fp_component_setverticalscrollposition setverticalscrollposition;
 	psy_ui_fp_component_children children;
 	psy_ui_fp_component_enableinput enableinput;
 	psy_ui_fp_component_preventinput preventinput;
@@ -170,6 +152,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_focuslost;
 	psy_Signal signal_focus;	
 	psy_Signal signal_preferredsizechanged;
+	psy_Signal signal_scrollrangechanged;
 	psy_ui_AlignType align;
 	psy_ui_JustifyType justify;
 	int alignexpandmode;
@@ -195,6 +178,8 @@ typedef struct psy_ui_Component {
 	psy_ui_Size minsize;
 	psy_ui_Size maxsize;
 	psy_ui_IntPoint scroll;	
+	psy_ui_IntPoint vscrollrange;
+	psy_ui_IntPoint hscrollrange;
 	psy_ui_Overflow overflow;
 	int preventpreferredsizeatalign;	
 } psy_ui_Component;
@@ -223,17 +208,38 @@ void psy_ui_component_showstate(psy_ui_Component*, int cmd);
 void psy_ui_component_showhorizontalscrollbar(psy_ui_Component*);
 void psy_ui_component_hidehorizontalscrollbar(psy_ui_Component*);
 void psy_ui_component_sethorizontalscrollrange(psy_ui_Component*, int min, int max);
-void psy_ui_component_horizontalscrollrange(psy_ui_Component*, int* scrollmin,
-	int* scrollmax);
+
+INLINE void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* scrollmin,
+	int* scrollmax)
+{
+	*scrollmin = self->hscrollrange.x;
+	*scrollmax = self->hscrollrange.y;
+}
+
 void psy_ui_component_showverticalscrollbar(psy_ui_Component*);
 void psy_ui_component_hideverticalscrollbar(psy_ui_Component*);
-void psy_ui_component_setverticalscrollrange(psy_ui_Component*, int min, int max);
-void psy_ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
-	int* scrollmax);
-int psy_ui_component_verticalscrollposition(psy_ui_Component* self);
-void psy_ui_component_setverticalscrollposition(psy_ui_Component*, int position);
-void psy_ui_component_sethorizontalscrollposition(psy_ui_Component*, int position);
-int psy_ui_component_horizontalscrollposition(psy_ui_Component*);
+
+INLINE void psy_ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int max)
+{
+	self->vscrollrange.x = min;
+	self->vscrollrange.y = max;
+	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_VERTICAL);
+}
+
+INLINE void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int max)
+{
+	self->hscrollrange.x = min;
+	self->hscrollrange.y = max;
+	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_HORIZONTAL);
+}
+
+INLINE void psy_ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
+	int* scrollmax)
+{
+	*scrollmin = self->vscrollrange.x;
+	*scrollmax = self->vscrollrange.y;
+}
+
 void psy_ui_component_scrollstep(psy_ui_Component*, intptr_t stepx, intptr_t stepy);
 void psy_ui_component_move(psy_ui_Component*, psy_ui_Point topleft);
 void psy_ui_component_resize(psy_ui_Component*, psy_ui_Size);
@@ -313,20 +319,6 @@ typedef void (*psy_ui_fp_componentimp_dev_invalidate)(struct psy_ui_ComponentImp
 typedef void (*psy_ui_fp_componentimp_dev_invalidaterect)(struct psy_ui_ComponentImp*, const psy_ui_Rectangle*);
 typedef void (*psy_ui_fp_componentimp_dev_update)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setfont)(struct psy_ui_ComponentImp*, psy_ui_Font*);
-typedef void (*psy_ui_fp_componentimp_dev_showhorizontalscrollbar)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_hidehorizontalscrollbar)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_sethorizontalscrollrange)(struct psy_ui_ComponentImp*, int min, int max);
-typedef void (*psy_ui_fp_componentimp_dev_horizontalscrollrange)(struct psy_ui_ComponentImp*, int* scrollmin,
-	int* scrollmax);
-typedef int (*psy_ui_fp_componentimp_dev_horizontalscrollposition)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_sethorizontalscrollposition)(struct psy_ui_ComponentImp*, int position);
-typedef void (*psy_ui_fp_componentimp_dev_showverticalscrollbar)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_hideverticalscrollbar)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_setverticalscrollrange)(struct psy_ui_ComponentImp*, int min, int max);
-typedef void (*psy_ui_fp_componentimp_dev_verticalscrollrange)(struct psy_ui_ComponentImp*, int* scrollmin,
-	int* scrollmax);
-typedef int (*psy_ui_fp_componentimp_dev_verticalscrollposition)(struct psy_ui_ComponentImp*);
-typedef void (*psy_ui_fp_componentimp_dev_setverticalscrollposition)(struct psy_ui_ComponentImp*, int position);
 typedef psy_List* (*psy_ui_fp_componentimp_dev_children)(struct psy_ui_ComponentImp*, int recursive);
 typedef void (*psy_ui_fp_componentimp_dev_enableinput)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_preventinput)(struct psy_ui_ComponentImp*);
@@ -369,18 +361,6 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_invalidaterect dev_invalidaterect;
 	psy_ui_fp_componentimp_dev_update dev_update;
 	psy_ui_fp_componentimp_dev_setfont dev_setfont;
-	psy_ui_fp_componentimp_dev_showhorizontalscrollbar dev_showhorizontalscrollbar;
-	psy_ui_fp_componentimp_dev_hidehorizontalscrollbar dev_hidehorizontalscrollbar;
-	psy_ui_fp_componentimp_dev_sethorizontalscrollrange dev_sethorizontalscrollrange;
-	psy_ui_fp_componentimp_dev_horizontalscrollposition dev_horizontalscrollposition;
-	psy_ui_fp_componentimp_dev_sethorizontalscrollposition dev_sethorizontalscrollposition;
-	psy_ui_fp_componentimp_dev_horizontalscrollrange dev_horizontalscrollrange;
-	psy_ui_fp_componentimp_dev_showverticalscrollbar dev_showverticalscrollbar;
-	psy_ui_fp_componentimp_dev_hideverticalscrollbar dev_hideverticalscrollbar;
-	psy_ui_fp_componentimp_dev_setverticalscrollrange dev_setverticalscrollrange;
-	psy_ui_fp_componentimp_dev_verticalscrollrange dev_verticalscrollrange;
-	psy_ui_fp_componentimp_dev_verticalscrollposition dev_verticalscrollposition;
-	psy_ui_fp_componentimp_dev_setverticalscrollposition dev_setverticalscrollposition;
 	psy_ui_fp_componentimp_dev_children dev_children;
 	psy_ui_fp_componentimp_dev_enableinput dev_enableinput;
 	psy_ui_fp_componentimp_dev_preventinput dev_preventinput;
@@ -543,9 +523,9 @@ INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow
 		if (overflow == psy_ui_OVERFLOW_HIDDEN) {
 			psy_ui_component_sethorizontalscrollrange(self, 0, 0);
 			psy_ui_component_setverticalscrollrange(self, 0, 0);
-		} else {			
+		} else {
 			psy_ui_component_updateoverflow(self);
-		}
+		}		
 	}
 }
 

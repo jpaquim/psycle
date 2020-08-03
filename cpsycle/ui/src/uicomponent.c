@@ -167,20 +167,6 @@ static void setposition(psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 static psy_ui_Size framesize(psy_ui_Component*);
 static void scrollto(psy_ui_Component*, intptr_t dx, intptr_t dy);
 static void setfont(psy_ui_Component*, psy_ui_Font*);
-static void showhorizontalscrollbar(psy_ui_Component*);
-static void hidehorizontalscrollbar(psy_ui_Component*);
-static void sethorizontalscrollrange(psy_ui_Component*, int min, int max);
-static void horizontalscrollrange(psy_ui_Component*, int* scrollmin,
-	int* scrollmax);
-static int horizontalscrollposition(psy_ui_Component*);
-static void sethorizontalscrollposition(psy_ui_Component*, int position);
-static void showverticalscrollbar(psy_ui_Component*);
-static void hideverticalscrollbar(psy_ui_Component*);
-static void setverticalscrollrange(psy_ui_Component*, int min, int max);
-static void verticalscrollrange(psy_ui_Component*, int* scrollmin,
-	int* scrollmax);
-static int verticalscrollposition(psy_ui_Component*);
-static void setverticalscrollposition(psy_ui_Component*, int position);
 static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
@@ -205,7 +191,7 @@ static int vtable_initialized = 0;
 
 static void vtable_init(void)
 {
-	if (!vtable_initialized) {		
+	if (!vtable_initialized) {
 		vtable.dispose = dispose;
 		vtable.destroy = destroy;
 		vtable.show = show;
@@ -218,19 +204,7 @@ static void vtable_init(void)
 		vtable.setposition = setposition;		
 		vtable.framesize = framesize;
 		vtable.scrollto = scrollto;		
-		vtable.setfont = setfont;
-		vtable.showhorizontalscrollbar = showhorizontalscrollbar;
-		vtable.hidehorizontalscrollbar = hidehorizontalscrollbar;
-		vtable.sethorizontalscrollrange = sethorizontalscrollrange;
-		vtable.horizontalscrollrange = horizontalscrollrange;
-		vtable.horizontalscrollposition = horizontalscrollposition;
-		vtable.sethorizontalscrollposition = sethorizontalscrollposition;
-		vtable.showverticalscrollbar = showverticalscrollbar;
-		vtable.hideverticalscrollbar = hideverticalscrollbar;
-		vtable.setverticalscrollrange = setverticalscrollrange;
-		vtable.verticalscrollrange = verticalscrollrange;
-		vtable.verticalscrollposition = verticalscrollposition;
-		vtable.setverticalscrollposition = setverticalscrollposition;
+		vtable.setfont = setfont;		
 		vtable.children = children;
 		// events
 		vtable.ondraw = 0;
@@ -396,68 +370,6 @@ void setfont(psy_ui_Component* self, psy_ui_Font* font)
 	}
 }
 
-void showhorizontalscrollbar(psy_ui_Component* self)
-{
-	self->imp->vtable->dev_showhorizontalscrollbar(self->imp);
-}
-
- void hidehorizontalscrollbar(psy_ui_Component* self)
-{
-	 self->imp->vtable->dev_hidehorizontalscrollbar(self->imp);
-}
-
-void sethorizontalscrollrange(psy_ui_Component* self, int min, int max)
-{
-	 self->imp->vtable->dev_sethorizontalscrollrange(self->imp, min, max);
-}
-
-void horizontalscrollrange(struct psy_ui_Component* self, int* scrollmin,
-	int* scrollmax)
-{
-	self->imp->vtable->dev_horizontalscrollrange(self->imp, scrollmin, scrollmax);
-}
-
-int horizontalscrollposition(psy_ui_Component* self)
-{
-	return self->imp->vtable->dev_horizontalscrollposition(self->imp);
-}
-
-void sethorizontalscrollposition(psy_ui_Component* self, int position)
-{
-	 self->imp->vtable->dev_sethorizontalscrollposition(self->imp, position);
-}
-
-void showverticalscrollbar(psy_ui_Component* self)
-{
-	self->imp->vtable->dev_showverticalscrollbar(self->imp);
-}
-
-void hideverticalscrollbar(psy_ui_Component* self)
-{
-	self->imp->vtable->dev_hideverticalscrollbar(self->imp);
-}
-
-void setverticalscrollrange(psy_ui_Component* self, int min, int max)
-{
-	self->imp->vtable->dev_setverticalscrollrange(self->imp, min, max);
-}
-
-void verticalscrollrange(struct psy_ui_Component* self, int* scrollmin,
-	int* scrollmax)
-{
-	self->imp->vtable->dev_verticalscrollrange(self->imp, scrollmin, scrollmax);
-}
-
-int verticalscrollposition(psy_ui_Component* self)
-{
-	return self->imp->vtable->dev_verticalscrollposition(self->imp);
-}
-
-void setverticalscrollposition(psy_ui_Component* self, int position)
-{
-	self->imp->vtable->dev_setverticalscrollposition(self->imp, position);
-}
-
 psy_List* children(psy_ui_Component* self, int recursive)
 {
 	return self->imp->vtable->dev_children(self->imp, recursive);
@@ -492,12 +404,15 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_preferredsizechanged);
 	psy_signal_init(&self->signal_command);
 	psy_signal_init(&self->signal_selectsection);
+	psy_signal_init(&self->signal_scrollrangechanged);
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
 	self->scrollstepx = 100;
 	self->scrollstepy = 12;
-	self->overflow = psy_ui_OVERFLOW_HIDDEN;
+	self->overflow = psy_ui_OVERFLOW_HIDDEN;	
+	self->vscrollrange.x = 0;
+	self->vscrollrange.y = 0;
 	self->preventdefault = 0;
 	self->preventpreferredsize = 0;
 	self->preventpreferredsizeatalign = FALSE;
@@ -564,6 +479,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_command);
 	psy_signal_dispose(&self->signal_preferredsizechanged);
 	psy_signal_dispose(&self->signal_selectsection);
+	psy_signal_dispose(&self->signal_scrollrangechanged);
 }
 
 void psy_ui_component_destroy(psy_ui_Component* self)
@@ -581,68 +497,6 @@ void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_
 void psy_ui_component_showstate(psy_ui_Component* self, int state)
 {
 	self->vtable->showstate(self, state);	
-}
-
-void psy_ui_component_showhorizontalscrollbar(psy_ui_Component* self)
-{
-	self->vtable->showhorizontalscrollbar(self);
-}
-
-void psy_ui_component_hidehorizontalscrollbar(psy_ui_Component* self)
-{
-	self->vtable->hidehorizontalscrollbar(self);
-}
-
-void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int max)
-{
-	self->vtable->sethorizontalscrollrange(self, min, max);
-}
-
-void psy_ui_component_showverticalscrollbar(psy_ui_Component* self)
-{
-	self->vtable->showverticalscrollbar(self);
-}
-
-void psy_ui_component_hideverticalscrollbar(psy_ui_Component* self)
-{
-	self->vtable->hideverticalscrollbar(self);
-}
-
-void psy_ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int max)
-{
-	self->vtable->setverticalscrollrange(self, min, max);
-}
-
-int psy_ui_component_verticalscrollposition(psy_ui_Component* self)
-{
-	return self->vtable->verticalscrollposition(self);
-}
-
-void psy_ui_component_setverticalscrollposition(psy_ui_Component* self, int position)
-{
-	self->vtable->setverticalscrollposition(self, position);
-}
-
-int psy_ui_component_horizontalscrollposition(psy_ui_Component* self)
-{	
-	return self->vtable->horizontalscrollposition(self);
-}
-
-void psy_ui_component_sethorizontalscrollposition(psy_ui_Component* self, int position)
-{
-	self->vtable->sethorizontalscrollposition(self, position);
-}
-
-void psy_ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,
-	int* scrollmax)
-{
-	self->vtable->verticalscrollrange(self, scrollmin, scrollmax);
-}
-
-void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* scrollmin,
-	int* scrollmax)
-{
-	self->vtable->horizontalscrollrange(self, scrollmin, scrollmax);
 }
 
 void psy_ui_component_move(psy_ui_Component* self, psy_ui_Point topleft)
@@ -1000,19 +854,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_invalidate = dev_invalidate;
 		imp_vtable.dev_invalidaterect = dev_invalidaterect;
 		imp_vtable.dev_update = dev_update;
-		imp_vtable.dev_setfont = dev_setfont;
-		imp_vtable.dev_showhorizontalscrollbar = dev_showhorizontalscrollbar;
-		imp_vtable.dev_hidehorizontalscrollbar = dev_hidehorizontalscrollbar;
-		imp_vtable.dev_sethorizontalscrollrange = dev_sethorizontalscrollrange;
-		imp_vtable.dev_horizontalscrollrange = dev_horizontalscrollrange;
-		imp_vtable.dev_horizontalscrollposition = dev_horizontalscrollposition;
-		imp_vtable.dev_sethorizontalscrollposition = dev_sethorizontalscrollposition;
-		imp_vtable.dev_showverticalscrollbar = dev_showverticalscrollbar;
-		imp_vtable.dev_hideverticalscrollbar = dev_hideverticalscrollbar;
-		imp_vtable.dev_setverticalscrollrange = dev_setverticalscrollrange;
-		imp_vtable.dev_verticalscrollrange = dev_verticalscrollrange;
-		imp_vtable.dev_verticalscrollposition = dev_verticalscrollposition;
-		imp_vtable.dev_setverticalscrollposition = dev_setverticalscrollposition;
+		imp_vtable.dev_setfont = dev_setfont;		
 		imp_vtable.dev_children = dev_children;
 		imp_vtable.dev_enableinput = dev_enableinput;
 		imp_vtable.dev_preventinput = dev_preventinput;
@@ -1021,12 +863,12 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_stoptimer = dev_stoptimer;
 		imp_vtable.dev_seticonressource = dev_seticonressource;
 		imp_vtable.dev_textmetric = dev_textmetric;
-imp_vtable.dev_textsize = dev_textsize;
-imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
-imp_vtable.dev_settitle = dev_settitle;
-imp_vtable.dev_setfocus = dev_setfocus;
-imp_vtable.dev_hasfocus = dev_hasfocus;
-imp_vtable.dev_platform = dev_platform;
+		imp_vtable.dev_textsize = dev_textsize;
+		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
+		imp_vtable.dev_settitle = dev_settitle;
+		imp_vtable.dev_setfocus = dev_setfocus;
+		imp_vtable.dev_hasfocus = dev_hasfocus;
+		imp_vtable.dev_platform = dev_platform;
 	}
 }
 
@@ -1076,10 +918,6 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
 	oldscrollx = self->scroll.x;
 	self->scroll.x = left;
 	if (self->scroll.x != oldscrollx) {		
-		if ((self->overflow & psy_ui_OVERFLOW_HSCROLL) == psy_ui_OVERFLOW_HSCROLL) {
-			psy_ui_component_sethorizontalscrollposition(self,
-				self->scroll.x / self->scrollstepx);
-		}
 		if (self->signal_scroll.slots) {
 			psy_signal_emit(&self->signal_scroll, self, 0);
 		}
@@ -1094,11 +932,7 @@ void psy_ui_component_setscrolltop(psy_ui_Component* self, int top)
 	
 	oldscrolly = self->scroll.y;
 	self->scroll.y = top;
-	if (self->scroll.y != oldscrolly) {
-		if ((self->overflow & psy_ui_OVERFLOW_VSCROLL) == psy_ui_OVERFLOW_VSCROLL) {
-			psy_ui_component_setverticalscrollposition(self,
-				self->scroll.y / self->scrollstepy);
-		}
+	if (self->scroll.y != oldscrolly) {		
 		if (self->signal_scroll.slots) {			
 			psy_signal_emit(&self->signal_scroll, self, 0);
 		}

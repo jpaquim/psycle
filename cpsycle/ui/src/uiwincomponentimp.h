@@ -27,11 +27,7 @@ typedef struct psy_ui_win_ComponentImp {
 	HWND hwnd;
 	uintptr_t winid;
 	HBRUSH background;
-	winproc wndproc;
-	int vscrollmin;
-	int vscrollmax;
-	int hscrollmin;
-	int hscrollmax;
+	winproc wndproc;	
 	int preventwmchar;
 	psy_ui_Size sizecache;
 	bool sizecachevalid;

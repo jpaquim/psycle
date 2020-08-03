@@ -9,6 +9,7 @@
 #include <uibutton.h>
 #include <uilabel.h>
 #include <uicheckbox.h>
+#include <uiscroller.h>
 #include <plugincatcher.h>
 #include <hashtbl.h>
 
@@ -69,6 +70,8 @@ typedef struct {
    NewMachineDetail detail;
    psy_Signal signal_selected;
    MachineViewSkin* skin;
+   psy_ui_Scroller scroller_fav;
+   psy_ui_Scroller scroller_main;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
