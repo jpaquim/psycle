@@ -1,6 +1,6 @@
 CC = gcc
-inc = -I../../container/src -I../../../diversalis/src -I /usr/include/freetype2
-cflags = -Wfatal-errors -g
+inc = -I/usr/local/include -I../../container/src -I../../../diversalis/src -I/usr/include/freetype2
+cflags = -Wfatal-errors
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
@@ -12,4 +12,4 @@ libpsyui.a: $(obj)
 
 .PHONY: clean	
 clean:
-	rm -f $(obj) libpsyui.a
+	rm -f $(obj) psyui.a

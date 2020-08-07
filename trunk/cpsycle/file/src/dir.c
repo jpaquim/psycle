@@ -7,6 +7,7 @@
 
 #include "dir.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -140,6 +141,7 @@ void psy_path_extract_path(psy_Path* self)
 #if defined DIVERSALIS__COMPILER__GNU || defined DIVERSALIS__OS__POSIX
 
 #include <unistd.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>

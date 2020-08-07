@@ -6,8 +6,8 @@ wave controller, sampulse and sampler ps1 use, and avoiding ui dependencies in
 the audio core. A command line player makes use of this separation. The player
 will serve as first step to make a posix version available. The ui is reduced
 from mfc to win32 and wrapped behind an own layer. In a next step this layer
-will be used to add xt motif. The version is written in c with c++ parts, in
-which some plugin and driver apis are written in.
+will be used to add a x11 implementation. The version is written in c with c++
+parts, in which some plugin and driver apis are written in.
 
 Structure of the host
 
@@ -15,7 +15,10 @@ audio           machines, patterns, instruments, sequence, player,
                 song import/export, library load, ...
 host            graphical psycle front end
 player          textmode psycle front end
-ui              bridged win32 calls, setup for x/motif (placeholder)
+ui              bridged win32 calls, setup for x11 (placeholder, just a few
+                tests)
+uitest			a test program for X11 (placeholder, just a few
+                tests)
 audiodrivers	win: asio, mme, mmemidi, directx, wasapi
                 linux: alsa (placeholder)
 
@@ -46,15 +49,13 @@ in Project Linker settings for the host project. Set the Output File
 Target to the project standard. Install on older platforms the DirectX
 SDK and add the include/lib sdk directories (Tools/Options/Directories).
 Copy the appropiate vc runtime and universalis dlls from an existing psycle
-installation, copy bwltbl.dll from the existing psycle plugin path,
-to the output dir(cpsycle/debug and cpsycle/release).
+installation to the output dir(cpsycle/debug and cpsycle/release).
 Only in VC6 set the working dir (host project settings) to
 your-path\cpsycle\debug or your-path\cpsycle\release) that the host can
 find the audio driver dlls.
 
 List of runtime files to be copied:
 
-bwltbl.dll, (from plugin path)
 boost_chrono_your_version.dll, (from bin path)
 boost_date_time_your_version.dll, (from bin path)
 boost_filesystem_your_version.dll, (from bin path)
