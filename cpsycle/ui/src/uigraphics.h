@@ -222,7 +222,7 @@ INLINE void psy_ui_curveto(psy_ui_Graphics* self, psy_ui_IntPoint control_p1,
 	self->vtable->curveto(self, control_p1, control_p2, p);
 }
 
-INLINE  psy_ui_drawarc(psy_ui_Graphics* self,
+INLINE void psy_ui_drawarc(psy_ui_Graphics* self,
 	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
 {
 	self->vtable->drawarc(self, x1, y1, x2, y2, x3, y3, x4, y4);

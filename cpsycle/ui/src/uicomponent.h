@@ -205,9 +205,6 @@ INLINE void psy_ui_component_hide(psy_ui_Component* self)
 }
 
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
-void psy_ui_component_showhorizontalscrollbar(psy_ui_Component*);
-void psy_ui_component_hidehorizontalscrollbar(psy_ui_Component*);
-void psy_ui_component_sethorizontalscrollrange(psy_ui_Component*, int min, int max);
 
 INLINE void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* scrollmin,
 	int* scrollmax)
@@ -324,7 +321,7 @@ typedef void (*psy_ui_fp_componentimp_dev_enableinput)(struct psy_ui_ComponentIm
 typedef void (*psy_ui_fp_componentimp_dev_preventinput)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setcursor)(struct psy_ui_ComponentImp*, psy_ui_CursorStyle);
 typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp*, uintptr_t id,
-	unsigned int interval);
+	uintptr_t interval);
 typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
 typedef psy_ui_TextMetric (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*, psy_ui_Font* font);

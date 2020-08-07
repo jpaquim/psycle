@@ -343,11 +343,11 @@ void psy_ui_editor_clear(psy_ui_Editor* self)
 {
 
 }
-void psy_ui_editor_setcolor(psy_ui_Editor* self, uint32_t color)
+void psy_ui_editor_setcolor(psy_ui_Editor* self, psy_ui_Color color)
 {
 
 }
-void psy_ui_editor_setbackgroundcolor(psy_ui_Editor* v, uint32_t color)
+void psy_ui_editor_setbackgroundcolor(psy_ui_Editor* v, psy_ui_Color color)
 {
 
 }
