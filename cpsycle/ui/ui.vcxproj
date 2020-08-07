@@ -166,22 +166,6 @@
     <ClCompile Include="src\uiwinlistboximp.c" />
     <ClCompile Include="src\uiwinopendialogimp.c" />
     <ClCompile Include="src\uiwinsavedialogimp.c" />
-    <ClCompile Include="src\uixtapp.c" />
-    <ClCompile Include="src\uixtbitmapimp.c" />
-    <ClCompile Include="src\uixtcheckboximp.c" />
-    <ClCompile Include="src\uixtcolordialogimp.c" />
-    <ClCompile Include="src\uixtcomboboximp.c" />
-    <ClCompile Include="src\uixtcomponentimp.c" />
-    <ClCompile Include="src\uixteditimp.c" />
-    <ClCompile Include="src\uixtfolderdialogimp.c" />
-    <ClCompile Include="src\uixtfontdialogimp.c" />
-    <ClCompile Include="src\uixtfontimp.c" />
-    <ClCompile Include="src\uixtgraphicsimp.c" />
-    <ClCompile Include="src\uixtimpfactory.c" />
-    <ClCompile Include="src\uixtlabelimp.c" />
-    <ClCompile Include="src\uixtlistboximp.c" />
-    <ClCompile Include="src\uixtopendialogimp.c" />
-    <ClCompile Include="src\uixtsavedialogimp.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uialigner.h" />
