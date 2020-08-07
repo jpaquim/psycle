@@ -170,54 +170,6 @@
     <ClCompile Include="src\uiwinsavedialogimp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\uixtapp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtbitmapimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtcheckboximp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtcolordialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtcomboboximp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtcomponentimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixteditimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtfolderdialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtfontdialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtfontimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtgraphicsimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtimpfactory.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtlabelimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtlistboximp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtopendialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\uixtsavedialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uiscrollbar.c">
       <Filter>Source Files</Filter>
     </ClCompile>
