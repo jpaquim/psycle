@@ -368,7 +368,7 @@ psy_audio_IntMachineParam* psy_audio_intmachineparam_alloc(void)
 
 psy_audio_IntMachineParam* psy_audio_intmachineparam_allocinit(
 	const char* name, const char* label, int type, int32_t* data,
-	int minval, int maxval)
+	intptr_t minval, intptr_t maxval)
 {
 	psy_audio_IntMachineParam* rv;
 
@@ -512,7 +512,7 @@ psy_audio_FloatMachineParam* psy_audio_floatmachineparam_alloc(void)
 
 psy_audio_FloatMachineParam* psy_audio_floatmachineparam_allocinit(
 	const char* name, const char* label, int type, float* data,
-	int minval, int maxval)
+	intptr_t minval, intptr_t maxval)
 {
 	psy_audio_FloatMachineParam* rv;
 
@@ -974,7 +974,7 @@ psy_audio_GainMachineParam* psy_audio_gainmachineparam_alloc(void)
 
 psy_audio_GainMachineParam* psy_audio_gainmachineparam_allocinit(
 	const char* name, const char* label, int type, float* data,
-	int minval, int maxval)
+	intptr_t minval, intptr_t maxval)
 {
 	psy_audio_GainMachineParam* rv;
 

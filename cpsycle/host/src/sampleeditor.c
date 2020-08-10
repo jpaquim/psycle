@@ -1106,8 +1106,8 @@ void sampleeditor_processlua(SampleEditor* self, uintptr_t channel, uintptr_t fr
 	}
 	lua_getglobal(processor.L, "work");
 	if (!lua_isnil(processor.L, -1)) { 
-		size_t len;
-		size_t i;
+		lua_Unsigned len;
+		lua_Unsigned i;
 		int status = lua_pcall(processor.L, 0, LUA_MULTRET, 0);
 
 		if (status) {
@@ -1119,7 +1119,7 @@ void sampleeditor_processlua(SampleEditor* self, uintptr_t channel, uintptr_t fr
 		}
 		len = lua_rawlen(processor.L, -1);		
 		for (i = 1; i <= len; ++i) {
-			uintptr_t dst;
+			lua_Unsigned dst;
 			lua_rawgeti(processor.L, -1, i);
 
 			dst = i + framestart - 1;

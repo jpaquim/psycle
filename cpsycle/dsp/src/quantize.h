@@ -42,7 +42,7 @@ INLINE int32_t psy_dsp_rint(float flt)
     }
     return i;
 #else
-    return static_cast<int32_t>(flt);
+    return (int32_t)(flt);
 #endif
 }
 

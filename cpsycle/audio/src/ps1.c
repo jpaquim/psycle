@@ -228,8 +228,8 @@ void psy_audio_ps1sampler_init(psy_audio_PS1Sampler* self,
 	psy_audio_ps1sampler_initparameters(self);	
 	psy_audio_samplerticktimer_init(&self->ticktimer,
 		self,	// callback context (sampler)
-		psy_audio_ps1sampler_ontimertick,
-		psy_audio_ps1sampler_ontimerwork);
+		(fp_samplerticktimer_ontick)psy_audio_ps1sampler_ontimertick,
+		(fp_samplerticktimer_onwork)psy_audio_ps1sampler_ontimerwork);
 }
 
 // psycle-mfc: Sampler::~Sampler()

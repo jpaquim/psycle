@@ -21,6 +21,8 @@ extern "C" {
 // typedef LRESULT(CALLBACK* winproc)(HWND hwnd, UINT message, WPARAM wParam,
 //	LPARAM lParam);
 
+struct psy_ui_x11_ComponentImp;
+
 typedef struct psy_ui_x11_ComponentImp {
 	psy_ui_ComponentImp imp;
 	struct psy_ui_Component* component;
@@ -29,7 +31,13 @@ typedef struct psy_ui_x11_ComponentImp {
 	uintptr_t winid;
 	psy_ui_Size sizecache;
 	bool sizecachevalid;
+	psy_ui_TextMetric tm;
+	bool tmcachevalid;
 	psy_ui_Color backgroundcolor;
+	bool mapped;
+	psy_ui_Graphics g;
+	psy_List* children_nonrec_cache;
+	struct psy_ui_x11_ComponentImp* parent;
 //	HBRUSH background;
 //	winproc wndproc;
 } psy_ui_x11_ComponentImp;

@@ -169,13 +169,13 @@ static void psy_audio_samplervoice_performretrig(psy_audio_SamplerVoice*);
 
 // implementation
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
-	psy_audio_Sampler* sampler,
-	psy_audio_Samples* samples,
-	psy_audio_Instrument* instrument,
+	struct psy_audio_Sampler* sampler,
+	struct psy_audio_Samples* samples,
+	struct psy_audio_Instrument* instrument,
 	psy_audio_SamplerChannel* channel,
 	uintptr_t channelnum,
 	uintptr_t samplerate,
-	int quality,
+	ResamplerType quality,
 	int maxvolume) 
 {		
 	self->sampler = sampler;
@@ -1032,7 +1032,7 @@ void psy_audio_samplervoice_performfx(psy_audio_SamplerVoice* self)
 	psy_List* p;
 
 	for (p = self->effects; p != NULL; psy_list_next(&p)) {
-		int effect = (int)psy_list_entry(p);
+		int effect = (int)(intptr_t)psy_list_entry(p);
 
 		switch (effect) {
 			case SAMPLER_EFFECT_VOLUMESLIDE:

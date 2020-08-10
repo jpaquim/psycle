@@ -11,43 +11,45 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../detail/portable.h"
+
 #ifndef NDEBUG
 #include "../../detail/trace.h"
 #endif
 
 #define REFILLBUFFERSIZE 64 * 3
 
-static INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_looptype(psy_audio_SampleIterator* self)
+INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_looptype(psy_audio_SampleIterator* self)
 {
 	return self->sample->loop.type;
 }
 
-static INLINE uint32_t psy_audio_sampleiterator_loopstart(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_loopstart(psy_audio_SampleIterator* self)
 {
 	return self->sample->loop.start;
 }
 
-static INLINE uint32_t psy_audio_sampleiterator_loopend(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_loopend(psy_audio_SampleIterator* self)
 {
 	return self->sample->loop.end;
 }
 
-static INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_sustainlooptype(psy_audio_SampleIterator* self)
+INLINE psy_audio_SampleLoopType psy_audio_sampleiterator_sustainlooptype(psy_audio_SampleIterator* self)
 {
 	return self->sample->sustainloop.type;
 }
 
-static INLINE uint32_t psy_audio_sampleiterator_sustainloopstart(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_sustainloopstart(psy_audio_SampleIterator* self)
 {
 	return self->sample->sustainloop.start;
 }
 
-static INLINE uint32_t psy_audio_sampleiterator_sustainloopend(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_sustainloopend(psy_audio_SampleIterator* self)
 {
 	return self->sample->sustainloop.end;
 }
 
-static INLINE uint32_t psy_audio_sampleiterator_length(psy_audio_SampleIterator* self)
+INLINE uint32_t psy_audio_sampleiterator_length(psy_audio_SampleIterator* self)
 {
 	return self->sample->numframes;
 }

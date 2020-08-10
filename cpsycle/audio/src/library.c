@@ -227,6 +227,14 @@ void psy_library_dispose(psy_Library* self)
 	}
 }
 
+void psy_library_setenv(psy_Library* self, const char* path, const char* root)
+{
+}
+
+void psy_library_restoreenv(psy_Library* self)
+{
+}
+
 #elif defined(DIVERSALIS__OS__LINUX)
 
 #include <dlfcn.h>
@@ -243,7 +251,9 @@ void psy_library_load(psy_Library* self, const char* path)
 	self->module = dlopen(path, RTLD_LAZY /*RTLD_NOW*/);
 	
 	if (self->module == 0) {
-		self->err = dlerror();
+		self->err = (dlerror())
+			? 1
+			: 0;
         perror("library load ");
 	}	
 }
@@ -265,6 +275,14 @@ void psy_library_dispose(psy_Library* self)
 		dlclose(self->module);
 		self->module = 0;
 	}
-}			
+}		
+
+void psy_library_setenv(psy_Library* self, const char* path, const char* root)
+{
+}
+
+void psy_library_restoreenv(psy_Library* self)
+{
+}
 
 #endif

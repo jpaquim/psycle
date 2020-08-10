@@ -67,7 +67,8 @@ typedef struct psy_audio_Instrument {
 	char* name;
 	bool loop;
 	uintptr_t lines;
-	/// Action to take on the playing voice when any new note comes in the same channel.
+	/// Action to take on the playing voice when any new note comes in the same
+	/// channel.
 	psy_audio_NewNoteAction nna;
 	/// [0..1.0f] Global volume affecting all samples of the instrument.
 	psy_dsp_amp_t globalvolume;
@@ -96,10 +97,11 @@ void psy_audio_instrument_setname(psy_audio_Instrument*, const char* name);
 void psy_audio_instrument_setindex(psy_audio_Instrument*, uintptr_t index);
 uintptr_t psy_audio_instrument_index(psy_audio_Instrument*);
 const char* psy_audio_instrument_name(psy_audio_Instrument*);
-void psy_audio_instrument_setnna(psy_audio_Instrument*, psy_audio_NewNoteAction nna);
+void psy_audio_instrument_setnna(psy_audio_Instrument*,
+	psy_audio_NewNoteAction);
 psy_audio_NewNoteAction psy_audio_instrument_nna(psy_audio_Instrument*);
-psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument*, uintptr_t key,
-	uintptr_t velocity, double frequency);
+psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument*,
+	uintptr_t key, uintptr_t velocity, double frequency);
 void psy_audio_instrument_clearentries(psy_audio_Instrument*);
 void psy_audio_instrument_addentry(psy_audio_Instrument*,
 	const psy_audio_InstrumentEntry* entry);

@@ -7,7 +7,7 @@
 #include "sequencer.h" // calculate duration
 #include <stdlib.h>
 
-static sequenceentryid = 1;
+static int sequenceentryid = 1;
 
 static void sequenceselection_addeditposition(SequenceSelection*);
 static psy_audio_PatternNode* SequenceTrackIterator_next(SequenceTrackIterator*);

@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../detail/portable.h"
+
 static void kbdbox_makekeyproperties(KbdBox*);
 static void kbdbox_addkeyproperties(KbdBox*, psy_Properties* section,
 	uintptr_t keycode, const char* label, int size, int cr);
@@ -109,7 +111,7 @@ void kbdbox_initfont(KbdBox* self)
 	self->corner.height = psy_ui_value_makepx(5);
 	self->descident = tm.tmAveCharWidth * 6;
 	self->ident = (int)(tm.tmHeight * 0.3);
-	self->keyheight = (tm.tmHeight * 3.5);
+	self->keyheight = (int)(tm.tmHeight * 3.5);
 	self->keywidth = tm.tmAveCharWidth * 16;
 }
 

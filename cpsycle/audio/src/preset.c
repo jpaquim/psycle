@@ -63,7 +63,7 @@ const char* psy_audio_preset_name(psy_audio_Preset* self)
 }
 
 void psy_audio_preset_setvalue(psy_audio_Preset* self, uintptr_t param,
-	int value)
+	intptr_t value)
 {
 	psy_table_insert(&self->parameters, param, (void*)(uintptr_t)value);
 }

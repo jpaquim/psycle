@@ -11,7 +11,7 @@
 #include "uiwinimpfactory.h"
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 #include <curses.h>
-#include "uicursesimpfactory.h"
+#include "uicursesimpfactory.h"o
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
 #include "uix11app.h"
 #include "uix11impfactory.h"
@@ -29,7 +29,7 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 	self->main = 0;
 	psy_signal_init(&self->signal_dispose);
 	ui_app_initplatform(self, instance);
-	psy_ui_defaults_init(&self->defaults);	
+	psy_ui_defaults_init(&self->defaults);
 }
 
 void ui_app_initplatform(psy_ui_App* self, uintptr_t instance)
@@ -37,15 +37,18 @@ void ui_app_initplatform(psy_ui_App* self, uintptr_t instance)
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	self->platform = (psy_ui_WinApp*) malloc(sizeof(psy_ui_WinApp));
 	psy_ui_winapp_init(app.platform, (HINSTANCE) instance);
-	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_win_impfactory_allocinit();
+	self->imp_factory = (psy_ui_ImpFactory*)
+		psy_ui_win_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_CURSES
 	initscr();
 	refresh();
-	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_curses_impfactory_allocinit();
+	self->imp_factory = (psy_ui_ImpFactory*)
+		psy_ui_curses_impfactory_allocinit();
 #elif PSYCLE_USE_TK == PSYCLE_TK_XT
-	self->platform = (psy_ui_X11App*) malloc(sizeof(psy_ui_X11App));
+	self->platform = (psy_ui_X11App*)malloc(sizeof(psy_ui_X11App));
 	psy_ui_x11app_init(app.platform, 0);
-	self->imp_factory = (psy_ui_ImpFactory*) psy_ui_x11_impfactory_allocinit();
+	self->imp_factory = (psy_ui_ImpFactory*)
+		psy_ui_x11_impfactory_allocinit();
 #else
 	#error "Platform not supported"
 #endif

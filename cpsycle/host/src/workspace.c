@@ -289,10 +289,10 @@ void workspace_initplayer(Workspace* self)
 	psy_audio_player_init(&self->player, self->song,
 		((psy_ui_win_ComponentImp*)(self->mainhandle->imp))->hwnd);
 #else
-	player_init(&self->player, self->song, 0);
+	psy_audio_player_init(&self->player, self->song, 0);
 #endif
 #else
-	player_init(&self->player, self->song, 0);
+	psy_audio_player_init(&self->player, self->song, 0);
 #endif		
 	self->cmds = cmdproperties_create();
 	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
@@ -303,8 +303,10 @@ void workspace_initplayer(Workspace* self)
 
 psy_Properties* workspace_driverconfiguration(Workspace* self)
 {		
-	return psy_properties_find(self->driverconfigurations,
-		workspace_driverkey(self), PSY_PROPERTY_TYP_NONE);
+	return (self->driverconfigurations && workspace_driverkey(self))
+		? psy_properties_find(self->driverconfigurations,
+			workspace_driverkey(self), PSY_PROPERTY_TYP_NONE)
+		: NULL;
 }
 	
 void workspace_configaudio(Workspace* self)

@@ -106,12 +106,12 @@ typedef struct {
 	uint8_t offset;
 	// configuration
 	int maxvolume;
-} psy_audio_SamplerVoice;
+} psy_audio_SamplerVoice; 
 
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
 	struct psy_audio_Sampler* sampler,
-	psy_audio_Samples*,
-	psy_audio_Instrument*,
+	struct psy_audio_Samples*,
+	struct psy_audio_Instrument*,
 	psy_audio_SamplerChannel* channel,
 	uintptr_t channelnum, uintptr_t samplerate,
 	ResamplerType quality,

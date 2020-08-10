@@ -65,7 +65,7 @@ static int driver_open(psy_AudioDriver*);
 static void driver_configure(FileOutDriver*, psy_Properties*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static uintptr_t samplerate(psy_AudioDriver*);
+static unsigned int samplerate(psy_AudioDriver*);
 static void PollerThread(void *fileoutdriver);
 static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
@@ -98,7 +98,7 @@ int fileoutdriver_init(FileOutDriver* self)
 	self->driver.close = driver_close;
 	self->driver.dispose = driver_dispose;
 	self->driver.configure = (psy_audiodriver_fp_configure) driver_configure;
-	self->driver.samplerate = samplerate;
+	self->driver.samplerate = (psy_audiodriver_fp_samplerate) samplerate;
 	psy_signal_init(&self->driver.signal_stop);
 	init_properties(self);
 #if defined(DIVERSALIS__OS__MICROSOFT)	
@@ -174,7 +174,7 @@ void driver_configure(FileOutDriver* self, psy_Properties* config)
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 
-uintptr_t samplerate(psy_AudioDriver* self)
+unsigned int samplerate(psy_AudioDriver* self)
 {
 	return 44100;
 }
@@ -206,7 +206,7 @@ void init_properties(FileOutDriver* self)
 
 void PollerThread(void* driver)
 {	
-	uintptr_t n;	
+	int n;	
 	uintptr_t blocksize = 4096;
 	int hostisplaying = 1;
 

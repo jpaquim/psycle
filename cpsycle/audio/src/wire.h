@@ -27,13 +27,15 @@ typedef struct psy_audio_LegacyWire
 		/// Incoming connections Machine vol
 		float _inputConVol;
 		/// Value to multiply _inputConVol[] with to have a 0.0...1.0 range
-		// The reason of the _wireMultiplier variable is because VSTs output wave data
-		// in the range -1.0 to +1.0, while natives and internals output at -32768.0 to +32768.0
-		// Initially (when the format was made), Psycle did convert this in the "Work" function,
-		// but since it already needs to multiply the output by inputConVol, I decided to remove
-		// that extra conversion and use directly the volume to do so.
+		// The reason of the _wireMultiplier variable is because VSTs output
+		// wave data in the range -1.0 to +1.0, while natives and internals
+		// output at -32768.0 to +32768.0
+		// Initially (when the format was made), Psycle did convert this in the
+		// "Work" function, but since it already needs to multiply the output by
+		// inputConVol, I decided to remove that extra conversion and use
+		// directly the volume to do so.
 		float _wireMultiplier;
-		//Pin mapping (for loading)
+		// Pin mapping (for loading)
 		// Wire::Mapping pinMapping;
 		///\}
 

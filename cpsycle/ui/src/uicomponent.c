@@ -78,8 +78,9 @@ psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setbackgroundcolor(psy_ui_Component* self, psy_ui_Color color)
-{	
+void psy_ui_component_setbackgroundcolor(psy_ui_Component* self,
+	psy_ui_Color color)
+{		
 	psy_ui_color_set(&self->style.backgroundcolor, color);
 }
 
@@ -816,7 +817,12 @@ static void dev_setcursor(psy_ui_ComponentImp* self, psy_ui_CursorStyle cursorst
 static void dev_starttimer(psy_ui_ComponentImp* self, uintptr_t id, uintptr_t interval) { }
 static void dev_stoptimer(psy_ui_ComponentImp* self, uintptr_t id) { }
 static void dev_seticonressource(psy_ui_ComponentImp* self, int ressourceid) { }
-static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self, psy_ui_Font* font) { psy_ui_TextMetric tm; memset(&tm, 0, sizeof(tm));  return tm; }
+static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self)
+{
+	psy_ui_TextMetric tm;
+	memset(&tm, 0, sizeof(tm));
+	return tm;
+}
 static psy_ui_Size dev_textsize(psy_ui_ComponentImp* self, const char* text, psy_ui_Font* font) { psy_ui_Size rv = { 0, 0 }; return rv; }
 static void dev_setbackgroundcolor(psy_ui_ComponentImp* self, psy_ui_Color color) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }

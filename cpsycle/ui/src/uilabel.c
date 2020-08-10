@@ -97,7 +97,10 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	}	
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
-		psy_ui_component_size(psy_ui_label_base(self)), &tm);				
+		psy_ui_component_size(psy_ui_label_base(self)), &tm);
+		
+	//psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
+	//return;
 	if (size.height >= tm.tmHeight * 2) {
 		numcolumnavgchars = (int)(size.width / (int)(tm.tmAveCharWidth));
 	} else {

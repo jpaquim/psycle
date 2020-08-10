@@ -17,6 +17,33 @@ static void psy_ui_scroller_horizontal_onchanged(psy_ui_Scroller*, psy_ui_Scroll
 static void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller*, psy_ui_ScrollBar* sender);
 static void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller*, psy_ui_Component* sender,
 	psy_ui_Orientation);
+static void psy_ui_scroller_connectclient(psy_ui_Scroller*);
+
+/*void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
+	psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_enablealign(&self->component);
+	// horizontal scrollbar
+	psy_ui_scrollbar_init(&self->bottom, &self->component);
+	psy_ui_scrollbar_setorientation(&self->bottom, psy_ui_HORIZONTAL);
+	psy_ui_component_setalign(&self->bottom.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_hide(&self->bottom.component);
+	// vertical scrollbar
+	psy_ui_scrollbar_init(&self->right, &self->component);
+	psy_ui_scrollbar_setorientation(&self->right, psy_ui_VERTICAL);
+	psy_ui_component_setalign(&self->right.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(&self->right.component);
+	// reparent client
+	self->client = client;
+	//psy_ui_component_setparent(client, &self->component);
+	//psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
+	psy_signal_connect(&self->right.signal_changed, self,
+		psy_ui_scroller_vertical_onchanged);
+	psy_signal_connect(&self->bottom.signal_changed, self,
+		psy_ui_scroller_horizontal_onchanged);
+	psy_ui_scrollbar_setscrollrange(&self->right, 0, 100);
+}*/
 
 void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_Component* parent)
@@ -39,15 +66,21 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_component_setalign(client, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->right.signal_changed, self,
 		psy_ui_scroller_vertical_onchanged);
-	psy_signal_connect(&self->client->signal_scrollrangechanged, self,
-		psy_ui_scroller_scrollrangechanged);
 	psy_signal_connect(&self->bottom.signal_changed, self,
 		psy_ui_scroller_horizontal_onchanged);
 	psy_ui_scrollbar_setscrollrange(&self->right, 0, 100);
-	psy_signal_connect(&client->signal_size, self,
+	psy_ui_scroller_connectclient(self);
+}
+
+void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
+{
+	psy_signal_connect(&self->client->signal_scrollrangechanged, self,
+		psy_ui_scroller_scrollrangechanged);		
+	psy_signal_connect(&self->client->signal_size, self,
 		psy_ui_scroller_onsize);
 	psy_signal_connect(&self->client->signal_scroll, self,
-		psy_ui_scroller_onscroll);	
+		psy_ui_scroller_onscroll);		
+	psy_ui_component_setalign(self->client, psy_ui_ALIGN_CLIENT);
 }
 
 void psy_ui_scroller_onsize(psy_ui_Scroller* self, psy_ui_Component* sender, psy_ui_Size* size)

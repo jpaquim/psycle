@@ -38,6 +38,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "../../detail/portable.h"
+
 int **gFFTBitTable = NULL;
 //const int MaxFastBits = 16;
 const int MaxFastBits = 12;

@@ -35,7 +35,7 @@ static void stereophase_drawphase(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawscale(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_drawbars(StereoPhase*, psy_ui_Graphics*);
 static void stereophase_ontimer(StereoPhase*, psy_ui_Component* sender, uintptr_t timerid);
-static void stereophase_onsrcmachineworked(StereoPhase*, psy_audio_Machine*, unsigned int slot, psy_audio_BufferContext*);
+static void stereophase_onsrcmachineworked(StereoPhase*, psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
 static void stereophase_onsongchanged(StereoPhase*, Workspace*, int flag, psy_audio_SongFile*);
 static void stereophase_connectmachinessignals(StereoPhase*, Workspace*);
 static void stereophase_disconnectmachinessignals(StereoPhase*, Workspace*);

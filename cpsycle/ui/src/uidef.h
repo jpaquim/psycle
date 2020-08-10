@@ -440,6 +440,19 @@ INLINE psy_ui_Color psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 	return rv;
 }
 
+INLINE void psy_ui_color_rgb(psy_ui_Color* self,
+	uint8_t* r, uint8_t* g, uint8_t* b)
+{
+	uint32_t temp;
+		
+	temp = (self->value & 0xFF);
+	*r = (uint8_t) temp;	
+	temp = ((self->value >> 8) & 0xFF);
+	*g = (uint8_t) temp;	
+	temp = ((self->value >> 16) & 0xFF);
+	*b = (uint8_t) temp;
+}
+
 void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b);
 
 typedef enum {

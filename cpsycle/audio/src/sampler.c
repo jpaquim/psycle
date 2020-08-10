@@ -247,8 +247,8 @@ void psy_audio_sampler_init(psy_audio_Sampler* self,
 	}
 	psy_audio_samplerticktimer_init(&self->ticktimer,
 		self, // callback context (sampler)
-		psy_audio_sampler_ontimertick,
-		psy_audio_sampler_ontimerwork);
+		(fp_samplerticktimer_ontick)psy_audio_sampler_ontimertick,
+		(fp_samplerticktimer_onwork)psy_audio_sampler_ontimerwork);
 }
 
 void psy_audio_sampler_initparameters(psy_audio_Sampler* self)
