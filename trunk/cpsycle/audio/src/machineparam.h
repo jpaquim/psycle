@@ -181,8 +181,8 @@ INLINE psy_audio_MachineParam* psy_audio_intmachineparam_base(psy_audio_IntMachi
 
 psy_audio_IntMachineParam* psy_audio_intmachineparam_alloc(void);
 psy_audio_IntMachineParam* psy_audio_intmachineparam_allocinit(
-	const char* name, const char* label, int type, intptr_t* data, intptr_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, int32_t* data, intptr_t minval,
+	intptr_t maxval);
 
 // psy_audio_FloatMachineParam [0 .. 1]
 typedef struct psy_audio_FloatMachineParam {
@@ -286,8 +286,8 @@ typedef struct psy_audio_GainMachineParam {
 } psy_audio_GainMachineParam;
 
 void psy_audio_gainmachineparam_init(psy_audio_GainMachineParam*,
-	const char* name, const char* label, int type, float* data, int32_t minval,
-	int32_t maxval);
+	const char* name, const char* label, int type, float* data, intptr_t minval,
+	intptr_t maxval);
 void psy_audio_gainmachineparam_dispose(psy_audio_GainMachineParam*);
 void psy_audio_gainmachineparam_setmask(psy_audio_GainMachineParam*, const char* mask);
 

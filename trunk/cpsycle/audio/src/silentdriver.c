@@ -16,7 +16,7 @@ static int driver_open(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static uintptr_t samplerate(psy_AudioDriver*);
+static unsigned int samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
@@ -47,7 +47,7 @@ int driver_init(psy_AudioDriver* driver)
 	driver->close = driver_close;
 	driver->dispose = driver_dispose;
 	driver->configure = driver_configure;
-	driver->samplerate = samplerate;
+	driver->samplerate = (psy_audiodriver_fp_samplerate) samplerate;
 	driver->capturename = (psy_audiodriver_fp_capturename) capturename;
 	driver->numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 	driver->playbackname = (psy_audiodriver_fp_playbackname)playbackname;
@@ -85,7 +85,7 @@ void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
 
 }
 
-uintptr_t samplerate(psy_AudioDriver* self)
+unsigned int samplerate(psy_AudioDriver* self)
 {
 	return 44100;
 }

@@ -17,7 +17,7 @@ extern "C" {
 
 // psy_audio_Connections, psy_audio_PinMapping, psy_audio_PinConnection
 //
-// aim: defines the wire mapping (psy_audio_Connections) and pinmapping
+// Defines the wire mapping (psy_audio_Connections) and pinmapping
 // (psy_audio_PinMapping) inside a wire. No special wire class has been
 // implemented like in mfc psycle. LegacyWire and Wire are only helpers
 // for song loading and the machineview ui.
@@ -50,7 +50,8 @@ typedef struct psy_audio_PinMapping {
 
 void psy_audio_pinmapping_init(psy_audio_PinMapping*, uintptr_t numchannels);
 void psy_audio_pinmapping_dispose(psy_audio_PinMapping*);
-void psy_audio_pinmapping_copy(psy_audio_PinMapping*, const psy_audio_PinMapping* src);
+void psy_audio_pinmapping_copy(psy_audio_PinMapping*,
+	const psy_audio_PinMapping* src);
 void psy_audio_pinmapping_clear(psy_audio_PinMapping*);
 void psy_audio_pinmapping_autowire(psy_audio_PinMapping*,
 	uintptr_t numchannels);
@@ -134,20 +135,26 @@ typedef struct {
 void connections_init(psy_audio_Connections*);
 void connections_dispose(psy_audio_Connections*);
 void connections_copy(psy_audio_Connections*, psy_audio_Connections* src);
-psy_audio_MachineSockets* connections_initslot(psy_audio_Connections*, uintptr_t slot);
-psy_audio_MachineSockets* connections_at(psy_audio_Connections*, uintptr_t slot);
-int connections_connect(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
-void connections_disconnect(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
-int connections_connected(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot);
+psy_audio_MachineSockets* connections_initslot(psy_audio_Connections*,
+	uintptr_t slot);
+psy_audio_MachineSockets* connections_at(psy_audio_Connections*,
+	uintptr_t slot);
+int connections_connect(psy_audio_Connections*, uintptr_t outputslot,
+	uintptr_t inputslot);
+void connections_disconnect(psy_audio_Connections*, uintptr_t outputslot,
+	uintptr_t inputslot);
+int connections_connected(psy_audio_Connections*, uintptr_t outputslot,
+	uintptr_t inputslot);
 void connections_disconnectall(psy_audio_Connections*, uintptr_t slot);
-void connections_setwirevolume(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot,
+void connections_setwirevolume(psy_audio_Connections*, uintptr_t outputslot,
+	uintptr_t inputslot,
 	psy_dsp_amp_t factor);
-void connections_setpinmapping(psy_audio_Connections*, uintptr_t outputslot, uintptr_t inputslot,
-	const psy_audio_PinMapping*);
-psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, uintptr_t outputslot, 
-	uintptr_t inputslot);
-psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self, uintptr_t outputslot,
-	uintptr_t inputslot);
+void connections_setpinmapping(psy_audio_Connections*, uintptr_t outputslot,
+	uintptr_t inputslot, const psy_audio_PinMapping*);
+psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*,
+	uintptr_t outputslot, uintptr_t inputslot);
+psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self,
+	uintptr_t outputslot, uintptr_t inputslot);
 
 #ifdef __cplusplus
 }

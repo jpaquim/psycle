@@ -18,10 +18,12 @@ typedef struct {
 	psy_Table parameters;
 } psy_audio_Duplicator2;
 
-void psy_audio_duplicator2_init(psy_audio_Duplicator2*, psy_audio_MachineCallback);
+void psy_audio_duplicator2_init(psy_audio_Duplicator2*,
+	psy_audio_MachineCallback);
 const psy_audio_MachineInfo* psy_audio_duplicator2_info(void);
 
-INLINE psy_audio_Machine* psy_audio_duplicator2_base(psy_audio_Duplicator2* self)
+INLINE psy_audio_Machine* psy_audio_duplicator2_base(
+	psy_audio_Duplicator2* self)
 {
 	return &(self->custommachine.machine);
 }

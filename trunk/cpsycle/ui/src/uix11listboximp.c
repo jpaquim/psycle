@@ -43,7 +43,7 @@ static void dev_setcursor(psy_ui_x11_ListBoxImp* self, psy_ui_CursorStyle style)
 static void dev_starttimer(psy_ui_x11_ListBoxImp* self, uintptr_t id, uintptr_t interval) { self->x11_component_imp.imp.vtable->dev_starttimer(&self->x11_component_imp.imp, id, interval); }
 static void dev_stoptimer(psy_ui_x11_ListBoxImp* self, uintptr_t id) { self->x11_component_imp.imp.vtable->dev_stoptimer(&self->x11_component_imp.imp, id); }
 static void dev_seticonressource(psy_ui_x11_ListBoxImp* self, int ressourceid) { self->x11_component_imp.imp.vtable->dev_seticonressource(&self->x11_component_imp.imp, ressourceid); }
-static psy_ui_TextMetric dev_textmetric(psy_ui_x11_ListBoxImp* self, psy_ui_Font* font) { return self->x11_component_imp.imp.vtable->dev_textmetric(&self->x11_component_imp.imp, font); }
+static psy_ui_TextMetric dev_textmetric(psy_ui_x11_ListBoxImp* self) { return self->x11_component_imp.imp.vtable->dev_textmetric(&self->x11_component_imp.imp); }
 static psy_ui_Size dev_textsize(psy_ui_x11_ListBoxImp* self, const char* text, psy_ui_Font* font) { return self->x11_component_imp.imp.vtable->dev_textsize(&self->x11_component_imp.imp, text, font); }
 static void dev_setbackgroundcolor(psy_ui_x11_ListBoxImp* self, psy_ui_Color color) { self->x11_component_imp.imp.vtable->dev_setbackgroundcolor(&self->x11_component_imp.imp, color); }
 static void dev_settitle(psy_ui_x11_ListBoxImp* self, const char* title) { self->x11_component_imp.imp.vtable->dev_settitle(&self->x11_component_imp.imp, title); }

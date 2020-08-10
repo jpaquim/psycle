@@ -4,7 +4,9 @@
 #ifndef psy_audio_BUFFERCONTEXT_H
 #define psy_audio_BUFFERCONTEXT_H
 
+// audio
 #include "buffer.h"
+// container
 #include <list.h>
 
 #ifdef __cplusplus
@@ -31,7 +33,7 @@ void psy_audio_buffercontext_init(psy_audio_BufferContext*,
 	uintptr_t numsamples,
 	uintptr_t numtracks);
 void psy_audio_buffercontext_dispose(psy_audio_BufferContext*);
-void psy_audio_buffercontext_setoffset(psy_audio_BufferContext* self,
+void psy_audio_buffercontext_setoffset(psy_audio_BufferContext*,
 	uintptr_t offset);
 
 INLINE void psy_audio_buffercontext_setnumsamples(

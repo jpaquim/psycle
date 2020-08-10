@@ -511,7 +511,7 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 
 					// Plugin dll name
 					psyfile_read(songfile->file, sDllName, sizeof(sDllName));
-					_strlwr(sDllName);
+					psy_strlwr(sDllName);
 					if (internalmachinesconvert_pluginname_exists(&converter, type, sDllName)) {
 						pMac[i] = internalmachinesconvert_redirect(&converter, songfile, &i, type, sDllName);
 					} else {

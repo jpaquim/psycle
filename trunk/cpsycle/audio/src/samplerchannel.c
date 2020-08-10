@@ -27,7 +27,7 @@ static const char E8VolMap[16] = { 0,4,9,13,17,21,26,30,34,38,43,47,51,55,60,64 
 static void psy_audio_samplerchannel_level_normvalue(psy_audio_SamplerChannel*,
 	psy_audio_IntMachineParam* sender, float* rv);
 // getters
-static INLINE float psy_audio_samplerchannel_defaultpanfactorfloat(
+INLINE float psy_audio_samplerchannel_defaultpanfactorfloat(
 	psy_audio_SamplerChannel* self)
 {
 	return (self->defaultpanfactor & 0xFF) / 200.0f;
@@ -404,7 +404,7 @@ void psy_audio_samplerchannel_performfx(psy_audio_SamplerChannel* self)
 	psy_List* p;
 
 	for (p = self->effects; p != NULL; psy_list_next(&p)) {
-		int effect = (int)psy_list_entry(p);
+		int effect = (int)(intptr_t)psy_list_entry(p);
 		
 		switch (effect) {
 			case SAMPLER_EFFECT_CHANNELVOLSLIDE:

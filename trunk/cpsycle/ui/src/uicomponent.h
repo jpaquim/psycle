@@ -324,7 +324,7 @@ typedef void (*psy_ui_fp_componentimp_dev_starttimer)(struct psy_ui_ComponentImp
 	uintptr_t interval);
 typedef void (*psy_ui_fp_componentimp_dev_stoptimer)(struct psy_ui_ComponentImp*, uintptr_t id);
 typedef void (*psy_ui_fp_componentimp_dev_seticonressource)(struct psy_ui_ComponentImp*, int ressourceid);
-typedef psy_ui_TextMetric (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*, psy_ui_Font* font);
+typedef psy_ui_TextMetric (*psy_ui_fp_componentimp_dev_textmetric)(struct psy_ui_ComponentImp*);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_textsize)(struct psy_ui_ComponentImp*, const char* text, psy_ui_Font*);
 typedef void (*psy_ui_fp_componentimp_dev_setbackgroundcolor)(struct psy_ui_ComponentImp*, psy_ui_Color color);
 typedef void (*psy_ui_fp_componentimp_dev_settitle)(struct psy_ui_ComponentImp*, const char* title);
@@ -420,8 +420,7 @@ INLINE void psy_ui_component_stoptimer(psy_ui_Component* self, uintptr_t id)
 
 INLINE psy_ui_TextMetric psy_ui_component_textmetric(psy_ui_Component* self)
 {
-	return self->imp->vtable->dev_textmetric(self->imp, 
-		psy_ui_component_font(self));
+	return self->imp->vtable->dev_textmetric(self->imp);
 }
 
 INLINE psy_ui_Size psy_ui_component_textsize(psy_ui_Component* self, const char* text)

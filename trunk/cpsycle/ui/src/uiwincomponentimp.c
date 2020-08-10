@@ -22,7 +22,7 @@ static BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
 static int windowstyle(psy_ui_win_ComponentImp*);
 static int windowexstyle(psy_ui_win_ComponentImp*);
 
-static void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
+static void psy_ui_win_component_create_window(psy_ui_win_ComponentImp*,
 	psy_ui_win_ComponentImp* parent,
 	const char* classname,
 	int x, int y, int width, int height,
@@ -30,7 +30,7 @@ static void psy_ui_win_component_create_window(psy_ui_win_ComponentImp* self,
 	int usecommand);
 static HINSTANCE psy_ui_win_component_instance(psy_ui_win_ComponentImp*
 	parent);
-static void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp* self,
+static void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp*,
 	LPCSTR classname);
 
 // VTable Prototypes
@@ -44,19 +44,23 @@ static void dev_move(psy_ui_win_ComponentImp*, int left, int top);
 static void dev_resize(psy_ui_win_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_win_ComponentImp*, int width, int height);
 static psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp*);
-static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft, psy_ui_Size);
+static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft,
+	psy_ui_Size);
 static psy_ui_Size dev_size(psy_ui_win_ComponentImp*);
 static void dev_updatesize(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_win_ComponentImp*);
 static void dev_scrollto(psy_ui_win_ComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* dev_parent(psy_ui_win_ComponentImp*);
 static void dev_setparent(psy_ui_win_ComponentImp*, psy_ui_Component* parent);
-static void dev_insert(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child, psy_ui_win_ComponentImp* insertafter);
-static void dev_setorder(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* insertafter);
+static void dev_insert(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp* child,
+	psy_ui_win_ComponentImp* insertafter);
+static void dev_setorder(psy_ui_win_ComponentImp*, psy_ui_win_ComponentImp*
+	insertafter);
 static void dev_capture(psy_ui_win_ComponentImp*);
 static void dev_releasecapture(psy_ui_win_ComponentImp*);
 static void dev_invalidate(psy_ui_win_ComponentImp*);
-static void dev_invalidaterect(psy_ui_win_ComponentImp*, const psy_ui_Rectangle*);
+static void dev_invalidaterect(psy_ui_win_ComponentImp*,
+	const psy_ui_Rectangle*);
 static void dev_update(psy_ui_win_ComponentImp*);
 static void dev_setfont(psy_ui_win_ComponentImp*, psy_ui_Font*);
 static void dev_showhorizontalscrollbar(psy_ui_win_ComponentImp*);
@@ -65,12 +69,14 @@ static psy_List* dev_children(psy_ui_win_ComponentImp*, int recursive);
 static void dev_enableinput(psy_ui_win_ComponentImp*);
 static void dev_preventinput(psy_ui_win_ComponentImp*);
 static void dev_setcursor(psy_ui_win_ComponentImp*, psy_ui_CursorStyle);
-static void dev_starttimer(psy_ui_win_ComponentImp*, uintptr_t id, uintptr_t interval);
+static void dev_starttimer(psy_ui_win_ComponentImp*, uintptr_t id,
+	uintptr_t interval);
 static void dev_stoptimer(psy_ui_win_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
-static psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp*, psy_ui_Font*);
-static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text, psy_ui_Font*);
-static void dev_setbackgroundcolor(psy_ui_win_ComponentImp*, psy_ui_Color color);
+static psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp*);
+static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text,
+	psy_ui_Font*);
+static void dev_setbackgroundcolor(psy_ui_win_ComponentImp*, psy_ui_Color);
 static void dev_settitle(psy_ui_win_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
@@ -86,40 +92,57 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose) dev_dispose;
 		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy) dev_destroy;
 		vtable.dev_show = (psy_ui_fp_componentimp_dev_show) dev_show;
-		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate) dev_showstate;
+		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)
+			dev_showstate;
 		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide) dev_hide;
 		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible) dev_visible;
 		vtable.dev_move = (psy_ui_fp_componentimp_dev_move) dev_move;
 		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize) dev_resize;
-		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize) dev_clientresize;
-		vtable.dev_position = (psy_ui_fp_componentimp_dev_position) dev_position;
-		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition) dev_setposition;
+		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
+			dev_clientresize;
+		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
+		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)
+			dev_setposition;
 		vtable.dev_size = (psy_ui_fp_componentimp_dev_size)dev_size;
 		vtable.dev_updatesize = (psy_ui_fp_componentimp_dev_size)dev_updatesize;
-		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
-		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;
-		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent) dev_parent;
-		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent) dev_setparent;
-		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert) dev_insert;
-		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture) dev_capture;
-		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture) dev_releasecapture;
-		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate) dev_invalidate;
-		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect) dev_invalidaterect;
-		vtable.dev_update = (psy_ui_fp_componentimp_dev_update) dev_update;
-		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont) dev_setfont;		
-		vtable.dev_children = (psy_ui_fp_componentimp_dev_children) dev_children;
-		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput) dev_enableinput;
-		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput) dev_preventinput;
-		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor) dev_setcursor;
-		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer) dev_starttimer;
-		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer) dev_stoptimer;
-		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
-		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric) dev_textmetric;
-		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize) dev_textsize;
-		vtable.dev_setbackgroundcolor = (psy_ui_fp_componentimp_dev_setbackgroundcolor) dev_setbackgroundcolor;
-		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle) dev_settitle;
-		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus) dev_setfocus;
-		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus) dev_hasfocus;
+		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize)
+			dev_framesize;
+		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto)dev_scrollto;
+		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent)dev_parent;
+		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent)
+			dev_setparent;
+		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)dev_insert;
+		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)dev_capture;
+		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
+			dev_releasecapture;
+		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate)
+			dev_invalidate;
+		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect)
+			dev_invalidaterect;
+		vtable.dev_update = (psy_ui_fp_componentimp_dev_update)dev_update;
+		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont)dev_setfont;		
+		vtable.dev_children = (psy_ui_fp_componentimp_dev_children)dev_children;
+		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput)
+			dev_enableinput;
+		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)
+			dev_preventinput;
+		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)
+			dev_setcursor;
+		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)
+			dev_starttimer;
+		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer)
+			dev_stoptimer;
+		vtable.dev_seticonressource =
+			(psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
+		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric)
+			dev_textmetric;
+		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)dev_textsize;
+		vtable.dev_setbackgroundcolor =
+			(psy_ui_fp_componentimp_dev_setbackgroundcolor)
+			dev_setbackgroundcolor;
+		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
+		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
+		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
 		vtable_initialized = 1;
 	}
 }
@@ -144,12 +167,13 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->wndproc = 0;	
 	self->preventwmchar = 0;
 	self->sizecachevalid = FALSE;
+	self->tmcachevalid = FALSE;
 	self->dbg = 0;
 	parent_imp = (parent)
 		? (psy_ui_win_ComponentImp*)parent
 		: NULL;	
-	psy_ui_win_component_create_window(self, parent_imp, classname, x, y, width, height,
-		dwStyle, usecommand);
+	psy_ui_win_component_create_window(self, parent_imp, classname, x, y, width,
+		height, dwStyle, usecommand);
 	if (self->hwnd) {
 		psy_ui_win_component_init_wndproc(self, classname);
 	}
@@ -226,7 +250,8 @@ void psy_ui_win_component_init_wndproc(psy_ui_win_ComponentImp* self,
 #endif
 	if (classname != winapp->componentclass && classname != winapp->appclass) {
 #if defined(_WIN64)		
-		SetWindowLongPtr(self->hwnd, GWLP_WNDPROC, (LONG_PTR)winapp->comwinproc);
+		SetWindowLongPtr(self->hwnd, GWLP_WNDPROC,
+			(LONG_PTR)winapp->comwinproc);
 #else	
 		SetWindowLong(self->hwnd, GWL_WNDPROC, (LONG)winapp->comwinproc);
 #endif
@@ -311,7 +336,7 @@ void dev_resize(psy_ui_win_ComponentImp* self, psy_ui_Size size)
 {
 	psy_ui_TextMetric tm;
 
-	tm = dev_textmetric(self, self->component ? psy_ui_component_font(self->component) : NULL);
+	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, NULL,
 		0, 0,
@@ -359,11 +384,12 @@ psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp* self)
 	return rv;
 }
 
-void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size)
+void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
+	psy_ui_Size size)
 {
 	psy_ui_TextMetric tm;
 
-	tm = dev_textmetric(self, self->component ? psy_ui_component_font(self->component) : NULL);
+	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, 0,
 		psy_ui_value_px(&topleft.x, &tm),
@@ -441,7 +467,8 @@ void dev_setparent(psy_ui_win_ComponentImp* self, psy_ui_Component* parent)
 	}
 }
 
-void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child, psy_ui_win_ComponentImp* insertafter)
+void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child,
+	psy_ui_win_ComponentImp* insertafter)
 {
 	SetParent(child->hwnd, self->hwnd);
 	SetWindowPos(
@@ -452,7 +479,8 @@ void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child, p
 	);
 }
 
-void dev_setorder(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* insertafter)
+void dev_setorder(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp*
+	insertafter)
 {
 	SetWindowPos(
 		self->hwnd,
@@ -477,7 +505,8 @@ void dev_invalidate(psy_ui_win_ComponentImp* self)
 	InvalidateRect(self->hwnd, NULL, FALSE);
 }
 
-void dev_invalidaterect(psy_ui_win_ComponentImp* self, const psy_ui_Rectangle* r)
+void dev_invalidaterect(psy_ui_win_ComponentImp* self,
+	const psy_ui_Rectangle* r)
 {
 	RECT rc;
 
@@ -500,6 +529,7 @@ void dev_setfont(psy_ui_win_ComponentImp* self, psy_ui_Font* source)
 		
 		hfont = ((psy_ui_win_FontImp*)(source->imp))->hfont;
 		SendMessage(self->hwnd, WM_SETFONT, (WPARAM)hfont, 0);
+		self->tmcachevalid = FALSE;
 	}	
 }
 
@@ -552,54 +582,63 @@ void dev_preventinput(psy_ui_win_ComponentImp* self)
 	EnableWindow(self->hwnd, 0);
 }
 
-psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp* self, psy_ui_Font* font)
+psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp* self)
 {
-	psy_ui_TextMetric rv;
-	TEXTMETRIC tm;
-	HDC hdc;
-	HFONT hPrevFont = 0;
-	HFONT hfont = 0;
+	if (self->tmcachevalid) {
+		return self->tm;
+	} else {
+		psy_ui_TextMetric rv;
+		TEXTMETRIC tm;
+		HDC hdc;
+		HFONT hPrevFont = 0;
+		HFONT hfont = 0;
+		psy_ui_Font* font;
 
-	hdc = GetDC(self->hwnd);
-	SaveDC(hdc);
-	if (font) {
-		hfont = ((psy_ui_win_FontImp*)font->imp)->hfont;
-		if (hfont) {
-			hPrevFont = SelectObject(hdc, hfont);
+		hdc = GetDC(self->hwnd);
+		SaveDC(hdc);
+		font = psy_ui_component_font(self->component);
+		if (font) {
+			hfont = ((psy_ui_win_FontImp*)font->imp)->hfont;
+			if (hfont) {
+				hPrevFont = SelectObject(hdc, hfont);
+			}
 		}
-	}
-	GetTextMetrics(hdc, &tm);
-	if (font) {
-		if (hPrevFont) {
-			SelectObject(hdc, hPrevFont);
+		GetTextMetrics(hdc, &tm);
+		if (font) {
+			if (hPrevFont) {
+				SelectObject(hdc, hPrevFont);
+			}
 		}
+		RestoreDC(hdc, -1);
+		ReleaseDC(self->hwnd, hdc);
+		rv.tmHeight = tm.tmHeight;
+		rv.tmAscent = tm.tmAscent;
+		rv.tmDescent = tm.tmDescent;
+		rv.tmInternalLeading = tm.tmInternalLeading;
+		rv.tmExternalLeading = tm.tmExternalLeading;
+		rv.tmAveCharWidth = tm.tmAveCharWidth;
+		rv.tmMaxCharWidth = tm.tmMaxCharWidth;
+		rv.tmWeight = tm.tmWeight;
+		rv.tmOverhang = tm.tmOverhang;
+		rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
+		rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
+		rv.tmFirstChar = tm.tmFirstChar;
+		rv.tmLastChar = tm.tmLastChar;
+		rv.tmDefaultChar = tm.tmDefaultChar;
+		rv.tmBreakChar = tm.tmBreakChar;
+		rv.tmItalic = tm.tmItalic;
+		rv.tmUnderlined = tm.tmUnderlined;
+		rv.tmStruckOut = tm.tmStruckOut;
+		rv.tmPitchAndFamily = tm.tmPitchAndFamily;
+		rv.tmCharSet = tm.tmCharSet;
+		self->tm = rv;
+		self->tmcachevalid = TRUE;
+		return rv;
 	}
-	RestoreDC(hdc, -1);
-	ReleaseDC(self->hwnd, hdc);
-	rv.tmHeight = tm.tmHeight;
-	rv.tmAscent = tm.tmAscent;
-	rv.tmDescent = tm.tmDescent;
-	rv.tmInternalLeading = tm.tmInternalLeading;
-	rv.tmExternalLeading = tm.tmExternalLeading;
-	rv.tmAveCharWidth = tm.tmAveCharWidth;
-	rv.tmMaxCharWidth = tm.tmMaxCharWidth;
-	rv.tmWeight = tm.tmWeight;
-	rv.tmOverhang = tm.tmOverhang;
-	rv.tmDigitizedAspectX = tm.tmDigitizedAspectX;
-	rv.tmDigitizedAspectY = tm.tmDigitizedAspectY;
-	rv.tmFirstChar = tm.tmFirstChar;
-	rv.tmLastChar = tm.tmLastChar;
-	rv.tmDefaultChar = tm.tmDefaultChar;
-	rv.tmBreakChar = tm.tmBreakChar;
-	rv.tmItalic = tm.tmItalic;
-	rv.tmUnderlined = tm.tmUnderlined;
-	rv.tmStruckOut = tm.tmStruckOut;
-	rv.tmPitchAndFamily = tm.tmPitchAndFamily;
-	rv.tmCharSet = tm.tmCharSet;
-	return rv;
 }
 
-void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle cursorstyle)
+void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle
+	cursorstyle)
 {
 	HCURSOR hc;
 
@@ -707,7 +746,8 @@ void dev_seticonressource(psy_ui_win_ComponentImp* self, int ressourceid)
 #endif
 }
 
-psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text, psy_ui_Font* font)
+psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text,
+	psy_ui_Font* font)
 {
 	psy_ui_Size rv;
 	psy_ui_Graphics g;

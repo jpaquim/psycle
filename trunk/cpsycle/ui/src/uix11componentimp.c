@@ -19,11 +19,7 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-#include <Xm/BulletinB.h>
-#include <Xm/PushB.h>
-
 extern psy_ui_App app;
-// static BOOL CALLBACK allchildenumproc(HWND hwnd, LPARAM lParam);
 
 static void dev_rec_children(psy_ui_x11_ComponentImp*,
 	psy_List** children);
@@ -52,14 +48,17 @@ static void dev_move(psy_ui_x11_ComponentImp*, int left, int top);
 static void dev_resize(psy_ui_x11_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_x11_ComponentImp*, int width, int height);
 static psy_ui_Rectangle dev_position(psy_ui_x11_ComponentImp*);
-static void dev_setposition(psy_ui_x11_ComponentImp*, psy_ui_Point topleft, psy_ui_Size);
+static void dev_setposition(psy_ui_x11_ComponentImp*, psy_ui_Point topleft,
+	psy_ui_Size);
 static psy_ui_Size dev_size(psy_ui_x11_ComponentImp*);
 static void dev_updatesize(psy_ui_x11_ComponentImp*);
 static psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp*);
 static void dev_scrollto(psy_ui_x11_ComponentImp*, intptr_t dx, intptr_t dy);
 static psy_ui_Component* dev_parent(psy_ui_x11_ComponentImp*);
-static void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component* parent);
-static void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child, psy_ui_x11_ComponentImp* insertafter);
+static void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component*
+	parent);
+static void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp*
+	child, psy_ui_x11_ComponentImp* insertafter);
 static void dev_capture(psy_ui_x11_ComponentImp*);
 static void dev_releasecapture(psy_ui_x11_ComponentImp*);
 static void dev_invalidate(psy_ui_x11_ComponentImp*);
@@ -73,8 +72,9 @@ static void dev_setcursor(psy_ui_x11_ComponentImp*, psy_ui_CursorStyle);
 static void dev_starttimer(psy_ui_x11_ComponentImp*, uintptr_t id, uintptr_t interval);
 static void dev_stoptimer(psy_ui_x11_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_x11_ComponentImp*, int ressourceid);
-static psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp*, psy_ui_Font*);
-static psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp*, const char* text, psy_ui_Font*);
+static psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp*);
+static psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp*, const char* text,
+	psy_ui_Font*);
 static void dev_setbackgroundcolor(psy_ui_x11_ComponentImp*, psy_ui_Color color);
 static void dev_settitle(psy_ui_x11_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_x11_ComponentImp*);
@@ -88,49 +88,66 @@ static void xt_imp_vtable_init(psy_ui_x11_ComponentImp* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->imp.vtable;
-		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose) dev_dispose;
-		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy) dev_destroy;
-		vtable.dev_show = (psy_ui_fp_componentimp_dev_show) dev_show;
-		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate) dev_showstate;
-		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide) dev_hide;
-		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible) dev_visible;
-		vtable.dev_move = (psy_ui_fp_componentimp_dev_move) dev_move;
-		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize) dev_resize;
-		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize) dev_clientresize;
-		vtable.dev_position = (psy_ui_fp_componentimp_dev_position) dev_position;
-		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition) dev_setposition;
+		vtable.dev_dispose = (psy_ui_fp_componentimp_dev_dispose)dev_dispose;
+		vtable.dev_destroy = (psy_ui_fp_componentimp_dev_destroy)dev_destroy;
+		vtable.dev_show = (psy_ui_fp_componentimp_dev_show)dev_show;
+		vtable.dev_showstate = (psy_ui_fp_componentimp_dev_showstate)
+			dev_showstate;
+		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide)dev_hide;
+		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible)dev_visible;
+		vtable.dev_move = (psy_ui_fp_componentimp_dev_move)dev_move;
+		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize)dev_resize;
+		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
+			dev_clientresize;
+		vtable.dev_position = (psy_ui_fp_componentimp_dev_position)dev_position;
+		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition)
+			dev_setposition;
 		vtable.dev_size = (psy_ui_fp_componentimp_dev_size) dev_size;
-		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
-		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;
-		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent) dev_parent;
-		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent) dev_setparent;
-		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert) dev_insert;
-		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture) dev_capture;
-		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture) dev_releasecapture;
-		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate) dev_invalidate;
-		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect) dev_invalidaterect;
-		vtable.dev_update = (psy_ui_fp_componentimp_dev_update) dev_update;
-		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont) dev_setfont;
-		vtable.dev_children = (psy_ui_fp_componentimp_dev_children) dev_children;
-		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput) dev_enableinput;
-		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput) dev_preventinput;
-		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor) dev_setcursor;
-		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer) dev_starttimer;
-		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer) dev_stoptimer;
-		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
-		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric) dev_textmetric;
-		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize) dev_textsize;
-		vtable.dev_setbackgroundcolor = (psy_ui_fp_componentimp_dev_setbackgroundcolor) dev_setbackgroundcolor;
-		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle) dev_settitle;
-		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus) dev_setfocus;
-		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus) dev_hasfocus;
+		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize)
+			dev_framesize;
+		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto)dev_scrollto;
+		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent)dev_parent;
+		vtable.dev_setparent = (psy_ui_fp_componentimp_dev_setparent)
+			dev_setparent;
+		vtable.dev_insert = (psy_ui_fp_componentimp_dev_insert)dev_insert;
+		vtable.dev_capture = (psy_ui_fp_componentimp_dev_capture)dev_capture;
+		vtable.dev_releasecapture = (psy_ui_fp_componentimp_dev_releasecapture)
+			dev_releasecapture;
+		vtable.dev_invalidate = (psy_ui_fp_componentimp_dev_invalidate)
+			dev_invalidate;
+		vtable.dev_invalidaterect = (psy_ui_fp_componentimp_dev_invalidaterect)
+			dev_invalidaterect;
+		vtable.dev_update = (psy_ui_fp_componentimp_dev_update)dev_update;
+		vtable.dev_setfont = (psy_ui_fp_componentimp_dev_setfont)dev_setfont;
+		vtable.dev_children = (psy_ui_fp_componentimp_dev_children)dev_children;
+		vtable.dev_enableinput = (psy_ui_fp_componentimp_dev_enableinput)
+			dev_enableinput;
+		vtable.dev_preventinput = (psy_ui_fp_componentimp_dev_preventinput)
+			dev_preventinput;
+		vtable.dev_setcursor = (psy_ui_fp_componentimp_dev_setcursor)
+			dev_setcursor;
+		vtable.dev_starttimer = (psy_ui_fp_componentimp_dev_starttimer)
+			dev_starttimer;
+		vtable.dev_stoptimer = (psy_ui_fp_componentimp_dev_stoptimer)
+			dev_stoptimer;
+		vtable.dev_seticonressource =
+			(psy_ui_fp_componentimp_dev_seticonressource)
+			dev_seticonressource;
+		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric)
+			dev_textmetric;
+		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)
+			dev_textsize;
+		vtable.dev_setbackgroundcolor =
+			(psy_ui_fp_componentimp_dev_setbackgroundcolor)
+			dev_setbackgroundcolor;
+		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
+		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
+		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
 		vtable_initialized = 1;
 	}
 }
 
-// x callback prototypes
-static void widget_expose(Widget w, XtPointer clientdata,
-  XEvent * event, Boolean *dummy);
+// prototypes
 
 void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	psy_ui_Component* component,
@@ -149,12 +166,13 @@ void psy_ui_x11_componentimp_init(psy_ui_x11_ComponentImp* self,
 	self->hwnd = 0;
 	self->winid = -1;
 	self->sizecachevalid = FALSE;
+	self->tmcachevalid = FALSE;
 	self->backgroundcolor = psy_ui_color_make(0);
 //	self->wndproc = 0;
 //	self->background = 0;
 	parent_imp = parent ? (psy_ui_x11_ComponentImp*)parent : 0;	
-	psy_ui_x11_component_create_window(self, parent_imp, classname, x, y, width, height,
-		dwStyle, usecommand);			
+	psy_ui_x11_component_create_window(self, parent_imp, classname, x, y, width,
+		height, dwStyle, usecommand);			
 	if (self->hwnd) {
 //		psy_ui_x11_component_init_wndproc(self, classname);
 	}
@@ -183,20 +201,22 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
         // XtManageChild(self->bulletin);        
         self->hwnd = XCreateSimpleWindow(
 			xtapp->dpy, XDefaultRootWindow(xtapp->dpy),
-				100, 100, 400, 400, 4, 0, 0);		
+				x, y, width, height, 4, 0, 0);
 		XSelectInput(xtapp->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
 			StructureNotifyMask);
-
-    } else {
-        printf("Create Child Widget\n");
+		self->mapped = FALSE;
+		app.main = self->hwnd;
+    } else {        
         self->hwnd = XCreateSimpleWindow(
 			xtapp->dpy, parent->hwnd,
-				20, 20, 100, 100, 0, 0, 0);
+				x, y, width, height, 0, 0, 0);
 			XMapWindow(xtapp->dpy, self->hwnd);
 			XSelectInput(xtapp->dpy, self->hwnd,
-				KeyPressMask | ButtonPressMask | ExposureMask |
-				StructureNotifyMask);
+				KeyPressMask | ButtonPressMask | ButtonReleaseMask |
+				PointerMotionMask |
+				ExposureMask | StructureNotifyMask);
+			self->mapped = TRUE;
         // self->hwnd = XtCreateWidget(NULL, 
         //    xmBulletinBoardWidgetClass,
         //    parent->bulletin ? parent->bulletin : parent->hwnd,
@@ -207,6 +227,12 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
         //    XtManageChild(self->hwnd);
         //self->bulletin = 0;
     }
+    self->parent = parent;    
+    if (self->parent) {
+		psy_list_free(self->parent->children_nonrec_cache);
+		self->parent->children_nonrec_cache = NULL;
+	}
+    self->children_nonrec_cache = NULL;
     if (self->hwnd) {		
 		XSetWMProtocols(xtapp->dpy, self->hwnd, &xtapp->wmDeleteMessage, 1);
        /* GC gc;
@@ -221,6 +247,28 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
         widget_expose, (void*)self);        
         XtResizeWidget(self->hwnd, 200, 200, 0);	
         XtRealizeWidget(self->hwnd);	*/
+        GC gc;
+		PlatformXtGC xgc;
+		XGCValues gcv;
+		psy_ui_Graphics g;
+		XColor dummy;
+		XFontStruct *fontinfo;
+		Window root;
+		Window window;
+		int     screen;	
+				
+		screen  = XDefaultScreen(xtapp->dpy);			
+        gcv.function =   GXcopy;
+        gcv.plane_mask = AllPlanes;
+            //fontinfo = XLoadQueryFont(self->dpy,"6x10"); 
+            //XSetFont(self->dpy,gc,fontinfo->fid); 
+        gc = XCreateGC(xtapp->dpy, self->hwnd ,
+			GCFunction | GCPlaneMask, // | GCForeground | GCBackground,
+			&gcv);
+        xgc.display =xtapp->dpy;
+		xgc.window = self->hwnd;	    
+		xgc.gc = gc;			
+		psy_ui_graphics_init(&self->g, &xgc);	
     }
 	
 	//self->hwnd = CreateWindow(
@@ -296,6 +344,9 @@ void dev_dispose(psy_ui_x11_ComponentImp* self)
 		//DeleteObject(self->background);
 	//}
 	psy_ui_componentimp_dispose(&self->imp);
+	psy_ui_graphics_dispose(&self->g);
+	psy_list_free(self->children_nonrec_cache);
+	self->children_nonrec_cache = NULL;
 }
 
 psy_ui_x11_ComponentImp* psy_ui_x11_componentimp_alloc(void)
@@ -340,7 +391,8 @@ void dev_show(psy_ui_x11_ComponentImp* self)
 	psy_ui_X11App* xtapp;		
 
     xtapp = (psy_ui_X11App*) app.platform;        
-	XMapWindow(xtapp->dpy, self->hwnd);	
+	XMapWindow(xtapp->dpy, self->hwnd);
+	self->mapped = TRUE;
 }
 
 void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
@@ -349,6 +401,7 @@ void dev_showstate(psy_ui_x11_ComponentImp* self, int state)
 
     xtapp = (psy_ui_X11App*) app.platform;
 	XMapWindow(xtapp->dpy, self->hwnd);
+	self->mapped = TRUE;
 }
 
 void dev_hide(psy_ui_x11_ComponentImp* self)
@@ -356,21 +409,20 @@ void dev_hide(psy_ui_x11_ComponentImp* self)
 	psy_ui_X11App* xtapp;		
 
     xtapp = (psy_ui_X11App*) app.platform;
-	XUnmapWindow(xtapp->dpy, self->hwnd);	
+	XUnmapWindow(xtapp->dpy, self->hwnd);
+	self->mapped = FALSE;
 }
 
 int dev_visible(psy_ui_x11_ComponentImp* self)
 {
-//	return IsWindowVisible(self->hwnd);
-	return 1;
+	return self->mapped;
 }
 
 void dev_move(psy_ui_x11_ComponentImp* self, int left, int top)
 {
 	psy_ui_X11App* xtapp;		
 
-    xtapp = (psy_ui_X11App*) app.platform;	
-	printf("move-%d:\n", self->component->debugflag);
+    xtapp = (psy_ui_X11App*) app.platform;
 	XMoveWindow(xtapp->dpy, self->hwnd,
 		left,
 		top);    
@@ -382,13 +434,15 @@ void dev_resize(psy_ui_x11_ComponentImp* self, psy_ui_Size size)
 	psy_ui_X11App* xtapp;		
 
     xtapp = (psy_ui_X11App*) app.platform;
-	tm = dev_textmetric(self, (self->component)
-		? psy_ui_component_font(self->component)
-		: NULL);
-	self->sizecachevalid = FALSE;
+	tm = dev_textmetric(self);
+	self->sizecachevalid = FALSE;	
 	XResizeWindow(xtapp->dpy, self->hwnd,
-		psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));	
+		(psy_ui_value_px(&size.width, &tm) > 0)
+			? psy_ui_value_px(&size.width, &tm)
+			: 1,
+		(psy_ui_value_px(&size.height, &tm) > 0)
+			? psy_ui_value_px(&size.height, &tm)
+			: 1);
 	self->sizecache = size;
 	self->sizecachevalid = TRUE;
 }
@@ -415,23 +469,31 @@ void dev_clientresize(psy_ui_x11_ComponentImp* self, int width, int height)
 	self->sizecachevalid = FALSE;
 }
 
-void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size)
+void dev_setposition(psy_ui_x11_ComponentImp* self, psy_ui_Point topleft,
+	psy_ui_Size size)
 {
 	psy_ui_TextMetric tm;
 	psy_ui_X11App* xtapp;		
 
     xtapp = (psy_ui_X11App*) app.platform;
-	tm = dev_textmetric(self, (self->component)
-		? psy_ui_component_font(self->component)
-		: NULL);
+	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
-	printf("setposition-%d:\n", self->component->debugflag);
+	//printf("setposition-%d:%d,%d,%d,%d\n",
+	//	self->component->debugflag,
+	//	psy_ui_value_px(&topleft.x, &tm),
+	//	psy_ui_value_px(&topleft.y, &tm),
+	//	psy_ui_value_px(&size.width, &tm),
+	//	psy_ui_value_px(&size.height, &tm));		
 	XMoveResizeWindow(xtapp->dpy, self->hwnd,
 		psy_ui_value_px(&topleft.x, &tm),
-		psy_ui_value_px(&topleft.y, &tm),
-		psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
-	dev_updatesize(self);    
+		psy_ui_value_px(&topleft.y, &tm),		
+		(psy_ui_value_px(&size.width, &tm) > 0)
+			? psy_ui_value_px(&size.width, &tm)
+			: 1,
+		(psy_ui_value_px(&size.height, &tm) > 0)
+			? psy_ui_value_px(&size.height, &tm)
+			: 1);	
+	dev_updatesize(self);	
 }
 
 psy_ui_Rectangle dev_position(psy_ui_x11_ComponentImp* self)
@@ -445,15 +507,15 @@ psy_ui_Rectangle dev_position(psy_ui_x11_ComponentImp* self)
     unsigned int y = 0;
     unsigned int width = 0;
     unsigned int height = 0;
-    psy_ui_X11App* xtapp;		
+    psy_ui_X11App* xtapp;
+    XWindowAttributes win_attr;	
 
-    xtapp = (psy_ui_X11App*) app.platform;        
-    XGetGeometry(xtapp->dpy, self->hwnd, &root, &x, &y,
-		&width, &height, &temp, &temp);	    
-    rv.left = x;
-	rv.top = y;
-	rv.right = x + width;
-	rv.bottom = y + height;
+    xtapp = (psy_ui_X11App*) app.platform;
+    XGetWindowAttributes(xtapp->dpy, self->hwnd, &win_attr);
+    rv.left = win_attr.x;
+	rv.top = win_attr.y;
+	rv.right = x + win_attr.width;
+	rv.bottom = y + win_attr.height;
 	return rv;
 }
 
@@ -466,13 +528,13 @@ psy_ui_Size dev_size(psy_ui_x11_ComponentImp* self)
         unsigned int temp;
         unsigned int width = 0;
         unsigned int height = 0;
-        psy_ui_X11App* xtapp;		
+        psy_ui_X11App* xtapp;
+        XWindowAttributes win_attr;		
 
-        xtapp = (psy_ui_X11App*) app.platform;        
-        XGetGeometry(xtapp->dpy, self->hwnd, &root, &temp, &temp,
-                &width, &height, &temp, &temp);	
-        rv.width = psy_ui_value_makepx(width);
-        rv.height = psy_ui_value_makepx(height);
+        xtapp = (psy_ui_X11App*) app.platform;
+        XGetWindowAttributes(xtapp->dpy, self->hwnd, &win_attr);       
+        rv.width = psy_ui_value_makepx(win_attr.width);
+        rv.height = psy_ui_value_makepx(win_attr.height);
     } else {
         rv.width = psy_ui_value_makepx(0);
         rv.height = psy_ui_value_makepx(0);
@@ -487,13 +549,13 @@ void dev_updatesize(psy_ui_x11_ComponentImp* self)
     unsigned int temp;
     unsigned int width = 0;
     unsigned int height = 0;
-    psy_ui_X11App* xtapp;		
+    psy_ui_X11App* xtapp;
+    XWindowAttributes win_attr;			
 
     xtapp = (psy_ui_X11App*) app.platform;        
-    XGetGeometry(xtapp->dpy, self->hwnd, &root, &temp, &temp,
-		&width, &height, &temp, &temp);	
-    size.width = psy_ui_value_makepx(width);
-    size.height = psy_ui_value_makepx(height);	
+	XGetWindowAttributes(xtapp->dpy, self->hwnd, &win_attr); 	
+    size.width = psy_ui_value_makepx(win_attr.width);
+    size.height = psy_ui_value_makepx(win_attr.height);	
 	self->sizecache = size;
 	self->sizecachevalid = TRUE;
 }
@@ -507,13 +569,13 @@ psy_ui_Size dev_framesize(psy_ui_x11_ComponentImp* self)
         unsigned int temp;
         unsigned int width = 0;
         unsigned int height = 0;
-        psy_ui_X11App* xtapp;		
+        psy_ui_X11App* xtapp;
+        XWindowAttributes win_attr;			
 
         xtapp = (psy_ui_X11App*) app.platform;        
-        XGetGeometry(xtapp->dpy, self->hwnd, &root, &temp, &temp,
-               &width, &height, &temp, &temp);	
-        rv.width = psy_ui_value_makepx(width);
-        rv.height = psy_ui_value_makepx(height);
+        XGetWindowAttributes(xtapp->dpy, self->hwnd, &win_attr); 
+        rv.width = psy_ui_value_makepx(win_attr.width);
+        rv.height = psy_ui_value_makepx(win_attr.height);
     } else {
         rv.width = psy_ui_value_makepx(0);
         rv.height = psy_ui_value_makepx(0);
@@ -529,41 +591,35 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
 
 psy_ui_Component* dev_parent(psy_ui_x11_ComponentImp* self)
 {
-	psy_ui_X11App* xtapp;
-	Window root_win;
-	Window parent_win;
-	Window* child_windows;
-	int num_child_windows;
-
-    xtapp = (psy_ui_X11App*) app.platform; 
-	psy_ui_x11_ComponentImp* imp;
-		
-	XQueryTree(xtapp->dpy, self->hwnd,
-           &root_win,
-           &parent_win,
-           &child_windows, &num_child_windows);                                           
-	XFree(child_windows);
-
-	imp = (psy_ui_x11_ComponentImp*) psy_table_at(&xtapp->selfmap,
-		(uintptr_t)parent_win);
-	return imp ? imp->component : 0;
+	return (self->parent)
+		? self->parent->component
+		: NULL;
 }
 
 void dev_setparent(psy_ui_x11_ComponentImp* self, psy_ui_Component* parent)
-{
-	//psy_ui_WinApp* winapp;
-	//psy_ui_x11_ComponentImp* parentimp;
+{	
+	if (parent) {
+		psy_ui_x11_ComponentImp* parentimp;
+		psy_ui_X11App* xtapp;
 
-	//winapp = (psy_ui_WinApp*)app.platform;
-	//parentimp = (psy_ui_x11_ComponentImp*) parent->imp;
-	//if (parentimp) {
-		//SetParent(self->hwnd, parentimp->hwnd);
-	//}
+		xtapp = (psy_ui_X11App*)app.platform;   
+		parentimp = (psy_ui_x11_ComponentImp*)parent->imp;
+		if (parentimp) {	
+			self->parent = parentimp;	
+			psy_list_free(self->parent->children_nonrec_cache);
+			self->parent->children_nonrec_cache = NULL;		
+			XReparentWindow(xtapp->dpy,
+				self->hwnd,
+				parentimp->hwnd,
+				0, 0);					
+		}
+	}
 }
 
 void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 	psy_ui_x11_ComponentImp* insertafter)
 {
+	dev_setparent(child, self->component);
 	//SetParent(child->hwnd, self->hwnd);
 	//SetWindowPos(
 		//child->hwnd,
@@ -585,18 +641,52 @@ void dev_releasecapture(psy_ui_x11_ComponentImp* self)
 
 void dev_invalidate(psy_ui_x11_ComponentImp* self)
 {
-//	InvalidateRect(self->hwnd, NULL, FALSE);
+	XExposeEvent xev;
+	Window root;
+	unsigned int temp;
+	unsigned int x = 0;
+	unsigned int y = 0;
+	unsigned int width = 0;
+	unsigned int height = 0;
+	psy_ui_X11App* xtapp;		
+
+	xtapp = (psy_ui_X11App*) app.platform;        
+	XGetGeometry(xtapp->dpy, self->hwnd, &root, &x, &y,
+			&width, &height, &temp, &temp);
+	xev.type    = Expose ;
+	xev.display = xtapp->dpy;
+	xev.window = self->hwnd;
+	xev.count = 0;
+	xev.x = x;
+	xev.y = y;
+	xev.width = width; 
+	xev.height = height;	
+	XSendEvent (xtapp->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 }
 
 void dev_invalidaterect(psy_ui_x11_ComponentImp* self, const psy_ui_Rectangle* r)
-{
-	//RECT rc;
+{	
+	XExposeEvent xev;
+	Window root;
+	unsigned int temp;
+	unsigned int x = 0;
+	unsigned int y = 0;
+	unsigned int width = 0;
+	unsigned int height = 0;
+	psy_ui_X11App* xtapp;		
 
-	//rc.left = r->left;
-	//rc.top = r->top;
-	//rc.right = r->right;
-	//rc.bottom = r->bottom;
-	//InvalidateRect(self->hwnd, &rc, FALSE);
+	xtapp = (psy_ui_X11App*) app.platform;        
+	XGetGeometry(xtapp->dpy, self->hwnd, &root, &x, &y,
+			&width, &height, &temp, &temp);
+	xev.type    = Expose ;
+	xev.display = xtapp->dpy;
+	xev.window = self->hwnd;
+	xev.count = 0;
+	xev.x = r->left;
+	xev.y = r->top;
+	xev.width = r->right - r->left; 
+	xev.height = r->bottom - r->top;	
+	XSendEvent (xtapp->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 }
 
 void dev_update(psy_ui_x11_ComponentImp* self)
@@ -606,14 +696,8 @@ void dev_update(psy_ui_x11_ComponentImp* self)
 
 void dev_setfont(psy_ui_x11_ComponentImp* self, psy_ui_Font* source)
 {
-	//if (source) {
-		//HFONT hfont;
-		
-		//hfont = ((psy_ui_x11_FontImp*)(source->imp))->hfont;
-		//SendMessage(self->hwnd, WM_SETFONT, (WPARAM)hfont, 0);
-	//}	
+	self->tmcachevalid = FALSE;
 }
-
 
 void dev_rec_children(psy_ui_x11_ComponentImp* self,
 	psy_List** children)
@@ -622,6 +706,7 @@ void dev_rec_children(psy_ui_x11_ComponentImp* self,
 	Window root_win;
 	Window parent_win;
 	Window* child_windows;
+	int i;
 	int num_child_windows;	
 		    
     xtapp = (psy_ui_X11App*) app.platform; 
@@ -630,12 +715,12 @@ void dev_rec_children(psy_ui_x11_ComponentImp* self,
            &root_win,
            &parent_win,
            &child_windows, &num_child_windows);   
-	while (num_child_windows--) {
+	for (i = 0; i < num_child_windows; ++i) {
 		uintptr_t hwnd;
 		psy_ui_x11_ComponentImp* imp;
 		psy_ui_Component* child;
 			
-        hwnd = child_windows[num_child_windows];
+        hwnd = child_windows[i];
         imp = psy_table_at(&xtapp->selfmap, hwnd);
 		child = imp ? imp->component : 0;
 		if (child) {
@@ -650,69 +735,48 @@ psy_List* dev_children(psy_ui_x11_ComponentImp* self, int recursive)
 {	
 	psy_List* children = NULL;
 	
-	if (recursive = psy_ui_RECURSIVE) {
+	if (recursive == psy_ui_RECURSIVE) {		
 		dev_rec_children(self, &children);
 	} else {
-		psy_ui_X11App* xtapp;
-		Window root_win;
-		Window parent_win;
-		Window* child_windows;
-		int num_child_windows;	
-				
-		xtapp = (psy_ui_X11App*) app.platform; 
-		psy_ui_x11_ComponentImp* imp;		
-		XQueryTree(xtapp->dpy, self->hwnd,
-			   &root_win,
-			   &parent_win,
-			   &child_windows, &num_child_windows);   
-		while (num_child_windows--) {
-			uintptr_t hwnd;
-			psy_ui_x11_ComponentImp* imp;
-			psy_ui_Component* child;
-				
-			hwnd = child_windows[num_child_windows];
-			imp = psy_table_at(&xtapp->selfmap, hwnd);
-			child = imp ? imp->component : 0;
-			if (child) {
-				psy_list_append(&children, child);
+		if (self->children_nonrec_cache) {
+			psy_List* p;
+			
+			for (p = self->children_nonrec_cache; p != NULL;
+				psy_list_next(&p)) {
+					psy_list_append(&children, (psy_ui_Component*)
+						psy_list_entry(p));
 			}
-		}                                                   
-		XFree(child_windows);
-	}
-	printf("dev_children\n");
-	//if (recursive == 1) {
-		//EnumChildWindows(self->hwnd, allchildenumproc, (LPARAM) &children);
-	//}
-	//else {
-		//uintptr_t hwnd = (uintptr_t)GetWindow(self->hwnd, GW_CHILD);
-		//if (hwnd) {
-			//psy_ui_WinApp* winapp;
-			//psy_ui_x11_ComponentImp* imp;
-			//psy_ui_Component* child;
-
-			//winapp = (psy_ui_WinApp*)app.platform;
-			//imp = psy_table_at(&winapp->selfmap, hwnd);
-			//child = imp ? imp->component : 0;
-			//if (child) {
-				//children = psy_list_create(child);
-			//}
-		//}
-		//while (hwnd) {
-			//hwnd = (uintptr_t) GetNextWindow((HWND)hwnd, GW_HWNDNEXT);
-			//if (hwnd) {
-				//psy_ui_WinApp* winapp;
-				//psy_ui_x11_ComponentImp* imp;
-				//psy_ui_Component* child;
-
-				//winapp = (psy_ui_WinApp*)app.platform;
-				//imp = psy_table_at(&winapp->selfmap, hwnd);
-				//child = imp ? imp->component : 0;
-				//if (child) {
-					//psy_list_append(&children, child);
-				//}
-			//}
-		//}
-	//}
+		} else {
+			psy_ui_X11App* xtapp;
+			Window root_win;
+			Window parent_win;
+			Window* child_windows;
+			int i;
+			int num_child_windows;	
+					
+			xtapp = (psy_ui_X11App*) app.platform; 
+			psy_ui_x11_ComponentImp* imp;		
+			XQueryTree(xtapp->dpy, self->hwnd,
+				   &root_win,
+				   &parent_win,
+				   &child_windows, &num_child_windows);
+			for (i = 0; i < num_child_windows; ++i) {
+				uintptr_t hwnd;
+				psy_ui_x11_ComponentImp* imp;
+				psy_ui_Component* child;
+					
+				hwnd = child_windows[i];
+				imp = psy_table_at(&xtapp->selfmap, hwnd);
+				child = imp ? imp->component : 0;
+				if (child) {
+					psy_list_append(&children, child);
+					psy_list_append(&self->children_nonrec_cache, child);
+				}
+			}                                                   
+			XFree(child_windows);			
+			
+		}
+	}	
 	return children;	
 }
 
@@ -726,12 +790,37 @@ void dev_preventinput(psy_ui_x11_ComponentImp* self)
 //	EnableWindow(self->hwnd, 0);
 }
 
-psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self,
-	psy_ui_Font* font)
+psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self)
 {
-	psy_ui_TextMetric rv;
-	rv.tmHeight = 12;
-	rv.tmAveCharWidth = 10;
+	if (self->tmcachevalid) {
+		return self->tm;
+	} else {
+		psy_ui_TextMetric rv;
+		psy_ui_X11App* xtapp;
+		GC gc;
+		PlatformXtGC xgc;
+		psy_ui_Graphics g;
+		psy_ui_x11_GraphicsImp* gx11;
+									
+		rv.tmAveCharWidth = 10;
+		xtapp = (psy_ui_X11App*) app.platform;
+		gc = XCreateGC(xtapp->dpy, self->hwnd, 0, 0);
+		xgc.display =xtapp->dpy;
+		xgc.window = self->hwnd;	    
+		xgc.gc = gc;
+		psy_ui_graphics_init(&g, &xgc);
+		gx11 = (psy_ui_x11_GraphicsImp*)g.imp;
+		rv.tmHeight = gx11->xftfont->height;
+		rv.tmAscent = gx11->xftfont->ascent;
+		rv.tmDescent = gx11->xftfont->descent;
+		rv.tmMaxCharWidth = gx11->xftfont->max_advance_width;
+		rv.tmAveCharWidth = gx11->xftfont->max_advance_width / 4;
+		// printf("avcharwidth %d\n", rv.tmAveCharWidth);
+		psy_ui_graphics_dispose(&g);
+		self->tm = rv;
+		self->tmcachevalid = TRUE;
+		return rv;
+	}
 	//TEXTMETRIC tm;
 	//HDC hdc;
 	//HFONT hPrevFont = 0;
@@ -769,7 +858,7 @@ psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self,
 	//rv.tmStruckOut = tm.tmStruckOut;
 	//rv.tmPitchAndFamily = tm.tmPitchAndFamily;
 	//rv.tmCharSet = tm.tmCharSet;
-	return rv;
+	
 }
 
 void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle cursorstyle)
@@ -883,54 +972,20 @@ void dev_seticonressource(psy_ui_x11_ComponentImp* self, int ressourceid)
 psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
 	psy_ui_Font* font)
 {
-    psy_ui_Size rv;
-        
-    if (self->hwnd) {
-        Window window;	    
-        psy_ui_Graphics g;
-        PlatformXtGC xgc;
-        GC gc;
-        XGCValues gcv;
-        psy_ui_X11App* xtapp;
-        psy_ui_x11_ComponentImp* imp;
-        
-        xtapp = (psy_ui_X11App*) app.platform;
-        imp = (psy_ui_x11_ComponentImp*) psy_table_at(&xtapp->selfmap, (uintptr_t)
-            self->hwnd);
-        if (!imp) {
-            TRACE("psycle x11 ui textsize no imp found\n");
-            rv.width = psy_ui_value_makepx(0);
-            rv.height = psy_ui_value_makepx(0);
-            return rv;
-        }
-       // if (imp->bulletin) {
-         //   window = imp->bulletin;
-        //} else {
-            window = self->hwnd;
-        //}        
-        gcv.function =   GXcopy;
-        gcv.plane_mask = AllPlanes; 
-        gcv.foreground = 0; 
-		gcv.background = 0; 
-		printf("hwnd-%d\n", window);
-        //gc = XCreateGC(window, 
-		//	XDefaultRootWindow(xtapp->dpy),
-		  //  0, 0);
-        //xgc.display = xtapp->dpy;
-        //xgc.window = self->hwnd;
-        //xgc.gc = gc;
-        //psy_ui_graphics_init(&g, &xgc);
-        // psy_ui_setfont(&g, font);
-        //rv = psy_ui_textsize(&g, text);
-        //psy_ui_graphics_dispose(&g);
-        rv = psy_ui_size_make(
-			psy_ui_value_makepx(100),
-			psy_ui_value_makepx(12));
-    } else {
-        TRACE("psycle x11 ui textsize no window found\n");
-        rv.width = psy_ui_value_makepx(0);
-        rv.height = psy_ui_value_makepx(0);
-    }
+    psy_ui_Size rv;    
+	psy_ui_X11App* xtapp;
+	GC gc;
+	PlatformXtGC xgc;
+	psy_ui_Graphics g;	
+									
+	xtapp = (psy_ui_X11App*) app.platform;
+	gc = XCreateGC(xtapp->dpy, self->hwnd, 0, 0);
+	xgc.display =xtapp->dpy;
+	xgc.window = self->hwnd;	    
+	xgc.gc = gc;
+	psy_ui_graphics_init(&g, &xgc);
+	rv = psy_ui_textsize(&g, text);
+	psy_ui_graphics_dispose(&g);        
 	return rv;
 }
 
@@ -1002,40 +1057,5 @@ int windowexstyle(psy_ui_x11_ComponentImp* self)
 */
 	return rv;
 }
-
-void widget_expose(Widget window, XtPointer clientdata,
-  XEvent * event, Boolean *dummy)
- {	 		 
-/*	GC gc;
-	XGCValues gcv;
-	PlatformXtGC xgc;
-	psy_ui_Graphics g;
-	psy_ui_X11App* xtapp;
-	psy_ui_x11_ComponentImp* imp;
-		  
-	xtapp = (psy_ui_X11App*) app.platform;
-	imp = (psy_ui_x11_ComponentImp*) psy_table_at(&xtapp->selfmap, (uintptr_t)
-		window);
-	if (!imp) {
-		return;
-	}
-   // if (imp->bulletin) {
-     //   window = imp->bulletin;
-    //}
-    window = self->hwnd;
-	gcv.foreground = 0; // BlackPixelOfScreen(XtScreen(window));
-	gc = XCreateGC(xtapp->dpy, 
-	    XDefaultRootWindow(xtapp->dpy),
-		    GCForeground, &gcv);
-	xgc.display =xtapp->dpy;
-	xgc.window = window;	    
-	xgc.gc = gc;		    
-	psy_ui_graphics_init(&g, &xgc);	
-	if (imp->component->vtable->ondraw) {
-		imp->component->vtable->ondraw(imp->component, &g);
-	}
-	psy_signal_emit(&imp->component->signal_draw, imp->component, 1, &g);
-	psy_ui_graphics_dispose(&g);	*/
- }
 
 #endif

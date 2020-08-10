@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
 
 static int isblack(int key)
 {
@@ -604,10 +605,15 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 	psy_ui_component_setmargin(&self->parameterview.component, &margin);
 	instrumententryview_init(&self->entryview,
 		&self->component, &self->parameterview);
+#ifdef DIVERSALIS__OS__MICROSOFT
 	psy_ui_scroller_init(&self->scroller, &self->entryview.component,
 		&self->component);
 	psy_ui_component_setoverflow(&self->entryview.component, psy_ui_OVERFLOW_VSCROLL);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
+#else
+	// todo: scroller here slows X11 down
+	psy_ui_component_setalign(&self->entryview.component, psy_ui_ALIGN_CLIENT);
+#endif
 	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(0), psy_ui_value_makeew(2),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));

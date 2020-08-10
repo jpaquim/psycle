@@ -19,7 +19,8 @@ typedef struct {
 
 void psy_audio_inputs_init(psy_audio_Inputs*);
 void psy_audio_inputs_dispose(psy_audio_Inputs*);
-void psy_audio_inputs_define(psy_audio_Inputs*, int input, int cmd, const char* cmdname);
+void psy_audio_inputs_define(psy_audio_Inputs*, int input, int cmd,
+	const char* cmdname);
 int psy_audio_inputs_cmd(psy_audio_Inputs*, int cmd);
 const char* psy_audio_inputs_cmdname(psy_audio_Inputs*, int cmd);
 
@@ -28,7 +29,8 @@ INLINE uintptr_t psy_audio_encodeinput(uintptr_t keycode, bool shift, bool ctrl)
 	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9);
 }
 
-INLINE void psy_audio_decodeinput(uintptr_t input, uintptr_t* keycode, bool* shift, bool* ctrl)
+INLINE void psy_audio_decodeinput(uintptr_t input, uintptr_t* keycode,
+	bool* shift, bool* ctrl)
 {
 	*keycode = input & 0xFF;
 	*shift = ((input >> 8) & 0x01) == 0x01;

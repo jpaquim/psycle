@@ -29,7 +29,6 @@ typedef struct {
 } GearButtons;
 
 void gearbuttons_init(GearButtons*, psy_ui_Component* parent, Workspace*);
-psy_ui_Component* gearbuttons_base(GearButtons*);
 
 INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
 {

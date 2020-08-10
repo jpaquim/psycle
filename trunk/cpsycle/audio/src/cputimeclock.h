@@ -31,7 +31,8 @@ INLINE void psy_audio_cputimeclock_begin(psy_audio_CpuTimeClock* self)
 INLINE void psy_audio_cputimeclock_end(psy_audio_CpuTimeClock* self)
 {
 	self->end = clock();
-	self->cpu_time_used = ((double)self->end - (double)self->start) / CLOCKS_PER_SEC;
+	self->cpu_time_used = ((double)self->end - (double)self->start) /
+		CLOCKS_PER_SEC;
 }
 
 INLINE void psy_audio_cputimeclock_reset(psy_audio_CpuTimeClock* self)
@@ -44,7 +45,8 @@ INLINE double psy_audio_cputimeclock_cputime(psy_audio_CpuTimeClock* self)
 	return self->cpu_time_used;
 }
 
-INLINE unsigned int psy_audio_cputimeclock_cputime_count(psy_audio_CpuTimeClock* self)
+INLINE unsigned int psy_audio_cputimeclock_cputime_count(
+	psy_audio_CpuTimeClock* self)
 {
 	return self->count;
 }

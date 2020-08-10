@@ -75,7 +75,8 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_table_init(&self->trackstonotes);
 	psy_table_init(&self->worked);
 	psy_audio_pattern_init(&self->patterndefaults);
-	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_big_beat_t) 0.25f);
+	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_big_beat_t)
+		0.25f);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
@@ -119,7 +120,8 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 // driver callbacks
 
 // sound driver callback
-// - splits work to psy_audio_MAX_STREAM_SIZE parts or to let work begin on a line tick
+// - splits work to psy_audio_MAX_STREAM_SIZE parts or to let work begin on a
+//   line tick
 // - player_workamount processes each spltted part
 // - updates the sequencer line tick count
 psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
@@ -280,7 +282,8 @@ void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 	uintptr_t amount)
 {
 	psy_audio_Buffer* masteroutput;	
-	masteroutput = psy_audio_machines_outputs(&self->song->machines, psy_audio_MASTER_INDEX);
+	masteroutput = psy_audio_machines_outputs(&self->song->machines,
+		psy_audio_MASTER_INDEX);
 	if (masteroutput) {		
 		psy_audio_buffer_scale(masteroutput, PSY_DSP_AMP_RANGE_NATIVE, amount);
 		if (self->dodither) {
@@ -291,8 +294,8 @@ void psy_audio_player_filldriver(psy_audio_Player* self, psy_dsp_amp_t* buffer,
 	}
 }
 
-void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer* buffer,
-	uintptr_t amount)
+void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer*
+	buffer, uintptr_t amount)
 {
 	uintptr_t channel;
 
@@ -458,7 +461,8 @@ void psy_audio_player_dostop(psy_audio_Player* self)
 	}
 }
 
-void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_big_beat_t offset)
+void psy_audio_player_setposition(psy_audio_Player* self, psy_dsp_big_beat_t
+	offset)
 {
 	psy_audio_sequencer_setposition(&self->sequencer, offset);
 }
@@ -470,10 +474,12 @@ void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 }
 
 // psy_AudioDriver set, get, load, unload, restart, ..., methods
-void psy_audio_player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver* driver)
+void psy_audio_player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver*
+	driver)
 {
 	self->driver = driver;
-	driver->connect(driver, self, psy_audio_player_work, mainframe);
+	driver->connect(driver, self, (AUDIODRIVERWORKFN)psy_audio_player_work,
+		mainframe);
 }
 
 psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player* self)
@@ -494,10 +500,12 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 			pfndriver_create fpdrivercreate;
 
 			fpdrivercreate = (pfndriver_create)
-				psy_library_functionpointer(&self->drivermodule, "driver_create");
+				psy_library_functionpointer(&self->drivermodule,
+				"driver_create");
 			if (fpdrivercreate) {
 				driver = fpdrivercreate();				
-				driver->connect(driver, self, psy_audio_player_work, mainframe);
+				driver->connect(driver, self, (AUDIODRIVERWORKFN)
+					psy_audio_player_work, mainframe);
 			}
 			psy_audio_exclusivelock_enable();
 		}		

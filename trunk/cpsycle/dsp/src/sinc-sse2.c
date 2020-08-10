@@ -10,7 +10,7 @@
 
 #include <math.h>
 
-#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
+#if DIVERSALIS__CPU__X86__SSE >= 2 && defined DIVERSALIS__COMPILER__MICROSOFT && defined DIVERSALIS__COMPILER__FEATURE__XMM_INTRINSICS
 
 #include "sse_mathfun.h"
 #include <xmmintrin.h>

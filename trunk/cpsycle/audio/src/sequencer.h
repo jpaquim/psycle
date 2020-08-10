@@ -4,8 +4,10 @@
 #ifndef psy_audio_SEQUENCER_H
 #define psy_audio_SEQUENCER_H
 
+// audio
 #include "sequence.h"
 #include "machines.h"
+// container
 #include <list.h>
 
 #ifdef __cplusplus
@@ -84,11 +86,13 @@ void psy_audio_sequencer_frametick(psy_audio_Sequencer*,
 	uintptr_t numsamples);
 void psy_audio_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);
-uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*, uintptr_t amount);
+uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*,
+	uintptr_t amount);
 void psy_audio_sequencer_onnewline(psy_audio_Sequencer*);
 void psy_audio_sequencer_setposition(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position);
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(psy_audio_Sequencer*
+	self)
 {
 	return self->position;
 }
@@ -139,8 +143,8 @@ INLINE uintptr_t psy_audio_sequencer_frames(psy_audio_Sequencer* self,
 	return (uintptr_t)(offset / self->beatspersample);
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_frametooffset(psy_audio_Sequencer* self,
-	uintptr_t numsamples)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_frametooffset(
+	psy_audio_Sequencer* self, uintptr_t numsamples)
 {
 	return numsamples * self->beatspersample;
 }
@@ -172,9 +176,9 @@ INLINE void psy_audio_sequencer_stoploop(psy_audio_Sequencer* self)
 	self->looping = FALSE;
 }
 
-INLINE psy_audio_sequencer_looping(psy_audio_Sequencer* self)
+INLINE bool psy_audio_sequencer_looping(psy_audio_Sequencer* self)
 {
-	return self->looping;
+	return self->looping != FALSE;
 }
 
 INLINE psy_audio_SequencerPlayMode psy_audio_sequencer_playmode(
@@ -194,17 +198,20 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 	return rv;
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_beatspersample(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_beatspersample(
+	psy_audio_Sequencer* self)
 {
 	return self->beatspersample;
 }
 
-INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(psy_audio_Sequencer* self)
+INLINE psy_dsp_big_beat_t psy_audio_sequencer_currbeatsperline(
+	psy_audio_Sequencer* self)
 {
 	return 1.0 / (self->lpb * psy_audio_sequencer_speed(self));
 }
 
-void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*, const psy_audio_PatternNode*);
+void psy_audio_sequencer_checkiterators(psy_audio_Sequencer*,
+	const psy_audio_PatternNode*);
 
 // elapsed playtime in seconds
 INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(

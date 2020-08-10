@@ -339,6 +339,11 @@ void psy_ui_editor_addtext(psy_ui_Editor* self, const char* text)
 {
 
 }
+
+char* psy_ui_editor_text(psy_ui_Editor* self, uintptr_t maxlength, char* text)
+{
+}
+
 void psy_ui_editor_clear(psy_ui_Editor* self)
 {
 
@@ -358,6 +363,16 @@ void psy_ui_editor_enableedit(psy_ui_Editor* self)
 void psy_ui_editor_preventedit(psy_ui_Editor* self)
 {
 
+}
+
+void psy_ui_editor_enablewrap(psy_ui_Editor* self)
+{
+	
+}
+
+void psy_ui_editor_disablewrap(psy_ui_Editor* self)
+{
+	
 }
 
 #endif

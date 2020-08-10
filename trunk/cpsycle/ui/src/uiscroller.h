@@ -13,8 +13,13 @@ typedef struct {
 	psy_ui_Component* client;
 } psy_ui_Scroller;
 
-void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client, psy_ui_Component* parent);
-// void psy_ui_scroller_updateoverflow(psy_ui_Scroller*);
+void psy_ui_scroller_init(psy_ui_Scroller*, psy_ui_Component* client,
+	psy_ui_Component* parent);
+//void psy_ui_scroller_updateoverflow(psy_ui_Scroller*);
+
+//void psy_ui_scroller_connectclient(psy_ui_Scroller* self);
+//void psy_ui_scroller_init_reparent(psy_ui_Scroller* self,
+	//psy_ui_Component* client, psy_ui_Component* parent);
 
 INLINE psy_ui_Component* psy_ui_scroller_base(psy_ui_Scroller* self)
 {

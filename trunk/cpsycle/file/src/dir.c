@@ -245,6 +245,11 @@ const char* psy_dir_config(void)
     return "/home/user";
 }
 
+const char* psy_dir_home(void)
+{
+	return "/home/user";
+}
+
 #elif defined(DIVERSALIS__OS__MICROSOFT)
 
 #include <direct.h>

@@ -190,8 +190,10 @@ typedef	void (*fp_machine_editoridle)(struct psy_audio_Machine*);
 typedef	const char* (*fp_machine_editname)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_seteditname)(struct psy_audio_Machine*, const char*
 	name);
-typedef void (*fp_machine_setposition)(struct psy_audio_Machine*, intptr_t x, intptr_t y);
-typedef void (*fp_machine_position)(struct psy_audio_Machine*, intptr_t* x, intptr_t* y);
+typedef void (*fp_machine_setposition)(struct psy_audio_Machine*, intptr_t x,
+	intptr_t y);
+typedef void (*fp_machine_position)(struct psy_audio_Machine*, intptr_t* x,
+	intptr_t* y);
 typedef	struct psy_audio_Buffer* (*fp_machine_buffermemory)(struct
 	psy_audio_Machine*);
 typedef	uintptr_t (*fp_machine_buffermemorysize)(struct psy_audio_Machine*);
@@ -212,9 +214,12 @@ typedef void (*fp_machine_bankname)(struct psy_audio_Machine*, int bnkidx,
 typedef int (*fp_machine_numbanks)(struct psy_audio_Machine*);
 typedef void (*fp_machine_setcurrbank)(struct psy_audio_Machine*, int bnkIdx);
 typedef int (*fp_machine_currbank)(struct psy_audio_Machine*);
-typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*, struct psy_audio_Preset*);
-typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*, struct psy_audio_Presets*);
-typedef struct psy_audio_Presets* (*fp_machine_presets)(struct psy_audio_Machine*);
+typedef void (*fp_machine_currentpreset)(struct psy_audio_Machine*,
+	struct psy_audio_Preset*);
+typedef void (*fp_machine_setpresets)(struct psy_audio_Machine*,
+	struct psy_audio_Presets*);
+typedef struct psy_audio_Presets* (*fp_machine_presets)(
+	struct psy_audio_Machine*);
 typedef bool (*fp_machine_acceptpresets)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_command)(struct psy_audio_Machine*);
 typedef const char* (*fp_machine_modulepath)(struct psy_audio_Machine*);
@@ -745,7 +750,8 @@ INLINE int psy_audio_machine_numprograms(psy_audio_Machine* self)
 	return self->vtable->numprograms(self);
 }
 
-INLINE void psy_audio_machine_setcurrprogram(psy_audio_Machine* self, int prgIdx)
+INLINE void psy_audio_machine_setcurrprogram(psy_audio_Machine* self,
+	int prgIdx)
 {
 	self->vtable->setcurrprogram(self, prgIdx);
 }
@@ -776,17 +782,20 @@ INLINE int psy_audio_machine_currbank(psy_audio_Machine* self)
 	return self->vtable->currbank(self);
 }
 
-INLINE void psy_audio_machine_currentpreset(psy_audio_Machine* self, struct psy_audio_Preset* preset)
+INLINE void psy_audio_machine_currentpreset(psy_audio_Machine* self,
+	struct psy_audio_Preset* preset)
 {
 	self->vtable->currentpreset(self, preset);
 }
 
-INLINE void psy_audio_machine_setpresets(psy_audio_Machine* self, struct psy_audio_Presets* presets)
+INLINE void psy_audio_machine_setpresets(psy_audio_Machine* self,
+	struct psy_audio_Presets* presets)
 {
 	self->vtable->setpresets(self, presets);
 }
 
-INLINE struct psy_audio_Presets* psy_audio_machine_presets(psy_audio_Machine* self)
+INLINE struct psy_audio_Presets* psy_audio_machine_presets(
+	psy_audio_Machine* self)
 {
 	return self->vtable->presets(self);
 }
@@ -898,7 +907,8 @@ INLINE psy_dsp_beat_t psy_audio_machine_beatspertick(psy_audio_Machine* self)
 
 INLINE psy_dsp_beat_t psy_audio_machine_samplespertick(psy_audio_Machine* self)
 {
-	return 1.f / self->vtable->beatspersample(self) * self->vtable->beatspertick(self);
+	return 1.f / self->vtable->beatspersample(self) *
+		self->vtable->beatspertick(self);
 }
 
 INLINE uintptr_t psy_audio_machine_ticksperbeat(psy_audio_Machine* self)
@@ -919,7 +929,8 @@ INLINE psy_dsp_beat_t psy_audio_machine_currbeatsperline(psy_audio_Machine*
 
 INLINE uintptr_t psy_audio_machine_currsamplesperrow(psy_audio_Machine* self)
 {
-	return (uintptr_t)(self->vtable->currbeatsperline(self) * 1.f / self->vtable->beatspersample(self));
+	return (uintptr_t)(self->vtable->currbeatsperline(self) * 1.f /
+		self->vtable->beatspersample(self));
 }
 
 INLINE psy_dsp_beat_t psy_audio_machine_currlinesperbeat(psy_audio_Machine*
@@ -1000,7 +1011,8 @@ INLINE void psy_audio_machine_output(psy_audio_Machine* self, const char* text)
 	self->vtable->output(self, text);
 }
 
-INLINE psy_audio_CpuTimeClock psy_audio_machine_accumulated_processing_time(psy_audio_Machine* self)
+INLINE psy_audio_CpuTimeClock psy_audio_machine_accumulated_processing_time(
+	psy_audio_Machine* self)
 {
 	return self->accumulated_processing_time_;
 }

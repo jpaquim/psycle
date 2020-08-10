@@ -161,7 +161,8 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 	strcpy(text, multipath);
 	token = strtok(text, seps);
 	while (token != NULL) {
-		psy_dir_enumerate_recursive(self, token, wildcard, option, onenumdir);
+		psy_dir_enumerate_recursive(self, token, wildcard, option,
+			(psy_fp_findfile)onenumdir);
 		token = strtok(0, seps );
 	}
 }
@@ -175,12 +176,13 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 		p = psy_properties_findsection(self->dirconfig, "plugins");
 		if (p) {			
 			psy_dir_enumerate_recursive(self, psy_properties_as_str(p), "*"MODULEEXT,
-				MACH_PLUGIN, onenumdir);
+				MACH_PLUGIN,
+				(psy_fp_findfile)onenumdir);
 		}
 		p = psy_properties_findsection(self->dirconfig, "luascripts");
 		if (p) {		
 			psy_dir_enumerate(self, psy_properties_as_str(p), "*.lua", MACH_LUA,
-				onenumdir);
+				(psy_fp_findfile)onenumdir);
 		}
 		p = psy_properties_findsection(self->dirconfig, "vsts32");
 		if (p) {		
@@ -307,7 +309,8 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 		searchname = path;
 		searchtype = machtype;
 		searchresult = 0;
-		psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+		psy_properties_enumerate(self->plugins, self,
+			(psy_PropertiesCallback)onpropertiesenum);
 		if (!searchresult) {
 			if (strstr(path, "blitz")) {
 				if (newgamefxblitzifversionunknown) {
@@ -317,13 +320,14 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				}
 				searchtype = machtype;
 				searchresult = 0;
-				psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+				psy_properties_enumerate(self->plugins, self,
+					(psy_PropertiesCallback)onpropertiesenum);
 				if (!searchresult) {
 					searchname = "blitzn:0";
 					searchtype = machtype;
 					searchresult = 0;
 					psy_properties_enumerate(self->plugins, self,
-						onpropertiesenum);
+						(psy_PropertiesCallback)onpropertiesenum);
 				}
 				if (!searchresult) {
 					if (newgamefxblitzifversionunknown) {						
@@ -334,7 +338,7 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					searchtype = machtype;
 					searchresult = 0;
 					psy_properties_enumerate(self->plugins, self,
-						onpropertiesenum);
+						(psy_PropertiesCallback)onpropertiesenum);
 				}
 			} else
 			if (strstr(path, "gamefx")) {
@@ -347,13 +351,13 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_properties_enumerate(self->plugins, self,
-					onpropertiesenum);
+					(psy_PropertiesCallback)onpropertiesenum);
 				if (!searchresult) {
 					searchname = "gamefxn:0";
 					searchtype = machtype;
 					searchresult = 0;
 					psy_properties_enumerate(self->plugins, self,
-						onpropertiesenum);
+						(psy_PropertiesCallback)onpropertiesenum);
 				}
 				if (!searchresult) {
 					if (newgamefxblitzifversionunknown) {
@@ -365,7 +369,7 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 					searchtype = machtype;
 					searchresult = 0;
 					psy_properties_enumerate(self->plugins, self,
-						onpropertiesenum);
+						(psy_PropertiesCallback)onpropertiesenum);
 				}
 			}
 		}
@@ -375,7 +379,7 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_properties_enumerate(self->plugins, self,
-					onpropertiesenum);
+					(psy_PropertiesCallback)onpropertiesenum);
 			}
 		}
 		if (!searchresult) {
@@ -384,7 +388,7 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_properties_enumerate(self->plugins, self,
-					onpropertiesenum);
+					(psy_PropertiesCallback)onpropertiesenum);
 			}
 		}
 		if (!searchresult) {
@@ -393,7 +397,7 @@ char* plugincatcher_modulepath(psy_audio_PluginCatcher* self,
 				searchtype = machtype;
 				searchresult = 0;
 				psy_properties_enumerate(self->plugins, self,
-					onpropertiesenum);
+					(psy_PropertiesCallback)onpropertiesenum);
 			}
 		}
 		if (searchresult) {			
@@ -430,6 +434,7 @@ const char* plugincatcher_searchpath(psy_audio_PluginCatcher* self, const char* 
 	searchname = name;
 	searchtype = machtype;
 	searchresult = 0;
-	psy_properties_enumerate(self->plugins, self, onpropertiesenum);
+	psy_properties_enumerate(self->plugins, self,
+		(psy_PropertiesCallback)onpropertiesenum);
 	return psy_properties_at_str(searchresult, "path", 0);
 }

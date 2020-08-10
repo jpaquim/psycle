@@ -32,6 +32,8 @@ typedef struct psy_ui_win_ComponentImp {
 	psy_ui_Size sizecache;
 	bool sizecachevalid;
 	int dbg;
+	psy_ui_TextMetric tm;
+	bool tmcachevalid;
 } psy_ui_win_ComponentImp;
 
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,

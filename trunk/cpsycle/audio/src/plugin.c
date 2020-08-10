@@ -547,7 +547,7 @@ void currentpreset(psy_audio_Plugin* self, psy_audio_Preset* preset)
 		size = mi_getdatasize(self->mi);
 		if (size > 0) {
 			pData = (unsigned char*)malloc(size);
-			mi_getdata(self->mi);
+			mi_getdata(self->mi, pData);
 			psy_audio_preset_putdata(preset, size, pData);
 			free(pData);
 		}

@@ -4,10 +4,12 @@
 #ifndef psy_audio_BUFFER_H
 #define psy_audio_BUFFER_H
 
-#include <dsptypes.h>
 #include "../../detail/psydef.h"
-
+// audio
 #include "array.h"
+// dsp
+#include <dsptypes.h>
+// container
 #include <list.h>
 
 #ifdef __cplusplus

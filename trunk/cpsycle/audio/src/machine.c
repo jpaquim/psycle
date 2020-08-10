@@ -23,47 +23,66 @@
 /// Machinecallback
 static uintptr_t machinecallback_samplerate(void* self) { return 44100;  }
 static psy_dsp_beat_t machinecallback_bpm(void* self) { return 125.f; }
-static psy_dsp_beat_t machinecallback_beatspertick(void* self) { return 1 / (psy_dsp_beat_t) 24.f; }
+static psy_dsp_beat_t machinecallback_beatspertick(void* self) { return 1 /
+	(psy_dsp_beat_t) 24.f; }
 static psy_dsp_beat_t machinecallback_beatspersample(void* self) { return 512; }
-static psy_dsp_beat_t machinecallback_currbeatsperline(void* self) { return 4096; }
-static struct psy_audio_Samples* machinecallback_samples(void* self) { return 0; }
+static psy_dsp_beat_t machinecallback_currbeatsperline(void* self) {
+	return 4096; }
+static struct psy_audio_Samples* machinecallback_samples(void* self) {
+	return 0; }
 static psy_audio_Machines* machinecallback_machines(void* self) { return 0; }
-static struct psy_audio_Instruments* machinecallback_instruments(void* self) { return 0; }
-static struct psy_audio_MachineFactory* machinecallback_machinefactory(void* self) { return 0; }
+static struct psy_audio_Instruments* machinecallback_instruments(void* self) {
+	return 0; }
+static struct psy_audio_MachineFactory* machinecallback_machinefactory(void*
+	self) {
+	return 0;
+}
 static bool machinecallback_fileselect_load(void* self) { return FALSE; }
 static bool machinecallback_fileselect_save(void* self) { return FALSE; }
 static void machinecallback_fileselect_directory(void* self) { }
 static void machinecallback_output(void* self, const char* text) { }
 static bool machinecallback_addcapture(void* self, int index) { return 0; }
 static bool machinecallback_removecapture(void* self, int index) { return 0; }
-static void machinecallback_readbuffers(void* self, int index, float** pleft, float** pright, int numsamples) { }
-static const char* machinecallback_capturename(void* self, int index) { return ""; }
+static void machinecallback_readbuffers(void* self, int index, float** pleft,
+	float** pright, int numsamples) {
+}
+static const char* machinecallback_capturename(void* self, int index) {
+	return "";
+}
 static int machinecallback_numcaptures(void* self) { return 0; }
-static const char* machinecallback_playbackname(void* self, int index) { return ""; }
+static const char* machinecallback_playbackname(void* self, int index) {
+	return "";
+}
 static int machinecallback_numplaybacks(void* self) { return 0; }
 
 void machinecallback_initempty(psy_audio_MachineCallback* self)
 {
-	self->samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
+	self->samplerate = (fp_mcb_samplerate)machinecallback_samplerate;
 	self->bpm = (fp_mcb_bpm) machinecallback_bpm;
-	self->beatspertick = (fp_mcb_beatspertick) machinecallback_beatspertick;
-	self->beatspersample = (fp_mcb_beatspersample) machinecallback_beatspersample;
-	self->currbeatsperline = (fp_mcb_currbeatsperline) machinecallback_currbeatsperline;
-	self->samples = (fp_mcb_samples) machinecallback_samples;
-	self->machines = (fp_mcb_machines) machinecallback_machines;
-	self->instruments = (fp_mcb_instruments) machinecallback_instruments;
-	self->machinefactory = (fp_mcb_machinefactory) machinecallback_machinefactory;
-	self->fileselect_load = (fp_mcb_fileselect_load) machinecallback_fileselect_load;
-	self->fileselect_save = (fp_mcb_fileselect_save) machinecallback_fileselect_save;
-	self->fileselect_directory = (fp_mcb_fileselect_directory) machinecallback_fileselect_directory;
+	self->beatspertick = (fp_mcb_beatspertick)machinecallback_beatspertick;
+	self->beatspersample = (fp_mcb_beatspersample)
+		machinecallback_beatspersample;
+	self->currbeatsperline = (fp_mcb_currbeatsperline)
+		machinecallback_currbeatsperline;
+	self->samples = (fp_mcb_samples)machinecallback_samples;
+	self->machines = (fp_mcb_machines)machinecallback_machines;
+	self->instruments = (fp_mcb_instruments)machinecallback_instruments;
+	self->machinefactory = (fp_mcb_machinefactory)
+		machinecallback_machinefactory;
+	self->fileselect_load = (fp_mcb_fileselect_load)
+		machinecallback_fileselect_load;
+	self->fileselect_save = (fp_mcb_fileselect_save)
+		machinecallback_fileselect_save;
+	self->fileselect_directory = (fp_mcb_fileselect_directory)
+		machinecallback_fileselect_directory;
 	self->output = (fp_mcb_output) machinecallback_output;
 	self->addcapture = (fp_mcb_addcapture) machinecallback_addcapture;
 	self->removecapture = (fp_mcb_removecapture) machinecallback_removecapture;
-	self->readbuffers = (fp_mcb_readbuffers) machinecallback_readbuffers;
-	self->capturename = (fp_mcb_capturename) machinecallback_capturename;
-	self->numcaptures = (fp_mcb_numcaptures) machinecallback_numcaptures;
-	self->playbackname = (fp_mcb_playbackname) machinecallback_playbackname;
-	self->numplaybacks = (fp_mcb_numplaybacks) machinecallback_numplaybacks;
+	self->readbuffers = (fp_mcb_readbuffers)machinecallback_readbuffers;
+	self->capturename = (fp_mcb_capturename)machinecallback_capturename;
+	self->numcaptures = (fp_mcb_numcaptures)machinecallback_numcaptures;
+	self->playbackname = (fp_mcb_playbackname)machinecallback_playbackname;
+	self->numplaybacks = (fp_mcb_numplaybacks)machinecallback_numplaybacks;
 }
 
 static psy_audio_MachineInfo const macinfo = {	
@@ -571,8 +590,8 @@ void loadspecific(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 		psyfile_read(songfile->file, &temp, sizeof(temp));
 		param = psy_audio_machine_tweakparameter(self, i);
 		if (param) {
-			int minval;
-			int maxval;
+			intptr_t minval;
+			intptr_t maxval;
 			float value;
 
 			psy_audio_machineparam_range(param, &minval, &maxval);

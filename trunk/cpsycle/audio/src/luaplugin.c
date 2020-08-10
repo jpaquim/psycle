@@ -107,7 +107,7 @@ int luapluginparam_label(psy_audio_LuaPluginMachineParam* self, char* text)
 		psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 		if (psy_luaimport_open(&in, 0)) {
 			const char* str;
-			int l;
+			size_t l = 0;
 
 			getparam(&in, self->index, "label");
 			psy_luaimport_pcall(&in, 1);
@@ -133,7 +133,7 @@ int luapluginparam_name(psy_audio_LuaPluginMachineParam* self, char* text)
 		psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 		if (psy_luaimport_open(&in, 0)) {
 			const char* str;
-			int l;
+			size_t l;
 
 			getparam(&in, self->index, "name");
 			psy_luaimport_pcall(&in, 1);
@@ -175,7 +175,7 @@ int luapluginparam_describe(psy_audio_LuaPluginMachineParam* self, char* text)
 		psy_luaimport_init(&in, self->plugin->script.L, self->plugin->client);
 		if (psy_luaimport_open(&in, 0)) {
 			const char* str;
-			int l;
+			size_t l;
 
 			getparam(&in, self->index, "display");
 			psy_luaimport_pcall(&in, 1);
@@ -209,8 +209,8 @@ float luapluginparam_normvalue(psy_audio_LuaPluginMachineParam* self)
 	return (float)v;
 }
 
-void luapluginparam_range(psy_audio_LuaPluginMachineParam* self, int* minval,
-	int* maxval)
+void luapluginparam_range(psy_audio_LuaPluginMachineParam* self, intptr_t* minval,
+	intptr_t* maxval)
 {
 	psy_LuaImport in;
 	lua_Number v;
@@ -1136,8 +1136,8 @@ void loadspecific(psy_audio_LuaPlugin* self, psy_audio_SongFile* songfile,
 
 			param = psy_audio_machine_tweakparameter(&self->custommachine.machine, i);
 			if (param) {
-				int minval;
-				int maxval;
+				intptr_t minval;
+				intptr_t maxval;
 				float value;
 				int temp;
 
@@ -1251,7 +1251,7 @@ const char* luaplugin_id(psy_audio_LuaPlugin* self, int index)
 	psy_luaimport_init(&in, self->script.L, self->client);
 	if (psy_luaimport_open(&in, 0)) {
 		const char* str;
-		int l;
+		size_t l = 0;
 
 		getparam(&in, index, "id");
 		psy_luaimport_pcall(&in, 1);
