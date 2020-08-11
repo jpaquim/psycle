@@ -5,8 +5,8 @@ different screen resolutions, adding a sequencer, unifying the instruments and
 wave controller, sampulse and sampler ps1 use, and avoiding ui dependencies in
 the audio core. A command line player makes use of this separation. The player
 will serve as first step to make a posix version available. The ui is reduced
-from mfc to win32 and wrapped behind an own layer. In a next step this layer
-will be used to add a x11 implementation. The version is written in c with c++
+from mfc to win32 and wrapped behind an own layer. A X11 implementation is
+started but not finished. The version is written in c with c++
 parts, in which some plugin and driver apis are written in.
 
 Structure of the host
@@ -15,12 +15,11 @@ audio           machines, patterns, instruments, sequence, player,
                 song import/export, library load, ...
 host            graphical psycle front end
 player          textmode psycle front end
-ui              bridged win32 calls, setup for x11 (placeholder, just a few
-                tests)
+ui              bridged win32/x11(not finished) calls
 uitest			a test program for X11 (placeholder, just a few
                 tests)
 audiodrivers	win: asio, mme, mmemidi, directx, wasapi
-                linux: alsa (placeholder)
+                linux: alsa
 
 external libs
 lua             script engine used since psycle 1.10
@@ -29,7 +28,7 @@ scintilla       plugin editor, help file viewer
 helper libs				
 container       list, hashtable, properties, signals
 dsp             buffer operations, adsr, notetab defines, sse2 optimizations,
-		dither, resampler, filter
+                dither, resampler, filter
 file            file/dir routines
 
 Additional includes
@@ -37,6 +36,8 @@ compiler
 detail          global header defines, platform tweaks
 
 Compiling
+
+MS-Windows
 
 It compiles with VC6 x86, VC2008(x86 tested, SP1), VC2017 (x86/x64) and
 VC2019(x86/x64), although VC6/2008 may not be updated or tested at every
@@ -64,3 +65,14 @@ boost_systems_your_version.dll, (from bin path)
 boost_thread_your_version.dll, (from bin path)
 universalis.dll (depending on your version needed or not) (from bin path)
 scintilla.dll (vc6, vc2008 only, search for an old compatible win98/xp dll)
+
+Posix
+
+The X11 part is quite unfinished, but to build execute the makefiles in the
+src directories of audio, container, dsp, file, ui, build the alsa driver and
+finally the host. Since there is no fileselector yet, you need to set
+manually a psy file somewhere in the fileload bar. The devel libs for X11 with
+xft, freetype, xmu, xshape and for alsa needs to be installed.
+Unfortunatley the makefiles of the qpsycle plugins arent working completly on
+a recent system without fixing them manually.
+

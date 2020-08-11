@@ -9,6 +9,7 @@
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
 #include <X11/extensions/shape.h>
+#include "X11/keysym.h"
 
 #include "uix11graphicsimp.h"
 #include "uix11fontimp.h"
@@ -48,6 +49,11 @@ extern psy_ui_App app;
 static int handleevent(psy_ui_X11App*, XEvent*);
 static int shapeEventBase, shapeErrorBase;
 
+// prototypes
+static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
+static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
+	int mask, XEvent*);
+// implementation
 void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 {
 	static const char szAppClass[] = "PsycleApp";	
@@ -852,7 +858,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			unsigned int height = 0; 
 			psy_ui_Rectangle r;				
 			unsigned int temp = 0;
-			XWindowAttributes win_attr;	
+			XWindowAttributes win_attr;
+			psy_ui_x11_GraphicsImp* gx11;
 									
 			window = event->xexpose.window;									
 			//screen  = XDefaultScreen(self->dpy);			
@@ -899,6 +906,10 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			psy_ui_setcolor(&imp->g, psy_ui_component_color(imp->component));
 			psy_ui_settextcolor(&imp->g, psy_ui_component_color(imp->component));
 			psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
+			// translate coordinates
+			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+			gx11->dx = -imp->component->scroll.x;
+			gx11->dy = -imp->component->scroll.y;			
 			if (imp->component->vtable->ondraw) {				
 				imp->component->vtable->ondraw(imp->component, &imp->g);
 			}
@@ -930,8 +941,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 
 				close = imp->component->vtable->onclose(imp->component);
 				if (imp->component->signal_close.slots) {
-					psy_signal_emit(&imp->component->signal_close, imp->component, 1,
-						(void*)&close);
+					psy_signal_emit(&imp->component->signal_close,
+						imp->component, 1, (void*)&close);
 				}
 				if (!close) {
 					return 0;
@@ -941,6 +952,43 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				self->running = FALSE;
 			}		
             break;
+        case KeyPress: {
+			psy_ui_KeyEvent ev;
+			
+			ev = translate_keyevent(&event->xkey);			
+			imp->component->vtable->onkeydown(imp->component, &ev);
+			psy_signal_emit(&imp->component->signal_keydown, imp->component,
+				1, &ev);
+			if (ev.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+				XKeyEvent xkevent;
+
+				xkevent = event->xkey;
+				xkevent.window      = imp->parent->hwnd;				
+				XSendEvent(self->dpy, imp->parent->hwnd, True, KeyPressMask,
+					(XEvent*)&xkevent);
+			}			
+			return 0;
+			break; }
+        case KeyRelease: {
+			psy_ui_KeyEvent ev;
+							
+			ev = translate_keyevent(&event->xkey);		
+			//(int)wParam, lParam, 
+			//	GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+			//	(lParam & 0x40000000) == 0x40000000);
+			imp->component->vtable->onkeyup(imp->component, &ev);
+			psy_signal_emit(&imp->component->signal_keyup, imp->component,
+				1, &ev);
+			if (ev.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+				XKeyEvent xkevent;
+
+				xkevent = event->xkey;
+				xkevent.window      = imp->parent->hwnd;				
+				XSendEvent(self->dpy, imp->parent->hwnd, True, KeyReleaseMask,
+					(XEvent*)&xkevent);
+			}
+			return 0;
+			break; }
         case ButtonPress: {
 			psy_ui_MouseEvent ev;
 			XButtonEvent xbe;
@@ -1005,6 +1053,136 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			break;
 	  }
 	return 0;
+}
+
+psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
+{
+	psy_ui_KeyEvent rv;
+	KeySym keysym = NoSymbol;
+	int repeat = 0;					
+	static unsigned char buf[64];
+	static unsigned char bufnomod[2];
+	int ret;
+	XKeyEvent xkevent;
+
+	xkevent = *event;
+	xkevent.state = 0;			
+	ret = XLookupString(&xkevent, buf, sizeof buf, &keysym, 0);
+	switch (keysym) {
+		case XK_Home:
+			keysym = psy_ui_KEY_HOME;
+			break;
+		case XK_Escape:
+			keysym = psy_ui_KEY_ESCAPE;
+			break;
+		case XK_Return:
+			keysym = psy_ui_KEY_RETURN;
+			break;
+		case XK_Tab:
+			keysym = psy_ui_KEY_TAB;
+			break;
+		case XK_Prior:
+			keysym = psy_ui_KEY_PRIOR;
+			break;
+		case XK_Next:
+			keysym = psy_ui_KEY_NEXT;
+			break;
+		case XK_Left:
+			keysym = psy_ui_KEY_LEFT;
+			break;
+		case XK_Up:
+			keysym = psy_ui_KEY_UP;
+			break;
+		case XK_Right:
+			keysym = psy_ui_KEY_RIGHT;
+			break;
+		case XK_Down:
+			keysym = psy_ui_KEY_DOWN;
+			break;
+		case XK_Delete:
+			keysym = psy_ui_KEY_DELETE;
+			break;
+		case XK_BackSpace:
+			keysym = psy_ui_KEY_BACK;
+			break;
+		case XK_F1:
+			keysym = psy_ui_KEY_F1;
+			break;
+		case XK_F2:
+			keysym = psy_ui_KEY_F2;
+			break;
+		case XK_F3:
+			keysym = psy_ui_KEY_F3;
+			break;
+		case XK_F4:
+			keysym = psy_ui_KEY_F4;
+			break;
+		case XK_F5:
+			keysym = psy_ui_KEY_F5;
+			break;
+		case XK_F6:
+			keysym = psy_ui_KEY_F6;
+			break;
+		case XK_F7:
+			keysym = psy_ui_KEY_F7;
+			break;
+		case XK_F8:
+			keysym = psy_ui_KEY_F8;
+			break;
+		case XK_F9:
+			keysym = psy_ui_KEY_F9;
+			break;
+		case XK_F10:
+			keysym = psy_ui_KEY_F10;
+			break;
+		case XK_F11:
+			keysym = psy_ui_KEY_F11;
+			break;
+		case XK_F12:
+			keysym = psy_ui_KEY_F12;
+			break;
+		default:
+			if (ret && buf[0] != '\0') {
+				keysym = psy_ui_KEY_Q; //buf[0];
+			}
+			keysym = 'Q';
+			break;		
+	}
+	// if (ret && buf[0] != '\0') {
+	// 	keysym = buf[0];
+	// 	printf("%d,%d\n", ret, (int)buf[0]);
+	// } else {
+	// 	printf("no lookup %d\n", keysym);
+	// }
+	psy_ui_keyevent_init(&rv,
+		keysym,
+		0,
+		0,
+		0,
+		repeat);
+	return rv;
+}
+
+void sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
+	int mask,
+	XEvent* xev)
+{	
+	if (xev && psy_table_at(&self->selfmap,
+			(uintptr_t)imp->parent->hwnd)) {
+		//XEvent event;
+		
+		//event = *xev;
+		//event.xany.window = imp->parent->hwnd;
+		// psy_list_append(&winapp->targetids, imp->hwnd);
+		// winapp->eventretarget = imp->component;
+		//xev->xany.window = imp->parent->hwnd;
+		XSendEvent(self->dpy, imp->parent->hwnd, True, mask,
+			xev);
+	} else {
+		//psy_list_free(winapp->targetids);
+		//winapp->targetids = NULL;
+	}
+	//winapp->eventretarget = 0;
 }
 
 #endif

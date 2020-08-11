@@ -59,7 +59,7 @@ static const char* workspace_driverpath(Workspace*);
 static const char* workspace_driverkey(Workspace*);
 static const char* workspace_eventdriverpath(Workspace*);
 const char* workspace_languagekey(Workspace*);
-static void workspace_configaudio(Workspace*);
+//static void workspace_configaudio(Workspace*);
 static void workspace_configvisual(Workspace*);
 static void workspace_configkeyboard(Workspace*);
 static void workspace_configlanguage(Workspace*);
@@ -311,6 +311,7 @@ psy_Properties* workspace_driverconfiguration(Workspace* self)
 	
 void workspace_configaudio(Workspace* self)
 {			
+	printf("config audio: %s\n", workspace_driverpath(self));
 	psy_audio_player_loaddriver(&self->player, workspace_driverpath(self),
 		workspace_driverconfiguration(self));	
 	workspace_driverconfig(self);
@@ -423,8 +424,10 @@ void workspace_driverconfig(Workspace* self)
 {
 	psy_properties_free(self->driverconfigure->children);
 	self->driverconfigure->children = NULL;
-	psy_properties_append_property(self->driverconfigure,
-		psy_properties_clone(self->player.driver->properties, TRUE));
+	if (self->player.driver->properties) {
+		psy_properties_append_property(self->driverconfigure,
+			psy_properties_clone(self->player.driver->properties, TRUE));
+	}
 }
 
 void workspace_mididriverconfig(Workspace* self, int driverid)
@@ -518,7 +521,8 @@ void workspace_makelanguagelist(Workspace* self, psy_Properties* parent)
 		psy_properties_append_choice(self->general, "lang", 0),
 		"settingsview.language");
 	if (workdir(currdir)) {
-		psy_dir_enumerate(self, currdir, "*.ini", 0, workspace_onaddlanguage);
+		psy_dir_enumerate(self, currdir, "*.ini", 0, (psy_fp_findfile)
+			workspace_onaddlanguage);
 	}	
 }
 
@@ -1044,9 +1048,17 @@ void workspace_makedriverlist(Workspace* self)
 
 	psy_properties_settext(self->inputoutput, "Input/Output");
 	// change number to set startup driver, if no psycle.ini found
+#if defined(DIVERSALIS__OS__MICROSOFT)	
+	// 2 : directx
 	drivers = psy_properties_settext(psy_properties_append_choice(
 		self->inputoutput, "driver", 2),
 		"settingsview.audio-drivers");
+#elif defined(DIVERSALIS__OS__LINUX)
+	// 1 : alsa
+	drivers = psy_properties_settext(psy_properties_append_choice(
+		self->inputoutput, "driver", 1),
+		"settingsview.audio-drivers");
+#endif		
 	psy_properties_append_string(drivers, "silent", "silentdriver");
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	// output target for the audio driver dlls is {solutiondir}/Debug or 
@@ -1058,7 +1070,8 @@ void workspace_makedriverlist(Workspace* self)
 	psy_properties_append_string(drivers, "wasapi", ".\\wasapi.dll");
 	psy_properties_append_string(drivers, "asio", ".\\asiodriver.dll");
 #elif defined(DIVERSALIS__OS__LINUX)
-	psy_properties_append_string(drivers, "alsa", "..\\driver\\alsa\\libpsyalsa.so");
+	psy_properties_append_string(drivers, "alsa",
+		"../../driver/alsa/libpsyalsa.so");
 #endif
 }
 
@@ -1083,23 +1096,28 @@ void workspace_makedriverconfigurations(Workspace* self)
 
 					psy_library_init(&library);
 					psy_library_load(&library, path);
+					printf("driverconfigurations %s\n", path);
 					if (library.module) {
 						pfndriver_create fpdrivercreate;
 
 						fpdrivercreate = (pfndriver_create)
-							psy_library_functionpointer(&library, "driver_create");
+							psy_library_functionpointer(&library,
+								"driver_create");
 						if (fpdrivercreate) {
 							psy_AudioDriver* driver;							
 
 							driver = fpdrivercreate();
-							if (driver && driver->properties && driver->properties->children) {
+							printf("driverconfigurations create \n");
+							if (driver && driver->properties &&
+								driver->properties->children) {
 								psy_Properties* driversection;
-
+								printf("driversection create \n");
 								driversection = psy_properties_append_section(
 									self->driverconfigurations,
 									psy_properties_key(p));
 								psy_properties_append_property(driversection,
-									psy_properties_clone(driver->properties->children, 1));
+									psy_properties_clone(
+										driver->properties->children, 1));
 								driver->dispose(driver);
 							}
 						}
@@ -2335,7 +2353,7 @@ void workspace_showgear(Workspace* self)
 void workspace_onlanguagechanged(Workspace* self, Translator* sender)
 {
 	psy_properties_enumerate(self->config.children, self,
-		workspace_onchangelanguageenum);	
+		(psy_PropertiesCallback)workspace_onchangelanguageenum);	
 }
 
 int workspace_onchangelanguageenum(Workspace* self,
