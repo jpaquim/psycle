@@ -527,6 +527,9 @@ typedef enum {
 	psy_ui_CURSORSTYLE_SW_RESIZE
 } psy_ui_CursorStyle;
 
+#define psy_ui_ETO_OPAQUE	0x0002
+#define psy_ui_ETO_CLIPPED	0x0004
+
 typedef enum {
 	psy_ui_KEY_LBUTTON         = 0x01,
 	psy_ui_KEY_RBUTTON         = 0x02,
@@ -655,8 +658,6 @@ typedef enum {
 	psy_ui_KEY_BRACKETRIGHT    = 0xDD
 } psy_ui_Key;
 
-#define psy_ui_ETO_OPAQUE	0x0002
-#define psy_ui_ETO_CLIPPED	0x0004
 
 #ifdef __cplusplus
 }

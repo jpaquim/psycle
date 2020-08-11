@@ -60,6 +60,8 @@ static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static unsigned int driver_samplerate(psy_AudioDriver*);
 
+static void thread_function(void* driver);
+static void init_properties(psy_AudioDriver*);
 static void set_hwparams(AlsaDriver* self, snd_pcm_hw_params_t* params,
     snd_pcm_access_t access);
 static void set_swparams(AlsaDriver* self, snd_pcm_sw_params_t* swparams);
@@ -120,25 +122,25 @@ int driver_init(psy_AudioDriver* driver)
 	self->channels = 2; // count of channels
 
 	// safe default values
-	self->buffer_time = 200000;
-	self->period_time = 60000;
+	self->buffer_time = 80000;						
+	self->period_time = 20000;
 
 	self->buffer_size = 0;
 	self->period_size = 0;
 	self->output = 0;
-//	driver_configure(&self->driver);
+	init_properties(driver);
 	return 0;
 }
 
 int driver_dispose(psy_AudioDriver* driver)
 {
 	AlsaDriver* self = (AlsaDriver*) driver;
-	properties_free(self->driver.properties);
+	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;	
 	return 0;
 }
 
-static void init_properties(psy_AudioDriver* self)
+void init_properties(psy_AudioDriver* self)
 {	
 	psy_Properties* property;	
 
@@ -211,6 +213,7 @@ int driver_open(psy_AudioDriver* driver)
 	char* device_name;
 	unsigned int chn;
 	int err;
+	int threadid;
 
 	// return immediatly if the thread is already running
 	if (self->running_) return 0;
@@ -268,6 +271,13 @@ int driver_open(psy_AudioDriver* driver)
 	// { scoped_lock lock(mutex_);
 	// while (!running_) condition_.wait(lock);
 	// }
+	self->stop_requested_ = FALSE;
+	if (pthread_create(&threadid, NULL, (void*(*)(void*))thread_function,
+		(void*) driver) == 0)
+	{		
+		return TRUE;	  
+	}
+	return FALSE;
 }
 
 void thread_function(void* driver) {
@@ -277,7 +287,7 @@ void thread_function(void* driver) {
 	self->running_ = TRUE;
 	//}
 	//condition_.notify_one();
-
+	printf("Enter Alsa Thread function\n");
 	while (TRUE) {
 		int16_t* ptr;
 		int cptr;
@@ -285,7 +295,7 @@ void thread_function(void* driver) {
 		// check whether the thread has been asked to terminate
 		// { scoped_lock lock(mutex_);
 		if (self->stop_requested_) goto notify_termination;
-		// }
+		// }		
 		FillBuffer(self, 0, self->period_size);
 		ptr = self->samples;
 		cptr = self->period_size;
@@ -303,6 +313,8 @@ void thread_function(void* driver) {
 			ptr += err * self->channels;
 			cptr -= err;
 		}
+//		usleep(100);
+	//	printf("write\n");
 		// this_thread::yield(); ///\todo is this useful?
 	}
 
@@ -312,6 +324,7 @@ notify_termination:
 	self->running_ = FALSE;
 	// }
 	// condition_.notify_one();
+	printf("Leave Alsa Thread\n");
 }
 
 /// Underrun and suspend recovery
@@ -372,6 +385,7 @@ void FillBuffer(AlsaDriver* self, snd_pcm_uframes_t offset, int count)
 	float* input;
 	int hostisplaying;
     unsigned int chn;
+    int num;
 
 	// verify and prepare the contents of areas
 	for (chn = 0; chn < self->channels; ++chn) {
@@ -379,22 +393,25 @@ void FillBuffer(AlsaDriver* self, snd_pcm_uframes_t offset, int count)
 			fprintf(stderr, "psycle: alsa: areas %u.first == %d, aborting. %s\n",
                 chn, (int)self->areas[chn].first );			
 		}
-		self->samples[chn] = (int16_t*)(((unsigned char*)self->areas[chn].addr)
+		samples[chn] = (int16_t*)(((unsigned char*)self->areas[chn].addr)
             + (self->areas[chn].first / 8));
 		if (self->areas[chn].step % 16) {			
 			fprintf(stderr, "psycle: alsa: areas[%u].step == %d, aborting. \n",
                 chn, self->areas[chn].step);			
 		}
 		steps[chn] = self->areas[chn].step / 16;
-		self->samples[chn] += offset * steps[chn];
+		samples[chn] += offset * steps[chn];
 	}
 	// fill the channel areas
+	num = count;
 	input = self->driver._pCallback(
-		self->driver._callbackContext, &count, &hostisplaying);	
-
-	// dequantize16anddeinterlace(input, samples[0], steps[0], samples[1], steps[1], count);
-	samples[0] += steps[0] * count;
-	samples[1] += steps[1] * count;
+		self->driver._callbackContext, &num, &hostisplaying);		
+	while (count-- > 0) {
+		*samples[0] = (int16_t)(*input++);
+		samples[0] += steps[0];
+		*samples[1] = (int16_t)(*input++);
+		samples[1] += steps[1];
+	}
 }
 
 void set_hwparams(AlsaDriver* self, snd_pcm_hw_params_t* params, snd_pcm_access_t access)

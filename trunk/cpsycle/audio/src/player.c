@@ -317,6 +317,8 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 	notes = psy_properties_find(self->eventdrivers.cmds, "notes",
 		PSY_PROPERTY_TYP_SECTION);
 	cmd = sender->getcmd(sender, notes);
+	printf("input %d, ", (int)cmd.id);
+	printf("param1 %d\n", (int)cmd.data.param1);
 	if (cmd.id != -1 && cmd.data.param1 < 255) {		
 		unsigned char note;
 		psy_audio_Machine* machine;
@@ -502,15 +504,18 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 			fpdrivercreate = (pfndriver_create)
 				psy_library_functionpointer(&self->drivermodule,
 				"driver_create");
+			printf("driver driver_create\n");
 			if (fpdrivercreate) {
 				driver = fpdrivercreate();				
 				driver->connect(driver, self, (AUDIODRIVERWORKFN)
 					psy_audio_player_work, mainframe);
+				printf("driver driver_connect\n");
 			}
 			psy_audio_exclusivelock_enable();
 		}		
 	}
-	if (!driver) {
+	if (!driver) {		
+		printf("create silentdriver\n");
 		driver = psy_audio_create_silent_driver();
 		psy_audio_exclusivelock_disable();
 	}	
@@ -519,7 +524,9 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 	psy_dsp_rmsvol_setsamplerate(driver->samplerate(driver));
 	self->driver = driver;
 	if (self->driver && config) {
+		printf("driver driver_configure\n");
 		self->driver->configure(self->driver, config);
+		printf("driver driver_open\n");
 		self->driver->open(self->driver);
 	}
 }
