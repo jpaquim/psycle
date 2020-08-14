@@ -10,25 +10,7 @@
 #include <string.h>
 #include "resources/resource.h"
 
-static void about_initbuttons(About* self);
-static void about_oncontributors(About*, psy_ui_Component* sender);
-static void about_onversion(About*, psy_ui_Component* sender);
-static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
-static void about_onalign(About*);
-
-static psy_ui_ComponentVtable about_vtable;
-static int about_vtable_initialized = 0;
-
-static void about_vtable_init(About* self)
-{
-	if (!about_vtable_initialized) {
-		about_vtable = *(self->component.vtable);		
-		about_vtable.onalign = (psy_ui_fp_onalign) about_onalign;
-		about_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
-			about_onmousedoubleclick;
-		about_vtable_initialized = 1;
-	}
-}
+#include "../../detail/portable.h"
 
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
@@ -106,6 +88,28 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, psy_ui_color_make(0x00232323));
 }
 
+// About
+// prototypes
+static void about_initbuttons(About*);
+static void about_oncontributors(About*, psy_ui_Component* sender);
+static void about_onversion(About*, psy_ui_Component* sender);
+static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
+static void about_onalign(About*);
+// vtable
+static psy_ui_ComponentVtable about_vtable;
+static int about_vtable_initialized = 0;
+
+static void about_vtable_init(About* self)
+{
+	if (!about_vtable_initialized) {
+		about_vtable = *(self->component.vtable);
+		about_vtable.onalign = (psy_ui_fp_onalign)about_onalign;
+		about_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+			about_onmousedoubleclick;
+		about_vtable_initialized = 1;
+	}
+}
+// implementation
 void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 {				
 	psy_ui_component_init(&self->component, parent);	
@@ -157,8 +161,12 @@ void about_onalign(About* self)
 	size = psy_ui_component_size(&self->component);	
 	tm = psy_ui_component_textmetric(&self->component);
 	bitmapsize = psy_ui_bitmap_size(&self->image.bitmap);
+	bitmapsize.width = psy_ui_value_makepx(
+		max(tm.tmAveCharWidth * 40,
+			psy_ui_value_px(&bitmapsize.width, &tm)));
 	bitmapsize.height = psy_ui_value_makepx(
-		psy_ui_value_px(&bitmapsize.height, &tm) + tm.tmHeight * 4);
+		max(tm.tmHeight * 20,
+			psy_ui_value_px(&bitmapsize.height, &tm) + tm.tmHeight * 4));
 	centerx = (psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&bitmapsize.width, &tm)) / 2;
 	centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;
 	contribbuttonsize = psy_ui_component_preferredsize(&self->contribbutton.component, &size);

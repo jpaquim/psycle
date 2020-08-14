@@ -76,9 +76,19 @@ typedef struct psy_AudioDriver {
 	psy_Signal signal_stop;
 } psy_AudioDriver;
 
+#if defined DIVERSALIS__OS__MICROSOFT
+
 typedef psy_AudioDriver* (__cdecl *pfndriver_create)(void);
 
 EXPORT psy_AudioDriver* __cdecl driver_create(void);
 EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void);
+
+#else
+typedef psy_AudioDriver* (*pfndriver_create)(void);
+
+EXPORT psy_AudioDriver* driver_create(void);
+EXPORT AudioDriverInfo const * GetPsycleDriverInfo(void);
+
+#endif
 
 #endif

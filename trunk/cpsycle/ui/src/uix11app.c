@@ -45,14 +45,16 @@ extern psy_ui_App app;
 	//return EXCEPTION_EXECUTE_HANDLER;
 // }
 
-
-static int handleevent(psy_ui_X11App*, XEvent*);
 static int shapeEventBase, shapeErrorBase;
 
 // prototypes
+static int handleevent(psy_ui_X11App*, XEvent*);
+static void dispose_window(psy_ui_X11App*, Window);
 static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
 static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
+static int timertick(psy_ui_X11App*);
+	
 // implementation
 void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 {
@@ -75,13 +77,15 @@ void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 	if (!shape_extension) {
 		printf("XShapeQueryExtension error\n");
 	}
+	self->timers = 0;
 }
 
 void psy_ui_x11app_dispose(psy_ui_X11App* self)
-{
+{	
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
 	XCloseDisplay(self->dpy);
+	psy_list_deallocate(&self->timers, NULL);	
 //	DeleteObject(self->defaultbackgroundbrush);
 }
 
@@ -783,27 +787,37 @@ void widget_expose(Widget w, XtPointer clientdata,
 int psy_ui_x11app_run(psy_ui_X11App* self) 
 {
 	XEvent event;	
-
-	//// __try
-	//// {
-		//while (GetMessage (&msg, NULL, 0, 0))
-		//{
-			  //TranslateMessage (&msg) ;
-			  //DispatchMessage (&msg) ;
-		//}
-	//// }
-	//// __except(FilterException("app loop", GetExceptionCode(), GetExceptionInformation())) {			
-	//// }
-    //return (int) msg.wParam ;
-    
-//while (1) {
-//XtAppNextEvent(self->context, &xevent);		 
-	//	 XtDispatchEvent(&xevent);		 
-	// }
+	int x11_fd;
+	fd_set in_fds;
+	struct timeval tv;
+	
+	x11_fd = ConnectionNumber(self->dpy);
+	
 	self->running = TRUE;
 	while (self->running) {
-      XNextEvent(self->dpy, &event);
-      handleevent(self, &event);
+		// create a file description set containing x11_fd
+        FD_ZERO(&in_fds);
+        FD_SET(x11_fd, &in_fds);
+
+        // set timer to 1 ms
+        tv.tv_usec = 1000;
+        tv.tv_sec = 0;
+        
+        // Wait for X Event or a Timer
+        int num_ready_fds = select(x11_fd + 1, &in_fds, NULL, NULL, &tv);
+        if (num_ready_fds > 0) {
+            // printf("Event Received!\n");
+		} else if (num_ready_fds == 0)
+            // Handle timer here
+            timertick(self);            
+        else {
+            printf("X11 select: An error occured!\n");
+		}
+	
+		while(XPending(self->dpy)) {
+            XNextEvent(self->dpy, &event);	      
+			handleevent(self, &event);
+		}
       //printf("%d\n", event.type);
       //printf("%d\n", StructureNotifyMask);
     }
@@ -814,6 +828,62 @@ void psy_ui_x11app_stop(psy_ui_X11App* self)
 {
 	self->running = FALSE;
 //	PostQuitMessage(0);
+}
+
+int timertick(psy_ui_X11App* self)
+{
+	psy_List* p;
+	
+	for (p = self->timers; p != NULL; p = p->next) {
+		psy_ui_X11TickCounter* counter;
+		
+		counter = (psy_ui_X11TickCounter*)psy_list_entry(p);
+		if (counter->tick == 0) {
+			psy_ui_x11_ComponentImp* imp;
+	
+			imp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
+				(uintptr_t)counter->hwnd);
+			if (imp && imp->component) {
+				if (imp->component->signal_timer.slots) {
+					psy_signal_emit(&imp->component->signal_timer,
+						imp->component, 1, counter->id);
+				}
+			}
+			counter->tick = counter->numticks;			
+		}
+		if (counter->tick > 0) {
+			--counter->tick;
+		}	
+	}
+}
+
+void psy_ui_x11app_starttimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id,
+	uintptr_t interval)
+{
+	psy_ui_X11TickCounter* counter;
+		
+	counter = (psy_ui_X11TickCounter*)malloc(sizeof(psy_ui_X11TickCounter));
+	counter->hwnd = hwnd;
+	counter->id = id;
+	counter->numticks = interval;
+	counter->tick = 0;
+	psy_list_append(&self->timers, counter);
+}
+
+void psy_ui_x11app_stoptimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id)
+{
+	psy_List* p;
+	
+	for (p = self->timers; p != NULL; p = p->next) {
+		psy_ui_X11TickCounter* counter;
+		
+		counter = (psy_ui_X11TickCounter*)psy_list_entry(p);
+		if (counter->hwnd == hwnd && counter->id == id) {
+			psy_list_remove(&self->timers, p);
+			free(counter);
+			break;
+		}
+	}
 }
 
 int handleevent(psy_ui_X11App* self, XEvent* event)
@@ -827,17 +897,10 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 	if (!imp) {
 		return 0;
 	}
-	switch (event->type)
-      {
-		  case DestroyNotify: {
-			if (imp->component) {
-				psy_ui_component_dispose(imp->component);
-			} else {
-				imp->imp.vtable->dev_dispose(&imp->imp);
-			}
-			psy_table_remove(&self->selfmap, (uintptr_t)imp->hwnd);			  
-		    printf("DestroyNotify\n");
-		  break; }
+	switch (event->type) {
+		  case DestroyNotify:
+			dispose_window(self, imp->hwnd);
+		  break;
 		  case Expose: {			
 			if (event->xexpose.count != 0 ||
 				!psy_ui_component_visible(imp->component)) {
@@ -918,38 +981,56 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			//XFlush(self->dpy);							
 			//psy_ui_graphics_dispose(&g);		
 			break; }
-		case ConfigureNotify: {
+		case ConfigureNotify: {			
 			XConfigureEvent xce = event->xconfigure;
-			psy_ui_Size size;
-								
-			if (imp->component->alignchildren) {
-				psy_ui_component_align(imp->component);
+			
+			if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
+				psy_ui_Size size;
+					
+				imp->prev_w = xce.width;
+				imp->prev_h = xce.height;
+				if (imp->component->alignchildren) {
+					psy_ui_component_align(imp->component);
+				}
+				size.width = psy_ui_value_makepx(xce.width);
+				size.height = psy_ui_value_makepx(xce.height);						
+							   
+				imp->component->vtable->onsize(imp->component, &size);
+				if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
+					psy_ui_component_updateoverflow(imp->component);						
+				}
+				psy_signal_emit(&imp->component->signal_size, imp->component, 1,
+					(void*)&size);
 			}
-			size.width = psy_ui_value_makepx(xce.width);
-			size.height = psy_ui_value_makepx(xce.height);				
-			imp->component->vtable->onsize(imp->component, &size);
-			if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
-				psy_ui_component_updateoverflow(imp->component);						
-			}
-			psy_signal_emit(&imp->component->signal_size, imp->component, 1,
-				(void*)&size);
 			return 0 ;			
 		break; }
 		case ClientMessage:
             if (event->xclient.data.l[0] == self->wmDeleteMessage) {
-                bool close;
+				XEvent e;
+				uintptr_t hwnd;
+                //bool close;
 
-				close = imp->component->vtable->onclose(imp->component);
-				if (imp->component->signal_close.slots) {
-					psy_signal_emit(&imp->component->signal_close,
-						imp->component, 1, (void*)&close);
+				//close = imp->component->vtable->onclose(imp->component);
+				//if (imp->component->signal_close.slots) {
+				//	psy_signal_emit(&imp->component->signal_close,
+				//		imp->component, 1, (void*)&close);
+				//}
+				//if (!close) {
+				//	return 0;
+				//}
+				hwnd = event->xclient.window;
+				XDestroyWindow(self->dpy, event->xclient.window);
+				while (TRUE) {
+					XNextEvent(self->dpy, event);
+					if (event->type ==  DestroyNotify) {
+						dispose_window(self, event->xany.window);
+						if (hwnd == event->xany.window) {
+							printf("cleaned up\n");
+							break;
+						}
+					}
 				}
-				if (!close) {
-					return 0;
-				}
-				//XDestroyWindow(self->dpy, app.main);
-				//XSync(self->dpy, FALSE);
-				self->running = FALSE;
+				self->running = FALSE;				
 			}		
             break;
         case KeyPress: {
@@ -1055,6 +1136,23 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 	return 0;
 }
 
+void dispose_window(psy_ui_X11App* self, Window window)
+{
+	psy_ui_x11_ComponentImp* imp;
+	
+	printf("dispose: %u\n", (unsigned int)window);	
+	imp = (psy_ui_x11_ComponentImp*)psy_table_at(
+		&self->selfmap, (uintptr_t) window);
+	if (imp) {	
+		if (imp->component) {
+			psy_ui_component_dispose(imp->component);
+		} else {
+			imp->imp.vtable->dev_dispose(&imp->imp);
+		}
+		psy_table_remove(&self->selfmap, (uintptr_t)imp->hwnd);		
+	}
+}
+
 psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 {
 	psy_ui_KeyEvent rv;
@@ -1064,9 +1162,12 @@ psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 	static unsigned char bufnomod[2];
 	int ret;
 	XKeyEvent xkevent;
-
-	xkevent = *event;
-	xkevent.state = 0;			
+	bool shift;
+	bool ctrl;
+	
+	xkevent = *event;	
+	shift = (xkevent.state & ShiftMask) == ShiftMask;
+	ctrl = (xkevent.state & ControlMask) == ControlMask;					
 	ret = XLookupString(&xkevent, buf, sizeof buf, &keysym, 0);
 	switch (keysym) {
 		case XK_Home:
@@ -1143,9 +1244,19 @@ psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 			break;
 		default:
 			if (ret && buf[0] != '\0') {
-				keysym = psy_ui_KEY_Q; //buf[0];
+				if (buf[0] >= 'A' && buf[0] <= 'Z') {					
+					keysym = psy_ui_KEY_A +
+						buf[0] - 'A';
+				} else if (buf[0] >= 'a' && buf[0] <= 'z') {
+					keysym = psy_ui_KEY_A +
+						buf[0] - 'a';
+				} else if (buf[0] >= '0' && buf[0] <= '9') {
+					keysym = psy_ui_KEY_DIGIT0 +
+						buf[0] - '0';
+				} else {
+					keysym = psy_ui_KEY_A; //buf[0];
+				}
 			}
-			keysym = 'Q';
 			break;		
 	}
 	// if (ret && buf[0] != '\0') {
@@ -1157,8 +1268,8 @@ psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 	psy_ui_keyevent_init(&rv,
 		keysym,
 		0,
-		0,
-		0,
+		shift,
+		ctrl,
 		repeat);
 	return rv;
 }

@@ -185,10 +185,12 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	int err = 0;	
 
 	x11app = (psy_ui_X11App*) app.platform;	
+	self->prev_w = width;
+	self->prev_h = height;
 	if (parent == 0) {		      
         self->hwnd = XCreateSimpleWindow(
 			x11app->dpy, XDefaultRootWindow(x11app->dpy),
-				x, y, width, height, 4, 0, 0);
+				x, y, width, height, 4, 0, 0x00232323);
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
 			StructureNotifyMask);
@@ -196,7 +198,7 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
     } else {        
         self->hwnd = XCreateSimpleWindow(
 			x11app->dpy, parent->hwnd,
-				x, y, width, height, 0, 0, 0);
+				x, y, width, height, 0, 0, 0x00232323);
 			XMapWindow(x11app->dpy, self->hwnd);
 			XSelectInput(x11app->dpy, self->hwnd,
 				KeyPressMask | KeyReleaseMask |
@@ -905,12 +907,18 @@ void dev_setcursor(psy_ui_x11_ComponentImp* self, psy_ui_CursorStyle cursorstyle
 void dev_starttimer(psy_ui_x11_ComponentImp* self, uintptr_t id,
 	uintptr_t interval)
 {
-//	SetTimer(self->hwnd, id, interval, 0);
+	psy_ui_X11App* x11app;
+	
+	x11app = (psy_ui_X11App*)app.platform;
+	psy_ui_x11app_starttimer(x11app, self->hwnd, id, interval);
 }
 
 void dev_stoptimer(psy_ui_x11_ComponentImp* self, uintptr_t id)
 {
-//	KillTimer(self->hwnd, id);
+	psy_ui_X11App* x11app;
+	
+	x11app = (psy_ui_X11App*)app.platform;
+	psy_ui_x11app_stoptimer(x11app, self->hwnd, id);
 }
 
 void dev_seticonressource(psy_ui_x11_ComponentImp* self, int ressourceid)

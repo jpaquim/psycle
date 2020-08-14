@@ -3,11 +3,10 @@ hopefully helps some new programmers to continue psycle.
 It should help replacing MFC from Psycle, making the host more responsive to
 different screen resolutions, adding a sequencer, unifying the instruments and
 wave controller, sampulse and sampler ps1 use, and avoiding ui dependencies in
-the audio core. A command line player makes use of this separation. The player
-will serve as first step to make a posix version available. The ui is reduced
-from mfc to win32 and wrapped behind an own layer. A X11 implementation is
-started but not finished. The version is written in c with c++
-parts, in which some plugin and driver apis are written in.
+the audio core. A command line player makes use of this separation. The ui was
+reduced from mfc to win32 and wrapped behind an own layer. A X11 implementation
+is started but not finished. The version is written in c with c++ parts, in which
+some plugin and driver apis are written in.
 
 Structure of the host
 
@@ -68,11 +67,13 @@ scintilla.dll (vc6, vc2008 only, search for an old compatible win98/xp dll)
 
 Posix
 
-The X11 part is quite unfinished, but to build execute the makefiles in the
-src directories of audio, container, dsp, file, ui, build the alsa driver and
-finally the host. Since there is no fileselector yet, you need to set
-manually a psy file somewhere in the fileload bar. The devel libs for X11 with
-xft, freetype, xmu, xshape and for alsa needs to be installed.
-Unfortunatley the makefiles of the qpsycle plugins arent working completly on
-a recent system without fixing them manually.
+The X11 part is unfinished, but to build execute the makefiles in the src
+directories of audio, container, dsp, file, ui, build the alsa driver and
+finally the host. The devel libs for X11 with xft, freetype, xmu, xshape and
+in case of building the alsa driver (linux) the alsa devel libs needs to be
+installed. Other unix sound systems driver don't exist, but we wrote in the
+past for qpsycle some (jack, esound, oss). The psycle, qpsycle, cpsycle drivers
+are very simililar, so they can be added later. Unfortunatley the makefiles of
+the qpsycle plugins aren't working completly on a recent system without fixing
+them manually, thus only the internal plugins are currently available.
 

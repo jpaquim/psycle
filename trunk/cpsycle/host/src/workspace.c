@@ -973,6 +973,10 @@ void workspace_makekeyboard(Workspace* self)
 
 void workspace_makedirectories(Workspace* self)
 {	
+	const char* home;
+	char path[4096];
+	
+	home = psy_dir_home();
 	self->directories = psy_properties_settext(
 		psy_properties_append_section(&self->config, "directories"),
 			"settingsview.directories");
@@ -980,9 +984,16 @@ void workspace_makedirectories(Workspace* self)
 		psy_properties_settext(
 			psy_properties_append_string(self->directories, "app", PSYCLE_APP_DIR),
 			"App directory"),
-		PSY_PROPERTY_HINT_HIDE);	
+		PSY_PROPERTY_HINT_HIDE);
+#if defined(DIVERSALIS__OS__MICROSOFT)		
 	workspace_makedirectory(self, "songs", "settingsview.song-directory",
 		PSYCLE_SONGS_DEFAULT_DIR);	
+#else
+	psy_snprintf(path, 4096, "%s", home);
+	printf("path %s\n", path);
+	workspace_makedirectory(self, "songs", "settingsview.song-directory",
+		path);	
+#endif		
 	workspace_makedirectory(self, "samples", "settingsview.samples-directory",
 		PSYCLE_SAMPLES_DEFAULT_DIR);	
 	workspace_makedirectory(self, "plugins", "settingsview.plug-in-directory",

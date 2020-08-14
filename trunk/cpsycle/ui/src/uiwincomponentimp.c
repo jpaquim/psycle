@@ -592,11 +592,13 @@ psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp* self)
 		HDC hdc;
 		HFONT hPrevFont = 0;
 		HFONT hfont = 0;
-		psy_ui_Font* font;
+		psy_ui_Font* font = NULL;
 
 		hdc = GetDC(self->hwnd);
 		SaveDC(hdc);
-		font = psy_ui_component_font(self->component);
+		if (self->component) {
+			font = psy_ui_component_font(self->component);
+		}
 		if (font) {
 			hfont = ((psy_ui_win_FontImp*)font->imp)->hfont;
 			if (hfont) {
