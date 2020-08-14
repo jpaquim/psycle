@@ -40,6 +40,9 @@ static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onmidi(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+static void mainframe_onfileloadview(MainFrame*, psy_ui_Component* sender);
+#endif
 static void mainframe_onplugineditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
@@ -80,6 +83,9 @@ static void mainframe_ondockview(MainFrame*, Workspace* sender,
 static void mainframe_onlanguagechanged(MainFrame*, Translator* sender);
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender, int option, int mode);
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+static void mainframe_onfileload(MainFrame*, FileView* sender);
+#endif
 
 #define GEARVIEW 10
 
@@ -171,6 +177,10 @@ void mainframe_init(MainFrame* self)
 		mainframe_initbars(self);
 		psy_signal_connect(&self->filebar.recentbutton.signal_clicked, self,
 			mainframe_onrecentsongs);
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+		psy_signal_connect(&self->filebar.loadbutton.signal_clicked, self,
+			mainframe_onfileloadview);
+#endif
 	}
 	// tabbars
 	psy_ui_component_setalign(&self->tabbars, psy_ui_ALIGN_TOP);
@@ -280,6 +290,15 @@ void mainframe_init(MainFrame* self)
 		&self->workspace);
 	psy_ui_component_setalign(&self->recentview.component, psy_ui_ALIGN_LEFT);
 	psy_ui_component_hide(&self->recentview.component);
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+	// file load view
+	fileview_init(&self->fileloadview, &self->component,
+		&self->workspace);
+	psy_ui_component_setalign(&self->fileloadview.component, psy_ui_ALIGN_LEFT);
+	psy_ui_component_hide(&self->fileloadview.component);
+	psy_signal_connect(&self->fileloadview.signal_selected,
+		self, mainframe_onfileload);
+#endif
 	// sequenceview
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);
 	psy_ui_component_setalign(&self->sequenceview.component,
@@ -815,6 +834,21 @@ void mainframe_onrecentsongs(MainFrame* self, psy_ui_Component* sender)
 	}
 }
 
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+void mainframe_onfileloadview(MainFrame* self, psy_ui_Component* sender)
+{
+	if (psy_ui_component_visible(&self->fileloadview.component)) {
+		//psy_ui_button_seticon(&self->filebar.loadbutton, psy_ui_ICON_MORE);
+		psy_ui_component_hide(&self->fileloadview.component);
+		psy_ui_component_align(&self->component);
+	} else {
+		//psy_ui_button_seticon(&self->filebar.recentbutton, psy_ui_ICON_LESS);
+		psy_ui_component_show(&self->fileloadview.component);
+		psy_ui_component_align(&self->component);
+	}
+}
+#endif
+
 void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 {
 	if (psy_ui_component_visible(&self->plugineditor.component)) {
@@ -1160,3 +1194,14 @@ void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_component_align(&self->component);
 	}
 }
+
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+void mainframe_onfileload(MainFrame* self, FileView* sender)
+{
+	const char* path;
+
+	path = fileview_path(sender);
+	workspace_loadsong(&self->workspace, path,
+		workspace_playsongafterload(&self->workspace));
+}
+#endif

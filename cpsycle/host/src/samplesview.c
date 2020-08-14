@@ -404,8 +404,10 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);		
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_setcharnumber(sliders[i], 16);
-		psy_ui_slider_connect(sliders[i], self, generalview_ondescribe,
-			generalview_ontweak, generalview_onvalue);
+		psy_ui_slider_connect(sliders[i], self,
+			(ui_slider_fpdescribe)generalview_ondescribe,
+			(ui_slider_fptweak)generalview_ontweak,
+			(ui_slider_fpvalue)generalview_onvalue);
 	}
 	generalview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
@@ -621,8 +623,10 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_setcharnumber(sliders[i], 16);
-		psy_ui_slider_connect(sliders[i], self, vibratoview_ondescribe,
-			vibratoview_ontweak, vibratoview_onvalue);
+		psy_ui_slider_connect(sliders[i], self,
+			(ui_slider_fpdescribe)vibratoview_ondescribe,
+			(ui_slider_fptweak)vibratoview_ontweak,
+			(ui_slider_fpvalue)vibratoview_onvalue);
 	}	
 	sliders[0]->component.margin.top.quantity.integer = 32;		
 }

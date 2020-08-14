@@ -6,6 +6,8 @@
 
 #include "../../detail/psydef.h"
 
+#include <list.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,6 +69,8 @@ void psy_dir_extract_path(const char* path, char* prefix, char* name, char* ext)
 void psy_mkdir(const char* path);
 bool psy_direxists(const char* path);
 bool psy_filereadable(const char* fname);
+psy_List* psy_drives(void);
+psy_List* psy_directories(const char* path);
 
 #ifdef __cplusplus
 }

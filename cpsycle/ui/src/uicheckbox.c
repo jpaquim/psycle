@@ -6,7 +6,13 @@
 #include "uicheckbox.h"
 #include "uiapp.h"
 #include "uiimpfactory.h"
+
+#include <stdlib.h>
 #include <string.h>
+
+#include "../../detail/portable.h"
+
+#ifdef PSY_USE_PLATFORM_CHECKBOX
 
 extern psy_ui_App app;
 
@@ -84,6 +90,8 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 	}
 }
 
+#endif
+
 // psy_ui_CheckBoxImp vtable
 static void dev_settext(psy_ui_CheckBoxImp* self, const char* title) { }
 static void dev_text(psy_ui_CheckBoxImp* self, char* text) { }
@@ -111,3 +119,128 @@ void psy_ui_checkboximp_init(psy_ui_CheckBoxImp* self)
 	checkbox_imp_vtable_init();
 	self->vtable = &checkbox_imp_vtable;
 }
+
+#ifndef PSY_USE_PLATFORM_CHECKBOX
+
+static void psy_ui_checkbox_ondestroy(psy_ui_CheckBox*, psy_ui_Component*);
+static void psy_ui_checkbox_ondraw(psy_ui_CheckBox*,
+	psy_ui_Graphics*);
+static void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
+static void psy_ui_checkbox_onmousedown(psy_ui_CheckBox*, psy_ui_MouseEvent*);
+
+static psy_ui_ComponentVtable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(psy_ui_CheckBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondraw = (psy_ui_fp_ondraw)
+			psy_ui_checkbox_ondraw;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)
+			psy_ui_checkbox_onmousedown;
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+			psy_ui_checkbox_onpreferredsize;
+		vtable_initialized = 1;
+	}
+}
+
+void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
+{
+	psy_ui_component_init(&self->component, parent);
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	psy_ui_component_doublebuffer(&self->component);
+	self->text = strdup("");
+	self->state = 0;
+	psy_signal_init(&self->signal_clicked);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		psy_ui_checkbox_ondestroy);
+}
+
+void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
+{
+	free(self->text);
+	psy_signal_dispose(&self->signal_clicked);
+}
+
+void psy_ui_checkbox_ondraw(psy_ui_CheckBox* self, psy_ui_Graphics* g)
+{
+	psy_ui_IntSize size;
+	psy_ui_IntSize checksize;
+	psy_ui_TextMetric tm;
+	psy_ui_Rectangle r;
+
+
+	tm = psy_ui_component_textmetric(&self->component);
+	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
+		&tm);
+	checksize = psy_ui_intsize_make(15, tm.tmHeight);
+	r = psy_ui_rectangle_make(0, (size.height - checksize.height) / 2, checksize.width,
+		checksize.height);
+	if (self->state == 0) {
+		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00444444));
+	} else {
+		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00999999));
+	}
+	psy_ui_textout(g, r.right + 5, (size.height - tm.tmHeight) / 2,
+		self->text, strlen(self->text));
+}
+
+void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
+{
+	char* temp;
+
+	temp = self->text;
+	self->text = strdup(text);
+	free(temp);	
+}
+
+void psy_ui_checkbox_text(psy_ui_CheckBox* self, char* text)
+{
+	psy_snprintf(text, 256, "%s", self->text);
+}
+
+void psy_ui_checkbox_check(psy_ui_CheckBox* self)
+{
+	self->state = 1;
+}
+
+void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
+{
+	self->state = 0;
+}
+
+int psy_ui_checkbox_checked(psy_ui_CheckBox* self)
+{
+	return self->state;	
+}
+
+void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	if (rv) {
+		psy_ui_Size size;
+		psy_ui_TextMetric tm;
+		char text[256];
+
+		psy_ui_checkbox_text(self, text);
+		size = psy_ui_component_textsize(&self->component, text);
+		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 20);
+		rv->height = size.height;
+	}
+}
+
+void psy_ui_checkbox_onmousedown(psy_ui_CheckBox* self, psy_ui_MouseEvent* ev)
+{
+	if (self->state == 0) {
+		self->state = 1;
+	} else {
+		self->state = 0;
+	}
+	psy_ui_component_invalidate(&self->component);
+	psy_signal_emit(&self->signal_clicked, self, 0);
+}
+
+#endif

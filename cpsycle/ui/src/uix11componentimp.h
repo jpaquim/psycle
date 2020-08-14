@@ -31,6 +31,8 @@ typedef struct psy_ui_x11_ComponentImp {
 	uintptr_t winid;
 	psy_ui_Size sizecache;
 	bool sizecachevalid;
+	int prev_w; // used to detect change with ConfigureNotify that can be
+	int prev_h; // triggered for other reasons than resize
 	psy_ui_TextMetric tm;
 	bool tmcachevalid;
 	psy_ui_Color backgroundcolor;

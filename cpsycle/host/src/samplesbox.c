@@ -27,25 +27,27 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(1), psy_ui_value_makepx(0));
+	
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
-	psy_signal_init(&self->signal_changed);
-	psy_signal_connect(&self->component.signal_destroy, self,
-		samplesbox_ondestroy);	
+	psy_ui_component_enablealign(&self->component);	
 	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_label_setcharnumber(&self->header, 25);
-	psy_ui_component_setmargin(&self->header.component, &margin);
-	psy_ui_listbox_init(&self->subsamplelist, &self->component);
-	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setpreferredsize(&self->subsamplelist.component,
-		psy_ui_size_make(
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
-	psy_ui_label_init(&self->group, &self->component);
-	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);	
-	psy_ui_component_setmargin(&self->group.component, &margin);
+	psy_ui_component_setmargin(&self->header.component, &margin);		
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->samplelist, &self->component);	
 	psy_ui_component_setalign(&self->samplelist.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_label_init(&self->group, &self->component);
+	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setmargin(&self->group.component, &margin);
+	psy_ui_listbox_init(&self->subsamplelist, &self->component);
+	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
+	//psy_ui_component_setpreferredsize(&self->subsamplelist.component,
+		//psy_ui_size_make(
+			//psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
+
+	psy_signal_init(&self->signal_changed);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		samplesbox_ondestroy);
 	psy_ui_component_setmargin(&self->samplelist.component, &margin);
 	samplesbox_setsamples(self, samples);	
 	psy_signal_connect(&self->samplelist.signal_selchanged, self,
@@ -100,7 +102,7 @@ void samplesbox_buildsubsamplelist(SamplesBox* self, uintptr_t slot, bool create
 {	
 	uintptr_t subslot = 0;
 	char text[40];
-	
+	return;
 	if (create) {
 		psy_ui_listbox_clear(&self->subsamplelist);
 	}

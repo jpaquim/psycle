@@ -62,22 +62,20 @@ void psy_ui_label_text(psy_ui_Label* self, char* text)
 
 void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	if (rv) {
-		psy_ui_TextMetric tm;		
+	psy_ui_TextMetric tm;		
 
-		tm = psy_ui_component_textmetric(psy_ui_label_base(self));
-		if (self->charnumber == 0) {
-			psy_ui_Size size;
+	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
+	if (self->charnumber == 0) {
+		psy_ui_Size size;
 			
-			size = psy_ui_component_textsize(psy_ui_label_base(self), self->text);
-			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4 +
-				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
-		} else {
-			rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
-		}
-		rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linespacing) +
-			psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm));
+		size = psy_ui_component_textsize(psy_ui_label_base(self), self->text);
+		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4 +
+			psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
+	} else {
+		rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
 	}
+	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * self->linespacing) +
+		psy_ui_margin_height_px(&psy_ui_label_base(self)->spacing, &tm));	
 }
 
 void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)

@@ -7,18 +7,19 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
-static void BuildInstrumentList(InstrumentsBox* self);
-static void AddString(InstrumentsBox* self, const char* text);
-static void OnInstrumentSlotChanged(InstrumentsBox* self, psy_audio_Instrument* sender,
-	const psy_audio_InstrumentIndex* slot);
-static void OnInstrumentInsert(InstrumentsBox* self, psy_ui_Component* sender,
-	const psy_audio_InstrumentIndex* slot);
-static void OnInstrumentRemoved(InstrumentsBox* self, psy_ui_Component* sender,
-	const psy_audio_InstrumentIndex* slot);
-static void OnInstrumentGroupListChanged(InstrumentsBox* self, psy_ui_Component* sender,
-	int slot);
-static void OnInstrumentListChanged(InstrumentsBox* self, psy_ui_Component* sender,
-	int slot);
+static void instrumentsbox_buildlist(InstrumentsBox*);
+static void instrumentsbox_buildgroup(InstrumentsBox*);
+static void instrumentsbox_addstring(InstrumentsBox*, const char* text);
+static void instrumentsbox_oninstrumentslotchanged(InstrumentsBox*,
+	psy_audio_Instrument* sender, const psy_audio_InstrumentIndex* slot);
+static void instrumentsbox_oninstrumentinsert(InstrumentsBox*,
+	psy_ui_Component* sender, const psy_audio_InstrumentIndex* slot);
+static void instrumentsbox_oninstrumentremoved(InstrumentsBox*,
+	psy_ui_Component* sender, const psy_audio_InstrumentIndex* slot);
+static void instrumentsbox_ongrouplistchanged(InstrumentsBox*,
+	psy_ui_Component* sender, int slot);
+static void instrumentsbox_onlistchanged(InstrumentsBox*,
+	psy_ui_Component* sender, int slot);
 
 void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments)
@@ -34,29 +35,31 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_settext(&self->group, "Group Instruments");
 	psy_ui_listbox_init(&self->instrumentlist, &self->component);
-	psy_ui_component_setalign(&self->instrumentlist.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setalign(&self->instrumentlist.component,
+		psy_ui_ALIGN_CLIENT);
 	instrumentsbox_setinstruments(self, instruments);
 	psy_signal_connect(&self->grouplist.signal_selchanged, self,
-		OnInstrumentGroupListChanged);
+		instrumentsbox_ongrouplistchanged);
 	psy_signal_connect(&self->instrumentlist.signal_selchanged, self,
-		OnInstrumentListChanged);
+		instrumentsbox_onlistchanged);
 }
 
-void samplesbox_buildinstrumentgroup(InstrumentsBox* self)
+void instrumentsbox_buildgroup(InstrumentsBox* self)
 {
 	if (self->instruments) {
 		uintptr_t slot = 0;
 		char text[40];
 
 		psy_ui_listbox_clear(&self->grouplist);
-		for (; slot < max(psy_audio_instruments_groupsize(self->instruments), 1); ++slot) {
+		for (; slot < max(psy_audio_instruments_groupsize(self->instruments),
+				1); ++slot) {
 			psy_snprintf(text, 20, "%02X:%s", slot, "");
 			psy_ui_listbox_addtext(&self->grouplist, text);
 		}
 	}
 }
 
-void BuildInstrumentList(InstrumentsBox* self)
+void instrumentsbox_buildlist(InstrumentsBox* self)
 {
 	psy_audio_Instrument* instrument;
 	int groupslot;
@@ -76,26 +79,28 @@ void BuildInstrumentList(InstrumentsBox* self)
 		} else {
 			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
 		}
-		AddString(self, buffer);
+		instrumentsbox_addstring(self, buffer);
 	}
 }
 
-void AddString(InstrumentsBox* self, const char* text)
+void instrumentsbox_addstring(InstrumentsBox* self, const char* text)
 {
 	psy_ui_listbox_addtext(&self->instrumentlist, text);
 }
 
-void OnInstrumentGroupListChanged(InstrumentsBox* self, psy_ui_Component* sender, int slot)
+void instrumentsbox_ongrouplistchanged(InstrumentsBox* self, psy_ui_Component*
+	sender, int slot)
 {
 	instruments_changeslot(self->instruments, instrumentindex_make(slot, 0));
 }
 
-void OnInstrumentListChanged(InstrumentsBox* self, psy_ui_Component* sender, int slot)
+void instrumentsbox_onlistchanged(InstrumentsBox* self, psy_ui_Component*
+	sender, int slot)
 {
 	int groupslot;
 
 	psy_signal_disconnect(&self->instruments->signal_slotchange, self,
-		OnInstrumentSlotChanged);
+		instrumentsbox_oninstrumentslotchanged);
 	groupslot = psy_ui_listbox_cursel(&self->grouplist);
 	if (groupslot == -1) {
 		groupslot = 0;
@@ -103,44 +108,45 @@ void OnInstrumentListChanged(InstrumentsBox* self, psy_ui_Component* sender, int
 	instruments_changeslot(self->instruments,
 		instrumentindex_make(groupslot, slot));
 	psy_signal_connect(&self->instruments->signal_slotchange, self,
-		OnInstrumentSlotChanged);
+		instrumentsbox_oninstrumentslotchanged);
 }
 
-void OnInstrumentInsert(InstrumentsBox* self, psy_ui_Component* sender,
-	const psy_audio_InstrumentIndex* slot)
+void instrumentsbox_oninstrumentinsert(InstrumentsBox* self, psy_ui_Component*
+	sender, const psy_audio_InstrumentIndex* slot)
 {
-	BuildInstrumentList(self);
+	instrumentsbox_buildlist(self);
 	psy_ui_listbox_setcursel(&self->instrumentlist, slot->slot);		
 }
 
-void OnInstrumentRemoved(InstrumentsBox* self, psy_ui_Component* sender,
-	const psy_audio_InstrumentIndex* slot)
+void instrumentsbox_oninstrumentremoved(InstrumentsBox* self, psy_ui_Component*
+	sender, const psy_audio_InstrumentIndex* slot)
 {
-	BuildInstrumentList(self);
+	instrumentsbox_buildlist(self);
 	psy_ui_listbox_setcursel(&self->instrumentlist, slot->slot);		
 }
 
-void OnInstrumentSlotChanged(InstrumentsBox* self, psy_audio_Instrument* sender,
-	const psy_audio_InstrumentIndex* slot)
+void instrumentsbox_oninstrumentslotchanged(InstrumentsBox* self,
+	psy_audio_Instrument* sender, const psy_audio_InstrumentIndex* slot)
 {	
-	BuildInstrumentList(self);	
+	instrumentsbox_buildlist(self);
 	psy_ui_listbox_setcursel(&self->grouplist, slot->slot);
 	psy_ui_listbox_setcursel(&self->instrumentlist, slot->subslot);	
 }
 
-void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments* instruments)
+void instrumentsbox_setinstruments(InstrumentsBox* self, psy_audio_Instruments*
+	instruments)
 {
 	self->instruments = instruments;
-	samplesbox_buildinstrumentgroup(self);
-	BuildInstrumentList(self);
+	instrumentsbox_buildgroup(self);
+	instrumentsbox_buildlist(self);
 	psy_ui_listbox_setcursel(&self->grouplist, 0);
 	psy_ui_listbox_setcursel(&self->instrumentlist, 0);	
 	psy_signal_connect(&instruments->signal_insert, self,
-		OnInstrumentInsert);
+		instrumentsbox_oninstrumentinsert);
 	psy_signal_connect(&instruments->signal_removed, self,
-		OnInstrumentRemoved);
+		instrumentsbox_oninstrumentremoved);
 	psy_signal_connect(&instruments->signal_slotchange, self,
-		OnInstrumentSlotChanged);
+		instrumentsbox_oninstrumentslotchanged);
 }
 
 int instrumentsbox_selected(InstrumentsBox* self)
@@ -150,8 +156,8 @@ int instrumentsbox_selected(InstrumentsBox* self)
 
 void instrumentsbox_rebuild(InstrumentsBox* self)
 {
-	samplesbox_buildinstrumentgroup(self);
-	BuildInstrumentList(self);
+	instrumentsbox_buildgroup(self);
+	instrumentsbox_buildlist(self);
 	if (self->instruments) {
 		psy_ui_listbox_setcursel(&self->grouplist,
 			self->instruments->slot.slot);

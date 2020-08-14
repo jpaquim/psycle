@@ -21,7 +21,8 @@ typedef enum {
 } MachineBoxMode;
 
 typedef struct {
-	psy_ui_ListBox machinelist;	
+	psy_ui_Component component;
+	psy_ui_ListBox listbox;	
 	psy_audio_Machines* machines;
 	psy_Table listboxslots;
 	psy_Table slotslistbox;

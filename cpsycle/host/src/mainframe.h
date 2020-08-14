@@ -43,6 +43,11 @@
 #include "zoombox.h"
 #include "checkunsaved.h"
 #include "interpreter.h"
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+#include "fileview.h"
+#endif
+
+#include "../../detail/os.h"
 
 // MainFrame
 //
@@ -94,6 +99,9 @@ typedef struct {
 	CPUView cpuview;
 	MidiView midiview;
 	RecentView recentview;
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+	FileView fileloadview;
+#endif
 	psy_ui_Component statusbar;
 	psy_ui_Notebook viewtabbars;
 	psy_ui_Notebook viewstatusbars;

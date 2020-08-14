@@ -31,8 +31,10 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->newbutton.signal_clicked, self,
 		filebar_onnewsong);
 	psy_ui_button_init(&self->loadbutton, filebar_base(self));
+#ifdef PSYCLE_USE_PLATFORM_FILEOPEN
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
+#endif
 	psy_ui_button_init(&self->savebutton, filebar_base(self));
 	psy_signal_connect(&self->savebutton.signal_clicked, self,
 		filebar_onsavesong);

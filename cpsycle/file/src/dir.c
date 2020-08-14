@@ -176,7 +176,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
 {
  	DIR *dir;
 	struct dirent *dir_ptr;
-	char path[4096];	
+	char path[4096];
 	
 	if ((dir=opendir(root)) == NULL) {
 	   return;
@@ -185,7 +185,7 @@ void psy_dir_enumerate(void* context, const char* root, const char* wildcard,
 	   if (wildcardmatch((*dir_ptr).d_name, wildcard)) {
 		  if ((strncmp(".", (*dir_ptr).d_name, 1) != 0) && 
  		  	 (strncmp("..", (*dir_ptr).d_name, 2) != 0)) {
-					psy_snprintf(path, 4096, "%s\\%s", root,
+					psy_snprintf(path, 4096, "%s/%s", root,
 		                (*dir_ptr).d_name);
 					enumproc(context, path, flag);										   
           }				   
@@ -248,6 +248,29 @@ const char* psy_dir_config(void)
 const char* psy_dir_home(void)
 {
 	return "/home/user";
+}
+
+psy_List* psy_drives(void)
+{
+	return NULL;
+}
+
+psy_List* psy_directories(const char* path)
+{
+	DIR *d;
+	psy_List* rv = NULL;
+	struct dirent *dir;
+
+	d = opendir(path);
+	if (d) {
+		while ((dir = readdir(d)) != NULL) {			
+			if (dir->d_type == DT_DIR) {
+				psy_list_append(&rv, strdup(dir->d_name));
+			}
+		}
+		closedir(d);
+	}
+	return rv;
 }
 
 #elif defined(DIVERSALIS__OS__MICROSOFT)
@@ -461,6 +484,56 @@ const char* psy_dir_home(void)
 	return achDevice;
 }
 
+psy_List* psy_drives(void)
+{
+	psy_List* rv = NULL;
+	DWORD dwSize = MAX_PATH;
+	char szLogicalDrives[MAX_PATH] = { 0 };
+	DWORD dwResult = GetLogicalDriveStrings(dwSize, szLogicalDrives);
+
+	if (dwResult > 0 && dwResult <= MAX_PATH) {
+		char* szSingleDrive = szLogicalDrives;
+		while (*szSingleDrive) {
+			psy_list_append(&rv, strdup(szSingleDrive));
+			szSingleDrive += strlen(szSingleDrive) + 1;
+		}
+	}
+	return rv;
+}
+
+psy_List* psy_directories(const char* root)
+{
+	psy_List* rv = NULL;
+	HANDLE hFind;
+	WIN32_FIND_DATA wfd;
+	char path[MAX_PATH];
+	BOOL cont;
+
+	// First, enumerate all files using the wildcard in the current directory
+	psy_snprintf(path, MAX_PATH, "%s\\*", root);
+	if ((hFind = FindFirstFile(path, &wfd)) == INVALID_HANDLE_VALUE) {
+
+	} else {
+		cont = TRUE;
+		do {
+			//if ((strncmp(".", wfd.cFileName, 1) != 0) &&
+				//(strncmp("..", wfd.cFileName, 2) != 0)) {
+				if ((wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+					psy_snprintf(path, MAX_PATH, "\\%s", wfd.cFileName);
+					psy_list_append(&rv, strdup(path));
+				}
+			//}
+		} while (FindNextFile(hFind, &wfd));
+		if (GetLastError() != ERROR_NO_MORE_FILES) {
+			SetLastError(0);
+		}
+		if (FindClose(hFind) == FALSE) {
+			SetLastError(0);
+		}
+	}
+	return rv;
+}
+
 #else
 
 #include <stdio.h>
@@ -495,6 +568,19 @@ void insertpathenv(const char* path)
 void setpathenv(const char* path)
 {
 }
+
+psy_List* psy_drives(void)
+{
+	return NULL;
+}
+
+psy_List* psy_directories(const char* path)
+{
+	psy_List* rv = NULL;
+
+	return NULL;
+}
+
 #endif
 
 struct FileSearch {
