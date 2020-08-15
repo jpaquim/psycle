@@ -118,8 +118,8 @@ void machineui_editname(MachineUi* self, psy_ui_Edit* edit,
 {
 	if (self->machine) {
 		psy_ui_Rectangle r;
-		int x;
-		int y;
+		intptr_t x;
+		intptr_t y;
 		
 		free(self->restorename);
 		self->restorename = (psy_audio_machine_editname(self->machine))
@@ -198,8 +198,33 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 			}
 		}
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
-			&self->coords->background);
+		if (!psy_ui_bitmap_empty(&wireview->skin.skinbmp)) {
+			skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+				&self->coords->background);
+		} else {
+			psy_ui_Color bgcolor;
+			
+			if (self->mode == MACHMODE_MASTER) {
+				bgcolor = psy_ui_color_make(0x00333333);
+			} else
+			if (self->mode == MACHMODE_FX) {	
+				bgcolor = psy_ui_color_make(0x003E2f25);
+			} else {
+				bgcolor = psy_ui_color_make(0x002f3E25);				
+			}			
+			psy_ui_drawsolidrectangle(g, r, bgcolor);
+			if (self->mode == MACHMODE_MASTER) {
+				psy_ui_Rectangle clip;
+
+				clip = psy_ui_rectangle_make(r.left + coords->name.destx,
+					r.top + coords->name.desty, coords->name.destwidth,
+					coords->name.destheight);
+				psy_ui_textoutrectangle(g, r.left + coords->name.destx,
+				r.top + coords->name.desty,
+				psy_ui_ETO_CLIPPED, clip,
+				"Master", strlen("Master"));
+			}
+		}
 		if (self->mode == MACHMODE_FX) {			
 			psy_ui_settextcolor(g, wireview->skin.effect_fontcolour);
 		} else {		

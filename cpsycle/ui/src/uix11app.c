@@ -50,9 +50,12 @@ static int shapeEventBase, shapeErrorBase;
 // prototypes
 static int handleevent(psy_ui_X11App*, XEvent*);
 static void dispose_window(psy_ui_X11App*, Window);
+static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp* imp,
+	int x, int y, int width, int height);	
 static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
 static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
+static void adjustcoordinates(psy_ui_Component*, int* x, int* y);	
 static int timertick(psy_ui_X11App*);
 	
 // implementation
@@ -77,7 +80,8 @@ void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 	if (!shape_extension) {
 		printf("XShapeQueryExtension error\n");
 	}
-	self->timers = 0;
+	self->timers = NULL;
+	psy_table_init(&self->colormap);
 }
 
 void psy_ui_x11app_dispose(psy_ui_X11App* self)
@@ -85,7 +89,8 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 	psy_table_dispose(&self->selfmap);
 	psy_table_dispose(&self->winidmap);
 	XCloseDisplay(self->dpy);
-	psy_list_deallocate(&self->timers, NULL);	
+	psy_list_deallocate(&self->timers, NULL);
+	psy_table_dispose(&self->colormap);	
 //	DeleteObject(self->defaultbackgroundbrush);
 }
 
@@ -898,89 +903,24 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 		return 0;
 	}
 	switch (event->type) {
-		  case DestroyNotify:
-			dispose_window(self, imp->hwnd);
-		  break;
-		  case Expose: {			
-			if (event->xexpose.count != 0 ||
-				!psy_ui_component_visible(imp->component)) {
-				return 0;
-			}			
-			//GC gc;
-			//PlatformXtGC xgc;
-			//XGCValues gcv;
-			//psy_ui_Graphics g;
-			XColor dummy;
-			XFontStruct *fontinfo;
-			Window root;
-			Window window;
-			int     screen;			 
-			unsigned int x = 0;
-			unsigned int y = 0;
-			unsigned int width = 0;
-			unsigned int height = 0; 
-			psy_ui_Rectangle r;				
-			unsigned int temp = 0;
-			XWindowAttributes win_attr;
-			psy_ui_x11_GraphicsImp* gx11;
-									
-			window = event->xexpose.window;									
-			//screen  = XDefaultScreen(self->dpy);			
-            //gcv.function =   GXcopy;
-            //gcv.plane_mask = AllPlanes;            
-            //fontinfo = XLoadQueryFont(self->dpy,"6x10"); 
-            //XSetFont(self->dpy,gc,fontinfo->fid); 
-           // gc = XCreateGC(self->dpy, imp->hwnd ,
-			//	GCFunction | GCPlaneMask, // | GCForeground | GCBackground,
-			//	&gcv);
-            //xgc.display =self->dpy;
-			//xgc.window = imp->hwnd;	    
-			//xgc.gc = gc;	
-		//	XClearWindow(self->dpy,window);			 				
-			    // XFlush(self->dpy);       
-			//psy_ui_graphics_init(&g, &xgc);	
-			//if (imp->component->backgroundmode ==
-				//			psy_ui_BACKGROUND_SET) {
-				// draw background
-				
-				//XGetGeometry(self->dpy, imp->hwnd, &root, &x, &y,
-				//	&width, &height, &temp, &temp);					
-				//	(int)event->xexpose.y,
-				//	(int)(event->xexpose.y - y));
-				//}
-				
-			XGetWindowAttributes(self->dpy, imp->hwnd, &win_attr);    
-				psy_ui_setrectangle(&r,
-					0,
-					0,					
-					win_attr.width,
-					win_attr.height);
-				psy_ui_drawsolidrectangle(&imp->g, r,
-					psy_ui_component_backgroundcolor(imp->component));					
-			//}
-			// prepare a clip rect that can be used by a component to
-			// optimize the draw amount
-			psy_ui_setrectangle(&imp->g.clip,
-				0,
-				0,
-				win_attr.width,
-				win_attr.height);
-			// prepare colors
-			psy_ui_setcolor(&imp->g, psy_ui_component_color(imp->component));
-			psy_ui_settextcolor(&imp->g, psy_ui_component_color(imp->component));
-			psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
-			// translate coordinates
-			gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
-			gx11->dx = -imp->component->scroll.x;
-			gx11->dy = -imp->component->scroll.y;			
-			if (imp->component->vtable->ondraw) {				
-				imp->component->vtable->ondraw(imp->component, &imp->g);
-			}
-			psy_signal_emit(&imp->component->signal_draw, imp->component, 1,
-				&imp->g);
-			//XFlush(self->dpy);							
-			//psy_ui_graphics_dispose(&g);		
-			break; }
+		case DestroyNotify:
+		dispose_window(self, imp->hwnd);
+			break;
+		case NoExpose:
+			//expose_window(self, imp,
+				//event->xnoexpose.x, event->xnoexpose.y,
+				//event->xnoexpose.width, event->xnoexpose.height);
+			break;
+		case GraphicsExpose:
+			//printf("GraphicsExpose\n");
+			//expose_window(self, imp,
+				//event->xgraphicsexpose.x, event->xgraphicsexpose.y,
+				//event->xgraphicsexpose.width, event->xgraphicsexpose.height);
+			break;
+		case Expose:
+			expose_window(self, imp, event->xexpose.x, event->xexpose.y,
+				event->xexpose.width, event->xexpose.height);
+			break;
 		case ConfigureNotify: {			
 			XConfigureEvent xce = event->xconfigure;
 			
@@ -1084,7 +1024,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				0);
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);			
+					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+			adjustcoordinates(imp->component, &ev.x, &ev.y);			
 			imp->component->vtable->onmousedown(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
 					&ev);
@@ -1104,7 +1045,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				0);
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);			
+					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+			adjustcoordinates(imp->component, &ev.x, &ev.y);		
 			imp->component->vtable->onmouseup(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
 					&ev);
@@ -1124,7 +1066,8 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				0);
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
-					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);			
+					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
+			adjustcoordinates(imp->component, &ev.x, &ev.y);			
 			imp->component->vtable->onmousemove(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mousemove, imp->component, 1,
 					&ev);
@@ -1135,6 +1078,54 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 	  }
 	return 0;
 }
+
+void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
+	int x, int y, int width, int height)
+{
+	psy_ui_x11_GraphicsImp* gx11;
+	XRectangle rectangle;
+	
+	if (!psy_ui_component_visible(imp->component)) {
+		return;
+	}												
+	gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+	// reset scroll origin
+	gx11->dx = 0;
+	gx11->dy = 0;			
+	// prepare a clip rect that can be used by a component to
+	// optimize the draw amount
+	psy_ui_setrectangle(&imp->g.clip, x, y, width, height);
+	// set gc/xfd clip
+	rectangle.x = (short) x;
+	rectangle.y = (short) y;
+	rectangle.width = (unsigned short) width;
+	rectangle.height = (unsigned short) height;
+	XUnionRectWithRegion(&rectangle, gx11->region, gx11->region);
+	XSetRegion(self->dpy, gx11->gc, gx11->region);
+	XftDrawSetClipRectangles(gx11->xfd,0,0,&rectangle,1);
+	XDestroyRegion(gx11->region);
+	gx11->region = XCreateRegion();
+	// draw background					
+	psy_ui_drawsolidrectangle(&imp->g, imp->g.clip,
+		psy_ui_component_backgroundcolor(imp->component));			
+	// prepare colors
+	psy_ui_setcolor(&imp->g, psy_ui_component_color(imp->component));
+	psy_ui_settextcolor(&imp->g, psy_ui_component_color(imp->component));
+	psy_ui_setbackgroundmode(&imp->g, psy_ui_TRANSPARENT);
+	// translate coordinates			
+	gx11->dx = -imp->component->scroll.x;
+	gx11->dy = -imp->component->scroll.y;
+	psy_ui_setrectangle(&imp->g.clip,
+		x + imp->component->scroll.x, y + imp->component->scroll.y,
+		width, height);
+	// call draw handlers			
+	if (imp->component->vtable->ondraw) {				
+		imp->component->vtable->ondraw(imp->component, &imp->g);
+	}
+	psy_signal_emit(&imp->component->signal_draw, imp->component, 1,
+		&imp->g);	
+}
+
 
 void dispose_window(psy_ui_X11App* self, Window window)
 {
@@ -1150,6 +1141,19 @@ void dispose_window(psy_ui_X11App* self, Window window)
 			imp->imp.vtable->dev_dispose(&imp->imp);
 		}
 		psy_table_remove(&self->selfmap, (uintptr_t)imp->hwnd);		
+	}
+}
+
+void adjustcoordinates(psy_ui_Component* component, int* x, int* y)
+{		
+	*x += component->scroll.x;
+	*y += component->scroll.y;
+	if (!psy_ui_margin_iszero(&component->spacing)) {
+		psy_ui_TextMetric tm;
+
+		tm = psy_ui_component_textmetric(component);
+		*x -= psy_ui_value_px(&component->spacing.left, &tm);
+		*y -= psy_ui_value_px(&component->spacing.top, &tm);
 	}
 }
 
@@ -1294,6 +1298,36 @@ void sendeventtoparent(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
 		//winapp->targetids = NULL;
 	}
 	//winapp->eventretarget = 0;
+}
+
+int psy_ui_x11app_colourindex(psy_ui_X11App* self, psy_ui_Color color)
+{	
+	int rv;
+	XColor xcolor;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	
+	if (psy_table_exists(&self->colormap,
+			(uintptr_t)color.value)) {
+		rv = (int)(intptr_t)psy_table_at(&self->colormap,
+			(uintptr_t)color.value);
+	} else {				
+		psy_ui_color_rgb(&color, &r, &g, &b);
+		xcolor.red = r * 256;
+		xcolor.green = g * 256;
+		xcolor.blue = b * 256;	
+		if (XAllocColor(self->dpy, DefaultColormap(self->dpy,
+				DefaultScreen(self->dpy)), &xcolor)) {
+			rv = xcolor.pixel;
+		} else {
+			rv = BlackPixel(self->dpy, DefaultScreen(self->dpy));
+			printf("Warning: can't allocate requested colour\n");
+		}
+		psy_table_insert(&self->colormap, (uintptr_t)color.value,
+			(void*)(uintptr_t)rv);
+	}
+	return rv;
 }
 
 #endif

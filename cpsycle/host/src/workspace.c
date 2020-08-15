@@ -597,7 +597,7 @@ void workspace_makepatternview(Workspace* self, psy_Properties* visual)
 		psy_properties_append_bool(pvc, "wraparound", 1),
 		"settingsview.wrap-around");
 	psy_properties_settext(
-		psy_properties_append_bool(pvc, "centercursoronscreen", 1),
+		psy_properties_append_bool(pvc, "centercursoronscreen", 0),
 		"settingsview.center-cursor-on-screen");	
 	psy_properties_settext(
 		psy_properties_append_int(pvc, "beatsperbar", 4, 1, 16),

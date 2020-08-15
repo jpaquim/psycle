@@ -32,8 +32,10 @@ void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 		psy_ui_size_make(psy_ui_value_makeew(2), psy_ui_value_makepx(0)));
 	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_RIGHT);	
 	parameterlistbox_setmachine(self, machine);	
-	psy_ui_slider_connect(&self->slider, self, parameterlistbox_ondescribe,
-		parameterlistbox_ontweak, parameterlistbox_onvalue);
+	psy_ui_slider_connect(&self->slider, self,
+		(ui_slider_fpdescribe)parameterlistbox_ondescribe,
+		(ui_slider_fptweak)parameterlistbox_ontweak,
+		(ui_slider_fpvalue)parameterlistbox_onvalue);
 	// psy_signal_connect(&self->parameterlist.signal_selchanged, self,
 		//onparameterlistchanged);
 }

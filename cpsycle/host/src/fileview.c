@@ -123,7 +123,7 @@ void fileview_onfileboxselected(FileView* self, psy_ui_ListBox* sender, intptr_t
 				}
 				++path;
 			}
-			if (path != '\0') {
+			if (*path != '\0') {
 				self->curr = strdup(path);
 				self->numdirectories = 0;
 				psy_list_deallocate(&self->files, NULL);

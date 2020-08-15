@@ -201,8 +201,10 @@ void sampleeditoramplify_init(SampleEditorAmplify* self, psy_ui_Component* paren
 	psy_ui_slider_init(&self->gain, &self->component);
 	psy_ui_slider_showvertical(&self->gain);
 	psy_ui_slider_setcharnumber(&self->gain, 4);
-	psy_ui_slider_connect(&self->gain, self, sampleeditoramplify_ondescribe,
-		sampleeditoramplify_ontweak, sampleeditoramplify_onvalue);
+	psy_ui_slider_connect(&self->gain, self,
+		(ui_slider_fpdescribe)sampleeditoramplify_ondescribe,
+		(ui_slider_fptweak)sampleeditoramplify_ontweak,
+		(ui_slider_fpvalue)sampleeditoramplify_onvalue);
 	psy_ui_component_setalign(&self->gain.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->dbdisplay, &self->component);
 	sampleeditoramplify_ondescribe(self, 0, text);

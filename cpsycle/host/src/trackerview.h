@@ -262,7 +262,7 @@ void trackerview_setfont(TrackerView*, psy_ui_Font*, bool iszoombase);
 void trackerview_invalidateline(TrackerView*, psy_dsp_big_beat_t offset);
 void trackerview_makecmds(psy_Properties* parent);
 
-INLINE trackerview_blockmenuvisible(TrackerView* self)
+INLINE bool trackerview_blockmenuvisible(TrackerView* self)
 {
 	return psy_ui_component_visible(&self->blockmenu.component);
 }
