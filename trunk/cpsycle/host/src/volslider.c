@@ -5,12 +5,13 @@
 
 #include "volslider.h"
 
-#include "convert.h"
+#include <convert.h>
 
 #include <songio.h>
 #include <uiapp.h>
 #include <stdio.h>
 #include <math.h>
+
 #include "../../detail/portable.h"
 
 static void volslider_onviewdescribe(VolSlider*, psy_ui_Slider*, char* text);
@@ -27,11 +28,14 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 	psy_ui_slider_settext(&self->slider, "VU");
 	psy_ui_slider_setvaluecharnumber(&self->slider, 10);
 	psy_ui_component_setalign(&self->slider.component, psy_ui_ALIGN_TOP);
-	psy_ui_slider_connect(&self->slider, self, volslider_onviewdescribe,
-		volslider_onviewtweak, volslider_onviewvalue);	
+	psy_ui_slider_connect(&self->slider, self,
+		(ui_slider_fpdescribe)volslider_onviewdescribe,
+		(ui_slider_fptweak)volslider_onviewtweak,
+		(ui_slider_fpvalue)volslider_onviewvalue);
 }
 
-void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender, char* text)
+void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender,
+	char* text)
 {
 	if (self->workspace->song && psy_audio_machines_master(
 			&self->workspace->song->machines)) {

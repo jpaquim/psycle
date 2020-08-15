@@ -314,7 +314,7 @@ void dev_dispose(psy_ui_x11_ComponentImp* self)
 
 psy_ui_x11_ComponentImp* psy_ui_x11_componentimp_alloc(void)
 {
-	return (psy_ui_x11_ComponentImp*) malloc(sizeof(psy_ui_x11_ComponentImp));
+	return (psy_ui_x11_ComponentImp*)malloc(sizeof(psy_ui_x11_ComponentImp));
 }
 
 psy_ui_x11_ComponentImp* psy_ui_x11_componentimp_allocinit(
@@ -540,12 +540,23 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
 {	
 	if (dx != 0 || dy != 0) {
 		psy_ui_X11App* x11app;
-		XWindowAttributes win_attr;
+		XWindowAttributes win_attr;			
 		psy_ui_x11_GraphicsImp* gx11;
+		XExposeEvent xev;
+		Region region;
+		XRectangle rectangle;
 
 		x11app = (psy_ui_X11App*) app.platform;        
 		XGetWindowAttributes(x11app->dpy, self->hwnd, &win_attr); 
 		gx11 = (psy_ui_x11_GraphicsImp*)self->g.imp;	
+		region = XCreateRegion();
+		rectangle.x = 0;
+		rectangle.y = 0;
+		rectangle.width = (unsigned short) win_attr.width;
+		rectangle.height = (unsigned short) win_attr.height;
+		XUnionRectWithRegion(&rectangle, region, region);
+		XSetRegion(x11app->dpy, gx11->gc, region);		
+		XDestroyRegion(region);
 		XCopyArea(x11app->dpy, self->hwnd, self->hwnd,
 			gx11->gc,
 			(dx < 0) ? -dx : 0, // srcx
@@ -554,6 +565,25 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
 			(dy < 0) ? win_attr.height + dy : win_attr.height - dy, // srcheight
 			(dx < 0) ? 0 : dx, // destx
 			(dy < 0) ? 0 : dy); // desty
+		XSync(x11app->dpy, FALSE);
+		// printf("%d\n", dy);
+		xev.type = Expose;
+		xev.display = x11app->dpy;
+		xev.window = self->hwnd;
+		xev.count = 0;
+		if (dy < 0) {
+			xev.x = 0;
+			xev.y = win_attr.height + dy;
+			xev.width = win_attr.width; 
+			xev.height = -dy;
+		} else if (dy > 0) {
+			xev.x = 0;
+			xev.y = 0;
+			xev.width = win_attr.width; 
+			xev.height = dy;
+		}
+		// printf("scrollto: %d, %d, %d, %d\n", xev.x, xev.y, xev.width, xev.height);
+		XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 	}
 }
 
@@ -599,12 +629,28 @@ void dev_insert(psy_ui_x11_ComponentImp* self, psy_ui_x11_ComponentImp* child,
 
 void dev_capture(psy_ui_x11_ComponentImp* self)
 {
-//	SetCapture(self->hwnd);
+	psy_ui_X11App* x11app;
+
+	x11app = (psy_ui_X11App*)app.platform;
+	XGrabPointer(x11app->dpy,
+		   self->hwnd,
+		   0,
+		   ButtonPressMask|ButtonReleaseMask|
+		   ButtonMotionMask|PointerMotionMask,
+		   GrabModeAsync,
+		   GrabModeAsync, 
+		   None,
+		   0,
+		   CurrentTime);
 }
 
 void dev_releasecapture(psy_ui_x11_ComponentImp* self)
 {
-//	ReleaseCapture();
+	psy_ui_X11App* x11app;
+
+	x11app = (psy_ui_X11App*)app.platform;
+	XUngrabPointer(x11app->dpy, CurrentTime);
+	XFlush(x11app->dpy);
 }
 
 void dev_invalidate(psy_ui_x11_ComponentImp* self)
@@ -621,28 +667,28 @@ void dev_invalidate(psy_ui_x11_ComponentImp* self)
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;
-	xev.x = win_attr.x;
-	xev.y = win_attr.y;
+	xev.x = 0;
+	xev.y = 0;
 	xev.width = win_attr.width; 
 	xev.height = win_attr.height;	
-	XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
+	XSendEvent(x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 }
 
 void dev_invalidaterect(psy_ui_x11_ComponentImp* self, const
 	psy_ui_Rectangle* r)
 {	
 	XExposeEvent xev;	
-	psy_ui_X11App* x11app;		
+	psy_ui_X11App* x11app;
 
-	x11app = (psy_ui_X11App*) app.platform;	
+	x11app = (psy_ui_X11App*) app.platform;
 	xev.type = Expose;
 	xev.display = x11app->dpy;
 	xev.window = self->hwnd;
 	xev.count = 0;
-	xev.x = r->left;
-	xev.y = r->top;
+	xev.x = r->left - self->component->scroll.x;
+	xev.y = r->top - self->component->scroll.y;
 	xev.width = r->right - r->left; 
-	xev.height = r->bottom - r->top;	
+	xev.height = r->bottom - r->top;		
 	XSendEvent (x11app->dpy, self->hwnd, True, ExposureMask, (XEvent *)&xev);
 }
 
@@ -652,6 +698,7 @@ void dev_update(psy_ui_x11_ComponentImp* self)
 
 	x11app = (psy_ui_X11App*) app.platform;	
 	XFlush(x11app->dpy);
+	XSync(x11app->dpy, FALSE);
 }
 
 void dev_setfont(psy_ui_x11_ComponentImp* self, psy_ui_Font* source)

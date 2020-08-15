@@ -11,8 +11,6 @@
 
 #include "../../detail/portable.h"
 
-#define TIMERID_PLAYPOSBAR 500
-
 static void playposbar_ontimer(PlayPosBar*, psy_ui_Component* sender,
 	uintptr_t timerid);
 static void playposbar_updatelabel(PlayPosBar*);
@@ -44,12 +42,12 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	playposbar_updatelabel(self);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		playposbar_onsongchanged);
-	psy_ui_component_starttimer(&self->component, TIMERID_PLAYPOSBAR, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender,
 	uintptr_t timerid)
-{		
+{
 	if (psy_audio_player_playing(&self->workspace->player)) {
 		playposbar_updatelabel(self);
 	}

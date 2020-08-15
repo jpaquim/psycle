@@ -113,7 +113,7 @@ void mainframe_init(MainFrame* self)
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 	psy_ui_frame_init(&self->component, 0);
 	vtable_init(self);
-	self->component.vtable = &vtable;
+	self->component.vtable = &vtable;	
 	self->startpage = FALSE;
 	psy_ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
 	psy_ui_component_enablealign(&self->component);	
@@ -881,6 +881,7 @@ void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 	psy_Properties* property)
 {	
+	printf("mainframe_onsettingsviewchanged\n");
 	if (strcmp(psy_properties_key(property), "showstepsequencer") == 0) {
 		if (workspace_showstepsequencer(&self->workspace)) {
 			psy_ui_component_show(&self->stepsequencerview.component);

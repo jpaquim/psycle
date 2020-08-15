@@ -250,9 +250,9 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_component_setalign(&self->globalvolume.component, psy_ui_ALIGN_TOP);
 	psy_ui_slider_connect(&self->globalvolume, self,
-		instrumentgeneralview_ongeneralviewdescribe,
-		instrumentgeneralview_ongeneralviewtweak,
-		instrumentgeneralview_ongeneralviewvalue);
+		(ui_slider_fpdescribe)instrumentgeneralview_ongeneralviewdescribe,
+		(ui_slider_fptweak)instrumentgeneralview_ongeneralviewtweak,
+		(ui_slider_fpvalue)instrumentgeneralview_ongeneralviewvalue);
 	instrumentnotemapview_init(&self->notemapview, &self->component, workspace);
 	psy_ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
 	instrumentgeneralview_updatetext(self, &workspace->translator);
@@ -471,9 +471,9 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_connect(sliders[i], self,
-			instrumentvolumeview_onvolumeviewdescribe,
-			instrumentvolumeview_onvolumeviewtweak,
-			instrumentvolumeview_onvolumeviewvalue);
+			(ui_slider_fpdescribe)instrumentvolumeview_onvolumeviewdescribe,
+			(ui_slider_fptweak)instrumentvolumeview_onvolumeviewtweak,
+			(ui_slider_fpvalue)instrumentvolumeview_onvolumeviewvalue);
 	}
 	instrumentvolumeview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
@@ -739,9 +739,9 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 		psy_ui_component_setalign(&sliders[i]->component, psy_ui_ALIGN_TOP);
 		psy_ui_component_setmargin(&sliders[i]->component, &margin);
 		psy_ui_slider_connect(sliders[i], self,
-			instrumentfilterview_ondescribe,
-			instrumentfilterview_ontweak,
-			instrumentfilterview_onvalue);
+			(ui_slider_fpdescribe)instrumentfilterview_ondescribe,
+			(ui_slider_fptweak)instrumentfilterview_ontweak,
+			(ui_slider_fpvalue)instrumentfilterview_onvalue);
 	}
 	instrumentfilterview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,

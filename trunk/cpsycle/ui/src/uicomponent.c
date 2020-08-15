@@ -488,10 +488,12 @@ void psy_ui_component_destroy(psy_ui_Component* self)
 	self->vtable->destroy(self);
 }
 
-void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx, intptr_t stepy)
+void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx,
+	intptr_t stepy)
 {
 	if (stepy != 0 || stepx != 0) {
-		self->vtable->scrollto(self, self->scrollstepx * stepx, self->scrollstepy * stepy);
+		self->vtable->scrollto(self, self->scrollstepx * stepx,
+			self->scrollstepy * stepy);
 	}
 }
 

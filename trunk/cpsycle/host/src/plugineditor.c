@@ -289,7 +289,7 @@ void plugineditor_buildfilelist(PluginEditor* self)
 		psy_dir_extract_path(self->basepath, prefix, name, ext);		
 		psy_snprintf(path, 4096, "%s\\%s", prefix, name);		
 		psy_dir_enumerate_recursive(self, path, "*.lua",
-			MACH_PLUGIN, plugineditor_onenumdir);		
+			MACH_PLUGIN, (psy_fp_findfile)plugineditor_onenumdir);		
 	}
 }
 

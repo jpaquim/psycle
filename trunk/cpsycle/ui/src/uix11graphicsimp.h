@@ -28,6 +28,7 @@ typedef struct psy_ui_x11_GraphicsImp {
 	GC gc;
 	Display* display;
 	Window window;
+	Region region;
 	XftDraw* xfd;
 	XftColor black;
 	XftFont* xftfont;

@@ -158,8 +158,10 @@ void wireview_initvolumeslider(WireView* self)
 		psy_ui_size_make(psy_ui_value_makeew(2),
 		psy_ui_value_makepx(0)));
 	psy_ui_component_setalign(&self->volslider.component, psy_ui_ALIGN_CLIENT);	
-	psy_ui_slider_connect(&self->volslider, self, wireview_ondescribevolume,
-		wireview_ontweakvolume, wireview_onvaluevolume);
+	psy_ui_slider_connect(&self->volslider, self,
+		(ui_slider_fpdescribe)wireview_ondescribevolume,
+		(ui_slider_fptweak)wireview_ontweakvolume,
+		(ui_slider_fpvalue)wireview_onvaluevolume);
 }
 
 void wireview_initrategroup(WireView* self)

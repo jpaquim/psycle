@@ -153,7 +153,7 @@ void propertiesrenderer_ondraw(PropertiesRenderer* self, psy_ui_Graphics* g)
 		self->cpx = self->linestate_clipstart->cpx;
 	}
 	psy_properties_enumerate(self->properties->children, self,
-			propertiesrenderer_onpropertiesdrawenum);	
+		(psy_PropertiesCallback)propertiesrenderer_onpropertiesdrawenum);	
 }
 
 void propertiesrenderer_preparepropertiesenum(PropertiesRenderer* self)
@@ -179,6 +179,7 @@ void propertiesrenderer_updatelinestates(PropertiesRenderer* self)
 	propertiesrenderer_preparepropertiesenum(self);
 	self->currlinestatecount = 0;
 	psy_properties_enumerate(self->properties->children, self,
+		(psy_PropertiesCallback)
 		propertiesrenderer_onpropertiesupdatelinestates);
 }
 
@@ -575,8 +576,9 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 	self->button = 0;	
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
-		propertiesrenderer_onpropertieshittestenum);
+		(psy_PropertiesCallback)propertiesrenderer_onpropertieshittestenum);
 	if (self->selected) {
+		printf("selected\n");
 		if (self->button &&
 				psy_properties_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;
@@ -632,7 +634,8 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 				self->selected);
 		} else
 		if (psy_properties_type(self->selected) == PSY_PROPERTY_TYP_BOOL) {
-			self->selected->item.value.i = self->selected->item.value.i == 0;
+			self->selected->item.value.i =
+				!(self->selected->item.value.i != FALSE);
 			psy_signal_emit(&self->signal_changed, self, 1,
 				self->selected);
 		} else
@@ -947,7 +950,7 @@ void  propertiesrenderer_onpreferredsize(PropertiesRenderer* self, const psy_ui_
 	self->search = 0;
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_properties_enumerate(self->properties->children, self,
-		propertiesrenderer_onenumpropertyposition);
+		(psy_PropertiesCallback)propertiesrenderer_onenumpropertyposition);
 	self->component.scrollstepy = self->lineheight;
 	rv->height = psy_ui_value_makepx(self->cpy);	
 	memcpy(self->col_perc, col_perc, sizeof(col_perc));
@@ -1066,10 +1069,11 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 			int scrollmax;
 
 			propertiesrenderer_preparepropertiesenum(&self->renderer);
-			psy_properties_enumerate(self->renderer.properties->children, &self->renderer,
+			psy_properties_enumerate(self->renderer.properties->children,
+				&self->renderer, (psy_PropertiesCallback)
 				propertiesrenderer_onenumpropertyposition);
-			psy_ui_component_verticalscrollrange(&self->renderer.component, &scrollmin,
-				&scrollmax);
+			psy_ui_component_verticalscrollrange(&self->renderer.component,
+				&scrollmin, &scrollmax);
 			scrollposition = self->renderer.cpy / self->renderer.lineheight;
 			if (scrollposition > scrollmax) {
 				scrollposition = scrollmax;
@@ -1103,7 +1107,7 @@ void propertiesview_onlanguagechanged(PropertiesView* self, Translator* sender)
 void propertiesview_translate(PropertiesView* self)
 {
 	psy_properties_enumerate(self->renderer.properties, self,
-		propertiesview_onchangelanguageenum);
+		(psy_PropertiesCallback)propertiesview_onchangelanguageenum);
 }
 
 int propertiesview_onchangelanguageenum(PropertiesView* self,
