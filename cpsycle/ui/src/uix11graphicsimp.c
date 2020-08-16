@@ -155,6 +155,16 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	//XSetGraphicsExposures(self->display, self->gc, TRUE);
 }
 
+void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
+{
+	XftDrawDestroy(self->xfd);
+	self->xfd = XftDrawCreate(
+		self->display,
+		self->window,
+		self->visual,
+	    DefaultColormap(self->display, DefaultScreen(self->display)));	
+}
+
 // xt implementation method for psy_ui_Graphics
 void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 {	

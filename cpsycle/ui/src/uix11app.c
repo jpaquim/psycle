@@ -67,7 +67,7 @@ void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 	if (!shape_extension) {
 		printf("XShapeQueryExtension error\n");
 	}
-	self->dbe = FALSE;
+	self->dbe = TRUE;
 	if (self->dbe) {
 		psy_ui_x11app_initdbe(self);
 	} else {
@@ -726,71 +726,6 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 		//}
 	//}
 //}
-//void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam)
-//{
-	//SCROLLINFO		si;	
-    //int				iPos; 
-	//psy_ui_win_ComponentImp* imp;
-     
-	//si.cbSize = sizeof (si) ;
-    //si.fMask  = SIF_ALL ;
-    //GetScrollInfo (hwnd, SB_HORZ, &si) ;	
-
-	//// Save the position for comparison later on
-	//iPos = si.nPos ;
-	//handle_scrollparam(&si, wParam);
-	//// Set the position and then retrieve it.  Due to adjustments
-	//// by Windows it may not be the same as the value set.
-	//si.fMask = SIF_POS ;
-	//SetScrollInfo (hwnd, SB_HORZ, &si, TRUE) ;
-	//GetScrollInfo (hwnd, SB_HORZ, &si) ;
-
-	//// If the position has changed, scroll the window and update it
-
-	//if (si.nPos != iPos)
-	//{                    
-		//psy_ui_WinApp* winapp;
-
-		//winapp = (psy_ui_WinApp*) app.platform;
-		//imp = psy_table_at(&winapp->selfmap, (uintptr_t) hwnd);
-		//if (imp->component && imp->component->signal_scroll.slots) {
-			//psy_signal_emit(&imp->component->signal_scroll, imp->component, 2, 
-				//(iPos - si.nPos), 0);			
-		//}
-		//if (imp->component->handlehscroll) {
-			//psy_ui_component_scrollstep(imp->component, (iPos - si.nPos), 0);
-		//}
-	//}
-//}
-
-//void handle_scrollparam(SCROLLINFO* si, WPARAM wParam)
-//{
-	//switch (LOWORD (wParam)) {
-		//case SB_TOP:
-		   //si->nPos = si->nMin ;
-		//break ;
-		//case SB_BOTTOM:
-		   //si->nPos = si->nMax ;
-		//break ;
-		//case SB_LINEUP:
-		   //si->nPos -= 1 ;
-		//break ;
-		//case SB_LINEDOWN:
-		   //si->nPos += 1 ;
-		//break ;
-		//case SB_PAGEUP:
-		   //si->nPos -= si->nPage ;
-		//break ;
-		//case SB_PAGEDOWN:
-		   //si->nPos += si->nPage ;
-		//break ;
-		//case SB_THUMBTRACK:
-		   //si->nPos = HIWORD(wParam);
-		//break ;
-		//default:
-		//break ;         
-	//}
-//}
 
 void widget_expose(Widget w, XtPointer clientdata,
   XmDrawingAreaCallbackStruct* cbs)
@@ -925,30 +860,38 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//event->xgraphicsexpose.x, event->xgraphicsexpose.y,
 				//event->xgraphicsexpose.width, event->xgraphicsexpose.height);
 			break;
-		case Expose: {
-			XdbeSwapInfo swapInfo;
-			swapInfo.swap_window = imp->hwnd;
-			swapInfo.swap_action = XdbeBackground;
+		case Expose: {					
 			expose_window(self, imp, event->xexpose.x, event->xexpose.y,
 				event->xexpose.width, event->xexpose.height);
 			if (self->dbe) {
-				XdbeSwapBuffers(self->dpy, &swapInfo, 1);
+				psy_ui_x11_GraphicsImp* gx11;
+										
+				gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+				XCopyArea(self->dpy, imp->d_backBuf, 
+					imp->hwnd, gx11->gc, event->xexpose.x, event->xexpose.y,
+				event->xexpose.width, event->xexpose.height, event->xexpose.x,
+				event->xexpose.y);
 			}
 			break; }
 		case ConfigureNotify: {			
 			XConfigureEvent xce = event->xconfigure;
-			
+						
 			if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
-				psy_ui_Size size;
+				psy_ui_Size size;				
 					
 				imp->prev_w = xce.width;
 				imp->prev_h = xce.height;
+				if (self->dbe) {
+					psy_ui_x11_GraphicsImp* gx11;
+										
+					gx11 = (psy_ui_x11_GraphicsImp*)imp->g.imp;
+					psy_ui_x11_graphicsimp_updatexft(gx11);
+				}
 				if (imp->component->alignchildren) {
 					psy_ui_component_align(imp->component);
 				}
 				size.width = psy_ui_value_makepx(xce.width);
-				size.height = psy_ui_value_makepx(xce.height);						
-							   
+				size.height = psy_ui_value_makepx(xce.height);				
 				imp->component->vtable->onsize(imp->component, &size);
 				if (imp->component->overflow != psy_ui_OVERFLOW_HIDDEN) {
 					psy_ui_component_updateoverflow(imp->component);						
