@@ -16,7 +16,6 @@ static void timerbar_offsetbpm(TimeBar*, psy_dsp_big_beat_t bpm);
 void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {				
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	self->player = player;

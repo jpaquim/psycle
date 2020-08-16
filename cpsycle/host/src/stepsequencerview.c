@@ -512,7 +512,6 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerview_vtable_init(self);
 	self->component.vtable = &stepsequencerview_vtable;
-	psy_ui_component_enablealign(&self->component);
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
 	psy_ui_component_setalign(&self->stepsequencerbarselect.component,

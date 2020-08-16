@@ -125,12 +125,13 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->imp.vtable = &xt_imp_vtable;
 	self->display = platformgc->display;
 	self->window = platformgc->window;
+	self->visual = platformgc->visual;
 	self->gc = platformgc->gc;
 	s = DefaultScreen(self->display);
 	self->xfd = XftDrawCreate(
 		self->display,
 		self->window,
-		DefaultVisual(self->display, s),
+		self->visual,
 	    DefaultColormap(self->display, s));
 	self->xftfont = XftFontOpenXlfd(self->display,
 		s, "arial");
@@ -139,7 +140,7 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 			s, "arial");
 	}		
 	XftColorAllocName(self->display,
-		DefaultVisual(self->display, s),
+		self->visual,
 		DefaultColormap(self->display, s),
 		"black", &self->black);
 	self->textcolor.color.red   = 0xFFFF;
@@ -160,7 +161,7 @@ void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 	XDestroyRegion(self->region);
 	XFreeGC(self->display, self->gc);
 	XftColorFree(self->display,
-	   DefaultVisual(self->display, DefaultScreen(self->display)),
+	   self->visual,	   
 	   DefaultColormap(self->display, DefaultScreen(self->display)),
 	   &self->black);
 	XftFontClose(self->display, self->xftfont);

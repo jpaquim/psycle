@@ -291,6 +291,7 @@ void showstate(psy_ui_Component* self, int state)
 {
 	self->visible = 1;
 	self->imp->vtable->dev_showstate(self->imp, state);
+	psy_ui_component_align(self);
 }
 
 void hide(psy_ui_Component* self)
@@ -419,7 +420,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
 	self->justify = psy_ui_JUSTIFY_EXPAND;
-	self->alignchildren = 0;
+	self->alignchildren = 1;
 	self->alignexpandmode = psy_ui_NOEXPAND;	
 	self->preferredsize = psy_ui_component_size(self);
 	self->maxsize = psy_ui_size_zero();
@@ -623,14 +624,14 @@ void psy_ui_component_enablealign(psy_ui_Component* self)
 	self->alignchildren = 1;	
 }
 
-void psy_ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)
-{
-	self->alignexpandmode = mode;
-}
-
 void psy_ui_component_preventalign(psy_ui_Component* self)
 {
 	self->alignchildren = 0;
+}
+
+void psy_ui_component_setalignexpand(psy_ui_Component* self, psy_ui_ExpandMode mode)
+{
+	self->alignexpandmode = mode;
 }
 
 void psy_ui_component_enableinput(psy_ui_Component* self, int recursive)

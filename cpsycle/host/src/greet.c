@@ -16,7 +16,6 @@ void greet_init(Greet* self, psy_ui_Component* parent)
 	psy_ui_Margin leftmargin;
 
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(3));

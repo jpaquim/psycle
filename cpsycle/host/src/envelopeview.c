@@ -415,8 +415,7 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);
 	envelopeview_vtable_init(self);
-	self->component.vtable = &envelopeview_vtable;
-	psy_ui_component_enablealign(&self->component);
+	self->component.vtable = &envelopeview_vtable;	
 	envelopebox_init(&self->envelopebox, &self->component);
 	psy_ui_component_setalign(&self->envelopebox.component, psy_ui_ALIGN_CLIENT);
 	scrollzoom_init(&self->zoom, &self->component);

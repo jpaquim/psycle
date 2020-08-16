@@ -32,7 +32,6 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->load, &self->component);	
@@ -87,7 +86,6 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	self->source = 0;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_init(&self->header, &self->component);
 	psy_ui_component_enablealign(&self->header);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
@@ -238,7 +236,6 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_edit_init(&self->nameedit, &self->component);		
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
@@ -394,7 +391,6 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0));	
 	self->notestabmode = workspace_notetabmode(workspace);
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_slider_init(&self->defaultvolume, &self->component);
 	psy_ui_slider_init(&self->globalvolume, &self->component);
 	psy_ui_slider_init(&self->panposition, &self->component);
@@ -579,7 +575,6 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 	};	
 
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);	
 	self->sample = 0;
 	self->player = player;
 	// header
@@ -787,7 +782,6 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0));
 	self->sample = 0;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_init(&self->cont, &self->component);
 	psy_ui_component_enablealign(&self->cont);
 	psy_ui_component_setmargin(&self->cont, &rowmargin);
@@ -1054,7 +1048,6 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		psy_ui_value_makeeh(0.5));
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(3));

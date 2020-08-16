@@ -15,8 +15,7 @@ static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,
 void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_label_init(&self->header, &self->component);		
 	psy_ui_combobox_init(&self->combobox, &self->component);

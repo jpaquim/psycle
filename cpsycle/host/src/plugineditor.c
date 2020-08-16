@@ -49,8 +49,7 @@ static const char* machinesource =
 void plugineditorcreatebar_init(PluginEditorCreateBar* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	psy_ui_label_init(&self->desc, &self->component);
 	psy_ui_label_settext(&self->desc, "Plugin Name");
@@ -83,9 +82,7 @@ static void writetext(const char* path, const char* text);
 void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
-	self->component.debugflag = 9000;
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	self->basepath = 0;	
 	self->instanceidx = UINTPTR_MAX;

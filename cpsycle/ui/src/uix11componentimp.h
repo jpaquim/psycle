@@ -13,6 +13,7 @@
 #include <X11/ShellP.h>
 #include <Xm/Xm.h>
 #include <Xm/Display.h>
+#include <X11/extensions/Xdbe.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +28,7 @@ typedef struct psy_ui_x11_ComponentImp {
 	psy_ui_ComponentImp imp;
 	struct psy_ui_Component* component;
 	Window hwnd;
+	XdbeBackBuffer d_backBuf;
     //Widget bulletin;
 	uintptr_t winid;
 	psy_ui_Size sizecache;

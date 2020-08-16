@@ -19,8 +19,7 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 {			
 	psy_ui_Margin margin;
 	
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);		
 	// titlerow
 	psy_ui_component_init(&self->titlerow, &self->component);
 	psy_ui_component_enablealign(&self->titlerow);
@@ -108,8 +107,7 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	} else {
 		psy_ui_component_init(&self->component, parent);
 	}
-	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);	
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
 	parameterlistbox_init(&self->parameterbox, &self->component, NULL);

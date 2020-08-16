@@ -26,11 +26,12 @@ extern "C" {
 	//WPARAM wParam, LPARAM lParam);
 	
 typedef struct
-{
+{	
 	uintptr_t hwnd;
 	uintptr_t id;
 	uintptr_t tick;
 	uintptr_t numticks;
+	bool doubleclick;
 } psy_ui_X11TickCounter;
 
 typedef struct {
@@ -45,6 +46,8 @@ typedef struct {
 	bool running;
 	psy_List* timers;
 	psy_Table colormap;
+	Visual* visual;
+	bool dbe;
 } psy_ui_X11App;
 
 void psy_ui_x11app_init(psy_ui_X11App*, void* instance);

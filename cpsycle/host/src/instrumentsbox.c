@@ -24,8 +24,7 @@ static void instrumentsbox_onlistchanged(InstrumentsBox*,
 void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments)
 {		
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_settext(&self->header, "Instrument Group");

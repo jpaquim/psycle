@@ -20,7 +20,6 @@ void linesperbeatbar_init(LinesPerBeatBar* self, psy_ui_Component* parent,
 	self->lpb = 0;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	self->player = &workspace->player;		

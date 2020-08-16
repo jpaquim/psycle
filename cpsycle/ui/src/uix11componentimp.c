@@ -187,18 +187,35 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
 	x11app = (psy_ui_X11App*) app.platform;	
 	self->prev_w = width;
 	self->prev_h = height;
-	if (parent == 0) {		      
-        self->hwnd = XCreateSimpleWindow(
+	self->d_backBuf = 0;
+	if (parent == 0) {
+		XSetWindowAttributes xAttr;
+		unsigned long xAttrMask = CWBackPixel;
+		
+		xAttr.background_pixel = 0x00232323;		     
+        self->hwnd = XCreateWindow(
 			x11app->dpy, XDefaultRootWindow(x11app->dpy),
-				x, y, width, height, 4, 0, 0x00232323);
+				x, y, width, height, 0,
+				CopyFromParent, CopyFromParent, x11app->visual,
+				xAttrMask, &xAttr);		      
+        //self->hwnd = XCreateSimpleWindow(
+		//	x11app->dpy, XDefaultRootWindow(x11app->dpy),
+		//		x, y, width, height, 4, 0, 0x00232323);
 		XSelectInput(x11app->dpy, self->hwnd,
 			ExposureMask | KeyPressMask | KeyReleaseMask |
 			StructureNotifyMask);
 		self->mapped = FALSE;
-    } else {        
-        self->hwnd = XCreateSimpleWindow(
+    } else {   
+		XSetWindowAttributes xAttr;
+		unsigned long xAttrMask = CWBackPixel;
+		
+		xAttr.background_pixel = 0x00232323;		     
+        self->hwnd = XCreateWindow(
 			x11app->dpy, parent->hwnd,
-				x, y, width, height, 0, 0, 0x00232323);
+				x, y, width, height, 0,
+				CopyFromParent, CopyFromParent, x11app->visual,
+				xAttrMask, &xAttr);
+				// 0, 0x00232323);
 			XMapWindow(x11app->dpy, self->hwnd);
 			XSelectInput(x11app->dpy, self->hwnd,
 				KeyPressMask | KeyReleaseMask |
@@ -215,22 +232,25 @@ void psy_ui_x11_component_create_window(psy_ui_x11_ComponentImp* self,
     if (self->hwnd) {		       
         GC gc;
 		PlatformXtGC xgc;
-		XGCValues gcv;
 		psy_ui_Graphics g;
 		XColor dummy;
 		XFontStruct *fontinfo;
 		Window root;
 		Window window;
 		int     screen;	
-				
+		
 		XSetWMProtocols(x11app->dpy, self->hwnd, &x11app->wmDeleteMessage, 1);
-		screen  = XDefaultScreen(x11app->dpy);			
-        gcv.function =   GXcopy;
-        gcv.plane_mask = AllPlanes;           
-        gc = XCreateGC(x11app->dpy, self->hwnd, GCFunction | GCPlaneMask, &gcv);
-        xgc.display =x11app->dpy;
-		xgc.window = self->hwnd;	    
-		xgc.gc = gc;			
+		if (x11app->dbe) {		
+			self->d_backBuf = XdbeAllocateBackBufferName(x11app->dpy, self->hwnd,
+				XdbeBackground);
+			xgc.window = self->d_backBuf;
+		} else {
+			xgc.window = self->hwnd;
+		}
+        gc = XCreateGC(x11app->dpy, xgc.window, 0, NULL);
+        xgc.display =x11app->dpy;		
+		xgc.gc = gc;
+		xgc.visual = x11app->visual;		
 		psy_ui_graphics_init(&self->g, &xgc);	
     }
 	
@@ -813,7 +833,12 @@ psy_ui_TextMetric dev_textmetric(psy_ui_x11_ComponentImp* self)
 		x11app = (psy_ui_X11App*) app.platform;
 		gc = XCreateGC(x11app->dpy, self->hwnd, 0, 0);
 		xgc.display =x11app->dpy;
-		xgc.window = self->hwnd;	    
+		if (x11app->dbe) {
+			xgc.window = self->d_backBuf;
+		} else {
+			xgc.window = self->hwnd;
+		}
+		xgc.visual = x11app->visual;
 		xgc.gc = gc;
 		psy_ui_graphics_init(&g, &xgc);
 		gx11 = (psy_ui_x11_GraphicsImp*)g.imp;
@@ -994,7 +1019,12 @@ psy_ui_Size dev_textsize(psy_ui_x11_ComponentImp* self, const char* text,
 	x11app = (psy_ui_X11App*) app.platform;
 	gc = XCreateGC(x11app->dpy, self->hwnd, 0, 0);
 	xgc.display =x11app->dpy;
-	xgc.window = self->hwnd;	    
+	if (x11app->dbe) {
+		xgc.window = self->d_backBuf;
+	} else {
+		xgc.window = self->hwnd;
+	}
+	xgc.visual = x11app->visual;    
 	xgc.gc = gc;
 	psy_ui_graphics_init(&g, &xgc);
 	rv = psy_ui_textsize(&g, text);

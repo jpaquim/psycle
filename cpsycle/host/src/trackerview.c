@@ -2720,7 +2720,6 @@ static void patternblockmenu_onlanguagechanged(PatternBlockMenu*, Translator* se
 void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_button_init(&self->cut, &self->component);
 	psy_ui_button_settext(&self->cut, "Cut");
 	psy_ui_button_init(&self->copy, &self->component);
@@ -3216,7 +3215,6 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	trackerview_vtable_init(self);
 	self->component.vtable = &trackerview_vtable;
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		trackerview_ondestroy);

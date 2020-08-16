@@ -64,8 +64,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 {
 	psy_ui_Margin margin;
 	
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_combobox_init(&self->curvetype, &self->component);
 	psy_ui_component_setalign(&self->curvetype.component, psy_ui_ALIGN_LEFT);
 	psy_ui_combobox_addtext(&self->curvetype, "Linear");
@@ -445,8 +444,7 @@ void interpolatecurvebox_clear(InterpolateCurveBox* self)
 void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component* parent,
 	int startsel, int endsel, int lpb, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);		
 	interpolatecurvebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	interpolatecurvebox_init(&self->box, &self->component, self, workspace);

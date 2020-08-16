@@ -122,8 +122,7 @@ void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent);
 	patternproperties_vtable_init(self);
-	self->component.vtable = &patternproperties_vtable;
-	psy_ui_component_enablealign(&self->component);
+	self->component.vtable = &patternproperties_vtable;	
 	psy_ui_label_init(&self->namelabel, &self->component);
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_label_settext(&self->namelabel, "Pattern Name");	

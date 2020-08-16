@@ -8,7 +8,6 @@
 void vubar_init(VuBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	clipbox_init(&self->clipbox, &self->component, workspace);	
 	psy_ui_component_setalign(&self->clipbox.component, psy_ui_ALIGN_RIGHT);
 	vumeter_init(&self->vumeter, &self->component, workspace);

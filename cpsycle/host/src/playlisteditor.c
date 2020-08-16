@@ -80,8 +80,7 @@ void playlisteditorbuttons_init(PlayListEditorButtons* self,
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_init(&self->row1, &self->component);
 	psy_ui_component_enablealign(&self->row1);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
@@ -119,8 +118,7 @@ void playlisteditor_init(PlayListEditor* self, psy_ui_Component* parent,
 	self->nextentry = 0;
 	psy_ui_component_init(&self->component, parent);
 	vtable_init(self);
-	self->component.vtable = &vtable;
-	psy_ui_component_enablealign(&self->component);
+	self->component.vtable = &vtable;	
 	psy_ui_listbox_init(&self->listbox, &self->component);	
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	playlisteditorbuttons_init(&self->buttons, &self->component);

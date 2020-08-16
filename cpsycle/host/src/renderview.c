@@ -24,8 +24,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		renderview_ondestroy);
-	psy_ui_component_enablealign(&self->component);
+		renderview_ondestroy);	
 	renderview_makeproperties(self);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
 		self->properties, workspace);

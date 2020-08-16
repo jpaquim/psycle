@@ -34,8 +34,7 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 			
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	psy_ui_button_init(&self->rescan, &self->component);
 	psy_ui_button_setcharnumber(&self->rescan, 30);
@@ -103,8 +102,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
@@ -633,8 +631,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	newmachine_vtable_init(self);
 	self->component.vtable = &newmachine_vtable;
-	self->skin = skin;
-	psy_ui_component_enablealign(&self->component);	
+	self->skin = skin;		
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);	
 	// header margin

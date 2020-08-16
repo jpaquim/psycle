@@ -98,8 +98,7 @@ void playbar_initalign(PlayBar* self)
 
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_ui_component_enablealign(&self->component);
+		psy_ui_value_makepx(0));	
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(

@@ -45,7 +45,6 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 	psy_ui_component_init(&self->component, parent);
 	sequencebuttons_vtable_init(self);
 	self->component.vtable = &sequencebuttons_vtable;
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_button_init(&self->incpattern, &self->component);	
 	psy_ui_button_init(&self->insertentry, &self->component);	
 	psy_ui_button_init(&self->decpattern, &self->component);	
@@ -510,9 +509,7 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->duration_ms = 0;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);	
-	psy_ui_label_init(&self->desc, &self->component);	
-	
+	psy_ui_label_init(&self->desc, &self->component);
 	psy_ui_label_setcharnumber(&self->desc, 9);
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
@@ -566,7 +563,6 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_checkbox_init(&self->followsong, &self->component);	
 	psy_ui_checkbox_init(&self->shownames, &self->component);	
 	psy_ui_checkbox_init(&self->showplaylist, &self->component);		
@@ -641,8 +637,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	self->patterns = &workspace->song->patterns;
 	self->selection = &workspace->sequenceselection;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
-	psy_ui_component_enablealign(&self->component);
+		psy_ui_BACKGROUND_NONE);	
 	playlisteditor_init(&self->playlisteditor, &self->component,
 		workspace);
 	psy_ui_component_setalign(&self->playlisteditor.component, psy_ui_ALIGN_TOP);

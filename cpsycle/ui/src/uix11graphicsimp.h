@@ -21,6 +21,7 @@ typedef struct {
 	GC gc;
 	Display* display;
 	Window window;
+	Visual* visual;
 } PlatformXtGC;
 
 typedef struct psy_ui_x11_GraphicsImp {
@@ -28,6 +29,7 @@ typedef struct psy_ui_x11_GraphicsImp {
 	GC gc;
 	Display* display;
 	Window window;
+	Visual* visual;
 	Region region;
 	XftDraw* xfd;
 	XftColor black;

@@ -23,7 +23,6 @@ static void psy_ui_scroller_connectclient(psy_ui_Scroller*);
 	psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	// horizontal scrollbar
 	psy_ui_scrollbar_init(&self->bottom, &self->component);
 	psy_ui_scrollbar_setorientation(&self->bottom, psy_ui_HORIZONTAL);
@@ -49,7 +48,6 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	// horizontal scrollbar
 	psy_ui_scrollbar_init(&self->bottom, &self->component);
 	psy_ui_scrollbar_setorientation(&self->bottom, psy_ui_HORIZONTAL);

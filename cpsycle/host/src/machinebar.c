@@ -51,7 +51,6 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_table_init(&self->comboboxslots);
 	psy_table_init(&self->slotscombobox);
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machinebar_ondestroy);
 	psy_ui_combobox_init(&self->machinebox, &self->component);

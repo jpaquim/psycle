@@ -52,7 +52,6 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_enablealign(&self->component);	
 	self->workspace = workspace;
 	self->trackheight = 30;
 	self->textheight = 12;
