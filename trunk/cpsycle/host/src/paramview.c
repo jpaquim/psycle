@@ -132,8 +132,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 {
 	psy_Properties* pv;
 
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	++paramview_refcount;

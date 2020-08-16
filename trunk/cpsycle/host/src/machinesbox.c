@@ -24,8 +24,7 @@ static void machinesbox_onmachineslistchanged(MachinesBox*, psy_ui_Component* se
 void machinesbox_init(MachinesBox* self, psy_ui_Component* parent,
 	psy_audio_Machines* machines, MachineBoxMode mode, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	self->mode = mode;
 	self->showslots = 1;

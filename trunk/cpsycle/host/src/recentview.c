@@ -13,8 +13,7 @@ static void recentview_onclear(RecentView*, PropertiesView* sender);
 void recentview_init(RecentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
 {	
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	self->workspace = workspace;
 	psy_ui_button_init(&self->clear, &self->component);

@@ -41,8 +41,7 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 
 	self->workspace = workspace;
 	self->editor = editor;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_checkbox_init(&self->selecttogether, &self->component);
 	psy_ui_checkbox_settext(&self->selecttogether, "Select Channels Together");
 	psy_ui_checkbox_check(&self->selecttogether);
@@ -135,8 +134,7 @@ static void sampleeditorbar_onlanguagechanged(SampleEditorOperations*, Translato
 void sampleeditoroperations_init(SampleEditorOperations* self,
 	psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_button_init(&self->cut, &self->component);
 	psy_ui_button_init(&self->crop, &self->component);
 	psy_ui_button_init(&self->copy, &self->component);
@@ -154,8 +152,7 @@ void sampleeditoroperations_initalign(SampleEditorOperations* self)
 
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(0.5));
-	psy_ui_component_enablealign(&self->component);
+		psy_ui_value_makeeh(0.5));	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
@@ -194,7 +191,6 @@ void sampleeditoramplify_init(SampleEditorAmplify* self, psy_ui_Component* paren
 	self->workspace = workspace;
 	self->gainvalue = (psy_dsp_amp_t) 2/3.f;
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_settext(&self->header, "Adjust Volume");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
@@ -244,7 +240,6 @@ void sampleeditluaprocessor_init(SampleEditLuaProcessor* self, psy_ui_Component*
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_settext(&self->header, "Lua Processor");
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
@@ -275,7 +270,6 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
-	psy_ui_component_enablealign(&self->component);
 	sampleeditoroperations_init(&self->copypaste, &self->component, workspace);
 	psy_ui_component_setalign(&self->copypaste.component, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->process, &self->component);	
@@ -392,7 +386,6 @@ void sampleeditorplaybar_init(SampleEditorPlayBar* self, psy_ui_Component* paren
 {
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	// psy_ui_button_init(&self->loop, &self->component);
 	// psy_ui_button_settext(&self->loop, "Loop");	
 	// psy_signal_connect(&self->loop.signal_clicked, self, onloopclicked);	
@@ -411,7 +404,6 @@ void sampleeditorplaybar_initalign(SampleEditorPlayBar* self)
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(
@@ -449,7 +441,6 @@ void sampleeditorheader_init(SampleEditorHeader* self,
 	psy_ui_component_init(&self->component, parent);
 	sampleeditorheader_vtable_init(self);
 	self->component.vtable = &sampleeditorheader_vtable;
-	psy_ui_component_enablealign(&self->component);	
 	psy_ui_component_doublebuffer(&self->component);	
 }
 
@@ -568,7 +559,6 @@ void samplebox_init(SampleBox* self, psy_ui_Component* parent, Workspace* worksp
 {
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_table_init(&self->waveboxes);
@@ -709,7 +699,6 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0));
-	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		sampleeditor_ondestroy);	
 	sampleprocessview_init(&self->processview, &self->component, workspace);

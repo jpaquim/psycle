@@ -560,8 +560,7 @@ void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_button_init(&self->add, &self->component);
 	psy_ui_button_settext(&self->add, "Add");
 	psy_ui_button_init(&self->remove, &self->component);
@@ -581,8 +580,7 @@ void instrumentnotemapview_init(InstrumentNoteMapView* self,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	psy_ui_label_init(&self->label, &self->component);

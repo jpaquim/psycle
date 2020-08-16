@@ -987,7 +987,6 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesview_ondestroy);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);

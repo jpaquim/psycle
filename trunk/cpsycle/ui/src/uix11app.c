@@ -9,7 +9,7 @@
 #include <X11/IntrinsicP.h>
 #include <X11/ShellP.h>
 #include <X11/extensions/shape.h>
-#include "X11/keysym.h"
+#include <X11/extensions/Xdbe.h>
 
 #include "uix11graphicsimp.h"
 #include "uix11fontimp.h"
@@ -20,43 +20,30 @@
 #include <stdio.h>
 
 // int iDeltaPerLine = 120;
-//extern psy_Table menumap;
+
 extern psy_ui_App app;
-
-//static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
-//static void handle_hscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
-//static void handle_scrollparam(SCROLLINFO* si, WPARAM wParam);
-
-//LRESULT CALLBACK ui_winproc(HWND hwnd, UINT message,
-	//WPARAM wParam, LPARAM lParam);
-//LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
-	//WPARAM wParam, LPARAM lParam);
-//static void psy_ui_winapp_registerclasses(psy_ui_WinApp*);
-
-//static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
-//{
-	//return (psy_ui_win_ComponentImp*)self->imp->vtable->dev_platform(self->imp);
-//}
-
-//static int FilterException(const char* msg, int code, struct _EXCEPTION_POINTERS *ep) 
-//{	
-	//// char txt[512];				
-	//MessageBox(0, msg, "Psycle Ui Exception", MB_OK | MB_ICONERROR);
-	//return EXCEPTION_EXECUTE_HANDLER;
-// }
-
 static int shapeEventBase, shapeErrorBase;
+
+// double click
+static int buttonclicks = 0;
+static int buttonclickcounter = 0;
+static int doubleclicktime = 200;
+static psy_ui_MouseEvent buttonpressevent;
 
 // prototypes
 static int handleevent(psy_ui_X11App*, XEvent*);
 static void dispose_window(psy_ui_X11App*, Window);
-static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp* imp,
+static void expose_window(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int x, int y, int width, int height);	
+void buttonpress_single(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
+	psy_ui_MouseEvent*);
+static int translate_x11button(int button);	
 static psy_ui_KeyEvent translate_keyevent(XKeyEvent*);
 static void sendeventtoparent(psy_ui_X11App*, psy_ui_x11_ComponentImp*,
 	int mask, XEvent*);
 static void adjustcoordinates(psy_ui_Component*, int* x, int* y);	
 static int timertick(psy_ui_X11App*);
+static void psy_ui_x11app_initdbe(psy_ui_X11App*);
 	
 // implementation
 void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
@@ -80,8 +67,68 @@ void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 	if (!shape_extension) {
 		printf("XShapeQueryExtension error\n");
 	}
+	self->dbe = FALSE;
+	if (self->dbe) {
+		psy_ui_x11app_initdbe(self);
+	} else {
+		self->visual = DefaultVisual(self->dpy,
+			DefaultScreen(self->dpy));
+	}
 	self->timers = NULL;
 	psy_table_init(&self->colormap);
+}
+
+void psy_ui_x11app_initdbe(psy_ui_X11App* self)
+{
+	int major, minor;
+	
+	self->visual = 0;
+	if (XdbeQueryExtension(self->dpy, &major, &minor)) {
+		printf("Xdbe (%d.%d) supported, using double buffering\n", major, minor);
+		int numScreens = 1;
+		Drawable screens[] = { DefaultRootWindow(self->dpy) };
+		XdbeScreenVisualInfo *info = XdbeGetVisualInfo(self->dpy, screens, &numScreens);
+		if (!info || numScreens < 1 || info->count < 1) {
+			fprintf(stderr, "No visuals support Xdbe\n");
+			return;
+		}
+
+		// Choosing the first one, seems that they have all perflevel of 0,
+		// and the depth varies.
+		XVisualInfo xvisinfo_templ;
+		xvisinfo_templ.visualid = info->visinfo[0].visual; // We know there's at least one
+		// As far as I know, screens are densely packed, so we can assume that if at least 1 exists, it's screen 0.
+		xvisinfo_templ.screen = 0;
+		xvisinfo_templ.depth = info->visinfo[0].depth;
+
+		int matches;
+		XVisualInfo *xvisinfo_match =
+			XGetVisualInfo(self->dpy, VisualIDMask|VisualScreenMask|VisualDepthMask, &xvisinfo_templ, &matches);
+
+		if (!xvisinfo_match || matches < 1) {
+			fprintf(stderr, "Couldn't match a Visual with double buffering\n");
+			return;
+		}
+
+		/*
+		printf("%d supported visuals\n", info->count);
+		for (int i = 0; i < info->count; ++i) {
+			printf("visual %d/%d: id %d, depth %d, perf %d\n",
+					i, info->count,
+					info->visinfo[i].visual,
+					info->visinfo[i].depth,
+					info->visinfo[i].perflevel);
+		}
+		printf("We got xvisinfo: id: %d, screen %d, depth %d\n",
+				xvisinfo_match->visualid, xvisinfo_match->screen, xvisinfo_match->depth);
+		*/
+
+		// We can use Visual from the match
+		self->visual = xvisinfo_match->visual;
+	} else {
+		fprintf(stderr, "No Xdbe support\n");
+		return;
+	}	
 }
 
 void psy_ui_x11app_dispose(psy_ui_X11App* self)
@@ -94,45 +141,6 @@ void psy_ui_x11app_dispose(psy_ui_X11App* self)
 //	DeleteObject(self->defaultbackgroundbrush);
 }
 
-//void psy_ui_winapp_registerclasses(psy_ui_WinApp* self)
-//{
-	//WNDCLASS     wndclass ;
-	//INITCOMMONCONTROLSEX icex;
-	//int succ;
-		
-	//wndclass.style         = CS_HREDRAW | CS_VREDRAW ;
-    //wndclass.lpfnWndProc   = self->winproc;
-    //wndclass.cbClsExtra    = 0;
-    //wndclass.cbWndExtra    = 0;
-    //wndclass.hInstance     = (HINSTANCE) self->instance;
-    //wndclass.hIcon         = LoadIcon (NULL, IDI_APPLICATION) ;
-    //wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW) ;
-    //wndclass.hbrBackground = (HBRUSH) GetStockObject (NULL_BRUSH) ;
-    //wndclass.lpszMenuName  = NULL ;
-    //wndclass.lpszClassName = self->appclass;
-	//if (!RegisterClass (&wndclass))
-    //{
-		//MessageBox (NULL, TEXT ("This program requires Windows NT!"), 
-                      //self->appclass, MB_ICONERROR) ;		
-    //}
-	
-	//wndclass.style         = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	//wndclass.lpfnWndProc   = self->winproc;
-	//wndclass.cbClsExtra    = 0;
-	//wndclass.cbWndExtra    = sizeof (long); 
-	//wndclass.hInstance     = self->instance;
-	//wndclass.hIcon         = NULL;
-	//wndclass.hCursor       = LoadCursor (NULL, IDC_ARROW);
-	//wndclass.hbrBackground = (HBRUSH) GetStockObject (NULL_BRUSH);
-	//wndclass.lpszMenuName  = NULL;
-	//wndclass.lpszClassName = self->componentclass;
-     
-	//RegisterClass (&wndclass) ;	
-	//// Ensure that the common control DLL is loaded.     		
-	//icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-    //icex.dwICC = ICC_USEREX_CLASSES;
-    //succ = InitCommonControlsEx(&icex);
-//}
 
 //LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 	//WPARAM wParam, LPARAM lParam)
@@ -803,28 +811,22 @@ int psy_ui_x11app_run(psy_ui_X11App* self)
 		// create a file description set containing x11_fd
         FD_ZERO(&in_fds);
         FD_SET(x11_fd, &in_fds);
-
         // set timer to 1 ms
         tv.tv_usec = 1000;
-        tv.tv_sec = 0;
-        
-        // Wait for X Event or a Timer
+        tv.tv_sec = 0;        
+		// wait for X event or a timer
         int num_ready_fds = select(x11_fd + 1, &in_fds, NULL, NULL, &tv);
         if (num_ready_fds > 0) {
-            // printf("Event Received!\n");
-		} else if (num_ready_fds == 0)
-            // Handle timer here
+            // X11 event
+		} else if (num_ready_fds == 0) {
             timertick(self);            
-        else {
+        } else {
             printf("X11 select: An error occured!\n");
 		}
-	
 		while(XPending(self->dpy)) {
             XNextEvent(self->dpy, &event);	      
 			handleevent(self, &event);
-		}
-      //printf("%d\n", event.type);
-      //printf("%d\n", StructureNotifyMask);
+		}      
     }
     return 0;
 }
@@ -853,12 +855,17 @@ int timertick(psy_ui_X11App* self)
 					psy_signal_emit(&imp->component->signal_timer,
 						imp->component, 1, counter->id);
 				}
-			}
+			}			
 			counter->tick = counter->numticks;			
 		}
 		if (counter->tick > 0) {
 			--counter->tick;
 		}	
+	}
+	if (buttonclicks == 1 && buttonclickcounter > 0) {
+		--buttonclickcounter;
+	} else {
+		buttonclicks = 0;
 	}
 }
 
@@ -868,6 +875,7 @@ void psy_ui_x11app_starttimer(psy_ui_X11App* self, uintptr_t hwnd, uintptr_t id,
 	psy_ui_X11TickCounter* counter;
 		
 	counter = (psy_ui_X11TickCounter*)malloc(sizeof(psy_ui_X11TickCounter));
+	counter->doubleclick = FALSE;
 	counter->hwnd = hwnd;
 	counter->id = id;
 	counter->numticks = interval;
@@ -917,10 +925,16 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 				//event->xgraphicsexpose.x, event->xgraphicsexpose.y,
 				//event->xgraphicsexpose.width, event->xgraphicsexpose.height);
 			break;
-		case Expose:
+		case Expose: {
+			XdbeSwapInfo swapInfo;
+			swapInfo.swap_window = imp->hwnd;
+			swapInfo.swap_action = XdbeBackground;
 			expose_window(self, imp, event->xexpose.x, event->xexpose.y,
 				event->xexpose.width, event->xexpose.height);
-			break;
+			if (self->dbe) {
+				XdbeSwapBuffers(self->dpy, &swapInfo, 1);
+			}
+			break; }
 		case ConfigureNotify: {			
 			XConfigureEvent xce = event->xconfigure;
 			
@@ -1010,36 +1024,55 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			}
 			return 0;
 			break; }
-        case ButtonPress: {
+        case ButtonPress: {			
 			psy_ui_MouseEvent ev;
-			XButtonEvent xbe;
 			
-			xbe = event->xbutton;			
 			psy_ui_mouseevent_init(&ev,
-				xbe.x,
-				xbe.y,
-				xbe.button,
+				event->xbutton.x,
+				event->xbutton.y,
+				translate_x11button(event->xbutton.button),
 				0,
 				0,
 				0);
 				//(SHORT)LOWORD (lParam), 
 				//(SHORT)HIWORD (lParam), MK_RBUTTON, 0,
 					//GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0);
-			adjustcoordinates(imp->component, &ev.x, &ev.y);			
-			imp->component->vtable->onmousedown(imp->component, &ev);
-			psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1,
-					&ev);
-			return 0;
+			adjustcoordinates(imp->component, &ev.x, &ev.y);
+			if (buttonclicks == 0) {
+				buttonpressevent = ev;										
+				buttonpress_single(self, imp, &ev);
+				buttonclicks = 1;				
+				buttonclickcounter = doubleclicktime;
+			} else {
+				// No timeout
+				// stop click timer
+				buttonclicks = 0;
+				// check distance
+				if (ev.x != buttonpressevent.x || ev.y != buttonpressevent.y) {
+					// single click
+					buttonpress_single(self, imp, &ev);
+				} else {
+					// double click			
+					imp->component->vtable->onmousedoubleclick(imp->component, &ev);
+					psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
+						&ev);
+					while (ev.bubble != FALSE && imp->parent && imp->parent->hwnd) {
+						imp = imp->parent;
+						imp->component->vtable->onmousedoubleclick(imp->component, &ev);
+						psy_signal_emit(&imp->component->signal_mousedoubleclick, imp->component, 1,
+							&ev);
+					}
+				}			
+			}			
+			return 0;			
 			break; }
 		case ButtonRelease: {
 			psy_ui_MouseEvent ev;
-			XButtonEvent xbe;
-			
-			xbe = event->xbutton;			
+					
 			psy_ui_mouseevent_init(&ev,
-				xbe.x,
-				xbe.y,
-				xbe.button,
+				event->xbutton.x,
+				event->xbutton.y,
+				translate_x11button(event->xbutton.button),
 				0,
 				0,
 				0);
@@ -1056,6 +1089,9 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			psy_ui_MouseEvent ev;
 			XMotionEvent xme;
 			
+			if (buttonclicks == 1) {
+				buttonclicks = 0;
+			}
 			xme = event->xmotion;
 			psy_ui_mouseevent_init(&ev,
 				xme.x,
@@ -1077,6 +1113,13 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			break;
 	  }
 	return 0;
+}
+
+void buttonpress_single(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
+	psy_ui_MouseEvent* ev)
+{
+	imp->component->vtable->onmousedown(imp->component, ev);
+	psy_signal_emit(&imp->component->signal_mousedown, imp->component, 1, ev);
 }
 
 void expose_window(psy_ui_X11App* self, psy_ui_x11_ComponentImp* imp,
@@ -1156,6 +1199,27 @@ void adjustcoordinates(psy_ui_Component* component, int* x, int* y)
 		*y -= psy_ui_value_px(&component->spacing.top, &tm);
 	}
 }
+
+int translate_x11button(int button)
+{
+	int rv;
+	
+	switch (button) {
+		case 1: // left button
+			rv = 1;
+			break;
+		case 2: // middle button
+			rv = 3;
+			break;
+		case 3: // right button
+			rv = 2;
+			break;
+		default:
+			rv = 1;
+			break;
+	}
+	return rv;
+}	
 
 psy_ui_KeyEvent translate_keyevent(XKeyEvent* event)
 {

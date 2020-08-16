@@ -328,7 +328,6 @@ static void psy_ui_listbox_onselchanged(psy_ui_ListBox*, psy_ui_ListBoxClient*
 void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_listboxclient_init(&self->client, &self->component);
 	psy_ui_scroller_init(&self->scroller, &self->client.component,
 		&self->component);

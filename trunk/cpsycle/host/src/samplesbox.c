@@ -28,8 +28,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(1), psy_ui_value_makepx(0));
 	
-	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_label_setcharnumber(&self->header, 25);
 	psy_ui_component_setmargin(&self->header.component, &margin);		

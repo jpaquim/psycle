@@ -57,7 +57,6 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_enablealign(&self->component);
 	self->tweakbase = -1;
 	self->orientation = psy_ui_HORIZONTAL;
 	self->value = 0.0;

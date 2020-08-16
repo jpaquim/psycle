@@ -18,8 +18,7 @@ static void parameterlistbox_onvalue(ParameterListBox*, psy_ui_Slider*,
 void parameterlistbox_init(ParameterListBox* self, psy_ui_Component* parent,
 	psy_audio_Machine* machine)
 {	
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_listbox_init(&self->listbox, &self->component);
 	psy_ui_component_setalign(&self->listbox.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setpreferredsize(&self->listbox.component,

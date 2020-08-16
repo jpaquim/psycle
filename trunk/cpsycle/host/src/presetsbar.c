@@ -44,8 +44,7 @@ void presetsbar_init(PresetsBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->machine = NULL;	
 	self->userpreset = FALSE;
-	psy_path_init(&self->presetpath, "");
-	psy_ui_component_enablealign(&self->component);
+	psy_path_init(&self->presetpath, "");	
 	psy_ui_label_init(&self->bank, &self->component);
 	psy_ui_label_settext(&self->bank, "Bank");
 	psy_ui_combobox_init(&self->bankselector, &self->component);

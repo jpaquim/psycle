@@ -267,8 +267,8 @@ INLINE void psy_ui_component_setborder(psy_ui_Component* self, psy_ui_Border bor
 psy_ui_Border psy_ui_component_border(psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
 void psy_ui_component_enablealign(psy_ui_Component*);
-void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
 void psy_ui_component_preventalign(psy_ui_Component*);
+void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
 void psy_ui_component_enableinput(psy_ui_Component*, int recursive);
 void psy_ui_component_preventinput(psy_ui_Component*, int recursive);
 void psy_ui_component_setbackgroundmode(psy_ui_Component*, psy_ui_BackgroundMode);

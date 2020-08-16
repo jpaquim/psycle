@@ -12,8 +12,7 @@ void navigation_init(Navigation* self, psy_ui_Component* parent, Workspace* work
 {
 	psy_ui_Margin margin;	
 	psy_ui_component_init(&self->component, parent);	
-	self->workspace = workspace;
-	psy_ui_component_enablealign(&self->component);
+	self->workspace = workspace;	
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->prev, &self->component);	

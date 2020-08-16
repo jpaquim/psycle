@@ -4,7 +4,7 @@ LIBDIRS = -L ../../container/src -L ../../dsp/src -L ../../audio/src -L ../../fi
 src = $(wildcard *.c)
 obj = $(src:.c=.o)
 
-LDFLAGS = -no-pie -lncurses -laudio -lcontainer -ldsp -lfile -lXm -lXt -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lncurses -lpthread -ldl -lstdc++ -lpsyui
+LDFLAGS = -no-pie -lncurses -laudio -lcontainer -ldsp -lfile -lX11 -lXft -lXext -lXmu -lm -llua5.3 -lpthread -ldl -lstdc++ -lpsyui
 
 psycle: $(obj)
 		$(CC) -g -O2 -o $@ $^ $(LIBDIRS) $(LDFLAGS)	

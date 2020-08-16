@@ -114,8 +114,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);		
 	stepbox_init(&self->step, &self->component, workspace);
 	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
@@ -216,8 +215,7 @@ void patternview_init(PatternView* self,
 	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(3));
-	self->workspace = workspace;
-	psy_ui_component_enablealign(&self->component);
+	self->workspace = workspace;	
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_focus, self, patternview_onfocus);

@@ -126,8 +126,7 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 {	
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
-	psy_ui_margin_init(&self->topmargin);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_margin_init(&self->topmargin);	
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_BOTTOM);	

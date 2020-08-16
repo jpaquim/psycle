@@ -15,8 +15,7 @@ static void midiview_initflags(MidiView*);
 void midiview_init(MidiView* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	psy_ui_margin_init(&self->topmargin);
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);

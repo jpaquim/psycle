@@ -85,7 +85,6 @@ int psycle_run(uintptr_t instance, int options)
 	psy_ui_app_init(&app, instance);
 	// Creates the mainframe
 	psy_ui_frame_init(&mainframe, NULL);
-	mainframe.debugflag = 2;
 	psy_ui_component_enablealign(&mainframe);
 	psy_ui_component_setbackgroundmode(&mainframe,
 		psy_ui_BACKGROUND_SET);

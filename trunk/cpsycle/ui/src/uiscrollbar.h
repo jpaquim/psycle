@@ -8,7 +8,7 @@
 
 // Scrollbar
 //
-// aim: displays a scrollbar
+// displays a scrollbar
 //
 // psy_ui_Component
 //      ^
@@ -20,19 +20,27 @@
 extern "C" {
 #endif
 
+typedef struct psy_ui_ScrollBarPane {
+    psy_ui_Component component;
+    intptr_t pos;
+    intptr_t screenpos;
+    intptr_t scrollmax;
+    intptr_t scrollmin;
+    int dragoffset;
+    int drag;
+    psy_ui_Orientation orientation;
+    psy_Signal signal_changed;
+} psy_ui_ScrollBarPane;
+
+void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*, psy_ui_Component* parent);
+void psy_ui_scrollbarpane_setorientation(psy_ui_ScrollBarPane*, psy_ui_Orientation);
+
 typedef struct {
     psy_ui_Component component;
     psy_ui_Button less;
     psy_ui_Button more;
-    psy_ui_Component slider;
-    psy_ui_Component sliderpane;
-    int dragoffset;
-    int drag;
-    intptr_t scrollmax;
-    intptr_t scrollmin;
-    psy_ui_Orientation orientation;
-    psy_Signal signal_changed;
-    intptr_t pos;
+    psy_ui_ScrollBarPane sliderpane;
+    psy_Signal signal_changed;    
 } psy_ui_ScrollBar;
 
 void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);

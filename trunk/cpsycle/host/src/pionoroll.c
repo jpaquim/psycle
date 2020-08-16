@@ -802,7 +802,6 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	self->opcount = 0;
 	self->syncpattern = 1;
 	self->pattern = 0;	
-	psy_ui_component_enablealign(&self->component);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,

@@ -10,7 +10,6 @@ void songbar_init(SongBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	songtrackbar_init(&self->songtrackbar, &self->component, workspace);	
 	timerbar_init(&self->timebar, &self->component, &workspace->player);	
 	linesperbeatbar_init(&self->linesperbeatbar, &self->component, workspace);

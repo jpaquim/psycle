@@ -149,8 +149,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 }
 
 void songpropertiesview_initalign(SongPropertiesView* self)
-{	
-	psy_ui_component_enablealign(&self->component);
+{
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),

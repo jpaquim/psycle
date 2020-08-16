@@ -14,8 +14,7 @@
 
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_init(&self->component, parent);		
 	psy_ui_edit_multiline_init(&self->contrib, &self->component);
 	psy_ui_edit_preventedit(&self->contrib);
 	psy_ui_edit_setlinenumber(&self->contrib, 10);
@@ -116,7 +115,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	about_vtable_init(self);
 	self->component.vtable = &about_vtable;
 	self->workspace = workspace;
-	psy_ui_component_enablealign(&self->component);
+	
 	about_initbuttons(self);
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	

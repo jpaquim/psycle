@@ -16,8 +16,7 @@ void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init(&self->undobutton, &self->component);
 	psy_signal_connect(&self->undobutton.signal_clicked, self,

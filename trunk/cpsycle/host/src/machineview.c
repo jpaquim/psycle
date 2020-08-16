@@ -1641,8 +1641,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->component, parent);
-	self->workspace = workspace;
-	psy_ui_component_enablealign(&self->component);	
+	self->workspace = workspace;		
 	psy_ui_checkbox_init(&self->mixersend, &self->component);	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(4), psy_ui_value_makepx(0),
@@ -1742,7 +1741,6 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	machineview_vtable_init(self);
 	self->component.vtable = &machineview_vtable;
 	self->workspace = workspace;	
-	psy_ui_component_enablealign(&self->component);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		machineview_onsongchanged);
 	psy_ui_notebook_init(&self->notebook, &self->component);	

@@ -44,9 +44,10 @@ static void vumeter_vtable_init(Vumeter* self)
 void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {					
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);	
 	vumeter_vtable_init(self);
-	self->component.vtable = &vumeter_vtable;	
+	self->component.vtable = &vumeter_vtable;
+	psy_ui_component_preventalign(&self->component);
 	self->leftavg = 0;
 	self->rightavg = 0;
 	self->workspace = workspace;

@@ -115,8 +115,7 @@ void mainframe_init(MainFrame* self)
 	vtable_init(self);
 	self->component.vtable = &vtable;	
 	self->startpage = FALSE;
-	psy_ui_component_seticonressource(&self->component, IDI_PSYCLEICON);
-	psy_ui_component_enablealign(&self->component);	
+	psy_ui_component_seticonressource(&self->component, IDI_PSYCLEICON);		
 	workspace_init(&self->workspace, &self->component);	
 	workspace_load_configuration(&self->workspace);
 	workspace_load_recentsongs(&self->workspace);
@@ -194,11 +193,11 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),	
 		psy_ui_HORIZONTALEXPAND);	
 	tabbar_append_tabs(&self->tabbar, 
-		"" /* Machines */,
-		"" /* Patterns */,
-		"" /* Samples */,
-		"" /* Instruments */,
-		"" /* Properties */,
+		"", // Machines
+		"", // Patterns
+		"", // Samples
+		"", // Instruments
+		"", // Properties
 		NULL);
 	tabbar_append(&self->tabbar,
 		"" /* Settings */)->margin.left =
