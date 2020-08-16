@@ -43,6 +43,7 @@ void scrollzoom_init(ScrollZoom* self, psy_ui_Component* parent)
 {		
 	psy_ui_component_init(&self->component, parent);
 	scrollzoomvtable_init(self);
+	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	self->start = 0.f;
 	self->end = 1.f;

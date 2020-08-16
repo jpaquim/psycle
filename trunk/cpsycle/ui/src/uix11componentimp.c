@@ -576,7 +576,7 @@ void dev_scrollto(psy_ui_x11_ComponentImp* self, intptr_t dx, intptr_t dy)
 		rectangle.height = (unsigned short) win_attr.height;
 		XUnionRectWithRegion(&rectangle, region, region);
 		XSetRegion(x11app->dpy, gx11->gc, region);		
-		XDestroyRegion(region);
+		XDestroyRegion(region);		
 		XCopyArea(x11app->dpy, self->hwnd, self->hwnd,
 			gx11->gc,
 			(dx < 0) ? -dx : 0, // srcx

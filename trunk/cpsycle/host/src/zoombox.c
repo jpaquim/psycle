@@ -14,9 +14,9 @@ static void zoombox_onmousewheel(ZoomBox*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 
 void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
-{	
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+{		
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
 	psy_ui_component_setpreferredsize(&self->component, 
 		psy_ui_size_make(psy_ui_value_makeew(2),
 		psy_ui_value_makeeh(2)));

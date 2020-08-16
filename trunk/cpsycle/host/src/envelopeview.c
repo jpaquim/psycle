@@ -87,6 +87,7 @@ static void envelopebox_vtable_init(EnvelopeBox* self)
 void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 {				
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_preventalign(&self->component);
 	envelopebox_vtable_init(self);
 	self->component.vtable = &envelopebox_vtable;
 	self->zoomleft = 0.f;

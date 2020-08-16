@@ -70,6 +70,7 @@ void kbdbox_init(KbdBox* self, psy_ui_Component* parent)
 	psy_ui_component_init(kbdbox_base(self), parent);
 	kbdbox_vtable_init(self);
 	self->component.vtable = &kbdbox_vtable;
+	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(kbdbox_base(self));
 	psy_signal_connect(&kbdbox_base(self)->signal_destroy, self,
 		kbdbox_ondestroy);	
