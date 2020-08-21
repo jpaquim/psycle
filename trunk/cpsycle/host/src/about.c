@@ -121,6 +121,8 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_image_init(&self->image, psy_ui_notebook_base(&self->notebook));	
 	self->image.component.preventdefault = 0;
 	psy_ui_bitmap_loadresource(&self->image.bitmap, IDB_ABOUT);	
+	psy_ui_bitmap_load(&self->image.bitmap,
+		"/home/user/cpsycle/host/src/resources/splash_screen.png");
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));		
 	psy_ui_notebook_setpageindex(&self->notebook, 0);

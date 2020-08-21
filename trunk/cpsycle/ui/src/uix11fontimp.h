@@ -8,6 +8,7 @@
 #define psy_ui_x11_FONTIMP_H
 
 #include "uifont.h"
+#include <X11/Xft/Xft.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,7 +16,7 @@ extern "C" {
 
 typedef struct psy_ui_x11_FontImp {
 	psy_ui_FontImp imp;
-	void* hfont;	
+	XftFont* hfont;	
 } psy_ui_x11_FontImp;
 
 void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*);

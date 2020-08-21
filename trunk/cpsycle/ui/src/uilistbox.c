@@ -360,6 +360,16 @@ void psy_ui_listbox_settext(psy_ui_ListBox* self, const char* text, intptr_t
 
 }
 
+void psy_ui_listbox_text(psy_ui_ListBox* self, char* text, uintptr_t index)
+{
+	char* itemtext;
+
+	itemtext = (char*)psy_table_at(&self->client.items, index);
+	if (itemtext) {
+		psy_snprintf(text, 256, "%s", itemtext);
+	}	
+}
+
 void psy_ui_listbox_clear(psy_ui_ListBox* self)
 {
 	psy_ui_listboxclient_clear(&self->client);

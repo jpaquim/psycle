@@ -8,6 +8,7 @@
 #define psy_ui_x11_COMBOBOXIMP_H
 
 #include "uicombobox.h"
+#include "uilistbox.h"
 #include "uix11componentimp.h"
 
 #ifdef __cplusplus
@@ -17,7 +18,7 @@ extern "C" {
 	typedef struct psy_ui_x11_ComboBoxImp {
 		psy_ui_ComboBoxImp imp;		
 		psy_ui_x11_ComponentImp x11_component_imp;
-		psy_ui_x11_ComponentImp xt_combo_imp;		
+		psy_ui_ListBox x11_combo;
 		struct psy_ui_Component* component;
 	} psy_ui_x11_ComboBoxImp;
 

@@ -48,6 +48,8 @@ typedef struct {
 	psy_Table colormap;
 	Visual* visual;
 	bool dbe;
+	bool dograb;
+	Window grabwin;
 } psy_ui_X11App;
 
 void psy_ui_x11app_init(psy_ui_X11App*, void* instance);
@@ -59,6 +61,12 @@ void psy_ui_x11app_starttimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id,
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 void psy_ui_x11app_stoptimer(psy_ui_X11App*, uintptr_t hwnd, uintptr_t id);
 int psy_ui_x11app_colourindex(psy_ui_X11App*, psy_ui_Color);
+
+INLINE void psy_ui_x11app_startgrab(psy_ui_X11App* self, Window w)
+{
+	self->dograb = TRUE;
+	self->grabwin = w;
+}
 
 #ifdef __cplusplus
 }
