@@ -33,6 +33,7 @@ typedef struct psy_ui_x11_GraphicsImp {
 	Region region;
 	XftDraw* xfd;
 	XftColor black;
+	XftFont* defaultfont;
 	XftFont* xftfont;
 	XftColor textcolor;
 	psy_ui_Color textbackgroundcolor;

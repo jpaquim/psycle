@@ -120,11 +120,14 @@ void psy_ui_listboximp_init(psy_ui_ListBoxImp*);
 
 #ifdef PSY_USE_PLATFORM_LISTBOX
 
-INLINE void psy_psy_ui_listbox_text(psy_ui_ListBox* self, char* text, uintptr_t index)
+INLINE void psy_ui_listbox_text(psy_ui_ListBox* self, char* text,
+	uintptr_t index)
 {
     self->imp->vtable->dev_text(self->imp, text, index);        
 }
 
+#else
+void psy_ui_listbox_text(psy_ui_ListBox*, char* text, uintptr_t index);
 #endif
 
 #ifdef __cplusplus

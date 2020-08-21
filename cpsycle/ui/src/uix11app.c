@@ -76,6 +76,8 @@ void psy_ui_x11app_init(psy_ui_X11App* self, void* instance)
 	}
 	self->timers = NULL;
 	psy_table_init(&self->colormap);
+	self->dograb = FALSE;
+	self->grabwin = 0;
 }
 
 void psy_ui_x11app_initdbe(psy_ui_X11App* self)
@@ -871,11 +873,24 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 					imp->hwnd, gx11->gc, event->xexpose.x, event->xexpose.y,
 				event->xexpose.width, event->xexpose.height, event->xexpose.x,
 				event->xexpose.y);
-			}
+			}			
 			break; }
+		case MapNotify:
+			if (self->dograb && imp->hwnd == self->grabwin) {			
+				XGrabPointer(self->dpy,self->grabwin,True,
+				PointerMotionMask | ButtonReleaseMask | ButtonPressMask,
+				GrabModeAsync,
+			    GrabModeAsync,None,None,CurrentTime);			    
+			}	
+			break;
+		case UnmapNotify:
+			if (self->dograb && imp->hwnd == self->grabwin) {
+				self->dograb = FALSE;
+			}
+			break;
 		case ConfigureNotify: {			
 			XConfigureEvent xce = event->xconfigure;
-						
+										
 			if (xce.width != imp->prev_w || xce.height != imp->prev_h) {
 				psy_ui_Size size;				
 					
@@ -967,8 +982,25 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			}
 			return 0;
 			break; }
-        case ButtonPress: {			
+        case ButtonPress: {	
 			psy_ui_MouseEvent ev;
+			
+			if (self->dograb) {
+				psy_ui_x11_ComponentImp* grabimp;
+				psy_ui_Component* curr;
+				
+				grabimp = (psy_ui_x11_ComponentImp*)psy_table_at(&self->selfmap,
+					(uintptr_t)self->grabwin);
+				
+				curr = imp->component;
+				while (curr && curr != grabimp->component) {
+					curr = psy_ui_component_parent(curr);
+				}
+				if (!curr) {					
+					psy_ui_component_hide(grabimp->component);
+					return 0;
+				}			
+			}							
 			
 			psy_ui_mouseevent_init(&ev,
 				event->xbutton.x,
@@ -1006,12 +1038,12 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 							&ev);
 					}
 				}			
-			}			
+			}					
 			return 0;			
 			break; }
-		case ButtonRelease: {
+		case ButtonRelease: {			
 			psy_ui_MouseEvent ev;
-					
+																								
 			psy_ui_mouseevent_init(&ev,
 				event->xbutton.x,
 				event->xbutton.y,
@@ -1025,7 +1057,7 @@ int handleevent(psy_ui_X11App* self, XEvent* event)
 			adjustcoordinates(imp->component, &ev.x, &ev.y);		
 			imp->component->vtable->onmouseup(imp->component, &ev);
 			psy_signal_emit(&imp->component->signal_mouseup, imp->component, 1,
-					&ev);
+					&ev);			
 			return 0;
 			break; }
 		case MotionNotify: {

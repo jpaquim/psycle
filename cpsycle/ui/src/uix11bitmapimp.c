@@ -9,6 +9,18 @@
 
 #include "uiapp.h"
 #include "uix11app.h"
+#include <X11/xpm.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static Bool
+bigendian (void)
+{
+  union { int i; char c[sizeof(int)]; } u;
+  u.i = 1;
+  return !u.c[0];
+}
+
 
 extern psy_ui_App app;
 
@@ -53,19 +65,7 @@ void dispose(psy_ui_x11_BitmapImp* self)
 }
 
 int load(psy_ui_x11_BitmapImp* self, const char* path)
-{
-	/*HBITMAP bitmap;
-
-	bitmap = (HBITMAP)LoadImage(NULL,
-		(LPCTSTR)path,
-		IMAGE_BITMAP,
-		0, 0,
-		LR_DEFAULTSIZE | LR_LOADFROMFILE);
-	if (bitmap != NULL) {
-		dispose(self);
-		self->bitmap = bitmap;
-	}
-	return bitmap == 0;*/
+{	
 	return 0;
 }
 
@@ -111,5 +111,6 @@ int empty(psy_ui_x11_BitmapImp* self)
 {
 	return self->pixmap == 0;
 }
+
 
 #endif

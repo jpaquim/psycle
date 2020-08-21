@@ -8,10 +8,11 @@
 #if PSYCLE_USE_TK == PSYCLE_TK_XT
 
 #include "uix11app.h"
+#include "uix11fontimp.h"
 #include "uix11bitmapimp.h"
 #include "uiapp.h"
 #include <stdlib.h>
-#include	<X11/Xmu/Drawing.h>
+#include <X11/Xmu/Drawing.h>
 
 extern psy_ui_App app;
 
@@ -133,12 +134,13 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 		self->window,
 		self->visual,
 	    DefaultColormap(self->display, s));
-	self->xftfont = XftFontOpenXlfd(self->display,
+	self->defaultfont = XftFontOpenXlfd(self->display,
 		s, "arial");
-	if (!self->xftfont) {
-		self->xftfont = XftFontOpenName(self->display,
+	if (!self->defaultfont) {
+		self->defaultfont = XftFontOpenName(self->display,
 			s, "arial");
-	}		
+	}
+	self->xftfont = self->defaultfont;
 	XftColorAllocName(self->display,
 		self->visual,
 		DefaultColormap(self->display, s),
@@ -152,7 +154,6 @@ void psy_ui_x11_graphicsimp_init(psy_ui_x11_GraphicsImp* self,
 	self->dx = 0;
 	self->dy = 0;
 	self->region = XCreateRegion();
-	//XSetGraphicsExposures(self->display, self->gc, TRUE);
 }
 
 void psy_ui_x11_graphicsimp_updatexft(psy_ui_x11_GraphicsImp* self)
@@ -174,7 +175,7 @@ void psy_ui_x11_g_imp_dispose(psy_ui_x11_GraphicsImp* self)
 	   self->visual,	   
 	   DefaultColormap(self->display, DefaultScreen(self->display)),
 	   &self->black);
-	XftFontClose(self->display, self->xftfont);
+	XftFontClose(self->display, self->defaultfont);
 	XftDrawDestroy(self->xfd);
 }
 
@@ -417,9 +418,9 @@ void psy_ui_x11_g_imp_settextcolor(psy_ui_x11_GraphicsImp* self,
 
 void psy_ui_x11_g_imp_setfont(psy_ui_x11_GraphicsImp* self, psy_ui_Font* font)
 {	
-//	if (font && ((psy_ui_x11_FontImp*)font->imp)->hfont) {		
-//		SelectObject(self->hdc, ((psy_ui_x11_FontImp*)font->imp)->hfont);
-//	}
+	if (font && ((psy_ui_x11_FontImp*)font->imp)->hfont) {
+		self->xftfont = ((psy_ui_x11_FontImp*)(font->imp))->hfont;
+	}
 }
 
 void psy_ui_x11_g_imp_drawline(psy_ui_x11_GraphicsImp* self, int x1, int y1,

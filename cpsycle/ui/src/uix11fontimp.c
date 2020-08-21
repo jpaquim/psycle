@@ -10,6 +10,7 @@
 #include "uiapp.h"
 #include <stdlib.h>
 #include <string.h>
+#include "uix11app.h"
 
 extern psy_ui_App app;
 
@@ -29,23 +30,33 @@ static void imp_vtable_init(psy_ui_x11_FontImp* self)
 {
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_font_imp_fp_dispose) psy_ui_x11_font_imp_dispose;		
-		imp_vtable.dev_copy = (psy_ui_font_imp_fp_copy) psy_ui_x11_font_imp_copy;
-		imp_vtable.dev_fontinfo = (psy_ui_font_imp_fp_dev_fontinfo) dev_fontinfo;
+		imp_vtable.dev_dispose = (psy_ui_font_imp_fp_dispose)
+			psy_ui_x11_font_imp_dispose;		
+		imp_vtable.dev_copy = (psy_ui_font_imp_fp_copy)psy_ui_x11_font_imp_copy;
+		imp_vtable.dev_fontinfo = (psy_ui_font_imp_fp_dev_fontinfo)dev_fontinfo;
 		imp_vtable_initialized = 1;
 	}
 }
 
-void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo* fontinfo)
+void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo*
+	fontinfo)
 {
 	psy_ui_font_imp_init(&self->imp);
 	imp_vtable_init(self);	
 	self->imp.vtable = &imp_vtable;
-	if (fontinfo) {		
-//		LOGFONT lf;
+	if (fontinfo) {
+		psy_ui_X11App* x11app;		
 
-//		lf = logfont(*fontinfo);
-//		self->hfont = CreateFontIndirect(&lf);
+		x11app = (psy_ui_X11App*) app.platform;
+		self->hfont = XftFontOpenXlfd(
+			x11app->dpy,
+			DefaultScreen(x11app->dpy),
+			fontinfo->lfFaceName);
+		if (!self->hfont) {
+			self->hfont = XftFontOpenName(x11app->dpy,
+				DefaultScreen(x11app->dpy),
+				fontinfo->lfFaceName);
+		}
 	} else {
 		self->hfont = 0;		
 	}
@@ -55,7 +66,10 @@ void psy_ui_x11_fontimp_init(psy_ui_x11_FontImp* self, const psy_ui_FontInfo* fo
 void psy_ui_x11_font_imp_dispose(psy_ui_x11_FontImp* self)
 {	
 	if (self->hfont) {
-//		DeleteObject(self->hfont);	
+		psy_ui_X11App* x11app;		
+
+		x11app = (psy_ui_X11App*) app.platform;
+		XftFontClose(x11app->dpy, self->hfont);	
 		self->hfont = 0;
 	}
 }
@@ -72,15 +86,7 @@ void psy_ui_x11_font_imp_copy(psy_ui_x11_FontImp* self, psy_ui_x11_FontImp* othe
 psy_ui_FontInfo dev_fontinfo(psy_ui_x11_FontImp* self)
 {
 	psy_ui_FontInfo rv;
-//	int ret;	
-//	LOGFONT lf;
-
-//	ret = GetObject(self->hfont, sizeof(lf), &lf);
-//	if (ret == 0) {
-//		psy_ui_fontinfo_init(&rv, "", 0);
-//	} else {
-//		rv = psy_ui_fontinfo(lf);
-//	}
+	psy_ui_fontinfo_init(&rv, "arial", 12);
 	return rv;
 }
 

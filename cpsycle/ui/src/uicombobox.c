@@ -8,6 +8,7 @@
 #include "uiimpfactory.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 extern psy_ui_App app;
 
@@ -206,29 +207,30 @@ void onmousedown(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
 {
 	psy_ui_TextMetric tm;
 	psy_ui_Size size = psy_ui_component_size(&self->component);
-
+	
 	tm = psy_ui_component_textmetric(&self->component);
 	if (ev->x >= psy_ui_value_px(&size.width, &tm) - 40 && ev->x < psy_ui_value_px(&size.width, &tm) - 25) {
+		printf("combobox mousedown 1\n");
 		intptr_t index = psy_ui_combobox_cursel(self);
 		if (index > 0) {
 			psy_ui_combobox_setcursel(self, index - 1);
 			psy_signal_emit(&self->signal_selchanged, self, 1, index - 1);
 		}
-	} else
-		if (ev->x >= psy_ui_value_px(&size.width, &tm) - 25 && ev->x < psy_ui_value_px(&size.width, &tm) - 10) {
-			intptr_t count;
-			intptr_t index;
-			
-			index = psy_ui_combobox_cursel(self);
-			count = self->imp->vtable->dev_count(self->imp);
-			if (index < count - 1) {
-				psy_ui_combobox_setcursel(self, index + 1);
-				psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
-			}
+	} else if (ev->x >= psy_ui_value_px(&size.width, &tm) - 25 && ev->x < psy_ui_value_px(&size.width, &tm) - 10) {
+		intptr_t count;
+		intptr_t index;
+		
+		printf("combobox mousedown 2\n");
+		index = psy_ui_combobox_cursel(self);
+		count = self->imp->vtable->dev_count(self->imp);
+		if (index < count - 1) {
+			psy_ui_combobox_setcursel(self, index + 1);
+			psy_signal_emit(&self->signal_selchanged, self, 1, index + 1);
 		}
-		else {
-			self->imp->vtable->dev_showdropdown(self->imp);			
-		}
+	} else {
+		printf("combobox mousedown 3\n");
+		self->imp->vtable->dev_showdropdown(self->imp);
+	}
 }
 
 void onmousemove(psy_ui_ComboBox* self, psy_ui_MouseEvent* ev)
