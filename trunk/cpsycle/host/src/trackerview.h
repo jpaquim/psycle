@@ -64,19 +64,26 @@ void trackercolumndef_init(TrackColumnDef*, int numdigits, int numchars,
 typedef psy_audio_Inputs TrackerInputs;
 
 typedef struct {
-	PatternViewSkin* skin;
-	psy_audio_Pattern* pattern;
 	psy_Table trackconfigs;
-	TrackDef defaulttrackdef;
+	TrackDef trackdef;
 	int textwidth;
 	int textleftedge;
 	int patterntrackident;
 	int headertrackident;
+} TrackConfig;
+
+void trackconfig_init(TrackConfig*, bool wideinst);
+void trackconfig_dispose(TrackConfig*);
+
+typedef struct {
+	PatternViewSkin* skin;
+	psy_audio_Pattern* pattern;
+	TrackConfig* trackconfig;	
 	uintptr_t numtracks;
 	double zoom;
 } TrackerGridState;
 
-void trackergridstate_init(TrackerGridState*);
+void trackergridstate_init(TrackerGridState*, TrackConfig* config);
 void trackergridstate_dispose(TrackerGridState*);
 int trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
@@ -93,9 +100,10 @@ typedef struct {
 	uintptr_t currtrack;
 } TrackerHeader;
 
-void trackerheader_init(TrackerHeader*, psy_ui_Component* parent,
+void trackerheader_init(TrackerHeader*, psy_ui_Component* parent, TrackConfig*,
 	TrackerGridState*, Workspace*);
-void trackerheader_setsharedgridstate(TrackerHeader*, TrackerGridState*);
+void trackerheader_setsharedgridstate(TrackerHeader*, TrackerGridState*,
+	TrackConfig*);
 
 typedef struct {
 	int lineheight;
@@ -212,9 +220,10 @@ typedef struct {
    Workspace* workspace;
 } TrackerGrid;
 
-void trackergrid_init(TrackerGrid*, psy_ui_Component* parent,
+void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
 	TrackerGridState*, TrackerLineState*, TrackerGridEditMode, Workspace*);
-void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*);
+void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,
+	TrackConfig*);
 void trackergrid_setsharedlinestate(TrackerGrid*, TrackerLineState*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_enablesync(TrackerGrid*);
@@ -231,7 +240,8 @@ typedef struct TrackerView {
 	TrackerGrid grid;
 	psy_ui_Scroller scroller;
 	PatternBlockMenu blockmenu;
-	InterpolateCurveView interpolatecurveview;	
+	InterpolateCurveView interpolatecurveview;
+	TrackConfig trackconfig;
 	TrackerLineState linestate;
 	TrackerGridState gridstate;
 	int showlinenumbers;
@@ -256,7 +266,6 @@ void TrackerViewApplyProperties(TrackerView*, psy_Properties*);
 void trackerview_showblockmenu(TrackerView*);
 void trackerview_hideblockmenu(TrackerView*);
 void trackerview_updatescrollstep(TrackerView*);
-void trackerview_initcolumns(TrackerView*);
 void trackerview_computemetrics(TrackerView*);
 void trackerview_setfont(TrackerView*, psy_ui_Font*, bool iszoombase);
 void trackerview_invalidateline(TrackerView*, psy_dsp_big_beat_t offset);
