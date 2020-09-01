@@ -197,7 +197,7 @@ static void sampler_vtable_init(psy_audio_PS1Sampler* self)
 // for samplerate, samples and instruments.
 // This avoids the static global::player calls of psycle-mfc
 void psy_audio_ps1sampler_init(psy_audio_PS1Sampler* self,
-	psy_audio_MachineCallback callback)
+	psy_audio_MachineCallback* callback)
 {
 	int i;
 
@@ -1178,7 +1178,7 @@ psy_audio_PS1Sampler* psy_audio_ps1sampler_alloc(void)
 	return (psy_audio_PS1Sampler*)malloc(sizeof(psy_audio_PS1Sampler));
 }
 
-psy_audio_PS1Sampler* psy_audio_ps1sampler_allocinit(psy_audio_MachineCallback callback)
+psy_audio_PS1Sampler* psy_audio_ps1sampler_allocinit(psy_audio_MachineCallback* callback)
 {
 	psy_audio_PS1Sampler* rv;
 

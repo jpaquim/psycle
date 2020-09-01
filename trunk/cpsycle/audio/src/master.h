@@ -36,7 +36,7 @@ typedef struct psy_audio_Master {
 	intptr_t y;
 } psy_audio_Master;
 
-void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback);
+void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_master_info(void);
 
 #ifdef __cplusplus

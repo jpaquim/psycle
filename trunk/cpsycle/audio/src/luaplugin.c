@@ -333,7 +333,7 @@ static void vtable_init(psy_audio_LuaPlugin* self)
 	}
 }
 		
-void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallback callback,
+void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallback* callback,
 	const char* path)
 {
 	int err = 0;	
@@ -393,7 +393,7 @@ void reload(psy_audio_LuaPlugin* self)
 {	
 	if (!psyclescript_empty(&self->script)) {
 		char path[4096];
-		psy_audio_MachineCallback mcb;
+		psy_audio_MachineCallback* mcb;
 
 		psy_snprintf(path, 4096, "%s", psyclescript_modulepath(&self->script));
 		mcb = self->custommachine.machine.callback;		
@@ -425,10 +425,8 @@ int psy_audio_plugin_luascript_test(const char* path, psy_audio_MachineInfo* mac
 	err = psyclescript_machineinfo(&script, machineinfo);
 	if (err != 0) {
 		psy_audio_LuaPlugin plugin;
-		psy_audio_MachineCallback mcb;
 		
-		machinecallback_initempty(&mcb);
-		psy_audio_luaplugin_init(&plugin, mcb, path);
+		psy_audio_luaplugin_init(&plugin, NULL, path);
 		if (psy_audio_machine_info(psy_audio_luaplugin_base(&plugin))) {
 			machineinfo_copy(machineinfo,
 				psy_audio_machine_info(psy_audio_luaplugin_base(&plugin)));
@@ -927,7 +925,7 @@ int luamachine_channel(lua_State* L)
 void psy_audio_luamachine_init(psy_audio_LuaMachine* self)
 {	
 	psy_audio_CustomMachine* custommachine;
-	psy_audio_MachineCallback callback;
+	psy_audio_MachineCallback* callback;
 		
 	custommachine = (psy_audio_CustomMachine*) malloc(sizeof(psy_audio_CustomMachine));
 	if (custommachine) {

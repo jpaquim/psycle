@@ -243,7 +243,7 @@ static void vtable_init(psy_audio_LadspaPlugin* self)
 	}
 }
 
-void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_MachineCallback callback,
+void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_MachineCallback* callback,
 	const char* path, uintptr_t shellidx)
 {
 	LADSPA_Descriptor_Function pfDescriptorFunction;

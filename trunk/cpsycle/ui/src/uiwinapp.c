@@ -742,7 +742,6 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 				break; }
 			case WM_MOUSEMOVE:
-				TRACE("MOUSEMOVE\n");
 				if (!imp->component->mousetracking) {
 					TRACKMOUSEEVENT tme;
 					

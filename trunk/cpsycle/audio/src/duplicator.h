@@ -19,7 +19,7 @@ typedef struct {
 } psy_audio_Duplicator;
 
 void psy_audio_duplicator_init(psy_audio_Duplicator*,
-	psy_audio_MachineCallback);
+	psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_duplicator_info(void);
 
 INLINE psy_audio_Machine* psy_audio_duplicator_base(psy_audio_Duplicator* self)

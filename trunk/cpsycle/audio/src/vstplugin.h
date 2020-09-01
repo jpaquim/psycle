@@ -36,7 +36,7 @@ typedef struct {
 	psy_Table parameters;
 } psy_audio_VstPlugin;
 
-void psy_audio_vstplugin_init(psy_audio_VstPlugin*, psy_audio_MachineCallback, const char* path);
+void psy_audio_vstplugin_init(psy_audio_VstPlugin*, psy_audio_MachineCallback*, const char* path);
 INLINE psy_audio_Machine* psy_audio_vstplugin_base(psy_audio_VstPlugin* self)
 {
 	return &(self->custommachine.machine);

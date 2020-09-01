@@ -63,9 +63,9 @@ typedef struct psy_audio_Sampler {
 	int32_t panningmode;
 } psy_audio_Sampler;
 
-void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback);
+void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback*);
 psy_audio_Sampler* psy_audio_sampler_alloc(void);
-psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback);
+psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_sampler_info(void);
 
 INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)

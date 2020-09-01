@@ -248,7 +248,7 @@ static void vtable_init(psy_audio_Plugin* self)
 	}
 }
 
-void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback callback,
+void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* callback,
 	const char* path, const char* root)
 {
 	GETINFO GetInfo;
@@ -277,7 +277,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback cal
 			CMachineInfo* pInfo = GetInfo();
 			if (pInfo) {
 				mi_resetcallback(self->mi);
-				mi_setcallback(self->mi, &callback);
+				mi_setcallback(self->mi, callback);
 				mi_init(self->mi);
 				tweakdefaults(self, pInfo);
 				self->plugininfo = machineinfo_allocinit();				

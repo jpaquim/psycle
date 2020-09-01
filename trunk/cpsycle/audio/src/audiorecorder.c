@@ -87,7 +87,7 @@ static void vtable_init(psy_audio_AudioRecorder* self)
 	}
 }
 
-void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, psy_audio_MachineCallback callback)
+void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, psy_audio_MachineCallback* callback)
 {		
 	custommachine_init(&self->custommachine, callback);
 	vtable_init(self);

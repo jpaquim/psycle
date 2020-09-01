@@ -22,6 +22,7 @@
 #include <dir.h>
 
 typedef struct {
+	psy_audio_MachineCallback machinecallback;
 	psy_audio_Player player;
 	psy_audio_Song* song;	
 	psy_audio_PluginCatcher plugincatcher;
@@ -48,19 +49,9 @@ static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void cmdplayer_idle(void);
 /// Machinecallback
 static psy_audio_MachineCallback machinecallback(CmdPlayer*);
-static uintptr_t machinecallback_samplerate(CmdPlayer*);
-static psy_dsp_big_beat_t machinecallback_bpm(CmdPlayer*);
-static psy_dsp_big_beat_t machinecallback_beatspersample(CmdPlayer*);
-static psy_dsp_big_beat_t machinecallback_currbeatsperline(CmdPlayer*);
 static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
 static psy_audio_Machines* machinecallback_machines(CmdPlayer*);
 struct psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
-static bool machinecallback_addcapture(CmdPlayer*, int index);
-static bool machinecallback_removecapture(CmdPlayer*, int index);
-static void machinecallback_readbuffers(CmdPlayer*, int index, float** pleft, float** pright, int numsamples);
-static bool machinecallback_fileselect_load(CmdPlayer*, char filter[], char inoutName[]);
-static bool machinecallback_fileselect_save(CmdPlayer*, char filter[], char inoutName[]);
-static void machinecallback_fileselect_directory(CmdPlayer*);
 static void machinecallback_output(CmdPlayer*, const char* text);
 
 static void usage(void) {
@@ -167,8 +158,31 @@ void cmdplayer_idle(void)
 #endif
 }
 
+// MachineCallback VTable
+static psy_audio_MachineCallbackVtable psy_audio_machinecallbackvtable_vtable;
+static int psy_audio_machinecallbackvtable_initialized = 0;
+
+static void psy_audio_machinecallbackvtable_init(CmdPlayer* self)
+{
+	if (!psy_audio_machinecallbackvtable_initialized) {
+		psy_audio_machinecallbackvtable_vtable = *self->machinecallback.vtable;		
+		psy_audio_machinecallbackvtable_vtable.samples = (fp_mcb_samples)
+			machinecallback_samples;
+		psy_audio_machinecallbackvtable_vtable.machines = (fp_mcb_machines)
+			machinecallback_machines;
+		psy_audio_machinecallbackvtable_vtable.instruments = (fp_mcb_instruments)
+			machinecallback_instruments;		
+		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
+			machinecallback_output;
+		psy_audio_machinecallbackvtable_initialized = 1;
+	}
+}
+
 void cmdplayer_init(CmdPlayer* self)
 {    
+	psy_audio_machinecallback_init(&self->machinecallback, &self->player);
+	psy_audio_machinecallbackvtable_init(self);
+	self->machinecallback.vtable = &psy_audio_machinecallbackvtable_vtable;
     printf("init config\n");
 	self->config = psy_properties_create();
     printf("init player\n");
@@ -206,7 +220,6 @@ void cmdplayer_initenv(CmdPlayer* self)
 	}
 }
 
-
 void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
 	plugincatcher_init(&self->plugincatcher, self->directories);
@@ -216,7 +229,7 @@ void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 		printf("no plugin cache found, start scanning\n");
 		cmdplayer_scanplugins(self);
 	}
-	psy_audio_machinefactory_init(&self->machinefactory, machinecallback(self), 
+	psy_audio_machinefactory_init(&self->machinefactory, &self->machinecallback, 
 		&self->plugincatcher);
 }
 
@@ -347,102 +360,29 @@ void cmdplayer_applysongproperties(CmdPlayer* self)
 	psy_audio_player_setlpb(&self->player, self->song->properties.lpb);
 }
 
-// callbacks
-psy_audio_MachineCallback machinecallback(CmdPlayer* self)
-{
-	psy_audio_MachineCallback rv;
-
-	rv.context = self;	
-    rv.samplerate = (fp_mcb_samplerate) machinecallback_samplerate;
-	rv.bpm = (fp_mcb_bpm) machinecallback_bpm;
-	rv.beatspersample = (fp_mcb_beatspersample) machinecallback_beatspersample;
-	rv.currbeatsperline = (fp_mcb_currbeatsperline) machinecallback_currbeatsperline;
-	rv.samples = (fp_mcb_samples) machinecallback_samples;
-	rv.machines = (fp_mcb_machines) machinecallback_machines;
-	rv.instruments = (fp_mcb_instruments) machinecallback_instruments;	
-	rv.fileselect_load = (fp_mcb_fileselect_load) machinecallback_fileselect_load;
-	rv.fileselect_save = (fp_mcb_fileselect_save) machinecallback_fileselect_save;
-	rv.fileselect_directory = (fp_mcb_fileselect_directory) machinecallback_fileselect_directory;
-	rv.output = (fp_mcb_output) machinecallback_output;
-	rv.addcapture = (fp_mcb_addcapture) machinecallback_addcapture;
-	rv.removecapture = (fp_mcb_removecapture) machinecallback_removecapture;
-	rv.readbuffers = (fp_mcb_readbuffers) machinecallback_readbuffers;
-	return rv;
-}
-
-uintptr_t machinecallback_samplerate(CmdPlayer* self)
-{
-    return self->player.driver->samplerate(self->player.driver);
-}
-
-psy_dsp_big_beat_t machinecallback_bpm(CmdPlayer* self)
-{
-    return psy_audio_player_bpm(&self->player);
-}
-
-psy_dsp_big_beat_t machinecallback_beatspersample(CmdPlayer* self)
-{
-    return psy_audio_sequencer_beatspersample(&self->player.sequencer);
-}
-
-psy_dsp_big_beat_t machinecallback_currbeatsperline(CmdPlayer* self)
-{
-    return psy_audio_sequencer_currbeatsperline(&self->player.sequencer);
-}
-
+// machine callback interface implementation
 psy_audio_Samples* machinecallback_samples(CmdPlayer* self)
 {
-    return self->song ? &self->song->samples : 0;
+    return (self->song)
+		? &self->song->samples
+		: 0;
 }
 
 psy_audio_Machines* machinecallback_machines(CmdPlayer* self)
 {
-    return self->song ? &self->song->machines : 0;
+    return (self->song)
+		? &self->song->machines
+		: 0;
 }
 
 psy_audio_Instruments* machinecallback_instruments(CmdPlayer* self)
 {
-    return self->song ? &self->song->instruments : 0;
-}
-
-bool machinecallback_fileselect_load(CmdPlayer* self, char filter[], char inoutName[])
-{
-	return FALSE;
-}
-
-bool machinecallback_fileselect_save(CmdPlayer* self, char filter[], char inoutName[])
-{
-	return FALSE;
-}
-
-void machinecallback_fileselect_directory(CmdPlayer* self)
-{
+    return (self->song)
+		? &self->song->instruments
+		: 0;
 }
 
 void machinecallback_output(CmdPlayer* self, const char* text)
 {
     printf("%s\n", text);
-}
-
-bool machinecallback_addcapture(CmdPlayer* self, int index)
-{
-	if (self->player.driver) {
-		return self->player.driver->addcapture(self->player.driver, index);
-	}
-	return FALSE;
-}
-
-bool machinecallback_removecapture(CmdPlayer* self, int index)
-{
-	if (self->player.driver) {
-		return self->player.driver->removecapture(self->player.driver, index);
-	}
-	return FALSE;
-}
-
-void machinecallback_readbuffers(CmdPlayer* self, int index, float** pleft, float** pright, int numsamples)
-{
-	if (self->player.driver) {
-		self->player.driver->readbuffers(self->player.driver, index, pleft, pright, numsamples);
-	}
 }

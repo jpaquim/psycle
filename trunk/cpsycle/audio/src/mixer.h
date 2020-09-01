@@ -204,7 +204,7 @@ typedef struct psy_audio_Mixer {
 	psy_Table legacysend_;
 } psy_audio_Mixer;
 
-void psy_audio_mixer_init(psy_audio_Mixer*, psy_audio_MachineCallback);
+void psy_audio_mixer_init(psy_audio_Mixer*, psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_mixer_info(void);
 
 INLINE psy_audio_InputChannel* psy_audio_mixer_Channel(psy_audio_Mixer* self,

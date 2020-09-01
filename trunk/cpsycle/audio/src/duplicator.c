@@ -85,7 +85,7 @@ static void vtable_init(psy_audio_Duplicator* self)
 }
 
 void psy_audio_duplicator_init(psy_audio_Duplicator* self,
-	psy_audio_MachineCallback callback)
+	psy_audio_MachineCallback* callback)
 {
 	custommachine_init(&self->custommachine, callback);
 	vtable_init(self);

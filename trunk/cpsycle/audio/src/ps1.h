@@ -138,9 +138,9 @@ typedef struct psy_audio_PS1Sampler {
 	bool linearslide;
 } psy_audio_PS1Sampler;
 
-void psy_audio_ps1sampler_init(psy_audio_PS1Sampler*, psy_audio_MachineCallback);
+void psy_audio_ps1sampler_init(psy_audio_PS1Sampler*, psy_audio_MachineCallback*);
 psy_audio_PS1Sampler* psy_audio_ps1sampler_alloc(void);
-psy_audio_PS1Sampler* psy_audio_ps1sampler_allocinit(psy_audio_MachineCallback);
+psy_audio_PS1Sampler* psy_audio_ps1sampler_allocinit(psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_ps1sampler_info(void);
 
 INLINE psy_audio_Machine* psy_audio_ps1sampler_base(psy_audio_PS1Sampler* self)

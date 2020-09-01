@@ -69,7 +69,7 @@ static void vtable_init(psy_audio_CustomMachine* self)
 }
 
 void custommachine_init(psy_audio_CustomMachine* self,
-	psy_audio_MachineCallback callback)
+	psy_audio_MachineCallback* callback)
 {	
 	psy_audio_machine_init(&self->machine, callback);
 	vtable_init(self);
