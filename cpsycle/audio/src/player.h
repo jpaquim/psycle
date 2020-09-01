@@ -28,9 +28,8 @@ typedef struct psy_audio_Player {
 	psy_AudioDriver* driver;
 	psy_audio_Song* song;
 	// empty song for lock minimized
-	// song switching
+	// song switching	
 	psy_audio_MachineFactory machinefactory;
-	psy_audio_MachineCallback machinecallback;
 	psy_audio_Song emptysong;
 	psy_audio_Sequencer sequencer;	
 	uintptr_t numsongtracks;

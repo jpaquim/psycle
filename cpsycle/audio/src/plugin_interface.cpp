@@ -29,13 +29,13 @@ class PluginFxCallback : public CFxCallback
 		return 256;
 	}
 	inline virtual int GetSamplingRate() const {
-		return callback.samplerate && callback.context
-			? callback.samplerate(callback.context)
+		return callback
+			? callback->vtable->samplerate(callback)
 			: 44100;
 	}
 	inline virtual int GetBPM() const {
-		return callback.bpm && callback.context
-			? (int)callback.bpm(callback.context)
+		return callback
+			? (int)callback->vtable->bpm(callback)
 			: 125;
 	}
 	inline virtual int GetTPB() const { return 4; }
@@ -45,8 +45,8 @@ class PluginFxCallback : public CFxCallback
 	}
 	virtual bool FileBox(bool openMode, char filter[], char inoutName[])
 	{
-		if (callback.fileselect_load&& callback.context) {
-			return callback.fileselect_load(callback.context, filter, inoutName) != FALSE;
+		if (callback) {
+			return callback->vtable->fileselect_load(callback, filter, inoutName) != FALSE;
 		}
 		return false;
 	}
@@ -56,7 +56,7 @@ class PluginFxCallback : public CFxCallback
 	inline virtual float * unused1(int, int) { return NULL;}
 
 	public: ///\todo private:
-		psy_audio_MachineCallback callback;
+		psy_audio_MachineCallback* callback;
 };
 
 void mi_resetcallback(CMachineInterface* mi)
@@ -64,7 +64,7 @@ void mi_resetcallback(CMachineInterface* mi)
 	mi->pCB = 0;
 }
 
-void mi_setcallback(CMachineInterface* mi, const struct psy_audio_MachineCallback* callback)
+void mi_setcallback(CMachineInterface* mi, struct psy_audio_MachineCallback* callback)
 {
 	PluginFxCallback* pCB;
 
@@ -73,11 +73,7 @@ void mi_setcallback(CMachineInterface* mi, const struct psy_audio_MachineCallbac
 	}	
 	pCB = dynamic_cast<PluginFxCallback*>(mi->pCB);
 	if (pCB) {
-		if (callback) {								
-			pCB->callback = *callback;
-		} else {
-			memset(&mi->pCB, 0, sizeof(psy_audio_MachineCallback));
-		}	
+		pCB->callback = callback;		
 	}
 }
 

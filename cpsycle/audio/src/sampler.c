@@ -215,7 +215,7 @@ static void sampler_vtable_init(psy_audio_Sampler* self)
 }
 
 void psy_audio_sampler_init(psy_audio_Sampler* self,
-	psy_audio_MachineCallback callback)
+	psy_audio_MachineCallback* callback)
 {
 	custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
@@ -402,7 +402,7 @@ psy_audio_Sampler* psy_audio_sampler_alloc(void)
 	return (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
 }
 
-psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback callback)
+psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback* callback)
 {
 	psy_audio_Sampler* rv;
 

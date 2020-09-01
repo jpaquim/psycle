@@ -34,14 +34,14 @@ extern "C" {
 
 
 typedef struct psy_audio_MachineFactory {
-	psy_audio_MachineCallback machinecallback;	
+	psy_audio_MachineCallback* machinecallback;	
 	psy_audio_PluginCatcher* catcher;
 	bool loadnewgamefxblitz;
 	bool createasproxy;
 	char* errstr;
 } psy_audio_MachineFactory;
 
-void psy_audio_machinefactory_init(psy_audio_MachineFactory*, psy_audio_MachineCallback, psy_audio_PluginCatcher*);
+void psy_audio_machinefactory_init(psy_audio_MachineFactory*, psy_audio_MachineCallback*, psy_audio_PluginCatcher*);
 void psy_audio_machinefactory_dispose(psy_audio_MachineFactory*);
 psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory*, MachineType,
 	const char* plugincatchername);

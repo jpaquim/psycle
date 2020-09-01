@@ -12,7 +12,7 @@
 //
 // psy_ui_Component <>----<> psy_ui_ComponentImp
 //      ^
-//      |                         | 
+//      |                         
 //      |
 // psy_ui_Label
 

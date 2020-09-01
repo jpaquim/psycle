@@ -52,9 +52,7 @@ static void psy_audio_player_notifylinetick(psy_audio_Player*);
 void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	void* handle)
 {			
-	machinecallback_initempty(&self->machinecallback);
-	psy_audio_machinefactory_init(&self->machinefactory, self->machinecallback,
-		NULL);
+	psy_audio_machinefactory_init(&self->machinefactory, NULL, NULL);
 	psy_audio_song_init(&self->emptysong, &self->machinefactory);
 	self->song = song;	
 	self->numsongtracks = 16;

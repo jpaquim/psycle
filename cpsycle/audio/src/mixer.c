@@ -938,7 +938,7 @@ static void vtable_init(psy_audio_Mixer* self)
 	}
 }
 
-void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback callback)
+void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* callback)
 {
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	psy_audio_Machines* machines;

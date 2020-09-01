@@ -27,7 +27,7 @@
 #define _MAX_PATH 4096
 #endif
 
-void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_MachineCallback callback,
+void psy_audio_machinefactory_init(psy_audio_MachineFactory* self, psy_audio_MachineCallback* callback,
 	psy_audio_PluginCatcher* catcher)
 {
 	self->machinecallback = callback;

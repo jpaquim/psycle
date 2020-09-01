@@ -87,7 +87,7 @@ static int machineproxy_numcaptures(psy_audio_MachineProxy*);
 static const char* machineproxy_playbackname(psy_audio_MachineProxy*, int index);
 static int machineproxy_numplaybacks(psy_audio_MachineProxy*);
 
-static void machineproxy_setcallback(psy_audio_MachineProxy*, psy_audio_MachineCallback);
+static void machineproxy_setcallback(psy_audio_MachineProxy*, psy_audio_MachineCallback*);
 static int machineproxy_haseditor(psy_audio_MachineProxy*);
 static void machineproxy_seteditorhandle(psy_audio_MachineProxy*, void* handle);
 static void machineproxy_editorsize(psy_audio_MachineProxy*, int* width, int* height);
@@ -1179,7 +1179,7 @@ void machineproxy_readbuffers(psy_audio_MachineProxy* self, int index, float**pl
 	}	
 }
 
-void machineproxy_setcallback(psy_audio_MachineProxy* self, psy_audio_MachineCallback callback)
+void machineproxy_setcallback(psy_audio_MachineProxy* self, psy_audio_MachineCallback* callback)
 { 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        

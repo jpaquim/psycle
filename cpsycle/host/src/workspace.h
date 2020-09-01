@@ -17,6 +17,17 @@
 #include <sequence.h>
 #include <notestab.h>
 
+// Workspace
+//
+// connects the player with the host ui and configures both
+//
+// psy_ui_MachineCallback <>---- Player
+//      ^                 <>---- MachineFactory
+//      |                 <>---- psy_audio_PluginCatcher
+//      |                 <>---- psy_audio_Song
+//  Workspace             <>---- History
+//                        <>---- Translator
+
 enum {
 	TABPAGE_MACHINEVIEW = 0,
 	TABPAGE_PATTERNVIEW = 1,
@@ -63,6 +74,7 @@ typedef struct {
 } MaximizedView;
 
 typedef struct {
+	psy_audio_MachineCallback machinecallback;
 	psy_audio_Song* song;
 	psy_audio_Song* songcbk;
 	psy_audio_Player player;

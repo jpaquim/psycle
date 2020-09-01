@@ -21,7 +21,7 @@ typedef struct psy_audio_AudioRecorder {
 } psy_audio_AudioRecorder;
 
 void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self,
-	psy_audio_MachineCallback);
+	psy_audio_MachineCallback*);
 const psy_audio_MachineInfo* psy_audio_audiorecorder_info(void);
 
 INLINE psy_audio_Machine* psy_audio_audiorecorder_base(psy_audio_AudioRecorder*

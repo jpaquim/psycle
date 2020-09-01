@@ -226,7 +226,7 @@ static void vtable_init(psy_audio_VstPlugin* self)
 	}
 }
 
-void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, psy_audio_MachineCallback callback,
+void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, psy_audio_MachineCallback* callback,
 	const char* path)
 {		
 	PluginEntryProc mainproc;
@@ -925,18 +925,21 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 void vstplugin_onfileselect(psy_audio_VstPlugin* self,
 	struct VstFileSelect* select)
 {
+	if (!self->custommachine.machine.callback) {
+		return;
+	}
 	switch (select->command) {
 		case kVstFileLoad:
-			self->custommachine.machine.callback.fileselect_load(
-				self->custommachine.machine.callback.context, NULL, NULL);
+			self->custommachine.machine.callback->vtable->fileselect_load(
+				self->custommachine.machine.callback, NULL, NULL);
 		break;
 		case kVstFileSave:
-			self->custommachine.machine.callback.fileselect_save(
-				self->custommachine.machine.callback.context, NULL, NULL);
+			self->custommachine.machine.callback->vtable->fileselect_save(
+				self->custommachine.machine.callback, NULL, NULL);
 		break;
 		case kVstDirectorySelect:
-			self->custommachine.machine.callback.fileselect_directory(
-				self->custommachine.machine.callback.context);
+			self->custommachine.machine.callback->vtable->fileselect_directory(
+				self->custommachine.machine.callback);
 		break;
 		default:
 		break;

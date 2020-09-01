@@ -29,7 +29,7 @@ typedef struct {
 	intptr_t y;
 } psy_audio_CustomMachine;
 
-void custommachine_init(psy_audio_CustomMachine*, psy_audio_MachineCallback);
+void custommachine_init(psy_audio_CustomMachine*, psy_audio_MachineCallback*);
 void custommachine_dispose(psy_audio_CustomMachine*);
 
 #ifdef __cplusplus
