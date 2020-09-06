@@ -53,12 +53,25 @@ typedef struct psy_EventDriver {
 	void (*configure)(struct psy_EventDriver*);	
 	int (*close)(struct psy_EventDriver*);	
 	void (*write)(struct psy_EventDriver*, EventDriverData);
-	void (*cmd)(struct psy_EventDriver*, EventDriverData, EventDriverCmd*);
+	void (*cmd)(struct psy_EventDriver*, const char* section, EventDriverData, EventDriverCmd*);
 	int (*error)(int, const char*);
-	EventDriverCmd (*getcmd)(struct psy_EventDriver*, psy_Properties* section);
+	EventDriverCmd (*getcmd)(struct psy_EventDriver*, const char* section);
 	void (*setcmddef)(struct psy_EventDriver*, psy_Properties*);
 	psy_Signal signal_input;
 } psy_EventDriver;
+
+INLINE uintptr_t psy_audio_encodeinput(uintptr_t keycode, bool shift, bool ctrl)
+{
+	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9);
+}
+
+INLINE void psy_audio_decodeinput(uintptr_t input, uintptr_t* keycode,
+	bool* shift, bool* ctrl)
+{
+	*keycode = input & 0xFF;
+	*shift = ((input >> 8) & 0x01) == 0x01;
+	*ctrl = ((input >> 9) & 0x01) == 0x01;
+}
 
 
 #ifndef __x86_64

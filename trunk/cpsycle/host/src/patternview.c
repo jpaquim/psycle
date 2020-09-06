@@ -400,11 +400,7 @@ void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 
 void patternview_oncontextmenu(PatternView* self, psy_ui_Component* sender)
 {
-	if (trackerview_blockmenuvisible(&self->trackerview)) {
-		trackerview_hideblockmenu(&self->trackerview);
-	} else {
-		trackerview_showblockmenu(&self->trackerview);
-	}
+	trackerview_toggleblockmenu(&self->trackerview);	
 }
 
 void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component* sender)

@@ -309,12 +309,9 @@ void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer*
 void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 	psy_EventDriver* sender)
 {
-	psy_Properties* notes;
 	EventDriverCmd cmd;	
 	
-	notes = psy_properties_find(self->eventdrivers.cmds, "notes",
-		PSY_PROPERTY_TYP_SECTION);
-	cmd = sender->getcmd(sender, notes);
+	cmd = sender->getcmd(sender, "notes");
 	printf("input %d, ", (int)cmd.id);
 	printf("param1 %d\n", (int)cmd.data.param1);
 	if (cmd.id != -1 && cmd.data.param1 < 255) {		

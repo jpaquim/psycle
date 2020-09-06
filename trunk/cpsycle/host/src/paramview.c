@@ -12,8 +12,6 @@
 #include <stdlib.h>
 #include "../../detail/portable.h"
 
-#define TIMERID_PARAMVIEW 410
-
 static void onpreferredsize(ParamView*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void ondestroy(ParamView*, psy_ui_Component* sender);
 static void ondraw(ParamView*, psy_ui_Graphics*);
@@ -160,7 +158,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
 	psy_signal_connect(&self->component.signal_mousewheel, self,
 		onmousewheel);
-	psy_ui_component_starttimer(&self->component, TIMERID_PARAMVIEW, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 ParamView* paramview_alloc(void)

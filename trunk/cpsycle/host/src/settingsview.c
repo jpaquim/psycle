@@ -5,7 +5,6 @@
 
 #include "settingsview.h"
 #include <stdio.h>
-#include "inputmap.h"
 #include <stdlib.h>
 #include <string.h>
 

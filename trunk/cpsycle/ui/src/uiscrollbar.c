@@ -40,7 +40,8 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self, psy_ui_Component* par
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setbackgroundcolor(&self->component, psy_ui_color_make(0x00444444));
+	psy_ui_component_setbackgroundcolor(&self->component,
+		psy_ui_color_make(0x00444444));
 	self->pos = 0;
 	self->drag = 0;
 	self->screenpos = 0;
@@ -177,6 +178,7 @@ static void psy_ui_scrollbar_onscrollpanechanged(psy_ui_ScrollBar*, psy_ui_Scrol
 void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_scrollbar_ondestroy);
 	// Less Button

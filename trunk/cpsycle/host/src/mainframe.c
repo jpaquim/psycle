@@ -554,7 +554,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	// 	psy_Properties* section;
 
 	// section = psy_properties_find(sender->properties, "general");
-	cmd = sender->getcmd(sender, 0);
+	cmd = sender->getcmd(sender, "generalcmds");
 	if (cmd.id == CMD_IMM_HELP) {
 		tabbar_select(&self->helpview.tabbar, 0);
 		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);		

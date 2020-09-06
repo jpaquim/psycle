@@ -5,10 +5,11 @@
 #include "../../detail/os.h"
 
 #include "inputdefiner.h"
-#include "inputmap.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <hashtbl.h>
+#include "../../driver/eventdriver.h"
 
 #if defined DIVERSALIS__OS__MICROSOFT
 

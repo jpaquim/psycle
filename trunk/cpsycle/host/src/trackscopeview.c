@@ -13,8 +13,6 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-#define TIMERID_TRACKSCOPEVIEW 6000
-
 static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
 static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_MouseEvent*);
 static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
@@ -57,7 +55,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	self->textheight = 12;
 	psy_signal_connect(&self->component.signal_timer, self,
 		trackscopeview_ontimer);
-	psy_ui_component_starttimer(&self->component, TIMERID_TRACKSCOPEVIEW, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
@@ -293,10 +291,10 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 
 void trackscopeview_start(TrackScopeView* self)
 {
-	psy_ui_component_starttimer(&self->component, TIMERID_TRACKSCOPEVIEW, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void trackscopeview_stop(TrackScopeView* self)
 {
-	psy_ui_component_stoptimer(&self->component, TIMERID_TRACKSCOPEVIEW);
+	psy_ui_component_stoptimer(&self->component, 0);
 }

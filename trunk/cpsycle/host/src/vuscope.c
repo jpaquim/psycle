@@ -16,8 +16,6 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-
-#define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
 
 static const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
@@ -70,7 +68,7 @@ void vuscope_init(VuScope* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		vuscope_onsongchanged);
 	vuscope_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void vuscope_ondestroy(VuScope* self)
@@ -314,9 +312,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 
 void vuscope_ontimer(VuScope* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
-	if (timerid == TIMERID_MASTERVU) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsigned int slot,
@@ -341,7 +337,7 @@ void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsign
 psy_dsp_amp_t vuscope_wirevolume(VuScope* self)
 {
 	return connections_wirevolume(&self->workspace->song->machines.connections,
-		self->wire.src, self->wire.dst);
+		self->wire);
 }
 
 void vuscope_onsongchanged(VuScope* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)

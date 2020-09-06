@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TIMERID_MACHINEEDITORVIEW 420
-
 static void machineeditorview_ondestroy(MachineEditorView*, psy_ui_Component* sender);
 static void machineeditorview_onpreferredsize(MachineEditorView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
@@ -50,7 +48,7 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 #endif
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machineeditorview_ondestroy);
-	psy_ui_component_starttimer(&self->component, TIMERID_MACHINEEDITORVIEW, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void machineeditorview_ondestroy(MachineEditorView* self, psy_ui_Component* sender)

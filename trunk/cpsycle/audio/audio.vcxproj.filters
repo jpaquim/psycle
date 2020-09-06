@@ -50,9 +50,6 @@
     <ClCompile Include="src\fileoutdriver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\inputmap.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\instrument.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -283,9 +280,6 @@
     <ClInclude Include="src\fileoutdriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\inputmap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\instrument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -473,6 +467,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ps1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cmdsnotes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

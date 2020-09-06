@@ -243,8 +243,8 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 
 							output_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
 							nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
-							connections_setwirevolume(&machines->connections, ev->vol,
-								output_entry->slot, nv * nv * 4.f);
+							connections_setwirevolume(&machines->connections,
+								psy_audio_wire_make(ev->vol, output_entry->slot), nv * nv * 4.f);
 						}
 					}
 				}

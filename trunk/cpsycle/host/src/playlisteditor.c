@@ -13,8 +13,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TIMERID_PLAYLIST 4000
-
 static void playlisteditor_ontimer(PlayListEditor*, uintptr_t timerid);
 
 static void playlisteditor_onaddsong(PlayListEditor*, psy_ui_Component* sender);
@@ -198,12 +196,12 @@ void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 {		
 	psy_audio_player_stop(&self->workspace->player);
 	self->nextentry = self->currentry;
-	psy_ui_component_starttimer(&self->component, TIMERID_PLAYLIST, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void playlisteditor_onstop(PlayListEditor* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
+	psy_ui_component_stoptimer(&self->component, 0);
 	psy_audio_player_stop(&self->workspace->player);
 }
 
@@ -255,7 +253,7 @@ void playlisteditor_ontimer(PlayListEditor* self, uintptr_t timerid)
 			psy_ui_listbox_setcursel(&self->listbox, c);
 		} else {
 			psy_audio_player_stop(&self->workspace->player);
-			psy_ui_component_stoptimer(&self->component, TIMERID_PLAYLIST);
+			psy_ui_component_stoptimer(&self->component, 0);
 		}
 	}
 }
