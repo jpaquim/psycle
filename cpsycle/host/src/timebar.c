@@ -4,8 +4,6 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
-#define TIMERID_TIMERBAR 500
-
 static void timerbar_onlesslessclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onlessclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onmoreclicked(TimeBar*, psy_ui_Component* sender);
@@ -52,7 +50,7 @@ void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* pl
 			psy_ui_ALIGN_LEFT,
 			&margin));
 	}	
-	psy_ui_component_starttimer(&self->component, TIMERID_TIMERBAR, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 	psy_signal_connect(&self->component.signal_timer, self,
 		timerbar_ontimer);
 }

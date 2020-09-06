@@ -8,8 +8,6 @@
 #include <math.h>
 #include <rms.h>
 
-#define TIMERID_MASTERVU 400
-
 static void vumeter_ondestroy(Vumeter*, psy_ui_Component* sender);
 static void vumeter_ondraw(Vumeter*, psy_ui_Graphics*);
 static void vumeter_ontimer(Vumeter*, psy_ui_Component* sender, uintptr_t timerid);
@@ -59,12 +57,12 @@ void vumeter_init(Vumeter* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_timer, self, vumeter_ontimer);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		vumeter_ondestroy);
-	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void vumeter_ondestroy(Vumeter* self, psy_ui_Component* sender)
 {	
-	psy_ui_component_stoptimer(&self->component, TIMERID_MASTERVU);
+	psy_ui_component_stoptimer(&self->component, 0);
 }
 
 void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
@@ -97,7 +95,7 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 
 void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
-	if (timerid == TIMERID_MASTERVU && self->workspace->song) {
+	if (self->workspace->song) {
 		psy_audio_Machine* master;
 		psy_audio_Buffer* memory;
 		psy_dsp_amp_t leftavg;

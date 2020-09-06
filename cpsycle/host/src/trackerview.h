@@ -9,8 +9,6 @@
 #include "tabbar.h"
 #include "workspace.h"
 #include <uibutton.h>
-#include <inputmap.h>
-#include <uibutton.h>
 #include <uilabel.h>
 #include <uiscroller.h>
 #include "zoombox.h"
@@ -19,12 +17,8 @@
 
 #include <pattern.h>
 
-// aim: The TrackerView is where you enter notes. It displays a Pattern
-//      selected by the SequenceView as a tracker grid.
-
-typedef struct {
-	psy_ui_TextMetric tm;	
-} TrackerMetrics;
+// The TrackerView is where you enter notes. It displays a Pattern selected by
+// the SequenceView as a tracker grid.
 
 enum {
 	TRACKER_COLUMN_NONE = -1,
@@ -58,11 +52,6 @@ typedef struct {
 
 void trackdef_init(TrackDef*);
 
-void trackercolumndef_init(TrackColumnDef*, int numdigits, int numchars,
-	int marginright, int wrapeditcol, int wrapclearcol, int emptyvalue);
-
-typedef psy_audio_Inputs TrackerInputs;
-
 typedef struct {
 	psy_Table trackconfigs;
 	TrackDef trackdef;
@@ -90,6 +79,8 @@ TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
 int trackergridstate_track_x(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_screentotrack(TrackerGridState*, int x,
 	uintptr_t numsongtracks);
+uintptr_t trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
+uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, int x);
 
 typedef struct {
 	psy_ui_Component component;
@@ -201,6 +192,7 @@ typedef struct {
    psy_dsp_big_beat_t cbpl;
    psy_dsp_NotesTabMode notestabmode;
    psy_audio_PatternEditPosition cursor;
+   psy_audio_PatternEditPosition oldcursor;
    PatternSelection selection;
    psy_audio_PatternEditPosition dragselectionbase;
    psy_audio_PatternEditPosition lastdragcursor;
@@ -211,13 +203,15 @@ typedef struct {
    int columnresize;
    int dragcolumn;
    int dragcolumnbase;
+   uintptr_t dragtrack;
+   int dragparamcol;
    unsigned int opcount;
    bool syncpattern;
    bool wraparound;
    bool showemptydata;
    TrackerGridEditMode editmode;
-   psy_ui_TextMetric tm;
    Workspace* workspace;
+   psy_Signal signal_colresize;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
@@ -229,6 +223,11 @@ void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_enablesync(TrackerGrid*);
 void trackergrid_preventsync(TrackerGrid*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
+
+INLINE bool trackergrid_midline(TrackerGrid* self)
+{
+	return self->midline;
+}
 
 typedef struct TrackerView {
 	psy_ui_Component component;	
@@ -251,7 +250,6 @@ typedef struct TrackerView {
 	Workspace* workspace;
 	psy_List* sublines;
 	psy_Table screenlines;
-	TrackerMetrics metrics;	
 	ZoomBox zoombox;
 	bool hasnewline;
 	int zoomheightbase;
@@ -262,9 +260,7 @@ void trackerview_init(TrackerView*, psy_ui_Component* parent,
 	 psy_ui_Component* patternview, PatternViewSkin*, Workspace*);
 void TrackerViewSongChanged(TrackerView*, Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
-void TrackerViewApplyProperties(TrackerView*, psy_Properties*);
-void trackerview_showblockmenu(TrackerView*);
-void trackerview_hideblockmenu(TrackerView*);
+void trackerview_toggleblockmenu(TrackerView*);
 void trackerview_updatescrollstep(TrackerView*);
 void trackerview_computemetrics(TrackerView*);
 void trackerview_setfont(TrackerView*, psy_ui_Font*, bool iszoombase);

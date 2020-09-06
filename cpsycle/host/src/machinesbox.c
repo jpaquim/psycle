@@ -262,7 +262,8 @@ void machinesbox_exchange(MachinesBox* self)
 					slot = (int) psy_table_at(&self->listboxslots,
 						selection[i]);				
 					if (slot != srcslot) {		
-						psy_audio_machines_exchange(self->machines, srcslot, slot);
+						psy_audio_machines_exchange(self->machines, srcslot,
+							slot);
 						break;
 					}
 				}

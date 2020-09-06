@@ -4,11 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "cmdproperties.h"
-#include "cmdsnotes.h"
 #include "cmdsgeneral.h"
-#include "inputmap.h"
 #include "uidef.h"
 #include "trackerview.h"
+
+#include <cmdsnotes.h>
 
 static void cmdproperties_makenotes(psy_Properties*);
 static void cmdproperties_makegeneral(psy_Properties*);

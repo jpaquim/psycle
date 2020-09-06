@@ -984,9 +984,10 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 				psy_audio_machines_connect(&songfile->song->machines,
 					psy_audio_wire_make(wire->_inputMachine, slot));
 				connections_setwirevolume(&songfile->song->machines.connections,
-					wire->_inputMachine, slot, wire->_inputConVol * wire->_wireMultiplier);
+					psy_audio_wire_make(wire->_inputMachine, slot),
+					wire->_inputConVol * wire->_wireMultiplier);
 				connections_setpinmapping(&songfile->song->machines.connections,
-					wire->_inputMachine, slot, &wire->pinmapping);
+					psy_audio_wire_make(wire->_inputMachine, slot), &wire->pinmapping);
 			}
 		}
 	}	

@@ -5,7 +5,6 @@
 
 #include "eventdrivers.h"
 #include "kbddriver.h"
-#include "inputmap.h"
 
 #include <stdlib.h>
 #include <string.h>

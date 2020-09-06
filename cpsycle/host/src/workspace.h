@@ -12,7 +12,6 @@
 #include <plugincatcher.h>
 #include <machinefactory.h>
 #include <uicomponent.h>
-#include <undoredo.h>
 #include "undoredo.h"
 #include <sequence.h>
 #include <notestab.h>

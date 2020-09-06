@@ -778,7 +778,8 @@ void psy_audio_psy2_load(psy_audio_SongFile* songfile)
 											psy_audio_machines_connect(&songfile->song->machines,
 												psy_audio_wire_make(invmach[wire->_inputMachine], invmach[i]));
 										connections_setwirevolume(&songfile->song->machines.connections,
-											invmach[wire->_inputMachine], invmach[i], val* wire->_wireMultiplier);
+											psy_audio_wire_make(invmach[wire->_inputMachine], invmach[i]),
+											val* wire->_wireMultiplier);
 									}
 								}
 							}
@@ -814,13 +815,13 @@ void machine_load(psy_audio_SongFile* songfile, uintptr_t slot)
 
 void master_load(psy_audio_SongFile* songfile, uintptr_t slot)
 {
-	char _editName[32];
+	char editname[32];
 	cpoint_t connectionpoint[MAX_CONNECTIONS];
 	int32_t panning;
 	int32_t _outDry;	
 
-	psyfile_read(songfile->file, _editName, 16);
-	_editName[15] = 0;
+	psyfile_read(songfile->file, editname, 16);
+	editname[15] = 0;
 	
 	legacywires_load_psy2(songfile, slot);
 
@@ -962,4 +963,3 @@ void plugin_skipload(psy_audio_SongFile* songfile, uintptr_t slot)
 	psyfile_read(songfile->file, &panning, sizeof(panning));
 	psyfile_skip(songfile->file, 109);	
 }
-

@@ -27,8 +27,8 @@ static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*);
-static void driver_cmd(psy_EventDriver*, EventDriverData input, EventDriverCmd*);
-static EventDriverCmd driver_getcmd(psy_EventDriver*, psy_Properties* section);
+static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData input, EventDriverCmd*);
+static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Properties*);
 
 static void init_properties(psy_EventDriver* self);
@@ -56,21 +56,24 @@ EXPORT EventDriverInfo const * __cdecl GetPsycleEventDriverInfo(void)
 EXPORT psy_EventDriver* __cdecl eventdriver_create(void)
 {
 	MmeMidiDriver* mme = (MmeMidiDriver*) malloc(sizeof(MmeMidiDriver));
-	memset(mme, 0, sizeof(MmeMidiDriver));
-	mme->deviceid = DEVICE_NONE;
-	mme->driver.open = driver_open;
-	mme->driver.free = driver_free;
-	mme->driver.open = driver_open;
-	mme->driver.close = driver_close;
-	mme->driver.dispose = driver_dispose;
-	mme->driver.configure = driver_configure;
-	mme->driver.error = onerror;
-	mme->driver.cmd = driver_cmd;
-	mme->driver.getcmd = driver_getcmd;
-	mme->driver.setcmddef = setcmddef;
-	mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	driver_init(&mme->driver);
-	return &mme->driver;
+	if (mme) {
+		memset(mme, 0, sizeof(MmeMidiDriver));
+		mme->deviceid = DEVICE_NONE;
+		mme->driver.open = driver_open;
+		mme->driver.free = driver_free;
+		mme->driver.open = driver_open;
+		mme->driver.close = driver_close;
+		mme->driver.dispose = driver_dispose;
+		mme->driver.configure = driver_configure;
+		mme->driver.error = onerror;
+		mme->driver.cmd = driver_cmd;
+		mme->driver.getcmd = driver_getcmd;
+		mme->driver.setcmddef = setcmddef;
+		mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		driver_init(&mme->driver);
+		return &mme->driver;
+	}
+	return NULL;
 }
 
 void driver_free(psy_EventDriver* driver)
@@ -212,18 +215,18 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 	}
 }
 
-void driver_cmd(psy_EventDriver* driver, EventDriverData input, EventDriverCmd* cmd)
+void driver_cmd(psy_EventDriver* driver, const char* section, EventDriverData input, EventDriverCmd* cmd)
 {		
 	cmd->id = input.param1;
 	cmd->data.param1 = input.param1;
 }
 
-EventDriverCmd driver_getcmd(psy_EventDriver* driver, psy_Properties* section)
+EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 {
 	EventDriverCmd cmd;
 	MmeMidiDriver* self = (MmeMidiDriver*) driver;	
 			
-	driver_cmd(driver, self->lastinput, &cmd);	
+	driver_cmd(driver, section, self->lastinput, &cmd);	
 	return cmd;
 }
 

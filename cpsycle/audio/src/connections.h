@@ -129,7 +129,7 @@ typedef struct {
 	psy_Table sends;
 	psy_Signal signal_connected;
 	psy_Signal signal_disconnected;
-	int filemode;
+	bool filemode;
 } psy_audio_Connections;
 
 void connections_init(psy_audio_Connections*);
@@ -139,22 +139,17 @@ psy_audio_MachineSockets* connections_initslot(psy_audio_Connections*,
 	uintptr_t slot);
 psy_audio_MachineSockets* connections_at(psy_audio_Connections*,
 	uintptr_t slot);
-int connections_connect(psy_audio_Connections*, uintptr_t outputslot,
-	uintptr_t inputslot);
-void connections_disconnect(psy_audio_Connections*, uintptr_t outputslot,
-	uintptr_t inputslot);
-int connections_connected(psy_audio_Connections*, uintptr_t outputslot,
-	uintptr_t inputslot);
+int connections_connect(psy_audio_Connections*, psy_audio_Wire);
+void connections_disconnect(psy_audio_Connections*, psy_audio_Wire);
+int connections_connected(psy_audio_Connections*, psy_audio_Wire);
 void connections_disconnectall(psy_audio_Connections*, uintptr_t slot);
-void connections_setwirevolume(psy_audio_Connections*, uintptr_t outputslot,
-	uintptr_t inputslot,
+void connections_setwirevolume(psy_audio_Connections*, psy_audio_Wire,
 	psy_dsp_amp_t factor);
-void connections_setpinmapping(psy_audio_Connections*, uintptr_t outputslot,
-	uintptr_t inputslot, const psy_audio_PinMapping*);
-psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*,
-	uintptr_t outputslot, uintptr_t inputslot);
-psy_audio_WireSocketEntry* connection_input(psy_audio_Connections* self,
-	uintptr_t outputslot, uintptr_t inputslot);
+void connections_setpinmapping(psy_audio_Connections*, psy_audio_Wire,
+	const psy_audio_PinMapping*);
+psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, psy_audio_Wire);
+psy_audio_WireSocketEntry* connection_input(psy_audio_Connections*,
+	psy_audio_Wire);
 
 #ifdef __cplusplus
 }

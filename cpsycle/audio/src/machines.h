@@ -59,14 +59,15 @@ void psy_audio_machines_insert(psy_audio_Machines*, uintptr_t slot,
 	psy_audio_Machine*);
 void psy_audio_machines_erase(psy_audio_Machines*, uintptr_t slot);
 void psy_audio_machines_remove(psy_audio_Machines*, uintptr_t slot);
-void psy_audio_machines_exchange(psy_audio_Machines*, uintptr_t srcslot, uintptr_t dstslot);
+void psy_audio_machines_exchange(psy_audio_Machines*, uintptr_t srcslot,
+	uintptr_t dstslot);
 uintptr_t psy_audio_machines_append(psy_audio_Machines*, psy_audio_Machine*);
 psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines*, uintptr_t slot);
 uintptr_t psy_audio_machines_size(psy_audio_Machines*);
-void psy_audio_machines_connect(psy_audio_Machines*, psy_audio_Wire wire);
-void psy_audio_machines_disconnect(psy_audio_Machines*, psy_audio_Wire wire);
+void psy_audio_machines_connect(psy_audio_Machines*, psy_audio_Wire);
+void psy_audio_machines_disconnect(psy_audio_Machines*, psy_audio_Wire);
 void psy_audio_machines_disconnectall(psy_audio_Machines*, uintptr_t slot);
-int psy_audio_machines_connected(psy_audio_Machines*, uintptr_t outputslot, uintptr_t inputslot);
+int psy_audio_machines_connected(psy_audio_Machines*, psy_audio_Wire);
 void psy_audio_machines_updatepath(psy_audio_Machines*);
 
 INLINE MachineList* psy_audio_machines_path(psy_audio_Machines* self)

@@ -14,7 +14,6 @@
 #include <quantize.h>
 #include <string.h>
 
-#define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
 
 static const int SCOPE_BARS_WIDTH = 256 / SCOPE_SPEC_BANDS;
@@ -78,7 +77,7 @@ void stereophase_init(StereoPhase* self, psy_ui_Component* parent, psy_audio_Wir
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		stereophase_onsongchanged);
 	stereophase_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void stereophase_ondestroy(StereoPhase* self)
@@ -323,9 +322,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 
 void stereophase_ontimer(StereoPhase* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
-	if (timerid == TIMERID_MASTERVU) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machine,
@@ -336,7 +333,7 @@ void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machin
 		psy_audio_WireSocketEntry* input;	
 
 		connections = &self->workspace->song->machines.connections;
-		input = connection_input(connections, self->wire.src, self->wire.dst);
+		input = connection_input(connections, self->wire);
 		if (input) {					
 			self->leftavg = bc->output->rms->data.previousLeft / 32768;
 			self->rightavg = bc->output->rms->data.previousRight / 32768;

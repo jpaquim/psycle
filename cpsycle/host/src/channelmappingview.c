@@ -325,7 +325,7 @@ psy_List* pinedit_hittest_wire(PinEdit* self, int x, int y)
 	psy_List* pinpair;
 	
 	connections = &self->workspace->song->machines.connections;
-	input = connection_input(connections, self->wire.src, self->wire.dst);
+	input = connection_input(connections, self->wire);
 	for (pinpair = input->mapping.container; pinpair != 0; pinpair = pinpair->next) {
 		psy_audio_PinConnection* pinconnection;
 		psy_ui_Rectangle out;
@@ -510,7 +510,7 @@ psy_audio_PinMapping* pinedit_mapping(PinEdit* self)
 	psy_audio_WireSocketEntry* input;
 
 	connections = &self->workspace->song->machines.connections;
-	input = connection_input(connections, self->wire.src, self->wire.dst);
+	input = connection_input(connections, self->wire);
 	return (input)
 		? &input->mapping
 		: NULL;

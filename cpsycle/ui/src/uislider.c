@@ -30,8 +30,6 @@ static void psy_ui_slider_describevalue(psy_ui_Slider*);
 static void psy_ui_slider_onalign(psy_ui_Slider*);
 static void psy_ui_slider_onpreferredsize(psy_ui_Slider*, psy_ui_Size* limit, psy_ui_Size* rv);
 
-static const int UI_TIMERID_SLIDER = 600;
-
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
 
@@ -76,7 +74,7 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 		psy_ui_slider_ondestroy);	
 	psy_signal_connect(&self->component.signal_timer, self,
 		psy_ui_slider_ontimer);
-	psy_ui_component_starttimer(&self->component, UI_TIMERID_SLIDER, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void psy_ui_slider_initsignals(psy_ui_Slider* self)

@@ -5,7 +5,6 @@
 #include "../../detail/os.h"
 
 #include "kbdhelp.h"
-#include "inputmap.h"
 
 #include <stdlib.h>
 #include <stdio.h>

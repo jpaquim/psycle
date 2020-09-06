@@ -14,7 +14,6 @@
 
 #include "../../detail/portable.h"
 
-#define TIMERID_MASTERVU 400
 #define SCOPE_SPEC_BANDS 256
 #define SCOPE_BUF_SIZE_LOG 13
 #define SCOPE_BUF_SIZE 1 << SCOPE_BUF_SIZE_LOG
@@ -80,7 +79,7 @@ void oscilloscope_init(Oscilloscope* self, psy_ui_Component* parent, psy_audio_W
 		oscilloscope_onsongchanged);
 	oscilloscope_connectmachinessignals(self, workspace);
 	oscilloscope_init_memory(self);
-	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void oscilloscope_init_memory(Oscilloscope* self)
@@ -228,9 +227,7 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
 void oscilloscope_ontimer(Oscilloscope* self, psy_ui_Component* sender,
 	uintptr_t timerid)
 {	
-	if (timerid == TIMERID_MASTERVU) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void oscilloscope_onsrcmachineworked(Oscilloscope* self,
@@ -259,8 +256,7 @@ void oscilloscope_onsrcmachineworked(Oscilloscope* self,
 		self->hold_buffer->writepos = memory->writepos;		
 	}
 	self->invol = connections_wirevolume(
-		&self->workspace->song->machines.connections,
-		self->wire.src, self->wire.dst);
+		&self->workspace->song->machines.connections, self->wire);
 }
 
 

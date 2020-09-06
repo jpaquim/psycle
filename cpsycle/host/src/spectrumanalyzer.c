@@ -13,7 +13,6 @@
 #include <operations.h>
 #include <string.h>
 
-#define TIMERID_MASTERVU 400
 #define SCOPE_BUF_SIZE_LOG 13
 
 #define SCOPE_BARS_WIDTH  (256 / SCOPE_SPEC_BANDS)
@@ -80,7 +79,7 @@ void spectrumanalyzer_init(SpectrumAnalyzer* self, psy_ui_Component* parent, psy
 	fftclass_init(&self->fftSpec);
 	fftclass_setup(&self->fftSpec, hann, self->scope_spec_samples, SCOPE_SPEC_BANDS);
 	spectrumanalyzer_connectmachinessignals(self, workspace);
-	psy_ui_component_starttimer(&self->component, TIMERID_MASTERVU, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
 void spectrumanalyzer_ondestroy(SpectrumAnalyzer* self)
@@ -312,9 +311,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 
 void spectrumanalyzer_ontimer(SpectrumAnalyzer* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
-	if (timerid == TIMERID_MASTERVU) {
-		psy_ui_component_invalidate(&self->component);
-	}
+	psy_ui_component_invalidate(&self->component);	
 }
 
 void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
@@ -322,7 +319,7 @@ void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
 	psy_audio_BufferContext* bc)
 {	
 	self->invol = connections_wirevolume(&self->workspace->song->machines.connections,
-		self->wire.src, self->wire.dst);	
+		self->wire);	
 }
 
 void spectrumanalyzer_onsongchanged(SpectrumAnalyzer* self, Workspace* workspace,
