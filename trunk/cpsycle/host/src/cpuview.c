@@ -34,9 +34,10 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
-	cpumoduleview_vtable_init(self);
+	cpumoduleview_vtable_init(self);	
 	self->component.vtable = &cpumoduleview_vtable;
 	self->workspace = workspace;
+	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
@@ -63,27 +64,18 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 			if (machine) {
 				if ((cpy - psy_ui_component_scrolltop(&self->component)) >= 0) {
 					char text[40];
-					const psy_audio_MachineInfo* info;
-					float percent;
-					float real_time_duration;
-					psy_audio_CpuTimeClock clock;
+					const psy_audio_MachineInfo* info;					
 
-					real_time_duration = 100;
 					info = psy_audio_machine_info(machine);
-					if (info) {
+					if (info) {						
 						psy_snprintf(text, 20, "%d", (int)slot);
 						psy_ui_textout(g, 0, cpy, text, strlen(text));
 						psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy,
 							psy_audio_machine_editname(machine),
 							min(strlen(psy_audio_machine_editname(machine)), 14));
 						psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
-							info->Name, strlen(info->Name));
-						clock = psy_audio_machine_accumulated_processing_time(machine);
-						percent = 100.0f *
-							psy_audio_cputimeclock_cputime_count(&clock) /
-							real_time_duration;
-						percent = 0.f;
-						psy_snprintf(text, 40, "%.1f%%", percent);
+							info->Name, strlen(info->Name));						
+						psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);
 						psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
 							strlen(text));
 					}
@@ -243,6 +235,6 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 	if (nummachines != self->lastnummachines) {
 		self->lastnummachines = nummachines;
 		psy_ui_component_updateoverflow(&self->modules.component);
-		psy_ui_component_invalidate(&self->modules.component);
 	}
+	psy_ui_component_invalidate(&self->modules.component);
 }

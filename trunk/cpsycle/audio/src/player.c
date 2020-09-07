@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "../../detail/portable.h"
 #include "fileio.h"
 #include "../../detail/psyconf.h"
@@ -238,14 +239,18 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 		if (output) {
 			psy_audio_BufferContext bc;
 			psy_List* events;
-
+			
 			events = psy_audio_sequencer_timedevents(&self->sequencer,
 				slot, amount);
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
 				self->numsongtracks);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
-			psy_audio_machine_work(machine, &bc);			
+			psy_audio_cputimeclock_measure(&machine->cpu_time);
+			psy_audio_machine_work(machine, &bc);
+			psy_audio_cputimeclock_stop(&machine->cpu_time);
+			psy_audio_cputimeclock_update(&machine->cpu_time,
+				amount, psy_audio_sequencer_samplerate(&self->sequencer));			
 #ifdef PSYCLE_LOG_WORKEVENTS
 			log_workevents(events);
 #endif

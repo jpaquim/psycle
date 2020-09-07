@@ -11,44 +11,40 @@
 
 typedef struct psy_audio_CpuTimeClock {
 	clock_t start, end;
-	double cpu_time_used;
-	unsigned int count;
+	double last_perc;
+	double perc;
 } psy_audio_CpuTimeClock;
 
 INLINE void psy_audio_cputimeclock_init(psy_audio_CpuTimeClock* self)
 {
-	self->count = 0;
-	self->start = 0;
-	self->end = 0;
-	self->cpu_time_used = 0.0;
+	self->last_perc = 0.0;
+	self->perc = 0.0;
 }
 
-INLINE void psy_audio_cputimeclock_begin(psy_audio_CpuTimeClock* self)
+INLINE void psy_audio_cputimeclock_measure(psy_audio_CpuTimeClock* self)
 {
 	self->start = clock();
 }
 
-INLINE void psy_audio_cputimeclock_end(psy_audio_CpuTimeClock* self)
+INLINE void psy_audio_cputimeclock_stop(psy_audio_CpuTimeClock* self)
 {
 	self->end = clock();
-	self->cpu_time_used = ((double)self->end - (double)self->start) /
-		CLOCKS_PER_SEC;
 }
 
-INLINE void psy_audio_cputimeclock_reset(psy_audio_CpuTimeClock* self)
+INLINE void psy_audio_cputimeclock_update(psy_audio_CpuTimeClock* self, uintptr_t amount, uintptr_t samplerate)
 {
-	self->cpu_time_used = 0.0;
-}
+	if (amount > 0) {
+		double cpu_time_used;
+		double max_time;
+		double currperc;
 
-INLINE double psy_audio_cputimeclock_cputime(psy_audio_CpuTimeClock* self)
-{
-	return self->cpu_time_used;
-}
-
-INLINE unsigned int psy_audio_cputimeclock_cputime_count(
-	psy_audio_CpuTimeClock* self)
-{
-	return self->count;
+		cpu_time_used = ((double)(self->end - self->start)) / CLOCKS_PER_SEC;
+		max_time = amount / (double)samplerate;
+		currperc = cpu_time_used / max_time;
+		self->perc = (self->last_perc + currperc) / 2;
+		self->last_perc = self->perc;
+		
+	}
 }
 
 #endif /* psy_audio_CPUTIMECLOCK_H */

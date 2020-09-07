@@ -395,7 +395,7 @@ typedef struct psy_audio_Machine {
 	psy_audio_MachineCallback* callback;	
 	psy_Signal signal_worked;
 	int err;
-	psy_audio_CpuTimeClock accumulated_processing_time_;
+	psy_audio_CpuTimeClock cpu_time;
 } psy_audio_Machine;
 
 void psy_audio_machine_init(psy_audio_Machine*, psy_audio_MachineCallback*);
@@ -1019,10 +1019,10 @@ INLINE void psy_audio_machine_output(psy_audio_Machine* self, const char* text)
 	self->vtable->output(self, text);
 }
 
-INLINE psy_audio_CpuTimeClock psy_audio_machine_accumulated_processing_time(
+INLINE psy_audio_CpuTimeClock psy_audio_machine_cpu_time(
 	psy_audio_Machine* self)
 {
-	return self->accumulated_processing_time_;
+	return self->cpu_time;
 }
 
 #ifdef __cplusplus
