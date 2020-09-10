@@ -137,7 +137,7 @@ const char* psy_audio_sample_name(psy_audio_Sample* self)
 
 
 psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample* self,
-	ResamplerType quality)
+	psy_dsp_ResamplerQuality quality)
 {
 	psy_audio_SampleIterator* rv;
 

@@ -46,7 +46,7 @@
 
 /// Temporary buffer to get all the audio from psy_audio_Master (which work in small chunks), and send it to the soundcard after converting it to float.
 #define MAX_SAMPLES_WORKFN		65536
-/// psy_audio_Sampler
+/// psy_audio_XMSampler
 #define OVERLAPTIME				128
 /// Maximum size of the audio block to be passed to the Work() function.
 // int const STREAM_SIZE = 256; // plugin_interface::MAX_BUFFER_LENGTH;

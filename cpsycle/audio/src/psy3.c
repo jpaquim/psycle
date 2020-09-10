@@ -570,7 +570,7 @@ void readinsd(psy_audio_SongFile* self)
 	unsigned char _NNA;
 
 
-	int32_t sampler_to_use = -1; // psy_audio_Sampler machine index for lockinst.
+	int32_t sampler_to_use = -1; // psy_audio_XMSampler machine index for lockinst.
 	unsigned char _LOCKINST;	// Force this instrument number to change the selected machine to use a specific sampler when editing (i.e. when using the pc or midi keyboards, not the notes already existing in a pattern)
 
 	///\name Amplitude Envelope overview:
@@ -1497,12 +1497,9 @@ void readmacd(psy_audio_SongFile* self)
 	if((self->file->currchunk.version&0xFFFF0000) == VERSION_MAJOR_ZERO)
 	{
 		int32_t index;
-		psyfile_read(self->file, &index, sizeof index);
-		if (index == 128) {
-			index = index;
-		}
-		if(index < MAX_MACHINES)
-		{			
+
+		psyfile_read(self->file, &index, sizeof index);		
+		if (index < MAX_MACHINES) {			
 			psy_audio_Machine* machine;
 			
 			machine = machineloadchunk(self, index);
@@ -2196,7 +2193,7 @@ int psy3_write_connections(psy_audio_SongFile* self, uintptr_t slot)
 	int i;
 	int c;
 	int status = PSY_OK;
-
+	
 	sockets = connections_at(&self->song->machines.connections, slot);						
 	if (status = psyfile_write_int32(self->file, sockets && sockets->inputs
 			? psy_list_size(sockets->inputs) : 0)) {
@@ -2209,73 +2206,54 @@ int psy3_write_connections(psy_audio_SongFile* self, uintptr_t slot)
 	c = 0;	
 	if (sockets) {
 		for (in = sockets->inputs, out = sockets->outputs;
-				(in || out) && (c < MAX_CONNECTIONS);
-				in = in ? in->next : 0, out = out ? out->next : 0, ++c) {
-			float invol = 1.f;			
+			(in || out) || (c < MAX_CONNECTIONS);
+			in = in ? in->next : 0, out = out ? out->next : 0, ++c) {
+			float invol = 1.f;
 			if (in) {
 				psy_audio_WireSocketEntry* entry;
 
-				incon = 1;
-				entry = (psy_audio_WireSocketEntry*) in->entry;
-				invol = entry->volume;				
+				incon = TRUE;
+				entry = (psy_audio_WireSocketEntry*)in->entry;
+				invol = entry->volume;
 				if (status = psyfile_write_int32(self->file, (int32_t)
-						(entry->slot))) {
+					(entry->slot))) {
 					return status;
 				}
 			} else {
-				incon = 0;
+				incon = FALSE;
 				if (status = psyfile_write_int32(self->file, -1)) {
-				return status;
-			}
+					return status;
+				}
 			}
 			if (out) {
 				psy_audio_WireSocketEntry* entry;
 
-				outcon = 1;
-				entry = (psy_audio_WireSocketEntry*) out->entry;
+				outcon = TRUE;
+				entry = (psy_audio_WireSocketEntry*)out->entry;
 				if (status = psyfile_write_int32(self->file, (int32_t)
-						(entry->slot))) {
+					(entry->slot))) {
 					return status;
 				}
 			} else {
-				outcon = 0;
+				outcon = FALSE;
 				if (status = psyfile_write_int32(self->file, -1)) {
 					return status;
 				}
-			}			
-		}
-		if (status = psyfile_write_float(self->file, 1.f)) {
-			return status;
-		}
-		if (status = psyfile_write_float(self->file, 1.f)) {
-			return status;
-		}
-		if (status = psyfile_write_uint8(self->file, (uint8_t) outcon)) {
-			return status;
-		}
-		if (status = psyfile_write_uint8(self->file, (uint8_t) incon)) {
-			return status;
-		}
-	}
-	// fill not used connections
-	for (i = c; i < MAX_CONNECTIONS; ++i) {
-		if (status = psyfile_write_int32(self->file, -1)) {
-			return status;
-		}
-		if (status = psyfile_write_int32(self->file, -1)) {
-			return status;
-		}
-		if (status = psyfile_write_float(self->file, 1.f)) {
-			return status;
-		}
-		if (status = psyfile_write_float(self->file, 1.f)) {
-			return status;
-		}
-		if (status = psyfile_write_uint8(self->file, 0)) {
-			return status;
-		}
-		if (status = psyfile_write_uint8(self->file, 0)) {
-			return status;
+			}
+			// Incoming connections Machine vol
+			if (status = psyfile_write_float(self->file, invol)) {
+				return status;
+			}
+			// Value to multiply _inputConVol[] to have a 0.0...1.0 range
+			if (status = psyfile_write_float(self->file, 1.f)) {
+				return status;
+			}
+			if (status = psyfile_write_uint8(self->file, (uint8_t)outcon)) {
+				return status;
+			}
+			if (status = psyfile_write_uint8(self->file, (uint8_t)incon)) {
+				return status;
+			}
 		}
 	}
 	return status;

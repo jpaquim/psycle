@@ -79,6 +79,7 @@ intptr_t psy_ui_listbox_cursel(psy_ui_ListBox*);
 void psy_ui_listbox_selitems(psy_ui_ListBox*, int* items, int maxitems);
 intptr_t psy_ui_listbox_selcount(psy_ui_ListBox*);
 void psy_ui_listbox_setcharnumber(psy_ui_ListBox*, uintptr_t num);
+intptr_t psy_ui_listbox_count(psy_ui_ListBox*);
 
 INLINE psy_ui_Component* psy_ui_listbox_base(psy_ui_ListBox* self)
 {
@@ -98,6 +99,7 @@ typedef void (*psy_ui_fp_listboximp_dev_setcursel)(struct psy_ui_ListBoxImp*, in
 typedef intptr_t (*psy_ui_fp_listboximp_dev_cursel)(struct psy_ui_ListBoxImp*);
 typedef void (*psy_ui_fp_listboximp_dev_selitems)(struct psy_ui_ListBoxImp*, int* items, int maxitems);
 typedef intptr_t (*psy_ui_fp_listboximp_dev_selcount)(struct psy_ui_ListBoxImp*);
+typedef intptr_t(*psy_ui_fp_listboximp_dev_count)(struct psy_ui_ListBoxImp*);
 
 typedef struct {
     psy_ui_fp_listboximp_dev_addtext dev_addtext;
@@ -109,6 +111,7 @@ typedef struct {
     psy_ui_fp_listboximp_dev_cursel dev_cursel;
     psy_ui_fp_listboximp_dev_selitems dev_selitems;
     psy_ui_fp_listboximp_dev_selcount dev_selcount;
+    psy_ui_fp_listboximp_dev_count dev_count;
 } psy_ui_ListBoxImpVTable;
 
 typedef struct psy_ui_ListBoxImp {

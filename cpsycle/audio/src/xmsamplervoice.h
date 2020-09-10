@@ -1,10 +1,10 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef psy_audio_SAMPLERVOICE_H
-#define psy_audio_SAMPLERVOICE_H
+#ifndef psy_audio_XMSAMPLERVOICE_H
+#define psy_audio_XMSAMPLERVOICE_H
 
-#include "samplerchannel.h"
+#include "xmsamplerchannel.h"
 #include "samplerdefs.h"
 // dsp
 #include <adsr.h>
@@ -16,14 +16,14 @@
 extern "C" {
 #endif
 
-struct psy_audio_Sampler;
+struct psy_audio_XMSampler;
 struct psy_audio_Samples;
 struct psy_audio_Instrument;
 
 typedef struct {
 	uintptr_t channelnum;
-	psy_audio_SamplerChannel* channel;
-	struct psy_audio_Sampler* sampler;
+	psy_audio_XMSamplerChannel* channel;
+	struct psy_audio_XMSampler* sampler;
 	struct psy_audio_Samples* samples;
 
 	struct psy_audio_Instrument* instrument;
@@ -37,7 +37,7 @@ typedef struct {
 	// SampleIterator (WaveDataController)
 	psy_List* positions;
 
-	ResamplerType resamplertype;
+	psy_dsp_ResamplerQuality resamplertype;
 	// todo
 	//dsp::ITFilter m_FilterIT;
 	//dsp::Filter m_FilterClassic;
@@ -106,59 +106,59 @@ typedef struct {
 	uint8_t offset;
 	// configuration
 	int maxvolume;
-} psy_audio_SamplerVoice; 
+} psy_audio_XMSamplerVoice; 
 
-void psy_audio_samplervoice_init(psy_audio_SamplerVoice*,
-	struct psy_audio_Sampler* sampler,
+void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice*,
+	struct psy_audio_XMSampler* sampler,
 	struct psy_audio_Samples*,
 	struct psy_audio_Instrument*,
-	psy_audio_SamplerChannel* channel,
+	psy_audio_XMSamplerChannel* channel,
 	uintptr_t channelnum, uintptr_t samplerate,
-	ResamplerType quality,
+	psy_dsp_ResamplerQuality quality,
 	int maxvolume);
-void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice*);
-psy_audio_SamplerVoice* psy_audio_samplervoice_alloc(void);
-psy_audio_SamplerVoice* psy_audio_samplervoice_allocinit(struct psy_audio_Sampler*,
+void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice*);
+psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_alloc(void);
+psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_allocinit(struct psy_audio_XMSampler*,
 	psy_audio_Instrument*,
-	psy_audio_SamplerChannel* channel,
+	psy_audio_XMSamplerChannel* channel,
 	uintptr_t channelnum,
 	uintptr_t samplerate);
-void psy_audio_samplervoice_seqtick(psy_audio_SamplerVoice*,
+void psy_audio_xmsamplervoice_seqtick(psy_audio_XMSamplerVoice*,
 	const psy_audio_PatternEvent*);
-void psy_audio_samplervoice_nna(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_noteon(psy_audio_SamplerVoice*, int note);
-void psy_audio_samplervoice_noteon_frequency(psy_audio_SamplerVoice*,
+void psy_audio_xmsamplervoice_nna(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice*, int note);
+void psy_audio_xmsamplervoice_noteon_frequency(psy_audio_XMSamplerVoice*,
 	double frequency);
-void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_fastnoteoff(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_work(psy_audio_SamplerVoice*, psy_audio_Buffer*,
+void psy_audio_xmsamplervoice_noteoff(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_fastnoteoff(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice*, psy_audio_Buffer*,
 	uintptr_t numsamples);
-void psy_audio_samplervoice_release(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_fastrelease(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_clearpositions(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_setresamplerquality(psy_audio_SamplerVoice*,
-	ResamplerType quality);
-void psy_audio_samplervoice_newline(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_tick(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_seteffect(psy_audio_SamplerVoice*,
+void psy_audio_xmsamplervoice_release(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_fastrelease(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_clearpositions(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_setresamplerquality(psy_audio_XMSamplerVoice*,
+	psy_dsp_ResamplerQuality quality);
+void psy_audio_xmsamplervoice_newline(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_tick(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_seteffect(psy_audio_XMSamplerVoice*,
 	const struct psy_audio_PatternEvent*);
-void psy_audio_samplervoice_performfx(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_effectinit(psy_audio_SamplerVoice*);
-void psy_audio_samplervoice_reseteffects(psy_audio_SamplerVoice*);
+void psy_audio_xmsamplervoice_performfx(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_effectinit(psy_audio_XMSamplerVoice*);
+void psy_audio_xmsamplervoice_reseteffects(psy_audio_XMSamplerVoice*);
 
 // Volume of the current note.
-INLINE uint16_t psy_audio_samplervoice_volume(psy_audio_SamplerVoice* self)
+INLINE uint16_t psy_audio_xmsamplervoice_volume(psy_audio_XMSamplerVoice* self)
 {
 	return self->volume;
 }
 
-INLINE void psy_audio_samplervoice_setvolume(psy_audio_SamplerVoice* self, uint16_t vol)
+INLINE void psy_audio_xmsamplervoice_setvolume(psy_audio_XMSamplerVoice* self, uint16_t vol)
 {
 	self->volume = vol;	
 }
 
 // Voice.RealVolume() returns the calculated volume out of "WaveData.WaveGlobVol() * Instrument.Volume() * Voice.NoteVolume()"
-INLINE float psy_audio_samplervoice_realvolume(psy_audio_SamplerVoice* self, psy_audio_Sample* sample)
+INLINE float psy_audio_xmsamplervoice_realvolume(psy_audio_XMSamplerVoice* self, psy_audio_Sample* sample)
 {
 	float realvolume;
 
@@ -174,37 +174,37 @@ INLINE float psy_audio_samplervoice_realvolume(psy_audio_SamplerVoice* self, psy
 		: 0;
 }
 
-void psy_audio_samplervoice_updatefadeout(psy_audio_SamplerVoice*, psy_audio_Sample*);
+void psy_audio_xmsamplervoice_updatefadeout(psy_audio_XMSamplerVoice*, psy_audio_Sample*);
 
-INLINE bool psy_audio_isplaying(psy_audio_SamplerVoice* self)
+INLINE bool psy_audio_isplaying(psy_audio_XMSamplerVoice* self)
 {
 	return self->play;
 
 }
 
-INLINE bool psy_audio_samplervoice_isplaying(psy_audio_SamplerVoice* self)
+INLINE bool psy_audio_xmsamplervoice_isplaying(psy_audio_XMSamplerVoice* self)
 {
 	return self->play;
 }
 
-INLINE void psy_audio_samplervoice_setisplaying(psy_audio_SamplerVoice* self,
+INLINE void psy_audio_xmsamplervoice_setisplaying(psy_audio_XMSamplerVoice* self,
 	bool value)
 {
 	self->play = value;
 }
 
-INLINE bool psy_audio_samplervoice_isstopping(psy_audio_SamplerVoice* self)
+INLINE bool psy_audio_xmsamplervoice_isstopping(psy_audio_XMSamplerVoice* self)
 {
 	return self->stopping;
 }
 
-INLINE void psy_audio_samplervoice_setstopping(psy_audio_SamplerVoice* self,
+INLINE void psy_audio_xmsamplervoice_setstopping(psy_audio_XMSamplerVoice* self,
 	bool stop)
 {
 	self->stopping = stop;
 }
 
-INLINE FilterType psy_audio_samplervoice_filtertype(psy_audio_SamplerVoice* self)
+INLINE FilterType psy_audio_xmsamplervoice_filtertype(psy_audio_XMSamplerVoice* self)
 {
 	return filter_type(&self->_filter);
 }
@@ -213,4 +213,4 @@ INLINE FilterType psy_audio_samplervoice_filtertype(psy_audio_SamplerVoice* self
 }
 #endif
 
-#endif /* psy_audio_SAMPLERVOICE_H */
+#endif /* psy_audio_XMSAMPLERVOICE_H */

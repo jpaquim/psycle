@@ -14,21 +14,20 @@
 #include "sinc.h"
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum ResamplerType {
-	RESAMPLERTYPE_ZERO_ORDER,
-	RESAMPLERTYPE_LINEAR,
-	RESAMPLERTYPE_SPLINE,
-	RESAMPLERTYPE_SINC,
-	// RESAMPLERTYPE_SOXR,
-	RESAMPLERTYPE_NUMRESAMPLERS
-} ResamplerType;
+typedef enum psy_dsp_ResamplerQuality {
+	psy_dsp_RESAMPLERQUALITY_ZERO_ORDER,
+	psy_dsp_RESAMPLERQUALITY_LINEAR,
+	psy_dsp_RESAMPLERQUALITY_SPLINE,
+	psy_dsp_RESAMPLERQUALITY_SINC,
+	// psy_dsp_RESAMPLERQUALITY_SOXR,
+	psy_dsp_RESAMPLERQUALITY_NUMRESAMPLERS
+} psy_dsp_ResamplerQuality;
 
-typedef struct {	
+typedef struct psy_dsp_MultiResampler {
 	psy_dsp_Resampler resampler;
 	psy_dsp_LinearResampler linear;
 #ifdef PSYCLE_USE_SSE
@@ -38,14 +37,14 @@ typedef struct {
 	psy_dsp_SplineResampler spline;
 	psy_dsp_SincResampler sinc;
 #endif	
-	ResamplerType selected;
+	psy_dsp_ResamplerQuality selected;
 	psy_dsp_Resampler* selectedresampler;	
 } psy_dsp_MultiResampler;
 
-void psy_dsp_multiresampler_init(psy_dsp_MultiResampler*, ResamplerType type);
-void psy_dsp_multiresampler_settype(psy_dsp_MultiResampler*, ResamplerType type);
-ResamplerType psy_dsp_multiresampler_type(psy_dsp_MultiResampler*);
-const char* psy_dsp_multiresampler_name(ResamplerType);
+void psy_dsp_multiresampler_init(psy_dsp_MultiResampler*, psy_dsp_ResamplerQuality);
+void psy_dsp_multiresampler_setquality(psy_dsp_MultiResampler*, psy_dsp_ResamplerQuality);
+psy_dsp_ResamplerQuality psy_dsp_multiresampler_quality(psy_dsp_MultiResampler*);
+const char* psy_dsp_multiresampler_name(psy_dsp_ResamplerQuality);
 uintptr_t psy_dsp_multiresampler_count(void);
 
 INLINE psy_dsp_Resampler* psy_dsp_multiresampler_base(psy_dsp_MultiResampler* self)

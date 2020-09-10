@@ -280,8 +280,9 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 		psy_ui_value_makepx(0));	
 	psy_ui_component_setmargin(&self->process.component, &margin);
 	psy_ui_listbox_init(&self->processors, &self->component);
+	self->processors.component.debugflag = 55;
 	psy_ui_component_setalign(&self->processors.component, psy_ui_ALIGN_TOP);
-	psy_ui_component_setmargin(&self->processors.component, &margin);
+	psy_ui_component_setmargin(&self->processors.component, &margin);	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_enablealign(&self->notebook.component);
@@ -752,7 +753,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 {
 	uintptr_t c;
 
-	psy_audio_sampler_init(&self->sampler,
+	psy_audio_xmsampler_init(&self->sampler,
 		self->workspace->machinefactory.machinecallback);
 	psy_audio_buffer_init(&self->samplerbuffer, 2);
 	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {

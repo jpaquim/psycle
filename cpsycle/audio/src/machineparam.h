@@ -237,6 +237,11 @@ INLINE psy_audio_MachineParam* psy_audio_choicemachineparam_base(psy_audio_Choic
 	return &(self->machineparam);
 }
 
+INLINE intptr_t psy_audio_choicemachineparam_choice(psy_audio_ChoiceMachineParam* self)
+{
+	return psy_audio_machineparam_scaledvalue(&self->machineparam);	
+}
+
 typedef enum {
 	psy_audio_VOLUME_LINEAR,
 	psy_audio_VOLUME_MIXER

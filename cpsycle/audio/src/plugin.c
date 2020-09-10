@@ -53,17 +53,20 @@ static void pluginparam_vtable_init(psy_audio_PluginMachineParam* self)
 {
 	if (!pluginparam_vtable_initialized) {
 		pluginparam_vtable = *(self->machineparam.vtable);
-		pluginparam_vtable.tweak = (fp_machineparam_tweak) pluginparam_tweak;
-		pluginparam_vtable.normvalue = (fp_machineparam_normvalue) pluginparam_normvalue;
-		pluginparam_vtable.range = (fp_machineparam_range) pluginparam_range;
-		pluginparam_vtable.name = (fp_machineparam_name) pluginparam_name;
-		pluginparam_vtable.label = (fp_machineparam_label) pluginparam_label;
-		pluginparam_vtable.type = (fp_machineparam_type) pluginparam_type;
-		pluginparam_vtable.describe = (fp_machineparam_describe) pluginparam_describe;
+		pluginparam_vtable.tweak = (fp_machineparam_tweak)pluginparam_tweak;
+		pluginparam_vtable.normvalue = (fp_machineparam_normvalue)
+			pluginparam_normvalue;
+		pluginparam_vtable.range = (fp_machineparam_range)pluginparam_range;
+		pluginparam_vtable.name = (fp_machineparam_name)pluginparam_name;
+		pluginparam_vtable.label = (fp_machineparam_label)pluginparam_label;
+		pluginparam_vtable.type = (fp_machineparam_type)pluginparam_type;
+		pluginparam_vtable.describe = (fp_machineparam_describe)
+			pluginparam_describe;
 	}
 }
 
-void psy_audio_pluginmachineparam_init(psy_audio_PluginMachineParam* self, struct CMachineInterface* mi,
+void psy_audio_pluginmachineparam_init(psy_audio_PluginMachineParam* self,
+	struct CMachineInterface* mi,
 	CMachineInfo* cinfo,
 	uintptr_t index)
 {
@@ -88,7 +91,8 @@ psy_audio_PluginMachineParam* psy_audio_pluginmachineparam_alloc(void)
 	return (psy_audio_PluginMachineParam*) malloc(sizeof(psy_audio_PluginMachineParam));
 }
 
-psy_audio_PluginMachineParam* psy_audio_pluginmachineparam_allocinit(struct CMachineInterface* mi,
+psy_audio_PluginMachineParam* psy_audio_pluginmachineparam_allocinit(
+	struct CMachineInterface* mi,
 	CMachineInfo* cinfo,
 	uintptr_t index)
 {

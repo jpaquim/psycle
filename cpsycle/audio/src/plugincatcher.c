@@ -15,7 +15,7 @@
 #include "plugin.h"
 #include "luaplugin.h"
 #include "sampler.h"
-#include "ps1.h"
+#include "xmsampler.h"
 #include "vstplugin.h"
 #include "ladspaplugin.h"
 
@@ -101,10 +101,10 @@ void plugincatcher_clear(psy_audio_PluginCatcher* self)
 
 void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 {			
-	plugincatcher_makeplugininfo(self, "sampler", "", MACH_XMSAMPLER,
+	plugincatcher_makeplugininfo(self, "sampulse", "", MACH_XMSAMPLER,
+		psy_audio_xmsampler_info());
+	plugincatcher_makeplugininfo(self, "sampler", "", MACH_SAMPLER,
 		psy_audio_sampler_info());
-	plugincatcher_makeplugininfo(self, "samplerps1", "", MACH_SAMPLER,
-		psy_audio_ps1sampler_info());
 	plugincatcher_makeplugininfo(self, "dummy", "", MACH_DUMMY,
 		dummymachine_info());
 	plugincatcher_makeplugininfo(self, "master", "", MACH_MASTER,
@@ -168,31 +168,29 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 }
 
 void plugincatcher_scan(psy_audio_PluginCatcher* self)
-{	
-	psy_Properties* p;
-
+{
 	plugincatcher_clear(self);
 	if (self->dirconfig) {
-		p = psy_properties_findsection(self->dirconfig, "plugins");
-		if (p) {			
-			psy_dir_enumerate_recursive(self, psy_properties_as_str(p), "*"MODULEEXT,
-				MACH_PLUGIN,
+		const char* path;
+
+		path = psy_properties_at_str(self->dirconfig, "plugins", NULL);
+		if (path) {			
+			psy_dir_enumerate_recursive(self, path, "*"MODULEEXT, MACH_PLUGIN,
 				(psy_fp_findfile)onenumdir);
 		}
-		p = psy_properties_findsection(self->dirconfig, "luascripts");
-		if (p) {		
-			psy_dir_enumerate(self, psy_properties_as_str(p), "*.lua", MACH_LUA,
+		path = psy_properties_at_str(self->dirconfig, "luascripts", NULL);
+		if (path) {
+			psy_dir_enumerate(self, path, "*.lua", MACH_LUA,
 				(psy_fp_findfile)onenumdir);
 		}
-		p = psy_properties_findsection(self->dirconfig, "vsts32");
-		if (p) {		
-			plugincatcher_scan_multipath(self, psy_properties_as_str(p),
-				"*"MODULEEXT, MACH_VST);
+		path = psy_properties_at_str(self->dirconfig, "vsts32", NULL);
+		if (path) {
+			plugincatcher_scan_multipath(self, path, "*"MODULEEXT, MACH_VST);
 		}
-		p = psy_properties_findsection(self->dirconfig, "ladspas");
-		if (p) {
-			plugincatcher_scan_multipath(self, psy_properties_as_str(p),
-				"*"MODULEEXT, MACH_LADSPA);
+		path = psy_properties_at_str(self->dirconfig, "ladspas", NULL);
+		if (path) {
+			plugincatcher_scan_multipath(self, path, "*"MODULEEXT,
+				MACH_LADSPA);
 		}
 	}
 	psy_signal_emit(&self->signal_changed, self, 0);
@@ -212,41 +210,44 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 	psy_audio_MachineInfo macinfo;
 	char name[_MAX_PATH];	
 
-	machineinfo_init(&macinfo);	
-	if (type == MACH_PLUGIN) {		
-		if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {
-			plugincatcher_catchername(self, path, name, macinfo.shellidx);
-			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
-				&macinfo);
-			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
-		}	
-	} else
-	if (type == MACH_LUA) {
-		if (psy_audio_plugin_luascript_test(path, &macinfo)) {
-			plugincatcher_catchername(self, path, name, macinfo.shellidx);
-			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
-				&macinfo);
-			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
-		}
-	}
-	else
-	if (type == MACH_VST) {
-		if (psy_audio_plugin_vst_test(path, &macinfo)) {
-			plugincatcher_catchername(self, path, name, macinfo.shellidx);
-			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
-				&macinfo);
-			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
-		}
-	} else
-	if (type == MACH_LADSPA) {
-		uintptr_t shellidx;
+	machineinfo_init(&macinfo);
+	switch (type) {
+		case MACH_PLUGIN:
+			if (psy_audio_plugin_psycle_test(path, self->nativeroot, &macinfo)) {
+				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+					&macinfo);
+				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+			}
+			break;
+		case MACH_LUA:
+			if (psy_audio_plugin_luascript_test(path, &macinfo)) {
+				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+					&macinfo);
+				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+			}
+			break;
+		case MACH_VST:
+			if (psy_audio_plugin_vst_test(path, &macinfo)) {
+				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+					&macinfo);
+				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+			}
+			break;
+		case MACH_LADSPA: {
+			uintptr_t shellidx;
 
-		for (shellidx = 0; psy_audio_plugin_ladspa_test(path, &macinfo, shellidx) != 0; ++shellidx) {
-			plugincatcher_catchername(self, path, name, macinfo.shellidx);
-			plugincatcher_makeplugininfo(self, name, path, macinfo.type,
-				&macinfo);
-			psy_signal_emit(&self->signal_scanprogress, self, 1, 1);			
-		}
+			for (shellidx = 0; psy_audio_plugin_ladspa_test(path, &macinfo, shellidx) != 0; ++shellidx) {
+				plugincatcher_catchername(self, path, name, macinfo.shellidx);
+				plugincatcher_makeplugininfo(self, name, path, macinfo.type,
+					&macinfo);
+				psy_signal_emit(&self->signal_scanprogress, self, 1, 1);
+			}
+			break; }
+		default:
+			break;
 	}
 	machineinfo_dispose(&macinfo);
 	return 1;

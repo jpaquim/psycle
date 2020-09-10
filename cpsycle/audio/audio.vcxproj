@@ -206,7 +206,6 @@
     <ClCompile Include="src\preset.c" />
     <ClCompile Include="src\presetio.c" />
     <ClCompile Include="src\presets.c" />
-    <ClCompile Include="src\ps1.c" />
     <ClCompile Include="src\psy2.c" />
     <ClCompile Include="src\psy2converter.c" />
     <ClCompile Include="src\psy3.c" />
@@ -218,9 +217,7 @@
     <ClCompile Include="src\sampler.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
-    <ClCompile Include="src\samplerchannel.c" />
     <ClCompile Include="src\samplerdefs.c" />
-    <ClCompile Include="src\samplervoice.c" />
     <ClCompile Include="src\samples.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -249,6 +246,9 @@
     <ClCompile Include="src\wavsongio.c" />
     <ClCompile Include="src\wire.c" />
     <ClCompile Include="src\xm.c" />
+    <ClCompile Include="src\xmsampler.c" />
+    <ClCompile Include="src\xmsamplerchannel.c" />
+    <ClCompile Include="src\xmsamplervoice.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h" />
@@ -303,7 +303,6 @@
     <ClInclude Include="src\preset.h" />
     <ClInclude Include="src\presetio.h" />
     <ClInclude Include="src\presets.h" />
-    <ClInclude Include="src\ps1.h" />
     <ClInclude Include="src\psy2.h" />
     <ClInclude Include="src\psy2converter.h" />
     <ClInclude Include="src\psy3.h" />
@@ -311,9 +310,7 @@
     <ClInclude Include="src\sample.h" />
     <ClInclude Include="src\sampleiterator.h" />
     <ClInclude Include="src\sampler.h" />
-    <ClInclude Include="src\samplerchannel.h" />
     <ClInclude Include="src\samplerdefs.h" />
-    <ClInclude Include="src\samplervoice.h" />
     <ClInclude Include="src\samples.h" />
     <ClInclude Include="src\sequence.h" />
     <ClInclude Include="src\sequencer.h" />
@@ -329,6 +326,9 @@
     <ClInclude Include="src\wire.h" />
     <ClInclude Include="src\xm.h" />
     <ClInclude Include="src\xmdefs.h" />
+    <ClInclude Include="src\xmsampler.h" />
+    <ClInclude Include="src\xmsamplerchannel.h" />
+    <ClInclude Include="src\xmsamplervoice.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)container\container.vcxproj">

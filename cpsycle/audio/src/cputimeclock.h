@@ -43,7 +43,6 @@ INLINE void psy_audio_cputimeclock_update(psy_audio_CpuTimeClock* self, uintptr_
 		currperc = cpu_time_used / max_time;
 		self->perc = (self->last_perc + currperc) / 2;
 		self->last_perc = self->perc;
-		
 	}
 }
 

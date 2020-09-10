@@ -925,12 +925,10 @@ int luamachine_channel(lua_State* L)
 void psy_audio_luamachine_init(psy_audio_LuaMachine* self)
 {	
 	psy_audio_CustomMachine* custommachine;
-	psy_audio_MachineCallback* callback;
 		
 	custommachine = (psy_audio_CustomMachine*) malloc(sizeof(psy_audio_CustomMachine));
-	if (custommachine) {
-		memset(&callback, 0, sizeof(psy_audio_MachineCallback));
-		custommachine_init(custommachine, callback);
+	if (custommachine) {		
+		custommachine_init(custommachine, NULL);
 		self->machine = &custommachine->machine;
 	} else {
 		self->machine = 0;

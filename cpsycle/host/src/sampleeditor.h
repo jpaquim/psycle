@@ -18,7 +18,7 @@
 
 #include <uilistbox.h>
 
-#include <sampler.h>
+#include <xmsampler.h>
 #include <sample.h>
 
 // aim: Wave editor and loop point definer.
@@ -139,7 +139,7 @@ typedef struct SampleEditor {
 	SampleBox samplebox;	
 	ScrollZoom zoom;
 	psy_audio_Sample* sample;
-	psy_audio_Sampler sampler;
+	psy_audio_XMSampler sampler;
 	psy_audio_Buffer samplerbuffer;
 	psy_audio_PatternEntry samplerentry;
 	psy_List* samplerevents;

@@ -64,7 +64,7 @@ static void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator*,
 	psy_dsp_amp_t buffer[192], psy_dsp_amp_t* data, bool released);
 
 void psy_audio_sampleiterator_init(psy_audio_SampleIterator* self,
-	psy_audio_Sample* sample, ResamplerType quality)
+	psy_audio_Sample* sample, psy_dsp_ResamplerQuality quality)
 {
 	self->sample = sample;
 	self->looped = FALSE;
@@ -158,7 +158,7 @@ psy_audio_SampleIterator* psy_audio_sampleiterator_allocinit(psy_audio_Sample*
 
 	rv = psy_audio_sampleiterator_alloc();
 	if (rv) {		
-		psy_audio_sampleiterator_init(rv, sample, RESAMPLERTYPE_LINEAR);
+		psy_audio_sampleiterator_init(rv, sample, psy_dsp_RESAMPLERQUALITY_LINEAR);
 	}
 	return rv;
 }
@@ -466,14 +466,14 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 }
 
 void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self,
-	ResamplerType quality)
+	psy_dsp_ResamplerQuality quality)
 {
-	psy_dsp_multiresampler_settype(&self->resampler, quality);
+	psy_dsp_multiresampler_setquality(&self->resampler, quality);
 }
 
-ResamplerType psy_audio_sampleiterator_quality(psy_audio_SampleIterator* self)
+psy_dsp_ResamplerQuality psy_audio_sampleiterator_quality(psy_audio_SampleIterator* self)
 {
-	return psy_dsp_multiresampler_type(&self->resampler);	
+	return psy_dsp_multiresampler_quality(&self->resampler);	
 }
 
 void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator* self,

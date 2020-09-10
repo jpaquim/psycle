@@ -98,6 +98,11 @@ intptr_t psy_ui_listbox_selcount(psy_ui_ListBox* self)
 	return self->imp->vtable->dev_selcount(self->imp);
 }
 
+intptr_t psy_ui_listbox_count(psy_ui_ListBox* self)
+{
+	return self->imp->vtable->dev_count(self->imp);
+}
+
 void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, uintptr_t num)
 {
 	self->charnumber = num;
@@ -107,13 +112,13 @@ void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
 	psy_ui_TextMetric tm;
-
+	
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
 		? psy_ui_value_makepx(tm.tmAveCharWidth * 40)
 		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
 	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * 1.2) *
-		psy_ui_listbox_selcount(self));
+		psy_ui_listbox_count(self));	
 }
 
 #endif
@@ -130,7 +135,8 @@ static void dev_clear(psy_ui_ListBoxImp* self) { }
 static void dev_setcursel(psy_ui_ListBoxImp* self, intptr_t index) { }
 static intptr_t dev_cursel(psy_ui_ListBoxImp* self) { return -1; }
 static void dev_selitems(psy_ui_ListBoxImp* self, int* items, int maxitems) { }
-static  intptr_t dev_selcount(psy_ui_ListBoxImp* self) { return 0;  }
+static intptr_t dev_selcount(psy_ui_ListBoxImp* self) { return 0;  }
+static intptr_t dev_count(psy_ui_ListBoxImp* self) { return 0; }
 
 static psy_ui_ListBoxImpVTable listbox_imp_vtable;
 static int listbox_imp_vtable_initialized = 0;
@@ -147,6 +153,7 @@ static void listbox_imp_vtable_init(void)
 		listbox_imp_vtable.dev_cursel = dev_cursel;
 		listbox_imp_vtable.dev_selitems = dev_selitems;
 		listbox_imp_vtable.dev_selcount = dev_selcount;
+		listbox_imp_vtable.dev_count = dev_count;
 		listbox_imp_vtable_initialized = 1;
 	}
 }
@@ -170,6 +177,7 @@ static void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient*,
 static void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient*,
 	psy_ui_MouseEvent*);
 static void psy_ui_listboxclient_onsize(psy_ui_ListBoxClient*, const psy_ui_Size*);
+static intptr_t  psy_ui_listboxclient_count(psy_ui_ListBoxClient* self);
 
 static psy_ui_ComponentVtable psy_ui_listboxclient_vtable;
 static int psy_ui_listboxclient_vtable_initialized = 0;
@@ -258,14 +266,14 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 void psy_ui_listboxclient_onpreferredsize(psy_ui_ListBoxClient* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	psy_ui_TextMetric tm;
+	psy_ui_TextMetric tm;	
 
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
-		? psy_ui_value_makepx(tm.tmAveCharWidth * 30)
+		? psy_ui_value_makepx(tm.tmAveCharWidth * 40)
 		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
-	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * 1.2) * psy_table_size(
-		&self->items));
+	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * 1.2) *
+		psy_ui_listboxclient_count(self));
 }
 
 void psy_ui_listboxclient_onmousedown(psy_ui_ListBoxClient* self,
@@ -318,6 +326,11 @@ intptr_t psy_ui_listboxclient_cursel(psy_ui_ListBoxClient* self)
 void psy_ui_listboxclient_setcharnumber(psy_ui_ListBoxClient* self, uintptr_t num)
 {
 	self->charnumber = num;
+}
+
+intptr_t  psy_ui_listboxclient_count(psy_ui_ListBoxClient* self)
+{
+	return psy_table_size(&self->items);
 }
 
 // ListBox
@@ -405,6 +418,11 @@ void psy_ui_listbox_onselchanged(psy_ui_ListBox* self, psy_ui_ListBoxClient*
 void psy_ui_listbox_setcharnumber(psy_ui_ListBox* self, uintptr_t num)
 {
 	psy_ui_listboxclient_setcharnumber(&self->client, num);
+}
+
+intptr_t psy_ui_listbox_count(psy_ui_ListBox* self)
+{
+	return psy_ui_listboxclient_count(&self->client);
 }
 
 #endif
