@@ -51,26 +51,29 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 				componentsize = psy_ui_component_size(component);
 			}
 			if (!psy_ui_value_iszero(&component->maxsize.width)) {
-				if (psy_ui_value_comp(&componentsize.width,
-						&component->maxsize.width, &tm) > 0) {
+				if (psy_ui_value_comp(&component->maxsize.width,
+						&componentsize.width, &tm) < 0) {
 					componentsize.width = component->maxsize.width;
 				}
 			}
-			if (!psy_ui_value_iszero(&component->maxsize.height)) {
-				if (psy_ui_value_comp(&componentsize.height,
-						&component->maxsize.height, &tm) > 0) {
+			if (!psy_ui_value_iszero(&component->maxsize.height)) {	
+				if (component->debugflag == 50) {
+					self = self;
+				}
+				if (psy_ui_value_comp(&component->maxsize.height,
+					&componentsize.height, &tm) < 0) {
 					componentsize.height = component->maxsize.height;
 				}
 			}
 			if (!psy_ui_value_iszero(&component->minsize.width)) {
-				if (psy_ui_value_comp(&componentsize.width,
-						&component->minsize.width, &tm) < 0) {
+				if (psy_ui_value_comp(&component->minsize.width,
+					&componentsize.width, &tm) > 0) {
 					componentsize.width = component->minsize.width;
 				}
 			}
 			if (!psy_ui_value_iszero(&component->minsize.height)) {
-				if (psy_ui_value_comp(&componentsize.height,
-						&component->minsize.height, &tm) < 0) {
+				if (psy_ui_value_comp(&component->minsize.height,
+						&componentsize.height, &tm) > 0) {
 					componentsize.height = component->minsize.height;
 				}
 			}

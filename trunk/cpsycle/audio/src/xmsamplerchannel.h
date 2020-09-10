@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#ifndef psy_audio_SAMPLERCHANNEL_H
-#define psy_audio_SAMPLERCHANNEL_H
+#ifndef psy_audio_XMSAMPLERCHANNEL_H
+#define psy_audio_XMSAMPLERCHANNEL_H
 
 #include "custommachine.h"
 #include "instrument.h"
@@ -21,7 +21,7 @@ struct psy_audio_SongFile;
 struct psy_audio_BufferContext;
 struct psy_audio_PatternEvent;
 
-typedef struct psy_audio_SamplerChannel {
+typedef struct psy_audio_XMSamplerChannel {
 	// // Channel Index. UINTPTR_MAX used for master
 	uintptr_t index;
 	// (0..1.0f) value used for Playback (channel volume)
@@ -104,38 +104,38 @@ typedef struct psy_audio_SamplerChannel {
 	int defaultcutoff;
 	int defaultressonance;
 	FilterType m_DefaultFilterType;
-} psy_audio_SamplerChannel;
+} psy_audio_XMSamplerChannel;
 
-void psy_audio_samplerchannel_init(psy_audio_SamplerChannel*, uintptr_t index);
-void psy_audio_samplerchannel_dispose(psy_audio_SamplerChannel*);
-void psy_audio_samplerchannel_restore(psy_audio_SamplerChannel*);
-bool  psy_audio_samplerchannel_load(psy_audio_SamplerChannel*,
+void psy_audio_xmsamplerchannel_init(psy_audio_XMSamplerChannel*, uintptr_t index);
+void psy_audio_xmsamplerchannel_dispose(psy_audio_XMSamplerChannel*);
+void psy_audio_xmsamplerchannel_restore(psy_audio_XMSamplerChannel*);
+bool  psy_audio_xmsamplerchannel_load(psy_audio_XMSamplerChannel*,
 	struct psy_audio_SongFile*);
-void psy_audio_samplerchannel_save(psy_audio_SamplerChannel*,
+void psy_audio_xmsamplerchannel_save(psy_audio_XMSamplerChannel*,
 	struct psy_audio_SongFile*);
-void psy_audio_samplerchannel_work(psy_audio_SamplerChannel*, struct psy_audio_BufferContext*);
+void psy_audio_xmsamplerchannel_work(psy_audio_XMSamplerChannel*, struct psy_audio_BufferContext*);
 // effects
-void psy_audio_samplerchannel_newline(psy_audio_SamplerChannel*);
-void psy_audio_samplerchannel_effectinit(psy_audio_SamplerChannel*);
-void psy_audio_samplerchannel_seteffect(psy_audio_SamplerChannel*,
+void psy_audio_xmsamplerchannel_newline(psy_audio_XMSamplerChannel*);
+void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel*);
+void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel*,
 	const struct psy_audio_PatternEvent*);
-void psy_audio_samplerchannel_performfx(psy_audio_SamplerChannel*);
+void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel*);
 
 
-INLINE void psy_audio_samplerchannel_setpanfactor(psy_audio_SamplerChannel*
+INLINE void psy_audio_xmsamplerchannel_setpanfactor(psy_audio_XMSamplerChannel*
 	self, psy_dsp_amp_t value)
 {
 	self->panfactor = value;
 }
 
-INLINE psy_dsp_amp_t psy_audio_samplerchannel_panfactor(
-	psy_audio_SamplerChannel* self)
+INLINE psy_dsp_amp_t psy_audio_xmsamplerchannel_panfactor(
+	psy_audio_XMSamplerChannel* self)
 {
 	return self->panfactor;
 }
 
-INLINE int psy_audio_samplerchannel_defaultpanfactor(
-	psy_audio_SamplerChannel* self)
+INLINE int psy_audio_xmsamplerchannel_defaultpanfactor(
+	psy_audio_XMSamplerChannel* self)
 {
 	return self->defaultpanfactor;
 }
@@ -144,4 +144,4 @@ INLINE int psy_audio_samplerchannel_defaultpanfactor(
 }
 #endif
 
-#endif /* psy_audio_SAMPLERCHANNEL_H */
+#endif /* psy_audio_XMSAMPLERCHANNEL_H */

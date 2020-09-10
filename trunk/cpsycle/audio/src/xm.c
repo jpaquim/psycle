@@ -7,7 +7,7 @@
 #include "xmdefs.h"
 #include "song.h"
 #include "songio.h"
-#include "sampler.h"
+#include "xmsampler.h"
 
 #include <operations.h>
 

@@ -15,7 +15,7 @@
 #include "plugin.h"
 #include "luaplugin.h"
 #include "sampler.h"
-#include "ps1.h"
+#include "xmsampler.h"
 #include "vstplugin.h"
 #include "ladspaplugin.h"
 #include "machineproxy.h"
@@ -161,23 +161,23 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			break;
 		}
 		case MACH_SAMPLER: {
-			psy_audio_PS1Sampler* sampler;
+			psy_audio_Sampler* sampler;
 
-			sampler = psy_audio_ps1sampler_allocinit(self->machinecallback);
+			sampler = psy_audio_sampler_allocinit(self->machinecallback);
 			if (sampler) {
-				rv = psy_audio_ps1sampler_base(sampler);
+				rv = psy_audio_sampler_base(sampler);
 			} else {
 				rv = 0;
 			}
 			break;			
 		}
 		case MACH_XMSAMPLER: {
-			psy_audio_Sampler* sampler;
+			psy_audio_XMSampler* sampler;
 			
-			sampler = psy_audio_sampler_allocinit(self->machinecallback);
+			sampler = psy_audio_xmsampler_allocinit(self->machinecallback);
 			if (sampler) {
 				sampler->xmsamplerload = 1;
-				rv = psy_audio_sampler_base(sampler);
+				rv = psy_audio_xmsampler_base(sampler);
 			} else {
 				rv = 0;
 			}		

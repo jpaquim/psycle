@@ -18,7 +18,7 @@ typedef struct psy_audio_WaveOsc {
 	double gain;
 	bool playing;
 	psy_audio_WaveShape shape;
-	ResamplerType quality;
+	psy_dsp_ResamplerQuality quality;
 	float *pm, *fm, *am;
 	float phase;
 } psy_audio_WaveOsc;
@@ -42,8 +42,8 @@ INLINE bool psy_audio_waveosc_playing(psy_audio_WaveOsc* self)
 	return self->playing;
 }
 
-void psy_audio_waveosc_setquality(psy_audio_WaveOsc*, ResamplerType);
-ResamplerType  psy_audio_waveosc_quality(psy_audio_WaveOsc*);
+void psy_audio_waveosc_setquality(psy_audio_WaveOsc*, psy_dsp_ResamplerQuality);
+psy_dsp_ResamplerQuality  psy_audio_waveosc_quality(psy_audio_WaveOsc*);
 
 void psy_audio_waveosc_setshape(psy_audio_WaveOsc*, psy_audio_WaveShape);
 

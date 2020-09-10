@@ -53,14 +53,14 @@ static void vtable_init(psy_dsp_MultiResampler* self)
 	}	
 }
 
-void psy_dsp_multiresampler_init(psy_dsp_MultiResampler* self, ResamplerType type)
+void psy_dsp_multiresampler_init(psy_dsp_MultiResampler* self, psy_dsp_ResamplerQuality type)
 {
 	psy_dsp_resampler_init(&self->resampler);
 	vtable_init(self);
 	self->resampler.vtable = &vtable;
 	psy_dsp_multiresampler_initresamplers(self);
-	self->selected = RESAMPLERTYPE_LINEAR;
-	psy_dsp_multiresampler_settype(self, type);
+	self->selected = psy_dsp_RESAMPLERQUALITY_LINEAR;
+	psy_dsp_multiresampler_setquality(self, type);
 }
 
 void psy_dsp_multiresampler_initresamplers(psy_dsp_MultiResampler* self)
@@ -82,29 +82,29 @@ void psy_dsp_multiresampler_dispose(psy_dsp_MultiResampler* self)
 	}
 }
 
-void psy_dsp_multiresampler_settype(psy_dsp_MultiResampler* self,
-	ResamplerType type)
+void psy_dsp_multiresampler_setquality(psy_dsp_MultiResampler* self,
+	psy_dsp_ResamplerQuality type)
 {
 	psy_dsp_Resampler* base;
 
 	self->selected = type;
 	switch (self->selected) {
-		case RESAMPLERTYPE_LINEAR:
+		case psy_dsp_RESAMPLERQUALITY_LINEAR:
 			base = psy_dsp_linearresampler_base(&self->linear);
 		break;
 #ifdef PSYCLE_USE_SSE	
-		case RESAMPLERTYPE_SPLINE:	
+		case psy_dsp_RESAMPLERQUALITY_SPLINE:	
 			base = psy_dsp_spline_sse2_resampler_base(&self->spline);
 		break;
-		case RESAMPLERTYPE_SINC:
+		case psy_dsp_RESAMPLERQUALITY_SINC:
 			base = psy_dsp_sinc_sse2_resampler_base(&self->sinc);
 		break;
 		break;
 #else
-		case RESAMPLERTYPE_SPLINE:
+		case psy_dsp_RESAMPLERQUALITY_SPLINE:
 			base = psy_dsp_spline_resampler_base(&self->spline);
 		break;
-		case RESAMPLERTYPE_SINC:
+		case psy_dsp_RESAMPLERQUALITY_SINC:
 			base = psy_dsp_sinc_resampler_base(&self->sinc);
 		break;
 #endif
@@ -115,19 +115,19 @@ void psy_dsp_multiresampler_settype(psy_dsp_MultiResampler* self,
 	self->selectedresampler = base;
 }
 
-ResamplerType psy_dsp_multiresampler_type(psy_dsp_MultiResampler* self)
+psy_dsp_ResamplerQuality psy_dsp_multiresampler_quality(psy_dsp_MultiResampler* self)
 {
 	return self->selected;
 }
 
-const char* psy_dsp_multiresampler_name(ResamplerType type)
+const char* psy_dsp_multiresampler_name(psy_dsp_ResamplerQuality type)
 {
 	return names[(int)type];
 }
 
 uintptr_t psy_dsp_multiresampler_count(void)
 {
-	return RESAMPLERTYPE_NUMRESAMPLERS;
+	return psy_dsp_RESAMPLERQUALITY_NUMRESAMPLERS;
 }
 
 psy_dsp_amp_t work(psy_dsp_MultiResampler* self,

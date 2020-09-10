@@ -29,6 +29,10 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_settext(&self->header, "Instrument Group");
 	psy_ui_listbox_init(&self->grouplist, &self->component);
+	psy_ui_component_setmaximumsize(&self->grouplist.component,
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
+	psy_ui_component_setminimumsize(&self->grouplist.component,
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 	psy_ui_component_setalign(&self->grouplist.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->group, &self->component);
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_TOP);

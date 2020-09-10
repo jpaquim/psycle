@@ -6,10 +6,10 @@
 #include "ticktimer.h"
 #include "buffercontext.h"
 
-static void psy_audio_samplerticktimer_dowork(psy_audio_SamplerTickTimer*,
+static void psy_audio_ticktimer_dowork(psy_audio_TickTimer*,
 	uintptr_t numsamples, struct psy_audio_BufferContext*, uintptr_t offset);
 
-void psy_audio_samplerticktimer_init(psy_audio_SamplerTickTimer* self,
+void psy_audio_ticktimer_init(psy_audio_TickTimer* self,
 	void* context,
 	fp_samplerticktimer_ontick tick,
 	fp_samplerticktimer_onwork work)
@@ -22,7 +22,7 @@ void psy_audio_samplerticktimer_init(psy_audio_SamplerTickTimer* self,
 	self->tickcount = 0;
 }
 
-void psy_audio_samplerticktimer_reset(psy_audio_SamplerTickTimer* self,
+void psy_audio_ticktimer_reset(psy_audio_TickTimer* self,
 	uintptr_t samplesprotick)
 {
 	self->samplesprotick = samplesprotick;
@@ -30,7 +30,7 @@ void psy_audio_samplerticktimer_reset(psy_audio_SamplerTickTimer* self,
 	self->tickcount = 0;
 }
 
-void psy_audio_samplerticktimer_update(psy_audio_SamplerTickTimer* self,
+void psy_audio_ticktimer_update(psy_audio_TickTimer* self,
 	uintptr_t numsamples, psy_audio_BufferContext* bc)
 {	
 	uintptr_t j = 0;
@@ -44,7 +44,7 @@ void psy_audio_samplerticktimer_update(psy_audio_SamplerTickTimer* self,
 
 			worknum = j - lastpos;
 			if (worknum) {
-				psy_audio_samplerticktimer_dowork(self, worknum, bc, lastpos);
+				psy_audio_ticktimer_dowork(self, worknum, bc, lastpos);
 				amount -= worknum;
 				lastpos = j;
 			}
@@ -58,11 +58,11 @@ void psy_audio_samplerticktimer_update(psy_audio_SamplerTickTimer* self,
 		}
 	}
 	if (amount) {
-		psy_audio_samplerticktimer_dowork(self, amount, bc, lastpos);		
+		psy_audio_ticktimer_dowork(self, amount, bc, lastpos);		
 	}
 }
 
-void psy_audio_samplerticktimer_dowork(psy_audio_SamplerTickTimer* self,
+void psy_audio_ticktimer_dowork(psy_audio_TickTimer* self,
 	uintptr_t amount, psy_audio_BufferContext* bc, uintptr_t offset)
 {
 	uintptr_t restorenumsamples;

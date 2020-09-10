@@ -59,13 +59,15 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 		instrumentheaderview_onlanguagechanged);
 }
 
-void instrumentheaderview_updatetext(InstrumentHeaderView* self, Translator* translator)
+void instrumentheaderview_updatetext(InstrumentHeaderView* self, Translator*
+	translator)
 {
 	psy_ui_label_settext(&self->namelabel, 
 		translator_translate(translator, "instrumentview.instrument-name"));
 }
 
-void instrumentheaderview_onlanguagechanged(InstrumentHeaderView* self, Translator* sender)
+void instrumentheaderview_onlanguagechanged(InstrumentHeaderView* self,
+	Translator* sender)
 {
 	instrumentheaderview_updatetext(self, sender);
 }
@@ -76,12 +78,16 @@ void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 	self->instrument = instrument;
 	psy_signal_prevent(&self->nameedit.signal_change, self,
 		instrumentheaderview_oneditinstrumentname);
-	psy_ui_edit_settext(&self->nameedit, instrument ? instrument->name : "");
+	psy_ui_edit_settext(&self->nameedit,
+		(instrument)
+		? instrument->name
+		: "");
 	psy_signal_enable(&self->nameedit.signal_change, self,
 		instrumentheaderview_oneditinstrumentname);
 }
 
-void instrumentheaderview_oneditinstrumentname(InstrumentHeaderView* self, psy_ui_Edit* sender)
+void instrumentheaderview_oneditinstrumentname(InstrumentHeaderView* self,
+	psy_ui_Edit* sender)
 {
 	if (self->instrument) {
 		char text[40];

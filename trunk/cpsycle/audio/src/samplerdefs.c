@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 // Sampler Configuration
-void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd* self,
+void psy_audio_xmsamplercmd_init_all(psy_audio_XMSamplerCmd* self,
 	int id, int patternid, int mask)
 {
 	self->id = id;
@@ -16,23 +16,23 @@ void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd* self,
 	self->mode = mask;
 }
 
-void psy_audio_samplercmd_dispose(psy_audio_SamplerCmd* self)
+void psy_audio_xmsamplercmd_dispose(psy_audio_XMSamplerCmd* self)
 {	
 }
 
-psy_audio_SamplerCmd* psy_audio_samplercmd_alloc(void)
+psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_alloc(void)
 {
-	return (psy_audio_SamplerCmd*)malloc(sizeof(psy_audio_SamplerCmd));
+	return (psy_audio_XMSamplerCmd*)malloc(sizeof(psy_audio_XMSamplerCmd));
 }
 
-psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
+psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_allocinit_all(int id,
 	int patternid, int mask)
 {
-	psy_audio_SamplerCmd* rv;
+	psy_audio_XMSamplerCmd* rv;
 	
-	rv = psy_audio_samplercmd_alloc();
+	rv = psy_audio_xmsamplercmd_alloc();
 	if (rv) {
-		psy_audio_samplercmd_init_all(rv, id, patternid, mask);
+		psy_audio_xmsamplercmd_init_all(rv, id, patternid, mask);
 	}
 	return rv;
 }

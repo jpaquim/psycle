@@ -194,7 +194,7 @@ extern "C" {
 #define SAMPLER_EFFECT_GLOBALVOLSLIDE  0x00002000
 #define SAMPLER_EFFECT_PORTAMENTO  0x00004000
 
-typedef enum psy_audio_SamplerCmdMode {
+typedef enum psy_audio_XMSamplerCmdMode {
 	// *= remembers its last value when called with param 00.
 	psy_audio_SAMPLERCMDMODE_MEM0 = 1,
 	// t = slides / changes each tick. (or is applied in a specific tick != 0)
@@ -203,21 +203,21 @@ typedef enum psy_audio_SamplerCmdMode {
 	psy_audio_SAMPLERCMDMODE_PERS = 4,
 	// n = they need to appear next to a note.
 	psy_audio_SAMPLERCMDMODE_NEXT = 8  
-} psy_audio_SamplerCmdMode;
+} psy_audio_XMSamplerCmdMode;
 
 typedef struct SamplerCmd {
 	int id;
 	int patternid;
 	int mode;
-} psy_audio_SamplerCmd;
+} psy_audio_XMSamplerCmd;
 
-void psy_audio_samplercmd_init_all(psy_audio_SamplerCmd*,
+void psy_audio_xmsamplercmd_init_all(psy_audio_XMSamplerCmd*,
 	int id, int patternid, int mask);
-void psy_audio_samplercmd_dispose(psy_audio_SamplerCmd*);
+void psy_audio_xmsamplercmd_dispose(psy_audio_XMSamplerCmd*);
 
-INLINE psy_audio_SamplerCmd psy_audio_samplercmd_make(int id, int patternid, int mask)
+INLINE psy_audio_XMSamplerCmd psy_audio_xmsamplercmd_make(int id, int patternid, int mask)
 {
-	psy_audio_SamplerCmd rv;
+	psy_audio_XMSamplerCmd rv;
 
 	rv.id = id;
 	rv.patternid = patternid;
@@ -225,19 +225,19 @@ INLINE psy_audio_SamplerCmd psy_audio_samplercmd_make(int id, int patternid, int
 	return rv;
 }
 
-INLINE int psy_audio_samplercmd_id(psy_audio_SamplerCmd* self)
+INLINE int psy_audio_xmsamplercmd_id(psy_audio_XMSamplerCmd* self)
 {
 	return self->id;
 }
 
-INLINE bool psy_audio_samplercmd_hasticktime(const psy_audio_SamplerCmd* self)
+INLINE bool psy_audio_xmsamplercmd_hasticktime(const psy_audio_XMSamplerCmd* self)
 {
 	return ((self->mode & psy_audio_SAMPLERCMDMODE_TICK)
 		== psy_audio_SAMPLERCMDMODE_TICK);
 }
 
-psy_audio_SamplerCmd* psy_audio_samplercmd_alloc(void);
-psy_audio_SamplerCmd* psy_audio_samplercmd_allocinit_all(int id,
+psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_alloc(void);
+psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_allocinit_all(int id,
 	int patternid, int mask);
 
 typedef enum {
@@ -250,7 +250,7 @@ typedef enum {
 	psy_audio_PANNING_LINEAR = 0,
 	psy_audio_PANNING_TWOWAY = 1,
 	psy_audio_PANNING_EQUALPOWER = 2
-} psy_audio_SamplerPanningMode;
+} psy_audio_XMSamplerPanningMode;
 
 typedef struct ZxxMacro {
 	int32_t mode;

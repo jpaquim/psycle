@@ -111,6 +111,7 @@ static void dev_setcursel(psy_ui_x11_ListBoxImp*, intptr_t index);
 static intptr_t dev_cursel(psy_ui_x11_ListBoxImp*);
 static void dev_selitems(psy_ui_x11_ListBoxImp*, int* items, int maxitems);
 static intptr_t dev_selcount(psy_ui_x11_ListBoxImp*);
+static intptr_t dev_count(psy_ui_x11_ListBoxImp*);
 
 static psy_ui_ListBoxImpVTable listboximp_vtable;
 static int listboximp_vtable_initialized = 0;
@@ -118,15 +119,16 @@ static int listboximp_vtable_initialized = 0;
 static void listboximp_imp_vtable_init(psy_ui_x11_ListBoxImp* self)
 {
 	if (!listboximp_vtable_initialized) {
-		listboximp_vtable.dev_addtext = (psy_ui_fp_listboximp_dev_addtext) dev_addtext;
-		listboximp_vtable.dev_settext = (psy_ui_fp_listboximp_dev_settext) dev_settext;
-		listboximp_vtable.dev_text = (psy_ui_fp_listboximp_dev_text) dev_text;
-		listboximp_vtable.dev_setstyle = (psy_ui_fp_listboximp_dev_setstyle) dev_setstyle;
-		listboximp_vtable.dev_clear = (psy_ui_fp_listboximp_dev_clear) dev_clear;
-		listboximp_vtable.dev_setcursel = (psy_ui_fp_listboximp_dev_setcursel) dev_setcursel;
-		listboximp_vtable.dev_cursel = (psy_ui_fp_listboximp_dev_cursel) dev_cursel;
-		listboximp_vtable.dev_selitems = (psy_ui_fp_listboximp_dev_selitems) dev_selitems;
-		listboximp_vtable.dev_selcount = (psy_ui_fp_listboximp_dev_selcount) dev_selcount;
+		listboximp_vtable.dev_addtext = (psy_ui_fp_listboximp_dev_addtext)dev_addtext;
+		listboximp_vtable.dev_settext = (psy_ui_fp_listboximp_dev_settext)dev_settext;
+		listboximp_vtable.dev_text = (psy_ui_fp_listboximp_dev_text)dev_text;
+		listboximp_vtable.dev_setstyle = (psy_ui_fp_listboximp_dev_setstyle)dev_setstyle;
+		listboximp_vtable.dev_clear = (psy_ui_fp_listboximp_dev_clear)dev_clear;
+		listboximp_vtable.dev_setcursel = (psy_ui_fp_listboximp_dev_setcursel)dev_setcursel;
+		listboximp_vtable.dev_cursel = (psy_ui_fp_listboximp_dev_cursel)dev_cursel;
+		listboximp_vtable.dev_selitems = (psy_ui_fp_listboximp_dev_selitems)dev_selitems;
+		listboximp_vtable.dev_selcount = (psy_ui_fp_listboximp_dev_selcount)dev_selcount;
+		listboximp_vtable.dev_count = (psy_ui_fp_listboximp_dev_count)dev_count;
 		listboximp_vtable_initialized = 1;
 	}
 }
@@ -260,6 +262,11 @@ intptr_t dev_selcount(psy_ui_x11_ListBoxImp* self)
 {
 //	return SendMessage(self->x11_component_imp.hwnd, LB_GETSELCOUNT,
 //		(WPARAM)0, (LPARAM)0);
+	return 0;
+}
+
+intptr_t dev_count(psy_ui_x11_ListBoxImp* self)
+{	
 	return 0;
 }
 

@@ -36,7 +36,7 @@ void psy_audio_waveosc_init(psy_audio_WaveOsc* self, psy_audio_WaveShape shape, 
 	self->pm = NULL;
 	self->phase = 0;
 	psy_audio_sampleiterator_init(&self->sampleiterator,
-		psy_audio_waveosc_sample(self, frequency), RESAMPLERTYPE_LINEAR);
+		psy_audio_waveosc_sample(self, frequency), psy_dsp_RESAMPLERQUALITY_LINEAR);
 	psy_audio_sampleiterator_setspeed(&self->sampleiterator, frequency / self->basefrequency);
 	psy_audio_sampleiterator_play(&self->sampleiterator);
 }
@@ -149,13 +149,13 @@ void psy_audio_waveosc_stop(psy_audio_WaveOsc* self, double phase)
 }
 
 void psy_audio_waveosc_setquality(psy_audio_WaveOsc* self,
-	ResamplerType quality)
+	psy_dsp_ResamplerQuality quality)
 {
 	self->quality = quality;
 	psy_audio_sampleiterator_setquality(&self->sampleiterator, quality);
 }
 
-ResamplerType  psy_audio_waveosc_quality(psy_audio_WaveOsc* self)
+psy_dsp_ResamplerQuality  psy_audio_waveosc_quality(psy_audio_WaveOsc* self)
 {
 	return self->quality;
 }

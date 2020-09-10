@@ -70,7 +70,7 @@ typedef struct {
 } psy_audio_SampleIterator;
 
 void psy_audio_sampleiterator_init(psy_audio_SampleIterator*, struct psy_audio_Sample*,
-	ResamplerType);
+	psy_dsp_ResamplerQuality);
 void psy_audio_sampleiterator_dispose(psy_audio_SampleIterator*);
 psy_audio_SampleIterator* psy_audio_sampleiterator_alloc(void);
 psy_audio_SampleIterator* psy_audio_sampleiterator_allocinit(struct psy_audio_Sample*);
@@ -129,7 +129,7 @@ INLINE void psy_audio_sampleiterator_stop(psy_audio_SampleIterator* self)
 void psy_audio_sampleiterator_dooffset(psy_audio_SampleIterator*,
 	uint8_t offset);
 
-void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self, ResamplerType quality);
+void psy_audio_sampleiterator_setquality(psy_audio_SampleIterator* self, psy_dsp_ResamplerQuality quality);
 
 void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator*, struct psy_audio_Sample*);
 
