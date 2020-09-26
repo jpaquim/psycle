@@ -26,7 +26,9 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Component titlebar;
 	psy_ui_Label title;
+	psy_ui_Button hide;
 	psy_ui_Label coreinfo;
 	psy_ui_Component top;
 	psy_ui_Margin topmargin;

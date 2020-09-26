@@ -35,8 +35,8 @@
 #define PSYCLE__NAME "psycle"
 #define PSYCLE__TITLE "Psycle Modular Music Creation Studio"
 #define PSYCLE__BRANCH "Psycledelics"
-#define PSYCLE__COPYRIGHT "Copyright 2000-2014 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
-#define PSYCLE__LICENSE "Some parts GPL, others public domain"
+#define PSYCLE__COPYRIGHT "Copyright 2000-2020 Psycledelics ( http://psycle.pastnotecut.org and http://psycle.sourceforge.net )"
+#define PSYCLE__LICENSE "GPL 2.0"
 #define PSYCLE__VERSION__MAJOR 1
 #define PSYCLE__VERSION__MINOR 12
 #define PSYCLE__VERSION__PATCH 5

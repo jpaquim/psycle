@@ -27,6 +27,7 @@ const char* pluginnames_convname(PluginNames*, int type, const char* name);
 
 typedef struct InternalMachinesConvert {
 	PluginNames pluginnames;
+	psy_Table machine_converted_from;
 } InternalMachinesConvert;
 
 void internalmachinesconvert_init(InternalMachinesConvert*);
@@ -42,7 +43,8 @@ struct psy_audio_Machine* internalmachinesconvert_redirect(
 	InternalMachinesConvert*,
 	struct psy_audio_SongFile*, int* index, int type, const char* name);
 void internalmachineconverter_retweak_song(InternalMachinesConvert*,
-	struct psy_audio_Song*);
+	struct psy_audio_Song*,
+	double samplerate);
 #ifdef __cplusplus
 }
 #endif

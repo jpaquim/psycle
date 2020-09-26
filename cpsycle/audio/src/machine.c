@@ -966,6 +966,9 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			// Do not create the hidden wire from mixer send to the send machine.
 			int outWire = psy_audio_legacywires_findlegacyoutput(&songfile->legacywires, wire->_inputMachine, slot);
 			if (outWire != -1) {
+				psy_audio_Wire newwire;
+
+				newwire = psy_audio_wire_make(wire->_inputMachine, slot);
 				//if (wire.pinMapping.size() > 0) {
 				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
 				//		, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex)
@@ -981,13 +984,17 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 					//wire->_inputConVol *= 32768.f;
 				//}
 				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
-				psy_audio_machines_connect(&songfile->song->machines,
-					psy_audio_wire_make(wire->_inputMachine, slot));
-				connections_setwirevolume(&songfile->song->machines.connections,
-					psy_audio_wire_make(wire->_inputMachine, slot),
-					wire->_inputConVol * wire->_wireMultiplier);
-				connections_setpinmapping(&songfile->song->machines.connections,
-					psy_audio_wire_make(wire->_inputMachine, slot), &wire->pinmapping);
+				if (psy_audio_machines_valid_connection(
+						&songfile->song->machines,
+						newwire)) {
+					psy_audio_machines_connect(&songfile->song->machines, newwire);
+					connections_setwirevolume(&songfile->song->machines.connections,
+						newwire,
+						wire->_inputConVol * wire->_wireMultiplier);
+					connections_setpinmapping(&songfile->song->machines.connections,
+						newwire,
+						&wire->pinmapping);
+				}
 			}
 		}
 	}	

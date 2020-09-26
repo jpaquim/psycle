@@ -567,6 +567,20 @@ psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines* self, uintptr_t slo
 	return psy_table_at(&self->slots, slot);
 }
 
+bool psy_audio_machines_valid_connection(psy_audio_Machines* self, psy_audio_Wire wire)
+{
+	psy_audio_Machine* src;
+	psy_audio_Machine* dst;
+
+	src = psy_audio_machines_at(self, wire.src);
+	dst = psy_audio_machines_at(self, wire.dst);
+	if (src && dst) {
+		return (psy_audio_machine_numoutputs(src) > 0 &&
+			psy_audio_machine_numinputs(dst) > 0);
+	}
+	return FALSE;
+}
+
 void psy_audio_machines_connect(psy_audio_Machines* self, psy_audio_Wire wire)
 {
 	if (self->preventundoredo || self->filemode) {

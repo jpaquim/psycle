@@ -8,9 +8,11 @@
 
 #include <uibutton.h>
 #include <uiedit.h>
+#include <uieditor.h>
 #include <uiimage.h>
 #include <uilabel.h>
 #include <uinotebook.h>
+#include <uiscroller.h>
 
 // aim: Shows information about Psycle
 
@@ -31,6 +33,11 @@ typedef struct {
 	psy_ui_Label versioninfo;
 } Version;
 
+typedef struct {
+	psy_ui_Component component;
+	psy_ui_Editor licenceinfo;
+} Licence;
+
 void version_init(Version*, psy_ui_Component* parent);
 
 typedef struct {	
@@ -39,8 +46,10 @@ typedef struct {
 	psy_ui_Image image;
 	Contrib contrib;
 	Version version;
+	Licence licence;
 	psy_ui_Button contribbutton;
 	psy_ui_Button versionbutton;
+	psy_ui_Button licencebutton;
 	psy_ui_Button okbutton;
 	Workspace* workspace;
 } About;

@@ -26,9 +26,36 @@ typedef struct cpoint_t {
 	int32_t y;
 } cpoint_t;
 
+typedef struct ConverterType {
+	int type;
+	const char* name;
+} ConverterType;
+
+static void convertertype_init(ConverterType* self, int type, const char* name)
+{
+	self->type = type;
+	self->name = name;
+}
+
+static ConverterType* convertertype_alloc(void)
+{
+	return (ConverterType*)malloc(sizeof(ConverterType));
+}
+
+static ConverterType* convertertype_allocinit(int type, const char* name)
+{
+	ConverterType* rv;
+
+	rv = convertertype_alloc();
+	if (rv) {
+		convertertype_init(rv, type, name);
+	}
+	return rv;
+}
+
 static void pluginnames_insert(PluginNames*, int type, const char* name, const char* convname);
 static void readplugin(InternalMachinesConvert*, psy_audio_Machine* plugin, psy_audio_SongFile* songfile, int* index, int type, const char* name);
-static void retweak_parameter(psy_audio_SongFile*, psy_audio_Machine*, int type, const char* name, int* parameter, int* integral_value);
+static void retweak_parameter(psy_audio_Song*, double samplerate, int type, const char* name, int* parameter, int* integral_value);
 static void retweak_parameters(psy_audio_SongFile*, psy_audio_Machine* machine, int type, const char* name,
 	int* parameters, int parameter_count, int parameter_offset);
 
@@ -140,15 +167,20 @@ const char* pluginnames_convname(PluginNames* self, int type, const char* name)
 void internalmachinesconvert_init(InternalMachinesConvert* self)
 {
 	pluginnames_init(&self->pluginnames);
+	psy_table_init(&self->machine_converted_from);
 }
 
 void internalmachinesconvert_dispose(InternalMachinesConvert* self)
 {
 	pluginnames_dispose(&self->pluginnames);
+	psy_table_disposeall(&self->machine_converted_from,
+		(psy_fp_disposefunc)NULL);
 }
 
-psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* self, psy_audio_SongFile* songfile, int* index, int type,
-	const char* name)
+psy_audio_Machine* internalmachinesconvert_redirect(
+	InternalMachinesConvert* self,
+	psy_audio_SongFile* songfile,
+	int* index, int type, const char* name)
 {
 	psy_audio_Machine* machine;
 	char sDllName[256];
@@ -302,6 +334,12 @@ psy_audio_Machine* internalmachinesconvert_redirect(InternalMachinesConvert* sel
 		psyfile_skip(songfile->file, 45);
 	}
 	
+	if (machine) {
+		ConverterType* convertertype;
+
+		convertertype = convertertype_allocinit(type, name);
+		psy_table_insert(&self->machine_converted_from, (uintptr_t)machine, convertertype);
+	}
 	return machine;
 }
 
@@ -379,7 +417,7 @@ void readplugin(InternalMachinesConvert* self, psy_audio_Machine* machine,
 	Vals = 0;
 }
 
-void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_audio_Song* song)
+void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_audio_Song* song, double samplerate)
 {
 	/// \todo must each twk repeat the machine number ?
 	// int previous_machines [MAX_TRACKS]; for(int i = 0 ; i < MAX_TRACKS ; ++i) previous_machines[i] = 255;
@@ -409,28 +447,44 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 			}
 			if (event->note == NOTECOMMANDS_TWEAK && event->mach < MAX_MACHINES)
 			{
-				/*std::map<Machine* const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
-				if (i != machine_converted_from.end())
-				{
-					int parameter(event._inst);
-					int value((event._cmd << 8) + event._parameter);
-					retweak(i->second, parameter, value);
-					event._inst = parameter;
-					event._cmd = value >> 8; event._parameter = 0xff & value;
-				}*/
+				if (psy_table_exists(&self->machine_converted_from, event->mach)) {
+					ConverterType* convertertype;
+					int parameter;
+					int value;
+
+					convertertype = psy_table_at(&self->machine_converted_from,
+						event->mach);
+					parameter = event->inst;
+					value = ((event->cmd << 8) + event->parameter);
+
+					retweak_parameter(song, samplerate,
+						convertertype->type,
+						convertertype->name,
+						&parameter,
+						&value);
+					event->inst = parameter;
+					event->cmd = value >> 8;
+					event->parameter = 0xff & value;
+				}				
 			} else
 			if (event->cmd == 0x0E && event->mach < MAX_MACHINES) {
-				/*std::map<Machine* const, std::pair<int, std::string>>::const_iterator i(machine_converted_from.find(song._pMachine[event._mach]));
-				if (i != machine_converted_from.end())
-				{
-					if (i->second.second == asynth22) {
-						int param(25);
-						int value(event._parameter);
-						retweak(i->second, param, value);
-						event._cmd = 0x0F;
-						event._parameter = value;
-					}
-				}*/
+				if (psy_table_exists(&self->machine_converted_from, event->mach)) {
+					ConverterType* convertertype;
+					int param;
+					int value;
+
+					convertertype = psy_table_at(&self->machine_converted_from,
+						event->mach);		
+					param = 25;
+					value = event->parameter;
+					retweak_parameter(song, samplerate,
+						convertertype->type,
+						convertertype->name,
+						&param,
+						&value);
+					event->cmd = 0x0F;
+					event->parameter = value;					
+				}
 			}			
 		}
 	}
@@ -441,14 +495,15 @@ void retweak_parameters(psy_audio_SongFile* songfile, psy_audio_Machine* machine
 {
 	int parameter = 0;
 
-	for (; parameter < parameter_count; ++parameter)
-	{
+	for (; parameter < parameter_count; ++parameter) {
 		int new_parameter;
 		int new_value;
 		psy_audio_MachineParam* param;
 		new_parameter = parameter_offset + parameter;				
 		new_value = parameters[parameter];
-		retweak_parameter(songfile, machine, type, name, &new_parameter,
+		retweak_parameter(songfile->song,
+			psy_audio_machine_samplerate(machine),
+			type, name, &new_parameter,
 			&new_value);
 		param = psy_audio_machine_parameter(machine, new_parameter);
 		if (param) {
@@ -457,8 +512,9 @@ void retweak_parameters(psy_audio_SongFile* songfile, psy_audio_Machine* machine
 	}
 }
 
-void retweak_parameter(psy_audio_SongFile* songfile,
-	psy_audio_Machine* machine, int type, const char* name, int* parameter,
+void retweak_parameter(psy_audio_Song* song,
+	double samplerate, 
+	int type, const char* name, int* parameter,
 	int* integral_value)
 {
 	typedef double Real;
@@ -470,10 +526,10 @@ void retweak_parameter(psy_audio_SongFile* songfile,
 	double bpl;
 	double bps;
 
-	sr = psy_audio_machine_samplerate(machine);
-	bps = (psy_audio_song_bpm(songfile->song) * (psy_dsp_beat_t) 1.f) /
+	sr = samplerate;
+	bps = (psy_audio_song_bpm(song) * (psy_dsp_beat_t) 1.f) /
 		(sr * 60.0f);
-	bpl = 1 / (psy_dsp_beat_t) songfile->song->properties.lpb;
+	bpl = 1 / (psy_dsp_beat_t) song->properties.lpb;
 	spr =  bpl * 1/bps;
 
 	value = *integral_value;

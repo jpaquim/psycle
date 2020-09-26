@@ -64,6 +64,7 @@ void psy_audio_machines_exchange(psy_audio_Machines*, uintptr_t srcslot,
 uintptr_t psy_audio_machines_append(psy_audio_Machines*, psy_audio_Machine*);
 psy_audio_Machine* psy_audio_machines_at(psy_audio_Machines*, uintptr_t slot);
 uintptr_t psy_audio_machines_size(psy_audio_Machines*);
+bool psy_audio_machines_valid_connection(psy_audio_Machines*, psy_audio_Wire wire);
 void psy_audio_machines_connect(psy_audio_Machines*, psy_audio_Wire);
 void psy_audio_machines_disconnect(psy_audio_Machines*, psy_audio_Wire);
 void psy_audio_machines_disconnectall(psy_audio_Machines*, uintptr_t slot);
