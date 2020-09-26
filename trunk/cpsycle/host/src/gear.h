@@ -38,6 +38,9 @@ INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
 typedef struct {
 	psy_ui_Component component;
 	TabBar tabbar;
+	psy_ui_Component titlebar;
+	psy_ui_Label title;
+	psy_ui_Button hide;
 	psy_ui_Notebook notebook;
 	psy_ui_ListBox listbox;	
 	MachinesBox machinesboxgen;
@@ -46,7 +49,7 @@ typedef struct {
 	SamplesBox samplesbox;	
 	GearButtons buttons;	
 	psy_audio_Machines* machines;
-	Workspace* workspace;
+	Workspace* workspace;	
 } Gear;
 
 void gear_init(Gear*, psy_ui_Component* parent, Workspace*);

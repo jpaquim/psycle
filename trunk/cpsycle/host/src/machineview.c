@@ -1151,11 +1151,17 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 							self->selectedwire);
 					}
 					if (self->dragmode < MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {
-						psy_audio_machines_connect(self->machines,
-							psy_audio_wire_make(slot, self->dragslot));
+						if (psy_audio_machines_valid_connection(self->machines,
+							psy_audio_wire_make(slot, self->dragslot))) {
+							psy_audio_machines_connect(self->machines,
+								psy_audio_wire_make(slot, self->dragslot));
+						}
 					} else {
-						psy_audio_machines_connect(self->machines,
-							psy_audio_wire_make(self->dragslot, slot));
+						if (psy_audio_machines_valid_connection(self->machines,
+								psy_audio_wire_make(self->dragslot, slot))) {
+							psy_audio_machines_connect(self->machines,
+								psy_audio_wire_make(self->dragslot, slot));
+						}
 					}
 				}
 			} else if (ev->button == 2) {

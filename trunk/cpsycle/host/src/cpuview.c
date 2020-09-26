@@ -112,13 +112,14 @@ static void cpuview_initperformance(CPUView*);
 static void cpuview_initmodules(CPUView*, Workspace* workspace);
 static void cpuview_ontimer(CPUView*, psy_ui_Component* sender,
 	uintptr_t timerid);
+static void cpuview_onhide(CPUView*);
 
 void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
-	psy_ui_margin_init(&self->topmargin);	
+	psy_ui_margin_init(&self->topmargin);		
 	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_BOTTOM);	
@@ -134,9 +135,22 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 
 void cpuview_inittitle(CPUView* self)
 {
-	psy_ui_label_init(&self->title, &self->top);
+	psy_ui_Margin margin;
+
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
+	// titlebar
+	psy_ui_component_init(&self->titlebar, &self->component);
+	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(&self->titlebar, &margin);
+	psy_ui_label_init(&self->title, &self->titlebar);
 	psy_ui_label_settext(&self->title, "Psycle DSP/CPU Performance Monitor");
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init(&self->hide, &self->titlebar);
+	psy_ui_button_settext(&self->hide, "X");
+	psy_signal_connect(&self->hide.signal_clicked, self, cpuview_onhide);
+	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);	
 }
 
 void cpuview_initcoreinfo(CPUView* self)
@@ -237,4 +251,10 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 		psy_ui_component_updateoverflow(&self->modules.component);
 	}
 	psy_ui_component_invalidate(&self->modules.component);
+}
+
+void cpuview_onhide(CPUView* self)
+{
+	psy_ui_component_hide(&self->component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
 }

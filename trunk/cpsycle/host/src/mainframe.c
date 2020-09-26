@@ -37,7 +37,9 @@ static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onmousedown(MainFrame*, psy_ui_MouseEvent*);
 static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry*);
 static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onhidegear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
+static void mainframe_onhidecpu(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onmidi(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onrecentsongs(MainFrame*, psy_ui_Component* sender);
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
@@ -254,12 +256,16 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_hide(&self->gear.component);
 	psy_signal_connect(&self->machinebar.gear.signal_clicked, self,
 		mainframe_ongear);
+	psy_signal_connect(&self->gear.component.signal_hide, self,
+		mainframe_onhidegear);
 	// cpuview	
 	cpuview_init(&self->cpuview, &self->client, &self->workspace);
 	psy_ui_component_setalign(&self->cpuview.component, psy_ui_ALIGN_RIGHT);				
 	psy_ui_component_hide(&self->cpuview.component);
 	psy_signal_connect(&self->machinebar.cpu.signal_clicked, self,
 		mainframe_oncpu);
+	psy_signal_connect(&self->cpuview.component.signal_hide, self,
+		mainframe_onhidecpu);
 	// midiview
 	midiview_init(&self->midiview, &self->client, &self->workspace);
 	psy_ui_component_setalign(&self->midiview.component, psy_ui_ALIGN_RIGHT);
@@ -779,8 +785,7 @@ void mainframe_onshowgear(MainFrame* self, Workspace* sender)
 
 void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 {
-	if (psy_ui_component_visible(&self->gear.component)) {
-		psy_ui_button_disablehighlight(&self->machinebar.gear);
+	if (psy_ui_component_visible(&self->gear.component)) {		
 		psy_ui_component_hide(&self->gear.component);
 		psy_ui_component_align(&self->client);
 	} else {						
@@ -791,10 +796,14 @@ void mainframe_ongear(MainFrame* self, psy_ui_Component* sender)
 	}	
 }
 
+void mainframe_onhidegear(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_button_disablehighlight(&self->machinebar.gear);
+}
+
 void mainframe_oncpu(MainFrame* self, psy_ui_Component* sender)
 {
-	if (psy_ui_component_visible(&self->cpuview.component)) {
-		psy_ui_button_disablehighlight(&self->machinebar.cpu);
+	if (psy_ui_component_visible(&self->cpuview.component)) {		
 		psy_ui_component_hide(&self->cpuview.component);
 		psy_ui_component_align(&self->client);
 	}
@@ -803,6 +812,11 @@ void mainframe_oncpu(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_component_show(&self->cpuview.component);
 		psy_ui_component_align(&self->client);
 	}
+}
+
+void mainframe_onhidecpu(MainFrame* self, psy_ui_Component* sender)
+{
+	psy_ui_button_disablehighlight(&self->machinebar.cpu);
 }
 
 void mainframe_onmidi(MainFrame* self, psy_ui_Component* sender)

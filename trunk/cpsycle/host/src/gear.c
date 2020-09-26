@@ -67,16 +67,33 @@ static void gear_onclone(Gear*, psy_ui_Component* sender);
 static void gear_onexchange(Gear* self, psy_ui_Component* sender);
 static void gear_onparameters(Gear*, psy_ui_Component* sender);
 static void gear_onmaster(Gear*, psy_ui_Component* sender);
-
+static void gear_onhide(Gear*);
 
 void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 {		
+	psy_ui_Margin margin;
+
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
 	psy_ui_component_init(gear_base(self), parent);
 	psy_ui_component_enablealign(gear_base(self));
+	// titlebar
+	psy_ui_component_init(&self->titlebar, gear_base(self));
+	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(&self->titlebar, &margin);
+	psy_ui_label_init(&self->title, &self->titlebar);
+	psy_ui_label_settext(&self->title, "Gear Rack");
+	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_button_init(&self->hide, &self->titlebar);
+	psy_ui_button_settext(&self->hide, "X");
+	psy_signal_connect(&self->hide.signal_clicked, self, gear_onhide);
+	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
+	// client
 	tabbar_init(&self->tabbar, gear_base(self));	
 	tabbar_append_tabs(&self->tabbar, "", "", "", "", NULL);
 	tabbar_select(&self->tabbar, 0);
@@ -199,3 +216,8 @@ void gear_onmaster(Gear* self, psy_ui_Component* sender)
 	workspace_showparameters(self->workspace, psy_audio_MASTER_INDEX);
 }
 
+void gear_onhide(Gear* self)
+{	
+	psy_ui_component_hide(&self->component);
+	psy_ui_component_align(psy_ui_component_parent(&self->component));
+}
