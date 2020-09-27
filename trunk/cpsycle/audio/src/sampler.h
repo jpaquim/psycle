@@ -121,7 +121,7 @@ extern "C" {
 		psy_audio_ChoiceMachineParam param_defaultspeed;
 		psy_audio_IntMachineParam param_instrumentbank;
 		// 0: basec = C3, 1: basec = C4
-		int defaultspeed;
+		int32_t defaultspeed;
 		// Instrument Bank 0: PS1 1: Sampulse
 		int32_t instrumentbank;
 		psy_dsp_ResamplerQuality resamplerquality;
@@ -169,6 +169,11 @@ extern "C" {
 	INLINE bool psy_audio_sampler_usefilters(psy_audio_Sampler* self)
 	{
 		return self->usefilters != FALSE;
+	}
+
+	INLINE void psy_audio_sampler_setnumvoices(psy_audio_Sampler* self, uintptr_t num)
+	{
+		self->numvoices = num;
 	}
 
 #ifdef __cplusplus

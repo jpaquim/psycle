@@ -34,6 +34,14 @@ typedef struct {
 
 void songproperties_init(SongProperties*, const char* title,
 	const char* credits, const char* comments);
+void songproperties_init_all(SongProperties*, const char* title,
+	const char* credits, const char* comments,
+	uintptr_t tracks,
+	int octave,
+	uintptr_t lpb,
+	int tpb,
+	int extraticksperbeat,
+	psy_dsp_big_beat_t bpm);
 void songproperties_copy(SongProperties*, const SongProperties* other);
 void songproperties_dispose(SongProperties*);
 void songproperties_setbpm(SongProperties*, psy_dsp_big_beat_t bpm);

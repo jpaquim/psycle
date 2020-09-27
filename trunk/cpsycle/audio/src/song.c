@@ -31,6 +31,26 @@ void songproperties_init(SongProperties* self, const char* title,
 	self->extraticksperbeat = 0;
 }
 
+void songproperties_init_all(SongProperties* self, const char* title,
+	const char* credits, const char* comments,
+	uintptr_t tracks,
+	int octave,
+	uintptr_t lpb,
+	int tpb,
+	int extraticksperbeat,
+	psy_dsp_big_beat_t bpm)
+{
+	self->title = strdup(title);
+	self->credits = strdup(credits);
+	self->comments = strdup(comments);
+	self->lpb = lpb;
+	self->tracks = tracks;
+	self->octave = octave;
+	self->tpb = tpb;
+	self->extraticksperbeat = extraticksperbeat;
+	self->bpm = bpm;
+}
+
 void songproperties_dispose(SongProperties* self)
 {
 	free(self->title);

@@ -90,8 +90,9 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 #endif
 			psyfile_close(self->file);
 		} else if (strcmp(header,"PSY2SONG") == 0) {
+			// PSY2SONG is the Sign of the file.
 #ifdef PSYCLE_USE_PSY2
-			psy_audio_psy2_load(self);			
+			psy_audio_psy2_load(self);
 #else
 			status = PSY_ERRFILEFORMAT;
 #endif
