@@ -122,7 +122,7 @@ void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);
 int psy_audio_player_recordingnotes(psy_audio_Player*);
 // event driver
-void psy_audio_player_loadeventdriver(psy_audio_Player*, const char* path);
+psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*, const char* path);
 void psy_audio_player_removeeventdriver(psy_audio_Player*, int id);
 void psy_audio_player_restarteventdriver(psy_audio_Player*, int id);
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);

@@ -22,7 +22,7 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	self->workspace = workspace;
 	psy_ui_component_init(kbdhelp_base(self), parent);		
 	psy_ui_component_enablealign(kbdhelp_base(self));
-	kbdbox_init(&self->kbdbox, kbdhelp_base(self));	
+	kbdbox_init(&self->kbdbox, kbdhelp_base(self), workspace);	
 	psy_ui_component_setalign(kbdbox_base(&self->kbdbox),
 		psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, &self->component);

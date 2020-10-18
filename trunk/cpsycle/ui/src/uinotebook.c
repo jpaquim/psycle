@@ -177,23 +177,8 @@ void psy_ui_notebook_full(psy_ui_Notebook* self)
 }
 
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)
-{
-	psy_ui_Component* rv = 0;
-	psy_List* p;
-	psy_List* q;
-
-	for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0);
-			p != NULL; p = p->next) {		
-		psy_ui_Component* component;
-
-		component = (psy_ui_Component*)p->entry;
-		if (psy_ui_component_visible(component)) {
-			rv = component;
-			break;
-		}
-	}
-	psy_list_free(q);
-	return rv;			
+{	
+	return psy_ui_component_at(psy_ui_notebook_base(self), self->pageindex);
 }
 
 psy_ui_Component* psy_ui_notebook_base(psy_ui_Notebook* self)

@@ -837,7 +837,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 		psy_list_free(self->samplerevents);
 		patternevent_init_all(&event,
 			(unsigned char) 48,
-			(unsigned char) instruments_slot(&self->workspace->song->instruments).subslot,
+			(unsigned char)psy_audio_instruments_selected(&self->workspace->song->instruments).subslot,
 			NOTECOMMANDS_MACH_EMPTY,
 			NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	

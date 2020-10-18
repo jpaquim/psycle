@@ -66,7 +66,7 @@ void eventdrivers_dispose(EventDrivers* self)
 	psy_signal_dispose(&self->signal_input);
 }
 
-void eventdrivers_load(EventDrivers* self, const char* path)
+psy_EventDriver* eventdrivers_load(EventDrivers* self, const char* path)
 {
 	psy_EventDriver* eventdriver = 0;	
 	
@@ -105,6 +105,7 @@ void eventdrivers_load(EventDrivers* self, const char* path)
 			}
 		}
 	}
+	return eventdriver;
 }
 
 void eventdrivers_restart(EventDrivers* self, int id)
@@ -220,6 +221,22 @@ void eventdrivers_setcmds(EventDrivers* self, psy_Properties* cmds)
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			eventdriver->setcmddef(eventdriver, cmds);
+		}
+	}
+}
+
+void eventdrivers_idle(EventDrivers* self)
+{
+	psy_List* p;
+
+	for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
+		EventDriverEntry* eventdriverentry;
+		psy_EventDriver* eventdriver;
+
+		eventdriverentry = (EventDriverEntry*)psy_list_entry(p);
+		eventdriver = eventdriverentry->eventdriver;
+		if (eventdriver) {
+			eventdriver->idle(eventdriver);
 		}
 	}
 }

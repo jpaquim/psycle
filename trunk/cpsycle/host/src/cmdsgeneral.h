@@ -12,7 +12,7 @@
 #define CS_KEY_START 0
 /// Start index of inmediate commands (play, stop, change view,...)
 #define CS_IMM_START 256
-		/// Start index for edit-related commands (select, cut..)
+/// Start index for edit-related commands (select, cut..)
 #define CS_EDT_START 512		
 
 enum {

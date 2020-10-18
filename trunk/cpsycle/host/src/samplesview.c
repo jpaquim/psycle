@@ -191,8 +191,8 @@ void samplessongimportview_oncopy(SamplesSongImportView* self,
 		psy_audio_instrument_setname(instrument, psy_audio_sample_name(samplecopy));
 		psy_audio_instrument_setindex(instrument, dst.slot);
 
-		instruments_insert(&self->workspace->song->instruments, instrument,
-			instrumentindex_make(0, dst.slot));
+		psy_audio_instruments_insert(&self->workspace->song->instruments, instrument,
+			psy_audio_instrumentindex_make(0, dst.slot));
 		samplesview_setsample(self->view, dst);
 		/*signal_prevent(&self->workspace->song->instruments.signal_slotchange,
 			self->view, OnInstrumentSlotChanged);
@@ -1153,8 +1153,8 @@ void samplesview_onsamplesboxchanged(SamplesView* self, psy_ui_Component* sender
 	if (self->workspace->song) {
 		psy_signal_disconnect(&self->workspace->song->instruments.signal_slotchange,
 			self, samplesview_oninstrumentslotchanged);
-		instruments_changeslot(&self->workspace->song->instruments,
-			instrumentindex_make(0, index.slot));
+		psy_audio_instruments_select(&self->workspace->song->instruments,
+			psy_audio_instrumentindex_make(0, index.slot));
 		psy_signal_connect(
 			&self->workspace->song->instruments.signal_slotchange,
 			self, samplesview_oninstrumentslotchanged);
@@ -1218,14 +1218,14 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			entry.sampleindex = index;
 			psy_audio_instrument_addentry(instrument, &entry);
 			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
-			instruments_insert(&self->workspace->song->instruments, instrument,
-				instrumentindex_make(0, index.slot));
+			psy_audio_instruments_insert(&self->workspace->song->instruments, instrument,
+				psy_audio_instrumentindex_make(0, index.slot));
 			samplesview_setsample(self, index);
 			psy_signal_prevent(
 				&self->workspace->song->instruments.signal_slotchange,
 				self, samplesview_oninstrumentslotchanged);
-			instruments_changeslot(&self->workspace->song->instruments,
-				instrumentindex_make(0, index.slot));
+			psy_audio_instruments_select(&self->workspace->song->instruments,
+				psy_audio_instrumentindex_make(0, index.slot));
 			psy_signal_enable(
 				&self->workspace->song->instruments.signal_slotchange,
 				self, samplesview_oninstrumentslotchanged);
@@ -1263,8 +1263,8 @@ void samplesview_ondeletesample(SamplesView* self, psy_ui_Component* sender)
 		index = samplesbox_selected(&self->samplesbox);
 		psy_audio_exclusivelock_enter();
 		psy_audio_samples_remove(&self->workspace->song->samples, index);
-		instruments_remove(&self->workspace->song->instruments,
-			instrumentindex_make(0, index.subslot));
+		psy_audio_instruments_remove(&self->workspace->song->instruments,
+			psy_audio_instrumentindex_make(0, index.subslot));
 		samplesview_setsample(self, index);
 		psy_audio_exclusivelock_leave();
 	}
@@ -1294,8 +1294,8 @@ void samplesview_onduplicatesample(SamplesView* self, psy_ui_Component* sender)
 				instrument = psy_audio_instrument_allocinit();
 				psy_audio_instrument_setname(instrument, psy_audio_sample_name(copy));
 				psy_audio_instrument_setindex(instrument, dst.slot);
-				instruments_insert(&self->workspace->song->instruments,
-					instrument, instrumentindex_make(0, dst.slot));
+				psy_audio_instruments_insert(&self->workspace->song->instruments,
+					instrument, psy_audio_instrumentindex_make(0, dst.slot));
 				samplesview_setsample(self, sampleindex_make(dst.slot, 0));
 			}
 		}

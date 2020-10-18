@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
+static void instrumentsbox_updatetext(InstrumentsBox*, Translator*);
+static void instrumentsbox_onlanguagechanged(InstrumentsBox*, Translator*);
 static void instrumentsbox_buildlist(InstrumentsBox*);
 static void instrumentsbox_buildgroup(InstrumentsBox*);
 static void instrumentsbox_addstring(InstrumentsBox*, const char* text);
@@ -22,12 +24,12 @@ static void instrumentsbox_onlistchanged(InstrumentsBox*,
 	psy_ui_Component* sender, int slot);
 
 void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
-	psy_audio_Instruments* instruments)
+	psy_audio_Instruments* instruments, Workspace* workspace)
 {		
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_settext(&self->header, "Instrument Group");
+	
 	psy_ui_listbox_init(&self->grouplist, &self->component);
 	psy_ui_component_setmaximumsize(&self->grouplist.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
@@ -35,8 +37,7 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 	psy_ui_component_setalign(&self->grouplist.component, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->group, &self->component);
-	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_settext(&self->group, "Group Instruments");
+	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->instrumentlist, &self->component);
 	psy_ui_component_setalign(&self->instrumentlist.component,
 		psy_ui_ALIGN_CLIENT);
@@ -45,6 +46,23 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 		instrumentsbox_ongrouplistchanged);
 	psy_signal_connect(&self->instrumentlist.signal_selchanged, self,
 		instrumentsbox_onlistchanged);
+	instrumentsbox_updatetext(self, &workspace->translator);
+	psy_signal_connect(&workspace->signal_languagechanged, self,
+		instrumentsbox_onlanguagechanged);
+}
+
+void instrumentsbox_updatetext(InstrumentsBox* self, Translator* translator)
+{
+	psy_ui_label_settext(&self->header, translator_translate(translator,
+		"instrumentsbox.instrument-groups"));
+	psy_ui_label_settext(&self->group, translator_translate(translator,
+		"instrumentsbox.group-instruments"));
+}
+
+void instrumentsbox_onlanguagechanged(InstrumentsBox* self,
+	Translator* sender)
+{
+	instrumentsbox_updatetext(self, sender);
 }
 
 void instrumentsbox_buildgroup(InstrumentsBox* self)
@@ -75,8 +93,8 @@ void instrumentsbox_buildlist(InstrumentsBox* self)
 		groupslot = 0;
 	}
 	for ( ; slot < 256; ++slot) {		
-		if (instrument = instruments_at(self->instruments,
-			instrumentindex_make(groupslot, slot))) {
+		if (instrument = psy_audio_instruments_at(self->instruments,
+			psy_audio_instrumentindex_make(groupslot, slot))) {
 			psy_snprintf(buffer, 20, "%02X*:%s", slot,
 				psy_audio_instrument_name(instrument));
 		} else {
@@ -94,7 +112,8 @@ void instrumentsbox_addstring(InstrumentsBox* self, const char* text)
 void instrumentsbox_ongrouplistchanged(InstrumentsBox* self, psy_ui_Component*
 	sender, int slot)
 {
-	instruments_changeslot(self->instruments, instrumentindex_make(slot, 0));
+	psy_audio_instruments_select(self->instruments,
+		psy_audio_instrumentindex_make(slot, 0));
 }
 
 void instrumentsbox_onlistchanged(InstrumentsBox* self, psy_ui_Component*
@@ -108,8 +127,8 @@ void instrumentsbox_onlistchanged(InstrumentsBox* self, psy_ui_Component*
 	if (groupslot == -1) {
 		groupslot = 0;
 	}
-	instruments_changeslot(self->instruments,
-		instrumentindex_make(groupslot, slot));
+	psy_audio_instruments_select(self->instruments,
+		psy_audio_instrumentindex_make(groupslot, slot));
 	psy_signal_connect(&self->instruments->signal_slotchange, self,
 		instrumentsbox_oninstrumentslotchanged);
 }
@@ -118,21 +137,21 @@ void instrumentsbox_oninstrumentinsert(InstrumentsBox* self, psy_ui_Component*
 	sender, const psy_audio_InstrumentIndex* slot)
 {
 	instrumentsbox_buildlist(self);
-	psy_ui_listbox_setcursel(&self->instrumentlist, slot->slot);		
+	psy_ui_listbox_setcursel(&self->instrumentlist, slot->groupslot);
 }
 
 void instrumentsbox_oninstrumentremoved(InstrumentsBox* self, psy_ui_Component*
 	sender, const psy_audio_InstrumentIndex* slot)
 {
 	instrumentsbox_buildlist(self);
-	psy_ui_listbox_setcursel(&self->instrumentlist, slot->slot);		
+	psy_ui_listbox_setcursel(&self->instrumentlist, slot->groupslot);
 }
 
 void instrumentsbox_oninstrumentslotchanged(InstrumentsBox* self,
 	psy_audio_Instrument* sender, const psy_audio_InstrumentIndex* slot)
 {	
 	instrumentsbox_buildlist(self);
-	psy_ui_listbox_setcursel(&self->grouplist, slot->slot);
+	psy_ui_listbox_setcursel(&self->grouplist, slot->groupslot);
 	psy_ui_listbox_setcursel(&self->instrumentlist, slot->subslot);	
 }
 
@@ -163,8 +182,8 @@ void instrumentsbox_rebuild(InstrumentsBox* self)
 	instrumentsbox_buildlist(self);
 	if (self->instruments) {
 		psy_ui_listbox_setcursel(&self->grouplist,
-			self->instruments->slot.slot);
+			psy_audio_instruments_selected(self->instruments).groupslot);
 		psy_ui_listbox_setcursel(&self->instrumentlist,
-			self->instruments->slot.subslot);
+			psy_audio_instruments_selected(self->instruments).subslot);
 	}
 }

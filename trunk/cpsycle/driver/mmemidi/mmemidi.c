@@ -30,6 +30,7 @@ static void driver_configure(psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData input, EventDriverCmd*);
 static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Properties*);
+static void driver_idle(psy_EventDriver* self) { }
 
 static void init_properties(psy_EventDriver* self);
 static void apply_properties(MmeMidiDriver* self);
@@ -69,6 +70,7 @@ EXPORT psy_EventDriver* __cdecl eventdriver_create(void)
 		mme->driver.cmd = driver_cmd;
 		mme->driver.getcmd = driver_getcmd;
 		mme->driver.setcmddef = setcmddef;
+		mme->driver.idle = driver_idle;
 		mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 		driver_init(&mme->driver);
 		return &mme->driver;

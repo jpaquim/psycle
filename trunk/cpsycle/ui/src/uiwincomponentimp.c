@@ -168,7 +168,8 @@ void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,
 	self->preventwmchar = 0;
 	self->sizecachevalid = FALSE;
 	self->tmcachevalid = FALSE;
-	self->dbg = 0;
+	self->dbg = 0;	
+	self->visible = parent ? TRUE : FALSE;
 	parent_imp = (parent)
 		? (psy_ui_win_ComponentImp*)parent
 		: NULL;	
@@ -303,25 +304,29 @@ void dev_destroy(psy_ui_win_ComponentImp* self)
 
 void dev_show(psy_ui_win_ComponentImp* self)
 {
+	self->visible = TRUE;
 	ShowWindow(self->hwnd, SW_SHOW);
 	UpdateWindow(self->hwnd);
 }
 
 void dev_showstate(psy_ui_win_ComponentImp* self, int state)
 {
+	self->visible = TRUE;
 	ShowWindow(self->hwnd, state);
 	UpdateWindow(self->hwnd);
 }
 
 void dev_hide(psy_ui_win_ComponentImp* self)
 {
+	self->visible = FALSE;
 	ShowWindow(self->hwnd, SW_HIDE);
 	UpdateWindow(self->hwnd);
 }
 
 int dev_visible(psy_ui_win_ComponentImp* self)
 {
-	return IsWindowVisible(self->hwnd);
+	return self->visible;
+	//return IsWindowVisible(self->hwnd);
 }
 
 void dev_move(psy_ui_win_ComponentImp* self, int left, int top)

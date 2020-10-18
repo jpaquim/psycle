@@ -1023,7 +1023,7 @@ int array_mod(lua_State* L)
 int array_method_from_table(lua_State* L)
 {
 	psy_audio_Array* rv = *(psy_audio_Array**)luaL_checkudata(L, 1, luaarraybind_meta);
-	size_t len = lua_rawlen(L, 2);
+	lua_Unsigned len = lua_rawlen(L, 2);
 	float* ptr = psy_audio_array_data(rv);
 	size_t i;
 

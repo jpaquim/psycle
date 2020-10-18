@@ -35,7 +35,7 @@ static void machinebar_onnextmachine(MachineBar*, psy_ui_Component* sender);
 static void machinebar_updatetext(MachineBar*);
 static bool machinebar_instrumentmode(MachineBar* self)
 {
-	return psy_ui_combobox_cursel(&self->instparambox) == 1;
+	return psy_ui_combobox_cursel(&self->selectinstparam) == 1;
 }
 
 void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* workspace)
@@ -68,12 +68,13 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_combobox_addtext(&self->selectinstparam, "Params");
 	psy_ui_combobox_addtext(&self->selectinstparam,
 		workspace_translate(workspace, "Instrument"));
-	psy_ui_combobox_init(&self->instparambox, &self->component);
-	psy_ui_combobox_setcharnumber(&self->instparambox, 30);
-	psy_ui_combobox_setcursel(&self->selectinstparam, 1);
 	psy_signal_connect(&self->selectinstparam.signal_selchanged, self,
 		machinebar_onselectinstparamselchange);
+	// Combobox for Instruments or Parameters
+	psy_ui_combobox_init(&self->instparambox, &self->component);
+	psy_ui_combobox_setcharnumber(&self->instparambox, 30);
 	machinebar_buildparaminstbox(self);
+	psy_ui_combobox_setcursel(&self->selectinstparam, 1);	
 	psy_ui_combobox_setcursel(&self->instparambox, 0);
 	psy_signal_connect(&self->instparambox.signal_selchanged, self,
 		machinebar_oninstparamboxselchange);
@@ -128,7 +129,8 @@ void machinebar_oninstrumentinsert(MachineBar* self, psy_audio_Instruments* send
 
 	machinebar_buildinstrumentlist(self);
 	psy_ui_combobox_setcursel(&self->instparambox, slot);
-	instrument = instruments_at(sender, instrumentindex_make(0, slot));
+	instrument = psy_audio_instruments_at(sender,
+		psy_audio_instrumentindex_make(0, slot));
 	if (instrument) {
 		psy_signal_connect(&instrument->signal_namechanged, self,
 			machinebar_oninstrumentnamechanged);
@@ -274,8 +276,8 @@ void machinebar_buildinstrumentlist(MachineBar* self)
 
 	psy_ui_combobox_clear(&self->instparambox);
 	for ( ; slot < 256; ++slot) {		
-		if (instrument = instruments_at(&self->workspace->song->instruments,
-				instrumentindex_make(0, slot))) {
+		if (instrument = psy_audio_instruments_at(&self->workspace->song->instruments,
+			psy_audio_instrumentindex_make(0, slot))) {
 			psy_snprintf(text, 20, "%02X:%s", slot,
 				psy_audio_instrument_name(instrument));
 		} else {
@@ -292,12 +294,9 @@ void machinebar_onselectinstparamselchange(MachineBar* self, psy_ui_Component* s
 
 void machinebar_oninstparamboxselchange(MachineBar* self, psy_ui_Component* sender, int sel)
 {
-	if (machinebar_instrumentmode(self)) {
-		psy_signal_prevent(&self->instruments->signal_slotchange, self,
-			machinebar_oninstrumentslotchanged);
-		instruments_changeslot(self->instruments, instrumentindex_make(0, sel));
-		psy_signal_enable(&self->instruments->signal_slotchange, self,
-			machinebar_oninstrumentslotchanged);
+	if (machinebar_instrumentmode(self)) {		
+		psy_audio_instruments_select(self->instruments,
+			psy_audio_instrumentindex_make(0, sel));		
 	} else {
 		psy_audio_machines_changetweakparam(self->machines, sel);
 	}
@@ -312,7 +311,7 @@ void machinebar_onsongchanged(MachineBar* self, Workspace* workspace, int flag,
 	machinebar_buildmachinebox(self);
 	machinebar_buildinstrumentlist(self);
 	psy_ui_combobox_setcursel(&self->instparambox,
-		workspace->song->instruments.slot.subslot);
+		psy_audio_instruments_selected(&workspace->song->instruments).subslot);
 }
 
 void machinebar_connectsongsignals(MachineBar* self)
@@ -366,6 +365,6 @@ void machinebar_oninstrumentnamechanged(MachineBar* self, psy_ui_Component* send
 	if (self->instruments) {
 		machinebar_buildinstrumentlist(self);
 		psy_ui_combobox_setcursel(&self->instparambox,
-			self->instruments->slot.subslot);
+			psy_audio_instruments_selected(&self->instruments).subslot);
 	}
 }

@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "../../detail/portable.h"
+#include <player.h>
 
 static void kbdbox_makekeyproperties(KbdBox*);
 static void kbdbox_addkeyproperties(KbdBox*, psy_Properties* section,
@@ -47,6 +48,7 @@ static void kbdbox_initfont(KbdBox*);
 static void kbdbox_makekeys(KbdBox*);
 static void kbdbox_ondestroy(KbdBox*, psy_ui_Component* sender);
 static void kbdbox_ondraw(KbdBox*, psy_ui_Graphics*);
+static void kbdbox_onmousedown(KbdBox*, psy_ui_MouseEvent*);
 static void kbdbox_drawkey(KbdBox*, psy_ui_Graphics*, KbdBoxKey*);
 static void kbdbox_addsmallkey(KbdBox*, uintptr_t keycode, const char* label);
 static void kbdbox_addmediumkey(KbdBox*, uintptr_t keycode, const char* label);
@@ -61,15 +63,18 @@ static void kbdbox_vtable_init(KbdBox* self)
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
 		kbdbox_vtable.ondraw = (psy_ui_fp_ondraw)kbdbox_ondraw;
+		kbdbox_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			kbdbox_onmousedown;
 		kbdbox_vtable_initialized = 1;
 	}
 }
 
-void kbdbox_init(KbdBox* self, psy_ui_Component* parent)
+void kbdbox_init(KbdBox* self, psy_ui_Component* parent, Workspace* workspace)
 {			
 	psy_ui_component_init(kbdbox_base(self), parent);
 	kbdbox_vtable_init(self);
 	self->component.vtable = &kbdbox_vtable;
+	self->workspace = workspace;
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(kbdbox_base(self));
 	psy_signal_connect(&kbdbox_base(self)->signal_destroy, self,
@@ -128,6 +133,31 @@ void kbdbox_ondraw(KbdBox* self, psy_ui_Graphics* g)
 
 		key = (KbdBoxKey*)psy_tableiterator_value(&it);
 		kbdbox_drawkey(self, g, key);
+	}
+}
+
+void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->keys);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		KbdBoxKey* key;
+
+		key = (KbdBoxKey*)psy_tableiterator_value(&it);
+		if (psy_ui_rectangle_intersect(&key->position, ev->x, ev->y)) {
+			psy_EventDriver* kbd;
+			EventDriverData input;
+
+			input.message = EVENTDRIVER_KEYDOWN;
+			kbd = workspace_kbddriver(self->workspace);
+			input.param1 = psy_audio_encodeinput(psy_tableiterator_key(&it),
+				0, 0);
+			input.param2 = workspace_octave(self->workspace) * 12;
+			kbd->write(kbd, input);
+			break;
+		}
 	}
 }
 

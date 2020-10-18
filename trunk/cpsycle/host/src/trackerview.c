@@ -171,7 +171,7 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 
 // TrackerGridState
 // prototypes
-static void definecmd(psy_Properties*, uintptr_t input, int cmd, const char* text, const char* shorttext);
+static void definecmd(psy_Properties*, uintptr_t input, int cmd, const char* key, const char* shorttext);
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
@@ -247,6 +247,7 @@ enum {
 	CMD_SELECTCOL,
 	CMD_SELECTBAR,
 
+	CMD_SELECTMACHINE,	///< Enter
 	CMD_UNDO,
 	CMD_REDO,
 
@@ -540,6 +541,7 @@ static void trackergrid_prevcol(TrackerGrid*);
 static void trackergrid_nextcol(TrackerGrid*);
 static void trackergrid_selectall(TrackerGrid*);
 static void trackergrid_selectcol(TrackerGrid*);
+static void trackergrid_selectmachine(TrackerGrid*);
 static void trackergrid_enterevent(TrackerGrid*, psy_ui_KeyEvent*);
 static void trackergrid_oninput(TrackerGrid*, psy_audio_Player*,
 	psy_audio_PatternEvent*);
@@ -1363,6 +1365,32 @@ void trackergrid_selectbar(TrackerGrid* self)
 	}
 }
 
+void trackergrid_selectmachine(TrackerGrid* self)
+{
+	if (self->workspace->song) {
+		psy_audio_PatternNode* prev;
+		psy_audio_PatternEntry* entry;
+		psy_audio_PatternNode* node;
+		
+		node = psy_audio_pattern_findnode(self->gridstate->pattern,
+			self->cursor.track,
+			(psy_dsp_big_beat_t)self->cursor.offset,
+			(psy_dsp_big_beat_t)self->bpl,
+			&prev);
+		if (node) {
+			psy_audio_PatternEvent* ev;
+
+			entry = (psy_audio_PatternEntry*)node->entry;
+			ev = patternentry_front(entry);
+			psy_audio_machines_changeslot(&self->workspace->song->machines,
+				ev->mach);
+			psy_audio_instruments_select(&self->workspace->song->instruments,
+				psy_audio_instrumentindex_make(0, ev->inst));			
+		}		
+	}
+}
+
+
 void trackergrid_enterevent(TrackerGrid* self, psy_ui_KeyEvent* ev)
 {
 	if (self->cursor.column != TRACKER_COLUMN_NOTE) {
@@ -1553,7 +1581,8 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	machine = psy_audio_machines_at(&self->workspace->song->machines, ev.mach);
 	if (machine &&
 		machine_supports(machine, MACHINE_USES_INSTRUMENTS)) {
-		ev.inst = self->workspace->song->instruments.slot.subslot;
+		ev.inst = psy_audio_instruments_selected(
+			&self->workspace->song->instruments).subslot;
 	}
 	trackergrid_inputevent(self, &ev, chordmode);
 }
@@ -2531,6 +2560,7 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 		psy_ui_component_preferredsize(&self->view->header.component, limit), &tm);
 	height = headersize.height;
 	if (self->view->showdefaultline) {
+		tm = psy_ui_component_textmetric(&self->view->grid.component);
 		height += tm.tmHeight + 1;
 	}	
 	rv->height = psy_ui_value_makepx(height);
@@ -2589,7 +2619,7 @@ void trackergrid_onchangeinstrument(TrackerGrid* self)
 		psy_audio_pattern_changeinstrument(self->gridstate->pattern,
 			self->selection.topleft,
 			self->selection.bottomright,
-			self->workspace->song->instruments.slot.subslot);
+			psy_audio_instruments_selected(&self->workspace->song->instruments).subslot);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -2643,7 +2673,6 @@ void trackergrid_onblockcopy(TrackerGrid* self)
 		psy_audio_pattern_setlength(&self->workspace->patternpaste,
 			(psy_dsp_big_beat_t)(self->selection.bottomright.offset -
 				self->selection.topleft.offset));
-
 	}
 	psy_ui_component_invalidate(&self->component);
 }
@@ -3098,8 +3127,15 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 			case TRACKER_COLUMN_NOTE:
 				patternentry_front(entry)->note = value;
 				break;
-			case TRACKER_COLUMN_INST:
-				patternentry_front(entry)->inst = value;
+			case TRACKER_COLUMN_INST:				
+				if ((self->inst.numchars == 2) && value == 0xFF) {
+					// this also clears the high byte of the 16bit instrument
+					// value, if only two digits are visible
+					// (settings wideinstrumentcolum: off)
+					patternentry_front(entry)->inst = 0xFFFF;
+				} else {
+					patternentry_front(entry)->inst = value;
+				}
 				break;
 			case TRACKER_COLUMN_MACH:
 				patternentry_front(entry)->mach = value;
@@ -3899,6 +3935,10 @@ bool trackerview_handlecommand(TrackerView* self, psy_ui_KeyEvent* ev, int cmd)
 		case CMD_SELECTBAR:
 			trackergrid_selectbar(&self->grid);
 			break;
+		case CMD_SELECTMACHINE:
+			trackergrid_selectmachine(&self->grid);
+			psy_ui_component_setfocus(&self->grid.component);
+			break;
 		case CMD_UNDO:
 			workspace_undo(self->workspace);
 			break;
@@ -4174,6 +4214,7 @@ void trackerview_makecmds(psy_Properties* parent)
 	definecmd(cmds, psy_audio_encodeinput('R', 0, 1), CMD_SELECTCOL, "cmd_selectcol", "sel col");
 	definecmd(cmds, psy_audio_encodeinput('K', 0, 1), CMD_SELECTBAR, "cmd_selectbar", "sel bar");
 
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RETURN, 0, 0), CMD_SELECTMACHINE, "cmd_selectmachine", "Select Mac / Ins in Cursor Pos");
 	definecmd(cmds, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO, "cmd_undo", "undo");
 	definecmd(cmds, psy_audio_encodeinput('Z', 1, 1), CMD_REDO, "cmd_redo", "redo");
 	definecmd(cmds, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG, "cmd_followsong", "follow");
@@ -4182,13 +4223,13 @@ void trackerview_makecmds(psy_Properties* parent)
 	}
 }
 
-void definecmd(psy_Properties* cmds, uintptr_t input, int cmd, const char* text, const char* shorttext)
+void definecmd(psy_Properties* cmds, uintptr_t input, int cmd, const char* key, const char* shorttext)
 {
 	psy_properties_settext(psy_properties_setshorttext(
-		psy_properties_setid(psy_properties_append_int(cmds, text,
+		psy_properties_setid(psy_properties_append_int(cmds, key,
 			input, 0, 0), cmd),
 		shorttext),
-		text);
+		key);
 }
 
 void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)

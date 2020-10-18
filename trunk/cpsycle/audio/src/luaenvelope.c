@@ -71,11 +71,11 @@ int luaenvelope_create(lua_State* L)
 		psy_dsp_EnvelopeSettings* settings;
 
 		settings = &env->settings;
-		size_t len = lua_rawlen(L, 2);
+		lua_Unsigned len = lua_rawlen(L, 2);
 		for (size_t i = 1; i <= len; ++i) {
 			double t;
 			double peak;
-			size_t argnum;
+			lua_Unsigned argnum;
 
 			lua_rawgeti(L, 2, i); // get point {time, peak}
 			argnum = lua_rawlen(L, 4);

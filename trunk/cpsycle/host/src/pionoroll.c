@@ -437,8 +437,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 		if (((beatstart * self->gridstate->lpb + c)  % (self->gridstate->lpb * 4)) == 0) {
 			linecolor = patternviewskin_row4beatcolor(self->gridstate->skin,
 				0, self->workspace->song->properties.tracks);
-		} else
-		if ((c % self->gridstate->lpb) == 0) {
+		} else if ((c % self->gridstate->lpb) == 0) {
 			linecolor = patternviewskin_rowbeatcolor(self->gridstate->skin,
 				0, self->workspace->song->properties.tracks);
 		} else {
@@ -452,7 +451,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g)
 	}
 	
 	keymin = max(self->keyboardstate->keymin,
-		(keyboardheight - g->clip.bottom) / self->keyboardstate->keyheight);
+		(keyboardheight - g->clip.bottom) / self->keyboardstate->keyheight - 1);
 	keymax = min(self->keyboardstate->keymax,
 		(keyboardheight - g->clip.top) / self->keyboardstate->keyheight);
 	for (key = keymin; key <= keymax; ++key) {		
@@ -948,7 +947,7 @@ void pianoroll_ongridscroll(Pianoroll* self, psy_ui_Component* sender)
 			psy_ui_component_scrollleft(&self->grid.component));		
 	}
 	if (psy_ui_component_scrolltop(&self->grid.component) !=
-			psy_ui_component_scrolltop(&self->header.component)) {
+			psy_ui_component_scrolltop(&self->keyboard.component)) {
 		psy_ui_component_setscrolltop(&self->keyboard.component,
 			psy_ui_component_scrolltop(&self->grid.component));		
 	}

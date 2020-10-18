@@ -34,6 +34,7 @@ typedef struct psy_ui_win_ComponentImp {
 	int dbg;
 	psy_ui_TextMetric tm;
 	bool tmcachevalid;
+	bool visible;
 } psy_ui_win_ComponentImp;
 
 void psy_ui_win_componentimp_init(psy_ui_win_ComponentImp* self,

@@ -31,6 +31,7 @@ struct MODSAMPLEHEADER
 };
 
 void psy_audio_xm_load(struct psy_audio_SongFile*);
+void psy_audio_xm_save(struct psy_audio_SongFile*);
 void psy_audio_xi_load(struct psy_audio_SongFile*, uintptr_t slot);
 bool psy_audio_mod_load(struct psy_audio_SongFile*);
 bool psy_audio_mod_isvalid(struct psy_audio_SongFile*);

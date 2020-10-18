@@ -4,6 +4,8 @@
 #if !defined(KBDBOX_H)
 #define KBDBOX_H
 
+#include "workspace.h"
+
 #include "uicomponent.h"
 
 #include <properties.h>
@@ -35,9 +37,10 @@ typedef struct KbdBox{
 	int keywidth;
 	psy_ui_Size corner;
 	psy_Properties* keyset;
+	Workspace* workspace;
 } KbdBox;
 
-void kbdbox_init(KbdBox*, psy_ui_Component* parent);
+void kbdbox_init(KbdBox*, psy_ui_Component* parent, Workspace*);
 void kbdbox_setcolor(KbdBox*, uintptr_t keycode, psy_ui_Color color);
 void kbdbox_cleardescriptions(KbdBox*);
 void kbdbox_setdescription(KbdBox*, uintptr_t keycode, int shift, int ctrl, const char* desc);

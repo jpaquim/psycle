@@ -98,7 +98,7 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machine
 	song_initpatterns(self);
 	song_initsequence(self);
 	psy_audio_samples_init(&self->samples);
-	instruments_init(&self->instruments);
+	psy_audio_instruments_init(&self->instruments);
 	song_initsignals(self);
 }
 
@@ -139,7 +139,7 @@ void psy_audio_song_dispose(psy_audio_Song* self)
 	patterns_dispose(&self->patterns);
 	sequence_dispose(&self->sequence);		
 	psy_audio_samples_dispose(&self->samples);
-	instruments_dispose(&self->instruments);	
+	psy_audio_instruments_dispose(&self->instruments);
 	song_disposesignals(self);
 }
 

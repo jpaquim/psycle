@@ -101,7 +101,7 @@ static void vtable_init(MainFrame* self)
 		vtable.onkeydown = (psy_ui_fp_onkeydown) mainframe_onkeydown;
 		vtable.onkeyup = (psy_ui_fp_onkeyup) mainframe_onkeyup;
 		vtable.onmousedown = (psy_ui_fp_onmousedown) mainframe_onmousedown;
-		vtable.ontimer = (psy_ui_fp_ontimer) mainframe_ontimer;
+		vtable.ontimer = (psy_ui_fp_ontimer)mainframe_ontimer;
 		vtable.onclose = (psy_ui_fp_onclose)mainframe_onclose;
 	}
 }
@@ -557,102 +557,126 @@ void mainframe_destroyed(MainFrame* self, psy_ui_Component* component)
 void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 {
 	EventDriverCmd cmd;
-	// 	psy_Properties* section;
 
-	// section = psy_properties_find(sender->properties, "general");
 	cmd = sender->getcmd(sender, "generalcmds");
-	if (cmd.id == CMD_IMM_HELP) {
-		tabbar_select(&self->helpview.tabbar, 0);
-		tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);		
-	} else
-	if (cmd.id == CMD_IMM_HELPSHORTCUT) {
-		mainframe_ontogglekbdhelp(self, &self->component);		
-	} else
-	if (cmd.id == CMD_IMM_EDITMACHINE) {
-		tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
-	} else
-	if (cmd.id == CMD_IMM_EDITPATTERN) {
-		tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
-	} else
-	if (cmd.id == CMD_IMM_ADDMACHINE) {
-		self->machineview.newmachine.pluginsview.calledby =
-			self->tabbar.selected;
-		workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW,
-			1, 0);
-	} else
-	if (cmd.id == CMD_IMM_PLAYSONG) {
-		psy_audio_player_setposition(&self->workspace.player, 0);
-		psy_audio_player_start(&self->workspace.player);
-	} else
-	if (cmd.id == CMD_IMM_PLAYSTART) {
-		SequenceEntry* entry;
+	switch (cmd.id) {
+		case CMD_IMM_HELP:
+			tabbar_select(&self->helpview.tabbar, 0);
+			tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);
+			break;
+		case CMD_IMM_HELPSHORTCUT:
+			mainframe_ontogglekbdhelp(self, &self->component);
+			break;
+		case CMD_IMM_EDITMACHINE:
+			tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+			break;
+		case CMD_IMM_EDITPATTERN:
+			tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
+			break;
+		case CMD_IMM_ADDMACHINE:
+			self->machineview.newmachine.pluginsview.calledby =
+				self->tabbar.selected;
+			workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW,
+				1, 0);
+			break;
+		case CMD_IMM_PLAYSONG:
+			psy_audio_player_setposition(&self->workspace.player, 0);
+			psy_audio_player_start(&self->workspace.player);
+			break;
+		case CMD_IMM_PLAYSTART: {
+			SequenceEntry* entry;
 
-		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);		
-		psy_audio_player_setposition(&self->workspace.player,
-			(entry) ? entry->offset : 0);
-		psy_audio_player_start(&self->workspace.player);
-	} else
-	if (cmd.id == CMD_IMM_PLAYFROMPOS) {
-		psy_dsp_big_beat_t playposition = 0;
-		SequenceEntry* entry;
+			entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+			psy_audio_player_setposition(&self->workspace.player,
+				(entry) ? entry->offset : 0);
+			psy_audio_player_start(&self->workspace.player);
+			break; }
+		case CMD_IMM_PLAYFROMPOS: {
+			psy_dsp_big_beat_t playposition = 0;
+			SequenceEntry* entry;
 
-		entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-		playposition = (entry ? entry->offset : 0) + 
-			(psy_dsp_big_beat_t) self->workspace.patterneditposition.offset;
-		psy_audio_player_setposition(&self->workspace.player, playposition);
-		psy_audio_player_start(&self->workspace.player);
-	} else
-	if (cmd.id == CMD_IMM_PLAYSTOP) {
-		psy_audio_player_stop(&self->workspace.player);
-	} else
-	if (cmd.id == CMD_IMM_SONGPOSDEC) {
-		if (self->workspace.song) {		
-			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
+			entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+			playposition = (entry ? entry->offset : 0) +
+				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+			psy_audio_player_setposition(&self->workspace.player, playposition);
+			psy_audio_player_start(&self->workspace.player);
+			break; }
+		case CMD_IMM_PLAYSTOP:
+			psy_audio_player_stop(&self->workspace.player);
+			break;
+		case CMD_IMM_SONGPOSDEC:
+			if (self->workspace.song) {
+				if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
-				sequenceselection_seteditposition(
-					&self->workspace.sequenceselection,
-					sequence_makeposition(&self->workspace.song->sequence,
-						self->workspace.sequenceselection.editposition.track,
-						self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
-				workspace_setsequenceselection(&self->workspace, 
-					self->workspace.sequenceselection);
+					sequenceselection_seteditposition(
+						&self->workspace.sequenceselection,
+						sequence_makeposition(&self->workspace.song->sequence,
+							self->workspace.sequenceselection.editposition.track,
+							self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
+					workspace_setsequenceselection(&self->workspace,
+						self->workspace.sequenceselection);
+				}
 			}
-		}
-	} else
-	if (cmd.id == CMD_IMM_SONGPOSINC) {
-		if (self->workspace.song) {						
-			if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
+			break;
+		case CMD_IMM_SONGPOSINC:
+			if (self->workspace.song) {
+				if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->next) {
-				sequenceselection_seteditposition(
-					&self->workspace.sequenceselection,
-					sequence_makeposition(&self->workspace.song->sequence,
-						self->workspace.sequenceselection.editposition.track,
-						self->workspace.sequenceselection.editposition.trackposition.tracknode->next));
-				workspace_setsequenceselection(&self->workspace, 
-					self->workspace.sequenceselection);
+					sequenceselection_seteditposition(
+						&self->workspace.sequenceselection,
+						sequence_makeposition(&self->workspace.song->sequence,
+							self->workspace.sequenceselection.editposition.track,
+							self->workspace.sequenceselection.editposition.trackposition.tracknode->next));
+					workspace_setsequenceselection(&self->workspace,
+						self->workspace.sequenceselection);
+				}
 			}
-		}
-	} else
-	if (cmd.id == CMD_IMM_MAXPATTERN) {
-		mainframe_maximizeorminimizeview(self);
-	} else
-	if (cmd.id == CMD_IMM_INFOMACHINE) {
-		workspace_showparameters(&self->workspace,
-			psy_audio_machines_slot(&self->workspace.song->machines));
-	} else
-	if (cmd.id == CMD_IMM_EDITINSTR) {
-		workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0, 0);
-	} else
-	if (cmd.id == CMD_IMM_EDITSAMPLE) {
-		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
-		tabbar_select(&self->samplesview.clienttabbar, 0);
-	} else
-	if (cmd.id == CMD_IMM_EDITWAVE) {
-		workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
-		tabbar_select(&self->samplesview.clienttabbar, 2);
-	} else
-	if (cmd.id == CMD_IMM_TERMINAL) {		
-		mainframe_ontoggleterminal(self, &self->component);		
+			break;
+		case CMD_IMM_MAXPATTERN:
+			mainframe_maximizeorminimizeview(self);
+			break;
+		case CMD_IMM_INFOMACHINE:
+			workspace_showparameters(&self->workspace,
+				psy_audio_machines_slot(&self->workspace.song->machines));
+			break;
+		case CMD_IMM_EDITINSTR:
+			workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0, 0);
+			break;
+		case CMD_IMM_EDITSAMPLE:
+			workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
+			tabbar_select(&self->samplesview.clienttabbar, 0);
+			break;
+		case CMD_IMM_EDITWAVE:
+			workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
+			tabbar_select(&self->samplesview.clienttabbar, 2);
+			break;
+		case CMD_IMM_TERMINAL:
+			mainframe_ontoggleterminal(self, &self->component);
+			break;
+		case CMD_IMM_INSTRDEC:
+			if (self->workspace.song) {
+				psy_audio_InstrumentIndex index;
+
+				index = psy_audio_instruments_selected(&self->workspace.song->instruments);
+				if (index.subslot > 0) {
+					--index.subslot;
+					psy_audio_instruments_select(&self->workspace.song->instruments,
+						index);
+				}
+			}
+			break;
+		case CMD_IMM_INSTRINC:
+			if (self->workspace.song) {
+				psy_audio_InstrumentIndex index;
+
+				index = psy_audio_instruments_selected(&self->workspace.song->instruments);
+					++index.subslot;
+				psy_audio_instruments_select(&self->workspace.song->instruments,
+					index);
+			}
+			break;
+		default:
+			break;
 	}
 }
 

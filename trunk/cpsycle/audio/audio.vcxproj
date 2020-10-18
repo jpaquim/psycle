@@ -249,6 +249,7 @@
     <ClCompile Include="src\xmsampler.c" />
     <ClCompile Include="src\xmsamplerchannel.c" />
     <ClCompile Include="src\xmsamplervoice.c" />
+    <ClCompile Include="src\xmsongexport.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h" />
@@ -329,6 +330,7 @@
     <ClInclude Include="src\xmsampler.h" />
     <ClInclude Include="src\xmsamplerchannel.h" />
     <ClInclude Include="src\xmsamplervoice.h" />
+    <ClInclude Include="src\xmsongexport.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SolutionDir)container\container.vcxproj">

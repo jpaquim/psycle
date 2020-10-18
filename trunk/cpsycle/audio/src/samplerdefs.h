@@ -98,101 +98,101 @@ extern "C" {
 	p = persistent ( a new note doesn't reset it )
 	n = they need to appear next to a note.
 */
-#define	SAMPLER_CMD_NONE                 0x00	
-#define SAMPLER_CMD_PORTAMENTO_UP        0x01 // Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
-#define SAMPLER_CMD_PORTAMENTO_DOWN      0x02 // Portamento Down, Fine porta (02Fx), and Extra fine porta (02Ex) (*t)
-#define SAMPLER_CMD_PORTA2NOTE           0x03 // Tone Portamento						(*tn)
-#define SAMPLER_CMD_VIBRATO              0x04 // Do Vibrato							(*t)
-#define SAMPLER_CMD_TONEPORTAVOL         0x05 // Tone Portament & Volume Slide		(*t)
-#define SAMPLER_CMD_VIBRATOVOL           0x06 // Vibrato & Volume Slide				(*t)
-#define SAMPLER_CMD_TREMOLO              0x07 // Tremolo							(*t)
-#define SAMPLER_CMD_PANNING              0x08 // Set Panning Position				(p)
-#define SAMPLER_CMD_PANNINGSLIDE         0x09 // Panning slide						(*t)
-#define SAMPLER_CMD_SET_CHANNEL_VOLUME   0x0A // Set channel's volume				(p)
-#define SAMPLER_CMD_CHANNEL_VOLUMESLIDE  0x0B // channel Volume Slide up (0By0) down (0B0x), Fine slide up(0BFy) down(0BxF)	 (*tp)
-#define SAMPLER_CMD_VOLUME               0x0C // Set Volume
-#define SAMPLER_CMD_VOLUMESLIDE          0x0D // Volume Slide up (0Dy0), down (0D0x), Fine slide up(0DyF), down(0DFy)	 (*t)
-#define SAMPLER_CMD_FINESLIDEUP          0x0F // Part of the value that indicates it is a fine slide up
-#define SAMPLER_CMD_FINESLIDEDOWN        0xF0 // Part of the value that indicates it is a fine slide down
-#define SAMPLER_CMD_EXTENDED             0x0E // Extend Command
-#define SAMPLER_CMD_MIDI_MACRO           0x0F // Impulse Tracker MIDI macro			(p)
-#define SAMPLER_CMD_ARPEGGIO             0x10 // Arpeggio							(*t)
-#define SAMPLER_CMD_RETRIG               0x11 // Retrigger Note						(*t)
-#define SAMPLER_CMD_FINE_VIBRATO         0x14 // Vibrato 4 times finer				(*t)
-#define SAMPLER_CMD_TREMOR               0x17 // Tremor								(*t)
-#define SAMPLER_CMD_PANBRELLO            0x18 // Panbrello							(*t)
-#define SAMPLER_CMD_SET_ENV_POSITION     0x19 // Set Envelope Position
-#define SAMPLER_CMD_SET_GLOBAL_VOLUME    0x1C // Sets Global Volume
-#define SAMPLER_CMD_GLOBAL_VOLUME_SLIDE  0x1D // Slides Global Volume				(*t)
-#define SAMPLER_CMD_SENDTOVOLUME         0x1E // Interprets this as a volume command	()
-#define SAMPLER_CMD_OFFSET               0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)		PORTAMENTO_UP = 0x01,// Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
+#define	XM_SAMPLER_CMD_NONE                 0x00	
+#define XM_SAMPLER_CMD_PORTAMENTO_UP        0x01 // Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
+#define XM_SAMPLER_CMD_PORTAMENTO_DOWN      0x02 // Portamento Down, Fine porta (02Fx), and Extra fine porta (02Ex) (*t)
+#define XM_SAMPLER_CMD_PORTA2NOTE           0x03 // Tone Portamento						(*tn)
+#define XM_SAMPLER_CMD_VIBRATO              0x04 // Do Vibrato							(*t)
+#define XM_SAMPLER_CMD_TONEPORTAVOL         0x05 // Tone Portament & Volume Slide		(*t)
+#define XM_SAMPLER_CMD_VIBRATOVOL           0x06 // Vibrato & Volume Slide				(*t)
+#define XM_SAMPLER_CMD_TREMOLO              0x07 // Tremolo							(*t)
+#define XM_SAMPLER_CMD_PANNING              0x08 // Set Panning Position				(p)
+#define XM_SAMPLER_CMD_PANNINGSLIDE         0x09 // Panning slide						(*t)
+#define XM_SAMPLER_CMD_SET_CHANNEL_VOLUME   0x0A // Set channel's volume				(p)
+#define XM_SAMPLER_CMD_CHANNEL_VOLUMESLIDE  0x0B // channel Volume Slide up (0By0) down (0B0x), Fine slide up(0BFy) down(0BxF)	 (*tp)
+#define XM_SAMPLER_CMD_VOLUME               0x0C // Set Volume
+#define XM_SAMPLER_CMD_VOLUMESLIDE          0x0D // Volume Slide up (0Dy0), down (0D0x), Fine slide up(0DyF), down(0DFy)	 (*t)
+#define XM_SAMPLER_CMD_FINESLIDEUP          0x0F // Part of the value that indicates it is a fine slide up
+#define XM_SAMPLER_CMD_FINESLIDEDOWN        0xF0 // Part of the value that indicates it is a fine slide down
+#define XM_SAMPLER_CMD_EXTENDED             0x0E // Extend Command
+#define XM_SAMPLER_CMD_MIDI_MACRO           0x0F // Impulse Tracker MIDI macro			(p)
+#define XM_SAMPLER_CMD_ARPEGGIO             0x10 // Arpeggio							(*t)
+#define XM_SAMPLER_CMD_RETRIG               0x11 // Retrigger Note						(*t)
+#define XM_SAMPLER_CMD_FINE_VIBRATO         0x14 // Vibrato 4 times finer				(*t)
+#define XM_SAMPLER_CMD_TREMOR               0x17 // Tremor								(*t)
+#define XM_SAMPLER_CMD_PANBRELLO            0x18 // Panbrello							(*t)
+#define XM_SAMPLER_CMD_SET_ENV_POSITION     0x19 // Set Envelope Position
+#define XM_SAMPLER_CMD_SET_GLOBAL_VOLUME    0x1C // Sets Global Volume
+#define XM_SAMPLER_CMD_GLOBAL_VOLUME_SLIDE  0x1D // Slides Global Volume				(*t)
+#define XM_SAMPLER_CMD_SENDTOVOLUME         0x1E // Interprets this as a volume command	()
+#define XM_SAMPLER_CMD_OFFSET               0x90 // Set Sample Offset  , note!: 0x9yyy ! not 0x90yy (*n)		PORTAMENTO_UP = 0x01,// Portamento Up , Fine porta (01Fx), and Extra fine porta (01Ex)	(*t)
 
-#define SAMPLER_CMD_E_GLISSANDO_TYPE     0x30 // E3     Set gliss control           (p)
-#define SAMPLER_CMD_E_VIBRATO_WAVE       0x40 // E4     Set vibrato control         (p)
-#define SAMPLER_CMD_E_PANBRELLO_WAVE     0x50 //                                    (p)
+#define XM_SAMPLER_CMD_E_GLISSANDO_TYPE     0x30 // E3     Set gliss control           (p)
+#define XM_SAMPLER_CMD_E_VIBRATO_WAVE       0x40 // E4     Set vibrato control         (p)
+#define XM_SAMPLER_CMD_E_PANBRELLO_WAVE     0x50 //                                    (p)
 //0x60
-#define SAMPLER_CMD_E_TREMOLO_WAVE       0x70 // E7     Set tremolo control         (p)
-#define SAMPLER_CMD_E_SET_PAN            0x80 //                                    (p)
-#define SAMPLER_CMD_E9	                 0x90
+#define XM_SAMPLER_CMD_E_TREMOLO_WAVE       0x70 // E7     Set tremolo control         (p)
+#define XM_SAMPLER_CMD_E_SET_PAN            0x80 //                                    (p)
+#define XM_SAMPLER_CMD_E9	                 0x90
 //0xA0,
 //0xB0,
-#define SAMPLER_CMD_E_DELAYED_NOTECUT    0xC0 // EC     Note cut                    (t)
-#define SAMPLER_CMD_E_NOTE_DELAY         0xD0 // ED     Note delay                  (tn)
-#define SAMPLER_CMD_EE                   0xE0
-#define SAMPLER_CMD_E_SET_MIDI_MACRO     0xF0 //                                    (p)
+#define XM_SAMPLER_CMD_E_DELAYED_NOTECUT    0xC0 // EC     Note cut                    (t)
+#define XM_SAMPLER_CMD_E_NOTE_DELAY         0xD0 // ED     Note delay                  (tn)
+#define XM_SAMPLER_CMD_EE                   0xE0
+#define XM_SAMPLER_CMD_E_SET_MIDI_MACRO     0xF0 //                                    (p)
 
-#define	SAMPLER_CMD_E9_SURROUND_OFF      0x00 //									(p)
-#define	SAMPLER_CMD_E9_SURROUND_ON       0x01 //									(p)
-#define	SAMPLER_CMD_E9_REVERB_OFF        0x08 //									(p)
-#define	SAMPLER_CMD_E9_REVERB_FORCE      0x09 //									(p)
-#define	SAMPLER_CMD_E9_STANDARD_SURROUND 0x0A //									(p)
-#define	SAMPLER_CMD_E9_QUAD_SURROUND     0x0B // (p)Select quad surround mode: this allows you to pan in the rear channels, especially useful for 4-speakers playback. Note that S9A and S9B do not activate the surround for the current channel, it is a global setting that will affect the behavior of the surround for all channels. You can enable or disable the surround for individual channels by using the S90 and S91 effects. In quad surround mode, the channel surround will stay active until explicitely disabled by a S90 effect
-#define	SAMPLER_CMD_E9_GLOBAL_FILTER     0x0C // (p)Select global filter mode (IT compatibility). This is the default, when resonant filters are enabled with a Zxx effect, they will stay active until explicitely disabled by setting the cutoff frequency to the maximum (Z7F), and the resonance to the minimum (Z80).
-#define	SAMPLER_CMD_E9_LOCAL_FILTER      0x0D // (p)Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
-#define	SAMPLER_CMD_E9_PLAY_FORWARD      0x0E // Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
-#define	SAMPLER_CMD_E9_PLAY_BACKWARD     0x0F // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward. 
+#define	XM_SAMPLER_CMD_E9_SURROUND_OFF      0x00 //									(p)
+#define	XM_SAMPLER_CMD_E9_SURROUND_ON       0x01 //									(p)
+#define	XM_SAMPLER_CMD_E9_REVERB_OFF        0x08 //									(p)
+#define	XM_SAMPLER_CMD_E9_REVERB_FORCE      0x09 //									(p)
+#define	XM_SAMPLER_CMD_E9_STANDARD_SURROUND 0x0A //									(p)
+#define	XM_SAMPLER_CMD_E9_QUAD_SURROUND     0x0B // (p)Select quad surround mode: this allows you to pan in the rear channels, especially useful for 4-speakers playback. Note that S9A and S9B do not activate the surround for the current channel, it is a global setting that will affect the behavior of the surround for all channels. You can enable or disable the surround for individual channels by using the S90 and S91 effects. In quad surround mode, the channel surround will stay active until explicitely disabled by a S90 effect
+#define	XM_SAMPLER_CMD_E9_GLOBAL_FILTER     0x0C // (p)Select global filter mode (IT compatibility). This is the default, when resonant filters are enabled with a Zxx effect, they will stay active until explicitely disabled by setting the cutoff frequency to the maximum (Z7F), and the resonance to the minimum (Z80).
+#define	XM_SAMPLER_CMD_E9_LOCAL_FILTER      0x0D // (p)Select local filter mode (MPT beta compatibility): when this mode is selected, the resonant filter will only affect the current note. It will be deactivated when a new note is being played.
+#define	XM_SAMPLER_CMD_E9_PLAY_FORWARD      0x0E // Play forward. You may use this to temporarily force the direction of a bidirectional loop to go forward.
+#define	XM_SAMPLER_CMD_E9_PLAY_BACKWARD     0x0F // Play backward. The current instrument will be played backwards, or it will temporarily set the direction of a loop to go backward. 
 
 
-#define	SAMPLER_CMD_VOL_VOLUME0			0x00  // 0x00..0x0F (63)  ||
-#define	SAMPLER_CMD_VOL_VOLUME1			0x10  // 0x10..0x1F (63)  || All are the same command.
-#define	SAMPLER_CMD_VOL_VOLUME2			0x20  // 0x20..0x2F (63)  ||
-#define	SAMPLER_CMD_VOL_VOLUME3			0x30  // 0x30..0x3F (63)  ||
-#define	SAMPLER_CMD_VOL_VOLSLIDEUP		0x40  // 0x40..0x4F (16)
-#define	SAMPLER_CMD_VOL_VOLSLIDEDOWN	0x50  // 0x50..0x5F (16)
-#define	SAMPLER_CMD_VOL_FINEVOLSLIDEUP	0x60  // 0x60..0x6F (16)
-#define	SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN 0x70 // 0x70..0x7F (16)
-#define	SAMPLER_CMD_VOL_PANNING			0x80  // 0x80..0x8F (16)
-#define	SAMPLER_CMD_VOL_PANSLIDELEFT	0x90  // 0x90..0x9F (16)
-#define	SAMPLER_CMD_VOL_PANSLIDERIGHT	0xA0  // 0xA0..0xAF (16)
-#define	SAMPLER_CMD_VOL_VIBRATO			0xB0  // 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy 
-#define	SAMPLER_CMD_VOL_TONEPORTAMENTO	0xC0  // 0xC0..0xCF (16) Linked to Porta2Note 
-#define	SAMPLER_CMD_VOL_PITCH_SLIDE_UP	0xD0  // 0xD0..0xDF (16)
-#define	SAMPLER_CMD_VOL_PITCH_SLIDE_DOWN 0xE0 // 0xE0..0xEF (16)
+#define	XM_SAMPLER_CMD_VOL_VOLUME0			0x00  // 0x00..0x0F (63)  ||
+#define	XM_SAMPLER_CMD_VOL_VOLUME1			0x10  // 0x10..0x1F (63)  || All are the same command.
+#define	XM_SAMPLER_CMD_VOL_VOLUME2			0x20  // 0x20..0x2F (63)  ||
+#define	XM_SAMPLER_CMD_VOL_VOLUME3			0x30  // 0x30..0x3F (63)  ||
+#define	XM_SAMPLER_CMD_VOL_VOLSLIDEUP		0x40  // 0x40..0x4F (16)
+#define	XM_SAMPLER_CMD_VOL_VOLSLIDEDOWN	0x50  // 0x50..0x5F (16)
+#define	XM_SAMPLER_CMD_VOL_FINEVOLSLIDEUP	0x60  // 0x60..0x6F (16)
+#define	XM_SAMPLER_CMD_VOL_FINEVOLSLIDEDOWN 0x70 // 0x70..0x7F (16)
+#define	XM_SAMPLER_CMD_VOL_PANNING			0x80  // 0x80..0x8F (16)
+#define	XM_SAMPLER_CMD_VOL_PANSLIDELEFT	0x90  // 0x90..0x9F (16)
+#define	XM_SAMPLER_CMD_VOL_PANSLIDERIGHT	0xA0  // 0xA0..0xAF (16)
+#define	XM_SAMPLER_CMD_VOL_VIBRATO			0xB0  // 0xB0..0xBF (16) Linked to Vibrato Vy = 4xy 
+#define	XM_SAMPLER_CMD_VOL_TONEPORTAMENTO	0xC0  // 0xC0..0xCF (16) Linked to Porta2Note 
+#define	XM_SAMPLER_CMD_VOL_PITCH_SLIDE_UP	0xD0  // 0xD0..0xDF (16)
+#define	XM_SAMPLER_CMD_VOL_PITCH_SLIDE_DOWN 0xE0 // 0xE0..0xEF (16)
 											   // 0xFF -> Blank.
 	
 	
 #define ISSLIDEUP(val) !((val)&0x0F)
 #define ISSLIDEDOWN(val) !((val)&0xF0)
-#define ISFINESLIDEUP(val) (((val)&0x0F)==SAMPLER_CMD_FINESLIDEUP)
-#define ISFINESLIDEDOWN(val) (((val)&0xF0)==SAMPLER_CMD_FINESLIDEDOWN)
+#define ISFINESLIDEUP(val) (((val)&0x0F)==XM_SAMPLER_CMD_FINESLIDEUP)
+#define ISFINESLIDEDOWN(val) (((val)&0xF0)==XM_SAMPLER_CMD_FINESLIDEDOWN)
 #define GETSLIDEUPVAL(val) (((val)&0xF0)>>4)
 #define GETSLIDEDOWNVAL(val) ((val)&0x0F)
 
-#define SAMPLER_EFFECT_VIBRATO  0x00000001
-#define SAMPLER_EFFECT_PITCHSLIDE  0x00000002
-#define SAMPLER_EFFECT_CHANNELVOLSLIDE  0x00000004
-#define SAMPLER_EFFECT_SLIDE2NOTE  0x00000008
-#define SAMPLER_EFFECT_VOLUMESLIDE  0x00000010
-#define SAMPLER_EFFECT_PANSLIDE  0x00000020
-#define SAMPLER_EFFECT_TREMOLO  0x00000040
-#define SAMPLER_EFFECT_ARPEGGIO  0x00000080
-#define SAMPLER_EFFECT_NOTECUT  0x00000100
-#define SAMPLER_EFFECT_PANBRELLO  0x00000200
-#define SAMPLER_EFFECT_RETRIG  0x00000400
-#define SAMPLER_EFFECT_TREMOR  0x00000800
-#define SAMPLER_EFFECT_NOTEDELAY  0x00001000
-#define SAMPLER_EFFECT_GLOBALVOLSLIDE  0x00002000
-#define SAMPLER_EFFECT_PORTAMENTO  0x00004000
+#define XM_SAMPLER_EFFECT_VIBRATO  0x00000001
+#define XM_SAMPLER_EFFECT_PITCHSLIDE  0x00000002
+#define XM_SAMPLER_EFFECT_CHANNELVOLSLIDE  0x00000004
+#define XM_SAMPLER_EFFECT_SLIDE2NOTE  0x00000008
+#define XM_SAMPLER_EFFECT_VOLUMESLIDE  0x00000010
+#define XM_SAMPLER_EFFECT_PANSLIDE  0x00000020
+#define XM_SAMPLER_EFFECT_TREMOLO  0x00000040
+#define XM_SAMPLER_EFFECT_ARPEGGIO  0x00000080
+#define XM_SAMPLER_EFFECT_NOTECUT  0x00000100
+#define XM_SAMPLER_EFFECT_PANBRELLO  0x00000200
+#define XM_SAMPLER_EFFECT_RETRIG  0x00000400
+#define XM_SAMPLER_EFFECT_TREMOR  0x00000800
+#define XM_SAMPLER_EFFECT_NOTEDELAY  0x00001000
+#define XM_SAMPLER_EFFECT_GLOBALVOLSLIDE  0x00002000
+#define XM_SAMPLER_EFFECT_PORTAMENTO  0x00004000
 
 typedef enum psy_audio_XMSamplerCmdMode {
 	// *= remembers its last value when called with param 00.

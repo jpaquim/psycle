@@ -494,8 +494,8 @@ void seqtick(psy_audio_XMSampler* self, uintptr_t channelnum,
 		return;
 	}
 	event = *ev;
-	if (event.cmd == SAMPLER_CMD_EXTENDED) {
-		if ((event.parameter & 0xF0) == SAMPLER_CMD_E_NOTE_DELAY) {
+	if (event.cmd == XM_SAMPLER_CMD_EXTENDED) {
+		if ((event.parameter & 0xF0) == XM_SAMPLER_CMD_E_NOTE_DELAY) {
 			// skip for now and reinsert in sequencerinsert
 			// with delayed offset
 			return;
@@ -517,7 +517,7 @@ void seqtick(psy_audio_XMSampler* self, uintptr_t channelnum,
 	if (!voice) {
 		psy_audio_Instrument* instrument;
 		
-		instrument = instruments_at(psy_audio_machine_instruments(
+		instrument = psy_audio_instruments_at(psy_audio_machine_instruments(
 			psy_audio_xmsampler_base(self)),
 			currslot(self, channelnum, &event));
 		if (instrument) {
@@ -591,7 +591,7 @@ psy_audio_InstrumentIndex currslot(psy_audio_XMSampler* self, uintptr_t channel,
 	} else { 
 		rv = NOTECOMMANDS_EMPTY;
 	}
-	return instrumentindex_make(self->instrumentbank, rv);
+	return psy_audio_instrumentindex_make(self->instrumentbank, rv);
 }
 
 void releaseallvoices(psy_audio_XMSampler* self)
@@ -809,8 +809,8 @@ psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
 
 		entry = p->entry;
 		event = patternentry_front(entry);
-		if (event->cmd == SAMPLER_CMD_EXTENDED) {
-			if ((event->parameter & 0xf0) == SAMPLER_CMD_E_DELAYED_NOTECUT) {
+		if (event->cmd == XM_SAMPLER_CMD_EXTENDED) {
+			if ((event->parameter & 0xf0) == XM_SAMPLER_CMD_E_DELAYED_NOTECUT) {
 				psy_audio_PatternEntry* noteoff;
 
 				// This means there is always 6 ticks per row whatever number of rows.
@@ -823,7 +823,7 @@ psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
 						psy_audio_xmsampler_base(self));
 				psy_list_append(&insert, noteoff);
 			} else 
-			if ((event->parameter & 0xF0) == SAMPLER_CMD_E_NOTE_DELAY) {
+			if ((event->parameter & 0xF0) == XM_SAMPLER_CMD_E_NOTE_DELAY) {
 				psy_audio_PatternEntry* newentry;
 				psy_audio_PatternEvent* ev;
 				int numticks;

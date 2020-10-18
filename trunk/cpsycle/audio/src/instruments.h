@@ -17,10 +17,13 @@ extern "C" {
 
 // psy_audio_Instruments
 // 
-// Aim: Container of instruments
+// Aim: Container of grouped instruments
 // Structure:
-// psy_audio_Instruments <@>----- psy_audio_Instrument
-//                              *                     
+// psy_audio_Instruments <@>----- <psy_audio_InstrumentsGroup>
+//                              *             <@>----- psy_audio_Instrument
+//                                                   *
+// default group index 0: Sampler PS1
+//               index 1: Sampulse
 
 // InstrumentIndex
 //
@@ -28,14 +31,17 @@ extern "C" {
 //      Separate sampulse and ps1 instruments
 //
 // Pair of two indexes (slot; subslot)
-// 1. slot:    selects a group
-// 2. subslot: selects a slot inside a group pointing
-//	           to a instrument
+// 1. groupslot: selects a group
+// 2. subslot:   selects a slot inside a group pointing
+//	             to a instrument
 
 typedef struct {
-	uintptr_t slot;
+	uintptr_t groupslot;
 	uintptr_t subslot;
 } psy_audio_InstrumentIndex;
+
+psy_audio_InstrumentIndex psy_audio_instrumentindex_make(uintptr_t groupslot,
+	uintptr_t subslot);
 
 typedef struct {
 	char* name;
@@ -44,23 +50,31 @@ typedef struct {
 
 typedef struct psy_audio_Instruments {
 	psy_Table groups;
-	psy_audio_InstrumentIndex slot;
+	psy_audio_InstrumentIndex selected;
 	psy_Signal signal_insert;
 	psy_Signal signal_removed;
 	psy_Signal signal_slotchange;
 } psy_audio_Instruments;
 
-psy_audio_InstrumentIndex instrumentindex_make(uintptr_t slot, uintptr_t subslot);
+void psy_audio_instruments_init(psy_audio_Instruments*);
+void psy_audio_instruments_dispose(psy_audio_Instruments*);
+void psy_audio_instruments_insert(psy_audio_Instruments*,
+	psy_audio_Instrument*, psy_audio_InstrumentIndex);
+void psy_audio_instruments_remove(psy_audio_Instruments*,
+	psy_audio_InstrumentIndex);
+void psy_audio_instruments_select(psy_audio_Instruments*,
+	psy_audio_InstrumentIndex);
 
-void instruments_init(psy_audio_Instruments*);
-void instruments_dispose(psy_audio_Instruments*);
-void instruments_insert(psy_audio_Instruments*, psy_audio_Instrument*, psy_audio_InstrumentIndex);
-void instruments_remove(psy_audio_Instruments*, psy_audio_InstrumentIndex);
-void instruments_changeslot(psy_audio_Instruments*, psy_audio_InstrumentIndex);
-psy_audio_InstrumentIndex instruments_slot(psy_audio_Instruments*);
-psy_audio_Instrument* instruments_at(psy_audio_Instruments*, psy_audio_InstrumentIndex);
-uintptr_t instruments_size(psy_audio_Instruments*, uintptr_t slot);
+INLINE psy_audio_InstrumentIndex psy_audio_instruments_selected(
+	psy_audio_Instruments* self)
+{
+	return self->selected;
+}
 
+psy_audio_Instrument* psy_audio_instruments_at(psy_audio_Instruments*,
+	psy_audio_InstrumentIndex);
+uintptr_t psy_audio_instruments_size(psy_audio_Instruments*, uintptr_t
+	groupslot);
 psy_TableIterator psy_audio_instruments_begin(psy_audio_Instruments*);
 psy_TableIterator psy_audio_instruments_groupbegin(psy_audio_Instruments*,
 	uintptr_t slot);

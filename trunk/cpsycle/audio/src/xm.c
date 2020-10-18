@@ -8,6 +8,7 @@
 #include "song.h"
 #include "songio.h"
 #include "xmsampler.h"
+#include "xmsongexport.h"
 
 #include <operations.h>
 
@@ -259,7 +260,8 @@ void xm_readinstrument(psy_audio_SongFile* self, uint32_t slot, uint32_t start, 
 	start = psyfile_seek(self->file, start);
 	instrument = psy_audio_instrument_allocinit();
 	psy_audio_instrument_setindex(instrument, slot + 1);
-	instruments_insert(&self->song->instruments, instrument, instrumentindex_make(0, slot));
+	psy_audio_instruments_insert(&self->song->instruments, instrument,
+		psy_audio_instrumentindex_make(0, slot));
 	if (!xi) {
 		instrumentheader.size = psyfile_read_uint32(self->file);
 	} else {
@@ -659,7 +661,8 @@ void psy_audio_mod_loadinstrument(psy_audio_SongFile* self, int idx,
 	}
 
 	//instr.ValidateEnabled();
-	instruments_insert(&self->song->instruments, instr, instrumentindex_make(0, idx));	
+	psy_audio_instruments_insert(&self->song->instruments, instr,
+		psy_audio_instrumentindex_make(0, idx));
 }
 
 void psy_audio_mod_loadsampleheader(psy_audio_SongFile* self, psy_audio_Sample* _wave, int iInstrIdx,
@@ -795,6 +798,10 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 			unsigned char type = 0;
 			unsigned char param = 0;
 			unsigned short period = 428;
+			int exchwave[3] = { psy_audio_WAVEFORMS_SINUS,
+				psy_audio_WAVEFORMS_SAWDOWN,
+				psy_audio_WAVEFORMS_SQUARE
+			};
 
 			// read note
 			mentry[0] = ReadUInt1(self->file); mentry[1] = ReadUInt1(self->file);
@@ -807,88 +814,83 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 
 			patternevent_clear(&e);
 			// translate
-			//e.parameter = param;
-
-			/*int exchwave[3] = { XMInstrument::WaveData<>::WaveForms::SINUS,
-				XMInstrument::WaveData<>::WaveForms::SAWDOWN,
-				XMInstrument::WaveData<>::WaveForms::SQUARE
-			};*/
+			e.parameter = param;
 			
 			switch (type) {
 			case XMCMD_ARPEGGIO:
 				if (param != 0) {
-					// e.cmd = XMSampler::CMD::ARPEGGIO;
+					e.cmd = XM_SAMPLER_CMD_ARPEGGIO;
 				} else {
-					// e.cmd = XMSampler::CMD::NONE;
+					e.cmd = XM_SAMPLER_CMD_NONE;
 				}
 				break;
 			case XMCMD_PORTAUP:
-				// e.cmd = XMSampler::CMD::PORTAMENTO_UP;
+				e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
 				break;
 			case XMCMD_PORTADOWN:
-				// e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
+				e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
 				break;
 			case XMCMD_PORTA2NOTE:
-				// e._cmd = XMSampler::CMD::PORTA2NOTE;
+				e.cmd = XM_SAMPLER_CMD_PORTA2NOTE;
 				break;
 			case XMCMD_VIBRATO:
-				// e._cmd = XMSampler::CMD::VIBRATO;
+				e.cmd = XM_SAMPLER_CMD_VIBRATO;
 				break;
 			case XMCMD_TONEPORTAVOL:
-				// e._cmd = XMSampler::CMD::TONEPORTAVOL;
+				e.cmd = XM_SAMPLER_CMD_TONEPORTAVOL;
 				break;
 			case XMCMD_VIBRATOVOL:
-				// e._cmd = XMSampler::CMD::VIBRATOVOL;
+				e.cmd = XM_SAMPLER_CMD_VIBRATOVOL;
 				break;
 			case XMCMD_TREMOLO:
-				// e._cmd = XMSampler::CMD::TREMOLO;
+				e.cmd = XM_SAMPLER_CMD_TREMOLO;
 				break;
 			case XMCMD_PANNING:
-				// e._cmd = XMSampler::CMD::PANNING;
+				e.cmd = XM_SAMPLER_CMD_PANNING;
 				break;
 			case XMCMD_OFFSET:
-				// e._cmd = XMSampler::CMD::OFFSET;
+				e.cmd = XM_SAMPLER_CMD_OFFSET;
 				break;
 			case XMCMD_VOLUMESLIDE:
-				e.cmd = SAMPLER_CMD_VOLUMESLIDE;
+				e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
 				e.parameter = param;
 				break;
 			case XMCMD_POSITION_JUMP:
-				// e._cmd = PatternCmd::JUMP_TO_ORDER;
+				//e.cmd = XM_SAMPLER_CMD_JUMP_TO_ORDER;
 				break;
 			case XMCMD_VOLUME:
-				e.cmd = SAMPLER_CMD_VOLUME;
+				e.cmd = XM_SAMPLER_CMD_VOLUME;
 				e.parameter = param; // <= 0x40 ? param * 2 : 0x80;
 				break;
 			case XMCMD_PATTERN_BREAK:
-				// e._cmd = PatternCmd::BREAK_TO_LINE;
+				//e._cmd = PatternCmd::BREAK_TO_LINE;
 				// e._parameter = ((param & 0xF0) >> 4) * 10 + (param & 0x0F);
 				break;
 			case XMCMD_EXTENDED:
 				switch (param & 0xf0) {
 				case XMCMD_E_FINE_PORTA_UP:
-					// e._cmd = XMSampler::CMD::PORTAMENTO_UP;
-					// e._parameter = 0xF0 + (param & 0x0F);
+					e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
+					e.parameter = 0xF0 + (param & 0x0F);
 					break;
 				case XMCMD_E_FINE_PORTA_DOWN:
-					// e._cmd = XMSampler::CMD::PORTAMENTO_DOWN;
-					// e._parameter = 0xF0 + (param & 0x0F);
+					e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
+					e.parameter = 0xF0 + (param & 0x0F);
 					break;
 				case XMCMD_E_GLISSANDO_STATUS:
-					// e._cmd = XMSampler::CMD::EXTENDED;
-					// e._parameter = XMSampler::CMD_E::E_GLISSANDO_TYPE | ((param == 0) ? 0 : 1);
+					e.cmd = XM_SAMPLER_CMD_EXTENDED;
+					e.parameter = XM_SAMPLER_CMD_E_GLISSANDO_TYPE | ((param == 0) ? 0 : 1);
 					break;
 				case XMCMD_E_VIBRATO_WAVE:
-					// e._cmd = XMSampler::CMD::EXTENDED;
-					// e._parameter = XMSampler::CMD_E::E_VIBRATO_WAVE | exchwave[param & 0x3];
+					e.cmd = XM_SAMPLER_CMD_EXTENDED;
+					e.parameter = XM_SAMPLER_CMD_E_VIBRATO_WAVE | exchwave[param & 0x3];
 					break;
 				case XMCMD_E_FINETUNE:
-					// e._cmd = XMSampler::CMD::NONE;
-					// e._parameter = 0;
+					e.cmd = XM_SAMPLER_CMD_NONE;
+					e.parameter = 0;
 					break;
 				case XMCMD_E_PATTERN_LOOP:
-					// e._cmd = PatternCmd::EXTENDED;
-					// e._parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
+					//e.cmd = PatternCmd::EXTENDED;
+					//e.parameter = PatternCmd::PATTERN_LOOP | (param & 0xf);
 					break;
 				case XMCMD_E_TREMOLO_WAVE:
 					// e._cmd = XMSampler::CMD::EXTENDED;
@@ -907,20 +909,20 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 					// e._parameter = 0xf0 + (param & 0xf);
 					break;
 				case XMCMD_E_DELAYED_NOTECUT:
-					// e._cmd = XMSampler::CMD::EXTENDED;
-					// e._parameter = XMSampler::CMD_E::E_DELAYED_NOTECUT | (param & 0xf);
+					e.cmd = XM_SAMPLER_CMD_EXTENDED;
+					e.parameter = XM_SAMPLER_CMD_E_DELAYED_NOTECUT | (param & 0xf);
 					break;
 				case XMCMD_E_NOTE_DELAY:
-					// e._cmd = XMSampler::CMD::EXTENDED;
-					// e._parameter = XMSampler::CMD_E::E_NOTE_DELAY | (param & 0xf);
+					e.cmd = XM_SAMPLER_CMD_EXTENDED;
+					e.parameter = XM_SAMPLER_CMD_E_NOTE_DELAY | (param & 0xf);
 					break;
 				case XMCMD_E_PATTERN_DELAY:
-					// e._cmd = PatternCmd::EXTENDED;
-					// e._parameter = PatternCmd::PATTERN_DELAY | (param & 0xf);
+					//e.cmd = PatternCmd::EXTENDED;
+					//e.parameter = PatternCmd::PATTERN_DELAY | (param & 0xf);
 					break;
 				default:
-					// e._cmd = XMSampler::CMD::NONE;
-					// e._parameter = 0;
+					e.cmd = XM_SAMPLER_CMD_NONE;
+					e.parameter = 0;
 					break;
 				}
 				break;
@@ -943,7 +945,7 @@ void psy_audio_mod_loadsinglepattern(psy_audio_SongFile* self, int patIdx, int i
 				}*/
 				break;
 			default:
-				//e._cmd = XMSampler::CMD::NONE;
+				e.cmd = XM_SAMPLER_CMD_NONE;
 				break;
 			}
 			// instrument/note
@@ -1017,4 +1019,13 @@ uint8_t psy_audio_mod_convertperiodtonote(uint16_t period)
 			- log10(period) * 39.863137138648348174443833153873); //12/log10(2);
 		return (unsigned char)(note);
 	}
+}
+
+void psy_audio_xm_save(struct psy_audio_SongFile* self)
+{
+	XMSongExport xmexport;
+
+	xmsongexport_init(&xmexport);
+	xmsongexport_exportsong(&xmexport, self);
+	xmsongexport_dispose(&xmexport);
 }

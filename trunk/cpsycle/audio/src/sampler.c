@@ -111,7 +111,7 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_newline(psy_audio_SamplerVoice* self)
 {
 	self->effretTicks = 0;
-	self->effCmd = SAMPLER_CMD_NONE;
+	self->effCmd = PS1_SAMPLER_CMD_NONE;
 	if (self->_triggerNoteOff > self->_sampleCounter) {
 		self->_triggerNoteOff -= self->_sampleCounter;
 	} else {
@@ -466,7 +466,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 		return; // if no wave, return.
 	}
 	voice = psy_audio_sampler_getcurrentvoice(self, channel);
-	if (data.cmd != SAMPLER_CMD_NONE) {
+	if (data.cmd != PS1_SAMPLER_CMD_NONE) {
 		// Adding also the current command, to make the loops easier.
 		psy_audio_PatternEvent data2 = data;
 		data2.inst = channel;
@@ -480,7 +480,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 
 		ev = (psy_audio_PatternEvent*)psy_list_entry(ite);
 		if (ev->inst == channel) {
-			if (ev->cmd == SAMPLER_CMD_PORTA2NOTE &&
+			if (ev->cmd == PS1_SAMPLER_CMD_PORTA2NOTE &&
 					data.note < NOTECOMMANDS_RELEASE &&
 					voice != UINTPTR_MAX) {
 				// if (self->linearslide) {   // isLinearSlide()
@@ -554,8 +554,8 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 	//If this sample is not enabled, Voice::Tick is not called. Also, Sampler::Tick takes care of previus instrument used.
 	self->_instrument = pEntry->inst;
 	insts = psy_audio_machine_instruments(psy_audio_sampler_base(self->sampler));
-	self->inst = instruments_at(insts,
-		instrumentindex_make(self->sampler->instrumentbank, self->_instrument));
+	self->inst = psy_audio_instruments_at(insts,
+		psy_audio_instrumentindex_make(self->sampler->instrumentbank, self->_instrument));
 	// Setup commands that affect the new or already playing voice.
 	for (ite = multicmdMem; ite != NULL; psy_list_next(&ite)) {
 		psy_audio_PatternEvent* ev;
@@ -810,8 +810,8 @@ psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler* self, psy_List* e
 
 		entry = p->entry;
 		event = patternentry_front(entry);
-		if (event->cmd == SAMPLER_CMD_EXTENDED) {
-			if ((event->parameter & 0xf0) == SAMPLER_CMD_E_DELAYED_NOTECUT) {
+		if (event->cmd == PS1_SAMPLER_CMD_EXTENDED) {
+			if ((event->parameter & 0xf0) == PS1_SAMPLER_CMD_EXT_NOTEOFF) {
 				psy_audio_PatternEntry* noteoff;
 
 				// This means there is always 6 ticks per row whatever number of rows.
@@ -824,7 +824,7 @@ psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler* self, psy_List* e
 						psy_audio_sampler_base(self));
 				psy_list_append(&insert, noteoff);
 			} else
-				if ((event->parameter & 0xF0) == SAMPLER_CMD_E_NOTE_DELAY) {
+				if ((event->parameter & 0xF0) == PS1_SAMPLER_CMD_EXT_NOTEDELAY) {
 					psy_audio_PatternEntry* newentry;
 					psy_audio_PatternEvent* ev;
 					int numticks;
@@ -1063,7 +1063,7 @@ void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 			psy_audio_sampleiterator_setspeed(&self->controller, speed / 4294967296.0);
 			break;
 			// 0x03 : Porta to note
-		case SAMPLER_CMD_PORTA2NOTE:
+		case PS1_SAMPLER_CMD_PORTA2NOTE:
 			//effVal is multiplied by -1 in Tick() if it needs to slide down.
 			speed = self->controller.speed * pow(2.0, self->effVal * factor);
 			if ((self->effVal < 0 && speed < self->_effPortaSpeed)
