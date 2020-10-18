@@ -9,6 +9,7 @@
 static void helpview_updatetext(HelpView*, Translator*);
 static void helpview_onlanguagechanged(HelpView*, Translator* sender);
 static void selectsection(HelpView*, psy_ui_Component* sender, uintptr_t section);
+static void helpview_onfocus(HelpView*, psy_ui_Component* sender);
 
 TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -32,6 +33,8 @@ TabBar* helpview_init(HelpView* self, psy_ui_Component* parent,
 	helpview_updatetext(self, &workspace->translator);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		helpview_onlanguagechanged);
+	psy_signal_connect(&self->component.signal_focus, self,
+		helpview_onfocus);
 	return &self->tabbar;
 }
 
@@ -52,4 +55,14 @@ void helpview_onlanguagechanged(HelpView* self, Translator* sender)
 void selectsection(HelpView* self, psy_ui_Component* sender, uintptr_t section)
 {
 	tabbar_select(&self->tabbar, (int) section);
+}
+
+void helpview_onfocus(HelpView* self, psy_ui_Component* sender)
+{
+	psy_ui_Component* view;
+
+	view = psy_ui_notebook_activepage(&self->notebook);
+	if (view) {
+		psy_ui_component_setfocus(view);
+	}
 }

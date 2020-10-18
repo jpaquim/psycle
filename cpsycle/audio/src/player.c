@@ -339,7 +339,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			? (uint16_t) self->song->machines.tweakparam
 			: (uint16_t) (machine && machine_supports(machine,
 					MACH_SUPPORTS_INSTRUMENTS)
-				? instruments_slot(&self->song->instruments).subslot
+				? psy_audio_instruments_selected(&self->song->instruments).subslot
 				: NOTECOMMANDS_INST_EMPTY),
 			(uint8_t) (self->song
 				? psy_audio_machines_slot(&self->song->machines)
@@ -575,9 +575,9 @@ int psy_audio_player_recordingnotes(psy_audio_Player* self)
 }
 
 // psy_EventDriver load, unload, restart, ..., methods
-void psy_audio_player_loadeventdriver(psy_audio_Player* self, const char* path)
+psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player* self, const char* path)
 {
-	eventdrivers_load(&self->eventdrivers, path);
+	return eventdrivers_load(&self->eventdrivers, path);
 }
 
 void psy_audio_player_restarteventdriver(psy_audio_Player* self, int id)

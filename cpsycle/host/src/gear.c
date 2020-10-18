@@ -107,7 +107,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		&workspace->song->machines, MACHINEBOX_FX, self->workspace);
 	instrumentsbox_init(&self->instrumentsbox,
 		psy_ui_notebook_base(&self->notebook), 
-		&workspace->song->instruments);
+		&workspace->song->instruments, workspace);
 	samplesbox_init(&self->samplesbox, psy_ui_notebook_base(&self->notebook),
 		&workspace->song->samples, workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,

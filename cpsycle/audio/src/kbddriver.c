@@ -36,6 +36,7 @@ static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData,
 	EventDriverCmd*);
 static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Properties*);
+static void driver_idle(psy_EventDriver* self) { }
 
 int onerror(int err, const char* msg)
 {
@@ -64,6 +65,7 @@ psy_EventDriver* create_kbd_driver(void)
 		kbd->driver.cmd = driver_cmd;
 		kbd->driver.getcmd = driver_getcmd;
 		kbd->driver.setcmddef = setcmddef;
+		kbd->driver.idle = driver_idle;
 		driver_init(&kbd->driver);
 		return &kbd->driver;
 	}

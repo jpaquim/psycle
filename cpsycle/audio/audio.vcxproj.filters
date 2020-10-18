@@ -236,6 +236,9 @@
     <ClCompile Include="src\xmsamplervoice.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\xmsongexport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -470,6 +473,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\xmsamplervoice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\xmsongexport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

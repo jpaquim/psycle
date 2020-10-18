@@ -6,51 +6,52 @@
 #include "instruments.h"
 #include <stdlib.h>
 
-psy_audio_InstrumentIndex instrumentindex_make(uintptr_t slot, uintptr_t subslot)
+psy_audio_InstrumentIndex psy_audio_instrumentindex_make(uintptr_t groupslot,
+	uintptr_t subslot)
 {
 	psy_audio_InstrumentIndex rv;
 
-	rv.slot = slot;
+	rv.groupslot = groupslot;
 	rv.subslot = subslot;
 	return rv;
 }
 
 // InstrumentsGroup
-void instrumentsgroup_init(psy_audio_InstrumentsGroup* self)
+void psy_audio_instrumentsgroup_init(psy_audio_InstrumentsGroup* self)
 {
 	psy_table_init(&self->container);
 }
 
-void instrumentsgroup_dispose(psy_audio_InstrumentsGroup* self)
+void psy_audio_instrumentsgroup_dispose(psy_audio_InstrumentsGroup* self)
 {
 	psy_table_disposeall(&self->container, (psy_fp_disposefunc)
 		psy_audio_instrument_dispose);	
 }
 
-psy_audio_InstrumentsGroup* instrumentsgroup_alloc(void)
+psy_audio_InstrumentsGroup* psy_audio_instrumentsgroup_alloc(void)
 {
 	return (psy_audio_InstrumentsGroup*)malloc(sizeof(psy_audio_InstrumentsGroup));
 }
 
-psy_audio_InstrumentsGroup* instrumentsgroup_allocinit(void)
+psy_audio_InstrumentsGroup* psy_audio_instrumentsgroup_allocinit(void)
 {
 	psy_audio_InstrumentsGroup* rv;
 
-	rv = instrumentsgroup_alloc();
+	rv = psy_audio_instrumentsgroup_alloc();
 	if (rv) {
-		instrumentsgroup_init(rv);
+		psy_audio_instrumentsgroup_init(rv);
 	}
 	return rv;
 }
 
-void instrumentsgroup_insert(psy_audio_InstrumentsGroup* self, psy_audio_Instrument* instrument, uintptr_t slot)
+void psy_audio_instrumentsgroup_insert(psy_audio_InstrumentsGroup* self, psy_audio_Instrument* instrument, uintptr_t slot)
 {
 	if (instrument) {
 		psy_table_insert(&self->container, slot, instrument);
 	}
 }
 
-void instrumentsgroup_remove(psy_audio_InstrumentsGroup* self, uintptr_t slot)
+void psy_audio_instrumentsgroup_remove(psy_audio_InstrumentsGroup* self, uintptr_t slot)
 {
 	psy_audio_Instrument* instrument;
 
@@ -62,97 +63,93 @@ void instrumentsgroup_remove(psy_audio_InstrumentsGroup* self, uintptr_t slot)
 	}
 }
 
-psy_audio_Instrument* instrumentsgroup_at(psy_audio_InstrumentsGroup* self, uintptr_t slot)
+psy_audio_Instrument* psy_audio_instrumentsgroup_at(psy_audio_InstrumentsGroup* self, uintptr_t slot)
 {
 	return psy_table_at(&self->container, slot);
 }
 
-uintptr_t instrumentsgroup_size(psy_audio_InstrumentsGroup* self)
+uintptr_t psy_audio_instrumentsgroup_size(psy_audio_InstrumentsGroup* self)
 {
 	return psy_table_size(&self->container);
 }
 
 // psy_audio_Instruments
-void instruments_init(psy_audio_Instruments* self)
+void psy_audio_instruments_init(psy_audio_Instruments* self)
 {
 	psy_table_init(&self->groups);
-	self->slot = instrumentindex_make(0, 0);
+	self->selected = psy_audio_instrumentindex_make(0, 0);
 	psy_signal_init(&self->signal_insert);
 	psy_signal_init(&self->signal_removed);
 	psy_signal_init(&self->signal_slotchange);	
 }
 
-void instruments_dispose(psy_audio_Instruments* self)
+void psy_audio_instruments_dispose(psy_audio_Instruments* self)
 {	
 	psy_table_disposeall(&self->groups, (psy_fp_disposefunc)
-		instrumentsgroup_dispose);	
+		psy_audio_instrumentsgroup_dispose);
 	psy_signal_dispose(&self->signal_insert);
 	psy_signal_dispose(&self->signal_removed);
 	psy_signal_dispose(&self->signal_slotchange);
 }
 
-void instruments_insert(psy_audio_Instruments* self, psy_audio_Instrument* instrument,
+void psy_audio_instruments_insert(psy_audio_Instruments* self, psy_audio_Instrument* instrument,
 	psy_audio_InstrumentIndex index)
 {
 	psy_audio_InstrumentsGroup* group;
 
-	group = psy_table_at(&self->groups, index.slot);
+	group = psy_table_at(&self->groups, index.groupslot);
 	if (!group) {
-		group = instrumentsgroup_allocinit();
+		group = psy_audio_instrumentsgroup_allocinit();
 		if (group) {
-			psy_table_insert(&self->groups, index.slot, group);
+			psy_table_insert(&self->groups, index.groupslot, group);
 		}
 	}
 	if (group) {
-		instrumentsgroup_insert(group, instrument, index.subslot);
+		psy_audio_instrumentsgroup_insert(group, instrument, index.subslot);
 		psy_signal_emit(&self->signal_insert, self, 1, &index);
 	}
 }
 
-void instruments_remove(psy_audio_Instruments* self, psy_audio_InstrumentIndex index)
+void psy_audio_instruments_remove(psy_audio_Instruments* self, psy_audio_InstrumentIndex index)
 {	
 	psy_audio_InstrumentsGroup* group;
 
-	group = psy_table_at(&self->groups, index.slot);
+	group = psy_table_at(&self->groups, index.groupslot);
 	if (group) {
-		instrumentsgroup_remove(group, index.subslot);
-		if (instrumentsgroup_size(group) == 0) {
-			psy_table_remove(&self->groups, index.slot);
-			instrumentsgroup_dispose(group);
+		psy_audio_instrumentsgroup_remove(group, index.subslot);
+		if (psy_audio_instrumentsgroup_size(group) == 0) {
+			psy_table_remove(&self->groups, index.groupslot);
+			psy_audio_instrumentsgroup_dispose(group);
 			free(group);
 			psy_signal_emit(&self->signal_removed, self, 1, &index);
 		}
 	}
 }
 
-void instruments_changeslot(psy_audio_Instruments* self, psy_audio_InstrumentIndex index)
+void psy_audio_instruments_select(psy_audio_Instruments* self, psy_audio_InstrumentIndex index)
 {
-	self->slot = index;	
+	self->selected = index;	
 	psy_signal_emit(&self->signal_slotchange, self, 1, &index);
 }
 
-psy_audio_InstrumentIndex instruments_slot(psy_audio_Instruments* self)
-{
-	return self->slot;
-}
-
-psy_audio_Instrument* instruments_at(psy_audio_Instruments* self,
+psy_audio_Instrument* psy_audio_instruments_at(psy_audio_Instruments* self,
 	psy_audio_InstrumentIndex index)
 {
 	psy_audio_InstrumentsGroup* group;
 
-	group = psy_table_at(&self->groups, index.slot);
+	group = psy_table_at(&self->groups, index.groupslot);
 	if (group) {
-		return instrumentsgroup_at(group, index.subslot);
+		return psy_audio_instrumentsgroup_at(group, index.subslot);
 	}
 	return NULL;
 }
 
-uintptr_t instruments_size(psy_audio_Instruments* self, uintptr_t slot)
+uintptr_t psy_audio_instruments_size(psy_audio_Instruments* self,
+	uintptr_t groupslot)
 {
 	psy_audio_InstrumentsGroup* group;
 
-	group = psy_table_at(&self->groups, slot);
+	group = psy_table_at(&self->groups, groupslot);
 	if (group) {
 		return psy_table_size(&group->container);
 	}

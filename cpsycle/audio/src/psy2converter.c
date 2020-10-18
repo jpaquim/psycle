@@ -539,7 +539,7 @@ void retweak_parameter(psy_audio_Song* song,
 	{
 		enum Parameters { gain };
 		static const int parameters[] = { gain };
-		*parameter = parameters[--*parameter];
+		*parameter = parameters[-- * parameter];
 		switch (*parameter)
 		{
 		case gain:
@@ -553,11 +553,10 @@ void retweak_parameter(psy_audio_Song* song,
 		}
 	}
 	break;
-	case distortion:
-	{
+	case distortion: {
 		enum Parameters { input_gain, output_gain, positive_threshold, positive_clamp, negative_threshold, negative_clamp, symmetric };
 		static const int parameters[] = { positive_threshold, positive_clamp, negative_threshold, negative_clamp };
-		*parameter = parameters[--*parameter];
+		*parameter = parameters[-- * parameter];
 		switch (*parameter)
 		{
 		case negative_threshold:
@@ -566,100 +565,89 @@ void retweak_parameter(psy_audio_Song* song,
 		case positive_clamp:
 			value *= maximum / 0x100;
 			break;
-		}
-	}
-	break;
-	case delay:
-	{
+		}	
+		break; }
+	case delay: {
 		enum Parameters { dry, wet, left_delay, left_feedback, right_delay, right_feedback };
 		static const int parameters[] = { left_delay, left_feedback, right_delay, right_feedback, dry, wet };
 		*parameter = parameters[--*parameter];
-		switch (*parameter)
-		{
-		case left_delay:
-		case right_delay:
-			value *= (float)(2 * 3 * 4 * 5 * 7) / spr;
-			break;
-		case left_feedback:
-		case right_feedback:
-			value = (100 + value) * maximum / 200;
-			break;
-		case dry:
-		case wet:
-			value = (0x100 + value) * maximum / 0x200;
-			break;
+		switch (*parameter) {
+			case left_delay:
+			case right_delay:
+				value *= (float)(2 * 3 * 4 * 5 * 7) / spr;
+				break;
+			case left_feedback:
+			case right_feedback:
+				value = (100 + value) * maximum / 200;
+				break;
+			case dry:
+			case wet:
+				value = (0x100 + value) * maximum / 0x200;
+				break;
 		}
-	}
-	break;
-	case flanger:
-	{
+	break;	}
+	case flanger: {
 		enum Parameters { delay, modulation_amplitude, modulation_radians_per_second, modulation_stereo_dephase, interpolation, dry, wet, left_feedback, right_feedback };
 		static const int parameters[] = { delay, modulation_amplitude, modulation_radians_per_second, left_feedback, modulation_stereo_dephase, right_feedback, dry, wet, interpolation };
 		*parameter = parameters[--*parameter];
-		switch (*parameter)
-		{
-		case delay:
-			value *= maximum / 0.1 / sr;
-			break;
-		case modulation_amplitude:
-		case modulation_stereo_dephase:
-			value *= maximum / 0x100;
-			break;
-		case modulation_radians_per_second:
-			if (value < 1.0f) {
-				value = 0;
-			} else {
-				psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 100 * psy_dsp_PI * 2);
-				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 3e-9 * sr);
-			}
-			break;
-		case left_feedback:
-		case right_feedback:
-			value = (100 + value) * maximum / 200;
-			break;
-		case dry:
-		case wet:
-			value = (0x100 + value) * maximum / 0x200;
-			break;
-		case interpolation:
-			value = value != 0;
-			break;
+		switch (*parameter) {
+			case delay:
+				value *= maximum / 0.1 / sr;
+				break;
+			case modulation_amplitude:
+			case modulation_stereo_dephase:
+				value *= maximum / 0x100;
+				break;
+			case modulation_radians_per_second:
+				if (value < 1.0f) {
+					value = 0;
+				} else {
+					psy_dsp_scale_init_exp(&scale, maximum, 0.0001 * psy_dsp_PI * 2, 100 * psy_dsp_PI * 2);
+					value = psy_dsp_scale_exp_apply_inverse(&scale, value * 3e-9 * sr);
+				}
+				break;
+			case left_feedback:
+			case right_feedback:
+				value = (100 + value) * maximum / 200;
+				break;
+			case dry:
+			case wet:
+				value = (0x100 + value) * maximum / 0x200;
+				break;
+			case interpolation:
+				value = value != 0;
+				break;
 		}
-	}
-	break;
-	case filter_2_poles:
-	{
+	break;	}
+	case filter_2_poles: {
 		enum Parameters { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
 		static const int parameters[] = { response, cutoff_frequency, resonance, modulation_sequencer_ticks, modulation_amplitude, modulation_stereo_dephase };
 		*parameter = parameters[--*parameter];
-		switch (*parameter)
-		{
-		case cutoff_frequency:
-			if (value < 1.0f) {
-				value = 0;
-			} else {				
-				psy_dsp_scale_init_exp(&scale, maximum, 15 * psy_dsp_PI, 22050 * psy_dsp_PI);
-				value = psy_dsp_scale_exp_apply_inverse(&scale, asin(value / 0x100) * sr);
-			}
-			break;
-		case modulation_sequencer_ticks:
-			if (value < 1.0f) {
-				value = 0;
-			} else {
-				psy_dsp_scale_init_exp(&scale, maximum, psy_dsp_PI * 2 / 10000, psy_dsp_PI * 2 * 2 * 3 * 4 * 5 * 7);
-				value = psy_dsp_scale_exp_apply_inverse(&scale, value * 3e-8 * spr);
-			}
-			break;
-		case resonance:
-		case modulation_amplitude:
-		case modulation_stereo_dephase:
-			value *= maximum / 0x100;
-			break;
+		switch (*parameter) {
+			case cutoff_frequency:
+				if (value < 1.0f) {
+					value = 0;
+				} else {				
+					psy_dsp_scale_init_exp(&scale, maximum, 15 * psy_dsp_PI, 22050 * psy_dsp_PI);
+					value = psy_dsp_scale_exp_apply_inverse(&scale, asin(value / 0x100) * sr);
+				}
+				break;
+			case modulation_sequencer_ticks:
+				if (value < 1.0f) {
+					value = 0;
+				} else {
+					psy_dsp_scale_init_exp(&scale, maximum, psy_dsp_PI * 2 / 10000, psy_dsp_PI * 2 * 2 * 3 * 4 * 5 * 7);
+					value = psy_dsp_scale_exp_apply_inverse(&scale, value * 3e-8 * spr);
+				}
+				break;
+			case resonance:
+			case modulation_amplitude:
+			case modulation_stereo_dephase:
+				value *= maximum / 0x100;
+				break;
 		}
-	}
-	break;
-	case ring_modulator:
-	{
+		break;	}
+	case ring_modulator: {
 		enum Parameters { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
 		static const int parameters[] = { am_radians_per_second, am_glide, fm_radians_per_second, fm_bandwidth };
 		*parameter = parameters[--*parameter];
@@ -698,10 +686,8 @@ void retweak_parameter(psy_audio_Song* song,
 			}
 			break;
 		}
-	}
-	break;
-	case nativeplug:
-	{
+	break;	}
+	case nativeplug: {
 		if (strcmp(name, abass) == 0) {
 			if (*parameter > 0 && *parameter < 15) {
 				*parameter += 4;
@@ -710,26 +696,22 @@ void retweak_parameter(psy_audio_Song* song,
 			} else if (*parameter > 15) {
 				*parameter += 8;
 			}
-		} else
-		if (strcmp(name, asynth) == 0) {
+		} else if (strcmp(name, asynth) == 0) {
 			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
 				value = 5;
 			}
 			if (*parameter == 17) {
 				value += 10.f;
 			}
-		} else
-		if (strcmp(name, asynth2) == 0) {
+		} else if (strcmp(name, asynth2) == 0) {
 			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
 				value = 5;
 			}
-		} else
-		if (strcmp(name, asynth21) == 0) {
+		} else if (strcmp(name, asynth21) == 0) {
 			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
 				value = 5;
 			}
-		} else
-		if (strcmp(name, asynth22) == 0) {			
+		} else if (strcmp(name, asynth22) == 0) {			
 			if ((*parameter == 0 || *parameter == 1) && *integral_value == 4) {
 				value = 5;
 			}

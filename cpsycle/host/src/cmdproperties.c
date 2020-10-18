@@ -247,6 +247,14 @@ void cmdproperties_makegeneral(psy_Properties* self)
 		psy_properties_setid(psy_properties_append_int(general, "cmd_terminal",
 			psy_audio_encodeinput(psy_ui_KEY_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL),
 		"term"), "Terminal");
+	psy_properties_settext(psy_properties_setshorttext(
+		psy_properties_setid(psy_properties_append_int(general, "cmd_instrdec",
+			psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 1), 0, 0), CMD_IMM_INSTRDEC),
+		"inst-1"), "Current Instrument -1");
+	psy_properties_settext(psy_properties_setshorttext(
+		psy_properties_setid(psy_properties_append_int(general, "cmd_instrinc",
+			psy_audio_encodeinput(psy_ui_KEY_UP, 0, 1), 0, 0), CMD_IMM_INSTRINC),
+		"inst+1"), "Current Instrument +1");
 	for (p = general->children; p != NULL; p = psy_properties_next(p)) {
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_INPUT);
 	}	

@@ -1175,6 +1175,7 @@ void workspace_makemidi(Workspace* self)
 	psy_properties_append_string(installed, "kbd", "kbd");	
 #if defined(DIVERSALIS__OS__MICROSOFT)
 	psy_properties_append_string(installed, "mmemidi", ".\\mmemidi.dll");
+	psy_properties_append_string(installed, "dxjoystick", ".\\dxjoystick.dll");
 #endif
 	psy_properties_settext(
 		psy_properties_append_action(self->midi, "addeventdriver"),
@@ -1287,8 +1288,13 @@ void workspace_configchanged(Workspace* self, psy_Properties* property,
 				id = psy_properties_as_int(p);				
 				for (p = p->children; p != NULL  && c != id; p = p->next, ++c);
 				if (p) {
-					psy_audio_player_loadeventdriver(&self->player,
+					psy_EventDriver* driver;
+
+					driver = psy_audio_player_loadeventdriver(&self->player,
 						psy_properties_as_str(p));
+					if (driver) {
+						driver->setcmddef(driver, self->cmds);
+					}
 					workspace_updatemididriverlist(self);
 					p = psy_properties_at(self->midi, "mididriver", PSY_PROPERTY_TYP_NONE);
 					if (p) {
@@ -1972,6 +1978,7 @@ void workspace_idle(Workspace* self)
 			self->lastentry = 0;
 		}		
 	}
+	eventdrivers_idle(&self->player.eventdrivers);
 }
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)

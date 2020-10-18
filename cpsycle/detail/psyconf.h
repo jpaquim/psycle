@@ -67,6 +67,6 @@
 
 #define PSYCLE_USE_PSY3
 #define PSYCLE_USE_PSY2
-// #define PSYCLE_USE_XM
+#define PSYCLE_USE_XM
 
 #endif /* psy_CONF_H */

@@ -27,8 +27,8 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	instrument = psy_audio_instrument_allocinit();
 	psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
 	psy_audio_instrument_setindex(instrument, index.slot);
-	instruments_insert(&self->song->instruments, instrument,
-		instrumentindex_make(0, index.slot));
+	psy_audio_instruments_insert(&self->song->instruments, instrument,
+		psy_audio_instrumentindex_make(0, index.slot));
 	{
 		psy_audio_Pattern* pattern;
 		psy_audio_PatternEvent patternevent;		

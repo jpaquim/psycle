@@ -197,21 +197,21 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 	//1st check: Channel ( They can appear without an existing playing note and are persistent when a new one comes)
 	switch (volcmd & 0xF0)
 	{
-		case SAMPLER_CMD_VOL_PANNING:
+		case XM_SAMPLER_CMD_VOL_PANNING:
 			psy_audio_xmsamplerchannel_setpanfactor(self,
 				(volcmd & 0x0F) / 15.0f);
 			break;
-		case SAMPLER_CMD_VOL_PANSLIDELEFT:
+		case XM_SAMPLER_CMD_VOL_PANSLIDELEFT:
 			// this command is actually fine pan slide
 			psy_audio_xmsamplerchannel_setpanningslide(self,
 				(volcmd & 0x0F) << 4);
 			break;
-		case SAMPLER_CMD_VOL_PANSLIDERIGHT:
+		case XM_SAMPLER_CMD_VOL_PANSLIDERIGHT:
 			// this command is actually fine pan slide
 			psy_audio_xmsamplerchannel_setpanningslide(self,
 				volcmd & 0x0F);
 			break;
-		case SAMPLER_CMD_VOL_VIBRATO:
+		case XM_SAMPLER_CMD_VOL_VIBRATO:
 			psy_audio_xmsamplerchannel_setvibrato(self,
 				0, (volcmd & 0x0F) << 2);
 			break;
@@ -220,77 +220,77 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 	}
 	
 	switch (ev->cmd) {
-		case SAMPLER_CMD_PANNING:
+		case XM_SAMPLER_CMD_PANNING:
 			self->surround = FALSE;
 			self->panfactor = ev->parameter / (psy_dsp_amp_t)255;
 		break;
-		case SAMPLER_CMD_SET_CHANNEL_VOLUME:
+		case XM_SAMPLER_CMD_SET_CHANNEL_VOLUME:
 			self->volume = (psy_dsp_amp_t)((ev->parameter < 64)
 				? (ev->parameter / 64.0f)
 				: 1.0f);
 			break;
-		case SAMPLER_CMD_PANNINGSLIDE:
+		case XM_SAMPLER_CMD_PANNINGSLIDE:
 			psy_audio_xmsamplerchannel_setpanningslide(self, ev->parameter);
 			break;
-		case SAMPLER_CMD_CHANNEL_VOLUMESLIDE:
+		case XM_SAMPLER_CMD_CHANNEL_VOLUMESLIDE:
 			psy_audio_xmsamplerchannel_setchannelvolumeslide(self, ev->parameter);
 			break;
-		case SAMPLER_CMD_SET_GLOBAL_VOLUME:			
+		case XM_SAMPLER_CMD_SET_GLOBAL_VOLUME:
 			// m_pSampler->GlobalVolume(parameter < 0x80 ? parameter : 0x80);
 			break;
-		case SAMPLER_CMD_VOLUMESLIDE:
+		case XM_SAMPLER_CMD_VOLUMESLIDE:
 			psy_audio_xmsamplerchannel_setvolumeslide(self, ev->parameter);
 			break;
-		case SAMPLER_CMD_GLOBAL_VOLUME_SLIDE:
+		case XM_SAMPLER_CMD_GLOBAL_VOLUME_SLIDE:
 			break;		
-		case SAMPLER_CMD_EXTENDED:
+		case XM_SAMPLER_CMD_EXTENDED:
 			switch (ev->parameter & 0xF0) {
-				case SAMPLER_CMD_E9:
+				case XM_SAMPLER_CMD_E9:
 					switch (ev->parameter & 0x0F) {
-						case SAMPLER_CMD_E9_SURROUND_OFF:
+						case XM_SAMPLER_CMD_E9_SURROUND_OFF:
 							self->surround = FALSE;
 							break;
-						case SAMPLER_CMD_E9_SURROUND_ON:
+						case XM_SAMPLER_CMD_E9_SURROUND_ON:
 							self->surround = TRUE;
 							break;
-						case SAMPLER_CMD_E9_REVERB_OFF:
+						case XM_SAMPLER_CMD_E9_REVERB_OFF:
 							break;
-						case SAMPLER_CMD_E9_REVERB_FORCE:
+						case XM_SAMPLER_CMD_E9_REVERB_FORCE:
 							break;
-						case SAMPLER_CMD_E9_STANDARD_SURROUND:
+						case XM_SAMPLER_CMD_E9_STANDARD_SURROUND:
 							break;
-						case SAMPLER_CMD_E9_QUAD_SURROUND:
+						case XM_SAMPLER_CMD_E9_QUAD_SURROUND:
 							break;
-						case SAMPLER_CMD_E9_GLOBAL_FILTER:
+						case XM_SAMPLER_CMD_E9_GLOBAL_FILTER:
 							break;
-						case SAMPLER_CMD_E9_LOCAL_FILTER:
+						case XM_SAMPLER_CMD_E9_LOCAL_FILTER:
 							break;
 						default:
 							break;
 						}
 					break;
-				case SAMPLER_CMD_E_SET_PAN:
+				case XM_SAMPLER_CMD_E_SET_PAN:
 					psy_audio_xmsamplerchannel_setpanfactor(self,
 						E8VolMap[(ev->parameter & 0xf)] / 64.0f);
 					break;
-				case SAMPLER_CMD_E_SET_MIDI_MACRO:
+				case XM_SAMPLER_CMD_E_SET_MIDI_MACRO:
 					//\todo : implement. For now, it maps directly to internal Filter commands
 					self->midi_set = ev->parameter & 0x0F;
 					break;
-				case SAMPLER_CMD_E_GLISSANDO_TYPE:
+				case XM_SAMPLER_CMD_E_GLISSANDO_TYPE:
 					self->grissando = ev->parameter != 0;
 					break;
-				case SAMPLER_CMD_E_VIBRATO_WAVE:
+				case XM_SAMPLER_CMD_E_VIBRATO_WAVE:
 					if (ev->parameter <= psy_audio_WAVEFORMS_RANDOM) {
 						self->vibratotype = (psy_audio_WaveForms)(ev->parameter);
 					} else { self->vibratotype = psy_audio_WAVEFORMS_SINUS; }
 					break;
-				case SAMPLER_CMD_E_PANBRELLO_WAVE:
+				case XM_SAMPLER_CMD_E_PANBRELLO_WAVE:
 					if (ev->parameter <= psy_audio_WAVEFORMS_RANDOM) {
 						self->panbrellotype = (psy_audio_WaveForms)(ev->parameter);
 					} else { self->panbrellotype = psy_audio_WAVEFORMS_SINUS; }
 					break;
-				case SAMPLER_CMD_E_TREMOLO_WAVE:
+				case XM_SAMPLER_CMD_E_TREMOLO_WAVE:
 					if (ev->parameter <= psy_audio_WAVEFORMS_RANDOM) {
 						self->tremolotype = (psy_audio_WaveForms)(ev->parameter);
 					} else { self->tremolotype = psy_audio_WAVEFORMS_SINUS; }
@@ -299,7 +299,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 				break;
 			}
 			break;
-		case SAMPLER_CMD_MIDI_MACRO:
+		case XM_SAMPLER_CMD_MIDI_MACRO:
 			if (ev->parameter < 0x80) {
 				realset = self->midi_set;
 				realvalue = ev->parameter;
@@ -365,27 +365,27 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 			break;
 	}
 	switch (ev->cmd) {
-		case SAMPLER_CMD_VIBRATO:
+		case XM_SAMPLER_CMD_VIBRATO:
 			psy_audio_xmsamplerchannel_setvibrato(self,
 				((ev->parameter >> 4) & 0x0F),
 				(ev->parameter & 0x0F) << 2);
 			break;
-		case SAMPLER_CMD_FINE_VIBRATO:
+		case XM_SAMPLER_CMD_FINE_VIBRATO:
 			psy_audio_xmsamplerchannel_setvibrato(self,
 				((ev->parameter >> 4) & 0x0F),
 				(ev->parameter & 0x0F));
 			break;
-		case SAMPLER_CMD_TREMOLO:
+		case XM_SAMPLER_CMD_TREMOLO:
 			psy_audio_xmsamplerchannel_settremolo(self,
 				((ev->parameter >> 4) & 0x0F),
 				(ev->parameter & 0x0F));
 			break;
-		case SAMPLER_CMD_PANBRELLO:
+		case XM_SAMPLER_CMD_PANBRELLO:
 			psy_audio_xmsamplerchannel_setpanbrello(self,
 				((ev->parameter >> 4) & 0x0F),
 				(ev->parameter & 0x0F));
 			break;
-		case SAMPLER_CMD_RETRIG:
+		case XM_SAMPLER_CMD_RETRIG:
 			psy_audio_xmsamplerchannel_setretrigger(self,
 				ev->parameter);
 			break;
@@ -407,10 +407,10 @@ void psy_audio_xmsamplerchannel_performfx(psy_audio_XMSamplerChannel* self)
 		int effect = (int)(intptr_t)psy_list_entry(p);
 		
 		switch (effect) {
-			case SAMPLER_EFFECT_CHANNELVOLSLIDE:
+			case XM_SAMPLER_EFFECT_CHANNELVOLSLIDE:
 				psy_audio_xmsamplerchannel_perform_channelvolumeslide(self);
 				break;
-			case SAMPLER_EFFECT_PANSLIDE:				
+			case XM_SAMPLER_EFFECT_PANSLIDE:
 				psy_audio_xmsamplerchannel_performpanningslide(self);
 				break;
 			default:
@@ -426,7 +426,7 @@ void psy_audio_xmsamplerchannel_setvolumeslide(psy_audio_XMSamplerChannel* self,
 		if (self->volumeslidemem == 0) return;
 		speed = self->volumeslidemem;
 	} else self->volumeslidemem = speed;
-	psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_CHANNELVOLSLIDE);
+	psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_CHANNELVOLSLIDE);
 }
 
 void psy_audio_xmsamplerchannel_setchannelvolumeslide(psy_audio_XMSamplerChannel* self,
@@ -441,14 +441,14 @@ void psy_audio_xmsamplerchannel_setchannelvolumeslide(psy_audio_XMSamplerChannel
 
 	if (ISSLIDEUP(speed)) { // Slide up
 		speed = GETSLIDEUPVAL(speed);
-		psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_CHANNELVOLSLIDE);
+		psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_CHANNELVOLSLIDE);
 		self->chanvolslidespeed = speed / 64.0f;
 		if (speed == 0xF) {
 			psy_audio_xmsamplerchannel_perform_channelvolumeslide(self);
 		}
 	} else if (ISSLIDEDOWN(speed)) { // Slide down
 		speed = GETSLIDEDOWNVAL(speed);
-		psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_CHANNELVOLSLIDE);
+		psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_CHANNELVOLSLIDE);
 		self->chanvolslidespeed = -speed / 64.0f;
 		if (speed == 0xF) {
 			psy_audio_xmsamplerchannel_perform_channelvolumeslide(self);
@@ -482,14 +482,14 @@ void psy_audio_xmsamplerchannel_setpanningslide(psy_audio_XMSamplerChannel* self
 
 	if (ISSLIDEUP(speed)) { // Slide Left
 		speed = GETSLIDEUPVAL(speed);
-		psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_PANSLIDE);
+		psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_PANSLIDE);
 		self->panslidespeed = -speed / 64.0f;
 		if (speed == 0xF) {
 			psy_audio_xmsamplerchannel_performpanningslide(self);
 		}
 	} else if (ISSLIDEDOWN(speed)) { // Slide Right
 		speed = GETSLIDEDOWNVAL(speed);
-		psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_PANSLIDE);
+		psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_PANSLIDE);
 		self->panslidespeed = speed / 64.0f;
 		if (speed == 0xF) {
 			psy_audio_xmsamplerchannel_performpanningslide(self);
@@ -524,7 +524,7 @@ void psy_audio_xmsamplerchannel_setvibrato(psy_audio_XMSamplerChannel* self, int
 		if (self->vibratospeedmem == 0) return;
 		speed = self->vibratospeedmem;
 	} else self->vibratospeedmem = speed;	
-	psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_VIBRATO);
+	psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_VIBRATO);
 }
 
 void psy_audio_xmsamplerchannel_setpitchslide(psy_audio_XMSamplerChannel* self,
@@ -544,10 +544,10 @@ void psy_audio_xmsamplerchannel_setpitchslide(psy_audio_XMSamplerChannel* self,
 		{
 			if (note != NOTECOMMANDS_RELEASE) {
 			//	if (ForegroundVoice()) { ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
-				psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_SLIDE2NOTE);
+				psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_SLIDE2NOTE);
 			}
 		} else {
-			psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_PITCHSLIDE);
+			psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_PITCHSLIDE);
 		}
 	} else if (speed < 0xF0) {
 		speed = speed & 0xf;
@@ -577,7 +577,7 @@ void psy_audio_xmsamplerchannel_settremolo(psy_audio_XMSamplerChannel* self, int
 		if (self->tremolospeedmem == 0) return;
 		speed = self->tremolospeedmem;
 	} else self->tremolospeedmem = speed;
-	psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_TREMOLO);
+	psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_TREMOLO);
 }
 
 void psy_audio_xmsamplerchannel_setpanbrello(psy_audio_XMSamplerChannel* self, int speed, int depth)
@@ -591,7 +591,7 @@ void psy_audio_xmsamplerchannel_setpanbrello(psy_audio_XMSamplerChannel* self, i
 		if (self->panbrellospeedmem == 0) return;
 		speed = self->panbrellospeedmem;
 	} else self->panbrellospeedmem = speed;
-	psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_PANBRELLO);
+	psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_PANBRELLO);
 }
 
 void  psy_audio_xmsamplerchannel_setretrigger(psy_audio_XMSamplerChannel* self, 
@@ -634,7 +634,7 @@ void  psy_audio_xmsamplerchannel_setretrigger(psy_audio_XMSamplerChannel* self,
 	self->ticks = ticks;
 	self->retrigvol = effretvol;
 	self->retrigoperation = effretmode;
-	psy_audio_xmsamplerchannel_addeffect(self, SAMPLER_EFFECT_RETRIG);
+	psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_RETRIG);
 	
 }
 

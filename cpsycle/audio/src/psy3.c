@@ -24,14 +24,6 @@
 #define _MAX_PATH 4096
 #endif
 
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE)
-#define TRUE 1
-#endif
-
 static void readinfo(psy_audio_SongFile*);
 static void readsngi(psy_audio_SongFile*);
 static void readseqd(psy_audio_SongFile*, unsigned char* playorder,
@@ -205,7 +197,6 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 		}
 	}
 }
-
 
 void buildsequence(psy_audio_SongFile* self, unsigned char* playorder, int playlength)
 {
@@ -732,8 +723,8 @@ void readinsd(psy_audio_SongFile* self)
 			ENV_F_RT = (ENV_F_RT/220)*220; if (ENV_F_RT <=0) ENV_F_RT=1;			
 			psy_audio_instrument_setname(instrument, instrum_name);
 			psy_audio_instrument_setindex(instrument, index);
-			instruments_insert(&self->song->instruments, instrument,
-				instrumentindex_make(0, index));
+			psy_audio_instruments_insert(&self->song->instruments, instrument,
+				psy_audio_instrumentindex_make(0, index));
 		}
 	}	
 }
@@ -835,13 +826,15 @@ void readsmid(psy_audio_SongFile* self)
 		if (index < MAX_INSTRUMENTS) {
 			psy_audio_Instrument* instrument;
 
-			if (!instruments_at(&self->song->instruments, instrumentindex_make(1, index))) {
+			if (!psy_audio_instruments_at(&self->song->instruments,				
+					psy_audio_instrumentindex_make(1, index))) {
 				instrument = psy_audio_instrument_allocinit();
 				psy_audio_instrument_setindex(instrument, index);
-				instruments_insert(&self->song->instruments, instrument,
-					instrumentindex_make(1, index));
+				psy_audio_instruments_insert(&self->song->instruments, instrument,
+					psy_audio_instrumentindex_make(1, index));
 			}
-			instrument = instruments_at(&self->song->instruments, instrumentindex_make(1, index));
+			instrument = psy_audio_instruments_at(&self->song->instruments,
+				psy_audio_instrumentindex_make(1, index));
 			loadxminstrument(self, instrument, 0, self->file->currchunk.version &
 				0xFFFF);
 		}
@@ -1669,13 +1662,13 @@ uint32_t psy3_chunkcount(psy_audio_Song* song)
 	uint32_t rv = 3;
 
 	// PATD
-	rv += (uint32_t) patterns_size(&song->patterns);
+	rv += (uint32_t)patterns_size(&song->patterns);
 	// MACD
-	rv += (uint32_t) psy_audio_machines_size(&song->machines);
+	rv += (uint32_t)psy_audio_machines_size(&song->machines);
 	// INSD
-	rv += (uint32_t)instruments_size(&song->instruments, 0);
+	rv += (uint32_t)psy_audio_instruments_size(&song->instruments, 0);
 	// SMSB
-	rv += (uint32_t) psy_audio_samples_groupsize(&song->samples);
+	rv += (uint32_t)psy_audio_samples_groupsize(&song->samples);
 	return rv;
 }
 
@@ -2190,7 +2183,6 @@ int psy3_write_connections(psy_audio_SongFile* self, uintptr_t slot)
 	psy_List* out;			
 	int incon;
 	int outcon;
-	int i;
 	int c;
 	int status = PSY_OK;
 	

@@ -30,7 +30,7 @@ typedef struct cpoint_t {
 
 /// helper struct for the PSY2 loader.
 typedef struct VSTLoader {
-	bool valid;
+	uint8_t valid;
 	char dllName[128];
 	int32_t numpars;
 	float* pars;
@@ -504,8 +504,8 @@ void psy2loader_readinstruments(PSY2Loader* self)
 						instrument = psy_audio_instrument_allocinit();
 						psy_audio_instrument_setname(instrument, names[i]);
 						psy_audio_instrument_setindex(instrument, i);
-						instruments_insert(&self->songfile->song->instruments,
-							instrument, instrumentindex_make(0, i));
+						psy_audio_instruments_insert(&self->songfile->song->instruments,
+							instrument, psy_audio_instrumentindex_make(0, i));
 					}
 
 				} else
@@ -527,10 +527,10 @@ void psy2loader_readvsts(PSY2Loader* self)
 {
 	int32_t i;
 
-	for (i = 0; i < OLD_MAX_PLUGINS; i++) {
-		unsigned char valid;
-		psyfile_read(self->songfile->file, &valid, sizeof(valid));
-		if (valid) {
+	for (i = 0; i < OLD_MAX_PLUGINS; ++i) {
+		psyfile_read(self->songfile->file, &self->vstL[i].valid,
+			sizeof(self->vstL[i].valid));
+		if (self->vstL[i].valid) {
 			psyfile_read(self->songfile->file, self->vstL[i].dllName,
 				sizeof(self->vstL[i].dllName));
 			psy_strlwr(self->vstL[i].dllName);
@@ -612,7 +612,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 					char plugincatchername[_MAX_PATH];
 					char sError[128];
 					bool berror;
-					psy_audio_VstPlugin* pVstPlugin;
+					psy_audio_Machine* pVstPlugin;
 					unsigned char program;
 					int32_t instance;
 					VstPreload vstpreload;					
@@ -635,16 +635,21 @@ void psy2loader_readmachines(PSY2Loader* self)
 					} else {		
 						plugincatcher_catchername(self->songfile->song->machinefactory->catcher,
 							self->vstL[instance].dllName, plugincatchername, shellIdx);
-						pVstPlugin = (psy_audio_VstPlugin*)psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername);			
+						pVstPlugin = psy_audio_machinefactory_makemachine(factory, MACH_PLUGIN, plugincatchername);			
 						if (pVstPlugin) {
 							int c;
-							// pVstPlugin->LoadFromMac(pTempMac);
-							// pVstPlugin->SetProgram(program);
-							// pVstPlugin->_macIndex = i;
+
+							psy_audio_machine_setcurrprogram(pVstPlugin, program);
+							psy_audio_machine_setslot(pVstPlugin, i);
 							const int numpars = self->vstL[instance].numpars;
-							for (c = 0; c < numpars; ++c)
-							{
-								//pVstPlugin->SetParameter(c, vstL[instance].pars[c]);
+							for (c = 0; c < numpars; ++c) {
+								psy_audio_MachineParam* param;
+
+								param = psy_audio_machine_tweakparameter(pVstPlugin, c);
+								if (param) {
+									psy_audio_machine_parameter_tweak(pVstPlugin,
+										param, self->vstL[instance].pars[c]);
+								}
 							}
 						} else {
 							berror = TRUE;
@@ -653,8 +658,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 					}
 					if (berror) {
 						self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_DUMMY, plugincatchername);
-						psy_audio_machine_setslot(self->pMac[i], i);
-						plugin_skipload(self->songfile, i);
+						psy_audio_machine_setslot(self->pMac[i], i);						
 						if (type == MACH_VSTFX) {
 							// self->pMac[i]->_mode = MACHMODE_FX;
 						} else {
@@ -866,7 +870,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 			}
 		}		
 		
-		{
+		//{
 			//////////////////////////////////////////////////////////////////////////
 			//Finished all the songfile->file loading. Now Process the data to the current structures
 
@@ -876,7 +880,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 
 			// progress.m_Progress.SetPos(8192+4096+2048);
 			// ::Sleep(1);
-			int32_t i;
+			/*int32_t i;
 			psy_Table* legacywiretable;
 			
 
@@ -930,7 +934,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 									//} else {
 									//	pMac[i]->inWires[c].ConnectSource(*pSourceMac, 0, d);
 									//}
-									//pMac[i]->inWires[c].SetVolume(val * wire._wireMultiplier); */
+									//pMac[i]->inWires[c].SetVolume(val * wire._wireMultiplier); 
 									if (psy_audio_machines_valid_connection(
 										&self->songfile->song->machines, newwire)) {
 										psy_audio_machines_connect(&self->songfile->song->machines, newwire);
@@ -945,7 +949,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 					}
 				}
 			}
-		}
+		}*/
 
 		// todo samplerate
 		internalmachineconverter_retweak_song(&self->converter, self->songfile->song, 44100.0);
@@ -959,6 +963,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 			psy_Table* legacywires;
 			
 			legacywires = (psy_Table*)malloc(sizeof(psy_Table));
+			legacywires = (psy_Table*)malloc(sizeof(psy_Table));
 			psy_table_init(legacywires);
 			for (i = 0; i < 128; i++)
 			{
@@ -969,42 +974,57 @@ void psy2loader_addmachines(PSY2Loader* self)
 
 					legacywiretable = psy_audio_legacywires_at(&self->songfile->legacywires, i);
 					for (it_wires = psy_table_begin(legacywiretable);
-							!psy_tableiterator_equal(&it_wires, psy_table_end());
-							psy_tableiterator_inc(&it_wires)) {
+						!psy_tableiterator_equal(&it_wires, psy_table_end());
+						psy_tableiterator_inc(&it_wires)) {
 						psy_audio_LegacyWire* legacywire;
 
 						legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it_wires);
 						if (legacywire->_inputCon && legacywire->_inputMachine < 128) {
-							float val = legacywire->_inputConVol;
+							int32_t d;
 
-							legacywire->_inputMachine = invmach[legacywire->_inputMachine];							
-							if (val > 4.1f)
-							{
-								val *= 0.000030517578125f; // BugFix
-							} else if (val < 0.00004f)
-							{
-								val *= 32768.0f; // BugFix
-							}
-							legacywire->_inputConVol = val;
-						}
+							//d = psy_audio_legacywires_findlegacyoutput(&self->songfile->legacywires,
+								//legacywire->_inputMachine, i);
+							legacywire->_inputMachine = invmach[legacywire->_inputMachine];
+							//if (d != -1)
+							//{
+								//psy_audio_LegacyWire* outputwire;
+
+								//outputwire = psy_table_at(legacywiretable, d);
+								//if (outputwire) {
+									float val;
+
+									val = legacywire->_inputConVol;
+									if (val > 4.1f)
+									{
+										val *= 0.000030517578125f; // BugFix
+									} else if (val < 0.00004f)
+									{
+										val *= 32768.0f; // BugFix
+									}
+									legacywire->_inputConVol = val;
+								}
+							//}
+						//}
 						if (legacywire->_connection && legacywire->_outputMachine && legacywire->_outputMachine < 128) {
 							legacywire->_outputMachine = invmach[legacywire->_outputMachine];
 						} else {
 							legacywire->_outputMachine = psy_audio_MASTER_INDEX;
-						}						
+						}
 					}
 					psy_table_insert(legacywires, i, legacywiretable);
 				}
 			}
+
 			psy_table_clear(&self->songfile->legacywires.legacywires);
 			for (i = 0; i < 128; i++) {
 				if (invmach[i] != 255) {
 					psy_Table* legacywiretable;
-					psy_TableIterator it;
 
 					legacywiretable = psy_table_at(legacywires, i);
-					psy_table_insert(&self->songfile->legacywires.legacywires, invmach[i],
-						legacywiretable);
+					if (legacywiretable) {
+						psy_table_insert(&self->songfile->legacywires.legacywires, invmach[i],
+							legacywiretable);
+					}
 				}
 			}
 			psy_table_dispose(legacywires);
@@ -1239,7 +1259,7 @@ bool vstpreload_load(VstPreload* self, uintptr_t slot, unsigned char* _program, 
 
 	
 	psyfile_read(self->songfile->file, &old, sizeof old); // old format
-	psyfile_read(self->songfile->file, &_instance, sizeof _instance); // ovst.instance
+	psyfile_read(self->songfile->file, _instance, sizeof *_instance); // ovst.instance
 	if (old)
 	{
 		char mch;

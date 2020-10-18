@@ -57,6 +57,7 @@ typedef struct psy_EventDriver {
 	int (*error)(int, const char*);
 	EventDriverCmd (*getcmd)(struct psy_EventDriver*, const char* section);
 	void (*setcmddef)(struct psy_EventDriver*, psy_Properties*);
+	int (*idle)(struct psy_EventDriver*);
 	psy_Signal signal_input;
 } psy_EventDriver;
 

@@ -144,7 +144,7 @@ void patterns_remove(psy_audio_Patterns* self, uintptr_t slot)
 
 uintptr_t patterns_size(psy_audio_Patterns* self)
 {
-	return self->slots.count;
+	return psy_table_size(&self->slots);
 }
 
 void patterns_activatesolotrack(psy_audio_Patterns* self, uintptr_t track)

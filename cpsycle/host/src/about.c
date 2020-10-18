@@ -157,6 +157,7 @@ static void about_onversion(About*, psy_ui_Component* sender);
 static void about_onlicence(About*, psy_ui_Component* sender);
 static void about_onmousedoubleclick(About*, psy_ui_MouseEvent*);
 static void about_onalign(About*);
+static void about_onfocus(About*, psy_ui_Component* sender);
 // vtable
 static psy_ui_ComponentVtable about_vtable;
 static int about_vtable_initialized = 0;
@@ -167,7 +168,7 @@ static void about_vtable_init(About* self)
 		about_vtable = *(self->component.vtable);
 		about_vtable.onalign = (psy_ui_fp_onalign)about_onalign;
 		about_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
-			about_onmousedoubleclick;
+			about_onmousedoubleclick;		
 		about_vtable_initialized = 1;
 	}
 }
@@ -190,6 +191,8 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));
 	licence_init(&self->licence, psy_ui_notebook_base(&self->notebook));
 	psy_ui_notebook_setpageindex(&self->notebook, 0);
+	psy_signal_connect(&self->component.signal_focus, self,
+		about_onfocus);
 }
 
 void about_initbuttons(About* self)
@@ -290,6 +293,11 @@ void about_onalign(About* self)
 			psy_ui_value_makepx(
 				centery + psy_ui_value_px(&bitmapsize.height, &tm))),
 		okbuttonsize);
+}
+
+void about_onfocus(About* self, psy_ui_Component* sender)
+{
+	psy_ui_component_setfocus(&self->okbutton.component);
 }
 
 void about_oncontributors(About* self, psy_ui_Component* sender) 

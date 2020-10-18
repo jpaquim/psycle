@@ -29,7 +29,7 @@ typedef struct {
 void eventdrivers_init(EventDrivers*, void* systemhandle);
 void eventdrivers_dispose(EventDrivers*);
 void eventdrivers_initkbd(EventDrivers*);
-void eventdrivers_load(EventDrivers*, const char* path);
+psy_EventDriver* eventdrivers_load(EventDrivers*, const char* path);
 void eventdrivers_restart(EventDrivers*, int id);
 void eventdrivers_restartall(EventDrivers*);
 void eventdrivers_remove(EventDrivers*, int id);
@@ -37,6 +37,7 @@ void eventdrivers_setcmds(EventDrivers*, psy_Properties* self);
 unsigned int eventdrivers_size(EventDrivers*);
 psy_EventDriver* eventdrivers_driver(EventDrivers*, int id); 
 EventDriverEntry* eventdrivers_entry(EventDrivers*, int id);
+void eventdrivers_idle(EventDrivers*);
 
 #ifdef __cplusplus
 }

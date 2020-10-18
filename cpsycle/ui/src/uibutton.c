@@ -22,6 +22,7 @@ static void onmouseleave(psy_ui_Button*);
 static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit, psy_ui_Size* rv);
 static void enableinput(psy_ui_Button*);
 static void preventinput(psy_ui_Button*);
+static void button_onkeydown(psy_ui_Button*, psy_ui_KeyEvent*);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -33,10 +34,11 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.enableinput = (psy_ui_fp_component_enableinput)enableinput;
 		vtable.preventinput = (psy_ui_fp_component_preventinput)preventinput;
 		vtable.ondraw = (psy_ui_fp_ondraw)ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;		
+		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_onmouseenter)onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_onmouseleave)onmouseleave;		
+		vtable.onkeydown = (psy_ui_fp_onkeydown)button_onkeydown;
 		vtable_initialized = 1;
 	}
 }
@@ -85,7 +87,7 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->enabled == FALSE) {
 		psy_ui_settextcolor(g, psy_ui_color_make(0x00777777));
-	} else if (self->hover) {
+	} else if (self->hover || psy_ui_component_hasfocus(&self->component)) {
 		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 	} else if (psy_ui_button_highlighted(self)) {
 		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
@@ -337,5 +339,13 @@ void preventinput(psy_ui_Button* self)
 	if (self->enabled == TRUE) {
 		self->enabled = FALSE;
 		psy_ui_component_invalidate(psy_ui_button_base(self));
+	}
+}
+
+void button_onkeydown(psy_ui_Button* self, psy_ui_KeyEvent* ev)
+{
+	if (self->enabled && ev->keycode == psy_ui_KEY_RETURN) {		
+		psy_signal_emit(&self->signal_clicked, self, 0);
+		psy_ui_keyevent_stoppropagation(ev);
 	}
 }

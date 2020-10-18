@@ -1020,7 +1020,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	instrumentviewbuttons_init(&self->buttons, &self->left, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	instrumentsbox_init(&self->instrumentsbox, &self->left,
-		&workspace->song->instruments);
+		&workspace->song->instruments, workspace);
 	psy_ui_component_setalign(&self->instrumentsbox.component,
 		psy_ui_ALIGN_CLIENT);
 	{
@@ -1143,7 +1143,7 @@ void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentInde
 {
 	psy_audio_Instrument* instrument;
 
-	instrument = instruments_at(&self->workspace->song->instruments, index);
+	instrument = psy_audio_instruments_at(&self->workspace->song->instruments, index);
 	instrumentheaderview_setinstrument(&self->header, instrument);
 	instrumentgeneralview_setinstrument(&self->general, instrument);
 	instrumentvolumeview_setinstrument(&self->volume, instrument);
@@ -1180,7 +1180,7 @@ void instrumentview_onsongchanged(InstrumentView* self, Workspace* workspace, in
 		samplesbox_setsamples(&self->general.notemapview.samplesbox,
 			&workspace->song->samples);
 	}
-	instrumentview_setinstrument(self, instrumentindex_make(0, 0));
+	instrumentview_setinstrument(self, psy_audio_instrumentindex_make(0, 0));
 }
 
 void instrumentview_oncreateinstrument(InstrumentView* self, psy_ui_Component* sender)
@@ -1190,14 +1190,14 @@ void instrumentview_oncreateinstrument(InstrumentView* self, psy_ui_Component* s
 		int selected;
 
 		selected = instrumentsbox_selected(&self->instrumentsbox);
-		if (instruments_at(&self->workspace->song->instruments, instrumentindex_make(0, selected))) {
-			instruments_remove(&self->workspace->song->instruments, instrumentindex_make(0, selected));
+		if (psy_audio_instruments_at(&self->workspace->song->instruments, psy_audio_instrumentindex_make(0, selected))) {
+			psy_audio_instruments_remove(&self->workspace->song->instruments, psy_audio_instrumentindex_make(0, selected));
 		}
 		instrument = psy_audio_instrument_allocinit();
 		psy_audio_instrument_setname(instrument, "Untitled");
 		psy_audio_instrument_setindex(instrument, selected);
-		instruments_insert(&self->workspace->song->instruments, instrument,
-			instrumentindex_make(0, selected));
+		psy_audio_instruments_insert(&self->workspace->song->instruments, instrument,
+			psy_audio_instrumentindex_make(0, selected));
 	}
 }
 
@@ -1219,7 +1219,7 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			songfile.song = self->workspace->song;
 			songfile.file = &file;
 			if (psyfile_open(&file, psy_ui_opendialog_filename(&dialog))) {
-				psy_audio_xi_load(&songfile, instruments_slot(
+				psy_audio_xi_load(&songfile, psy_audio_instruments_selected(
 					&self->workspace->song->instruments).subslot);
 			}
 			psyfile_close(&file);

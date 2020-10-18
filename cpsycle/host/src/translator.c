@@ -426,6 +426,12 @@ void translator_definekeys(psy_Properties* lang)
 	psy_properties_set_str(section,
 		"advance-line-on-record",
 		"Advance Line On Record");
+	// instrumentsbox
+	section = psy_properties_append_section(lang, "instrumentsbox");
+	psy_properties_set_str(section,
+		"instrument-groups", "Instrument Groups");
+	psy_properties_set_str(section,
+		"group-instruments", "Group Instruments");	
 	// instrumentview
 	section = psy_properties_append_section(lang, "instrumentview");
 	psy_properties_set_str(section,
@@ -478,7 +484,7 @@ void translator_definekeys(psy_Properties* lang)
 		"filter", "Filter");
 	psy_properties_set_str(section,
 		"pitch", "Pitch");
-	// MachineView
+	// machineview
 	section = psy_properties_append_section(lang, "machineview");
 	psy_properties_set_str(section,
 		"new-machine", "New Machine");
