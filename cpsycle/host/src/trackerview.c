@@ -3357,6 +3357,7 @@ static void trackerview_oninterpolatecurve(TrackerView*,
 static void trackerview_oninterpolatecurveviewoncancel(TrackerView*,
 	InterpolateCurveView* sender);
 static void trackerview_oncolresize(TrackerView*, TrackerGrid* sender);
+static void trackerview_oneventdriverinput(TrackerView*, psy_EventDriver*);
 // vtable
 static psy_ui_ComponentVtable trackerview_vtable;
 static int trackerview_vtable_initialized = 0;
@@ -3461,6 +3462,8 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	trackerview_readconfig(self);
 	psy_signal_connect(&self->workspace->player.signal_numsongtrackschanged, self,
 		trackerview_numtrackschanged);
+	psy_signal_connect(&self->workspace->player.eventdrivers.signal_input, self,
+		trackerview_oneventdriverinput);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -3843,8 +3846,23 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 			self->grid.chordmode ? 0 : ev->shift, ev->ctrl);
 		input.param2 = workspace_octave(self->workspace) * 12;
 		kbd->cmd(kbd, "trackercmds", input, &cmd);
-		if (trackerview_handlecommand(self, ev, cmd.id)) {
+		if (cmd.id != -1) {
+			trackerview_handlecommand(self, ev, cmd.id);
 			psy_ui_keyevent_stoppropagation(ev);
+		} else {
+			trackergrid_enterevent(&self->grid, ev);
+		}
+	}
+}
+
+void trackerview_oneventdriverinput(TrackerView* self, psy_EventDriver* sender)
+{
+	if (psy_ui_component_hasfocus(&self->grid.component)) {
+		EventDriverCmd cmd;
+
+		cmd = sender->getcmd(sender, "trackercmds");
+		if (cmd.id != -1) {
+			trackerview_handlecommand(self, NULL, cmd.id);
 		}
 	}
 }
@@ -3858,14 +3876,14 @@ bool trackerview_handlecommand(TrackerView* self, psy_ui_KeyEvent* ev, int cmd)
 			break;
 		case CMD_NAVPAGEUP:
 			trackergrid_prevlines(&self->grid,
-				psy_audio_player_lpb(&self->workspace->player), 0);
+			psy_audio_player_lpb(&self->workspace->player), 0);
 			break;
 		case CMD_NAVDOWN:
 			trackergrid_advanceline(&self->grid);
 			break;
 		case CMD_NAVPAGEDOWN:
 			trackergrid_advancelines(&self->grid,
-				psy_audio_player_lpb(&self->workspace->player), 0);
+			psy_audio_player_lpb(&self->workspace->player), 0);
 			break;
 		case CMD_NAVLEFT:
 			trackergrid_prevcol(&self->grid);
@@ -3920,11 +3938,15 @@ bool trackerview_handlecommand(TrackerView* self, psy_ui_KeyEvent* ev, int cmd)
 			break;
 		case CMD_ROWDELETE:
 			trackergrid_rowdelete(&self->grid);
-			psy_ui_keyevent_stoppropagation(ev);
+			if (ev) {
+				psy_ui_keyevent_stoppropagation(ev);
+			}
 			break;
 		case CMD_ROWCLEAR:
 			trackergrid_rowclear(&self->grid);
-			psy_ui_keyevent_stoppropagation(ev);
+			if (ev) {
+				psy_ui_keyevent_stoppropagation(ev);
+			}
 			break;
 		case CMD_SELECTALL:
 			trackergrid_selectall(&self->grid);
@@ -3950,7 +3972,6 @@ bool trackerview_handlecommand(TrackerView* self, psy_ui_KeyEvent* ev, int cmd)
 			break;
 		default:
 			handled = FALSE;
-			trackergrid_enterevent(&self->grid, ev);
 		break;
 	}
 	return handled;

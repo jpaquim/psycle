@@ -19,6 +19,10 @@
 
 #define INPUT_BUTTON_FIRST 0
 #define INPUT_BUTTON_LAST 127
+#define INPUT_MOVE_UP 128
+#define INPUT_MOVE_DOWN 129
+#define INPUT_MOVE_LEFT 130
+#define INPUT_MOVE_RIGHT 131
 
 typedef struct {
 	psy_EventDriver driver;
@@ -45,6 +49,7 @@ static void driver_configure(psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData input, EventDriverCmd*);
 static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void driver_setcmddef(psy_EventDriver*, psy_Properties*);
+static void driver_setcmddefaults(DXJoystickDriver*, psy_Properties*);
 static void driver_idle(psy_EventDriver* self);
 
 static void init_properties(psy_EventDriver* self);
@@ -57,6 +62,9 @@ static HRESULT poll(DXJoystickDriver*, DIJOYSTATE2* js);
 
 static BOOL CALLBACK
 enumCallback(const DIDEVICEINSTANCE* instance, VOID* context);
+
+static BOOL CALLBACK
+staticSetGameControllerAxesRanges(LPCDIDEVICEOBJECTINSTANCE devObjInst, LPVOID pvRef);
 
 static int driver_setformat(DXJoystickDriver*);
 
@@ -212,6 +220,13 @@ int driver_open(psy_EventDriver* driver)
 		return 0;
 	}	
 	driver_setformat(self);
+	// set range and dead zone of joystick axes
+	hr = self->joystick->lpVtbl->EnumObjects(self->joystick,
+		&staticSetGameControllerAxesRanges, self->joystick, DIDFT_AXIS);
+	if (FAILED(hr)) {
+		driver->error(0, "Unable to set axis ranges of game controllers");
+		return 0;
+	}	
 	self->active = TRUE;
 	memset(&self->state, 0, sizeof(DIJOYSTATE2));
 	return success;
@@ -292,19 +307,33 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 	}
 }
 
-void driver_cmd(psy_EventDriver* driver, const char* section, EventDriverData input, EventDriverCmd* cmd)
+void driver_cmd(psy_EventDriver* driver, const char* sectionname,
+	EventDriverData input, EventDriverCmd* cmd)
 {		
+	DXJoystickDriver* self = (DXJoystickDriver*)driver;
+	psy_Properties* section;
+
+	if (!sectionname) {
+		return;
+	}
 	cmd->id = -1;
+	section = psy_properties_findsection(driver->properties, sectionname);
+	if (!section) {
+		return;
+	}
 	if (input.message != FALSE) {
-		if (input.param1 == INPUT_BUTTON_FIRST + 0) {
-			cmd->id = 272; // MACHINEVIEW
-			cmd->data.param1 = 0;
-			cmd->data.param2 = 0;
-		} else if (input.param1 == INPUT_BUTTON_FIRST + 1) {
-			cmd->id = 273; // PATTERNVIEW
-			cmd->data.param1 = 0;
-			cmd->data.param2 = 0;
+		psy_Properties* p;
+
+		for (p = section->children; p != NULL; p = psy_properties_next(p)) {
+			if (psy_properties_as_int(p) == input.param1) {
+				break;
+			}
 		}
+		if (p) {
+			cmd->id = p->item.id;
+			cmd->data.param1 = 0;
+			cmd->data.param2 = 0;
+		}		
 	}
 }
 
@@ -338,6 +367,26 @@ void driver_setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
 		cmds = psy_properties_clone(cmddef->children, TRUE);
 		psy_properties_append_property(
 			self->cmddef, cmds);
+		driver_setcmddefaults(self, cmds);
+	}
+}
+
+void driver_setcmddefaults(DXJoystickDriver* self, psy_Properties* cmddef)
+{
+	psy_Properties* section;
+
+	section = psy_properties_find(cmddef, "generalcmds", PSY_PROPERTY_TYP_SECTION);
+	if (section) {
+		psy_properties_set_int(section, "cmd_editmachine", INPUT_BUTTON_FIRST + 0);
+		psy_properties_set_int(section, "cmd_editpattern", INPUT_BUTTON_FIRST + 1);
+		psy_properties_set_int(section, "cmd_help", INPUT_BUTTON_FIRST + 2);
+	}
+	section = psy_properties_find(cmddef, "trackercmds", PSY_PROPERTY_TYP_SECTION);
+	if (section) {
+		psy_properties_set_int(section, "cmd_navup", INPUT_MOVE_UP);
+		psy_properties_set_int(section, "cmd_navdown", INPUT_MOVE_DOWN);
+		psy_properties_set_int(section, "cmd_navleft", INPUT_MOVE_LEFT);
+		psy_properties_set_int(section, "cmd_navright", INPUT_MOVE_RIGHT);
 	}
 }
 
@@ -345,7 +394,7 @@ void driver_idle(psy_EventDriver* driver)
 {
 	DIJOYSTATE2 state;
 	DXJoystickDriver* self;
-	int i;
+	int i;	
 
 	self = (DXJoystickDriver*)driver;
 	poll(self, &state);
@@ -355,6 +404,28 @@ void driver_idle(psy_EventDriver* driver)
 			self->lastinput.param1 = INPUT_BUTTON_FIRST + i;
 			psy_signal_emit(&self->driver.signal_input, self, 0);
 		}
+	}
+	
+	if (state.lY < 0) {
+		self->lastinput.message = TRUE;
+		self->lastinput.param1 = INPUT_MOVE_UP;
+		self->lastinput.param2 = self->state.lY;
+		psy_signal_emit(&self->driver.signal_input, self, 0);
+	} else if (state.lY > 0) {
+		self->lastinput.message = TRUE;
+		self->lastinput.param1 = INPUT_MOVE_DOWN;
+		self->lastinput.param2 =  state.lY;
+		psy_signal_emit(&self->driver.signal_input, self, 0);
+	} else if (state.lX < 0) {
+		self->lastinput.message = TRUE;
+		self->lastinput.param1 = INPUT_MOVE_LEFT;
+		self->lastinput.param2 = self->state.lX;
+		psy_signal_emit(&self->driver.signal_input, self, 0);
+	} else if (state.lX > 0) {
+		self->lastinput.message = TRUE;
+		self->lastinput.param1 = INPUT_MOVE_RIGHT;
+		self->lastinput.param2 = state.lX;
+		psy_signal_emit(&self->driver.signal_input, self, 0);
 	}
 	self->state = state;
 }
@@ -398,4 +469,53 @@ HRESULT poll(DXJoystickDriver* self, DIJOYSTATE2* js)
 	}
 
 	return S_OK;
+}
+
+BOOL CALLBACK staticSetGameControllerAxesRanges(LPCDIDEVICEOBJECTINSTANCE devObjInst, LPVOID pvRef)
+{
+	// the game controller
+	LPDIRECTINPUTDEVICE8 gameController = (LPDIRECTINPUTDEVICE8)pvRef;
+	gameController->lpVtbl->Acquire(gameController);
+
+	// structure to hold game controller range properties
+	DIPROPRANGE gameControllerRange;
+
+	// set the range to -100 and 100
+	gameControllerRange.lMin = -100;
+	gameControllerRange.lMax = 100;
+
+	// set the size of the structure
+	gameControllerRange.diph.dwSize = sizeof(DIPROPRANGE);
+	gameControllerRange.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+
+	// set the object that we want to change		
+	gameControllerRange.diph.dwHow = DIPH_BYID;
+	gameControllerRange.diph.dwObj = devObjInst->dwType;
+
+	// now set the range for the axis		
+	if (FAILED(gameController->lpVtbl->SetProperty(gameController,
+		DIPROP_RANGE, &gameControllerRange.diph))) {
+		return DIENUM_STOP;
+	}
+
+	// structure to hold game controller axis dead zone
+	DIPROPDWORD gameControllerDeadZone;
+
+	// set the dead zone to 10%
+	gameControllerDeadZone.dwData = 1000;
+
+	// set the size of the structure
+	gameControllerDeadZone.diph.dwSize = sizeof(DIPROPDWORD);
+	gameControllerDeadZone.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+
+	// set the object that we want to change
+	gameControllerDeadZone.diph.dwHow = DIPH_BYID;
+	gameControllerDeadZone.diph.dwObj = devObjInst->dwType;
+
+	// now set the dead zone for the axis
+	if (FAILED(gameController->lpVtbl->SetProperty(gameController,
+		DIPROP_DEADZONE, &gameControllerDeadZone.diph)))
+		return DIENUM_STOP;
+
+	return DIENUM_CONTINUE;
 }
