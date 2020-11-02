@@ -50,7 +50,7 @@ typedef struct psy_EventDriver {
 	int (*open)(struct psy_EventDriver*);
 	int (*dispose)(struct psy_EventDriver*);
 	void (*free)(struct psy_EventDriver*);	
-	void (*configure)(struct psy_EventDriver*);	
+	void (*configure)(struct psy_EventDriver*, psy_Properties*);
 	int (*close)(struct psy_EventDriver*);	
 	void (*write)(struct psy_EventDriver*, EventDriverData);
 	void (*cmd)(struct psy_EventDriver*, const char* section, EventDriverData, EventDriverCmd*);

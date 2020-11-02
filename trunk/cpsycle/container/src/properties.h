@@ -55,6 +55,7 @@ typedef struct {
 	int disposechildren;
 	int save;
 	int id;
+	int allowappend;
 } psy_Property;
 
 void psy_property_init(psy_Property*);
@@ -95,6 +96,7 @@ const char* psy_properties_key(psy_Properties*);
 int psy_properties_type(psy_Properties*);
 psy_Properties* psy_properties_at(psy_Properties*, const char* key, psy_PropertyType);
 psy_Properties* psy_properties_at_choice(psy_Properties*);
+psy_Properties* psy_properties_at_index(psy_Properties*, int index);
 double psy_properties_at_real(psy_Properties*, const char* key, double defaultvalue);
 const char* psy_properties_at_str(psy_Properties*, const char* key, const char* defaulttext);
 int psy_properties_at_int(psy_Properties*, const char* key, int defaultvalue);
@@ -134,6 +136,7 @@ psy_Properties* psy_properties_next(psy_Properties*);
 psy_Properties* psy_properties_remove(psy_Properties*, psy_Properties*);
 void psy_properties_clear(psy_Properties*);
 uintptr_t psy_properties_size(psy_Properties*);
+bool psy_properties_empty(psy_Properties*);
 
 #ifdef __cplusplus
 }

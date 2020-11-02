@@ -20,7 +20,7 @@ typedef enum {
 	PROPERTIESIO_STATE_ADDPROPERTY = 2,
 	PROPERTIESIO_STATE_READSECTION = 3,
 	PROPERTIESIO_STATE_ADDSECTION = 4,
-	PROPERTIESIO_STATE_READCOMMENT = 5
+	PROPERTIESIO_STATE_READCOMMENT = 5,
 } PropertiesIOState;
 
 static int reallocstr(char** str, size_t size, size_t* cap);
@@ -40,8 +40,11 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 		char* value = 0;
 		size_t valcap = 0;
 		psy_Properties* curr;
+		psy_Properties* choice;
+		int ischoice = 0;
 
-		curr = self;		
+		curr = self;
+		choice = 0;
 		state = PROPERTIESIO_STATE_READKEY;
 		reallocstr(&key, 256, &keycap);
 		reallocstr(&value, 256, &valcap);				
@@ -104,30 +107,30 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 			}			
 			if (state == PROPERTIESIO_STATE_ADDPROPERTY) {
 				psy_Properties* p = psy_properties_at(curr, key, PSY_PROPERTY_TYP_NONE);
-				if (p) {					
+				if (p) {
 					switch (p->item.typ) {
-						case PSY_PROPERTY_TYP_ROOT:
+					case PSY_PROPERTY_TYP_ROOT:
 						break;
-						case PSY_PROPERTY_TYP_INTEGER:
-							psy_properties_set_int(curr, key, atoi(value));
+					case PSY_PROPERTY_TYP_INTEGER:
+						psy_properties_set_int(curr, key, atoi(value));
 						break;
-						case PSY_PROPERTY_TYP_BOOL:
-							psy_properties_set_bool(curr, key, atoi(value));
+					case PSY_PROPERTY_TYP_BOOL:
+						psy_properties_set_bool(curr, key, atoi(value));
 						break;
-						case PSY_PROPERTY_TYP_CHOICE:
-							psy_properties_set_choice(curr, key, atoi(value));
+					case PSY_PROPERTY_TYP_CHOICE:
+						choice = psy_properties_set_choice(curr, key, atoi(value));
+						ischoice = 1;
 						break;
-						case PSY_PROPERTY_TYP_STRING:						
-							psy_properties_set_str(curr, key, value);
+					case PSY_PROPERTY_TYP_STRING:
+						psy_properties_set_str(curr, key, value);
 						break;
-						case PSY_PROPERTY_TYP_FONT:
-							psy_properties_set_font(curr, key, value);
+					case PSY_PROPERTY_TYP_FONT:
+						psy_properties_set_font(curr, key, value);
 						break;
-						default:
+					default:
 						break;
-					}					
-				} else
-				if (allowappend) {
+					}
+				} else if (allowappend || curr->item.allowappend) {
 					int intval;
 					char *stopstring;
 
@@ -144,16 +147,23 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 			if (state == PROPERTIESIO_STATE_ADDSECTION) {
 				psy_Properties* p;				
 				psy_Properties* prev = 0;
-				p = psy_properties_findsectionex(self, key, &prev);
+				p = psy_properties_findsectionex(self, key, &prev);				
 				if (p == self) {
 					curr = self;
-				} else
+					ischoice = 0;
+				} else				
 				if (p && p->item.typ == PSY_PROPERTY_TYP_SECTION) {
+					ischoice = 0;
 					curr = p;
 				} else
-				if ((strcmp(key, "root") != 0) && allowappend) {					
+				if (ischoice) {
+					curr = choice;
+				} else
+				if ((strcmp(key, "root") != 0) && allowappend) {		
+					ischoice = 0;
 					curr = psy_properties_append_section(prev, key);
 				} else {
+					ischoice = 0;
 					curr = self;
 				}
 				cp = 0;
@@ -179,6 +189,8 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 
 static int skip;
 static int skiplevel;
+static int choicelevel;
+static char* lastsection;
 
 void propertiesio_save(psy_Properties* self, const char* path)
 {
@@ -188,7 +200,10 @@ void propertiesio_save(psy_Properties* self, const char* path)
 	if (fp) {
 		skip = 0;
 		skiplevel = 0;
+		choicelevel = 0;
+		lastsection = 0;
 		psy_properties_enumerate(self, fp, (psy_PropertiesCallback) OnSaveIniEnum);
+		free(lastsection);
 		fclose(fp);
 	}
 }
@@ -203,6 +218,19 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 		skip = 1;
 		skiplevel = level;
 		return 1;
+	}
+	if (choicelevel != 0 && choicelevel != level) {
+		char_dyn_t* sections;
+		
+		sections = lastsection;
+		fwrite("\n", sizeof(char), 1, fp);
+		fwrite("[", sizeof(char), 1, fp);
+		if (sections[0] != '\0') {
+			fwrite(sections, sizeof(char), strlen(sections), fp);
+		}
+		fwrite("]", sizeof(char), 1, fp);
+		fwrite("\n", sizeof(char), 1, fp);
+		choicelevel = 0;
 	}
 	if (property->item.key) {
 		char text[40];
@@ -220,6 +248,8 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 			char_dyn_t* sections;
 
 			sections = psy_properties_sections(property);
+			free(lastsection);
+			lastsection = sections ? strdup(sections) : 0;
 			fwrite("[", sizeof(char), 1, fp);
 			if (sections[0] != '\0') {
 				fwrite(sections, sizeof(char), strlen(sections), fp);
@@ -248,11 +278,25 @@ int OnSaveIniEnum(FILE* fp, psy_Properties* property, int level)
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;				
-				case PSY_PROPERTY_TYP_CHOICE:
+				case PSY_PROPERTY_TYP_CHOICE: {
+					choicelevel = level + 1;
+					char_dyn_t* sections;
+
 					psy_snprintf(text, 40, "%d", property->item.value.i);
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
-				break;
+
+					sections = psy_properties_sections(property);
+					fwrite("\n", sizeof(char), 1, fp);
+					fwrite("[", sizeof(char), 1, fp);
+					if (sections[0] != '\0') {
+						fwrite(sections, sizeof(char), strlen(sections), fp);
+					}
+					fwrite(".", sizeof(char), 1, fp);
+					fwrite(property->item.key, sizeof(char), strlen(property->item.key), fp);
+					fwrite("]", sizeof(char), 1, fp);
+					free(sections);
+					break; }
 				case PSY_PROPERTY_TYP_STRING:
 				case PSY_PROPERTY_TYP_FONT:
 					fwrite(psy_properties_as_str(property), sizeof(char),

@@ -87,12 +87,13 @@ typedef struct {
 	psy_Properties* recentfiles;	
 	psy_Properties* general;
 	psy_Properties* inputoutput;
-	psy_Properties* midi;
+	psy_Properties* eventinputs;
 	psy_Properties* keyboard;
 	psy_Properties* directories;
 	psy_Properties* compatibility;
 	psy_Properties* driverconfigure;
 	psy_Properties* driverconfigurations;
+	psy_Properties* eventdriverconfigurations;
 	psy_Properties* midiconfigure;
 	psy_Properties* theme;
 	psy_Properties* cmds;

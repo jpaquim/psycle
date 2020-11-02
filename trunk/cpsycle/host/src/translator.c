@@ -231,6 +231,7 @@ void translator_definekeys(psy_Properties* lang)
 	psy_properties_set_str(section, "show-master", "Show Master");
 	psy_properties_set_str(section, "create-replace", "Create/Replace");
 	psy_properties_set_str(section, "effects", "Effects");
+	psy_properties_set_str(section, "instruments", "Instruments");
 	psy_properties_set_str(section, "generators", "Generators");
 	psy_properties_set_str(section, "waves", "Waves");
 	// settingsview
