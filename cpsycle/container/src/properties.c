@@ -46,6 +46,7 @@ void psy_property_init(psy_Property* self)
 	self->disposechildren = TRUE;
 	self->save = TRUE;
 	self->id = 0;
+	self->allowappend = 0;
 }
 
 void psy_property_copy(psy_Property* self, psy_Property* src)
@@ -69,6 +70,7 @@ void psy_property_copy(psy_Property* self, psy_Property* src)
 	self->disposechildren = src->disposechildren;
 	self->save = src->save;
 	self->id = src->id;
+	self->allowappend = src->allowappend;
 }
 
 void psy_property_dispose(psy_Property* self)
@@ -577,7 +579,7 @@ psy_Properties* psy_properties_set_double(psy_Properties* self, const char* key,
 }
 
 void psy_properties_enumerate(psy_Properties* self, void* target,
-	int (*enumproc)(void* self, psy_Properties* properties, int level))
+	int (*enumproc)(void* self, psy_Properties* properties))
 {
 	PropertiesCallbackContext context;
 
@@ -920,6 +922,14 @@ uintptr_t psy_properties_size(psy_Properties* self)
 	return rv;
 }
 
+bool psy_properties_empty(psy_Properties* self)
+{
+	if (self) {
+		return self->children == NULL;
+	}
+	return FALSE;
+}
+
 psy_Properties* psy_properties_at_choice(psy_Properties* self)
 {
 	psy_Properties* rv = 0;	
@@ -933,6 +943,27 @@ psy_Properties* psy_properties_at_choice(psy_Properties* self)
 		p = self->children;		
 		while (p) {
 			if (count == choice) {
+				rv = p;
+				break;
+			}
+			p = psy_properties_next(p);
+			++count;
+		}
+	}
+	return rv;
+}
+
+psy_Properties* psy_properties_at_index(psy_Properties* self, int index)
+{
+	psy_Properties* rv = 0;
+
+	if (self) {
+		psy_Properties* p;
+		int count = 0;
+
+		p = self->children;
+		while (p) {
+			if (count == index) {
 				rv = p;
 				break;
 			}

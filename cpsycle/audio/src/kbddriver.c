@@ -30,7 +30,7 @@ static int driver_init(psy_EventDriver*);
 static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
-static void driver_configure(psy_EventDriver* self) { }
+static void driver_configure(psy_EventDriver*, psy_Properties*);
 static void driver_write(psy_EventDriver*, EventDriverData input);
 static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData,
 	EventDriverCmd*);
@@ -198,5 +198,12 @@ void setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
 {
 	psy_properties_free(driver->properties);
 	driver->properties = psy_properties_clone(cmddef, 1);
-	driver_configure(driver);
+	driver_configure(driver, driver->properties);
+}
+
+void driver_configure(psy_EventDriver* driver, psy_Properties* properties)
+{
+	if (properties && driver->properties) {
+		psy_properties_sync(driver->properties, properties);		
+	}
 }

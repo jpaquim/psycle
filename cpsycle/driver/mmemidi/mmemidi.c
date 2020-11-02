@@ -26,7 +26,7 @@ static int driver_init(psy_EventDriver*);
 static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
-static void driver_configure(psy_EventDriver*);
+static void driver_configure(psy_EventDriver*, psy_Properties*);
 static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData input, EventDriverCmd*);
 static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Properties*);
@@ -142,7 +142,7 @@ void apply_properties(MmeMidiDriver* self)
 	}
 }
 
-void driver_configure(psy_EventDriver* self)
+void driver_configure(psy_EventDriver* self, psy_Properties* properties)
 {
 	apply_properties((MmeMidiDriver*)self);
 }

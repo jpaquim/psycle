@@ -45,7 +45,7 @@ static int driver_init(psy_EventDriver*);
 static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
-static void driver_configure(psy_EventDriver*);
+static void driver_configure(psy_EventDriver*, psy_Properties*);
 static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData input, EventDriverCmd*);
 static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void driver_setcmddef(psy_EventDriver*, psy_Properties*);
@@ -190,7 +190,7 @@ void apply_properties(DXJoystickDriver* self)
 	}
 }
 
-void driver_configure(psy_EventDriver* self)
+void driver_configure(psy_EventDriver* self, psy_Properties* properties)
 {
 	apply_properties((DXJoystickDriver*)self);
 }
@@ -405,7 +405,6 @@ void driver_idle(psy_EventDriver* driver)
 			psy_signal_emit(&self->driver.signal_input, self, 0);
 		}
 	}
-	
 	if (state.lY < 0) {
 		self->lastinput.message = TRUE;
 		self->lastinput.param1 = INPUT_MOVE_UP;
@@ -416,7 +415,8 @@ void driver_idle(psy_EventDriver* driver)
 		self->lastinput.param1 = INPUT_MOVE_DOWN;
 		self->lastinput.param2 =  state.lY;
 		psy_signal_emit(&self->driver.signal_input, self, 0);
-	} else if (state.lX < 0) {
+	}
+	if (state.lX < 0) {
 		self->lastinput.message = TRUE;
 		self->lastinput.param1 = INPUT_MOVE_LEFT;
 		self->lastinput.param2 = self->state.lX;

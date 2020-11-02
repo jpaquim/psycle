@@ -23,16 +23,16 @@ void eventdrivers_init(EventDrivers* self, void* systemhandle)
 
 void eventdrivers_initkbd(EventDrivers* self)
 {
-	psy_EventDriver* eventdriver;
+	psy_EventDriver* kbd;
 	EventDriverEntry* eventdriverentry;
 
-	eventdriver = create_kbd_driver();	
-	self->kbddriver = eventdriver;	
+	kbd = create_kbd_driver();
+	self->kbddriver = kbd;
 	eventdriverentry = (EventDriverEntry*) malloc(sizeof(EventDriverEntry));
-	eventdriverentry->eventdriver = eventdriver;
+	eventdriverentry->eventdriver = kbd;
 	eventdriverentry->library = 0;
 	psy_list_append(&self->eventdrivers, eventdriverentry);
-	psy_signal_connect(&eventdriver->signal_input, self,
+	psy_signal_connect(&kbd->signal_input, self,
 		eventdrivers_ondriverinput);
 }
 
@@ -115,7 +115,7 @@ void eventdrivers_restart(EventDrivers* self, int id)
 	eventdriver = eventdrivers_driver(self, id);
 	if (eventdriver) {
 		eventdriver->close(eventdriver);	
-		eventdriver->configure(eventdriver);
+		eventdriver->configure(eventdriver, eventdriver->properties);
 		eventdriver->open(eventdriver);	
 	}
 }
@@ -132,7 +132,7 @@ void eventdrivers_restartall(EventDrivers* self)
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			eventdriver->close(eventdriver);	
-			eventdriver->configure(eventdriver);
+			eventdriver->configure(eventdriver, eventdriver->properties);
 			eventdriver->open(eventdriver);	
 		}
 	}

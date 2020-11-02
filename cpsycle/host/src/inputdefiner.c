@@ -27,6 +27,8 @@ static void ondraw(InputDefiner*, psy_ui_Graphics*);
 static void onkeydown(InputDefiner*, psy_ui_KeyEvent*);
 static void onkeyup(InputDefiner*, psy_ui_KeyEvent*);
 
+static bool validkeycode(uintptr_t keycode);
+
 static psy_Table keynames;
 static int count = 0;
 
@@ -73,8 +75,7 @@ void inputdefiner_setinput(InputDefiner* self, unsigned int input)
 }
 
 void inputdefiner_text(InputDefiner* self, char* text)
-{
-	
+{	
 	uintptr_t keycode;
 	bool shift;
 	bool ctrl;
@@ -112,7 +113,6 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
     shift = ev->shift;
     ctrl = ev->ctrl;
 #endif    
-
 	if ((ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL)) {
 		if (self->regularkey == 0) {
 			self->input = psy_audio_encodeinput(0, shift, ctrl);
@@ -120,7 +120,7 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
 		}
 	}
-	if (ev->keycode >= 0x30) {
+	if (validkeycode(ev->keycode)) {
 		self->regularkey = ev->keycode;
 		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
 	}
@@ -147,14 +147,29 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	if (self->regularkey) {		
 		self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl);
 	}
-	if (ev->keycode >= 0x30) {
+	if (validkeycode(ev->keycode)) {
 		self->regularkey = 0;
 	}
-	if (inputkeycode <= 0x30) {
+	if (!validkeycode(inputkeycode)) {
 		self->input = psy_audio_encodeinput(0, shift, ctrl);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyevent_stoppropagation(ev);
+}
+
+bool validkeycode(uintptr_t keycode)
+{
+	return (keycode >= 0x30 ||
+		keycode == psy_ui_KEY_LEFT ||
+		keycode == psy_ui_KEY_RIGHT ||
+		keycode == psy_ui_KEY_UP ||
+		keycode == psy_ui_KEY_DOWN ||
+		keycode == psy_ui_KEY_TAB ||
+		keycode == psy_ui_KEY_BACK ||
+		keycode == psy_ui_KEY_DELETE ||
+		keycode == psy_ui_KEY_HOME ||
+		keycode == psy_ui_KEY_END ||
+		keycode == psy_ui_KEY_RETURN);
 }
 
 void keynames_init(void)

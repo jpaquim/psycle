@@ -365,6 +365,6 @@ void machinebar_oninstrumentnamechanged(MachineBar* self, psy_ui_Component* send
 	if (self->instruments) {
 		machinebar_buildinstrumentlist(self);
 		psy_ui_combobox_setcursel(&self->instparambox,
-			psy_audio_instruments_selected(&self->instruments).subslot);
+			psy_audio_instruments_selected(self->instruments).subslot);
 	}
 }
