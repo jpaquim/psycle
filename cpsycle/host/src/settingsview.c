@@ -46,7 +46,7 @@ static void propertiesrenderer_oneditkeydown(PropertiesRenderer*, psy_ui_Compone
 static void propertiesrenderer_oninputdefinerchange(PropertiesRenderer*,
 	InputDefiner* sender);
 static void propertiesrenderer_ondestroy(PropertiesRenderer*, psy_ui_Component* sender);
-static void propertiesrenderer_onsize(PropertiesRenderer*, psy_ui_Component* sender, psy_ui_Size*);
+static void propertiesrenderer_onalign(PropertiesRenderer*, psy_ui_Component* sender);
 static void propertiesrenderer_setlinebackground(PropertiesRenderer*,psy_Properties*);
 static void propertiesrenderer_drawkey(PropertiesRenderer*, psy_Properties*, int column);
 static void propertiesrenderer_drawvalue(PropertiesRenderer*, psy_Properties*, int column);
@@ -121,8 +121,8 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	psy_ui_component_hide(&self->inputdefiner.component);
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
-	psy_signal_connect(&self->component.signal_size, self,
-		propertiesrenderer_onsize);
+	psy_signal_connect(&self->component.signal_align, self,
+		propertiesrenderer_onalign);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
 }
 
@@ -202,9 +202,7 @@ PropertiesRenderLineState* propertiesrenderer_findfirstlinestate(
 
 int propertiesrenderer_onpropertiesupdatelinestates(PropertiesRenderer* self,
 	psy_Properties* property, int level)
-{
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+{	
 	PropertiesRenderLineState* linestate;
 
 	linestate = (PropertiesRenderLineState*)malloc(sizeof(PropertiesRenderLineState));
@@ -229,9 +227,7 @@ int propertiesrenderer_onpropertiesupdatelinestates(PropertiesRenderer* self,
 	}
 	propertiesrenderer_countblocklines(self, property, 0);
 	linestate->numlines = self->numblocklines;
-	propertiesrenderer_advanceline(self);
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
+	propertiesrenderer_advanceline(self);	
 	return 1;
 }
 
@@ -282,7 +278,7 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	propertiesrenderer_advanceline(self);
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	return self->cpy -psy_ui_component_scrolltop(&self->component) < psy_ui_value_px(&size.height, &tm);
+	return self->cpy - psy_ui_component_scrolltop(&self->component) < psy_ui_value_px(&size.height, &tm);
 }
 
 void propertiesrenderer_addremoveident(PropertiesRenderer* self, int level)
@@ -886,11 +882,13 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self, psy_ui_Component
 	}
 }
 
-void propertiesrenderer_onsize(PropertiesRenderer* self, psy_ui_Component* sender,
-	psy_ui_Size* size)
+void propertiesrenderer_onalign(PropertiesRenderer* self, psy_ui_Component* sender)
 {	
-	propertiesrenderer_computecolumns(self, size);
-	propertiesrenderer_updatelinestates(self);
+	psy_ui_Size size;
+
+	size = psy_ui_component_size(&self->component);
+	propertiesrenderer_computecolumns(self, &size);
+	propertiesrenderer_updatelinestates(self);	
 }
 
 void propertiesrenderer_computecolumns(PropertiesRenderer* self, const psy_ui_Size* size)
@@ -925,7 +923,7 @@ int propertiesrenderer_columnstart(PropertiesRenderer* self, int column)
 		: 0;
 }
 
-void  propertiesrenderer_onpreferredsize(PropertiesRenderer* self, const psy_ui_Size* limit,
+void propertiesrenderer_onpreferredsize(PropertiesRenderer* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];
@@ -989,7 +987,8 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
-	propertiesrenderer_init(&self->renderer, &self->component, properties, workspace);
+	propertiesrenderer_init(&self->renderer, &self->component, properties,
+		workspace);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
 		&self->component);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
@@ -1019,7 +1018,8 @@ void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_selected);
 }
 
-void propertiesview_selectsection(PropertiesView* self, psy_ui_Component* sender, uintptr_t section)
+void propertiesview_selectsection(PropertiesView* self,
+	psy_ui_Component* sender, uintptr_t section)
 {
 	tabbar_select(&self->tabbar, (int)section);
 }
@@ -1085,9 +1085,11 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 
 void propertiesview_onpropertiesrendererchanged(PropertiesView* self,
 	PropertiesRenderer* sender, psy_Properties* selected)
-{
+{		
 	psy_signal_emit(&self->signal_changed, self, 1,
 		selected);
+	psy_ui_component_align(propertiesrenderer_base(&self->renderer));
+	psy_ui_component_updateoverflow(propertiesrenderer_base(&self->renderer));
 }
 
 void propertiesview_onpropertiesrendererselected(PropertiesView* self,

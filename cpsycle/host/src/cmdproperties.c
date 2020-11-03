@@ -176,8 +176,9 @@ void cmdproperties_makegeneral(psy_Properties* self)
 	psy_Properties* general;
 	psy_Properties* p;
 
-	general = psy_properties_append_section(self, "generalcmds");	
-	psy_properties_settext(general, "generalcmds");	
+	general = psy_properties_settext(
+		psy_properties_append_section(self, "general"),
+		"General");	
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_help",
 			psy_audio_encodeinput(psy_ui_KEY_F1, 0, 0), 0, 0), CMD_IMM_HELP),

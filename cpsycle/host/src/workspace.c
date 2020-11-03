@@ -322,7 +322,7 @@ void workspace_initplayer(Workspace* self)
 	psy_audio_player_init(&self->player, self->song, 0);
 #endif		
 	self->cmds = cmdproperties_create();
-	eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
+	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
 	workspace_driverconfig(self);
 	workspace_updateactiveeventdriverlist(self);
 	workspace_showactiveeventinputconfig(self, 0);
@@ -1264,9 +1264,9 @@ void workspace_updateactiveeventdriverlist(Workspace* self)
 		numdrivers = psy_audio_player_numeventdrivers(&self->player);
 		for (i = 0; i < numdrivers; ++i) {
 			char key[40];
-			EventDriverEntry* entry;
+			psy_audio_EventDriverEntry* entry;
 
-			entry = eventdrivers_entry(&self->player.eventdrivers, i);
+			entry = psy_audio_eventdrivers_entry(&self->player.eventdrivers, i);
 			if (entry && entry->eventdriver) {
 				int installeddriverindex;
 				char text[512];
@@ -1299,9 +1299,9 @@ void workspace_makeeventdriverconfigurations(Workspace* self)
 	psy_properties_clear(self->eventdriverconfigurations);
 	numdrivers = psy_audio_player_numeventdrivers(&self->player);
 	for (i = 0; i < numdrivers; ++i) {
-		EventDriverEntry* entry;
+		psy_audio_EventDriverEntry* entry;
 
-		entry = eventdrivers_entry(&self->player.eventdrivers, i);
+		entry = psy_audio_eventdrivers_entry(&self->player.eventdrivers, i);
 		if (entry) {
 			psy_EventDriver* driver;
 
@@ -1332,9 +1332,9 @@ void workspace_readeventdriverconfigurations(Workspace* self)
 	if (self->eventdriverconfigurations) {
 		numdrivers = psy_audio_player_numeventdrivers(&self->player);
 		for (i = 0; i < numdrivers; ++i) {
-			EventDriverEntry* entry;
+			psy_audio_EventDriverEntry* entry;
 
-			entry = eventdrivers_entry(&self->player.eventdrivers, i);
+			entry = psy_audio_eventdrivers_entry(&self->player.eventdrivers, i);
 			if (entry) {
 				psy_EventDriver* driver;
 
@@ -1795,7 +1795,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_configlanguage(self);
 	workspace_configaudio(self);	
 	workspace_configeventinput(self);
-	eventdrivers_restartall(&self->player.eventdrivers);
+	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_updateactiveeventdriverlist(self);
 	workspace_makeeventdriverconfigurations(self);
 	propertiesio_load(&self->config, psy_path_path(&path), 0);
@@ -2119,7 +2119,7 @@ void workspace_idle(Workspace* self)
 			self->lastentry = 0;
 		}		
 	}
-	eventdrivers_idle(&self->player.eventdrivers);
+	psy_audio_eventdrivers_idle(&self->player.eventdrivers);
 }
 
 void workspace_showparameters(Workspace* self, uintptr_t machineslot)

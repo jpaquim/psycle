@@ -593,4 +593,42 @@ void translator_definekeys(psy_Properties* lang)
 		"process", "Process");
 	psy_properties_set_str(section,
 		"no-wave-loaded", "No wave loaded");
+	section = psy_properties_append_section(lang, "cmds");
+	// Tracker
+	psy_properties_set_str(section, "navup", "Nav Up", "up");
+	psy_properties_set_str(section, "navdown", "Nav Down", "down");
+	psy_properties_set_str(section, "navleft", "Nav Left", "left");
+	psy_properties_set_str(section, "navright", "Nav Right", "right");
+	psy_properties_set_str(section, "navpageup", "Nav Up 16", "pageup");
+	psy_properties_set_str(section, "navpagedown", "Nav Down 16", "pagedown");
+	psy_properties_set_str(section, "navtop", "Nav Top", "track top");
+	psy_properties_set_str(section, "navbottom", "Nav Bottom", "track bottom");
+	psy_properties_set_str(section, "columnprev", "Prev column", "prev col");
+	psy_properties_set_str(section, "columnnext", "Next column", "next col");
+
+	psy_properties_set_str(section, "rowinsert", "Insert row", "ins row");
+	psy_properties_set_str(section, "rowdelete", "Delete row", "del row");
+	psy_properties_set_str(section, "rowclear", "Clear row", "clr row");
+
+	psy_properties_set_str(section, "blockstart", "Block Start", "sel start");
+	psy_properties_set_str(section, "blockend", "Block End", "sel end");
+	psy_properties_set_str(section, "blockunmark", "Block Unmark", "unmark");
+	psy_properties_set_str(section, "blockcut", "Block cut", "cut");
+	psy_properties_set_str(section, "blockcopy", "Block copy", "copy");
+	psy_properties_set_str(section, "blockpaste", "Block paste", "paste");
+	psy_properties_set_str(section, "blockmix", "Block Mix", "mix");
+
+	psy_properties_set_str(section, "transposeblockinc", "Transpose Block +1", "Trsp+");
+	psy_properties_set_str(section, "transposeblockdec", "Transpose Block -1", "Trsp-");
+	psy_properties_set_str(section, "transposeblockinc12", "Transpose Block +12", "Trsp+12");
+	psy_properties_set_str(section, "transposeblockdec12", "Transpose Block -12", "Trsp-12");
+
+	psy_properties_set_str(section, "selectall", "Block Select All", "sel all");
+	psy_properties_set_str(section, "selectcol", "Block Select Column", "sel col");
+	psy_properties_set_str(section, "selectbar", "Block Select Bar", "sel bar");
+
+	psy_properties_set_str(section, "selectmachine", "Select Mac/Ins in Cursor Pos", "Select Mac/Ins in Cursor Pos");
+	psy_properties_set_str(section, "undo", "Edit Undo", "undo");
+	psy_properties_set_str(section, "redo", "Edit Redo", "redo");
+	psy_properties_set_str(section, "followsong", "Follow Song", "follow");
 }

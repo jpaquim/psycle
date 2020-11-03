@@ -375,7 +375,7 @@ void driver_setcmddefaults(DXJoystickDriver* self, psy_Properties* cmddef)
 {
 	psy_Properties* section;
 
-	section = psy_properties_find(cmddef, "generalcmds", PSY_PROPERTY_TYP_SECTION);
+	section = psy_properties_find(cmddef, "general", PSY_PROPERTY_TYP_SECTION);
 	if (section) {
 		psy_properties_set_int(section, "cmd_editmachine", INPUT_BUTTON_FIRST + 0);
 		psy_properties_set_int(section, "cmd_editpattern", INPUT_BUTTON_FIRST + 1);

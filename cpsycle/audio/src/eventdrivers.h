@@ -12,10 +12,14 @@
 extern "C" {
 #endif
 
+// psy_audio_EventDrivers
+//
+// container for all active inputdriver
+
 typedef struct {
 	psy_EventDriver* eventdriver;
 	psy_Library* library;
-} EventDriverEntry;
+} psy_audio_EventDriverEntry;
 
 typedef struct {
 	psy_EventDriver* kbddriver;
@@ -24,20 +28,20 @@ typedef struct {
 	void* systemhandle;	
 	psy_Signal signal_input;
 	psy_Properties* cmds;
-} EventDrivers;
+} psy_audio_EventDrivers;
 
-void eventdrivers_init(EventDrivers*, void* systemhandle);
-void eventdrivers_dispose(EventDrivers*);
-void eventdrivers_initkbd(EventDrivers*);
-psy_EventDriver* eventdrivers_load(EventDrivers*, const char* path);
-void eventdrivers_restart(EventDrivers*, int id);
-void eventdrivers_restartall(EventDrivers*);
-void eventdrivers_remove(EventDrivers*, int id);
-void eventdrivers_setcmds(EventDrivers*, psy_Properties* self);
-unsigned int eventdrivers_size(EventDrivers*);
-psy_EventDriver* eventdrivers_driver(EventDrivers*, int id); 
-EventDriverEntry* eventdrivers_entry(EventDrivers*, int id);
-void eventdrivers_idle(EventDrivers*);
+void psy_audio_eventdrivers_init(psy_audio_EventDrivers*, void* systemhandle);
+void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers*);
+void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers*);
+psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers*, const char* path);
+void psy_audio_eventdrivers_restart(psy_audio_EventDrivers*, int id);
+void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers*);
+void psy_audio_eventdrivers_remove(psy_audio_EventDrivers*, int id);
+void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers*, psy_Properties* self);
+unsigned int psy_audio_eventdrivers_size(psy_audio_EventDrivers*);
+psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers*, int id); 
+psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*, int id);
+void psy_audio_eventdrivers_idle(psy_audio_EventDrivers*);
 
 #ifdef __cplusplus
 }

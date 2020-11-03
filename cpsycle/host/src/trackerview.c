@@ -171,7 +171,7 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 
 // TrackerGridState
 // prototypes
-static void definecmd(psy_Properties*, uintptr_t input, int cmd, const char* key, const char* shorttext);
+static void definecmd(psy_Properties*, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext);
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
@@ -4202,55 +4202,55 @@ void trackerview_makecmds(psy_Properties* parent)
 
 	cmds = psy_properties_settext(
 		psy_properties_append_section(parent, "trackercmds"),
-		"Tracker Inputs");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP, "cmd_navup", "up");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 0), CMD_NAVDOWN, "cmd_navdown", "down");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_LEFT, 0, 0), CMD_NAVLEFT, "cmd_navleft", "left");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RIGHT, 0, 0), CMD_NAVRIGHT, "cmd_navright", "right");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_PRIOR, 0, 0), CMD_NAVPAGEUP, "cmd_navpageup", "pageup");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_NEXT, 0, 0), CMD_NAVPAGEDOWN, "cmd_navpagedown", "pagedown");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_HOME, 0, 0), CMD_NAVTOP, "cmd_navtop", "track top");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_END, 0, 0), CMD_NAVBOTTOM, "cmd_navbottom", "track bottom");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_TAB, 1, 0), CMD_COLUMNPREV, "cmd_columnprev", "prev col");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 0), CMD_COLUMNNEXT, "cmd_columnnext", "next col");
+		"Tracker");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP, "cmd_navup", "cmds.navup", "up");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 0), CMD_NAVDOWN, "cmd_navdown", "cmds.navdown", "down");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_LEFT, 0, 0), CMD_NAVLEFT, "cmd_navleft", "cmds.navleft", "left");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RIGHT, 0, 0), CMD_NAVRIGHT, "cmd_navright", "cmds.navright", "right");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_PRIOR, 0, 0), CMD_NAVPAGEUP, "cmd_navpageup", "cmds.navpageup", "pageup");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_NEXT, 0, 0), CMD_NAVPAGEDOWN, "cmd_navpagedown", "cmds.navpagedown", "pagedown");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_HOME, 0, 0), CMD_NAVTOP, "cmd_navtop", "cmds.navtop", "track top");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_END, 0, 0), CMD_NAVBOTTOM, "cmd_navbottom", "cmds.navbottom", "track bottom");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_TAB, 1, 0), CMD_COLUMNPREV, "cmd_columnprev", "cmds.columnprev", "prev col");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 0), CMD_COLUMNNEXT, "cmd_columnnext", "cmds.columnnext", "next col");
 
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_INSERT, 0, 0), CMD_ROWINSERT, "cmd_rowinsert", "ins row");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_BACK, 0, 0), CMD_ROWDELETE, "cmd_rowdelete", "del row");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DELETE, 0, 0), CMD_ROWCLEAR, "cmd_rowclear", "clr row");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_INSERT, 0, 0), CMD_ROWINSERT, "cmd_rowinsert", "cmds.rowinsert", "ins row");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_BACK, 0, 0), CMD_ROWDELETE, "cmd_rowdelete", "cmds.rowdelete", "del row");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DELETE, 0, 0), CMD_ROWCLEAR, "cmd_rowclear", "cmds.rowclear", "clr row");
 
-	definecmd(cmds, psy_audio_encodeinput('B', 0, 1), CMD_BLOCKSTART, "cmd_blockstart", "sel start");
-	definecmd(cmds, psy_audio_encodeinput('E', 0, 1), CMD_BLOCKEND, "cmd_blockend", "sel end");
-	definecmd(cmds, psy_audio_encodeinput('U', 0, 1), CMD_BLOCKUNMARK, "cmd_blockunmark", "unmark");
-	definecmd(cmds, psy_audio_encodeinput('X', 0, 1), CMD_BLOCKCUT, "cmd_blockcut", "cut");
-	definecmd(cmds, psy_audio_encodeinput('C', 0, 1), CMD_BLOCKCOPY, "cmd_blockcopy", "copy");
-	definecmd(cmds, psy_audio_encodeinput('V', 0, 1), CMD_BLOCKPASTE, "cmd_blockpaste", "paste");
-	definecmd(cmds, psy_audio_encodeinput('M', 0, 1), CMD_BLOCKMIX, "cmd_blockmix", "mix");
+	definecmd(cmds, psy_audio_encodeinput('B', 0, 1), CMD_BLOCKSTART, "cmd_blockstart", "cmds.blockstart", "sel start");
+	definecmd(cmds, psy_audio_encodeinput('E', 0, 1), CMD_BLOCKEND, "cmd_blockend", "cmds.blockend", "sel end");
+	definecmd(cmds, psy_audio_encodeinput('U', 0, 1), CMD_BLOCKUNMARK, "cmd_blockunmark", "cmds.blockunmark", "unmark");
+	definecmd(cmds, psy_audio_encodeinput('X', 0, 1), CMD_BLOCKCUT, "cmd_blockcut", "cmds.blockcut", "cut");
+	definecmd(cmds, psy_audio_encodeinput('C', 0, 1), CMD_BLOCKCOPY, "cmd_blockcopy", "cmds.blockcopy", "copy");
+	definecmd(cmds, psy_audio_encodeinput('V', 0, 1), CMD_BLOCKPASTE, "cmd_blockpaste", "cmds.blockpaste", "paste");
+	definecmd(cmds, psy_audio_encodeinput('M', 0, 1), CMD_BLOCKMIX, "cmd_blockmix", "cmds.blockmix", "mix");
 
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F12, 0, 1), CMD_TRANSPOSEBLOCKINC, "cmd_transposeblockinc", "Trsp+");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC, "cmd_transposeblockdec", "Trsp-");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12, "cmd_transposeblockinc12", "Trsp+12");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12, "cmd_transposeblockdec12", "Trsp-12");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F12, 0, 1), CMD_TRANSPOSEBLOCKINC, "cmd_transposeblockinc", "cmds.transposeblockinc", "Trsp+");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC, "cmd_transposeblockdec", "cmds.transposeblockdec", "Trsp-");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12, "cmd_transposeblockinc12", "cmds.transposeblockinc12", "Trsp+12");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12, "cmd_transposeblockdec12", "cmds.transposeblockdec12", "Trsp-12");
 
-	definecmd(cmds, psy_audio_encodeinput('A', 0, 1), CMD_SELECTALL, "cmd_selectall", "sel all");
-	definecmd(cmds, psy_audio_encodeinput('R', 0, 1), CMD_SELECTCOL, "cmd_selectcol", "sel col");
-	definecmd(cmds, psy_audio_encodeinput('K', 0, 1), CMD_SELECTBAR, "cmd_selectbar", "sel bar");
+	definecmd(cmds, psy_audio_encodeinput('A', 0, 1), CMD_SELECTALL, "cmd_selectall", "cmds.selectall", "sel all");
+	definecmd(cmds, psy_audio_encodeinput('R', 0, 1), CMD_SELECTCOL, "cmd_selectcol", "cmds.selectcol", "sel col");
+	definecmd(cmds, psy_audio_encodeinput('K', 0, 1), CMD_SELECTBAR, "cmd_selectbar", "cmds.selectbar", "sel bar");
 
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RETURN, 0, 0), CMD_SELECTMACHINE, "cmd_selectmachine", "Select Mac / Ins in Cursor Pos");
-	definecmd(cmds, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO, "cmd_undo", "undo");
-	definecmd(cmds, psy_audio_encodeinput('Z', 1, 1), CMD_REDO, "cmd_redo", "redo");
-	definecmd(cmds, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG, "cmd_followsong", "follow");
+	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RETURN, 0, 0), CMD_SELECTMACHINE, "cmd_selectmachine", "cmds.selectmachine", "Select Mac/Ins in Cursor Pos");
+	definecmd(cmds, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO, "cmd_undo", "cmds.undo", "undo");
+	definecmd(cmds, psy_audio_encodeinput('Z', 1, 1), CMD_REDO, "cmd_redo", "cmds.redo", "redo");
+	definecmd(cmds, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG, "cmd_followsong", "cmds.followsong", "follow");
 	for (p = cmds->children; p != NULL; p = psy_properties_next(p)) {
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_INPUT);
 	}
 }
 
-void definecmd(psy_Properties* cmds, uintptr_t input, int cmd, const char* key, const char* shorttext)
+void definecmd(psy_Properties* cmds, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext)
 {
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(cmds, key,
 			input, 0, 0), cmd),
 		shorttext),
-		key);
+		text);
 }
 
 void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)
