@@ -65,7 +65,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 		&song->machines);
 	mainframe = handle;
 	psy_audio_player_initdriver(self);
-	eventdrivers_init(&self->eventdrivers, handle);
+	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
 	psy_signal_connect(&self->eventdrivers.signal_input, self,
 		psy_audio_player_oneventdriverinput);
 	psy_audio_player_initsignals(self);
@@ -99,7 +99,7 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 {			
 	psy_audio_player_unloaddriver(self);
 	psy_library_dispose(&self->drivermodule);
-	eventdrivers_dispose(&self->eventdrivers);	
+	psy_audio_eventdrivers_dispose(&self->eventdrivers);	
 	psy_signal_dispose(&self->signal_numsongtrackschanged);
 	psy_signal_dispose(&self->signal_lpbchanged);
 	psy_signal_dispose(&self->signal_inputevent);	
@@ -577,17 +577,17 @@ int psy_audio_player_recordingnotes(psy_audio_Player* self)
 // psy_EventDriver load, unload, restart, ..., methods
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player* self, const char* path)
 {
-	return eventdrivers_load(&self->eventdrivers, path);
+	return psy_audio_eventdrivers_load(&self->eventdrivers, path);
 }
 
 void psy_audio_player_restarteventdriver(psy_audio_Player* self, int id)
 {
-	eventdrivers_restart(&self->eventdrivers, id);
+	psy_audio_eventdrivers_restart(&self->eventdrivers, id);
 }
 
 void psy_audio_player_removeeventdriver(psy_audio_Player * self, int id)
 {
-	eventdrivers_remove(&self->eventdrivers, id);
+	psy_audio_eventdrivers_remove(&self->eventdrivers, id);
 }
 
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player* self)
@@ -597,12 +597,12 @@ psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player* self)
 
 psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player* self, int id)
 {
-	return eventdrivers_driver(&self->eventdrivers, id);
+	return psy_audio_eventdrivers_driver(&self->eventdrivers, id);
 }
 
 unsigned int psy_audio_player_numeventdrivers(psy_audio_Player* self)
 {
-	return eventdrivers_size(&self->eventdrivers);
+	return psy_audio_eventdrivers_size(&self->eventdrivers);
 }
 
 void psy_audio_player_setemptysong(psy_audio_Player* self)

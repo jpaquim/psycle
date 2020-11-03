@@ -72,6 +72,11 @@ void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
 
 void propertiesrenderer_setfixedwidth(PropertiesRenderer*, psy_ui_Value width);
 
+INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
+{
+	return &self->component;
+}
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component viewtabbar;	

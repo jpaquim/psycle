@@ -558,7 +558,7 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 {
 	EventDriverCmd cmd;
 
-	cmd = sender->getcmd(sender, "generalcmds");
+	cmd = sender->getcmd(sender, "general");
 	switch (cmd.id) {
 		case CMD_IMM_HELP:
 			tabbar_select(&self->helpview.tabbar, 0);
