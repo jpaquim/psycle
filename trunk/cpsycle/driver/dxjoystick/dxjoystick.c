@@ -16,6 +16,7 @@
 #include <hashtbl.h>
 
 #define DEVICE_NONE 0
+#define PSY_EVENTDRIVER_DXJOYSTICK_GUID 0x0003
 
 #define INPUT_BUTTON_FIRST 0
 #define INPUT_BUTTON_LAST 127
@@ -33,7 +34,7 @@ typedef struct {
 	int deviceid;
 	bool active;
 	int (*error)(int, const char*);
-	EventDriverData lastinput;	
+	psy_EventDriverData lastinput;	
 	HANDLE hEvent;
 	psy_Properties* devices;
 	psy_Properties* cmddef;
@@ -45,9 +46,11 @@ static int driver_init(psy_EventDriver*);
 static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
+static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Properties*);
-static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData input, EventDriverCmd*);
-static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
+static void driver_cmd(psy_EventDriver*, const char* section,
+	psy_EventDriverData input, psy_EventDriverCmd*);
+static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void driver_setcmddef(psy_EventDriver*, psy_Properties*);
 static void driver_setcmddefaults(DXJoystickDriver*, psy_Properties*);
 static void driver_idle(psy_EventDriver* self);
@@ -68,15 +71,40 @@ staticSetGameControllerAxesRanges(LPCDIDEVICEOBJECTINSTANCE devObjInst, LPVOID p
 
 static int driver_setformat(DXJoystickDriver*);
 
+static psy_EventDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static int driver_onerror(int err, const char* msg);
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.free = driver_free;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = driver_configure;
+		vtable.info = driver_info;
+		vtable.error = driver_onerror;
+		vtable.cmd = driver_cmd;
+		vtable.getcmd = driver_getcmd;
+		vtable.setcmddef = driver_setcmddef;
+		vtable.idle = driver_idle;
+		vtable_initialized = 1;
+	}
+}
+
 int driver_onerror(int err, const char* msg)
 {
 	MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
 	return 0;
 }
 
-EXPORT EventDriverInfo const * __cdecl GetPsycleEventDriverInfo(void)
+EXPORT psy_EventDriverInfo const * __cdecl psy_eventdriver_moduleinfo(void)
 {
-	static EventDriverInfo info;
+	static psy_EventDriverInfo info;
+
+	info.guid = PSY_EVENTDRIVER_DXJOYSTICK_GUID;
 	info.Flags = 0;
 	info.Name = "DirectX Joystick Driver";
 	info.ShortName = "DX Joystick";
@@ -84,24 +112,10 @@ EXPORT EventDriverInfo const * __cdecl GetPsycleEventDriverInfo(void)
 	return &info;
 }
 
-EXPORT psy_EventDriver* __cdecl eventdriver_create(void)
+EXPORT psy_EventDriver* __cdecl psy_eventdriver_create(void)
 {
-	DXJoystickDriver* dxjoystick = (DXJoystickDriver*) malloc(sizeof(DXJoystickDriver));
-	if (dxjoystick) {
-		memset(dxjoystick, 0, sizeof(DXJoystickDriver));
-		dxjoystick->deviceid = DEVICE_NONE;
-		dxjoystick->driver.open = driver_open;
-		dxjoystick->driver.free = driver_free;
-		dxjoystick->driver.open = driver_open;
-		dxjoystick->driver.close = driver_close;
-		dxjoystick->driver.dispose = driver_dispose;
-		dxjoystick->driver.configure = driver_configure;
-		dxjoystick->driver.error = driver_onerror;
-		dxjoystick->driver.cmd = driver_cmd;
-		dxjoystick->driver.getcmd = driver_getcmd;
-		dxjoystick->driver.setcmddef = driver_setcmddef;
-		dxjoystick->driver.idle = driver_idle;
-		dxjoystick->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	DXJoystickDriver* dxjoystick = (DXJoystickDriver*)malloc(sizeof(DXJoystickDriver));
+	if (dxjoystick) {		
 		driver_init(&dxjoystick->driver);
 		return &dxjoystick->driver;
 	}
@@ -113,11 +127,19 @@ void driver_free(psy_EventDriver* driver)
 	free(driver);
 }
 
+const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
+{
+	return psy_eventdriver_moduleinfo();
+}
+
 int driver_init(psy_EventDriver* driver)
 {
-	DXJoystickDriver* self = (DXJoystickDriver*) driver;
+	DXJoystickDriver* self = (DXJoystickDriver*)driver;
 	HRESULT hr;
 
+	memset(self, 0, sizeof(DXJoystickDriver));
+	vtable_init();
+	self->driver.vtable = &vtable;	
 	self->active = 0;
 	psy_table_init(&self->inputs);
 	// Create a DirectInput device
@@ -132,7 +154,7 @@ int driver_init(psy_EventDriver* driver)
 
 int driver_dispose(psy_EventDriver* driver)
 {
-	DXJoystickDriver* self = (DXJoystickDriver*) driver;
+	DXJoystickDriver* self = (DXJoystickDriver*) driver;	
 	psy_properties_free(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
@@ -147,7 +169,10 @@ void init_properties(psy_EventDriver* context)
 	HRESULT hr;
 
 	self = (DXJoystickDriver*)context;
-	context->properties = psy_properties_create();		
+	context->properties = psy_properties_create();
+	psy_properties_sethint(psy_properties_append_int(context->properties,
+		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0),
+		PSY_PROPERTY_HINT_HIDE);
 	psy_properties_append_string(context->properties, "name", "directx joystick");
 	psy_properties_append_string(context->properties, "version", "1.0");
 	self->devices = psy_properties_append_choice(context->properties, "device", 0);
@@ -200,12 +225,12 @@ int driver_open(psy_EventDriver* driver)
 	HRESULT hr;
 	DIDEVICEINSTANCE* instance;
 
-	DXJoystickDriver* self = (DXJoystickDriver*) driver;
+	DXJoystickDriver* self = (DXJoystickDriver*)driver;
 	unsigned int success = 1;
 
 	self->lastinput.message = -1;
 	// Obtain an interface to the enumerated joystick.
-	
+
 	instance = (DIDEVICEINSTANCE*)psy_table_at(&self->inputs, 0);
 	if (!instance) {
 		return 0;
@@ -216,20 +241,21 @@ int driver_open(psy_EventDriver* driver)
 	// If it failed, then we can't use this joystick. (Maybe the user unplugged
 	// it while we were in the middle of enumerating it.)
 	if (FAILED(hr)) {
-		driver->error(0, "Cannot open DirectX Input device");
+		psy_eventdriver_error(&self->driver, 0, "Cannot open DirectX Input device");
 		return 0;
-	}	
+	}
 	driver_setformat(self);
 	// set range and dead zone of joystick axes
 	hr = self->joystick->lpVtbl->EnumObjects(self->joystick,
 		&staticSetGameControllerAxesRanges, self->joystick, DIDFT_AXIS);
 	if (FAILED(hr)) {
-		driver->error(0, "Unable to set axis ranges of game controllers");
+		psy_eventdriver_error(&self->driver, 0, "Unable to set axis ranges of game controllers");
 		return 0;
-	}	
+	}
 	self->active = TRUE;
 	memset(&self->state, 0, sizeof(DIJOYSTATE2));
 	return success;
+
 }
 
 int driver_setformat(DXJoystickDriver* self)
@@ -269,7 +295,9 @@ int driver_close(psy_EventDriver* driver)
 	DXJoystickDriver* self = (DXJoystickDriver*) driver;
 	unsigned int success = 1;
 	
-
+	if (self->joystick) {
+		self->joystick->lpVtbl->Unacquire(self->joystick);
+	}
 	return success;
 }
 
@@ -308,7 +336,7 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
-	EventDriverData input, EventDriverCmd* cmd)
+	psy_EventDriverData input, psy_EventDriverCmd* cmd)
 {		
 	DXJoystickDriver* self = (DXJoystickDriver*)driver;
 	psy_Properties* section;
@@ -337,9 +365,9 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	}
 }
 
-EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
+psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 {
-	EventDriverCmd cmd;
+	psy_EventDriverCmd cmd;
 	DXJoystickDriver* self = (DXJoystickDriver*) driver;	
 			
 	driver_cmd(driver, section, self->lastinput, &cmd);	

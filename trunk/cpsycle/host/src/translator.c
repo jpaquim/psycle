@@ -9,39 +9,46 @@
 #include <propertiesio.h>
 // platform
 #include "../../detail/portable.h"
+// std
+#include <assert.h>
 
 static void translator_definekeys(psy_Properties* lang);
-static bool translator_hastranslation(Translator*, const char* key,
+static bool translator_hastranslation(const char* key,
 	const char* translation);
 static const char* translator_remove_section(Translator*, const char* key);
 
 void translator_init(Translator* self)
 {
+	assert(self);
 	psy_properties_init(&self->dictionary);
 	translator_definekeys(&self->dictionary);
 }
 
 void translator_dispose(Translator* self)
 {
+	assert(self);
 	psy_properties_dispose(&self->dictionary);
 }
 
 void translator_reset(Translator* self)
 {
+	assert(self);
 	psy_properties_clear(&self->dictionary);
 	translator_definekeys(&self->dictionary);
 }
 
 bool translator_load(Translator* self, const char* path)
 {	
+	assert(self);
 	translator_reset(self);
 	return propertiesio_load(&self->dictionary, path, FALSE);
 }
 
-bool translator_test(Translator* self, const char* path, char* id)
+bool translator_test(const Translator* self, const char* path, char* id)
 {
 	psy_Properties* lang;
 
+	assert(self);
 	lang = psy_properties_create();
 	if (propertiesio_load(lang, path, 1)) {
 		psy_Properties* p;
@@ -61,23 +68,24 @@ const char* translator_translate(Translator* self, const char* key)
 {	
 	const char* rv;
 
+	assert(self);
 	rv = psy_properties_at_str(&self->dictionary, key, key);
-	if (!translator_hastranslation(self, rv, key)) {
+	if (!translator_hastranslation(rv, key)) {
 		return translator_remove_section(self, rv);
 	}
 	return rv;
 }
 
-bool translator_hastranslation(Translator* self, const char* key,
-	const char* translation)
+bool translator_hastranslation(const char* key, const char* translation)
 {
-	return translation != key;
+	return key != translation;	
 }
 
 const char* translator_remove_section(Translator* self, const char* key)
 {
 	const char* rv;
 
+	assert(self);
 	if (key) {
 		rv = strrchr(key, '.');
 		rv = (rv != NULL)
@@ -95,7 +103,8 @@ const char* translator_remove_section(Translator* self, const char* key)
 void translator_definekeys(psy_Properties* lang)
 {
 	psy_Properties* section;	
-		
+
+	assert(lang);
 	psy_properties_set_str(lang, "lang", "en");
 	// filebar
 	section = psy_properties_append_section(lang, "file");
@@ -141,12 +150,10 @@ void translator_definekeys(psy_Properties* lang)
 	psy_properties_set_str(section, "midi", "MIDI");
 	// Trackbar
 	section = psy_properties_append_section(lang, "trackbar");
-	psy_properties_set_str(section,
-		"tracks", "Tracks");
+	psy_properties_set_str(section, "tracks", "Tracks");
 	// Octave
 	section = psy_properties_append_section(lang, "octavebar");
-	psy_properties_set_str(section,
-		"octave", "Octave");
+	psy_properties_set_str(section, "octave", "Octave");
 	// edit operations
 	section = psy_properties_append_section(lang, "edit");
 	psy_properties_set_str(section, "cut", "Cut");
@@ -168,57 +175,31 @@ void translator_definekeys(psy_Properties* lang)
 		"Remove connection with right click");	
 	// Render
 	section = psy_properties_append_section(lang, "render");
-	psy_properties_set_str(section,
-		"render", "Render");
-	psy_properties_set_str(section,
-		"file", "File");
+	psy_properties_set_str(section, "render", "Render");
+	psy_properties_set_str(section, "file", "File");
 	psy_properties_set_str(section,
 		"sequence-positions", "Sequence positions");
-	psy_properties_set_str(section,
-		"quality", "Quality");
-	psy_properties_set_str(section,
-		"dither", "Dither");
-	psy_properties_set_str(section,
-		"selection", "Selection");
-	psy_properties_set_str(section,
-		"record", "Record");
-	psy_properties_set_str(section,
-		"enable", "enable");
-	psy_properties_set_str(section,
-		"from", "from");
-	psy_properties_set_str(section,
-		"to", "to");
-	psy_properties_set_str(section,
-		"number", "Number");
-	psy_properties_set_str(section,
-		"save-wave", "Save Wave");
-	psy_properties_set_str(section,
-		"entire-song", "The Entire Song");
-	psy_properties_set_str(section,
-		"samplerate", "Samplerate");	
-	psy_properties_set_str(section,
-		"bitdepth", "Bit depth");
-	psy_properties_set_str(section,
-		"none", "none");
-	psy_properties_set_str(section,
-		"pdf",
-		"Prob. Distribution");
-	psy_properties_set_str(section,
-		"triangular", "Triangular");
-	psy_properties_set_str(section,
-		"rectangular", "Rectangular");
-	psy_properties_set_str(section,
-		"gaussian", "gaussian");
-	psy_properties_set_str(section,
-		"noise-shaping", "noise-shaping");
-	psy_properties_set_str(section,
-		"high-pass-contour",
-		"High - Pass Contour");
-	psy_properties_set_str(section,
-		"none",
-		"none");
-	psy_properties_set_str(section,
-		"output-path", "Output path");
+	psy_properties_set_str(section, "quality", "Quality");
+	psy_properties_set_str(section, "dither", "Dither");
+	psy_properties_set_str(section, "selection", "Selection");
+	psy_properties_set_str(section, "record", "Record");
+	psy_properties_set_str(section, "enable", "enable");
+	psy_properties_set_str(section, "from", "from");
+	psy_properties_set_str(section, "to", "to");
+	psy_properties_set_str(section, "number", "Number");
+	psy_properties_set_str(section, "save-wave", "Save Wave");
+	psy_properties_set_str(section, "entire-song", "The Entire Song");
+	psy_properties_set_str(section, "samplerate", "Samplerate");
+	psy_properties_set_str(section, "bitdepth", "Bit depth");
+	psy_properties_set_str(section, "none", "none");
+	psy_properties_set_str(section, "pdf", "Prob. Distribution");
+	psy_properties_set_str(section, "triangular", "Triangular");
+	psy_properties_set_str(section, "rectangular", "Rectangular");
+	psy_properties_set_str(section, "gaussian", "gaussian");
+	psy_properties_set_str(section, "noise-shaping", "noise-shaping");
+	psy_properties_set_str(section, "high-pass-contour", "High - Pass Contour");
+	psy_properties_set_str(section, "none", "none");
+	psy_properties_set_str(section, "output-path", "Output path");
 	psy_properties_set_str(section,
 		"save-each-unmuted", "Save each unmuted");	
 	// gear
@@ -270,16 +251,12 @@ void translator_definekeys(psy_Properties* lang)
 		"Vst64 directories");
 	psy_properties_set_str(section, "ladspa-directories",
 		"Ladspa directories");
-	psy_properties_set_str(section, "skin-directory",
-		"Skin directory");
-	psy_properties_set_str(section,
-		"theme", "Theme");	
-	psy_properties_set_str(section,
-		"background", "Background");
-	psy_properties_set_str(section,
-		"font", "Font");
-	psy_properties_set_str(section,
-		"name", "Name");
+	psy_properties_set_str(section, "skin-directory", "Skin directory");
+	psy_properties_set_str(section, "theme", "Theme");	
+	psy_properties_set_str(section, "background", "Background");
+	psy_properties_set_str(section, "font", "Font");
+	psy_properties_set_str(section, "name", "Name");
+	psy_properties_set_str(section, "version", "Version");
 	psy_properties_set_str(section,
 		"show-about-at-startup", "Show About At Startup");
 	psy_properties_set_str(section,
@@ -298,72 +275,42 @@ void translator_definekeys(psy_Properties* lang)
 		"move-cursor-when-paste", "Move Cursor When Paste");
 	psy_properties_set_str(section,
 		"show-as-window", "Show as Window");	
-	psy_properties_set_str(section,
-		"load-skin", "Load skin");
-	psy_properties_set_str(section,
-		"default-skin", "Default skin");
-	psy_properties_set_str(section,
-		"default-font", "Default Font");
-	psy_properties_set_str(section,
-		"default-line", "Default Line");
-	psy_properties_set_str(section,
-		"load-dial-bitmap", "Load dial bitmap");
-	psy_properties_set_str(section,
-		"choose-font", "Choose Font");
+	psy_properties_set_str(section, "load-skin", "Load skin");
+	psy_properties_set_str(section, "default-skin", "Default skin");
+	psy_properties_set_str(section, "default-font", "Default Font");
+	psy_properties_set_str(section, "default-line", "Default Line");
+	psy_properties_set_str(section, "load-dial-bitmap", "Load dial bitmap");
+	psy_properties_set_str(section, "choose-font", "Choose Font");
 	// settingsview/patternview
+	psy_properties_set_str(section, "draw-empty-data", "Draw empty data");
+	psy_properties_set_str(section, "default-entries", "Default entries");
+	psy_properties_set_str(section, "line-numbers", "Line numbers");
+	psy_properties_set_str(section, "beat-offset", "Beat offset");
 	psy_properties_set_str(section,
-		"draw-empty-data",
-		"Draw empty data");
-	psy_properties_set_str(section, 
-		"default-entries",
-		"Default entries");
+		"line-numbers-cursor", "Line numbers cursor");
 	psy_properties_set_str(section,
-		"line-numbers",
-		"Line numbers");
-	psy_properties_set_str(section,
-		"beat-offset",
-		"Beat offset");
-	psy_properties_set_str(section,
-		"line-numbers-cursor",
-		"Line numbers cursor");
-	psy_properties_set_str(section,
-		"line-numbers-in-hex",
-		"Line numbers in HEX");
+		"line-numbers-in-hex", "Line numbers in HEX");
 	psy_properties_set_str(section,
 		"wide-instrument-column",
 		"Wide instrument column");
 	psy_properties_set_str(section,
-		"pattern-track-scopes",
-		"Pattern track scopes");
+		"pattern-track-scopes", "Pattern track scopes");
+	psy_properties_set_str(section, "wrap-around", "Wrap Around");
 	psy_properties_set_str(section,
-		"wrap-around",
-		"Wrap Around");
+		"center-cursor-on-screen", "Center cursor on screen");
 	psy_properties_set_str(section,
-		"center-cursor-on-screen",
-		"Center cursor on screen");
+		"bar-highlighting", "Bar highlighting: (beats/bar)");
 	psy_properties_set_str(section,
-		"bar-highlighting",
-		"Bar highlighting: (beats/bar)");
-	psy_properties_set_str(section,
-		"a4-440hz",
-		"A4 is 440Hz (Otherwise it is 220Hz)");
+		"a4-440hz", "A4 is 440Hz (Otherwise it is 220Hz)");
 	// settingsview/machineview
 	psy_properties_set_str(section,
-		"draw-machine-indexes",
-		"Draw Machine Indexes");
-	psy_properties_set_str(section,
-		"draw-vu-meters",
-		"Draw VU Meters");
-	psy_properties_set_str(section,
-		"draw-wire-hover",
-		"Draw VU Meters");
+		"draw-machine-indexes", "Draw Machine Indexes");
+	psy_properties_set_str(section, "draw-vu-meters", "Draw VU Meters");
+	psy_properties_set_str(section, "draw-wire-hover", "Draw VU Meters");
 	// settingsview/machineview/theme
-	psy_properties_set_str(section,
-		"vu-background", "Vu BackGround");
-	psy_properties_set_str(section,
-		"vu-bar", "Vu Bar");
-	psy_properties_set_str(section,
-		"onclip", "OnClip");
+	psy_properties_set_str(section, "vu-background", "Vu BackGround");
+	psy_properties_set_str(section, "vu-bar", "Vu Bar");
+	psy_properties_set_str(section, "onclip", "OnClip");
 	psy_properties_set_str(section,
 		"generators-font-face", "Generators Font Face");
 	psy_properties_set_str(section,
@@ -372,263 +319,203 @@ void translator_definekeys(psy_Properties* lang)
 		"effect-fontface", "effect_fontface");
 	psy_properties_set_str(section,
 		"effect-font-flags", "effect_font_flags");
-	psy_properties_set_str(section,
-		"background", "Background");
-	psy_properties_set_str(section,
-		"wirecolour", "Wires");
-	psy_properties_set_str(section,
-		"wirecolour2", "wirecolour2");
-	psy_properties_set_str(section, 
-		"polygons", "Polygons");
-	psy_properties_set_str(section,
-		"generators-font", "Generators Font");
-	psy_properties_set_str(section,
-		"effects-font", "Effects Font");
-	psy_properties_set_str(section,
-		"wire-width", "Wire width");
-	psy_properties_set_str(section,
-		"antialias-halo", "AntiAlias halo");
+	psy_properties_set_str(section, "background", "Background");
+	psy_properties_set_str(section, "wirecolour", "Wires");
+	psy_properties_set_str(section, "wirecolour2", "wirecolour2");
+	psy_properties_set_str(section, "polygons", "Polygons");
+	psy_properties_set_str(section, "generators-font", "Generators Font");
+	psy_properties_set_str(section, "effects-font", "Effects Font");
+	psy_properties_set_str(section, "wire-width", "Wire width");
+	psy_properties_set_str(section, "antialias-halo", "AntiAlias halo");
 	psy_properties_set_str(section,
 		"machine-background", "Machine Background");
-	psy_properties_set_str(section,
-		"polygon-size", "Polygon size");
+	psy_properties_set_str(section, "polygon-size", "Polygon size");
 	// settingsview/paramview
 	psy_properties_set_str(section,
 		"native-machine-parameter-window",
 		"Native Machine Parameter Window");
-	psy_properties_set_str(section,
-		"load-dial-bitmap",
-		"Load Dial Bitmap");
+	psy_properties_set_str(section, "load-dial-bitmap", "Load Dial Bitmap");
 	// settingsview/paramview-theme
-	psy_properties_set_str(section,
-		"title-background", "Title Background");
-	psy_properties_set_str(section,
-		"title-font", "Title Font");
-	psy_properties_set_str(section,
-		"param-background", "Param Background");
-	psy_properties_set_str(section,
-		"param-font", "Param Font");
-	psy_properties_set_str(section,
-		"value-background", "Value Background");
-	psy_properties_set_str(section,
-		"value-font", "Value Font");
+	psy_properties_set_str(section, "title-background", "Title Background");
+	psy_properties_set_str(section, "title-font", "Title Font");
+	psy_properties_set_str(section, "param-background", "Param Background");
+	psy_properties_set_str(section, "param-font", "Param Font");
+	psy_properties_set_str(section, "value-background", "Value Background");
+	psy_properties_set_str(section, "value-font", "Value Font");
 	psy_properties_set_str(section,
 		"selparam-background", "SelParam Background");
-	psy_properties_set_str(section,
-		"selparam-font", "SelParam Font");
+	psy_properties_set_str(section, "selparam-font", "SelParam Font");
 	psy_properties_set_str(section,
 		"selvalue-background", "SelValue Background");
-	psy_properties_set_str(section,
-		"selvalue-font", "SelValue Font");
+	psy_properties_set_str(section, "selvalue-font", "SelValue Font");
 	// settingsview/keyboard/misc	
 	psy_properties_set_str(section,
 		"record-tws",
 		"Record Mouse Tweaks as tws (Smooth tweaks)");
 	psy_properties_set_str(section,
-		"advance-line-on-record",
-		"Advance Line On Record");
+		"advance-line-on-record", "Advance Line On Record");
 	// instrumentsbox
 	section = psy_properties_append_section(lang, "instrumentsbox");
 	psy_properties_set_str(section,
 		"instrument-groups", "Instrument Groups");
-	psy_properties_set_str(section,
-		"group-instruments", "Group Instruments");	
+	psy_properties_set_str(section, "group-instruments", "Group Instruments");
 	// instrumentview
 	section = psy_properties_append_section(lang, "instrumentview");
 	psy_properties_set_str(section,
 		"instrument-name", "Instrument Name");
-	psy_properties_set_str(section,
-		"new-note-action", "New Note Action");
-	psy_properties_set_str(section,
-		"note-cut", "Note Cut");
-	psy_properties_set_str(section,
-		"note-release", "Note Release");
-	psy_properties_set_str(section,
-		"note-fadeout", "Note Fadeout");
-	psy_properties_set_str(section,
-		"none", "None");
+	psy_properties_set_str(section, "new-note-action", "New Note Action");
+	psy_properties_set_str(section, "note-cut", "Note Cut");
+	psy_properties_set_str(section, "note-release", "Note Release");
+	psy_properties_set_str(section, "note-fadeout", "Note Fadeout");
+	psy_properties_set_str(section, "none", "None");
 	psy_properties_set_str(section,
 		"play-sample-to-fit", "Play sample to fit");
-	psy_properties_set_str(section,
-		"pattern-rows", "Pattern rows");
-	psy_properties_set_str(section,
-		"global-volume", "Global volume");
+	psy_properties_set_str(section, "pattern-rows", "Pattern rows");
+	psy_properties_set_str(section, "global-volume", "Global volume");
 	psy_properties_set_str(section,
 		"amplitude-envelope", "Amplitude envelope");
-	psy_properties_set_str(section,
-		"attack", "Attack");
-	psy_properties_set_str(section,
-		"decay", "Decay");
-	psy_properties_set_str(section,
-		"sustain-level", "Sustain level");
-	psy_properties_set_str(section,
-		"release", "Release");
-	psy_properties_set_str(section,
-		"filter-type", "Filter type");
-	psy_properties_set_str(section,
-		"filter-envelope", "Filter envelope");
-	psy_properties_set_str(section,
-		"cut-off", "Cut-off");
-	psy_properties_set_str(section,
-		"res", "Res/bandw.");
-	psy_properties_set_str(section,
-		"mod", "Mod. Amount");
-	psy_properties_set_str(section,
-		"random-panning", "Random panning");
-	psy_properties_set_str(section,
-		"general", "General");
-	psy_properties_set_str(section,
-		"volume", "Volume");
-	psy_properties_set_str(section,
-		"pan", "Pan");
-	psy_properties_set_str(section,
-		"filter", "Filter");
-	psy_properties_set_str(section,
-		"pitch", "Pitch");
+	psy_properties_set_str(section, "attack", "Attack");
+	psy_properties_set_str(section, "decay", "Decay");
+	psy_properties_set_str(section, "sustain-level", "Sustain level");
+	psy_properties_set_str(section, "release", "Release");
+	psy_properties_set_str(section, "filter-type", "Filter type");
+	psy_properties_set_str(section, "filter-envelope", "Filter envelope");
+	psy_properties_set_str(section, "cut-off", "Cut-off");
+	psy_properties_set_str(section, "res", "Res/bandw.");
+	psy_properties_set_str(section, "mod", "Mod. Amount");
+	psy_properties_set_str(section, "random-panning", "Random panning");
+	psy_properties_set_str(section, "general", "General");
+	psy_properties_set_str(section, "volume", "Volume");
+	psy_properties_set_str(section, "pan", "Pan");
+	psy_properties_set_str(section, "filter", "Filter");
+	psy_properties_set_str(section, "pitch", "Pitch");
 	// machineview
 	section = psy_properties_append_section(lang, "machineview");
-	psy_properties_set_str(section,
-		"new-machine", "New Machine");
-	psy_properties_set_str(section,
-		"wires", "Wires");
+	psy_properties_set_str(section, "new-machine", "New Machine");
+	psy_properties_set_str(section, "wires", "Wires");
 	psy_properties_set_str(section,
 		"no-machines-loaded", "No Machines Loaded");
-	psy_properties_set_str(section,
-		"no-machine", "No Machine");
+	psy_properties_set_str(section, "no-machine", "No Machine");
 	psy_properties_set_str(section,
 		"connect-to-mixer-send-return-input",
 		"Connect to Mixer-send/return-input");
 	// PatternView
 	section = psy_properties_append_section(lang, "patternview");
-	psy_properties_set_str(section,
-		"line", "Line");
-	psy_properties_set_str(section,
-		"defaults", "Defaults");
-	psy_properties_set_str(section,
-		"step", "Step");
+	psy_properties_set_str(section, "line", "Line");
+	psy_properties_set_str(section, "defaults", "Defaults");
+	psy_properties_set_str(section, "step", "Step");
 	// SequenceView
 	section = psy_properties_append_section(lang, "sequencerview");
-	psy_properties_set_str(section,
-		"follow-song", "Follow Song");
-	psy_properties_set_str(section,
-		"show-playlist", "Show Playlist");
+	psy_properties_set_str(section, "follow-song", "Follow Song");
+	psy_properties_set_str(section, "show-playlist", "Show Playlist");
 	psy_properties_set_str(section,
 		"show-pattern-names", "Show Pattern Names");
-	psy_properties_set_str(section,
-		"record-tweaks", "Record tweaks");
+	psy_properties_set_str(section, "record-tweaks", "Record tweaks");
 	psy_properties_set_str(section,
 		"multichannel-audition", "Multichannel audition");
-	psy_properties_set_str(section,
-		"duration", "Duration");
-	psy_properties_set_str(section,
-		"ins", "Insert");
-	psy_properties_set_str(section,
-		"new", "New");
-	psy_properties_set_str(section,
-		"clone", "Clone");
-	psy_properties_set_str(section,
-		"del", "Delete");
-	psy_properties_set_str(section,
-		"new-trk", "New Track");
-	psy_properties_set_str(section,
-		"del-trk", "Del Track");
-	psy_properties_set_str(section,
-		"clear", "Clear");
-	psy_properties_set_str(section,
-		"copy", "Copy");
-	psy_properties_set_str(section,
-		"paste", "Paste");
-	psy_properties_set_str(section,
-		"singlesel", "SingleSel");
-	psy_properties_set_str(section,
-		"multisel", "MultiSel");
+	psy_properties_set_str(section, "duration", "Duration");
+	psy_properties_set_str(section, "ins", "Insert");
+	psy_properties_set_str(section, "new", "New");
+	psy_properties_set_str(section, "clone", "Clone");
+	psy_properties_set_str(section, "del", "Delete");
+	psy_properties_set_str(section, "new-trk", "New Track");
+	psy_properties_set_str(section, "del-trk", "Del Track");
+	psy_properties_set_str(section, "clear", "Clear");
+	psy_properties_set_str(section, "copy", "Copy");
+	psy_properties_set_str(section, "paste", "Paste");
+	psy_properties_set_str(section, "singlesel", "SingleSel");
+	psy_properties_set_str(section, "multisel", "MultiSel");
 	section = psy_properties_append_section(lang, "newmachine");
-	psy_properties_set_str(section,
-		"all", "All");
-	psy_properties_set_str(section,
-		"favorites", "Favorites");
+	psy_properties_set_str(section, "all", "All");
+	psy_properties_set_str(section, "favorites", "Favorites");
 	psy_properties_set_str(section,
 		"jme-version-unknown",
 		"Load new gamefx and blitz if version is unknown");
 	psy_properties_set_str(section,
-		"song-loading-compatibility",
-		"Song loading compatibility");
-	psy_properties_set_str(section,
-		"rescan", "Rescan");
+		"song-loading-compatibility", "Song loading compatibility");
+	psy_properties_set_str(section, "rescan", "Rescan");
 	psy_properties_set_str(section,
 		"select-plugin-directories", "Select plugin directories");
 	psy_properties_set_str(section,
 		"sort-by-favorite", "Sort by favorite");
-	psy_properties_set_str(section,
-		"sort-by-name", "Sort by name");
-	psy_properties_set_str(section,
-		"sort-by-type", "Sort by type");
-	psy_properties_set_str(section,
-		"sort-by-mode", "Sort by mode");
+	psy_properties_set_str(section, "sort-by-name", "Sort by name");
+	psy_properties_set_str(section, "sort-by-type", "Sort by type");
+	psy_properties_set_str(section, "sort-by-mode", "Sort by mode");
 	psy_properties_set_str(section,
 		"select-plugin-to-view-description",
 		"Select a plugin to view its description");
 	section = psy_properties_append_section(lang, "samplesview");
-	psy_properties_set_str(section,
-		"samplename", "Samplename");
-	psy_properties_set_str(section,
-		"samplerate", "Samplerate");
-	psy_properties_set_str(section,
-		"samples", "Samples");
-	psy_properties_set_str(section,
-		"groupsamples", "Group Samples");
+	psy_properties_set_str(section, "samplename", "Samplename");
+	psy_properties_set_str(section, "samplerate", "Samplerate");
+	psy_properties_set_str(section, "samples", "Samples");
+	psy_properties_set_str(section, "groupsamples", "Group Samples");
 	psy_properties_set_str(section,
 		"groupsfirstsample", "Groups first sample");
-	psy_properties_set_str(section,
-		"default-volume", "Default volume");
-	psy_properties_set_str(section,
-		"global-volume", "Global volume");
-	psy_properties_set_str(section,
-		"pan-position", "Pan Position");
-	psy_properties_set_str(section,
-		"sampled-note", "Sampled note");
-	psy_properties_set_str(section,
-		"pitch-finetune", "Pitch finetune");
-	psy_properties_set_str(section,
-		"process", "Process");
-	psy_properties_set_str(section,
-		"no-wave-loaded", "No wave loaded");
+	psy_properties_set_str(section, "default-volume", "Default volume");
+	psy_properties_set_str(section, "global-volume", "Global volume");
+	psy_properties_set_str(section, "pan-position", "Pan Position");
+	psy_properties_set_str(section, "sampled-note", "Sampled note");
+	psy_properties_set_str(section, "pitch-finetune", "Pitch finetune");
+	psy_properties_set_str(section, "process", "Process");
+	psy_properties_set_str(section, "no-wave-loaded", "No wave loaded");	
 	section = psy_properties_append_section(lang, "cmds");
+	psy_properties_set_str(section, "keymap", "Keymap");
+	// General
+	psy_properties_set_str(section, "help", "Help");
+	psy_properties_set_str(section, "helpshortcut", "Kbd Help");
+	psy_properties_set_str(section, "editmachine", "Machines" );
+	psy_properties_set_str(section, "editpattern", "Patterns");
+	psy_properties_set_str(section, "addmachine", "Add Machine");
+	psy_properties_set_str(section, "playsong", "Play Song");
+	psy_properties_set_str(section, "playstart", "Play Start");
+	psy_properties_set_str(section, "playfrompos", "Play Pos");
+	psy_properties_set_str(section, "playstop", "stop");
+	psy_properties_set_str(section, "songposdec", "Seqpos dec");
+	psy_properties_set_str(section, "songposinc", "Seqpos Inc");
+	psy_properties_set_str(section, "maxpattern", "Max Pattern");
+	psy_properties_set_str(section, "infomachine", "gear");
+	psy_properties_set_str(section, "editinstr", "Instruments");
+	psy_properties_set_str(section, "editsample", "Samples");
+	psy_properties_set_str(section, "editwave", "Wave Edit");
+	psy_properties_set_str(section, "terminal", "Terminal");
+	psy_properties_set_str(section, "instrdec", "Current Instrument -1");
+	psy_properties_set_str(section, "instrinc", "Current Instrument +1");
 	// Tracker
-	psy_properties_set_str(section, "navup", "Nav Up", "up");
-	psy_properties_set_str(section, "navdown", "Nav Down", "down");
-	psy_properties_set_str(section, "navleft", "Nav Left", "left");
-	psy_properties_set_str(section, "navright", "Nav Right", "right");
-	psy_properties_set_str(section, "navpageup", "Nav Up 16", "pageup");
-	psy_properties_set_str(section, "navpagedown", "Nav Down 16", "pagedown");
-	psy_properties_set_str(section, "navtop", "Nav Top", "track top");
-	psy_properties_set_str(section, "navbottom", "Nav Bottom", "track bottom");
-	psy_properties_set_str(section, "columnprev", "Prev column", "prev col");
-	psy_properties_set_str(section, "columnnext", "Next column", "next col");
+	psy_properties_set_str(section, "navup", "Nav Up");
+	psy_properties_set_str(section, "navdown", "Nav Down");
+	psy_properties_set_str(section, "navleft", "Nav Left");
+	psy_properties_set_str(section, "navright", "Nav Right");
+	psy_properties_set_str(section, "navpageup", "Nav Up 16");
+	psy_properties_set_str(section, "navpagedown", "Nav Down 16");
+	psy_properties_set_str(section, "navtop", "Nav Top");
+	psy_properties_set_str(section, "navbottom", "Nav Bottom");
+	psy_properties_set_str(section, "columnprev", "Prev column");
+	psy_properties_set_str(section, "columnnext", "Next column");
 
-	psy_properties_set_str(section, "rowinsert", "Insert row", "ins row");
-	psy_properties_set_str(section, "rowdelete", "Delete row", "del row");
-	psy_properties_set_str(section, "rowclear", "Clear row", "clr row");
+	psy_properties_set_str(section, "rowinsert", "Insert row");
+	psy_properties_set_str(section, "rowdelete", "Delete row");
+	psy_properties_set_str(section, "rowclear", "Clear row");
 
-	psy_properties_set_str(section, "blockstart", "Block Start", "sel start");
-	psy_properties_set_str(section, "blockend", "Block End", "sel end");
-	psy_properties_set_str(section, "blockunmark", "Block Unmark", "unmark");
-	psy_properties_set_str(section, "blockcut", "Block cut", "cut");
-	psy_properties_set_str(section, "blockcopy", "Block copy", "copy");
-	psy_properties_set_str(section, "blockpaste", "Block paste", "paste");
-	psy_properties_set_str(section, "blockmix", "Block Mix", "mix");
+	psy_properties_set_str(section, "blockstart", "Block Start");
+	psy_properties_set_str(section, "blockend", "Block End");
+	psy_properties_set_str(section, "blockunmark", "Block Unmark");
+	psy_properties_set_str(section, "blockcut", "Block cut");
+	psy_properties_set_str(section, "blockcopy", "Block copy");
+	psy_properties_set_str(section, "blockpaste", "Block paste");
+	psy_properties_set_str(section, "blockmix", "Block Mix");
 
-	psy_properties_set_str(section, "transposeblockinc", "Transpose Block +1", "Trsp+");
-	psy_properties_set_str(section, "transposeblockdec", "Transpose Block -1", "Trsp-");
-	psy_properties_set_str(section, "transposeblockinc12", "Transpose Block +12", "Trsp+12");
-	psy_properties_set_str(section, "transposeblockdec12", "Transpose Block -12", "Trsp-12");
+	psy_properties_set_str(section, "transposeblockinc", "Transpose Block +1");
+	psy_properties_set_str(section, "transposeblockdec", "Transpose Block -1");
+	psy_properties_set_str(section, "transposeblockinc12", "Transpose Block +12");
+	psy_properties_set_str(section, "transposeblockdec12", "Transpose Block -12");
 
-	psy_properties_set_str(section, "selectall", "Block Select All", "sel all");
-	psy_properties_set_str(section, "selectcol", "Block Select Column", "sel col");
-	psy_properties_set_str(section, "selectbar", "Block Select Bar", "sel bar");
+	psy_properties_set_str(section, "selectall", "Block Select All");
+	psy_properties_set_str(section, "selectcol", "Block Select Column");
+	psy_properties_set_str(section, "selectbar", "Block Select Bar");
 
-	psy_properties_set_str(section, "selectmachine", "Select Mac/Ins in Cursor Pos", "Select Mac/Ins in Cursor Pos");
-	psy_properties_set_str(section, "undo", "Edit Undo", "undo");
-	psy_properties_set_str(section, "redo", "Edit Redo", "redo");
-	psy_properties_set_str(section, "followsong", "Follow Song", "follow");
+	psy_properties_set_str(section, "selectmachine",
+		"Select Mac/Ins in Cursor Pos");
+	psy_properties_set_str(section, "undo", "Edit Undo");
+	psy_properties_set_str(section, "redo", "Edit Redo");
+	psy_properties_set_str(section, "followsong", "Follow Song");
 }

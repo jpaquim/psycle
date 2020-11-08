@@ -13,7 +13,7 @@ extern "C" {
 #include "list.h"
 #include "signal.h"
 
-// aim: Command Handler for undo redo commands
+// Command Handler for undo redo commands
 
 typedef struct {
 	psy_List* undo;

@@ -219,31 +219,34 @@ psy_Properties* psy_properties_clone(psy_Properties* self, int all)
 
 psy_Properties* psy_properties_sync(psy_Properties* self, psy_Properties* src)
 {
-	psy_Properties* p;
-	p = src->children;
-	for (p = src->children; p != NULL; p = psy_properties_next(p)) {
-		psy_Properties* q;
+	if (self != src) {
+		psy_Properties* p;
 
-		q = psy_properties_at(self, psy_properties_key(p), PSY_PROPERTY_TYP_NONE);
-		if (q) {
-			if (psy_properties_type(p) == PSY_PROPERTY_TYP_STRING) {
-				psy_properties_set_str(self, psy_properties_key(p),
-					psy_properties_as_str(p));
-			} else
-			if (psy_properties_type(p) == PSY_PROPERTY_TYP_INTEGER) {
-				psy_properties_set_int(self, psy_properties_key(p),
-					psy_properties_as_int(p));
-			} else
-			if (psy_properties_type(p) == PSY_PROPERTY_TYP_BOOL) {
-				psy_properties_set_bool(self, psy_properties_key(p),
-					psy_properties_as_int(p));
-			} else
-			if (psy_properties_type(p) == PSY_PROPERTY_TYP_FONT) {
-				psy_properties_set_font(self, psy_properties_key(p),
-					psy_properties_as_str(p));
-			}
-			if (q->children && p->children) {
-				psy_properties_sync(q, p);
+		p = src->children;
+		for (p = src->children; p != NULL; p = psy_properties_next(p)) {
+			psy_Properties* q;
+			
+			q = psy_properties_at(self, psy_properties_key(p), PSY_PROPERTY_TYP_NONE);
+			if (q) {
+				if (psy_properties_type(p) == PSY_PROPERTY_TYP_STRING) {
+					psy_properties_set_str(self, psy_properties_key(p),
+						psy_properties_as_str(p));
+				} else
+					if (psy_properties_type(p) == PSY_PROPERTY_TYP_INTEGER) {
+						psy_properties_set_int(self, psy_properties_key(p),
+							psy_properties_as_int(p));
+					} else
+						if (psy_properties_type(p) == PSY_PROPERTY_TYP_BOOL) {
+							psy_properties_set_bool(self, psy_properties_key(p),
+								psy_properties_as_int(p));
+						} else
+							if (psy_properties_type(p) == PSY_PROPERTY_TYP_FONT) {
+								psy_properties_set_font(self, psy_properties_key(p),
+									psy_properties_as_str(p));
+							}
+						if (q->children && p->children) {
+							psy_properties_sync(q, p);
+						}
 			}
 		}
 	}
@@ -761,7 +764,12 @@ psy_Properties* psy_properties_settext(psy_Properties* self, const char* text)
 
 const char* psy_properties_text(psy_Properties* self)
 {
-	return self->item.text ? self->item.text : self->item.key ? self->item.key : "";
+	assert(self);
+	return (self->item.text)
+		? self->item.text
+		: ((self->item.key)
+			? self->item.key
+			: "");
 }
 
 psy_Properties* psy_properties_settranslation(psy_Properties* self, const char* text)
@@ -852,11 +860,16 @@ psy_Properties* tail(psy_Properties* self)
 
 psy_Properties* psy_properties_append_property(psy_Properties* self, psy_Properties* p)
 {	
-	if (self) {		
+	if (self && p) {		
 		if (self->children) {
 			tail(self->children)->next = p;		
 		} else {
 			self->children = p;
+			psy_Properties* i;
+			
+			for (i = p; i != NULL; i = i->next) {
+				i->parent = self;
+			}
 		}
 		p->parent = self;
 	}
@@ -911,9 +924,9 @@ void psy_properties_clear(psy_Properties* self)
 	}
 }
 
-uintptr_t psy_properties_size(psy_Properties* self)
+uintptr_t psy_properties_size(const psy_Properties* self)
 {
-	unsigned int rv = 0;
+	uintptr_t rv = 0;
 		
 	if (self) {
 		psy_Properties* p;
@@ -922,7 +935,7 @@ uintptr_t psy_properties_size(psy_Properties* self)
 	return rv;
 }
 
-bool psy_properties_empty(psy_Properties* self)
+bool psy_properties_empty(const psy_Properties* self)
 {
 	if (self) {
 		return self->children == NULL;

@@ -168,6 +168,31 @@ static bool createcaptureport(MmeDriver*, PortCapt*);
 static bool addcaptureport(MmeDriver*, int idx);
 static bool removecaptureport(MmeDriver*, int idx);
 
+static psy_AudioDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;
+		vtable.connect = driver_connect;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = driver_configure;
+		vtable.samplerate = samplerate;
+		vtable.addcapture = (psy_audiodriver_fp_addcapture)addcaptureport;
+		vtable.removecapture = (psy_audiodriver_fp_removecapture)removecaptureport;
+		vtable.readbuffers = (psy_audiodriver_fp_readbuffers)readbuffers;
+		vtable.capturename = (psy_audiodriver_fp_capturename)capturename;
+		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
+		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
+		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable_initialized = 1;
+	}
+}
+
 EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 {
 	static AudioDriverInfo info;
@@ -181,24 +206,7 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
 	MmeDriver* mme = (MmeDriver*) malloc(sizeof(MmeDriver));
-	if (mme) {
-		memset(mme, 0, sizeof(MmeDriver));
-		mme->driver.open = driver_open;
-		mme->driver.deallocate = driver_deallocate;
-		mme->driver.connect = driver_connect;
-		mme->driver.open = driver_open;
-		mme->driver.close = driver_close;
-		mme->driver.dispose = driver_dispose;
-		mme->driver.configure = driver_configure;
-		mme->driver.samplerate = samplerate;
-		mme->driver.addcapture = (psy_audiodriver_fp_addcapture) addcaptureport;
-		mme->driver.removecapture = (psy_audiodriver_fp_removecapture) removecaptureport;
-		mme->driver.readbuffers = (psy_audiodriver_fp_readbuffers) readbuffers;
-		mme->driver.capturename = (psy_audiodriver_fp_capturename) capturename;
-		mme->driver.numcaptures = (psy_audiodriver_fp_numcaptures) numcaptures;
-		mme->driver.playbackname = (psy_audiodriver_fp_playbackname) playbackname;
-		mme->driver.numplaybacks = (psy_audiodriver_fp_numplaybacks) numplaybacks;
-		mme->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (mme) {		
 		driver_init(&mme->driver);
 		return &mme->driver;
 	} else {
@@ -208,13 +216,18 @@ EXPORT psy_AudioDriver* __cdecl driver_create(void)
 
 void driver_deallocate(psy_AudioDriver* driver)
 {
-	driver->dispose(driver);
+	driver_dispose(driver);
 	free(driver);
 }
 
 int driver_init(psy_AudioDriver* driver)
 {
-	MmeDriver* self = (MmeDriver*) driver;	
+	MmeDriver* self = (MmeDriver*)driver;	
+
+	memset(self, 0, sizeof(MmeDriver));
+	vtable_init();
+	self->driver.vtable = &vtable;
+	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	/*self->_deviceId = 0; // WAVE_MAPPER;
 	self->_blockSizeBytes = 4096;
 	self->pollSleep_ = 10;*/

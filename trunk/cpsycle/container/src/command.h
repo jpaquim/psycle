@@ -6,12 +6,14 @@
 
 #include "../../detail/psydef.h"
 
+#include <assert.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: Interface that implements the Command Pattern used
-//      for undo/redo operations
+// Interface that implements the Command Pattern used
+// for undo/redo operations
 
 struct psy_Command;
 
@@ -31,16 +33,19 @@ void psy_command_init(psy_Command* self);
 
 INLINE void psy_command_dispose(psy_Command* self)
 {
+	assert(self);
 	self->vtable->dispose(self);
 }
 
 INLINE void psy_command_execute(psy_Command* self)
 {
+	assert(self);
 	self->vtable->execute(self);
 }
 
 INLINE void psy_command_revert(psy_Command* self)
 {
+	assert(self);
 	self->vtable->revert(self);
 }
 

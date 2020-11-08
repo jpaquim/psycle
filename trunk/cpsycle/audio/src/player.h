@@ -127,8 +127,9 @@ void psy_audio_player_removeeventdriver(psy_audio_Player*, int id);
 void psy_audio_player_restarteventdriver(psy_audio_Player*, int id);
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
 psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, int id);
-unsigned int psy_audio_player_numeventdrivers(psy_audio_Player*);
-void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount, uintptr_t slot);
+uintptr_t psy_audio_player_numeventdrivers(psy_audio_Player*);
+void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
+	uintptr_t slot);
 void psy_audio_player_setemptysong(psy_audio_Player*);
 
 #ifdef __cplusplus

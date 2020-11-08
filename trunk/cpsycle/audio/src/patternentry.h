@@ -5,9 +5,12 @@
 #define psy_audio_PATTERNENTRY_H
 
 #include "patternevent.h"
-#include <list.h>
+
 #include "../../detail/stdint.h"
 #include "../../detail/psydef.h"
+
+#include <assert.h>
+#include <list.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,17 +51,20 @@ psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry*);
 
 INLINE psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry* self)
 {
+	assert(self);
 	return (psy_audio_PatternEvent*)(self->events->entry);
 }
 
 INLINE const psy_audio_PatternEvent* patternentry_front_const(
 	const psy_audio_PatternEntry* self)
 {
+	assert(self);
 	return (const psy_audio_PatternEvent*)(self->events->entry);
 }
 
 INLINE void patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_big_beat_t bpm)
 {
+	assert(self);
 	self->bpm = bpm;
 }
 
@@ -71,11 +77,13 @@ typedef psy_List psy_audio_PatternNode;
 
 INLINE psy_audio_PatternEntry* psy_audio_patternnode_entry(psy_audio_PatternNode* self)
 {
+	assert(self);
 	return (psy_audio_PatternEntry*)self->entry;
 }
 
 INLINE void psy_audio_patternnode_next(psy_audio_PatternNode** self)
 {
+	assert(self);
 	psy_list_next(self);
 }
 

@@ -135,8 +135,8 @@ psy_PropertyHint psy_properties_hint(psy_Properties*);
 psy_Properties* psy_properties_next(psy_Properties*);
 psy_Properties* psy_properties_remove(psy_Properties*, psy_Properties*);
 void psy_properties_clear(psy_Properties*);
-uintptr_t psy_properties_size(psy_Properties*);
-bool psy_properties_empty(psy_Properties*);
+uintptr_t psy_properties_size(const psy_Properties*);
+bool psy_properties_empty(const psy_Properties*);
 
 #ifdef __cplusplus
 }

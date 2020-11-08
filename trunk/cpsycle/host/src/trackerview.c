@@ -481,7 +481,7 @@ static void trackergrid_onmousedoubleclick(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousewheel(TrackerGrid*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
 static psy_audio_PatternEditPosition trackergrid_makecursor(TrackerGrid*, int x, int y);
-static int trackergrid_resizecolumn(TrackerGrid*, int x, int y);
+static uintptr_t trackergrid_resizecolumn(TrackerGrid*, int x, int y);
 static void trackergrid_dragcolumn(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_startdragselection(TrackerGrid*, psy_audio_PatternEditPosition);
 static void trackergrid_dragselection(TrackerGrid*, psy_audio_PatternEditPosition);
@@ -594,7 +594,7 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 		self->midline = FALSE;
 	}
 	self->columnresize = 0;
-	self->dragcolumn = -1;
+	self->dragcolumn = UINTPTR_MAX;
 	self->dragcolumnbase = 0;
 	self->chordmode = FALSE;
 	self->chordbegin = 0;
@@ -826,7 +826,7 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, PatternSelec
 
 void trackergrid_drawresizebar(TrackerGrid* self, psy_ui_Graphics* g, PatternSelection* clip)
 {
-	if (self->linestate->pattern && self->dragcolumn != -1) {
+	if (self->linestate->pattern && self->dragcolumn != UINTPTR_MAX) {
 		psy_ui_Rectangle r;
 
 		psy_ui_setrectangle(&r, self->dragcolumnbase, 0, 2,
@@ -1181,15 +1181,15 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 			return;
 		} else {
 			psy_EventDriver* kbd;
-			EventDriverData input;
-			EventDriverCmd cmd;
+			psy_EventDriverData input;
+			psy_EventDriverCmd cmd;
 
 			kbd = workspace_kbddriver(self->workspace);
 			input.message = EVENTDRIVER_KEYDOWN;
 			input.param1 = psy_audio_encodeinput(ev->keycode,
 				self->chordmode ? 0 : ev->shift, ev->ctrl);
 			input.param2 = workspace_octave(self->workspace) * 12;
-			kbd->cmd(kbd, "trackercmds", input, &cmd);
+			psy_eventdriver_cmd(kbd, "trackercmds", input, &cmd);
 			if (cmd.id == CMD_NAVLEFT) {
 				trackergrid_prevcol(self);
 				psy_ui_component_invalidate(&self->component);
@@ -1215,14 +1215,14 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 				}
 				{
 					psy_EventDriver* kbd;
-					EventDriverCmd cmd;
-					EventDriverData input;
+					psy_EventDriverCmd cmd;
+					psy_EventDriverData input;
 
 					cmd.id = -1;
 					kbd = workspace_kbddriver(self->workspace);
 					input.message = EVENTDRIVER_KEYDOWN;
 					input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
-					kbd->cmd(kbd, "notes", input, &cmd);
+					psy_eventdriver_cmd(kbd, "notes", input, &cmd);
 					trackergrid_inputnote(self,
 						(psy_dsp_note_t)(cmd.id + workspace_octave(self->workspace) * 12),
 						1);
@@ -1403,14 +1403,14 @@ void trackergrid_enterevent(TrackerGrid* self, psy_ui_KeyEvent* ev)
 	}
 	{
 		psy_EventDriver* kbd;
-		EventDriverCmd cmd;
-		EventDriverData input;
+		psy_EventDriverCmd cmd;
+		psy_EventDriverData input;
 
 		cmd.id = -1;
 		kbd = workspace_kbddriver(self->workspace);
 		input.message = EVENTDRIVER_KEYDOWN;
 		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
-		kbd->cmd(kbd, "notes", input, &cmd);
+		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
 		if (cmd.id == NOTECOMMANDS_RELEASE) {
 			trackergrid_inputnote(self, NOTECOMMANDS_RELEASE, self->chordmode);
 			psy_ui_keyevent_stoppropagation(ev);
@@ -1748,7 +1748,7 @@ void trackergrid_onmousedown(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	if (self->gridstate->pattern && ev->button == 1) {
 		self->dragcolumn = trackergrid_resizecolumn(self, ev->x, ev->y);
-		if (self->dragcolumn == -1) {
+		if (self->dragcolumn == UINTPTR_MAX) {
 			trackergrid_storecursor(self);
 			self->cursor = trackergrid_makecursor(self, ev->x, ev->y);
 			self->selection.topleft = self->cursor;
@@ -1779,7 +1779,7 @@ void trackergrid_onmousemove(TrackerGrid* self, psy_ui_MouseEvent* ev)
 	psy_audio_PatternEditPosition cursor;
 
 	if (ev->button == 1) {
-		if (self->dragcolumn != -1) {
+		if (self->dragcolumn != UINTPTR_MAX) {
 			uintptr_t paramcol;
 			TrackDef* trackdef;
 
@@ -1881,7 +1881,7 @@ void trackergrid_dragselection(TrackerGrid* self, psy_audio_PatternEditPosition 
 
 void trackergrid_dragcolumn(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
-	if (self->dragcolumn != -1) {
+	if (self->dragcolumn != UINTPTR_MAX) {
 		uintptr_t track;
 		TrackDef* trackdef;
 
@@ -1939,16 +1939,16 @@ void trackergrid_onmousewheel(TrackerGrid* self, psy_ui_Component* sender, psy_u
 	}
 }
 
-int trackergrid_resizecolumn(TrackerGrid* self, int x, int y)
+uintptr_t trackergrid_resizecolumn(TrackerGrid* self, int x, int y)
 {
-	int rv;
+	uintptr_t rv;
 	TrackDef* trackdef;
 	psy_audio_PatternEditPosition position;
 	int lines;
 	int coloffset;
 	int cpx;
 
-	rv = -1;
+	rv = UINTPTR_MAX;
 	position.offset = trackerlinestate_offset(self->linestate, y, &lines);
 	position.track = trackergridstate_screentotrack(self->gridstate, x, self->gridstate->numtracks);
 	coloffset = (x - self->gridstate->trackconfig->patterntrackident) -
@@ -2013,8 +2013,8 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 1) {
 		psy_ui_component_releasecapture(&self->component);
-		if (self->dragcolumn != -1) {
-			self->dragcolumn = -1;
+		if (self->dragcolumn != UINTPTR_MAX) {
+			self->dragcolumn = UINTPTR_MAX;
 			psy_ui_component_invalidate(&self->component);
 		}
 	}
@@ -3837,15 +3837,15 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 		}
 	} else {
 		psy_EventDriver* kbd;
-		EventDriverData input;
-		EventDriverCmd cmd;
+		psy_EventDriverData input;
+		psy_EventDriverCmd cmd;
 
 		kbd = workspace_kbddriver(self->workspace);
 		input.message = EVENTDRIVER_KEYDOWN;		
 		input.param1 = psy_audio_encodeinput(ev->keycode,
 			self->grid.chordmode ? 0 : ev->shift, ev->ctrl);
 		input.param2 = workspace_octave(self->workspace) * 12;
-		kbd->cmd(kbd, "trackercmds", input, &cmd);
+		psy_eventdriver_cmd(kbd, "trackercmds", input, &cmd);
 		if (cmd.id != -1) {
 			trackerview_handlecommand(self, ev, cmd.id);
 			psy_ui_keyevent_stoppropagation(ev);
@@ -3858,9 +3858,9 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 void trackerview_oneventdriverinput(TrackerView* self, psy_EventDriver* sender)
 {
 	if (psy_ui_component_hasfocus(&self->grid.component)) {
-		EventDriverCmd cmd;
+		psy_EventDriverCmd cmd;
 
-		cmd = sender->getcmd(sender, "trackercmds");
+		cmd = psy_eventdriver_getcmd(sender, "trackercmds");
 		if (cmd.id != -1) {
 			trackerview_handlecommand(self, NULL, cmd.id);
 		}

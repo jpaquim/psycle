@@ -74,31 +74,46 @@ static void fileoutdriver_closefile(FileOutDriver*);
 
 static void init_properties(FileOutDriver* driver);
 
+static psy_AudioDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;
+		vtable.connect = driver_connect;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = (psy_audiodriver_fp_configure)driver_configure;
+		vtable.samplerate = (psy_audiodriver_fp_samplerate)samplerate;
+		vtable_initialized = 1;
+	}
+}
+
 psy_AudioDriver* psy_audio_create_fileout_driver(void)
 {
 	FileOutDriver* out = malloc(sizeof(FileOutDriver));
-	fileoutdriver_init(out);
-	return &out->driver;
+	if (out) {		
+		fileoutdriver_init(out);
+		return &out->driver;
+	}
+	return NULL;
 }
 
 void driver_deallocate(psy_AudioDriver* driver)
 {
-	driver->dispose(driver);
+	driver_dispose(driver);
 	free(driver);
 }
 
 int fileoutdriver_init(FileOutDriver* self)
 {
 	memset(&self->driver, 0, sizeof(psy_AudioDriver));
-	psy_audiodriversettings_init(&self->settings);
-	self->driver.open = driver_open;
-	self->driver.deallocate = driver_deallocate;	
-	self->driver.connect = driver_connect;
-	self->driver.open = driver_open;
-	self->driver.close = driver_close;
-	self->driver.dispose = driver_dispose;
-	self->driver.configure = (psy_audiodriver_fp_configure) driver_configure;
-	self->driver.samplerate = (psy_audiodriver_fp_samplerate) samplerate;
+	vtable_init();
+	self->driver.vtable = &vtable;
+	psy_audiodriversettings_init(&self->settings);	
 	psy_signal_init(&self->driver.signal_stop);
 	init_properties(self);
 #if defined(DIVERSALIS__OS__MICROSOFT)	

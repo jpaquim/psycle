@@ -312,8 +312,9 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
 		if (loopend - loopstart < totalsamples) {
 			int startpos = loopstart;
 			int endpos = loopend;
-			int i;
-			for (i = 0; i < totalsamples; i++) {
+			uintptr_t i;
+
+			for (i = 0; i < totalsamples; ++i) {
 				buffer[secbegin + totalsamples - i] = data[endpos];
 				buffer[secbegin + totalsamples + i] = data[startpos];
 				endpos--;
@@ -488,7 +489,7 @@ void psy_audio_sampleiterator_setsample(psy_audio_SampleIterator* self,
 }
 
 // Set Current sample position 
-void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uint32_t value)
+void psy_audio_sampleiterator_setposition(psy_audio_SampleIterator* self, uintptr_t value)
 {
 	if (!self->sample) {
 		return;

@@ -240,9 +240,9 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 					}
 				} else if (pData->_note == notecommands::release) {
 					note = 0x61;
-				} else {
+				} else {*/
 					note = 0x00;
-				}*/
+				//}
 
 				unsigned char vol = 0;
 				unsigned char type = 0;

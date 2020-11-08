@@ -314,9 +314,9 @@ void psy_audio_player_ditherbuffer(psy_audio_Player* self, psy_audio_Buffer*
 void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 	psy_EventDriver* sender)
 {
-	EventDriverCmd cmd;	
+	psy_EventDriverCmd cmd;	
 	
-	cmd = sender->getcmd(sender, "notes");
+	cmd = psy_eventdriver_getcmd(sender, "notes");
 	printf("input %d, ", (int)cmd.id);
 	printf("param1 %d\n", (int)cmd.data.param1);
 	if (cmd.id != -1 && cmd.data.param1 < 255) {		
@@ -387,7 +387,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 	self->song = song;
 	if (self->song) {		
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
-			&song->machines, self->driver->samplerate(self->driver));		
+			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setnumsongtracks(self,
 			patterns_songtracks(&song->patterns));
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
@@ -480,7 +480,7 @@ void psy_audio_player_setaudiodriver(psy_audio_Player* self, psy_AudioDriver*
 	driver)
 {
 	self->driver = driver;
-	driver->connect(driver, self, (AUDIODRIVERWORKFN)psy_audio_player_work,
+	psy_audiodriver_connect(driver, self, (AUDIODRIVERWORKFN)psy_audio_player_work,
 		mainframe);
 }
 
@@ -507,7 +507,7 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 			printf("driver driver_create\n");
 			if (fpdrivercreate) {
 				driver = fpdrivercreate();				
-				driver->connect(driver, self, (AUDIODRIVERWORKFN)
+				psy_audiodriver_connect(driver, self, (AUDIODRIVERWORKFN)
 					psy_audio_player_work, mainframe);
 				printf("driver driver_connect\n");
 			}
@@ -519,23 +519,23 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 		driver = psy_audio_create_silent_driver();
 		psy_audio_exclusivelock_disable();
 	}	
-	psy_audio_sequencer_setsamplerate(&self->sequencer, driver->samplerate(
+	psy_audio_sequencer_setsamplerate(&self->sequencer, psy_audiodriver_samplerate(
 		driver));
-	psy_dsp_rmsvol_setsamplerate(driver->samplerate(driver));
+	psy_dsp_rmsvol_setsamplerate(psy_audiodriver_samplerate(driver));
 	self->driver = driver;
 	if (self->driver && config) {
 		printf("driver driver_configure\n");
-		self->driver->configure(self->driver, config);
+		psy_audiodriver_configure(self->driver, config);
 		printf("driver driver_open\n");
-		self->driver->open(self->driver);
+		psy_audiodriver_open(self->driver);
 	}
 }
 
 void psy_audio_player_unloaddriver(psy_audio_Player* self)
 {
 	if (self->driver) {
-		self->driver->close(self->driver);				
-		self->driver->deallocate(self->driver);
+		psy_audiodriver_close(self->driver);
+		psy_audiodriver_deallocate(self->driver);
 		psy_library_unload(&self->drivermodule);		
 	}
 	self->driver = 0;
@@ -552,9 +552,9 @@ void psy_audio_player_restartdriver(psy_audio_Player* self,
 	psy_Properties* config)
 {	
 	if (self->driver) {
-		self->driver->close(self->driver);	
-		self->driver->configure(self->driver, config);
-		self->driver->open(self->driver);
+		psy_audiodriver_close(self->driver);
+		psy_audiodriver_configure(self->driver, config);
+		psy_audiodriver_open(self->driver);
 	}
 }
 
@@ -600,7 +600,7 @@ psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player* self, int id)
 	return psy_audio_eventdrivers_driver(&self->eventdrivers, id);
 }
 
-unsigned int psy_audio_player_numeventdrivers(psy_audio_Player* self)
+uintptr_t psy_audio_player_numeventdrivers(psy_audio_Player* self)
 {
 	return psy_audio_eventdrivers_size(&self->eventdrivers);
 }

@@ -67,7 +67,7 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 				if (c == '=') {
 					state = PROPERTIESIO_STATE_READVAL;
 					key[cp] = '\0';
-					cp = 0;
+					cp = 0;					
 				} else {
 					if (!reallocstr(&key, cp, &keycap)) {
 						key[cp] = c;
@@ -90,7 +90,7 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 				if (c == ']') {
 					state = PROPERTIESIO_STATE_ADDSECTION;
 					key[cp] = '\0';
-					cp = 0;
+					cp = 0;					
 				} else
 				if (!reallocstr(&key, cp, &keycap)) {
 					key[cp] = c;
@@ -147,6 +147,7 @@ int propertiesio_load(psy_Properties* self, const char* path, int allowappend)
 			if (state == PROPERTIESIO_STATE_ADDSECTION) {
 				psy_Properties* p;				
 				psy_Properties* prev = 0;
+
 				p = psy_properties_findsectionex(self, key, &prev);				
 				if (p == self) {
 					curr = self;

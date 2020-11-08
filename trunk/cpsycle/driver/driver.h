@@ -55,11 +55,8 @@ typedef int (*psy_audiodriver_fp_addcapture)(struct psy_AudioDriver*, int index)
 typedef int (*psy_audiodriver_fp_removecapture)(struct psy_AudioDriver*, int index);
 typedef void (*psy_audiodriver_fp_readbuffers)(struct psy_AudioDriver*, int index, float** pleft, float** pright, int numsamples);
 
-typedef struct psy_AudioDriver {
-	AUDIODRIVERWORKFN _pCallback;	
-	void* _callbackContext;
-	psy_Properties* properties;
-	psy_audiodriver_fp_open open;		
+typedef struct psy_AudioDriverVTable {
+	psy_audiodriver_fp_open open;
 	psy_audiodriver_fp_dispose dispose;
 	psy_audiodriver_fp_deallocate deallocate;
 	psy_audiodriver_fp_configure configure;
@@ -73,6 +70,13 @@ typedef struct psy_AudioDriver {
 	psy_audiodriver_fp_numcaptures numcaptures;
 	psy_audiodriver_fp_playbackname playbackname;
 	psy_audiodriver_fp_numplaybacks numplaybacks;
+} psy_AudioDriverVTable;
+
+typedef struct psy_AudioDriver {
+	psy_AudioDriverVTable* vtable;
+	AUDIODRIVERWORKFN _pCallback;	
+	void* _callbackContext;
+	psy_Properties* properties;	
 	psy_Signal signal_stop;
 } psy_AudioDriver;
 
@@ -90,5 +94,77 @@ EXPORT psy_AudioDriver* driver_create(void);
 EXPORT AudioDriverInfo const * GetPsycleDriverInfo(void);
 
 #endif
+
+INLINE int psy_audiodriver_open(psy_AudioDriver* self)
+{
+	return self->vtable->open(self);
+}
+
+INLINE int psy_audiodriver_dispose(psy_AudioDriver* self)
+{
+	return self->vtable->dispose(self);
+}
+
+INLINE void psy_audiodriver_deallocate(psy_AudioDriver* self)
+{
+	self->vtable->deallocate(self);
+}
+
+INLINE void psy_audiodriver_configure(psy_AudioDriver* self, psy_Properties* properties)
+{
+	self->vtable->configure(self, properties);
+}
+
+INLINE int psy_audiodriver_close(psy_AudioDriver* self)
+{
+	return self->vtable->close(self);
+}
+
+INLINE void psy_audiodriver_connect(psy_AudioDriver* self, void* context,
+	AUDIODRIVERWORKFN callback,
+	void* handle)
+{
+	self->vtable->connect(self, context, callback, handle);
+}
+
+INLINE unsigned int psy_audiodriver_samplerate(psy_AudioDriver* self)
+{
+	return self->vtable->samplerate(self);
+}
+
+INLINE const char* psy_audiodriver_capturename(psy_AudioDriver* self, int index)
+{
+	return self->vtable->capturename(self, index);
+}
+
+INLINE int psy_audiodriver_numcaptures(psy_AudioDriver* self)
+{
+	return self->vtable->numcaptures(self);
+}
+
+INLINE const char* psy_audiodriver_playbackname(psy_AudioDriver* self, int index)
+{
+	return self->vtable->playbackname(self, index);
+}
+
+INLINE int psy_audiodriver_numplaybacks(psy_AudioDriver* self)
+{
+	return self->vtable->numplaybacks(self);
+}
+
+INLINE int psy_audiodriver_addcapture(psy_AudioDriver* self, int index)
+{
+	return self->vtable->addcapture(self, index);
+}
+
+INLINE int psy_audiodriver_removecapture(psy_AudioDriver* self, int index)
+{
+	return self->vtable->removecapture(self, index);
+}
+
+INLINE void psy_audiodriver_readbuffers(psy_AudioDriver* self, int index, float** pleft, float** pright, int numsamples)
+{
+	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
+}
 
 #endif

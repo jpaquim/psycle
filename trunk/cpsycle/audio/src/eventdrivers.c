@@ -16,24 +16,25 @@ void psy_audio_eventdrivers_init(psy_audio_EventDrivers* self, void* systemhandl
 	self->eventdrivers = NULL;	
 	self->kbddriver = NULL;
 	self->cmds = NULL;
-	self->systemhandle = systemhandle;	
+	self->systemhandle = systemhandle;
+	psy_table_init(&self->guids);
 	psy_signal_init(&self->signal_input);
 	psy_audio_eventdrivers_initkbd(self);
 }
 
 void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers* self)
 {
-	psy_EventDriver* kbd;
 	psy_audio_EventDriverEntry* eventdriverentry;
 
-	kbd = create_kbd_driver();
-	self->kbddriver = kbd;
-	eventdriverentry = (psy_audio_EventDriverEntry*)malloc(sizeof(psy_audio_EventDriverEntry));
-	eventdriverentry->eventdriver = kbd;
-	eventdriverentry->library = 0;
-	psy_list_append(&self->eventdrivers, eventdriverentry);
-	psy_signal_connect(&kbd->signal_input, self,
-		eventdrivers_ondriverinput);
+	self->kbddriver = psy_audio_kbddriver_create();
+	if (self->kbddriver) {
+		eventdriverentry = (psy_audio_EventDriverEntry*)malloc(sizeof(psy_audio_EventDriverEntry));
+		eventdriverentry->eventdriver = self->kbddriver;
+		eventdriverentry->library = 0;
+		psy_list_append(&self->eventdrivers, eventdriverentry);
+		psy_signal_connect(&self->kbddriver->signal_input, self,
+			eventdrivers_ondriverinput);
+	}
 }
 
 void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
@@ -46,12 +47,12 @@ void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
 		
 		eventdriverentry = (psy_audio_EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
-		eventdriver->close(eventdriver);
-		eventdriver->dispose(eventdriver);
+		psy_eventdriver_close(eventdriver);
+		psy_eventdriver_dispose(eventdriver);
 #if defined _CRTDBG_MAP_ALLOC
 		free(eventdriver);
 #else
-		eventdriver->free(eventdriver);
+		psy_eventdriver_free(eventdriver);
 #endif
 		if (eventdriverentry && eventdriverentry->library) {
 			psy_library_unload(eventdriverentry->library);
@@ -62,6 +63,7 @@ void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
 	psy_list_free(self->eventdrivers);
 	self->eventdrivers = NULL;
 	self->cmds = NULL;
+	psy_table_disposeall(&self->guids, (psy_fp_disposefunc)0);
 	psy_signal_dispose(&self->signal_input);
 }
 
@@ -84,17 +86,17 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 				pfneventdriver_create fpeventdrivercreate;
 
 				fpeventdrivercreate = (pfneventdriver_create)
-					psy_library_functionpointer(library, "eventdriver_create");
+					psy_library_functionpointer(library, "psy_eventdriver_create");
 				if (fpeventdrivercreate) {
 					psy_audio_EventDriverEntry* eventdriverentry;
 
 					eventdriver = fpeventdrivercreate();
-					eventdriver->setcmddef(eventdriver, self->cmds);					
+					psy_eventdriver_setcmddef(eventdriver, self->cmds);
 					eventdriverentry = (psy_audio_EventDriverEntry*) malloc(sizeof(psy_audio_EventDriverEntry));
 					eventdriverentry->eventdriver = eventdriver;
 					eventdriverentry->library = library;
 					psy_list_append(&self->eventdrivers, eventdriverentry);				
-					eventdriver->open(eventdriver);
+					psy_eventdriver_open(eventdriver);
 					psy_signal_connect(&eventdriver->signal_input, self,
 						eventdrivers_ondriverinput);
 				}
@@ -107,15 +109,62 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 	return eventdriver;
 }
 
+int psy_audio_eventdrivers_guid(psy_audio_EventDrivers* self,
+	const char* path)
+{
+	if (strcmp("kbd", path) == 0) {
+		return PSY_EVENTDRIVER_KBD_GUID;
+	} else {
+		psy_Library* library;
+
+		library = psy_library_allocinit();
+		psy_library_load(library, path);
+		if (!psy_library_empty(library)) {
+			pfneventdriver_info fpeventdriverinfo;
+
+			fpeventdriverinfo = (pfneventdriver_info)
+				psy_library_functionpointer(library, "psy_eventdriver_moduleinfo");
+			if (fpeventdriverinfo) {
+				psy_EventDriverInfo* eventdriverinfo;
+
+				eventdriverinfo = fpeventdriverinfo();
+				if (eventdriverinfo) {
+					return eventdriverinfo->guid;
+				}
+			}
+		}
+	}
+	return -1;
+}
+
+void psy_audio_eventdrivers_register(psy_audio_EventDrivers* self,
+	int guid, const char* path)
+{
+	if (path) {
+		psy_table_insert(&self->guids, (uintptr_t)guid, (void*)(uintptr_t)strdup(path));
+	}
+}
+
+psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers* self, int guid)
+{
+	const char* path;
+
+	path = (const char*)psy_table_at(&self->guids, guid);
+	if (path) {
+		return psy_audio_eventdrivers_load(self, path);
+	}
+	return NULL;
+}
+
 void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, int id)
 {	
 	psy_EventDriver* eventdriver;
 
 	eventdriver = psy_audio_eventdrivers_driver(self, id);
 	if (eventdriver) {
-		eventdriver->close(eventdriver);	
-		eventdriver->configure(eventdriver, eventdriver->properties);
-		eventdriver->open(eventdriver);	
+		psy_eventdriver_close(eventdriver);
+		psy_eventdriver_configure(eventdriver, eventdriver->properties);
+		psy_eventdriver_open(eventdriver);
 	}
 }
 
@@ -130,9 +179,9 @@ void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers* self)
 		eventdriverentry = (psy_audio_EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
-			eventdriver->close(eventdriver);	
-			eventdriver->configure(eventdriver, eventdriver->properties);
-			eventdriver->open(eventdriver);	
+			psy_eventdriver_close(eventdriver);
+			psy_eventdriver_configure(eventdriver, eventdriver->properties);
+			psy_eventdriver_open(eventdriver);
 		}
 	}
 }
@@ -146,22 +195,21 @@ void psy_audio_eventdrivers_remove(psy_audio_EventDrivers* self, int id)
 		psy_audio_EventDriverEntry* eventdriverentry;
 		psy_List* p;
 
-		eventdriver->close(eventdriver);
-		eventdriver->dispose(eventdriver);
+		psy_eventdriver_close(eventdriver);
+		psy_eventdriver_dispose(eventdriver);
 #if defined _CRTDBG_MAP_ALLOC
 		free(eventdriver);
 #else
-		eventdriver->free(eventdriver);
+		psy_eventdriver_free(eventdriver);
 #endif
-//		free(eventdriver);
 		if (eventdriver == self->kbddriver) {
-			self->kbddriver = 0;
+			self->kbddriver = NULL;
 		}
 		eventdriverentry = psy_audio_eventdrivers_entry(self, id);
 		if (eventdriverentry && eventdriverentry->library) {
 			psy_library_unload(eventdriverentry->library);
 			psy_library_deallocate(eventdriverentry->library);			
-			eventdriverentry->library = 0;
+			eventdriverentry->library = NULL;
 		}
 		for (p = self->eventdrivers; p != NULL; psy_list_next(&p)) {
 			if (((psy_audio_EventDriverEntry*)p->entry)->eventdriver == eventdriver) {
@@ -173,9 +221,9 @@ void psy_audio_eventdrivers_remove(psy_audio_EventDrivers* self, int id)
 	}
 }
 
-unsigned int psy_audio_eventdrivers_size(psy_audio_EventDrivers* self)
+uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers* self)
 {
-	int rv = 0;
+	uintptr_t rv = 0;
 	psy_List* p;
 	
 	for (p = self->eventdrivers; p != NULL; psy_list_next(&p), ++rv);
@@ -219,7 +267,7 @@ void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers* self, psy_Properties
 		eventdriverentry = (psy_audio_EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
-			eventdriver->setcmddef(eventdriver, cmds);
+			psy_eventdriver_setcmddef(eventdriver, cmds);
 		}
 	}
 }
@@ -235,7 +283,7 @@ void psy_audio_eventdrivers_idle(psy_audio_EventDrivers* self)
 		eventdriverentry = (psy_audio_EventDriverEntry*)psy_list_entry(p);
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
-			eventdriver->idle(eventdriver);
+			psy_eventdriver_idle(eventdriver);
 		}
 	}
 }

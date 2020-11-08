@@ -25,7 +25,7 @@
 static uintptr_t machinecallback_samplerate(psy_audio_MachineCallback* self)
 {
 	return (self->player && self->player->driver)
-		? self->player->driver->samplerate(self->player->driver)
+		? psy_audiodriver_samplerate(self->player->driver)
 		: 44100;
 }
 
@@ -72,14 +72,14 @@ static void machinecallback_output(psy_audio_MachineCallback* self, const char* 
 static bool machinecallback_addcapture(psy_audio_MachineCallback* self, int index)
 {
 	return (self->player && self->player->driver)
-		? self->player->driver->addcapture(self->player->driver, index)
+		? psy_audiodriver_addcapture(self->player->driver, index)
 		: FALSE;
 }
 
 static bool machinecallback_removecapture(psy_audio_MachineCallback* self, int index)
 {
 	return (self->player && self->player->driver)
-		? self->player->driver->removecapture(self->player->driver, index)
+		? psy_audiodriver_removecapture(self->player->driver, index)
 		: FALSE;
 }
 
@@ -87,31 +87,31 @@ static void machinecallback_readbuffers(psy_audio_MachineCallback* self, int ind
 	float** pright, int numsamples)
 {
 	if (self->player && self->player->driver) {
-		self->player->driver->readbuffers(self->player->driver, index, pleft, pright, numsamples);
+		psy_audiodriver_readbuffers(self->player->driver, index, pleft, pright, numsamples);
 	}
 }
 static const char* machinecallback_capturename(psy_audio_MachineCallback* self, int index) {
 	return (self->player && self->player->driver)
-		? self->player->driver->capturename(self->player->driver, index)
+		? psy_audiodriver_capturename(self->player->driver, index)
 		: "";
 }
 
 static int machinecallback_numcaptures(psy_audio_MachineCallback* self)
 {
 	return (self->player && self->player->driver)
-		? self->player->driver->numcaptures(self->player->driver)
+		? psy_audiodriver_numcaptures(self->player->driver)
 		: 0;	
 }
 
 static const char* machinecallback_playbackname(psy_audio_MachineCallback* self, int index)
 {
 	return (self->player && self->player->driver)
-		? self->player->driver->playbackname(self->player->driver, index)
+		? psy_audiodriver_playbackname(self->player->driver, index)
 		: "";
 }
 static int machinecallback_numplaybacks(psy_audio_MachineCallback* self) {
 	return (self->player && self->player->driver)
-		? self->player->driver->numplaybacks(self->player->driver)
+		? psy_audiodriver_numplaybacks(self->player->driver)
 		: 0;	
 }
 

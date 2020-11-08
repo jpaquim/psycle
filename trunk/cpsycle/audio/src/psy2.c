@@ -980,10 +980,10 @@ void psy2loader_addmachines(PSY2Loader* self)
 
 						legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it_wires);
 						if (legacywire->_inputCon && legacywire->_inputMachine < 128) {
-							int32_t d;
+							// int32_t d;
 
-							//d = psy_audio_legacywires_findlegacyoutput(&self->songfile->legacywires,
-								//legacywire->_inputMachine, i);
+							// d = psy_audio_legacywires_findlegacyoutput(&self->songfile->legacywires,
+							//legacywire->_inputMachine, i);
 							legacywire->_inputMachine = invmach[legacywire->_inputMachine];
 							//if (d != -1)
 							//{

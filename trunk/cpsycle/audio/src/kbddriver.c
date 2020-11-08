@@ -19,10 +19,22 @@
 #include <windows.h>
 #endif
 
+static psy_EventDriverInfo const* psy_audio_kbddriver_info(void)
+{
+	static psy_EventDriverInfo info;
+	info.guid = PSY_EVENTDRIVER_KBD_GUID;
+	info.Flags = 0;
+	info.Name = "kbd";
+	info.ShortName = "kbd";
+	info.Version = 0;
+	return &info;
+}
+
 typedef struct {
 	psy_EventDriver driver;
 	int (*error)(int, const char*);
-	EventDriverData lastinput;	
+	psy_EventDriverData lastinput;
+	psy_Properties* cmddef;
 } KbdDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -30,13 +42,39 @@ static int driver_init(psy_EventDriver*);
 static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
+static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Properties*);
-static void driver_write(psy_EventDriver*, EventDriverData input);
-static void driver_cmd(psy_EventDriver*, const char* section, EventDriverData,
-	EventDriverCmd*);
-static EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
+static void driver_write(psy_EventDriver*, psy_EventDriverData input);
+static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverData,
+	psy_EventDriverCmd*);
+static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Properties*);
 static void driver_idle(psy_EventDriver* self) { }
+static int onerror(int err, const char* msg);
+static void init_properties(psy_EventDriver*);
+
+static psy_EventDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.free = driver_free;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.info = driver_info;
+		vtable.configure = driver_configure;
+		vtable.error = onerror;
+		vtable.write = driver_write;
+		vtable.cmd = driver_cmd;
+		vtable.getcmd = driver_getcmd;
+		vtable.setcmddef = setcmddef;
+		vtable.idle = driver_idle;
+		vtable_initialized = 1;
+	}
+}
 
 int onerror(int err, const char* msg)
 {
@@ -49,23 +87,10 @@ int onerror(int err, const char* msg)
 #endif    
 }
 
-psy_EventDriver* create_kbd_driver(void)
+psy_EventDriver* psy_audio_kbddriver_create(void)
 {
 	KbdDriver* kbd = (KbdDriver*)malloc(sizeof(KbdDriver));
-	if (kbd) {
-		memset(kbd, 0, sizeof(KbdDriver));
-		kbd->driver.open = driver_open;
-		kbd->driver.free = driver_free;
-		kbd->driver.open = driver_open;
-		kbd->driver.close = driver_close;
-		kbd->driver.dispose = driver_dispose;
-		kbd->driver.configure = driver_configure;
-		kbd->driver.error = onerror;
-		kbd->driver.write = driver_write;
-		kbd->driver.cmd = driver_cmd;
-		kbd->driver.getcmd = driver_getcmd;
-		kbd->driver.setcmddef = setcmddef;
-		kbd->driver.idle = driver_idle;
+	if (kbd) {			
 		driver_init(&kbd->driver);
 		return &kbd->driver;
 	}
@@ -81,7 +106,10 @@ int driver_init(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
 	
-	self->driver.properties = NULL;
+	memset(self, 0, sizeof(KbdDriver));
+	vtable_init();
+	self->driver.vtable = &vtable;
+	init_properties(&self->driver);
 	psy_signal_init(&driver->signal_input);
 	return 0;
 }
@@ -93,6 +121,26 @@ int driver_dispose(psy_EventDriver* driver)
 	self->driver.properties = NULL;
 	psy_signal_dispose(&driver->signal_input);
 	return 1;
+}
+
+void init_properties(psy_EventDriver* context)
+{
+	KbdDriver* self;
+
+	self = (KbdDriver*)context;
+	context->properties = psy_properties_create();
+	psy_properties_sethint(psy_properties_append_int(context->properties,
+		"guid", PSY_EVENTDRIVER_KBD_GUID, 0, 0),
+		PSY_PROPERTY_HINT_HIDE);
+	psy_properties_settext(
+		psy_properties_append_string(context->properties, "name", "kbd"),
+		"settingsview.name");
+	psy_properties_settext(
+		psy_properties_append_string(context->properties, "version", "1.0"),
+		"settingsview.version");
+	self->cmddef = psy_properties_settext(
+		psy_properties_append_section(context->properties, "cmds"),
+		"cmds.keymap");
 }
 
 int driver_open(psy_EventDriver* driver)
@@ -109,7 +157,12 @@ int driver_close(psy_EventDriver* driver)
 	return 0;
 }
 
-void driver_write(psy_EventDriver* driver, EventDriverData input)
+const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
+{
+	return psy_audio_kbddriver_info();
+}
+
+void driver_write(psy_EventDriver* driver, psy_EventDriverData input)
 {	
 	KbdDriver* self;	
 
@@ -119,10 +172,10 @@ void driver_write(psy_EventDriver* driver, EventDriverData input)
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
-	EventDriverData input, EventDriverCmd* cmd)
+	psy_EventDriverData input, psy_EventDriverCmd* cmd)
 {		
 	KbdDriver* self;
-	EventDriverCmd kbcmd;
+	psy_EventDriverCmd kbcmd;
 	psy_Properties* section;
 
 	self = (KbdDriver*)(driver);
@@ -184,10 +237,10 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	}
 }
 
-EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
+psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 {	
 	KbdDriver* self;
-	EventDriverCmd cmd;	
+	psy_EventDriverCmd cmd;	
 		
 	self = (KbdDriver*)(driver);
 	driver_cmd(driver, section, self->lastinput, &cmd);	
@@ -196,14 +249,19 @@ EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 
 void setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
 {
-	psy_properties_free(driver->properties);
-	driver->properties = psy_properties_clone(cmddef, 1);
-	driver_configure(driver, driver->properties);
+	if (cmddef && cmddef->children) {
+		KbdDriver* self = (KbdDriver*)driver;
+		psy_Properties* cmds;
+		
+		cmds = psy_properties_clone(cmddef->children, TRUE);
+			psy_properties_append_property(
+			self->cmddef, cmds);		
+	}
 }
 
-void driver_configure(psy_EventDriver* driver, psy_Properties* properties)
+void driver_configure(psy_EventDriver* driver, psy_Properties* configuration)
 {
-	if (properties && driver->properties) {
-		psy_properties_sync(driver->properties, properties);		
+	if (configuration && driver->properties) {
+		psy_properties_sync(driver->properties, configuration);
 	}
 }

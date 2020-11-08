@@ -21,7 +21,7 @@ typedef struct FileView {
 	char* drive;
 	psy_Signal signal_selected;
 	psy_List* files;
-	uintptr_t numdirectories;
+	intptr_t numdirectories;
 } FileView;
 
 void fileview_init(FileView*, psy_ui_Component* parent, Workspace*);

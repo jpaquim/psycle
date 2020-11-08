@@ -55,17 +55,22 @@ int psy_audio_luabind_envelope_open(lua_State *L)
 }
 
 int luaenvelope_create(lua_State* L)
-{	
+{
 	int n;
-	int self = 1;	
-	psy_dsp_Envelope* env;	
-	
+	int self = 1;
+	psy_dsp_Envelope* env;
+	lua_Integer suspos;
+	lua_Number startpeak;
+
 	n = lua_gettop(L);  // Number of arguments
 	if (n != 3) {
 		return luaL_error(L,
-			"Got %d arguments expected 3 (self, points, sustainpos", n);
+			"Got %d arguments expected 3 (self, points, sustainpos)", n);
 	}
 	env = (psy_dsp_Envelope*)malloc(sizeof(psy_dsp_Envelope));
+	if (!env) {
+		return luaL_error(L, "Memory Error");
+	}
 	psy_dsp_envelope_init(env);
 	if (lua_istable(L, 2)) {
 		psy_dsp_EnvelopeSettings* settings;
@@ -101,13 +106,13 @@ int luaenvelope_create(lua_State* L)
 			lua_pop(L, 1);
 		}
 	}
-	int suspos = luaL_checkinteger(L, 3) - 1;
-	double startpeak = 0;
+	suspos = luaL_checkinteger(L, 3) - 1;
+	startpeak = 0;
 	if (n == 4) {
 		startpeak = luaL_checknumber(L, 4);
 	}
-	env->startpeak = startpeak;	
-	env->sustainstage = suspos;
+	env->startpeak = (psy_dsp_amp_t)startpeak;	
+	env->sustainstage = (int)suspos;
 	psyclescript_createuserdata(L, 1, luaenvelope_meta, env);	
 	return 1;
 }
@@ -183,14 +188,16 @@ int setpeak(lua_State* L)
 
 	self = psyclescript_checkself(L, 1, luaenvelope_meta);
 	stage = luaL_checkinteger(L, 2);
-	p = psy_list_at(self->settings.points, stage - 1);
-	if (p) {
-		psy_dsp_EnvelopePoint* pt;
-		lua_Number peak;
+	if (stage > 0) {
+		p = psy_list_at(self->settings.points, (uintptr_t)stage - 1);
+		if (p) {
+			psy_dsp_EnvelopePoint* pt;
+			lua_Number peak;
 
-		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(p);
-		peak = luaL_checknumber(L, 3);
-		pt->value = peak;
+			pt = (psy_dsp_EnvelopePoint*)psy_list_entry(p);
+			peak = luaL_checknumber(L, 3);
+			pt->value = (psy_dsp_amp_t)peak;
+		}
 	}
 	return psyclescript_chaining(L);
 }
@@ -215,14 +222,16 @@ int setstagetime(lua_State* L)
 
 	self = psyclescript_checkself(L, 1, luaenvelope_meta);
 	stage = luaL_checkinteger(L, 2);
-	p = psy_list_at(self->settings.points, stage - 1);
-	if (p) {
-		psy_dsp_EnvelopePoint* pt;
-		lua_Number time;
+	if (stage >= 0) {
+		p = psy_list_at(self->settings.points, (uintptr_t)stage - 1);
+		if (p) {
+			psy_dsp_EnvelopePoint* pt;
+			lua_Number time;
 
-		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(p);
-		time = luaL_checknumber(L, 3);
-		pt->time = time;
+			pt = (psy_dsp_EnvelopePoint*)psy_list_entry(p);
+			time = luaL_checknumber(L, 3);
+			pt->time = (psy_dsp_beat_t)time;
+		}
 	}
 	return psyclescript_chaining(L);
 }

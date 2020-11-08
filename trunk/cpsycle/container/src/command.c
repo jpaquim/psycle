@@ -24,6 +24,7 @@ static void vtable_init(void)
 
 void psy_command_init(psy_Command* self)
 {
+	assert(self);
 	vtable_init();
 	self->vtable = &vtable;
 }
