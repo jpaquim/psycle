@@ -220,6 +220,30 @@ static void refreshavailableports(WasapiDriver*);
 static void clearplayenums(WasapiDriver*);
 static void clearcapenums(WasapiDriver*);
 
+static psy_AudioDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;
+		vtable.connect = driver_connect;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = driver_configure;
+		vtable.samplerate = samplerate;
+		vtable.addcapture = (psy_audiodriver_fp_addcapture)addcaptureport;
+		vtable.removecapture = (psy_audiodriver_fp_removecapture)removecaptureport;
+		vtable.capturename = (psy_audiodriver_fp_capturename)capturename;
+		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
+		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
+		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable_initialized = 1;
+	}
+}
+
 // ------------------------------------------------------------------------------------------
 // Aligns v backwards
 static INLINE UINT32 ALIGN_BWD(UINT32 v, UINT32 align)
@@ -352,40 +376,28 @@ EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
 	WasapiDriver* wasapi;
 	
-	wasapi = (WasapiDriver*) malloc(sizeof(WasapiDriver));
-	if (wasapi) {
-		memset(wasapi, 0, sizeof(WasapiDriver));
-		wasapi->driver.open = driver_open;
-		wasapi->driver.deallocate = driver_deallocate;
-		wasapi->driver.connect = driver_connect;
-		wasapi->driver.open = driver_open;
-		wasapi->driver.close = driver_close;
-		wasapi->driver.dispose = driver_dispose;
-		wasapi->driver.configure = driver_configure;
-		wasapi->driver.samplerate = samplerate;
-		wasapi->driver.addcapture = (psy_audiodriver_fp_addcapture) addcaptureport;
-		wasapi->driver.removecapture = (psy_audiodriver_fp_removecapture) removecaptureport;
-		wasapi->driver.capturename = (psy_audiodriver_fp_capturename) capturename;
-		wasapi->driver.numcaptures = (psy_audiodriver_fp_numcaptures) numcaptures;
-		wasapi->driver.playbackname = (psy_audiodriver_fp_playbackname) playbackname;
-		wasapi->driver.numplaybacks = (psy_audiodriver_fp_numplaybacks) numplaybacks;
-		wasapi->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	wasapi = (WasapiDriver*)malloc(sizeof(WasapiDriver));
+	if (wasapi) {		
 		driver_init(&wasapi->driver);
 		return &wasapi->driver;
-	} else {
-		return 0;
-	}
+	} 
+	return NULL;	
 }
 
 void driver_deallocate(psy_AudioDriver* driver)
 {
-	driver->dispose(driver);
+	driver_dispose(driver);
 	free(driver);
 }
 
 int driver_init(psy_AudioDriver* driver)
 {
 	WasapiDriver* self = (WasapiDriver*) driver;
+
+	memset(self, 0, sizeof(WasapiDriver));
+	vtable_init();
+	self->driver.vtable = &vtable;
+	self->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #ifdef PSYCLE_USE_SSE
 	psy_dsp_sse2_init(&dsp);
 #else

@@ -182,80 +182,80 @@ void cmdproperties_makegeneral(psy_Properties* self)
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_help",
 			psy_audio_encodeinput(psy_ui_KEY_F1, 0, 0), 0, 0), CMD_IMM_HELP),
-		"hlp"), "Help");
+		"hlp"), "cmds.help");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_helpshortcut",
 			psy_audio_encodeinput(psy_ui_KEY_F1, 1, 0), 0, 0), CMD_IMM_HELPSHORTCUT),
-		"kbdhlp"), "Kbd Help");
+		"kbdhlp"), "cmds.helpshortcut");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_editmachine",
 			psy_audio_encodeinput(psy_ui_KEY_F2, 0, 0), 0, 0), CMD_IMM_EDITMACHINE),
-		"mac"), "Machines"
+		"mac"), "cmds.editmachine"
 	);
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_editpattern",
 			psy_audio_encodeinput(psy_ui_KEY_F3, 0, 0), 0, 0), CMD_IMM_EDITPATTERN),
-		"pat"), "Patterns");
+		"pat"), "cmds.editpattern");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_addmachine",
 			psy_audio_encodeinput(psy_ui_KEY_F9, 0, 0), 0, 0), CMD_IMM_ADDMACHINE),
-		"addmac"), "Add Machine");
+		"addmac"), "cmds.addmachine");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_playsong",
 			psy_audio_encodeinput(psy_ui_KEY_F5, 1, 0), 0, 0), CMD_IMM_PLAYSONG),
-		"playa"), "Play Song");
+		"playa"), "cmds.playsong");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_playstart",
 			psy_audio_encodeinput(psy_ui_KEY_F5, 0, 0), 0, 0), CMD_IMM_PLAYSTART),
-		"plays"), "Play Start");
+		"plays"), "cmds.playstart");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_playfrompos",
 			psy_audio_encodeinput(psy_ui_KEY_F7, 0, 0), 0, 0), CMD_IMM_PLAYFROMPOS),
-		"playp"), "Play Pos");
+		"playp"), "cmds.playfrompos");
 	psy_properties_settext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_playstop",
 			psy_audio_encodeinput(psy_ui_KEY_F8, 0, 0), 0, 0), CMD_IMM_PLAYSTOP),
-		"stop");
+		"cmds.playstop");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_songposdec",
 			psy_audio_encodeinput(psy_ui_KEY_LEFT, 1, 0), 0, 0), CMD_IMM_SONGPOSDEC),
-		"decseqp"), "Seqpos dec");
+		"decseqp"), "cmds.songposdec");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_songposinc",
 			psy_audio_encodeinput(psy_ui_KEY_RIGHT, 1, 0), 0, 0), CMD_IMM_SONGPOSINC),
-		"incseqp"), "Seqpos Inc");
+		"incseqp"), "cmds.songposinc");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_maxpattern",
 			psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 1), 0, 0), CMD_IMM_MAXPATTERN),
-		"maxpat"), "Max Pattern");
+		"maxpat"), "cmds.maxpattern");
 	psy_properties_settext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_infomachine",
 			psy_audio_encodeinput(psy_ui_KEY_RETURN, 1, 0), 0, 0), CMD_IMM_INFOMACHINE),
-		"gear");
+		"cmds.infomachine");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_editinstr",			
 			psy_audio_encodeinput(psy_ui_KEY_F10, 0, 0), 0, 0), CMD_IMM_EDITINSTR),
-		"inst"), "Instruments");
+		"inst"), "cmds.editinstr");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_editsample",
 			psy_audio_encodeinput(psy_ui_KEY_F10, 1, 0), 0, 0), CMD_IMM_EDITSAMPLE),
-		"smpl"), "Samples");
+		"smpl"), "cmds.editsample");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_editwave",
 		psy_audio_encodeinput(psy_ui_KEY_F10, 0, 1), 0, 0), CMD_IMM_EDITWAVE),
-		"wav"), "Wave Edit");
+		"wav"), "cmds.editwave");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_terminal",
 			psy_audio_encodeinput(psy_ui_KEY_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL),
-		"term"), "Terminal");
+		"term"), "cmds.terminal");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_instrdec",
 			psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 1), 0, 0), CMD_IMM_INSTRDEC),
-		"inst-1"), "Current Instrument -1");
+		"inst-1"), "cmds.instrdec");
 	psy_properties_settext(psy_properties_setshorttext(
 		psy_properties_setid(psy_properties_append_int(general, "cmd_instrinc",
 			psy_audio_encodeinput(psy_ui_KEY_UP, 0, 1), 0, 0), CMD_IMM_INSTRINC),
-		"inst+1"), "Current Instrument +1");
+		"inst+1"), "cmds.instrinc");
 	for (p = general->children; p != NULL; p = psy_properties_next(p)) {
 		psy_properties_sethint(p, PSY_PROPERTY_HINT_INPUT);
 	}	

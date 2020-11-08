@@ -315,8 +315,7 @@ int psy_audio_presetio_savefxp(const char* path, psy_audio_Preset* preset)
 int psy_audio_presetio_savefxpversion0(FILE* fp, psy_audio_Preset* preset)
 {		
 	int32_t temp32;
-	char name[28];
-	int32_t param;
+	char name[28];	
 	const char chnk[] = "CcnK";
 	intptr_t sizepos;
 	intptr_t currpos;
@@ -353,6 +352,8 @@ int psy_audio_presetio_savefxpversion0(FILE* fp, psy_audio_Preset* preset)
 			return psy_audio_PRESETIO_ERROR_WRITE;
 		}				
 	} else {
+		uintptr_t param;
+
 		for (param = 0; param < psy_audio_preset_numparameters(preset); ++param) {
 			float value;
 

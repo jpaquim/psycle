@@ -8,9 +8,9 @@
 
 // Translator
 //
-// Defines a dictionary for localization, contains a default set for english,
-// can test "ini" files for language definitions and can load a dictionary from
-// an "ini" file.
+// Defines a dictionary for localization with a default set in english. It can
+// test "ini" files for language definitions and can load a dictionary from an
+// "ini" file.
 //
 // Translator <>----- psy_Properties        ; dictionary
 //    |
@@ -22,6 +22,7 @@
 // sections:
 // [file] [undo] [play] [main] [help] [machinebar] [edit] [lpb] [render] [gear]
 // [settingsview] [instrumentview] [machineview] [newmachine] [samplesview]
+// [cmds]
 // word definitions: see translator.c definekeys
 
 typedef struct Translator {
@@ -37,7 +38,7 @@ void translator_reset(Translator*);
 // with the new definitions
 bool translator_load(Translator* self, const char* path);
 // tests root.lang property. (workspace uses this to scan the language list)
-bool translator_test(Translator* self, const char* path, char* id);
+bool translator_test(const Translator*, const char* path, char* id);
 // translate a key
 // word definitions: see translator.c definekeys
 // example  translate("file.load")

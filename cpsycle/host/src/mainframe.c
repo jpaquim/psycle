@@ -556,9 +556,9 @@ void mainframe_destroyed(MainFrame* self, psy_ui_Component* component)
 
 void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 {
-	EventDriverCmd cmd;
+	psy_EventDriverCmd cmd;
 
-	cmd = sender->getcmd(sender, "general");
+	cmd = psy_eventdriver_getcmd(sender, "general");
 	switch (cmd.id) {
 		case CMD_IMM_HELP:
 			tabbar_select(&self->helpview.tabbar, 0);
@@ -684,14 +684,14 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 {	
 	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
-		EventDriverData input;			
+		psy_EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYDOWN;
 		kbd = workspace_kbddriver(&self->workspace);		
 		input.param1 = psy_audio_encodeinput(ev->keycode, 
 			self->patternview.trackerview.grid.chordmode ? 0 : ev->shift, ev->ctrl);		
 		input.param2 = workspace_octave(&self->workspace) * 12;
-		kbd->write(kbd, input);
+		psy_eventdriver_write(kbd, input);
 	}
 }
 
@@ -699,13 +699,13 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
-		EventDriverData input;			
+		psy_EventDriverData input;			
 		
 		input.message = EVENTDRIVER_KEYUP;
         input.param1 = psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl);
 		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);
-		kbd->write(kbd, input);
+		psy_eventdriver_write(kbd, input);
 	}
 }
 

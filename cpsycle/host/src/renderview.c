@@ -37,7 +37,7 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 void renderview_ondestroy(RenderView* self, psy_ui_Component* sender)
 {
 	psy_properties_free(self->properties);	
-	self->fileoutdriver->deallocate(self->fileoutdriver);
+	psy_audiodriver_deallocate(self->fileoutdriver);
 }
 
 void renderview_makeproperties(RenderView* self)
@@ -192,7 +192,7 @@ void renderview_render(RenderView* self)
 	psy_Properties* driverconfig;
 	 
 	self->curraudiodriver = psy_audio_player_audiodriver(&self->workspace->player);
-	self->curraudiodriver->close(self->curraudiodriver);
+	psy_audiodriver_close(self->curraudiodriver);
 	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);	
 	driverconfig = psy_properties_clone(self->fileoutdriver->properties, 1);
 	psy_properties_set_str(driverconfig, "outputpath",
@@ -204,7 +204,7 @@ void renderview_render(RenderView* self)
 	psy_properties_set_int(driverconfig, "channels",
 		psy_properties_at_int(self->properties, "quality.channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
-	self->fileoutdriver->configure(self->fileoutdriver, driverconfig);
+	psy_audiodriver_configure(self->fileoutdriver, driverconfig);
 	psy_properties_free(driverconfig);
 	self->restoreloopmode = self->workspace->player.sequencer.looping;
 	self->workspace->player.sequencer.looping = 0;
@@ -233,7 +233,7 @@ void renderview_render(RenderView* self)
 	psy_audio_player_start(&self->workspace->player);
 	psy_signal_connect(&self->fileoutdriver->signal_stop, self,
 		renderview_onstoprendering);
-	self->fileoutdriver->open(self->fileoutdriver);
+	psy_audiodriver_open(self->fileoutdriver);
 }
 
 void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
@@ -247,6 +247,6 @@ void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 	}
 	psy_dsp_dither_setsettings(&self->workspace->player.dither,
 		self->restoredither);	
-	self->curraudiodriver->open(self->curraudiodriver);
-	self->fileoutdriver->close(self->fileoutdriver);
+	psy_audiodriver_open(self->curraudiodriver);
+	psy_audiodriver_close(self->fileoutdriver);
 }

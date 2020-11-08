@@ -201,10 +201,10 @@ typedef struct {
    bool chordmode;
    int chordbegin;
    int columnresize;
-   int dragcolumn;
+   uintptr_t dragcolumn;
    int dragcolumnbase;
    uintptr_t dragtrack;
-   int dragparamcol;
+   uintptr_t dragparamcol;
    unsigned int opcount;
    bool syncpattern;
    bool wraparound;

@@ -24,34 +24,48 @@ static int numplaybacks(psy_AudioDriver*);
 
 static void init_properties(psy_AudioDriver* driver);
 
+static psy_AudioDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;
+		vtable.connect = driver_connect;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = driver_configure;
+		vtable.samplerate = (psy_audiodriver_fp_samplerate)samplerate;
+		vtable.capturename = (psy_audiodriver_fp_capturename)capturename;
+		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
+		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
+		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable_initialized = 1;
+	}
+}
+
 psy_AudioDriver* psy_audio_create_silent_driver(void)
 {
-	psy_AudioDriver* driver = malloc(sizeof(psy_AudioDriver));	
-	driver_init(driver);
+	psy_AudioDriver* driver = malloc(sizeof(psy_AudioDriver));
+	if (driver) {		
+		driver_init(driver);
+	}
 	return driver;
 }
 
 void driver_deallocate(psy_AudioDriver* self)
 {
-	self->dispose(self);
+	driver_dispose(self);
 	free(self);
 }
 
 int driver_init(psy_AudioDriver* driver)
-{
+{	
 	memset(driver, 0, sizeof(psy_AudioDriver));
-	driver->open = driver_open;
-	driver->deallocate = driver_deallocate;	
-	driver->connect = driver_connect;
-	driver->open = driver_open;
-	driver->close = driver_close;
-	driver->dispose = driver_dispose;
-	driver->configure = driver_configure;
-	driver->samplerate = (psy_audiodriver_fp_samplerate) samplerate;
-	driver->capturename = (psy_audiodriver_fp_capturename) capturename;
-	driver->numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
-	driver->playbackname = (psy_audiodriver_fp_playbackname)playbackname;
-	driver->numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+	vtable_init();
+	driver->vtable = &vtable;	
 	init_properties(driver);
 	return 0;
 }

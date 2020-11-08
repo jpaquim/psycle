@@ -15,9 +15,10 @@ static uintptr_t h(uintptr_t k, uintptr_t size) {  return k % size; }
 
 void psy_table_init(psy_Table* self)
 {
-  self->arraysize = psy_TABLEKEYS;
-  memset(self->keys, 0, sizeof(self->keys));
-  self->count = 0; 
+	assert(self);
+	self->arraysize = psy_TABLEKEYS;
+	memset(self->keys, 0, sizeof(self->keys));
+	self->count = 0; 
 }
 
 void psy_table_dispose(psy_Table* self)
@@ -26,6 +27,7 @@ void psy_table_dispose(psy_Table* self)
   psy_TableHashEntry* p;
   psy_TableHashEntry* q;
 
+  assert(self);
   for (i = 0; i < self->arraysize; ++i) {
     for (p = self->keys[i]; p != NULL; p = q) {      
 	  q = p->next;
@@ -40,6 +42,7 @@ void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
 {
 	psy_TableIterator it;
 
+	assert(self);
 	if (disposefunc) {
 		for (it = psy_table_begin(self);
 				!psy_tableiterator_equal(&it, psy_table_end());
@@ -58,6 +61,7 @@ void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc)
 }
 void psy_table_clear(psy_Table * self)
 {
+	assert(self);
 	psy_table_dispose(self);
 	psy_table_init(self);
 }
@@ -68,6 +72,7 @@ void psy_table_insert(psy_Table* self, uintptr_t k, void* value)
 	psy_TableHashEntry* p;
 	psy_TableHashEntry* newentry;
 
+	assert(self);
 	hn = h(k, self->arraysize);
 	p = 0;
 	if (self->keys[hn] != 0) {
@@ -100,6 +105,7 @@ void psy_table_insert(psy_Table* self, uintptr_t k, void* value)
 
 void psy_table_insert_strhash(psy_Table* self, const char* strkey, void* value)
 {
+	assert(self);
 	psy_table_insert(self, hash(strkey), value);
 }
 
@@ -109,6 +115,7 @@ void psy_table_remove(psy_Table* self, uintptr_t k)
 	psy_TableHashEntry* p;
 	psy_TableHashEntry* q;
 
+	assert(self);
 	hn = h(k, self->arraysize);
 	if (self->keys[hn] != 0) {	
 		p = self->keys[hn];
@@ -134,6 +141,7 @@ void* psy_table_at(psy_Table* self, uintptr_t k)
 {
 	void* rv = 0;
 	  	
+	assert(self);
 	if (self->count > 0) {
 		uintptr_t hn;
 
@@ -159,10 +167,11 @@ void* psy_table_at_strhash(psy_Table* self, const char* strkey)
 	return psy_table_at(self, hash(strkey));
 }
 
-int psy_table_exists(psy_Table* self, uintptr_t k)
+bool psy_table_exists(const psy_Table* self, uintptr_t k)
 {	
-	int rv = 0;
+	bool rv = 0;
 	  	
+	assert(self);
 	if (self->count > 0) {
 		uintptr_t hn;
 
@@ -183,25 +192,28 @@ int psy_table_exists(psy_Table* self, uintptr_t k)
 	return rv;
 }
 
-int psy_table_exists_strhash(psy_Table* self, const char* strkey)
+bool psy_table_exists_strhash(const psy_Table* self, const char* strkey)
 {
+	assert(self);
 	return psy_table_exists(self, hash(strkey));
 }
 
-uintptr_t psy_table_size(psy_Table* self)
+uintptr_t psy_table_size(const psy_Table* self)
 {
+	assert(self);
 	return self->count;
 }
 
-uintptr_t psy_table_maxkey(psy_Table* self)
+uintptr_t psy_table_maxkey(const psy_Table* self)
 {	
 	psy_TableIterator it;
 	uintptr_t rv;
 
+	assert(self);
 	if (self->count == 0) {
 		return UINTPTR_MAX;
 	}	
-	for (rv = 0, it = psy_table_begin(self);
+	for (rv = 0, it = psy_table_begin((psy_Table*)self);
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 		if (rv < psy_tableiterator_key(&it)) {
@@ -215,6 +227,7 @@ psy_TableIterator psy_table_begin(psy_Table* self)
 {
 	psy_TableIterator rv;
 
+	assert(self);
 	psy_tableiterator_init(&rv, self);
 	return rv;
 }

@@ -6,7 +6,8 @@
 
 #include "../../driver/eventdriver.h"
 #include "library.h"
-#include "list.h"
+#include <list.h>
+#include <hashtbl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,17 +29,24 @@ typedef struct {
 	void* systemhandle;	
 	psy_Signal signal_input;
 	psy_Properties* cmds;
+	psy_Table guids;
 } psy_audio_EventDrivers;
 
 void psy_audio_eventdrivers_init(psy_audio_EventDrivers*, void* systemhandle);
 void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_initkbd(psy_audio_EventDrivers*);
+void psy_audio_eventdrivers_register(psy_audio_EventDrivers*,
+	int guid, const char* path);
+psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers*,
+	int guid);
 psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers*, const char* path);
+int psy_audio_eventdrivers_guid(psy_audio_EventDrivers*,
+	const char* path);
 void psy_audio_eventdrivers_restart(psy_audio_EventDrivers*, int id);
 void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_remove(psy_audio_EventDrivers*, int id);
 void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers*, psy_Properties* self);
-unsigned int psy_audio_eventdrivers_size(psy_audio_EventDrivers*);
+uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers*);
 psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers*, int id); 
 psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*, int id);
 void psy_audio_eventdrivers_idle(psy_audio_EventDrivers*);

@@ -81,8 +81,9 @@ psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, ui
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev);
 /// gets the first pattern
 ///\return the first pattern node
-INLINE psy_audio_PatternNode* psy_audio_pattern_begin(psy_audio_Pattern* self)
+INLINE psy_audio_PatternNode* psy_audio_pattern_begin(const psy_audio_Pattern* self)
 {
+	assert(self);
 	return self->events;
 }
 /// finds the last pattern
@@ -91,18 +92,24 @@ psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
 /// sets the pattern description
 void psy_audio_pattern_setname(psy_audio_Pattern*, const char*);
 ///\return pattern description
-INLINE const char* psy_audio_pattern_name(psy_audio_Pattern* self) { return self->name; }
+INLINE const char* psy_audio_pattern_name(const psy_audio_Pattern* self)
+{
+	assert(self);
+	return self->name;
+}
 /// sets the pattern length
 void psy_audio_pattern_setlength(psy_audio_Pattern*, psy_dsp_big_beat_t length);
 /// return length of the pattern
-INLINE psy_dsp_big_beat_t psy_audio_pattern_length(psy_audio_Pattern* self)
+INLINE psy_dsp_big_beat_t psy_audio_pattern_length(const psy_audio_Pattern* self)
 {
+	assert(self);
 	return self->length;
 }
 /// tells if the pattern contains events
 ///\return tells if the pattern contains events
-INLINE int psy_audio_pattern_empty(psy_audio_Pattern* self)
+INLINE int psy_audio_pattern_empty(const psy_audio_Pattern* self)
 {
+	assert(self);
 	return self->events == NULL;
 }
 /// sets the event or an empty event if event is 0
@@ -111,15 +118,16 @@ void psy_audio_pattern_setevent(psy_audio_Pattern*, psy_audio_PatternNode*, cons
 ///\return gets the event or an empty event if node is 0
 psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern*, psy_audio_PatternNode*);
 /// gets the op count to determine changes
-INLINE uintptr_t psy_audio_pattern_opcount(psy_audio_Pattern* self)
+INLINE uintptr_t psy_audio_pattern_opcount(const psy_audio_Pattern* self)
 {
+	assert(self);
 	return self->opcount;
 }
 /// multiplies all entry offsets with the given factor
 void psy_audio_pattern_scale(psy_audio_Pattern*, float factor);
 /// erases all entries of the block
-void psy_audio_pattern_blockremove(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end);
+void psy_audio_pattern_blockremove(psy_audio_Pattern*,
+	psy_audio_PatternEditPosition begin, psy_audio_PatternEditPosition end);
 /// interpolates linear all entries of the block
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
 	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl);
@@ -141,7 +149,7 @@ void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_PatternEdi
 void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
 /// returns the maximum number of songtracks 
 /// used by the paste pattern, player uses songtracks of patterns
-uintptr_t psy_audio_pattern_maxsongtracks(psy_audio_Pattern*);
+uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern*);
 
 #ifdef __cplusplus
 }

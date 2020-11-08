@@ -111,7 +111,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 					output *= self->am[dstpos];
 				}
 				
-				data[dstpos] += output * self->gain;
+				data[dstpos] += (float)(output * self->gain);
 				nextsamples--;
 				++dstpos;				
 				diff = psy_audio_sampleiterator_inc(&self->sampleiterator);				
@@ -138,7 +138,7 @@ void psy_audio_waveosc_start(psy_audio_WaveOsc* self, double phase)
 {
 	if (self->sampleiterator.sample) {
 		psy_audio_sampleiterator_setposition(&self->sampleiterator,
-			phase * self->sampleiterator.sample->numframes);
+			(uintptr_t)(phase * self->sampleiterator.sample->numframes));
 		self->playing = TRUE;
 	}
 }

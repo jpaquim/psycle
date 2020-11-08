@@ -8,7 +8,9 @@
 extern "C" {
 #endif
 
-struct psy_EventDriver* create_kbd_driver(void);
+#define PSY_EVENTDRIVER_KBD_GUID 0x0001
+
+struct psy_EventDriver* psy_audio_kbddriver_create(void);
 
 #ifdef __cplusplus
 }

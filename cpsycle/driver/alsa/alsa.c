@@ -68,6 +68,25 @@ static void set_swparams(AlsaDriver* self, snd_pcm_sw_params_t* swparams);
 static void FillBuffer(AlsaDriver* self, snd_pcm_uframes_t offset, int count);
 static int xrun_recovery(AlsaDriver* self, int err);
 static void do_stop(AlsaDriver* self);
+static int on_error(int err, const char* msg);
+
+static psy_AudioDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;
+		vtable.connect = driver_connect;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = driver_configure;
+		vtable.samplerate = driver_samplerate;		
+		vtable_initialized = 1;
+	}
+}
 
 int on_error(int err, const char* msg)
 {
@@ -87,21 +106,12 @@ EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 
 EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
-	AlsaDriver* dx = (AlsaDriver*) malloc(sizeof(AlsaDriver));
-	if (dx != 0) {
-		memset(dx, 0, sizeof(AlsaDriver));
-		dx->driver.open = driver_open;
-		dx->driver.deallocate = driver_deallocate;
-		dx->driver.connect = driver_connect;
-		dx->driver.open = driver_open;
-		dx->driver.close = driver_close;
-		dx->driver.dispose = driver_dispose;
-		dx->driver.configure = driver_configure;
-		dx->driver.samplerate = driver_samplerate;
+	AlsaDriver* dx = (AlsaDriver*)malloc(sizeof(AlsaDriver));
+	if (dx != NULL) {		
 		driver_init(&dx->driver);
 		return &dx->driver;
 	}
-	return 0;
+	return NULL;
 }
 
 void driver_deallocate(psy_AudioDriver* driver)
@@ -114,6 +124,9 @@ int driver_init(psy_AudioDriver* driver)
 {
 	AlsaDriver* self = (AlsaDriver*) driver;	
 
+	memset(self, 0, sizeof(AlsaDriver));
+	vtable_init();
+	self->driver.vtable = &vtable;
 	self->error = on_error;
 	memset(&self->format, 0, sizeof(self->format));
 

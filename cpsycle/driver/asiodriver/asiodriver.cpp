@@ -1364,6 +1364,31 @@ static void driver_deallocate(psy_AudioDriver*);
 static void init_properties(psy_AudioDriver*);
 static void readbuffers(AsioDriver* self, int idx, float** left, float** right, int numsamples);
 
+static psy_AudioDriverVTable vtable;
+static int vtable_initialized = 0;
+
+static void vtable_init(void)
+{
+	if (!vtable_initialized) {
+		vtable.open = driver_open;
+		vtable.deallocate = driver_deallocate;
+		vtable.connect = driver_connect;
+		vtable.open = driver_open;
+		vtable.close = driver_close;
+		vtable.dispose = driver_dispose;
+		vtable.configure = driver_configure;
+		vtable.samplerate = driver_samplerate;
+		vtable.addcapture = (psy_audiodriver_fp_addcapture)addcaptureport;
+		vtable.removecapture = (psy_audiodriver_fp_removecapture)removecaptureport;
+		vtable.readbuffers = (psy_audiodriver_fp_readbuffers)readbuffers;
+		vtable.capturename = (psy_audiodriver_fp_capturename)capturename;
+		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
+		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
+		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable_initialized = 1;
+	}
+}
+
 int on_error(int err, const char* msg)
 {
 	MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
@@ -1382,35 +1407,19 @@ EXPORT AudioDriverInfo const* __cdecl GetPsycleDriverInfo(void)
 
 EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
-	AsioDriver* directx;
+	AsioDriver* asio;
 
-	directx = (AsioDriver*)malloc(sizeof(AsioDriver));
-	if (directx != 0) {
-		memset(directx, 0, sizeof(AsioDriver));
-		directx->driver.open = driver_open;
-		directx->driver.deallocate = driver_deallocate;
-		directx->driver.connect = driver_connect;
-		directx->driver.open = driver_open;
-		directx->driver.close = driver_close;
-		directx->driver.dispose = driver_dispose;
-		directx->driver.configure = driver_configure;
-		directx->driver.samplerate = driver_samplerate;
-		directx->driver.addcapture = (psy_audiodriver_fp_addcapture)addcaptureport;
-		directx->driver.removecapture = (psy_audiodriver_fp_removecapture)removecaptureport;
-		directx->driver.readbuffers = (psy_audiodriver_fp_readbuffers)readbuffers;
-		directx->driver.capturename = (psy_audiodriver_fp_capturename)capturename;
-		directx->driver.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
-		directx->driver.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
-		directx->driver.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
-		driver_init(&directx->driver);
-		return &directx->driver;
+	asio = (AsioDriver*)malloc(sizeof(AsioDriver));
+	if (asio != NULL) {		
+		driver_init(&asio->driver);
+		return &asio->driver;
 	}
-	return 0;
+	return NULL;
 }
 
 void driver_deallocate(psy_AudioDriver* driver)
 {
-	driver->dispose(driver);
+	driver_dispose(driver);
 	free(driver);
 }
 
@@ -1418,6 +1427,9 @@ int driver_init(psy_AudioDriver* driver)
 {
 	AsioDriver* self = (AsioDriver*) driver;
 
+	memset(self, 0, sizeof(AsioDriver));
+	vtable_init();
+	self->driver.vtable = &vtable;
 	self->error = on_error;
 #ifdef PSYCLE_USE_SSE
 	psy_dsp_sse2_init(&dsp);

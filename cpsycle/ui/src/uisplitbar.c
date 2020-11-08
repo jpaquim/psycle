@@ -6,8 +6,8 @@
 #include "uisplitbar.h"
 #include "uiapp.h"
 
-#include "../../detail/portable.h"
 #include "../../detail/trace.h"
+#include "../../detail/portable.h"
 
 static void splitbar_ondraw(psy_ui_SplitBar*, psy_ui_Graphics*);
 static void splitbar_onmousedown(psy_ui_SplitBar*, psy_ui_MouseEvent*);

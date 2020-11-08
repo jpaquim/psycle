@@ -58,6 +58,7 @@ static void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice* self);
 // psycle-mfc: Voice::Voice()
 void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self, psy_audio_Sampler* sampler)
 {
+	assert(self);
 	// This uses the XMWaveDataController
 	// instead a separate Controller like in mfc psycle
 	// The missing Controller variables are added to the
@@ -73,8 +74,8 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self, psy_audio_Sampler
 	// Voice Constructor
 	self->sampler = sampler;
 	self->inst = NULL;
-	self->_instrument = 0xFF;
-	self->_channel = -1;
+	self->instrument = 0xFF;
+	self->channel = -1;
 	self->_sampleCounter = 0;
 	self->_cutoff = 0;
 	self->effCmd = PS1_SAMPLER_CMD_NONE;
@@ -85,6 +86,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self, psy_audio_Sampler
 // psycle-mfc:: Voice::~Voice()
 void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	psy_dsp_adsr_dispose(&self->_envelope);
 	psy_dsp_adsr_dispose(&self->_filterEnv);
 	psy_audio_sampleiterator_dispose(&self->controller);
@@ -94,13 +96,14 @@ void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 // psycle mfc: Voice::Init
 void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	adsr_settings_initdefault(&self->_envelopesettings);
 	psy_dsp_adsr_init(&self->_envelope, &self->_envelopesettings,
 		psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
 	adsr_settings_initdefault(&self->_filterenvsettings);
 	psy_dsp_adsr_init(&self->_filterEnv, &self->_filterenvsettings,
 		psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
-	self->_channel = -1;
+	self->channel = -1;
 	self->_triggerNoteOff = 0;
 	self->_triggerNoteDelay = 0;
 	self->effretTicks = 0;
@@ -110,6 +113,7 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 // mfc name: Voice::NewLine()
 void psy_audio_samplervoice_newline(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	self->effretTicks = 0;
 	self->effCmd = PS1_SAMPLER_CMD_NONE;
 	if (self->_triggerNoteOff > self->_sampleCounter) {
@@ -162,16 +166,19 @@ static void psy_audio_sampler_resamplingmethod_tweak(psy_audio_Sampler*,
 static const psy_audio_MachineInfo* psy_audio_sampler_vinfo(psy_audio_Sampler*
 	self)
 {
+	assert(self);
 	return &macinfo;
 }
 
 static uintptr_t psy_audio_sampler_numinputs(psy_audio_Sampler* self)
 {
+	assert(self);
 	return 0;
 }
 
 static uintptr_t psy_audio_sampler_numoutputs(psy_audio_Sampler* self)
 {
+	assert(self);
 	return 2;
 }
 
@@ -181,6 +188,7 @@ static bool sampler_vtable_initialized = FALSE;
 // implementation
 static void sampler_vtable_init(psy_audio_Sampler* self)
 {
+	assert(self);
 	if (!sampler_vtable_initialized) {
 		sampler_vtable = *(psy_audio_sampler_base(self)->vtable);
 		sampler_vtable.generateaudio = (fp_machine_generateaudio)
@@ -223,8 +231,8 @@ void psy_audio_sampler_init(psy_audio_Sampler* self,
 {
 	int i;
 
+	assert(self);
 	// SetSampleRate(Global::player().SampleRate());
-
 	custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
 	psy_audio_sampler_base(self)->vtable = &sampler_vtable;
@@ -255,6 +263,7 @@ void psy_audio_sampler_init_voices(psy_audio_Sampler* self)
 {
 	uintptr_t i;
 
+	assert(self);
 	self->numvoices = PS1_SAMPLER_DEFAULT_POLYPHONY;
 	for (i = 0; i < PS1_SAMPLER_MAX_POLYPHONY; ++i) {
 		psy_audio_samplervoice_init(&self->_voices[i], self);
@@ -281,6 +290,7 @@ psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback*
 // psycle-mfc: Sampler::~Sampler()
 void psy_audio_sampler_dispose(psy_audio_Sampler* self)
 {	
+	assert(self);
 	psy_audio_sampler_clearmulticmdmem(self);
 	psy_audio_sampler_disposeparameters(self);
 	psy_audio_sampler_dispose_voices(self);
@@ -291,6 +301,7 @@ void psy_audio_sampler_dispose_voices(psy_audio_Sampler* self)
 {
 	uintptr_t i;
 
+	assert(self);
 	for (i = 0; i < PS1_SAMPLER_MAX_POLYPHONY; ++i) {
 		psy_audio_samplervoice_dispose(&self->_voices[i]);
 	}
@@ -301,6 +312,7 @@ void psy_audio_sampler_stop(psy_audio_Sampler* self)
 {
 	uintptr_t i;
 
+	assert(self);
 	for (i = 0; i < self->numvoices; ++i) {
 		psy_audio_samplervoice_noteofffast(&self->_voices[i]);
 		self->_voices[i]._effPortaSpeed = 4294967296.0f;
@@ -313,9 +325,10 @@ void psy_audio_sampler_stopinstrument(psy_audio_Sampler* self,
 {
 	uintptr_t i;
 
+	assert(self);
 	for (i = 0; i < self->numvoices; ++i) {
 		psy_audio_SamplerVoice* pVoice = &self->_voices[i];
-		if (pVoice->_instrument == insIdx &&
+		if (pVoice->instrument == insIdx &&
 			(pVoice->_envelope.stage != ENV_OFF ||
 				pVoice->_triggerNoteDelay > 0)) {
 			psy_audio_samplervoice_setup(pVoice);
@@ -331,6 +344,7 @@ void psy_audio_sampler_setsamplerate(psy_audio_Sampler* self, int sr)
 {
 	uintptr_t i;
 
+	assert(self);
 	//Machine::SetSampleRate(sr);
 	for (i = 0; i < self->numvoices; ++i) {
 		filter_setsamplerate(&self->_voices[i]._filter, sr);
@@ -343,6 +357,7 @@ void psy_audio_sampler_setsamplerate(psy_audio_Sampler* self, int sr)
 // cpsycle: so far not used 
 bool psy_audio_sampler_playstrack(psy_audio_Sampler* self, int track)
 {
+	assert(self);
 	// return (self->TriggerDelayCounter[track] > 0 || GetCurrentVoice(track) != -1);
 	return FALSE;
 }
@@ -352,9 +367,10 @@ int psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, int track)
 {
 	uintptr_t voice;
 
+	assert(self);
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		// ENV_OFF is not checked, because channel will be -1
-		if (self->_voices[voice]._channel == track &&
+		if (self->_voices[voice].channel == track &&
 			(self->_voices[voice]._triggerNoteDelay > 0 ||
 				self->_voices[voice]._envelope.stage != ENV_FASTRELEASE)) {
 			return voice;
@@ -368,6 +384,7 @@ void psy_audio_sampler_newline(psy_audio_Sampler* self)
 {
 	uintptr_t voice;
 
+	assert(self);
 	psy_audio_sampler_clearmulticmdmem(self);
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		psy_audio_samplervoice_newline(&self->_voices[voice]);
@@ -393,6 +410,7 @@ void psy_audio_sampler_newline(psy_audio_Sampler* self)
 //             Multicmds may be called twice
 void psy_audio_sampler_clearmulticmdmem(psy_audio_Sampler* self)
 {
+	assert(self);
 	psy_list_deallocate(&self->multicmdMem, (psy_fp_disposefunc)NULL);
 }
 
@@ -402,6 +420,7 @@ uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 	uintptr_t useVoice = UINTPTR_MAX;
 	uintptr_t voice;
 
+	assert(self);
 	for (voice = 0; voice < self->numvoices; ++voice)	// Find a voice to apply the new note
 	{
 		switch (self->_voices[voice]._envelope.stage)
@@ -432,6 +451,7 @@ uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* pData)
 {
+	assert(self);
 	// if (_mute) return; // Avoid new note entering when muted.
 	psy_audio_PatternEvent* copy;
 	psy_audio_PatternEvent data = *pData;
@@ -517,7 +537,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 			// This algorithm should be replace by a LRU lookup
 			useVoice = 0;
 		}
-		self->_voices[useVoice]._channel = channel;
+		self->_voices[useVoice].channel = channel;
 	} else {
 		if (voice != UINTPTR_MAX) {
 			if (data.note == NOTECOMMANDS_RELEASE) {
@@ -551,11 +571,12 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 	psy_List* ite;
 	psy_audio_Instruments* insts;
 
+	assert(self);
 	//If this sample is not enabled, Voice::Tick is not called. Also, Sampler::Tick takes care of previus instrument used.
-	self->_instrument = pEntry->inst;
+	self->instrument = pEntry->inst;
 	insts = psy_audio_machine_instruments(psy_audio_sampler_base(self->sampler));
 	self->inst = psy_audio_instruments_at(insts,
-		psy_audio_instrumentindex_make(self->sampler->instrumentbank, self->_instrument));
+		psy_audio_instrumentindex_make(self->sampler->instrumentbank, self->instrument));
 	// Setup commands that affect the new or already playing voice.
 	for (ite = multicmdMem; ite != NULL; psy_list_next(&ite)) {
 		psy_audio_PatternEvent* ev;
@@ -573,7 +594,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 
 				sample = psy_audio_samples_at(
 					psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-					sampleindex_make(self->_instrument, 0));
+					sampleindex_make(self->instrument, 0));
 				w_offset = (uint64_t)(ev->parameter * sample->numframes) << 24;
 				dooffset = TRUE;
 			} break;
@@ -602,7 +623,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 
 						sample = psy_audio_samples_at(
 							psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-							sampleindex_make(self->_instrument, 0));
+							sampleindex_make(self->instrument, 0));
 						finetune = sample->numframes * 0.01;
 						speeddouble = pow(2.0, (((double)pEntry->note +
 							(double)sample->tune - (double)basec) + finetune) / 12.0) *
@@ -673,7 +694,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 
 		sample = psy_audio_samples_at(
 			psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-			sampleindex_make(self->_instrument, 0));
+			sampleindex_make(self->instrument, 0));
 		psy_audio_sampleiterator_setsample(&self->controller, sample);
 		if (self->inst->loop)
 		{
@@ -752,6 +773,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 // mfc-psycle: GenerateAudioInTicks(int /*startSample*/,  int numSamples)
 void psy_audio_sampler_generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 {
+	assert(self);
 	if (!self->linearslide) {
 		uintptr_t voice;
 		
@@ -772,6 +794,7 @@ void psy_audio_sampler_generateaudio(psy_audio_Sampler* self, psy_audio_BufferCo
 
 void psy_audio_sampler_ontimertick(psy_audio_Sampler* self)
 {
+	assert(self);
 	if (self->linearslide) {
 		uintptr_t voice;
 
@@ -788,6 +811,7 @@ void psy_audio_sampler_ontimerwork(psy_audio_Sampler* self,
 {
 	uintptr_t voice;
 
+	assert(self);
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		psy_audio_samplervoice_work(&self->_voices[voice],
 			bc->numsamples,
@@ -804,6 +828,7 @@ psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler* self, psy_List* e
 	psy_List* p;
 	psy_List* insert = 0;
 
+	assert(self);
 	for (p = events; p != NULL; psy_list_next(&p)) {
 		psy_audio_PatternEntry* entry;
 		psy_audio_PatternEvent* event;
@@ -852,10 +877,11 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 	float right_output;
 	uintptr_t dstpos;
 
+	assert(self);
 	// If the sample has been deleted while playing...
 	if (!psy_audio_samples_at(
 		psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-		sampleindex_make(self->_instrument, 0))) {
+		sampleindex_make(self->instrument, 0))) {
 		psy_audio_samplervoice_setup(self);
 		return;
 	}
@@ -965,6 +991,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 // mfc-psycle: WaveDataController::RampVolume
 void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	// calculate volume  (volume ramped)
 	if (self->_lVolCurr > self->_lVolDest) {
 		self->_lVolCurr -= 0.005f;
@@ -985,6 +1012,7 @@ void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice* self)
 // mfc-psycle: Voice::NoteOff()
 void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	psy_dsp_adsr_release(&self->_envelope);
 	psy_dsp_adsr_release(&self->_filterEnv);
 	self->_triggerNoteDelay = 0;
@@ -994,6 +1022,7 @@ void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 // mfc-psycle: Voice::NoteOffFast()
 void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	psy_dsp_adsr_fastrelease(&self->_envelope);
 	psy_dsp_adsr_fastrelease(&self->_filterEnv);
 	self->_triggerNoteDelay = 0;
@@ -1003,6 +1032,7 @@ void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice* self)
 // mfc-psycle: Voice::PerformFxOld(dsp::resampler& resampler)
 void psy_audio_samplervoice_performfxold(psy_audio_SamplerVoice* self)
 {
+	assert(self);
 	// 4294967 stands for (2^30/250), meaning that
 	//value 250 = (inc)decreases the speed in 1/4th of the original (wave) speed each PerformFx call.
 	int64_t shift;
@@ -1047,6 +1077,7 @@ void psy_audio_samplervoice_performfxnew(psy_audio_SamplerVoice* self)
 	double factor;
 	int64_t speed;
 
+	assert(self);
 	// value 1 = (inc)decreases the speed in one seminote each beat.
 	factor = 1.0 / (12.0 * psy_audio_machine_ticksperbeat(
 		psy_audio_sampler_base(self->sampler)));
@@ -1084,6 +1115,7 @@ void psy_audio_sampler_setresamplerquality(psy_audio_Sampler* self,
 {
 	uintptr_t voice;
 
+	assert(self);
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		psy_audio_sampleiterator_setquality(&self->_voices[voice].controller,
 			quality);
@@ -1097,6 +1129,7 @@ void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile*
 	uint32_t size;
 	psy_dsp_ResamplerQuality resamplerquality;
 
+	assert(self);
 	self->instrumentbank = 0;
 	psy_audio_sampler_defaultC4(self, FALSE);
 	self->linearslide = FALSE;
@@ -1160,6 +1193,7 @@ void psy_audio_sampler_savespecific(psy_audio_Sampler* self, psy_audio_SongFile*
 	uint32_t temp;
 	uint32_t size;
 	
+	assert(self);
 	size = 3 * sizeof(temp) + 2 * sizeof(bool);
 	psyfile_write(songfile->file, &size, sizeof(size));
 	temp = self->numvoices;
@@ -1193,6 +1227,7 @@ void psy_audio_sampler_initparameters(psy_audio_Sampler* self)
 {
 	psy_dsp_ResamplerQuality quality;
 
+	assert(self);
 	psy_audio_intmachineparam_init(&self->param_numvoices,
 		"Limit Voices", "Limit Voices", MPF_STATE,
 		(int32_t*)&self->numvoices, 1, PS1_SAMPLER_MAX_POLYPHONY);
@@ -1223,6 +1258,7 @@ void psy_audio_sampler_initparameters(psy_audio_Sampler* self)
 
 void psy_audio_sampler_disposeparameters(psy_audio_Sampler* self)
 {
+	assert(self);
 	psy_audio_intmachineparam_dispose(&self->param_numvoices);
 	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
@@ -1231,17 +1267,20 @@ void psy_audio_sampler_disposeparameters(psy_audio_Sampler* self)
 
 uintptr_t psy_audio_sampler_numparameters(psy_audio_Sampler* self)
 {
+	assert(self);
 	return 4;
 }
 
 uintptr_t psy_audio_sampler_numparametercols(psy_audio_Sampler* self)
 {
+	assert(self);
 	return 4;
 }
 
 psy_audio_MachineParam* psy_audio_sampler_parameter(psy_audio_Sampler* self,
 	uintptr_t param)
 {
+	assert(self);
 	switch (param) {
 		case 0:
 			return psy_audio_intmachineparam_base(&self->param_numvoices);
@@ -1264,6 +1303,7 @@ psy_audio_MachineParam* psy_audio_sampler_parameter(psy_audio_Sampler* self,
 void psy_audio_sampler_resamplingmethod_tweak(psy_audio_Sampler* self,
 	psy_audio_ChoiceMachineParam* sender, float value)
 {
+	assert(self);
 	psy_audio_sampler_setresamplerquality(self,
 		psy_audio_choicemachineparam_choice(sender));		
 }

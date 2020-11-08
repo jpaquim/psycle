@@ -74,24 +74,28 @@ extern "C" {
 		psy_dsp_ADSRSettings _filterenvsettings;
 		Filter _filter;
 		psy_audio_Instrument* inst;
-		int _instrument;
-		int _channel;
+		int instrument;
+		int channel;
 
-		int _sampleCounter;		//Amount of samples since line Tick on this voice.
-		int _triggerNoteOff;   //Amount of samples previous to do a delayed noteoff
-		int _triggerNoteDelay;  //Amount of samples previous to do a delayed noteon (Also used for retrig)
+		// Amount of samples since line Tick on this voice.
+		int _sampleCounter;
+		// Amount of samples previous to do a delayed noteoff
+		int _triggerNoteOff;
+		// Amount of samples previous to do a delayed noteon (Also used for
+		// retrig)
+		int _triggerNoteDelay;
 		int _cutoff;
 		float _coModify;
 		int64_t _effPortaSpeed;
-		// Line memory for command being executed{
-		int effCmd;  //running command (like porta or retrig).
-		int effVal;  //value related to the running command (like porta or retrig)
-		//}
-		// retrig {
+		// Line memory for command being executed
+		// running command (like porta or retrig).
+		int effCmd;
+		//value related to the running command (like porta or retrig)
+		int effVal;
+		// retrig
 		int effretTicks; // Number of ticks remaining for retrig
 		float effretVol; // volume change amount
 		int effretMode;  // volume change mode (multipler or sum)
-		// } retrig
 		// WaveDataController
 		float _vol; // 0..1 value of this voice volume,
 		float _pan;
@@ -145,16 +149,19 @@ extern "C" {
 
 	INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
 	{
+		assert(self);
 		return &(self->custommachine.machine);
 	}
 
 	INLINE void psy_audio_sampler_defaultC4(psy_audio_Sampler* self, bool correct)
 	{
+		assert(self);
 		self->defaultspeed = correct;
 	}
 
-	INLINE bool psy_audio_sampler_isdefaultC4(psy_audio_Sampler* self)
+	INLINE bool psy_audio_sampler_isdefaultC4(const psy_audio_Sampler* self)
 	{
+		assert(self);
 		return self->defaultspeed;
 	}
 
@@ -163,11 +170,13 @@ extern "C" {
 
 	INLINE psy_dsp_ResamplerQuality psy_audio_sampler_resamplerquality(psy_audio_Sampler* self)
 	{
+		assert(self);
 		return self->resamplerquality;
 	}
 
-	INLINE bool psy_audio_sampler_usefilters(psy_audio_Sampler* self)
+	INLINE bool psy_audio_sampler_usefilters(const psy_audio_Sampler* self)
 	{
+		assert(self);
 		return self->usefilters != FALSE;
 	}
 
