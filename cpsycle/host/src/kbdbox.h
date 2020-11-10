@@ -36,7 +36,7 @@ typedef struct KbdBox{
 	int keyheight;
 	int keywidth;
 	psy_ui_Size corner;
-	psy_Properties* keyset;
+	psy_Property* keyset;
 	Workspace* workspace;
 } KbdBox;
 

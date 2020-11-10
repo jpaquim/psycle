@@ -6,7 +6,7 @@
 #include "fileoutdriver.h"
 
 #include "../../detail/os.h"
-#include "../../driver/driver.h"
+#include "../../driver/audiodriver.h"
 #include "../../driver/audiodriversettings.h"
 
 #include <stdlib.h>
@@ -62,7 +62,7 @@ static int fileoutdriver_init(FileOutDriver*);
 static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
 static int driver_open(psy_AudioDriver*);
-static void driver_configure(FileOutDriver*, psy_Properties*);
+static void driver_configure(FileOutDriver*, psy_Property*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static unsigned int samplerate(psy_AudioDriver*);
@@ -130,7 +130,7 @@ int driver_dispose(psy_AudioDriver* driver)
 	FileOutDriver* self;
 
 	self = (FileOutDriver*) driver;
-	psy_properties_free(driver->properties);
+	psy_property_deallocate(driver->properties);
 	driver->properties = 0;
 	psy_signal_dispose(&driver->signal_stop);
 	free(self->filecontext.path);
@@ -169,23 +169,23 @@ int driver_close(psy_AudioDriver* driver)
 	return 0;
 }
 
-void driver_configure(FileOutDriver* self, psy_Properties* config)
+void driver_configure(FileOutDriver* self, psy_Property* config)
 {
 	psy_AudioDriver* driver = &self->driver;
 
 	if (config) {
-		psy_properties_sync(driver->properties, config);
+		psy_property_sync(driver->properties, config);
 	}
 	free(self->filecontext.path);
 	self->filecontext.path = strdup(
-		psy_properties_at_str(driver->properties,
+		psy_property_at_str(driver->properties,
 			"outputpath", "Untitled.wav"));
 	psy_audiodriversettings_setvalidbitdepth(&self->settings,
-		psy_properties_at_int(driver->properties, "bitdepth", 16));
+		psy_property_at_int(driver->properties, "bitdepth", 16));
 	psy_audiodriversettings_setsamplespersec(&self->settings,
-		psy_properties_at_int(driver->properties, "samplerate", 44100));
+		psy_property_at_int(driver->properties, "samplerate", 44100));
 	psy_audiodriversettings_setchannelmode(&self->settings,
-		psy_properties_at_int(driver->properties, "channels",
+		psy_property_at_int(driver->properties, "channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 
@@ -198,24 +198,24 @@ void init_properties(FileOutDriver* self)
 {
 	psy_AudioDriver* driver = &self->driver;
 
-	driver->properties = psy_properties_create();
-	psy_properties_settext(
-		psy_properties_sethint(
-			psy_properties_append_string(driver->properties, "name", "FileOut Driver"),
+	driver->properties = psy_property_allocinit_key("FileOut Driver");
+	psy_property_settext(
+		psy_property_sethint(
+			psy_property_append_string(driver->properties, "name", "FileOut Driver"),
 			PSY_PROPERTY_HINT_READONLY),
 		"Name");
-	psy_properties_sethint(
-		psy_properties_append_string(driver->properties, "vendor", "Psycledelics"),
+	psy_property_sethint(
+		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
-		psy_properties_append_string(driver->properties, "version", "1.0"),
+	psy_property_sethint(
+		psy_property_append_string(driver->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_append_string(driver->properties, "outputpath", "Untitled.wav");
-	psy_properties_append_int(driver->properties, "bitdepth",
+	psy_property_append_string(driver->properties, "outputpath", "Untitled.wav");
+	psy_property_append_int(driver->properties, "bitdepth",
 		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
-	psy_properties_append_int(driver->properties, "samplerate",
+	psy_property_append_int(driver->properties, "samplerate",
 		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
-	psy_properties_append_choice(driver->properties, "channels",
+	psy_property_append_choice(driver->properties, "channels",
 		(int)psy_audiodriversettings_channelmode(&self->settings));
 }
 

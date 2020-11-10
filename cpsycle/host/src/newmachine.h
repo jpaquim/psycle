@@ -50,8 +50,8 @@ typedef struct {
    int numparametercols;
    int avgcharwidth;
    int pluginpos;
-   psy_Properties* plugins;
-   psy_Properties* selectedplugin;
+   psy_Property* plugins;
+   psy_Property* selectedplugin;
    psy_Signal signal_selected;
    psy_Signal signal_changed;
    Workspace* workspace;

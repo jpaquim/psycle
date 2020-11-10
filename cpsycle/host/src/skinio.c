@@ -14,7 +14,7 @@ int _httoi(const char *value)
 	return (int)strtol(value, 0, 16);
 }
 
-int skin_load(psy_Properties* properties, const char* path)
+int skin_load(psy_Property* properties, const char* path)
 {
 	FILE* fp;
 	char buf[512];
@@ -37,7 +37,7 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "pattern_fontface", q);
+					psy_property_append_string(properties, "pattern_fontface", q);
 				}
 			}
 		}
@@ -46,7 +46,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pattern_font_point", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pattern_font_point", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pattern_font_flags\"=dword:"))
@@ -54,7 +54,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pattern_font_flags", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pattern_font_flags", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pattern_font_x\"=dword:"))
@@ -62,7 +62,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pattern_font_x", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pattern_font_x", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pattern_font_y\"=dword:"))
@@ -70,7 +70,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pattern_font_y", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pattern_font_y", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pattern_header_skin\"=\""))
@@ -84,7 +84,7 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "pattern_header_skin", q);
+					psy_property_append_string(properties, "pattern_header_skin", q);
 				}
 			}
 		}
@@ -99,7 +99,7 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "generator_fontface", q);
+					psy_property_append_string(properties, "generator_fontface", q);
 				}
 			}
 		}
@@ -108,7 +108,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "generator_font_point", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "generator_font_point", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"generator_font_flags\"=dword:"))
@@ -116,7 +116,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "generator_font_flags", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "generator_font_flags", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"effect_fontface\"=\""))
@@ -130,7 +130,7 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "effect_fontface", q);
+					psy_property_append_string(properties, "effect_fontface", q);
 				}
 			}
 		}
@@ -139,7 +139,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"effect_font_flags\"=dword:"))
@@ -147,7 +147,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "effect_font_flags", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "effect_font_flags", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"machine_skin\"=\""))
@@ -161,7 +161,7 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "machine_skin", q);
+					psy_property_append_string(properties, "machine_skin", q);
 				}
 			}
 		}
@@ -176,7 +176,7 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "machine_background", q);
+					psy_property_append_string(properties, "machine_background", q);
 					// check for no \ in which case search for it?
 					//bBmpBkg = TRUE;
 				}
@@ -205,7 +205,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_separator", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_separator", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_separator2\"=dword:"))
@@ -213,7 +213,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_separator2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_separator2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_background\"=dword:"))
@@ -221,7 +221,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_background", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_background", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_background2\"=dword:"))
@@ -229,7 +229,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_background2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_background2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_font\"=dword:"))
@@ -237,7 +237,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_font", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_font", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_font2\"=dword:"))
@@ -245,7 +245,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_font2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_font2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_fontCur\"=dword:"))
@@ -253,7 +253,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_fontcur", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_fontcur", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_fontCur2\"=dword:"))
@@ -261,7 +261,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_fontcur2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_fontcur2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_fontSel\"=dword:"))
@@ -269,7 +269,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_fontsel", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_fontsel", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_fontSel2\"=dword:"))
@@ -277,7 +277,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_fontsel2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_fontsel2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_fontPlay\"=dword:"))
@@ -285,7 +285,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_fontplay", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_fontplay", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_fontPlay2\"=dword:"))
@@ -293,7 +293,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_fontplay2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_fontplay2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_row\"=dword:"))
@@ -301,7 +301,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_row", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_row", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_row2\"=dword:"))
@@ -309,7 +309,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_row2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_row2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_rowbeat\"=dword:"))
@@ -317,7 +317,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_rowbeat", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_rowbeat", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_rowbeat2\"=dword:"))
@@ -325,7 +325,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_rowbeat2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_rowbeat2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_row4beat\"=dword:"))
@@ -333,7 +333,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_row4beat", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_row4beat", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_row4beat2\"=dword:"))
@@ -341,7 +341,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "pvc_row4beat2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_row4beat2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_selection\"=dword:"))
@@ -349,7 +349,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_selection", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_selection", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_selection2\"=dword:"))
@@ -357,7 +357,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_selection2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_selection2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_playbar\"=dword:"))
@@ -365,7 +365,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_playbar", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_playbar", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_playbar2\"=dword:"))
@@ -373,7 +373,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_playbar2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_playbar2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_cursor\"=dword:"))
@@ -381,7 +381,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_cursor", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_cursor", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"pvc_cursor2\"=dword:"))
@@ -389,7 +389,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "pvc_cursor2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "pvc_cursor2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"vu1\"=dword:"))
@@ -397,7 +397,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "vu", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "vu", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"vu2\"=dword:"))
@@ -405,7 +405,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "vu2", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "vu2", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"vu3\"=dword:"))
@@ -413,7 +413,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "vu3", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "vu3", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_colour\"=dword:"))
@@ -421,7 +421,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_colour", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_colour", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_wirecolour\"=dword:"))
@@ -429,7 +429,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_wirecolour", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_wirecolour", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_polycolour\"=dword:"))
@@ -437,7 +437,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_polycolour", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_polycolour", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_wirewidth\"=dword:"))
@@ -445,7 +445,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_wirewidth", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_wirewidth", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_wireaa\"=hex:"))
@@ -453,7 +453,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_wireaa", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_wireaa", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_generator_fontcolour\"=dword:"))
@@ -461,7 +461,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "mv_generator_fontcolour", _httoi(q+1), 0, 0);				
+				psy_property_append_int(properties, "mv_generator_fontcolour", _httoi(q+1), 0, 0);				
 			}
 		}
 		else if (strstr(buf,"\"mv_effect_fontcolour\"=dword:"))
@@ -469,7 +469,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_effect_fontcolour", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_effect_fontcolour", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf,"\"mv_triangle_size\"=hex:"))
@@ -477,7 +477,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "mv_triangle_size", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "mv_triangle_size", _httoi(q+1), 0, 0);
 			}
 		}
 
@@ -493,8 +493,8 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "mv_fontcolour_generator", _httoi(q+1), 0, 0);	
-				psy_properties_append_int(properties, "mv_fontcolour_effect", _httoi(q+1), 0, 0);				
+				psy_property_append_int(properties, "mv_fontcolour_generator", _httoi(q+1), 0, 0);	
+				psy_property_append_int(properties, "mv_fontcolour_effect", _httoi(q+1), 0, 0);				
 			}
 		}
 		else if (strstr(buf,"\"machine_fontface\"=\""))
@@ -508,8 +508,8 @@ int skin_load(psy_Properties* properties, const char* path)
 				if (p)
 				{
 					p[0]=0;					
-					psy_properties_append_string(properties, "generator_fontface", q);	
-					psy_properties_append_string(properties, "effect_fontface", q);
+					psy_property_append_string(properties, "generator_fontface", q);	
+					psy_property_append_string(properties, "effect_fontface", q);
 				}
 			}
 		}
@@ -518,8 +518,8 @@ int skin_load(psy_Properties* properties, const char* path)
 			char *q = strchr(buf,58); // :
 			if (q)
 			{				
-				psy_properties_append_int(properties, "generator_font_point", _httoi(q+1), 0, 0);
-				psy_properties_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "generator_font_point", _httoi(q+1), 0, 0);
+				psy_property_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUITopColor\"=dword:"))
@@ -527,7 +527,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguitopcolor", _httoi(q + 1), 0, 0);			
+				psy_property_append_int(properties, "machineguitopcolor", _httoi(q + 1), 0, 0);			
 			}
 		}
 		else if (strstr(buf, "\"machineGUIFontTopColor\"=dword:"))
@@ -535,7 +535,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguifonttopcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguifonttopcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUIBottomColor\"=dword:"))
@@ -543,7 +543,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguibottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguibottomcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUIFontBottomColor\"=dword:"))
@@ -551,7 +551,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguifontbottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguifontbottomcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUIHTopColor\"=dword:"))
@@ -559,7 +559,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguihtopcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihtopcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUIHFontTopColor\"=dword:"))
@@ -567,7 +567,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguihfonttopcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihfonttopcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUIHBottomColor\"=dword:"))
@@ -575,7 +575,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguihbottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihbottomcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUIHFontBottomColor\"=dword:"))
@@ -583,7 +583,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguihfontbottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihfontbottomcolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUITitleColor\"=dword:"))
@@ -591,7 +591,7 @@ int skin_load(psy_Properties* properties, const char* path)
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_properties_append_int(properties, "machineguititlecolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguititlecolor", _httoi(q + 1), 0, 0);
 			}
 		}
 		else if (strstr(buf, "\"machineGUITitleFontColor\"=dword:"))
@@ -599,7 +599,7 @@ int skin_load(psy_Properties* properties, const char* path)
 		char* q = strchr(buf, 58); // :
 		if (q)
 		{
-			psy_properties_append_int(properties, "machineguititlefontcolor", _httoi(q + 1), 0, 0);
+			psy_property_append_int(properties, "machineguititlefontcolor", _httoi(q + 1), 0, 0);
 		}
 		}
 	}
@@ -607,7 +607,7 @@ int skin_load(psy_Properties* properties, const char* path)
 	return PSY_OK;
 }
 
-int skin_loadpsh(psy_Properties* properties, const char* path)
+int skin_loadpsh(psy_Property* properties, const char* path)
 {
 	char buf[1 << 10];
 	int loaded = 0;
@@ -659,7 +659,7 @@ int skin_loadpsh(psy_Properties* properties, const char* path)
 					value =  &twodots[1];
 				}
 			}			
-			psy_properties_append_string(properties, key, value);			
+			psy_property_append_string(properties, key, value);			
 			loaded = 1;
 		}
 	}

@@ -171,7 +171,7 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 
 // TrackerGridState
 // prototypes
-static void definecmd(psy_Properties*, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext);
+static void definecmd(psy_Property*, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext);
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
@@ -3337,11 +3337,11 @@ static void trackerview_showlinenumbers(TrackerView*, int showstate);
 static void trackerview_showlinenumbercursor(TrackerView*, int showstate);
 static void trackerview_showlinenumbersinhex(TrackerView*, int showstate);
 static void trackerview_onconfigchanged(TrackerView*, Workspace*,
-	psy_Properties*);
+	psy_Property*);
 static void trackerview_readconfig(TrackerView*);
 static void trackerview_readfont(TrackerView*);
 static void trackerview_readtheme(TrackerView*);
-static void trackerview_applyproperties(TrackerView*, psy_Properties*);
+static void trackerview_applyproperties(TrackerView*, psy_Property*);
 static void trackerview_onpatternimport(TrackerView*);
 static void trackerview_onpatternexport(TrackerView*);
 static void trackerview_onlpbchanged(TrackerView*, psy_audio_Player* sender,
@@ -3776,7 +3776,7 @@ void trackerview_onzoomboxchanged(TrackerView* self, ZoomBox* sender)
 	}
 }
 
-void trackerview_applyproperties(TrackerView* self, psy_Properties* p)
+void trackerview_applyproperties(TrackerView* self, psy_Property* p)
 {
 	patternviewskin_settheme(self->gridstate.skin, p,
 		workspace_skins_directory(self->workspace));	
@@ -4055,19 +4055,19 @@ void trackerview_onlpbchanged(TrackerView* self, psy_audio_Player* sender, uintp
 }
 
 void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
-	psy_Properties* property)
+	psy_Property* property)
 {
 	if (property == &workspace->config) {
 		trackerview_readconfig(self);
-	} else if (psy_properties_insection(property, workspace->patternviewtheme)) {
+	} else if (psy_property_insection(property, workspace->patternviewtheme)) {
 		trackerview_applyproperties(self, workspace->patternviewtheme);
-	} else if (strcmp(psy_properties_key(property), "wraparound") == 0) {
-		self->grid.wraparound = psy_properties_as_int(property);
+	} else if (strcmp(psy_property_key(property), "wraparound") == 0) {
+		self->grid.wraparound = psy_property_as_int(property);
 		psy_ui_component_invalidate(&self->component);
-	} else if (strcmp(psy_properties_key(property), "beatoffset") == 0) {
+	} else if (strcmp(psy_property_key(property), "beatoffset") == 0) {
 		psy_ui_component_align(&self->component);
-	} else if (strcmp(psy_properties_key(property), "griddefaults") == 0) {
-		if (psy_properties_as_int(property)) {
+	} else if (strcmp(psy_property_key(property), "griddefaults") == 0) {
+		if (psy_property_as_int(property)) {
 			psy_ui_component_show(&self->griddefaults.component);
 			self->showdefaultline = 1;
 		} else {
@@ -4076,28 +4076,28 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 		}
 		psy_ui_component_align(&self->left);
 		psy_ui_component_align(&self->component);
-	} else if (strcmp(psy_properties_key(property), "linenumbers") == 0) {
-		trackerview_showlinenumbers(self, psy_properties_as_int(property));
-	} else if (strcmp(psy_properties_key(property), "linenumberscursor") == 0) {
-		trackerview_showlinenumbercursor(self, psy_properties_as_int(property));
-	} else if (strcmp(psy_properties_key(property), "linenumbersinhex") == 0) {
-		trackerview_showlinenumbersinhex(self, psy_properties_as_int(property));
-	} else if (strcmp(psy_properties_key(property), "wideinstcolumn") == 0) {
-		trackconfig_initcolumns(&self->trackconfig, psy_properties_as_int(property));
+	} else if (strcmp(psy_property_key(property), "linenumbers") == 0) {
+		trackerview_showlinenumbers(self, psy_property_as_int(property));
+	} else if (strcmp(psy_property_key(property), "linenumberscursor") == 0) {
+		trackerview_showlinenumbercursor(self, psy_property_as_int(property));
+	} else if (strcmp(psy_property_key(property), "linenumbersinhex") == 0) {
+		trackerview_showlinenumbersinhex(self, psy_property_as_int(property));
+	} else if (strcmp(psy_property_key(property), "wideinstcolumn") == 0) {
+		trackconfig_initcolumns(&self->trackconfig, psy_property_as_int(property));
 		trackerview_computemetrics(self);
-	} else if (strcmp(psy_properties_key(property), "drawemptydata") == 0) {
-		trackergrid_showemptydata(&self->grid, psy_properties_as_int(property));
-	} else if (strcmp(psy_properties_key(property), "centercursoronscreen") == 0) {
-		trackergrid_setcentermode(&self->grid, psy_properties_as_int(property));
-	} else if (strcmp(psy_properties_key(property), "notetab") == 0) {
+	} else if (strcmp(psy_property_key(property), "drawemptydata") == 0) {
+		trackergrid_showemptydata(&self->grid, psy_property_as_int(property));
+	} else if (strcmp(psy_property_key(property), "centercursoronscreen") == 0) {
+		trackergrid_setcentermode(&self->grid, psy_property_as_int(property));
+	} else if (strcmp(psy_property_key(property), "notetab") == 0) {
 		self->grid.notestabmode = self->griddefaults.notestabmode =
 			workspace_notetabmode(self->workspace);
-	} else if (strcmp(psy_properties_key(property), "font") == 0) {
+	} else if (strcmp(psy_property_key(property), "font") == 0) {
 		psy_ui_FontInfo fontinfo;
 		psy_ui_Font font;
 
 		psy_ui_fontinfo_init_string(&fontinfo,
-			psy_properties_as_str(property));
+			psy_property_as_str(property));
 		psy_ui_font_init(&font, &fontinfo);
 		trackerview_setfont(self, &font, TRUE);
 		psy_ui_font_dispose(&font);
@@ -4107,25 +4107,25 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 
 void trackerview_readconfig(TrackerView* self)
 {
-	psy_Properties* pv;
+	psy_Property* pv;
 
-	pv = psy_properties_findsection(&self->workspace->config, "visual.patternview");
+	pv = psy_property_findsection(&self->workspace->config, "visual.patternview");
 	if (pv) {
-		if (psy_properties_at_bool(pv, "griddefaults", 1)) {
+		if (psy_property_at_bool(pv, "griddefaults", 1)) {
 			self->showdefaultline = 1;
 			psy_ui_component_show(&self->griddefaults.component);
 		} else {
 			self->showdefaultline = 0;
 			psy_ui_component_hide(&self->griddefaults.component);
 		}
-		trackerview_showlinenumbers(self, psy_properties_at_bool(pv, "linenumbers", 1));
-		trackerview_showlinenumbercursor(self, psy_properties_at_bool(pv, "linenumberscursor", 1));
-		trackerview_showlinenumbersinhex(self, psy_properties_at_bool(pv, "linenumbersinhex", 1));
-		self->grid.wraparound = psy_properties_at_bool(pv, "wraparound", 1);
-		trackergrid_showemptydata(&self->grid, psy_properties_at_bool(pv, "drawemptydata", 1));
-		trackergrid_setcentermode(&self->grid, psy_properties_at_bool(pv, "centercursoronscreen", 1));
+		trackerview_showlinenumbers(self, psy_property_at_bool(pv, "linenumbers", 1));
+		trackerview_showlinenumbercursor(self, psy_property_at_bool(pv, "linenumberscursor", 1));
+		trackerview_showlinenumbersinhex(self, psy_property_at_bool(pv, "linenumbersinhex", 1));
+		self->grid.wraparound = psy_property_at_bool(pv, "wraparound", 1);
+		trackergrid_showemptydata(&self->grid, psy_property_at_bool(pv, "drawemptydata", 1));
+		trackergrid_setcentermode(&self->grid, psy_property_at_bool(pv, "centercursoronscreen", 1));
 		self->grid.notestabmode = self->griddefaults.notestabmode =
-			(psy_properties_at_bool(pv, "notetab", 0))
+			(psy_property_at_bool(pv, "notetab", 0))
 			? psy_dsp_NOTESTAB_A440
 			: psy_dsp_NOTESTAB_A220;
 		trackerview_readfont(self);
@@ -4138,15 +4138,15 @@ void trackerview_readconfig(TrackerView* self)
 
 void trackerview_readfont(TrackerView* self)
 {
-	psy_Properties* pv;
+	psy_Property* pv;
 
-	pv = psy_properties_findsection(&self->workspace->config, "visual.patternview");
+	pv = psy_property_findsection(&self->workspace->config, "visual.patternview");
 	if (pv) {
 		psy_ui_FontInfo fontinfo;
 		psy_ui_Font font;
 
 		psy_ui_fontinfo_init_string(&fontinfo,
-			psy_properties_at_str(pv, "font", "tahoma;-16"));
+			psy_property_at_str(pv, "font", "tahoma;-16"));
 		psy_ui_font_init(&font, &fontinfo);
 		trackerview_setfont(self, &font, TRUE);
 		psy_ui_font_dispose(&font);
@@ -4195,13 +4195,12 @@ void trackergrid_showemptydata(TrackerGrid* self, int showstate)
 	psy_ui_component_invalidate(&self->component);
 }
 
-void trackerview_makecmds(psy_Properties* parent)
+void trackerview_makecmds(psy_Property* parent)
 {
-	psy_Properties* cmds;
-	psy_Properties* p;
+	psy_Property* cmds;
 
-	cmds = psy_properties_settext(
-		psy_properties_append_section(parent, "trackercmds"),
+	cmds = psy_property_settext(
+		psy_property_append_section(parent, "trackercmds"),
 		"Tracker");
 	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP, "cmd_navup", "cmds.navup", "up");
 	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 0), CMD_NAVDOWN, "cmd_navdown", "cmds.navdown", "down");
@@ -4239,15 +4238,20 @@ void trackerview_makecmds(psy_Properties* parent)
 	definecmd(cmds, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO, "cmd_undo", "cmds.undo", "undo");
 	definecmd(cmds, psy_audio_encodeinput('Z', 1, 1), CMD_REDO, "cmd_redo", "cmds.redo", "redo");
 	definecmd(cmds, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG, "cmd_followsong", "cmds.followsong", "follow");
-	for (p = cmds->children; p != NULL; p = psy_properties_next(p)) {
-		psy_properties_sethint(p, PSY_PROPERTY_HINT_INPUT);
-	}
+	if (cmds) {
+		psy_List* p;
+
+		for (p = psy_property_children(cmds); p != NULL; psy_list_next(&p)) {
+			psy_property_sethint((psy_Property*)psy_list_entry(p),
+				PSY_PROPERTY_HINT_INPUT);
+		}
+	}	
 }
 
-void definecmd(psy_Properties* cmds, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext)
+void definecmd(psy_Property* cmds, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext)
 {
-	psy_properties_settext(psy_properties_setshorttext(
-		psy_properties_setid(psy_properties_append_int(cmds, key,
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(cmds, key,
 			input, 0, 0), cmd),
 		shorttext),
 		text);

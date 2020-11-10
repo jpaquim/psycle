@@ -222,34 +222,36 @@ void plugineditor_onsave(PluginEditor* self, psy_ui_Component* sender)
 }
 
 void plugineditor_buildpluginlist(PluginEditor* self)
-{
-	psy_Properties* p;
-	int c;
-	
+{	
 	psy_table_clear(&self->pluginmappping);
 	psy_ui_combobox_clear(&self->pluginselector);
-	p = self->workspace->plugincatcher.plugins;
-	if (p) {
-		p = p->children;
-	}
-	for (c = 0; p != NULL; p = psy_properties_next(p)) {
-		if (psy_properties_at_int(p, "type", -1) == MACH_LUA) {
-			psy_ui_combobox_addtext(&self->pluginselector, psy_properties_key(p));
-			psy_table_insert(&self->pluginmappping, (uintptr_t) c, p);
-			++c;
+	if (workspace_pluginlist(self->workspace)) {
+		psy_List* p;
+		int c;
+
+		for (p = psy_property_children(workspace_pluginlist(self->workspace)), c = 0;
+				p != NULL; psy_list_next(&p)) {
+			psy_Property* property;
+
+			property = (psy_Property*)psy_list_entry(p);
+			if (psy_property_at_int(property, "type", -1) == MACH_LUA) {
+				psy_ui_combobox_addtext(&self->pluginselector, psy_property_key(property));
+				psy_table_insert(&self->pluginmappping, (uintptr_t)c, property);
+				++c;
+			}
 		}
-	}
+	}	
 }
 
 void plugineditor_onpluginselected(PluginEditor* self, psy_ui_Component* sender, int slot)
 {
-	psy_Properties* p;
+	psy_Property* p;
 
 	p = psy_table_at(&self->pluginmappping, slot);
 	if (p) {
 		const char* path;
 
-		path = psy_properties_at_str(p, "path", 0);
+		path = psy_property_at_str(p, "path", 0);
 		if (path) {
 			if (self->basepath == 0 || (strcmp(path, self->basepath) != 0)) {
 				psy_ui_editor_clear(&self->editor);

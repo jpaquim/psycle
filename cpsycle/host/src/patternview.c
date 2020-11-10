@@ -30,7 +30,7 @@ static void patternviewbar_ondefaultline(PatternViewBar*,
 	psy_ui_CheckBox* sender);
 static void patternviewbar_initalign(PatternViewBar*);
 static void patternviewbar_onconfigchanged(PatternViewBar*, Workspace*,
-	psy_Properties*);
+	psy_Property*);
 static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
 
@@ -155,15 +155,15 @@ void patternviewbar_onlanguagechanged(PatternViewBar* self, Translator* sender)
 
 void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
 {
-	psy_Properties* pv;
+	psy_Property* pv;
 
-	pv = psy_properties_findsection(&self->workspace->config, "visual.patternview");
+	pv = psy_property_findsection(&self->workspace->config, "visual.patternview");
 	if (pv) {
-		psy_Properties* p;
+		psy_Property* p;
 		
-		p = psy_properties_at(pv, "griddefaults", PSY_PROPERTY_TYP_NONE);
+		p = psy_property_at(pv, "griddefaults", PSY_PROPERTY_TYPE_NONE);
 		if (p) {			
-			psy_properties_set_bool(pv, "griddefaults", !psy_properties_as_int(p));
+			psy_property_set_bool(pv, "griddefaults", !psy_property_as_int(p));
 			psy_signal_emit(&self->workspace->signal_configchanged, self->workspace, 1, p);
 		}
 	}
@@ -409,7 +409,7 @@ void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component
 }
 
 void patternviewbar_onconfigchanged(PatternViewBar* self, Workspace* workspace,
-	psy_Properties* property)
+	psy_Property* property)
 {
 	if (workspace_ismovecursorwhenpaste(workspace)) {
 		psy_ui_checkbox_check(&self->movecursorwhenpaste);

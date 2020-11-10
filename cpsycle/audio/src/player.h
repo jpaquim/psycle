@@ -4,7 +4,7 @@
 #ifndef psy_audio_PLAYER_H
 #define psy_audio_PLAYER_H
 
-#include "../../driver/driver.h"
+#include "../../driver/audiodriver.h"
 #include "eventdrivers.h"
 #include "song.h"
 #include "machinefactory.h"
@@ -114,9 +114,10 @@ INLINE uintptr_t psy_audio_player_samplerate(psy_audio_Player* self)
 // audio driver
 void psy_audio_player_setaudiodriver(psy_audio_Player*, psy_AudioDriver*);
 psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player*);
-void psy_audio_player_loaddriver(psy_audio_Player*, const char* path, psy_Properties* config);
-void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path, psy_Properties* config);
-void psy_audio_player_restartdriver(psy_audio_Player*, psy_Properties* config);
+void psy_audio_player_loaddriver(psy_audio_Player*, const char* path, psy_Property* config, bool open);
+void psy_audio_player_unloaddriver(psy_audio_Player*);
+void psy_audio_player_reloaddriver(psy_audio_Player*, const char* path, psy_Property* config);
+void psy_audio_player_restartdriver(psy_audio_Player*, psy_Property* config);
 // event recording
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);

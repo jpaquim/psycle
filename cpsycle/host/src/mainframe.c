@@ -50,7 +50,7 @@ static void mainframe_ongearcreate(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onaboutok(MainFrame*, psy_ui_Component* sender);
 static void mainframe_setstartpage(MainFrame*);
 static void mainframe_onsettingsviewchanged(MainFrame*, PropertiesView* sender,
-	psy_Properties*);
+	psy_Property*);
 static void mainframe_ontabbarchanged(MainFrame*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void mainframe_onsongchanged(MainFrame*, Workspace* sender,
@@ -916,10 +916,10 @@ void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
 }
 
 void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
-	psy_Properties* property)
+	psy_Property* property)
 {	
 	printf("mainframe_onsettingsviewchanged\n");
-	if (strcmp(psy_properties_key(property), "showstepsequencer") == 0) {
+	if (strcmp(psy_property_key(property), "showstepsequencer") == 0) {
 		if (workspace_showstepsequencer(&self->workspace)) {
 			psy_ui_component_show(&self->stepsequencerview.component);
 		} else {
@@ -927,7 +927,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 		}
 		psy_ui_component_align(&self->client);
 	}
-	if (strcmp(psy_properties_key(property), "trackscopes") == 0) {
+	if (strcmp(psy_property_key(property), "trackscopes") == 0) {
 		if (workspace_showtrackscopes(&self->workspace)) {
 			psy_ui_component_show(&self->trackscopeview.component);
 			psy_ui_component_align(&self->component);

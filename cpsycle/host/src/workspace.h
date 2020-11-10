@@ -80,26 +80,26 @@ typedef struct {
 	psy_audio_PluginCatcher plugincatcher;
 	psy_audio_MachineFactory machinefactory;
 	// Psycle settings
-	psy_Properties config;
+	psy_Property config;
 	// Some sections of config
-	psy_Properties* language;
-	psy_Properties* recentsongs;
-	psy_Properties* recentfiles;	
-	psy_Properties* general;
-	psy_Properties* inputoutput;
-	psy_Properties* eventinputs;
-	psy_Properties* keyboard;
-	psy_Properties* directories;
-	psy_Properties* compatibility;
-	psy_Properties* driverconfigure;
-	psy_Properties* driverconfigurations;
-	psy_Properties* eventdriverconfigurations;
-	psy_Properties* midiconfigure;
-	psy_Properties* theme;
-	psy_Properties* cmds;
-	psy_Properties* patternviewtheme;
-	psy_Properties* machineviewtheme;
-	psy_Properties* paramtheme;	
+	psy_Property* language;
+	psy_Property* recentsongs;
+	psy_Property* recentfiles;	
+	psy_Property* general;
+	psy_Property* inputoutput;
+	psy_Property* eventinputs;
+	psy_Property* keyboard;
+	psy_Property* directories;
+	psy_Property* compatibility;
+	psy_Property* driverconfigure;
+	psy_Property* driverconfigurations;
+	psy_Property* eventdriverconfigurations;
+	psy_Property* midiconfigure;
+	psy_Property* theme;
+	psy_Property* cmds;
+	psy_Property* patternviewtheme;
+	psy_Property* machineviewtheme;
+	psy_Property* paramtheme;	
 	int octave;
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;	
@@ -158,8 +158,8 @@ INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
 void workspace_loadskin(Workspace*, const char* path);
 void workspace_loadcontrolskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
-psy_Properties* workspace_pluginlist(Workspace*);
-psy_Properties* workspace_recentsongs(Workspace*);
+psy_Property* workspace_pluginlist(Workspace*);
+psy_Property* workspace_recentsongs(Workspace*);
 void workspace_load_configuration(Workspace*);
 void workspace_save_configuration(Workspace*);
 void workspace_load_recentsongs(Workspace*);
@@ -184,8 +184,8 @@ int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
 int workspace_showwirehover(Workspace*);
 int workspace_showparamviewaswindow(Workspace*);
-void workspace_configchanged(Workspace*, psy_Properties* property,
-	psy_Properties* choice);
+void workspace_configchanged(Workspace*, psy_Property* property,
+	psy_Property* choice);
 int workspace_wraparound(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
