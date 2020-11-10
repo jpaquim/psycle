@@ -15,7 +15,7 @@
 
 #include <hashtbl.h>
 
-// aim: Displays psy_Properties and allows to edit them.
+// aim: Displays psy_Property and allows to edit them.
 
 #define PROPERTIESRENDERER_NUMCOLS 3
 
@@ -24,7 +24,7 @@ typedef struct PropertiesRenderLineState {
 	int cpx;
 	int level;
 	int numlines;
-	psy_Properties* properties;
+	psy_Property* properties;
 } PropertiesRenderLineState;
 
 void propertiesrenderlinestate_init(PropertiesRenderLineState*);
@@ -32,12 +32,12 @@ void propertiesrenderlinestate_dispose(PropertiesRenderLineState*);
 
 typedef struct {
 	psy_ui_Component component;
-	psy_Properties* properties;
+	psy_Property* properties;
 	psy_ui_Graphics* g;
 	int lastlevel;
-	psy_Properties* selected;
+	psy_Property* selected;
 	int keyselected;
-	psy_Properties* search;
+	psy_Property* search;
 	psy_ui_Rectangle selrect;
 	int button;	
 	int mx;
@@ -54,7 +54,7 @@ typedef struct {
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
 	int col_width[PROPERTIESRENDERER_NUMCOLS];	
 	int col_start[PROPERTIESRENDERER_NUMCOLS];
-	psy_Properties* choiceproperty;
+	psy_Property* choiceproperty;
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
@@ -68,7 +68,7 @@ typedef struct {
 } PropertiesRenderer;
 
 void propertiesrenderer_init(PropertiesRenderer*, psy_ui_Component* parent,
-	psy_Properties*, Workspace*);
+	psy_Property*, Workspace*);
 
 void propertiesrenderer_setfixedwidth(PropertiesRenderer*, psy_ui_Value width);
 
@@ -89,7 +89,7 @@ typedef struct {
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
-	psy_ui_Component* tabbarparent, psy_Properties*, Workspace*);
+	psy_ui_Component* tabbarparent, psy_Property*, Workspace*);
 
 INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
 	float col0_perc, float col1_perc, float col2_perc)

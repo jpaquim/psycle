@@ -37,41 +37,56 @@ void kbdhelp_init(KbdHelp* self, psy_ui_Component* parent, Workspace* workspace)
 	kbdhelp_appendtabbarsections(self);	
 }
 
-void kbdhelp_markpatterncmds(KbdHelp* self, const char* section)
+void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 {
-	psy_EventDriver* kbd;
-	psy_Properties* p;
+	psy_EventDriver* kbd;	
 
 	kbdbox_cleardescriptions(&self->kbdbox);
 	kbd = workspace_kbddriver(self->workspace);
 	if (kbd) {
-		p = psy_properties_find(kbd->properties, section, PSY_PROPERTY_TYP_NONE);
-		if (p && p->children) {
-			for (p = p->children; p != NULL; p = p->next) {
+		psy_Property* section;
+
+		section = psy_property_find(kbd->properties, sectionname,
+			PSY_PROPERTY_TYPE_SECTION);
+		if (section) {
+			psy_List* p;
+
+			for (p = psy_property_children(section); p != NULL;
+					psy_list_next(&p)) {
+				psy_Property* property;
 				uintptr_t keycode;
 				bool shift;
 				bool ctrl;
 
-				psy_audio_decodeinput(p->item.value.i, &keycode, &shift, &ctrl);
+				property = (psy_Property*)p->entry;
+				psy_audio_decodeinput(property->item.value.i, &keycode, &shift, &ctrl);
 				kbdbox_setcolor(&self->kbdbox, keycode, psy_ui_color_make(0x00B1C8B0));
 				kbdbox_setdescription(&self->kbdbox, keycode, shift,
-					ctrl, psy_properties_shorttext(p));
+					ctrl, psy_property_shorttext(property));
 			}
-		}		
+		}
 	}
 }
 
 void kbdhelp_appendtabbarsections(KbdHelp* self)
-{
-	psy_Properties* p;
+{	
 	psy_EventDriver* kbd;
 
 	kbd = workspace_kbddriver(self->workspace);
 	if (kbd) {
-		for (p = kbd->properties->children; p != NULL;
-			p = psy_properties_next(p)) {
-			if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
-				tabbar_append(&self->tabbar, psy_properties_translation(p));
+		psy_List* p;
+
+		if (kbd->properties) {
+			for (p = psy_property_children(kbd->properties); p != NULL;
+					psy_list_next(&p)) {
+				psy_Property* property;
+
+				property = (psy_Property*)p->entry;
+				if (psy_property_type(property) ==
+						PSY_PROPERTY_TYPE_SECTION) {
+					tabbar_append(&self->tabbar,
+						psy_property_translation(property));
+				}
 			}
 		}
 		tabbar_select(&self->tabbar, 0);
@@ -82,8 +97,7 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 
 void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 	int tabindex)
-{
-	psy_Properties* p = 0;
+{	
 	Tab* tab;
 	psy_EventDriver* kbd;
 
@@ -91,21 +105,26 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 	if (kbd) {
 		self->search = 0;
 		if (kbd->properties) {
+			psy_List* p = 0;
+			psy_Property* property = NULL;
+
 			p = kbd->properties->children;
 			tab = tabbar_tab(&self->tabbar, tabindex);
 			if (tab) {
 				while (p) {
-					if (psy_properties_type(p) == PSY_PROPERTY_TYP_SECTION) {
-						if (strcmp(psy_properties_translation(p), tab->text) == 0) {
+					property = (psy_Property*)p->entry;
+					if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
+						if (strcmp(psy_property_translation(property), tab->text) == 0) {
 							break;
 						}
 					}
-					p = psy_properties_next(p);
+					property = NULL;
+					psy_list_next(&p);
 				}
 			}
-			self->search = p;	
+			self->search = property;	
 			if (self->search) {
-				kbdhelp_markpatterncmds(self, psy_properties_key(self->search));
+				kbdhelp_markpatterncmds(self, psy_property_key(self->search));
 				psy_ui_component_invalidate(&self->component);
 			}
 		}

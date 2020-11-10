@@ -19,11 +19,12 @@
 
 // includes
 #include <string.h>
-#include "../driver.h"
+#include "../audiodriver.h"
 #include <stdio.h>
 #include <quantize.h>
 #include <operations.h>
 #include <hashtbl.h>
+#include "../../detail/portable.h"
 
 static psy_dsp_Operations dsp;
 
@@ -34,6 +35,8 @@ const GUID KSDATAFORMAT_SUBTYPE_PCM = { 0x00000001, 0x0000, 0x0010,
 #undef KSDATAFORMAT_SUBTYPE_IEEE_FLOAT
 const GUID KSDATAFORMAT_SUBTYPE_IEEE_FLOAT = { 00000003, 0x0000, 0x0010,
 {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71} };
+
+#define PSY_AUDIODRIVER_DIRECTX_GUID 0x0002
 
 #define BYTES_PER_SAMPLE 4	// 2 * 16bits
 #define SHORT_MIN	-32768
@@ -131,7 +134,7 @@ static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN ca
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
-static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static void driver_configure(psy_AudioDriver*, psy_Property*);
 static uintptr_t driver_samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
@@ -142,6 +145,7 @@ static int removecaptureport(DXDriver* self, int idx);
 static bool start(DXDriver*);
 static bool stop(DXDriver*);
 static void driver_deallocate(psy_AudioDriver*);
+static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 
 static void preparewaveformat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static DWORD WINAPI notifythread(void* pDirectSound);
@@ -180,6 +184,7 @@ static void vtable_init(void)
 		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
 	}
 }
@@ -190,9 +195,11 @@ int on_error(int err, const char* msg)
 	return 0;
 }
 
-EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
+EXPORT psy_AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 {
-	static AudioDriverInfo info;
+	static psy_AudioDriverInfo info;
+
+	info.guid = PSY_AUDIODRIVER_DIRECTX_GUID;
 	info.Flags = 0;
 	info.Name = "DirectSound Audio Driver";
 	info.ShortName = "DXSOUND";
@@ -255,7 +262,7 @@ int driver_init(psy_AudioDriver* driver)
 int driver_dispose(psy_AudioDriver* driver)
 {
 	DXDriver* self = (DXDriver*) driver;
-	psy_properties_free(self->driver.properties);
+	psy_property_deallocate(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
 	psy_table_dispose(&self->_portMapping);
@@ -331,80 +338,84 @@ void clearcapenums(DXDriver* self)
 static void init_properties(psy_AudioDriver* driver)
 {	
 	DXDriver* self = (DXDriver*)driver;
-	psy_Properties* property;	
-	psy_Properties* devices;
-	psy_Properties* indevices;
+	char key[256];
+	psy_Property* property;	
+	psy_Property* devices;
+	psy_Property* indevices;
 	psy_List* p;
 	int i;		
 
-	driver->properties = psy_properties_create();
-	psy_properties_settext(
-		psy_properties_sethint(
-			psy_properties_append_string(driver->properties, "name", "directsound"),
+	psy_snprintf(key, 256, "directx-guid-%d", PSY_AUDIODRIVER_DIRECTX_GUID);
+	driver->properties = psy_property_allocinit_key(key);
+	psy_property_sethint(psy_property_append_int(self->driver.properties,
+		"guid", PSY_AUDIODRIVER_DIRECTX_GUID, 0, 0),
+		PSY_PROPERTY_HINT_HIDE);
+	psy_property_settext(
+		psy_property_sethint(
+			psy_property_append_string(driver->properties, "name", "directsound"),
 				PSY_PROPERTY_HINT_READONLY),
 			"Name");
-	psy_properties_sethint(
-		psy_properties_append_string(driver->properties, "vendor", "Psycledelics"),
+	psy_property_sethint(
+		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
-		psy_properties_append_string(driver->properties, "version", "1.0"),
+	psy_property_sethint(
+		psy_property_append_string(driver->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
-	property = psy_properties_append_choice(driver->properties, "device", -1);
-	psy_properties_append_int(driver->properties, "bitdepth",
+	property = psy_property_append_choice(driver->properties, "device", -1);
+	psy_property_append_int(driver->properties, "bitdepth",
 		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
-	psy_properties_append_int(driver->properties, "samplerate",
+	psy_property_append_int(driver->properties, "samplerate",
 		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
-	psy_properties_append_int(driver->properties, "dither", 0, 0, 1);
-	psy_properties_settext(
-		psy_properties_append_int(driver->properties, "numbuf",
+	psy_property_append_int(driver->properties, "dither", 0, 0, 1);
+	psy_property_settext(
+		psy_property_append_int(driver->properties, "numbuf",
 			psy_audiodriversettings_blockcount(&self->settings), 1, 8),
 		"Buffer Number");
-	psy_properties_settext(
-		psy_properties_append_int(driver->properties, "numsamples",
+	psy_property_settext(
+		psy_property_append_int(driver->properties, "numsamples",
 			psy_audiodriversettings_blockframes(&self->settings),
 				64, 8193),
 		"Buffer Samples");
-	devices = psy_properties_append_choice(driver->properties, "device", 0);
+	devices = psy_property_append_choice(driver->properties, "device", 0);
 	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;				
-		psy_properties_append_int(devices, port->portname, i, 0, 0);
+		psy_property_append_int(devices, port->portname, i, 0, 0);
 	}
-	indevices = psy_properties_append_choice(driver->properties, "indevice", 0);
+	indevices = psy_property_append_choice(driver->properties, "indevice", 0);
 	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
-		psy_properties_append_int(indevices, port->portname, i, 0, 0);
+		psy_property_append_int(indevices, port->portname, i, 0, 0);
 	}
 }
 
-void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 {
 	DXDriver* self;
-	psy_Properties* property;
+	self = (DXDriver*)driver;
+	psy_Property* property;
 
-	self = (DXDriver*) driver;
-	if (config) {
-		psy_properties_free(self->driver.properties);
-		self->driver.properties = psy_properties_clone(config, 1);
+	if (self->driver.properties && config) {		
+		psy_property_sync(self->driver.properties, config);
 	}
-	property = psy_properties_at(self->driver.properties, "bitdepth", PSY_PROPERTY_TYP_NONE);
-	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+	property = psy_property_at(self->driver.properties, "bitdepth", PSY_PROPERTY_TYPE_NONE);
+	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
 		psy_audiodriversettings_setvalidbitdepth(&self->settings,
-			psy_properties_as_int(property));
+			psy_property_as_int(property));
 	}
-	property = psy_properties_at(self->driver.properties, "samplerate", PSY_PROPERTY_TYP_NONE);
-	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+	property = psy_property_at(self->driver.properties, "samplerate", PSY_PROPERTY_TYPE_NONE);
+	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
 		psy_audiodriversettings_setsamplespersec(&self->settings,
-			psy_properties_as_int(property));
+			psy_property_as_int(property));
 	}
-	property = psy_properties_at(self->driver.properties, "numbuf", PSY_PROPERTY_TYP_NONE);
-	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+	property = psy_property_at(self->driver.properties, "numbuf", PSY_PROPERTY_TYPE_NONE);
+	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
 		psy_audiodriversettings_setblockcount(&self->settings,
-			psy_properties_as_int(property));
+			psy_property_as_int(property));
 	}
-	property = psy_properties_at(self->driver.properties, "numsamples", PSY_PROPERTY_TYP_NONE);
-	if (property && psy_properties_type(property) == PSY_PROPERTY_TYP_INTEGER) {
+	property = psy_property_at(self->driver.properties, "numsamples", PSY_PROPERTY_TYPE_NONE);
+	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
 		psy_audiodriversettings_setblockframes(&self->settings,
-			psy_properties_as_int(property));
+			psy_property_as_int(property));
 	}	
 }
 
@@ -1005,4 +1016,9 @@ int numplaybacks(psy_AudioDriver* driver)
 	DXDriver* self = (DXDriver*)driver;
 
 	return psy_list_size(self->_playEnums);
+}
+
+const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
+{
+	return GetPsycleDriverInfo();
 }

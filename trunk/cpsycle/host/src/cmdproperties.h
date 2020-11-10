@@ -17,11 +17,11 @@
 //      by the Workspace in the 'psycle.ini' configuration file.
 //
 // Example:
-//  psy_properties_settext(psy_properties_setshorttext(
-//	  psy_properties_setid(psy_properties_append_int(general, "cmd_terminal",
+//  psy_property_settext(psy_property_setshorttext(
+//	  psy_property_setid(psy_property_append_int(general, "cmd_terminal",
 //    psy_audio_encodeinput(psy_ui_KEY_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL),
 //    "term"), "Terminal");
 
-psy_Properties* cmdproperties_create(void);
+psy_Property* cmdproperties_create(void);
 
 #endif

@@ -9,24 +9,26 @@
 
 psy_List* psy_list_create(void* entry)
 {
-	psy_List* list;
+	psy_List* rv;
 
-	list = (psy_List*) malloc(sizeof(psy_List));
-	list->prev = NULL;
-	list->next = NULL;
-	list->tail = list;
-	list->size = 1;
-	list->entry = entry;
-	return list;
+	rv = (psy_List*)malloc(sizeof(psy_List));
+	if (rv) {
+		rv->prev = NULL;
+		rv->next = NULL;
+		rv->tail = rv;
+		rv->size = 1;
+		rv->entry = entry;
+	}
+	return rv;
 }
 
-void psy_list_free(psy_List* list)
+void psy_list_free(psy_List* self)
 {
-	if (list) {
+	if (self) {
 		psy_List* ptr;
 		psy_List* next;
 
-		ptr = list;
+		ptr = self;
 		while (ptr != NULL) {
 			next = ptr->next;
 			free(ptr);
@@ -170,7 +172,7 @@ psy_List* psy_list_at(psy_List* self, uintptr_t numentry)
 
 void psy_list_deallocate(psy_List** self, psy_fp_disposefunc disposefunc)
 {
-	if (*self) {
+	if (self && *self) {
 		psy_List* p = *self;		
 
 		if (disposefunc) {

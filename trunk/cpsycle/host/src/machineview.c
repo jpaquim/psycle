@@ -417,7 +417,7 @@ static int machinewireview_hittesteditname(MachineWireView*, int x, int y,
 static psy_dsp_amp_t machinewireview_panvalue(MachineWireView*, int x, int y,
 	uintptr_t slot);
 static void machinewireview_onnewmachineselected(MachineView*,
-	psy_ui_Component* sender, psy_Properties*);
+	psy_ui_Component* sender, psy_Property*);
 static void machinewireview_onmachineschangeslot(MachineWireView*,
 	psy_audio_Machines*, uintptr_t slot);
 static void machinewireview_onmachinesinsert(MachineWireView*,
@@ -431,7 +431,7 @@ static void machinewireview_ondisconnected(MachineWireView*, psy_audio_Connectio
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*,
 	int flag, psy_audio_SongFile*);
 static void machinewireview_buildmachineuis(MachineWireView*);
-static void machinewireview_applyproperties(MachineWireView*, psy_Properties*);
+static void machinewireview_applyproperties(MachineWireView*, psy_Property*);
 static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
 	uintptr_t slot);
 static void machinewireview_onmasterworked(MachineWireView*,
@@ -439,7 +439,7 @@ static void machinewireview_onmasterworked(MachineWireView*,
 static void machinewireview_ontimer(MachineWireView*, uintptr_t timerid);
 static void machinewireview_invalidateallmacvus(MachineWireView*);
 static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
-	psy_Properties*);
+	psy_Property*);
 static void machinewireview_readconfig(MachineWireView*);
 static void machinewireview_showwireview(MachineWireView*,
 	psy_audio_Wire wire);
@@ -564,30 +564,30 @@ void machinewireview_ondestroy(MachineWireView* self, psy_ui_Component* sender)
 }
 
 void machinewireview_onconfigchanged(MachineWireView* self,
-	Workspace* workspace, psy_Properties* property)
+	Workspace* workspace, psy_Property* property)
 {	
 	machinewireview_readconfig(self);
 }
 
 void machinewireview_readconfig(MachineWireView* self)
 {
-	psy_Properties* mv;
+	psy_Property* mv;
 	
-	mv = psy_properties_findsection(&self->workspace->config,
+	mv = psy_property_findsection(&self->workspace->config,
 		"visual.machineview");
 	if (mv) {		
-		self->drawvumeters = psy_properties_at_bool(mv, "drawvumeters", 1);
+		self->drawvumeters = psy_property_at_bool(mv, "drawvumeters", 1);
 		psy_ui_component_stoptimer(&self->component, 0);
 		if (self->drawvumeters) {
 			psy_ui_component_starttimer(&self->component, 0, 50);
 		}
-		self->skin.drawmachineindexes = psy_properties_at_bool(mv,
+		self->skin.drawmachineindexes = psy_property_at_bool(mv,
 			"drawmachineindexes", 1);
 		self->showwirehover = workspace_showwirehover(self->workspace);
 	}
 }
 
-void machinewireview_applyproperties(MachineWireView* self, psy_Properties* p)
+void machinewireview_applyproperties(MachineWireView* self, psy_Property* p)
 {
 	machineviewskin_settheme(&self->skin, p, workspace_skins_directory(self->workspace));
 	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);	
@@ -1767,20 +1767,20 @@ WireFrame* machinewireview_wireframe(MachineWireView* self,
 }
 
 void machinewireview_onnewmachineselected(MachineView* self,
-	psy_ui_Component* sender, psy_Properties* plugininfo)
+	psy_ui_Component* sender, psy_Property* plugininfo)
 {		
 	psy_audio_Machine* machine;
 	
 	machine = psy_audio_machinefactory_makemachinefrompath(
 		&self->workspace->machinefactory,
-		psy_properties_at_int(plugininfo, "type", UINTPTR_MAX),
-		psy_properties_at_str(plugininfo, "path", ""),
-		psy_properties_at_int(plugininfo, "shellidx", 0));
+		psy_property_at_int(plugininfo, "type", UINTPTR_MAX),
+		psy_property_at_str(plugininfo, "path", ""),
+		psy_property_at_int(plugininfo, "shellidx", 0));
 	if (machine) {
 		int favorite;
 
-		favorite = psy_properties_at_int(plugininfo, "favorite", 0);
-		psy_properties_set_int(plugininfo, "favorite", ++favorite);
+		favorite = psy_property_at_int(plugininfo, "favorite", 0);
+		psy_property_set_int(plugininfo, "favorite", ++favorite);
 		if (self->wireview.addeffect) {
 			uintptr_t slot;
 

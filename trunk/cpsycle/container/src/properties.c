@@ -12,629 +12,758 @@
 #include <assert.h>
 #include <stddef.h>
 
+static char* psy_strdup(const char* str)
+{
+	return (str)
+		? strdup(str)
+		: NULL;
+}
+
+static char* psy_strlen(const char* str)
+{
+	return (str)
+		? strlen(str)
+		: NULL;
+}
+
+static char* psy_setstr(char** dest, const char* text) {
+	assert(dest);
+
+	if (text != *dest) {
+		free(*dest);
+		*dest = psy_strdup(text);
+	}
+	return *dest;
+}
+
 typedef struct {
 	void* target;
-	psy_PropertiesCallback callback;
+	psy_PropertyCallback callback;
 	int level;
 } PropertiesCallbackContext;
 
-static int properties_enumerate_rec(psy_Properties*, PropertiesCallbackContext*);
-static int OnSearchPropertiesEnum(psy_Properties*, psy_Properties*, int level);
-static int OnPropertySearchPropertiesEnum(psy_Properties* self, 
-	psy_Properties* property, int level);
-static psy_Properties* tail(psy_Properties*);
+static int properties_enumerate_rec(psy_Property*, PropertiesCallbackContext*);
+static int OnSearchPropertiesEnum(psy_Property*, psy_Property*, int level);
+static int OnPropertySearchPropertiesEnum(psy_Property*, psy_Property*,
+	int level);
 
-static psy_Properties* psy_properties_create_string(const char* key, const char* value);
-static psy_Properties* psy_properties_create_font(const char* key, const char* value);
-static psy_Properties* psy_properties_create_int(const char* key, int value, int min, int max);
-static psy_Properties* psy_properties_create_bool(const char* key, int value);
-static psy_Properties* psy_properties_create_choice(const char* key, int value);
-
-
-void psy_property_init(psy_Property* self)
+// psy_PropertyItem
+// implementation
+void psy_propertyitem_init(psy_PropertyItem* self)
 {
-	self->key = strdup("");
-	self->text = strdup("");
-	self->shorttext = strdup("");
-	self->translation = strdup("");
-	self->comment = strdup("");
-	self->typ = PSY_PROPERTY_TYP_INTEGER;
-	self->value.i = 0;	
+	assert(self);
+
+	self->key = NULL;
+	self->text = NULL;
+	self->shorttext = NULL;
+	self->translation = NULL;
+	self->comment = NULL;
+	self->typ = PSY_PROPERTY_TYPE_INTEGER;
+	self->value.i = 0;
 	self->min = 0;
 	self->max = 0;
 	self->hint = PSY_PROPERTY_HINT_NONE;
 	self->disposechildren = TRUE;
 	self->save = TRUE;
-	self->id = 0;
+	self->id = -1;
 	self->allowappend = 0;
 }
 
-void psy_property_copy(psy_Property* self, psy_Property* src)
+void psy_propertyitem_copy(psy_PropertyItem* self, psy_PropertyItem* source)
 {
-	psy_property_dispose(self);
-	self->key = src->key ? strdup(src->key) : NULL;
-	self->text = src->text ? strdup(src->text) : NULL;
-	self->shorttext = src->shorttext ? strdup(src->shorttext) : NULL;
-	self->translation = src->translation ? strdup(src->translation) : NULL;
-	self->comment = src->comment ? strdup(src->comment) : NULL;
-	if (src->typ == PSY_PROPERTY_TYP_STRING ||
-			src->typ == PSY_PROPERTY_TYP_FONT) {
-		self->value.s = (src->value.s) ? strdup(src->value.s) : NULL;
+	assert(self);
+
+	if (self == source) {
+		return;
+	}
+	psy_propertyitem_dispose(self);
+	self->key = psy_strdup(source->key);
+	self->text = psy_strdup(source->text);
+	self->shorttext = psy_strdup(source->shorttext);
+	self->translation = psy_strdup(source->translation);
+	self->comment = psy_strdup(source->comment);
+	if (source->typ == PSY_PROPERTY_TYPE_STRING ||
+			source->typ == PSY_PROPERTY_TYPE_FONT) {
+		self->value.s = psy_strdup(source->value.s);
 	} else {
-		self->value = src->value;
-	}	
-	self->min = src->min;
-	self->max = src->max;
-	self->typ = src->typ;
-	self->hint = src->hint;
-	self->disposechildren = src->disposechildren;
-	self->save = src->save;
-	self->id = src->id;
-	self->allowappend = src->allowappend;
+		self->value = source->value;
+	}
+	self->min = source->min;
+	self->max = source->max;
+	self->typ = source->typ;
+	self->hint = source->hint;
+	self->disposechildren = source->disposechildren;
+	self->save = source->save;
+	self->id = source->id;
+	self->allowappend = source->allowappend;
 }
 
-void psy_property_dispose(psy_Property* self)
+void psy_propertyitem_dispose(psy_PropertyItem* self)
 {
+	assert(self);
+
 	free(self->key);
 	free(self->text);
 	free(self->shorttext);
 	free(self->translation);
 	free(self->comment);
-	if (self->typ == PSY_PROPERTY_TYP_STRING ||
-			self->typ == PSY_PROPERTY_TYP_FONT) {
+	if (self->typ == PSY_PROPERTY_TYPE_STRING ||
+			self->typ == PSY_PROPERTY_TYPE_FONT) {
 		free(self->value.s);
-	}	
+	}
 }
 
-void psy_properties_init_type(psy_Properties* self, const char* key, psy_PropertyType typ)
-{		
-	self->children = 0;
-	self->parent = 0;
-	self->next = 0;	
-	self->dispose = 0;    
-	memset(&self->item, 0, sizeof(psy_Property));    
-	self->item.key = strdup(key);
-	self->item.text = NULL;
-	self->item.translation = NULL;
-	self->item.shorttext = NULL;
-	self->item.comment = NULL;
+// psy_Property
+// Prototypes
+static psy_Property* psy_property_create_string(const char* key,
+	const char* value);
+static psy_Property* psy_property_create_font(const char* key,
+	const char* value);
+static psy_Property* psy_property_create_int(const char* key, int value,
+	int min, int max);
+static psy_Property* psy_property_create_bool(const char* key, int value);
+static psy_Property* psy_property_create_choice(const char* key, int value);
+
+// Implementation
+void psy_property_init(psy_Property* self)
+{
+	assert(self);
+
+	psy_property_init_type(self, "root", PSY_PROPERTY_TYPE_ROOT);
+}
+
+void psy_property_init_key(psy_Property* self, const char* key)
+{
+	assert(self);
+
+	psy_property_init_type(self,
+		(key)
+			? key
+			: "root",
+		PSY_PROPERTY_TYPE_ROOT);
+}
+
+void psy_property_init_type(psy_Property* self, const char* key,
+	psy_PropertyType typ)
+{
+	assert(self);
+
+	psy_propertyitem_init(&self->item);	
+	psy_setstr(&self->item.key, key);	
 	self->item.typ = typ;
 	self->item.hint = PSY_PROPERTY_HINT_EDIT;
-	self->item.disposechildren = 1;	
-	self->item.id = -1;
-	self->item.save = 1;    
+	self->children = NULL;
+	self->dispose = NULL;
+	self->parent = NULL;
 }
 
-void psy_properties_free(psy_Properties* self)
+void psy_property_dispose(psy_Property* self)
 {
-	psy_Properties* p;
-	psy_Properties* q;
+	assert(self);
 
-	if (self) {
-		p = self;
-		for (p = self; p != NULL; p = q) {
-			q = p->next;			
-			if (p->dispose) {
-				p->dispose(&p->item);
-			} else
-			if (p->children && p->item.disposechildren) {
-				psy_properties_free(p->children);
-				p->children = NULL;
-			}
-			psy_property_dispose(&p->item);
-			free(p);			
-		}
-	}	
+	if (self->item.disposechildren) {
+		psy_list_deallocate(&self->children, (psy_fp_disposefunc)
+			psy_property_dispose);
+	}
+	psy_propertyitem_dispose(&self->item);
 }
 
-psy_Properties* psy_properties_create(void)
+psy_Property* psy_property_allocinit_key(const char* key)
 {
-	psy_Properties* rv;
-        
-	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
-    if (rv) {	    
-        psy_properties_init_type(rv, "root", PSY_PROPERTY_TYP_ROOT);
-    }
+	psy_Property* rv;
+
+	rv = (psy_Property*)malloc(sizeof(psy_Property));
+	if (rv) {
+		psy_property_init_key(rv, key);		
+	}
 	return rv;
 }
 
-void psy_properties_init(psy_Properties* self)
+void psy_property_deallocate(psy_Property* self)
 {
-	psy_properties_init_type(self, "root", PSY_PROPERTY_TYP_ROOT);
-}
-
-void psy_properties_dispose(psy_Properties* self)
-{	
-	psy_property_dispose(&self->item);
-	if (self->children != NULL) {
-		psy_Properties* p;
-		psy_Properties* q;
-
-		for (p = self->children; p != NULL; p = q) {
-			q = p->next;
-			if (p->dispose) {
-				p->dispose(&p->item);
-			} else
-				if (p->children && p->item.disposechildren) {
-					psy_properties_free(p->children);
-					p->children = NULL;
-				}
-			psy_property_dispose(&p->item);
-			free(p);
-		}
-	}
-}
-
-psy_Properties* psy_properties_append_section(psy_Properties* self, const char* name)
-{
-	psy_Properties* rv;
-	
 	assert(self);
-	rv = (psy_Properties*) malloc(sizeof(psy_Properties));
-    if (rv) {
-        psy_properties_init_type(rv, name, PSY_PROPERTY_TYP_SECTION);
-    }
-	return psy_properties_append_property(self, rv);
+
+	psy_propertyitem_dispose(&self->item);
+	free(self);
 }
 
-psy_Properties* psy_properties_clone(psy_Properties* self, int all)
+psy_Property* psy_property_sync(psy_Property* self, psy_Property* source)
 {
-	psy_Properties* first = NULL;
-	psy_Properties* rv = NULL;
-	psy_Properties* p = NULL;
-	psy_Properties* q = NULL;
-	
-	p = self;
-	while (p) {
-		if (first != NULL && !all) {
-			break;
-		}
-		rv = (psy_Properties*) malloc(sizeof(psy_Properties));
-		if (!rv) {
-			break;
-		}
-		if (first == NULL) {
-			first = rv;			
-		} else {		
-			q->next = rv;
-		}
-		rv->next = NULL;		
-		rv->parent = NULL;
-		rv->children = NULL;
-		rv->dispose = NULL;
-		psy_property_init(&rv->item);
-		psy_property_copy(&rv->item, &p->item);				
-		if (p->children) {
-			psy_Properties* i;
-			rv->children = psy_properties_clone(p->children, 1);
-			for (i = rv->children; i != 0; i = i->next) {
-				i->parent = rv;
-			}
-		}
-		q = rv;
-		p = p->next;
-	}
-	return first;
-}
+	assert(self);
 
-psy_Properties* psy_properties_sync(psy_Properties* self, psy_Properties* src)
-{
-	if (self != src) {
-		psy_Properties* p;
+	if (self != source) {
+		psy_List* i;
 
-		p = src->children;
-		for (p = src->children; p != NULL; p = psy_properties_next(p)) {
-			psy_Properties* q;
-			
-			q = psy_properties_at(self, psy_properties_key(p), PSY_PROPERTY_TYP_NONE);
+		for (i = source->children; i != NULL; psy_list_next(&i)) {
+			psy_Property* q;
+			psy_Property* p;
+
+			p = (psy_Property*)i->entry;
+			q = psy_property_at(self, psy_property_key(p),
+				PSY_PROPERTY_TYPE_NONE);
 			if (q) {
-				if (psy_properties_type(p) == PSY_PROPERTY_TYP_STRING) {
-					psy_properties_set_str(self, psy_properties_key(p),
-						psy_properties_as_str(p));
-				} else
-					if (psy_properties_type(p) == PSY_PROPERTY_TYP_INTEGER) {
-						psy_properties_set_int(self, psy_properties_key(p),
-							psy_properties_as_int(p));
-					} else
-						if (psy_properties_type(p) == PSY_PROPERTY_TYP_BOOL) {
-							psy_properties_set_bool(self, psy_properties_key(p),
-								psy_properties_as_int(p));
-						} else
-							if (psy_properties_type(p) == PSY_PROPERTY_TYP_FONT) {
-								psy_properties_set_font(self, psy_properties_key(p),
-									psy_properties_as_str(p));
-							}
-						if (q->children && p->children) {
-							psy_properties_sync(q, p);
-						}
+				if (psy_property_type(p) == PSY_PROPERTY_TYPE_STRING) {
+					psy_property_set_str(self, psy_property_key(p),
+						psy_property_as_str(p));
+				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_INTEGER) {
+					psy_property_set_int(self, psy_property_key(p),
+						psy_property_as_int(p));
+				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_BOOL) {
+					psy_property_set_bool(self, psy_property_key(p),
+						psy_property_as_int(p));
+				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_FONT) {
+					psy_property_set_font(self, psy_property_key(p),
+					psy_property_as_str(p));
+				}
+				if (q->children && p->children) {
+					psy_property_sync(q, p);
+				}
 			}
 		}
 	}
 	return self;
 }
 
-psy_Property* psy_properties_entry(psy_Properties* self)
+psy_Property* psy_property_append_property(psy_Property* self, psy_Property* property)
 {
+	assert(self);
+
+	if (property) {
+		psy_list_append(&self->children, property);
+		if (psy_property_type(property) == PSY_PROPERTY_TYPE_ROOT) {
+			property->item.typ = PSY_PROPERTY_TYPE_SECTION;
+		}
+		property->parent = self;
+	}
+	return property;
+}
+
+psy_Property* psy_property_append_section(psy_Property* self, const char* name)
+{
+	psy_Property* rv;
+
+	assert(self);
+
+	rv = (psy_Property*)malloc(sizeof(psy_Property));
+	if (rv) {
+		psy_property_init_type(rv, name, PSY_PROPERTY_TYPE_SECTION);
+	}
+	return psy_property_append_property(self, rv);
+}
+
+psy_Property* psy_property_clone(psy_Property* self)
+{
+	psy_Property* rv;	
+
+	assert(self);
+
+	rv = (psy_Property*)malloc(sizeof(psy_Property));
+	if (rv) {
+		rv->parent = NULL;
+		rv->children = NULL;
+		rv->dispose = NULL;
+		psy_propertyitem_init(&rv->item);
+		psy_propertyitem_copy(&rv->item, &self->item);
+		if (self->children) {
+			psy_List* p;
+
+			for (p = self->children; p != NULL; psy_list_next(&p)) {
+				psy_Property* q;
+
+				q = psy_property_clone(p->entry);
+				psy_list_append(&rv->children, q);
+				q->parent = rv;
+			}
+		}
+	}
+	return rv;
+}
+
+psy_PropertyItem* psy_property_entry(psy_Property* self)
+{
+	assert(self);
+
 	return &self->item;
 }
 
-psy_Properties* psy_properties_create_string(const char* key, const char* value)
-{		
-	psy_Properties* p;
+psy_Property* psy_property_create_string(const char* key, const char* value)
+{
+	psy_Property* property;
 
-	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_STRING);	
-	p->item.value.s = strdup(value);	
-	return p;
-}
-
-psy_Properties* psy_properties_append_string(psy_Properties* self, const char* key, const char* value)
-{	
-	return psy_properties_append_property(self, psy_properties_create_string(key, value));	
-}
-
-psy_Properties* psy_properties_create_font(const char* key, const char* value)
-{		
-	psy_Properties* p;
-
-	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_FONT);	
-	p->item.value.s = strdup(value);	
-	return p;
-}
-
-psy_Properties* psy_properties_append_font(psy_Properties* self, const char* key, const char* value)
-{	
-	return psy_properties_append_property(self, psy_properties_create_font(key, value));	
-}
-
-psy_Properties* psy_properties_append_userdata(psy_Properties* self, const char* key,
-	void* value, void (*dispose)(psy_Property*))
-{			
-	psy_Properties* p;
-
-	if (!self) {
-		return 0;
+	property = (psy_Property*)malloc(sizeof(psy_Property));
+	if (property) {
+		psy_property_init_type(property, key, PSY_PROPERTY_TYPE_STRING);
+		property->item.value.s = psy_strdup(value);
 	}
-	p = tail(self);
-	p->next = (psy_Properties*) malloc(sizeof(psy_Properties));	
-	psy_properties_init_type(p->next, key, PSY_PROPERTY_TYP_USERDATA);
-	p->next->dispose = dispose;	
-	p->next->item.value.ud = value;	
-	return p->next;
+	return property;
 }
 
-psy_Properties* psy_properties_create_int(const char* key, int value, int min, int max)
+psy_Property* psy_property_append_string(psy_Property* self, const char* key,
+	const char* value)
 {
-	psy_Properties* p;
+	assert(self);
 
-	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_INTEGER);	
-	p->item.value.i = value;
-	return p;
+	return psy_property_append_property(self,
+		psy_property_create_string(key, value));
 }
 
-psy_Properties* psy_properties_append_action(psy_Properties* self, const char* key)
-{			
-	psy_Properties* p;
-	
-	p = psy_properties_create_int(key, 0, 0, 0);
-	p->item.typ = PSY_PROPERTY_TYP_ACTION;
-	p->item.hint = PSY_PROPERTY_HINT_CHECK;
-	psy_properties_append_property(self, p);
-	return p;
-}
-
-psy_Properties* psy_properties_append_int(psy_Properties* self, const char* key, int value, int min, int max)
-{			
-	return psy_properties_append_property(self, psy_properties_create_int(key, value, min, max));	
-}
-
-psy_Properties* psy_properties_create_bool(const char* key, int value)
+psy_Property* psy_property_create_font(const char* key, const char* value)
 {
-	psy_Properties* p;
-	
-	p = psy_properties_create_int(key, value != 0, 0, 1);
-	p->item.typ = PSY_PROPERTY_TYP_BOOL;
-	p->item.hint = PSY_PROPERTY_HINT_CHECK;
-	return p;
+	psy_Property* property;
+
+	property = (psy_Property*)malloc(sizeof(psy_Property));
+	if (property) {
+		psy_property_init_type(property, key, PSY_PROPERTY_TYPE_FONT);
+		property->item.value.s = psy_strdup(value);
+	}
+	return property;
 }
 
-psy_Properties* psy_properties_append_bool(psy_Properties* self, const char* key, bool value)
+psy_Property* psy_property_append_font(psy_Property* self, const char* key,
+	const char* value)
 {
-	psy_Properties* rv;
+	assert(self);
 
-	rv = (psy_Properties*)malloc(sizeof(psy_Properties));
+	return psy_property_append_property(self,
+		psy_property_create_font(key, value));
+}
+
+psy_Property* psy_property_append_userdata(psy_Property* self, const char* key,
+	void* value, void (*dispose)(psy_PropertyItem*))
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = (psy_Property*)malloc(sizeof(psy_Property));
+	if (property) {
+		psy_list_append(&self->children, property);
+		psy_property_init_type(property, key, PSY_PROPERTY_TYPE_USERDATA);
+		property->dispose = dispose;
+		property->item.value.ud = value;
+	}
+	return property;
+}
+
+psy_Property* psy_property_create_int(const char* key, int value, int minval,
+	int maxval)
+{
+	psy_Property* property;
+
+	assert(minval <= maxval);
+	property = (psy_Property*)malloc(sizeof(psy_Property));
+	if (property) {
+		psy_property_init_type(property, key, PSY_PROPERTY_TYPE_INTEGER);
+		property->item.value.i = value;
+		property->item.min = minval;
+		property->item.max = maxval;
+	}
+	return property;
+}
+
+psy_Property* psy_property_append_action(psy_Property* self, const char* key)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_create_int(key, 0, 0, 0);
+	if (property) {
+		property->item.typ = PSY_PROPERTY_TYPE_ACTION;
+		property->item.hint = PSY_PROPERTY_HINT_CHECK;
+		psy_property_append_property(self, property);
+	}
+	return property;
+}
+
+psy_Property* psy_property_append_int(psy_Property* self, const char* key,
+	int value, int min, int max)
+{
+	assert(self);
+
+	return psy_property_append_property(self,
+		psy_property_create_int(key, value, min, max));
+}
+
+psy_Property* psy_property_create_bool(const char* key, int value)
+{
+	psy_Property* property;
+
+	property = psy_property_create_int(key, value != 0, 0, 1);
+	if (property) {
+		property->item.typ = PSY_PROPERTY_TYPE_BOOL;
+		property->item.hint = PSY_PROPERTY_HINT_CHECK;
+	}
+	return property;
+}
+
+psy_Property* psy_property_append_bool(psy_Property* self,
+	const char* key, bool value)
+{
+	psy_Property* rv;
+
+	assert(self);
+
+	rv = (psy_Property*)malloc(sizeof(psy_Property));
 	if (rv) {
-		psy_properties_init_type(rv, key, PSY_PROPERTY_TYP_BOOL);
+		psy_property_init_type(rv, key, PSY_PROPERTY_TYPE_BOOL);
 		rv->item.value.i = (value != FALSE);
 		rv->item.hint = PSY_PROPERTY_HINT_CHECK;
 	}
-	return psy_properties_append_property(self, rv);
+	return psy_property_append_property(self, rv);
 }
 
-psy_Properties* psy_properties_append_double(psy_Properties* self, const char* key,
+psy_Property* psy_property_append_double(psy_Property* self, const char* key,
 	double value, double min, double max)
 {
-	psy_Properties* p;
-		
-	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_DOUBLE);	
-	p->item.value.d = value;		
-	return psy_properties_append_property(self, p);	
+	psy_Property* property;
+
+	assert(self);
+
+	property = (psy_Property*)malloc(sizeof(psy_Property));
+	if (property) {
+		psy_property_init_type(property, key, PSY_PROPERTY_TYPE_DOUBLE);
+		property->item.value.d = value;
+	}
+	return psy_property_append_property(self, property);
 }
 
-psy_Properties* psy_properties_create_choice(const char* key, int value)
+psy_Property* psy_property_create_choice(const char* key, int value)
 {
-	psy_Properties* p;
+	psy_Property* property;
 
-	p = (psy_Properties*) malloc(sizeof(psy_Properties));
-	psy_properties_init_type(p, key, PSY_PROPERTY_TYP_CHOICE);	
-	p->item.value.i = value;		
-	p->item.hint = PSY_PROPERTY_HINT_LIST;
-	return p;
+	property = (psy_Property*)malloc(sizeof(psy_Property));
+	if (property) {
+		psy_property_init_type(property, key, PSY_PROPERTY_TYPE_CHOICE);
+		property->item.value.i = value;
+		property->item.hint = PSY_PROPERTY_HINT_LIST;
+	}
+	return property;
 }
 
-psy_Properties* psy_properties_append_choice(psy_Properties* self, const char* key, int value)
-{	
-	return psy_properties_append_property(self, psy_properties_create_choice(key, value));	
+psy_Property* psy_property_append_choice(psy_Property* self, const char* key,
+	int value)
+{
+	assert(self);
+
+	return psy_property_append_property(self,
+		psy_property_create_choice(key, value));
 }
 
 char* pathend(const char* path, char* section, char* key)
 {
 	char* p;
-	
+
 	p = strrchr(path, '.');
 	return p;
 }
 
-psy_Properties* psy_properties_at(psy_Properties* self, const char* key, psy_PropertyType type)
+psy_Property* psy_property_at(psy_Property* self, const char* key,
+	psy_PropertyType type)
 {
-	psy_Properties* p;	
+	psy_List* p = NULL;
 	char* c;
-	
+
+	assert(self);
+
+	if (!key) {
+		return NULL;
+	}
 	c = strrchr(key, '.');
-	if (!c) {			
-		p = self->children;		
+	if (!c) {
+		p = self->children;
 	} else {
 		char* path;
 		ptrdiff_t count;
-		
+
 		count = c - key;
 		path = malloc(count + 1);
-		if (path) {			
+		if (path) {
+			psy_Property* q;
+
 			strncpy(path, key, count);
 			path[count] = '\0';
 			key = c + 1;
-			p = psy_properties_findsection(self, path);
-			if (p) {
-				p = p->children;
+			q = psy_property_findsection(self, path);
+			if (q) {
+				p = q->children;
 			}
 			free(path);
 		}
 	}
-	while (p != NULL) {		
-		if ((p->item.key != NULL) &&
-				((type == PSY_PROPERTY_TYP_NONE) || (p->item.typ == type)) &&
-				strcmp(key, p->item.key) == 0) {
+	while (p != NULL) {
+		psy_Property* property;
+
+		property = (psy_Property*)psy_list_entry(p);
+		assert(property->item.key);
+		if (((type == PSY_PROPERTY_TYPE_NONE) || (property->item.typ == type)) &&
+				(strcmp(key, property->item.key) == 0)) {
 			break;
 		}
-		p = p->next;		
-	}	
-	return p;
-}
-
-int psy_properties_at_int(psy_Properties* properties, const char* key, int defaultvalue)
-{
-	int rv = defaultvalue;
-
-	if (properties) {
-		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_NONE);
-		if (property &&
-			(property->item.typ == PSY_PROPERTY_TYP_INTEGER ||
-			 property->item.typ == PSY_PROPERTY_TYP_CHOICE)) {
-			rv = property->item.value.i;
-		} else {
-			rv = defaultvalue;
-		}
+		psy_list_next(&p);
 	}
-	return rv;
+	return (p)
+		? (psy_Property*)psy_list_entry(p)
+		: NULL;
 }
 
-bool psy_properties_at_bool(psy_Properties* properties, const char* key, bool defaultvalue)
+int psy_property_at_int(psy_Property* self, const char* key, int defaultvalue)
 {
-	bool rv;
+	psy_Property* property;
 
-	if (!properties) {
-		rv = defaultvalue != FALSE;
-	} else {
-		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_NONE);
-		if (property && (property->item.typ == PSY_PROPERTY_TYP_BOOL ||
-				property->item.typ == PSY_PROPERTY_TYP_INTEGER)) {
-			rv = property->item.value.i != FALSE;
-		} else {
-			rv = defaultvalue;
-		}
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
+	if (property && (property->item.typ == PSY_PROPERTY_TYPE_INTEGER ||
+			property->item.typ == PSY_PROPERTY_TYPE_CHOICE)) {
+		return property->item.value.i;
 	}
-	return rv;
+	return defaultvalue;
 }
 
-double psy_properties_at_real(psy_Properties* properties, const char* key,
+bool psy_property_at_bool(psy_Property* self, const char* key,
+	bool defaultvalue)
+{	
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
+	if (property && (property->item.typ == PSY_PROPERTY_TYPE_BOOL ||
+		property->item.typ == PSY_PROPERTY_TYPE_INTEGER)) {
+		return property->item.value.i != FALSE;
+	}
+	return defaultvalue;	
+}
+
+double psy_property_at_real(psy_Property* self, const char* key,
 	double defaultvalue)
 {
-	double rv;
+	psy_Property* property;
 
-	if (!properties) {
-		rv = defaultvalue;
-	} else {
-		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_DOUBLE);
-		if (property && property->item.typ == PSY_PROPERTY_TYP_DOUBLE) {
-			rv = property->item.value.d;
-		} else {
-			rv = defaultvalue;
-		}
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_DOUBLE);
+	if (property && property->item.typ == PSY_PROPERTY_TYPE_DOUBLE) {
+		return property->item.value.d;
 	}
-	return rv;
+	return defaultvalue;
 }
 
-const char* psy_properties_at_str(psy_Properties* properties, const char* key,
+const char* psy_property_at_str(psy_Property* self, const char* key,
 	const char* defaulttext)
 {
-	const char* rv = 0;
-	if (!properties) {
-		rv = defaulttext;
-	} else {
-		psy_Properties* property = psy_properties_at(properties, key, PSY_PROPERTY_TYP_STRING);
-		if (property && property->item.typ == PSY_PROPERTY_TYP_STRING ||
-			property && property->item.typ == PSY_PROPERTY_TYP_FONT) {
-			rv = property->item.value.s;
-		} else {
-			rv = defaulttext;
-		}
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_STRING);
+	if (property && property->item.typ == PSY_PROPERTY_TYPE_STRING ||
+		property && property->item.typ == PSY_PROPERTY_TYPE_FONT) {
+		return property->item.value.s;
 	}
-	return rv;
+	return defaulttext;
 }
 
-psy_Properties* psy_properties_set_str(psy_Properties* self, const char* key,
+psy_Property* psy_property_set_str(psy_Property* self, const char* key,
 	const char* value)
 {
-	psy_Properties* p;
-	
-	p = psy_properties_at(self, key, PSY_PROPERTY_TYP_STRING);
-	if (p) {
-		if (p->item.typ == PSY_PROPERTY_TYP_STRING) {
-			free(p->item.value.s);
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_STRING);
+	if (property) {
+		property->item.typ = PSY_PROPERTY_TYPE_STRING;
+		if (property->item.typ == PSY_PROPERTY_TYPE_STRING) {
+			if (property->item.value.s != value) {
+				free(property->item.value.s);
+			} else {
+				return property;
+			}
 		}
-		p->item.value.s = strdup(value);
-		p->item.typ = PSY_PROPERTY_TYP_STRING;
+		property->item.value.s = psy_strdup(value);
 	} else {
-		p = psy_properties_append_string(self, key, value);
+		property = psy_property_append_string(self, key, value);
 	}
-	return p;
+	return property;
 }
 
-psy_Properties* psy_properties_set_font(psy_Properties* self, const char* key,
+psy_Property* psy_property_set_font(psy_Property* self, const char* key,
 	const char* value)
 {
-	psy_Properties* p;
-	
-	p = psy_properties_at(self, key, PSY_PROPERTY_TYP_FONT);
-	if (p) {
-		if (p->item.typ == PSY_PROPERTY_TYP_FONT) {
-			free(p->item.value.s);
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_FONT);
+	if (property) {
+		if (property->item.typ == PSY_PROPERTY_TYPE_FONT) {
+			free(property->item.value.s);
 		}
-		p->item.value.s = strdup(value);
-		p->item.typ = PSY_PROPERTY_TYP_FONT;
+		property->item.value.s = psy_strdup(value);
+		property->item.typ = PSY_PROPERTY_TYPE_FONT;
 	} else {
-		p = psy_properties_append_font(self, key, value);
+		property = psy_property_append_font(self, key, value);
 	}
-	return p;
+	return property;
 }
 
-psy_Properties* psy_properties_set_int(psy_Properties* self, const char* key, int value)
-{
-	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_INTEGER);
-	if (p) {		
-		p->item.value.i = value;
-		p->item.typ = PSY_PROPERTY_TYP_INTEGER;		
-	} else {
-		p = psy_properties_append_int(self, key, value, 0, 0);
-	}
-	return p;
-}
-
-psy_Properties* psy_properties_set_bool(psy_Properties* self, const char* key, bool value)
+psy_Property* psy_property_set_int(psy_Property* self, const char* key,
+	int value)
 {	
-	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_BOOL);
-	if (p) {
-		p->item.value.i = (value != FALSE);
-		p->item.typ = PSY_PROPERTY_TYP_BOOL;
-		p->item.hint = PSY_PROPERTY_HINT_CHECK;
+	psy_Property* property;
+	
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_INTEGER);
+	if (property) {
+		if (psy_property_int_valid(property, value)) {
+			property->item.value.i = value;
+			property->item.typ = PSY_PROPERTY_TYPE_INTEGER;
+		}
 	} else {
-		p = psy_properties_append_int(self, key, value, 0, 0);
+		property = psy_property_append_int(self, key, value, 0, 0);
 	}
-	return p;
+	return property;
 }
 
-psy_Properties* psy_properties_set_choice(psy_Properties* self, const char* key, int value)
+bool psy_property_int_valid(psy_Property* self, int value)
 {
-	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_NONE);
-	if (p) {		
-		p->item.value.i = value;
-		p->item.typ = PSY_PROPERTY_TYP_CHOICE;
-	} else {
-		p = psy_properties_append_int(self, key, value, 0, 0);
-		p->item.typ = PSY_PROPERTY_TYP_CHOICE;
+	assert(self);
+
+	if (psy_property_int_hasrange(self)) {
+		return (value >= self->item.min) && (value <= self->item.max);
 	}
-	return p;
+	return TRUE;
 }
 
-psy_Properties* psy_properties_set_double(psy_Properties* self, const char* key, double value)
+bool psy_property_int_hasrange(psy_Property* self)
 {
-	psy_Properties* p = psy_properties_at(self, key, PSY_PROPERTY_TYP_NONE);
-	if (p) {		
-		p->item.value.d = value;
-		p->item.typ = PSY_PROPERTY_TYP_DOUBLE;		
-	} else {
-		p = psy_properties_append_double(self, key, value, 0, 0);
-	}
-	return p;
+	return !(self->item.min == 0 && self->item.max == 0);
 }
 
-void psy_properties_enumerate(psy_Properties* self, void* target,
-	int (*enumproc)(void* self, psy_Properties* properties))
+psy_Property* psy_property_set_bool(psy_Property* self, const char* key,
+	bool value)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_BOOL);
+	if (property) {
+		property->item.value.i = (value != FALSE);
+		property->item.typ = PSY_PROPERTY_TYPE_BOOL;
+		property->item.hint = PSY_PROPERTY_HINT_CHECK;
+	} else {
+		property = psy_property_append_int(self, key, value, 0, 0);
+	}
+	return property;
+}
+
+psy_Property* psy_property_set_choice(psy_Property* self, const char* key,
+	int value)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
+	if (property) {
+		property->item.value.i = value;
+		property->item.typ = PSY_PROPERTY_TYPE_CHOICE;
+	} else {
+		property = psy_property_append_int(self, key, value, 0, 0);
+		property->item.typ = PSY_PROPERTY_TYPE_CHOICE;
+	}
+	return property;
+}
+
+psy_Property* psy_property_set_double(psy_Property* self, const char* key,
+	double value)
+{
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
+	if (property) {
+		property->item.value.d = value;
+		property->item.typ = PSY_PROPERTY_TYPE_DOUBLE;
+	} else {
+		property = psy_property_append_double(self, key, value, 0, 0);
+	}
+	return property;
+}
+
+void psy_property_enumerate(psy_Property* self, void* target,
+	psy_PropertyCallback callback)
 {
 	PropertiesCallbackContext context;
 
+	assert(self);
+
 	context.target = target;
-	context.callback = enumproc;
-	context.level = 0;	
-	properties_enumerate_rec(self, &context);	
+	context.callback = callback;
+	context.level = 0;
+	properties_enumerate_rec(self, &context);
 }
 
-int properties_enumerate_rec(psy_Properties* self, PropertiesCallbackContext* context)
+int properties_enumerate_rec(psy_Property* self,
+	PropertiesCallbackContext* context)
 {
-	psy_Properties* p;
-	p = self;
-	while (p != NULL) {		
-		int walkoption = context->callback(context->target, p, context->level);
+	psy_List* p;
+
+	assert(self);
+
+	p = self->children;
+	while (p != NULL) {
+		int walkoption = context->callback(context->target, p->entry,
+			context->level);
 		if (walkoption == 0) {
 			return 0;
 		} else
-		if (walkoption == 1) {
-			if (p->children) {
-				++context->level;
-				if (!properties_enumerate_rec(p->children, context)) {
+			if (walkoption == 1) {
+				if (((psy_Property*)(p->entry))->children) {
+					++context->level;
+					if (!properties_enumerate_rec(p->entry, context)) {
+						--context->level;
+						return 0;
+					}
 					--context->level;
-					return 0;
-				}			
-				--context->level;
+				}
 			}
-		}
 		p = p->next;
-	}	
+	}
 	return 1;
 }
 
 static const char* searchkey;
 static psy_PropertyType searchtyp;
-static psy_Properties* keyfound;
-static psy_Properties* searchproperty;
+static psy_Property* keyfound;
+static psy_Property* searchproperty;
 
 
-psy_Properties* psy_properties_find(psy_Properties* self, const char* key, psy_PropertyType typ)
+psy_Property* psy_property_find(psy_Property* self, const char* key,
+	psy_PropertyType typ)
 {
+	assert(self);
+
 	searchtyp = typ;
 	searchkey = key;
 	keyfound = 0;
-	psy_properties_enumerate(self, self, (psy_PropertiesCallback) OnSearchPropertiesEnum);
-	return keyfound;		
+	psy_property_enumerate(self, self, (psy_PropertyCallback)
+		OnSearchPropertiesEnum);
+	return keyfound;
 }
 
-int OnSearchPropertiesEnum(psy_Properties* self, psy_Properties* property, int level)
+int OnSearchPropertiesEnum(psy_Property* self, psy_Property* property, int level)
 {
-	if (property->item.key && 
-			(searchtyp == PSY_PROPERTY_TYP_NONE || property->item.typ == searchtyp)  &&
+	assert(self);
+
+	if (property->item.key &&
+			(searchtyp == PSY_PROPERTY_TYPE_NONE ||
+			property->item.typ == searchtyp) &&
 			strcmp(property->item.key, searchkey) == 0) {
 		keyfound = property;
 		return 0;
@@ -642,8 +771,11 @@ int OnSearchPropertiesEnum(psy_Properties* self, psy_Properties* property, int l
 	return 1;
 }
 
-int OnPropertySearchPropertiesEnum(psy_Properties* self, psy_Properties* property, int level)
+int OnPropertySearchPropertiesEnum(psy_Property* self, psy_Property* property,
+	int level)
 {
+	assert(self);
+
 	if (property == searchproperty) {
 		keyfound = property;
 		return 0;
@@ -651,94 +783,108 @@ int OnPropertySearchPropertiesEnum(psy_Properties* self, psy_Properties* propert
 	return 1;
 }
 
-psy_Properties* psy_properties_findsection(psy_Properties* self, const char* key)
+psy_Property* psy_property_findsection(psy_Property* self, const char* key)
 {
-	psy_Properties* prev = 0;
+	psy_Property* prev = 0;
 
-	return psy_properties_findsectionex(self, key, &prev);
+	return psy_property_findsectionex(self, key, &prev);
 }
 
-int psy_properties_insection(psy_Properties* self, psy_Properties* section)
+int psy_property_insection(psy_Property* self, psy_Property* section)
 {
 	int rv = 0;
-		
-	if (section) {				
+
+	assert(self);
+
+	if (section) {
 		keyfound = 0;
 		searchproperty = self;
-			
-		psy_properties_enumerate(section, section,
-		    (psy_PropertiesCallback)OnPropertySearchPropertiesEnum);
-		rv = keyfound != 0;		
+
+		psy_property_enumerate(section, section,
+			(psy_PropertyCallback)OnPropertySearchPropertiesEnum);
+		rv = keyfound != 0;
 	}
 	return rv;
 }
 
-psy_Properties* psy_properties_findsectionex(psy_Properties* self, const char* key,
-	psy_Properties** prev)
-{	
-	psy_Properties* p;	
+psy_Property* psy_property_findsectionex(psy_Property* self, const char* key,
+	psy_Property** prev)
+{
+	psy_Property* p;
 	char* text;
-	char seps[]   = " .";
-	char *token;
+	char seps[] = " .";
+	char* token;
+
+	assert(self);
 
 	p = self;
 	*prev = p;
-	text = strdup(key);
-	token = strtok(text, seps );
-	while(token != 0) {
-		p = psy_properties_find(p, token, PSY_PROPERTY_TYP_SECTION);
+	text = psy_strdup(key);
+	token = strtok(text, seps);
+	while (token != 0) {
+		p = psy_property_find(p, token, PSY_PROPERTY_TYPE_SECTION);
 		if (!p) {
 			break;
-		}		
+		}
 		*prev = p;
-		token = strtok(0, seps );		
+		token = strtok(0, seps);
 	}
 	free(text);
 	return p;
 }
 
-int psy_properties_type(psy_Properties* self)
+int psy_property_type(psy_Property* self)
 {
-	return self ? self->item.typ : 0;
+	assert(self);
+
+	return self->item.typ;
 }
 
-const char* psy_properties_key(psy_Properties* self)
-{	
-	return (self) ? self->item.key : "";
-}
-
-int psy_properties_as_int(psy_Properties* self)
+const char* psy_property_key(psy_Property* self)
 {
-	return (self) ? self->item.value.i : 0;
+	assert(self);
+
+	return self->item.key;
 }
 
-const char* psy_properties_as_str(psy_Properties* self)
+int psy_property_as_int(psy_Property* self)
 {
-	return (self && self->item.value.s) ? self->item.value.s : "";
+	assert(self);
+
+	return self->item.value.i;
 }
 
-char_dyn_t* psy_properties_sections(psy_Properties* self)
-{	
+const char* psy_property_as_str(psy_Property* self)
+{
+	assert(self);
+
+	return (self->item.value.s) ? self->item.value.s : "";
+}
+
+char_dyn_t* psy_property_sections(psy_Property* self)
+{
 	char_dyn_t* rv;
-	psy_Properties* p;
+	psy_Property* p;
 	psy_List* tokens;
 	psy_List* q;
 	uintptr_t size;
-	
+
+	assert(self);
+
 	p = self;
 	tokens = NULL;
 	size = 1;
 	while (p != NULL) {
-		if (p->item.typ == PSY_PROPERTY_TYP_SECTION) {
-			psy_list_insert(&tokens, NULL, (void*)psy_properties_key(p));
-			size += strlen(psy_properties_key(p));
+		if (p->item.typ == PSY_PROPERTY_TYPE_SECTION) {
+			psy_list_insert(&tokens, NULL, (void*)psy_property_key(p));
+			size += strlen(psy_property_key(p));
 			if (p->parent) {
 				++size;
 			}
-		}		
+		}
 		p = p->parent;
 	}
-	rv = (char_dyn_t*) malloc(size);
+	rv = (char_dyn_t*)malloc(size);
 	*rv = '\0';
 	for (q = tokens; q != NULL; psy_list_next(&q)) {
 		if (q->prev != NULL) {
@@ -750,239 +896,192 @@ char_dyn_t* psy_properties_sections(psy_Properties* self)
 	return rv;
 }
 
-psy_Properties* psy_properties_settext(psy_Properties* self, const char* text)
-{
-	if (self) {
-		char* temp;
-
-		temp = self->item.text;
-		self->item.text = (text) ? strdup(text) : strdup("");
-		free(temp);
-	}
-	return self;
-}
-
-const char* psy_properties_text(psy_Properties* self)
+psy_Property* psy_property_settext(psy_Property* self, const char* text)
 {
 	assert(self);
-	return (self->item.text)
+
+	psy_setstr(&self->item.text, text);	
+	return self;
+}
+
+const char* psy_property_text(psy_Property* self)
+{
+	assert(self);
+
+	return (psy_strlen(self->item.text) != 0)
 		? self->item.text
-		: ((self->item.key)
+		: (psy_strlen(self->item.key) != 0)
 			? self->item.key
-			: "");
+			: "";
 }
 
-psy_Properties* psy_properties_settranslation(psy_Properties* self, const char* text)
+psy_Property* psy_property_settranslation(psy_Property* self, const char* text)
 {
-	if (self) {
-		char* temp;
+	assert(self);
 
-		temp = self->item.translation;
-		self->item.translation = text ? strdup(text) : NULL;
-		free(temp);
-	}
+	psy_setstr(&self->item.translation, text);	
 	return self;
 }
 
-psy_Properties* psy_properties_setcomment(psy_Properties* self, const char* text)
+psy_Property* psy_property_setcomment(psy_Property* self, const char* text)
 {
-	if (self) {
-		char* temp;
+	assert(self);
 
-		temp = self->item.comment;
-		self->item.comment = (text) ? strdup(text) : strdup("");
-		free(temp);
-	}
+	psy_setstr(&self->item.comment, text);	
 	return self;
 }
 
-const char* psy_properties_translation(psy_Properties* self)
+const char* psy_property_translation(psy_Property* self)
 {
-	return (self->item.translation && strlen(self->item.translation) != 0)
+	assert(self);
+
+	return (psy_strlen(self->item.translation) != 0)
 		? self->item.translation
-		: psy_properties_text(self);
+		: psy_property_text(self);
 }
 
-psy_Properties* psy_properties_setshorttext(psy_Properties* self, const char* text)
+psy_Property* psy_property_setshorttext(psy_Property* self, const char* text)
 {
-	if (self) {
-		char* temp;
+	assert(self);
 
-		temp = self->item.shorttext;
-		self->item.shorttext = (text) ? strdup(text) : strdup("");
-		free(temp);
-	}
+	psy_setstr(&self->item.shorttext, text);	
 	return self;
 }
 
-const char* psy_properties_shorttext(psy_Properties* self)
+const char* psy_property_shorttext(psy_Property* self)
 {
-	return self->item.shorttext ? self->item.shorttext : 
-		self->item.text ? self->item.text :
-		self->item.key ? self->item.key : "";
+	assert(self);
+
+	return (psy_strlen(self->item.shorttext) != 0)
+		? self->item.shorttext
+		: psy_strlen(self->item.text) != 0
+			? self->item.text
+			: psy_strlen(self->item.key) != 0
+				? self->item.key
+				: "";
 }
 
-const char* psy_properties_comment(psy_Properties* self)
+const char* psy_property_comment(psy_Property* self)
 {
-	return self->item.comment ? self->item.comment : "";
+	assert(self);
+
+	return (psy_strlen(self->item.comment) != 0)
+		? self->item.comment
+		: "";
 }
 
-psy_Properties* psy_properties_setid(psy_Properties* self, int id)
-{	
-	if (self) {
-		self->item.id = id;
-	}
+psy_Property* psy_property_setid(psy_Property* self, int id)
+{
+	assert(self);
+
+	self->item.id = id;	
 	return self;
 }
 
-int psy_properties_id(psy_Properties* self)
+int psy_property_id(psy_Property* self)
 {
-	return self ? self->item.id : -1;
+	assert(self);
+
+	return self->item.id;
 }
 
-int psy_properties_ischoiceitem(psy_Properties* self)
+int psy_property_ischoiceitem(psy_Property* self)
 {
-	return self->parent && self->parent->item.typ == PSY_PROPERTY_TYP_CHOICE;	
+	assert(self);
+
+	return self->parent &&
+		(self->parent->item.typ == PSY_PROPERTY_TYPE_CHOICE);
 }
 
-psy_Properties* tail(psy_Properties* self)
+psy_Property* psy_property_sethint(psy_Property* self, psy_PropertyHint hint)
 {
-	psy_Properties* p;
-	
-	p = self;
-	if (p) {
-		while (p->next != 0) {
-			p = p->next;		
-		}
-	}
-	return p;
-}
+	assert(self);
 
-psy_Properties* psy_properties_append_property(psy_Properties* self, psy_Properties* p)
-{	
-	if (self && p) {		
-		if (self->children) {
-			tail(self->children)->next = p;		
-		} else {
-			self->children = p;
-			psy_Properties* i;
-			
-			for (i = p; i != NULL; i = i->next) {
-				i->parent = self;
-			}
-		}
-		p->parent = self;
-	}
-	return p;
-}
-
-psy_Properties* psy_properties_sethint(psy_Properties* self, psy_PropertyHint hint)
-{
-	if (self) {
-		self->item.hint = hint;
-	}
+	self->item.hint = hint;	
 	return self;
 }
 
-psy_PropertyHint psy_properties_hint(psy_Properties* self)
+psy_PropertyHint psy_property_hint(psy_Property* self)
+{
+	assert(self);
+
+	return self->item.hint;
+}
+
+psy_Property* psy_property_remove(psy_Property* self, psy_Property* property)
 {	
-	return self ? self->item.hint : PSY_PROPERTY_HINT_NONE;
+	psy_List* q = 0;
+	psy_List* p;
+
+	assert(self);
+
+	p = self->children;
+	while (p != NULL) {
+		if (p->entry == property) {				
+			psy_property_deallocate(p->entry);
+			q = psy_list_remove(&self->children, p);
+			break;
+		}
+		p = p->next;
+	}
+	if (q) {
+		return q->entry;
+	}
+	return NULL;
 }
 
-psy_Properties* psy_properties_next(psy_Properties* self) {
-	return self ? self->next : 0;
-}
-
-psy_Properties* psy_properties_remove(psy_Properties* self, psy_Properties* property)
+void psy_property_clear(psy_Property* self)
 {
-	psy_Properties* q = 0;
-	if (self) {
-		psy_Properties* p;
+	psy_List* p;
 
-		p = self->children;		
-		while (p != NULL) {
-			if (p == property) {
-				if (q) {
-					q->next = p->next;
-				}				
-				p->next = NULL;
-				psy_properties_free(p);
-				break;
-			}
-			q = p;
-			p = p->next;
+	assert(self);
+
+	for (p = self->children; p != NULL; psy_list_next(&p)) {		
+		psy_property_deallocate((psy_Property*)psy_list_entry(p));
+	}
+	psy_list_free(self->children);
+	self->children = NULL;	
+}
+
+uintptr_t psy_property_size(const psy_Property* self)
+{	
+	assert(self);
+
+	return psy_list_size(self->children);		
+}
+
+bool psy_property_empty(const psy_Property* self)
+{
+	assert(self);
+
+	return self->children == NULL;	
+}
+
+psy_List* psy_property_children(psy_Property* self)
+{
+	assert(self);
+
+	return self->children;
+}
+
+psy_Property* psy_property_at_choice(psy_Property* self)
+{	
+	assert(self);
+
+	return psy_property_at_index(self, psy_property_as_int(self));
+}
+
+psy_Property* psy_property_at_index(psy_Property* self, int index)
+{
+	assert(self);
+
+	if (index >= 0) {
+		psy_List* p;
+
+		p = psy_list_at(self->children, index);
+		if (p) {
+			return (psy_Property*)psy_list_entry(p);
 		}
 	}
-	return q;
-}
-
-void psy_properties_clear(psy_Properties* self)
-{			
-	if (self) {
-		psy_properties_free(self->children);
-		self->children = NULL;
-	}
-}
-
-uintptr_t psy_properties_size(const psy_Properties* self)
-{
-	uintptr_t rv = 0;
-		
-	if (self) {
-		psy_Properties* p;
-		for (p = self->children; p != NULL; p = p->next, ++rv);
-	}
-	return rv;
-}
-
-bool psy_properties_empty(const psy_Properties* self)
-{
-	if (self) {
-		return self->children == NULL;
-	}
-	return FALSE;
-}
-
-psy_Properties* psy_properties_at_choice(psy_Properties* self)
-{
-	psy_Properties* rv = 0;	
-		
-	if (self) {		
-		int choice;	
-		psy_Properties* p;
-		int count = 0;		
-		
-		choice = psy_properties_as_int(self);
-		p = self->children;		
-		while (p) {
-			if (count == choice) {
-				rv = p;
-				break;
-			}
-			p = psy_properties_next(p);
-			++count;
-		}
-	}
-	return rv;
-}
-
-psy_Properties* psy_properties_at_index(psy_Properties* self, int index)
-{
-	psy_Properties* rv = 0;
-
-	if (self) {
-		psy_Properties* p;
-		int count = 0;
-
-		p = self->children;
-		while (p) {
-			if (count == index) {
-				rv = p;
-				break;
-			}
-			p = psy_properties_next(p);
-			++count;
-		}
-	}
-	return rv;
+	return NULL;
 }

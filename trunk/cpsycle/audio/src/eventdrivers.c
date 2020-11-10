@@ -255,7 +255,7 @@ void eventdrivers_ondriverinput(psy_audio_EventDrivers* self, psy_EventDriver* s
 	psy_signal_emit(&self->signal_input, sender, 0);
 }
 
-void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers* self, psy_Properties* cmds)
+void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers* self, psy_Property* cmds)
 {
 	psy_List* p;
 

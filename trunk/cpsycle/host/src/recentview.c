@@ -7,7 +7,7 @@
 #include <string.h>
 
 static void recentview_onselected(RecentView*, PropertiesView* sender,
-	psy_Properties*);
+	psy_Property*);
 static void recentview_onclear(RecentView*, PropertiesView* sender);
 
 void recentview_init(RecentView* self, psy_ui_Component* parent,
@@ -33,13 +33,13 @@ void recentview_init(RecentView* self, psy_ui_Component* parent,
 }
 
 void recentview_onselected(RecentView* self, PropertiesView* sender,
-	psy_Properties* property)
+	psy_Property* property)
 {
-	if (psy_properties_insection(property, self->workspace->recentfiles)) {
+	if (psy_property_insection(property, self->workspace->recentfiles)) {
 		if (!self->workspace->filename || strcmp(self->workspace->filename,
-				psy_properties_key(property)) != 0) {
+				psy_property_key(property)) != 0) {
 			workspace_loadsong(self->workspace,
-				psy_properties_key(property),
+				psy_property_key(property),
 				workspace_playsongafterload(self->workspace));
 		}
 	}

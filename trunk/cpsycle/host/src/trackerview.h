@@ -265,7 +265,7 @@ void trackerview_updatescrollstep(TrackerView*);
 void trackerview_computemetrics(TrackerView*);
 void trackerview_setfont(TrackerView*, psy_ui_Font*, bool iszoombase);
 void trackerview_invalidateline(TrackerView*, psy_dsp_big_beat_t offset);
-void trackerview_makecmds(psy_Properties* parent);
+void trackerview_makecmds(psy_Property* parent);
 
 INLINE bool trackerview_blockmenuvisible(TrackerView* self)
 {

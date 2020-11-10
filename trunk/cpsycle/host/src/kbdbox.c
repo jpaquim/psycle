@@ -12,7 +12,7 @@
 #include <player.h>
 
 static void kbdbox_makekeyproperties(KbdBox*);
-static void kbdbox_addkeyproperties(KbdBox*, psy_Properties* section,
+static void kbdbox_addkeyproperties(KbdBox*, psy_Property* section,
 	uintptr_t keycode, const char* label, int size, int cr);
 
 void kbdboxkey_init_all(KbdBoxKey* self, int x, int y, int width, int height, const char* label)
@@ -93,7 +93,7 @@ void kbdbox_ondestroy(KbdBox* self, psy_ui_Component* sender)
 {
 	psy_table_disposeall(&self->keys, (psy_fp_disposefunc)
 		kbdboxkey_dispose);	
-	psy_properties_free(self->keyset);
+	psy_property_deallocate(self->keyset);
 }
 
 void kbdbox_initfont(KbdBox* self)
@@ -187,26 +187,31 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 void kbdbox_makekeys(KbdBox* self)
 {
 	if (self->keyset) {
-		psy_Properties* p;
+		psy_Property* mainsection;
 
 		self->cpx = 0;
 		self->cpy = 0;
 
-		p = psy_properties_find(self->keyset, "main", PSY_PROPERTY_TYP_SECTION);
-		if (p && p->children) {
+		mainsection = psy_property_find(self->keyset, "main", PSY_PROPERTY_TYPE_SECTION);
+		if (mainsection) {
+			psy_List* p;
 			int currrow = 0;
-			for (p = p->children; p != NULL; p = p->next) {				
+
+			for (p = psy_property_children(mainsection); p != NULL;
+					psy_list_next(&p)) {
+				psy_Property* property;
 				int keycode;
 
-				keycode = psy_properties_at_int(p, "keycode", -1);
+				property = (psy_Property*)p->entry;				
+				keycode = psy_property_at_int(property, "keycode", -1);
 				if (keycode != -1) {
 					const char* label;
 					int size;
 					int cr;
 
-					label = psy_properties_at_str(p, "label", "");
-					size = psy_properties_at_int(p, "size", 0);
-					cr = psy_properties_at_int(p, "cr", 0);
+					label = psy_property_at_str(property, "label", "");
+					size = psy_property_at_int(property, "size", 0);
+					cr = psy_property_at_int(property, "cr", 0);
 
 					if (cr) {
 						self->cpy += self->keyheight + self->ident;
@@ -224,8 +229,7 @@ void kbdbox_makekeys(KbdBox* self)
 					if (size == 3) {
 						kbdbox_addlargekey(self, keycode, label);
 					}
-				}
-				
+				}				
 			}
 		}
 	}
@@ -233,12 +237,12 @@ void kbdbox_makekeys(KbdBox* self)
 	
 void kbdbox_makekeyproperties(KbdBox* self)
 {
-	psy_Properties* main;
+	psy_Property* main;
 	int kc;
 	int col = 0;
 
-	self->keyset = psy_properties_create();
-	main = psy_properties_append_section(self->keyset, "main");
+	self->keyset = psy_property_allocinit_key(NULL);
+	main = psy_property_append_section(self->keyset, "main");
 		
 	kc = 0x1000;
 	kbdbox_addkeyproperties(self, main, psy_ui_KEY_ESCAPE, "ESC", 1, 0);
@@ -323,16 +327,16 @@ void kbdbox_makekeyproperties(KbdBox* self)
 	kbdbox_addkeyproperties(self, main, kc++, "CTRL", 0, 0);
 }
 
-void kbdbox_addkeyproperties(KbdBox* self, psy_Properties* section,
+void kbdbox_addkeyproperties(KbdBox* self, psy_Property* section,
 	uintptr_t keycode, const char* label, int size, int cr)
 {
-	psy_Properties* key;
+	psy_Property* key;
 
-	key = psy_properties_append_section(section, "key");
-	psy_properties_append_int(key, "keycode", keycode, 0, 0);	
-	psy_properties_append_string(key, "label", label);
-	psy_properties_append_int(key, "size", size, 0, 0);
-	psy_properties_append_int(key, "cr", cr, 0, 0);
+	key = psy_property_append_section(section, "key");
+	psy_property_append_int(key, "keycode", keycode, 0, 0);	
+	psy_property_append_string(key, "label", label);
+	psy_property_append_int(key, "size", size, 0, 0);
+	psy_property_append_int(key, "cr", cr, 0, 0);
 }
 
 void kbdbox_addsmallkey(KbdBox* self, uintptr_t keycode, const char* label)

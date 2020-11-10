@@ -11,19 +11,19 @@
 #include "../../detail/portable.h"
 
 // newmachine
-static void plugindisplayname(psy_Properties*, char* text);
-static int plugintype(psy_Properties*, char* text);
-static int pluginmode(psy_Properties*, char* text);
+static void plugindisplayname(psy_Property*, char* text);
+static int plugintype(psy_Property*, char* text);
+static int pluginmode(psy_Property*, char* text);
 
 static void newmachinebar_onrescan(NewMachineBar*, psy_ui_Component* sender);
 static void newmachinebar_onselectdirectories(NewMachineBar*, psy_ui_Component* sender);
 
-psy_Properties* newmachine_sort(psy_Properties* source, psy_fp_comp);
-psy_Properties* newmachine_favorites(psy_Properties* source);
-static int newmachine_comp_favorite(psy_Properties* p, psy_Properties* q);
-static int newmachine_comp_name(psy_Properties* p, psy_Properties* q);
-static int newmachine_comp_type(psy_Properties* p, psy_Properties* q);
-static int newmachine_comp_mode(psy_Properties* p, psy_Properties* q);
+psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp);
+psy_Property* newmachine_favorites(psy_Property* source);
+static int newmachine_comp_favorite(psy_Property* p, psy_Property* q);
+static int newmachine_comp_name(psy_Property* p, psy_Property* q);
+static int newmachine_comp_type(psy_Property* p, psy_Property* q);
+static int newmachine_comp_mode(psy_Property* p, psy_Property* q);
 static int newmachine_isplugin(int type);
 
 static void newmachinebar_updatetext(NewMachineBar*, Translator*);
@@ -175,14 +175,14 @@ void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* s
 // pluginsview
 static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
-static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Properties*,
+static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
 	int x, int y);
 static void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
-static void pluginsview_cursorposition(PluginsView*, psy_Properties* plugin,
+static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,
 	int* col, int* row);
-static psy_Properties* pluginsview_pluginbycursorposition(PluginsView*,
+static psy_Property* pluginsview_pluginbycursorposition(PluginsView*,
 	int col, int row);
 static void pluginsview_onmousedown(PluginsView*, psy_ui_MouseEvent*);
 static void pluginsview_onmousedoubleclick(PluginsView*, psy_ui_MouseEvent*);
@@ -226,8 +226,8 @@ void pluginsview_init(PluginsView* self, psy_ui_Component* parent,
 			self->plugins = newmachine_favorites(
 				workspace_pluginlist(workspace));
 		} else {
-			self->plugins = psy_properties_clone(
-				workspace_pluginlist(workspace), 1);
+			self->plugins = psy_property_clone(
+				workspace_pluginlist(workspace));
 		}
 	} else {
 		self->plugins = NULL;
@@ -252,36 +252,37 @@ void pluginsview_ondestroy(PluginsView* self, psy_ui_Component* component)
 	psy_signal_dispose(&self->signal_selected);
 	psy_signal_dispose(&self->signal_changed);
 	if (self->plugins) {
-		psy_properties_free(self->plugins);
+		psy_property_deallocate(self->plugins);
 	}
 }
 
 void pluginsview_ondraw(PluginsView* self, psy_ui_Graphics* g)
-{	
-	psy_Properties* p;
-	int cpx = 0;
-	int cpy = 0;
-	psy_ui_Size size;
-
-	size = psy_ui_component_size(&self->component);
-	pluginsview_computetextsizes(self, &size);
-	p = self->plugins;
-	if (p) {
-		p = p->children;
+{		
+	
+	if (self->plugins) {
+		psy_ui_Size size;
+		psy_List* p;		
+		int cpx;
+		int cpy;
+		
+		size = psy_ui_component_size(&self->component);
+		pluginsview_computetextsizes(self, &size);
+		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
+		for (p = psy_property_children(self->plugins), cpx = 0, cpy = 0;
+				p != NULL; psy_list_next(&p)) {
+			pluginsview_drawitem(self, g, (psy_Property*)psy_list_entry(p),
+				cpx, cpy);
+			cpx += self->columnwidth;
+			if (cpx >= self->numparametercols * self->columnwidth) {
+				cpx = 0;
+				cpy += self->lineheight;
+			}
+		}
 	}
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	for (; p != NULL; p = psy_properties_next(p)) {		
-		pluginsview_drawitem(self, g, p, cpx, cpy);
-		cpx += self->columnwidth;
-		if (cpx >= self->numparametercols * self->columnwidth) {
-			cpx = 0;
-			cpy += self->lineheight;
-		}		
-	}	
 }
 
 void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
-	psy_Properties* property, int x, int y)
+	psy_Property* property, int x, int y)
 {
 	char text[128];
 
@@ -319,22 +320,22 @@ void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 	self->component.scrollstepy = self->lineheight;
 }
 
-void plugindisplayname(psy_Properties* property, char* text)
+void plugindisplayname(psy_Property* property, char* text)
 {	
 	const char* label;
 
-	label = psy_properties_at_str(property, "shortname", "");
+	label = psy_property_at_str(property, "shortname", "");
 	if (strcmp(label, "") == 0) {
-		label = psy_properties_key(property);
+		label = psy_property_key(property);
 	}
 	psy_snprintf(text, 128, "%s", label);
 }
 
-int plugintype(psy_Properties* property, char* text)
+int plugintype(psy_Property* property, char* text)
 {	
 	int rv;
 	
-	rv = psy_properties_at_int(property, "type", -1);
+	rv = psy_property_at_int(property, "type", -1);
 	switch (rv) {
 		case MACH_PLUGIN:
 			strcpy(text, "psy");
@@ -358,11 +359,11 @@ int plugintype(psy_Properties* property, char* text)
 	return rv;
 }
 
-int pluginmode(psy_Properties* property, char* text)
+int pluginmode(psy_Property* property, char* text)
 {			
 	int rv;
 
-	rv = psy_properties_at_int(property, "mode", -1);
+	rv = psy_property_at_int(property, "mode", -1);
 	strcpy(text, rv == MACHMODE_FX ? "fx" : "gn");
 	return rv;
 }
@@ -376,7 +377,7 @@ void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 
 		pluginsview_computetextsizes(self, limit);
 		size = psy_ui_component_size(&self->component);
-		currlines = psy_properties_size(self->plugins) /
+		currlines = psy_property_size(self->plugins) /
 			self->numparametercols + 1;				
 		rv->height = psy_ui_value_makepx(self->component.scrollstepy * currlines);
 		rv->width = size.width;		
@@ -386,7 +387,7 @@ void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 {
 	if (self->selectedplugin) {
-		psy_Properties* plugin;
+		psy_Property* plugin;
 		int col;
 		int row;
 
@@ -405,14 +406,14 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				break;
 			case psy_ui_KEY_DELETE:
 				if (self->selectedplugin) {
-					psy_Properties* p;
-					p = psy_properties_find(self->workspace->plugincatcher.plugins,
-							psy_properties_key(self->selectedplugin),
-							PSY_PROPERTY_TYP_NONE);
+					psy_Property* p;
+					p = psy_property_find(self->workspace->plugincatcher.plugins,
+							psy_property_key(self->selectedplugin),
+							PSY_PROPERTY_TYPE_NONE);
 					if (!self->onlyfavorites && p) {
-						psy_properties_remove(self->workspace->plugincatcher.plugins, p);
+						psy_property_remove(self->workspace->plugincatcher.plugins, p);
 					} else {						
-						psy_properties_set_int(p, "favorite", 0);
+						psy_property_set_int(p, "favorite", 0);
 					}
 					plugincatcher_save(&self->workspace->plugincatcher);
 					psy_signal_emit(&self->workspace->plugincatcher.signal_changed,
@@ -453,59 +454,53 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 	} else
 	if (ev->keycode >= psy_ui_KEY_LEFT && ev->keycode <= psy_ui_KEY_DOWN) {
 		if (self->plugins->children)
-		self->selectedplugin = self->plugins->children;
+		self->selectedplugin = self->plugins;
 		psy_signal_emit(&self->signal_changed, self, 1,
 			self->selectedplugin);
 		psy_ui_component_invalidate(&self->component);			
 	}	
 }
 
-void pluginsview_cursorposition(PluginsView* self, psy_Properties* plugin,
+void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
 	int* col, int* row)
 {		
 	*col = 0;
 	*row = 0;
-	if (plugin) {
-		psy_Properties* p;
-		psy_ui_Size size;
-
-		size = psy_ui_component_size(&self->component);
-		pluginsview_computetextsizes(self, &size);
-		p = self->plugins;
-		if (p) {
-			for (p = p->children; p != NULL; p = p->next) {
-				if (p == plugin) {
-					break;
-				}
-				++(*col);
-				if (*col >= self->numparametercols) {
-					*col = 0;
-					++(*row);
-				}
+	if (plugin && self->plugins) {
+		psy_List* p;
+		
+		for (p = psy_property_children(self->plugins); p != NULL;
+				psy_list_next(&p)) {	
+			if (p->entry == plugin) {
+				break;
 			}
-		}
+			++(*col);
+			if (*col >= self->numparametercols) {
+				*col = 0;
+				++(*row);
+			}
+		}		
 	}	
 }
 
-psy_Properties* pluginsview_pluginbycursorposition(PluginsView* self, int col, int row)
-{		
-	psy_Properties* rv;	
-	int currcol;
-	int currrow;
-	psy_ui_Size size;
-
-	size = psy_ui_component_size(&self->component);
-	rv = NULL;
-	currcol = 0;
-	currrow = 0;
-	pluginsview_computetextsizes(self, &size);	
+psy_Property* pluginsview_pluginbycursorposition(PluginsView* self, int col, int row)
+{				
 	if (self->plugins) {
-		psy_Properties* p;
+		psy_Property* rv;
+		psy_List* p;
+		int currcol;
+		int currrow;
+		psy_ui_Size size;
+		rv = NULL;
 
-		p = self->plugins;
-		for (p = p->children; p != NULL; p = p->next) {
+		currcol = 0;
+		currrow = 0;
+		size = psy_ui_component_size(&self->component);
+		pluginsview_computetextsizes(self, &size);
+		for (p = psy_property_children(self->plugins); p != NULL;
+				psy_list_next(&p)) {			
 			if (currcol == col && currrow == row) {
-				rv = p;
+				rv = (psy_Property*)p->entry;
 				break;
 			}
 			++currcol;
@@ -513,9 +508,10 @@ psy_Properties* pluginsview_pluginbycursorposition(PluginsView* self, int col, i
 				currcol = 0;
 				++currrow;
 			}
-		}		
+		}
+		return rv;
 	}
-	return rv;
+	return NULL;
 }
 
 void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
@@ -532,23 +528,23 @@ void pluginsview_onmousedown(PluginsView* self, psy_ui_MouseEvent* ev)
 }
 
 void pluginsview_hittest(PluginsView* self, int x, int y)
-{	
-	psy_Properties* p;
-	int cpx = 0;
-	int cpy = 0;
-	psy_ui_Size size;
+{				
+	if (self->plugins) {
+		psy_ui_Size size;
+		psy_List* p;
+		int cpx;
+		int cpy;
 
-	size = psy_ui_component_size(&self->component);	
-	pluginsview_computetextsizes(self, &size);
-	p = self->plugins;
-	if (p) {			
-		for (p = p->children ; p != NULL; p = p->next) {
+		size = psy_ui_component_size(&self->component);
+		pluginsview_computetextsizes(self, &size);
+		for (p = psy_property_children(self->plugins), cpx = 0, cpy = 0;
+				p != NULL; psy_list_next(&p)) {
 			psy_ui_Rectangle r;
 
 			psy_ui_setrectangle(&r, cpx, cpy, self->columnwidth,
 				self->lineheight);
 			if (psy_ui_rectangle_intersect(&r, x, y)) {
-				self->selectedplugin = p;
+				self->selectedplugin = (psy_Property*)psy_list_entry(p);
 				break;
 			}		
 			cpx += self->columnwidth;
@@ -576,13 +572,13 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 	psy_ui_component_setscrolltop(&self->component, 0);
 	self->selectedplugin = 0;
 	if (self->plugins) {
-		psy_properties_free(self->plugins);
+		psy_property_deallocate(self->plugins);
 	}
 	if (sender->plugins) {
 		if (self->onlyfavorites) {
 			self->plugins = newmachine_favorites(sender->plugins);
 		} else {
-			self->plugins = psy_properties_clone(sender->plugins, 1);
+			self->plugins = psy_property_clone(sender->plugins);
 		}
 	} else {
 		self->plugins = 0;
@@ -596,9 +592,9 @@ void pluginsview_onplugincachechanged(PluginsView* self,
 // prototypes
 static void newmachine_ondestroy(NewMachine*, psy_ui_Component* component);
 static void newmachine_onpluginselected(NewMachine*, psy_ui_Component* parent,
-	psy_Properties*);
+	psy_Property*);
 static void newmachine_onpluginchanged(NewMachine*, psy_ui_Component* parent,
-	psy_Properties*);
+	psy_Property*);
 static void newmachine_onplugincachechanged(NewMachine*, psy_audio_PluginCatcher*);
 static void newmachine_onkeydown(NewMachine*, psy_ui_KeyEvent*);
 static void newmachine_onsortbyfavorite(NewMachine*, psy_ui_Component* sender);
@@ -727,32 +723,32 @@ void newmachine_onlanguagechanged(NewMachine* self, Translator* sender)
 }
 
 void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
-	psy_Properties* selected)
+	psy_Property* selected)
 {
 	const char* text;
 	char detail[1024];
-	psy_Properties* sorted;
+	psy_Property* sorted;
 
-	text = psy_properties_at_str(selected, "name", "");
+	text = psy_property_at_str(selected, "name", "");
 	strcpy(detail, text);
-	// text = psy_properties_at_str(selected, "desc", "");
+	// text = psy_property_at_str(selected, "desc", "");
 	// strcat(detail, "  ");
 	// strcat(detail, text);	
-	text = psy_properties_at_str(selected, "author", "");
+	text = psy_property_at_str(selected, "author", "");
 	strcat(detail, "\n(");
 	strcat(detail, text);
 	strcat(detail, ")");
 	psy_ui_label_settext(&self->detail.desclabel, detail);
 	self->detail.empty = FALSE;
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
-	psy_properties_sync(workspace_pluginlist(self->pluginsview.workspace), self->pluginsview.plugins);
+	psy_property_sync(workspace_pluginlist(self->pluginsview.workspace), self->pluginsview.plugins);
 	plugincatcher_save(&self->pluginsview.workspace->plugincatcher);
 	pluginsview_onplugincachechanged(&self->favoriteview,
 		&self->favoriteview.workspace->plugincatcher);
 	if (self->favoriteview.plugins) {
 		sorted = newmachine_sort(self->favoriteview.plugins,
 			newmachine_comp_favorite);
-		psy_properties_free(self->favoriteview.plugins);
+		psy_property_deallocate(self->favoriteview.plugins);
 		self->favoriteview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->favoriteview.component, 0);
@@ -762,20 +758,24 @@ void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,
 }
 
 void newmachine_onpluginchanged(NewMachine* self, psy_ui_Component* parent,
-	psy_Properties* selected)
+	psy_Property* selected)
 {
 	const char* text;
 	char detail[1024];
 
-	text = psy_properties_at_str(selected, "name", "");
-	strcpy(detail, text);
-	// text = psy_properties_at_str(selected, "desc", "");
-	// strcat(detail, "  ");
-	// strcat(detail, text);	
-	text = psy_properties_at_str(selected, "author", "");
-	strcat(detail, "\n(");
-	strcat(detail, text);
-	strcat(detail, ")");
+	if (selected) {
+		text = psy_property_at_str(selected, "name", "");
+		strcpy(detail, text);
+		text = psy_property_at_str(selected, "desc", "");
+		strcat(detail, "  ");
+		strcat(detail, text);
+		text = psy_property_at_str(selected, "author", "");
+		strcat(detail, "\n(");
+		strcat(detail, text);
+		strcat(detail, ")");
+	} else {
+		detail[0] = '\0';
+	}
 	psy_ui_label_settext(&self->detail.desclabel, detail);
 }
 
@@ -787,12 +787,12 @@ void newmachine_onplugincachechanged(NewMachine* self,
 
 void newmachine_onsortbyfavorite(NewMachine* self, psy_ui_Component* sender)
 {
-	psy_Properties* sorted;
+	psy_Property* sorted;
 
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_favorite);
-		psy_properties_free(self->pluginsview.plugins);
+		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -803,12 +803,12 @@ void newmachine_onsortbyfavorite(NewMachine* self, psy_ui_Component* sender)
 
 void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 {
-	psy_Properties* sorted;
+	psy_Property* sorted;
 	
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_name);
-		psy_properties_free(self->pluginsview.plugins);
+		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -819,12 +819,12 @@ void newmachine_onsortbyname(NewMachine* self, psy_ui_Component* sender)
 
 void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
 {
-	psy_Properties* sorted;
+	psy_Property* sorted;
 	
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_type);
-		psy_properties_free(self->pluginsview.plugins);
+		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -835,12 +835,12 @@ void newmachine_onsortbytype(NewMachine* self, psy_ui_Component* parent)
 
 void newmachine_onsortbymode(NewMachine* self, psy_ui_Component* parent)
 {
-	psy_Properties* sorted;
+	psy_Property* sorted;
 	
 	if (self->pluginsview.plugins) {
 		sorted = newmachine_sort(self->pluginsview.plugins,
 			newmachine_comp_mode);
-		psy_properties_free(self->pluginsview.plugins);
+		psy_property_deallocate(self->pluginsview.plugins);
 		self->pluginsview.plugins = sorted;
 		newmachinedetail_reset(&self->detail);
 		psy_ui_component_setscrolltop(&self->pluginsview.component, 0);
@@ -856,90 +856,90 @@ void newmachine_onkeydown(NewMachine* self, psy_ui_KeyEvent* ev)
 	}
 }
 
-psy_Properties* newmachine_favorites(psy_Properties* source)
+psy_Property* newmachine_favorites(psy_Property* source)
 {
-	psy_Properties* rv = 0;
+	psy_Property* rv = 0;
+
+	if (source && !psy_property_empty(source)) {
+		psy_List* p;
+
+		rv = psy_property_allocinit_key(NULL);
+		for (p = psy_property_children(source); p != NULL; psy_list_next(&p)) {
+			psy_Property* property;
+
+			property = (psy_Property*)psy_list_entry(p);
+			if (psy_property_at_int(property, "favorite", 0) != FALSE) {				
+				psy_property_append_property(rv, psy_property_clone(
+					property));
+			}
+		}		
+	}
+	return rv;
+}
+
+psy_Property* newmachine_sort(psy_Property* source, psy_fp_comp comp)
+{		
+	psy_Property* rv = NULL;
 
 	if (source) {
-		psy_Properties* p;
-
-		p = source->children;
-		if (p) {
-			rv = psy_properties_create();
-			for (; p != NULL; p = psy_properties_next(p)) {
-				if (psy_properties_at_int(p, "favorite", 0) != FALSE) {
-					psy_properties_append_property(rv, psy_properties_clone(
-						p, 0));
-				}
-			}			
+		int i;
+		int num;
+		psy_List* p;
+		psy_Property** propertiesptr;
+		
+		num = psy_property_size(source);
+		propertiesptr = malloc(sizeof(psy_Property*) * num);
+		if (propertiesptr) {
+			p = psy_property_children(source);
+			for (i = 0; p != NULL && i < num; psy_list_next(&p), ++i) {
+				propertiesptr[i] = (psy_Property*)psy_list_entry(p);
+			}
+			psy_qsort(propertiesptr, 0, num - 1, comp);
+			rv = psy_property_allocinit_key(NULL);
+			for (i = 0; i < num; ++i) {
+				psy_property_append_property(rv, psy_property_clone(
+					propertiesptr[i]));
+			}
+			free(propertiesptr);
 		}
 	}
 	return rv;
 }
 
-psy_Properties* newmachine_sort(psy_Properties* source, psy_fp_comp comp)
-{		
-	psy_Properties* rv = 0;
-
-	if (source) {
-		int i;
-		int num;
-		psy_Properties* p;
-		psy_Properties** propertiesptr;
-		
-		p = source;
-		num = psy_properties_size(p);
-		propertiesptr = malloc(sizeof(psy_Properties*) * num);
-		p = p->children;		
-		for (i =0 ; p != NULL && i < num; p = p->next, ++i) {
-			propertiesptr[i] = p;
-		}		
-		psy_qsort(propertiesptr, 0, num - 1, comp);
-
-		rv = psy_properties_create();		
-		for (i = 0; i < num; ++i) {
-			psy_properties_append_property(rv, psy_properties_clone(
-				propertiesptr[i], 0));
-		}		
-		free(propertiesptr);
-	}
-	return rv;
-}
-
-int newmachine_comp_favorite(psy_Properties* p, psy_Properties* q)
+int newmachine_comp_favorite(psy_Property* p, psy_Property* q)
 {
 	int left;
 	int right;
 	
-	left = psy_properties_at_int(p, "favorite", 0);
-	right = psy_properties_at_int(q, "favorite", 0);
+	left = psy_property_at_int(p, "favorite", 0);
+	right = psy_property_at_int(q, "favorite", 0);
 	return right - left;
 }
 
-int newmachine_comp_name(psy_Properties* p, psy_Properties* q)
+int newmachine_comp_name(psy_Property* p, psy_Property* q)
 {
 	const char* left;
 	const char* right;
 
-	left = psy_properties_at_str(p, "name", "");
+	left = psy_property_at_str(p, "name", "");
 	if (strlen(left) == 0) {
-		left = psy_properties_key(p);
+		left = psy_property_key(p);
 	}
-	right = psy_properties_at_str(q, "name", "");
+	right = psy_property_at_str(q, "name", "");
 	if (strlen(right) == 0) {
-		right = psy_properties_key(q);
+		right = psy_property_key(q);
 	}
 	return strcmp(left, right);		
 }
 
-int newmachine_comp_type(psy_Properties* p, psy_Properties* q)
+int newmachine_comp_type(psy_Property* p, psy_Property* q)
 {
 	int left;
 	int right;
 	
-	left = psy_properties_at_int(p, "type", 128);
+	left = psy_property_at_int(p, "type", 128);
 	left = newmachine_isplugin(left) ? left : 0;
-	right = psy_properties_at_int(q, "type", 128);
+	right = psy_property_at_int(q, "type", 128);
 	right = newmachine_isplugin(right) ? right : 0;
 	return left - right;		
 }
@@ -953,10 +953,10 @@ int newmachine_isplugin(int type)
 	   (type == MACH_LADSPA);
 }
 
-int newmachine_comp_mode(psy_Properties* p, psy_Properties* q)
+int newmachine_comp_mode(psy_Property* p, psy_Property* q)
 {	
-	return psy_properties_at_int(p, "mode", 128) -
-		psy_properties_at_int(q, "mode", 128);	
+	return psy_property_at_int(p, "mode", 128) -
+		psy_property_at_int(q, "mode", 128);	
 }
 
 void newmachine_onfocus(NewMachine* self, psy_ui_Component* sender)

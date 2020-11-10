@@ -4,16 +4,19 @@
 #include "../../detail/prefix.h"
 
 #include "silentdriver.h"
-#include "../../driver/driver.h"
+#include "../../driver/audiodriver.h"
 #include <stdlib.h>
 #include <string.h>
+#include "../../detail/portable.h"
+
+#define PSY_AUDIODRIVER_SILENTDRIVER_GUID 0x0006
 
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
 static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
 	void* handle);
 static int driver_open(psy_AudioDriver*);
-static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static void driver_configure(psy_AudioDriver*, psy_Property*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static unsigned int samplerate(psy_AudioDriver*);
@@ -21,6 +24,7 @@ static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
 static const char* playbackname(psy_AudioDriver*, int index);
 static int numplaybacks(psy_AudioDriver*);
+static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 
 static void init_properties(psy_AudioDriver* driver);
 
@@ -42,8 +46,21 @@ static void vtable_init(void)
 		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
 	}
+}
+
+static const psy_AudioDriverInfo* GetPsycleDriverInfo(void)
+{
+	static psy_AudioDriverInfo info;
+
+	info.guid = PSY_AUDIODRIVER_SILENTDRIVER_GUID;
+	info.Flags = 0;
+	info.Name = "SilentAudioDriver";
+	info.ShortName = "Silent";
+	info.Version = 0;
+	return &info;
 }
 
 psy_AudioDriver* psy_audio_create_silent_driver(void)
@@ -72,7 +89,7 @@ int driver_init(psy_AudioDriver* driver)
 
 int driver_dispose(psy_AudioDriver* driver)
 {
-	psy_properties_free(driver->properties);
+	psy_property_deallocate(driver->properties);
 	driver->properties = 0;
 	return 0;
 }
@@ -94,7 +111,7 @@ int driver_close(psy_AudioDriver* driver)
 	return 0;
 }
 
-void driver_configure(psy_AudioDriver* driver, psy_Properties* config)
+void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 {
 
 }
@@ -106,15 +123,18 @@ unsigned int samplerate(psy_AudioDriver* self)
 
 void init_properties(psy_AudioDriver* self)
 {		
-	self->properties = psy_properties_create();
-	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "name", "Silent AudioDriver"),
+	char key[256];
+
+	psy_snprintf(key, 256, "silent-guid-%d", PSY_AUDIODRIVER_SILENTDRIVER_GUID);
+	self->properties = psy_property_allocinit_key(key);
+	psy_property_sethint(
+		psy_property_append_string(self->properties, "name", "Silent AudioDriver"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "vendor", "Psycledelics"),
+	psy_property_sethint(
+		psy_property_append_string(self->properties, "vendor", "Psycledelics"),
 		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
-		psy_properties_append_string(self->properties, "version", "1.0"),
+	psy_property_sethint(
+		psy_property_append_string(self->properties, "version", "1.0"),
 		PSY_PROPERTY_HINT_READONLY);
 }
 
@@ -136,4 +156,9 @@ const char* playbackname(psy_AudioDriver* driver, int index)
 int numplaybacks(psy_AudioDriver* driver)
 {
 	return 0;
+}
+
+const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
+{
+	return GetPsycleDriverInfo();
 }

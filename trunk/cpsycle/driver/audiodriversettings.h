@@ -62,6 +62,15 @@ INLINE unsigned int psy_audiodriversettings_samplespersec(
 INLINE void psy_audiodriversettings_setsamplespersec(
 	psy_AudioDriverSettings* self, uintptr_t value)
 {
+	if (value <= 22050) {
+		value = 22050;
+	} else if (value <= 44100) {
+		value = 44100;
+	} else if (value <= 48000) {
+		value = 48000;
+	} else {
+		value = 96000;
+	}
 	self->samplespersec_ = value;
 }
 
@@ -86,6 +95,7 @@ INLINE unsigned int psy_audiodriversettings_bitdepth(
 INLINE void psy_audiodriversettings_setvalidbitdepth(
 	psy_AudioDriverSettings* self, uintptr_t validbitdepth)
 {
+	validbitdepth = (validbitdepth / 8) * 8;
 	self->validbitdepth_ = validbitdepth;
 	self->bitdepth_ = (validbitdepth == 24) ? 32 : validbitdepth;
 	self->framebytes_ = 

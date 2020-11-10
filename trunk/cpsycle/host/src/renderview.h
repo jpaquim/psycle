@@ -18,7 +18,7 @@
 typedef struct {
 	psy_ui_Component component;
 	PropertiesView view;
-	psy_Properties* properties;
+	psy_Property* properties;
 	Workspace* workspace;
 	psy_AudioDriver* fileoutdriver;
 	psy_AudioDriver* curraudiodriver;	

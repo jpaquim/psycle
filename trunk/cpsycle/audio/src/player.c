@@ -31,7 +31,6 @@ static PsyFile logfile;
 static void psy_audio_player_initdriver(psy_audio_Player*);
 static void psy_audio_player_initkbddriver(psy_audio_Player*);
 static void psy_audio_player_initsignals(psy_audio_Player*);
-static void psy_audio_player_unloaddriver(psy_audio_Player*);
 static void psy_audio_player_unloadeventdrivers(psy_audio_Player*);
 static psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player*, int* numsamples,
 	int* stop);
@@ -85,7 +84,7 @@ void psy_audio_player_initdriver(psy_audio_Player* self)
 {	
 	self->driver = 0;	
 	psy_library_init(&self->drivermodule);
-	psy_audio_player_loaddriver(self, 0, 0);
+	psy_audio_player_loaddriver(self, 0, 0, TRUE);
 }
 
 void psy_audio_player_initsignals(psy_audio_Player* self)
@@ -490,7 +489,7 @@ psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player* self)
 }
 
 void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
-	psy_Properties* config)
+	psy_Property* config, bool open)
 {
 	psy_AudioDriver* driver = 0;
 	
@@ -523,12 +522,16 @@ void psy_audio_player_loaddriver(psy_audio_Player* self, const char* path,
 		driver));
 	psy_dsp_rmsvol_setsamplerate(psy_audiodriver_samplerate(driver));
 	self->driver = driver;
-	if (self->driver && config) {
-		printf("driver driver_configure\n");
-		psy_audiodriver_configure(self->driver, config);
+	if (self->driver) {
+		if (config) {
+			printf("driver driver_configure\n");
+			psy_audiodriver_configure(self->driver, config);
+		}
 		printf("driver driver_open\n");
-		psy_audiodriver_open(self->driver);
-	}
+		if (open) {
+			psy_audiodriver_open(self->driver);
+		}
+	}	
 }
 
 void psy_audio_player_unloaddriver(psy_audio_Player* self)
@@ -536,20 +539,20 @@ void psy_audio_player_unloaddriver(psy_audio_Player* self)
 	if (self->driver) {
 		psy_audiodriver_close(self->driver);
 		psy_audiodriver_deallocate(self->driver);
-		psy_library_unload(&self->drivermodule);		
-	}
-	self->driver = 0;
+		psy_library_unload(&self->drivermodule);
+		self->driver = NULL;
+	}	
 }
 
 void psy_audio_player_reloaddriver(psy_audio_Player* self, const char* path,
-	psy_Properties* config)
+	psy_Property* config)
 {		
 	psy_audio_player_unloaddriver(self);
-	psy_audio_player_loaddriver(self, path, config);
+	psy_audio_player_loaddriver(self, path, config, TRUE);
 }
 
 void psy_audio_player_restartdriver(psy_audio_Player* self,
-	psy_Properties* config)
+	psy_Property* config)
 {	
 	if (self->driver) {
 		psy_audiodriver_close(self->driver);

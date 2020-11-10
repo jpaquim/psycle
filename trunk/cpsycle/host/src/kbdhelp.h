@@ -18,7 +18,7 @@ typedef struct KbdHelp {
 	TabBar tabbar;
 	KbdBox kbdbox;	
 	Workspace* workspace;
-	psy_Properties* search;
+	psy_Property* search;
 } KbdHelp;
 
 void kbdhelp_init(KbdHelp*, psy_ui_Component* parent, Workspace*);

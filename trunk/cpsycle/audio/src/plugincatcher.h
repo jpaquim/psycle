@@ -16,15 +16,15 @@ extern "C" {
 #endif
 
 typedef struct {
-	psy_Properties* plugins;
+	psy_Property* plugins;
 	char* inipath;
 	char* nativeroot;
-	psy_Properties* dirconfig;
+	psy_Property* dirconfig;
 	psy_Signal signal_changed;
 	psy_Signal signal_scanprogress;
 } psy_audio_PluginCatcher;
 
-void plugincatcher_init(psy_audio_PluginCatcher*, psy_Properties* dirconfig);
+void plugincatcher_init(psy_audio_PluginCatcher*, psy_Property* dirconfig);
 void plugincatcher_dispose(psy_audio_PluginCatcher*);
 void plugincatcher_clear(psy_audio_PluginCatcher*);
 void plugincatcher_scan(psy_audio_PluginCatcher*);

@@ -10,8 +10,8 @@
 extern "C" {
 #endif
 
-int propertiesio_load(psy_Properties*, const char* path, int allowappend);
-void propertiesio_save(psy_Properties*, const char* path);
+int propertiesio_load(psy_Property*, const char* path, int allowappend);
+void propertiesio_save(psy_Property*, const char* path);
 
 #ifdef __cplusplus
 }

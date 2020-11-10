@@ -49,7 +49,7 @@ typedef struct {
 
 void machineviewskin_init(MachineViewSkin*);
 void machineviewskin_dispose(MachineViewSkin*);
-void machineviewskin_settheme(MachineViewSkin*, psy_Properties* p,
+void machineviewskin_settheme(MachineViewSkin*, psy_Property* p,
 	const char* skindir);
 
 #endif /* MACHINEVIEWSKIN_H */

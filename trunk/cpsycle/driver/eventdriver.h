@@ -50,20 +50,20 @@ typedef struct psy_EventDriverVTable {
 	int (*dispose)(struct psy_EventDriver*);
 	void (*free)(struct psy_EventDriver*);
 	const psy_EventDriverInfo* (*info)(struct psy_EventDriver*);
-	void (*configure)(struct psy_EventDriver*, psy_Properties*);
+	void (*configure)(struct psy_EventDriver*, psy_Property*);
 	int (*close)(struct psy_EventDriver*);
 	void (*write)(struct psy_EventDriver*, psy_EventDriverData);
 	void (*cmd)(struct psy_EventDriver*, const char* section, psy_EventDriverData,
 		psy_EventDriverCmd*);
 	int (*error)(int, const char*);
 	psy_EventDriverCmd(*getcmd)(struct psy_EventDriver*, const char* section);
-	void (*setcmddef)(struct psy_EventDriver*, psy_Properties*);
+	void (*setcmddef)(struct psy_EventDriver*, psy_Property*);
 	void (*idle)(struct psy_EventDriver*);
 } psy_EventDriverVTable;
 
 typedef struct psy_EventDriver {
 	psy_EventDriverVTable* vtable;
-	psy_Properties* properties;	
+	psy_Property* properties;	
 	psy_Signal signal_input;
 } psy_EventDriver;
 
@@ -122,7 +122,7 @@ INLINE const psy_EventDriverInfo* psy_eventdriver_info(psy_EventDriver* self)
 	return self->vtable->info(self);
 }
 
-INLINE void psy_eventdriver_configure(psy_EventDriver* self, psy_Properties*
+INLINE void psy_eventdriver_configure(psy_EventDriver* self, psy_Property*
 	properties)
 {
 	self->vtable->configure(self, properties);
@@ -156,7 +156,7 @@ INLINE psy_EventDriverCmd psy_eventdriver_getcmd(psy_EventDriver* self,
 	return self->vtable->getcmd(self, section);
 }
 
-INLINE void psy_eventdriver_setcmddef(psy_EventDriver* self, psy_Properties*
+INLINE void psy_eventdriver_setcmddef(psy_EventDriver* self, psy_Property*
 	properties)
 {
 	self->vtable->setcmddef(self, properties);

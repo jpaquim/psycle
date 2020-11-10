@@ -27,11 +27,12 @@
 #include "../dsp/src/dsptypes.h"
 
 typedef struct {
+	int guid;								// Global unique identifier
 	int Version;							// VERSION
 	int Flags;								// Flags	
 	char const *Name;						// "Windows MME Driver"
 	char const *ShortName;					// "MME"	
-} AudioDriverInfo;
+} psy_AudioDriverInfo;
 
 typedef psy_dsp_amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples,
 	int* playing);
@@ -41,7 +42,7 @@ struct psy_AudioDriver;
 typedef int (*psy_audiodriver_fp_open)(struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_dispose)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_deallocate)(struct psy_AudioDriver*);
-typedef void (*psy_audiodriver_fp_configure)(struct psy_AudioDriver*, psy_Properties*);
+typedef void (*psy_audiodriver_fp_configure)(struct psy_AudioDriver*, psy_Property*);
 typedef int (*psy_audiodriver_fp_close)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_connect)(struct psy_AudioDriver*, void* context,
 	AUDIODRIVERWORKFN callback,
@@ -54,6 +55,7 @@ typedef int (*psy_audiodriver_fp_numplaybacks)(struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_addcapture)(struct psy_AudioDriver*, int index);
 typedef int (*psy_audiodriver_fp_removecapture)(struct psy_AudioDriver*, int index);
 typedef void (*psy_audiodriver_fp_readbuffers)(struct psy_AudioDriver*, int index, float** pleft, float** pright, int numsamples);
+typedef const psy_AudioDriverInfo* (*psy_audiodriver_fp_info)(struct psy_AudioDriver*);
 
 typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_open open;
@@ -70,13 +72,14 @@ typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_numcaptures numcaptures;
 	psy_audiodriver_fp_playbackname playbackname;
 	psy_audiodriver_fp_numplaybacks numplaybacks;
+	psy_audiodriver_fp_info info;
 } psy_AudioDriverVTable;
 
 typedef struct psy_AudioDriver {
 	psy_AudioDriverVTable* vtable;
 	AUDIODRIVERWORKFN _pCallback;	
 	void* _callbackContext;
-	psy_Properties* properties;	
+	psy_Property* properties;	
 	psy_Signal signal_stop;
 } psy_AudioDriver;
 
@@ -85,13 +88,13 @@ typedef struct psy_AudioDriver {
 typedef psy_AudioDriver* (__cdecl *pfndriver_create)(void);
 
 EXPORT psy_AudioDriver* __cdecl driver_create(void);
-EXPORT AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void);
+EXPORT psy_AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void);
 
 #else
 typedef psy_AudioDriver* (*pfndriver_create)(void);
 
 EXPORT psy_AudioDriver* driver_create(void);
-EXPORT AudioDriverInfo const * GetPsycleDriverInfo(void);
+EXPORT psy_AudioDriverInfo const * GetPsycleDriverInfo(void);
 
 #endif
 
@@ -110,7 +113,7 @@ INLINE void psy_audiodriver_deallocate(psy_AudioDriver* self)
 	self->vtable->deallocate(self);
 }
 
-INLINE void psy_audiodriver_configure(psy_AudioDriver* self, psy_Properties* properties)
+INLINE void psy_audiodriver_configure(psy_AudioDriver* self, psy_Property* properties)
 {
 	self->vtable->configure(self, properties);
 }
@@ -165,6 +168,11 @@ INLINE int psy_audiodriver_removecapture(psy_AudioDriver* self, int index)
 INLINE void psy_audiodriver_readbuffers(psy_AudioDriver* self, int index, float** pleft, float** pright, int numsamples)
 {
 	self->vtable->readbuffers(self, index, pleft, pright, numsamples);
+}
+
+INLINE const psy_AudioDriverInfo* psy_audiodriver_info(psy_AudioDriver* self)
+{
+	return self->vtable->info(self);
 }
 
 #endif

@@ -15,6 +15,8 @@
 
 #include "cmdsnotes.h"
 
+#include "../../detail/portable.h"
+
 #if defined DIVERSALIS__OS__MICROSOFT    
 #include <windows.h>
 #endif
@@ -34,7 +36,7 @@ typedef struct {
 	psy_EventDriver driver;
 	int (*error)(int, const char*);
 	psy_EventDriverData lastinput;
-	psy_Properties* cmddef;
+	psy_Property* cmddef;
 } KbdDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -43,12 +45,12 @@ static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
-static void driver_configure(psy_EventDriver*, psy_Properties*);
+static void driver_configure(psy_EventDriver*, psy_Property*);
 static void driver_write(psy_EventDriver*, psy_EventDriverData input);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverData,
 	psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
-static void setcmddef(psy_EventDriver*, psy_Properties*);
+static void setcmddef(psy_EventDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 static int onerror(int err, const char* msg);
 static void init_properties(psy_EventDriver*);
@@ -117,7 +119,7 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
-	psy_properties_free(self->driver.properties);
+	psy_property_deallocate(self->driver.properties);
 	self->driver.properties = NULL;
 	psy_signal_dispose(&driver->signal_input);
 	return 1;
@@ -126,20 +128,22 @@ int driver_dispose(psy_EventDriver* driver)
 void init_properties(psy_EventDriver* context)
 {
 	KbdDriver* self;
+	char key[256];
 
 	self = (KbdDriver*)context;
-	context->properties = psy_properties_create();
-	psy_properties_sethint(psy_properties_append_int(context->properties,
+	psy_snprintf(key, 256, "kbd-guid-%d", PSY_EVENTDRIVER_KBD_GUID);
+	context->properties = psy_property_allocinit_key(key);
+	psy_property_sethint(psy_property_append_int(context->properties,
 		"guid", PSY_EVENTDRIVER_KBD_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_properties_settext(
-		psy_properties_append_string(context->properties, "name", "kbd"),
+	psy_property_settext(
+		psy_property_append_string(context->properties, "name", "kbd"),
 		"settingsview.name");
-	psy_properties_settext(
-		psy_properties_append_string(context->properties, "version", "1.0"),
+	psy_property_settext(
+		psy_property_append_string(context->properties, "version", "1.0"),
 		"settingsview.version");
-	self->cmddef = psy_properties_settext(
-		psy_properties_append_section(context->properties, "cmds"),
+	self->cmddef = psy_property_settext(
+		psy_property_append_section(context->properties, "cmds"),
 		"cmds.keymap");
 }
 
@@ -176,7 +180,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 {		
 	KbdDriver* self;
 	psy_EventDriverCmd kbcmd;
-	psy_Properties* section;
+	psy_Property* section;
 
 	self = (KbdDriver*)(driver);
 	cmd->id = -1;
@@ -184,20 +188,24 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	if (!sectionname) {
 		return;
 	}
-	section = psy_properties_findsection(driver->properties, sectionname);
+	section = psy_property_findsection(driver->properties, sectionname);
 	if (!section) {
 		return;
 	}
 	if (input.message == EVENTDRIVER_KEYDOWN) {
-		psy_Properties* p;
+		psy_List* p;
+		psy_Property* property = NULL;
 
-		for (p = section->children; p != NULL; p = psy_properties_next(p)) {
-			if (psy_properties_as_int(p) == input.param1) {
+		for (p = psy_property_children(section); p != NULL;
+				psy_list_next(&p)) {			
+			property = (psy_Property*)psy_list_entry(p);
+			if (psy_property_as_int(property) == input.param1) {
 				break;
 			}
+			property = NULL;
 		}
-		if (p) {
-			kbcmd.id = p->item.id;
+		if (property) {
+			kbcmd.id = property->item.id;
 		}		
 		if (kbcmd.id == CMD_NOTE_STOP) {
 			cmd->id = kbcmd.id;
@@ -220,15 +228,19 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 			cmd->data.param1 = kbcmd.id + input.param2;
 		}
 	} else {
-		psy_Properties* p;
+		psy_List* p;
+		psy_Property* property = NULL;
 
-		for (p = section->children; p != NULL; p = psy_properties_next(p)) {
-			if (psy_properties_as_int(p) == input.param1) {
+		for (p = psy_property_children(section); p != NULL;
+				psy_list_next(&p)) {
+			property = (psy_Property*)psy_list_entry(p);
+			if (psy_property_as_int(property) == input.param1) {
 				break;
 			}
+			property = NULL;
 		}
-		if (p) {
-			kbcmd.id = p->item.id;
+		if (property) {
+			kbcmd.id = property->item.id;
 		}
 		if (kbcmd.id <= NOTECOMMANDS_RELEASE) {
 			cmd->id = NOTECOMMANDS_RELEASE;
@@ -247,21 +259,24 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 	return cmd;
 }
 
-void setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
+void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 {
 	if (cmddef && cmddef->children) {
 		KbdDriver* self = (KbdDriver*)driver;
-		psy_Properties* cmds;
-		
-		cmds = psy_properties_clone(cmddef->children, TRUE);
-			psy_properties_append_property(
-			self->cmddef, cmds);		
+
+		if (self->cmddef) {
+			psy_property_remove(self->driver.properties, self->cmddef);
+		}
+		self->cmddef = psy_property_clone(cmddef);
+		psy_property_append_property(self->driver.properties,
+			self->cmddef);
+		psy_property_settext(self->cmddef, "cmds.keymap");
 	}
 }
 
-void driver_configure(psy_EventDriver* driver, psy_Properties* configuration)
+void driver_configure(psy_EventDriver* driver, psy_Property* configuration)
 {
 	if (configuration && driver->properties) {
-		psy_properties_sync(driver->properties, configuration);
+		psy_property_sync(driver->properties, configuration);
 	}
 }

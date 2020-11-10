@@ -12,7 +12,7 @@
 // test "ini" files for language definitions and can load a dictionary from an
 // "ini" file.
 //
-// Translator <>----- psy_Properties        ; dictionary
+// Translator <>----- psy_Property        ; dictionary
 //    |
 //    - - <<use>>- -> psy_propertiesio      ; dictionary load
 //
@@ -26,7 +26,7 @@
 // word definitions: see translator.c definekeys
 
 typedef struct Translator {
-	psy_Properties dictionary;	
+	psy_Property dictionary;	
 } Translator;
 
 void translator_init(Translator*);

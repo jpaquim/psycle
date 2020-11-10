@@ -28,7 +28,7 @@ typedef struct {
 	void* context;
 	void* systemhandle;	
 	psy_Signal signal_input;
-	psy_Properties* cmds;
+	psy_Property* cmds;
 	psy_Table guids;
 } psy_audio_EventDrivers;
 
@@ -45,7 +45,7 @@ int psy_audio_eventdrivers_guid(psy_audio_EventDrivers*,
 void psy_audio_eventdrivers_restart(psy_audio_EventDrivers*, int id);
 void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_remove(psy_audio_EventDrivers*, int id);
-void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers*, psy_Properties* self);
+void psy_audio_eventdrivers_setcmds(psy_audio_EventDrivers*, psy_Property* self);
 uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers*);
 psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers*, int id); 
 psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*, int id);

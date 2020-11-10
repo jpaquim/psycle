@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <hashtbl.h>
 
+#include "../../detail/portable.h"
+
 #define DEVICE_NONE 0
 #define PSY_EVENTDRIVER_DXJOYSTICK_GUID 0x0003
 
@@ -36,8 +38,8 @@ typedef struct {
 	int (*error)(int, const char*);
 	psy_EventDriverData lastinput;	
 	HANDLE hEvent;
-	psy_Properties* devices;
-	psy_Properties* cmddef;
+	psy_Property* devices;
+	psy_Property* cmddef;
 	DIJOYSTATE2 state;
 } DXJoystickDriver;
 
@@ -47,16 +49,15 @@ static int driver_open(psy_EventDriver*);
 static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
-static void driver_configure(psy_EventDriver*, psy_Properties*);
+static void driver_configure(psy_EventDriver*, psy_Property*);
 static void driver_cmd(psy_EventDriver*, const char* section,
 	psy_EventDriverData input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
-static void driver_setcmddef(psy_EventDriver*, psy_Properties*);
-static void driver_setcmddefaults(DXJoystickDriver*, psy_Properties*);
+static void driver_setcmddef(psy_EventDriver*, psy_Property*);
+static void driver_setcmddefaults(DXJoystickDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self);
 
 static void init_properties(psy_EventDriver* self);
-static void apply_properties(DXJoystickDriver* self);
 
 static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
 	DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
@@ -155,7 +156,7 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	DXJoystickDriver* self = (DXJoystickDriver*) driver;	
-	psy_properties_free(self->driver.properties);
+	psy_property_deallocate(self->driver.properties);
 	self->driver.properties = 0;
 	CloseHandle(self->hEvent);
 	psy_signal_dispose(&driver->signal_input);
@@ -166,23 +167,25 @@ int driver_dispose(psy_EventDriver* driver)
 void init_properties(psy_EventDriver* context)
 {		
 	DXJoystickDriver* self;
+	char key[256];
 	HRESULT hr;
 
 	self = (DXJoystickDriver*)context;
-	context->properties = psy_properties_create();
-	psy_properties_sethint(psy_properties_append_int(context->properties,
+	psy_snprintf(key, 256, "dxjoystick-guid-%d", PSY_EVENTDRIVER_DXJOYSTICK_GUID);
+	context->properties = psy_property_allocinit_key(key);
+	psy_property_sethint(psy_property_append_int(context->properties,
 		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_properties_append_string(context->properties, "name", "directx joystick");
-	psy_properties_append_string(context->properties, "version", "1.0");
-	self->devices = psy_properties_append_choice(context->properties, "device", 0);
-	psy_properties_append_int(self->devices, "0:None", 0, 0, 0);
+	psy_property_append_string(context->properties, "name", "directx joystick");
+	psy_property_append_string(context->properties, "version", "1.0");
+	self->devices = psy_property_append_choice(context->properties, "device", 0);
+	psy_property_append_int(self->devices, "0:None", 0, 0, 0);
 	self->count = 0;
 	if (FAILED(hr = self->di->lpVtbl->EnumDevices(self->di,
 			DI8DEVCLASS_GAMECTRL, enumCallback,
 			self, DIEDFL_ATTACHEDONLY))) {
 	}
-	self->cmddef = psy_properties_append_section(context->properties, "cmds");
+	self->cmddef = psy_property_append_section(context->properties, "cmds");
 }
 
 BOOL CALLBACK
@@ -192,32 +195,32 @@ enumCallback(const DIDEVICEINSTANCE* instance, VOID* context)
 	DIDEVICEINSTANCE* input;
 	char text[256];
 
-	self = (DXJoystickDriver*)context;
-	
+	self = (DXJoystickDriver*)context;	
 	_snprintf(text, 256, "%d:%s", self->count, instance->tszProductName);
 	input = (DIDEVICEINSTANCE*)malloc(sizeof(DIDEVICEINSTANCE));
 	*input = *instance;
 	psy_table_insert(&self->inputs, self->count, input);
-	psy_properties_append_int(self->devices, text, self->count, 0, 0);
+	psy_property_append_int(self->devices, text, self->count, 0, 0);
 	++self->count;
 	return DIENUM_CONTINUE;
 }
 
-void apply_properties(DXJoystickDriver* self)
-{	
-	if (self->driver.properties) {
-		psy_Properties* p;
+void driver_configure(psy_EventDriver* context, psy_Property* config)
+{
+	DXJoystickDriver* self;
 
-		p = psy_properties_at(self->driver.properties, "device", PSY_PROPERTY_TYP_NONE);
+	self = (DXJoystickDriver*)context;
+	if (config) {
+		psy_property_sync(self->driver.properties, config);
+	}
+	if (self->driver.properties) {
+		psy_Property* p;
+
+		p = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_NONE);
 		if (p) {
-			self->deviceid = psy_properties_as_int(p);
+			self->deviceid = psy_property_as_int(p);
 		}
 	}
-}
-
-void driver_configure(psy_EventDriver* self, psy_Properties* properties)
-{
-	apply_properties((DXJoystickDriver*)self);
 }
 
 int driver_open(psy_EventDriver* driver)
@@ -339,36 +342,40 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	psy_EventDriverData input, psy_EventDriverCmd* cmd)
 {		
 	DXJoystickDriver* self = (DXJoystickDriver*)driver;
-	psy_Properties* section;
+	psy_Property* section;
 
 	if (!sectionname) {
 		return;
 	}
 	cmd->id = -1;
-	section = psy_properties_findsection(driver->properties, sectionname);
+	section = psy_property_findsection(driver->properties, sectionname);
 	if (!section) {
 		return;
 	}
 	if (input.message != FALSE) {
-		psy_Properties* p;
+		psy_Property* property = NULL;
+		psy_List* p;
 
-		for (p = section->children; p != NULL; p = psy_properties_next(p)) {
-			if (psy_properties_as_int(p) == input.param1) {
+		for (p = psy_property_children(section); p != NULL;
+				psy_list_next(&p)) {			
+			property = (psy_Property*)psy_list_entry(p);
+			if (psy_property_as_int(property) == input.param1) {
 				break;
 			}
+			property = NULL;
 		}
-		if (p) {
-			cmd->id = p->item.id;
+		if (property) {
+			cmd->id = property->item.id;
 			cmd->data.param1 = 0;
 			cmd->data.param2 = 0;
-		}		
+		}
 	}
 }
 
 psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 {
 	psy_EventDriverCmd cmd;
-	DXJoystickDriver* self = (DXJoystickDriver*) driver;	
+	DXJoystickDriver* self = (DXJoystickDriver*)driver;
 			
 	driver_cmd(driver, section, self->lastinput, &cmd);	
 	return cmd;
@@ -377,44 +384,47 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 /*
 void driver_configure(psy_EventDriver* driver)
 {
-	psy_Properties* notes;
+	psy_Property* notes;
 
-	notes = psy_properties_findsection(driver->properties, "notes");
+	notes = psy_property_findsection(driver->properties, "notes");
 	if (notes) {
 		driver_makenoteinputs((KbdDriver*)driver, notes);
 	}
 }
 */
 
-void driver_setcmddef(psy_EventDriver* driver, psy_Properties* cmddef)
+void driver_setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 {	
-	if (cmddef && cmddef->children) {
-		DXJoystickDriver* self = (DXJoystickDriver*)driver;
-		psy_Properties* cmds;
+	DXJoystickDriver* self = (DXJoystickDriver*)driver;
 
-		cmds = psy_properties_clone(cmddef->children, TRUE);
-		psy_properties_append_property(
-			self->cmddef, cmds);
-		driver_setcmddefaults(self, cmds);
-	}
+	if (cmddef && cmddef->children) {
+		if (self->cmddef) {
+			psy_property_remove(self->driver.properties, self->cmddef);
+		}
+		self->cmddef = psy_property_clone(cmddef);
+		psy_property_append_property(self->driver.properties,
+			self->cmddef);
+		psy_property_settext(self->cmddef, "cmds.keymap");
+		driver_setcmddefaults(self, self->cmddef);
+	}			
 }
 
-void driver_setcmddefaults(DXJoystickDriver* self, psy_Properties* cmddef)
+void driver_setcmddefaults(DXJoystickDriver* self, psy_Property* cmddef)
 {
-	psy_Properties* section;
+	psy_Property* section;
 
-	section = psy_properties_find(cmddef, "general", PSY_PROPERTY_TYP_SECTION);
+	section = psy_property_find(cmddef, "general", PSY_PROPERTY_TYPE_SECTION);
 	if (section) {
-		psy_properties_set_int(section, "cmd_editmachine", INPUT_BUTTON_FIRST + 0);
-		psy_properties_set_int(section, "cmd_editpattern", INPUT_BUTTON_FIRST + 1);
-		psy_properties_set_int(section, "cmd_help", INPUT_BUTTON_FIRST + 2);
+		psy_property_set_int(section, "cmd_editmachine", INPUT_BUTTON_FIRST + 0);
+		psy_property_set_int(section, "cmd_editpattern", INPUT_BUTTON_FIRST + 1);
+		psy_property_set_int(section, "cmd_help", INPUT_BUTTON_FIRST + 2);
 	}
-	section = psy_properties_find(cmddef, "trackercmds", PSY_PROPERTY_TYP_SECTION);
+	section = psy_property_find(cmddef, "trackercmds", PSY_PROPERTY_TYPE_SECTION);
 	if (section) {
-		psy_properties_set_int(section, "cmd_navup", INPUT_MOVE_UP);
-		psy_properties_set_int(section, "cmd_navdown", INPUT_MOVE_DOWN);
-		psy_properties_set_int(section, "cmd_navleft", INPUT_MOVE_LEFT);
-		psy_properties_set_int(section, "cmd_navright", INPUT_MOVE_RIGHT);
+		psy_property_set_int(section, "cmd_navup", INPUT_MOVE_UP);
+		psy_property_set_int(section, "cmd_navdown", INPUT_MOVE_DOWN);
+		psy_property_set_int(section, "cmd_navleft", INPUT_MOVE_LEFT);
+		psy_property_set_int(section, "cmd_navright", INPUT_MOVE_RIGHT);
 	}
 }
 
