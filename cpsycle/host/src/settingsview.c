@@ -824,7 +824,7 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Mous
 			}
 		} else
 		if (self->selected->item.typ == PSY_PROPERTY_TYPE_STRING) {
-			if (psy_property_hint(self->selected) != PSY_PROPERTY_HINT_READONLY) {
+			if (!psy_property_readonly(self->selected)) {
 				psy_ui_edit_settext(&self->edit, self->selected->item.value.s);
 				edit = &self->edit.component;
 			}
@@ -837,8 +837,7 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self, psy_ui_Mous
 				psy_ui_size_make(
 					psy_ui_value_makepx(self->selrect.right - self->selrect.left),
 					psy_ui_value_makepx(self->textheight + 2)));
-			if (psy_property_hint(self->selected) !=
-					PSY_PROPERTY_HINT_READONLY) {				
+			if (!psy_property_readonly(self->selected)) {				
 				psy_ui_component_show(edit);
 				psy_ui_component_setfocus(edit);
 			}			

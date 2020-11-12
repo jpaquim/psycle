@@ -218,7 +218,7 @@ static int removecaptureport(WasapiDriver*, int idx);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 
 static void PrepareWaveFormat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
-static void init_properties(psy_AudioDriver* self);
+static void init_properties(psy_AudioDriver*);
 static int on_error(int err, const char* msg);
 
 static void refreshavailableports(WasapiDriver*);
@@ -452,19 +452,20 @@ static void init_properties(psy_AudioDriver* driver)
 	int i;
 
 	psy_snprintf(key, 256, "wasapi-guid-%d", PSY_AUDIODRIVER_WASAPI_GUID);
-	driver->properties = psy_property_allocinit_key(key);
+	driver->properties = psy_property_settext(
+		psy_property_allocinit_key(key), "Windows WASAPI interface");
 	psy_property_sethint(psy_property_append_int(self->driver.properties,
 		"guid", PSY_AUDIODRIVER_WASAPI_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_property_sethint(
-		psy_property_append_string(driver->properties, "name", "wasapi"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_property_sethint(
+	psy_property_setreadonly(
+		psy_property_append_string(driver->properties, "name", "Windows WASAPI Driver"),
+		TRUE);
+	psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_property_sethint(
+		TRUE);
+	psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);
+		TRUE);
 	devices = psy_property_append_choice(driver->properties, "device", -1);
 	
 	psy_property_append_int(driver->properties, "bitdepth", 16, 0, 32);
@@ -472,12 +473,16 @@ static void init_properties(psy_AudioDriver* driver)
 	psy_property_append_int(driver->properties, "dither", 0, 0, 1);
 	psy_property_append_int(driver->properties, "numbuf", 8, 6, 8);
 	psy_property_append_int(driver->properties, "numsamples", 4096, 128, 8193);
-	devices = psy_property_append_choice(driver->properties, "device", 0);
+	devices = psy_property_settext(
+		psy_property_append_choice(driver->properties, "device", 0),
+		"Output Device");
 	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnum* port = (PortEnum*)p->entry;
 		psy_property_append_int(devices, port->portName, i, 0, 0);
 	}
-	indevices = psy_property_append_choice(driver->properties, "indevice", 0);
+	indevices = psy_property_settext(
+		psy_property_append_choice(driver->properties, "indevice", 0),
+		"Standard Input Device (Select different in Recorder)");
 	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnum* port = (PortEnum*)p->entry;
 		psy_property_append_int(indevices, port->portName, i, 0, 0);

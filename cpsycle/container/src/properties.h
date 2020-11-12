@@ -42,7 +42,6 @@ typedef enum {
 typedef enum {
 	PSY_PROPERTY_HINT_NONE,
 	PSY_PROPERTY_HINT_HIDE,
-	PSY_PROPERTY_HINT_READONLY,
 	PSY_PROPERTY_HINT_EDIT,
 	PSY_PROPERTY_HINT_EDITDIR,
 	PSY_PROPERTY_HINT_EDITCOLOR,
@@ -66,7 +65,8 @@ typedef struct psy_PropertyItem {
 	int min;
 	int max;
 	int typ;
-	int hint;	
+	int hint;
+	bool readonly;
 	int disposechildren;
 	int save;
 	int id;
@@ -162,6 +162,8 @@ psy_Property* psy_property_settext(psy_Property*, const char* text);
 psy_Property* psy_property_settranslation(psy_Property*, const char* text);
 psy_Property* psy_property_setshorttext(psy_Property*, const char* text);
 psy_Property* psy_property_setcomment(psy_Property*, const char* text);
+psy_Property* psy_property_setreadonly(psy_Property*, bool on);
+bool psy_property_readonly(const psy_Property*);
 const char* psy_property_text(psy_Property*);
 const char* psy_property_translation(psy_Property*);
 const char* psy_property_shorttext(psy_Property*);

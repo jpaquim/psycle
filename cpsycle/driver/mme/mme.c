@@ -159,7 +159,7 @@ static int on_error(int err, const char* msg);
 
 int on_error(int err, const char* msg)
 {
-	MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
+	MessageBox(0, msg, "Windows Wave MME driver", MB_OK | MB_ICONERROR);
 	return 0;
 }
 
@@ -281,21 +281,22 @@ static void init_properties(psy_AudioDriver* driver)
 
 	self = (MmeDriver*)driver;
 	psy_snprintf(key, 256, "mme-guid-%d", PSY_AUDIODRIVER_MME_GUID);
-	driver->properties = psy_property_allocinit_key(key);
+	driver->properties = psy_property_settext(
+		psy_property_allocinit_key(key), "Windows Wave MME");
 	psy_property_sethint(psy_property_append_int(self->driver.properties,
 		"guid", PSY_AUDIODRIVER_MME_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_property_settext(psy_property_sethint(
-		psy_property_append_string(driver->properties, "name", "winmme"),
-		PSY_PROPERTY_HINT_READONLY),
+	psy_property_settext(psy_property_setreadonly(
+		psy_property_append_string(driver->properties, "name", "Windows Wave MME"),
+		TRUE),
 		"Driver");
-	psy_property_settext(psy_property_sethint(
+	psy_property_settext(psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
-		PSY_PROPERTY_HINT_READONLY),
+		TRUE),
 		"Vendor");
-	psy_property_settext(psy_property_sethint(
+	psy_property_settext(psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY),
+		TRUE),
 		"Version");
 	psy_property_settext(
 		psy_property_append_int(driver->properties, "bitdepth",
@@ -320,7 +321,7 @@ static void init_properties(psy_AudioDriver* driver)
 		"Buffer Samples");
 	devices = psy_property_settext(
 		psy_property_append_choice(driver->properties, "device", 0),
-		"Device");
+		"Output Device");
 	psy_property_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
 	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;

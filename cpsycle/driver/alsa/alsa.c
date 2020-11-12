@@ -166,19 +166,20 @@ void init_properties(psy_AudioDriver* self)
 	char key[256];
 
 	psy_snprintf(key, 256, "alsa-guid-%d", PSY_AUDIODRIVER_ALSA_GUID);
-	self->properties = psy_properties_create(key);
+	self->properties = psy_property_settext(
+		psy_properties_create(key), "Linux ALSA Interface");
 	psy_properties_sethint(psy_properties_append_int(self->driver.properties,
 		"guid", PSY_AUDIODRIVER_ALSA_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_properties_sethint(
+	psy_property_setreadonly(
 		psy_properties_append_string(self->properties, "name", "alsa"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
+		TRUE);
+	psy_property_setreadonly(
 		psy_properties_append_string(self->properties, "vendor", "Psycedelics"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_properties_sethint(
+		TRUE);
+	psy_property_setreadonly(
 		psy_properties_append_string(self->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);
+		TRUE);
 	property = psy_properties_append_choice(self->properties, "device", -1);	
 	psy_properties_append_int(self->properties, "bitdepth", 16, 0, 32);
 	psy_properties_append_int(self->properties, "samplerate", 44100, 0, 0);

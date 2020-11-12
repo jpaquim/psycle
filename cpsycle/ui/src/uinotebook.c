@@ -35,7 +35,7 @@ void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
 			size = psy_ui_component_preferredsize(psy_ui_notebook_base(self), &size);
 		}
 		for (p = q = psy_ui_component_children(psy_ui_notebook_base(self), 0); p != NULL;
-			p = p->next, ++c) {
+			psy_list_next(&p), ++c) {
 			psy_ui_Component* component;
 
 			component = (psy_ui_Component*)p->entry;
