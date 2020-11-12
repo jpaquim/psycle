@@ -632,7 +632,7 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 		psy_audio_PatternEvent* ev;
 
 		ev = (psy_audio_PatternEvent*)psy_list_entry(p);
-		if (ev->note == NOTECOMMANDS_TWEAK) {
+		if (ev->note == psy_audio_NOTECOMMANDS_TWEAK) {
 			if (ev->inst < psy_audio_machine_numparameters(self)) {
 				psy_audio_MachineParam* param;				
 				
@@ -659,15 +659,15 @@ void work_entry(psy_audio_Machine* self, psy_audio_PatternEntry* entry)
 				}
 			}
 		} else 
-		if (ev->note == NOTECOMMANDS_EMPTY && ev->cmd == EXTENDED) {
-			if ((ev->parameter & 0xF0) == SET_BYPASS) {
+		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY && ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
+			if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_BYPASS) {
 				if ((ev->parameter & 0x0F) == 0) {
 					psy_audio_machine_unbypass(self);
 				} else {
 					psy_audio_machine_bypass(self);
 				}
 			} else
-			if ((ev->parameter & 0xF0) == SET_MUTE) {
+			if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_MUTE) {
 				if ((ev->parameter & 0x0F) == 0) {
 					psy_audio_machine_unmute(self);
 				} else {

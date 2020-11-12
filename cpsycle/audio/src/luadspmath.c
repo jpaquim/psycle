@@ -33,7 +33,7 @@ int notetofreq(lua_State* L)
 {
 	double note = luaL_checknumber(L, 1);
 	int n = lua_gettop(L);
-	lua_Integer base = NOTECOMMANDS_MIDDLEA;
+	lua_Integer base = psy_audio_NOTECOMMANDS_MIDDLEA;
 	if (n == 2) {
 		base = luaL_checkinteger(L, 2);
 	}
@@ -45,7 +45,7 @@ int freqtonote(lua_State* L)
 {
 	double f = luaL_checknumber(L, 1);
 	int n = lua_gettop(L);
-	lua_Integer base = NOTECOMMANDS_MIDDLEA;
+	lua_Integer base = psy_audio_NOTECOMMANDS_MIDDLEA;
 	double note;
 
 	if (n == 2) {

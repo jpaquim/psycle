@@ -9,10 +9,10 @@
 
 // Sampler Configuration
 void psy_audio_xmsamplercmd_init_all(psy_audio_XMSamplerCmd* self,
-	int id, int patternid, int mask)
+	int id, int patternslot, int mask)
 {
 	self->id = id;
-	self->patternid = patternid;
+	self->patternslot = patternslot;
 	self->mode = mask;
 }
 
@@ -26,13 +26,13 @@ psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_alloc(void)
 }
 
 psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_allocinit_all(int id,
-	int patternid, int mask)
+	int patternslot, int mask)
 {
 	psy_audio_XMSamplerCmd* rv;
 	
 	rv = psy_audio_xmsamplercmd_alloc();
 	if (rv) {
-		psy_audio_xmsamplercmd_init_all(rv, id, patternid, mask);
+		psy_audio_xmsamplercmd_init_all(rv, id, patternslot, mask);
 	}
 	return rv;
 }

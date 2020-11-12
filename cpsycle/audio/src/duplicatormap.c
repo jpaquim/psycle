@@ -21,8 +21,8 @@ void duplicatoroutput_dispose(psy_audio_DuplicatorOutput* self)
 	psy_table_dispose(&self->allochans);
 	self->machine = -1;
 	self->offset = 0;
-	self->lowkey = NOTECOMMANDS_C0;
-	self->highkey = NOTECOMMANDS_B9;
+	self->lowkey = psy_audio_NOTECOMMANDS_C0;
+	self->highkey = psy_audio_NOTECOMMANDS_B9;
 }
 
 void psy_audio_duplicatoroutput_setall(psy_audio_DuplicatorOutput* self,

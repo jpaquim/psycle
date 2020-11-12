@@ -23,6 +23,9 @@ typedef struct KbdHelp {
 
 void kbdhelp_init(KbdHelp*, psy_ui_Component* parent, Workspace*);
 
-INLINE psy_ui_Component* kbdhelp_base(KbdHelp* self) { return &self->component; }
+INLINE psy_ui_Component* kbdhelp_base(KbdHelp* self)
+{
+	return &self->component;
+}
 
 #endif /* KBDHELP_H */

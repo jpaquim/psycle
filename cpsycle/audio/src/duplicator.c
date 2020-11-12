@@ -170,7 +170,7 @@ psy_List* sequencerinsert(psy_audio_Duplicator* self, psy_audio_PatternNode* eve
 					patternentry = psy_audio_patternnode_entry(p);
 					newentry = patternentry_clone(patternentry);
 					note = patternentry_front(patternentry)->note;					
-					if (note < NOTECOMMANDS_RELEASE) {						
+					if (note < psy_audio_NOTECOMMANDS_RELEASE) {						
 						note = transpose(note, output->offset);
 					}
 					mapchannel = psy_audio_duplicatormap_channel(&self->map,
@@ -182,7 +182,7 @@ psy_List* sequencerinsert(psy_audio_Duplicator* self, psy_audio_PatternNode* eve
 						psy_list_append(&insert, newentry);
 					}
 					if (patternentry_front(patternentry)->note >= 
-							NOTECOMMANDS_RELEASE) {
+							psy_audio_NOTECOMMANDS_RELEASE) {
 						psy_audio_duplicatormap_release(&self->map,
 							patternentry->track, mapchannel, output);
 					}
@@ -197,11 +197,11 @@ int transpose(int note, int offset)
 {
 	int rv = note + offset;
 
-	if (note >= NOTECOMMANDS_RELEASE) {
-		rv = NOTECOMMANDS_B9;
+	if (note >= psy_audio_NOTECOMMANDS_RELEASE) {
+		rv = psy_audio_NOTECOMMANDS_B9;
 	} else
 	if (note < 0) {
-		rv = NOTECOMMANDS_C0;
+		rv = psy_audio_NOTECOMMANDS_C0;
 	}
 	return rv;
 }

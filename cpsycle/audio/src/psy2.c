@@ -208,7 +208,7 @@ void psy2loader_readpatterns(PSY2Loader* self)
 			psy_audio_Pattern* pattern;
 
 			pattern = psy_audio_pattern_allocinit();
-			patterns_insert(&self->songfile->song->patterns, i, pattern);
+			psy_audio_patterns_insert(&self->songfile->song->patterns, i, pattern);
 			pData = malloc(OLD_MAX_TRACKS * sizeof(psy_audio_PatternEntry));
 			for (c = 0; c < numlines; ++c) {
 				int32_t track;
@@ -225,17 +225,17 @@ void psy2loader_readpatterns(PSY2Loader* self)
 					// uint8_t mach;		2
 					// uint8_t cmd;			3
 					// uint8_t parameter;	4												
-					patternevent_clear(&event);
+					psy_audio_patternevent_clear(&event);
 					event.note = ptrack[0];
 					event.inst = (ptrack[1] == 0xFF)
-						? event.inst = NOTECOMMANDS_INST_EMPTY
+						? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
 						: ptrack[1];
 					event.mach = (ptrack[2] == 0xFF)
-						? event.mach = NOTECOMMANDS_MACH_EMPTY
+						? event.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY
 						: ptrack[2];
 					event.cmd = ptrack[3];
 					event.parameter = ptrack[4];
-					if (!patternevent_empty(&event)) {
+					if (!psy_audio_patternevent_empty(&event)) {
 						node = psy_audio_pattern_insert(pattern, node, track, offset,
 							&event);
 					}
@@ -250,7 +250,7 @@ void psy2loader_readpatterns(PSY2Loader* self)
 			psy_audio_Pattern* pattern;
 
 			pattern = psy_audio_pattern_allocinit();
-			patterns_insert(&self->songfile->song->patterns, i, pattern);
+			psy_audio_patterns_insert(&self->songfile->song->patterns, i, pattern);
 			pattern->length = 64 * 0.25;
 		}
 	}
@@ -259,16 +259,16 @@ void psy2loader_readpatterns(PSY2Loader* self)
 void psy2loader_readsequence(PSY2Loader* self)
 {
 	int32_t i;
-	SequencePosition sequenceposition;
+	psy_audio_SequencePosition sequenceposition;
 
 	sequenceposition.track =
-		sequence_appendtrack(&self->songfile->song->sequence,
-			sequencetrack_allocinit());
+		psy_audio_sequence_appendtrack(&self->songfile->song->sequence,
+			psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < self->playlength; ++i) {
 		sequenceposition.trackposition =
-			sequence_last(&self->songfile->song->sequence,
+			psy_audio_sequence_last(&self->songfile->song->sequence,
 				sequenceposition.track);
-		sequence_insert(&self->songfile->song->sequence,
+		psy_audio_sequence_insert(&self->songfile->song->sequence,
 			sequenceposition, self->playorder[i]);
 	}
 }

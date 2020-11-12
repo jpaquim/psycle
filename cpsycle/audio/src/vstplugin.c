@@ -382,15 +382,15 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		psy_audio_PatternEvent* ev = patternentry_front(entry);
 
 		numworksamples = (unsigned int)entry->delta - pos;
-		if (ev->note == NOTECOMMANDS_EMPTY && ev->cmd == EXTENDED) {
-			if ((ev->parameter & 0xF0) == SET_BYPASS) {
+		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY && ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
+			if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_BYPASS) {
 				if ((ev->parameter & 0x0F) == 0) {
 					psy_audio_machine_unbypass(psy_audio_vstplugin_base(self));
 				} else {
 					psy_audio_machine_bypass(psy_audio_vstplugin_base(self));
 				}
 			} else
-				if ((ev->parameter & 0xF0) == SET_MUTE) {
+				if ((ev->parameter & 0xF0) == psy_audio_PATTERNCMD_SET_MUTE) {
 					if ((ev->parameter & 0x0F) == 0) {
 						psy_audio_machine_unmute(psy_audio_vstplugin_base(self));
 					} else {
@@ -398,17 +398,17 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					}
 				}
 		} else
-		if (patternentry_front(entry)->inst == NOTECOMMANDS_INST_EMPTY) {
+		if (patternentry_front(entry)->inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			midichannel = 0;
 		} else {
 			midichannel = patternentry_front(entry)->inst & 0x0F;
 		}
-		if (patternentry_front(entry)->cmd == SET_PANNING) {
+		if (patternentry_front(entry)->cmd == psy_audio_PATTERNCMD_SET_PANNING) {
 			// todo split work
 			psy_audio_machine_setpanning(psy_audio_vstplugin_base(self),
 				patternentry_front(entry)->parameter / 255.f);
 		} else
-		if (patternentry_front(entry)->note == NOTECOMMANDS_MIDICC) {
+		if (patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_MIDICC) {
 			if (patternentry_front(entry)->inst >= 0x80 &&
 				patternentry_front(entry)->inst < 0xFF) {
 					self->events->events[count] = (VstEvent*)
@@ -425,7 +425,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				}
 			}
 		} else
-		if (patternentry_front(entry)->note == NOTECOMMANDS_TWEAK) {
+		if (patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
 			psy_audio_MachineParam* param;
 						
 			if (numworksamples > 0) {				
@@ -466,7 +466,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			self->events->numEvents = 0;
 			count = 0;
 		} else 
-		if (patternentry_front(entry)->note < NOTECOMMANDS_RELEASE) {
+		if (patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
 			VstNote* note = 0;
 
 			if (psy_table_exists(&self->tracknote, entry->track)) {
@@ -492,7 +492,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			note->midichan = midichannel;
 			++count;			
 		} else
-		if (patternentry_front(entry)->note == NOTECOMMANDS_RELEASE) {
+		if (patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				VstNote* note;
 				

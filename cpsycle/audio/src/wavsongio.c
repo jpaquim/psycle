@@ -33,23 +33,23 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 		psy_audio_Pattern* pattern;
 		psy_audio_PatternEvent patternevent;		
 
-		patternevent_clear(&patternevent);
+		psy_audio_patternevent_clear(&patternevent);
 		patternevent.note = 48;
 		pattern = psy_audio_pattern_allocinit();
 		psy_audio_pattern_insert(pattern, 0, 0, (psy_dsp_beat_t) 0, &patternevent);
 		psy_audio_pattern_setlength(pattern,
 			(sample->numframes / (psy_dsp_beat_t)sample->samplerate) / 60 * 125);
-		patterns_insert(&self->song->patterns, 0, pattern);
-		patterns_setsongtracks(&self->song->patterns, 1);
+		psy_audio_patterns_insert(&self->song->patterns, 0, pattern);
+		psy_audio_patterns_setsongtracks(&self->song->patterns, 1);
 	}
 	{
-		SequencePosition sequenceposition;
+		psy_audio_SequencePosition sequenceposition;
 		
-		sequenceposition.track = sequence_appendtrack(&self->song->sequence,
-			sequencetrack_allocinit());
+		sequenceposition.track = psy_audio_sequence_appendtrack(&self->song->sequence,
+			psy_audio_sequencetrack_allocinit());
 		sequenceposition.trackposition =
-			sequence_begin(&self->song->sequence, sequenceposition.track, 0);
-		sequence_insert(&self->song->sequence, sequenceposition, 0);
+			psy_audio_sequence_begin(&self->song->sequence, sequenceposition.track, 0);
+		psy_audio_sequence_insert(&self->song->sequence, sequenceposition, 0);
 	}
 	{
 		psy_audio_Machine* machine;

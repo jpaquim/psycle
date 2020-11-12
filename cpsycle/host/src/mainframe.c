@@ -35,7 +35,7 @@ static void mainframe_destroyed(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onmousedown(MainFrame*, psy_ui_MouseEvent*);
-static void mainframe_onsequenceselchange(MainFrame* , SequenceEntry*);
+static void mainframe_onsequenceselchange(MainFrame* , psy_audio_SequenceEntry*);
 static void mainframe_ongear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onhidegear(MainFrame*, psy_ui_Component* sender);
 static void mainframe_oncpu(MainFrame*, psy_ui_Component* sender);
@@ -66,6 +66,7 @@ static void mainframe_updatetitle(MainFrame*);
 static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
+static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
 
@@ -92,17 +93,18 @@ static void mainframe_onfileload(MainFrame*, FileView* sender);
 #define GEARVIEW 10
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(MainFrame* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onkeydown = (psy_ui_fp_onkeydown) mainframe_onkeydown;
-		vtable.onkeyup = (psy_ui_fp_onkeyup) mainframe_onkeyup;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) mainframe_onmousedown;
+		vtable.onkeydown = (psy_ui_fp_onkeydown)mainframe_onkeydown;
+		vtable.onkeyup = (psy_ui_fp_onkeyup)mainframe_onkeyup;
+		vtable.onmousedown = (psy_ui_fp_onmousedown)mainframe_onmousedown;
 		vtable.ontimer = (psy_ui_fp_ontimer)mainframe_ontimer;
 		vtable.onclose = (psy_ui_fp_onclose)mainframe_onclose;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -289,6 +291,11 @@ void mainframe_init(MainFrame* self)
 	if (!workspace_showstepsequencer(&self->workspace)) {
 		psy_ui_component_hide(&self->stepsequencerview.component);
 	}
+	// seqeditor
+	seqeditor_init(&self->seqeditor, &self->client, &self->workspace);
+	psy_ui_component_setalign(&self->seqeditor.component,
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_hide(&self->seqeditor.component);
 	// recent song view
 	recentview_init(&self->recentview, &self->component,
 		&self->viewtabbars.component,
@@ -308,6 +315,10 @@ void mainframe_init(MainFrame* self)
 	sequenceview_init(&self->sequenceview, &self->component, &self->workspace);
 	psy_ui_component_setalign(&self->sequenceview.component,
 		psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->sequenceview.options.toggleseqediticon.signal_clicked, self,
+		mainframe_ontoggleseqeditor);
+	psy_signal_connect(&self->sequenceview.options.toggleseqedit.signal_clicked, self,
+		mainframe_ontoggleseqeditor);
 	// splitbar
 	psy_ui_splitbar_init(&self->splitbar, &self->component);
 	// plugineditor
@@ -448,15 +459,14 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_ui_button_settext(&self->togglekbdhelp, "Kbd");
 	psy_ui_component_setalign(&self->togglekbdhelp.component,
 		psy_ui_ALIGN_RIGHT);
+	psy_signal_connect(&self->togglekbdhelp.signal_clicked, self,
+		mainframe_ontogglekbdhelp);
 	psy_ui_button_init(&self->toggleterminal, &self->statusbar);
 	psy_ui_button_settext(&self->toggleterminal, "  Terminal");	
 	psy_ui_component_setalign(&self->toggleterminal.component,
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->toggleterminal.signal_clicked, self,
-		mainframe_ontoggleterminal);
-	self->togglekbdhelp.component.debugflag = 4321;
-	psy_signal_connect(&self->togglekbdhelp.signal_clicked, self,
-		mainframe_ontogglekbdhelp);
+		mainframe_ontoggleterminal);	
 	psy_ui_progressbar_init(&self->progressbar, &self->statusbar);
 	psy_ui_component_setalign(&self->progressbar.component,
 		psy_ui_ALIGN_RIGHT);	
@@ -584,18 +594,18 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			psy_audio_player_start(&self->workspace.player);
 			break;
 		case CMD_IMM_PLAYSTART: {
-			SequenceEntry* entry;
+			psy_audio_SequenceEntry* entry;
 
-			entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
 			psy_audio_player_setposition(&self->workspace.player,
 				(entry) ? entry->offset : 0);
 			psy_audio_player_start(&self->workspace.player);
 			break; }
 		case CMD_IMM_PLAYFROMPOS: {
 			psy_dsp_big_beat_t playposition = 0;
-			SequenceEntry* entry;
+			psy_audio_SequenceEntry* entry;
 
-			entry = sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
 			playposition = (entry ? entry->offset : 0) +
 				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
 			psy_audio_player_setposition(&self->workspace.player, playposition);
@@ -608,9 +618,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			if (self->workspace.song) {
 				if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
-					sequenceselection_seteditposition(
+					psy_audio_sequenceselection_seteditposition(
 						&self->workspace.sequenceselection,
-						sequence_makeposition(&self->workspace.song->sequence,
+						psy_audio_sequence_makeposition(&self->workspace.song->sequence,
 							self->workspace.sequenceselection.editposition.track,
 							self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
 					workspace_setsequenceselection(&self->workspace,
@@ -622,9 +632,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			if (self->workspace.song) {
 				if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
 					self->workspace.sequenceselection.editposition.trackposition.tracknode->next) {
-					sequenceselection_seteditposition(
+					psy_audio_sequenceselection_seteditposition(
 						&self->workspace.sequenceselection,
-						sequence_makeposition(&self->workspace.song->sequence,
+						psy_audio_sequence_makeposition(&self->workspace.song->sequence,
 							self->workspace.sequenceselection.editposition.track,
 							self->workspace.sequenceselection.editposition.trackposition.tracknode->next));
 					workspace_setsequenceselection(&self->workspace,
@@ -1202,6 +1212,17 @@ bool mainframe_onclose(MainFrame* self)
 		return FALSE;
 	}
 	return TRUE;
+}
+
+void mainframe_ontoggleseqeditor(MainFrame* self, psy_ui_Component* sender)
+{
+	if (psy_ui_component_visible(seqeditor_base(&self->seqeditor))) {
+		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+		psy_ui_component_align(&self->client);
+	} else {
+		psy_ui_component_show(seqeditor_base(&self->seqeditor));
+		psy_ui_component_align(&self->client);
+	}
 }
 
 void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)

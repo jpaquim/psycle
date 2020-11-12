@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 #ifdef PSY_USE_PLATFORM_LISTBOX
 
@@ -43,7 +44,7 @@ void psy_ui_listbox_init(psy_ui_ListBox* self, psy_ui_Component* parent)
 	self->component.vtable = &psy_ui_listbox_vtable;
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
-
+	self->charnumber = 0;
 }
 
 void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
@@ -55,6 +56,7 @@ void psy_ui_listbox_init_multiselect(psy_ui_ListBox* self, psy_ui_Component*
 		&self->imp->component_imp);
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);
 	psy_signal_init(&self->signal_selchanged);
+	self->charnumber = 0;
 }
 
 void ondestroy(psy_ui_ListBox* self, psy_ui_Component* sender)
@@ -115,8 +117,8 @@ void psy_ui_listbox_onpreferredsize(psy_ui_ListBox* self,
 	
 	tm = psy_ui_component_textmetric(&self->component);
 	rv->width = (self->charnumber == 0)
-		? psy_ui_value_makepx(tm.tmAveCharWidth * 40)
-		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
+		? psy_ui_value_makepx(tm.tmAveCharWidth * 40) // tm.tmAveCharWidth
+		: psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber); // 
 	rv->height = psy_ui_value_makepx((int)(tm.tmHeight * 1.2) *
 		psy_ui_listbox_count(self));	
 }

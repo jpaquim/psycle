@@ -207,20 +207,20 @@ typedef enum psy_audio_XMSamplerCmdMode {
 
 typedef struct SamplerCmd {
 	int id;
-	int patternid;
+	int patternslot;
 	int mode;
 } psy_audio_XMSamplerCmd;
 
 void psy_audio_xmsamplercmd_init_all(psy_audio_XMSamplerCmd*,
-	int id, int patternid, int mask);
+	int id, int patternslot, int mask);
 void psy_audio_xmsamplercmd_dispose(psy_audio_XMSamplerCmd*);
 
-INLINE psy_audio_XMSamplerCmd psy_audio_xmsamplercmd_make(int id, int patternid, int mask)
+INLINE psy_audio_XMSamplerCmd psy_audio_xmsamplercmd_make(int id, int patternslot, int mask)
 {
 	psy_audio_XMSamplerCmd rv;
 
 	rv.id = id;
-	rv.patternid = patternid;
+	rv.patternslot = patternslot;
 	rv.mode = mask;
 	return rv;
 }
@@ -238,7 +238,7 @@ INLINE bool psy_audio_xmsamplercmd_hasticktime(const psy_audio_XMSamplerCmd* sel
 
 psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_alloc(void);
 psy_audio_XMSamplerCmd* psy_audio_xmsamplercmd_allocinit_all(int id,
-	int patternid, int mask);
+	int patternslot, int mask);
 
 typedef enum {
 	INTERPOL_NONE = 0,

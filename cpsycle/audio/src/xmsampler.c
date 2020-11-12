@@ -505,11 +505,11 @@ void seqtick(psy_audio_XMSampler* self, uintptr_t channelnum,
 	if (channel) {
 		psy_audio_xmsamplerchannel_seteffect(channel, &event);
 	}
-	if (event.note == NOTECOMMANDS_RELEASE) {
+	if (event.note == psy_audio_NOTECOMMANDS_RELEASE) {
 		releasevoices(self, channelnum);
 		return;
 	}
-	if (event.note < NOTECOMMANDS_RELEASE) {
+	if (event.note < psy_audio_NOTECOMMANDS_RELEASE) {
 		nnavoices(self, channelnum);
 	} else {
 		voice = activevoice(self, channelnum);
@@ -582,14 +582,14 @@ psy_audio_InstrumentIndex currslot(psy_audio_XMSampler* self, uintptr_t channel,
 {
 	int rv;
 
-	if (event->inst != NOTECOMMANDS_EMPTY) {
+	if (event->inst != psy_audio_NOTECOMMANDS_EMPTY) {
 		psy_table_insert(&self->lastinst, channel, (void*)(uintptr_t)event->inst);
 		rv = event->inst;
 	} else
 	if (psy_table_exists(&self->lastinst, channel)) {
 		rv = (int)(uintptr_t) psy_table_at(&self->lastinst, channel);
 	} else { 
-		rv = NOTECOMMANDS_EMPTY;
+		rv = psy_audio_NOTECOMMANDS_EMPTY;
 	}
 	return psy_audio_instrumentindex_make(self->instrumentbank, rv);
 }
@@ -816,7 +816,7 @@ psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
 				// This means there is always 6 ticks per row whatever number of rows.
 				//_triggerNoteOff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
 				noteoff = patternentry_allocinit();
-				patternentry_front(noteoff)->note = NOTECOMMANDS_RELEASE;
+				patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
 				patternentry_front(noteoff)->mach = patternentry_front(entry)->mach;
 				noteoff->delta += /*entry->offset*/ + (event->parameter & 0x0f) / 6.f *
 					psy_audio_machine_currbeatsperline(

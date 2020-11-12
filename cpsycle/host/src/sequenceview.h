@@ -42,7 +42,7 @@ void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent,
 typedef struct {
 	psy_ui_Component component;
 	psy_audio_Sequence* sequence;
-	SequenceSelection* selection;	
+	psy_audio_SequenceSelection* selection;	
 	psy_audio_Patterns* patterns;	
 	int selected;
 	int selectedtrack;
@@ -55,7 +55,8 @@ typedef struct {
 	bool showpatternnames;
 	psy_dsp_beat_t lastplayposition;
 	psy_audio_Player* player;
-	SequenceEntry* lastentry;	
+	psy_audio_SequenceEntry* lastentry;
+	int refreshcount;
 	Workspace* workspace;
 	struct SequenceView* view;
 } SequenceListView;
@@ -94,6 +95,9 @@ typedef struct {
 	psy_ui_CheckBox showplaylist;
 	psy_ui_CheckBox recordtweaks;
 	psy_ui_CheckBox multichannelaudition;
+	psy_ui_Component top;
+	psy_ui_Button toggleseqedit;
+	psy_ui_Button toggleseqediticon;
 	Workspace* workspace;
 } SequencerOptionsBar;
 
@@ -112,7 +116,7 @@ typedef struct SequenceView {
 	SequencerOptionsBar options;
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;
-	SequenceSelection* selection;
+	psy_audio_SequenceSelection* selection;
 	Workspace* workspace;
 } SequenceView;
 

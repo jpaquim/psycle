@@ -209,19 +209,19 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		}		
 		if (kbcmd.id == CMD_NOTE_STOP) {
 			cmd->id = kbcmd.id;
-			cmd->data.param1 = NOTECOMMANDS_RELEASE;			
+			cmd->data.param1 = psy_audio_NOTECOMMANDS_RELEASE;			
 		} else
 		if (kbcmd.id == CMD_NOTE_TWEAKM) {
 			cmd->id = kbcmd.id;
-			cmd->data.param1 = NOTECOMMANDS_TWEAK;			
+			cmd->data.param1 = psy_audio_NOTECOMMANDS_TWEAK;			
 		} else
 		if (kbcmd.id == CMD_NOTE_TWEAKS) {
 			cmd->id = kbcmd.id;
-			cmd->data.param1 = NOTECOMMANDS_TWEAKSLIDE;			
+			cmd->data.param1 = psy_audio_NOTECOMMANDS_TWEAKSLIDE;			
 		} else
 		if (kbcmd.id == CMD_NOTE_MIDICC) {
 			cmd->id = kbcmd.id;
-			cmd->data.param1 = NOTECOMMANDS_MIDICC;
+			cmd->data.param1 = psy_audio_NOTECOMMANDS_MIDICC;
 		} else
 		if (kbcmd.id != -1) {
 			cmd->id = kbcmd.id;
@@ -242,9 +242,9 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		if (property) {
 			kbcmd.id = property->item.id;
 		}
-		if (kbcmd.id <= NOTECOMMANDS_RELEASE) {
-			cmd->id = NOTECOMMANDS_RELEASE;
-			cmd->data.param1 = NOTECOMMANDS_RELEASE;
+		if (kbcmd.id <= psy_audio_NOTECOMMANDS_RELEASE) {
+			cmd->id = psy_audio_NOTECOMMANDS_RELEASE;
+			cmd->data.param1 = psy_audio_NOTECOMMANDS_RELEASE;
 		}
 	}
 }

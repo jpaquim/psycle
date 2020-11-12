@@ -835,11 +835,11 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 		psy_audio_PatternEvent event;
 		psy_audio_exclusivelock_enter();
 		psy_list_free(self->samplerevents);
-		patternevent_init_all(&event,
+		psy_audio_patternevent_init_all(&event,
 			(unsigned char) 48,
 			(unsigned char)psy_audio_instruments_selected(&self->workspace->song->instruments).subslot,
-			NOTECOMMANDS_MACH_EMPTY,
-			NOTECOMMANDS_VOL_EMPTY,
+			psy_audio_NOTECOMMANDS_MACH_EMPTY,
+			psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	
 		patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
 		self->samplerevents = psy_list_create(&self->samplerentry);
@@ -853,11 +853,11 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 
 	psy_audio_exclusivelock_enter();
 	psy_list_free(self->samplerevents);
-	patternevent_init_all(&event,
-		NOTECOMMANDS_RELEASE,
+	psy_audio_patternevent_init_all(&event,
+		psy_audio_NOTECOMMANDS_RELEASE,
 		0,		
-		NOTECOMMANDS_MACH_EMPTY,
-		NOTECOMMANDS_VOL_EMPTY,
+		psy_audio_NOTECOMMANDS_MACH_EMPTY,
+		psy_audio_NOTECOMMANDS_VOL_EMPTY,
 		0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerentry);
 	patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);

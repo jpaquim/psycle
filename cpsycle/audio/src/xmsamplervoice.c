@@ -210,7 +210,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	self->resamplertype = quality;
 	self->currrandvol = 1.f;
 	self->volume = 128;
-	self->note = NOTECOMMANDS_EMPTY;
+	self->note = psy_audio_NOTECOMMANDS_EMPTY;
 	self->_cutoff = 127;
 	self->m_Ressonance = 0;
 	self->_coModify = 0;
@@ -218,7 +218,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	self->play = FALSE;
 	self->stopping = FALSE;
 	self->period = 0;
-	self->note = NOTECOMMANDS_EMPTY;
+	self->note = psy_audio_NOTECOMMANDS_EMPTY;
 	self->volume = 128;
 	psy_dsp_slider_resetto(&self->rampl, 0.f);
 	psy_dsp_slider_resetto(&self->rampr, 0.f);
@@ -298,7 +298,7 @@ void psy_audio_xmsamplervoice_seqtick(psy_audio_XMSamplerVoice* self,
 	const psy_audio_PatternEvent* ev)
 {
 	psy_audio_xmsamplervoice_seteffect(self, ev);
-	if (ev->note < NOTECOMMANDS_RELEASE) {		
+	if (ev->note < psy_audio_NOTECOMMANDS_RELEASE) {		
 		psy_audio_xmsamplervoice_noteon(self, ev->note);
 	}
 }
@@ -343,11 +343,11 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 					self->period = (int)psy_dsp_notetoamigaperiod(note,
 						sample->samplerate,
 						sample->tune +
-						NOTECOMMANDS_MIDDLEC - self->sampler->basec,
+						psy_audio_NOTECOMMANDS_MIDDLEC - self->sampler->basec,
 						sample->finetune);
 				} else {
 					self->period = (int)psy_dsp_notetoperiod(note, sample->tune +
-						NOTECOMMANDS_MIDDLEC - self->sampler->basec,
+						psy_audio_NOTECOMMANDS_MIDDLEC - self->sampler->basec,
 						sample->finetune);
 				}
 				psy_audio_xmsamplervoice_updateiteratorspeed(self, iterator);				
@@ -1232,14 +1232,14 @@ void psy_audio_xmsamplervoice_setpitchslide(psy_audio_XMSamplerVoice* self,
 		if (self->channel->pitchslidemem == 0) return;
 		speed = self->channel->pitchslidemem;
 	}
-	if (speed < 0xE0 || note != NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+	if (speed < 0xE0 || note != psy_audio_NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
 	{									// Porta to note does not have Fine.
 		speed <<= 2;
 		//if (ForegroundVoice()) { ForegroundVoice()->
 		self->pitchslidespeed = bUp ? -speed : speed;
-		if (note != NOTECOMMANDS_EMPTY)
+		if (note != psy_audio_NOTECOMMANDS_EMPTY)
 		{
-			if (note != NOTECOMMANDS_RELEASE) {
+			if (note != psy_audio_NOTECOMMANDS_RELEASE) {
 				//	if (ForegroundVoice()) { ForegroundVoice()
 				// self->slide2notedestperiod = NoteToPeriod(note); }
 				psy_audio_xmsamplervoice_addeffect(self, XM_SAMPLER_EFFECT_SLIDE2NOTE);

@@ -325,28 +325,28 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 		uintptr_t track = 0;
 		psy_audio_PatternEvent event;
 
-		if (cmd.id < NOTECOMMANDS_RELEASE) {
+		if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
 			note = (unsigned char) cmd.data.param1;
 		} else {
 			note = cmd.data.param1;
 		}
 		machine = psy_audio_machines_at(&self->song->machines,
 			psy_audio_machines_slot(&self->song->machines));
-		patternevent_init_all(&event,
+		psy_audio_patternevent_init_all(&event,
 			note,
-			(note == NOTECOMMANDS_TWEAK)
+			(note == psy_audio_NOTECOMMANDS_TWEAK)
 			? (uint16_t) self->song->machines.tweakparam
 			: (uint16_t) (machine && machine_supports(machine,
 					MACH_SUPPORTS_INSTRUMENTS)
 				? psy_audio_instruments_selected(&self->song->instruments).subslot
-				: NOTECOMMANDS_INST_EMPTY),
+				: psy_audio_NOTECOMMANDS_INST_EMPTY),
 			(uint8_t) (self->song
 				? psy_audio_machines_slot(&self->song->machines)
 				: 0),
-			(uint8_t) NOTECOMMANDS_VOL_EMPTY,
+			(uint8_t) psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			0, 0);		
 		if (self->multichannelaudition) {
-			if (event.note < NOTECOMMANDS_RELEASE) {
+			if (event.note < psy_audio_NOTECOMMANDS_RELEASE) {
 				if (psy_table_exists(&self->notestotracks, event.note)) {
 					track = (uintptr_t) psy_table_at(&self->notestotracks,
 						event.note);
@@ -360,7 +360,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 						(void*)(uintptr_t) event.note);
 				}
 			} else
-			if (event.note == NOTECOMMANDS_RELEASE) {				
+			if (event.note == psy_audio_NOTECOMMANDS_RELEASE) {				
 				if (psy_table_exists(&self->notestotracks, note)) {
 					track = (uintptr_t) psy_table_at(&self->notestotracks,
 						note);
@@ -388,7 +388,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
 		psy_audio_player_setnumsongtracks(self,
-			patterns_songtracks(&song->patterns));
+			psy_audio_patterns_songtracks(&song->patterns));
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
 	}

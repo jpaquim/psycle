@@ -536,13 +536,13 @@ void psy_audio_xmsamplerchannel_setpitchslide(psy_audio_XMSamplerChannel* self,
 		if (self->pitchslidemem == 0) return;
 		speed = self->pitchslidemem;
 	} else self->pitchslidemem = speed & 0xff;
-	if (speed < 0xE0 || note != NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
+	if (speed < 0xE0 || note != psy_audio_NOTECOMMANDS_EMPTY)	// Portamento , Fine porta ("f0", and Extra fine porta "e0" ) (*)
 	{									// Porta to note does not have Fine.
 		speed <<= 2;
 		//if (ForegroundVoice()) { ForegroundVoice()->m_PitchSlideSpeed = bUp ? -speed : speed; }
-		if (note != NOTECOMMANDS_EMPTY)
+		if (note != psy_audio_NOTECOMMANDS_EMPTY)
 		{
-			if (note != NOTECOMMANDS_RELEASE) {
+			if (note != psy_audio_NOTECOMMANDS_RELEASE) {
 			//	if (ForegroundVoice()) { ForegroundVoice()->m_Slide2NoteDestPeriod = ForegroundVoice()->NoteToPeriod(note); }
 				psy_audio_xmsamplerchannel_addeffect(self, XM_SAMPLER_EFFECT_SLIDE2NOTE);
 			}

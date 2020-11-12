@@ -27,9 +27,9 @@ static void psy_audio_instrument_disposeentries(psy_audio_Instrument*);
 void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 {	
 	self->sampleindex = sampleindex_make(UINTPTR_MAX, UINTPTR_MAX);
-	parameterrange_init(&self->keyrange, 0, NOTECOMMANDS_RELEASE - 1, 0,
-		NOTECOMMANDS_RELEASE - 1);
-	parameterrange_init(&self->velocityrange, 0, 0xFF, 0, 0xFF);
+	psy_audio_parameterrange_init(&self->keyrange, 0, psy_audio_NOTECOMMANDS_RELEASE - 1, 0,
+		psy_audio_NOTECOMMANDS_RELEASE - 1);
+	psy_audio_parameterrange_init(&self->velocityrange, 0, 0xFF, 0, 0xFF);
 	frequencyrange_init(&self->freqrange, 0, 0, 0, 0);	
 	self->use_keyrange = 1;
 	self->use_velrange = 0;
@@ -55,10 +55,10 @@ psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void)
 int psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
 	uintptr_t velocity, double frequency)
 {
-	if (self->use_keyrange && !parameterrange_intersect(&self->keyrange, key)) {
+	if (self->use_keyrange && !psy_audio_parameterrange_intersect(&self->keyrange, key)) {
 		return 0;
 	}
-	if (self->use_velrange && !parameterrange_intersect(&self->velocityrange, velocity)) {
+	if (self->use_velrange && !psy_audio_parameterrange_intersect(&self->velocityrange, velocity)) {
 		return 0;
 	}
 	if (self->use_freqrange && !frequencyrange_intersect(&self->freqrange, frequency)) {

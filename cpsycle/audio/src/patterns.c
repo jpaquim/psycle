@@ -4,48 +4,61 @@
 #include "../../detail/prefix.h"
 
 #include "patterns.h"
+
+#include <assert.h>
 #include <stdlib.h>
 
-static void patterns_init_signals(psy_audio_Patterns*);
-static void patterns_dispose_signals(psy_audio_Patterns*);
-static uintptr_t patterns_firstfreeslot(psy_audio_Patterns*);
-static void patterns_disposeslots(psy_audio_Patterns*);
-static void patterns_onpatternnamechanged(psy_audio_Patterns*,
+// prototypes
+static void psy_audio_patterns_init_signals(psy_audio_Patterns*);
+static void psy_audio_patterns_dispose_signals(psy_audio_Patterns*);
+static uintptr_t psy_audio_patterns_firstfreeslot(psy_audio_Patterns*);
+static void psy_audio_patterns_disposeslots(psy_audio_Patterns*);
+static void psy_audio_patterns_onpatternnamechanged(psy_audio_Patterns*,
 	psy_audio_Pattern* sender);
-static void patterns_onpatternlengthchanged(psy_audio_Patterns*,
+static void psy_audio_patterns_onpatternlengthchanged(psy_audio_Patterns*,
 	psy_audio_Pattern* sender);
-
-void patterns_init(psy_audio_Patterns* self)
+// implementation
+void psy_audio_patterns_init(psy_audio_Patterns* self)
 {
+	assert(self);
+
 	psy_table_init(&self->slots);
 	self->songtracks = 16;	
 	self->sharetracknames = 0;
 	patternstrackstate_init(&self->trackstate);
-	patterns_init_signals(self);
+	psy_audio_patterns_init_signals(self);
 }
 
-void patterns_init_signals(psy_audio_Patterns* self)
+void psy_audio_patterns_init_signals(psy_audio_Patterns* self)
 {
+	assert(self);
+
 	psy_signal_init(&self->signal_namechanged);
 	psy_signal_init(&self->signal_lengthchanged);
 }
 
-void patterns_dispose(psy_audio_Patterns* self)
+void psy_audio_patterns_dispose(psy_audio_Patterns* self)
 {	
-	patterns_disposeslots(self);
+	assert(self);
+
+	psy_audio_patterns_disposeslots(self);
 	patternstrackstate_dispose(&self->trackstate);
-	patterns_dispose_signals(self);
+	psy_audio_patterns_dispose_signals(self);
 }
 
-void patterns_dispose_signals(psy_audio_Patterns* self)
+void psy_audio_patterns_dispose_signals(psy_audio_Patterns* self)
 {
+	assert(self);
+
 	psy_signal_dispose(&self->signal_namechanged);
 	psy_signal_dispose(&self->signal_lengthchanged);
 }
 
-void patterns_disposeslots(psy_audio_Patterns* self)
+void psy_audio_patterns_disposeslots(psy_audio_Patterns* self)
 {	
 	psy_TableIterator it;
+
+	assert(self);
 
 	for (it = psy_table_begin(&self->slots);
 			!psy_tableiterator_equal(&it, psy_table_end()); psy_tableiterator_inc(&it)) {
@@ -59,34 +72,42 @@ void patterns_disposeslots(psy_audio_Patterns* self)
 	psy_signal_disconnectall(&self->signal_namechanged);
 }
 
-void patterns_clear(psy_audio_Patterns* self)
+void psy_audio_patterns_clear(psy_audio_Patterns* self)
 {
-	patterns_disposeslots(self);	
+	assert(self);
+
+	psy_audio_patterns_disposeslots(self);
 	psy_table_init(&self->slots);	
 }
 
-void patterns_insert(psy_audio_Patterns* self, uintptr_t slot,
+void psy_audio_patterns_insert(psy_audio_Patterns* self, uintptr_t slot,
 	psy_audio_Pattern* pattern)
 {
+	assert(self);
+
 	psy_table_insert(&self->slots, slot, pattern);
 	psy_signal_connect(&pattern->signal_namechanged, self,
-		patterns_onpatternnamechanged);
+		psy_audio_patterns_onpatternnamechanged);
 	psy_signal_connect(&pattern->signal_lengthchanged, self,
-		patterns_onpatternlengthchanged);
+		psy_audio_patterns_onpatternlengthchanged);
 }
 
-uintptr_t patterns_append(psy_audio_Patterns* self, psy_audio_Pattern* pattern)
+uintptr_t psy_audio_patterns_append(psy_audio_Patterns* self, psy_audio_Pattern* pattern)
 {
 	uintptr_t slot;
 	
-	slot = patterns_firstfreeslot(self);
-	patterns_insert(self, slot, pattern);
+	assert(self);
+
+	slot = psy_audio_patterns_firstfreeslot(self);
+	psy_audio_patterns_insert(self, slot, pattern);
 	return slot;
 }
 
-uintptr_t patterns_firstfreeslot(psy_audio_Patterns* self)
+uintptr_t psy_audio_patterns_firstfreeslot(psy_audio_Patterns* self)
 {
 	uintptr_t rv = 0;
+
+	assert(self);
 
 	// find first free slot
 	while (psy_table_exists(&self->slots, rv)) {
@@ -95,16 +116,19 @@ uintptr_t patterns_firstfreeslot(psy_audio_Patterns* self)
 	return rv;
 }
 
-psy_audio_Pattern* patterns_at(psy_audio_Patterns* self, uintptr_t slot)
+psy_audio_Pattern* psy_audio_patterns_at(psy_audio_Patterns* self, uintptr_t slot)
 {
 	return psy_table_at(&self->slots, slot);
 }
 
-uintptr_t patterns_slot(psy_audio_Patterns* self, psy_audio_Pattern* pattern)
+uintptr_t psy_audio_patterns_slot(psy_audio_Patterns* self, psy_audio_Pattern* pattern)
 {
-	uintptr_t rv = UINTPTR_MAX;
+	uintptr_t rv;
 	psy_TableIterator it;
 
+	assert(self);
+
+	rv = UINTPTR_MAX;
 	for (it = psy_table_begin(&self->slots);
 		!psy_tableiterator_equal(&it, psy_table_end());
 		psy_tableiterator_inc(&it)) {
@@ -116,25 +140,29 @@ uintptr_t patterns_slot(psy_audio_Patterns* self, psy_audio_Pattern* pattern)
 	return rv;
 }
 
-void patterns_erase(psy_audio_Patterns* self, uintptr_t slot)
+void psy_audio_patterns_erase(psy_audio_Patterns* self, uintptr_t slot)
 {
 	psy_audio_Pattern* pattern;
 	
-	pattern = patterns_at(self, slot);
+	assert(self);
+
+	pattern = psy_audio_patterns_at(self, slot);
 	psy_table_remove(&self->slots, slot);
 	if (pattern) {
 		psy_signal_disconnect(&pattern->signal_namechanged, self,
-			patterns_onpatternnamechanged);
+			psy_audio_patterns_onpatternnamechanged);
 		psy_signal_disconnect(&pattern->signal_lengthchanged, self,
-			patterns_onpatternlengthchanged);
+			psy_audio_patterns_onpatternlengthchanged);
 	}
 }
 
-void patterns_remove(psy_audio_Patterns* self, uintptr_t slot)
+void psy_audio_patterns_remove(psy_audio_Patterns* self, uintptr_t slot)
 {
 	psy_audio_Pattern* pattern;
 	
-	pattern = patterns_at(self, slot);
+	assert(self);
+
+	pattern = psy_audio_patterns_at(self, slot);
 	psy_table_remove(&self->slots, slot);
 	if (pattern) {
 		psy_audio_pattern_dispose(pattern);
@@ -142,68 +170,92 @@ void patterns_remove(psy_audio_Patterns* self, uintptr_t slot)
 	}
 }
 
-uintptr_t patterns_size(psy_audio_Patterns* self)
+uintptr_t psy_audio_patterns_size(psy_audio_Patterns* self)
 {
+	assert(self);
+
 	return psy_table_size(&self->slots);
 }
 
-void patterns_activatesolotrack(psy_audio_Patterns* self, uintptr_t track)
+void psy_audio_patterns_activatesolotrack(psy_audio_Patterns* self,
+	uintptr_t track)
 {
+	assert(self);
+
 	patternstrackstate_activatesolotrack(&self->trackstate, track);
 }
 
-void patterns_deactivatesolotrack(psy_audio_Patterns* self)
+void psy_audio_patterns_deactivatesolotrack(psy_audio_Patterns* self)
 {
+	assert(self);
+
 	patternstrackstate_deactivatesolotrack(&self->trackstate);
 }
 
-void patterns_mutetrack(psy_audio_Patterns* self, uintptr_t track)
+void psy_audio_patterns_mutetrack(psy_audio_Patterns* self, uintptr_t track)
 {
+	assert(self);
+
 	patternstrackstate_mutetrack(&self->trackstate, track);
 }
 
-void patterns_unmutetrack(psy_audio_Patterns* self, uintptr_t track)
+void psy_audio_patterns_unmutetrack(psy_audio_Patterns* self, uintptr_t track)
 {
+	assert(self);
+
 	patternstrackstate_unmutetrack(&self->trackstate, track);
 }
 
-int patterns_istrackmuted(psy_audio_Patterns* self, uintptr_t track)
+int psy_audio_patterns_istrackmuted(psy_audio_Patterns* self, uintptr_t track)
 {
+	assert(self);
+
 	return patternstrackstate_istrackmuted(&self->trackstate, track);
 }
 
-int patterns_istracksoloed(psy_audio_Patterns* self, uintptr_t track)
+int psy_audio_patterns_istracksoloed(psy_audio_Patterns* self, uintptr_t track)
 {
+	assert(self);
+
 	return patternstrackstate_istracksoloed(&self->trackstate, track);
 }
 
-void patterns_setsongtracks(psy_audio_Patterns* self, uintptr_t trackcount)
+void psy_audio_patterns_setsongtracks(psy_audio_Patterns* self,
+	uintptr_t trackcount)
 {
+	assert(self);
+
 	self->songtracks = trackcount;
 }
 
-uintptr_t patterns_songtracks(psy_audio_Patterns* self)
+uintptr_t psy_audio_patterns_songtracks(psy_audio_Patterns* self)
 {
+	assert(self);
+
 	return self->songtracks;
 }
 
-void patterns_onpatternnamechanged(psy_audio_Patterns* self,
+void psy_audio_patterns_onpatternnamechanged(psy_audio_Patterns* self,
 	psy_audio_Pattern* sender)
 {
 	uintptr_t slot;
 	
-	slot = patterns_slot(self, sender);
+	assert(self);
+
+	slot = psy_audio_patterns_slot(self, sender);
 	if (slot != UINTPTR_MAX) {
 		psy_signal_emit(&self->signal_namechanged, self, 1, slot);
 	}	
 }
 
-void patterns_onpatternlengthchanged(psy_audio_Patterns* self,
+void psy_audio_patterns_onpatternlengthchanged(psy_audio_Patterns* self,
 	psy_audio_Pattern* sender)
 {
 	uintptr_t slot;
 
-	slot = patterns_slot(self, sender);
+	assert(self);
+
+	slot = psy_audio_patterns_slot(self, sender);
 	if (slot != UINTPTR_MAX) {
 		psy_signal_emit(&self->signal_lengthchanged, self, 1, slot);
 	}

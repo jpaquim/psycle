@@ -5,7 +5,7 @@
 
 #include "patternevent.h"
 
-void parameterrange_init(psy_audio_ParameterRange* self, 
+void psy_audio_parameterrange_init(psy_audio_ParameterRange* self, 
 	uintptr_t low, uintptr_t high, uintptr_t min, uintptr_t max)
 {
 	self->low = low;
@@ -14,12 +14,12 @@ void parameterrange_init(psy_audio_ParameterRange* self,
 	self->max = high;
 }
 
-int parameterrange_intersect(psy_audio_ParameterRange* self, uintptr_t value)
+int psy_audio_parameterrange_intersect(psy_audio_ParameterRange* self, uintptr_t value)
 {
 	return value >= self->low && value <= self->high;
 }
 
-void patternevent_init_all(psy_audio_PatternEvent* self,
+void psy_audio_patternevent_init_all(psy_audio_PatternEvent* self,
 	uint8_t note,
 	uint16_t inst,
 	uint8_t mach,
@@ -35,38 +35,38 @@ void patternevent_init_all(psy_audio_PatternEvent* self,
 	self->parameter = parameter;		
 }
 
-void patternevent_clear(psy_audio_PatternEvent* self)
+void psy_audio_patternevent_clear(psy_audio_PatternEvent* self)
 {
-	self->note = NOTECOMMANDS_EMPTY;
-	self->inst = NOTECOMMANDS_INST_EMPTY;
-	self->mach = NOTECOMMANDS_MACH_EMPTY;
-	self->vol = NOTECOMMANDS_VOL_EMPTY;
+	self->note = psy_audio_NOTECOMMANDS_EMPTY;
+	self->inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
+	self->mach = psy_audio_NOTECOMMANDS_MACH_EMPTY;
+	self->vol = psy_audio_NOTECOMMANDS_VOL_EMPTY;
 	self->cmd = 0;
 	self->parameter = 0;
 }
 
-int patternevent_empty(const psy_audio_PatternEvent* self)
+int psy_audio_patternevent_empty(const psy_audio_PatternEvent* self)
 {	
 	return
-		self->note == NOTECOMMANDS_EMPTY &&
-		self->inst == NOTECOMMANDS_INST_EMPTY &&
-		self->mach == NOTECOMMANDS_MACH_EMPTY &&
-		self->vol == NOTECOMMANDS_VOL_EMPTY &&
+		self->note == psy_audio_NOTECOMMANDS_EMPTY &&
+		self->inst == psy_audio_NOTECOMMANDS_INST_EMPTY &&
+		self->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY &&
+		self->vol == psy_audio_NOTECOMMANDS_VOL_EMPTY &&
 		self->cmd == 0 &&		
 		self->parameter == 0;		
 }
 
-int patternevent_empty_except_volume(const psy_audio_PatternEvent* self)
+int psy_audio_patternevent_empty_except_volume(const psy_audio_PatternEvent* self)
 {
 	return
-		self->note == NOTECOMMANDS_EMPTY &&
-		self->inst == NOTECOMMANDS_INST_EMPTY &&
-		self->mach == NOTECOMMANDS_MACH_EMPTY &&		
+		self->note == psy_audio_NOTECOMMANDS_EMPTY &&
+		self->inst == psy_audio_NOTECOMMANDS_INST_EMPTY &&
+		self->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY &&		
 		self->cmd == 0 &&		
 		self->parameter == 0;
 }
 
-int patternevent_has_volume(const psy_audio_PatternEvent* self)
+int psy_audio_patternevent_has_volume(const psy_audio_PatternEvent* self)
 {
-	return self->vol != NOTECOMMANDS_VOL_EMPTY;
+	return self->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY;
 }

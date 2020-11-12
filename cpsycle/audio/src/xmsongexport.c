@@ -53,7 +53,7 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	char modulename[20];
 	uintptr_t i;
 	psy_List* t;
-	SequenceTrack* track;
+	psy_audio_SequenceTrack* track;
 
 	self->macInstruments = 0;
 	bool hasSampler = FALSE;
@@ -107,24 +107,24 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 
 	memset(&self->m_Header, 0, sizeof(self->m_Header));
 	self->m_Header.size = sizeof(self->m_Header);
-	self->m_Header.norder = sequence_maxtracksize(&songfile->song->sequence);
+	self->m_Header.norder = psy_audio_sequence_maxtracksize(&songfile->song->sequence);
 	self->m_Header.restartpos = 0;	
 	self->m_Header.channels = min(songfile->song->properties.tracks, 32);
 	// Number of patterns stored in file. There should be at least 1 pattern
 	// if you expect to hear anything out of the speakers. The maximum value is
 	// 256. Don’t confuse this with[Song length]!
-	self->m_Header.patterns = min(patterns_size(&songfile->song->patterns), 256);
+	self->m_Header.patterns = min(psy_audio_patterns_size(&songfile->song->patterns), 256);
 	self->m_Header.instruments = min(128, self->macInstruments + self->xmInstruments + samInstruments);
 	self->m_Header.flags = 0x0001; //Linear frequency.	
 	self->m_Header.speed = (int)floor(24.f / songfile->song->properties.lpb) + songfile->song->properties.extraticksperbeat;
 	self->m_Header.tempo = (int)songfile->song->properties.bpm;
 	// Pattern order table
-	track = (SequenceTrack*)songfile->song->sequence.tracks->entry;
+	track = (psy_audio_SequenceTrack*)songfile->song->sequence.tracks->entry;
 	for (t = track->entries; t != 0; t = t->next) {
-		SequenceEntry* entry;
+		psy_audio_SequenceEntry* entry;
 
-		entry = (SequenceEntry*)t->entry;
-		self->m_Header.order[i] = entry->pattern;		
+		entry = (psy_audio_SequenceEntry*)t->entry;
+		self->m_Header.order[i] = entry->patternslot;
 	}
 	psyfile_write(songfile->file, &self->m_Header, sizeof(self->m_Header));
 }
@@ -168,12 +168,12 @@ void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* song
 			}
 			for (int i = 0; i < songfile->song->properties.tracks; i++) {
 				/*const PatternEntry* pData = reinterpret_cast<const PatternEntry*>(song._ptrackline(patIdx, i, j));
-				if (pData->note == NOTECOMMANDS_MIDICC) {
+				if (pData->note == psy_audio_NOTECOMMANDS_MIDICC) {
 					if (pData->inst < maxtracks) {
 						extraEntry[pData->_inst] = pData;
 					}
 				} else if (pData->note != notecommands::tweak && pData->_note != notecommands::tweakslide) {
-					if (pData->cmd == PatternCmd::EXTENDED && (pData->_parameter & 0xF0) == PatternCmd::ROW_EXTRATICKS) {
+					if (pData->cmd == psy_audio_PatternCmd::psy_audio_PATTERNCMD_EXTENDED && (pData->_parameter & 0xF0) == psy_audio_PatternCmd::psy_audio_PATTERNCMD_ROW_EXTRATICKS) {
 						addTicks = pData->_parameter & 0x0F;
 					}
 				}*/
@@ -282,25 +282,25 @@ void xmsongexport_getcommand(XMSongExport* self, psy_audio_SongFile* songfile, i
 	int singleEffectCharacter = (pData->cmd & 0xF0);
 	if (singleEffectCharacter == 0xF0) { //Global commands
 		switch (pData->cmd) {
-		case SET_TEMPO:
+		case psy_audio_PATTERNCMD_SET_TEMPO:
 			if (pData->parameter >= 0x20) {
 				*type = XMCMD_SETSPEED;
 				*param = pData->parameter;
 			}
 			break;
-		case EXTENDED:
+		case psy_audio_PATTERNCMD_EXTENDED:
 			switch (pData->parameter & 0xF0) {
-			case SET_LINESPERBEAT0:
-			case SET_LINESPERBEAT1:
+			case psy_audio_PATTERNCMD_SET_LINESPERBEAT0:
+			case psy_audio_PATTERNCMD_SET_LINESPERBEAT1:
 				*type = XMCMD_SETSPEED;
 				*param = floor(24.f / pData->parameter) + self->addTicks;
 				self->addTicks = 0;
 				break;
-			case PATTERN_LOOP:
+			case psy_audio_PATTERNCMD_PATTERN_LOOP:
 				*type = XMCMD_EXTENDED;
 				*param = XMCMD_E_PATTERN_LOOP + (pData->parameter & 0x0F);
 				break;
-			case PATTERN_DELAY:
+			case psy_audio_PATTERNCMD_PATTERN_DELAY:
 				*type = XMCMD_EXTENDED;
 				*param = XMCMD_E_PATTERN_DELAY + (pData->parameter & 0x0F);
 				break;
@@ -308,25 +308,25 @@ void xmsongexport_getcommand(XMSongExport* self, psy_audio_SongFile* songfile, i
 				break;
 			}
 			break;
-		case JUMP_TO_ORDER:
+		case psy_audio_PATTERNCMD_JUMP_TO_ORDER:
 			*type = XMCMD_POSITION_JUMP;
 			*param = pData->parameter;
 			break;
-		case BREAK_TO_LINE:
+		case psy_audio_PATTERNCMD_BREAK_TO_LINE:
 			*type = XMCMD_PATTERN_BREAK;
 			*param = ((pData->parameter / 10) << 4) + (pData->parameter % 10);
 			break;
-		case SET_VOLUME:
+		case psy_audio_PATTERNCMD_SET_VOLUME:
 			if (pData->inst == 255) {
 				*type = XMCMD_SET_GLOBAL_VOLUME;
 				*param = pData->parameter >> 1;
 			}
 			break;
-		case NOTE_DELAY:
+		case psy_audio_PATTERNCMD_NOTE_DELAY:
 			*type = XMCMD_EXTENDED;
 			*param = XMCMD_E_NOTE_DELAY | (pData->parameter * songfile->song->properties.tpb / 256);
 			break;
-		case ARPEGGIO:
+		case psy_audio_PATTERNCMD_ARPEGGIO:
 			*type = XMCMD_ARPEGGIO;
 			*param = pData->parameter;
 			break;

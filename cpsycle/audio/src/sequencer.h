@@ -27,7 +27,7 @@ typedef struct {
 
 typedef struct {
 	psy_audio_SequencerTrackState state;
-	SequenceTrackIterator* iterator;
+	psy_audio_SequenceTrackIterator* iterator;
 } psy_audio_SequencerTrack;
 
 typedef struct {
