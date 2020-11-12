@@ -173,7 +173,7 @@ void psy_audio_pattern_setevent(psy_audio_Pattern* self, psy_audio_PatternNode* 
 		} else {
 			psy_audio_PatternEvent empty;
 
-			patternevent_clear(&empty);
+			psy_audio_patternevent_clear(&empty);
 			*patternentry_front(entry) = empty;
 		}
 		++self->opcount;
@@ -188,7 +188,7 @@ psy_audio_PatternEvent psy_audio_pattern_event(psy_audio_Pattern* self, psy_audi
 	} else {
 		psy_audio_PatternEvent empty;
 
-		patternevent_clear(&empty);
+		psy_audio_patternevent_clear(&empty);
 		return empty;
 	}	
 }
@@ -349,7 +349,7 @@ void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
 		else {
 			psy_audio_PatternEvent ev;
 
-			patternevent_clear(&ev);
+			psy_audio_patternevent_clear(&ev);
 			psy_audio_patternevent_settweakvalue(&ev, value);
 			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
 		}
@@ -389,7 +389,7 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self,
 			psy_audio_PatternEvent ev;
 			double curveval = hermitecurveinterpolate(val0, val1, val2, val3, line - begin.line, distance, 0, TRUE);
 
-			patternevent_clear(&ev);
+			psy_audio_patternevent_clear(&ev);
 			psy_audio_patternevent_settweakvalue(&ev, (intptr_t)curveval);
 			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
 		}
@@ -436,14 +436,14 @@ void psy_audio_pattern_blocktranspose(psy_audio_Pattern* self,
 		entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 		if (entry->offset < end.offset) {
 			if (entry->track >= begin.track && entry->track < end.track) {
-				if (patternentry_front(entry)->note < NOTECOMMANDS_RELEASE) {
+				if (patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
 					if (patternentry_front(entry)->note + offset < 0) {
 						patternentry_front(entry)->note = 0;
 					} else {
 						patternentry_front(entry)->note += offset;
 					}					
-					if (patternentry_front(entry)->note >= NOTECOMMANDS_RELEASE) {
-						patternentry_front(entry)->note = NOTECOMMANDS_RELEASE - 1;
+					if (patternentry_front(entry)->note >= psy_audio_NOTECOMMANDS_RELEASE) {
+						patternentry_front(entry)->note = psy_audio_NOTECOMMANDS_RELEASE - 1;
 					}
 				}
 			}

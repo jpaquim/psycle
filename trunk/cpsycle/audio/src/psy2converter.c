@@ -440,12 +440,12 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 			entry = (psy_audio_PatternEntry*)psy_list_entry(p);
 			event = patternentry_front(entry);
 
-			if (event->note == NOTECOMMANDS_TWEAKEFFECT)
+			if (event->note == psy_audio_NOTECOMMANDS_TWEAKEFFECT)
 			{
 				event->mach += 0x40;
-				event->note = NOTECOMMANDS_TWEAK;
+				event->note = psy_audio_NOTECOMMANDS_TWEAK;
 			}
-			if (event->note == NOTECOMMANDS_TWEAK && event->mach < MAX_MACHINES)
+			if (event->note == psy_audio_NOTECOMMANDS_TWEAK && event->mach < MAX_MACHINES)
 			{
 				if (psy_table_exists(&self->machine_converted_from, event->mach)) {
 					ConverterType* convertertype;

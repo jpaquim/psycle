@@ -215,19 +215,19 @@ void master_generateaudio(psy_audio_Master* self, psy_audio_BufferContext* bc)
 void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 	const psy_audio_PatternEvent* ev)
 {
-	if (ev->cmd == SET_VOLUME) {
+	if (ev->cmd == psy_audio_PATTERNCMD_SET_VOLUME) {
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
 		if (machines) {
-			if (ev->inst == NOTECOMMANDS_INST_EMPTY &&
+			if (ev->inst == psy_audio_NOTECOMMANDS_INST_EMPTY &&
 				ev->vol == psy_audio_MASTER_INDEX) {
 				psy_dsp_amp_t nv;
 
 				nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
 				self->volume = nv * nv * 4.f;
 			} else
-				if (ev->inst != NOTECOMMANDS_INST_EMPTY) {
+				if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 					psy_audio_MachineSockets* sockets;
 
 					sockets = connections_at(&machines->connections, ev->vol);

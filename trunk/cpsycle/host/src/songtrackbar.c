@@ -80,7 +80,7 @@ void songtrackbar_onselchange(SongTrackBar* self, psy_ui_Component* sender,
 {		
 	psy_audio_player_setnumsongtracks(&self->workspace->player, index + MIN_TRACKS);
 	if (self->workspace->song) {
-		patterns_setsongtracks(&self->workspace->song->patterns, index + MIN_TRACKS);
+		psy_audio_patterns_setsongtracks(&self->workspace->song->patterns, index + MIN_TRACKS);
 	}
 }
 

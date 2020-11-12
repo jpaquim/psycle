@@ -273,11 +273,11 @@ void trackdef_init(TrackDef* self)
 	trackcolumndef_init(&self->note, 1, 3, 1,
 		TRACKER_COLUMN_NOTE, TRACKER_COLUMN_NOTE, 0xFF);
 	trackcolumndef_init(&self->inst, 2, 2, 1,
-		TRACKER_COLUMN_INST, TRACKER_COLUMN_INST, NOTECOMMANDS_INST_EMPTY);
+		TRACKER_COLUMN_INST, TRACKER_COLUMN_INST, psy_audio_NOTECOMMANDS_INST_EMPTY);
 	trackcolumndef_init(&self->mach, 2, 2, 1,
-		TRACKER_COLUMN_MACH, TRACKER_COLUMN_MACH, NOTECOMMANDS_MACH_EMPTY);
+		TRACKER_COLUMN_MACH, TRACKER_COLUMN_MACH, psy_audio_NOTECOMMANDS_MACH_EMPTY);
 	trackcolumndef_init(&self->vol, 2, 2, 1,
-		TRACKER_COLUMN_VOL, TRACKER_COLUMN_VOL, NOTECOMMANDS_VOL_EMPTY);
+		TRACKER_COLUMN_VOL, TRACKER_COLUMN_VOL, psy_audio_NOTECOMMANDS_VOL_EMPTY);
 	trackcolumndef_init(&self->cmd, 2, 2, 0,
 		TRACKER_COLUMN_NONE, TRACKER_COLUMN_CMD, 0x00);
 	trackcolumndef_init(&self->param, 2, 2, 1,
@@ -1411,12 +1411,12 @@ void trackergrid_enterevent(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		input.message = EVENTDRIVER_KEYDOWN;
 		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
 		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
-		if (cmd.id == NOTECOMMANDS_RELEASE) {
-			trackergrid_inputnote(self, NOTECOMMANDS_RELEASE, self->chordmode);
+		if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
+			trackergrid_inputnote(self, psy_audio_NOTECOMMANDS_RELEASE, self->chordmode);
 			psy_ui_keyevent_stoppropagation(ev);
 			return;
 		}
-		if (cmd.id != -1 && cmd.id <= NOTECOMMANDS_RELEASE && ev->shift &&
+		if (cmd.id != -1 && cmd.id <= psy_audio_NOTECOMMANDS_RELEASE && ev->shift &&
 			!self->chordmode && ev->keycode != psy_ui_KEY_SHIFT) {
 			self->chordmode = TRUE;
 			self->chordbegin = self->cursor.track;
@@ -1429,7 +1429,7 @@ void trackergrid_oninput(TrackerGrid* self, psy_audio_Player* sender,
 {
 	if (psy_ui_component_hasfocus(&self->component) &&
 		self->cursor.column == TRACKER_COLUMN_NOTE &&
-		event->note != NOTECOMMANDS_RELEASE) {
+		event->note != psy_audio_NOTECOMMANDS_RELEASE) {
 		trackergrid_setdefaultevent(self,
 			&sender->patterndefaults,
 			event);
@@ -1451,13 +1451,13 @@ void trackergrid_setdefaultevent(TrackerGrid* self,
 		psy_audio_PatternEvent* defaultevent;
 
 		defaultevent = patternentry_front(psy_audio_patternnode_entry(node));
-		if (defaultevent->inst != NOTECOMMANDS_INST_EMPTY) {
+		if (defaultevent->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			ev->inst = defaultevent->inst;
 		}
-		if (defaultevent->mach != NOTECOMMANDS_MACH_EMPTY) {
+		if (defaultevent->mach != psy_audio_NOTECOMMANDS_MACH_EMPTY) {
 			ev->mach = defaultevent->mach;
 		}
-		if (defaultevent->vol != NOTECOMMANDS_VOL_EMPTY) {
+		if (defaultevent->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
 			ev->vol = defaultevent->vol;
 		}
 	}
@@ -1571,11 +1571,11 @@ void trackergrid_inputnote(TrackerGrid* self, psy_dsp_note_t note,
 	psy_audio_Machine* machine;
 	psy_audio_PatternEvent ev;
 
-	patternevent_init_all(&ev,
+	psy_audio_patternevent_init_all(&ev,
 		note,
-		NOTECOMMANDS_INST_EMPTY,
+		psy_audio_NOTECOMMANDS_INST_EMPTY,
 		(unsigned char)psy_audio_machines_slot(&self->workspace->song->machines),
-		NOTECOMMANDS_VOL_EMPTY,
+		psy_audio_NOTECOMMANDS_VOL_EMPTY,
 		0,
 		0);
 	machine = psy_audio_machines_at(&self->workspace->song->machines, ev.mach);
@@ -2143,12 +2143,12 @@ void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g, int 
 void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track)
 {
 	if (self->workspace->song) {
-		if (patterns_istrackmuted(&self->workspace->song->patterns,
+		if (psy_audio_patterns_istrackmuted(&self->workspace->song->patterns,
 			track)) {
 			skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
 				&self->gridstate->skin->headercoords.mute);
 		}
-		if (patterns_istracksoloed(&self->workspace->song->patterns,
+		if (psy_audio_patterns_istracksoloed(&self->workspace->song->patterns,
 			track)) {
 			skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
 				&self->gridstate->skin->headercoords.solo);
@@ -2190,12 +2190,12 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			self->gridstate->skin->headercoords.mute.destheight);
 		if (psy_ui_rectangle_intersect(&r, ev->x +
 				psy_ui_component_scrollleft(&self->component), ev->y)) {
-			if (patterns_istrackmuted(&self->workspace->song->patterns,
+			if (psy_audio_patterns_istrackmuted(&self->workspace->song->patterns,
 				track)) {
-				patterns_unmutetrack(&self->workspace->song->patterns,
+				psy_audio_patterns_unmutetrack(&self->workspace->song->patterns,
 					track);
 			} else {
-				patterns_mutetrack(&self->workspace->song->patterns,
+				psy_audio_patterns_mutetrack(&self->workspace->song->patterns,
 					track);
 			}
 			psy_ui_component_invalidate(&self->component);
@@ -2207,12 +2207,12 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			self->gridstate->skin->headercoords.solo.destheight);
 		if (psy_ui_rectangle_intersect(&r, ev->x +
 				psy_ui_component_scrollleft(&self->component), ev->y)) {
-			if (patterns_istracksoloed(&self->workspace->song->patterns,
+			if (psy_audio_patterns_istracksoloed(&self->workspace->song->patterns,
 				track)) {
-				patterns_deactivatesolotrack(
+				psy_audio_patterns_deactivatesolotrack(
 					&self->workspace->song->patterns);
 			} else {
-				patterns_activatesolotrack(
+				psy_audio_patterns_activatesolotrack(
 					&self->workspace->song->patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);
@@ -3032,7 +3032,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 	psy_ui_setrectangle(&r, x + cpx, y,
 		self->gridstate->trackconfig->textwidth * 3,
 		tm.tmHeight);	
-	notestr = (event->note != NOTECOMMANDS_EMPTY || !self->showemptydata)
+	notestr = (event->note != psy_audio_NOTECOMMANDS_EMPTY || !self->showemptydata)
 		? psy_dsp_notetostr(event->note, self->notestabmode)
 		: emptynotestr;	
 	psy_ui_textoutrectangle(g, r.left, r.top, psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
@@ -3159,7 +3159,7 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 			if (!p) {
 				psy_audio_PatternEvent ev;
 
-				patternevent_clear(&ev);
+				psy_audio_patternevent_clear(&ev);
 				patternentry_addevent(entry, &ev);
 				p = entry->events->tail;
 			}
@@ -3358,6 +3358,7 @@ static void trackerview_oninterpolatecurveviewoncancel(TrackerView*,
 	InterpolateCurveView* sender);
 static void trackerview_oncolresize(TrackerView*, TrackerGrid* sender);
 static void trackerview_oneventdriverinput(TrackerView*, psy_EventDriver*);
+
 // vtable
 static psy_ui_ComponentVtable trackerview_vtable;
 static int trackerview_vtable_initialized = 0;
@@ -3688,14 +3689,14 @@ void trackerview_onparametertweak(TrackerView* self, Workspace* sender,
 		machine = psy_audio_machines_at(&self->workspace->song->machines, slot);
 		assert(machine);
 		value = 0; // machine_parametervalue_scaled(machine, tweak, normvalue);
-		patternevent_init_all(&event,
+		psy_audio_patternevent_init_all(&event,
 			(unsigned char)(
 				(workspace_recordtweaksastws(sender))
-				? NOTECOMMANDS_TWEAKSLIDE
-				: NOTECOMMANDS_TWEAK),
-			NOTECOMMANDS_INST_EMPTY,
+				? psy_audio_NOTECOMMANDS_TWEAKSLIDE
+				: psy_audio_NOTECOMMANDS_TWEAK),
+			psy_audio_NOTECOMMANDS_INST_EMPTY,
 			(unsigned char)psy_audio_machines_slot(&self->workspace->song->machines),
-			NOTECOMMANDS_VOL_EMPTY,
+			psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			(unsigned char)((value & 0xFF00) >> 8),
 			(unsigned char)(value & 0xFF));
 		event.inst = (unsigned char)tweak;

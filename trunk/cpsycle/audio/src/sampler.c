@@ -461,14 +461,14 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	uintptr_t voice;
 	bool doporta = FALSE;
 
-	if (data.note == NOTECOMMANDS_MIDICC) {
+	if (data.note == psy_audio_NOTECOMMANDS_MIDICC) {
 		//TODO: This has one problem, it requires a non-mcm command to trigger the memory.
 		data.inst = channel;
 		copy = malloc(sizeof(psy_audio_PatternEvent));
 		*copy = data;
 		psy_list_append(&self->multicmdMem, copy);
 		return;
-	} else if (data.note > NOTECOMMANDS_RELEASE && data.note != NOTECOMMANDS_EMPTY) {
+	} else if (data.note > psy_audio_NOTECOMMANDS_RELEASE && data.note != psy_audio_NOTECOMMANDS_EMPTY) {
 		// don't process twk , twf of Mcm Commands
 		return;
 	}
@@ -501,7 +501,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 		ev = (psy_audio_PatternEvent*)psy_list_entry(ite);
 		if (ev->inst == channel) {
 			if (ev->cmd == PS1_SAMPLER_CMD_PORTA2NOTE &&
-					data.note < NOTECOMMANDS_RELEASE &&
+					data.note < psy_audio_NOTECOMMANDS_RELEASE &&
 					voice != UINTPTR_MAX) {
 				// if (self->linearslide) {   // isLinearSlide()
 					// EnablePerformFx();
@@ -515,7 +515,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 			}
 		}
 	}	
-	if (data.note < NOTECOMMANDS_RELEASE && !doporta) {	// Handle Note On.	
+	if (data.note < psy_audio_NOTECOMMANDS_RELEASE && !doporta) {	// Handle Note On.	
 		useVoice = psy_audio_sampler_getfreevoice(self); // Find a voice to apply the new note
 		if (voice != UINTPTR_MAX) { // NoteOff previous Notes in this channel.
 			switch (self->_voices[voice].inst->nna) {
@@ -540,7 +540,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 		self->_voices[useVoice].channel = channel;
 	} else {
 		if (voice != UINTPTR_MAX) {
-			if (data.note == NOTECOMMANDS_RELEASE) {
+			if (data.note == psy_audio_NOTECOMMANDS_RELEASE) {
 				psy_audio_samplervoice_noteoff(&self->_voices[voice]);  //  Handle Note Off
 			}
 			useVoice = voice;
@@ -555,7 +555,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	// Todo: mfc-psycle: Event Order newline; executeline; postnewline;
 	// Sequencer can emit notes inside a line aswell. This may execute multicmds twice.
 	psy_audio_samplervoice_tick(&self->_voices[useVoice], &data, channel,
-		self->defaultspeed ? NOTECOMMANDS_MIDDLEC : 48, self->multicmdMem);
+		self->defaultspeed ? psy_audio_NOTECOMMANDS_MIDDLEC : 48, self->multicmdMem);
 }
 
 // mfc-psycle: Voice::Tick(PatternEntry* pEntry,int channelNum, dsp::resampler& resampler, int baseC, std::vector<PatternEntry>&multicmdMem)
@@ -616,7 +616,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				if (self->_envelope.stage != ENV_OFF) {
 					self->effCmd = ev->cmd;
 					self->effVal = ev->parameter;
-					if (pEntry->note < NOTECOMMANDS_RELEASE) {
+					if (pEntry->note < psy_audio_NOTECOMMANDS_RELEASE) {
 						psy_audio_Sample* sample;
 						double speeddouble;
 						double finetune;
@@ -687,7 +687,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			}
 		}
 	}
-	if (pEntry->note < NOTECOMMANDS_RELEASE && !doporta)
+	if (pEntry->note < psy_audio_NOTECOMMANDS_RELEASE && !doporta)
 	{
 		psy_audio_Sample* sample;
 		double speeddouble;
@@ -842,7 +842,7 @@ psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler* self, psy_List* e
 				// This means there is always 6 ticks per row whatever number of rows.
 				//_triggerNoteOff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
 				noteoff = patternentry_allocinit();
-				patternentry_front(noteoff)->note = NOTECOMMANDS_RELEASE;
+				patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
 				patternentry_front(noteoff)->mach = patternentry_front(entry)->mach;
 				noteoff->delta += /*entry->offset*/ +(event->parameter & 0x0f) / 6.f *
 					psy_audio_machine_currbeatsperline(

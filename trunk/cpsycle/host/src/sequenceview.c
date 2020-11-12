@@ -215,7 +215,7 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 	psy_ui_Component* sender, psy_ui_Graphics* g)
 {
-	SequenceTracks* p;	
+	psy_audio_SequenceTracks* p;	
 	int cpx = 0;
 	int centery;
 	int lineheight = 1;
@@ -249,7 +249,7 @@ static void sequencelistview_onpreferredsize(SequenceListView*, psy_ui_Size* lim
 	psy_ui_Size* rv);
 static void sequencelistview_ondraw(SequenceListView*, psy_ui_Graphics*);
 static void sequencelistview_drawtrack(SequenceListView*, psy_ui_Graphics*,
-	SequenceTrack*, int trackindex, int x);
+	psy_audio_SequenceTrack*, int trackindex, int x);
 static void sequencelistview_onmousedown(SequenceListView*,
 	psy_ui_MouseEvent*);
 static void sequencelistview_onmousedoubleclick(SequenceListView*,
@@ -300,6 +300,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->lastplayposition = -1.f;
 	self->lastentry = 0;
 	self->showpatternnames = 0;
+	self->refreshcount = 0;
 	if (self->sequence && self->sequence->patterns) {
 		psy_signal_connect(&self->sequence->patterns->signal_namechanged, self,
 			sequencelistview_onpatternnamechanged);
@@ -311,14 +312,14 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 {
-	SequenceTracks* p;	
+	psy_audio_SequenceTracks* p;	
 	int cpx = 0;
 	int c = 0;		
 	self->foundselected = 0;
 	sequencelistview_computetextsizes(self);
 	for (p = self->sequence->tracks; p != NULL; p = p->next, 
 			cpx += self->trackwidth, ++c) {
-		sequencelistview_drawtrack(self, g, (SequenceTrack*)p->entry, c, cpx -
+		sequencelistview_drawtrack(self, g, (psy_audio_SequenceTrack*)p->entry, c, cpx -
 			psy_ui_component_scrollleft(&self->component) + listviewmargin);
 	}
 	if (!self->foundselected) {
@@ -339,9 +340,9 @@ void sequencelistview_onpreferredsize(SequenceListView* self, psy_ui_Size* limit
 {
 	if (self->sequence) {
 		self->component.debugflag = 9000;
-		rv->width = psy_ui_value_makepx(sequence_sizetracks(self->sequence) *
+		rv->width = psy_ui_value_makepx(psy_audio_sequence_sizetracks(self->sequence) *
 			self->component.scrollstepx);
-		rv->height = psy_ui_value_makepx(sequence_maxtracksize(self->sequence) *
+		rv->height = psy_ui_value_makepx(psy_audio_sequence_maxtracksize(self->sequence) *
 			self->component.scrollstepy);
 	} else {
 		*rv = psy_ui_size_zero();
@@ -362,7 +363,7 @@ void sequencelistview_computetextsizes(SequenceListView* self)
 	self->component.scrollstepx = self->trackwidth;
 }
 
-void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, SequenceTrack* track, int trackindex, int x)
+void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_audio_SequenceTrack* track, int trackindex, int x)
 {
 	psy_List* p;	
 	unsigned int c = 0;
@@ -377,42 +378,60 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, Sequ
 	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, psy_ui_value_px(&size.height, &tm));
 	psy_ui_settextcolor(g, psy_ui_color_make(0));
 	p = track->entries;
-	for (; p != NULL; p = p->next, ++c, cpy += self->lineheight) {
-		SequenceEntry* entry;
-		int playing = 0;
-		entry = (SequenceEntry*)p->entry;		
+	for (; p != NULL; psy_list_next(&p), ++c, cpy += self->lineheight) {
+		psy_audio_SequenceEntry* entry;
+		bool playing = FALSE;
+		entry = (psy_audio_SequenceEntry*)p->entry;		
 
 		if (psy_audio_player_playing(self->player)) {
 			psy_audio_Pattern* pattern;
 
-			pattern = patterns_at(self->patterns, entry->pattern);			
+			pattern = psy_audio_patterns_at(self->patterns, entry->patternslot);
 			if (pattern && 
 					psy_audio_player_position(self->player) >= entry->offset &&
 					psy_audio_player_position(self->player) < entry->offset +
 					pattern->length) {
-				playing = 1;
+				playing = TRUE;
 			}
 		}
 		if (self->showpatternnames) {
 			psy_audio_Pattern* pattern;
 
-			pattern = patterns_at(self->patterns, entry->pattern);
+			pattern = psy_audio_patterns_at(self->patterns, entry->patternslot);
 			if (pattern) {
 				psy_snprintf(text, 20, "%02X: %s %4.2f", c, psy_audio_pattern_name(pattern), entry->offset);
 			} else {
-				psy_snprintf(text, 20, "%02X:%02X(ERR) %4.2f", c, entry->pattern, entry->offset);
+				psy_snprintf(text, 20, "%02X:%02X(ERR) %4.2f", c, entry->patternslot, entry->offset);
 			}
 		} else {
-			psy_snprintf(text, 20, "%02X:%02X  %4.2f", c, entry->pattern, entry->offset);
+			psy_snprintf(text, 20, "%02X:%02X  %4.2f", c, entry->patternslot, entry->offset);
 		}
 		if ( self->selectedtrack == trackindex &&
 			(self->selection->editposition.trackposition.tracknode == p
 				 || (psy_list_findentry(self->selection->entries, entry))				 
 				 )) {
+			if (playing) {
+				int progress;
+				psy_ui_Rectangle r;
+
+				progress = ((int)((psy_audio_player_position(self->player) - entry->offset) / 16.0) * (
+					self->trackwidth - 5));
+				r = psy_ui_rectangle_make(x + 5, cpy + listviewmargin,
+					progress, tm.tmHeight);
+				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00514536));
+			}
 			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x009B7800));
 			psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 			self->foundselected = 1;				
 		} else if (playing) {
+			int progress;
+			psy_ui_Rectangle r;
+
+			progress = (int)(((psy_audio_player_position(self->player) - entry->offset) / 16.0) * (
+				self->trackwidth - 5));
+			r = psy_ui_rectangle_make(x + 5, cpy + listviewmargin,
+				progress, tm.tmHeight);
+			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00514536));
 			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
 			psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
 		} else {
@@ -445,9 +464,9 @@ void sequencelistview_onmousedown(SequenceListView* self,
 	sequencelistview_computetextsizes(self);
 	selected = (ev->y - listviewmargin) / self->lineheight;
 	selectedtrack = ev->x / self->trackwidth;
-	if (selectedtrack < sequence_sizetracks(self->sequence)) {		
-		sequenceselection_seteditposition(self->selection,
-			sequence_at(self->sequence, selectedtrack, selected));		
+	if (selectedtrack < psy_audio_sequence_sizetracks(self->sequence)) {		
+		psy_audio_sequenceselection_seteditposition(self->selection,
+			psy_audio_sequence_at(self->sequence, selectedtrack, selected));		
 		workspace_setsequenceselection(self->workspace, *self->selection);
 		sequenceview_updateplayposition(self->view);
 	}
@@ -462,9 +481,9 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 	sequencelistview_computetextsizes(self);
 	selected = (ev->y - listviewmargin) / self->lineheight;
 	selectedtrack = ev->x / self->trackwidth;
-	if (selectedtrack < sequence_sizetracks(self->sequence)) {
-		sequenceselection_seteditposition(self->selection,
-			sequence_at(self->sequence, selectedtrack, selected));
+	if (selectedtrack < psy_audio_sequence_sizetracks(self->sequence)) {
+		psy_audio_sequenceselection_seteditposition(self->selection,
+			psy_audio_sequence_at(self->sequence, selectedtrack, selected));
 		workspace_setsequenceselection(self->workspace, *self->selection);
 		sequenceview_changeplayposition(self->view);
 	}	
@@ -472,14 +491,19 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 
 void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
 {
-	SequenceTrackIterator it;
+	psy_audio_SequenceTrackIterator it;
 
 	if (psy_audio_player_playing(self->player)) {
-		it = sequence_begin(self->sequence, self->sequence->tracks,
-			psy_audio_player_position(self->player));
+		if (self->refreshcount == 2) {
+			psy_ui_component_invalidate(&self->component);
+			self->refreshcount = 0;
+		}
+		++self->refreshcount;
+		it = psy_audio_sequence_begin(self->sequence, self->sequence->tracks,
+			psy_audio_player_position(self->player));		
 		if (it.tracknode && self->lastentry != it.tracknode->entry) {
 			psy_ui_component_invalidate(&self->component);
-			self->lastentry = (SequenceEntry*)it.tracknode->entry;
+			self->lastentry = (psy_audio_SequenceEntry*)it.tracknode->entry;
 		}
 	} else if (self->lastentry) {
 		psy_ui_component_invalidate(&self->component);
@@ -546,7 +570,7 @@ void sequenceduration_update(SequenceViewDuration* self)
 	songlength = psy_audio_sequence_calcdurationinms(self->sequence);
 	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
 		(int)(songlength / 60), ((int)songlength % 60),
-		sequence_duration(self->sequence));
+		psy_audio_sequence_duration(self->sequence));
 	psy_ui_label_settext(&self->duration, text);
 }
 
@@ -567,7 +591,26 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	psy_ui_checkbox_init(&self->shownames, &self->component);	
 	psy_ui_checkbox_init(&self->showplaylist, &self->component);		
 	psy_ui_checkbox_init(&self->recordtweaks, &self->component);	
-	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);	
+	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
+	{
+		psy_ui_Margin margin;
+		psy_ui_component_init(&self->top, &self->component);
+		psy_ui_component_enablealign(&self->top);
+		psy_ui_component_setalign(&self->top, psy_ui_ALIGN_BOTTOM);
+		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+			psy_ui_value_makepx(0));
+		psy_ui_button_init(&self->toggleseqediticon, &self->top);
+		psy_ui_button_seticon(&self->toggleseqediticon, psy_ui_ICON_MORE);
+		psy_ui_component_setalign(&self->toggleseqediticon.component,
+			psy_ui_ALIGN_LEFT);
+		psy_ui_component_setmargin(&self->toggleseqediticon.component, &margin);
+		psy_ui_button_init(&self->toggleseqedit, &self->top);
+		psy_ui_button_settext(&self->toggleseqedit, "Show Sequenceeditor");
+		psy_ui_component_setalign(&self->toggleseqedit.component,
+			psy_ui_ALIGN_LEFT);
+		psy_ui_component_setmargin(&self->toggleseqedit.component, &margin);
+	}
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		sequenceroptionsbar_onlanguagechanged);
 	sequenceroptionsbar_updatetext(self);
@@ -627,19 +670,21 @@ static void sequenceview_onrecordtweaks(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onmultichannelaudition(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag, psy_audio_SongFile* songfile);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
+static void sequenceview_onsequencechanged(SequenceView*,
+	psy_audio_Sequence* sender);
 
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{		
+{			
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
 	self->sequence = &workspace->song->sequence;
 	self->patterns = &workspace->song->patterns;
 	self->selection = &workspace->sequenceselection;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);	
+		psy_ui_BACKGROUND_NONE);
 	playlisteditor_init(&self->playlisteditor, &self->component,
-		workspace);
+		workspace);	
 	psy_ui_component_setalign(&self->playlisteditor.component, psy_ui_ALIGN_TOP);
 	psy_ui_splitbar_init(&self->splitbar, &self->component);
 	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_TOP);
@@ -662,11 +707,11 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	sequencebuttons_init(&self->buttons, &self->component, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
-	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);	
 	sequenceroptionsbar_init(&self->options, &self->component, workspace);	
 	if (workspace_showplaylisteditor(workspace)) {
 		psy_ui_checkbox_check(&self->options.showplaylist);
-	}
+	}	
 	psy_ui_component_setalign(&self->options.component, psy_ui_ALIGN_BOTTOM);
 	sequenceduration_init(&self->duration, &self->component, self->sequence, workspace);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);
@@ -717,16 +762,23 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(16),
 			psy_ui_value_makepx(0)));
+	if (self->sequence && self->sequence->patterns) {
+		psy_signal_connect(&self->sequence->patterns->signal_namechanged,
+			&self->listview,
+			sequencelistview_onpatternnamechanged);
+		psy_signal_connect(&self->sequence->sequencechanged,
+			self, sequenceview_onsequencechanged);
+	}
 }
 
 void sequenceview_onnewentry(SequenceView* self)
 {
 	psy_List* tracknode;
 
-	tracknode = sequence_insert(self->sequence, self->selection->editposition,
-		patterns_append(self->patterns, psy_audio_pattern_allocinit()));
-	sequenceselection_seteditposition(self->selection,
-		sequence_makeposition(self->sequence,
+	tracknode = psy_audio_sequence_insert(self->sequence, self->selection->editposition,
+		psy_audio_patterns_append(self->patterns, psy_audio_pattern_allocinit()));
+	psy_audio_sequenceselection_seteditposition(self->selection,
+		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			tracknode));
 	workspace_setsequenceselection(self->workspace,
@@ -739,16 +791,16 @@ void sequenceview_onnewentry(SequenceView* self)
 
 void sequenceview_oninsertentry(SequenceView* self)
 {
-	SequencePosition editposition;
-	SequenceEntry* entry;
+	psy_audio_SequencePosition editposition;
+	psy_audio_SequenceEntry* entry;
 	psy_List* tracknode;
 
 	editposition = self->workspace->sequenceselection.editposition;
-	entry = sequenceposition_entry(&editposition);
-	tracknode = sequence_insert(self->sequence, editposition,
-		entry ? entry->pattern : 0);
-	sequenceselection_seteditposition(self->selection,
-		sequence_makeposition(self->sequence,
+	entry = psy_audio_sequenceposition_entry(&editposition);
+	tracknode = psy_audio_sequence_insert(self->sequence, editposition,
+		entry ? entry->patternslot : 0);
+	psy_audio_sequenceselection_seteditposition(self->selection,
+		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			tracknode));
 	sequenceview_updateplayposition(self);
@@ -761,21 +813,21 @@ void sequenceview_oninsertentry(SequenceView* self)
 
 void sequenceview_oncloneentry(SequenceView* self)
 {
-	SequencePosition editposition;
-	SequenceEntry* entry;
+	psy_audio_SequencePosition editposition;
+	psy_audio_SequenceEntry* entry;
 
 	editposition = self->workspace->sequenceselection.editposition;
-	entry = sequenceposition_entry(&editposition);
+	entry = psy_audio_sequenceposition_entry(&editposition);
 	if (entry) {
 		psy_audio_Pattern* pattern;
 		psy_List* tracknode;
 
-		pattern = patterns_at(self->patterns, entry->pattern);
+		pattern = psy_audio_patterns_at(self->patterns, entry->patternslot);
 		if (pattern) {
-			tracknode = sequence_insert(self->sequence, editposition,
-				patterns_append(self->patterns, psy_audio_pattern_clone(pattern)));
-			sequenceselection_seteditposition(self->selection,
-				sequence_makeposition(self->sequence,
+			tracknode = psy_audio_sequence_insert(self->sequence, editposition,
+				psy_audio_patterns_append(self->patterns, psy_audio_pattern_clone(pattern)));
+			psy_audio_sequenceselection_seteditposition(self->selection,
+				psy_audio_sequence_makeposition(self->sequence,
 					self->selection->editposition.track,
 					tracknode));
 			workspace_setsequenceselection(self->workspace,
@@ -788,31 +840,31 @@ void sequenceview_oncloneentry(SequenceView* self)
 
 void sequenceview_ondelentry(SequenceView* self)
 {
-	SequencePosition editposition;
+	psy_audio_SequencePosition editposition;
 	SequenceTrackNode* tracknode;
 
 	editposition = self->workspace->sequenceselection.editposition;
-	tracknode = sequence_remove(self->sequence, editposition);
+	tracknode = psy_audio_sequence_remove(self->sequence, editposition);
 	if (tracknode) {
-		editposition = sequence_makeposition(self->sequence,
+		editposition = psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			tracknode);
 	} else {
-		editposition.trackposition = sequence_last(self->sequence,
+		editposition.trackposition = psy_audio_sequence_last(self->sequence,
 			editposition.track);
 	}
 	if (editposition.track == self->sequence->tracks &&
-		sequence_size(self->sequence, editposition.track) == 0) {
-		SequencePosition position;
+		psy_audio_sequence_size(self->sequence, editposition.track) == 0) {
+		psy_audio_SequencePosition position;
 
-		position.trackposition = sequence_begin(self->sequence, editposition.track, 0);
+		position.trackposition = psy_audio_sequence_begin(self->sequence, editposition.track, 0);
 		position.track = editposition.track;
-		tracknode = sequence_insert(self->sequence, position, 0);
-		editposition = sequence_makeposition(self->sequence,
+		tracknode = psy_audio_sequence_insert(self->sequence, position, 0);
+		editposition = psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			tracknode);
 	}
-	sequenceselection_seteditposition(self->selection, editposition);
+	psy_audio_sequenceselection_seteditposition(self->selection, editposition);
 	workspace_setsequenceselection(self->workspace,
 		self->workspace->sequenceselection);
 	sequenceview_updateplayposition(self);
@@ -823,17 +875,17 @@ void sequenceview_ondelentry(SequenceView* self)
 
 void sequenceview_onincpattern(SequenceView* self)
 {
-	SequenceEntry* entry;
-	SequencePosition editposition;
+	psy_audio_SequenceEntry* entry;
+	psy_audio_SequencePosition editposition;
 
 	editposition = self->workspace->sequenceselection.editposition;
-	entry = sequenceposition_entry(&editposition);
+	entry = psy_audio_sequenceposition_entry(&editposition);
 	if (entry) {
-		sequence_setpatternslot(self->sequence, editposition,
-			entry->pattern + 1);
+		psy_audio_sequence_setpatternslot(self->sequence, editposition,
+			entry->patternslot + 1);
 	}
-	sequenceselection_seteditposition(self->selection,
-		sequence_makeposition(self->sequence,
+	psy_audio_sequenceselection_seteditposition(self->selection,
+		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			editposition.trackposition.tracknode));
 	workspace_setsequenceselection(self->workspace,
@@ -844,17 +896,17 @@ void sequenceview_onincpattern(SequenceView* self)
 
 void sequenceview_ondecpattern(SequenceView* self)
 {
-	SequenceEntry* entry;
-	SequencePosition editposition;
+	psy_audio_SequenceEntry* entry;
+	psy_audio_SequencePosition editposition;
 
 	editposition = self->workspace->sequenceselection.editposition;
-	entry = sequenceposition_entry(&editposition);
-	if (entry && entry->pattern > 0) {
-		sequence_setpatternslot(self->sequence, editposition,
-			entry->pattern - 1);
+	entry = psy_audio_sequenceposition_entry(&editposition);
+	if (entry && entry->patternslot > 0) {
+		psy_audio_sequence_setpatternslot(self->sequence, editposition,
+			entry->patternslot - 1);
 	}
-	sequenceselection_seteditposition(self->selection,
-		sequence_makeposition(self->sequence,
+	psy_audio_sequenceselection_seteditposition(self->selection,
+		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			editposition.trackposition.tracknode));
 	workspace_setsequenceselection(self->workspace,
@@ -866,7 +918,7 @@ void sequenceview_ondecpattern(SequenceView* self)
 void sequenceview_onnewtrack(SequenceView* self)
 {
 	psy_audio_exclusivelock_enter();
-	sequence_appendtrack(self->sequence, sequencetrack_allocinit());
+	psy_audio_sequence_appendtrack(self->sequence, psy_audio_sequencetrack_allocinit());
 	psy_audio_exclusivelock_leave();
 	psy_ui_component_updateoverflow(&self->listview.component);	
 	psy_ui_component_invalidate(&self->component);
@@ -874,11 +926,11 @@ void sequenceview_onnewtrack(SequenceView* self)
 
 void sequenceview_ondeltrack(SequenceView* self)
 {
-	SequencePosition position;
-	position = sequence_at(self->sequence, self->listview.selectedtrack,
+	psy_audio_SequencePosition position;
+	position = psy_audio_sequence_at(self->sequence, self->listview.selectedtrack,
 		self->listview.selected);
 	psy_audio_exclusivelock_enter();
-	sequence_removetrack(self->sequence, position.track);
+	psy_audio_sequence_removetrack(self->sequence, position.track);
 	psy_audio_exclusivelock_leave();	
 	sequenceduration_update(&self->duration);
 	psy_ui_component_updateoverflow(&self->listview.component);
@@ -887,21 +939,21 @@ void sequenceview_ondeltrack(SequenceView* self)
 
 void sequenceview_onclear(SequenceView* self)
 {
-	SequencePosition sequenceposition;
+	psy_audio_SequencePosition sequenceposition;
 
 	if (self->workspace->song) {
 		psy_audio_exclusivelock_enter();
 		workspace_disposesequencepaste(self->workspace);
-		sequence_clear(self->sequence);
-		patterns_clear(&self->workspace->song->patterns);
-		patterns_insert(&self->workspace->song->patterns, 0,
+		psy_audio_sequence_clear(self->sequence);
+		psy_audio_patterns_clear(&self->workspace->song->patterns);
+		psy_audio_patterns_insert(&self->workspace->song->patterns, 0,
 			psy_audio_pattern_allocinit());
 		sequenceposition.track =
-			sequence_appendtrack(self->sequence, sequencetrack_allocinit());
+			psy_audio_sequence_appendtrack(self->sequence, psy_audio_sequencetrack_allocinit());
 		sequenceposition.trackposition =
-			sequence_begin(self->sequence, sequenceposition.track, 0);
-		sequence_insert(self->sequence, sequenceposition, 0);
-		sequenceselection_setsequence(self->selection, self->sequence);
+			psy_audio_sequence_begin(self->sequence, sequenceposition.track, 0);
+		psy_audio_sequence_insert(self->sequence, sequenceposition, 0);
+		psy_audio_sequenceselection_setsequence(self->selection, self->sequence);
 		workspace_setsequenceselection(self->workspace, *self->selection);
 		sequenceview_updateplayposition(self);		
 		psy_audio_exclusivelock_leave();
@@ -920,27 +972,27 @@ void sequenceview_oncopy(SequenceView* self)
 
 	workspace_disposesequencepaste(self->workspace);
 	for (p = self->selection->entries; p != NULL; p = p->next) {
-		SequenceEntry* entry;
+		psy_audio_SequenceEntry* entry;
 
-		entry = (SequenceEntry*)p->entry;
+		entry = (psy_audio_SequenceEntry*)p->entry;
 		psy_list_append(&self->workspace->sequencepaste,
-			sequenceentry_allocinit(entry->pattern, entry->offset));
+			psy_audio_sequenceentry_allocinit(entry->patternslot, entry->offset));
 	}
 }
 
 void sequenceview_onpaste(SequenceView* self)
 {
-	SequencePosition position;
+	psy_audio_SequencePosition position;
 	psy_List* p;
 
 	position = self->selection->editposition;
 	for (p = self->workspace->sequencepaste; p != NULL; p = p->next) {
-		SequenceEntry* entry;
+		psy_audio_SequenceEntry* entry;
 		SequenceTrackNode* node;
 
-		entry = (SequenceEntry*)p->entry;
-		node = sequence_insert(self->sequence, position, entry->pattern);
-		position = sequence_makeposition(self->sequence,
+		entry = (psy_audio_SequenceEntry*)p->entry;
+		node = psy_audio_sequence_insert(self->sequence, position, entry->patternslot);
+		position = psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
 			node);
 	}
@@ -951,14 +1003,14 @@ void sequenceview_onsingleselection(SequenceView* self, psy_ui_Button* sender)
 {
 	psy_ui_button_highlight(&self->buttons.singlesel);
 	psy_ui_button_disablehighlight(&self->buttons.multisel);
-	self->listview.selection->selectionmode = SELECTIONMODE_SINGLE;
+	self->listview.selection->selectionmode = psy_audio_SEQUENCE_SELECTIONMODE_SINGLE;
 }
 
 void sequenceview_onmultiselection(SequenceView* self, psy_ui_Button* sender)
 {
 	psy_ui_button_highlight(&self->buttons.multisel);
 	psy_ui_button_disablehighlight(&self->buttons.singlesel);
-	self->listview.selection->selectionmode = SELECTIONMODE_MULTI;
+	self->listview.selection->selectionmode = psy_audio_SEQUENCE_SELECTIONMODE_MULTI;
 }
 
 void sequenceview_onfollowsong(SequenceView* self, psy_ui_Button* sender)
@@ -1035,6 +1087,10 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 		psy_signal_connect(&self->sequence->patterns->signal_namechanged,
 			&self->listview,
 			sequencelistview_onpatternnamechanged);
+		psy_signal_connect(&self->sequence->sequencechanged,
+			self, sequenceview_onsequencechanged);		
+		psy_signal_connect(&self->sequence->sequencechanged,
+			self, sequenceview_onsequencechanged);		
 	}	
 	sequenceduration_update(&self->duration);
 	psy_ui_component_updateoverflow(&self->listview.component);
@@ -1043,8 +1099,8 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 
 void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* sender)
 {
-	SequencePosition position;
-	SequenceTracks* p;
+	psy_audio_SequencePosition position;
+	psy_audio_SequenceTracks* p;
 	psy_List* q;
 	int c = 0;
 	int visilines;
@@ -1064,7 +1120,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	self->listview.selectedtrack = c;
 	c = 0;
 	if (p) {
-		q = ((SequenceTrack*)p->entry)->entries;
+		q = ((psy_audio_SequenceTrack*)p->entry)->entries;
 		while (q) {
 			if (q == position.trackposition.tracknode) {
 				break;
@@ -1097,16 +1153,24 @@ void sequenceview_updateplayposition(SequenceView* self)
 
 void sequenceview_changeplayposition(SequenceView* self)
 {
-	SequencePosition editposition;
-	SequenceEntry* entry;
+	psy_audio_SequencePosition editposition;
+	psy_audio_SequenceEntry* entry;
 	psy_dsp_big_beat_t startposition;
 
 	editposition = self->workspace->sequenceselection.editposition;
-	entry = sequenceposition_entry(&editposition);
+	entry = psy_audio_sequenceposition_entry(&editposition);
 	startposition = entry->offset;
 	psy_audio_exclusivelock_enter();
 	psy_audio_player_stop(&self->workspace->player);
 	psy_audio_player_setposition(&self->workspace->player, startposition);
 	psy_audio_player_start(&self->workspace->player);
 	psy_audio_exclusivelock_leave();
+}
+
+void sequenceview_onsequencechanged(SequenceView* self,
+	psy_audio_Sequence* sender)
+{	
+	psy_ui_component_updateoverflow(&self->listview.component);
+	psy_ui_component_invalidate(&self->component);
+	sequenceduration_update(&self->duration);
 }

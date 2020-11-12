@@ -200,15 +200,15 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 
 void buildsequence(psy_audio_SongFile* self, unsigned char* playorder, int playlength)
 {
-	SequencePosition sequenceposition;
+	psy_audio_SequencePosition sequenceposition;
 	int32_t i;
 		
 	sequenceposition.track =
-		sequence_appendtrack(&self->song->sequence, sequencetrack_allocinit());
+		psy_audio_sequence_appendtrack(&self->song->sequence, psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < playlength; ++i) {			
 		sequenceposition.trackposition =
-			sequence_last(&self->song->sequence, sequenceposition.track);
-		sequence_insert(&self->song->sequence, sequenceposition, playorder[i]);
+			psy_audio_sequence_last(&self->song->sequence, sequenceposition.track);
+		psy_audio_sequence_insert(&self->song->sequence, sequenceposition, playorder[i]);
 	}
 }
 
@@ -260,7 +260,7 @@ void readsngi(psy_audio_SongFile* self)
 		// # of tracks for whole song
 		psyfile_read(self->file, &temp, sizeof temp);
 		songtracks = temp;
-		patterns_setsongtracks(&self->song->patterns, songtracks);
+		psy_audio_patterns_setsongtracks(&self->song->patterns, songtracks);
 		// bpm
 		{///\todo: this was a hack added in 1.9alpha to allow decimal bpm values
 			int32_t bpmcoarse;
@@ -411,7 +411,7 @@ void readpatd(psy_audio_SongFile* self)
 
 					psource = pdest;
 					pattern = psy_audio_pattern_allocinit();
-					patterns_insert(&self->song->patterns, index, pattern);
+					psy_audio_patterns_insert(&self->song->patterns, index, pattern);
 					psy_audio_pattern_setname(pattern, patternname[index]);
 					for (y = 0; y < patternlines[index]; ++y) {
 						unsigned char* ptrack = psource;
@@ -419,7 +419,7 @@ void readpatd(psy_audio_SongFile* self)
 						psy_dsp_big_beat_t offset;
 
 						offset = bpl * y;
-						for (track = 0; track < patterns_songtracks(&self->song->patterns);
+						for (track = 0; track < psy_audio_patterns_songtracks(&self->song->patterns);
 							++track) {
 							psy_audio_PatternEvent event;
 							// Psy3 PatternEntry format
@@ -429,17 +429,17 @@ void readpatd(psy_audio_SongFile* self)
 							// uint8_t mach;		2
 							// uint8_t cmd;			3
 							// uint8_t parameter;	4												
-							patternevent_clear(&event);
+							psy_audio_patternevent_clear(&event);
 							event.note = ptrack[0];
 							event.inst = (ptrack[1] == 0xFF)
-								? event.inst = NOTECOMMANDS_INST_EMPTY
+								? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
 								: ptrack[1];
 							event.mach = (ptrack[2] == 0xFF)
-								? event.mach = NOTECOMMANDS_MACH_EMPTY
+								? event.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY
 								: ptrack[2];
 							event.cmd = ptrack[3];
 							event.parameter = ptrack[4];
-							if (!patternevent_empty(&event)) {
+							if (!psy_audio_patternevent_empty(&event)) {
 								node = psy_audio_pattern_insert(pattern, node, track, offset,
 									&event);
 							}
@@ -496,7 +496,7 @@ void readepat(psy_audio_SongFile* self)
 
 			psyfile_read(self->file, &temp, sizeof(temp));
 			index = temp;			
-			patterns_insert(&self->song->patterns, index, pattern);
+			psy_audio_patterns_insert(&self->song->patterns, index, pattern);
 			// pattern length
 			psyfile_read(self->file, &ftemp, sizeof ftemp);
 			psy_audio_pattern_setlength(pattern, ftemp);
@@ -526,7 +526,7 @@ void readepat(psy_audio_SongFile* self)
 				for (j = 0; j < numevents; ++j) {
 					psy_audio_PatternEvent ev;
 
-					patternevent_clear(&ev);
+					psy_audio_patternevent_clear(&ev);
 					psyfile_read(self->file, &temp, sizeof(temp));
 					ev.note = temp;
 					psyfile_read(self->file, &temp, sizeof(temp));
@@ -1662,7 +1662,7 @@ uint32_t psy3_chunkcount(psy_audio_Song* song)
 	uint32_t rv = 3;
 
 	// PATD
-	rv += (uint32_t)patterns_size(&song->patterns);
+	rv += (uint32_t)psy_audio_patterns_size(&song->patterns);
 	// MACD
 	rv += (uint32_t)psy_audio_machines_size(&song->machines);
 	// INSD
@@ -1839,7 +1839,7 @@ int psy3_write_seqd(psy_audio_SongFile* self)
 		// This needs to be replaced to store the Multisequence.
 		static char* sequencename = "seq0";
 		psy_List* t;
-		SequenceTrack* track;
+		psy_audio_SequenceTrack* track;
 
 		if (status = psyfile_writeheader(self->file, "SEQD",
 				CURRENT_FILE_VERSION_SEQD, 0, &sizepos)) {
@@ -1851,7 +1851,7 @@ int psy3_write_seqd(psy_audio_SongFile* self)
 		}
 		// sequence length
 		if (status = psyfile_write_int32(self->file, (int32_t)
-				sequence_size(&self->song->sequence,
+				psy_audio_sequence_size(&self->song->sequence,
 				self->song->sequence.tracks))) {
 			return status;
 		}
@@ -1859,14 +1859,14 @@ int psy3_write_seqd(psy_audio_SongFile* self)
 		if (status = psyfile_writestring(self->file, sequencename)) {
 			return status;
 		}
-		track = (SequenceTrack*) self->song->sequence.tracks->entry;
+		track = (psy_audio_SequenceTrack*) self->song->sequence.tracks->entry;
 		for (t = track->entries ; t != 0; t = t->next) {
-			SequenceEntry* entry;
+			psy_audio_SequenceEntry* entry;
 
-			entry = (SequenceEntry*) t->entry;
+			entry = (psy_audio_SequenceEntry*) t->entry;
 			// sequence data
 			if (status = psyfile_write_int32(self->file, (int32_t)
-					entry->pattern)) {
+					entry->patternslot)) {
 				return status;
 			}
 		}
@@ -1888,7 +1888,7 @@ int psy3_write_patd(psy_audio_SongFile* self)
 
 	for (i = 0; i < MAX_PATTERNS; ++i) {
 		// check every pattern for validity
-		if (sequence_patternused(&self->song->sequence, i)) {
+		if (psy_audio_sequence_patternused(&self->song->sequence, i)) {
 			// ok save it
 			psy_audio_Pattern* pattern;
 			int32_t patternLines;
@@ -1903,7 +1903,7 @@ int psy3_write_patd(psy_audio_SongFile* self)
 			size_t patsize;
 			uint32_t sizepos;
 			
-			pattern = patterns_at(&self->song->patterns, i);
+			pattern = psy_audio_patterns_at(&self->song->patterns, i);
 			lpb = self->song->properties.lpb;
 			patternLines = (int32_t) (pattern->length * lpb + 0.5);
 			patsize = self->song->patterns.songtracks *
@@ -2011,7 +2011,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 			!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
 		// check every pattern for validity
-		if (sequence_patternused(&self->song->sequence,
+		if (psy_audio_sequence_patternused(&self->song->sequence,
 				psy_tableiterator_key(&it))) {
 			++c;
 		}
@@ -2025,7 +2025,7 @@ int psy3_write_epat(psy_audio_SongFile* self)
 			!psy_tableiterator_equal(&it, psy_table_end());
 				psy_tableiterator_inc(&it)) {
 		// check every pattern for validity
-		if (sequence_patternused(&self->song->sequence,
+		if (psy_audio_sequence_patternused(&self->song->sequence,
 				psy_tableiterator_key(&it))) {			
 			psy_audio_Pattern* pattern;										
 			int32_t index;

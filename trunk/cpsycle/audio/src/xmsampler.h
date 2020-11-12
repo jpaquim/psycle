@@ -75,12 +75,12 @@ INLINE psy_audio_Machine* psy_audio_xmsampler_base(psy_audio_XMSampler* self)
 
 INLINE void psy_audio_xmsampler_defaultC4(psy_audio_XMSampler* self, bool correct)
 {
-	self->basec = correct ? NOTECOMMANDS_MIDDLEC : 48;
+	self->basec = correct ? psy_audio_NOTECOMMANDS_MIDDLEC : 48;
 }
 			
 INLINE bool psy_audio_xmsampler_isdefaultC4(psy_audio_XMSampler* self)
 {
-	return self->basec == NOTECOMMANDS_MIDDLEC;
+	return self->basec == psy_audio_NOTECOMMANDS_MIDDLEC;
 }
 
 void psy_audio_xmsampler_setresamplerquality(psy_audio_XMSampler* self,

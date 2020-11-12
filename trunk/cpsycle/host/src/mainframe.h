@@ -22,6 +22,7 @@
 #include "plugineditor.h"
 #include "patternview.h"
 #include "sequenceview.h"
+#include "seqeditor.h"
 #include "stepsequencerview.h"
 #include "samplesview.h"
 #include "instrumentview.h"
@@ -83,6 +84,7 @@ typedef struct {
 	psy_ui_Component paramviews;
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
+	SeqEditor seqeditor;
 	MachineView machineview;
 	PatternView patternview;		
 	SamplesView samplesview;

@@ -19,11 +19,11 @@ static char* psy_strdup(const char* str)
 		: NULL;
 }
 
-static char* psy_strlen(const char* str)
+static intptr_t psy_strlen(const char* str)
 {
 	return (str)
 		? strlen(str)
-		: NULL;
+		: 0;
 }
 
 static char* psy_setstr(char** dest, const char* text) {

@@ -61,17 +61,17 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl)
 					// uint8_t mach;		2
 					// uint8_t cmd;			3
 					// uint8_t parameter;	4												
-					patternevent_clear(&event);					
+					psy_audio_patternevent_clear(&event);					
 					event.note = ptrack[0];
 					event.inst = (ptrack[1] == 0xFF)
-						? event.inst = NOTECOMMANDS_INST_EMPTY
+						? event.inst = psy_audio_NOTECOMMANDS_INST_EMPTY
 						: ptrack[1];
 					event.mach = (ptrack[2] == 0xFF)
-						? event.mach = NOTECOMMANDS_MACH_EMPTY
+						? event.mach = psy_audio_NOTECOMMANDS_MACH_EMPTY
 						: ptrack[2];
 					event.cmd = ptrack[3];
 					event.parameter = ptrack[4];
-					if (!patternevent_empty(&event)) {						
+					if (!psy_audio_patternevent_empty(&event)) {						
 						node = psy_audio_pattern_insert(pattern, node, track, offset, &event);
 					}				
 			}

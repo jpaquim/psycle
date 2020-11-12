@@ -111,19 +111,19 @@ void song_initmachines(psy_audio_Song* self)
 
 void song_initpatterns(psy_audio_Song* self)
 {
-	patterns_init(&self->patterns);
-	patterns_insert(&self->patterns, 0, psy_audio_pattern_allocinit());
+	psy_audio_patterns_init(&self->patterns);
+	psy_audio_patterns_insert(&self->patterns, 0, psy_audio_pattern_allocinit());
 }
 
 void song_initsequence(psy_audio_Song* self)
 {
-	SequencePosition sequenceposition;
-	sequence_init(&self->sequence, &self->patterns);	
+	psy_audio_SequencePosition sequenceposition;
+	psy_audio_sequence_init(&self->sequence, &self->patterns);	
 	sequenceposition.track = 
-		sequence_appendtrack(&self->sequence, sequencetrack_allocinit());
+		psy_audio_sequence_appendtrack(&self->sequence, psy_audio_sequencetrack_allocinit());
 	sequenceposition.trackposition =
-		sequence_begin(&self->sequence, sequenceposition.track, 0);
-	sequence_insert(&self->sequence, sequenceposition, 0);
+		psy_audio_sequence_begin(&self->sequence, sequenceposition.track, 0);
+	psy_audio_sequence_insert(&self->sequence, sequenceposition, 0);
 }
 
 void song_initsignals(psy_audio_Song* self)
@@ -136,8 +136,8 @@ void psy_audio_song_dispose(psy_audio_Song* self)
 {
 	songproperties_dispose(&self->properties);
 	psy_audio_machines_dispose(&self->machines);
-	patterns_dispose(&self->patterns);
-	sequence_dispose(&self->sequence);		
+	psy_audio_patterns_dispose(&self->patterns);
+	psy_audio_sequence_dispose(&self->sequence);		
 	psy_audio_samples_dispose(&self->samples);
 	psy_audio_instruments_dispose(&self->instruments);
 	song_disposesignals(self);
@@ -175,8 +175,8 @@ void psy_audio_song_deallocate(psy_audio_Song* self)
 
 void psy_audio_song_clear(psy_audio_Song* self)
 {
-	sequence_clear(&self->sequence);
-	patterns_clear(&self->patterns);
+	psy_audio_sequence_clear(&self->sequence);
+	psy_audio_patterns_clear(&self->patterns);
 	psy_audio_machines_clear(&self->machines);
 }
 

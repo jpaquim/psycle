@@ -60,8 +60,8 @@ static int screentokey(int x, double keysize)
 			++rv;
 		}
 	}
-	if (rv >= NOTECOMMANDS_RELEASE) {
-		rv = NOTECOMMANDS_RELEASE - 1;
+	if (rv >= psy_audio_NOTECOMMANDS_RELEASE) {
+		rv = psy_audio_NOTECOMMANDS_RELEASE - 1;
 	}
 	return rv;	
 }
@@ -104,7 +104,7 @@ void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 void instrumentkeyboardview_ondraw(InstrumentKeyboardView* self, psy_ui_Graphics* g)
 {		
 	int keymin = 0;
-	int keymax = NOTECOMMANDS_RELEASE;
+	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 	int key;
 	double cp = 0;
 	float top = 0.50;
@@ -155,7 +155,7 @@ void instrumentkeyboardview_onsize(InstrumentKeyboardView* self, psy_ui_Size* si
 void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 {
 	int keymin = 0;
-	int keymax = NOTECOMMANDS_RELEASE;
+	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 	int key;
 	int numwhitekeys;
 	psy_ui_TextMetric tm;
@@ -246,7 +246,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		psy_ui_TextMetric tm;
 		psy_ui_IntSize size;
 		int keymin = 0;
-		int keymax = NOTECOMMANDS_RELEASE;
+		int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 		int key;
 		int numwhitekeys;
 
@@ -334,7 +334,7 @@ void instrumententryview_onsize(InstrumentEntryView* self, psy_ui_Size* size)
 void instrumententryview_updatemetrics(InstrumentEntryView* self)
 {
 	int keymin = 0;
-	int keymax = NOTECOMMANDS_RELEASE;
+	int keymax = psy_audio_NOTECOMMANDS_RELEASE;
 	int key;
 	int numwhitekeys;
 	psy_ui_TextMetric tm;
@@ -422,7 +422,7 @@ float instrumententryview_keysize(InstrumentEntryView* self)
 {	
 	int key;
 	int keymin = 0;
-	int keymax = NOTECOMMANDS_RELEASE - 1;
+	int keymax = psy_audio_NOTECOMMANDS_RELEASE - 1;
 	int numwhitekeys;
 	psy_ui_TextMetric tm;
 	psy_ui_Size size;

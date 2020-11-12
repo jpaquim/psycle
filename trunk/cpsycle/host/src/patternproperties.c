@@ -19,42 +19,47 @@ typedef struct {
 	psy_dsp_big_beat_t oldlength;
 } PatternPropertiesApplyCommand;
 
-static void PatternPropertiesApplyCommandDispose(PatternPropertiesApplyCommand*);
-static void PatternPropertiesApplyCommandExecute(PatternPropertiesApplyCommand*);
-static void PatternPropertiesApplyCommandRevert(PatternPropertiesApplyCommand*);
+static void patternpropertiesapplycommand_dispose(PatternPropertiesApplyCommand*);
+static void patternpropertiesapplycommand_execute(PatternPropertiesApplyCommand*);
+static void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand*);
 
 // vtable
 static psy_CommandVtable patternpropertiesapplycommand_vtable;
-static int patternpropertiesapplycommand_vtable_initialized = 0;
+static bool patternpropertiesapplycommand_vtable_initialized = FALSE;
 
 static void patternpropertiesapplycommand_vtable_init(PatternPropertiesApplyCommand* self)
 {
 	if (!patternpropertiesapplycommand_vtable_initialized) {
 		patternpropertiesapplycommand_vtable = *(self->command.vtable);
-		patternpropertiesapplycommand_vtable.dispose = (psy_fp_command)PatternPropertiesApplyCommandDispose;
-		patternpropertiesapplycommand_vtable.execute = (psy_fp_command)PatternPropertiesApplyCommandExecute;
-		patternpropertiesapplycommand_vtable.revert = (psy_fp_command)PatternPropertiesApplyCommandRevert;
-		patternpropertiesapplycommand_vtable_initialized = 1;
+		patternpropertiesapplycommand_vtable.dispose = (psy_fp_command)
+			patternpropertiesapplycommand_dispose;
+		patternpropertiesapplycommand_vtable.execute = (psy_fp_command)
+			patternpropertiesapplycommand_execute;
+		patternpropertiesapplycommand_vtable.revert = (psy_fp_command)
+			patternpropertiesapplycommand_revert;
+		patternpropertiesapplycommand_vtable_initialized = TRUE;
 	}
 }
 
-PatternPropertiesApplyCommand* PatternPropertiesApplyCommandAlloc(psy_audio_Pattern* pattern,
+static PatternPropertiesApplyCommand* patternpropertiesapplycommand_allocinit(psy_audio_Pattern* pattern,
 	const char* name, psy_dsp_big_beat_t length)
 {
 	PatternPropertiesApplyCommand* rv;
 
-	rv = malloc(sizeof(PatternPropertiesApplyCommand));		
-	psy_command_init(&rv->command);
-	patternpropertiesapplycommand_vtable_init(rv);
-	rv->command.vtable = &patternpropertiesapplycommand_vtable;
-	rv->pattern = pattern;
-	rv->newname = strdup(name);
-	rv->newlength = length;
-	rv->oldname = 0;
+	rv = malloc(sizeof(PatternPropertiesApplyCommand));
+	if (rv) {
+		psy_command_init(&rv->command);
+		patternpropertiesapplycommand_vtable_init(rv);
+		rv->command.vtable = &patternpropertiesapplycommand_vtable;
+		rv->pattern = pattern;
+		rv->newname = strdup(name);
+		rv->newlength = length;
+		rv->oldname = 0;
+	}
 	return rv;
 }
 
-void PatternPropertiesApplyCommandDispose(PatternPropertiesApplyCommand* self)
+void patternpropertiesapplycommand_dispose(PatternPropertiesApplyCommand* self)
 {
 	free(self->newname);
 	self->newname = 0;
@@ -62,7 +67,7 @@ void PatternPropertiesApplyCommandDispose(PatternPropertiesApplyCommand* self)
 	self->oldname = 0;
 }
 
-void PatternPropertiesApplyCommandExecute(PatternPropertiesApplyCommand* self)
+void patternpropertiesapplycommand_execute(PatternPropertiesApplyCommand* self)
 {
 	self->oldname = strdup(psy_audio_pattern_name(self->pattern));
 	psy_audio_pattern_setname(self->pattern, self->newname);
@@ -73,7 +78,7 @@ void PatternPropertiesApplyCommandExecute(PatternPropertiesApplyCommand* self)
 	self->newname = 0;
 }
 
-void PatternPropertiesApplyCommandRevert(PatternPropertiesApplyCommand* self)
+void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand* self)
 {
 	self->newname = strdup(psy_audio_pattern_name(self->pattern));
 	psy_audio_pattern_setname(self->pattern, self->oldname);
@@ -174,7 +179,7 @@ void patternproperties_onapply(PatternProperties* self,
 		psy_signal_prevent(&self->workspace->song->patterns.signal_namechanged,
 			self, patternproperties_onpatternlengthchanged);
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&PatternPropertiesApplyCommandAlloc(self->pattern,
+			&patternpropertiesapplycommand_allocinit(self->pattern,
 				psy_ui_edit_text(&self->nameedit),
 				(psy_dsp_big_beat_t)atof(psy_ui_edit_text(&self->lengthedit))
 				)->command);
@@ -200,7 +205,7 @@ void patternproperties_onpatternnamechanged(PatternProperties* self,
 {
 	psy_audio_Pattern* pattern;
 
-	pattern = patterns_at(patterns, slot);
+	pattern = psy_audio_patterns_at(patterns, slot);
 	if (pattern && pattern == self->pattern) {
 		psy_ui_edit_settext(&self->nameedit,
 			psy_audio_pattern_name(pattern));
@@ -212,7 +217,7 @@ void patternproperties_onpatternlengthchanged(PatternProperties* self,
 {
 	psy_audio_Pattern* pattern;
 
-	pattern = patterns_at(patterns, slot);
+	pattern = psy_audio_patterns_at(patterns, slot);
 	if (pattern && pattern == self->pattern) {
 		char buffer[20];
 

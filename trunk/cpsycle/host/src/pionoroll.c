@@ -642,7 +642,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 			psy_audio_PatternNode* node = 0;
 			psy_audio_PatternNode* prev = 0;
 
-			patternevent_clear(&event);
+			psy_audio_patternevent_clear(&event);
 			event.note = self->keyboardstate->keymax - 1 - ev->y / self->keyboardstate->keyheight;
 			node = psy_audio_pattern_findnode(self->pattern, self->gridstate->cursor.track, offset,
 				1 / (psy_dsp_big_beat_t)self->gridstate->lpb, &prev);
@@ -669,7 +669,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 				psy_audio_pattern_remove(self->pattern, node);
 				if (next) {
 					if (patternentry_front(psy_audio_patternnode_entry(next))->note
-						== NOTECOMMANDS_RELEASE) {
+						== psy_audio_NOTECOMMANDS_RELEASE) {
 						if (self->hover == psy_audio_patternnode_entry(next)) {
 							self->hover = 0;
 						}

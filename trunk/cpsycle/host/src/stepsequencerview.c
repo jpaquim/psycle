@@ -190,12 +190,12 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		cursor.column = 0;	
 		cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
 			&self->workspace->player);		
-		patternevent_clear(&event);
+		psy_audio_patternevent_clear(&event);
 		event.note = 48;
 		event.inst = (uint16_t)psy_audio_instruments_selected(
 			&self->workspace->song->instruments).subslot;
 		event.mach = (uint8_t) psy_audio_machines_slot(&self->workspace->song->machines);
-		// event.cmd = GATE;
+		// event.cmd = psy_audio_PATTERNCMD_GATE;
 		// event.parameter = 0x80;
 		stepsequencerbar_setdefaultevent(self,
 			cursor.track,
@@ -236,16 +236,16 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 		psy_audio_PatternEntry* entry;
 
 		entry = (psy_audio_PatternEntry*) node->entry;
-		if (patternentry_front(entry)->note != NOTECOMMANDS_EMPTY) {
+		if (patternentry_front(entry)->note != psy_audio_NOTECOMMANDS_EMPTY) {
 			event->note = patternentry_front(entry)->note;
 		}
-		if (patternentry_front(entry)->inst != NOTECOMMANDS_INST_EMPTY) {
+		if (patternentry_front(entry)->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			event->inst = patternentry_front(entry)->inst;
 		}
-		if (patternentry_front(entry)->mach != NOTECOMMANDS_MACH_EMPTY) {
+		if (patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_MACH_EMPTY) {
 			event->mach = patternentry_front(entry)->mach;
 		}
-		if (patternentry_front(entry)->vol != NOTECOMMANDS_VOL_EMPTY) {
+		if (patternentry_front(entry)->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
 			event->vol = patternentry_front(entry)->vol;
 		}
 		if (patternentry_front(entry)->cmd != 0) {
@@ -519,7 +519,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->stepsequencerbarselect.component, &margin);
 	stepsequencerbar_init(&self->stepsequencerbar, &self->component,
 		&self->steptimer, workspace);
-	stepsequencerview_setpattern(self, patterns_at(&workspace->song->patterns,
+	stepsequencerview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns,
 		0));
 	psy_ui_component_setalign(&self->stepsequencerbar.component,
 		psy_ui_ALIGN_LEFT);
@@ -558,15 +558,15 @@ void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 	Workspace* workspace)
 {
-	SequenceSelection selection;
-	SequenceEntry* entry;
+	psy_audio_SequenceSelection selection;
+	psy_audio_SequenceEntry* entry;
 	psy_audio_Pattern* pattern;
 
 	selection = workspace_sequenceselection(workspace);
-	entry = sequenceposition_entry(&selection.editposition);	
+	entry = psy_audio_sequenceposition_entry(&selection.editposition);	
 	if (entry) {
-		pattern = patterns_at(&workspace->song->patterns,
-			entry->pattern);		
+		pattern = psy_audio_patterns_at(&workspace->song->patterns,
+			entry->patternslot);
 	} else {		
 		pattern = 0;
 	}
@@ -577,16 +577,16 @@ void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
 void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
 {
-	SequenceSelection selection;	
+	psy_audio_SequenceSelection selection;	
 	psy_audio_Pattern* pattern;
 
 	selection = workspace_sequenceselection(workspace);
 	if (selection.editposition.trackposition.tracknode) {
-		SequenceEntry* entry;
+		psy_audio_SequenceEntry* entry;
 
-		entry = (SequenceEntry*)
+		entry = (psy_audio_SequenceEntry*)
 			selection.editposition.trackposition.tracknode->entry;
-		pattern = patterns_at(&workspace->song->patterns, entry->pattern);		
+		pattern = psy_audio_patterns_at(&workspace->song->patterns, entry->patternslot);
 	} else {
 		pattern = 0;
 	}

@@ -276,12 +276,12 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 			}
 		} else
 		if (ev->button == 2) {				
-			if (patterns_istracksoloed(&self->workspace->song->patterns,
+			if (psy_audio_patterns_istracksoloed(&self->workspace->song->patterns,
 						track)) {
-				patterns_deactivatesolotrack(
+				psy_audio_patterns_deactivatesolotrack(
 					&self->workspace->song->patterns);
 			} else {
-				patterns_activatesolotrack(
+				psy_audio_patterns_activatesolotrack(
 					&self->workspace->song->patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);

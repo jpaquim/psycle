@@ -27,11 +27,11 @@
 #include "../dsp/src/dsptypes.h"
 
 typedef struct {
-	int guid;								// Global unique identifier
-	int Version;							// VERSION
-	int Flags;								// Flags	
-	char const *Name;						// "Windows MME Driver"
-	char const *ShortName;					// "MME"	
+	int guid;                // Global unique identifier
+	int Version;
+	int Flags;
+	char const *Name;        // "Windows MME Driver"
+	char const *ShortName;   // "MME"	
 } psy_AudioDriverInfo;
 
 typedef psy_dsp_amp_t* (*AUDIODRIVERWORKFN)(void* context, int* numSamples,

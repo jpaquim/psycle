@@ -407,14 +407,14 @@ int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_M
 void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* ev)
 {	
-	if (patternevent_has_volume(ev)) {
+	if (psy_audio_patternevent_has_volume(ev)) {
 		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, 0x0C, ev->vol);
 		if (ev->parameter != 0 || ev->cmd != 0) {
-			mi_seqtick(self->mi, channel, NOTECOMMANDS_EMPTY,
-				NOTECOMMANDS_EMPTY, ev->cmd, ev->parameter);
+			mi_seqtick(self->mi, channel, psy_audio_NOTECOMMANDS_EMPTY,
+				psy_audio_NOTECOMMANDS_EMPTY, ev->cmd, ev->parameter);
 		}
 	} else
-	if (ev->note == NOTECOMMANDS_MIDICC && ev->inst >= 0x80 && ev->inst < 0xFF) {		
+	if (ev->note == psy_audio_NOTECOMMANDS_MIDICC && ev->inst >= 0x80 && ev->inst < 0xFF) {		
 		mi_midievent(self->mi, ev->inst & 0x0F, ev->inst & 0xF0,
 			(ev->cmd << 8) + ev->parameter);			
 	} else {
