@@ -125,17 +125,19 @@ void init_properties(psy_AudioDriver* self)
 {		
 	char key[256];
 
-	psy_snprintf(key, 256, "silent-guid-%d", PSY_AUDIODRIVER_SILENTDRIVER_GUID);
-	self->properties = psy_property_allocinit_key(key);
-	psy_property_sethint(
+	psy_snprintf(key, 256, "silent-guid-%d",
+		PSY_AUDIODRIVER_SILENTDRIVER_GUID);
+	self->properties = psy_property_settext(
+		psy_property_allocinit_key(key), "Silent");
+	psy_property_setreadonly(
 		psy_property_append_string(self->properties, "name", "Silent AudioDriver"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_property_sethint(
+		TRUE);
+	psy_property_setreadonly(
 		psy_property_append_string(self->properties, "vendor", "Psycledelics"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_property_sethint(
+		TRUE);
+	psy_property_setreadonly(
 		psy_property_append_string(self->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);
+		TRUE);
 }
 
 const char* capturename(psy_AudioDriver* driver, int index)

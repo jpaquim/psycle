@@ -65,6 +65,7 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 	self->hint = PSY_PROPERTY_HINT_NONE;
 	self->disposechildren = TRUE;
 	self->save = TRUE;
+	self->readonly = FALSE;
 	self->id = -1;
 	self->allowappend = 0;
 }
@@ -194,28 +195,31 @@ psy_Property* psy_property_sync(psy_Property* self, psy_Property* source)
 	if (self != source) {
 		psy_List* i;
 
-		for (i = source->children; i != NULL; psy_list_next(&i)) {
+		for (i = psy_property_children(source); i != NULL; psy_list_next(&i)) {
 			psy_Property* q;
 			psy_Property* p;
 
-			p = (psy_Property*)i->entry;
+			p = (psy_Property*)psy_list_entry(i);
 			q = psy_property_at(self, psy_property_key(p),
-				PSY_PROPERTY_TYPE_NONE);
-			if (q) {
+					PSY_PROPERTY_TYPE_NONE);
+			if (q && !psy_property_readonly(q)) {
 				if (psy_property_type(p) == PSY_PROPERTY_TYPE_STRING) {
 					psy_property_set_str(self, psy_property_key(p),
 						psy_property_as_str(p));
 				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_INTEGER) {
 					psy_property_set_int(self, psy_property_key(p),
 						psy_property_as_int(p));
+				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_CHOICE) {
+						psy_property_set_choice(self, psy_property_key(p),
+							psy_property_as_int(p));
 				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_BOOL) {
 					psy_property_set_bool(self, psy_property_key(p),
 						psy_property_as_int(p));
 				} else if (psy_property_type(p) == PSY_PROPERTY_TYPE_FONT) {
 					psy_property_set_font(self, psy_property_key(p),
-					psy_property_as_str(p));
+						psy_property_as_str(p));
 				}
-				if (q->children && p->children) {
+				if (!psy_property_empty(q) && !psy_property_empty(p)) {
 					psy_property_sync(q, p);
 				}
 			}
@@ -574,15 +578,17 @@ psy_Property* psy_property_set_str(psy_Property* self, const char* key,
 
 	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_STRING);
 	if (property) {
-		property->item.typ = PSY_PROPERTY_TYPE_STRING;
-		if (property->item.typ == PSY_PROPERTY_TYPE_STRING) {
-			if (property->item.value.s != value) {
-				free(property->item.value.s);
-			} else {
-				return property;
+		if (!psy_property_readonly(property)) {
+			property->item.typ = PSY_PROPERTY_TYPE_STRING;
+			if (property->item.typ == PSY_PROPERTY_TYPE_STRING) {
+				if (property->item.value.s != value) {
+					free(property->item.value.s);
+				} else {
+					return property;
+				}
 			}
+			property->item.value.s = psy_strdup(value);
 		}
-		property->item.value.s = psy_strdup(value);
 	} else {
 		property = psy_property_append_string(self, key, value);
 	}
@@ -598,11 +604,13 @@ psy_Property* psy_property_set_font(psy_Property* self, const char* key,
 
 	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_FONT);
 	if (property) {
-		if (property->item.typ == PSY_PROPERTY_TYPE_FONT) {
-			free(property->item.value.s);
+		if (!psy_property_readonly(property)) {
+			if (property->item.typ == PSY_PROPERTY_TYPE_FONT) {
+				free(property->item.value.s);
+			}
+			property->item.value.s = psy_strdup(value);
+			property->item.typ = PSY_PROPERTY_TYPE_FONT;
 		}
-		property->item.value.s = psy_strdup(value);
-		property->item.typ = PSY_PROPERTY_TYPE_FONT;
 	} else {
 		property = psy_property_append_font(self, key, value);
 	}
@@ -618,9 +626,11 @@ psy_Property* psy_property_set_int(psy_Property* self, const char* key,
 
 	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_INTEGER);
 	if (property) {
-		if (psy_property_int_valid(property, value)) {
-			property->item.value.i = value;
-			property->item.typ = PSY_PROPERTY_TYPE_INTEGER;
+		if (!psy_property_readonly(property)) {
+			if (psy_property_int_valid(property, value)) {
+				property->item.value.i = value;
+				property->item.typ = PSY_PROPERTY_TYPE_INTEGER;
+			}
 		}
 	} else {
 		property = psy_property_append_int(self, key, value, 0, 0);
@@ -652,9 +662,11 @@ psy_Property* psy_property_set_bool(psy_Property* self, const char* key,
 
 	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_BOOL);
 	if (property) {
-		property->item.value.i = (value != FALSE);
-		property->item.typ = PSY_PROPERTY_TYPE_BOOL;
-		property->item.hint = PSY_PROPERTY_HINT_CHECK;
+		if (!psy_property_readonly(property)) {
+			property->item.value.i = (value != FALSE);
+			property->item.typ = PSY_PROPERTY_TYPE_BOOL;
+			property->item.hint = PSY_PROPERTY_HINT_CHECK;
+		}
 	} else {
 		property = psy_property_append_int(self, key, value, 0, 0);
 	}
@@ -670,8 +682,10 @@ psy_Property* psy_property_set_choice(psy_Property* self, const char* key,
 
 	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
 	if (property) {
-		property->item.value.i = value;
-		property->item.typ = PSY_PROPERTY_TYPE_CHOICE;
+		if (!psy_property_readonly(property)) {
+			property->item.value.i = value;
+			property->item.typ = PSY_PROPERTY_TYPE_CHOICE;
+		}
 	} else {
 		property = psy_property_append_int(self, key, value, 0, 0);
 		property->item.typ = PSY_PROPERTY_TYPE_CHOICE;
@@ -688,8 +702,10 @@ psy_Property* psy_property_set_double(psy_Property* self, const char* key,
 
 	property = psy_property_at(self, key, PSY_PROPERTY_TYPE_NONE);
 	if (property) {
-		property->item.value.d = value;
-		property->item.typ = PSY_PROPERTY_TYPE_DOUBLE;
+		if (!psy_property_readonly(property)) {
+			property->item.value.d = value;
+			property->item.typ = PSY_PROPERTY_TYPE_DOUBLE;
+		}
 	} else {
 		property = psy_property_append_double(self, key, value, 0, 0);
 	}
@@ -929,6 +945,21 @@ psy_Property* psy_property_setcomment(psy_Property* self, const char* text)
 
 	psy_setstr(&self->item.comment, text);	
 	return self;
+}
+
+psy_Property* psy_property_setreadonly(psy_Property* self, bool on)
+{
+	assert(self);
+
+	self->item.readonly = on;
+	return self;
+}
+
+bool psy_property_readonly(const psy_Property* self)
+{
+	assert(self);
+
+	return self->item.readonly;
 }
 
 const char* psy_property_translation(psy_Property* self)

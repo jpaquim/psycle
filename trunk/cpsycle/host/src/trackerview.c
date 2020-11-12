@@ -488,6 +488,7 @@ static void trackergrid_dragselection(TrackerGrid*, psy_audio_PatternEditPositio
 static void trackergrid_onscroll(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_centeroncursor(TrackerGrid*);
 static void trackergrid_setcentermode(TrackerGrid*, int mode);
+static void trackergrid_onfocus(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_onfocuslost(TrackerGrid*, psy_ui_Component* sender);
 static int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset);
 static void trackergrid_clipblock(TrackerGrid*, const psy_ui_Rectangle*,
@@ -608,6 +609,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	// self->tm = psy_ui_component_textmetric(&self->component);	
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);
+	psy_signal_connect(&self->component.signal_focus, self,
+		trackergrid_onfocus);
 	psy_signal_connect(&self->component.signal_focuslost, self,
 		trackergrid_onfocuslost);
 	psy_signal_connect(&self->component.signal_mousewheel, self,
@@ -2018,6 +2021,11 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 			psy_ui_component_invalidate(&self->component);
 		}
 	}
+}
+
+void trackergrid_onfocus(TrackerGrid* self, psy_ui_Component* sender)
+{
+	trackergrid_invalidatecursor(self);
 }
 
 void trackergrid_onfocuslost(TrackerGrid* self, psy_ui_Component* sender)

@@ -1764,10 +1764,9 @@ void workspace_addrecentsong(Workspace* self, const char* filename)
 		psy_Path path;		
 
 		psy_path_init(&path, filename);
-		psy_property_settext(psy_property_sethint(
+		psy_property_settext(psy_property_setreadonly(
 			psy_property_append_string(self->recentfiles,
-				filename, ""),
-			PSY_PROPERTY_HINT_READONLY), psy_path_name(&path));
+				filename, ""), TRUE), psy_path_name(&path));
 		workspace_save_recentsongs(self);
 		psy_path_dispose(&path);
 	}
@@ -1933,7 +1932,7 @@ void workspace_load_recentsongs(Workspace* self)
 			property = (psy_Property*)psy_list_entry(p);
 			psy_path_init(&path, psy_property_key(property));
 			psy_property_settext(property, psy_path_name(&path));
-			psy_property_sethint(property, PSY_PROPERTY_HINT_READONLY);
+			psy_property_setreadonly(property, TRUE);
 			psy_path_dispose(&path);
 		}
 	}

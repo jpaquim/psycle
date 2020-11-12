@@ -110,7 +110,7 @@ typedef struct {
 	int _playing;
 	// Controls if we want the thread to be running or not
 	int _threadRun;	
-	GUID device_guid_;
+	LPGUID device_guid_;
 	int _deviceIndex;		
 	int _currentOffset;
 	uint32_t _dsBufferSize;
@@ -191,7 +191,7 @@ static void vtable_init(void)
 
 int on_error(int err, const char* msg)
 {
-	MessageBox(0, msg, "Windows WaveOut MME driver", MB_OK | MB_ICONERROR);
+	MessageBox(0, msg, "DirectSound Audio Driver", MB_OK | MB_ICONERROR);
 	return 0;
 }
 
@@ -201,8 +201,8 @@ EXPORT psy_AudioDriverInfo const * __cdecl GetPsycleDriverInfo(void)
 
 	info.guid = PSY_AUDIODRIVER_DIRECTX_GUID;
 	info.Flags = 0;
-	info.Name = "DirectSound Audio Driver";
-	info.ShortName = "DXSOUND";
+	info.Name = "DirectSound";
+	info.ShortName = "DXSound";
 	info.Version = 0;
 	return &info;
 }
@@ -211,12 +211,12 @@ EXPORT psy_AudioDriver* __cdecl driver_create(void)
 {
 	DXDriver* directx;
 	
-	directx = (DXDriver*) malloc(sizeof(DXDriver));
-	if (directx != 0) {		
+	directx = (DXDriver*)malloc(sizeof(DXDriver));
+	if (directx != NULL) {		
 		driver_init(&directx->driver);
 		return &directx->driver;
 	}
-	return 0;
+	return NULL;
 }
 
 void driver_deallocate(psy_AudioDriver* driver)
@@ -240,7 +240,7 @@ int driver_init(psy_AudioDriver* driver)
 	self->_pDs = NULL;
 	self->_pBuffer = NULL;
 	self->driver._pCallback = NULL;
-	self->device_guid_ = DSDEVID_DefaultPlayback;	
+	self->device_guid_ = (LPGUID)&DSDEVID_DefaultPlayback;
 	self->_dither = 0;
 	self->_playEnums = 0;
 	self->_capEnums = 0;
@@ -338,35 +338,45 @@ void clearcapenums(DXDriver* self)
 static void init_properties(psy_AudioDriver* driver)
 {	
 	DXDriver* self = (DXDriver*)driver;
-	char key[256];
-	psy_Property* property;	
+	char key[256];	
 	psy_Property* devices;
 	psy_Property* indevices;
 	psy_List* p;
 	int i;		
 
 	psy_snprintf(key, 256, "directx-guid-%d", PSY_AUDIODRIVER_DIRECTX_GUID);
-	driver->properties = psy_property_allocinit_key(key);
-	psy_property_sethint(psy_property_append_int(self->driver.properties,
+	driver->properties = psy_property_settext(
+		psy_property_allocinit_key(key), "DirectSound");
+	psy_property_sethint(		
+		psy_property_append_int(self->driver.properties,
 		"guid", PSY_AUDIODRIVER_DIRECTX_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(
-		psy_property_sethint(
-			psy_property_append_string(driver->properties, "name", "directsound"),
-				PSY_PROPERTY_HINT_READONLY),
+		psy_property_setreadonly(
+			psy_property_append_string(driver->properties, "name", "DirectSound"),
+				TRUE),
 			"Name");
-	psy_property_sethint(
+	psy_property_settext(
+		psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_property_sethint(
-		psy_property_append_string(driver->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);
-	property = psy_property_append_choice(driver->properties, "device", -1);
-	psy_property_append_int(driver->properties, "bitdepth",
-		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
-	psy_property_append_int(driver->properties, "samplerate",
-		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
-	psy_property_append_int(driver->properties, "dither", 0, 0, 1);
+			TRUE),
+			"Vendor");
+	psy_property_settext(
+		psy_property_setreadonly(
+			psy_property_append_string(driver->properties, "version", "1.0"),
+			TRUE),
+			"Version");
+	psy_property_settext(
+		psy_property_append_int(driver->properties, "bitdepth",
+			psy_audiodriversettings_bitdepth(&self->settings), 0, 32),
+		"Bitdepth");
+	psy_property_settext(
+		psy_property_append_int(driver->properties, "samplerate",
+			psy_audiodriversettings_samplespersec(&self->settings), 0, 0),
+		"Samplerate");
+	psy_property_settext(
+		psy_property_append_int(driver->properties, "dither", 0, 0, 1),
+		"Dither");
 	psy_property_settext(
 		psy_property_append_int(driver->properties, "numbuf",
 			psy_audiodriversettings_blockcount(&self->settings), 1, 8),
@@ -376,14 +386,18 @@ static void init_properties(psy_AudioDriver* driver)
 			psy_audiodriversettings_blockframes(&self->settings),
 				64, 8193),
 		"Buffer Samples");
-	devices = psy_property_append_choice(driver->properties, "device", 0);
-	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
-		PortEnums* port = (PortEnums*)p->entry;				
+	devices = psy_property_settext(
+		psy_property_append_choice(driver->properties, "device", 0),
+		"Output Device");
+	for (p = self->_playEnums, i = 0; p != NULL; psy_list_next(&p), ++i) {
+		PortEnums* port = (PortEnums*)psy_list_entry(p);
 		psy_property_append_int(devices, port->portname, i, 0, 0);
 	}
-	indevices = psy_property_append_choice(driver->properties, "indevice", 0);
-	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
-		PortEnums* port = (PortEnums*)p->entry;
+	indevices = psy_property_settext(
+		psy_property_append_choice(driver->properties, "indevice", 0),
+		"Standard Input Device (Select different in Recorder)");
+	for (p = self->_capEnums, i = 0; p != NULL; psy_list_next(&p), ++i) {
+		PortEnums* port = (PortEnums*)psy_list_entry(p);
 		psy_property_append_int(indevices, port->portname, i, 0, 0);
 	}
 }
@@ -416,7 +430,29 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
 		psy_audiodriversettings_setblockframes(&self->settings,
 			psy_property_as_int(property));
-	}	
+	}
+	property = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_CHOICE);
+	if (property) {
+		int playenumindex;
+		psy_List* portnode;
+		
+		portnode = NULL;
+		playenumindex = psy_property_as_int(property);
+		if (playenumindex >= 0) {
+			portnode = psy_list_at(self->_playEnums, playenumindex);
+			if (portnode) {
+				PortEnums* port;
+
+				port = (PortEnums*)psy_list_entry(portnode);
+				if (port) {
+					self->device_guid_ = port->guid;
+				}
+			}
+		}
+		if (!portnode) {
+			self->device_guid_ = (LPGUID)&DSDEVID_DefaultPlayback;
+		}
+	}
 }
 
 uintptr_t driver_samplerate(psy_AudioDriver* self)
@@ -455,7 +491,7 @@ bool start(DXDriver* self)
 	if (self->driver._pCallback == NULL) {
 		return FALSE;
 	}
-	if (FAILED(DirectSoundCreate8(&self->device_guid_, &self->_pDs, NULL)))
+	if (hr = FAILED(DirectSoundCreate8(self->device_guid_, &self->_pDs, NULL)))
 	{
 		self->error(1, "Failed to create DirectSound object");
 		return FALSE;

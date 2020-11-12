@@ -1470,21 +1470,22 @@ void init_properties(psy_AudioDriver* driver)
 	psy_Property* indevices;
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);
-	driver->properties = psy_property_allocinit_key(key);	
+	driver->properties = psy_property_settext(
+		psy_property_allocinit_key(key), "Asio 2_2");
 	psy_property_sethint(psy_property_append_int(self->driver.properties,
 		"guid", PSY_AUDIODRIVER_ASIO_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(
-		psy_property_sethint(
-			psy_property_append_string(driver->properties, "name", "asiodriver"),
-			PSY_PROPERTY_HINT_READONLY),
+		psy_property_setreadonly(
+			psy_property_append_string(driver->properties, "name", "Asio 2_2 Driver"),
+			TRUE),
 		"Name");
-	psy_property_sethint(
+	psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
-		PSY_PROPERTY_HINT_READONLY);
-	psy_property_sethint(
+		TRUE);
+	psy_property_setreadonly(
 		psy_property_append_string(driver->properties, "version", "1.0"),
-		PSY_PROPERTY_HINT_READONLY);
+		TRUE);
 	property = psy_property_append_choice(driver->properties, "device", -1);
 	psy_property_append_int(driver->properties, "bitdepth",
 		psy_audiodriversettings_bitdepth(&ASIOInterface::settings_), 0, 32);
@@ -1500,8 +1501,12 @@ void init_properties(psy_AudioDriver* driver)
 			psy_audiodriversettings_blockframes(&ASIOInterface::settings_),
 			64, 8193),
 		"Buffer Samples");
-	devices = psy_property_append_choice(driver->properties, "device", 0);
-	indevices = psy_property_append_choice(driver->properties, "indevice", 0);
+	devices = psy_property_settext(
+		psy_property_append_choice(driver->properties, "device", 0),
+		"Output Device");
+	indevices = psy_property_settext(
+		psy_property_append_choice(driver->properties, "indevice", 0),
+		"Standard Input Device(Select different in Recorder)");
 }
 
 void driver_configure(psy_AudioDriver* driver, psy_Property* config)
