@@ -651,7 +651,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 				self->selected);
 		} else if (psy_property_type(self->selected) ==
 				PSY_PROPERTY_TYPE_BOOL) {
-			psy_property_setitem_bool(self->selected, psy_property_item_bool(
+			psy_property_setitem_bool(self->selected, !psy_property_item_bool(
 				self->selected));
 			psy_signal_emit(&self->signal_changed, self, 1,
 				self->selected);

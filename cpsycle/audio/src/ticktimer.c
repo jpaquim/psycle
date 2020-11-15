@@ -14,6 +14,8 @@ void psy_audio_ticktimer_init(psy_audio_TickTimer* self,
 	fp_samplerticktimer_ontick tick,
 	fp_samplerticktimer_onwork work)
 {	
+	assert(self);
+
 	self->context = context;
 	self->tick = tick;
 	self->work = work;
@@ -25,6 +27,8 @@ void psy_audio_ticktimer_init(psy_audio_TickTimer* self,
 void psy_audio_ticktimer_reset(psy_audio_TickTimer* self,
 	uintptr_t samplesprotick)
 {
+	assert(self);
+
 	self->samplesprotick = samplesprotick;
 	self->counter = 0;
 	self->tickcount = 0;
@@ -36,6 +40,8 @@ void psy_audio_ticktimer_update(psy_audio_TickTimer* self,
 	uintptr_t j = 0;
 	uintptr_t lastpos = 0;
 	uintptr_t amount;
+
+	assert(self);
 
 	amount = numsamples;
 	for (; j < numsamples; ++j) {
@@ -67,6 +73,8 @@ void psy_audio_ticktimer_dowork(psy_audio_TickTimer* self,
 {
 	uintptr_t restorenumsamples;
 	uintptr_t restoreoffset;
+
+	assert(self);
 
 	restorenumsamples = psy_audio_buffercontext_numsamples(bc);
 	restoreoffset = bc->output->offset;

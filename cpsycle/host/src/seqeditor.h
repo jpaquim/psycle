@@ -15,10 +15,15 @@ typedef struct SeqEditorTrackState {
 void seqeditortrackstate_init(SeqEditorTrackState*);
 
 typedef struct {
-	psy_ui_Component component;	
+	psy_ui_Component component;
+	psy_ui_Color rulerbaselinecolour;
+	psy_ui_Color rulermarkcolour;
+	SeqEditorTrackState* trackstate;
+	Workspace* workspace;
 } SeqEditorHeader;
 
-void seqeditorheader_init(SeqEditorHeader*, psy_ui_Component* parent);
+void seqeditorheader_init(SeqEditorHeader*, psy_ui_Component* parent,
+	SeqEditorTrackState*, Workspace*);
 
 INLINE psy_ui_Component* seqeditorheader_base(SeqEditorHeader* self)
 {
@@ -93,10 +98,12 @@ typedef struct SeqEditorTracks {
 	SeqEditorTrackState* trackstate;
 	Workspace* workspace;
 	psy_List* tracks;
+	int lastplaylinepx;
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,
 	SeqEditorTrackState*, Workspace*);
+bool seqeditortracks_playlinechanged(SeqEditorTracks*);
 
 INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 {

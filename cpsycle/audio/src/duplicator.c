@@ -98,7 +98,9 @@ void psy_audio_duplicator_init(psy_audio_Duplicator* self,
 }
 
 void dispose(psy_audio_Duplicator* self)
-{					
+{
+	assert(self);
+	
 	disposeparameters(self);
 	psy_audio_custommachine_dispose(&self->custommachine);
 	psy_audio_duplicatormap_dispose(&self->map);
