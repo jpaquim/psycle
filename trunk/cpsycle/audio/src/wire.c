@@ -10,12 +10,16 @@
 
 void psy_audio_legacywires_init(psy_audio_LegacyWires* self)
 {
+	assert(self);
+
 	psy_table_init(&self->legacywires);
 }
 
 void psy_audio_legacywires_dispose(psy_audio_LegacyWires* self)
 {
 	psy_TableIterator it;
+
+	assert(self);
 
 	for (it = psy_table_begin(&self->legacywires);
 			!psy_tableiterator_equal(&it, psy_table_end());
@@ -41,6 +45,8 @@ void psy_audio_legacywires_dispose(psy_audio_LegacyWires* self)
 psy_Table* psy_audio_legacywires_at(psy_audio_LegacyWires* self,
 	uintptr_t machineslot)
 {
+	assert(self);
+
 	return psy_table_at(&self->legacywires, machineslot);
 }
 
@@ -49,6 +55,8 @@ int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires* self,
 {
 	psy_Table* legacywiretable;
 	psy_TableIterator it;
+
+	assert(self);
 
 	legacywiretable = psy_audio_legacywires_at(self, sourcemac);
 	if (!legacywiretable) {
@@ -76,6 +84,8 @@ void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
 {
 	psy_Table* legacywiretable;
 	uintptr_t i;
+
+	assert(songfile);
 
 	legacywiretable = (psy_Table*)malloc(sizeof(psy_Table));
 	psy_table_init(legacywiretable);

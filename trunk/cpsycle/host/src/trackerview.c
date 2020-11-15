@@ -588,12 +588,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->opcount = 0;
 	self->syncpattern = TRUE;
-	self->hasselection = FALSE;
-	if (editmode == TRACKERGRID_EDITMODE_SONG) {
-		self->midline = TRUE;
-	} else {
-		self->midline = FALSE;
-	}
+	self->hasselection = FALSE;	
+	self->midline = FALSE;	
 	self->columnresize = 0;
 	self->dragcolumn = UINTPTR_MAX;
 	self->dragcolumnbase = 0;
@@ -603,10 +599,8 @@ void trackergrid_init(TrackerGrid* self, psy_ui_Component* parent,
 	self->showemptydata = FALSE;
 	self->editmode = editmode;
 	if (editmode == TRACKERGRID_EDITMODE_SONG) {
-		psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL
-			| psy_ui_OVERFLOW_VSCROLLCENTER);
-	}
-	// self->tm = psy_ui_component_textmetric(&self->component);	
+		psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
+	}	
 	psy_signal_connect(&self->component.signal_scroll, self,
 		trackergrid_onscroll);
 	psy_signal_connect(&self->component.signal_focus, self,

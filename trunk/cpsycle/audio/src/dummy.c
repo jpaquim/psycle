@@ -41,23 +41,26 @@ static psy_dsp_amp_range_t amprange(psy_audio_DummyMachine* self)
 }
 
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_DummyMachine* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->custommachine.machine.vtable;
-		vtable.mode = (fp_machine_mode) mode;
-		vtable.info = (fp_machine_info) info;
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
-		vtable.amprange = (fp_machine_amprange) amprange;
-		vtable_initialized = 1;
+		vtable.mode = (fp_machine_mode)mode;
+		vtable.info = (fp_machine_info)info;
+		vtable.numinputs = (fp_machine_numinputs)numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
+		vtable.amprange = (fp_machine_amprange)amprange;
+		vtable_initialized = TRUE;
 	}
 }
 
-void psy_audio_dummymachine_init(psy_audio_DummyMachine* self, psy_audio_MachineCallback* callback)
-{	
+void psy_audio_dummymachine_init(psy_audio_DummyMachine* self,
+	psy_audio_MachineCallback* callback)
+{
+	assert(self);
+
 	self->mode = MACHMODE_FX;
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);

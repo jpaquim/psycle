@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../detail/portable.h"
+
 static void song_initproperties(psy_audio_Song*);
 static void song_initmachines(psy_audio_Song*);
 static void song_initpatterns(psy_audio_Song*);
@@ -20,9 +22,11 @@ static void song_disposesignals(psy_audio_Song*);
 void songproperties_init(SongProperties* self, const char* title,
 	const char* credits, const char* comments)
 {
-	self->title = strdup(title);
-	self->credits = strdup(credits);
-	self->comments = strdup(comments);
+	assert(self);
+
+	self->title = psy_strdup(title);
+	self->credits = psy_strdup(credits);
+	self->comments = psy_strdup(comments);
 	self->bpm = (psy_dsp_big_beat_t) 125.0;
 	self->lpb = 4;
 	self->tracks = 16;
@@ -40,9 +44,11 @@ void songproperties_init_all(SongProperties* self, const char* title,
 	int extraticksperbeat,
 	psy_dsp_big_beat_t bpm)
 {
-	self->title = strdup(title);
-	self->credits = strdup(credits);
-	self->comments = strdup(comments);
+	assert(self);
+
+	self->title = psy_strdup(title);
+	self->credits = psy_strdup(credits);
+	self->comments = psy_strdup(comments);
 	self->lpb = lpb;
 	self->tracks = tracks;
 	self->octave = octave;
@@ -53,21 +59,25 @@ void songproperties_init_all(SongProperties* self, const char* title,
 
 void songproperties_dispose(SongProperties* self)
 {
+	assert(self);
+
 	free(self->title);
-	self->title = 0;
+	self->title = NULL;
 	free(self->credits);
-	self->credits = 0;
+	self->credits = NULL;
 	free(self->comments);
-	self->comments = 0;
+	self->comments = NULL;
 }
 
 void songproperties_copy(SongProperties* self, const SongProperties* other)
 {
+	assert(self);
+
 	if (self != other) {
 		songproperties_dispose(self);
-		self->title = strdup(other->title);
-		self->credits = strdup(other->credits);
-		self->comments = strdup(other->comments);
+		self->title = psy_strdup(other->title);
+		self->credits = psy_strdup(other->credits);
+		self->comments = psy_strdup(other->comments);
 		self->bpm = other->bpm;
 		self->lpb = other->lpb;
 		self->octave = other->octave;
@@ -79,6 +89,8 @@ void songproperties_copy(SongProperties* self, const SongProperties* other)
 
 void songproperties_setbpm(SongProperties* self, psy_dsp_big_beat_t bpm)
 {
+	assert(self);
+
 	if (bpm < 32) {
 		self->bpm = 32;
 	} else
@@ -89,8 +101,11 @@ void songproperties_setbpm(SongProperties* self, psy_dsp_big_beat_t bpm)
 	}	
 }
 
-void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machinefactory)
-{		
+void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
+	machinefactory)
+{
+	assert(self);
+
 	self->machinefactory = machinefactory;	
 	songproperties_init(&self->properties, "Untitled", "Unnamed",
 		"No Comments");	
@@ -104,23 +119,33 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory* machine
 
 void song_initmachines(psy_audio_Song* self)
 {
+	assert(self);
+
 	psy_audio_machines_init(&self->machines);
 	psy_audio_machines_insertmaster(&self->machines,
-		psy_audio_machinefactory_makemachine(self->machinefactory, MACH_MASTER, 0));
+		psy_audio_machinefactory_makemachine(self->machinefactory, MACH_MASTER,
+			0));
 }
 
 void song_initpatterns(psy_audio_Song* self)
 {
+	assert(self);
+
 	psy_audio_patterns_init(&self->patterns);
-	psy_audio_patterns_insert(&self->patterns, 0, psy_audio_pattern_allocinit());
+	psy_audio_patterns_insert(&self->patterns, 0,
+		psy_audio_pattern_allocinit());
 }
 
 void song_initsequence(psy_audio_Song* self)
 {
 	psy_audio_SequencePosition sequenceposition;
+
+	assert(self);
+
 	psy_audio_sequence_init(&self->sequence, &self->patterns);	
 	sequenceposition.track = 
-		psy_audio_sequence_appendtrack(&self->sequence, psy_audio_sequencetrack_allocinit());
+		psy_audio_sequence_appendtrack(&self->sequence,
+			psy_audio_sequencetrack_allocinit());
 	sequenceposition.trackposition =
 		psy_audio_sequence_begin(&self->sequence, sequenceposition.track, 0);
 	psy_audio_sequence_insert(&self->sequence, sequenceposition, 0);
@@ -128,12 +153,16 @@ void song_initsequence(psy_audio_Song* self)
 
 void song_initsignals(psy_audio_Song* self)
 {
+	assert(self);
+
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_saveprogress);
 }
 
 void psy_audio_song_dispose(psy_audio_Song* self)
 {
+	assert(self);
+
 	songproperties_dispose(&self->properties);
 	psy_audio_machines_dispose(&self->machines);
 	psy_audio_patterns_dispose(&self->patterns);
@@ -145,16 +174,19 @@ void psy_audio_song_dispose(psy_audio_Song* self)
 
 void song_disposesignals(psy_audio_Song* self)
 {
+	assert(self);
+
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_saveprogress);
 }
 
 psy_audio_Song* psy_audio_song_alloc(void)
 {
-	return (psy_audio_Song*) malloc(sizeof(psy_audio_Song));
+	return (psy_audio_Song*)malloc(sizeof(psy_audio_Song));
 }
 
-psy_audio_Song* psy_audio_song_allocinit(psy_audio_MachineFactory* machinefactory)
+psy_audio_Song* psy_audio_song_allocinit(psy_audio_MachineFactory*
+	machinefactory)
 {
 	psy_audio_Song* rv;
 
@@ -175,6 +207,8 @@ void psy_audio_song_deallocate(psy_audio_Song* self)
 
 void psy_audio_song_clear(psy_audio_Song* self)
 {
+	assert(self);
+
 	psy_audio_sequence_clear(&self->sequence);
 	psy_audio_patterns_clear(&self->patterns);
 	psy_audio_machines_clear(&self->machines);
@@ -183,20 +217,28 @@ void psy_audio_song_clear(psy_audio_Song* self)
 void psy_audio_song_setproperties(psy_audio_Song* self,
 	const SongProperties* properties)
 {	
+	assert(self);
+
 	songproperties_copy(&self->properties, properties);
 }
 
 void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_big_beat_t bpm)
 {
+	assert(self);
+
 	songproperties_setbpm(&self->properties, bpm);		
 }
 
 psy_dsp_big_beat_t psy_audio_song_bpm(psy_audio_Song* self)
 {
+	assert(self);
+
 	return songproperties_bpm(&self->properties);
 }
 
 uintptr_t psy_audio_song_lpb(psy_audio_Song* self)
 {
+	assert(self);
+
 	return songproperties_lpb(&self->properties);
 }

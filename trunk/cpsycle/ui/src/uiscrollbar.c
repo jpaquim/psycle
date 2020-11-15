@@ -38,18 +38,19 @@ static void psy_ui_scrollbarpane_vtable_init(psy_ui_ScrollBarPane* self)
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_scrollbarpane_vtable_init(self);
+	self->component.vtable = &psy_ui_scrollbarpane_vtable;
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setbackgroundcolor(&self->component,
 		psy_ui_color_make(0x00444444));
 	self->pos = 0;
 	self->drag = 0;
-	self->screenpos = 0;
-	psy_ui_scrollbarpane_vtable_init(self);
-	self->component.vtable = &psy_ui_scrollbarpane_vtable;
+	self->screenpos = 0;	
 	self->orientation = psy_ui_VERTICAL;
 	self->scrollmin = 0;
 	self->scrollmax = 0;
+	self->screenpos = 0;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_scrollbarpane_ondestroy);
