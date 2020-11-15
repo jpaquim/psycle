@@ -87,7 +87,7 @@ static void vtable_init(psy_audio_Duplicator* self)
 void psy_audio_duplicator_init(psy_audio_Duplicator* self,
 	psy_audio_MachineCallback* callback)
 {
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	psy_audio_duplicator_base(self)->vtable = &vtable;
 	self->isticking = 0;
@@ -100,7 +100,7 @@ void psy_audio_duplicator_init(psy_audio_Duplicator* self,
 void dispose(psy_audio_Duplicator* self)
 {					
 	disposeparameters(self);
-	custommachine_dispose(&self->custommachine);
+	psy_audio_custommachine_dispose(&self->custommachine);
 	psy_audio_duplicatormap_dispose(&self->map);
 }
 
@@ -168,20 +168,20 @@ psy_List* sequencerinsert(psy_audio_Duplicator* self, psy_audio_PatternNode* eve
 					int note;
 					int mapchannel;
 					patternentry = psy_audio_patternnode_entry(p);
-					newentry = patternentry_clone(patternentry);
-					note = patternentry_front(patternentry)->note;					
+					newentry = psy_audio_patternentry_clone(patternentry);
+					note = psy_audio_patternentry_front(patternentry)->note;					
 					if (note < psy_audio_NOTECOMMANDS_RELEASE) {						
 						note = transpose(note, output->offset);
 					}
 					mapchannel = psy_audio_duplicatormap_channel(&self->map,
 						patternentry->track, output);
 					if (newentry) {						
-						patternentry_front(newentry)->mach = output->machine;
-						patternentry_front(newentry)->note = note;						
+						psy_audio_patternentry_front(newentry)->mach = output->machine;
+						psy_audio_patternentry_front(newentry)->note = note;						
 						newentry->track = mapchannel;
 						psy_list_append(&insert, newentry);
 					}
-					if (patternentry_front(patternentry)->note >= 
+					if (psy_audio_patternentry_front(patternentry)->note >= 
 							psy_audio_NOTECOMMANDS_RELEASE) {
 						psy_audio_duplicatormap_release(&self->map,
 							patternentry->track, mapchannel, output);

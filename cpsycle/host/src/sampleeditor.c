@@ -841,7 +841,7 @@ void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 			psy_audio_NOTECOMMANDS_MACH_EMPTY,
 			psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	
-		patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
+		psy_audio_patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
 		self->samplerevents = psy_list_create(&self->samplerentry);
 		psy_audio_exclusivelock_leave();
 	}
@@ -860,7 +860,7 @@ void sampleeditor_onstop(SampleEditor* self, psy_ui_Component* sender)
 		psy_audio_NOTECOMMANDS_VOL_EMPTY,
 		0, 0);	
 	self->samplerevents = psy_list_create(&self->samplerentry);
-	patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
+	psy_audio_patternentry_init_all(&self->samplerentry, &event, 0, 0, 120.f, 0);
 	psy_audio_exclusivelock_leave();
 }
 
@@ -876,7 +876,7 @@ void sampleeditor_onmasterworked(SampleEditor* self, psy_audio_Machine* machine,
 	psy_audio_buffer_addsamples(bc->output, &self->samplerbuffer, bc->numsamples, 
 		(psy_dsp_amp_t) 1.f);
 	if (self->samplerevents) {
-		patternentry_dispose(&self->samplerentry);
+		psy_audio_patternentry_dispose(&self->samplerentry);
 	}
 	psy_list_free(self->samplerevents);
 	self->samplerevents = 0;*/

@@ -233,7 +233,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 		psy_audio_Buffer* output;
 
 		output = psy_audio_machine_mix(machine, slot, amount,
-			connections_at(&self->song->machines.connections, slot),
+			psy_audio_connections_at(&self->song->machines.connections, slot),
 			&self->song->machines, self);
 		if (output) {
 			psy_audio_BufferContext bc;

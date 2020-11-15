@@ -6,7 +6,7 @@
 #include "dummy.h"
 #include "plugin_interface.h"
 
-const psy_audio_MachineInfo* dummymachine_info(void)
+const psy_audio_MachineInfo* psy_audio_dummymachine_info(void)
 {
 	static psy_audio_MachineInfo const macinfo = {
 		MI_VERSION,
@@ -30,7 +30,7 @@ const psy_audio_MachineInfo* dummymachine_info(void)
 }
 
 static const psy_audio_MachineInfo* info(psy_audio_DummyMachine* self) {
-	return dummymachine_info();
+	return psy_audio_dummymachine_info();
 }
 static int mode(psy_audio_DummyMachine* self) { return self->mode; }
 static uintptr_t numinputs(psy_audio_DummyMachine* self) { return 2; }
@@ -56,10 +56,10 @@ static void vtable_init(psy_audio_DummyMachine* self)
 	}
 }
 
-void dummymachine_init(psy_audio_DummyMachine* self, psy_audio_MachineCallback* callback)
+void psy_audio_dummymachine_init(psy_audio_DummyMachine* self, psy_audio_MachineCallback* callback)
 {	
 	self->mode = MACHMODE_FX;
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;
 }

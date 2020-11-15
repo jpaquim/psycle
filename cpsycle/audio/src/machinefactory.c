@@ -103,7 +103,7 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			
 			dummy = (psy_audio_DummyMachine*)malloc(sizeof(psy_audio_DummyMachine));
 			if (dummy) {
-				dummymachine_init(dummy, self->machinecallback);
+				psy_audio_dummymachine_init(dummy, self->machinecallback);
 				rv = (psy_audio_Machine*) dummy;
 			} else {
 				rv = 0;

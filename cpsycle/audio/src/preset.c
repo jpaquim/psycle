@@ -4,8 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "preset.h"
+
 #include <string.h>
 #include <stdlib.h>
+
+#include "../../detail/portable.h"
 
 void psy_audio_preset_init(psy_audio_Preset* self)
 {
@@ -22,10 +25,10 @@ void psy_audio_preset_init(psy_audio_Preset* self)
 void psy_audio_preset_dispose(psy_audio_Preset* self)
 {
 	free(self->name);
-	self->name = 0;
+	self->name = NULL;
 	psy_table_dispose(&self->parameters);
 	free(self->data);
-	self->data = 0;
+	self->data = NULL;
 	self->datasize = 0;	
 }
 
@@ -53,8 +56,7 @@ psy_audio_Preset* psy_audio_preset_allocinit(void)
 
 void psy_audio_preset_setname(psy_audio_Preset* self, const char* name)
 {
-	free(self->name);
-	self->name = strdup(name);
+	psy_strreset(&self->name, name);
 }
 
 const char* psy_audio_preset_name(psy_audio_Preset* self)

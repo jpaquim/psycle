@@ -6,7 +6,9 @@
 #include "uibutton.h"
 #include <string.h>
 #include <stdlib.h>
+
 #include "../../detail/trace.h"
+#include "../../detail/portable.h"
 
 static unsigned int arrowcolor = 0x00777777;
 static unsigned int arrowhighlightcolor = 0x00FFFFFF;
@@ -280,8 +282,7 @@ void onmouseleave(psy_ui_Button* self)
 
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 {	
-	free(self->text);
-	self->text = strdup(text);
+	psy_strreset(&self->text, text);	
 	psy_ui_component_invalidate(psy_ui_button_base(self));    
 }
 

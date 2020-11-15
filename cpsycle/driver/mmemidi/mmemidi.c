@@ -50,7 +50,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
-		vtable.free = driver_free;
+		vtable.deallocate = driver_free;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -154,11 +154,7 @@ void init_properties(psy_EventDriver* context)
 		
 		MIDIINCAPS caps;
 		midiInGetDevCaps(i, &caps, sizeof(MIDIINCAPS));
-#if defined _MSC_VER > 1200
-		_snprintf_s(text, strlen(caps.szPname), 256, "%d:%s", i, caps.szPname);
-#else
-		_snprintf(text, 256, "%d:%s", i, caps.szPname);
-#endif
+		psy_snprintf(text, 256, "%d:%s", i, caps.szPname);
 		psy_property_append_int(devices, text, i, 0, 0);
 	}
 	self->cmddef = psy_property_append_section(self->driver.properties, "cmds");
@@ -175,7 +171,7 @@ void driver_configure(psy_EventDriver* driver, psy_Property* config)
 	}
 	p = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_NONE);
 	if (p) {
-		self->deviceid = psy_property_as_int(p);
+		self->deviceid = psy_property_item_int(p);
 	}	
 }
 

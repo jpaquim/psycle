@@ -708,7 +708,7 @@ void inputchannel_dw_describe(psy_audio_InputChannel* self,
 void inputchannel_gain_tweak(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, float value)
 {
-	connections_setwirevolume(&psy_audio_machine_machines(
+	psy_audio_connections_setwirevolume(&psy_audio_machine_machines(
 		psy_audio_mixer_base(self->mixer))->connections,
 		psy_audio_wire_make(
 			self->inputslot,
@@ -719,7 +719,7 @@ void inputchannel_gain_tweak(psy_audio_InputChannel* self,
 void inputchannel_gain_normvalue(psy_audio_InputChannel* self,
 	psy_audio_CustomMachineParam* sender, float* rv)
 {
-	*rv = (float)sqrt(connections_wirevolume(
+	*rv = (float)sqrt(psy_audio_connections_wirevolume(
 		&psy_audio_machine_machines(psy_audio_mixer_base(self->mixer))->connections,
 		psy_audio_wire_make(
 			self->inputslot,
@@ -762,7 +762,7 @@ psy_dsp_amp_t inputchannel_wirevolume(psy_audio_InputChannel* self)
 {
 	psy_dsp_amp_t rv;
 
-	rv = connections_wirevolume(
+	rv = psy_audio_connections_wirevolume(
 		&psy_audio_machine_machines(psy_audio_mixer_base(self->mixer))->connections,
 		psy_audio_wire_make(
 			self->inputslot,
@@ -946,7 +946,7 @@ void psy_audio_mixer_init(psy_audio_Mixer* self, psy_audio_MachineCallback* call
 	psy_audio_Machine* base = (psy_audio_Machine*)self;
 	psy_audio_Machines* machines;
 
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;
 	psy_table_init(&self->inputs);
@@ -978,7 +978,7 @@ void psy_audio_mixer_dispose(psy_audio_Mixer* self)
 	psy_audio_custommachineparam_dispose(&self->blank_param);
 	psy_audio_custommachineparam_dispose(&self->ignore_param);
 	psy_audio_custommachineparam_dispose(&self->routemaster_param);	
-	custommachine_dispose(&self->custommachine);	
+	psy_audio_custommachine_dispose(&self->custommachine);	
 }
 
 void psy_audio_mixer_dispose_channels(psy_audio_Mixer* self)
@@ -1064,7 +1064,7 @@ void mixinputs(psy_audio_Mixer* self, psy_audio_Machines* machines,
 
 			// mix input to master
 			input->buffer = psy_audio_machines_outputs(machines, input->inputslot);			
-			wirevol = connections_wirevolume(&machines->connections,
+			wirevol = psy_audio_connections_wirevolume(&machines->connections,
 				psy_audio_wire_make(input->inputslot,
 				psy_audio_machine_slot(psy_audio_mixer_base(self))));
 			psy_audio_buffer_addsamples(self->master.buffer, input->buffer,
@@ -2047,7 +2047,7 @@ void postloadinputchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, 
 				//inWires[c].SetVolume(wire._inputConVol * wire._wireMultiplier);
 				psy_audio_machines_connect(&songfile->song->machines,
 					psy_audio_wire_make(wire->_inputMachine, slot));
-				connections_setwirevolume(&songfile->song->machines.connections,
+				psy_audio_connections_setwirevolume(&songfile->song->machines.connections,
 					psy_audio_wire_make(wire->_inputMachine, slot),
 					wire->_inputConVol * wire->_wireMultiplier);
 				channel = psy_audio_mixer_Channel(self, c);
@@ -2086,7 +2086,7 @@ void postreturnchannels(psy_audio_Mixer* self, psy_audio_SongFile* songfile, uin
 			}
 			psy_audio_machines_connect(&songfile->song->machines,
 				psy_audio_wire_make(wire->_inputMachine, slot));
-			connections_setwirevolume(&songfile->song->machines.connections,
+			psy_audio_connections_setwirevolume(&songfile->song->machines.connections,
 				psy_audio_wire_make(wire->_inputMachine, slot),
 				wire->_inputConVol * wire->_wireMultiplier);
 			/*if (wire.pinMapping.size() > 0) {

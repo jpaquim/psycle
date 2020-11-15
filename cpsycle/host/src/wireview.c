@@ -224,7 +224,7 @@ void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 	psy_audio_WireSocketEntry* input;	
 
 	connections = &self->workspace->song->machines.connections;
-	input = connection_input(connections, self->wire);
+	input = psy_audio_connections_input(connections, self->wire);
 	if (input) {
 		char text[128];
 
@@ -241,7 +241,7 @@ void wireview_ontweakvolume(WireView* self, psy_ui_Slider* slider, float value)
 	psy_audio_WireSocketEntry* input;	
 
 	connections = &self->workspace->song->machines.connections;
-	input = connection_input(connections, self->wire);
+	input = psy_audio_connections_input(connections, self->wire);
 	if (input) {		
 		input->volume = (psy_dsp_amp_t)(value * value * 4);			
 	}
@@ -253,7 +253,7 @@ void wireview_onvaluevolume(WireView* self, psy_ui_Slider* slider, float* value)
 	psy_audio_WireSocketEntry* input;	
 
 	connections = &self->workspace->song->machines.connections;
-	input = connection_input(connections, self->wire);
+	input = psy_audio_connections_input(connections, self->wire);
 	if (input) {		
 		*value = (float)(sqrt(input->volume) * 0.5);
 	}

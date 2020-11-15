@@ -4,9 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "custommachine.h"
+// dsp
+#include <operations.h>
+// std
 #include <stdlib.h>
 #include <string.h>
-#include <operations.h>
+// platform
+#include "../../detail/portable.h"
 
 static void custommachine_init_memory(psy_audio_CustomMachine*, uintptr_t numframes);
 static void custommachine_dispose_memory(psy_audio_CustomMachine*);
@@ -68,7 +72,7 @@ static void vtable_init(psy_audio_CustomMachine* self)
 	}
 }
 
-void custommachine_init(psy_audio_CustomMachine* self,
+void psy_audio_custommachine_init(psy_audio_CustomMachine* self,
 	psy_audio_MachineCallback* callback)
 {	
 	psy_audio_machine_init(&self->machine, callback);
@@ -98,7 +102,7 @@ void custommachine_init_memory(psy_audio_CustomMachine* self, uintptr_t numframe
 	psy_audio_buffer_enablerms(&self->memorybuffer);
 }
 
-void custommachine_dispose(psy_audio_CustomMachine* self)
+void psy_audio_custommachine_dispose(psy_audio_CustomMachine* self)
 {	
 	free(self->editname);
 	self->editname = 0;
@@ -133,8 +137,7 @@ const char* custommachine_editname(psy_audio_CustomMachine* self)
 
 void custommachine_seteditname(psy_audio_CustomMachine* self, const char* name)
 {
-	free(self->editname);
-	self->editname = strdup(name);
+	psy_strreset(&self->editname, name);
 }
 
 psy_audio_Buffer* custommachine_buffermemory(psy_audio_CustomMachine* self)

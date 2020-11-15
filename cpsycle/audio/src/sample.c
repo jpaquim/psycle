@@ -10,6 +10,8 @@
 #include <operations.h>
 #include <alignedalloc.h>
 
+#include "../../detail/portable.h"
+
 void psy_audio_vibrato_init(psy_audio_Vibrato* self)
 {
 	self->attack = 0;
@@ -126,15 +128,13 @@ void psy_audio_sample_save(psy_audio_Sample* self, const char* path)
 
 void psy_audio_sample_setname(psy_audio_Sample* self, const char* name)
 {
-	free(self->name);
-	self->name = strdup(name);
+	psy_strreset(&self->name, name);	
 }
 
 const char* psy_audio_sample_name(psy_audio_Sample* self)
 {
 	return self->name;
 }
-
 
 psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample* self,
 	psy_dsp_ResamplerQuality quality)

@@ -114,6 +114,7 @@ INLINE portcapt_init(PortCapt* self)
 typedef struct {
 	psy_AudioDriver driver;
 	psy_AudioDriverSettings settings;
+	psy_Property* configuration;
 	HWAVEOUT _handle;
 	int _deviceId;
 	int _dither;
@@ -142,6 +143,7 @@ static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
+static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static uintptr_t samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
@@ -186,6 +188,7 @@ static void vtable_init(void)
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.samplerate = samplerate;
 		vtable.addcapture = (psy_audiodriver_fp_addcapture)addcaptureport;
 		vtable.removecapture = (psy_audiodriver_fp_removecapture)removecaptureport;
@@ -261,8 +264,8 @@ int driver_init(psy_AudioDriver* driver)
 int driver_dispose(psy_AudioDriver* driver)
 {
 	MmeDriver* self = (MmeDriver*) driver;
-	psy_property_deallocate(self->driver.properties);
-	self->driver.properties = 0;
+	psy_property_deallocate(self->configuration);
+	self->configuration = NULL;
 	CloseHandle(self->hEvent);
 	psy_table_dispose(&self->_portMapping);
 	clearplayenums(self);
@@ -281,46 +284,46 @@ static void init_properties(psy_AudioDriver* driver)
 
 	self = (MmeDriver*)driver;
 	psy_snprintf(key, 256, "mme-guid-%d", PSY_AUDIODRIVER_MME_GUID);
-	driver->properties = psy_property_settext(
+	self->configuration = psy_property_settext(
 		psy_property_allocinit_key(key), "Windows Wave MME");
-	psy_property_sethint(psy_property_append_int(self->driver.properties,
+	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_MME_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "name", "Windows Wave MME"),
+		psy_property_append_string(self->configuration, "name", "Windows Wave MME"),
 		TRUE),
 		"Driver");
 	psy_property_settext(psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
+		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
 		TRUE),
 		"Vendor");
 	psy_property_settext(psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "version", "1.0"),
+		psy_property_append_string(self->configuration, "version", "1.0"),
 		TRUE),
 		"Version");
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "bitdepth",
+		psy_property_append_int(self->configuration, "bitdepth",
 			psy_audiodriversettings_bitdepth(&self->settings), 0, 32),
 		"Bitrate");
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "samplerate",
+		psy_property_append_int(self->configuration, "samplerate",
 			psy_audiodriversettings_samplespersec(&self->settings), 0, 0),
 		"Samplerate"
 		);
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "dither", 0, 0, 1),
+		psy_property_append_int(self->configuration, "dither", 0, 0, 1),
 		"Dither");
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "numbuf",
+		psy_property_append_int(self->configuration, "numbuf",
 			psy_audiodriversettings_blockcount(&self->settings), 1, 8),
 		"Buffer Number");
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "numsamples",
+		psy_property_append_int(self->configuration, "numsamples",
 			psy_audiodriversettings_blockframes(&self->settings),
 			64, 8193),
 		"Buffer Samples");
 	devices = psy_property_settext(
-		psy_property_append_choice(driver->properties, "device", 0),
+		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
 	psy_property_append_int(devices, "WAVE_MAPPER", -1, 0, 0);
 	for (p = self->_playEnums, i = 0; p != NULL; p = p->next, ++i) {
@@ -328,7 +331,7 @@ static void init_properties(psy_AudioDriver* driver)
 		psy_property_append_int(devices, port->portname, i, 0, 0);
 	}
 	indevices = psy_property_settext(
-		psy_property_append_choice(driver->properties, "indevice", 0),
+		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device (Select different in Recorder)");
 	for (p = self->_capEnums, i = 0; p != NULL; p = p->next, ++i) {
 		PortEnums* port = (PortEnums*)p->entry;
@@ -342,42 +345,30 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 	psy_Property* property;
 
 	self = (MmeDriver*)driver;
-	if (self->driver.properties && config) {
-		psy_property_sync(self->driver.properties, config);		
+	if (self->configuration && config) {
+		psy_property_sync(self->configuration, config);
 	}
-	property = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_NONE);
+	property = psy_property_at(self->configuration, "device", PSY_PROPERTY_TYPE_NONE);
 	if (property && property->item.typ == PSY_PROPERTY_TYPE_CHOICE) {
 		psy_Property* device;
 
 		device = psy_property_at_choice(property);
 		if (device) {
-			self->_deviceId =  psy_property_as_int(device);
+			self->_deviceId =  psy_property_item_int(device);
 		}
-	}
-	property = psy_property_at(self->driver.properties, "bitdepth", PSY_PROPERTY_TYPE_NONE);
-	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
-		psy_audiodriversettings_setvalidbitdepth(&self->settings,
-			psy_property_as_int(property));
-		psy_property_set_int(self->driver.properties, "bitdepth",
-			psy_audiodriversettings_validbitdepth(&self->settings));
-	}
-	property = psy_property_at(self->driver.properties, "samplerate", PSY_PROPERTY_TYPE_NONE);
-	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
-		psy_audiodriversettings_setsamplespersec(&self->settings,
-			psy_property_as_int(property));
-		psy_property_set_int(self->driver.properties, "samplerate",
-			psy_audiodriversettings_samplespersec(&self->settings));
-	}
-	property = psy_property_at(self->driver.properties, "numbuf", PSY_PROPERTY_TYPE_NONE);
-	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
-		psy_audiodriversettings_setblockcount(&self->settings,
-			psy_property_as_int(property));
-	}
-	property = psy_property_at(self->driver.properties, "numsamples", PSY_PROPERTY_TYPE_NONE);
-	if (property && psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
-		psy_audiodriversettings_setblockframes(&self->settings,
-			psy_property_as_int(property));
 	}	
+	psy_audiodriversettings_setvalidbitdepth(&self->settings,
+		psy_property_at_int(self->configuration, "bitdepth",
+			psy_audiodriversettings_validbitdepth(&self->settings)));
+	psy_audiodriversettings_setsamplespersec(&self->settings,
+		psy_property_at_int(self->configuration, "samplerate",
+			psy_audiodriversettings_samplespersec(&self->settings)));
+	psy_audiodriversettings_setblockcount(&self->settings,
+		psy_property_at_int(self->configuration, "numbuf",
+			psy_audiodriversettings_blockcount(&self->settings)));
+	psy_audiodriversettings_setblockframes(&self->settings,
+		psy_property_at_int(self->configuration, "numsamples",
+			psy_audiodriversettings_blockframes(&self->settings)));
 }
 
 uintptr_t samplerate(psy_AudioDriver* self)
@@ -969,4 +960,11 @@ int numplaybacks(psy_AudioDriver* driver)
 const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
 {
 	return GetPsycleDriverInfo();
+}
+
+const psy_Property* driver_configuration(const psy_AudioDriver* driver)
+{
+	MmeDriver* self = (MmeDriver*)driver;
+
+	return self->configuration;
 }

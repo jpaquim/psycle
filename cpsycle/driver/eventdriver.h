@@ -48,7 +48,7 @@ typedef struct {
 typedef struct psy_EventDriverVTable {
 	int (*open)(struct psy_EventDriver*);
 	int (*dispose)(struct psy_EventDriver*);
-	void (*free)(struct psy_EventDriver*);
+	void (*deallocate)(struct psy_EventDriver*);
 	const psy_EventDriverInfo* (*info)(struct psy_EventDriver*);
 	void (*configure)(struct psy_EventDriver*, psy_Property*);
 	int (*close)(struct psy_EventDriver*);
@@ -114,7 +114,7 @@ INLINE int psy_eventdriver_dispose(psy_EventDriver* self)
 
 INLINE void psy_eventdriver_free(psy_EventDriver* self)
 {
-	self->vtable->free(self);
+	self->vtable->deallocate(self);
 }
 
 INLINE const psy_EventDriverInfo* psy_eventdriver_info(psy_EventDriver* self)

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-void frequencyrange_init(psy_audio_FrequencyRange* self,
+void psy_audio_frequencyrange_init(psy_audio_FrequencyRange* self,
 	double low, double high, double min, double max)
 {
 	self->low = low;
@@ -30,7 +30,7 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 	psy_audio_parameterrange_init(&self->keyrange, 0, psy_audio_NOTECOMMANDS_RELEASE - 1, 0,
 		psy_audio_NOTECOMMANDS_RELEASE - 1);
 	psy_audio_parameterrange_init(&self->velocityrange, 0, 0xFF, 0, 0xFF);
-	frequencyrange_init(&self->freqrange, 0, 0, 0, 0);	
+	psy_audio_frequencyrange_init(&self->freqrange, 0, 0, 0, 0);	
 	self->use_keyrange = 1;
 	self->use_velrange = 0;
 	self->use_freqrange = 0;

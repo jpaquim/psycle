@@ -870,7 +870,7 @@ void savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t i;
 
 	connections = &songfile->song->machines.connections;
-	connected_sockets = connections_at(connections, slot);
+	connected_sockets = psy_audio_connections_at(connections, slot);
 	if (connected_sockets) {
 		WireSocket* p;
 
@@ -988,10 +988,10 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 						&songfile->song->machines,
 						newwire)) {
 					psy_audio_machines_connect(&songfile->song->machines, newwire);
-					connections_setwirevolume(&songfile->song->machines.connections,
+					psy_audio_connections_setwirevolume(&songfile->song->machines.connections,
 						newwire,
 						wire->_inputConVol * wire->_wireMultiplier);
-					connections_setpinmapping(&songfile->song->machines.connections,
+					psy_audio_connections_setpinmapping(&songfile->song->machines.connections,
 						newwire,
 						&wire->pinmapping);
 				}

@@ -74,9 +74,11 @@ INLINE uintptr_t psy_list_size(const psy_List* self)
 		: 0;
 }
 /// checks if the list has the node
-bool psy_list_check(psy_List*, psy_List* node);
+bool psy_list_exists(psy_List*, psy_List* node);
 /// returns the node for the entry
 psy_List* psy_list_findentry(psy_List*, void* entry);
+/// returns the index of the entry or UINTPTR_MAX
+uintptr_t psy_list_entry_index(psy_List*, void* entry);
 /// returns the node at numentry position
 psy_List* psy_list_at(psy_List*, uintptr_t numentry);
 

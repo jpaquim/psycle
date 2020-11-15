@@ -17,6 +17,14 @@ typedef struct {
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
 void inputdefiner_setinput(InputDefiner*, unsigned int input);
+
+INLINE unsigned int inputdefiner_input(const InputDefiner* self)
+{
+	assert(self);
+
+	return self->input;
+}
+
 void inputdefiner_text(InputDefiner*, char* text);
 
 #endif

@@ -94,16 +94,16 @@ psy_List* psy_list_insert(psy_List** self, psy_List* ptr, void* entry)
 }
 
 psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
-{	
-	psy_List* rv;
-	psy_List* tail;	
+{		
+	if (self && (*self) && ptr) {
+		psy_List* rv;
+		psy_List* tail;
 
-	if (self && *self) {
 		tail = (*self)->tail;
 		if (ptr->prev == NULL && ptr->next == NULL) {
 			*self = NULL;
 			free(ptr);
-			return 0;
+			return NULL;
 		}
 		if (ptr->prev != NULL) {
 			ptr->prev->next = ptr->next;
@@ -123,13 +123,12 @@ psy_List* psy_list_remove(psy_List** self, psy_List* ptr)
 		rv = ptr->next;
 		free(ptr);
 		--(*self)->size;
-	} else {
-		rv = NULL;
+		return rv;
 	}
-	return rv;
+	return NULL;
 }
 
-bool psy_list_check(psy_List* self, psy_List* node)
+bool psy_list_exists(psy_List* self, psy_List* node)
 {
 	psy_List* p = self;
 			
@@ -153,6 +152,25 @@ psy_List* psy_list_findentry(psy_List* self, void* entry)
 		p = p->next;		
 	}
 	return p;
+}
+
+uintptr_t psy_list_entry_index(psy_List* self, void* entry)
+{
+	uintptr_t rv;
+	psy_List* p = self;
+
+	rv = 0;
+	while (p != NULL) {
+		if (p->entry == entry) {
+			break;
+		}
+		p = p->next;
+		++rv;
+	}
+	if (!p) {
+		rv = UINTPTR_MAX;
+	}
+	return rv;
 }
 
 psy_List* psy_list_at(psy_List* self, uintptr_t numentry)

@@ -9,17 +9,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-void patternentry_init(psy_audio_PatternEntry* self)
+void psy_audio_patternentry_init(psy_audio_PatternEntry* self)
 {
 	psy_audio_PatternEvent first;
 
 	assert(self);
 	memset(self, 0, sizeof(psy_audio_PatternEntry));
 	psy_audio_patternevent_clear(&first);
-	patternentry_addevent(self,	&first);
+	psy_audio_patternentry_addevent(self,	&first);
 }
 
-void patternentry_init_all(psy_audio_PatternEntry* self,
+void psy_audio_patternentry_init_all(psy_audio_PatternEntry* self,
 	const psy_audio_PatternEvent* event,
 	psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t delta,
@@ -28,14 +28,14 @@ void patternentry_init_all(psy_audio_PatternEntry* self,
 {
 	assert(self);
 	self->events = NULL;
-	patternentry_addevent(self,	event);	
+	psy_audio_patternentry_addevent(self,	event);	
 	self->offset = offset;
 	self->delta = delta;
 	self->bpm = bpm;
 	self->track = track;
 }
 
-void patternentry_dispose(psy_audio_PatternEntry* self)
+void psy_audio_patternentry_dispose(psy_audio_PatternEntry* self)
 {
 	psy_List* p;
 
@@ -47,23 +47,23 @@ void patternentry_dispose(psy_audio_PatternEntry* self)
 	self->events = 0;
 }
 
-psy_audio_PatternEntry* patternentry_alloc(void)
+psy_audio_PatternEntry* psy_audio_patternentry_alloc(void)
 {
 	return (psy_audio_PatternEntry*)malloc(sizeof(psy_audio_PatternEntry));
 }
 
-psy_audio_PatternEntry* patternentry_allocinit(void)
+psy_audio_PatternEntry* psy_audio_patternentry_allocinit(void)
 {
 	psy_audio_PatternEntry* rv;
 	
-	rv = patternentry_alloc();
+	rv = psy_audio_patternentry_alloc();
 	if (rv) {
-		patternentry_init(rv);
+		psy_audio_patternentry_init(rv);
 	}
 	return rv;
 }
 
-psy_audio_PatternEntry* patternentry_allocinit_all(
+psy_audio_PatternEntry* psy_audio_patternentry_allocinit_all(
 	const psy_audio_PatternEvent* event,
 	psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t delta,
@@ -72,19 +72,19 @@ psy_audio_PatternEntry* patternentry_allocinit_all(
 {
 	psy_audio_PatternEntry* rv;
 
-	rv = patternentry_alloc();
+	rv = psy_audio_patternentry_alloc();
 	if (rv) {
-		patternentry_init_all(rv, event, offset, delta, bpm, track);
+		psy_audio_patternentry_init_all(rv, event, offset, delta, bpm, track);
 	}
 	return rv;
 }
 
-psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
+psy_audio_PatternEntry* psy_audio_patternentry_clone(psy_audio_PatternEntry* entry)
 {
 	psy_audio_PatternEntry* rv;
 	if (entry) {
 		psy_List* p;
-		rv = patternentry_alloc();
+		rv = psy_audio_patternentry_alloc();
 		rv->bpm = entry->bpm;
 		rv->delta = entry->delta;
 		rv->offset = entry->offset;
@@ -107,7 +107,7 @@ psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry* entry)
 	return rv;
 }
 
-void patternentry_addevent(psy_audio_PatternEntry* self,
+void psy_audio_patternentry_addevent(psy_audio_PatternEntry* self,
 	const psy_audio_PatternEvent* event)
 {
 	psy_audio_PatternEvent* copy;

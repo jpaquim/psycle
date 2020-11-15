@@ -123,7 +123,7 @@ void saveblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl, uintptr
 
 		entry = psy_audio_patternnode_entry(node->entry);
 		if (entry->track < songtracks) {
-			ev = patternentry_front(entry);
+			ev = psy_audio_patternentry_front(entry);
 			line = (int)(entry->offset / bpl);
 			track = entry->track;
 			ptrack = &dest[(track * nlines + line) * EVENT_SIZE];

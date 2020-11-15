@@ -58,24 +58,23 @@ typedef struct psy_PropertyItem {
 	char* comment;
 	union {
 		char* s;
-		int i;
+		intptr_t i;
 		double d;
 		void* ud;
 	} value;
-	int min;
-	int max;
+	intptr_t min;
+	intptr_t max;
 	int typ;
 	int hint;
 	bool readonly;
-	int disposechildren;
-	int save;
-	int id;
-	int allowappend;
+	bool disposechildren;
+	bool save;
+	intptr_t id;
 } psy_PropertyItem;
 
 void psy_propertyitem_init(psy_PropertyItem*);
 void psy_propertyitem_dispose(psy_PropertyItem*);
-void psy_propertyitem_copy(psy_PropertyItem*, psy_PropertyItem* source);
+void psy_propertyitem_copy(psy_PropertyItem*, const psy_PropertyItem* source);
 
 typedef struct psy_Property {
 	psy_PropertyItem item;
@@ -84,10 +83,10 @@ typedef struct psy_Property {
 	void (*dispose)(psy_PropertyItem*);
 } psy_Property;
 
-typedef int (*psy_PropertyCallback)(void* , psy_Property*, int level);
+typedef int (*psy_PropertyCallback)(void*, psy_Property*, int level);
 
 // Init/dispose
-// {
+//
 // Inits a property, key and type is root.
 void psy_property_init(psy_Property*);
 // Inits a property with a key. if key is zero, the key is "root".
@@ -96,92 +95,104 @@ void psy_property_init_key(psy_Property*, const char* key);
 void psy_property_init_type(psy_Property*, const char* key, psy_PropertyType);
 // Disposes a property and its children, but doesn't free self.
 void psy_property_dispose(psy_Property*);
-// }
 
 // Allocation/deallocation
-// {
-// Allocates memory for a property and inits it with key "root".
+//
+// Allocates memory for a property and inits it with a key,
+// if key is zero, the key is "root".
 psy_Property* psy_property_allocinit_key(const char* key);
 // Disposes a property and its children and frees the memory of self.
 void psy_property_deallocate(psy_Property*);
 // Allocates memory needed to clone(full copy) the source property.
-psy_Property* psy_property_clone(psy_Property* source);
-// }
-// Synchronizes recursively properties with same keys.
-psy_Property* psy_property_sync(psy_Property*, psy_Property* source);
-// Appends a property. If source typ is root, it changes to section.
-psy_Property* psy_property_append_property(psy_Property*, psy_Property*);
-// Creates and appends for different types a property to its children list.
-// {
-psy_Property* psy_property_append_section(psy_Property*, const char* key);
-psy_Property* psy_property_append_string(psy_Property*, const char* key, const char* value);
-psy_Property* psy_property_append_font(psy_Property*, const char* key, const char* value);
-psy_Property* psy_property_append_choice(psy_Property*, const char* key, int value);
-psy_Property* psy_property_append_userdata(psy_Property*, const char* key,
-	void* value, void (*dispose)(psy_PropertyItem*));
-psy_Property* psy_property_append_int(psy_Property*, const char* key, int value, int min, int max);
-psy_Property* psy_property_append_bool(psy_Property*, const char* key, bool value);
-psy_Property* psy_property_append_double(psy_Property*, const char* key, double value, double min, double max);
-psy_Property* psy_property_append_action(psy_Property*, const char* key);
-// }
-// Getter/Cast
-// {
-const char* psy_property_key(psy_Property*);
-int psy_property_type(psy_Property*);
-psy_Property* psy_property_at(psy_Property*, const char* key, psy_PropertyType);
-psy_Property* psy_property_at_choice(psy_Property*);
-psy_Property* psy_property_at_index(psy_Property*, int index);
-double psy_property_at_real(psy_Property*, const char* key, double defaultvalue);
-const char* psy_property_at_str(psy_Property*, const char* key, const char* defaulttext);
-int psy_property_at_int(psy_Property*, const char* key, int defaultvalue);
-bool psy_property_at_bool(psy_Property*, const char* key, bool defaultvalue);
-int psy_property_as_int(psy_Property*);
-const char* psy_property_as_str(psy_Property*);
-bool psy_property_int_valid(psy_Property*, int value);
-bool psy_property_int_hasrange(psy_Property*);
-// }
-// Setter
-// {
-psy_Property* psy_property_set_section(psy_Property*, const char* sectionname);
-psy_Property* psy_property_set_int(psy_Property*, const char* key, int value);
-psy_Property* psy_property_set_str(psy_Property*, const char* key, const char* value);
-psy_Property* psy_property_set_font(psy_Property*, const char* key, const char* value);
-psy_Property* psy_property_set_bool(psy_Property*, const char* key, bool value);
-psy_Property* psy_property_set_choice(psy_Property*, const char* key, int value);
-psy_Property* psy_property_set_double(psy_Property*, const char* key, double value);
-// }
+psy_Property* psy_property_clone(const psy_Property* source);
+// Synchronizes recursively properties with the same keys.
+psy_Property* psy_property_sync(psy_Property*, const psy_Property* source);
+
+// Structure
+//
+uintptr_t psy_property_size(const psy_Property*);
+bool psy_property_empty(const psy_Property*);
+psy_List* psy_property_children(psy_Property*);
+psy_Property* psy_property_parent(const psy_Property*);
+psy_Property* psy_property_remove(psy_Property*, psy_Property*);
+void psy_property_clear(psy_Property*);
+bool psy_property_insection(const psy_Property*, psy_Property* section);
 void psy_property_enumerate(psy_Property*, void* target, psy_PropertyCallback);
 psy_Property* psy_property_find(psy_Property*, const char* key, psy_PropertyType);
 psy_Property* psy_property_findsection(psy_Property*, const char* key);
 psy_Property* psy_property_findsectionex(psy_Property*, const char* key,
 	psy_Property** prev);
-char_dyn_t* psy_property_sections(psy_Property*);
-int psy_property_insection(psy_Property*, psy_Property* section);
-psy_PropertyItem* psy_property_entry(psy_Property*);
-psy_Property* psy_property_settext(psy_Property*, const char* text);
-psy_Property* psy_property_settranslation(psy_Property*, const char* text);
-psy_Property* psy_property_setshorttext(psy_Property*, const char* text);
-psy_Property* psy_property_setcomment(psy_Property*, const char* text);
+char_dyn_t* psy_property_sections(const psy_Property*);
+
+// Setter key/value
+//
+// Changes property value or creates and inserts a new property
+psy_Property* psy_property_at(psy_Property*, const char* key, psy_PropertyType);
+const psy_Property* psy_property_at_const(const psy_Property*, const char* key,
+	psy_PropertyType);
+psy_Property* psy_property_at_index(psy_Property*, intptr_t index);
+psy_Property* psy_property_set_bool(psy_Property*, const char* key, bool value);
+bool psy_property_at_bool(const psy_Property*, const char* key, bool defaultvalue);
+psy_Property* psy_property_set_int(psy_Property*, const char* key, intptr_t value);
+intptr_t psy_property_at_int(const psy_Property*, const char* key, intptr_t defaultvalue);
+psy_Property* psy_property_set_double(psy_Property*, const char* key, double value);
+double psy_property_at_real(const psy_Property*, const char* key, double defaultvalue);
+psy_Property* psy_property_set_str(psy_Property*, const char* key, const char* value);
+const char* psy_property_at_str(const psy_Property*, const char* key, const char* defaulttext);
+psy_Property* psy_property_set_font(psy_Property*, const char* key, const char* value);
+psy_Property* psy_property_set_choice(psy_Property*, const char* key, intptr_t value);
+psy_Property* psy_property_at_choice(psy_Property*);
+bool psy_property_ischoiceitem(const psy_Property*);
+// Appends a property. If source typ is root, it changes to section.
+psy_Property* psy_property_append_property(psy_Property*, psy_Property*);
+// Creates and appends a a new property
+psy_Property* psy_property_append_section(psy_Property*, const char* key);
+psy_Property* psy_property_append_string(psy_Property*, const char* key, const char* value);
+psy_Property* psy_property_append_font(psy_Property*, const char* key, const char* value);
+psy_Property* psy_property_append_choice(psy_Property*, const char* key, intptr_t value);
+psy_Property* psy_property_append_userdata(psy_Property*, const char* key,
+	void* value, void (*dispose)(psy_PropertyItem*));
+psy_Property* psy_property_append_int(psy_Property*, const char* key, intptr_t value, intptr_t min, intptr_t max);
+psy_Property* psy_property_append_bool(psy_Property*, const char* key, bool value);
+psy_Property* psy_property_append_double(psy_Property*, const char* key, double value, double min, double max);
+psy_Property* psy_property_append_action(psy_Property*, const char* key);
+
+// Item setter/getter
+//
+// Definition
+const char* psy_property_key(const psy_Property*);
+int psy_property_type(const psy_Property*);
 psy_Property* psy_property_setreadonly(psy_Property*, bool on);
 bool psy_property_readonly(const psy_Property*);
-const char* psy_property_text(psy_Property*);
-const char* psy_property_translation(psy_Property*);
-const char* psy_property_shorttext(psy_Property*);
-const char* psy_property_comment(psy_Property*);
-psy_Property* psy_property_setid(psy_Property*, int id);
-int psy_property_id(psy_Property* self);
 psy_Property* psy_property_sethint(psy_Property*, psy_PropertyHint);
-int psy_property_ischoiceitem(psy_Property*);
-psy_PropertyHint psy_property_hint(psy_Property*);
-psy_Property* psy_property_remove(psy_Property*, psy_Property*);
-void psy_property_clear(psy_Property*);
-uintptr_t psy_property_size(const psy_Property*);
-bool psy_property_empty(const psy_Property*);
-psy_List* psy_property_children(psy_Property*);
+psy_PropertyHint psy_property_hint(const psy_Property*);
+// Value
+psy_Property* psy_property_setitem_bool(psy_Property*, bool value);
+bool psy_property_item_bool(const psy_Property*);
+psy_Property* psy_property_setitem_int(psy_Property*, intptr_t value);
+intptr_t psy_property_item_int(const psy_Property*);
+bool psy_property_int_valid(const psy_Property*, intptr_t value);
+bool psy_property_int_hasrange(const psy_Property*);
+psy_Property* psy_property_setitem_double(psy_Property*, double value);
+double psy_property_item_double(const psy_Property*);
+psy_Property* psy_property_setitem_str(psy_Property*, const char* str);
+const char* psy_property_item_str(const psy_Property*);
+psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
+const char* psy_property_item_font(const psy_Property*);
+// Description
+psy_Property* psy_property_setid(psy_Property*, intptr_t id);
+intptr_t psy_property_id(const psy_Property* self);
+psy_Property* psy_property_settext(psy_Property*, const char* text);
+const char* psy_property_text(const psy_Property*);
+psy_Property* psy_property_settranslation(psy_Property*, const char* text);
+const char* psy_property_translation(const psy_Property*);
+psy_Property* psy_property_setshorttext(psy_Property*, const char* text);
+const char* psy_property_shorttext(const psy_Property*);
+psy_Property* psy_property_setcomment(psy_Property*, const char* text);
+const char* psy_property_comment(const psy_Property*);
 
 #ifdef __cplusplus
 }
-
 #endif
 
 #endif /* psy_PROPERTIES_H */

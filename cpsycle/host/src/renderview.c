@@ -194,7 +194,8 @@ void renderview_render(RenderView* self)
 	self->curraudiodriver = psy_audio_player_audiodriver(&self->workspace->player);
 	psy_audiodriver_close(self->curraudiodriver);
 	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);	
-	driverconfig = psy_property_clone(self->fileoutdriver->properties);
+	driverconfig = psy_property_clone(psy_audiodriver_configuration(
+		self->fileoutdriver));
 	psy_property_set_str(driverconfig, "outputpath",
 		psy_property_at_str(self->properties, "filesave.outputpath", "Untitled.wav"));
 	psy_property_set_int(driverconfig, "samplerate",
@@ -218,12 +219,13 @@ void renderview_render(RenderView* self)
 		
 		pdf = psy_property_at(self->properties, "dither.pdf", PSY_PROPERTY_TYPE_NONE);
 		if (pdf) {
-			dither_pdf = (psy_dsp_DitherPdf)pdf->item.value.i;
+			dither_pdf = (psy_dsp_DitherPdf)psy_property_item_int(pdf);
 		}
 		noiseshaping = psy_property_at(self->properties,
 			"dither.noiseshape", PSY_PROPERTY_TYPE_NONE);
 		if (noiseshaping) {
-			dither_noiseshape = (psy_dsp_DitherNoiseShape)noiseshaping->item.value.i;
+			dither_noiseshape = (psy_dsp_DitherNoiseShape)
+				psy_property_item_int(noiseshaping);
 		}
 		psy_audio_player_setdither(&self->workspace->player, 16, dither_pdf,
 			dither_noiseshape);

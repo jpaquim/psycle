@@ -70,7 +70,7 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Property* dirconfig)
 	self->dirconfig = dirconfig;
 	p = psy_property_find(self->dirconfig, "app", PSY_PROPERTY_TYPE_NONE);
 	if (p) {
-		self->nativeroot = strdup(psy_property_as_str(p));
+		self->nativeroot = strdup(psy_property_item_str(p));
 	} else {
 		self->nativeroot = strdup(PSYCLE_APP_DIR);
 	}
@@ -106,7 +106,7 @@ void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
 	plugincatcher_makeplugininfo(self, "sampler", "", MACH_SAMPLER,
 		psy_audio_sampler_info());
 	plugincatcher_makeplugininfo(self, "dummy", "", MACH_DUMMY,
-		dummymachine_info());
+		psy_audio_dummymachine_info());
 	plugincatcher_makeplugininfo(self, "master", "", MACH_MASTER,
 		psy_audio_master_info());
 	plugincatcher_makeplugininfo(self, "mixer", "", MACH_MIXER,

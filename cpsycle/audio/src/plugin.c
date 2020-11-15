@@ -257,7 +257,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 {
 	GETINFO GetInfo;
 			
-	custommachine_init(&self->custommachine, callback);	
+	psy_audio_custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	psy_audio_plugin_base(self)->vtable = &vtable;
 	psy_table_init(&self->parameters);
@@ -326,7 +326,7 @@ void dispose(psy_audio_Plugin* self)
 		free(self->presets);
 	}
 	disposeparameters(self);
-	custommachine_dispose(&self->custommachine);
+	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 void disposeparameters(psy_audio_Plugin* self)

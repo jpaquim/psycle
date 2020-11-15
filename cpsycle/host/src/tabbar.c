@@ -9,6 +9,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "../../detail/portable.h"
+
 static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
 static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
 static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
@@ -65,8 +67,7 @@ void tab_dispose(Tab* self)
 
 void tab_settext(Tab* self, const char* text)
 {
-	free(self->text);
-	self->text = strdup(text);	
+	psy_strreset(&self->text, text);	
 }
 
 void tabbar_init(TabBar* self, psy_ui_Component* parent)

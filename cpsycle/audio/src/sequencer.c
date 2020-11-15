@@ -251,7 +251,7 @@ psy_List* psy_audio_sequencer_machinetickevents(psy_audio_Sequencer* self,
 		
 	for (p = self->events; p != NULL; psy_list_next(&p)) {
 		psy_audio_PatternEntry* entry = psy_audio_patternnode_entry(p);		
-		if (patternentry_front(entry)->mach == slot) {			
+		if (psy_audio_patternentry_front(entry)->mach == slot) {			
 			psy_list_append(&rv, entry);						
 		}		
 	}
@@ -319,19 +319,19 @@ psy_dsp_big_beat_t psy_audio_sequencer_skiptrackiterators(psy_audio_Sequencer*
 void psy_audio_sequencer_clearevents(psy_audio_Sequencer* self)
 {
 	psy_list_deallocate(&self->events, (psy_fp_disposefunc)
-		patternentry_dispose);	
+		psy_audio_patternentry_dispose);	
 }
 
 void psy_audio_sequencer_cleardelayed(psy_audio_Sequencer* self)
 {	
 	psy_list_deallocate(&self->delayedevents, (psy_fp_disposefunc)
-		patternentry_dispose);	
+		psy_audio_patternentry_dispose);	
 }
 
 void psy_audio_sequencer_clearinputevents(psy_audio_Sequencer* self)
 {
 	psy_list_deallocate(&self->inputevents, (psy_fp_disposefunc)
-		patternentry_dispose);	
+		psy_audio_patternentry_dispose);	
 }
 
 void psy_audio_sequencer_frametick(psy_audio_Sequencer* self, uintptr_t
@@ -447,17 +447,17 @@ int psy_audio_sequencer_sequencerinsert(psy_audio_Sequencer* self) {
 		psy_audio_PatternEntry* entry;			
 		
 		entry = psy_audio_patternnode_entry(p);
-		if (patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_EMPTY &&
+		if (psy_audio_patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_EMPTY &&
 				self->machines) {
 			psy_audio_Machine* machine;				
 				
 			machine = psy_audio_machines_at(self->machines,
-				patternentry_front(entry)->mach);
+				psy_audio_patternentry_front(entry)->mach);
 			if (machine) {
 				psy_List* events;
 
 				events = psy_audio_sequencer_machinetickevents(self,
-					patternentry_front(entry)->mach);
+					psy_audio_patternentry_front(entry)->mach);
 				if (events) {					
 					psy_audio_PatternNode* insert;
 					
@@ -589,7 +589,7 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 					}
 				break;
 				case psy_audio_PATTERNCMD_SET_TEMPO:
-					self->bpm = patternentry_front(patternentry)->parameter;
+					self->bpm = psy_audio_patternentry_front(patternentry)->parameter;
 					psy_audio_sequencer_compute_beatspersample(self);
 					done = TRUE;
 				break;
@@ -725,17 +725,17 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 	psy_audio_PatternEntry* patternentry,
 	psy_audio_SequencerTrack* track, psy_dsp_big_beat_t offset)
 {			
-	if (patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_TWEAKSLIDE) {
+	if (psy_audio_patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_TWEAKSLIDE) {
 		psy_audio_sequencer_maketweakslideevents(self, patternentry, offset);
 	} else
-	if (patternentry_front(patternentry)->note < psy_audio_NOTECOMMANDS_TWEAK ||
-			patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_EMPTY) {
+	if (psy_audio_patternentry_front(patternentry)->note < psy_audio_NOTECOMMANDS_TWEAK ||
+			psy_audio_patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_EMPTY) {
 		if (self->machines) {
 			psy_audio_Machine* machine;
 
-			machine = psy_audio_machines_at(self->machines, patternentry_front(patternentry)->mach);
+			machine = psy_audio_machines_at(self->machines, psy_audio_patternentry_front(patternentry)->mach);
 			if (!machine) {
-				if (patternentry_front(patternentry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+				if (psy_audio_patternentry_front(patternentry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY) {
 					uintptr_t lastmachine;
 					lastmachine = (uintptr_t)psy_table_at(&self->lastmachine, patternentry->track);
 					machine = psy_audio_machines_at(self->machines, lastmachine);
@@ -743,46 +743,46 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			}
 			// Does this machine really exist and is not muted?
 			if (machine && !psy_audio_machine_muted(machine)) {
-				if (patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_NOTE_DELAY) {
+				if (psy_audio_patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_NOTE_DELAY) {
 					psy_audio_sequencer_notedelay(self, patternentry, offset);
-				} else if (patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_RETRIGGER) {
+				} else if (psy_audio_patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_RETRIGGER) {
 					psy_audio_sequencer_retrigger(self, patternentry, track, offset);
-				} else if (patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_RETR_CONT) {
+				} else if (psy_audio_patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_RETR_CONT) {
 					psy_audio_sequencer_retriggercont(self, patternentry, track, offset);
-				} else if (patternentry_front(patternentry)->cmd != psy_audio_PATTERNCMD_SET_VOLUME) {
+				} else if (psy_audio_patternentry_front(patternentry)->cmd != psy_audio_PATTERNCMD_SET_VOLUME) {
 					psy_audio_sequencer_note(self, patternentry, offset);
 				}
 			} 
 		}
-		if (patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_SET_VOLUME) {
+		if (psy_audio_patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_SET_VOLUME) {
 			psy_audio_PatternEntry* entry;
 
 			// volume column used to store mach
-			entry = patternentry_clone(patternentry);			
-			patternentry_front(entry)->vol = 
-				(patternentry_front(entry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY)
+			entry = psy_audio_patternentry_clone(patternentry);			
+			psy_audio_patternentry_front(entry)->vol = 
+				(psy_audio_patternentry_front(entry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY)
 				? psy_audio_MASTER_INDEX
-				: patternentry_front(entry)->mach;
+				: psy_audio_patternentry_front(entry)->mach;
 			// because master handles all wires volumes
-			patternentry_front(entry)->mach = psy_audio_MASTER_INDEX;
-			patternentry_setbpm(entry, self->bpm);
+			psy_audio_patternentry_front(entry)->mach = psy_audio_MASTER_INDEX;
+			psy_audio_patternentry_setbpm(entry, self->bpm);
 			entry->delta = offset - self->position;
 			psy_list_append(&self->events, entry);				
 		}		
 	} else
-	if (patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
+	if (psy_audio_patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
 		psy_audio_sequencer_tweak(self, patternentry, offset);
 	} else
-	if ((patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_MIDICC) &&
-			(patternentry_front(patternentry)->inst < 0x80)) {
+	if ((psy_audio_patternentry_front(patternentry)->note == psy_audio_NOTECOMMANDS_MIDICC) &&
+			(psy_audio_patternentry_front(patternentry)->inst < 0x80)) {
 		psy_audio_PatternEntry* entry;
 
-		entry = patternentry_clone(patternentry);
-		patternentry_setbpm(entry, self->bpm);
+		entry = psy_audio_patternentry_clone(patternentry);
+		psy_audio_patternentry_setbpm(entry, self->bpm);
 		entry->delta = offset - self->position;
-		entry->track = patternentry_front(patternentry)->inst;
-		patternentry_front(entry)->note = psy_audio_NOTECOMMANDS_EMPTY;
-		patternentry_front(entry)->inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
+		entry->track = psy_audio_patternentry_front(patternentry)->inst;
+		psy_audio_patternentry_front(entry)->note = psy_audio_NOTECOMMANDS_EMPTY;
+		psy_audio_patternentry_front(entry)->inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
 		psy_list_append(&self->events, entry);
 	}		
 }
@@ -793,9 +793,9 @@ void psy_audio_sequencer_notedelay(psy_audio_Sequencer* self,
 {
 	psy_audio_PatternEntry* entry;
 
-	entry = patternentry_clone(patternentry);
-	patternentry_setbpm(entry, self->bpm);
-	entry->delta = offset + patternentry_front(entry)->parameter *
+	entry = psy_audio_patternentry_clone(patternentry);
+	psy_audio_patternentry_setbpm(entry, self->bpm);
+	entry->delta = offset + psy_audio_patternentry_front(entry)->parameter *
 		(psy_audio_sequencer_currbeatsperline(self) / 256.f);
 	psy_list_append(&self->delayedevents, entry);
 }
@@ -806,8 +806,8 @@ void psy_audio_sequencer_retrigger(psy_audio_Sequencer* self,
 {
 	psy_audio_PatternEntry* entry;
 
-	entry = patternentry_clone(patternentry);
-	patternentry_setbpm(entry, self->bpm);
+	entry = psy_audio_patternentry_clone(patternentry);
+	psy_audio_patternentry_setbpm(entry, self->bpm);
 	entry->delta = offset - self->position;
 	psy_list_append(&self->events, entry);
 	psy_audio_sequencer_makeretriggerevents(self, track, entry, offset);
@@ -819,8 +819,8 @@ void psy_audio_sequencer_retriggercont(psy_audio_Sequencer* self,
 {
 	psy_audio_PatternEntry* entry;
 
-	entry = patternentry_clone(patternentry);
-	patternentry_setbpm(entry, self->bpm);
+	entry = psy_audio_patternentry_clone(patternentry);
+	psy_audio_patternentry_setbpm(entry, self->bpm);
 	entry->delta = offset + track->state.retriggeroffset;
 	psy_list_append(&self->delayedevents, entry);
 	psy_audio_sequencer_makeretriggercontinueevents(self, track, entry,
@@ -832,20 +832,20 @@ void psy_audio_sequencer_note(psy_audio_Sequencer* self,
 {
 	psy_audio_PatternEntry* entry;
 
-	entry = patternentry_clone(patternentry);
-	if (patternentry_front(entry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+	entry = psy_audio_patternentry_clone(patternentry);
+	if (psy_audio_patternentry_front(entry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY) {
 		uintptr_t lastmachine;
 
 		lastmachine = (uintptr_t)psy_table_at(&self->lastmachine,
 			patternentry->track);
-		patternentry_front(entry)->mach = (uint8_t)lastmachine;
+		psy_audio_patternentry_front(entry)->mach = (uint8_t)lastmachine;
 	}
-	patternentry_setbpm(entry, self->bpm);
+	psy_audio_patternentry_setbpm(entry, self->bpm);
 	entry->delta = offset - self->position;
-	if (patternentry_front(patternentry)->note <
+	if (psy_audio_patternentry_front(patternentry)->note <
 		psy_audio_NOTECOMMANDS_RELEASE) {
 		psy_table_insert(&self->lastmachine, entry->track,
-			(void*)(uintptr_t)patternentry_front(patternentry)->mach);
+			(void*)(uintptr_t)psy_audio_patternentry_front(patternentry)->mach);
 	}
 	psy_list_append(&self->events, entry);
 }
@@ -855,10 +855,10 @@ void psy_audio_sequencer_tweak(psy_audio_Sequencer* self,
 {
 	psy_audio_PatternEntry* entry;
 
-	entry = patternentry_clone(patternentry);
-	patternentry_setbpm(entry, self->bpm);
+	entry = psy_audio_patternentry_clone(patternentry);
+	psy_audio_patternentry_setbpm(entry, self->bpm);
 	entry->delta = offset - self->position;
-	patternentry_front(entry)->vol = 0;
+	psy_audio_patternentry_front(entry)->vol = 0;
 	psy_list_append(&self->events, entry);
 }
 
@@ -883,9 +883,9 @@ void psy_audio_addgate(psy_audio_Sequencer* self, psy_audio_PatternEntry*
 	if (gate != psy_audio_NOTECOMMANDS_GATE_EMPTY) {		
 		psy_audio_PatternEntry* noteoff;
 
-		noteoff = patternentry_allocinit();
-		patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
-		patternentry_front(noteoff)->mach = patternentry_front(entry)->mach;
+		noteoff = psy_audio_patternentry_allocinit();
+		psy_audio_patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
+		psy_audio_patternentry_front(noteoff)->mach = psy_audio_patternentry_front(entry)->mach;
 		noteoff->delta += entry->offset + gate / 
 			(self->lpb * psy_audio_sequencer_speed(self) * 128.f);
 		psy_list_append(&self->delayedevents, noteoff);
@@ -905,11 +905,11 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 	if (!self->machines) {
 		return;
 	}
-	machine = psy_audio_machines_at(self->machines, patternentry_front(entry)->mach);
+	machine = psy_audio_machines_at(self->machines, psy_audio_patternentry_front(entry)->mach);
 	if (!machine) {
 		return;
 	}
-	tweak = patternentry_front(entry)->inst;
+	tweak = psy_audio_patternentry_front(entry)->inst;
 	if (tweak >= psy_audio_machine_numtweakparameters(machine)) {
 		return;	
 	}
@@ -927,10 +927,10 @@ void psy_audio_sequencer_maketweakslideevents(psy_audio_Sequencer* self,
 	for (slide = 0; slide < numslides; ++slide) {
 		psy_audio_PatternEntry* slideentry;
 				
-		slideentry = patternentry_clone(entry);
-		patternentry_front(slideentry)->note = psy_audio_NOTECOMMANDS_TWEAK;
-		patternentry_front(slideentry)->vol = (uint16_t)(numslides - slide);
-		patternentry_setbpm(slideentry, self->bpm);		
+		slideentry = psy_audio_patternentry_clone(entry);
+		psy_audio_patternentry_front(slideentry)->note = psy_audio_NOTECOMMANDS_TWEAK;
+		psy_audio_patternentry_front(slideentry)->vol = (uint16_t)(numslides - slide);
+		psy_audio_patternentry_setbpm(slideentry, self->bpm);		
 		slideentry->delta = offset +
 			psy_audio_sequencer_frametooffset(self, slide * framesperslide);
 		slideentry->priority = 1; // not used right now
@@ -945,15 +945,15 @@ void psy_audio_sequencer_makeretriggerevents(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t retriggerstep;
 	psy_dsp_big_beat_t retriggeroffset;		
 	
-	retriggerstep = patternentry_front(entry)->parameter *
+	retriggerstep = psy_audio_patternentry_front(entry)->parameter *
 		(psy_audio_sequencer_currbeatsperline(self) / 256.f);		
 	retriggeroffset = retriggerstep;
 	while (retriggeroffset < psy_audio_sequencer_currbeatsperline(self)) {
 		psy_audio_PatternEntry* retriggerentry;
 		
-		retriggerentry = patternentry_clone(entry);
-		patternentry_front(retriggerentry)->cmd = 0;
-		patternentry_front(retriggerentry)->parameter = 0;
+		retriggerentry = psy_audio_patternentry_clone(entry);
+		psy_audio_patternentry_front(retriggerentry)->cmd = 0;
+		psy_audio_patternentry_front(retriggerentry)->parameter = 0;
 		retriggerentry->delta = offset + entry->delta + retriggeroffset;
 		psy_list_append(&self->delayedevents, retriggerentry);
 		retriggeroffset += retriggerstep;
@@ -970,10 +970,10 @@ void psy_audio_sequencer_makeretriggercontinueevents(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t retriggerstep;
 	psy_dsp_big_beat_t retriggeroffset;
 	
-	if ((patternentry_front(entry)->parameter & 0xf0) != 0) {
+	if ((psy_audio_patternentry_front(entry)->parameter & 0xf0) != 0) {
 		uint8_t retriggerrate; // x / 16 = row duration per trigger
 
-		retriggerrate = patternentry_front(entry)->parameter & 0xf0;
+		retriggerrate = psy_audio_patternentry_front(entry)->parameter & 0xf0;
 		// convert retriggerrate to beat unit
 		retriggerstep = retriggerrate *
 			(psy_audio_sequencer_currbeatsperline(self) / 256.f);
@@ -985,9 +985,9 @@ void psy_audio_sequencer_makeretriggercontinueevents(psy_audio_Sequencer* self,
 	while (retriggeroffset < psy_audio_sequencer_currbeatsperline(self)) {
 		psy_audio_PatternEntry* retriggerentry;
 
-		retriggerentry = patternentry_clone(entry);
-		patternentry_front(retriggerentry)->cmd = 0;
-		patternentry_front(retriggerentry)->parameter = 0;
+		retriggerentry = psy_audio_patternentry_clone(entry);
+		psy_audio_patternentry_front(retriggerentry)->cmd = 0;
+		psy_audio_patternentry_front(retriggerentry)->parameter = 0;
 		retriggerentry->delta = entry->delta + retriggeroffset;
 		psy_list_append(&self->delayedevents, retriggerentry);		
 		retriggeroffset += retriggerstep;
@@ -1072,7 +1072,7 @@ void psy_audio_sequencer_addinputevent(psy_audio_Sequencer* self,
 {
 	if (ev) {
 		psy_list_append(&self->inputevents,
-			patternentry_allocinit_all(ev, 0, 0, self->bpm, track));
+			psy_audio_patternentry_allocinit_all(ev, 0, 0, self->bpm, track));
 	}
 }
 

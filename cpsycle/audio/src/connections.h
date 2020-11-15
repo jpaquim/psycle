@@ -77,12 +77,12 @@ typedef struct {
 	WireSocket* outputs;
 } psy_audio_MachineSockets;
 
-void machinesockets_init(psy_audio_MachineSockets*);
-void machinesockets_dispose(psy_audio_MachineSockets*);
-void machinesockets_copy(psy_audio_MachineSockets*,
+void psy_audio_machinesockets_init(psy_audio_MachineSockets*);
+void psy_audio_machinesockets_dispose(psy_audio_MachineSockets*);
+void psy_audio_machinesockets_copy(psy_audio_MachineSockets*,
 	psy_audio_MachineSockets* src);
 
-WireSocket* connection_at(WireSocket*, uintptr_t slot);
+WireSocket* psy_audio_connection_at(WireSocket*, uintptr_t slot);
 
 typedef struct {
 	uintptr_t src;
@@ -132,23 +132,23 @@ typedef struct {
 	bool filemode;
 } psy_audio_Connections;
 
-void connections_init(psy_audio_Connections*);
-void connections_dispose(psy_audio_Connections*);
-void connections_copy(psy_audio_Connections*, psy_audio_Connections* src);
-psy_audio_MachineSockets* connections_initslot(psy_audio_Connections*,
+void psy_audio_connections_init(psy_audio_Connections*);
+void psy_audio_connections_dispose(psy_audio_Connections*);
+void psy_audio_connections_copy(psy_audio_Connections*, psy_audio_Connections* src);
+psy_audio_MachineSockets* psy_audio_connections_initslot(psy_audio_Connections*,
 	uintptr_t slot);
-psy_audio_MachineSockets* connections_at(psy_audio_Connections*,
+psy_audio_MachineSockets* psy_audio_connections_at(psy_audio_Connections*,
 	uintptr_t slot);
-int connections_connect(psy_audio_Connections*, psy_audio_Wire);
-void connections_disconnect(psy_audio_Connections*, psy_audio_Wire);
-int connections_connected(psy_audio_Connections*, psy_audio_Wire);
-void connections_disconnectall(psy_audio_Connections*, uintptr_t slot);
-void connections_setwirevolume(psy_audio_Connections*, psy_audio_Wire,
+int psy_audio_connections_connect(psy_audio_Connections*, psy_audio_Wire);
+void psy_audio_connections_disconnect(psy_audio_Connections*, psy_audio_Wire);
+int psy_audio_connections_connected(psy_audio_Connections*, psy_audio_Wire);
+void psy_audio_connections_disconnectall(psy_audio_Connections*, uintptr_t slot);
+void psy_audio_connections_setwirevolume(psy_audio_Connections*, psy_audio_Wire,
 	psy_dsp_amp_t factor);
-void connections_setpinmapping(psy_audio_Connections*, psy_audio_Wire,
+void psy_audio_connections_setpinmapping(psy_audio_Connections*, psy_audio_Wire,
 	const psy_audio_PinMapping*);
-psy_dsp_amp_t connections_wirevolume(psy_audio_Connections*, psy_audio_Wire);
-psy_audio_WireSocketEntry* connection_input(psy_audio_Connections*,
+psy_dsp_amp_t psy_audio_connections_wirevolume(psy_audio_Connections*, psy_audio_Wire);
+psy_audio_WireSocketEntry* psy_audio_connections_input(psy_audio_Connections*,
 	psy_audio_Wire);
 
 #ifdef __cplusplus

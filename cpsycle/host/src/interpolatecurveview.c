@@ -525,7 +525,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 
 					keyframe = keyframe_allocinit(
 						entry->offset - self->selection.topleft.offset,
-						patternentry_front(entry)->parameter,
+						psy_audio_patternentry_front(entry)->parameter,
 						INTERPOLATECURVETYPE_LINEAR);
 					if (keyframe) {
 						psy_list_append(&self->keyframes, keyframe);

@@ -248,7 +248,7 @@ void psy_audio_ladspaplugin_init(psy_audio_LadspaPlugin* self, psy_audio_Machine
 {
 	LADSPA_Descriptor_Function pfDescriptorFunction;
 
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	psy_audio_ladspaplugin_base(self)->vtable = &vtable;
 	psy_table_init(&self->values_);
@@ -316,7 +316,7 @@ void dispose(psy_audio_LadspaPlugin* self)
 		free(self->plugininfo);
 		self->plugininfo = 0;
 	}
-	custommachine_dispose(&self->custommachine);
+	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 psy_audio_Machine* clone(psy_audio_LadspaPlugin* self)

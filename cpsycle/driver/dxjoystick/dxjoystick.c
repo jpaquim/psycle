@@ -12,6 +12,7 @@
 #include <dinput.h>
 #pragma comment (lib, "dinput8.lib")
 #pragma comment (lib, "dxguid.lib")
+#include <stdlib.h>
 #include <stdio.h>
 #include <hashtbl.h>
 
@@ -81,7 +82,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
-		vtable.free = driver_free;
+		vtable.deallocate = driver_free;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
@@ -196,7 +197,7 @@ enumCallback(const DIDEVICEINSTANCE* instance, VOID* context)
 	char text[256];
 
 	self = (DXJoystickDriver*)context;	
-	_snprintf(text, 256, "%d:%s", self->count, instance->tszProductName);
+	psy_snprintf(text, 256, "%d:%s", self->count, instance->tszProductName);
 	input = (DIDEVICEINSTANCE*)malloc(sizeof(DIDEVICEINSTANCE));
 	*input = *instance;
 	psy_table_insert(&self->inputs, self->count, input);
@@ -218,7 +219,7 @@ void driver_configure(psy_EventDriver* context, psy_Property* config)
 
 		p = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_NONE);
 		if (p) {
-			self->deviceid = psy_property_as_int(p);
+			self->deviceid = psy_property_item_int(p);
 		}
 	}
 }
@@ -359,7 +360,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		for (p = psy_property_children(section); p != NULL;
 				psy_list_next(&p)) {			
 			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_as_int(property) == input.param1) {
+			if (psy_property_item_int(property) == input.param1) {
 				break;
 			}
 			property = NULL;

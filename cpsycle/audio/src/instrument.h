@@ -33,7 +33,7 @@ typedef struct {
 	double max;
 } psy_audio_FrequencyRange;
 
-void frequencyrange_init(psy_audio_FrequencyRange* self,
+void psy_audio_frequencyrange_init(psy_audio_FrequencyRange* self,
 	double low, double high, double min, double max);
 
 /// When a new note comes to play in a channel, and there is still one playing
