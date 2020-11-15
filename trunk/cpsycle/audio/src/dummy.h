@@ -15,8 +15,8 @@ typedef struct {
 	int mode;
 } psy_audio_DummyMachine;
 
-void dummymachine_init(psy_audio_DummyMachine*, psy_audio_MachineCallback*);
-const psy_audio_MachineInfo* dummymachine_info(void);
+void psy_audio_dummymachine_init(psy_audio_DummyMachine*, psy_audio_MachineCallback*);
+const psy_audio_MachineInfo* psy_audio_dummymachine_info(void);
 
 #ifdef __cplusplus
 }

@@ -318,7 +318,7 @@ void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
 	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
 {	
-	self->invol = connections_wirevolume(&self->workspace->song->machines.connections,
+	self->invol = psy_audio_connections_wirevolume(&self->workspace->song->machines.connections,
 		self->wire);	
 }
 

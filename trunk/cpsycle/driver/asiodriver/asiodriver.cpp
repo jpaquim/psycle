@@ -1326,6 +1326,7 @@ long ASIOInterface::asioMessages(long selector, long value, void* message, doubl
 typedef struct {
 	psy_AudioDriver driver;
 	// psy_AudioDriverSettings settings;
+	psy_Property* configuration;
 	HWND m_hWnd;
 	int _dither;
 	unsigned int pollSleep_;
@@ -1355,6 +1356,7 @@ static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
+static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static uintptr_t driver_samplerate(psy_AudioDriver*);
 static const char* capturename(psy_AudioDriver*, int index);
 static int numcaptures(psy_AudioDriver*);
@@ -1382,6 +1384,7 @@ static void vtable_init(void)
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.samplerate = driver_samplerate;
 		vtable.addcapture = (psy_audiodriver_fp_addcapture)addcaptureport;
 		vtable.removecapture = (psy_audiodriver_fp_removecapture)removecaptureport;
@@ -1455,8 +1458,8 @@ int driver_dispose(psy_AudioDriver* driver)
 	AsioDriver* self = (AsioDriver*)driver;
 	delete self->asioif;
 	self->asioif = 0;
-	psy_property_deallocate(self->driver.properties);
-	self->driver.properties = 0;
+	psy_property_deallocate(self->configuration);
+	self->configuration = NULL;
 	CloseAVRT();
 	return 0;
 }
@@ -1470,42 +1473,42 @@ void init_properties(psy_AudioDriver* driver)
 	psy_Property* indevices;
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);
-	driver->properties = psy_property_settext(
+	self->configuration = psy_property_settext(
 		psy_property_allocinit_key(key), "Asio 2_2");
-	psy_property_sethint(psy_property_append_int(self->driver.properties,
+	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_ASIO_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(
 		psy_property_setreadonly(
-			psy_property_append_string(driver->properties, "name", "Asio 2_2 Driver"),
+			psy_property_append_string(self->configuration, "name", "Asio 2_2 Driver"),
 			TRUE),
 		"Name");
 	psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
+		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "version", "1.0"),
+		psy_property_append_string(self->configuration, "version", "1.0"),
 		TRUE);
-	property = psy_property_append_choice(driver->properties, "device", -1);
-	psy_property_append_int(driver->properties, "bitdepth",
+	property = psy_property_append_choice(self->configuration, "device", -1);
+	psy_property_append_int(self->configuration, "bitdepth",
 		psy_audiodriversettings_bitdepth(&ASIOInterface::settings_), 0, 32);
-	psy_property_append_int(driver->properties, "samplerate",
+	psy_property_append_int(self->configuration, "samplerate",
 		psy_audiodriversettings_samplespersec(&ASIOInterface::settings_), 0, 0);
-	psy_property_append_int(driver->properties, "dither", 0, 0, 1);
+	psy_property_append_int(self->configuration, "dither", 0, 0, 1);
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "numbuf",
+		psy_property_append_int(self->configuration, "numbuf",
 			psy_audiodriversettings_blockcount(&ASIOInterface::settings_), 1, 8),
 		"Buffer Number");
 	psy_property_settext(
-		psy_property_append_int(driver->properties, "numsamples",
+		psy_property_append_int(self->configuration, "numsamples",
 			psy_audiodriversettings_blockframes(&ASIOInterface::settings_),
 			64, 8193),
 		"Buffer Samples");
 	devices = psy_property_settext(
-		psy_property_append_choice(driver->properties, "device", 0),
+		psy_property_append_choice(self->configuration, "device", 0),
 		"Output Device");
 	indevices = psy_property_settext(
-		psy_property_append_choice(driver->properties, "indevice", 0),
+		psy_property_append_choice(self->configuration, "indevice", 0),
 		"Standard Input Device(Select different in Recorder)");
 }
 
@@ -1516,27 +1519,31 @@ void driver_configure(psy_AudioDriver* driver, psy_Property* config)
 
 	self = (AsioDriver*)driver;
 	if (config) {
-		psy_property_sync(self->driver.properties, config);
+		psy_property_sync(self->configuration, config);
 	}
-	property = psy_property_at(self->driver.properties, "bitdepth", PSY_PROPERTY_TYPE_NONE);
-	if (property && property->item.typ == PSY_PROPERTY_TYPE_INTEGER) {
+	property = psy_property_at(self->configuration, "bitdepth",
+		PSY_PROPERTY_TYPE_INTEGER);
+	if (property) {
 		psy_audiodriversettings_setvalidbitdepth(&ASIOInterface::settings_,
-			property->item.value.i);
+			psy_property_item_int(property));
 	}
-	property = psy_property_at(self->driver.properties, "samplerate", PSY_PROPERTY_TYPE_NONE);
-	if (property && property->item.typ == PSY_PROPERTY_TYPE_INTEGER) {
+	property = psy_property_at(self->configuration, "samplerate",
+		PSY_PROPERTY_TYPE_INTEGER);
+	if (property) {
 		psy_audiodriversettings_setsamplespersec(&ASIOInterface::settings_,
-			property->item.value.i);
+			psy_property_item_int(property));
 	}
-	property = psy_property_at(self->driver.properties, "numbuf", PSY_PROPERTY_TYPE_NONE);
-	if (property && property->item.typ == PSY_PROPERTY_TYPE_INTEGER) {
+	property = psy_property_at(self->configuration, "numbuf",
+		PSY_PROPERTY_TYPE_INTEGER);
+	if (property) {
 		psy_audiodriversettings_setblockcount(&ASIOInterface::settings_,
-			property->item.value.i);
+			psy_property_item_int(property));
 	}
-	property = psy_property_at(self->driver.properties, "numsamples", PSY_PROPERTY_TYPE_NONE);
-	if (property && property->item.typ == PSY_PROPERTY_TYPE_INTEGER) {
+	property = psy_property_at(self->configuration, "numsamples",
+		PSY_PROPERTY_TYPE_INTEGER);
+	if (property) {
 		psy_audiodriversettings_setblockframes(&ASIOInterface::settings_,
-			property->item.value.i);
+			psy_property_item_int(property));
 	}	
 }
 
@@ -1622,4 +1629,11 @@ int addcaptureport(AsioDriver* self, int idx)
 const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
 {
 	return GetPsycleDriverInfo();
+}
+
+const psy_Property* driver_configuration(const psy_AudioDriver* driver)
+{
+	AsioDriver* self = (AsioDriver*)driver;
+
+	return self->configuration;
 }

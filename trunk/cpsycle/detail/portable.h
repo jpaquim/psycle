@@ -14,7 +14,9 @@
 #undef max
 #endif
 
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <ctype.h>
@@ -41,6 +43,30 @@
 #ifndef max
 #define max(a, b)  (((a) > (b)) ? (a) : (b)) 
 #endif
+
+INLINE char* psy_strdup(const char* str)
+{
+	return (str)
+		? strdup(str)
+		: NULL;
+}
+
+INLINE intptr_t psy_strlen(const char* str)
+{
+	return (str)
+		? strlen(str)
+		: 0;
+}
+
+INLINE char* psy_strreset(char** dest, const char* text) {
+	assert(dest);
+
+	if (text != *dest) {
+		free(*dest);
+		*dest = psy_strdup(text);
+	}
+	return *dest;
+}
 
 INLINE void psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
 {

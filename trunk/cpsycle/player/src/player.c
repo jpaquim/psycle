@@ -204,9 +204,10 @@ void cmdplayer_init(CmdPlayer* self)
     printf("load driver \n");
 	psy_audio_player_loaddriver(&self->player, cmdplayer_driverpath(self),
 		NULL /*no config*/, TRUE /*open*/);
-	printf("Audio driver %s \n", 
-		psy_property_at_str(self->player.driver->properties, "name",
-		"no description"));
+	if (self->player.driver) {
+		printf("Audio driver %s \n",
+			psy_audiodriver_info(self->player.driver)->Name);
+	}
 }
 
 void cmdplayer_initenv(CmdPlayer* self)
@@ -316,12 +317,12 @@ const char* cmdplayer_driverpath(CmdPlayer* self)
 		int choice;		
 		int count;
 		
-		choice = psy_property_as_int(p);
+		choice = psy_property_item_int(p);
 		p = p->children;
 		count = 0;
 		while (p) {
 			if (count == choice) {
-				rv = psy_property_as_str(p);
+				rv = psy_property_item_str(p);
 				break;
 			}
 			p = psy_property_next(p);

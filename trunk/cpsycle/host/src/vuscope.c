@@ -336,7 +336,7 @@ void vuscope_onsrcmachineworked(VuScope* self, psy_audio_Machine* master, unsign
 
 psy_dsp_amp_t vuscope_wirevolume(VuScope* self)
 {
-	return connections_wirevolume(&self->workspace->song->machines.connections,
+	return psy_audio_connections_wirevolume(&self->workspace->song->machines.connections,
 		self->wire);
 }
 

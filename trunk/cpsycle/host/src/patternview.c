@@ -163,7 +163,7 @@ void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
 		
 		p = psy_property_at(pv, "griddefaults", PSY_PROPERTY_TYPE_NONE);
 		if (p) {			
-			psy_property_set_bool(pv, "griddefaults", !psy_property_as_int(p));
+			psy_property_set_bool(pv, "griddefaults", !psy_property_item_int(p));
 			psy_signal_emit(&self->workspace->signal_configchanged, self->workspace, 1, p);
 		}
 	}

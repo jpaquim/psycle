@@ -340,7 +340,7 @@ void psy_audio_luaplugin_init(psy_audio_LuaPlugin* self, psy_audio_MachineCallba
 
 	self->plugininfo = 0;
 	self->usenoteon = FALSE;
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	psy_audio_luaplugin_base(self)->vtable = &vtable;
 	psy_audio_luapluginmachineparam_init(&self->parameter, self, UINTPTR_MAX);
@@ -383,7 +383,7 @@ void dispose(psy_audio_LuaPlugin* self)
 		self->plugininfo = 0;
 	}	
     psyclescript_dispose(&self->script);
-	custommachine_dispose(&self->custommachine);
+	psy_audio_custommachine_dispose(&self->custommachine);
 	psy_audio_lock_dispose(self->lock);
 	free(self->lock);
 	psy_audio_luapluginmachineparam_dispose(&self->parameter);
@@ -928,7 +928,7 @@ void psy_audio_luamachine_init(psy_audio_LuaMachine* self)
 		
 	custommachine = (psy_audio_CustomMachine*) malloc(sizeof(psy_audio_CustomMachine));
 	if (custommachine) {		
-		custommachine_init(custommachine, NULL);
+		psy_audio_custommachine_init(custommachine, NULL);
 		self->machine = &custommachine->machine;
 	} else {
 		self->machine = 0;

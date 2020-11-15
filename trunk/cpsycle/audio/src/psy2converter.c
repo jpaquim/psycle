@@ -438,7 +438,7 @@ void internalmachineconverter_retweak_song(InternalMachinesConvert* self, psy_au
 			psy_audio_PatternEvent* event;
 
 			entry = (psy_audio_PatternEntry*)psy_list_entry(p);
-			event = patternentry_front(entry);
+			event = psy_audio_patternentry_front(entry);
 
 			if (event->note == psy_audio_NOTECOMMANDS_TWEAKEFFECT)
 			{

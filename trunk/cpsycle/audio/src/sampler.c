@@ -233,7 +233,7 @@ void psy_audio_sampler_init(psy_audio_Sampler* self,
 
 	assert(self);
 	// SetSampleRate(Global::player().SampleRate());
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	sampler_vtable_init(self);
 	psy_audio_sampler_base(self)->vtable = &sampler_vtable;
 	psy_audio_machine_seteditname(psy_audio_sampler_base(self), "Sampler");
@@ -294,7 +294,7 @@ void psy_audio_sampler_dispose(psy_audio_Sampler* self)
 	psy_audio_sampler_clearmulticmdmem(self);
 	psy_audio_sampler_disposeparameters(self);
 	psy_audio_sampler_dispose_voices(self);
-	custommachine_dispose(&self->custommachine);
+	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 void psy_audio_sampler_dispose_voices(psy_audio_Sampler* self)
@@ -834,16 +834,16 @@ psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler* self, psy_List* e
 		psy_audio_PatternEvent* event;
 
 		entry = p->entry;
-		event = patternentry_front(entry);
+		event = psy_audio_patternentry_front(entry);
 		if (event->cmd == PS1_SAMPLER_CMD_EXTENDED) {
 			if ((event->parameter & 0xf0) == PS1_SAMPLER_CMD_EXT_NOTEOFF) {
 				psy_audio_PatternEntry* noteoff;
 
 				// This means there is always 6 ticks per row whatever number of rows.
 				//_triggerNoteOff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
-				noteoff = patternentry_allocinit();
-				patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
-				patternentry_front(noteoff)->mach = patternentry_front(entry)->mach;
+				noteoff = psy_audio_patternentry_allocinit();
+				psy_audio_patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
+				psy_audio_patternentry_front(noteoff)->mach = psy_audio_patternentry_front(entry)->mach;
 				noteoff->delta += /*entry->offset*/ +(event->parameter & 0x0f) / 6.f *
 					psy_audio_machine_currbeatsperline(
 						psy_audio_sampler_base(self));
@@ -854,8 +854,8 @@ psy_List* psy_audio_sampler_sequencerinsert(psy_audio_Sampler* self, psy_List* e
 					psy_audio_PatternEvent* ev;
 					int numticks;
 
-					newentry = patternentry_clone(entry);
-					ev = patternentry_front(newentry);
+					newentry = psy_audio_patternentry_clone(entry);
+					ev = psy_audio_patternentry_front(newentry);
 					numticks = event->parameter & 0x0f;
 					ev->cmd = 0;
 					ev->parameter = 0;

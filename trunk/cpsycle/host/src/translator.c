@@ -55,7 +55,7 @@ bool translator_test(const Translator* self, const char* path, char* id)
 
 		p = psy_property_at(lang, "lang", PSY_PROPERTY_TYPE_NONE);
 		if (p) {
-			psy_snprintf(id, 256, "%s", psy_property_as_str(p));
+			psy_snprintf(id, 256, "%s", psy_property_item_str(p));
 			psy_property_deallocate(lang);
 			return TRUE;
 		}

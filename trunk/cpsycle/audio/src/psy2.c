@@ -938,7 +938,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 									if (psy_audio_machines_valid_connection(
 										&self->songfile->song->machines, newwire)) {
 										psy_audio_machines_connect(&self->songfile->song->machines, newwire);
-										connections_setwirevolume(
+										psy_audio_connections_setwirevolume(
 											&self->songfile->song->machines.connections,
 											newwire,
 											val * wire->_wireMultiplier);										

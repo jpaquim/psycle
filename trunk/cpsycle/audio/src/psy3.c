@@ -511,7 +511,7 @@ void readepat(psy_audio_SongFile* self)
 				uint32_t numevents;
 				uint32_t j;
 
-				entry = patternentry_alloc();
+				entry = psy_audio_patternentry_alloc();
 				entry->events = 0;
 				// read track
 				psyfile_read(self->file, &temp, sizeof(temp));
@@ -539,7 +539,7 @@ void readepat(psy_audio_SongFile* self)
 					ev.cmd = temp;
 					psyfile_read(self->file, &temp, sizeof(temp));
 					ev.parameter = temp;
-					patternentry_addevent(entry, &ev);
+					psy_audio_patternentry_addevent(entry, &ev);
 				}
 				psy_list_append(&pattern->events, entry);
 			}			
@@ -1953,11 +1953,11 @@ int psy3_write_patd(psy_audio_SongFile* self)
 				// uint8_t mach;		2
 				// uint8_t cmd;			3
 				// uint8_t parameter;	4
-				data[0] = patternentry_front(entry)->note;
-				data[1] = (uint8_t)(patternentry_front(entry)->inst & 0xFF);
-				data[2] = patternentry_front(entry)->mach;
-				data[3] = patternentry_front(entry)->cmd;
-				data[4] = patternentry_front(entry)->parameter;
+				data[0] = psy_audio_patternentry_front(entry)->note;
+				data[1] = (uint8_t)(psy_audio_patternentry_front(entry)->inst & 0xFF);
+				data[2] = psy_audio_patternentry_front(entry)->mach;
+				data[3] = psy_audio_patternentry_front(entry)->cmd;
+				data[4] = psy_audio_patternentry_front(entry)->parameter;
 			}			
 			size77 = beerz77comp2(source, 
 				&copy, self->song->patterns.songtracks * patternLines *
@@ -2186,7 +2186,7 @@ int psy3_write_connections(psy_audio_SongFile* self, uintptr_t slot)
 	int c;
 	int status = PSY_OK;
 	
-	sockets = connections_at(&self->song->machines.connections, slot);						
+	sockets = psy_audio_connections_at(&self->song->machines.connections, slot);						
 	if (status = psyfile_write_int32(self->file, sockets && sockets->inputs
 			? psy_list_size(sockets->inputs) : 0)) {
 		return status;

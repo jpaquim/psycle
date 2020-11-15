@@ -89,7 +89,7 @@ static void vtable_init(psy_audio_AudioRecorder* self)
 
 void psy_audio_audiorecorder_init(psy_audio_AudioRecorder* self, psy_audio_MachineCallback* callback)
 {		
-	custommachine_init(&self->custommachine, callback);
+	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;
 	psy_audio_machine_seteditname(psy_audio_audiorecorder_base(self), "Recorder");

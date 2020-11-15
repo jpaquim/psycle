@@ -44,8 +44,6 @@ typedef struct {
 	int my;
 	int cpy;
 	int cpx;
-	int currchoice;
-	int choicecount;
 	int lineheight;
 	int textheight;
 	int centery;

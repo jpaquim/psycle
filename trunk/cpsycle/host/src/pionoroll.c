@@ -350,7 +350,7 @@ void pianogrid_init(Pianogrid* self, psy_ui_Component* parent,
 	for (track = 0; track < 64; ++track) {
 		psy_audio_PatternEntry* channelentry;
 
-		channelentry = patternentry_allocinit();
+		channelentry = psy_audio_patternentry_allocinit();
 		channelentry->offset = -1.0f;
 		channelentry->track = track;
 		psy_table_insert(&self->channel, track, channelentry);
@@ -395,7 +395,7 @@ void pianogrid_setpattern(Pianogrid* self, psy_audio_Pattern* pattern)
 void pianogrid_ondestroy(Pianogrid* self)
 {
 	psy_table_disposeall(&self->channel, (psy_fp_disposefunc)
-		patternentry_dispose);
+		psy_audio_patternentry_dispose);
 }
 
 void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
@@ -535,12 +535,12 @@ void pianogrid_drawentries(Pianogrid* self, psy_ui_Graphics* g)
 					channelentry->delta > 0);
 				channelentry->offset = -1.0f;
 			}
-			if (patternentry_front(entry)->note == 120) {
+			if (psy_audio_patternentry_front(entry)->note == 120) {
 				channelentry->offset = -1.0f;
 			} else {
 				channelentry->offset = entry->offset;
-				*patternentry_front(channelentry)
-					= *patternentry_front(entry);
+				*psy_audio_patternentry_front(channelentry)
+					= *psy_audio_patternentry_front(entry);
 				channelentry->delta = 0;
 				if (self->hover == entry) {
 					channelentry->delta = 1;
@@ -573,7 +573,7 @@ void pianogrid_drawentry(Pianogrid* self, psy_ui_Graphics* g,
 	psy_audio_PatternEditPosition editposition;
 
 	editposition = workspace_patterneditposition(self->workspace);
-	event = patternentry_front(entry);
+	event = psy_audio_patternentry_front(entry);
 	int left = (int)((offset) * self->gridstate->beatwidth);
 	int width = (int)(length * self->gridstate->beatwidth);
 	psy_ui_setrectangle(&r, left,
@@ -668,7 +668,7 @@ void pianogrid_onmousedown(Pianogrid* self, psy_ui_MouseEvent* ev)
 				}
 				psy_audio_pattern_remove(self->pattern, node);
 				if (next) {
-					if (patternentry_front(psy_audio_patternnode_entry(next))->note
+					if (psy_audio_patternentry_front(psy_audio_patternnode_entry(next))->note
 						== psy_audio_NOTECOMMANDS_RELEASE) {
 						if (self->hover == psy_audio_patternnode_entry(next)) {
 							self->hover = 0;

@@ -255,7 +255,7 @@ void oscilloscope_onsrcmachineworked(Oscilloscope* self,
 			self->hold_buffer_numsamples, 1.0f);
 		self->hold_buffer->writepos = memory->writepos;		
 	}
-	self->invol = connections_wirevolume(
+	self->invol = psy_audio_connections_wirevolume(
 		&self->workspace->song->machines.connections, self->wire);
 }
 

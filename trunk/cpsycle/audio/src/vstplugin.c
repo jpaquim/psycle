@@ -231,7 +231,7 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, psy_audio_MachineCallba
 {		
 	PluginEntryProc mainproc;
 	
-	custommachine_init(&self->custommachine, callback);	
+	psy_audio_custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	psy_audio_vstplugin_base(self)->vtable = &vtable;
 	psy_audio_machine_setcallback(psy_audio_vstplugin_base(self), callback);
@@ -303,7 +303,7 @@ void dispose(psy_audio_VstPlugin* self)
 	}
 	psy_table_dispose(&self->tracknote);
 	disposeparameters(self);
-	custommachine_dispose(&self->custommachine);
+	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
 void initparameters(psy_audio_VstPlugin* self)
@@ -379,7 +379,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 		int numworksamples;
 		int midichannel;
 		psy_audio_PatternEntry* entry = psy_audio_patternnode_entry(p);
-		psy_audio_PatternEvent* ev = patternentry_front(entry);
+		psy_audio_PatternEvent* ev = psy_audio_patternentry_front(entry);
 
 		numworksamples = (unsigned int)entry->delta - pos;
 		if (ev->note == psy_audio_NOTECOMMANDS_EMPTY && ev->cmd == psy_audio_PATTERNCMD_EXTENDED) {
@@ -398,34 +398,34 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 					}
 				}
 		} else
-		if (patternentry_front(entry)->inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
+		if (psy_audio_patternentry_front(entry)->inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			midichannel = 0;
 		} else {
-			midichannel = patternentry_front(entry)->inst & 0x0F;
+			midichannel = psy_audio_patternentry_front(entry)->inst & 0x0F;
 		}
-		if (patternentry_front(entry)->cmd == psy_audio_PATTERNCMD_SET_PANNING) {
+		if (psy_audio_patternentry_front(entry)->cmd == psy_audio_PATTERNCMD_SET_PANNING) {
 			// todo split work
 			psy_audio_machine_setpanning(psy_audio_vstplugin_base(self),
-				patternentry_front(entry)->parameter / 255.f);
+				psy_audio_patternentry_front(entry)->parameter / 255.f);
 		} else
-		if (patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_MIDICC) {
-			if (patternentry_front(entry)->inst >= 0x80 &&
-				patternentry_front(entry)->inst < 0xFF) {
+		if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_MIDICC) {
+			if (psy_audio_patternentry_front(entry)->inst >= 0x80 &&
+				psy_audio_patternentry_front(entry)->inst < 0xFF) {
 					self->events->events[count] = (VstEvent*)
 					allocmidientry(self, entry);
 				++count;
 			} else {						
 				// Panning
-				if (patternentry_front(entry)->cmd == 0xC2) {
+				if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {
 					self->events->events[count] = (VstEvent*) allocmidi(self,
 						(unsigned char)(0xB0 | midichannel), 0x0A,
 						(unsigned char)(
-							patternentry_front(entry)->parameter >> 1));
+							psy_audio_patternentry_front(entry)->parameter >> 1));
 					++count;	
 				}
 			}
 		} else
-		if (patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
+		if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_TWEAK) {
 			psy_audio_MachineParam* param;
 						
 			if (numworksamples > 0) {				
@@ -442,18 +442,18 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				psy_audio_buffercontext_setoffset(bc, 0);
 			}
 			param = psy_audio_machine_tweakparameter(psy_audio_vstplugin_base(self),
-				patternentry_front(entry)->inst);			
+				psy_audio_patternentry_front(entry)->inst);			
 			if (param) {
 				uint16_t v;
 
-				v = psy_audio_patternevent_tweakvalue(patternentry_front(entry));
-				if (patternentry_front(entry)->vol > 0) {
+				v = psy_audio_patternevent_tweakvalue(psy_audio_patternentry_front(entry));
+				if (psy_audio_patternentry_front(entry)->vol > 0) {
 					int32_t curr;
 					int32_t step;
 					int32_t nv;
 
 					curr = psy_audio_machine_parameter_patternvalue(psy_audio_vstplugin_base(self), param);
-					step = (v - curr) / patternentry_front(entry)->vol;
+					step = (v - curr) / psy_audio_patternentry_front(entry)->vol;
 					nv = curr + step;
 					psy_audio_machine_parameter_tweak_pattern(psy_audio_vstplugin_base(self), param, nv);
 				} else {
@@ -466,7 +466,7 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 			self->events->numEvents = 0;
 			count = 0;
 		} else 
-		if (patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
+		if (psy_audio_patternentry_front(entry)->note < psy_audio_NOTECOMMANDS_RELEASE) {
 			VstNote* note = 0;
 
 			if (psy_table_exists(&self->tracknote, entry->track)) {
@@ -476,10 +476,10 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				++count;
 			}
 			// Panning
-			if (patternentry_front(entry)->cmd == 0xC2) {
+			if (psy_audio_patternentry_front(entry)->cmd == 0xC2) {
 				self->events->events[count] = (VstEvent*) allocmidi(self,
 					(unsigned char)(0xB0 | midichannel), 0x0A,
-					(unsigned char)(patternentry_front(entry)->parameter >> 1));
+					(unsigned char)(psy_audio_patternentry_front(entry)->parameter >> 1));
 				++count;	
 			}
 			self->events->events[count] = (VstEvent*)
@@ -488,11 +488,11 @@ void processevents(psy_audio_VstPlugin* self, psy_audio_BufferContext* bc)
 				note = malloc(sizeof(VstNote));
 				psy_table_insert(&self->tracknote, entry->track, (void*) note);
 			}
-			note->key = patternentry_front(entry)->note;
+			note->key = psy_audio_patternentry_front(entry)->note;
 			note->midichan = midichannel;
 			++count;			
 		} else
-		if (patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
+		if (psy_audio_patternentry_front(entry)->note == psy_audio_NOTECOMMANDS_RELEASE) {
 			if (psy_table_exists(&self->tracknote, entry->track)) {
 				VstNote* note;
 				
@@ -558,7 +558,7 @@ struct VstMidiEvent* allocnoteon(psy_audio_VstPlugin* self,
 		char note;
 
 		memset(rv, 0, sizeof(struct VstMidiEvent));
-		note = (char) patternentry_front_const(entry)->note;
+		note = (char) psy_audio_patternentry_front_const(entry)->note;
 		rv->type = kVstMidiType;
 		rv->byteSize = sizeof(struct VstMidiEvent);
 		rv->flags = kVstMidiEventIsRealtime;
@@ -596,13 +596,13 @@ struct VstMidiEvent* allocmidientry(psy_audio_VstPlugin* self,
 		char note;
 
 		memset(rv, 0, sizeof(struct VstMidiEvent));
-		note = (char) patternentry_front_const(entry)->note;
+		note = (char) psy_audio_patternentry_front_const(entry)->note;
 		rv->type = kVstMidiType;
 		rv->byteSize = sizeof(struct VstMidiEvent);
 		rv->flags = kVstMidiEventIsRealtime;
-		rv->midiData[0] = (char) patternentry_front_const(entry)->inst;
-		rv->midiData[1] = (char) patternentry_front_const(entry)->cmd;
-		rv->midiData[2] = (char) patternentry_front_const(entry)->parameter;
+		rv->midiData[0] = (char) psy_audio_patternentry_front_const(entry)->inst;
+		rv->midiData[1] = (char) psy_audio_patternentry_front_const(entry)->cmd;
+		rv->midiData[2] = (char) psy_audio_patternentry_front_const(entry)->parameter;
 	}
 	return rv;
 }

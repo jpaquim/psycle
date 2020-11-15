@@ -71,7 +71,7 @@ static void entervaluecolumn(psy_audio_PatternEntry* entry, int column, int valu
 {
 	psy_audio_PatternEvent* ev;
 
-	ev = patternentry_front(entry);
+	ev = psy_audio_patternentry_front(entry);
 	switch (column) {
 		case TRACKER_COLUMN_INST:
 			ev->inst = value;
@@ -753,7 +753,7 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, PatternSelec
 	int lpb;
 	psy_audio_PatternEntry empty;
 
-	patternentry_init(&empty);
+	psy_audio_patternentry_init(&empty);
 	size = psy_ui_component_size(&self->component);
 	halfy = (self->linestate->visilines / 2) * self->linestate->lineheight +
 		psy_ui_component_scrolltop(&self->component);
@@ -824,7 +824,7 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, PatternSelec
 		++line;
 		cpy += self->linestate->lineheight;
 	}
-	patternentry_dispose(&empty);
+	psy_audio_patternentry_dispose(&empty);
 }
 
 void trackergrid_drawresizebar(TrackerGrid* self, psy_ui_Graphics* g, PatternSelection* clip)
@@ -1384,7 +1384,7 @@ void trackergrid_selectmachine(TrackerGrid* self)
 			psy_audio_PatternEvent* ev;
 
 			entry = (psy_audio_PatternEntry*)node->entry;
-			ev = patternentry_front(entry);
+			ev = psy_audio_patternentry_front(entry);
 			psy_audio_machines_changeslot(&self->workspace->song->machines,
 				ev->mach);
 			psy_audio_instruments_select(&self->workspace->song->instruments,
@@ -1453,7 +1453,7 @@ void trackergrid_setdefaultevent(TrackerGrid* self,
 	if (node) {
 		psy_audio_PatternEvent* defaultevent;
 
-		defaultevent = patternentry_front(psy_audio_patternnode_entry(node));
+		defaultevent = psy_audio_patternentry_front(psy_audio_patternnode_entry(node));
 		if (defaultevent->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			ev->inst = defaultevent->inst;
 		}
@@ -1498,7 +1498,7 @@ void trackergrid_rowdelete(TrackerGrid* self)
 				psy_audio_PatternNode* node;
 				psy_audio_PatternNode* prev;
 
-				event = *patternentry_front(entry);
+				event = *psy_audio_patternentry_front(entry);
 				offset = entry->offset;
 				track = entry->track;
 				psy_audio_pattern_remove(self->gridstate->pattern, p);
@@ -1513,7 +1513,7 @@ void trackergrid_rowdelete(TrackerGrid* self)
 					psy_audio_PatternEntry* entry;
 
 					entry = (psy_audio_PatternEntry*)node->entry;
-					*patternentry_front(entry) = event;
+					*psy_audio_patternentry_front(entry) = event;
 				} else {
 					psy_audio_pattern_insert(self->gridstate->pattern, prev, track,
 						(psy_dsp_big_beat_t)offset, &event);
@@ -1602,7 +1602,7 @@ void trackergrid_inputvalue(TrackerGrid* self, int value, int digit)
 
 		trackdef = trackergridstate_trackdef(self->gridstate, self->cursor.track);
 		columndef = trackdef_columndef(trackdef, self->cursor.column);
-		patternentry_init(&newentry);
+		psy_audio_patternentry_init(&newentry);
 		node = psy_audio_pattern_findnode(self->gridstate->pattern,
 			self->cursor.track,
 			(psy_dsp_big_beat_t)self->cursor.offset,
@@ -1626,7 +1626,7 @@ void trackergrid_inputvalue(TrackerGrid* self, int value, int digit)
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&InsertCommandAlloc(self->gridstate->pattern, self->bpl,
 				self->cursor,
-				*patternentry_front(entry),
+				*psy_audio_patternentry_front(entry),
 				self->workspace)->command);
 		if (!digit) {
 			if (columndef->wrapclearcolumn == TRACKER_COLUMN_NONE) {
@@ -1649,7 +1649,7 @@ void trackergrid_inputvalue(TrackerGrid* self, int value, int digit)
 		}
 		trackergrid_invalidatecursor(self);
 		trackergrid_enablesync(self);
-		patternentry_dispose(&newentry);
+		psy_audio_patternentry_dispose(&newentry);
 	}
 }
 
@@ -2668,7 +2668,7 @@ void trackergrid_onblockcopy(TrackerGrid* self)
 					prev = psy_audio_pattern_insert(&self->workspace->patternpaste,
 						prev, entry->track - trackoffset,
 						entry->offset - offset,
-						patternentry_front(entry));
+						psy_audio_patternentry_front(entry));
 				}
 			} else {
 				break;
@@ -2721,13 +2721,13 @@ void trackergrid_onblockpaste(TrackerGrid* self)
 			psy_audio_PatternEntry* entry;
 
 			entry = (psy_audio_PatternEntry*)node->entry;
-			*patternentry_front(entry) = *patternentry_front(pasteentry);
+			*psy_audio_patternentry_front(entry) = *psy_audio_patternentry_front(pasteentry);
 		} else {
 			psy_audio_pattern_insert(self->gridstate->pattern,
 				prev,
 				pasteentry->track + trackoffset,
 				pasteentry->offset + offset,
-				patternentry_front(pasteentry));
+				psy_audio_patternentry_front(pasteentry));
 		}
 		p = p->next;
 	}
@@ -2772,7 +2772,7 @@ void trackergrid_onblockmixpaste(TrackerGrid* self)
 				prev,
 				pasteentry->track + trackoffset,
 				pasteentry->offset + offset,
-				patternentry_front(pasteentry));
+				psy_audio_patternentry_front(pasteentry));
 		}
 		psy_audio_patternnode_next(&p);
 	}
@@ -3029,7 +3029,7 @@ void trackergrid_drawentry(TrackerGrid* self, psy_ui_Graphics* g,
 
 	tm = psy_ui_component_textmetric(&self->component);
 	currcolumnflags = columnflags;
-	event = patternentry_front(entry);
+	event = psy_audio_patternentry_front(entry);
 	trackdef = trackergridstate_trackdef(self->gridstate, entry->track);
 	focus = psy_ui_component_hasfocus(&self->component);
 	currcolumnflags.cursor = self->linestate->drawcursor && focus &&
@@ -3133,23 +3133,23 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 	if (column < TRACKER_COLUMN_CMD) {
 		switch (column) {
 			case TRACKER_COLUMN_NOTE:
-				patternentry_front(entry)->note = value;
+				psy_audio_patternentry_front(entry)->note = value;
 				break;
 			case TRACKER_COLUMN_INST:				
 				if ((self->inst.numchars == 2) && value == 0xFF) {
 					// this also clears the high byte of the 16bit instrument
 					// value, if only two digits are visible
 					// (settings wideinstrumentcolum: off)
-					patternentry_front(entry)->inst = 0xFFFF;
+					psy_audio_patternentry_front(entry)->inst = 0xFFFF;
 				} else {
-					patternentry_front(entry)->inst = value;
+					psy_audio_patternentry_front(entry)->inst = value;
 				}
 				break;
 			case TRACKER_COLUMN_MACH:
-				patternentry_front(entry)->mach = value;
+				psy_audio_patternentry_front(entry)->mach = value;
 				break;
 			case TRACKER_COLUMN_VOL:
-				patternentry_front(entry)->vol = value;
+				psy_audio_patternentry_front(entry)->vol = value;
 				break;
 			default:
 				break;
@@ -3168,7 +3168,7 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 				psy_audio_PatternEvent ev;
 
 				psy_audio_patternevent_clear(&ev);
-				patternentry_addevent(entry, &ev);
+				psy_audio_patternentry_addevent(entry, &ev);
 				p = entry->events->tail;
 			}
 			if (c == num) {
@@ -3199,16 +3199,16 @@ uintptr_t trackdef_value(TrackDef* self, uintptr_t column,
 	if (column < TRACKER_COLUMN_CMD) {
 		switch (column) {
 			case TRACKER_COLUMN_NOTE:
-				rv = patternentry_front_const(entry)->note;
+				rv = psy_audio_patternentry_front_const(entry)->note;
 				break;
 			case TRACKER_COLUMN_INST:
-				rv = patternentry_front_const(entry)->inst;
+				rv = psy_audio_patternentry_front_const(entry)->inst;
 				break;
 			case TRACKER_COLUMN_MACH:
-				rv = patternentry_front_const(entry)->mach;
+				rv = psy_audio_patternentry_front_const(entry)->mach;
 				break;
 			case TRACKER_COLUMN_VOL:
-				rv = patternentry_front_const(entry)->vol;
+				rv = psy_audio_patternentry_front_const(entry)->vol;
 				break;
 			default:
 				rv = 0;
@@ -4071,12 +4071,12 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 	} else if (psy_property_insection(property, workspace->patternviewtheme)) {
 		trackerview_applyproperties(self, workspace->patternviewtheme);
 	} else if (strcmp(psy_property_key(property), "wraparound") == 0) {
-		self->grid.wraparound = psy_property_as_int(property);
+		self->grid.wraparound = psy_property_item_int(property);
 		psy_ui_component_invalidate(&self->component);
 	} else if (strcmp(psy_property_key(property), "beatoffset") == 0) {
 		psy_ui_component_align(&self->component);
 	} else if (strcmp(psy_property_key(property), "griddefaults") == 0) {
-		if (psy_property_as_int(property)) {
+		if (psy_property_item_int(property)) {
 			psy_ui_component_show(&self->griddefaults.component);
 			self->showdefaultline = 1;
 		} else {
@@ -4086,18 +4086,18 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 		psy_ui_component_align(&self->left);
 		psy_ui_component_align(&self->component);
 	} else if (strcmp(psy_property_key(property), "linenumbers") == 0) {
-		trackerview_showlinenumbers(self, psy_property_as_int(property));
+		trackerview_showlinenumbers(self, psy_property_item_int(property));
 	} else if (strcmp(psy_property_key(property), "linenumberscursor") == 0) {
-		trackerview_showlinenumbercursor(self, psy_property_as_int(property));
+		trackerview_showlinenumbercursor(self, psy_property_item_int(property));
 	} else if (strcmp(psy_property_key(property), "linenumbersinhex") == 0) {
-		trackerview_showlinenumbersinhex(self, psy_property_as_int(property));
+		trackerview_showlinenumbersinhex(self, psy_property_item_int(property));
 	} else if (strcmp(psy_property_key(property), "wideinstcolumn") == 0) {
-		trackconfig_initcolumns(&self->trackconfig, psy_property_as_int(property));
+		trackconfig_initcolumns(&self->trackconfig, psy_property_item_int(property));
 		trackerview_computemetrics(self);
 	} else if (strcmp(psy_property_key(property), "drawemptydata") == 0) {
-		trackergrid_showemptydata(&self->grid, psy_property_as_int(property));
+		trackergrid_showemptydata(&self->grid, psy_property_item_int(property));
 	} else if (strcmp(psy_property_key(property), "centercursoronscreen") == 0) {
-		trackergrid_setcentermode(&self->grid, psy_property_as_int(property));
+		trackergrid_setcentermode(&self->grid, psy_property_item_int(property));
 	} else if (strcmp(psy_property_key(property), "notetab") == 0) {
 		self->grid.notestabmode = self->griddefaults.notestabmode =
 			workspace_notetabmode(self->workspace);
@@ -4106,7 +4106,7 @@ void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
 		psy_ui_Font font;
 
 		psy_ui_fontinfo_init_string(&fontinfo,
-			psy_property_as_str(property));
+			psy_property_item_str(property));
 		psy_ui_font_init(&font, &fontinfo);
 		trackerview_setfont(self, &font, TRUE);
 		psy_ui_font_dispose(&font);

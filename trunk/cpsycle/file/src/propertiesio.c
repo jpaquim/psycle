@@ -130,7 +130,7 @@ int propertiesio_load(psy_Property* self, const char* path, int allowappend)
 					default:
 						break;
 					}
-				} else if (allowappend || curr->item.allowappend) {
+				} else if (allowappend) {
 					int intval;
 					char *stopstring;
 
@@ -261,7 +261,7 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
 		if (property->item.typ != PSY_PROPERTY_TYPE_ACTION) {
 			if (strcmp(psy_property_key(property), "favorite") == 0) {
 				property = property;
-				if (psy_property_as_int(property) > 0) {
+				if (psy_property_item_int(property) > 0) {
 					property = property;
 				}
 			}
@@ -270,12 +270,13 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
 			fwrite("=", sizeof(char), 1, fp);
 			switch (property->item.typ) {				
 				case PSY_PROPERTY_TYPE_INTEGER:
-					psy_snprintf(text, 40, "%d", psy_property_as_int(property));
+					psy_snprintf(text, 40, "%d", psy_property_item_int(property));
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);					
 				break;
 				case PSY_PROPERTY_TYPE_BOOL:
-					psy_snprintf(text, 40, "%d", property->item.value.i);
+					psy_snprintf(text, 40, "%d", (int)psy_property_item_bool(
+						property));
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 				break;				
@@ -283,7 +284,8 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
 					choicelevel = level + 1;
 					char_dyn_t* sections;
 
-					psy_snprintf(text, 40, "%d", property->item.value.i);
+					psy_snprintf(text, 40, "%d", psy_property_item_int(
+						property));
 					text[39] = '\0';
 					fwrite(text, sizeof(char), strlen(text), fp);
 
@@ -294,14 +296,15 @@ int OnSaveIniEnum(FILE* fp, psy_Property* property, int level)
 						fwrite(sections, sizeof(char), strlen(sections), fp);
 					}
 					fwrite(".", sizeof(char), 1, fp);
-					fwrite(property->item.key, sizeof(char), strlen(property->item.key), fp);
+					fwrite(property->item.key, sizeof(char),
+						strlen(property->item.key), fp);
 					fwrite("]", sizeof(char), 1, fp);
 					free(sections);
 					break; }
 				case PSY_PROPERTY_TYPE_STRING:
 				case PSY_PROPERTY_TYPE_FONT:
-					fwrite(psy_property_as_str(property), sizeof(char),
-						strlen(psy_property_as_str(property)), fp);					
+					fwrite(psy_property_item_str(property), sizeof(char),
+						strlen(psy_property_item_str(property)), fp);
 				break;						
 				default:
 				break;

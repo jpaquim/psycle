@@ -236,23 +236,23 @@ void stepsequencerbar_setdefaultevent(StepsequencerBar* self,
 		psy_audio_PatternEntry* entry;
 
 		entry = (psy_audio_PatternEntry*) node->entry;
-		if (patternentry_front(entry)->note != psy_audio_NOTECOMMANDS_EMPTY) {
-			event->note = patternentry_front(entry)->note;
+		if (psy_audio_patternentry_front(entry)->note != psy_audio_NOTECOMMANDS_EMPTY) {
+			event->note = psy_audio_patternentry_front(entry)->note;
 		}
-		if (patternentry_front(entry)->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
-			event->inst = patternentry_front(entry)->inst;
+		if (psy_audio_patternentry_front(entry)->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+			event->inst = psy_audio_patternentry_front(entry)->inst;
 		}
-		if (patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_MACH_EMPTY) {
-			event->mach = patternentry_front(entry)->mach;
+		if (psy_audio_patternentry_front(entry)->mach != psy_audio_NOTECOMMANDS_MACH_EMPTY) {
+			event->mach = psy_audio_patternentry_front(entry)->mach;
 		}
-		if (patternentry_front(entry)->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
-			event->vol = patternentry_front(entry)->vol;
+		if (psy_audio_patternentry_front(entry)->vol != psy_audio_NOTECOMMANDS_VOL_EMPTY) {
+			event->vol = psy_audio_patternentry_front(entry)->vol;
 		}
-		if (patternentry_front(entry)->cmd != 0) {
-			event->cmd = patternentry_front(entry)->cmd;
+		if (psy_audio_patternentry_front(entry)->cmd != 0) {
+			event->cmd = psy_audio_patternentry_front(entry)->cmd;
 		}
-		if (patternentry_front(entry)->parameter != 0) {
-			event->parameter = patternentry_front(entry)->parameter;
+		if (psy_audio_patternentry_front(entry)->parameter != 0) {
+			event->parameter = psy_audio_patternentry_front(entry)->parameter;
 		}	
 	}
 }

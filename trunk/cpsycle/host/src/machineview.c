@@ -619,7 +619,7 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 	psy_audio_MachineSockets* sockets;
 	WireSocket* p;
 	
-	sockets	= connections_at(&self->machines->connections, slot);
+	sockets	= psy_audio_connections_at(&self->machines->connections, slot);
 	if (sockets) {
 		for (p = sockets->outputs; p != NULL; p = p->next) {
 			psy_audio_WireSocketEntry* entry =
@@ -1420,7 +1420,7 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 		WireSocket* p;			
 		uintptr_t slot = it.curr->key;
 	
-		sockets	= connections_at(&self->machines->connections, slot);
+		sockets	= psy_audio_connections_at(&self->machines->connections, slot);
 		if (sockets) {
 			p = sockets->outputs;	
 			while (p != NULL) {
@@ -2087,7 +2087,7 @@ psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slo
 		psy_audio_MachineSockets* sockets;
 
 		rv = machineui_position(machineui);
-		sockets = connections_at(&self->machines->connections, slot);
+		sockets = psy_audio_connections_at(&self->machines->connections, slot);
 		if (sockets) {
 			for (p = sockets->outputs; p != NULL; p = p->next) {
 				psy_audio_WireSocketEntry* entry =

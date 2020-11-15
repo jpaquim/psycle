@@ -61,6 +61,7 @@ static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Properties*);
+static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static unsigned int driver_samplerate(psy_AudioDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 
@@ -87,6 +88,7 @@ static void vtable_init(void)
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.samplerate = driver_samplerate;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
@@ -554,4 +556,9 @@ void set_swparams(AlsaDriver* self, snd_pcm_sw_params_t* swparams) {
 const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
 {
 	return GetPsycleDriverInfo();
+}
+
+const psy_Property* driver_configuration(const psy_AudioDriver* self)
+{
+	return self->properties;
 }

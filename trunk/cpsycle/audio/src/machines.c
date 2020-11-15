@@ -57,13 +57,13 @@ InsertMachineCommand* insertmachinecommand_allocinit(psy_audio_Machines* machine
 	rv->machine = machine;
 	rv->slot = slot;
 	rv->restoreconnection = FALSE;
-	connections_init(&rv->connections);
+	psy_audio_connections_init(&rv->connections);
 	return rv;
 }
 
 void insertmachinecommand_dispose(InsertMachineCommand* self)
 {		
-	connections_dispose(&self->connections);
+	psy_audio_connections_dispose(&self->connections);
 }
 
 void insertmachinecommand_execute(InsertMachineCommand* self)
@@ -73,7 +73,7 @@ void insertmachinecommand_execute(InsertMachineCommand* self)
 		self->machine);
 	if (self->restoreconnection) {
 		psy_audio_exclusivelock_enter();
-		connections_copy(&self->machines->connections,
+		psy_audio_connections_copy(&self->machines->connections,
 			&self->connections);
 		psy_audio_machines_updatepath(self->machines);
 		psy_audio_exclusivelock_leave();
@@ -87,9 +87,9 @@ void insertmachinecommand_revert(InsertMachineCommand* self)
 
 	machine = psy_audio_machines_at(self->machines, self->slot);
 	if (machine) {
-		connections_dispose(&self->connections);
-		connections_init(&self->connections);
-		connections_copy(&self->connections, &self->machines->connections);
+		psy_audio_connections_dispose(&self->connections);
+		psy_audio_connections_init(&self->connections);
+		psy_audio_connections_copy(&self->connections, &self->machines->connections);
 		self->restoreconnection = TRUE;
 		self->machine = psy_audio_machine_clone(machine);
 		self->machines->preventundoredo = TRUE;
@@ -137,13 +137,13 @@ DeleteMachineCommand* deletemachinecommand_allocinit(psy_audio_Machines* machine
 	rv->machines = machines;
 	rv->machine = NULL;
 	rv->slot = slot;
-	connections_init(&rv->connections);
+	psy_audio_connections_init(&rv->connections);
 	return rv;
 }
 
 void deletemachinecommand_dispose(DeleteMachineCommand* self)
 {	
-	connections_dispose(&self->connections);
+	psy_audio_connections_dispose(&self->connections);
 }
 
 void deletemachinecommand_execute(DeleteMachineCommand* self)
@@ -152,9 +152,9 @@ void deletemachinecommand_execute(DeleteMachineCommand* self)
 
 	machine = psy_audio_machines_at(self->machines, self->slot);
 	if (machine) {
-		connections_dispose(&self->connections);
-		connections_init(&self->connections);
-		connections_copy(&self->connections, &self->machines->connections);		
+		psy_audio_connections_dispose(&self->connections);
+		psy_audio_connections_init(&self->connections);
+		psy_audio_connections_copy(&self->connections, &self->machines->connections);		
 		self->machine = psy_audio_machine_clone(machine);
 		self->machines->preventundoredo = TRUE;
 		psy_audio_machines_remove(self->machines, self->slot);
@@ -169,7 +169,7 @@ void deletemachinecommand_revert(DeleteMachineCommand* self)
 		psy_audio_machines_insert(self->machines, self->slot,
 			self->machine);
 		psy_audio_exclusivelock_enter();
-		connections_copy(&self->machines->connections,
+		psy_audio_connections_copy(&self->machines->connections,
 			&self->connections);
 		psy_audio_machines_updatepath(self->machines);
 		psy_audio_exclusivelock_leave();
@@ -233,9 +233,9 @@ void connectmachinecommand_execute(ConnectMachineCommand* self)
 	psy_audio_machines_connect(self->machines, self->wire);
 	if (self->restore) {
 		psy_audio_exclusivelock_enter();
-		connections_setpinmapping(&self->machines->connections,
+		psy_audio_connections_setpinmapping(&self->machines->connections,
 			self->wire, &self->pins);
-		connections_setwirevolume(&self->machines->connections,
+		psy_audio_connections_setwirevolume(&self->machines->connections,
 			self->wire, self->volume);
 		psy_audio_exclusivelock_leave();
 	}
@@ -247,9 +247,9 @@ void connectmachinecommand_revert(ConnectMachineCommand* self)
 	psy_audio_WireSocketEntry* socket;
 		
 	self->machines->preventundoredo = TRUE;
-	self->volume = connections_wirevolume(&self->machines->connections,
+	self->volume = psy_audio_connections_wirevolume(&self->machines->connections,
 		self->wire);
-	socket = connection_input(&self->machines->connections, self->wire);
+	socket = psy_audio_connections_input(&self->machines->connections, self->wire);
 	if (socket) {
 		psy_audio_pinmapping_copy(&self->pins, &socket->mapping);
 		self->restore = TRUE;
@@ -313,9 +313,9 @@ void disconnectmachinecommand_execute(DisconnectMachineCommand* self)
 	psy_audio_WireSocketEntry* socket;
 
 	self->machines->preventundoredo = TRUE;
-	self->volume = connections_wirevolume(&self->machines->connections,
+	self->volume = psy_audio_connections_wirevolume(&self->machines->connections,
 		self->wire);
-	socket = connection_input(&self->machines->connections, self->wire);
+	socket = psy_audio_connections_input(&self->machines->connections, self->wire);
 	if (socket) {
 		psy_audio_pinmapping_copy(&self->pins, &socket->mapping);
 	}
@@ -328,9 +328,9 @@ void disconnectmachinecommand_revert(DisconnectMachineCommand* self)
 	self->machines->preventundoredo = TRUE;
 	psy_audio_machines_connect(self->machines, self->wire);
 	psy_audio_exclusivelock_enter();
-	connections_setpinmapping(&self->machines->connections,
+	psy_audio_connections_setpinmapping(&self->machines->connections,
 		self->wire, &self->pins);	
-	connections_setwirevolume(&self->machines->connections, self->wire,
+	psy_audio_connections_setwirevolume(&self->machines->connections, self->wire,
 		self->volume);
 	psy_audio_exclusivelock_leave();
 	self->machines->preventundoredo = FALSE;
@@ -358,7 +358,7 @@ static uintptr_t machines_findmaxindex(psy_audio_Machines*);
 void psy_audio_machines_init(psy_audio_Machines* self)
 {
 	psy_table_init(&self->slots);	
-	connections_init(&self->connections);	
+	psy_audio_connections_init(&self->connections);	
 	psy_table_init(&self->inputbuffers);
 	psy_table_init(&self->outputbuffers);
 	psy_table_init(&self->nopath);
@@ -397,7 +397,7 @@ void psy_audio_machines_dispose(psy_audio_Machines* self)
 	psy_list_free(self->path);
 	self->path = 0;
 	psy_table_dispose(&self->slots);	
-	connections_dispose(&self->connections);
+	psy_audio_connections_dispose(&self->connections);
 	psy_table_dispose(&self->nopath);
 	dsp.memory_dealloc(self->samplebuffers);
 	psy_undoredo_dispose(&self->undoredo);
@@ -589,7 +589,7 @@ void psy_audio_machines_connect(psy_audio_Machines* self, psy_audio_Wire wire)
 		if (!self->filemode) {
 			psy_audio_exclusivelock_enter();
 		}
-		rv = connections_connect(&self->connections, wire);
+		rv = psy_audio_connections_connect(&self->connections, wire);
 		if (!self->filemode) {
 			machines_setpath(self, psy_audio_compute_path(self,
 				psy_audio_MASTER_INDEX, TRUE));
@@ -606,7 +606,7 @@ void psy_audio_machines_disconnect(psy_audio_Machines* self, psy_audio_Wire wire
 {
 	if (self->preventundoredo || self->filemode) {
 		psy_audio_exclusivelock_enter();
-		connections_disconnect(&self->connections, wire);
+		psy_audio_connections_disconnect(&self->connections, wire);
 		machines_setpath(self, psy_audio_compute_path(self, psy_audio_MASTER_INDEX,
 			TRUE));
 		psy_audio_exclusivelock_leave();
@@ -620,13 +620,13 @@ void psy_audio_machines_disconnect(psy_audio_Machines* self, psy_audio_Wire wire
 void psy_audio_machines_disconnectall(psy_audio_Machines* self, uintptr_t slot)
 {
 	psy_audio_exclusivelock_enter();
-	connections_disconnectall(&self->connections, slot);
+	psy_audio_connections_disconnectall(&self->connections, slot);
 	psy_audio_exclusivelock_leave();
 }
 
 int psy_audio_machines_connected(psy_audio_Machines* self, psy_audio_Wire wire)
 {	
-	return connections_connected(&self->connections, wire);
+	return psy_audio_connections_connected(&self->connections, wire);
 }
 
 void psy_audio_machines_updatepath(psy_audio_Machines* self)
@@ -692,7 +692,7 @@ bool isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
 {
 	psy_audio_MachineSockets* sockets;
 
-	sockets = connections_at(&self->connections, slot);
+	sockets = psy_audio_connections_at(&self->connections, slot);
 	if (!sockets || !sockets->inputs) {
 		return TRUE;
 	}
@@ -772,7 +772,7 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 {	
 	psy_audio_MachineSockets* connected_sockets;	
 
-	connected_sockets = connections_at(&self->connections, slot);	
+	connected_sockets = psy_audio_connections_at(&self->connections, slot);	
 	if (connected_sockets) {
 		WireSocket* p;
 

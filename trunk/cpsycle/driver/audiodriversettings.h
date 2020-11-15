@@ -3,6 +3,7 @@
 
 #include "../detail/os.h"
 #include "../detail/psydef.h"
+
 #include <assert.h>
 
 #if !defined(PSY_AUDIODRIVERSETTINGS_H)

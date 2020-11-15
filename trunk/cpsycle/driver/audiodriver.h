@@ -43,6 +43,7 @@ typedef int (*psy_audiodriver_fp_open)(struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_dispose)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_deallocate)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_configure)(struct psy_AudioDriver*, psy_Property*);
+typedef const psy_Property* (*psy_audiodriver_fp_configuration)(const struct psy_AudioDriver*);
 typedef int (*psy_audiodriver_fp_close)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_connect)(struct psy_AudioDriver*, void* context,
 	AUDIODRIVERWORKFN callback,
@@ -62,6 +63,7 @@ typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_dispose dispose;
 	psy_audiodriver_fp_deallocate deallocate;
 	psy_audiodriver_fp_configure configure;
+	psy_audiodriver_fp_configuration configuration;
 	psy_audiodriver_fp_close close;
 	psy_audiodriver_fp_connect connect;
 	psy_audiodriver_fp_samplerate samplerate;
@@ -78,8 +80,7 @@ typedef struct psy_AudioDriverVTable {
 typedef struct psy_AudioDriver {
 	psy_AudioDriverVTable* vtable;
 	AUDIODRIVERWORKFN _pCallback;	
-	void* _callbackContext;
-	psy_Property* properties;	
+	void* _callbackContext;		
 	psy_Signal signal_stop;
 } psy_AudioDriver;
 
@@ -116,6 +117,11 @@ INLINE void psy_audiodriver_deallocate(psy_AudioDriver* self)
 INLINE void psy_audiodriver_configure(psy_AudioDriver* self, psy_Property* properties)
 {
 	self->vtable->configure(self, properties);
+}
+
+INLINE const psy_Property* psy_audiodriver_configuration(const psy_AudioDriver* self)
+{
+	return self->vtable->configuration(self);
 }
 
 INLINE int psy_audiodriver_close(psy_AudioDriver* self)

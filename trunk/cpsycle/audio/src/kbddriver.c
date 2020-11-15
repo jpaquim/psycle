@@ -62,7 +62,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
-		vtable.free = driver_free;
+		vtable.deallocate = driver_free;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -199,7 +199,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		for (p = psy_property_children(section); p != NULL;
 				psy_list_next(&p)) {			
 			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_as_int(property) == input.param1) {
+			if (psy_property_item_int(property) == input.param1) {
 				break;
 			}
 			property = NULL;
@@ -234,7 +234,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		for (p = psy_property_children(section); p != NULL;
 				psy_list_next(&p)) {
 			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_as_int(property) == input.param1) {
+			if (psy_property_item_int(property) == input.param1) {
 				break;
 			}
 			property = NULL;

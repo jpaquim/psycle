@@ -30,45 +30,48 @@ typedef struct {
 	uintptr_t priority;
 } psy_audio_PatternEntry;
 
-void patternentry_init(psy_audio_PatternEntry*);
-void patternentry_init_all(psy_audio_PatternEntry*,
+void psy_audio_patternentry_init(psy_audio_PatternEntry*);
+void psy_audio_patternentry_init_all(psy_audio_PatternEntry*,
 	const psy_audio_PatternEvent* event,
 	psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t delta,
 	psy_dsp_big_beat_t bpm,
 	uintptr_t track);
-void patternentry_dispose(psy_audio_PatternEntry*);
+void psy_audio_patternentry_dispose(psy_audio_PatternEntry*);
 
-psy_audio_PatternEntry* patternentry_alloc(void);
-psy_audio_PatternEntry* patternentry_allocinit(void);
-psy_audio_PatternEntry* patternentry_allocinit_all(
+psy_audio_PatternEntry* psy_audio_patternentry_alloc(void);
+psy_audio_PatternEntry* psy_audio_patternentry_allocinit(void);
+psy_audio_PatternEntry* psy_audio_patternentry_allocinit_all(
 	const psy_audio_PatternEvent* event,
 	psy_dsp_big_beat_t offset,
 	psy_dsp_big_beat_t delta,
 	psy_dsp_big_beat_t bpm,
 	uintptr_t track);
-psy_audio_PatternEntry* patternentry_clone(psy_audio_PatternEntry*);
+psy_audio_PatternEntry* psy_audio_patternentry_clone(psy_audio_PatternEntry*);
 
-INLINE psy_audio_PatternEvent* patternentry_front(psy_audio_PatternEntry* self)
+INLINE psy_audio_PatternEvent* psy_audio_patternentry_front(psy_audio_PatternEntry* self)
 {
 	assert(self);
+
 	return (psy_audio_PatternEvent*)(self->events->entry);
 }
 
-INLINE const psy_audio_PatternEvent* patternentry_front_const(
+INLINE const psy_audio_PatternEvent* psy_audio_patternentry_front_const(
 	const psy_audio_PatternEntry* self)
 {
 	assert(self);
+
 	return (const psy_audio_PatternEvent*)(self->events->entry);
 }
 
-INLINE void patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_big_beat_t bpm)
+INLINE void psy_audio_patternentry_setbpm(psy_audio_PatternEntry* self, psy_dsp_big_beat_t bpm)
 {
 	assert(self);
+
 	self->bpm = bpm;
 }
 
-void patternentry_addevent(psy_audio_PatternEntry*,
+void psy_audio_patternentry_addevent(psy_audio_PatternEntry*,
 	const psy_audio_PatternEvent*);
 
 
@@ -78,12 +81,14 @@ typedef psy_List psy_audio_PatternNode;
 INLINE psy_audio_PatternEntry* psy_audio_patternnode_entry(psy_audio_PatternNode* self)
 {
 	assert(self);
+
 	return (psy_audio_PatternEntry*)self->entry;
 }
 
 INLINE void psy_audio_patternnode_next(psy_audio_PatternNode** self)
 {
 	assert(self);
+
 	psy_list_next(self);
 }
 

@@ -48,6 +48,7 @@ typedef struct {
 typedef struct {
 	psy_AudioDriver driver;
 	psy_AudioDriverSettings settings;
+	psy_Property* configuration;
 	int pollsleep;
 	int stoppolling;
 #if defined(DIVERSALIS__OS__MICROSOFT)	
@@ -63,6 +64,7 @@ static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN ca
 	void* handle);
 static int driver_open(psy_AudioDriver*);
 static void driver_configure(FileOutDriver*, psy_Property*);
+static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
 static unsigned int samplerate(psy_AudioDriver*);
@@ -87,6 +89,7 @@ static void vtable_init(void)
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = (psy_audiodriver_fp_configure)driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.samplerate = (psy_audiodriver_fp_samplerate)samplerate;
 		vtable_initialized = 1;
 	}
@@ -130,8 +133,8 @@ int driver_dispose(psy_AudioDriver* driver)
 	FileOutDriver* self;
 
 	self = (FileOutDriver*) driver;
-	psy_property_deallocate(driver->properties);
-	driver->properties = 0;
+	psy_property_deallocate(self->configuration);
+	self->configuration = NULL;
 	psy_signal_dispose(&driver->signal_stop);
 	free(self->filecontext.path);
 	self->filecontext.path = 0;
@@ -174,18 +177,18 @@ void driver_configure(FileOutDriver* self, psy_Property* config)
 	psy_AudioDriver* driver = &self->driver;
 
 	if (config) {
-		psy_property_sync(driver->properties, config);
+		psy_property_sync(self->configuration, config);
 	}
 	free(self->filecontext.path);
 	self->filecontext.path = strdup(
-		psy_property_at_str(driver->properties,
+		psy_property_at_str(self->configuration,
 			"outputpath", "Untitled.wav"));
 	psy_audiodriversettings_setvalidbitdepth(&self->settings,
-		psy_property_at_int(driver->properties, "bitdepth", 16));
+		psy_property_at_int(self->configuration, "bitdepth", 16));
 	psy_audiodriversettings_setsamplespersec(&self->settings,
-		psy_property_at_int(driver->properties, "samplerate", 44100));
+		psy_property_at_int(self->configuration, "samplerate", 44100));
 	psy_audiodriversettings_setchannelmode(&self->settings,
-		psy_property_at_int(driver->properties, "channels",
+		psy_property_at_int(self->configuration, "channels",
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 }
 
@@ -198,24 +201,24 @@ void init_properties(FileOutDriver* self)
 {
 	psy_AudioDriver* driver = &self->driver;
 
-	driver->properties = psy_property_allocinit_key("FileOut Driver");
+	self->configuration = psy_property_allocinit_key("FileOut Driver");
 	psy_property_settext(
 		psy_property_setreadonly(
-			psy_property_append_string(driver->properties, "name", "FileOut Driver"),
+			psy_property_append_string(self->configuration, "name", "FileOut Driver"),
 			TRUE),
 		"Name");
 	psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "vendor", "Psycledelics"),
+		psy_property_append_string(self->configuration, "vendor", "Psycledelics"),
 		TRUE);
 	psy_property_setreadonly(
-		psy_property_append_string(driver->properties, "version", "1.0"),
+		psy_property_append_string(self->configuration, "version", "1.0"),
 		TRUE);
-	psy_property_append_string(driver->properties, "outputpath", "Untitled.wav");
-	psy_property_append_int(driver->properties, "bitdepth",
+	psy_property_append_string(self->configuration, "outputpath", "Untitled.wav");
+	psy_property_append_int(self->configuration, "bitdepth",
 		psy_audiodriversettings_bitdepth(&self->settings), 0, 32);
-	psy_property_append_int(driver->properties, "samplerate",
+	psy_property_append_int(self->configuration, "samplerate",
 		psy_audiodriversettings_samplespersec(&self->settings), 0, 0);
-	psy_property_append_choice(driver->properties, "channels",
+	psy_property_append_choice(self->configuration, "channels",
 		(int)psy_audiodriversettings_channelmode(&self->settings));
 }
 
@@ -508,4 +511,11 @@ DDCRET WriteStereoSample(psy_audio_WaveFormatChunk* wave_format, float LeftSampl
 		break;
 	}
 	return retcode;
+}
+
+const psy_Property* driver_configuration(const psy_AudioDriver* driver)
+{
+	FileOutDriver* self = (FileOutDriver*)driver;
+
+	return self->configuration;
 }
