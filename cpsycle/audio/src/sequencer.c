@@ -766,7 +766,7 @@ void psy_audio_sequencer_jumptoorder(psy_audio_Sequencer* self,
 void psy_audio_sequencer_breaktoline(psy_audio_Sequencer* self,
 	psy_audio_SequenceTrackIterator* it, const psy_audio_PatternEvent* ev)
 {
-	SequenceTrackNode* next = it->tracknode->next;
+	psy_audio_SequenceEntryNode* next = it->tracknode->next;
 
 	assert(self);
 

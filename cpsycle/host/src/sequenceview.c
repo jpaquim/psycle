@@ -825,8 +825,10 @@ void sequenceview_onnewentry(SequenceView* self)
 {
 	psy_List* tracknode;
 
-	tracknode = psy_audio_sequence_insert(self->sequence, self->selection->editposition,
-		psy_audio_patterns_append(self->patterns, psy_audio_pattern_allocinit()));
+	tracknode = psy_audio_sequence_insert(self->sequence,
+		self->selection->editposition,
+		psy_audio_patterns_append(self->patterns,
+		psy_audio_pattern_allocinit()));
 	psy_audio_sequenceselection_seteditposition(self->selection,
 		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
@@ -891,7 +893,7 @@ void sequenceview_oncloneentry(SequenceView* self)
 void sequenceview_ondelentry(SequenceView* self)
 {
 	psy_audio_SequencePosition editposition;
-	SequenceTrackNode* tracknode;
+	psy_audio_SequenceEntryNode* tracknode;
 
 	editposition = self->workspace->sequenceselection.editposition;
 	tracknode = psy_audio_sequence_remove(self->sequence, editposition);
@@ -1038,7 +1040,7 @@ void sequenceview_onpaste(SequenceView* self)
 	position = self->selection->editposition;
 	for (p = self->workspace->sequencepaste; p != NULL; psy_list_entry(p)) {
 		psy_audio_SequenceEntry* entry;
-		SequenceTrackNode* node;
+		psy_audio_SequenceEntryNode* node;
 
 		entry = (psy_audio_SequenceEntry*)p->entry;
 		node = psy_audio_sequence_insert(self->sequence, position,
