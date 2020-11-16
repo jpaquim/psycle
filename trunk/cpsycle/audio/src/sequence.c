@@ -157,6 +157,7 @@ void psy_audio_sequenceentry_init(psy_audio_SequenceEntry* self, uintptr_t patte
 	self->offset = offset;
 	self->selplay = 0;
 	self->id = sequenceentryid++;
+	self->row = 0;
 }
 
 psy_audio_SequenceEntry* psy_audio_sequenceentry_alloc(void)
@@ -332,17 +333,22 @@ psy_audio_SequenceTrackIterator psy_audio_sequence_last(psy_audio_Sequence* self
 void sequence_reposition(psy_audio_Sequence* self, psy_audio_SequenceTrack* track)
 {
 	psy_dsp_big_beat_t curroffset = 0.0f;	
-	psy_List* p;	
+	psy_List* p;
+	uintptr_t row;
 			
-	for (p = track->entries; p != NULL; psy_list_next(&p)) {
+	for (p = track->entries, row = 0; p != NULL; psy_list_next(&p), ++row) {
 		psy_audio_Pattern* pattern;
-		psy_audio_SequenceEntry* entry = (psy_audio_SequenceEntry*) p->entry;
-		pattern = psy_audio_patterns_at(self->patterns, entry->patternslot);
+		psy_audio_SequenceEntry* sequenceentry;
+		
+		sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+		sequenceentry->row = row;
+		pattern = psy_audio_patterns_at(self->patterns,
+			psy_audio_sequenceentry_patternslot(sequenceentry));
 		if (pattern) {
-			entry->offset = curroffset;
+			sequenceentry->offset = curroffset;
 			curroffset += pattern->length;
 		} else {
-			entry->offset = curroffset;
+			sequenceentry->offset = curroffset;
 		}		
 	}
 }

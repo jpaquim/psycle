@@ -57,6 +57,7 @@ typedef struct {
 	bool playing;
 	psy_dsp_big_beat_t position;
 	psy_dsp_big_beat_t window;
+	uintptr_t currrowposition;
 	psy_List* currtracks;
 	psy_audio_PatternNode* events;
 	psy_audio_PatternNode* globalevents;
@@ -96,6 +97,13 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_position(psy_audio_Sequencer*
 {
 	return self->position;
 }
+
+INLINE uintptr_t psy_audio_sequencer_playlist_position(const psy_audio_Sequencer*
+	self)
+{
+	return self->currrowposition;
+}
+
 void psy_audio_sequencer_start(psy_audio_Sequencer*);
 
 INLINE void psy_audio_sequencer_stop(psy_audio_Sequencer* self)
@@ -219,6 +227,8 @@ INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 {
 	return self->playcounter / (psy_dsp_seconds_t)self->samplerate;
 }
+
+psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(psy_audio_Sequencer* self);
 
 #ifdef __cplusplus
 }

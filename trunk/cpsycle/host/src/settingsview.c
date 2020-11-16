@@ -130,6 +130,11 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_align, self,
 		propertiesrenderer_onalign);
 	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
+	self->valuecolor = psy_ui_color_make(0x00CACACA);
+	self->sectioncolor = psy_ui_color_make(0x00CACACA);
+	self->separatorcolor = psy_ui_color_make(0x00333333);
+	self->valueselcolor = psy_ui_color_make(0x00FFFFFF);
+	self->valueselbackgroundcolor = psy_ui_color_make(0x009B7800);
 }
 
 void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* sender)
@@ -214,13 +219,16 @@ int propertiesrenderer_onpropertiesupdatelinestates(PropertiesRenderer* self,
 {	
 	PropertiesRenderLineState* linestate;
 
-	linestate = (PropertiesRenderLineState*)malloc(sizeof(PropertiesRenderLineState));
+	linestate = (PropertiesRenderLineState*)
+		malloc(sizeof(PropertiesRenderLineState));
+	assert(linestate);
 	propertiesrenderlinestate_init(linestate);
 	linestate->cpy = self->cpy;
 	linestate->cpx = self->cpx;
 	linestate->level = level;
 	linestate->properties = property;
-	psy_table_insert(&self->linestates, self->currlinestatecount, (void*)linestate);
+	psy_table_insert(&self->linestates, self->currlinestatecount,
+		(void*)linestate);
 	++self->currlinestatecount;	
 	propertiesrenderer_addremoveident(self, level);
 	if (self->cpy != 0 && level == 0 && psy_property_type(property) ==
@@ -266,7 +274,7 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 
 		intsize = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
 			&tm);
-		psy_ui_setcolor(self->g, psy_ui_color_make(0x00333333));
+		psy_ui_setcolor(self->g, self->separatorcolor);
 		psy_ui_drawline(self->g, self->cpx, self->cpy, intsize.width, self->cpy);
 	}
 	propertiesrenderer_drawkey(self, property, 0);
@@ -276,7 +284,8 @@ int propertiesrenderer_onpropertiesdrawenum(PropertiesRenderer* self,
 	propertiesrenderer_advanceline(self);
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	return self->cpy - psy_ui_component_scrolltop(&self->component) < psy_ui_value_px(&size.height, &tm);
+	return (self->cpy - psy_ui_component_scrolltop(&self->component))
+		< psy_ui_value_px(&size.height, &tm);
 }
 
 void propertiesrenderer_addremoveident(PropertiesRenderer* self, int level)
@@ -325,6 +334,9 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property
 		count = strlen(psy_property_translation(property));
 		str = psy_property_translation(property);
 		tm = psy_ui_component_textmetric(&self->component);
+
+		psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
+		psy_ui_settextcolor(self->g, psy_ui_component_color(&self->component));
 		
 		numcolumnavgchars = (uintptr_t)(propertiesrenderer_columnwidth(self, column) /
 			(int)(tm.tmAveCharWidth * 1.70));
@@ -376,7 +388,20 @@ char* strrchrpos(char* str, char c, uintptr_t pos)
 
 void propertiesrenderer_drawvalue(PropertiesRenderer* self, psy_Property* property,
 	int column)
-{	
+{
+	if (self->selected == property) {
+		psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
+		psy_ui_setbackgroundcolor(self->g, self->valueselbackgroundcolor);
+		psy_ui_settextcolor(self->g, self->valueselcolor);
+	} else {
+		psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
+		if (psy_property_readonly(property)) {
+			psy_ui_settextcolor(self->g, psy_ui_component_color(
+				&self->component));
+		} else {
+			psy_ui_settextcolor(self->g, self->valuecolor);
+		}
+	}
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_BOOL ||
 			psy_property_ischoiceitem(property)) {
 		propertiesrenderer_drawcheckbox(self, property, column);
@@ -401,11 +426,7 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Property* prope
 	int column)
 {
 	psy_ui_Rectangle r;
-	if (self->selected == property) {					
-		psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
-		psy_ui_setbackgroundcolor(self->g, psy_ui_color_make(0x009B7800));
-		psy_ui_settextcolor(self->g, psy_ui_color_make(0x00FFFFFF));
-	}				
+	
 	psy_ui_setrectangle(&r, propertiesrenderer_columnwidth(self, column) * column,
 		self->cpy + self->centery,
 		propertiesrenderer_columnstart(self, column), self->textheight);
@@ -415,9 +436,7 @@ void propertiesrenderer_drawstring(PropertiesRenderer* self, psy_Property* prope
 		psy_ui_ETO_CLIPPED, r,
 		psy_property_item_str(property),
 		strlen(psy_property_item_str(property)));
-	psy_ui_setbackgroundcolor(self->g, psy_ui_color_make(0x003E3E3E));
-	psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolor(self->g, psy_ui_color_make(0x00CACACA));
+	//psy_ui_setbackgroundcolor(self->g, psy_ui_color_make(0x003E3E3E));		
 }
 
 void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* property,
@@ -552,14 +571,16 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* pro
 			psy_ui_value_px(&knobsize.height, &tm)) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
-		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, psy_ui_color_make(0x00555555));
+		psy_ui_drawsolidroundrectangle(self->g, r, cornersize,
+			psy_ui_color_make(0x00555555));
 	} else {
 		r.left = propertiesrenderer_columnstart(self, column) + tm.tmAveCharWidth * 2;
 		r.top = self->cpy + (self->lineheight -
 			psy_ui_value_px(&knobsize.height, &tm)) / 2;
 		r.right = r.left + (int)(tm.tmAveCharWidth * 2.5);
 		r.bottom = r.top + psy_ui_value_px(&knobsize.height, &tm);
-		psy_ui_drawsolidroundrectangle(self->g, r, cornersize, psy_ui_color_make(0x00CACACA));
+		psy_ui_drawsolidroundrectangle(self->g, r, cornersize,
+			psy_ui_color_make(0x00CACACA));
 	}	
 }
 
@@ -585,12 +606,12 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 		(psy_PropertyCallback)propertiesrenderer_onpropertieshittestenum);
 	if (self->selected) {
 		printf("selected\n");
-		if (self->button &&
-				psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITDIR) {
+		if (self->button && psy_property_hint(self->selected) ==
+				PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;
 						
-			psy_ui_folderdialog_init_all(&dialog, 0,
-				psy_property_translation(self->selected), "");
+			psy_ui_folderdialog_init_all(&dialog, 0, psy_property_translation(
+				self->selected), "");
 			if (psy_ui_folderdialog_execute(&dialog)) {
 				psy_property_set_str(self->selected->parent,
 					self->selected->item.key, psy_ui_folderdialog_path(&dialog));

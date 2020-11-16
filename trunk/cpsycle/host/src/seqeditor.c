@@ -214,8 +214,12 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 			}
 			if (selected) {
 				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00514536));
+				psy_ui_setcolor(g, psy_ui_color_make(0x00555555));
+				psy_ui_drawrectangle(g, r);				
 			} else {
-				psy_ui_drawrectangle(g, r);
+				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00333333));
+				psy_ui_setcolor(g, psy_ui_color_make(0x00444444));
+				psy_ui_drawrectangle(g, r);				
 			}
 			/*if (self->showpatternnames) {
 				psy_audio_Pattern* pattern;

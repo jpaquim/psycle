@@ -55,8 +55,8 @@ typedef struct {
 	bool showpatternnames;
 	psy_dsp_beat_t lastplayposition;
 	psy_audio_Player* player;
-	psy_audio_SequenceEntry* lastentry;
 	int refreshcount;
+	uintptr_t lastplayrow;
 	Workspace* workspace;
 	struct SequenceView* view;
 } SequenceListView;
