@@ -31,12 +31,12 @@ typedef struct {
 	psy_ui_Color row2;
 	psy_ui_Color font;
 	psy_ui_Color font2;
-	psy_ui_Color fontPlay;
-	psy_ui_Color fontPlay2;
-	psy_ui_Color fontCur;
-	psy_ui_Color fontCur2;
-	psy_ui_Color fontSel;
-	psy_ui_Color fontSel2;
+	psy_ui_Color fontplay;
+	psy_ui_Color fontplay2;
+	psy_ui_Color fontcur;
+	psy_ui_Color fontcur2;
+	psy_ui_Color fontsel;
+	psy_ui_Color fontsel2;
 	psy_ui_Color selection;
 	psy_ui_Color selection2;
 	psy_ui_Color playbar;

@@ -89,6 +89,12 @@ INLINE psy_dsp_big_beat_t psy_audio_player_position(psy_audio_Player* self)
 	return psy_audio_sequencer_position(&self->sequencer);
 }
 
+INLINE uintptr_t psy_audio_player_playlist_position(const psy_audio_Player*
+	self)
+{
+	return psy_audio_sequencer_playlist_position(&self->sequencer);
+}
+
 INLINE void psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_big_beat_t bpm)
 {
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
@@ -109,6 +115,11 @@ INLINE uintptr_t psy_audio_player_lpb(psy_audio_Player* self)
 INLINE uintptr_t psy_audio_player_samplerate(psy_audio_Player* self)
 {
 	return psy_audio_sequencer_samplerate(&self->sequencer);
+}
+
+INLINE psy_dsp_percent_t psy_audio_player_playlist_rowprogress(psy_audio_Player* self)
+{
+	return psy_audio_sequencer_playlist_rowprogress(&self->sequencer);
 }
 
 // audio driver

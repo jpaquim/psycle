@@ -111,19 +111,19 @@ psy_ui_Color patternviewskin_fontcolor(PatternViewSkin* self, uintptr_t track, u
 psy_ui_Color patternviewskin_fontplaycolor(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
 	return patternviewskin_color(&self->fontplaycolors, track, numtracks,
-		self->fontPlay, self->fontPlay2);
+		self->fontplay, self->fontplay2);
 }
 
 psy_ui_Color patternviewskin_fontcurcolor(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
 	return patternviewskin_color(&self->fontcurcolors, track, numtracks,
-		self->fontCur, self->fontCur2);
+		self->fontcur, self->fontcur2);
 }
 
 psy_ui_Color patternviewskin_fontselcolor(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
 	return patternviewskin_color(&self->fontselcolors, track, numtracks,
-		self->fontSel, self->fontSel2);
+		self->fontsel, self->fontsel2);
 }
 
 psy_ui_Color patternviewskin_selectioncolor(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
@@ -155,10 +155,11 @@ psy_ui_Color patternviewskin_color(psy_Table* table, uintptr_t track, uintptr_t 
 {
 	psy_ui_Color rv;
 
-	rv = psy_ui_color_make((uintptr_t)psy_table_at(table, track));
-	if (rv.value == 0 && !psy_table_exists(table, track)) {
+	if (!psy_table_exists(table, track)) {	
 		rv = patternviewskin_calculatetrackcolor(track, numtracks, source1, source2);
 		psy_table_insert(table, track, (void*)(uintptr_t)rv.value);
+	} else {
+		rv = psy_ui_color_make((uintptr_t)psy_table_at(table, track));
 	}
 	return rv;
 }
@@ -231,10 +232,11 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	self->row2 = psy_ui_color_make(psy_property_at_int(p, "pvc_row2", 0x003E3E3E));
 	self->font = psy_ui_color_make(psy_property_at_int(p, "pvc_font", 0x00CACACA));
 	self->font2 = psy_ui_color_make(psy_property_at_int(p, "pvc_font2", 0x00CACACA));
-	self->fontPlay = psy_ui_color_make(psy_property_at_int(p, "pvc_fontplay", 0x00FFFFFF));
-	self->fontCur2 = psy_ui_color_make(psy_property_at_int(p, "pvc_fontcur2", 0x00FFFFFF));
-	self->fontSel = psy_ui_color_make(psy_property_at_int(p, "pvc_fontsel", 0x00FFFFFF));
-	self->fontSel2 = psy_ui_color_make(psy_property_at_int(p, "pvc_fontsel2", 0x00FFFFFF));
+	self->fontplay = psy_ui_color_make(psy_property_at_int(p, "pvc_fontplay", 0x00ffffff));
+	self->fontcur = psy_ui_color_make(psy_property_at_int(p, "pvc_fontcur", 0x00ffffff));
+	self->fontcur2 = psy_ui_color_make(psy_property_at_int(p, "pvc_fontcur2", 0x00ffffff));
+	self->fontsel = psy_ui_color_make(psy_property_at_int(p, "pvc_fontsel", 0x00ffffff));
+	self->fontsel2 = psy_ui_color_make(psy_property_at_int(p, "pvc_fontsel2", 0x00ffffff));
 	self->selection = psy_ui_color_make(psy_property_at_int(p, "pvc_selection", 0x009B7800));
 	self->selection2 = psy_ui_color_make(psy_property_at_int(p, "pvc_selection2", 0x009B7800));
 	self->playbar = psy_ui_color_make(psy_property_at_int(p, "pvc_playbar", 0x009F7B00));

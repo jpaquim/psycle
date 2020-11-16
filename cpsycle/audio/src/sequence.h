@@ -18,6 +18,7 @@ extern "C" {
 
 typedef struct {
 	uintptr_t id;
+	uintptr_t row;
 	uintptr_t patternslot;
 	psy_dsp_big_beat_t offset;
 	int selplay;
@@ -44,6 +45,18 @@ INLINE uintptr_t psy_audio_sequenceentry_patternslot(const
 	assert(self);
 
 	return self->patternslot;
+}
+
+INLINE psy_audio_Pattern* psy_audio_sequenceentry_pattern(const
+	psy_audio_SequenceEntry* self, psy_audio_Patterns* patterns)
+{
+	assert(self);
+
+	if (patterns) {
+		return (psy_audio_Pattern*)psy_audio_patterns_at(patterns,
+			self->patternslot);		
+	}
+	return NULL;
 }
 
 typedef psy_List SequenceTrackNode;

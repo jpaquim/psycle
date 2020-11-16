@@ -33,12 +33,13 @@ void propertiesrenderlinestate_dispose(PropertiesRenderLineState*);
 typedef struct {
 	psy_ui_Component component;
 	psy_Property* properties;
-	psy_ui_Graphics* g;
-	int lastlevel;
 	psy_Property* selected;
-	int keyselected;
 	psy_Property* search;
+	psy_Property* choiceproperty;
+	psy_ui_Graphics* g;
 	psy_ui_Rectangle selrect;
+	int lastlevel;	
+	int keyselected;
 	int button;	
 	int mx;
 	int my;
@@ -51,8 +52,7 @@ typedef struct {
 	int identwidth;
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
 	int col_width[PROPERTIESRENDERER_NUMCOLS];	
-	int col_start[PROPERTIESRENDERER_NUMCOLS];
-	psy_Property* choiceproperty;
+	int col_start[PROPERTIESRENDERER_NUMCOLS];	
 	psy_ui_Edit edit;
 	InputDefiner inputdefiner;
 	psy_Signal signal_changed;
@@ -61,7 +61,12 @@ typedef struct {
 	bool usefixedwidth;
 	PropertiesRenderLineState* linestate_clipstart;
 	uintptr_t currlinestatecount;
-	psy_Table linestates;
+	psy_Table linestates;	
+	psy_ui_Color valuecolor;
+	psy_ui_Color sectioncolor;
+	psy_ui_Color separatorcolor;
+	psy_ui_Color valueselcolor;
+	psy_ui_Color valueselbackgroundcolor;
 	Workspace* workspace;
 } PropertiesRenderer;
 

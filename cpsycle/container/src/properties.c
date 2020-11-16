@@ -89,7 +89,8 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 	self->hint = source->hint;
 	self->disposechildren = source->disposechildren;
 	self->save = source->save;
-	self->id = source->id;	
+	self->id = source->id;
+	self->readonly = source->readonly;
 }
 
 // psy_Property
@@ -209,7 +210,7 @@ psy_Property* psy_property_sync(psy_Property* self, const psy_Property* source)
 		for (i = psy_property_children((psy_Property*)source); i != NULL;
 			psy_list_next(&i)) {
 			psy_Property* q;
-			psy_Property* p;
+			const psy_Property* p;
 
 			p = (const psy_Property*)psy_list_entry(i);
 			q = psy_property_at(self, psy_property_key(p),
@@ -309,8 +310,7 @@ bool psy_property_insection(const psy_Property* self, psy_Property* section)
 
 	if (section) {
 		keyfound = 0;
-		searchproperty = self;
-
+		searchproperty = (psy_Property*)self;
 		psy_property_enumerate(section, section,
 			(psy_PropertyCallback)psy_property_onsearchpropertyenum);
 		return keyfound != FALSE;
@@ -435,7 +435,7 @@ psy_Property* psy_property_findsectionex(psy_Property* self, const char* key,
 char_dyn_t* psy_property_sections(const psy_Property* self)
 {
 	char_dyn_t* rv;
-	psy_Property* p;
+	const psy_Property* p;
 	psy_List* tokens;
 	psy_List* q;
 	uintptr_t size;
@@ -446,14 +446,14 @@ char_dyn_t* psy_property_sections(const psy_Property* self)
 	tokens = NULL;
 	size = 1;
 	while (p != NULL) {
-		if (p->item.typ == PSY_PROPERTY_TYPE_SECTION) {
+		if (psy_property_type(p) == PSY_PROPERTY_TYPE_SECTION) {
 			psy_list_insert(&tokens, NULL, (void*)psy_property_key(p));
 			size += strlen(psy_property_key(p));
 			if (p->parent) {
 				++size;
 			}
 		}
-		p = p->parent;
+		p = psy_property_parent(p);
 	}
 	rv = (char_dyn_t*)malloc(size);
 	*rv = '\0';
