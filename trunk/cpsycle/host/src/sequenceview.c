@@ -211,6 +211,7 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(1)));
+	psy_ui_component_preventalign(&self->component);
 }
 
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
@@ -1038,16 +1039,14 @@ void sequenceview_onpaste(SequenceView* self)
 	psy_List* p;
 
 	position = self->selection->editposition;
-	for (p = self->workspace->sequencepaste; p != NULL; psy_list_entry(p)) {
-		psy_audio_SequenceEntry* entry;
-		psy_audio_SequenceEntryNode* node;
+	for (p = self->workspace->sequencepaste; p != NULL; psy_list_next(&p)) {
+		psy_audio_SequenceEntry* sequenceentry;
 
-		entry = (psy_audio_SequenceEntry*)p->entry;
-		node = psy_audio_sequence_insert(self->sequence, position,
-			entry->patternslot);
+		sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);		
 		position = psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.track,
-			node);
+			psy_audio_sequence_insert(self->sequence, position,
+				psy_audio_sequenceentry_patternslot(sequenceentry)));
 	}
 	psy_ui_component_invalidate(&self->component);
 }

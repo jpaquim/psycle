@@ -506,12 +506,15 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 {
 	psy_ui_Margin margin;
 
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(2.0));
+	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makeew(2.0));
 	self->workspace = workspace;	
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerview_vtable_init(self);
+	self->component.debugflag = 1000;
 	self->component.vtable = &stepsequencerview_vtable;
+	psy_ui_component_setbackgroundcolor(&self->component, psy_ui_color_make(0x00CACACA));
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
 	psy_ui_component_setalign(&self->stepsequencerbarselect.component,

@@ -36,7 +36,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			p = p->next) {
 		psy_ui_Component* component;
 			
-		component = (psy_ui_Component*)p->entry;		
+		component = (psy_ui_Component*)psy_list_entry(p);		
 		if (component->visible) {
 			psy_ui_Size componentsize;
 			psy_ui_Size limit;
@@ -289,6 +289,11 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 
 		size = *rv;
 		tm = psy_ui_component_textmetric(self->component);
+
+		if (self->component->debugflag == 1000) {
+			self = self;
+		}
+
 		if (self->component->alignchildren &&
 				!self->component->preventpreferredsize) {
 			psy_List* p;
@@ -410,12 +415,12 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 					}				
 				}
 			}
-			psy_list_free(q);
-			*rv = maxsize;
+			*rv = maxsize;			
 			rv->width = psy_ui_value_makepx(psy_ui_value_px(&rv->width, &tm) +
 				psy_ui_margin_width_px(&self->component->spacing, &tm));
 			rv->height = psy_ui_value_makepx(psy_ui_value_px(&rv->height, &tm) +
 				psy_ui_margin_height_px(&self->component->spacing, &tm));
+			psy_list_free(q);				
 		} else {
 			*rv = size;
 			rv->width = psy_ui_value_makepx(psy_ui_value_px(&rv->width, &tm) +
