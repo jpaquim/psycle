@@ -307,7 +307,7 @@ void psy_audio_sequencer_clearcurrtracks(psy_audio_Sequencer* self)
 void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t offset)
 {
-	psy_audio_SequenceTracks* p;
+	psy_audio_SequenceTrackNode* p;
 
 	assert(self);
 

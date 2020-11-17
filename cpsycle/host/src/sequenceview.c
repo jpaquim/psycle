@@ -216,7 +216,7 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 	psy_ui_Component* sender, psy_ui_Graphics* g)
 {
-	psy_audio_SequenceTracks* p;	
+	psy_audio_SequenceTrackNode* p;	
 	int cpx = 0;
 	int centery;
 	int lineheight = 1;
@@ -320,7 +320,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 {
-	psy_audio_SequenceTracks* p;	
+	psy_audio_SequenceTrackNode* p;	
 	int cpx = 0;
 	int c = 0;		
 	self->foundselected = 0;
@@ -1153,7 +1153,7 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* sender)
 {
 	psy_audio_SequencePosition position;
-	psy_audio_SequenceTracks* p;
+	psy_audio_SequenceTrackNode* p;
 	psy_List* q;
 	int c = 0;
 	int visilines;
