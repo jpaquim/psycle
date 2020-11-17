@@ -367,7 +367,7 @@ void seqeditortrack_onmouseup_virtual(SeqEditorTrack* self,
 		sequenceentry->repositionoffset = self->itemdragposition - (sequenceentry->offset - sequenceentry->repositionoffset);
 		sequenceentry->offset = self->itemdragposition;
 		self->drag_sequenceitem_node = NULL;
-		sequence_reposition(&self->workspace->song->sequence, self->currtrack);
+		sequence_reposition_track(&self->workspace->song->sequence, self->currtrack);
 		psy_signal_emit(&self->workspace->song->sequence.sequencechanged, self, 0);
 	}
 	self->drag_sequenceitem_node = NULL;
@@ -452,7 +452,7 @@ void seqeditortracks_build(SeqEditorTracks* self)
 		seqeditortrack_dispose);
 	sequence = seqeditortracks_sequence(self);
 	if (sequence) {
-		psy_audio_SequenceTracks* t;
+		psy_audio_SequenceTrackNode* t;
 		uintptr_t c;
 		
 		for (t = sequence->tracks, c = 0; t != NULL;
@@ -475,7 +475,7 @@ void seqeditortracks_ondraw(SeqEditorTracks* self, psy_ui_Graphics* g)
 {
 	psy_audio_Sequence* sequence = seqeditortracks_sequence(self);	
 	if (sequence) {
-		psy_audio_SequenceTracks* seqnode;
+		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;
 		int cpx, cpy;
 		uintptr_t c;
@@ -544,7 +544,7 @@ void seqeditortracks_onpreferredsize(SeqEditorTracks* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	if (self->workspace->song) {
-		psy_audio_SequenceTracks* seqnode;
+		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;
 		int cpxmax, cpymax;
 		psy_ui_TextMetric tm;
@@ -602,7 +602,7 @@ void seqeditortracks_notifymouse(SeqEditorTracks* self, psy_ui_MouseEvent* ev,
 {
 	psy_audio_Sequence* sequence = seqeditortracks_sequence(self);
 	if (sequence) {
-		psy_audio_SequenceTracks* seqnode;
+		psy_audio_SequenceTrackNode* seqnode;
 		psy_List* seqeditnode;
 		int cpy;
 		int c;

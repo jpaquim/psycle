@@ -2,24 +2,28 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/os.h"
 
 #include "psy2.h"
+// local
+#include "constants.h"
+#include "machinefactory.h"
+#include "pattern.h"
+#include "plugin.h"
+#include "plugin_interface.h"
 #include "psy2converter.h"
 #include "song.h"
 #include "songio.h"
-#include "plugin.h"
 #include "vstplugin.h"
-#include "plugin_interface.h"
-#include "pattern.h"
-#include "constants.h"
 #include "wire.h"
+// dsp
 #include <datacompression.h>
 #include <operations.h>
-#include "machinefactory.h"
+// std
 #include <stdlib.h>
 #include <string.h>
+// platform
 #include "../../detail/portable.h"
+#include "../../detail/os.h"
 
 #define PSY2_EVENT_SIZE 5
 
@@ -42,7 +46,8 @@ typedef struct VstPreload {
 } VstPreload;
 
 static void vstpreload_init(VstPreload*, psy_audio_SongFile*);
-static bool vstpreload_load(VstPreload*, uintptr_t slot, unsigned char* _program, int32_t* _instance);
+static bool vstpreload_load(VstPreload*, uintptr_t slot,
+	unsigned char* program, int32_t* instance);
 
 static void machine_load(psy_audio_SongFile*, uintptr_t slot);
 static void master_load(psy_audio_SongFile*, uintptr_t slot);

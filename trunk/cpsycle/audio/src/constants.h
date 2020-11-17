@@ -58,7 +58,7 @@
 //Version for the song data information (BPM, number of tracks..)
 #define CURRENT_FILE_VERSION_SNGI	0x00000002
 //Version for the sequence data (playback order)
-#define CURRENT_FILE_VERSION_SEQD	0x00000000
+#define CURRENT_FILE_VERSION_SEQD	0x00000001
 //Version for the pattern data
 #define CURRENT_FILE_VERSION_PATD	0x00000002
 //Version for the machine data

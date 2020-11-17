@@ -4,21 +4,23 @@
 #include "../../detail/prefix.h"
 
 #include "psy3.h"
+// local
+#include "constants.h"
+#include "plugin_interface.h"
 #include "song.h"
 #include "songio.h"
-#include "constants.h"
-#include <datacompression.h>
-#include <operations.h>
-#include <dir.h>
 #include "machinefactory.h"
 #include "wire.h"
-
+// dsp
+#include <datacompression.h>
+#include <operations.h>
+// file
+#include <dir.h>
+// std
 #include <stdlib.h>
 #include <string.h>
-
+// platform
 #include "../../detail/portable.h"
-#include "../../detail/psydef.h"
-#include "plugin_interface.h"
 
 #if !defined DIVERSALIS__OS__MICROSOFT
 #define _MAX_PATH 4096
@@ -26,8 +28,7 @@
 
 static void readinfo(psy_audio_SongFile*);
 static void readsngi(psy_audio_SongFile*);
-static void readseqd(psy_audio_SongFile*, unsigned char* playorder,
-	int32_t* playlength);
+static void readseqd(psy_audio_SongFile*);
 static void readpatd(psy_audio_SongFile*);
 static void readepat(psy_audio_SongFile*);
 static void readinsd(psy_audio_SongFile*);
@@ -45,8 +46,6 @@ static psy_audio_Machine* machineloadchunk(psy_audio_SongFile*,
 	int32_t index);
 static psy_audio_Machine* machineloadchunk_createmachine(psy_audio_SongFile*,
 	int32_t index, char* modulename, char* catchername, bool* replaced);
-static void buildsequence(psy_audio_SongFile*, unsigned char* playorder,
-	int playlength);
 static void psy3_setinstrumentnames(psy_audio_SongFile*);
 
 static uint32_t psy3_chunkcount(psy_audio_Song*);
@@ -77,11 +76,9 @@ int psy_audio_psy3_load(psy_audio_SongFile* self)
 	uint32_t temp32;
 	uint32_t index = 0;
 	int32_t solo = 0;
-	int32_t playlength;
 	int32_t chunkcount = 0;		
 	int32_t progress = 0;
 	uint32_t filesize = psyfile_filesize(self->file);
-	unsigned char playorder[MAX_SONG_POSITIONS];	
 	
 	psyfile_read(self->file, &temp32, sizeof(temp32));
 	self->file->fileversion = temp32;
@@ -122,7 +119,7 @@ int psy_audio_psy3_load(psy_audio_SongFile* self)
 		} else 
 		if (strcmp(header,"SEQD")==0) {
 			psyfile_readchunkbegin(self->file);
-			readseqd(self, playorder, &playlength);			
+			readseqd(self);
 			psyfile_seekchunkend(self->file);
 			progress += 1;
 		} else 
@@ -175,7 +172,7 @@ int psy_audio_psy3_load(psy_audio_SongFile* self)
 		psy_signal_emit(&self->song->signal_loadprogress, self, 1,
 			progress);
 	}	
-	buildsequence(self, playorder, playlength);	
+	sequence_reposition(&self->song->sequence);
 	psy3_setinstrumentnames(self);
 	return self->err;
 }
@@ -195,20 +192,6 @@ void psy3_setinstrumentnames(psy_audio_SongFile* self)
 		if (sample) {
 			psy_audio_instrument_setname(instrument, psy_audio_sample_name(sample));
 		}
-	}
-}
-
-void buildsequence(psy_audio_SongFile* self, unsigned char* playorder, int playlength)
-{
-	psy_audio_SequencePosition sequenceposition;
-	int32_t i;
-		
-	sequenceposition.track =
-		psy_audio_sequence_appendtrack(&self->song->sequence, psy_audio_sequencetrack_allocinit());
-	for (i = 0; i < playlength; ++i) {			
-		sequenceposition.trackposition =
-			psy_audio_sequence_last(&self->song->sequence, sequenceposition.track);
-		psy_audio_sequence_insert(&self->song->sequence, sequenceposition, playorder[i]);
 	}
 }
 
@@ -340,26 +323,63 @@ void readsngi(psy_audio_SongFile* self)
 	}	
 }
 
-void readseqd(psy_audio_SongFile* self, unsigned char* playorder, int32_t* playlength)
-{		
-	int32_t index;	
-		
-	if((self->file->currchunk.version&0xffff0000) == VERSION_MAJOR_ZERO)
+void readseqd(psy_audio_SongFile* self) //, unsigned char* playorder, int32_t* playlength)
+{					
+	if ((self->file->currchunk.version & 0xffff0000) == VERSION_MAJOR_ZERO)
 	{
+		psy_audio_SequenceTrackNode* t;		
+		int32_t index;
+		uint32_t i;
+		char ptemp[256];
+		int32_t playlength;
+		psy_audio_SequencePosition sequenceposition;
+
 		// index, for multipattern - for now always 0
-		psyfile_read(self->file, &index, sizeof index);
-		if (index < MAX_SEQUENCES)
-		{
-			char ptemp[256];
-			int32_t i;
-			// play length for this sequence
-			*playlength = psyfile_read_int32(self->file);			
-			// name, for multipattern, for now unused
-			psyfile_readstring(self->file, ptemp, sizeof ptemp);
-			for (i = 0; i < *playlength; ++i)
-			{
-				playorder[i] = (uint8_t) psyfile_read_uint32(self->file);
+		psyfile_read(self->file, &index, sizeof(index));
+		if (index < 0) {
+			return; // skip
+		}
+		// create new tracks (0..index), if not already existing
+		for (i = 0, t = self->song->sequence.tracks; i <= index; ++i) {
+			if (!t) {
+				t = psy_audio_sequence_appendtrack(&self->song->sequence,
+					psy_audio_sequencetrack_allocinit());
+			} else if (i < index) {
+				psy_list_next(&t);
 			}
+		}
+		assert(t);
+		// play length for this sequence
+		playlength = psyfile_read_int32(self->file);
+		// name, for multipattern, for now unused
+		psyfile_readstring(self->file, ptemp, sizeof ptemp);
+		for (i = 0; i < playlength; ++i) {
+			uint8_t patternslot;
+			psy_audio_SequencePosition sequenceposition;
+
+			sequenceposition.track = t;
+			sequenceposition.trackposition =
+				psy_audio_sequence_last(&self->song->sequence, t);
+			patternslot = (uint8_t)psyfile_read_uint32(self->file);
+			psy_audio_sequence_insert(&self->song->sequence, sequenceposition,
+				patternslot);
+		}
+		if (self->file->currchunk.version > 0) {
+			// this extends the seqd chunk file format to handle 
+			// beat positions
+			psy_audio_SequenceEntryNode* p;
+			psy_audio_SequenceTrack* track;
+
+			track = (psy_audio_SequenceTrack*)psy_list_entry(t);
+			for (p = track->entries, i = 0; i < playlength && p != NULL;
+					++i, psy_list_next(&p)) {
+				float repositionoffset;
+				psy_audio_SequenceEntry* sequenceentry;
+				
+				sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+				repositionoffset = (float)psyfile_read_float(self->file);
+				sequenceentry->repositionoffset = repositionoffset;
+			}			
 		}
 	}	
 }
@@ -1702,8 +1722,8 @@ int psy3_write_header(psy_audio_SongFile* self)
 
 int psy3_write_songinfo(psy_audio_SongFile* self)
 {		
-	uint32_t sizepos;
-	int status = PSY_OK;
+	int status;
+	uint32_t sizepos;	
 	
 	if (status = psyfile_writeheader(self->file, "INFO",
 			CURRENT_FILE_VERSION_INFO, 0, &sizepos)) {
@@ -1731,9 +1751,11 @@ int psy3_write_songinfo(psy_audio_SongFile* self)
 //	id = "SNGI";
 int psy3_write_sngi(psy_audio_SongFile* self)
 {
+	int status;
 	uint32_t sizepos;	
 	uint32_t i;
-	int status = PSY_OK;
+	
+	assert(self && self->song);
 
 	if (status = psyfile_writeheader(self->file, "SNGI",
 		CURRENT_FILE_VERSION_SNGI, 0, &sizepos)) {
@@ -1830,43 +1852,56 @@ int psy3_write_sngi(psy_audio_SongFile* self)
 //	id = "SEQD"; 
 int psy3_write_seqd(psy_audio_SongFile* self)
 {		
+	int status;
 	int32_t index;
-	int status = PSY_OK;
+	psy_audio_SequenceTrackNode* t;
 
-	for (index = 0; index < MAX_SEQUENCES; ++index)
-	{
+	assert(self && self->song);
+
+	status = PSY_OK;
+	for (t = self->song->sequence.tracks, index = 0; t != NULL;
+			psy_list_next(&t), ++index) {
 		uint32_t sizepos;
+		psy_audio_SequenceTrack* track;
 		// This needs to be replaced to store the Multisequence.
 		static char* sequencename = "seq0";
-		psy_List* t;
-		psy_audio_SequenceTrack* track;
-
+		psy_List* s;
+		
 		if (status = psyfile_writeheader(self->file, "SEQD",
 				CURRENT_FILE_VERSION_SEQD, 0, &sizepos)) {
 			return status;
 		}
+		track = (psy_audio_SequenceTrack*)psy_list_entry(t);
 		// sequence track number
-		if (status = psyfile_write_int32(self->file, (int32_t) index)) {
+		if (status = psyfile_write_int32(self->file, (int32_t)index)) {
 			return status;
 		}
 		// sequence length
 		if (status = psyfile_write_int32(self->file, (int32_t)
-				psy_audio_sequence_size(&self->song->sequence,
-				self->song->sequence.tracks))) {
+				psy_audio_sequence_size(&self->song->sequence, t))) {
 			return status;
 		}
 		// sequence name
 		if (status = psyfile_writestring(self->file, sequencename)) {
 			return status;
-		}
-		track = (psy_audio_SequenceTrack*) self->song->sequence.tracks->entry;
-		for (t = track->entries ; t != 0; t = t->next) {
-			psy_audio_SequenceEntry* entry;
+		}		
+		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+			psy_audio_SequenceEntry* sequenceentry;
 
-			entry = (psy_audio_SequenceEntry*) t->entry;
+			sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
 			// sequence data
 			if (status = psyfile_write_int32(self->file, (int32_t)
-					entry->patternslot)) {
+					psy_audio_sequenceentry_patternslot(sequenceentry))) {
+				return status;
+			}
+		}
+		for (s = track->entries; s != NULL; psy_list_next(&s)) {
+			psy_audio_SequenceEntry* sequenceentry;
+
+			sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(s);
+			// sequence data
+			if (status = psyfile_write_float(self->file, (float)
+					sequenceentry->repositionoffset)) {
 				return status;
 			}
 		}
