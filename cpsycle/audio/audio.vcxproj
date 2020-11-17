@@ -208,7 +208,8 @@
     <ClCompile Include="src\presets.c" />
     <ClCompile Include="src\psy2.c" />
     <ClCompile Include="src\psy2converter.c" />
-    <ClCompile Include="src\psy3.c" />
+    <ClCompile Include="src\psy3loader.c" />
+    <ClCompile Include="src\psy3saver.c" />
     <ClCompile Include="src\psyclescript.c" />
     <ClCompile Include="src\sample.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
@@ -306,7 +307,8 @@
     <ClInclude Include="src\presets.h" />
     <ClInclude Include="src\psy2.h" />
     <ClInclude Include="src\psy2converter.h" />
-    <ClInclude Include="src\psy3.h" />
+    <ClInclude Include="src\psy3loader.h" />
+    <ClInclude Include="src\psy3saver.h" />
     <ClInclude Include="src\psyclescript.h" />
     <ClInclude Include="src\sample.h" />
     <ClInclude Include="src\sampleiterator.h" />

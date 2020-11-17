@@ -20,12 +20,12 @@ typedef struct {
 	psy_ui_Color rulermarkcolour;
 	SeqEditorTrackState* trackstate;
 	Workspace* workspace;
-} SeqEditorHeader;
+} SeqEditorRuler;
 
-void seqeditorheader_init(SeqEditorHeader*, psy_ui_Component* parent,
+void seqeditorruler_init(SeqEditorRuler*, psy_ui_Component* parent,
 	SeqEditorTrackState*, Workspace*);
 
-INLINE psy_ui_Component* seqeditorheader_base(SeqEditorHeader* self)
+INLINE psy_ui_Component* seqeditorruler_base(SeqEditorRuler* self)
 {
 	return &self->component;
 }
@@ -120,6 +120,28 @@ INLINE void seqeditortrack_onmouseup(SeqEditorTrack* self,
 	self->vtable->onmouseup(self, ev);
 }
 
+typedef struct SeqEditorTrackHeader {
+	SeqEditorTrack base;	
+} SeqEditorTrackHeader;
+
+void seqeditortrackheader_init(SeqEditorTrackHeader*,
+	struct SeqEditorTracks* parent,
+	SeqEditorTrackState*, Workspace*);
+
+SeqEditorTrackHeader* seqeditortrackheader_alloc(void);
+SeqEditorTrackHeader* seqeditortrackheader_allocinit(struct SeqEditorTracks* parent,
+	SeqEditorTrackState*, Workspace*);
+
+INLINE SeqEditorTrack* seqeditortrackheader_base(SeqEditorTrackHeader* self)
+{
+	return &self->base;
+}
+
+enum {
+	SEQEDITOR_TRACKMODE_ENTRY,
+	SEQEDITOR_TRACKMODE_HEADER,
+};
+
 typedef struct SeqEditorTracks {
 	psy_ui_Component component;
 	SeqEditorTrackState* trackstate;
@@ -127,10 +149,11 @@ typedef struct SeqEditorTracks {
 	psy_List* tracks;
 	int lastplaylinepx;
 	SeqEditorTrack* capture;
+	int mode;
 } SeqEditorTracks;
 
 void seqeditortracks_init(SeqEditorTracks*, psy_ui_Component* parent,
-	SeqEditorTrackState*, Workspace*);
+	SeqEditorTrackState*, int mode, Workspace*);
 bool seqeditortracks_playlinechanged(SeqEditorTracks*);
 
 INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
@@ -140,9 +163,10 @@ INLINE psy_ui_Component* seqeditortracks_base(SeqEditorTracks* self)
 
 typedef struct {
 	psy_ui_Component component;
-	SeqEditorHeader header;
+	SeqEditorRuler ruler;
 	psy_ui_Scroller scroller;
-	SeqEditorTracks tracks;
+	SeqEditorTracks trackheaders;
+	SeqEditorTracks tracks;	
 	SeqEditorTrackState trackstate;
 	Workspace* workspace;
 } SeqEditor;

@@ -5,8 +5,9 @@
 
 #include "songio.h"
 
+#include "psy3loader.h"
+#include "psy3saver.h"
 #include "psy2.h"
-#include "psy3.h"
 #include "song.h"
 #include "machinefactory.h"
 #include "wavsongio.h"
@@ -82,7 +83,10 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		psy_signal_emit(&self->song->signal_loadprogress, self->song, 1, 1);
 		if (strcmp(header,"PSY3SONG") == 0) {
 #ifdef PSYCLE_USE_PSY3
-			if (status = psy_audio_psy3_load(self)) {
+			psy_audio_PSY3Loader psy3loader;
+
+			psy_audio_psy3loader_init(&psy3loader, self);
+			if (status = psy_audio_psy3loader_load(&psy3loader)) {
 				psy_audio_songfile_errfile(self);
 			}
 #else
@@ -159,8 +163,11 @@ int psy_audio_songfile_save(psy_audio_SongFile* self, const char* path)
 	self->err = 0;
 	self->warnings = 0;
 	self->path = path;
-	if (psyfile_create(self->file, path, 1)) {				
-		if (status = psy_audio_psy3_save(self)) {
+	if (psyfile_create(self->file, path, 1)) {	
+		psy_audio_PSY3Saver psy3saver;
+
+		psy_audio_psy3saver_init(&psy3saver, self);
+		if (status = psy_audio_psy3saver_save(&psy3saver)) {
 			psy_audio_songfile_errfile(self);
 		}
 		psyfile_close(self->file);

@@ -149,9 +149,6 @@
     <ClCompile Include="src\psy2converter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\psy3.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\psyclescript.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -237,6 +234,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\xmsongexport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psy3loader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\psy3saver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -385,9 +388,6 @@
     <ClInclude Include="src\psy2converter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\psy3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\psyclescript.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -476,6 +476,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\xmsongexport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psy3loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\psy3saver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
