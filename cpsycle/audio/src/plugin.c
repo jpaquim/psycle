@@ -260,6 +260,7 @@ void psy_audio_plugin_init(psy_audio_Plugin* self, psy_audio_MachineCallback* ca
 	psy_audio_custommachine_init(&self->custommachine, callback);	
 	vtable_init(self);
 	psy_audio_plugin_base(self)->vtable = &vtable;
+	psy_audio_logicalchannels_init(&self->logicalchannels);
 	psy_table_init(&self->parameters);
 	psy_library_init(&self->library);
 	psy_library_setenv(&self->library, path, root);
@@ -326,6 +327,7 @@ void dispose(psy_audio_Plugin* self)
 		free(self->presets);
 	}
 	disposeparameters(self);
+	psy_audio_logicalchannels_dispose(&self->logicalchannels);
 	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
@@ -407,10 +409,14 @@ int psy_audio_plugin_psycle_test(const char* path, const char* root, psy_audio_M
 void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	const psy_audio_PatternEvent* ev)
 {	
+	uintptr_t physicalchannel;
+
+	physicalchannel = psy_audio_logicalchannels_physical(
+		&self->logicalchannels, channel);
 	if (psy_audio_patternevent_has_volume(ev)) {
-		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, 0x0C, ev->vol);
+		mi_seqtick(self->mi, physicalchannel, ev->note, ev->inst & 0xFF, 0x0C, ev->vol);
 		if (ev->parameter != 0 || ev->cmd != 0) {
-			mi_seqtick(self->mi, channel, psy_audio_NOTECOMMANDS_EMPTY,
+			mi_seqtick(self->mi, physicalchannel, psy_audio_NOTECOMMANDS_EMPTY,
 				psy_audio_NOTECOMMANDS_EMPTY, ev->cmd, ev->parameter);
 		}
 	} else
@@ -418,7 +424,7 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 		mi_midievent(self->mi, ev->inst & 0x0F, ev->inst & 0xF0,
 			(ev->cmd << 8) + ev->parameter);			
 	} else {
-		mi_seqtick(self->mi, channel, ev->note, ev->inst & 0xFF, ev->cmd,
+		mi_seqtick(self->mi, physicalchannel, ev->note, ev->inst & 0xFF, ev->cmd,
 			ev->parameter);
 	}
 }
@@ -426,6 +432,7 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 void stop(psy_audio_Plugin* self)
 {
 	mi_stop(self->mi);
+	psy_audio_logicalchannels_reset(&self->logicalchannels);
 }
 
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
