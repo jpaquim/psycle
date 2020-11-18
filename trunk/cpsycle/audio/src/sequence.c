@@ -107,7 +107,7 @@ void psy_audio_sequenceselection_setsequence(psy_audio_SequenceSelection* self,
 // psy_audio_SequenceTrack
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack* self)
 {
-	self->entries = 0;
+	self->entries = NULL;
 	self->name = psy_strdup("seq");
 }
 

@@ -28,6 +28,7 @@ typedef struct {
 typedef struct {
 	psy_audio_SequencerTrackState state;
 	psy_audio_SequenceTrackIterator* iterator;
+	uintptr_t channeloffset;
 } psy_audio_SequencerTrack;
 
 typedef struct {

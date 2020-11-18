@@ -6,6 +6,7 @@
 
 #include "custommachine.h"
 #include "library.h"
+#include "logicalchannels.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,7 @@ typedef struct psy_audio_Plugin {
 	psy_Table parameters;
 	struct psy_audio_Presets* presets;
 	uintptr_t currprog;
+	psy_audio_LogicalChannels logicalchannels;
 } psy_audio_Plugin;
 
 void psy_audio_plugin_init(psy_audio_Plugin*, psy_audio_MachineCallback*, const char* path,

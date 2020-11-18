@@ -77,8 +77,8 @@ typedef psy_List psy_audio_SequenceEntryNode;
 // A list of SequenceEntries sorted according to the playorder
 
 typedef struct {
-	psy_audio_SequenceEntryNode* entries;
-	char* name;
+	psy_audio_SequenceEntryNode* entries;	
+	char* name;	
 } psy_audio_SequenceTrack;
 
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack*);

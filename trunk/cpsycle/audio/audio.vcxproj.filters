@@ -242,6 +242,9 @@
     <ClCompile Include="src\psy3saver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\logicalchannels.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -482,6 +485,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\psy3saver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\logicalchannels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -153,6 +153,7 @@
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
     <ClCompile Include="src\lock.c" />
+    <ClCompile Include="src\logicalchannels.c" />
     <ClCompile Include="src\luaarray.c" />
     <ClCompile Include="src\luadspmath.c" />
     <ClCompile Include="src\luaenvelope.c" />
@@ -275,6 +276,7 @@
     <ClInclude Include="src\ladspaplugin.h" />
     <ClInclude Include="src\library.h" />
     <ClInclude Include="src\lock.h" />
+    <ClInclude Include="src\logicalchannels.h" />
     <ClInclude Include="src\luaarray.h" />
     <ClInclude Include="src\luadspmath.h" />
     <ClInclude Include="src\luaenvelope.h" />
