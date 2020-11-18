@@ -32,18 +32,21 @@ void psy_list_deallocate(psy_List**, psy_fp_disposefunc disposefunc);
 INLINE void* psy_list_entry(psy_List* self)
 {
 	assert(self);
+
 	return self->entry;
 }
 /// returns the next node or NULL
 INLINE void psy_list_next(psy_List** self)
 {
 	assert(self != NULL && (*self) != NULL);
+
 	*self = (*self)->next;
 }
 /// returns the previous node or NULL
 INLINE void psy_list_prev(psy_List** self)
 {
 	assert(self != NULL && (*self) != NULL);
+
 	*self = (*self)->prev;
 }
 /// constructs a node or new list and appends it to the tail of the list

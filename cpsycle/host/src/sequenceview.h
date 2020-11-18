@@ -8,6 +8,7 @@
 #include <sequence.h>
 
 #include <uibutton.h>
+#include <uiedit.h>
 #include <uilabel.h>
 #include <uicheckbox.h>
 #include <uisplitbar.h>
@@ -25,8 +26,9 @@ typedef struct {
 	psy_ui_Button delentry;
 	psy_ui_Button cloneentry;
 	psy_ui_Button newtrack;
-	psy_ui_Button deltrack;
+	psy_ui_Button deltrack;	
 	psy_ui_Button clear;
+	psy_ui_Button rename;
 	psy_ui_Button cut;
 	psy_ui_Button copy;
 	psy_ui_Button paste;
@@ -43,7 +45,8 @@ typedef struct {
 	psy_ui_Component component;
 	psy_audio_Sequence* sequence;
 	psy_audio_SequenceSelection* selection;	
-	psy_audio_Patterns* patterns;	
+	psy_audio_Patterns* patterns;
+	psy_ui_Edit rename;
 	int selected;
 	int selectedtrack;
 	int foundselected;
@@ -65,6 +68,7 @@ void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
 	struct SequenceView*, psy_audio_Sequence*, psy_audio_Patterns*, Workspace*);
 void sequencelistview_showpatternnames(SequenceListView*);
 void sequencelistview_showpatternslots(SequenceListView*);
+void sequencelistview_rename(SequenceListView*);
 void sequencelistview_computetextsizes(SequenceListView*);
 
 typedef struct {

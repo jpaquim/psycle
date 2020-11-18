@@ -289,11 +289,6 @@ void psy_ui_aligner_preferredsize(psy_ui_Aligner* self,
 
 		size = *rv;
 		tm = psy_ui_component_textmetric(self->component);
-
-		if (self->component->debugflag == 1000) {
-			self = self;
-		}
-
 		if (self->component->alignchildren &&
 				!self->component->preventpreferredsize) {
 			psy_List* p;

@@ -352,7 +352,8 @@ void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self,
 		value = (int)((step * (line - begin.line) + startval));
 		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl, &prev);
 		if (node) {
-			psy_audio_patternevent_settweakvalue(psy_audio_patternentry_front(node->entry), value);
+			psy_audio_patternevent_settweakvalue(psy_audio_patternentry_front(
+				node->entry), value);
 			++self->opcount;
 		}
 		else {

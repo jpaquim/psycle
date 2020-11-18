@@ -512,9 +512,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	self->workspace = workspace;	
 	psy_ui_component_init(&self->component, parent);
 	stepsequencerview_vtable_init(self);
-	self->component.debugflag = 1000;
 	self->component.vtable = &stepsequencerview_vtable;
-	psy_ui_component_setbackgroundcolor(&self->component, psy_ui_color_make(0x00CACACA));
 	stepsequencerbarselect_init(&self->stepsequencerbarselect, &self->component,
 		&self->steptimer, workspace);
 	psy_ui_component_setalign(&self->stepsequencerbarselect.component,
@@ -584,11 +582,11 @@ void stepsequencerview_onsongchanged(StepsequencerView* self, Workspace* workspa
 	psy_audio_Pattern* pattern;
 
 	selection = workspace_sequenceselection(workspace);
-	if (selection.editposition.trackposition.tracknode) {
+	if (selection.editposition.trackposition.sequencentrynode) {
 		psy_audio_SequenceEntry* entry;
 
 		entry = (psy_audio_SequenceEntry*)
-			selection.editposition.trackposition.tracknode->entry;
+			selection.editposition.trackposition.sequencentrynode->entry;
 		pattern = psy_audio_patterns_at(&workspace->song->patterns, entry->patternslot);
 	} else {
 		pattern = 0;

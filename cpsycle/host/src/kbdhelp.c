@@ -74,26 +74,29 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 	psy_EventDriver* kbd;
 
 	kbd = workspace_kbddriver(self->workspace);
-	if (kbd) {
-		psy_List* p;
+	if (kbd && kbd->properties) {
+		psy_Property* cmds;
 
-		if (kbd->properties) {
-			for (p = psy_property_children(kbd->properties); p != NULL;
+		cmds = psy_property_findsection(kbd->properties, "cmds");
+		if (cmds) {
+			psy_List* p;
+
+			for (p = psy_property_children(cmds); p != NULL;
 					psy_list_next(&p)) {
 				psy_Property* property;
 
-				property = (psy_Property*)p->entry;
+				property = (psy_Property*)psy_list_entry(p);
 				if (psy_property_type(property) ==
-						PSY_PROPERTY_TYPE_SECTION) {
+					PSY_PROPERTY_TYPE_SECTION) {
 					tabbar_append(&self->tabbar,
 						psy_property_translation(property));
 				}
 			}
 		}
-		tabbar_select(&self->tabbar, 0);
-		psy_signal_connect(&self->tabbar.signal_change, self,
-			kbdhelp_ontabbarchange);
 	}
+	tabbar_select(&self->tabbar, 0);
+	psy_signal_connect(&self->tabbar.signal_change, self,
+		kbdhelp_ontabbarchange);
 }
 
 void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
@@ -103,31 +106,31 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 	psy_EventDriver* kbd;
 
 	kbd = workspace_kbddriver(self->workspace);
-	if (kbd) {
-		self->search = 0;
-		if (kbd->properties) {
+	if (kbd && kbd->properties) {			
+		psy_Property* property;
+		psy_Property* cmds;
+		
+		property = NULL;
+		cmds = psy_property_findsection(kbd->properties, "cmds");
+		tab = tabbar_tab(&self->tabbar, tabindex);
+		if (cmds && tab) {				
 			psy_List* p = 0;
-			psy_Property* property = NULL;
 
-			p = kbd->properties->children;
-			tab = tabbar_tab(&self->tabbar, tabindex);
-			if (tab) {
-				while (p) {
-					property = (psy_Property*)p->entry;
-					if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
-						if (strcmp(psy_property_translation(property), tab->text) == 0) {
-							break;
-						}
+			p = psy_property_children(cmds);
+			while (p) {
+				property = (psy_Property*)psy_list_entry(p);
+				if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
+					if (strcmp(psy_property_translation(property), tab->text) == 0) {
+						break;
 					}
-					property = NULL;
-					psy_list_next(&p);
 				}
+				property = NULL;
+				psy_list_next(&p);
 			}
-			self->search = property;	
-			if (self->search) {
-				kbdhelp_markpatterncmds(self, psy_property_key(self->search));
-				psy_ui_component_invalidate(&self->component);
-			}
+		}
+		if (property) {
+			kbdhelp_markpatterncmds(self, psy_property_key(property));
+			psy_ui_component_invalidate(&self->component);
 		}
 	}
 }

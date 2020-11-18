@@ -160,7 +160,7 @@ int psy_audio_psy3loader_load(psy_audio_PSY3Loader* self)
 		psy_signal_emit(&self->songfile->song->signal_loadprogress, self, 1,
 			progress);
 	}	
-	sequence_reposition(&self->songfile->song->sequence);
+	psy_audio_reposition(&self->songfile->song->sequence);
 	psy_audio_psy3loader_setinstrumentnames(self);
 	return self->songfile->err;
 }
@@ -347,7 +347,7 @@ void psy_audio_psy3loader_read_seqd(psy_audio_PSY3Loader* self)
 			uint8_t patternslot;
 			psy_audio_SequencePosition sequenceposition;
 
-			sequenceposition.track = t;
+			sequenceposition.tracknode = t;
 			sequenceposition.trackposition =
 				psy_audio_sequence_last(&self->songfile->song->sequence, t);
 			patternslot = (uint8_t)psyfile_read_uint32(self->songfile->file);

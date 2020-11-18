@@ -266,13 +266,13 @@ void psy2loader_readsequence(PSY2Loader* self)
 	int32_t i;
 	psy_audio_SequencePosition sequenceposition;
 
-	sequenceposition.track =
+	sequenceposition.tracknode =
 		psy_audio_sequence_appendtrack(&self->songfile->song->sequence,
 			psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < self->playlength; ++i) {
 		sequenceposition.trackposition =
 			psy_audio_sequence_last(&self->songfile->song->sequence,
-				sequenceposition.track);
+				sequenceposition.tracknode);
 		psy_audio_sequence_insert(&self->songfile->song->sequence,
 			sequenceposition, self->playorder[i]);
 	}

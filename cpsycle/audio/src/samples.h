@@ -15,7 +15,7 @@ extern "C" {
 
 // psy_audio_Samples, psy_audio_SamplesGroup
 // 
-// Aim: Container of samples with pregrouping for sampler, sampulse and ft2
+// Container of samples with pregrouping for sampler, sampulse and ft2
 // Structure:
 // psy_audio_Samples <@>----- psy_audio_SamplesGroup <@>----- psy_audio_Sample
 //                          *                               *
