@@ -45,10 +45,10 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	{
 		psy_audio_SequencePosition sequenceposition;
 		
-		sequenceposition.track = psy_audio_sequence_appendtrack(&self->song->sequence,
+		sequenceposition.tracknode = psy_audio_sequence_appendtrack(&self->song->sequence,
 			psy_audio_sequencetrack_allocinit());
 		sequenceposition.trackposition =
-			psy_audio_sequence_begin(&self->song->sequence, sequenceposition.track, 0);
+			psy_audio_sequence_begin(&self->song->sequence, sequenceposition.tracknode, 0);
 		psy_audio_sequence_insert(&self->song->sequence, sequenceposition, 0);
 	}
 	{

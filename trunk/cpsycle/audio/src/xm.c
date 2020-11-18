@@ -454,11 +454,11 @@ void xm_makesequence(psy_audio_SongFile* self, struct XMFILEHEADER *xmheader)
 	uintptr_t i;
 	psy_audio_SequencePosition sequenceposition;
 
-	sequenceposition.track =
+	sequenceposition.tracknode =
 		psy_audio_sequence_appendtrack(&self->song->sequence, psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < xmheader->norder; ++i) {
 		sequenceposition.trackposition =
-			psy_audio_sequence_last(&self->song->sequence, sequenceposition.track);
+			psy_audio_sequence_last(&self->song->sequence, sequenceposition.tracknode);
 		psy_audio_sequence_insert(&self->song->sequence, sequenceposition,
 			xmheader->order[i]);
 	}
@@ -758,11 +758,11 @@ void psy_audio_mod_makesequence(psy_audio_SongFile* self, struct MODHEADER* m_He
 	uintptr_t i;
 	psy_audio_SequencePosition sequenceposition;
 
-	sequenceposition.track =
+	sequenceposition.tracknode =
 		psy_audio_sequence_appendtrack(&self->song->sequence, psy_audio_sequencetrack_allocinit());
 	for (i = 0; i < m_Header->songlength; ++i) {
 		sequenceposition.trackposition =
-			psy_audio_sequence_last(&self->song->sequence, sequenceposition.track);
+			psy_audio_sequence_last(&self->song->sequence, sequenceposition.tracknode);
 		psy_audio_sequence_insert(&self->song->sequence, sequenceposition,
 			m_Header->order[i]);
 	}

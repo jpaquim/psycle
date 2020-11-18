@@ -592,6 +592,9 @@ void workspace_makegeneral(Workspace* self)
 	psy_property_settext(
 		psy_property_append_bool(self->general, "playsongafterload", TRUE),
 		"settingsview.play-song-after-load");
+	psy_property_settext(
+		psy_property_append_bool(self->general, "showpatternnames", FALSE),
+		"sequencerview.show-pattern-names");
 }
 
 void workspace_makelanguagelist(Workspace* self, psy_Property* parent)
@@ -1681,6 +1684,29 @@ int workspace_playsongafterload(Workspace* self)
 	return psy_property_at_bool(self->general, "playsongafterload", 1);
 }
 
+int workspace_showingpatternnames(Workspace* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->general, "showpatternnames", 1);
+}
+
+void workspace_showpatternnames(Workspace* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_configchanged, self, 1,
+		psy_property_set_bool(self->general, "showpatternnames", TRUE));
+}
+
+void workspace_showpatternids(Workspace* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_configchanged, self, 1,
+		psy_property_set_bool(self->general, "showpatternnames", FALSE));
+}
+
 int workspace_showplaylisteditor(Workspace* self)
 {	
 	assert(self);
@@ -2200,10 +2226,10 @@ void workspace_addhistory(Workspace* self)
 			!self->history.prevented) {
 		int sequencentryid = -1;
 
-		if (self->sequenceselection.editposition.trackposition.tracknode) {
+		if (self->sequenceselection.editposition.trackposition.sequencentrynode) {
 				psy_audio_SequenceEntry* entry;			
 				entry = (psy_audio_SequenceEntry*)
-					self->sequenceselection.editposition.trackposition.tracknode->entry;
+					self->sequenceselection.editposition.trackposition.sequencentrynode->entry;
 				sequencentryid = entry->id;
 		}
 		history_add(&self->history, self->currview, sequencentryid);
@@ -2222,7 +2248,7 @@ void workspace_updatecurrview(Workspace* self)
 		self->navigating = 1;
 		workspace_selectview(self, entry->viewid, 0, 0);
 		if (entry->sequenceentryid != -1 &&
-			self->sequenceselection.editposition.trackposition.tracknode) {
+			self->sequenceselection.editposition.trackposition.sequencentrynode) {
 			psy_audio_SequencePosition position;
 
 			position = psy_audio_sequence_positionfromid(&self->song->sequence,
@@ -2318,9 +2344,9 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 
 	assert(self);
 
-	if (selection->editposition.trackposition.tracknode) {
+	if (selection->editposition.trackposition.sequencentrynode) {
 		entry = (psy_audio_SequenceEntry*)
-			selection->editposition.trackposition.tracknode->entry;
+			selection->editposition.trackposition.sequencentrynode->entry;
 		position.pattern = entry->patternslot;
 		position.column = 0;
 		position.digit = 0;
@@ -2342,14 +2368,14 @@ void workspace_idle(Workspace* self)
 			it = psy_audio_sequence_begin(&self->song->sequence, 
 				self->song->sequence.tracks,
 				psy_audio_player_position(&self->player));
-			if (it.tracknode && self->lastentry != it.tracknode->entry) {
+			if (it.sequencentrynode && self->lastentry != it.sequencentrynode->entry) {
 				psy_audio_sequenceselection_seteditposition(&self->sequenceselection, 
 						psy_audio_sequence_makeposition(&self->song->sequence,
-							self->song->sequence.tracks, it.tracknode));
+							self->song->sequence.tracks, it.sequencentrynode));
 				self->history.prevented = 1;
 				workspace_setsequenceselection(self, self->sequenceselection);
 				self->history.prevented = 0;
-				self->lastentry = (psy_audio_SequenceEntry*) it.tracknode->entry;		
+				self->lastentry = (psy_audio_SequenceEntry*) it.sequencentrynode->entry;
 			}
 			if (self->lastentry) {				
 				self->patterneditposition.line = (int) (
@@ -2485,7 +2511,7 @@ void workspace_updatenavigation(Workspace* self)
 		workspace_selectview(self, entry->viewid, 0, 0);
 	}
 	if (entry->sequenceentryid != -1 &&
-			self->sequenceselection.editposition.trackposition.tracknode) {
+			self->sequenceselection.editposition.trackposition.sequencentrynode) {
 		psy_audio_SequencePosition position;
 
 		position = psy_audio_sequence_positionfromid(&self->song->sequence,

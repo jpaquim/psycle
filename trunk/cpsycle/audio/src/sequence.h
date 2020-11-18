@@ -16,6 +16,13 @@
 extern "C" {
 #endif
 
+// psy_audio_Sequence
+//
+// contains the playorder list of a song (multisequence)
+
+// psy_audio_SequenceEntry
+//
+// Entry inside a track of a sequence
 typedef struct {
 	uintptr_t id;
 	uintptr_t row;
@@ -65,11 +72,17 @@ INLINE psy_audio_Pattern* psy_audio_sequenceentry_pattern(const
 
 typedef psy_List psy_audio_SequenceEntryNode;
 
+// psy_audio_SequenceTrack
+//
+// A list of SequenceEntries sorted according to the playorder
+
 typedef struct {
 	psy_audio_SequenceEntryNode* entries;
+	char* name;
 } psy_audio_SequenceTrack;
 
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack*);
+void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack*);
 
 psy_audio_SequenceTrack* psy_audio_sequencetrack_alloc(void);
 psy_audio_SequenceTrack* psy_audio_sequencetrack_allocinit(void);
@@ -77,9 +90,22 @@ psy_audio_SequenceTrack* psy_audio_sequencetrack_allocinit(void);
 psy_dsp_big_beat_t psy_audio_sequencetrack_duration(psy_audio_SequenceTrack*,
 	psy_audio_Patterns* patterns);
 
+void psy_audio_sequencetrack_setname(psy_audio_SequenceTrack* self, const char* name);
+
+INLINE const char* psy_audio_sequencetrack_name(const psy_audio_SequenceTrack* self)
+{
+	assert(self);
+
+	return self->name;
+}
+
+// psy_audio_SequenceTrackIterator
+//
+// Iterator the player uses to advance through the track and pattern
+
 typedef struct {
 	psy_audio_Patterns* patterns;	
-	psy_audio_SequenceEntryNode* tracknode;
+	psy_audio_SequenceEntryNode* sequencentrynode;
 	psy_audio_PatternNode* patternnode;	
 } psy_audio_SequenceTrackIterator;
 
@@ -96,8 +122,8 @@ INLINE psy_audio_PatternNode* psy_audio_sequencetrackiterator_patternnode(
 INLINE psy_audio_SequenceEntry* psy_audio_sequencetrackiterator_entry(
 	psy_audio_SequenceTrackIterator* self)
 {
-	return (self->tracknode)
-		? (psy_audio_SequenceEntry*)psy_list_entry(self->tracknode)
+	return (self->sequencentrynode)
+		? (psy_audio_SequenceEntry*)psy_list_entry(self->sequencentrynode)
 		: NULL;
 }
 
@@ -120,8 +146,12 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencetrackiterator_offset(
 
 typedef psy_List psy_audio_SequenceTrackNode;
 
+// psy_audio_SequencePosition
+//
+// defines the overall position in a song
+
 typedef struct {
-	psy_audio_SequenceTrackNode* track;
+	psy_audio_SequenceTrackNode* tracknode;
 	psy_audio_SequenceTrackIterator trackposition;	
 } psy_audio_SequencePosition;
 
@@ -154,6 +184,8 @@ psy_audio_SequencePosition psy_audio_sequenceselection_editposition(
 void psy_audio_sequenceselection_setsequence(psy_audio_SequenceSelection*,
 	struct psy_audio_Sequence*);
 
+// psy_audio_Sequence
+
 typedef struct psy_audio_Sequence {
 	psy_audio_SequenceTrackNode* tracks;
 	psy_audio_Patterns* patterns;
@@ -175,8 +207,10 @@ psy_audio_SequenceTrackIterator psy_audio_sequence_begin(psy_audio_Sequence*,
 psy_audio_SequenceTrackIterator psy_audio_sequence_last(psy_audio_Sequence*,
 	psy_List* track);
 void psy_audio_sequence_clear(psy_audio_Sequence*);
-psy_audio_SequenceTrackNode* psy_audio_sequence_appendtrack(psy_audio_Sequence*, psy_audio_SequenceTrack*);
-psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(psy_audio_Sequence*, psy_audio_SequenceTrackNode*);
+psy_audio_SequenceTrackNode* psy_audio_sequence_appendtrack(
+	psy_audio_Sequence*, psy_audio_SequenceTrack*);
+psy_audio_SequenceTrackNode* psy_audio_sequence_removetrack(
+	psy_audio_Sequence*, psy_audio_SequenceTrackNode*);
 psy_audio_SequenceTrack* psy_audio_sequence_track_at(psy_audio_Sequence*,
 	uintptr_t index);
 uintptr_t psy_audio_sequence_sizetracks(psy_audio_Sequence*);
@@ -192,8 +226,9 @@ psy_audio_SequencePosition psy_audio_sequence_positionfromid(psy_audio_Sequence*
 void psy_audio_sequence_setplayselection(psy_audio_Sequence*,
 	struct psy_audio_SequenceSelection*);
 void psy_audio_sequence_clearplayselection(psy_audio_Sequence*);
-void sequence_reposition(psy_audio_Sequence* self);
-void sequence_reposition_track(psy_audio_Sequence* self, psy_audio_SequenceTrack*);
+void psy_audio_reposition(psy_audio_Sequence*);
+void psy_audio_sequence_reposition_track(psy_audio_Sequence*,
+	psy_audio_SequenceTrack*);
 
 #ifdef __cplusplus
 }

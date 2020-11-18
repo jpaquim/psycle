@@ -421,6 +421,7 @@ void translator_definekeys(psy_Property* lang)
 	psy_property_set_str(section, "new-trk", "New Track");
 	psy_property_set_str(section, "del-trk", "Del Track");
 	psy_property_set_str(section, "clear", "Clear");
+	psy_property_set_str(section, "rename", "Rename");
 	psy_property_set_str(section, "copy", "Copy");
 	psy_property_set_str(section, "paste", "Paste");
 	psy_property_set_str(section, "singlesel", "SingleSel");

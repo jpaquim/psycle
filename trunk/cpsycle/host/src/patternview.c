@@ -354,11 +354,11 @@ void patternview_onsongchanged(PatternView* self, Workspace* workspace, int flag
 	psy_audio_SequenceSelection selection;	
 	
 	selection = workspace_sequenceselection(workspace);	
-	if (selection.editposition.trackposition.tracknode) {
+	if (selection.editposition.trackposition.sequencentrynode) {
 		psy_audio_SequenceEntry* entry;
 
 		entry = (psy_audio_SequenceEntry*)
-			selection.editposition.trackposition.tracknode->entry;
+			selection.editposition.trackposition.sequencentrynode->entry;
 		pattern = psy_audio_patterns_at(&workspace->song->patterns, entry->patternslot);
 	} else {
 		pattern = 0;

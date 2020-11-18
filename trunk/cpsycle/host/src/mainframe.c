@@ -616,13 +616,13 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			break;
 		case CMD_IMM_SONGPOSDEC:
 			if (self->workspace.song) {
-				if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
-					self->workspace.sequenceselection.editposition.trackposition.tracknode->prev) {
+				if (self->workspace.sequenceselection.editposition.trackposition.sequencentrynode &&
+					self->workspace.sequenceselection.editposition.trackposition.sequencentrynode->prev) {
 					psy_audio_sequenceselection_seteditposition(
 						&self->workspace.sequenceselection,
 						psy_audio_sequence_makeposition(&self->workspace.song->sequence,
-							self->workspace.sequenceselection.editposition.track,
-							self->workspace.sequenceselection.editposition.trackposition.tracknode->prev));
+							self->workspace.sequenceselection.editposition.tracknode,
+							self->workspace.sequenceselection.editposition.trackposition.sequencentrynode->prev));
 					workspace_setsequenceselection(&self->workspace,
 						self->workspace.sequenceselection);
 				}
@@ -630,13 +630,13 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			break;
 		case CMD_IMM_SONGPOSINC:
 			if (self->workspace.song) {
-				if (self->workspace.sequenceselection.editposition.trackposition.tracknode &&
-					self->workspace.sequenceselection.editposition.trackposition.tracknode->next) {
+				if (self->workspace.sequenceselection.editposition.trackposition.sequencentrynode &&
+					self->workspace.sequenceselection.editposition.trackposition.sequencentrynode->next) {
 					psy_audio_sequenceselection_seteditposition(
 						&self->workspace.sequenceselection,
 						psy_audio_sequence_makeposition(&self->workspace.song->sequence,
-							self->workspace.sequenceselection.editposition.track,
-							self->workspace.sequenceselection.editposition.trackposition.tracknode->next));
+							self->workspace.sequenceselection.editposition.tracknode,
+							self->workspace.sequenceselection.editposition.trackposition.sequencentrynode->next));
 					workspace_setsequenceselection(&self->workspace,
 						self->workspace.sequenceselection);
 				}
@@ -1217,11 +1217,19 @@ bool mainframe_onclose(MainFrame* self)
 void mainframe_ontoggleseqeditor(MainFrame* self, psy_ui_Component* sender)
 {
 	if (psy_ui_component_visible(seqeditor_base(&self->seqeditor))) {
+		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
+			psy_ui_ICON_MORE);
+		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
+			"Show SequenceEditor");
 		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
 		psy_ui_component_align(&self->client);
 	} else {
 		psy_ui_component_show(seqeditor_base(&self->seqeditor));
 		psy_ui_component_align(&self->client);
+		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,
+			psy_ui_ICON_LESS);
+		psy_ui_button_settext(&self->sequenceview.options.toggleseqedit,
+			"Hide SequenceEditor");
 	}
 }
 
