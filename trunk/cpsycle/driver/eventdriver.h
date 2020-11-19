@@ -45,25 +45,39 @@ typedef struct {
 	psy_EventDriverData data;
 } psy_EventDriverCmd;
 
+typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);
+typedef int (*psy_eventdriver_fp_dispose)(struct psy_EventDriver*);
+typedef void (*psy_eventdriver_fp_deallocate)(struct psy_EventDriver*);
+typedef void (*psy_eventdriver_fp_configure)(struct psy_EventDriver*, psy_Property*);
+typedef const psy_Property* (*psy_eventdriver_fp_configuration)(const struct psy_EventDriver*);
+typedef const psy_EventDriverInfo* (*psy_eventdriver_fp_info)(struct psy_EventDriver*);
+typedef int (*psy_eventdriver_fp_close)(struct psy_EventDriver*);
+typedef void (*psy_eventdriver_fp_write)(struct psy_EventDriver*, psy_EventDriverData);
+typedef void (*psy_eventdriver_fp_cmd)(struct psy_EventDriver*, const char* section, psy_EventDriverData,
+	psy_EventDriverCmd*);
+typedef int (*psy_eventdriver_fp_error)(int, const char*);
+typedef psy_EventDriverCmd(*psy_eventdriver_fp_getcmd)(struct psy_EventDriver*, const char* section);
+typedef void (*psy_eventdriver_fp_setcmddef)(struct psy_EventDriver*, psy_Property*);
+typedef void (*psy_eventdriver_fp_idle)(struct psy_EventDriver*);
+
 typedef struct psy_EventDriverVTable {
-	int (*open)(struct psy_EventDriver*);
-	int (*dispose)(struct psy_EventDriver*);
-	void (*deallocate)(struct psy_EventDriver*);
-	const psy_EventDriverInfo* (*info)(struct psy_EventDriver*);
-	void (*configure)(struct psy_EventDriver*, psy_Property*);
-	int (*close)(struct psy_EventDriver*);
-	void (*write)(struct psy_EventDriver*, psy_EventDriverData);
-	void (*cmd)(struct psy_EventDriver*, const char* section, psy_EventDriverData,
-		psy_EventDriverCmd*);
-	int (*error)(int, const char*);
-	psy_EventDriverCmd(*getcmd)(struct psy_EventDriver*, const char* section);
-	void (*setcmddef)(struct psy_EventDriver*, psy_Property*);
-	void (*idle)(struct psy_EventDriver*);
+	psy_eventdriver_fp_open open;
+	psy_eventdriver_fp_dispose dispose;
+	psy_eventdriver_fp_deallocate deallocate;	
+	psy_eventdriver_fp_info info;
+	psy_eventdriver_fp_configure configure;
+	psy_eventdriver_fp_configuration configuration;
+	psy_eventdriver_fp_close close;
+	psy_eventdriver_fp_write write;
+	psy_eventdriver_fp_cmd cmd;
+	psy_eventdriver_fp_error error;
+	psy_eventdriver_fp_getcmd getcmd;
+	psy_eventdriver_fp_setcmddef setcmddef;
+	psy_eventdriver_fp_idle idle;
 } psy_EventDriverVTable;
 
 typedef struct psy_EventDriver {
-	psy_EventDriverVTable* vtable;
-	psy_Property* properties;	
+	psy_EventDriverVTable* vtable;	
 	psy_Signal signal_input;
 } psy_EventDriver;
 
@@ -126,6 +140,11 @@ INLINE void psy_eventdriver_configure(psy_EventDriver* self, psy_Property*
 	properties)
 {
 	self->vtable->configure(self, properties);
+}
+
+INLINE const psy_Property* psy_eventdriver_configuration(const psy_EventDriver* self)
+{
+	return self->vtable->configuration(self);
 }
 
 INLINE int psy_eventdriver_close(psy_EventDriver* self)

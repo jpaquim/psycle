@@ -948,8 +948,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 			trackscopeview_stop(&self->trackscopeview);
 		}
 	} else {
-		workspace_configchanged(&self->workspace, property,
-			sender->renderer.choiceproperty);
+		workspace_configchanged(&self->workspace, property);
 	}
 }
 

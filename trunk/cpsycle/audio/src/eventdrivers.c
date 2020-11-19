@@ -75,6 +75,7 @@ psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const
 		if (strcmp(path, "kbd") == 0) {
 			if (!self->kbddriver) {
 				psy_audio_eventdrivers_initkbd(self);
+				eventdriver = self->kbddriver;
 			}
 		} else {
 			psy_Library* library;
@@ -156,14 +157,15 @@ psy_EventDriver* psy_audio_eventdrivers_loadbyguid(psy_audio_EventDrivers* self,
 	return NULL;
 }
 
-void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, int id)
+void psy_audio_eventdrivers_restart(psy_audio_EventDrivers* self, int id,
+	psy_Property* configuration)
 {	
 	psy_EventDriver* eventdriver;
 
 	eventdriver = psy_audio_eventdrivers_driver(self, id);
 	if (eventdriver) {
 		psy_eventdriver_close(eventdriver);
-		psy_eventdriver_configure(eventdriver, eventdriver->properties);
+		psy_eventdriver_configure(eventdriver, configuration);
 		psy_eventdriver_open(eventdriver);
 	}
 }
@@ -180,7 +182,7 @@ void psy_audio_eventdrivers_restartall(psy_audio_EventDrivers* self)
 		eventdriver = eventdriverentry->eventdriver;
 		if (eventdriver) {
 			psy_eventdriver_close(eventdriver);
-			psy_eventdriver_configure(eventdriver, eventdriver->properties);
+			psy_eventdriver_configure(eventdriver, NULL);
 			psy_eventdriver_open(eventdriver);
 		}
 	}

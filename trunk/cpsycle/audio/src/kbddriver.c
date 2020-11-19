@@ -37,6 +37,7 @@ typedef struct {
 	int (*error)(int, const char*);
 	psy_EventDriverData lastinput;
 	psy_Property* cmddef;
+	psy_Property* configuration;
 } KbdDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -46,6 +47,7 @@ static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
+static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_write(psy_EventDriver*, psy_EventDriverData input);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverData,
 	psy_EventDriverCmd*);
@@ -68,6 +70,7 @@ static void vtable_init(void)
 		vtable.dispose = driver_dispose;
 		vtable.info = driver_info;
 		vtable.configure = driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.error = onerror;
 		vtable.write = driver_write;
 		vtable.cmd = driver_cmd;
@@ -119,8 +122,8 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	KbdDriver* self = (KbdDriver*) driver;
-	psy_property_deallocate(self->driver.properties);
-	self->driver.properties = NULL;
+	psy_property_deallocate(self->configuration);
+	self->configuration = NULL;
 	psy_signal_dispose(&driver->signal_input);
 	return 1;
 }
@@ -132,18 +135,18 @@ void init_properties(psy_EventDriver* context)
 
 	self = (KbdDriver*)context;
 	psy_snprintf(key, 256, "kbd-guid-%d", PSY_EVENTDRIVER_KBD_GUID);
-	context->properties = psy_property_allocinit_key(key);
-	psy_property_sethint(psy_property_append_int(context->properties,
+	self->configuration = psy_property_allocinit_key(key);
+	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_KBD_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_settext(
-		psy_property_append_string(context->properties, "name", "kbd"),
+		psy_property_append_string(self->configuration, "name", "kbd"),
 		"settingsview.name");
 	psy_property_settext(
-		psy_property_append_string(context->properties, "version", "1.0"),
+		psy_property_append_string(self->configuration, "version", "1.0"),
 		"settingsview.version");
 	self->cmddef = psy_property_settext(
-		psy_property_append_section(context->properties, "cmds"),
+		psy_property_append_section(self->configuration, "cmds"),
 		"cmds.keymap");
 }
 
@@ -188,7 +191,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	if (!sectionname) {
 		return;
 	}
-	section = psy_property_findsection(driver->properties, sectionname);
+	section = psy_property_findsection(self->configuration, sectionname);
 	if (!section) {
 		return;
 	}
@@ -265,10 +268,10 @@ void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 		KbdDriver* self = (KbdDriver*)driver;
 
 		if (self->cmddef) {
-			psy_property_remove(self->driver.properties, self->cmddef);
+			psy_property_remove(self->configuration, self->cmddef);
 		}
 		self->cmddef = psy_property_clone(cmddef);
-		psy_property_append_property(self->driver.properties,
+		psy_property_append_property(self->configuration,
 			self->cmddef);
 		psy_property_settext(self->cmddef, "cmds.keymap");
 	}
@@ -276,7 +279,18 @@ void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 
 void driver_configure(psy_EventDriver* driver, psy_Property* configuration)
 {
-	if (configuration && driver->properties) {
-		psy_property_sync(driver->properties, configuration);
+	KbdDriver* self;
+
+	self = (KbdDriver*)driver;
+	if (configuration && self->configuration) {
+		psy_property_sync(self->configuration, configuration);
 	}
+}
+
+const psy_Property* driver_configuration(const psy_EventDriver* driver)
+{
+	KbdDriver* self;
+
+	self = (KbdDriver*)driver;
+	return self->configuration;
 }

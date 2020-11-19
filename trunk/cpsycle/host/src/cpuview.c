@@ -215,6 +215,9 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 	MEMORYSTATUSEX lpBuffer;
 	char buffer[128];
 
+	if (!psy_ui_component_visible(&self->component)) {
+		return;
+	}
 	lpBuffer.dwLength = sizeof(MEMORYSTATUSEX);
 	GlobalMemoryStatusEx(&lpBuffer);
 

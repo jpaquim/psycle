@@ -75,7 +75,6 @@ typedef struct {
 typedef struct {
 	psy_audio_MachineCallback machinecallback;
 	psy_audio_Song* song;
-	psy_audio_Song* songcbk;
 	psy_audio_Player player;
 	psy_audio_PluginCatcher plugincatcher;
 	psy_audio_MachineFactory machinefactory;
@@ -92,9 +91,9 @@ typedef struct {
 	psy_Property* directories;
 	psy_Property* compatibility;
 	psy_Property* driverconfigure;
-	psy_Property* driverconfigurations;
+	psy_Property* driverconfigurations;	
+	psy_Property* eventdriverconfigure;
 	psy_Property* eventdriverconfigurations;
-	psy_Property* midiconfigure;
 	psy_Property* theme;
 	psy_Property* cmds;
 	psy_Property* patternviewtheme;
@@ -187,8 +186,7 @@ int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
 int workspace_showwirehover(Workspace*);
 int workspace_showparamviewaswindow(Workspace*);
-void workspace_configchanged(Workspace*, psy_Property* property,
-	psy_Property* choice);
+void workspace_configchanged(Workspace*, psy_Property* property);
 int workspace_wraparound(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);

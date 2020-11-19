@@ -42,6 +42,7 @@ typedef struct {
 	psy_Property* devices;
 	psy_Property* cmddef;
 	DIJOYSTATE2 state;
+	psy_Property* configuration;
 } DXJoystickDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -51,6 +52,7 @@ static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
+static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section,
 	psy_EventDriverData input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
@@ -86,6 +88,7 @@ static void vtable_init(void)
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.info = driver_info;
 		vtable.error = driver_onerror;
 		vtable.cmd = driver_cmd;
@@ -157,8 +160,8 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	DXJoystickDriver* self = (DXJoystickDriver*) driver;	
-	psy_property_deallocate(self->driver.properties);
-	self->driver.properties = 0;
+	psy_property_deallocate(self->configuration);
+	self->configuration = 0;
 	CloseHandle(self->hEvent);
 	psy_signal_dispose(&driver->signal_input);
 	psy_table_disposeall(&self->inputs, (psy_fp_disposefunc)NULL);
@@ -173,20 +176,20 @@ void init_properties(psy_EventDriver* context)
 
 	self = (DXJoystickDriver*)context;
 	psy_snprintf(key, 256, "dxjoystick-guid-%d", PSY_EVENTDRIVER_DXJOYSTICK_GUID);
-	context->properties = psy_property_allocinit_key(key);
-	psy_property_sethint(psy_property_append_int(context->properties,
+	self->configuration = psy_property_allocinit_key(key);
+	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_property_append_string(context->properties, "name", "directx joystick");
-	psy_property_append_string(context->properties, "version", "1.0");
-	self->devices = psy_property_append_choice(context->properties, "device", 0);
+	psy_property_append_string(self->configuration, "name", "directx joystick");
+	psy_property_append_string(self->configuration, "version", "1.0");
+	self->devices = psy_property_append_choice(self->configuration, "device", 0);
 	psy_property_append_int(self->devices, "0:None", 0, 0, 0);
 	self->count = 0;
 	if (FAILED(hr = self->di->lpVtbl->EnumDevices(self->di,
 			DI8DEVCLASS_GAMECTRL, enumCallback,
 			self, DIEDFL_ATTACHEDONLY))) {
 	}
-	self->cmddef = psy_property_append_section(context->properties, "cmds");
+	self->cmddef = psy_property_append_section(self->configuration, "cmds");
 }
 
 BOOL CALLBACK
@@ -206,18 +209,18 @@ enumCallback(const DIDEVICEINSTANCE* instance, VOID* context)
 	return DIENUM_CONTINUE;
 }
 
-void driver_configure(psy_EventDriver* context, psy_Property* config)
+void driver_configure(psy_EventDriver* context, psy_Property* configuration)
 {
 	DXJoystickDriver* self;
 
 	self = (DXJoystickDriver*)context;
-	if (config) {
-		psy_property_sync(self->driver.properties, config);
+	if (configuration) {
+		psy_property_sync(self->configuration, configuration);
 	}
-	if (self->driver.properties) {
+	if (self->configuration) {
 		psy_Property* p;
 
-		p = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_NONE);
+		p = psy_property_at(self->configuration, "device", PSY_PROPERTY_TYPE_NONE);
 		if (p) {
 			self->deviceid = psy_property_item_int(p);
 		}
@@ -349,7 +352,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		return;
 	}
 	cmd->id = -1;
-	section = psy_property_findsection(driver->properties, sectionname);
+	section = psy_property_findsection(self->configuration, sectionname);
 	if (!section) {
 		return;
 	}
@@ -400,10 +403,10 @@ void driver_setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 
 	if (cmddef && cmddef->children) {
 		if (self->cmddef) {
-			psy_property_remove(self->driver.properties, self->cmddef);
+			psy_property_remove(self->configuration, self->cmddef);
 		}
 		self->cmddef = psy_property_clone(cmddef);
-		psy_property_append_property(self->driver.properties,
+		psy_property_append_property(self->configuration,
 			self->cmddef);
 		psy_property_settext(self->cmddef, "cmds.keymap");
 		driver_setcmddefaults(self, self->cmddef);
@@ -557,4 +560,12 @@ BOOL CALLBACK staticSetGameControllerAxesRanges(LPCDIDEVICEOBJECTINSTANCE devObj
 		return DIENUM_STOP;
 
 	return DIENUM_CONTINUE;
+}
+
+const psy_Property* driver_configuration(const psy_EventDriver* driver)
+{
+	DXJoystickDriver* self;
+
+	self = (DXJoystickDriver*)driver;
+	return self->configuration;
 }
