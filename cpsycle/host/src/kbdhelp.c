@@ -43,10 +43,10 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 
 	kbdbox_cleardescriptions(&self->kbdbox);
 	kbd = workspace_kbddriver(self->workspace);
-	if (kbd) {
+	if (kbd && psy_eventdriver_configuration(kbd)) {
 		psy_Property* section;
 
-		section = psy_property_find(kbd->properties, sectionname,
+		section = psy_property_find(psy_eventdriver_configuration(kbd), sectionname,
 			PSY_PROPERTY_TYPE_SECTION);
 		if (section) {
 			psy_List* p;
@@ -74,10 +74,11 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 	psy_EventDriver* kbd;
 
 	kbd = workspace_kbddriver(self->workspace);
-	if (kbd && kbd->properties) {
+	if (kbd && psy_eventdriver_configuration(kbd)) {
 		psy_Property* cmds;
 
-		cmds = psy_property_findsection(kbd->properties, "cmds");
+		cmds = psy_property_findsection(psy_eventdriver_configuration(kbd),
+			"cmds");
 		if (cmds) {
 			psy_List* p;
 
@@ -106,12 +107,13 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 	psy_EventDriver* kbd;
 
 	kbd = workspace_kbddriver(self->workspace);
-	if (kbd && kbd->properties) {			
+	if (kbd && psy_eventdriver_configuration(kbd)) {
 		psy_Property* property;
 		psy_Property* cmds;
 		
 		property = NULL;
-		cmds = psy_property_findsection(kbd->properties, "cmds");
+		cmds = psy_property_findsection(psy_eventdriver_configuration(kbd),
+			"cmds");
 		tab = tabbar_tab(&self->tabbar, tabindex);
 		if (cmds && tab) {				
 			psy_List* p = 0;

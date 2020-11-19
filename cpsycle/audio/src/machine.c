@@ -38,7 +38,11 @@ static psy_dsp_beat_t machinecallback_bpm(psy_audio_MachineCallback* self)
 
 static psy_dsp_beat_t machinecallback_beatspertick(psy_audio_MachineCallback* self)
 {
-	return 1 / (psy_dsp_beat_t) 24.f;
+	assert(self);
+
+	return (self->song)
+		? 1 / (psy_dsp_beat_t)self->song->properties.tpb
+		: 1 / (psy_dsp_beat_t)24.f;
 }
 
 static psy_dsp_beat_t machinecallback_beatspersample(psy_audio_MachineCallback* self)
@@ -55,11 +59,30 @@ static psy_dsp_beat_t machinecallback_currbeatsperline(psy_audio_MachineCallback
 		: 4096;
 }
 
-static struct psy_audio_Samples* machinecallback_samples(psy_audio_MachineCallback* self) {
-	return 0; }
-static psy_audio_Machines* machinecallback_machines(psy_audio_MachineCallback* self) { return 0; }
-static struct psy_audio_Instruments* machinecallback_instruments(psy_audio_MachineCallback* self) {
-	return 0; }
+static struct psy_audio_Samples* machinecallback_samples(psy_audio_MachineCallback* self)
+{
+	if (self->song) {
+		return &self->song->samples;
+	}
+	return NULL;
+}
+
+static psy_audio_Machines* machinecallback_machines(psy_audio_MachineCallback* self)
+{
+	if (self->song) {
+		return &self->song->machines;
+	}
+	return NULL;
+}
+
+static struct psy_audio_Instruments* machinecallback_instruments(psy_audio_MachineCallback* self)
+{
+	if (self->song) {
+		return &self->song->instruments;
+	}
+	return NULL;
+}
+
 static struct psy_audio_MachineFactory* machinecallback_machinefactory(psy_audio_MachineCallback*
 	self) {
 	return 0;
@@ -165,11 +188,20 @@ static void psy_audio_machinecallbackvtable_init(void)
 		psy_audio_machinecallbackvtable_initialized = 1;
 	}
 }
-void psy_audio_machinecallback_init(psy_audio_MachineCallback* self, psy_audio_Player* player)
+void psy_audio_machinecallback_init(psy_audio_MachineCallback* self,
+	psy_audio_Player* player,
+	psy_audio_Song* song)
 {
 	psy_audio_machinecallbackvtable_init();
 	self->vtable = &psy_audio_machinecallbackvtable_vtable;
 	self->player = player;
+	self->song = song;
+}
+
+void psy_audio_machinecallback_setsong(psy_audio_MachineCallback* self,
+	psy_audio_Song* song)
+{
+	self->song = song;
 }
 
 static psy_audio_MachineInfo const macinfo = {	

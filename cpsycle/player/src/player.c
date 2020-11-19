@@ -49,9 +49,6 @@ static psy_audio_MachineCallback machinecallback(CmdPlayer*);
 static void cmdplayer_idle(void);
 /// Machinecallback
 static psy_audio_MachineCallback machinecallback(CmdPlayer*);
-static psy_audio_Samples* machinecallback_samples(CmdPlayer*);
-static psy_audio_Machines* machinecallback_machines(CmdPlayer*);
-struct psy_audio_Instruments* machinecallback_instruments(CmdPlayer*);
 static void machinecallback_output(CmdPlayer*, const char* text);
 
 static void usage(void) {
@@ -166,12 +163,6 @@ static void psy_audio_machinecallbackvtable_init(CmdPlayer* self)
 {
 	if (!psy_audio_machinecallbackvtable_initialized) {
 		psy_audio_machinecallbackvtable_vtable = *self->machinecallback.vtable;		
-		psy_audio_machinecallbackvtable_vtable.samples = (fp_mcb_samples)
-			machinecallback_samples;
-		psy_audio_machinecallbackvtable_vtable.machines = (fp_mcb_machines)
-			machinecallback_machines;
-		psy_audio_machinecallbackvtable_vtable.instruments = (fp_mcb_instruments)
-			machinecallback_instruments;		
 		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
 			machinecallback_output;
 		psy_audio_machinecallbackvtable_initialized = 1;
@@ -180,7 +171,7 @@ static void psy_audio_machinecallbackvtable_init(CmdPlayer* self)
 
 void cmdplayer_init(CmdPlayer* self)
 {    
-	psy_audio_machinecallback_init(&self->machinecallback, &self->player);
+	psy_audio_machinecallback_init(&self->machinecallback, &self->player, NULL);
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &psy_audio_machinecallbackvtable_vtable;
     printf("init config\n");
@@ -362,26 +353,6 @@ void cmdplayer_applysongproperties(CmdPlayer* self)
 }
 
 // machine callback interface implementation
-psy_audio_Samples* machinecallback_samples(CmdPlayer* self)
-{
-    return (self->song)
-		? &self->song->samples
-		: 0;
-}
-
-psy_audio_Machines* machinecallback_machines(CmdPlayer* self)
-{
-    return (self->song)
-		? &self->song->machines
-		: 0;
-}
-
-psy_audio_Instruments* machinecallback_instruments(CmdPlayer* self)
-{
-    return (self->song)
-		? &self->song->instruments
-		: 0;
-}
 
 void machinecallback_output(CmdPlayer* self, const char* text)
 {

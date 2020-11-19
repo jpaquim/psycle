@@ -106,7 +106,7 @@ void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 {
 	assert(self);
 
-	self->machinefactory = machinefactory;	
+	self->machinefactory = machinefactory;
 	songproperties_init(&self->properties, "Untitled", "Unnamed",
 		"No Comments");	
 	song_initmachines(self);

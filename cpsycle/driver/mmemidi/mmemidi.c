@@ -23,6 +23,7 @@ typedef struct {
 	psy_EventDriverData lastinput;	
 	HANDLE hEvent;
 	psy_Property* cmddef;
+	psy_Property* configuration;
 } psy_MmeMidiDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -32,6 +33,7 @@ static int driver_close(psy_EventDriver*);
 static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
+static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverData input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Property*);
@@ -56,6 +58,7 @@ static void vtable_init(void)
 		vtable.dispose = driver_dispose;
 		vtable.info = driver_info;
 		vtable.configure = driver_configure;
+		vtable.configuration = driver_configuration;
 		vtable.error = onerror;
 		vtable.cmd = driver_cmd;
 		vtable.getcmd = driver_getcmd;
@@ -117,8 +120,8 @@ int driver_init(psy_EventDriver* driver)
 int driver_dispose(psy_EventDriver* driver)
 {
 	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*) driver;
-	psy_property_deallocate(self->driver.properties);
-	self->driver.properties = 0;
+	psy_property_deallocate(self->configuration);
+	self->configuration = NULL;
 	CloseHandle(self->hEvent);
 	psy_signal_dispose(&driver->signal_input);
 	return 0;
@@ -140,13 +143,13 @@ void init_properties(psy_EventDriver* context)
 	int n;	
 
 	psy_snprintf(key, 256, "mmemidi-guid-%d", PSY_EVENTDRIVER_MMEMIDI_GUID);
-	self->driver.properties = psy_property_allocinit_key(key);
-	psy_property_sethint(psy_property_append_int(self->driver.properties,
+	self->configuration = psy_property_allocinit_key(key);
+	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_MMEMIDI_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
-	psy_property_append_string(self->driver.properties, "name", "winmme midi");
-	psy_property_append_string(self->driver.properties, "version", "1.0");
-	devices = psy_property_append_choice(self->driver.properties, "device", 0);		 
+	psy_property_append_string(self->configuration, "name", "winmme midi");
+	psy_property_append_string(self->configuration, "version", "1.0");
+	devices = psy_property_append_choice(self->configuration, "device", 0);
 	psy_property_append_int(devices, "0:None", 0, 0, 0);
 	n = midiInGetNumDevs();	
 	for (i = 0; i < n; ++i) {
@@ -157,7 +160,7 @@ void init_properties(psy_EventDriver* context)
 		psy_snprintf(text, 256, "%d:%s", i, caps.szPname);
 		psy_property_append_int(devices, text, i, 0, 0);
 	}
-	self->cmddef = psy_property_append_section(self->driver.properties, "cmds");
+	self->cmddef = psy_property_append_section(self->configuration, "cmds");
 }
 
 void driver_configure(psy_EventDriver* driver, psy_Property* config)
@@ -166,10 +169,10 @@ void driver_configure(psy_EventDriver* driver, psy_Property* config)
 	self = (psy_MmeMidiDriver*)driver;
 	psy_Property* p;
 
-	if (self->driver.properties && config) {		
-		psy_property_sync(self->driver.properties, config);
+	if (self->configuration && config) {
+		psy_property_sync(self->configuration, config);
 	}
-	p = psy_property_at(self->driver.properties, "device", PSY_PROPERTY_TYPE_NONE);
+	p = psy_property_at(self->configuration, "device", PSY_PROPERTY_TYPE_NONE);
 	if (p) {
 		self->deviceid = psy_property_item_int(p);
 	}	
@@ -279,4 +282,12 @@ void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 	if (notes) {
 		driver_makenoteinputs((KbdDriver*)driver, notes);
 	} */
+}
+
+const psy_Property* driver_configuration(const psy_EventDriver* driver)
+{
+	psy_MmeMidiDriver* self;
+
+	self = (psy_MmeMidiDriver*)driver;
+	return self->configuration;
 }

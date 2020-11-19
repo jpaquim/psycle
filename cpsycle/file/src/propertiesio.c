@@ -75,7 +75,7 @@ int propertiesio_load(psy_Property* self, const char* path, int allowappend)
 					++cp;
 				}
 			} else
-			if (state == PROPERTIESIO_STATE_READVAL) {
+			if (state == PROPERTIESIO_STATE_READVAL) {				
 				if (c == '\n') {
 					state = PROPERTIESIO_STATE_ADDPROPERTY;
 					value[cp] = '\0';
@@ -106,7 +106,10 @@ int propertiesio_load(psy_Property* self, const char* path, int allowappend)
 					}
 			}			
 			if (state == PROPERTIESIO_STATE_ADDPROPERTY) {
+				bool append;
 				psy_Property* p = psy_property_at(curr, key, PSY_PROPERTY_TYPE_NONE);
+
+				append = allowappend || (curr && curr->item.allowappend);
 				if (p) {
 					switch (p->item.typ) {
 					case PSY_PROPERTY_TYPE_ROOT:
@@ -117,7 +120,7 @@ int propertiesio_load(psy_Property* self, const char* path, int allowappend)
 					case PSY_PROPERTY_TYPE_BOOL:
 						psy_property_set_bool(curr, key, atoi(value));
 						break;
-					case PSY_PROPERTY_TYPE_CHOICE:
+					case PSY_PROPERTY_TYPE_CHOICE:						
 						choice = psy_property_set_choice(curr, key, atoi(value));
 						ischoice = 1;
 						break;
@@ -130,7 +133,7 @@ int propertiesio_load(psy_Property* self, const char* path, int allowappend)
 					default:
 						break;
 					}
-				} else if (allowappend) {
+				} else if (append) {
 					int intval;
 					char *stopstring;
 

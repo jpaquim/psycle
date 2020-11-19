@@ -44,6 +44,7 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 	self->hint = PSY_PROPERTY_HINT_NONE;
 	self->disposechildren = TRUE;
 	self->save = TRUE;
+	self->allowappend = FALSE;
 	self->readonly = FALSE;
 	self->id = -1;	
 }
@@ -966,6 +967,27 @@ psy_PropertyHint psy_property_hint(const psy_Property* self)
 	assert(self);
 
 	return self->item.hint;
+}
+
+void psy_property_preventsave(psy_Property* self)
+{
+	assert(self);
+
+	self->item.save = FALSE;
+}
+
+void psy_property_enablesave(psy_Property* self)
+{
+	assert(self);
+
+	self->item.save = TRUE;
+}
+
+void psy_property_enableappend(psy_Property* self)
+{
+	assert(self);
+
+	self->item.allowappend = TRUE;
 }
 
 // item setter/getter

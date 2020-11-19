@@ -50,8 +50,7 @@ void psy_ui_label_ondestroy(psy_ui_Label* self, psy_ui_Component* sender)
 
 void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 {
-	free(self->text);
-	self->text = strdup(text ? text : "");
+	psy_strreset(&self->text, text);	
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
