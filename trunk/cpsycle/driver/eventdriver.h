@@ -29,20 +29,27 @@ typedef struct {
 } psy_EventDriverInfo;
 
 typedef enum {
-	EVENTDRIVER_KEYDOWN,
-	EVENTDRIVER_KEYUP
-} psy_EventType;
+	psy_EVENTDRIVER_KEYDOWN,
+	psy_EVENTDRIVER_KEYUP
+} psy_EventDriverInputType;
 
 typedef struct 
 {	
 	intptr_t message;
 	intptr_t param1;
 	intptr_t param2;
-} psy_EventDriverData;
+} psy_EventDriverInput;
+
+typedef struct psy_EventDriverMidiData
+{
+	unsigned char byte0;
+	unsigned char byte1;
+	unsigned char byte2;
+} psy_EventDriverMidiData;
 
 typedef struct {
 	int id;
-	psy_EventDriverData data;
+	psy_EventDriverMidiData midi;
 } psy_EventDriverCmd;
 
 typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);
@@ -52,8 +59,8 @@ typedef void (*psy_eventdriver_fp_configure)(struct psy_EventDriver*, psy_Proper
 typedef const psy_Property* (*psy_eventdriver_fp_configuration)(const struct psy_EventDriver*);
 typedef const psy_EventDriverInfo* (*psy_eventdriver_fp_info)(struct psy_EventDriver*);
 typedef int (*psy_eventdriver_fp_close)(struct psy_EventDriver*);
-typedef void (*psy_eventdriver_fp_write)(struct psy_EventDriver*, psy_EventDriverData);
-typedef void (*psy_eventdriver_fp_cmd)(struct psy_EventDriver*, const char* section, psy_EventDriverData,
+typedef void (*psy_eventdriver_fp_write)(struct psy_EventDriver*, psy_EventDriverInput);
+typedef void (*psy_eventdriver_fp_cmd)(struct psy_EventDriver*, const char* section, psy_EventDriverInput,
 	psy_EventDriverCmd*);
 typedef int (*psy_eventdriver_fp_error)(int, const char*);
 typedef psy_EventDriverCmd(*psy_eventdriver_fp_getcmd)(struct psy_EventDriver*, const char* section);
@@ -152,13 +159,13 @@ INLINE int psy_eventdriver_close(psy_EventDriver* self)
 	return self->vtable->close(self);
 }
 
-INLINE void psy_eventdriver_write(psy_EventDriver* self, psy_EventDriverData input)
+INLINE void psy_eventdriver_write(psy_EventDriver* self, psy_EventDriverInput input)
 {
 	self->vtable->write(self, input);
 }
 
 INLINE void psy_eventdriver_cmd(psy_EventDriver* self, const char* section,
-	psy_EventDriverData input, psy_EventDriverCmd* cmd)
+	psy_EventDriverInput input, psy_EventDriverCmd* cmd)
 {
 	self->vtable->cmd(self, section, input, cmd);
 }

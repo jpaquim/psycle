@@ -73,6 +73,7 @@ static void fileoutdriver_createfile(FileOutDriver*);
 static void fileoutdriver_writebuffer(FileOutDriver*, float* pBuf,
 	uintptr_t amount);
 static void fileoutdriver_closefile(FileOutDriver*);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static void init_properties(FileOutDriver* driver);
 
@@ -91,6 +92,7 @@ static void vtable_init(void)
 		vtable.configure = (psy_audiodriver_fp_configure)driver_configure;
 		vtable.configuration = driver_configuration;
 		vtable.samplerate = (psy_audiodriver_fp_samplerate)samplerate;
+		vtable.playposinsamples = playposinsamples;
 		vtable_initialized = 1;
 	}
 }
@@ -201,7 +203,7 @@ void init_properties(FileOutDriver* self)
 {
 	psy_AudioDriver* driver = &self->driver;
 
-	self->configuration = psy_property_allocinit_key("FileOut Driver");
+	self->configuration = psy_property_preventtranslate(psy_property_allocinit_key("FileOut Driver"));
 	psy_property_settext(
 		psy_property_setreadonly(
 			psy_property_append_string(self->configuration, "name", "FileOut Driver"),
@@ -518,4 +520,9 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	FileOutDriver* self = (FileOutDriver*)driver;
 
 	return self->configuration;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	return 0;
 }

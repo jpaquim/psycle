@@ -296,6 +296,10 @@ void mainframe_init(MainFrame* self)
 	psy_ui_component_setalign(&self->seqeditor.component,
 		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_hide(&self->seqeditor.component);
+	psy_ui_splitbar_init(&self->splitseqeditor, &self->client);
+	psy_ui_component_setalign(&self->splitseqeditor.component,
+		psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_hide(&self->splitseqeditor.component);
 	// recent song view
 	recentview_init(&self->recentview, &self->component,
 		&self->viewtabbars.component,
@@ -694,9 +698,9 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 {	
 	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
-		psy_EventDriverData input;			
+		psy_EventDriverInput input;			
 		
-		input.message = EVENTDRIVER_KEYDOWN;
+		input.message = psy_EVENTDRIVER_KEYDOWN;
 		kbd = workspace_kbddriver(&self->workspace);		
 		input.param1 = psy_audio_encodeinput(ev->keycode, 
 			self->patternview.trackerview.grid.chordmode ? 0 : ev->shift, ev->ctrl);		
@@ -709,9 +713,9 @@ void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)
 {
 	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
 		psy_EventDriver* kbd;
-		psy_EventDriverData input;			
+		psy_EventDriverInput input;			
 		
-		input.message = EVENTDRIVER_KEYUP;
+		input.message = psy_EVENTDRIVER_KEYUP;
         input.param1 = psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl);
 		input.param2 = 48;
 		kbd = workspace_kbddriver(&self->workspace);
@@ -1222,7 +1226,9 @@ void mainframe_ontoggleseqeditor(MainFrame* self, psy_ui_Component* sender)
 			"Show SequenceEditor");
 		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
 		psy_ui_component_align(&self->client);
+		psy_ui_component_hide(&self->splitseqeditor.component);
 	} else {
+		psy_ui_component_show(&self->splitseqeditor.component);
 		psy_ui_component_show(seqeditor_base(&self->seqeditor));
 		psy_ui_component_align(&self->client);
 		psy_ui_button_seticon(&self->sequenceview.options.toggleseqediticon,

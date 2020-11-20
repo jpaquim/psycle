@@ -164,6 +164,7 @@ static void clearcapenums(DXDriver*);
 static void clearcapports(DXDriver*);
 static bool createcaptureport(DXDriver*, PortCapt* port);
 static void readbuffers(DXDriver* self, int index, float** pleft, float** pright, int numsamples);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static psy_AudioDriverVTable vtable;
 static bool vtable_initialized = FALSE;
@@ -187,6 +188,7 @@ static void vtable_init(void)
 		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable.playposinsamples = playposinsamples;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = TRUE;
 	}
@@ -349,8 +351,8 @@ static void init_properties(psy_AudioDriver* driver)
 	int i;		
 
 	psy_snprintf(key, 256, "directx-guid-%d", PSY_AUDIODRIVER_DIRECTX_GUID);
-	self->configuration = psy_property_settext(
-		psy_property_allocinit_key(key), "DirectSound");
+	self->configuration = psy_property_preventtranslate(psy_property_settext(
+		psy_property_allocinit_key(key), "DirectSound"));
 	psy_property_sethint(		
 		psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_DIRECTX_GUID, 0, 0),
@@ -1061,4 +1063,31 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	DXDriver* self = (DXDriver*)driver;
 
 	return self->configuration;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	DXDriver* self = (DXDriver*)driver;
+	HRESULT hr;
+	DWORD playPos, writePos;
+
+	//http://msdn.microsoft.com/en-us/library/ee418744%28v=VS.85%29.aspx
+	//When a buffer is created, the play cursor is set to 0. As the buffer is played,
+	//the cursor moves and always points to the next byte of data to be played.
+	//When the buffer is stopped, the cursor remains where it is.
+	if (!self->_threadRun) return 0;
+	
+	hr = IDirectSoundBuffer8_GetCurrentPosition(self->_pBuffer, &playPos, &writePos);
+	if (FAILED(hr))
+	{
+		on_error(0, "DirectSoundBuffer::GetCurrentPosition failed");
+		return 0;
+	}
+	if (playPos < writePos && self->_lowMark > writePos) {
+		return (playPos + self->m_readPosWraps * self->_dsBufferSize) /
+			psy_audiodriversettings_framebytes(&self->settings);
+	} else {
+		return (playPos + (self->m_readPosWraps - 1) * self->_dsBufferSize) /
+			psy_audiodriversettings_framebytes(&self->settings);
+	}
 }

@@ -98,8 +98,7 @@ typedef struct {
 	psy_Property* cmds;
 	psy_Property* patternviewtheme;
 	psy_Property* machineviewtheme;
-	psy_Property* paramtheme;	
-	int octave;
+	psy_Property* paramtheme;
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;	
 	psy_Signal signal_configchanged;

@@ -124,7 +124,8 @@ int psy_audio_eventdrivers_guid(psy_audio_EventDrivers* self,
 			pfneventdriver_info fpeventdriverinfo;
 
 			fpeventdriverinfo = (pfneventdriver_info)
-				psy_library_functionpointer(library, "psy_eventdriver_moduleinfo");
+				psy_library_functionpointer(library,
+					"psy_eventdriver_moduleinfo");
 			if (fpeventdriverinfo) {
 				psy_EventDriverInfo* eventdriverinfo;
 

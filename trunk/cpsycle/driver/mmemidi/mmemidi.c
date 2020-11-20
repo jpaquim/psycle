@@ -10,6 +10,7 @@
 #include <process.h>
 #include <stdio.h>
 
+#include "../../audio/src/cmdsnotes.h"
 #include "../../detail/portable.h"
 
 #define DEVICE_NONE 0
@@ -20,7 +21,7 @@ typedef struct {
 	HMIDIIN hMidiIn;
 	int deviceid;		
 	int (*error)(int, const char*);
-	psy_EventDriverData lastinput;	
+	psy_EventDriverCmd lastinput;
 	HANDLE hEvent;
 	psy_Property* cmddef;
 	psy_Property* configuration;
@@ -34,12 +35,13 @@ static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_EventDriver*);
-static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverData input, psy_EventDriverCmd*);
+static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 
 static void init_properties(psy_EventDriver* self);
+static int clearcmddefenum(psy_MmeMidiDriver*, psy_Property*, int level);
 static int onerror(int err, const char* msg);
 
 static CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg,
@@ -105,7 +107,11 @@ void driver_free(psy_EventDriver* driver)
 
 int driver_init(psy_EventDriver* driver)
 {
-	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*) driver;
+	psy_MmeMidiDriver* self;
+	
+	assert(driver);
+
+	self = (psy_MmeMidiDriver*)driver;
 	memset(self, 0, sizeof(psy_MmeMidiDriver));
 	vtable_init();
 	self->driver.vtable = &vtable;
@@ -119,9 +125,16 @@ int driver_init(psy_EventDriver* driver)
 
 int driver_dispose(psy_EventDriver* driver)
 {
-	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*) driver;
+	psy_MmeMidiDriver* self;
+
+	assert(driver);
+	
+	self = (psy_MmeMidiDriver*)driver;
+	if (self->hMidiIn) {
+		driver_close(driver);
+	}
 	psy_property_deallocate(self->configuration);
-	self->configuration = NULL;
+	self->configuration = NULL;	
 	CloseHandle(self->hEvent);
 	psy_signal_dispose(&driver->signal_input);
 	return 0;
@@ -143,14 +156,14 @@ void init_properties(psy_EventDriver* context)
 	int n;	
 
 	psy_snprintf(key, 256, "mmemidi-guid-%d", PSY_EVENTDRIVER_MMEMIDI_GUID);
-	self->configuration = psy_property_allocinit_key(key);
+	self->configuration = psy_property_preventtranslate(
+		psy_property_allocinit_key(key));
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_MMEMIDI_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
 	psy_property_append_string(self->configuration, "name", "winmme midi");
 	psy_property_append_string(self->configuration, "version", "1.0");
 	devices = psy_property_append_choice(self->configuration, "device", 0);
-	psy_property_append_int(devices, "0:None", 0, 0, 0);
 	n = midiInGetNumDevs();	
 	for (i = 0; i < n; ++i) {
 		char text[256];
@@ -172,28 +185,27 @@ void driver_configure(psy_EventDriver* driver, psy_Property* config)
 	if (self->configuration && config) {
 		psy_property_sync(self->configuration, config);
 	}
-	p = psy_property_at(self->configuration, "device", PSY_PROPERTY_TYPE_NONE);
+	p = psy_property_at(self->configuration, "device",
+		PSY_PROPERTY_TYPE_NONE);
 	if (p) {
 		self->deviceid = psy_property_item_int(p);
-	}	
+	}
 }
 
 int driver_open(psy_EventDriver* driver)
 {
 	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*)driver;	
-	unsigned int success = 1;
+	int success = 1;
 
-	self->lastinput.message = -1;
+	self->lastinput.id = -1;
 	if (self->deviceid != 0) {
-		if (midiInOpen (&self->hMidiIn, self->deviceid - 1, (DWORD_PTR)MidiCallback,
+		if (midiInOpen (&self->hMidiIn, self->deviceid, (DWORD_PTR)MidiCallback,
 				(DWORD_PTR)driver, CALLBACK_FUNCTION)) {
 			psy_eventdriver_error(driver, 0, "Cannot open MIDI device");
 			success = 0;
-		} else {		
-			if (midiInStart(self->hMidiIn)) {
-				psy_eventdriver_error(driver, 0, "Cannot start MIDI device");
-				success = 0;
-			}
+		} else if (midiInStart(self->hMidiIn)) {
+			psy_eventdriver_error(driver, 0, "Cannot start MIDI device");
+			success = 0;
 		}
 	}	         
 	return success;
@@ -202,87 +214,116 @@ int driver_open(psy_EventDriver* driver)
 int driver_close(psy_EventDriver* driver)
 {
 	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*)driver;
-	unsigned int success = 1;
+	int success = 1;
 
 	if (self->deviceid != 0 && self->hMidiIn && midiInClose(self->hMidiIn)) {
 		psy_eventdriver_error(driver, 0, "Cannot close MIDI device");
 		success = 0;
 	}
-
+	self->hMidiIn = NULL;
 	return success;
 }
 
-CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2)
+CALLBACK MidiCallback(HMIDIIN handle, unsigned int msg, DWORD_PTR instance,
+	DWORD_PTR param1, DWORD_PTR param2)
 {			
-	psy_EventDriver* driver = (psy_EventDriver*)dwInstance;	
-	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*) driver;	
-	switch(uMsg) {
-		// normal data message
-		case MIM_DATA:
-		{
-			int cmd;
-			int lsb;
-			int msb;
-			unsigned char* data;
+	psy_MmeMidiDriver* self;
+	
+	self = (psy_MmeMidiDriver*)instance;	
 
-			data = (unsigned char*) &dwParam1;
-			lsb = data[0] & 0x0F;
-			msb = (data[0] & 0xF0) >> 4;
-			switch (msb) {
-				case 0x9:
-					// Note On/Off
-					cmd = data[2] > 0 ? data[1] - 48 : 120;
-					// channel = lsb;
-					self->lastinput.param1 = cmd;
-					self->lastinput.param2 = 48;
-					psy_signal_emit(&self->driver.signal_input, self, 0);
-				default:
+	switch(msg) {
+		// normal data message
+		case MIM_DATA:		
+			self->lastinput.id = CMD_NOTE_MIDIEV;
+			self->lastinput.midi.byte0 = LOBYTE(LOWORD(param1));
+			self->lastinput.midi.byte1 = HIBYTE(LOWORD(param1));
+			self->lastinput.midi.byte2 = LOBYTE(HIWORD(param1));
+			psy_signal_emit(&self->driver.signal_input, self, 0);					
+			break;
+		default:
+			break;
+	}
+}
+
+void driver_cmd(psy_EventDriver* driver, const char* section,
+	psy_EventDriverInput input, psy_EventDriverCmd* cmd)
+{		
+	cmd->id = -1;
+}
+
+psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* sectionname)
+{	
+	psy_MmeMidiDriver* self;
+	psy_Property* section;
+	psy_EventDriverCmd cmd;
+	psy_Property* property = NULL;
+	psy_List* p;
+	
+	self = (psy_MmeMidiDriver*)driver;
+
+	cmd.id = -1;
+	if (!sectionname) {
+		return cmd;
+	}	
+	section = psy_property_findsection(self->configuration, sectionname);
+	if (!section) {
+		self->lastinput;
+	}
+	for (p = psy_property_children(section); p != NULL;
+			psy_list_next(&p)) {
+		unsigned char byte0;
+		unsigned char byte1;
+		unsigned char byte2;
+
+		property = (psy_Property*)psy_list_entry(p);
+		if (psy_property_item_int(property) != 0) {
+			byte0 = LOBYTE(LOWORD(psy_property_item_int(property)));
+			byte1 = HIBYTE(LOWORD(psy_property_item_int(property)));
+			byte2 = LOBYTE(HIWORD(psy_property_item_int(property)));
+			if (byte0 == self->lastinput.midi.byte0 &&
+				byte1 == self->lastinput.midi.byte1) {
+				// byte2 == self->lastinput.midi.byte2) {
+				cmd.id = property->item.id;
+				cmd.midi.byte0 = byte0;
+				cmd.midi.byte1 = byte1;
+				cmd.midi.byte2 = byte2;
+				return cmd;
 				break;
 			}
 		}
-		break;
-		default:
-		break;
+		property = NULL;
 	}
+	return self->lastinput;
 }
-
-void driver_cmd(psy_EventDriver* driver, const char* section, psy_EventDriverData input, psy_EventDriverCmd* cmd)
-{		
-	cmd->id = input.param1;
-	cmd->data.param1 = input.param1;
-}
-
-psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
-{
-	psy_EventDriverCmd cmd;
-	psy_MmeMidiDriver* self = (psy_MmeMidiDriver*) driver;	
-			
-	driver_cmd(driver, section, self->lastinput, &cmd);	
-	return cmd;
-}
-
-/*
-void driver_configure(psy_EventDriver* driver)
-{
-	psy_Property* notes;
-
-	notes = psy_property_findsection(driver->properties, "notes");
-	if (notes) {
-		driver_makenoteinputs((KbdDriver*)driver, notes);
-	}
-}
-*/
 
 void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 {
-/*	psy_Property* notes;
+	if (cmddef && cmddef->children) {
+		psy_MmeMidiDriver* self = (psy_MmeMidiDriver*)driver;
 
-	driver->properties = psy_property_clone(cmddef);
-	notes = psy_property_findsection(driver->properties, "notes");
-	if (notes) {
-		driver_makenoteinputs((KbdDriver*)driver, notes);
-	} */
+		if (self->cmddef) {
+			psy_property_remove(self->configuration, self->cmddef);
+		}
+		self->cmddef = psy_property_clone(cmddef);
+		psy_property_append_property(self->configuration,
+			self->cmddef);
+		psy_property_settext(self->cmddef, "cmds.keymap");
+		if (!psy_property_empty(self->cmddef)) {
+			psy_property_enumerate(self->cmddef, self,
+				(psy_PropertyCallback)clearcmddefenum);
+		}
+	}
 }
+
+int clearcmddefenum(psy_MmeMidiDriver* self, psy_Property* property, int level)
+{
+	psy_property_sethint(property, PSY_PROPERTY_HINT_EDIT);
+	if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
+		psy_property_setitem_int(property, 0);
+	}
+	return 1;
+}
+
 
 const psy_Property* driver_configuration(const psy_EventDriver* driver)
 {

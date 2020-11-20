@@ -4,10 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "pianoroll.h"
+// std
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 
 static int isblack(int key)

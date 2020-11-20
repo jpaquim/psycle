@@ -70,6 +70,7 @@ typedef struct psy_PropertyItem {
 	bool allowappend;
 	bool disposechildren;
 	bool save;
+	bool translate;
 	intptr_t id;
 } psy_PropertyItem;
 
@@ -167,9 +168,10 @@ psy_Property* psy_property_setreadonly(psy_Property*, bool on);
 bool psy_property_readonly(const psy_Property*);
 psy_Property* psy_property_sethint(psy_Property*, psy_PropertyHint);
 psy_PropertyHint psy_property_hint(const psy_Property*);
-void psy_property_preventsave(psy_Property*);
-void psy_property_enablesave(psy_Property*);
-void psy_property_enableappend(psy_Property*);
+psy_Property* psy_property_preventsave(psy_Property*);
+psy_Property* psy_property_enablesave(psy_Property*);
+psy_Property* psy_property_enableappend(psy_Property*);
+psy_Property* psy_property_preventtranslate(psy_Property*);
 // Value
 psy_Property* psy_property_setitem_bool(psy_Property*, bool value);
 bool psy_property_item_bool(const psy_Property*);

@@ -3,22 +3,21 @@
 
 #include "../../detail/prefix.h"
 
-#include <assert.h>
-
-#include "constants.h"
 #include "logicalchannels.h"
+
+#include <assert.h>
+#include <string.h>
 
 void psy_audio_logicalchannels_init(psy_audio_LogicalChannels* self)
 {	
 	assert(self);
 
-	psy_table_init(&self->physicalmap);
+	memset(self->physical_active, 0, sizeof(bool) * MAX_TRACKS);
 	psy_table_init(&self->logicalmap);
 }
 
 void psy_audio_logicalchannels_dispose(psy_audio_LogicalChannels* self)
-{
-	psy_table_dispose(&self->physicalmap);
+{	
 	psy_table_dispose(&self->logicalmap);
 }
 
@@ -30,19 +29,15 @@ uintptr_t psy_audio_logicalchannels_physical(psy_audio_LogicalChannels* self, ui
 		rv = (uintptr_t)psy_table_at(&self->logicalmap, logical);
 	} else {		
 		rv = logical % MAX_TRACKS;
-		if (!psy_table_exists(&self->physicalmap, rv)) {
+		if (!self->physical_active[rv]) {
 			// physical free
-			psy_table_insert(&self->physicalmap, rv, (void*)logical);
+			self->physical_active[rv] = TRUE;
 		} else {
-			// physical channel not free
-			if (psy_table_size(&self->physicalmap) >= MAX_TRACKS) {
-				// no physical channels free
-				// todo
-			}
+			// todo check physical channel not free			
 			// find free physical channel
 			for (rv = 0; rv < 64; ++rv) {
-				if (!psy_table_exists(&self->physicalmap, rv)) {
-					psy_table_insert(&self->physicalmap, rv, (void*)logical);
+				if (self->physical_active[rv] == FALSE) {
+					self->physical_active[rv] = TRUE;
 					break;
 				}
 			}			
@@ -54,6 +49,6 @@ uintptr_t psy_audio_logicalchannels_physical(psy_audio_LogicalChannels* self, ui
 
 void psy_audio_logicalchannels_reset(psy_audio_LogicalChannels* self)
 {
-	psy_table_clear(&self->physicalmap);
+	memset(self->physical_active, 0, sizeof(bool) * MAX_TRACKS);
 	psy_table_clear(&self->logicalmap);
 }

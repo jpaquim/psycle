@@ -32,6 +32,7 @@ static const char* playbackname(psy_AudioDriver*, int index);
 static int numplaybacks(psy_AudioDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
 static const psy_Property* driver_configuration(const struct psy_AudioDriver*);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static void init_properties(SilentDriver* driver);
 
@@ -55,6 +56,7 @@ static void vtable_init(void)
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
+		vtable.playposinsamples = playposinsamples;
 		vtable_initialized = 1;
 	}
 }
@@ -73,11 +75,14 @@ static const psy_AudioDriverInfo* GetPsycleDriverInfo(void)
 
 psy_AudioDriver* psy_audio_create_silent_driver(void)
 {
-	SilentDriver* driver = (SilentDriver*)malloc(sizeof(SilentDriver));
-	if (driver) {		
-		driver_init(driver);
+	SilentDriver* silent;
+	
+	silent = (SilentDriver*)malloc(sizeof(SilentDriver));
+	if (silent) {
+		driver_init(silent);
+		return &silent->driver;
 	}
-	return driver;
+	return NULL;
 }
 
 void driver_deallocate(psy_AudioDriver* self)
@@ -140,8 +145,8 @@ void init_properties(SilentDriver* self)
 
 	psy_snprintf(key, 256, "silent-guid-%d",
 		PSY_AUDIODRIVER_SILENTDRIVER_GUID);
-	self->configuration = psy_property_settext(
-		psy_property_allocinit_key(key), "Silent");
+	self->configuration = psy_property_preventtranslate(psy_property_settext(
+		psy_property_allocinit_key(key), "Silent"));
 	psy_property_setreadonly(
 		psy_property_append_string(self->configuration, "name", "Silent AudioDriver"),
 		TRUE);
@@ -184,4 +189,9 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 
 	self = (SilentDriver*)driver;
 	return self->configuration;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	return 0;
 }

@@ -48,6 +48,9 @@ typedef struct psy_audio_Player {
 	psy_audio_Pattern patterndefaults;
 	psy_dsp_Dither dither;
 	bool dodither;
+	int octave;
+	uint32_t resyncplayposinsamples;
+	psy_dsp_big_beat_t resyncplayposinbeats;
 } psy_audio_Player;
 
 // init dispose
@@ -64,6 +67,13 @@ void psy_audio_player_setnumsongtracks(psy_audio_Player*, uintptr_t numsongtrack
 INLINE uintptr_t psy_audio_player_numsongtracks(psy_audio_Player* self)
 {
 	return self->numsongtracks;
+}
+
+void psy_audio_player_setoctave(psy_audio_Player*, uintptr_t octave);
+
+INLINE uintptr_t psy_audio_player_octave(psy_audio_Player* self)
+{
+	return self->octave;
 }
 
 void psy_audio_player_setvumetermode(psy_audio_Player*, VUMeterMode);

@@ -152,14 +152,15 @@ static int numplaybacks(psy_AudioDriver*);
 static bool start(MmeDriver*);
 static bool stop(MmeDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static void preparewaveformat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static void PollerThread(void *pWaveOut);
 static void DoBlocks(MmeDriver* self);
 static void init_properties(psy_AudioDriver* self);
-static int on_error(int err, const char* msg);
+static int onerror(int err, const char* msg);
 
-int on_error(int err, const char* msg)
+int onerror(int err, const char* msg)
 {
 	MessageBox(0, msg, "Windows Wave MME driver", MB_OK | MB_ICONERROR);
 	return 0;
@@ -197,6 +198,7 @@ static void vtable_init(void)
 		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable.playposinsamples = playposinsamples;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
 	}
@@ -242,7 +244,7 @@ int driver_init(psy_AudioDriver* driver)
 	/*self->_deviceId = 0; // WAVE_MAPPER;
 	self->_blockSizeBytes = 4096;
 	self->pollSleep_ = 10;*/
-	self->error = on_error;
+	self->error = onerror;
 	self->_deviceId = 0;
 	self->pollSleep_ = 20;
 	self->_dither = 0;
@@ -284,8 +286,8 @@ static void init_properties(psy_AudioDriver* driver)
 
 	self = (MmeDriver*)driver;
 	psy_snprintf(key, 256, "mme-guid-%d", PSY_AUDIODRIVER_MME_GUID);
-	self->configuration = psy_property_settext(
-		psy_property_allocinit_key(key), "Windows Wave MME");
+	self->configuration = psy_property_preventtranslate(psy_property_settext(
+		psy_property_allocinit_key(key), "Windows Wave MME"));
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_MME_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
@@ -967,4 +969,37 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	MmeDriver* self = (MmeDriver*)driver;
 
 	return self->configuration;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	MmeDriver* self = (MmeDriver*)driver;
+	MMTIME time;
+
+	// WARNING! waveOutGetPosition in TIME_SAMPLES has max of 0x7FFFFF for 16bit stereo signals.
+	if (self->_stopPolling) {
+		return 0;
+	}
+	time.wType = TIME_SAMPLES;
+	if (waveOutGetPosition(self->_handle, &time, sizeof(MMTIME)) != MMSYSERR_NOERROR)
+	{
+		onerror(0, "waveOutGetPosition() failed");
+	}
+	if (time.wType != TIME_SAMPLES)
+	{
+		onerror(0, "waveOutGetPosition() doesn't support TIME_SAMPLES");
+	}
+
+	uint32_t retval = time.u.sample;
+	// sample counter wrap around?
+	if (self->m_lastPlayPos > retval)
+	{
+		self->m_readPosWraps++;
+		if (self->m_lastPlayPos > self->_writePos) {
+			self->m_readPosWraps = 0;
+			// PsycleGlobal::midi().ReSync();	// MIDI IMPLEMENTATION
+		}
+	}
+	self->m_lastPlayPos = retval;
+	return retval + (self->m_readPosWraps * 0x800000);
 }

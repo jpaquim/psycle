@@ -203,7 +203,6 @@ void workspace_init(Workspace* self, void* handle)
 	psy_dsp_noopt_init(&dsp);
 #endif
 	self->fontheight = 12;
-	self->octave = 4;	
 	self->cursorstep = 1;
 	self->followsong = 0;
 	self->recordtweaks = 0;
@@ -1507,21 +1506,27 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 	switch (psy_property_id(property)) {
 		case PROPERTY_ID_LOADSKIN:
 			workspace_onloadskin(self);
+			return;
 			break;
 		case PROPERTY_ID_DEFAULTSKIN:
 			workspace_ondefaultskin(self);
+			return;
 			break;
 		case PROPERTY_ID_LOADCONTROLSKIN:
 			workspace_onloadcontrolskin(self);
+			return;
 			break;
 		case PROPERTY_ID_ADDEVENTDRIVER:
 			workspace_onaddeventdriver(self);
+			return;
 			break;
 		case PROPERTY_ID_REMOVEEVENTDRIVER:
 			workspace_onremoveeventdriver(self);
+			return;
 			break;
 		case PROPERTY_ID_DEFAULTFONT:
 			workspace_setdefaultfont(self, property);
+			return;
 			break;
 		case PROPERTY_ID_DRAWVUMETERS:
 			if (psy_property_item_bool(property)) {
@@ -1529,6 +1534,7 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 			} else {
 				psy_audio_player_setvumetermode(&self->player, VUMETER_NONE);
 			}
+			return;
 			break;
 		default: {
 			psy_Property* choice;
@@ -1538,19 +1544,24 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 				: NULL;			
 			if (choice && (psy_property_id(choice) == PROPERTY_ID_LANG)) {
 				workspace_configlanguage(self);
+				return;
 			} else if (choice && (psy_property_id(choice) ==
 				PROPERTY_ID_AUDIODRIVERS)) {
 				workspace_onaudiodriverselect(self);
+				return;
 			} else if (choice && psy_property_id(choice) ==
 				PROPERTY_ID_ACTIVEEVENTDRIVERS) {
 				workspace_showactiveeventdriverconfig(self,
 					psy_property_item_int(choice));
+				return;
 			} else if (psy_property_insection(property,
 				self->driverconfigure)) {
 				workspace_oneditaudiodriverconfiguration(self);
+				return;
 			} else if (psy_property_insection(property,
 				self->eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);
+				return;
 			}
 			break;
 		}
@@ -2115,6 +2126,7 @@ void workspace_load_configuration(Workspace* self)
 	workspace_makeeventdriverconfigurations(self);
 	propertiesio_load(&self->config, psy_path_path(&path), 0);
 	workspace_readeventdriverconfigurations(self);
+	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_showactiveeventdriverconfig(self,
 		workspace_curreventdriverconfiguration(self));
 	workspace_configvisual(self);
@@ -2201,7 +2213,7 @@ void workspace_setoctave(Workspace* self, int octave)
 {
 	assert(self);
 
-	self->octave = octave;
+	psy_audio_player_setoctave(&self->player, octave);
 	psy_signal_emit(&self->signal_octavechanged, self, 1, octave);
 }
 
@@ -2209,7 +2221,7 @@ int workspace_octave(Workspace* self)
 {
 	assert(self);
 
-	return self->octave;
+	return psy_audio_player_octave(&self->player);
 }
 
 void workspace_undo(Workspace* self)
