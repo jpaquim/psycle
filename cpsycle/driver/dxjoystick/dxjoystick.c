@@ -37,7 +37,7 @@ typedef struct {
 	int deviceid;
 	bool active;
 	int (*error)(int, const char*);
-	psy_EventDriverData lastinput;	
+	psy_EventDriverInput lastinput;	
 	HANDLE hEvent;
 	psy_Property* devices;
 	psy_Property* cmddef;
@@ -54,7 +54,7 @@ static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section,
-	psy_EventDriverData input, psy_EventDriverCmd*);
+	psy_EventDriverInput input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void driver_setcmddef(psy_EventDriver*, psy_Property*);
 static void driver_setcmddefaults(DXJoystickDriver*, psy_Property*);
@@ -176,7 +176,7 @@ void init_properties(psy_EventDriver* context)
 
 	self = (DXJoystickDriver*)context;
 	psy_snprintf(key, 256, "dxjoystick-guid-%d", PSY_EVENTDRIVER_DXJOYSTICK_GUID);
-	self->configuration = psy_property_allocinit_key(key);
+	self->configuration = psy_property_preventtranslate(psy_property_allocinit_key(key));
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_DXJOYSTICK_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
@@ -343,7 +343,7 @@ CALLBACK MidiCallback(HMIDIIN handle, unsigned int uMsg, DWORD_PTR dwInstance, D
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
-	psy_EventDriverData input, psy_EventDriverCmd* cmd)
+	psy_EventDriverInput input, psy_EventDriverCmd* cmd)
 {		
 	DXJoystickDriver* self = (DXJoystickDriver*)driver;
 	psy_Property* section;
@@ -369,9 +369,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 			property = NULL;
 		}
 		if (property) {
-			cmd->id = property->item.id;
-			cmd->data.param1 = 0;
-			cmd->data.param2 = 0;
+			cmd->id = property->item.id;			
 		}
 	}
 }

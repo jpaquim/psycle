@@ -1178,11 +1178,11 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 			return;
 		} else {
 			psy_EventDriver* kbd;
-			psy_EventDriverData input;
+			psy_EventDriverInput input;
 			psy_EventDriverCmd cmd;
 
 			kbd = workspace_kbddriver(self->workspace);
-			input.message = EVENTDRIVER_KEYDOWN;
+			input.message = psy_EVENTDRIVER_KEYDOWN;
 			input.param1 = psy_audio_encodeinput(ev->keycode,
 				self->chordmode ? 0 : ev->shift, ev->ctrl);
 			input.param2 = workspace_octave(self->workspace) * 12;
@@ -1213,11 +1213,11 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 				{
 					psy_EventDriver* kbd;
 					psy_EventDriverCmd cmd;
-					psy_EventDriverData input;
+					psy_EventDriverInput input;
 
 					cmd.id = -1;
 					kbd = workspace_kbddriver(self->workspace);
-					input.message = EVENTDRIVER_KEYDOWN;
+					input.message = psy_EVENTDRIVER_KEYDOWN;
 					input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
 					psy_eventdriver_cmd(kbd, "notes", input, &cmd);
 					trackergrid_inputnote(self,
@@ -1401,11 +1401,11 @@ void trackergrid_enterevent(TrackerGrid* self, psy_ui_KeyEvent* ev)
 	{
 		psy_EventDriver* kbd;
 		psy_EventDriverCmd cmd;
-		psy_EventDriverData input;
+		psy_EventDriverInput input;
 
 		cmd.id = -1;
 		kbd = workspace_kbddriver(self->workspace);
-		input.message = EVENTDRIVER_KEYDOWN;
+		input.message = psy_EVENTDRIVER_KEYDOWN;
 		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
 		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
 		if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
@@ -3840,11 +3840,11 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 		}
 	} else {
 		psy_EventDriver* kbd;
-		psy_EventDriverData input;
+		psy_EventDriverInput input;
 		psy_EventDriverCmd cmd;
 
 		kbd = workspace_kbddriver(self->workspace);
-		input.message = EVENTDRIVER_KEYDOWN;		
+		input.message = psy_EVENTDRIVER_KEYDOWN;		
 		input.param1 = psy_audio_encodeinput(ev->keycode,
 			self->grid.chordmode ? 0 : ev->shift, ev->ctrl);
 		input.param2 = workspace_octave(self->workspace) * 12;

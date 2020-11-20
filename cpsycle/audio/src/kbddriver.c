@@ -35,7 +35,7 @@ static psy_EventDriverInfo const* psy_audio_kbddriver_info(void)
 typedef struct {
 	psy_EventDriver driver;
 	int (*error)(int, const char*);
-	psy_EventDriverData lastinput;
+	psy_EventDriverInput lastinput;
 	psy_Property* cmddef;
 	psy_Property* configuration;
 } KbdDriver;
@@ -48,8 +48,8 @@ static int driver_dispose(psy_EventDriver*);
 static const psy_EventDriverInfo* driver_info(psy_EventDriver*);
 static void driver_configure(psy_EventDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_EventDriver*);
-static void driver_write(psy_EventDriver*, psy_EventDriverData input);
-static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverData,
+static void driver_write(psy_EventDriver*, psy_EventDriverInput input);
+static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput,
 	psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static void setcmddef(psy_EventDriver*, psy_Property*);
@@ -135,7 +135,7 @@ void init_properties(psy_EventDriver* context)
 
 	self = (KbdDriver*)context;
 	psy_snprintf(key, 256, "kbd-guid-%d", PSY_EVENTDRIVER_KBD_GUID);
-	self->configuration = psy_property_allocinit_key(key);
+	self->configuration = psy_property_preventtranslate(psy_property_allocinit_key(key));
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_EVENTDRIVER_KBD_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
@@ -169,7 +169,7 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 	return psy_audio_kbddriver_info();
 }
 
-void driver_write(psy_EventDriver* driver, psy_EventDriverData input)
+void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 {	
 	KbdDriver* self;	
 
@@ -179,7 +179,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverData input)
 }
 
 void driver_cmd(psy_EventDriver* driver, const char* sectionname,
-	psy_EventDriverData input, psy_EventDriverCmd* cmd)
+	psy_EventDriverInput input, psy_EventDriverCmd* cmd)
 {		
 	KbdDriver* self;
 	psy_EventDriverCmd kbcmd;
@@ -195,7 +195,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	if (!section) {
 		return;
 	}
-	if (input.message == EVENTDRIVER_KEYDOWN) {
+	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
 		psy_List* p;
 		psy_Property* property = NULL;
 
@@ -209,27 +209,8 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		}
 		if (property) {
 			kbcmd.id = property->item.id;
+			cmd->id = kbcmd.id;
 		}		
-		if (kbcmd.id == CMD_NOTE_STOP) {
-			cmd->id = kbcmd.id;
-			cmd->data.param1 = psy_audio_NOTECOMMANDS_RELEASE;			
-		} else
-		if (kbcmd.id == CMD_NOTE_TWEAKM) {
-			cmd->id = kbcmd.id;
-			cmd->data.param1 = psy_audio_NOTECOMMANDS_TWEAK;			
-		} else
-		if (kbcmd.id == CMD_NOTE_TWEAKS) {
-			cmd->id = kbcmd.id;
-			cmd->data.param1 = psy_audio_NOTECOMMANDS_TWEAKSLIDE;			
-		} else
-		if (kbcmd.id == CMD_NOTE_MIDICC) {
-			cmd->id = kbcmd.id;
-			cmd->data.param1 = psy_audio_NOTECOMMANDS_MIDICC;
-		} else
-		if (kbcmd.id != -1) {
-			cmd->id = kbcmd.id;
-			cmd->data.param1 = kbcmd.id + input.param2;
-		}
 	} else {
 		psy_List* p;
 		psy_Property* property = NULL;
@@ -247,7 +228,6 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		}
 		if (kbcmd.id <= psy_audio_NOTECOMMANDS_RELEASE) {
 			cmd->id = psy_audio_NOTECOMMANDS_RELEASE;
-			cmd->data.param1 = psy_audio_NOTECOMMANDS_RELEASE;
 		}
 	}
 }
@@ -273,7 +253,7 @@ void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
 		self->cmddef = psy_property_clone(cmddef);
 		psy_property_append_property(self->configuration,
 			self->cmddef);
-		psy_property_settext(self->cmddef, "cmds.keymap");
+		psy_property_settext(self->cmddef, "cmds.keymap");		
 	}
 }
 

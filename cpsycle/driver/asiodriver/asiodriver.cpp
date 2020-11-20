@@ -299,6 +299,18 @@ bool ASIOInterface::Enable(bool e)
 	return e ? Start() : Stop();
 }
 
+uint32_t ASIOInterface::GetPlayPosInSamples()
+{
+	if (!_running) return 0;
+	return writePos - GetOutputLatencySamples();
+}
+
+uint32_t ASIOInterface::GetWritePosInSamples() const
+{
+	if (!_running) return 0;
+	return writePos;
+}
+
 void ASIOInterface::GetPlaybackPorts(std::vector<std::string>& ports) const
 {
 	ports.resize(0);
@@ -1370,6 +1382,7 @@ static void driver_deallocate(psy_AudioDriver*);
 static void init_properties(psy_AudioDriver*);
 static void readbuffers(AsioDriver* self, int idx, float** left, float** right, int numsamples);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static psy_AudioDriverVTable vtable;
 static int vtable_initialized = 0;
@@ -1393,6 +1406,7 @@ static void vtable_init(void)
 		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable.playposinsamples = playposinsamples;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
 	}
@@ -1473,8 +1487,8 @@ void init_properties(psy_AudioDriver* driver)
 	psy_Property* indevices;
 
 	psy_snprintf(key, 256, "asio-guid-%d", PSY_AUDIODRIVER_ASIO_GUID);
-	self->configuration = psy_property_settext(
-		psy_property_allocinit_key(key), "Asio 2_2");
+	self->configuration = psy_property_preventtranslate(psy_property_settext(
+		psy_property_allocinit_key(key), "Asio 2_2"));
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_ASIO_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
@@ -1636,4 +1650,11 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	AsioDriver* self = (AsioDriver*)driver;
 
 	return self->configuration;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	AsioDriver* self = (AsioDriver*)driver;
+
+	return self->asioif->GetPlayPosInSamples();
 }

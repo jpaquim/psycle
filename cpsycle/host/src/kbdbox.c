@@ -148,7 +148,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 		key = (KbdBoxKey*)psy_tableiterator_value(&it);
 		if (psy_ui_rectangle_intersect(&key->position, ev->x, ev->y)) {
 			psy_EventDriver* kbd;
-			psy_EventDriverData input;
+			psy_EventDriverInput input;
 			int rowheight;
 			int pos;
 			bool shift = FALSE;
@@ -170,7 +170,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 					ctrl = TRUE;
 				}
 			}			
-			input.message = EVENTDRIVER_KEYDOWN;
+			input.message = psy_EVENTDRIVER_KEYDOWN;
 			kbd = workspace_kbddriver(self->workspace);
 			input.param1 = psy_audio_encodeinput(psy_tableiterator_key(&it),
 				shift, ctrl);

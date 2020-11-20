@@ -1167,8 +1167,12 @@ void propertiesview_translate(PropertiesView* self)
 int propertiesview_onchangelanguageenum(PropertiesView* self,
 	psy_Property* property, int level)
 {	
-	psy_property_settranslation(property,
-		translator_translate(&self->workspace->translator,
-			psy_property_text(property)));
+	if (!property->item.translate) {
+		return 2;
+	} else {
+		psy_property_settranslation(property,
+			translator_translate(&self->workspace->translator,
+				psy_property_text(property)));
+	}
 	return TRUE;
 }

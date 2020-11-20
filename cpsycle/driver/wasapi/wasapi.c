@@ -218,6 +218,7 @@ static int numplaybacks(psy_AudioDriver*);
 static int addcaptureport(WasapiDriver*, int idx);
 static int removecaptureport(WasapiDriver*, int idx);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static void PrepareWaveFormat(WAVEFORMATEXTENSIBLE* wf, int channels, int sampleRate, int bits, int validBits);
 static void init_properties(psy_AudioDriver*);
@@ -248,6 +249,7 @@ static void vtable_init(void)
 		vtable.numcaptures = (psy_audiodriver_fp_numcaptures)numcaptures;
 		vtable.playbackname = (psy_audiodriver_fp_playbackname)playbackname;
 		vtable.numplaybacks = (psy_audiodriver_fp_numplaybacks)numplaybacks;
+		vtable.playposinsamples = playposinsamples;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
 	}
@@ -455,8 +457,8 @@ static void init_properties(psy_AudioDriver* driver)
 	int i;
 
 	psy_snprintf(key, 256, "wasapi-guid-%d", PSY_AUDIODRIVER_WASAPI_GUID);
-	self->configuration = psy_property_settext(
-		psy_property_allocinit_key(key), "Windows WASAPI interface");
+	self->configuration = psy_property_preventtranslate(psy_property_settext(
+		psy_property_allocinit_key(key), "Windows WASAPI interface"));
 	psy_property_sethint(psy_property_append_int(self->configuration,
 		"guid", PSY_AUDIODRIVER_WASAPI_GUID, 0, 0),
 		PSY_PROPERTY_HINT_HIDE);
@@ -1621,4 +1623,26 @@ const psy_Property* driver_configuration(const psy_AudioDriver* driver)
 	WasapiDriver* self = (WasapiDriver*)driver;
 
 	return self->configuration;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	WasapiDriver* self = (WasapiDriver*)driver;
+	UINT64 pos;
+	uint32_t retVal = 0;
+
+	if (self->running) {
+		HRESULT hr = IAudioClock_GetPosition(self->pAudioClock, &pos, NULL);
+		EXIT_ON_ERROR(hr)
+			if (self->audioClockFreq == psy_audiodriversettings_samplespersec(&self->settings)) {
+				retVal = pos;
+			} else {
+				//Thus, the stream-relative offset in seconds can always be calculated as p/f.
+				retVal = (pos * psy_audiodriversettings_samplespersec(&self->settings) /
+					self->audioClockFreq);
+			}
+	}
+Exit:
+	return retVal;
+	return 0;
 }

@@ -46,6 +46,7 @@ void psy_propertyitem_init(psy_PropertyItem* self)
 	self->save = TRUE;
 	self->allowappend = FALSE;
 	self->readonly = FALSE;
+	self->translate = TRUE;
 	self->id = -1;	
 }
 
@@ -92,6 +93,8 @@ void psy_propertyitem_copy(psy_PropertyItem* self, const psy_PropertyItem*
 	self->save = source->save;
 	self->id = source->id;
 	self->readonly = source->readonly;
+	self->save = source->save;
+	self->translate = source->translate;
 }
 
 // psy_Property
@@ -345,17 +348,16 @@ int properties_enumerate_rec(psy_Property* self,
 			context->level);
 		if (walkoption == 0) {
 			return 0;
-		} else
-			if (walkoption == 1) {
-				if (((psy_Property*)(p->entry))->children) {
-					++context->level;
-					if (!properties_enumerate_rec(p->entry, context)) {
-						--context->level;
-						return 0;
-					}
+		} else if (walkoption == 1) {
+			if (((psy_Property*)(p->entry))->children) {
+				++context->level;
+				if (!properties_enumerate_rec(p->entry, context)) {
 					--context->level;
+					return 0;
 				}
+				--context->level;
 			}
+		}
 		p = p->next;
 	}
 	return 1;
@@ -969,25 +971,36 @@ psy_PropertyHint psy_property_hint(const psy_Property* self)
 	return self->item.hint;
 }
 
-void psy_property_preventsave(psy_Property* self)
+psy_Property* psy_property_preventsave(psy_Property* self)
 {
 	assert(self);
 
 	self->item.save = FALSE;
+	return self;
 }
 
-void psy_property_enablesave(psy_Property* self)
+psy_Property* psy_property_enablesave(psy_Property* self)
 {
 	assert(self);
 
 	self->item.save = TRUE;
+	return self;
 }
 
-void psy_property_enableappend(psy_Property* self)
+psy_Property* psy_property_enableappend(psy_Property* self)
 {
 	assert(self);
 
 	self->item.allowappend = TRUE;
+	return self;
+}
+
+psy_Property* psy_property_preventtranslate(psy_Property* self)
+{
+	assert(self);
+
+	self->item.translate = FALSE;
+	return self;
 }
 
 // item setter/getter

@@ -404,7 +404,7 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer* self,
 {
 	assert(self);
 
-	if (psy_audio_sequencer_playing(self)) {
+	if (psy_audio_sequencer_playing(self)) {		
 		psy_audio_sequencer_advanceposition(self, width);		
 	}
 	psy_audio_sequencer_clearevents(self);

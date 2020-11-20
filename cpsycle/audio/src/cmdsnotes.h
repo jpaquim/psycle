@@ -62,6 +62,7 @@ enum {
 	//CMD_NOTE_TweakE = 122,	///< tweak effect. Old! No longer used.
 	CMD_NOTE_MIDICC = 123,	///< Mcm Command (MIDI CC)
 	CMD_NOTE_TWEAKS = 124,	///< tweak slide command
+	CMD_NOTE_MIDIEV = 125
 };
 
 #endif

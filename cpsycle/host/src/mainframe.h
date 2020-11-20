@@ -84,6 +84,7 @@ typedef struct {
 	psy_ui_Component paramviews;
 	StepsequencerView stepsequencerview;
 	SequenceView sequenceview;
+	psy_ui_SplitBar splitseqeditor;
 	SeqEditor seqeditor;
 	MachineView machineview;
 	PatternView patternview;		

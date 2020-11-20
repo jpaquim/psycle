@@ -64,6 +64,7 @@ static void driver_configure(psy_AudioDriver*, psy_Properties*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
 static unsigned int driver_samplerate(psy_AudioDriver*);
 static const psy_AudioDriverInfo* driver_info(psy_AudioDriver*);
+static uint32_t playposinsamples(psy_AudioDriver*);
 
 static void thread_function(void* driver);
 static void init_properties(psy_AudioDriver*);
@@ -90,6 +91,7 @@ static void vtable_init(void)
 		vtable.configure = driver_configure;
 		vtable.configuration = driver_configuration;
 		vtable.samplerate = driver_samplerate;
+		vtable.playposinsamples = playposinsamples;
 		vtable.info = (psy_audiodriver_fp_info)driver_info;
 		vtable_initialized = 1;
 	}
@@ -561,4 +563,11 @@ const psy_AudioDriverInfo* driver_info(psy_AudioDriver* self)
 const psy_Property* driver_configuration(const psy_AudioDriver* self)
 {
 	return self->properties;
+}
+
+uint32_t playposinsamples(psy_AudioDriver* driver)
+{
+	AlsaDriver* self = (AlsaDriver*)driver;
+
+	return 0;
 }

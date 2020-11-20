@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "player.h"
+#include "constants.h"
 #include "exclusivelock.h"
 #include "math.h"
 #include "master.h"
@@ -21,6 +22,7 @@
 #include "../../detail/psyconf.h"
 #include "stdlib.h"
 #include "../../detail/trace.h"
+#include "cmdsnotes.h"
 
 static psy_dsp_amp_t bufferdriver[65535];
 static void* mainframe;
@@ -59,6 +61,9 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->recordingnotes = 0;
 	self->multichannelaudition = 0;
 	self->dodither = FALSE;
+	self->octave = 4;
+	self->resyncplayposinsamples = 0;
+	self->resyncplayposinbeats = 0.0;
 	psy_dsp_dither_init(&self->dither);
 	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
 		&song->machines);
@@ -136,6 +141,9 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 		? psy_audio_MAX_STREAM_SIZE
 		: numsamplex;
 	psy_audio_exclusivelock_enter();
+	self->resyncplayposinsamples = psy_audiodriver_playposinsamples(
+		self->driver);
+	self->resyncplayposinbeats = psy_audio_player_position(self);
 	do {		
 		amount = maxamount;
 		if (amount > numsamplex) {
@@ -176,7 +184,7 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 
 void psy_audio_player_workamount(psy_audio_Player* self, uintptr_t amount,
 	uintptr_t* numsamplex, psy_dsp_amp_t** psamples)
-{
+{	
 	psy_audio_sequencer_frametick(&self->sequencer, amount);
 	if (self->song) {
 		psy_audio_player_workpath(self, amount);
@@ -315,20 +323,35 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 {
 	psy_EventDriverCmd cmd;	
 	
-	cmd = psy_eventdriver_getcmd(sender, "notes");
-	printf("input %d, ", (int)cmd.id);
-	printf("param1 %d\n", (int)cmd.data.param1);
-	if (cmd.id != -1 && cmd.data.param1 < 255) {		
+	cmd = psy_eventdriver_getcmd(sender, "notes");	
+	if (cmd.id != -1 && cmd.id < 255) {		
 		unsigned char note;
 		psy_audio_Machine* machine;
 
 		uintptr_t track = 0;
 		psy_audio_PatternEvent event;
 
-		if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
-			note = (unsigned char) cmd.data.param1;
+		if (cmd.id == CMD_NOTE_MIDIEV) {
+			int lsb;
+			int msb;
+
+			lsb = cmd.midi.byte0 & 0x0F;
+			msb = (cmd.midi.byte0 & 0xF0) >> 4;
+			switch (msb) {
+			case 0x9:
+				// Note On/Off
+				note = (cmd.midi.byte2 > 0)
+					? cmd.midi.byte1
+					: 120;
+				break;
+			default:
+				return;
+				break;
+			}
+		} else if (cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
+			note = cmd.id + self->octave * 12;
 		} else {
-			note = cmd.data.param1;
+			note = cmd.id;
 		}
 		machine = psy_audio_machines_at(&self->song->machines,
 			psy_audio_machines_slot(&self->song->machines));
@@ -372,8 +395,16 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 		psy_audio_sequencer_addinputevent(&self->sequencer, &event, track);
 		if (self->recordingnotes && psy_audio_sequencer_playing(&
 				self->sequencer)) {
+			psy_dsp_big_beat_t offset;
+
+			offset = psy_audio_sequencer_frametooffset(&self->sequencer,
+				psy_audiodriver_playposinsamples(self->driver) -
+				self->resyncplayposinsamples);
+			if (offset < 0) {
+				offset = 0;
+			}
 			psy_audio_sequencer_recordinputevent(&self->sequencer, &event, 0, 
-				psy_audio_player_position(self));
+				self->resyncplayposinbeats);
 		} else {			
 			psy_signal_emit(&self->signal_inputevent, self, 1, &event);
 		}
@@ -397,10 +428,18 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 void psy_audio_player_setnumsongtracks(psy_audio_Player* self,
 	uintptr_t numsongtracks)
 {
-	if (numsongtracks >= 1 && numsongtracks <= 64) {
+	if (numsongtracks >= 1 && numsongtracks < MAX_TRACKS) {
 		self->numsongtracks = numsongtracks;	
 		psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
 			self->numsongtracks);
+	}
+}
+
+void psy_audio_player_setoctave(psy_audio_Player* self,
+	uintptr_t octave)
+{
+	if (octave >= 0 && octave < 8) {
+		self->octave = octave;		
 	}
 }
 

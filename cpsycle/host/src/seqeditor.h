@@ -5,11 +5,14 @@
 #define SEQEDITOR_H
 
 #include "workspace.h"
+#include "zoombox.h"
 
 #include <uiscroller.h>
 
 typedef struct SeqEditorTrackState {
 	int pxperbeat;
+	psy_ui_Value lineheight;
+	psy_ui_Value linemargin;
 } SeqEditorTrackState;
 
 void seqeditortrackstate_init(SeqEditorTrackState*);
@@ -165,6 +168,9 @@ typedef struct {
 	psy_ui_Component component;
 	SeqEditorRuler ruler;
 	psy_ui_Scroller scroller;
+	psy_ui_Component left;
+	ZoomBox zoombox_beat;
+	ZoomBox zoombox_height;
 	SeqEditorTracks trackheaders;
 	SeqEditorTracks tracks;	
 	SeqEditorTrackState trackstate;

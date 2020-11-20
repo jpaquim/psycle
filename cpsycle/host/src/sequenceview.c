@@ -332,14 +332,14 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 {
 	psy_audio_SequenceTrackNode* p;	
 	int cpx = 0;
-	int c = 0;		
+	int trackindex = 0;		
 	self->foundselected = 0;
 
 	sequencelistview_computetextsizes(self);	
 	for (p = self->sequence->tracks; p != NULL; p = p->next, 
-			cpx += self->trackwidth, ++c) {
-		sequencelistview_drawtrack(self, g, (psy_audio_SequenceTrack*)p->entry, c, cpx -
-			psy_ui_component_scrollleft(&self->component) + listviewmargin);
+			cpx += self->trackwidth, ++trackindex) {
+		sequencelistview_drawtrack(self, g, (psy_audio_SequenceTrack*)
+			psy_list_entry(p), trackindex, cpx);
 	}
 	if (!self->foundselected) {
 		int cpy;
