@@ -635,8 +635,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1),
 		psy_ui_value_makepx(0));
 	// section border, define for the top line above a section label
-	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_SOLID,
-		psy_ui_BORDER_NONE, psy_ui_BORDER_NONE, psy_ui_BORDER_NONE);
+	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_NONE,
+		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
 	// favorite view
 	psy_ui_label_init(&self->favoriteheader, &self->component);
 	psy_ui_label_settextalignment(&self->favoriteheader,

@@ -361,8 +361,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						POINT dblbuffer_offset;
 						HFONT hfont = 0;
 						HFONT hPrevFont = 0;																		
-						psy_ui_TextMetric tm;
-						psy_ui_Border border;
+						psy_ui_TextMetric tm;						
 
 						if (imp->component->doublebuffered) {
 							// create a graphics context with back buffer bitmap
@@ -397,24 +396,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							psy_ui_drawsolidrectangle(&g, r,
 								psy_ui_component_backgroundcolor(
 									imp->component));
-						}
-						border = psy_ui_component_border(imp->component);
-						if (border.mode.set) {
-							if (border.top != psy_ui_BORDER_NONE) {
-								if (border.color_top.mode.set) {
-									psy_ui_setcolor(&g, border.color_top);
-								} else {
-									psy_ui_setcolor(&g,
-										app.defaults.style_common.border.color_top);
-								}
-								psy_ui_drawline(&g,
-									ps.rcPaint.left - dblbuffer_offset.x,
-									ps.rcPaint.top - dblbuffer_offset.y,
-									ps.rcPaint.left + ps.rcPaint.right -
-										dblbuffer_offset.x,
-									ps.rcPaint.top - dblbuffer_offset.y);
-							}
-						}
+						}						
 						// prepare a clip rect that can be used by a component
 						// to optimize the draw amount
 						psy_ui_setrectangle(&g.clip,
@@ -474,13 +456,15 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							imp->component));
 						psy_ui_settextcolor(&g, psy_ui_component_color(
 							imp->component));
-						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);
+						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);						
+						// draw border						
+						psy_ui_component_drawborder(imp->component, &g);
 						// call specialization methods (vtable, then signals)
 						if (imp->component->vtable->ondraw) {
 							imp->component->vtable->ondraw(imp->component, &g);
 						}
 						psy_signal_emit(&imp->component->signal_draw,
-							imp->component, 1, &g);
+							imp->component, 1, &g);						
 						// clean up font
 						if (hPrevFont) {
 							SelectObject(win_g->hdc, hPrevFont);
@@ -888,6 +872,8 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	}
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
+
+
 
 void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
 {

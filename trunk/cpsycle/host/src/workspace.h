@@ -89,6 +89,7 @@ typedef struct {
 	psy_Property* eventinputs;
 	psy_Property* keyboard;
 	psy_Property* directories;
+	psy_Property* midicontrollers;
 	psy_Property* compatibility;
 	psy_Property* driverconfigure;
 	psy_Property* driverconfigurations;	
@@ -149,6 +150,8 @@ typedef struct {
 void workspace_init(Workspace*, void* handle);
 void workspace_dispose(Workspace*);
 void workspace_disposesequencepaste(Workspace*);
+void workspace_load_configuration(Workspace*);
+void workspace_save_configuration(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path, bool play);
 void workspace_savesong(Workspace*, const char* path);
@@ -158,8 +161,6 @@ void workspace_loadcontrolskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
 psy_Property* workspace_pluginlist(Workspace*);
 psy_Property* workspace_recentsongs(Workspace*);
-void workspace_load_configuration(Workspace*);
-void workspace_save_configuration(Workspace*);
 void workspace_load_recentsongs(Workspace*);
 void workspace_save_recentsongs(Workspace*);
 void workspace_clearrecentsongs(Workspace*);

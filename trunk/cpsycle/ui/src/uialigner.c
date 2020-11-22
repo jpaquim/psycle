@@ -74,7 +74,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 			if (!psy_ui_value_iszero(&component->minsize.height)) {
 				if (psy_ui_value_comp(&component->minsize.height,
 						&componentsize.height, &tm) > 0) {
-					componentsize.height = component->minsize.height;
+					componentsize.height = component->minsize.height;					
 				}
 			}
 			c_tm = psy_ui_component_textmetric(self->component);

@@ -245,6 +245,12 @@
     <ClCompile Include="src\logicalchannels.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\midiconfig.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\midiinput.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -488,6 +494,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\logicalchannels.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midiconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midiinput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

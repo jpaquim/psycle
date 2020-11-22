@@ -66,7 +66,6 @@ typedef struct psy_AudioDriverVTable {
 	psy_audiodriver_fp_configure configure;
 	psy_audiodriver_fp_configuration configuration;
 	psy_audiodriver_fp_close close;
-	psy_audiodriver_fp_connect connect;
 	psy_audiodriver_fp_samplerate samplerate;
 	psy_audiodriver_fp_addcapture addcapture;
 	psy_audiodriver_fp_removecapture removecapture;
@@ -81,8 +80,9 @@ typedef struct psy_AudioDriverVTable {
 
 typedef struct psy_AudioDriver {
 	psy_AudioDriverVTable* vtable;
-	AUDIODRIVERWORKFN _pCallback;	
-	void* _callbackContext;		
+	AUDIODRIVERWORKFN callback;
+	void* callbackcontext;
+	void* handle;
 	psy_Signal signal_stop;
 } psy_AudioDriver;
 
@@ -135,7 +135,9 @@ INLINE void psy_audiodriver_connect(psy_AudioDriver* self, void* context,
 	AUDIODRIVERWORKFN callback,
 	void* handle)
 {
-	self->vtable->connect(self, context, callback, handle);
+	self->callback = callback;
+	self->callbackcontext = context;
+	self->handle = handle;
 }
 
 INLINE unsigned int psy_audiodriver_samplerate(psy_AudioDriver* self)

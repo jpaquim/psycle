@@ -38,6 +38,8 @@ typedef struct {
 	psy_EventDriverInput lastinput;
 	psy_Property* cmddef;
 	psy_Property* configuration;
+	bool shift;
+	int chordmode;
 } KbdDriver;
 
 static void driver_free(psy_EventDriver*);
@@ -156,6 +158,8 @@ int driver_open(psy_EventDriver* driver)
 
 	self = (KbdDriver*)(driver);
 	self->lastinput.message = 0;
+	self->chordmode = 0;
+	self->shift = 0;
 	return 0;
 }
 
@@ -171,10 +175,57 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 
 void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 {	
-	KbdDriver* self;	
+	KbdDriver* self;
+	int res;
+	uintptr_t keycode;	
+	bool ctrl;
+
+	assert(driver);
 
 	self = (KbdDriver*)(driver);
-	self->lastinput = input;	
+
+	// patternview chordmode
+	psy_audio_decodeinput((uintptr_t)input.param1, &keycode, &self->shift, &ctrl);
+	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
+		bool noteedit;
+
+		noteedit = psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_PATTERNEDIT, 0, 0)
+			&& psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_NOTECOLUMN, 0, 0);
+		if (noteedit && self->shift && !self->chordmode && keycode != 16 /* Shift Key*/) {
+			psy_EventDriverCmd cmd;
+			psy_EventDriverInput testnote;
+
+			cmd.id = -1;
+			testnote = input;
+			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl);
+			driver_cmd(driver, "notes", testnote, &cmd);
+			if (cmd.id != -1 && cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
+				self->chordmode = TRUE;
+				psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_SETCHORDMODE, 1, 0);
+			}
+		} else if (noteedit) {
+			psy_EventDriverCmd cmd;
+			psy_EventDriverInput testnote;
+
+			cmd.id = -1;
+			testnote = input;
+			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl);
+			driver_cmd(driver, "notes", testnote, &cmd);
+			if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
+				psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_INSERTNOTEOFF, 1, 0);
+				return;
+			}
+		}
+	}
+	if (!self->shift) {
+		self->chordmode = FALSE;
+	}
+	// handle chordmode
+	if (self->chordmode != FALSE) {
+		// remove shift		
+		input.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl);
+	}
+	self->lastinput = input;
 	psy_signal_emit(&self->driver.signal_input, self, 0);
 }
 
@@ -194,7 +245,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 	section = psy_property_findsection(self->configuration, sectionname);
 	if (!section) {
 		return;
-	}
+	}	
 	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
 		psy_List* p;
 		psy_Property* property = NULL;
@@ -218,7 +269,7 @@ void driver_cmd(psy_EventDriver* driver, const char* sectionname,
 		for (p = psy_property_children(section); p != NULL;
 				psy_list_next(&p)) {
 			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_item_int(property) == input.param1) {
+			if (psy_property_item_int(property) == input.param1) {				
 				break;
 			}
 			property = NULL;

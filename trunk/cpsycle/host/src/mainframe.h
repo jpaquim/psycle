@@ -100,7 +100,7 @@ typedef struct {
 	psy_ui_SplitBar splitbarplugineditor;
 	VuBar vubar;
 	CPUView cpuview;
-	MidiView midiview;
+	MidiMonitor midiview;
 	RecentView recentview;
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 	FileView fileloadview;

@@ -196,6 +196,7 @@
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
     <ClCompile Include="src\presetsbar.c" />
+    <ClCompile Include="src\propertiesview.c" />
     <ClCompile Include="src\psycle.c" />
     <ClCompile Include="src\recentview.c" />
     <ClCompile Include="src\renderview.c" />
@@ -287,6 +288,7 @@
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
     <ClInclude Include="src\presetsbar.h" />
+    <ClInclude Include="src\propertiesview.h" />
     <ClInclude Include="src\recentview.h" />
     <ClInclude Include="src\renderview.h" />
     <ClInclude Include="src\resources\resource.h" />

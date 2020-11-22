@@ -4,7 +4,7 @@
 #if !defined(RECENTVIEW_H)
 #define RECENTVIEW_H
 
-#include "settingsview.h"
+#include "propertiesview.h"
 #include <uibutton.h>
 #include "workspace.h"
 

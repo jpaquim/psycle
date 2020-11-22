@@ -223,6 +223,31 @@ void translator_definekeys(psy_Property* lang)
 	psy_property_set_str(section, "patternview", "Pattern View");
 	psy_property_set_str(section, "keyboard-and-misc", "Keyboard and misc");
 	psy_property_set_str(section, "compatibility", "Compatibility");
+	psy_property_set_str(section, "midicontrollers", "MIDI Controllers");
+	psy_property_set_str(section, "midi-controllers-mapping",
+		"Midi controllers mapping");
+	psy_property_set_str(section, "midi-controllers-macselect",
+		"Select Generator/Instrument with");
+	psy_property_set_str(section, "midi-controllers-auxselect",
+		"Select Instrument/Aux with");
+	psy_property_set_str(section, "midi-controllers-select-inpsycle",
+		"Currently selected in Psycle");
+	psy_property_set_str(section, "midi-controllers-select-bybank",
+		"Selected by bank change");
+	psy_property_set_str(section, "midi-controllers-select-byprogram",
+		"Selected by program change");
+	psy_property_set_str(section, "midi-controllers-select-bychannel",
+		"Selected by MIDI channel index");
+	psy_property_set_str(section, "midi-controllers-recordrawmidiasmcm",
+		"Record Raw MIDI as MCM");
+	psy_property_set_str(section, "midi-controllers-mapping-map-velocity",
+		"Map Velocity");
+	psy_property_set_str(section, "midi-controllers-mapping-map-pitchwheel",
+		"Map Pitch Wheel");
+	psy_property_set_str(section, "midi-controllers-mapping-map-controller",
+		"Map Controller");
+	psy_property_set_str(section, "midi-controllers-mapping-map-active",
+		"active");
 	psy_property_set_str(section, "language", "Language");
 	psy_property_set_str(section, "event-input", "Event Input");
 	psy_property_set_str(section, "audio-drivers", "Audio Drivers");
@@ -518,5 +543,5 @@ void translator_definekeys(psy_Property* lang)
 		"Select Mac/Ins in Cursor Pos");
 	psy_property_set_str(section, "undo", "Edit Undo");
 	psy_property_set_str(section, "redo", "Edit Redo");
-	psy_property_set_str(section, "followsong", "Follow Song");
+	psy_property_set_str(section, "followsong", "Follow Song");	
 }

@@ -511,6 +511,7 @@ INLINE int psy_ui_component_scrolltop(psy_ui_Component* self)
 }
 
 void psy_ui_component_updateoverflow(psy_ui_Component*);
+void psy_ui_component_drawborder(psy_ui_Component*, psy_ui_Graphics*);
 
 INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow overflow)
 {

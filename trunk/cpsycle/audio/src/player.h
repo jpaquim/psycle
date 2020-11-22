@@ -8,6 +8,7 @@
 #include "eventdrivers.h"
 #include "song.h"
 #include "machinefactory.h"
+#include "midiinput.h"
 #include "sequencer.h"
 #include <signal.h>
 #include "library.h"
@@ -51,6 +52,7 @@ typedef struct psy_audio_Player {
 	int octave;
 	uint32_t resyncplayposinsamples;
 	psy_dsp_big_beat_t resyncplayposinbeats;
+	psy_audio_MidiInput midiinput;	
 } psy_audio_Player;
 
 // init dispose
@@ -151,9 +153,12 @@ void psy_audio_player_restarteventdriver(psy_audio_Player*, int id,
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
 psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, int id);
 uintptr_t psy_audio_player_numeventdrivers(psy_audio_Player*);
+void psy_audio_player_write_eventdrivers(psy_audio_Player*, psy_EventDriverInput input);
 void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
 	uintptr_t slot);
 void psy_audio_player_setemptysong(psy_audio_Player*);
+void psy_audio_player_configure(psy_audio_Player*, psy_Property*
+	configuration);
 
 #ifdef __cplusplus
 }

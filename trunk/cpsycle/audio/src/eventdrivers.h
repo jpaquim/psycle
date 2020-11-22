@@ -30,6 +30,8 @@ typedef struct {
 	psy_Signal signal_input;
 	psy_Property* cmds;
 	psy_Table guids;
+	EVENTDRIVERWORKFN callback;
+	void* callbackcontext;
 } psy_audio_EventDrivers;
 
 void psy_audio_eventdrivers_init(psy_audio_EventDrivers*, void* systemhandle);
@@ -51,6 +53,8 @@ uintptr_t psy_audio_eventdrivers_size(psy_audio_EventDrivers*);
 psy_EventDriver* psy_audio_eventdrivers_driver(psy_audio_EventDrivers*, int id); 
 psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*, int id);
 void psy_audio_eventdrivers_idle(psy_audio_EventDrivers*);
+void psy_audio_eventdrivers_setcallback(psy_audio_EventDrivers* self,
+	EVENTDRIVERWORKFN callback, void* context);
 
 #ifdef __cplusplus
 }

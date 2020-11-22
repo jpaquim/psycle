@@ -198,6 +198,7 @@ typedef struct {
    psy_audio_PatternEditPosition lastdragcursor;
    int hasselection;
    int midline;
+   int chordmodestarting;
    bool chordmode;
    int chordbegin;
    int columnresize;
@@ -223,6 +224,7 @@ void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
 void trackergrid_enablesync(TrackerGrid*);
 void trackergrid_preventsync(TrackerGrid*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
+void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, bool chordmode);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {

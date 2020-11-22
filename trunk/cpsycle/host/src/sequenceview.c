@@ -1057,7 +1057,7 @@ void sequenceview_ondeltrack(SequenceView* self)
 		self->listview.selected);
 	psy_audio_exclusivelock_enter();
 	psy_audio_sequence_removetrack(self->sequence, position.tracknode);
-	psy_audio_exclusivelock_leave();	
+	psy_audio_exclusivelock_leave();
 	sequenceduration_update(&self->duration);
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);

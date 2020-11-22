@@ -131,7 +131,6 @@ typedef struct {
 } DXDriver;
 
 static int driver_init(psy_AudioDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,void* handle);
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
@@ -174,8 +173,6 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
-		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
 		vtable.configure = driver_configure;
@@ -244,7 +241,10 @@ int driver_init(psy_AudioDriver* driver)
 	self->_playing = FALSE;	
 	self->_pDs = NULL;
 	self->_pBuffer = NULL;
-	self->driver._pCallback = NULL;
+	self->driver.callback = NULL;
+	self->driver.callbackcontext = NULL;
+	self->driver.handle = NULL;
+	self->m_hWnd = 0;
 	self->device_guid_ = (LPGUID)&DSDEVID_DefaultPlayback;
 	self->_dither = 0;
 	self->_playEnums = 0;
@@ -459,15 +459,8 @@ uintptr_t driver_samplerate(psy_AudioDriver* self)
 	return psy_audiodriversettings_samplespersec(&((DXDriver*)self)->settings);
 }
 
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
-{	
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;
-	((DXDriver*)driver)->m_hWnd = (HWND) handle;
-}
-
 int driver_open(psy_AudioDriver* driver)
-{
+{	
 	return start((DXDriver*)driver);
 }
 
@@ -484,10 +477,11 @@ bool start(DXDriver* self)
 	if (self->_running) {
 		return TRUE;
 	}
+	self->m_hWnd = self->driver.handle;
 	if (self->m_hWnd == NULL) {
 		return FALSE;
 	}
-	if (self->driver._pCallback == NULL) {
+	if (self->driver.callback == NULL) {
 		return FALSE;
 	}
 	if (hr = FAILED(DirectSoundCreate8(self->device_guid_, &self->_pDs, NULL)))
@@ -725,8 +719,8 @@ void doblocks(DXDriver* self)
 		int numSamples = blockSize1 / psy_audiodriversettings_framebytes(&self->settings);
 		int hostisplaying;
 		float* pFloatBlock =
-			self->driver._pCallback(
-				self->driver._callbackContext, &numSamples, &hostisplaying);			
+			self->driver.callback(
+				self->driver.callbackcontext, &numSamples, &hostisplaying);			
 		if (_sampleValidBits == 32) {			
 			// dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pBlock1), numSamples * 2, 1.f / 32768.f);
 		}
@@ -743,8 +737,8 @@ void doblocks(DXDriver* self)
 		{
 			float* pFloatBlock;
 			numSamples = blockSize2 / psy_audiodriversettings_framebytes(&self->settings);
-			pFloatBlock = self->driver._pCallback(
-					self->driver._callbackContext, &numSamples, &hostisplaying);
+			pFloatBlock = self->driver.callback(
+					self->driver.callbackcontext, &numSamples, &hostisplaying);
 				
 				//_pCallback(self->driver._callbackContext, numSamples);
 			if (_sampleValidBits == 32) {

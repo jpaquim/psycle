@@ -86,6 +86,8 @@ static void mainframe_ondockview(MainFrame*, Workspace* sender,
 static void mainframe_onlanguagechanged(MainFrame*, Translator* sender);
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender, int option, int mode);
+// EventDriverCallback
+static int mainframe_eventdrivercallback(MainFrame*, int msg, int param1, int param2);
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 static void mainframe_onfileload(MainFrame*, FileView* sender);
 #endif
@@ -269,7 +271,7 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->cpuview.component.signal_hide, self,
 		mainframe_onhidecpu);
 	// midiview
-	midiview_init(&self->midiview, &self->client, &self->workspace);
+	midimonitor_init(&self->midiview, &self->client, &self->workspace);
 	psy_ui_component_setalign(&self->midiview.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(&self->midiview.component);	
 	psy_signal_connect(&self->machinebar.midi.signal_clicked, self,
@@ -363,6 +365,8 @@ void mainframe_init(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_skinchanged, self,
 		mainframe_onskinchanged);	
 	mainframe_updatetheme(self);
+	psy_audio_eventdrivers_setcallback(&self->workspace.player.eventdrivers,
+		mainframe_eventdrivercallback, self);
 }
 
 void mainframe_updatetheme(MainFrame* self)
@@ -695,16 +699,14 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 }
 
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
-{	
-	if (ev->keycode != psy_ui_KEY_CONTROL && ev->keycode != psy_ui_KEY_SHIFT) {
+{
+	if (ev->keycode != psy_ui_KEY_CONTROL) {
 		psy_EventDriver* kbd;
 		psy_EventDriverInput input;			
 		
 		input.message = psy_EVENTDRIVER_KEYDOWN;
-		kbd = workspace_kbddriver(&self->workspace);		
-		input.param1 = psy_audio_encodeinput(ev->keycode, 
-			self->patternview.trackerview.grid.chordmode ? 0 : ev->shift, ev->ctrl);		
-		input.param2 = workspace_octave(&self->workspace) * 12;
+		kbd = workspace_kbddriver(&self->workspace);
+		input.param1 = psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl);
 		psy_eventdriver_write(kbd, input);
 	}
 }
@@ -1277,3 +1279,29 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 		workspace_playsongafterload(&self->workspace));
 }
 #endif
+
+// eventdriver callback to handle chordmode, patternedit noterelease
+int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1, int param2)
+{
+	switch (msg) {
+		case PSY_EVENTDRIVER_PATTERNEDIT:
+			return psy_ui_component_hasfocus(&self->patternview.trackerview.grid.component);
+			break;
+		case PSY_EVENTDRIVER_NOTECOLUMN:
+			return self->patternview.trackerview.grid.cursor.column == 0;
+			break;
+		case PSY_EVENTDRIVER_SETCHORDMODE:
+			if (param1 == 1) {
+				self->patternview.trackerview.grid.chordbegin =
+					self->patternview.trackerview.grid.cursor.track;
+				self->patternview.trackerview.grid.chordmode = TRUE;
+			}
+			break;
+		case PSY_EVENTDRIVER_INSERTNOTEOFF:
+			trackergrid_inputnote(&self->patternview.trackerview.grid,
+				psy_audio_NOTECOMMANDS_RELEASE,
+				self->patternview.trackerview.grid.chordmode);
+			break;
+	}
+	return 0;
+}

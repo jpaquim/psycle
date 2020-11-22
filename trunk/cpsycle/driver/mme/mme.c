@@ -138,7 +138,6 @@ typedef struct {
 
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
@@ -184,7 +183,6 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -378,12 +376,6 @@ uintptr_t samplerate(psy_AudioDriver* self)
 	return psy_audiodriversettings_samplespersec(&((MmeDriver*)self)->settings);
 }
 
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
-{
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;
-}
-
 int driver_open(psy_AudioDriver* driver)
 {
 	return start((MmeDriver*)driver);
@@ -399,7 +391,7 @@ bool start(MmeDriver* self)
 
 	//			CSingleLock lock(&_lock, TRUE);
 	if (self->_running) return TRUE;
-	if (self->driver._pCallback == NULL) {
+	if (self->driver.callback == NULL) {
 		return FALSE;
 	}
 	preparewaveformat((WAVEFORMATEXTENSIBLE*)&format,
@@ -553,7 +545,7 @@ void DoBlocks(MmeDriver* self)
 	numSamples = psy_audiodriversettings_blockframes(&self->settings);
 	_sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
 	n = numSamples;
-	pFloatBlock = self->driver._pCallback(self->driver._callbackContext, &n, &hostisplaying);
+	pFloatBlock = self->driver.callback(self->driver.callbackcontext, &n, &hostisplaying);
 	if (_sampleValidBits == 32) {
 		//dsp::MovMul(pFloatBlock, reinterpret_cast<float*>(pBlock), numSamples * 2, 1.f / 32768.f);
 	}
