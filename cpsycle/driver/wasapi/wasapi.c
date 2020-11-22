@@ -204,7 +204,6 @@ static unsigned int GetBufferSamples(WasapiDriver*);
 
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(psy_AudioDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
@@ -236,7 +235,6 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -543,12 +541,6 @@ uintptr_t samplerate(psy_AudioDriver* self)
 	return psy_audiodriversettings_samplespersec(&((WasapiDriver*)self)->settings);
 }
 
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
-{
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;
-}
-
 int driver_open(psy_AudioDriver* driver)
 {
 	WasapiDriver* self = (WasapiDriver*) driver;
@@ -563,7 +555,7 @@ bool start(WasapiDriver* self)
 	self->out.streamFlags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK;
 	self->out.shareMode = self->shared ? AUDCLNT_SHAREMODE_SHARED : AUDCLNT_SHAREMODE_EXCLUSIVE;
 	if (self->running) return TRUE;
-	if (!self->driver._pCallback) return FALSE;
+	if (!self->driver.callback) return FALSE;
 
 	hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
 		&IID_IMMDeviceEnumerator, (void**)&pEnumerator);
@@ -1120,8 +1112,8 @@ HRESULT DoBlock(WasapiDriver* self, IAudioRenderClient* pRenderClient, int numFr
 	unsigned int _sampleValidBits = psy_audiodriversettings_validbitdepth(&self->settings);
 	int hostisplaying;
 	float* pFloatBlock =
-		self->driver._pCallback(
-			self->driver._callbackContext, &numFramesAvailable, &hostisplaying);
+		self->driver.callback(
+			self->driver.callbackcontext, &numFramesAvailable, &hostisplaying);
 	if (_sampleValidBits == 32) {
 		dsp.movmul(pFloatBlock, (float*)pData, numFramesAvailable * 2, 1.f / 32768.f);
 	}

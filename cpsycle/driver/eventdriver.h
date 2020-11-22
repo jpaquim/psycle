@@ -20,6 +20,12 @@
 #include <properties.h>
 #include <signal.h>
 
+
+#define PSY_EVENTDRIVER_PATTERNEDIT 1
+#define PSY_EVENTDRIVER_NOTECOLUMN 2
+#define PSY_EVENTDRIVER_SETCHORDMODE 3
+#define PSY_EVENTDRIVER_INSERTNOTEOFF 4
+
 typedef struct {
 	int guid;
 	int Version;							
@@ -30,7 +36,7 @@ typedef struct {
 
 typedef enum {
 	psy_EVENTDRIVER_KEYDOWN,
-	psy_EVENTDRIVER_KEYUP
+	psy_EVENTDRIVER_KEYUP	
 } psy_EventDriverInputType;
 
 typedef struct 
@@ -51,6 +57,8 @@ typedef struct {
 	int id;
 	psy_EventDriverMidiData midi;
 } psy_EventDriverCmd;
+
+typedef int (*EVENTDRIVERWORKFN)(void* context, int msg, int param1, int param2);
 
 typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);
 typedef int (*psy_eventdriver_fp_dispose)(struct psy_EventDriver*);
@@ -86,6 +94,8 @@ typedef struct psy_EventDriverVTable {
 typedef struct psy_EventDriver {
 	psy_EventDriverVTable* vtable;	
 	psy_Signal signal_input;
+	EVENTDRIVERWORKFN callback;
+	void* callbackcontext;
 } psy_EventDriver;
 
 INLINE uintptr_t psy_audio_encodeinput(uintptr_t keycode, bool shift, bool
@@ -191,6 +201,21 @@ INLINE void psy_eventdriver_setcmddef(psy_EventDriver* self, psy_Property*
 INLINE void psy_eventdriver_idle(psy_EventDriver* self)
 {
 	self->vtable->idle(self);
+}
+
+INLINE void psy_eventdriver_connect(psy_EventDriver* self, void* context,
+	EVENTDRIVERWORKFN callback)
+{
+	self->callbackcontext = context;
+	self->callback = callback;
+}
+
+INLINE int psy_eventdriver_hostevent(psy_EventDriver* self, int msg, int param1, int param2)
+{
+	if (self->callback) {
+		return self->callback(self->callbackcontext, msg, param1, param2);
+	}
+	return 0;
 }
 
 #endif

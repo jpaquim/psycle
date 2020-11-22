@@ -4,7 +4,7 @@
 #if !defined(RENDERVIEW_H)
 #define RENDERVIEW_H
 
-#include "settingsview.h"
+#include "propertiesview.h"
 
 #include <uicomponent.h>
 #include <uilabel.h>

@@ -18,8 +18,6 @@ typedef struct {
 
 static void driver_deallocate(psy_AudioDriver*);
 static int driver_init(SilentDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
-	void* handle);
 static int driver_open(psy_AudioDriver*);
 static void driver_configure(psy_AudioDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
@@ -44,7 +42,6 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -110,13 +107,6 @@ int driver_dispose(psy_AudioDriver* driver)
 	self->configuration = NULL;
 	psy_signal_dispose(&driver->signal_stop);
 	return 0;
-}
-
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback,
-	void* handle)
-{
-	driver->_pCallback = callback;
-	driver->_callbackContext = context;
 }
 
 int driver_open(psy_AudioDriver* driver)

@@ -1004,3 +1004,37 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		}		
 	}
 }
+
+void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
+{
+	psy_ui_Border border;
+
+	border = psy_ui_component_border(self);
+	if (border.mode.set) {
+		psy_ui_TextMetric tm;
+		psy_ui_IntSize size;
+
+		tm = psy_ui_component_textmetric(self);
+		size = psy_ui_intsize_init_size(
+			psy_ui_component_size(self), &tm);
+		if (border.top != psy_ui_BORDER_NONE) {
+			if (border.color_top.mode.set) {
+				psy_ui_setcolor(g, border.color_top);
+			} else {
+				psy_ui_setcolor(g,
+					app.defaults.style_common.border.color_top);
+			}
+			psy_ui_drawline(g, 0, 0, size.width, 0);
+		}
+		if (border.bottom != psy_ui_BORDER_NONE) {
+			if (border.color_top.mode.set) {
+				psy_ui_setcolor(g, border.color_top);
+			} else {
+				psy_ui_setcolor(g,
+					app.defaults.style_common.border.color_top);
+			}
+			psy_ui_drawline(g, 0, size.height - 1, size.width,
+				size.height - 1);
+		}
+	}
+}

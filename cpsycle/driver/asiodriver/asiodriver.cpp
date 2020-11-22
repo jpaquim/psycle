@@ -1363,7 +1363,6 @@ typedef struct {
 } AsioDriver;
 
 static int driver_init(psy_AudioDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback, void* handle);
 static int driver_open(psy_AudioDriver*);
 static int driver_close(psy_AudioDriver*);
 static int driver_dispose(psy_AudioDriver*);
@@ -1392,7 +1391,6 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -1566,19 +1564,12 @@ uintptr_t driver_samplerate(psy_AudioDriver* self)
 	return psy_audiodriversettings_samplespersec(&ASIOInterface::settings_);
 }
 
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback, void* handle)
-{
-	AsioDriver* self = (AsioDriver*)driver;
-	driver->_callbackContext = context;
-	driver->_pCallback = callback;
-	self->asioif->m_hWnd = (HWND)handle;
-	self->asioif->Initialize(callback, context);
-}
-
 int driver_open(psy_AudioDriver* driver)
 {
 	int status;
 	AsioDriver* self = (AsioDriver*)driver;
+	self->asioif->m_hWnd = (HWND)driver->handle;
+	self->asioif->Initialize(driver->callback, driver->callbackcontext);
 	status = self->asioif->Enable(true);
 	return status;
 }

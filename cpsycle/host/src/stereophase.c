@@ -6,13 +6,16 @@
 #include "stereophase.h"
 
 #include <songio.h>
-#include "../../detail/portable.h"
-#include <math.h>
-#include <rms.h>
+
 #include <exclusivelock.h>
 #include <operations.h>
 #include <quantize.h>
+#include <rms.h>
+
+#include <math.h>
 #include <string.h>
+
+#include "../../detail/portable.h"
 
 #define SCOPE_SPEC_BANDS 256
 

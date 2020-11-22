@@ -254,6 +254,9 @@
     <ClCompile Include="src\seqeditor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\propertiesview.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -508,6 +511,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\seqeditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\propertiesview.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

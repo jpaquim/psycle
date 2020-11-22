@@ -46,8 +46,8 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 	if (kbd && psy_eventdriver_configuration(kbd)) {
 		psy_Property* section;
 
-		section = psy_property_find(psy_eventdriver_configuration(kbd), sectionname,
-			PSY_PROPERTY_TYPE_SECTION);
+		section = psy_property_find(psy_eventdriver_configuration(kbd),
+			sectionname, PSY_PROPERTY_TYPE_SECTION);
 		if (section) {
 			psy_List* p;
 

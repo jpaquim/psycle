@@ -42,7 +42,8 @@ enum {
 	PROPERTY_ID_DRAWVUMETERS,
 	PROPERTY_ID_LANG,
 	PROPERTY_ID_AUDIODRIVERS,
-	PROPERTY_ID_ACTIVEEVENTDRIVERS
+	PROPERTY_ID_ACTIVEEVENTDRIVERS,
+	PROPERTY_ID_MAPCONTROLLER,	
 };
 
 static void workspace_initplayer(Workspace*);
@@ -84,7 +85,9 @@ static void workspace_makeeventdriverconfigurations(Workspace*);
 static void workspace_showactiveeventdriverconfig(Workspace*, int deviceid);
 static void workspace_updateactiveeventdriverlist(Workspace*);
 static void workspace_configeventdrivers(Workspace*);
-
+// midiinput
+static void workspace_makemidicontrollers(Workspace*);
+// compatibility
 static void workspace_makecompatibility(Workspace*);
 static const char* workspace_eventdriverpath(Workspace*);
 static int workspace_curreventdriverconfiguration(Workspace*);
@@ -123,9 +126,6 @@ static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 // recent files
 static void workspace_addrecentsong(Workspace*, const char* path);
-static void workspace_onlanguagechanged(Workspace*, Translator* sender);
-static int workspace_onchangelanguageenum(Workspace*, psy_Property*,
-	int level);
 
 void history_init(History* self)
 {
@@ -240,8 +240,6 @@ void workspace_init(Workspace* self, void* handle)
 	psy_audio_patterneditposition_init(&self->patterneditposition);
 	psy_audio_pattern_init(&self->patternpaste);
 	self->sequencepaste = 0;
-	psy_signal_connect(&self->signal_languagechanged, self,
-		workspace_onlanguagechanged);
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
@@ -380,7 +378,9 @@ void workspace_configlanguage(Workspace* self)
 				0);
 			psy_ui_updatealign(self->mainhandle, NULL);
 		}
-	}	
+	}
+	psy_signal_emit(&self->signal_languagechanged, &self->translator,
+		0);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -564,8 +564,8 @@ void workspace_makeconfig(Workspace* self)
 	workspace_makedirectories(self);
 	workspace_makeinputoutput(self);
 	workspace_makeeventinput(self);
+	workspace_makemidicontrollers(self);
 	workspace_makecompatibility(self);
-	workspace_onlanguagechanged(self, &self->translator);
 }
 
 void workspace_makegeneral(Workspace* self)
@@ -1150,6 +1150,113 @@ void workspace_makedefaultuserpresetpath(Workspace* self)
 	psy_path_dispose(&defaultuserpresetpath);
 }
 
+void workspace_makemidicontrollers(Workspace* self)
+{
+	psy_Property* mapping;
+	psy_Property* choice;
+	psy_Property* group;
+	int i;
+
+	self->midicontrollers = psy_property_settext(
+		psy_property_append_section(&self->config, "midicontrollers"),
+		"settingsview.midicontrollers");	
+	// macselect
+	choice = psy_property_settext(
+		psy_property_append_choice(self->midicontrollers,
+			"macselect", 0),
+		"settingsview.midi-controllers-macselect");
+	psy_property_settext(
+		psy_property_append_string(choice, "inpsycle", ""),
+		"settingsview.midi-controllers-select-inpsycle");
+	psy_property_settext(
+		psy_property_append_string(choice, "bybank", ""),
+		"settingsview.midi-controllers-select-bybank");
+	psy_property_settext(
+		psy_property_append_string(choice, "bybank", ""),
+		"settingsview.midi-controllers-select-byprogram");
+	psy_property_settext(
+		psy_property_append_string(choice, "bybank", ""),
+		"settingsview.midi-controllers-select-bychannel");
+	// auxselect
+	choice = psy_property_settext(
+		psy_property_append_choice(self->midicontrollers,
+			"auxselect", 0),
+		"settingsview.midi-controllers-auxselect");
+	psy_property_settext(
+		psy_property_append_string(choice, "inpsycle", ""),
+		"settingsview.midi-controllers-select-inpsycle");
+	psy_property_settext(
+		psy_property_append_string(choice, "bybank", ""),
+		"settingsview.midi-controllers-select-bybank");
+	psy_property_settext(
+		psy_property_append_string(choice, "bybank", ""),
+		"settingsview.midi-controllers-select-byprogram");
+	psy_property_settext(
+		psy_property_append_string(choice, "bybank", ""),
+		"settingsview.midi-controllers-select-bychannel");
+	psy_property_settext(
+		psy_property_append_bool(self->midicontrollers,
+			"recordrawmidiasmcm", TRUE),
+		"settingsview.midi-controllers-recordrawmidiasmcm");
+	// Mapping
+	mapping = psy_property_settext(
+		psy_property_append_section(self->midicontrollers,
+			"mapping"),
+		"settingsview.midi-controllers-mapping");	
+	// groups
+	// Map Velocity
+	psy_property_settext(
+		psy_property_append_bool(mapping,
+			"velocityactive", TRUE),
+		"settingsview.midi-controllers-mapping-map-velocity");
+	group = psy_property_settext(
+		psy_property_append_section(mapping, "velocity"), "");			
+	psy_property_append_string(group, "cmd", "c");
+	psy_property_append_int(group, "from", 0, 0, 0xFF);
+	psy_property_append_int(group, "to", 0xFF, 0, 0xFF);
+	// Map Pitchwheel
+	psy_property_settext(
+		psy_property_append_bool(mapping,
+			"pitchwheelactive", TRUE),
+			"settingsview.midi-controllers-mapping-map-pitchwheel");
+	group = psy_property_append_section(mapping,
+			"pitchwheel");
+	choice = psy_property_append_choice(group, "to", 0);
+	psy_property_append_string(choice, "cmd", "");
+	psy_property_append_string(choice, "twk", "");
+	psy_property_append_string(choice, "tws", "");
+	psy_property_append_string(choice, "mcm", "");
+	psy_property_append_string(group, "with", "1");
+	psy_property_append_int(group, "from", 0, 0, 0xFF);
+	psy_property_append_int(group, "to", 0xFF, 0, 0xFF);
+	// Map Controllers
+	for (i = 0; i < 16; ++i) {
+		char hexstr[256];
+		char text[256];
+
+		psy_snprintf(text, 256, "controlleractive%X", (i + 1));
+		psy_property_setid(psy_property_settext(
+			psy_property_append_bool(mapping, text, FALSE),
+			"settingsview.midi-controllers-mapping-map-controller"),
+			PROPERTY_ID_MAPCONTROLLER + i);
+		psy_snprintf(text, 256, "controller%X", (i + 1));
+		group = psy_property_sethint(psy_property_settext(
+			psy_property_append_section(mapping, text),
+			"Controller"),
+			PSY_PROPERTY_HINT_HIDE);
+		psy_snprintf(hexstr, 256, "%X", (i + 1));
+		psy_property_append_string(group, "Controller", hexstr);
+		choice = psy_property_append_choice(group, "to", 0);
+		psy_property_append_string(choice, "cmd", "");
+		psy_property_append_string(choice, "twk", "");
+		psy_property_append_string(choice, "tws", "");
+		psy_property_append_string(choice, "mcm", "");
+		psy_property_append_string(group, "with", hexstr);
+		psy_property_append_int(group, "from", 0, 0, 0xFF);
+		psy_property_append_int(group, "to", 0xFF, 0, 0xFF);
+	}
+}
+
 void workspace_makecompatibility(Workspace* self)
 {
 	assert(self);
@@ -1441,8 +1548,14 @@ void workspace_makeeventdriverconfigurations(Workspace* self)
 
 			driver = entry->eventdriver;
 			if (driver && psy_eventdriver_configuration(driver)) {
-				psy_property_append_property(self->eventdriverconfigurations,
-					psy_property_clone(psy_eventdriver_configuration(driver)));
+				char key[256];
+				psy_Property* section;
+
+				psy_snprintf(key, 256, "configuration-%i", i);
+				section = psy_property_append_section(
+					self->eventdriverconfigurations, key);
+				psy_property_append_property(section, psy_property_clone(
+					psy_eventdriver_configuration(driver)));
 			}
 		}
 	}
@@ -1452,40 +1565,40 @@ void workspace_readeventdriverconfigurations(Workspace* self)
 {		
 	assert(self);
 
-	if (self->eventdriverconfigurations) {
+	if (self->eventdriverconfigurations) {		
+		uintptr_t numdrivers;
 		psy_List* p;
+		uintptr_t i;
 		
-		for (p = psy_property_children(self->eventdriverconfigurations);
-				p != NULL; psy_list_next(&p)) {
+		numdrivers = psy_audio_eventdrivers_size(&self->player.eventdrivers);
+		for (p = psy_property_children(self->eventdriverconfigurations), i = 0;
+				p != NULL && i != numdrivers; psy_list_next(&p), ++i) {
 			psy_Property* configuration;
 
-			configuration = (psy_Property*)p->entry;
+			configuration = (psy_Property*)psy_list_entry(p);
+			if (psy_property_empty(configuration)) {
+				continue;
+			}
+			configuration = (psy_Property*)psy_list_entry(
+				psy_property_children(configuration));
 			if (!psy_property_empty(configuration)) {
 				int guid;
 
 				guid = psy_property_at_int(configuration, "guid", -1);
 				if (guid != -1) {
-					uintptr_t numdrivers;
-					uintptr_t i;
+					psy_EventDriver* driver;
+					const psy_EventDriverInfo* driverinfo;
 
-					numdrivers = psy_audio_eventdrivers_size(&self->player.eventdrivers);
-					for (i = 0; i < numdrivers; ++i) {
-						psy_EventDriver* driver;
-
-						driver = psy_audio_eventdrivers_driver(&self->player.eventdrivers, i);
-						if (driver) {
-							const psy_EventDriverInfo* driverinfo;
-
-							driverinfo = psy_eventdriver_info(driver);
-							if (driverinfo) {
-								if (driverinfo->guid == guid) {
-									psy_eventdriver_configure(driver,
-										configuration);
-									break;
-								}
-							}
+					driver = psy_audio_eventdrivers_driver(&self->player.eventdrivers, i);
+					if (driver) {
+						driverinfo = psy_eventdriver_info(driver);
+						if (!driverinfo) {
+							continue;
+						}					
+						if (driverinfo->guid == guid) {
+							psy_eventdriver_configure(driver, configuration);							
 						}
-					}
+					}					
 				}
 			}
 		}							
@@ -1501,32 +1614,28 @@ const char* workspace_translate(Workspace* self, const char* key)
 
 void workspace_configchanged(Workspace* self, psy_Property* property)
 {
+	bool worked;
 	assert(self && property);
 
+	worked = TRUE;
 	switch (psy_property_id(property)) {
 		case PROPERTY_ID_LOADSKIN:
 			workspace_onloadskin(self);
-			return;
 			break;
 		case PROPERTY_ID_DEFAULTSKIN:
 			workspace_ondefaultskin(self);
-			return;
 			break;
 		case PROPERTY_ID_LOADCONTROLSKIN:
 			workspace_onloadcontrolskin(self);
-			return;
 			break;
 		case PROPERTY_ID_ADDEVENTDRIVER:
 			workspace_onaddeventdriver(self);
-			return;
 			break;
 		case PROPERTY_ID_REMOVEEVENTDRIVER:
 			workspace_onremoveeventdriver(self);
-			return;
 			break;
 		case PROPERTY_ID_DEFAULTFONT:
 			workspace_setdefaultfont(self, property);
-			return;
 			break;
 		case PROPERTY_ID_DRAWVUMETERS:
 			if (psy_property_item_bool(property)) {
@@ -1534,7 +1643,6 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 			} else {
 				psy_audio_player_setvumetermode(&self->player, VUMETER_NONE);
 			}
-			return;
 			break;
 		default: {
 			psy_Property* choice;
@@ -1543,30 +1651,49 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 				? psy_property_parent(property)
 				: NULL;			
 			if (choice && (psy_property_id(choice) == PROPERTY_ID_LANG)) {
-				workspace_configlanguage(self);
-				return;
+					workspace_configlanguage(self);
 			} else if (choice && (psy_property_id(choice) ==
 				PROPERTY_ID_AUDIODRIVERS)) {
-				workspace_onaudiodriverselect(self);
-				return;
+					workspace_onaudiodriverselect(self);
 			} else if (choice && psy_property_id(choice) ==
 				PROPERTY_ID_ACTIVEEVENTDRIVERS) {
-				workspace_showactiveeventdriverconfig(self,
+					workspace_showactiveeventdriverconfig(self,
 					psy_property_item_int(choice));
-				return;
 			} else if (psy_property_insection(property,
-				self->driverconfigure)) {
+					self->driverconfigure)) {
 				workspace_oneditaudiodriverconfiguration(self);
 				return;
 			} else if (psy_property_insection(property,
-				self->eventdriverconfigure)) {
+					self->eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);
-				return;
+			} else if (psy_property_insection(property, self->midicontrollers)) {
+				if (psy_property_id(property) >= PROPERTY_ID_MAPCONTROLLER &&
+					psy_property_id(property) < PROPERTY_ID_MAPCONTROLLER + 0x10) {
+					char sectionname[256];
+					psy_Property* section;
+
+					psy_snprintf(sectionname, 256, "controller%X",
+						psy_property_id(property) - PROPERTY_ID_MAPCONTROLLER + 1);
+					section = psy_property_find(self->midicontrollers, sectionname,
+						PSY_PROPERTY_TYPE_SECTION);
+					if (section) {
+						if (psy_property_item_bool(property)) {
+							psy_property_sethint(section, PSY_PROPERTY_HINT_EDIT);
+						} else {
+							psy_property_sethint(section, PSY_PROPERTY_HINT_HIDE);
+						}
+					}
+				}
+				psy_audio_player_configure(&self->player, self->midicontrollers);				
+			} else {
+				worked = FALSE;
 			}
 			break;
 		}
 	}	
-	psy_signal_emit(&self->signal_configchanged, self, 1, property);
+	if (!worked) {
+		psy_signal_emit(&self->signal_configchanged, self, 1, property);
+	}
 }
 
 void workspace_onloadskin(Workspace* self)
@@ -2129,6 +2256,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_showactiveeventdriverconfig(self,
 		workspace_curreventdriverconfiguration(self));
+	psy_audio_player_configure(&self->player, self->midicontrollers);
 	workspace_configvisual(self);
 	if (workspace_loadnewblitz(self)) {
 		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(
@@ -2878,27 +3006,6 @@ void workspace_showgear(Workspace* self)
 	assert(self);
 
 	psy_signal_emit(&self->signal_showgear, self, 0);
-}
-
-void workspace_onlanguagechanged(Workspace* self, Translator* sender)
-{
-	assert(self);
-
-	if (!psy_property_empty(&self->config)) {
-		psy_property_enumerate(&self->config, self,
-			(psy_PropertyCallback)workspace_onchangelanguageenum);
-	}
-}
-
-int workspace_onchangelanguageenum(Workspace* self,
-	psy_Property* property, int level)
-{	
-	assert(self);
-
-	psy_property_settranslation(property,
-		translator_translate(&self->translator,
-		psy_property_text(property)));	
-	return TRUE;
 }
 
 bool workspace_songmodified(const Workspace* self)

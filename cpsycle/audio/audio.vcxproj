@@ -179,6 +179,8 @@
     <ClCompile Include="src\master.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\midiconfig.c" />
+    <ClCompile Include="src\midiinput.c" />
     <ClCompile Include="src\mixer.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -293,6 +295,8 @@
     <ClInclude Include="src\machineproxy.h" />
     <ClInclude Include="src\machines.h" />
     <ClInclude Include="src\master.h" />
+    <ClInclude Include="src\midiconfig.h" />
+    <ClInclude Include="src\midiinput.h" />
     <ClInclude Include="src\mixer.h" />
     <ClInclude Include="src\pattern.h" />
     <ClInclude Include="src\patternentry.h" />

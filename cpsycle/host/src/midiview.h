@@ -5,13 +5,44 @@
 #define MIDIVIEW_H
 
 #include "labelpair.h"
-#include <uicheckbox.h>
 #include "workspace.h"
+
+#include <uibutton.h>
+#include <uicheckbox.h>
+#include <uiscroller.h>
+
+
+typedef struct {
+	psy_ui_Component component;	
+	int* channelmap;
+} MidiActiveChannelBox;
+
+void midiactivechannelbox_init(MidiActiveChannelBox*,
+	psy_ui_Component* parent, int* channelmap);
 
 typedef struct {
 	psy_ui_Component component;
+	MidiActiveChannelBox channelmap;
+	Workspace* workspace;
+} MidiFlagsView;
+
+void midiflagsview_init(MidiFlagsView*, psy_ui_Component* parent, Workspace*);
+
+typedef struct {
+	psy_ui_Component component;
+	psy_ui_Value colx[4];
+	Workspace* workspace;
+} MidiChannelMappingView;
+
+void midichannelmappingview_init(MidiChannelMappingView*, psy_ui_Component* parent,
+	Workspace*);
+
+typedef struct {
+	psy_ui_Component component;
+	psy_ui_Component titlebar;
 	psy_ui_Label title;
-	psy_ui_Label coreinfo;
+	psy_ui_Button hide;
+	psy_ui_Label coretitle;
 	psy_ui_Component top;
 	psy_ui_Component resources;
 	psy_ui_Label resourcestitle;
@@ -25,11 +56,18 @@ typedef struct {
 	LabelPair machines;
 	LabelPair routing;
 	psy_ui_CheckBox cpucheck;
-	psy_ui_Component performancelist;
+	MidiFlagsView flags;
+	psy_ui_Label flagtitle;
 	psy_ui_Margin topmargin;
+	psy_ui_Label channelmappingtitle;
+	psy_ui_Scroller scroller;
+	MidiChannelMappingView channelmapping;
 	Workspace* workspace;
-} MidiView;
+	uintptr_t channelmapupdate;
+	uint32_t lastchannelmap;
+	int channelstatcounter;
+} MidiMonitor;
 
-void midiview_init(MidiView*, psy_ui_Component* parent, Workspace*);
+void midimonitor_init(MidiMonitor*, psy_ui_Component* parent, Workspace*);
 
 #endif

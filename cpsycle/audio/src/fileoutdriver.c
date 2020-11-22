@@ -60,8 +60,6 @@ typedef struct {
 
 static void driver_deallocate(psy_AudioDriver*);
 static int fileoutdriver_init(FileOutDriver*);
-static void driver_connect(psy_AudioDriver*, void* context, AUDIODRIVERWORKFN callback,
-	void* handle);
 static int driver_open(psy_AudioDriver*);
 static void driver_configure(FileOutDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_AudioDriver*);
@@ -85,7 +83,6 @@ static void vtable_init(void)
 	if (!vtable_initialized) {
 		vtable.open = driver_open;
 		vtable.deallocate = driver_deallocate;
-		vtable.connect = driver_connect;
 		vtable.open = driver_open;
 		vtable.close = driver_close;
 		vtable.dispose = driver_dispose;
@@ -141,13 +138,6 @@ int driver_dispose(psy_AudioDriver* driver)
 	free(self->filecontext.path);
 	self->filecontext.path = 0;
 	return 0;
-}
-
-void driver_connect(psy_AudioDriver* driver, void* context, AUDIODRIVERWORKFN callback,
-	void* handle)
-{
-	driver->_pCallback = callback;
-	driver->_callbackContext = context;
 }
 
 int driver_open(psy_AudioDriver* driver)
@@ -241,7 +231,7 @@ void PollerThread(void* driver)
 		float *pBuf;
 		n = blocksize / 2;
 		
-		pBuf = self->driver._pCallback(self->driver._callbackContext, &n,
+		pBuf = self->driver.callback(self->driver.callbackcontext, &n,
 			&hostisplaying);		
 		fileoutdriver_writebuffer(self, pBuf, blocksize);
 		self->filecontext.numsamples += blocksize;

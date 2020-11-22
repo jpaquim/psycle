@@ -251,7 +251,23 @@ enum {
 	CMD_UNDO,
 	CMD_REDO,
 
-	CMD_FOLLOWSONG
+	CMD_FOLLOWSONG,	
+	CMD_DIGIT0,
+	CMD_DIGIT1,
+	CMD_DIGIT2,
+	CMD_DIGIT3,
+	CMD_DIGIT4,
+	CMD_DIGIT5,
+	CMD_DIGIT6,
+	CMD_DIGIT7,
+	CMD_DIGIT8,
+	CMD_DIGIT9,
+	CMD_DIGITA,
+	CMD_DIGITB,
+	CMD_DIGITC,
+	CMD_DIGITD,
+	CMD_DIGITE,
+	CMD_DIGITF
 };
 
 // TrackColumnDef
@@ -518,7 +534,6 @@ static void trackergrid_onblocktransposeup(TrackerGrid*);
 static void trackergrid_onblocktransposedown(TrackerGrid*);
 static void trackergrid_onblocktransposeup12(TrackerGrid*);
 static void trackergrid_onblocktransposedown12(TrackerGrid*);
-static void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, bool chordmode);
 static void trackergrid_inputvalue(TrackerGrid*, int value, int digit);
 static void trackergrid_prevtrack(TrackerGrid*);
 static void trackergrid_nexttrack(TrackerGrid*);
@@ -543,7 +558,6 @@ static void trackergrid_nextcol(TrackerGrid*);
 static void trackergrid_selectall(TrackerGrid*);
 static void trackergrid_selectcol(TrackerGrid*);
 static void trackergrid_selectmachine(TrackerGrid*);
-static void trackergrid_enterevent(TrackerGrid*, psy_ui_KeyEvent*);
 static void trackergrid_oninput(TrackerGrid*, psy_audio_Player*,
 	psy_audio_PatternEvent*);
 static void trackergrid_setdefaultevent(TrackerGrid*,
@@ -1387,40 +1401,6 @@ void trackergrid_selectmachine(TrackerGrid* self)
 	}
 }
 
-
-void trackergrid_enterevent(TrackerGrid* self, psy_ui_KeyEvent* ev)
-{
-	if (self->cursor.column != TRACKER_COLUMN_NOTE) {
-		int digit = keycodetoint(ev->keycode);
-		if (digit != -1) {
-			trackergrid_inputvalue(self, digit, 1);
-			psy_ui_keyevent_stoppropagation(ev);
-			return;
-		}
-	}
-	{
-		psy_EventDriver* kbd;
-		psy_EventDriverCmd cmd;
-		psy_EventDriverInput input;
-
-		cmd.id = -1;
-		kbd = workspace_kbddriver(self->workspace);
-		input.message = psy_EVENTDRIVER_KEYDOWN;
-		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
-		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
-		if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
-			trackergrid_inputnote(self, psy_audio_NOTECOMMANDS_RELEASE, self->chordmode);
-			psy_ui_keyevent_stoppropagation(ev);
-			return;
-		}
-		if (cmd.id != -1 && cmd.id <= psy_audio_NOTECOMMANDS_RELEASE && ev->shift &&
-			!self->chordmode && ev->keycode != psy_ui_KEY_SHIFT) {
-			self->chordmode = TRUE;
-			self->chordbegin = self->cursor.track;
-		}
-	}
-}
-
 void trackergrid_oninput(TrackerGrid* self, psy_audio_Player* sender,
 	psy_audio_PatternEvent* event)
 {
@@ -2019,7 +1999,7 @@ void trackergrid_onmouseup(TrackerGrid* self, psy_ui_MouseEvent* ev)
 
 void trackergrid_onfocus(TrackerGrid* self, psy_ui_Component* sender)
 {
-	trackergrid_invalidatecursor(self);
+	trackergrid_invalidatecursor(self);	
 }
 
 void trackergrid_onfocuslost(TrackerGrid* self, psy_ui_Component* sender)
@@ -3838,23 +3818,6 @@ void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
 				trackerview_toggleblockmenu(self);
 			}
 		}
-	} else {
-		psy_EventDriver* kbd;
-		psy_EventDriverInput input;
-		psy_EventDriverCmd cmd;
-
-		kbd = workspace_kbddriver(self->workspace);
-		input.message = psy_EVENTDRIVER_KEYDOWN;		
-		input.param1 = psy_audio_encodeinput(ev->keycode,
-			self->grid.chordmode ? 0 : ev->shift, ev->ctrl);
-		input.param2 = workspace_octave(self->workspace) * 12;
-		psy_eventdriver_cmd(kbd, "trackercmds", input, &cmd);
-		if (cmd.id != -1) {
-			trackerview_handlecommand(self, ev, cmd.id);
-			psy_ui_keyevent_stoppropagation(ev);
-		} else {
-			trackergrid_enterevent(&self->grid, ev);
-		}
 	}
 }
 
@@ -3866,7 +3829,7 @@ void trackerview_oneventdriverinput(TrackerView* self, psy_EventDriver* sender)
 		cmd = psy_eventdriver_getcmd(sender, "trackercmds");
 		if (cmd.id != -1) {
 			trackerview_handlecommand(self, NULL, cmd.id);
-		}
+		}		
 	}
 }
 
@@ -3973,6 +3936,29 @@ bool trackerview_handlecommand(TrackerView* self, psy_ui_KeyEvent* ev, int cmd)
 		case CMD_FOLLOWSONG:
 			trackerview_togglefollowsong(self);
 			break;
+		case CMD_DIGIT0:
+		case CMD_DIGIT1:
+		case CMD_DIGIT2:
+		case CMD_DIGIT3:
+		case CMD_DIGIT4:
+		case CMD_DIGIT5:
+		case CMD_DIGIT6:
+		case CMD_DIGIT7:
+		case CMD_DIGIT8:
+		case CMD_DIGIT9:
+		case CMD_DIGITA:
+		case CMD_DIGITB:
+		case CMD_DIGITC:
+		case CMD_DIGITD:
+		case CMD_DIGITE:
+		case CMD_DIGITF:
+			if (self->grid.cursor.column != TRACKER_COLUMN_NOTE) {
+				int digit = cmd - CMD_DIGIT0;
+				if (digit != -1) {
+					trackergrid_inputvalue(&self->grid, digit, 1);
+				}
+			}
+			break;		
 		default:
 			handled = FALSE;
 		break;
@@ -4241,6 +4227,24 @@ void trackerview_makecmds(psy_Property* parent)
 	definecmd(cmds, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO, "cmd_undo", "cmds.undo", "undo");
 	definecmd(cmds, psy_audio_encodeinput('Z', 1, 1), CMD_REDO, "cmd_redo", "cmds.redo", "redo");
 	definecmd(cmds, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG, "cmd_followsong", "cmds.followsong", "follow");
+
+	definecmd(cmds, psy_audio_encodeinput('0', 0, 0), CMD_DIGIT0, "cmd_digit0", "cmds.digit0", "0");
+	definecmd(cmds, psy_audio_encodeinput('1', 0, 0), CMD_DIGIT1, "cmd_digit1", "cmds.digit1", "1");
+	definecmd(cmds, psy_audio_encodeinput('2', 0, 0), CMD_DIGIT2, "cmd_digit2", "cmds.digit2", "2");
+	definecmd(cmds, psy_audio_encodeinput('3', 0, 0), CMD_DIGIT3, "cmd_digit3", "cmds.digit3", "3");
+	definecmd(cmds, psy_audio_encodeinput('4', 0, 0), CMD_DIGIT4, "cmd_digit4", "cmds.digit4", "4");
+	definecmd(cmds, psy_audio_encodeinput('5', 0, 0), CMD_DIGIT5, "cmd_digit5", "cmds.digit5", "5");
+	definecmd(cmds, psy_audio_encodeinput('6', 0, 0), CMD_DIGIT6, "cmd_digit6", "cmds.digit6", "6");
+	definecmd(cmds, psy_audio_encodeinput('7', 0, 0), CMD_DIGIT7, "cmd_digit7", "cmds.digit7", "7");
+	definecmd(cmds, psy_audio_encodeinput('8', 0, 0), CMD_DIGIT8, "cmd_digit8", "cmds.digit8", "8");
+	definecmd(cmds, psy_audio_encodeinput('9', 0, 0), CMD_DIGIT9, "cmd_digit9", "cmds.digit9", "9");
+	definecmd(cmds, psy_audio_encodeinput('A', 0, 0), CMD_DIGITA, "cmd_digitA", "cmds.digitA", "A");
+	definecmd(cmds, psy_audio_encodeinput('B', 0, 0), CMD_DIGITB, "cmd_digitB", "cmds.digitB", "B");
+	definecmd(cmds, psy_audio_encodeinput('C', 0, 0), CMD_DIGITC, "cmd_digitC", "cmds.digitC", "C");
+	definecmd(cmds, psy_audio_encodeinput('D', 0, 0), CMD_DIGITD, "cmd_digitD", "cmds.digitD", "D");
+	definecmd(cmds, psy_audio_encodeinput('E', 0, 0), CMD_DIGITE, "cmd_digitE", "cmds.digitE", "E");
+	definecmd(cmds, psy_audio_encodeinput('F', 0, 0), CMD_DIGITF, "cmd_digitF", "cmds.digitF", "F");
+	
 	if (cmds) {
 		psy_List* p;
 
