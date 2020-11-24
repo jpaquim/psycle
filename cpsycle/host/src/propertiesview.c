@@ -444,9 +444,12 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* prop
 {	
 	char text[256];
 	
-	if (psy_property_hint(property) == PSY_PROPERTY_HINT_INPUT) {
+	if (psy_property_hint(property) == PSY_PROPERTY_HINT_SHORTCUT) {
 		inputdefiner_setinput(&self->inputdefiner, psy_property_item_int(property));
 		inputdefiner_text(&self->inputdefiner, text);
+	} else
+	if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITHEX) {
+		psy_snprintf(text, 20, "%X", psy_property_item_int(property));
 	} else
 	if (psy_property_hint(property) == PSY_PROPERTY_HINT_EDITCOLOR) {
 		psy_snprintf(text, 20, "0x%d", psy_property_item_int(property));
@@ -467,7 +470,7 @@ void propertiesrenderer_drawinteger(PropertiesRenderer* self, psy_Property* prop
 	psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column),
 		self->cpy + self->centery,
 		text, strlen(text));
-	if (psy_property_int_hasrange(property)) {
+	if (psy_property_int_hasrange(property) && !psy_property_readonly(property)) {
 		psy_snprintf(text, 256, "from %d to %d", property->item.min, property->item.max);
 		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column + 1),
 			self->cpy + self->centery,
@@ -842,14 +845,19 @@ void propertiesrenderer_onmousedoubleclick(PropertiesRenderer* self,
 
 		if (psy_property_type(self->selected) == PSY_PROPERTY_TYPE_INTEGER) {
 			if (psy_property_hint(self->selected) ==
-					PSY_PROPERTY_HINT_INPUT) {
+					PSY_PROPERTY_HINT_SHORTCUT) {
 				inputdefiner_setinput(&self->inputdefiner,
 					psy_property_item_int(self->selected));
 				edit = &self->inputdefiner.component;				
 			} else {
 				char text[40];
-				psy_snprintf(text, 40, "%d",
-					psy_property_item_int(self->selected));
+				if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITHEX) {
+					psy_snprintf(text, 40, "%X",
+						psy_property_item_int(self->selected));
+				} else {
+					psy_snprintf(text, 40, "%d",
+						psy_property_item_int(self->selected));
+				}
 				psy_ui_edit_settext(&self->edit, text);
 				edit = &self->edit.component;				
 			}
@@ -894,8 +902,13 @@ void propertiesrenderer_oneditchange(PropertiesRenderer* self, psy_ui_Edit* send
 	if (self->selected) {
 		switch (psy_property_type(self->selected)) {
 			case PSY_PROPERTY_TYPE_INTEGER:
-				psy_property_setitem_int(self->selected,
-					atoi(psy_ui_edit_text(&self->edit)));
+				if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITHEX) {
+					psy_property_setitem_int(self->selected,
+						strtol(psy_ui_edit_text(&self->edit), NULL, 16));
+				} else {
+					psy_property_setitem_int(self->selected,
+						atoi(psy_ui_edit_text(&self->edit)));
+				}
 			break;
 			case PSY_PROPERTY_TYPE_STRING:
 				psy_property_setitem_str(self->selected,
@@ -916,11 +929,18 @@ void propertiesrenderer_oneditkeydown(PropertiesRenderer* self,
 		psy_ui_component_hide(&self->edit.component);
 		psy_ui_component_setfocus(&self->component);
 		propertiesrenderer_oneditchange(self, &self->edit);
-	} else
-	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
 		psy_ui_component_hide(&self->edit.component);
 		psy_ui_component_setfocus(&self->component);		
-	}
+	} else if (psy_property_hint(self->selected) == PSY_PROPERTY_HINT_EDITHEX) {
+		if ((ev->keycode >= psy_ui_KEY_DIGIT0 && ev->keycode <= psy_ui_KEY_DIGIT9) ||
+			(ev->keycode >= psy_ui_KEY_A && ev->keycode <= psy_ui_KEY_F) ||
+			(ev->keycode < psy_ui_KEY_HELP)) {
+			return;
+		} else {
+			psy_ui_keyevent_preventdefault(ev);
+		}
+	}	
 }
 
 void propertiesrenderer_onalign(PropertiesRenderer* self, psy_ui_Component*

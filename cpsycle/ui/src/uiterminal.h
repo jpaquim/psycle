@@ -20,6 +20,11 @@ void psy_ui_terminal_init(psy_ui_Terminal*, psy_ui_Component* parent);
 void psy_ui_terminal_output(psy_ui_Terminal*, const char* text);
 void psy_ui_terminal_clear(psy_ui_Terminal*);
 
+INLINE psy_ui_Component* psy_ui_terminal_base(psy_ui_Terminal* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -224,6 +224,10 @@ void translator_definekeys(psy_Property* lang)
 	psy_property_set_str(section, "keyboard-and-misc", "Keyboard and misc");
 	psy_property_set_str(section, "compatibility", "Compatibility");
 	psy_property_set_str(section, "midicontrollers", "MIDI Controllers");
+	psy_property_set_str(section, "midi-controllers-add",
+		"Add Controller Map");
+	psy_property_set_str(section, "midi=controllers-remove",
+		"Remove");
 	psy_property_set_str(section, "midi-controllers-mapping",
 		"Midi controllers mapping");
 	psy_property_set_str(section, "midi-controllers-macselect",
@@ -435,9 +439,11 @@ void translator_definekeys(psy_Property* lang)
 	psy_property_set_str(section, "show-playlist", "Show Playlist");
 	psy_property_set_str(section,
 		"show-pattern-names", "Show Pattern Names");
-	psy_property_set_str(section, "record-tweaks", "Record tweaks");
+	psy_property_set_str(section, "record-noteoff", "Record note-off");
+	psy_property_set_str(section, "record-tweak", "Record tweak");
+	psy_property_set_str(section, "allow-notes-to_effect", "Allow notes to effect");
 	psy_property_set_str(section,
-		"multichannel-audition", "Multichannel audition");
+		"multichannel-audition", "Multitrack playback on keypress");
 	psy_property_set_str(section, "duration", "Duration");
 	psy_property_set_str(section, "ins", "Insert");
 	psy_property_set_str(section, "new", "New");

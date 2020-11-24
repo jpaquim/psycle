@@ -176,7 +176,6 @@ const psy_EventDriverInfo* driver_info(psy_EventDriver* self)
 void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 {	
 	KbdDriver* self;
-	int res;
 	uintptr_t keycode;	
 	bool ctrl;
 
@@ -186,6 +185,12 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 
 	// patternview chordmode
 	psy_audio_decodeinput((uintptr_t)input.param1, &keycode, &self->shift, &ctrl);
+	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
+		return;
+	}
+	if (input.message == psy_EVENTDRIVER_KEYUP && keycode == 0x10 /* psy_ui_KEY_SHIFT */) {
+		return;
+	}
 	if (input.message == psy_EVENTDRIVER_KEYDOWN) {
 		bool noteedit;
 

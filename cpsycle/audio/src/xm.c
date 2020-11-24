@@ -61,7 +61,7 @@ static uint16_t flip16(uint16_t value)
 void psy_audio_xm_load(psy_audio_SongFile* self)
 {	
 	uint32_t nextstart;
-	SongProperties songproperties;
+	psy_audio_SongProperties songproperties;
 	char name[20];
 	char comments[4096];
 	char trackername[20];
@@ -75,7 +75,7 @@ void psy_audio_xm_load(psy_audio_SongFile* self)
 	name[sizeof(name) - 1] = '\0';
 	strcpy(comments, "Imported from FastTracker II Module: ");
 	strcat(comments, self->file->szName);
-	songproperties_init(&songproperties, name, "", comments);
+	psy_audio_songproperties_init(&songproperties, name, "", comments);
 	psy_audio_song_setproperties(self->song, &songproperties);
 	trackername_follows = psyfile_read_uint8(self->file);
 	if (trackername_follows != XM_TRACKERNAME_FOLLOWS) {
@@ -489,7 +489,7 @@ static uint8_t psy_audio_mod_convertperiodtonote(uint16_t period);
 
 bool psy_audio_mod_load(psy_audio_SongFile* self)
 {
-	SongProperties songproperties;
+	psy_audio_SongProperties songproperties;
 	char* text;
 	const char* comment = "Imported from MOD Module : ";
 	struct MODSAMPLEHEADER m_Samples[32];
@@ -515,7 +515,7 @@ bool psy_audio_mod_load(psy_audio_SongFile* self)
 
 	text = (char*)malloc(sizeof(comment) + strlen(self->path) + 1);
 	psy_snprintf(text, sizeof(comment) + strlen(self->path), "%s%s", comment, self->path);
-	songproperties_init(&songproperties, pSongName, "", text);
+	psy_audio_songproperties_init(&songproperties, pSongName, "", text);
 	free(text);
 	psy_audio_song_setproperties(self->song, &songproperties);	
 

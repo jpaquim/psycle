@@ -44,21 +44,21 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 	kbdbox_cleardescriptions(&self->kbdbox);
 	kbd = workspace_kbddriver(self->workspace);
 	if (kbd && psy_eventdriver_configuration(kbd)) {
-		psy_Property* section;
+		const psy_Property* section;
 
-		section = psy_property_find(psy_eventdriver_configuration(kbd),
+		section = psy_property_find_const(psy_eventdriver_configuration(kbd),
 			sectionname, PSY_PROPERTY_TYPE_SECTION);
 		if (section) {
-			psy_List* p;
+			const psy_List* p;
 
-			for (p = psy_property_children(section); p != NULL;
-					psy_list_next(&p)) {
-				psy_Property* property;
+			for (p = psy_property_children_const(section); p != NULL;
+					psy_list_next_const(&p)) {
+				const psy_Property* property;
 				uintptr_t keycode;
 				bool shift;
 				bool ctrl;
 
-				property = (psy_Property*)psy_list_entry(p);
+				property = (const psy_Property*)psy_list_entry_const(p);
 				psy_audio_decodeinput(psy_property_item_int(property),
 					&keycode, &shift, &ctrl);
 				kbdbox_setcolor(&self->kbdbox, keycode, psy_ui_color_make(0x00B1C8B0));
@@ -75,18 +75,18 @@ void kbdhelp_appendtabbarsections(KbdHelp* self)
 
 	kbd = workspace_kbddriver(self->workspace);
 	if (kbd && psy_eventdriver_configuration(kbd)) {
-		psy_Property* cmds;
+		const psy_Property* cmds;
 
-		cmds = psy_property_findsection(psy_eventdriver_configuration(kbd),
+		cmds = psy_property_findsection_const(psy_eventdriver_configuration(kbd),
 			"cmds");
 		if (cmds) {
-			psy_List* p;
+			const psy_List* p;
 
-			for (p = psy_property_children(cmds); p != NULL;
-					psy_list_next(&p)) {
-				psy_Property* property;
+			for (p = psy_property_children_const(cmds); p != NULL;
+					psy_list_next_const(&p)) {
+				const psy_Property* property;
 
-				property = (psy_Property*)psy_list_entry(p);
+				property = (const psy_Property*)psy_list_entry_const(p);
 				if (psy_property_type(property) ==
 					PSY_PROPERTY_TYPE_SECTION) {
 					tabbar_append(&self->tabbar,
@@ -108,26 +108,26 @@ void kbdhelp_ontabbarchange(KbdHelp* self, psy_ui_Component* sender,
 
 	kbd = workspace_kbddriver(self->workspace);
 	if (kbd && psy_eventdriver_configuration(kbd)) {
-		psy_Property* property;
-		psy_Property* cmds;
+		const psy_Property* property;
+		const psy_Property* cmds;
 		
 		property = NULL;
-		cmds = psy_property_findsection(psy_eventdriver_configuration(kbd),
+		cmds = psy_property_findsection_const(psy_eventdriver_configuration(kbd),
 			"cmds");
 		tab = tabbar_tab(&self->tabbar, tabindex);
 		if (cmds && tab) {				
-			psy_List* p = 0;
+			const psy_List* p = 0;
 
-			p = psy_property_children(cmds);
+			p = psy_property_children_const(cmds);
 			while (p) {
-				property = (psy_Property*)psy_list_entry(p);
+				property = (const psy_Property*)psy_list_entry_const(p);
 				if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
 					if (strcmp(psy_property_translation(property), tab->text) == 0) {
 						break;
 					}
 				}
 				property = NULL;
-				psy_list_next(&p);
+				psy_list_next_const(&p);
 			}
 		}
 		if (property) {

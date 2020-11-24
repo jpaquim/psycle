@@ -136,21 +136,26 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 void cpuview_inittitle(CPUView* self)
 {
 	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	
 	// titlebar
 	psy_ui_component_init(&self->titlebar, &self->component);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init(&self->title, &self->titlebar);
 	psy_ui_label_settext(&self->title, "Psycle DSP/CPU Performance Monitor");
+	psy_ui_component_setcolor(&self->title.component, psy_ui_color_make(0x00B1C8B0));
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init(&self->hide, &self->titlebar);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_signal_connect(&self->hide.signal_clicked, self, cpuview_onhide);
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0.0),
+		psy_ui_value_makepx(0));
+	psy_ui_component_setmargin(&self->hide.component, &margin);
 }
 
 void cpuview_initcoreinfo(CPUView* self)

@@ -60,8 +60,9 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_audio_song_init(&self->emptysong, &self->machinefactory);
 	self->song = song;	
 	self->numsongtracks = 16;
-	self->recordingnotes = 0;
-	self->multichannelaudition = 0;
+	self->recordingnotes = FALSE;
+	self->recordnoteoff = FALSE;
+	self->multichannelaudition = FALSE;
 	self->dodither = FALSE;
 	self->octave = 4;
 	self->resyncplayposinsamples = 0;
@@ -70,7 +71,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
 		&song->machines);
 	mainframe = handle;
-	psy_audio_midiinput_init(&self->midiinput);	
+	psy_audio_midiinput_init(&self->midiinput, song);
 	psy_audio_player_initdriver(self);
 	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
 	psy_signal_connect(&self->eventdrivers.signal_input, self,
@@ -82,7 +83,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_table_init(&self->worked);
 	psy_audio_pattern_init(&self->patterndefaults);
 	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_big_beat_t)
-		0.25);
+		0.25);	
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
@@ -419,8 +420,10 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			if (offset < 0) {
 				offset = 0;
 			}
-			psy_audio_sequencer_recordinputevent(&self->sequencer, &event, 0, 
-				self->resyncplayposinbeats);
+			if (self->recordnoteoff || event.note != psy_audio_NOTECOMMANDS_RELEASE) {
+				psy_audio_sequencer_recordinputevent(&self->sequencer, &event, 0,
+					self->resyncplayposinbeats);
+			}			
 		} else {			
 			psy_signal_emit(&self->signal_inputevent, self, 1, &event);
 		}
@@ -433,6 +436,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 	assert(self);
 
 	self->song = song;
+	psy_audio_midiinput_setsong(&self->midiinput, song);
 	if (self->song) {		
 		psy_audio_sequencer_reset(&self->sequencer, &song->sequence,
 			&song->machines, psy_audiodriver_samplerate(self->driver));		
@@ -440,6 +444,7 @@ void psy_audio_player_setsong(psy_audio_Player* self, psy_audio_Song* song)
 			psy_audio_patterns_songtracks(&song->patterns));
 		psy_audio_player_setbpm(self, psy_audio_song_bpm(self->song));
 		psy_audio_player_setlpb(self, psy_audio_song_lpb(self->song));
+		
 	}
 }
 
@@ -747,10 +752,11 @@ void psy_audio_player_setemptysong(psy_audio_Player* self)
 	psy_audio_exclusivelock_leave();
 }
 
-void psy_audio_player_configure(psy_audio_Player* self, psy_Property*
-	configuration)
+void psy_audio_player_midiconfigure(psy_audio_Player* self, psy_Property*
+	configuration, bool datastr)
 {
 	assert(self);
 
-	psy_audio_midiinput_configure(&self->midiinput, configuration);
+	psy_audio_midiinput_configure(&self->midiinput, configuration, datastr);
 }
+

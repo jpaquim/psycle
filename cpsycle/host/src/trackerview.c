@@ -18,6 +18,7 @@
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 
+#include "../../driver/eventdriver.h"
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
@@ -31,6 +32,9 @@ static int testcursor(psy_audio_PatternEditPosition cursor, uintptr_t track,
 {
 	return cursor.track == track && psy_dsp_testrange(cursor.offset, offset, 1.0 / lpb);
 }
+
+static void definecmd(psy_Property*, int cmd, uintptr_t keycode, bool shift,
+	bool ctrl, const char* key, const char* shorttext);
 
 static uintptr_t trackergrid_columnvalue(psy_audio_PatternEvent*, int column);
 
@@ -170,8 +174,6 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 }
 
 // TrackerGridState
-// prototypes
-static void definecmd(psy_Property*, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext);
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
@@ -1402,16 +1404,15 @@ void trackergrid_selectmachine(TrackerGrid* self)
 }
 
 void trackergrid_oninput(TrackerGrid* self, psy_audio_Player* sender,
-	psy_audio_PatternEvent* event)
+	psy_audio_PatternEvent* ev)
 {
-	if (psy_ui_component_hasfocus(&self->component) &&
-		self->cursor.column == TRACKER_COLUMN_NOTE &&
-		event->note != psy_audio_NOTECOMMANDS_RELEASE) {
-		trackergrid_setdefaultevent(self,
-			&sender->patterndefaults,
-			event);
-		trackergrid_inputevent(self, event,
-			self->chordmode);
+	if (self->cursor.column == TRACKER_COLUMN_NOTE &&
+			ev->note != psy_audio_NOTECOMMANDS_RELEASE) {
+		if (workspace_currview(self->workspace) == TABPAGE_PATTERNVIEW &&
+				self->editmode == TRACKERGRID_EDITMODE_SONG) {
+			trackergrid_setdefaultevent(self, &sender->patterndefaults, ev);
+			trackergrid_inputevent(self, ev, self->chordmode);
+		}
 	}
 }
 
@@ -3318,8 +3319,8 @@ static void trackerview_togglefollowsong(TrackerView*);
 static void trackerview_showlinenumbers(TrackerView*, int showstate);
 static void trackerview_showlinenumbercursor(TrackerView*, int showstate);
 static void trackerview_showlinenumbersinhex(TrackerView*, int showstate);
-static void trackerview_onconfigchanged(TrackerView*, Workspace*,
-	psy_Property*);
+static void trackerview_onconfigurationchanged(TrackerView*, Workspace*,
+	psy_Property* configurtion);
 static void trackerview_readconfig(TrackerView*);
 static void trackerview_readfont(TrackerView*);
 static void trackerview_readtheme(TrackerView*);
@@ -3333,7 +3334,6 @@ static void trackerview_onpatterneditpositionchanged(TrackerView*,
 static void trackerview_onparametertweak(TrackerView*,
 	Workspace* sender, int slot, uintptr_t tweak, float value);
 static void trackerview_onskinchanged(TrackerView*, Workspace*);
-static void trackerview_togglecomponent(TrackerView*, psy_ui_Component*);
 static void trackerview_oninterpolatecurve(TrackerView*,
 	psy_ui_Component* sender);
 static void trackerview_oninterpolatecurveviewoncancel(TrackerView*,
@@ -3524,7 +3524,7 @@ void trackerview_connectplayer(TrackerView* self)
 void trackerview_connectworkspace(TrackerView* self)
 {
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		trackerview_onconfigchanged);
+		trackerview_onconfigurationchanged);
 	psy_signal_connect(&self->workspace->signal_patterneditpositionchanged, self,
 		trackerview_onpatterneditpositionchanged);
 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
@@ -3732,7 +3732,7 @@ void trackerview_onpatternexport(TrackerView* self)
 
 void trackerview_toggleblockmenu(TrackerView* self)
 {
-	trackerview_togglecomponent(self, &self->blockmenu.component);	
+	psy_ui_component_togglevisibility(&self->blockmenu.component);
 }
 
 void trackerview_onzoomboxchanged(TrackerView* self, ZoomBox* sender)
@@ -4043,8 +4043,8 @@ void trackerview_onlpbchanged(TrackerView* self, psy_audio_Player* sender, uintp
 	psy_ui_component_invalidate(&self->linenumbers.component);
 }
 
-void trackerview_onconfigchanged(TrackerView* self, Workspace* workspace,
-	psy_Property* property)
+void trackerview_onconfigurationchanged(TrackerView* self, Workspace*
+	workspace, psy_Property* property)
 {
 	if (property == &workspace->config) {
 		trackerview_readconfig(self);
@@ -4191,77 +4191,168 @@ void trackerview_makecmds(psy_Property* parent)
 	cmds = psy_property_settext(
 		psy_property_append_section(parent, "trackercmds"),
 		"Tracker");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_UP, 0, 0), CMD_NAVUP, "cmd_navup", "cmds.navup", "up");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DOWN, 0, 0), CMD_NAVDOWN, "cmd_navdown", "cmds.navdown", "down");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_LEFT, 0, 0), CMD_NAVLEFT, "cmd_navleft", "cmds.navleft", "left");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RIGHT, 0, 0), CMD_NAVRIGHT, "cmd_navright", "cmds.navright", "right");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_PRIOR, 0, 0), CMD_NAVPAGEUP, "cmd_navpageup", "cmds.navpageup", "pageup");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_NEXT, 0, 0), CMD_NAVPAGEDOWN, "cmd_navpagedown", "cmds.navpagedown", "pagedown");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_HOME, 0, 0), CMD_NAVTOP, "cmd_navtop", "cmds.navtop", "track top");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_END, 0, 0), CMD_NAVBOTTOM, "cmd_navbottom", "cmds.navbottom", "track bottom");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_TAB, 1, 0), CMD_COLUMNPREV, "cmd_columnprev", "cmds.columnprev", "prev col");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 0), CMD_COLUMNNEXT, "cmd_columnnext", "cmds.columnnext", "next col");
+	definecmd(cmds, CMD_NAVUP, // cmd
+		psy_ui_KEY_UP, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navup", "up");
+	definecmd(cmds, CMD_NAVDOWN,
+		psy_ui_KEY_DOWN, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navdown", "down");
+	definecmd(cmds, CMD_NAVLEFT,
+		psy_ui_KEY_LEFT, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navleft", "left");
+	definecmd(cmds, CMD_NAVRIGHT,
+		psy_ui_KEY_RIGHT, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navright", "right");
+	definecmd(cmds, CMD_NAVPAGEUP,
+		psy_ui_KEY_PRIOR, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navpageup", "pageup");
+	definecmd(cmds, CMD_NAVPAGEDOWN,
+		psy_ui_KEY_NEXT, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navpagedown", "pagedown");
+	definecmd(cmds, CMD_NAVTOP,
+		psy_ui_KEY_HOME, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navtop", "track top");
+	definecmd(cmds, CMD_NAVBOTTOM,
+		psy_ui_KEY_END, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"navbottom", "track bottom");
+	definecmd(cmds, CMD_COLUMNPREV,
+		psy_ui_KEY_TAB, psy_SHIFT_ON, psy_CTRL_OFF,
+		"columnprev", "prev col");
+	definecmd(cmds, CMD_COLUMNNEXT,
+		psy_ui_KEY_TAB, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"columnnext", "next col");
+	definecmd(cmds, CMD_ROWINSERT,
+		psy_ui_KEY_INSERT, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"rowinsert", "ins row");
+	definecmd(cmds, CMD_ROWDELETE,
+		psy_ui_KEY_BACK, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"rowdelete", "del row");
+	definecmd(cmds, CMD_ROWCLEAR,
+		psy_ui_KEY_DELETE, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"rowclear", "clr row");
+	definecmd(cmds, CMD_BLOCKSTART,
+		psy_ui_KEY_B, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockstart", "sel start");
+	definecmd(cmds, CMD_BLOCKEND,
+		psy_ui_KEY_E, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockend", "sel end");
+	definecmd(cmds, CMD_BLOCKUNMARK,
+		psy_ui_KEY_U, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockunmark", "unmark");
+	definecmd(cmds, CMD_BLOCKCUT,
+		psy_ui_KEY_X, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockcut", "cut");
+	definecmd(cmds, CMD_BLOCKCOPY,
+		psy_ui_KEY_C, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockcopy", "copy");
+	definecmd(cmds, CMD_BLOCKPASTE,
+		psy_ui_KEY_V, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockpaste", "paste");
+	definecmd(cmds, CMD_BLOCKMIX,
+		psy_ui_KEY_M, psy_SHIFT_OFF, psy_CTRL_ON,
+		"blockmix", "mix");
 
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_INSERT, 0, 0), CMD_ROWINSERT, "cmd_rowinsert", "cmds.rowinsert", "ins row");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_BACK, 0, 0), CMD_ROWDELETE, "cmd_rowdelete", "cmds.rowdelete", "del row");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_DELETE, 0, 0), CMD_ROWCLEAR, "cmd_rowclear", "cmds.rowclear", "clr row");
+	definecmd(cmds, CMD_TRANSPOSEBLOCKINC,
+		psy_ui_KEY_F12, psy_SHIFT_OFF, psy_CTRL_ON,
+		"transposeblockinc", "Trsp+");
+	definecmd(cmds, CMD_TRANSPOSEBLOCKDEC,
+		psy_ui_KEY_F11, psy_SHIFT_OFF, psy_CTRL_ON,
+		"transposeblockdec", "Trsp-");
+	definecmd(cmds, CMD_TRANSPOSEBLOCKINC12,
+		psy_ui_KEY_F12, psy_SHIFT_ON, psy_CTRL_ON,
+		"transposeblockinc12", "Trsp+12");
+	definecmd(cmds, CMD_TRANSPOSEBLOCKDEC12,
+		psy_ui_KEY_F11, psy_SHIFT_ON, psy_CTRL_ON,
+		"transposeblockdec12", "Trsp-12");
 
-	definecmd(cmds, psy_audio_encodeinput('B', 0, 1), CMD_BLOCKSTART, "cmd_blockstart", "cmds.blockstart", "sel start");
-	definecmd(cmds, psy_audio_encodeinput('E', 0, 1), CMD_BLOCKEND, "cmd_blockend", "cmds.blockend", "sel end");
-	definecmd(cmds, psy_audio_encodeinput('U', 0, 1), CMD_BLOCKUNMARK, "cmd_blockunmark", "cmds.blockunmark", "unmark");
-	definecmd(cmds, psy_audio_encodeinput('X', 0, 1), CMD_BLOCKCUT, "cmd_blockcut", "cmds.blockcut", "cut");
-	definecmd(cmds, psy_audio_encodeinput('C', 0, 1), CMD_BLOCKCOPY, "cmd_blockcopy", "cmds.blockcopy", "copy");
-	definecmd(cmds, psy_audio_encodeinput('V', 0, 1), CMD_BLOCKPASTE, "cmd_blockpaste", "cmds.blockpaste", "paste");
-	definecmd(cmds, psy_audio_encodeinput('M', 0, 1), CMD_BLOCKMIX, "cmd_blockmix", "cmds.blockmix", "mix");
+	definecmd(cmds, CMD_SELECTALL,
+		psy_ui_KEY_A, psy_SHIFT_OFF, psy_CTRL_ON,
+		"selectall", "sel all");
+	definecmd(cmds, CMD_SELECTCOL,
+		psy_ui_KEY_R, psy_SHIFT_OFF, psy_CTRL_ON,
+		"selectcol", "sel col");
+	definecmd(cmds, CMD_SELECTBAR,
+		psy_ui_KEY_K, psy_SHIFT_OFF, psy_CTRL_ON,
+		"selectbar", "sel bar");
 
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F12, 0, 1), CMD_TRANSPOSEBLOCKINC, "cmd_transposeblockinc", "cmds.transposeblockinc", "Trsp+");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F11, 0, 1), CMD_TRANSPOSEBLOCKDEC, "cmd_transposeblockdec", "cmds.transposeblockdec", "Trsp-");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F12, 1, 1), CMD_TRANSPOSEBLOCKINC12, "cmd_transposeblockinc12", "cmds.transposeblockinc12", "Trsp+12");
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_F11, 1, 1), CMD_TRANSPOSEBLOCKDEC12, "cmd_transposeblockdec12", "cmds.transposeblockdec12", "Trsp-12");
+	definecmd(cmds, CMD_SELECTMACHINE,
+		psy_ui_KEY_RETURN, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"selectmachine", "Sel Mac/Ins");
+	definecmd(cmds, CMD_UNDO,
+		psy_ui_KEY_Z, psy_SHIFT_OFF, psy_CTRL_ON,
+		"undo", "undo");
+	definecmd(cmds, CMD_REDO,
+		psy_ui_KEY_Z, psy_SHIFT_ON, psy_CTRL_ON,
+		"redo", "redo");
+	definecmd(cmds, CMD_FOLLOWSONG,
+		psy_ui_KEY_F, psy_SHIFT_OFF, psy_CTRL_ON,
+		"followsong", "follow");
 
-	definecmd(cmds, psy_audio_encodeinput('A', 0, 1), CMD_SELECTALL, "cmd_selectall", "cmds.selectall", "sel all");
-	definecmd(cmds, psy_audio_encodeinput('R', 0, 1), CMD_SELECTCOL, "cmd_selectcol", "cmds.selectcol", "sel col");
-	definecmd(cmds, psy_audio_encodeinput('K', 0, 1), CMD_SELECTBAR, "cmd_selectbar", "cmds.selectbar", "sel bar");
-
-	definecmd(cmds, psy_audio_encodeinput(psy_ui_KEY_RETURN, 0, 0), CMD_SELECTMACHINE, "cmd_selectmachine", "cmds.selectmachine", "Select Mac/Ins in Cursor Pos");
-	definecmd(cmds, psy_audio_encodeinput('Z', 0, 1), CMD_UNDO, "cmd_undo", "cmds.undo", "undo");
-	definecmd(cmds, psy_audio_encodeinput('Z', 1, 1), CMD_REDO, "cmd_redo", "cmds.redo", "redo");
-	definecmd(cmds, psy_audio_encodeinput('F', 0, 1), CMD_FOLLOWSONG, "cmd_followsong", "cmds.followsong", "follow");
-
-	definecmd(cmds, psy_audio_encodeinput('0', 0, 0), CMD_DIGIT0, "cmd_digit0", "cmds.digit0", "0");
-	definecmd(cmds, psy_audio_encodeinput('1', 0, 0), CMD_DIGIT1, "cmd_digit1", "cmds.digit1", "1");
-	definecmd(cmds, psy_audio_encodeinput('2', 0, 0), CMD_DIGIT2, "cmd_digit2", "cmds.digit2", "2");
-	definecmd(cmds, psy_audio_encodeinput('3', 0, 0), CMD_DIGIT3, "cmd_digit3", "cmds.digit3", "3");
-	definecmd(cmds, psy_audio_encodeinput('4', 0, 0), CMD_DIGIT4, "cmd_digit4", "cmds.digit4", "4");
-	definecmd(cmds, psy_audio_encodeinput('5', 0, 0), CMD_DIGIT5, "cmd_digit5", "cmds.digit5", "5");
-	definecmd(cmds, psy_audio_encodeinput('6', 0, 0), CMD_DIGIT6, "cmd_digit6", "cmds.digit6", "6");
-	definecmd(cmds, psy_audio_encodeinput('7', 0, 0), CMD_DIGIT7, "cmd_digit7", "cmds.digit7", "7");
-	definecmd(cmds, psy_audio_encodeinput('8', 0, 0), CMD_DIGIT8, "cmd_digit8", "cmds.digit8", "8");
-	definecmd(cmds, psy_audio_encodeinput('9', 0, 0), CMD_DIGIT9, "cmd_digit9", "cmds.digit9", "9");
-	definecmd(cmds, psy_audio_encodeinput('A', 0, 0), CMD_DIGITA, "cmd_digitA", "cmds.digitA", "A");
-	definecmd(cmds, psy_audio_encodeinput('B', 0, 0), CMD_DIGITB, "cmd_digitB", "cmds.digitB", "B");
-	definecmd(cmds, psy_audio_encodeinput('C', 0, 0), CMD_DIGITC, "cmd_digitC", "cmds.digitC", "C");
-	definecmd(cmds, psy_audio_encodeinput('D', 0, 0), CMD_DIGITD, "cmd_digitD", "cmds.digitD", "D");
-	definecmd(cmds, psy_audio_encodeinput('E', 0, 0), CMD_DIGITE, "cmd_digitE", "cmds.digitE", "E");
-	definecmd(cmds, psy_audio_encodeinput('F', 0, 0), CMD_DIGITF, "cmd_digitF", "cmds.digitF", "F");
-	
-	if (cmds) {
-		psy_List* p;
-
-		for (p = psy_property_children(cmds); p != NULL; psy_list_next(&p)) {
-			psy_property_sethint((psy_Property*)psy_list_entry(p),
-				PSY_PROPERTY_HINT_INPUT);
-		}
-	}	
+	definecmd(cmds, CMD_DIGIT0,
+		psy_ui_KEY_DIGIT0, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit0", "0");
+	definecmd(cmds, CMD_DIGIT1,
+		psy_ui_KEY_DIGIT1, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit1", "1");
+	definecmd(cmds, CMD_DIGIT2,
+		psy_ui_KEY_DIGIT2, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit2", "2");
+	definecmd(cmds, CMD_DIGIT3,
+		psy_ui_KEY_DIGIT3, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit3", "3");
+	definecmd(cmds, CMD_DIGIT4,
+		psy_ui_KEY_DIGIT4, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit4", "4");
+	definecmd(cmds, CMD_DIGIT5,
+		psy_ui_KEY_DIGIT5, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit5", "5");
+	definecmd(cmds, CMD_DIGIT6,
+		psy_ui_KEY_DIGIT6, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit6", "6");
+	definecmd(cmds, CMD_DIGIT7,
+		psy_ui_KEY_DIGIT7, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit7", "7");
+	definecmd(cmds, CMD_DIGIT8,
+		psy_ui_KEY_DIGIT8, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit8", "8");
+	definecmd(cmds, CMD_DIGIT9,
+		psy_ui_KEY_DIGIT9, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digit9", "9");
+	definecmd(cmds, CMD_DIGITA,
+		psy_ui_KEY_A, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digitA", "A");
+	definecmd(cmds, CMD_DIGITB,
+		psy_ui_KEY_B, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digitB", "B");
+	definecmd(cmds, CMD_DIGITC,
+		psy_ui_KEY_C, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digitC", "C");
+	definecmd(cmds, CMD_DIGITD,
+		psy_ui_KEY_D, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digitD", "D");
+	definecmd(cmds, CMD_DIGITE,
+		psy_ui_KEY_E, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digitE", "E");
+	definecmd(cmds, CMD_DIGITF,
+		psy_ui_KEY_F, psy_SHIFT_OFF, psy_CTRL_OFF,
+		"digitF", "F");	
 }
 
-void definecmd(psy_Property* cmds, uintptr_t input, int cmd, const char* key, const char* text, const char* shorttext)
+// Defines a property with shortcut defaults for the keyboard driver
+// key		: cmd id used by the trackerview
+// text		: "cmds.key" language dictionary key used by the translator
+// shorttext: short description for the keyboard help view
+// value	: encoded key shortcut (keycode/shift/ctrl)
+void definecmd(psy_Property* cmds, int cmd, uintptr_t keycode, bool shift,
+	bool ctrl, const char* key, const char* shorttext)
 {
-	psy_property_settext(psy_property_setshorttext(
+	char text[256];
+
+	psy_snprintf(text, 256, "cmds.%s", key);
+	psy_property_sethint( psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(cmds, key,
-			input, 0, 0), cmd),
-		shorttext),
-		text);
+		psy_audio_encodeinput(keycode, shift, ctrl), 0, 0),
+		cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);
 }
 
 void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)
@@ -4274,17 +4365,5 @@ void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)
 
 void trackerview_oninterpolatecurve(TrackerView* self, psy_ui_Component* sender)
 {
-	trackerview_togglecomponent(self, &self->interpolatecurveview.component);	
-}
-
-void trackerview_togglecomponent(TrackerView* self, psy_ui_Component* component)
-{
-	if (psy_ui_component_visible(component)) {
-		psy_ui_component_hide(component);
-		psy_ui_component_align(psy_ui_component_parent(component));
-	} else {
-		component->visible = 1;
-		psy_ui_component_align(psy_ui_component_parent(component));
-		psy_ui_component_show(component);
-	}	
+	psy_ui_component_togglevisibility(&self->interpolatecurveview.component);
 }

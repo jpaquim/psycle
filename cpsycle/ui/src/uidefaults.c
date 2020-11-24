@@ -29,7 +29,9 @@ void psy_ui_defaults_init(psy_ui_Defaults* self)
 	
 		psy_ui_fontinfo_init(&fontinfo, "Tahoma", 80);	
 		psy_ui_font_init(&self->style_common.font, &fontinfo);
-	}	
+	}
+	// orange 0x002279F1
+	// green 0x00B1C8B0
 }
 
 void psy_ui_defaults_initcolors(psy_ui_Defaults* self)

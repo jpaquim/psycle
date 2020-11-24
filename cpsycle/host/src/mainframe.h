@@ -125,6 +125,15 @@ typedef struct {
 } MainFrame;
 
 void mainframe_init(MainFrame*);
-int mainframe_showmaximizedatstart(MainFrame*);
+
+INLINE int mainframe_showmaximizedatstart(MainFrame* self)
+{
+	return workspace_showmaximizedatstart(&self->workspace);
+}
+
+INLINE psy_ui_Component* mainframe_base(MainFrame* self)
+{
+	return &self->component;
+}
 
 #endif

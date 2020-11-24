@@ -24,4 +24,9 @@ void zoombox_init(ZoomBox*, psy_ui_Component* parent);
 INLINE double zoombox_rate(ZoomBox* self) { return self->zoomrate; }
 void zoombox_setrate(ZoomBox*, double);
 
+INLINE psy_ui_Component* zoombox_base(ZoomBox* self)
+{
+	return &self->component;
+}
+
 #endif

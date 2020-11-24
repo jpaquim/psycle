@@ -68,6 +68,30 @@ INLINE char* psy_strreset(char** dest, const char* text) {
 	return *dest;
 }
 
+INLINE char* psy_strcat_realloc(char* str1, const char* str2)
+{
+	if (!str2) {
+		return str1;
+	} else if (!str1) {
+		return psy_strdup(str2);
+	} else {	
+		char* rv;
+		char* resize;
+		uintptr_t str1_len;
+		uintptr_t str2_len;
+
+		str1_len = strlen(str1);
+		str2_len = strlen(str2);
+		resize = (char*)realloc(str1, str1_len + str2_len + 1);
+		if (!resize) {
+			return str1;
+		}
+		rv = resize;
+		memcpy(rv + str1_len, str2, str2_len + 1);
+		return rv;
+	}
+}
+
 INLINE void psy_snprintf(char* buf, size_t buflen, const char* fmt, ...)
 {
 	va_list ap;

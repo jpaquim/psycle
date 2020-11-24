@@ -42,7 +42,8 @@ typedef struct psy_audio_Player {
 	psy_audio_EventDrivers eventdrivers;	
 	VUMeterMode vumode;
 	int recordingnotes;
-	int multichannelaudition;	
+	bool recordnoteoff;
+	int multichannelaudition;
 	psy_Table notestotracks;
 	psy_Table trackstonotes;
 	psy_Table worked;
@@ -145,6 +146,22 @@ void psy_audio_player_restartdriver(psy_audio_Player*, psy_Property* config);
 void psy_audio_player_startrecordingnotes(psy_audio_Player*);
 void psy_audio_player_stoprecordingnotes(psy_audio_Player*);
 int psy_audio_player_recordingnotes(psy_audio_Player*);
+
+INLINE void psy_audio_player_recordnoteoff(psy_audio_Player* self)
+{
+	self->recordnoteoff = TRUE;
+}
+
+INLINE void psy_audio_player_preventrecordnoteoff(psy_audio_Player* self)
+{
+	self->recordnoteoff = FALSE;
+}
+
+INLINE bool psy_audio_player_recordingnoteoff(const psy_audio_Player* self)
+{
+	return self->recordnoteoff;
+}
+
 // event driver
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*, const char* path);
 void psy_audio_player_removeeventdriver(psy_audio_Player*, int id);
@@ -157,8 +174,8 @@ void psy_audio_player_write_eventdrivers(psy_audio_Player*, psy_EventDriverInput
 void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
 	uintptr_t slot);
 void psy_audio_player_setemptysong(psy_audio_Player*);
-void psy_audio_player_configure(psy_audio_Player*, psy_Property*
-	configuration);
+void psy_audio_player_midiconfigure(psy_audio_Player*, psy_Property*
+	configuration, bool datastr);
 
 #ifdef __cplusplus
 }

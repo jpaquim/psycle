@@ -35,8 +35,22 @@ INLINE void* psy_list_entry(psy_List* self)
 
 	return self->entry;
 }
+/// returns the const entry of a node (!= NULL)
+INLINE const void* psy_list_entry_const(const psy_List* self)
+{
+	assert(self);
+
+	return self->entry;
+}
 /// returns the next node or NULL
 INLINE void psy_list_next(psy_List** self)
+{
+	assert(self != NULL && (*self) != NULL);
+
+	*self = (*self)->next;
+}
+/// returns the next node or NULL
+INLINE void psy_list_next_const(const psy_List** self)
 {
 	assert(self != NULL && (*self) != NULL);
 

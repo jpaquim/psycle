@@ -42,10 +42,11 @@ typedef enum {
 typedef enum {
 	PSY_PROPERTY_HINT_NONE,
 	PSY_PROPERTY_HINT_HIDE,
-	PSY_PROPERTY_HINT_EDIT,
+	PSY_PROPERTY_HINT_EDIT,	
 	PSY_PROPERTY_HINT_EDITDIR,
 	PSY_PROPERTY_HINT_EDITCOLOR,
-	PSY_PROPERTY_HINT_INPUT,
+	PSY_PROPERTY_HINT_EDITHEX,
+	PSY_PROPERTY_HINT_SHORTCUT,
 	PSY_PROPERTY_HINT_LIST,
 	PSY_PROPERTY_HINT_CHECK	
 } psy_PropertyHint;
@@ -115,13 +116,16 @@ psy_Property* psy_property_sync(psy_Property*, const psy_Property* source);
 uintptr_t psy_property_size(const psy_Property*);
 bool psy_property_empty(const psy_Property*);
 psy_List* psy_property_children(psy_Property*);
+const psy_List* psy_property_children_const(const psy_Property*);
 psy_Property* psy_property_parent(const psy_Property*);
 psy_Property* psy_property_remove(psy_Property*, psy_Property*);
 void psy_property_clear(psy_Property*);
 bool psy_property_insection(const psy_Property*, psy_Property* section);
 void psy_property_enumerate(psy_Property*, void* target, psy_PropertyCallback);
 psy_Property* psy_property_find(psy_Property*, const char* key, psy_PropertyType);
+const psy_Property* psy_property_find_const(const psy_Property*, const char* key, psy_PropertyType);
 psy_Property* psy_property_findsection(psy_Property*, const char* key);
+const psy_Property* psy_property_findsection_const(const psy_Property*, const char* key);
 psy_Property* psy_property_findsectionex(psy_Property*, const char* key,
 	psy_Property** prev);
 char_dyn_t* psy_property_sections(const psy_Property*);
@@ -133,6 +137,7 @@ psy_Property* psy_property_at(psy_Property*, const char* key, psy_PropertyType);
 const psy_Property* psy_property_at_const(const psy_Property*, const char* key,
 	psy_PropertyType);
 psy_Property* psy_property_at_index(psy_Property*, intptr_t index);
+uintptr_t psy_property_index(const psy_Property*);
 psy_Property* psy_property_set_bool(psy_Property*, const char* key, bool value);
 bool psy_property_at_bool(const psy_Property*, const char* key, bool defaultvalue);
 psy_Property* psy_property_set_int(psy_Property*, const char* key, intptr_t value);
