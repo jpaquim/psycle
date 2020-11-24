@@ -20,4 +20,9 @@ typedef struct {
 void recentview_init(RecentView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
+INLINE psy_ui_Component* recentview_base(RecentView* self)
+{
+	return &self->component;
+}
+
 #endif /* RECENTVIEW_H */

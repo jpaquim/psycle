@@ -17,7 +17,7 @@ static void psy_ui_label_onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 
 static psy_ui_ComponentVtable psy_ui_label_vtable;
-static int psy_ui_label_vtable_initialized = 0;
+static bool psy_ui_label_vtable_initialized = FALSE;
 
 static void psy_ui_label_vtable_init(psy_ui_Label* self)
 {
@@ -25,12 +25,14 @@ static void psy_ui_label_vtable_init(psy_ui_Label* self)
 		psy_ui_label_vtable = *(self->component.vtable);
 		psy_ui_label_vtable.ondraw = (psy_ui_fp_ondraw)psy_ui_label_ondraw;
 		psy_ui_label_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)psy_ui_label_onpreferredsize;
-		psy_ui_label_vtable_initialized = 1;
+		psy_ui_label_vtable_initialized = TRUE;
 	}
 }
 
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {
+	assert(self);
+
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_vtable_init(self);
 	self->component.vtable = &psy_ui_label_vtable;
@@ -38,25 +40,35 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 	self->linespacing = 1.0;
 	self->textalignment = psy_ui_ALIGNMENT_CENTER_VERTICAL |
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;
-	self->text = strdup("");
+	self->text = NULL;
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_label_ondestroy);
 }
 
 void psy_ui_label_ondestroy(psy_ui_Label* self, psy_ui_Component* sender)
 {
+	assert(self);
+
 	free(self->text);
 }
 
 void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 {
+	assert(self);
+
 	psy_strreset(&self->text, text);	
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
 void psy_ui_label_text(psy_ui_Label* self, char* text)
 {
-	psy_snprintf(self->text, 256, "%s", text);
+	assert(self);
+
+	if (self->text) {
+		psy_snprintf(self->text, 256, "%s", text);
+	} else {
+		text[0] = '\0';
+	}
 }
 
 void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui_Size* rv)
@@ -64,12 +76,17 @@ void psy_ui_label_onpreferredsize(psy_ui_Label* self, psy_ui_Size* limit, psy_ui
 	psy_ui_TextMetric tm;		
 
 	tm = psy_ui_component_textmetric(psy_ui_label_base(self));
-	if (self->charnumber == 0) {
-		psy_ui_Size size;
-			
-		size = psy_ui_component_textsize(psy_ui_label_base(self), self->text);
-		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4 +
-			psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
+	if (self->charnumber == 0) {		
+		if (psy_strlen(self->text) == 0) {
+			rv->width = psy_ui_value_makepx(0);
+		} else {
+			psy_ui_Size size;
+
+			size = psy_ui_component_textsize(psy_ui_label_base(self),
+				self->text);
+			rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 4 +
+				psy_ui_margin_width_px(&psy_ui_label_base(self)->spacing, &tm));
+		}		
 	} else {
 		rv->width = psy_ui_value_makepx(tm.tmAveCharWidth * self->charnumber);
 	}
@@ -89,7 +106,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 	char* string;
 	uintptr_t numcolumnavgchars;
 		
-	if (strlen(self->text) == 0) {
+	if (psy_strlen(self->text) == 0) {
 		return;
 	}	
 	tm = psy_ui_component_textmetric(&self->component);

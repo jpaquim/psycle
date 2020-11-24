@@ -205,6 +205,7 @@ INLINE void psy_ui_component_hide(psy_ui_Component* self)
 }
 
 void psy_ui_component_showstate(psy_ui_Component*, int cmd);
+void psy_ui_component_togglevisibility(psy_ui_Component*);
 
 INLINE void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* scrollmin,
 	int* scrollmax)
@@ -530,6 +531,7 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 {
 	return self->overflow;
 }
+
 
 #ifdef __cplusplus
 }

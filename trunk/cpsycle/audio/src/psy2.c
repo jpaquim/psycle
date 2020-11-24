@@ -134,7 +134,7 @@ void psy2loader_readheader(PSY2Loader* self)
 	int32_t beatspermin;
 	int32_t sampR;
 	int32_t linesperbeat;	
-	SongProperties songproperties;
+	psy_audio_SongProperties songproperties;
 
 	// PSY2SONG, the Sign of the file, already read by songio,
 	// so it isn't done here again
@@ -177,7 +177,7 @@ void psy2loader_readheader(PSY2Loader* self)
 		// The old format assumes we output at 44100 samples/sec, so...	
 		linesperbeat = (int32_t)(44100 * 60 / (sampR * beatspermin));
 	}	
-	songproperties_init_all(&songproperties,
+	psy_audio_songproperties_init_all(&songproperties,
 		name,
 		author,
 		comments,
@@ -188,7 +188,7 @@ void psy2loader_readheader(PSY2Loader* self)
 		0,
 		beatspermin);
 	psy_audio_song_setproperties(self->songfile->song, &songproperties);
-	songproperties_dispose(&songproperties);
+	psy_audio_songproperties_dispose(&songproperties);
 }
 
 void psy2loader_readpatterns(PSY2Loader* self)

@@ -1038,3 +1038,19 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 		}
 	}
 }
+
+void psy_ui_component_togglevisibility(psy_ui_Component* self)
+{
+	assert(self);
+	if (psy_ui_component_parent(self)) {
+		if (psy_ui_component_visible(self)) {
+			psy_ui_component_hide(self);
+			psy_ui_component_align(psy_ui_component_parent(self));
+		} else {
+			psy_ui_component_hide(self);
+			self->visible = 1;
+			psy_ui_component_align(psy_ui_component_parent(self));
+			psy_ui_component_show(self);
+		}
+	}
+}

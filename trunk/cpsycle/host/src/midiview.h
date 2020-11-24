@@ -41,6 +41,7 @@ typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component titlebar;
 	psy_ui_Label title;
+	psy_ui_Button configure;
 	psy_ui_Button hide;
 	psy_ui_Label coretitle;
 	psy_ui_Component top;
@@ -59,7 +60,9 @@ typedef struct {
 	MidiFlagsView flags;
 	psy_ui_Label flagtitle;
 	psy_ui_Margin topmargin;
+	psy_ui_Component topchannelmapping;
 	psy_ui_Label channelmappingtitle;
+	psy_ui_Button mapconfigure;
 	psy_ui_Scroller scroller;
 	MidiChannelMappingView channelmapping;
 	Workspace* workspace;

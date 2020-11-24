@@ -39,6 +39,24 @@ enum {
 	TABPAGE_CHECKUNSAVED = 8
 };
 
+enum {
+	PROPERTY_ID_LOADSKIN = 1,
+	PROPERTY_ID_DEFAULTSKIN,
+	PROPERTY_ID_LOADCONTROLSKIN,
+	PROPERTY_ID_ADDEVENTDRIVER,
+	PROPERTY_ID_REMOVEEVENTDRIVER,
+	PROPERTY_ID_DEFAULTFONT,
+	PROPERTY_ID_DRAWVUMETERS,
+	PROPERTY_ID_LANG,
+	PROPERTY_ID_SHOWSTEPSEQUENCER,
+	PROPERTY_ID_TRACKSCOPES,
+	PROPERTY_ID_AUDIODRIVERS,
+	PROPERTY_ID_ACTIVEEVENTDRIVERS,
+	PROPERTY_ID_MAPCONTROLLER,
+	PROPERTY_ID_ADDCONTROLLERMAP,
+	PROPERTY_ID_REMOVECONTROLLERMAP
+};
+
 typedef enum {
 	CHECKUNSAVE_CLOSE,
 	CHECKUNSAVE_LOAD,
@@ -155,7 +173,10 @@ void workspace_save_configuration(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path, bool play);
 void workspace_savesong(Workspace*, const char* path);
-INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
+INLINE psy_audio_Song* workspace_song(Workspace* self)
+{
+	return self->song;
+}
 void workspace_loadskin(Workspace*, const char* path);
 void workspace_loadcontrolskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
@@ -186,7 +207,7 @@ int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
 int workspace_showwirehover(Workspace*);
 int workspace_showparamviewaswindow(Workspace*);
-void workspace_configchanged(Workspace*, psy_Property* property);
+void workspace_configurationchanged(Workspace*, psy_Property* property);
 int workspace_wraparound(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
@@ -197,6 +218,12 @@ psy_audio_SequenceSelection workspace_sequenceselection(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);
+
+INLINE Translator* workspace_translator(Workspace* self)
+{
+	return &self->translator;
+}
+
 int workspace_hasplugincache(Workspace*);
 psy_EventDriver* workspace_kbddriver(Workspace*);
 int workspace_followingsong(Workspace*);
@@ -231,6 +258,18 @@ const char* workspace_doc_directory(Workspace*);
 const char* workspace_config_directory(Workspace*);
 const char* workspace_userpresets_directory(Workspace*);
 void workspace_changedefaultfontsize(Workspace*, int size);
+// this is the unzoomed font height
+INLINE int workspace_fontheight(Workspace* self)
+{
+	return self->fontheight;
+}
+
+INLINE void workspace_zoom(Workspace* self, double factor)
+{
+	workspace_changedefaultfontsize(self, (int)(factor *
+		workspace_fontheight(self)));
+}
+
 const char* workspace_dialbitmap_path(Workspace*);
 void workspace_dockview(Workspace*, psy_ui_Component* view);
 int workspace_ismovecursorwhenpaste(Workspace*);

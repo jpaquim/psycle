@@ -21,6 +21,11 @@ typedef struct {
 
 void psy_ui_splitbar_init(psy_ui_SplitBar*, psy_ui_Component* parent);
 
+INLINE psy_ui_Component* psy_ui_splitbar_base(psy_ui_SplitBar* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

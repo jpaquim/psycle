@@ -92,7 +92,9 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	} else if (self->hover || psy_ui_component_hasfocus(&self->component)) {
 		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
 	} else if (psy_ui_button_highlighted(self)) {
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
+		//psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+		//psy_ui_drawrectangle(g, r);
+		psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));		
 	} else {
 		psy_ui_settextcolor(g, self->textcolor);
 	}
@@ -295,6 +297,10 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 void psy_ui_button_highlight(psy_ui_Button* self)
 {
 	if (!psy_ui_button_highlighted(self)) {
+		self->restorebgcolor = psy_ui_component_backgroundcolor(
+			psy_ui_button_base(self));
+		//psy_ui_component_setbackgroundcolor(psy_ui_button_base(self),
+			//psy_ui_color_make(0x002F3E25));
 		self->highlight = TRUE;		
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
@@ -304,6 +310,8 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (psy_ui_button_highlighted(self)) {
 		self->highlight = FALSE;
+		//psy_ui_component_setbackgroundcolor(psy_ui_button_base(self),
+		//	self->restorebgcolor);
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }

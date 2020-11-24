@@ -32,20 +32,6 @@
 #define _MAX_PATH 4096
 #endif
 
-enum {
-	PROPERTY_ID_LOADSKIN = 1,
-	PROPERTY_ID_DEFAULTSKIN,
-	PROPERTY_ID_LOADCONTROLSKIN,
-	PROPERTY_ID_ADDEVENTDRIVER,
-	PROPERTY_ID_REMOVEEVENTDRIVER,
-	PROPERTY_ID_DEFAULTFONT,
-	PROPERTY_ID_DRAWVUMETERS,
-	PROPERTY_ID_LANG,
-	PROPERTY_ID_AUDIODRIVERS,
-	PROPERTY_ID_ACTIVEEVENTDRIVERS,
-	PROPERTY_ID_MAPCONTROLLER,	
-};
-
 static void workspace_initplayer(Workspace*);
 static void workspace_initplugincatcherandmachinefactory(Workspace*);
 static void workspace_initsignals(Workspace*);
@@ -86,7 +72,9 @@ static void workspace_showactiveeventdriverconfig(Workspace*, int deviceid);
 static void workspace_updateactiveeventdriverlist(Workspace*);
 static void workspace_configeventdrivers(Workspace*);
 // midiinput
+static void workspace_makemidiconfiguration(Workspace*);
 static void workspace_makemidicontrollers(Workspace*);
+static void workspace_makemidicontrollersave(Workspace*);
 // compatibility
 static void workspace_makecompatibility(Workspace*);
 static const char* workspace_eventdriverpath(Workspace*);
@@ -564,7 +552,7 @@ void workspace_makeconfig(Workspace* self)
 	workspace_makedirectories(self);
 	workspace_makeinputoutput(self);
 	workspace_makeeventinput(self);
-	workspace_makemidicontrollers(self);
+	workspace_makemidiconfiguration(self);
 	workspace_makecompatibility(self);
 }
 
@@ -595,9 +583,10 @@ void workspace_makegeneral(Workspace* self)
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showplaylisteditor", FALSE),
 		"settingsview.show-playlist-editor");
-	psy_property_settext(
+	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
-		"settingsview.show-sequencestepbar");
+		"settingsview.show-sequencestepbar"),
+		PROPERTY_ID_SHOWSTEPSEQUENCER);
 	psy_property_settext(
 		psy_property_append_bool(self->general, "saverecentsongs", TRUE),
 		"settingsview.save-recent-songs");
@@ -612,6 +601,7 @@ void workspace_makegeneral(Workspace* self)
 void workspace_makelanguagelist(Workspace* self, psy_Property* parent)
 {
 	char currdir[4096];
+	psy_Property* defaultlang;
 	
 	assert(self);
 
@@ -622,7 +612,25 @@ void workspace_makelanguagelist(Workspace* self, psy_Property* parent)
 	if (workdir(currdir)) {
 		psy_dir_enumerate(self, currdir, "*.ini", 0, (psy_fp_findfile)
 			workspace_onaddlanguage);
-	}	
+	}
+#if defined PSYCLE_DEFAULT_LANG_ES
+	defaultlang = psy_property_find(self->language, "es",
+		PSY_PROPERTY_TYPE_NONE);
+#elif defined PSYCLE_DEFAULT_LANG_EN
+	defaultlang = psy_property_find(self->language, "en",
+		PSY_PROPERTY_TYPE_NONE);
+#else
+	defaultlang = psy_property_find(self->language, "es",
+		PSY_PROPERTY_TYPE_NONE);
+#endif
+	if (defaultlang) {
+		uintptr_t index;
+		
+		index = psy_property_index(defaultlang);
+		if (index != UINTPTR_MAX) {
+			psy_property_setitem_int(self->language, index);
+		}
+	}
 }
 
 int workspace_onaddlanguage(Workspace* self, const char* path, int flag)
@@ -698,9 +706,10 @@ void workspace_makepatternview(Workspace* self, psy_Property* visual)
 	psy_property_settext(
 		psy_property_append_bool(pvc, "wideinstcolumn", 0),
 		"settingsview.wide-instrument-column");
-	psy_property_settext(
+	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(pvc, "trackscopes", 1),
-		"settingsview.pattern-track-scopes");
+		"settingsview.pattern-track-scopes"),
+		PROPERTY_ID_TRACKSCOPES);
 	psy_property_settext(
 		psy_property_append_bool(pvc, "wraparound", 1),
 		"settingsview.wrap-around");
@@ -1150,12 +1159,9 @@ void workspace_makedefaultuserpresetpath(Workspace* self)
 	psy_path_dispose(&defaultuserpresetpath);
 }
 
-void workspace_makemidicontrollers(Workspace* self)
-{
-	psy_Property* mapping;
-	psy_Property* choice;
-	psy_Property* group;
-	int i;
+void workspace_makemidiconfiguration(Workspace* self)
+{	
+	psy_Property* choice;	
 
 	self->midicontrollers = psy_property_settext(
 		psy_property_append_section(&self->config, "midicontrollers"),
@@ -1198,63 +1204,18 @@ void workspace_makemidicontrollers(Workspace* self)
 		psy_property_append_bool(self->midicontrollers,
 			"recordrawmidiasmcm", TRUE),
 		"settingsview.midi-controllers-recordrawmidiasmcm");
-	// Mapping
-	mapping = psy_property_settext(
+	// Map Controllers	
+	psy_property_setid(psy_property_settext(
+		psy_property_append_action(self->midicontrollers,
+			"addcontroller"),
+		"settingsview.midi-controllers-add"),
+		PROPERTY_ID_ADDCONTROLLERMAP);
+	psy_property_sethint(psy_property_append_string(self->midicontrollers,
+		"controllerdata", ""),
+		PSY_PROPERTY_HINT_HIDE);
+	psy_property_preventsave(psy_property_settext(
 		psy_property_append_section(self->midicontrollers,
-			"mapping"),
-		"settingsview.midi-controllers-mapping");	
-	// groups
-	// Map Velocity
-	psy_property_settext(
-		psy_property_append_bool(mapping,
-			"velocityactive", TRUE),
-		"settingsview.midi-controllers-mapping-map-velocity");
-	group = psy_property_settext(
-		psy_property_append_section(mapping, "velocity"), "");			
-	psy_property_append_string(group, "cmd", "c");
-	psy_property_append_int(group, "from", 0, 0, 0xFF);
-	psy_property_append_int(group, "to", 0xFF, 0, 0xFF);
-	// Map Pitchwheel
-	psy_property_settext(
-		psy_property_append_bool(mapping,
-			"pitchwheelactive", TRUE),
-			"settingsview.midi-controllers-mapping-map-pitchwheel");
-	group = psy_property_append_section(mapping,
-			"pitchwheel");
-	choice = psy_property_append_choice(group, "to", 0);
-	psy_property_append_string(choice, "cmd", "");
-	psy_property_append_string(choice, "twk", "");
-	psy_property_append_string(choice, "tws", "");
-	psy_property_append_string(choice, "mcm", "");
-	psy_property_append_string(group, "with", "1");
-	psy_property_append_int(group, "from", 0, 0, 0xFF);
-	psy_property_append_int(group, "to", 0xFF, 0, 0xFF);
-	// Map Controllers
-	for (i = 0; i < 16; ++i) {
-		char hexstr[256];
-		char text[256];
-
-		psy_snprintf(text, 256, "controlleractive%X", (i + 1));
-		psy_property_setid(psy_property_settext(
-			psy_property_append_bool(mapping, text, FALSE),
-			"settingsview.midi-controllers-mapping-map-controller"),
-			PROPERTY_ID_MAPCONTROLLER + i);
-		psy_snprintf(text, 256, "controller%X", (i + 1));
-		group = psy_property_sethint(psy_property_settext(
-			psy_property_append_section(mapping, text),
-			"Controller"),
-			PSY_PROPERTY_HINT_HIDE);
-		psy_snprintf(hexstr, 256, "%X", (i + 1));
-		psy_property_append_string(group, "Controller", hexstr);
-		choice = psy_property_append_choice(group, "to", 0);
-		psy_property_append_string(choice, "cmd", "");
-		psy_property_append_string(choice, "twk", "");
-		psy_property_append_string(choice, "tws", "");
-		psy_property_append_string(choice, "mcm", "");
-		psy_property_append_string(group, "with", hexstr);
-		psy_property_append_int(group, "from", 0, 0, 0xFF);
-		psy_property_append_int(group, "to", 0xFF, 0, 0xFF);
-	}
+			"controllers"), "Mapping"));
 }
 
 void workspace_makecompatibility(Workspace* self)
@@ -1561,6 +1522,21 @@ void workspace_makeeventdriverconfigurations(Workspace* self)
 	}
 }
 
+void workspace_makemidicontrollersave(Workspace* self)
+{
+	char_dyn_t* str;
+	psy_Property* controllers;
+
+	controllers = psy_property_find(self->midicontrollers, "controllerdata",
+		PSY_PROPERTY_TYPE_STRING);
+	if (!controllers) {
+		return;
+	}
+	str = psy_audio_midiconfig_controllers_tostring(&self->player.midiinput.midiconfig);
+	psy_property_setitem_str(controllers, str);
+	free(str);	
+}
+
 void workspace_readeventdriverconfigurations(Workspace* self)
 {		
 	assert(self);
@@ -1612,39 +1588,62 @@ const char* workspace_translate(Workspace* self, const char* key)
 	return translator_translate(&self->translator, key);
 }
 
-void workspace_configchanged(Workspace* self, psy_Property* property)
+void workspace_configurationchanged(Workspace* self, psy_Property* property)
 {
 	bool worked;
 	assert(self && property);
 
 	worked = TRUE;
 	switch (psy_property_id(property)) {
-		case PROPERTY_ID_LOADSKIN:
-			workspace_onloadskin(self);
-			break;
-		case PROPERTY_ID_DEFAULTSKIN:
-			workspace_ondefaultskin(self);
-			break;
-		case PROPERTY_ID_LOADCONTROLSKIN:
-			workspace_onloadcontrolskin(self);
-			break;
-		case PROPERTY_ID_ADDEVENTDRIVER:
-			workspace_onaddeventdriver(self);
-			break;
-		case PROPERTY_ID_REMOVEEVENTDRIVER:
-			workspace_onremoveeventdriver(self);
-			break;
-		case PROPERTY_ID_DEFAULTFONT:
-			workspace_setdefaultfont(self, property);
-			break;
-		case PROPERTY_ID_DRAWVUMETERS:
-			if (psy_property_item_bool(property)) {
-				psy_audio_player_setvumetermode(&self->player, VUMETER_RMS);
-			} else {
-				psy_audio_player_setvumetermode(&self->player, VUMETER_NONE);
+	case PROPERTY_ID_LOADSKIN:
+		workspace_onloadskin(self);
+		break;
+	case PROPERTY_ID_DEFAULTSKIN:
+		workspace_ondefaultskin(self);
+		break;
+	case PROPERTY_ID_LOADCONTROLSKIN:
+		workspace_onloadcontrolskin(self);
+		break;
+	case PROPERTY_ID_ADDEVENTDRIVER:
+		workspace_onaddeventdriver(self);
+		break;
+	case PROPERTY_ID_REMOVEEVENTDRIVER:
+		workspace_onremoveeventdriver(self);
+		break;
+	case PROPERTY_ID_DEFAULTFONT:
+		workspace_setdefaultfont(self, property);
+		break;
+	case PROPERTY_ID_DRAWVUMETERS:
+		if (psy_property_item_bool(property)) {
+			psy_audio_player_setvumetermode(&self->player, VUMETER_RMS);
+		} else {
+			psy_audio_player_setvumetermode(&self->player, VUMETER_NONE);
+		}
+	case PROPERTY_ID_ADDCONTROLLERMAP: {
+		psy_audio_MidiConfigGroup group;
+
+		psy_audio_midiconfiggroup_init(&group, psy_audio_MIDICONFIG_GT_CUSTOM,
+			1);
+		psy_audio_midiconfig_addcontroller(
+			&self->player.midiinput.midiconfig, group);
+		workspace_makemidicontrollers(self);
+		break; }
+	case PROPERTY_ID_REMOVECONTROLLERMAP: {
+		psy_Property* group;
+		int id;
+
+		group = psy_property_parent(property);
+		if (group) {
+			id = psy_property_at_int(group, "id", -1);
+			if (id != -1) {
+				psy_audio_midiconfig_removecontroller(&self->player.midiinput.midiconfig,
+					id);
+				workspace_makemidicontrollersave(self);
+				workspace_makemidicontrollers(self);
 			}
-			break;
-		default: {
+		}
+		break; }
+	default: {
 			psy_Property* choice;
 
 			choice = (psy_property_ischoiceitem(property))
@@ -1667,24 +1666,9 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 					self->eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);
 			} else if (psy_property_insection(property, self->midicontrollers)) {
-				if (psy_property_id(property) >= PROPERTY_ID_MAPCONTROLLER &&
-					psy_property_id(property) < PROPERTY_ID_MAPCONTROLLER + 0x10) {
-					char sectionname[256];
-					psy_Property* section;
-
-					psy_snprintf(sectionname, 256, "controller%X",
-						psy_property_id(property) - PROPERTY_ID_MAPCONTROLLER + 1);
-					section = psy_property_find(self->midicontrollers, sectionname,
-						PSY_PROPERTY_TYPE_SECTION);
-					if (section) {
-						if (psy_property_item_bool(property)) {
-							psy_property_sethint(section, PSY_PROPERTY_HINT_EDIT);
-						} else {
-							psy_property_sethint(section, PSY_PROPERTY_HINT_HIDE);
-						}
-					}
-				}
-				psy_audio_player_configure(&self->player, self->midicontrollers);				
+				psy_audio_player_midiconfigure(&self->player,
+					self->midicontrollers, FALSE);
+				workspace_makemidicontrollersave(self);				
 			} else {
 				worked = FALSE;
 			}
@@ -1694,6 +1678,79 @@ void workspace_configchanged(Workspace* self, psy_Property* property)
 	if (!worked) {
 		psy_signal_emit(&self->signal_configchanged, self, 1, property);
 	}
+}
+
+void workspace_makemidicontrollers(Workspace* self)
+{	
+	char text[256];
+
+	psy_Property* controllers;	
+
+	controllers = psy_property_find(self->midicontrollers, "controllers",
+		PSY_PROPERTY_TYPE_SECTION);
+	if (controllers) {
+		psy_property_clear(controllers);
+		psy_List* i;
+		int c;
+
+		for (c = 0, i = self->player.midiinput.midiconfig.groups; i != NULL;
+				psy_list_next(&i), ++c)
+		{
+			psy_audio_MidiConfigGroup* midigroup;
+			psy_Property* group;
+			psy_Property* choice;
+			bool isvelocity;
+			bool ispitchwheel;
+			bool hasmessage;
+
+			isvelocity = c == 0;
+			ispitchwheel = c == 1;
+			hasmessage = c > 1;
+
+			midigroup = (psy_audio_MidiConfigGroup*)psy_list_entry(i);
+			psy_snprintf(text, 256, "controller%X", (c + 1));
+			group = psy_property_settext(
+				psy_property_append_section(controllers, text),
+				(isvelocity)
+				? "Velocity"
+				: (ispitchwheel)
+					? "Pitch Wheel"
+					: "Controller");			
+			psy_property_sethint(psy_property_append_int(group, "id", c, 0, 0),
+				PSY_PROPERTY_HINT_HIDE);
+			psy_property_settext(psy_property_append_bool(group, "record",
+				midigroup->record), "Map");	
+			psy_property_sethint(psy_property_setreadonly(psy_property_settext(
+				psy_property_append_int(group, "message", midigroup->message, 0, 127),
+				"Controller Number"), (!hasmessage)), PSY_PROPERTY_HINT_EDITHEX);
+			if (hasmessage || ispitchwheel) {
+				choice = psy_property_settext(
+					psy_property_append_choice(group, "type", midigroup->type),
+					"to");
+				psy_property_append_string(choice, "cmd", "");
+				psy_property_append_string(choice, "twk", "");
+				psy_property_append_string(choice, "tws", "");
+				psy_property_append_string(choice, "mcm", "");
+			}
+			psy_property_sethint(psy_property_settext(psy_property_append_int(
+				group, "cmd", midigroup->command, 0, 0xF), "value"),
+				PSY_PROPERTY_HINT_EDITHEX);
+			psy_property_sethint(psy_property_append_int(
+				group, "from", midigroup->from, 0, 0xFF),
+				PSY_PROPERTY_HINT_EDITHEX);
+			psy_property_sethint(psy_property_append_int(
+				group, "to", midigroup->to, 0, 0xFF),
+				PSY_PROPERTY_HINT_EDITHEX);
+			if (hasmessage) {
+				psy_property_setid(psy_property_settext(
+					psy_property_append_action(group,
+						"removecontroller"),
+					"Remove"),
+					PROPERTY_ID_REMOVECONTROLLERMAP);
+			}
+		}
+	}
+	workspace_makemidicontrollersave(self);
 }
 
 void workspace_onloadskin(Workspace* self)
@@ -2256,7 +2313,9 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	workspace_showactiveeventdriverconfig(self,
 		workspace_curreventdriverconfiguration(self));
-	psy_audio_player_configure(&self->player, self->midicontrollers);
+	psy_audio_player_midiconfigure(&self->player, self->midicontrollers,
+		TRUE /* use controllerdata */);
+	workspace_makemidicontrollers(self);
 	workspace_configvisual(self);
 	if (workspace_loadnewblitz(self)) {
 		psy_audio_machinefactory_loadnewgamefxandblitzifversionunknown(
@@ -2280,6 +2339,7 @@ void workspace_save_configuration(Workspace* self)
 	psy_path_setprefix(&path, workspace_config_directory(self));
 	psy_path_setname(&path, PSYCLE_INI);
 	workspace_makeeventdriverconfigurations(self);
+	workspace_makemidicontrollersave(self);
 	propertiesio_save(&self->config, psy_path_path(&path));
 	psy_path_dispose(&path);
 }

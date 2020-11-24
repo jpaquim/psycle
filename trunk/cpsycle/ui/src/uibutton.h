@@ -32,6 +32,7 @@ typedef struct {
 	psy_ui_Alignment textalignment;
 	bool enabled;
 	psy_ui_Color textcolor;
+	psy_ui_Color restorebgcolor;
 } psy_ui_Button;
 
 void psy_ui_button_init(psy_ui_Button*, psy_ui_Component* parent);

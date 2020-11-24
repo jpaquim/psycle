@@ -30,11 +30,11 @@ typedef struct {
 	char* credits;
 	char* comments;
 	psy_dsp_big_beat_t bpm;
-} SongProperties;
+} psy_audio_SongProperties;
 
-void songproperties_init(SongProperties*, const char* title,
+void psy_audio_songproperties_init(psy_audio_SongProperties*, const char* title,
 	const char* credits, const char* comments);
-void songproperties_init_all(SongProperties*, const char* title,
+void psy_audio_songproperties_init_all(psy_audio_SongProperties*, const char* title,
 	const char* credits, const char* comments,
 	uintptr_t tracks,
 	int octave,
@@ -42,22 +42,27 @@ void songproperties_init_all(SongProperties*, const char* title,
 	int tpb,
 	int extraticksperbeat,
 	psy_dsp_big_beat_t bpm);
-void songproperties_copy(SongProperties*, const SongProperties* other);
-void songproperties_dispose(SongProperties*);
-void songproperties_setbpm(SongProperties*, psy_dsp_big_beat_t bpm);
+void psy_audio_songproperties_copy(psy_audio_SongProperties*, const psy_audio_SongProperties* other);
+void psy_audio_songproperties_dispose(psy_audio_SongProperties*);
+void psy_audio_songproperties_setbpm(psy_audio_SongProperties*, psy_dsp_big_beat_t bpm);
 
-INLINE psy_dsp_big_beat_t songproperties_bpm(SongProperties* self)
+INLINE psy_dsp_big_beat_t psy_audio_songproperties_bpm(const psy_audio_SongProperties* self)
 {
 	return self->bpm;
 }
 
-INLINE uintptr_t songproperties_lpb(SongProperties* self)
+INLINE uintptr_t psy_audio_songproperties_lpb(const psy_audio_SongProperties* self)
 {
 	return self->lpb;
 }
 
+INLINE const char* psy_audio_songproperties_title(const psy_audio_SongProperties* self)
+{
+	return self->title;
+}
+
 typedef struct psy_audio_Song {
-	SongProperties properties;
+	psy_audio_SongProperties properties;
 	psy_audio_Machines machines;
 	psy_audio_Patterns patterns;
 	psy_audio_Sequence sequence;
@@ -83,18 +88,30 @@ void psy_audio_song_deallocate(psy_audio_Song*);
 /// Clears the song completly (no master, no pattern, no sequence track/entry)
 void psy_audio_song_clear(psy_audio_Song*);
 /// set song properties
-void psy_audio_song_setproperties(psy_audio_Song*, const SongProperties*);
+void psy_audio_song_setproperties(psy_audio_Song*, const psy_audio_SongProperties*);
 /// return song properties title
-INLINE const char* psy_audio_song_title(psy_audio_Song* self)
+INLINE const char* psy_audio_song_title(const psy_audio_Song* self)
 {
-	return self->properties.title;
+	assert(self);
+
+	return psy_audio_songproperties_title(&self->properties);
 }
 /// set song properties bpm
 void psy_audio_song_setbpm(psy_audio_Song*, psy_dsp_big_beat_t bpm);
 /// return song properties bpm
-psy_dsp_big_beat_t psy_audio_song_bpm(psy_audio_Song*);
+INLINE psy_dsp_big_beat_t psy_audio_song_bpm(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_bpm(&self->properties);
+}
 /// return song properties lpb
-uintptr_t psy_audio_song_lpb(psy_audio_Song*);
+INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_lpb(&self->properties);
+}
 
 #ifdef __cplusplus
 }

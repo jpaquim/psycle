@@ -190,12 +190,12 @@ void psy_audio_psy3loader_read_info(psy_audio_PSY3Loader* self)
 		char name_[129];
 		char author_[65];
 		char comments_[65536];
-		SongProperties songproperties;
+		psy_audio_SongProperties songproperties;
 
 		psyfile_readstring(self->songfile->file, name_, sizeof name_);
 		psyfile_readstring(self->songfile->file, author_, sizeof author_);
 		psyfile_readstring(self->songfile->file, comments_,sizeof comments_);
-		songproperties_init(&songproperties, name_, author_, comments_);
+		psy_audio_songproperties_init(&songproperties, name_, author_, comments_);
 		psy_audio_song_setproperties(self->songfile->song, &songproperties);
 		//bugfix. There were songs with incorrect size.
 		if(self->songfile->file->currchunk.version == 0) {

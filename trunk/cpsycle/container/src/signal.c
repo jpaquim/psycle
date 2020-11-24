@@ -98,7 +98,7 @@ void psy_signal_disconnect(psy_Signal* self, void* context, void* fp)
 
 	assert(self);
 
-	p = psy_signal_findslotnode(self, context, self);
+	p = psy_signal_findslotnode(self, context, fp);
 	if (p != NULL) {				
 		free(psy_list_entry(p));
 		psy_list_remove(&self->slots, p);

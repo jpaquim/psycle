@@ -114,9 +114,11 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	int hoverwidth = 0;
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
-	
+	int tabheight;
+		
 	size = psy_ui_component_size(tabbar_base(self));
 	tm = psy_ui_component_textmetric(tabbar_base(self));
+	tabheight = psy_ui_value_px(&size.height, &tm);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);	
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		cpx = 0;
@@ -163,6 +165,22 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 			if (tab->mode == TABMODE_LABEL) {
 				psy_ui_settextcolor(g, psy_ui_color_make(0x00B1A596));
 			}
+			if (self->selected == c && self->tabalignment == psy_ui_ALIGN_TOP) {
+				int y;
+				// psy_ui_Rectangle r;
+
+				psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+				y = tm.tmHeight + 2;
+
+				// psy_ui_setrectangle(&r, cpxsel, 0, selwidth, y + 1);
+				// psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x002F3E25));				
+
+				// psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);
+				if (self->hover && self->hoverindex != self->selected) {
+					psy_ui_setcolor(g, psy_ui_color_make(0x00FFFFFF));
+					psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
+				}
+			}
 			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
 			cpx += psy_ui_value_px(&tab->size.width, &tm) + psy_ui_value_px(&tab->margin.right, &tm);
 		} else
@@ -170,13 +188,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 				self->tabalignment == psy_ui_ALIGN_RIGHT) {
 			cpx = psy_ui_value_px(&tab->margin.left, &tm);
 			if (self->hover && self->hoverindex == c) {
-				// psy_ui_Rectangle r;
-
-				// psy_ui_setrectangle(&r, 0, cpy,
-				// 	size.width, tab->size.height +
-				// 		psy_ui_value_px(&tab->margin.bottom, &tm) +
-				// 		psy_ui_value_px(&tab->margin.top, &tm));
-				// psy_ui_drawsolidrectangle(g, r, 0x00242424);
+				
 				// psy_ui_setcolor(g, 0x00383838);
 				// psy_ui_drawrectangle(g, r);
 				psy_ui_setcolor(g, psy_ui_color_make(0x00FFFFFF));
@@ -196,10 +208,10 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	}
 	psy_ui_setcolor(g, psy_ui_color_make(0x005F5F5F));
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
-		int y;
+		int y;		
 
 		psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
-		y = tm.tmHeight + 2;
+		y = tm.tmHeight + 2;				
 		psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);		 
 		if (self->hover && self->hoverindex != self->selected) {		
 			psy_ui_setcolor(g, psy_ui_color_make(0x00FFFFFF));

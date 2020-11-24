@@ -28,47 +28,69 @@ enum {
 	psy_audio_MIDICONFIG_NUM_TYPES
 };
 
+enum {
+	psy_audio_MIDICONFIG_GT_VELOCITY,
+	psy_audio_MIDICONFIG_GT_PITCHWHEEL,
+	psy_audio_MIDICONFIG_GT_CUSTOM		
+};
+
+
 typedef struct psy_audio_MidiConfigGroup {
+	int grouptype;
 	bool record;
 	int type;
 	int command;
 	int from;
 	int to;
+	int message;
+	char encode[64];
 } psy_audio_MidiConfigGroup;
 
-void psy_audio_midiconfiggroup_init(psy_audio_MidiConfigGroup*);
+void psy_audio_midiconfiggroup_init(psy_audio_MidiConfigGroup*, int grouptype,
+	int command);
 
 psy_audio_MidiConfigGroup* psy_audio_midiconfiggroup_alloc(void);
-psy_audio_MidiConfigGroup* psy_audio_midiconfiggroup_allocinit(void);
+psy_audio_MidiConfigGroup* psy_audio_midiconfiggroup_allocinit(int grouptype,
+	int command);
 
 INLINE bool psy_audio_midiconfiggroup_record(const psy_audio_MidiConfigGroup* self)
 {
+	assert(self);
+
 	return self->record;
 }
 
 INLINE int  psy_audio_midiconfiggroup_type(const psy_audio_MidiConfigGroup* self)
 {
+	assert(self);
+
 	return self->type;
 }
 
 INLINE int  psy_audio_midiconfiggroup_command(const psy_audio_MidiConfigGroup* self)
 { 
+	assert(self);
+
 	return self->command;
 }
 INLINE int  psy_audio_midiconfiggroup_from(const psy_audio_MidiConfigGroup* self)
 {
+	assert(self);
+
 	return self->from;
 }
 
 INLINE int  psy_audio_midiconfiggroup_to(const psy_audio_MidiConfigGroup* self)
 {
+	assert(self);
+
 	return self->to;
 }
 
+const char* psy_audio_midiconfiggroup_tostring(const psy_audio_MidiConfigGroup* self);
+
 typedef struct psy_audio_MidiConfig {
-	psy_List* groups;
-	psy_audio_MidiConfigGroup velocity;
-	psy_audio_MidiConfigGroup pitch;
+	psy_List* groups;	
 	bool raw;
 	psy_audio_midiconfig_selector_t	gen_select_with;
 	psy_audio_midiconfig_selector_t	inst_select_with;
@@ -76,9 +98,37 @@ typedef struct psy_audio_MidiConfig {
 
 void psy_audio_midiconfig_init(psy_audio_MidiConfig*);
 void psy_audio_midiconfig_dispose(psy_audio_MidiConfig*);
+void psy_audio_midiconfig_reset(psy_audio_MidiConfig*);
 
-void psy_audio_midiconfig_configure(psy_audio_MidiConfig*, psy_Property*
-	configuration);
+void psy_audio_midiconfig_configure(psy_audio_MidiConfig*,
+	const psy_Property* configuration, bool datastr);
+
+void psy_audio_midiconfig_addcontroller(psy_audio_MidiConfig*,
+	psy_audio_MidiConfigGroup group);
+void psy_audio_midiconfig_removecontroller(psy_audio_MidiConfig* self, int id);
+char_dyn_t* psy_audio_midiconfig_controllers_tostring(const psy_audio_MidiConfig* self);
+
+INLINE uintptr_t psy_audio_midiconfig_numcontrollers(const
+	psy_audio_MidiConfig* self)
+{
+	assert(self);
+
+	return psy_list_size(self->groups);
+}
+
+INLINE psy_audio_MidiConfigGroup* psy_audio_midiconfig_at(const
+	psy_audio_MidiConfig* self, int index)
+{
+	psy_List* i;
+
+	assert(self);
+
+	i = psy_list_at(self->groups, index);
+	if (i) {
+		return (psy_audio_MidiConfigGroup*)psy_list_entry(i);
+	}
+	return NULL;
+}
 
 #ifdef __cplusplus
 }

@@ -97,8 +97,10 @@ typedef struct {
 	psy_ui_CheckBox followsong;
 	psy_ui_CheckBox shownames;
 	psy_ui_CheckBox showplaylist;
-	psy_ui_CheckBox recordtweaks;
+	psy_ui_CheckBox recordnoteoff;
+	psy_ui_CheckBox recordtweak;
 	psy_ui_CheckBox multichannelaudition;
+	psy_ui_CheckBox allownotestoeffect;
 	psy_ui_Component top;
 	psy_ui_Button toggleseqedit;
 	psy_ui_Button toggleseqediticon;

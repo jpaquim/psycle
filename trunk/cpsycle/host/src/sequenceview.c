@@ -697,13 +697,17 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 {
 	psy_ui_Margin margin;
 
+	assert(self);
+
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_checkbox_init(&self->followsong, &self->component);	
 	psy_ui_checkbox_init(&self->shownames, &self->component);	
-	psy_ui_checkbox_init(&self->showplaylist, &self->component);		
-	psy_ui_checkbox_init(&self->recordtweaks, &self->component);	
+	psy_ui_checkbox_init(&self->showplaylist, &self->component);
+	psy_ui_checkbox_init(&self->recordnoteoff, &self->component);
+	psy_ui_checkbox_init(&self->recordtweak, &self->component);
 	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
+	psy_ui_checkbox_init(&self->allownotestoeffect, &self->component);	
 	{
 		psy_ui_Margin margin;
 		psy_ui_component_init(&self->top, &self->component);
@@ -736,7 +740,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1),
 		psy_ui_value_makeew(2.0));
-	psy_ui_component_setmargin(&self->multichannelaudition.component, &margin);
+	psy_ui_component_setmargin(&self->allownotestoeffect.component, &margin);
 }
 
 void sequenceroptionsbar_updatetext(SequencerOptionsBar* self)
@@ -747,10 +751,14 @@ void sequenceroptionsbar_updatetext(SequencerOptionsBar* self)
 		workspace_translate(self->workspace, "sequencerview.show-pattern-names"));
 	psy_ui_checkbox_settext(&self->showplaylist,
 		workspace_translate(self->workspace, "sequencerview.show-playlist"));
-	psy_ui_checkbox_settext(&self->recordtweaks,
-		workspace_translate(self->workspace, "sequencerview.record-tweaks"));
+	psy_ui_checkbox_settext(&self->recordnoteoff,
+		workspace_translate(self->workspace, "sequencerview.record-noteoff"));
+	psy_ui_checkbox_settext(&self->recordtweak,
+		workspace_translate(self->workspace, "sequencerview.record-tweak"));
 	psy_ui_checkbox_settext(&self->multichannelaudition,
 		workspace_translate(self->workspace, "sequencerview.multichannel-audition"));
+	psy_ui_checkbox_settext(&self->allownotestoeffect,
+		workspace_translate(self->workspace, "sequencerview.allow-notes-to_effect"));	
 }
 
 void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar* self, Translator* sender)
@@ -779,7 +787,8 @@ static void sequenceview_onshowplaylist(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onshowpatternnames(SequenceView*, psy_ui_CheckBox* sender);
 static void sequenceview_onfollowsong(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onfollowsongchanged(SequenceView*, Workspace* sender);
-static void sequenceview_onrecordtweaks(SequenceView*, psy_ui_Button* sender);
+static void sequenceview_onrecordtweak(SequenceView*, psy_ui_Button* sender);
+static void sequenceview_onrecordnoteoff(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onmultichannelaudition(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag, psy_audio_SongFile* songfile);
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
@@ -826,7 +835,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	sequenceroptionsbar_init(&self->options, &self->component, workspace);	
 	if (workspace_showplaylisteditor(workspace)) {
 		psy_ui_checkbox_check(&self->options.showplaylist);
-	}	
+	}
 	psy_ui_component_setalign(&self->options.component, psy_ui_ALIGN_BOTTOM);
 	sequenceduration_init(&self->duration, &self->component, self->sequence, workspace);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);
@@ -870,9 +879,11 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		psy_ui_checkbox_disablecheck(&self->options.shownames);
 	}
 	psy_signal_connect(&self->options.shownames.signal_clicked, self,
-		sequenceview_onshowpatternnames);	
-	psy_signal_connect(&self->options.recordtweaks.signal_clicked, self,
-		sequenceview_onrecordtweaks);
+		sequenceview_onshowpatternnames);
+	psy_signal_connect(&self->options.recordnoteoff.signal_clicked, self,
+		sequenceview_onrecordnoteoff);
+	psy_signal_connect(&self->options.recordtweak.signal_clicked, self,
+		sequenceview_onrecordtweak);
 	psy_signal_connect(&self->options.multichannelaudition.signal_clicked, self,
 		sequenceview_onmultichannelaudition);
 	psy_signal_connect(&workspace->signal_songchanged, self,
@@ -1190,12 +1201,21 @@ void sequenceview_onshowpatternnames(SequenceView* self, psy_ui_CheckBox* sender
 	}
 }
 
-void sequenceview_onrecordtweaks(SequenceView* self, psy_ui_Button* sender)
+void sequenceview_onrecordtweak(SequenceView* self, psy_ui_Button* sender)
 {
 	if (workspace_recordingtweaks(self->workspace)) {
 		workspace_stoprecordtweaks(self->workspace);
 	} else {
 		workspace_recordtweaks(self->workspace);
+	}
+}
+
+void sequenceview_onrecordnoteoff(SequenceView* self, psy_ui_Button* sender)
+{
+	if (psy_audio_player_recordingnoteoff(&self->workspace->player)) {		
+		psy_audio_player_preventrecordnoteoff(&self->workspace->player);
+	} else {
+		psy_audio_player_recordnoteoff(&self->workspace->player);		
 	}
 }
 

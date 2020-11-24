@@ -151,7 +151,12 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 		int inst;
 		psy_audio_Machine* machine;
 				
-		machine = NULL;		
+		machine = NULL;	
+		if (psy_audio_midiinput_genmap(midiinput, ch) != UINTPTR_MAX) {
+			psy_ui_settextcolor(g, psy_ui_component_color(&self->component));
+		} else {
+			psy_ui_settextcolor(g, psy_ui_color_make(0x00444444));
+		}
 		psy_snprintf(text, 256, "Ch %d", (ch + 1));
 		psy_ui_textout(g, colx_px[0], cpy, text, strlen(text));
 		//Generator/effect selector
@@ -195,7 +200,8 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 				if (self->workspace->song) {
 					psy_audio_InstrumentIndex instidx;
 
-					instidx = psy_audio_instruments_selected(&self->workspace->song->instruments);
+					instidx = psy_audio_instruments_selected(
+						&self->workspace->song->instruments);
 					selidx = instidx.subslot;
 				}
 				break;
@@ -251,6 +257,8 @@ static void midimonitor_onmachineslotchange(MidiMonitor* self, psy_audio_Machine
 static void midimonitor_ontimer(MidiMonitor*, uintptr_t timerid);
 static void midimonitor_updatechannelmap(MidiMonitor*);
 static void midimonitor_onhide(MidiMonitor*);
+static void midimonitor_onconfigure(MidiMonitor*);
+static void midimonitor_onmapconfigure(MidiMonitor*);
 
 // vtable
 static psy_ui_ComponentVtable midimonitor_vtable;
@@ -288,21 +296,30 @@ void midimonitor_init(MidiMonitor* self, psy_ui_Component* parent, Workspace*
 void midimonitor_inittitle(MidiMonitor* self)
 {
 	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	
 	// titlebar
 	psy_ui_component_init(&self->titlebar, &self->component);
 	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
+		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init(&self->title, &self->titlebar);
 	psy_ui_label_settext(&self->title, "Psycle MIDI Monitor");
-	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setcolor(&self->title.component, psy_ui_color_make(0x00B1C8B0));
+	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
+	psy_ui_button_init(&self->configure, &self->titlebar);
+	psy_ui_button_settext(&self->configure, "(configure devices)");
+	psy_ui_component_setalign(&self->configure.component, psy_ui_ALIGN_LEFT);
+	psy_signal_connect(&self->configure.signal_clicked, self, midimonitor_onconfigure);
 	psy_ui_button_init(&self->hide, &self->titlebar);
 	psy_ui_button_settext(&self->hide, "X");
 	psy_signal_connect(&self->hide.signal_clicked, self, midimonitor_onhide);
-	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);	
+	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0.0),
+		psy_ui_value_makepx(0));
+	psy_ui_component_setmargin(&self->hide.component, &margin);
 }
 
 void midimonitor_initcorestatus(MidiMonitor* self)
@@ -365,12 +382,18 @@ void midimonitor_initflags(MidiMonitor* self)
 
 void midimonitor_initchannelmapping(MidiMonitor* self)
 {	
-	psy_ui_label_init(&self->channelmappingtitle, &self->component);
-	psy_ui_label_settext(&self->channelmappingtitle, "Channel Mapping");	
-	psy_ui_component_setminimumsize(&self->channelmappingtitle.component,
+	psy_ui_component_init(&self->topchannelmapping, &self->component);
+	psy_ui_component_setalign(&self->topchannelmapping, psy_ui_ALIGN_TOP);
+	psy_ui_component_setminimumsize(&self->topchannelmapping,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2.0)));
+	psy_ui_label_init(&self->channelmappingtitle, &self->topchannelmapping);
+	psy_ui_label_settext(&self->channelmappingtitle, "Channel Mapping");		
 	psy_ui_component_setalign(&self->channelmappingtitle.component,
-		psy_ui_ALIGN_TOP);	
+		psy_ui_ALIGN_LEFT);
+	psy_ui_button_init(&self->mapconfigure, &self->topchannelmapping);
+	psy_ui_button_settext(&self->mapconfigure, "(configure)");
+	psy_signal_connect(&self->mapconfigure.signal_clicked, self, midimonitor_onmapconfigure);
+	psy_ui_component_setalign(&self->mapconfigure.component, psy_ui_ALIGN_LEFT);
 	midichannelmappingview_init(&self->channelmapping, &self->component,
 		self->workspace);
 	psy_ui_component_setoverflow(&self->channelmapping.component,
@@ -436,4 +459,14 @@ void midimonitor_onhide(MidiMonitor* self)
 {
 	psy_ui_component_hide(&self->component);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
+}
+
+void midimonitor_onconfigure(MidiMonitor* self)
+{	
+	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, 5, 0);
+}
+
+void midimonitor_onmapconfigure(MidiMonitor* self)
+{
+	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, 6, 0);
 }

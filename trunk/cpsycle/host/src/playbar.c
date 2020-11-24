@@ -251,10 +251,8 @@ void playbar_ontimer(PlayBar* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
 	if (psy_audio_player_playing(self->player)) {
 		psy_ui_button_highlight(&self->play);
-		psy_ui_component_enableinput(&self->stop.component, psy_ui_NONRECURSIVE);
 	} else {
-		psy_ui_button_disablehighlight(&self->play);	
-		psy_ui_component_preventinput(&self->stop.component, psy_ui_NONRECURSIVE);
+		psy_ui_button_disablehighlight(&self->play);
 	}
 	if (psy_audio_sequencer_looping(&self->player->sequencer)) {
 		psy_ui_button_highlight(&self->loop);

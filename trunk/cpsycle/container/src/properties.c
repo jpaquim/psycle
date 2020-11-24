@@ -266,6 +266,13 @@ psy_List* psy_property_children(psy_Property* self)
 	return self->children;
 }
 
+const psy_List* psy_property_children_const(const psy_Property* self)
+{
+	assert(self);
+
+	return self->children;
+}
+
 psy_Property* psy_property_parent(const psy_Property* self)
 {
 	assert(self);
@@ -376,6 +383,14 @@ psy_Property* psy_property_find(psy_Property* self, const char* key,
 	return keyfound;
 }
 
+const psy_Property* psy_property_find_const(const psy_Property* self,
+	const char* key, psy_PropertyType typ)
+{
+	assert(self);
+
+	return psy_property_find((psy_Property*)self, key, typ);
+}
+
 int psy_property_onsearchenum(psy_Property* self, psy_Property* property, int level)
 {
 	assert(self);
@@ -407,6 +422,11 @@ psy_Property* psy_property_findsection(psy_Property* self, const char* key)
 	psy_Property* prev = 0;
 
 	return psy_property_findsectionex(self, key, &prev);
+}
+
+const psy_Property* psy_property_findsection_const(const psy_Property* self , const char* key)
+{
+	return psy_property_findsection((psy_Property*)self, key);
 }
 
 psy_Property* psy_property_findsectionex(psy_Property* self, const char* key,
@@ -538,6 +558,16 @@ psy_Property* psy_property_at_index(psy_Property* self, intptr_t index)
 		}
 	}
 	return NULL;
+}
+
+uintptr_t psy_property_index(const psy_Property* self)
+{
+	assert(self);
+
+	if (psy_property_parent(self)) {
+		return psy_list_entry_index(self->parent->children, self);
+	}
+	return UINTPTR_MAX;
 }
 
 psy_Property* psy_property_set_bool(psy_Property* self, const char* key,
@@ -1025,7 +1055,7 @@ psy_Property* psy_property_setitem_int(psy_Property* self, intptr_t value)
 {
 	assert(self);
 
-	if (!self->item.readonly) {
+	if (!self->item.readonly && psy_property_int_valid(self, value)) {
 		self->item.value.i = value;
 	}
 	return self;
