@@ -275,6 +275,17 @@ void psy_ui_value_sub(psy_ui_Value* self, const psy_ui_Value* other,
 	}
 }
 
+void psy_ui_value_mul_real(psy_ui_Value* self, double factor)
+{
+	if ((self->unit == psy_ui_UNIT_EH) ||
+		(self->unit == psy_ui_UNIT_EW)) {
+		self->quantity.real *= factor;
+	} else {
+		self->quantity.integer *= factor;
+		self->unit = psy_ui_UNIT_PX;
+	}
+}
+
 int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm)
 {
@@ -323,7 +334,7 @@ void psy_ui_error(const char* err, const char* shorterr)
 #endif
 }
 
-void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b)
+void psy_ui_colour_add(psy_ui_Colour* self, float r, float g, float b)
 {
 	float p0 = (float)((self->value >> 16) & 0xff) + r;
 	float p1 = (float)((self->value >> 8) & 0xff) + g;

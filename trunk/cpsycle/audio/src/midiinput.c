@@ -60,8 +60,8 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	psy_audio_PatternEvent* rv)
 {
 	uintptr_t track = 0;
-	int lsb;
-	int msb;
+	int status_ln;
+	int status_hn;
 	int status;
 	int channel;
 
@@ -80,8 +80,12 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	assert(self);
 
 	psy_audio_patternevent_clear(rv);
-	lsb = mididata.byte0 & 0x0F;
-	msb = (mididata.byte0 & 0xF0) >> 4;
+
+	status = mididata.byte0;
+	status_ln = mididata.byte0 & 0x0F;
+	status_hn = (mididata.byte0 & 0xF0) >> 4;
+	channel = status_ln;
+	
 	// assign uses
 	note = mididata.byte1;
 	program = mididata.byte1;
@@ -89,8 +93,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	velocity = mididata.byte2;
 	data2 = mididata.byte2;
 
-	status = mididata.byte0;
-	channel = lsb;
+		
 	if (mididata.byte0 != 0xFE) {
 		self->stats.channelmap |= (1 << (channel));
 	}
@@ -101,7 +104,7 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 	parameter = 0;
 	orignote = psy_audio_NOTECOMMANDS_EMPTY;
 
-	switch (msb) {
+	switch (status_hn) {
 	case 0x08:	// (also) note off
 		velocity = 0;
 		//fallthrough
@@ -326,21 +329,77 @@ bool psy_audio_midiinput_workinput(psy_audio_MidiInput* self,
 		cmd = data1;
 		parameter = data2;
 		break;
+		// extended codes
+	case 0x0F:
+	{
+		switch (status_ln) {
+			// MIDI SEEK: Set Song Position Pointer
+			case 0x02:
+				note = psy_audio_NOTECOMMANDS_MIDI_SPP;
+				// data1 and data2 needs to be combined into a 14-bit value
+				// The 14-bit value is the MIDI Beat (1 MIDI Beat = 1/16 beat)
+				cmd = data1;
+				parameter = data2;
+				break;
+			case 0x0A: {
+				note = psy_audio_NOTECOMMANDS_MIDI_CLK_START;
+				self->stats.flags |= FSTAT_FASTART;
+
+				// force sync
+				// InternalReSync(dwTime);
+				// return FALSE;		
+				break; }
+				 // MIDI SYNC: Timing Clock
+			case 0x08: {
+				note = psy_audio_NOTECOMMANDS_MIDI_CLK;
+				self->stats.flags |= FSTAT_F8CLOCK;
+
+				// resync?
+				//if (m_reSync)
+				///{
+					//m_stats.flags |= FSTAT_RESYNC;
+
+					//m_reSync = false;
+
+					// force sync
+					//InternalReSync(dwTime);
+				//} else
+				//{
+					// use clocks to keep us in sync as best as we can
+					//InternalClock(dwTime);
+				//}
+				// return FALSE;
+				break; }
+			case 0x0B: {
+				note = psy_audio_NOTECOMMANDS_MIDI_CLK_CONT;
+				self->stats.flags |= FSTAT_FASTART;
+			break; }
+			// MIDI SYNC: Stop
+			case 0x0C: {
+				note = psy_audio_NOTECOMMANDS_MIDI_CLK_STOP;
+				self->stats.flags |= FSTAT_FCSTOP;
+
+				// stop the song play (in effect, stops all sound)
+				// handled by psy_audio_sequencer_clockstop
+				break; }
+					 // do nothing (apart from exit) if not recognised
+			default:		
+				return FALSE;
+				break;
+		}
+		break; }
 	default:
 		return FALSE;
 		break;
 	}
-
 	// invalid machine/channel?	
-	if (!psy_audio_machines_at(&self->song->machines, busmachine) &&
-			note != psy_audio_NOTECOMMANDS_MIDI_SYNC) {
-		return FALSE;
+	if ((note >= psy_audio_NOTECOMMANDS_MIDI_SPP && note <= psy_audio_NOTECOMMANDS_MIDI_SYNC) ||
+			psy_audio_machines_at(&self->song->machines, busmachine)) {
+		psy_audio_patternevent_init_all(rv, note, inst, busmachine,
+			psy_audio_NOTECOMMANDS_VOL_EMPTY, cmd, parameter);
+		return TRUE;
 	}
-
-	psy_audio_patternevent_init_all(rv, note, inst, busmachine,
-		psy_audio_NOTECOMMANDS_VOL_EMPTY, cmd, parameter);
-
-	return TRUE;
+	return FALSE;
 }
 
 void psy_audio_midiinput_setinstmap(psy_audio_MidiInput* self, uintptr_t channel,

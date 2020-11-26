@@ -21,4 +21,9 @@ typedef struct {
 void playposbar_init(PlayPosBar*, psy_ui_Component* parent,
 	Workspace* workspace);
 
+INLINE psy_ui_Component* playposbar_base(PlayPosBar* self)
+{
+	return &self->component;
+}
+
 #endif

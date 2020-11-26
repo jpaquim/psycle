@@ -12,16 +12,16 @@
 #include "skincoord.h"
 
 typedef struct {
-    psy_ui_Color fonttopcolor;
-    psy_ui_Color fontbottomcolor;
-    psy_ui_Color fonthtopcolor;
-    psy_ui_Color fonthbottomcolor;
-    psy_ui_Color fonttitlecolor;
-    psy_ui_Color topcolor;
-    psy_ui_Color bottomcolor;
-    psy_ui_Color htopcolor;
-    psy_ui_Color hbottomcolor;
-    psy_ui_Color titlecolor;
+    psy_ui_Colour fonttopcolour;
+    psy_ui_Colour fontbottomcolour;
+    psy_ui_Colour fonthtopcolour;
+    psy_ui_Colour fonthbottomcolour;
+    psy_ui_Colour fonttitlecolour;
+    psy_ui_Colour topcolour;
+    psy_ui_Colour bottomcolour;
+    psy_ui_Colour htopcolour;
+    psy_ui_Colour hbottomcolour;
+    psy_ui_Colour titlecolour;
     psy_ui_Bitmap knobbitmap;
     psy_ui_Bitmap mixerbitmap;
     char* bitmappath;

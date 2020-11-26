@@ -198,14 +198,14 @@ static void pluginsview_vtable_init(PluginsView* self)
 {
 	if (!pluginsview_vtable_initialized) {
 		pluginsview_vtable = *(self->component.vtable);				
-		pluginsview_vtable.ondraw = (psy_ui_fp_ondraw) pluginsview_ondraw;		
-		pluginsview_vtable.onkeydown = (psy_ui_fp_onkeydown)
+		pluginsview_vtable.ondraw = (psy_ui_fp_component_ondraw) pluginsview_ondraw;		
+		pluginsview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			pluginsview_onkeydown;
-		pluginsview_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		pluginsview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			pluginsview_onmousedown;
-		pluginsview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+		pluginsview_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
 			pluginsview_onmousedoubleclick;
-		pluginsview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		pluginsview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			pluginsview_onpreferredsize;		
 	}
 }
@@ -287,11 +287,11 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	char text[128];
 
 	if (property == self->selectedplugin) {
-		psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x009B7800));
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
+		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	} else {
-		psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
+		psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 	}		
 	plugindisplayname(property, text);	
 	psy_ui_textout(g, x, y + 2, text, strlen(text));
@@ -299,9 +299,9 @@ void pluginsview_drawitem(PluginsView* self, psy_ui_Graphics* g,
 	psy_ui_textout(g, x + self->columnwidth - 7 * self->avgcharwidth,
 		y + 2, text, strlen(text));
 	if (pluginmode(property, text) == MACHMODE_FX) {
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {		
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 	}
 	psy_ui_textout(g, x + self->columnwidth - 10 * self->avgcharwidth,
 		y + 2, text, strlen(text));
@@ -613,7 +613,7 @@ static void newmachine_vtable_init(NewMachine* self)
 {
 	if (!newmachine_vtable_initialized) {
 		newmachine_vtable = *(self->component.vtable);				
-		newmachine_vtable.onkeydown = (psy_ui_fp_onkeydown)
+		newmachine_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			newmachine_onkeydown;		
 	}
 }
@@ -705,8 +705,8 @@ void newmachine_ondestroy(NewMachine* self, psy_ui_Component* component)
 
 void newmachine_updateskin(NewMachine* self)
 {
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin->colour);
-	psy_ui_component_setcolor(&self->component, self->skin->effect_fontcolour);
+	psy_ui_component_setbackgroundcolour(&self->component, self->skin->colour);
+	psy_ui_component_setcolour(&self->component, self->skin->effect_fontcolour);
 }
 
 void newmachine_updatetext(NewMachine* self, Translator* translator)

@@ -84,39 +84,39 @@ void machineviewskin_settheme(MachineViewSkin* self, psy_Property* p, const char
 	const char* machine_skin_name;
 
 	if (p) {
-		self->colour = psy_ui_color_make(psy_property_at_int(p, "mv_colour", 0x00232323));
-		self->wirecolour = psy_ui_color_make(psy_property_at_int(p, "mv_wirecolour", 0x005F5F5F));
-		self->selwirecolour = psy_ui_color_make(psy_property_at_int(p, "mv_selwirecolour", 0x007F7F7F));
-		self->hoverwirecolour = psy_ui_color_make(psy_property_at_int(p, "mv_hoverwirecolour", 0x007F7F7F));
-		self->polycolour = psy_ui_color_make(psy_property_at_int(p, "mv_wireaacolour2", 0x005F5F5F));
-		self->polycolour = psy_ui_color_make(psy_property_at_int(p, "mv_polycolour", 0x00B1C8B0));
+		self->colour = psy_ui_colour_make(psy_property_at_int(p, "mv_colour", 0x00232323));
+		self->wirecolour = psy_ui_colour_make(psy_property_at_int(p, "mv_wirecolour", 0x005F5F5F));
+		self->selwirecolour = psy_ui_colour_make(psy_property_at_int(p, "mv_selwirecolour", 0x007F7F7F));
+		self->hoverwirecolour = psy_ui_colour_make(psy_property_at_int(p, "mv_hoverwirecolour", 0x007F7F7F));
+		self->polycolour = psy_ui_colour_make(psy_property_at_int(p, "mv_wireaacolour2", 0x005F5F5F));
+		self->polycolour = psy_ui_colour_make(psy_property_at_int(p, "mv_polycolour", 0x00B1C8B0));
 		self->generator_fontcolour =
-			psy_ui_color_make(psy_property_at_int(p, "mv_generator_fontcolour", 0x00B1C8B0));
+			psy_ui_colour_make(psy_property_at_int(p, "mv_generator_fontcolour", 0x00B1C8B0));
 		self->effect_fontcolour =
-			psy_ui_color_make(psy_property_at_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
+			psy_ui_colour_make(psy_property_at_int(p, "mv_effect_fontcolour", 0x00D1C5B6));
 		self->triangle_size = psy_property_at_int(p, "mv_triangle_size", 10);
 		machine_skin_name = psy_property_at_str(p, "machine_skin", 0);
 	} else {
-		self->colour = psy_ui_color_make(0x00232323);
-		self->wirecolour = psy_ui_color_make(0x005F5F5F);
-		self->selwirecolour = psy_ui_color_make(0x007F7F7F);
-		self->hoverwirecolour = psy_ui_color_make(0x007F7F7F);
-		self->polycolour = psy_ui_color_make(0x005F5F5F);
-		self->polycolour = psy_ui_color_make(0x00B1C8B0);
-		self->generator_fontcolour = psy_ui_color_make(0x00B1C8B0);
-		self->effect_fontcolour = psy_ui_color_make(0x00D1C5B6);
+		self->colour = psy_ui_colour_make(0x00232323);
+		self->wirecolour = psy_ui_colour_make(0x005F5F5F);
+		self->selwirecolour = psy_ui_colour_make(0x007F7F7F);
+		self->hoverwirecolour = psy_ui_colour_make(0x007F7F7F);
+		self->polycolour = psy_ui_colour_make(0x005F5F5F);
+		self->polycolour = psy_ui_colour_make(0x00B1C8B0);
+		self->generator_fontcolour = psy_ui_colour_make(0x00B1C8B0);
+		self->effect_fontcolour = psy_ui_colour_make(0x00D1C5B6);
 		self->triangle_size = 10;
 		machine_skin_name = NULL;
 	}
 	self->wireaacolour =
-		psy_ui_color_make(((((self->wirecolour.value & 0x00ff0000)
+		psy_ui_colour_make(((((self->wirecolour.value & 0x00ff0000)
 			+ ((self->colour.value & 0x00ff0000) * 4)) / 5) & 0x00ff0000) +
 			((((self->wirecolour.value & 0x00ff00)
 				+ ((self->colour.value & 0x00ff00) * 4)) / 5) & 0x00ff00) +
 			((((self->wirecolour.value & 0x00ff)
 				+ ((self->colour.value & 0x00ff) * 4)) / 5) & 0x00ff));
 	self->wireaacolour2 =
-		psy_ui_color_make((((((self->wirecolour.value & 0x00ff0000))
+		psy_ui_colour_make((((((self->wirecolour.value & 0x00ff0000))
 			+ ((self->colour.value & 0x00ff0000))) / 2) & 0x00ff0000) +
 			(((((self->wirecolour.value & 0x00ff00))
 				+ ((self->colour.value & 0x00ff00))) / 2) & 0x00ff00) +

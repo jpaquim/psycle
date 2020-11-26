@@ -12,6 +12,7 @@
 typedef struct SeqEditorTrackState {
 	int pxperbeat;
 	psy_ui_Value lineheight;
+	psy_ui_Value defaultlineheight;
 	psy_ui_Value linemargin;
 } SeqEditorTrackState;
 
@@ -19,8 +20,8 @@ void seqeditortrackstate_init(SeqEditorTrackState*);
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_Color rulerbaselinecolour;
-	psy_ui_Color rulermarkcolour;
+	psy_ui_Colour rulerbaselinecolour;
+	psy_ui_Colour rulermarkcolour;
 	SeqEditorTrackState* trackstate;
 	Workspace* workspace;
 } SeqEditorRuler;

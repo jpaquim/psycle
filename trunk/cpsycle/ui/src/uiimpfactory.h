@@ -46,7 +46,7 @@ typedef struct psy_ui_ListBoxImp* (*psy_ui_fp_impfactory_allocinit_listboximp)(s
 typedef struct psy_ui_ListBoxImp* (*psy_ui_fp_impfactory_allocinit_listboximp_multiselect)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_ComboBoxImp* (*psy_ui_fp_impfactory_allocinit_comboboximp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 typedef struct psy_ui_CheckBoxImp* (*psy_ui_fp_impfactory_allocinit_checkboximp)(struct psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
-typedef struct psy_ui_ColorDialogImp* (*psy_ui_fp_impfactory_allocinit_colordialogimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component* parent);
+typedef struct psy_ui_ColourDialogImp* (*psy_ui_fp_impfactory_allocinit_colourdialogimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component* parent);
 typedef struct psy_ui_OpenDialogImp* (*psy_ui_fp_impfactory_allocinit_opendialogimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component* parent);
 typedef struct psy_ui_OpenDialogImp* (*psy_ui_fp_impfactory_allocinit_all_opendialogimp)(struct psy_ui_ImpFactory*, struct psy_ui_Component* parent,
 	const char* title,
@@ -77,7 +77,7 @@ typedef struct psy_ui_ImpFactoryVTable {
 	psy_ui_fp_impfactory_allocinit_listboximp_multiselect allocinit_listboximp_multiselect;
 	psy_ui_fp_impfactory_allocinit_comboboximp allocinit_comboboximp;
 	psy_ui_fp_impfactory_allocinit_checkboximp allocinit_checkboximp;
-	psy_ui_fp_impfactory_allocinit_colordialogimp allocinit_colordialogimp;
+	psy_ui_fp_impfactory_allocinit_colourdialogimp allocinit_colourdialogimp;
 	psy_ui_fp_impfactory_allocinit_opendialogimp allocinit_opendialogimp;
 	psy_ui_fp_impfactory_allocinit_all_opendialogimp allocinit_all_opendialogimp;
 	psy_ui_fp_impfactory_allocinit_savedialogimp allocinit_savedialogimp;
@@ -106,7 +106,7 @@ struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp(psy_ui_ImpFacto
 struct psy_ui_ListBoxImp* psy_ui_impfactory_allocinit_listboximp_multiselect(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_ComboBoxImp* psy_ui_impfactory_allocinit_comboboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
 struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFactory*, struct psy_ui_Component*, struct psy_ui_Component* parent);
-struct psy_ui_ColorDialogImp* psy_ui_impfactory_allocinit_colordialogimp(psy_ui_ImpFactory*, struct psy_ui_Component* parent);
+struct psy_ui_ColourDialogImp* psy_ui_impfactory_allocinit_colourdialogimp(psy_ui_ImpFactory*, struct psy_ui_Component* parent);
 struct psy_ui_OpenDialogImp* psy_ui_impfactory_allocinit_opendialogimp(psy_ui_ImpFactory*, struct psy_ui_Component* parent);
 struct psy_ui_OpenDialogImp* psy_ui_impfactory_allocinit_all_opendialogimp(psy_ui_ImpFactory*, struct psy_ui_Component* parent,
 	const char* title,

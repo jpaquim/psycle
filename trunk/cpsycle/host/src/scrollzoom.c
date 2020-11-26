@@ -27,12 +27,12 @@ static void scrollzoomvtable_init(ScrollZoom* self)
 {
 	if (!scrollzoom_vtable_initialized) {
 		scrollzoom_vtable = *(self->component.vtable);		
-		scrollzoom_vtable.ondraw = (psy_ui_fp_ondraw)scrollzoom_ondraw;
-		scrollzoom_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		scrollzoom_vtable.ondraw = (psy_ui_fp_component_ondraw)scrollzoom_ondraw;
+		scrollzoom_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			scrollzoom_onmousedown;
-		scrollzoom_vtable.onmousemove = (psy_ui_fp_onmousemove)
+		scrollzoom_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
 			scrollzoom_onmousemove;
-		scrollzoom_vtable.onmouseup = (psy_ui_fp_onmouseup)
+		scrollzoom_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
 			scrollzoom_onmouseup;
 		scrollzoom_vtable_initialized = TRUE;
 	}
@@ -76,7 +76,7 @@ void scrollzoom_ondraw(ScrollZoom* self, psy_ui_Graphics* g)
 	if (zoomleftx == zoomrightx) {
 		++zoomrightx;
 	}	
-	psy_ui_setcolor(g, psy_ui_color_make(0x00666666));
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00666666));
 	psy_ui_setrectangle(&r, zoomleftx, 0, zoomrightx - zoomleftx,
 		psy_ui_value_px(&size.height, &tm));
 	psy_ui_drawrectangle(g, r);

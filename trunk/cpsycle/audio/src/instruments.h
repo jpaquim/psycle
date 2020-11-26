@@ -64,6 +64,8 @@ void psy_audio_instruments_remove(psy_audio_Instruments*,
 	psy_audio_InstrumentIndex);
 void psy_audio_instruments_select(psy_audio_Instruments*,
 	psy_audio_InstrumentIndex);
+void psy_audio_instruments_dec(psy_audio_Instruments*);
+void psy_audio_instruments_inc(psy_audio_Instruments*);
 
 INLINE psy_audio_InstrumentIndex psy_audio_instruments_selected(
 	psy_audio_Instruments* self)

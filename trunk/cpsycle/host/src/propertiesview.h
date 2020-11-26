@@ -62,11 +62,11 @@ typedef struct {
 	PropertiesRenderLineState* linestate_clipstart;
 	uintptr_t currlinestatecount;
 	psy_Table linestates;	
-	psy_ui_Color valuecolor;
-	psy_ui_Color sectioncolor;
-	psy_ui_Color separatorcolor;
-	psy_ui_Color valueselcolor;
-	psy_ui_Color valueselbackgroundcolor;
+	psy_ui_Colour valuecolour;
+	psy_ui_Colour sectioncolour;
+	psy_ui_Colour separatorcolour;
+	psy_ui_Colour valueselcolour;
+	psy_ui_Colour valueselbackgroundcolour;
 	Workspace* workspace;
 } PropertiesRenderer;
 

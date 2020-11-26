@@ -34,11 +34,11 @@ static void vtable_init(TrackScopeView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onalign = (psy_ui_fp_onalign) trackscopeview_onalign;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.onalign = (psy_ui_fp_component_onalign) trackscopeview_onalign;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			trackscopeview_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_ondraw) trackscopeview_ondraw;
-		vtable.onmousedown = (psy_ui_fp_onmousedown)
+		vtable.ondraw = (psy_ui_fp_component_ondraw) trackscopeview_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			trackscopeview_onmousedown;
 	}
 }
@@ -77,7 +77,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		tm = psy_ui_component_textmetric(&self->component);		
 		width = psy_ui_value_px(&size.width, &tm) / maxcolumns;
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00444444));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
 		for (c = 0; c < numtracks; ++c) {
 			trackscopeview_drawtrackindex(self, g, cpx, cpy, width,
 					self->trackheight, c);
@@ -108,7 +108,7 @@ void trackscopeview_drawtrackindex(TrackScopeView* self, psy_ui_Graphics* g,
 	char text[40];
 	extern psy_ui_App app;
 
-	psy_ui_setcolor(g, app.defaults.style_common.color);
+	psy_ui_setcolour(g, app.defaults.style_common.colour);
 	psy_snprintf(text, 40, "%X", track);
 	psy_ui_textout(g, x + 3, y, text, strlen(text));
 }
@@ -134,7 +134,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 		psy_ui_textout(g, x + width - 10, y + height - self->textheight, text,
 			strlen(text));
 	}
-	psy_ui_setcolor(g, psy_ui_color_make(0x00888888));
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00888888));
 	if (self->workspace->song) {
 		psy_audio_Machine* machine;
 		int centery;
@@ -209,7 +209,7 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 	int y, int width, int height, int track)
 {	
 	int ident = (int)(width * 0.25);
-	psy_ui_setcolor(g, app.defaults.style_common.color);
+	psy_ui_setcolour(g, app.defaults.style_common.colour);
 	psy_ui_moveto(g, psy_ui_intpoint_make(x + ident, y + (int)(height * 0.2)));
 	psy_ui_curveto(g,
 		psy_ui_intpoint_make(x + width - ident * 2, y + (int)(height * 0.3)),

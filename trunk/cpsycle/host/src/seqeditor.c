@@ -16,13 +16,13 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-#define DEFAULT_LINEHEIGHT 1.2
 #define DEFAULT_PXPERBEAT 5
 
 void seqeditortrackstate_init(SeqEditorTrackState* self)
 {
 	self->pxperbeat = DEFAULT_PXPERBEAT;
-	self->lineheight = psy_ui_value_makeeh(DEFAULT_LINEHEIGHT);
+	self->defaultlineheight = psy_ui_value_makeeh(1.2);
+	self->lineheight = self->defaultlineheight;
 	self->linemargin = psy_ui_value_makeeh(0.5);
 }
 
@@ -40,9 +40,9 @@ static void seqeditorruler_vtable_init(SeqEditorRuler* self)
 {
 	if (!seqeditorruler_vtable_initialized) {
 		seqeditorruler_vtable = *(self->component.vtable);
-		seqeditorruler_vtable.ondraw = (psy_ui_fp_ondraw)
+		seqeditorruler_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			seqeditorruler_ondraw;
-		seqeditorruler_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		seqeditorruler_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			seqeditorruler_onpreferredsize;
 		seqeditorruler_vtable_initialized = TRUE;
 	}
@@ -57,8 +57,8 @@ void seqeditorruler_init(SeqEditorRuler* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);
 	self->trackstate = trackstate;
 	self->workspace = workspace;
-	self->rulerbaselinecolour = psy_ui_color_make(0x00555555);
-	self->rulermarkcolour = psy_ui_color_make(0x00666666);
+	self->rulerbaselinecolour = psy_ui_colour_make(0x00555555);
+	self->rulermarkcolour = psy_ui_colour_make(0x00666666);
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged, self,
 		seqeditorruler_onsequenceselectionchanged);
 }
@@ -87,7 +87,7 @@ void seqeditorruler_drawruler(SeqEditorRuler* self, psy_ui_Graphics* g)
 		(psy_dsp_big_beat_t)self->trackstate->pxperbeat;
 	//psy_audio_sequence_duration(&self->workspace->song->sequence);
 	linewidth = (int)(duration * self->trackstate->pxperbeat);
-	psy_ui_setcolor(g, self->rulerbaselinecolour);
+	psy_ui_setcolour(g, self->rulerbaselinecolour);
 	psy_ui_drawline(g, 0, baseline, linewidth, baseline);
 	clipstart = 0;
 	clipend = duration;
@@ -252,12 +252,12 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 				}
 			}
 			if (selected) {
-				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00514536));
-				psy_ui_setcolor(g, psy_ui_color_make(0x00555555));
+				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
+				psy_ui_setcolour(g, psy_ui_colour_make(0x00555555));
 				psy_ui_drawrectangle(g, r);				
 			} else {
-				psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00333333));
-				psy_ui_setcolor(g, psy_ui_color_make(0x00444444));
+				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00333333));
+				psy_ui_setcolour(g, psy_ui_colour_make(0x00444444));
 				psy_ui_drawrectangle(g, r);				
 			}
 			if (workspace_showingpatternnames(self->workspace)) {
@@ -296,7 +296,7 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 			psy_ui_component_size(&self->parent->component), &tm);
 		cpx = (int)(self->itemdragposition * self->trackstate->pxperbeat);			
 		r = psy_ui_rectangle_make(cpx, y, 2, lineheight);
-		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00CACACA));		
+		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));		
 	}
 }
 
@@ -475,9 +475,9 @@ void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self,
 	}
 
 	if (self->base.currtrack == edittrack) {
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	} else {
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 	}
 	if (self->base.currtrack) {
 		psy_snprintf(text, 256, "%02X %s", self->base.trackindex,
@@ -541,16 +541,16 @@ static void seqeditortracks_vtable_init(SeqEditorTracks* self)
 {
 	if (!seqeditortracks_vtable_initialized) {
 		seqeditortracks_vtable = *(self->component.vtable);
-		seqeditortracks_vtable.ondraw = (psy_ui_fp_ondraw)seqeditortracks_ondraw;
-		seqeditortracks_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		seqeditortracks_vtable.ondraw = (psy_ui_fp_component_ondraw)seqeditortracks_ondraw;
+		seqeditortracks_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			seqeditortracks_onpreferredsize;
-		seqeditortracks_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		seqeditortracks_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			seqeditortracks_onmousedown;
-		seqeditortracks_vtable.onmousemove = (psy_ui_fp_onmousemove)
+		seqeditortracks_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
 			seqeditortracks_onmousemove;
-		seqeditortracks_vtable.onmouseup = (psy_ui_fp_onmouseup)
+		seqeditortracks_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
 			seqeditortracks_onmouseup;
-		seqeditortracks_vtable.ontimer = (psy_ui_fp_ontimer)
+		seqeditortracks_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			seqeditortracks_ontimer;
 		seqeditortracks_vtable_initialized = TRUE;
 	}
@@ -634,7 +634,7 @@ void seqeditortracks_ondraw(SeqEditorTracks* self, psy_ui_Graphics* g)
 		int lineheight;
 
 		tm = psy_ui_component_textmetric(&self->component);
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 		cpx = 0;		
 		cpy = 0;
 		linemargin = psy_ui_value_px(&self->trackstate->linemargin, &tm);		
@@ -986,7 +986,8 @@ void seqeditor_onzoomboxbeatchanged(SeqEditor* self, ZoomBox* sender)
 
 void seqeditor_onzoomboxheightchanged(SeqEditor* self, ZoomBox* sender)
 {
-	self->trackstate.lineheight.quantity.real = sender->zoomrate * DEFAULT_LINEHEIGHT;
+	self->trackstate.lineheight = psy_ui_mul_value_real(
+		self->trackstate.defaultlineheight, zoombox_rate(sender));
 	psy_ui_component_updateoverflow(&self->tracks.component);
 	psy_ui_component_invalidate(&self->tracks.component);
 	psy_ui_component_invalidate(&self->trackheaders.component);

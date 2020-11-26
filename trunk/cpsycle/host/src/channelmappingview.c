@@ -37,10 +37,10 @@ static void vtable_init(PinEdit* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw)pinedit_ondraw;
-		vtable.onmousedown = (psy_ui_fp_onmousedown)pinedit_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_onmousedown)pinedit_onmousemove;
-		vtable.onmouseup = (psy_ui_fp_onmousedown)pinedit_onmouseup;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)pinedit_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)pinedit_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousedown)pinedit_onmousemove;
+		vtable.onmouseup = (psy_ui_fp_component_onmousedown)pinedit_onmouseup;
 		vtable_initialized = 1;
 	}
 }
@@ -57,8 +57,8 @@ void pinedit_init(PinEdit* self, psy_ui_Component* parent, psy_audio_Wire wire,
 	self->dragmode = PINEDIT_DRAG_NONE;
 	self->mx = 0;
 	self->my = 0;
-	self->pincolor = psy_ui_color_make(0x00444444);
-	self->wirecolor = psy_ui_color_make(0x00999999);
+	self->pincolour = psy_ui_colour_make(0x00444444);
+	self->wirecolour = psy_ui_colour_make(0x00999999);
 }
 
 void pinedit_ondraw(PinEdit* self, psy_ui_Graphics* g)
@@ -80,9 +80,9 @@ void pinedit_drawsockets(PinEdit* self, psy_ui_Graphics* g)
 		uintptr_t numsrcpins;
 		uintptr_t numdstpins;
 
-		psy_ui_setcolor(g, self->pincolor);
+		psy_ui_setcolour(g, self->pincolour);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolor(g, self->pincolor);
+		psy_ui_settextcolour(g, self->pincolour);
 		numsrcpins = psy_audio_machine_numoutputs(srcmachine);
 		for (p = 0; p < numsrcpins; ++p) {
 			pinedit_drawpinoutput(self, g, p);
@@ -225,7 +225,7 @@ void pinedit_drawconnections(PinEdit* self, psy_ui_Graphics* g)
 		pinconnection = (psy_audio_PinConnection*)(pinpair->entry);
 		out = pinedit_pinposition_output(self, pinconnection->src);
 		in = pinedit_pinposition_input(self, pinconnection->dst);		
-		psy_ui_setcolor(g, self->wirecolor);
+		psy_ui_setcolour(g, self->wirecolour);
 		p0 = psy_ui_intpoint_make(out.left + (out.right - out.left) / 2,
 			out.top + (out.bottom - out.top) / 2);
 		p1 = psy_ui_intpoint_make(in.left + (in.right - in.left) / 2,
@@ -246,7 +246,7 @@ void pinedit_drawdrag(PinEdit* self, psy_ui_Graphics* g)
 		psy_ui_Rectangle in;
 
 		in = pinedit_pinposition_input(self, self->drag_dst);
-		psy_ui_setcolor(g, self->wirecolor);
+		psy_ui_setcolour(g, self->wirecolour);
 		psy_ui_drawline(g, self->mx, self->my,
 			in.left + (in.right - in.left) / 2,
 			in.top + (in.bottom - in.top) / 2);
@@ -256,7 +256,7 @@ void pinedit_drawdrag(PinEdit* self, psy_ui_Graphics* g)
 		psy_ui_Rectangle out;
 
 		out = pinedit_pinposition_output(self, self->drag_src);
-		psy_ui_setcolor(g, self->wirecolor);
+		psy_ui_setcolour(g, self->wirecolour);
 		psy_ui_drawline(g, self->mx, self->my,
 			out.left + (out.right - out.left) / 2,
 			out.top + (out.bottom - out.top) / 2);

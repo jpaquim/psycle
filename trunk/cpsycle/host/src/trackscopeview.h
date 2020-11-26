@@ -19,6 +19,11 @@ void trackscopeview_init(TrackScopeView*, psy_ui_Component* parent,
 void trackscopeview_start(TrackScopeView*);
 void trackscopeview_stop(TrackScopeView*);
 
+INLINE psy_ui_Component* trackscopeview_base(TrackScopeView* self)
+{
+	return &self->component;
+}
+
 #endif
 
 

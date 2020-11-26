@@ -32,19 +32,19 @@ static void psy_ui_curses_g_imp_drawroundrectangle(psy_ui_curses_GraphicsImp*, c
 	psy_ui_Size cornersize);
 static psy_ui_Size psy_ui_curses_g_imp_textsize(psy_ui_curses_GraphicsImp*, const char*);
 static void psy_ui_curses_g_imp_drawsolidrectangle(psy_ui_curses_GraphicsImp*, const psy_ui_Rectangle r,
-	psy_ui_Color color);
+	psy_ui_Colour colour);
 static void psy_ui_curses_g_imp_drawsolidroundrectangle(psy_ui_curses_GraphicsImp*, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color);
+	psy_ui_Size cornersize, psy_ui_Colour colour);
 static void psy_ui_curses_g_imp_drawsolidpolygon(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 static void psy_ui_curses_g_imp_drawline(psy_ui_curses_GraphicsImp*, int x1, int y1, int x2, int y2);
 static void psy_ui_curses_g_imp_drawfullbitmap(psy_ui_curses_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
 static void psy_ui_curses_g_imp_drawbitmap(psy_ui_curses_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc);
-static void psy_ui_curses_g_imp_setbackgroundcolor(psy_ui_curses_GraphicsImp*, psy_ui_Color color);
+static void psy_ui_curses_g_imp_setbackgroundcolour(psy_ui_curses_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_curses_g_imp_setbackgroundmode(psy_ui_curses_GraphicsImp*, unsigned int mode);
-static void psy_ui_curses_g_imp_settextcolor(psy_ui_curses_GraphicsImp*, psy_ui_Color color);
-static void psy_ui_curses_g_imp_setcolor(psy_ui_curses_GraphicsImp*, psy_ui_Color color);
+static void psy_ui_curses_g_imp_settextcolour(psy_ui_curses_GraphicsImp*, psy_ui_Colour colour);
+static void psy_ui_curses_g_imp_setcolour(psy_ui_curses_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_curses_g_imp_setfont(psy_ui_curses_GraphicsImp*, psy_ui_Font* font);
 static void psy_ui_curses_g_imp_moveto(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint pt);
 static void psy_ui_curses_g_imp_devcurveto(psy_ui_curses_GraphicsImp*, psy_ui_IntPoint control_p1,
@@ -70,10 +70,10 @@ static void win_imp_vtable_init(psy_ui_curses_GraphicsImp* self)
 		win_imp_vtable.dev_drawline = (psy_ui_fp_graphicsimp_dev_drawline)psy_ui_curses_g_imp_drawline;		
 		win_imp_vtable.dev_drawfullbitmap = (psy_ui_fp_graphicsimp_dev_drawfullbitmap)psy_ui_curses_g_imp_drawfullbitmap;
 		win_imp_vtable.dev_drawbitmap = (psy_ui_fp_graphicsimp_dev_drawbitmap)psy_ui_curses_g_imp_drawbitmap;
-		win_imp_vtable.dev_setbackgroundcolor = (psy_ui_fp_graphicsimp_dev_setbackgroundcolor)psy_ui_curses_g_imp_setbackgroundcolor;
+		win_imp_vtable.dev_setbackgroundcolour = (psy_ui_fp_graphicsimp_dev_setbackgroundcolour)psy_ui_curses_g_imp_setbackgroundcolour;
 		win_imp_vtable.dev_setbackgroundmode = (psy_ui_fp_graphicsimp_dev_setbackgroundmode)psy_ui_curses_g_imp_setbackgroundmode;
-		win_imp_vtable.dev_settextcolor = (psy_ui_fp_graphicsimp_dev_settextcolor)psy_ui_curses_g_imp_settextcolor;
-		win_imp_vtable.dev_setcolor = (psy_ui_fp_graphicsimp_dev_setcolor)psy_ui_curses_g_imp_setcolor;
+		win_imp_vtable.dev_settextcolour = (psy_ui_fp_graphicsimp_dev_settextcolour)psy_ui_curses_g_imp_settextcolour;
+		win_imp_vtable.dev_setcolour = (psy_ui_fp_graphicsimp_dev_setcolour)psy_ui_curses_g_imp_setcolour;
 		win_imp_vtable.dev_setfont = (psy_ui_fp_graphicsimp_dev_setfont)psy_ui_curses_g_imp_setfont;
 		win_imp_vtable.dev_moveto = (psy_ui_fp_graphicsimp_dev_moveto)psy_ui_curses_g_imp_moveto;
 		win_imp_vtable.dev_devcurveto = (psy_ui_fp_graphicsimp_dev_curveto)psy_ui_curses_g_imp_devcurveto;
@@ -132,12 +132,12 @@ void psy_ui_curses_g_imp_drawroundrectangle(psy_ui_curses_GraphicsImp* self, con
 {
 }
 
-void psy_ui_curses_g_imp_drawsolidrectangle(psy_ui_curses_GraphicsImp* self, const psy_ui_Rectangle r, psy_ui_Color color)
+void psy_ui_curses_g_imp_drawsolidrectangle(psy_ui_curses_GraphicsImp* self, const psy_ui_Rectangle r, psy_ui_Colour colour)
 { 
 }
 
 void psy_ui_curses_g_imp_drawsolidroundrectangle(psy_ui_curses_GraphicsImp* self, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color)
+	psy_ui_Size cornersize, psy_ui_Colour colour)
 {
 }
 
@@ -155,7 +155,7 @@ void psy_ui_curses_g_imp_drawbitmap(psy_ui_curses_GraphicsImp* self, psy_ui_Bitm
 {
 }
 
-void psy_ui_curses_g_imp_setcolor(psy_ui_curses_GraphicsImp* self, psy_ui_Color color)
+void psy_ui_curses_g_imp_setcolour(psy_ui_curses_GraphicsImp* self, psy_ui_Colour colour)
 {
 }
 
@@ -163,11 +163,11 @@ void psy_ui_curses_g_imp_setbackgroundmode(psy_ui_curses_GraphicsImp* self, unsi
 {
 }
 
-void psy_ui_curses_g_imp_setbackgroundcolor(psy_ui_curses_GraphicsImp* self, psy_ui_Color color)
+void psy_ui_curses_g_imp_setbackgroundcolour(psy_ui_curses_GraphicsImp* self, psy_ui_Colour colour)
 {	
 }
 
-void psy_ui_curses_g_imp_settextcolor(psy_ui_curses_GraphicsImp* self, psy_ui_Color color)
+void psy_ui_curses_g_imp_settextcolour(psy_ui_curses_GraphicsImp* self, psy_ui_Colour colour)
 {
 }
 

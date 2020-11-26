@@ -19,7 +19,7 @@ static void vtable_init(psy_ui_Edit* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize) onpreferredsize;
 	}	vtable_initialized = 1;
 }
 

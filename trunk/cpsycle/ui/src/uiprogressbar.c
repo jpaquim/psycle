@@ -19,8 +19,8 @@ static void vtable_init(psy_ui_ProgressBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize) onpreferredsize;
 		vtable_initialized = 1;
 	}
 }
@@ -59,7 +59,7 @@ void ondraw(psy_ui_ProgressBar* self, psy_ui_Graphics* g)
 		(psy_ui_value_px(&size.height, &tm) - height) / 2, 
 		(int)(self->progress * psy_ui_value_px(&size.width, &tm)),
 		height);
-	psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00D1C5B6));
+	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00D1C5B6));
 }
 
 void onpreferredsize(psy_ui_ProgressBar* self, psy_ui_Size* limit,

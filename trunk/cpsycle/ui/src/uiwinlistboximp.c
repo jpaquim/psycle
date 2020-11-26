@@ -45,7 +45,7 @@ static void dev_stoptimer(psy_ui_win_ListBoxImp* self, uintptr_t id) { self->win
 static void dev_seticonressource(psy_ui_win_ListBoxImp* self, int ressourceid) { self->win_component_imp.imp.vtable->dev_seticonressource(&self->win_component_imp.imp, ressourceid); }
 static psy_ui_TextMetric dev_textmetric(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_textmetric(&self->win_component_imp.imp); }
 static psy_ui_Size dev_textsize(psy_ui_win_ListBoxImp* self, const char* text, psy_ui_Font* font) { return self->win_component_imp.imp.vtable->dev_textsize(&self->win_component_imp.imp, text, font); }
-static void dev_setbackgroundcolor(psy_ui_win_ListBoxImp* self, psy_ui_Color color) { self->win_component_imp.imp.vtable->dev_setbackgroundcolor(&self->win_component_imp.imp, color); }
+static void dev_setbackgroundcolour(psy_ui_win_ListBoxImp* self, psy_ui_Colour colour) { self->win_component_imp.imp.vtable->dev_setbackgroundcolour(&self->win_component_imp.imp, colour); }
 static void dev_settitle(psy_ui_win_ListBoxImp* self, const char* title) { self->win_component_imp.imp.vtable->dev_settitle(&self->win_component_imp.imp, title); }
 static void dev_setfocus(psy_ui_win_ListBoxImp* self) { self->win_component_imp.imp.vtable->dev_setfocus(&self->win_component_imp.imp); }
 static int dev_hasfocus(psy_ui_win_ListBoxImp* self) { return self->win_component_imp.imp.vtable->dev_hasfocus(&self->win_component_imp.imp); }
@@ -90,7 +90,7 @@ static void imp_vtable_init(void)
 		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
 		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric) dev_textmetric;
 		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize) dev_textsize;
-		vtable.dev_setbackgroundcolor = (psy_ui_fp_componentimp_dev_setbackgroundcolor) dev_setbackgroundcolor;
+		vtable.dev_setbackgroundcolour = (psy_ui_fp_componentimp_dev_setbackgroundcolour) dev_setbackgroundcolour;
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle) dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus) dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus) dev_hasfocus;

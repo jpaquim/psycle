@@ -48,9 +48,9 @@ typedef void (*psy_ui_fp_graphics_drawroundrectangle)(struct psy_ui_Graphics*, c
 	psy_ui_Size cornersize);
 typedef psy_ui_Size (*psy_ui_fp_graphics_textsize)(struct psy_ui_Graphics*, const char*);
 typedef void (*psy_ui_fp_graphics_drawsolidrectangle)(struct psy_ui_Graphics*, const psy_ui_Rectangle r,
-	psy_ui_Color color);
+	psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_drawsolidroundrectangle)(struct psy_ui_Graphics*, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color);
+	psy_ui_Size cornersize, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_drawsolidpolygon)(struct psy_ui_Graphics*, psy_ui_IntPoint*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 typedef void (*psy_ui_fp_graphics_drawline)(struct psy_ui_Graphics*, int x1, int y1, int x2, int y2);
@@ -59,11 +59,11 @@ typedef void (*psy_ui_fp_graphics_drawbitmap)(struct psy_ui_Graphics*, psy_ui_Bi
 	int height, int xsrc, int ysrc);
 typedef void (*psy_ui_fp_graphics_drawstretchedbitmap)(struct psy_ui_Graphics*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc, int wsrc, int hsrc);
-typedef void (*psy_ui_fp_graphics_setbackgroundcolor)(struct psy_ui_Graphics*, psy_ui_Color color);
+typedef void (*psy_ui_fp_graphics_setbackgroundcolour)(struct psy_ui_Graphics*, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_setbackgroundmode)(struct psy_ui_Graphics*, unsigned int mode);
-typedef void (*psy_ui_fp_graphics_settextcolor)(struct psy_ui_Graphics*, psy_ui_Color color);
+typedef void (*psy_ui_fp_graphics_settextcolour)(struct psy_ui_Graphics*, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_settextalign)(struct psy_ui_Graphics*, unsigned int align);
-typedef void (*psy_ui_fp_graphics_setcolor)(struct psy_ui_Graphics*, psy_ui_Color color);
+typedef void (*psy_ui_fp_graphics_setcolour)(struct psy_ui_Graphics*, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphics_setfont)(struct psy_ui_Graphics*, psy_ui_Font* font);
 typedef void (*psy_ui_fp_graphics_moveto)(struct psy_ui_Graphics*, psy_ui_IntPoint pt);
 typedef void (*psy_ui_fp_graphics_curveto)(struct psy_ui_Graphics*, psy_ui_IntPoint control_p1,
@@ -87,11 +87,11 @@ typedef struct psy_ui_GraphicsVTable {
 	psy_ui_fp_graphics_drawfullbitmap drawfullbitmap;
 	psy_ui_fp_graphics_drawbitmap drawbitmap;
 	psy_ui_fp_graphics_drawstretchedbitmap drawstretchedbitmap;
-	psy_ui_fp_graphics_setbackgroundcolor setbackgroundcolor;
+	psy_ui_fp_graphics_setbackgroundcolour setbackgroundcolour;
 	psy_ui_fp_graphics_setbackgroundmode setbackgroundmode;
-	psy_ui_fp_graphics_settextcolor settextcolor;
+	psy_ui_fp_graphics_settextcolour settextcolour;
 	psy_ui_fp_graphics_settextalign settextalign;
-	psy_ui_fp_graphics_setcolor setcolor;	
+	psy_ui_fp_graphics_setcolour setcolour;	
 	psy_ui_fp_graphics_setfont setfont;
 	psy_ui_fp_graphics_moveto moveto;
 	psy_ui_fp_graphics_curveto curveto;
@@ -142,15 +142,15 @@ INLINE void psy_ui_drawroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectan
 	self->vtable->drawroundrectangle(self, r, cornersize);	
 }
 
-INLINE void psy_ui_drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r, psy_ui_Color color)
+INLINE void psy_ui_drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r, psy_ui_Colour colour)
 {
-	self->vtable->drawsolidrectangle(self, r, color);     
+	self->vtable->drawsolidrectangle(self, r, colour);     
 }
 
 INLINE void psy_ui_drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color)
+	psy_ui_Size cornersize, psy_ui_Colour colour)
 {
-	self->vtable->drawsolidroundrectangle(self, r, cornersize, color);
+	self->vtable->drawsolidroundrectangle(self, r, cornersize, colour);
 }
 
 INLINE void psy_ui_drawsolidpolygon(psy_ui_Graphics* self, psy_ui_IntPoint* pts,
@@ -176,9 +176,9 @@ INLINE void psy_ui_drawstretchedbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bit
 	self->vtable->drawstretchedbitmap(self, bitmap, x, y, width, height, xsrc, ysrc, wsrc, hsrc);
 }
 
-INLINE void psy_ui_setcolor(psy_ui_Graphics* self, psy_ui_Color color)
+INLINE void psy_ui_setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {	
-	self->vtable->setcolor(self, color);
+	self->vtable->setcolour(self, colour);
 }
 
 INLINE void psy_ui_setbackgroundmode(psy_ui_Graphics* self, unsigned int mode)
@@ -186,14 +186,14 @@ INLINE void psy_ui_setbackgroundmode(psy_ui_Graphics* self, unsigned int mode)
 	self->vtable->setbackgroundmode(self, mode);
 }
 
-INLINE void psy_ui_setbackgroundcolor(psy_ui_Graphics* self, psy_ui_Color color)
+INLINE void psy_ui_setbackgroundcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {	
-	self->vtable->setbackgroundcolor(self, color);
+	self->vtable->setbackgroundcolour(self, colour);
 }
 
-INLINE void psy_ui_settextcolor(psy_ui_Graphics* self, psy_ui_Color color)
+INLINE void psy_ui_settextcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {
-	self->vtable->settextcolor(self, color);
+	self->vtable->settextcolour(self, colour);
 }
 
 INLINE void psy_ui_settextalign(psy_ui_Graphics* self, unsigned int align)
@@ -249,9 +249,9 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawroundrectangle)(struct psy_ui_Graph
 	psy_ui_Size cornersize);
 typedef psy_ui_Size (*psy_ui_fp_graphicsimp_dev_textsize)(struct psy_ui_GraphicsImp*, const char*);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_Rectangle r,
-	psy_ui_Color color);
+	psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidroundrectangle)(struct psy_ui_GraphicsImp*, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color);
+	psy_ui_Size cornersize, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawsolidpolygon)(struct psy_ui_GraphicsImp*, psy_ui_IntPoint*,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawline)(struct psy_ui_GraphicsImp*, int x1, int y1, int x2, int y2);
@@ -260,11 +260,11 @@ typedef void (*psy_ui_fp_graphicsimp_dev_drawbitmap)(struct psy_ui_GraphicsImp*,
 	int height, int xsrc, int ysrc);
 typedef void (*psy_ui_fp_graphicsimp_dev_drawstretchedbitmap)(struct psy_ui_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
 	int height, int xsrc, int ysrc, int wsrc, int hsrc);
-typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundcolor)(struct psy_ui_GraphicsImp*, psy_ui_Color color);
+typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_setbackgroundmode)(struct psy_ui_GraphicsImp*, unsigned int mode);
-typedef void (*psy_ui_fp_graphicsimp_dev_settextcolor)(struct psy_ui_GraphicsImp*, psy_ui_Color color);
+typedef void (*psy_ui_fp_graphicsimp_dev_settextcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_settextalign)(struct psy_ui_GraphicsImp*, unsigned int align);
-typedef void (*psy_ui_fp_graphicsimp_dev_setcolor)(struct psy_ui_GraphicsImp*, psy_ui_Color color);
+typedef void (*psy_ui_fp_graphicsimp_dev_setcolour)(struct psy_ui_GraphicsImp*, psy_ui_Colour colour);
 typedef void (*psy_ui_fp_graphicsimp_dev_setfont)(struct psy_ui_GraphicsImp*, psy_ui_Font* font);
 typedef void (*psy_ui_fp_graphicsimp_dev_moveto)(struct psy_ui_GraphicsImp*, psy_ui_IntPoint pt);
 typedef void (*psy_ui_fp_graphicsimp_dev_curveto)(struct psy_ui_GraphicsImp*, psy_ui_IntPoint control_p1,
@@ -288,11 +288,11 @@ typedef struct psy_ui_GraphicsImpVTable {
 	psy_ui_fp_graphicsimp_dev_drawfullbitmap dev_drawfullbitmap;
 	psy_ui_fp_graphicsimp_dev_drawbitmap dev_drawbitmap;
 	psy_ui_fp_graphicsimp_dev_drawstretchedbitmap dev_drawstretchedbitmap;
-	psy_ui_fp_graphicsimp_dev_setbackgroundcolor dev_setbackgroundcolor;
+	psy_ui_fp_graphicsimp_dev_setbackgroundcolour dev_setbackgroundcolour;
 	psy_ui_fp_graphicsimp_dev_setbackgroundmode dev_setbackgroundmode;
-	psy_ui_fp_graphicsimp_dev_settextcolor dev_settextcolor;
+	psy_ui_fp_graphicsimp_dev_settextcolour dev_settextcolour;
 	psy_ui_fp_graphicsimp_dev_settextalign dev_settextalign;
-	psy_ui_fp_graphicsimp_dev_setcolor dev_setcolor;
+	psy_ui_fp_graphicsimp_dev_setcolour dev_setcolour;
 	psy_ui_fp_graphicsimp_dev_setfont dev_setfont;
 	psy_ui_fp_graphicsimp_dev_moveto dev_moveto;
 	psy_ui_fp_graphicsimp_dev_curveto dev_curveto;

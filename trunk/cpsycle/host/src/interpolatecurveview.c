@@ -95,12 +95,12 @@ static void interpolatecurvebox_vtable_init(InterpolateCurveBox* self)
 	if (!interpolatecurvebox_vtable_initialized) {
 		interpolatecurvebox_vtable = *(self->component.vtable);
 		interpolatecurvebox_vtable.ondraw =
-			(psy_ui_fp_ondraw) interpolatecurvebox_ondraw;
-		interpolatecurvebox_vtable.onmousedown = (psy_ui_fp_onmousedown)
+			(psy_ui_fp_component_ondraw) interpolatecurvebox_ondraw;
+		interpolatecurvebox_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			interpolatecurvebox_onmousedown;
-		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_onmousemove)
+		interpolatecurvebox_vtable.onmousemove = (psy_ui_fp_component_onmousemove)
 			interpolatecurvebox_onmousemove;
-		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_onmouseup)
+		interpolatecurvebox_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
 			interpolatecurvebox_onmouseup;		
 		interpolatecurvebox_vtable_initialized = 1;
 	}
@@ -157,7 +157,7 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		size = psy_ui_component_size(&self->component);
 		lines = (uintptr_t)(self->range / 0.25f);
 		scalex = psy_ui_value_px(&size.width, &tm) / self->range;
-		psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 		for (i = 0; i < lines; i += 0.25) {
 			int x;
 
@@ -201,7 +201,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	lines = (uintptr_t)(self->range / 0.25f);
 	scalex = psy_ui_value_px(&size.width, &tm) / self->range;
 	scaley = psy_ui_value_px(&size.height, &tm) / (double) 0xFF;
-	psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	interpolatecurvebox_drawselector(self, g, (int)(lastoffset * scalex),
 		(int)(psy_ui_value_px(&size.height, &tm) - (int)(lastcurveval * scaley)), self->keyframes);
 	curve = entry->curve;
@@ -272,15 +272,15 @@ void interpolatecurvebox_drawselector(InterpolateCurveBox* self,
 {
 	psy_ui_Rectangle r;
 	int half = 2;
-	psy_ui_Color color;
+	psy_ui_Colour colour;
 
 	psy_ui_setrectangle(&r, x - half, y - half, half * 2, half * 2);
 	if (self->selected == keyframe) {
-		color = psy_ui_color_make(0x000000FF);
+		colour = psy_ui_colour_make(0x000000FF);
 	} else {
-		color = psy_ui_color_make(0x00FFFFFF);
+		colour = psy_ui_colour_make(0x00FFFFFF);
 	}
-	psy_ui_drawsolidrectangle(g, r, color);
+	psy_ui_drawsolidrectangle(g, r, colour);
 }
 
 void interpolatecurvebox_onmousedown(InterpolateCurveBox* self, psy_ui_MouseEvent* ev)
@@ -577,11 +577,11 @@ void interpolatecurveview_oninterpolate(InterpolateCurveView* self,
 		lastvalue = entry->value;
 		for (kf = self->box.keyframes->next; kf != 0; kf = kf->next) {
 			KeyFrame* entry;
-			psy_audio_PatternEditPosition start;
-			psy_audio_PatternEditPosition end;
+			psy_audio_PatternCursor start;
+			psy_audio_PatternCursor end;
 
-			psy_audio_patterneditposition_init(&start);
-			psy_audio_patterneditposition_init(&end);
+			psy_audio_patterncursor_init(&start);
+			psy_audio_patterncursor_init(&end);
 			start.offset = lastoffset;
 			start.line = (uintptr_t)(lastoffset / 0.25f);
 			entry = (KeyFrame*)kf->entry;

@@ -133,14 +133,14 @@ typedef struct {
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
 	Workspace* workspace;
-	psy_audio_PatternEditPosition lastcursor;
+	psy_audio_PatternCursor lastcursor;
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
 	TrackerLineState*, Workspace* workspace);
 void trackerlinenumbers_setsharedlinestate(TrackerLineNumbers*, TrackerLineState*);
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
-	const psy_audio_PatternEditPosition*);
+	const psy_audio_PatternCursor*);
 void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
 	psy_dsp_big_beat_t offset);
 
@@ -191,11 +191,11 @@ typedef struct {
    psy_dsp_big_beat_t bpl;
    psy_dsp_big_beat_t cbpl;
    psy_dsp_NotesTabMode notestabmode;
-   psy_audio_PatternEditPosition cursor;
-   psy_audio_PatternEditPosition oldcursor;
+   psy_audio_PatternCursor cursor;
+   psy_audio_PatternCursor oldcursor;
    PatternSelection selection;
-   psy_audio_PatternEditPosition dragselectionbase;
-   psy_audio_PatternEditPosition lastdragcursor;
+   psy_audio_PatternCursor dragselectionbase;
+   psy_audio_PatternCursor lastdragcursor;
    int hasselection;
    int midline;
    int chordmodestarting;
@@ -225,6 +225,7 @@ void trackergrid_enablesync(TrackerGrid*);
 void trackergrid_preventsync(TrackerGrid*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, bool chordmode);
+void trackergrid_invalidateline(TrackerGrid*, psy_dsp_big_beat_t offset);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {
@@ -266,7 +267,6 @@ void trackerview_toggleblockmenu(TrackerView*);
 void trackerview_updatescrollstep(TrackerView*);
 void trackerview_computemetrics(TrackerView*);
 void trackerview_setfont(TrackerView*, psy_ui_Font*, bool iszoombase);
-void trackerview_invalidateline(TrackerView*, psy_dsp_big_beat_t offset);
 void trackerview_makecmds(psy_Property* parent);
 
 INLINE bool trackerview_blockmenuvisible(TrackerView* self)

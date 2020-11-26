@@ -225,7 +225,7 @@ void workspace_init(Workspace* self, void* handle)
 	workspace_initsignals(self);	
 	workspace_initplayer(self);
 	workspace_registereventdrivers(self);
-	psy_audio_patterneditposition_init(&self->patterneditposition);
+	psy_audio_patterncursor_init(&self->patterneditposition);
 	psy_audio_pattern_init(&self->patternpaste);
 	self->sequencepaste = 0;
 }
@@ -266,7 +266,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_dockview);
 	psy_signal_init(&self->signal_defaultfontchanged);
-	psy_signal_init(&self->signal_showgear);
+	psy_signal_init(&self->signal_togglegear);
 	psy_signal_init(&self->signal_languagechanged);
 }
 
@@ -320,7 +320,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_followsongchanged);
 	psy_signal_dispose(&self->signal_dockview);
 	psy_signal_dispose(&self->signal_defaultfontchanged);
-	psy_signal_dispose(&self->signal_showgear);
+	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_languagechanged);
 }
 
@@ -1034,52 +1034,52 @@ void workspace_makeparamtheme(Workspace* self, psy_Property* view)
 		"theme");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguititlecolor", 0x00292929, 0, 0),
+			"machineguititlecolour", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.title-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguititlefontcolor", 0x00B4B4B4, 0, 0),
+			"machineguititlefontcolour", 0x00B4B4B4, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.title-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguitopcolor", 0x00555555, 0, 0),
+			"machineguitopcolour", 0x00555555, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.param-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguifonttopcolor", 0x00CDCDCD, 0, 0),
+			"machineguifonttopcolour", 0x00CDCDCD, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.param-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguibottomcolor", 0x00444444, 0, 0),
+			"machineguibottomcolour", 0x00444444, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.value-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguifontbottomcolor", 0x00E7BD18, 0, 0),
+			"machineguifontbottomcolour", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.value-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguihtopcolor", 0x00555555, 0, 0),
+			"machineguihtopcolour", 0x00555555, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.selparam-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguihfonttopcolor", 0x00CDCDCD, 0, 0),
+			"machineguihfonttopcolour", 0x00CDCDCD, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.selparam-font");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguihbottomcolor", 0x00292929, 0, 0),
+			"machineguihbottomcolour", 0x00292929, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.selvalue-background");
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->paramtheme,
-			"machineguihfontbottomcolor", 0x00E7BD18, 0, 0),
+			"machineguihfontbottomcolour", 0x00E7BD18, 0, 0),
 			PSY_PROPERTY_HINT_EDITCOLOR),
 			"settingsview.selvalue-font");	
 }
@@ -2482,7 +2482,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 }
 
 void workspace_setpatterneditposition(Workspace* self,
-	psy_audio_PatternEditPosition editposition)
+	psy_audio_PatternCursor editposition)
 {	
 	assert(self);
 
@@ -2492,7 +2492,7 @@ void workspace_setpatterneditposition(Workspace* self,
 	psy_signal_emit(&self->signal_patterneditpositionchanged, self, 0);
 }
 
-psy_audio_PatternEditPosition workspace_patterneditposition(Workspace* self)
+psy_audio_PatternCursor workspace_patterneditposition(Workspace* self)
 {
 	assert(self);
 
@@ -2631,7 +2631,7 @@ void workspace_stopfollowsong(Workspace* self)
 void workspace_onsequenceeditpositionchanged(Workspace* self,
 	psy_audio_SequenceSelection* selection)
 {
-	psy_audio_PatternEditPosition position;
+	psy_audio_PatternCursor position;
 	psy_audio_SequenceEntry* entry;
 
 	assert(self);
@@ -3061,11 +3061,11 @@ bool workspace_isconnectasmixersend(const Workspace* self)
 	return psy_audio_machines_isconnectasmixersend(&self->song->machines);
 }
 
-void workspace_showgear(Workspace* self)
+void workspace_togglegear(Workspace* self)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_showgear, self, 0);
+	psy_signal_emit(&self->signal_togglegear, self, 0);
 }
 
 bool workspace_songmodified(const Workspace* self)
@@ -3084,4 +3084,35 @@ psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
 			"visual.patternview.notetab", 0))
 		? psy_dsp_NOTESTAB_A440
 		: psy_dsp_NOTESTAB_A220;
+}
+
+void workspace_songposdec(Workspace* self)
+{
+	if (self->song) {
+		if (self->sequenceselection.editposition.trackposition.sequencentrynode &&
+			self->sequenceselection.editposition.trackposition.sequencentrynode->prev) {
+			psy_audio_sequenceselection_seteditposition(
+				&self->sequenceselection,
+				psy_audio_sequence_makeposition(&self->song->sequence,
+					self->sequenceselection.editposition.tracknode,
+					self->sequenceselection.editposition.trackposition.sequencentrynode->prev));
+			workspace_setsequenceselection(self, self->sequenceselection);
+		}
+	}
+}
+
+void workspace_songposinc(Workspace* self)
+{
+	if (self->song) {
+		if (self->sequenceselection.editposition.trackposition.sequencentrynode &&
+			self->sequenceselection.editposition.trackposition.sequencentrynode->next) {
+			psy_audio_sequenceselection_seteditposition(
+				&self->sequenceselection,
+				psy_audio_sequence_makeposition(&self->song->sequence,
+					self->sequenceselection.editposition.tracknode,
+					self->sequenceselection.editposition.trackposition.sequencentrynode->next));
+			workspace_setsequenceselection(self,
+				self->sequenceselection);
+		}
+	}
 }

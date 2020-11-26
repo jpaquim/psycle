@@ -22,10 +22,10 @@
 //                -------------> Workspace (signal_songchanged)
 
 typedef struct {
-	psy_ui_Color on;
-	psy_ui_Color off;
-	psy_ui_Color borderon;
-	psy_ui_Color borderoff;
+	psy_ui_Colour on;
+	psy_ui_Colour off;
+	psy_ui_Colour borderon;
+	psy_ui_Colour borderoff;
 } ClipBoxSkin;
 
 typedef struct {

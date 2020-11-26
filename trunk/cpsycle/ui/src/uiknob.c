@@ -23,11 +23,11 @@ static void vtable_init(psy_ui_Knob* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize) onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown) onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter) onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave) onmouseleave;
 		vtable_initialized = 1;
 	}
 }
@@ -76,7 +76,7 @@ void ondraw(psy_ui_Knob* self, psy_ui_Graphics* g)
 	if (self->bitmap) {
 		psy_ui_drawbitmap(g, self->bitmap, 0, 0, 28, 28, 0, 0);
 	}
-	psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_ui_textout(g, 30, 0, self->label, strlen(self->label));
 	psy_ui_textout(g, 30, 28 / 2, self->desc, strlen(self->desc));

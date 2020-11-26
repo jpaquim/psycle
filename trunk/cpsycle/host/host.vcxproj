@@ -187,6 +187,7 @@
     <ClCompile Include="src\oscilloscope.c" />
     <ClCompile Include="src\paramlistbox.c" />
     <ClCompile Include="src\paramview.c" />
+    <ClCompile Include="src\patterncmds.c" />
     <ClCompile Include="src\patternproperties.c" />
     <ClCompile Include="src\patternview.c" />
     <ClCompile Include="src\patternviewskin.c" />
@@ -279,6 +280,7 @@
     <ClInclude Include="src\oscilloscope.h" />
     <ClInclude Include="src\paramlistbox.h" />
     <ClInclude Include="src\paramview.h" />
+    <ClInclude Include="src\patterncmds.h" />
     <ClInclude Include="src\patternproperties.h" />
     <ClInclude Include="src\patternview.h" />
     <ClInclude Include="src\patternviewskin.h" />

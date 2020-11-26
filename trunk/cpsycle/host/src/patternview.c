@@ -41,7 +41,7 @@ static void vtable_init(PatternViewStatus* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondraw = (psy_ui_fp_ondraw) patternviewstatus_ondraw;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) patternviewstatus_ondraw;
 		vtable_initialized = 1;
 	}
 }
@@ -78,7 +78,7 @@ void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus* self,
 void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 {
 	char text[256];
-	psy_audio_PatternEditPosition editposition;
+	psy_audio_PatternCursor editposition;
 	psy_audio_SequencePosition sequenceposition;
 	psy_audio_SequenceEntry* sequenceentry;
 	int pattern;
@@ -95,7 +95,7 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 	} else {
 		pattern = -1;
 	}	
-	psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	psy_snprintf(text, 256, "Pat %d  Ln %d  Trk %d  Col %d:%d Edit",
 		pattern,
@@ -197,7 +197,7 @@ static void patternview_vtable_init(PatternView* self)
 {
 	if (!patternview_vtable_initialized) {
 		patternview_vtable = *(self->component.vtable);
-		patternview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		patternview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			patternview_onpreferredsize;
 		patternview_vtable_initialized = 1;
 	}

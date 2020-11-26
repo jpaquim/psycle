@@ -45,7 +45,7 @@ static void vtable_init(Oscilloscope* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw)oscilloscope_ondraw;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)oscilloscope_ondraw;
 		vtable_initialized = 1;
 	}
 }

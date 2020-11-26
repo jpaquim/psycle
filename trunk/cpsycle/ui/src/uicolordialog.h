@@ -6,50 +6,50 @@
 
 #include "uicomponent.h"
 
-// ColorDialog
+// ColourDialog
 // Bridge
 // Aim: avoid coupling to one platform (win32, xt/motif, etc)
-// Abstraction/Refined  psy_ui_ColorDialog
-// Implementor			psy_ui_ColorDialogImp
-// Concrete Implementor	psy_ui_win_ColorDialogImp
+// Abstraction/Refined  psy_ui_ColourDialog
+// Implementor			psy_ui_ColourDialogImp
+// Concrete Implementor	psy_ui_win_ColourDialogImp
 //
-// psy_ui_ColorDialog <>-------- psy_ui_ColorDialogImp
+// psy_ui_ColourDialog <>-------- psy_ui_ColourDialogImp
 //     imp->dev_execute                     ^
 //     ...                                  |
-//                             psy_ui_win_ColorDialogImp
+//                             psy_ui_win_ColourDialogImp
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct psy_ui_ColorDialogImp;
+struct psy_ui_ColourDialogImp;
 
-typedef struct psy_ui_ColorDialog {
-	struct psy_ui_ColorDialogImp* imp;	
-} psy_ui_ColorDialog;
+typedef struct psy_ui_ColourDialog {
+	struct psy_ui_ColourDialogImp* imp;	
+} psy_ui_ColourDialog;
 
-void psy_ui_colordialog_init(psy_ui_ColorDialog*, psy_ui_Component* parent);
-void psy_ui_colordialog_dispose(psy_ui_ColorDialog*);
-int psy_ui_colordialog_execute(psy_ui_ColorDialog*);
-psy_ui_Color psy_ui_colordialog_color(psy_ui_ColorDialog*);
+void psy_ui_colourdialog_init(psy_ui_ColourDialog*, psy_ui_Component* parent);
+void psy_ui_colourdialog_dispose(psy_ui_ColourDialog*);
+int psy_ui_colourdialog_execute(psy_ui_ColourDialog*);
+psy_ui_Colour psy_ui_colourdialog_colour(psy_ui_ColourDialog*);
 
-// psy_ui_ColorImp
+// psy_ui_ColourImp
 
-typedef void (*psy_ui_fp_colordialogimp_dev_dispose)(struct psy_ui_ColorDialogImp*);
-typedef int (*psy_ui_fp_colordialogimp_dev_execute)(struct psy_ui_ColorDialogImp*);
-typedef psy_ui_Color (*psy_ui_fp_colordialogimp_dev_color)(struct psy_ui_ColorDialogImp*);
+typedef void (*psy_ui_fp_colourdialogimp_dev_dispose)(struct psy_ui_ColourDialogImp*);
+typedef int (*psy_ui_fp_colourdialogimp_dev_execute)(struct psy_ui_ColourDialogImp*);
+typedef psy_ui_Colour (*psy_ui_fp_colourdialogimp_dev_colour)(struct psy_ui_ColourDialogImp*);
 
-typedef struct psy_ui_ColorDialogImpVTable {
-	psy_ui_fp_colordialogimp_dev_dispose dev_dispose;
-	psy_ui_fp_colordialogimp_dev_execute dev_execute;	
-	psy_ui_fp_colordialogimp_dev_color dev_color;
-} psy_ui_ColorDialogImpVTable;
+typedef struct psy_ui_ColourDialogImpVTable {
+	psy_ui_fp_colourdialogimp_dev_dispose dev_dispose;
+	psy_ui_fp_colourdialogimp_dev_execute dev_execute;	
+	psy_ui_fp_colourdialogimp_dev_colour dev_colour;
+} psy_ui_ColourDialogImpVTable;
 
-typedef struct psy_ui_ColorDialogImp {
-	psy_ui_ColorDialogImpVTable* vtable;
-} psy_ui_ColorDialogImp;
+typedef struct psy_ui_ColourDialogImp {
+	psy_ui_ColourDialogImpVTable* vtable;
+} psy_ui_ColourDialogImp;
 
-void psy_ui_colordialogimp_init(psy_ui_ColorDialogImp*);
+void psy_ui_colourdialogimp_init(psy_ui_ColourDialogImp*);
 
 #ifdef __cplusplus
 }

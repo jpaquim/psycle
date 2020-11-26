@@ -21,9 +21,9 @@ static void drawroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
 	psy_ui_Size cornersize);
 static psy_ui_Size textsize(psy_ui_Graphics*, const char* text);
 static void drawsolidrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
-	psy_ui_Color color);
+	psy_ui_Colour colour);
 static void drawsolidroundrectangle(psy_ui_Graphics*, const psy_ui_Rectangle,
-	psy_ui_Size cornersize, psy_ui_Color color);
+	psy_ui_Size cornersize, psy_ui_Colour colour);
 static void drawsolidpolygon(psy_ui_Graphics*, psy_ui_IntPoint* points,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter);
 static void drawline(psy_ui_Graphics*, int x1, int y1, int x2, int y2);
@@ -32,11 +32,11 @@ static void drawbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y, int w
 	int height, int xsrc, int ysrc);
 static void drawstretchedbitmap(psy_ui_Graphics*, psy_ui_Bitmap* bmp, int x, int y, int width,
 	int height, int xsrc, int ysrc, int wsrc, int hsrc);
-static void setbackgroundcolor(psy_ui_Graphics*, psy_ui_Color color);
+static void setbackgroundcolour(psy_ui_Graphics*, psy_ui_Colour colour);
 static void setbackgroundmode(psy_ui_Graphics*, unsigned int mode);
-static void settextcolor(psy_ui_Graphics*, psy_ui_Color color);
+static void settextcolour(psy_ui_Graphics*, psy_ui_Colour colour);
 static void settextalign(psy_ui_Graphics*, unsigned int align);
-static void setcolor(psy_ui_Graphics*, psy_ui_Color color);
+static void setcolour(psy_ui_Graphics*, psy_ui_Colour colour);
 static void setfont(psy_ui_Graphics*, psy_ui_Font* font);
 static void moveto(psy_ui_Graphics*, psy_ui_IntPoint point);
 static void curveto(psy_ui_Graphics*, psy_ui_IntPoint control_p1,
@@ -66,11 +66,11 @@ static void vtable_init(void)
 		vtable.drawfullbitmap = drawfullbitmap;
 		vtable.drawbitmap = drawbitmap;
 		vtable.drawstretchedbitmap = drawstretchedbitmap;
-		vtable.setbackgroundcolor = setbackgroundcolor;
+		vtable.setbackgroundcolour = setbackgroundcolour;
 		vtable.setbackgroundmode = setbackgroundmode;
-		vtable.settextcolor = settextcolor;
+		vtable.settextcolour = settextcolour;
 		vtable.settextalign = settextalign;
-		vtable.setcolor = setcolor;
+		vtable.setcolour = setcolour;
 		vtable.setfont = setfont;
 		vtable.moveto = moveto;
 		vtable.curveto = curveto;
@@ -121,15 +121,15 @@ static psy_ui_Size textsize(psy_ui_Graphics* self, const char* text)
 }
 
 static void drawsolidrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
-	psy_ui_Color color)
+	psy_ui_Colour colour)
 {
-	self->imp->vtable->dev_drawsolidrectangle(self->imp, r, color);
+	self->imp->vtable->dev_drawsolidrectangle(self->imp, r, colour);
 }
 
 static void drawsolidroundrectangle(psy_ui_Graphics* self, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color)
+	psy_ui_Size cornersize, psy_ui_Colour colour)
 {
-		self->imp->vtable->dev_drawsolidroundrectangle(self->imp, r, cornersize, color);
+		self->imp->vtable->dev_drawsolidroundrectangle(self->imp, r, cornersize, colour);
 }
 static void drawsolidpolygon(psy_ui_Graphics* self, psy_ui_IntPoint* points,
 	unsigned int numpoints,  unsigned int inner, unsigned int outter)
@@ -160,9 +160,9 @@ static void drawstretchedbitmap(psy_ui_Graphics* self, psy_ui_Bitmap* bmp, int x
 		height, xsrc, ysrc, wsrc, hsrc);
 }
 
-static void setbackgroundcolor(psy_ui_Graphics* self, psy_ui_Color color)
+static void setbackgroundcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {
-	self->imp->vtable->dev_setbackgroundcolor(self->imp, color);
+	self->imp->vtable->dev_setbackgroundcolour(self->imp, colour);
 }
 
 static void setbackgroundmode(psy_ui_Graphics* self, unsigned int mode)
@@ -170,9 +170,9 @@ static void setbackgroundmode(psy_ui_Graphics* self, unsigned int mode)
 	self->imp->vtable->dev_setbackgroundmode(self->imp, mode);
 }
 
-static void settextcolor(psy_ui_Graphics* self, psy_ui_Color color)
+static void settextcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {
-	self->imp->vtable->dev_settextcolor(self->imp, color);
+	self->imp->vtable->dev_settextcolour(self->imp, colour);
 }
 
 static void settextalign(psy_ui_Graphics* self, unsigned int align)
@@ -180,9 +180,9 @@ static void settextalign(psy_ui_Graphics* self, unsigned int align)
 	self->imp->vtable->dev_settextalign(self->imp, align);
 }
 
-static void setcolor(psy_ui_Graphics* self, psy_ui_Color color)
+static void setcolour(psy_ui_Graphics* self, psy_ui_Colour colour)
 {
-	self->imp->vtable->dev_setcolor(self->imp, color);
+	self->imp->vtable->dev_setcolour(self->imp, colour);
 }
 
 static void setfont(psy_ui_Graphics* self, psy_ui_Font* font)
@@ -232,9 +232,9 @@ static psy_ui_Size dev_textsize(psy_ui_GraphicsImp* self, const char* text)
 	return rv;
 }
 static void dev_drawsolidrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
-	psy_ui_Color color) { }
+	psy_ui_Colour colour) { }
 static void dev_drawsolidroundrectangle(psy_ui_GraphicsImp* self, const psy_ui_Rectangle r,
-	psy_ui_Size cornersize, psy_ui_Color color) { }
+	psy_ui_Size cornersize, psy_ui_Colour colour) { }
 static void dev_drawsolidpolygon(psy_ui_GraphicsImp* self, psy_ui_IntPoint* pt,
 	unsigned int numpoints, unsigned int inner, unsigned int outter) { }
 static void dev_drawline(psy_ui_GraphicsImp* self, int x1, int y1, int x2, int y2) { }
@@ -243,11 +243,11 @@ static void dev_drawbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, 
 	int height, int xsrc, int ysrc) { }
 static void dev_drawstretchedbitmap(psy_ui_GraphicsImp* self, psy_ui_Bitmap* bmp, int x, int y, int width,
 	int height, int xsrc, int ysrc, int wsrc, int hsrc) { }
-static void dev_setbackgroundcolor(psy_ui_GraphicsImp* self, psy_ui_Color color) { }
+static void dev_setbackgroundcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
 static void dev_setbackgroundmode(psy_ui_GraphicsImp* self, unsigned int mode) { }
-static void dev_settextcolor(psy_ui_GraphicsImp* self, psy_ui_Color color) { }
+static void dev_settextcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
 static void dev_settextalign(psy_ui_GraphicsImp* self, unsigned int align) { }
-static void dev_setcolor(psy_ui_GraphicsImp* self, psy_ui_Color color) { }
+static void dev_setcolour(psy_ui_GraphicsImp* self, psy_ui_Colour colour) { }
 static void dev_setfont(psy_ui_GraphicsImp* self, psy_ui_Font* font) { }
 static void dev_moveto(psy_ui_GraphicsImp* self, psy_ui_IntPoint pt) { }
 static void dev_curveto(psy_ui_GraphicsImp* self, psy_ui_IntPoint control_p1,
@@ -276,11 +276,11 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_drawfullbitmap = dev_drawfullbitmap;
 		imp_vtable.dev_drawbitmap = dev_drawbitmap;
 		imp_vtable.dev_drawstretchedbitmap = dev_drawstretchedbitmap;
-		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
+		imp_vtable.dev_setbackgroundcolour = dev_setbackgroundcolour;
 		imp_vtable.dev_setbackgroundmode = dev_setbackgroundmode;
-		imp_vtable.dev_settextcolor = dev_settextcolor;
+		imp_vtable.dev_settextcolour = dev_settextcolour;
 		imp_vtable.dev_settextalign = dev_settextalign;
-		imp_vtable.dev_setcolor = dev_setcolor;
+		imp_vtable.dev_setcolour = dev_setcolour;
 		imp_vtable.dev_setfont = dev_setfont;
 		imp_vtable.dev_moveto = dev_moveto;
 		imp_vtable.dev_curveto = dev_curveto;

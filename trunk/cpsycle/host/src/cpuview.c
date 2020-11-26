@@ -23,8 +23,8 @@ static void cpumoduleview_vtable_init(CPUModuleView* self)
 {
 	if (!cpumoduleview_vtable_initialized) {
 		cpumoduleview_vtable = *(self->component.vtable);
-		cpumoduleview_vtable.ondraw = (psy_ui_fp_ondraw)cpumoduleview_ondraw;
-		cpumoduleview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		cpumoduleview_vtable.ondraw = (psy_ui_fp_component_ondraw)cpumoduleview_ondraw;
+		cpumoduleview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			cpumoduleview_onpreferredsize;
 		cpumoduleview_vtable_initialized = TRUE;
 	}
@@ -54,7 +54,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->component), &tm);
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		for (slot = 0; slot <= psy_audio_machines_maxindex(
 				&self->workspace->song->machines); ++slot) {
 			psy_audio_Machine* machine;
@@ -146,7 +146,7 @@ void cpuview_inittitle(CPUView* self)
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init(&self->title, &self->titlebar);
 	psy_ui_label_settext(&self->title, "Psycle DSP/CPU Performance Monitor");
-	psy_ui_component_setcolor(&self->title.component, psy_ui_color_make(0x00B1C8B0));
+	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init(&self->hide, &self->titlebar);
 	psy_ui_button_settext(&self->hide, "X");

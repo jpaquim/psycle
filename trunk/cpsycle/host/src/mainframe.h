@@ -56,6 +56,14 @@
 // workspace. First component created after program start by psycle.c and
 // last destroyed at program termination.
 
+typedef enum {	
+	TERMINALMSGTYPE_ERROR,
+	TERMINALMSGTYPE_WARNING,
+	TERMINALMSGTYPE_MESSAGE,
+	TERMINALMSGTYPE_NONE,
+	TERMINALMSGTYPE_NUM
+} TerminalMsgType;
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component top;
@@ -70,6 +78,7 @@ typedef struct {
 	psy_ui_SplitBar splitbarterminal;
 	psy_ui_ProgressBar progressbar;
 	psy_ui_Button toggleterminal;
+	psy_ui_Colour terminalbutton_colours[TERMINALMSGTYPE_NUM];
 	psy_ui_Button togglekbdhelp;
 	Navigation navigation;
 	TabBar tabbar;	
@@ -100,7 +109,7 @@ typedef struct {
 	psy_ui_SplitBar splitbarplugineditor;
 	VuBar vubar;
 	CPUView cpuview;
-	MidiMonitor midiview;
+	MidiMonitor midimonitor;
 	RecentView recentview;
 #ifndef PSYCLE_USE_PLATFORM_FILEOPEN
 	FileView fileloadview;
@@ -118,9 +127,7 @@ typedef struct {
 	MachineViewBar machineviewbar;
 	CheckUnsavedBox checkunsavedbox;
 	bool startpage;
-	bool terminalhasmessage;
-	bool terminalhaswarning;
-	bool terminalhaserror;
+	TerminalMsgType terminalmsgtype;
 	Interpreter interpreter;
 } MainFrame;
 

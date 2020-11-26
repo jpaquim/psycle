@@ -76,7 +76,8 @@ typedef struct {
 	psy_dsp_big_beat_t numplaybeats;
 	psy_Signal signal_newline;
 	uintptr_t playcounter;
-	bool calcduration;
+	uintptr_t ppqncounter;
+	bool calcduration;	
 } psy_audio_Sequencer;
 
 void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,
@@ -90,6 +91,12 @@ void psy_audio_sequencer_tick(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t offset);
 uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer*,
 	uintptr_t amount);
+// clock
+void psy_audio_sequencer_clockstart(psy_audio_Sequencer*);
+void psy_audio_sequencer_clock(psy_audio_Sequencer*);
+void psy_audio_sequencer_clockcontinue(psy_audio_Sequencer*);
+void psy_audio_sequencer_clockstop(psy_audio_Sequencer*);
+
 void psy_audio_sequencer_onnewline(psy_audio_Sequencer*);
 void psy_audio_sequencer_setposition(psy_audio_Sequencer*,
 	psy_dsp_big_beat_t position);
@@ -228,6 +235,7 @@ INLINE psy_dsp_seconds_t psy_audio_sequencer_currplaytime(
 {
 	return self->playcounter / (psy_dsp_seconds_t)self->samplerate;
 }
+
 
 psy_dsp_percent_t psy_audio_sequencer_playlist_rowprogress(psy_audio_Sequencer* self);
 

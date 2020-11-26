@@ -132,6 +132,30 @@ void psy_audio_instruments_select(psy_audio_Instruments* self, psy_audio_Instrum
 	psy_signal_emit(&self->signal_slotchange, self, 1, &index);
 }
 
+void psy_audio_instruments_dec(psy_audio_Instruments* self)
+{
+	psy_audio_InstrumentIndex index;
+
+	assert(self);
+		
+	index = psy_audio_instruments_selected(self);
+	if (index.subslot > 0) {
+		--index.subslot;
+		psy_audio_instruments_select(self, index);		
+	}
+}
+
+void psy_audio_instruments_inc(psy_audio_Instruments* self)
+{
+	psy_audio_InstrumentIndex index;
+
+	assert(self);
+
+	index = psy_audio_instruments_selected(self);
+	++index.subslot;
+	psy_audio_instruments_select(self, index);
+}
+
 psy_audio_Instrument* psy_audio_instruments_at(psy_audio_Instruments* self,
 	psy_audio_InstrumentIndex index)
 {

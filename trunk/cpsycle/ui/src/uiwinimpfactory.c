@@ -40,7 +40,7 @@ static struct psy_ui_ListBoxImp* allocinit_listboximp(psy_ui_win_ImpFactory*, st
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_ComboBoxImp* allocinit_comboboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
 static struct psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_win_ImpFactory*, struct psy_ui_Component* component, struct psy_ui_Component* parent);
-static struct psy_ui_ColorDialogImp* allocinit_colordialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent);
+static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent);
 static struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent);
 static psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_win_ImpFactory*, struct psy_ui_Component* parent,
 	const char* title,
@@ -78,7 +78,7 @@ static void vtable_init(psy_ui_win_ImpFactory* self)
 		vtable.allocinit_listboximp_multiselect = (psy_ui_fp_impfactory_allocinit_listboximp_multiselect) allocinit_listboximp_multiselect;
 		vtable.allocinit_checkboximp = (psy_ui_fp_impfactory_allocinit_checkboximp) allocinit_checkboximp;
 		vtable.allocinit_comboboximp = (psy_ui_fp_impfactory_allocinit_comboboximp) allocinit_comboboximp;
-		vtable.allocinit_colordialogimp = (psy_ui_fp_impfactory_allocinit_colordialogimp) allocinit_colordialogimp;
+		vtable.allocinit_colourdialogimp = (psy_ui_fp_impfactory_allocinit_colourdialogimp) allocinit_colourdialogimp;
 		vtable.allocinit_opendialogimp = (psy_ui_fp_impfactory_allocinit_opendialogimp) allocinit_opendialogimp;
 		vtable.allocinit_all_opendialogimp = (psy_ui_fp_impfactory_allocinit_all_opendialogimp) allocinit_all_opendialogimp;
 		vtable.allocinit_savedialogimp = (psy_ui_fp_impfactory_allocinit_savedialogimp) allocinit_savedialogimp;
@@ -284,15 +284,15 @@ psy_ui_CheckBoxImp* allocinit_checkboximp(psy_ui_win_ImpFactory* self, struct ps
 	return (psy_ui_CheckBoxImp*)rv;
 }
 
-psy_ui_ColorDialogImp* allocinit_colordialogimp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* parent)
+psy_ui_ColourDialogImp* allocinit_colourdialogimp(psy_ui_win_ImpFactory* self, struct psy_ui_Component* parent)
 {	
-	psy_ui_win_ColorDialogImp* imp;
+	psy_ui_win_ColourDialogImp* imp;
 	psy_ui_WinApp* winapp;
 
 	winapp = (psy_ui_WinApp*) app.platform;
-	imp = (psy_ui_win_ColorDialogImp*) malloc(sizeof(psy_ui_win_ColorDialogImp));
+	imp = (psy_ui_win_ColourDialogImp*) malloc(sizeof(psy_ui_win_ColourDialogImp));
 	if (imp) {
-		psy_ui_win_colordialogimp_init(imp);
+		psy_ui_win_colourdialogimp_init(imp);
 		return &imp->imp;
 	}
 	return 0;

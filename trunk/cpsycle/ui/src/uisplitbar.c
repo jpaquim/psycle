@@ -28,13 +28,13 @@ static void vtable_init(psy_ui_SplitBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw)splitbar_ondraw;
-		vtable.onmousedown = (psy_ui_fp_onmousedown)splitbar_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_onmousemove)splitbar_onmousemove;
-		vtable.onmouseup = (psy_ui_fp_onmouseup)splitbar_onmouseup;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter)splitbar_onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave)splitbar_onmouseleave;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.ondraw = (psy_ui_fp_component_ondraw)splitbar_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)splitbar_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove)splitbar_onmousemove;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseup)splitbar_onmouseup;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)splitbar_onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)splitbar_onmouseleave;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			splitbar_onpreferredsize;
 		vtable_initialized = TRUE;
 	}
@@ -69,12 +69,12 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 			self->component.align == psy_ui_ALIGN_RIGHT) {
 		center = size.height / 2 - thumbsize / 2;
 		ident = size.width / 2;
-		psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 		psy_ui_drawline(g, ident, center, ident, center + thumbsize);
 	} else {
 		center = size.width / 2 - thumbsize / 2;
 		ident = size.height / 2;
-		psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 		psy_ui_drawline(g, center, ident, center + thumbsize, ident);
 	}
 }
@@ -135,8 +135,8 @@ void splitbar_onmousedown(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		splitbar_setcursor(self);
 	}
 	if (self->resize) {
-		psy_ui_component_setbackgroundcolor(&self->component,
-			psy_ui_color_make(0x00333333));
+		psy_ui_component_setbackgroundcolour(&self->component,
+			psy_ui_colour_make(0x00333333));
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -280,8 +280,8 @@ void splitbar_onmouseup(psy_ui_SplitBar* self, psy_ui_MouseEvent* ev)
 		self->hover = 1;
 	}
 	if (self->resize) {
-		psy_ui_component_setbackgroundcolor(&self->component,
-			app.defaults.style_common.backgroundcolor);
+		psy_ui_component_setbackgroundcolour(&self->component,
+			app.defaults.style_common.backgroundcolour);
 		psy_ui_component_invalidate(&self->component);
 		self->resize = 0;
 	}

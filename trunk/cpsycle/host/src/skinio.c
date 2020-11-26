@@ -522,84 +522,84 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "effect_font_point", _httoi(q+1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUITopColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUITopColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguitopcolor", _httoi(q + 1), 0, 0);			
+				psy_property_append_int(properties, "machineguitopcolour", _httoi(q + 1), 0, 0);			
 			}
 		}
-		else if (strstr(buf, "\"machineGUIFontTopColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIFontTopColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguifonttopcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguifonttopcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIBottomColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIBottomColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguibottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguibottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIFontBottomColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIFontBottomColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguifontbottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguifontbottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHTopColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHTopColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguihtopcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihtopcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHFontTopColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHFontTopColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguihfonttopcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihfonttopcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHBottomColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHBottomColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguihbottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihbottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHFontBottomColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHFontBottomColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguihfontbottomcolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguihfontbottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUITitleColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUITitleColour\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
 			{
-				psy_property_append_int(properties, "machineguititlecolor", _httoi(q + 1), 0, 0);
+				psy_property_append_int(properties, "machineguititlecolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUITitleFontColor\"=dword:"))
+		else if (strstr(buf, "\"machineGUITitleFontColour\"=dword:"))
 		{
 		char* q = strchr(buf, 58); // :
 		if (q)
 		{
-			psy_property_append_int(properties, "machineguititlefontcolor", _httoi(q + 1), 0, 0);
+			psy_property_append_int(properties, "machineguititlefontcolour", _httoi(q + 1), 0, 0);
 		}
 		}
 	}

@@ -37,14 +37,14 @@ static void vtable_init(psy_ui_Slider* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw) psy_ui_slider_ondraw;
-		vtable.onalign = (psy_ui_fp_onalign) psy_ui_slider_onalign;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.ondraw = (psy_ui_fp_component_ondraw) psy_ui_slider_ondraw;
+		vtable.onalign = (psy_ui_fp_component_onalign) psy_ui_slider_onalign;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			psy_ui_slider_onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) psy_ui_slider_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_onmousemove) psy_ui_slider_onmousemove;
-		vtable.onmousewheel = (psy_ui_fp_onmousewheel) psy_ui_slider_onmousewheel;
-		vtable.onmouseup = (psy_ui_fp_onmouseup) psy_ui_slider_onmouseup;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown) psy_ui_slider_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove) psy_ui_slider_onmousemove;
+		vtable.onmousewheel = (psy_ui_fp_component_onmousewheel) psy_ui_slider_onmousewheel;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseup) psy_ui_slider_onmouseup;
 		vtable_initialized = 1;
 	}
 }
@@ -132,7 +132,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 	psy_ui_TextMetric tm;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setcolor(g, app.defaults.style_common.border.color_top);	
+	psy_ui_setcolour(g, app.defaults.style_common.border.colour_top);	
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		psy_ui_Size size;	
 
@@ -140,7 +140,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		if (self->labelvisible) {
 			psy_ui_setrectangle(&r, 0, 0,
 				self->labelsize, psy_ui_value_px(&size.height, &tm));
-			psy_ui_settextcolor(g, app.defaults.style_common.color);
+			psy_ui_settextcolour(g, app.defaults.style_common.colour);
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_textoutrectangle(g, 0, 0, 0, r,
 				self->label, strlen(self->label));
@@ -155,12 +155,12 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r,
 			self->labelsize + self->margin + (int)((psy_ui_value_px(&size.width, &tm) - self->slidersize) * self->value),
 			2, self->slidersize, psy_ui_value_px(&size.height, &tm) - 4);
-		psy_ui_drawsolidrectangle(g, r, app.defaults.style_common.color);
+		psy_ui_drawsolidrectangle(g, r, app.defaults.style_common.colour);
 		if (self->valuelabelvisible) {
 			size = psy_ui_component_size(&self->component);
 			psy_ui_setrectangle(&r, psy_ui_value_px(&size.width, &tm) - self->valuelabelsize, 0,
 				self->valuelabelsize, psy_ui_value_px(&size.height, &tm));
-			psy_ui_settextcolor(g, app.defaults.style_common.color);
+			psy_ui_settextcolour(g, app.defaults.style_common.colour);
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			psy_ui_textoutrectangle(g, psy_ui_value_px(&size.width, &tm) -
 				self->valuelabelsize, 0, 0, r,
@@ -193,7 +193,7 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r, 2 + centerx,
 			(int)((psy_ui_value_px(&size.height, &tm) - sliderheight) * (1 - self->value)),
 			psy_ui_value_px(&slidersize.width, &tm) - 4, sliderheight);
-		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00CACACA));
+		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00CACACA));
 	}	
 }
 

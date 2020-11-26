@@ -24,7 +24,7 @@ typedef enum {
 	WHITE,
 	GRAY,	
 	BLACK
-} Colors;
+} Colours;
 
 typedef struct psy_audio_Machines {	
 	psy_Table slots;
@@ -33,7 +33,7 @@ typedef struct psy_audio_Machines {
 	psy_audio_Connections connections;
 	MachinePath* path;
 	psy_Table nopath;
-	psy_Table colors;
+	psy_Table colours;
 	psy_List* buffers;	
 	float* samplebuffers;
 	int numsamplebuffers;
