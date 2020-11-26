@@ -18,5 +18,10 @@ typedef struct {
 
 void navigation_init(Navigation*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* navigation_base(Navigation* self)
+{
+	return &self->component;
+}
+
 
 #endif

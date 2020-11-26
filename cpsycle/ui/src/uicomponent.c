@@ -78,57 +78,57 @@ psy_ui_Font* psy_ui_component_font(psy_ui_Component* self)
 	return rv;
 }
 
-void psy_ui_component_setbackgroundcolor(psy_ui_Component* self,
-	psy_ui_Color color)
+void psy_ui_component_setbackgroundcolour(psy_ui_Component* self,
+	psy_ui_Colour colour)
 {		
-	psy_ui_color_set(&self->style.backgroundcolor, color);
+	psy_ui_colour_set(&self->style.backgroundcolour, colour);
 }
 
-psy_ui_Color psy_ui_component_backgroundcolor(psy_ui_Component* self)
+psy_ui_Colour psy_ui_component_backgroundcolour(psy_ui_Component* self)
 {
 	psy_ui_Component* curr;
 
 	curr = self;
 	while (curr) {
-		if (curr->style.backgroundcolor.mode.set) {
+		if (curr->style.backgroundcolour.mode.set) {
 			break;
 		}
-		if (self->style.backgroundcolor.mode.inherited == FALSE) {
+		if (self->style.backgroundcolour.mode.inherited == FALSE) {
 			curr = NULL;
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
 	}
 	if (curr) {
-		return curr->style.backgroundcolor;
+		return curr->style.backgroundcolour;
 	}
-	return app.defaults.style_common.backgroundcolor;
+	return app.defaults.style_common.backgroundcolour;
 }
 
-void psy_ui_component_setcolor(psy_ui_Component* self, psy_ui_Color color)
+void psy_ui_component_setcolour(psy_ui_Component* self, psy_ui_Colour colour)
 {
-	psy_ui_color_set(&self->style.color, color);
+	psy_ui_colour_set(&self->style.colour, colour);
 }
 
-psy_ui_Color psy_ui_component_color(psy_ui_Component* self)
+psy_ui_Colour psy_ui_component_colour(psy_ui_Component* self)
 {	
 	psy_ui_Component* curr;
 
 	curr = self;
 	while (curr) {
-		if (curr->style.color.mode.set) {
+		if (curr->style.colour.mode.set) {
 			break;
 		}
-		if (self->style.color.mode.inherited == FALSE) {
+		if (self->style.colour.mode.inherited == FALSE) {
 			curr = NULL;
 			break;
 		}
 		curr = psy_ui_component_parent(curr);
 	}
 	if (curr) {
-		return curr->style.color;
+		return curr->style.colour;
 	}
-	return app.defaults.style_common.color;
+	return app.defaults.style_common.colour;
 }
 
 psy_ui_Border psy_ui_component_border(psy_ui_Component* self)
@@ -172,6 +172,8 @@ static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
 // events
+static void ondestroy(psy_ui_Component* self) { }
+static void ondestroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
 static void onalign(psy_ui_Component* self) { }
 static void onpreferredsize(psy_ui_Component*, const psy_ui_Size* limit, psy_ui_Size* rv);
@@ -194,7 +196,7 @@ static void vtable_init(void)
 {
 	if (!vtable_initialized) {
 		vtable.dispose = dispose;
-		vtable.destroy = destroy;
+		vtable.destroy = destroy;		
 		vtable.show = show;
 		vtable.showstate = showstate;
 		vtable.hide = hide;
@@ -208,6 +210,8 @@ static void vtable_init(void)
 		vtable.setfont = setfont;		
 		vtable.children = children;
 		// events
+		vtable.ondestroy = ondestroy;
+		vtable.ondestroyed = ondestroyed;
 		vtable.ondraw = 0;
 		vtable.onalign = onalign;
 		vtable.onpreferredsize = onpreferredsize;
@@ -441,8 +445,8 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	psy_ui_intpoint_init(&self->scroll);	
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
-		self->imp->vtable->dev_setbackgroundcolor(self->imp,
-			psy_ui_component_backgroundcolor(self));
+		self->imp->vtable->dev_setbackgroundcolour(self->imp,
+			psy_ui_component_backgroundcolour(self));
 	}
 }
 
@@ -827,7 +831,7 @@ static psy_ui_TextMetric dev_textmetric(psy_ui_ComponentImp* self)
 	return tm;
 }
 static psy_ui_Size dev_textsize(psy_ui_ComponentImp* self, const char* text, psy_ui_Font* font) { psy_ui_Size rv = { 0, 0 }; return rv; }
-static void dev_setbackgroundcolor(psy_ui_ComponentImp* self, psy_ui_Color color) { }
+static void dev_setbackgroundcolour(psy_ui_ComponentImp* self, psy_ui_Colour colour) { }
 static void dev_settitle(psy_ui_ComponentImp* self, const char* title) { }
 static void dev_setfocus(psy_ui_ComponentImp* self) { }
 static int dev_hasfocus(psy_ui_ComponentImp* self) { return 0;  }
@@ -873,7 +877,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_seticonressource = dev_seticonressource;
 		imp_vtable.dev_textmetric = dev_textmetric;
 		imp_vtable.dev_textsize = dev_textsize;
-		imp_vtable.dev_setbackgroundcolor = dev_setbackgroundcolor;
+		imp_vtable.dev_setbackgroundcolour = dev_setbackgroundcolour;
 		imp_vtable.dev_settitle = dev_settitle;
 		imp_vtable.dev_setfocus = dev_setfocus;
 		imp_vtable.dev_hasfocus = dev_hasfocus;
@@ -1018,20 +1022,20 @@ void psy_ui_component_drawborder(psy_ui_Component* self, psy_ui_Graphics* g)
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(self), &tm);
 		if (border.top != psy_ui_BORDER_NONE) {
-			if (border.color_top.mode.set) {
-				psy_ui_setcolor(g, border.color_top);
+			if (border.colour_top.mode.set) {
+				psy_ui_setcolour(g, border.colour_top);
 			} else {
-				psy_ui_setcolor(g,
-					app.defaults.style_common.border.color_top);
+				psy_ui_setcolour(g,
+					app.defaults.style_common.border.colour_top);
 			}
 			psy_ui_drawline(g, 0, 0, size.width, 0);
 		}
 		if (border.bottom != psy_ui_BORDER_NONE) {
-			if (border.color_top.mode.set) {
-				psy_ui_setcolor(g, border.color_top);
+			if (border.colour_top.mode.set) {
+				psy_ui_setcolour(g, border.colour_top);
 			} else {
-				psy_ui_setcolor(g,
-					app.defaults.style_common.border.color_top);
+				psy_ui_setcolour(g,
+					app.defaults.style_common.border.colour_top);
 			}
 			psy_ui_drawline(g, 0, size.height - 1, size.width,
 				size.height - 1);

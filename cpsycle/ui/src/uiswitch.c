@@ -20,10 +20,10 @@ static void vtable_init(psy_ui_Switch* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize) onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) onmousedown;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter) onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave) onmouseleave;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;
 		vtable_initialized = 1;
 	}
 }
@@ -64,7 +64,7 @@ void ondraw(psy_ui_Switch* self, psy_ui_Graphics* g)
 	r.top = (switchsize.height - size.height) / 2;
 	r.right = r.left + (int)(tm.tmAveCharWidth * 4.8);
 	r.bottom = r.top + size.height;
-	psy_ui_setcolor(g, 0x00555555);
+	psy_ui_setcolour(g, 0x00555555);
 	psy_ui_drawroundrectangle(g, r, cornersize);	
 	if (!checked) {
 		r.left = (int)(tm.tmAveCharWidth * 0.4);

@@ -32,9 +32,9 @@ static void sequencebuttons_vtable_init(SequenceButtons* self)
 {
 	if (!sequencebuttons_vtable_initialized) {
 		sequencebuttons_vtable = *(self->component.vtable);
-		sequencebuttons_vtable.onalign = (psy_ui_fp_onalign)
+		sequencebuttons_vtable.onalign = (psy_ui_fp_component_onalign)
 			sequencebuttons_onalign;
-		sequencebuttons_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		sequencebuttons_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			sequencebuttons_onpreferredsize;
 		sequencebuttons_vtable_initialized = 1;
 	}
@@ -241,9 +241,9 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 			self->view->listview.trackwidth - 5,
 			lineheight);
 		if (self->view->listview.selectedtrack == c) {
-			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00B1C8B0));
+			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00B1C8B0));
 		} else {
-			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00444444));
+			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00444444));
 		}
 	}	
 }
@@ -278,16 +278,16 @@ static void sequencelistview_vtable_init(SequenceListView* self)
 {
 	if (!sequencelistview_vtable_initialized) {
 		sequencelistview_vtable = *(self->component.vtable);		
-		sequencelistview_vtable.ondraw = (psy_ui_fp_ondraw)
+		sequencelistview_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			sequencelistview_ondraw;
-		sequencelistview_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		sequencelistview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			sequencelistview_onmousedown;
 		sequencelistview_vtable.onmousedoubleclick =
-			(psy_ui_fp_onmousedoubleclick)
+			(psy_ui_fp_component_onmousedoubleclick)
 			sequencelistview_onmousedoubleclick;		
-		sequencelistview_vtable.ontimer = (psy_ui_fp_ontimer)
+		sequencelistview_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			sequencelistview_ontimer;
-		sequencelistview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		sequencelistview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			sequencelistview_onpreferredsize;
 		sequencelistview_vtable_initialized = TRUE;
 	}	
@@ -350,7 +350,7 @@ void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 		psy_ui_setrectangle(&r, cpx,
 			cpy, self->trackwidth - 5 - 2 * listviewmargin,
 			self->textheight);
-		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x009B7800));
+		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x009B7800));
 	}
 }
 
@@ -401,7 +401,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 	tm = psy_ui_component_textmetric(&self->component);
 	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5,
 		psy_ui_value_px(&size.height, &tm));
-	psy_ui_settextcolor(g, psy_ui_color_make(0));
+	psy_ui_settextcolour(g, psy_ui_colour_make(0));
 	p = track->entries;
 	for (; p != NULL; psy_list_next(&p), ++c, cpy += self->lineheight) {
 		psy_audio_SequenceEntry* sequenceentry;
@@ -443,18 +443,18 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 				 || (psy_list_findentry(self->selection->entries, sequenceentry))
 				 )) {
 			if (!rowplaying) {
-				psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x009B7800));
+				psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));
 			} else {
 				psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			}
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 			self->foundselected = 1;				
 		} else if (rowplaying) {			
-			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		} else {
-			psy_ui_setbackgroundcolor(g, psy_ui_color_make(0x00232323));
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00CACACA));
+			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 		}
 		psy_ui_textout(g, x + 5, cpy + listviewmargin, text,
 			strlen(text));
@@ -471,7 +471,7 @@ void sequencelistview_drawprogressbar(SequenceListView* self,
 			x + 5, y + listviewmargin,		
 			(int)((psy_audio_player_playlist_rowprogress(&self->workspace->player)) *
 				(self->trackwidth - 5)), tm->tmHeight);
-	psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00514536));
+	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
 }
 
 void sequencelistview_showpatternnames(SequenceListView* self)

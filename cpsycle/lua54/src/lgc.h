@@ -12,7 +12,7 @@
 #include "lstate.h"
 
 /*
-** Collectable objects may have one of three colors: white, which
+** Collectable objects may have one of three colours: white, which
 ** means the object is not marked; gray, which means the
 ** object is marked, but its references may be not marked; and
 ** black, which means that the object and all its references are marked.

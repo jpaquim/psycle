@@ -8,8 +8,8 @@
 
 void psy_ui_style_init(psy_ui_Style* self)
 {
-	psy_ui_color_init(&self->color);
-	psy_ui_color_init(&self->backgroundcolor);
+	psy_ui_colour_init(&self->colour);
+	psy_ui_colour_init(&self->backgroundcolour);
 	psy_ui_border_init(&self->border);
 	self->use_font = 0;
 }

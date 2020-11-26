@@ -65,7 +65,7 @@ void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 	psy_table_init(&self->selfmap);
 	psy_table_init(&self->winidmap);
 	self->defaultbackgroundbrush = CreateSolidBrush(
-		app.defaults.style_common.backgroundcolor.value);
+		app.defaults.style_common.backgroundcolour.value);
 	self->targetids = NULL;
 }
 
@@ -136,9 +136,12 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 		{
 			case WM_NCDESTROY:
 				// restore default winproc				
-				if (imp->component && imp->component->signal_destroyed.slots) {
-					psy_signal_emit(&imp->component->signal_destroyed,
-						imp->component, 0);
+				if (imp->component) {
+					if (imp->component->signal_destroyed.slots) {
+						psy_signal_emit(&imp->component->signal_destroyed,
+							imp->component, 0);
+					}
+					imp->component->vtable->ondestroyed(imp->component);
 				}
 #if defined(_WIN64)		
 				SetWindowLongPtr(imp->hwnd, GWLP_WNDPROC, (LONG_PTR)
@@ -154,9 +157,12 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 				psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 				break;
 			case WM_DESTROY:
-				if (imp->component && imp->component->signal_destroy.slots) {
-					psy_signal_emit(&imp->component->signal_destroy,
-						imp->component, 0);
+				if (imp->component) {
+					if (imp->component->signal_destroy.slots) {
+						psy_signal_emit(&imp->component->signal_destroy,
+							imp->component, 0);
+					}
+					imp->component->vtable->ondestroy(imp->component);
 				}								
 				break;			
 			case WM_TIMER:								
@@ -289,9 +295,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 			case WM_CTLCOLOREDIT:
 				imp = psy_table_at(&winapp->selfmap, (uintptr_t) lParam);
 				if (imp && imp->component) {					
-					SetTextColor((HDC) wParam, psy_ui_component_color(
+					SetTextColor((HDC) wParam, psy_ui_component_colour(
 						imp->component).value);
-					SetBkColor((HDC) wParam, psy_ui_component_backgroundcolor(
+					SetBkColor((HDC) wParam, psy_ui_component_backgroundcolour(
 						imp->component).value);
 					if ((imp->component->backgroundmode & psy_ui_BACKGROUND_SET)
 							== psy_ui_BACKGROUND_SET) {
@@ -302,9 +308,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					}
 				} else {				
 					SetTextColor((HDC) wParam,
-						app.defaults.style_common.color.value);
+						app.defaults.style_common.colour.value);
 					SetBkColor((HDC)wParam,
-						app.defaults.style_common.backgroundcolor.value);
+						app.defaults.style_common.backgroundcolour.value);
 					return (intptr_t) winapp->defaultbackgroundbrush;
 				}
 				break;
@@ -394,7 +400,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 								ps.rcPaint.top - dblbuffer_offset.y,
 								clipsize.x, clipsize.y);
 							psy_ui_drawsolidrectangle(&g, r,
-								psy_ui_component_backgroundcolor(
+								psy_ui_component_backgroundcolour(
 									imp->component));
 						}						
 						// prepare a clip rect that can be used by a component
@@ -451,10 +457,10 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						hfont = ((psy_ui_win_FontImp*)
 							psy_ui_component_font(imp->component)->imp)->hfont;
 						hPrevFont = SelectObject(win_g->hdc, hfont);						
-						// prepare colors
-						psy_ui_setcolor(&g, psy_ui_component_color(
+						// prepare colours
+						psy_ui_setcolour(&g, psy_ui_component_colour(
 							imp->component));
-						psy_ui_settextcolor(&g, psy_ui_component_color(
+						psy_ui_settextcolour(&g, psy_ui_component_colour(
 							imp->component));
 						psy_ui_setbackgroundmode(&g, psy_ui_TRANSPARENT);						
 						// draw border						
@@ -490,18 +496,24 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}
 				break;
 			case WM_NCDESTROY:
-				if (imp->component && imp->component->signal_destroyed.slots) {
-					psy_signal_emit(&imp->component->signal_destroyed,
-						imp->component, 0);
+				if (imp->component) {
+					if (imp->component->signal_destroyed.slots) {
+						psy_signal_emit(&imp->component->signal_destroyed,
+							imp->component, 0);
+					}
+					imp->component->vtable->ondestroyed(imp->component);
 				}
 				psy_ui_component_dispose(imp->component);
 				psy_table_remove(&winapp->selfmap, (uintptr_t)hwnd);
 				return 0;
 				break;
 			case WM_DESTROY:
-				if (imp->component && imp->component->signal_destroy.slots) {
-					psy_signal_emit(&imp->component->signal_destroy,
-						imp->component, 0);
+				if (imp->component) {
+					if (imp->component->signal_destroy.slots) {
+						psy_signal_emit(&imp->component->signal_destroy,
+							imp->component, 0);
+					}
+					imp->component->vtable->ondestroy(imp->component);
 				}
 				return 0;
 				break;

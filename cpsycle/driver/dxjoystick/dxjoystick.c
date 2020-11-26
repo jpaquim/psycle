@@ -421,7 +421,7 @@ void driver_setcmddefaults(DXJoystickDriver* self, psy_Property* cmddef)
 		psy_property_set_int(section, "cmd_editpattern", INPUT_BUTTON_FIRST + 1);
 		psy_property_set_int(section, "cmd_help", INPUT_BUTTON_FIRST + 2);
 	}
-	section = psy_property_find(cmddef, "trackercmds", PSY_PROPERTY_TYPE_SECTION);
+	section = psy_property_find(cmddef, "tracker", PSY_PROPERTY_TYPE_SECTION);
 	if (section) {
 		psy_property_set_int(section, "cmd_navup", INPUT_MOVE_UP);
 		psy_property_set_int(section, "cmd_navdown", INPUT_MOVE_DOWN);

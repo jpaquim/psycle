@@ -109,9 +109,9 @@ static void patternproperties_vtable_init(PatternProperties* self)
 {
 	if (!patternproperties_vtable_initialized) {
 		patternproperties_vtable = *(self->component.vtable);
-		patternproperties_vtable.onkeydown = (psy_ui_fp_onkeydown)
+		patternproperties_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			patternproperties_onkeydown;
-		patternproperties_vtable.onkeyup = (psy_ui_fp_onkeydown)
+		patternproperties_vtable.onkeyup = (psy_ui_fp_component_onkeydown)
 			patternproperties_onkeyup;
 		patternproperties_vtable_initialized = 1;
 	}

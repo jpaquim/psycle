@@ -95,6 +95,11 @@ typedef struct MachineViewBar {
 void machineviewbar_init(MachineViewBar*, psy_ui_Component* parent, Workspace*);
 void machineviewbar_settext(MachineViewBar*, const char* text);
 
+INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
+{
+	return &self->component;
+}
+
 typedef struct {
 	psy_ui_Component component;
 	TabBar tabbar;
@@ -107,5 +112,10 @@ typedef struct {
 
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
+INLINE psy_ui_Component* mainview_base(MachineView* self)
+{
+	return &self->component;
+}
 
 #endif

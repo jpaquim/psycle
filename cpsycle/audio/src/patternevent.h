@@ -68,6 +68,11 @@ typedef	enum {
 	// Place whatever that can be written in the pattern above invalid, and
 	// anything else below it
 	psy_audio_NOTECOMMANDS_INVALID,
+	psy_audio_NOTECOMMANDS_MIDI_SPP = 249,
+	psy_audio_NOTECOMMANDS_MIDI_CLK_START = 250,
+	psy_audio_NOTECOMMANDS_MIDI_CLK = 251,
+	psy_audio_NOTECOMMANDS_MIDI_CLK_CONT = 252,
+	psy_audio_NOTECOMMANDS_MIDI_CLK_STOP = 253,
 	psy_audio_NOTECOMMANDS_MIDI_SYNC = 254,
 	psy_audio_NOTECOMMANDS_EMPTY = 255,
 	psy_audio_NOTECOMMANDS_INST_EMPTY = 0xFFFF,

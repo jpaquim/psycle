@@ -23,17 +23,18 @@ typedef struct {
 	uintptr_t column;
 	uintptr_t digit;
 	uintptr_t pattern;
-} psy_audio_PatternEditPosition;
+	uint8_t key;
+} psy_audio_PatternCursor;
 
-void psy_audio_patterneditposition_init(psy_audio_PatternEditPosition*);
+void psy_audio_patterncursor_init(psy_audio_PatternCursor*);
 
 /// compares two pattern edit positions, if they are equal
-int psy_audio_patterneditposition_equal(psy_audio_PatternEditPosition* lhs,
-	psy_audio_PatternEditPosition* rhs);
+int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
+	psy_audio_PatternCursor* rhs);
 
 typedef struct {
-	psy_audio_PatternEditPosition topleft;
-	psy_audio_PatternEditPosition bottomright;
+	psy_audio_PatternCursor topleft;
+	psy_audio_PatternCursor bottomright;
 } PatternSelection;
 
 typedef struct psy_audio_Pattern {
@@ -127,29 +128,53 @@ INLINE uintptr_t psy_audio_pattern_opcount(const psy_audio_Pattern* self)
 void psy_audio_pattern_scale(psy_audio_Pattern*, float factor);
 /// erases all entries of the block
 void psy_audio_pattern_blockremove(psy_audio_Pattern*,
-	psy_audio_PatternEditPosition begin, psy_audio_PatternEditPosition end);
+	psy_audio_PatternCursor begin, psy_audio_PatternCursor end);
 /// interpolates linear all entries of the block
-void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl);
-void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
-void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
+void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*, psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl);
+void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
+void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 /// transposes all entries of the block with the offset
-void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, int offset);
+void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end, int offset);
 /// changes the machine column of all entries of the block with the offset
-void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, int machine);
+void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end, int machine);
 /// changes the instrument column of all entries of the block with the offset
-void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_PatternEditPosition begin,
-	psy_audio_PatternEditPosition end, int machine);
+void psy_audio_pattern_changeinstrument(psy_audio_Pattern*, psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end, int machine);
 /// sets the maximum number of songtracks 
 /// used by the paste pattern, player uses songtracks of patterns
 void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
 /// returns the maximum number of songtracks 
 /// used by the paste pattern, player uses songtracks of patterns
 uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern*);
+
+
+typedef struct {
+	psy_audio_PatternCursor* cursor;
+	psy_audio_Pattern* pattern;	
+	psy_dsp_big_beat_t bpl;
+	bool wrap;
+} psy_audio_PatternCursorNavigator;
+
+INLINE void psy_audio_patterncursornavigator_init(psy_audio_PatternCursorNavigator* self,
+	psy_audio_PatternCursor* cursor, psy_audio_Pattern* pattern,
+	psy_dsp_big_beat_t bpl, bool wrap)
+{
+	self->cursor = cursor;
+	self->pattern = pattern;
+	self->bpl = bpl;
+	self->wrap = wrap;
+}
+
+bool psy_audio_patterncursornavigator_advancelines(
+	psy_audio_PatternCursorNavigator*, uintptr_t lines);
+bool psy_audio_patterncursornavigator_prevlines(
+	psy_audio_PatternCursorNavigator*, uintptr_t lines);
+
 
 #ifdef __cplusplus
 }

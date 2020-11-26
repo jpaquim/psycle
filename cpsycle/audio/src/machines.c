@@ -749,9 +749,9 @@ MachineList* psy_audio_compute_path(psy_audio_Machines* self, uintptr_t slot, bo
 	MachineList* rv = 0;	
 
 	reset_nopath(self);	
-	psy_table_init(&self->colors);
+	psy_table_init(&self->colours);
 	compute_slotpath(self, slot, &rv);
-	psy_table_dispose(&self->colors);
+	psy_table_dispose(&self->colours);
 	//	Debug Path Output
 	// if (rv) {
 	// 	psy_List* p;
@@ -780,14 +780,14 @@ void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 			psy_audio_WireSocketEntry* entry;
 
 			entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-			if (!psy_table_exists(&self->colors, entry->slot)) {
-				psy_table_insert(&self->colors, entry->slot, (void*) 1);
+			if (!psy_table_exists(&self->colours, entry->slot)) {
+				psy_table_insert(&self->colours, entry->slot, (void*) 1);
 				compute_slotpath(self, entry->slot, path);
 			} else {
 				// cycle detected				
 				// skip
 			}			
-			psy_table_remove(&self->colors, entry->slot);			
+			psy_table_remove(&self->colours, entry->slot);			
 		}	
 	}
 	if (psy_table_exists(&self->nopath, slot)) {

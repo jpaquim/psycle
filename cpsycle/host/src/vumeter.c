@@ -18,10 +18,10 @@ static int vumeterdefaultskin_initialized = 0;
 static void vumeterskin_init(Vumeter* self)
 {
 	if (!vumeterdefaultskin_initialized) {
-		vumeterdefaultskin.background = psy_ui_color_make(0x00000000);
-		vumeterdefaultskin.rms = psy_ui_color_make(0x0000FF00);
-		vumeterdefaultskin.peak = psy_ui_color_make(0x00333333);
-		vumeterdefaultskin.border = psy_ui_color_make(0x003E3E3E);
+		vumeterdefaultskin.background = psy_ui_colour_make(0x00000000);
+		vumeterdefaultskin.rms = psy_ui_colour_make(0x0000FF00);
+		vumeterdefaultskin.peak = psy_ui_colour_make(0x00333333);
+		vumeterdefaultskin.border = psy_ui_colour_make(0x003E3E3E);
 		vumeterdefaultskin_initialized = 1;
 	}
 	self->skin = vumeterdefaultskin;
@@ -34,7 +34,7 @@ static void vumeter_vtable_init(Vumeter* self)
 {
 	if (!vumeter_vtable_initialized) {
 		vumeter_vtable = *(self->component.vtable);
-		vumeter_vtable.ondraw = (psy_ui_fp_ondraw)vumeter_ondraw;
+		vumeter_vtable.ondraw = (psy_ui_fp_component_ondraw)vumeter_ondraw;
 		vumeter_vtable_initialized = 1;
 	}
 }

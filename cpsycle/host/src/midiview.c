@@ -23,9 +23,9 @@ static void midiactivechannelbox_vtable_init(MidiActiveChannelBox* self)
 {
 	if (!midiactivechannelbox_vtable_initialized) {
 		midiactivechannelbox_vtable = *(self->component.vtable);
-		midiactivechannelbox_vtable.ondraw = (psy_ui_fp_ondraw)
+		midiactivechannelbox_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			midiactivechannelbox_ondraw;
-		midiactivechannelbox_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		midiactivechannelbox_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			midiactivechannelbox_onpreferredsize;
 		midiactivechannelbox_vtable_initialized = TRUE;
 	}
@@ -79,6 +79,72 @@ void midiactivechannelbox_onpreferredsize(MidiActiveChannelBox* self,
 	rv->height = psy_ui_value_makeeh(2.4);
 }
 
+// MidiActiveClockBox
+// prototypes
+static void midiactiveclockbox_ondraw(MidiActiveClockBox*, psy_ui_Graphics*);
+static void midiactiveclockbox_onpreferredsize(MidiActiveClockBox*,
+	psy_ui_Size* limit, psy_ui_Size* rv);
+// vtable
+static psy_ui_ComponentVtable midiactiveclockbox_vtable;
+static bool midiactiveclockbox_vtable_initialized = FALSE;
+
+static void midiactiveclockbox_vtable_init(MidiActiveClockBox* self)
+{
+	if (!midiactiveclockbox_vtable_initialized) {
+		midiactiveclockbox_vtable = *(self->component.vtable);
+		midiactiveclockbox_vtable.ondraw = (psy_ui_fp_component_ondraw)
+			midiactiveclockbox_ondraw;
+		midiactiveclockbox_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			midiactiveclockbox_onpreferredsize;
+		midiactiveclockbox_vtable_initialized = TRUE;
+	}
+}
+// implementation
+void midiactiveclockbox_init(MidiActiveClockBox* self,
+	psy_ui_Component* parent, int* flags)
+{
+	psy_ui_component_init(&self->component, parent);
+	midiactiveclockbox_vtable_init(self);
+	self->component.vtable = &midiactiveclockbox_vtable;
+	self->flags = flags;
+}
+
+void midiactiveclockbox_ondraw(MidiActiveClockBox* self,
+	psy_ui_Graphics* g)
+{	
+	psy_ui_TextMetric tm;
+	psy_ui_Value colew;
+	int headercolw_px;
+	int colw_px;
+	int lineheight;
+
+	tm = psy_ui_component_textmetric(&self->component);
+	colew = psy_ui_value_makeew(20);
+	headercolw_px = psy_ui_value_px(&colew, &tm);
+	colew = psy_ui_value_makeew(3.5);
+	colw_px = psy_ui_value_px(&colew, &tm);
+	lineheight = (int)(tm.tmHeight * 1.2);
+	psy_ui_textout(g, 0, 0,     "MIDI Sync: START", strlen("MIDI Sync: START"));
+	psy_ui_textout(g, 0, lineheight, "MIDI Sync: CLOCK", strlen("MIDI Sync: CLOCK"));
+	psy_ui_textout(g, 0, lineheight * 2, "MIDI Sync: STOP", strlen("MIDI Sync: STOP"));
+	if ((*self->flags & FSTAT_FASTART) == FSTAT_FASTART) {
+		psy_ui_textout(g, headercolw_px, 0, ".", strlen("."));
+	}
+	if ((*self->flags & FSTAT_F8CLOCK) == FSTAT_F8CLOCK) {
+		psy_ui_textout(g, headercolw_px, lineheight, ".", strlen("."));
+	}
+	if ((*self->flags & FSTAT_FCSTOP) == FSTAT_FCSTOP) {
+		psy_ui_textout(g, headercolw_px, lineheight * 2, ".", strlen("."));
+	}
+}
+
+void midiactiveclockbox_onpreferredsize(MidiActiveClockBox* self,
+	psy_ui_Size* limit, psy_ui_Size* rv)
+{
+	rv->width = psy_ui_value_makeew(22);
+	rv->height = psy_ui_value_makeeh(3 * 1.2);
+}
+
 // MidiFlagsView
 // implementation
 void midiflagsview_init(MidiFlagsView* self, psy_ui_Component* parent,
@@ -86,9 +152,13 @@ void midiflagsview_init(MidiFlagsView* self, psy_ui_Component* parent,
 {
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
+	midiactiveclockbox_init(&self->clock, &self->component,
+		&self->workspace->player.midiinput.stats.flags);
+	psy_ui_component_setalign(&self->clock.component, psy_ui_ALIGN_TOP);
 	midiactivechannelbox_init(&self->channelmap, &self->component,
 		&self->workspace->player.midiinput.stats.channelmap);
 	psy_ui_component_setalign(&self->channelmap.component, psy_ui_ALIGN_TOP);
+	
 }
 
 // MidiChannelMappingView
@@ -106,9 +176,9 @@ static void vtable_init(MidiChannelMappingView* self)
 {
 	if (!midichannelmappingview_vtable_initialized) {
 		midichannelmappingview_vtable = *(self->component.vtable);
-		midichannelmappingview_vtable.ondraw = (psy_ui_fp_ondraw)
+		midichannelmappingview_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			midichannelmappingview_ondraw;
-		midichannelmappingview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		midichannelmappingview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			midichannelmappingview_onpreferredsize;
 		midichannelmappingview_vtable_initialized = TRUE;
 	}
@@ -153,9 +223,9 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 				
 		machine = NULL;	
 		if (psy_audio_midiinput_genmap(midiinput, ch) != UINTPTR_MAX) {
-			psy_ui_settextcolor(g, psy_ui_component_color(&self->component));
+			psy_ui_settextcolour(g, psy_ui_component_colour(&self->component));
 		} else {
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00444444));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00444444));
 		}
 		psy_snprintf(text, 256, "Ch %d", (ch + 1));
 		psy_ui_textout(g, colx_px[0], cpy, text, strlen(text));
@@ -268,7 +338,7 @@ static void midimonitor_vtable_init(MidiMonitor* self)
 {
 	if (!midimonitor_vtable_initialized) {
 		midimonitor_vtable = *(self->component.vtable);		
-		midimonitor_vtable.ontimer = (psy_ui_fp_ontimer)midimonitor_ontimer;
+		midimonitor_vtable.ontimer = (psy_ui_fp_component_ontimer)midimonitor_ontimer;
 		midimonitor_vtable_initialized = TRUE;
 	}
 }
@@ -306,7 +376,7 @@ void midimonitor_inittitle(MidiMonitor* self)
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init(&self->title, &self->titlebar);
 	psy_ui_label_settext(&self->title, "Psycle MIDI Monitor");
-	psy_ui_component_setcolor(&self->title.component, psy_ui_color_make(0x00B1C8B0));
+	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->configure, &self->titlebar);
 	psy_ui_button_settext(&self->configure, "(configure devices)");
@@ -317,7 +387,7 @@ void midimonitor_inittitle(MidiMonitor* self)
 	psy_signal_connect(&self->hide.signal_clicked, self, midimonitor_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0.0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 }
@@ -413,7 +483,7 @@ void midimonitor_onsongchanged(MidiMonitor* self, Workspace* sender, int flag,
 	psy_audio_SongFile* songfile)
 {
 	self->channelmapupdate =
-		self->workspace->player.midiinput.stats.channelmapupdate - 1;
+		self->workspace->player.midiinput.stats.channelmapupdate - 1;	
 	if (sender->song) {
 		psy_signal_connect(&sender->song->machines.signal_slotchange, self,
 			midimonitor_onmachineslotchange);
@@ -429,9 +499,15 @@ void midimonitor_ontimer(MidiMonitor* self, uintptr_t timerid)
 				self->workspace->player.midiinput.stats.channelmap = 0;
 			}
 		}
+		if (self->flagstatcounter > 0) {
+			--self->flagstatcounter;
+			if (self->flagstatcounter == 0) {
+				self->workspace->player.midiinput.stats.flags = 0;
+			}
+		}
 		if (self->channelmapupdate !=
 				self->workspace->player.midiinput.stats.channelmapupdate) {
-			psy_ui_component_invalidate(&self->channelmapping.component);
+			psy_ui_component_invalidate(&self->channelmapping.component);			
 			self->channelmapupdate =
 				self->workspace->player.midiinput.stats.channelmapupdate;			
 		}
@@ -439,6 +515,11 @@ void midimonitor_ontimer(MidiMonitor* self, uintptr_t timerid)
 			self->channelstatcounter = 5;			
 			self->lastchannelmap = self->workspace->player.midiinput.stats.channelmap;
 			psy_ui_component_invalidate(&self->flags.channelmap.component);
+		}
+		if (self->lastflags != self->workspace->player.midiinput.stats.flags) {
+			self->flagstatcounter = 5;
+			self->lastflags = self->workspace->player.midiinput.stats.flags;
+			psy_ui_component_invalidate(&self->flags.clock.component);
 		}
 	}
 }

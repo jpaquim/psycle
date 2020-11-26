@@ -78,4 +78,9 @@ typedef struct StepsequencerView {
 void stepsequencerview_init(StepsequencerView*, psy_ui_Component* parent,
 	Workspace*);
 
+INLINE psy_ui_Component* stepsequencerview_base(StepsequencerView* self)
+{
+	return &self->component;
+}
+
 #endif

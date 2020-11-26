@@ -110,19 +110,36 @@ void psy_ui_value_add(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*);
 void psy_ui_value_sub(psy_ui_Value*, const psy_ui_Value* other,
 	const psy_ui_TextMetric*);
+void psy_ui_value_mul_real(psy_ui_Value*, double factor);
 
 INLINE psy_ui_Value psy_ui_add_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm)
 {	
-	psy_ui_value_add(&lhs, &rhs, tm);
-	return lhs;
+	psy_ui_Value rv;
+
+	rv = lhs;
+	psy_ui_value_add(&rv, &rhs, tm);
+	return rv;
 }
 
 INLINE psy_ui_Value psy_ui_sub_values(psy_ui_Value lhs, psy_ui_Value rhs,
 	const psy_ui_TextMetric* tm)
 {
-	psy_ui_value_sub(&lhs, &rhs, tm);
-	return lhs;
+	psy_ui_Value rv;
+
+	rv = lhs;
+	psy_ui_value_sub(&rv, &rhs, tm);
+	return rv;
+}
+
+
+INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
+{
+	psy_ui_Value rv;
+
+	rv = lhs;
+	psy_ui_value_mul_real(&rv, factor);
+	return rv;
 }
 
 int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
@@ -400,22 +417,22 @@ typedef enum {
 	psy_ui_ALIGNMENT_BOTTOM
 } psy_ui_Alignment;
 
-typedef struct psy_ui_Color
+typedef struct psy_ui_Colour
 {
 	psy_ui_PropertyMode mode;
 	uint32_t value;
-} psy_ui_Color;
+} psy_ui_Colour;
 
-INLINE void psy_ui_color_init(psy_ui_Color* self)
+INLINE void psy_ui_colour_init(psy_ui_Colour* self)
 {
 	self->mode.inherited = TRUE;
 	self->mode.set = FALSE;
 	self->value = 0x00000000;
 }
 
-INLINE psy_ui_Color psy_ui_color_make(uint32_t value)
+INLINE psy_ui_Colour psy_ui_colour_make(uint32_t value)
 {
-	psy_ui_Color rv;
+	psy_ui_Colour rv;
 
 	rv.mode.inherited = TRUE;
 	rv.mode.set = TRUE;
@@ -423,16 +440,16 @@ INLINE psy_ui_Color psy_ui_color_make(uint32_t value)
 	return rv;
 }
 
-INLINE void psy_ui_color_set(psy_ui_Color* self, psy_ui_Color color)
+INLINE void psy_ui_colour_set(psy_ui_Colour* self, psy_ui_Colour colour)
 {
 	self->mode.inherited = TRUE;
 	self->mode.set = TRUE;
-	self->value = color.value;
+	self->value = colour.value;
 }
 
-INLINE psy_ui_Color psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
+INLINE psy_ui_Colour psy_ui_colour_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 {
-	psy_ui_Color rv;
+	psy_ui_Colour rv;
 
 	rv.mode.inherited = TRUE;
 	rv.mode.set = TRUE;
@@ -440,7 +457,7 @@ INLINE psy_ui_Color psy_ui_color_make_rgb(uint8_t r, uint8_t g, uint8_t b)
 	return rv;
 }
 
-INLINE void psy_ui_color_rgb(psy_ui_Color* self,
+INLINE void psy_ui_colour_rgb(psy_ui_Colour* self,
 	uint8_t* r, uint8_t* g, uint8_t* b)
 {
 	uint32_t temp;
@@ -453,7 +470,7 @@ INLINE void psy_ui_color_rgb(psy_ui_Color* self,
 	*b = (uint8_t) temp;
 }
 
-void psy_ui_color_add(psy_ui_Color* self, float r, float g, float b);
+void psy_ui_colour_add(psy_ui_Colour* self, float r, float g, float b);
 
 typedef enum {
 	psy_ui_BORDER_NONE,
@@ -466,10 +483,10 @@ typedef struct {
 	psy_ui_BorderStyle right;
 	psy_ui_BorderStyle bottom;
 	psy_ui_BorderStyle left;
-	psy_ui_Color color_top;
-	psy_ui_Color color_right;
-	psy_ui_Color color_bottom;
-	psy_ui_Color color_left;
+	psy_ui_Colour colour_top;
+	psy_ui_Colour colour_right;
+	psy_ui_Colour colour_bottom;
+	psy_ui_Colour colour_left;
 } psy_ui_Border;
 
 INLINE void psy_ui_border_init(psy_ui_Border* self)
@@ -480,10 +497,10 @@ INLINE void psy_ui_border_init(psy_ui_Border* self)
 	self->right = psy_ui_BORDER_NONE;
 	self->bottom = psy_ui_BORDER_NONE;
 	self->left = psy_ui_BORDER_NONE;
-	psy_ui_color_init(&self->color_top);
-	psy_ui_color_init(&self->color_right);
-	psy_ui_color_init(&self->color_bottom);
-	psy_ui_color_init(&self->color_left);
+	psy_ui_colour_init(&self->colour_top);
+	psy_ui_colour_init(&self->colour_right);
+	psy_ui_colour_init(&self->colour_bottom);
+	psy_ui_colour_init(&self->colour_left);
 }
 
 INLINE void psy_ui_border_init_all(psy_ui_Border* self, psy_ui_BorderStyle top,
@@ -495,10 +512,10 @@ INLINE void psy_ui_border_init_all(psy_ui_Border* self, psy_ui_BorderStyle top,
 	self->right = right;
 	self->bottom = bottom;
 	self->left = left;
-	psy_ui_color_init(&self->color_top);
-	psy_ui_color_init(&self->color_right);
-	psy_ui_color_init(&self->color_bottom);
-	psy_ui_color_init(&self->color_left);
+	psy_ui_colour_init(&self->colour_top);
+	psy_ui_colour_init(&self->colour_right);
+	psy_ui_colour_init(&self->colour_bottom);
+	psy_ui_colour_init(&self->colour_left);
 }
 
 typedef enum {

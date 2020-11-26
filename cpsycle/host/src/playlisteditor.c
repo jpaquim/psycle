@@ -34,9 +34,9 @@ static void vtable_init(PlayListEditor* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			playlisteditor_onpreferredsize;
-		vtable.ontimer = (psy_ui_fp_ontimer)
+		vtable.ontimer = (psy_ui_fp_component_ontimer)
 			playlisteditor_ontimer;
 	}
 }

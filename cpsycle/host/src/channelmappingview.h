@@ -32,8 +32,8 @@ typedef struct {
 	int drag_dst;
 	int mx;
 	int my;
-	psy_ui_Color pincolor;
-	psy_ui_Color wirecolor;
+	psy_ui_Colour pincolour;
+	psy_ui_Colour wirecolour;
 	Workspace* workspace;
 } PinEdit;
 

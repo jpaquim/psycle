@@ -10,8 +10,8 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-static unsigned int arrowcolor = 0x00777777;
-static unsigned int arrowhighlightcolor = 0x00FFFFFF;
+static unsigned int arrowcolour = 0x00777777;
+static unsigned int arrowhighlightcolour = 0x00FFFFFF;
 
 static void ondestroy(psy_ui_Button*, psy_ui_Component* sender);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
@@ -35,12 +35,12 @@ static void vtable_init(psy_ui_Button* self)
 		vtable = *(psy_ui_button_base(self)->vtable);
 		vtable.enableinput = (psy_ui_fp_component_enableinput)enableinput;
 		vtable.preventinput = (psy_ui_fp_component_preventinput)preventinput;
-		vtable.ondraw = (psy_ui_fp_ondraw)ondraw;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_onmousedown)onmousedown;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter)onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave)onmouseleave;		
-		vtable.onkeydown = (psy_ui_fp_onkeydown)button_onkeydown;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;		
+		vtable.onkeydown = (psy_ui_fp_component_onkeydown)button_onkeydown;
 		vtable_initialized = 1;
 	}
 }
@@ -59,7 +59,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
 	self->text = strdup("");
-	self->textcolor = psy_ui_color_make(0x00CACACA);
+	self->textcolour = psy_ui_colour_make(0x00CACACA);
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&psy_ui_button_base(self)->signal_destroy, self,
 		ondestroy);
@@ -88,15 +88,15 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_value_px(&size.height, &tm));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	if (self->enabled == FALSE) {
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00777777));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00777777));
 	} else if (self->hover || psy_ui_component_hasfocus(&self->component)) {
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	} else if (psy_ui_button_highlighted(self)) {
-		//psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+		//psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		//psy_ui_drawrectangle(g, r);
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));		
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));		
 	} else {
-		psy_ui_settextcolor(g, self->textcolor);
+		psy_ui_settextcolour(g, self->textcolour);
 	}
 	if ((self->textalignment & psy_ui_ALIGNMENT_CENTER_HORIZONTAL) ==
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL) {
@@ -171,10 +171,10 @@ void drawicon(psy_ui_Button* self, psy_ui_Graphics* g)
 void drawarrow(psy_ui_Button* self, psy_ui_IntPoint* arrow, psy_ui_Graphics* g)
 {
 	if (self->hover == 1) {
-		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolor,
-			arrowhighlightcolor);
+		psy_ui_drawsolidpolygon(g, arrow, 4, arrowhighlightcolour,
+			arrowhighlightcolour);
 	} else {		
-		psy_ui_drawsolidpolygon(g, arrow, 4, arrowcolor, arrowcolor);
+		psy_ui_drawsolidpolygon(g, arrow, 4, arrowcolour, arrowcolour);
 	}		
 }
 
@@ -297,10 +297,10 @@ void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
 void psy_ui_button_highlight(psy_ui_Button* self)
 {
 	if (!psy_ui_button_highlighted(self)) {
-		self->restorebgcolor = psy_ui_component_backgroundcolor(
+		self->restorebgcolour = psy_ui_component_backgroundcolour(
 			psy_ui_button_base(self));
-		//psy_ui_component_setbackgroundcolor(psy_ui_button_base(self),
-			//psy_ui_color_make(0x002F3E25));
+		//psy_ui_component_setbackgroundcolour(psy_ui_button_base(self),
+			//psy_ui_colour_make(0x002F3E25));
 		self->highlight = TRUE;		
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
@@ -310,8 +310,8 @@ void psy_ui_button_disablehighlight(psy_ui_Button* self)
 {
 	if (psy_ui_button_highlighted(self)) {
 		self->highlight = FALSE;
-		//psy_ui_component_setbackgroundcolor(psy_ui_button_base(self),
-		//	self->restorebgcolor);
+		//psy_ui_component_setbackgroundcolour(psy_ui_button_base(self),
+		//	self->restorebgcolour);
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
 }
@@ -321,10 +321,10 @@ bool psy_ui_button_highlighted(psy_ui_Button* self)
 	return self->highlight != FALSE;
 }
 
-void psy_ui_button_settextcolor(psy_ui_Button* self, psy_ui_Color color)
+void psy_ui_button_settextcolour(psy_ui_Button* self, psy_ui_Colour colour)
 {
-	if (self->textcolor.value != color.value) {
-		self->textcolor = color;
+	if (self->textcolour.value != colour.value) {
+		self->textcolour = colour;
 		psy_ui_component_invalidate(&self->component);
 	}
 }

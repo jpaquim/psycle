@@ -4,11 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "sequencer.h"
+// local
+#include "exclusivelock.h"
 #include "pattern.h"
 #include "instruments.h"
+// container
 #include <qsort.h>
+// std
 #include <assert.h>
 #include <stdlib.h>
+// platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -180,6 +185,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->numplaybeats = (psy_dsp_big_beat_t)4.0;
 	self->position = (psy_dsp_big_beat_t)0.0;
 	self->playcounter = 0;
+	self->ppqncounter = 0;
 	self->window = (psy_dsp_big_beat_t)0.0;
 	self->linetickcount = (psy_dsp_big_beat_t)0.0;
 	self->mode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
@@ -224,6 +230,7 @@ void psy_audio_sequencer_start(psy_audio_Sequencer* self)
 	if (self->mode == psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 		psy_audio_sequencer_setbarloop(self);
 	}
+	self->ppqncounter = 0;
 	self->playing = TRUE;
 }
 
@@ -482,6 +489,31 @@ uintptr_t psy_audio_sequencer_updatelinetickcount(psy_audio_Sequencer* self,
 		rv = amount;
 	}
 	return rv;
+}
+
+void psy_audio_sequencer_clockstart(psy_audio_Sequencer* self)
+{	
+	// todo lock
+	psy_audio_sequencer_stop(self);
+	psy_audio_sequencer_setposition(self, (psy_dsp_big_beat_t)0.0);
+	psy_audio_sequencer_start(self);
+}
+
+void psy_audio_sequencer_clock(psy_audio_Sequencer* self)
+{	
+	// todo sync
+}
+
+void psy_audio_sequencer_clockcontinue(psy_audio_Sequencer* self)
+{	
+	if (!psy_audio_sequencer_playing(self)) {
+		psy_audio_sequencer_start(self);
+	}
+}
+
+void psy_audio_sequencer_clockstop(psy_audio_Sequencer* self)
+{
+	psy_audio_sequencer_stop(self);
 }
 
 void psy_audio_sequencer_onnewline(psy_audio_Sequencer* self)

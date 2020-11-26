@@ -52,4 +52,9 @@ typedef struct {
 
 void cpuview_init(CPUView*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* cpuview_base(CPUView* self)
+{
+	return &self->component;
+}
+
 #endif

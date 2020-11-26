@@ -18,6 +18,13 @@ extern "C" {
 #define psy_audio_MAX_CONTROLLERS   127
 #define psy_audio_MAX_PARAMETERS    127
 
+/// the three MIDI sync codes
+#define FSTAT_FASTART               0x0002
+/// the three MIDI sync codes
+#define FSTAT_F8CLOCK               0x0004
+/// the three MIDI sync codes
+#define FSTAT_FCSTOP                0x0008
+
 typedef struct psy_audio_MidiInputStats
 {	
 	/// bitmapped channel active map	(CLEAR AFTER READ)

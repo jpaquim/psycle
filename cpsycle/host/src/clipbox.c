@@ -13,8 +13,8 @@
 
 static void clipbox_ondestroy(ClipBox*, psy_ui_Component* sender);
 static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
-static void clipbox_currclipcolors(ClipBox*, psy_ui_Color* currbackground,
-	psy_ui_Color* currborder);
+static void clipbox_currclipcolours(ClipBox*, psy_ui_Colour* currbackground,
+	psy_ui_Colour* currborder);
 static void clipbox_ontimer(ClipBox*, uintptr_t timerid);
 static void clipbox_onmousedown(ClipBox*, psy_ui_MouseEvent*);
 static void clipbox_onmasterworked(ClipBox*, psy_audio_Machine* master, uintptr_t slot,
@@ -29,10 +29,10 @@ static int clipboxdefaultskin_initialized = 0;
 static void clipboxdefaultskin_init(ClipBox* self)
 {
 	if (!clipboxdefaultskin_initialized) {
-		clipboxdefaultskin.on = psy_ui_color_make(0x000000FF);
-		clipboxdefaultskin.off = psy_ui_color_make(0x00232323);
-		clipboxdefaultskin.borderon = psy_ui_color_make(0x00333333);
-		clipboxdefaultskin.borderoff = psy_ui_color_make(0x00333333);
+		clipboxdefaultskin.on = psy_ui_colour_make(0x000000FF);
+		clipboxdefaultskin.off = psy_ui_colour_make(0x00232323);
+		clipboxdefaultskin.borderon = psy_ui_colour_make(0x00333333);
+		clipboxdefaultskin.borderoff = psy_ui_colour_make(0x00333333);
 		clipboxdefaultskin_initialized = 1;
 	}
 	self->skin = clipboxdefaultskin;
@@ -45,9 +45,9 @@ static void vtable_init(ClipBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw) clipbox_ondraw;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) clipbox_onmousedown;
-		vtable.ontimer = (psy_ui_fp_ontimer) clipbox_ontimer;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) clipbox_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown) clipbox_onmousedown;
+		vtable.ontimer = (psy_ui_fp_component_ontimer) clipbox_ontimer;
 		vtable_initialized = 1;
 	}
 }
@@ -136,8 +136,8 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 	psy_ui_Size size;
 	psy_ui_TextMetric tm;
 	psy_ui_Rectangle rc;
-	psy_ui_Color currbackground;
-	psy_ui_Color currborder;
+	psy_ui_Colour currbackground;
+	psy_ui_Colour currborder;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
@@ -146,14 +146,14 @@ void clipbox_ondraw(ClipBox* self, psy_ui_Graphics* g)
 	}
 	psy_ui_setrectangle(&rc, 1, 5, psy_ui_value_px(&size.width, &tm) - 1,
 		psy_ui_value_px(&size.height, &tm) - 5);
-	clipbox_currclipcolors(self, &currbackground, &currborder);
+	clipbox_currclipcolours(self, &currbackground, &currborder);
 	psy_ui_drawsolidrectangle(g, rc, currbackground);
-	psy_ui_setcolor(g, currborder);			
+	psy_ui_setcolour(g, currborder);			
 	psy_ui_drawrectangle(g, rc);
 }
 
-void clipbox_currclipcolors(ClipBox* self, psy_ui_Color* currbackground,
-	psy_ui_Color* currborder)
+void clipbox_currclipcolours(ClipBox* self, psy_ui_Colour* currbackground,
+	psy_ui_Colour* currborder)
 {
 	if (clipbox_isclipon(self)) {
 		*currbackground = self->skin.on;

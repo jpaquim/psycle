@@ -76,7 +76,7 @@ static void dev_seticonressource(psy_ui_win_ComponentImp*, int ressourceid);
 static psy_ui_TextMetric dev_textmetric(psy_ui_win_ComponentImp*);
 static psy_ui_Size dev_textsize(psy_ui_win_ComponentImp*, const char* text,
 	psy_ui_Font*);
-static void dev_setbackgroundcolor(psy_ui_win_ComponentImp*, psy_ui_Color);
+static void dev_setbackgroundcolour(psy_ui_win_ComponentImp*, psy_ui_Colour);
 static void dev_settitle(psy_ui_win_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_win_ComponentImp*);
 static int dev_hasfocus(psy_ui_win_ComponentImp*);
@@ -137,9 +137,9 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric)
 			dev_textmetric;
 		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize)dev_textsize;
-		vtable.dev_setbackgroundcolor =
-			(psy_ui_fp_componentimp_dev_setbackgroundcolor)
-			dev_setbackgroundcolor;
+		vtable.dev_setbackgroundcolour =
+			(psy_ui_fp_componentimp_dev_setbackgroundcolour)
+			dev_setbackgroundcolour;
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle)dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus)dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus)dev_hasfocus;
@@ -771,12 +771,12 @@ psy_ui_Size dev_textsize(psy_ui_win_ComponentImp* self, const char* text,
 	return rv;
 }
 
-void dev_setbackgroundcolor(psy_ui_win_ComponentImp* self, psy_ui_Color color)
+void dev_setbackgroundcolour(psy_ui_win_ComponentImp* self, psy_ui_Colour colour)
 {	
 	if (self->background) {
 		DeleteObject(self->background);
 	}
-	self->background = CreateSolidBrush(color.value);
+	self->background = CreateSolidBrush(colour.value);
 }
 
 void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)

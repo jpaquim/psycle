@@ -60,13 +60,13 @@
 #define PAUSEADJ		100
 
 
-/* mask to erase all color bits (plus gen. related stuff) */
-#define maskcolors	(~(bitmask(BLACKBIT) | WHITEBITS | AGEBITS))
+/* mask to erase all colour bits (plus gen. related stuff) */
+#define maskcolours	(~(bitmask(BLACKBIT) | WHITEBITS | AGEBITS))
 
 
-/* macro to erase all color bits then sets only the current white bit */
+/* macro to erase all colour bits then sets only the current white bit */
 #define makewhite(g,x)	\
- (x->marked = cast_byte((x->marked & maskcolors) | luaC_white(g)))
+ (x->marked = cast_byte((x->marked & maskcolours) | luaC_white(g)))
 
 #define white2gray(x)	resetbits(x->marked, WHITEBITS)
 #define black2gray(x)	resetbit(x->marked, BLACKBIT)
@@ -766,7 +766,7 @@ static GCObject **sweeplist (lua_State *L, GCObject **p, int countin,
       freeobj(L, curr);  /* erase 'curr' */
     }
     else {  /* change mark to 'white' */
-      curr->marked = cast_byte((marked & maskcolors) | white);
+      curr->marked = cast_byte((marked & maskcolours) | white);
       p = &curr->next;  /* go to next element */
     }
   }
@@ -965,13 +965,13 @@ void luaC_checkfinalizer (lua_State *L, GCObject *o, Table *mt) {
 static void setpause (global_State *g);
 
 
-/* mask to erase all color bits, not changing gen-related stuff */
-#define maskgencolors	(~(bitmask(BLACKBIT) | WHITEBITS))
+/* mask to erase all colour bits, not changing gen-related stuff */
+#define maskgencolours	(~(bitmask(BLACKBIT) | WHITEBITS))
 
 
 /*
 ** Sweep a list of objects, deleting dead ones and turning
-** the non dead to old (without changing their colors).
+** the non dead to old (without changing their colours).
 */
 static void sweep2old (lua_State *L, GCObject **p) {
   GCObject *curr;
@@ -993,8 +993,8 @@ static void sweep2old (lua_State *L, GCObject **p) {
 ** Sweep for generational mode. Delete dead objects. (Because the
 ** collection is not incremental, there are no "new white" objects
 ** during the sweep. So, any white object must be dead.) For
-** non-dead objects, advance their ages and clear the color of
-** new objects. (Old objects keep their colors.)
+** non-dead objects, advance their ages and clear the colour of
+** new objects. (Old objects keep their colours.)
 */
 static GCObject **sweepgen (lua_State *L, global_State *g, GCObject **p,
                             GCObject *limit) {
@@ -1017,7 +1017,7 @@ static GCObject **sweepgen (lua_State *L, global_State *g, GCObject **p,
     }
     else {  /* correct mark and age */
       if (getage(curr) == G_NEW)
-        curr->marked = cast_byte((curr->marked & maskgencolors) | white);
+        curr->marked = cast_byte((curr->marked & maskgencolours) | white);
       setage(curr, nextage[getage(curr)]);
       p = &curr->next;  /* go to next element */
     }
@@ -1033,7 +1033,7 @@ static GCObject **sweepgen (lua_State *L, global_State *g, GCObject **p,
 static void whitelist (global_State *g, GCObject *p) {
   int white = luaC_white(g);
   for (; p != NULL; p = p->next)
-    p->marked = cast_byte((p->marked & maskcolors) | white);
+    p->marked = cast_byte((p->marked & maskcolours) | white);
 }
 
 

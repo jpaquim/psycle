@@ -32,6 +32,11 @@ typedef struct {
 	Workspace* workspace;
 } PatternViewBar;
 
+INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
+{
+	return &self->component;
+}
+
 void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
 	Workspace*);
 

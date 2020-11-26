@@ -206,7 +206,7 @@ void playbar_startplay(PlayBar* self)
 		startposition = entry->offset;
 		if (psy_audio_sequencer_playmode(&self->player->sequencer)
 			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
-			psy_audio_PatternEditPosition editposition;
+			psy_audio_PatternCursor editposition;
 
 			editposition = workspace_patterneditposition(self->workspace);			
 			startposition += (psy_dsp_big_beat_t) editposition.offset;

@@ -22,7 +22,7 @@ void kbdboxkey_init_all(KbdBoxKey* self, int x, int y, int width, int height, co
 	self->desc0 = strdup("");
 	self->desc1 = strdup("");
 	self->desc2 = strdup("");
-	self->color = psy_ui_color_make(0x00666666);
+	self->colour = psy_ui_colour_make(0x00666666);
 }
 
 void kbdboxkey_dispose(KbdBoxKey* self)
@@ -62,8 +62,8 @@ static void kbdbox_vtable_init(KbdBox* self)
 {
 	if (!kbdbox_vtable_initialized) {
 		kbdbox_vtable = *(self->component.vtable);
-		kbdbox_vtable.ondraw = (psy_ui_fp_ondraw)kbdbox_ondraw;
-		kbdbox_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		kbdbox_vtable.ondraw = (psy_ui_fp_component_ondraw)kbdbox_ondraw;
+		kbdbox_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			kbdbox_onmousedown;
 		kbdbox_vtable_initialized = 1;
 	}
@@ -188,14 +188,14 @@ void kbdbox_drawkey(KbdBox* self, psy_ui_Graphics* g, KbdBoxKey* key)
 	int cpy;
 
 	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setcolor(g, key->color);
+	psy_ui_setcolour(g, key->colour);
 	psy_ui_drawroundrectangle(g, key->position, self->corner);
-	psy_ui_settextcolor(g, psy_ui_color_make(0x00666666));
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
 	cpx = key->position.left + 4;
 	cpy = key->position.top + 4;
 	psy_ui_textout(g, cpx, cpy,
 		key->label, strlen(key->label));
-	psy_ui_settextcolor(g, key->color);
+	psy_ui_settextcolour(g, key->colour);
 	psy_ui_textout(g, cpx + self->descident, cpy,
 		key->desc0, strlen(key->desc0));
 	psy_ui_textout(g, cpx, cpy + tm.tmHeight,
@@ -406,13 +406,13 @@ void kbdbox_addlargekey(KbdBox* self, uintptr_t keycode, const char* label)
 	}
 }
 
-void kbdbox_setcolor(KbdBox* self, uintptr_t keycode, psy_ui_Color color)
+void kbdbox_setcolour(KbdBox* self, uintptr_t keycode, psy_ui_Colour colour)
 {
 	KbdBoxKey* key;
 
 	key = psy_table_at(&self->keys, keycode);
 	if (key) {
-		key->color = color;
+		key->colour = colour;
 		psy_ui_component_invalidate(kbdbox_base(self));
 	}
 }

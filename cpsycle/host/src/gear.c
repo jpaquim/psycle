@@ -88,7 +88,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setmargin(&self->titlebar, &margin);
 	psy_ui_label_init(&self->title, &self->titlebar);
 	psy_ui_label_settext(&self->title, "Gear Rack");
-	psy_ui_component_setcolor(&self->title.component, psy_ui_color_make(0x00B1C8B0));
+	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_button_init(&self->hide, &self->titlebar);
 	psy_ui_button_settext(&self->hide, "X");

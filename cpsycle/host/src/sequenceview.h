@@ -130,6 +130,9 @@ void sequenceview_init(SequenceView*, psy_ui_Component* parent, Workspace*);
 void sequenceview_updateplayposition(SequenceView*);
 void sequenceview_changeplayposition(SequenceView*);
 
-
+INLINE psy_ui_Component* sequenceview_base(SequenceView* self)
+{
+	return &self->component;
+}
 
 #endif

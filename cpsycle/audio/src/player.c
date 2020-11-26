@@ -30,6 +30,15 @@ static void* mainframe;
 static PsyFile logfile;
 #endif
 
+static uint16_t midi_combinebytes(unsigned char data1, unsigned char data2)
+{
+	uint16_t rv_14bit;
+	rv_14bit = (unsigned short)data2;
+	rv_14bit <<= 7;
+	rv_14bit |= (unsigned short)data1;
+	return rv_14bit;
+}
+
 static void psy_audio_player_initdriver(psy_audio_Player*);
 static void psy_audio_player_initkbddriver(psy_audio_Player*);
 static void psy_audio_player_initsignals(psy_audio_Player*);
@@ -354,14 +363,41 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 	cmd = psy_eventdriver_getcmd(sender, "notes");
 	if (cmd.id != -1 && cmd.id < 255) {		
 		uintptr_t track = 0;
-		psy_audio_PatternEvent event;
+		psy_audio_PatternEvent ev;
 				
 		if (cmd.id == CMD_NOTE_MIDIEV) {
-			psy_audio_patternevent_clear(&event);
+			psy_audio_patternevent_clear(&ev);
 			if (!psy_audio_midiinput_workinput(&self->midiinput, cmd.midi,
-				&self->song->machines, &event)) {
+				&self->song->machines, &ev)) {
 				return;
-			}			
+			}
+			if (ev.note >= psy_audio_NOTECOMMANDS_MIDI_SPP &&
+					ev.note <= psy_audio_NOTECOMMANDS_MIDI_SYNC) {
+				switch (ev.note) {
+					case psy_audio_NOTECOMMANDS_MIDI_SPP: {
+						uint16_t midibeats;
+
+						midibeats = midi_combinebytes(ev.cmd, ev.parameter);
+						psy_audio_sequencer_setposition(&self->sequencer,
+							midibeats * 1/16.0);
+						break; }
+					case psy_audio_NOTECOMMANDS_MIDI_CLK_START:
+						psy_audio_sequencer_clockstart(&self->sequencer);
+						break;
+					case psy_audio_NOTECOMMANDS_MIDI_CLK:
+						psy_audio_sequencer_clock(&self->sequencer);
+						break;
+					case psy_audio_NOTECOMMANDS_MIDI_CLK_CONT:
+						psy_audio_sequencer_clockcontinue(&self->sequencer);
+						break;
+					case psy_audio_NOTECOMMANDS_MIDI_CLK_STOP:
+						psy_audio_sequencer_clockstop(&self->sequencer);
+						break;
+					default:
+						break;
+				}
+				return;
+			}
 		} else {
 			unsigned char note;
 			uintptr_t mac = 0;
@@ -374,7 +410,7 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 				note = cmd.id;
 			}
 			machine = psy_audio_machines_at(&self->song->machines, mac);
-			psy_audio_patternevent_init_all(&event,
+			psy_audio_patternevent_init_all(&ev,
 				note,
 				(note == psy_audio_NOTECOMMANDS_TWEAK)
 				? (uint16_t)self->song->machines.tweakparam
@@ -387,29 +423,29 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 				0, 0);
 		}		
 		if (self->multichannelaudition) {
-			if (event.note < psy_audio_NOTECOMMANDS_RELEASE) {
-				if (psy_table_exists(&self->notestotracks, event.note)) {
+			if (ev.note < psy_audio_NOTECOMMANDS_RELEASE) {
+				if (psy_table_exists(&self->notestotracks, ev.note)) {
 					track = (uintptr_t) psy_table_at(&self->notestotracks,
-						event.note);
+						ev.note);
 				} else {							
 					while (psy_table_exists(&self->trackstonotes, track)) {
 						++track;
 					}
-					psy_table_insert(&self->notestotracks, event.note,
+					psy_table_insert(&self->notestotracks, ev.note,
 						(void*) track);
 					psy_table_insert(&self->trackstonotes, track,
-						(void*)(uintptr_t) event.note);
+						(void*)(uintptr_t)ev.note);
 				}
-			} else if (event.note == psy_audio_NOTECOMMANDS_RELEASE) {				
-				if (psy_table_exists(&self->notestotracks, event.note)) {
+			} else if (ev.note == psy_audio_NOTECOMMANDS_RELEASE) {
+				if (psy_table_exists(&self->notestotracks, ev.note)) {
 					track = (uintptr_t) psy_table_at(&self->notestotracks,
-						event.note);
-					psy_table_remove(&self->notestotracks, event.note);
+						ev.note);
+					psy_table_remove(&self->notestotracks, ev.note);
 					psy_table_remove(&self->trackstonotes, track);
 				}
 			}
 		}
-		psy_audio_sequencer_addinputevent(&self->sequencer, &event, track);
+		psy_audio_sequencer_addinputevent(&self->sequencer, &ev, track);
 		if (self->recordingnotes && psy_audio_sequencer_playing(&
 				self->sequencer)) {
 			psy_dsp_big_beat_t offset;
@@ -420,12 +456,12 @@ void psy_audio_player_oneventdriverinput(psy_audio_Player* self,
 			if (offset < 0) {
 				offset = 0;
 			}
-			if (self->recordnoteoff || event.note != psy_audio_NOTECOMMANDS_RELEASE) {
-				psy_audio_sequencer_recordinputevent(&self->sequencer, &event, 0,
+			if (self->recordnoteoff || ev.note != psy_audio_NOTECOMMANDS_RELEASE) {
+				psy_audio_sequencer_recordinputevent(&self->sequencer, &ev, 0,
 					self->resyncplayposinbeats);
 			}			
 		} else {			
-			psy_signal_emit(&self->signal_inputevent, self, 1, &event);
+			psy_signal_emit(&self->signal_inputevent, self, 1, &ev);
 		}
 	}
 }
@@ -759,4 +795,3 @@ void psy_audio_player_midiconfigure(psy_audio_Player* self, psy_Property*
 
 	psy_audio_midiinput_configure(&self->midiinput, configuration, datastr);
 }
-

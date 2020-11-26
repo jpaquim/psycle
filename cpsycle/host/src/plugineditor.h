@@ -46,4 +46,9 @@ typedef struct {
 
 void plugineditor_init(PluginEditor*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* plugineditor_base(PluginEditor* self)
+{
+	return &self->component;
+}
+
 #endif

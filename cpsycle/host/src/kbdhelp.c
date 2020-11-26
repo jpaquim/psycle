@@ -61,7 +61,7 @@ void kbdhelp_markpatterncmds(KbdHelp* self, const char* sectionname)
 				property = (const psy_Property*)psy_list_entry_const(p);
 				psy_audio_decodeinput(psy_property_item_int(property),
 					&keycode, &shift, &ctrl);
-				kbdbox_setcolor(&self->kbdbox, keycode, psy_ui_color_make(0x00B1C8B0));
+				kbdbox_setcolour(&self->kbdbox, keycode, psy_ui_colour_make(0x00B1C8B0));
 				kbdbox_setdescription(&self->kbdbox, keycode, shift,
 					ctrl, psy_property_shorttext(property));
 			}

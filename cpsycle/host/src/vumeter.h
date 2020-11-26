@@ -18,10 +18,10 @@
 //       Vumeter < >---- Workspace < >---- Song <>---- Machines
 
 typedef struct {
-	psy_ui_Color rms;
-	psy_ui_Color peak;
-	psy_ui_Color background;
-	psy_ui_Color border;
+	psy_ui_Colour rms;
+	psy_ui_Colour peak;
+	psy_ui_Colour background;
+	psy_ui_Colour border;
 } VumeterSkin;
 
 typedef struct {	

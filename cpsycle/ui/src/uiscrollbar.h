@@ -30,6 +30,7 @@ typedef struct psy_ui_ScrollBarPane {
     int drag;
     psy_ui_Orientation orientation;
     psy_Signal signal_changed;
+    psy_Signal signal_clicked;
 } psy_ui_ScrollBarPane;
 
 void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane*, psy_ui_Component* parent);
@@ -40,7 +41,8 @@ typedef struct {
     psy_ui_Button less;
     psy_ui_Button more;
     psy_ui_ScrollBarPane sliderpane;
-    psy_Signal signal_changed;    
+    psy_Signal signal_changed;
+    psy_Signal signal_clicked;
 } psy_ui_ScrollBar;
 
 void psy_ui_scrollbar_init(psy_ui_ScrollBar*, psy_ui_Component* parent);

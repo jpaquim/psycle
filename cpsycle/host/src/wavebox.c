@@ -222,8 +222,8 @@ static void vtable_init(WaveBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);		
-		vtable.ondraw = (psy_ui_fp_ondraw) wavebox_ondraw;
-		vtable.onsize = (psy_ui_fp_onsize) wavebox_onsize;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) wavebox_ondraw;
+		vtable.onsize = (psy_ui_fp_component_onsize) wavebox_onsize;
 		vtable_initialized = 1;
 	}
 }
@@ -319,10 +319,10 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component), &tm);
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
-	psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 	if (!self->context.sample) {		
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-		psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		psy_ui_textout(g,
 			(size.width - tm.tmAveCharWidth * strlen(self->nowavetext)) / 2,
 			(size.height - tm.tmHeight) / 2,
@@ -363,20 +363,20 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 		}
 		scaley = (size.height / 2) / (psy_dsp_amp_t)32768;
 		if (self->context.sample && self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
-			psy_ui_drawsolidrectangle(g, cont_loop_rc, psy_ui_color_make(0x00333333));
+			psy_ui_drawsolidrectangle(g, cont_loop_rc, psy_ui_colour_make(0x00333333));
 			if (self->context.loopviewmode == WAVEBOX_LOOPVIEW_CONT_DOUBLE) {
-				psy_ui_drawsolidrectangle(g, cont_doubleloop_rc, psy_ui_color_make(0x00292929));
+				psy_ui_drawsolidrectangle(g, cont_doubleloop_rc, psy_ui_colour_make(0x00292929));
 			}
 		}
 		if (self->context.sample && self->context.sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
-			psy_ui_drawsolidrectangle(g, sustain_loop_rc, psy_ui_color_make(0x00444444));
+			psy_ui_drawsolidrectangle(g, sustain_loop_rc, psy_ui_colour_make(0x00444444));
 			if (self->context.loopviewmode == WAVEBOX_LOOPVIEW_SUSTAIN_DOUBLE) {
-				psy_ui_drawsolidrectangle(g, sustain_doubleloop_rc, psy_ui_color_make(0x00292929));
+				psy_ui_drawsolidrectangle(g, sustain_doubleloop_rc, psy_ui_colour_make(0x00292929));
 			}
 		}
 		if (self->context.selection.hasselection) {
 			psy_ui_drawsolidrectangle(g, wavebox_framerangetoscreen(self,
-				self->context.selection.end, self->context.selection.end), psy_ui_color_make(0x00B1C8B0));
+				self->context.selection.end, self->context.selection.end), psy_ui_colour_make(0x00B1C8B0));
 		}	
 		if (self->drawline) {
 			if (g->clip.left > 0) {
@@ -406,25 +406,25 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 				realframe <= self->context.selection.end) {
 				if (realframe == self->context.selection.start ||
 					realframe == (self->context.selection.end)) {
-					psy_ui_setcolor(g, psy_ui_color_make(0x00333333));
+					psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
 				} else {
-					psy_ui_setcolor(g, psy_ui_color_make(0x00262626));
+					psy_ui_setcolour(g, psy_ui_colour_make(0x00262626));
 				}
 				r.top = 0;
 				r.bottom = size.height;
 				if (firstselstart || self->dragstarted == FALSE) {
 					psy_ui_drawrectangle(g, r);
 					firstselstart = FALSE;
-					psy_ui_setcolor(g, psy_ui_color_make(0x00FF2288));
+					psy_ui_setcolour(g, psy_ui_colour_make(0x00FF2288));
 				} else {
-					psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+					psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 				}
 			} else
 			if (self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT &&
 					psy_ui_rectangle_intersect(&cont_loop_rc, x, 0)) {
-				psy_ui_setcolor(g, psy_ui_color_make(0x00D1C5B6));
+				psy_ui_setcolour(g, psy_ui_colour_make(0x00D1C5B6));
 			} else {
-				psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+				psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 			}
 			r.top = centery - (int)(framevalue * scaley);
 			r.bottom = centery;
@@ -447,14 +447,14 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			}
 		}
 		if (self->context.sample && self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
-			psy_ui_setcolor(g, psy_ui_color_make(0x00D1C5B6));
+			psy_ui_setcolour(g, psy_ui_colour_make(0x00D1C5B6));
 			psy_ui_drawline(g, cont_loop_rc.left, 0, cont_loop_rc.left + 1,
 				size.height);
 			psy_ui_drawline(g, cont_loop_rc.right, 0, cont_loop_rc.right + 1,
 				size.height);
 		}
 		if (self->context.sample && self->context.sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
-			psy_ui_setcolor(g, psy_ui_color_make(0x00B6C5D1));
+			psy_ui_setcolour(g, psy_ui_colour_make(0x00B6C5D1));
 			psy_ui_drawline(g, sustain_loop_rc.left, 0, sustain_loop_rc.left + 1,
 				size.height);
 			psy_ui_drawline(g, sustain_loop_rc.right, 0, sustain_loop_rc.right + 1,

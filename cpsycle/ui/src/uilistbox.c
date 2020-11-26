@@ -28,7 +28,7 @@ static void psy_ui_listbox_vtable_init(psy_ui_ListBox* self)
 	if (!psy_ui_listbox_vtable_initialized) {
 		psy_ui_listbox_vtable = *(self->component.vtable);		
 		psy_ui_listbox_vtable.onpreferredsize =
-			(psy_ui_fp_onpreferredsize)
+			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_listbox_onpreferredsize;		
 		psy_ui_listbox_vtable_initialized = 1;
 	}
@@ -188,14 +188,14 @@ static void psy_ui_listboxclient_vtable_init(psy_ui_ListBoxClient* self)
 {
 	if (!psy_ui_listboxclient_vtable_initialized) {
 		psy_ui_listboxclient_vtable = *(self->component.vtable);
-		psy_ui_listboxclient_vtable.ondraw = (psy_ui_fp_ondraw)
+		psy_ui_listboxclient_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			psy_ui_listboxclient_ondraw;
 		psy_ui_listboxclient_vtable.onpreferredsize =
-			(psy_ui_fp_onpreferredsize)
+			(psy_ui_fp_component_onpreferredsize)
 			psy_ui_listboxclient_onpreferredsize;
-		psy_ui_listboxclient_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		psy_ui_listboxclient_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			psy_ui_listboxclient_onmousedown;
-		psy_ui_listboxclient_vtable.onsize = (psy_ui_fp_onsize)
+		psy_ui_listboxclient_vtable.onsize = (psy_ui_fp_component_onsize)
 			psy_ui_listboxclient_onsize;
 		psy_ui_listboxclient_vtable_initialized = 1;
 	}
@@ -258,7 +258,7 @@ void psy_ui_listboxclient_ondraw(psy_ui_ListBoxClient* self, psy_ui_Graphics* g)
 			psy_ui_Rectangle r;
 
 			r = psy_ui_rectangle_make(0, cpy, size.width, lineheight);			
-			psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x009B7800));
+			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x009B7800));
 		}
 		psy_ui_textout(g, cpx, cpy, itemtext, strlen(itemtext));
 		cpy += lineheight;

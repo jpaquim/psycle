@@ -21,4 +21,9 @@ typedef struct {
 
 void songbar_init(SongBar*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* songbar_base(SongBar* self)
+{
+	return &self->component;
+}
+
 #endif

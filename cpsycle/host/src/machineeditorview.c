@@ -29,9 +29,9 @@ static void machineeditorview_vtable_init(MachineEditorView* self)
 {
 	if (!machineeditorview_vtable_initialized) {
 		machineeditorview_vtable = *(self->component.vtable);
-		machineeditorview_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		machineeditorview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			machineeditorview_onpreferredsize;
-		machineeditorview_vtable.ontimer = (psy_ui_fp_ontimer)machineeditorview_ontimer;
+		machineeditorview_vtable.ontimer = (psy_ui_fp_component_ontimer)machineeditorview_ontimer;
 	}
 }
 

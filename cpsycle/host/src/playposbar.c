@@ -47,9 +47,9 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender,
 	uintptr_t timerid)
 {
-	if (psy_audio_player_playing(&self->workspace->player)) {
-		playposbar_updatelabel(self);
-	}
+	//if (psy_audio_player_playing(&self->workspace->player)) {
+	playposbar_updatelabel(self);
+	//}
 }
 
 void playposbar_updatelabel(PlayPosBar* self)

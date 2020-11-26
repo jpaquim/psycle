@@ -21,6 +21,11 @@ void psy_ui_progressbar_settext(psy_ui_ProgressBar*, const char* text);
 void psy_ui_progressbar_setprogress(psy_ui_ProgressBar*, float progress);
 void psy_ui_progressbar_tick(psy_ui_ProgressBar*);
 
+INLINE psy_ui_Component* progressbar_base(psy_ui_ProgressBar* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

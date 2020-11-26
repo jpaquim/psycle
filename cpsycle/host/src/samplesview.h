@@ -151,4 +151,9 @@ void samplesview_init(SamplesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 void samplesview_setsample(SamplesView*, psy_audio_SampleIndex);
 
+INLINE psy_ui_Component* samplesview_base(SamplesView* self)
+{
+	return &self->component;
+}
+
 #endif

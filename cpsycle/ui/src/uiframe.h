@@ -13,6 +13,7 @@ extern "C" {
 typedef psy_ui_Component psy_ui_Frame;
 
 void psy_ui_frame_init(psy_ui_Frame*, psy_ui_Component* parent);
+void psy_ui_frame_init_main(psy_ui_Frame*);
 
 #ifdef __cplusplus
 }

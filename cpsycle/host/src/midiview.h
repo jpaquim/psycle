@@ -22,7 +22,16 @@ void midiactivechannelbox_init(MidiActiveChannelBox*,
 
 typedef struct {
 	psy_ui_Component component;
+	int* flags;
+} MidiActiveClockBox;
+
+void midiactiveclockbox_init(MidiActiveClockBox*,
+	psy_ui_Component* parent, int* flags);
+
+typedef struct {
+	psy_ui_Component component;
 	MidiActiveChannelBox channelmap;
+	MidiActiveClockBox clock;
 	Workspace* workspace;
 } MidiFlagsView;
 
@@ -68,9 +77,16 @@ typedef struct {
 	Workspace* workspace;
 	uintptr_t channelmapupdate;
 	uint32_t lastchannelmap;
+	uintptr_t lastflags;
 	int channelstatcounter;
+	int flagstatcounter;
 } MidiMonitor;
 
 void midimonitor_init(MidiMonitor*, psy_ui_Component* parent, Workspace*);
+
+INLINE psy_ui_Component* midimonitor_base(MidiMonitor* self)
+{
+	return &self->component;
+}
 
 #endif

@@ -84,7 +84,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	psy_ui_component_resize(&self->versioninfo.component,
 		psy_ui_size_make(psy_ui_value_makepx(500), psy_ui_value_makepx(300)));
-	psy_ui_component_setbackgroundcolor(&self->versioninfo.component, psy_ui_color_make(0x00232323));
+	psy_ui_component_setbackgroundcolour(&self->versioninfo.component, psy_ui_colour_make(0x00232323));
 }
 
 void licence_init(Licence* self, psy_ui_Component* parent)
@@ -143,8 +143,8 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 		);
 	psy_ui_component_resize(&self->licenceinfo.component,
 		psy_ui_size_make(psy_ui_value_makepx(500), psy_ui_value_makepx(300)));
-	psy_ui_component_setbackgroundcolor(&self->licenceinfo.component,
-		psy_ui_color_make(0x00232323));
+	psy_ui_component_setbackgroundcolour(&self->licenceinfo.component,
+		psy_ui_colour_make(0x00232323));
 	psy_ui_editor_preventedit(&self->licenceinfo);
 	psy_ui_editor_enablewrap(&self->licenceinfo);
 }
@@ -166,8 +166,8 @@ static void about_vtable_init(About* self)
 {
 	if (!about_vtable_initialized) {
 		about_vtable = *(self->component.vtable);
-		about_vtable.onalign = (psy_ui_fp_onalign)about_onalign;
-		about_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+		about_vtable.onalign = (psy_ui_fp_component_onalign)about_onalign;
+		about_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
 			about_onmousedoubleclick;		
 		about_vtable_initialized = 1;
 	}

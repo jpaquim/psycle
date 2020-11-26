@@ -67,7 +67,7 @@ static void dev_stoptimer(psy_ui_curses_ComponentImp*, uintptr_t id);
 static void dev_seticonressource(psy_ui_curses_ComponentImp*, int ressourceid);
 static psy_ui_TextMetric dev_textmetric(psy_ui_curses_ComponentImp*, psy_ui_Font*);
 static psy_ui_Size dev_textsize(psy_ui_curses_ComponentImp*, const char* text, psy_ui_Font*);
-static void dev_setbackgroundcolor(psy_ui_curses_ComponentImp*, uint32_t color);
+static void dev_setbackgroundcolour(psy_ui_curses_ComponentImp*, uint32_t colour);
 static void dev_settitle(psy_ui_curses_ComponentImp*, const char* title);
 static void dev_setfocus(psy_ui_curses_ComponentImp*);
 static int dev_hasfocus(psy_ui_curses_ComponentImp*);
@@ -122,7 +122,7 @@ static void win_imp_vtable_init(psy_ui_curses_ComponentImp* self)
 		vtable.dev_seticonressource = (psy_ui_fp_componentimp_dev_seticonressource) dev_seticonressource;
 		vtable.dev_textmetric = (psy_ui_fp_componentimp_dev_textmetric) dev_textmetric;
 		vtable.dev_textsize = (psy_ui_fp_componentimp_dev_textsize) dev_textsize;
-		vtable.dev_setbackgroundcolor = (psy_ui_fp_componentimp_dev_setbackgroundcolor) dev_setbackgroundcolor;
+		vtable.dev_setbackgroundcolour = (psy_ui_fp_componentimp_dev_setbackgroundcolour) dev_setbackgroundcolour;
 		vtable.dev_settitle = (psy_ui_fp_componentimp_dev_settitle) dev_settitle;
 		vtable.dev_setfocus = (psy_ui_fp_componentimp_dev_setfocus) dev_setfocus;
 		vtable.dev_hasfocus = (psy_ui_fp_componentimp_dev_hasfocus) dev_hasfocus;
@@ -426,7 +426,7 @@ psy_ui_Size dev_textsize(psy_ui_curses_ComponentImp* self, const char* text, psy
 	return rv;
 }
 
-void dev_setbackgroundcolor(psy_ui_curses_ComponentImp* self, uint32_t color)
+void dev_setbackgroundcolour(psy_ui_curses_ComponentImp* self, uint32_t colour)
 {		
 }
 

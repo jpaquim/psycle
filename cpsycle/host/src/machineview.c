@@ -202,17 +202,17 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 			skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
 				&self->coords->background);
 		} else {
-			psy_ui_Color bgcolor;
+			psy_ui_Colour bgcolour;
 			
 			if (self->mode == MACHMODE_MASTER) {
-				bgcolor = psy_ui_color_make(0x00333333);
+				bgcolour = psy_ui_colour_make(0x00333333);
 			} else
 			if (self->mode == MACHMODE_FX) {	
-				bgcolor = psy_ui_color_make(0x003E2f25);
+				bgcolour = psy_ui_colour_make(0x003E2f25);
 			} else {
-				bgcolor = psy_ui_color_make(0x002f3E25);				
+				bgcolour = psy_ui_colour_make(0x002f3E25);				
 			}			
-			psy_ui_drawsolidrectangle(g, r, bgcolor);
+			psy_ui_drawsolidrectangle(g, r, bgcolour);
 			if (self->mode == MACHMODE_MASTER) {
 				psy_ui_Rectangle clip;
 
@@ -226,9 +226,9 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 			}
 		}
 		if (self->mode == MACHMODE_FX) {			
-			psy_ui_settextcolor(g, wireview->skin.effect_fontcolour);
+			psy_ui_settextcolour(g, wireview->skin.effect_fontcolour);
 		} else {		
-			psy_ui_settextcolor(g, wireview->skin.generator_fontcolour);;
+			psy_ui_settextcolour(g, wireview->skin.generator_fontcolour);;
 		}
 		if (self->mode != MACHMODE_MASTER) {
 			psy_ui_Rectangle clip;
@@ -465,18 +465,18 @@ static void vtable_init(MachineWireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw)machinewireview_ondraw;
-		vtable.ontimer = (psy_ui_fp_ontimer)machinewireview_ontimer;
-		vtable.onmousedown = (psy_ui_fp_onmousedown)
+		vtable.ondraw = (psy_ui_fp_component_ondraw)machinewireview_ondraw;
+		vtable.ontimer = (psy_ui_fp_component_ontimer)machinewireview_ontimer;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			machinewireview_onmousedown;
-		vtable.onmouseup = (psy_ui_fp_onmouseup)machinewireview_onmouseup;
-		vtable.onmousemove = (psy_ui_fp_onmousemove)
+		vtable.onmouseup = (psy_ui_fp_component_onmouseup)machinewireview_onmouseup;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove)
 			machinewireview_onmousemove;
-		vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+		vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
 			machinewireview_onmousedoubleclick;
-		vtable.onkeydown = (psy_ui_fp_onkeydown)
+		vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			machinewireview_onkeydown;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			machinewireview_onpreferredsize;
 		vtable_initialized = TRUE;
 	}
@@ -591,7 +591,7 @@ void machinewireview_applyproperties(MachineWireView* self, psy_Property* p)
 {
 	machineviewskin_settheme(&self->skin, p, workspace_skins_directory(self->workspace));
 	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);	
-	psy_ui_component_setbackgroundcolor(&self->component, self->skin.colour);	
+	psy_ui_component_setbackgroundcolour(&self->component, self->skin.colour);	
 }
 
 void machinewireview_ondraw(MachineWireView* self, psy_ui_Graphics* g)
@@ -636,13 +636,13 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 					in = machineui_position(outmachineui);
 					if (self->hoverwire.src == slot &&
 						self->hoverwire.dst == entry->slot) {
-						psy_ui_setcolor(g, self->skin.hoverwirecolour);
+						psy_ui_setcolour(g, self->skin.hoverwirecolour);
 					} else
 					if (self->selectedwire.src == slot &&
 							self->selectedwire.dst == entry->slot) {
-						psy_ui_setcolor(g, self->skin.selwirecolour);
+						psy_ui_setcolour(g, self->skin.selwirecolour);
 					} else {
-						psy_ui_setcolor(g, self->skin.wirecolour);
+						psy_ui_setcolour(g, self->skin.wirecolour);
 					}
 					out.left = out.left + (out.right - out.left) / 2;
 					out.top = out.top + (out.bottom - out.top) / 2,
@@ -670,7 +670,7 @@ void machinewireview_drawwirearrow(MachineWireView* self, psy_ui_Graphics* g,
 	unsigned int polyInnards;
 	double phi;
 	
-	polyInnards = psy_ui_color_make_rgb((uint8_t)(192 * deltaColR),
+	polyInnards = psy_ui_colour_make_rgb((uint8_t)(192 * deltaColR),
 		(uint8_t)(192 * deltaColG), (uint8_t)(192 * deltaColB)).value;
 			
 	center.x = (x2 - x1) / 2 + x1;
@@ -728,7 +728,7 @@ void machinewireview_drawdragwire(MachineWireView* self, psy_ui_Graphics* g)
 
 			psy_audio_machine_position(machineui->machine, &x, &y);			
 			machinesize = machineui_size(machineui);
-			psy_ui_setcolor(g, self->skin.wirecolour);			
+			psy_ui_setcolour(g, self->skin.wirecolour);			
 			psy_ui_drawline(g, 
 				x + machinesize.width / 2, y + machinesize.height / 2,
 				self->mx, self->my);
@@ -761,7 +761,7 @@ void machineui_drawhighlight(MachineUi* self, psy_ui_Graphics* g,
 	static int d = 5; // the distance of the highlight from the machine
 
 	r = machineui_position(self);	
-	psy_ui_setcolor(g, wireview->skin.wirecolour);
+	psy_ui_setcolour(g, wireview->skin.wirecolour);
 	drawmachineline(g, 1, 0, r.left - d, r.top - d);
 	drawmachineline(g, 0, 1, r.left - d, r.top - d);
 	drawmachineline(g, -1, 0, r.right + d, r.top - d);
@@ -1196,7 +1196,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 					}
 				}
 			} else if (ev->button == 2) {
-				workspace_showgear(self->workspace);
+				workspace_togglegear(self->workspace);
 			}			
 		}
 	}
@@ -1943,13 +1943,13 @@ static void machineview_vtable_init(MachineView* self)
 {
 	if (!machineview_vtable_initialized) {
 		machineview_vtable = *(self->component.vtable);
-		machineview_vtable.onmousedown = (psy_ui_fp_onmousedown)
+		machineview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			machineview_onmousedown;
-		machineview_vtable.onmouseup = (psy_ui_fp_onmouseup)
+		machineview_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
 			machineview_onmouseup;
-		machineview_vtable.onmousedoubleclick = (psy_ui_fp_onmousedoubleclick)
+		machineview_vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)
 			machineview_onmousedoubleclick;
-		machineview_vtable.onkeydown = (psy_ui_fp_onkeydown)
+		machineview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			machineview_onkeydown;
 		machineview_vtable_initialized = TRUE;
 	}

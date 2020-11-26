@@ -23,8 +23,8 @@ static void psy_ui_label_vtable_init(psy_ui_Label* self)
 {
 	if (!psy_ui_label_vtable_initialized) {
 		psy_ui_label_vtable = *(self->component.vtable);
-		psy_ui_label_vtable.ondraw = (psy_ui_fp_ondraw)psy_ui_label_ondraw;
-		psy_ui_label_vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)psy_ui_label_onpreferredsize;
+		psy_ui_label_vtable.ondraw = (psy_ui_fp_component_ondraw)psy_ui_label_ondraw;
+		psy_ui_label_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)psy_ui_label_onpreferredsize;
 		psy_ui_label_vtable_initialized = TRUE;
 	}
 }

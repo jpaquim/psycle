@@ -29,14 +29,14 @@ static void vtable_init(TabBar* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onalign = (psy_ui_fp_onalign) tabbar_onalign;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.onalign = (psy_ui_fp_component_onalign) tabbar_onalign;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			tabbar_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_ondraw) tabbar_ondraw;
-		vtable.onmousedown = (psy_ui_fp_onmousedown) tabbar_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_onmousemove) tabbar_onmousemove;
-		vtable.onmouseenter = (psy_ui_fp_onmouseenter) tabbar_onmouseenter;
-		vtable.onmouseleave = (psy_ui_fp_onmouseleave) tabbar_onmouseleave;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) tabbar_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown) tabbar_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove) tabbar_onmousemove;
+		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter) tabbar_onmouseenter;
+		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave) tabbar_onmouseleave;
 		vtable_initialized = 1;
 	}
 }
@@ -139,45 +139,45 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 			cpx = psy_ui_value_px(&tab->margin.left, &tm);
 		}
 		if (self->selected == c) {
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 			cpxsel = cpx + psy_ui_value_px(&tab->margin.left, &tm);
 			selwidth = psy_ui_value_px(&tab->size.width, &tm);
 		}
 		if (self->hover && self->hoverindex == c && self->hoverindex != self->selected) {
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00EAEAEA));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00EAEAEA));
 			cpxhover = cpx + psy_ui_value_px(&tab->margin.left, &tm);
 			hoverwidth = psy_ui_value_px(&tab->size.width, &tm);
 		} else
 		if (tab->istoggle) {
 			if (tab->checkstate) {
-				psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));
+				psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 			} else {
-				psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+				psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 			}
 		} else		
 		if (self->selected == c) {			
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00B1C8B0));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		} else {
-			psy_ui_settextcolor(g, psy_ui_color_make(0x00D1C5B6));
+			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		}		
 		if (self->tabalignment == psy_ui_ALIGN_TOP) {			
 			cpx += psy_ui_value_px(&tab->margin.left, &tm);
 			if (tab->mode == TABMODE_LABEL) {
-				psy_ui_settextcolor(g, psy_ui_color_make(0x00B1A596));
+				psy_ui_settextcolour(g, psy_ui_colour_make(0x00B1A596));
 			}
 			if (self->selected == c && self->tabalignment == psy_ui_ALIGN_TOP) {
 				int y;
 				// psy_ui_Rectangle r;
 
-				psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+				psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 				y = tm.tmHeight + 2;
 
 				// psy_ui_setrectangle(&r, cpxsel, 0, selwidth, y + 1);
-				// psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x002F3E25));				
+				// psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x002F3E25));				
 
 				// psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);
 				if (self->hover && self->hoverindex != self->selected) {
-					psy_ui_setcolor(g, psy_ui_color_make(0x00FFFFFF));
+					psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
 					psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
 				}
 			}
@@ -189,9 +189,9 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 			cpx = psy_ui_value_px(&tab->margin.left, &tm);
 			if (self->hover && self->hoverindex == c) {
 				
-				// psy_ui_setcolor(g, 0x00383838);
+				// psy_ui_setcolour(g, 0x00383838);
 				// psy_ui_drawrectangle(g, r);
-				psy_ui_setcolor(g, psy_ui_color_make(0x00FFFFFF));
+				psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
 				psy_ui_drawline(g,
 					cpx,
 					cpy + psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.top, &tm),
@@ -200,21 +200,21 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 			}			
 			cpy += psy_ui_value_px(&tab->margin.top, &tm);
 			if (tab->mode == TABMODE_LABEL) {
-				psy_ui_settextcolor(g, psy_ui_color_make(0x00666666));
+				psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
 			}			
 			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));			
 			cpy += psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.bottom, &tm);
 		}
 	}
-	psy_ui_setcolor(g, psy_ui_color_make(0x005F5F5F));
+	psy_ui_setcolour(g, psy_ui_colour_make(0x005F5F5F));
 	if (self->tabalignment == psy_ui_ALIGN_TOP) {
 		int y;		
 
-		psy_ui_setcolor(g, psy_ui_color_make(0x00B1C8B0));
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		y = tm.tmHeight + 2;				
 		psy_ui_drawline(g, cpxsel, y, cpxsel + selwidth, y);		 
 		if (self->hover && self->hoverindex != self->selected) {		
-			psy_ui_setcolor(g, psy_ui_color_make(0x00FFFFFF));
+			psy_ui_setcolour(g, psy_ui_colour_make(0x00FFFFFF));
 			psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
 		}
 	} else

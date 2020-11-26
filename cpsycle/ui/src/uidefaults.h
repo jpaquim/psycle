@@ -15,7 +15,7 @@ extern "C" {
 #endif
 
 typedef struct {
-	uint32_t errorcolor;
+	uint32_t errorcolour;
 	psy_ui_Style style_common;
 } psy_ui_Defaults;
 

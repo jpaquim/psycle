@@ -45,9 +45,9 @@ static void vtable_init(InputDefiner* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);	
-		vtable.ondraw = (psy_ui_fp_ondraw) ondraw;
-		vtable.onkeydown = (psy_ui_fp_onkeydown) onkeydown;
-		vtable.onkeyup = (psy_ui_fp_onkeyup) onkeyup;
+		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
+		vtable.onkeydown = (psy_ui_fp_component_onkeydown) onkeydown;
+		vtable.onkeyup = (psy_ui_fp_component_onkeyup) onkeyup;
 		vtable_initialized = 1;
 	}
 }
@@ -95,7 +95,7 @@ void ondraw(InputDefiner* self, psy_ui_Graphics* g)
 {
 	char text[40];	
 	
-	psy_ui_settextcolor(g, psy_ui_color_make(0x00FFFFFF));
+	psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	inputdefiner_text(self, text);
 	psy_ui_textout(g, 0, 0, text, strlen(text));

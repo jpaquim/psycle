@@ -27,7 +27,7 @@ static void vtable_init(psy_ui_CheckBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			psy_ui_checkbox_onpreferredsize;
 		vtable_initialized = 1;
 	}
@@ -136,11 +136,11 @@ static void vtable_init(psy_ui_CheckBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_ondraw)
+		vtable.ondraw = (psy_ui_fp_component_ondraw)
 			psy_ui_checkbox_ondraw;
-		vtable.onmousedown = (psy_ui_fp_onmousedown)
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			psy_ui_checkbox_onmousedown;
-		vtable.onpreferredsize = (psy_ui_fp_onpreferredsize)
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			psy_ui_checkbox_onpreferredsize;
 		vtable_initialized = 1;
 	}
@@ -180,9 +180,9 @@ void psy_ui_checkbox_ondraw(psy_ui_CheckBox* self, psy_ui_Graphics* g)
 	r = psy_ui_rectangle_make(0, (size.height - checksize.height) / 2, checksize.width,
 		checksize.height);
 	if (self->state == 0) {
-		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00444444));
+		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00444444));
 	} else {
-		psy_ui_drawsolidrectangle(g, r, psy_ui_color_make(0x00999999));
+		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00999999));
 	}
 	psy_ui_textout(g, r.right + 5, (size.height - tm.tmHeight) / 2,
 		self->text, strlen(self->text));
