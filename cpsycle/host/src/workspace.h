@@ -39,6 +39,14 @@ enum {
 	TABPAGE_CHECKUNSAVED = 8
 };
 
+typedef enum {
+	PATTERNDISPLAY_TRACKER,
+	PATTERNDISPLAY_PIANOROLL,
+	PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL,
+	PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL,
+	PATTERNDISPLAY_NUM
+} PatternDisplayType;
+
 enum {
 	PROPERTY_ID_LOADSKIN = 1,
 	PROPERTY_ID_DEFAULTSKIN,
@@ -47,12 +55,16 @@ enum {
 	PROPERTY_ID_REMOVEEVENTDRIVER,
 	PROPERTY_ID_DEFAULTFONT,
 	PROPERTY_ID_DRAWVUMETERS,
+	PROPERTY_ID_PATTERNDISPLAY,
+	PROPERTY_ID_PATTERNDISPLAY_TRACKER,
+	PROPERTY_ID_PATTERNDISPLAY_PIANOROLL,
+	PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL,
+	PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL,
 	PROPERTY_ID_LANG,
 	PROPERTY_ID_SHOWSTEPSEQUENCER,
 	PROPERTY_ID_TRACKSCOPES,
 	PROPERTY_ID_AUDIODRIVERS,
-	PROPERTY_ID_ACTIVEEVENTDRIVERS,
-	PROPERTY_ID_MAPCONTROLLER,
+	PROPERTY_ID_ACTIVEEVENTDRIVERS,	
 	PROPERTY_ID_ADDCONTROLLERMAP,
 	PROPERTY_ID_REMOVECONTROLLERMAP
 };
@@ -139,6 +151,7 @@ typedef struct {
 	psy_Signal signal_defaultfontchanged;
 	psy_Signal signal_togglegear;
 	psy_Signal signal_languagechanged;
+	psy_Signal signal_selectpatterndisplay;
 	psy_ui_Component* mainhandle;	
 	History history;
 	psy_audio_PatternCursor patterneditposition;
@@ -211,8 +224,8 @@ void workspace_configurationchanged(Workspace*, psy_Property* property);
 int workspace_wraparound(Workspace*);
 void workspace_undo(Workspace*);
 void workspace_redo(Workspace*);
-void workspace_setpatterneditposition(Workspace*, psy_audio_PatternCursor);
-psy_audio_PatternCursor workspace_patterneditposition(Workspace*);
+void workspace_setpatterncursor(Workspace*, psy_audio_PatternCursor);
+psy_audio_PatternCursor workspace_patterncursor(Workspace*);
 void workspace_setsequenceselection(Workspace*, psy_audio_SequenceSelection);
 psy_audio_SequenceSelection workspace_sequenceselection(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
@@ -287,5 +300,7 @@ void workspace_outputerror(Workspace*, const char* text);
 void workspace_output(Workspace*, const char* text);
 void workspace_songposdec(Workspace*);
 void workspace_songposinc(Workspace*);
+PatternDisplayType workspace_patterndisplaytype(Workspace*);
+void workspace_selectpatterndisplay(Workspace*, PatternDisplayType);
 
 #endif

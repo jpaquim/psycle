@@ -55,8 +55,9 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
-		psy_ui_size_make(psy_ui_value_makeew(40),
-			psy_ui_value_makeeh(1)));
+		psy_ui_size_make(psy_ui_value_makeew(40.0),
+			psy_ui_value_makeeh(1.0)));
+	psy_ui_component_preventalign(&self->component);
 	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
 		patternviewstatus_onpatterneditpositionchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -87,7 +88,7 @@ void patternviewstatus_ondraw(PatternViewStatus* self, psy_ui_Graphics* g)
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);
-	editposition = workspace_patterneditposition(self->workspace);
+	editposition = workspace_patterncursor(self->workspace);
 	sequenceposition = workspace_sequenceselection(self->workspace).editposition;		
 	sequenceentry = psy_audio_sequenceposition_entry(&sequenceposition);	
 	if (sequenceentry) {
@@ -253,10 +254,11 @@ void patternview_init(PatternView* self,
 	tabbar_append_tabs(&self->tabbar, "Tracker", "Pianoroll", "Split", "Vertical", "Horizontal",
 		"Properties", NULL);
 	tabbar_tab(&self->tabbar, 2)->mode = TABMODE_LABEL;
-	tabbar_tab(&self->tabbar, 5)->istoggle = TRUE;
-	psy_signal_connect(&self->tabbar.signal_change, self,
-		patternview_ontabbarchange);	
+	tabbar_tab(&self->tabbar, 5)->istoggle = TRUE;		
 	tabbar_select(&self->tabbar, 0);
+	psy_signal_connect(&self->tabbar.signal_change, self,
+		patternview_ontabbarchange);
+	patternview_selectdisplay(self, PATTERNDISPLAY_TRACKER);
 	psy_ui_button_init(&self->contextbutton, &self->sectionbar);
 	psy_ui_button_seticon(&self->contextbutton, psy_ui_ICON_MORE);
 	psy_ui_component_setalign(psy_ui_button_base(&self->contextbutton), psy_ui_ALIGN_RIGHT);	
@@ -289,55 +291,38 @@ void patternview_ondestroy(PatternView* self, psy_ui_Component* sender)
 
 void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 	int tabindex)
-{
-	if (tabindex < 2) {
-		if (psy_ui_notebook_splitactivated(&self->editnotebook)) {
-			psy_ui_notebook_full(&self->editnotebook);						
-		}		
-		if (tabindex == 0) {
-			if (workspace_showlinenumbers(self->workspace)) {
-				psy_ui_component_show(&self->trackerview.left);
-				psy_ui_component_align(&self->component);
-			}
-		} else {
-			if (workspace_showlinenumbers(self->workspace)) {
-				psy_ui_component_hide(&self->trackerview.left);
-				psy_ui_component_align(&self->component);
-			}
-		}
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);		
-	} else 
-	if (tabindex == 3) {		
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {			
-			if (workspace_showlinenumbers(self->workspace)) {
-				psy_ui_component_show(&self->trackerview.left);
-				psy_ui_component_align(&self->component);
-			}								
-		}
-		psy_ui_notebook_split(&self->editnotebook, psy_ui_VERTICAL);
-	} else
-	if (tabindex == 4) {
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
-			if (workspace_showlinenumbers(self->workspace)) {
-				psy_ui_component_show(&self->trackerview.left);
-				psy_ui_component_align(&self->component);
-			}
-		}
-		psy_ui_notebook_split(&self->editnotebook, psy_ui_HORIZONTAL);
-	} else
+{	
 	if (tabindex == 5) {
 		// Properties
 		if (psy_ui_component_visible(&self->properties.component)) {
-			psy_ui_component_hide(&self->properties.component);			
+			psy_ui_component_hide(&self->properties.component);
 		} else {
 			psy_ui_component_show(&self->properties.component);
 		}
 		psy_ui_component_align(&self->component);
 	} else {
-		psy_ui_notebook_setpageindex(&self->notebook, 1);
+		PatternDisplayType display;
+
+		switch (tabindex) {
+		case 0:
+			display = PATTERNDISPLAY_TRACKER;
+			break;
+		case 1:
+			display = PATTERNDISPLAY_PIANOROLL;
+			break;
+		case 3:
+			display = PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL;
+			break;
+		case 4:
+			display = PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL;
+			break;
+		default:
+			display = PATTERNDISPLAY_NUM;
+			break;
+		}
+		if (display != PATTERNDISPLAY_NUM) {
+			workspace_selectpatterndisplay(self->workspace, display);
+		}
 	}
 }
 
@@ -442,4 +427,66 @@ void patternview_onpreferredsize(PatternView* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
 	*rv = psy_ui_component_size(&self->component);
+}
+
+void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
+{	
+	int tabindex;
+
+	switch (display) {
+		case PATTERNDISPLAY_TRACKER:
+			tabindex = 0;
+			break;
+		case PATTERNDISPLAY_PIANOROLL:
+			tabindex = 1;
+			break;
+		case PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL:
+			tabindex = 3;
+			break;
+		case PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL:
+			tabindex = 4;
+			break;
+		default:
+			tabindex = 0;
+			break;
+	}
+	if (tabindex < 2) {
+		if (psy_ui_notebook_splitactivated(&self->editnotebook)) {
+			psy_ui_notebook_full(&self->editnotebook);
+		}
+		if (tabindex == 0) {
+			if (workspace_showlinenumbers(self->workspace)) {
+				psy_ui_component_show(&self->trackerview.left);
+				psy_ui_component_align(&self->component);
+			}
+		} else {
+			if (workspace_showlinenumbers(self->workspace)) {
+				psy_ui_component_hide(&self->trackerview.left);
+				psy_ui_component_align(&self->component);
+			}
+		}
+		psy_ui_notebook_setpageindex(&self->notebook, 0);
+		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);
+	} else
+		if (tabindex == 3) {
+			psy_ui_notebook_setpageindex(&self->notebook, 0);
+			if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
+				if (workspace_showlinenumbers(self->workspace)) {
+					psy_ui_component_show(&self->trackerview.left);
+					psy_ui_component_align(&self->component);
+				}
+			}
+			psy_ui_notebook_split(&self->editnotebook, psy_ui_VERTICAL);
+		} else if (tabindex == 4) {
+				psy_ui_notebook_setpageindex(&self->notebook, 0);
+				if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
+					if (workspace_showlinenumbers(self->workspace)) {
+						psy_ui_component_show(&self->trackerview.left);
+						psy_ui_component_align(&self->component);
+					}
+				}
+				psy_ui_notebook_split(&self->editnotebook, psy_ui_HORIZONTAL);
+		} else {
+			psy_ui_notebook_setpageindex(&self->notebook, 1);
+		}
 }

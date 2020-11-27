@@ -9,6 +9,8 @@
 #include "zoombox.h"
 
 #include <uiscroller.h>
+#include <uilabel.h>
+#include <uicombobox.h>
 
 #include <pattern.h>
 
@@ -18,8 +20,10 @@ typedef struct {
 	psy_dsp_NotesTabMode notemode;
 	bool drawpianokeys;
 	psy_ui_Value keyheight;
+	int keyheightpx;
+	int keyboardheightpx;
 	psy_ui_Value defaultkeyheight;
-	PatternViewSkin* skin;
+	PatternViewSkin* skin;	
 } KeyboardState;
 
 void keyboardstate_init(KeyboardState*, PatternViewSkin* skin);
@@ -35,13 +39,20 @@ INLINE int keyboardstate_height(KeyboardState* self,
 	return keyboardstate_numkeys(self) * psy_ui_value_px(&self->keyheight, tm);
 }
 
+INLINE int keyboardstate_keypx(KeyboardState* self, int key)
+{
+	return self->keyboardheightpx - (key + 1) * self->keyheightpx;
+}
+
+INLINE int keyboardstate_pxtokey(KeyboardState* self, int px)
+{
+	return self->keymax - 1 - px / self->keyheightpx;
+}
+
 typedef struct {
 	psy_audio_Pattern* pattern;
 	psy_audio_PatternCursor cursor;		
-	PatternViewSkin* skin;
-	psy_ui_Colour eventcolour;
-	psy_ui_Colour eventhovercolour;
-	psy_ui_Colour eventcurrchannelcolour;		
+	PatternViewSkin* skin;		
 	int pxperbeat;
 	int defaultbeatwidth;
 	int lpb;
@@ -58,6 +69,11 @@ INLINE void gridstate_setpattern(GridState* self, psy_audio_Pattern* pattern)
 INLINE  psy_audio_Pattern* gridstate_pattern(GridState* self)
 {
 	return self->pattern;
+}
+
+INLINE psy_audio_PatternCursor gridstate_cursor(const GridState* self)
+{
+	return self->cursor;
 }
 
 INLINE void gridstate_setlpb(GridState* self, uintptr_t lpb)
@@ -91,6 +107,12 @@ INLINE intptr_t gridstate_steps(GridState* self,
 	return (intptr_t)(position * self->lpb);
 }
 
+INLINE psy_dsp_big_beat_t gridstate_stepstobeat(GridState* self,
+	intptr_t steps)
+{
+	return steps * gridstate_step(self);
+}
+
 INLINE psy_dsp_big_beat_t gridstate_quantize(GridState* self,
 	psy_dsp_big_beat_t position)
 {		
@@ -108,6 +130,11 @@ typedef struct {
 void pianoheader_init(PianoHeader*, psy_ui_Component* parent, GridState*);
 void pianoheader_setsharedgridstate(PianoHeader*, GridState*);
 
+INLINE psy_ui_Component* pianoheader_base(PianoHeader* self)
+{
+	return &self->component;
+}
+
 // Keyboard
 typedef struct {
 	psy_ui_Component component;
@@ -118,6 +145,11 @@ typedef struct {
 void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent,
 	KeyboardState*);
 void pianokeyboard_setsharedkeyboardstate(PianoKeyboard*, KeyboardState*);
+
+INLINE psy_ui_Component* pianokeyboard_base(PianoKeyboard* self)
+{
+	return &self->component;
+}
 
 typedef struct Pianogrid {
    psy_ui_Component component;
@@ -137,28 +169,45 @@ void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
 	GridState*, Workspace*);
 void pianogrid_setsharedgridstate(Pianogrid*, GridState*);
 void pianogrid_setsharedkeyboardstate(Pianogrid*, KeyboardState*);
-void pianogrid_setpattern(Pianogrid*, psy_audio_Pattern*);
 void pianogrid_invalidateline(Pianogrid*, psy_dsp_big_beat_t offset);
 void pianogrid_invalidatecursor(Pianogrid*);
 void pianogrid_storecursor(Pianogrid*);
+void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
+
+INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
+{
+	return &self->component;
+}
+
+typedef struct PianoBar {
+	psy_ui_Component component;
+	ZoomBox zoombox_keyheight;
+	psy_ui_Label keys;
+	psy_ui_ComboBox keytype;
+	Workspace* workspace;
+} PianoBar;
+
+void pianobar_init(PianoBar*, psy_ui_Component* parent, Workspace*);
+
+INLINE psy_ui_Component* pianobar_base(PianoBar* self)
+{
+	return &self->component;
+}
 
 typedef struct Pianoroll {
    psy_ui_Component component;
-   psy_ui_Component top;   
+   psy_ui_Component top;
    PianoHeader header;
    psy_ui_Component left;
-   ZoomBox zoombox_beatwidth;
-   ZoomBox zoombox_keyheight;
-   PianoKeyboard keyboard;
-   Pianogrid grid;
+   ZoomBox zoombox_beatwidth;   
    KeyboardState keyboardstate;
+   PianoKeyboard keyboard;
    GridState gridstate;
-   int cx;
-   int cy;
-   psy_audio_Pattern* pattern;
-   unsigned int opcount;
+   Pianogrid grid;   
+   uintptr_t opcount;
    bool syncpattern;
    psy_ui_Scroller scroller;
+   PianoBar bar;
    Workspace* workspace;
 } Pianoroll;
 
@@ -167,5 +216,10 @@ void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewSkin*,
 void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 void pianoroll_updatescroll(Pianoroll*);
 void pianoroll_makecmds(psy_Property* parent);
+
+INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)
+{
+	return &self->component;
+}
 
 #endif

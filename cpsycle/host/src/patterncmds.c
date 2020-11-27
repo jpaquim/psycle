@@ -85,7 +85,7 @@ void InsertCommandExecute(InsertCommand* self)
 			&self->event);
 		self->insert = 1;
 	}
-	workspace_setpatterneditposition(self->workspace, self->cursor);
+	workspace_setpatterncursor(self->workspace, self->cursor);
 }
 
 void InsertCommandRevert(InsertCommand* self)
@@ -107,7 +107,7 @@ void InsertCommandRevert(InsertCommand* self)
 			psy_audio_pattern_setevent(self->pattern, node, &self->oldevent);
 		}
 	}
-	workspace_setpatterneditposition(self->workspace, self->cursor);
+	workspace_setpatterncursor(self->workspace, self->cursor);
 }
 
 
@@ -158,7 +158,7 @@ void BlockTransposeCommandDispose(BlockTransposeCommand* self)
 
 void BlockTransposeCommandExecute(BlockTransposeCommand* self)
 {
-	workspace_setpatterneditposition(self->workspace, self->cursor);
+	workspace_setpatterncursor(self->workspace, self->cursor);
 	psy_audio_pattern_copy(&self->oldpattern, self->pattern);
 	psy_audio_pattern_blocktranspose(self->pattern,
 		self->block.topleft,
@@ -169,7 +169,7 @@ void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 {
 	assert(self->pattern);
 	if (self->pattern) {
-		workspace_setpatterneditposition(self->workspace, self->cursor);
+		workspace_setpatterncursor(self->workspace, self->cursor);
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 	}
 }
