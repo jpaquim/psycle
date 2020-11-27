@@ -40,6 +40,9 @@ void patternviewskin_init(PatternViewSkin* self)
 	psy_table_init(&self->playbarcolours);
 	psy_table_init(&self->cursorcolours);
 	psy_table_init(&self->midlinecolours);	
+	psy_table_init(&self->eventcolours);
+	psy_table_init(&self->eventhovercolours);
+	psy_table_init(&self->eventcurrchannelcolours);
 	psy_ui_bitmap_init(&self->bitmap);
 	psy_ui_bitmap_loadresource(&self->bitmap, IDB_HEADERSKIN);
 	patternviewskin_setclassicheadercoords(self);
@@ -59,6 +62,9 @@ void patternviewskin_dispose(PatternViewSkin* self)
 	psy_table_dispose(&self->playbarcolours);
 	psy_table_dispose(&self->cursorcolours);
 	psy_table_dispose(&self->midlinecolours);
+	psy_table_dispose(&self->eventcolours);
+	psy_table_dispose(&self->eventhovercolours);
+	psy_table_dispose(&self->eventcurrchannelcolours);
 	psy_ui_bitmap_dispose(&self->bitmap);
 }
 
@@ -76,6 +82,9 @@ void patternviewskin_clear(PatternViewSkin* self)
 	psy_table_clear(&self->playbarcolours);
 	psy_table_clear(&self->cursorcolours);
 	psy_table_clear(&self->midlinecolours);
+	psy_table_clear(&self->eventcolours);
+	psy_table_clear(&self->eventhovercolours);
+	psy_table_clear(&self->eventcurrchannelcolours);
 }
 
 psy_ui_Colour patternviewskin_separatorcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
@@ -201,7 +210,20 @@ psy_ui_Colour patternviewskin_keyseparatorcolour(PatternViewSkin* self)
 	return self->keyseparator;
 }
 
+psy_ui_Colour patternviewskin_eventcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
+{
+	return self->event;
+}
 
+psy_ui_Colour patternviewskin_eventhovercolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
+{
+	return self->eventhover;
+}
+
+psy_ui_Colour patternviewskin_eventcurrchannelcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
+{
+	return self->eventcurrchannel;
+}
 
 psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_t numtracks,
 	psy_ui_Colour source1, psy_ui_Colour source2)
@@ -302,6 +324,9 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	self->keyblack = psy_ui_colour_make(0x00444444);
 	self->keywhite = psy_ui_colour_make(0x00CACACA);
 	self->keyseparator = psy_ui_colour_make(0x00333333);
+	self->event = psy_ui_colour_make(0x00999999);
+	self->eventhover = psy_ui_colour_make(0x00DADADA);
+	self->eventcurrchannel = psy_ui_colour_make(0x00CACACA);	
 	pattern_header_skin_name = psy_property_at_str(p, "pattern_header_skin",
 		"");
 	if (strcmp(pattern_header_skin_name, "") == 0) {

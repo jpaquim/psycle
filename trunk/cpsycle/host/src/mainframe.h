@@ -129,6 +129,7 @@ typedef struct {
 	bool startpage;
 	TerminalMsgType terminalmsgtype;
 	Interpreter interpreter;
+	int startup;
 } MainFrame;
 
 void mainframe_init(MainFrame*);

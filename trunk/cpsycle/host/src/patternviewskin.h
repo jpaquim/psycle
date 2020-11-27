@@ -49,6 +49,9 @@ typedef struct {
 	psy_ui_Colour keywhite;
 	psy_ui_Colour keyblack;
 	psy_ui_Colour keyseparator;
+	psy_ui_Colour event;
+	psy_ui_Colour eventhover;
+	psy_ui_Colour eventcurrchannel;
 	// }
 	TrackerHeaderCoords headercoords;
 	psy_ui_Bitmap bitmap;
@@ -65,7 +68,10 @@ typedef struct {
 	psy_Table selectioncolours;
 	psy_Table playbarcolours;
 	psy_Table cursorcolours;
-	psy_Table midlinecolours;	
+	psy_Table midlinecolours;
+	psy_Table eventcolours;
+	psy_Table eventhovercolours;
+	psy_Table eventcurrchannelcolours;
 } PatternViewSkin;
 
 void patternviewskin_init(PatternViewSkin*);
@@ -88,8 +94,12 @@ psy_ui_Colour patternviewskin_selectioncolour(PatternViewSkin*, uintptr_t track,
 psy_ui_Colour patternviewskin_playbarcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_cursorcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_midlinecolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
+// pianoroll
 psy_ui_Colour patternviewskin_keywhitecolour(PatternViewSkin*);
 psy_ui_Colour patternviewskin_keyblackcolour(PatternViewSkin*);
 psy_ui_Colour patternviewskin_keyseparatorcolour(PatternViewSkin*);
+psy_ui_Colour patternviewskin_eventcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
+psy_ui_Colour patternviewskin_eventhovercolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
+psy_ui_Colour patternviewskin_eventcurrchannelcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 
 #endif /* PATTERNVIEWSKIN_H */

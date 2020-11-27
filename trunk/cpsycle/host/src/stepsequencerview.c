@@ -111,7 +111,7 @@ void stepsequencerbar_ondraw(StepsequencerBar* self, psy_ui_Graphics* g)
 		psy_audio_PatternCursor cursor;
 		psy_audio_PatternNode* curr;
 				
-		cursor = workspace_patterneditposition(self->workspace);
+		cursor = workspace_patterncursor(self->workspace);
 		curr = psy_audio_pattern_begin(self->pattern);
 		while (curr) {			
 			psy_audio_PatternEntry* entry;
@@ -186,7 +186,7 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 
 		bpl = (psy_dsp_big_beat_t) 1 / psy_audio_player_lpb(&self->workspace->player);
 		step = ev->x / self->stepwidth + self->position.steprow * 16;
-		cursor = workspace_patterneditposition(self->workspace);
+		cursor = workspace_patterncursor(self->workspace);
 		cursor.column = 0;	
 		cursor.offset = step / (psy_dsp_big_beat_t) psy_audio_player_lpb(
 			&self->workspace->player);		
@@ -263,7 +263,7 @@ void stepsequencerbar_oneditpositionchanged(StepsequencerBar* self,
 	psy_audio_PatternCursor cursor;
 	StepSequencerPosition position;
 
-	cursor = workspace_patterneditposition(self->workspace);
+	cursor = workspace_patterncursor(self->workspace);
 	position.line = offsettoline(&self->workspace->player,
 		(psy_dsp_big_beat_t) cursor.offset);
 	position.steprow = position.line / 16;
@@ -276,7 +276,7 @@ void stepsequencerview_oneditpositionchanged(StepsequencerView* self,
 	psy_audio_PatternCursor cursor;
 	StepSequencerPosition position;
 
-	cursor = workspace_patterneditposition(self->workspace);
+	cursor = workspace_patterncursor(self->workspace);
 	position.line = offsettoline(&self->workspace->player,
 		(psy_dsp_big_beat_t) cursor.offset);
 	position.steprow = position.line / 16;
@@ -386,7 +386,7 @@ void stepsequencerbarselect_oneditpositionchanged(StepsequencerBarSelect* self,
 	psy_audio_PatternCursor cursor;
 	StepSequencerPosition position;
 
-	cursor = workspace_patterneditposition(self->workspace);
+	cursor = workspace_patterncursor(self->workspace);
 	position.line = offsettoline(&self->workspace->player,
 		(psy_dsp_big_beat_t) cursor.offset);
 	position.steprow = position.line / 16;

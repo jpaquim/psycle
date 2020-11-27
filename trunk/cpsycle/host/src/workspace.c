@@ -198,7 +198,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->eventinputs = 0;
 	self->driverconfigurations = 0;
 	self->mainhandle = handle;
-	self->filename = strdup("Untitled.psy");
+	self->filename = strdup(PSYCLE_UNTITLED);
 	self->lastentry = 0;
 	self->maximizeview.maximized = 0;
 	self->maximizeview.row0 = 1;
@@ -268,6 +268,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_defaultfontchanged);
 	psy_signal_init(&self->signal_togglegear);
 	psy_signal_init(&self->signal_languagechanged);
+	psy_signal_init(&self->signal_selectpatterndisplay);
 }
 
 void workspace_dispose(Workspace* self)
@@ -322,6 +323,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_defaultfontchanged);
 	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_languagechanged);
+	psy_signal_dispose(&self->signal_selectpatterndisplay);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -675,8 +677,9 @@ void workspace_makevisual(Workspace* self)
 
 void workspace_makepatternview(Workspace* self, psy_Property* visual)
 {
-	psy_Property* pvc;	
-	
+	psy_Property* pvc;
+	psy_Property* choice;
+
 	assert(self);
 
 	pvc = psy_property_append_section(visual, "patternview");
@@ -687,7 +690,7 @@ void workspace_makepatternview(Workspace* self, psy_Property* visual)
 		"settingsview.font");
 	psy_property_settext(
 		psy_property_append_bool(pvc, "drawemptydata", 0),
-		"settingsview.draw-empty-data");	
+		"settingsview.draw-empty-data");
 	psy_property_settext(
 		psy_property_append_bool(pvc, "griddefaults", 1),
 		"settingsview.default-entries");
@@ -715,7 +718,7 @@ void workspace_makepatternview(Workspace* self, psy_Property* visual)
 		"settingsview.wrap-around");
 	psy_property_settext(
 		psy_property_append_bool(pvc, "centercursoronscreen", 0),
-		"settingsview.center-cursor-on-screen");	
+		"settingsview.center-cursor-on-screen");
 	psy_property_settext(
 		psy_property_append_int(pvc, "beatsperbar", 4, 1, 16),
 		"settingsview.bar-highlighting");
@@ -724,7 +727,33 @@ void workspace_makepatternview(Workspace* self, psy_Property* visual)
 		"settingsview.a4-440hz");
 	psy_property_settext(
 		psy_property_append_bool(pvc, "movecursorwhenpaste", 1),
-		"settingsview.move-cursor-when-paste");	
+		"settingsview.move-cursor-when-paste");
+	// Choice
+	choice = psy_property_setid(psy_property_settext(
+		psy_property_append_choice(pvc,
+			"patterndisplay", 0),
+		"settingsview.patterndisplay"),
+		PROPERTY_ID_PATTERNDISPLAY);
+	psy_property_setid(psy_property_settext(
+		psy_property_append_int(choice, "tracker",
+			0, 0, 0),
+		"settingsview.tracker"),
+		PROPERTY_ID_PATTERNDISPLAY_TRACKER);
+	psy_property_setid(psy_property_settext(
+			psy_property_append_int(choice, "piano",
+				0, 0, 0),
+			"settingsview.piano"),
+		PROPERTY_ID_PATTERNDISPLAY_PIANOROLL);
+	psy_property_setid(psy_property_settext(
+		psy_property_append_int(choice, "splitvertical",
+			0, 0, 0),
+		"settingsview.splitvertical"),
+		PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL);
+	psy_property_setid(psy_property_settext(
+		psy_property_append_int(choice, "splithorizontal",
+			0, 0, 0),
+		"settingsview.splithorizontal"),
+		PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL);
 	workspace_makepatternviewtheme(self, pvc);
 }
 
@@ -1648,7 +1677,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 
 			choice = (psy_property_ischoiceitem(property))
 				? psy_property_parent(property)
-				: NULL;			
+				: NULL;
 			if (choice && (psy_property_id(choice) == PROPERTY_ID_LANG)) {
 					workspace_configlanguage(self);
 			} else if (choice && (psy_property_id(choice) ==
@@ -1658,6 +1687,10 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 				PROPERTY_ID_ACTIVEEVENTDRIVERS) {
 					workspace_showactiveeventdriverconfig(self,
 					psy_property_item_int(choice));
+			} else if (choice && (psy_property_id(choice) ==
+					PROPERTY_ID_PATTERNDISPLAY)) {
+				workspace_selectpatterndisplay(self,
+					(PatternDisplayType)psy_property_item_int(choice));
 			} else if (psy_property_insection(property,
 					self->driverconfigure)) {
 				workspace_oneditaudiodriverconfiguration(self);
@@ -2481,7 +2514,7 @@ void workspace_changedefaultfontsize(Workspace* self, int size)
 	}
 }
 
-void workspace_setpatterneditposition(Workspace* self,
+void workspace_setpatterncursor(Workspace* self,
 	psy_audio_PatternCursor editposition)
 {	
 	assert(self);
@@ -2492,7 +2525,7 @@ void workspace_setpatterneditposition(Workspace* self,
 	psy_signal_emit(&self->signal_patterneditpositionchanged, self, 0);
 }
 
-psy_audio_PatternCursor workspace_patterneditposition(Workspace* self)
+psy_audio_PatternCursor workspace_patterncursor(Workspace* self)
 {
 	assert(self);
 
@@ -2645,7 +2678,7 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 		position.line = 0;
 		position.offset = 0;		
 		position.track = 0;
-		workspace_setpatterneditposition(self, position);		
+		workspace_setpatterncursor(self, position);		
 	}
 }
 
@@ -2678,7 +2711,7 @@ void workspace_idle(Workspace* self)
 				self->patterneditposition.offset = 
 					self->patterneditposition.line / 
 					(psy_dsp_big_beat_t) psy_audio_player_lpb(&self->player);
-				workspace_setpatterneditposition(self, 
+				workspace_setpatterncursor(self, 
 					self->patterneditposition);				
 			}
 		} else
@@ -2691,7 +2724,7 @@ void workspace_idle(Workspace* self)
 			self->patterneditposition.offset = 
 				self->patterneditposition.line / 
 				(psy_dsp_big_beat_t)psy_audio_player_lpb(&self->player);
-			workspace_setpatterneditposition(self, 
+			workspace_setpatterncursor(self, 
 				self->patterneditposition);
 			self->lastentry = 0;
 		}		
@@ -3115,4 +3148,59 @@ void workspace_songposinc(Workspace* self)
 				self->sequenceselection);
 		}
 	}
+}
+
+PatternDisplayType workspace_patterndisplaytype(Workspace* self)
+{
+	psy_Property* patterndisplay;
+	psy_Property* choice;
+
+	assert(self);
+	
+	patterndisplay = psy_property_at(&self->config,
+		"visual.patternview.patterndisplay",
+		PSY_PROPERTY_TYPE_CHOICE);
+	if (patterndisplay &&
+			psy_property_id(patterndisplay) == PROPERTY_ID_PATTERNDISPLAY) {
+		choice = psy_property_at_choice(patterndisplay);
+		if (choice) {
+			PatternDisplayType rv;
+
+			switch (psy_property_id(choice)) {
+				case PROPERTY_ID_PATTERNDISPLAY_TRACKER:
+					rv = PATTERNDISPLAY_TRACKER;
+					break;
+				case PROPERTY_ID_PATTERNDISPLAY_PIANOROLL:
+					rv = PATTERNDISPLAY_PIANOROLL;
+					break;
+				case PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL:
+					rv = PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL;
+					break;
+				case PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL:
+					rv = PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL;
+					break;
+				default:
+					rv = PATTERNDISPLAY_TRACKER;
+					break;
+			}
+			return rv;
+		}
+	}
+	return PATTERNDISPLAY_TRACKER;
+}
+
+void workspace_selectpatterndisplay(Workspace* self, PatternDisplayType
+	display)
+{
+	psy_Property* patterndisplay;
+
+	assert(self);
+
+	patterndisplay = psy_property_at(&self->config,
+		"visual.patternview.patterndisplay",
+		PSY_PROPERTY_TYPE_CHOICE);
+	if (patterndisplay) {		
+		psy_property_setitem_int(patterndisplay, display);		
+	}
+	psy_signal_emit(&self->signal_selectpatterndisplay, self, 1, display);
 }

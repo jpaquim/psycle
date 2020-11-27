@@ -208,7 +208,7 @@ void playbar_startplay(PlayBar* self)
 			== psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS) {
 			psy_audio_PatternCursor editposition;
 
-			editposition = workspace_patterneditposition(self->workspace);			
+			editposition = workspace_patterncursor(self->workspace);			
 			startposition += (psy_dsp_big_beat_t) editposition.offset;
 			numplaybeats = (psy_dsp_big_beat_t) atof(psy_ui_edit_text(
 				&self->loopbeatsedit));

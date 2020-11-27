@@ -331,6 +331,11 @@ void translator_definekeys(psy_Property* lang)
 		"bar-highlighting", "Bar highlighting: (beats/bar)");
 	psy_property_set_str(section,
 		"a4-440hz", "A4 is 440Hz (Otherwise it is 220Hz)");
+	psy_property_set_str(section, "patterndisplay", "Display pattern in");
+	psy_property_set_str(section, "tracker", "Tracker");
+	psy_property_set_str(section, "piano", "Pianoroll"),
+	psy_property_set_str(section, "splitvertical", "both side by side"),
+	psy_property_set_str(section, "splithorizontal", "both one below the other"),
 	// settingsview/machineview
 	psy_property_set_str(section,
 		"draw-machine-indexes", "Draw Machine Indexes");
