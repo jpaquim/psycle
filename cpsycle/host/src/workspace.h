@@ -135,7 +135,7 @@ typedef struct {
 	psy_Signal signal_configchanged;
 	psy_Signal signal_skinchanged;
 	psy_Signal signal_changecontrolskin;
-	psy_Signal signal_patterneditpositionchanged;
+	psy_Signal signal_patterncursorchanged;
 	psy_Signal signal_sequenceselectionchanged;
 	psy_Signal signal_loadprogress;
 	psy_Signal signal_scanprogress;

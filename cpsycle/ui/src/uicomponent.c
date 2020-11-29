@@ -595,7 +595,7 @@ void onpreferredsize(psy_ui_Component* self, const psy_ui_Size* limit,
 
 void psy_ui_component_doublebuffer(psy_ui_Component* self)
 {
-	self->doublebuffered = 1;
+	self->doublebuffered = TRUE;
 }
 
 void psy_ui_component_setmargin(psy_ui_Component* self,
@@ -1057,4 +1057,19 @@ void psy_ui_component_togglevisibility(psy_ui_Component* self)
 			psy_ui_component_show(self);
 		}
 	}
+}
+
+psy_ui_Rectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
+{
+	psy_ui_TextMetric tm;
+	psy_ui_IntSize size;
+
+	tm = psy_ui_component_textmetric(self);
+	size = psy_ui_intsize_init_size(
+		psy_ui_component_size(self), &tm);
+	return psy_ui_rectangle_make(
+		psy_ui_component_scrollleft(self),
+		psy_ui_component_scrolltop(self),
+		size.width,
+		size.height);
 }

@@ -37,6 +37,8 @@ void patternviewskin_init(PatternViewSkin* self)
 	psy_table_init(&self->fontcurcolours);
 	psy_table_init(&self->fontselcolours);
 	psy_table_init(&self->selectioncolours);
+	psy_table_init(&self->selectionbeatcolours);
+	psy_table_init(&self->selection4beatcolours);
 	psy_table_init(&self->playbarcolours);
 	psy_table_init(&self->cursorcolours);
 	psy_table_init(&self->midlinecolours);	
@@ -79,6 +81,8 @@ void patternviewskin_clear(PatternViewSkin* self)
 	psy_table_clear(&self->fontcurcolours);
 	psy_table_clear(&self->fontselcolours);
 	psy_table_clear(&self->selectioncolours);
+	psy_table_clear(&self->selectionbeatcolours);
+	psy_table_clear(&self->selection4beatcolours);
 	psy_table_clear(&self->playbarcolours);
 	psy_table_clear(&self->cursorcolours);
 	psy_table_clear(&self->midlinecolours);
@@ -166,6 +170,24 @@ psy_ui_Colour patternviewskin_selectioncolour(PatternViewSkin* self, uintptr_t t
 	}
 	return patternviewskin_colour(&self->selectioncolours, track, numtracks,
 		self->selection, self->selection2);
+}
+
+psy_ui_Colour patternviewskin_selectionbeatcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
+{	
+	if (numtracks == 0) {
+		return self->selectionbeat;
+	}	
+	return patternviewskin_colour(&self->selectionbeatcolours, track, numtracks,
+		self->selectionbeat, self->selectionbeat2);
+}
+
+psy_ui_Colour patternviewskin_selection4beatcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
+{
+	if (numtracks == 0) {
+		return self->selection4beat;
+	}
+	return patternviewskin_colour(&self->selection4beatcolours, track, numtracks,
+		self->selection4beat, self->selection4beat2);
 }
 
 psy_ui_Colour patternviewskin_playbarcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
@@ -292,7 +314,7 @@ psy_ui_Colour patternviewskin_calculatetrackcolour(uintptr_t track, uintptr_t nu
 
 void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char* skindir)
 {
-	const char* pattern_header_skin_name;
+	const char* pattern_header_skin_name;	
 
 	patternviewskin_clear(self);
 	self->separator = psy_ui_colour_make(psy_property_at_int(p, "pvc_separator", 0x00292929));
@@ -320,6 +342,11 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	self->cursor2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_cursor2", 0x009F7B00));
 	self->midline = psy_ui_colour_make(psy_property_at_int(p, "pvc_midline", 0x007D6100));
 	self->midline2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_midline2", 0x007D6100));
+	// selection
+	self->selectionbeat = psy_ui_diffadd_colours(self->row, self->rowbeat, self->selection);
+	self->selectionbeat2 = psy_ui_diffadd_colours(self->row2, self->rowbeat2, self->selection2);
+	self->selection4beat = psy_ui_diffadd_colours(self->row, self->row4beat, self->selection);
+	self->selection4beat2 = psy_ui_diffadd_colours(self->row2, self->row4beat2, self->selection2);	
 	// colours not part of current skin format
 	self->keyblack = psy_ui_colour_make(0x00444444);
 	self->keywhite = psy_ui_colour_make(0x00CACACA);

@@ -288,6 +288,15 @@ INLINE psy_ui_Size psy_ui_size_makepx(intptr_t width, intptr_t height)
 	return rv;
 }
 
+INLINE psy_ui_Size psy_ui_size_makeem(double width, double height)
+{
+	psy_ui_Size rv;
+
+	rv.width = psy_ui_value_makeew(width);
+	rv.height = psy_ui_value_makeeh(height);
+	return rv;
+}
+
 INLINE psy_ui_Size psy_ui_size_zero(void)
 {
 	psy_ui_Size rv;
@@ -470,7 +479,9 @@ INLINE void psy_ui_colour_rgb(psy_ui_Colour* self,
 	*b = (uint8_t) temp;
 }
 
-void psy_ui_colour_add(psy_ui_Colour* self, float r, float g, float b);
+psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b);
+psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
+	psy_ui_Colour add);
 
 typedef enum {
 	psy_ui_BORDER_NONE,

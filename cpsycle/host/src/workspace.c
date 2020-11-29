@@ -252,7 +252,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_configchanged);
 	psy_signal_init(&self->signal_skinchanged);
 	psy_signal_init(&self->signal_changecontrolskin);
-	psy_signal_init(&self->signal_patterneditpositionchanged);
+	psy_signal_init(&self->signal_patterncursorchanged);
 	psy_signal_init(&self->signal_sequenceselectionchanged);
 	psy_signal_init(&self->signal_loadprogress);
 	psy_signal_init(&self->signal_scanprogress);
@@ -307,7 +307,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_configchanged);
 	psy_signal_dispose(&self->signal_skinchanged);
 	psy_signal_dispose(&self->signal_changecontrolskin);
-	psy_signal_dispose(&self->signal_patterneditpositionchanged);
+	psy_signal_dispose(&self->signal_patterncursorchanged);
 	psy_signal_dispose(&self->signal_sequenceselectionchanged);
 	psy_signal_dispose(&self->signal_loadprogress);
 	psy_signal_dispose(&self->signal_scanprogress);
@@ -2522,7 +2522,7 @@ void workspace_setpatterncursor(Workspace* self,
 	self->patterneditposition = editposition;
 	self->patterneditposition.line = 
 		(int) (editposition.offset * psy_audio_player_lpb(&self->player));
-	psy_signal_emit(&self->signal_patterneditpositionchanged, self, 0);
+	psy_signal_emit(&self->signal_patterncursorchanged, self, 0);
 }
 
 psy_audio_PatternCursor workspace_patterncursor(Workspace* self)
@@ -2672,7 +2672,7 @@ void workspace_onsequenceeditpositionchanged(Workspace* self,
 	if (selection->editposition.trackposition.sequencentrynode) {
 		entry = (psy_audio_SequenceEntry*)
 			selection->editposition.trackposition.sequencentrynode->entry;
-		position.pattern = entry->patternslot;
+		position.patternid = entry->patternslot;
 		position.column = 0;
 		position.digit = 0;
 		position.line = 0;

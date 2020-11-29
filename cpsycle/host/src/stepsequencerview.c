@@ -84,7 +84,7 @@ void stepsequencerbar_init(StepsequencerBar* self, psy_ui_Component* parent,
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&workspace->player.signal_lpbchanged, self,
 		stepsequencerbar_onlpbchanged);
-	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
+	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		stepsequencerbar_oneditpositionchanged);
 }
 
@@ -354,7 +354,7 @@ void stepsequencerbarselect_init(StepsequencerBarSelect* self,
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->component.signal_destroy,
 		self, stepsequencerbarselect_ondestroy);	
-	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
+	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		stepsequencerbarselect_oneditpositionchanged);	
 }
 
@@ -527,7 +527,7 @@ void stepsequencerview_init(StepsequencerView* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->stepsequencerbar.component, &margin);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		stepsequencerview_onsongchanged);
-	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
+	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		stepsequencerview_oneditpositionchanged);
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
 		self, stepsequencerview_onsequenceselectionchanged);

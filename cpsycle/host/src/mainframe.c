@@ -1312,7 +1312,9 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 	switch (msg) {
 		case PSY_EVENTDRIVER_PATTERNEDIT:
 			return psy_ui_component_hasfocus(
-				&self->patternview.trackerview.grid.component);
+					&self->patternview.trackerview.grid.component) ||
+				psy_ui_component_hasfocus(
+					&self->patternview.pianoroll.grid.component);
 			break;
 		case PSY_EVENTDRIVER_NOTECOLUMN:
 			return self->patternview.trackerview.grid.cursor.column == 0;

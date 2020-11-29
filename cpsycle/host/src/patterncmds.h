@@ -33,6 +33,21 @@ InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
 	psy_audio_PatternCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace);
 
+
+typedef struct {
+	psy_Command command;
+	psy_audio_PatternCursor cursor;
+	psy_audio_Pattern* pattern;
+	double bpl;
+	psy_audio_PatternEvent event;
+	psy_audio_PatternEvent oldevent;
+	int remove;
+	Workspace* workspace;
+} RemoveCommand;
+
+RemoveCommand* RemoveCommandAlloc(psy_audio_Pattern*, double bpl,
+	psy_audio_PatternCursor, Workspace*);
+
 // BlockTranspose
 typedef struct {
 	psy_Command command;

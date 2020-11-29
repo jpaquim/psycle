@@ -15,8 +15,8 @@
 #include <pattern.h>
 
 typedef struct {
-	int keymin;
-	int keymax;
+	intptr_t keymin;
+	intptr_t keymax;
 	psy_dsp_NotesTabMode notemode;
 	bool drawpianokeys;
 	psy_ui_Value keyheight;
@@ -28,7 +28,7 @@ typedef struct {
 
 void keyboardstate_init(KeyboardState*, PatternViewSkin* skin);
 
-INLINE int keyboardstate_numkeys(KeyboardState* self)
+INLINE intptr_t keyboardstate_numkeys(KeyboardState* self)
 {
 	return self->keymax - self->keymin;
 }
@@ -39,15 +39,21 @@ INLINE int keyboardstate_height(KeyboardState* self,
 	return keyboardstate_numkeys(self) * psy_ui_value_px(&self->keyheight, tm);
 }
 
-INLINE int keyboardstate_keypx(KeyboardState* self, int key)
+INLINE int keyboardstate_keytopx(KeyboardState* self, intptr_t key)
 {
-	return self->keyboardheightpx - (key + 1) * self->keyheightpx;
+	return (int)(self->keyboardheightpx - (key + 1) * self->keyheightpx);
 }
 
-INLINE int keyboardstate_pxtokey(KeyboardState* self, int px)
+INLINE intptr_t keyboardstate_pxtokey(KeyboardState* self, int px)
 {
 	return self->keymax - 1 - px / self->keyheightpx;
 }
+
+typedef enum {
+	PIANOROLL_TRACK_DISPLAY_ALL,
+	PIANOROLL_TRACK_DISPLAY_CURRENT,
+	PIANOROLL_TRACK_DISPLAY_ACTIVE
+} PianoTrackDisplay;
 
 typedef struct {
 	psy_audio_Pattern* pattern;
@@ -55,8 +61,9 @@ typedef struct {
 	PatternViewSkin* skin;		
 	int pxperbeat;
 	int defaultbeatwidth;
-	int lpb;
+	uintptr_t lpb;
 	bool cursorchanging;
+	PianoTrackDisplay trackdisplay;
 } GridState;
 
 void gridstate_init(GridState*, PatternViewSkin* skin);
@@ -151,18 +158,31 @@ INLINE psy_ui_Component* pianokeyboard_base(PianoKeyboard* self)
 	return &self->component;
 }
 
+typedef struct {
+	uint8_t note;
+	psy_dsp_big_beat_t offset;
+	uintptr_t track;
+	// draw hover
+	bool hover;
+	// draw noterelease
+	bool noterelease;
+	// event exists	
+	bool active;
+} PianogridTrackEvent;
+
 typedef struct Pianogrid {
    psy_ui_Component component;
    GridState* gridstate;
    GridState defaultgridstate;
    KeyboardState* keyboardstate;
    KeyboardState defaultkeyboardstate;
-   psy_audio_PatternEntry* hover;
-   psy_Table channel;
+   psy_audio_PatternEntry* hoverpatternentry;
+   psy_Table lasttrackevent;
    Workspace* workspace;
    psy_dsp_big_beat_t sequenceentryoffset;
    psy_dsp_big_beat_t lastplayposition;
    psy_audio_PatternCursor oldcursor;
+   bool cursoronnoterelease;
 } Pianogrid;
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
@@ -184,6 +204,10 @@ typedef struct PianoBar {
 	ZoomBox zoombox_keyheight;
 	psy_ui_Label keys;
 	psy_ui_ComboBox keytype;
+	psy_ui_Label tracks;
+	psy_ui_Button tracks_all;
+	psy_ui_Button track_curr;
+	psy_ui_Button tracks_active;
 	Workspace* workspace;
 } PianoBar;
 

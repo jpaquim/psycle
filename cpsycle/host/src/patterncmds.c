@@ -22,10 +22,11 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
+// InsertCommand
+// prototypes
 static void InsertCommandDispose(InsertCommand*);
 static void InsertCommandExecute(InsertCommand*);
 static void InsertCommandRevert(InsertCommand*);
-
 // vtable
 static psy_CommandVtable insertcommandcommand_vtable;
 static bool insertcommandcommand_vtable_initialized = FALSE;
@@ -40,7 +41,7 @@ static void insertcommandcommand_vtable_init(InsertCommand* self)
 		insertcommandcommand_vtable_initialized = TRUE;
 	}
 }
-
+// implementation
 InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
 	psy_audio_PatternCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace)
@@ -110,7 +111,88 @@ void InsertCommandRevert(InsertCommand* self)
 	workspace_setpatterncursor(self->workspace, self->cursor);
 }
 
+// RemoveCommand
+// prototypes
+static void RemoveCommandDispose(RemoveCommand*);
+static void RemoveCommandExecute(RemoveCommand*);
+static void RemoveCommandRevert(RemoveCommand*);
+// vtable
+static psy_CommandVtable removecommandcommand_vtable;
+static bool removecommandcommand_vtable_initialized = FALSE;
 
+static void removecommandcommand_vtable_init(RemoveCommand* self)
+{
+	if (!removecommandcommand_vtable_initialized) {
+		removecommandcommand_vtable = *(self->command.vtable);
+		removecommandcommand_vtable.dispose = (psy_fp_command)RemoveCommandDispose;
+		removecommandcommand_vtable.execute = (psy_fp_command)RemoveCommandExecute;
+		removecommandcommand_vtable.revert = (psy_fp_command)RemoveCommandRevert;
+		removecommandcommand_vtable_initialized = TRUE;
+	}
+}
+// implementation
+RemoveCommand* RemoveCommandAlloc(psy_audio_Pattern* pattern, double bpl,
+	psy_audio_PatternCursor cursor, Workspace* workspace)
+{
+	RemoveCommand* rv;
+
+	rv = malloc(sizeof(RemoveCommand));
+	if (rv) {
+		psy_command_init(&rv->command);
+		removecommandcommand_vtable_init(rv);
+		rv->command.vtable = &removecommandcommand_vtable;
+		rv->cursor = cursor;
+		rv->bpl = bpl;
+		rv->remove = 0;
+		rv->pattern = pattern;
+		rv->workspace = workspace;
+	}
+	return rv;
+}
+
+void RemoveCommandDispose(RemoveCommand* self) { }
+
+void RemoveCommandExecute(RemoveCommand* self)
+{
+	psy_audio_PatternNode* node;
+	psy_audio_PatternNode* prev;
+
+	node = psy_audio_pattern_findnode(self->pattern,
+		self->cursor.track,
+		(psy_dsp_big_beat_t)self->cursor.offset,
+		(psy_dsp_big_beat_t)self->bpl, &prev);
+	if (node) {
+		self->oldevent = psy_audio_pattern_event(self->pattern, node);
+		psy_audio_pattern_remove(self->pattern, node);
+		psy_audio_sequencer_checkiterators(
+			&self->workspace->player.sequencer,
+			node);
+		self->remove = 1;
+	} else {		
+		self->remove = 0;
+	}
+	workspace_setpatterncursor(self->workspace, self->cursor);
+}
+
+void RemoveCommandRevert(RemoveCommand* self)
+{
+	if (self->remove) {
+		psy_audio_PatternNode* node;
+		psy_audio_PatternNode* prev;
+
+		node = psy_audio_pattern_findnode(self->pattern,
+			self->cursor.track,
+			self->cursor.offset,
+			self->bpl, &prev);		
+		node = psy_audio_pattern_insert(self->pattern,
+			prev,
+			self->cursor.track,
+			(psy_dsp_big_beat_t)self->cursor.offset,
+			&self->oldevent);					
+		workspace_setpatterncursor(self->workspace, self->cursor);
+		self->remove = 0;
+	}
+}
 
 static void BlockTransposeCommandDispose(BlockTransposeCommand*);
 static void BlockTransposeCommandExecute(BlockTransposeCommand*);
