@@ -419,6 +419,8 @@ INLINE psy_ui_Rectangle psy_ui_component_position(psy_ui_Component* self)
 	return self->imp->vtable->dev_position(self->imp);
 }
 
+psy_ui_Rectangle psy_ui_component_scrolledposition(psy_ui_Component*);
+
 INLINE void psy_ui_component_starttimer(psy_ui_Component* self, uintptr_t id,
 	uintptr_t interval)
 {

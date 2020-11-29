@@ -22,7 +22,7 @@ static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
 static void patternview_oncontextmenu(PatternView*,
 	psy_ui_Component* sender);
 static void patternviewstatus_ondraw(PatternViewStatus*, psy_ui_Graphics*);
-static void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus*,
+static void patternviewstatus_onpatterncursorchanged(PatternViewStatus*,
 	Workspace* sender);
 static void patternviewstatus_onsequenceselectionchanged(PatternViewStatus*,
 	Workspace* sender);
@@ -58,8 +58,8 @@ void patternviewstatus_init(PatternViewStatus* self, psy_ui_Component* parent,
 		psy_ui_size_make(psy_ui_value_makeew(40.0),
 			psy_ui_value_makeeh(1.0)));
 	psy_ui_component_preventalign(&self->component);
-	psy_signal_connect(&workspace->signal_patterneditpositionchanged, self,
-		patternviewstatus_onpatterneditpositionchanged);	
+	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
+		patternviewstatus_onpatterncursorchanged);	
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
 		self, patternviewstatus_onsequenceselectionchanged);
 }
@@ -70,7 +70,7 @@ void patternviewstatus_onsequenceselectionchanged(PatternViewStatus* self,
 	psy_ui_component_invalidate(&self->component);
 }
 
-void patternviewstatus_onpatterneditpositionchanged(PatternViewStatus* self,
+void patternviewstatus_onpatterncursorchanged(PatternViewStatus* self,
 	Workspace* sender)
 {
 	psy_ui_component_invalidate(&self->component);
@@ -467,9 +467,19 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
 		}
 		psy_ui_notebook_setpageindex(&self->notebook, 0);
 		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);
+		psy_signal_prevent(&self->tabbar.signal_change, self,
+			patternview_ontabbarchange);
+		tabbar_select(&self->tabbar, tabindex);
+		psy_signal_enable(&self->tabbar.signal_change, self,
+			patternview_ontabbarchange);		
 	} else
 		if (tabindex == 3) {
 			psy_ui_notebook_setpageindex(&self->notebook, 0);
+			psy_signal_prevent(&self->tabbar.signal_change, self,
+				patternview_ontabbarchange);
+			tabbar_select(&self->tabbar, 0);
+			psy_signal_enable(&self->tabbar.signal_change, self,
+				patternview_ontabbarchange);
 			if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
 				if (workspace_showlinenumbers(self->workspace)) {
 					psy_ui_component_show(&self->trackerview.left);
@@ -479,6 +489,11 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
 			psy_ui_notebook_split(&self->editnotebook, psy_ui_VERTICAL);
 		} else if (tabindex == 4) {
 				psy_ui_notebook_setpageindex(&self->notebook, 0);
+				psy_signal_prevent(&self->tabbar.signal_change, self,
+					patternview_ontabbarchange);
+				tabbar_select(&self->tabbar, 0);
+				psy_signal_enable(&self->tabbar.signal_change, self,
+					patternview_ontabbarchange);
 				if (!psy_ui_notebook_splitactivated(&self->editnotebook)) {
 					if (workspace_showlinenumbers(self->workspace)) {
 						psy_ui_component_show(&self->trackerview.left);
@@ -488,5 +503,10 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
 				psy_ui_notebook_split(&self->editnotebook, psy_ui_HORIZONTAL);
 		} else {
 			psy_ui_notebook_setpageindex(&self->notebook, 1);
+			psy_signal_prevent(&self->tabbar.signal_change, self,
+				patternview_ontabbarchange);
+			tabbar_select(&self->tabbar, 1);
+			psy_signal_enable(&self->tabbar.signal_change, self,
+				patternview_ontabbarchange);
 		}
 }

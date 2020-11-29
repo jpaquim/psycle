@@ -25,7 +25,7 @@ void psy_audio_patterncursor_init(psy_audio_PatternCursor* self)
 	self->line = 0;
 	self->column = 0;
 	self->digit = 0;
-	self->pattern = 0;
+	self->patternid = 0;
 }
 
 int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
@@ -37,7 +37,7 @@ int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 		rhs->digit == lhs->digit &&
 		rhs->track == lhs->track &&
 		rhs->offset == lhs->offset &&
-		rhs->pattern == lhs->pattern;
+		rhs->patternid == lhs->patternid;
 }
 
 static void psy_audio_pattern_init_signals(psy_audio_Pattern*);
@@ -145,7 +145,7 @@ void psy_audio_pattern_remove(psy_audio_Pattern* self, psy_audio_PatternNode* no
 }
 
 psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern* self,
-	psy_audio_PatternNode* prev, int track, psy_dsp_big_beat_t offset,
+	psy_audio_PatternNode* prev, uintptr_t track, psy_dsp_big_beat_t offset,
 	const psy_audio_PatternEvent* event)
 {
 	psy_audio_PatternNode* rv;
@@ -216,6 +216,24 @@ psy_audio_PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern* self, p
 	return p;
 }
 
+psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern* self,
+	uintptr_t track, psy_dsp_big_beat_t offset)
+{
+	psy_audio_PatternNode* p;
+
+	assert(self);
+
+	p = self->events;
+	while (p != NULL) {
+		psy_audio_PatternEntry* entry = (psy_audio_PatternEntry*)psy_list_entry(p);
+		if (entry->track == track && entry->offset >= offset) {
+			break;
+		}
+		psy_list_next(&p);
+	}
+	return p;
+}
+
 psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* self, uintptr_t track,
 	psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl, psy_audio_PatternNode** prev)
 {
@@ -226,7 +244,7 @@ psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* self, uintp
 	node = psy_audio_pattern_greaterequal(self, offset);
 	if (node) {
 		*prev = node->prev;
-	} else {
+	} else {		
 		*prev = psy_audio_pattern_last(self);
 	}	
 	while (node) {
@@ -251,6 +269,48 @@ psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern* self)
 	assert(self);
 
 	return psy_list_last(self->events);
+}
+
+psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern* self,
+	psy_audio_PatternNode* node, uintptr_t track)
+{	
+	if (node) {
+		psy_audio_PatternNode* rv;
+
+		rv = node->next;
+		while (rv) {
+			psy_audio_PatternEntry* entry;
+
+			entry = psy_audio_patternnode_entry(rv);
+			if (entry->track == track) {
+				break;
+			}
+			rv = rv->next;
+		}
+		return rv;
+	}
+	return NULL;
+}
+
+psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern* self,
+	psy_audio_PatternNode* node, uintptr_t track)
+{
+	if (node) {
+		psy_audio_PatternNode* rv;
+
+		rv = node->prev;
+		while (rv) {
+			psy_audio_PatternEntry* entry;
+
+			entry = psy_audio_patternnode_entry(rv);
+			if (entry->track == track) {
+				break;
+			}
+			rv = rv->prev;
+		}
+		return rv;
+	}
+	return NULL;
 }
 
 void psy_audio_pattern_setname(psy_audio_Pattern* self, const char* text)

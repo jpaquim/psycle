@@ -22,7 +22,7 @@ typedef struct {
 	uintptr_t line;
 	uintptr_t column;
 	uintptr_t digit;
-	uintptr_t pattern;
+	uintptr_t patternid;
 	uint8_t key;
 } psy_audio_PatternCursor;
 
@@ -69,13 +69,15 @@ psy_audio_Pattern* psy_audio_pattern_allocinit(void);
 psy_audio_Pattern* psy_audio_pattern_clone(psy_audio_Pattern*);
 /// inserts an event by copy
 ///\return the pattern node containing the inserted event
-psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, psy_audio_PatternNode* prev, int track,
+psy_audio_PatternNode* psy_audio_pattern_insert(psy_audio_Pattern*, psy_audio_PatternNode* prev, uintptr_t track,
 	psy_dsp_big_beat_t offset, const psy_audio_PatternEvent*);
 /// removes a pattern node
 void psy_audio_pattern_remove(psy_audio_Pattern*, psy_audio_PatternNode*);
 /// finds the pattern node greater or equal than the offset
 ///\return the pattern node greater or equal than the offset
 psy_audio_PatternNode* psy_audio_pattern_greaterequal(psy_audio_Pattern*, psy_dsp_big_beat_t offset);
+psy_audio_PatternNode* psy_audio_pattern_greaterequal_track(psy_audio_Pattern*,
+	uintptr_t track, psy_dsp_big_beat_t offset);
 /// finds a pattern node
 ///\return the pattern node
 psy_audio_PatternNode* psy_audio_pattern_findnode(psy_audio_Pattern* pattern, uintptr_t track,
@@ -90,6 +92,14 @@ INLINE psy_audio_PatternNode* psy_audio_pattern_begin(const psy_audio_Pattern* s
 /// finds the last pattern
 ///\return finds the last pattern node
 psy_audio_PatternNode* psy_audio_pattern_last(psy_audio_Pattern*);
+/// finds the next pattern node on a track
+///\return next pattern node on a track or NULL
+psy_audio_PatternNode* psy_audio_pattern_next_track(psy_audio_Pattern*,
+	psy_audio_PatternNode* node, uintptr_t track);
+/// finds the prev pattern node on a track
+///\return prev pattern node on a track or NULL
+psy_audio_PatternNode* psy_audio_pattern_prev_track(psy_audio_Pattern*,
+	psy_audio_PatternNode* node, uintptr_t track);
 /// sets the pattern description
 void psy_audio_pattern_setname(psy_audio_Pattern*, const char*);
 ///\return pattern description

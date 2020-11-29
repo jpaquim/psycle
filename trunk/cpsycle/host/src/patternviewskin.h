@@ -39,6 +39,10 @@ typedef struct {
 	psy_ui_Colour fontsel2;
 	psy_ui_Colour selection;
 	psy_ui_Colour selection2;
+	psy_ui_Colour selectionbeat;
+	psy_ui_Colour selectionbeat2;
+	psy_ui_Colour selection4beat;
+	psy_ui_Colour selection4beat2;
 	psy_ui_Colour playbar;
 	psy_ui_Colour playbar2;
 	psy_ui_Colour cursor;
@@ -66,6 +70,8 @@ typedef struct {
 	psy_Table fontcurcolours;
 	psy_Table fontselcolours;
 	psy_Table selectioncolours;
+	psy_Table selectionbeatcolours;
+	psy_Table selection4beatcolours;
 	psy_Table playbarcolours;
 	psy_Table cursorcolours;
 	psy_Table midlinecolours;
@@ -91,6 +97,8 @@ psy_ui_Colour patternviewskin_fontplaycolour(PatternViewSkin*, uintptr_t track, 
 psy_ui_Colour patternviewskin_fontcurcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_fontselcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_selectioncolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
+psy_ui_Colour patternviewskin_selectionbeatcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
+psy_ui_Colour patternviewskin_selection4beatcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_playbarcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_cursorcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_midlinecolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
