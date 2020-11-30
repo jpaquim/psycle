@@ -164,7 +164,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	}
 	scopesamples = psy_audio_machine_buffermemorysize(machine);
 	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
-	scopesamples = min(scopesamples, (int)(sr * self->scope_peak_rate * 0.001)) & (~3);
+	scopesamples = psy_min(scopesamples, (int)(sr * self->scope_peak_rate * 0.001)) & (~3);
 	pSamplesL = buffer->samples[0];
 	pSamplesR = buffer->samples[1];
 	//scopeBufferIndex is the position where it will write new data.
@@ -207,7 +207,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	}
 
 	// ok we have some data, lets make some points and draw them
-	maxval = max(mvl, mvr);
+	maxval = psy_max(mvl, mvr);
 	//Adapt difference range independently of max amplitude.
 	if (maxval > 0.0f) {
 		mvdl /= maxval;

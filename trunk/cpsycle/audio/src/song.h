@@ -51,6 +51,11 @@ INLINE psy_dsp_big_beat_t psy_audio_songproperties_bpm(const psy_audio_SongPrope
 	return self->bpm;
 }
 
+INLINE void psy_audio_songproperties_setlpb(psy_audio_SongProperties* self, uintptr_t lpb)
+{
+	self->lpb = lpb;
+}
+
 INLINE uintptr_t psy_audio_songproperties_lpb(const psy_audio_SongProperties* self)
 {
 	return self->lpb;
@@ -104,6 +109,13 @@ INLINE psy_dsp_big_beat_t psy_audio_song_bpm(const psy_audio_Song* self)
 	assert(self);
 
 	return psy_audio_songproperties_bpm(&self->properties);
+}
+/// set song properties lpb
+INLINE void psy_audio_song_setlpb(psy_audio_Song* self, uintptr_t lpb)
+{
+	assert(self);
+
+	psy_audio_songproperties_setlpb(&self->properties, lpb);
 }
 /// return song properties lpb
 INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)

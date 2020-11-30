@@ -1141,7 +1141,7 @@ bool machinewireview_dragmachine(MachineWireView* self, uintptr_t slot,
 		r_old = machineui_position(machineui);
 		psy_ui_rectangle_expand(&r_old, 10, 10, 10, 10);
 		psy_audio_machine_setposition(machineui->machine,
-			max(0, x), max(0, y));
+			psy_max(0, x), psy_max(0, y));
 		if (self->statusbar && machineui->machine) {
 			static char txt[128];
 			intptr_t mx;
@@ -1494,8 +1494,8 @@ void machinewireview_onmachinesinsert(MachineWireView* self,
 			height = machineui_position(machineui).bottom -
 				machineui_position(machineui).top;
 			psy_audio_machine_setposition(machine,
-				max(0, self->mx - width / 2),
-				max(0, self->my - height / 2));
+				psy_max(0, self->mx - width / 2),
+				psy_max(0, self->my - height / 2));
 		}
 		psy_ui_component_updateoverflow(&self->component);
 		psy_ui_component_invalidate(&self->component);

@@ -303,4 +303,19 @@ void workspace_songposinc(Workspace*);
 PatternDisplayType workspace_patterndisplaytype(Workspace*);
 void workspace_selectpatterndisplay(Workspace*, PatternDisplayType);
 
+INLINE psy_Property* workspace_patternviewtheme(Workspace* self)
+{
+	return self->patternviewtheme;
+}
+
+INLINE psy_Property* workspace_machineviewtheme(Workspace* self)
+{
+	return self->machineviewtheme;
+}
+
+INLINE psy_Property* workspace_paramtheme(Workspace* self)
+{
+	return self->paramtheme;
+}
+
 #endif

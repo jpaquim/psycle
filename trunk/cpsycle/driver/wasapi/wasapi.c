@@ -837,7 +837,7 @@ void FillPortList(WasapiDriver* self, psy_List** portList, IMMDeviceCollection* 
 
 			ZeroMemory(&pEnum->MixFormat, sizeof(WAVEFORMATEXTENSIBLE));
 			memcpy(&pEnum->MixFormat, vars.blob.pBlobData, 
-				min(sizeof(WAVEFORMATEXTENSIBLE), vars.blob.cbSize));
+				psy_min(sizeof(WAVEFORMATEXTENSIBLE), vars.blob.cbSize));
 			PropVariantClear(&vars);
 		}
 		//lantency
@@ -854,7 +854,7 @@ void FillPortList(WasapiDriver* self, psy_List** portList, IMMDeviceCollection* 
 			
 			hr = IAudioClient_GetMixFormat(client, &pwft);			
 			EXIT_ON_ERROR(hr);
-			memcpy(&pEnum->MixFormat, pwft, min(sizeof(WAVEFORMATEX) + pwft->cbSize,
+			memcpy(&pEnum->MixFormat, pwft, psy_min(sizeof(WAVEFORMATEX) + pwft->cbSize,
 				sizeof(WAVEFORMATEXTENSIBLE)));
 			if (pwft->cbSize == 0) pEnum->MixFormat.Samples.wValidBitsPerSample = pwft->wBitsPerSample;
 			CoTaskMemFree(pwft);
@@ -1190,7 +1190,7 @@ HRESULT GetStreamFormat(WasapiDriver* self, PaWasapiSubStream* stream, WAVEFORMA
 			psy_audiodriversettings_setvalidbitdepth(&self->settings,
 				wfex->Samples.wValidBitsPerSample);
 		}
-		memcpy(wfOut, pwft, min(sizeof(WAVEFORMATEX) + pwft->cbSize, sizeof(WAVEFORMATEXTENSIBLE)));
+		memcpy(wfOut, pwft, psy_min(sizeof(WAVEFORMATEX) + pwft->cbSize, sizeof(WAVEFORMATEXTENSIBLE)));
 		CoTaskMemFree(pwft);
 	}
 	else

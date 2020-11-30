@@ -926,14 +926,12 @@ void psy_ui_component_setscroll(psy_ui_Component* self,
 
 void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
 {	
-	int oldscrollx;
+	if (self->scroll.x != left) {
+		int oldscrollx;
 
-	oldscrollx = self->scroll.x;
-	self->scroll.x = left;
-	if (self->scroll.x != oldscrollx) {		
-		if (self->signal_scroll.slots) {
-			psy_signal_emit(&self->signal_scroll, self, 0);
-		}
+		oldscrollx = self->scroll.x;
+		self->scroll.x = left;	
+		psy_signal_emit(&self->signal_scroll, self, 0);		
 		psy_ui_component_scrollstep(self, (oldscrollx - self->scroll.x) /
 			self->scrollstepx, 0);
 	}
@@ -941,16 +939,14 @@ void psy_ui_component_setscrollleft(psy_ui_Component* self, int left)
 
 void psy_ui_component_setscrolltop(psy_ui_Component* self, int top)
 {
-	int oldscrolly;
+	if (self->scroll.y != top) {
+		int oldscrolly;
 	
-	oldscrolly = self->scroll.y;
-	self->scroll.y = top;
-	if (self->scroll.y != oldscrolly) {		
-		if (self->signal_scroll.slots) {			
-			psy_signal_emit(&self->signal_scroll, self, 0);
-		}
+		oldscrolly = self->scroll.y;
+		self->scroll.y = top;
+		psy_signal_emit(&self->signal_scroll, self, 0);	
 		psy_ui_component_scrollstep(self, 0, (oldscrolly - self->scroll.y) /
-			self->scrollstepy);
+				self->scrollstepy);
 	}
 }
 
@@ -975,13 +971,13 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 			psy_ui_component_setverticalscrollrange(self, -visilines / 2,
 				maxlines - visilines / 2 - 1);
 			if (currline > maxlines - visilines / 2) {
-				currline = max(-visilines / 2, maxlines -visilines / 2);
+				currline = psy_max(-visilines / 2, maxlines -visilines / 2);
 				psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
 			}
 		} else {
 			psy_ui_component_setverticalscrollrange(self, 0, maxlines - visilines);
 			if (currline > maxlines - visilines) {
-				currline = max(0, maxlines - visilines);
+				currline = psy_max(0, maxlines - visilines);
 				psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
 			}
 		}		
@@ -1003,7 +999,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 		currrow = psy_ui_component_scrollleft(self) / self->scrollstepx;		
 		psy_ui_component_sethorizontalscrollrange(self, 0, maxrows - visirows);			
 		if (currrow > maxrows - visirows) {
-			currrow = max(0, maxrows - visirows);
+			currrow = psy_max(0, maxrows - visirows);
 			psy_ui_component_setscrollleft(self, currrow * self->scrollstepx);
 		}		
 	}

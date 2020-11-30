@@ -200,7 +200,14 @@ INLINE void psy_ui_intpoint_init(psy_ui_IntPoint* self)
 	self->y = 0;
 }
 
-psy_ui_IntPoint psy_ui_intpoint_make(int x, int y);
+INLINE psy_ui_IntPoint psy_ui_intpoint_make(int x, int y)
+{
+	psy_ui_IntPoint rv;
+
+	rv.x = x;
+	rv.y = y;
+	return rv;
+}
 
 typedef struct {
 	int left;
@@ -224,6 +231,15 @@ INLINE psy_ui_Rectangle psy_ui_rectangle_make(int left, int top, int width, int 
 	rv.top = top;
 	rv.right = left + width;
 	rv.bottom = top + height;
+	return rv;
+}
+
+INLINE psy_ui_IntPoint psy_ui_intpoint_zero(void)
+{
+	psy_ui_IntPoint rv;
+
+	rv.x = 0;
+	rv.y = 0;
 	return rv;
 }
 
@@ -482,6 +498,11 @@ INLINE void psy_ui_colour_rgb(psy_ui_Colour* self,
 psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b);
 psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
 	psy_ui_Colour add);
+
+INLINE bool psy_ui_equal_colours(psy_ui_Colour lhs, psy_ui_Colour rhs)
+{
+	return lhs.value && rhs.value;
+}
 
 typedef enum {
 	psy_ui_BORDER_NONE,

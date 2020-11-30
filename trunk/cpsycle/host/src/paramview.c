@@ -585,7 +585,7 @@ void mpfsize(ParamView* self, uintptr_t paramtype, bool small, int* width, int* 
 		break;
 	case MPF_SLIDERCHECK:
 		tm = psy_ui_component_textmetric(&self->component);
-		*height = max(self->skin->checkoff.destheight,
+		*height = psy_max(self->skin->checkoff.destheight,
 			tm.tmHeight);
 		*width = self->skin->checkoff.destwidth +
 			tm.tmAveCharWidth * 5;

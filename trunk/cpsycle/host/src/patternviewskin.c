@@ -70,7 +70,7 @@ void patternviewskin_dispose(PatternViewSkin* self)
 	psy_ui_bitmap_dispose(&self->bitmap);
 }
 
-void patternviewskin_clear(PatternViewSkin* self)
+void patternviewskin_clearcache(PatternViewSkin* self)
 {
 	psy_table_clear(&self->trackseparatorcolours);
 	psy_table_clear(&self->row4beatcolours);
@@ -91,128 +91,92 @@ void patternviewskin_clear(PatternViewSkin* self)
 	psy_table_clear(&self->eventcurrchannelcolours);
 }
 
+psy_ui_Colour patternviewskin_backgroundcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
+{	
+	return patternviewskin_colour(&self->trackseparatorcolours, track, numtracks,
+		self->background, self->background2);
+}
+
 psy_ui_Colour patternviewskin_separatorcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->separator;
-	}
 	return patternviewskin_colour(&self->trackseparatorcolours, track, numtracks,
 		self->separator, self->separator2);
 }
 
 psy_ui_Colour patternviewskin_row4beatcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->row4beat;
-	}
 	return patternviewskin_colour(&self->row4beatcolours, track, numtracks,
 		self->row4beat, self->row4beat2);
 }
 
 psy_ui_Colour patternviewskin_rowbeatcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->rowbeat;
-	}
 	return patternviewskin_colour(&self->rowbeatcolours, track, numtracks,
 		self->rowbeat, self->rowbeat2);
 }
 
 psy_ui_Colour patternviewskin_rowcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->row;
-	}
 	return patternviewskin_colour(&self->rowcolours, track, numtracks,
 		self->row, self->row2);
 }
 
 psy_ui_Colour patternviewskin_fontcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->font;
-	}
 	return patternviewskin_colour(&self->fontcolours, track, numtracks,
 		self->font, self->font2);
 }
 
 psy_ui_Colour patternviewskin_fontplaycolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->fontplay;
-	}
 	return patternviewskin_colour(&self->fontplaycolours, track, numtracks,
 		self->fontplay, self->fontplay2);
 }
 
 psy_ui_Colour patternviewskin_fontcurcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->fontcur;
-	}
 	return patternviewskin_colour(&self->fontcurcolours, track, numtracks,
 		self->fontcur, self->fontcur2);
 }
 
 psy_ui_Colour patternviewskin_fontselcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->fontsel;
-	}
 	return patternviewskin_colour(&self->fontselcolours, track, numtracks,
 		self->fontsel, self->fontsel2);
 }
 
 psy_ui_Colour patternviewskin_selectioncolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
-{
-	if (numtracks == 0) {
-		return self->selection;
-	}
+{	
 	return patternviewskin_colour(&self->selectioncolours, track, numtracks,
 		self->selection, self->selection2);
 }
 
 psy_ui_Colour patternviewskin_selectionbeatcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
-{	
-	if (numtracks == 0) {
-		return self->selectionbeat;
-	}	
+{		
 	return patternviewskin_colour(&self->selectionbeatcolours, track, numtracks,
 		self->selectionbeat, self->selectionbeat2);
 }
 
 psy_ui_Colour patternviewskin_selection4beatcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->selection4beat;
-	}
 	return patternviewskin_colour(&self->selection4beatcolours, track, numtracks,
 		self->selection4beat, self->selection4beat2);
 }
 
 psy_ui_Colour patternviewskin_playbarcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->playbar;
-	}
 	return patternviewskin_colour(&self->playbarcolours, track, numtracks,
 		self->playbar, self->playbar2);
 }
 
 psy_ui_Colour patternviewskin_cursorcolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->cursor;
-	}
 	return patternviewskin_colour(&self->cursorcolours, track, numtracks,
 		self->cursor, self->cursor2);
 }
 
 psy_ui_Colour patternviewskin_midlinecolour(PatternViewSkin* self, uintptr_t track, uintptr_t numtracks)
 {
-	if (numtracks == 0) {
-		return self->midline;
-	}
 	return patternviewskin_colour(&self->midlinecolours, track, numtracks,
 		self->midline, self->midline2);
 }
@@ -252,7 +216,19 @@ psy_ui_Colour patternviewskin_colour(psy_Table* table, uintptr_t track, uintptr_
 {
 	psy_ui_Colour rv;
 
-	if (!psy_table_exists(table, track)) {	
+	if (psy_ui_equal_colours(source1, source2)) {
+		return source1;
+	}
+	if (numtracks < 2) {
+		return source1;
+	} else if (numtracks == 2) {
+		if (track == 0) {
+			return source1;
+		}
+		return source2;
+	}	
+	if (!psy_table_exists(table, track) || (psy_table_size(table) !=
+			numtracks)) {
 		rv = patternviewskin_calculatetrackcolour(track, numtracks, source1, source2);
 		psy_table_insert(table, track, (void*)(uintptr_t)rv.value);
 	} else {
@@ -316,7 +292,7 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 {
 	const char* pattern_header_skin_name;	
 
-	patternviewskin_clear(self);
+	patternviewskin_clearcache(self);
 	self->separator = psy_ui_colour_make(psy_property_at_int(p, "pvc_separator", 0x00292929));
 	self->separator2 = psy_ui_colour_make(psy_property_at_int(p, "pvc_separator2", 0x00292929));
 	self->background = psy_ui_colour_make(psy_property_at_int(p, "pvc_background", 0x00292929));
@@ -348,9 +324,9 @@ void patternviewskin_settheme(PatternViewSkin* self, psy_Property* p, const char
 	self->selection4beat = psy_ui_diffadd_colours(self->row, self->row4beat, self->selection);
 	self->selection4beat2 = psy_ui_diffadd_colours(self->row2, self->row4beat2, self->selection2);	
 	// colours not part of current skin format
-	self->keyblack = psy_ui_colour_make(0x00444444);
-	self->keywhite = psy_ui_colour_make(0x00CACACA);
-	self->keyseparator = psy_ui_colour_make(0x00333333);
+	self->keyblack = psy_ui_colour_make(0x00595959);
+	self->keywhite = psy_ui_colour_make(0x00C0C0C0);	
+	self->keyseparator = psy_ui_colour_make(0x999999);	
 	self->event = psy_ui_colour_make(0x00999999);
 	self->eventhover = psy_ui_colour_make(0x00DADADA);
 	self->eventcurrchannel = psy_ui_colour_make(0x00CACACA);	

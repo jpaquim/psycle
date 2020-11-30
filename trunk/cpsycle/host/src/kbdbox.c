@@ -458,7 +458,7 @@ void kbdbox_setdescription(KbdBox* self, uintptr_t keycode, int shift, int ctrl,
 		}		
 		free(*desc);
 		maxchars = 12;
-		numchars = min(strlen(text), maxchars);
+		numchars = psy_min(strlen(text), maxchars);
 		if (numchars < strlen(text)) {
 			*desc = strdup(text + (strlen(text) - maxchars));
 		} else {

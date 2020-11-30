@@ -344,7 +344,7 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property
 			uintptr_t numoutput;
 			char* wrap;
 
-			numoutput = min(numcolumnavgchars, count);
+			numoutput = psy_min(numcolumnavgchars, count);
 			if (numoutput < count) {
 				wrap = strrchrpos((char*)str, ' ', numoutput);
 				if (wrap) {
@@ -756,7 +756,7 @@ void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Property*
 		uintptr_t numoutput;
 		char* wrap;
 
-		numoutput = min(numcolumnavgchars, count);
+		numoutput = psy_min(numcolumnavgchars, count);
 		if (numoutput < count) {
 			wrap = strrchrpos((char*)str, ' ', numoutput);
 			if (wrap) {

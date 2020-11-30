@@ -316,7 +316,7 @@ void pluginsview_computetextsizes(PluginsView* self, const psy_ui_Size* size)
 	self->lineheight = (int) (tm.tmHeight * 1.5);
 	self->columnwidth = tm.tmAveCharWidth * 45;
 	self->identwidth = tm.tmAveCharWidth * 4;
-	self->numparametercols = max(1, psy_ui_value_px(&size->width, &tm) / self->columnwidth);
+	self->numparametercols = psy_max(1, psy_ui_value_px(&size->width, &tm) / self->columnwidth);
 	self->component.scrollstepy = self->lineheight;
 }
 

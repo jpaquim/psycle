@@ -109,12 +109,12 @@ void xmsongexport_writesongheader(XMSongExport* self, psy_audio_SongFile* songfi
 	self->m_Header.size = sizeof(self->m_Header);
 	self->m_Header.norder = psy_audio_sequence_maxtracksize(&songfile->song->sequence);
 	self->m_Header.restartpos = 0;	
-	self->m_Header.channels = min(songfile->song->properties.tracks, 32);
+	self->m_Header.channels = psy_min(songfile->song->properties.tracks, 32);
 	// Number of patterns stored in file. There should be at least 1 pattern
 	// if you expect to hear anything out of the speakers. The maximum value is
 	// 256. Don’t confuse this with[Song length]!
-	self->m_Header.patterns = min(psy_audio_patterns_size(&songfile->song->patterns), 256);
-	self->m_Header.instruments = min(128, self->macInstruments + self->xmInstruments + samInstruments);
+	self->m_Header.patterns = psy_min(psy_audio_patterns_size(&songfile->song->patterns), 256);
+	self->m_Header.instruments = psy_min(128, self->macInstruments + self->xmInstruments + samInstruments);
 	self->m_Header.flags = 0x0001; //Linear frequency.	
 	self->m_Header.speed = (int)floor(24.f / songfile->song->properties.lpb) + songfile->song->properties.extraticksperbeat;
 	self->m_Header.tempo = (int)songfile->song->properties.bpm;

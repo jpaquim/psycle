@@ -15,20 +15,16 @@
 #include "stepbox.h"
 #include "workspace.h"
 
-typedef struct {
-	psy_ui_Component component;	
-	Workspace* workspace;
-} PatternViewStatus;
-
-void patternviewstatus_init(PatternViewStatus*, psy_ui_Component* parent,
-	Workspace*);
+// PatternViewBar
+//
+// The bar displayed in the mainframe status bar, if the patternview is active
 
 typedef struct {
 	psy_ui_Component component;	
-	StepBox step;
+	StepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
-	PatternViewStatus status;
+	psy_ui_Label status;
 	Workspace* workspace;
 } PatternViewBar;
 
@@ -39,6 +35,10 @@ INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
 
 void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
 	Workspace*);
+
+// PatternView
+//
+// Displays the tracker and/or pianoroll
 
 typedef struct PatternView {
 	psy_ui_Component component;

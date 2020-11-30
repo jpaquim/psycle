@@ -268,7 +268,7 @@ void spectrumanalyzer_drawspectrum(SpectrumAnalyzer* self, psy_ui_Graphics* g)
 		aml = (aml < 0) ? 0 : (aml > 128) ? 128 : aml;
 		amr = (amr < 0) ? 0 : (amr > 128) ? 128 : amr;
 		if (i <= DCBar) {
-			curpeak = min(aml, amr);
+			curpeak = psy_min(aml, amr);
 			halfpeak = 128;
 			colour = CLBARDC;
 		}

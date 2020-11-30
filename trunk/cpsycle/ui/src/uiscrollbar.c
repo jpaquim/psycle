@@ -43,7 +43,7 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self, psy_ui_Component* par
 	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setbackgroundcolour(&self->component,
-		psy_ui_colour_make(0x00444444));
+		psy_ui_colour_make(0x00292929));
 	self->pos = 0;
 	self->drag = 0;
 	self->screenpos = 0;	
@@ -82,7 +82,7 @@ void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self, psy_ui_Graphics* g)
 	} else {
 		r = psy_ui_rectangle_make(0, self->screenpos, size.width, 20);
 	}
-	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00999999));
+	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00666666));
 }
 
 void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self, psy_ui_MouseEvent* ev)

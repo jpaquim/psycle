@@ -208,7 +208,7 @@ void vuscope_drawbars(VuScope* self, psy_ui_Graphics* g)
 	}
 	scopesamples = psy_audio_machine_buffermemorysize(machine);
 	//process the buffer that corresponds to the lapsed time. Also, force 16 bytes boundaries.
-	scopesamples = min(scopesamples, (int)(psy_audio_machine_samplerate(machine) *
+	scopesamples = psy_min(scopesamples, (int)(psy_audio_machine_samplerate(machine) *
 		self->scope_peak_rate * 0.001)) & (~3);
 	pSamplesL = buffer->samples[0];
 	pSamplesR = buffer->samples[1];

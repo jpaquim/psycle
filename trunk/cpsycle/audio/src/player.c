@@ -592,8 +592,11 @@ void psy_audio_player_setlpb(psy_audio_Player* self, uintptr_t lpb)
 {
 	assert(self);
 
+	if (self->song) {
+		psy_audio_song_setlpb(self->song, lpb);
+	}
 	psy_audio_sequencer_setlpb(&self->sequencer, lpb);
-	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);
+	psy_signal_emit(&self->signal_lpbchanged, self, 1, lpb);	
 }
 
 // psy_AudioDriver set, get, load, unload, restart, ..., methods

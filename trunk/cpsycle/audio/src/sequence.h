@@ -158,6 +158,7 @@ typedef struct {
 void psy_audio_sequenceposition_init(psy_audio_SequencePosition*);
 psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(
 	psy_audio_SequencePosition*);
+uintptr_t psy_audio_sequenceposition_patternid(psy_audio_SequencePosition*);
 
 typedef enum {
 	psy_audio_SEQUENCE_SELECTIONMODE_SINGLE,

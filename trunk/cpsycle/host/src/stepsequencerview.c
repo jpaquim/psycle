@@ -30,11 +30,16 @@ static void stepsequencerbarselect_oneditpositionchanged(
 	Workspace* sender);
 
 // bar
+#define STEPDRAW_BACKGROUND 1
+#define STEPDRAW_EVENT 2
+#define STEPDRAW_PLAY 3
+
 static void stepsequencerbar_ondraw(StepsequencerBar*, psy_ui_Graphics*);
 static void stepsequencerbar_drawbackground(StepsequencerBar*,
 	psy_ui_Graphics*);
 static void stepsequencerbar_drawstep(StepsequencerBar*, psy_ui_Graphics*,
 	int step, int mode);
+static psy_ui_Colour stepsequencerbar_stepcolour(StepsequencerBar*, int mode);
 static void stepsequencerbar_onmousedown(StepsequencerBar* self,
 	psy_ui_MouseEvent*);
 static void stepsequencerbar_setdefaultevent(StepsequencerBar*,
@@ -122,7 +127,7 @@ void stepsequencerbar_ondraw(StepsequencerBar* self, psy_ui_Graphics* g)
 			if (entry->track == cursor.track) {
 				if (line >= self->position.steprow * 16 &&
 					line < self->position.steprow * 16 + 16) {
-					stepsequencerbar_drawstep(self, g, line % 16, 2);
+					stepsequencerbar_drawstep(self, g, line % 16, STEPDRAW_EVENT);
 				}
 			}
 			psy_audio_patternnode_next(&curr);
@@ -132,7 +137,7 @@ void stepsequencerbar_ondraw(StepsequencerBar* self, psy_ui_Graphics* g)
 		if (self->steptimer->position.line >= self->position.steprow * 16 &&
 				self->steptimer->position.line < self->position.steprow * 16 + 16) {
 			stepsequencerbar_drawstep(self, g,
-				self->steptimer->position.line % 16, 2);
+				self->steptimer->position.line % 16, STEPDRAW_PLAY);
 		}
 	}	
 }
@@ -142,7 +147,7 @@ void stepsequencerbar_drawbackground(StepsequencerBar* self, psy_ui_Graphics* g)
 	int i;
 
 	for (i = 0; i < 16; ++i) {
-		stepsequencerbar_drawstep(self, g, i, 1);
+		stepsequencerbar_drawstep(self, g, i, STEPDRAW_BACKGROUND);
 	}
 }
 
@@ -157,20 +162,29 @@ void stepsequencerbar_drawstep(StepsequencerBar* self, psy_ui_Graphics* g,
 	corner.height = psy_ui_value_makepx(5);
 	cpx = step * self->stepwidth;
 	psy_ui_setrectangle(&r, cpx, 0, (int)(self->stepwidth * 0.8),
-		self->stepheight);
-	if (mode == 1) {
-		psy_ui_drawsolidroundrectangle(g, r, corner, psy_ui_colour_make(0x00666666));
-	} else
-	if (mode == 2) {
-		psy_ui_drawsolidroundrectangle(g, r, corner, psy_ui_colour_make(0x00999999));
-	} else
-	if (mode == 3) {
-		psy_ui_drawsolidroundrectangle(g, r, corner, psy_ui_colour_make(0x00FFFFFF));
-	}
+		self->stepheight);	
+	psy_ui_drawsolidroundrectangle(g, r, corner,
+		stepsequencerbar_stepcolour(self, mode));
 	if ((step % psy_audio_player_lpb(&self->workspace->player)) == 0) {
-		psy_ui_setcolour(g, psy_ui_colour_make(0x00CACACA));
+		psy_ui_setcolour(g, psy_ui_colour_make(0x00363636));
 		psy_ui_drawroundrectangle(g, r, corner);
 	}
+}
+
+psy_ui_Colour stepsequencerbar_stepcolour(StepsequencerBar* self, int mode)
+{
+	psy_ui_Colour rv;
+
+	if (mode == STEPDRAW_BACKGROUND) {
+		rv = psy_ui_colour_make(0x00292929);
+	} else if (mode == STEPDRAW_EVENT) {
+		rv = psy_ui_colour_make(0x00CACACA);
+	} else if (mode == STEPDRAW_PLAY) {
+		rv =psy_ui_colour_make(0x009F7B00);
+	} else {
+		rv = psy_ui_colour_make(0x00292929);
+	}
+	return rv;
 }
 
 void stepsequencerbar_onmousedown(StepsequencerBar* self,
@@ -553,7 +567,9 @@ void stepsequencerview_ondestroy(StepsequencerView* self, psy_ui_Component* send
 
 void stepsequencerview_ontimer(StepsequencerView* self, uintptr_t timerid)
 {
-	steptimer_tick(&self->steptimer);	
+	if (psy_ui_component_visible(&self->component)) {
+		steptimer_tick(&self->steptimer);
+	}
 }
 
 void stepsequencerview_onsequenceselectionchanged(StepsequencerView* self,
