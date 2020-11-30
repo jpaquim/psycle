@@ -728,7 +728,7 @@ void seqeditortracks_onpreferredsize(SeqEditorTracks* self, psy_ui_Size* limit,
 			seqtrack = (psy_audio_SequenceTrack*)psy_list_entry(seqnode);
 			seqeditortrack_updatetrack(seqedittrack, seqtrack, c);
 			seqeditortrack_onpreferredsize(seqedittrack, &limit, &preferredtracksize);
-			cpxmax = max(cpxmax, psy_ui_value_px(&preferredtracksize.width, &tm));
+			cpxmax = psy_max(cpxmax, psy_ui_value_px(&preferredtracksize.width, &tm));
 			cpymax += psy_ui_value_px(&preferredtracksize.height, &tm) +
 				linemargin;
 		}

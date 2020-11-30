@@ -72,7 +72,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 						psy_ui_textout(g, 0, cpy, text, strlen(text));
 						psy_ui_textout(g, tm.tmAveCharWidth * 5, cpy,
 							psy_audio_machine_editname(machine),
-							min(strlen(psy_audio_machine_editname(machine)), 14));
+							psy_min(strlen(psy_audio_machine_editname(machine)), 14));
 						psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
 							info->Name, strlen(info->Name));						
 						psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);

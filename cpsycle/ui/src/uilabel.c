@@ -132,7 +132,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 			uintptr_t numoutput;
 			char* wrap;
 
-			numoutput = min(numcolumnavgchars, count);
+			numoutput = psy_min(numcolumnavgchars, count);
 			if (numoutput < count) {
 				wrap = strrchrpos((char*)token, ' ', numoutput);
 				if (wrap) {

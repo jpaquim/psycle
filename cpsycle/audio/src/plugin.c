@@ -595,7 +595,7 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			size2 = mi_getdatasize(self->mi);
 			// This way we guarantee that the plugin will have enough bytes,
 			// even if it does not fit what it reads.
-			pData = (unsigned char*)malloc(max(size,size2));
+			pData = (unsigned char*)malloc(psy_max(size,size2));
 			psyfile_read(songfile->file, pData, size); // Read internal data.			
 			mi_putdata(self->mi, pData); // Internal load
 			free(pData);

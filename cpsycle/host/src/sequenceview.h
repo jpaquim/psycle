@@ -51,6 +51,7 @@ typedef struct {
 	int selectedtrack;
 	int foundselected;
 	int lineheight;
+	int textoffsety;
 	int textheight;
 	int trackwidth;
 	int identwidth;   

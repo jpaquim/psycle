@@ -217,6 +217,16 @@ psy_audio_SequenceEntry* psy_audio_sequenceposition_entry(psy_audio_SequencePosi
 	return rv;
 }
 
+uintptr_t psy_audio_sequenceposition_patternid(psy_audio_SequencePosition* self)
+{
+	assert(self);
+
+	if (psy_audio_sequenceposition_entry(self)) {
+		return psy_audio_sequenceposition_entry(self)->patternslot;
+	}
+	return UINTPTR_MAX;
+}
+
 // Sequence
 static void sequence_onpatternlengthchanged(psy_audio_Sequence* self,
 	psy_audio_Pattern* sender);

@@ -21,6 +21,14 @@ typedef uint8_t bool;
 #define TRUE 1
 #endif
 
+#ifndef psy_min
+#define psy_min(a, b) (((a < b) ? a : b))
+#endif
+
+#ifndef psy_max
+#define psy_max(a, b)  (((a) > (b)) ? (a) : (b)) 
+#endif
+
 // psycle status
 
 #define PSY_OK 0

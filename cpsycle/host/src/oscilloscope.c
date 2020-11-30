@@ -179,7 +179,7 @@ void oscilloscope_ondraw(Oscilloscope* self, psy_ui_Graphics* g)
 				} else {
 					frame = numsamples - 1 - (self->scope_view_samples - readpos);
 				}
-				frame = min(frame, numsamples - 1);
+				frame = psy_min(frame, numsamples - 1);
 				x1 = x2 = 0;
 				y1 = y2 = (int)(buffer->samples[channel][frame] * py);
 				for (i = 1; i < self->scope_view_samples; ++i) {

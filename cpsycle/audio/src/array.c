@@ -442,7 +442,7 @@ void psy_audio_array_max_array(psy_audio_Array* self, psy_audio_Array* other)
 	num = (self->len_ < other->len_) ? self->len_ : other->len_;	  
 	source = psy_audio_array_data(other);
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = max(self->ptr_[i], source[i]);
+		self->ptr_[i] = psy_max(self->ptr_[i], source[i]);
 	}
 }
 
@@ -451,7 +451,7 @@ void psy_audio_array_max_constant(psy_audio_Array* self, float value)
 	uintptr_t i;	
 			
 	for (i = 0; i < self->len_; ++i) {
-		self->ptr_[i] = max(self->ptr_[i], value);
+		self->ptr_[i] = psy_max(self->ptr_[i], value);
 	}
 }
 
@@ -464,7 +464,7 @@ void psy_audio_array_min_array(psy_audio_Array* self, psy_audio_Array* other)
 	num = (self->len_ < other->len_) ? self->len_ : other->len_;	  
 	source = psy_audio_array_data(other);
 	for (i = 0; i < num; ++i) {
-		self->ptr_[i] = min(self->ptr_[i], source[i]);		
+		self->ptr_[i] = psy_min(self->ptr_[i], source[i]);
 	}
 }
 
@@ -473,7 +473,7 @@ void psy_audio_array_min_constant(psy_audio_Array* self, float value)
 	uintptr_t i;	
 			
 	for (i = 0; i < self->len_; ++i) {
-		self->ptr_[i] = min(self->ptr_[i], value);
+		self->ptr_[i] = psy_min(self->ptr_[i], value);
 	}
 }
 

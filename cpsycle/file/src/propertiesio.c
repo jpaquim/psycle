@@ -323,7 +323,7 @@ int reallocstr(char** str, size_t size, size_t* cap)
 	int err = 0;
 
 	if (cap && *cap < size) {
-		*cap = min(size + 256, MAXSTRINGSIZE);		
+		*cap = psy_min(size + 256, MAXSTRINGSIZE);
 		*str = realloc(*str, *cap);
 		if (*cap == MAXSTRINGSIZE || *str == 0) {			
 			err = 1;			

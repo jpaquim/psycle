@@ -156,7 +156,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 				static float epsilon = 0.0001f;
 				
 				numsamples = psy_audio_machine_buffermemorysize(machine);
-				numsamples = min(numsamples, psy_audio_MAX_STREAM_SIZE);
+				numsamples = psy_min(numsamples, psy_audio_MAX_STREAM_SIZE);
 				if (numsamples > 0) {
 					bool zero;
 					uintptr_t writepos;
@@ -175,7 +175,7 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 						} else {
 							frame = writepos - numsamples;
 						}
-						frame = min(frame, numsamples - 1);
+						frame = psy_min(frame, numsamples - 1);
 						x1 = x2 = 0;
 						y1 = y2 = (int) (memory->samples[0][frame] * py);													
 						for (i = 1; i < numsamples; ++i) {

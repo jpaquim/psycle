@@ -932,7 +932,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 			left_output = 0;
 			right_output = 0;
 
-			intptr_t nextsamples = min(psy_audio_sampleiterator_prework(&self->controller,
+			intptr_t nextsamples = psy_min(psy_audio_sampleiterator_prework(&self->controller,
 				numsamples, FALSE), numsamples);
 			numsamples -= nextsamples;
 			while (nextsamples)

@@ -17,15 +17,6 @@
 
 extern psy_ui_App app;
 
-psy_ui_IntPoint psy_ui_intpoint_make(int x, int y)
-{
-	psy_ui_IntPoint rv;
-
-	rv.x = x;
-	rv.y = y;
-	return rv;
-}
-
 void psy_ui_setrectangle(psy_ui_Rectangle* self, int left, int top, int width,
 	int height)
 {

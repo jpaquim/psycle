@@ -26,9 +26,6 @@
     <ClCompile Include="src\uicheckbox.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\uicolourdialog.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uicombobox.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -131,9 +128,6 @@
     <ClCompile Include="src\uiwincheckboximp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\uiwincolourdialogimp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\uiwincomboboximp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -176,6 +170,12 @@
     <ClCompile Include="src\uiscroller.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\uiwincolordialogimp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\uicolordialog.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\uialigner.h">
@@ -191,9 +191,6 @@
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\uicheckbox.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\uicolourdialog.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\uicombobox.h">
@@ -298,9 +295,6 @@
     <ClInclude Include="src\uiwincheckboximp.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\uiwincolourdialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\uiwincomboboximp.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
@@ -346,9 +340,6 @@
     <ClInclude Include="src\uixtcheckboximp.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\uixtcolourdialogimp.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\uixtcomboboximp.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
@@ -389,6 +380,15 @@
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\uiscroller.h">
+      <Filter>Source Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uicolordialog.h">
+      <Filter>Source Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uiwincolordialogimp.h">
+      <Filter>Source Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\uixtcolordialogimp.h">
       <Filter>Source Files\Header Files</Filter>
     </ClInclude>
   </ItemGroup>

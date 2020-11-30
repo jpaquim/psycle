@@ -95,7 +95,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_signal_connect(&self->hide.signal_clicked, self, gear_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0.0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 	// client

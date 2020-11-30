@@ -8,8 +8,10 @@
 
 typedef struct {
 	psy_ui_Component component;
-	psy_ui_ScrollBar right;
-	psy_ui_ScrollBar bottom;
+	psy_ui_ScrollBar vscroll;
+	psy_ui_Component bottom;
+	psy_ui_ScrollBar hscroll;
+	psy_ui_Component spacer;
 	psy_ui_Component* client;
 } psy_ui_Scroller;
 

@@ -14,6 +14,13 @@
 
 #include <pattern.h>
 
+typedef enum {
+	KEYBOARDTYPE_KEYS,
+	KEYBOARDTYPE_NOTES,
+	KEYBOARDTYPE_DRUMS,
+	KEYBOARDTYPE_NUM
+} KeyboardType;
+
 typedef struct {
 	intptr_t keymin;
 	intptr_t keymax;
@@ -30,23 +37,44 @@ void keyboardstate_init(KeyboardState*, PatternViewSkin* skin);
 
 INLINE intptr_t keyboardstate_numkeys(KeyboardState* self)
 {
+	assert(self);
+
 	return self->keymax - self->keymin;
 }
 
 INLINE int keyboardstate_height(KeyboardState* self,
 	psy_ui_TextMetric* tm)
 {
+	assert(self);
+
 	return keyboardstate_numkeys(self) * psy_ui_value_px(&self->keyheight, tm);
 }
 
 INLINE int keyboardstate_keytopx(KeyboardState* self, intptr_t key)
 {
+	assert(self);
+
 	return (int)(self->keyboardheightpx - (key + 1) * self->keyheightpx);
 }
 
 INLINE intptr_t keyboardstate_pxtokey(KeyboardState* self, int px)
 {
+	assert(self);
+
 	return self->keymax - 1 - px / self->keyheightpx;
+}
+
+INLINE void pianokeyboardstate_clip(KeyboardState* self,
+	int clip_top_px, int clip_bottom_px,
+	uint8_t* rv_keymin, uint8_t* rv_keymax)
+{
+	assert(self);
+
+	*rv_keymin = psy_max(self->keymin,
+		(self->keyboardheightpx - clip_bottom_px) / self->keyheightpx - 1);
+	*rv_keymax = psy_min(self->keymax,
+		(self->keyboardheightpx - clip_top_px + self->keyheightpx) /
+		self->keyheightpx);
 }
 
 typedef enum {
@@ -56,89 +84,140 @@ typedef enum {
 } PianoTrackDisplay;
 
 typedef struct {
-	psy_audio_Pattern* pattern;
-	psy_audio_PatternCursor cursor;		
-	PatternViewSkin* skin;		
-	int pxperbeat;
-	int defaultbeatwidth;
+	psy_audio_Pattern* pattern;	
+	psy_audio_PatternCursor cursor;
 	uintptr_t lpb;
-	bool cursorchanging;
-	PianoTrackDisplay trackdisplay;
-} GridState;
+	PatternViewSkin* skin;
+	int pxperbeat;
+	int defaultbeatwidth;	
+} PianoGridState;
 
-void gridstate_init(GridState*, PatternViewSkin* skin);
+void gridstate_init(PianoGridState*, PatternViewSkin* skin);
 
-INLINE void gridstate_setpattern(GridState* self, psy_audio_Pattern* pattern)
+INLINE void pianogridstate_setpattern(PianoGridState* self, psy_audio_Pattern* pattern)
 {
+	assert(self);
+
 	self->pattern = pattern;
 }
 
-INLINE  psy_audio_Pattern* gridstate_pattern(GridState* self)
+INLINE  psy_audio_Pattern* pianogridstate_pattern(PianoGridState* self)
 {
+	assert(self);
+
 	return self->pattern;
 }
 
-INLINE psy_audio_PatternCursor gridstate_cursor(const GridState* self)
+INLINE psy_audio_PatternCursor pianogridstate_setcursor(PianoGridState* self,
+	psy_audio_PatternCursor cursor)
 {
+	assert(self);
+
+	self->cursor = cursor;
+}
+
+INLINE psy_audio_PatternCursor pianogridstate_cursor(const PianoGridState* self)
+{
+	assert(self);
+
 	return self->cursor;
 }
 
-INLINE void gridstate_setlpb(GridState* self, uintptr_t lpb)
+INLINE void pianogridstate_setlpb(PianoGridState* self, uintptr_t lpb)
 {
+	assert(self);
+
 	self->lpb = lpb;
 }
 
-INLINE psy_dsp_big_beat_t gridstate_pxtobeat(GridState* self, int px)
+INLINE void pianogridstate_setzoom(PianoGridState* self, psy_dsp_big_beat_t rate)
 {
+	assert(self);
+
+	self->pxperbeat = (int)(self->defaultbeatwidth * rate);
+}
+
+INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, int px)
+{
+	assert(self);
+
 	return px / (psy_dsp_big_beat_t)self->pxperbeat;
 }
 
-INLINE  int gridstate_beattopx(GridState* self, psy_dsp_big_beat_t position)
+INLINE int pianogridstate_beattopx(const PianoGridState* self, psy_dsp_big_beat_t position)
 {
+	assert(self);
+
 	return (int)(position * self->pxperbeat);
 }
 
-INLINE  psy_dsp_big_beat_t gridstate_step(GridState* self)
+INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
 {
+	assert(self);
+
 	return 1 / (psy_dsp_big_beat_t)self->lpb;
 }
 
-INLINE  int gridstate_steppx(GridState* self)
+INLINE int pianogridstate_steppx(const PianoGridState* self)
 {
-	return gridstate_beattopx(self, gridstate_step(self));
+	assert(self);
+
+	return pianogridstate_beattopx(self, pianogridstate_step(self));
 }
 
-INLINE intptr_t gridstate_steps(GridState* self,
+INLINE intptr_t pianogridstate_steps(const PianoGridState* self,
 	psy_dsp_big_beat_t position)
 {
+	assert(self);
+
 	return (intptr_t)(position * self->lpb);
 }
 
-INLINE psy_dsp_big_beat_t gridstate_stepstobeat(GridState* self,
+INLINE psy_dsp_big_beat_t pianogridstate_stepstobeat(PianoGridState* self,
 	intptr_t steps)
 {
-	return steps * gridstate_step(self);
+	assert(self);
+
+	return steps * pianogridstate_step(self);
 }
 
-INLINE psy_dsp_big_beat_t gridstate_quantize(GridState* self,
+INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
 	psy_dsp_big_beat_t position)
 {		
-	return gridstate_steps(self, position) *
+	assert(self);
+
+	return pianogridstate_steps(self, position) *
 		(1 / (psy_dsp_big_beat_t)self->lpb);
+}
+
+INLINE void pianogridstate_clip(PianoGridState* self,
+	int clip_left_px, int clip_right_px,
+	psy_dsp_big_beat_t* rv_left, psy_dsp_big_beat_t* rv_right)
+{
+	assert(self);
+	assert(rv_left && rv_right);
+
+	*rv_left = pianogridstate_quantize(self,
+		pianogridstate_pxtobeat(self, clip_left_px));
+	*rv_right = psy_min(
+		psy_audio_pattern_length(pianogridstate_pattern(self)),
+		pianogridstate_pxtobeat(self, clip_right_px));
 }
 
 // Header (Beatruler)
 typedef struct {
 	psy_ui_Component component;	
-	GridState* gridstate;
-	GridState defaultgridstate;
-} PianoHeader;
+	PianoGridState* gridstate;
+	PianoGridState defaultgridstate;
+} PianoRuler;
 
-void pianoheader_init(PianoHeader*, psy_ui_Component* parent, GridState*);
-void pianoheader_setsharedgridstate(PianoHeader*, GridState*);
+void pianoruler_init(PianoRuler*, psy_ui_Component* parent, PianoGridState*);
+void pianoruler_setsharedgridstate(PianoRuler*, PianoGridState*);
 
-INLINE psy_ui_Component* pianoheader_base(PianoHeader* self)
+INLINE psy_ui_Component* pianoruler_base(PianoRuler* self)
 {
+	assert(self);
+
 	return &self->component;
 }
 
@@ -152,6 +231,7 @@ typedef struct {
 void pianokeyboard_init(PianoKeyboard*, psy_ui_Component* parent,
 	KeyboardState*);
 void pianokeyboard_setsharedkeyboardstate(PianoKeyboard*, KeyboardState*);
+void pianokeyboard_setkeyboardtype(PianoKeyboard*, KeyboardType);
 
 INLINE psy_ui_Component* pianokeyboard_base(PianoKeyboard* self)
 {
@@ -172,8 +252,8 @@ typedef struct {
 
 typedef struct Pianogrid {
    psy_ui_Component component;
-   GridState* gridstate;
-   GridState defaultgridstate;
+   PianoGridState* gridstate;
+   PianoGridState defaultgridstate;
    KeyboardState* keyboardstate;
    KeyboardState defaultkeyboardstate;
    psy_audio_PatternEntry* hoverpatternentry;
@@ -183,19 +263,32 @@ typedef struct Pianogrid {
    psy_dsp_big_beat_t lastplayposition;
    psy_audio_PatternCursor oldcursor;
    bool cursoronnoterelease;
+   PianoTrackDisplay trackdisplay;
+   bool cursorchanging;
 } Pianogrid;
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
-	GridState*, Workspace*);
-void pianogrid_setsharedgridstate(Pianogrid*, GridState*);
+	PianoGridState*, Workspace*);
+void pianogrid_setsharedgridstate(Pianogrid*, PianoGridState*);
 void pianogrid_setsharedkeyboardstate(Pianogrid*, KeyboardState*);
 void pianogrid_invalidateline(Pianogrid*, psy_dsp_big_beat_t offset);
 void pianogrid_invalidatecursor(Pianogrid*);
+void pianogrid_setcursor(Pianogrid*, psy_audio_PatternCursor);
 void pianogrid_storecursor(Pianogrid*);
 void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
+void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);
+
+INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
+{
+	assert(self);
+
+	return self->trackdisplay;
+}
 
 INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
 {
+	assert(self);
+
 	return &self->component;
 }
 
@@ -215,18 +308,20 @@ void pianobar_init(PianoBar*, psy_ui_Component* parent, Workspace*);
 
 INLINE psy_ui_Component* pianobar_base(PianoBar* self)
 {
+	assert(self);
+
 	return &self->component;
 }
 
 typedef struct Pianoroll {
    psy_ui_Component component;
    psy_ui_Component top;
-   PianoHeader header;
+   PianoRuler header;
    psy_ui_Component left;
    ZoomBox zoombox_beatwidth;   
    KeyboardState keyboardstate;
    PianoKeyboard keyboard;
-   GridState gridstate;
+   PianoGridState gridstate;
    Pianogrid grid;   
    uintptr_t opcount;
    bool syncpattern;
@@ -243,6 +338,8 @@ void pianoroll_makecmds(psy_Property* parent);
 
 INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)
 {
+	assert(self);
+
 	return &self->component;
 }
 

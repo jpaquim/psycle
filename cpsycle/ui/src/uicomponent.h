@@ -545,6 +545,29 @@ INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 	return self->overflow;
 }
 
+INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, int stepx, int stepy)
+{
+	self->scrollstepx = stepx;
+	self->scrollstepy = stepy;
+}
+
+INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self, int step)
+{
+	self->scrollstepx = step;
+}
+
+INLINE void psy_ui_component_setscrollstepy(psy_ui_Component* self, int step)
+{
+	self->scrollstepy = step;
+}
+
+INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(self);
+	return psy_ui_intsize_init_size(psy_ui_component_size(self), &tm);
+}
 
 #ifdef __cplusplus
 }

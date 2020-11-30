@@ -65,8 +65,9 @@ void trackconfig_init(TrackConfig*, bool wideinst);
 void trackconfig_dispose(TrackConfig*);
 
 typedef struct {
-	PatternViewSkin* skin;
 	psy_audio_Pattern* pattern;
+	psy_audio_PatternCursor cursor;
+	PatternViewSkin* skin;	
 	TrackConfig* trackconfig;	
 	uintptr_t numtracks;
 	double zoom;
@@ -97,13 +98,13 @@ void trackerheader_setsharedgridstate(TrackerHeader*, TrackerGridState*,
 	TrackConfig*);
 
 typedef struct {
+	psy_audio_Pattern* pattern;
+	PatternViewSkin* skin;
 	int lineheight;
 	int lpb;
 	int drawcursor;
 	psy_dsp_big_beat_t lastplayposition;
-	psy_dsp_big_beat_t sequenceentryoffset;
-	PatternViewSkin* skin;
-	psy_audio_Pattern* pattern;
+	psy_dsp_big_beat_t sequenceentryoffset;	
 	// precomputed
 	int visilines;
 	bool cursorchanging;
@@ -190,8 +191,7 @@ typedef struct {
    int lpb;
    psy_dsp_big_beat_t bpl;
    psy_dsp_big_beat_t cbpl;
-   psy_dsp_NotesTabMode notestabmode;
-   psy_audio_PatternCursor cursor;
+   psy_dsp_NotesTabMode notestabmode;   
    psy_audio_PatternCursor oldcursor;
    PatternSelection selection;
    psy_audio_PatternCursor dragselectionbase;

@@ -110,10 +110,10 @@ int luafilter_work(lua_State* L)
 		float* data = psy_audio_array_data(x_input);
 		for (int i = 0; i < num; ++i) {
 			if (vcfc) {
-				filter_setcutoff(filter, (int)min(max(0.0f, vcfc[i]), 127.0f));
+				filter_setcutoff(filter, (int)psy_min(psy_max(0.0f, vcfc[i]), 127.0f));
 			}
 			if (vcfr) {
-				filter_setressonance(filter, (int)min(max(0.0f, vcfr[i]), 127.0f));
+				filter_setressonance(filter, (int)psy_min(psy_max(0.0f, vcfr[i]), 127.0f));
 			}
 			data[i] = filter->vtable->work(filter, data[i]);
 		}

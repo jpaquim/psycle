@@ -26,7 +26,7 @@ static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit
 	psy_ui_Size* rv);
 // vtable
 static psy_ui_ComponentVtable sequencebuttons_vtable;
-static int sequencebuttons_vtable_initialized = 0;
+static bool sequencebuttons_vtable_initialized = FALSE;
 
 static void sequencebuttons_vtable_init(SequenceButtons* self)
 {
@@ -36,7 +36,7 @@ static void sequencebuttons_vtable_init(SequenceButtons* self)
 			sequencebuttons_onalign;
 		sequencebuttons_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			sequencebuttons_onpreferredsize;
-		sequencebuttons_vtable_initialized = 1;
+		sequencebuttons_vtable_initialized = TRUE;
 	}
 }
 // implementation
@@ -256,7 +256,7 @@ static void sequencelistview_ondraw(SequenceListView*, psy_ui_Graphics*);
 static void sequencelistview_drawtrack(SequenceListView*, psy_ui_Graphics*,
 	psy_audio_SequenceTrack*, int trackindex, int x);
 static void sequencelistview_drawprogressbar(SequenceListView*,
-	psy_ui_Graphics*, int x, int y, psy_ui_TextMetric*,
+	psy_ui_Graphics*, int x, int y,
 	psy_audio_SequenceEntry*);
 static void sequencelistview_onmousedown(SequenceListView*,
 	psy_ui_MouseEvent*);
@@ -314,6 +314,7 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->selected = 0;
 	self->selectedtrack = 0;	
 	self->lineheight = 12;
+	self->textoffsety = 0;
 	self->trackwidth = 100;	
 	self->lastplayposition = -1.f;
 	self->lastplayrow = UINTPTR_MAX;
@@ -374,8 +375,9 @@ void sequencelistview_computetextsizes(SequenceListView* self)
 	psy_ui_TextMetric tm;
 	
 	tm = psy_ui_component_textmetric(&self->component);
-	self->avgcharwidth = tm.tmAveCharWidth;
-	self->lineheight = (int) (tm.tmHeight * 1.5);
+	self->avgcharwidth = tm.tmAveCharWidth;	 
+	self->lineheight = (int) (tm.tmHeight * 1.2);
+	self->textoffsety = (self->lineheight - tm.tmHeight) / 2;
 	self->textheight = tm.tmHeight;
 	self->trackwidth = tm.tmAveCharWidth * 16;
 	self->identwidth = tm.tmAveCharWidth * 4;
@@ -390,17 +392,14 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 	int cpy = 0;	
 	char text[20];
 	psy_ui_Rectangle r;	
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	psy_ui_IntSize size;
 	int startrow;
 	int endrow;
 
 	startrow = max(0, (g->clip.top - listviewmargin) / self->lineheight);
 	endrow = (int)((g->clip.bottom - listviewmargin) / (double)self->lineheight);
-	size = psy_ui_component_size(&self->component);
-	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5,
-		psy_ui_value_px(&size.height, &tm));
+	size = psy_ui_component_intsize(&self->component);	
+	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0));
 	p = track->entries;
 	for (; p != NULL; psy_list_next(&p), ++c, cpy += self->lineheight) {
@@ -436,7 +435,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 				sequenceentry->offset);
 		}
 		if (rowplaying) {
-			sequencelistview_drawprogressbar(self, g, x, cpy, &tm, sequenceentry);				
+			sequencelistview_drawprogressbar(self, g, x, cpy, sequenceentry);				
 		}
 		if ( self->selectedtrack == trackindex &&
 			(self->selection->editposition.trackposition.sequencentrynode == p
@@ -456,21 +455,20 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00CACACA));
 		}
-		psy_ui_textout(g, x + 5, cpy + listviewmargin, text,
+		psy_ui_textout(g, x + 5, cpy + listviewmargin + self->textoffsety, text,
 			strlen(text));
 	}	
 }
 
 void sequencelistview_drawprogressbar(SequenceListView* self,
-	psy_ui_Graphics* g, int x, int y, psy_ui_TextMetric* tm,
+	psy_ui_Graphics* g, int x, int y,
 	psy_audio_SequenceEntry* sequenceentry)
 {	
 	psy_ui_Rectangle r;
 	
-	r = psy_ui_rectangle_make(
-			x + 5, y + listviewmargin,		
+	r = psy_ui_rectangle_make(x + 5, y + listviewmargin,
 			(int)((psy_audio_player_playlist_rowprogress(&self->workspace->player)) *
-				(self->trackwidth - 5)), tm->tmHeight);
+				(self->trackwidth - 5)), self->lineheight);
 	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
 }
 
@@ -617,15 +615,10 @@ void sequencelistview_invalidaterow(SequenceListView* self, uintptr_t row)
 psy_ui_Rectangle sequencelistview_rowrectangle(SequenceListView* self,
 	uintptr_t row)
 {
-	psy_ui_TextMetric tm;
 	psy_ui_IntSize size;
 
-	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_intsize_init_size(
-		psy_ui_component_size(&self->component), &tm);
-	return psy_ui_rectangle_make(0,
-		self->lineheight * row + psy_ui_component_scrolltop(&self->component) +
-			listviewmargin,
+	size = psy_ui_component_intsize(&self->component);
+	return psy_ui_rectangle_make(0, self->lineheight * row + listviewmargin,
 		size.width, self->lineheight);	
 }
 
@@ -1255,8 +1248,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	int c = 0;
 	int visilines;
 	int listviewtop;
-	psy_ui_Size listviewsize;
-	psy_ui_TextMetric tm;
+	psy_ui_IntSize listviewsize;	
 
 	position = sender->sequenceselection.editposition;
 	p = sender->song->sequence.tracks;
@@ -1280,9 +1272,8 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 		}
 	}
 	self->listview.selected = c;
-	listviewsize = psy_ui_component_size(&self->listview.component);
-	tm = psy_ui_component_textmetric(&self->listview.component);
-	visilines = (psy_ui_value_px(&listviewsize.height, &tm) - listviewmargin) / self->listview.lineheight;
+	listviewsize = psy_ui_component_intsize(&self->listview.component);
+	visilines = (listviewsize.height - listviewmargin) / self->listview.lineheight;
 	listviewtop = psy_ui_component_scrolltop(&self->listview.component) / self->listview.lineheight;
 	if (c < listviewtop) {
 		psy_ui_component_setscrolltop(&self->listview.component, c * self->listview.lineheight);
