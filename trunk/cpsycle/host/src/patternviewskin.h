@@ -15,7 +15,9 @@ typedef struct {
 	SkinCoord mute;
 	SkinCoord solo;
 	SkinCoord digitx0;
-	SkinCoord digit0x;	
+	SkinCoord digit0x;
+	SkinCoord dplayon;
+	bool hasplayon;
 } TrackerHeaderCoords;
 
 typedef struct {

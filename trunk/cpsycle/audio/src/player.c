@@ -76,11 +76,13 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	self->octave = 4;
 	self->resyncplayposinsamples = 0;
 	self->resyncplayposinbeats = 0.0;
+	self->measure_cpu_usage = FALSE;
 	psy_dsp_dither_init(&self->dither);
 	psy_audio_sequencer_init(&self->sequencer, &song->sequence,
 		&song->machines);
 	mainframe = handle;
 	psy_audio_midiinput_init(&self->midiinput, song);
+	psy_audio_activechannels_init(&self->playon);
 	psy_audio_player_initdriver(self);
 	psy_audio_eventdrivers_init(&self->eventdrivers, handle);
 	psy_signal_connect(&self->eventdrivers.signal_input, self,
@@ -92,7 +94,7 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_table_init(&self->worked);
 	psy_audio_pattern_init(&self->patterndefaults);
 	psy_audio_pattern_setlength(&self->patterndefaults, (psy_dsp_big_beat_t)
-		0.25);	
+		0.25);
 #ifdef PSYCLE_LOG_WORKEVENTS
 	psyfile_create(&logfile, "C:\\Users\\user\\psycle-workevent-log.txt", 1);
 #endif
@@ -125,7 +127,8 @@ void psy_audio_player_dispose(psy_audio_Player* self)
 	psy_audio_eventdrivers_dispose(&self->eventdrivers);	
 	psy_signal_dispose(&self->signal_numsongtrackschanged);
 	psy_signal_dispose(&self->signal_lpbchanged);
-	psy_signal_dispose(&self->signal_inputevent);	
+	psy_signal_dispose(&self->signal_inputevent);
+	psy_audio_activechannels_dispose(&self->playon);
 	psy_audio_sequencer_dispose(&self->sequencer);
 	psy_table_dispose(&self->notestotracks);
 	psy_table_dispose(&self->trackstonotes);
@@ -190,8 +193,8 @@ psy_dsp_amp_t* psy_audio_player_work(psy_audio_Player* self, int* numsamples,
 					}
 				}
 			}
-			psy_audio_player_notifylinetick(self);
-			psy_audio_sequencer_onnewline(&self->sequencer);
+			psy_audio_player_notifylinetick(self);			
+			psy_audio_sequencer_onnewline(&self->sequencer);			
 		}		
 		if (amount > 0) {			
 			psy_audio_player_workamount(self, amount, &numsamplex, &samples);
@@ -276,25 +279,38 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 		if (output) {
 			psy_audio_BufferContext bc;
 			psy_List* events;
+			psy_List* p;
 			
 			events = psy_audio_sequencer_timedevents(&self->sequencer,
-				slot, amount);
+				slot, amount);			
+			if (psy_audio_player_playing(self)) {
+				// update playon
+				for (p = events; p != NULL; psy_list_next(&p)) {
+					psy_audio_PatternEntry* patternentry;
+
+					patternentry = (psy_audio_PatternEntry*)psy_list_entry(p);
+					psy_audio_activechannels_write(&self->playon,
+						patternentry->track,
+						psy_audio_patternentry_front(patternentry));
+				}
+			}
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
 				self->numsongtracks);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
-			psy_audio_cputimeclock_measure(&machine->cpu_time);
+			if (self->measure_cpu_usage) {
+				psy_audio_cputimeclock_measure(&machine->cpu_time);
+			}
 			psy_audio_machine_work(machine, &bc);
-			psy_audio_cputimeclock_stop(&machine->cpu_time);
-			psy_audio_cputimeclock_update(&machine->cpu_time,
-				amount, psy_audio_sequencer_samplerate(&self->sequencer));			
-#ifdef PSYCLE_LOG_WORKEVENTS
-			log_workevents(events);
-#endif
 			psy_audio_buffer_pan(output, psy_audio_machine_panning(machine),
 				amount);
 			psy_audio_machine_updatememory(machine, &bc);
 			psy_signal_emit(&machine->signal_worked, machine, 2, slot, &bc);
+			if (self->measure_cpu_usage) {
+				psy_audio_cputimeclock_stop(&machine->cpu_time);
+				psy_audio_cputimeclock_update(&machine->cpu_time,
+					amount, psy_audio_sequencer_samplerate(&self->sequencer));
+			}									
 			psy_list_free(events);			
 		}
 	}
@@ -549,13 +565,14 @@ void psy_audio_player_start(psy_audio_Player* self)
 {
 	assert(self);
 
+	psy_audio_activechannels_reset(&self->playon);
 	psy_audio_sequencer_start(&self->sequencer);
 }
 
 void psy_audio_player_stop(psy_audio_Player* self)
 {
 	assert(self);
-
+	
 	psy_audio_sequencer_stop(&self->sequencer);
 	psy_audio_player_dostop(self);
 }
@@ -577,6 +594,7 @@ void psy_audio_player_dostop(psy_audio_Player* self)
 		}
 		psy_audio_player_setbpm(self, self->song->properties.bpm);
 		psy_audio_player_setlpb(self, self->song->properties.lpb);
+		psy_audio_activechannels_reset(&self->playon);
 	}
 }
 
@@ -797,4 +815,9 @@ void psy_audio_player_midiconfigure(psy_audio_Player* self, psy_Property*
 	assert(self);
 
 	psy_audio_midiinput_configure(&self->midiinput, configuration, datastr);
+}
+
+void psy_audio_player_idle(psy_audio_Player* self)
+{
+	psy_audio_eventdrivers_idle(&self->eventdrivers);	
 }

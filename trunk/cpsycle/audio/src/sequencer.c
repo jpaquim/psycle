@@ -141,7 +141,7 @@ void psy_audio_sequencer_init(psy_audio_Sequencer* self, psy_audio_Sequence*
 	self->inputevents = NULL;
 	self->currtracks = NULL;
 	psy_table_init(&self->lastmachine);
-	psy_signal_init(&self->signal_newline);
+	psy_signal_init(&self->signal_newline);	
 	psy_audio_sequencer_reset_common(self, sequence, machines, 44100);	
 }
 
@@ -154,7 +154,7 @@ void psy_audio_sequencer_dispose(psy_audio_Sequencer* self)
 	psy_audio_sequencer_clearinputevents(self);
 	psy_audio_sequencer_clearcurrtracks(self);	
 	psy_table_dispose(&self->lastmachine);
-	psy_signal_dispose(&self->signal_newline);
+	psy_signal_dispose(&self->signal_newline);	
 	self->sequence = NULL;
 	self->machines = NULL;
 }

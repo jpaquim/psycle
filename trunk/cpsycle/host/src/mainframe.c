@@ -57,6 +57,7 @@ static void mainframe_initinterpreter(MainFrame*);
 static void mainframe_updatetext(MainFrame*, Translator*);
 static void mainframe_onskinchanged(MainFrame*, Workspace*);
 static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
+static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_delegatekeyboard(MainFrame*, intptr_t message,
 	psy_ui_KeyEvent*);
@@ -173,7 +174,7 @@ void mainframe_init(MainFrame* self)
 	mainframe_updatetext(self, workspace_translator(&self->workspace));
 	mainframe_initinterpreter(self);
 	mainframe_updateterminalbutton(self);
-	mainframe_connectworkspace(self);	
+	mainframe_connectworkspace(self);
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -714,14 +715,9 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			psy_audio_player_setposition(&self->workspace.player, 0);
 			psy_audio_player_start(&self->workspace.player);
 			break;
-		case CMD_IMM_PLAYSTART: {
-			psy_audio_SequenceEntry* entry;
-
-			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
-			psy_audio_player_setposition(&self->workspace.player,
-				(entry) ? entry->offset : 0);
-			psy_audio_player_start(&self->workspace.player);
-			break; }
+		case CMD_IMM_PLAYSTART:
+			workspace_playstart(&self->workspace);
+			break;
 		case CMD_IMM_PLAYFROMPOS: {
 			psy_dsp_big_beat_t playposition = 0;
 			psy_audio_SequenceEntry* entry;
@@ -1287,7 +1283,27 @@ void mainframe_onskinchanged(MainFrame* self, Workspace* sender)
 
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 {	
+	mainframe_checkplaystartwithrctrl(self, ev);
 	mainframe_delegatekeyboard(self, psy_EVENTDRIVER_KEYDOWN, ev);
+}
+
+void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyEvent* ev)
+{
+	if (workspace_playstartwithrctrl(&self->workspace)) {
+		if (ev->keycode == psy_ui_KEY_CONTROL) {
+			// todo: this win32 detection obly
+			int extended = (ev->keydata & 0x01000000) != 0;
+			if (extended) {
+				// right ctrl
+				workspace_playstart(&self->workspace);
+				return;
+			}
+		} else if (psy_audio_player_playing(&self->workspace.player) &&
+			ev->keycode == psy_ui_KEY_SPACE) {
+			psy_audio_player_stop(&self->workspace.player);
+			return;
+		}
+	}
 }
 
 void mainframe_onkeyup(MainFrame* self, psy_ui_KeyEvent* ev)

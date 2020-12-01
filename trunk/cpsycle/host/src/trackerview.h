@@ -90,6 +90,7 @@ typedef struct {
 	int classic;		
 	Workspace* workspace;
 	uintptr_t currtrack;
+	bool playon;
 } TrackerHeader;
 
 void trackerheader_init(TrackerHeader*, psy_ui_Component* parent, TrackConfig*,
@@ -213,6 +214,10 @@ typedef struct {
    TrackerGridEditMode editmode;
    Workspace* workspace;
    psy_Signal signal_colresize;
+   bool ft2home;
+   bool ft2delete;
+   bool effcursoralwaysdown;
+   bool movecursoronestep;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
@@ -254,9 +259,11 @@ typedef struct TrackerView {
 	psy_List* sublines;
 	psy_Table screenlines;
 	ZoomBox zoombox;
-	bool hasnewline;
 	int zoomheightbase;
 	psy_ui_Component* patternview;
+	int pgupdownstep;
+	bool pgupdownbeat;
+	bool pgupdown4beat;
 } TrackerView;
 
 void trackerview_init(TrackerView*, psy_ui_Component* parent,

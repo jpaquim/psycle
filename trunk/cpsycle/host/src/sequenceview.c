@@ -41,26 +41,26 @@ static void sequencebuttons_vtable_init(SequenceButtons* self)
 }
 // implementation
 void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Workspace* workspace)
-{			
+{
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	sequencebuttons_vtable_init(self);
 	self->component.vtable = &sequencebuttons_vtable;
-	psy_ui_button_init(&self->incpattern, &self->component);	
-	psy_ui_button_init(&self->insertentry, &self->component);	
-	psy_ui_button_init(&self->decpattern, &self->component);	
-	psy_ui_button_init(&self->newentry, &self->component);		
-	psy_ui_button_init(&self->cloneentry, &self->component);	
-	psy_ui_button_init(&self->delentry, &self->component);	
-	psy_ui_button_init(&self->newtrack, &self->component);	
-	psy_ui_button_init(&self->deltrack, &self->component);	
+	psy_ui_button_init(&self->incpattern, &self->component);
+	psy_ui_button_init(&self->insertentry, &self->component);
+	psy_ui_button_init(&self->decpattern, &self->component);
+	psy_ui_button_init(&self->newentry, &self->component);
+	psy_ui_button_init(&self->cloneentry, &self->component);
+	psy_ui_button_init(&self->delentry, &self->component);
+	psy_ui_button_init(&self->newtrack, &self->component);
+	psy_ui_button_init(&self->deltrack, &self->component);
 	psy_ui_button_init(&self->clear, &self->component);
 	psy_ui_button_init(&self->rename, &self->component);
 	//psy_ui_button_init(&self->cut, &self->component);
 	psy_ui_button_init(&self->copy, &self->component);
 	psy_ui_button_init(&self->paste, &self->component);
 	psy_ui_button_init(&self->singlesel, &self->component);
-	psy_ui_button_init(&self->multisel, &self->component);		
+	psy_ui_button_init(&self->multisel, &self->component);
 	psy_ui_button_highlight(&self->singlesel);
 	psy_ui_button_disablehighlight(&self->multisel);
 	sequencebuttons_updatetext(self, &workspace->translator);
@@ -120,17 +120,17 @@ void sequencebuttons_onalign(SequenceButtons* self)
 	psy_ui_TextMetric tm;
 	psy_List* p;
 	psy_List* q;
-	
+
 	size = psy_ui_component_size(&self->component);
 	size = psy_ui_component_preferredsize(&self->component, &size);
 	tm = psy_ui_component_textmetric(&self->component);
 	ident = tm.tmAveCharWidth * 1;
 	cpx = ident;
-	colwidth = (psy_ui_value_px(&size.width, &tm) - ident) / numparametercols;	
-	p = q = psy_ui_component_children(&self->component, 0);	
+	colwidth = (psy_ui_value_px(&size.width, &tm) - ident) / numparametercols;
+	p = q = psy_ui_component_children(&self->component, 0);
 	numrows = (psy_list_size(p) / numparametercols) + 1;
 	rowheight = psy_ui_value_px(&size.height, &tm) / numrows - margin;
-	for ( ; p != NULL; p = p->next, ++c, cpx += colwidth + margin) {
+	for (; p != NULL; p = p->next, ++c, cpx += colwidth + margin) {
 		psy_ui_Component* component;
 
 		component = (psy_ui_Component*)psy_list_entry(p);
@@ -138,7 +138,7 @@ void sequencebuttons_onalign(SequenceButtons* self)
 			cpx = ident;
 			cpy += rowheight + margin;
 			c = 0;
-		}		
+		}
 		psy_ui_component_setposition(component,
 			psy_ui_point_make(
 				psy_ui_value_makepx(cpx),
@@ -152,7 +152,7 @@ void sequencebuttons_onalign(SequenceButtons* self)
 
 void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{	
+{
 	if (rv) {
 		int numparametercols = 3;
 		int margin = 5;
@@ -167,13 +167,13 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 		psy_ui_TextMetric tm;
 		psy_List* p;
 		psy_List* q;
-		
+
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
 		ident = tm.tmAveCharWidth * 1;
 		cpx = ident;
 		for (p = q = psy_ui_component_children(&self->component, 0); p != NULL;
-				p = p->next, ++c) {
+			p = p->next, ++c) {
 			psy_ui_Component* component;
 			psy_ui_Size componentsize;
 			if (c >= numparametercols) {
@@ -189,10 +189,10 @@ void sequencebuttons_onpreferredsize(SequenceButtons* self, psy_ui_Size* limit,
 			cpx += psy_ui_value_px(&componentsize.width, &tm) + margin;
 			if (cpymax < cpy + psy_ui_value_px(&componentsize.height, &tm) + margin) {
 				cpymax = cpy + psy_ui_value_px(&componentsize.height, &tm) + margin;
-			}		
+			}
 		}
 		psy_list_free(q);
-		cpxmax = numparametercols * colmax;	
+		cpxmax = numparametercols * colmax;
 		rv->width = psy_ui_value_makepx(cpxmax);
 		rv->height = psy_ui_value_makepx(cpymax);
 	}
@@ -208,19 +208,19 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	psy_ui_Component* parent, SequenceView* view)
 {
 	self->view = view;
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_draw, self,
 		sequenceviewtrackheader_ondraw);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(1)));
+			psy_ui_value_makeeh(1)));
 	psy_ui_component_preventalign(&self->component);
 }
 
 void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 	psy_ui_Component* sender, psy_ui_Graphics* g)
 {
-	psy_audio_SequenceTrackNode* p;	
+	psy_audio_SequenceTrackNode* p;
 	int cpx = 0;
 	int centery;
 	int lineheight = 1;
@@ -235,9 +235,9 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 	centery = (psy_ui_value_px(&size.height, &tm) - lineheight) / 2;
 	cpx = listviewmargin;
 	sequencelistview_computetextsizes(&self->view->listview);
-	for (p = self->view->sequence->tracks; p != NULL; p = p->next, 
-			cpx += self->view->listview.trackwidth, ++c) {
-		psy_ui_setrectangle(&r, cpx, centery, 
+	for (p = self->view->sequence->tracks; p != NULL; p = p->next,
+		cpx += self->view->listview.trackwidth, ++c) {
+		psy_ui_setrectangle(&r, cpx, centery,
 			self->view->listview.trackwidth - 5,
 			lineheight);
 		if (self->view->listview.selectedtrack == c) {
@@ -245,7 +245,7 @@ void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
 		} else {
 			psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00444444));
 		}
-	}	
+	}
 }
 
 // SequenceListView
@@ -277,31 +277,31 @@ static bool sequencelistview_vtable_initialized = FALSE;
 static void sequencelistview_vtable_init(SequenceListView* self)
 {
 	if (!sequencelistview_vtable_initialized) {
-		sequencelistview_vtable = *(self->component.vtable);		
+		sequencelistview_vtable = *(self->component.vtable);
 		sequencelistview_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			sequencelistview_ondraw;
 		sequencelistview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			sequencelistview_onmousedown;
 		sequencelistview_vtable.onmousedoubleclick =
 			(psy_ui_fp_component_onmousedoubleclick)
-			sequencelistview_onmousedoubleclick;		
+			sequencelistview_onmousedoubleclick;
 		sequencelistview_vtable.ontimer = (psy_ui_fp_component_ontimer)
 			sequencelistview_ontimer;
 		sequencelistview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			sequencelistview_onpreferredsize;
 		sequencelistview_vtable_initialized = TRUE;
-	}	
+	}
 }
 // implementation
 void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	SequenceView* view, psy_audio_Sequence* sequence,
 	psy_audio_Patterns* patterns, Workspace* workspace)
-{	
+{
 	psy_ui_component_init(&self->component, parent);
-	sequencelistview_vtable_init(self);	
+	sequencelistview_vtable_init(self);
 	self->component.vtable = &sequencelistview_vtable;
 	psy_ui_component_doublebuffer(&self->component);
-	psy_ui_component_setwheelscroll(&self->component, 1);	
+	psy_ui_component_setwheelscroll(&self->component, 1);
 	psy_ui_edit_init(&self->rename, &self->component);
 	psy_signal_connect(&self->rename.component.signal_keydown, self,
 		sequencelistview_oneditkeydown);
@@ -312,10 +312,10 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	self->selection = &workspace->sequenceselection;
 	self->selected = 0;
-	self->selectedtrack = 0;	
+	self->selectedtrack = 0;
 	self->lineheight = 12;
 	self->textoffsety = 0;
-	self->trackwidth = 100;	
+	self->trackwidth = 100;
 	self->lastplayposition = -1.f;
 	self->lastplayrow = UINTPTR_MAX;
 	self->showpatternnames = workspace_showingpatternnames(workspace);
@@ -331,14 +331,14 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 
 void sequencelistview_ondraw(SequenceListView* self, psy_ui_Graphics* g)
 {
-	psy_audio_SequenceTrackNode* p;	
+	psy_audio_SequenceTrackNode* p;
 	int cpx = 0;
-	int trackindex = 0;		
+	int trackindex = 0;
 	self->foundselected = 0;
 
-	sequencelistview_computetextsizes(self);	
-	for (p = self->sequence->tracks; p != NULL; p = p->next, 
-			cpx += self->trackwidth, ++trackindex) {
+	sequencelistview_computetextsizes(self);
+	for (p = self->sequence->tracks; p != NULL; p = p->next,
+		cpx += self->trackwidth, ++trackindex) {
 		sequencelistview_drawtrack(self, g, (psy_audio_SequenceTrack*)
 			psy_list_entry(p), trackindex, cpx);
 	}
@@ -361,10 +361,10 @@ void sequencelistview_onpreferredsize(SequenceListView* self, psy_ui_Size* limit
 	if (self->sequence) {
 		rv->width = psy_ui_value_makepx(
 			psy_audio_sequence_sizetracks(self->sequence) *
-				self->component.scrollstepx);
+			self->component.scrollstepx);
 		rv->height = psy_ui_value_makepx(
 			psy_audio_sequence_maxtracksize(self->sequence) *
-				self->component.scrollstepy);
+			self->component.scrollstepy);
 	} else {
 		*rv = psy_ui_size_zero();
 	}
@@ -373,10 +373,10 @@ void sequencelistview_onpreferredsize(SequenceListView* self, psy_ui_Size* limit
 void sequencelistview_computetextsizes(SequenceListView* self)
 {
 	psy_ui_TextMetric tm;
-	
+
 	tm = psy_ui_component_textmetric(&self->component);
-	self->avgcharwidth = tm.tmAveCharWidth;	 
-	self->lineheight = (int) (tm.tmHeight * 1.2);
+	self->avgcharwidth = tm.tmAveCharWidth;
+	self->lineheight = (int)(tm.tmHeight * 1.2);
 	self->textoffsety = (self->lineheight - tm.tmHeight) / 2;
 	self->textheight = tm.tmHeight;
 	self->trackwidth = tm.tmAveCharWidth * 16;
@@ -387,18 +387,18 @@ void sequencelistview_computetextsizes(SequenceListView* self)
 
 void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_audio_SequenceTrack* track, int trackindex, int x)
 {
-	psy_List* p;	
+	psy_List* p;
 	uintptr_t c = 0;
-	int cpy = 0;	
+	int cpy = 0;
 	char text[20];
-	psy_ui_Rectangle r;	
+	psy_ui_Rectangle r;
 	psy_ui_IntSize size;
 	int startrow;
 	int endrow;
 
 	startrow = max(0, (g->clip.top - listviewmargin) / self->lineheight);
 	endrow = (int)((g->clip.bottom - listviewmargin) / (double)self->lineheight);
-	size = psy_ui_component_intsize(&self->component);	
+	size = psy_ui_component_intsize(&self->component);
 	psy_ui_setrectangle(&r, x, 0, self->trackwidth - 5, size.height);
 	psy_ui_settextcolour(g, psy_ui_colour_make(0));
 	p = track->entries;
@@ -414,7 +414,7 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 			break;
 		}
 		rowplaying = psy_audio_player_playing(self->player) &&
-			psy_audio_player_playlist_position(self->player) == c;		
+			psy_audio_player_playlist_position(self->player) == c;
 		if (self->showpatternnames) {
 			psy_audio_Pattern* pattern;
 
@@ -435,20 +435,20 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 				sequenceentry->offset);
 		}
 		if (rowplaying) {
-			sequencelistview_drawprogressbar(self, g, x, cpy, sequenceentry);				
+			sequencelistview_drawprogressbar(self, g, x, cpy, sequenceentry);
 		}
-		if ( self->selectedtrack == trackindex &&
+		if (self->selectedtrack == trackindex &&
 			(self->selection->editposition.trackposition.sequencentrynode == p
-				 || (psy_list_findentry(self->selection->entries, sequenceentry))
-				 )) {
+				|| (psy_list_findentry(self->selection->entries, sequenceentry))
+				)) {
 			if (!rowplaying) {
 				psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x009B7800));
 			} else {
 				psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 			}
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00FFFFFF));
-			self->foundselected = 1;				
-		} else if (rowplaying) {			
+			self->foundselected = 1;
+		} else if (rowplaying) {
 			psy_ui_setbackgroundcolour(g, psy_ui_colour_make(0x00232323));
 			psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		} else {
@@ -457,18 +457,18 @@ void sequencelistview_drawtrack(SequenceListView* self, psy_ui_Graphics* g, psy_
 		}
 		psy_ui_textout(g, x + 5, cpy + listviewmargin + self->textoffsety, text,
 			strlen(text));
-	}	
+	}
 }
 
 void sequencelistview_drawprogressbar(SequenceListView* self,
 	psy_ui_Graphics* g, int x, int y,
 	psy_audio_SequenceEntry* sequenceentry)
-{	
+{
 	psy_ui_Rectangle r;
-	
+
 	r = psy_ui_rectangle_make(x + 5, y + listviewmargin,
-			(int)((psy_audio_player_playlist_rowprogress(&self->workspace->player)) *
-				(self->trackwidth - 5)), self->lineheight);
+		(int)((psy_audio_player_playlist_rowprogress(&self->workspace->player)) *
+			(self->trackwidth - 5)), self->lineheight);
 	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
 }
 
@@ -513,7 +513,7 @@ void sequencelistview_rename(SequenceListView* self)
 void sequencelistview_oneditkeydown(SequenceListView* self,
 	psy_ui_Component* sender, psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_RETURN) {		
+	if (ev->keycode == psy_ui_KEY_RETURN) {
 		psy_audio_SequenceEntry* sequenceentry;
 
 		sequenceentry = psy_audio_sequenceposition_entry(
@@ -545,9 +545,9 @@ void sequencelistview_onmousedown(SequenceListView* self,
 	sequencelistview_computetextsizes(self);
 	selected = (ev->y - listviewmargin) / self->lineheight;
 	selectedtrack = ev->x / self->trackwidth;
-	if (selectedtrack < psy_audio_sequence_sizetracks(self->sequence)) {		
+	if (selectedtrack < psy_audio_sequence_sizetracks(self->sequence)) {
 		psy_audio_sequenceselection_seteditposition(self->selection,
-			psy_audio_sequence_at(self->sequence, selectedtrack, selected));		
+			psy_audio_sequence_at(self->sequence, selectedtrack, selected));
 		workspace_setsequenceselection(self->workspace, *self->selection);
 		sequenceview_updateplayposition(self->view);
 	}
@@ -567,7 +567,7 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 			psy_audio_sequence_at(self->sequence, selectedtrack, selected));
 		workspace_setsequenceselection(self->workspace, *self->selection);
 		sequenceview_changeplayposition(self->view);
-	}	
+	}
 }
 
 void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
@@ -575,19 +575,19 @@ void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
 	if (psy_audio_player_playing(self->player)) {
 		if (psy_audio_player_playlist_position(&self->workspace->player) != self->lastplayrow) {
 			// invalidate previous row
-			sequencelistview_invalidaterow(self, self->lastplayrow);			
+			sequencelistview_invalidaterow(self, self->lastplayrow);
 			self->lastplayrow = psy_audio_player_playlist_position(&self->workspace->player);
 			// next(curr) row is invalidated with row progress bar
 		}
 		if (self->refreshcount == 2) { // saves cpu not updating at every intervall
-                                       // todo: better check for player line change
+									   // todo: better check for player line change
 			// invalidate row progress bar
 			// takes care, too, that at row change the new row is invalidated
 			if (psy_audio_player_playlist_position(&self->workspace->player)
-					!= UINTPTR_MAX) {
+				!= UINTPTR_MAX) {
 				sequencelistview_invalidaterow(self,
 					psy_audio_player_playlist_position(&self->workspace->player));
-			}			
+			}
 			self->refreshcount = 0;
 		}
 		++self->refreshcount;
@@ -619,7 +619,7 @@ psy_ui_Rectangle sequencelistview_rowrectangle(SequenceListView* self,
 
 	size = psy_ui_component_intsize(&self->component);
 	return psy_ui_rectangle_make(0, self->lineheight * row + listviewmargin,
-		size.width, self->lineheight);	
+		size.width, self->lineheight);
 }
 
 // SequenceViewDuration
@@ -645,7 +645,7 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->duration, &self->component);
 	psy_ui_label_settextalignment(&self->duration, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_label_setcharnumber(&self->duration, 10);	
+	psy_ui_label_setcharnumber(&self->duration, 10);
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
@@ -668,10 +668,10 @@ void sequencedurationbar_onlanguagechanged(SequenceViewDuration* self,
 }
 
 void sequenceduration_update(SequenceViewDuration* self)
-{	
+{
 	psy_dsp_big_beat_t songlength;
 	char text[40];
-	
+
 	songlength = psy_audio_sequence_calcdurationinms(self->sequence);
 	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
 		(int)(songlength / 60), ((int)songlength % 60),
@@ -694,13 +694,13 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_checkbox_init(&self->followsong, &self->component);	
-	psy_ui_checkbox_init(&self->shownames, &self->component);	
+	psy_ui_checkbox_init(&self->followsong, &self->component);
+	psy_ui_checkbox_init(&self->shownames, &self->component);
 	psy_ui_checkbox_init(&self->showplaylist, &self->component);
 	psy_ui_checkbox_init(&self->recordnoteoff, &self->component);
 	psy_ui_checkbox_init(&self->recordtweak, &self->component);
 	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
-	psy_ui_checkbox_init(&self->allownotestoeffect, &self->component);	
+	psy_ui_checkbox_init(&self->allownotestoeffect, &self->component);
 	{
 		psy_ui_Margin margin;
 		psy_ui_component_init(&self->top, &self->component);
@@ -751,7 +751,7 @@ void sequenceroptionsbar_updatetext(SequencerOptionsBar* self)
 	psy_ui_checkbox_settext(&self->multichannelaudition,
 		workspace_translate(self->workspace, "sequencerview.multichannel-audition"));
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
-		workspace_translate(self->workspace, "sequencerview.allow-notes-to_effect"));	
+		workspace_translate(self->workspace, "sequencerview.allow-notes-to_effect"));
 }
 
 void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar* self, Translator* sender)
@@ -792,7 +792,7 @@ static void sequenceview_onconfigchanged(SequenceView*, Workspace*,
 
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{			
+{
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
 	self->sequence = &workspace->song->sequence;
@@ -801,7 +801,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	playlisteditor_init(&self->playlisteditor, &self->component,
-		workspace);	
+		workspace);
 	psy_ui_component_setalign(&self->playlisteditor.component, psy_ui_ALIGN_TOP);
 	psy_ui_splitbar_init(&self->splitbar, &self->component);
 	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_TOP);
@@ -814,8 +814,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 #if 1
 	// Use Custom Scrollbar
 	psy_ui_scroller_init(&self->scroller, &self->listview.component,
-	   &self->component);
-	 psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);	
+		&self->component);
+	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 #else
 	psy_ui_component_setalign(&self->listview.component, psy_ui_ALIGN_CLIENT);
 #endif
@@ -824,8 +824,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	sequencebuttons_init(&self->buttons, &self->component, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
-	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);	
-	sequenceroptionsbar_init(&self->options, &self->component, workspace);	
+	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);
+	sequenceroptionsbar_init(&self->options, &self->component, workspace);
 	if (workspace_showplaylisteditor(workspace)) {
 		psy_ui_checkbox_check(&self->options.showplaylist);
 	}
@@ -906,7 +906,7 @@ void sequenceview_onnewentry(SequenceView* self)
 	tracknode = psy_audio_sequence_insert(self->sequence,
 		self->selection->editposition,
 		psy_audio_patterns_append(self->patterns,
-		psy_audio_pattern_allocinit()));
+			psy_audio_pattern_allocinit()));
 	psy_audio_sequenceselection_seteditposition(self->selection,
 		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.tracknode,
@@ -999,7 +999,7 @@ void sequenceview_ondelentry(SequenceView* self)
 		self->workspace->sequenceselection);
 	sequenceview_updateplayposition(self);
 	sequenceduration_update(&self->duration);
-	psy_ui_component_updateoverflow(&self->listview.component);	
+	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1050,7 +1050,7 @@ void sequenceview_onnewtrack(SequenceView* self)
 	psy_audio_exclusivelock_enter();
 	psy_audio_sequence_appendtrack(self->sequence, psy_audio_sequencetrack_allocinit());
 	psy_audio_exclusivelock_leave();
-	psy_ui_component_updateoverflow(&self->listview.component);	
+	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -1085,7 +1085,7 @@ void sequenceview_onclear(SequenceView* self)
 		psy_audio_sequence_insert(self->sequence, sequenceposition, 0);
 		psy_audio_sequenceselection_setsequence(self->selection, self->sequence);
 		workspace_setsequenceselection(self->workspace, *self->selection);
-		sequenceview_updateplayposition(self);		
+		sequenceview_updateplayposition(self);
 		psy_audio_exclusivelock_leave();
 		psy_ui_component_updateoverflow(&self->listview.component);
 		psy_ui_component_invalidate(&self->component);
@@ -1124,7 +1124,7 @@ void sequenceview_onpaste(SequenceView* self)
 	for (p = self->workspace->sequencepaste; p != NULL; psy_list_next(&p)) {
 		psy_audio_SequenceEntry* sequenceentry;
 
-		sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);		
+		sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);
 		position = psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.tracknode,
 			psy_audio_sequence_insert(self->sequence, position,
@@ -1205,10 +1205,10 @@ void sequenceview_onrecordtweak(SequenceView* self, psy_ui_Button* sender)
 
 void sequenceview_onrecordnoteoff(SequenceView* self, psy_ui_Button* sender)
 {
-	if (psy_audio_player_recordingnoteoff(&self->workspace->player)) {		
+	if (psy_audio_player_recordingnoteoff(&self->workspace->player)) {
 		psy_audio_player_preventrecordnoteoff(&self->workspace->player);
 	} else {
-		psy_audio_player_recordnoteoff(&self->workspace->player);		
+		psy_audio_player_recordnoteoff(&self->workspace->player);
 	}
 }
 
@@ -1231,10 +1231,10 @@ void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int fl
 			&self->listview,
 			sequencelistview_onpatternnamechanged);
 		psy_signal_connect(&self->sequence->sequencechanged,
-			self, sequenceview_onsequencechanged);		
+			self, sequenceview_onsequencechanged);
 		psy_signal_connect(&self->sequence->sequencechanged,
-			self, sequenceview_onsequencechanged);		
-	}	
+			self, sequenceview_onsequencechanged);
+	}
 	sequenceduration_update(&self->duration);
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->listview.component);
@@ -1248,7 +1248,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 	int c = 0;
 	int visilines;
 	int listviewtop;
-	psy_ui_IntSize listviewsize;	
+	psy_ui_IntSize listviewsize;
 
 	position = sender->sequenceselection.editposition;
 	p = sender->song->sequence.tracks;
@@ -1287,7 +1287,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 void sequenceview_updateplayposition(SequenceView* self)
 {
 	if (workspace_followingsong(self->workspace) &&
-		  psy_audio_player_playing(&self->workspace->player)) {
+		psy_audio_player_playing(&self->workspace->player)) {
 		sequenceview_changeplayposition(self);
 	}
 }
@@ -1311,7 +1311,7 @@ void sequenceview_changeplayposition(SequenceView* self)
 
 void sequenceview_onsequencechanged(SequenceView* self,
 	psy_audio_Sequence* sender)
-{	
+{
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);
 	sequenceduration_update(&self->duration);

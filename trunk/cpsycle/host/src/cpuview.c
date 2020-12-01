@@ -74,8 +74,12 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 							psy_audio_machine_editname(machine),
 							psy_min(strlen(psy_audio_machine_editname(machine)), 14));
 						psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
-							info->Name, strlen(info->Name));						
-						psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);
+							info->Name, strlen(info->Name));
+						if (psy_audio_player_measuring_cpu_usage(&self->workspace->player)) {
+							psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);						
+						} else {
+							psy_snprintf(text, 40, "N/A");
+						}
 						psy_ui_textout(g, tm.tmAveCharWidth * 60, cpy, text,
 							strlen(text));
 					}
@@ -113,6 +117,7 @@ static void cpuview_initmodules(CPUView*, Workspace* workspace);
 static void cpuview_ontimer(CPUView*, psy_ui_Component* sender,
 	uintptr_t timerid);
 static void cpuview_onhide(CPUView*);
+static void cpuview_oncpuperf(CPUView*, psy_ui_CheckBox* sender);
 
 void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -153,7 +158,7 @@ void cpuview_inittitle(CPUView* self)
 	psy_signal_connect(&self->hide.signal_clicked, self, cpuview_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0.0),
+		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 }
@@ -187,7 +192,9 @@ void cpuview_initperformance(CPUView* self)
 	psy_ui_component_enablealign(&self->performance);
 	psy_ui_component_setalign(&self->performance, psy_ui_ALIGN_LEFT);
 	psy_ui_checkbox_init(&self->cpucheck, &self->performance);
-	psy_ui_checkbox_settext(&self->cpucheck, "CPU Performance");	
+	psy_ui_checkbox_settext(&self->cpucheck, "CPU Performance");
+	psy_signal_connect(&self->cpucheck.signal_clicked, self,
+		cpuview_oncpuperf);
 	labelpair_init(&self->audiothreads, &self->performance, "Audio threads");
 	labelpair_init(&self->totaltime, &self->performance, "Total (time)");
 	labelpair_init(&self->machines, &self->performance, "Machines");
@@ -265,4 +272,13 @@ void cpuview_onhide(CPUView* self)
 {
 	psy_ui_component_hide(&self->component);
 	psy_ui_component_align(psy_ui_component_parent(&self->component));
+}
+
+void cpuview_oncpuperf(CPUView* self, psy_ui_CheckBox* sender)
+{
+	if (psy_ui_checkbox_checked(sender) != 0) {
+		psy_audio_player_measure_cpu_usage(&self->workspace->player);
+	} else {
+		psy_audio_player_stop_measure_cpu_usage(&self->workspace->player);
+	}
 }

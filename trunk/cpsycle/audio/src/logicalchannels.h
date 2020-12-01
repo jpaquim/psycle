@@ -25,8 +25,8 @@ typedef struct psy_audio_LogicalChannels
 	psy_Table logicalmap;
 } psy_audio_LogicalChannels;
 
-void psy_audio_logicalchannels_init(psy_audio_LogicalChannels* self);
-void psy_audio_logicalchannels_dispose(psy_audio_LogicalChannels* self);
+void psy_audio_logicalchannels_init(psy_audio_LogicalChannels*);
+void psy_audio_logicalchannels_dispose(psy_audio_LogicalChannels*);
 
 uintptr_t psy_audio_logicalchannels_physical(psy_audio_LogicalChannels*, uintptr_t logical);
 void psy_audio_logicalchannels_reset(psy_audio_LogicalChannels*);

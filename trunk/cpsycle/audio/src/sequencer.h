@@ -7,6 +7,7 @@
 // audio
 #include "sequence.h"
 #include "machines.h"
+#include "activechannels.h"
 // container
 #include <list.h>
 

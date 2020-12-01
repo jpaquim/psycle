@@ -251,6 +251,9 @@
     <ClCompile Include="src\midiinput.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\activechannels.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\array.h">
@@ -500,6 +503,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\midiinput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\activechannels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

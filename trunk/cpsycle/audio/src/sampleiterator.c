@@ -296,7 +296,7 @@ void psy_audio_sampleiterator_refillbuffer(psy_audio_SampleIterator* self,
 	}
 	//Begin
 	memset(buffer, 0, REFILLBUFFERSIZE * sizeof(psy_dsp_amp_t));
-	memcpy(buffer + presamples, data, min(psy_audio_sampleiterator_length(self), totalsamples) * sizeof(psy_dsp_amp_t));
+	memcpy(buffer + presamples, data, psy_min(psy_audio_sampleiterator_length(self), totalsamples) * sizeof(psy_dsp_amp_t));
 	if (looptype == psy_audio_SAMPLE_LOOP_DO_NOT) {
 		//End
 		if (psy_audio_sampleiterator_length(self) < totalsamples) {
