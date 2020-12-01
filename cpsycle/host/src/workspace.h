@@ -48,11 +48,16 @@ typedef enum {
 } PatternDisplayType;
 
 enum {
-	PROPERTY_ID_LOADSKIN = 1,
+	PROPERTY_ID_REGENERATEPLUGINCACHE = 1,
+	PROPERTY_ID_ENABLEAUDIO,
+	PROPERTY_ID_LOADSKIN,
 	PROPERTY_ID_DEFAULTSKIN,
 	PROPERTY_ID_LOADCONTROLSKIN,
 	PROPERTY_ID_ADDEVENTDRIVER,
 	PROPERTY_ID_REMOVEEVENTDRIVER,
+	PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS,
+	PROPERTY_ID_EVENTDRIVERCONFIGLOAD,
+	PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE,
 	PROPERTY_ID_DEFAULTFONT,
 	PROPERTY_ID_DRAWVUMETERS,
 	PROPERTY_ID_PATTERNDISPLAY,
@@ -113,7 +118,8 @@ typedef struct {
 	// Some sections of config
 	psy_Property* language;
 	psy_Property* recentsongs;
-	psy_Property* recentfiles;	
+	psy_Property* recentfiles;
+	psy_Property* global;
 	psy_Property* general;
 	psy_Property* inputoutput;
 	psy_Property* eventinputs;
@@ -171,6 +177,7 @@ typedef struct {
 	MaximizedView maximizeview;
 	int fontheight;
 	char* dialbitmappath;
+	bool hasnewline;
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
@@ -246,6 +253,12 @@ void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
 void workspace_selectview(Workspace*, int view, uintptr_t section, int option);
 void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
+bool workspace_enableaudio(Workspace*);
+bool workspace_ft2home(Workspace*);
+bool workspace_ft2delete(Workspace*);
+bool workspace_effcursoralwayssdown(Workspace*);
+bool workspace_playstartwithrctrl(Workspace*);
+bool workspace_movecursoronestep(Workspace*);
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);
 int workspace_recordingtweaks(Workspace*);
@@ -295,6 +308,7 @@ bool workspace_songmodified(const Workspace*);
 bool workspace_currview_hasundo(Workspace*);
 bool workspace_currview_hasredo(Workspace*);
 psy_dsp_NotesTabMode workspace_notetabmode(Workspace*);
+void workspace_playstart(Workspace*);
 void workspace_outputwarning(Workspace*, const char* text);
 void workspace_outputerror(Workspace*, const char* text);
 void workspace_output(Workspace*, const char* text);

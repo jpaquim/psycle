@@ -121,6 +121,7 @@
     <ClCompile Include="$(SolutionDir)dsp\src\operations.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\activechannels.c" />
     <ClCompile Include="src\array.c" />
     <ClCompile Include="src\audiorecorder.c" />
     <ClCompile Include="src\buffer.c">
@@ -256,6 +257,7 @@
     <ClCompile Include="src\xmsongexport.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\activechannels.h" />
     <ClInclude Include="src\array.h" />
     <ClInclude Include="src\audiorecorder.h" />
     <ClInclude Include="src\buffer.h" />

@@ -375,6 +375,7 @@ void patternviewskin_setclassicheadercoords(PatternViewSkin* self)
 	static SkinCoord solo = { 62, 40, 17, 17, 47, 3, 17, 17, 0 };
 	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
 	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
+	static SkinCoord dplayon = { 0, 40, 7, 17, 5, 3, 7, 17, 0 };
 
 	self->headercoords.background = background;
 	self->headercoords.record = record;
@@ -382,6 +383,8 @@ void patternviewskin_setclassicheadercoords(PatternViewSkin* self)
 	self->headercoords.solo = solo;
 	self->headercoords.digit0x = digit0x;
 	self->headercoords.digitx0 = digitx0;
+	self->headercoords.dplayon = dplayon;
+	self->headercoords.hasplayon = TRUE;
 }
 
 void patternviewskin_setheadercoords(PatternViewSkin* self)
@@ -392,6 +395,7 @@ void patternviewskin_setheadercoords(PatternViewSkin* self)
 	static SkinCoord solo = { 92, 18, 11, 11, 97, 3, 11, 11, 0 };
 	static SkinCoord digitx0 = { 0, 23, 9, 17, 15, 3, 9, 17, 0 };
 	static SkinCoord digit0x = { 0, 23, 9, 17, 22, 3, 9, 17, 0 };
+	static SkinCoord dplayon = { 0, 40, 7, 17, 5, 3, 7, 17, 0 };
 
 	self->headercoords.background = background;
 	self->headercoords.record = record;
@@ -399,6 +403,8 @@ void patternviewskin_setheadercoords(PatternViewSkin* self)
 	self->headercoords.solo = solo;
 	self->headercoords.digit0x = digit0x;
 	self->headercoords.digitx0 = digitx0;
+	self->headercoords.dplayon = dplayon;
+	self->headercoords.hasplayon = TRUE;
 }
 
 void patternviewskin_setheadertextcoords(PatternViewSkin* self)

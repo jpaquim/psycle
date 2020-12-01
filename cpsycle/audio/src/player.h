@@ -53,7 +53,9 @@ typedef struct psy_audio_Player {
 	int octave;
 	uint32_t resyncplayposinsamples;
 	psy_dsp_big_beat_t resyncplayposinbeats;
-	psy_audio_MidiInput midiinput;	
+	psy_audio_MidiInput midiinput;
+	psy_audio_ActiveChannels playon;
+	bool measure_cpu_usage;
 } psy_audio_Player;
 
 // init dispose
@@ -135,6 +137,22 @@ INLINE psy_dsp_percent_t psy_audio_player_playlist_rowprogress(psy_audio_Player*
 	return psy_audio_sequencer_playlist_rowprogress(&self->sequencer);
 }
 
+// cpu measure
+INLINE void psy_audio_player_measure_cpu_usage(psy_audio_Player* self)
+{
+	self->measure_cpu_usage = TRUE;
+}
+
+INLINE void psy_audio_player_stop_measure_cpu_usage(psy_audio_Player* self)
+{
+	self->measure_cpu_usage = FALSE;
+}
+
+INLINE bool psy_audio_player_measuring_cpu_usage(const psy_audio_Player* self)
+{
+	return self->measure_cpu_usage;
+}
+
 // audio driver
 void psy_audio_player_setaudiodriver(psy_audio_Player*, psy_AudioDriver*);
 psy_AudioDriver* psy_audio_player_audiodriver(psy_audio_Player*);
@@ -176,6 +194,7 @@ void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,
 void psy_audio_player_setemptysong(psy_audio_Player*);
 void psy_audio_player_midiconfigure(psy_audio_Player*, psy_Property*
 	configuration, bool datastr);
+void psy_audio_player_idle(psy_audio_Player*);
 
 #ifdef __cplusplus
 }
