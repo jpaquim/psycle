@@ -5,31 +5,42 @@
 
 #include "undoredobar.h"
 
+// prototypes
 static void undoredobar_updatetext(UndoRedoBar*);
-static void undoredobar_initalign(UndoRedoBar* self);
 static void undoredobar_onundo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onredo(UndoRedoBar*, psy_ui_Component* sender);
 static void undoredobar_onlanguagechanged(UndoRedoBar*, Translator* sender);
-static void undoredobar_ontimer(UndoRedoBar*, psy_ui_Component* sender, uintptr_t timerid);
+static void undoredobar_ontimer(UndoRedoBar*, uintptr_t timerid);
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
 
+static psy_ui_ComponentVtable* vtable_init(UndoRedoBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ontimer = (psy_ui_fp_component_ontimer)undoredobar_ontimer;
+		vtable_initialized = TRUE;
+	}
+	return &vtable;
+}
+// implementation
 void undoredobar_init(UndoRedoBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{
-	self->workspace = workspace;
+{	
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init(&self->undobutton, &self->component);
-	psy_signal_connect(&self->undobutton.signal_clicked, self,
-		undoredobar_onundo);
-	psy_ui_button_init(&self->redobutton, &self->component);	
-	psy_signal_connect(&self->redobutton.signal_clicked, self,
-		undoredobar_onredo);
-	undoredobar_initalign(self);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));	
+	psy_ui_button_init_connect(&self->undobutton, undoredobar_base(self),
+		self, undoredobar_onundo);	
+	psy_ui_button_init_connect(&self->redobutton, undoredobar_base(self),
+		self, undoredobar_onredo);
+	self->workspace = workspace;
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		undoredobar_onlanguagechanged);
-	undoredobar_updatetext(self);
-	psy_signal_connect(&self->component.signal_timer, self,
-		undoredobar_ontimer);
+	undoredobar_updatetext(self);	
 	psy_ui_component_starttimer(&self->component, 0, 100);
 }
 
@@ -39,14 +50,6 @@ void undoredobar_updatetext(UndoRedoBar* self)
 		workspace_translate(self->workspace, "undo.undo"));
 	psy_ui_button_settext(&self->redobutton,
 		workspace_translate(self->workspace, "undo.redo"));
-}
-
-void undoredobar_initalign(UndoRedoBar* self)
-{			
-	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		NULL));
 }
 
 void undoredobar_onundo(UndoRedoBar* self, psy_ui_Component* sender)
@@ -64,8 +67,7 @@ void undoredobar_onlanguagechanged(UndoRedoBar* self, Translator* sender)
 	undoredobar_updatetext(self);
 }
 
-void undoredobar_ontimer(UndoRedoBar* self, psy_ui_Component* sender,
-	uintptr_t timerid)
+void undoredobar_ontimer(UndoRedoBar* self, uintptr_t timerid)
 {
 	if (workspace_currview_hasundo(self->workspace)) {
 		psy_ui_component_enableinput(psy_ui_button_base(&self->undobutton),

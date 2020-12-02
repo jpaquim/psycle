@@ -8,6 +8,10 @@
 #include <uislider.h>
 #include <machine.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_ListBox listbox;
@@ -18,5 +22,9 @@ typedef struct {
 void parameterlistbox_init(ParameterListBox*, psy_ui_Component* parent, psy_audio_Machine*);
 void parameterlistbox_setmachine(ParameterListBox*, psy_audio_Machine*);
 int parameterlistbox_selected(ParameterListBox*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

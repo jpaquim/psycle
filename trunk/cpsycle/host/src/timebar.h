@@ -4,25 +4,47 @@
 #if !defined(TIMEBAR_H)
 #define TIMEBAR_H
 
+// audio
+#include <player.h>
+// ui
 #include <uibutton.h>
 #include <uilabel.h>
-#include <player.h>
 
-// aim: Sets the speed of the track in beats per minute, ranging from 33 to
-//      999 BPM
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {
+// TimeBar
+//
+// Sets the speed of the player in beats per minute, ranging from 33 to 999 BPM
+
+typedef struct TimeBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label bpmdesc;
 	psy_ui_Label bpmlabel;
 	psy_ui_Button lessless;
 	psy_ui_Button less;
 	psy_ui_Button more;
 	psy_ui_Button moremore;
-	psy_audio_Player* player;
+	// data members	
 	psy_dsp_big_beat_t bpm;
+	// references
+	psy_audio_Player* player;	
 } TimeBar;
 
 void timerbar_init(TimeBar*, psy_ui_Component* parent, psy_audio_Player*);
 
+INLINE psy_ui_Component* timerbar_base(TimeBar* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* TIMEBAR_H */

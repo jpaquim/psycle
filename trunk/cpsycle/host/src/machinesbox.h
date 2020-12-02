@@ -9,6 +9,10 @@
 #include "machines.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: displays the machines of the current song and  machine slot used
 //      by the pattern and machine view inside a listbox. The view is
 //      synchronized with 'psy_audio_Machines', which stores the machines
@@ -38,5 +42,9 @@ void machinesbox_remove(MachinesBox*);
 void machinesbox_exchange(MachinesBox*);
 void machinesbox_showparameters(MachinesBox*);
 void machinesbox_setmachines(MachinesBox*, psy_audio_Machines*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

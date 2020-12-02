@@ -14,8 +14,11 @@
 #include "zoombox.h"
 #include "interpolatecurveview.h"
 #include "patternviewskin.h"
-
 #include <pattern.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
 	psy_Command command;
@@ -62,5 +65,9 @@ typedef struct {
 BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
 	PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
 	Workspace* workspace);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PATTERNCMDS*/

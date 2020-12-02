@@ -18,6 +18,10 @@
 #include <uinotebook.h>
 #include <uislider.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Instrument Editor
 
 struct InstrumentView;
@@ -163,5 +167,8 @@ typedef struct InstrumentView {
 void instrumentview_init(InstrumentView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

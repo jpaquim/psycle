@@ -27,6 +27,10 @@
 //  Workspace             <>---- History
 //                        <>---- Translator
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
 	TABPAGE_MACHINEVIEW = 0,
 	TABPAGE_PATTERNVIEW = 1,
@@ -107,15 +111,15 @@ typedef struct {
 	bool maximized;
 } MaximizedView;
 
-typedef struct {
-	psy_audio_MachineCallback machinecallback;
+typedef struct {	
 	psy_audio_Song* song;
 	psy_audio_Player player;
 	psy_audio_PluginCatcher plugincatcher;
 	psy_audio_MachineFactory machinefactory;
+	psy_audio_MachineCallback machinecallback;
 	// Psycle settings
 	psy_Property config;
-	// Some sections of config
+	// Sections of the configuration
 	psy_Property* language;
 	psy_Property* recentsongs;
 	psy_Property* recentfiles;
@@ -135,29 +139,7 @@ typedef struct {
 	psy_Property* cmds;
 	psy_Property* patternviewtheme;
 	psy_Property* machineviewtheme;
-	psy_Property* paramtheme;
-	psy_Signal signal_octavechanged;
-	psy_Signal signal_songchanged;	
-	psy_Signal signal_configchanged;
-	psy_Signal signal_skinchanged;
-	psy_Signal signal_changecontrolskin;
-	psy_Signal signal_patterncursorchanged;
-	psy_Signal signal_sequenceselectionchanged;
-	psy_Signal signal_loadprogress;
-	psy_Signal signal_scanprogress;
-	psy_Signal signal_beforesavesong;
-	psy_Signal signal_showparameters;
-	psy_Signal signal_viewselected;
-	psy_Signal signal_parametertweak;
-	psy_Signal signal_terminal_error;
-	psy_Signal signal_terminal_out;
-	psy_Signal signal_terminal_warning;
-	psy_Signal signal_followsongchanged;
-	psy_Signal signal_dockview;
-	psy_Signal signal_defaultfontchanged;
-	psy_Signal signal_togglegear;
-	psy_Signal signal_languagechanged;
-	psy_Signal signal_selectpatterndisplay;
+	psy_Property* paramtheme;	
 	psy_ui_Component* mainhandle;	
 	History history;
 	psy_audio_PatternCursor patterneditposition;
@@ -183,6 +165,29 @@ typedef struct {
 	uintptr_t undosavepoint;
 	uintptr_t machines_undosavepoint;
 	Translator translator;
+	// Signals
+	psy_Signal signal_octavechanged;
+	psy_Signal signal_songchanged;
+	psy_Signal signal_configchanged;
+	psy_Signal signal_skinchanged;
+	psy_Signal signal_changecontrolskin;
+	psy_Signal signal_patterncursorchanged;
+	psy_Signal signal_sequenceselectionchanged;
+	psy_Signal signal_loadprogress;
+	psy_Signal signal_scanprogress;
+	psy_Signal signal_beforesavesong;
+	psy_Signal signal_showparameters;
+	psy_Signal signal_viewselected;
+	psy_Signal signal_parametertweak;
+	psy_Signal signal_terminal_error;
+	psy_Signal signal_terminal_out;
+	psy_Signal signal_terminal_warning;
+	psy_Signal signal_followsongchanged;
+	psy_Signal signal_dockview;
+	psy_Signal signal_defaultfontchanged;
+	psy_Signal signal_togglegear;
+	psy_Signal signal_languagechanged;
+	psy_Signal signal_selectpatterndisplay;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -332,4 +337,8 @@ INLINE psy_Property* workspace_paramtheme(Workspace* self)
 	return self->paramtheme;
 }
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* WORKSPACE_H */

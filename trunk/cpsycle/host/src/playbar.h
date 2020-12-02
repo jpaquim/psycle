@@ -4,13 +4,21 @@
 #if !defined(PLAYBAR_H)
 #define PLAYBAR_H
 
+// host
+#include "workspace.h"
+// ui
 #include "uibutton.h"
 #include "uicombobox.h"
 #include "uiedit.h"
-#include "workspace.h"
 
-typedef struct {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct PlayBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Button loop;
 	psy_ui_ComboBox playmode;	
 	psy_ui_Edit loopbeatsedit;	
@@ -19,6 +27,7 @@ typedef struct {
 	psy_ui_Button recordnotes;
 	psy_ui_Button play;	
 	psy_ui_Button stop;
+	// references
 	psy_audio_Player* player;
 	Workspace* workspace;
 } PlayBar;
@@ -30,4 +39,8 @@ INLINE psy_ui_Component* playbar_base(PlayBar* self)
 	return &self->component;
 }
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* PLAYBAR_H */

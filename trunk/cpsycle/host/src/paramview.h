@@ -11,6 +11,10 @@
 #include <plugin_interface.h>
 #include "skincoord.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     psy_ui_Colour fonttopcolour;
     psy_ui_Colour fontbottomcolour;
@@ -60,5 +64,9 @@ ParamView* paramview_allocinit(psy_ui_Component* parent, psy_audio_Machine*,
 	Workspace*);
 void paramview_changecontrolskin(const char* path);
 void paramview_setzoom(ParamView*, double zoomrate);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

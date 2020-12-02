@@ -21,6 +21,10 @@
 //                |  <<send>>
 //                -------------> Workspace (signal_songchanged)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Colour on;
 	psy_ui_Colour off;
@@ -51,5 +55,9 @@ INLINE void clipbox_deactivate(ClipBox* self)
 {
 	self->isclipon = FALSE;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

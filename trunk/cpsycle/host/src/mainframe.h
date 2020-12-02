@@ -50,6 +50,10 @@
 
 #include "../../detail/os.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // MainFrame
 //
 // The root component of all other components of psycle. Initializes the
@@ -143,5 +147,9 @@ INLINE psy_ui_Component* mainframe_base(MainFrame* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

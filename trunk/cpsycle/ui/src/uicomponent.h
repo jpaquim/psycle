@@ -10,6 +10,7 @@
 #include <signal.h>
 #include "uimenu.h"
 #include "uistyle.h"
+#include "uidefaults.h"
 #include <list.h>
 #include "../../detail/stdint.h"
 
@@ -185,7 +186,10 @@ typedef struct psy_ui_Component {
 	psy_ui_IntPoint vscrollrange;
 	psy_ui_IntPoint hscrollrange;
 	psy_ui_Overflow overflow;
-	int preventpreferredsizeatalign;	
+	int tabindex;
+	int preventpreferredsizeatalign;
+	psy_ui_AlignType insertaligntype;
+	psy_ui_Margin insertmargin;
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);
@@ -228,17 +232,17 @@ INLINE void psy_ui_component_horizontalscrollrange(psy_ui_Component* self, int* 
 void psy_ui_component_showverticalscrollbar(psy_ui_Component*);
 void psy_ui_component_hideverticalscrollbar(psy_ui_Component*);
 
-INLINE void psy_ui_component_setverticalscrollrange(psy_ui_Component* self, int min, int max)
+INLINE void psy_ui_component_setverticalscrollrange(psy_ui_Component* self, int minval, int maxval)
 {
-	self->vscrollrange.x = min;
-	self->vscrollrange.y = max;
+	self->vscrollrange.x = minval;
+	self->vscrollrange.y = psy_max(minval, maxval);
 	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_VERTICAL);
 }
 
-INLINE void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self, int min, int max)
+INLINE void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self, int minval, int maxval)
 {
-	self->hscrollrange.x = min;
-	self->hscrollrange.y = max;
+	self->hscrollrange.x = minval;
+	self->hscrollrange.y = psy_max(minval, maxval);
 	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_HORIZONTAL);
 }
 
@@ -561,6 +565,19 @@ INLINE void psy_ui_component_setscrollstepy(psy_ui_Component* self, int step)
 	self->scrollstepy = step;
 }
 
+INLINE void psy_ui_component_settabindex(psy_ui_Component* self, int index)
+{
+	self->tabindex = index;
+}
+
+INLINE int psy_ui_component_tabindex(const psy_ui_Component* self)
+{
+	return self->tabindex;
+}
+
+void psy_ui_component_focus_next(const psy_ui_Component* self);
+void psy_ui_component_focus_prev(const psy_ui_Component* self);
+
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 {
 	psy_ui_TextMetric tm;
@@ -568,6 +585,12 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 	tm = psy_ui_component_textmetric(self);
 	return psy_ui_intsize_init_size(psy_ui_component_size(self), &tm);
 }
+
+void psy_ui_component_setdefaultalign(psy_ui_Component* self,
+	psy_ui_AlignType, psy_ui_Margin margin);
+
+const struct psy_ui_Defaults* psy_ui_defaults(void);
+
 
 #ifdef __cplusplus
 }

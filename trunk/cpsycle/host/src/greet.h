@@ -8,6 +8,10 @@
 #include <uibutton.h>
 #include <uilistbox.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: In this dialog, Psycledelics, the Community, wants to thank the people
 //      for their contributions in the developement of Psycle.
 //      Psycle's development began in May 2000. It was designed by Arguru and
@@ -24,5 +28,9 @@ typedef struct {
 } Greet;
 
 void greet_init(Greet* greet, psy_ui_Component* parent);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

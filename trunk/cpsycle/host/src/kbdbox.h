@@ -11,6 +11,10 @@
 #include <properties.h>
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: shows a keyboard with annotations
 
 typedef struct KbdBoxKey {
@@ -49,5 +53,9 @@ INLINE psy_ui_Component* kbdbox_base(KbdBox* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* KBDBOX_H */

@@ -9,6 +9,10 @@
 #include "tabbar.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // FileView
 
 typedef struct FileView {
@@ -32,5 +36,9 @@ INLINE psy_ui_Component* fileview_base(FileView* self)
 }
 
 const char* fileview_path(FileView* self);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* FILEVIEW_H */

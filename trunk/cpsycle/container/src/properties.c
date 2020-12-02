@@ -273,6 +273,16 @@ const psy_List* psy_property_children_const(const psy_Property* self)
 	return self->children;
 }
 
+psy_Property* psy_property_first(psy_Property* self)
+{
+	assert(self);
+
+	if (!psy_property_empty(self)) {
+		return (psy_Property*)psy_list_entry(self->children);
+	}
+	return NULL;
+}
+
 psy_Property* psy_property_parent(const psy_Property* self)
 {
 	assert(self);

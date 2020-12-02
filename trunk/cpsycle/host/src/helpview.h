@@ -12,6 +12,10 @@
 
 #include <uinotebook.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Helpview combines the About, Greet and textfile help in
 //      a tabbed notebook. 
 
@@ -32,5 +36,9 @@ INLINE psy_ui_Component* helpview_base(HelpView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

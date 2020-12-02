@@ -8,6 +8,10 @@
 #include "uilabel.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: sets the number of tracks for your patterns. This is a global setting
 //      affecting all patterns. The player will only play the tracks upto this
 //      number.
@@ -20,5 +24,9 @@ typedef struct {
 } SongTrackBar;
 
 void songtrackbar_init(SongTrackBar*, psy_ui_Component* parent, Workspace*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -260,6 +260,18 @@
     <ClCompile Include="src\patterncmds.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\trackergridstate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternheader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerlinenumbers.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerlinestate.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -520,6 +532,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\patterncmds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackergridstate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternheader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerlinenumbers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerlinestate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

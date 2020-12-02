@@ -7,6 +7,10 @@
 #include <uicomponent.h>
 #include <uilabel.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Combines two labels to display a label pair
 
 typedef struct {
@@ -16,5 +20,9 @@ typedef struct {
 } LabelPair;
 
 void labelpair_init(LabelPair*, psy_ui_Component* parent, const char* desc);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

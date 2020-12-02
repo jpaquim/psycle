@@ -11,6 +11,10 @@
 
 #include <samples.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: displays the samples of the current song. It is divided into two views.
 //      The upper displays the first sample of group, the lower all the samples
 //      of the selected group.
@@ -30,5 +34,9 @@ void samplesbox_init(SamplesBox*, psy_ui_Component* parent, psy_audio_Samples*,
 void samplesbox_setsamples(SamplesBox*, psy_audio_Samples*);
 psy_audio_SampleIndex samplesbox_selected(SamplesBox*);
 void samplesbox_select(SamplesBox*, psy_audio_SampleIndex);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SAMPLESBOX_H */

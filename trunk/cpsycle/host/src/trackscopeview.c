@@ -4,15 +4,16 @@
 #include "../../detail/prefix.h"
 
 #include "trackscopeview.h"
-
+// ui
 #include <uiapp.h>
-
+// std
 #include <math.h>
 #include <string.h>
-
+// platform
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
+// prototypes
 static void trackscopeview_ondraw(TrackScopeView*, psy_ui_Graphics*);
 static void trackscopeview_onmousedown(TrackScopeView*, psy_ui_MouseEvent*);
 static void trackscopeview_drawtrack(TrackScopeView*, psy_ui_Graphics*,
@@ -21,40 +22,39 @@ void trackscopeview_drawtrackindex(TrackScopeView*, psy_ui_Graphics*,
 	int x, int y, int width, int height, int track);
 void trackscopeview_drawtrackmuted(TrackScopeView*, psy_ui_Graphics*, int x,
 	int y, int width, int height, int track);
-static void trackscopeview_ontimer(TrackScopeView*, psy_ui_Component* sender,
-	uintptr_t timerid);
+static void trackscopeview_ontimer(TrackScopeView*, uintptr_t timerid);
 static void trackscopeview_onalign(TrackScopeView*);
 static void trackscopeview_onpreferredsize(TrackScopeView*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-
+// vtable
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
-static void vtable_init(TrackScopeView* self)
+static psy_ui_ComponentVtable* vtable_init(TrackScopeView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.onalign = (psy_ui_fp_component_onalign) trackscopeview_onalign;
+		vtable.ontimer = (psy_ui_fp_component_ontimer)trackscopeview_ontimer;
+		vtable.onalign = (psy_ui_fp_component_onalign)trackscopeview_onalign;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			trackscopeview_onpreferredsize;
-		vtable.ondraw = (psy_ui_fp_component_ondraw) trackscopeview_ondraw;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)trackscopeview_ondraw;
 		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
 			trackscopeview_onmousedown;
+		vtable_initialized = TRUE;
 	}
+	return &vtable;
 }
-
+// implementation
 void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);
-	vtable_init(self);
-	self->component.vtable = &vtable;
+	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	psy_ui_component_doublebuffer(&self->component);
 	self->workspace = workspace;
 	self->trackheight = 30;
-	self->textheight = 12;
-	psy_signal_connect(&self->component.signal_timer, self,
-		trackscopeview_ontimer);
+	self->textheight = 12;	
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -223,7 +223,7 @@ void trackscopeview_drawtrackmuted(TrackScopeView* self, psy_ui_Graphics* g, int
 		psy_ui_intpoint_make(x + width - (int)(ident * 0.5), y + (int)(height * 0.25)));
 }
 
-void trackscopeview_ontimer(TrackScopeView* self, psy_ui_Component* sender, uintptr_t timerid)
+void trackscopeview_ontimer(TrackScopeView* self, uintptr_t timerid)
 {
 	psy_ui_component_invalidate(&self->component);	
 }

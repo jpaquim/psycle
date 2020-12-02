@@ -6,6 +6,10 @@
 
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: terminal host control
 
 typedef struct {
@@ -17,5 +21,8 @@ void interpreter_dispose(Interpreter*);
 int interpreter_start(Interpreter*);
 int interpreter_onidle(Interpreter*);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -9,6 +9,10 @@
 #include <uibutton.h>
 #include <uilabel.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	CHECKUNSAVE_SAVE,
 	CHECKUNSAVE_NOSAVE,
@@ -41,5 +45,9 @@ INLINE psy_ui_Component* checkunsavedbox_base(CheckUnsavedBox* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* CHECKUNSAVED_H */

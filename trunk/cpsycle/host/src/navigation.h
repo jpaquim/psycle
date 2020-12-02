@@ -7,6 +7,10 @@
 #include "uibutton.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: browser like navigation for the previous selected views.
 
 typedef struct {
@@ -23,5 +27,8 @@ INLINE psy_ui_Component* navigation_base(Navigation* self)
 	return &self->component;
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

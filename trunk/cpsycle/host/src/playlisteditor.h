@@ -8,6 +8,10 @@
 #include <uibutton.h>
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	char* title;
 	char* path;
@@ -44,5 +48,9 @@ typedef struct PlayListEditor {
 } PlayListEditor;
 
 void playlisteditor_init(PlayListEditor*, psy_ui_Component* parent, Workspace*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

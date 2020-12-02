@@ -4,6 +4,10 @@
 #if !defined(CMDSGENERAL)
 #define CMDSGENERAL
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Defines a set of command ids to define keyboard shortcuts.
 //      Note shortcut ids are defined in cmdsnotes.h
 //      See also cmdproperties.h for the keyboard mapping
@@ -119,6 +123,10 @@ enum {
 	CMD_EDT_PATTERNTRACKRECORD,
 	CMD_EDT_SELECTBAR
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

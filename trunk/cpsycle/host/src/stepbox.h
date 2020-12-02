@@ -8,6 +8,10 @@
 #include "uilabel.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Select how many lines the cursor moves after a note is entered (1-16). 
 
 typedef struct {
@@ -18,5 +22,9 @@ typedef struct {
 } StepBox;
 
 void stepbox_init(StepBox*, psy_ui_Component* parent, Workspace*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

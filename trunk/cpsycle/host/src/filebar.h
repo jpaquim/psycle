@@ -9,6 +9,10 @@
 #include <uibutton.h>
 #include <uilabel.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: button panel to create, load, save and render a song
 
 typedef struct {
@@ -28,5 +32,9 @@ INLINE psy_ui_Component* filebar_base(FileBar* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* FILEBAR_H */

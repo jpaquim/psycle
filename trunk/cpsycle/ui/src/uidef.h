@@ -145,6 +145,11 @@ INLINE psy_ui_Value psy_ui_mul_value_real(psy_ui_Value lhs, double factor)
 int psy_ui_value_comp(psy_ui_Value* self, const psy_ui_Value* other,
 	const psy_ui_TextMetric* tm);
 
+INLINE psy_ui_Value psy_ui_value_zero(void)
+{
+	return psy_ui_value_makepx(0);
+}
+
 INLINE bool psy_ui_value_iszero(const psy_ui_Value* self)
 {
 	return (self->unit == psy_ui_UNIT_PX)
@@ -386,6 +391,15 @@ INLINE bool psy_ui_margin_iszero(const psy_ui_Margin* self)
 		psy_ui_value_iszero(&self->top) &&
 		psy_ui_value_iszero(&self->right) &&
 		psy_ui_value_iszero(&self->bottom);
+}
+
+INLINE psy_ui_Margin psy_ui_margin_make(psy_ui_Value top, psy_ui_Value right,
+	psy_ui_Value bottom, psy_ui_Value left)
+{
+	psy_ui_Margin rv;
+
+	psy_ui_margin_init_all(&rv, top, right, bottom, right);
+	return rv;
 }
 
 typedef enum {

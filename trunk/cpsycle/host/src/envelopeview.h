@@ -9,6 +9,10 @@
 #include <list.h>
 #include <adsr.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: This modifies the ADSR (Attack-Decay-Sustain-Release) envelope for the
 //      volume and filters, which is shown on a graph.
 //
@@ -54,5 +58,9 @@ void envelopeview_init(EnvelopeView*, psy_ui_Component* parent);
 void envelopeview_setadsrenvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
 void envelopeview_update(EnvelopeView*);
 void envelopeview_settext(EnvelopeView*, const char* text);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

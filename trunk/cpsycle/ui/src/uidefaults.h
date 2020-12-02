@@ -14,13 +14,26 @@
 extern "C" {
 #endif
 
-typedef struct {
+typedef struct psy_ui_Defaults {
 	uint32_t errorcolour;
 	psy_ui_Style style_common;
+	psy_ui_Margin hmargin;
+	psy_ui_Margin vmargin;
 } psy_ui_Defaults;
 
 void psy_ui_defaults_init(psy_ui_Defaults*);
 void psy_ui_defaults_dispose(psy_ui_Defaults*);
+
+INLINE psy_ui_Margin psy_ui_defaults_hmargin(const psy_ui_Defaults* self)
+{
+	return self->hmargin;
+}
+
+INLINE psy_ui_Margin psy_ui_defaults_vmargin(const psy_ui_Defaults* self)
+{
+	return self->vmargin;
+}
+
 
 #ifdef __cplusplus
 }

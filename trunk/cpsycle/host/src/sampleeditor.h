@@ -21,6 +21,10 @@
 #include <xmsampler.h>
 #include <sample.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Wave editor and loop point definer.
 
 struct SampleEditor;
@@ -157,5 +161,9 @@ void sampleeditor_showdoublesustainloop(SampleEditor*);
 void sampleeditor_showsinglesustainloop(SampleEditor*);
 void sampleeditor_drawlines(SampleEditor*);
 void sampleeditor_drawbars(SampleEditor*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

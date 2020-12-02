@@ -11,6 +11,10 @@
 #include "octavebar.h"
 #include "songtrackbar.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	SongTrackBar songtrackbar;
@@ -25,5 +29,9 @@ INLINE psy_ui_Component* songbar_base(SongBar* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

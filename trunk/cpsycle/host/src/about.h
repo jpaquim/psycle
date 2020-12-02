@@ -4,8 +4,9 @@
 #if !defined(ABOUT_H)
 #define ABOUT_H
 
+// host
 #include "workspace.h"
-
+// ui
 #include <uibutton.h>
 #include <uiedit.h>
 #include <uieditor.h>
@@ -14,10 +15,18 @@
 #include <uinotebook.h>
 #include <uiscroller.h>
 
-// aim: Shows information about Psycle
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {	
-	psy_ui_Component component;		
+// About
+//
+// Shows information about Psycle.
+
+typedef struct Contrib {
+	// inherits
+	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label asio;
 	psy_ui_Edit	sourceforge;
 	psy_ui_Edit	psycledelics;
@@ -28,20 +37,28 @@ typedef struct {
 
 void contrib_init(Contrib*, psy_ui_Component* parent);
 
-typedef struct {
+typedef struct Version{
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label versioninfo;
 } Version;
 
-typedef struct {
+void version_init(Version*, psy_ui_Component* parent);
+
+typedef struct Licence {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Editor licenceinfo;
 } Licence;
 
-void version_init(Version*, psy_ui_Component* parent);
+void licence_init(Licence*, psy_ui_Component* parent);
 
-typedef struct {	
+typedef struct About {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Notebook notebook;
 	psy_ui_Image image;
 	Contrib contrib;
@@ -51,9 +68,21 @@ typedef struct {
 	psy_ui_Button versionbutton;
 	psy_ui_Button licencebutton;
 	psy_ui_Button okbutton;
+	// references
 	Workspace* workspace;
 } About;
 
 void about_init(About*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* about_base(About* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* ABOUT_H */

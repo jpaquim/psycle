@@ -4,24 +4,33 @@
 #if !defined(VUBAR_H)
 #define VUBAR_H
 
+// host
 #include "clipbox.h"
 #include "volslider.h"
 #include "vumeter.h"
 #include "workspace.h"
 
-// aim: The VU Bar combines a Vumeter, a VolumeSlider and a ClipBox
-//      to display and control the Master volume
+// VuBar
+//
+// The VU Bar combines a Vumeter, a VolumeSlider and a ClipBox
+// to display and control the Master volume
 //
 // Structure:
-//  psy_ui_ComponentImp
+// psy_ui_ComponentImp
 //          ^
 //          |     
 //        VuBar <>------ Vumeter
 //               |------ VolSlider
 //               |------ ClipBox
 
-typedef struct {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct VuBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	Vumeter vumeter;
 	VolSlider volslider;
 	ClipBox clipbox;	
@@ -29,4 +38,15 @@ typedef struct {
 
 void vubar_init(VuBar*, psy_ui_Component* parent, Workspace*);
 
+INLINE psy_ui_Component* vubar_base(VuBar* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* VUBAR_H */

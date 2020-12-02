@@ -4,9 +4,14 @@
 #if !defined(VUMETER_H)
 #define VUMETER_H
 
+// host
 #include "workspace.h"
-
+// ui
 #include "uicomponent.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // aim: The VU Meter displays the left and right master volume during playback.
 //      A timer polls the BufferMemory of the Master and updates the rms volume
@@ -34,4 +39,8 @@ typedef struct {
 
 void vumeter_init(Vumeter*, psy_ui_Component* parent, Workspace*);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* VUMETER_H */

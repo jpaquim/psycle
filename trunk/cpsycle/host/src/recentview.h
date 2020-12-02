@@ -8,6 +8,10 @@
 #include <uibutton.h>
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: shows recently opened songs
 
 typedef struct {
@@ -24,5 +28,9 @@ INLINE psy_ui_Component* recentview_base(RecentView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RECENTVIEW_H */

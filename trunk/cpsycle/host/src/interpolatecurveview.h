@@ -15,6 +15,10 @@
 
 #include <pattern.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: specifies how the values of the parameters column will change from line
 //      to line. Clicking the 'Interpolate' Button fills the parameters column
 //      from the beginning to the end of a selection according to the curve in
@@ -92,6 +96,8 @@ void interpolatecurveview_setselection(InterpolateCurveView*,
 void interpolatecurveview_setpattern(InterpolateCurveView*,
 	psy_audio_Pattern*);
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

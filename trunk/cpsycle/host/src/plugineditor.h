@@ -12,6 +12,10 @@
 
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: ide for lua plugins
 
 typedef struct {
@@ -50,5 +54,9 @@ INLINE psy_ui_Component* plugineditor_base(PluginEditor* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

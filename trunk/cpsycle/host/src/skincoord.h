@@ -6,6 +6,10 @@
 
 #include "uidef.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	int srcx;
 	int srcy;
@@ -43,7 +47,8 @@ INLINE int skincoord_position(SkinCoord* coord, float value)
 	return (int)(value * coord->range);
 }
 
-
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

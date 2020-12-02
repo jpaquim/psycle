@@ -20,9 +20,9 @@ typedef enum {
 	psy_ui_ICON_DOWN
 } psy_ui_ButtonIcon;
 
-typedef struct {
-	psy_ui_Component component;
-	psy_Signal signal_clicked;	
+typedef struct psy_ui_Button {
+	// inherits
+	psy_ui_Component component;	
 	char* text;
 	int hover;
 	int highlight;
@@ -33,9 +33,13 @@ typedef struct {
 	bool enabled;
 	psy_ui_Colour textcolour;
 	psy_ui_Colour restorebgcolour;
+	// signals
+	psy_Signal signal_clicked;
 } psy_ui_Button;
 
 void psy_ui_button_init(psy_ui_Button*, psy_ui_Component* parent);
+void psy_ui_button_init_connect(psy_ui_Button*, psy_ui_Component* parent,
+	void* context, void* fp);
 void psy_ui_button_settext(psy_ui_Button*, const char* text);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
 void psy_ui_button_highlight(psy_ui_Button*);

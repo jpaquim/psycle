@@ -11,41 +11,44 @@
 
 #include "../../detail/portable.h"
 
-static void playposbar_ontimer(PlayPosBar*, psy_ui_Component* sender,
-	uintptr_t timerid);
+static void playposbar_ontimer(PlayPosBar*, uintptr_t timerid);
 static void playposbar_updatelabel(PlayPosBar*);
 static void playposbar_onsongchanged(PlayPosBar*, Workspace*,
 	int flag, psy_audio_SongFile*);
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* vtable_init(PlayPosBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ontimer = (psy_ui_fp_component_ontimer)playposbar_ontimer;
+		vtable_initialized = TRUE;
+	}
+	return &vtable;
+}
 
 void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
-{		
-	psy_ui_Margin margin;
-
+{
 	psy_ui_component_init(&self->component, parent);
-	self->workspace = workspace;	
+	psy_ui_component_setvtable(&self->component, vtable_init(self));
 	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);	
+		psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	self->workspace = workspace;	
 	psy_ui_label_init(&self->position, &self->component);
 	psy_ui_label_setcharnumber(&self->position, 20);
-	psy_ui_label_settextalignment(&self->position, psy_ui_ALIGNMENT_LEFT);
-	psy_signal_connect(&self->component.signal_timer, self,
-		playposbar_ontimer);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		&margin));
+	psy_ui_label_settextalignment(&self->position, psy_ui_ALIGNMENT_LEFT);	
 	playposbar_updatelabel(self);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		playposbar_onsongchanged);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
-void playposbar_ontimer(PlayPosBar* self, psy_ui_Component* sender,
-	uintptr_t timerid)
+void playposbar_ontimer(PlayPosBar* self, uintptr_t timerid)
 {
 	//if (psy_audio_player_playing(&self->workspace->player)) {
 	playposbar_updatelabel(self);

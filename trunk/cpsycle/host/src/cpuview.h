@@ -9,6 +9,10 @@
 #include <uiscroller.h>
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Displays information of the cpu and memory usage of the system and
 //      for each machine of a song
 //
@@ -56,5 +60,9 @@ INLINE psy_ui_Component* cpuview_base(CPUView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
