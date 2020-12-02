@@ -12,6 +12,10 @@
 
 #include "instruments.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: displays the instruments of the current song and  instrument slot used
 //      by the pattern editor in a listbox. The view is synchronized with 
 //      'psy_audio_Instruments', which stores the instrument and
@@ -31,5 +35,9 @@ void instrumentsbox_init(InstrumentsBox*, psy_ui_Component* parent, psy_audio_In
 void instrumentsbox_setinstruments(InstrumentsBox*, psy_audio_Instruments* instruments);
 int instrumentsbox_selected(InstrumentsBox*);
 void instrumentsbox_rebuild(InstrumentsBox*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

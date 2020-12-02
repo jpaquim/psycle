@@ -20,6 +20,10 @@
 #include "skincoord.h"
 #include "tabbar.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // MachineWireView
 // aim: Editor for the machines and their connections
 
@@ -117,5 +121,9 @@ INLINE psy_ui_Component* mainview_base(MachineView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

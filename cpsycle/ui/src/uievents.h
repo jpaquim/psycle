@@ -48,6 +48,11 @@ void psy_ui_mouseevent_stoppropagation(psy_ui_MouseEvent*);
 struct psy_ui_Component* psy_ui_mouseevent_target(psy_ui_MouseEvent*);
 void psy_ui_mouseevent_settarget(psy_ui_MouseEvent*, struct psy_ui_Component* target);
 
+INLINE void psy_ui_mouseevent_preventdefault(psy_ui_MouseEvent* self)
+{
+	self->preventdefault = TRUE;
+}
+
 #ifdef __cplusplus
 }
 #endif

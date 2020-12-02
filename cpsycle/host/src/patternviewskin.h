@@ -9,6 +9,10 @@
 #include <hashtbl.h>
 #include <properties.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	SkinCoord background;	
 	SkinCoord record;
@@ -112,5 +116,9 @@ psy_ui_Colour patternviewskin_keyseparatorcolour(PatternViewSkin*);
 psy_ui_Colour patternviewskin_eventcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_eventhovercolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
 psy_ui_Colour patternviewskin_eventcurrchannelcolour(PatternViewSkin*, uintptr_t track, uintptr_t numtracks);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PATTERNVIEWSKIN_H */

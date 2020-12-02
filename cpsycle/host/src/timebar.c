@@ -4,18 +4,35 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
+// TimeBar
+// prototypes
 static void timerbar_onlesslessclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onlessclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onmoreclicked(TimeBar*, psy_ui_Component* sender);
 static void timerbar_onmoremoreclicked(TimeBar*, psy_ui_Component* sender);
-static void timerbar_ontimer(TimeBar*, psy_ui_Component* sender, uintptr_t timerid);
+static void timerbar_ontimer(TimeBar*, uintptr_t timerid);
 static void timerbar_offsetbpm(TimeBar*, psy_dsp_big_beat_t bpm);
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
+
+static psy_ui_ComponentVtable* vtable_init(TimeBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ontimer = (psy_ui_fp_component_ontimer)timerbar_ontimer;
+		vtable_initialized = TRUE;
+	}
+	return &vtable;
+}
 
 void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* player)
 {				
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setvtable(&self->component, vtable_init(self));
+	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->player = player;
 	self->bpm = 0;
 	psy_ui_label_init(&self->bpmdesc, &self->component);
@@ -38,21 +55,8 @@ void timerbar_init(TimeBar* self, psy_ui_Component* parent, psy_audio_Player* pl
 	psy_ui_button_init(&self->moremore, &self->component);
 	psy_ui_button_seticon(&self->moremore, psy_ui_ICON_MOREMORE);	
 	psy_signal_connect(&self->moremore.signal_clicked, self,
-		timerbar_onmoremoreclicked);
-	{
-		psy_ui_Margin margin;
-
-		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-			psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0));
-		psy_list_free(psy_ui_components_setalign(
-			psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-			psy_ui_ALIGN_LEFT,
-			&margin));
-	}	
-	psy_ui_component_starttimer(&self->component, 0, 50);
-	psy_signal_connect(&self->component.signal_timer, self,
-		timerbar_ontimer);
+		timerbar_onmoremoreclicked);	
+	psy_ui_component_starttimer(&self->component, 0, 50);	
 }
 
 void timerbar_onlesslessclicked(TimeBar* self, psy_ui_Component* sender)
@@ -85,9 +89,9 @@ void timerbar_offsetbpm(TimeBar* self, psy_dsp_big_beat_t delta)
 	}
 }
 
-void timerbar_ontimer(TimeBar* self, psy_ui_Component* sender, uintptr_t timerid)
+void timerbar_ontimer(TimeBar* self, uintptr_t timerid)
 {		
-	if (self->bpm != psy_audio_player_bpm(self->player)) {
+	if (self->bpm != psy_audio_player_bpm(self->player)) { 
 		char txt[20];
 
 		self->bpm = psy_audio_player_bpm(self->player);

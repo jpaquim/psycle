@@ -117,6 +117,7 @@ uintptr_t psy_property_size(const psy_Property*);
 bool psy_property_empty(const psy_Property*);
 psy_List* psy_property_children(psy_Property*);
 const psy_List* psy_property_children_const(const psy_Property*);
+psy_Property* psy_property_first(psy_Property*);
 psy_Property* psy_property_parent(const psy_Property*);
 psy_Property* psy_property_remove(psy_Property*, psy_Property*);
 void psy_property_clear(psy_Property*);

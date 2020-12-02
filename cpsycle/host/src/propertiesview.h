@@ -15,6 +15,10 @@
 
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Displays psy_Property and allows to edit them.
 
 #define PROPERTIESRENDERER_NUMCOLS 3
@@ -101,5 +105,9 @@ INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
 	self->renderer.col_perc[1] = col1_perc;
 	self->renderer.col_perc[2] = col2_perc;	
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PROPERTIESVIEW */

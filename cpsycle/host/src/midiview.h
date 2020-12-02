@@ -11,6 +11,9 @@
 #include <uicheckbox.h>
 #include <uiscroller.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct {
 	psy_ui_Component component;	
@@ -88,5 +91,9 @@ INLINE psy_ui_Component* midimonitor_base(MidiMonitor* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

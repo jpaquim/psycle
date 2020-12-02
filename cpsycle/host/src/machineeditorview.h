@@ -10,6 +10,10 @@
 
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Displays a plugin custom ui. So far only vsts use this view.
 
 typedef struct {
@@ -22,5 +26,9 @@ void machineeditorview_init(MachineEditorView*, psy_ui_Component* parent,
 MachineEditorView* machineeditorview_alloc(void);
 MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine*, Workspace*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MACHINEEDITORVIEW_H */

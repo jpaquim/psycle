@@ -8,6 +8,10 @@
 #include "workspace.h"
 #include <fft.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Displays a realtime frequency band analysis, alternating left and
 //      right across the display, the blue lines are the left channel and the
 //      green lines are the right channel. 
@@ -39,5 +43,9 @@ void spectrumanalyzer_stop(SpectrumAnalyzer*);
 void spectrumanalyzer_hold(SpectrumAnalyzer*);
 void spectrumanalyzer_continue(SpectrumAnalyzer*);
 bool spectrumanalyzer_stopped(SpectrumAnalyzer*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SPECTRUMANALYZER_H */

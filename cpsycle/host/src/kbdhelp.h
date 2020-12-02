@@ -11,6 +11,10 @@
 #include <uieditor.h>
 #include <uinotebook.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: keyboard shortcut helpview for general and note commands.
 
 typedef struct KbdHelp {
@@ -26,5 +30,9 @@ INLINE psy_ui_Component* kbdhelp_base(KbdHelp* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* KBDHELP_H */

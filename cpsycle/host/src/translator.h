@@ -4,7 +4,12 @@
 #if !defined(TRANSLATOR_H)
 #define TRANSLATOR_H
 
+// container
 #include <properties.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // Translator
 //
@@ -46,5 +51,9 @@ bool translator_test(const Translator*, const char* path, char* id);
 // translate("help.load")
 //   returns: load (not found in help, return key without section prefix)
 const char* translator_translate(Translator*, const char* key);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TRANSLATOR_H */

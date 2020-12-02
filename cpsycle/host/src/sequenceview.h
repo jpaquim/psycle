@@ -17,6 +17,10 @@
 #include "playlisteditor.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;	
 	psy_ui_Button incpattern;
@@ -135,5 +139,9 @@ INLINE psy_ui_Component* sequenceview_base(SequenceView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

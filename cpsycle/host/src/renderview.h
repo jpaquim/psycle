@@ -13,6 +13,10 @@
 #include <uicheckbox.h>
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: View for saving a song as a Windows PCM Wav.
 
 typedef struct {
@@ -29,5 +33,9 @@ typedef struct {
 
 void renderview_init(RenderView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

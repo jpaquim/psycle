@@ -8,6 +8,10 @@
 #include "uicombobox.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Select Machine – Select the machine to be used
 //      Opens Gear Rack, CPU, MIDI, Lua Plugin Editor View
 //      Sampler : Select Instrument – Selects the instrument to be used or
@@ -40,5 +44,9 @@ INLINE psy_ui_Component* machinebar_base(MachineBar* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

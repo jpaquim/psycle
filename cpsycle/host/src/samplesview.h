@@ -17,6 +17,10 @@
 #include "notestab.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct SamplesView;
 
 typedef struct {
@@ -155,5 +159,9 @@ INLINE psy_ui_Component* samplesview_base(SamplesView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

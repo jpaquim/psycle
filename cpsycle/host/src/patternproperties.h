@@ -11,6 +11,10 @@
 #include "pattern.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label namelabel;
@@ -25,5 +29,9 @@ typedef struct {
 void patternproperties_init(PatternProperties*, psy_ui_Component* parent, psy_audio_Pattern*,
 	Workspace*);
 void patternproperties_setpattern(PatternProperties*, psy_audio_Pattern*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

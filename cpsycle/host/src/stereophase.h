@@ -7,9 +7,14 @@
 #include "uicomponent.h"
 #include "workspace.h"
 
-// aim: Displays the stereo phase of the signal 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {	
+// Displays the stereo phase of the signal 
+
+typedef struct {
+	// inherits
 	psy_ui_Component component;
 	psy_audio_Wire wire;
 	psy_dsp_amp_t leftavg;
@@ -31,5 +36,9 @@ typedef struct {
 
 void stereophase_init(StereoPhase*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);
 void stereophase_stop(StereoPhase*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* STEREOPHASE_H */

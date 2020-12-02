@@ -9,6 +9,10 @@
 
 #include <uiscroller.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SeqEditorTrackState {
 	int pxperbeat;
 	psy_ui_Value lineheight;
@@ -185,5 +189,9 @@ INLINE psy_ui_Component* seqeditor_base(SeqEditor* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* SEQEDITOR_H */

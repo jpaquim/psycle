@@ -13,6 +13,10 @@
 #include <plugincatcher.h>
 #include <hashtbl.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: adding machines
 
 typedef struct {
@@ -51,12 +55,13 @@ typedef struct {
    int avgcharwidth;
    int pluginpos;
    psy_Property* plugins;
-   psy_Property* selectedplugin;
-   psy_Signal signal_selected;
-   psy_Signal signal_changed;
+   psy_Property* selectedplugin;   
    Workspace* workspace;
    int calledby;
    bool onlyfavorites;
+   // Signals
+   psy_Signal signal_selected;
+   psy_Signal signal_changed;
 } PluginsView;
 
 void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites, Workspace*);
@@ -67,14 +72,19 @@ typedef struct {
    PluginsView favoriteview;
    psy_ui_Label pluginsheader;
    PluginsView pluginsview;
-   NewMachineDetail detail;
-   psy_Signal signal_selected;
+   NewMachineDetail detail;   
    MachineViewSkin* skin;
    psy_ui_Scroller scroller_fav;
    psy_ui_Scroller scroller_main;
+   // Signals
+   psy_Signal signal_selected;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
 void newmachine_updateskin(NewMachine*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

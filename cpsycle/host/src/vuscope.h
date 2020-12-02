@@ -4,13 +4,21 @@
 #if !defined(VUSCOPE_H)
 #define VUSCOPE_H
 
-#include "uicomponent.h"
+// host
 #include "workspace.h"
+// ui
+#include "uicomponent.h"
 
-// aim: displays the Left (coloured blue) and Right (green) volumes in
-//      decibels.
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {	
+// VuScope
+//
+// Display a blue left and green right volumebar in decibels.
+
+typedef struct VuScope {
+	// inherits
 	psy_ui_Component component;
 	psy_audio_Wire wire;
 	psy_dsp_amp_t leftavg;
@@ -31,4 +39,15 @@ void vuscope_start(VuScope*);
 void vuscope_stop(VuScope*);
 void vuscope_disconnect(VuScope*);
 
+INLINE psy_ui_Component* vuscope_base(VuScope* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* VUSCOPE_H */

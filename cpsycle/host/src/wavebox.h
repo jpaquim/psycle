@@ -6,11 +6,19 @@
 
 #include "workspace.h"
 
+// audio
 #include <sample.h>
+// ui
 #include <uicomponent.h>
 
-// aim: Shows PCM Wave data, allows frame and loop point sselection.
-//      The view can optionally doubled at the loop slice points.
+// WaveBox
+//
+// Shows PCM Wave data, allows frame and loop point selection.
+// The view can optionally doubled at the loop slice points.
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
 	WAVEBOX_DRAG_NONE,
@@ -133,5 +141,9 @@ INLINE psy_audio_Sample* wavebox_sample(WaveBox* self)
 {
 	return self->context.sample;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

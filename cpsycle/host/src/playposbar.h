@@ -9,6 +9,10 @@
 #include "player.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: displays a playback counter in beats unit
 
 typedef struct {
@@ -25,5 +29,9 @@ INLINE psy_ui_Component* playposbar_base(PlayPosBar* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

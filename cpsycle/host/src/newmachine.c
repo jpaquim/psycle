@@ -190,6 +190,10 @@ static void pluginsview_hittest(PluginsView*, int x, int y);
 static void pluginsview_computetextsizes(PluginsView*, const psy_ui_Size*);
 static void pluginsview_onplugincachechanged(PluginsView*,
 	psy_audio_PluginCatcher* sender);
+static int pluginsview_visilines(PluginsView*);
+static int pluginsview_topline(PluginsView*);
+static void pluginsview_settopline(PluginsView*, int line);
+static int pluginsview_numlines(const PluginsView*);
 
 static psy_ui_ComponentVtable pluginsview_vtable;
 static int pluginsview_vtable_initialized = 0;
@@ -372,15 +376,9 @@ void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
 	if (self->plugins) {
-		psy_ui_Size size;
-		int currlines;
-
 		pluginsview_computetextsizes(self, limit);
-		size = psy_ui_component_size(&self->component);
-		currlines = psy_property_size(self->plugins) /
-			self->numparametercols + 1;				
-		rv->height = psy_ui_value_makepx(self->component.scrollstepy * currlines);
-		rv->width = size.width;		
+		rv->height = psy_ui_value_makepx(self->lineheight *
+			pluginsview_numlines(self));
 	}
 }
 
@@ -421,15 +419,47 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 				}
 				break;
 			case psy_ui_KEY_DOWN:
-				++row;
+				if (row + 1 < pluginsview_numlines(self)) {
+					++row;
+					if (row > pluginsview_topline(self) + pluginsview_visilines(self)) {
+						pluginsview_settopline(self, row - pluginsview_visilines(self));
+					}
+				} else {
+					psy_ui_component_focus_next(psy_ui_component_parent(&self->component));
+				}
 				psy_ui_keyevent_stoppropagation(ev);
 				break;		
 			case psy_ui_KEY_UP:
 				if (row > 0) {
-					--row;				
+					--row;
+					if (row < pluginsview_topline(self)) {
+						pluginsview_settopline(self, row);
+					}
+				} else {
+					psy_ui_component_focus_prev(psy_ui_component_parent(
+						&self->component));
 				}
 				psy_ui_keyevent_stoppropagation(ev);
-				break;		
+				break;
+			case psy_ui_KEY_PRIOR:
+				if (row > 0) {
+					row = psy_max(0, row - 4);
+					if (row < pluginsview_topline(self)) {
+						pluginsview_settopline(self, row);
+					}
+				}
+				psy_ui_keyevent_stoppropagation(ev);
+				break;
+			case psy_ui_KEY_NEXT:
+				row += 4;
+				if (row >= pluginsview_numlines(self) - 1) {
+					row = pluginsview_numlines(self) - 1;
+				}
+				if (row > pluginsview_topline(self) + pluginsview_visilines(self)) {
+					pluginsview_settopline(self, row - pluginsview_visilines(self));
+				}
+				psy_ui_keyevent_stoppropagation(ev);
+				break;
 			case psy_ui_KEY_LEFT:			
 				if (col > 0) {
 					--col;		
@@ -453,12 +483,37 @@ void pluginsview_onkeydown(PluginsView* self, psy_ui_KeyEvent* ev)
 		}
 	} else
 	if (ev->keycode >= psy_ui_KEY_LEFT && ev->keycode <= psy_ui_KEY_DOWN) {
-		if (self->plugins->children)
-		self->selectedplugin = self->plugins;
-		psy_signal_emit(&self->signal_changed, self, 1,
-			self->selectedplugin);
-		psy_ui_component_invalidate(&self->component);			
+		if (self->plugins && !psy_property_empty(self->plugins)) {
+			self->selectedplugin = psy_property_first(self->plugins);
+			psy_signal_emit(&self->signal_changed, self, 1,
+				self->selectedplugin);
+			psy_ui_component_invalidate(&self->component);
+		}
 	}	
+}
+
+int pluginsview_visilines(PluginsView* self)
+{
+	psy_ui_IntSize size;
+
+	size = psy_ui_component_intsize(&self->component);
+	return size.height / self->lineheight;
+}
+
+int pluginsview_topline(PluginsView* self)
+{	
+	return psy_ui_component_scrolltop(&self->component) / self->lineheight;
+}
+
+int pluginsview_numlines(const PluginsView* self)
+{
+	return psy_property_size(self->plugins) /
+		self->numparametercols + 1;
+}
+
+void pluginsview_settopline(PluginsView* self, int line)
+{
+	psy_ui_component_setscrolltop(&self->component, line * self->lineheight);
 }
 
 void pluginsview_cursorposition(PluginsView* self, psy_Property* plugin,
@@ -624,7 +679,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 	psy_ui_Border sectionborder;
 	
-	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_init(&self->component, parent);	
 	newmachine_vtable_init(self);
 	self->component.vtable = &newmachine_vtable;
 	self->skin = skin;		
@@ -648,11 +703,12 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_resize(&self->favoriteheader.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));	
 	psy_ui_component_setborder(&self->favoriteheader.component, sectionborder);
-	pluginsview_init(&self->favoriteview, &self->component, TRUE, workspace);
+	pluginsview_init(&self->favoriteview, &self->component, TRUE, workspace);	
 	psy_ui_component_setmaximumsize(&self->favoriteview.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(4.0)));
 	psy_ui_scroller_init(&self->scroller_fav, &self->favoriteview.component,
 		&self->component);
+	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
 	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
 	// plugin view
 	psy_ui_label_init(&self->pluginsheader, &self->component);
@@ -665,9 +721,10 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_resize(&self->pluginsheader.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(2)));
 	psy_ui_component_setborder(&self->pluginsheader.component, sectionborder);
-	pluginsview_init(&self->pluginsview, &self->component, FALSE, workspace);
+	pluginsview_init(&self->pluginsview, &self->component, FALSE, workspace);	
 	psy_ui_scroller_init(&self->scroller_main, &self->pluginsview.component,
 		&self->component);
+	psy_ui_component_settabindex(&self->scroller_main.component, 1);
 	psy_ui_component_setalign(&self->scroller_main.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_selected);	
 	psy_signal_connect(&self->pluginsview.signal_selected, self,

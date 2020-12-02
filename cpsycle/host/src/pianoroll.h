@@ -14,6 +14,10 @@
 
 #include <pattern.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
 	KEYBOARDTYPE_KEYS,
 	KEYBOARDTYPE_NOTES,
@@ -342,5 +346,9 @@ INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)
 
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -721,44 +721,44 @@ void workspace_makepatternview(Workspace* self, psy_Property* visual)
 		psy_property_append_font(pvc, "font", PSYCLE_DEFAULT_FONT),
 		"settingsview.font");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "drawemptydata", 0),
+		psy_property_append_bool(pvc, "drawemptydata", FALSE),
 		"settingsview.draw-empty-data");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "griddefaults", 1),
+		psy_property_append_bool(pvc, "griddefaults", TRUE),
 		"settingsview.default-entries");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "linenumbers", 1),
+		psy_property_append_bool(pvc, "linenumbers", TRUE),
 		"settingsview.line-numbers");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "beatoffset", 1),
+		psy_property_append_bool(pvc, "beatoffset", FALSE),
 		"settingsview.beat-offset");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "linenumberscursor", 1),
+		psy_property_append_bool(pvc, "linenumberscursor", TRUE),
 		"settingsview.line-numbers-cursor");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "linenumbersinhex", 1),
+		psy_property_append_bool(pvc, "linenumbersinhex", FALSE),
 		"settingsview.line-numbers-in-hex");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "wideinstcolumn", 0),
+		psy_property_append_bool(pvc, "wideinstcolumn", FALSE),
 		"settingsview.wide-instrument-column");
 	psy_property_setid(psy_property_settext(
-		psy_property_append_bool(pvc, "trackscopes", 1),
+		psy_property_append_bool(pvc, "trackscopes", TRUE),
 		"settingsview.pattern-track-scopes"),
 		PROPERTY_ID_TRACKSCOPES);
 	psy_property_settext(
-		psy_property_append_bool(pvc, "wraparound", 1),
+		psy_property_append_bool(pvc, "wraparound", TRUE),
 		"settingsview.wrap-around");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "centercursoronscreen", 0),
+		psy_property_append_bool(pvc, "centercursoronscreen", FALSE),
 		"settingsview.center-cursor-on-screen");
 	psy_property_settext(
 		psy_property_append_int(pvc, "beatsperbar", 4, 1, 16),
 		"settingsview.bar-highlighting");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "notetab", 1),
+		psy_property_append_bool(pvc, "notetab", TRUE),
 		"settingsview.a4-440hz");
 	psy_property_settext(
-		psy_property_append_bool(pvc, "movecursorwhenpaste", 1),
+		psy_property_append_bool(pvc, "movecursorwhenpaste", TRUE),
 		"settingsview.move-cursor-when-paste");
 	// pattern display choice
 	choice = psy_property_setid(psy_property_settext(

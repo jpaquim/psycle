@@ -8,6 +8,10 @@
 
 #include <uicomponent.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: a scrollbar with zoom
 
 typedef struct {
@@ -31,5 +35,9 @@ INLINE float scrollzoom_end(ScrollZoom* self)
 {
 	return self->end;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -4,96 +4,126 @@
 #include "../../detail/prefix.h"
 
 #include "zoombox.h"
+// platform
 #include "../../detail/portable.h"
 
-static void zoombox_ondestroy(ZoomBox*, psy_ui_Component* sender);
+#define sgn(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
+
+// prototypes
+static void zoombox_ondestroy(ZoomBox*);
 static void zoombox_onzoomin(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_onzoomout(ZoomBox*, psy_ui_Component* sender);
 static void zoombox_updatelabel(ZoomBox*);
-static void zoombox_onmousewheel(ZoomBox*, psy_ui_Component* sender,
-	psy_ui_MouseEvent*);
+static void zoombox_onmousewheel(ZoomBox*, psy_ui_MouseEvent*);
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
 
-void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
-{		
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);	
-	psy_ui_component_setpreferredsize(&self->component, 
-		psy_ui_size_make(psy_ui_value_makeew(2),
-		psy_ui_value_makeeh(2)));
-	psy_ui_button_init(&self->zoomout, &self->component);
-	psy_ui_button_settext(&self->zoomout, "-");
-	psy_ui_button_setcharnumber(&self->zoomout, 2);
-	psy_ui_label_init(&self->label, &self->component);
-	psy_ui_label_settext(&self->label, "100");
-	psy_ui_label_setcharnumber(&self->label, 4);
-	psy_signal_connect(&self->component.signal_mousewheel, self,
-		zoombox_onmousewheel);
-	psy_ui_button_init(&self->zoomin, &self->component);
-	psy_ui_button_settext(&self->zoomin, "+");	
-	psy_ui_button_setcharnumber(&self->zoomin, 2);
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		NULL));
-	psy_signal_init(&self->signal_changed);
-	self->zoomrate = 1.0;
-	self->zoomstep = 0.25;
-	psy_signal_connect(&self->component.signal_destroy, self, zoombox_ondestroy);
-	psy_signal_connect(&self->zoomin.signal_clicked, self, zoombox_onzoomin);
-	psy_signal_connect(&self->zoomout.signal_clicked, self, zoombox_onzoomout);
+static psy_ui_ComponentVtable* vtable_init(ZoomBox* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+			zoombox_ondestroy;
+		vtable.onmousewheel = (psy_ui_fp_component_onmousewheel)
+			zoombox_onmousewheel;		
+		vtable_initialized = TRUE;
+	}
+	return &vtable;
 }
 
-void zoombox_ondestroy(ZoomBox* self, psy_ui_Component* sender)
+// implementation
+void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 {
+	assert(self);
+
+	// init base
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setvtable(zoombox_base(self), vtable_init(self));
+	psy_ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
+	// init ui elements
+	psy_ui_button_init(&self->zoomout, zoombox_base(self));
+	psy_ui_button_settext(&self->zoomout, "-");
+	psy_ui_button_setcharnumber(&self->zoomout, 2);
+	psy_signal_connect(&self->zoomout.signal_clicked, self, zoombox_onzoomout);
+	psy_ui_label_init(&self->label, zoombox_base(self));
+	psy_ui_label_settext(&self->label, "100");
+	psy_ui_label_setcharnumber(&self->label, 4);	
+	psy_ui_button_init(&self->zoomin, zoombox_base(self));
+	psy_ui_button_settext(&self->zoomin, "+");	
+	psy_ui_button_setcharnumber(&self->zoomin, 2);
+	psy_signal_connect(&self->zoomin.signal_clicked, self, zoombox_onzoomin);	
+	psy_list_free(psy_ui_components_setalign(
+		psy_ui_component_children(zoombox_base(self), psy_ui_NONRECURSIVE),
+		psy_ui_ALIGN_LEFT,
+		NULL));
+	// set defaults
+	self->zoomrate = 1.0;
+	self->zoomstep = 0.1;
+	self->minrate = 0.10;
+	self->maxrate = 10.0;
+	// init signal	
+	psy_signal_init(&self->signal_changed);
+}
+
+void zoombox_ondestroy(ZoomBox* self)
+{
+	assert(self);
+
 	psy_signal_dispose(&self->signal_changed);
 }
 
 void zoombox_onzoomin(ZoomBox* self, psy_ui_Component* sender)
-{		
-	self->zoomrate += self->zoomstep;	
-	if (self->zoomrate < 0.0) {
-		self->zoomrate = 0.0;
-	}
-	zoombox_updatelabel(self);
-	psy_signal_emit(&self->signal_changed, self, 0);
+{
+	assert(self);
+
+	zoombox_setrate(self,  self->zoomrate + self->zoomstep);
 }
 
 void zoombox_onzoomout(ZoomBox* self, psy_ui_Component* sender)
 {
-	self->zoomrate -= self->zoomstep;	
-	if (self->zoomrate > 10.0) {
-		self->zoomrate = 9.0;
-	}
-	zoombox_updatelabel(self);
-	psy_signal_emit(&self->signal_changed, self, 0);
+	assert(self);
+
+	zoombox_setrate(self, self->zoomrate - self->zoomstep);
 }
 
 void zoombox_setrate(ZoomBox* self, double rate)
 {	
-	if (rate > 0 && rate != self->zoomrate) {
+	assert(self);
+	
+	rate = psy_max(self->minrate, rate);
+	rate = psy_min(self->maxrate, rate);
+	if (rate != self->zoomrate) {
 		self->zoomrate = rate;
 		psy_signal_emit(&self->signal_changed, self, 0, self->zoomrate);
 		zoombox_updatelabel(self);
 	}	
 }
 
+void zoombox_setstep(ZoomBox* self, double step)
+{
+	assert(self);
+
+	self->zoomstep = step;
+}
+
 void zoombox_updatelabel(ZoomBox* self)
 {
 	char text[40];
 
-	psy_snprintf(text, 40, "%d", (int)(self->zoomrate * 100));
+	assert(self);
+
+	psy_snprintf(text, 40, "%d", (int)(self->zoomrate * 100 + 0.5));
 	psy_ui_label_settext(&self->label, text);
 }
 
-void zoombox_onmousewheel(ZoomBox* self, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev)
+void zoombox_onmousewheel(ZoomBox* self, psy_ui_MouseEvent* ev)
 {
+	assert(self);
+
 	if (ev->delta != 0) {
-		zoombox_setrate(self, self->zoomrate +
-			((ev->delta > 0)
-			? 1
-			: -1) *
-			self->zoomstep);
+		zoombox_setrate(self, self->zoomrate + sgn(ev->delta) * self->zoomstep);
 	}
-	ev->preventdefault = 1;
+	psy_ui_mouseevent_preventdefault(ev);
 }

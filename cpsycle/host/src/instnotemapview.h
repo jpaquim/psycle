@@ -17,6 +17,10 @@
 #include <uislider.h>
 #include <uiscroller.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: InstrumentNoteMapView plays the rule of the Sampulse Note mapping
 //      editor. Sampulse instruments can use more than one sample at a time,
 //      and to do so, they use the note mapping, which means that each of the
@@ -102,5 +106,9 @@ void instrumentnotemapview_init(InstrumentNoteMapView*,
 	psy_ui_Component* parent, Workspace*);
 void instrumentnotemapview_setinstrument(InstrumentNoteMapView*, psy_audio_Instrument*);
 void instrumentnotemapview_update(InstrumentNoteMapView*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

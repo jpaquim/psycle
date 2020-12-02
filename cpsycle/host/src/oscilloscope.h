@@ -10,6 +10,10 @@
 #include "uilabel.h"
 #include "zoombox.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: displays the Left and Right signals as a realtime waveform graph.
 
 typedef enum {
@@ -69,5 +73,9 @@ void oscilloscopeview_init(OscilloscopeView*, psy_ui_Component* parent,
 	psy_audio_Wire wire, Workspace*);
 void oscilloscopeview_start(OscilloscopeView*);
 void oscilloscopeview_stop(OscilloscopeView*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* Oscilloscope */

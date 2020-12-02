@@ -12,7 +12,6 @@
 
 static void filebar_updatetext(FileBar*, Translator* translator);
 static void filebar_onlanguagechanged(FileBar*, Translator* sender);
-static void filebar_initalign(FileBar*);
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
@@ -21,27 +20,24 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 {
 	self->workspace = workspace;
 	psy_ui_component_init(filebar_base(self), parent);	
-	psy_ui_component_enablealign(filebar_base(self));
 	psy_ui_component_setalignexpand(filebar_base(self),
 		psy_ui_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->recentbutton, filebar_base(self));
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);
 	psy_ui_label_init(&self->header, filebar_base(self));
-	psy_ui_button_init(&self->newbutton, filebar_base(self));
-	psy_signal_connect(&self->newbutton.signal_clicked, self,
-		filebar_onnewsong);
+	psy_ui_button_init_connect(&self->newbutton, filebar_base(self),
+		self, filebar_onnewsong);
 	psy_ui_button_init(&self->loadbutton, filebar_base(self));
 #ifdef PSYCLE_USE_PLATFORM_FILEOPEN
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 #endif
-	psy_ui_button_init(&self->savebutton, filebar_base(self));
-	psy_signal_connect(&self->savebutton.signal_clicked, self,
-		filebar_onsavesong);
-	psy_ui_button_init(&self->renderbutton, filebar_base(self));	
-	filebar_initalign(self);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		filebar_onlanguagechanged);
+	psy_ui_button_init_connect(&self->savebutton, filebar_base(self),
+		self, filebar_onsavesong);
+	psy_ui_button_init(&self->renderbutton, filebar_base(self),
+		self, filebar_onlanguagechanged);
 	filebar_updatetext(self, &workspace->translator);
 }
 
@@ -62,19 +58,6 @@ void filebar_updatetext(FileBar* self, Translator* translator)
 void filebar_onlanguagechanged(FileBar* self, Translator* sender)
 {
 	filebar_updatetext(self, sender);
-}
-
-void filebar_initalign(FileBar* self)
-{	
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(filebar_base(self), psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		&margin));
 }
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)

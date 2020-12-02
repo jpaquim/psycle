@@ -1333,12 +1333,12 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 					&self->patternview.pianoroll.grid.component);
 			break;
 		case PSY_EVENTDRIVER_NOTECOLUMN:
-			return self->patternview.trackerview.gridstate.cursor.column == 0;
+			return self->patternview.gridstate.cursor.column == 0;
 			break;
 		case PSY_EVENTDRIVER_SETCHORDMODE:
 			if (param1 == 1) {
 				self->patternview.trackerview.grid.chordbegin =
-					self->patternview.trackerview.gridstate.cursor.track;
+					self->patternview.gridstate.cursor.track;
 				self->patternview.trackerview.grid.chordmode = TRUE;
 			}
 			break;

@@ -4,8 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "playbar.h"
+// audio
 #include <exclusivelock.h>
+// std
 #include <stdlib.h>
+// platform
 #include "../../detail/portable.h"
 
 enum {
@@ -15,7 +18,6 @@ enum {
 };
 
 static void playbar_updatetext(PlayBar*, Translator*);
-static void playbar_initalign(PlayBar*);
 static void playbar_onloopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onrecordnotesclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onplaymodeselchanged(PlayBar*,
@@ -25,53 +27,62 @@ static void playbar_onnumplaybeatsmore(PlayBar*, psy_ui_Button* sender);
 static void playbar_onplayclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_startplay(PlayBar*);
 static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
-static void playbar_ontimer(PlayBar*, psy_ui_Component* sender, uintptr_t timerid);
+static void playbar_ontimer(PlayBar*, uintptr_t timerid);
 static void playbar_onlanguagechanged(PlayBar*, Translator* sender);
+// vtable
+static psy_ui_ComponentVtable vtable;
+static bool vtable_initialized = FALSE;
 
+static psy_ui_ComponentVtable* vtable_init(PlayBar* self)
+{
+	if (!vtable_initialized) {
+		vtable = *(self->component.vtable);
+		vtable.ontimer = (psy_ui_fp_component_ontimer)playbar_ontimer;
+		vtable_initialized = TRUE;
+	}
+	return &vtable;
+}
+// implementation
 void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
-{			
+{				
+	psy_ui_component_init(playbar_base(self), parent);
+	psy_ui_component_setvtable(playbar_base(self), vtable_init(self));
+	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
+	psy_ui_component_setdefaultalign(playbar_base(self), psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	self->workspace = workspace;
 	self->player = &workspace->player;
-	psy_ui_component_init(&self->component, parent);
-	// ui_component_setalignexpand(&self->component, UI_HORIZONTALEXPAND);
 	// loop
-	psy_ui_button_init(&self->loop, &self->component);
-	
-	psy_signal_connect(&self->loop.signal_clicked, self, playbar_onloopclicked);
+	psy_ui_button_init_connect(&self->loop, playbar_base(self),
+		self, playbar_onloopclicked);
 	// record
-	psy_ui_button_init(&self->recordnotes, &self->component);
-	
-	psy_signal_connect(&self->recordnotes.signal_clicked, self, playbar_onrecordnotesclicked);
-	psy_ui_button_init(&self->play, &self->component);
-	
-	psy_signal_connect(&self->play.signal_clicked, self, playbar_onplayclicked);
+	psy_ui_button_init_connect(&self->recordnotes, playbar_base(self),
+		self, playbar_onrecordnotesclicked);
+	psy_ui_button_init_connect(&self->play, playbar_base(self),
+		self, playbar_onplayclicked);
 	// playmode
-	psy_ui_combobox_init(&self->playmode, &self->component);	
+	psy_ui_combobox_init(&self->playmode, playbar_base(self));
 	psy_ui_combobox_setcharnumber(&self->playmode, 6);	
 	// play beat num
-	psy_ui_edit_init(&self->loopbeatsedit, &self->component);
+	psy_ui_edit_init(&self->loopbeatsedit, playbar_base(self));
 	psy_ui_edit_settext(&self->loopbeatsedit, "4.00");
 	psy_ui_edit_setcharnumber(&self->loopbeatsedit, 6);
-	psy_ui_button_init(&self->loopbeatsless, &self->component);
-	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);
-	psy_signal_connect(&self->loopbeatsless.signal_clicked, self,
-		playbar_onnumplaybeatsless);
-	psy_ui_button_init(&self->loopbeatsmore, &self->component);
-	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);
-	psy_signal_connect(&self->loopbeatsmore.signal_clicked, self,
-		playbar_onnumplaybeatsmore);
+	psy_ui_button_init_connect(&self->loopbeatsless, playbar_base(self),
+		self, playbar_onnumplaybeatsless);
+	psy_ui_button_seticon(&self->loopbeatsless, psy_ui_ICON_LESS);	
+	psy_ui_button_init_connect(&self->loopbeatsmore, playbar_base(self),
+		self, playbar_onnumplaybeatsmore);
+	psy_ui_button_seticon(&self->loopbeatsmore, psy_ui_ICON_MORE);	
 	// stop
-	psy_ui_button_init(&self->stop, &self->component);	
-	psy_signal_connect(&self->stop.signal_clicked, self, playbar_onstopclicked);
-	psy_signal_connect(&self->component.signal_timer, self, playbar_ontimer);
-	playbar_initalign(self);
+	psy_ui_button_init_connect(&self->stop, playbar_base(self),
+		self, playbar_onstopclicked);
 	playbar_updatetext(self, &self->workspace->translator);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
 		playbar_onplaymodeselchanged);
 	psy_signal_connect(&self->workspace->signal_languagechanged, self,
 		playbar_onlanguagechanged);
-	psy_ui_component_starttimer(&self->component, 0, 100);
+	psy_ui_component_starttimer(playbar_base(self), 0, 100);
 }
 
 void playbar_updatetext(PlayBar* self, Translator* translator)
@@ -90,20 +101,6 @@ void playbar_updatetext(PlayBar* self, Translator* translator)
 		translator_translate(translator, "play.beats"));
 	psy_ui_button_settext(&self->stop,
 		translator_translate(translator, "play.stop"));
-}
-
-void playbar_initalign(PlayBar* self)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));	
-	psy_ui_component_setalignexpand(&self->component,
-		psy_ui_HORIZONTALEXPAND);
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT, &margin));
 }
 
 void playbar_onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
@@ -247,7 +244,7 @@ void playbar_onrecordnotesclicked(PlayBar* self, psy_ui_Component* sender)
 	}
 }
 
-void playbar_ontimer(PlayBar* self, psy_ui_Component* sender, uintptr_t timerid)
+void playbar_ontimer(PlayBar* self, uintptr_t timerid)
 {	
 	if (psy_audio_player_playing(self->player)) {
 		psy_ui_button_highlight(&self->play);

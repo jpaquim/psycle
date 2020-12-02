@@ -8,6 +8,10 @@
 #include "uilabel.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Current octave, ranging from 0 to 8, when entering notes with the PC
 //      keyboard
 
@@ -25,5 +29,8 @@ INLINE psy_ui_Component* octavebar_base(OctaveBar* self)
 	return &self->component;
 }
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -9,6 +9,10 @@
 #include <uiedit.h>
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Component tabbar;
@@ -34,5 +38,9 @@ void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 void songpropertiesview_enableedit(SongPropertiesView*);
 void songpropertiesview_disableedit(SongPropertiesView*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

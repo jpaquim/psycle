@@ -9,6 +9,10 @@
 #include "uibutton.h"
 #include "workspace.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Sets the Lines per beat – Number of lines per beat, ranging from
 //      1 to 31.
 
@@ -30,5 +34,9 @@ INLINE psy_ui_Component* linesperbeatbar_base(LinesPerBeatBar* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

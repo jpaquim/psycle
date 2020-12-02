@@ -7,8 +7,16 @@
 
 #include <properties.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int skin_load(psy_Property*, const char* path);
 int skin_loadpsh(psy_Property*, const char* path);
 void skin_psh_values(const char* str, int maxcount, int* values);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* SKINFILE_H */

@@ -21,6 +21,10 @@
 #include <presets.h>
 #include <machine.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Wraps a Parameterview or Machineeditorview inside a frame. A Frame
 //      can be docked at the bottom of the Machineview or floated to
 //      a window.
@@ -67,5 +71,9 @@ MachineFrame* machineframe_allocinit(psy_ui_Component* parent, bool floated, Wor
 
 void machineframe_setview(MachineFrame* self, psy_ui_Component* view, psy_audio_Machine*);
 void machineframe_setparamview(MachineFrame* self, ParamView* view, psy_audio_Machine*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

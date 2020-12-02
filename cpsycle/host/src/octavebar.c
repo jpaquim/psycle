@@ -9,7 +9,6 @@
 
 #include "../../detail/portable.h"
 
-static void octavebar_initalign(OctaveBar*);
 static void octavebar_updatetext(OctaveBar*, Translator*);
 static void octavebar_onlanguagechanged(OctaveBar*, Translator* sender);
 static void octavebar_buildoctavebox(OctaveBar*);
@@ -18,12 +17,13 @@ static void octavebar_onoctavechanged(OctaveBar*, Workspace*, int octave);
 static void octavebar_onsongchanged(OctaveBar*, Workspace*, int flag, psy_audio_SongFile*);
 
 void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* workspace)
-{
-	self->workspace = workspace;
+{	
 	psy_ui_component_init(octavebar_base(self), parent);
-	psy_ui_component_enablealign(octavebar_base(self));
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_component_setalignexpand(octavebar_base(self),
 		psy_ui_HORIZONTALEXPAND);
+	self->workspace = workspace;
 	psy_ui_label_init(&self->headerlabel, octavebar_base(self));
 	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->octavebox, 2);	
@@ -37,7 +37,6 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		octavebar_onlanguagechanged);
 	octavebar_updatetext(self, &workspace->translator);
-	octavebar_initalign(self);
 }
 
 void octavebar_updatetext(OctaveBar* self, Translator* translator)
@@ -50,19 +49,6 @@ void octavebar_updatetext(OctaveBar* self, Translator* translator)
 void octavebar_onlanguagechanged(OctaveBar* self, Translator* sender)
 {
 	octavebar_updatetext(self, sender);
-}
-
-void octavebar_initalign(OctaveBar* self)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(octavebar_base(self), psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		&margin));
 }
 
 void octavebar_buildoctavebox(OctaveBar* self)

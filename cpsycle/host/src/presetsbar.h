@@ -15,6 +15,10 @@
 #include <presets.h>
 #include <machine.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: manages machine presets 
 
 typedef struct PresetsBar {
@@ -35,5 +39,9 @@ typedef struct PresetsBar {
 
 void presetsbar_init(PresetsBar*, psy_ui_Component* parent, Workspace*);
 void presetsbar_setmachine(PresetsBar*, psy_audio_Machine* machine);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PRESETSBAR_H */

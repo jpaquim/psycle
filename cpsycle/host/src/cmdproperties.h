@@ -6,6 +6,10 @@
 
 #include <properties.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: Creates properties, that are mapping cmd enum ids (cmdsgeneral.h) to
 //      a input key and containing additional information for the SettingView
 //      and 'psycle.ini' configuration file. The mapping consits of
@@ -22,6 +26,11 @@
 //    psy_audio_encodeinput(psy_ui_KEY_F12, 0, 0), 0, 0), CMD_IMM_TERMINAL),
 //    "term"), "Terminal");
 
+
 psy_Property* cmdproperties_create(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

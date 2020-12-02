@@ -9,6 +9,10 @@
 
 #include <pattern.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: A classical stepsequencer view for entering notes in the patterneditor
 //      The Left StepBar component selects the current pattern bar.
 
@@ -82,5 +86,9 @@ INLINE psy_ui_Component* stepsequencerview_base(StepsequencerView* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

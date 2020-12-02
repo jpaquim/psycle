@@ -245,6 +245,10 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	self->imp = imp;
 	psy_ui_component_init_base(self);
 	psy_ui_component_init_signals(self);
+	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
+		psy_ui_component_setalign(self, parent->insertaligntype);
+		psy_ui_component_setmargin(self, &parent->insertmargin);
+	}
 }
 
 void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
@@ -257,7 +261,11 @@ void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
 	self->imp = psy_ui_impfactory_allocinit_componentimp(psy_ui_app_impfactory(&app),
 		self, parent);
 	psy_ui_component_init_base(self);
-	psy_ui_component_init_signals(self);	
+	psy_ui_component_init_signals(self);
+	if (parent && parent->insertaligntype != psy_ui_ALIGN_NONE) {
+		psy_ui_component_setalign(self, parent->insertaligntype);
+		psy_ui_component_setmargin(self, &parent->insertmargin);
+	}
 }
 
 void dispose(psy_ui_Component* self)
@@ -423,14 +431,16 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->preventpreferredsize = 0;
 	self->preventpreferredsizeatalign = FALSE;
 	self->align = psy_ui_ALIGN_NONE;
+	psy_ui_margin_init(&self->margin);		
 	self->justify = psy_ui_JUSTIFY_EXPAND;
+	self->insertaligntype = psy_ui_ALIGN_NONE;
+	psy_ui_margin_init(&self->insertmargin);
 	self->alignchildren = 1;
 	self->alignexpandmode = psy_ui_NOEXPAND;	
 	self->preferredsize = psy_ui_component_size(self);
 	self->maxsize = psy_ui_size_zero();
 	self->minsize = psy_ui_size_zero();
-	psy_ui_style_init(&self->style);
-	psy_ui_margin_init(&self->margin);
+	psy_ui_style_init(&self->style);	
 	psy_ui_margin_init(&self->spacing);	
 	self->debugflag = 0;	
 	self->visible = 1;
@@ -442,6 +452,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->backgroundmode = psy_ui_BACKGROUND_SET;
 	self->mousetracking = 0;
 	self->cursor = psy_ui_CURSOR_DEFAULT;
+	self->tabindex = -1;
 	psy_ui_intpoint_init(&self->scroll);	
 	psy_ui_component_updatefont(self);
 	if (self->imp) {
@@ -974,7 +985,7 @@ void psy_ui_component_updateoverflow(psy_ui_Component* self)
 				currline = psy_max(-visilines / 2, maxlines -visilines / 2);
 				psy_ui_component_setscrolltop(self, currline * self->scrollstepy);
 			}
-		} else {
+		} else {		
 			psy_ui_component_setverticalscrollrange(self, 0, maxlines - visilines);
 			if (currline > maxlines - visilines) {
 				currline = psy_max(0, maxlines - visilines);
@@ -1068,4 +1079,84 @@ psy_ui_Rectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 		psy_ui_component_scrolltop(self),
 		size.width,
 		size.height);
+}
+
+void psy_ui_component_focus_next(const psy_ui_Component* self)
+{
+	if (self->tabindex != -1) {
+		psy_ui_Component* parent;		
+		
+		parent = psy_ui_component_parent(self);
+		if (parent) {
+			psy_ui_Component* focus;
+			psy_List* p;
+			psy_List* q;
+			int tabindex;
+
+			tabindex = psy_ui_component_tabindex(self);
+			focus = NULL;
+			for (q = p = psy_ui_component_children(parent, 0); p != NULL;
+					psy_list_next(&p)) {
+				psy_ui_Component* component;
+
+				component = (psy_ui_Component*)psy_list_entry(p);
+				if (tabindex < psy_ui_component_tabindex(component)) {
+					focus = component;
+					tabindex = psy_ui_component_tabindex(focus);
+				}
+			}
+			psy_list_free(q);
+			if (focus) {
+				psy_ui_component_setfocus(focus);
+			}
+		}
+	}
+}
+
+void psy_ui_component_focus_prev(const psy_ui_Component* self)
+{
+	if (self->tabindex != -1) {
+		psy_ui_Component* parent;
+
+		parent = psy_ui_component_parent(self);
+		if (parent) {
+			psy_ui_Component* focus;
+			psy_List* p;
+			psy_List* q;
+			int tabindex;
+
+			tabindex = psy_ui_component_tabindex(self);
+			focus = NULL;
+			for (q = p = psy_ui_component_children(parent, 0); p != NULL;
+					psy_list_next(&p)) {
+				psy_ui_Component* component;
+
+				component = (psy_ui_Component*)psy_list_entry(p);				
+				if (psy_ui_component_tabindex(component) != -1 &&
+						tabindex > psy_ui_component_tabindex(component)) {
+					focus = component;
+					tabindex = psy_ui_component_tabindex(focus);
+				}
+			}
+			psy_list_free(q);
+			if (focus) {
+				psy_ui_component_setfocus(focus);
+			}
+		}
+	}
+}
+
+
+void psy_ui_component_setdefaultalign(psy_ui_Component* self,
+	psy_ui_AlignType aligntype, psy_ui_Margin margin)
+{
+	self->insertaligntype = aligntype;
+	self->insertmargin = margin;
+}
+
+const struct psy_ui_Defaults* psy_ui_defaults(void)
+{
+	extern psy_ui_App app;
+
+	return &app.defaults;
 }

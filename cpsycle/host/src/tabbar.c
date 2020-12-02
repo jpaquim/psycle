@@ -349,11 +349,6 @@ void tabbar_select(TabBar* self, int tabindex)
 	psy_signal_emit(&self->signal_change, self, 1, self->selected);
 }
 
-int tabbar_selected(TabBar* self)
-{
-	return self->selected;
-}
-
 Tab* tabbar_append(TabBar* self, const char* label)
 {
 	Tab* tab;

@@ -19,6 +19,7 @@ static void psy_ui_scroller_vertical_onchanged(psy_ui_Scroller*, psy_ui_ScrollBa
 static void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller*, psy_ui_Component* sender,
 	psy_ui_Orientation);
 static void psy_ui_scroller_connectclient(psy_ui_Scroller*);
+static void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender);
 
 void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 	psy_ui_Component* parent)
@@ -59,6 +60,8 @@ void psy_ui_scroller_init(psy_ui_Scroller* self, psy_ui_Component* client,
 		psy_ui_scroller_horizontal_onchanged);
 	psy_ui_scrollbar_setscrollrange(&self->vscroll, 0, 100);
 	psy_ui_scroller_connectclient(self);
+	psy_signal_connect(&self->component.signal_focus, self,
+		psy_ui_scroller_onfocus);
 }
 
 void psy_ui_scroller_connectclient(psy_ui_Scroller* self)
@@ -154,6 +157,13 @@ void psy_ui_scroller_scrollrangechanged(psy_ui_Scroller* self, psy_ui_Component*
 }
 
 void psy_ui_scroller_onscrollbarclicked(psy_ui_Scroller* self, psy_ui_Component* sender)
+{
+	if (self->client) {
+		psy_ui_component_setfocus(self->client);
+	}
+}
+
+void psy_ui_scroller_onfocus(psy_ui_Scroller* self, psy_ui_Component* sender)
 {
 	if (self->client) {
 		psy_ui_component_setfocus(self->client);

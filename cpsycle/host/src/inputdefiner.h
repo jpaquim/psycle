@@ -9,6 +9,10 @@
 // aim: Component to define a keyboard shortcut. It is used by the
 //      SettingsView to edit the keyboard settings.
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
    psy_ui_Component component;   
    unsigned int input;
@@ -26,5 +30,9 @@ INLINE unsigned int inputdefiner_input(const InputDefiner* self)
 }
 
 void inputdefiner_text(InputDefiner*, char* text);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

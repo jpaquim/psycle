@@ -9,6 +9,10 @@
 #include <hashtbl.h>
 #include <properties.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	SkinCoord background;
 	SkinCoord vu0;
@@ -51,5 +55,9 @@ void machineviewskin_init(MachineViewSkin*);
 void machineviewskin_dispose(MachineViewSkin*);
 void machineviewskin_settheme(MachineViewSkin*, psy_Property* p,
 	const char* skindir);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MACHINEVIEWSKIN_H */

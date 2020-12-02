@@ -11,6 +11,10 @@
 
 #include <uieditor.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // aim: displays the help files with the Scintilla component, an open source
 //      source editor component, first used with psycle 1.12 and avoids the
 //      opening of an external text editor viewer like notepad.
@@ -29,5 +33,9 @@ INLINE psy_ui_Component* help_base(Help* self)
 {
 	return &self->component;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

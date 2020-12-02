@@ -215,7 +215,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 
 				pt_client.x = (SHORT)LOWORD(lParam);
 				pt_client.y = (SHORT)HIWORD(lParam);
-				ScreenToClient(imp->hwnd, &pt_client);
+				ScreenToClient(imp->hwnd, &pt_client);				
 				psy_ui_mouseevent_init(&ev,
 					pt_client.x + imp->component->scroll.x,
 					pt_client.y + imp->component->scroll.y,
@@ -793,7 +793,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 
 				pt_client.x = (SHORT)LOWORD(lParam);
 				pt_client.y = (SHORT)HIWORD(lParam);
-				ScreenToClient(imp->hwnd, &pt_client);
+				ScreenToClient(imp->hwnd, &pt_client);				
 				psy_ui_mouseevent_init(&ev,
 					pt_client.x,
 					pt_client.y,

@@ -188,6 +188,7 @@
     <ClCompile Include="src\paramlistbox.c" />
     <ClCompile Include="src\paramview.c" />
     <ClCompile Include="src\patterncmds.c" />
+    <ClCompile Include="src\patternheader.c" />
     <ClCompile Include="src\patternproperties.c" />
     <ClCompile Include="src\patternview.c" />
     <ClCompile Include="src\patternviewskin.c" />
@@ -220,6 +221,9 @@
     <ClCompile Include="src\stereophase.c" />
     <ClCompile Include="src\tabbar.c" />
     <ClCompile Include="src\timebar.c" />
+    <ClCompile Include="src\trackergridstate.c" />
+    <ClCompile Include="src\trackerlinenumbers.c" />
+    <ClCompile Include="src\trackerlinestate.c" />
     <ClCompile Include="src\trackerview.c" />
     <ClCompile Include="src\trackscopeview.c" />
     <ClCompile Include="src\translator.c" />
@@ -281,6 +285,7 @@
     <ClInclude Include="src\paramlistbox.h" />
     <ClInclude Include="src\paramview.h" />
     <ClInclude Include="src\patterncmds.h" />
+    <ClInclude Include="src\patternheader.h" />
     <ClInclude Include="src\patternproperties.h" />
     <ClInclude Include="src\patternview.h" />
     <ClInclude Include="src\patternviewskin.h" />
@@ -313,6 +318,9 @@
     <ClInclude Include="src\stereophase.h" />
     <ClInclude Include="src\tabbar.h" />
     <ClInclude Include="src\timebar.h" />
+    <ClInclude Include="src\trackergridstate.h" />
+    <ClInclude Include="src\trackerlinenumbers.h" />
+    <ClInclude Include="src\trackerlinestate.h" />
     <ClInclude Include="src\trackerview.h" />
     <ClInclude Include="src\trackscopeview.h" />
     <ClInclude Include="src\translator.h" />

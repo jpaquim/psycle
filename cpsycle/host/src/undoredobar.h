@@ -4,12 +4,20 @@
 #if !defined(UNDOREDOBAR_H)
 #define UNDOREDOBAR_H
 
-#include "uibutton.h"
+// host
 #include "workspace.h"
+// ui
+#include "uibutton.h"
 
-// aim: ToolBar for the workspace undo redo handler.
+// UndoRedoBar
+//
+// ToolBar for the workspace undo redo handler.
 
-typedef struct {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct UndoRedoBar {
 	psy_ui_Component component;
 	psy_ui_Button undobutton;
 	psy_ui_Button redobutton;
@@ -23,4 +31,8 @@ INLINE psy_ui_Component* undoredobar_base(UndoRedoBar* self)
 	return &self->component;
 }
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* UNDOREDOBAR_H */
