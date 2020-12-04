@@ -252,8 +252,8 @@ void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self, int shows
 // LineNumbersLabel
 // prototypes
 static void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel*, psy_ui_Component* sender);
-static void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel*, Translator*);
-static void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel*, Translator*);
+static void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel*, psy_Translator*);
+static void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel*, psy_Translator*);
 static void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel*,
 	TrackerLineState*);
 static void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel*,
@@ -290,7 +290,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	self->linestr = NULL;
 	self->defaultstr = NULL;
 	self->workspace = workspace;
-	trackerlinenumberslabel_updatetext(self, &workspace->translator);
+	trackerlinenumberslabel_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		trackerlinenumberslabel_onlanguagechanged);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -303,15 +303,15 @@ void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel* self, psy_ui_Com
 	free(self->defaultstr);
 }
 
-void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel* self, Translator* translator)
+void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel* self, psy_Translator* translator)
 {
 	free(self->linestr);
 	free(self->defaultstr);
-	self->linestr = strdup(translator_translate(translator, "patternview.line"));
-	self->defaultstr = strdup(translator_translate(translator, "patternview.defaults"));
+	self->linestr = strdup(psy_translator_translate(translator, "patternview.line"));
+	self->defaultstr = strdup(psy_translator_translate(translator, "patternview.defaults"));
 }
 
-void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel* self, Translator* sender)
+void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel* self, psy_Translator* sender)
 {
 	trackerlinenumberslabel_updatetext(self, sender);
 }

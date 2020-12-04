@@ -30,9 +30,14 @@ extern "C" {
 
 struct psy_ui_CheckBoxImp;
 
-typedef struct {
+typedef struct psy_ui_CheckBox {
+    // inherits
    psy_ui_Component component;
    struct psy_ui_CheckBoxImp* imp;
+   // internal data
+   char* text;
+   char* translation;
+   // signals
    psy_Signal signal_clicked;   
 } psy_ui_CheckBox;
 
@@ -42,6 +47,7 @@ typedef struct {
     psy_ui_Component component;    
     psy_Signal signal_clicked;
     char* text;
+    char* translation;
     int state;
 } psy_ui_CheckBox;
 
@@ -49,6 +55,7 @@ typedef struct {
 
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
 void psy_ui_checkbox_settext(psy_ui_CheckBox*, const char* text);
+const char* psy_ui_checkbox_text(psy_ui_CheckBox*);
 void psy_ui_checkbox_check(psy_ui_CheckBox*);
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox*);
 int psy_ui_checkbox_checked(psy_ui_CheckBox*);

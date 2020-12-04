@@ -9,11 +9,14 @@
 #include "../../detail/stdint.h"
 #include "../../detail/os.h"
 
+// local
 #include "uidefaults.h"
 #include "uistyle.h"
-
+// container
 #include <hashtbl.h>
 #include <signal.h>
+// file
+#include <translator.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,6 +30,7 @@ typedef struct {
 	void* platform;
 	psy_ui_Defaults defaults;
 	struct psy_ui_ImpFactory* imp_factory;
+	psy_Translator translator;
 } psy_ui_App;
 
 extern psy_ui_App app;

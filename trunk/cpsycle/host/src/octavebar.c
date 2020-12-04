@@ -9,8 +9,6 @@
 
 #include "../../detail/portable.h"
 
-static void octavebar_updatetext(OctaveBar*, Translator*);
-static void octavebar_onlanguagechanged(OctaveBar*, Translator* sender);
 static void octavebar_buildoctavebox(OctaveBar*);
 static void octavebar_onoctaveboxselchange(OctaveBar*, psy_ui_Component* sender, int sel);
 static void octavebar_onoctavechanged(OctaveBar*, Workspace*, int octave);
@@ -25,6 +23,7 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 		psy_ui_HORIZONTALEXPAND);
 	self->workspace = workspace;
 	psy_ui_label_init(&self->headerlabel, octavebar_base(self));
+	psy_ui_label_settext(&self->headerlabel, "octavebar.octave");
 	psy_ui_combobox_init(&self->octavebox, octavebar_base(self));
 	psy_ui_combobox_setcharnumber(&self->octavebox, 2);	
 	octavebar_buildoctavebox(self);
@@ -33,22 +32,7 @@ void octavebar_init(OctaveBar* self, psy_ui_Component* parent, Workspace* worksp
 	psy_signal_connect(&workspace->signal_octavechanged, self,
 		octavebar_onoctavechanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		octavebar_onsongchanged);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		octavebar_onlanguagechanged);
-	octavebar_updatetext(self, &workspace->translator);
-}
-
-void octavebar_updatetext(OctaveBar* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->headerlabel,
-		translator_translate(&self->workspace->translator,
-			"octavebar.octave"));
-}
-
-void octavebar_onlanguagechanged(OctaveBar* self, Translator* sender)
-{
-	octavebar_updatetext(self, sender);
+		octavebar_onsongchanged);	
 }
 
 void octavebar_buildoctavebox(OctaveBar* self)

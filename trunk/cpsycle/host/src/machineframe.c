@@ -4,16 +4,19 @@
 #include "../../detail/prefix.h"
 
 #include "machineframe.h"
+// host
 #include "resources/resource.h"
-
+// ui
 #include <uiframe.h>
-
+// std
 #include <stdlib.h>
 #include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
+// ParameterBar
+// implementation
 void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {			
@@ -64,6 +67,8 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_setmargin(&self->presetsbar.component, &margin);
 }
 
+// MachineFrame
+// prototypes
 static void machineframe_ondestroyed(MachineFrame* self,
 	psy_ui_Component* frame);
 static void machineframe_toggleparameterbox(MachineFrame*,
@@ -85,7 +90,7 @@ static void machineframe_setfloatbar(MachineFrame*);
 static void machineframe_setdockbar(MachineFrame*);
 static void ondefaultfontchanged(MachineFrame*, Workspace* sender);
 static void machineframe_onzoomboxchanged(MachineFrame*, ZoomBox* sender);
-
+// implementation
 void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	bool floated, Workspace* workspace)
 {

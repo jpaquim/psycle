@@ -170,10 +170,10 @@ psy_Property* psy_property_allocinit_key(const char* key)
 
 void psy_property_deallocate(psy_Property* self)
 {
-	assert(self);
-
-	psy_property_dispose(self);
-	free(self);
+	if (self) {
+		psy_property_dispose(self);
+		free(self);
+	}
 }
 
 psy_Property* psy_property_clone(const psy_Property* self)

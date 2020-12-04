@@ -62,6 +62,7 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 	psy_ui_edit_preventedit(&self->sourceforge);
 	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
 	psy_ui_label_init(&self->steincopyright, &self->component);
+	psy_ui_label_preventtranslation(&self->steincopyright);
 	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 	{
 		psy_ui_Margin margin;
@@ -80,6 +81,7 @@ void version_init(Version* self, psy_ui_Component* parent)
 {
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_label_init(&self->versioninfo, &self->component);
+	psy_ui_label_preventtranslation(&self->versioninfo);
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
 	psy_ui_component_resize(&self->versioninfo.component,
@@ -197,22 +199,23 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 
 void about_initbuttons(About* self)
 {
-	psy_ui_button_init(&self->contribbutton, &self->component);
-	psy_ui_button_settext(&self->contribbutton, 
-		workspace_translate(self->workspace, "help.contributors-credits"));
-	psy_signal_connect(&self->contribbutton.signal_clicked, self,
-		about_oncontributors);
-	psy_ui_button_init(&self->versionbutton, &self->component);
+	// contrib
+	psy_ui_button_init_connect(&self->contribbutton, &self->component,
+		self, about_oncontributors);
+	psy_ui_button_settext(&self->contribbutton,
+		"help.contributors-credits");
+	// version
+	psy_ui_button_init_connect(&self->versionbutton, &self->component,
+		self, about_onversion);
+	psy_ui_button_preventtranslation(&self->versionbutton);
 	psy_ui_button_settext(&self->versionbutton, PSYCLE__VERSION);
-	psy_signal_connect(&self->versionbutton.signal_clicked, self,
-		about_onversion);
-	psy_ui_button_init(&self->licencebutton, &self->component);
+	// licence
+	psy_ui_button_init_connect(&self->licencebutton, &self->component,
+		self, about_onlicence);	
 	psy_ui_button_settext(&self->licencebutton, "Licence");
-	psy_signal_connect(&self->licencebutton.signal_clicked, self,
-		about_onlicence);
+	// ok
 	psy_ui_button_init(&self->okbutton, &self->component);
-	psy_ui_button_settext(&self->okbutton,
-		workspace_translate(self->workspace, "help.ok"));
+	psy_ui_button_settext(&self->okbutton, "help.ok");
 }
 
 void about_onalign(About* self)

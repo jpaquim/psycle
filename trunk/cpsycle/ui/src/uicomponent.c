@@ -237,6 +237,9 @@ static void vtable_init(void)
 void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 	psy_ui_ComponentImp* imp)
 {
+	assert(self);
+	assert(self != parent);
+
 	vtable_init();
 	self->vtable = &vtable;
 	if (!parent) {
@@ -253,7 +256,11 @@ void psy_ui_component_init_imp(psy_ui_Component* self, psy_ui_Component* parent,
 
 void psy_ui_component_init(psy_ui_Component* self, psy_ui_Component* parent)
 {	
+	assert(self);
+	assert(self != parent);
+
 	vtable_init();
+
 	self->vtable = &vtable;
 	if (!parent) {
 		app.main = self;
@@ -512,6 +519,29 @@ void psy_ui_component_scrollstep(psy_ui_Component* self, intptr_t stepx,
 			self->scrollstepy * stepy);
 	}
 }
+
+void psy_ui_component_show_align(psy_ui_Component* self)
+{
+	assert(self);
+
+	if (psy_ui_component_parent(self)) {
+		self->visible = 1;
+		psy_ui_component_align(psy_ui_component_parent(self));
+	}
+	self->vtable->show(self);
+}
+
+void psy_ui_component_hide_align(psy_ui_Component* self)
+{
+	assert(self);
+
+	self->vtable->hide(self);
+	if (psy_ui_component_parent(self)) {
+		psy_ui_component_align(psy_ui_component_parent(self));
+	}
+	
+}
+
 
 void psy_ui_component_showstate(psy_ui_Component* self, int state)
 {

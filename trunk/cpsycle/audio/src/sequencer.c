@@ -191,6 +191,8 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->mode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
 	self->calcduration = FALSE;
 	self->currrowposition = UINTPTR_MAX;
+	self->extraticks = 0;
+	self->tpb = 24;
 	psy_audio_sequencer_clearevents(self);
 	psy_audio_sequencer_cleardelayed(self);
 	psy_audio_sequencer_clearinputevents(self);
@@ -280,6 +282,18 @@ void psy_audio_sequencer_setlpb(psy_audio_Sequencer* self, uintptr_t lpb)
 {	
 	self->lpb = lpb;
 	self->lpbspeed = (psy_dsp_big_beat_t)1.0;
+	psy_audio_sequencer_compute_beatspersample(self);
+}
+
+void psy_audio_sequencer_setticksperbeat(psy_audio_Sequencer* self, uintptr_t ticks)
+{
+	self->tpb = ticks;
+	psy_audio_sequencer_compute_beatspersample(self);
+}
+
+void psy_audio_sequencer_setextraticksperbeat(psy_audio_Sequencer* self, uintptr_t ticks)
+{
+	self->extraticks = ticks;
 	psy_audio_sequencer_compute_beatspersample(self);
 }
 
@@ -1205,10 +1219,10 @@ void psy_audio_sequencer_insertinputevents(psy_audio_Sequencer* self)
 void psy_audio_sequencer_compute_beatspersample(psy_audio_Sequencer* self)
 {
 	assert(self);
-
 	assert(self->samplerate != 0);
+	
 	self->beatspersample = (self->bpm * psy_audio_sequencer_speed(self)) /
-		(self->samplerate * 60.0f);
+		(self->samplerate * 60.0);
 }
 
 psy_List* psy_audio_sequencer_timedevents(psy_audio_Sequencer* self, uintptr_t

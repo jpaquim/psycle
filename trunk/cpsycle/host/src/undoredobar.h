@@ -18,9 +18,12 @@ extern "C" {
 #endif
 
 typedef struct UndoRedoBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Button undobutton;
 	psy_ui_Button redobutton;
+	// references
 	Workspace* workspace;
 } UndoRedoBar;
 
@@ -28,6 +31,8 @@ void undoredobar_init(UndoRedoBar*, psy_ui_Component* parent, Workspace*);
 
 INLINE psy_ui_Component* undoredobar_base(UndoRedoBar* self)
 {
+	assert(self);
+
 	return &self->component;
 }
 

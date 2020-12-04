@@ -107,15 +107,15 @@ static void trackergrid_ondestroy(TrackerGrid*, psy_ui_Component* sender);
 static int trackergrid_preferredtrackwidth(TrackerGrid*);
 static void trackergrid_ondraw(TrackerGrid*, psy_ui_Graphics*);
 static void trackergrid_drawbackground(TrackerGrid*, psy_ui_Graphics*,
-	PatternSelection* clip);
+	psy_audio_PatternSelection* clip);
 static void trackergrid_drawtrackbackground(TrackerGrid*, psy_ui_Graphics*,
 	int track);
 static void trackergrid_drawentries(TrackerGrid*, psy_ui_Graphics*,
-	PatternSelection* clip);
+	psy_audio_PatternSelection* clip);
 static void trackergrid_drawentry(TrackerGrid*, psy_ui_Graphics*,
 	psy_audio_PatternEntry*, int x, int y, TrackerColumnFlags);
 static void trackergrid_drawresizebar(TrackerGrid*, psy_ui_Graphics*,
-	PatternSelection*);
+	psy_audio_PatternSelection*);
 static void trackergrid_onkeydown(TrackerGrid*, psy_ui_KeyEvent*);
 static void trackergrid_onmousedown(TrackerGrid*, psy_ui_MouseEvent*);
 static void trackergrid_onmousemove(TrackerGrid*, psy_ui_MouseEvent*);
@@ -133,7 +133,7 @@ static void trackergrid_onfocus(TrackerGrid*, psy_ui_Component* sender);
 static void trackergrid_onfocuslost(TrackerGrid*, psy_ui_Component* sender);
 static int trackergrid_testselection(TrackerGrid*, unsigned int track, double offset);
 static void trackergrid_clipblock(TrackerGrid*, const psy_ui_Rectangle*,
-	PatternSelection*);
+	psy_audio_PatternSelection*);
 static void trackergrid_drawdigit(TrackerGrid*, psy_ui_Graphics*,
 	int x, int y, int value, int empty, int mid);
 static void trackergrid_onpreferredsize(TrackerGrid*, const psy_ui_Size* limit,
@@ -286,7 +286,7 @@ void trackergrid_setsharedlinestate(TrackerGrid* self, TrackerLineState*
 
 void trackergrid_ondraw(TrackerGrid* self, psy_ui_Graphics* g)
 {
-	PatternSelection clip;
+	psy_audio_PatternSelection clip;
 
 	if (self->gridstate->pattern) {
 		trackergrid_clipblock(self, &g->clip, &clip);
@@ -300,7 +300,7 @@ void trackergrid_ondraw(TrackerGrid* self, psy_ui_Graphics* g)
 }
 
 void trackergrid_clipblock(TrackerGrid* self, const psy_ui_Rectangle* clip,
-	PatternSelection* block)
+	psy_audio_PatternSelection* block)
 {
 	int lines;
 
@@ -323,7 +323,7 @@ void trackergrid_clipblock(TrackerGrid* self, const psy_ui_Rectangle* clip,
 	block->bottomright.line = lines;
 }
 
-void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g, PatternSelection* clip)
+void trackergrid_drawbackground(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_PatternSelection* clip)
 {
 	uintptr_t track;
 	psy_ui_IntSize size;	
@@ -380,7 +380,7 @@ int trackergrid_testselection(TrackerGrid* self, unsigned int track, double offs
 		offset < self->selection.bottomright.offset;
 }
 
-void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, PatternSelection* clip)
+void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_PatternSelection* clip)
 {
 	unsigned int track;
 	int cpx = 0;
@@ -468,7 +468,7 @@ void trackergrid_drawentries(TrackerGrid* self, psy_ui_Graphics* g, PatternSelec
 	psy_audio_patternentry_dispose(&empty);
 }
 
-void trackergrid_drawresizebar(TrackerGrid* self, psy_ui_Graphics* g, PatternSelection* clip)
+void trackergrid_drawresizebar(TrackerGrid* self, psy_ui_Graphics* g, psy_audio_PatternSelection* clip)
 {
 	if (self->linestate->pattern && self->dragcolumn != UINTPTR_MAX) {
 		psy_ui_Rectangle r;
@@ -1967,8 +1967,7 @@ void trackergrid_onblocktransposedown12(TrackerGrid* self)
 
 // PatternBlockMenu
 // prototypes
-static void patternblockmenu_updatetext(PatternBlockMenu* self, Translator*);
-static void patternblockmenu_onlanguagechanged(PatternBlockMenu*, Translator* sender);
+static void patternblockmenu_updatetext(PatternBlockMenu* self);
 // implementation
 void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Workspace* workspace)
 {
@@ -1983,6 +1982,9 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Wor
 	psy_ui_button_settext(&self->mixpaste, "MixPaste");
 	psy_ui_button_init(&self->del, &self->component);
 	psy_ui_button_settext(&self->del, "Delete");
+
+	psy_ui_button_init(&self->transform, &self->component);
+	psy_ui_button_settext(&self->transform, "Search and replace");
 
 	psy_ui_button_init(&self->interpolatelinear, &self->component);
 	psy_ui_button_settext(&self->interpolatelinear, "Interpolate (Linear)");
@@ -2006,52 +2008,30 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Wor
 	psy_ui_button_settext(&self->import, "Import (psb)");
 	psy_ui_button_init(&self->export, &self->component);
 	psy_ui_button_settext(&self->export, "Export (psb)");
-	patternblockmenu_updatetext(self, &workspace->translator);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		patternblockmenu_onlanguagechanged);
+	patternblockmenu_updatetext(self);	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		NULL));
 }
 
-void patternblockmenu_updatetext(PatternBlockMenu* self, Translator* translator)
+void patternblockmenu_updatetext(PatternBlockMenu* self)
 {	
-	psy_ui_button_settext(&self->cut, 
-		translator_translate(translator, "edit.cut"));
-	psy_ui_button_settext(&self->copy,
-		translator_translate(translator, "edit.copy"));
-	psy_ui_button_settext(&self->paste,
-		translator_translate(translator, "edit.paste"));
-	psy_ui_button_settext(&self->mixpaste,
-		translator_translate(translator, "edit.mixpaste"));
-	psy_ui_button_settext(&self->del,
-		translator_translate(translator, "edit.delete"));
-	psy_ui_button_settext(&self->interpolatelinear,
-		translator_translate(translator, "Interpolate (Linear)"));
-	psy_ui_button_settext(&self->interpolatecurve,
-		translator_translate(translator, "Interpolate (Curve)"));
-	psy_ui_button_settext(&self->changegenerator,
-		translator_translate(translator, "Change Generator"));
-	psy_ui_button_settext(&self->changeinstrument,
-		translator_translate(translator, "Change Instrument"));
-	psy_ui_button_settext(&self->blocktransposeup,
-		translator_translate(translator, "Transpose +1"));
-	psy_ui_button_settext(&self->blocktransposedown,
-		translator_translate(translator, "Transpose -1"));
-	psy_ui_button_settext(&self->blocktransposeup12,
-		translator_translate(translator, "Transpose +12"));
-	psy_ui_button_settext(&self->blocktransposedown12,
-		translator_translate(translator, "Transpose -12"));
-	psy_ui_button_settext(&self->import,
-		translator_translate(translator, "Import (psb)"));
-	psy_ui_button_settext(&self->export,
-		translator_translate(translator, "Export (psb)"));
-}
-
-void patternblockmenu_onlanguagechanged(PatternBlockMenu* self, Translator* sender)
-{
-	patternblockmenu_updatetext(self, sender);
+	psy_ui_button_settext(&self->cut, "edit.cut");
+	psy_ui_button_settext(&self->copy, "edit.copy");
+	psy_ui_button_settext(&self->paste, "edit.paste");
+	psy_ui_button_settext(&self->mixpaste, "edit.mixpaste");
+	psy_ui_button_settext(&self->del, "edit.delete");
+	psy_ui_button_settext(&self->interpolatelinear, "Interpolate (Linear)");
+	psy_ui_button_settext(&self->interpolatecurve, "Interpolate (Curve)");
+	psy_ui_button_settext(&self->changegenerator, "Change Generator");
+	psy_ui_button_settext(&self->changeinstrument, "Change Instrument");
+	psy_ui_button_settext(&self->blocktransposeup, "Transpose +1");
+	psy_ui_button_settext(&self->blocktransposedown, "Transpose -1");
+	psy_ui_button_settext(&self->blocktransposeup12, "Transpose +12");
+	psy_ui_button_settext(&self->blocktransposedown12, "Transpose -12");
+	psy_ui_button_settext(&self->import, "Import (psb)");
+	psy_ui_button_settext(&self->export, "Export (psb)");
 }
 
 int trackergrid_preferredtrackwidth(TrackerGrid* self)
@@ -2182,6 +2162,7 @@ static void trackerview_onpatternimport(TrackerView*);
 static void trackerview_onpatternexport(TrackerView*);
 static void trackerview_onparametertweak(TrackerView*,
 	Workspace* sender, int slot, uintptr_t tweak, float value);
+static void trackerview_ontransform(TrackerView*);
 static void trackerview_oninterpolatecurve(TrackerView*,
 	psy_ui_Component* sender);
 static void trackerview_oninterpolatecurveviewoncancel(TrackerView*,
@@ -2223,7 +2204,13 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	self->showdefaultline = 1;
 	self->pgupdownstep = 4;
 	self->pgupdownbeat = TRUE;
-	self->pgupdown4beat = FALSE;		
+	self->pgupdown4beat = FALSE;
+	// TransformPatternView	
+	transformpatternview_init(&self->transformview, &self->component,
+		workspace);
+	psy_ui_component_setalign(transformpatternview_base(&self->transformview),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(transformpatternview_base(&self->transformview));	
 	// Interpolate View
 	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0, 0, 0, workspace);
 	psy_ui_component_setalign(&self->interpolatecurveview.component, psy_ui_ALIGN_BOTTOM);
@@ -2283,6 +2270,8 @@ void trackerview_connectblockmenu(TrackerView* self)
 		trackerview_onpatternimport);
 	psy_signal_connect(&self->blockmenu.export.signal_clicked,
 		self, trackerview_onpatternexport);
+	psy_signal_connect(&self->blockmenu.transform.signal_clicked, self,
+		trackerview_ontransform);
 	psy_signal_connect(&self->blockmenu.interpolatelinear.signal_clicked, &self->grid,
 		trackergrid_oninterpolatelinear);
 	psy_signal_connect(&self->blockmenu.interpolatecurve.signal_clicked, self,
@@ -2891,4 +2880,11 @@ void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)
 void trackerview_oninterpolatecurve(TrackerView* self, psy_ui_Component* sender)
 {
 	psy_ui_component_togglevisibility(&self->interpolatecurveview.component);
+}
+
+void trackerview_ontransform(TrackerView* self)
+{
+	psy_ui_component_hide(&self->blockmenu.component);
+	psy_ui_component_show_align(transformpatternview_base(
+		&self->transformview));
 }

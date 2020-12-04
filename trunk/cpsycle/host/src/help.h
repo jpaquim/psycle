@@ -4,27 +4,33 @@
 #if !defined(HELP_H)
 #define HELP_H
 
-#include "about.h"
-#include "greet.h"
+// host
 #include "tabbar.h"
 #include "workspace.h"
-
+// ui
 #include <uieditor.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: displays the help files with the Scintilla component, an open source
-//      source editor component, first used with psycle 1.12 and avoids the
-//      opening of an external text editor viewer like notepad.
+// Help
+//
+// Integrated textfile viewer to show the psycle help files inside the psycle
+// doc directory. Configure the used files with PSYCLE_HELPFILES in psyconf.h.
+// It uses Scintilla, an open source editor component, first used with
+// psycle 1.12.
 
-typedef struct {
+typedef struct Help {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Editor editor;
 	TabBar tabbar;
-	Workspace* workspace;
+	// internal data
 	psy_Table filenames;
+	// references
+	Workspace* workspace;
 } Help;
 
 void help_init(Help*, psy_ui_Component* parent, Workspace*);
@@ -38,4 +44,4 @@ INLINE psy_ui_Component* help_base(Help* self)
 }
 #endif
 
-#endif
+#endif /* HELP_H */

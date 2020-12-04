@@ -23,6 +23,9 @@
     <ClCompile Include="src\propertiesio.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\translator.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\datacompression.h">
@@ -35,6 +38,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\propertiesio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\translator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

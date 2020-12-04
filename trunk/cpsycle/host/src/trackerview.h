@@ -6,6 +6,7 @@
 
 // host
 #include "interpolatecurveview.h"
+#include "transformpatternview.h"
 #include "trackerlinestate.h"
 #include "trackergridstate.h"
 #include "workspace.h"
@@ -23,13 +24,16 @@ extern "C" {
 
 #define TRACKERGRID_numparametercols 10
 
-typedef struct {
+typedef struct PatternBlockMenu {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Button cut;
 	psy_ui_Button copy;
 	psy_ui_Button paste;
 	psy_ui_Button mixpaste;
 	psy_ui_Button del;
+	psy_ui_Button transform;
 	psy_ui_Button interpolatelinear;
 	psy_ui_Button interpolatecurve;
 	psy_ui_Button changegenerator;
@@ -43,6 +47,13 @@ typedef struct {
 } PatternBlockMenu;
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*, Workspace*);
+
+INLINE psy_ui_Component* patternblockmenu_base(PatternBlockMenu* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 typedef struct {
 	int playbar;
@@ -59,40 +70,44 @@ typedef enum {
 } TrackerGridEditMode;
 
 typedef struct {
-   psy_ui_Component component;
-   TrackerGridState* gridstate;
-   TrackerGridState defaultgridstate;
-   TrackerLineState* linestate;
-   TrackerLineState defaultlinestate;
-   int lpb;
-   psy_dsp_big_beat_t bpl;
-   psy_dsp_big_beat_t cbpl;
-   psy_dsp_NotesTabMode notestabmode;   
-   psy_audio_PatternCursor oldcursor;
-   PatternSelection selection;
-   psy_audio_PatternCursor dragselectionbase;
-   psy_audio_PatternCursor lastdragcursor;
-   int hasselection;
-   int midline;
-   int chordmodestarting;
-   bool chordmode;
-   int chordbegin;
-   int columnresize;
-   uintptr_t dragcolumn;
-   int dragcolumnbase;
-   uintptr_t dragtrack;
-   uintptr_t dragparamcol;
-   unsigned int opcount;
-   bool syncpattern;
-   bool wraparound;
-   bool showemptydata;
-   TrackerGridEditMode editmode;
-   Workspace* workspace;
-   psy_Signal signal_colresize;
-   bool ft2home;
-   bool ft2delete;
-   bool effcursoralwaysdown;
-   bool movecursoronestep;
+	// inherits
+	psy_ui_Component component;
+	// internal data	
+	TrackerGridState defaultgridstate;	
+	TrackerLineState defaultlinestate;
+	int lpb;
+	psy_dsp_big_beat_t bpl;
+	psy_dsp_big_beat_t cbpl;
+	psy_dsp_NotesTabMode notestabmode;   
+	psy_audio_PatternCursor oldcursor;
+	psy_audio_PatternSelection selection;
+	psy_audio_PatternCursor dragselectionbase;
+	psy_audio_PatternCursor lastdragcursor;
+	int hasselection;
+	int midline;
+	int chordmodestarting;
+	bool chordmode;
+	int chordbegin;
+	int columnresize;
+	uintptr_t dragcolumn;
+	int dragcolumnbase;
+	uintptr_t dragtrack;
+	uintptr_t dragparamcol;
+	unsigned int opcount;
+	bool syncpattern;
+	bool wraparound;
+	bool showemptydata;
+	TrackerGridEditMode editmode;	
+	bool ft2home;
+	bool ft2delete;
+	bool effcursoralwaysdown;
+	bool movecursoronestep;
+	// signals
+	psy_Signal signal_colresize;
+	// references
+	TrackerGridState* gridstate;
+	TrackerLineState* linestate;
+	Workspace* workspace;
 } TrackerGrid;
 
 void trackergrid_init(TrackerGrid*, psy_ui_Component* parent, TrackConfig*,
@@ -119,18 +134,30 @@ INLINE bool trackergrid_midline(TrackerGrid* self)
 	return self->midline;
 }
 
+INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 // todo move the rest of the class to patternview and
 // trackergrid
 typedef struct TrackerView {
+	// inherits
 	psy_ui_Component component;	
+	// ui elements
 	TrackerGrid grid;
 	psy_ui_Scroller scroller;
 	PatternBlockMenu blockmenu;
-	InterpolateCurveView interpolatecurveview;			
+	TransformPatternView transformview;
+	InterpolateCurveView interpolatecurveview;
+	// internal data
 	int showdefaultline;	
 	int pgupdownstep;
 	bool pgupdownbeat;
 	bool pgupdown4beat;
+	// references
 	Workspace* workspace;
 	struct PatternView* view;
 } TrackerView;
@@ -149,8 +176,15 @@ INLINE bool trackerview_blockmenuvisible(TrackerView* self)
 	return psy_ui_component_visible(&self->blockmenu.component);
 }
 
+INLINE psy_ui_Component* trackerview_base(TrackerView* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* TRACKERVIEW */

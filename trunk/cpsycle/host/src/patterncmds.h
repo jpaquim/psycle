@@ -57,13 +57,13 @@ typedef struct {
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
 	psy_audio_PatternCursor cursor;
-	PatternSelection block;
+	psy_audio_PatternSelection block;
 	int transposeoffset;
 	Workspace* workspace;
 } BlockTransposeCommand;
 
 BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
-	PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
+	psy_audio_PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
 	Workspace* workspace);
 
 #ifdef __cplusplus

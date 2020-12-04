@@ -538,8 +538,8 @@ uintptr_t pinedit_numoutputs(PinEdit* self)
 		: 0;
 }
 
-static void channelmappingview_updatetext(ChannelMappingView*, Translator*);
-static void channelmappingview_onlanguagechanged(ChannelMappingView*, Translator*);
+// ChannelMappingView
+// prototypes
 static void channelmappingview_onautowire(ChannelMappingView*,
 	psy_ui_Component* sender);
 static void channelmappingview_unselectall(ChannelMappingView*,
@@ -553,18 +553,19 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	psy_ui_component_init(&self->buttongroup, &self->component);	
-	psy_ui_label_init(&self->help, &self->component);
+	psy_ui_label_init_text(&self->help, &self->component,
+		"channelmapping.remove-connection-with-right-click");
 	psy_ui_label_settextalignment(&self->help, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_BOTTOM);		
 	psy_ui_component_enablealign(&self->buttongroup);
 	psy_ui_component_setalign(&self->buttongroup, psy_ui_ALIGN_RIGHT);
-	psy_ui_button_init(&self->autowire, &self->buttongroup);	
-	psy_ui_button_settextalignment(&self->autowire, psy_ui_ALIGNMENT_LEFT);
-	psy_signal_connect(&self->autowire.signal_clicked, self,
+	psy_ui_button_init_connect(&self->autowire, &self->buttongroup, self,
 		channelmappingview_onautowire);
-	psy_ui_button_init(&self->unselectall, &self->buttongroup);	
-	psy_signal_connect(&self->unselectall.signal_clicked, self,
-		channelmappingview_unselectall);	
+	psy_ui_button_settext(&self->autowire, "channelmapping.autowire");
+	psy_ui_button_settextalignment(&self->autowire, psy_ui_ALIGNMENT_LEFT);
+	psy_ui_button_init_connect(&self->unselectall, &self->buttongroup,
+		self, channelmappingview_unselectall);
+	psy_ui_button_settext(&self->unselectall, "channelmapping.unselect-all");
 	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
@@ -579,28 +580,7 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(0.5), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0));
 	psy_ui_component_setmargin(&self->pinedit.component, &margin);
-	psy_ui_component_setmargin(&self->help.component, &margin);
-	channelmappingview_updatetext(self, &workspace->translator);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		channelmappingview_onlanguagechanged);
-}
-
-void channelmappingview_updatetext(ChannelMappingView* self,
-	Translator* translator)
-{
-	psy_ui_label_settext(&self->help, translator_translate(translator,
-		"channelmapping.remove-connection-with-right-click"));
-	psy_ui_button_settext(&self->autowire, translator_translate(translator,
-		"channelmapping.autowire"));
-	psy_ui_button_settext(&self->unselectall, translator_translate(translator,
-		"channelmapping.unselect-all"));
-}
-
-void channelmappingview_onlanguagechanged(ChannelMappingView* self,
-	Translator* sender)
-{
-	channelmappingview_updatetext(self, sender);
-	psy_ui_component_align(&self->component);
+	psy_ui_component_setmargin(&self->help.component, &margin);	
 }
 
 void channelmappingview_onautowire(ChannelMappingView* self,

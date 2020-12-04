@@ -4,10 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "stepbox.h"
+// platform
 #include "../../detail/portable.h"
 
-static void stepbox_updatetext(StepBox*, Translator*);
-static void stepbox_onlanguagechanged(StepBox*, Translator* sender);
+// prototypes
 static void stepbox_build(StepBox*);
 static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,
 	int index);
@@ -17,7 +17,8 @@ void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->header, &self->component);		
+	psy_ui_label_init(&self->header, &self->component);
+	psy_ui_label_settext(&self->header, "patternview.step");
 	psy_ui_combobox_init(&self->combobox, &self->component);
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
 		stepbox_onselectionchanged);
@@ -28,21 +29,7 @@ void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_list_free(psy_ui_components_setalign(		
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-		NULL));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		stepbox_onlanguagechanged);
-	stepbox_updatetext(self, &workspace->translator);
-}
-
-void stepbox_updatetext(StepBox* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->header, 
-		translator_translate(translator, "patternview.step"));
-}
-
-void stepbox_onlanguagechanged(StepBox* self, Translator* sender)
-{
-	stepbox_updatetext(self, sender);
+		NULL));	
 }
 
 void stepbox_build(StepBox* self)
@@ -51,6 +38,7 @@ void stepbox_build(StepBox* self)
 
 	for (step = 1; step <= 16; ++step) {
 		char text[20];
+
 		psy_snprintf(text, 20, "%d", step);
 		psy_ui_combobox_addtext(&self->combobox, text);
 	}	

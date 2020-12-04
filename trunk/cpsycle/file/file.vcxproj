@@ -113,12 +113,14 @@
     <ClCompile Include="src\dir.c" />
     <ClCompile Include="src\fileio.c" />
     <ClCompile Include="src\propertiesio.c" />
+    <ClCompile Include="src\translator.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\datacompression.h" />
     <ClInclude Include="src\dir.h" />
     <ClInclude Include="src\fileio.h" />
     <ClInclude Include="src\propertiesio.h" />
+    <ClInclude Include="src\translator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

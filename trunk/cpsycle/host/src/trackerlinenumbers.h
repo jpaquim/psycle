@@ -20,14 +20,16 @@ extern "C" {
 
 struct TrackerView;
 
-typedef struct {
+typedef struct TrackerLineNumbersLabel {
 	// inherits
-	psy_ui_Component component;
-	TrackerLineState* linestate;
-	TrackerLineState defaultlinestate;
-	struct TrackerView* view;
+	psy_ui_Component component;	
+	// internal data
 	char_dyn_t* linestr;
 	char_dyn_t* defaultstr;
+	// references
+	struct TrackerView* view;
+	TrackerLineState* linestate;
+	TrackerLineState defaultlinestate;
 	Workspace* workspace;
 } TrackerLineNumbersLabel;
 
@@ -35,18 +37,28 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
 	psy_ui_Component* parent, TrackerLineState*, struct TrackerView*,
 	Workspace*);
 
-typedef struct {
+INLINE psy_ui_Component* TrackerLineNumbersLabel_base(TrackerLineNumbersLabel* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+typedef struct TrackerLineNumbers {
+	// inherits
 	psy_ui_Component component;
-	TrackerLineState* linestate;
-	TrackerLineState defaultlinestate;
-	Workspace* workspace;
+	// internal data
 	psy_audio_PatternCursor lastcursor;	
 	int showlinenumbercursor;
 	int showlinenumbersinhex;
+	// references
+	TrackerLineState* linestate;
+	TrackerLineState defaultlinestate;
+	Workspace* workspace;
 } TrackerLineNumbers;
 
 void trackerlinenumbers_init(TrackerLineNumbers*, psy_ui_Component* parent,
-	TrackerLineState*, Workspace* workspace);
+	TrackerLineState*, Workspace*);
 void trackerlinenumbers_setsharedlinestate(TrackerLineNumbers*, TrackerLineState*);
 void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_PatternCursor*);
@@ -55,18 +67,35 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
 void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers*, int showstate);
 void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers*, int showstate);
 
+INLINE psy_ui_Component* trackerlinenumbers_base(TrackerLineNumbers* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 // TrackerLineNumberBar
 typedef struct TrackerLineNumberBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	TrackerLineNumbersLabel linenumberslabel;
 	TrackerLineNumbers linenumbers;
 	ZoomBox zoombox;
+	// internal data
 	int zoomheightbase;
 } TrackerLineNumberBar;
 
-void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component*
-	parent, TrackerLineState* linestate, struct TrackerView* view, Workspace* workspace);
+void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
+	parent, TrackerLineState*, struct TrackerView*, Workspace*);
 void trackerlinenumberbar_computefontheight(TrackerLineNumberBar*);
+
+INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

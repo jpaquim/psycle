@@ -4,19 +4,24 @@
 #if !defined(INPUTDEFINER_H)
 #define INPUTDEFINER_H
 
+// ui
 #include <uicomponent.h>
 
-// aim: Component to define a keyboard shortcut. It is used by the
-//      SettingsView to edit the keyboard settings.
+// InputDefiner
+//
+// Component to define a keyboard shortcut. It is used by the SettingsView to
+// edit the keyboard settings.
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-   psy_ui_Component component;   
-   unsigned int input;
-   int regularkey;   
+typedef struct InputDefiner {
+	// inherits 
+	psy_ui_Component component;
+	// internal data
+	unsigned int input;
+	int regularkey;   
 } InputDefiner;
 
 void inputdefiner_init(InputDefiner*, psy_ui_Component* parent);
@@ -31,8 +36,13 @@ INLINE unsigned int inputdefiner_input(const InputDefiner* self)
 
 void inputdefiner_text(InputDefiner*, char* text);
 
+INLINE psy_ui_Component* inputdefiner_base(InputDefiner* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* INPUTDEFINER_H */

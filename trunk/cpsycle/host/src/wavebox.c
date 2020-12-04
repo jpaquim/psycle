@@ -193,8 +193,8 @@ void waveboxcontext_updateoffsetstep(WaveBoxContext* self)
 }
 
 
-static void wavebox_updatetext(WaveBox*, Translator*);
-static void wavebox_onlanguagechanged(WaveBox*, Translator* sender);
+static void wavebox_updatetext(WaveBox*, psy_Translator*);
+static void wavebox_onlanguagechanged(WaveBox*, psy_Translator* sender);
 static void wavebox_ondraw(WaveBox*, psy_ui_Graphics*);
 static void wavebox_ondestroy(WaveBox*, psy_ui_Component* sender);
 static void wavebox_onmousedown(WaveBox*, psy_ui_Component* sender,
@@ -254,7 +254,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 		wavebox_onmousedoubleclick);
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		wavebox_onlanguagechanged);
-	wavebox_updatetext(self, &workspace->translator);
+	wavebox_updatetext(self, workspace_translator(workspace));
 }
 
 void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
@@ -263,13 +263,13 @@ void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
 	free(self->nowavetext);
 }
 
-void wavebox_updatetext(WaveBox* self, Translator* translator)
+void wavebox_updatetext(WaveBox* self, psy_Translator* translator)
 {
 	wavebox_setnowavetext(self,
-		translator_translate(translator, "samplesview.no-wave-loaded"));
+		psy_translator_translate(translator, "samplesview.no-wave-loaded"));
 }
 
-void wavebox_onlanguagechanged(WaveBox* self, Translator* sender)
+void wavebox_onlanguagechanged(WaveBox* self, psy_Translator* sender)
 {
 	wavebox_updatetext(self, sender);
 }

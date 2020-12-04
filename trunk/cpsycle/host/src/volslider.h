@@ -19,15 +19,23 @@ extern "C" {
 //
 // Controls the volume of the Master
 
-typedef struct {
+typedef struct VolSlider {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Slider slider;
+	// references
 	Workspace* workspace;
 } VolSlider;
 
 void volslider_init(VolSlider*, psy_ui_Component* parent, Workspace*);
+
+INLINE psy_ui_Component* volslider_base(VolSlider* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

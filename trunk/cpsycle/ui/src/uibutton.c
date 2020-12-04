@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "uibutton.h"
+#include "uiapp.h"
 // std
 #include <string.h>
 #include <stdlib.h>
@@ -15,6 +16,7 @@ static unsigned int arrowcolour = 0x00777777;
 static unsigned int arrowhighlightcolour = 0x00FFFFFF;
 
 static void ondestroy(psy_ui_Button*);
+static void onlanguagechanged(psy_ui_Button*, psy_Translator* sender);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
 static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
 static void drawarrow(psy_ui_Button*, psy_ui_IntPoint* arrow, psy_ui_Graphics*);
@@ -48,7 +50,9 @@ static void vtable_init(psy_ui_Button* self)
 }
 
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
-{	    
+{
+	extern psy_ui_App app;
+
 	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
@@ -61,8 +65,23 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;	
 	self->enabled = TRUE;
 	self->text = NULL;
-	self->textcolour = psy_ui_colour_make(0x00CACACA);
-	psy_signal_init(&self->signal_clicked);	
+	self->translation = NULL;
+	self->translate = TRUE;
+	self->textcolour = psy_ui_colour_make(0x00BDBDBD);
+	self->shiftstate = FALSE;
+	self->ctrlstate = FALSE;
+	psy_signal_init(&self->signal_clicked);
+	psy_signal_connect(&app.translator.signal_languagechanged, self,
+		onlanguagechanged);
+}
+
+void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
+	const char* text)
+{
+	assert(self);
+
+	psy_ui_button_init(self, parent);
+	psy_ui_button_settext(self, text);
 }
 
 void psy_ui_button_init_connect(psy_ui_Button* self, psy_ui_Component* parent,
@@ -76,7 +95,18 @@ void ondestroy(psy_ui_Button* self)
 {	
 	free(self->text);
 	self->text = NULL;
+	free(self->translation);
+	self->translation = NULL;
 	psy_signal_dispose(&self->signal_clicked);	
+}
+
+void onlanguagechanged(psy_ui_Button* self, psy_Translator* sender)
+{
+	assert(self);
+
+	psy_strreset(&self->translation, psy_translator_translate(sender,
+		self->text));
+	psy_ui_component_invalidate(&self->component);
 }
 
 void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
@@ -87,9 +117,15 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 	psy_ui_Rectangle r;
 	int centerx = 0;
 	int centery = 0;
+	char* text;
 
+	if (self->translate && self->translation) {
+		text = self->translation;
+	} else {
+		text = self->text;
+	}
 	size = psy_ui_component_size(psy_ui_button_base(self));
-	textsize = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
+	textsize = psy_ui_component_textsize(psy_ui_button_base(self), text);
 	tm = psy_ui_component_textmetric(&self->component);   
 	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
 		psy_ui_value_px(&size.height, &tm));
@@ -113,14 +149,14 @@ void ondraw(psy_ui_Button* self, psy_ui_Graphics* g)
 		psy_ui_ALIGNMENT_CENTER_VERTICAL) {
 		centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&textsize.height, &tm)) / 2;
 	}
-	if (self->text) {
+	if (text) {
 		psy_ui_textoutrectangle(g,
 			centerx,
 			centery,
 			psy_ui_ETO_CLIPPED,
 			r,
-			self->text,
-			strlen(self->text));
+			text,
+			strlen(text));
 	}
 	if (self->icon != psy_ui_ICON_NONE) {
 		drawicon(self, g);
@@ -227,11 +263,17 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 {		
 	psy_ui_TextMetric tm;	
 	psy_ui_Size size;
-		
+	char* text;
+
+	if (self->translate && self->translation) {
+		text = self->translation;
+	} else {
+		text = self->text;
+	}		
 	tm = psy_ui_component_textmetric(psy_ui_button_base(self));
 	if (self->charnumber == 0) {
-		if (self->text) {
-			size = psy_ui_component_textsize(psy_ui_button_base(self), self->text);
+		if (text) {
+			size = psy_ui_component_textsize(psy_ui_button_base(self), text);
 		} else {
 			size = psy_ui_size_zero();
 		}
@@ -257,6 +299,8 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
 	if (self->enabled) {
+		self->shiftstate = ev->shift;
+		self->ctrlstate = ev->ctrl;
 		psy_signal_emit(&self->signal_clicked, self, 0);
 	}
 }
@@ -279,8 +323,16 @@ void onmouseleave(psy_ui_Button* self)
 
 void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 {	
-	psy_strreset(&self->text, text);	
-	psy_ui_component_invalidate(psy_ui_button_base(self));    
+	assert(self);
+
+	psy_strreset(&self->text, text);
+	if (self->translate) {
+		extern psy_ui_App app;
+
+		psy_strreset(&self->translation,
+			psy_translator_translate(&app.translator, text));
+	}
+	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
 
 void psy_ui_button_seticon(psy_ui_Button* self, psy_ui_ButtonIcon icon)
@@ -328,6 +380,15 @@ void psy_ui_button_settextalignment(psy_ui_Button* self,
 	psy_ui_Alignment alignment)
 {
 	self->textalignment = alignment;
+}
+
+void psy_ui_button_preventtranslation(psy_ui_Button* self)
+{
+	self->translate = FALSE;
+	if (self->translation) {
+		free(self->translation);
+		self->translation = NULL;
+	}
 }
 
 void enableinput(psy_ui_Button* self)

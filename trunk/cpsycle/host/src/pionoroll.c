@@ -56,9 +56,9 @@ void gridstate_init(PianoGridState* self, PatternViewSkin* skin)
 
 // Header
 static void pianoruler_ondraw(PianoRuler*, psy_ui_Graphics*);
-static PatternSelection pianoruler_clipselection(PianoRuler*,
+static psy_audio_PatternSelection pianoruler_clipselection(PianoRuler*,
 	psy_ui_Rectangle clip);
-static void pianoruler_drawruler(PianoRuler*, psy_ui_Graphics*, PatternSelection);
+static void pianoruler_drawruler(PianoRuler*, psy_ui_Graphics*, psy_audio_PatternSelection);
 void pianoruler_drawbeat(PianoRuler*, psy_ui_Graphics*, int beat, int x,
 	int baseline, int tmheight);
 static void pianoruler_onpreferredsize(PianoRuler*, const psy_ui_Size* limit,
@@ -126,10 +126,10 @@ void pianoruler_ondraw(PianoRuler* self, psy_ui_Graphics* g)
 	pianoruler_drawruler(self, g, pianoruler_clipselection(self, g->clip));
 }
 
-PatternSelection pianoruler_clipselection(PianoRuler* self,
+psy_audio_PatternSelection pianoruler_clipselection(PianoRuler* self,
 	psy_ui_Rectangle clip)
 {
-	PatternSelection rv;
+	psy_audio_PatternSelection rv;
 
 	assert(self);
 
@@ -142,7 +142,7 @@ PatternSelection pianoruler_clipselection(PianoRuler* self,
 }
 
 void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
-	PatternSelection clip)
+	psy_audio_PatternSelection clip)
 {	
 	psy_ui_TextMetric tm;
 	psy_ui_IntSize size;
@@ -383,29 +383,29 @@ void pianokeyboard_setkeyboardtype(PianoKeyboard* self, KeyboardType
 static void pianogrid_ondestroy(Pianogrid*);
 static void pianogrid_ondraw(Pianogrid*, psy_ui_Graphics*);
 static void pianogrid_drawbackground(Pianogrid*, psy_ui_Graphics*,
-	PatternSelection clip);
+	psy_audio_PatternSelection clip);
 static void pianogrid_drawuncoveredrightbackground(Pianogrid*,
 	psy_ui_Graphics*, psy_ui_IntSize);
 static void pianogrid_drawuncoveredbottombackground(Pianogrid*,
 	psy_ui_Graphics*, psy_ui_IntSize);
 static void pianogrid_updatekeystate(Pianogrid*);
-static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*, PatternSelection);
-static PatternSelection pianogrid_clipselection(Pianogrid*, psy_ui_Rectangle
+static void pianogrid_drawgrid(Pianogrid*, psy_ui_Graphics*, psy_audio_PatternSelection);
+static psy_audio_PatternSelection pianogrid_clipselection(Pianogrid*, psy_ui_Rectangle
 	clip);
 static void pianogrid_drawgridcells(Pianogrid*, psy_ui_Graphics*,
-	PatternSelection clip);
+	psy_audio_PatternSelection clip);
 static void pianogrid_drawstepseparators(Pianogrid*, psy_ui_Graphics*,
-	PatternSelection clip);
+	psy_audio_PatternSelection clip);
 static void pianogrid_drawkeyseparators(Pianogrid* self, psy_ui_Graphics*,
-	PatternSelection clip);
-static void pianogrid_drawplaybar(Pianogrid*, psy_ui_Graphics*, PatternSelection);
-static void pianogrid_drawentries(Pianogrid*, psy_ui_Graphics*, PatternSelection);
+	psy_audio_PatternSelection clip);
+static void pianogrid_drawplaybar(Pianogrid*, psy_ui_Graphics*, psy_audio_PatternSelection);
+static void pianogrid_drawentries(Pianogrid*, psy_ui_Graphics*, psy_audio_PatternSelection);
 static bool pianogrid_hastrackdisplay(Pianogrid*, uintptr_t track);
 static PianogridTrackEvent* pianogrid_lasttrackevent_at(Pianogrid* self, uintptr_t track);
 static void pianogrid_lasttrackevent_clear(Pianogrid*);
 static void pianogrid_drawevent(Pianogrid*, psy_ui_Graphics*,
 	PianogridTrackEvent*, psy_dsp_big_beat_t length);
-static void pianogrid_drawcursor(Pianogrid*, psy_ui_Graphics*, PatternSelection);
+static void pianogrid_drawcursor(Pianogrid*, psy_ui_Graphics*, psy_audio_PatternSelection);
 static psy_ui_Colour pianogrid_cellcolour(Pianogrid* self, uintptr_t step,
 	intptr_t key);
 static void pianogrid_onpreferredsize(Pianogrid* self, const psy_ui_Size* limit,
@@ -522,7 +522,7 @@ void pianogrid_settrackdisplay(Pianogrid* self, PianoTrackDisplay display)
 
 void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 {
-	PatternSelection clip;
+	psy_audio_PatternSelection clip;
 
 	assert(self);
 
@@ -552,10 +552,10 @@ void pianogrid_updatekeystate(Pianogrid* self)
 		self->keyboardstate, &tm);
 }
 
-PatternSelection pianogrid_clipselection(Pianogrid* self,
+psy_audio_PatternSelection pianogrid_clipselection(Pianogrid* self,
 	psy_ui_Rectangle clip)
 {
-	PatternSelection rv;
+	psy_audio_PatternSelection rv;
 
 	assert(self);
 
@@ -568,7 +568,7 @@ PatternSelection pianogrid_clipselection(Pianogrid* self,
 }
 
 void pianogrid_drawbackground(Pianogrid* self, psy_ui_Graphics* g,
-	PatternSelection clip)
+	psy_audio_PatternSelection clip)
 {	
 	psy_ui_IntSize size;
 		
@@ -623,7 +623,7 @@ void pianogrid_drawuncoveredbottombackground(Pianogrid* self, psy_ui_Graphics*
 	}
 }
 
-void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g, PatternSelection clip)
+void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g, psy_audio_PatternSelection clip)
 {
 	assert(self);
 
@@ -633,7 +633,7 @@ void pianogrid_drawgrid(Pianogrid* self, psy_ui_Graphics* g, PatternSelection cl
 }
 
 void pianogrid_drawgridcells(Pianogrid* self, psy_ui_Graphics* g,
-	PatternSelection clip)
+	psy_audio_PatternSelection clip)
 {	
 	uintptr_t key;
 
@@ -678,7 +678,7 @@ psy_ui_Colour pianogrid_cellcolour(Pianogrid* self, uintptr_t step, intptr_t key
 }
 
 void pianogrid_drawstepseparators(Pianogrid* self, psy_ui_Graphics* g,
-	PatternSelection clip)
+	psy_audio_PatternSelection clip)
 {
 	psy_dsp_big_beat_t c;
 
@@ -699,7 +699,7 @@ void pianogrid_drawstepseparators(Pianogrid* self, psy_ui_Graphics* g,
 
 // draws key separators at C and E
 void pianogrid_drawkeyseparators(Pianogrid* self, psy_ui_Graphics* g,
-	PatternSelection clip)
+	psy_audio_PatternSelection clip)
 {	
 	uint8_t key;	
 
@@ -721,7 +721,7 @@ void pianogrid_drawkeyseparators(Pianogrid* self, psy_ui_Graphics* g,
 	}
 }
 
-void pianogrid_drawcursor(Pianogrid* self, psy_ui_Graphics* g, PatternSelection clip)
+void pianogrid_drawcursor(Pianogrid* self, psy_ui_Graphics* g, psy_audio_PatternSelection clip)
 {
 	assert(self);
 
@@ -747,7 +747,7 @@ void pianogrid_drawcursor(Pianogrid* self, psy_ui_Graphics* g, PatternSelection 
 	}
 }
 
-void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g, PatternSelection clip)
+void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g, psy_audio_PatternSelection clip)
 {
 	assert(self);
 
@@ -771,7 +771,7 @@ void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g, PatternSelection
 }
 
 void pianogrid_drawentries(Pianogrid* self, psy_ui_Graphics* g,
-	PatternSelection clip)
+	psy_audio_PatternSelection clip)
 {
 	assert(self);
 

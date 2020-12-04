@@ -59,6 +59,8 @@
 #define PSYCLE_INI "psycle.ini"
 #define PSYCLE_RECENT_SONG_INI "psycle-recentsongs.ini"
 
+#define PSYCLE_HELPFILES "readme.txt keys.txt tweaking.txt whatsnew.txt"
+
 #define PSYCLE_USE_MACHINEPROXY
 
 // #define PSYCLE_DEFAULT_LANG_ES
@@ -69,5 +71,7 @@
 #define PSYCLE_USE_PSY3
 #define PSYCLE_USE_PSY2
 #define PSYCLE_USE_XM
+
+// #define PSYCLE_TIMEBAR_OLD
 
 #endif /* psy_CONF_H */

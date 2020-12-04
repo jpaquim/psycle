@@ -4,25 +4,28 @@
 #if !defined(SEQUENCERVIEW_H)
 #define SEQUENCERVIEW_H
 
-#include <patterns.h>
-#include <sequence.h>
-
-#include <uibutton.h>
-#include <uiedit.h>
-#include <uilabel.h>
-#include <uicheckbox.h>
-#include <uisplitbar.h>
-#include <uiscroller.h>
-
+// host
 #include "playlisteditor.h"
 #include "workspace.h"
+// audio
+#include <patterns.h>
+#include <sequence.h>
+// ui
+#include <uibutton.h>
+#include <uicheckbox.h>
+#include <uiedit.h>
+#include <uilabel.h>
+#include <uiscroller.h>
+#include <uisplitbar.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
-	psy_ui_Component component;	
+typedef struct SequenceButtons {
+	// inherits
+	psy_ui_Component component;
+	// ui elements
 	psy_ui_Button incpattern;
 	psy_ui_Button decpattern;	
 	psy_ui_Button newentry;
@@ -37,20 +40,20 @@ typedef struct {
 	psy_ui_Button copy;
 	psy_ui_Button paste;
 	psy_ui_Button singlesel;
-	psy_ui_Button multisel;	
-	void* context;
+	psy_ui_Button multisel;
+	// references	
 	Workspace* workspace;
 } SequenceButtons;
 
 void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent,
 	Workspace*);
 
-typedef struct {
+typedef struct SequenceListView {
+	// inherits
 	psy_ui_Component component;
-	psy_audio_Sequence* sequence;
-	psy_audio_SequenceSelection* selection;	
-	psy_audio_Patterns* patterns;
+	// ui elements	
 	psy_ui_Edit rename;
+	// internal data
 	int selected;
 	int selectedtrack;
 	int foundselected;
@@ -61,12 +64,16 @@ typedef struct {
 	int identwidth;   
 	int avgcharwidth;	
 	bool showpatternnames;
-	psy_dsp_beat_t lastplayposition;
-	psy_audio_Player* player;
+	psy_dsp_beat_t lastplayposition;	
 	int refreshcount;
 	uintptr_t lastplayrow;
-	Workspace* workspace;
+	// references
+	psy_audio_Player* player;
+	psy_audio_Sequence* sequence;
+	psy_audio_SequenceSelection* selection;
+	psy_audio_Patterns* patterns;	
 	struct SequenceView* view;
+	Workspace* workspace;
 } SequenceListView;
 
 void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
@@ -76,12 +83,16 @@ void sequencelistview_showpatternslots(SequenceListView*);
 void sequencelistview_rename(SequenceListView*);
 void sequencelistview_computetextsizes(SequenceListView*);
 
-typedef struct {
+typedef struct SequenceViewDuration {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label desc;
-	psy_ui_Label duration;	
-	psy_audio_Sequence* sequence;
+	psy_ui_Label duration;		
+	// internal data
 	float duration_ms;
+	// references
+	psy_audio_Sequence* sequence;
 	Workspace* workspace;
 } SequenceViewDuration;
 
@@ -89,16 +100,20 @@ void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
 	psy_audio_Sequence*, Workspace*);
 void sequenceduration_update(SequenceViewDuration*);
 
-typedef struct {
+typedef struct SequenceViewTrackHeader {
+	// inherits
 	psy_ui_Component component;
+	// references
 	struct SequenceView* view;
 } SequenceViewTrackHeader;
 
 void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 	psy_ui_Component* parent, struct SequenceView*);
 
-typedef struct {
+typedef struct SequencerOptionsBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_CheckBox followsong;
 	psy_ui_CheckBox shownames;
 	psy_ui_CheckBox showplaylist;
@@ -109,6 +124,7 @@ typedef struct {
 	psy_ui_Component top;
 	psy_ui_Button toggleseqedit;
 	psy_ui_Button toggleseqediticon;
+	// references
 	Workspace* workspace;
 } SequencerOptionsBar;
 
@@ -116,7 +132,9 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* paren
 	Workspace*);
 
 typedef struct SequenceView {
-	psy_ui_Component component;	
+	// inherits
+	psy_ui_Component component;
+	// ui elements
 	SequenceListView listview;
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
@@ -124,7 +142,8 @@ typedef struct SequenceView {
 	SequenceViewDuration duration;
 	PlayListEditor playlisteditor;
 	psy_ui_SplitBar splitbar;
-	SequencerOptionsBar options;
+	SequencerOptionsBar options;	
+	// references
 	psy_audio_Patterns* patterns;
 	psy_audio_Sequence* sequence;
 	psy_audio_SequenceSelection* selection;
@@ -144,4 +163,4 @@ INLINE psy_ui_Component* sequenceview_base(SequenceView* self)
 }
 #endif
 
-#endif
+#endif /* SEQUENCERVIEW_H */

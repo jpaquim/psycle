@@ -54,7 +54,6 @@ static void mainframe_initsequenceview(MainFrame*);
 static void mainframe_initplugineditor(MainFrame*);
 static void mainframe_connectworkspace(MainFrame*);
 static void mainframe_initinterpreter(MainFrame*);
-static void mainframe_updatetext(MainFrame*, Translator*);
 static void mainframe_onskinchanged(MainFrame*, Workspace*);
 static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyEvent*);
@@ -113,7 +112,7 @@ static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
 	psy_ui_Component* view);
-static void mainframe_onlanguagechanged(MainFrame*, Translator* sender);
+static void mainframe_onlanguagechanged(MainFrame*, psy_Translator* sender);
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender,
 	int option, int mode);
@@ -171,7 +170,6 @@ void mainframe_init(MainFrame* self)
 	mainframe_initstatusbar(self);	
 	mainframe_setstartpage(self);
 	mainframe_updatesongtitle(self);
-	mainframe_updatetext(self, workspace_translator(&self->workspace));
 	mainframe_initinterpreter(self);
 	mainframe_updateterminalbutton(self);
 	mainframe_connectworkspace(self);
@@ -195,37 +193,8 @@ void mainframe_ondestroyed(MainFrame* self)
 	psy_ui_app_stop(&app);
 }
 
-void mainframe_updatetext(MainFrame* self, Translator* translator)
+void mainframe_onlanguagechanged(MainFrame* self, psy_Translator* sender)
 {
-	assert(self);
-	
-	if (translator) {
-		tabbar_rename_tabs(&self->tabbar,
-			translator_translate(translator, "main.machines"),
-			translator_translate(translator, "main.patterns"),
-			translator_translate(translator, "main.samples"),
-			translator_translate(translator, "main.instruments"),
-			translator_translate(translator, "main.properties"),
-			translator_translate(translator, "main.settings"),
-			translator_translate(translator, "help.help"),
-			NULL);
-		psy_ui_button_settext(&self->toggleterminal,
-			translator_translate(translator, "main.terminal"));
-		psy_ui_button_settext(&self->togglekbdhelp,
-			translator_translate(translator, "main.kbd"));
-	} else {
-		tabbar_rename_tabs(&self->tabbar,
-			"Machines", "Patterns", "Samples", "Instruments", "Properties",
-			"Settings", "Help",
-			NULL);
-		psy_ui_button_settext(&self->toggleterminal, "Terminal");
-		psy_ui_button_settext(&self->togglekbdhelp, "Kbd");
-	}
-}
-
-void mainframe_onlanguagechanged(MainFrame* self, Translator* sender)
-{
-	mainframe_updatetext(self, sender);
 	psy_ui_component_alignall(mainframe_base(self));
 }
 
@@ -326,6 +295,7 @@ void mainframe_initstatusbar(MainFrame* self)
 void mainframe_initstatusbarlabel(MainFrame* self, psy_ui_Margin* margin)
 {
 	psy_ui_label_init(&self->statusbarlabel, &self->statusbar);
+	psy_ui_label_preventtranslation(&self->statusbarlabel);
 	psy_ui_label_settext(&self->statusbarlabel, "Ready");
 	psy_ui_label_setcharnumber(&self->statusbarlabel, 29);
 	psy_ui_component_setmargin(psy_ui_label_base(&self->statusbarlabel),
@@ -356,7 +326,7 @@ void mainframe_initterminalbutton(MainFrame* self)
 		psy_ui_colour_make(0x0000FF00);
 	self->terminalmsgtype = TERMINALMSGTYPE_NONE;
 	psy_ui_button_init(&self->toggleterminal, &self->statusbar);
-	psy_ui_button_settext(&self->toggleterminal, "  Terminal");
+	psy_ui_button_settext(&self->toggleterminal, "Terminal");
 	psy_ui_component_setalign(psy_ui_button_base(&self->toggleterminal),
 		psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->toggleterminal.signal_clicked, self,
@@ -470,14 +440,13 @@ void mainframe_initmaintabbar(MainFrame* self)
 	tabbar_init(&self->tabbar, &self->tabbars);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
-		psy_ui_HORIZONTALEXPAND);
-	// Machines, Patterns, Samples, Instruments, Properties
-	// text set in updatetext with translation
-	tabbar_append_tabs(&self->tabbar, "", "", "", "", "", NULL);
+		psy_ui_HORIZONTALEXPAND);	
+	tabbar_append_tabs(&self->tabbar, "main.machines", "main.patterns",
+		"main.samples", "main.instruments", "main.properties", "help.help", NULL);
 	// ident setting help tabs
-	tabbar_append(&self->tabbar, "" /* Settings */)->margin.left =
+	tabbar_append(&self->tabbar, "main.settings")->margin.left =
 		psy_ui_value_makeew(4.0);
-	tabbar_append(&self->tabbar, "" /* Help */)->margin.right =
+	tabbar_append(&self->tabbar, "main.help")->margin.right =
 		psy_ui_value_makeew(4.0);
 	psy_ui_notebook_init(&self->viewtabbars, &self->tabbars);
 	psy_ui_component_setalign(&self->viewtabbars.component, psy_ui_ALIGN_LEFT);

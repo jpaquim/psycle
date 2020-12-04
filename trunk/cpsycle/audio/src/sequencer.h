@@ -54,8 +54,10 @@ typedef struct {
 	psy_dsp_big_beat_t bpm;
 	uintptr_t samplerate;
 	psy_dsp_big_beat_t beatspersample;	
-	unsigned int lpb; // global
-	psy_dsp_big_beat_t lpbspeed; // pattern	
+	uintptr_t lpb; // global
+	psy_dsp_big_beat_t lpbspeed; // pattern
+	uintptr_t extraticks;
+	uintptr_t tpb;
 	bool playing;
 	psy_dsp_big_beat_t position;
 	psy_dsp_big_beat_t window;
@@ -154,6 +156,9 @@ INLINE uintptr_t psy_audio_sequencer_lpb(psy_audio_Sequencer* self)
 	return self->lpb;
 }
 
+void psy_audio_sequencer_setticksperbeat(psy_audio_Sequencer*, uintptr_t ticks);
+void psy_audio_sequencer_setextraticksperbeat(psy_audio_Sequencer*, uintptr_t ticks);
+
 INLINE uintptr_t psy_audio_sequencer_frames(psy_audio_Sequencer* self,
 	psy_dsp_big_beat_t offset)
 {
@@ -208,7 +213,12 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 {
 	psy_dsp_big_beat_t rv;
 
-	rv = self->lpbspeed;
+	if (self->extraticks != 0) {
+		rv = self->lpbspeed * (self->tpb /
+			(psy_dsp_big_beat_t)(self->extraticks * self->lpb + self->tpb));
+	} else {
+		rv = self->lpbspeed;
+	}	
 	if (self->rowdelay.active) {
 		rv *= self->rowdelay.rowspeed;
 	}

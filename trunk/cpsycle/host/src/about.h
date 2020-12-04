@@ -37,6 +37,13 @@ typedef struct Contrib {
 
 void contrib_init(Contrib*, psy_ui_Component* parent);
 
+INLINE psy_ui_Component* contrib_base(Contrib* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 typedef struct Version{
 	// inherits
 	psy_ui_Component component;
@@ -46,6 +53,13 @@ typedef struct Version{
 
 void version_init(Version*, psy_ui_Component* parent);
 
+INLINE psy_ui_Component* version_base(Version* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
 typedef struct Licence {
 	// inherits
 	psy_ui_Component component;
@@ -54,6 +68,13 @@ typedef struct Licence {
 } Licence;
 
 void licence_init(Licence*, psy_ui_Component* parent);
+
+INLINE psy_ui_Component* licence_base(Licence* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 typedef struct About {
 	// inherits

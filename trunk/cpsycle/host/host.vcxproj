@@ -156,6 +156,7 @@
     <ClCompile Include="src\cmdproperties.c" />
     <ClCompile Include="src\config.c" />
     <ClCompile Include="src\cpuview.c" />
+    <ClCompile Include="src\defaultlang.c" />
     <ClCompile Include="src\envelopeview.c" />
     <ClCompile Include="src\filebar.c" />
     <ClCompile Include="src\fileview.c" />
@@ -226,7 +227,7 @@
     <ClCompile Include="src\trackerlinestate.c" />
     <ClCompile Include="src\trackerview.c" />
     <ClCompile Include="src\trackscopeview.c" />
-    <ClCompile Include="src\translator.c" />
+    <ClCompile Include="src\transformpatternview.c" />
     <ClCompile Include="src\undoredobar.c" />
     <ClCompile Include="src\volslider.c" />
     <ClCompile Include="src\vubar.c" />
@@ -253,6 +254,7 @@
     <ClInclude Include="src\cmdsnotes.h" />
     <ClInclude Include="src\config.h" />
     <ClInclude Include="src\cpuview.h" />
+    <ClInclude Include="src\defaultlang.h" />
     <ClInclude Include="src\envelopeview.h" />
     <ClInclude Include="src\filebar.h" />
     <ClInclude Include="src\fileview.h" />
@@ -323,7 +325,7 @@
     <ClInclude Include="src\trackerlinestate.h" />
     <ClInclude Include="src\trackerview.h" />
     <ClInclude Include="src\trackscopeview.h" />
-    <ClInclude Include="src\translator.h" />
+    <ClInclude Include="src\transformpatternview.h" />
     <ClInclude Include="src\undoredobar.h" />
     <ClInclude Include="src\volslider.h" />
     <ClInclude Include="src\vubar.h" />

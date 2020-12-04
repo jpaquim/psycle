@@ -467,7 +467,7 @@ void interpolatecurveview_ondestroy(InterpolateCurveView* self,
 }
 
 void interpolatecurveview_setselection(InterpolateCurveView* self,
-	PatternSelection selection)
+	psy_audio_PatternSelection selection)
 {
 	self->box.range = selection.bottomright.offset - selection.topleft.offset;
 	self->box.selection = selection;

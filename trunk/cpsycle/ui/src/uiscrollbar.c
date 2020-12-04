@@ -185,17 +185,17 @@ void psy_ui_scrollbar_init(psy_ui_ScrollBar* self, psy_ui_Component* parent)
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_scrollbar_ondestroy);
 	// Less Button
-	psy_ui_button_init(&self->less, &self->component);
+	psy_ui_button_init_connect(&self->less, &self->component,
+		self, psy_ui_scrollbar_onless);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_UP);
 	psy_ui_button_setcharnumber(&self->less, 2);
-	psy_ui_component_setalign(&self->less.component, psy_ui_ALIGN_TOP);
-	psy_signal_connect(&self->less.signal_clicked, self, psy_ui_scrollbar_onless);
+	psy_ui_component_setalign(&self->less.component, psy_ui_ALIGN_TOP);	
 	// More Button
-	psy_ui_button_init(&self->more, &self->component);
+	psy_ui_button_init_connect(&self->more, &self->component,
+		self, psy_ui_scrollbar_onmore);
 	psy_ui_button_seticon(&self->more, psy_ui_ICON_DOWN);
 	psy_ui_button_setcharnumber(&self->more, 2);
 	psy_ui_component_setalign(&self->more.component, psy_ui_ALIGN_BOTTOM);
-	psy_signal_connect(&self->more.signal_clicked, self, psy_ui_scrollbar_onmore);
 	// Pane
 	psy_ui_scrollbarpane_init(&self->sliderpane, &self->component);
 	psy_ui_component_setalign(&self->sliderpane.component, psy_ui_ALIGN_CLIENT);

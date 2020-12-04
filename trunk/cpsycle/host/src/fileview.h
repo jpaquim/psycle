@@ -4,28 +4,38 @@
 #if !defined(FILEVIEW_H)
 #define FILEVIEW_H
 
-#include "uilistbox.h"
-
+// host
 #include "tabbar.h"
 #include "workspace.h"
+// ui
+#include "uilistbox.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // FileView
+//
+// Displays a file chooser added for xlib missing a native one. The win32
+// build is configured to use the native instead this one.
+// To activate undefine PSYCLE_USE_PLATFORM_FILEOPEN in psyconf.h.
 
 typedef struct FileView {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_selected;
+	// ui elements
 	psy_ui_ListBox filebox;
-	TabBar drives;
-	Workspace* workspace;
+	// internal data
+	TabBar drives;	
 	psy_Table filenames;
 	char* curr;
-	char* drive;
-	psy_Signal signal_selected;
+	char* drive;	
 	psy_List* files;
 	intptr_t numdirectories;
+	// references
+	Workspace* workspace;
 } FileView;
 
 void fileview_init(FileView*, psy_ui_Component* parent, Workspace*);

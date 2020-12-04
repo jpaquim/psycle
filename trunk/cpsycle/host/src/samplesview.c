@@ -20,8 +20,8 @@
 
 // SamplesViewButtons
 // prototypes
-static void samplesviewbuttons_updatetext(SamplesViewButtons*, Translator*);
-static void samplesviewbuttons_onlanguagechanged(SamplesViewButtons*, Translator* sender);
+static void samplesviewbuttons_updatetext(SamplesViewButtons*, psy_Translator*);
+static void samplesviewbuttons_onlanguagechanged(SamplesViewButtons*, psy_Translator* sender);
 // implementation
 void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -41,24 +41,24 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
-	samplesviewbuttons_updatetext(self, &workspace->translator);
+	samplesviewbuttons_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		samplesviewbuttons_onlanguagechanged);
 }
 
-void samplesviewbuttons_updatetext(SamplesViewButtons* self, Translator* translator)
+void samplesviewbuttons_updatetext(SamplesViewButtons* self, psy_Translator* translator)
 {
 	psy_ui_button_settext(&self->load, 
-		translator_translate(translator, "file.load"));
+		psy_translator_translate(translator, "file.load"));
 	psy_ui_button_settext(&self->save,
-		translator_translate(translator, "file.save"));
+		psy_translator_translate(translator, "file.save"));
 	psy_ui_button_settext(&self->duplicate,
-		translator_translate(translator, "edit.duplicate"));
+		psy_translator_translate(translator, "edit.duplicate"));
 	psy_ui_button_settext(&self->del,
-		translator_translate(translator, "edit.delete"));
+		psy_translator_translate(translator, "edit.delete"));
 }
 
-void samplesviewbuttons_onlanguagechanged(SamplesViewButtons* self, Translator* sender)
+void samplesviewbuttons_onlanguagechanged(SamplesViewButtons* self, psy_Translator* sender)
 {
 	samplesviewbuttons_updatetext(self, sender);
 }
@@ -221,8 +221,8 @@ void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
 static void samplesheaderview_onprevsample(SamplesHeaderView*, psy_ui_Component* sender);
 static void samplesheaderview_onnextsample(SamplesHeaderView*, psy_ui_Component* sender);
 static void samplesheaderview_oneditsamplename(SamplesHeaderView*, psy_ui_Edit* sender);
-static void samplesheaderview_updatetext(SamplesHeaderView*, Translator*);
-static void samplesheaderview_onlanguagechanged(SamplesHeaderView*, Translator*);
+static void samplesheaderview_updatetext(SamplesHeaderView*, psy_Translator*);
+static void samplesheaderview_onlanguagechanged(SamplesHeaderView*, psy_Translator*);
 
 // implementation
 void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
@@ -262,22 +262,22 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 			&margin));
-	samplesheaderview_updatetext(self, &workspace->translator);
+	samplesheaderview_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		samplesheaderview_onlanguagechanged);
 }
 
-void samplesheaderview_updatetext(SamplesHeaderView* self, Translator* translator)
+void samplesheaderview_updatetext(SamplesHeaderView* self, psy_Translator* translator)
 {
 	psy_ui_label_settext(&self->namelabel,
-		translator_translate(translator, "samplesview.samplename"));
+		psy_translator_translate(translator, "samplesview.samplename"));
 	psy_ui_label_settext(&self->srlabel,
-		translator_translate(translator, "samplesview.samplerate"));
+		psy_translator_translate(translator, "samplesview.samplerate"));
 	psy_ui_label_settext(&self->numsamplesheaderlabel,
-		translator_translate(translator, "samplesview.samples"));
+		psy_translator_translate(translator, "samplesview.samples"));
 }
 
-void samplesheaderview_onlanguagechanged(SamplesHeaderView* self, Translator* sender)
+void samplesheaderview_onlanguagechanged(SamplesHeaderView* self, psy_Translator* sender)
 {
 	samplesheaderview_updatetext(self, sender);
 }
@@ -368,8 +368,8 @@ static void generalview_fillpandescription(SamplesGeneralView*, char* txt);
 static void generalview_ondescribe(SamplesGeneralView*, psy_ui_Slider*, char* txt);
 static void generalview_ontweak(SamplesGeneralView*, psy_ui_Slider*, float value);
 static void generalview_onvalue(SamplesGeneralView*, psy_ui_Slider*, float* value);
-static void generalview_updatetext(SamplesGeneralView*, Translator*);
-static void generalview_onlanguagechanged(SamplesGeneralView*, Translator*);
+static void generalview_updatetext(SamplesGeneralView*, psy_Translator*);
+static void generalview_onlanguagechanged(SamplesGeneralView*, psy_Translator*);
 // implementation
 void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -405,26 +405,26 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 			(ui_slider_fptweak)generalview_ontweak,
 			(ui_slider_fpvalue)generalview_onvalue);
 	}
-	generalview_updatetext(self, &workspace->translator);
+	generalview_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		generalview_onlanguagechanged);
 }
 
-void generalview_updatetext(SamplesGeneralView* self, Translator* translator)
+void generalview_updatetext(SamplesGeneralView* self, psy_Translator* translator)
 {
 	psy_ui_slider_settext(&self->defaultvolume, 
-		translator_translate(translator, "samplesview.default-volume"));
+		psy_translator_translate(translator, "samplesview.default-volume"));
 	psy_ui_slider_settext(&self->globalvolume,
-		translator_translate(translator, "samplesview.global-volume"));
+		psy_translator_translate(translator, "samplesview.global-volume"));
 	psy_ui_slider_settext(&self->panposition,
-		translator_translate(translator, "samplesview.pan-position"));
+		psy_translator_translate(translator, "samplesview.pan-position"));
 	psy_ui_slider_settext(&self->samplednote,
-		translator_translate(translator, "samplesview.sampled-note"));
+		psy_translator_translate(translator, "samplesview.sampled-note"));
 	psy_ui_slider_settext(&self->pitchfinetune,
-		translator_translate(translator, "samplesview.pitch-finetune"));
+		psy_translator_translate(translator, "samplesview.pitch-finetune"));
 }
 
-void generalview_onlanguagechanged(SamplesGeneralView* self, Translator* sender)
+void generalview_onlanguagechanged(SamplesGeneralView* self, psy_Translator* sender)
 {
 	generalview_updatetext(self, sender);
 }

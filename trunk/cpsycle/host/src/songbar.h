@@ -4,19 +4,24 @@
 #if !defined(SONGBAR_H)
 #define SONGBAR_H
 
-#include "uicomponent.h"
-#include "workspace.h"
-#include "timebar.h"
 #include "linesperbeatbar.h"
 #include "octavebar.h"
+#include "timebar.h"
 #include "songtrackbar.h"
+#include "workspace.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct {
+// SongBar
+//
+// Groups song settings for track, bpm, lpb and octave
+
+typedef struct SongBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	SongTrackBar songtrackbar;
 	TimeBar timebar;
 	LinesPerBeatBar linesperbeatbar;
