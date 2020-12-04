@@ -4,11 +4,11 @@
 #ifndef psy_audio_PATTERN_H
 #define psy_audio_PATTERN_H
 
+// local
 #include "patternentry.h"
-
+// container
 #include <signal.h>
-
-#include "../../detail/stdint.h"
+// platform
 #include "../../detail/psydef.h"
 
 #ifdef __cplusplus
@@ -28,6 +28,9 @@ typedef struct {
 
 void psy_audio_patterncursor_init(psy_audio_PatternCursor*);
 
+psy_audio_PatternCursor psy_audio_patterncursor_make(
+	uintptr_t track, psy_dsp_big_beat_t offset);
+
 /// compares two pattern edit positions, if they are equal
 int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 	psy_audio_PatternCursor* rhs);
@@ -35,7 +38,74 @@ int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 typedef struct {
 	psy_audio_PatternCursor topleft;
 	psy_audio_PatternCursor bottomright;
-} PatternSelection;
+} psy_audio_PatternSelection;
+
+void psy_audio_patternselection_init_all(psy_audio_PatternSelection*,
+	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
+psy_audio_PatternSelection psy_audio_patternselection_make(
+	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
+
+typedef bool (*psy_audio_fp_matches)(const uintptr_t test, const uintptr_t reference);
+typedef uintptr_t (*psy_audio_fp_replacewith)(const uintptr_t current, const uintptr_t newval);
+
+typedef struct psy_audio_PatternSearchReplaceMode
+{	
+	psy_audio_fp_matches notematcher;
+	psy_audio_fp_matches instmatcher;
+	psy_audio_fp_matches machmatcher;
+	psy_audio_fp_replacewith notereplacer;
+	psy_audio_fp_replacewith instreplacer;
+	psy_audio_fp_replacewith machreplacer;
+	psy_audio_fp_replacewith tweakreplacer;
+	uintptr_t notereference;
+	uintptr_t instreference;
+	uintptr_t machreference;
+	uintptr_t notereplace;
+	uintptr_t instreplace;
+	uintptr_t machreplace;
+	uintptr_t tweakreplace;
+} psy_audio_PatternSearchReplaceMode;
+
+INLINE bool psy_audio_patternsearchreplacemode_matchesall(uintptr_t t, uintptr_t r)
+{
+	return TRUE;
+}
+
+INLINE bool psy_audio_patternsearchreplacemode_matchesempty(uintptr_t test,
+	uintptr_t r)
+{
+	return test == 0xff;
+}
+
+INLINE bool psy_audio_patternsearchreplacemode_matchesnonempty(uintptr_t test,
+	uintptr_t r)
+{
+	return test != 0xff;
+}
+
+INLINE bool psy_audio_patternsearchreplacemode_matchesequal(uintptr_t test,
+	uintptr_t reference)
+{
+	return test == reference;
+}
+
+INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithempty(uintptr_t c,
+	uintptr_t nv)
+{
+	return 0xff;
+}
+
+INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithcurrent(uintptr_t current,
+	uintptr_t nv)
+{
+	return current;
+}
+
+INLINE uintptr_t psy_audio_patternsearchreplacemode_replacewithnewval(uintptr_t c,
+	uintptr_t newval)
+{
+	return newval;
+}
 
 typedef struct psy_audio_Pattern {
 	// public
@@ -161,8 +231,11 @@ void psy_audio_pattern_setmaxsongtracks(psy_audio_Pattern*, uintptr_t num);
 /// returns the maximum number of songtracks 
 /// used by the paste pattern, player uses songtracks of patterns
 uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern*);
+// searches the pattern
+psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*,
+	psy_audio_PatternSelection, psy_audio_PatternSearchReplaceMode);
 
-
+// psy_audio_PatternCursorNavigator
 typedef struct {
 	psy_audio_PatternCursor* cursor;
 	psy_audio_Pattern* pattern;	

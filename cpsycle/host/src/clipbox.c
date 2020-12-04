@@ -4,13 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "clipbox.h"
-
+// dsp
 #include <rms.h>
-
+// audio
 #include <songio.h>
 
 #define TIMER_ID_CLIPBOX 700
 
+// prototypes
 static void clipbox_ondestroy(ClipBox*, psy_ui_Component* sender);
 static void clipbox_ondraw(ClipBox*, psy_ui_Graphics*);
 static void clipbox_currclipcolours(ClipBox*, psy_ui_Colour* currbackground,
@@ -37,21 +38,21 @@ static void clipboxdefaultskin_init(ClipBox* self)
 	}
 	self->skin = clipboxdefaultskin;
 }
-
+// vtable
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(ClipBox* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw) clipbox_ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown) clipbox_onmousedown;
-		vtable.ontimer = (psy_ui_fp_component_ontimer) clipbox_ontimer;
-		vtable_initialized = 1;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)clipbox_ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)clipbox_onmousedown;
+		vtable.ontimer = (psy_ui_fp_component_ontimer)clipbox_ontimer;
+		vtable_initialized = TRUE;
 	}
 }
-
+// implementation
 void clipbox_init(ClipBox* self, psy_ui_Component* parent, Workspace* workspace)
 {	
 	psy_ui_component_init(&self->component, parent);
@@ -74,7 +75,7 @@ void clipbox_ondestroy(ClipBox* self, psy_ui_Component* sender)
 {
 	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
 		clipbox_onsongchanged);
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_signal_disconnect(&psy_audio_machines_master(
 			&self->workspace->song->machines)->signal_worked, self,
 			clipbox_onmasterworked);

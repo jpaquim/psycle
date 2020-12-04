@@ -4,18 +4,23 @@
 #if !defined(STEREOPHASE_H)
 #define STEREOPHASE_H
 
-#include "uicomponent.h"
+// host
 #include "workspace.h"
+// ui
+#include "uicomponent.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// StereoPhase
+//
 // Displays the stereo phase of the signal 
 
-typedef struct {
+typedef struct StereoPhase {
 	// inherits
 	psy_ui_Component component;
+	// internal data
 	psy_audio_Wire wire;
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
@@ -31,11 +36,19 @@ typedef struct {
 	int peakLifeL, peakLifeR;
 	//Memories for phase
 	float o_mvc, o_mvpc, o_mvl, o_mvdl, o_mvpl, o_mvdpl, o_mvr, o_mvdr, o_mvpr, o_mvdpr;
+	// references
 	Workspace* workspace;	
 } StereoPhase;
 
 void stereophase_init(StereoPhase*, psy_ui_Component* parent, psy_audio_Wire wire, Workspace*);
 void stereophase_stop(StereoPhase*);
+
+INLINE psy_ui_Component* stereophase__base(StereoPhase* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

@@ -4,32 +4,40 @@
 #if !defined(CPUVIEW_H)
 #define CPUVIEW_H
 
+// host
 #include "labelpair.h"
+#include "workspace.h"
+// ui
 #include <uicheckbox.h>
 #include <uiscroller.h>
-#include "workspace.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: Displays information of the cpu and memory usage of the system and
-//      for each machine of a song
+// CPUView
+//
+// Displays information of the cpu and memory usage of the system and
+// for each machine of a song
 //
 // todo: uses windows api methods to access process information, implement
 //       unix platform informations aswell
 //       machine cpu accumulating not finished for now
 
-typedef struct {
+typedef struct CPUModuleView {
+	// inherits
 	psy_ui_Component component;
+	// references
 	Workspace* workspace;
 } CPUModuleView;
 
-void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
+void cpumoduleview_init(CPUModuleView*, psy_ui_Component* parent,
 	Workspace* workspace);
 
-typedef struct {
+typedef struct CPUView {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Component titlebar;
 	psy_ui_Label title;
 	psy_ui_Button hide;
@@ -49,9 +57,11 @@ typedef struct {
 	LabelPair routing;
 	psy_ui_CheckBox cpucheck;
 	CPUModuleView modules;
-	Workspace* workspace;
+	psy_ui_Scroller scroller;	
+	// internal data
 	uintptr_t lastnummachines;
-	psy_ui_Scroller scroller;
+	// references
+	Workspace* workspace;	
 } CPUView;
 
 void cpuview_init(CPUView*, psy_ui_Component* parent, Workspace*);
@@ -65,4 +75,4 @@ INLINE psy_ui_Component* cpuview_base(CPUView* self)
 }
 #endif
 
-#endif
+#endif /* CPUVIEW_H */

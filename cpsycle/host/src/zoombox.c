@@ -43,17 +43,17 @@ void zoombox_init(ZoomBox* self, psy_ui_Component* parent)
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
 	// init ui elements
-	psy_ui_button_init(&self->zoomout, zoombox_base(self));
+	psy_ui_button_init_connect(&self->zoomout, zoombox_base(self),
+		self, zoombox_onzoomout);
 	psy_ui_button_settext(&self->zoomout, "-");
 	psy_ui_button_setcharnumber(&self->zoomout, 2);
-	psy_signal_connect(&self->zoomout.signal_clicked, self, zoombox_onzoomout);
 	psy_ui_label_init(&self->label, zoombox_base(self));
 	psy_ui_label_settext(&self->label, "100");
 	psy_ui_label_setcharnumber(&self->label, 4);	
-	psy_ui_button_init(&self->zoomin, zoombox_base(self));
+	psy_ui_button_init_connect(&self->zoomin, zoombox_base(self),
+		self, zoombox_onzoomin);
 	psy_ui_button_settext(&self->zoomin, "+");	
 	psy_ui_button_setcharnumber(&self->zoomin, 2);
-	psy_signal_connect(&self->zoomin.signal_clicked, self, zoombox_onzoomin);	
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(zoombox_base(self), psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,

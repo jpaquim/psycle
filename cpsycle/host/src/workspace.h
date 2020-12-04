@@ -4,17 +4,19 @@
 #if !defined(WORKSPACE_H)
 #define WORKSPACE_H
 
-#include "translator.h"
 #include <song.h>
 #include <player.h>
 #include <propertiesio.h>
+#include <translator.h>
 #include <signal.h>
 #include <plugincatcher.h>
 #include <machinefactory.h>
 #include <uicomponent.h>
+#include <uiapp.h>
 #include "undoredo.h"
 #include <sequence.h>
 #include <notestab.h>
+
 
 // Workspace
 //
@@ -25,7 +27,7 @@
 //      |                 <>---- psy_audio_PluginCatcher
 //      |                 <>---- psy_audio_Song
 //  Workspace             <>---- History
-//                        <>---- Translator
+//
 
 #ifdef __cplusplus
 extern "C" {
@@ -163,8 +165,7 @@ typedef struct {
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
-	uintptr_t machines_undosavepoint;
-	Translator translator;
+	uintptr_t machines_undosavepoint;	
 	// Signals
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;
@@ -198,10 +199,17 @@ void workspace_save_configuration(Workspace*);
 void workspace_newsong(Workspace*);
 void workspace_loadsong(Workspace*, const char* path, bool play);
 void workspace_savesong(Workspace*, const char* path);
+
 INLINE psy_audio_Song* workspace_song(Workspace* self)
 {
 	return self->song;
 }
+
+INLINE psy_audio_Player* workspace_player(Workspace* self)
+{
+	return &self->player;
+}
+
 void workspace_loadskin(Workspace*, const char* path);
 void workspace_loadcontrolskin(Workspace*, const char* path);
 void workspace_scanplugins(Workspace*);
@@ -244,9 +252,11 @@ void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
 const char* workspace_translate(Workspace*, const char* key);
 
-INLINE Translator* workspace_translator(Workspace* self)
+INLINE psy_Translator* workspace_translator(Workspace* self)
 {
-	return &self->translator;
+	extern psy_ui_App app;
+
+	return &app.translator;
 }
 
 int workspace_hasplugincache(Workspace*);

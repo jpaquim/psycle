@@ -30,6 +30,7 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 	psy_signal_init(&self->signal_dispose);
 	ui_app_initplatform(self, instance);
 	psy_ui_defaults_init(&self->defaults);
+	psy_translator_init(&self->translator);
 }
 
 void ui_app_initplatform(psy_ui_App* self, uintptr_t instance)
@@ -72,6 +73,7 @@ void psy_ui_app_dispose(psy_ui_App* self)
 	free(self->imp_factory);
 	self->imp_factory = 0;
 	psy_ui_defaults_dispose(&self->defaults);
+	psy_translator_dispose(&self->translator);
 }
 
 struct psy_ui_Component* psy_ui_app_main(psy_ui_App* self)

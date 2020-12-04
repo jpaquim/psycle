@@ -52,10 +52,12 @@ void psy_ui_combobox_init(psy_ui_ComboBox* self, psy_ui_Component* parent)
 	self->component.vtable = &vtable;
 	self->charnumber = 0;
 	self->hover = 0;
+	psy_table_init(&self->itemdata);
 }
 
 void ondestroy(psy_ui_ComboBox* self, psy_ui_Component* sender)
 {
+	psy_table_dispose(&self->itemdata);
 	psy_signal_dispose(&self->signal_selchanged);
 }
 
@@ -87,6 +89,19 @@ intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox* self)
 void psy_ui_combobox_setcharnumber(psy_ui_ComboBox* self, int number)
 {
 	self->charnumber = number;
+}
+
+void psy_ui_combobox_setitemdata(psy_ui_ComboBox* self, uintptr_t index, intptr_t data)
+{
+	psy_table_insert(&self->itemdata, index, (void*)data);
+}
+
+intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox* self, uintptr_t index)
+{
+	if (psy_table_exists(&self->itemdata, index)) {
+		return (intptr_t)psy_table_at(&self->itemdata, index);
+	}
+	return -1;
 }
 
 void onpreferredsize(psy_ui_ComboBox* self, psy_ui_Size* limit,

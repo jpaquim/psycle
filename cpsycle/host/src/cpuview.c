@@ -149,13 +149,13 @@ void cpuview_inittitle(CPUView* self)
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->titlebar, &margin);
-	psy_ui_label_init(&self->title, &self->titlebar);
-	psy_ui_label_settext(&self->title, "Psycle DSP/CPU Performance Monitor");
+	psy_ui_label_init_text(&self->title, &self->titlebar,
+		"Psycle DSP/CPU Performance Monitor");
 	psy_ui_component_setcolour(&self->title.component, psy_ui_colour_make(0x00B1C8B0));
 	psy_ui_component_setalign(&self->title.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_button_init(&self->hide, &self->titlebar);
+	psy_ui_button_init_connect(&self->hide, &self->titlebar,
+		self, cpuview_onhide);
 	psy_ui_button_settext(&self->hide, "X");
-	psy_signal_connect(&self->hide.signal_clicked, self, cpuview_onhide);
 	psy_ui_component_setalign(&self->hide.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
@@ -165,8 +165,7 @@ void cpuview_inittitle(CPUView* self)
 
 void cpuview_initcoreinfo(CPUView* self)
 {
-	psy_ui_label_init(&self->coreinfo, &self->top);
-	psy_ui_label_settext(&self->coreinfo, "Core Info");
+	psy_ui_label_init_text(&self->coreinfo, &self->top, "Core Info");
 	psy_ui_component_setalign(&self->coreinfo.component, psy_ui_ALIGN_TOP);
 }
 
@@ -175,8 +174,8 @@ void cpuview_initresources(CPUView* self)
 	psy_ui_component_init(&self->resources, &self->top);
 	psy_ui_component_enablealign(&self->resources);
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
-	psy_ui_label_init(&self->resourcestitle, &self->resources);
-	psy_ui_label_settext(&self->resourcestitle, "Available Resources");		
+	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
+		"Available Resources");		
 	labelpair_init(&self->resources_win, &self->resources, "Windows Resources");
 	labelpair_init(&self->resources_mem, &self->resources, "Physical Memory(RAM)");
 	labelpair_init(&self->resources_swap, &self->resources, "Page File (Swap)");

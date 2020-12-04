@@ -277,9 +277,9 @@ void oncommand(psy_ui_ComboBox* self, psy_ui_Component* sender, WPARAM wParam,
 		{
 			if (self->signal_selchanged.slots) {
 				intptr_t sel = psy_ui_combobox_cursel(self);
-				psy_signal_emit(&self->signal_selchanged, self, 1, sel);
-				psy_ui_component_invalidate(&self->component);
+				psy_signal_emit(&self->signal_selchanged, self, 1, sel);				
 			}
+			psy_ui_component_invalidate(&self->component);
 		}
 		break;
 		default:

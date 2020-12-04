@@ -1869,9 +1869,9 @@ static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
 static void machineviewbar_onlanguagechanged(MachineViewBar*,
-	Translator* sender);
+	psy_Translator* sender);
 static void machineviewbar_updatetext(MachineViewBar* self,
-	Translator*);
+	psy_Translator*);
 
 void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -1890,25 +1890,26 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 		machineviewbar_onmixerconnectmodeclick);	
 	psy_ui_component_setalign(&self->mixersend.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->status, &self->component);
+	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 44);		
 	psy_ui_component_setalign(psy_ui_label_base(&self->status),
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machineviewbar_onsongchanged);
-	machineviewbar_updatetext(self, &workspace->translator);
+	machineviewbar_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
-		machineviewbar_onlanguagechanged);	
+		machineviewbar_onlanguagechanged);
 }
 
-void machineviewbar_updatetext(MachineViewBar* self, Translator* translator)
+void machineviewbar_updatetext(MachineViewBar* self, psy_Translator* translator)
 {
 	psy_ui_checkbox_settext(&self->mixersend,
-		translator_translate(translator,
+		psy_translator_translate(translator,
 			"machineview.connect-to-mixer-send-return-input"));
 }
 
-void machineviewbar_onlanguagechanged(MachineViewBar* self, Translator* sender)
+void machineviewbar_onlanguagechanged(MachineViewBar* self, psy_Translator* sender)
 {
 	machineviewbar_updatetext(self, sender);
 }
@@ -1940,7 +1941,7 @@ void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
 }
 
 // MachineView
-static void machineview_updatetext(MachineView*, Translator*);
+static void machineview_updatetext(MachineView*, psy_Translator*);
 static void machineview_onsongchanged(MachineView*, Workspace*, int flag, psy_audio_SongFile*);
 static void machineview_onmousedown(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onmouseup(MachineView*, psy_ui_MouseEvent*);
@@ -1948,7 +1949,6 @@ static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onkeydown(MachineView*, psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
 static void machineview_onskinchanged(MachineView*, Workspace*);
-static void machineview_onlanguagechanged(MachineView*, Translator* sender);
 static void machineview_selectsection(MachineView*, psy_ui_Component* sender, uintptr_t section);
 
 static psy_ui_ComponentVtable machineview_vtable;
@@ -2000,7 +2000,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->newmachine.component, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, tabbarparent);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
-	tabbar_append_tabs(&self->tabbar, "", "", NULL); // Wires, New Machine
+	tabbar_append_tabs(&self->tabbar, "machineview.wires",
+		"machineview.new-machine", NULL);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		machineview_selectsection);
 	psy_ui_notebook_setpageindex(&self->notebook, 0);	
@@ -2012,26 +2013,10 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		machineview_onskinchanged);	
-	machineview_updatetext(self, &workspace->translator);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		machineview_onlanguagechanged);
 	if (workspace_showwirehover(workspace)) {
 		self->wireview.showwirehover = TRUE;
 	}
 	self->wireview.firstsize = 1;
-}
-
-void machineview_updatetext(MachineView* self, Translator* translator)
-{
-	tabbar_rename_tabs(&self->tabbar,
-		translator_translate(translator, "machineview.wires"),
-		translator_translate(translator, "machineview.new-machine"),
-		NULL);
-}
-
-void machineview_onlanguagechanged(MachineView* self, Translator* sender)
-{
-	machineview_updatetext(self, sender);
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)

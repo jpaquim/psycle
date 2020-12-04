@@ -8,8 +8,6 @@
 #include "../../detail/portable.h"
 
 static void samplesbox_ondestroy(SamplesBox*);
-static void samplesbox_updatetext(SamplesBox*, Translator*);
-static void samplesbox_onlanguagechanged(SamplesBox*, Translator* sender);
 static void samplesbox_buildsamplelist(SamplesBox*);
 static void samplesbox_buildsubsamplelist(SamplesBox*, uintptr_t slot, bool create);
 static void samplesbox_onsampleinsert(SamplesBox*, psy_ui_Component* sender, psy_audio_SampleIndex*);
@@ -30,6 +28,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_label_init(&self->header, &self->component);
+	psy_ui_label_settext(&self->header, "samplesview.groupsfirstsample");
 	psy_ui_label_setcharnumber(&self->header, 25);
 	psy_ui_component_setmargin(&self->header.component, &margin);		
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
@@ -42,6 +41,7 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 	psy_ui_component_setalign(&self->subsamplelist.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_label_init(&self->group, &self->component);
+	psy_ui_label_settext(&self->group, "samplesview.groupsamples");
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->group.component, &margin);	
 	psy_signal_init(&self->signal_changed);
@@ -52,28 +52,12 @@ void samplesbox_init(SamplesBox* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->samplelist.signal_selchanged, self,
 		samplesbox_onsamplelistchanged);
 	psy_signal_connect(&self->subsamplelist.signal_selchanged, self,
-		samplesbox_onsubsamplelistchanged);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		samplesbox_onlanguagechanged);
-	samplesbox_updatetext(self, &workspace->translator);
+		samplesbox_onsubsamplelistchanged);	
 }
 
 void samplesbox_ondestroy(SamplesBox* self)
 {
 	psy_signal_dispose(&self->signal_changed);
-}
-
-void samplesbox_updatetext(SamplesBox* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->header, 
-		translator_translate(translator, "samplesview.groupsfirstsample"));
-	psy_ui_label_settext(&self->group,
-		translator_translate(translator, "samplesview.groupsamples"));
-}
-
-void samplesbox_onlanguagechanged(SamplesBox* self, Translator* sender)
-{
-	samplesbox_updatetext(self, sender);
 }
 
 void samplesbox_buildsamplelist(SamplesBox* self)

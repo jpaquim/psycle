@@ -16,6 +16,7 @@ static void wireview_initvolumeslider(WireView*);
 static void wireview_inittabbar(WireView*);
 static void wireview_initrategroup(WireView*);
 static void wireview_initbottomgroup(WireView*);
+static void wireview_updatetext(WireView*, psy_Translator*);
 static void wireview_onsongchanged(WireView*, Workspace*);
 static void wireview_connectmachinessignals(WireView*, Workspace*);
 static void wireview_ondescribevolume(WireView*, psy_ui_Slider*, char* txt);
@@ -108,11 +109,10 @@ void wireview_inittabbar(WireView* self)
 	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init(&self->togglevu, &self->top);
+	psy_ui_button_init_connect(&self->togglevu, &self->top,
+		self, wireview_ontogglevu);
 	psy_ui_button_seticon(&self->togglevu, psy_ui_ICON_MORE);
 	psy_ui_component_setalign(&self->togglevu.component, psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->togglevu.signal_clicked, self,
-		wireview_ontogglevu);
 	psy_ui_label_init(&self->vulabel, &self->top);
 	psy_ui_label_settext(&self->vulabel, "Vu");
 	psy_ui_label_settextalignment(&self->vulabel, psy_ui_ALIGNMENT_LEFT);
@@ -175,11 +175,10 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->rategroup, &margin);
 	psy_ui_component_enablealign(&self->rategroup);
-	psy_ui_button_init(&self->hold, &self->rategroup);
+	psy_ui_button_init_connect(&self->hold, &self->rategroup,
+		self, wireview_onhold);
 	psy_ui_button_settext(&self->hold, "Hold");
 	psy_ui_component_setalign(&self->hold.component, psy_ui_ALIGN_RIGHT);
-	psy_signal_connect(&self->hold.signal_clicked, self,
-		wireview_onhold);
 	psy_ui_slider_init(&self->modeslider, &self->rategroup);
 	psy_ui_slider_showhorizontal(&self->modeslider);
 	psy_ui_slider_hidevaluelabel(&self->modeslider);
@@ -200,17 +199,14 @@ void wireview_initbottomgroup(WireView* self)
 {
 	psy_ui_component_init(&self->bottomgroup, wireview_base(self));
 	psy_ui_component_setalign(&self->bottomgroup, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_enablealign(&self->bottomgroup);
-	psy_ui_button_init(&self->deletewire, &self->bottomgroup);
+	psy_ui_component_setdefaultalign(&self->bottomgroup, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_button_init_connect(&self->deletewire, &self->bottomgroup,
+		self, wireview_ondeleteconnection);
 	psy_ui_button_settext(&self->deletewire, "Delete Connection");
-	psy_ui_component_setalign(&self->deletewire.component, psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->deletewire.signal_clicked, self,
-		wireview_ondeleteconnection);
-	psy_ui_button_init(&self->addeffect, &self->bottomgroup);
+	psy_ui_button_init_connect(&self->addeffect, &self->bottomgroup,
+		self, wireview_onaddeffect);	
 	psy_ui_button_settext(&self->addeffect, "Add Effect");
-	psy_ui_component_setalign(&self->addeffect.component, psy_ui_ALIGN_LEFT);
-	psy_signal_connect(&self->addeffect.signal_clicked, self,
-		wireview_onaddeffect);
 }
 
 void wireview_onsongchanged(WireView* self, Workspace* workspace)

@@ -33,11 +33,17 @@ typedef struct psy_ui_Button {
 	bool enabled;
 	psy_ui_Colour textcolour;
 	psy_ui_Colour restorebgcolour;
+	bool shiftstate;
+	bool ctrlstate;
+	char* translation;
+	bool translate;
 	// signals
 	psy_Signal signal_clicked;
 } psy_ui_Button;
 
 void psy_ui_button_init(psy_ui_Button*, psy_ui_Component* parent);
+void psy_ui_button_init_text(psy_ui_Button*, psy_ui_Component* parent,
+	const char* text);
 void psy_ui_button_init_connect(psy_ui_Button*, psy_ui_Component* parent,
 	void* context, void* fp);
 void psy_ui_button_settext(psy_ui_Button*, const char* text);
@@ -49,6 +55,21 @@ void psy_ui_button_settextcolour(psy_ui_Button*, psy_ui_Colour);
 void psy_ui_button_setcharnumber(psy_ui_Button*, int number);
 void psy_ui_button_setlinespacing(psy_ui_Button*, double spacing);
 void psy_ui_button_settextalignment(psy_ui_Button*, psy_ui_Alignment);
+void psy_ui_button_preventtranslation(psy_ui_Button*);
+
+INLINE bool psy_ui_button_hasctrl(const psy_ui_Button* self)
+{
+	assert(self);
+
+	return self->ctrlstate;
+}
+
+INLINE bool psy_ui_button_hasshift(const psy_ui_Button* self)
+{
+	assert(self);
+
+	return self->shiftstate;
+}
 
 INLINE psy_ui_Component* psy_ui_button_base(psy_ui_Button* self)
 {

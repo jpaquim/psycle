@@ -4,25 +4,30 @@
 #if !defined(GEAR_H)
 #define GEAR_H
 
-#include "uibutton.h"
-#include "uilistbox.h"
+// host
 #include "instrumentsbox.h"
-#include "samplesbox.h"
 #include "machinesbox.h"
-#include "uinotebook.h"
+#include "samplesbox.h"
 #include "tabbar.h"
 #include "workspace.h"
+// ui
+#include "uibutton.h"
+#include "uilistbox.h"
+#include "uinotebook.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: The Gear Rack is a convenient way to organise your machines. Use the
-//      buttons "Generators", "Effects" and "Instruments" to switch between the
-//      different tabs
+// Gear
+// The Gear Rack is a convenient way to organise your machines. Use the
+// buttons "Generators", "Effects" and "Instruments" to switch between the
+// different tabs
 
-typedef struct {
+typedef struct GearButtons {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Button createreplace;
 	psy_ui_Button del;
 	psy_ui_Button parameters;
@@ -39,8 +44,10 @@ INLINE psy_ui_Component* gearbuttons_base(GearButtons* self)
 	return &self->component;
 }
 
-typedef struct {
+typedef struct Gear {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	TabBar tabbar;
 	psy_ui_Component titlebar;
 	psy_ui_Label title;
@@ -51,7 +58,8 @@ typedef struct {
 	MachinesBox machinesboxfx;
 	InstrumentsBox instrumentsbox;
 	SamplesBox samplesbox;	
-	GearButtons buttons;	
+	GearButtons buttons;
+	// references
 	psy_audio_Machines* machines;
 	Workspace* workspace;	
 } Gear;
@@ -67,4 +75,4 @@ INLINE psy_ui_Component* gear_base(Gear* self)
 }
 #endif
 
-#endif
+#endif /* GEAR_H */

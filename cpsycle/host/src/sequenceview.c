@@ -4,14 +4,17 @@
 #include "../../detail/prefix.h"
 
 #include "sequenceview.h"
+// audio
+#include <exclusivelock.h>
+#include <patterns.h>
+#include <songio.h>
+// ui
+#include <uialigner.h>
+// std
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <patterns.h>
-#include <exclusivelock.h>
-#include <songio.h>
-#include <uialigner.h>
-#include <assert.h>
-
+// pltform
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
@@ -19,8 +22,6 @@ static int listviewmargin = 5;
 
 // SequenceButtons
 // prototypes
-static void sequencebuttons_onlanguagechanged(SequenceButtons*, Translator* sender);
-static void sequencebuttons_updatetext(SequenceButtons*, Translator* translator);
 static void sequencebuttons_onalign(SequenceButtons*);
 static void sequencebuttons_onpreferredsize(SequenceButtons*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -46,63 +47,38 @@ void sequencebuttons_init(SequenceButtons* self, psy_ui_Component* parent, Works
 	psy_ui_component_init(&self->component, parent);
 	sequencebuttons_vtable_init(self);
 	self->component.vtable = &sequencebuttons_vtable;
-	psy_ui_button_init(&self->incpattern, &self->component);
-	psy_ui_button_init(&self->insertentry, &self->component);
-	psy_ui_button_init(&self->decpattern, &self->component);
-	psy_ui_button_init(&self->newentry, &self->component);
-	psy_ui_button_init(&self->cloneentry, &self->component);
-	psy_ui_button_init(&self->delentry, &self->component);
-	psy_ui_button_init(&self->newtrack, &self->component);
-	psy_ui_button_init(&self->deltrack, &self->component);
-	psy_ui_button_init(&self->clear, &self->component);
-	psy_ui_button_init(&self->rename, &self->component);
-	//psy_ui_button_init(&self->cut, &self->component);
-	psy_ui_button_init(&self->copy, &self->component);
-	psy_ui_button_init(&self->paste, &self->component);
-	psy_ui_button_init(&self->singlesel, &self->component);
-	psy_ui_button_init(&self->multisel, &self->component);
+	psy_ui_button_init_text(&self->incpattern, &self->component,
+		"+");
+	psy_ui_button_init_text(&self->insertentry, &self->component,
+		"sequencerview.ins");
+	psy_ui_button_init_text(&self->decpattern, &self->component,
+		"-");
+	psy_ui_button_init_text(&self->newentry, &self->component,
+		"sequencerview.new");
+	psy_ui_button_init_text(&self->cloneentry, &self->component,
+		"sequencerview.clone");
+	psy_ui_button_init_text(&self->delentry, &self->component,
+		"sequencerview.del");
+	psy_ui_button_init_text(&self->newtrack, &self->component,
+		"sequencerview.new-trk");
+	psy_ui_button_init_text(&self->deltrack, &self->component,
+		"sequencerview.del-trk");
+	psy_ui_button_init_text(&self->clear, &self->component,
+		"sequencerview.clear");
+	psy_ui_button_init_text(&self->rename, &self->component,
+		"sequencerview.rename");
+	// psy_ui_button_init(&self->cut, &self->component);
+	// psy_ui_button_settext(&self->cut, "");
+	psy_ui_button_init_text(&self->copy, &self->component,
+		"sequencerview.copy");
+	psy_ui_button_init_text(&self->paste, &self->component,
+		"sequencerview.paste");
+	psy_ui_button_init_text(&self->singlesel, &self->component,
+		"sequencerview.singlesel");
+	psy_ui_button_init_text(&self->multisel, &self->component,
+		"sequencerview.multisel");
 	psy_ui_button_highlight(&self->singlesel);
 	psy_ui_button_disablehighlight(&self->multisel);
-	sequencebuttons_updatetext(self, &workspace->translator);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		sequencebuttons_onlanguagechanged);
-}
-
-void sequencebuttons_updatetext(SequenceButtons* self, Translator* translator)
-{
-	psy_ui_button_settext(&self->incpattern, "+");
-	psy_ui_button_settext(&self->insertentry,
-		translator_translate(translator, "sequencerview.ins"));
-	psy_ui_button_settext(&self->decpattern, "-");
-	psy_ui_button_settext(&self->newentry,
-		translator_translate(translator, "sequencerview.new"));
-	psy_ui_button_settext(&self->cloneentry,
-		translator_translate(translator, "sequencerview.clone"));
-	psy_ui_button_settext(&self->delentry,
-		translator_translate(translator, "sequencerview.del"));
-	psy_ui_button_settext(&self->newtrack,
-		translator_translate(translator, "sequencerview.new-trk"));
-	psy_ui_button_settext(&self->deltrack,
-		translator_translate(translator, "sequencerview.del-trk"));
-	psy_ui_button_settext(&self->clear,
-		translator_translate(translator, "sequencerview.clear"));
-	psy_ui_button_settext(&self->rename,
-		translator_translate(translator, "sequencerview.rename"));
-	// psy_ui_button_settext(&self->cut, "");
-	psy_ui_button_settext(&self->copy,
-		translator_translate(translator, "sequencerview.copy"));
-	psy_ui_button_settext(&self->paste,
-		translator_translate(translator, "sequencerview.paste"));
-	psy_ui_button_settext(&self->singlesel,
-		translator_translate(translator, "sequencerview.singlesel"));
-	psy_ui_button_settext(&self->multisel,
-		translator_translate(translator, "sequencerview.multisel"));
-}
-
-void sequencebuttons_onlanguagechanged(SequenceButtons* self,
-	Translator* sender)
-{
-	sequencebuttons_updatetext(self, sender);
 }
 
 void sequencebuttons_onalign(SequenceButtons* self)
@@ -623,8 +599,6 @@ psy_ui_Rectangle sequencelistview_rowrectangle(SequenceListView* self,
 }
 
 // SequenceViewDuration
-static void sequencedurationbar_updatetext(SequenceViewDuration* self);
-static void sequencedurationbar_onlanguagechanged(SequenceViewDuration*, Translator* sender);
 // implementation
 void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_audio_Sequence* sequence, Workspace* workspace)
@@ -640,31 +614,18 @@ void sequenceduration_init(SequenceViewDuration* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_label_init(&self->desc, &self->component);
 	psy_ui_label_setcharnumber(&self->desc, 9);
+	psy_ui_label_settext(&self->desc, "sequencerview.duration");
 	psy_ui_label_settextalignment(&self->desc, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_component_setalign(&self->desc.component, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init(&self->duration, &self->component);
 	psy_ui_label_settextalignment(&self->duration, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_label_setcharnumber(&self->duration, 10);
+	psy_ui_label_preventtranslation(&self->duration);
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
-		&margin));
-	sequencedurationbar_updatetext(self);
-	sequenceduration_update(self);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		sequencedurationbar_onlanguagechanged);
-}
-
-void sequencedurationbar_updatetext(SequenceViewDuration* self)
-{
-	psy_ui_label_settext(&self->desc, workspace_translate(self->workspace,
-		"sequencerview.duration"));
-}
-
-void sequencedurationbar_onlanguagechanged(SequenceViewDuration* self,
-	Translator* sender)
-{
-	sequencedurationbar_updatetext(self);
+		&margin));	
+	sequenceduration_update(self);	
 }
 
 void sequenceduration_update(SequenceViewDuration* self)
@@ -680,10 +641,6 @@ void sequenceduration_update(SequenceViewDuration* self)
 }
 
 // SequencerOptionsBar
-// prototypes
-static void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar*,
-	Translator* sender);
-static void sequenceroptionsbar_updatetext(SequencerOptionsBar*);
 // implementation
 void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	psy_ui_Component* parent, Workspace* workspace)
@@ -691,16 +648,31 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	psy_ui_Margin margin;
 
 	assert(self);
-
-	self->workspace = workspace;
+	assert(workspace);
+	
 	psy_ui_component_init(&self->component, parent);
+	self->workspace = workspace;
 	psy_ui_checkbox_init(&self->followsong, &self->component);
+	psy_ui_checkbox_settext(&self->followsong,
+		"sequencerview.follow-song");
 	psy_ui_checkbox_init(&self->shownames, &self->component);
+	psy_ui_checkbox_settext(&self->shownames,
+		"sequencerview.show-pattern-names");
 	psy_ui_checkbox_init(&self->showplaylist, &self->component);
+	psy_ui_checkbox_settext(&self->showplaylist,
+		"sequencerview.show-playlist");
 	psy_ui_checkbox_init(&self->recordnoteoff, &self->component);
+	psy_ui_checkbox_settext(&self->recordnoteoff,
+		"sequencerview.record-noteoff");
 	psy_ui_checkbox_init(&self->recordtweak, &self->component);
+	psy_ui_checkbox_settext(&self->recordtweak,
+		"sequencerview.record-tweak");
 	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
+	psy_ui_checkbox_settext(&self->multichannelaudition,
+		"sequencerview.multichannel-audition");
 	psy_ui_checkbox_init(&self->allownotestoeffect, &self->component);
+	psy_ui_checkbox_settext(&self->allownotestoeffect,
+		"sequencerview.allow-notes-to_effect");	
 	{
 		psy_ui_Margin margin;
 		psy_ui_component_init(&self->top, &self->component);
@@ -714,15 +686,12 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 		psy_ui_component_setalign(&self->toggleseqediticon.component,
 			psy_ui_ALIGN_LEFT);
 		psy_ui_component_setmargin(&self->toggleseqediticon.component, &margin);
-		psy_ui_button_init(&self->toggleseqedit, &self->top);
-		psy_ui_button_settext(&self->toggleseqedit, "Show Sequenceeditor");
+		psy_ui_button_init_text(&self->toggleseqedit, &self->top,
+			"Show Sequenceeditor");
 		psy_ui_component_setalign(&self->toggleseqedit.component,
 			psy_ui_ALIGN_LEFT);
 		psy_ui_component_setmargin(&self->toggleseqedit.component, &margin);
-	}
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		sequenceroptionsbar_onlanguagechanged);
-	sequenceroptionsbar_updatetext(self);
+	}	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.2),
 		psy_ui_value_makeew(2.0));
@@ -734,29 +703,6 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(1),
 		psy_ui_value_makeew(2.0));
 	psy_ui_component_setmargin(&self->allownotestoeffect.component, &margin);
-}
-
-void sequenceroptionsbar_updatetext(SequencerOptionsBar* self)
-{
-	psy_ui_checkbox_settext(&self->followsong,
-		workspace_translate(self->workspace, "sequencerview.follow-song"));
-	psy_ui_checkbox_settext(&self->shownames,
-		workspace_translate(self->workspace, "sequencerview.show-pattern-names"));
-	psy_ui_checkbox_settext(&self->showplaylist,
-		workspace_translate(self->workspace, "sequencerview.show-playlist"));
-	psy_ui_checkbox_settext(&self->recordnoteoff,
-		workspace_translate(self->workspace, "sequencerview.record-noteoff"));
-	psy_ui_checkbox_settext(&self->recordtweak,
-		workspace_translate(self->workspace, "sequencerview.record-tweak"));
-	psy_ui_checkbox_settext(&self->multichannelaudition,
-		workspace_translate(self->workspace, "sequencerview.multichannel-audition"));
-	psy_ui_checkbox_settext(&self->allownotestoeffect,
-		workspace_translate(self->workspace, "sequencerview.allow-notes-to_effect"));
-}
-
-void sequenceroptionsbar_onlanguagechanged(SequencerOptionsBar* self, Translator* sender)
-{
-	sequenceroptionsbar_updatetext(self);
 }
 
 // SequenceView
@@ -789,7 +735,7 @@ static void sequenceview_onsequencechanged(SequenceView*,
 	psy_audio_Sequence* sender);
 static void sequenceview_onconfigchanged(SequenceView*, Workspace*,
 	psy_Property*);
-
+// implementation
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -820,7 +766,6 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->listview.component, psy_ui_ALIGN_CLIENT);
 #endif
 	self->listview.player = &workspace->player;
-	self->buttons.context = &self->listview;
 	sequencebuttons_init(&self->buttons, &self->component, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);

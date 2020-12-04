@@ -4,15 +4,13 @@
 #include "../../detail/prefix.h"
 
 #include "songtrackbar.h"
-
+// audio
 #include <songio.h>
-
+// platform
 #include "../../detail/portable.h"
 
 #define MIN_TRACKS 4
 
-static void songtrackbar_updatetext(SongTrackBar*, Translator*);
-static void songtrackbar_onlanguagechanged(SongTrackBar*, Translator* sender);
 static void songtrackbar_build(SongTrackBar*);
 static void songtrackbar_onselchange(SongTrackBar*, psy_ui_Component* sender,
 	int index);
@@ -29,7 +27,8 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
 	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->headerlabel, &self->component);				
+	psy_ui_label_init(&self->headerlabel, &self->component);
+	psy_ui_label_settext(&self->headerlabel, "trackbar.tracks");
 	psy_ui_combobox_init(&self->trackbox, &self->component);	
 	psy_ui_combobox_setcharnumber(&self->trackbox, 4);
 	songtrackbar_build(self);	
@@ -38,10 +37,7 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 	psy_signal_connect(&workspace->player.signal_numsongtrackschanged, self,
 		songtrackbar_onsongtracknumchanged);
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		songtrackbar_onsongchanged);
-	songtrackbar_updatetext(self, &workspace->translator);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		songtrackbar_onlanguagechanged);
+		songtrackbar_onsongchanged);	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
@@ -49,17 +45,6 @@ void songtrackbar_init(SongTrackBar* self, psy_ui_Component* parent, Workspace*
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
-}
-
-void songtrackbar_updatetext(SongTrackBar* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->headerlabel, 
-		translator_translate(translator, "trackbar.tracks"));
-}
-
-void songtrackbar_onlanguagechanged(SongTrackBar* self, Translator* sender)
-{
-	songtrackbar_updatetext(self, sender);
 }
 
 void songtrackbar_build(SongTrackBar* self)

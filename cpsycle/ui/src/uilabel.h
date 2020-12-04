@@ -26,15 +26,20 @@ typedef struct {
     double linespacing;
     psy_ui_Alignment textalignment;
     char* text;
+    char* translation;
+    bool translate;
 } psy_ui_Label;
 
 void psy_ui_label_init(psy_ui_Label*, psy_ui_Component* parent);
+void psy_ui_label_init_text(psy_ui_Label*, psy_ui_Component* parent,
+    const char* text);
 void psy_ui_label_settext(psy_ui_Label*, const char* text);
 void psy_ui_label_text(psy_ui_Label*, char* text);
 void psy_ui_label_setcharnumber(psy_ui_Label*, int number);
 void psy_ui_label_setlinespacing(psy_ui_Label*, double spacing);
 // void psy_ui_label_setstyle(psy_ui_Label*, int style);
 void psy_ui_label_settextalignment(psy_ui_Label*, psy_ui_Alignment alignment);
+void psy_ui_label_preventtranslation(psy_ui_Label*);
 
 INLINE psy_ui_Component* psy_ui_label_base(psy_ui_Label* self)
 {

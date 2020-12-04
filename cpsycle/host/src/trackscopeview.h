@@ -19,9 +19,11 @@ extern "C" {
 
 typedef struct TrackScopeView {
 	// inherits
-	psy_ui_Component component;	
+	psy_ui_Component component;
+	// internal data
 	int trackheight;
 	int textheight;
+	// references
 	Workspace* workspace;	
 } TrackScopeView;
 

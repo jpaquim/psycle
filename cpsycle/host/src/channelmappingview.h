@@ -32,10 +32,10 @@ typedef enum {
 	PINEDIT_DRAG_NEW_SRC
 } PinEditDragMode;
 
-typedef struct {
+typedef struct PinEdit {
 	// inherits
 	psy_ui_Component component;
-	// data members
+	// internal data
 	psy_audio_Wire wire;
 	PinEditDragMode dragmode;
 	int drag_src;
@@ -52,6 +52,13 @@ void pinedit_init(PinEdit*, psy_ui_Component* parent, psy_audio_Wire,
 	Workspace*);
 void pinedit_autowire(PinEdit*);
 void pinedit_unselectall(PinEdit*);
+
+INLINE psy_ui_Component* pinedit_base(PinEdit* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 typedef struct ChannelMappingView {
 	// inherits

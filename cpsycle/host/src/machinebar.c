@@ -10,7 +10,6 @@
 #include "../../detail/portable.h"
 
 static void machinebar_ondestroy(MachineBar*, psy_ui_Component* component);
-static void machinebar_onlanguagechanged(MachineBar* self, Translator*);
 static void machinebar_buildmachinebox(MachineBar*);
 static void machinebar_onmachinesinsert(MachineBar*, psy_audio_Machines* machines, int slot);
 static int machinebar_insertmachine(MachineBar*, size_t slot, psy_audio_Machine*);
@@ -32,7 +31,6 @@ static void machinebar_connectinstrumentsignals(MachineBar*);
 static void machinebar_clearmachinebox(MachineBar* self);
 static void machinebar_onprevmachine(MachineBar*, psy_ui_Component* sender);
 static void machinebar_onnextmachine(MachineBar*, psy_ui_Component* sender);
-static void machinebar_updatetext(MachineBar*);
 static bool machinebar_instrumentmode(MachineBar* self)
 {
 	return psy_ui_combobox_cursel(&self->selectinstparam) == 1;
@@ -55,10 +53,14 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 		machinebar_ondestroy);
 	psy_ui_combobox_init(&self->machinebox, &self->component);
 	psy_ui_combobox_setcharnumber(&self->machinebox, 30);	
-	psy_ui_button_init(&self->gear, &self->component);	
-	psy_ui_button_init(&self->editor, &self->component);	
+	psy_ui_button_init(&self->gear, &self->component);
+	psy_ui_button_settext(&self->gear, "machinebar.gear");
+	psy_ui_button_init(&self->editor, &self->component);
+	psy_ui_button_settext(&self->editor, "machinebar.editor");
 	psy_ui_button_init(&self->cpu, &self->component);
-	psy_ui_button_init(&self->midi, &self->component);	
+	psy_ui_button_settext(&self->cpu, "machinebar.cpu");
+	psy_ui_button_init(&self->midi, &self->component);
+	psy_ui_button_settext(&self->midi, "machinebar.midi");
 	machinebar_buildmachinebox(self);
 	psy_signal_connect(&self->machinebox.signal_selchanged, self,
 		machinebar_onmachineboxselchange);
@@ -81,9 +83,6 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinebar_onsongchanged);
 	machinebar_connectsongsignals(self);
-	machinebar_updatetext(self);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		machinebar_onlanguagechanged);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
@@ -94,23 +93,6 @@ void machinebar_ondestroy(MachineBar* self, psy_ui_Component* component)
 {
 	psy_table_dispose(&self->comboboxslots);
 	psy_table_dispose(&self->slotscombobox);
-}
-
-void machinebar_updatetext(MachineBar* self)
-{
-	psy_ui_button_settext(&self->gear,
-		workspace_translate(self->workspace, "machinebar.gear"));
-	psy_ui_button_settext(&self->editor,
-		workspace_translate(self->workspace, "machinebar.editor"));
-	psy_ui_button_settext(&self->cpu,
-		workspace_translate(self->workspace, "machinebar.cpu"));
-	psy_ui_button_settext(&self->midi,
-		workspace_translate(self->workspace, "machinebar.midi"));
-}
-
-void machinebar_onlanguagechanged(MachineBar* self, Translator* sender)
-{
-	machinebar_updatetext(self);
 }
 
 void machinebar_clearmachinebox(MachineBar* self)

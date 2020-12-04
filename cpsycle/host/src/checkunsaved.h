@@ -4,8 +4,9 @@
 #if !defined(CHECKUNSAVED_H)
 #define CHECKUNSAVED_H
 
+// host
 #include "workspace.h"
-
+// ui
 #include <uibutton.h>
 #include <uilabel.h>
 
@@ -19,20 +20,25 @@ typedef enum {
 	CHECKUNSAVE_CONTINUE
 } CheckUnsaveButton;
 
-typedef struct {
-	psy_ui_Component component;	
+typedef struct CheckUnsavedBox {
+	// inherits
+	psy_ui_Component component;
+	// signals
+	psy_Signal signal_execute;
+	// ui elements
 	psy_ui_Component view;
 	psy_ui_Label title;
 	psy_ui_Label header;
 	psy_ui_Button saveandexit;
 	psy_ui_Button exit;
-	psy_ui_Button cont;	
-	Workspace* workspace;
-	psy_Signal signal_execute;
+	psy_ui_Button cont;			
 	CheckUnsaveMode mode;
+	// internal data
 	char* titlestr;
 	char* savestr;
-	char* nosavestr;
+	char* nosavestr;	
+	// references
+	Workspace* workspace;
 } CheckUnsavedBox;
 
 void checkunsavedbox_init(CheckUnsavedBox*, psy_ui_Component* parent, Workspace*);

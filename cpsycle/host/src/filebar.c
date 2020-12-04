@@ -4,60 +4,43 @@
 #include "../../detail/prefix.h"
 
 #include "filebar.h"
-
+// audio
 #include <songio.h>
-
+// ui
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 
-static void filebar_updatetext(FileBar*, Translator* translator);
-static void filebar_onlanguagechanged(FileBar*, Translator* sender);
+// prototypes
 static void filebar_onnewsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onloadsong(FileBar*, psy_ui_Component* sender);
 static void filebar_onsavesong(FileBar*, psy_ui_Component* sender);
-
+// implementation
 void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
-{
+{	
+	psy_ui_component_init(filebar_base(self), parent);
 	self->workspace = workspace;
-	psy_ui_component_init(filebar_base(self), parent);	
 	psy_ui_component_setalignexpand(filebar_base(self),
 		psy_ui_HORIZONTALEXPAND);
 	psy_ui_component_setdefaultalign(filebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->recentbutton, filebar_base(self));
 	psy_ui_button_seticon(&self->recentbutton, psy_ui_ICON_MORE);
-	psy_ui_label_init(&self->header, filebar_base(self));
+	psy_ui_label_init_text(&self->header, filebar_base(self),
+		"file.song");
 	psy_ui_button_init_connect(&self->newbutton, filebar_base(self),
 		self, filebar_onnewsong);
+	psy_ui_button_settext(&self->newbutton, "file.new");
 	psy_ui_button_init(&self->loadbutton, filebar_base(self));
+	psy_ui_button_settext(&self->loadbutton, "file.load");
 #ifdef PSYCLE_USE_PLATFORM_FILEOPEN
 	psy_signal_connect(&self->loadbutton.signal_clicked, self,
 		filebar_onloadsong);
 #endif
 	psy_ui_button_init_connect(&self->savebutton, filebar_base(self),
 		self, filebar_onsavesong);
-	psy_ui_button_init(&self->renderbutton, filebar_base(self),
-		self, filebar_onlanguagechanged);
-	filebar_updatetext(self, &workspace->translator);
-}
-
-void filebar_updatetext(FileBar* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->header,
-		translator_translate(translator, "file.song"));
-	psy_ui_button_settext(&self->newbutton,
-		translator_translate(translator, "file.new"));
-	psy_ui_button_settext(&self->loadbutton,
-		translator_translate(translator, "file.load"));
-	psy_ui_button_settext(&self->savebutton,
-		translator_translate(translator, "file.save"));
-	psy_ui_button_settext(&self->renderbutton,
-		translator_translate(translator, "file.render"));
-}
-
-void filebar_onlanguagechanged(FileBar* self, Translator* sender)
-{
-	filebar_updatetext(self, sender);
+	psy_ui_button_settext(&self->savebutton, "file.save");
+	psy_ui_button_init(&self->renderbutton, filebar_base(self));
+	psy_ui_button_settext(&self->renderbutton, "file.render");	
 }
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)

@@ -4,8 +4,9 @@
 #if !defined(FILEBAR_H)
 #define FILEBAR_H
 
+// host
 #include "workspace.h"
-
+// ui
 #include <uibutton.h>
 #include <uilabel.h>
 
@@ -15,14 +16,17 @@ extern "C" {
 
 // aim: button panel to create, load, save and render a song
 
-typedef struct {
+typedef struct FileBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label header;
 	psy_ui_Button recentbutton;
 	psy_ui_Button newbutton;
 	psy_ui_Button loadbutton;
 	psy_ui_Button savebutton;
 	psy_ui_Button renderbutton;
+	// references
 	Workspace* workspace;	
 } FileBar;
 

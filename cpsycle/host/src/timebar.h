@@ -4,6 +4,8 @@
 #if !defined(TIMEBAR_H)
 #define TIMEBAR_H
 
+// host
+#include "workspace.h"
 // audio
 #include <player.h>
 // ui
@@ -17,6 +19,10 @@ extern "C" {
 // TimeBar
 //
 // Sets the speed of the player in beats per minute, ranging from 33 to 999 BPM
+// If you want to increase or decrease the BPM by 10, you can press the CTRL
+// key while you click the button
+// The older two button version can be set with #define PSYCLE_TIMEBAR_OLD
+// see details/psyconf.h
 
 typedef struct TimeBar {
 	// inherits
@@ -31,12 +37,12 @@ typedef struct TimeBar {
 	// data members	
 	psy_dsp_big_beat_t bpm;
 	// references
-	psy_audio_Player* player;	
+	Workspace* workspace;
 } TimeBar;
 
-void timerbar_init(TimeBar*, psy_ui_Component* parent, psy_audio_Player*);
+void timebar_init(TimeBar*, psy_ui_Component* parent, Workspace*);
 
-INLINE psy_ui_Component* timerbar_base(TimeBar* self)
+INLINE psy_ui_Component* timebar_base(TimeBar* self)
 {
 	assert(self);
 

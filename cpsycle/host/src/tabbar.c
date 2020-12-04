@@ -5,14 +5,21 @@
 
 #include "tabbar.h"
 
+// file
+#include <translator.h>
+// ui
+#include <uiapp.h>
+// std
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
+
 
 #include "../../detail/portable.h"
 
-static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
 static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
+static void tabbar_onlanguagechanged(TabBar*, psy_Translator* sender);
+static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
 static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmouseenter(TabBar*);
@@ -45,6 +52,9 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 	const psy_ui_Margin* margin)
 {
 	self->text = strdup(text);
+	self->translation = NULL;
+	psy_strreset(&self->translation,
+		psy_translator_translate(&app.translator, text));
 	self->istoggle = FALSE;
 	self->mode = TABMODE_SINGLESEL;
 	self->checkstate = 0;
@@ -63,11 +73,14 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 void tab_dispose(Tab* self)
 {
 	free(self->text);
+	free(self->translation);
 }
 
 void tab_settext(Tab* self, const char* text)
 {
 	psy_strreset(&self->text, text);	
+	psy_strreset(&self->translation,
+		psy_translator_translate(&app.translator, text));	
 }
 
 void tabbar_init(TabBar* self, psy_ui_Component* parent)
@@ -88,6 +101,8 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	psy_ui_margin_init_all(&self->defaulttabmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+	psy_signal_connect(&app.translator.signal_languagechanged, self,
+		tabbar_onlanguagechanged);
 }
 
 void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
@@ -132,8 +147,14 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 	}
 	for (tabs = self->tabs; tabs != 0; tabs = tabs->next, ++c) {
 		Tab* tab;
+		char* text;	
 
-		tab = (Tab*)tabs->entry;	
+		tab = (Tab*)psy_list_entry(tabs);
+		if (tab->translation) {
+			text = tab->translation;
+		} else {
+			text = tab->text;
+		}
 		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
 			self->tabalignment == psy_ui_ALIGN_RIGHT) {
 			cpx = psy_ui_value_px(&tab->margin.left, &tm);
@@ -181,7 +202,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 					psy_ui_drawline(g, cpxhover, y, cpxhover + hoverwidth, y);
 				}
 			}
-			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));
+			psy_ui_textout(g, cpx, cpy, text, strlen(text));
 			cpx += psy_ui_value_px(&tab->size.width, &tm) + psy_ui_value_px(&tab->margin.right, &tm);
 		} else
 		if (self->tabalignment == psy_ui_ALIGN_LEFT ||
@@ -202,7 +223,7 @@ void tabbar_ondraw(TabBar* self, psy_ui_Graphics* g)
 			if (tab->mode == TABMODE_LABEL) {
 				psy_ui_settextcolour(g, psy_ui_colour_make(0x00666666));
 			}			
-			psy_ui_textout(g, cpx, cpy, tab->text, strlen(tab->text));			
+			psy_ui_textout(g, cpx, cpy, text, strlen(text));			
 			cpy += psy_ui_value_px(&tab->size.height, &tm) + psy_ui_value_px(&tab->margin.bottom, &tm);
 		}
 	}
@@ -351,10 +372,12 @@ void tabbar_select(TabBar* self, int tabindex)
 
 Tab* tabbar_append(TabBar* self, const char* label)
 {
-	Tab* tab;
+	Tab* tab;	
 
 	tab = (Tab*) malloc(sizeof(Tab));
 	if (tab) {
+		char* text;
+		
 		tab_init(tab, label, 0, &self->defaulttabmargin);
 		if (self->tabs == 0) {
 			if (self->tabalignment == psy_ui_ALIGN_TOP) {
@@ -364,7 +387,12 @@ Tab* tabbar_append(TabBar* self, const char* label)
 			}			
 		}
 		psy_list_append(&self->tabs, tab);
-		tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
+		if (tab->translation) {
+			text = tab->translation;
+		} else {
+			text = tab->text;
+		}
+		tab->size = psy_ui_component_textsize(tabbar_base(self), text);
 		tab->size.height = psy_ui_value_makeeh(1.5);
 	}
 	return tab;
@@ -384,15 +412,10 @@ void tabbar_append_tabs(TabBar* self, const char* label, ...)
 
 void tabbar_clear(TabBar* self)
 {
-	psy_List* p;
+	assert(self);
 
-	for (p = self->tabs; p != NULL; p = p->next) {
-		tab_dispose((Tab*)(p->entry));
-		free(p->entry);
-	}
-	psy_list_free(self->tabs);
-	self->tabs = 0;
 	self->selected = 0;
+	psy_list_deallocate(&self->tabs, (psy_fp_disposefunc)tab_dispose);	
 }
 
 void tabbar_rename_tabs(TabBar* self, const char* label, ...)
@@ -400,6 +423,8 @@ void tabbar_rename_tabs(TabBar* self, const char* label, ...)
 	const char* currlabel;
 	psy_List* t;
 	va_list ap;
+
+	assert(self);
 
 	va_start(ap, label);
 	for (t = self->tabs, currlabel = label; t != NULL && currlabel != NULL;
@@ -444,9 +469,15 @@ void tabbar_onalign(TabBar* self)
 	
 	for (p = self->tabs; p != NULL; p = p->next) {
 		Tab* tab;
+		char* text;
 
 		tab = (Tab*)p->entry;
-		tab->size = psy_ui_component_textsize(tabbar_base(self), tab->text);
+		if (tab->translation) {
+			text = tab->translation;
+		} else {
+			text = tab->text;
+		}
+		tab->size = psy_ui_component_textsize(tabbar_base(self), text);
 	}		
 }
 
@@ -473,12 +504,18 @@ void tabbar_onpreferredsize(TabBar* self, psy_ui_Size* limit, psy_ui_Size* rv)
 		if (self->tabalignment == psy_ui_ALIGN_LEFT) {		
 			cpy = 5;
 		}
-		for (tabs = self->tabs; tabs != 0; tabs = tabs->next) {
+		for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
 			Tab* tab;
 			psy_ui_Size tabsize;
+			char* text;			
 
-			tab = (Tab*) tabs->entry;
-			tabsize = psy_ui_component_textsize(tabbar_base(self), tab->text);
+			tab = (Tab*)psy_list_entry(tabs);
+			if (tab->translation) {
+				text = tab->translation;
+			} else {
+				text = tab->text;
+			}
+			tabsize = psy_ui_component_textsize(tabbar_base(self), text);
 			tabsize.height = psy_ui_value_makeeh(1.5);
 			if (self->tabalignment == psy_ui_ALIGN_TOP) {								
 				cpx += psy_ui_value_px(&tabsize.width, &tm);
@@ -529,7 +566,7 @@ Tab* tabbar_tab(TabBar* self, int tabindex)
 	
 	for (p = self->tabs; p != NULL && c < tabindex; p = p->next, ++c);
 	if (p) {		
-		rv = (Tab*)p->entry;		
+		rv = (Tab*)psy_list_entry(p);
 	}
 	return rv;
 }
@@ -555,10 +592,10 @@ int tabbar_numchecked(TabBar* self)
 	int rv;
 	psy_List* tabs;
 	
-	for (rv = 0, tabs = self->tabs; tabs != NULL; tabs = tabs->next) {
+	for (rv = 0, tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
 		Tab* tab;
 
-		tab = (Tab*)tabs->entry;
+		tab = (Tab*)psy_list_entry(tabs);
 		if (tab != NULL && tab->checkstate != 0) {
 			++rv;
 		}		
@@ -568,15 +605,32 @@ int tabbar_numchecked(TabBar* self)
 
 void tabbar_resettabcheckstates(TabBar* self)
 {
-	int rv;
 	psy_List* tabs;
 
-	for (rv = 0, tabs = self->tabs; tabs != NULL; tabs = tabs->next) {
+	for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
 		Tab* tab;
 
-		tab = (Tab*)tabs->entry;
+		tab = (Tab*)psy_list_entry(tabs);
 		if (tab != NULL) {
 			tab->checkstate = 0;
 		}
 	}
+}
+
+void tabbar_onlanguagechanged(TabBar* self, psy_Translator* sender)
+{	
+	psy_List* tabs;
+
+	assert(self);
+
+	for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
+		Tab* tab;
+
+		tab = (Tab*)psy_list_entry(tabs);
+		if (tab != NULL) {
+			psy_strreset(&tab->translation, psy_translator_translate(sender,
+				tab->text));
+		}
+	}
+	psy_ui_component_invalidate(&self->component);
 }

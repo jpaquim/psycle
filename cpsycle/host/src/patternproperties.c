@@ -83,7 +83,7 @@ void patternpropertiesapplycommand_revert(PatternPropertiesApplyCommand* self)
 	self->newname = strdup(psy_audio_pattern_name(self->pattern));
 	psy_audio_pattern_setname(self->pattern, self->oldname);
 	free(self->oldname);
-	self->oldname = 0;	
+	self->oldname = 0;
 	self->newlength = psy_audio_pattern_length(self->pattern);
 	psy_audio_pattern_setlength(self->pattern, self->oldlength);
 	self->oldlength = 0.f;
@@ -103,9 +103,9 @@ static void patternproperties_onkeydown(PatternProperties*, psy_ui_KeyEvent*);
 static void patternproperties_onkeyup(PatternProperties*, psy_ui_KeyEvent*);
 
 static psy_ui_ComponentVtable patternproperties_vtable;
-static int patternproperties_vtable_initialized = 0;
+static bool patternproperties_vtable_initialized = FALSE;
 
-static void patternproperties_vtable_init(PatternProperties* self)
+static psy_ui_ComponentVtable* patternproperties_vtable_init(PatternProperties* self)
 {
 	if (!patternproperties_vtable_initialized) {
 		patternproperties_vtable = *(self->component.vtable);
@@ -113,46 +113,41 @@ static void patternproperties_vtable_init(PatternProperties* self)
 			patternproperties_onkeydown;
 		patternproperties_vtable.onkeyup = (psy_ui_fp_component_onkeydown)
 			patternproperties_onkeyup;
-		patternproperties_vtable_initialized = 1;
+		patternproperties_vtable_initialized = TRUE;
 	}
+	return &patternproperties_vtable;
 }
 
 void patternproperties_init(PatternProperties* self, psy_ui_Component* parent,
 	psy_audio_Pattern* pattern, Workspace* workspace)
-{	
-	psy_ui_Margin margin;
-
+{
 	self->workspace = workspace;
 	self->pattern = pattern;
 
 	psy_ui_component_init(&self->component, parent);
-	patternproperties_vtable_init(self);
-	self->component.vtable = &patternproperties_vtable;	
+	psy_ui_component_setvtable(&self->component,
+		patternproperties_vtable_init(self));
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make(psy_ui_value_makepx(0), psy_ui_value_makeew(2.0),
+			psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0)));
 	psy_ui_label_init(&self->namelabel, &self->component);
+	psy_ui_label_settext(&self->namelabel, "Pattern Name");
 	psy_ui_label_settextalignment(&self->namelabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_label_settext(&self->namelabel, "Pattern Name");	
 	psy_ui_edit_init(&self->nameedit, &self->component);
-	psy_ui_edit_settext(&self->nameedit, "No Pattern");	
+	psy_ui_edit_settext(&self->nameedit, "No Pattern");
 	psy_ui_edit_setcharnumber(&self->nameedit, 40);
 	psy_ui_label_init(&self->lengthlabel, &self->component);
+	psy_ui_label_settext(&self->lengthlabel, "Length");
 	psy_ui_label_settextalignment(&self->lengthlabel, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_label_settext(&self->lengthlabel, "Length");	
 	psy_ui_edit_init(&self->lengthedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->lengthedit, 20);
-	psy_ui_button_init(&self->applybutton, &self->component);
+	psy_ui_button_init_connect(&self->applybutton, &self->component, self,
+		patternproperties_onapply);
 	psy_ui_button_settext(&self->applybutton, "Apply");
 	psy_ui_button_settextalignment(&self->applybutton, psy_ui_ALIGNMENT_LEFT);
-	psy_signal_connect(&self->applybutton.signal_clicked, self,
-		patternproperties_onapply);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		patternproperties_onsongchanged);
 	patternproperties_connectsongsignals(self);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0), psy_ui_value_makeew(2),
-		psy_ui_value_makeeh(1.0), psy_ui_value_makepx(0));
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		&margin));
 }
 
 void patternproperties_setpattern(PatternProperties* self,
@@ -182,7 +177,7 @@ void patternproperties_onapply(PatternProperties* self,
 			&patternpropertiesapplycommand_allocinit(self->pattern,
 				psy_ui_edit_text(&self->nameedit),
 				(psy_dsp_big_beat_t)atof(psy_ui_edit_text(&self->lengthedit))
-				)->command);
+			)->command);
 		psy_signal_enable(&self->workspace->song->patterns.signal_namechanged,
 			self, patternproperties_onpatternnamechanged);
 		psy_signal_enable(&self->workspace->song->patterns.signal_namechanged,
@@ -192,6 +187,13 @@ void patternproperties_onapply(PatternProperties* self,
 
 void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyEvent* ev)
 {
+	if (ev->keycode == psy_ui_KEY_RETURN) {
+		patternproperties_onapply(self, &self->component);
+		psy_ui_keyevent_preventdefault(ev);
+	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		workspace_selectview(self->workspace, TABPAGE_PATTERNVIEW, 0, 0);
+		psy_ui_keyevent_preventdefault(ev);
+	}
 	psy_ui_keyevent_stoppropagation(ev);
 }
 

@@ -398,7 +398,7 @@ INLINE psy_ui_Margin psy_ui_margin_make(psy_ui_Value top, psy_ui_Value right,
 {
 	psy_ui_Margin rv;
 
-	psy_ui_margin_init_all(&rv, top, right, bottom, right);
+	psy_ui_margin_init_all(&rv, top, right, bottom, left);
 	return rv;
 }
 
@@ -448,12 +448,12 @@ typedef enum {
 	psy_ui_ALIGNMENT_NONE = 0,
 	psy_ui_ALIGNMENT_LEFT = 2,
 	psy_ui_ALIGNMENT_RIGHT = 4,
-	psy_ui_ALIGNMENT_CENTER_HORIZONTAL = psy_ui_ALIGNMENT_LEFT |
-	psy_ui_ALIGNMENT_RIGHT,
+	psy_ui_ALIGNMENT_CENTER_HORIZONTAL =
+		psy_ui_ALIGNMENT_LEFT | psy_ui_ALIGNMENT_RIGHT,
 	psy_ui_ALIGNMENT_TOP = 8,
 	psy_ui_ALIGNMENT_BOTTOM = 16,
-	psy_ui_ALIGNMENT_CENTER_VERTICAL = psy_ui_ALIGNMENT_TOP |
-	psy_ui_ALIGNMENT_BOTTOM
+	psy_ui_ALIGNMENT_CENTER_VERTICAL =
+		psy_ui_ALIGNMENT_TOP | psy_ui_ALIGNMENT_BOTTOM
 } psy_ui_Alignment;
 
 typedef struct psy_ui_Colour

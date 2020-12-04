@@ -7,6 +7,7 @@
 #include "workspace.h"
 // local
 #include "cmdproperties.h"
+#include "defaultlang.h"
 #include "skinio.h"
 // file
 #include <dir.h>
@@ -16,6 +17,7 @@
 #include <exclusivelock.h>
 #include <kbddriver.h>
 // ui
+#include <uiapp.h>
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 #include <uiwincomponentimp.h>
@@ -184,6 +186,9 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 
 void workspace_init(Workspace* self, void* handle)
 {	
+	psy_Property defaultlang;
+	extern psy_ui_App app;
+
 	assert(self);
 
 	psy_audio_exclusivelock_init();
@@ -211,8 +216,11 @@ void workspace_init(Workspace* self, void* handle)
 	self->maximizeview.row2 = 1;
 	self->currnavigation = 0;
 	self->currview = 0;
-	self->dialbitmappath = 0;
-	translator_init(&self->translator);
+	self->dialbitmappath = 0;	
+	psy_property_init(&defaultlang);
+	make_translator_default(&defaultlang);
+	psy_translator_setdefault(&app.translator, &defaultlang);
+	psy_property_dispose(&defaultlang);
 	self->undosavepoint = 0;
 	self->machines_undosavepoint = 0;
 	history_init(&self->history);
@@ -283,8 +291,7 @@ void workspace_dispose(Workspace* self)
 	psy_audio_player_dispose(&self->player);
 	psy_audio_song_deallocate(self->song);	
 	self->song = NULL;
-	psy_property_dispose(&self->config);
-	translator_dispose(&self->translator);	
+	psy_property_dispose(&self->config);	
 	free(self->filename);
 	self->filename = NULL;
 	plugincatcher_dispose(&self->plugincatcher);
@@ -362,19 +369,20 @@ void workspace_initplayer(Workspace* self)
 void workspace_configlanguage(Workspace* self)
 {	
 	psy_Property* langchoice;
+	extern psy_ui_App app;
 
 	assert(self);
 
 	langchoice = psy_property_at_choice(self->language);
 	if (langchoice) {
-		if (translator_load(&self->translator,
+		if (psy_translator_load(&app.translator,
 			psy_property_item_str(langchoice))) {
-			psy_signal_emit(&self->signal_languagechanged, &self->translator,
+			psy_signal_emit(&self->signal_languagechanged, &app.translator,
 				0);
 			psy_ui_updatealign(self->mainhandle, NULL);
 		}
 	}
-	psy_signal_emit(&self->signal_languagechanged, &self->translator,
+	psy_signal_emit(&self->signal_languagechanged, &app.translator,
 		0);
 }
 
@@ -673,7 +681,7 @@ int workspace_onaddlanguage(Workspace* self, const char* path, int flag)
 
 	assert(self);
 
-	if (translator_test(&self->translator, path, languageid)) {
+	if (psy_translator_test(&app.translator, path, languageid)) {
 		psy_property_settext(
 			psy_property_append_string(self->language, languageid, path),
 			languageid);
@@ -1767,7 +1775,7 @@ const char* workspace_translate(Workspace* self, const char* key)
 {			
 	assert(self);
 
-	return translator_translate(&self->translator, key);
+	return psy_translator_translate(&app.translator, key);
 }
 
 void workspace_configurationchanged(Workspace* self, psy_Property* property)

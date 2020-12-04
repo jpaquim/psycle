@@ -17,9 +17,7 @@ extern "C" {
 //
 // Stores shared data for the Trackergrid and linenumbers
 
-typedef struct TrackerLineState {
-	psy_audio_Pattern* pattern;
-	PatternViewSkin* skin;
+typedef struct TrackerLineState {	
 	int lineheight;
 	int lpb;
 	int drawcursor;
@@ -28,6 +26,9 @@ typedef struct TrackerLineState {
 	// precomputed
 	int visilines;
 	bool cursorchanging;
+	// references
+	psy_audio_Pattern* pattern;
+	PatternViewSkin* skin;
 } TrackerLineState;
 
 void trackerlinestate_init(TrackerLineState*);

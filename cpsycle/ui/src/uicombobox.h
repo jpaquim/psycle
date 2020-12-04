@@ -4,7 +4,10 @@
 #ifndef psy_ui_COMBOBOX_H
 #define psy_ui_COMBOBOX_H
 
+// local
 #include "uicomponent.h"
+// container
+#include <hashtbl.h>
 
 // ComboBox
 // Bridge
@@ -32,6 +35,7 @@ typedef struct {
    int ownerdrawn;   
    int hover;
    int charnumber;
+   psy_Table itemdata;
 } psy_ui_ComboBox;
 
 void psy_ui_combobox_init(psy_ui_ComboBox*, psy_ui_Component* parent);
@@ -40,6 +44,8 @@ void psy_ui_combobox_clear(psy_ui_ComboBox*);
 void psy_ui_combobox_setcursel(psy_ui_ComboBox*, intptr_t index);
 intptr_t psy_ui_combobox_cursel(psy_ui_ComboBox*);
 void psy_ui_combobox_setcharnumber(psy_ui_ComboBox*, int num);
+void psy_ui_combobox_setitemdata(psy_ui_ComboBox*, uintptr_t index, intptr_t data);
+intptr_t psy_ui_combobox_itemdata(psy_ui_ComboBox*, uintptr_t index);
 
 INLINE psy_ui_Component* psy_psy_ui_combobox_base(psy_ui_ComboBox* self)
 {

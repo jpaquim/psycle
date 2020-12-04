@@ -4,32 +4,41 @@
 #if !defined(HELPVIEW_H)
 #define HELPVIEW_H
 
+// host
 #include "about.h"
 #include "greet.h"
 #include "help.h"
 #include "tabbar.h"
-#include "workspace.h"
-
+// ui
 #include <uinotebook.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: Helpview combines the About, Greet and textfile help in
-//      a tabbed notebook. 
+typedef enum {
+	HELPVIEWSECTION_ABOUT = 0,
+	HELPVIEWSECTION_GREET,
+	HELPVIEWSECTION_HELP
+} HelpViewSection;
 
-typedef struct {
+// Helpview
+//
+// Groups About, Greet and Help (textfiles).
+
+typedef struct HelpView {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Notebook notebook;
-	TabBar tabbar;	
+	TabBar tabbar;
+	// sections
+	Help help;
 	About about;
 	Greet greet;
-	Help help;
-	Workspace* workspace;
 } HelpView;
 
-TabBar* helpview_init(HelpView*, psy_ui_Component* parent,
+void helpview_init(HelpView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
 INLINE psy_ui_Component* helpview_base(HelpView* self)
@@ -41,4 +50,4 @@ INLINE psy_ui_Component* helpview_base(HelpView* self)
 }
 #endif
 
-#endif
+#endif /* HELPVIEW_H */

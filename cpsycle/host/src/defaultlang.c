@@ -2,109 +2,15 @@
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
 #include "../../detail/prefix.h"
-#include "../../detail/psyconf.h"
 
-#include "translator.h"
-// file
-#include <propertiesio.h>
-// platform
-#include "../../detail/portable.h"
-// std
-#include <assert.h>
+#include "defaultlang.h"
 
-static void translator_definekeys(psy_Property* lang);
-static bool translator_hastranslation(const char* key,
-	const char* translation);
-static const char* translator_remove_section(Translator*, const char* key);
-
-void translator_init(Translator* self)
-{
-	assert(self);
-	psy_property_init(&self->dictionary);
-	translator_definekeys(&self->dictionary);
-}
-
-void translator_dispose(Translator* self)
-{
-	assert(self);
-	psy_property_dispose(&self->dictionary);
-}
-
-void translator_reset(Translator* self)
-{
-	assert(self);
-	psy_property_clear(&self->dictionary);
-	translator_definekeys(&self->dictionary);
-}
-
-bool translator_load(Translator* self, const char* path)
-{	
-	assert(self);
-	translator_reset(self);
-	return propertiesio_load(&self->dictionary, path, FALSE);
-}
-
-bool translator_test(const Translator* self, const char* path, char* id)
-{
-	psy_Property* lang;
-
-	assert(self);
-	lang = psy_property_allocinit_key(NULL);
-	if (propertiesio_load(lang, path, 1)) {
-		psy_Property* p;
-
-		p = psy_property_at(lang, "lang", PSY_PROPERTY_TYPE_NONE);
-		if (p) {
-			psy_snprintf(id, 256, "%s", psy_property_item_str(p));
-			psy_property_deallocate(lang);
-			return TRUE;
-		}
-	}
-	psy_property_deallocate(lang);
-	return FALSE;
-}
-
-const char* translator_translate(Translator* self, const char* key)
-{	
-	const char* rv;
-
-	assert(self);
-	rv = psy_property_at_str(&self->dictionary, key, key);
-	if (!translator_hastranslation(rv, key)) {
-		return translator_remove_section(self, rv);
-	}
-	return rv;
-}
-
-bool translator_hastranslation(const char* key, const char* translation)
-{
-	return key != translation;	
-}
-
-const char* translator_remove_section(Translator* self, const char* key)
-{
-	const char* rv;
-
-	assert(self);
-	if (key) {
-		rv = strrchr(key, '.');
-		rv = (rv != NULL)
-			? rv + 1
-			: key;
-	} else {
-		rv = NULL;
-	}
-	if (rv == NULL) {
-		rv = "";
-	}
-	return rv;
-}
-
-void translator_definekeys(psy_Property* lang)
+void make_translator_default(psy_Property* lang)
 {
 	psy_Property* section;	
 
 	assert(lang);
+
 	psy_property_set_str(lang, "lang", "en");
 	// filebar
 	section = psy_property_append_section(lang, "file");
@@ -131,6 +37,7 @@ void translator_definekeys(psy_Property* lang)
 	psy_property_set_str(section, "samples", "Samples");
 	psy_property_set_str(section, "instrument", "Instrument");
 	psy_property_set_str(section, "instruments", "Instruments");
+	psy_property_set_str(section, "help", "Help");
 	psy_property_set_str(section, "settings", "Settings");
 	psy_property_set_str(section, "properties", "Properties");
 	psy_property_set_str(section, "kbd", "Kbd");
@@ -165,9 +72,12 @@ void translator_definekeys(psy_Property* lang)
 	psy_property_set_str(section, "clear", "Clear");
 	psy_property_set_str(section, "duplicate", "Duplicate");
 	psy_property_set_str(section, "clone", "Clone");
+	// Timebar
+	section = psy_property_append_section(lang, "timebar");
+	psy_property_set_str(section, "tempo", "Tempo");
 	// Lines per beat bar
 	section = psy_property_append_section(lang, "lpb");
-	psy_property_set_str(section, "lines-per-beat", "lines per beat");	
+	psy_property_set_str(section, "lines-per-beat", "Lines per beat");
 	section = psy_property_append_section(section, "channelmapping");
 	psy_property_set_str(section, "autowire", "Autowire");
 	psy_property_set_str(section, "unselect-all", "Unselect all");

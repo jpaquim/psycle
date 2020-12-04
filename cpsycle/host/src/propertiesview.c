@@ -1030,7 +1030,7 @@ static void propertiesview_onpropertiesrendererchanged(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
 static void propertiesview_onpropertiesrendererselected(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
-static void propertiesview_onlanguagechanged(PropertiesView*, Translator*);
+static void propertiesview_onlanguagechanged(PropertiesView*, psy_Translator*);
 static void propertiesview_translate(PropertiesView*);
 static int propertiesview_onchangelanguageenum(PropertiesView*,
 	psy_Property*, int level);
@@ -1099,8 +1099,7 @@ void propertiesview_updatetabbarsections(PropertiesView* self)
 
 			property = (psy_Property*)p->entry;
 			if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
-				tabbar_append(&self->tabbar,
-					psy_property_translation(property));
+				tabbar_append(&self->tabbar, psy_property_text(property));
 			}
 		}
 	}
@@ -1172,7 +1171,7 @@ void propertiesview_onpropertiesrendererselected(PropertiesView* self,
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 }
 
-void propertiesview_onlanguagechanged(PropertiesView* self, Translator* sender)
+void propertiesview_onlanguagechanged(PropertiesView* self, psy_Translator* sender)
 {
 	propertiesview_translate(self);
 	propertiesview_updatetabbarsections(self);
@@ -1191,7 +1190,7 @@ int propertiesview_onchangelanguageenum(PropertiesView* self,
 		return 2;
 	} else {
 		psy_property_settranslation(property,
-			translator_translate(&self->workspace->translator,
+			psy_translator_translate(workspace_translator(self->workspace),
 				psy_property_text(property)));
 	}
 	return TRUE;

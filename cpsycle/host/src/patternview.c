@@ -20,8 +20,8 @@ static void patternviewbar_onconfigchanged(PatternViewBar*, Workspace*,
 	psy_Property*);
 static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
-static void patternviewbar_updatetext(PatternViewBar*, Translator*);
-static void patternviewbar_onlanguagechanged(PatternViewBar*, Translator* sender);
+static void patternviewbar_updatetext(PatternViewBar*, psy_Translator*);
+static void patternviewbar_onlanguagechanged(PatternViewBar*, psy_Translator* sender);
 static void patternviewbar_onpatterncursorchanged(PatternViewBar*,
 	Workspace* sender);
 static void patternviewbar_onsequenceselectionchanged(PatternViewBar*,
@@ -46,6 +46,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->defaultentries.signal_clicked, self,
 		patternviewbar_ondefaultline);
 	psy_ui_label_init(&self->status, &self->component);
+	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 40);
 	patternviewbar_initalign(self);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
@@ -64,18 +65,18 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		patternviewbar_onlanguagechanged);
 	patternviewbar_updatestatus(self);
-	patternviewbar_updatetext(self, &self->workspace->translator);
+	patternviewbar_updatetext(self, workspace_translator(workspace));
 }
 
-void patternviewbar_updatetext(PatternViewBar* self, Translator* translator)
+void patternviewbar_updatetext(PatternViewBar* self, psy_Translator* translator)
 {
 	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
-		translator_translate(translator, "settingsview.move-cursor-when-paste"));
+		psy_translator_translate(translator, "settingsview.move-cursor-when-paste"));
 	psy_ui_checkbox_settext(&self->defaultentries,
-		translator_translate(translator, "settingsview.default-line"));
+		psy_translator_translate(translator, "settingsview.default-line"));
 }
 
-void patternviewbar_onlanguagechanged(PatternViewBar* self, Translator* sender)
+void patternviewbar_onlanguagechanged(PatternViewBar* self, psy_Translator* sender)
 {
 	patternviewbar_updatetext(self, sender);
 }
@@ -447,6 +448,10 @@ void patternview_onpropertiesapply(PatternView* self, psy_ui_Component* sender)
 
 void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 {
+	if (tabbar_selected(&self->tabbar) == 1) { // Pianoroll
+		psy_ui_component_setfocus(&self->pianoroll.grid.component);
+		return;
+	}
 	psy_ui_component_setfocus(&self->trackerview.grid.component);
 }
 
@@ -815,6 +820,8 @@ void patternview_updateksin(PatternView* self)
 	psy_ui_component_setbackgroundcolour(&self->left.linenumbers.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerview.blockmenu.component,
+		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setbackgroundcolour(&self->trackerview.transformview.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerview.interpolatecurveview.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));

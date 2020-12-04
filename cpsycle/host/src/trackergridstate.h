@@ -80,8 +80,7 @@ enum {
 	CMD_DIGITF
 };
 
-
-typedef struct {
+typedef struct TrackColumnDef {
 	uintptr_t numdigits;
 	uintptr_t numchars;
 	uintptr_t marginright;
@@ -93,7 +92,7 @@ typedef struct {
 void trackcolumndef_init(TrackColumnDef* self, int numdigits, int numchars,
 	int marginright, int wrapeditcolumn, int wrapclearcolumn, int emptyvalue);
 
-typedef struct {
+typedef struct TrackDef {
 	TrackColumnDef note;
 	TrackColumnDef inst;
 	TrackColumnDef mach;
@@ -127,8 +126,7 @@ void trackdef_setvalue(TrackDef* self, uintptr_t column,
 uintptr_t trackdef_numcolumns(TrackDef* self);
 uintptr_t trackdef_numdigits(TrackDef* self, uintptr_t column);
 
-
-typedef struct {
+typedef struct TrackConfig {
 	psy_Table trackconfigs;
 	TrackDef trackdef;
 	int textwidth;
@@ -143,14 +141,15 @@ void trackconfig_initcolumns(TrackConfig*, bool wideinst);
 
 typedef struct {
 	psy_audio_Pattern* pattern;
-	psy_audio_PatternCursor cursor;
-	PatternViewSkin* skin;	
-	TrackConfig* trackconfig;	
+	psy_audio_PatternCursor cursor;	
 	uintptr_t numtracks;
 	double zoom;
+	// references
+	PatternViewSkin* skin;
+	TrackConfig* trackconfig;
 } TrackerGridState;
 
-void trackergridstate_init(TrackerGridState*, TrackConfig* config);
+void trackergridstate_init(TrackerGridState*, TrackConfig*);
 void trackergridstate_dispose(TrackerGridState*);
 int trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);

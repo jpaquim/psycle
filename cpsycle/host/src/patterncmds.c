@@ -213,7 +213,7 @@ static void blocktransposecommandcommand_vtable_init(BlockTransposeCommand* self
 }
 
 BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
-	PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
+	psy_audio_PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
 	Workspace* workspace)
 {
 	BlockTransposeCommand* rv;

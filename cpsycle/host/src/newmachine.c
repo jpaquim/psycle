@@ -26,8 +26,8 @@ static int newmachine_comp_type(psy_Property* p, psy_Property* q);
 static int newmachine_comp_mode(psy_Property* p, psy_Property* q);
 static int newmachine_isplugin(int type);
 
-static void newmachinebar_updatetext(NewMachineBar*, Translator*);
-static void newmachinebar_onlanguagechanged(NewMachineBar*, Translator* sender);
+static void newmachinebar_updatetext(NewMachineBar*, psy_Translator*);
+static void newmachinebar_onlanguagechanged(NewMachineBar*, psy_Translator* sender);
 
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -55,28 +55,28 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));	
-	newmachinebar_updatetext(self, &workspace->translator);
+	newmachinebar_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		newmachinebar_onlanguagechanged);
 }
 
-void newmachinebar_updatetext(NewMachineBar* self, Translator* translator)
+void newmachinebar_updatetext(NewMachineBar* self, psy_Translator* translator)
 {
 	psy_ui_button_settext(&self->rescan,
-		translator_translate(translator, "newmachine.rescan"));
+		psy_translator_translate(translator, "newmachine.rescan"));
 	psy_ui_button_settext(&self->selectdirectories,
-		translator_translate(translator, "newmachine.select-plugin-directories"));
+		psy_translator_translate(translator, "newmachine.select-plugin-directories"));
 	psy_ui_button_settext(&self->sortbyfavorite,
-		translator_translate(translator, "newmachine.sort-by-favorite"));
+		psy_translator_translate(translator, "newmachine.sort-by-favorite"));
 	psy_ui_button_settext(&self->sortbyname,
-		translator_translate(translator, "newmachine.sort-by-name"));
+		psy_translator_translate(translator, "newmachine.sort-by-name"));
 	psy_ui_button_settext(&self->sortbytype,
-		translator_translate(translator, "newmachine.sort-by-type"));
+		psy_translator_translate(translator, "newmachine.sort-by-type"));
 	psy_ui_button_settext(&self->sortbymode,
-		translator_translate(translator, "newmachine.sort-by-mode"));
+		psy_translator_translate(translator, "newmachine.sort-by-mode"));
 }
 
-void newmachinebar_onlanguagechanged(NewMachineBar* self, Translator* sender)
+void newmachinebar_onlanguagechanged(NewMachineBar* self, psy_Translator* sender)
 {
 	newmachinebar_updatetext(self, sender);
 }
@@ -93,8 +93,8 @@ void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* se
 
 // NewMachineDetail
 static void newmachinedetail_reset(NewMachineDetail*);
-static void newmachinedetail_updatetext(NewMachineDetail*, Translator*);
-static void newmachinedetail_onlanguagechanged(NewMachineDetail*, Translator* sender);
+static void newmachinedetail_updatetext(NewMachineDetail*, psy_Translator*);
+static void newmachinedetail_onlanguagechanged(NewMachineDetail*, psy_Translator* sender);
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
 
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
@@ -106,8 +106,7 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&self->desclabel, &self->component);
-	psy_ui_label_settext(&self->desclabel,
+	psy_ui_label_init_text(&self->desclabel, &self->component,
 		"Select a plugin to view its description");
 	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);	
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
@@ -130,27 +129,27 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
-	newmachinedetail_updatetext(self, &workspace->translator);
+	newmachinedetail_updatetext(self, workspace_translator(workspace));
 	psy_signal_connect(&workspace->signal_languagechanged, self,
 		newmachinedetail_onlanguagechanged);
 }
 
-void newmachinedetail_updatetext(NewMachineDetail* self, Translator* translator)
+void newmachinedetail_updatetext(NewMachineDetail* self, psy_Translator* translator)
 {	
 	if (self->empty) {
 		psy_ui_label_settext(&self->desclabel,
-			translator_translate(translator,
+			psy_translator_translate(translator,
 				"newmachine.select-plugin-to-view-description"));
 	}
 	psy_ui_checkbox_settext(&self->compatblitzgamefx,
-		translator_translate(translator,
+		psy_translator_translate(translator,
 			"newmachine.jme-version-unknown"));
 	psy_ui_label_settext(&self->compatlabel,
-		translator_translate(translator,
+		psy_translator_translate(translator,
 			"newmachine.song-loading-compatibility"));
 }
 
-void newmachinedetail_onlanguagechanged(NewMachineDetail* self, Translator* sender)
+void newmachinedetail_onlanguagechanged(NewMachineDetail* self, psy_Translator* sender)
 {
 	newmachinedetail_updatetext(self, sender);
 }
@@ -657,8 +656,6 @@ static void newmachine_onsortbyname(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbytype(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onsortbymode(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
-static void newmachine_updatetext(NewMachine*, Translator*);
-static void newmachine_onlanguagechanged(NewMachine*, Translator* sender);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -693,7 +690,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_border_init_all(&sectionborder, psy_ui_BORDER_NONE,
 		psy_ui_BORDER_NONE, psy_ui_BORDER_SOLID, psy_ui_BORDER_NONE);
 	// favorite view
-	psy_ui_label_init(&self->favoriteheader, &self->component);
+	psy_ui_label_init_text(&self->favoriteheader, &self->component,
+			"newmachine.favorites");
 	psy_ui_label_settextalignment(&self->favoriteheader,
 		psy_ui_ALIGNMENT_LEFT |
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
@@ -711,7 +709,8 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	psy_ui_component_settabindex(&self->scroller_fav.component, 0);
 	psy_ui_component_setalign(&self->scroller_fav.component, psy_ui_ALIGN_TOP);
 	// plugin view
-	psy_ui_label_init(&self->pluginsheader, &self->component);
+	psy_ui_label_init_text(&self->pluginsheader, &self->component,
+		"newmachine.all");
 	psy_ui_label_settextalignment(&self->pluginsheader,
 		psy_ui_ALIGNMENT_LEFT |
 		psy_ui_ALIGNMENT_CENTER_VERTICAL);
@@ -749,9 +748,6 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 		newmachine_onfocus);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		newmachine_ondestroy);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		newmachine_onlanguagechanged);
-	newmachine_updatetext(self, &workspace->translator);
 	newmachine_updateskin(self);
 }
 
@@ -764,19 +760,6 @@ void newmachine_updateskin(NewMachine* self)
 {
 	psy_ui_component_setbackgroundcolour(&self->component, self->skin->colour);
 	psy_ui_component_setcolour(&self->component, self->skin->effect_fontcolour);
-}
-
-void newmachine_updatetext(NewMachine* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->favoriteheader,
-		translator_translate(translator, "newmachine.favorites"));
-	psy_ui_label_settext(&self->pluginsheader,
-		translator_translate(translator, "newmachine.all"));
-}
-
-void newmachine_onlanguagechanged(NewMachine* self, Translator* sender)
-{
-	newmachine_updatetext(self, sender);
 }
 
 void newmachine_onpluginselected(NewMachine* self, psy_ui_Component* parent,

@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
-static void instrumentsbox_updatetext(InstrumentsBox*, Translator*);
-static void instrumentsbox_onlanguagechanged(InstrumentsBox*, Translator*);
 static void instrumentsbox_buildlist(InstrumentsBox*);
 static void instrumentsbox_buildgroup(InstrumentsBox*);
 static void instrumentsbox_addstring(InstrumentsBox*, const char* text);
@@ -27,16 +25,17 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
 {		
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_label_init(&self->header, &self->component);
-	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
-	
+	psy_ui_label_init_text(&self->header, &self->component,
+		"instrumentsbox.instrument-groups");
+	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->grouplist, &self->component);
 	psy_ui_component_setmaximumsize(&self->grouplist.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 	psy_ui_component_setminimumsize(&self->grouplist.component,
 		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(10)));
 	psy_ui_component_setalign(&self->grouplist.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init(&self->group, &self->component);
+	psy_ui_label_init_text(&self->group, &self->component,
+		"instrumentsbox.group-instruments");
 	psy_ui_component_setalign(&self->group.component, psy_ui_ALIGN_TOP);	
 	psy_ui_listbox_init(&self->instrumentlist, &self->component);
 	psy_ui_component_setalign(&self->instrumentlist.component,
@@ -46,23 +45,6 @@ void instrumentsbox_init(InstrumentsBox* self, psy_ui_Component* parent,
 		instrumentsbox_ongrouplistchanged);
 	psy_signal_connect(&self->instrumentlist.signal_selchanged, self,
 		instrumentsbox_onlistchanged);
-	instrumentsbox_updatetext(self, &workspace->translator);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		instrumentsbox_onlanguagechanged);
-}
-
-void instrumentsbox_updatetext(InstrumentsBox* self, Translator* translator)
-{
-	psy_ui_label_settext(&self->header, translator_translate(translator,
-		"instrumentsbox.instrument-groups"));
-	psy_ui_label_settext(&self->group, translator_translate(translator,
-		"instrumentsbox.group-instruments"));
-}
-
-void instrumentsbox_onlanguagechanged(InstrumentsBox* self,
-	Translator* sender)
-{
-	instrumentsbox_updatetext(self, sender);
 }
 
 void instrumentsbox_buildgroup(InstrumentsBox* self)

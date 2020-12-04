@@ -111,13 +111,43 @@ INLINE uintptr_t psy_audio_player_playlist_position(const psy_audio_Player*
 }
 
 INLINE void psy_audio_player_setbpm(psy_audio_Player* self, psy_dsp_big_beat_t bpm)
-{
+{	
 	psy_audio_sequencer_setbpm(&self->sequencer, bpm);
+	if (self->song) {
+		psy_audio_song_setbpm(self->song, psy_audio_sequencer_bpm(
+			&self->sequencer));
+	}
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_player_bpm(psy_audio_Player* self)
 {
 	return psy_audio_sequencer_bpm(&self->sequencer);
+}
+
+INLINE void psy_audio_player_setticksperbeat(psy_audio_Player* self, uintptr_t ticks)
+{
+	psy_audio_sequencer_setextraticksperbeat(&self->sequencer, ticks);
+	if (self->song) {
+		self->song->properties.tpb = ticks;
+	}
+}
+
+INLINE psy_dsp_big_beat_t psy_audio_player_ticksperbeat(psy_audio_Player* self)
+{
+	return self->sequencer.tpb;
+}
+
+INLINE void psy_audio_player_setextraticksperbeat(psy_audio_Player* self, uintptr_t ticks)
+{
+	psy_audio_sequencer_setextraticksperbeat(&self->sequencer, ticks);
+	if (self->song) {
+		self->song->properties.extraticksperbeat = ticks;
+	}
+}
+
+INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(psy_audio_Player* self)
+{
+	return self->sequencer.extraticks;
 }
 
 void psy_audio_player_setlpb(psy_audio_Player*, uintptr_t lpb);

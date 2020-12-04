@@ -73,7 +73,7 @@ typedef struct {
 	intptr_t minval;
 	intptr_t maxval;
 	psy_audio_Pattern* pattern;
-	PatternSelection selection;
+	psy_audio_PatternSelection selection;
 	psy_List* dragkeyframe;
 	psy_List* selected;
 	struct InterpolateCurveView* view;
@@ -92,7 +92,7 @@ typedef struct InterpolateCurveView {
 void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
 	int startsel, int endsel, int lpb, Workspace*);
 void interpolatecurveview_setselection(InterpolateCurveView*,
-	PatternSelection);
+	psy_audio_PatternSelection);
 void interpolatecurveview_setpattern(InterpolateCurveView*,
 	psy_audio_Pattern*);
 

@@ -25,6 +25,7 @@ typedef enum {
 
 typedef struct Tab {
 	char* text;
+	char* translation;
 	TabMode mode;
 	psy_ui_Size size;
 	psy_ui_Margin margin;
