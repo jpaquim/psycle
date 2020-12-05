@@ -30,7 +30,6 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 
 	psy_ui_component_init(help_base(self), parent);	
 	self->workspace = workspace;
-	psy_ui_component_enablealign(help_base(self));	
 	tabbar_init(&self->tabbar, help_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	

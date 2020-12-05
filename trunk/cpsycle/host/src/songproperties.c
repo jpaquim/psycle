@@ -195,8 +195,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->edit_title.component.signal_keydown, self,
 		songpropertiesview_onfilterkeys);
 	// credits
-	psy_ui_component_init(&self->credits, &self->component);
-	psy_ui_component_enablealign(&self->credits);
+	psy_ui_component_init(&self->credits, &self->component);	
 	psy_ui_label_init_text(&self->label_credits, &self->credits,
 		"Credits");
 	psy_ui_label_setcharnumber(&self->label_credits, charnum);
@@ -243,8 +242,7 @@ void songpropertiesview_init(SongPropertiesView* self, psy_ui_Component* parent,
 	psy_ui_label_setcharnumber(&self->realticksperbeat, 8);		
 	// Comments
 	psy_ui_component_init(&self->comments, &self->component);
-	psy_ui_component_enablealign(&self->comments);
-	psy_ui_label_init(&self->label_comments, &self->comments,
+	psy_ui_label_init_text(&self->label_comments, &self->comments,
 		"Extended Comments");
 	psy_ui_label_settextalignment(&self->label_comments,
 		psy_ui_ALIGNMENT_LEFT);

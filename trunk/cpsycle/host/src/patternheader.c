@@ -68,7 +68,6 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->component.vtable = &trackerheader_vtable;
 	trackerheader_setsharedgridstate(self, gridstate, trackconfig);	
 	psy_ui_component_doublebuffer(&self->component);
-	self->gridstate->numtracks = 16;
 	self->classic = 1;
 	self->workspace = workspace;
 	self->currtrack = 0;

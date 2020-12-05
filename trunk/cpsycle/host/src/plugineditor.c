@@ -87,7 +87,6 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	self->basepath = 0;	
 	self->instanceidx = UINTPTR_MAX;
 	psy_ui_component_init(&self->bar, &self->component);
-	psy_ui_component_enablealign(&self->bar);
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_TOP);
 	psy_ui_button_init(&self->reload, &self->bar);
 	psy_ui_component_setalign(&self->reload.component, psy_ui_ALIGN_LEFT);
@@ -106,7 +105,6 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 		&plugineditor_onsave);	
 	// Plugin select
 	psy_ui_component_init(&self->row0, &self->component);
-	psy_ui_component_enablealign(&self->row0);
 	psy_ui_component_setalign(&self->row0, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->plugindesc, &self->row0);
 	psy_ui_label_settext(&self->plugindesc, "Plugin");
@@ -116,7 +114,6 @@ void plugineditor_init(PluginEditor* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->pluginselector.component, psy_ui_ALIGN_CLIENT);
 	// File Select
 	psy_ui_component_init(&self->row1, &self->component);
-	psy_ui_component_enablealign(&self->row1);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->filedesc, &self->row1);
 	psy_ui_label_settext(&self->filedesc, "File");

@@ -25,7 +25,6 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);		
 	// titlerow
 	psy_ui_component_init(&self->titlerow, &self->component);
-	psy_ui_component_enablealign(&self->titlerow);
 	psy_ui_label_init(&self->title, &self->titlerow);	
 	psy_ui_component_setalign(&self->floatview.component, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init(&self->close, &self->titlerow);
@@ -39,7 +38,6 @@ void parameterbar_init(ParameterBar* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->floatview.component, psy_ui_ALIGN_RIGHT);
 	// row0
 	psy_ui_component_init(&self->row0, &self->component);
-	psy_ui_component_enablealign(&self->row0);
 	zoombox_init(&self->zoombox, &self->row0);
 	self->zoombox.zoomstep = 0.10;
 	psy_ui_button_init(&self->mute, &self->row0);	
@@ -119,7 +117,6 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->parameterbox.component,
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
-	psy_ui_component_enablealign(&self->notebook.component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	psy_ui_editor_init(&self->help, psy_ui_notebook_base(&self->notebook));
@@ -179,7 +176,7 @@ void machineframe_setview(MachineFrame* self, psy_ui_Component* view,
 			psy_snprintf(text, 128, "%.2X :",
 				psy_audio_machine_slot(self->machine));
 	}
-	psy_ui_notebook_setpageindex(&self->notebook, 1);
+	psy_ui_notebook_select(&self->notebook, 1);
 	psy_ui_component_settitle(&self->component, text);
 	psy_ui_component_align(&self->component);
 	psy_signal_connect(&view->signal_preferredsizechanged, self,
@@ -251,10 +248,10 @@ void machineframe_togglehelp(MachineFrame* self,
 	psy_ui_Component* sender)
 {	
 	if (psy_ui_notebook_pageindex(&self->notebook) == 0) {			
-		psy_ui_notebook_setpageindex(&self->notebook, 1);
+		psy_ui_notebook_select(&self->notebook, 1);
 		psy_ui_button_disablehighlight(&self->parameterbar.help);
 	} else {		
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
+		psy_ui_notebook_select(&self->notebook, 0);
 		psy_ui_button_highlight(&self->parameterbar.help);
 	}	
 }

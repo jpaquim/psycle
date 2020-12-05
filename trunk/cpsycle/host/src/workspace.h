@@ -7,7 +7,6 @@
 #include <song.h>
 #include <player.h>
 #include <propertiesio.h>
-#include <translator.h>
 #include <signal.h>
 #include <plugincatcher.h>
 #include <machinefactory.h>
@@ -65,6 +64,7 @@ enum {
 	PROPERTY_ID_EVENTDRIVERCONFIGLOAD,
 	PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE,
 	PROPERTY_ID_DEFAULTFONT,
+	PROPERTY_ID_DEFAULTLINES,
 	PROPERTY_ID_DRAWVUMETERS,
 	PROPERTY_ID_PATTERNDISPLAY,
 	PROPERTY_ID_PATTERNDISPLAY_TRACKER,
@@ -130,6 +130,7 @@ typedef struct {
 	psy_Property* inputoutput;
 	psy_Property* eventinputs;
 	psy_Property* keyboard;
+	psy_Property* keyboard_misc;
 	psy_Property* directories;
 	psy_Property* midicontrollers;
 	psy_Property* compatibility;
@@ -186,8 +187,7 @@ typedef struct {
 	psy_Signal signal_followsongchanged;
 	psy_Signal signal_dockview;
 	psy_Signal signal_defaultfontchanged;
-	psy_Signal signal_togglegear;
-	psy_Signal signal_languagechanged;
+	psy_Signal signal_togglegear;	
 	psy_Signal signal_selectpatterndisplay;
 } Workspace;
 
@@ -240,6 +240,9 @@ int workspace_showtrackscopes(Workspace*);
 int workspace_showmachineindexes(Workspace*);
 int workspace_showwirehover(Workspace*);
 int workspace_showparamviewaswindow(Workspace*);
+bool workspace_savereminder(Workspace*);
+bool workspace_patdefaultlines(Workspace* self);
+bool workspace_allowmultipleinstances(Workspace*);
 void workspace_configurationchanged(Workspace*, psy_Property* property);
 int workspace_wraparound(Workspace*);
 void workspace_undo(Workspace*);
@@ -250,15 +253,6 @@ void workspace_setsequenceselection(Workspace*, psy_audio_SequenceSelection);
 psy_audio_SequenceSelection workspace_sequenceselection(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
-const char* workspace_translate(Workspace*, const char* key);
-
-INLINE psy_Translator* workspace_translator(Workspace* self)
-{
-	extern psy_ui_App app;
-
-	return &app.translator;
-}
-
 int workspace_hasplugincache(Workspace*);
 psy_EventDriver* workspace_kbddriver(Workspace*);
 int workspace_followingsong(Workspace*);

@@ -21,7 +21,7 @@ void psy_ui_notebook_init(psy_ui_Notebook* self, psy_ui_Component* parent)
 	self->split = 0;
 }
 
-void psy_ui_notebook_setpageindex(psy_ui_Notebook* self, int pageindex)
+void psy_ui_notebook_select(psy_ui_Notebook* self, int pageindex)
 {	
 	psy_List* p;
 	psy_List* q;
@@ -94,7 +94,7 @@ void onsize(psy_ui_Notebook* self, psy_ui_Component* sender, psy_ui_Size* size)
 
 void ontabbarchange(psy_ui_Notebook* self, psy_ui_Component* sender, int tabindex)
 {
-	psy_ui_notebook_setpageindex(self, tabindex);
+	psy_ui_notebook_select(self, tabindex);
 }
 
 void psy_ui_notebook_split(psy_ui_Notebook* self, psy_ui_Orientation orientation)
@@ -172,16 +172,11 @@ void psy_ui_notebook_full(psy_ui_Notebook* self)
 	if (self->split) {
 		psy_ui_component_destroy(&self->splitbar.component);
 		self->split = 0;
-		psy_ui_notebook_setpageindex(self, self->pageindex);		
+		psy_ui_notebook_select(self, self->pageindex);		
 	}
 }
 
 psy_ui_Component* psy_ui_notebook_activepage(psy_ui_Notebook* self)
 {	
 	return psy_ui_component_at(psy_ui_notebook_base(self), self->pageindex);
-}
-
-psy_ui_Component* psy_ui_notebook_base(psy_ui_Notebook* self)
-{
-	return &self->component;
 }

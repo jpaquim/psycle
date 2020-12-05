@@ -20,8 +20,6 @@ static void patternviewbar_onconfigchanged(PatternViewBar*, Workspace*,
 	psy_Property*);
 static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
-static void patternviewbar_updatetext(PatternViewBar*, psy_Translator*);
-static void patternviewbar_onlanguagechanged(PatternViewBar*, psy_Translator* sender);
 static void patternviewbar_onpatterncursorchanged(PatternViewBar*,
 	Workspace* sender);
 static void patternviewbar_onsequenceselectionchanged(PatternViewBar*,
@@ -36,10 +34,14 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);		
 	stepbox_init(&self->cursorstep, &self->component, workspace);
-	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);	
+	psy_ui_checkbox_init(&self->movecursorwhenpaste, &self->component);
+	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
+		"settingsview.move-cursor-when-paste");	
 	psy_signal_connect(&self->movecursorwhenpaste.signal_clicked, self,
 		patternviewbar_onmovecursorwhenpaste);
 	psy_ui_checkbox_init(&self->defaultentries, &self->component);
+	psy_ui_checkbox_settext(&self->defaultentries,
+		"settingsview.default-line");
 	if (workspace_showgriddefaults(self->workspace)) {
 		psy_ui_checkbox_check(&self->defaultentries);
 	}
@@ -61,24 +63,8 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 		psy_ui_checkbox_check(&self->movecursorwhenpaste);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->movecursorwhenpaste);
-	}
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		patternviewbar_onlanguagechanged);
-	patternviewbar_updatestatus(self);
-	patternviewbar_updatetext(self, workspace_translator(workspace));
-}
-
-void patternviewbar_updatetext(PatternViewBar* self, psy_Translator* translator)
-{
-	psy_ui_checkbox_settext(&self->movecursorwhenpaste,
-		psy_translator_translate(translator, "settingsview.move-cursor-when-paste"));
-	psy_ui_checkbox_settext(&self->defaultentries,
-		psy_translator_translate(translator, "settingsview.default-line"));
-}
-
-void patternviewbar_onlanguagechanged(PatternViewBar* self, psy_Translator* sender)
-{
-	patternviewbar_updatetext(self, sender);
+	}	
+	patternviewbar_updatestatus(self);	
 }
 
 void patternviewbar_ondefaultline(PatternViewBar* self, psy_ui_CheckBox* sender)
@@ -147,9 +133,50 @@ void patternviewbar_updatestatus(PatternViewBar* self)
 	psy_ui_label_settext(&self->status, text);
 }
 
+// PatternBlockMenu
+// implementation
+void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Workspace* workspace)
+{
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
+		psy_ui_defaults_vmargin(psy_ui_defaults()));
+	psy_ui_button_init_text(&self->cut, &self->component, "edit.cut");
+	psy_ui_button_init_text(&self->copy, &self->component, "edit.copy");
+	psy_ui_button_init_text(&self->paste, &self->component, "edit.paste");
+	psy_ui_button_init_text(&self->mixpaste, &self->component,
+		"edit.mixpaste");
+	psy_ui_button_init_text(&self->del, &self->component, "edit.delete");
+
+	psy_ui_button_init_text(&self->transform, &self->component,
+		"Search and replace");
+
+	psy_ui_button_init_text(&self->interpolatelinear, &self->component,
+		"Interpolate (Linear)");
+	psy_ui_button_init_text(&self->interpolatecurve, &self->component,
+		"Interpolate (Curve)");
+	psy_ui_button_init_text(&self->changegenerator, &self->component,
+		"Change Generator");
+	psy_ui_button_init_text(&self->changeinstrument, &self->component,
+		"Change Instrument");
+
+	psy_ui_button_init_text(&self->blocktransposeup, &self->component,
+		"Transpose +1");
+	psy_ui_button_init_text(&self->blocktransposedown, &self->component,
+		"Transpose -1");
+	psy_ui_button_init_text(&self->blocktransposeup12, &self->component,
+		"Transpose +12");
+	psy_ui_button_init_text(&self->blocktransposedown12, &self->component,
+		"Transpose -12");
+
+	psy_ui_button_init_text(&self->import, &self->component, "Import (psb)");
+	psy_ui_button_init_text(&self->export, &self->component, "Export (psb)");	
+}
+
 // PatternView
 // prototypes
 static void patternview_inittabbar(PatternView*, psy_ui_Component* tabbarparent);
+static void patternview_initblockmenu(PatternView*);
+static void patternview_connectblockmenu(PatternView*);
 static void patternview_ontabbarchange(PatternView*, psy_ui_Component* sender,
 	int tabindex);
 static void patternview_onsongchanged(PatternView*, Workspace* sender,
@@ -164,6 +191,9 @@ static void patternview_readfont(PatternView*);
 static void patternview_onpropertiesapply(PatternView*,
 	psy_ui_Component* sender);
 static void patternview_onfocus(PatternView*, psy_ui_Component* sender);
+static void patternview_onmousedown(PatternView*, psy_ui_MouseEvent*);
+static void  patternview_onmouseup(PatternView*, psy_ui_MouseEvent*);
+static void patternview_onkeydown(PatternView*, psy_ui_KeyEvent* ev);
 static void patternview_oncontextmenu(PatternView*,
 	psy_ui_Component* sender);
 static void patternview_ondestroy(PatternView* self, psy_ui_Component* sender);
@@ -201,6 +231,12 @@ static void patternview_vtable_init(PatternView* self)
 			patternview_onalign;
 		patternview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			patternview_onpreferredsize;
+		patternview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+			patternview_onmousedown;
+		patternview_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+			patternview_onmouseup;
+		patternview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
+			patternview_onkeydown;
 		patternview_vtable_initialized = 1;
 	}
 }
@@ -228,7 +264,7 @@ void patternview_init(PatternView* self,
 	psy_ui_notebook_init(&self->editnotebook, psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_setbackgroundmode(&self->editnotebook.component,
 		psy_ui_BACKGROUND_NONE);
-	psy_ui_notebook_setpageindex(&self->editnotebook, 0);
+	psy_ui_notebook_select(&self->editnotebook, 0);
 	patternproperties_init(&self->properties, &self->component, NULL, workspace);
 	psy_ui_component_setalign(&self->properties.component, psy_ui_ALIGN_TOP);
 	psy_ui_component_hide(&self->properties.component);
@@ -276,7 +312,21 @@ void patternview_init(PatternView* self,
 		workspace);	
 	patternview_setpattern(self, psy_audio_patterns_at(&workspace->song->patterns, 0));	
 	psy_signal_connect(&self->properties.applybutton.signal_clicked, self,
-		patternview_onpropertiesapply);	
+		patternview_onpropertiesapply);
+	// blockmenu
+	patternview_initblockmenu(self);
+	// TransformPatternView	
+	transformpatternview_init(&self->transformpattern, &self->component,
+		workspace);
+	psy_ui_component_setalign(transformpatternview_base(&self->transformpattern),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(transformpatternview_base(&self->transformpattern));
+	// Interpolate View
+	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0, 0, 0, workspace);
+	psy_ui_component_setalign(&self->interpolatecurveview.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_hide(&self->interpolatecurveview.component);
+	//psy_signal_connect(&self->interpolatecurveview.signal_cancel, self,
+		//trackerview_oninterpolatecurveviewoncancel);
 	// Tabbar
 	patternview_inittabbar(self, tabbarparent);
 	patternview_selectdisplay(self, PATTERNDISPLAY_TRACKER);
@@ -321,7 +371,6 @@ void patternview_ondestroy(PatternView* self, psy_ui_Component* sender)
 void patternview_inittabbar(PatternView* self, psy_ui_Component* tabbarparent)
 {
 	psy_ui_component_init(&self->sectionbar, tabbarparent);
-	psy_ui_component_enablealign(&self->sectionbar);
 	psy_ui_component_setalign(&self->sectionbar, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->sectionbar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
@@ -373,6 +422,7 @@ void patternview_ontabbarchange(PatternView* self, psy_ui_Component* sender,
 
 void patternview_setpattern(PatternView* self, psy_audio_Pattern* pattern)
 {		
+	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);
 	trackerview_setpattern(&self->trackerview, pattern);
 	pianoroll_setpattern(&self->pianoroll, pattern);
 	patternproperties_setpattern(&self->properties, pattern);
@@ -457,7 +507,7 @@ void patternview_onfocus(PatternView* self, psy_ui_Component* sender)
 
 void patternview_oncontextmenu(PatternView* self, psy_ui_Component* sender)
 {
-	trackerview_toggleblockmenu(&self->trackerview);	
+	patternview_toggleblockmenu(self);	
 }
 
 void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component* sender)
@@ -506,15 +556,15 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
 		if (psy_ui_notebook_splitactivated(&self->editnotebook)) {
 			psy_ui_notebook_full(&self->editnotebook);
 		}		
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
-		psy_ui_notebook_setpageindex(&self->editnotebook, tabindex);
+		psy_ui_notebook_select(&self->notebook, 0);
+		psy_ui_notebook_select(&self->editnotebook, tabindex);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 		tabbar_select(&self->tabbar, tabindex);
 		psy_signal_enable(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);		
 	} else if (tabindex == 3) {
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
+		psy_ui_notebook_select(&self->notebook, 0);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 		tabbar_select(&self->tabbar, 0);
@@ -528,7 +578,7 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
 		}
 		psy_ui_notebook_split(&self->editnotebook, psy_ui_VERTICAL);
 	} else if (tabindex == 4) {
-		psy_ui_notebook_setpageindex(&self->notebook, 0);
+		psy_ui_notebook_select(&self->notebook, 0);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 		tabbar_select(&self->tabbar, 0);
@@ -542,7 +592,7 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayType display)
 		}
 		psy_ui_notebook_split(&self->editnotebook, psy_ui_HORIZONTAL);
 	} else {
-		psy_ui_notebook_setpageindex(&self->notebook, 1);
+		psy_ui_notebook_select(&self->notebook, 1);
 		psy_signal_prevent(&self->tabbar.signal_change, self,
 			patternview_ontabbarchange);
 		tabbar_select(&self->tabbar, 1);
@@ -819,13 +869,13 @@ void patternview_updateksin(PatternView* self)
 {
 	psy_ui_component_setbackgroundcolour(&self->left.linenumbers.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->trackerview.blockmenu.component,
+	psy_ui_component_setbackgroundcolour(&self->blockmenu.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->trackerview.transformview.component,
+	psy_ui_component_setbackgroundcolour(&self->transformpattern.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setbackgroundcolour(&self->trackerview.interpolatecurveview.component,
+	psy_ui_component_setbackgroundcolour(&self->interpolatecurveview.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	psy_ui_component_setcolour(&self->trackerview.interpolatecurveview.component,
+	psy_ui_component_setcolour(&self->interpolatecurveview.component,
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerview.scroller.hscroll.sliderpane.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
@@ -858,4 +908,108 @@ void patternview_numtrackschanged(PatternView* self, psy_audio_Player* player,
 {
 	self->griddefaults.gridstate->numtracks = numsongtracks;
 	psy_ui_component_invalidate(&self->griddefaults.component);
+}
+
+void patternview_initblockmenu(PatternView* self)
+{
+	patternblockmenu_init(&self->blockmenu, &self->component, self->workspace);
+	psy_ui_component_setalign(&self->blockmenu.component, psy_ui_ALIGN_RIGHT);
+	patternview_connectblockmenu(self);
+	psy_ui_component_hide(&self->blockmenu.component);
+}
+
+void patternview_connectblockmenu(PatternView* self)
+{
+	psy_signal_connect(&self->blockmenu.changeinstrument.signal_clicked, &self->trackerview.grid,
+		trackergrid_onchangeinstrument);
+	psy_signal_connect(&self->blockmenu.cut.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblockcut);
+	psy_signal_connect(&self->blockmenu.copy.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblockcopy);
+	psy_signal_connect(&self->blockmenu.paste.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblockpaste);
+	psy_signal_connect(&self->blockmenu.mixpaste.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblockmixpaste);
+	psy_signal_connect(&self->blockmenu.del.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblockdelete);
+	psy_signal_connect(&self->blockmenu.blocktransposeup.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblocktransposeup);
+	psy_signal_connect(&self->blockmenu.blocktransposedown.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblocktransposedown);
+	psy_signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblocktransposeup12);
+	psy_signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked, &self->trackerview.grid,
+		trackergrid_onblocktransposedown12);
+	psy_signal_connect(&self->blockmenu.import.signal_clicked, &self->trackerview.grid,
+		trackerview_onpatternimport);
+	psy_signal_connect(&self->blockmenu.export.signal_clicked,
+		self, trackerview_onpatternexport);
+	psy_signal_connect(&self->blockmenu.transform.signal_clicked, self,
+		patternview_toggletransformpattern);
+	psy_signal_connect(&self->blockmenu.interpolatelinear.signal_clicked, &self->trackerview.grid,
+		trackergrid_oninterpolatelinear);
+	psy_signal_connect(&self->blockmenu.interpolatecurve.signal_clicked, self,
+		patternview_toggleinterpolatecurve);
+	psy_signal_connect(&self->blockmenu.changegenerator.signal_clicked, &self->trackerview.grid,
+		trackergrid_onchangegenerator);
+}
+
+void patternview_toggleblockmenu(PatternView* self)
+{
+	psy_ui_component_togglevisibility(&self->blockmenu.component);
+	psy_ui_component_togglevisibility(psy_ui_button_base(&self->pianoroll.bar.blockmenu));
+}
+
+
+void patternview_toggleinterpolatecurve(PatternView* self, psy_ui_Component* sender)
+{
+	interpolatecurveview_setpattern(&self->interpolatecurveview, self->gridstate.pattern);
+	interpolatecurveview_setselection(&self->interpolatecurveview,
+		self->trackerview.grid.selection);
+	psy_ui_component_togglevisibility(&self->interpolatecurveview.component);
+}
+
+void patternview_toggletransformpattern(PatternView* self, psy_ui_Component* sender)
+{
+	psy_ui_component_togglevisibility(&self->transformpattern.component);
+}
+
+void patternview_onmousedown(PatternView* self, psy_ui_MouseEvent* ev)
+{
+	bool blockmenu;
+
+	blockmenu =		
+		((ev->button == 2) && ev->target == trackergrid_base(&self->trackerview.grid)) ||
+		// ((ev->button == 2) && psy_ui_component_visible(&self->blockmenu.component)) ||
+		(ev->target == psy_ui_button_base(&self->pianoroll.bar.blockmenu));
+	if  (blockmenu) {
+			patternview_toggleblockmenu(self);
+	} else if (ev->button == 2) {
+		if (psy_ui_component_visible(&self->interpolatecurveview.component)) {
+			patternview_toggleinterpolatecurve(self, &self->component);
+		}
+	}
+}
+
+void  patternview_onmouseup(PatternView* self, psy_ui_MouseEvent* ev)
+{
+	if (ev->button == 1 && self->trackerview.grid.hasselection) {
+		interpolatecurveview_setpattern(&self->interpolatecurveview, self->gridstate.pattern);
+		interpolatecurveview_setselection(&self->interpolatecurveview,
+			self->trackerview.grid.selection);
+	}
+}
+
+void patternview_onkeydown(PatternView* self, psy_ui_KeyEvent* ev)
+{
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		if (psy_ui_component_visible(&self->blockmenu.component)) {
+			patternview_toggleblockmenu(self);
+			psy_ui_keyevent_stoppropagation(ev);
+		}		
+		if (psy_ui_component_visible(&self->interpolatecurveview.component)) {
+			patternview_toggleinterpolatecurve(self, &self->component);
+			psy_ui_keyevent_stoppropagation(ev);
+		}		
+	}
 }

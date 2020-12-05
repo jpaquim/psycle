@@ -1349,8 +1349,13 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 	psy_ui_Margin margin;
 
 	assert(self);
-	
+		
 	psy_ui_component_init(&self->component, parent);
+	margin = psy_ui_defaults_hmargin(psy_ui_defaults());
+	psy_ui_margin_setleft(&margin, psy_ui_value_makeew(1.0));
+	psy_ui_margin_setbottom(&margin, psy_ui_value_makeew(0.5));
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		margin);
 	self->workspace = workspace;
 	psy_ui_label_init(&self->keys, pianobar_base(self));
 	psy_ui_label_settext(&self->keys, "Keyboard");
@@ -1363,19 +1368,12 @@ void pianobar_init(PianoBar* self, psy_ui_Component* parent,
 	psy_ui_combobox_setcursel(&self->keytype, 0);
 	psy_ui_label_init(&self->tracks, pianobar_base(self));
 	psy_ui_label_settext(&self->tracks, "Show Tracks");
-	psy_ui_button_init(&self->tracks_all, pianobar_base(self));
-	psy_ui_button_settext(&self->tracks_all, "All");
+	psy_ui_button_init_text(&self->tracks_all, pianobar_base(self), "All");
 	psy_ui_button_highlight(&self->tracks_all);
-	psy_ui_button_init(&self->track_curr, pianobar_base(self));
-	psy_ui_button_settext(&self->track_curr, "Current");
-	psy_ui_button_init(&self->tracks_active, pianobar_base(self));
-	psy_ui_button_settext(&self->tracks_active, "Active");	
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.25),
-		psy_ui_value_makeew(1.0));
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(pianobar_base(self), psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT, &margin));
+	psy_ui_button_init_text(&self->track_curr, pianobar_base(self), "Current");
+	psy_ui_button_init_text(&self->tracks_active, pianobar_base(self), "Active");
+	psy_ui_button_init_text(&self->blockmenu, pianobar_base(self), "Block Menu");
+	psy_ui_component_setalign(&self->blockmenu, psy_ui_ALIGN_RIGHT);
 }
 
 // Pianoroll
@@ -1436,8 +1434,7 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	keyboardstate_init(&self->keyboardstate, skin);
 	gridstate_init(&self->gridstate, skin);	
 	// left area (keyboardheader, keyboard)
-	psy_ui_component_init(&self->left, &self->component);
-	psy_ui_component_enablealign(&self->left);
+	psy_ui_component_init(&self->left, &self->component);	
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	zoombox_init(&self->zoombox_beatwidth, &self->left);
 	psy_signal_connect(&self->zoombox_beatwidth.signal_changed, self,
@@ -1448,7 +1445,6 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->keyboard.component, psy_ui_ALIGN_CLIENT);	
 	// top area (beatruler)
 	psy_ui_component_init(&self->top, &self->component);
-	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	pianoruler_init(&self->header, &self->top, &self->gridstate);
 	psy_ui_component_setalign(pianoruler_base(&self->header), psy_ui_ALIGN_TOP);

@@ -144,21 +144,6 @@ static void trackergrid_enterdigitcolumn(TrackerGrid*, psy_audio_PatternEntry* e
 	int track, int column, int digit, int digitvalue);
 
 static void trackergrid_invalidatecursor(TrackerGrid*);
-static void trackergrid_oninterpolatelinear(TrackerGrid*);
-static void trackergrid_onchangegenerator(TrackerGrid*);
-static void trackergrid_onchangeinstrument(TrackerGrid*);
-static void trackergrid_blockstart(TrackerGrid*);
-static void trackergrid_blockend(TrackerGrid*);
-static void trackergrid_blockunmark(TrackerGrid*);
-static void trackergrid_onblockcut(TrackerGrid*);
-static void trackergrid_onblockcopy(TrackerGrid*);
-static void trackergrid_onblockpaste(TrackerGrid*);
-static void trackergrid_onblockmixpaste(TrackerGrid*);
-static void trackergrid_onblockdelete(TrackerGrid*);
-static void trackergrid_onblocktransposeup(TrackerGrid*);
-static void trackergrid_onblocktransposedown(TrackerGrid*);
-static void trackergrid_onblocktransposeup12(TrackerGrid*);
-static void trackergrid_onblocktransposedown12(TrackerGrid*);
 static void trackergrid_inputvalue(TrackerGrid*, int value, int digit);
 static void trackergrid_prevtrack(TrackerGrid*);
 static void trackergrid_nexttrack(TrackerGrid*);
@@ -1965,74 +1950,6 @@ void trackergrid_onblocktransposedown12(TrackerGrid* self)
 	}
 }
 
-// PatternBlockMenu
-// prototypes
-static void patternblockmenu_updatetext(PatternBlockMenu* self);
-// implementation
-void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent, Workspace* workspace)
-{
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_button_init(&self->cut, &self->component);
-	psy_ui_button_settext(&self->cut, "Cut");
-	psy_ui_button_init(&self->copy, &self->component);
-	psy_ui_button_settext(&self->copy, "Copy");
-	psy_ui_button_init(&self->paste, &self->component);
-	psy_ui_button_settext(&self->paste, "Paste");
-	psy_ui_button_init(&self->mixpaste, &self->component);
-	psy_ui_button_settext(&self->mixpaste, "MixPaste");
-	psy_ui_button_init(&self->del, &self->component);
-	psy_ui_button_settext(&self->del, "Delete");
-
-	psy_ui_button_init(&self->transform, &self->component);
-	psy_ui_button_settext(&self->transform, "Search and replace");
-
-	psy_ui_button_init(&self->interpolatelinear, &self->component);
-	psy_ui_button_settext(&self->interpolatelinear, "Interpolate (Linear)");
-	psy_ui_button_init(&self->interpolatecurve, &self->component);
-	psy_ui_button_settext(&self->interpolatecurve, "Interpolate (Curve)");
-	psy_ui_button_init(&self->changegenerator, &self->component);
-	psy_ui_button_settext(&self->changegenerator, "Change Generator");
-	psy_ui_button_init(&self->changeinstrument, &self->component);
-	psy_ui_button_settext(&self->changeinstrument, "Change Instrument");
-
-	psy_ui_button_init(&self->blocktransposeup, &self->component);
-	psy_ui_button_settext(&self->blocktransposeup, "Transpose +1");
-	psy_ui_button_init(&self->blocktransposedown, &self->component);
-	psy_ui_button_settext(&self->blocktransposedown, "Transpose -1");
-	psy_ui_button_init(&self->blocktransposeup12, &self->component);
-	psy_ui_button_settext(&self->blocktransposeup12, "Transpose +12");
-	psy_ui_button_init(&self->blocktransposedown12, &self->component);
-	psy_ui_button_settext(&self->blocktransposedown12, "Transpose -12");
-
-	psy_ui_button_init(&self->import, &self->component);
-	psy_ui_button_settext(&self->import, "Import (psb)");
-	psy_ui_button_init(&self->export, &self->component);
-	psy_ui_button_settext(&self->export, "Export (psb)");
-	patternblockmenu_updatetext(self);	
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_TOP,
-		NULL));
-}
-
-void patternblockmenu_updatetext(PatternBlockMenu* self)
-{	
-	psy_ui_button_settext(&self->cut, "edit.cut");
-	psy_ui_button_settext(&self->copy, "edit.copy");
-	psy_ui_button_settext(&self->paste, "edit.paste");
-	psy_ui_button_settext(&self->mixpaste, "edit.mixpaste");
-	psy_ui_button_settext(&self->del, "edit.delete");
-	psy_ui_button_settext(&self->interpolatelinear, "Interpolate (Linear)");
-	psy_ui_button_settext(&self->interpolatecurve, "Interpolate (Curve)");
-	psy_ui_button_settext(&self->changegenerator, "Change Generator");
-	psy_ui_button_settext(&self->changeinstrument, "Change Instrument");
-	psy_ui_button_settext(&self->blocktransposeup, "Transpose +1");
-	psy_ui_button_settext(&self->blocktransposedown, "Transpose -1");
-	psy_ui_button_settext(&self->blocktransposeup12, "Transpose +12");
-	psy_ui_button_settext(&self->blocktransposedown12, "Transpose -12");
-	psy_ui_button_settext(&self->import, "Import (psb)");
-	psy_ui_button_settext(&self->export, "Export (psb)");
-}
 
 int trackergrid_preferredtrackwidth(TrackerGrid* self)
 {
@@ -2141,13 +2058,7 @@ void trackergrid_enterdigitcolumn(TrackerGrid* self, psy_audio_PatternEntry* ent
 
 // TrackerView
 // prototypes
-static void trackerview_initblockmenu(TrackerView*);
-static void trackerview_connectblockmenu(TrackerView*);
 static void trackerview_connectworkspace(TrackerView*);
-static void trackerview_onmousedown(TrackerView*, psy_ui_MouseEvent*);
-static void trackerview_onmouseup(TrackerView*, psy_ui_MouseEvent*);
-static void trackerview_onkeydown(TrackerView*, psy_ui_KeyEvent*);
-static void trackerview_onkeyup(TrackerView*, psy_ui_KeyEvent*);
 static void trackerview_numtrackschanged(TrackerView* self, psy_audio_Player*,
 	uintptr_t numsongtracks);
 static bool trackerview_handlecommand(TrackerView*, psy_ui_KeyEvent*, int cmd);
@@ -2158,20 +2069,14 @@ static void trackerview_onconfigurationchanged(TrackerView*, Workspace*,
 	psy_Property* configurtion);
 static void trackerview_readconfiguration(TrackerView*);
 static void trackerview_readpgupdowntype(TrackerView*);
-static void trackerview_onpatternimport(TrackerView*);
-static void trackerview_onpatternexport(TrackerView*);
 static void trackerview_onparametertweak(TrackerView*,
 	Workspace* sender, int slot, uintptr_t tweak, float value);
-static void trackerview_ontransform(TrackerView*);
-static void trackerview_oninterpolatecurve(TrackerView*,
-	psy_ui_Component* sender);
-static void trackerview_oninterpolatecurveviewoncancel(TrackerView*,
-	InterpolateCurveView* sender);
 static void trackerview_oneventdriverinput(TrackerView*, psy_EventDriver*);
+static void trackerview_onkeyup(TrackerView* self, psy_ui_KeyEvent* ev);
 
 // vtable
 static psy_ui_ComponentVtable trackerview_vtable;
-static int trackerview_vtable_initialized = 0;
+static bool trackerview_vtable_initialized = FALSE;
 
 static void trackerview_vtable_init(TrackerView* self)
 {
@@ -2179,15 +2084,9 @@ static void trackerview_vtable_init(TrackerView* self)
 		trackerview_vtable = *(self->component.vtable);
 		trackerview_vtable.onalign = (psy_ui_fp_component_onalign)
 			trackerview_onalign;
-		trackerview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
-			trackerview_onmousedown;
-		trackerview_vtable.onmouseup = (psy_ui_fp_component_onmouseup)
-			trackerview_onmouseup;
-		trackerview_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
-			trackerview_onkeydown;
-		trackerview_vtable.onkeyup = (psy_ui_fp_component_onkeydown)
+		trackerview_vtable.onkeyup= (psy_ui_fp_component_onkeyup)
 			trackerview_onkeyup;
-		trackerview_vtable_initialized = 1;
+		trackerview_vtable_initialized = TRUE;
 	}
 }
 // implementation
@@ -2204,22 +2103,7 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 	self->showdefaultline = 1;
 	self->pgupdownstep = 4;
 	self->pgupdownbeat = TRUE;
-	self->pgupdown4beat = FALSE;
-	// TransformPatternView	
-	transformpatternview_init(&self->transformview, &self->component,
-		workspace);
-	psy_ui_component_setalign(transformpatternview_base(&self->transformview),
-		psy_ui_ALIGN_RIGHT);
-	psy_ui_component_hide(transformpatternview_base(&self->transformview));	
-	// Interpolate View
-	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0, 0, 0, workspace);
-	psy_ui_component_setalign(&self->interpolatecurveview.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_hide(&self->interpolatecurveview.component);
-	psy_signal_connect(&self->interpolatecurveview.signal_cancel, self,
-		trackerview_oninterpolatecurveviewoncancel);
-	// left bar	
-	// Context menu
-	trackerview_initblockmenu(self);
+	self->pgupdown4beat = FALSE;	
 	// top bar		
 	// pattern main grid
 	trackergrid_init(&self->grid, &self->component, trackconfig,
@@ -2234,50 +2118,6 @@ void trackerview_init(TrackerView* self, psy_ui_Component* parent,
 		trackerview_numtrackschanged);
 	psy_signal_connect(&self->workspace->player.eventdrivers.signal_input, self,
 		trackerview_oneventdriverinput);	
-}
-
-void trackerview_initblockmenu(TrackerView* self)
-{
-	patternblockmenu_init(&self->blockmenu, &self->component, self->workspace);
-	psy_ui_component_setalign(&self->blockmenu.component, psy_ui_ALIGN_RIGHT);
-	trackerview_connectblockmenu(self);
-	psy_ui_component_hide(&self->blockmenu.component);
-}
-
-void trackerview_connectblockmenu(TrackerView* self)
-{
-	psy_signal_connect(&self->blockmenu.changeinstrument.signal_clicked, &self->grid,
-		trackergrid_onchangeinstrument);
-	psy_signal_connect(&self->blockmenu.cut.signal_clicked, &self->grid,
-		trackergrid_onblockcut);
-	psy_signal_connect(&self->blockmenu.copy.signal_clicked, &self->grid,
-		trackergrid_onblockcopy);
-	psy_signal_connect(&self->blockmenu.paste.signal_clicked, &self->grid,
-		trackergrid_onblockpaste);
-	psy_signal_connect(&self->blockmenu.mixpaste.signal_clicked, &self->grid,
-		trackergrid_onblockmixpaste);
-	psy_signal_connect(&self->blockmenu.del.signal_clicked, &self->grid,
-		trackergrid_onblockdelete);
-	psy_signal_connect(&self->blockmenu.blocktransposeup.signal_clicked, &self->grid,
-		trackergrid_onblocktransposeup);
-	psy_signal_connect(&self->blockmenu.blocktransposedown.signal_clicked, &self->grid,
-		trackergrid_onblocktransposedown);
-	psy_signal_connect(&self->blockmenu.blocktransposeup12.signal_clicked, &self->grid,
-		trackergrid_onblocktransposeup12);
-	psy_signal_connect(&self->blockmenu.blocktransposedown12.signal_clicked, &self->grid,
-		trackergrid_onblocktransposedown12);
-	psy_signal_connect(&self->blockmenu.import.signal_clicked, &self->grid,
-		trackerview_onpatternimport);
-	psy_signal_connect(&self->blockmenu.export.signal_clicked,
-		self, trackerview_onpatternexport);
-	psy_signal_connect(&self->blockmenu.transform.signal_clicked, self,
-		trackerview_ontransform);
-	psy_signal_connect(&self->blockmenu.interpolatelinear.signal_clicked, &self->grid,
-		trackergrid_oninterpolatelinear);
-	psy_signal_connect(&self->blockmenu.interpolatecurve.signal_clicked, self,
-		trackerview_oninterpolatecurve);
-	psy_signal_connect(&self->blockmenu.changegenerator.signal_clicked, &self->grid,
-		trackergrid_onchangegenerator);
 }
 
 void trackerview_connectworkspace(TrackerView* self)
@@ -2301,12 +2141,6 @@ void trackerview_numtrackschanged(TrackerView* self, psy_audio_Player* player,
 	self->grid.gridstate->numtracks = numsongtracks;	
 	psy_ui_component_updateoverflow(&self->grid.component);
 	psy_ui_component_invalidate(&self->grid.component);	
-}
-
-void trackerview_oninterpolatecurveviewoncancel(TrackerView* self,
-	InterpolateCurveView* sender)
-{
-	trackerview_oninterpolatecurve(self, &self->grid.component);
 }
 
 void trackerview_updatescrollstep(TrackerView* self)
@@ -2396,11 +2230,6 @@ void trackerview_onpatternexport(TrackerView* self)
 	}
 }
 
-void trackerview_toggleblockmenu(TrackerView* self)
-{
-psy_ui_component_togglevisibility(&self->blockmenu.component);
-}
-
 void trackerview_togglefollowsong(TrackerView* self)
 {
 	if (workspace_followingsong(self->workspace)) {
@@ -2408,45 +2237,6 @@ void trackerview_togglefollowsong(TrackerView* self)
 	} else {
 		workspace_followsong(self->workspace);
 	}
-}
-
-void trackerview_onmousedown(TrackerView* self, psy_ui_MouseEvent* ev)
-{
-	if (ev->button == 2) {
-		if (psy_ui_component_visible(&self->interpolatecurveview.component)) {
-			trackerview_oninterpolatecurve(self, &self->component);
-		} else {
-			trackerview_toggleblockmenu(self);
-		}
-	}
-}
-
-void trackerview_onmouseup(TrackerView* self, psy_ui_MouseEvent* ev)
-{
-	if (ev->button == 1 && self->grid.hasselection) {
-		interpolatecurveview_setselection(&self->interpolatecurveview,
-			self->grid.selection);
-	}
-}
-
-void trackerview_onkeydown(TrackerView* self, psy_ui_KeyEvent* ev)
-{
-	/*if ((ev->keycode == psy_ui_KEY_DOWN) &&
-		(ev->target == &self->griddefaults.component)) {
-		psy_ui_component_setfocus(&self->grid.component);
-		psy_ui_component_invalidate(&self->grid.component);
-		psy_ui_keyevent_stoppropagation(ev);
-	} else*/
-		if (ev->keycode == psy_ui_KEY_ESCAPE) {
-			if (psy_ui_component_visible(&self->interpolatecurveview.component)) {
-				trackerview_oninterpolatecurve(self, &self->component);
-			} else {
-				if (psy_ui_component_visible(&self->blockmenu.component)) {
-					trackerview_toggleblockmenu(self);
-				}
-			}
-			psy_ui_keyevent_stoppropagation(ev);
-		}
 }
 
 void trackerview_oneventdriverinput(TrackerView* self, psy_EventDriver* sender)
@@ -2873,18 +2663,5 @@ void definecmd(psy_Property* cmds, int cmd, uintptr_t keycode, bool shift,
 
 void trackerview_setpattern(TrackerView* self, psy_audio_Pattern* pattern)
 {	
-	trackergrid_setpattern(&self->grid, pattern);
-	interpolatecurveview_setpattern(&self->interpolatecurveview, pattern);	
-}
-
-void trackerview_oninterpolatecurve(TrackerView* self, psy_ui_Component* sender)
-{
-	psy_ui_component_togglevisibility(&self->interpolatecurveview.component);
-}
-
-void trackerview_ontransform(TrackerView* self)
-{
-	psy_ui_component_hide(&self->blockmenu.component);
-	psy_ui_component_show_align(transformpatternview_base(
-		&self->transformview));
+	trackergrid_setpattern(&self->grid, pattern);	
 }

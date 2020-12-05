@@ -53,7 +53,7 @@ static void workspace_makemachineview(Workspace*, psy_Property*);
 static void workspace_makemachineviewtheme(Workspace*, psy_Property*);
 static void workspace_makeparamview(Workspace*, psy_Property*);
 static void workspace_makeparamtheme(Workspace*, psy_Property*);
-static void workspace_makekeyboard(Workspace*);
+static void workspace_makekeyboardandmisc(Workspace*);
 static void workspace_makedirectories(Workspace*);
 static void workspace_makedefaultuserpresetpath(Workspace*);
 static void workspace_makedirectory(Workspace*, const char* key,
@@ -187,7 +187,6 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 void workspace_init(Workspace* self, void* handle)
 {	
 	psy_Property defaultlang;
-	extern psy_ui_App app;
 
 	assert(self);
 
@@ -219,7 +218,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->dialbitmappath = 0;	
 	psy_property_init(&defaultlang);
 	make_translator_default(&defaultlang);
-	psy_translator_setdefault(&app.translator, &defaultlang);
+	psy_translator_setdefault(psy_ui_translator(), &defaultlang);
 	psy_property_dispose(&defaultlang);
 	self->undosavepoint = 0;
 	self->machines_undosavepoint = 0;
@@ -279,8 +278,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_followsongchanged);
 	psy_signal_init(&self->signal_dockview);
 	psy_signal_init(&self->signal_defaultfontchanged);
-	psy_signal_init(&self->signal_togglegear);
-	psy_signal_init(&self->signal_languagechanged);
+	psy_signal_init(&self->signal_togglegear);	
 	psy_signal_init(&self->signal_selectpatterndisplay);
 }
 
@@ -334,7 +332,6 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_dockview);
 	psy_signal_dispose(&self->signal_defaultfontchanged);
 	psy_signal_dispose(&self->signal_togglegear);
-	psy_signal_dispose(&self->signal_languagechanged);
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
 }
 
@@ -368,22 +365,15 @@ void workspace_initplayer(Workspace* self)
 
 void workspace_configlanguage(Workspace* self)
 {	
-	psy_Property* langchoice;
-	extern psy_ui_App app;
+	psy_Property* langchoice;	
 
 	assert(self);
 
 	langchoice = psy_property_at_choice(self->language);
 	if (langchoice) {
-		if (psy_translator_load(&app.translator,
-			psy_property_item_str(langchoice))) {
-			psy_signal_emit(&self->signal_languagechanged, &app.translator,
-				0);
-			psy_ui_updatealign(self->mainhandle, NULL);
-		}
-	}
-	psy_signal_emit(&self->signal_languagechanged, &app.translator,
-		0);
+		psy_translator_load(psy_ui_translator(),
+			psy_property_item_str(langchoice));			
+	}	
 }
 
 void workspace_configvisual(Workspace* self)
@@ -576,7 +566,7 @@ void workspace_makeconfig(Workspace* self)
 	workspace_makeglobal(self);
 	workspace_makegeneral(self);
 	workspace_makevisual(self);	
-	workspace_makekeyboard(self);
+	workspace_makekeyboardandmisc(self);
 	workspace_makedirectories(self);
 	workspace_makeinputoutput(self);
 	workspace_makeeventinput(self);
@@ -1153,9 +1143,9 @@ void workspace_makeparamtheme(Workspace* self, psy_Property* view)
 			"settingsview.selvalue-font");	
 }
 
-void workspace_makekeyboard(Workspace* self)
+void workspace_makekeyboardandmisc(Workspace* self)
 {	
-	psy_Property* choice;
+	psy_Property* choice;	
 
 	assert(self);
 
@@ -1210,6 +1200,22 @@ void workspace_makekeyboard(Workspace* self)
 		psy_property_append_int(self->keyboard, "pgupdownstep",
 			4, 0, 32),
 		"Page Up / Page Down step lines");
+	self->keyboard_misc = psy_property_settext(
+		psy_property_append_section(self->keyboard, "misc"),
+		"Miscellaneous options");
+	psy_property_settext(
+		psy_property_append_bool(self->keyboard_misc,
+			"savereminder", TRUE),
+		"\"Save file?\" reminders on Load, New or Exit");
+	psy_property_setid(psy_property_settext(
+		psy_property_append_int(self->keyboard_misc,
+			"numdefaultlines", 64, 1, 1024),
+		"Default lines on new pattern"),
+		PROPERTY_ID_DEFAULTLINES);
+	psy_property_settext(
+		psy_property_append_bool(self->keyboard_misc,
+			"allowmultiinstances", FALSE),
+		"Allow multiple instances of Psycle");
 }
 
 void workspace_makedirectories(Workspace* self)
@@ -1771,13 +1777,6 @@ void workspace_readeventdriverconfigurations(Workspace* self)
 	}
 }
 
-const char* workspace_translate(Workspace* self, const char* key)
-{			
-	assert(self);
-
-	return psy_translator_translate(&app.translator, key);
-}
-
 void workspace_configurationchanged(Workspace* self, psy_Property* property)
 {
 	bool worked;
@@ -1809,7 +1808,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 			} else {
 				psy_audiodriver_close(self->player.driver);
 			}
-			break; }	
+			break; }
 	case PROPERTY_ID_LOADSKIN:
 		workspace_onloadskin(self);
 		break;
@@ -1836,6 +1835,11 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		break;
 	case PROPERTY_ID_DEFAULTFONT:
 		workspace_setdefaultfont(self, property);
+		break;
+	case PROPERTY_ID_DEFAULTLINES:
+		if (psy_property_item_int(property) > 0) {
+			psy_audio_pattern_setdefaultlines((uintptr_t)psy_property_item_int(property));
+		}
 		break;
 	case PROPERTY_ID_DRAWVUMETERS:
 		if (psy_property_item_bool(property)) {
@@ -2539,7 +2543,10 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, workspace_config_directory(self));
 	psy_path_setname(&path, PSYCLE_INI);		
-	propertiesio_load(&self->config, psy_path_path(&path), 0);	
+	propertiesio_load(&self->config, psy_path_path(&path), 0);
+	if (workspace_patdefaultlines(self) > 0) {
+		psy_audio_pattern_setdefaultlines(workspace_patdefaultlines(self));
+	}
 	workspace_configlanguage(self);
 	{
 		psy_Property* driversection = NULL;
@@ -3019,6 +3026,26 @@ bool workspace_movecursoronestep(Workspace* self)
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "movecursoronestep", TRUE);
+}
+
+bool workspace_savereminder(Workspace* self)
+{
+	assert(self);
+
+	return  psy_property_at_bool(self->keyboard_misc, "savereminder", TRUE);
+}
+
+bool workspace_patdefaultlines(Workspace* self)
+{
+	assert(self);
+
+	return psy_property_at_int(self->keyboard_misc, "numdefaultlines", 64);
+}
+
+bool workspace_allowmultipleinstances(Workspace* self)
+{
+	return psy_property_at_bool(self->keyboard_misc,
+		"allowmultiinstances", FALSE);
 }
 
 void workspace_recordtweaks(Workspace* self)

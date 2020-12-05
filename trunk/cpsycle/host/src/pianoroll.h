@@ -305,6 +305,7 @@ typedef struct PianoBar {
 	psy_ui_Button tracks_all;
 	psy_ui_Button track_curr;
 	psy_ui_Button tracks_active;
+	psy_ui_Button blockmenu;
 	Workspace* workspace;
 } PianoBar;
 

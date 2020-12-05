@@ -1,23 +1,22 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-// prefix file for each .c file
 #include "../../detail/prefix.h"
 
 #include "machineview.h"
-
-// host imports
+// host
 #include "skingraphics.h"
 #include "wireview.h"
-// audio imports
+// audio
 #include <exclusivelock.h>
 #include <songio.h>
-// standard c imports
+// std
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-// platform tweaks
+// platform
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
 static void machineui_init(MachineUi*, psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin*, Workspace*);
@@ -26,6 +25,7 @@ static void machineui_dispose(MachineUi*);
 static void machineui_onframedestroyed(MachineUi*, psy_ui_Component* sender);
 static psy_ui_IntSize machineui_size(MachineUi*);
 static psy_ui_Rectangle machineui_position(MachineUi*);
+static psy_ui_Rectangle machineui_vuposition(MachineUi*);
 static void machineui_draw(MachineUi*, psy_ui_Graphics*, MachineWireView*, uintptr_t slot);
 static void machineui_drawvu(MachineUi*, psy_ui_Graphics*, MachineWireView*);
 static void machineui_drawvudisplay(MachineUi*, psy_ui_Graphics*, MachineWireView*);
@@ -39,27 +39,30 @@ static void machineui_onkeydown(MachineUi*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void machineui_oneditchange(MachineUi*, psy_ui_Edit* sender);
 static void machineui_oneditfocuslost(MachineUi*, psy_ui_Component* sender);
-static void machineui_invalidate(MachineUi*, MachineWireView*);
+static void machineui_invalidate(MachineUi*, MachineWireView*, bool vu);
 
 // MachineUi
 void machineui_init(MachineUi* self, psy_audio_Machine* machine,
 	uintptr_t slot, MachineViewSkin* skin, Workspace* workspace)
 {	
+	assert(self);
 	assert(machine);
+	assert(workspace);
+
 	self->machine = machine;	
 	self->workspace = workspace;	
 	self->skin = skin;	
 	self->mode = psy_audio_machine_mode(machine);
-	self->coords = NULL;
-	machineui_updatecoords(self);	
 	self->volumedisplay = (psy_dsp_amp_t)0.f;
 	self->volumemaxdisplay = (psy_dsp_amp_t)0.f;
-	self->volumemaxcounterlife = 0;	
+	self->volumemaxcounterlife = 0;
+	self->coords = NULL;
 	self->slot = slot;
 	self->frame = NULL;
 	self->paramview = NULL;
 	self->editorview = NULL;
 	self->restorename = NULL;
+	machineui_updatecoords(self);	
 }
 
 void machineui_updatecoords(MachineUi* self)
@@ -109,6 +112,20 @@ psy_ui_Rectangle machineui_position(MachineUi* self)
 		psy_audio_machine_position(self->machine, &x, &y);	
 		return psy_ui_rectangle_make(x, y, self->coords->background.destwidth,
 			self->coords->background.destheight);
+	}
+	return psy_ui_rectangle_make(0, 0, 200, 20);
+}
+
+psy_ui_Rectangle machineui_vuposition(MachineUi* self)
+{
+	if (self->coords && self->machine) {
+		intptr_t x;
+		intptr_t y;
+
+		psy_audio_machine_position(self->machine, &x, &y);
+		return psy_ui_rectangle_make(x + self->coords->vu0.destx,
+			y + self->coords->vu0.desty, self->coords->vu0.destwidth,
+			self->coords->vu0.destheight);
 	}
 	return psy_ui_rectangle_make(0, 0, 200, 20);
 }
@@ -188,30 +205,22 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 
 		editname[0] = '\0';
 		coords = self->coords;		
-		if (psy_audio_machine_editname(self->machine)) {
-			if (self->skin->drawmachineindexes) {
-				psy_snprintf(editname, 130, "%.2X:%s", (int)slot, 
-					psy_audio_machine_editname(self->machine));
-			} else {
-				psy_snprintf(editname, 130, "%s", 
-					psy_audio_machine_editname(self->machine));
-			}
-		}
+		
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		if (!psy_ui_bitmap_empty(&wireview->skin.skinbmp)) {
 			skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
 				&self->coords->background);
 		} else {
 			psy_ui_Colour bgcolour;
-			
+
 			if (self->mode == MACHMODE_MASTER) {
 				bgcolour = psy_ui_colour_make(0x00333333);
 			} else
-			if (self->mode == MACHMODE_FX) {	
-				bgcolour = psy_ui_colour_make(0x003E2f25);
-			} else {
-				bgcolour = psy_ui_colour_make(0x002f3E25);				
-			}			
+				if (self->mode == MACHMODE_FX) {
+					bgcolour = psy_ui_colour_make(0x003E2f25);
+				} else {
+					bgcolour = psy_ui_colour_make(0x002f3E25);
+				}
 			psy_ui_drawsolidrectangle(g, r, bgcolour);
 			if (self->mode == MACHMODE_MASTER) {
 				psy_ui_Rectangle clip;
@@ -220,45 +229,56 @@ void machineui_draw(MachineUi* self, psy_ui_Graphics* g,
 					r.top + coords->name.desty, coords->name.destwidth,
 					coords->name.destheight);
 				psy_ui_textoutrectangle(g, r.left + coords->name.destx,
-				r.top + coords->name.desty,
-				psy_ui_ETO_CLIPPED, clip,
-				"Master", strlen("Master"));
+					r.top + coords->name.desty,
+					psy_ui_ETO_CLIPPED, clip,
+					"Master", strlen("Master"));
 			}
 		}
-		if (self->mode == MACHMODE_FX) {			
-			psy_ui_settextcolour(g, wireview->skin.effect_fontcolour);
-		} else {		
-			psy_ui_settextcolour(g, wireview->skin.generator_fontcolour);;
-		}
-		if (self->mode != MACHMODE_MASTER) {
-			psy_ui_Rectangle clip;
+		if (!wireview->drawvumode) {
+			if (psy_audio_machine_editname(self->machine)) {
+				if (self->skin->drawmachineindexes) {
+					psy_snprintf(editname, 130, "%.2X:%s", (int)slot,
+						psy_audio_machine_editname(self->machine));
+				} else {
+					psy_snprintf(editname, 130, "%s",
+						psy_audio_machine_editname(self->machine));
+				}
+			}
+			if (self->mode == MACHMODE_FX) {
+				psy_ui_settextcolour(g, wireview->skin.effect_fontcolour);
+			} else {
+				psy_ui_settextcolour(g, wireview->skin.generator_fontcolour);;
+			}
+			if (self->mode != MACHMODE_MASTER) {
+				psy_ui_Rectangle clip;
 
-			clip = psy_ui_rectangle_make(r.left + coords->name.destx,
-				r.top + coords->name.desty, coords->name.destwidth,
-				coords->name.destheight);
-			psy_ui_textoutrectangle(g, r.left + coords->name.destx,
-				r.top + coords->name.desty,
-				psy_ui_ETO_CLIPPED, clip,
-				editname, strlen(editname));
-			skin_blitpart(g, &wireview->skin.skinbmp,
-				r.left + skincoord_position(&coords->pan,
-				psy_audio_machine_panning(self->machine)), r.top,
+				clip = psy_ui_rectangle_make(r.left + coords->name.destx,
+					r.top + coords->name.desty, coords->name.destwidth,
+					coords->name.destheight);
+				psy_ui_textoutrectangle(g, r.left + coords->name.destx,
+					r.top + coords->name.desty,
+					psy_ui_ETO_CLIPPED, clip,
+					editname, strlen(editname));
+				skin_blitpart(g, &wireview->skin.skinbmp,
+					r.left + skincoord_position(&coords->pan,
+						psy_audio_machine_panning(self->machine)), r.top,
 					&coords->pan);
-			if (psy_audio_machine_muted(self->machine)) {
-				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
-					&coords->mute);
-			}			
-			if ((psy_audio_machine_mode(self->machine) == MACHMODE_FX) &&				
-				psy_audio_machine_bypassed(self->machine)) {
-				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
-					&coords->bypass);
+				if (psy_audio_machine_muted(self->machine)) {
+					skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+						&coords->mute);
+				}
+				if ((psy_audio_machine_mode(self->machine) == MACHMODE_FX) &&
+					psy_audio_machine_bypassed(self->machine)) {
+					skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+						&coords->bypass);
+				}
+				if ((psy_audio_machine_mode(self->machine) == MACHMODE_GENERATOR) &&
+					psy_audio_machines_soloed(wireview->machines) == self->slot) {
+					skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
+						&coords->solo);
+				}
 			}
-			if ((psy_audio_machine_mode(self->machine) == MACHMODE_GENERATOR) &&
-				psy_audio_machines_soloed(wireview->machines) == self->slot) {
-				skin_blitpart(g, &wireview->skin.skinbmp, r.left, r.top,
-					&coords->solo);
-			}
-		}		
+		}
 		if (wireview->drawvumeters) {
 			machineui_drawvu(self, g, wireview);
 		}
@@ -440,7 +460,6 @@ static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
 static void machinewireview_onmasterworked(MachineWireView*,
 	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
 static void machinewireview_ontimer(MachineWireView*, uintptr_t timerid);
-static void machinewireview_invalidateallmacvus(MachineWireView*);
 static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
 	psy_Property*);
 static void machinewireview_readconfig(MachineWireView*);
@@ -500,6 +519,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->wireframes = 0;
 	self->randominsert = 1;
 	self->addeffect = 0;
+	self->drawvumode = FALSE;
 	self->scroller = scroller;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
@@ -528,7 +548,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 		machinewireview_onsize);
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
-	psy_ui_component_starttimer(&self->component, 0, 50);
+	psy_ui_component_starttimer(&self->component, 0, 50);	
 	if (workspace->machineviewtheme) {
 		machinewireview_applyproperties(self, workspace->machineviewtheme);
 	}
@@ -1068,7 +1088,7 @@ void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 				psy_audio_machine_setpanning(machineui->machine,
 					machinewireview_panvalue(self, ev->x, ev->y,
 						self->dragslot));
-				machineui_invalidate(machineui, self);
+				machineui_invalidate(machineui, self, FALSE);
 			}
 		} else if (machinewireview_dragging_machine(self)) {
 			if (!machinewireview_dragmachine(self, self->dragslot,
@@ -1599,13 +1619,19 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 	psy_List* p;
 	psy_List* q;
 	psy_TableIterator it;
-	
+	bool updatevus;
+
+	self->drawvumode = TRUE;
+	updatevus = psy_ui_component_visible(&self->component);
+	if (updatevus) {
+		psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
+	}
 	for (p = self->wireframes; p != NULL; p = q) {
 		WireFrame* frame;
 
-		frame = (WireFrame*) p->entry;
+		frame = (WireFrame*)p->entry;
 		q = p->next;
-		if (frame->wireview && !wireview_wireexists(frame->wireview)) {			
+		if (frame->wireview && !wireview_wireexists(frame->wireview)) {
 			psy_ui_component_destroy(&frame->wireview->component);
 			free(frame->wireview);
 			psy_ui_component_destroy(&frame->component);
@@ -1617,7 +1643,8 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 			!psy_tableiterator_equal(&it, psy_table_end());
 			psy_tableiterator_inc(&it)) {
 		MachineUi* machineui;
-		machineui  = psy_tableiterator_value(&it);
+
+		machineui = psy_tableiterator_value(&it);
 		if (machineui->frame) {
 			if (machineui->frame->dofloat) {
 				MachineFrame* frame;
@@ -1646,14 +1673,13 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 					machineframe_setview(frame, view, machine);
 				}
 				psy_ui_component_show(&frame->component);
-				psy_ui_component_destroy(&temp);					
+				psy_ui_component_destroy(&temp);
 				machineui->frame = frame;
 				psy_signal_connect(&frame->component.signal_destroy, machineui,
 					machineui_onframedestroyed);
 				psy_ui_component_align(psy_ui_component_parent(dockparent));
 				psy_ui_component_align(dockparent);
-			} else
-			if (machineui->frame->dodock) {
+			} else if (machineui->frame->dodock) {
 				MachineFrame* frame;
 				psy_ui_Component temp;
 				psy_ui_Component* view;
@@ -1683,8 +1709,7 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				workspace_dockview(self->workspace, &machineui->frame->component);
 				psy_signal_connect(&frame->component.signal_destroy, machineui,
 					machineui_onframedestroyed);
-			} else
-			if (machineui->frame->doclose) {
+			} else if (machineui->frame->doclose) {
 				psy_ui_Component* dockparent;
 
 				dockparent = psy_ui_component_parent(&machineui->frame->component);
@@ -1693,25 +1718,26 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				psy_ui_component_align(dockparent);
 			}
 		}
-	}
-	machinewireview_invalidateallmacvus(self);
-}
-
-void machinewireview_invalidateallmacvus(MachineWireView* self)
-{
-	psy_TableIterator it;
-	
-	for (it = psy_table_begin(&self->machineuis);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {		
-		machineui_invalidate(psy_tableiterator_value(&it), self);
+		if (updatevus) {
+			machineui_invalidate(machineui, self, TRUE);
+		}
 	}	
+	if (updatevus) {
+		psy_ui_component_update(&self->component);
+		self->drawvumode = FALSE;
+		psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_SET);
+	}
 }
 
-void machineui_invalidate(MachineUi* self, MachineWireView* wireview)
-{	
-	psy_ui_component_invalidaterect(&wireview->component,
-		machineui_position(self));
+void machineui_invalidate(MachineUi* self, MachineWireView* wireview, bool vu)
+{
+	if (vu) {
+		psy_ui_component_invalidaterect(&wireview->component,
+			machineui_vuposition(self));
+	} else {
+		psy_ui_component_invalidaterect(&wireview->component,
+			machineui_position(self));
+	}
 }
 
 void machinewireview_showwireview(MachineWireView* self, psy_audio_Wire wire)
@@ -1868,10 +1894,6 @@ static void machineviewbar_onsongchanged(MachineViewBar*, Workspace*,
 	int flag, psy_audio_SongFile*);
 static void machineviewbar_onmixerconnectmodeclick(MachineViewBar*,
 	psy_ui_Component* sender);
-static void machineviewbar_onlanguagechanged(MachineViewBar*,
-	psy_Translator* sender);
-static void machineviewbar_updatetext(MachineViewBar* self,
-	psy_Translator*);
 
 void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -1886,6 +1908,8 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->mixersend.component, &margin);
 	psy_ui_checkbox_check(&self->mixersend);
+	psy_ui_checkbox_settext(&self->mixersend,
+		"machineview.connect-to-mixer-send-return-input");
 	psy_signal_connect(&self->mixersend.signal_clicked, self,
 		machineviewbar_onmixerconnectmodeclick);	
 	psy_ui_component_setalign(&self->mixersend.component, psy_ui_ALIGN_LEFT);
@@ -1896,22 +1920,7 @@ void machineviewbar_init(MachineViewBar* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT);
 	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
 	psy_signal_connect(&workspace->signal_songchanged, self,
-		machineviewbar_onsongchanged);
-	machineviewbar_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		machineviewbar_onlanguagechanged);
-}
-
-void machineviewbar_updatetext(MachineViewBar* self, psy_Translator* translator)
-{
-	psy_ui_checkbox_settext(&self->mixersend,
-		psy_translator_translate(translator,
-			"machineview.connect-to-mixer-send-return-input"));
-}
-
-void machineviewbar_onlanguagechanged(MachineViewBar* self, psy_Translator* sender)
-{
-	machineviewbar_updatetext(self, sender);
+		machineviewbar_onsongchanged);	
 }
 
 void machineviewbar_settext(MachineViewBar* self, const char* text)
@@ -2004,7 +2013,7 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		"machineview.new-machine", NULL);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		machineview_selectsection);
-	psy_ui_notebook_setpageindex(&self->notebook, 0);	
+	psy_ui_notebook_select(&self->notebook, 0);	
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	psy_signal_connect(&self->newmachine.signal_selected, self,
@@ -2136,7 +2145,8 @@ void machinewireview_onpreferredsize(MachineWireView* self, const psy_ui_Size* l
 	rv->height = psy_ui_value_makepx(bounds.bottom);
 }
 
-void machineview_selectsection(MachineView* self, psy_ui_Component* sender, uintptr_t section)
+void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
+	uintptr_t section)
 {
 	tabbar_select(&self->tabbar, (int) section);
 	if (section == 0) {

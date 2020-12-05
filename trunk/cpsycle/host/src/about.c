@@ -4,18 +4,20 @@
 #include "../../detail/prefix.h"
 
 #include "about.h"
-#include "../../detail/psydef.h"
-
+// local
+#include "resources/resource.h"
+// std
 #include <stdio.h>
 #include <string.h>
-#include "resources/resource.h"
-
+// platform
 #include "../../detail/portable.h"
 
 void contrib_init(Contrib* self, psy_ui_Component* parent)
 {	
-	psy_ui_component_init(&self->component, parent);		
-	psy_ui_edit_multiline_init(&self->contrib, &self->component);
+	psy_ui_component_init(contrib_base(self), parent);
+	psy_ui_component_setdefaultalign(contrib_base(self), psy_ui_ALIGN_TOP,
+		psy_ui_defaults_vmargin(psy_ui_defaults()));
+	psy_ui_edit_multiline_init(&self->contrib, contrib_base(self));
 	psy_ui_edit_preventedit(&self->contrib);
 	psy_ui_edit_setlinenumber(&self->contrib, 10);
 	psy_ui_edit_settext(&self->contrib,						
@@ -55,44 +57,32 @@ void contrib_init(Contrib* self, psy_ui_Component* parent)
 		"Argu\t\t( http://www.aodix.com/ )" "\r\n"
 		"Oatmeal by Fuzzpilz\t( http://bicycle-for-slugs.org/ )"
 	);	
-	psy_ui_edit_init(&self->psycledelics, &self->component);
+	psy_ui_edit_init(&self->psycledelics, contrib_base(self));
 	psy_ui_edit_preventedit(&self->psycledelics);
 	psy_ui_edit_settext(&self->psycledelics, "http://psycle.pastnotecut.org");	
-	psy_ui_edit_init(&self->sourceforge, &self->component);
+	psy_ui_edit_init(&self->sourceforge, contrib_base(self));
 	psy_ui_edit_preventedit(&self->sourceforge);
-	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");	
-	psy_ui_label_init(&self->steincopyright, &self->component);
+	psy_ui_edit_settext(&self->sourceforge, "http://psycle.sourceforge.net");
+	psy_ui_label_init(&self->steincopyright, contrib_base(self));
 	psy_ui_label_preventtranslation(&self->steincopyright);
-	psy_ui_label_settext(&self->steincopyright, "VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
-	{
-		psy_ui_Margin margin;
-
-		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
-			psy_ui_value_makepx(0));
-		psy_list_free(psy_ui_components_setalign(
-			psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-			psy_ui_ALIGN_TOP,
-			&margin));				
-	}
+	psy_ui_label_settext(&self->steincopyright,
+		"VST Virtual Studio Technology v2.4 (c)1998-2006 Steinberg");	
 }
 
 void version_init(Version* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);	
-	psy_ui_label_init(&self->versioninfo, &self->component);
+	psy_ui_component_init(version_base(self), parent);
+	psy_ui_label_init(&self->versioninfo, version_base(self));
 	psy_ui_label_preventtranslation(&self->versioninfo);
 	psy_ui_label_settextalignment(&self->versioninfo, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);
 	psy_ui_label_settext(&self->versioninfo, PSYCLE__BUILD__IDENTIFIER("\r\n"));
-	psy_ui_component_resize(&self->versioninfo.component,
-		psy_ui_size_make(psy_ui_value_makepx(500), psy_ui_value_makepx(300)));
-	psy_ui_component_setbackgroundcolour(&self->versioninfo.component, psy_ui_colour_make(0x00232323));
+	psy_ui_component_resize(psy_ui_label_base(&self->versioninfo),
+		psy_ui_size_makepx(500, 300));
 }
 
 void licence_init(Licence* self, psy_ui_Component* parent)
 {
-	psy_ui_component_init(&self->component, parent);		
-	psy_ui_component_enablealign(&self->component);
+	psy_ui_component_init(&self->component, parent);	
 	psy_ui_editor_init(&self->licenceinfo, &self->component);
 	psy_ui_editor_settext(&self->licenceinfo,
 		"Psycle is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version."
@@ -146,7 +136,7 @@ void licence_init(Licence* self, psy_ui_Component* parent)
 	psy_ui_component_resize(&self->licenceinfo.component,
 		psy_ui_size_make(psy_ui_value_makepx(500), psy_ui_value_makepx(300)));
 	psy_ui_component_setbackgroundcolour(&self->licenceinfo.component,
-		psy_ui_colour_make(0x00232323));
+		psy_ui_defaults()->style_common.backgroundcolour);
 	psy_ui_editor_preventedit(&self->licenceinfo);
 	psy_ui_editor_enablewrap(&self->licenceinfo);
 }
@@ -192,7 +182,7 @@ void about_init(About* self, psy_ui_Component* parent, Workspace* workspace)
 	contrib_init(&self->contrib, psy_ui_notebook_base(&self->notebook));
 	version_init(&self->version, psy_ui_notebook_base(&self->notebook));
 	licence_init(&self->licence, psy_ui_notebook_base(&self->notebook));
-	psy_ui_notebook_setpageindex(&self->notebook, 0);
+	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->component.signal_focus, self,
 		about_onfocus);
 }
@@ -305,21 +295,21 @@ void about_onfocus(About* self, psy_ui_Component* sender)
 
 void about_oncontributors(About* self, psy_ui_Component* sender) 
 {	
-	psy_ui_notebook_setpageindex(&self->notebook, 
+	psy_ui_notebook_select(&self->notebook, 
 		psy_ui_notebook_pageindex(&self->notebook) != 1 ? 1 : 0);
 	psy_ui_component_invalidate(&self->component);
 }
 
 void about_onversion(About* self, psy_ui_Component* sender) 
 {	
-	psy_ui_notebook_setpageindex(&self->notebook, 
+	psy_ui_notebook_select(&self->notebook, 
 		psy_ui_notebook_pageindex(&self->notebook) != 2 ? 2 : 0);
 	psy_ui_component_invalidate(&self->component);
 }
 
 void about_onlicence(About* self, psy_ui_Component* sender)
 {
-	psy_ui_notebook_setpageindex(&self->notebook,
+	psy_ui_notebook_select(&self->notebook,
 		psy_ui_notebook_pageindex(&self->notebook) != 3 ? 3 : 0);
 	psy_ui_component_invalidate(&self->component);
 }

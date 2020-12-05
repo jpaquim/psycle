@@ -27,8 +27,7 @@ void fileview_init(FileView* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {		
 	psy_ui_component_init(fileview_base(self), parent);
-	self->workspace = workspace;
-	psy_ui_component_enablealign(fileview_base(self));		
+	self->workspace = workspace;	
 	tabbar_init(&self->drives, fileview_base(self));
 	psy_ui_component_setalign(tabbar_base(&self->drives), psy_ui_ALIGN_LEFT);
 	self->drives.tabalignment = psy_ui_ALIGN_LEFT;

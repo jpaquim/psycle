@@ -12,6 +12,7 @@
 #include "uistyle.h"
 #include "uidefaults.h"
 #include <list.h>
+#include <translator.h>
 #include "../../detail/stdint.h"
 
 // psy_ui_Component
@@ -84,6 +85,7 @@ typedef void (*psy_ui_fp_component_onmouseleave)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_onkeydown)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_component_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t);
+typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -120,6 +122,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onkeydown onkeydown;
 	psy_ui_fp_component_onkeydown onkeyup;
 	psy_ui_fp_component_ontimer ontimer;
+	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;
@@ -158,6 +161,7 @@ typedef struct psy_ui_Component {
 	psy_Signal signal_focus;	
 	psy_Signal signal_preferredsizechanged;
 	psy_Signal signal_scrollrangechanged;
+	psy_Signal signal_languagechanged;
 	psy_ui_AlignType align;
 	psy_ui_JustifyType justify;
 	int alignexpandmode;
@@ -594,6 +598,11 @@ void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType, psy_ui_Margin margin);
 
 const struct psy_ui_Defaults* psy_ui_defaults(void);
+
+void psy_ui_component_updatelanguage(psy_ui_Component* self);
+psy_Translator* psy_ui_translator(void);
+
+const char* psy_ui_translate(const char* key);
 
 
 #ifdef __cplusplus

@@ -552,12 +552,13 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
-	psy_ui_component_init(&self->buttongroup, &self->component);	
+	psy_ui_component_init(&self->buttongroup, &self->component);
+	psy_ui_component_setdefaultalign(&self->buttongroup, psy_ui_ALIGN_TOP,
+		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_label_init_text(&self->help, &self->component,
 		"channelmapping.remove-connection-with-right-click");
 	psy_ui_label_settextalignment(&self->help, psy_ui_ALIGNMENT_LEFT);
 	psy_ui_component_setalign(&self->help.component, psy_ui_ALIGN_BOTTOM);		
-	psy_ui_component_enablealign(&self->buttongroup);
 	psy_ui_component_setalign(&self->buttongroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_button_init_connect(&self->autowire, &self->buttongroup, self,
 		channelmappingview_onautowire);
@@ -566,14 +567,7 @@ void channelmappingview_init(ChannelMappingView* self, psy_ui_Component* parent,
 	psy_ui_button_init_connect(&self->unselectall, &self->buttongroup,
 		self, channelmappingview_unselectall);
 	psy_ui_button_settext(&self->unselectall, "channelmapping.unselect-all");
-	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->buttongroup, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_TOP,
-		&margin));	
+	psy_ui_button_settextalignment(&self->unselectall, psy_ui_ALIGNMENT_LEFT);	
 	pinedit_init(&self->pinedit, &self->component, wire, workspace);
 	psy_ui_component_setalign(&self->pinedit.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),

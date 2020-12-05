@@ -5,8 +5,6 @@
 #define TRACKERVIEW
 
 // host
-#include "interpolatecurveview.h"
-#include "transformpatternview.h"
 #include "trackerlinestate.h"
 #include "trackergridstate.h"
 #include "workspace.h"
@@ -23,37 +21,6 @@ extern "C" {
 // the SequenceView as a tracker grid.
 
 #define TRACKERGRID_numparametercols 10
-
-typedef struct PatternBlockMenu {
-	// inherits
-	psy_ui_Component component;
-	// ui elements
-	psy_ui_Button cut;
-	psy_ui_Button copy;
-	psy_ui_Button paste;
-	psy_ui_Button mixpaste;
-	psy_ui_Button del;
-	psy_ui_Button transform;
-	psy_ui_Button interpolatelinear;
-	psy_ui_Button interpolatecurve;
-	psy_ui_Button changegenerator;
-	psy_ui_Button changeinstrument;
-	psy_ui_Button blocktransposeup;
-	psy_ui_Button blocktransposedown;
-	psy_ui_Button blocktransposeup12;	
-	psy_ui_Button blocktransposedown12;	
-	psy_ui_Button import;
-	psy_ui_Button export;
-} PatternBlockMenu;
-
-void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*, Workspace*);
-
-INLINE psy_ui_Component* patternblockmenu_base(PatternBlockMenu* self)
-{
-	assert(self);
-
-	return &self->component;
-}
 
 typedef struct {
 	int playbar;
@@ -128,6 +95,22 @@ int trackergrid_scrollright(TrackerGrid*, psy_audio_PatternCursor);
 void trackergrid_storecursor(TrackerGrid*);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
+// block menu
+void trackergrid_oninterpolatelinear(TrackerGrid*);
+void trackergrid_onchangegenerator(TrackerGrid*);
+void trackergrid_onchangeinstrument(TrackerGrid*);
+void trackergrid_blockstart(TrackerGrid*);
+void trackergrid_blockend(TrackerGrid*);
+void trackergrid_blockunmark(TrackerGrid*);
+void trackergrid_onblockcut(TrackerGrid*);
+void trackergrid_onblockcopy(TrackerGrid*);
+void trackergrid_onblockpaste(TrackerGrid*);
+void trackergrid_onblockmixpaste(TrackerGrid*);
+void trackergrid_onblockdelete(TrackerGrid*);
+void trackergrid_onblocktransposeup(TrackerGrid*);
+void trackergrid_onblocktransposedown(TrackerGrid*);
+void trackergrid_onblocktransposeup12(TrackerGrid*);
+void trackergrid_onblocktransposedown12(TrackerGrid*);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {
@@ -148,10 +131,7 @@ typedef struct TrackerView {
 	psy_ui_Component component;	
 	// ui elements
 	TrackerGrid grid;
-	psy_ui_Scroller scroller;
-	PatternBlockMenu blockmenu;
-	TransformPatternView transformview;
-	InterpolateCurveView interpolatecurveview;
+	psy_ui_Scroller scroller;	
 	// internal data
 	int showdefaultline;	
 	int pgupdownstep;
@@ -167,14 +147,10 @@ void trackerview_init(TrackerView*, psy_ui_Component* parent,
 	struct PatternView* view,
 	Workspace*);
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
-void trackerview_toggleblockmenu(TrackerView*);
 void trackerview_updatescrollstep(TrackerView*);
 void trackerview_makecmds(psy_Property* parent);
-
-INLINE bool trackerview_blockmenuvisible(TrackerView* self)
-{
-	return psy_ui_component_visible(&self->blockmenu.component);
-}
+void trackerview_onpatternimport(TrackerView*);
+void trackerview_onpatternexport(TrackerView*);
 
 INLINE psy_ui_Component* trackerview_base(TrackerView* self)
 {

@@ -32,8 +32,6 @@ void gearbuttons_init(GearButtons* self, psy_ui_Component* parent, Workspace* wo
 
 // Gear
 // prototypes
-static void gear_updatetext(Gear*, psy_Translator*);
-static void gear_onlanguagechanged(Gear*, psy_Translator* sender);
 static void gear_ondelete(Gear*, psy_ui_Component* sender);
 static void gear_onsongchanged(Gear*, Workspace*, int flag, psy_audio_SongFile*);
 static void gear_onclone(Gear*, psy_ui_Component* sender);
@@ -71,7 +69,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 	// client
 	tabbar_init(&self->tabbar, gear_base(self));	
-	tabbar_append_tabs(&self->tabbar, "", "", "", "", NULL);
+	tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
+		"gear.instruments", "gear.waves", NULL);
 	tabbar_select(&self->tabbar, 0);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
 	psy_ui_notebook_init(&self->notebook, gear_base(self));
@@ -100,24 +99,6 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		gear_onmaster);
 	psy_signal_connect(&self->buttons.exchange.signal_clicked, self,
 		gear_onexchange);
-	gear_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		gear_onlanguagechanged);
-}
-
-void gear_updatetext(Gear* self, psy_Translator* translator)
-{
-	tabbar_rename_tabs(&self->tabbar,
-		psy_translator_translate(translator, "gear.generators"),
-		psy_translator_translate(translator, "gear.effects"),
-		psy_translator_translate(translator, "gear.instruments"),
-		psy_translator_translate(translator, "gear.waves"),
-		NULL);
-}
-
-void gear_onlanguagechanged(Gear* self, psy_Translator* sender)
-{
-	gear_updatetext(self, sender);
 }
 
 void gear_ondelete(Gear* self, psy_ui_Component* sender)

@@ -21,6 +21,7 @@ int iDeltaPerLine = 120;
 extern psy_Table menumap;
 extern psy_ui_App app;
 
+static psy_ui_Component* eventtarget(psy_ui_Component* component);
 static void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message,
 	WPARAM wparam, LPARAM lparam);
 static void handle_vscroll(HWND hwnd, WPARAM wParam, LPARAM lParam);
@@ -47,6 +48,8 @@ static int FilterException(const char* msg, int code,
 	MessageBox(0, msg, "Psycle Ui Exception", MB_OK | MB_ICONERROR);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+
+static void onlanguagechanged(psy_ui_WinApp*, psy_Translator* sender);
 
 void psy_ui_winapp_init(psy_ui_WinApp* self, HINSTANCE instance)
 {
@@ -538,6 +541,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 							GetKeyState(VK_SHIFT) < 0,
 							GetKeyState(VK_CONTROL) < 0,
 							(lParam & 0x40000000) == 0x40000000);
+						psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
 						psy_signal_emit(&imp->component->signal_keydown,
 							imp->component, 1, &ev);					
 						if (ev.bubble != FALSE &&
@@ -556,20 +560,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
-				if (winapp->targetids) {
-					HWND targethwnd;
-					psy_ui_win_ComponentImp* targetimp;
-
-					targethwnd = (winapp->targetids->tail)
-						? (HWND)(uintptr_t)(winapp->targetids->tail->entry)
-						: 0;
-					targetimp = (psy_ui_win_ComponentImp*)psy_table_at(
-						&winapp->selfmap,
-						(uintptr_t)targethwnd);
-					if (targetimp) {
-						ev.target = targetimp->component;
-					}
-				}
+				psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onkeydown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_keydown, imp->component,
 					1, &ev);
@@ -587,6 +578,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
 					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
 					(lParam & 0x40000000) == 0x40000000);
+				psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onkeyup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_keyup, imp->component,
 					1, &ev);
@@ -603,6 +595,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component,
 					1, &ev);
@@ -619,6 +612,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component,
 					1, &ev);
@@ -635,6 +629,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmouseup(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mouseup, imp->component,
 					1, &ev);
@@ -651,6 +646,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown,
 					imp->component, 1, &ev);
@@ -667,7 +663,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
-				psy_ui_mouseevent_settarget(&ev, winapp->eventretarget);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown,
 					imp->component, 1, &ev);
@@ -684,6 +680,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedown(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedown,
 					imp->component, 1, &ev);
@@ -700,6 +697,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_LBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick,
 					imp->component, 1, &ev);				
@@ -716,6 +714,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_MBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick,
 					imp->component, 1, &ev);
@@ -732,6 +731,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 					MK_RBUTTON, 0, GetKeyState(VK_SHIFT) < 0,
 					GetKeyState(VK_CONTROL) < 0);
 				adjustcoordinates(imp->component, &ev.x, &ev.y);
+				psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onmousedoubleclick(imp->component, &ev);
 				psy_signal_emit(&imp->component->signal_mousedoubleclick,
 					imp->component, 1, &ev);
@@ -764,6 +764,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						wParam, 0, GetKeyState(VK_SHIFT) < 0,
 						GetKeyState(VK_CONTROL) < 0);
 					adjustcoordinates(imp->component, &ev.x, &ev.y);
+					//psy_ui_mouseevent_settarget(&ev, eventtarget(imp->component));
 					imp->component->vtable->onmousemove(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_mousemove,
 						imp->component, 1, &ev);					
@@ -885,7 +886,27 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 	return DefWindowProc (hwnd, message, wParam, lParam) ;
 }
 
+psy_ui_Component* eventtarget(psy_ui_Component* component)
+{
+	psy_ui_WinApp* winapp;
 
+	winapp = (psy_ui_WinApp*)app.platform;
+	if (winapp->targetids) {
+		HWND targethwnd;
+		psy_ui_win_ComponentImp* targetimp;
+
+		targethwnd = (winapp->targetids)
+			? (HWND)(uintptr_t)(winapp->targetids->entry)
+			: NULL;
+		targetimp = (psy_ui_win_ComponentImp*)psy_table_at(
+			&winapp->selfmap,
+			(uintptr_t)targethwnd);
+		if (targetimp) {
+			return targetimp->component;
+		}
+	}
+	return component;
+}
 
 void sendmessagetoparent(psy_ui_win_ComponentImp* imp, uintptr_t message, WPARAM wparam, LPARAM lparam)
 {
@@ -1037,6 +1058,9 @@ void psy_ui_winapp_close(psy_ui_WinApp* self, psy_ui_Component* main)
 	PostMessage(((psy_ui_win_ComponentImp*)(main->imp))->hwnd, WM_CLOSE, 0, 0);	
 }
 
+void onlanguagechanged(psy_ui_WinApp* self, psy_Translator* sender)
+{
 
+}
 
 #endif

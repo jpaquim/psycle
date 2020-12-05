@@ -113,27 +113,20 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_init(&self->row1, &self->component);
-	psy_ui_component_enablealign(&self->row1);
 	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->row1, psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init(&self->create, &self->row1);
-	psy_ui_button_settext(&self->create, "file.new");
-	psy_ui_button_init(&self->load, &self->row1);
-	psy_ui_button_settext(&self->load, "file.load");
-	psy_ui_button_init(&self->save, &self->row1);
-	psy_ui_button_settext(&self->save, "file.save");
-	psy_ui_button_init(&self->duplicate, &self->row1);
-	psy_ui_button_settext(&self->duplicate, "edit.duplicate");
+	psy_ui_button_init_text(&self->create, &self->row1, "file.new");
+	psy_ui_button_init_text(&self->load, &self->row1, "file.load");
+	psy_ui_button_init_text(&self->save, &self->row1, "file.save");
+	psy_ui_button_init_text(&self->duplicate, &self->row1, "edit.duplicate");
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->row1, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	psy_ui_component_init(&self->row2, &self->component);
-	psy_ui_component_enablealign(&self->row2);
 	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->row2, psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init(&self->del, &self->row2);
-	psy_ui_button_settext(&self->del, "edit.delete");
+	psy_ui_button_init_text(&self->del, &self->row2, "edit.delete");
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->row2, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
@@ -142,8 +135,6 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 
 // InstrumentGeneralView
 // prototypes
-static void instrumentgeneralview_updatetext(InstrumentGeneralView*, psy_Translator*);
-static void instrumentgeneralview_onlanguagechanged(InstrumentGeneralView*, psy_Translator* sender);
 static void instrumentgeneralview_onfitrow(InstrumentGeneralView*,
 	psy_ui_Component* sender);
 static void instrumentgeneralview_onnnacut(InstrumentGeneralView*);
@@ -176,7 +167,6 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 	psy_ui_component_setmargin(&self->notemapview.samplesbox.component, &margin);
 	// nna
 	psy_ui_component_init(&self->nna, &self->component);
-	psy_ui_component_enablealign(&self->nna);
 	psy_ui_component_setalign(&self->nna, psy_ui_ALIGN_TOP);
 	psy_ui_label_init_text(&self->nnaheader, &self->nna,
 		"instrumentview.new-note-action");
@@ -198,7 +188,6 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		&margin));
 	// fitrow
 	psy_ui_component_init(&self->fitrow, &self->component);
-	psy_ui_component_enablealign(&self->fitrow);
 	psy_ui_component_setalign(&self->fitrow, psy_ui_ALIGN_TOP);
 	psy_ui_checkbox_init(&self->fitrowcheck, &self->fitrow);
 	psy_signal_connect(&self->fitrowcheck.signal_clicked, self,
@@ -219,22 +208,11 @@ void instrumentgeneralview_init(InstrumentGeneralView* self,
 		(ui_slider_fpvalue)instrumentgeneralview_ongeneralviewvalue);
 	instrumentnotemapview_init(&self->notemapview, &self->component, workspace);
 	psy_ui_component_setalign(&self->notemapview.component, psy_ui_ALIGN_CLIENT);
-	instrumentgeneralview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		instrumentgeneralview_onlanguagechanged);
-}
-
-void instrumentgeneralview_updatetext(InstrumentGeneralView* self, psy_Translator* translator)
-{
 	psy_ui_checkbox_settext(&self->fitrowcheck,
 		"instrumentview.play-sample-to-fit");
 	psy_ui_slider_settext(&self->globalvolume,
 		"instrumentview.global-volume");
-}
-
-void instrumentgeneralview_onlanguagechanged(InstrumentGeneralView* self, psy_Translator* sender)
-{
-	instrumentgeneralview_updatetext(self, sender);
+	
 }
 
 void instrumentgeneralview_setinstrument(InstrumentGeneralView* self,
@@ -376,8 +354,8 @@ void instrumentgeneralview_ongeneralviewdescribe(InstrumentGeneralView* self,
 
 // InstrumentVolumeView
 // prototypes
-static void instrumentvolumeview_updatetext(InstrumentVolumeView*, psy_Translator*);
-static void instrumentvolumeview_onlanguagechanged(InstrumentVolumeView*, psy_Translator* sender);
+static void instrumentvolumeview_updatetext(InstrumentVolumeView*);
+static void instrumentvolumeview_onlanguagechanged(InstrumentVolumeView*, psy_ui_Component* sender);
 static void instrumentvolumeview_onvolumeviewdescribe(InstrumentVolumeView*,
 	psy_ui_Slider*, char* txt);
 static void instrumentvolumeview_onvolumeviewtweak(InstrumentVolumeView*,
@@ -410,9 +388,13 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 		psy_ui_value_makepx(5));
 	psy_ui_component_setmargin(&self->envelopeview.component, &margin);		
 	psy_ui_slider_init(&self->attack, &self->component);
+	psy_ui_slider_settext(&self->attack, "instrumentview.attack");
 	psy_ui_slider_init(&self->decay, &self->component);
+	psy_ui_slider_settext(&self->decay, "instrumentview.decay");
 	psy_ui_slider_init(&self->sustain, &self->component);
-	psy_ui_slider_init(&self->release, &self->component);	
+	psy_ui_slider_settext(&self->sustain, "instrumentview.sustain-level");
+	psy_ui_slider_init(&self->release, &self->component);
+	psy_ui_slider_settext(&self->release, "instrumentview.release");
 	psy_ui_margin_init_all(&margin,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(5),
@@ -426,29 +408,20 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 			(ui_slider_fptweak)instrumentvolumeview_onvolumeviewtweak,
 			(ui_slider_fpvalue)instrumentvolumeview_onvolumeviewvalue);
 	}
-	instrumentvolumeview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
+	instrumentvolumeview_updatetext(self);
+	psy_signal_connect(&self->component.signal_languagechanged, self,
 		instrumentvolumeview_onlanguagechanged);
 }
 
-void instrumentvolumeview_updatetext(InstrumentVolumeView* self, psy_Translator* translator)
+void instrumentvolumeview_updatetext(InstrumentVolumeView* self)
 {
-	envelopeview_settext(&self->envelopeview,
-		psy_translator_translate(translator, "instrumentview.amplitude-envelope"));
-	psy_ui_slider_settext(&self->attack,
-		psy_translator_translate(translator, "instrumentview.attack"));
-	psy_ui_slider_settext(&self->decay,
-		psy_translator_translate(translator, "instrumentview.decay"));
-	psy_ui_slider_settext(&self->sustain,
-		psy_translator_translate(translator, "instrumentview.sustain-level"));
-	psy_ui_slider_settext(&self->release,
-		psy_translator_translate(translator, "instrumentview.release"));
-
+	envelopeview_settext(&self->envelopeview, psy_ui_translate(
+		"instrumentview.amplitude-envelope"));	
 }
 
-void instrumentvolumeview_onlanguagechanged(InstrumentVolumeView* self, psy_Translator* sender)
+void instrumentvolumeview_onlanguagechanged(InstrumentVolumeView* self, psy_ui_Component* sender)
 {
-	instrumentvolumeview_updatetext(self, sender);
+	instrumentvolumeview_updatetext(self);
 }
 
 void instrumentvolumeview_setinstrument(InstrumentVolumeView* self,
@@ -550,8 +523,6 @@ void instrumentvolumeview_onvolumeviewvalue(InstrumentVolumeView* self,
 
 // InstrumentPanView
 // prototypes
-static void instrumentpanview_updatetext(InstrumentPanView*, psy_Translator*);
-static void instrumentpanview_onlanguagechanged(InstrumentPanView*, psy_Translator* sender);
 static void instrumentpanview_onrandompanning(InstrumentPanView* self,
 	psy_ui_CheckBox* sender);
 // implementation
@@ -566,27 +537,15 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	self->instrument = 0;
 	self->instruments = instruments;	
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_checkbox_init(&self->randompanning, &self->component);	
+	psy_ui_checkbox_init(&self->randompanning, &self->component);
+	psy_ui_checkbox_settext(&self->randompanning,
+		"instrumentview.random-panning");
 	psy_signal_connect(&self->randompanning.signal_clicked, self,
 		instrumentpanview_onrandompanning);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
-		&margin));
-	instrumentpanview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		instrumentpanview_onlanguagechanged);
-}
-
-void instrumentpanview_updatetext(InstrumentPanView* self, psy_Translator* translator)
-{
-	psy_ui_checkbox_settext(&self->randompanning,
-		psy_translator_translate(translator, "instrumentview.random-panning"));
-}
-
-void instrumentpanview_onlanguagechanged(InstrumentPanView* self, psy_Translator* sender)
-{
-	instrumentpanview_updatetext(self, sender);
+		&margin));	
 }
 
 void instrumentpanview_setinstrument(InstrumentPanView* self,
@@ -609,8 +568,8 @@ void instrumentpanview_onrandompanning(InstrumentPanView* self, psy_ui_CheckBox*
 
 // InstrumentFilterView
 // prototypes
-static void instrumentfilterview_updatetext(InstrumentFilterView*, psy_Translator*);
-static void instrumentfilterview_onlanguagechanged(InstrumentFilterView*, psy_Translator* sender);
+static void instrumentfilterview_updatetext(InstrumentFilterView*);
+static void instrumentfilterview_onlanguagechanged(InstrumentFilterView*, psy_ui_Component* sender);
 static void instrumentfilterview_fillfiltercombobox(InstrumentFilterView*);
 static void instrumentfilterview_ondescribe(InstrumentFilterView*, psy_ui_Slider*, char* txt);
 static void instrumentfilterview_ontweak(InstrumentFilterView*, psy_ui_Slider*, float value);
@@ -636,7 +595,6 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 	self->instrument = 0;
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_init(&self->filter, &self->component);
-	psy_ui_component_enablealign(&self->filter);
 	psy_ui_component_setalign(&self->filter, psy_ui_ALIGN_TOP);	
 	psy_ui_label_init_text(&self->filtertypeheader, &self->filter,
 		"Filter type");
@@ -692,36 +650,28 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 			(ui_slider_fptweak)instrumentfilterview_ontweak,
 			(ui_slider_fpvalue)instrumentfilterview_onvalue);
 	}
-	instrumentfilterview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
+	instrumentfilterview_updatetext(self);
+	psy_signal_connect(&self->component.signal_languagechanged, self,
 		instrumentfilterview_onlanguagechanged);
+	psy_ui_label_settext(&self->filtertypeheader, "instrumentview.filter-type");
+	psy_ui_slider_settext(&self->attack, "instrumentview.attack");
+	psy_ui_slider_settext(&self->decay, "instrumentview.decay");
+	psy_ui_slider_settext(&self->sustain, "instrumentview.sustain-level");
+	psy_ui_slider_settext(&self->release, "instrumentview.release");
+	psy_ui_slider_settext(&self->cutoff, "instrumentview.cut-off");
+	psy_ui_slider_settext(&self->res, "instrumentview.res");
+	psy_ui_slider_settext(&self->modamount, "instrumentview.mod");
 }
 
-void instrumentfilterview_updatetext(InstrumentFilterView* self, psy_Translator* translator)
-{
-	psy_ui_label_settext(&self->filtertypeheader,
-		psy_translator_translate(translator, "instrumentview.filter-type"));
+void instrumentfilterview_updatetext(InstrumentFilterView* self)
+{	
 	envelopeview_settext(&self->envelopeview,
-		psy_translator_translate(translator, "instrumentview.filter-envelope"));
-	psy_ui_slider_settext(&self->attack,
-		psy_translator_translate(translator, "instrumentview.attack"));
-	psy_ui_slider_settext(&self->decay,
-		psy_translator_translate(translator, "instrumentview.decay"));
-	psy_ui_slider_settext(&self->sustain,
-		psy_translator_translate(translator, "instrumentview.sustain-level"));
-	psy_ui_slider_settext(&self->release,
-		psy_translator_translate(translator, "instrumentview.release"));
-	psy_ui_slider_settext(&self->cutoff,
-		psy_translator_translate(translator, "instrumentview.cut-off"));
-	psy_ui_slider_settext(&self->res,
-		psy_translator_translate(translator, "instrumentview.res"));
-	psy_ui_slider_settext(&self->modamount,
-		psy_translator_translate(translator, "instrumentview.mod"));
+		psy_ui_translate("instrumentview.filter-envelope"));	
 }
 
-void instrumentfilterview_onlanguagechanged(InstrumentFilterView* self, psy_Translator* sender)
+void instrumentfilterview_onlanguagechanged(InstrumentFilterView* self, psy_ui_Component* sender)
 {
-	instrumentfilterview_updatetext(self, sender);
+	instrumentfilterview_updatetext(self);
 }
 
 void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
@@ -886,27 +836,12 @@ void instrumentfilterview_onvalue(InstrumentFilterView* self,
 }
 
 // InstrumentPitchView
-// prototypes
-static void instrumentpitchview_updatetext(InstrumentPitchView*, psy_Translator*);
-static void instrumentpitchview_onlanguagechanged(InstrumentPitchView*, psy_Translator* sender);
 // implementation
 void instrumentpitchview_init(InstrumentPitchView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
 {
 	self->instruments = instruments;	
-	psy_ui_component_init(&self->component, parent);
-	instrumentpitchview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		instrumentpitchview_onlanguagechanged);
-}
-
-void instrumentpitchview_updatetext(InstrumentPitchView* self, psy_Translator* translator)
-{	
-}
-
-void instrumentpitchview_onlanguagechanged(InstrumentPitchView* self, psy_Translator* sender)
-{
-	instrumentpitchview_updatetext(self, sender);
+	psy_ui_component_init(&self->component, parent);	
 }
 
 void instrumentpitchview_setinstrument(InstrumentPitchView* self,
@@ -917,8 +852,6 @@ void instrumentpitchview_setinstrument(InstrumentPitchView* self,
 
 // InstrumentView
 // prototypes
-static void instrumentview_updatetext(InstrumentView*, psy_Translator*);
-static void instrumentview_onlanguagechanged(InstrumentView*, psy_Translator* sender);
 static void instrumentview_oncreateinstrument(InstrumentView*,
 	psy_ui_Component* sender);
 static void instrumentview_onloadinstrument(InstrumentView*, psy_ui_Component* sender);
@@ -964,7 +897,6 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
 	psy_ui_component_init(&self->left, &self->component);
-	psy_ui_component_enablealign(&self->left);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	instrumentviewbuttons_init(&self->buttons, &self->left, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
@@ -983,15 +915,16 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	}
 	// client
 	psy_ui_component_init(&self->client, &self->component);
-	psy_ui_component_enablealign(&self->client);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0));
 	psy_ui_component_setmargin(&self->client, &margin);
 	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
 	tabbar_init(&self->tabbar, &self->client);
-	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
-	tabbar_append_tabs(&self->tabbar, "", "", "", "", "", NULL);
+	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);	
+	tabbar_append_tabs(&self->tabbar, "instrumentview.general",
+		"instrumentview.volume", "instrumentview.pan", "instrumentview.filter",
+		"instrumentview.pitch", NULL);
 	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
@@ -1021,7 +954,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		instrumentview_onmachinesinsert);
 	psy_signal_connect(&self->workspace->song->machines.signal_removed, self,
 		instrumentview_onmachinesremoved);
-	psy_ui_notebook_setpageindex(&self->notebook, 0);
+	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, instrumentview_onsongchanged);
 	samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples
 	/* ,&workspace->song->instruments */);
@@ -1032,26 +965,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->general.notemapview.buttons.add.signal_clicked, self,
 		instrumentview_onaddentry);
 	psy_signal_connect(&self->general.notemapview.buttons.remove.signal_clicked, self,
-		instrumentview_onremoveentry);
-	instrumentview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		instrumentview_onlanguagechanged);
-}
-
-void instrumentview_updatetext(InstrumentView* self, psy_Translator* translator)
-{
-	tabbar_rename_tabs(&self->tabbar,
-		psy_translator_translate(translator, "instrumentview.general"),
-		psy_translator_translate(translator, "instrumentview.volume"),
-		psy_translator_translate(translator, "instrumentview.pan"),
-		psy_translator_translate(translator, "instrumentview.filter"),
-		psy_translator_translate(translator, "instrumentview.pitch"),
-		NULL);
-}
-
-void instrumentview_onlanguagechanged(InstrumentView* self, psy_Translator* sender)
-{
-	instrumentview_updatetext(self, sender);
+		instrumentview_onremoveentry);	
 }
 
 void instrumentview_oninstrumentinsert(InstrumentView* self, psy_audio_Instruments* sender,

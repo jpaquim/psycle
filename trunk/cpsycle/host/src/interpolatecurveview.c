@@ -122,9 +122,11 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	self->pattern = 0;
 	self->dragkeyframe = 0;
 	self->selected = 0;
+	self->pattern = NULL;
 	psy_signal_connect(&self->component.signal_destroy, self,
 		interpolatecurvebox_ondestroy);
 	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 			psy_ui_value_makeeh(10)));			
@@ -441,10 +443,12 @@ void interpolatecurvebox_clear(InterpolateCurveBox* self)
 	self->keyframes = 0;
 }
 
-void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component* parent,
-	int startsel, int endsel, int lpb, Workspace* workspace)
+// InterpolateCurveView
+// implementation
+void interpolatecurveview_init(InterpolateCurveView* self, psy_ui_Component*
+	parent, int startsel, int endsel, int lpb, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);		
+	psy_ui_component_init(&self->component, parent);	
 	interpolatecurvebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_BOTTOM);
 	interpolatecurvebox_init(&self->box, &self->component, self, workspace);

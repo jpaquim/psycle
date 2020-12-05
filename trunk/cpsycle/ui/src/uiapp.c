@@ -5,6 +5,7 @@
 #include "../../detail/os.h"
 
 #include "uiapp.h"
+#include "uicomponent.h"
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 #include "uiwinapp.h"	
@@ -22,6 +23,8 @@
 
 psy_ui_App app;
 
+void psy_ui_app_onlanguagechanged(psy_ui_App*, psy_Translator* sender);
+
 static void ui_app_initplatform(psy_ui_App*, uintptr_t instance);
 
 void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
@@ -31,6 +34,8 @@ void psy_ui_app_init(psy_ui_App* self, uintptr_t instance)
 	ui_app_initplatform(self, instance);
 	psy_ui_defaults_init(&self->defaults);
 	psy_translator_init(&self->translator);
+	psy_signal_connect(&self->translator.signal_languagechanged, self,
+		psy_ui_app_onlanguagechanged);
 }
 
 void ui_app_initplatform(psy_ui_App* self, uintptr_t instance)
@@ -102,4 +107,24 @@ void psy_ui_app_close(psy_ui_App* self)
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_ui_winapp_close((psy_ui_WinApp*)self->platform, self->main);
 #endif	
+}
+
+void psy_ui_app_onlanguagechanged(psy_ui_App* self, psy_Translator* translator)
+{	
+	if (self->main) {
+		psy_List* p;
+		psy_List* q;
+
+		// notify all components language changed
+		psy_ui_component_updatelanguage(self->main);
+		for (p = q = psy_ui_component_children(self->main, psy_ui_RECURSIVE);
+				p != NULL; psy_list_next(&p)) {
+			psy_ui_Component* component;
+
+			component = (psy_ui_Component*)psy_list_entry(p);
+			psy_ui_component_updatelanguage(component);
+		}
+		psy_list_free(q);
+		psy_ui_component_alignall(self->main);
+	}	
 }

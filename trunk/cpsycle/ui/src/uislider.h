@@ -15,8 +15,9 @@ typedef struct {
 	double value;
 	double rulerstep;
 	int tweakbase;
-	char label[128];
-	char valuedescription[128];
+	char* label;
+	char* translation;
+	char valuedescription[128];	
 	float step;
 	int labelsize;
 	int slidersize;

@@ -21,6 +21,8 @@ typedef struct TrackScopeView {
 	// inherits
 	psy_ui_Component component;
 	// internal data
+	uintptr_t maxcolumns;
+	int trackwidth;
 	int trackheight;
 	int textheight;
 	// references
