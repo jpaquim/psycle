@@ -692,8 +692,9 @@ void psy_audio_sequence_setpatternslot(psy_audio_Sequence* self,
 		psy_audio_Pattern* pattern;		
 		
 		pattern = psy_audio_patterns_at(self->patterns, slot);
-		if (pattern == NULL) {	
+		if (pattern == NULL) {			
 			pattern = psy_audio_pattern_allocinit();
+			// todo set correct default lines
 			psy_audio_patterns_insert(self->patterns, slot, pattern);		
 		}
 		psy_audio_sequenceentry_setpatternslot(sequenceentry, slot);

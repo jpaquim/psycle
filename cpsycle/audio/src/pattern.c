@@ -75,6 +75,8 @@ psy_audio_PatternSelection psy_audio_patternselection_make(
 	return rv;
 }
 
+static uintptr_t defaultlines = 64;
+
 // Pattern
 // prototypes
 static void psy_audio_pattern_init_signals(psy_audio_Pattern*);
@@ -85,7 +87,8 @@ void psy_audio_pattern_init(psy_audio_Pattern* self)
 	assert(self);
 
 	self->events = NULL;
-	self->length = 16;
+	// todo needs player lpb to be correct
+	self->length = defaultlines / (psy_dsp_big_beat_t)4.0;
 	self->name = strdup("Untitled");	
 	self->opcount = 0;
 	self->maxsongtracks = 0;
@@ -732,4 +735,14 @@ bool psy_audio_patterncursornavigator_prevlines(psy_audio_PatternCursorNavigator
 		}
 	}
 	return FALSE;
+}
+
+void psy_audio_pattern_setdefaultlines(uintptr_t numlines)
+{
+	defaultlines = numlines;
+}
+
+uintptr_t psy_audio_pattern_defaultlines(void)
+{
+	return defaultlines;
 }

@@ -1,36 +1,35 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(MACHINEVIEW)
-#define MACHINEVIEW
+#if !defined(MACHINEVIEW_H)
+#define MACHINEVIEW_H
 
+// host
+#include "machineframe.h"
+#include "machineeditorview.h" // vst view
+#include "machineviewskin.h"
+#include "newmachine.h"
+#include "paramview.h"
+#include "tabbar.h"
 #include "workspace.h"
+// ui
 #include <uiedit.h>
-#include <uidef.h>
 #include <uinotebook.h>
 #include <uiscroller.h>
-#include <player.h>
-#include <plugincatcher.h>
-#include "newmachine.h"
-#include "machineframe.h"
-#include "paramview.h"
-#include "machineeditorview.h"
-#include "machinebar.h"
-#include "machineviewskin.h"
-#include "skincoord.h"
-#include "tabbar.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // MachineWireView
-// aim: Editor for the machines and their connections
+//
+// Editor for the machines and their connections
 
 // MachineView
-// aim: tabbed view for MachineWireView and NewMachine 
+//
+// tabbed view for MachineWireView and NewMachine 
 
-typedef struct {	
+typedef struct MachineUi {
 	int mode;
 	/// output level for display (0 .. 1.f)	
 	psy_dsp_amp_t volumedisplay;
@@ -46,6 +45,7 @@ typedef struct {
 	ParamView* paramview;
 	MachineEditorView* editorview;
 	char* restorename;
+	// references
 	Workspace* workspace;
 } MachineUi;
 
@@ -58,10 +58,10 @@ enum {
 	MACHINEWIREVIEW_DRAG_PAN,
 };
 
-typedef struct {
+typedef struct MachineWireView {
+	// inherits
 	psy_ui_Component component;
-	psy_ui_Scroller* scroller;
-	psy_audio_Machines* machines;
+	// internal data
 	psy_Table machineuis;
 	psy_List* wireframes;	
 	int mx;
@@ -74,15 +74,19 @@ typedef struct {
 	psy_audio_Wire hoverwire;
 	int drawvumeters;	
 	psy_audio_PluginCatcher plugincatcher;
-	MachineViewSkin skin;
-	Workspace* workspace;	
-	struct MachineViewBar* statusbar;
+	MachineViewSkin skin;	
 	psy_ui_Edit editname;
 	int firstsize;
 	int randominsert;
 	int addeffect;
 	bool mousemoved;
 	bool showwirehover;
+	bool drawvumode;
+	// references
+	struct MachineViewBar* statusbar;
+	psy_audio_Machines* machines;
+	psy_ui_Scroller* scroller;
+	Workspace* workspace;
 } MachineWireView;
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
@@ -104,20 +108,23 @@ INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
 	return &self->component;
 }
 
-typedef struct {
+typedef struct MachineView {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	TabBar tabbar;
 	psy_ui_Notebook notebook;	
 	MachineWireView wireview;
 	psy_ui_Scroller scroller;
 	NewMachine newmachine;
+	// references
 	Workspace* workspace;
 } MachineView;
 
 void machineview_init(MachineView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
-INLINE psy_ui_Component* mainview_base(MachineView* self)
+INLINE psy_ui_Component* machineview_base(MachineView* self)
 {
 	return &self->component;
 }
@@ -126,4 +133,4 @@ INLINE psy_ui_Component* mainview_base(MachineView* self)
 }
 #endif
 
-#endif
+#endif /* MACHINEVIEW_H */

@@ -4,34 +4,42 @@
 #if !defined(KBDBOX_H)
 #define KBDBOX_H
 
+// host
 #include "workspace.h"
-
+// ui
 #include "uicomponent.h"
-
-#include <properties.h>
+// container
 #include <hashtbl.h>
+#include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: shows a keyboard with annotations
+// KbdBox
+//
+// Shows a keyboard with annotations
 
+// defines one key of the keybox
 typedef struct KbdBoxKey {
 	char* label;
-	char* desc0;
-	char* desc1;
-	char* desc2;
+	char* desc0; // row 0 keycode
+	char* desc1; // row 1 keycode with shift
+	char* desc2; // row 2 keycode with ctrl
 	psy_ui_Colour colour;
 	psy_ui_Rectangle position;
 } KbdBoxKey;
 
-void kbdboxkey_init_all(KbdBoxKey*, int x, int y, int width, int height, const char* label);
+void kbdboxkey_init_all(KbdBoxKey*, int x, int y, int width, int height,
+	const char* label);
 void kbdboxkey_dispose(KbdBoxKey*);
-KbdBoxKey* kbdboxkey_allocinit_all(int x, int y, int width, int height, const char* label);
+KbdBoxKey* kbdboxkey_allocinit_all(int x, int y, int width, int height,
+	const char* label);
 
 typedef struct KbdBox{
+	// inherits
 	psy_ui_Component component;
+	// internal data
 	psy_Table keys;
 	int cpx;
 	int cpy;
@@ -41,13 +49,15 @@ typedef struct KbdBox{
 	int keywidth;
 	psy_ui_Size corner;
 	psy_Property* keyset;
+	// references	
 	Workspace* workspace;
 } KbdBox;
 
 void kbdbox_init(KbdBox*, psy_ui_Component* parent, Workspace*);
-void kbdbox_setcolour(KbdBox*, uintptr_t keycode, psy_ui_Colour colour);
+void kbdbox_setcolour(KbdBox*, uintptr_t keycode, psy_ui_Colour);
 void kbdbox_cleardescriptions(KbdBox*);
-void kbdbox_setdescription(KbdBox*, uintptr_t keycode, int shift, int ctrl, const char* desc);
+void kbdbox_setdescription(KbdBox*, uintptr_t keycode, int shift, int ctrl,
+	const char* desc);
 
 INLINE psy_ui_Component* kbdbox_base(KbdBox* self)
 {

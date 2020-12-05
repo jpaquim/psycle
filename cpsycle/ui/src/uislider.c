@@ -29,9 +29,10 @@ static void psy_ui_slider_updatevalue(psy_ui_Slider*);
 static void psy_ui_slider_describevalue(psy_ui_Slider*);
 static void psy_ui_slider_onalign(psy_ui_Slider*);
 static void psy_ui_slider_onpreferredsize(psy_ui_Slider*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void psy_ui_slider_onlanguagechanged(psy_ui_Slider*);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_Slider* self)
 {
@@ -45,7 +46,9 @@ static void vtable_init(psy_ui_Slider* self)
 		vtable.onmousemove = (psy_ui_fp_component_onmousemove) psy_ui_slider_onmousemove;
 		vtable.onmousewheel = (psy_ui_fp_component_onmousewheel) psy_ui_slider_onmousewheel;
 		vtable.onmouseup = (psy_ui_fp_component_onmouseup) psy_ui_slider_onmouseup;
-		vtable_initialized = 1;
+		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			psy_ui_slider_onlanguagechanged;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -59,10 +62,11 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	self->orientation = psy_ui_HORIZONTAL;
 	self->value = 0.0;
 	self->labelsize = 100;
+	self->label = NULL;
 	self->slidersize = 6;
 	self->valuelabelsize = 40;	
 	self->valuedescription[0] = '\0';
-	self->label[0] = '\0';
+	self->translation = NULL;
 	self->margin = 5;
 	self->rulerstep = 0.1;
 	self->charnumber = 0;
@@ -88,6 +92,8 @@ void psy_ui_slider_initsignals(psy_ui_Slider* self)
 
 void psy_ui_slider_ondestroy(psy_ui_Slider* self, psy_ui_Component* sender)
 {
+	free(self->translation);		
+	free(self->label);
 	psy_ui_slider_disposesignals(self);
 }
 
@@ -101,8 +107,10 @@ void psy_ui_slider_disposesignals(psy_ui_Slider* self)
 }
 
 void psy_ui_slider_settext(psy_ui_Slider* self, const char* text)
-{
-	strcpy(self->label, text);
+{	
+	psy_strreset(&self->label, text);
+	psy_strreset(&self->translation, psy_ui_translate(text));
+	psy_ui_component_invalidate(&self->component);
 }
 
 void psy_ui_slider_setcharnumber(psy_ui_Slider* self, int charnumber)
@@ -142,8 +150,10 @@ void psy_ui_slider_ondraw(psy_ui_Slider* self, psy_ui_Graphics* g)
 				self->labelsize, psy_ui_value_px(&size.height, &tm));
 			psy_ui_settextcolour(g, app.defaults.style_common.colour);
 			psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-			psy_ui_textoutrectangle(g, 0, 0, 0, r,
-				self->label, strlen(self->label));
+			if (self->translation) {
+				psy_ui_textoutrectangle(g, 0, 0, 0, r,
+					self->translation, psy_strlen(self->translation));
+			}
 			size.width = psy_ui_value_makepx(
 				psy_ui_value_px(&size.width, &tm) - (self->valuelabelsize + self->labelsize + 2 * self->margin));
 
@@ -375,7 +385,7 @@ void psy_ui_slider_onalign(psy_ui_Slider* self)
 		if (self->labelvisible) {
 			self->labelsize = tm.tmAveCharWidth *
 				((self->charnumber == 0)
-					? strlen(self->label) + 2
+					? psy_strlen(self->translation) + 2
 					: self->charnumber);
 		} else {
 			self->labelsize = 0;
@@ -383,7 +393,7 @@ void psy_ui_slider_onalign(psy_ui_Slider* self)
 		if (self->valuelabelvisible) {
 			self->valuelabelsize = tm.tmAveCharWidth *
 				((self->valuecharnumber == 0)
-					? strlen(self->label) + 2
+					? psy_strlen(self->translation) + 2
 					: self->valuecharnumber);
 		} else {
 			self->valuelabelsize = 0;
@@ -401,4 +411,12 @@ void psy_ui_slider_onpreferredsize(psy_ui_Slider* self, psy_ui_Size* limit,
 		rv->width = psy_ui_value_makeew(self->charnumber);
 		rv->height = psy_ui_value_makeeh(20);
 	}
+}
+
+void psy_ui_slider_onlanguagechanged(psy_ui_Slider* self)
+{
+	assert(self);
+
+	psy_strreset(&self->translation, psy_ui_translate(self->label));
+	psy_ui_component_invalidate(&self->component);
 }

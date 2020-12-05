@@ -112,7 +112,6 @@ static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
 	psy_ui_Component* view);
-static void mainframe_onlanguagechanged(MainFrame*, psy_Translator* sender);
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender,
 	int option, int mode);
@@ -191,11 +190,6 @@ void mainframe_ondestroyed(MainFrame* self)
 	workspace_dispose(&self->workspace);
 	interpreter_dispose(&self->interpreter);
 	psy_ui_app_stop(&app);
-}
-
-void mainframe_onlanguagechanged(MainFrame* self, psy_Translator* sender)
-{
-	psy_ui_component_alignall(mainframe_base(self));
 }
 
 void mainframe_initworkspace(MainFrame* self)
@@ -286,7 +280,7 @@ void mainframe_initstatusbar(MainFrame* self)
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->statusbar, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
-	psy_ui_notebook_setpageindex(&self->viewstatusbars, 0);
+	psy_ui_notebook_select(&self->viewstatusbars, 0);
 	mainframe_initkbdhelpbutton(self);
 	mainframe_initterminalbutton(self);		
 	mainframe_initprogressbar(self);
@@ -442,7 +436,7 @@ void mainframe_initmaintabbar(MainFrame* self)
 	psy_ui_component_setalignexpand(tabbar_base(&self->tabbar),
 		psy_ui_HORIZONTALEXPAND);	
 	tabbar_append_tabs(&self->tabbar, "main.machines", "main.patterns",
-		"main.samples", "main.instruments", "main.properties", "help.help", NULL);
+		"main.samples", "main.instruments", "main.properties", NULL);
 	// ident setting help tabs
 	tabbar_append(&self->tabbar, "main.settings")->margin.left =
 		psy_ui_value_makeew(4.0);
@@ -625,9 +619,7 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_dockview, self,
 		mainframe_ondockview);
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
-		mainframe_ontogglegearworkspace);
-	psy_signal_connect(&self->workspace.signal_languagechanged, self,
-		mainframe_onlanguagechanged);
+		mainframe_ontogglegearworkspace);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
 		mainframe_oncheckunsaved);
 	psy_signal_connect(&self->workspace.signal_skinchanged, self,
@@ -953,7 +945,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 
 void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 {
-	psy_ui_notebook_setpageindex(&self->notebook, TABPAGE_RENDERVIEW);
+	psy_ui_notebook_select(&self->notebook, TABPAGE_RENDERVIEW);
 }
 
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
@@ -980,7 +972,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 	if (index != GEARVIEW) {
 		psy_ui_Component* view;
 
-		if (index == TABPAGE_CHECKUNSAVED) {
+		if (index == TABPAGE_CHECKUNSAVED) {			
 			if (option == CHECKUNSAVE_CLOSE) {
 				self->checkunsavedbox.mode = option;
 				checkunsavedbox_setlabels(&self->checkunsavedbox,
@@ -999,13 +991,13 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 					"Song Load Request, but your Song is not saved!",
 					"Save and Load Song",
 					"Load Song (no save)");
-			}
+			}			
 		}
 		tabbar_select(&self->tabbar, index);
 		view = psy_ui_notebook_activepage(&self->notebook);
 		if (view) {
 			psy_ui_component_setfocus(view);
-			psy_ui_component_selectsection(view, section);
+			psy_ui_component_selectsection(view, section);			
 		}
 		if (index == TABPAGE_MACHINEVIEW && section == 1) {
 			if (option == 20) {
@@ -1026,8 +1018,8 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 		self->startpage = 0;
 	}
 	workspace_onviewchanged(&self->workspace, tabindex);				
-	psy_ui_notebook_setpageindex(&self->viewstatusbars, tabindex);	
-	psy_ui_notebook_setpageindex(&self->viewtabbars, tabindex);
+	psy_ui_notebook_select(&self->viewstatusbars, tabindex);	
+	psy_ui_notebook_select(&self->viewtabbars, tabindex);
 	component = psy_ui_notebook_activepage(&self->notebook);
 	if (component) {
 		psy_ui_component_setfocus(component);
@@ -1175,9 +1167,10 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 
 bool mainframe_onclose(MainFrame* self)
 {
-	if (workspace_songmodified(&self->workspace)) {
+	if (workspace_savereminder(&self->workspace) &&
+			workspace_songmodified(&self->workspace)) {
 		workspace_selectview(&self->workspace, TABPAGE_CHECKUNSAVED, 0,
-			CHECKUNSAVE_CLOSE);
+			CHECKUNSAVE_CLOSE);		
 		return FALSE;
 	}
 	return TRUE;

@@ -59,7 +59,6 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 	self->scope_spec_rate = 0.f;
 	psy_ui_component_init(wireview_base(self), parent);
 	psy_ui_component_doublebuffer(wireview_base(self));
-	psy_ui_component_enablealign(wireview_base(self));	
 	wireview_initvolumeslider(self);
 	wireview_initbottomgroup(self);
 	wireview_initrategroup(self);
@@ -106,7 +105,6 @@ void wireview_inittabbar(WireView* self)
 	psy_ui_Margin margin;
 
 	psy_ui_component_init(&self->top, &self->component);
-	psy_ui_component_enablealign(&self->top);
 	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->top, psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init_connect(&self->togglevu, &self->top,
@@ -139,7 +137,6 @@ void wireview_initvolumeslider(WireView* self)
 	psy_ui_component_doublebuffer(wireview_base(self));
 	psy_ui_component_setalign(&self->slidergroup, psy_ui_ALIGN_RIGHT);
 	psy_ui_component_setmargin(&self->slidergroup, &margin);
-	psy_ui_component_enablealign(&self->slidergroup);
 	//psy_ui_component_resize(&self->slidergroup, psy_ui_value_makeew(2),
 		//psy_ui_value_makepx(0));
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
@@ -174,7 +171,6 @@ void wireview_initrategroup(WireView* self)
 	psy_ui_component_init(&self->rategroup, wireview_base(self));
 	psy_ui_component_setalign(&self->rategroup, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->rategroup, &margin);
-	psy_ui_component_enablealign(&self->rategroup);
 	psy_ui_button_init_connect(&self->hold, &self->rategroup,
 		self, wireview_onhold);
 	psy_ui_button_settext(&self->hold, "Hold");

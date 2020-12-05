@@ -28,7 +28,7 @@ void psy_ui_updatesyles(psy_ui_Component* main)
 		
 		// merge
 		psy_ui_component_updatefont(main);
-		for (p = q = psy_ui_component_children(main, 1); p != NULL; p = p->next) {
+		for (p = q = psy_ui_component_children(main, psy_ui_RECURSIVE); p != NULL; p = p->next) {
 			psy_ui_Component* child;			
 			child = (psy_ui_Component*) p->entry;			
 			psy_ui_component_updatefont(child);						
@@ -188,6 +188,7 @@ static void onmouseleave(psy_ui_Component* self) { }
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
+static void onlanguagechanged(psy_ui_Component* self, psy_Translator* translator) { }
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -228,8 +229,9 @@ static void vtable_init(void)
 		vtable.onkeydown = onkeydown;
 		vtable.onkeydown = onkeyup;
 		vtable.ontimer = ontimer;
+		vtable.onlanguagechanged = onlanguagechanged;
 		vtable.enableinput = enableinput;
-		vtable.preventinput = preventinput;
+		vtable.preventinput = preventinput;		
 		vtable_initialized = 1;
 	}
 }
@@ -426,6 +428,7 @@ void psy_ui_component_init_signals(psy_ui_Component* self)
 	psy_signal_init(&self->signal_command);
 	psy_signal_init(&self->signal_selectsection);
 	psy_signal_init(&self->signal_scrollrangechanged);
+	psy_signal_init(&self->signal_languagechanged);
 }
 
 void psy_ui_component_init_base(psy_ui_Component* self) {	
@@ -471,7 +474,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 void psy_ui_component_dispose(psy_ui_Component* self)
 {
 	self->vtable->dispose(self);
-	psy_ui_component_dispose_signals(self);
+	psy_ui_component_dispose_signals(self);	
 }
 
 void psy_ui_component_dispose_signals(psy_ui_Component* self)
@@ -504,6 +507,7 @@ void psy_ui_component_dispose_signals(psy_ui_Component* self)
 	psy_signal_dispose(&self->signal_preferredsizechanged);
 	psy_signal_dispose(&self->signal_selectsection);
 	psy_signal_dispose(&self->signal_scrollrangechanged);
+	psy_signal_dispose(&self->signal_languagechanged);
 }
 
 void psy_ui_component_destroy(psy_ui_Component* self)
@@ -1189,4 +1193,24 @@ const struct psy_ui_Defaults* psy_ui_defaults(void)
 	extern psy_ui_App app;
 
 	return &app.defaults;
+}
+
+void psy_ui_component_updatelanguage(psy_ui_Component* self)
+{
+	assert(self);
+
+	self->vtable->onlanguagechanged(self);
+	psy_signal_emit(&self->signal_languagechanged, self, 0);
+}
+
+psy_Translator* psy_ui_translator(void)
+{
+	extern psy_ui_App app;
+
+	return &app.translator;
+}
+
+const char* psy_ui_translate(const char* key)
+{
+	return psy_translator_translate(psy_ui_translator(), key);
 }

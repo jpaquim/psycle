@@ -9,6 +9,7 @@
 
 #include "../../detail/stdint.h"
 #include <stddef.h>
+#include <string.h>
 #include "uifont.h"
 
 #ifdef __cplusplus
@@ -257,8 +258,13 @@ int psy_ui_rectangle_intersect_rectangle(const psy_ui_Rectangle*,
 void psy_ui_rectangle_union(psy_ui_Rectangle*, const psy_ui_Rectangle* other);
 void psy_ui_rectangle_expand(psy_ui_Rectangle*, int top, int right, int bottom, int left);
 void psy_ui_rectangle_move(psy_ui_Rectangle*, int dx, int dy);
+
 void psy_ui_error(const char* err, const char* shorterr);
 
+INLINE bool psy_ui_rectangle_equal(psy_ui_Rectangle* self, psy_ui_Rectangle* other)
+{
+	return memcmp(self, other, sizeof(psy_ui_Rectangle)) == 0;
+}
 
 typedef struct {
 	int width;
@@ -510,6 +516,7 @@ INLINE void psy_ui_colour_rgb(psy_ui_Colour* self,
 }
 
 psy_ui_Colour* psy_ui_colour_add_rgb(psy_ui_Colour* self, float r, float g, float b);
+psy_ui_Colour* psy_ui_colour_mul_rgb(psy_ui_Colour* self, float r, float g, float b);
 psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
 	psy_ui_Colour add);
 

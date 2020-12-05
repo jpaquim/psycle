@@ -884,14 +884,12 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_ui_Margin topmargin;
 	
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_enablealign(&self->component);
 	seqeditor_vtable_init(self);
 	self->component.vtable = &seqeditor_vtable;
 	psy_ui_component_doublebuffer(&self->component);
 	seqeditortrackstate_init(&self->trackstate);
 	self->workspace = workspace;
 	psy_ui_component_init(&self->left, &self->component);
-	psy_ui_component_enablealign(&self->left);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	zoombox_init(&self->zoombox_beat, &self->left);
 	psy_ui_component_setalign(&self->zoombox_beat.component, psy_ui_ALIGN_TOP);

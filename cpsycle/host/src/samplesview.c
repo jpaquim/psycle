@@ -19,9 +19,6 @@
 #include "../../detail/portable.h"
 
 // SamplesViewButtons
-// prototypes
-static void samplesviewbuttons_updatetext(SamplesViewButtons*, psy_Translator*);
-static void samplesviewbuttons_onlanguagechanged(SamplesViewButtons*, psy_Translator* sender);
 // implementation
 void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -34,33 +31,14 @@ void samplesviewbuttons_init(SamplesViewButtons* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_setalignexpand(&self->component,
 		psy_ui_HORIZONTALEXPAND);
-	psy_ui_button_init(&self->load, &self->component);	
-	psy_ui_button_init(&self->save, &self->component);	
-	psy_ui_button_init(&self->duplicate, &self->component);	
-	psy_ui_button_init(&self->del, &self->component);	
+	psy_ui_button_init_text(&self->load, &self->component, "file.load");
+	psy_ui_button_init_text(&self->save, &self->component, "file.save");
+	psy_ui_button_init_text(&self->duplicate, &self->component,
+		"edit.duplicate");
+	psy_ui_button_init_text(&self->del, &self->component, "edit.delete");
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT, &margin));
-	samplesviewbuttons_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		samplesviewbuttons_onlanguagechanged);
-}
-
-void samplesviewbuttons_updatetext(SamplesViewButtons* self, psy_Translator* translator)
-{
-	psy_ui_button_settext(&self->load, 
-		psy_translator_translate(translator, "file.load"));
-	psy_ui_button_settext(&self->save,
-		psy_translator_translate(translator, "file.save"));
-	psy_ui_button_settext(&self->duplicate,
-		psy_translator_translate(translator, "edit.duplicate"));
-	psy_ui_button_settext(&self->del,
-		psy_translator_translate(translator, "edit.delete"));
-}
-
-void samplesviewbuttons_onlanguagechanged(SamplesViewButtons* self, psy_Translator* sender)
-{
-	samplesviewbuttons_updatetext(self, sender);
+		psy_ui_ALIGN_LEFT, &margin));	
 }
 
 // SamplesSongImportView
@@ -87,7 +65,6 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_init(&self->header, &self->component);
-	psy_ui_component_enablealign(&self->header);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
 	psy_ui_label_init(&self->label, &self->header);
 	psy_ui_label_settext(&self->label, "Source");	
@@ -104,7 +81,6 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 		&margin));
 	// bar
 	psy_ui_component_init(&self->bar, &self->component);
-	psy_ui_component_enablealign(&self->bar);
 	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_LEFT);
 	psy_ui_button_init(&self->add, &self->bar);
 	psy_ui_button_settext(&self->add, "<- Copy");
@@ -221,8 +197,6 @@ void samplessongimportview_onsamplesboxchanged(SamplesSongImportView* self,
 static void samplesheaderview_onprevsample(SamplesHeaderView*, psy_ui_Component* sender);
 static void samplesheaderview_onnextsample(SamplesHeaderView*, psy_ui_Component* sender);
 static void samplesheaderview_oneditsamplename(SamplesHeaderView*, psy_ui_Edit* sender);
-static void samplesheaderview_updatetext(SamplesHeaderView*, psy_Translator*);
-static void samplesheaderview_onlanguagechanged(SamplesHeaderView*, psy_Translator*);
 
 // implementation
 void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
@@ -236,7 +210,8 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);
-	psy_ui_label_init(&self->namelabel, &self->component);
+	psy_ui_label_init_text(&self->namelabel, &self->component,
+		"samplesview.samplename");	
 	psy_ui_edit_init(&self->nameedit, &self->component);		
 	psy_ui_edit_setcharnumber(&self->nameedit, 20);	
 	psy_signal_connect(&self->nameedit.signal_change, self,
@@ -249,10 +224,12 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);	
 	psy_signal_connect(&self->nextbutton.signal_clicked, self,
 		samplesheaderview_onnextsample);
-	psy_ui_label_init(&self->srlabel, &self->component);	
+	psy_ui_label_init(&self->srlabel, &self->component);
+	psy_ui_label_settext(&self->srlabel, "samplesview.samplerate");	
 	psy_ui_edit_init(&self->sredit, &self->component);	
 	psy_ui_edit_setcharnumber(&self->sredit, 8);
-	psy_ui_label_init(&self->numsamplesheaderlabel, &self->component);	
+	psy_ui_label_init_text(&self->numsamplesheaderlabel, &self->component,
+		"samplesview.samples");
 	psy_ui_label_init(&self->numsampleslabel, &self->component);
 	psy_ui_label_setcharnumber(&self->numsampleslabel, 10);
 	psy_ui_label_init(&self->channellabel, &self->component);
@@ -261,25 +238,7 @@ void samplesheaderview_init(SamplesHeaderView* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-			&margin));
-	samplesheaderview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		samplesheaderview_onlanguagechanged);
-}
-
-void samplesheaderview_updatetext(SamplesHeaderView* self, psy_Translator* translator)
-{
-	psy_ui_label_settext(&self->namelabel,
-		psy_translator_translate(translator, "samplesview.samplename"));
-	psy_ui_label_settext(&self->srlabel,
-		psy_translator_translate(translator, "samplesview.samplerate"));
-	psy_ui_label_settext(&self->numsamplesheaderlabel,
-		psy_translator_translate(translator, "samplesview.samples"));
-}
-
-void samplesheaderview_onlanguagechanged(SamplesHeaderView* self, psy_Translator* sender)
-{
-	samplesheaderview_updatetext(self, sender);
+			&margin));		
 }
 
 void samplesheaderview_setsample(SamplesHeaderView* self, psy_audio_Sample* sample)
@@ -368,8 +327,7 @@ static void generalview_fillpandescription(SamplesGeneralView*, char* txt);
 static void generalview_ondescribe(SamplesGeneralView*, psy_ui_Slider*, char* txt);
 static void generalview_ontweak(SamplesGeneralView*, psy_ui_Slider*, float value);
 static void generalview_onvalue(SamplesGeneralView*, psy_ui_Slider*, float* value);
-static void generalview_updatetext(SamplesGeneralView*, psy_Translator*);
-static void generalview_onlanguagechanged(SamplesGeneralView*, psy_Translator*);
+static void generalview_updatetext(SamplesGeneralView*);
 // implementation
 void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -405,28 +363,21 @@ void samplesgeneralview_init(SamplesGeneralView* self, psy_ui_Component* parent,
 			(ui_slider_fptweak)generalview_ontweak,
 			(ui_slider_fpvalue)generalview_onvalue);
 	}
-	generalview_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		generalview_onlanguagechanged);
+	generalview_updatetext(self);	
 }
 
-void generalview_updatetext(SamplesGeneralView* self, psy_Translator* translator)
+void generalview_updatetext(SamplesGeneralView* self)
 {
 	psy_ui_slider_settext(&self->defaultvolume, 
-		psy_translator_translate(translator, "samplesview.default-volume"));
+		"samplesview.default-volume");
 	psy_ui_slider_settext(&self->globalvolume,
-		psy_translator_translate(translator, "samplesview.global-volume"));
+		"samplesview.global-volume");
 	psy_ui_slider_settext(&self->panposition,
-		psy_translator_translate(translator, "samplesview.pan-position"));
+		"samplesview.pan-position");
 	psy_ui_slider_settext(&self->samplednote,
-		psy_translator_translate(translator, "samplesview.sampled-note"));
+		"samplesview.sampled-note");
 	psy_ui_slider_settext(&self->pitchfinetune,
-		psy_translator_translate(translator, "samplesview.pitch-finetune"));
-}
-
-void generalview_onlanguagechanged(SamplesGeneralView* self, psy_Translator* sender)
-{
-	generalview_updatetext(self, sender);
+		"samplesview.pitch-finetune");
 }
 
 void generalview_setsample(SamplesGeneralView* self, psy_audio_Sample* sample)
@@ -584,7 +535,6 @@ void samplesvibratoview_init(SamplesVibratoView* self, psy_ui_Component* parent,
 			psy_ui_value_makeew(2), psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0));
 		psy_ui_component_init(&self->header, &self->component);
-		psy_ui_component_enablealign(&self->header);
 		psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);		
 		psy_ui_label_init(&self->waveformheaderlabel, &self->header);
 		psy_ui_label_settext(&self->waveformheaderlabel, "Waveform");
@@ -783,7 +733,6 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 	self->sample = 0;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_init(&self->cont, &self->component);
-	psy_ui_component_enablealign(&self->cont);
 	psy_ui_component_setmargin(&self->cont, &rowmargin);
 	psy_ui_label_init(&self->loopheaderlabel, &self->cont);	
 	psy_ui_label_settext(&self->loopheaderlabel, "Continuous Loop");
@@ -807,7 +756,6 @@ void samplesloopview_init(SamplesLoopView* self, psy_ui_Component* parent,
 		psy_ui_ALIGN_LEFT,
 		&margin));
 	psy_ui_component_init(&self->sustain, &self->component);
-	psy_ui_component_enablealign(&self->sustain);
 	psy_ui_label_init(&self->sustainloopheaderlabel, &self->sustain);
 	psy_ui_label_settext(&self->sustainloopheaderlabel, "Sustain Loop");
 	psy_ui_label_setcharnumber(&self->sustainloopheaderlabel, 18);
@@ -1057,7 +1005,6 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->header.component, psy_ui_ALIGN_TOP);
 	// left
 	psy_ui_component_init(&self->left, &self->component);
-	psy_ui_component_enablealign(&self->left);
 	psy_ui_component_setalign(&self->left, psy_ui_ALIGN_LEFT);
 	psy_ui_component_setmargin(&self->left, &leftmargin);
 	samplesviewbuttons_init(&self->buttons, &self->left, workspace);
@@ -1085,14 +1032,12 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 		&leftmargin);
 	psy_ui_component_setalign(&self->clientnotebook.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_init(&self->client, &self->clientnotebook.component);
-	psy_ui_component_enablealign(&self->client);
 	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
 	tabbar_append(&self->tabbar, "General");
 	tabbar_append(&self->tabbar, "Vibrato");
 	psy_ui_notebook_init(&self->notebook, &self->client);
-	psy_ui_component_enablealign(psy_ui_notebook_base(&self->notebook));
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setbackgroundmode(psy_ui_notebook_base(&self->notebook),
@@ -1107,7 +1052,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	samplesvibratoview_init(&self->vibrato, psy_ui_notebook_base(&self->notebook),
 		&workspace->player);
 	psy_ui_component_setalign(&self->vibrato.component, psy_ui_ALIGN_TOP);
-	psy_ui_notebook_setpageindex(&self->notebook, 0);
+	psy_ui_notebook_select(&self->notebook, 0);
 	wavebox_init(&self->wavebox, &self->client, workspace);
 	psy_ui_component_setalign(&self->wavebox.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_component_setmargin(&self->wavebox.component, &waveboxmargin);
@@ -1125,10 +1070,10 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	// WaveEditorView
 	sampleeditor_init(&self->sampleeditor, &self->clientnotebook.component,
 		workspace);
-	psy_ui_notebook_setpageindex(&self->clientnotebook, 0);
+	psy_ui_notebook_select(&self->clientnotebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		samplesview_onsongchanged);
-	psy_ui_notebook_setpageindex(&self->clientnotebook, 0);
+	psy_ui_notebook_select(&self->clientnotebook, 0);
 	psy_ui_notebook_connectcontroller(&self->clientnotebook,
 		&self->clienttabbar.signal_change);
 	samplesview_setsample(self, sampleindex_make(0, 0));

@@ -259,7 +259,6 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 	psy_ui_component_setmargin(&self->processors.component, &margin);	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
-	psy_ui_component_enablealign(&self->notebook.component);
 	sampleeditoramplify_init(&self->amplify, &self->notebook.component, workspace);	
 	sampleprocessview_buildprocessorlist(self);
 	psy_ui_component_init(&self->emptypage1,
@@ -278,7 +277,7 @@ void sampleprocessview_init(SampleEditorProcessView* self, psy_ui_Component* par
 		psy_ui_notebook_base(&self->notebook),
 		workspace);	
 	psy_ui_listbox_setcursel(&self->processors, 0);
-	psy_ui_notebook_setpageindex(&self->notebook, 0);
+	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&self->processors.signal_selchanged, self,
 		sampleeditorprocessview_onprocessorselected);
 	psy_ui_component_setpreferredsize(&self->component,
@@ -302,7 +301,7 @@ void sampleprocessview_buildprocessorlist(SampleEditorProcessView* self)
 void sampleeditorprocessview_onprocessorselected(SampleEditorProcessView* self,
 	psy_ui_Component* sender, int index)
 {
-	psy_ui_notebook_setpageindex(&self->notebook, index);
+	psy_ui_notebook_select(&self->notebook, index);
 }
 
 static void sampleeditorplaybar_initalign(SampleEditorPlayBar*);

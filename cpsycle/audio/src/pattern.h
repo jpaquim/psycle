@@ -234,6 +234,10 @@ uintptr_t psy_audio_pattern_maxsongtracks(const psy_audio_Pattern*);
 // searches the pattern
 psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*,
 	psy_audio_PatternSelection, psy_audio_PatternSearchReplaceMode);
+/// number of lines a pattern will be created
+void psy_audio_pattern_setdefaultlines(uintptr_t numlines);
+/// return number of lines a pattern will be created
+uintptr_t psy_audio_pattern_defaultlines(void);
 
 // psy_audio_PatternCursorNavigator
 typedef struct {

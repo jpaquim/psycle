@@ -17,7 +17,7 @@ enum {
 	PLAY_BEATS
 };
 
-static void playbar_updatetext(PlayBar*, psy_Translator*);
+static void playbar_updatetext(PlayBar*);
 static void playbar_onloopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onrecordnotesclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_onplaymodeselchanged(PlayBar*,
@@ -28,7 +28,7 @@ static void playbar_onplayclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_startplay(PlayBar*);
 static void playbar_onstopclicked(PlayBar*, psy_ui_Component* sender);
 static void playbar_ontimer(PlayBar*, uintptr_t timerid);
-static void playbar_onlanguagechanged(PlayBar*, psy_Translator* sender);
+static void playbar_onlanguagechanged(PlayBar*);
 // vtable
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
@@ -38,6 +38,8 @@ static psy_ui_ComponentVtable* vtable_init(PlayBar* self)
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
 		vtable.ontimer = (psy_ui_fp_component_ontimer)playbar_ontimer;
+		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			playbar_onlanguagechanged;
 		vtable_initialized = TRUE;
 	}
 	return &vtable;
@@ -81,24 +83,19 @@ void playbar_init(PlayBar* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_button_init_connect(&self->stop, playbar_base(self),
 		self, playbar_onstopclicked);
 	psy_ui_button_settext(&self->stop, "play.stop");
-	playbar_updatetext(self, workspace_translator(workspace));
+	playbar_updatetext(self);
 	psy_ui_combobox_setcursel(&self->playmode, 0);
 	psy_signal_connect(&self->playmode.signal_selchanged, self,
-		playbar_onplaymodeselchanged);
-	psy_signal_connect(&self->workspace->signal_languagechanged, self,
-		playbar_onlanguagechanged);
+		playbar_onplaymodeselchanged);	
 	psy_ui_component_starttimer(playbar_base(self), 0, 100);
 }
 
-void playbar_updatetext(PlayBar* self, psy_Translator* translator)
+void playbar_updatetext(PlayBar* self)
 {
 	psy_ui_combobox_clear(&self->playmode);
-	psy_ui_combobox_addtext(&self->playmode,
-		psy_translator_translate(translator, "play.song"));
-	psy_ui_combobox_addtext(&self->playmode,
-		psy_translator_translate(translator, "play.sel"));
-	psy_ui_combobox_addtext(&self->playmode,
-		psy_translator_translate(translator, "play.beats"));
+	psy_ui_combobox_addtext(&self->playmode, psy_ui_translate("play.song"));
+	psy_ui_combobox_addtext(&self->playmode, psy_ui_translate("play.sel"));
+	psy_ui_combobox_addtext(&self->playmode, psy_ui_translate("play.beats"));
 }
 
 void playbar_onplaymodeselchanged(PlayBar* self, psy_ui_ComboBox* sender, int sel)
@@ -256,7 +253,7 @@ void playbar_ontimer(PlayBar* self, uintptr_t timerid)
 	}
 }
 
-void playbar_onlanguagechanged(PlayBar* self, psy_Translator* sender)
+void playbar_onlanguagechanged(PlayBar* self)
 {
-	playbar_updatetext(self, sender);
+	playbar_updatetext(self);
 }

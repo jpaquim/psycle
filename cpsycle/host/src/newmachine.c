@@ -26,9 +26,6 @@ static int newmachine_comp_type(psy_Property* p, psy_Property* q);
 static int newmachine_comp_mode(psy_Property* p, psy_Property* q);
 static int newmachine_isplugin(int type);
 
-static void newmachinebar_updatetext(NewMachineBar*, psy_Translator*);
-static void newmachinebar_onlanguagechanged(NewMachineBar*, psy_Translator* sender);
-
 void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 	Workspace* workspace)
 {
@@ -36,14 +33,20 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 			
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
-	psy_ui_button_init(&self->rescan, &self->component);
+	psy_ui_button_init_text(&self->rescan, &self->component,
+		"newmachine.rescan");
 	psy_ui_button_setcharnumber(&self->rescan, 30);
-	psy_ui_button_init(&self->selectdirectories, &self->component);
+	psy_ui_button_init_text(&self->selectdirectories, &self->component,
+		"newmachine.select-plugin-directories");
 	psy_ui_button_setcharnumber(&self->rescan, 30);
-	psy_ui_button_init(&self->sortbyfavorite, &self->component);
-	psy_ui_button_init(&self->sortbyname, &self->component);
-	psy_ui_button_init(&self->sortbytype, &self->component);
-	psy_ui_button_init(&self->sortbymode, &self->component);
+	psy_ui_button_init_text(&self->sortbyfavorite, &self->component,
+		"newmachine.sort-by-favorite");
+	psy_ui_button_init_text(&self->sortbyname, &self->component,
+		"newmachine.sort-by-name");
+	psy_ui_button_init_text(&self->sortbytype, &self->component,
+		"newmachine.sort-by-type");
+	psy_ui_button_init_text(&self->sortbymode, &self->component,
+		"newmachine.sort-by-mode");
 	psy_signal_connect(&self->rescan.signal_clicked, self,
 		newmachinebar_onrescan);
 	psy_signal_connect(&self->selectdirectories.signal_clicked, self,
@@ -55,30 +58,6 @@ void newmachinebar_init(NewMachineBar* self, psy_ui_Component* parent,
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_TOP,
 		&margin));	
-	newmachinebar_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		newmachinebar_onlanguagechanged);
-}
-
-void newmachinebar_updatetext(NewMachineBar* self, psy_Translator* translator)
-{
-	psy_ui_button_settext(&self->rescan,
-		psy_translator_translate(translator, "newmachine.rescan"));
-	psy_ui_button_settext(&self->selectdirectories,
-		psy_translator_translate(translator, "newmachine.select-plugin-directories"));
-	psy_ui_button_settext(&self->sortbyfavorite,
-		psy_translator_translate(translator, "newmachine.sort-by-favorite"));
-	psy_ui_button_settext(&self->sortbyname,
-		psy_translator_translate(translator, "newmachine.sort-by-name"));
-	psy_ui_button_settext(&self->sortbytype,
-		psy_translator_translate(translator, "newmachine.sort-by-type"));
-	psy_ui_button_settext(&self->sortbymode,
-		psy_translator_translate(translator, "newmachine.sort-by-mode"));
-}
-
-void newmachinebar_onlanguagechanged(NewMachineBar* self, psy_Translator* sender)
-{
-	newmachinebar_updatetext(self, sender);
 }
 
 void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
@@ -93,8 +72,8 @@ void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* se
 
 // NewMachineDetail
 static void newmachinedetail_reset(NewMachineDetail*);
-static void newmachinedetail_updatetext(NewMachineDetail*, psy_Translator*);
-static void newmachinedetail_onlanguagechanged(NewMachineDetail*, psy_Translator* sender);
+static void newmachinedetail_updatetext(NewMachineDetail*);
+static void newmachinedetail_onlanguagechanged(NewMachineDetail*, psy_ui_Component* sender);
 static void newmachinedetail_onloadnewblitz(NewMachineDetail*, psy_ui_Component* sender);
 
 void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
@@ -106,11 +85,16 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	newmachinebar_init(&self->bar, &self->component, workspace);
 	psy_ui_component_setalign(&self->bar.component, psy_ui_ALIGN_TOP);
-	psy_ui_label_init_text(&self->desclabel, &self->component,
-		"Select a plugin to view its description");
-	psy_ui_label_settextalignment(&self->desclabel, psy_ui_ALIGNMENT_CENTER_HORIZONTAL);	
+	psy_ui_label_init(&self->desclabel, &self->component);
+	psy_ui_label_preventtranslation(&self->desclabel);
+	psy_ui_label_settext(&self->desclabel, psy_ui_translate(
+		"newmachine.select-plugin-to-view-description"));
+	psy_ui_label_settextalignment(&self->desclabel,
+		psy_ui_ALIGNMENT_CENTER_HORIZONTAL);	
 	psy_ui_component_setalign(&self->desclabel.component, psy_ui_ALIGN_CLIENT);
 	psy_ui_checkbox_init(&self->compatblitzgamefx, &self->component);
+	psy_ui_checkbox_settext(&self->compatblitzgamefx,
+		"newmachine.jme-version-unknown");
 	//psy_ui_component_setmaximumsize(&self->compatblitzgamefx.component,
 	//	psy_ui_size_make(psy_ui_value_makeew(10),
 	//	psy_ui_value_makeeh(0)));
@@ -120,7 +104,8 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
 		newmachinedetail_onloadnewblitz);
 	psy_ui_component_setalign(&self->compatblitzgamefx.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_label_init(&self->compatlabel, &self->component);
+	psy_ui_label_init_text(&self->compatlabel, &self->component,	
+		"newmachine.song-loading-compatibility");
 	psy_ui_label_settextalignment(&self->compatlabel, psy_ui_ALIGNMENT_LEFT);	
 	psy_ui_component_setalign(&self->compatlabel.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
@@ -129,36 +114,28 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
 		&margin));
-	newmachinedetail_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
+	newmachinedetail_updatetext(self);
+	psy_signal_connect(&self->component.signal_languagechanged, self,
 		newmachinedetail_onlanguagechanged);
 }
 
-void newmachinedetail_updatetext(NewMachineDetail* self, psy_Translator* translator)
+void newmachinedetail_updatetext(NewMachineDetail* self)
 {	
 	if (self->empty) {
-		psy_ui_label_settext(&self->desclabel,
-			psy_translator_translate(translator,
-				"newmachine.select-plugin-to-view-description"));
-	}
-	psy_ui_checkbox_settext(&self->compatblitzgamefx,
-		psy_translator_translate(translator,
-			"newmachine.jme-version-unknown"));
-	psy_ui_label_settext(&self->compatlabel,
-		psy_translator_translate(translator,
-			"newmachine.song-loading-compatibility"));
+		psy_ui_label_settext(&self->desclabel, psy_ui_translate(
+			"newmachine.select-plugin-to-view-description"));
+	}	
 }
 
-void newmachinedetail_onlanguagechanged(NewMachineDetail* self, psy_Translator* sender)
+void newmachinedetail_onlanguagechanged(NewMachineDetail* self, psy_ui_Component* sender)
 {
-	newmachinedetail_updatetext(self, sender);
+	newmachinedetail_updatetext(self);
 }
 
 void newmachinedetail_reset(NewMachineDetail* self)
 {
-	psy_ui_label_settext(&self->desclabel,
-		workspace_translate(self->workspace,
-			"newmachine.select-plugin-to-view-description"));
+	psy_ui_label_settext(&self->desclabel, psy_ui_translate(
+		"newmachine.select-plugin-to-view-description"));
 	self->empty = TRUE;
 }
 

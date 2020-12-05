@@ -68,8 +68,8 @@ void machinebar_init(MachineBar* self, psy_ui_Component* parent, Workspace* work
 	psy_ui_combobox_init(&self->selectinstparam, &self->component);
 	psy_ui_combobox_setcharnumber(&self->selectinstparam, 14);
 	psy_ui_combobox_addtext(&self->selectinstparam, "Params");
-	psy_ui_combobox_addtext(&self->selectinstparam,
-		workspace_translate(workspace, "Instrument"));
+	psy_ui_combobox_addtext(&self->selectinstparam, psy_ui_translate(
+		"Instrument"));
 	psy_signal_connect(&self->selectinstparam.signal_selchanged, self,
 		machinebar_onselectinstparamselchange);
 	// Combobox for Instruments or Parameters
@@ -141,9 +141,8 @@ void machinebar_buildmachinebox(MachineBar* self)
 {
 	machinebar_clearmachinebox(self);
 	if (psy_audio_machines_size(self->machines) == 1) {
-		psy_ui_combobox_addtext(&self->machinebox,
-			workspace_translate(self->workspace,
-				"machineview.no-machines-loaded"));
+		psy_ui_combobox_addtext(&self->machinebox, psy_ui_translate(
+			"machineview.no-machines-loaded"));
 		psy_ui_combobox_setcursel(&self->machinebox, 0);
 	} else {
 		psy_TableIterator it;
@@ -245,8 +244,8 @@ void machinebar_buildparamlist(MachineBar* self)
 			}
 		}
 	} else {
-		psy_ui_combobox_addtext(&self->instparambox,
-			workspace_translate(self->workspace, "machineview.no-machine"));
+		psy_ui_combobox_addtext(&self->instparambox, psy_ui_translate(
+			"machineview.no-machine"));
 	}
 }
 

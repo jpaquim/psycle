@@ -405,7 +405,6 @@ void midimonitor_initcorestatus(MidiMonitor* self)
 void midimonitor_initcorestatusleft(MidiMonitor* self)
 {	
 	psy_ui_component_init(&self->resources, &self->top);
-	psy_ui_component_enablealign(&self->resources);
 	psy_ui_component_setalign(&self->resources, psy_ui_ALIGN_LEFT);
 	psy_ui_label_init_text(&self->resourcestitle, &self->resources,
 		"Core Status");		
@@ -422,7 +421,6 @@ void midimonitor_initcorestatusleft(MidiMonitor* self)
 void midimonitor_initcorestatusright(MidiMonitor* self)
 {	
 	psy_ui_component_init(&self->performance, &self->top);
-	psy_ui_component_enablealign(&self->performance);
 	psy_ui_component_setalign(&self->performance, psy_ui_ALIGN_LEFT);
 	psy_ui_checkbox_init(&self->cpucheck, &self->performance);
 	psy_ui_checkbox_settext(&self->cpucheck, "");	

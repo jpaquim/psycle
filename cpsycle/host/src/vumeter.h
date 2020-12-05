@@ -13,8 +13,10 @@
 extern "C" {
 #endif
 
-// aim: The VU Meter displays the left and right master volume during playback.
-//      A timer polls the BufferMemory of the Master and updates the rms volume
+// Vumeter
+//
+// The VU Meter displays the left and right master volume during playback.
+// A timer polls the BufferMemory of the Master and updates the rms volume
 //
 // Structure:
 //  psy_ui_ComponentImp
@@ -29,15 +31,26 @@ typedef struct {
 	psy_ui_Colour border;
 } VumeterSkin;
 
-typedef struct {	
+typedef struct Vumeter {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	VumeterSkin skin;
+	// internal data
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
+	// references
 	Workspace* workspace;
 } Vumeter;
 
 void vumeter_init(Vumeter*, psy_ui_Component* parent, Workspace*);
+
+INLINE psy_ui_Component* vumeter_base(Vumeter* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

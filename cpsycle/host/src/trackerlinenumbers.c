@@ -252,8 +252,8 @@ void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self, int shows
 // LineNumbersLabel
 // prototypes
 static void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel*, psy_ui_Component* sender);
-static void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel*, psy_Translator*);
-static void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel*, psy_Translator*);
+static void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel*);
+static void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel*);
 static void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel*,
 	TrackerLineState*);
 static void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel*,
@@ -275,6 +275,8 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 			trackerlinenumberslabel_onmousedown;
 		trackerlinenumberslabel_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			trackerlinenumberslabel_onpreferredsize;
+		trackerlinenumberslabel_vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			trackerlinenumberslabel_onlanguagechanged;
 	}
 }
 
@@ -290,9 +292,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	self->linestr = NULL;
 	self->defaultstr = NULL;
 	self->workspace = workspace;
-	trackerlinenumberslabel_updatetext(self, workspace_translator(workspace));
-	psy_signal_connect(&workspace->signal_languagechanged, self,
-		trackerlinenumberslabel_onlanguagechanged);
+	trackerlinenumberslabel_updatetext(self);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		trackerlinenumberslabel_ondestroy);
 }
@@ -303,17 +303,17 @@ void trackerlinenumberslabel_ondestroy(TrackerLineNumbersLabel* self, psy_ui_Com
 	free(self->defaultstr);
 }
 
-void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel* self, psy_Translator* translator)
+void trackerlinenumberslabel_updatetext(TrackerLineNumbersLabel* self)
 {
 	free(self->linestr);
 	free(self->defaultstr);
-	self->linestr = strdup(psy_translator_translate(translator, "patternview.line"));
-	self->defaultstr = strdup(psy_translator_translate(translator, "patternview.defaults"));
+	self->linestr = strdup(psy_ui_translate("patternview.line"));
+	self->defaultstr = strdup(psy_ui_translate("patternview.defaults"));
 }
 
-void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel* self, psy_Translator* sender)
+void trackerlinenumberslabel_onlanguagechanged(TrackerLineNumbersLabel* self)
 {
-	trackerlinenumberslabel_updatetext(self, sender);
+	trackerlinenumberslabel_updatetext(self);
 }
 
 void trackerlinenumberslabel_setsharedlinestate(TrackerLineNumbersLabel* self,

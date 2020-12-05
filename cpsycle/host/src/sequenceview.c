@@ -676,7 +676,6 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	{
 		psy_ui_Margin margin;
 		psy_ui_component_init(&self->top, &self->component);
-		psy_ui_component_enablealign(&self->top);
 		psy_ui_component_setalign(&self->top, psy_ui_ALIGN_BOTTOM);
 		psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 			psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
@@ -847,11 +846,17 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 void sequenceview_onnewentry(SequenceView* self)
 {
 	psy_List* tracknode;
+	psy_audio_Pattern* newpattern;
 
+	newpattern = psy_audio_pattern_allocinit();
+	// change length to default lines
+	psy_audio_pattern_setlength(newpattern,
+		psy_audio_pattern_defaultlines() /
+		(psy_audio_player_lpb(&self->workspace->player)));
 	tracknode = psy_audio_sequence_insert(self->sequence,
 		self->selection->editposition,
 		psy_audio_patterns_append(self->patterns,
-			psy_audio_pattern_allocinit()));
+			newpattern));
 	psy_audio_sequenceselection_seteditposition(self->selection,
 		psy_audio_sequence_makeposition(self->sequence,
 			self->selection->editposition.tracknode,

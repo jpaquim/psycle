@@ -15,6 +15,7 @@ void psy_ui_keyevent_init(psy_ui_KeyEvent* self, int keycode, int keydata,
 	self->repeat = repeat;
 	self->bubble = 1;
 	self->preventdefault = FALSE;
+	self->target = NULL;
 }
 
 void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent* self)

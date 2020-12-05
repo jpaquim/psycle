@@ -5,20 +5,15 @@
 
 #include "tabbar.h"
 
-// file
-#include <translator.h>
-// ui
-#include <uiapp.h>
 // std
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-
-
+// platform
 #include "../../detail/portable.h"
 
 static void tabbar_ondestroy(TabBar*, psy_ui_Component* component);
-static void tabbar_onlanguagechanged(TabBar*, psy_Translator* sender);
+static void tabbar_onlanguagechanged(TabBar*);
 static void tabbar_ondraw(TabBar*, psy_ui_Graphics*);
 static void tabbar_onmousedown(TabBar*, psy_ui_MouseEvent*);
 static void tabbar_onmousemove(TabBar*, psy_ui_MouseEvent*);
@@ -44,6 +39,8 @@ static void vtable_init(TabBar* self)
 		vtable.onmousemove = (psy_ui_fp_component_onmousemove) tabbar_onmousemove;
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter) tabbar_onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave) tabbar_onmouseleave;
+		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			tabbar_onlanguagechanged;
 		vtable_initialized = 1;
 	}
 }
@@ -53,8 +50,7 @@ void tab_init(Tab* self, const char* text, psy_ui_Size* size,
 {
 	self->text = strdup(text);
 	self->translation = NULL;
-	psy_strreset(&self->translation,
-		psy_translator_translate(&app.translator, text));
+	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->istoggle = FALSE;
 	self->mode = TABMODE_SINGLESEL;
 	self->checkstate = 0;
@@ -79,8 +75,7 @@ void tab_dispose(Tab* self)
 void tab_settext(Tab* self, const char* text)
 {
 	psy_strreset(&self->text, text);	
-	psy_strreset(&self->translation,
-		psy_translator_translate(&app.translator, text));	
+	psy_strreset(&self->translation, psy_ui_translate(text));
 }
 
 void tabbar_init(TabBar* self, psy_ui_Component* parent)
@@ -89,7 +84,6 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_doublebuffer(tabbar_base(self));
-	psy_ui_component_enablealign(tabbar_base(self));
 	self->tabs = 0;
 	self->selected = 0;
 	self->hover = 0;
@@ -100,9 +94,7 @@ void tabbar_init(TabBar* self, psy_ui_Component* parent)
 	self->tabalignment = psy_ui_ALIGN_TOP;
 	psy_ui_margin_init_all(&self->defaulttabmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0));
-	psy_signal_connect(&app.translator.signal_languagechanged, self,
-		tabbar_onlanguagechanged);
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0));	
 }
 
 void tabbar_ondestroy(TabBar* self, psy_ui_Component* component)
@@ -617,7 +609,7 @@ void tabbar_resettabcheckstates(TabBar* self)
 	}
 }
 
-void tabbar_onlanguagechanged(TabBar* self, psy_Translator* sender)
+void tabbar_onlanguagechanged(TabBar* self)
 {	
 	psy_List* tabs;
 
@@ -628,8 +620,7 @@ void tabbar_onlanguagechanged(TabBar* self, psy_Translator* sender)
 
 		tab = (Tab*)psy_list_entry(tabs);
 		if (tab != NULL) {
-			psy_strreset(&tab->translation, psy_translator_translate(sender,
-				tab->text));
+			psy_strreset(&tab->translation, psy_ui_translate(tab->text));
 		}
 	}
 	psy_ui_component_invalidate(&self->component);

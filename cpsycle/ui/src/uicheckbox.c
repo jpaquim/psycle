@@ -6,25 +6,22 @@
 // local
 #include "uiapp.h"
 #include "uicheckbox.h"
-#include "uiapp.h"
 #include "uiimpfactory.h"
-
+// std
 #include <stdlib.h>
 #include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 
 #ifdef PSY_USE_PLATFORM_CHECKBOX
 
-extern psy_ui_App app;
-
 static void psy_ui_checkbox_ondestroy(psy_ui_CheckBox*, psy_ui_Component*);
 static void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
-static void psy_ui_checkbox_onlanguagechanged(psy_ui_CheckBox*, psy_Translator* sender);
+static void psy_ui_checkbox_onlanguagechanged(psy_ui_CheckBox*);
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_ui_CheckBox* self)
 {
@@ -32,7 +29,9 @@ static void vtable_init(psy_ui_CheckBox* self)
 		vtable = *(self->component.vtable);
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			psy_ui_checkbox_onpreferredsize;
-		vtable_initialized = 1;
+		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			psy_ui_checkbox_onlanguagechanged;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -47,9 +46,7 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	self->translation = NULL;
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&self->component.signal_destroy, self,
-		psy_ui_checkbox_ondestroy);
-	psy_signal_connect(&app.translator.signal_languagechanged, self,
-		psy_ui_checkbox_onlanguagechanged);
+		psy_ui_checkbox_ondestroy);	
 }
 
 void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
@@ -61,11 +58,8 @@ void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
 
 void psy_ui_checkbox_settext(psy_ui_CheckBox* self, const char* text)
 {
-	extern psy_ui_App app;
-
 	psy_strreset(&self->text, text);	
-	psy_strreset(&self->translation,
-		psy_translator_translate(&app.translator, text));
+	psy_strreset(&self->translation, psy_ui_translate(text));
 	self->imp->vtable->dev_settext(self->imp, self->translation);
 }
 
@@ -103,12 +97,11 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 	}
 }
 
-void psy_ui_checkbox_onlanguagechanged(psy_ui_CheckBox* self, psy_Translator* sender)
+void psy_ui_checkbox_onlanguagechanged(psy_ui_CheckBox* self)
 {
 	assert(self);
 
-	psy_strreset(&self->translation, psy_translator_translate(sender,
-		self->text));
+	psy_strreset(&self->translation, psy_ui_translate(self->text));
 	self->imp->vtable->dev_settext(self->imp, self->translation);
 	psy_ui_component_invalidate(&self->component);
 }

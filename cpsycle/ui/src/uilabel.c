@@ -4,8 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "uilabel.h"
-// local
-#include "uiapp.h"
 // std
 #include <stdlib.h>
 #include <string.h>
@@ -13,10 +11,10 @@
 #include "../../detail/portable.h"
 
 // prototypes
-static void psy_ui_label_ondestroy(psy_ui_Label*, psy_ui_Component* sender);
-static void psy_ui_label_onlanguagechanged(psy_ui_Label*, psy_Translator* sender);
+static void psy_ui_label_ondestroy(psy_ui_Label*);
 static void psy_ui_label_ondraw(psy_ui_Label*, psy_ui_Graphics*);
 static void psy_ui_label_onpreferredsize(psy_ui_Label*, psy_ui_Size* limit, psy_ui_Size* rv);
+static void psy_ui_label_onlanguagechanged(psy_ui_Label*);
 
 static char* strrchrpos(char* str, char c, uintptr_t pos);
 // vtable
@@ -27,16 +25,22 @@ static void psy_ui_label_vtable_init(psy_ui_Label* self)
 {
 	if (!psy_ui_label_vtable_initialized) {
 		psy_ui_label_vtable = *(self->component.vtable);
-		psy_ui_label_vtable.ondraw = (psy_ui_fp_component_ondraw)psy_ui_label_ondraw;
-		psy_ui_label_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)psy_ui_label_onpreferredsize;
+		psy_ui_label_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+			psy_ui_label_ondestroy;
+		psy_ui_label_vtable.ondraw = (psy_ui_fp_component_ondraw)
+			psy_ui_label_ondraw;
+		psy_ui_label_vtable.onpreferredsize =
+			(psy_ui_fp_component_onpreferredsize)
+			psy_ui_label_onpreferredsize;
+		psy_ui_label_vtable.onlanguagechanged =
+			(psy_ui_fp_component_onlanguagechanged)
+			psy_ui_label_onlanguagechanged;
 		psy_ui_label_vtable_initialized = TRUE;
 	}
 }
 // implementation
 void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 {
-	extern psy_ui_App app;
-
 	assert(self);
 
 	psy_ui_component_init(&self->component, parent);	
@@ -48,11 +52,7 @@ void psy_ui_label_init(psy_ui_Label* self, psy_ui_Component* parent)
 		psy_ui_ALIGNMENT_CENTER_HORIZONTAL;
 	self->text = NULL;
 	self->translation = NULL;
-	self->translate = TRUE;
-	psy_signal_connect(&self->component.signal_destroy, self,
-		psy_ui_label_ondestroy);
-	psy_signal_connect(&app.translator.signal_languagechanged, self,
-		psy_ui_label_onlanguagechanged);
+	self->translate = TRUE;		
 }
 
 void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
@@ -64,21 +64,20 @@ void psy_ui_label_init_text(psy_ui_Label* self, psy_ui_Component* parent,
 	psy_ui_label_settext(self, text);
 }
 
-void psy_ui_label_ondestroy(psy_ui_Label* self, psy_ui_Component* sender)
+void psy_ui_label_ondestroy(psy_ui_Label* self)
 {
 	assert(self);
-
+	
 	free(self->text);
 	free(self->translation);
 }
 
-void psy_ui_label_onlanguagechanged(psy_ui_Label* self, psy_Translator* sender)
+void psy_ui_label_onlanguagechanged(psy_ui_Label* self)
 {
 	assert(self);
 
-	psy_strreset(&self->translation, psy_translator_translate(sender,
-		self->text));
-	psy_ui_component_invalidate(&self->component);
+	psy_strreset(&self->translation, psy_ui_translate(self->text));
+	psy_ui_component_invalidate(psy_ui_label_base(self));
 }
 
 void psy_ui_label_settext(psy_ui_Label* self, const char* text)
@@ -87,10 +86,8 @@ void psy_ui_label_settext(psy_ui_Label* self, const char* text)
 
 	psy_strreset(&self->text, text);
 	if (self->translate) {
-		extern psy_ui_App app;
-
-		psy_strreset(&self->translation,
-			psy_translator_translate(&app.translator, text));
+		psy_strreset(&self->translation, psy_translator_translate(
+			psy_ui_translator(), text));
 	}
 	psy_ui_component_invalidate(psy_ui_label_base(self));
 }

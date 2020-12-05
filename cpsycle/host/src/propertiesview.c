@@ -505,7 +505,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* prope
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
 		const char* choosefonttext;
 
-		choosefonttext = workspace_translate(self->workspace, "settingsview.choose-font");
+		choosefonttext = psy_ui_translate("settingsview.choose-font");
 		psy_ui_textout(self->g, propertiesrenderer_columnstart(self, column) + 3,
 			self->cpy, choosefonttext, strlen(choosefonttext));
 	} else {
@@ -520,7 +520,7 @@ void propertiesrenderer_drawbutton(PropertiesRenderer* self, psy_Property* prope
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_FONT) {
 		const char* choosefonttext;
 
-		choosefonttext = workspace_translate(self->workspace, "settingsview.choose-font");
+		choosefonttext = psy_ui_translate("settingsview.choose-font");
 		size = psy_ui_component_textsize(&self->component, choosefonttext);
 	} else {
 		size = psy_ui_component_textsize(&self->component,
@@ -1030,7 +1030,7 @@ static void propertiesview_onpropertiesrendererchanged(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
 static void propertiesview_onpropertiesrendererselected(PropertiesView*,
 	PropertiesRenderer* sender, psy_Property*);
-static void propertiesview_onlanguagechanged(PropertiesView*, psy_Translator*);
+static void propertiesview_onlanguagechanged(PropertiesView*, psy_ui_Component*);
 static void propertiesview_translate(PropertiesView*);
 static int propertiesview_onchangelanguageenum(PropertiesView*,
 	psy_Property*, int level);
@@ -1071,7 +1071,7 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_onpropertiesrendererchanged);
 	psy_signal_connect(&self->renderer.signal_selected, self,
 		propertiesview_onpropertiesrendererselected);
-	psy_signal_connect(&workspace->signal_languagechanged, self,
+	psy_signal_connect(&self->component.signal_languagechanged, self,
 		propertiesview_onlanguagechanged);	
 }
 
@@ -1125,7 +1125,7 @@ void propertiesview_ontabbarchange(PropertiesView* self, psy_ui_Component* sende
 			while (p) {
 				property = (psy_Property*)p->entry;
 				if (psy_property_type(property) == PSY_PROPERTY_TYPE_SECTION) {
-					if (strcmp(psy_property_translation(property), tab->text) == 0) {						
+					if (strcmp(psy_property_translation(property), tab->translation) == 0) {						
 						break;
 					}
 				}
@@ -1171,7 +1171,7 @@ void propertiesview_onpropertiesrendererselected(PropertiesView* self,
 	psy_signal_emit(&self->signal_selected, self, 1, selected);
 }
 
-void propertiesview_onlanguagechanged(PropertiesView* self, psy_Translator* sender)
+void propertiesview_onlanguagechanged(PropertiesView* self, psy_ui_Component* sender)
 {
 	propertiesview_translate(self);
 	propertiesview_updatetabbarsections(self);
@@ -1189,9 +1189,8 @@ int propertiesview_onchangelanguageenum(PropertiesView* self,
 	if (!property->item.translate) {
 		return 2;
 	} else {
-		psy_property_settranslation(property,
-			psy_translator_translate(workspace_translator(self->workspace),
-				psy_property_text(property)));
+		psy_property_settranslation(property, psy_ui_translate(
+			psy_property_text(property)));
 	}
 	return TRUE;
 }

@@ -45,7 +45,8 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
-	if (workspace_songmodified(self->workspace)) {
+	if (workspace_savereminder(self->workspace) && 
+			workspace_songmodified(self->workspace)) {
 		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_NEW);
 	} else {
 		workspace_newsong(self->workspace);
@@ -54,7 +55,8 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
-	if (workspace_songmodified(self->workspace)) {
+	if (workspace_savereminder(self->workspace) &&
+			workspace_songmodified(self->workspace)) {
 		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
 	} else {
 		psy_ui_OpenDialog dialog;		

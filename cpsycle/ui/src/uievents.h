@@ -30,6 +30,11 @@ void psy_ui_keyevent_init(psy_ui_KeyEvent*, int keycode, int keydata,
 void psy_ui_keyevent_stoppropagation(psy_ui_KeyEvent*);
 void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent*);
 
+INLINE void psy_ui_keyevent_settarget(psy_ui_KeyEvent* self, struct psy_ui_Component* target)
+{
+	self->target = target;
+}
+
 typedef struct {	
 	int x;
 	int y;

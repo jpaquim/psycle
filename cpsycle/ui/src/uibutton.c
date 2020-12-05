@@ -4,7 +4,6 @@
 #include "../../detail/prefix.h"
 
 #include "uibutton.h"
-#include "uiapp.h"
 // std
 #include <string.h>
 #include <stdlib.h>
@@ -16,7 +15,7 @@ static unsigned int arrowcolour = 0x00777777;
 static unsigned int arrowhighlightcolour = 0x00FFFFFF;
 
 static void ondestroy(psy_ui_Button*);
-static void onlanguagechanged(psy_ui_Button*, psy_Translator* sender);
+static void onlanguagechanged(psy_ui_Button*);
 static void ondraw(psy_ui_Button*, psy_ui_Graphics*);
 static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
 static void drawarrow(psy_ui_Button*, psy_ui_IntPoint* arrow, psy_ui_Graphics*);
@@ -45,14 +44,14 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;		
 		vtable.onkeydown = (psy_ui_fp_component_onkeydown)button_onkeydown;
+		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
+			onlanguagechanged;
 		vtable_initialized = TRUE;
 	}
 }
 
 void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 {
-	extern psy_ui_App app;
-
 	psy_ui_component_init(psy_ui_button_base(self), parent);
 	vtable_init(self);
 	self->component.vtable = &vtable;
@@ -70,9 +69,7 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->textcolour = psy_ui_colour_make(0x00BDBDBD);
 	self->shiftstate = FALSE;
 	self->ctrlstate = FALSE;
-	psy_signal_init(&self->signal_clicked);
-	psy_signal_connect(&app.translator.signal_languagechanged, self,
-		onlanguagechanged);
+	psy_signal_init(&self->signal_clicked);	
 }
 
 void psy_ui_button_init_text(psy_ui_Button* self, psy_ui_Component* parent,
@@ -100,12 +97,11 @@ void ondestroy(psy_ui_Button* self)
 	psy_signal_dispose(&self->signal_clicked);	
 }
 
-void onlanguagechanged(psy_ui_Button* self, psy_Translator* sender)
+void onlanguagechanged(psy_ui_Button* self)
 {
 	assert(self);
 
-	psy_strreset(&self->translation, psy_translator_translate(sender,
-		self->text));
+	psy_strreset(&self->translation, psy_ui_translate(self->text));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -298,10 +294,10 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
-	if (self->enabled) {
+	if (self->enabled && ev->button == 1) {
 		self->shiftstate = ev->shift;
-		self->ctrlstate = ev->ctrl;
-		psy_signal_emit(&self->signal_clicked, self, 0);
+		self->ctrlstate = ev->ctrl;		
+		psy_signal_emit(&self->signal_clicked, self, 0);		
 	}
 }
 
@@ -327,10 +323,7 @@ void psy_ui_button_settext(psy_ui_Button* self, const char* text)
 
 	psy_strreset(&self->text, text);
 	if (self->translate) {
-		extern psy_ui_App app;
-
-		psy_strreset(&self->translation,
-			psy_translator_translate(&app.translator, text));
+		psy_strreset(&self->translation, psy_ui_translate(text));
 	}
 	psy_ui_component_invalidate(psy_ui_button_base(self));
 }
@@ -393,7 +386,7 @@ void psy_ui_button_preventtranslation(psy_ui_Button* self)
 
 void enableinput(psy_ui_Button* self)
 {
-	if (self->enabled == FALSE) {
+	if (!self->enabled) {
 		self->enabled = TRUE;
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
@@ -401,7 +394,7 @@ void enableinput(psy_ui_Button* self)
 
 void preventinput(psy_ui_Button* self)
 {
-	if (self->enabled == TRUE) {
+	if (self->enabled) {
 		self->enabled = FALSE;
 		psy_ui_component_invalidate(psy_ui_button_base(self));
 	}
