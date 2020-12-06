@@ -24,12 +24,22 @@ static void transformpatternview_init_replace(TransformPatternView*);
 static void transformpatternview_init_searchon(TransformPatternView*);
 static void transformpatternview_init_actions(TransformPatternView*);
 static void transformpatternview_initselection(TransformPatternView*);
+static void transformpatternview_applyto(TransformPatternView*,
+	int index);
+static void transformpatternview_onsearchonmousedown(TransformPatternView*,
+	psy_ui_Component* sender, psy_ui_MouseEvent*);
 static void transformpatternview_onsearch(TransformPatternView*);
+static void transformpatternview_searchentiresong(TransformPatternView*,
+	psy_audio_PatternSearchReplaceMode);
 static void transformpatternview_searchpattern(TransformPatternView*,
+	psy_audio_PatternSearchReplaceMode);
+static void transformpatternview_searchcurrentselection(TransformPatternView*,
 	psy_audio_PatternSearchReplaceMode);
 static void transformpatternview_onreplace(TransformPatternView*);
 static void transformpatternview_onhide(TransformPatternView*);
-static psy_audio_PatternSearchReplaceMode setupsearchreplacemode(int searchnote, int searchinst, int searchmach, int replnote, int replinst, int replmach, bool repltweak);
+static psy_audio_PatternSearchReplaceMode setupsearchreplacemode(
+	int searchnote, int searchinst, int searchmach,
+	int replnote, int replinst, int replmach, bool repltweak);
 static psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView*);
 
 // implementation
@@ -40,6 +50,8 @@ void transformpatternview_init(TransformPatternView* self, psy_ui_Component*
 
 	psy_ui_component_init(transformpatternview_base(self), parent);
 	self->workspace = workspace;
+	self->applyto = 0;
+	psy_audio_patternselection_init(&self->patternselection);
 	psy_ui_margin_init_all(&self->sectionmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0));
@@ -126,16 +138,20 @@ void transformpatternview_init_searchon(TransformPatternView* self)
 	psy_ui_component_init(&self->searchon, transformpatternview_base(self));	
 	psy_ui_component_setdefaultalign(&self->searchon,
 		psy_ui_ALIGN_TOP, psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_label_init(&self->searchontitle, &self->searchon);
-	psy_ui_label_settext(&self->searchontitle, "Search on");
-	psy_ui_component_setdefaultalign(&self->searchon,
+	psy_ui_label_init_text(&self->searchontitle, &self->searchon, "Search on");	
+	psy_ui_component_init(&self->searchonchoice, &self->searchon);
+	psy_signal_connect(&self->searchonchoice.signal_mousedown, self,
+		transformpatternview_onsearchonmousedown);
+	psy_ui_component_setdefaultalign(&self->searchonchoice,
 		psy_ui_ALIGN_TOP, self->sectionmargin);
-	psy_ui_checkbox_init(&self->entire, &self->searchon);
-	psy_ui_checkbox_settext(&self->entire, "Entire song");
-	psy_ui_checkbox_init(&self->currpattern, &self->searchon);
-	psy_ui_checkbox_settext(&self->currpattern, "Current pattern");
-	psy_ui_checkbox_init(&self->currselection, &self->searchon);
-	psy_ui_checkbox_settext(&self->currselection, "Current selection");
+	psy_ui_label_init_text(&self->entire, &self->searchonchoice, "Entire song");
+	psy_ui_label_init_text(&self->currpattern, &self->searchonchoice,
+		"Current pattern");
+	psy_ui_label_init_text(&self->currselection, &self->searchonchoice,
+		"Current selection");
+	psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
+		psy_ui_NONRECURSIVE);
+	transformpatternview_applyto(self, 1);
 }
 
 void transformpatternview_init_actions(TransformPatternView* self)
@@ -234,10 +250,51 @@ void transformpatternview_initselection(TransformPatternView* self)
 	psy_ui_combobox_setcursel(&self->replacemach, 0);
 }
 
+void transformpatternview_onsearchonmousedown(TransformPatternView* self,
+	psy_ui_Component* sender, psy_ui_MouseEvent* ev)
+{
+	psy_List* q;
+
+	q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONRECURSIVE);
+	transformpatternview_applyto(self, psy_list_entry_index(q, ev->target));
+	free(q);
+}
+
+void transformpatternview_applyto(TransformPatternView* self, int index)
+{
+	psy_List* p;
+	psy_List* q;
+	int c;
+
+	if (index != -1 && index != 2 || self->patternselection.valid) {
+		self->applyto = index;
+	}	
+	c = 0;
+	for (p = q = psy_ui_component_children(&self->searchonchoice, psy_ui_NONRECURSIVE); p != NULL;
+		psy_list_next(&p), ++c) {
+		psy_ui_Component* component;
+
+		component = (psy_ui_Component*)psy_list_entry(p);		
+		if (c == self->applyto) {			
+			psy_ui_component_setcolour(component,
+				psy_ui_colour_make(0x00B1C8B0));
+		} else {
+			psy_ui_component_setcolour(component,
+				psy_ui_colour_make(0x00BDBDBD));
+		}
+		if (component == &self->currselection && !self->patternselection.valid) {
+			psy_ui_component_setcolour(component,
+				psy_ui_colour_make(0x00666666));
+		}		
+	}
+	free(q);
+	psy_ui_component_invalidate(&self->searchonchoice);
+}
+
 void transformpatternview_onsearch(TransformPatternView* self)
 {
 	psy_audio_PatternSearchReplaceMode searchreplacemode;
-
+	
 	searchreplacemode = setupsearchreplacemode(
 		psy_ui_combobox_itemdata(&self->searchnote,
 			psy_ui_combobox_cursel(&self->searchnote)),
@@ -246,7 +303,63 @@ void transformpatternview_onsearch(TransformPatternView* self)
 		psy_ui_combobox_itemdata(&self->searchmach,
 			psy_ui_combobox_cursel(&self->searchmach)),
 		-1, -1, -1, FALSE);
-	transformpatternview_searchpattern(self, searchreplacemode);
+	switch (self->applyto) {
+		case 0:
+			transformpatternview_searchentiresong(self, searchreplacemode);
+			break;
+		case 1:
+			transformpatternview_searchpattern(self, searchreplacemode);
+			break;
+		case 2:
+			transformpatternview_searchcurrentselection(self, searchreplacemode);
+			break;
+		default:
+			break;
+	}	
+}
+
+void transformpatternview_searchentiresong(TransformPatternView* self,
+	psy_audio_PatternSearchReplaceMode searchreplacemode)
+{
+	assert(self);
+
+	if (workspace_song(self->workspace)) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_patterns_begin(
+					&workspace_song(self->workspace)->patterns);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_Pattern* currpattern;
+
+			currpattern = (psy_audio_Pattern*)psy_tableiterator_value(&it);
+			if (psy_audio_sequence_patternused(&self->workspace->song->sequence,
+					psy_tableiterator_key(&it))) {
+				psy_audio_PatternCursor cursor;
+
+				cursor = psy_audio_pattern_searchinpattern(currpattern,
+					psy_audio_patternselection_make(
+						psy_audio_patterncursor_make(0, (psy_dsp_big_beat_t)0.0),
+						psy_audio_patterncursor_make(MAX_TRACKS,
+							psy_audio_pattern_length(currpattern))),
+					searchreplacemode);
+				if (cursor.line != UINTPTR_MAX) {
+					psy_audio_SequencePosition position;
+										
+					position = psy_audio_sequence_patternfirstused(
+						&workspace_song(self->workspace)->sequence,
+						psy_tableiterator_key(&it));
+					psy_audio_sequenceselection_seteditposition(
+						&self->workspace->sequenceselection,
+						position);
+					workspace_setsequenceselection(self->workspace,
+						self->workspace->sequenceselection);
+					workspace_setpatterncursor(self->workspace, cursor);
+					break;
+				}
+			}
+		}
+	}
 }
 
 void transformpatternview_searchpattern(TransformPatternView* self,
@@ -269,6 +382,45 @@ void transformpatternview_searchpattern(TransformPatternView* self,
 		if (cursor.line != UINTPTR_MAX) {
 			workspace_setpatterncursor(self->workspace, cursor);
 		}
+	}
+}
+
+void transformpatternview_searchcurrentselection(TransformPatternView* self,
+	psy_audio_PatternSearchReplaceMode searchreplacemode)
+{
+	psy_audio_Pattern* currpattern;
+
+	assert(self);
+
+	currpattern = transformpatternview_currpattern(self);
+	if (currpattern) {
+		psy_audio_PatternCursor cursor;
+
+		cursor = psy_audio_pattern_searchinpattern(currpattern,
+			self->patternselection,
+			searchreplacemode);
+		if (cursor.line != UINTPTR_MAX) {
+			workspace_setpatterncursor(self->workspace, cursor);
+		}
+	}	
+}
+
+void transformpatternview_setpatternselection(TransformPatternView* self,
+	psy_audio_PatternSelection selection)
+{
+	if (self->patternselection.valid != selection.valid) {
+		self->patternselection = selection;
+		if (selection.valid) {
+			psy_ui_component_enableinput(psy_ui_label_base(&self->currselection),
+				psy_ui_NONRECURSIVE);
+			transformpatternview_applyto(self, 2);
+		} else {
+			psy_ui_component_preventinput(psy_ui_label_base(&self->currselection),
+				psy_ui_NONRECURSIVE);
+			if (self->applyto == 2) {
+				transformpatternview_applyto(self, 1);
+			}
+		}				
 	}
 }
 
@@ -348,3 +500,4 @@ psy_audio_PatternSearchReplaceMode setupsearchreplacemode(int searchnote, int se
 	mode.tweakreplacer = (repltweak) ? psy_audio_patternsearchreplacemode_replacewithempty : psy_audio_patternsearchreplacemode_replacewithcurrent;
 	return mode;
 }
+

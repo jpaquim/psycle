@@ -3042,6 +3042,22 @@ bool workspace_patdefaultlines(Workspace* self)
 	return psy_property_at_int(self->keyboard_misc, "numdefaultlines", 64);
 }
 
+void workspace_togglepatdefaultline(Workspace* self)
+{
+	psy_Property* pv;
+
+	pv = psy_property_findsection(&self->config, "visual.patternview");
+	if (pv) {
+		psy_Property* p;
+
+		p = psy_property_at(pv, "griddefaults", PSY_PROPERTY_TYPE_NONE);
+		if (p) {
+			psy_property_set_bool(pv, "griddefaults", !psy_property_item_int(p));
+			psy_signal_emit(&self->signal_configchanged, self, 1, p);
+		}
+	}
+}
+
 bool workspace_allowmultipleinstances(Workspace* self)
 {
 	return psy_property_at_bool(self->keyboard_misc,

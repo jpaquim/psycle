@@ -1,8 +1,8 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PATTERNCMDS)
-#define PATTERNCMDS
+#if !defined(PATTERNCMDS_H)
+#define PATTERNCMDS_H
 
 #include "notestab.h"
 #include "skincoord.h"
@@ -21,6 +21,7 @@ extern "C" {
 #endif
 
 typedef struct {
+	// inherits
 	psy_Command command;
 	psy_audio_PatternCursor cursor;
 	psy_audio_Pattern* pattern;
@@ -31,13 +32,12 @@ typedef struct {
 	Workspace* workspace;
 } InsertCommand;
 
-
 InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
 	psy_audio_PatternCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace);
 
-
 typedef struct {
+	// inherits
 	psy_Command command;
 	psy_audio_PatternCursor cursor;
 	psy_audio_Pattern* pattern;
@@ -53,6 +53,7 @@ RemoveCommand* RemoveCommandAlloc(psy_audio_Pattern*, double bpl,
 
 // BlockTranspose
 typedef struct {
+	// inherits
 	psy_Command command;
 	psy_audio_Pattern* pattern;
 	psy_audio_Pattern oldpattern;
@@ -66,8 +67,39 @@ BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
 	psy_audio_PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
 	Workspace* workspace);
 
+typedef struct {
+	// inherits
+	psy_Command command;
+	psy_audio_PatternSelection selection;
+	psy_audio_Pattern* pattern;
+	psy_audio_Pattern oldpattern;
+	bool remove;
+	Workspace* workspace;
+} BlockRemoveCommand;
+
+BlockRemoveCommand* BlockRemoveCommandAlloc(psy_audio_Pattern*,
+	psy_audio_PatternSelection, Workspace*);
+
+typedef struct BlockPasteCommand {
+	// inherits
+	psy_Command command;
+	psy_audio_PatternCursor destcursor;
+	psy_audio_Pattern* pattern;
+	psy_audio_Pattern source;
+	psy_audio_Pattern oldpattern;
+	psy_dsp_big_beat_t bpl;
+	bool paste;
+	bool mix;
+	Workspace* workspace;
+} BlockPasteCommand;
+
+BlockPasteCommand* BlockPasteCommandAlloc(psy_audio_Pattern*,
+	psy_audio_Pattern* source, psy_audio_PatternCursor,
+	psy_dsp_big_beat_t bpl, bool mix, Workspace*);
+
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* PATTERNCMDS*/
+#endif /* PATTERNCMDS_H*/

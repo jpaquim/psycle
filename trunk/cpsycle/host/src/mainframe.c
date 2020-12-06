@@ -692,6 +692,13 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 		case CMD_IMM_PLAYSTOP:
 			psy_audio_player_stop(&self->workspace.player);
 			break;
+		case CMD_IMM_FOLLOWSONG:		
+			if (workspace_followingsong(&self->workspace)) {
+				workspace_stopfollowsong(&self->workspace);
+			} else {
+				workspace_followsong(&self->workspace);
+			}
+			break;
 		case CMD_IMM_SONGPOSDEC:
 			workspace_songposdec(&self->workspace);			
 			break;

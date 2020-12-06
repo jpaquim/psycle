@@ -8,6 +8,7 @@
 #include "interpolatecurveview.h"
 #include "patternheader.h"
 #include "patternproperties.h"
+#include "patternviewmenu.h"
 #include "pianoroll.h"
 #include "stepbox.h"
 #include "tabbar.h"
@@ -46,39 +47,6 @@ INLINE psy_ui_Component* patternviewbar_base(PatternViewBar* self)
 void patternviewbar_init(PatternViewBar*, psy_ui_Component* parent,
 	Workspace*);
 
-// PatternBlockMenu
-
-typedef struct PatternBlockMenu {
-	// inherits
-	psy_ui_Component component;
-	// ui elements
-	psy_ui_Button cut;
-	psy_ui_Button copy;
-	psy_ui_Button paste;
-	psy_ui_Button mixpaste;
-	psy_ui_Button del;
-	psy_ui_Button transform;
-	psy_ui_Button interpolatelinear;
-	psy_ui_Button interpolatecurve;
-	psy_ui_Button changegenerator;
-	psy_ui_Button changeinstrument;
-	psy_ui_Button blocktransposeup;
-	psy_ui_Button blocktransposedown;
-	psy_ui_Button blocktransposeup12;
-	psy_ui_Button blocktransposedown12;
-	psy_ui_Button import;
-	psy_ui_Button export;
-} PatternBlockMenu;
-
-void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*, Workspace*);
-
-INLINE psy_ui_Component* patternblockmenu_base(PatternBlockMenu* self)
-{
-	assert(self);
-
-	return &self->component;
-}
-
 // PatternView
 //
 // Displays the tracker and/or pianoroll
@@ -106,9 +74,10 @@ typedef struct PatternView {
 	TrackConfig trackconfig;
 	TrackerGridState gridstate;
 	PatternViewSkin skin;
-	int showlinenumbers;
+	bool showlinenumbers;
+	bool showdefaultline;
 	// references
-	Workspace* workspace;	
+	Workspace* workspace;
 } PatternView;
 
 void patternview_init(PatternView*, psy_ui_Component* parent,
@@ -119,6 +88,9 @@ void patternview_showlinenumbers(PatternView*, int showstate);
 void patternview_toggleblockmenu(PatternView*);
 void patternview_toggleinterpolatecurve(PatternView*, psy_ui_Component* sender);
 void patternview_toggletransformpattern(PatternView*, psy_ui_Component* sender);
+void patternview_oninterpolatelinear(PatternView*);
+void patternview_onpatternimport(PatternView*);
+void patternview_onpatternexport(PatternView*);
 
 #ifdef __cplusplus
 }

@@ -64,8 +64,8 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers*,
 	const psy_audio_PatternCursor*);
 void trackerlinenumbers_invalidateline(TrackerLineNumbers*,
 	psy_dsp_big_beat_t offset);
-void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers*, int showstate);
-void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers*, int showstate);
+void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers*, bool showstate);
+void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers*, bool showstate);
 
 INLINE psy_ui_Component* trackerlinenumbers_base(TrackerLineNumbers* self)
 {

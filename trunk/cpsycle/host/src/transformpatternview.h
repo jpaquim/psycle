@@ -48,9 +48,10 @@ typedef struct TransformPatternView {
 	// searchon
 	psy_ui_Component searchon;
 	psy_ui_Label searchontitle;
-	psy_ui_CheckBox entire;
-	psy_ui_CheckBox currpattern;
-	psy_ui_CheckBox currselection;
+	psy_ui_Component searchonchoice;
+	psy_ui_Label entire;
+	psy_ui_Label currpattern;
+	psy_ui_Label currselection;
 	// actions	
 	psy_ui_Component actions;
 	psy_ui_Button dosearch;
@@ -58,6 +59,8 @@ typedef struct TransformPatternView {
 	psy_ui_Button docancel;
 	// internal data
 	psy_ui_Margin sectionmargin;
+	int applyto;
+	psy_audio_PatternSelection patternselection;
 	// references
 	Workspace* workspace;
 } TransformPatternView;
@@ -71,6 +74,9 @@ INLINE psy_ui_Component* transformpatternview_base(TransformPatternView* self)
 
 	return &self->component;
 }
+
+void transformpatternview_setpatternselection(TransformPatternView*,
+	psy_audio_PatternSelection);
 
 #ifdef __cplusplus
 }

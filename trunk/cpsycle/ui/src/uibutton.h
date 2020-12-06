@@ -46,6 +46,8 @@ void psy_ui_button_init_text(psy_ui_Button*, psy_ui_Component* parent,
 	const char* text);
 void psy_ui_button_init_connect(psy_ui_Button*, psy_ui_Component* parent,
 	void* context, void* fp);
+void psy_ui_button_init_text_connect(psy_ui_Button*, psy_ui_Component* parent,
+	const char* text, void* context, void* fp);
 void psy_ui_button_settext(psy_ui_Button*, const char* text);
 void psy_ui_button_seticon(psy_ui_Button*, psy_ui_ButtonIcon);
 void psy_ui_button_highlight(psy_ui_Button*);

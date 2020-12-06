@@ -192,6 +192,7 @@
     <ClCompile Include="src\patternheader.c" />
     <ClCompile Include="src\patternproperties.c" />
     <ClCompile Include="src\patternview.c" />
+    <ClCompile Include="src\patternviewmenu.c" />
     <ClCompile Include="src\patternviewskin.c" />
     <ClCompile Include="src\pionoroll.c" />
     <ClCompile Include="src\playbar.c" />
@@ -290,6 +291,7 @@
     <ClInclude Include="src\patternheader.h" />
     <ClInclude Include="src\patternproperties.h" />
     <ClInclude Include="src\patternview.h" />
+    <ClInclude Include="src\patternviewmenu.h" />
     <ClInclude Include="src\patternviewskin.h" />
     <ClInclude Include="src\pianoroll.h" />
     <ClInclude Include="src\playbar.h" />

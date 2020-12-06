@@ -275,6 +275,9 @@
     <ClCompile Include="src\defaultlang.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\patternviewmenu.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -550,6 +553,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\defaultlang.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewmenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
