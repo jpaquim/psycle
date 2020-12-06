@@ -67,15 +67,18 @@ INLINE const char* psy_audio_songproperties_title(const psy_audio_SongProperties
 }
 
 typedef struct psy_audio_Song {
+	// signals
+	psy_Signal signal_loadprogress;
+	psy_Signal signal_saveprogress;
+	// data members
 	psy_audio_SongProperties properties;
 	psy_audio_Machines machines;
 	psy_audio_Patterns patterns;
 	psy_audio_Sequence sequence;
 	psy_audio_Samples samples;
-	psy_audio_Instruments instruments;
+	psy_audio_Instruments instruments;	
+	// references
 	struct psy_audio_MachineFactory* machinefactory;
-	psy_Signal signal_loadprogress;
-	psy_Signal signal_saveprogress;
 } psy_audio_Song;
 
 /// initializes a song with a master and one sequence track/entry/pattern
@@ -90,8 +93,31 @@ psy_audio_Song* psy_audio_song_alloc(void);
 psy_audio_Song* psy_audio_song_allocinit(struct psy_audio_MachineFactory*);
 /// calls dispose and deallocates memory allocated by song_alloc
 void psy_audio_song_deallocate(psy_audio_Song*);
-/// Clears the song completly (no master, no pattern, no sequence track/entry)
+/// clears the song completly (no master, no pattern, no sequence track/entry)
 void psy_audio_song_clear(psy_audio_Song*);
+/// getter of the song parts
+INLINE psy_audio_Machines* psy_audio_song_machines(psy_audio_Song* self)
+{
+	return &self->machines;
+}
+
+INLINE psy_audio_Patterns* psy_audio_song_sequence(psy_audio_Song* self) {
+	return &self->patterns;
+}
+
+INLINE psy_audio_Sequence* psy_audio_song_(psy_audio_Song* self) {
+	return &self->sequence;
+}
+
+INLINE psy_audio_Samples* psy_audio_song_samples(psy_audio_Song* self)
+{
+	return &self->samples;
+}
+
+INLINE psy_audio_Instruments* psy_audio_song_instruments(psy_audio_Song* self)
+{
+	return &self->instruments;
+}
 /// set song properties
 void psy_audio_song_setproperties(psy_audio_Song*, const psy_audio_SongProperties*);
 /// return song properties title

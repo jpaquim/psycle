@@ -680,6 +680,46 @@ bool psy_audio_sequence_patternused(psy_audio_Sequence* self, uintptr_t patterns
 	return rv;
 }
 
+psy_audio_SequencePosition psy_audio_sequence_patternfirstused(psy_audio_Sequence* self,
+	uintptr_t patternslot)
+{
+	psy_audio_SequencePosition rv;
+	psy_audio_SequenceTrackNode* t;
+
+	assert(self);
+	rv.tracknode = NULL;
+	rv.trackposition.patternnode = NULL;
+	rv.trackposition.patterns = self->patterns;
+	rv.trackposition.sequencentrynode = NULL;
+
+	t = self->tracks;
+	while (t) {
+		psy_audio_SequenceTrack* track;
+		psy_audio_SequenceEntryNode* p;
+
+		track = (psy_audio_SequenceTrack*)t->entry;
+		p = track->entries;
+		while (p) {
+			psy_audio_SequenceEntry* sequenceentry;
+
+			sequenceentry = (psy_audio_SequenceEntry*)psy_list_entry(p);
+			if (psy_audio_sequenceentry_patternslot(sequenceentry) ==
+					patternslot) {
+				psy_audio_Pattern* pattern;
+
+				pattern = psy_audio_patterns_at(self->patterns, patternslot);
+				rv.tracknode = t;
+				rv.trackposition.sequencentrynode = p;
+				rv.trackposition.patternnode = pattern->events;
+				break;
+			}
+			psy_list_next(&p);
+		}
+		psy_list_next(&t);
+	}
+	return rv;
+}
+
 void psy_audio_sequence_setpatternslot(psy_audio_Sequence* self,
 	psy_audio_SequencePosition position, uintptr_t slot)
 {

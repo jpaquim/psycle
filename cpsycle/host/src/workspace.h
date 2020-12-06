@@ -16,7 +16,6 @@
 #include <sequence.h>
 #include <notestab.h>
 
-
 // Workspace
 //
 // connects the player with the host ui and configures both
@@ -241,7 +240,8 @@ int workspace_showmachineindexes(Workspace*);
 int workspace_showwirehover(Workspace*);
 int workspace_showparamviewaswindow(Workspace*);
 bool workspace_savereminder(Workspace*);
-bool workspace_patdefaultlines(Workspace* self);
+bool workspace_patdefaultlines(Workspace*);
+void workspace_togglepatdefaultline(Workspace*);
 bool workspace_allowmultipleinstances(Workspace*);
 void workspace_configurationchanged(Workspace*, psy_Property* property);
 int workspace_wraparound(Workspace*);

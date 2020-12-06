@@ -38,8 +38,10 @@ int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 typedef struct {
 	psy_audio_PatternCursor topleft;
 	psy_audio_PatternCursor bottomright;
+	bool valid;
 } psy_audio_PatternSelection;
 
+void psy_audio_patternselection_init(psy_audio_PatternSelection*);
 void psy_audio_patternselection_init_all(psy_audio_PatternSelection*,
 	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
 psy_audio_PatternSelection psy_audio_patternselection_make(
@@ -209,6 +211,17 @@ void psy_audio_pattern_scale(psy_audio_Pattern*, float factor);
 /// erases all entries of the block
 void psy_audio_pattern_blockremove(psy_audio_Pattern*,
 	psy_audio_PatternCursor begin, psy_audio_PatternCursor end);
+// erases the pattern and copies the block from a source pattern
+void psy_audio_pattern_blockcopy(psy_audio_Pattern* self,
+	psy_audio_Pattern* source, psy_audio_PatternSelection selection);
+// paste the block from a source pattern to the cursor position
+void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
+	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_dsp_big_beat_t bpl);
+// mix paste the block from a source pattern to the cursor position
+void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
+	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_dsp_big_beat_t bpl);
 /// interpolates linear all entries of the block
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl);

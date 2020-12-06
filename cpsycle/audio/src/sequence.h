@@ -217,6 +217,8 @@ psy_audio_SequenceTrack* psy_audio_sequence_track_at(psy_audio_Sequence*,
 uintptr_t psy_audio_sequence_sizetracks(psy_audio_Sequence*);
 uintptr_t psy_audio_sequence_maxtracksize(psy_audio_Sequence*);
 bool psy_audio_sequence_patternused(psy_audio_Sequence*, uintptr_t patternslot);
+psy_audio_SequencePosition psy_audio_sequence_patternfirstused(psy_audio_Sequence*,
+	uintptr_t patternslot);
 void psy_audio_sequence_setpatternslot(psy_audio_Sequence*, psy_audio_SequencePosition,
 	uintptr_t slot);
 psy_dsp_big_beat_t psy_audio_sequence_duration(psy_audio_Sequence*);

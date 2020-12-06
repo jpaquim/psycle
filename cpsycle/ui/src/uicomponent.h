@@ -270,7 +270,6 @@ void psy_ui_component_setposition(psy_ui_Component*, psy_ui_Point,
 psy_List* psy_ui_component_children(psy_ui_Component*, int recursive);
 psy_ui_Size psy_ui_component_frame_size(psy_ui_Component*);
 psy_ui_Component* psy_ui_component_at(psy_ui_Component*, uintptr_t index);
-
 void psy_ui_component_setfont(psy_ui_Component*, psy_ui_Font*);
 psy_ui_Font* psy_ui_component_font(psy_ui_Component*);
 void psy_ui_component_preventdefault(psy_ui_Component*);

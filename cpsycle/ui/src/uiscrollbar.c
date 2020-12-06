@@ -140,8 +140,14 @@ void psy_ui_scrollbarpane_setthumbposition(psy_ui_ScrollBarPane* self, intptr_t 
 {
 	double step;
 
+	if (pos < self->scrollmin) {
+		pos = self->scrollmin;
+	}
+	if (pos > self->scrollmax) {
+		pos = self->scrollmax;
+	}
 	step = psy_ui_scrollbarpane_step(self);
-	self->screenpos = (intptr_t)(1 / step * (pos - self->scrollmin));
+	self->screenpos = (intptr_t)(1.0 / step * (pos - self->scrollmin));
 	self->pos = pos;
 	psy_ui_component_invalidate(&self->component);
 }

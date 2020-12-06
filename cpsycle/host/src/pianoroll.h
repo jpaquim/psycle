@@ -1,13 +1,14 @@
 // This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
 // copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
 
-#if !defined(PIANOROLL)
-#define PIANOROLL
+#if !defined(PIANOROLL_H)
+#define PIANOROLL_H
 
+// host
 #include "patternviewskin.h"
 #include "workspace.h"
 #include "zoombox.h"
-
+// ui
 #include <uiscroller.h>
 #include <uilabel.h>
 #include <uicombobox.h>
@@ -18,6 +19,12 @@
 extern "C" {
 #endif
 
+// Pianoroll
+//
+// The Pianoroll is another way than the normal tracker view to enter notes.
+// It displays a Pattern selected by the SequenceView in a roll with a piano
+// keyboard at the left and the time line to the right.
+
 typedef enum {
 	KEYBOARDTYPE_KEYS,
 	KEYBOARDTYPE_NOTES,
@@ -25,7 +32,7 @@ typedef enum {
 	KEYBOARDTYPE_NUM
 } KeyboardType;
 
-typedef struct {
+typedef struct KeyboardState {
 	intptr_t keymin;
 	intptr_t keymax;
 	psy_dsp_NotesTabMode notemode;
@@ -34,7 +41,8 @@ typedef struct {
 	int keyheightpx;
 	int keyboardheightpx;
 	psy_ui_Value defaultkeyheight;
-	PatternViewSkin* skin;	
+	// references
+	PatternViewSkin* skin;
 } KeyboardState;
 
 void keyboardstate_init(KeyboardState*, PatternViewSkin* skin);
@@ -87,13 +95,14 @@ typedef enum {
 	PIANOROLL_TRACK_DISPLAY_ACTIVE
 } PianoTrackDisplay;
 
-typedef struct {
-	psy_audio_Pattern* pattern;	
+typedef struct PianoGridState {
 	psy_audio_PatternCursor cursor;
-	uintptr_t lpb;
-	PatternViewSkin* skin;
+	uintptr_t lpb;	
 	int pxperbeat;
-	int defaultbeatwidth;	
+	int defaultbeatwidth;
+	// references
+	psy_audio_Pattern* pattern;
+	PatternViewSkin* skin;
 } PianoGridState;
 
 void gridstate_init(PianoGridState*, PatternViewSkin* skin);
@@ -210,7 +219,9 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 
 // Header (Beatruler)
 typedef struct {
+	// inherits
 	psy_ui_Component component;	
+	// references
 	PianoGridState* gridstate;
 	PianoGridState defaultgridstate;
 } PianoRuler;
@@ -226,8 +237,10 @@ INLINE psy_ui_Component* pianoruler_base(PianoRuler* self)
 }
 
 // Keyboard
-typedef struct {
+typedef struct PianoKeyboard {
+	// inherits
 	psy_ui_Component component;
+	// references
 	KeyboardState* keyboardstate;
 	KeyboardState defaultkeyboardstate;
 } PianoKeyboard;
@@ -255,20 +268,28 @@ typedef struct {
 } PianogridTrackEvent;
 
 typedef struct Pianogrid {
+	// inherits
    psy_ui_Component component;
-   PianoGridState* gridstate;
-   PianoGridState defaultgridstate;
-   KeyboardState* keyboardstate;
+   // internal data
+   PianoGridState defaultgridstate;   
    KeyboardState defaultkeyboardstate;
    psy_audio_PatternEntry* hoverpatternentry;
-   psy_Table lasttrackevent;
-   Workspace* workspace;
+   psy_Table lasttrackevent;   
    psy_dsp_big_beat_t sequenceentryoffset;
    psy_dsp_big_beat_t lastplayposition;
    psy_audio_PatternCursor oldcursor;
+   psy_audio_PatternCursor dragcursor;
    bool cursoronnoterelease;
    PianoTrackDisplay trackdisplay;
    bool cursorchanging;
+   psy_audio_PatternSelection selection;
+   psy_audio_PatternCursor dragselectionbase;
+   psy_audio_PatternCursor lastdragcursor;
+   int hasselection;
+   // references
+   KeyboardState* keyboardstate;
+   PianoGridState* gridstate;
+   Workspace* workspace;
 } Pianogrid;
 
 void pianogrid_init(Pianogrid*, psy_ui_Component* parent, KeyboardState*,
@@ -297,6 +318,7 @@ INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
 }
 
 typedef struct PianoBar {
+	// inherits
 	psy_ui_Component component;
 	ZoomBox zoombox_keyheight;
 	psy_ui_Label keys;
@@ -306,6 +328,7 @@ typedef struct PianoBar {
 	psy_ui_Button track_curr;
 	psy_ui_Button tracks_active;
 	psy_ui_Button blockmenu;
+	// references
 	Workspace* workspace;
 } PianoBar;
 
@@ -319,20 +342,24 @@ INLINE psy_ui_Component* pianobar_base(PianoBar* self)
 }
 
 typedef struct Pianoroll {
-   psy_ui_Component component;
-   psy_ui_Component top;
-   PianoRuler header;
-   psy_ui_Component left;
-   ZoomBox zoombox_beatwidth;   
-   KeyboardState keyboardstate;
-   PianoKeyboard keyboard;
-   PianoGridState gridstate;
-   Pianogrid grid;   
-   uintptr_t opcount;
-   bool syncpattern;
-   psy_ui_Scroller scroller;
-   PianoBar bar;
-   Workspace* workspace;
+	// inherits
+	psy_ui_Component component;
+	// ui elements
+	psy_ui_Component top;
+	PianoRuler header;
+	psy_ui_Component left;
+	ZoomBox zoombox_beatwidth;   
+	Pianogrid grid;
+	psy_ui_Scroller scroller;
+	PianoBar bar;
+	// internal data
+	KeyboardState keyboardstate;
+	PianoKeyboard keyboard;
+	PianoGridState gridstate;	
+	uintptr_t opcount;
+	bool syncpattern;
+	// references	
+	Workspace* workspace;
 } Pianoroll;
 
 void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewSkin*,
@@ -352,4 +379,4 @@ INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)
 }
 #endif
 
-#endif
+#endif /* PIANOROLL_H */

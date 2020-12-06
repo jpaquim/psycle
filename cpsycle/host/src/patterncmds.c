@@ -255,3 +255,144 @@ void BlockTransposeCommandRevert(BlockTransposeCommand* self)
 		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
 	}
 }
+
+// BlockRemoveCommand
+// prototypes
+static void BlockRemoveCommandDispose(BlockRemoveCommand*);
+static void BlockRemoveCommandExecute(BlockRemoveCommand*);
+static void BlockRemoveCommandRevert(BlockRemoveCommand*);
+// vtable
+static psy_CommandVtable blockremovecommandcommand_vtable;
+static bool blockremovecommandcommand_vtable_initialized = FALSE;
+
+static void blockremovecommandcommand_vtable_init(BlockRemoveCommand* self)
+{
+	if (!blockremovecommandcommand_vtable_initialized) {
+		blockremovecommandcommand_vtable = *(self->command.vtable);
+		blockremovecommandcommand_vtable.dispose = (psy_fp_command)BlockRemoveCommandDispose;
+		blockremovecommandcommand_vtable.execute = (psy_fp_command)BlockRemoveCommandExecute;
+		blockremovecommandcommand_vtable.revert = (psy_fp_command)BlockRemoveCommandRevert;
+		blockremovecommandcommand_vtable_initialized = TRUE;
+	}
+}
+// implementation
+BlockRemoveCommand* BlockRemoveCommandAlloc(psy_audio_Pattern* pattern,
+	psy_audio_PatternSelection selection, Workspace* workspace)
+{
+	BlockRemoveCommand* rv;
+
+	rv = malloc(sizeof(BlockRemoveCommand));
+	if (rv) {
+		psy_command_init(&rv->command);
+		blockremovecommandcommand_vtable_init(rv);
+		rv->command.vtable = &blockremovecommandcommand_vtable;
+		rv->selection = selection;
+		rv->remove = FALSE;
+		rv->pattern = pattern;
+		rv->workspace = workspace;
+	}
+	return rv;
+}
+
+void BlockRemoveCommandDispose(BlockRemoveCommand* self) { }
+
+void BlockRemoveCommandExecute(BlockRemoveCommand* self)
+{
+	if (!self->remove) {
+		psy_audio_pattern_init(&self->oldpattern);
+		psy_audio_pattern_copy(&self->oldpattern,
+			self->pattern);
+	}
+	psy_audio_pattern_blockremove(self->pattern,
+		self->selection.topleft,
+		self->selection.bottomright);
+	self->remove = TRUE;
+	//psy_audio_sequencer_checkiterators(
+		//&self->workspace->player.sequencer,
+		//node);	
+}
+
+void BlockRemoveCommandRevert(BlockRemoveCommand* self)
+{
+	if (self->remove) {
+		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
+		psy_audio_pattern_dispose(&self->oldpattern);
+		self->remove = 0;
+	}
+}
+
+// BlockPasteCommand
+// prototypes
+static void BlockPasteCommandDispose(BlockPasteCommand*);
+static void BlockPasteCommandExecute(BlockPasteCommand*);
+static void BlockPasteCommandRevert(BlockPasteCommand*);
+// vtable
+static psy_CommandVtable blockpastecommandcommand_vtable;
+static bool blockpastecommandcommand_vtable_initialized = FALSE;
+
+static void blockpastecommandcommand_vtable_init(BlockPasteCommand* self)
+{
+	if (!blockpastecommandcommand_vtable_initialized) {
+		blockpastecommandcommand_vtable = *(self->command.vtable);
+		blockpastecommandcommand_vtable.dispose = (psy_fp_command)BlockPasteCommandDispose;
+		blockpastecommandcommand_vtable.execute = (psy_fp_command)BlockPasteCommandExecute;
+		blockpastecommandcommand_vtable.revert = (psy_fp_command)BlockPasteCommandRevert;
+		blockpastecommandcommand_vtable_initialized = TRUE;
+	}
+}
+// implementation
+BlockPasteCommand* BlockPasteCommandAlloc(psy_audio_Pattern* pattern,
+	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
+	psy_dsp_big_beat_t bpl, bool mix, Workspace* workspace)
+{
+	BlockPasteCommand* rv;
+
+	rv = malloc(sizeof(BlockPasteCommand));
+	if (rv) {
+		psy_command_init(&rv->command);
+		blockpastecommandcommand_vtable_init(rv);
+		rv->command.vtable = &blockpastecommandcommand_vtable;
+		rv->destcursor = destcursor;
+		rv->paste = FALSE;
+		rv->pattern = pattern;
+		rv->bpl = bpl;
+		rv->mix = mix;
+		psy_audio_pattern_init(&rv->source);
+		psy_audio_pattern_copy(&rv->source, source);
+		rv->workspace = workspace;
+	}
+	return rv;
+}
+
+void BlockPasteCommandDispose(BlockPasteCommand* self) { }
+
+void BlockPasteCommandExecute(BlockPasteCommand* self)
+{
+	if (!self->paste) {
+		psy_audio_pattern_init(&self->oldpattern);
+		psy_audio_pattern_copy(&self->oldpattern,
+			self->pattern);
+	}
+	if (self->mix) {
+		psy_audio_pattern_blockmixpaste(self->pattern,
+			&self->source, self->destcursor,
+			self->bpl);
+	} else {
+		psy_audio_pattern_blockpaste(self->pattern,
+			&self->source, self->destcursor,
+			self->bpl);
+	}
+	self->paste = TRUE;
+	//psy_audio_sequencer_checkiterators(
+		//&self->workspace->player.sequencer,
+		//node);	
+}
+
+void BlockPasteCommandRevert(BlockPasteCommand* self)
+{
+	if (self->paste) {
+		psy_audio_pattern_copy(self->pattern, &self->oldpattern);
+		psy_audio_pattern_dispose(&self->oldpattern);
+		self->paste = FALSE;
+	}
+}

@@ -237,13 +237,13 @@ void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* l
 	rv->height = psy_ui_value_makepx(0);
 }
 
-void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers* self, int showstate)
+void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers* self, bool showstate)
 {
 	self->showlinenumbercursor = showstate;
 	psy_ui_component_invalidate(&self->component);
 }
 
-void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self, int showstate)
+void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self, bool showstate)
 {
 	self->showlinenumbersinhex = showstate;
 	psy_ui_component_invalidate(&self->component);
@@ -358,7 +358,7 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 	psy_ui_setbackgroundcolour(g, self->linestate->skin->background);
 	psy_ui_settextcolour(g, self->linestate->skin->font);
 	psy_ui_textoutrectangle(g, r.left, 0, 0, r, self->linestr, strlen(self->linestr));
-	if (self->view->showdefaultline) {
+	if (self->view->view->showdefaultline) {
 		psy_ui_setfont(g, psy_ui_component_font(
 			&self->view->view->left.linenumbers.component));
 		if ((workspace_showbeatoffset(self->workspace))) {
@@ -378,12 +378,13 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	psy_ui_TextMetric tm;
 	psy_ui_IntSize headersize;
 
-	// todo remove view
+	// todo remove view reference
 	tm = psy_ui_component_textmetric(&self->view->view->header.component);
 	headersize = psy_ui_intsize_init_size(
 		psy_ui_component_preferredsize(&self->view->view->header.component, limit), &tm);
 	height = headersize.height;
-	if (self->view->showdefaultline) {		
+	// todo remove view reference
+	if (self->view->view->showdefaultline) {		
 		height += self->linestate->lineheight;
 	}	
 	rv->height = psy_ui_value_makepx(height);

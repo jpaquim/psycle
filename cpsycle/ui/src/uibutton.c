@@ -21,6 +21,7 @@ static void drawicon(psy_ui_Button*, psy_ui_Graphics*);
 static void drawarrow(psy_ui_Button*, psy_ui_IntPoint* arrow, psy_ui_Graphics*);
 static void makearrow(psy_ui_IntPoint*, psy_ui_ButtonIcon icon, int x, int y);
 static void onmousedown(psy_ui_Button*, psy_ui_MouseEvent*);
+static void onmouseup(psy_ui_Button*, psy_ui_MouseEvent*);
 static void onmouseenter(psy_ui_Button*);
 static void onmouseleave(psy_ui_Button*);
 static void onpreferredsize(psy_ui_Button*, psy_ui_Size* limit, psy_ui_Size* rv);
@@ -41,6 +42,7 @@ static void vtable_init(psy_ui_Button* self)
 		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
 		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseup)onmouseup;
 		vtable.onmouseenter = (psy_ui_fp_component_onmouseenter)onmouseenter;
 		vtable.onmouseleave = (psy_ui_fp_component_onmouseleave)onmouseleave;		
 		vtable.onkeydown = (psy_ui_fp_component_onkeydown)button_onkeydown;
@@ -86,6 +88,13 @@ void psy_ui_button_init_connect(psy_ui_Button* self, psy_ui_Component* parent,
 {
 	psy_ui_button_init(self, parent);
 	psy_signal_connect(&self->signal_clicked, context, fp);
+}
+
+void psy_ui_button_init_text_connect(psy_ui_Button* self, psy_ui_Component*
+	parent, const char* text, void* context, void* fp)
+{
+	psy_ui_button_init_connect(self, parent, context, fp);
+	psy_ui_button_settext(self, text);
 }
 
 void ondestroy(psy_ui_Button* self)
@@ -294,11 +303,25 @@ void onpreferredsize(psy_ui_Button* self, psy_ui_Size* limit, psy_ui_Size* rv)
 
 void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {
+	psy_ui_component_capture(psy_ui_button_base(self));
+}
+
+void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
+{		
+	psy_ui_component_releasecapture(psy_ui_button_base(self));	
 	if (self->enabled && ev->button == 1) {
-		self->shiftstate = ev->shift;
-		self->ctrlstate = ev->ctrl;		
-		psy_signal_emit(&self->signal_clicked, self, 0);		
-	}
+		psy_ui_Rectangle client_position;
+		psy_ui_IntSize size;
+
+		size = psy_ui_component_intsize(self);
+		client_position = psy_ui_rectangle_make(0, 0, size.width, size.height);
+		if (psy_ui_rectangle_intersect(&client_position, ev->x, ev->y)) {
+			self->shiftstate = ev->shift;
+			self->ctrlstate = ev->ctrl;
+			psy_signal_emit(&self->signal_clicked, self, 0);
+		}
+		psy_ui_mouseevent_stoppropagation(ev);
+	}	
 }
 
 void onmouseenter(psy_ui_Button* self)

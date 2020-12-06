@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+// TrackerView
+//
 // The TrackerView is where you enter notes. It displays a Pattern selected by
 // the SequenceView as a tracker grid.
 
@@ -50,7 +52,6 @@ typedef struct {
 	psy_audio_PatternSelection selection;
 	psy_audio_PatternCursor dragselectionbase;
 	psy_audio_PatternCursor lastdragcursor;
-	int hasselection;
 	int midline;
 	int chordmodestarting;
 	bool chordmode;
@@ -96,21 +97,20 @@ void trackergrid_storecursor(TrackerGrid*);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
 // block menu
-void trackergrid_oninterpolatelinear(TrackerGrid*);
-void trackergrid_onchangegenerator(TrackerGrid*);
-void trackergrid_onchangeinstrument(TrackerGrid*);
+void trackergrid_changegenerator(TrackerGrid*);
+void trackergrid_changeinstrument(TrackerGrid*);
 void trackergrid_blockstart(TrackerGrid*);
 void trackergrid_blockend(TrackerGrid*);
 void trackergrid_blockunmark(TrackerGrid*);
-void trackergrid_onblockcut(TrackerGrid*);
-void trackergrid_onblockcopy(TrackerGrid*);
-void trackergrid_onblockpaste(TrackerGrid*);
-void trackergrid_onblockmixpaste(TrackerGrid*);
-void trackergrid_onblockdelete(TrackerGrid*);
-void trackergrid_onblocktransposeup(TrackerGrid*);
-void trackergrid_onblocktransposedown(TrackerGrid*);
-void trackergrid_onblocktransposeup12(TrackerGrid*);
-void trackergrid_onblocktransposedown12(TrackerGrid*);
+void trackergrid_blockcut(TrackerGrid*);
+void trackergrid_blockcopy(TrackerGrid*);
+void trackergrid_blockpaste(TrackerGrid*);
+void trackergrid_blockmixpaste(TrackerGrid*);
+void trackergrid_blockdelete(TrackerGrid*);
+void trackergrid_blocktransposeup(TrackerGrid*);
+void trackergrid_blocktransposedown(TrackerGrid*);
+void trackergrid_blocktransposeup12(TrackerGrid*);
+void trackergrid_blocktransposedown12(TrackerGrid*);
 
 INLINE bool trackergrid_midline(TrackerGrid* self)
 {
@@ -132,8 +132,7 @@ typedef struct TrackerView {
 	// ui elements
 	TrackerGrid grid;
 	psy_ui_Scroller scroller;	
-	// internal data
-	int showdefaultline;	
+	// internal data	
 	int pgupdownstep;
 	bool pgupdownbeat;
 	bool pgupdown4beat;
@@ -149,8 +148,6 @@ void trackerview_init(TrackerView*, psy_ui_Component* parent,
 void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
 void trackerview_updatescrollstep(TrackerView*);
 void trackerview_makecmds(psy_Property* parent);
-void trackerview_onpatternimport(TrackerView*);
-void trackerview_onpatternexport(TrackerView*);
 
 INLINE psy_ui_Component* trackerview_base(TrackerView* self)
 {

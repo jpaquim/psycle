@@ -28,6 +28,14 @@ void psy_audio_patterns_dispose(psy_audio_Patterns*);
 void psy_audio_patterns_insert(psy_audio_Patterns*,uintptr_t slot, psy_audio_Pattern*);
 uintptr_t psy_audio_patterns_append(psy_audio_Patterns*, psy_audio_Pattern*);
 psy_audio_Pattern* psy_audio_patterns_at(psy_audio_Patterns*, uintptr_t slot);
+
+INLINE psy_TableIterator psy_audio_patterns_begin(psy_audio_Patterns* self)
+{
+	assert(self);
+
+	return psy_table_begin(&self->slots);
+}
+
 void psy_audio_patterns_clear(psy_audio_Patterns*);
 void psy_audio_patterns_erase(psy_audio_Patterns*, uintptr_t slot);
 void psy_audio_patterns_remove(psy_audio_Patterns*, uintptr_t slot);

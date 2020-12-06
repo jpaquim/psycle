@@ -4,32 +4,41 @@
 #if !defined(PLUGINEDITOR_H)
 #define PLUGINEDITOR_H
 
+// host
+#include "workspace.h"
+// ui
+#include <uibutton.h>
 #include <uicombobox.h>
-#include <uilabel.h>
 #include <uiedit.h>
 #include <uieditor.h>
-#include <uibutton.h>
-
-#include "workspace.h"
+#include <uilabel.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: ide for lua plugins
+// PluginEditor
+//
+// Editor for lua plugins
 
-typedef struct {
-	psy_ui_Component component;	
+typedef struct PluginEditorCreateBar {
+	// inherits
+	psy_ui_Component component;
+	// ui elements
 	psy_ui_Label desc;
 	psy_ui_Edit name;
 	psy_ui_Button create;
+	// references
 	Workspace* workspace;
 } PluginEditorCreateBar;
 
-void plugineditorcreatebar_init(PluginEditorCreateBar*, psy_ui_Component* parent, Workspace*);
+void plugineditorcreatebar_init(PluginEditorCreateBar*, psy_ui_Component*
+	parent, Workspace*);
 
-typedef struct {
+typedef struct PluginEditor {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Editor editor;
 	psy_ui_Component bar;
 	psy_ui_Button newplugin;
@@ -41,17 +50,21 @@ typedef struct {
 	psy_ui_Component row1;
 	psy_ui_Label filedesc;
 	psy_ui_ComboBox fileselector;
-	PluginEditorCreateBar createbar;
-	Workspace* workspace;
+	PluginEditorCreateBar createbar;	
+	// internal data
 	const char* basepath;	
 	uintptr_t instanceidx;
 	psy_Table pluginmappping;
+	// referneces
+	Workspace* workspace;
 } PluginEditor;
 
 void plugineditor_init(PluginEditor*, psy_ui_Component* parent, Workspace*);
 
 INLINE psy_ui_Component* plugineditor_base(PluginEditor* self)
 {
+	assert(self);
+
 	return &self->component;
 }
 
@@ -59,4 +72,4 @@ INLINE psy_ui_Component* plugineditor_base(PluginEditor* self)
 }
 #endif
 
-#endif
+#endif /* PLUGINEDITOR_H */
