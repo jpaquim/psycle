@@ -56,6 +56,7 @@ static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section,
 	psy_EventDriverInput input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
+static const char* driver_target(psy_EventDriver*);
 static void driver_setcmddef(psy_EventDriver*, psy_Property*);
 static void driver_setcmddefaults(DXJoystickDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self);
@@ -93,6 +94,7 @@ static void vtable_init(void)
 		vtable.error = driver_onerror;
 		vtable.cmd = driver_cmd;
 		vtable.getcmd = driver_getcmd;
+		vtable.target = driver_target;
 		vtable.setcmddef = driver_setcmddef;
 		vtable.idle = driver_idle;
 		vtable_initialized = 1;
@@ -382,6 +384,12 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* section)
 	driver_cmd(driver, section, self->lastinput, &cmd);	
 	return cmd;
 }
+
+const char* driver_target(psy_EventDriver* self)
+{
+	return NULL;
+}
+
 
 /*
 void driver_configure(psy_EventDriver* driver)

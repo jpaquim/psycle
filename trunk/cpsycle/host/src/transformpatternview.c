@@ -282,7 +282,7 @@ void transformpatternview_applyto(TransformPatternView* self, int index)
 			psy_ui_component_setcolour(component,
 				psy_ui_colour_make(0x00BDBDBD));
 		}
-		if (component == &self->currselection && !self->patternselection.valid) {
+		if (component == &self->currselection.component && !self->patternselection.valid) {
 			psy_ui_component_setcolour(component,
 				psy_ui_colour_make(0x00666666));
 		}		
@@ -333,7 +333,7 @@ void transformpatternview_searchentiresong(TransformPatternView* self,
 			psy_audio_Pattern* currpattern;
 
 			currpattern = (psy_audio_Pattern*)psy_tableiterator_value(&it);
-			if (psy_audio_sequence_patternused(&self->workspace->song->sequence,
+			if (psy_audio_sequence_patternused(&workspace_song(self->workspace)->sequence,
 					psy_tableiterator_key(&it))) {
 				psy_audio_PatternCursor cursor;
 
@@ -432,7 +432,7 @@ psy_audio_Pattern* transformpatternview_currpattern(TransformPatternView* self)
 	selection = workspace_sequenceselection(self->workspace);
 	entry = psy_audio_sequenceposition_entry(&selection.editposition);
 	if (entry) {
-		return psy_audio_patterns_at(&self->workspace->song->patterns,
+		return psy_audio_patterns_at(&workspace_song(self->workspace)->patterns,
 			entry->patternslot);		
 	}
 	return NULL;

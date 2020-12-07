@@ -112,7 +112,32 @@ typedef struct {
 	bool maximized;
 } MaximizedView;
 
-typedef struct {	
+typedef struct {
+	// Signals
+	psy_Signal signal_octavechanged;
+	psy_Signal signal_songchanged;
+	psy_Signal signal_configchanged;
+	psy_Signal signal_skinchanged;
+	psy_Signal signal_changecontrolskin;
+	psy_Signal signal_patterncursorchanged;
+	psy_Signal signal_sequenceselectionchanged;
+	psy_Signal signal_loadprogress;
+	psy_Signal signal_scanprogress;
+	psy_Signal signal_beforesavesong;
+	psy_Signal signal_showparameters;
+	psy_Signal signal_viewselected;
+	psy_Signal signal_parametertweak;
+	psy_Signal signal_terminal_error;
+	psy_Signal signal_terminal_out;
+	psy_Signal signal_terminal_warning;
+	psy_Signal signal_followsongchanged;
+	psy_Signal signal_dockview;
+	psy_Signal signal_defaultfontchanged;
+	psy_Signal signal_togglegear;
+	psy_Signal signal_selectpatterndisplay;
+	psy_Signal signal_floatsection;
+	psy_Signal signal_docksection;
+	// audio
 	psy_audio_Song* song;
 	psy_audio_Player player;
 	psy_audio_PluginCatcher plugincatcher;
@@ -165,29 +190,7 @@ typedef struct {
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
-	uintptr_t machines_undosavepoint;	
-	// Signals
-	psy_Signal signal_octavechanged;
-	psy_Signal signal_songchanged;
-	psy_Signal signal_configchanged;
-	psy_Signal signal_skinchanged;
-	psy_Signal signal_changecontrolskin;
-	psy_Signal signal_patterncursorchanged;
-	psy_Signal signal_sequenceselectionchanged;
-	psy_Signal signal_loadprogress;
-	psy_Signal signal_scanprogress;
-	psy_Signal signal_beforesavesong;
-	psy_Signal signal_showparameters;
-	psy_Signal signal_viewselected;
-	psy_Signal signal_parametertweak;
-	psy_Signal signal_terminal_error;
-	psy_Signal signal_terminal_out;
-	psy_Signal signal_terminal_warning;
-	psy_Signal signal_followsongchanged;
-	psy_Signal signal_dockview;
-	psy_Signal signal_defaultfontchanged;
-	psy_Signal signal_togglegear;	
-	psy_Signal signal_selectpatterndisplay;
+	uintptr_t machines_undosavepoint;
 } Workspace;
 
 void workspace_init(Workspace*, void* handle);
@@ -261,6 +264,8 @@ void workspace_stopfollowsong(Workspace*);
 void workspace_idle(Workspace*);
 void workspace_showparameters(Workspace*, uintptr_t machineslot);
 void workspace_selectview(Workspace*, int view, uintptr_t section, int option);
+void workspace_floatsection(Workspace*, int view, uintptr_t section);
+void workspace_docksection(Workspace*, int view, uintptr_t section);
 void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
 bool workspace_enableaudio(Workspace*);
 bool workspace_ft2home(Workspace*);

@@ -821,3 +821,9 @@ void psy_audio_player_idle(psy_audio_Player* self)
 {
 	psy_audio_eventdrivers_idle(&self->eventdrivers);	
 }
+
+void psy_audio_player_sendcmd(psy_audio_Player* self, const char* section,
+	psy_EventDriverCmd cmd)
+{
+	psy_audio_eventdrivers_sendcmd(&self->eventdrivers, section, cmd);
+}

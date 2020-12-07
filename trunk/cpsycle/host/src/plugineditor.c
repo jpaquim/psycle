@@ -196,10 +196,10 @@ void plugineditor_onnewplugin(PluginEditor* self, psy_ui_Component* sender)
 
 void plugineditor_onreload(PluginEditor* self, psy_ui_Component* sender)
 {
-	if (self->workspace->song && self->instanceidx) {
+	if (workspace_song(self->workspace) && self->instanceidx) {
 		psy_audio_Machine* machine;
 
-		machine = psy_audio_machines_at(&self->workspace->song->machines, self->instanceidx);
+		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->instanceidx);
 		if (machine) {			
 			psy_audio_exclusivelock_enter();
 			psy_audio_machine_reload(machine);

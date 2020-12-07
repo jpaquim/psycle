@@ -36,12 +36,12 @@ void volslider_init(VolSlider* self, psy_ui_Component* parent,
 void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender,
 	char* text)
 {
-	if (self->workspace->song && psy_audio_machines_master(
-			&self->workspace->song->machines)) {
+	if (workspace_song(self->workspace) && psy_audio_machines_master(
+			&workspace_song(self->workspace)->machines)) {
 		psy_audio_MachineParam* param;
 
 		param = psy_audio_machine_tweakparameter(
-			psy_audio_machines_master(&self->workspace->song->machines), 0);
+			psy_audio_machines_master(&workspace_song(self->workspace)->machines), 0);
 		if (param) {
 			float normvalue;
 			float volume;
@@ -56,12 +56,12 @@ void volslider_onviewdescribe(VolSlider* self, psy_ui_Slider* sender,
 
 void volslider_onviewtweak(VolSlider* self, psy_ui_Slider* sender, float value)
 {
-	if (self->workspace->song &&
-			psy_audio_machines_master(&self->workspace->song->machines)) {
+	if (workspace_song(self->workspace) &&
+			psy_audio_machines_master(&workspace_song(self->workspace)->machines)) {
 		psy_audio_MachineParam* param;
 
 		param = psy_audio_machine_tweakparameter(
-			psy_audio_machines_master(&self->workspace->song->machines), 0);
+			psy_audio_machines_master(&workspace_song(self->workspace)->machines), 0);
 		if (param) {
 			psy_audio_machineparam_tweak(param, value);
 		}
@@ -70,12 +70,12 @@ void volslider_onviewtweak(VolSlider* self, psy_ui_Slider* sender, float value)
 
 void volslider_onviewvalue(VolSlider* self, psy_ui_Slider* sender, float* rv)
 {	
-	if (self->workspace->song && psy_audio_machines_master(
-			&self->workspace->song->machines)) {
+	if (workspace_song(self->workspace) && psy_audio_machines_master(
+			&workspace_song(self->workspace)->machines)) {
 		psy_audio_MachineParam* param;
 
 		param = psy_audio_machine_tweakparameter(
-			psy_audio_machines_master(&self->workspace->song->machines), 0);
+			psy_audio_machines_master(&workspace_song(self->workspace)->machines), 0);
 		if (param) {
 			*rv = psy_audio_machineparam_normvalue(param);
 			return;

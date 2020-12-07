@@ -44,7 +44,7 @@ void cpumoduleview_init(CPUModuleView* self, psy_ui_Component* parent,
 
 void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		uintptr_t slot;
 		int cpy = 0;
 		psy_ui_TextMetric tm;
@@ -56,10 +56,10 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 		psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
 		for (slot = 0; slot <= psy_audio_machines_maxindex(
-				&self->workspace->song->machines); ++slot) {
+				&workspace_song(self->workspace)->machines); ++slot) {
 			psy_audio_Machine* machine;
 
-			machine = psy_audio_machines_at(&self->workspace->song->machines,
+			machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 				slot);
 			if (machine) {
 				if ((cpy - psy_ui_component_scrolltop(&self->component)) >= 0) {
@@ -99,8 +99,8 @@ void cpumoduleview_onpreferredsize(CPUModuleView* self, const psy_ui_Size* limit
 	uintptr_t currlines;
 	psy_ui_Size size;
 	
-	if (self->workspace->song) {
-		currlines = psy_audio_machines_size(&self->workspace->song->machines);
+	if (workspace_song(self->workspace)) {
+		currlines = psy_audio_machines_size(&workspace_song(self->workspace)->machines);
 	} else {
 		currlines = 0;
 	}
@@ -255,8 +255,8 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 #endif
 	psy_ui_label_settext(&self->resources_vmem.value, buffer);
 #endif
-	if (self->workspace->song) {
-		nummachines = psy_audio_machines_size(&self->workspace->song->machines);
+	if (workspace_song(self->workspace)) {
+		nummachines = psy_audio_machines_size(&workspace_song(self->workspace)->machines);
 	} else {
 		nummachines = 0;
 	}

@@ -30,6 +30,7 @@ static void mainframe_initworkspace(MainFrame*);
 static void mainframe_initemptystatusbar(MainFrame*);
 static void mainframe_inittoparea(MainFrame*);
 static void mainframe_initclientarea(MainFrame*);
+static void mainframe_initrightarea(MainFrame*);
 static void mainframe_initterminal(MainFrame*);
 static void mainframe_initkbdhelp(MainFrame*);
 static void mainframe_initstatusbar(MainFrame*);
@@ -112,6 +113,10 @@ static void mainframe_onchangecontrolskin(MainFrame*, Workspace* sender,
 	const char* path);
 static void mainframe_ondockview(MainFrame*, Workspace* sender,
 	psy_ui_Component* view);
+static void mainframe_onfloatsection(MainFrame*, Workspace* sender,
+	int view, uintptr_t section);
+static void mainframe_ondocksection(MainFrame*, Workspace* sender,
+	int view, uintptr_t section);
 static bool mainframe_onclose(MainFrame*);
 static void mainframe_oncheckunsaved(MainFrame*, CheckUnsavedBox* sender,
 	int option, int mode);
@@ -146,17 +151,18 @@ static psy_ui_ComponentVtable* vtable_init(MainFrame* self)
 void mainframe_init(MainFrame* self)
 {
 	mainframe_initframe(self);	
-	mainframe_initworkspace(self);
+	mainframe_initworkspace(self);	
 	mainframe_initemptystatusbar(self);	
 	mainframe_initterminal(self);
 	mainframe_initkbdhelp(self);
-	mainframe_inittoparea(self);	
+	mainframe_inittoparea(self);
 	mainframe_initclientarea(self);
-	mainframe_inittabbars(self);
+	mainframe_inittabbars(self);	
 	mainframe_initbars(self);	
 	mainframe_initnavigation(self);
 	mainframe_initmaintabbar(self);	
 	mainframe_initmainviews(self);
+	mainframe_initrightarea(self);
 	mainframe_initgear(self);
 	mainframe_initcpuview(self);
 	mainframe_initmidimonitor(self);		
@@ -226,6 +232,13 @@ void mainframe_initclientarea(MainFrame* self)
 	psy_ui_component_init(&self->paramviews, &self->client);
 	psy_ui_component_setalign(&self->paramviews, psy_ui_ALIGN_BOTTOM);
 }
+
+void mainframe_initrightarea(MainFrame* self)
+{
+	psy_ui_component_init(&self->right, &self->client);
+	psy_ui_component_setalign(&self->right, psy_ui_ALIGN_RIGHT);
+}
+
 
 void mainframe_initterminal(MainFrame* self)
 {
@@ -626,6 +639,10 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_onskinchanged);
 	psy_signal_connect(&self->workspace.signal_selectpatterndisplay, self,
 		mainframe_onselectpatterndisplay);
+	psy_signal_connect(&self->workspace.signal_floatsection, self,
+		mainframe_onfloatsection);
+	psy_signal_connect(&self->workspace.signal_docksection, self,
+		mainframe_ondocksection);
 	psy_audio_eventdrivers_setcallback(&self->workspace.player.eventdrivers,
 		mainframe_eventdrivercallback, self);
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
@@ -1099,6 +1116,28 @@ void mainframe_ondockview(MainFrame* self, Workspace* sender,
 	psy_ui_component_align(&self->paramviews);
 }
 
+void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
+	int view, uintptr_t section)
+{
+	if (view == TABPAGE_HELPVIEW) {
+		if (section == HELPVIEWSECTION_HELP) {
+			helpview_float(&self->helpview, section, &self->right);
+			psy_ui_component_align(&self->client);
+		}
+	}
+}
+
+void mainframe_ondocksection(MainFrame* self, Workspace* sender,
+	int view, uintptr_t section)
+{
+	if (view == TABPAGE_HELPVIEW) {
+		if (section == HELPVIEWSECTION_HELP) {
+			helpview_dock(&self->helpview, section, &self->right);
+			psy_ui_component_align(&self->client);
+		}
+	}
+}
+
 void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 {
 	if (ev->button == 2 && psy_ui_mouseevent_target(ev) ==
@@ -1297,7 +1336,7 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 	switch (msg) {
 		case PSY_EVENTDRIVER_PATTERNEDIT:
 			return psy_ui_component_hasfocus(
-					&self->patternview.trackerview.grid.component) ||
+					&self->patternview.tracker.component) ||
 				psy_ui_component_hasfocus(
 					&self->patternview.pianoroll.grid.component);
 			break;
@@ -1306,16 +1345,22 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 			break;
 		case PSY_EVENTDRIVER_SETCHORDMODE:
 			if (param1 == 1) {
-				self->patternview.trackerview.grid.chordbegin =
+				self->patternview.tracker.chordbegin =
 					self->patternview.gridstate.cursor.track;
-				self->patternview.trackerview.grid.chordmode = TRUE;
+				self->patternview.tracker.chordmode = TRUE;
 			}
 			break;
 		case PSY_EVENTDRIVER_INSERTNOTEOFF:
-			trackergrid_inputnote(&self->patternview.trackerview.grid,
+			trackergrid_inputnote(&self->patternview.tracker,
 				psy_audio_NOTECOMMANDS_RELEASE,
-				self->patternview.trackerview.grid.chordmode);
+				self->patternview.tracker.chordmode);
+			break;
+		case PSY_EVENTDRIVER_SECTION:
+			trackergrid_inputnote(&self->patternview.tracker,
+				psy_audio_NOTECOMMANDS_RELEASE,
+				self->patternview.tracker.chordmode);
 			break;
 	}
 	return 0;
 }
+

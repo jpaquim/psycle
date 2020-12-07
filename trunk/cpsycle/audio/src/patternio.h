@@ -13,8 +13,8 @@ extern "C" {
 
 struct psy_audio_Pattern;
 
-void psy_audio_patternio_load(struct psy_audio_Pattern*, const char* path, psy_dsp_beat_t bpl);
-void psy_audio_patternio_save(struct psy_audio_Pattern*, const char* path, psy_dsp_beat_t bpl, uintptr_t songtracks);
+void psy_audio_patternio_load(struct psy_audio_Pattern*, const char* path, psy_dsp_big_beat_t bpl);
+void psy_audio_patternio_save(struct psy_audio_Pattern*, const char* path, psy_dsp_big_beat_t bpl, uintptr_t songtracks);
 
 #ifdef __cplusplus
 }

@@ -168,19 +168,19 @@ void patternproperties_setpattern(PatternProperties* self,
 void patternproperties_onapply(PatternProperties* self,
 	psy_ui_Component* sender)
 {
-	if (self->workspace->song && self->pattern) {
-		psy_signal_prevent(&self->workspace->song->patterns.signal_namechanged,
+	if (workspace_song(self->workspace) && self->pattern) {
+		psy_signal_prevent(&workspace_song(self->workspace)->patterns.signal_namechanged,
 			self, patternproperties_onpatternnamechanged);
-		psy_signal_prevent(&self->workspace->song->patterns.signal_namechanged,
+		psy_signal_prevent(&workspace_song(self->workspace)->patterns.signal_namechanged,
 			self, patternproperties_onpatternlengthchanged);
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&patternpropertiesapplycommand_allocinit(self->pattern,
 				psy_ui_edit_text(&self->nameedit),
 				(psy_dsp_big_beat_t)atof(psy_ui_edit_text(&self->lengthedit))
 			)->command);
-		psy_signal_enable(&self->workspace->song->patterns.signal_namechanged,
+		psy_signal_enable(&workspace_song(self->workspace)->patterns.signal_namechanged,
 			self, patternproperties_onpatternnamechanged);
-		psy_signal_enable(&self->workspace->song->patterns.signal_namechanged,
+		psy_signal_enable(&workspace_song(self->workspace)->patterns.signal_namechanged,
 			self, patternproperties_onpatternlengthchanged);
 	}
 }
@@ -236,10 +236,10 @@ void patternproperties_onsongchanged(PatternProperties* self, Workspace* workspa
 
 void patternproperties_connectsongsignals(PatternProperties* self)
 {
-	if (self->workspace->song) {
-		psy_signal_connect(&self->workspace->song->patterns.signal_namechanged, self,
+	if (workspace_song(self->workspace)) {
+		psy_signal_connect(&workspace_song(self->workspace)->patterns.signal_namechanged, self,
 			patternproperties_onpatternnamechanged);
-		psy_signal_connect(&self->workspace->song->patterns.signal_lengthchanged, self,
+		psy_signal_connect(&workspace_song(self->workspace)->patterns.signal_lengthchanged, self,
 			patternproperties_onpatternlengthchanged);
 	}
 }

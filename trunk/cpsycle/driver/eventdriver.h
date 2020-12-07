@@ -25,6 +25,7 @@
 #define PSY_EVENTDRIVER_NOTECOLUMN 2
 #define PSY_EVENTDRIVER_SETCHORDMODE 3
 #define PSY_EVENTDRIVER_INSERTNOTEOFF 4
+#define PSY_EVENTDRIVER_SECTION 5
 
 typedef struct {
 	int guid;
@@ -69,6 +70,14 @@ typedef struct {
 	psy_EventDriverMidiData midi;
 } psy_EventDriverCmd;
 
+INLINE psy_EventDriverCmd psy_eventdrivercmd_makeid(int id)
+{
+	psy_EventDriverCmd rv;
+
+	rv.id = id;
+	return rv;
+}
+
 typedef int (*EVENTDRIVERWORKFN)(void* context, int msg, int param1, int param2);
 
 typedef int (*psy_eventdriver_fp_open)(struct psy_EventDriver*);
@@ -83,6 +92,7 @@ typedef void (*psy_eventdriver_fp_cmd)(struct psy_EventDriver*, const char* sect
 	psy_EventDriverCmd*);
 typedef int (*psy_eventdriver_fp_error)(int, const char*);
 typedef psy_EventDriverCmd(*psy_eventdriver_fp_getcmd)(struct psy_EventDriver*, const char* section);
+typedef const char*(*psy_eventdriver_fp_target)(struct psy_EventDriver*);
 typedef void (*psy_eventdriver_fp_setcmddef)(struct psy_EventDriver*, psy_Property*);
 typedef void (*psy_eventdriver_fp_idle)(struct psy_EventDriver*);
 
@@ -98,6 +108,7 @@ typedef struct psy_EventDriverVTable {
 	psy_eventdriver_fp_cmd cmd;
 	psy_eventdriver_fp_error error;
 	psy_eventdriver_fp_getcmd getcmd;
+	psy_eventdriver_fp_target target;
 	psy_eventdriver_fp_setcmddef setcmddef;
 	psy_eventdriver_fp_idle idle;
 } psy_EventDriverVTable;
@@ -206,6 +217,11 @@ INLINE psy_EventDriverCmd psy_eventdriver_getcmd(psy_EventDriver* self,
 	const char* section)
 {
 	return self->vtable->getcmd(self, section);
+}
+
+INLINE const char* psy_eventdriver_target(psy_EventDriver* self)
+{
+	return self->vtable->target(self);
 }
 
 INLINE void psy_eventdriver_setcmddef(psy_EventDriver* self, psy_Property*

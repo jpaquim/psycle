@@ -130,6 +130,7 @@
     <ClCompile Include="src\buffercontext.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\cmddriver.c" />
     <ClCompile Include="src\connections.c" />
     <ClCompile Include="src\cputimeclock.c" />
     <ClCompile Include="src\custommachine.c" />
@@ -262,6 +263,7 @@
     <ClInclude Include="src\audiorecorder.h" />
     <ClInclude Include="src\buffer.h" />
     <ClInclude Include="src\buffercontext.h" />
+    <ClInclude Include="src\cmddriver.h" />
     <ClInclude Include="src\cmdsnotes.h" />
     <ClInclude Include="src\connections.h" />
     <ClInclude Include="src\constants.h" />

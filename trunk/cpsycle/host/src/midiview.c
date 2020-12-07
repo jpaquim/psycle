@@ -233,8 +233,8 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 		selidx = UINTPTR_MAX;
 		switch (midiinput->midiconfig.gen_select_with) {
 			case psy_audio_MIDICONFIG_MS_USE_SELECTED:
-				if (self->workspace->song) {
-					selidx = psy_audio_machines_slot(&self->workspace->song->machines);
+				if (workspace_song(self->workspace)) {
+					selidx = psy_audio_machines_slot(&workspace_song(self->workspace)->machines);
 				}
 				break;
 			case psy_audio_MIDICONFIG_MS_BANK:
@@ -248,8 +248,8 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 				selidx = UINTPTR_MAX;
 				break;
 		}
-		if (self->workspace->song && selidx != UINTPTR_MAX) {
-			machine = psy_audio_machines_at(&self->workspace->song->machines,
+		if (workspace_song(self->workspace) && selidx != UINTPTR_MAX) {
+			machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 				selidx);
 			if (machine) {
 				psy_ui_textout(g, colx_px[1], cpy,
@@ -267,11 +267,11 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 			switch (midiinput->midiconfig.inst_select_with)
 			{
 			case psy_audio_MIDICONFIG_MS_USE_SELECTED:
-				if (self->workspace->song) {
+				if (workspace_song(self->workspace)) {
 					psy_audio_InstrumentIndex instidx;
 
 					instidx = psy_audio_instruments_selected(
-						&self->workspace->song->instruments);
+						&workspace_song(self->workspace)->instruments);
 					selidx = instidx.subslot;
 				}
 				break;
@@ -470,8 +470,8 @@ void midimonitor_initchannelmapping(MidiMonitor* self)
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->workspace->signal_songchanged, self,
 		midimonitor_onsongchanged);	
-	if (self->workspace->song) {
-		psy_signal_connect(&self->workspace->song->machines.signal_slotchange,
+	if (workspace_song(self->workspace)) {
+		psy_signal_connect(&workspace_song(self->workspace)->machines.signal_slotchange,
 			self, midimonitor_onmachineslotchange);
 	}
 }

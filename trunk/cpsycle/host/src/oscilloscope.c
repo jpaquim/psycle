@@ -87,7 +87,7 @@ void oscilloscope_init_memory(Oscilloscope* self)
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* memory;
 
-	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
 	if (machine) {
 		memory = psy_audio_machine_buffermemory(machine);
 		if (memory) {
@@ -107,8 +107,8 @@ void oscilloscope_ondestroy(Oscilloscope* self)
 		oscilloscope_onsongchanged);
 	oscilloscope_disconnectmachinessignals(self, self->workspace);
 	oscilloscope_deallocate_holdbuffer(self);
-	if (self->workspace->song) {
-		machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
+	if (workspace_song(self->workspace)) {
+		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
 		if (machine) {
 			memory = psy_audio_machine_buffermemory(machine);
 			if (memory) {
@@ -209,7 +209,7 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
 
-	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
 	if (!machine) {
 		*numsamples = 0;
 		return NULL;
@@ -256,7 +256,7 @@ void oscilloscope_onsrcmachineworked(Oscilloscope* self,
 		self->hold_buffer->writepos = memory->writepos;		
 	}
 	self->invol = psy_audio_connections_wirevolume(
-		&self->workspace->song->machines.connections, self->wire);
+		&workspace_song(self->workspace)->machines.connections, self->wire);
 }
 
 
@@ -295,9 +295,9 @@ void oscilloscope_disconnectmachinessignals(Oscilloscope* self, Workspace* works
 
 void oscilloscope_stop(Oscilloscope* self)
 {
-	if (self->workspace && self->workspace->song) {
+	if (self->workspace && workspace_song(self->workspace)) {
 		psy_audio_Machine* srcmachine;		
-		srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
+		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 			self->wire.src);
 		if (srcmachine) {
 			psy_audio_exclusivelock_enter();

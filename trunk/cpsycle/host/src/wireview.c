@@ -93,9 +93,9 @@ void wireview_init(WireView* self, psy_ui_Component* parent, psy_audio_Wire wire
 
 void wireview_ondestroy(WireView* self)
 {
-	if (self->workspace && self->workspace->song) {
+	if (self->workspace && workspace_song(self->workspace)) {
 		psy_signal_disconnect(
-			&self->workspace->song->machines.connections.signal_disconnected,
+			&workspace_song(self->workspace)->machines.connections.signal_disconnected,
 			self, wireview_ondisconnected);		
 	}
 }
@@ -215,7 +215,7 @@ void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 	psy_audio_Connections* connections;
 	psy_audio_WireSocketEntry* input;	
 
-	connections = &self->workspace->song->machines.connections;
+	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
 	if (input) {
 		char text[128];
@@ -232,7 +232,7 @@ void wireview_ontweakvolume(WireView* self, psy_ui_Slider* slider, float value)
 	psy_audio_Connections* connections;
 	psy_audio_WireSocketEntry* input;	
 
-	connections = &self->workspace->song->machines.connections;
+	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
 	if (input) {		
 		input->volume = (psy_dsp_amp_t)(value * value * 4);			
@@ -244,7 +244,7 @@ void wireview_onvaluevolume(WireView* self, psy_ui_Slider* slider, float* value)
 	psy_audio_Connections* connections;
 	psy_audio_WireSocketEntry* input;	
 
-	connections = &self->workspace->song->machines.connections;
+	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
 	if (input) {		
 		*value = (float)(sqrt(input->volume) * 0.5);
@@ -309,15 +309,15 @@ void wireview_onhold(WireView* self, psy_ui_Component* sender)
 
 void wireview_ondeleteconnection(WireView* self, psy_ui_Component* sender)
 {
-	if (self->workspace && self->workspace->song) {		
-		psy_audio_machines_disconnect(&self->workspace->song->machines,
+	if (self->workspace && workspace_song(self->workspace)) {		
+		psy_audio_machines_disconnect(&workspace_song(self->workspace)->machines,
 			self->wire);
 	}
 }
 
 void wireview_onaddeffect(WireView* self, psy_ui_Component* sender)
 {
-	if (self->workspace && self->workspace->song) {
+	if (self->workspace && workspace_song(self->workspace)) {
 		workspace_selectview(self->workspace, TABPAGE_MACHINEVIEW, 1, 20);
 	}
 }
@@ -330,8 +330,8 @@ void wireview_ondisconnected(WireView* self, psy_audio_Connections* connections,
 
 int wireview_wireexists(WireView* self)
 {
-	return (self->workspace && self->workspace->song)
-		   ? psy_audio_machines_connected(&self->workspace->song->machines,
+	return (self->workspace && workspace_song(self->workspace))
+		   ? psy_audio_machines_connected(&workspace_song(self->workspace)->machines,
 				self->wire)
 		   : 0;
 }
@@ -340,7 +340,7 @@ void wireview_connectmachinessignals(WireView* self, Workspace* workspace)
 {	
 	if (workspace->song) {
 		psy_signal_connect(
-			&self->workspace->song->machines.connections.signal_disconnected,
+			&workspace_song(self->workspace)->machines.connections.signal_disconnected,
 			self, wireview_ondisconnected);
 	}
 }

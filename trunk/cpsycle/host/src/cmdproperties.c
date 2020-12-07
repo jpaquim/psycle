@@ -23,7 +23,7 @@ psy_Property* cmdproperties_create(void)
 	if (rv) {
 		cmdproperties_makenotes(rv);
 		cmdproperties_makegeneral(rv);
-		trackerview_makecmds(rv);
+		maketrackercmds(rv);
 		pianoroll_makecmds(rv);
 	}
 	return rv;

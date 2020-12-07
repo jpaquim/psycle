@@ -727,9 +727,9 @@ void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 	psy_signal_dispose(&self->signal_samplemodified);
 	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
 		sampleeditor_onsongchanged);
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_signal_disconnect(&psy_audio_machines_master(
-			&self->workspace->song->machines)->signal_worked, self,
+			&workspace_song(self->workspace)->machines)->signal_worked, self,
 			sampleeditor_onmasterworked);
 	}
 }
@@ -784,13 +784,13 @@ void sampleeditor_connectmachinessignals(SampleEditor* self,
 
 void sampleeditor_onplay(SampleEditor* self, psy_ui_Component* sender)
 {	
-	if (self->workspace->song && self->sample) {
+	if (workspace_song(self->workspace) && self->sample) {
 		psy_audio_PatternEvent event;
 		psy_audio_exclusivelock_enter();
 		psy_list_free(self->samplerevents);
 		psy_audio_patternevent_init_all(&event,
 			(unsigned char) 48,
-			(unsigned char)psy_audio_instruments_selected(&self->workspace->song->instruments).subslot,
+			(unsigned char)psy_audio_instruments_selected(&workspace_song(self->workspace)->instruments).subslot,
 			psy_audio_NOTECOMMANDS_MACH_EMPTY,
 			psy_audio_NOTECOMMANDS_VOL_EMPTY,
 			0, 0);	

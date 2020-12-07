@@ -190,7 +190,7 @@ psy_ui_Colour stepsequencerbar_stepcolour(StepsequencerBar* self, int mode)
 void stepsequencerbar_onmousedown(StepsequencerBar* self,
 	psy_ui_MouseEvent* ev)
 {
-	if (self->pattern && self->workspace->song) {
+	if (self->pattern && workspace_song(self->workspace)) {
 		int step;
 		psy_audio_PatternEvent event;
 		psy_audio_PatternNode* node;
@@ -207,8 +207,8 @@ void stepsequencerbar_onmousedown(StepsequencerBar* self,
 		psy_audio_patternevent_clear(&event);
 		event.note = 48;
 		event.inst = (uint16_t)psy_audio_instruments_selected(
-			&self->workspace->song->instruments).subslot;
-		event.mach = (uint8_t) psy_audio_machines_slot(&self->workspace->song->machines);
+			&workspace_song(self->workspace)->instruments).subslot;
+		event.mach = (uint8_t) psy_audio_machines_slot(&workspace_song(self->workspace)->machines);
 		// event.cmd = psy_audio_PATTERNCMD_GATE;
 		// event.parameter = 0x80;
 		stepsequencerbar_setdefaultevent(self,

@@ -944,15 +944,15 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		workspace);
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
-	psy_signal_connect(&self->workspace->song->instruments.signal_insert, self,
+	psy_signal_connect(&workspace_song(self->workspace)->instruments.signal_insert, self,
 		instrumentview_oninstrumentinsert);
-	psy_signal_connect(&self->workspace->song->instruments.signal_removed, self,
+	psy_signal_connect(&workspace_song(self->workspace)->instruments.signal_removed, self,
 		instrumentview_oninstrumentremoved);
-	psy_signal_connect(&self->workspace->song->instruments.signal_slotchange, self,
+	psy_signal_connect(&workspace_song(self->workspace)->instruments.signal_slotchange, self,
 		instrumentview_oninstrumentslotchanged);
-	psy_signal_connect(&self->workspace->song->machines.signal_insert, self,
+	psy_signal_connect(&workspace_song(self->workspace)->machines.signal_insert, self,
 		instrumentview_onmachinesinsert);
-	psy_signal_connect(&self->workspace->song->machines.signal_removed, self,
+	psy_signal_connect(&workspace_song(self->workspace)->machines.signal_removed, self,
 		instrumentview_onmachinesremoved);
 	psy_ui_notebook_select(&self->notebook, 0);
 	psy_signal_connect(&workspace->signal_songchanged, self, instrumentview_onsongchanged);
@@ -1006,7 +1006,7 @@ void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentInde
 {
 	psy_audio_Instrument* instrument;
 
-	instrument = psy_audio_instruments_at(&self->workspace->song->instruments, index);
+	instrument = psy_audio_instruments_at(&workspace_song(self->workspace)->instruments, index);
 	instrumentheaderview_setinstrument(&self->header, instrument);
 	instrumentgeneralview_setinstrument(&self->general, instrument);
 	instrumentvolumeview_setinstrument(&self->volume, instrument);
@@ -1030,9 +1030,9 @@ void instrumentview_onsongchanged(InstrumentView* self, Workspace* workspace, in
 			instrumentview_oninstrumentinsert);
 		psy_signal_connect(&workspace->song->instruments.signal_removed, self,
 			instrumentview_oninstrumentremoved);
-		psy_signal_connect(&self->workspace->song->machines.signal_insert, self,
+		psy_signal_connect(&workspace_song(self->workspace)->machines.signal_insert, self,
 			instrumentview_onmachinesinsert);
-		psy_signal_connect(&self->workspace->song->machines.signal_removed, self,
+		psy_signal_connect(&workspace_song(self->workspace)->machines.signal_removed, self,
 			instrumentview_onmachinesremoved);
 		instrumentsbox_setinstruments(&self->instrumentsbox,
 			&workspace->song->instruments);
@@ -1048,25 +1048,25 @@ void instrumentview_onsongchanged(InstrumentView* self, Workspace* workspace, in
 
 void instrumentview_oncreateinstrument(InstrumentView* self, psy_ui_Component* sender)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_audio_Instrument* instrument;
 		int selected;
 
 		selected = instrumentsbox_selected(&self->instrumentsbox);
-		if (psy_audio_instruments_at(&self->workspace->song->instruments, psy_audio_instrumentindex_make(0, selected))) {
-			psy_audio_instruments_remove(&self->workspace->song->instruments, psy_audio_instrumentindex_make(0, selected));
+		if (psy_audio_instruments_at(&workspace_song(self->workspace)->instruments, psy_audio_instrumentindex_make(0, selected))) {
+			psy_audio_instruments_remove(&workspace_song(self->workspace)->instruments, psy_audio_instrumentindex_make(0, selected));
 		}
 		instrument = psy_audio_instrument_allocinit();
 		psy_audio_instrument_setname(instrument, "Untitled");
 		psy_audio_instrument_setindex(instrument, selected);
-		psy_audio_instruments_insert(&self->workspace->song->instruments, instrument,
+		psy_audio_instruments_insert(&workspace_song(self->workspace)->instruments, instrument,
 			psy_audio_instrumentindex_make(0, selected));
 	}
 }
 
 void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sender)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_ui_OpenDialog dialog;
 		static char filter[] =
 			"Instrument (*.xi)|*.xi";
@@ -1079,11 +1079,11 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			PsyFile file;
 
 			psy_audio_songfile_init(&songfile);
-			songfile.song = self->workspace->song;
+			songfile.song = workspace_song(self->workspace);
 			songfile.file = &file;
 			if (psyfile_open(&file, psy_ui_opendialog_filename(&dialog))) {
 				psy_audio_xi_load(&songfile, psy_audio_instruments_selected(
-					&self->workspace->song->instruments).subslot);
+					&workspace_song(self->workspace)->instruments).subslot);
 			}
 			psyfile_close(&file);
 			psy_audio_songfile_dispose(&songfile);

@@ -62,7 +62,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 
 void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 		int c;				
 		int rows = 1;
@@ -77,7 +77,7 @@ void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 		for (c = 0, cpx = cpy = 0; c < numtracks; ++c) {
 			trackscopeview_drawtrackindex(self, g, cpx, cpy, c);
 			if (!patternstrackstate_istrackmuted(
-					&self->workspace->song->patterns.trackstate, c)) {
+					&workspace_song(self->workspace)->patterns.trackstate, c)) {
 				trackscopeview_drawtrack(self, g, cpx, cpy, c);
 			} else {
 				trackscopeview_drawtrackmuted(self, g, cpx, cpy, c);
@@ -126,13 +126,13 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 	} else {
 		lastmachine = UINTPTR_MAX;
 	}	
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* machine;
 		int centery;
 		bool active = FALSE;
 		
 		centery = height / 2 + y;
-		machine = psy_audio_machines_at(&self->workspace->song->machines,
+		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 			lastmachine);
 		if (machine) {
 			psy_audio_Buffer* memory;
@@ -254,15 +254,15 @@ void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
 
 void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		int columns;
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
 		int track;
 		int trackwidth;
-		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
-
-
+		uintptr_t numtracks;
+		
+		numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
 		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
@@ -270,22 +270,21 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		track = (ev->x / trackwidth) + (ev->y / self->trackheight) * columns;
 		if (ev->button == 1) {
 			if (!patternstrackstate_istrackmuted(
-					&self->workspace->song->patterns.trackstate, track)) {
+					&workspace_song(self->workspace)->patterns.trackstate, track)) {
 				patternstrackstate_mutetrack(
-					&self->workspace->song->patterns.trackstate, track);
+					&workspace_song(self->workspace)->patterns.trackstate, track);
 			} else {
 				patternstrackstate_unmutetrack(
-					&self->workspace->song->patterns.trackstate, track);
+					&workspace_song(self->workspace)->patterns.trackstate, track);
 			}
-		} else
-		if (ev->button == 2) {				
-			if (psy_audio_patterns_istracksoloed(&self->workspace->song->patterns,
+		} else if (ev->button == 2) {				
+			if (psy_audio_patterns_istracksoloed(&workspace_song(self->workspace)->patterns,
 						track)) {
 				psy_audio_patterns_deactivatesolotrack(
-					&self->workspace->song->patterns);
+					&workspace_song(self->workspace)->patterns);
 			} else {
 				psy_audio_patterns_activatesolotrack(
-					&self->workspace->song->patterns, track);
+					&workspace_song(self->workspace)->patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);
 		}

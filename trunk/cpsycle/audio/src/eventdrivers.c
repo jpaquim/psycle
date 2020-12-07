@@ -4,8 +4,10 @@
 #include "../../detail/prefix.h"
 
 #include "eventdrivers.h"
+// local
+#include "cmddriver.h"
 #include "kbddriver.h"
-
+// std
 #include <stdlib.h>
 #include <string.h>
 
@@ -15,6 +17,7 @@ void psy_audio_eventdrivers_init(psy_audio_EventDrivers* self, void* systemhandl
 {
 	self->eventdrivers = NULL;	
 	self->kbddriver = NULL;
+	self->cmddriver = psy_audio_cmddriver_create();
 	self->cmds = NULL;
 	self->systemhandle = systemhandle;
 	psy_table_init(&self->guids);
@@ -69,6 +72,7 @@ void psy_audio_eventdrivers_dispose(psy_audio_EventDrivers* self)
 	self->cmds = NULL;
 	psy_table_disposeall(&self->guids, (psy_fp_disposefunc)0);
 	psy_signal_dispose(&self->signal_input);
+	psy_eventdriver_free(self->cmddriver);
 }
 
 psy_EventDriver* psy_audio_eventdrivers_load(psy_audio_EventDrivers* self, const char* path)
@@ -319,4 +323,11 @@ void psy_audio_eventdrivers_setcallback(psy_audio_EventDrivers* self,
 			eventdriver->callbackcontext = context;
 		}
 	}
+}
+
+void psy_audio_eventdrivers_sendcmd(psy_audio_EventDrivers* self,
+	const char* section, psy_EventDriverCmd cmd)
+{
+	psy_audio_cmddriver_setcmd(self->cmddriver, section, cmd);
+	psy_signal_emit(&self->signal_input, self->cmddriver, 0);
 }

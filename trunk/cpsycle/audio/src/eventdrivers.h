@@ -24,6 +24,7 @@ typedef struct {
 
 typedef struct {
 	psy_EventDriver* kbddriver;
+	psy_EventDriver* cmddriver;
 	psy_List* eventdrivers;
 	void* context;
 	void* systemhandle;	
@@ -55,6 +56,8 @@ psy_audio_EventDriverEntry* psy_audio_eventdrivers_entry(psy_audio_EventDrivers*
 void psy_audio_eventdrivers_idle(psy_audio_EventDrivers*);
 void psy_audio_eventdrivers_setcallback(psy_audio_EventDrivers* self,
 	EVENTDRIVERWORKFN callback, void* context);
+void psy_audio_eventdrivers_sendcmd(psy_audio_EventDrivers*,
+	const char* section, psy_EventDriverCmd cmd);
 
 #ifdef __cplusplus
 }

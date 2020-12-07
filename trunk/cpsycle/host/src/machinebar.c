@@ -257,7 +257,7 @@ void machinebar_buildinstrumentlist(MachineBar* self)
 
 	psy_ui_combobox_clear(&self->instparambox);
 	for ( ; slot < 256; ++slot) {		
-		if (instrument = psy_audio_instruments_at(&self->workspace->song->instruments,
+		if (instrument = psy_audio_instruments_at(&workspace_song(self->workspace)->instruments,
 			psy_audio_instrumentindex_make(0, slot))) {
 			psy_snprintf(text, 20, "%02X:%s", slot,
 				psy_audio_instrument_name(instrument));

@@ -153,7 +153,7 @@ void stereophase_drawphase(StereoPhase* self, psy_ui_Graphics* g)
 	float quarterpi;
 	
 	mvc = mvpc = mvl = mvdl = mvpl = mvdpl = mvr = mvdr = mvpr = mvdpr = 0.0f;
-	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
 	if (!machine) {
 		return;
 	}
@@ -335,7 +335,7 @@ void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machin
 		psy_audio_Connections* connections;
 		psy_audio_WireSocketEntry* input;	
 
-		connections = &self->workspace->song->machines.connections;
+		connections = &workspace_song(self->workspace)->machines.connections;
 		input = psy_audio_connections_input(connections, self->wire);
 		if (input) {					
 			self->leftavg = bc->output->rms->data.previousLeft / 32768;
@@ -381,9 +381,9 @@ void stereophase_disconnectmachinessignals(StereoPhase* self, Workspace* workspa
 
 void stereophase_stop(StereoPhase* self)
 {
-	if (self->workspace && self->workspace->song) {
+	if (self->workspace && workspace_song(self->workspace)) {
 		psy_audio_Machine* srcmachine;		
-		srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
+		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 			self->wire.src);
 		if (srcmachine) {
 			psy_audio_exclusivelock_enter();

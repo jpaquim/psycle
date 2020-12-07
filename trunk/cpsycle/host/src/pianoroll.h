@@ -114,7 +114,7 @@ INLINE void pianogridstate_setpattern(PianoGridState* self, psy_audio_Pattern* p
 	self->pattern = pattern;
 }
 
-INLINE  psy_audio_Pattern* pianogridstate_pattern(PianoGridState* self)
+INLINE psy_audio_Pattern* pianogridstate_pattern(PianoGridState* self)
 {
 	assert(self);
 
@@ -285,7 +285,7 @@ typedef struct Pianogrid {
    psy_audio_PatternSelection selection;
    psy_audio_PatternCursor dragselectionbase;
    psy_audio_PatternCursor lastdragcursor;
-   int hasselection;
+   intptr_t pgupdownstep;
    // references
    KeyboardState* keyboardstate;
    PianoGridState* gridstate;
@@ -302,6 +302,11 @@ void pianogrid_setcursor(Pianogrid*, psy_audio_PatternCursor);
 void pianogrid_storecursor(Pianogrid*);
 void pianogrid_onpatternchange(Pianogrid*, psy_audio_Pattern*);
 void pianogrid_settrackdisplay(Pianogrid*, PianoTrackDisplay);
+
+INLINE void pianogrid_setpgupdownstep(Pianogrid* self, intptr_t step)
+{
+	self->pgupdownstep = step;
+}
 
 INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
 {
@@ -367,6 +372,28 @@ void pianoroll_init(Pianoroll*, psy_ui_Component* parent, PatternViewSkin*,
 void pianoroll_setpattern(Pianoroll*, psy_audio_Pattern*);
 void pianoroll_updatescroll(Pianoroll*);
 void pianoroll_makecmds(psy_Property* parent);
+bool pianoroll_handlecommand(Pianoroll*, int cmd);
+
+INLINE void pianoroll_setpgupdownstep(Pianoroll* self, intptr_t step)
+{
+	pianogrid_setpgupdownstep(&self->grid, step);
+}
+
+// block operations
+void pianoroll_navup(Pianoroll*);
+void pianoroll_navdown(Pianoroll*);
+void pianoroll_enter(Pianoroll*);
+void pianoroll_rowclear(Pianoroll*);
+void pianoroll_blockcut(Pianoroll*);
+void pianoroll_blockcopy(Pianoroll*);
+void pianoroll_blockpaste(Pianoroll*);
+void pianoroll_blockdelete(Pianoroll*);
+void pianoroll_selectall(Pianoroll*);
+void pianoroll_selectbar(Pianoroll*);
+void pianoroll_blockunmark(Pianoroll*);
+void pianoroll_blockstart(Pianoroll*);
+void pianoroll_blockend(Pianoroll*);
+
 
 INLINE psy_ui_Component* pianoroll_base(Pianoroll* self)
 {

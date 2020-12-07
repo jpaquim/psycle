@@ -416,16 +416,19 @@ void psy_audio_pattern_blockremove(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl)
+	psy_audio_PatternSelection selection, psy_dsp_big_beat_t bpl)
 {
 	intptr_t startval;
 	intptr_t endval;
 	psy_audio_PatternNode* prev;
 	psy_audio_PatternNode* node;
+	psy_audio_PatternCursor begin;
+	psy_audio_PatternCursor end;
 
 	assert(self);
 
+	begin = selection.topleft;
+	end = selection.bottomright;
 	begin.line = (uintptr_t)(begin.offset / bpl);
 	end.line = (uintptr_t)(end.offset / bpl);
 	node = psy_audio_pattern_findnode(self, begin.track, begin.line * bpl, bpl, &prev);
@@ -738,6 +741,58 @@ bool psy_audio_patterncursornavigator_prevlines(
 				return TRUE;
 			} else {
 				self->cursor->offset = 0;
+			}
+		}
+	}
+	return FALSE;
+}
+
+bool psy_audio_patterncursornavigator_advancekeys(psy_audio_PatternCursorNavigator*
+	self, uintptr_t lines)
+{
+	uintptr_t maxkey;
+
+	assert(self);
+	assert(self->cursor);
+	assert(self->pattern);
+
+	maxkey = self->maxkeys;
+	if (lines > 0) {
+		self->cursor->key += lines;
+		if (self->cursor->key >= maxkey) {
+			if (self->wrap) {
+				self->cursor->key = self->cursor->key - maxkey;
+				if (self->cursor->key > maxkey - 1) {
+					self->cursor->key = maxkey - 1;
+				}
+				return FALSE;
+			} else {
+				self->cursor->key = maxkey - 1;
+			}
+		}
+	}
+	return TRUE;
+}
+
+bool psy_audio_patterncursornavigator_prevkeys(
+	psy_audio_PatternCursorNavigator* self, uintptr_t lines)
+{
+	uintptr_t maxkey;
+
+	assert(self);
+	assert(self->cursor);
+	assert(self->pattern);
+
+	maxkey = self->maxkeys;
+	if (lines > 0) {
+		if (self->cursor->key >= lines) {
+			self->cursor->key -= lines;					
+		} else {
+			if (self->wrap) {
+				self->cursor->key += maxkey;
+				return TRUE;
+			} else {
+				self->cursor->key = 0;
 			}
 		}
 	}
