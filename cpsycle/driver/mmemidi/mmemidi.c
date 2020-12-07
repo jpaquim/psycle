@@ -37,6 +37,7 @@ static void driver_configure(psy_EventDriver*, psy_Property*);
 static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
+static const char* driver_target(psy_EventDriver*);
 static void setcmddef(psy_EventDriver*, psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 
@@ -64,6 +65,7 @@ static void vtable_init(void)
 		vtable.error = onerror;
 		vtable.cmd = driver_cmd;
 		vtable.getcmd = driver_getcmd;
+		vtable.target = driver_target;
 		vtable.setcmddef = setcmddef;
 		vtable.idle = driver_idle;
 		vtable_initialized = 1;
@@ -294,6 +296,11 @@ psy_EventDriverCmd driver_getcmd(psy_EventDriver* driver, const char* sectionnam
 		property = NULL;
 	}
 	return self->lastinput;
+}
+
+const char* driver_target(psy_EventDriver* self)
+{
+	return NULL;
 }
 
 void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)

@@ -10,6 +10,8 @@
 #include "help.h"
 #include "tabbar.h"
 // ui
+#include <uibutton.h>
+#include <uilabel.h>
 #include <uinotebook.h>
 
 #ifdef __cplusplus
@@ -31,15 +33,24 @@ typedef struct HelpView {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_Notebook notebook;
+	psy_ui_Component bar;
 	TabBar tabbar;
+	psy_ui_Button floatsection;
 	// sections
 	Help help;
 	About about;
 	Greet greet;
+	psy_ui_Component sectionfloated;
+	psy_ui_Label floatdesc;
+	// references
+	Workspace* workspace;
 } HelpView;
 
 void helpview_init(HelpView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
+void helpview_float(HelpView*, HelpViewSection section, psy_ui_Component* dest);
+void helpview_dock(HelpView*, HelpViewSection section, psy_ui_Component* src);
 
 INLINE psy_ui_Component* helpview_base(HelpView* self)
 {

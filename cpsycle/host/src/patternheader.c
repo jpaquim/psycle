@@ -193,13 +193,13 @@ void trackerheader_drawtracknumber(TrackerHeader* self, psy_ui_Graphics* g, int 
 
 void trackerheader_drawtrackleds(TrackerHeader* self, psy_ui_Graphics* g, int x, uintptr_t track)
 {
-	if (self->workspace->song) {
-		if (psy_audio_patterns_istrackmuted(&self->workspace->song->patterns,
+	if (workspace_song(self->workspace)) {
+		if (psy_audio_patterns_istrackmuted(&workspace_song(self->workspace)->patterns,
 			track)) {
 			skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
 				&self->gridstate->skin->headercoords.mute);
 		}
-		if (psy_audio_patterns_istracksoloed(&self->workspace->song->patterns,
+		if (psy_audio_patterns_istracksoloed(&workspace_song(self->workspace)->patterns,
 			track)) {
 			skin_blitpart(g, &self->gridstate->skin->bitmap, x, 0,
 				&self->gridstate->skin->headercoords.solo);
@@ -222,7 +222,7 @@ void trackerheader_drawtrackselection(TrackerHeader* self, psy_ui_Graphics* g, i
 
 void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_ui_Rectangle r;
 		uintptr_t track;
 		int track_x;
@@ -241,12 +241,12 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			self->gridstate->skin->headercoords.mute.destheight);
 		if (psy_ui_rectangle_intersect(&r, ev->x +
 			psy_ui_component_scrollleft(&self->component), ev->y)) {
-			if (psy_audio_patterns_istrackmuted(&self->workspace->song->patterns,
+			if (psy_audio_patterns_istrackmuted(&workspace_song(self->workspace)->patterns,
 				track)) {
-				psy_audio_patterns_unmutetrack(&self->workspace->song->patterns,
+				psy_audio_patterns_unmutetrack(&workspace_song(self->workspace)->patterns,
 					track);
 			} else {
-				psy_audio_patterns_mutetrack(&self->workspace->song->patterns,
+				psy_audio_patterns_mutetrack(&workspace_song(self->workspace)->patterns,
 					track);
 			}
 			psy_ui_component_invalidate(&self->component);
@@ -258,13 +258,13 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 			self->gridstate->skin->headercoords.solo.destheight);
 		if (psy_ui_rectangle_intersect(&r, ev->x +
 			psy_ui_component_scrollleft(&self->component), ev->y)) {
-			if (psy_audio_patterns_istracksoloed(&self->workspace->song->patterns,
+			if (psy_audio_patterns_istracksoloed(&workspace_song(self->workspace)->patterns,
 				track)) {
 				psy_audio_patterns_deactivatesolotrack(
-					&self->workspace->song->patterns);
+					&workspace_song(self->workspace)->patterns);
 			} else {
 				psy_audio_patterns_activatesolotrack(
-					&self->workspace->song->patterns, track);
+					&workspace_song(self->workspace)->patterns, track);
 			}
 			psy_ui_component_invalidate(&self->component);
 		} else {

@@ -223,8 +223,8 @@ void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 	psy_audio_Pattern* source, psy_audio_PatternCursor destcursor,
 	psy_dsp_big_beat_t bpl);
 /// interpolates linear all entries of the block
-void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*, psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl);
+void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*,
+	psy_audio_PatternSelection, psy_dsp_big_beat_t bpl);
 void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
@@ -258,23 +258,28 @@ typedef struct {
 	psy_audio_Pattern* pattern;	
 	psy_dsp_big_beat_t bpl;
 	bool wrap;
+	uintptr_t maxkeys;
 } psy_audio_PatternCursorNavigator;
 
 INLINE void psy_audio_patterncursornavigator_init(psy_audio_PatternCursorNavigator* self,
 	psy_audio_PatternCursor* cursor, psy_audio_Pattern* pattern,
-	psy_dsp_big_beat_t bpl, bool wrap)
+	psy_dsp_big_beat_t bpl, bool wrap, uintptr_t maxkeys)
 {
 	self->cursor = cursor;
 	self->pattern = pattern;
 	self->bpl = bpl;
 	self->wrap = wrap;
+	self->maxkeys = maxkeys;
 }
 
 bool psy_audio_patterncursornavigator_advancelines(
 	psy_audio_PatternCursorNavigator*, uintptr_t lines);
 bool psy_audio_patterncursornavigator_prevlines(
 	psy_audio_PatternCursorNavigator*, uintptr_t lines);
-
+bool psy_audio_patterncursornavigator_advancekeys(
+	psy_audio_PatternCursorNavigator*, uintptr_t lines);
+bool psy_audio_patterncursornavigator_prevkeys(
+	psy_audio_PatternCursorNavigator*, uintptr_t lines);
 
 #ifdef __cplusplus
 }

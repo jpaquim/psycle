@@ -62,8 +62,9 @@ typedef struct PatternView {
 	TrackerGrid griddefaults;
 	TrackerHeader header;
 	psy_ui_Notebook notebook;
-	psy_ui_Notebook editnotebook;	
-	TrackerView trackerview;
+	psy_ui_Notebook editnotebook;
+	psy_ui_Scroller trackerscroller;
+	TrackerGrid tracker;
 	Pianoroll pianoroll;	
 	PatternProperties properties;
 	PatternBlockMenu blockmenu;
@@ -76,6 +77,8 @@ typedef struct PatternView {
 	PatternViewSkin skin;
 	bool showlinenumbers;
 	bool showdefaultline;
+	PatternCursorStepMode pgupdownstepmode;
+	intptr_t pgupdownstep;
 	// references
 	Workspace* workspace;
 } PatternView;

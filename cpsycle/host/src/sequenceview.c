@@ -1021,12 +1021,12 @@ void sequenceview_onclear(SequenceView* self)
 {
 	psy_audio_SequencePosition sequenceposition;
 
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_audio_exclusivelock_enter();
 		workspace_disposesequencepaste(self->workspace);
 		psy_audio_sequence_clear(self->sequence);
-		psy_audio_patterns_clear(&self->workspace->song->patterns);
-		psy_audio_patterns_insert(&self->workspace->song->patterns, 0,
+		psy_audio_patterns_clear(&workspace_song(self->workspace)->patterns);
+		psy_audio_patterns_insert(&workspace_song(self->workspace)->patterns, 0,
 			psy_audio_pattern_allocinit());
 		sequenceposition.tracknode =
 			psy_audio_sequence_appendtrack(self->sequence, psy_audio_sequencetrack_allocinit());

@@ -20,6 +20,7 @@ static void help_buildtabs(Help*);
 static void help_ontabbarchanged(Help*, psy_ui_Component* sender,
 	uintptr_t tabindex);
 static void help_loadpage(Help*, uintptr_t index);
+static void help_onalign(Help*, psy_ui_Component* sender);
 	
 // implementation
 void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
@@ -31,16 +32,16 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_component_init(help_base(self), parent);	
 	self->workspace = workspace;
 	tabbar_init(&self->tabbar, help_base(self));
+	self->lastalign = psy_ui_ALIGN_NONE;
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;	
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1), psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.5));
 	psy_ui_component_setmargin(tabbar_base(&self->tabbar), &margin);
-	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(0.5),
-		psy_ui_value_makepx(0));
+	psy_ui_margin_init_all(&tabmargin,
+		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+		psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0));
 	tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
 	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0), psy_ui_value_makepx(0),
@@ -55,6 +56,8 @@ void help_init(Help* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_table_init(&self->filenames);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		help_ondestroy);
+	psy_signal_connect(&self->component.signal_align, self,
+		help_onalign);
 	help_registerfiles(self);
 	help_loadpage(self, 0);
 }
@@ -125,4 +128,30 @@ void help_loadpage(Help* self, uintptr_t index)
 		psy_path_dispose(&path);
 	}
 	psy_ui_editor_preventedit(&self->editor);
+}
+
+void help_onalign(Help* self, psy_ui_Component* sender)
+{
+	if (self->lastalign != psy_ui_component_parent(sender)->align) {
+		psy_ui_Margin tabmargin;
+
+		if (psy_ui_component_parent(sender)->align == psy_ui_ALIGN_RIGHT) {
+			self->tabbar.tabalignment = psy_ui_ALIGN_TOP;
+			psy_ui_component_setalign(&self->tabbar.component, psy_ui_ALIGN_TOP);
+			psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
+				psy_ui_value_makeew(1.5),
+				psy_ui_value_makepx(0), psy_ui_value_makepx(0));
+			tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+			psy_ui_component_align(&self->tabbar);
+		} else {
+			psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
+			self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
+			psy_ui_margin_init_all(&tabmargin,
+				psy_ui_value_makepx(0), psy_ui_value_makepx(0),
+				psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0));			
+			tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
+			psy_ui_component_align(&self->tabbar);
+		}
+		self->lastalign = psy_ui_component_parent(sender)->align;
+	}
 }

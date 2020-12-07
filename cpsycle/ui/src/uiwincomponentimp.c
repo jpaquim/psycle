@@ -476,12 +476,14 @@ void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child,
 	psy_ui_win_ComponentImp* insertafter)
 {
 	SetParent(child->hwnd, self->hwnd);
-	SetWindowPos(
-		child->hwnd,
-		insertafter->hwnd,
-		0, 0, 0, 0,
-		SWP_NOMOVE | SWP_NOSIZE
-	);
+	if (insertafter) {
+		SetWindowPos(
+			child->hwnd,
+			(insertafter) ? insertafter->hwnd : (HWND)NULL,
+			0, 0, 0, 0,
+			SWP_NOMOVE | SWP_NOSIZE
+		);
+	}
 }
 
 void dev_setorder(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp*

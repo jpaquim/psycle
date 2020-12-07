@@ -565,7 +565,20 @@ Tab* tabbar_tab(TabBar* self, int tabindex)
 
 void tabbar_setdefaulttabmargin(TabBar* self, const psy_ui_Margin* margin)
 {
+	psy_List* tabs;
+
+	assert(self);
+
 	self->defaulttabmargin = *margin;
+	
+	for (tabs = self->tabs; tabs != NULL; psy_list_next(&tabs)) {
+		Tab* tab;
+
+		tab = (Tab*)psy_list_entry(tabs);
+		if (tab != NULL) {
+			tab->margin = self->defaulttabmargin;
+		}
+	}
 }
 
 int tabbar_checkstate(TabBar* self, int tabindex)

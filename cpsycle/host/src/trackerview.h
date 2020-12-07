@@ -22,8 +22,6 @@ extern "C" {
 // The TrackerView is where you enter notes. It displays a Pattern selected by
 // the SequenceView as a tracker grid.
 
-#define TRACKERGRID_numparametercols 10
-
 typedef struct {
 	int playbar;
 	int cursor;
@@ -37,6 +35,12 @@ typedef enum {
 	TRACKERGRID_EDITMODE_LOCAL,
 	TRACKERGRID_EDITMODE_SONG
 } TrackerGridEditMode;
+
+typedef enum {
+	PATTERNCURSOR_STEP_BEAT,
+	PATTERNCURSOR_STEP_4BEAT,
+	PATTERNCURSOR_STEP_LINES
+} PatternCursorStepMode;
 
 typedef struct {
 	// inherits
@@ -70,6 +74,7 @@ typedef struct {
 	bool ft2delete;
 	bool effcursoralwaysdown;
 	bool movecursoronestep;
+	intptr_t pgupdownstep;	
 	// signals
 	psy_Signal signal_colresize;
 	// references
@@ -96,6 +101,13 @@ int trackergrid_scrollright(TrackerGrid*, psy_audio_PatternCursor);
 void trackergrid_storecursor(TrackerGrid*);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
+void trackergrid_readconfiguration(TrackerGrid*);
+
+INLINE void trackergrid_setpgupdownstep(TrackerGrid* self, intptr_t step)
+{
+	self->pgupdownstep = step;
+}
+bool trackergrid_handlecommand_song(TrackerGrid*, psy_ui_KeyEvent* ev, int cmd);
 // block menu
 void trackergrid_changegenerator(TrackerGrid*);
 void trackergrid_changeinstrument(TrackerGrid*);
@@ -124,37 +136,7 @@ INLINE psy_ui_Component* trackergrid_base(TrackerGrid* self)
 	return &self->component;
 }
 
-// todo move the rest of the class to patternview and
-// trackergrid
-typedef struct TrackerView {
-	// inherits
-	psy_ui_Component component;	
-	// ui elements
-	TrackerGrid grid;
-	psy_ui_Scroller scroller;	
-	// internal data	
-	int pgupdownstep;
-	bool pgupdownbeat;
-	bool pgupdown4beat;
-	// references
-	Workspace* workspace;
-	struct PatternView* view;
-} TrackerView;
-
-void trackerview_init(TrackerView*, psy_ui_Component* parent,
-	TrackerGridState*, TrackerLineState*, TrackConfig*,
-	struct PatternView* view,
-	Workspace*);
-void trackerview_setpattern(TrackerView*, psy_audio_Pattern*);
-void trackerview_updatescrollstep(TrackerView*);
-void trackerview_makecmds(psy_Property* parent);
-
-INLINE psy_ui_Component* trackerview_base(TrackerView* self)
-{
-	assert(self);
-
-	return &self->component;
-}
+void maketrackercmds(psy_Property* parent);
 
 #ifdef __cplusplus
 }

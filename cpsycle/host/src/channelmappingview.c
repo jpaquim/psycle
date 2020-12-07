@@ -73,8 +73,8 @@ void pinedit_drawsockets(PinEdit* self, psy_ui_Graphics* g)
 	psy_audio_Machine* srcmachine;
 	psy_audio_Machine* dstmachine;
 	
-	srcmachine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
-	dstmachine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.dst);
+	srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
+	dstmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.dst);
 	if (srcmachine && dstmachine) {	
 		uintptr_t p;
 		uintptr_t numsrcpins;
@@ -324,7 +324,7 @@ psy_List* pinedit_hittest_wire(PinEdit* self, int x, int y)
 	psy_audio_WireSocketEntry* input;
 	psy_List* pinpair;
 	
-	connections = &self->workspace->song->machines.connections;
+	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
 	for (pinpair = input->mapping.container; pinpair != 0; pinpair = pinpair->next) {
 		psy_audio_PinConnection* pinconnection;
@@ -461,7 +461,7 @@ void pinedit_onmouseup(PinEdit* self, psy_ui_MouseEvent* ev)
 
 void pinedit_autowire(PinEdit* self)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_audio_PinMapping* mapping;
 
 		mapping = pinedit_mapping(self);
@@ -469,9 +469,9 @@ void pinedit_autowire(PinEdit* self)
 			psy_audio_Machine* srcmachine;
 			psy_audio_Machine* dstmachine;
 
-			srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
+			srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 				self->wire.src);
-			dstmachine = psy_audio_machines_at(&self->workspace->song->machines,
+			dstmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 				self->wire.dst);
 			if (srcmachine && dstmachine) {
 				uintptr_t maxchannels;
@@ -491,7 +491,7 @@ void pinedit_autowire(PinEdit* self)
 
 void pinedit_unselectall(PinEdit* self)
 {
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_audio_PinMapping* mapping;
 
 		mapping = pinedit_mapping(self);
@@ -509,7 +509,7 @@ psy_audio_PinMapping* pinedit_mapping(PinEdit* self)
 	psy_audio_Connections* connections;
 	psy_audio_WireSocketEntry* input;
 
-	connections = &self->workspace->song->machines.connections;
+	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
 	return (input)
 		? &input->mapping
@@ -520,7 +520,7 @@ uintptr_t pinedit_numinputs(PinEdit* self)
 {	
 	psy_audio_Machine* dstmachine;
 	
-	dstmachine = psy_audio_machines_at(&self->workspace->song->machines,
+	dstmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 		self->wire.dst);
 	return (dstmachine)
 		? psy_audio_machine_numinputs(dstmachine)
@@ -531,7 +531,7 @@ uintptr_t pinedit_numoutputs(PinEdit* self)
 {
 	psy_audio_Machine* srcmachine;
 
-	srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
+	srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 		self->wire.src);
 	return (srcmachine)
 		? psy_audio_machine_numoutputs(srcmachine)

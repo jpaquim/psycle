@@ -281,17 +281,19 @@ static void trackerlinenumberslabel_vtable_init(TrackerLineNumbersLabel* self)
 }
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
-	psy_ui_Component* parent, TrackerLineState* linestate, TrackerView* view,
+	psy_ui_Component* parent, TrackerLineState* linestate,
 	Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
 	trackerlinenumberslabel_vtable_init(self);
 	self->component.vtable = &trackerlinenumberslabel_vtable;
 	trackerlinenumberslabel_setsharedlinestate(self, linestate);
-	self->view = view;
 	self->linestr = NULL;
 	self->defaultstr = NULL;
 	self->workspace = workspace;
+	self->headerheight = 12;
+	self->showdefaultline = FALSE;
+	self->showbeatoffset = FALSE;
 	trackerlinenumberslabel_updatetext(self);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		trackerlinenumberslabel_ondestroy);
@@ -341,31 +343,21 @@ void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel* self,
 
 void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphics* g)
 {
-	psy_ui_Size size;
-	psy_ui_TextMetric tm;
+	psy_ui_IntSize size;
 	psy_ui_Rectangle r;
-	psy_ui_IntSize headersize;
 
-	// todo remove view
-	tm = psy_ui_component_textmetric(&self->view->view->header.component);
-	size = psy_ui_component_size(&self->component);
-	headersize = psy_ui_intsize_init_size(
-		psy_ui_component_preferredsize(&self->view->view->header.component, &size), &tm);
-	tm = psy_ui_component_textmetric(&self->component);
-	psy_ui_setrectangle(&r, 0, 0, psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm));
+	size = psy_ui_component_intsize(&self->component);	
+	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
 	psy_ui_setbackgroundcolour(g, self->linestate->skin->background);
 	psy_ui_settextcolour(g, self->linestate->skin->font);
 	psy_ui_textoutrectangle(g, r.left, 0, 0, r, self->linestr, strlen(self->linestr));
-	if (self->view->view->showdefaultline) {
-		psy_ui_setfont(g, psy_ui_component_font(
-			&self->view->view->left.linenumbers.component));
-		if ((workspace_showbeatoffset(self->workspace))) {
-			psy_ui_textoutrectangle(g, r.left, headersize.height, 0,
+	if (self->showdefaultline) {		
+		if ((self->showbeatoffset)) {
+			psy_ui_textoutrectangle(g, r.left, self->headerheight, 0,
 				r, self->defaultstr, strlen(self->defaultstr));
 		} else {
-			psy_ui_textoutrectangle(g, r.left, headersize.height, 0,
+			psy_ui_textoutrectangle(g, r.left, self->headerheight, 0,
 				r, "Def", strlen("Def"));
 		}
 	}
@@ -374,21 +366,15 @@ void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphi
 void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 	psy_ui_Size* limit, psy_ui_Size* rv)
 {	
-	int height = 0;
-	psy_ui_TextMetric tm;
-	psy_ui_IntSize headersize;
-
+	int height;
+	
+	height = self->headerheight;
 	// todo remove view reference
-	tm = psy_ui_component_textmetric(&self->view->view->header.component);
-	headersize = psy_ui_intsize_init_size(
-		psy_ui_component_preferredsize(&self->view->view->header.component, limit), &tm);
-	height = headersize.height;
-	// todo remove view reference
-	if (self->view->view->showdefaultline) {		
+	if (self->showdefaultline) {		
 		height += self->linestate->lineheight;
 	}	
 	rv->height = psy_ui_value_makepx(height);
-	rv->width = (workspace_showbeatoffset(self->workspace))
+	rv->width = (self->showbeatoffset)
 		? psy_ui_value_makeew(10)
 		: psy_ui_value_makeew(5);
 }
@@ -454,12 +440,12 @@ void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 
 // implementation
 void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* parent,
-	TrackerLineState* linestate, struct TrackerView* view, Workspace* workspace)
+	TrackerLineState* linestate, Workspace* workspace)
 {
 	psy_ui_Margin leftmargin;
 
 	psy_ui_component_init(&self->component, parent);	
-	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, linestate, view,
+	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, linestate,
 		workspace);
 	psy_ui_component_setalign(&self->linenumberslabel.component, psy_ui_ALIGN_TOP);
 	trackerlinenumbers_init(&self->linenumbers, &self->component, linestate,

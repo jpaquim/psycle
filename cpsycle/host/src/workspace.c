@@ -280,6 +280,8 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_defaultfontchanged);
 	psy_signal_init(&self->signal_togglegear);	
 	psy_signal_init(&self->signal_selectpatterndisplay);
+	psy_signal_init(&self->signal_floatsection);
+	psy_signal_init(&self->signal_docksection);
 }
 
 void workspace_dispose(Workspace* self)
@@ -333,6 +335,8 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_defaultfontchanged);
 	psy_signal_dispose(&self->signal_togglegear);
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
+	psy_signal_dispose(&self->signal_floatsection);
+	psy_signal_dispose(&self->signal_docksection);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -3522,3 +3526,12 @@ void workspace_selectpatterndisplay(Workspace* self, PatternDisplayType
 	psy_signal_emit(&self->signal_selectpatterndisplay, self, 1, display);
 }
 
+void workspace_floatsection(Workspace* self, int view, uintptr_t section)
+{
+	psy_signal_emit(&self->signal_floatsection, self, 2, view, section);
+}
+
+void workspace_docksection(Workspace* self, int view, uintptr_t section)
+{
+	psy_signal_emit(&self->signal_docksection, self, 2, view, section);
+}

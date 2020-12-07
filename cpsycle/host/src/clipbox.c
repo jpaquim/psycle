@@ -77,7 +77,7 @@ void clipbox_ondestroy(ClipBox* self, psy_ui_Component* sender)
 		clipbox_onsongchanged);
 	if (workspace_song(self->workspace)) {
 		psy_signal_disconnect(&psy_audio_machines_master(
-			&self->workspace->song->machines)->signal_worked, self,
+			&workspace_song(self->workspace)->machines)->signal_worked, self,
 			clipbox_onmasterworked);
 	}
 }

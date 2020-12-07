@@ -26,6 +26,9 @@ typedef struct TrackerLineNumbersLabel {
 	// internal data
 	char_dyn_t* linestr;
 	char_dyn_t* defaultstr;
+	int headerheight;
+	bool showdefaultline;
+	bool showbeatoffset;
 	// references
 	struct TrackerView* view;
 	TrackerLineState* linestate;
@@ -34,8 +37,33 @@ typedef struct TrackerLineNumbersLabel {
 } TrackerLineNumbersLabel;
 
 void trackerlinenumberslabel_init(TrackerLineNumbersLabel*,
-	psy_ui_Component* parent, TrackerLineState*, struct TrackerView*,
-	Workspace*);
+	psy_ui_Component* parent, TrackerLineState*, Workspace*);
+
+INLINE void trackerlinenumberslabel_setheaderheight(TrackerLineNumbersLabel* self,
+	int headerheight)
+{
+	self->headerheight = headerheight;
+}
+
+INLINE void trackerlinenumberslabel_showdefaultline(TrackerLineNumbersLabel* self)
+{
+	self->showdefaultline = TRUE;
+}
+
+INLINE void trackerlinenumberslabel_hidedefaultline(TrackerLineNumbersLabel* self)
+{
+	self->showdefaultline = FALSE;
+}
+
+INLINE void trackerlinenumberslabel_showbeatoffset(TrackerLineNumbersLabel* self)
+{
+	self->showbeatoffset = TRUE;
+}
+
+INLINE void trackerlinenumberslabel_hidebeatoffset(TrackerLineNumbersLabel* self)
+{
+	self->showbeatoffset = FALSE;
+}
 
 INLINE psy_ui_Component* TrackerLineNumbersLabel_base(TrackerLineNumbersLabel* self)
 {
@@ -87,7 +115,7 @@ typedef struct TrackerLineNumberBar {
 } TrackerLineNumberBar;
 
 void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
-	parent, TrackerLineState*, struct TrackerView*, Workspace*);
+	parent, TrackerLineState*, Workspace*);
 void trackerlinenumberbar_computefontheight(TrackerLineNumberBar*);
 
 INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)

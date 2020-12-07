@@ -497,7 +497,7 @@ INLINE void psy_ui_component_setparent(psy_ui_Component* self, psy_ui_Component*
 INLINE void psy_ui_component_insert(psy_ui_Component* self, psy_ui_Component* child,
 	psy_ui_Component* insertafter)
 {
-	self->imp->vtable->dev_insert(self->imp, child->imp, insertafter->imp);
+	self->imp->vtable->dev_insert(self->imp, child->imp, (insertafter) ? insertafter->imp : NULL);
 }
 
 INLINE void psy_ui_component_setorder(psy_ui_Component* self, psy_ui_Component* insertafter)

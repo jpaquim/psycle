@@ -318,7 +318,7 @@ void spectrumanalyzer_onsrcmachineworked(SpectrumAnalyzer* self,
 	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
 {	
-	self->invol = psy_audio_connections_wirevolume(&self->workspace->song->machines.connections,
+	self->invol = psy_audio_connections_wirevolume(&workspace_song(self->workspace)->machines.connections,
 		self->wire);	
 }
 
@@ -356,9 +356,9 @@ void spectrumanalyzer_disconnectmachinessignals(SpectrumAnalyzer* self, Workspac
 
 void spectrumanalyzer_stop(SpectrumAnalyzer* self)
 {
-	if (self->workspace && self->workspace->song) {
+	if (self->workspace && workspace_song(self->workspace)) {
 		psy_audio_Machine* srcmachine;		
-		srcmachine = psy_audio_machines_at(&self->workspace->song->machines,
+		srcmachine = psy_audio_machines_at(&workspace_song(self->workspace)->machines,
 			self->wire.src);
 		if (srcmachine) {
 			psy_audio_exclusivelock_enter();
@@ -408,7 +408,7 @@ psy_audio_Buffer* spectrumanalyzer_buffer(SpectrumAnalyzer * self,
 	psy_audio_Machine* machine;
 	psy_audio_Buffer* buffer;
 
-	machine = psy_audio_machines_at(&self->workspace->song->machines, self->wire.src);
+	machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
 	if (!machine) {
 		*numsamples = 0;
 		return NULL;

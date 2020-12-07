@@ -150,11 +150,19 @@ INLINE psy_dsp_big_beat_t psy_audio_player_extraticksperbeat(psy_audio_Player* s
 	return self->sequencer.extraticks;
 }
 
+///\returns lines per beat
 void psy_audio_player_setlpb(psy_audio_Player*, uintptr_t lpb);
 
 INLINE uintptr_t psy_audio_player_lpb(psy_audio_Player* self)
 {
 	return psy_audio_sequencer_lpb(&self->sequencer);
+}
+
+///\returns beats per line
+INLINE psy_dsp_big_beat_t psy_audio_player_bpl(psy_audio_Player* self)
+{
+	return (psy_dsp_big_beat_t)(1.0) /
+		psy_audio_sequencer_lpb(&self->sequencer);
 }
 
 INLINE uintptr_t psy_audio_player_samplerate(psy_audio_Player* self)
@@ -225,6 +233,8 @@ void psy_audio_player_setemptysong(psy_audio_Player*);
 void psy_audio_player_midiconfigure(psy_audio_Player*, psy_Property*
 	configuration, bool datastr);
 void psy_audio_player_idle(psy_audio_Player*);
+void psy_audio_player_sendcmd(psy_audio_Player*, const char* section,
+	psy_EventDriverCmd cmd);
 
 #ifdef __cplusplus
 }

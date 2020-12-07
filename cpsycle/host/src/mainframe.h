@@ -4,8 +4,45 @@
 #if !defined(MAINFRAME_H)
 #define MAINFRAME_H
 
-#include "workspace.h"
+// platform
+#include "../../detail/os.h"
+// host
+#include "checkunsaved.h"
+#include "cpuview.h"
+#include "filebar.h"
+#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
+#include "fileview.h"
+#endif
+#include "gear.h"
+#include "helpview.h"
+#include "interpreter.h"
+#include "instrumentview.h"
+#include "kbdhelp.h"
+#include "machinebar.h"
+#include "machineview.h"
+#include "midiview.h"
+#include "navigation.h"
+#include "plugineditor.h"
+#include "patternview.h"
+#include "recentview.h"
+#include "renderview.h"
+#include "sequenceview.h"
+#include "seqeditor.h"
+#include "songbar.h"
+#include "stepbox.h"
+#include "stepsequencerview.h"
+#include "samplesview.h"
+#include "settingsview.h"
+#include "songproperties.h"
+#include "tabbar.h"
 #include "trackscopeview.h"
+#include "playbar.h"
+#include "playposbar.h"
+#include "undoredobar.h"
+#include "vubar.h"
+#include "workspace.h"
+#include "zoombox.h"
+// ui
 #include <uilabel.h>
 #include <uibutton.h>
 #include <uiframe.h>
@@ -13,42 +50,8 @@
 #include <uinotebook.h>
 #include <uiprogressbar.h>
 #include <uisplitbar.h>
-#include "filebar.h"
-#include "undoredobar.h"
-#include "navigation.h"
-#include "machinebar.h"
-#include "machineview.h"
-#include "gear.h"
-#include "plugineditor.h"
-#include "patternview.h"
-#include "sequenceview.h"
-#include "seqeditor.h"
-#include "stepsequencerview.h"
-#include "samplesview.h"
-#include "instrumentview.h"
-#include "settingsview.h"
-#include "songproperties.h"
-#include "renderview.h"
-#include "properties.h"
-#include "tabbar.h"
-#include "playbar.h"
-#include "playposbar.h"
-#include "vubar.h"
-#include "cpuview.h"
-#include "midiview.h"
-#include "recentview.h"
-#include "songbar.h"
-#include "helpview.h"
-#include "kbdhelp.h"
-#include "stepbox.h"
-#include "zoombox.h"
-#include "checkunsaved.h"
-#include "interpreter.h"
-#ifndef PSYCLE_USE_PLATFORM_FILEOPEN
-#include "fileview.h"
-#endif
-
-#include "../../detail/os.h"
+// container
+#include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,8 +71,10 @@ typedef enum {
 	TERMINALMSGTYPE_NUM
 } TerminalMsgType;
 
-typedef struct {
+typedef struct MainFrame {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Component top;
 	psy_ui_Component topright;
 	psy_ui_Component toprow0;
@@ -81,8 +86,7 @@ typedef struct {
 	psy_ui_SplitBar splitbar;
 	psy_ui_SplitBar splitbarterminal;
 	psy_ui_ProgressBar progressbar;
-	psy_ui_Button toggleterminal;
-	psy_ui_Colour terminalbutton_colours[TERMINALMSGTYPE_NUM];
+	psy_ui_Button toggleterminal;	
 	psy_ui_Button togglekbdhelp;
 	Navigation navigation;
 	TabBar tabbar;	
@@ -123,17 +127,19 @@ typedef struct {
 	psy_ui_Notebook viewstatusbars;
 	ZoomBox zoombox;
 	psy_ui_Component left;
-	psy_ui_Component* activeview;
+	psy_ui_Component right;
 	Workspace workspace;
 	psy_ui_Label label;	
 	psy_ui_Label statusbarlabel;
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
 	CheckUnsavedBox checkunsavedbox;
-	bool startpage;
 	TerminalMsgType terminalmsgtype;
 	Interpreter interpreter;
+	// internal data
 	int startup;
+	bool startpage;
+	psy_ui_Colour terminalbutton_colours[TERMINALMSGTYPE_NUM];
 } MainFrame;
 
 void mainframe_init(MainFrame*);
@@ -152,4 +158,4 @@ INLINE psy_ui_Component* mainframe_base(MainFrame* self)
 }
 #endif
 
-#endif
+#endif /* MAINFRAME_H */

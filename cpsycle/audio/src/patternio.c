@@ -11,10 +11,10 @@
 
 #define EVENT_SIZE 5
 
-static void loadblock(FILE*, psy_audio_Pattern*, psy_dsp_beat_t bpl);
-static void saveblock(FILE*, psy_audio_Pattern*, psy_dsp_beat_t bpl, uintptr_t songtracks);
+static void loadblock(FILE*, psy_audio_Pattern*, psy_dsp_big_beat_t bpl);
+static void saveblock(FILE*, psy_audio_Pattern*, psy_dsp_big_beat_t bpl, uintptr_t songtracks);
 
-void psy_audio_patternio_load(psy_audio_Pattern* pattern, const char* path, psy_dsp_beat_t bpl)
+void psy_audio_patternio_load(psy_audio_Pattern* pattern, const char* path, psy_dsp_big_beat_t bpl)
 {
 	FILE* fp;
 
@@ -24,7 +24,7 @@ void psy_audio_patternio_load(psy_audio_Pattern* pattern, const char* path, psy_
 	fclose(fp);
 }
 
-void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl)
+void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_big_beat_t bpl)
 {
 	int32_t nt, nl;
 
@@ -50,7 +50,7 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl)
 				// if (l < MAX_LINES && t < MAX_TRACKS)
 					unsigned char* ptrack;
 					psy_audio_PatternEvent event;
-					psy_dsp_beat_t offset;					
+					psy_dsp_big_beat_t offset;
 
 					ptrack = &source[(line * nt + track) * EVENT_SIZE];
 					offset = bpl * line;
@@ -80,7 +80,7 @@ void loadblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl)
 	}
 }
 
-void psy_audio_patternio_save(psy_audio_Pattern* pattern, const char* path, psy_dsp_beat_t bpl, uintptr_t songtracks)
+void psy_audio_patternio_save(psy_audio_Pattern* pattern, const char* path, psy_dsp_big_beat_t bpl, uintptr_t songtracks)
 {
 	FILE* fp;
 	
@@ -91,7 +91,7 @@ void psy_audio_patternio_save(psy_audio_Pattern* pattern, const char* path, psy_
 	}
 }
 
-void saveblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_beat_t bpl, uintptr_t songtracks)
+void saveblock(FILE* fp, psy_audio_Pattern* pattern, psy_dsp_big_beat_t bpl, uintptr_t songtracks)
 {	
 	int nlines;		
 	unsigned char* dest;

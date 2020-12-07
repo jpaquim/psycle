@@ -1941,8 +1941,8 @@ void machineviewbar_onmixerconnectmodeclick(MachineViewBar* self,
 void machineviewbar_onsongchanged(MachineViewBar* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
 {
-	if (!self->workspace->song ||
-			psy_audio_machines_isconnectasmixersend(&self->workspace->song->machines)) {
+	if (!workspace_song(self->workspace) ||
+			psy_audio_machines_isconnectasmixersend(&workspace_song(self->workspace)->machines)) {
 		psy_ui_checkbox_check(&self->mixersend);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->mixersend);		

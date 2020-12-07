@@ -95,13 +95,13 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 
 void vumeter_ontimer(Vumeter* self, psy_ui_Component* sender, uintptr_t timerid)
 {	
-	if (self->workspace->song) {
+	if (workspace_song(self->workspace)) {
 		psy_audio_Machine* master;
 		psy_audio_Buffer* memory;
 		psy_dsp_amp_t leftavg;
 		psy_dsp_amp_t rightavg;
 
-		master = psy_audio_machines_master(&self->workspace->song->machines);
+		master = psy_audio_machines_master(&workspace_song(self->workspace)->machines);
 		if (master) {
 			memory = psy_audio_machine_buffermemory(master);
 			if (memory && memory->rms) {

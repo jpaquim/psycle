@@ -29,6 +29,7 @@ typedef struct Help {
 	TabBar tabbar;
 	// internal data
 	psy_Table filenames;
+	psy_ui_AlignType lastalign;
 	// references
 	Workspace* workspace;
 } Help;

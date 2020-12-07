@@ -29,7 +29,7 @@ enum {
 	CMD_NAVLEFT,
 	CMD_NAVRIGHT,
 	CMD_NAVPAGEUP,	///< pgup
-	CMD_NAVPAGEDOWN,///< pgdn
+	CMD_NAVPAGEDOWN,///< pgdn	
 	CMD_NAVTOP,		///< home
 	CMD_NAVBOTTOM,	///< end
 
@@ -60,6 +60,10 @@ enum {
 	CMD_SELECTMACHINE,	///< Enter
 	CMD_UNDO,
 	CMD_REDO,
+
+	CMD_BLOCKDELETE,
+	CMD_NAVPAGEUPKEYBOARD, ///< pgup keyboard
+	CMD_NAVPAGEDOWNKEYBOARD, ///< pgdn keyboard
 
 	CMD_DIGIT0,
 	CMD_DIGIT1,
@@ -157,6 +161,20 @@ uintptr_t trackergridstate_screentotrack(TrackerGridState*, int x,
 	uintptr_t numsongtracks);
 uintptr_t trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, int x);
+
+INLINE void trackergridstate_setpattern(TrackerGridState* self, psy_audio_Pattern* pattern)
+{
+	assert(self);
+
+	self->pattern = pattern;
+}
+
+INLINE psy_audio_Pattern* trackergridstate_pattern(TrackerGridState* self)
+{
+	assert(self);
+
+	return self->pattern;
+}
 
 INLINE int trackergridstate_preferredtrackwidth(TrackerGridState* self)
 {
