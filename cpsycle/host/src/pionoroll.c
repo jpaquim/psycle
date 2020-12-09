@@ -18,7 +18,7 @@
 
 #define CMD_ENTER 1100
 
-static void definecmd(psy_Property* cmds, int cmd, uintptr_t keycode,
+static void setcmdall(psy_Property* cmds, int cmd, uintptr_t keycode,
 	bool shift, bool ctrl, const char* key, const char* shorttext);
 
 // KeyboardState
@@ -129,9 +129,13 @@ psy_audio_PatternSelection pianoruler_clipselection(PianoRuler* self,
 
 	rv.topleft.offset = pianogridstate_quantize(self->gridstate,
 		pianogridstate_pxtobeat(self->gridstate, clip.left));
-	rv.bottomright.offset = psy_min(
-		psy_audio_pattern_length(pianogridstate_pattern(self->gridstate)),
-		pianogridstate_pxtobeat(self->gridstate, clip.right));	
+	if (pianogridstate_pattern(self->gridstate)) {
+		rv.bottomright.offset = psy_min(
+			psy_audio_pattern_length(pianogridstate_pattern(self->gridstate)),
+			pianogridstate_pxtobeat(self->gridstate, clip.right));
+	} else {
+		rv.bottomright.offset = 0;
+	}
 	return rv;
 }
 
@@ -158,7 +162,7 @@ void pianoruler_drawruler(PianoRuler* self, psy_ui_Graphics* g,
 	psy_ui_drawline(g, psy_ui_component_scrollleft(&self->component), baseline,
 		size.width + psy_ui_component_scrollleft(&self->component),
 		baseline);
-	currstep = pianogridstate_steps(self->gridstate, clip.topleft.offset);
+	currstep = pianogridstate_beattosteps(self->gridstate, clip.topleft.offset);
 	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
 	for (c = clip.topleft.offset; c <= clip.bottomright.offset;
 			c += pianogridstate_step(self->gridstate), ++currstep) {
@@ -534,6 +538,8 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 	assert(self);
 
 	if (!pianogridstate_pattern(self->gridstate)) {
+		psy_ui_drawsolidrectangle(g, g->clip,
+			self->gridstate->skin->background);
 		return;
 	}	
 	pianogrid_updatekeystate(self);
@@ -653,7 +659,7 @@ void pianogrid_drawgridcells(Pianogrid* self, psy_ui_Graphics* g,
 
 		cpy = keyboardstate_keytopx(self->keyboardstate, key);		
 		c = clip.topleft.offset;
-		steps = pianogridstate_steps(self->gridstate, c);
+		steps = pianogridstate_beattosteps(self->gridstate, c);
 		for (; c <= clip.bottomright.offset;
 				c += pianogridstate_step(self->gridstate), ++steps) {			
 			psy_ui_drawsolidrectangle(g, psy_ui_rectangle_make(
@@ -1113,7 +1119,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 		if (ev->button == 1) {
 			// left button			
 			psy_undoredo_execute(&self->workspace->undoredo,
-				&InsertCommandAlloc(
+				&insertcommand_alloc(
 					pianogridstate_pattern(self->gridstate),
 					pianogridstate_step(self->gridstate),
 					cursor, patternevent,self->workspace)->command);
@@ -1157,7 +1163,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 						self->hoverpatternentry = NULL;
 					}
 					psy_undoredo_execute(&self->workspace->undoredo,
-						&RemoveCommandAlloc(self->gridstate->pattern,
+						&removecommand_alloc(self->gridstate->pattern,
 							pianogridstate_step(self->gridstate),
 							cursor, self->workspace)->command);
 					if (next) {
@@ -1171,7 +1177,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 							}
 							cursor.offset = nextentry->offset;
 							psy_undoredo_execute(&self->workspace->undoredo,
-								&RemoveCommandAlloc(self->gridstate->pattern,
+								&removecommand_alloc(self->gridstate->pattern,
 									pianogridstate_step(self->gridstate),
 									cursor, self->workspace)->command);
 						}
@@ -1196,7 +1202,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 								release = cursor;
 								release.offset = nextentry->offset;
 								psy_undoredo_execute(&self->workspace->undoredo,
-									&RemoveCommandAlloc(self->gridstate->pattern,
+									&removecommand_alloc(self->gridstate->pattern,
 										pianogridstate_step(self->gridstate),
 										release, self->workspace)->command);
 							}
@@ -1204,7 +1210,7 @@ void pianogrid_onmouseup(Pianogrid* self, psy_ui_MouseEvent* ev)
 						psy_audio_patternevent_clear(&release);
 						release.note = psy_audio_NOTECOMMANDS_RELEASE;
 						psy_undoredo_execute(&self->workspace->undoredo,
-							&InsertCommandAlloc(pianogridstate_pattern(self->gridstate),
+							&insertcommand_alloc(pianogridstate_pattern(self->gridstate),
 								pianogridstate_step(self->gridstate),
 								cursor, release,
 								self->workspace)->command);
@@ -1314,7 +1320,7 @@ int pianogrid_scrollright(Pianogrid* self, psy_audio_PatternCursor cursor)
 	//} else {
 	--visilines;
 	//}
-	line = pianogridstate_steps(self->gridstate, cursor.offset);
+	line = pianogridstate_beattosteps(self->gridstate, cursor.offset);
 	if (visilines < line - psy_ui_component_scrollleft(&self->component) /
 			pianogridstate_steppx(self->gridstate) + 2) {
 		int dlines;
@@ -1446,7 +1452,7 @@ int pianogrid_scrollleft(Pianogrid* self, psy_audio_PatternCursor cursor)
 
 	assert(self);
 
-	line = pianogridstate_steps(self->gridstate, cursor.offset);
+	line = pianogridstate_beattosteps(self->gridstate, cursor.offset);
 	psy_ui_setrectangle(&r,
 		pianogridstate_steppx(self->gridstate) * line, 0,
 		pianogridstate_steppx(self->gridstate), 200);
@@ -1543,22 +1549,18 @@ int pianogrid_scrolldown(Pianogrid* self, psy_audio_PatternCursor cursor)
 	return TRUE;
 }
 
-void pianogrid_invalidateline(Pianogrid* self, psy_dsp_big_beat_t offset)
+void pianogrid_invalidateline(Pianogrid* self, psy_dsp_big_beat_t position)
 {	
 	assert(self);
-
-	if (offset >= 0.0 && offset < psy_audio_pattern_length(pianogridstate_pattern(
-			self->gridstate))) {
-		psy_ui_TextMetric tm;
+	
+	if (position >= 0.0 && position < psy_audio_pattern_length(
+			pianogridstate_pattern(self->gridstate))) {
 		psy_ui_IntSize size;
 
-		tm = psy_ui_component_textmetric(&self->component);
-		size = psy_ui_intsize_init_size(
-			psy_ui_component_size(&self->component), &tm);
+		size =  psy_ui_component_intsize(&self->component);
 		psy_ui_component_invalidaterect(&self->component,
 			psy_ui_rectangle_make(
-				pianogridstate_beattopx(self->gridstate, pianogridstate_quantize(
-					self->gridstate, offset)),
+				pianogridstate_quantizebeattopx(self->gridstate, position),
 				psy_ui_component_scrolltop(&self->component),
 				pianogridstate_steppx(self->gridstate),
 				size.height));
@@ -1569,8 +1571,10 @@ void pianogrid_invalidatecursor(Pianogrid* self)
 {
 	assert(self);
 
-	pianogrid_invalidateline(self, self->oldcursor.offset);
-	pianogrid_invalidateline(self, self->gridstate->cursor.offset);
+	pianogrid_invalidateline(self, psy_audio_patterncursor_offset(
+		&self->oldcursor));
+	pianogrid_invalidateline(self, psy_audio_patterncursor_offset(
+		&self->gridstate->cursor));
 }
 
 void pianogrid_storecursor(Pianogrid* self)
@@ -1964,75 +1968,75 @@ void pianoroll_makecmds(psy_Property* parent)
 
 	cmds = psy_property_settext(psy_property_append_section(parent,
 		"pianoroll"), "Pianoroll");
-	definecmd(cmds, CMD_NAVUP,
+	setcmdall(cmds, CMD_NAVUP,
 		psy_ui_KEY_UP, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"navup", "up");	
-	definecmd(cmds, CMD_NAVDOWN,
+	setcmdall(cmds, CMD_NAVDOWN,
 		psy_ui_KEY_DOWN, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"navdown", "down");
-	definecmd(cmds, CMD_NAVLEFT,
+	setcmdall(cmds, CMD_NAVLEFT,
 		psy_ui_KEY_LEFT, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"navleft", "left");
-	definecmd(cmds, CMD_NAVRIGHT,
+	setcmdall(cmds, CMD_NAVRIGHT,
 		psy_ui_KEY_RIGHT, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"navright", "right");
-	definecmd(cmds, CMD_NAVPAGEUP,
+	setcmdall(cmds, CMD_NAVPAGEUP,
 		psy_ui_KEY_PRIOR, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"navpageup", "pageup");
-	definecmd(cmds, CMD_NAVPAGEDOWN,
+	setcmdall(cmds, CMD_NAVPAGEDOWN,
 		psy_ui_KEY_NEXT, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"navpagedown", "pagedown");
-	definecmd(cmds, CMD_NAVPAGEUPKEYBOARD,
+	setcmdall(cmds, CMD_NAVPAGEUPKEYBOARD,
 		psy_ui_KEY_PRIOR, psy_SHIFT_ON, psy_CTRL_OFF,
 		"navpageupkbd", "pageup kbd");
-	definecmd(cmds, CMD_NAVPAGEDOWNKEYBOARD,
+	setcmdall(cmds, CMD_NAVPAGEDOWNKEYBOARD,
 		psy_ui_KEY_NEXT, psy_SHIFT_ON, psy_CTRL_OFF,
 		"navpagedownkbd", "pagedown kbd");
-	definecmd(cmds, CMD_ENTER,
+	setcmdall(cmds, CMD_ENTER,
 		psy_ui_KEY_SPACE, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"enter", "enter");
-	definecmd(cmds, CMD_ROWCLEAR,
+	setcmdall(cmds, CMD_ROWCLEAR,
 		psy_ui_KEY_DELETE, psy_SHIFT_OFF, psy_CTRL_OFF,
 		"rowclear", "clr row");
-	definecmd(cmds, CMD_BLOCKSTART,
+	setcmdall(cmds, CMD_BLOCKSTART,
 		psy_ui_KEY_B, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockstart", "sel start");
-	definecmd(cmds, CMD_BLOCKEND,
+	setcmdall(cmds, CMD_BLOCKEND,
 		psy_ui_KEY_E, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockend", "sel end");
-	definecmd(cmds, CMD_BLOCKUNMARK,
+	setcmdall(cmds, CMD_BLOCKUNMARK,
 		psy_ui_KEY_U, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockunmark", "unmark");
-	definecmd(cmds, CMD_BLOCKCUT,
+	setcmdall(cmds, CMD_BLOCKCUT,
 		psy_ui_KEY_X, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockcut", "cut");
-	definecmd(cmds, CMD_BLOCKCOPY,
+	setcmdall(cmds, CMD_BLOCKCOPY,
 		psy_ui_KEY_C, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockcopy", "copy");
-	definecmd(cmds, CMD_BLOCKPASTE,
+	setcmdall(cmds, CMD_BLOCKPASTE,
 		psy_ui_KEY_V, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockpaste", "paste");
-	definecmd(cmds, CMD_BLOCKMIX,
+	setcmdall(cmds, CMD_BLOCKMIX,
 		psy_ui_KEY_M, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockmix", "mix");
-	definecmd(cmds, CMD_BLOCKDELETE,
+	setcmdall(cmds, CMD_BLOCKDELETE,
 		0, 0, 0,
 		"blockdelete", "blkdel");
 
-	definecmd(cmds, CMD_SELECTALL,
+	setcmdall(cmds, CMD_SELECTALL,
 		psy_ui_KEY_A, psy_SHIFT_OFF, psy_CTRL_ON,
 		"selectall", "sel all");
-	definecmd(cmds, CMD_SELECTBAR,
+	setcmdall(cmds, CMD_SELECTBAR,
 		psy_ui_KEY_K, psy_SHIFT_OFF, psy_CTRL_ON,
 		"selectbar", "sel bar");
 
-	definecmd(cmds, CMD_BLOCKUNMARK,
+	setcmdall(cmds, CMD_BLOCKUNMARK,
 		psy_ui_KEY_U, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockunmark", "unmark");
-	definecmd(cmds, CMD_BLOCKSTART,
+	setcmdall(cmds, CMD_BLOCKSTART,
 		psy_ui_KEY_B, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockstart", "sel start");
-	definecmd(cmds, CMD_BLOCKEND,
+	setcmdall(cmds, CMD_BLOCKEND,
 		psy_ui_KEY_E, psy_SHIFT_OFF, psy_CTRL_ON,
 		"blockend", "sel end");
 }
@@ -2114,7 +2118,7 @@ bool pianoroll_handlecommand(Pianoroll* self, int cmd)
 // text		: "cmds.key" language dictionary key used by the translator
 // shorttext: short description for the keyboard help view
 // value	: encoded key shortcut (keycode/shift/ctrl)
-void definecmd(psy_Property* cmds, int cmd, uintptr_t keycode, bool shift,
+void setcmdall(psy_Property* cmds, int cmd, uintptr_t keycode, bool shift,
 	bool ctrl, const char* key, const char* shorttext)
 {
 	char text[256];
@@ -2159,7 +2163,7 @@ void pianoroll_enter(Pianoroll* self)
 	psy_audio_patternevent_clear(&patternevent);
 	patternevent.note = self->gridstate.cursor.key;
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&InsertCommandAlloc(pianogridstate_pattern(&self->gridstate),
+		&insertcommand_alloc(pianogridstate_pattern(&self->gridstate),
 			pianogridstate_step(&self->gridstate),
 			self->gridstate.cursor, patternevent,
 			self->workspace)->command);
@@ -2169,7 +2173,7 @@ void pianoroll_enter(Pianoroll* self)
 void pianoroll_rowclear(Pianoroll* self)
 {
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&RemoveCommandAlloc(self->gridstate.pattern,
+		&removecommand_alloc(self->gridstate.pattern,
 			pianogridstate_step(&self->gridstate),
 			self->gridstate.cursor, self->workspace)->command);
 	pianogrid_advanceline(&self->grid);
@@ -2179,7 +2183,7 @@ void pianoroll_blockcut(Pianoroll* self)
 {
 	assert(self);
 
-	if (self->gridstate.pattern && self->grid.selection.valid) {
+	if (self->gridstate.pattern && psy_audio_patternselection_valid(&self->grid.selection)) {
 		pianoroll_blockcopy(self);
 		pianoroll_blockdelete(self);
 	}
@@ -2189,7 +2193,7 @@ void pianoroll_blockcopy(Pianoroll* self)
 {
 	assert(self);
 
-	if (self->gridstate.pattern && self->grid.selection.valid) {
+	if (self->gridstate.pattern && psy_audio_patternselection_valid(&self->grid.selection)) {
 		psy_audio_pattern_blockcopy(&self->workspace->patternpaste,
 			self->gridstate.pattern, self->grid.selection);
 	}
@@ -2198,7 +2202,7 @@ void pianoroll_blockcopy(Pianoroll* self)
 void pianoroll_blockpaste(Pianoroll* self)
 {
 	psy_undoredo_execute(&self->workspace->undoredo,
-		&BlockPasteCommandAlloc(self->gridstate.pattern,
+		&blockpastecommand_alloc(self->gridstate.pattern,
 			&self->workspace->patternpaste, self->gridstate.cursor,
 			1.0 / self->gridstate.lpb, FALSE, self->workspace)->command);
 	psy_ui_component_invalidate(&self->component);	
@@ -2206,9 +2210,9 @@ void pianoroll_blockpaste(Pianoroll* self)
 
 void pianoroll_blockdelete(Pianoroll* self)
 {
-	if (self->grid.selection.valid) {
+	if (psy_audio_patternselection_valid(&self->grid.selection)) {
 		psy_undoredo_execute(&self->workspace->undoredo,
-			&BlockRemoveCommandAlloc(self->gridstate.pattern,
+			&blockremovecommand_alloc(self->gridstate.pattern,
 				self->grid.selection,
 				self->workspace)->command);
 		//		sequencer_checkiterators(&self->workspace->player.sequencer,
@@ -2227,7 +2231,7 @@ void pianoroll_selectall(Pianoroll* self)
 		self->grid.selection.bottomright.offset = self->gridstate.pattern->length;
 		self->grid.selection.bottomright.track =
 			workspace_song(self->workspace)->patterns.songtracks;
-		self->grid.selection.valid = TRUE;
+		psy_audio_patternselection_enable(&self->grid.selection);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -2244,14 +2248,14 @@ void pianoroll_selectbar(Pianoroll* self)
 			self->gridstate.cursor.offset = self->gridstate.pattern->length;
 		}
 		self->grid.selection.bottomright.track = self->gridstate.cursor.track + 1;
-		self->grid.selection.valid = TRUE;
+		psy_audio_patternselection_enable(&self->grid.selection);
 		psy_ui_component_invalidate(&self->component);
 	}
 }
 
 void pianoroll_blockunmark(Pianoroll* self)
 {
-	self->grid.selection.valid = 0;
+	psy_audio_patternselection_disable(&self->grid.selection);
 	psy_ui_component_invalidate(&self->component);
 }
 

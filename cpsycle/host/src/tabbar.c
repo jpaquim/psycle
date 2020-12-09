@@ -254,6 +254,7 @@ void tabbar_onmousedown(TabBar* self, psy_ui_MouseEvent* ev)
 			tab->checkstate = !tab->checkstate;
 		}
 		psy_ui_component_invalidate(tabbar_base(self));
+		psy_ui_component_update(tabbar_base(self));
 		psy_signal_emit(&self->signal_change, self, 1, tabindex);
 	}
 
@@ -359,6 +360,7 @@ void tabbar_select(TabBar* self, int tabindex)
 		tab->checkstate = 1;
 	}
 	psy_ui_component_invalidate(tabbar_base(self));
+	psy_ui_component_update(tabbar_base(self));
 	psy_signal_emit(&self->signal_change, self, 1, self->selected);
 }
 

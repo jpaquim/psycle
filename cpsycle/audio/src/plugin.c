@@ -32,6 +32,7 @@ static void psy_audio_pluginmachineparam_dispose(psy_audio_PluginMachineParam*);
 psy_audio_PluginMachineParam* psy_audio_pluginmachineparam_alloc(void);
 
 static void pluginparam_tweak(psy_audio_PluginMachineParam*, float val);
+static void pluginparam_reset(psy_audio_PluginMachineParam*);
 static float pluginparam_normvalue(psy_audio_PluginMachineParam*);
 static void pluginparam_range(psy_audio_PluginMachineParam*,
 	intptr_t* minval, intptr_t* maxval);
@@ -54,6 +55,7 @@ static void pluginparam_vtable_init(psy_audio_PluginMachineParam* self)
 	if (!pluginparam_vtable_initialized) {
 		pluginparam_vtable = *(self->machineparam.vtable);
 		pluginparam_vtable.tweak = (fp_machineparam_tweak)pluginparam_tweak;
+		pluginparam_vtable.reset = (fp_machineparam_reset)pluginparam_reset;
 		pluginparam_vtable.normvalue = (fp_machineparam_normvalue)
 			pluginparam_normvalue;
 		pluginparam_vtable.range = (fp_machineparam_range)pluginparam_range;
@@ -113,6 +115,11 @@ void pluginparam_tweak(psy_audio_PluginMachineParam* self, float value)
 		self->cinfo->Parameters[self->index]->MinValue) + 0.5f) +
 		self->cinfo->Parameters[self->index]->MinValue;
 	mi_parametertweak(self->mi, (int)self->index, scaled);
+}
+
+void pluginparam_reset(psy_audio_PluginMachineParam* self)
+{
+	mi_parametertweak(self->mi, (int)self->index, self->cinfo->Parameters[self->index]->DefValue);
 }
 
 float pluginparam_normvalue(psy_audio_PluginMachineParam* self)

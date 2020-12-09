@@ -275,7 +275,7 @@ char_dyn_t* psy_audio_midiconfig_controllers_tostring(
 	for (i = self->groups; i != NULL; psy_list_next_const(&i)) {
 		const psy_audio_MidiConfigGroup* group;
 
-		group = (psy_audio_MidiConfigGroup*)psy_list_entry(i);		
+		group = (psy_audio_MidiConfigGroup*)psy_list_entry_const(i);
 		rv = psy_strcat_realloc(rv, psy_audio_midiconfiggroup_tostring(group));
 	}	
 	return rv;

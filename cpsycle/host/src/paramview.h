@@ -46,6 +46,7 @@ typedef struct ParamView {
    int cx;
    int cy;      
    uintptr_t tweak;
+   uintptr_t lasttweak;
    int tweakbase;   
    float tweakval;   
    Workspace* workspace;
@@ -53,7 +54,7 @@ typedef struct ParamView {
    psy_Table positions;
    psy_ui_Size cpmax;
    uintptr_t numparams;
-   int sizechanged;
+   int sizechanged;   
    psy_ui_FontInfo fontinfo;
 } ParamView;
 

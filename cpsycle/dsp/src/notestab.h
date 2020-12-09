@@ -39,6 +39,8 @@ typedef enum {
 
 #define psy_dsp_NOTESTAB_DEFAULT psy_dsp_NOTESTAB_A220
 
+extern char* hex_tab[16];
+
 const char* psy_dsp_notetostr(psy_dsp_note_t note, psy_dsp_NotesTabMode mode);
 const char* const * psy_dsp_notetab(psy_dsp_NotesTabMode mode);
 

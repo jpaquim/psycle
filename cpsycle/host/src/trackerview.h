@@ -5,8 +5,8 @@
 #define TRACKERVIEW
 
 // host
-#include "trackerlinestate.h"
 #include "trackergridstate.h"
+#include "trackerlinestate.h"
 #include "workspace.h"
 // ui
 #include <uibutton.h>
@@ -29,6 +29,7 @@ typedef struct {
 	int beat;
 	int beat4;
 	int mid;
+	int focus;
 } TrackerColumnFlags;
 
 typedef enum {
@@ -45,18 +46,17 @@ typedef enum {
 typedef struct {
 	// inherits
 	psy_ui_Component component;
+	// signals	
+	psy_Signal signal_colresize;
 	// internal data	
 	TrackerGridState defaultgridstate;	
-	TrackerLineState defaultlinestate;
-	int lpb;
-	psy_dsp_big_beat_t bpl;
-	psy_dsp_big_beat_t cbpl;
+	TrackerLineState defaultlinestate;	
 	psy_dsp_NotesTabMode notestabmode;   
 	psy_audio_PatternCursor oldcursor;
 	psy_audio_PatternSelection selection;
 	psy_audio_PatternCursor dragselectionbase;
 	psy_audio_PatternCursor lastdragcursor;
-	int midline;
+	bool midline;
 	int chordmodestarting;
 	bool chordmode;
 	int chordbegin;
@@ -75,8 +75,6 @@ typedef struct {
 	bool effcursoralwaysdown;
 	bool movecursoronestep;
 	intptr_t pgupdownstep;	
-	// signals
-	psy_Signal signal_colresize;
 	// references
 	TrackerGridState* gridstate;
 	TrackerLineState* linestate;
@@ -89,8 +87,6 @@ void trackergrid_setsharedgridstate(TrackerGrid*, TrackerGridState*,
 	TrackConfig*);
 void trackergrid_setsharedlinestate(TrackerGrid*, TrackerLineState*);
 void trackergrid_setpattern(TrackerGrid*, psy_audio_Pattern*);
-void trackergrid_enablesync(TrackerGrid*);
-void trackergrid_preventsync(TrackerGrid*);
 void trackergrid_showemptydata(TrackerGrid*, int showstate);
 void trackergrid_inputnote(TrackerGrid*, psy_dsp_note_t, bool chordmode);
 void trackergrid_invalidateline(TrackerGrid*, psy_dsp_big_beat_t offset);
@@ -99,15 +95,58 @@ int trackergrid_scrolldown(TrackerGrid*, psy_audio_PatternCursor);
 int trackergrid_scrollleft(TrackerGrid*, psy_audio_PatternCursor);
 int trackergrid_scrollright(TrackerGrid*, psy_audio_PatternCursor);
 void trackergrid_storecursor(TrackerGrid*);
+void trackergrid_invalidatecursor(TrackerGrid*);
 void trackergrid_centeroncursor(TrackerGrid*);
 void trackergrid_setcentermode(TrackerGrid*, int mode);
-void trackergrid_readconfiguration(TrackerGrid*);
+void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,
+	float normvalue);
+
+INLINE void trackergrid_enableft2home(TrackerGrid* self)
+{
+	self->ft2home = TRUE;
+}
+
+INLINE void trackergrid_enableithome(TrackerGrid* self)
+{
+	self->ft2home = FALSE;
+}
+
+INLINE void trackergrid_enableft2delete(TrackerGrid* self)
+{
+	self->ft2delete = TRUE;
+}
+
+INLINE void trackergrid_enableitdelete(TrackerGrid* self)
+{
+	self->ft2delete = FALSE;
+}
+
+INLINE void trackergrid_enablemovecursoronestep(TrackerGrid* self)
+{
+	self->movecursoronestep = TRUE;
+}
+
+INLINE void trackergrid_disablemovecursoronestep(TrackerGrid* self)
+{
+	self->movecursoronestep = FALSE;
+}
+
+INLINE void trackergrid_enableeffcursoralwaysdown(TrackerGrid* self)
+{
+	self->movecursoronestep = TRUE;
+}
+
+INLINE void trackergrid_disableffcursoralwaysdown(TrackerGrid* self)
+{
+	self->movecursoronestep = FALSE;
+}
 
 INLINE void trackergrid_setpgupdownstep(TrackerGrid* self, intptr_t step)
 {
 	self->pgupdownstep = step;
 }
-bool trackergrid_handlecommand_song(TrackerGrid*, psy_ui_KeyEvent* ev, int cmd);
+
+bool trackergrid_handlecommand(TrackerGrid*, int cmd);
 // block menu
 void trackergrid_changegenerator(TrackerGrid*);
 void trackergrid_changeinstrument(TrackerGrid*);

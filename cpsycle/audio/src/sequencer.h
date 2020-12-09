@@ -40,7 +40,8 @@ typedef struct {
 
 typedef struct {
 	bool active;	
-	psy_dsp_big_beat_t offset;
+	bool dostop;
+	psy_dsp_big_beat_t offset;	
 } psy_audio_SequencerJump;
 
 typedef struct {
@@ -80,7 +81,8 @@ typedef struct {
 	psy_Signal signal_newline;
 	uintptr_t playcounter;
 	uintptr_t ppqncounter;
-	bool calcduration;	
+	bool calcduration;
+	uintptr_t playtrack;
 } psy_audio_Sequencer;
 
 void psy_audio_sequencer_init(psy_audio_Sequencer*, psy_audio_Sequence*,

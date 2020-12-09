@@ -789,7 +789,10 @@ void dev_settitle(psy_ui_win_ComponentImp* self, const char* title)
 void dev_setfocus(psy_ui_win_ComponentImp* self)
 {
 	SetFocus(self->hwnd);
-	psy_signal_emit(&self->component->signal_focus, self, 0);
+	if (self->component) {
+		self->component->vtable->onfocus(self->component);
+		psy_signal_emit(&self->component->signal_focus, self, 0);
+	}
 }
 
 int dev_hasfocus(psy_ui_win_ComponentImp* self)

@@ -19,11 +19,6 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-static char* hex_tab[16] = {
-	"0", "1", "2", "3", "4", "5", "6", "7",
-	"8", "9", "A", "B", "C", "D", "E", "F"
-};
-
 static int testcursor(psy_audio_PatternCursor cursor, uintptr_t track,
 	psy_dsp_big_beat_t offset, uintptr_t lpb)
 {
@@ -36,6 +31,7 @@ void trackerlinestate_init(TrackerLineState* self)
 {
 	self->lineheight = 13;
 	self->lpb = 4;
+	self->bpl = 1.0 / self->lpb;
 	self->skin = NULL;
 	self->pattern = NULL;	
 	self->lastplayposition = -1.f;
@@ -49,20 +45,10 @@ void trackerlinestate_dispose(TrackerLineState* self)
 {
 }
 
-int trackerlinestate_offsettoscreenline(TrackerLineState* self,
+int trackerlinestate_beattoline(TrackerLineState* self,
 	psy_dsp_big_beat_t offset)
 {
-	return (int)(offset * self->lpb);
-}
-
-psy_dsp_big_beat_t trackerlinestate_offset(TrackerLineState* self, int y, unsigned int* lines)
-{
-	if (self->pattern) {
-		*lines = psy_max(0, y) / self->lineheight;
-		return (*lines) * (1.0 / self->lpb);
-	}
-	*lines = 0;
-	return 0;
+	return cast_decimal(offset * self->lpb);	
 }
 
 int trackerlinestate_testplaybar(TrackerLineState* self, psy_dsp_big_beat_t offset)

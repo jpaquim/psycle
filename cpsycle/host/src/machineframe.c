@@ -82,12 +82,15 @@ static void machineframe_onfloatview(MachineFrame*,
 static void machineframe_onclose(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_resize(MachineFrame*);
+static void machineframe_onalign(MachineFrame*, psy_ui_Component* sender);
 static void machineframe_preferredviewsizechanged(MachineFrame*,
 	psy_ui_Component* sender);
 static void machineframe_setfloatbar(MachineFrame*);
 static void machineframe_setdockbar(MachineFrame*);
 static void ondefaultfontchanged(MachineFrame*, Workspace* sender);
 static void machineframe_onzoomboxchanged(MachineFrame*, ZoomBox* sender);
+static void machineframe_onmouseup(MachineFrame*, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev);
 // implementation
 void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	bool floated, Workspace* workspace)
@@ -110,12 +113,15 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	} else {
 		psy_ui_component_init(&self->component, parent);
 	}
-	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);	
+	psy_ui_component_seticonressource(&self->component, IDI_MACPARAM);		
 	parameterbar_init(&self->parameterbar, &self->component, workspace);
 	psy_ui_component_setalign(&self->parameterbar.component, psy_ui_ALIGN_TOP);
+	newvalview_init(&self->newval, &self->component, 0, 0, 0, 0, 0, "new val", workspace);
+	psy_ui_component_setalign(&self->newval.component, psy_ui_ALIGN_TOP);
+	psy_ui_component_hide(&self->newval.component);
 	parameterlistbox_init(&self->parameterbox, &self->component, NULL);
 	psy_ui_component_setalign(&self->parameterbox.component,
-		psy_ui_ALIGN_RIGHT);
+		psy_ui_ALIGN_RIGHT);	
 	psy_ui_notebook_init(&self->notebook, &self->component);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
@@ -137,6 +143,10 @@ void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 		machineframe_onfloatview);
 	psy_signal_connect(&self->parameterbar.close.signal_clicked, self,
 		machineframe_onclose);
+	psy_signal_connect(&self->component.signal_mouseup, self,
+		machineframe_onmouseup);
+	psy_signal_connect(&self->component.signal_align, self,
+		machineframe_onalign);
 	if (floated) {
 		machineframe_setfloatbar(self);
 	} else {
@@ -281,6 +291,7 @@ void machineframe_resize(MachineFrame* self)
 {
 	psy_ui_Size viewsize;	
 	psy_ui_Size bar;
+	psy_ui_Size newval;
 	psy_ui_TextMetric tm;
 
 	tm = psy_ui_component_textmetric(&self->component);	
@@ -290,11 +301,14 @@ void machineframe_resize(MachineFrame* self)
 			psy_ui_value_px(&viewsize.width, &tm) + 150);
 	}	
 	bar = psy_ui_component_preferredsize(&self->parameterbar.component,
-		&viewsize);	
-	psy_ui_component_clientresize(&self->component,
-		psy_ui_size_make(
-			viewsize.width,
-			psy_ui_add_values(bar.height, viewsize.height, &tm)));
+		&viewsize);
+	newval = psy_ui_component_preferredsize(&self->newval.component,
+		&viewsize);
+	viewsize.height = psy_ui_add_values(bar.height, viewsize.height, &tm);
+	if (self->newval.component.visible) {
+		viewsize.height = psy_ui_add_values(newval.height, viewsize.height, &tm);
+	}
+	psy_ui_component_clientresize(&self->component, viewsize);
 }
 
 void machineframe_preferredviewsizechanged(MachineFrame* self,
@@ -330,6 +344,64 @@ void machineframe_onzoomboxchanged(MachineFrame* self, ZoomBox* sender)
 {
 	if (self->paramview) {		
 		paramview_setzoom(self->paramview, sender->zoomrate);
+		machineframe_resize(self);
+	}
+}
+
+void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{
+	if (ev->button == 2 && self->paramview && ev->target ==
+			&self->paramview->component && self->machine &&
+			self->paramview->lasttweak != UINTPTR_MAX) {
+		intptr_t min_v = 1;
+		intptr_t max_v = 1;
+		char name[64], title[128];
+		memset(name, 0, 64);
+		psy_audio_MachineParam* tweakpar;
+
+		tweakpar = psy_audio_machine_parameter(self->machine, self->paramview->lasttweak);
+		if (tweakpar) {
+			psy_audio_machine_parameter_range(self->machine, tweakpar, &min_v, &max_v);
+			psy_audio_machine_parameter_name(self->machine, tweakpar, name);
+			psy_snprintf
+			(
+				title, 128, "Param:'%.2x:%s' (Range from %d to %d)\0",
+				(int)self->paramview->lasttweak,
+				name,
+				min_v,
+				max_v
+			);
+			newvalview_reset(&self->newval, psy_audio_machine_slot(self->machine),
+				self->paramview->lasttweak, psy_audio_machine_parameter_scaledvalue(
+					self->machine, tweakpar), min_v, max_v, title);
+			if (!psy_ui_component_visible(&self->newval.component)) {
+				psy_ui_component_togglevisibility(&self->newval.component);
+				machineframe_resize(self);
+			}
+			psy_ui_component_setfocus(&self->newval.edit);
+		}
+	}
+}
+
+void machineframe_onalign(MachineFrame* self, psy_ui_Component* sender)
+{
+	if (self->paramview && self->newval.docancel) {
+		self->newval.docancel = FALSE;
+		self->newval.doapply = FALSE;
+		machineframe_resize(self);
+	} else if (self->paramview && self->newval.doapply) {
+		psy_audio_MachineParam* tweakpar;
+
+		self->newval.docancel = FALSE;
+		self->newval.doapply = FALSE;
+		if (self->machine && self->newval.paramindex != -1) {
+			tweakpar = psy_audio_machine_parameter(self->machine, self->newval.paramindex);
+			if (tweakpar) {
+				psy_audio_machine_parameter_tweak_scaled(self->machine,
+					tweakpar, self->newval.value);
+			}
+		}
 		machineframe_resize(self);
 	}
 }

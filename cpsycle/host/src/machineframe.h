@@ -4,6 +4,7 @@
 #if !defined(MACHINEFRAME_H)
 #define MACHINEFRAME_H
 
+#include "newval.h"
 #include "paramview.h"
 #include "paramlistbox.h"
 #include "presetsbar.h"
@@ -30,7 +31,9 @@ extern "C" {
 //      a window.
 
 typedef struct {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Component titlerow;
 	psy_ui_Component row0;
 	ZoomBox zoombox;
@@ -42,12 +45,15 @@ typedef struct {
 	psy_ui_Button command;
 	psy_ui_Button help;	
 	psy_ui_Button dock;
-	PresetsBar presetsbar;	
+	PresetsBar presetsbar;
+	// references
 	psy_audio_Machine* machine;
 } ParameterBar;
 
 typedef struct {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	ParameterBar parameterbar;
 	ParameterListBox parameterbox;
 	psy_ui_Notebook notebook;
@@ -58,9 +64,11 @@ typedef struct {
 	int dofloat;
 	int dodock;
 	int doclose;
-	int floated;
-	Workspace* workspace;
+	int floated;		
+	NewValView newval;
+	// references
 	ParamView* paramview;
+	Workspace* workspace;
 } MachineFrame;
 
 void parameterbar_init(ParameterBar*, psy_ui_Component* parent, Workspace* workspace);

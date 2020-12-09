@@ -15,6 +15,11 @@
 extern "C" {
 #endif
 
+// psy_audio_Pattern
+//
+// A pattern is a small section of your song which is placed in
+// sequence (sequence.h) with other patterns (patterns.h). 
+
 // edit position in the pattern
 typedef struct {	
 	uintptr_t track;
@@ -31,6 +36,12 @@ void psy_audio_patterncursor_init(psy_audio_PatternCursor*);
 psy_audio_PatternCursor psy_audio_patterncursor_make(
 	uintptr_t track, psy_dsp_big_beat_t offset);
 
+INLINE psy_dsp_big_beat_t psy_audio_patterncursor_offset(
+	const psy_audio_PatternCursor* self)
+{
+	return self->offset;
+}
+
 /// compares two pattern edit positions, if they are equal
 int psy_audio_patterncursor_equal(psy_audio_PatternCursor* lhs,
 	psy_audio_PatternCursor* rhs);
@@ -46,6 +57,31 @@ void psy_audio_patternselection_init_all(psy_audio_PatternSelection*,
 	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
 psy_audio_PatternSelection psy_audio_patternselection_make(
 	psy_audio_PatternCursor topleft, psy_audio_PatternCursor bottomright);
+
+INLINE bool psy_audio_patternselection_valid(const psy_audio_PatternSelection* self)
+{
+	return self->valid;
+}
+
+INLINE void psy_audio_patternselection_enable(psy_audio_PatternSelection* self)
+{
+	self->valid = TRUE;
+}
+
+INLINE void psy_audio_patternselection_disable(psy_audio_PatternSelection* self)
+{
+	self->valid = FALSE;
+}
+
+INLINE bool psy_audio_patternselection_test(psy_audio_PatternSelection* self,
+	uintptr_t track, psy_dsp_big_beat_t offset)
+{
+	return psy_audio_patternselection_valid(self) &&
+		track >= self->topleft.track &&
+		track < self->bottomright.track&&
+		offset >= self->topleft.offset &&
+		offset < self->bottomright.offset;
+}
 
 typedef bool (*psy_audio_fp_matches)(const uintptr_t test, const uintptr_t reference);
 typedef uintptr_t (*psy_audio_fp_replacewith)(const uintptr_t current, const uintptr_t newval);
@@ -280,6 +316,12 @@ bool psy_audio_patterncursornavigator_advancekeys(
 	psy_audio_PatternCursorNavigator*, uintptr_t lines);
 bool psy_audio_patterncursornavigator_prevkeys(
 	psy_audio_PatternCursorNavigator*, uintptr_t lines);
+bool psy_audio_patterncursornavigator_prevtrack(
+	psy_audio_PatternCursorNavigator*,
+	uintptr_t numsongtracks);
+bool psy_audio_patterncursornavigator_nexttrack(
+	psy_audio_PatternCursorNavigator*,
+	uintptr_t numsongtracks);
 
 #ifdef __cplusplus
 }

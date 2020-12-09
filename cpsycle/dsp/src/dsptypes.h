@@ -32,17 +32,30 @@ typedef enum {
 
 #define psy_dsp_epsilon 0.001
 
-INLINE int psy_dsp_testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
-	psy_dsp_big_beat_t width)
+INLINE int psy_dsp_testrange(psy_dsp_big_beat_t position, psy_dsp_big_beat_t intervalstart,
+	psy_dsp_big_beat_t intervalwidth)
 {
-	return position >= offset && position < offset + width;
+	return position >= intervalstart && position < intervalstart + intervalwidth;
 }
 
-INLINE bool psy_dsp_testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t offset,
+INLINE bool psy_dsp_testrange_e(psy_dsp_big_beat_t position, psy_dsp_big_beat_t intervalstart,
 	psy_dsp_big_beat_t width)
 {
-	return position + psy_dsp_epsilon * 2 >= offset &&
-		position < offset + width - psy_dsp_epsilon;
+	return position + psy_dsp_epsilon * 2 >= intervalstart &&
+		position < intervalstart + width - psy_dsp_epsilon;
+}
+
+INLINE int cast_decimal(psy_dsp_big_beat_t value)
+{
+	psy_dsp_big_beat_t decimalpart;
+	int roundup = 0;
+
+	decimalpart = (int)((value - (int)value) * 100000);
+	if (decimalpart >= 99999) {
+		roundup = 1;
+	}
+
+	return (int)(value) + roundup;
 }
 
 #ifdef __cplusplus

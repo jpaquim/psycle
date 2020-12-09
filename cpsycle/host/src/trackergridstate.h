@@ -142,12 +142,15 @@ void trackconfig_init(TrackConfig*, bool wideinst);
 void trackconfig_dispose(TrackConfig*);
 void trackconfig_initcolumns(TrackConfig*, bool wideinst);
 
-typedef struct {
-	psy_audio_Pattern* pattern;
+typedef struct TrackerGridState {
+	// signals
+	psy_Signal signal_cursorchanged;
+	// internal data
 	psy_audio_PatternCursor cursor;	
 	uintptr_t numtracks;
-	double zoom;
+	double zoom;	
 	// references
+	psy_audio_Pattern* pattern;
 	PatternViewSkin* skin;
 	TrackConfig* trackconfig;
 } TrackerGridState;
@@ -183,5 +186,21 @@ INLINE int trackergridstate_preferredtrackwidth(TrackerGridState* self)
 	}
 	return 0;
 }
+
+INLINE uintptr_t trackergridstate_numsongtracks(TrackerGridState* self)
+{
+	return self->numtracks;
+}
+
+INLINE uintptr_t trackergridstate_cursorposition_valid(TrackerGridState* self)
+{
+	if (self->pattern) {
+		return self->cursor.offset < psy_audio_pattern_length(self->pattern);
+	}
+	return self->cursor.offset != 0.0;
+}
+
+void trackergridstate_synccursor(TrackerGridState*);
+void trackergridstate_setcursor(TrackerGridState*,psy_audio_PatternCursor cursor);
 
 #endif /* TRACKERGRIDSTATE */

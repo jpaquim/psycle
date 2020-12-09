@@ -86,6 +86,8 @@ typedef void (*psy_ui_fp_component_onkeydown)(struct psy_ui_Component*, psy_ui_K
 typedef void (*psy_ui_fp_component_onkeyup)(struct psy_ui_Component*, psy_ui_KeyEvent*);
 typedef void (*psy_ui_fp_component_ontimer)(struct psy_ui_Component*, uintptr_t);
 typedef void (*psy_ui_fp_component_onlanguagechanged)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_onfocus)(struct psy_ui_Component*);
+typedef void (*psy_ui_fp_component_onfocuslost)(struct psy_ui_Component*);
 
 typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_dispose dispose;
@@ -123,6 +125,8 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_onkeydown onkeyup;
 	psy_ui_fp_component_ontimer ontimer;
 	psy_ui_fp_component_onlanguagechanged onlanguagechanged;
+	psy_ui_fp_component_onfocus onfocus;
+	psy_ui_fp_component_onfocus onfocuslost;
 } psy_ui_ComponentVtable;
 
 typedef void* psy_ui_ComponentDetails;
@@ -289,6 +293,12 @@ INLINE void psy_ui_component_setborder(psy_ui_Component* self, psy_ui_Border bor
 
 psy_ui_Border psy_ui_component_border(psy_ui_Component*);
 void psy_ui_component_setalign(psy_ui_Component*, psy_ui_AlignType align);
+INLINE void psy_ui_component_init_align(psy_ui_Component* self,
+	psy_ui_Component* parent, psy_ui_AlignType aligntype)
+{
+	psy_ui_component_init(self, parent);
+	psy_ui_component_setalign(self, aligntype);
+}
 void psy_ui_component_enablealign(psy_ui_Component*);
 void psy_ui_component_preventalign(psy_ui_Component*);
 void psy_ui_component_setalignexpand(psy_ui_Component*, psy_ui_ExpandMode);
@@ -489,6 +499,12 @@ INLINE psy_ui_Component* psy_ui_component_parent(psy_ui_Component* self)
 	return self->imp->vtable->dev_parent(self->imp);
 }
 
+INLINE const psy_ui_Component* psy_ui_component_parent_const(const psy_ui_Component* self)
+{
+	return ((psy_ui_Component*)self)->imp->vtable->dev_parent(
+		((psy_ui_Component*)(self))->imp);
+}
+
 INLINE void psy_ui_component_setparent(psy_ui_Component* self, psy_ui_Component* parent)
 {
 	self->imp->vtable->dev_setparent(self->imp, parent);
@@ -582,8 +598,8 @@ INLINE int psy_ui_component_tabindex(const psy_ui_Component* self)
 	return self->tabindex;
 }
 
-void psy_ui_component_focus_next(const psy_ui_Component* self);
-void psy_ui_component_focus_prev(const psy_ui_Component* self);
+void psy_ui_component_focus_next(psy_ui_Component*);
+void psy_ui_component_focus_prev(psy_ui_Component*);
 
 INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 {

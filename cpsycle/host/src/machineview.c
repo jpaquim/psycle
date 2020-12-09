@@ -469,8 +469,6 @@ static void machinewireview_onwireframedestroyed(MachineWireView*,
 	psy_ui_Component* sender);
 static WireFrame* machinewireview_wireframe(MachineWireView*,
 	psy_audio_Wire wire);
-static void machinewireview_onsize(MachineWireView*, psy_ui_Component* sender,
-	psy_ui_Size* size);
 static psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self,
 	uintptr_t slot);
 static void machinewireview_onpreferredsize(MachineWireView* self, const psy_ui_Size* limit,
@@ -511,7 +509,6 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	self->component.scrollstepy = 10;
-	self->firstsize = 0;
 	self->statusbar = 0;
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
@@ -544,15 +541,12 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 		machinewireview_onconfigchanged);	
 	psy_signal_connect(&workspace->signal_showparameters, self,
 		machinewireview_onshowparameters);	
-	psy_signal_connect(&self->component.signal_size, self,
-		machinewireview_onsize);
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
 	psy_ui_component_starttimer(&self->component, 0, 50);	
 	if (workspace->machineviewtheme) {
 		machinewireview_applyproperties(self, workspace->machineviewtheme);
 	}
-	self->firstsize = 1;	
 }
 
 void machinewireview_connectuisignals(MachineWireView* self)
@@ -803,19 +797,7 @@ void drawmachineline(psy_ui_Graphics* g, int xdir, int ydir, int x, int y)
 	psy_ui_drawline(g, x, y, x + xdir * hlength, y + ydir * hlength);
 }
 
-void machinewireview_onsize(MachineWireView* self, psy_ui_Component* sender,
-	psy_ui_Size* size)
-{
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	if (self->firstsize && psy_ui_value_px(&size->width, &tm) > 0) {
-		self->firstsize = 0;
-		machinewireview_align(self);
-	}
-}
-
-void machinewireview_align(MachineWireView* self)
+void machinewireview_centermaster(MachineWireView* self)
 {
 	MachineUi* machineui;	
 
@@ -1574,7 +1556,7 @@ void machinewireview_buildmachineuis(MachineWireView* self)
 		}
 		if (psy_audio_machines_size(self->machines) == 1) {
 			// if only master exists, center
-			machinewireview_align(self);
+			machinewireview_centermaster(self);
 		}
 	}
 }
@@ -2025,7 +2007,6 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	if (workspace_showwirehover(workspace)) {
 		self->wireview.showwirehover = TRUE;
 	}
-	self->wireview.firstsize = 1;
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)

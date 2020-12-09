@@ -184,6 +184,7 @@
     <ClCompile Include="src\midiview.c" />
     <ClCompile Include="src\navigation.c" />
     <ClCompile Include="src\newmachine.c" />
+    <ClCompile Include="src\newval.c" />
     <ClCompile Include="src\octavebar.c" />
     <ClCompile Include="src\oscilloscope.c" />
     <ClCompile Include="src\paramlistbox.c" />
@@ -283,6 +284,7 @@
     <ClInclude Include="src\midiview.h" />
     <ClInclude Include="src\navigation.h" />
     <ClInclude Include="src\newmachine.h" />
+    <ClInclude Include="src\newval.h" />
     <ClInclude Include="src\octavebar.h" />
     <ClInclude Include="src\oscilloscope.h" />
     <ClInclude Include="src\paramlistbox.h" />

@@ -21,6 +21,10 @@ static void machineparam_tweak(psy_audio_MachineParam* self, float value)
 	psy_signal_emit_float(&self->signal_tweak, self, value);
 }
 
+static void machineparam_reset(psy_audio_MachineParam* self)
+{
+}
+
 static float machineparam_normvalue(psy_audio_MachineParam* self)
 {
 	float rv = 0.f;
@@ -135,7 +139,7 @@ void psy_audio_custommachineparam_init(psy_audio_CustomMachineParam* self,
 	self->label = (label) ? strdup(label) : 0;
 	self->minval = minval;
 	self->maxval = maxval;
-	self->type = type;	
+	self->type = type;
 }
 
 void psy_audio_custommachineparam_dispose(psy_audio_CustomMachineParam* self)
@@ -165,7 +169,7 @@ psy_audio_CustomMachineParam* psy_audio_custommachineparam_allocinit(
 
 void customparam_tweak(psy_audio_CustomMachineParam* self, float value)
 {
-	psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);	
+	psy_signal_emit_float(&self->machineparam.signal_tweak, self, value);
 }
 
 int customparam_describe(psy_audio_CustomMachineParam* self, char* text)

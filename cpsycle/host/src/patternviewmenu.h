@@ -21,7 +21,8 @@ struct PatternView;
 
 typedef enum {
 	PATTERNVIEWTARGET_TRACKER,
-	PATTERNVIEWTARGET_PIANOROLL
+	PATTERNVIEWTARGET_PIANOROLL,
+	PATTERNVIEWTARGET_DEFAULTLINE
 } PatternViewTarget;
 
 typedef struct PatternBlockMenu {
@@ -53,6 +54,11 @@ typedef struct PatternBlockMenu {
 
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*,
 	struct PatternView*, Workspace*);
+
+INLINE PatternViewTarget patternblockmenu_target(PatternBlockMenu* self)
+{
+	return self->target;
+}
 
 INLINE psy_ui_Component* patternblockmenu_base(PatternBlockMenu* self)
 {

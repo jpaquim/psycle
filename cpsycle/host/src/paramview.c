@@ -32,6 +32,7 @@ static void onmouseup(ParamView*, psy_ui_MouseEvent*);
 static void onmousemove(ParamView*, psy_ui_MouseEvent*);
 static void onmousewheel(ParamView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
+static void onmousedoubleclick(ParamView*, psy_ui_MouseEvent*);
 static uintptr_t hittest(ParamView*, int x, int y);
 static void ontimer(ParamView*, psy_ui_Component* sender, uintptr_t timerid);
 static uintptr_t paramview_numrows(ParamView*);
@@ -117,11 +118,12 @@ static void vtable_init(ParamView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
-		vtable.ondraw = (psy_ui_fp_component_ondraw) ondraw;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown) onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousemove) onmousemove;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseup) onmouseup;
-		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize) onpreferredsize;
+		vtable.ondraw = (psy_ui_fp_component_ondraw)ondraw;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove)onmousemove;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseup)onmouseup;
+		vtable.onmousedoubleclick = (psy_ui_fp_component_onmousedoubleclick)onmousedoubleclick;
+		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)onpreferredsize;
 	}
 }
 
@@ -153,6 +155,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	paramskin_init(self);	
 	psy_table_init(&self->positions);
 	self->tweak = UINTPTR_MAX;
+	self->lasttweak = UINTPTR_MAX;
 	self->sizechanged = 1;
 	psy_signal_connect(&self->component.signal_destroy, self, ondestroy);		
 	psy_signal_connect(&self->component.signal_timer, self, ontimer);
@@ -658,31 +661,34 @@ void cellposition(ParamView* self, uintptr_t row, uintptr_t col, int* x, int* y)
 
 void onmousedown(ParamView* self, psy_ui_MouseEvent* ev)
 {
-	psy_audio_MachineParam* param;
+	self->lasttweak = hittest(self, ev->x, ev->y);
+	if (ev->button == 1) {
+		psy_audio_MachineParam* param;
+		
+		self->tweak = self->lasttweak;
+		param = tweakparam(self);
+		if (param) {
+			uintptr_t paramtype;
 
-	self->tweak = hittest(self, ev->x, ev->y);
-	param = tweakparam(self);
-	if (param) {
-		uintptr_t paramtype;
-				
-		self->tweakbase = ev->y;		
-		self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
-		paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
-		if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
-			if (self->tweakval == 0.f) {
-				psy_audio_machine_parameter_tweak(self->machine, param, 1.f);
-			} else {
-				psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
-			}			
+			self->tweakbase = ev->y;
+			self->tweakval = psy_audio_machine_parameter_normvalue(self->machine, param);
+			paramtype = psy_audio_machine_parameter_type(self->machine, param) & ~MPF_SMALL;
+			if (paramtype == MPF_SLIDERCHECK || paramtype == MPF_SWITCH) {
+				if (self->tweakval == 0.f) {
+					psy_audio_machine_parameter_tweak(self->machine, param, 1.f);
+				} else {
+					psy_audio_machine_parameter_tweak(self->machine, param, 0.f);
+				}
+			}
+			psy_ui_component_capture(&self->component);
 		}
-		psy_ui_component_capture(&self->component);
 	}
 }
 
 psy_audio_MachineParam* tweakparam(ParamView* self)
 {
 	psy_audio_MachineParam* rv = NULL;
-
+	
 	if (self->machine && self->tweak != UINTPTR_MAX) {
 		rv = psy_audio_machine_parameter(self->machine, self->tweak);
 	}
@@ -782,6 +788,22 @@ void onmousewheel(ParamView* self, psy_ui_Component* sender,
 	}
 	ev->preventdefault = 1;
 	self->tweak = UINTPTR_MAX;
+}
+
+void onmousedoubleclick(ParamView* self, psy_ui_MouseEvent* ev)
+{
+	if (self->machine) {
+		psy_audio_MachineParam* tweakpar;
+		uintptr_t paramindex;
+
+		paramindex = hittest(self, ev->x, ev->y);
+		if (paramindex != UINTPTR_MAX) {
+			tweakpar = psy_audio_machine_parameter(self->machine, paramindex);
+			if (tweakpar) {
+				psy_audio_machine_parameter_reset(self->machine, tweakpar);
+			}
+		}
+	}
 }
 
 void ontimer(ParamView* self, psy_ui_Component* sender, uintptr_t timerid)

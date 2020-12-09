@@ -1236,8 +1236,8 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 
 void sequenceview_updateplayposition(SequenceView* self)
 {
-	if (workspace_followingsong(self->workspace) &&
-		psy_audio_player_playing(&self->workspace->player)) {
+	if (workspace_followingsong(self->workspace) && psy_audio_player_playing(
+			&self->workspace->player)) {
 		sequenceview_changeplayposition(self);
 	}
 }

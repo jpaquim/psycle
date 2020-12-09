@@ -188,10 +188,12 @@ static void onmouseleave(psy_ui_Component* self) { }
 static void onkeydown(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void onkeyup(psy_ui_Component* self, psy_ui_KeyEvent* ev) { }
 static void ontimer(psy_ui_Component* self, uintptr_t timerid) { }
-static void onlanguagechanged(psy_ui_Component* self, psy_Translator* translator) { }
+static void onlanguagechanged(psy_ui_Component* self) { }
+static void onfocus(psy_ui_Component* self) { }
+static void onfocuslost(psy_ui_Component* self) { }
 
 static psy_ui_ComponentVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(void)
 {
@@ -231,8 +233,10 @@ static void vtable_init(void)
 		vtable.ontimer = ontimer;
 		vtable.onlanguagechanged = onlanguagechanged;
 		vtable.enableinput = enableinput;
-		vtable.preventinput = preventinput;		
-		vtable_initialized = 1;
+		vtable.preventinput = preventinput;
+		vtable.onfocus = onfocus;
+		vtable.onfocuslost = onfocuslost;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -1115,7 +1119,7 @@ psy_ui_Rectangle psy_ui_component_scrolledposition(psy_ui_Component* self)
 		size.height);
 }
 
-void psy_ui_component_focus_next(const psy_ui_Component* self)
+void psy_ui_component_focus_next(psy_ui_Component* self)
 {
 	if (self->tabindex != -1) {
 		psy_ui_Component* parent;		
@@ -1147,7 +1151,7 @@ void psy_ui_component_focus_next(const psy_ui_Component* self)
 	}
 }
 
-void psy_ui_component_focus_prev(const psy_ui_Component* self)
+void psy_ui_component_focus_prev(psy_ui_Component* self)
 {
 	if (self->tabindex != -1) {
 		psy_ui_Component* parent;

@@ -19,7 +19,7 @@
 // TrackerConfig
 // implementation
 void trackconfig_init(TrackConfig* self, bool wideinst)
-{
+{	
 	self->textwidth = 9;
 	self->textleftedge = 2;
 	self->textleftedge = 2;
@@ -47,16 +47,21 @@ void trackconfig_initcolumns(TrackConfig* self, bool wideinst)
 // implementation
 void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 {
-	self->zoom = 1.0;
-	self->skin = NULL;
-	self->pattern = NULL;
-	self->numtracks = 16;
+	// init signals
+	psy_signal_init(&self->signal_cursorchanged);
+	// set references
 	self->trackconfig = trackconfig;
+	self->pattern = NULL;
+	self->skin = NULL;	
+	// init internal data
 	psy_audio_patterncursor_init(&self->cursor);
+	self->zoom = 1.0;	
+	self->numtracks = 16;	
 }
 
 void trackergridstate_dispose(TrackerGridState* self)
 {
+	psy_signal_dispose(&self->signal_cursorchanged);
 }
 
 uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track, int x)
@@ -374,4 +379,18 @@ TrackColumnDef* trackdef_columndef(TrackDef* self, int column)
 		break;
 	}
 	return rv;
+}
+
+void trackergridstate_synccursor(TrackerGridState* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_cursorchanged, self, 0);
+}
+
+void trackergridstate_setcursor(TrackerGridState* self,
+	psy_audio_PatternCursor cursor)
+{
+	self->cursor = cursor;
+	trackergridstate_synccursor(self);
 }

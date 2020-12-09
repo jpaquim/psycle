@@ -10,7 +10,7 @@ static void helpview_initbase(HelpView*, psy_ui_Component* parent);
 static void helpview_inittabbar(HelpView*, psy_ui_Component* tabbarparent,
 	Workspace*);
 static void helpview_initsections(HelpView*, Workspace* workspace);
-static void helpview_initsectionfloated(HelpView*, psy_ui_Component* parent);
+static void helpview_initsectionfloated(HelpView*);
 static void helpview_onselectsection(HelpView*, psy_ui_Component* sender,
 	uintptr_t section);
 static void helpview_onfocus(HelpView*, psy_ui_Component* sender);
@@ -24,7 +24,7 @@ void helpview_init(HelpView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	helpview_inittabbar(self, tabbarparent, workspace);
 	helpview_initsections(self, workspace);
-	helpview_initsectionfloated(self, parent);
+	helpview_initsectionfloated(self);
 	tabbar_select(&self->tabbar, HELPVIEWSECTION_ABOUT);
 }
 // construction
@@ -40,8 +40,7 @@ void helpview_initbase(HelpView* self, psy_ui_Component* parent)
 void helpview_inittabbar(HelpView* self, psy_ui_Component* tabbarparent,
 	Workspace* workspace)
 {	
-	psy_ui_component_init(&self->bar, tabbarparent);
-	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_LEFT);	
+	psy_ui_component_init_align(&self->bar, tabbarparent, psy_ui_ALIGN_LEFT);
 	tabbar_init(&self->tabbar, &self->bar);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_LEFT);
 	tabbar_append_tabs(&self->tabbar, "help.help", "help.about",
@@ -66,7 +65,7 @@ void helpview_initsections(HelpView* self, Workspace* workspace)
 	
 }
 
-void helpview_initsectionfloated(HelpView* self, Workspace* workspace)
+void helpview_initsectionfloated(HelpView* self)
 {
 	psy_ui_component_init(&self->sectionfloated, helpview_base(self));
 	psy_ui_component_hide(&self->sectionfloated);

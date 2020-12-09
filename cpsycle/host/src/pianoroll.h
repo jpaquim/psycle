@@ -150,6 +150,23 @@ INLINE void pianogridstate_setzoom(PianoGridState* self, psy_dsp_big_beat_t rate
 	self->pxperbeat = (int)(self->defaultbeatwidth * rate);
 }
 
+INLINE intptr_t pianogridstate_beattosteps(const PianoGridState* self,
+	psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	return (intptr_t)(position * self->lpb);
+}
+
+INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
+	psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	return pianogridstate_beattosteps(self, position) *
+		(1 / (psy_dsp_big_beat_t)self->lpb);
+}
+
 INLINE psy_dsp_big_beat_t pianogridstate_pxtobeat(const PianoGridState* self, int px)
 {
 	assert(self);
@@ -162,6 +179,14 @@ INLINE int pianogridstate_beattopx(const PianoGridState* self, psy_dsp_big_beat_
 	assert(self);
 
 	return (int)(position * self->pxperbeat);
+}
+
+INLINE int pianogridstate_quantizebeattopx(const PianoGridState* self, psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	return pianogridstate_beattopx(self,
+		pianogridstate_quantize(self, position));
 }
 
 INLINE psy_dsp_big_beat_t pianogridstate_step(const PianoGridState* self)
@@ -178,29 +203,12 @@ INLINE int pianogridstate_steppx(const PianoGridState* self)
 	return pianogridstate_beattopx(self, pianogridstate_step(self));
 }
 
-INLINE intptr_t pianogridstate_steps(const PianoGridState* self,
-	psy_dsp_big_beat_t position)
-{
-	assert(self);
-
-	return (intptr_t)(position * self->lpb);
-}
-
 INLINE psy_dsp_big_beat_t pianogridstate_stepstobeat(PianoGridState* self,
 	intptr_t steps)
 {
 	assert(self);
 
 	return steps * pianogridstate_step(self);
-}
-
-INLINE psy_dsp_big_beat_t pianogridstate_quantize(const PianoGridState* self,
-	psy_dsp_big_beat_t position)
-{		
-	assert(self);
-
-	return pianogridstate_steps(self, position) *
-		(1 / (psy_dsp_big_beat_t)self->lpb);
 }
 
 INLINE void pianogridstate_clip(PianoGridState* self,
@@ -212,9 +220,13 @@ INLINE void pianogridstate_clip(PianoGridState* self,
 
 	*rv_left = pianogridstate_quantize(self,
 		pianogridstate_pxtobeat(self, clip_left_px));
-	*rv_right = psy_min(
-		psy_audio_pattern_length(pianogridstate_pattern(self)),
-		pianogridstate_pxtobeat(self, clip_right_px));
+	if (pianogridstate_pattern(self)) {
+		*rv_right = psy_min(
+			psy_audio_pattern_length(pianogridstate_pattern(self)),
+			pianogridstate_pxtobeat(self, clip_right_px));
+	} else {
+		*rv_right = 0;
+	}
 }
 
 // Header (Beatruler)

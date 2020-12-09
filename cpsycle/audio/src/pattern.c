@@ -691,6 +691,7 @@ psy_audio_PatternCursor psy_audio_pattern_searchinpattern(psy_audio_Pattern*
 	return cursor;
 }
 
+
 // psy_audio_PatternCursorNavigator
 // implementation
 bool psy_audio_patterncursornavigator_advancelines(psy_audio_PatternCursorNavigator*
@@ -704,19 +705,24 @@ bool psy_audio_patterncursornavigator_advancelines(psy_audio_PatternCursorNaviga
 
 	maxlength = psy_audio_pattern_length(self->pattern);
 	if (lines > 0) {
-		self->cursor->offset += lines * self->bpl;
+		int currlines;
+
+		currlines = cast_decimal(self->cursor->offset / self->bpl);
+		self->cursor->offset = (currlines + lines) * self->bpl;				
 		if (self->cursor->offset >= maxlength) {
 			if (self->wrap) {
 				self->cursor->offset = self->cursor->offset - maxlength;
 				if (self->cursor->offset > maxlength - self->bpl) {
 					self->cursor->offset = maxlength - self->bpl;
 				}
+				self->cursor->line = cast_decimal(self->cursor->offset / self->bpl);
 				return FALSE;
 			} else {
 				self->cursor->offset = maxlength - self->bpl;
 			}
 		}
-	} 
+		self->cursor->line = cast_decimal(self->cursor->offset / self->bpl);
+	}
 	return TRUE;
 }
 
@@ -731,19 +737,26 @@ bool psy_audio_patterncursornavigator_prevlines(
 
 	maxlength = psy_audio_pattern_length(self->pattern);
 	if (lines > 0) {
-		self->cursor->offset -= lines * self->bpl;
-		if (self->cursor->offset < 0) {
+		int currlines;
+
+		currlines = cast_decimal(self->cursor->offset / self->bpl);
+		self->cursor->offset = (currlines - (intptr_t)lines) * self->bpl;		
+		if (self->cursor->offset < 0.0) {
 			if (self->wrap) {
 				self->cursor->offset += maxlength;
 				if (self->cursor->offset < 0) {
-					self->cursor->offset = 0;
-				}
+					self->cursor->offset = 0.0;
+					self->cursor->line = 0;
+				}					
+				self->cursor->line = cast_decimal(self->cursor->offset / self->bpl);
 				return TRUE;
 			} else {
-				self->cursor->offset = 0;
+				self->cursor->offset = 0.0;
+				self->cursor->line = 0;
 			}
 		}
 	}
+	self->cursor->line = cast_decimal(self->cursor->offset / self->bpl);
 	return FALSE;
 }
 
@@ -795,6 +808,40 @@ bool psy_audio_patterncursornavigator_prevkeys(
 				self->cursor->key = 0;
 			}
 		}
+	}
+	return FALSE;
+}
+
+bool psy_audio_patterncursornavigator_prevtrack(
+	psy_audio_PatternCursorNavigator* self,
+	uintptr_t numsongtracks)
+{	
+	self->cursor->column = 0;
+	self->cursor->digit = 0;
+	if (self->cursor->track > 0) {
+		--self->cursor->track;
+		return TRUE;		
+	} else if (self->wrap) {
+		self->cursor->track = numsongtracks - 1;
+		return FALSE;		
+	}
+	return TRUE;
+}
+
+bool psy_audio_patterncursornavigator_nexttrack(
+	psy_audio_PatternCursorNavigator* self,
+	uintptr_t numsongtracks)
+{
+	assert(self);
+
+	self->cursor->column = 0;
+	self->cursor->digit = 0;
+	if (self->cursor->track < numsongtracks - 1) {
+		++self->cursor->track;
+		return FALSE;		
+	} else if (self->wrap) {
+		self->cursor->track = 0;
+		return TRUE;
 	}
 	return FALSE;
 }

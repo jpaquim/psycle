@@ -2860,6 +2860,23 @@ int workspace_hasplugincache(Workspace* self)
 	return self->hasplugincache;
 }
 
+void workspace_inccursorstep(Workspace* self)
+{
+
+}
+
+void workspace_deccursorstep(Workspace* self)
+{
+
+}
+
+void workspace_editquantizechange(Workspace* self, int diff) // User Called (Hotkey)
+{
+	const int total = 17;
+	const int nextsel = (total + workspace_cursorstep(self) + diff) % total;
+	workspace_setcursorstep(self, nextsel);	
+}
+
 psy_EventDriver* workspace_kbddriver(Workspace* self)
 {
 	assert(self);
@@ -3428,6 +3445,52 @@ psy_dsp_NotesTabMode workspace_notetabmode(Workspace* self)
 			"visual.patternview.notetab", 0))
 		? psy_dsp_NOTESTAB_A440
 		: psy_dsp_NOTESTAB_A220;
+}
+
+void workspace_patterndec(Workspace* self)
+{
+	if (self->song) {
+		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePosition editposition;
+
+		editposition = self->sequenceselection.editposition;
+		entry = psy_audio_sequenceposition_entry(&editposition);
+		if (entry && entry->patternslot > 0) {
+			psy_audio_sequence_setpatternslot(&self->song->sequence, editposition,
+				entry->patternslot - 1);
+		}
+		psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
+			psy_audio_sequence_makeposition(&self->song->sequence,
+				self->sequenceselection.editposition.tracknode,
+				editposition.trackposition.sequencentrynode));
+		workspace_setsequenceselection(self,
+			self->sequenceselection);
+		//sequenceview_updateplayposition(self);
+		//sequenceduration_update(&self->duration);
+	}
+}
+
+void workspace_patterninc(Workspace* self)
+{
+	if (self->song) {
+		psy_audio_SequenceEntry* entry;
+		psy_audio_SequencePosition editposition;
+
+		editposition = self->sequenceselection.editposition;
+		entry = psy_audio_sequenceposition_entry(&editposition);
+		if (entry) {
+			psy_audio_sequence_setpatternslot(&self->song->sequence, editposition,
+				entry->patternslot + 1);
+		}
+		psy_audio_sequenceselection_seteditposition(&self->sequenceselection,
+			psy_audio_sequence_makeposition(&self->song->sequence,
+				self->sequenceselection.editposition.tracknode,
+				editposition.trackposition.sequencentrynode));
+		workspace_setsequenceselection(self,
+			self->sequenceselection);
+		//sequenceview_updateplayposition(self);
+		//sequenceduration_update(&self->duration);
+	}
 }
 
 void workspace_songposdec(Workspace* self)
