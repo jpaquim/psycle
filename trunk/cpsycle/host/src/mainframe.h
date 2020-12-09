@@ -139,6 +139,10 @@ typedef struct MainFrame {
 	// internal data
 	int startup;
 	bool startpage;
+	bool playrow;	
+	psy_audio_SequencerPlayMode restoreplaymode;
+	psy_dsp_big_beat_t restorenumplaybeats;
+	bool restoreloop;
 	psy_ui_Colour terminalbutton_colours[TERMINALMSGTYPE_NUM];
 } MainFrame;
 

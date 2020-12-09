@@ -202,7 +202,15 @@ void cmdproperties_makegeneral(psy_Property* self)
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_playsong",
 			psy_audio_encodeinput(psy_ui_KEY_F5, 1, 0), 0, 0), CMD_IMM_PLAYSONG),
-		"playa"), "cmds.playsong");
+		"playa"), "cmds.playsong");	
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_playrowtrack",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT4, 0, 0), 0, 0), CMD_IMM_PLAYROWTRACK),
+		"playt"), "cmds.playrowtrack");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_playrowpattern",
+			psy_audio_encodeinput(psy_ui_KEY_DIGIT8, 0, 0), 0, 0), CMD_IMM_PLAYROWPATTERN),
+		"playr"), "cmds.playrowpattern");
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_playstart",
 			psy_audio_encodeinput(psy_ui_KEY_F5, 0, 0), 0, 0), CMD_IMM_PLAYSTART),
@@ -216,22 +224,34 @@ void cmdproperties_makegeneral(psy_Property* self)
 			psy_audio_encodeinput(psy_ui_KEY_F8, 0, 0), 0, 0), CMD_IMM_PLAYSTOP),
 		"cmds.playstop");
 	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_patterndec",
+			psy_audio_encodeinput(psy_ui_KEY_DOWN, 1, 0), 0, 0), CMD_IMM_PATTERNDEC),
+		"decpat"), "cmds.patterndec");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_patterninc",
+			psy_audio_encodeinput(psy_ui_KEY_UP, 1, 0), 0, 0), CMD_IMM_PATTERNINC),
+		"incpat"), "cmds.patterninc");
+	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_songposdec",
 			psy_audio_encodeinput(psy_ui_KEY_LEFT, 1, 0), 0, 0), CMD_IMM_SONGPOSDEC),
-		"decseqp"), "cmds.songposdec");
-	psy_property_settext(psy_property_setshorttext(
-		psy_property_setid(psy_property_append_int(general, "cmd_followsong",
-			psy_audio_encodeinput(psy_ui_KEY_F, psy_SHIFT_OFF, psy_CTRL_ON), 0, 0),
-				CMD_IMM_FOLLOWSONG),
-		"follow"), "followsong");
+		"decseqp"), "cmds.songposdec");	
 	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_songposinc",
 			psy_audio_encodeinput(psy_ui_KEY_RIGHT, 1, 0), 0, 0), CMD_IMM_SONGPOSINC),
 		"incseqp"), "cmds.songposinc");
 	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_followsong",
+			psy_audio_encodeinput(psy_ui_KEY_F, psy_SHIFT_OFF, psy_CTRL_ON), 0, 0),
+			CMD_IMM_FOLLOWSONG),
+		"follow"), "followsong");
+	psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(general, "cmd_maxpattern",
 			psy_audio_encodeinput(psy_ui_KEY_TAB, 0, 1), 0, 0), CMD_IMM_MAXPATTERN),
-		"maxpat"), "cmds.maxpattern");
+		"maxpat"), "cmds.maxpattern");	
+	psy_property_settext(
+		psy_property_setid(psy_property_append_int(general, "cmd_infopattern",
+			psy_audio_encodeinput(psy_ui_KEY_RETURN, 0, 1), 0, 0), CMD_IMM_INFOPATTERN),
+		"cmds.infopattern");
 	psy_property_settext(
 		psy_property_setid(psy_property_append_int(general, "cmd_infomachine",
 			psy_audio_encodeinput(psy_ui_KEY_RETURN, 1, 0), 0, 0), CMD_IMM_INFOMACHINE),
@@ -260,6 +280,14 @@ void cmdproperties_makegeneral(psy_Property* self)
 		psy_property_setid(psy_property_append_int(general, "cmd_instrinc",
 			psy_audio_encodeinput(psy_ui_KEY_UP, 0, 1), 0, 0), CMD_IMM_INSTRINC),
 		"inst+1"), "cmds.instrinc");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_editquantizedec",
+			psy_audio_encodeinput(219, 0, 0), 0, 0), CMD_EDT_EDITQUANTIZEDEC),
+		"lineskip-1"), "cmds.editquantizedec");
+	psy_property_settext(psy_property_setshorttext(
+		psy_property_setid(psy_property_append_int(general, "cmd_editquantizeinc",
+			psy_audio_encodeinput(221, 0, 0), 0, 0), CMD_EDT_EDITQUANTIZEINC),
+		"lineskip+1"), "cmds.editquantizedec");	
 	cmdproperties_setinput(general);
 }
 

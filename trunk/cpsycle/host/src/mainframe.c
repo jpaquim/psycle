@@ -10,6 +10,7 @@
 #include "resources/resource.h"
 #include "settingsview.h"
 // audio
+#include <exclusivelock.h>
 #include <songio.h>
 // ui
 #include <uiapp.h>
@@ -201,6 +202,10 @@ void mainframe_ondestroyed(MainFrame* self)
 void mainframe_initworkspace(MainFrame* self)
 {
 	self->startpage = FALSE;
+	self->playrow = FALSE;
+	self->restoreplaymode = psy_audio_SEQUENCERPLAYMODE_PLAYALL;
+	self->restorenumplaybeats = 4.0;
+	self->restoreloop = TRUE;
 	workspace_init(&self->workspace, mainframe_base(self));
 	workspace_load_configuration(&self->workspace);
 	workspace_load_recentsongs(&self->workspace);
@@ -269,12 +274,14 @@ void mainframe_initkbdhelp(MainFrame* self)
 void mainframe_initstatusbar(MainFrame* self)
 {	
 	psy_ui_Margin margin;
-
+	
 	zoombox_init(&self->zoombox, &self->statusbar);	
 	psy_signal_connect(&self->zoombox.signal_changed, self,
 		mainframe_onzoomboxchanged);
 	mainframe_initstatusbarlabel(self, &margin);	
-	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);	
+	psy_ui_notebook_init(&self->viewstatusbars, &self->statusbar);
+	psy_ui_component_setdefaultalign(&self->viewstatusbars.component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	machineviewbar_init(&self->machineviewbar, &self->viewstatusbars.component,
 		&self->workspace);	
 	self->machineview.wireview.statusbar = &self->machineviewbar;
@@ -283,13 +290,10 @@ void mainframe_initstatusbar(MainFrame* self)
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
 		psy_ui_notebook_base(&self->viewstatusbars),
 		&self->samplesview.sampleeditor,
-		&self->workspace);
-	psy_ui_margin_init_all(&margin, psy_ui_value_makeeh(0.25),
+		&self->workspace);	
+	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.0), psy_ui_value_makeeh(0.5),
-		psy_ui_value_makeew(1.0));
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(psy_ui_notebook_base(&self->viewstatusbars),
-		psy_ui_NONRECURSIVE), psy_ui_ALIGN_LEFT, &margin));
+		psy_ui_value_makeew(0));
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->statusbar, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT, &margin));
@@ -693,6 +697,51 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			psy_audio_player_setposition(&self->workspace.player, 0);
 			psy_audio_player_start(&self->workspace.player);
 			break;
+		case CMD_IMM_PLAYROWTRACK: {
+			psy_dsp_big_beat_t playposition = 0;
+			psy_audio_SequenceEntry* entry;
+
+			psy_audio_exclusivelock_enter();
+			psy_audio_player_stop(&self->workspace.player);
+			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+			playposition = (entry ? entry->offset : 0) +
+				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+			self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
+			self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
+			self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
+			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+			psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
+			psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+				psy_audio_player_bpl(&self->workspace.player));
+			self->workspace.player.sequencer.playtrack = self->workspace.patterneditposition.track;
+			psy_audio_player_setposition(&self->workspace.player, playposition);
+			psy_audio_player_start(&self->workspace.player);
+			self->playrow = TRUE;
+			psy_audio_exclusivelock_leave();
+			break; }
+		case CMD_IMM_PLAYROWPATTERN: {
+			psy_dsp_big_beat_t playposition = 0;
+			psy_audio_SequenceEntry* entry;
+
+			psy_audio_exclusivelock_enter();
+			psy_audio_player_stop(&self->workspace.player);			
+			entry = psy_audio_sequenceposition_entry(&self->workspace.sequenceselection.editposition);
+			playposition = (entry ? entry->offset : 0) +
+				(psy_dsp_big_beat_t)self->workspace.patterneditposition.offset;
+			self->restoreplaymode = psy_audio_sequencer_playmode(&self->workspace.player.sequencer);
+			self->restorenumplaybeats = self->workspace.player.sequencer.numplaybeats;
+			self->restoreloop = psy_audio_sequencer_looping(&self->workspace.player.sequencer);
+			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+			psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+				psy_audio_SEQUENCERPLAYMODE_PLAYNUMBEATS);
+			psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+				psy_audio_player_bpl(&self->workspace.player));
+			psy_audio_player_setposition(&self->workspace.player, playposition);
+			psy_audio_player_start(&self->workspace.player);
+			self->playrow = TRUE;
+			psy_audio_exclusivelock_leave();
+			break; }
 		case CMD_IMM_PLAYSTART:
 			workspace_playstart(&self->workspace);
 			break;
@@ -716,11 +765,34 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 				workspace_followsong(&self->workspace);
 			}
 			break;
+		case CMD_IMM_PATTERNINC:
+			workspace_patterninc(&self->workspace);
+			sequenceduration_update(&self->sequenceview.duration);
+			break;
+		case CMD_IMM_PATTERNDEC:
+			workspace_patterndec(&self->workspace);
+			sequenceduration_update(&self->sequenceview.duration);
+			break;
 		case CMD_IMM_SONGPOSDEC:
 			workspace_songposdec(&self->workspace);			
 			break;
 		case CMD_IMM_SONGPOSINC:
 			workspace_songposinc(&self->workspace);
+			break;
+		case CMD_IMM_INFOPATTERN:
+			if (workspace_currview(&self->workspace) != TABPAGE_PATTERNVIEW) {
+				workspace_selectview(&self->workspace, TABPAGE_PATTERNVIEW, 0, 0);
+			}
+			if (!psy_ui_component_visible(&self->patternview.properties.component)) {
+				Tab* tab;
+				psy_ui_component_togglevisibility(&self->patternview.properties.component);
+
+				tab = tabbar_tab(&self->patternview.tabbar, 5);
+				if (tab) {
+					tab->checkstate = TRUE;
+					psy_ui_component_invalidate(tabbar_base(&self->patternview.tabbar));
+				}
+			}
 			break;
 		case CMD_IMM_MAXPATTERN:
 			mainframe_maximizeorminimizeview(self);
@@ -753,6 +825,14 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			if (self->workspace.song) {
 				psy_audio_instruments_inc(&self->workspace.song->instruments);
 			}
+			break;
+		case CMD_EDT_EDITQUANTIZEDEC:
+			workspace_editquantizechange(&self->workspace, -1);
+			patterncursorstepbox_update(&self->patternbar.cursorstep);
+			break;
+		case CMD_EDT_EDITQUANTIZEINC:
+			workspace_editquantizechange(&self->workspace, 1);
+			patterncursorstepbox_update(&self->patternbar.cursorstep);
 			break;
 		default:
 			break;
@@ -975,10 +1055,24 @@ void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 {
 	if (self->startup && psy_ui_component_visible(mainframe_base(self))) {		
-		mainframe_onstartup(self);
+		mainframe_onstartup(self);		
+		machinewireview_centermaster(&self->machineview.wireview);
 		self->startup = FALSE;
 	}
 	workspace_idle(&self->workspace);
+	if (self->playrow && !psy_audio_player_playing(&self->workspace.player)) {
+		self->playrow = FALSE;
+		psy_audio_sequencer_setplaymode(&self->workspace.player.sequencer,
+			self->restoreplaymode);
+		psy_audio_sequencer_setnumplaybeats(&self->workspace.player.sequencer,
+			self->restorenumplaybeats);
+		if (self->restoreloop) {
+			psy_audio_sequencer_loop(&self->workspace.player.sequencer);
+		} else {
+			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
+		}
+		self->workspace.player.sequencer.playtrack = UINTPTR_MAX;
+	}
 }
 
 // event is called when mainframe has its final size and is visible on screen
@@ -1048,6 +1142,7 @@ void mainframe_ontabbarchanged(MainFrame* self, psy_ui_Component* sender,
 	if (component) {
 		psy_ui_component_setfocus(component);
 	}
+	psy_ui_component_align(&self->component);
 }
 
 void mainframe_onterminaloutput(MainFrame* self, Workspace* sender,
@@ -1336,9 +1431,11 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 	switch (msg) {
 		case PSY_EVENTDRIVER_PATTERNEDIT:
 			return psy_ui_component_hasfocus(
-					&self->patternview.tracker.component) ||
+				&self->patternview.tracker.component) ||
 				psy_ui_component_hasfocus(
-					&self->patternview.pianoroll.grid.component);
+					&self->patternview.pianoroll.grid.component) ||
+				psy_ui_component_hasfocus(
+					&self->patternview.griddefaults.component);
 			break;
 		case PSY_EVENTDRIVER_NOTECOLUMN:
 			return self->patternview.gridstate.cursor.column == 0;

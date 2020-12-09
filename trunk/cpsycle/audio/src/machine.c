@@ -316,6 +316,11 @@ static void param_tweak(psy_audio_Machine* self, psy_audio_MachineParam* param, 
 	psy_audio_machineparam_tweak(param, val);
 }
 
+static void param_reset(psy_audio_Machine* self, psy_audio_MachineParam* param)
+{
+	psy_audio_machineparam_reset(param);
+}
+
 static float param_normvalue(psy_audio_Machine* self, psy_audio_MachineParam* param)
 {
 	return psy_audio_machineparam_normvalue(param);
@@ -589,7 +594,8 @@ static void vtable_init(void)
 		vtable.presets = presets;
 		vtable.acceptpresets = acceptpresets;
 		vtable.command = command;
-		vtable.parameter_tweak = param_tweak;;
+		vtable.parameter_tweak = param_tweak;
+		vtable.parameter_reset = param_reset;
 		vtable.parameter_normvalue = param_normvalue;
 		vtable.parameter_range = param_range;
 		vtable.parameter_type = param_type;

@@ -50,8 +50,8 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
 	// titlebar
-	psy_ui_component_init(&self->titlebar, gear_base(self));
-	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->titlebar, gear_base(self),
+		psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));

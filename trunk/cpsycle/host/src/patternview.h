@@ -32,7 +32,7 @@ extern "C" {
 
 typedef struct {
 	psy_ui_Component component;	
-	StepBox cursorstep;
+	PatternCursorStepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
 	psy_ui_Label status;	

@@ -4,16 +4,9 @@
 #if !defined(PATTERNCMDS_H)
 #define PATTERNCMDS_H
 
-#include "notestab.h"
-#include "skincoord.h"
-#include "tabbar.h"
+// host
 #include "workspace.h"
-#include <uibutton.h>
-#include <uilabel.h>
-#include <uiscroller.h>
-#include "zoombox.h"
-#include "interpolatecurveview.h"
-#include "patternviewskin.h"
+// audio
 #include <pattern.h>
 
 #ifdef __cplusplus
@@ -32,7 +25,7 @@ typedef struct {
 	Workspace* workspace;
 } InsertCommand;
 
-InsertCommand* InsertCommandAlloc(psy_audio_Pattern* pattern, double bpl,
+InsertCommand* insertcommand_alloc(psy_audio_Pattern* pattern, double bpl,
 	psy_audio_PatternCursor cursor, psy_audio_PatternEvent event,
 	Workspace* workspace);
 
@@ -48,7 +41,7 @@ typedef struct {
 	Workspace* workspace;
 } RemoveCommand;
 
-RemoveCommand* RemoveCommandAlloc(psy_audio_Pattern*, double bpl,
+RemoveCommand* removecommand_alloc(psy_audio_Pattern*, double bpl,
 	psy_audio_PatternCursor, Workspace*);
 
 // BlockTranspose
@@ -63,7 +56,7 @@ typedef struct {
 	Workspace* workspace;
 } BlockTransposeCommand;
 
-BlockTransposeCommand* BlockTransposeCommandAlloc(psy_audio_Pattern* pattern,
+BlockTransposeCommand* blocktransposecommand_alloc(psy_audio_Pattern* pattern,
 	psy_audio_PatternSelection block, psy_audio_PatternCursor cursor, int transposeoffset,
 	Workspace* workspace);
 
@@ -77,7 +70,7 @@ typedef struct {
 	Workspace* workspace;
 } BlockRemoveCommand;
 
-BlockRemoveCommand* BlockRemoveCommandAlloc(psy_audio_Pattern*,
+BlockRemoveCommand* blockremovecommand_alloc(psy_audio_Pattern*,
 	psy_audio_PatternSelection, Workspace*);
 
 typedef struct BlockPasteCommand {
@@ -93,7 +86,7 @@ typedef struct BlockPasteCommand {
 	Workspace* workspace;
 } BlockPasteCommand;
 
-BlockPasteCommand* BlockPasteCommandAlloc(psy_audio_Pattern*,
+BlockPasteCommand* blockpastecommand_alloc(psy_audio_Pattern*,
 	psy_audio_Pattern* source, psy_audio_PatternCursor,
 	psy_dsp_big_beat_t bpl, bool mix, Workspace*);
 

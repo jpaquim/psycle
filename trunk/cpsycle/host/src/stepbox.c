@@ -8,35 +8,34 @@
 #include "../../detail/portable.h"
 
 // prototypes
-static void stepbox_build(StepBox*);
-static void stepbox_onselectionchanged(StepBox*, psy_ui_Component* sender,
-	int index);
+static void patterncursorstepbox_build(PatternCursorStepBox*);
+static void patterncursorstepbox_onselectionchanged(PatternCursorStepBox*,
+	psy_ui_Component* sender, int index);
 
-void stepbox_init(StepBox* self, psy_ui_Component* parent, Workspace* workspace)
-{
+void patterncursorstepbox_init(PatternCursorStepBox* self, psy_ui_Component*
+	parent, Workspace* workspace)
+{	
+	psy_ui_component_init(patterncursorstepbox_base(self), parent);
 	self->workspace = workspace;
-	psy_ui_component_init(&self->component, parent);
-	psy_ui_component_setalignexpand(&self->component, psy_ui_HORIZONTALEXPAND);
-	psy_ui_label_init(&self->header, &self->component);
+	psy_ui_component_setdefaultalign(patterncursorstepbox_base(self),
+		psy_ui_ALIGN_LEFT, psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_component_setalignexpand(patterncursorstepbox_base(self),
+		psy_ui_HORIZONTALEXPAND);
+	psy_ui_label_init(&self->header, patterncursorstepbox_base(self));
 	psy_ui_label_settext(&self->header, "patternview.step");
-	psy_ui_combobox_init(&self->combobox, &self->component);
+	psy_ui_combobox_init(&self->combobox, patterncursorstepbox_base(self));
 	psy_signal_connect(&self->combobox.signal_selchanged, self,
-		stepbox_onselectionchanged);
+		patterncursorstepbox_onselectionchanged);
 	psy_ui_combobox_setcharnumber(&self->combobox, 3);
-	stepbox_build(self);
-	psy_ui_combobox_setcursel(&self->combobox,
-		workspace_cursorstep(workspace) - 1);		
-	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		NULL));	
+	patterncursorstepbox_build(self);
+	patterncursorstepbox_update(self);	
 }
 
-void stepbox_build(StepBox* self)
+void patterncursorstepbox_build(PatternCursorStepBox* self)
 {
 	int step;
 
-	for (step = 1; step <= 16; ++step) {
+	for (step = 0; step <= 16; ++step) {
 		char text[20];
 
 		psy_snprintf(text, 20, "%d", step);
@@ -44,9 +43,16 @@ void stepbox_build(StepBox* self)
 	}	
 }
 
-void stepbox_onselectionchanged(StepBox* self, psy_ui_Component* sender, int index)
+void patterncursorstepbox_onselectionchanged(PatternCursorStepBox* self,
+	psy_ui_Component* sender, int index)
 {		
 	if (index >= 0) {
-		workspace_setcursorstep(self->workspace, index + 1);
+		workspace_setcursorstep(self->workspace, index);
 	}
+}
+
+void patterncursorstepbox_update(PatternCursorStepBox* self)
+{
+	psy_ui_combobox_setcursel(&self->combobox,
+		workspace_cursorstep(self->workspace));
 }

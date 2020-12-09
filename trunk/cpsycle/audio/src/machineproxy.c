@@ -102,6 +102,7 @@ static void machineproxy_setbuffermemorysize(psy_audio_MachineProxy*, uintptr_t)
 static psy_dsp_amp_range_t machineproxy_amprange(psy_audio_MachineProxy*);
 // MachineParameter calls
 static void machineproxy_param_tweak(psy_audio_MachineProxy* self, psy_audio_MachineParam* param, float val);
+static void machineproxy_param_reset(psy_audio_MachineProxy* self, psy_audio_MachineParam* param);
 static float machineproxy_param_normvalue(psy_audio_MachineProxy* self, psy_audio_MachineParam* param);
 static void machineproxy_param_range(psy_audio_MachineProxy* self, psy_audio_MachineParam* param, intptr_t* minval, intptr_t* maxval);
 static int machineproxy_param_type(psy_audio_MachineProxy* self, psy_audio_MachineParam* param);
@@ -260,7 +261,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.presets = (fp_machine_presets)machineproxy_presets;
 		vtable.acceptpresets = (fp_machine_acceptpresets)machineproxy_acceptpresets;
 		vtable.command = (fp_machine_command)machineproxy_command;
-		vtable.parameter_tweak = (fp_machine_param_tweak)machineproxy_param_tweak;;
+		vtable.parameter_tweak = (fp_machine_param_tweak)machineproxy_param_tweak;
+		vtable.parameter_reset = (fp_machine_param_reset)machineproxy_param_reset;
 		vtable.parameter_normvalue = (fp_machine_param_normvalue)machineproxy_param_normvalue;
 		vtable.parameter_range = (fp_machine_param_range)machineproxy_param_range;
 		vtable.parameter_type = (fp_machine_param_type)machineproxy_param_type;
@@ -1868,6 +1870,23 @@ void machineproxy_param_tweak(psy_audio_MachineProxy* self, psy_audio_MachinePar
 		}
 #endif		
 	}	
+}
+
+void machineproxy_param_reset(psy_audio_MachineProxy* self, psy_audio_MachineParam* param)
+{
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			psy_audio_machine_parameter_reset(self->client, param);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "parameter reset", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
 }
 
 float machineproxy_param_normvalue(psy_audio_MachineProxy* self, psy_audio_MachineParam* param)

@@ -76,7 +76,6 @@ typedef struct MachineWireView {
 	psy_audio_PluginCatcher plugincatcher;
 	MachineViewSkin skin;	
 	psy_ui_Edit editname;
-	int firstsize;
 	int randominsert;
 	int addeffect;
 	bool mousemoved;
@@ -91,7 +90,7 @@ typedef struct MachineWireView {
 
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller, Workspace*);
-void machinewireview_align(MachineWireView*);
+void machinewireview_centermaster(MachineWireView*);
 
 typedef struct MachineViewBar {
 	psy_ui_Component component;

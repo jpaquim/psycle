@@ -169,6 +169,8 @@ typedef	uintptr_t(*fp_machine_numtweakparameters)(struct psy_audio_Machine*);
 typedef	unsigned int (*fp_machine_numparametercols)(struct psy_audio_Machine*);
 typedef	void (*fp_machine_param_tweak)(struct psy_audio_Machine*, struct
 	psy_audio_MachineParam*, float val);
+typedef	void (*fp_machine_param_reset)(struct psy_audio_Machine*, struct
+	psy_audio_MachineParam*);
 typedef float (*fp_machine_param_normvalue)(struct psy_audio_Machine*, struct
 	psy_audio_MachineParam*);
 typedef void (*fp_machine_param_range)(struct psy_audio_Machine*, struct
@@ -327,6 +329,7 @@ typedef struct {
 	fp_machine_param_normvalue parameter_normvalue;
 	fp_machine_param_label parameter_label;	
 	fp_machine_param_tweak parameter_tweak;
+	fp_machine_param_reset parameter_reset;
 	// data
 	fp_machine_putdata putdata;
 	fp_machine_data data;
@@ -611,6 +614,12 @@ INLINE void psy_audio_machine_parameter_tweak(psy_audio_Machine* self,
 	psy_audio_MachineParam* param, float val)
 {
 	self->vtable->parameter_tweak(self, param, val);
+}
+
+INLINE void psy_audio_machine_parameter_reset(psy_audio_Machine* self,
+	psy_audio_MachineParam* param)
+{
+	self->vtable->parameter_reset(self, param);
 }
 
 INLINE float psy_audio_machine_parameter_normvalue(psy_audio_Machine* self,

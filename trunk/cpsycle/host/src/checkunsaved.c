@@ -24,8 +24,8 @@ void checkunsavedbox_init(CheckUnsavedBox* self, psy_ui_Component* parent, Works
 	self->titlestr = strdup("");
 	self->savestr = strdup("");
 	self->nosavestr = strdup("");	
-	psy_ui_component_init(&self->view, checkunsavedbox_base(self));	
-	psy_ui_component_setalign(&self->view, psy_ui_ALIGN_CENTER);
+	psy_ui_component_init_align(&self->view, checkunsavedbox_base(self),
+		psy_ui_ALIGN_CENTER);
 	psy_ui_label_init(&self->title, &self->view);
 	psy_ui_label_init(&self->header, &self->view);
 	psy_ui_button_init_connect(&self->saveandexit, &self->view,

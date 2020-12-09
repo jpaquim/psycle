@@ -4,11 +4,9 @@
 #include "../../detail/prefix.h"
 
 #include "songproperties.h"
-
+// audio
 #include <songio.h>
 // std
-#include <string.h>
-#include <stdlib.h>
 #include <ctype.h>
 // platform
 #include "../../detail/portable.h"
@@ -19,6 +17,8 @@ static void intedit_ondestroy(IntEdit*, psy_ui_Component* sender);
 static void intedit_onlessclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_onmoreclicked(IntEdit*, psy_ui_Component* sender);
 static void intedit_oneditkeydown(IntEdit*, psy_ui_Component* sender,
+	psy_ui_KeyEvent*);
+static void intedit_oneditkeyup(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
 static void intedit_oneditfocuslost(IntEdit*, psy_ui_Component* sender,
 	psy_ui_KeyEvent*);
@@ -37,7 +37,7 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	psy_ui_label_init(&self->desc, intedit_base(self));
 	psy_ui_label_settext(&self->desc, desc);
 	psy_ui_edit_init(&self->edit, intedit_base(self));
-	psy_ui_edit_setcharnumber(&self->edit, 4);	
+	psy_ui_edit_setcharnumber(&self->edit, 5);	
 	psy_ui_button_init_connect(&self->less, intedit_base(self),
 		self, intedit_onlessclicked);
 	psy_ui_button_seticon(&self->less, psy_ui_ICON_LESS);
@@ -48,6 +48,8 @@ void intedit_init(IntEdit* self, psy_ui_Component* parent,
 	intedit_setvalue(self, value);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
 		intedit_oneditkeydown);	
+	psy_signal_connect(&self->edit.component.signal_keyup, self,
+		intedit_oneditkeyup);
 	psy_signal_connect(&self->edit.component.signal_focuslost, self,
 		intedit_oneditfocuslost);
 	psy_signal_connect(&self->component.signal_destroy, self,
@@ -121,6 +123,13 @@ void intedit_oneditkeydown(IntEdit* self, psy_ui_Component* sender,
 		intedit_setvalue(self, value);
 		psy_signal_emit(&self->signal_changed, self, 0);
 	}
+	psy_ui_keyevent_stoppropagation(ev);
+}
+
+void intedit_oneditkeyup(IntEdit* self, psy_ui_Component* sender,
+	psy_ui_KeyEvent* ev)
+{
+	psy_ui_keyevent_stoppropagation(ev);
 }
 
 void intedit_oneditfocuslost(IntEdit* self , psy_ui_Component* sender,

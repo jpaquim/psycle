@@ -27,6 +27,7 @@ struct psy_audio_MachineParam;
 
 typedef	void (*fp_machineparam_tweak)(struct psy_audio_MachineParam*, float val);
 typedef float (*fp_machineparam_normvalue)(struct psy_audio_MachineParam*);
+typedef float (*fp_machineparam_reset)(struct psy_audio_MachineParam*);
 typedef void (*fp_machineparam_range)(struct psy_audio_MachineParam*, intptr_t* minval, intptr_t* maxval);
 typedef	int (*fp_machineparam_type)(struct psy_audio_MachineParam*);
 typedef	int (*fp_machineparam_label)(struct psy_audio_MachineParam*, char* text);
@@ -42,6 +43,7 @@ typedef struct MachineParamVtable {
 	fp_machineparam_describe describe;
 	// events
 	fp_machineparam_tweak tweak;
+	fp_machineparam_reset reset;
 } MachineParamVtable;
 
 typedef struct psy_audio_MachineParam {
@@ -60,6 +62,12 @@ void psy_audio_machineparam_dispose(psy_audio_MachineParam*);
 INLINE void psy_audio_machineparam_tweak(psy_audio_MachineParam* self, float value)
 {
 	self->vtable->tweak(self, value);
+}
+
+// reset to default
+INLINE void psy_audio_machineparam_reset(psy_audio_MachineParam* self)
+{
+	self->vtable->reset(self);
 }
 
 // [0.0f..1.0f] 

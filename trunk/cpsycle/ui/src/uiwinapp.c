@@ -196,19 +196,36 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 					if (preventdefault) {
 						imp->preventwmchar = 1;
 					}
-					if (ev.bubble != FALSE &&
-						psy_table_at(&winapp->selfmap,
-							(uintptr_t)GetParent(hwnd))) {
-						SendMessage(GetParent(hwnd), message, wParam, lParam);
+					if (ev.bubble != FALSE) {
+						sendmessagetoparent(imp, message, wParam, lParam);
 					}
-					break;
 				}
-			}
+				break; }
+			case WM_KEYUP: {
+				psy_ui_KeyEvent ev;
+
+				if (imp->component) {
+					psy_ui_keyevent_init(&ev, (int)wParam, lParam,
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+						(lParam & 0x40000000) == 0x40000000);
+					imp->component->vtable->onkeyup(imp->component, &ev);
+					psy_signal_emit(&imp->component->signal_keyup, imp->component,
+						1, &ev);
+					preventdefault = ev.preventdefault;
+					if (preventdefault) {
+						imp->preventwmchar = 1;
+					}
+					if (ev.bubble != FALSE) {
+						sendmessagetoparent(imp, message, wParam, lParam);
+					}
+				}
+				break; }			
 			case WM_KILLFOCUS:
-				if (imp->component && imp->component->signal_focuslost.slots) {
+				if (imp->component) {
+					imp->component->vtable->onfocuslost(imp->component);
 					psy_signal_emit(&imp->component->signal_focuslost,
 						imp->component, 0);
-				}
+				}				
 			break;	
 			case WM_MOUSEWHEEL:
 			{
@@ -534,23 +551,22 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				break; }
 			case WM_SYSKEYDOWN:
 				if (wParam >= VK_F10 && wParam <= VK_F12) {					
-					if (imp->component->signal_keydown.slots) {
-						psy_ui_KeyEvent ev;
+					psy_ui_KeyEvent ev;
 						
-						psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
-							GetKeyState(VK_SHIFT) < 0,
-							GetKeyState(VK_CONTROL) < 0,
-							(lParam & 0x40000000) == 0x40000000);
-						psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
-						psy_signal_emit(&imp->component->signal_keydown,
-							imp->component, 1, &ev);					
-						if (ev.bubble != FALSE &&
-							psy_table_at(&winapp->selfmap,
-							(uintptr_t) GetParent (hwnd))) {				
-							SendMessage (GetParent (hwnd), message, wParam,
-								lParam) ;
-						}
-					}
+					psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
+						GetKeyState(VK_SHIFT) < 0,
+						GetKeyState(VK_CONTROL) < 0,
+						(lParam & 0x40000000) == 0x40000000);
+					psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
+					imp->component->vtable->onkeydown(imp->component, &ev);
+					psy_signal_emit(&imp->component->signal_keydown,
+						imp->component, 1, &ev);					
+					if (ev.bubble != FALSE) {
+						sendmessagetoparent(imp, message, wParam, lParam);
+					} else {
+						psy_list_free(winapp->targetids);
+						winapp->targetids = NULL;
+					}					
 					return 0;
 				}
 				break;
@@ -874,10 +890,9 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				return 0;
 			break;
 			case WM_KILLFOCUS:
-				if (imp->component->signal_focuslost.slots) {
-					psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
-					return 0;
-				}
+				imp->component->vtable->onfocuslost(imp->component);
+				psy_signal_emit(&imp->component->signal_focuslost, imp->component, 0);
+				return 0;				
 			break;
 			default:			
 			break;

@@ -142,7 +142,7 @@ void help_onalign(Help* self, psy_ui_Component* sender)
 				psy_ui_value_makeew(1.5),
 				psy_ui_value_makepx(0), psy_ui_value_makepx(0));
 			tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
-			psy_ui_component_align(&self->tabbar);
+			psy_ui_component_align(tabbar_base(&self->tabbar));
 		} else {
 			psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 			self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
@@ -150,7 +150,7 @@ void help_onalign(Help* self, psy_ui_Component* sender)
 				psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 				psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0));			
 			tabbar_setdefaulttabmargin(&self->tabbar, &tabmargin);
-			psy_ui_component_align(&self->tabbar);
+			psy_ui_component_align(tabbar_base(&self->tabbar));
 		}
 		self->lastalign = psy_ui_component_parent(sender)->align;
 	}

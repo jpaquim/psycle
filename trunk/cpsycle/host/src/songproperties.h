@@ -16,15 +16,19 @@ extern "C" {
 #endif
 
 typedef struct IntEdit {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_changed;
+	// ui elements
 	psy_ui_Label desc;
 	psy_ui_Edit edit;
 	psy_ui_Button less;
 	psy_ui_Button more;
+	// internal data
 	int minval;
 	int maxval;
-	int restore;
-	psy_Signal signal_changed;
+	int restore;	
 } IntEdit;
 
 void intedit_init(IntEdit*, psy_ui_Component* parent,
@@ -36,7 +40,6 @@ int intedit_value(IntEdit*);
 void intedit_setvalue(IntEdit*, int value);
 void intedit_enableedit(IntEdit*);
 void intedit_preventedit(IntEdit*);
-
 
 INLINE psy_ui_Component* intedit_base(IntEdit* self)
 {
@@ -81,6 +84,13 @@ void songpropertiesview_init(SongPropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 void songpropertiesview_enableedit(SongPropertiesView*);
 void songpropertiesview_disableedit(SongPropertiesView*);
+
+INLINE psy_ui_Component* songpropertiesview_base(SongPropertiesView* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

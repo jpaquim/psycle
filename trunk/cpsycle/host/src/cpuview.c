@@ -130,8 +130,8 @@ void cpuview_init(CPUView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);	
 	self->workspace = workspace;
 	psy_ui_margin_init(&self->topmargin);		
-	psy_ui_component_init(&self->top, &self->component);
-	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_init_align(&self->top, &self->component,
+		psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->top, &margin);
 	cpuview_inittitle(self);
 	cpuview_initcoreinfo(self);	
@@ -148,8 +148,8 @@ void cpuview_inittitle(CPUView* self)
 	psy_ui_Margin margin;
 	
 	// titlebar
-	psy_ui_component_init(&self->titlebar, &self->component);
-	psy_ui_component_setalign(&self->titlebar, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->titlebar, &self->component,
+		psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(2.0));
@@ -190,8 +190,8 @@ void cpuview_initresources(CPUView* self)
 
 void cpuview_initperformance(CPUView* self)
 {	
-	psy_ui_component_init(&self->performance, &self->top);
-	psy_ui_component_setalign(&self->performance, psy_ui_ALIGN_LEFT);
+	psy_ui_component_init_align(&self->performance, &self->top,
+		psy_ui_ALIGN_LEFT);
 	psy_ui_component_setdefaultalign(&self->performance, psy_ui_ALIGN_TOP,
 		self->topmargin);	
 	psy_ui_checkbox_init(&self->cpucheck, &self->performance);

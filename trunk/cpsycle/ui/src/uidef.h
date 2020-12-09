@@ -522,7 +522,7 @@ psy_ui_Colour psy_ui_diffadd_colours(psy_ui_Colour base, psy_ui_Colour adjust,
 
 INLINE bool psy_ui_equal_colours(psy_ui_Colour lhs, psy_ui_Colour rhs)
 {
-	return lhs.value && rhs.value;
+	return lhs.value == rhs.value;
 }
 
 typedef enum {

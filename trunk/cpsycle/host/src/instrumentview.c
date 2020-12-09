@@ -112,8 +112,8 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makepx(0));
 	psy_ui_component_init(&self->component, parent);	
-	psy_ui_component_init(&self->row1, &self->component);
-	psy_ui_component_setalign(&self->row1, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->row1, &self->component,
+		psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->row1, psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init_text(&self->create, &self->row1, "file.new");
 	psy_ui_button_init_text(&self->load, &self->row1, "file.load");
@@ -123,8 +123,8 @@ void instrumentviewbuttons_init(InstrumentViewButtons* self,
 		psy_ui_component_children(&self->row1, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
 		&margin));
-	psy_ui_component_init(&self->row2, &self->component);
-	psy_ui_component_setalign(&self->row2, psy_ui_ALIGN_TOP);
+	psy_ui_component_init_align(&self->row2, &self->component,
+		psy_ui_ALIGN_TOP);
 	psy_ui_component_setalignexpand(&self->row2, psy_ui_HORIZONTALEXPAND);
 	psy_ui_button_init_text(&self->del, &self->row2, "edit.delete");
 	psy_list_free(psy_ui_components_setalign(

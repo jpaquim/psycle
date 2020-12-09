@@ -16,15 +16,15 @@
 #include "../../detail/trace.h"
 #include "../../detail/portable.h"
 
-static char* hex_tab[16] = {
-	"0", "1", "2", "3", "4", "5", "6", "7",
-	"8", "9", "A", "B", "C", "D", "E", "F"
-};
-
-static int testcursor(psy_audio_PatternCursor cursor, uintptr_t track,
-	psy_dsp_big_beat_t offset, uintptr_t lpb)
+static int testcursor(psy_audio_PatternCursor cursor, TrackerLineState* linestate,
+	uintptr_t track, psy_dsp_big_beat_t offset, psy_dsp_big_beat_t bpl)
 {
-	return cursor.track == track && psy_dsp_testrange(cursor.offset, offset, 1.0 / lpb);
+	int currline;
+	int cursorline;
+	currline = trackerlinestate_beattoline(linestate, offset);
+	cursorline = trackerlinestate_beattoline(linestate, cursor.offset);
+
+	return (cursorline == currline) && track == cursor.track;	
 }
 
 static void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
@@ -103,10 +103,10 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 				
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
-		topoffset = trackerlinestate_offset(self->linestate, g->clip.top,
-			&topline);
-		bottomoffset = trackerlinestate_offset(self->linestate, g->clip.bottom,
-			&bottomline);
+		topoffset = trackerlinestate_pxtobeat(self->linestate, g->clip.top);
+		topline = trackerlinestate_beattoline(self->linestate, topoffset);
+		bottomoffset = trackerlinestate_pxtobeatnotquantized(self->linestate, g->clip.bottom);
+		bottomline = (int)(bottomoffset * self->linestate->lpb + 0.5);
 		cpy = (topline) * self->linestate->lineheight;
 		offset = topoffset;
 		line = topline;
@@ -139,7 +139,7 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 				trackerlinestate_testplaybar(self->linestate, offset);
 			columnflags.mid = 0;
 			columnflags.cursor = self->linestate->drawcursor && !self->linestate->cursorchanging &&
-				testcursor(cursor, cursor.track, offset, self->linestate->lpb);
+				testcursor(cursor, self->linestate, cursor.track, offset, self->linestate->bpl);
 			columnflags.beat = fmod(offset, 1.0f) == 0.0f;
 			columnflags.beat4 = fmod(offset, 4.0f) == 0.0f;
 			columnflags.selection = 0;
@@ -196,8 +196,7 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
-	line = trackerlinestate_offsettoscreenline(self->linestate,
-		cursor->offset);
+	line = trackerlinestate_beattoline(self->linestate, cursor->offset);
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_rectangle_make(
 			0, self->linestate->lineheight * line,
