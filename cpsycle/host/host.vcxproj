@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\about.c" />
+    <ClCompile Include="src\audioconfig.c" />
     <ClCompile Include="src\channelmappingview.c" />
     <ClCompile Include="src\checkunsaved.c" />
     <ClCompile Include="src\clipbox.c" />
@@ -158,6 +159,7 @@
     <ClCompile Include="src\cpuview.c" />
     <ClCompile Include="src\defaultlang.c" />
     <ClCompile Include="src\envelopeview.c" />
+    <ClCompile Include="src\eventdriverconfig.c" />
     <ClCompile Include="src\filebar.c" />
     <ClCompile Include="src\fileview.c" />
     <ClCompile Include="src\gear.c" />
@@ -173,6 +175,7 @@
     <ClCompile Include="src\kbdbox.c" />
     <ClCompile Include="src\kbdhelp.c" />
     <ClCompile Include="src\labelpair.c" />
+    <ClCompile Include="src\languageconfig.c" />
     <ClCompile Include="src\linesperbeatbar.c" />
     <ClCompile Include="src\machinebar.c" />
     <ClCompile Include="src\machineeditorview.c" />
@@ -248,6 +251,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\about.h" />
+    <ClInclude Include="src\audioconfig.h" />
     <ClInclude Include="src\channelmappingview.h" />
     <ClInclude Include="src\checkunsaved.h" />
     <ClInclude Include="src\clipbox.h" />
@@ -258,6 +262,7 @@
     <ClInclude Include="src\cpuview.h" />
     <ClInclude Include="src\defaultlang.h" />
     <ClInclude Include="src\envelopeview.h" />
+    <ClInclude Include="src\eventdriverconfig.h" />
     <ClInclude Include="src\filebar.h" />
     <ClInclude Include="src\fileview.h" />
     <ClInclude Include="src\gear.h" />
@@ -273,6 +278,7 @@
     <ClInclude Include="src\kbdbox.h" />
     <ClInclude Include="src\kbdhelp.h" />
     <ClInclude Include="src\labelpair.h" />
+    <ClInclude Include="src\languageconfig.h" />
     <ClInclude Include="src\linesperbeatbar.h" />
     <ClInclude Include="src\machinebar.h" />
     <ClInclude Include="src\machineeditorview.h" />

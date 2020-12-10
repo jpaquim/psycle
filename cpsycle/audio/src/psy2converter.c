@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "psy2converter.h"
+#include "psy2.h"
 #include "machinefactory.h"
 #include "song.h"
 #include "songio.h"
@@ -189,6 +190,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	char _editName[32];
 	cpoint_t connectionpoint[MAX_CONNECTIONS];
 	int32_t panning;
+	psy_audio_MachineWires* machinewires;
 
 	convname = pluginnames_convname(&self->pluginnames, type, name);
 	assert(convname);
@@ -207,12 +209,11 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	if (type == nativeplug) {
 		readplugin(self, machine, songfile, index, type, name);
 	}
-	legacywires_load_psy2(songfile, *index);
-
+	machinewires = psy_audio_read_psy2machinewires(songfile->file);
+	psy_audio_legacywires_insert(songfile->legacywires, *index, machinewires);
 	psyfile_read(songfile->file, &connectionpoint, sizeof(connectionpoint));
 	// numInputs and numOutputs
 	psyfile_skip(songfile->file, 2 * sizeof(int32_t));
-
 	psyfile_read(songfile->file, &panning, sizeof(panning));
 	// Machine::SetPan(_panning);
 	psyfile_skip(songfile->file, 40); // skips sampler data.

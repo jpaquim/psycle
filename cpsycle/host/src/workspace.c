@@ -39,13 +39,9 @@ static void workspace_initplugincatcherandmachinefactory(Workspace*);
 static void workspace_initsignals(Workspace*);
 static void workspace_disposesignals(Workspace*);
 // make configuration
-static void workspace_makerecentsongs(Workspace*);
 static void workspace_makeconfig(Workspace*);
 static void workspace_makeglobal(Workspace*);
 static void workspace_makegeneral(Workspace*);
-static void workspace_makelanguagelist(Workspace*, psy_Property*);
-static int workspace_onaddlanguage(Workspace*, const char* path, int flag);
-static void workspace_makenotes(Workspace*);
 static void workspace_makevisual(Workspace*);
 static void workspace_makepatternview(Workspace*, psy_Property*);
 static void workspace_makepatternviewtheme(Workspace*, psy_Property*);
@@ -58,37 +54,13 @@ static void workspace_makedirectories(Workspace*);
 static void workspace_makedefaultuserpresetpath(Workspace*);
 static void workspace_makedirectory(Workspace*, const char* key,
 	const char* label, const char* defaultdir);
-static void workspace_makenotes(Workspace*);
-// audiodriver
-static void workspace_makeinputoutput(Workspace*);
-static void workspace_makedriverlist(Workspace*);
-static void workspace_makedriverconfigurations(Workspace*);
-static void workspace_update_driverconfigure_section(Workspace*);
-static const char* workspace_driverpath(Workspace*);
-static const char* workspace_driverkey(Workspace*);
-// eventdriver
-static void workspace_makeeventinput(Workspace*);
-static void workspace_makeeventdriverlist(Workspace*);
-static void workspace_registereventdrivers(Workspace*);
-static void workspace_makeeventdriverconfigurations(Workspace*);
-static void workspace_showactiveeventdriverconfig(Workspace*, int deviceid);
-static void workspace_updateactiveeventdriverlist(Workspace*);
-static void workspace_configeventdrivers(Workspace*);
-static psy_EventDriver* workspace_selectedeventdriver(Workspace*);
-static void workspace_reseteventdriverconfiguration(Workspace*);
-static void workspace_loadeventdriverconfiguration(Workspace*);
-static void workspace_saveeventdriverconfiguration(Workspace*);
 // midiinput
 static void workspace_makemidiconfiguration(Workspace*);
 static void workspace_makemidicontrollers(Workspace*);
 static void workspace_makemidicontrollersave(Workspace*);
 // compatibility
 static void workspace_makecompatibility(Workspace*);
-static const char* workspace_eventdriverpath(Workspace*);
-static int workspace_curreventdriverconfiguration(Workspace*);
-const char* workspace_languagekey(Workspace*);
 static void workspace_configvisual(Workspace*);
-static void workspace_configlanguage(Workspace*);
 static void workspace_setsong(Workspace*, psy_audio_Song*, int flag,
 	psy_audio_SongFile*);
 static void workspace_onloadprogress(Workspace*, psy_audio_Song*, int progress);
@@ -104,8 +76,6 @@ static void workspace_onaddeventdriver(Workspace*);
 static void workspace_onremoveeventdriver(Workspace*);
 static void workspace_onediteventdriverconfiguration(Workspace*);
 static void workspace_setdefaultfont(Workspace*, psy_Property*);
-static void workspace_onaudiodriverselect(Workspace*);
-static void workspace_oneditaudiodriverconfiguration(Workspace*);
 /// Machinecallback
 static psy_audio_MachineFactory* machinecallback_machinefactory(Workspace*);
 static bool machinecallback_fileselect_load(Workspace*, char filter[], char inoutName[]);
@@ -119,8 +89,6 @@ static void workspace_onterminaloutput(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
 static void workspace_onterminalerror(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
-// recent files
-static void workspace_addrecentsong(Workspace*, const char* path);
 
 void history_init(History* self)
 {
@@ -202,10 +170,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->fontheight = 12;
 	self->cursorstep = 1;
 	self->followsong = 0;
-	self->recordtweaks = 0;
-	self->inputoutput = 0;
-	self->eventinputs = 0;
-	self->driverconfigurations = 0;
+	self->recordtweaks = 0;	
 	self->mainhandle = handle;
 	self->filename = strdup(PSYCLE_UNTITLED);
 	self->lastentry = 0;
@@ -223,7 +188,7 @@ void workspace_init(Workspace* self, void* handle)
 	self->undosavepoint = 0;
 	self->machines_undosavepoint = 0;
 	history_init(&self->history);
-	workspace_makerecentsongs(self);
+	psy_playlist_init(&self->recentsongs);
 	workspace_makeconfig(self);	
 	workspace_initplugincatcherandmachinefactory(self);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
@@ -236,7 +201,8 @@ void workspace_init(Workspace* self, void* handle)
 	self->navigating = 0;
 	workspace_initsignals(self);	
 	workspace_initplayer(self);
-	workspace_registereventdrivers(self);
+
+	eventdriverconfig_registereventdrivers(&self->eventdrvconfig);
 	psy_audio_patterncursor_init(&self->patterneditposition);
 	psy_audio_pattern_init(&self->patternpaste);
 	self->sequencepaste = 0;	
@@ -305,8 +271,7 @@ void workspace_dispose(Workspace* self)
 	self->cmds = NULL;
 	psy_audio_sequenceselection_dispose(&self->sequenceselection);
 	free(self->dialbitmappath);
-	psy_property_deallocate(self->recentsongs);
-	self->recentsongs = NULL;
+	psy_playlist_dispose(&self->recentsongs);
 	psy_audio_exclusivelock_dispose();
 }
 
@@ -362,22 +327,10 @@ void workspace_initplayer(Workspace* self)
 #endif		
 	self->cmds = cmdproperties_create();
 	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
-	workspace_update_driverconfigure_section(self);
-	workspace_updateactiveeventdriverlist(self);
-	workspace_showactiveeventdriverconfig(self, 0);
-}
-
-void workspace_configlanguage(Workspace* self)
-{	
-	psy_Property* langchoice;	
-
-	assert(self);
-
-	langchoice = psy_property_at_choice(self->language);
-	if (langchoice) {
-		psy_translator_load(psy_ui_translator(),
-			psy_property_item_str(langchoice));			
-	}	
+	audioconfig_driverconfigure_section(&self->audioconfig);
+	self->eventdrvconfig.cmds = self->cmds;
+	eventdriverconfig_updateactiveeventdriverlist(&self->eventdrvconfig);	
+	eventdriverconfig_showactiveeventdriverconfig(&self->eventdrvconfig, 0);
 }
 
 void workspace_configvisual(Workspace* self)
@@ -404,133 +357,7 @@ void workspace_configvisual(Workspace* self)
 
 const char* workspace_driverpath(Workspace* self)
 {
-	psy_Property* p;
-
-	assert(self);
-
-	if (p = psy_property_at(self->inputoutput, "audiodrivers",
-			PSY_PROPERTY_TYPE_NONE)) {
-		if (p = psy_property_at_choice(p)) {		
-			return psy_property_item_str(p);
-		}
-	}
-	return NULL;
-}
-
-int workspace_curreventdriverconfiguration(Workspace* self)
-{
-	psy_Property* p;
-
-	assert(self);
-
-	if (p = psy_property_at(self->eventinputs, "activedrivers",
-			PSY_PROPERTY_TYPE_NONE)) {
-		return psy_property_item_int(p);			
-	}
-	return 0;
-}
-
-const char* workspace_languagekey(Workspace* self)
-{
-	psy_Property* p;
-	const char* rv = 0;
-
-	assert(self);
-
-	if (p = psy_property_at(self->general, "lang", PSY_PROPERTY_TYPE_NONE)) {
-		if (p = psy_property_at_choice(p)) {
-			rv = psy_property_item_str(p);
-		}
-	}
-	return rv;
-}
-
-const char* workspace_driverkey(Workspace* self)
-{
-	psy_Property* p;
-	const char* rv = 0;
-
-	assert(self);
-
-	if (p = psy_property_at(self->inputoutput, "audiodrivers",
-			PSY_PROPERTY_TYPE_NONE)) {
-		if (p = psy_property_at_choice(p)) {		
-			rv = psy_property_key(p);
-		}
-	}
-	return rv;
-}
-
-const char* workspace_eventdriverpath(Workspace* self)
-{
-	psy_Property* activedrivers;
-
-	assert(self);
-
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE);
-	if (activedrivers) {
-		psy_Property* choice;
-		
-		choice = psy_property_at_choice(activedrivers);
-		if (choice) {
-			return psy_property_item_str(choice);
-		}		
-	}
-	return NULL;
-}
-
-void workspace_update_driverconfigure_section(Workspace* self)
-{
-	assert(self);
-
-	if (self->driverconfigure) {
-		psy_Property* driversection;
-
-		psy_property_clear(self->driverconfigure);
-		if (psy_audiodriver_configuration(self->player.driver)) {
-			psy_property_append_property(self->driverconfigure,
-				psy_property_clone(
-					psy_audiodriver_configuration(self->player.driver)));
-		}
-		if (psy_audiodriver_configuration(self->player.driver)) {
-			driversection = psy_property_find(self->driverconfigurations,
-				psy_property_key(
-					psy_audiodriver_configuration(self->player.driver)),
-				PSY_PROPERTY_TYPE_NONE);
-			if (driversection) {
-				psy_property_remove(self->driverconfigurations,
-					driversection);
-				psy_property_append_property(self->driverconfigurations,
-					psy_property_clone(psy_audiodriver_configuration(
-						self->player.driver)));
-			}
-		}
-	}
-}
-
-void workspace_showactiveeventdriverconfig(Workspace* self, int driverid)
-{	
-	psy_EventDriver* eventdriver;
-
-	assert(self && self->eventdriverconfigure);
-
-	psy_property_clear(self->eventdriverconfigure);	
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventdriverconfigure, "defaults"),
-		"Defaults"), PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS);
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventdriverconfigure, "load"),
-		"Load"), PROPERTY_ID_EVENTDRIVERCONFIGLOAD);
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventdriverconfigure, "save"),
-		"Save"), PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE);
-	eventdriver = psy_audio_player_eventdriver(&self->player, driverid);
-	if (eventdriver) {		
-		psy_property_preventsave(self->eventdriverconfigure);
-		psy_property_append_property(self->eventdriverconfigure,
-			psy_property_clone(psy_eventdriver_configuration(eventdriver)));
-	}
+	return audioconfig_driverpath(&self->audioconfig);
 }
 
 void workspace_scanplugins(Workspace* self)
@@ -549,17 +376,6 @@ void workspace_onscanprogress(Workspace* self, psy_audio_PluginCatcher* sender,
 	psy_signal_emit(&self->signal_scanprogress, self, 1, progress);
 }
 
-void workspace_makerecentsongs(Workspace* self)
-{
-	assert(self);
-	self->recentsongs = psy_property_setcomment(
-		psy_property_allocinit_key(NULL),
-		"Psycle Recent Song History created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
-	self->recentfiles = psy_property_settext(
-		psy_property_append_section(self->recentsongs, "files"),
-		"Recent Songs");
-}
-
 void workspace_makeconfig(Workspace* self)
 {	
 	assert(self);
@@ -572,8 +388,8 @@ void workspace_makeconfig(Workspace* self)
 	workspace_makevisual(self);	
 	workspace_makekeyboardandmisc(self);
 	workspace_makedirectories(self);
-	workspace_makeinputoutput(self);
-	workspace_makeeventinput(self);
+	audioconfig_init(&self->audioconfig, &self->config, &self->player);
+	eventdriverconfig_init(&self->eventdrvconfig, &self->config, &self->player);
 	workspace_makemidiconfiguration(self);
 	workspace_makecompatibility(self);
 }
@@ -606,7 +422,7 @@ void workspace_makegeneral(Workspace* self)
 		psy_property_append_string(self->general, "version", "alpha"),
 		"settingsview.version"),
 		PSY_PROPERTY_HINT_HIDE);
-	workspace_makelanguagelist(self, self->general);
+	languageconfig_init(&self->languageconfig, self->general);	
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showaboutatstart", TRUE),
 		"settingsview.show-about-at-startup");
@@ -632,55 +448,6 @@ void workspace_makegeneral(Workspace* self)
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showpatternnames", FALSE),
 		"sequencerview.show-pattern-names");
-}
-
-void workspace_makelanguagelist(Workspace* self, psy_Property* parent)
-{
-	char currdir[4096];
-	psy_Property* defaultlang;
-	
-	assert(self);
-
-	self->language = psy_property_setid(psy_property_settext(
-		psy_property_append_choice(self->general, "lang", 0),
-		"settingsview.language"),
-		PROPERTY_ID_LANG);
-	if (workdir(currdir)) {
-		psy_dir_enumerate(self, currdir, "*.ini", 0, (psy_fp_findfile)
-			workspace_onaddlanguage);
-	}
-#if defined PSYCLE_DEFAULT_LANG_ES
-	defaultlang = psy_property_find(self->language, "es",
-		PSY_PROPERTY_TYPE_NONE);
-#elif defined PSYCLE_DEFAULT_LANG_EN
-	defaultlang = psy_property_find(self->language, "en",
-		PSY_PROPERTY_TYPE_NONE);
-#else
-	defaultlang = psy_property_find(self->language, "es",
-		PSY_PROPERTY_TYPE_NONE);
-#endif
-	if (defaultlang) {
-		uintptr_t index;
-		
-		index = psy_property_index(defaultlang);
-		if (index != UINTPTR_MAX) {
-			psy_property_setitem_int(self->language, index);
-		}
-	}
-}
-
-int workspace_onaddlanguage(Workspace* self, const char* path, int flag)
-{
-	char languageid[256];
-
-	assert(self);
-
-	if (psy_translator_test(&app.translator, path, languageid)) {
-		psy_property_settext(
-			psy_property_append_string(self->language, languageid, path),
-			languageid);
-	}	
-	return TRUE;
 }
 
 void workspace_makevisual(Workspace* self)
@@ -1363,365 +1130,6 @@ void workspace_makedirectory(Workspace* self, const char* key,
 		PSY_PROPERTY_HINT_EDITDIR);
 }
 
-void workspace_makeinputoutput(Workspace* self)
-{		
-	assert(self);
-
-	self->inputoutput = psy_property_settext(
-		psy_property_append_section(&self->config, "inputoutput"),
-		"Input/Output");
-	workspace_makedriverlist(self);
-	self->driverconfigure = psy_property_settext(
-		psy_property_append_section(self->inputoutput, "configure"),
-			"settingsview.configure");
-	self->driverconfigure->item.save = 0;
-	workspace_makedriverconfigurations(self);
-}
-
-void workspace_makedriverlist(Workspace* self)
-{
-	psy_Property* drivers;
-
-	assert(self);
-
-	// change number to set startup driver, if no psycle.ini found
-#if defined(DIVERSALIS__OS__MICROSOFT)	
-	// 2 : directx
-	drivers = psy_property_setid(psy_property_settext(
-		psy_property_append_choice(self->inputoutput,
-			"audiodrivers", 2),
-		"settingsview.audio-drivers"),
-		PROPERTY_ID_AUDIODRIVERS);
-
-#elif defined(DIVERSALIS__OS__LINUX)
-	// 1 : alsa
-	drivers = psy_property_settext(psy_property_append_choice(
-		self->inputoutput, "audiodrivers", 1),
-		"settingsview.audio-drivers");
-#endif		
-	psy_property_append_string(drivers, "silent", "silentdriver");
-#if defined(DIVERSALIS__OS__MICROSOFT)
-	// output target for the audio driver dlls is {solutiondir}/Debug or 
-	// {solutiondir}/Release
-	// if they aren't found, check if direcories fit and if
-	// dlls are compiled
-	psy_property_append_string(drivers, "mme", ".\\mme.dll");
-	psy_property_append_string(drivers, "directx", ".\\directx.dll");
-	psy_property_append_string(drivers, "wasapi", ".\\wasapi.dll");
-	psy_property_append_string(drivers, "asio", ".\\asiodriver.dll");
-#elif defined(DIVERSALIS__OS__LINUX)
-	psy_property_append_string(drivers, "alsa",
-		"../../driver/alsa/libpsyalsa.so");
-#endif
-}
-
-void workspace_makedriverconfigurations(Workspace* self)
-{
-	psy_Property* drivers;
-	
-	assert(self);
-
-	self->driverconfigurations = psy_property_sethint(
-		psy_property_append_section(self->inputoutput, "configurations"),
-		PSY_PROPERTY_HINT_HIDE);	
-	drivers = psy_property_at(self->inputoutput, "audiodrivers", PSY_PROPERTY_TYPE_NONE);
-	if (drivers) {
-		psy_List* p;
-
-		for (p = psy_property_children(drivers); p != NULL; psy_list_next(&p)) {
-			psy_Property* property;
-
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
-				const char* path;
-
-				path = psy_property_item_str(property);
-				if (path) {
-					psy_Library library;
-
-					psy_library_init(&library);
-					psy_library_load(&library, path);
-					printf("driverconfigurations %s\n", path);
-					if (library.module) {
-						pfndriver_create fpdrivercreate;
-
-						fpdrivercreate = (pfndriver_create)
-							psy_library_functionpointer(&library,
-								"driver_create");
-						if (fpdrivercreate) {
-							psy_AudioDriver* driver;							
-
-							driver = fpdrivercreate();
-							printf("driverconfigurations create \n");
-							if (driver &&
-									psy_audiodriver_configuration(driver) &&
-									!psy_property_empty(psy_audiodriver_configuration(driver))) {
-								printf("driversection create\n");															
-									psy_property_append_property(
-										self->driverconfigurations,
-										psy_property_clone(
-											psy_audiodriver_configuration(driver)));
-								psy_audiodriver_dispose(driver);								
-							}
-						}
-					}
-					psy_library_dispose(&library);
-				}
-			}
-		}
-	}
-}
-
-void workspace_makeeventinput(Workspace* self)
-{
-	assert(self);
-
-	self->eventinputs = psy_property_settext(
-		psy_property_append_section(&self->config, "eventinput"),
-		"Event Input");
-	workspace_makeeventdriverlist(self);
-	self->eventdriverconfigurations = psy_property_sethint(
-		psy_property_append_section(self->eventinputs, "configurations"),
-		PSY_PROPERTY_HINT_HIDE);
-}
-
-void workspace_makeeventdriverlist(Workspace* self)
-{		
-	psy_Property* installed;
-		
-	assert(self);
-
-	psy_property_settext(self->eventinputs, "settingsview.event-input");
-	// change number to set startup driver, if no psycle.ini found
-	installed = psy_property_settext(
-		psy_property_append_choice(self->eventinputs, "installeddriver", 0),
-			"Input Drivers");
-	psy_property_append_string(installed, "kbd", "kbd");	
-#if defined(DIVERSALIS__OS__MICROSOFT)
-	psy_property_append_string(installed, "mmemidi", ".\\mmemidi.dll");
-	psy_property_append_string(installed, "dxjoystick", ".\\dxjoystick.dll");
-#endif
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventinputs, "addeventdriver"),
-		"Add to active drivers"),
-		PROPERTY_ID_ADDEVENTDRIVER);
-	psy_property_enableappend(psy_property_setid(psy_property_settext(
-		psy_property_append_choice(self->eventinputs, "activedrivers", 0),
-		"Active Drivers"), PROPERTY_ID_ACTIVEEVENTDRIVERS));
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventinputs, "removeeventdriver"),
-		"Remove active driver"),
-		PROPERTY_ID_REMOVEEVENTDRIVER);
-	self->eventdriverconfigure = psy_property_settext(
-		psy_property_append_section(self->eventinputs,
-			"configure"),
-			"Configure");
-}
-
-void workspace_registereventdrivers(Workspace* self)
-{
-	psy_Property* drivers;	
-
-	assert(self);
-
-	drivers = psy_property_at(self->eventinputs, "installeddriver",
-		PSY_PROPERTY_TYPE_NONE);
-	if (drivers) {
-		psy_List* p;
-
-		for (p = psy_property_children(drivers); p != NULL; psy_list_next(&p)) {
-			psy_Property* property;
-			int guid;
-
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
-				guid = psy_audio_eventdrivers_guid(&self->player.eventdrivers,
-					psy_property_item_str(property));
-				if (guid != -1) {
-					psy_audio_eventdrivers_register(&self->player.eventdrivers,
-						guid, psy_property_item_str(property));
-				}
-			}
-		}
-	}
-}
-
-void workspace_configeventdrivers(Workspace* self)
-{
-	psy_Property* activedrivers;
-
-	assert(self);
-
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE);	
-	if (activedrivers) {
-		psy_List* p;
-
-		for (p = psy_property_children(activedrivers); p != NULL;
-				psy_list_next(&p)) {
-			psy_Property* property;
-
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
-				psy_EventDriver* driver;
-
-				driver = psy_audio_eventdrivers_loadbyguid(
-					&self->player.eventdrivers,
-					psy_property_item_int(property));
-				if (driver) {
-					psy_eventdriver_setcmddef(driver, self->cmds);
-				}
-			}
-		}
-	}
-}
-
-void workspace_reseteventdriverconfiguration(Workspace* self)
-{
-	psy_EventDriver* eventdriver;
-
-	assert(self);
-
-	eventdriver = workspace_selectedeventdriver(self);
-	if (eventdriver && psy_eventdriver_configuration(eventdriver)) {
-		psy_Property* activedrivers;
-		
-		psy_eventdriver_configure(eventdriver, NULL);
-		activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-			PSY_PROPERTY_TYPE_CHOICE);
-		if (activedrivers) {
-			workspace_showactiveeventdriverconfig(self,
-				psy_property_item_int(activedrivers));
-			workspace_update_driverconfigure_section(self);
-		}
-	}
-}
-
-void workspace_loadeventdriverconfiguration(Workspace* self)
-{
-	psy_EventDriver* eventdriver;
-
-	assert(self);
-
-	eventdriver = workspace_selectedeventdriver(self);
-	if (eventdriver && psy_eventdriver_configuration(eventdriver)) {
-		psy_ui_OpenDialog opendialog;
-
-		psy_ui_opendialog_init_all(&opendialog, 0,
-			"Load Event Driver Configuration",
-			"Psycle Event Driver Configuration|*.psk", "PSK",
-			workspace_config_directory(self));
-		if (psy_ui_opendialog_execute(&opendialog)) {
-			psy_Property* activedrivers;
-			psy_Property* local;
-
-			local = psy_property_clone(psy_eventdriver_configuration(eventdriver));
-			propertiesio_load(local, psy_ui_opendialog_filename(&opendialog), FALSE);
-			psy_eventdriver_configure(eventdriver, local);
-			activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-				PSY_PROPERTY_TYPE_CHOICE);
-			if (activedrivers) {
-				workspace_showactiveeventdriverconfig(self,
-					psy_property_item_int(activedrivers));
-			}
-			workspace_update_driverconfigure_section(self);
-			psy_property_deallocate(local);
-		}
-		psy_ui_opendialog_dispose(&opendialog);
-	}
-}
-
-void workspace_saveeventdriverconfiguration(Workspace* self)
-{
-	psy_EventDriver* eventdriver;
-
-	assert(self);
-
-	eventdriver = workspace_selectedeventdriver(self);
-	if (eventdriver && psy_eventdriver_configuration(eventdriver)) {
-		psy_ui_SaveDialog dialog;		
-		int success;		
-
-		psy_ui_savedialog_init_all(&dialog, 0,
-			"Save Event Driver Configuration",
-			"Psycle Event Driver Configuration|*.psk", "PSK",
-			workspace_config_directory(self));
-		success = psy_ui_savedialog_execute(&dialog);
-		if (success) {							
-			propertiesio_save(psy_eventdriver_configuration(eventdriver),
-				psy_ui_savedialog_filename(&dialog));
-		}
-		psy_ui_savedialog_dispose(&dialog);
-	}
-}
-
-void workspace_updateactiveeventdriverlist(Workspace* self)
-{	
-	psy_Property* drivers;
-	
-	assert(self);
-
-	drivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE);
-	if (drivers) {
-		uintptr_t numdrivers;
-		uintptr_t i;
-
-		psy_property_clear(drivers);	
-		numdrivers = psy_audio_player_numeventdrivers(&self->player);
-		for (i = 0; i < numdrivers; ++i) {
-			psy_audio_EventDriverEntry* entry;
-
-			entry = psy_audio_eventdrivers_entry(&self->player.eventdrivers, i);
-			if (entry && entry->eventdriver) {
-				const psy_EventDriverInfo* driverinfo;				
-								
-				driverinfo = psy_eventdriver_info(entry->eventdriver);
-				if (driverinfo) {
-					char key[40];
-
-					psy_snprintf(key, 40, "guid-%d", (int)i);
-					psy_property_settext(
-						psy_property_append_int(drivers, key,
-							driverinfo->guid, 0, 0),
-						driverinfo->Name);
-				}
-			}
-		}
-	}
-}
-
-void workspace_makeeventdriverconfigurations(Workspace* self)
-{	
-	int numdrivers;
-	int i;
-
-	assert(self);
-
-	psy_property_clear(self->eventdriverconfigurations);
-	numdrivers = psy_audio_player_numeventdrivers(&self->player);
-	for (i = 0; i < numdrivers; ++i) {
-		psy_audio_EventDriverEntry* entry;
-
-		entry = psy_audio_eventdrivers_entry(&self->player.eventdrivers, i);
-		if (entry) {
-			psy_EventDriver* driver;
-
-			driver = entry->eventdriver;
-			if (driver && psy_eventdriver_configuration(driver)) {
-				char key[256];
-				psy_Property* section;
-
-				psy_snprintf(key, 256, "configuration-%i", i);
-				section = psy_property_append_section(
-					self->eventdriverconfigurations, key);
-				psy_property_append_property(section, psy_property_clone(
-					psy_eventdriver_configuration(driver)));
-			}
-		}
-	}
-}
-
 void workspace_makemidicontrollersave(Workspace* self)
 {
 	char_dyn_t* str;
@@ -1737,49 +1145,6 @@ void workspace_makemidicontrollersave(Workspace* self)
 	free(str);	
 }
 
-void workspace_readeventdriverconfigurations(Workspace* self)
-{		
-	assert(self);
-
-	if (self->eventdriverconfigurations) {		
-		uintptr_t numdrivers;
-		psy_List* p;
-		uintptr_t i;
-		
-		numdrivers = psy_audio_eventdrivers_size(&self->player.eventdrivers);
-		for (p = psy_property_children(self->eventdriverconfigurations), i = 0;
-				p != NULL && i != numdrivers; psy_list_next(&p), ++i) {
-			psy_Property* configuration;
-
-			configuration = (psy_Property*)psy_list_entry(p);
-			if (psy_property_empty(configuration)) {
-				continue;
-			}
-			configuration = (psy_Property*)psy_list_entry(
-				psy_property_children(configuration));
-			if (!psy_property_empty(configuration)) {
-				int guid;
-
-				guid = psy_property_at_int(configuration, "guid", -1);
-				if (guid != -1) {
-					psy_EventDriver* driver;
-					const psy_EventDriverInfo* driverinfo;
-
-					driver = psy_audio_eventdrivers_driver(&self->player.eventdrivers, i);
-					if (driver) {
-						driverinfo = psy_eventdriver_info(driver);
-						if (!driverinfo) {
-							continue;
-						}					
-						if (driverinfo->guid == guid) {
-							psy_eventdriver_configure(driver, configuration);							
-						}
-					}					
-				}
-			}
-		}							
-	}
-}
 
 void workspace_configurationchanged(Workspace* self, psy_Property* property)
 {
@@ -1792,27 +1157,9 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		workspace_scanplugins(self);
 		break;
 	case PROPERTY_ID_ENABLEAUDIO:
-		if (self->player.driver) {
-			if (psy_property_item_bool(property)) {
-				psy_Property* driversection = NULL;
-
-				if (psy_audiodriver_configuration(self->player.driver)) {
-					driversection = psy_property_find(self->driverconfigurations,
-						psy_property_key(psy_audiodriver_configuration(
-							self->player.driver)),
-						PSY_PROPERTY_TYPE_NONE);
-				}
-				psy_audio_player_restartdriver(&self->player, driversection);				
-				psy_property_clear(self->driverconfigure);
-				if (psy_audiodriver_configuration(self->player.driver)) {
-					psy_property_append_property(self->driverconfigure,
-						psy_property_clone(psy_audiodriver_configuration(
-							self->player.driver)));
-				}
-			} else {
-				psy_audiodriver_close(self->player.driver);
-			}
-			break; }
+		audioconfig_enableaudio(&self->audioconfig,
+			psy_property_item_bool(property));
+		break; 
 	case PROPERTY_ID_LOADSKIN:
 		workspace_onloadskin(self);
 		break;
@@ -1829,13 +1176,13 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		workspace_onremoveeventdriver(self);
 		break;
 	case PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS:
-		workspace_reseteventdriverconfiguration(self);
+		eventdriverconfig_reseteventdriverconfiguration(&self->eventdrvconfig);
 		break;
 	case PROPERTY_ID_EVENTDRIVERCONFIGLOAD:
-		workspace_loadeventdriverconfiguration(self);
+		eventdriverconfig_loadeventdriverconfiguration(&self->eventdrvconfig);
 		break;
 	case PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE:
-		workspace_saveeventdriverconfiguration(self);
+		eventdriverconfig_saveeventdriverconfiguration(&self->eventdrvconfig);
 		break;
 	case PROPERTY_ID_DEFAULTFONT:
 		workspace_setdefaultfont(self, property);
@@ -1882,24 +1229,27 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 				? psy_property_parent(property)
 				: NULL;
 			if (choice && (psy_property_id(choice) == PROPERTY_ID_LANG)) {
-					workspace_configlanguage(self);
+					languageconfig_configlanguage(&self->languageconfig);
 			} else if (choice && (psy_property_id(choice) ==
 				PROPERTY_ID_AUDIODRIVERS)) {
-					workspace_onaudiodriverselect(self);
+					audioconfig_onaudiodriverselect(&self->audioconfig,
+						workspace_enableaudio(self));
 			} else if (choice && psy_property_id(choice) ==
 				PROPERTY_ID_ACTIVEEVENTDRIVERS) {
-					workspace_showactiveeventdriverconfig(self,
-					psy_property_item_int(choice));
+					eventdriverconfig_showactiveeventdriverconfig(
+						&self->eventdrvconfig, psy_property_item_int(choice));
 			} else if (choice && (psy_property_id(choice) ==
 					PROPERTY_ID_PATTERNDISPLAY)) {
 				workspace_selectpatterndisplay(self,
 					(PatternDisplayType)psy_property_item_int(choice));
 			} else if (psy_property_insection(property,
-					self->driverconfigure)) {
-				workspace_oneditaudiodriverconfiguration(self);
+					self->audioconfig.driverconfigure)) {
+				audioconfig_oneditaudiodriverconfiguration(&self->audioconfig,
+					workspace_enableaudio(self));
+				audioconfig_driverconfigure_section(&self->audioconfig);
 				return;
 			} else if (psy_property_insection(property,
-					self->eventdriverconfigure)) {
+					self->eventdrvconfig.eventdriverconfigure)) {
 				workspace_onediteventdriverconfiguration(self);
 			} else if (psy_property_insection(property, self->midicontrollers)) {
 				psy_audio_player_midiconfigure(&self->player,
@@ -2049,7 +1399,7 @@ void workspace_onaddeventdriver(Workspace* self)
 {
 	psy_Property* installeddriver;
 
-	installeddriver = psy_property_at(self->eventinputs, "installeddriver",
+	installeddriver = psy_property_at(self->eventdrvconfig.eventinputs, "installeddriver",
 		PSY_PROPERTY_TYPE_CHOICE);
 	if (installeddriver) {
 		psy_Property* choice;
@@ -2064,13 +1414,14 @@ void workspace_onaddeventdriver(Workspace* self)
 			if (driver) {
 				psy_eventdriver_setcmddef(driver, self->cmds);
 			}
-			workspace_updateactiveeventdriverlist(self);
-			activedrivers = psy_property_at(self->eventinputs, "activedrivers",
+			eventdriverconfig_updateactiveeventdriverlist(&self->eventdrvconfig);
+			activedrivers = psy_property_at(self->eventdrvconfig.eventinputs, "activedrivers",
 				PSY_PROPERTY_TYPE_CHOICE);
 			if (activedrivers) {
 				psy_property_setitem_int(activedrivers,
 					psy_audio_player_numeventdrivers(&self->player) - 1);
-				workspace_showactiveeventdriverconfig(self,
+				eventdriverconfig_showactiveeventdriverconfig(
+					&self->eventdrvconfig,
 					psy_property_item_int(activedrivers));
 			}
 		}
@@ -2081,17 +1432,17 @@ void workspace_onremoveeventdriver(Workspace* self)
 {
 	psy_Property* activedrivers;
 
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
+	activedrivers = psy_property_at(self->eventdrvconfig.eventinputs, "activedrivers",
 		PSY_PROPERTY_TYPE_CHOICE);
 	if (activedrivers) {
 		psy_audio_player_removeeventdriver(&self->player,
 			psy_property_item_int(activedrivers));
-		workspace_updateactiveeventdriverlist(self);
+		eventdriverconfig_updateactiveeventdriverlist(&self->eventdrvconfig);
 		if (psy_property_item_int(activedrivers) > 0) {
 			psy_property_setitem_int(activedrivers,
 				psy_property_item_int(activedrivers) - 1);
 		}
-		workspace_showactiveeventdriverconfig(self,
+		eventdriverconfig_showactiveeventdriverconfig(&self->eventdrvconfig,
 			psy_property_item_int(activedrivers));
 	}
 }
@@ -2100,7 +1451,7 @@ void workspace_onediteventdriverconfiguration(Workspace* self)
 {
 	psy_Property* activedrivers;
 
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
+	activedrivers = psy_property_at(self->eventdrvconfig.eventinputs, "activedrivers",
 		PSY_PROPERTY_TYPE_CHOICE);
 	if (activedrivers) {
 		psy_Property* driversection;
@@ -2108,74 +1459,13 @@ void workspace_onediteventdriverconfiguration(Workspace* self)
 
 		driver = psy_audio_player_eventdriver(&self->player,
 			psy_property_item_int(activedrivers));
-		driversection = psy_property_find(self->eventdriverconfigure,
+		driversection = psy_property_find(self->eventdrvconfig.eventdriverconfigure,
 			psy_property_key(psy_eventdriver_configuration(driver)),
 			PSY_PROPERTY_TYPE_NONE);
 		if (driversection) {
 			psy_audio_player_restarteventdriver(&self->player,
 				psy_property_item_int(activedrivers),
 				driversection);
-		}
-	}
-}
-
-psy_EventDriver* workspace_selectedeventdriver(Workspace* self)
-{
-	psy_EventDriver* rv;
-	psy_Property* activedrivers;
-
-	rv = NULL;
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_CHOICE);
-	if (activedrivers) {		
-		rv = psy_audio_player_eventdriver(&self->player,
-			psy_property_item_int(activedrivers));		
-	}
-	return rv;
-}
-
-void workspace_onaudiodriverselect(Workspace* self)
-{
-	psy_Property* driversection = NULL;
-
-	psy_audio_player_unloaddriver(&self->player);
-	psy_audio_player_loaddriver(&self->player, workspace_driverpath(self),
-		NULL /*no config*/, FALSE /*do not open yet*/);
-	if (psy_audiodriver_configuration(self->player.driver)) {
-		driversection = psy_property_find(self->driverconfigurations,
-			psy_property_key(psy_audiodriver_configuration(
-				self->player.driver)),
-			PSY_PROPERTY_TYPE_NONE);
-	}
-	if (workspace_enableaudio(self)) {
-		psy_audio_player_restartdriver(&self->player, driversection);
-	} else if (self->player.driver) {
-		psy_audiodriver_configure(self->player.driver, driversection);
-	}
-	psy_property_clear(self->driverconfigure);
-	if (psy_audiodriver_configuration(self->player.driver)) {
-		psy_property_append_property(self->driverconfigure,
-			psy_property_clone(psy_audiodriver_configuration(
-				self->player.driver)));
-	}
-}
-
-void workspace_oneditaudiodriverconfiguration(Workspace* self)
-{
-	if (psy_audiodriver_configuration(self->player.driver) != NULL) {
-		psy_Property* driversection;
-
-		driversection = psy_property_find(self->driverconfigure,
-			psy_property_key(psy_audiodriver_configuration(
-				self->player.driver)),
-			PSY_PROPERTY_TYPE_NONE);
-		if (driversection) {
-			if (workspace_enableaudio(self)) {
-				psy_audio_player_restartdriver(&self->player, driversection);
-			} else if (self->player.driver) {
-				psy_audiodriver_configure(self->player.driver, driversection);
-			}
-			workspace_update_driverconfigure_section(self);
 		}
 	}
 }
@@ -2415,7 +1705,9 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 			self->filename = strdup(path);
 			workspace_setsong(self, song, WORKSPACE_LOADSONG, &songfile);
 			psy_audio_songfile_dispose(&songfile);
-			workspace_addrecentsong(self, path);
+			if (workspace_saverecentsongs(self)) {
+				psy_playlist_add(&self->recentsongs, path);
+			}
 			psy_audio_songfile_dispose(&songfile);
 		}
 		psy_signal_emit(&self->signal_terminal_out, self, 1,
@@ -2424,24 +1716,6 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 			psy_audio_player_start(&self->player);
 		}
 	}	
-}
-
-void workspace_addrecentsong(Workspace* self, const char* filename)
-{
-	assert(self);
-
-	if (workspace_saverecentsongs(self) &&
-			!psy_property_find(self->recentfiles, filename,
-				PSY_PROPERTY_TYPE_NONE)) {
-		psy_Path path;		
-
-		psy_path_init(&path, filename);
-		psy_property_settext(psy_property_setreadonly(
-			psy_property_append_string(self->recentfiles,
-				filename, ""), TRUE), psy_path_name(&path));
-		workspace_save_recentsongs(self);
-		psy_path_dispose(&path);
-	}
 }
 
 void workspace_onloadprogress(Workspace* self, psy_audio_Song* sender, int progress)
@@ -2535,7 +1809,7 @@ psy_Property* workspace_recentsongs(Workspace* self)
 {
 	assert(self);
 
-	return self->recentsongs;
+	return self->recentsongs.recentsongs;
 }
 
 void workspace_load_configuration(Workspace* self)
@@ -2551,14 +1825,14 @@ void workspace_load_configuration(Workspace* self)
 	if (workspace_patdefaultlines(self) > 0) {
 		psy_audio_pattern_setdefaultlines(workspace_patdefaultlines(self));
 	}
-	workspace_configlanguage(self);
+	languageconfig_configlanguage(&self->languageconfig);
 	{
 		psy_Property* driversection = NULL;
 
-		psy_audio_player_loaddriver(&self->player, workspace_driverpath(self),
+		psy_audio_player_loaddriver(&self->player, audioconfig_driverpath(&self->audioconfig),
 			NULL /*no config*/, FALSE /*do not open yet*/);
 		if (psy_audiodriver_configuration(self->player.driver)) {
-			driversection = psy_property_find(self->driverconfigurations,
+			driversection = psy_property_find(self->audioconfig.driverconfigurations,
 				psy_property_key(
 					psy_audiodriver_configuration(self->player.driver)),
 				PSY_PROPERTY_TYPE_NONE);			
@@ -2568,17 +1842,17 @@ void workspace_load_configuration(Workspace* self)
 		} else if (self->player.driver) {
 			psy_audiodriver_configure(self->player.driver, driversection);
 		}
-		workspace_update_driverconfigure_section(self);
+		audioconfig_driverconfigure_section(&self->audioconfig);
 	}
-	workspace_configeventdrivers(self);
+	eventdriverconfig_configeventdrivers(&self->eventdrvconfig);
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
-	workspace_updateactiveeventdriverlist(self);
-	workspace_makeeventdriverconfigurations(self);
+	eventdriverconfig_updateactiveeventdriverlist(&self->eventdrvconfig);
+	eventdriverconfig_makeeventdriverconfigurations(&self->eventdrvconfig);
 	propertiesio_load(&self->config, psy_path_path(&path), 0);
-	workspace_readeventdriverconfigurations(self);
+	eventdriverconfig_readeventdriverconfigurations(&self->eventdrvconfig);
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
-	workspace_showactiveeventdriverconfig(self,
-		workspace_curreventdriverconfiguration(self));
+	eventdriverconfig_showactiveeventdriverconfig(&self->eventdrvconfig,
+		eventdriverconfig_curreventdriverconfiguration(&self->eventdrvconfig));
 	psy_audio_player_midiconfigure(&self->player, self->midicontrollers,
 		TRUE /* use controllerdata */);
 	workspace_makemidicontrollers(self);
@@ -2604,7 +1878,7 @@ void workspace_save_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, workspace_config_directory(self));
 	psy_path_setname(&path, PSYCLE_INI);
-	workspace_makeeventdriverconfigurations(self);
+	eventdriverconfig_makeeventdriverconfigurations(&self->eventdrvconfig);
 	workspace_makemidicontrollersave(self);
 	propertiesio_save(&self->config, psy_path_path(&path));
 	psy_path_dispose(&path);
@@ -2612,55 +1886,17 @@ void workspace_save_configuration(Workspace* self)
 
 void workspace_load_recentsongs(Workspace* self)
 {	
-	psy_List* p;
-	psy_Path path;
-
-	assert(self);
-
-	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, workspace_config_directory(self));
-	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);	
-	propertiesio_load(self->recentsongs, psy_path_path(&path), 1);
-	psy_path_dispose(&path);
-	if (self->recentfiles) {
-		for (p = psy_property_children(self->recentfiles); p != NULL;
-				psy_list_next(&p)) {
-			psy_Property* property;
-
-			property = (psy_Property*)psy_list_entry(p);
-			psy_path_init(&path, psy_property_key(property));
-			psy_property_settext(property, psy_path_name(&path));
-			psy_property_setreadonly(property, TRUE);
-			psy_path_dispose(&path);
-		}
-	}
+	psy_playlist_load(&self->recentsongs);	
 }
 
 void workspace_save_recentsongs(Workspace* self)
 {
-	psy_Path path;
-
-	assert(self);
-
-	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, workspace_config_directory(self));
-	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);	
-	propertiesio_save(self->recentsongs, psy_path_path(&path));
-	psy_path_dispose(&path);
+	psy_playlist_save(&self->recentsongs);	
 }
 
 void workspace_clearrecentsongs(Workspace* self)
 {
-	psy_Path path;
-	
-	assert(self);
-
-	psy_path_init(&path, NULL);
-	psy_path_setprefix(&path, workspace_config_directory(self));
-	psy_path_setname(&path, PSYCLE_RECENT_SONG_INI);
-	psy_property_clear(self->recentfiles);
-	propertiesio_save(self->recentsongs, psy_path_path(&path));
-	psy_path_dispose(&path);
+	psy_playlist_clear(&self->recentsongs);	
 }
 
 void workspace_setoctave(Workspace* self, int octave)

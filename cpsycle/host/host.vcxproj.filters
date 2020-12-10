@@ -5,281 +5,316 @@
       <UniqueIdentifier>{d4983d20-02bc-4672-8480-96d1b76de1c3}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{56e7f788-8c43-4fdd-a223-c48a453abb66}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    <Filter Include="configuration">
+      <UniqueIdentifier>{c39489a0-4089-4e38-92b7-ffc380a89fda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine">
+      <UniqueIdentifier>{75b79df8-d9d8-45ef-b8af-48ef068c12b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="monitors">
+      <UniqueIdentifier>{d30a031b-c44c-4f0c-a048-c2b022c73d73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="toolbars">
+      <UniqueIdentifier>{5b75f94e-0f6f-43d8-8627-47ddbf3e7272}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="file">
+      <UniqueIdentifier>{f9021e34-7373-4db9-846c-e5d7d76bd47d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="uicontrols">
+      <UniqueIdentifier>{12c64f53-339f-4279-b389-f4fa4f59bd26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pattern">
+      <UniqueIdentifier>{82fbea71-d0df-4bf2-853c-3766026c9ec5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="machine\instrument">
+      <UniqueIdentifier>{d718ab5d-e66e-4b8f-8c2f-875385faf02c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sequence">
+      <UniqueIdentifier>{80365077-5ea3-48e3-b522-e3bf49e8d314}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="help">
+      <UniqueIdentifier>{1fefc104-1a07-4dfb-bc53-fa6ab30f3a11}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\about.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\channelmappingview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\clipbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\cmdproperties.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\config.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\cpuview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\envelopeview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\filebar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\gear.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\greet.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\help.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\helpview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\inputdefiner.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instnotemapview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentsbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\instrumentview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\interpolatecurveview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\labelpair.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\linesperbeatbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machinebar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineframe.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machinesbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\mainframe.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\midiview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\navigation.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\newmachine.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\octavebar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\paramlistbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\paramview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternproperties.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\pionoroll.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\playbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\playlisteditor.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\playposbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\plugineditor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\psycle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\recentview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sampleeditor.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\samplesbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\samplesview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\scrollzoom.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sequenceview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\settingsview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\skincoord.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\skingraphics.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\skinio.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\songbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\songproperties.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\songtrackbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stepbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\stepsequencerview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\tabbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\timebar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackerview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackscopeview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\undoredobar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\volslider.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\vubar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\vumeter.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\vuscope.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wavebox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\wireview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\workspace.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\zoombox.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\audioconfig.c">
+      <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\oscilloscope.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\eventdriverconfig.c">
+      <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\spectrumanalyzer.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\config.c">
+      <Filter>configuration</Filter>
     </ClCompile>
-    <ClCompile Include="src\stereophase.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\kbdbox.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\kbdhelp.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineeditorview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\checkunsaved.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\presetsbar.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\interpreter.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patternviewskin.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\machineviewskin.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\fileview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\seqeditor.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\propertiesview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\patterncmds.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackergridstate.c">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\languageconfig.c">
+      <Filter>configuration</Filter>
     </ClCompile>
     <ClCompile Include="src\patternheader.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackerlinenumbers.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\trackerlinestate.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\transformpatternview.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\defaultlang.c">
-      <Filter>Source Files</Filter>
+      <Filter>pattern</Filter>
     </ClCompile>
     <ClCompile Include="src\patternviewmenu.c">
-      <Filter>Source Files</Filter>
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternviewskin.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pionoroll.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackergridstate.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerlinenumbers.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerlinestate.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackerview.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\transformpatternview.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternview.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patterncmds.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\defaultlang.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinebar.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineeditorview.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineframe.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machinesbox.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineview.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineviewskin.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramlistbox.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\paramview.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\presetsbar.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\newmachine.c">
+      <Filter>machine</Filter>
     </ClCompile>
     <ClCompile Include="src\newval.c">
-      <Filter>Source Files</Filter>
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\plugineditor.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gear.c">
+      <Filter>machine</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stereophase.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trackscopeview.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vumeter.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vuscope.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wireview.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\spectrumanalyzer.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\oscilloscope.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\midiview.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cpuview.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\channelmappingview.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\songbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\songtrackbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stepbox.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\timebar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\vubar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playposbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\linesperbeatbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\filebar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playbar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\volslider.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\undoredobar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\octavebar.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\clipbox.c">
+      <Filter>monitors</Filter>
+    </ClCompile>
+    <ClCompile Include="src\skinio.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\inputdefiner.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\kbdbox.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\labelpair.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tabbar.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\fileview.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\zoombox.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scrollzoom.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternproperties.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpolatecurveview.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instnotemapview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentsbox.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sampleeditor.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\samplesbox.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\samplesview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\wavebox.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\envelopeview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\cmdproperties.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\propertiesview.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\playlisteditor.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sequenceview.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stepsequencerview.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\seqeditor.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
+    <ClCompile Include="src\help.c">
+      <Filter>help</Filter>
+    </ClCompile>
+    <ClCompile Include="src\helpview.c">
+      <Filter>help</Filter>
+    </ClCompile>
+    <ClCompile Include="src\greet.c">
+      <Filter>help</Filter>
+    </ClCompile>
+    <ClCompile Include="src\kbdhelp.c">
+      <Filter>help</Filter>
+    </ClCompile>
+    <ClCompile Include="src\about.c">
+      <Filter>help</Filter>
+    </ClCompile>
+    <ClCompile Include="src\checkunsaved.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderview.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\navigation.c">
+      <Filter>toolbars</Filter>
+    </ClCompile>
+    <ClCompile Include="src\settingsview.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\recentview.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\skincoord.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\skingraphics.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\songproperties.c">
+      <Filter>file</Filter>
+    </ClCompile>
+    <ClCompile Include="src\interpreter.c">
+      <Filter>configuration</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -288,281 +323,290 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\about.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\audioconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\channelmappingview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\clipbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\cmdproperties.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\cmdsgeneral.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\cmdsnotes.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\languageconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
     <ClInclude Include="src\config.h">
-      <Filter>Header Files</Filter>
+      <Filter>configuration</Filter>
     </ClInclude>
-    <ClInclude Include="src\cpuview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\envelopeview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\filebar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\gear.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\greet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\help.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\helpview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\inputdefiner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instnotemapview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentsbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\instrumentview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interpolatecurveview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\labelpair.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\linesperbeatbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machinebar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineframe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machinesbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mainframe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\midiview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\navigation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\newmachine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\octavebar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\paramlistbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\paramview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternproperties.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\eventdriverconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
     <ClInclude Include="src\patternview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\pianoroll.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\playbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\playlisteditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\playposbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\plugineditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\recentview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\resources\resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sampleeditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\samplesbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\samplesview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\scrollzoom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sequenceview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\settingsview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\skincoord.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\skingraphics.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\skinio.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\songbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\songproperties.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\songtrackbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stepbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stepsequencerview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\tabbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\timebar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackscopeview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\undoredobar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\volslider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vubar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vumeter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\vuscope.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wavebox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\wireview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\workspace.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\zoombox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\oscilloscope.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\spectrumanalyzer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\stereophase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\kbdbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\kbdhelp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineeditorview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\checkunsaved.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\presetsbar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\interpreter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternviewskin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\machineviewskin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\fileview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\seqeditor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\propertiesview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patterncmds.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackergridstate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\patternheader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerlinenumbers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trackerlinestate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\transformpatternview.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\defaultlang.h">
-      <Filter>Header Files</Filter>
+      <Filter>pattern</Filter>
     </ClInclude>
     <ClInclude Include="src\patternviewmenu.h">
-      <Filter>Header Files</Filter>
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewskin.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pianoroll.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerlinenumbers.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackergridstate.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerlinestate.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackerview.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\transformpatternview.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternheader.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patterncmds.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\defaultlang.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\presetsbar.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\plugineditor.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineframe.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineeditorview.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinebar.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineview.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewskin.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\newmachine.h">
+      <Filter>machine</Filter>
     </ClInclude>
     <ClInclude Include="src\newval.h">
-      <Filter>Header Files</Filter>
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramlistbox.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\paramview.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gear.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\channelmappingview.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cpuview.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midiview.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\oscilloscope.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wireview.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vuscope.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trackscopeview.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stereophase.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\spectrumanalyzer.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\filebar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\linesperbeatbar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\playbar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\playposbar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\songbar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stepbox.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\songtrackbar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\timebar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vubar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\volslider.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\undoredobar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\vumeter.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\clipbox.h">
+      <Filter>monitors</Filter>
+    </ClInclude>
+    <ClInclude Include="src\skinio.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tabbar.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\kbdbox.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\labelpair.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\octavebar.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\scrollzoom.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zoombox.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\inputdefiner.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\fileview.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interpolatecurveview.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternproperties.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplesbox.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sampleeditor.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\samplesview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentsbox.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instnotemapview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\envelopeview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cmdproperties.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cmdsgeneral.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\cmdsnotes.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\propertiesview.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machinesbox.h">
+      <Filter>machine</Filter>
+    </ClInclude>
+    <ClInclude Include="src\playlisteditor.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequenceview.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\seqeditor.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stepsequencerview.h">
+      <Filter>sequence</Filter>
+    </ClInclude>
+    <ClInclude Include="src\wavebox.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\about.h">
+      <Filter>help</Filter>
+    </ClInclude>
+    <ClInclude Include="src\greet.h">
+      <Filter>help</Filter>
+    </ClInclude>
+    <ClInclude Include="src\help.h">
+      <Filter>help</Filter>
+    </ClInclude>
+    <ClInclude Include="src\helpview.h">
+      <Filter>help</Filter>
+    </ClInclude>
+    <ClInclude Include="src\kbdhelp.h">
+      <Filter>help</Filter>
+    </ClInclude>
+    <ClInclude Include="src\checkunsaved.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderview.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\navigation.h">
+      <Filter>toolbars</Filter>
+    </ClInclude>
+    <ClInclude Include="src\settingsview.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\recentview.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\skincoord.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\skingraphics.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\songproperties.h">
+      <Filter>file</Filter>
+    </ClInclude>
+    <ClInclude Include="src\interpreter.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\workspace.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mainframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\resources\resource.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,8 @@
 #ifndef psy_audio_PSY3LOADER_H
 #define psy_audio_PSY3LOADER_H
 
+#include "wire.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,10 +14,12 @@ struct psy_audio_SongFile;
 
 typedef struct psy_audio_PSY3Loader {
 	struct psy_audio_SongFile* songfile;
+	psy_audio_LegacyWires legacywires;
 } psy_audio_PSY3Loader;
 
 void psy_audio_psy3loader_init(psy_audio_PSY3Loader*,
 	struct psy_audio_SongFile*);
+void psy_audio_psy3loader_dispose(psy_audio_PSY3Loader*);
 int psy_audio_psy3loader_load(psy_audio_PSY3Loader*);
 
 #ifdef __cplusplus

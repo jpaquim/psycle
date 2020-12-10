@@ -112,6 +112,7 @@
     <ClCompile Include="src\datacompression.c" />
     <ClCompile Include="src\dir.c" />
     <ClCompile Include="src\fileio.c" />
+    <ClCompile Include="src\playlist.c" />
     <ClCompile Include="src\propertiesio.c" />
     <ClCompile Include="src\translator.c" />
   </ItemGroup>
@@ -119,6 +120,7 @@
     <ClInclude Include="src\datacompression.h" />
     <ClInclude Include="src\dir.h" />
     <ClInclude Include="src\fileio.h" />
+    <ClInclude Include="src\playlist.h" />
     <ClInclude Include="src\propertiesio.h" />
     <ClInclude Include="src\translator.h" />
   </ItemGroup>

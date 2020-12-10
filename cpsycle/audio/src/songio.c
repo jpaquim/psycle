@@ -42,14 +42,13 @@ void psy_audio_songfile_init(psy_audio_SongFile* self)
 	psy_signal_init(&self->signal_output);
 	psy_signal_init(&self->signal_warning);
 	self->machinesoloed = -1;
-	psy_audio_legacywires_init(&self->legacywires);
+	self->legacywires = NULL;
 }
 
 void psy_audio_songfile_dispose(psy_audio_SongFile* self)
 {
 	psy_signal_dispose(&self->signal_output);
 	psy_signal_dispose(&self->signal_warning);		
-	psy_audio_legacywires_dispose(&self->legacywires);
 }
 
 int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
@@ -89,6 +88,7 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			if (status = psy_audio_psy3loader_load(&psy3loader)) {
 				psy_audio_songfile_errfile(self);
 			}
+			psy_audio_psy3loader_dispose(&psy3loader);
 #else
 			status = PSY_ERRFILEFORMAT;
 #endif
@@ -96,7 +96,11 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		} else if (strcmp(header,"PSY2SONG") == 0) {
 			// PSY2SONG is the Sign of the file.
 #ifdef PSYCLE_USE_PSY2
-			psy_audio_psy2_load(self);
+			PSY2Loader psy2loader;
+
+			psy2loader_init(&psy2loader, self);
+			psy2loader_load(&psy2loader);
+			psy2loader_dispose(&psy2loader);
 #else
 			status = PSY_ERRFILEFORMAT;
 #endif
@@ -130,21 +134,9 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 		}
 		if (!psy_audio_machines_at(&self->song->machines, psy_audio_MASTER_INDEX)) {
 			psy_audio_songfile_createmaster(self);
-		}				
-		psy_audio_machines_solo(&self->song->machines,
-			self->machinesoloed);		
-		{
-			psy_TableIterator it;
-			// notify machines postload	
-			for (it = psy_audio_machines_begin(&self->song->machines);
-				!psy_tableiterator_equal(&it, psy_table_end());
-				psy_tableiterator_inc(&it)) {
-				psy_audio_Machine* machine;
-
-				machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-				psy_audio_machine_postload(machine, self, psy_tableiterator_key(&it));
-			}
 		}
+		psy_audio_machines_solo(&self->song->machines,
+			self->machinesoloed);
 		psy_audio_machines_endfilemode(&self->song->machines);		
 	} else {
 		status = psy_audio_songfile_errfile(self);

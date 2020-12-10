@@ -47,12 +47,18 @@ static psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Lo
 static psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(psy_audio_PSY3Loader*,
 	int32_t index, char* modulename, char* catchername, bool* replaced);
 static void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader*);
+static void psy_audio_psy3loader_postload(psy_audio_PSY3Loader*);
 
 void psy_audio_psy3loader_init(psy_audio_PSY3Loader* self, psy_audio_SongFile* songfile)
 {
 	assert(self && songfile && songfile->song);
-
+	psy_audio_legacywires_init(&self->legacywires);
 	self->songfile = songfile;
+}
+
+void psy_audio_psy3loader_dispose(psy_audio_PSY3Loader* self)
+{
+	psy_audio_legacywires_dispose(&self->legacywires);
 }
 
 //	===================
@@ -66,8 +72,9 @@ int psy_audio_psy3loader_load(psy_audio_PSY3Loader* self)
 	int32_t solo = 0;
 	int32_t chunkcount = 0;		
 	int32_t progress = 0;
-	uint32_t filesize = psyfile_filesize(self->songfile->file);
-	
+	uint32_t filesize = psyfile_filesize(self->songfile->file);		
+	self->songfile->legacywires = &self->legacywires;
+
 	psyfile_read(self->songfile->file, &temp32, sizeof(temp32));
 	self->songfile->file->fileversion = temp32;
 	psyfile_read(self->songfile->file, &temp32, sizeof(temp32));
@@ -162,7 +169,22 @@ int psy_audio_psy3loader_load(psy_audio_PSY3Loader* self)
 	}	
 	psy_audio_reposition(&self->songfile->song->sequence);
 	psy_audio_psy3loader_setinstrumentnames(self);
+	psy_audio_psy3loader_postload(self);
 	return self->songfile->err;
+}
+
+void psy_audio_psy3loader_postload(psy_audio_PSY3Loader* self)
+{					
+	psy_TableIterator it;
+	
+	for (it = psy_audio_machines_begin(&self->songfile->song->machines);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {		
+		psy_audio_machine_postload(
+			(psy_audio_Machine*)psy_tableiterator_value(&it),
+			self->songfile,
+			psy_tableiterator_key(&it));
+	}		
 }
 
 void psy_audio_psy3loader_setinstrumentnames(psy_audio_PSY3Loader* self)
@@ -1576,7 +1598,7 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader* s
 			psy_table_insert(legacywiretable, (uintptr_t)i, (void*)legacywire);
 		}
 	}
-	psy_table_insert(&self->songfile->legacywires.legacywires, index, legacywiretable);
+	psy_table_insert(&self->songfile->legacywires->legacywires, index, legacywiretable);
 	psyfile_readstring(self->songfile->file, editname, 32);
 	if (replaced) {
 		char text[256];

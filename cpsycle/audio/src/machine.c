@@ -816,7 +816,7 @@ void loadwiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t countwires;
 	psy_Table* legacywiretable;
 
-	legacywiretable = psy_audio_legacywires_at(&songfile->legacywires, slot);
+	legacywiretable = psy_audio_legacywires_at(songfile->legacywires, slot);
 	if (!legacywiretable) {
 		return;
 	}
@@ -969,7 +969,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t c;
 	psy_Table* legacywiretable;
 
-	legacywiretable = psy_audio_legacywires_at(&songfile->legacywires, slot);
+	legacywiretable = psy_audio_legacywires_at(songfile->legacywires, slot);
 	if (!legacywiretable) {
 		return;
 	}
@@ -1002,7 +1002,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			&& slot != wire->_inputMachine && inputmachine)
 		{
 			// Do not create the hidden wire from mixer send to the send machine.
-			int outWire = psy_audio_legacywires_findlegacyoutput(&songfile->legacywires, wire->_inputMachine, slot);
+			int outWire = psy_audio_legacywires_findlegacyoutput(songfile->legacywires, wire->_inputMachine, slot);
 			if (outWire != -1) {
 				psy_audio_Wire newwire;
 

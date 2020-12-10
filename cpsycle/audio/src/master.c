@@ -10,7 +10,9 @@
 #include "plugin_interface.h"
 
 #include <convert.h>
+// dsp
 #include <operations.h>
+#include <valuemapper.h>
 
 #include <string.h>
 #include <math.h>
@@ -225,7 +227,8 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 				psy_dsp_amp_t nv;
 
 				nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
-				self->volume = nv * nv * 4.f;
+				self->volume = nv * nv * 4.f;				
+				//self->volume = psy_dsp_map_255_1(ev->parameter) * 2;
 			} else
 				if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
 					psy_audio_MachineSockets* sockets;

@@ -4,17 +4,26 @@
 #if !defined(WORKSPACE_H)
 #define WORKSPACE_H
 
-#include <song.h>
-#include <player.h>
-#include <propertiesio.h>
-#include <signal.h>
-#include <plugincatcher.h>
+// host
+#include "audioconfig.h"
+#include "eventdriverconfig.h"
+#include "languageconfig.h"
+#include "undoredo.h"
+// audio
 #include <machinefactory.h>
+#include <player.h>
+#include <plugincatcher.h>
+#include <song.h>
+#include <sequence.h>
+#include <signal.h>
+// dsp
+#include <notestab.h>
+// ui
 #include <uicomponent.h>
 #include <uiapp.h>
-#include "undoredo.h"
-#include <sequence.h>
-#include <notestab.h>
+// file
+#include <playlist.h>
+#include <propertiesio.h>
 
 // Workspace
 //
@@ -56,12 +65,7 @@ enum {
 	PROPERTY_ID_ENABLEAUDIO,
 	PROPERTY_ID_LOADSKIN,
 	PROPERTY_ID_DEFAULTSKIN,
-	PROPERTY_ID_LOADCONTROLSKIN,
-	PROPERTY_ID_ADDEVENTDRIVER,
-	PROPERTY_ID_REMOVEEVENTDRIVER,
-	PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS,
-	PROPERTY_ID_EVENTDRIVERCONFIGLOAD,
-	PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE,
+	PROPERTY_ID_LOADCONTROLSKIN,	
 	PROPERTY_ID_DEFAULTFONT,
 	PROPERTY_ID_DEFAULTLINES,
 	PROPERTY_ID_DRAWVUMETERS,
@@ -69,12 +73,9 @@ enum {
 	PROPERTY_ID_PATTERNDISPLAY_TRACKER,
 	PROPERTY_ID_PATTERNDISPLAY_PIANOROLL,
 	PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_VERTICAL,
-	PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL,
-	PROPERTY_ID_LANG,
+	PROPERTY_ID_PATTERNDISPLAY_TRACKER_PIANOROLL_HORIZONTAL,	
 	PROPERTY_ID_SHOWSTEPSEQUENCER,
-	PROPERTY_ID_TRACKSCOPES,
-	PROPERTY_ID_AUDIODRIVERS,
-	PROPERTY_ID_ACTIVEEVENTDRIVERS,	
+	PROPERTY_ID_TRACKSCOPES,	
 	PROPERTY_ID_ADDCONTROLLERMAP,
 	PROPERTY_ID_REMOVECONTROLLERMAP
 };
@@ -146,22 +147,17 @@ typedef struct {
 	// Psycle settings
 	psy_Property config;
 	// Sections of the configuration
-	psy_Property* language;
-	psy_Property* recentsongs;
-	psy_Property* recentfiles;
+	AudioConfig audioconfig;
+	EventDriverConfig eventdrvconfig;
+	LanguageConfig languageconfig;
+	psy_Playlist recentsongs;	
 	psy_Property* global;
-	psy_Property* general;
-	psy_Property* inputoutput;
-	psy_Property* eventinputs;
+	psy_Property* general;		
 	psy_Property* keyboard;
 	psy_Property* keyboard_misc;
 	psy_Property* directories;
 	psy_Property* midicontrollers;
 	psy_Property* compatibility;
-	psy_Property* driverconfigure;
-	psy_Property* driverconfigurations;	
-	psy_Property* eventdriverconfigure;
-	psy_Property* eventdriverconfigurations;
 	psy_Property* theme;
 	psy_Property* cmds;
 	psy_Property* patternviewtheme;
