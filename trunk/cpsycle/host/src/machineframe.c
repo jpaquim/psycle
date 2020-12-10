@@ -379,7 +379,7 @@ void machineframe_onmouseup(MachineFrame* self, psy_ui_Component* sender,
 				psy_ui_component_togglevisibility(&self->newval.component);
 				machineframe_resize(self);
 			}
-			psy_ui_component_setfocus(&self->newval.edit);
+			psy_ui_component_setfocus(psy_ui_edit_base(&self->newval.edit));
 		}
 	}
 }

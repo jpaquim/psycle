@@ -8,6 +8,142 @@
 
 #include "constants.h"
 
+// LegacyWire
+void psy_audio_legacywire_copy(psy_audio_LegacyWire* self, psy_audio_LegacyWire* source)
+{
+	assert(self && source);
+
+	self->_inputMachine = source->_inputMachine;
+	self->_inputCon = source->_inputCon;
+	self->_inputConVol = source->_inputConVol;
+	self->_wireMultiplier = source->_wireMultiplier;
+	self->_outputMachine = source->_outputMachine;
+	self->_connection = source->_connection;
+	psy_audio_pinmapping_dispose(&self->pinmapping);
+	psy_audio_pinmapping_init(&self->pinmapping, 0);
+	psy_audio_pinmapping_copy(&self->pinmapping, &source->pinmapping);	
+}
+
+void psy_audio_legacywire_dispose(psy_audio_LegacyWire* self)
+{
+	psy_audio_pinmapping_dispose(&self->pinmapping);
+}
+
+psy_audio_LegacyWire* psy_audio_legacywire_clone(psy_audio_LegacyWire* source)
+{
+	psy_audio_LegacyWire* rv;
+	
+	assert(source);
+
+	rv = psy_audio_legacywire_allocinit();
+	if (rv) {
+		psy_audio_legacywire_copy(rv, source);
+	}
+	return rv;
+}
+
+// MachineWires
+void psy_audio_machinewires_init(psy_audio_MachineWires* self)
+{
+	//psy_table_init(&self->wires);
+	psy_table_init(self);
+}
+
+void psy_audio_machinewires_copy(psy_audio_MachineWires* self, psy_audio_MachineWires* other)
+{
+	psy_audio_MachineWires* rv;
+	psy_TableIterator it;
+
+	assert(self && other);
+
+	psy_audio_machinewires_clear(self);
+
+	for (it = psy_table_begin(other);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+		psy_audio_machinewires_insert(self, psy_tableiterator_key(&it),
+			psy_audio_legacywire_clone((psy_audio_LegacyWire*)
+				psy_tableiterator_value(&it)));
+	}	
+}
+
+void psy_audio_machinewires_dispose(psy_audio_MachineWires* self)
+{
+	//psy_table_disposeall(&self->wires, (psy_fp_disposefunc)
+		//psy_audio_legacywire_dispose);
+	psy_table_disposeall(self, (psy_fp_disposefunc)
+		psy_audio_legacywire_dispose);
+}
+
+psy_audio_MachineWires* psy_audio_machinewires_alloc(void)
+{
+	return (psy_audio_MachineWires*)malloc(sizeof(psy_audio_MachineWires));
+}
+
+psy_audio_MachineWires* psy_audio_machinewires_allocinit(void)
+{
+	psy_audio_MachineWires* rv;
+
+	rv = psy_audio_machinewires_alloc();
+	if (rv) {
+		psy_audio_machinewires_init(rv);
+	}
+	return rv;
+}
+
+psy_audio_MachineWires* psy_audio_machinewires_clone(psy_audio_MachineWires* source)
+{
+	psy_audio_MachineWires* rv;
+
+	assert(source);
+
+	rv = psy_audio_machinewires_allocinit();
+	if (rv) {
+		psy_audio_machinewires_copy(rv, source);
+	}
+	return rv;
+}
+
+
+void psy_audio_machinewires_deallocate(psy_audio_MachineWires* self)
+{
+	assert(self);
+
+	psy_audio_machinewires_dispose(self);
+	free(self);
+}
+
+void psy_audio_machinewires_clear(psy_audio_MachineWires* self)
+{
+	psy_audio_machinewires_dispose(self);
+	psy_audio_machinewires_init(self);
+}
+
+void psy_audio_machinewires_insert(psy_audio_MachineWires* self,
+	uintptr_t connectionid, psy_audio_LegacyWire* wire)
+{
+	assert(self && wire);
+
+	if (psy_table_exists(self, connectionid)) {
+		psy_audio_LegacyWire* wire;
+
+		wire = (psy_audio_LegacyWire*)psy_table_at(self,
+			connectionid);
+		psy_audio_legacywire_dispose(wire);
+		free(wire);
+	}
+	psy_table_insert(self, connectionid, wire);
+}
+
+psy_audio_LegacyWire* psy_audio_machinewires_at(psy_audio_MachineWires* self,
+	uintptr_t connectionid)
+{
+	assert(self);
+
+	return (psy_audio_LegacyWire*)psy_table_at(self, connectionid);
+}
+
+// LegacyWires
 void psy_audio_legacywires_init(psy_audio_LegacyWires* self)
 {
 	assert(self);
@@ -17,29 +153,23 @@ void psy_audio_legacywires_init(psy_audio_LegacyWires* self)
 
 void psy_audio_legacywires_dispose(psy_audio_LegacyWires* self)
 {
-	psy_TableIterator it;
+	psy_table_disposeall(&self->legacywires, (psy_fp_disposefunc)
+		psy_audio_machinewires_dispose);	
+}
 
-	assert(self);
+void psy_audio_legacywires_insert(psy_audio_LegacyWires* self, uintptr_t macid,
+	psy_audio_MachineWires* machinewires)
+{
+	assert(self && machinewires);
 
-	for (it = psy_table_begin(&self->legacywires);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-		psy_Table* legacywiretable;
-		psy_TableIterator it_wires;
+	if (psy_table_exists(&self->legacywires, macid)) {
+		psy_audio_MachineWires* wires;
 
-		legacywiretable = (psy_Table*)psy_tableiterator_value(&it);
-		for (it_wires = psy_table_begin(legacywiretable);
-				!psy_tableiterator_equal(&it_wires, psy_table_end());
-				psy_tableiterator_inc(&it_wires)) {
-			psy_audio_LegacyWire* legacywire;
-
-			legacywire = (psy_audio_LegacyWire*)psy_tableiterator_value(&it_wires);
-			psy_audio_legacywire_dispose(legacywire);
-			free(legacywire);
-		}
-		psy_table_dispose(legacywiretable);
+		wires = (psy_audio_MachineWires*)psy_table_at(&self->legacywires,
+			macid);
+		psy_audio_machinewires_deallocate(wires);
 	}
-	psy_table_dispose(&self->legacywires);
+	psy_table_insert(&self->legacywires, macid, machinewires);
 }
 
 psy_Table* psy_audio_legacywires_at(psy_audio_LegacyWires* self,
@@ -78,76 +208,4 @@ int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires* self,
 		}
 	}
 	return -1;
-}
-
-void legacywires_load_psy2(psy_audio_SongFile* songfile, uintptr_t slot)
-{
-	psy_Table* legacywiretable;
-	uintptr_t i;
-
-	assert(songfile);
-
-	legacywiretable = (psy_Table*)malloc(sizeof(psy_Table));
-	psy_table_init(legacywiretable);
-	psy_table_insert(&songfile->legacywires.legacywires, slot, legacywiretable);
-	// resize	
-	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		psy_table_insert(legacywiretable, (uintptr_t)i,
-			(void*)psy_audio_legacywire_allocinit());
-	}
-	// Incoming connections Machine number
-	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		int32_t input;
-		psy_audio_LegacyWire* legacywire;
-
-		psyfile_read(songfile->file, &input, sizeof(input));
-		legacywire = psy_table_at(legacywiretable, i);
-		if (legacywire) {
-			legacywire->_inputMachine = input;
-		}
-	}
-	// Outgoing connections Machine number
-	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		int32_t output;
-		psy_audio_LegacyWire* legacywire;
-
-		psyfile_read(songfile->file, &output, sizeof(output));
-		legacywire = psy_table_at(legacywiretable, i);
-		if (legacywire) {
-			legacywire->_outputMachine = output;
-		}
-	}
-	// Incoming connections Machine vol
-	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		float _inputConVol;
-		psy_audio_LegacyWire* legacywire;
-
-		psyfile_read(songfile->file, &_inputConVol, sizeof(_inputConVol));
-		legacywire = psy_table_at(legacywiretable, i);
-		if (legacywire) {
-			legacywire->_inputConVol = _inputConVol;
-		}
-	}
-	// Outgoing connections activated
-	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		uint8_t connection;
-		psy_audio_LegacyWire* legacywire;
-
-		psyfile_read(songfile->file, &connection, sizeof(connection));
-		legacywire = psy_table_at(legacywiretable, i);
-		if (legacywire) {
-			legacywire->_connection = connection;
-		}
-	}
-	// Incoming connections activated
-	for (i = 0; i < MAX_CONNECTIONS; ++i) {
-		uint8_t _inputCon;
-		psy_audio_LegacyWire* legacywire;
-
-		psyfile_read(songfile->file, &_inputCon, sizeof(_inputCon));
-		legacywire = psy_table_at(legacywiretable, i);
-		if (legacywire) {
-			legacywire->_inputCon = _inputCon;
-		}
-	}
 }

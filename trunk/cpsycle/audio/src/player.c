@@ -68,7 +68,6 @@ void psy_audio_player_init(psy_audio_Player* self, psy_audio_Song* song,
 	psy_audio_machinefactory_init(&self->machinefactory, NULL, NULL);
 	psy_audio_song_init(&self->emptysong, &self->machinefactory);
 	self->song = song;	
-	self->numsongtracks = 16;
 	self->recordingnotes = FALSE;
 	self->recordnoteoff = FALSE;
 	self->multichannelaudition = FALSE;
@@ -295,7 +294,7 @@ void psy_audio_player_workmachine(psy_audio_Player* self, uintptr_t amount,
 				}
 			}
 			psy_audio_buffercontext_init(&bc, events, output, output, amount,
-				self->numsongtracks);
+				self->sequencer.numsongtracks);
 			psy_audio_buffer_scale(output, psy_audio_machine_amprange(machine),
 				amount);
 			if (self->measure_cpu_usage) {
@@ -506,9 +505,10 @@ void psy_audio_player_setnumsongtracks(psy_audio_Player* self,
 	assert(self);
 
 	if (numsongtracks >= 1 && numsongtracks < MAX_TRACKS) {
-		self->numsongtracks = numsongtracks;	
+		psy_audio_sequencer_setnumsongtracks(&self->sequencer,
+			numsongtracks);
 		psy_signal_emit(&self->signal_numsongtrackschanged, self, 1,
-			self->numsongtracks);
+			numsongtracks);
 	}
 }
 

@@ -4,6 +4,12 @@
 #ifndef psy_audio_PSY2_H
 #define psy_audio_PSY2_H
 
+// local
+#include "constants.h"
+#include "machines.h"
+#include "psy2converter.h"
+#include "wire.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,8 +27,41 @@ extern "C" {
 
 struct psy_audio_SongFile;
 
-void psy_audio_psy2_load(struct psy_audio_SongFile*);
+/// helper struct for the PSY2 loader.
+typedef struct VSTLoader {
+	uint8_t valid;
+	char dllName[128];
+	int32_t numpars;
+	float* pars;
+} VSTLoader;
+
+typedef struct VstPreload {
+	char _editName[16];
+	struct psy_audio_SongFile* songfile;
+} VstPreload;
+
+typedef struct PSY2Loader {
+	struct psy_audio_SongFile* songfile;
+	uint8_t currentoctave;
+	int32_t songtracks;
+	unsigned char busEffect[64];
+	unsigned char busMachine[64];
+	unsigned char playorder[MAX_SONG_POSITIONS];
+	int32_t playlength;
+	uint8_t _machineActive[128];
+	psy_audio_Machine* pMac[128];
+	InternalMachinesConvert converter;
+	VSTLoader vstL[OLD_MAX_PLUGINS];
+	psy_audio_LegacyWires legacywires;
+	psy_audio_LegacyWires legacywiresremapped;
+} PSY2Loader;
+
+void psy2loader_init(PSY2Loader*, struct psy_audio_SongFile*);
+void psy2loader_dispose(PSY2Loader*);
+void psy2loader_load(PSY2Loader*);
 // no psy2 save implemented
+
+psy_audio_MachineWires* psy_audio_read_psy2machinewires(struct PsyFile*);
 
 #ifdef __cplusplus
 }

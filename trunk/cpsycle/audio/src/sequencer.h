@@ -5,6 +5,7 @@
 #define psy_audio_SEQUENCER_H
 
 // audio
+#include "constants.h"
 #include "sequence.h"
 #include "machines.h"
 #include "activechannels.h"
@@ -54,6 +55,7 @@ typedef struct {
 	psy_audio_Machines* machines;
 	psy_dsp_big_beat_t bpm;
 	uintptr_t samplerate;
+	uintptr_t numsongtracks;
 	psy_dsp_big_beat_t beatspersample;	
 	uintptr_t lpb; // global
 	psy_dsp_big_beat_t lpbspeed; // pattern
@@ -225,6 +227,16 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 		rv *= self->rowdelay.rowspeed;
 	}
 	return rv;
+}
+
+INLINE void psy_audio_sequencer_setnumsongtracks(psy_audio_Sequencer* self,
+	uintptr_t numsongtracks)
+{
+	assert(self);
+
+	if (numsongtracks >= 1 && numsongtracks < MAX_TRACKS) {
+		self->numsongtracks = numsongtracks;		
+	}
 }
 
 INLINE psy_dsp_big_beat_t psy_audio_sequencer_beatspersample(

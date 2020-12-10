@@ -154,10 +154,10 @@ psy_List* psy_list_findentry(psy_List* self, void* entry)
 	return p;
 }
 
-uintptr_t psy_list_entry_index(psy_List* self, void* entry)
+uintptr_t psy_list_entry_index(const psy_List* self, const void* entry)
 {
 	uintptr_t rv;
-	psy_List* p = self;
+	const psy_List* p = self;
 
 	rv = 0;
 	while (p != NULL) {

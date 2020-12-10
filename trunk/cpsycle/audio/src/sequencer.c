@@ -180,6 +180,7 @@ void psy_audio_sequencer_reset_common(psy_audio_Sequencer* self,
 	self->sequence = sequence;
 	self->machines = machines;
 	self->samplerate = samplerate;
+	self->numsongtracks = 16;
 	self->bpm = (psy_dsp_big_beat_t)125;
 	self->lpb = 4;
 	self->lpbspeed = (psy_dsp_big_beat_t)1.0;
@@ -798,26 +799,19 @@ void psy_audio_sequencer_patternloop(psy_audio_Sequencer* self,
 		if (self->loop.count > 0) {
 			self->loop.active = 1;
 			psy_audio_sequencer_jumpto(self, self->loop.offset);
-		}
-		else {
+		} else {
 			self->loop.offset = offset;
 		}
-	}
-	else
-	if (self->loop.count > 0 &&
-		offset != self->loop.offset) {
+	} else if (self->loop.count > 0 && offset != self->loop.offset) {
 		--self->loop.count;
 		if (self->loop.count > 0) {
 			psy_audio_sequencer_jumpto(self, self->loop.offset);
-		}
-		else {
+		} else {
 			self->loop.active = 0;
 			self->loop.offset = offset +
 				(psy_dsp_big_beat_t)1.f / self->lpb;
 		}
-	}
-	else
-	if (self->loop.count == 0) {
+	} else if (self->loop.count == 0) {
 		self->loop.active = 0;
 		self->loop.offset = offset;
 	}
@@ -914,11 +908,11 @@ void psy_audio_sequencer_addsequenceevent(psy_audio_Sequencer* self,
 			} 
 		}
 		if (psy_audio_patternentry_front(patternentry)->cmd == psy_audio_PATTERNCMD_SET_VOLUME) {
-			psy_audio_PatternEntry* entry;
+			psy_audio_PatternEntry* entry;			
 
 			// volume column used to store mach
 			entry = psy_audio_patternentry_clone(patternentry);
-			entry->track += track->channeloffset;
+			entry->track += track->channeloffset;			
 			psy_audio_patternentry_front(entry)->vol = 
 				(psy_audio_patternentry_front(entry)->mach == psy_audio_NOTECOMMANDS_MACH_EMPTY)
 				? psy_audio_MASTER_INDEX

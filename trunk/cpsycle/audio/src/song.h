@@ -61,6 +61,11 @@ INLINE uintptr_t psy_audio_songproperties_lpb(const psy_audio_SongProperties* se
 	return self->lpb;
 }
 
+INLINE uintptr_t psy_audio_songproperties_numtracks(const psy_audio_SongProperties* self)
+{
+	return self->tracks;
+}
+
 INLINE const char* psy_audio_songproperties_title(const psy_audio_SongProperties* self)
 {
 	return self->title;
@@ -149,6 +154,13 @@ INLINE uintptr_t psy_audio_song_lpb(const psy_audio_Song* self)
 	assert(self);
 
 	return psy_audio_songproperties_lpb(&self->properties);
+}
+/// return song properties numtracks
+INLINE uintptr_t psy_audio_song_numtracks(const psy_audio_Song* self)
+{
+	assert(self);
+
+	return psy_audio_songproperties_numtracks(&self->properties);
 }
 
 #ifdef __cplusplus

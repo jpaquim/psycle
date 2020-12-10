@@ -78,10 +78,10 @@ INLINE void psy_audio_legacywire_init_all(psy_audio_LegacyWire* self,
 	psy_audio_pinmapping_init(&self->pinmapping, 2);
 }
 
-INLINE void psy_audio_legacywire_dispose(psy_audio_LegacyWire* self)
-{
-	psy_audio_pinmapping_dispose(&self->pinmapping);
-}
+void psy_audio_legacywire_copy(psy_audio_LegacyWire*, psy_audio_LegacyWire*
+	source);
+void psy_audio_legacywire_dispose(psy_audio_LegacyWire* self);
+
 
 INLINE psy_audio_LegacyWire* psy_audio_legacywire_alloc(void)
 {
@@ -122,20 +122,45 @@ INLINE psy_audio_LegacyWire* psy_audio_legacywire_allocinit_all(
 	return rv;
 }
 
+psy_audio_LegacyWire* psy_audio_legacywire_clone(psy_audio_LegacyWire* source);	
+
+typedef psy_Table psy_audio_MachineWires;
+
+void psy_audio_machinewires_init(psy_audio_MachineWires*);
+void psy_audio_machinewires_copy(psy_audio_MachineWires*,
+	psy_audio_MachineWires* other);
+void psy_audio_machinewires_dispose(psy_audio_MachineWires*);
+psy_audio_MachineWires* psy_audio_machinewires_alloc(void);
+psy_audio_MachineWires* psy_audio_machinewires_allocinit(void);
+psy_audio_MachineWires* psy_audio_machinewires_clone(psy_audio_MachineWires*
+	source);
+void psy_audio_machinewires_deallocate(psy_audio_MachineWires*);
+void psy_audio_machinewires_clear(psy_audio_MachineWires*);
+void psy_audio_machinewires_insert(psy_audio_MachineWires*,
+	uintptr_t connectionid, psy_audio_LegacyWire*);
+psy_audio_LegacyWire* psy_audio_machinewires_at(psy_audio_MachineWires*,
+	uintptr_t connectionid);
+
+// psy_audio_LegacyWires
+//
+// Stores the connections of all machines with machineslot as key and as
+// value MachineWires, the wires of one machine.
+
 typedef struct psy_audio_LegacyWires {
 	// ConnectionID X psy_audio_LegacyWire*
 	psy_Table legacywires;
 } psy_audio_LegacyWires;
 
-struct psy_audio_SongFile;
-
 void psy_audio_legacywires_init(psy_audio_LegacyWires*);
 void psy_audio_legacywires_dispose(psy_audio_LegacyWires*);
+void psy_audio_legacywires_insert(psy_audio_LegacyWires*, uintptr_t macid,
+	psy_audio_MachineWires* machinewires);
 psy_Table* psy_audio_legacywires_at(psy_audio_LegacyWires*,
 	uintptr_t machineslot);
+// searches for an existing output connection in the machinewires of a machine
+// and if found returns the connection id (wire number) else -1
 int psy_audio_legacywires_findlegacyoutput(psy_audio_LegacyWires*,
 	int sourcemac, int macindex);
-void legacywires_load_psy2(struct psy_audio_SongFile*, uintptr_t slot);
 	
 #ifdef __cplusplus
 }
