@@ -637,8 +637,7 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 
 	song = psy_audio_song_allocinit(&self->machinefactory);
 	if (song) {
-		psy_audio_SongFile songfile;
-		bool play;
+		psy_audio_SongFile songfile;		
 		
 		psy_signal_connect(&song->signal_loadprogress, self,
 			workspace_onloadprogress);
