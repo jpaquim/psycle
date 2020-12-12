@@ -301,7 +301,7 @@ void plugineditor_oncreatenewplugin(PluginEditor* self, psy_ui_Component* sender
 	psy_Path path;	
 	psy_Path plugindir;
 	
-	dir = workspace_luascripts_directory(self->workspace);
+	dir = dirconfig_luascripts(&self->workspace->config.directories);
 	psy_path_init(&path, "");
 	psy_path_setprefix(&path, dir);
 	psy_path_setname(&path, "newplugin.lua");

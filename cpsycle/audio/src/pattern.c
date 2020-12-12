@@ -918,7 +918,7 @@ void psy_audio_pattern_blockpaste(psy_audio_Pattern* self,
 		end.offset = psy_audio_pattern_length(self);
 	}
 	psy_audio_pattern_blockremove(self, begin, end);
-	// sequencer_checkiterators(&self->workspace->player.sequencer,
+	// sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
 	//	node);
 	while (p != NULL) {
 		psy_audio_PatternEntry* pasteentry;

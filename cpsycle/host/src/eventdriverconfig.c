@@ -16,7 +16,8 @@
 // platform
 #include "../../detail/portable.h"
 
-void eventdriverconfig_init(EventDriverConfig* self, psy_Property* parent, psy_audio_Player* player)
+void eventdriverconfig_init(EventDriverConfig* self, psy_Property* parent,
+	psy_audio_Player* player)
 {
 	self->player = player;
 	self->config = parent;

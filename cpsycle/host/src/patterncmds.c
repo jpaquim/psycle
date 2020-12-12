@@ -105,7 +105,7 @@ void insertcommand_revert(InsertCommand* self)
 			psy_audio_pattern_remove(self->pattern, node);
 			if (self->workspace) {
 				psy_audio_sequencer_checkiterators(
-					&self->workspace->player.sequencer,
+					&workspace_player(self->workspace)->sequencer,
 					node);
 			}
 		} else {
@@ -172,7 +172,7 @@ void removecommand_execute(RemoveCommand* self)
 		psy_audio_pattern_remove(self->pattern, node);
 		if (self->workspace) {
 			psy_audio_sequencer_checkiterators(
-				&self->workspace->player.sequencer,
+				&workspace_player(self->workspace)->sequencer,
 				node);
 		}
 		self->remove = 1;
@@ -320,7 +320,7 @@ void BlockRemoveCommandExecute(BlockRemoveCommand* self)
 		self->selection.bottomright);
 	self->remove = TRUE;
 	//psy_audio_sequencer_checkiterators(
-		//&self->workspace->player.sequencer,
+		//&workspace_player(self->workspace).sequencer,
 		//node);	
 }
 
@@ -396,7 +396,7 @@ void BlockPasteCommandExecute(BlockPasteCommand* self)
 	}
 	self->paste = TRUE;
 	//psy_audio_sequencer_checkiterators(
-		//&self->workspace->player.sequencer,
+		//&workspace_player(self->workspace).sequencer,
 		//node);	
 }
 

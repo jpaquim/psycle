@@ -74,6 +74,8 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Property* dirconfig)
 	} else {
 		self->nativeroot = strdup(PSYCLE_APP_DIR);
 	}
+	self->saveafterscan = TRUE;
+	self->hasplugincache = FALSE;
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_scanprogress);
 }
@@ -97,6 +99,7 @@ void plugincatcher_clear(psy_audio_PluginCatcher* self)
 		psy_property_allocinit_key(NULL),
 		"Psycle Plugin Scanner Cache created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	plugincatcher_makeinternals(self);
+	self->hasplugincache = FALSE;
 }
 
 void plugincatcher_makeinternals(psy_audio_PluginCatcher* self)
@@ -193,6 +196,9 @@ void plugincatcher_scan(psy_audio_PluginCatcher* self)
 				MACH_LADSPA);
 		}
 	}
+	if (self->saveafterscan) {
+		plugincatcher_save(self);
+	}
 	psy_signal_emit(&self->signal_changed, self, 0);
 	psy_signal_emit(&self->signal_scanprogress, self, 1, 0);
 }
@@ -273,6 +279,7 @@ int plugincatcher_load(psy_audio_PluginCatcher* self)
 
 	plugincatcher_clear(self);	
 	rv = propertiesio_load(self->plugins, self->inipath, 1);
+	self->hasplugincache = rv;
 	psy_signal_emit(&self->signal_changed, self, 0);
 	return rv;
 }

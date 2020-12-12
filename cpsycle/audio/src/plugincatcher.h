@@ -22,6 +22,8 @@ typedef struct {
 	psy_Property* dirconfig;
 	psy_Signal signal_changed;
 	psy_Signal signal_scanprogress;
+	bool saveafterscan;
+	bool hasplugincache;
 } psy_audio_PluginCatcher;
 
 void plugincatcher_init(psy_audio_PluginCatcher*, psy_Property* dirconfig);
@@ -40,6 +42,13 @@ uintptr_t plugincatcher_extractshellidx(const char* path);
 void plugincatcher_catchername(psy_audio_PluginCatcher*, const char* path, char* name, uintptr_t shellidx);
 const char* plugincatcher_searchpath(psy_audio_PluginCatcher*, const char* name,
 	int type);
+
+INLINE bool psy_audio_plugincatcher_hascache(const psy_audio_PluginCatcher* self)
+{
+	assert(self);
+
+	return self->hasplugincache;
+}
 
 #ifdef __cplusplus
 }

@@ -22,7 +22,7 @@
 #include <errno.h>
 #endif
 
-static char load_filter[] =
+static char load_filters[] =
 "All Songs (*.psy *.xm *.it *.s3m *.mod *.wav)" "|*.psy;*.xm;*.it;*.s3m;*.mod;*.wav|"
 "Songs (*.psy)"				        "|*.psy|"
 "FastTracker II Songs (*.xm)"       "|*.xm|"
@@ -31,7 +31,7 @@ static char load_filter[] =
 "Original Mod Format Songs (*.mod)" "|*.mod|"
 "Wav Format Songs (*.wav)"			"|*.wav";
 
-static char save_filter[] =
+static char save_filters[] =
 "Songs (*.psy)|*.psy";
 
 static void psy_audio_songfile_createmaster(psy_audio_SongFile*);
@@ -195,10 +195,20 @@ int psy_audio_songfile_errfile(psy_audio_SongFile* self)
 
 const char* psy_audio_songfile_loadfilter(void)
 {
-	return load_filter;
+	return load_filters;
 }
 
 const char* psy_audio_songfile_savefilter(void)
 {
-	return save_filter;
+	return save_filters;
+}
+
+const char* psy_audio_songfile_defaultloadextension(void)
+{
+	return PSYCLE_DEFAULT_LOAD_EXTENSION;
+}
+
+const char* psy_audio_songfile_defaultsaveextension(void)
+{
+	return PSYCLE_DEFAULT_SAVE_EXTENSION;
 }

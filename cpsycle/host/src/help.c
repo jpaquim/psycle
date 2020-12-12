@@ -122,7 +122,8 @@ void help_loadpage(Help* self, uintptr_t index)
 		psy_Path path;
 
 		psy_path_init(&path, NULL);
-		psy_path_setprefix(&path, workspace_doc_directory(self->workspace));
+		psy_path_setprefix(&path, dirconfig_doc(
+			&self->workspace->config.directories));
 		psy_path_setname(&path, psy_table_at(&self->filenames, index));
 		psy_ui_editor_load(&self->editor, psy_path_path(&path));
 		psy_path_dispose(&path);

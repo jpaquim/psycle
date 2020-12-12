@@ -120,7 +120,7 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 	
 	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
 		psy_audio_songfile_loadfilter(), "PSY",
-		workspace_songs_directory(self->workspace));
+		dirconfig_songs(&self->workspace->config.directories));
 	if (psy_ui_opendialog_execute(&dialog)) {
 		psy_audio_SongFile songfile;
 
@@ -1146,7 +1146,7 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			"All Files (*.*)|*.*";
 
 		psy_ui_opendialog_init_all(&dialog, 0, "Load Sample", filter, "WAV",
-			workspace_samples_directory(self->workspace));
+			dirconfig_samples(&self->workspace->config.directories));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			psy_audio_Sample* sample;
 			psy_audio_SampleIndex index;
@@ -1192,7 +1192,7 @@ void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 		"Save Sample",
 		filter,
 		"WAV",
-		workspace_samples_directory(self->workspace));
+		dirconfig_samples(&self->workspace->config.directories));
 	if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {
 		psy_audio_sample_save(wavebox_sample(&self->wavebox),
 			psy_ui_savedialog_filename(&dialog));

@@ -51,7 +51,7 @@ void playposbar_init(PlayPosBar* self, psy_ui_Component* parent,
 
 void playposbar_ontimer(PlayPosBar* self, uintptr_t timerid)
 {
-	//if (psy_audio_player_playing(&self->workspace->player)) {
+	//if (psy_audio_player_playing(&workspace_player(self->workspace))) {
 	playposbar_updatelabel(self);
 	//}
 }
@@ -62,10 +62,10 @@ void playposbar_updatelabel(PlayPosBar* self)
 	char text[80];
 
 	currplaytime = psy_audio_sequencer_currplaytime(
-		&self->workspace->player.sequencer);
+		&workspace_player(self->workspace)->sequencer);
 	psy_snprintf(text, 40, "%02dm%02ds %.2fb",
 		(int)(currplaytime / 60), ((int)currplaytime % 60),
-		(float)psy_audio_player_position(&self->workspace->player));
+		(float)psy_audio_player_position(workspace_player(self->workspace)));
 	psy_ui_label_settext(&self->position, text);
 }
 

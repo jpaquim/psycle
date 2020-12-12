@@ -153,10 +153,10 @@ void midiflagsview_init(MidiFlagsView* self, psy_ui_Component* parent,
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
 	midiactiveclockbox_init(&self->clock, &self->component,
-		&self->workspace->player.midiinput.stats.flags);
+		&workspace_player(self->workspace)->midiinput.stats.flags);
 	psy_ui_component_setalign(&self->clock.component, psy_ui_ALIGN_TOP);
 	midiactivechannelbox_init(&self->channelmap, &self->component,
-		&self->workspace->player.midiinput.stats.channelmap);
+		&workspace_player(self->workspace)->midiinput.stats.channelmap);
 	psy_ui_component_setalign(&self->channelmap.component, psy_ui_ALIGN_TOP);
 	
 }
@@ -213,7 +213,7 @@ void midichannelmappingview_ondraw(MidiChannelMappingView* self, psy_ui_Graphics
 	}
 	lineheight = (int)(tm.tmHeight * 1.2);
 	midichannelmappingview_drawheader(self, g, colx_px, 0);
-	midiinput = &self->workspace->player.midiinput;
+	midiinput = &workspace_player(self->workspace)->midiinput;
 	for (ch = 0, cpy = lineheight; ch < psy_audio_MAX_MIDI_CHANNELS; ++ch,
 			cpy += lineheight) {
 		char text[256];
@@ -480,7 +480,7 @@ void midimonitor_onsongchanged(MidiMonitor* self, Workspace* sender, int flag,
 	psy_audio_SongFile* songfile)
 {
 	self->channelmapupdate =
-		self->workspace->player.midiinput.stats.channelmapupdate - 1;	
+		workspace_player(self->workspace)->midiinput.stats.channelmapupdate - 1;
 	if (sender->song) {
 		psy_signal_connect(&sender->song->machines.signal_slotchange, self,
 			midimonitor_onmachineslotchange);
@@ -493,29 +493,29 @@ void midimonitor_ontimer(MidiMonitor* self, uintptr_t timerid)
 		if (self->channelstatcounter > 0) {
 			--self->channelstatcounter;
 			if (self->channelstatcounter == 0) {
-				self->workspace->player.midiinput.stats.channelmap = 0;
+				workspace_player(self->workspace)->midiinput.stats.channelmap = 0;
 			}
 		}
 		if (self->flagstatcounter > 0) {
 			--self->flagstatcounter;
 			if (self->flagstatcounter == 0) {
-				self->workspace->player.midiinput.stats.flags = 0;
+				workspace_player(self->workspace)->midiinput.stats.flags = 0;
 			}
 		}
 		if (self->channelmapupdate !=
-				self->workspace->player.midiinput.stats.channelmapupdate) {
+				workspace_player(self->workspace)->midiinput.stats.channelmapupdate) {
 			psy_ui_component_invalidate(&self->channelmapping.component);			
 			self->channelmapupdate =
-				self->workspace->player.midiinput.stats.channelmapupdate;			
+				workspace_player(self->workspace)->midiinput.stats.channelmapupdate;
 		}
-		if (self->lastchannelmap != self->workspace->player.midiinput.stats.channelmap) {
+		if (self->lastchannelmap != workspace_player(self->workspace)->midiinput.stats.channelmap) {
 			self->channelstatcounter = 5;			
-			self->lastchannelmap = self->workspace->player.midiinput.stats.channelmap;
+			self->lastchannelmap = workspace_player(self->workspace)->midiinput.stats.channelmap;
 			psy_ui_component_invalidate(&self->flags.channelmap.component);
 		}
-		if (self->lastflags != self->workspace->player.midiinput.stats.flags) {
+		if (self->lastflags != workspace_player(self->workspace)->midiinput.stats.flags) {
 			self->flagstatcounter = 5;
-			self->lastflags = self->workspace->player.midiinput.stats.flags;
+			self->lastflags = workspace_player(self->workspace)->midiinput.stats.flags;
 			psy_ui_component_invalidate(&self->flags.clock.component);
 		}
 	}
@@ -530,7 +530,7 @@ void midimonitor_onmachineslotchange(MidiMonitor* self, psy_audio_Machines* send
 void midimonitor_updatechannelmap(MidiMonitor* self)
 {
 	self->channelmapupdate =
-		self->workspace->player.midiinput.stats.channelmapupdate - 1;
+		workspace_player(self->workspace)->midiinput.stats.channelmapupdate - 1;
 }
 
 void midimonitor_onhide(MidiMonitor* self)
@@ -541,10 +541,10 @@ void midimonitor_onhide(MidiMonitor* self)
 
 void midimonitor_onconfigure(MidiMonitor* self)
 {	
-	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, 5, 0);
+	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 5, 0);
 }
 
 void midimonitor_onmapconfigure(MidiMonitor* self)
 {
-	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, 6, 0);
+	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 6, 0);
 }

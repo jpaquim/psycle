@@ -40,7 +40,8 @@ void recentview_onselected(RecentView* self, PropertiesView* sender,
 				psy_property_key(property)) != 0) {
 			workspace_loadsong(self->workspace,
 				psy_property_key(property),
-				workspace_playsongafterload(self->workspace));
+				generalconfig_playsongafterload(psycleconfig_general(
+					workspace_conf(self->workspace))));
 		}
 	}
 }

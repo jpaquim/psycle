@@ -316,6 +316,33 @@
     <ClCompile Include="src\interpreter.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\machineparamconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\machineviewconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\patternviewconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\viewhistory.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\keyboardmiscconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\midiviewconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\generalconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\compatconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dirconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -607,6 +634,33 @@
     </ClInclude>
     <ClInclude Include="src\resources\resource.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineparamconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\machineviewconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\patternviewconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\viewhistory.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\keyboardmiscconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\midiviewconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\generalconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\compatconfig.h">
+      <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dirconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

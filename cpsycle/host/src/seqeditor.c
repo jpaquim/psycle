@@ -260,7 +260,8 @@ void seqeditortrack_ondraw_virtual(SeqEditorTrack* self, psy_ui_Graphics* g, int
 				psy_ui_setcolour(g, psy_ui_colour_make(0x00444444));
 				psy_ui_drawrectangle(g, r);				
 			}
-			if (workspace_showingpatternnames(self->workspace)) {
+			if (generalconfig_showingpatternnames(psycleconfig_general(
+					workspace_conf(self->workspace)))) {
 				psy_audio_Pattern* pattern;
 
 				pattern = psy_audio_sequenceentry_pattern(sequenceentry,
@@ -661,7 +662,7 @@ void seqeditortracks_ondraw(SeqEditorTracks* self, psy_ui_Graphics* g)
 
 void seqeditortracks_drawplayline(SeqEditorTracks* self, psy_ui_Graphics* g)
 {
-	if (psy_audio_player_playing(&self->workspace->player)) {
+	if (psy_audio_player_playing(workspace_player(self->workspace))) {
 		psy_ui_TextMetric tm;
 		psy_ui_IntSize size;
 		int cpx;
@@ -669,7 +670,7 @@ void seqeditortracks_drawplayline(SeqEditorTracks* self, psy_ui_Graphics* g)
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->component), &tm);
-		cpx = (int)(psy_audio_player_position(&self->workspace->player) *
+		cpx = (int)(psy_audio_player_position(workspace_player(self->workspace)) *
 			self->trackstate->pxperbeat);
 		psy_ui_drawline(g, cpx, 0, cpx, size.height);
 		self->lastplaylinepx = cpx;
@@ -685,7 +686,7 @@ bool seqeditortracks_playlinechanged(SeqEditorTracks* self)
 	tm = psy_ui_component_textmetric(&self->component);
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
-	cpx = (int)(psy_audio_player_position(&self->workspace->player) *
+	cpx = (int)(psy_audio_player_position(workspace_player(self->workspace)) *
 		self->trackstate->pxperbeat);
 	return cpx != self->lastplaylinepx;
 }
@@ -816,7 +817,7 @@ void seqeditortracks_onsequenceselectionchanged(SeqEditorTracks* self,
 
 void seqeditortracks_ontimer(SeqEditorTracks* self, uintptr_t timerid)
 {		
-	if (psy_audio_player_playing(&self->workspace->player) &&
+	if (psy_audio_player_playing(workspace_player(self->workspace)) &&
 			seqeditortracks_playlinechanged(self)) {
 		psy_ui_Rectangle r;
 		psy_ui_TextMetric tm;
@@ -831,7 +832,7 @@ void seqeditortracks_ontimer(SeqEditorTracks* self, uintptr_t timerid)
 			psy_ui_component_invalidaterect(&self->component, r);
 		}
 		r = psy_ui_rectangle_make(
-			(int)(psy_audio_player_position(&self->workspace->player) *
+			(int)(psy_audio_player_position(workspace_player(self->workspace)) *
 				self->trackstate->pxperbeat),
 			psy_ui_component_scrolltop(&self->component),
 			2, size.height);

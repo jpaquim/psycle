@@ -75,7 +75,7 @@ void cpumoduleview_ondraw(CPUModuleView* self, psy_ui_Graphics* g)
 							psy_min(strlen(psy_audio_machine_editname(machine)), 14));
 						psy_ui_textout(g, tm.tmAveCharWidth * 21, cpy,
 							info->Name, strlen(info->Name));
-						if (psy_audio_player_measuring_cpu_usage(&self->workspace->player)) {
+						if (psy_audio_player_measuring_cpu_usage(workspace_player(self->workspace))) {
 							psy_snprintf(text, 40, "%.1f%%", 100.0f * psy_audio_machine_cpu_time(machine).perc);						
 						} else {
 							psy_snprintf(text, 40, "N/A");
@@ -276,8 +276,8 @@ void cpuview_onhide(CPUView* self)
 void cpuview_oncpuperf(CPUView* self, psy_ui_CheckBox* sender)
 {
 	if (psy_ui_checkbox_checked(sender) != 0) {
-		psy_audio_player_measure_cpu_usage(&self->workspace->player);
+		psy_audio_player_measure_cpu_usage(workspace_player(self->workspace));
 	} else {
-		psy_audio_player_stop_measure_cpu_usage(&self->workspace->player);
+		psy_audio_player_stop_measure_cpu_usage(workspace_player(self->workspace));
 	}
 }

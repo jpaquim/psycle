@@ -150,7 +150,8 @@ void mainframe_init(MainFrame*);
 
 INLINE int mainframe_showmaximizedatstart(MainFrame* self)
 {
-	return workspace_showmaximizedatstart(&self->workspace);
+	return generalconfig_showmaximizedatstart(
+		psycleconfig_general(workspace_conf(&self->workspace)));
 }
 
 INLINE psy_ui_Component* mainframe_base(MainFrame* self)

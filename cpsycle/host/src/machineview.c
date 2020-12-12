@@ -544,8 +544,8 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
 	psy_ui_component_starttimer(&self->component, 0, 50);	
-	if (workspace->machineviewtheme) {
-		machinewireview_applyproperties(self, workspace->machineviewtheme);
+	if (workspace->config.macview.theme) {
+		machinewireview_applyproperties(self, workspace->config.macview.theme);
 	}
 }
 
@@ -591,7 +591,7 @@ void machinewireview_readconfig(MachineWireView* self)
 {
 	psy_Property* mv;
 	
-	mv = psy_property_findsection(&self->workspace->config,
+	mv = psy_property_findsection(&self->workspace->config.config,
 		"visual.machineview");
 	if (mv) {		
 		self->drawvumeters = psy_property_at_bool(mv, "drawvumeters", 1);
@@ -601,14 +601,17 @@ void machinewireview_readconfig(MachineWireView* self)
 		}
 		self->skin.drawmachineindexes = psy_property_at_bool(mv,
 			"drawmachineindexes", 1);
-		self->showwirehover = workspace_showwirehover(self->workspace);
+		self->showwirehover = machineviewconfig_showwirehover(
+			psycleconfig_macview(workspace_conf(self->workspace)));
 	}
 }
 
 void machinewireview_applyproperties(MachineWireView* self, psy_Property* p)
 {
-	machineviewskin_settheme(&self->skin, p, workspace_skins_directory(self->workspace));
-	self->skin.drawmachineindexes = workspace_showmachineindexes(self->workspace);	
+	machineviewskin_settheme(&self->skin, p,
+		dirconfig_skins(&self->workspace->config.directories));
+	self->skin.drawmachineindexes = machineviewconfig_showmachineindexes(
+		psycleconfig_macview(workspace_conf(self->workspace)));
 	psy_ui_component_setbackgroundcolour(&self->component, self->skin.colour);	
 }
 
@@ -2004,7 +2007,8 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		machineview_onskinchanged);	
-	if (workspace_showwirehover(workspace)) {
+	if (machineviewconfig_showwirehover(psycleconfig_macview(
+			workspace_conf(workspace)))) {
 		self->wireview.showwirehover = TRUE;
 	}
 }
@@ -2045,7 +2049,7 @@ void machineview_onfocus(MachineView* self, psy_ui_Component* sender)
 void machineview_onskinchanged(MachineView* self, Workspace* sender)
 {			
 	machinewireview_applyproperties(&self->wireview,
-		sender->machineviewtheme);
+		sender->config.macview.theme);
 	newmachine_updateskin(&self->newmachine);
 }
 

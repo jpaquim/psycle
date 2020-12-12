@@ -11,14 +11,18 @@ void make_translator_default(psy_Property* lang)
 
 	assert(lang);
 
-	psy_property_set_str(lang, "lang", "en");
-	// filebar
+	psy_property_set_str(lang, "lang", "en");			
+	// common file operations and filebar
 	section = psy_property_append_section(lang, "file");
 	psy_property_set_str(section, "song", "Song");
 	psy_property_set_str(section, "load", "Load");
 	psy_property_set_str(section, "save", "Save");
 	psy_property_set_str(section, "new", "New");
 	psy_property_set_str(section, "render", "Render");
+	psy_property_set_str(section, "loadsong", "Load Song");
+	psy_property_set_str(section, "savesong", "Save Song");
+	psy_property_set_str(section, "plugin-filesave", "Plugin File Load");
+	psy_property_set_str(section, "plugin-fileload", "Plugin File Save");
 	// undobar
 	section = psy_property_append_section(lang, "undo");
 	psy_property_set_str(section, "undo", "Undo");
@@ -133,7 +137,7 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "patternview", "Pattern View");
 	psy_property_set_str(section, "keyboard-and-misc", "Keyboard and misc");
 	psy_property_set_str(section, "compatibility", "Compatibility");
-	psy_property_set_str(section, "midicontrollers", "MIDI Controllers");
+	psy_property_set_str(section, "controllers", "MIDI Controllers");
 	psy_property_set_str(section, "midi-controllers-add",
 		"Add Controller Map");
 	psy_property_set_str(section, "midi=controllers-remove",

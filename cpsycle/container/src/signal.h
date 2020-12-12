@@ -15,6 +15,8 @@ extern "C" {
 // Allows communication between objects not related to an inheritance hierachy.
 // Stores a list of slots containing a function callback and a context
 // (destination object) pointer. There is no typesafety for context and sender.
+// Before the context becomes invalid (disposed) the context must disconnect
+// itself from the signal.
 // usage:
 // psy_signal_connect:
 // adds a slot (context, function callback pointer) to the slot list.

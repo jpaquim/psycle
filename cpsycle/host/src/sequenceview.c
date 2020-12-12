@@ -294,7 +294,8 @@ void sequencelistview_init(SequenceListView* self, psy_ui_Component* parent,
 	self->trackwidth = 100;
 	self->lastplayposition = -1.f;
 	self->lastplayrow = UINTPTR_MAX;
-	self->showpatternnames = workspace_showingpatternnames(workspace);
+	self->showpatternnames = generalconfig_showingpatternnames(psycleconfig_general(
+		workspace_conf(self->workspace)));
 	self->refreshcount = 0;
 	if (self->sequence && self->sequence->patterns) {
 		psy_signal_connect(&self->sequence->patterns->signal_namechanged, self,
@@ -443,7 +444,7 @@ void sequencelistview_drawprogressbar(SequenceListView* self,
 	psy_ui_Rectangle r;
 
 	r = psy_ui_rectangle_make(x + 5, y + listviewmargin,
-		(int)((psy_audio_player_playlist_rowprogress(&self->workspace->player)) *
+		(int)((psy_audio_player_playlist_rowprogress(workspace_player(self->workspace))) *
 			(self->trackwidth - 5)), self->lineheight);
 	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00514536));
 }
@@ -549,20 +550,20 @@ void sequencelistview_onmousedoubleclick(SequenceListView* self,
 void sequencelistview_ontimer(SequenceListView* self, uintptr_t timerid)
 {
 	if (psy_audio_player_playing(self->player)) {
-		if (psy_audio_player_playlist_position(&self->workspace->player) != self->lastplayrow) {
+		if (psy_audio_player_playlist_position(workspace_player(self->workspace)) != self->lastplayrow) {
 			// invalidate previous row
 			sequencelistview_invalidaterow(self, self->lastplayrow);
-			self->lastplayrow = psy_audio_player_playlist_position(&self->workspace->player);
+			self->lastplayrow = psy_audio_player_playlist_position(workspace_player(self->workspace));
 			// next(curr) row is invalidated with row progress bar
 		}
 		if (self->refreshcount == 2) { // saves cpu not updating at every intervall
 									   // todo: better check for player line change
 			// invalidate row progress bar
 			// takes care, too, that at row change the new row is invalidated
-			if (psy_audio_player_playlist_position(&self->workspace->player)
+			if (psy_audio_player_playlist_position(workspace_player(self->workspace))
 				!= UINTPTR_MAX) {
 				sequencelistview_invalidaterow(self,
-					psy_audio_player_playlist_position(&self->workspace->player));
+					psy_audio_player_playlist_position(workspace_player(self->workspace)));
 			}
 			self->refreshcount = 0;
 		}
@@ -750,7 +751,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->playlisteditor.component, psy_ui_ALIGN_TOP);
 	psy_ui_splitbar_init(&self->splitbar, &self->component);
 	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_TOP);
-	if (!workspace_showplaylisteditor(workspace)) {
+	if (!generalconfig_showplaylisteditor(psycleconfig_general(
+			workspace_conf(self->workspace)))) {
 		psy_ui_component_hide(&self->playlisteditor.component);
 		psy_ui_component_hide(&self->splitbar.component);
 	}
@@ -770,7 +772,8 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
 	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);
 	sequenceroptionsbar_init(&self->options, &self->component, workspace);
-	if (workspace_showplaylisteditor(workspace)) {
+	if (generalconfig_showplaylisteditor(psycleconfig_general(
+			workspace_conf(workspace)))) {
 		psy_ui_checkbox_check(&self->options.showplaylist);
 	}
 	psy_ui_component_setalign(&self->options.component, psy_ui_ALIGN_BOTTOM);
@@ -852,7 +855,7 @@ void sequenceview_onnewentry(SequenceView* self)
 	// change length to default lines
 	psy_audio_pattern_setlength(newpattern,
 		psy_audio_pattern_defaultlines() /
-		(psy_audio_player_lpb(&self->workspace->player)));
+		(psy_audio_player_lpb(workspace_player(self->workspace))));
 	tracknode = psy_audio_sequence_insert(self->sequence,
 		self->selection->editposition,
 		psy_audio_patterns_append(self->patterns,
@@ -1123,13 +1126,13 @@ void sequenceview_onshowplaylist(SequenceView* self, psy_ui_Button* sender)
 	if (psy_ui_component_visible(&self->playlisteditor.component)) {
 		psy_ui_component_hide(&self->playlisteditor.component);
 		psy_ui_component_hide(&self->splitbar.component);
-		psy_property_set_bool(self->workspace->general,
+		psy_property_set_bool(self->workspace->config.general.general,
 			"showplaylisteditor", 0);
 	} else {
 		self->playlisteditor.component.visible = 1;
 		psy_ui_component_show(&self->splitbar.component);
 		psy_ui_component_show(&self->playlisteditor.component);
-		psy_property_set_bool(self->workspace->general,
+		psy_property_set_bool(self->workspace->config.general.general,
 			"showplaylisteditor", 1);
 	}
 	psy_ui_component_align(&self->component);
@@ -1155,17 +1158,17 @@ void sequenceview_onrecordtweak(SequenceView* self, psy_ui_Button* sender)
 
 void sequenceview_onrecordnoteoff(SequenceView* self, psy_ui_Button* sender)
 {
-	if (psy_audio_player_recordingnoteoff(&self->workspace->player)) {
-		psy_audio_player_preventrecordnoteoff(&self->workspace->player);
+	if (psy_audio_player_recordingnoteoff(workspace_player(self->workspace))) {
+		psy_audio_player_preventrecordnoteoff(workspace_player(self->workspace));
 	} else {
-		psy_audio_player_recordnoteoff(&self->workspace->player);
+		psy_audio_player_recordnoteoff(workspace_player(self->workspace));
 	}
 }
 
 void sequenceview_onmultichannelaudition(SequenceView* self, psy_ui_Button* sender)
 {
-	self->workspace->player.multichannelaudition =
-		!self->workspace->player.multichannelaudition;
+	workspace_player(self->workspace)->multichannelaudition =
+		!workspace_player(self->workspace)->multichannelaudition;
 }
 
 void sequenceview_onsongchanged(SequenceView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
@@ -1237,7 +1240,7 @@ void sequenceview_onsequenceselectionchanged(SequenceView* self, Workspace* send
 void sequenceview_updateplayposition(SequenceView* self)
 {
 	if (workspace_followingsong(self->workspace) && psy_audio_player_playing(
-			&self->workspace->player)) {
+			workspace_player(self->workspace))) {
 		sequenceview_changeplayposition(self);
 	}
 }
@@ -1252,10 +1255,10 @@ void sequenceview_changeplayposition(SequenceView* self)
 	sequenceentry = psy_audio_sequenceposition_entry(&editposition);
 	startposition = sequenceentry->offset;
 	psy_audio_exclusivelock_enter();
-	psy_audio_player_stop(&self->workspace->player);
-	psy_audio_player_setposition(&self->workspace->player,
+	psy_audio_player_stop(workspace_player(self->workspace));
+	psy_audio_player_setposition(workspace_player(self->workspace),
 		startposition);
-	psy_audio_player_start(&self->workspace->player);
+	psy_audio_player_start(workspace_player(self->workspace));
 	psy_audio_exclusivelock_leave();
 }
 
@@ -1270,9 +1273,10 @@ void sequenceview_onsequencechanged(SequenceView* self,
 void sequenceview_onconfigchanged(SequenceView* self, Workspace* workspace,
 	psy_Property* property)
 {
-	if (self->listview.showpatternnames != workspace_showingpatternnames(workspace))
-	{
-		self->listview.showpatternnames = workspace_showingpatternnames(workspace);
+	if (self->listview.showpatternnames != generalconfig_showingpatternnames(
+			psycleconfig_general(workspace_conf(workspace)))) {
+		self->listview.showpatternnames = generalconfig_showingpatternnames(
+			psycleconfig_general(workspace_conf(workspace)));
 		psy_ui_component_invalidate(&self->listview.component);
 		if (self->listview.showpatternnames) {
 			psy_ui_checkbox_check(&self->options.shownames);

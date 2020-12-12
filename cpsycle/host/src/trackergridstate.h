@@ -159,8 +159,8 @@ void trackergridstate_init(TrackerGridState*, TrackConfig*);
 void trackergridstate_dispose(TrackerGridState*);
 int trackergridstate_trackwidth(TrackerGridState*, uintptr_t track);
 TrackDef* trackergridstate_trackdef(TrackerGridState*, uintptr_t track);
-int trackergridstate_track_x(TrackerGridState*, uintptr_t track);
-uintptr_t trackergridstate_screentotrack(TrackerGridState*, int x,
+int trackergridstate_tracktopx(TrackerGridState*, uintptr_t track);
+uintptr_t trackergridstate_pxtotrack(TrackerGridState*, int x,
 	uintptr_t numsongtracks);
 uintptr_t trackergridstate_basewidth(TrackerGridState*, uintptr_t track);
 uintptr_t trackergridstate_paramcol(TrackerGridState*, uintptr_t track, int x);

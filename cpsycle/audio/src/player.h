@@ -73,6 +73,13 @@ INLINE uintptr_t psy_audio_player_numsongtracks(psy_audio_Player* self)
 	return self->sequencer.numsongtracks;
 }
 
+INLINE psy_audio_MidiConfig* psy_audio_player_midiconfig(psy_audio_Player* self)
+{
+	return &self->midiinput.midiconfig;
+}
+
+
+
 void psy_audio_player_setoctave(psy_audio_Player*, uintptr_t octave);
 
 INLINE uintptr_t psy_audio_player_octave(psy_audio_Player* self)
