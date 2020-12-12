@@ -85,7 +85,7 @@ const char* patternblockmenu_section(PatternBlockMenu* self)
 
 void patternblockmenu_execute(PatternBlockMenu* self, int id)
 {
-	psy_audio_player_sendcmd(&self->workspace->player,
+	psy_audio_player_sendcmd(workspace_player(self->workspace),
 		patternblockmenu_section(self),
 		psy_eventdrivercmd_makeid(id));
 }

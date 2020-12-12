@@ -17,6 +17,7 @@ static void audioconfig_makedriverlist(AudioConfig*);
 void audioconfig_init(AudioConfig* self, psy_Property* parent, psy_audio_Player* player)
 {
 	self->player = player;
+	self->audioenabled = TRUE;
 	audioconfig_makesection(self, parent);
 }
 
@@ -257,4 +258,22 @@ void audioconfig_enableaudio(AudioConfig* self, bool enable)
 			psy_audiodriver_close(self->player->driver);
 		}
 	}
+}
+
+bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property)
+{	
+	psy_Property* choice;
+
+	assert(self && property);
+
+	if (psy_property_hasid(property, PROPERTY_ID_ENABLEAUDIO)) {
+		audioconfig_enableaudio(self, psy_property_item_bool(property));
+		return TRUE;
+	}
+	choice = psy_property_item_choice_parent(property);		
+	if (choice && psy_property_hasid(choice, PROPERTY_ID_AUDIODRIVERS)) {
+		audioconfig_onaudiodriverselect(self, self->audioenabled);
+		return TRUE;				
+	}
+	return FALSE;
 }

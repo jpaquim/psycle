@@ -63,7 +63,7 @@ void trackscopeview_init(TrackScopeView* self, psy_ui_Component* parent,
 void trackscopeview_ondraw(TrackScopeView* self, psy_ui_Graphics* g)
 {
 	if (workspace_song(self->workspace)) {
-		int numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
+		int numtracks = psy_audio_player_numsongtracks(workspace_player(self->workspace));
 		int c;				
 		int rows = 1;
 		uintptr_t currtrack;
@@ -113,12 +113,12 @@ void trackscopeview_drawtrack(TrackScopeView* self, psy_ui_Graphics* g,
 
 	width = self->trackwidth;
 	height = self->trackheight;
-	if (psy_table_exists(&self->workspace->player.sequencer.lastmachine,
+	if (psy_table_exists(&workspace_player(self->workspace)->sequencer.lastmachine,
 			track)) {
 		char text[40];
 
 		lastmachine = (uintptr_t)
-			psy_table_at(&self->workspace->player.sequencer.lastmachine,
+			psy_table_at(&workspace_player(self->workspace)->sequencer.lastmachine,
 				track);
 		psy_snprintf(text, 40, "%X", lastmachine);
 		psy_ui_textout(g, x + width - 10, y + height - self->textheight, text,
@@ -246,7 +246,7 @@ void trackscopeview_onpreferredsize(TrackScopeView* self, psy_ui_Size* limit,
 {		
 	uintptr_t rows;
 
-	rows = ((psy_audio_player_numsongtracks(&self->workspace->player) - 1)
+	rows = ((psy_audio_player_numsongtracks(workspace_player(self->workspace)) - 1)
 		/ self->maxcolumns) + 1;
 	rv->width = psy_ui_value_makeew(2 * 30);
 	rv->height = psy_ui_value_makeeh(rows * 2.75);
@@ -262,7 +262,7 @@ void trackscopeview_onmousedown(TrackScopeView* self, psy_ui_MouseEvent* ev)
 		int trackwidth;
 		uintptr_t numtracks;
 		
-		numtracks = psy_audio_player_numsongtracks(&self->workspace->player);
+		numtracks = psy_audio_player_numsongtracks(workspace_player(self->workspace));
 		columns = numtracks < self->maxcolumns ? numtracks : self->maxcolumns;
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);

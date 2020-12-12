@@ -191,7 +191,7 @@ void patternproperties_onkeydown(PatternProperties* self, psy_ui_KeyEvent* ev)
 		patternproperties_onapply(self, &self->component);
 		psy_ui_keyevent_preventdefault(ev);
 	} else if (ev->keycode == psy_ui_KEY_ESCAPE) {
-		workspace_selectview(self->workspace, TABPAGE_PATTERNVIEW, 0, 0);
+		workspace_selectview(self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
 		psy_ui_keyevent_preventdefault(ev);
 	}
 	psy_ui_keyevent_stoppropagation(ev);

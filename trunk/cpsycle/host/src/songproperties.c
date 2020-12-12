@@ -372,14 +372,14 @@ void songpropertiesview_oncreditschanged(SongPropertiesView* self,
 void songpropertiesview_ontempoeditchange(SongPropertiesView* self,
 	IntEdit* sender)
 {
-	psy_audio_player_setbpm(&self->workspace->player, intedit_value(sender));
+	psy_audio_player_setbpm(workspace_player(self->workspace), intedit_value(sender));
 	songpropertiesview_updaterealspeed(self);
 }
 
 void songpropertiesview_onlpbeditchange(SongPropertiesView* self,
 	IntEdit* sender)
 {
-	psy_audio_player_setlpb(&self->workspace->player, (uintptr_t)
+	psy_audio_player_setlpb(workspace_player(self->workspace), (uintptr_t)
 		intedit_value(sender));
 	songpropertiesview_updaterealspeed(self);
 }
@@ -387,7 +387,7 @@ void songpropertiesview_onlpbeditchange(SongPropertiesView* self,
 void songpropertiesview_ontpbeditchange(SongPropertiesView* self,
 	IntEdit* sender)
 {
-	psy_audio_player_setticksperbeat(&self->workspace->player, (uintptr_t)
+	psy_audio_player_setticksperbeat(workspace_player(self->workspace), (uintptr_t)
 		intedit_value(sender));
 	songpropertiesview_updaterealspeed(self);
 }
@@ -395,7 +395,7 @@ void songpropertiesview_ontpbeditchange(SongPropertiesView* self,
 void songpropertiesview_onetpbeditchange(SongPropertiesView* self,
 	IntEdit* sender)
 {
-	psy_audio_player_setextraticksperbeat(&self->workspace->player, (uintptr_t)
+	psy_audio_player_setextraticksperbeat(workspace_player(self->workspace), (uintptr_t)
 		intedit_value(sender));
 	songpropertiesview_updaterealspeed(self);
 }

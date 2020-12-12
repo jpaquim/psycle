@@ -50,8 +50,7 @@ void psy_audio_machinewires_init(psy_audio_MachineWires* self)
 }
 
 void psy_audio_machinewires_copy(psy_audio_MachineWires* self, psy_audio_MachineWires* other)
-{
-	psy_audio_MachineWires* rv;
+{	
 	psy_TableIterator it;
 
 	assert(self && other);

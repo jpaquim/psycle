@@ -6,6 +6,7 @@
 
 // container
 #include <properties.h>
+#include <translator.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,20 +14,25 @@ extern "C" {
 
 // LanguageConfig
 //
-// Configures and selects the language
+// Configures and selects the language of a psy_Translator
 
 enum {
 	PROPERTY_ID_LANG = 3000
 };
 
 typedef struct LanguageConfig {
-	psy_Property* language;
+	psy_Property* languagechoice;
 	// references
 	psy_Property* parent;
+	psy_Translator* translator;
 } LanguageConfig;
 
-void languageconfig_init(LanguageConfig*, psy_Property* parent);
-void languageconfig_configlanguage(LanguageConfig*);
+void languageconfig_init(LanguageConfig*, psy_Property* parent,
+	psy_Translator*);
+void languageconfig_updatelanguage(LanguageConfig*);
+
+// Will be called if settingview was changed
+bool languageconfig_onpropertychanged(LanguageConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

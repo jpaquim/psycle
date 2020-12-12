@@ -916,8 +916,7 @@ void psy2loader_addmachines(PSY2Loader* self)
 				for (j = psy_table_begin(wiresremapped);
 					!psy_tableiterator_equal(&j, psy_table_end());
 					psy_tableiterator_inc(&j)) {
-					psy_audio_LegacyWire* wireremapped;
-					float temp;
+					psy_audio_LegacyWire* wireremapped;					
 					
 					wireremapped = (psy_audio_LegacyWire*)psy_tableiterator_value(&j);
 					if (wireremapped->_inputCon && wireremapped->_inputMachine > -1 && wireremapped->_inputMachine < 128

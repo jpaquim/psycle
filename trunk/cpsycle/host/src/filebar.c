@@ -45,9 +45,9 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
-	if (workspace_savereminder(self->workspace) && 
+	if (keyboardandmisc_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_NEW);
+		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_NEW);
 	} else {
 		workspace_newsong(self->workspace);
 	}
@@ -55,34 +55,15 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
-	if (workspace_savereminder(self->workspace) &&
+	if (keyboardandmisc_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
-		workspace_selectview(self->workspace, TABPAGE_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
+		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
 	} else {
-		psy_ui_OpenDialog dialog;		
-
-		psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
-			psy_audio_songfile_loadfilter(), "PSY",
-			workspace_songs_directory(self->workspace));
-		if (psy_ui_opendialog_execute(&dialog)) {
-			workspace_loadsong(self->workspace,
-				psy_ui_opendialog_filename(&dialog),
-				workspace_playsongafterload(self->workspace));
-		}
-		psy_ui_opendialog_dispose(&dialog);
+		workspace_loadsong_fileselect(self->workspace);
 	}
 }
 
 void filebar_onsavesong(FileBar* self, psy_ui_Component* sender)
-{	
-	psy_ui_SaveDialog dialog;
-
-	psy_ui_savedialog_init_all(&dialog, 0, "Save Song",
-		psy_audio_songfile_loadfilter(), "PSY",
-		workspace_songs_directory(self->workspace));
-	if (psy_ui_savedialog_execute(&dialog)) {
-		workspace_savesong(self->workspace,
-			psy_ui_savedialog_filename(&dialog));
-	}
-	psy_ui_savedialog_dispose(&dialog);
+{		
+	workspace_savesong_fileselect(self->workspace);
 }

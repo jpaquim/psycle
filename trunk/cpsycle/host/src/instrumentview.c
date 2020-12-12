@@ -1072,7 +1072,7 @@ void instrumentview_onloadinstrument(InstrumentView* self, psy_ui_Component* sen
 			"Instrument (*.xi)|*.xi";
 
 		psy_ui_opendialog_init_all(&dialog, 0, "Load Instrument", filter, "XI",
-			workspace_samples_directory(self->workspace));
+			dirconfig_samples(&self->workspace->config.directories));
 		if (psy_ui_opendialog_execute(&dialog)) {
 			// psy_audio_SampleIndex index;
 			psy_audio_SongFile songfile;

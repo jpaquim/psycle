@@ -191,9 +191,9 @@ void renderview_render(RenderView* self)
 {	
 	psy_Property* driverconfig;
 	 
-	self->curraudiodriver = psy_audio_player_audiodriver(&self->workspace->player);
+	self->curraudiodriver = psy_audio_player_audiodriver(workspace_player(self->workspace));
 	psy_audiodriver_close(self->curraudiodriver);
-	psy_audio_player_setaudiodriver(&self->workspace->player, self->fileoutdriver);	
+	psy_audio_player_setaudiodriver(workspace_player(self->workspace), self->fileoutdriver);	
 	driverconfig = psy_property_clone(psy_audiodriver_configuration(
 		self->fileoutdriver));
 	psy_property_set_str(driverconfig, "outputpath",
@@ -207,10 +207,10 @@ void renderview_render(RenderView* self)
 			psy_AUDIODRIVERCHANNELMODE_STEREO));
 	psy_audiodriver_configure(self->fileoutdriver, driverconfig);
 	psy_property_deallocate(driverconfig);
-	self->restoreloopmode = self->workspace->player.sequencer.looping;
-	self->workspace->player.sequencer.looping = 0;
-	self->restoredither = psy_dsp_dither_settings(&self->workspace->player.dither);
-	self->restoredodither = self->workspace->player.dodither;
+	self->restoreloopmode = workspace_player(self->workspace)->sequencer.looping;
+	workspace_player(self->workspace)->sequencer.looping = 0;
+	self->restoredither = psy_dsp_dither_settings(&workspace_player(self->workspace)->dither);
+	self->restoredodither = workspace_player(self->workspace)->dodither;
 	if (psy_property_at_bool(self->properties, "dither.enable", FALSE) != FALSE) {
 		psy_Property* pdf;
 		psy_Property* noiseshaping;
@@ -227,12 +227,12 @@ void renderview_render(RenderView* self)
 			dither_noiseshape = (psy_dsp_DitherNoiseShape)
 				psy_property_item_int(noiseshaping);
 		}
-		psy_audio_player_setdither(&self->workspace->player, 16, dither_pdf,
+		psy_audio_player_setdither(workspace_player(self->workspace), 16, dither_pdf,
 			dither_noiseshape);
-		psy_audio_player_enabledither(&self->workspace->player);
+		psy_audio_player_enabledither(workspace_player(self->workspace));
 	}
-	psy_audio_player_setposition(&self->workspace->player, 0);
-	psy_audio_player_start(&self->workspace->player);
+	psy_audio_player_setposition(workspace_player(self->workspace), 0);
+	psy_audio_player_start(workspace_player(self->workspace));
 	psy_signal_connect(&self->fileoutdriver->signal_stop, self,
 		renderview_onstoprendering);
 	psy_audiodriver_open(self->fileoutdriver);
@@ -240,14 +240,14 @@ void renderview_render(RenderView* self)
 
 void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 {
-	psy_audio_player_stop(&self->workspace->player);
-	psy_audio_player_setaudiodriver(&self->workspace->player,
+	psy_audio_player_stop(workspace_player(self->workspace));
+	psy_audio_player_setaudiodriver(workspace_player(self->workspace),
 		self->curraudiodriver);
-	self->workspace->player.sequencer.looping = self->restoreloopmode;	
+	workspace_player(self->workspace)->sequencer.looping = self->restoreloopmode;
 	if (!self->restoredodither) {
-		psy_audio_player_disabledither(&self->workspace->player);
+		psy_audio_player_disabledither(workspace_player(self->workspace));
 	}
-	psy_dsp_dither_setsettings(&self->workspace->player.dither,
+	psy_dsp_dither_setsettings(&workspace_player(self->workspace)->dither,
 		self->restoredither);	
 	psy_audiodriver_open(self->curraudiodriver);
 	psy_audiodriver_close(self->fileoutdriver);

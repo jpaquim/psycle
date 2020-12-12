@@ -144,7 +144,7 @@ void playlisteditor_onaddsong(PlayListEditor* self, psy_ui_Component* sender)
 
 	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
 		psy_audio_songfile_loadfilter(), "PSY",
-		workspace_songs_directory(self->workspace));
+		dirconfig_songs(&self->workspace->config.directories));
 	if (psy_ui_opendialog_execute(&dialog)) {	
 		char name[4096];
 		char prefix[4096];
@@ -192,7 +192,7 @@ void playlisteditor_buildplaylist(PlayListEditor* self)
 
 void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 {		
-	psy_audio_player_stop(&self->workspace->player);
+	psy_audio_player_stop(workspace_player(self->workspace));
 	self->nextentry = self->currentry;
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
@@ -200,7 +200,7 @@ void playlisteditor_onplay(PlayListEditor* self, psy_ui_Component* sender)
 void playlisteditor_onstop(PlayListEditor* self, psy_ui_Component* sender)
 {	
 	psy_ui_component_stoptimer(&self->component, 0);
-	psy_audio_player_stop(&self->workspace->player);
+	psy_audio_player_stop(workspace_player(self->workspace));
 }
 
 void playlisteditor_onprev(PlayListEditor* self, psy_ui_Component* sender)
@@ -209,7 +209,7 @@ void playlisteditor_onprev(PlayListEditor* self, psy_ui_Component* sender)
 		self->nextentry = self->currentry->prev;
 		psy_ui_listbox_setcursel(&self->listbox,
 			psy_ui_listbox_cursel(&self->listbox) - 1);
-		psy_audio_player_stop(&self->workspace->player);
+		psy_audio_player_stop(workspace_player(self->workspace));
 	}
 }
 
@@ -219,13 +219,13 @@ void playlisteditor_onnext(PlayListEditor* self, psy_ui_Component* sender)
 		self->nextentry = self->currentry->next;
 		psy_ui_listbox_setcursel(&self->listbox,
 			psy_ui_listbox_cursel(&self->listbox) + 1);
-		psy_audio_player_stop(&self->workspace->player);
+		psy_audio_player_stop(workspace_player(self->workspace));
 	}
 }
 
 void playlisteditor_ontimer(PlayListEditor* self, uintptr_t timerid)
 {		
-	if (!psy_audio_player_playing(&self->workspace->player)) {
+	if (!psy_audio_player_playing(workspace_player(self->workspace))) {
 		if (self->nextentry) {
 			PlayListEntry* entry;
 			psy_List* p;
@@ -234,9 +234,9 @@ void playlisteditor_ontimer(PlayListEditor* self, uintptr_t timerid)
 			self->currentry = self->nextentry;
 			entry = (PlayListEntry*) self->currentry->entry;			
 			workspace_loadsong(self->workspace, entry->path, FALSE);		
-			psy_audio_sequencer_stoploop(&self->workspace->player.sequencer);
-			psy_audio_player_setposition(&self->workspace->player, 0);
-			psy_audio_player_start(&self->workspace->player);
+			psy_audio_sequencer_stoploop(&workspace_player(self->workspace)->sequencer);
+			psy_audio_player_setposition(workspace_player(self->workspace), 0);
+			psy_audio_player_start(workspace_player(self->workspace));
 			self->nextentry = self->currentry->next;
 			
 			p = self->entries;
@@ -250,7 +250,7 @@ void playlisteditor_ontimer(PlayListEditor* self, uintptr_t timerid)
 			}
 			psy_ui_listbox_setcursel(&self->listbox, c);
 		} else {
-			psy_audio_player_stop(&self->workspace->player);
+			psy_audio_player_stop(workspace_player(self->workspace));
 			psy_ui_component_stoptimer(&self->component, 0);
 		}
 	}
@@ -262,7 +262,7 @@ void playlisteditor_onlistchanged(PlayListEditor* self, psy_ui_Component* sender
 	psy_List* p;
 	
 	p = psy_list_at(self->entries, slot);
-	psy_audio_player_stop(&self->workspace->player);
+	psy_audio_player_stop(workspace_player(self->workspace));
 	self->currentry = p;
 	self->nextentry = p;
 }

@@ -14,8 +14,6 @@
 #include <songio.h>
 // ui
 #include <uiapp.h>
-#include <uiopendialog.h>
-#include <uisavedialog.h>
 // file
 #include <dir.h>
 // platform
@@ -99,7 +97,7 @@ static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
-static void mainframe_onselectpatterndisplay(MainFrame*, psy_ui_Component* sender, PatternDisplayType);
+static void mainframe_onselectpatterndisplay(MainFrame*, psy_ui_Component* sender, PatternDisplayMode);
 static void mainframe_onterminaloutput(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
@@ -391,7 +389,8 @@ void mainframe_initbars(MainFrame* self)
 		psy_ui_ALIGN_TOP);
 	psy_ui_component_setmargin(trackscopeview_base(&self->trackscopeview),
 		&rowmargin);
-	if (!workspace_showtrackscopes(&self->workspace)) {
+	if (!patternviewconfig_showtrackscopes(psycleconfig_patview(
+			workspace_conf(&self->workspace)))) {
 		psy_ui_component_hide(trackscopeview_base(&self->trackscopeview));
 		trackscopeview_stop(&self->trackscopeview);
 	}
@@ -487,7 +486,7 @@ void mainframe_initmainviews(MainFrame* self)
 	propertiesview_init(&self->settingsview,
 		psy_ui_notebook_base(&self->notebook),
 		&self->viewtabbars.component,
-		&self->workspace.config,
+		&self->workspace.config.config,
 		&self->workspace);
 	psy_signal_connect(&self->settingsview.signal_changed, self,
 		mainframe_onsettingsviewchanged);
@@ -549,8 +548,10 @@ void mainframe_initstepsequencerview(MainFrame* self)
 		&self->workspace);
 	psy_ui_component_setalign(stepsequencerview_base(&self->stepsequencerview),
 		psy_ui_ALIGN_BOTTOM);
-	if (!workspace_showstepsequencer(&self->workspace)) {
-		psy_ui_component_hide(stepsequencerview_base(&self->stepsequencerview));
+	if (!generalconfig_showstepsequencer(psycleconfig_general(
+			workspace_conf(&self->workspace)))) {
+		psy_ui_component_hide(stepsequencerview_base(
+			&self->stepsequencerview));
 	}
 }
 
@@ -624,9 +625,7 @@ void mainframe_initplugineditor(MainFrame* self)
 
 void mainframe_connectworkspace(MainFrame* self)
 {
-	psy_signal_emit(&self->workspace.signal_configchanged,
-		&self->workspace, 1, &self->workspace.config);
-	workspace_addhistory(&self->workspace);
+	workspace_configure_host(&self->workspace);
 	psy_signal_connect(&self->workspace.player.eventdrivers.signal_input, self,
 		mainframe_oneventdriverinput);
 	psy_signal_connect(&self->workspace.player.signal_numsongtrackschanged,
@@ -660,10 +659,11 @@ void mainframe_initinterpreter(MainFrame* self)
 
 void mainframe_setstartpage(MainFrame* self)
 {		
-	if (workspace_showaboutatstart(&self->workspace)) {
-		workspace_selectview(&self->workspace, TABPAGE_HELPVIEW, 1, 0);
+	if (generalconfig_showaboutatstart(psycleconfig_general(
+			workspace_conf(&self->workspace)))) {
+		workspace_selectview(&self->workspace, VIEW_ID_HELPVIEW, 1, 0);
 	} else {
-		workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW, 0, 0);
+		workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW, 0, 0);
 	}
 	self->startpage = TRUE;
 }
@@ -676,21 +676,21 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 	switch (cmd.id) {
 		case CMD_IMM_HELP:
 			tabbar_select(&self->helpview.tabbar, 0);
-			tabbar_select(&self->tabbar, TABPAGE_HELPVIEW);
+			tabbar_select(&self->tabbar, VIEW_ID_HELPVIEW);
 			break;
 		case CMD_IMM_HELPSHORTCUT:
 			mainframe_ontogglekbdhelp(self, mainframe_base(self));
 			break;
 		case CMD_IMM_EDITMACHINE:
-			tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+			tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 			break;
 		case CMD_IMM_EDITPATTERN:
-			tabbar_select(&self->tabbar, TABPAGE_PATTERNVIEW);
+			tabbar_select(&self->tabbar, VIEW_ID_PATTERNVIEW);
 			break;
 		case CMD_IMM_ADDMACHINE:
 			self->machineview.newmachine.pluginsview.calledby =
 				self->tabbar.selected;
-			workspace_selectview(&self->workspace, TABPAGE_MACHINEVIEW,
+			workspace_selectview(&self->workspace, VIEW_ID_MACHINEVIEW,
 				1, 0);
 			break;
 		case CMD_IMM_PLAYSONG:
@@ -780,8 +780,8 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 			workspace_songposinc(&self->workspace);
 			break;
 		case CMD_IMM_INFOPATTERN:
-			if (workspace_currview(&self->workspace) != TABPAGE_PATTERNVIEW) {
-				workspace_selectview(&self->workspace, TABPAGE_PATTERNVIEW, 0, 0);
+			if (workspace_currview(&self->workspace) != VIEW_ID_PATTERNVIEW) {
+				workspace_selectview(&self->workspace, VIEW_ID_PATTERNVIEW, 0, 0);
 			}
 			if (!psy_ui_component_visible(&self->patternview.properties.component)) {
 				Tab* tab;
@@ -802,15 +802,15 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 				psy_audio_machines_slot(&self->workspace.song->machines));
 			break;
 		case CMD_IMM_EDITINSTR:
-			workspace_selectview(&self->workspace, TABPAGE_INSTRUMENTSVIEW, 0,
+			workspace_selectview(&self->workspace, VIEW_ID_INSTRUMENTSVIEW, 0,
 				0);
 			break;
 		case CMD_IMM_EDITSAMPLE:
-			workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
+			workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
 			tabbar_select(&self->samplesview.clienttabbar, 0);
 			break;
 		case CMD_IMM_EDITWAVE:
-			workspace_selectview(&self->workspace, TABPAGE_SAMPLESVIEW, 0, 0);
+			workspace_selectview(&self->workspace, VIEW_ID_SAMPLESVIEW, 0, 0);
 			tabbar_select(&self->samplesview.clienttabbar, 2);
 			break;
 		case CMD_IMM_TERMINAL:
@@ -904,9 +904,10 @@ void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace,
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 	psy_audio_SongFile* songfile)
 {		
-	if (flag == WORKSPACE_LOADSONG) {
-		if (workspace_showsonginfoonload(sender)) {
-			tabbar_select(&self->tabbar, TABPAGE_PROPERTIESVIEW);
+	if (flag == WORKSPACE_LOADSONG) {		
+		if (generalconfig_showsonginfoonload(psycleconfig_general(
+				workspace_conf(sender)))) {
+			tabbar_select(&self->tabbar, VIEW_ID_SONGPROPERTIES);
 		}		
 	}	
 	mainframe_updatesongtitle(self);	
@@ -1007,13 +1008,13 @@ void mainframe_onplugineditor(MainFrame* self, psy_ui_Component* sender)
 
 void mainframe_onaboutok(MainFrame* self, psy_ui_Component* sender)
 {
-	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+	tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 }
 
 void mainframe_ongearcreate(MainFrame* self, psy_ui_Component* sender)
 {
 	self->machineview.newmachine.pluginsview.calledby = GEARVIEW;
-	tabbar_select(&self->tabbar, TABPAGE_MACHINEVIEW);
+	tabbar_select(&self->tabbar, VIEW_ID_MACHINEVIEW);
 	tabbar_select(&self->machineview.tabbar, 1);
 }
 
@@ -1049,7 +1050,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 
 void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 {
-	psy_ui_notebook_select(&self->notebook, TABPAGE_RENDERVIEW);
+	psy_ui_notebook_select(&self->notebook, VIEW_ID_RENDERVIEW);
 }
 
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
@@ -1090,7 +1091,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 	if (index != GEARVIEW) {
 		psy_ui_Component* view;
 
-		if (index == TABPAGE_CHECKUNSAVED) {			
+		if (index == VIEW_ID_CHECKUNSAVED) {			
 			if (option == CHECKUNSAVE_CLOSE) {
 				self->checkunsavedbox.mode = option;
 				checkunsavedbox_setlabels(&self->checkunsavedbox,
@@ -1117,7 +1118,7 @@ void mainframe_onviewselected(MainFrame* self, Workspace* sender, int index,
 			psy_ui_component_setfocus(view);
 			psy_ui_component_selectsection(view, section);			
 		}
-		if (index == TABPAGE_MACHINEVIEW && section == 1) {
+		if (index == VIEW_ID_MACHINEVIEW && section == 1) {
 			if (option == 20) {
 				self->machineview.wireview.randominsert = 0;
 				self->machineview.wireview.addeffect = 1;
@@ -1214,7 +1215,7 @@ void mainframe_ondockview(MainFrame* self, Workspace* sender,
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
 	int view, uintptr_t section)
 {
-	if (view == TABPAGE_HELPVIEW) {
+	if (view == VIEW_ID_HELPVIEW) {
 		if (section == HELPVIEWSECTION_HELP) {
 			helpview_float(&self->helpview, section, &self->right);
 			psy_ui_component_align(&self->client);
@@ -1225,7 +1226,7 @@ void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
 void mainframe_ondocksection(MainFrame* self, Workspace* sender,
 	int view, uintptr_t section)
 {
-	if (view == TABPAGE_HELPVIEW) {
+	if (view == VIEW_ID_HELPVIEW) {
 		if (section == HELPVIEWSECTION_HELP) {
 			helpview_dock(&self->helpview, section, &self->right);
 			psy_ui_component_align(&self->client);
@@ -1247,29 +1248,18 @@ void mainframe_onmousedown(MainFrame* self, psy_ui_MouseEvent* ev)
 void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 	int option, int mode)
 {	
-	bool load;
-
-	load = FALSE;
 	switch (option) {			
-		case CHECKUNSAVE_SAVE: {
-			psy_ui_SaveDialog dialog;
-
-			psy_ui_savedialog_init_all(&dialog, 0, "Save Song",
-				psy_audio_songfile_savefilter(), "PSY",
-				workspace_songs_directory(&self->workspace));
-			if (psy_ui_savedialog_execute(&dialog)) {
-				workspace_savesong(&self->workspace,
-					psy_ui_savedialog_filename(&dialog));
+		case CHECKUNSAVE_SAVE:
+			if (workspace_savesong_fileselect(&self->workspace)) {				
 				if (mode == CHECKUNSAVE_CLOSE) {
 					psy_ui_app_close(&app);
 				} else if (mode == CHECKUNSAVE_LOAD) {
-					load = TRUE;
+					workspace_loadsong_fileselect(&self->workspace);
 				} else if (mode == CHECKUNSAVE_NEW) {										
 					workspace_newsong(&self->workspace);					
 				}
-			}
-			psy_ui_savedialog_dispose(&dialog);
-			break; }
+			}			
+			break;
 		case CHECKUNSAVE_NOSAVE: {
 			extern psy_ui_App app;
 
@@ -1280,7 +1270,7 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 			if (mode == CHECKUNSAVE_CLOSE) {
 				psy_ui_app_close(&app);
 			} else if (mode == CHECKUNSAVE_LOAD) {
-				load = TRUE;
+				workspace_loadsong_fileselect(&self->workspace);
 			} else if (mode == CHECKUNSAVE_NEW) {
 				workspace_newsong(&self->workspace);
 			}
@@ -1290,27 +1280,14 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 			break;
 		default:		
 			break;
-	}
-	if (load) {
-		psy_ui_OpenDialog dialog;		
-
-		psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
-			psy_audio_songfile_loadfilter(), "PSY",
-			workspace_songs_directory(&self->workspace));
-		if (psy_ui_opendialog_execute(&dialog)) {
-			workspace_loadsong(&self->workspace,
-				psy_ui_opendialog_filename(&dialog),
-				workspace_playsongafterload(&self->workspace));
-		}
-		psy_ui_opendialog_dispose(&dialog);		
-	}
+	}	
 }
 
 bool mainframe_onclose(MainFrame* self)
 {
-	if (workspace_savereminder(&self->workspace) &&
+	if (keyboardandmisc_savereminder(&self->workspace.config.misc) &&
 			workspace_songmodified(&self->workspace)) {
-		workspace_selectview(&self->workspace, TABPAGE_CHECKUNSAVED, 0,
+		workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0,
 			CHECKUNSAVE_CLOSE);		
 		return FALSE;
 	}
@@ -1360,7 +1337,7 @@ void mainframe_ontogglekbdhelp(MainFrame* self, psy_ui_Component* sender)
 }
 
 void mainframe_onselectpatterndisplay(MainFrame* self, psy_ui_Component* sender,
-	PatternDisplayType display)
+	PatternDisplayMode display)
 {	
 	patternview_selectdisplay(&self->patternview,
 		workspace_patterndisplaytype(&self->workspace));
@@ -1392,7 +1369,8 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 
 void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyEvent* ev)
 {
-	if (workspace_playstartwithrctrl(&self->workspace)) {
+	if (keyboardandmisc_playstartwithrctrl(
+			&self->workspace.config.misc)) {
 		if (ev->keycode == psy_ui_KEY_CONTROL) {
 			// todo: this win32 detection obly
 			int extended = (ev->keydata & 0x01000000) != 0;
@@ -1460,4 +1438,3 @@ int mainframe_eventdrivercallback(MainFrame* self, int msg, int param1,
 	}
 	return 0;
 }
-

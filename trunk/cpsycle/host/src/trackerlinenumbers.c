@@ -98,8 +98,10 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		double bottomoffset;
 		int topline;
 		int bottomline;
+		bool drawbeat;
+
 		psy_audio_PatternCursor cursor;
-		char* linecountformat;
+		char* linecountformat;		
 				
 		size = psy_ui_component_size(&self->component);
 		tm = psy_ui_component_textmetric(&self->component);
@@ -110,15 +112,18 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		cpy = (topline) * self->linestate->lineheight;
 		offset = topoffset;
 		line = topline;
+		drawbeat = (patternviewconfig_showbeatoffset(psycleconfig_patview(
+			workspace_conf(self->workspace))));
 		cursor = workspace_patterncursor(self->workspace);
-		if (workspace_showlinenumbersinhex(self->workspace)) {
-			if (workspace_showbeatoffset(self->workspace)) {
+		if (patternviewconfig_linenumbersinhex(psycleconfig_patview(
+				workspace_conf(self->workspace)))) {
+			if (drawbeat) {
 				linecountformat = "%.2X %.3f";
 			} else {
 				linecountformat = "%.2X";
 			}
 		} else {
-			if (workspace_showbeatoffset(self->workspace)) {
+			if (drawbeat) {
 				linecountformat = "%3i %.3f";
 			} else {
 				linecountformat = "%3i";
@@ -128,17 +133,16 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			offset < self->linestate->pattern->length) {
 			psy_ui_Rectangle r;
 			TrackerColumnFlags columnflags;
-			int ystart;
-			int drawbeat;
+			int ystart;			
 			uintptr_t c;
 			int flatsize;
 			char digit[2];
-
-			drawbeat = workspace_showbeatoffset(self->workspace);
-			columnflags.playbar = psy_audio_player_playing(&self->workspace->player) && 
+			
+			columnflags.playbar = psy_audio_player_playing(workspace_player(self->workspace)) && 
 				trackerlinestate_testplaybar(self->linestate, offset);
 			columnflags.mid = 0;
-			columnflags.cursor = self->linestate->drawcursor && !self->linestate->cursorchanging &&
+			columnflags.cursor = self->showlinenumbercursor &&
+				self->linestate->drawcursor && !self->linestate->cursorchanging &&
 				testcursor(cursor, self->linestate, cursor.track, offset, self->linestate->bpl);
 			columnflags.beat = fmod(offset, 1.0f) == 0.0f;
 			columnflags.beat4 = fmod(offset, 4.0f) == 0.0f;
@@ -230,9 +234,10 @@ void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_bea
 void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	rv->width = (workspace_showbeatoffset(self->workspace))
-		? psy_ui_value_makeew(13)
-		: psy_ui_value_makeew(6);
+	rv->width = ((patternviewconfig_showbeatoffset(psycleconfig_patview(
+		workspace_conf(self->workspace)))))
+			? psy_ui_value_makeew(13)
+			: psy_ui_value_makeew(6);
 	rv->height = psy_ui_value_makepx(0);
 }
 
@@ -291,7 +296,7 @@ void trackerlinenumberslabel_init(TrackerLineNumbersLabel* self,
 	self->defaultstr = NULL;
 	self->workspace = workspace;
 	self->headerheight = 12;
-	self->showdefaultline = FALSE;
+	self->showdefaultline = TRUE;
 	self->showbeatoffset = FALSE;
 	trackerlinenumberslabel_updatetext(self);	
 	psy_signal_connect(&self->component.signal_destroy, self,

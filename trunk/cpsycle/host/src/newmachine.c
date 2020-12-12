@@ -68,7 +68,7 @@ void newmachinebar_onrescan(NewMachineBar* self, psy_ui_Component* sender)
 
 void newmachinebar_onselectdirectories(NewMachineBar* self, psy_ui_Component* sender)
 {
-	workspace_selectview(self->workspace, TABPAGE_SETTINGSVIEW, 3, 0);
+	workspace_selectview(self->workspace, VIEW_ID_SETTINGSVIEW, 3, 0);
 }
 
 // NewMachineDetail
@@ -99,7 +99,8 @@ void newmachinedetail_init(NewMachineDetail* self, psy_ui_Component* parent,
 	//psy_ui_component_setmaximumsize(&self->compatblitzgamefx.component,
 	//	psy_ui_size_make(psy_ui_value_makeew(10),
 	//	psy_ui_value_makeeh(0)));
-	if (workspace_loadnewblitz(self->workspace)) {
+	if (compatconfig_loadnewblitz(psycleconfig_compat(
+			workspace_conf(self->workspace)))) {
 		psy_ui_checkbox_check(&self->compatblitzgamefx);
 	}
 	psy_signal_connect(&self->compatblitzgamefx.signal_clicked, self,
@@ -141,12 +142,10 @@ void newmachinedetail_reset(NewMachineDetail* self)
 }
 
 void newmachinedetail_onloadnewblitz(NewMachineDetail* self, psy_ui_Component* sender)
-{
-	if (psy_ui_checkbox_checked(&self->compatblitzgamefx)) {
-		workspace_setloadnewblitz(self->workspace, 1);
-	} else {
-		workspace_setloadnewblitz(self->workspace, 0);
-	}
+{	
+	compatconfig_setloadnewblitz(
+		psycleconfig_compat(workspace_conf(self->workspace)),
+		psy_ui_checkbox_checked(&self->compatblitzgamefx) != FALSE);	
 }
 
 // pluginsview
@@ -154,7 +153,7 @@ static void pluginsview_ondestroy(PluginsView*, psy_ui_Component* component);
 static void pluginsview_ondraw(PluginsView*, psy_ui_Graphics*);
 static void pluginsview_drawitem(PluginsView*, psy_ui_Graphics*, psy_Property*,
 	int x, int y);
-static void pluginsview_onpreferredsize(PluginsView* self, const psy_ui_Size* limit,
+static void pluginsview_onpreferredsize(PluginsView*, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void pluginsview_onkeydown(PluginsView*, psy_ui_KeyEvent*);
 static void pluginsview_cursorposition(PluginsView*, psy_Property* plugin,

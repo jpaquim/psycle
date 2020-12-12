@@ -44,6 +44,8 @@ void psy_audio_songfile_warn(psy_audio_SongFile*, const char* text);
 void psy_audio_songfile_message(psy_audio_SongFile*, const char* text);
 const char* psy_audio_songfile_loadfilter(void);
 const char* psy_audio_songfile_savefilter(void);
+const char* psy_audio_songfile_defaultloadextension(void);
+const char* psy_audio_songfile_defaultsaveextension(void);
 
 #ifdef __cplusplus
 }

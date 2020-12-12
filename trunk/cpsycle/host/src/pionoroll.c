@@ -761,7 +761,7 @@ void pianogrid_drawcursor(Pianogrid* self, psy_ui_Graphics* g, psy_audio_Pattern
 	assert(self);
 
 	if (!self->cursorchanging && !self->cursoronnoterelease &&
-			!(psy_audio_player_playing(&self->workspace->player) &&
+			!(psy_audio_player_playing(workspace_player(self->workspace)) &&
 			workspace_followingsong(self->workspace))) {
 		psy_audio_PatternCursor cursor;		
 		intptr_t key;
@@ -786,10 +786,10 @@ void pianogrid_drawplaybar(Pianogrid* self, psy_ui_Graphics* g, psy_audio_Patter
 {
 	assert(self);
 
-	if (psy_audio_player_playing(&self->workspace->player)) {
+	if (psy_audio_player_playing(workspace_player(self->workspace))) {
 		psy_dsp_big_beat_t offset;
 
-		offset = psy_audio_player_position(&self->workspace->player) -
+		offset = psy_audio_player_position(workspace_player(self->workspace)) -
 			self->sequenceentryoffset;
 		if (offset >= 0 && offset < psy_audio_pattern_length(
 				pianogridstate_pattern(self->gridstate))) {			
@@ -1048,7 +1048,7 @@ void pianogrid_startdragselection(Pianogrid* self, psy_audio_PatternCursor curso
 	psy_dsp_big_beat_t bpl;
 
 	self->selection.valid = TRUE;
-	bpl = 1.0 / psy_audio_player_lpb(&self->workspace->player);	
+	bpl = 1.0 / psy_audio_player_lpb(workspace_player(self->workspace));	
 	self->selection.topleft.track = cursor.track;
 	self->selection.bottomright.track = cursor.track + 1;
 	if (cursor.key >= self->dragselectionbase.key) {
@@ -1072,7 +1072,7 @@ void pianogrid_dragselection(Pianogrid* self, psy_audio_PatternCursor cursor)
 {
 	psy_dsp_big_beat_t bpl;
 
-	bpl = 1.0 / psy_audio_player_lpb(&self->workspace->player);
+	bpl = 1.0 / psy_audio_player_lpb(workspace_player(self->workspace));
 	//int restoremidline = self->midline;
 	if (cursor.key >= self->dragselectionbase.key) {
 		self->selection.topleft.key = self->dragselectionbase.key;
@@ -1283,13 +1283,13 @@ void pianogrid_setcursor(Pianogrid* self, psy_audio_PatternCursor cursor)
 		pianogrid_invalidateline(self, self->gridstate->cursor.offset);
 	}
 	self->cursorchanging = FALSE;
-	if (psy_audio_player_playing(&self->workspace->player) && workspace_followingsong(self->workspace)) {
+	if (psy_audio_player_playing(workspace_player(self->workspace)) && workspace_followingsong(self->workspace)) {
 		bool scrolldown;
 
 		scrolldown = self->lastplayposition <
-			psy_audio_player_position(&self->workspace->player);
+			psy_audio_player_position(workspace_player(self->workspace));
 		pianogrid_invalidateline(self, self->lastplayposition - self->sequenceentryoffset);
-		self->lastplayposition = psy_audio_player_position(&self->workspace->player);
+		self->lastplayposition = psy_audio_player_position(workspace_player(self->workspace));
 		pianogrid_invalidateline(self, self->lastplayposition - self->sequenceentryoffset);		
 		if (self->lastplayposition >= self->sequenceentryoffset &&
 			self->lastplayposition < self->sequenceentryoffset +
@@ -1742,15 +1742,15 @@ void pianoroll_ontimer(Pianoroll* self, uintptr_t timerid)
 
 	if (pianogridstate_pattern(&self->gridstate) &&
 			psy_ui_component_visible(&self->component)) {
-		if (psy_audio_player_playing(&self->workspace->player)) {
+		if (psy_audio_player_playing(workspace_player(self->workspace))) {
 			int line;
-			line = (int)(psy_audio_player_position(&self->workspace->player) /
+			line = (int)(psy_audio_player_position(workspace_player(self->workspace)) /
 				self->gridstate.lpb);
 			if (self->grid.lastplayposition / self->gridstate.lpb != line) {
 				pianogrid_invalidateline(&self->grid,
 					self->grid.lastplayposition - self->grid.sequenceentryoffset);
 				self->grid.lastplayposition =
-					psy_audio_player_position(&self->workspace->player);
+					psy_audio_player_position(workspace_player(self->workspace));
 				pianogrid_invalidateline(&self->grid,
 					self->grid.lastplayposition - self->grid.sequenceentryoffset);
 			}
@@ -2215,7 +2215,7 @@ void pianoroll_blockdelete(Pianoroll* self)
 			&blockremovecommand_alloc(self->gridstate.pattern,
 				self->grid.selection,
 				self->workspace)->command);
-		//		sequencer_checkiterators(&self->workspace->player.sequencer,
+		//		sequencer_checkiterators(&workspace_player(self->workspace).sequencer,
 		//			node);
 		psy_ui_component_invalidate(&self->grid.component);
 	}

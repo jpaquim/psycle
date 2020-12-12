@@ -1043,6 +1043,12 @@ psy_Property* psy_property_preventtranslate(psy_Property* self)
 	return self;
 }
 
+bool psy_property_hasid(const psy_Property* self, int id)
+{
+	assert(self);
+	return (self->item.id == id);
+}
+
 // item setter/getter
 psy_Property* psy_property_setitem_bool(psy_Property* self, bool value)
 {
@@ -1133,6 +1139,13 @@ const char* psy_property_item_font(const psy_Property* self)
 	assert(self);
 
 	return (self->item.value.s) ? self->item.value.s : "";
+}
+
+psy_Property* psy_property_item_choice_parent(psy_Property* self)
+{
+	return (psy_property_ischoiceitem(self))
+		? psy_property_parent(self)
+		: NULL;
 }
 
 psy_Property* psy_property_setid(psy_Property* self, intptr_t id)

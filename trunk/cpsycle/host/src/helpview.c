@@ -129,10 +129,10 @@ void helpview_dock(HelpView* self, HelpViewSection section, psy_ui_Component* de
 void helpview_onfloatsection(HelpView* self, psy_ui_Button* sender)
 {
 	if (psy_ui_component_visible(&self->sectionfloated)) {
-		workspace_docksection(self->workspace, TABPAGE_HELPVIEW,
+		workspace_docksection(self->workspace, VIEW_ID_HELPVIEW,
 			HELPVIEWSECTION_HELP);
 	} else {
-		workspace_floatsection(self->workspace, TABPAGE_HELPVIEW,
+		workspace_floatsection(self->workspace, VIEW_ID_HELPVIEW,
 			HELPVIEWSECTION_HELP);
 	}
 }

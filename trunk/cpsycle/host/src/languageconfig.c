@@ -4,101 +4,115 @@
 #include "../../detail/prefix.h"
 
 #include "languageconfig.h"
-// ui
-#include <uicomponent.h> // access ui translator
 // file
 #include <dir.h>
-// std
-#include <stdio.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 
-static void languageconfig_makelanguagelist(LanguageConfig*, psy_Property*);
-static int languageconfig_onaddlanguage(LanguageConfig*, const char* path, int flag);
-static const char* languageconfig_languagekey(LanguageConfig*);
-static int languageconfig_onaddlanguage(LanguageConfig* self, const char* path, int flag);
+static void languageconfig_makelanguagechoice(LanguageConfig*);
+static void languageconfig_makelanguagelist(LanguageConfig*);
+static int languageconfig_enumlanguagedir(LanguageConfig*, const char* path,
+	int flag);
+static void languageconfig_setdefaultlanguage(LanguageConfig*);
+static const char* languageconfig_defaultlanguagekey(LanguageConfig*);
 
-void languageconfig_init(LanguageConfig* self, psy_Property* parent)
+void languageconfig_init(LanguageConfig* self, psy_Property* parent,
+	psy_Translator* translator)
 {
+	assert(self && parent && translator);
+
 	self->parent = parent;
-	languageconfig_makelanguagelist(self, parent);
+	self->translator = translator;
+	languageconfig_makelanguagechoice(self);
+	languageconfig_makelanguagelist(self);
+	languageconfig_setdefaultlanguage(self);
 }
 
-void languageconfig_makelanguagelist(LanguageConfig* self, psy_Property* parent)
+void languageconfig_makelanguagechoice(LanguageConfig* self)
+{
+	self->languagechoice = psy_property_append_choice(self->parent, "lang", 0);
+	psy_property_setid(self->languagechoice, PROPERTY_ID_LANG);
+	psy_property_settext(self->languagechoice, "settingsview.language");
+}
+
+void languageconfig_makelanguagelist(LanguageConfig* self)
 {
 	char currdir[4096];
-	psy_Property* defaultlang;
-
+	
 	assert(self);
-
-	self->language = psy_property_setid(psy_property_settext(
-		psy_property_append_choice(parent, "lang", 0),
-		"settingsview.language"),
-		PROPERTY_ID_LANG);
+	
 	if (workdir(currdir)) {
 		psy_dir_enumerate(self, currdir, "*.ini", 0, (psy_fp_findfile)
-			languageconfig_onaddlanguage);
-	}
-#if defined PSYCLE_DEFAULT_LANG_ES
-	defaultlang = psy_property_find(self->language, "es",
-		PSY_PROPERTY_TYPE_NONE);
-#elif defined PSYCLE_DEFAULT_LANG_EN
-	defaultlang = psy_property_find(self->language, "en",
-		PSY_PROPERTY_TYPE_NONE);
-#else
-	defaultlang = psy_property_find(self->language, "es",
-		PSY_PROPERTY_TYPE_NONE);
-#endif
-	if (defaultlang) {
-		uintptr_t index;
-
-		index = psy_property_index(defaultlang);
-		if (index != UINTPTR_MAX) {
-			psy_property_setitem_int(self->language, index);
-		}
+			languageconfig_enumlanguagedir);
 	}
 }
 
-int languageconfig_onaddlanguage(LanguageConfig* self, const char* path, int flag)
+int languageconfig_enumlanguagedir(LanguageConfig* self, const char* path,
+	int flag)
 {
-	char languageid[256];
+	char lang[256];
 
 	assert(self);
 
-	if (psy_translator_test(psy_ui_translator(), path, languageid)) {
-		psy_property_settext(
-			psy_property_append_string(self->language, languageid, path),
-			languageid);
+	if (psy_translator_test(self->translator, path, lang)) {
+		psy_property_settext(psy_property_append_string(
+			self->languagechoice, lang, path), lang);
 	}
 	return TRUE;
 }
 
-
-void languageconfig_configlanguage(LanguageConfig* self)
+void languageconfig_setdefaultlanguage(LanguageConfig* self)
 {
-	psy_Property* langchoice;
+	psy_Property* defaultlang;
 
-	assert(self);
+	if (defaultlang = psy_property_find(self->languagechoice,
+			languageconfig_defaultlanguagekey(self),
+			PSY_PROPERTY_TYPE_NONE)) {	
+		uintptr_t index;
 
-	langchoice = psy_property_at_choice(self->language);
-	if (langchoice) {
-		psy_translator_load(psy_ui_translator(),
-			psy_property_item_str(langchoice));
+		index = psy_property_index(defaultlang);
+		if (index != UINTPTR_MAX) {
+			psy_property_setitem_int(self->languagechoice, index);
+		}
 	}
 }
 
-const char* languageconfig_languagekey(LanguageConfig* self)
+const char* languageconfig_defaultlanguagekey(LanguageConfig* self)
 {
-	psy_Property* p;
-	const char* rv = 0;
+	return
+#if defined PSYCLE_DEFAULT_LANG_ES
+		"es";
+#elif defined PSYCLE_DEFAULT_LANG_EN
+		"en";
+#else
+		"es";
+#endif
+}
+
+void languageconfig_updatelanguage(LanguageConfig* self)
+{
+	psy_Property* lang;
 
 	assert(self);
 
-	if (p = psy_property_at(self->parent, "lang", PSY_PROPERTY_TYPE_NONE)) {
-		if (p = psy_property_at_choice(p)) {
-			rv = psy_property_item_str(p);
-		}
+	if (lang = psy_property_at_choice(self->languagechoice)) {
+		// This updates also the ui components over the translator language
+		// changed signal the ui is connected to.
+		psy_translator_load(self->translator, psy_property_item_str(lang));
 	}
-	return rv;
+}
+
+bool languageconfig_onpropertychanged(LanguageConfig* self,
+	psy_Property* property)
+{	
+	psy_Property* choice;	
+
+	assert(self && property);
+
+	choice = psy_property_item_choice_parent(property);
+	if (choice && psy_property_hasid(choice, PROPERTY_ID_LANG)) {
+		languageconfig_updatelanguage(self);
+		return TRUE;
+	}
+	return FALSE;
 }

@@ -75,7 +75,7 @@ void trackerheader_init(TrackerHeader* self, psy_ui_Component* parent,
 	self->playing = FALSE;
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged, self,
 		trackerheader_onpatterncursorchanged);
-	psy_signal_connect(&self->workspace->player.signal_numsongtrackschanged, self,
+	psy_signal_connect(&workspace_player(self->workspace)->signal_numsongtrackschanged, self,
 		trackerheader_numtrackschanged);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
@@ -117,7 +117,7 @@ TrackerHeaderTrackState* trackerheader_updatetrackstate(TrackerHeader* self, uin
 
 	trackstate = trackerheader_trackstate(self, track);
 	trackstate->playon = psy_audio_activechannels_playon(
-		&self->workspace->player.playon, track);
+		&workspace_player(self->workspace)->playon, track);
 	return trackstate;
 }
 
@@ -228,12 +228,12 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 		int track_x;
 		int centerx;
 
-		track = trackergridstate_screentotrack(self->gridstate,
+		track = trackergridstate_pxtotrack(self->gridstate,
 			ev->x + psy_ui_component_scrollleft(&self->component),
-			psy_audio_player_numsongtracks(&self->workspace->player));
+			psy_audio_player_numsongtracks(workspace_player(self->workspace)));
 		centerx = psy_max(0, (trackergridstate_trackwidth(self->gridstate, track) -
 			self->gridstate->skin->headercoords.background.destwidth) / 2);
-		track_x = trackergridstate_track_x(self->gridstate, track) + centerx;
+		track_x = trackergridstate_tracktopx(self->gridstate, track) + centerx;
 		psy_ui_setrectangle(&r,
 			self->gridstate->skin->headercoords.mute.destx + track_x,
 			self->gridstate->skin->headercoords.mute.desty,
@@ -281,7 +281,7 @@ void trackerheader_onmousedown(TrackerHeader* self, psy_ui_MouseEvent* ev)
 void trackerheader_onpreferredsize(TrackerHeader* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makepx(trackergridstate_track_x(self->gridstate,
+	rv->width = psy_ui_value_makepx(trackergridstate_tracktopx(self->gridstate,
 		self->gridstate->numtracks));
 	rv->height = psy_ui_value_makepx(30);
 }
@@ -300,7 +300,7 @@ void trackerheader_onpatterncursorchanged(TrackerHeader* self,
 
 void trackerheader_ontimer(TrackerHeader* self, uintptr_t timerid)
 {
-	if (workspace_currview(self->workspace) == TABPAGE_PATTERNVIEW &&
+	if (workspace_currview(self->workspace) == VIEW_ID_PATTERNVIEW &&
 		trackerheader_hasredraw(self)) {
 		psy_ui_component_invalidate(&self->component);
 	}
@@ -326,7 +326,7 @@ bool trackerheader_hastrackredraw(TrackerHeader* self, uintptr_t track)
 	TrackerHeaderTrackState* trackstate;
 
 	trackstate = trackerheader_trackstate(self, track);
-	return (psy_audio_activechannels_playon(&self->workspace->player.playon, track)
+	return (psy_audio_activechannels_playon(&workspace_player(self->workspace)->playon, track)
 		!= trackstate->playon);
 }
 

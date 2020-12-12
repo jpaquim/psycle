@@ -74,7 +74,7 @@ void paramskin_init(ParamView* self)
 		paramskin.checkon = checkon;
 		paramskin.checkoff = checkoff;
 		paramskin_initialized = 1;		
-		theme = self->workspace->paramtheme;
+		theme = self->workspace->config.macparam.paramtheme;
 		paramskin.topcolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguitopcolour", 0x00555555));
 		paramskin.fonttopcolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguifonttopcolour", 0x00CDCDCD));
 		paramskin.bottomcolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguibottomcolour", 0x00444444));
@@ -140,7 +140,7 @@ void paramview_init(ParamView* self, psy_ui_Component* parent, psy_audio_Machine
 	self->machine = machine;
 	self->numparams = 0;
 	psy_ui_component_doublebuffer(&self->component);
-	pv = psy_property_findsection(&self->workspace->config, "visual.paramview");
+	pv = psy_property_findsection(&self->workspace->config.config, "visual.paramview");
 	if (pv) {
 		psy_ui_Font font;
 

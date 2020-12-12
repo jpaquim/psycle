@@ -72,7 +72,7 @@ uintptr_t trackergridstate_paramcol(TrackerGridState* self, uintptr_t track, int
 	TrackDef* trackdef;
 
 	trackdef = trackergridstate_trackdef(self, track);
-	trackx = trackergridstate_track_x(self, track);
+	trackx = trackergridstate_tracktopx(self, track);
 	maincolumnwidth = trackergridstate_basewidth(self, track);
 	rv = (x - (trackx + maincolumnwidth)) / (4 * self->trackconfig->textwidth);
 	return rv;
@@ -110,16 +110,6 @@ void trackdef_init(TrackDef* self)
 	self->numfx = 1;
 }
 
-int trackergridstate_track_x(TrackerGridState* self, uintptr_t track)
-{
-	int rv = 0;
-	uintptr_t t;
-
-	for (t = 0; t < track; ++t) {
-		rv += trackergridstate_trackwidth(self, t);
-	}
-	return rv;
-}
 
 int trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
 {
@@ -135,7 +125,19 @@ int trackergridstate_trackwidth(TrackerGridState* self, uintptr_t track)
 	return trackergridstate_preferredtrackwidth(self);	
 }
 
-uintptr_t trackergridstate_screentotrack(TrackerGridState* self, int x, uintptr_t numsongtracks)
+
+int trackergridstate_tracktopx(TrackerGridState* self, uintptr_t track)
+{
+	int rv = 0;
+	uintptr_t t;
+
+	for (t = 0; t < track; ++t) {
+		rv += trackergridstate_trackwidth(self, t);
+	}
+	return rv;
+}
+
+uintptr_t trackergridstate_pxtotrack(TrackerGridState* self, int x, uintptr_t numsongtracks)
 {
 	int currx = 0;
 	uintptr_t rv = 0;

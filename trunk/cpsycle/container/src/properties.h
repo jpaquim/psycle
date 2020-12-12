@@ -178,6 +178,7 @@ psy_Property* psy_property_preventsave(psy_Property*);
 psy_Property* psy_property_enablesave(psy_Property*);
 psy_Property* psy_property_enableappend(psy_Property*);
 psy_Property* psy_property_preventtranslate(psy_Property*);
+bool psy_property_hasid(const psy_Property* self, int id);
 // Value
 psy_Property* psy_property_setitem_bool(psy_Property*, bool value);
 bool psy_property_item_bool(const psy_Property*);
@@ -191,6 +192,8 @@ psy_Property* psy_property_setitem_str(psy_Property*, const char* str);
 const char* psy_property_item_str(const psy_Property*);
 psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
 const char* psy_property_item_font(const psy_Property*);
+psy_Property* psy_property_item_choice_parent(psy_Property* self);
+
 // Description
 psy_Property* psy_property_setid(psy_Property*, intptr_t id);
 intptr_t psy_property_id(const psy_Property* self);

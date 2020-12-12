@@ -20,7 +20,7 @@ void psy_playlist_init(psy_Playlist* self)
 		
 	self->recentsongs = psy_property_setcomment(
 		psy_property_allocinit_key(NULL),
-		"Psycle Recent Song History created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
+		"Psycle Recent Song ViewHistory created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
 	self->recentfiles = psy_property_settext(
 		psy_property_append_section(self->recentsongs, "files"),
 		"Recent Songs");
