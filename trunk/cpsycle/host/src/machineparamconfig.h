@@ -18,14 +18,16 @@ enum {
 };
 
 typedef struct MachineParamConfig {
-	psy_Property* paramtheme;
+	psy_Property* paramview;
+	psy_Property* paramtheme;	
 	// references
-	psy_Property* parent;
-	
+	psy_Property* parent;	
 } MachineParamConfig;
 
 void machineparamconfig_init(MachineParamConfig*, psy_Property* parent);
-void machineparamconfig_makeparamtheme(MachineParamConfig* self, psy_Property* parent);
+void machineparamconfig_makeparamtheme(MachineParamConfig*, psy_Property* parent);
+
+bool machineparamconfig_showfloated(const MachineParamConfig*);
 
 #ifdef __cplusplus
 }

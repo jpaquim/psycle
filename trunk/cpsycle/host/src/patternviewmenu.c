@@ -17,6 +17,8 @@ static void patternblockmenu_onpaste(PatternBlockMenu*, psy_ui_Component* sender
 static void patternblockmenu_onmixpaste(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_ondelete(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_onreplace(PatternBlockMenu*, psy_ui_Component* sender);
+static void patternblockmenu_onblockswingfill(PatternBlockMenu*, psy_ui_Component* sender);
+static void patternblockmenu_ontrackswingfill(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_oninterpolatelinear(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_oninterpolatecurve(PatternBlockMenu*, psy_ui_Component* sender);
 static void patternblockmenu_onchangegenerator(PatternBlockMenu*, psy_ui_Component* sender);
@@ -52,6 +54,10 @@ void patternblockmenu_init(PatternBlockMenu* self, psy_ui_Component* parent,
 		self, patternblockmenu_ondelete);
 	psy_ui_button_init_text_connect(&self->transform, &self->component,
 		"Search and replace", self, patternblockmenu_onreplace);
+	psy_ui_button_init_text_connect(&self->blockswingfill, &self->component,
+		"Block Swing Fill", self, patternblockmenu_onblockswingfill);
+	psy_ui_button_init_text_connect(&self->trackswingfill, &self->component,
+		"Track Swing Fill", self, patternblockmenu_ontrackswingfill);
 	psy_ui_button_init_text_connect(&self->interpolatelinear, &self->component,
 		"Interpolate (Linear)", self, patternblockmenu_oninterpolatelinear);
 	psy_ui_button_init_text_connect(&self->interpolatecurve, &self->component,
@@ -125,6 +131,30 @@ void patternblockmenu_onreplace(PatternBlockMenu* self,
 {
 	if (self->target == PATTERNVIEWTARGET_TRACKER) {
 		patternview_toggletransformpattern(self->view,
+			&self->view->component);
+	} else {
+
+	}
+}
+
+void patternblockmenu_onblockswingfill(PatternBlockMenu* self,
+	psy_ui_Component* sender)
+{
+	if (self->target == PATTERNVIEWTARGET_TRACKER) {
+		self->view->trackmodeswingfill = FALSE;
+		patternview_toggleswingfill(self->view,
+			&self->view->component);
+	} else {
+
+	}
+}
+
+void patternblockmenu_ontrackswingfill(PatternBlockMenu* self,
+	psy_ui_Component* sender)
+{
+	if (self->target == PATTERNVIEWTARGET_TRACKER) {
+		self->view->trackmodeswingfill = TRUE;
+		patternview_toggleswingfill(self->view,
 			&self->view->component);
 	} else {
 

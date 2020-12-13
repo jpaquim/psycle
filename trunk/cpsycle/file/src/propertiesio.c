@@ -196,7 +196,7 @@ static int skiplevel;
 static int choicelevel;
 static char* lastsection;
 
-void propertiesio_save(psy_Property* self, const char* path)
+void propertiesio_save(const psy_Property* self, const char* path)
 {
 	FILE* fp;
 
@@ -206,7 +206,8 @@ void propertiesio_save(psy_Property* self, const char* path)
 		skiplevel = 0;
 		choicelevel = 0;
 		lastsection = 0;
-		psy_property_enumerate(self, fp, (psy_PropertyCallback) OnSaveIniEnum);
+		psy_property_enumerate((psy_Property*)self, fp, (psy_PropertyCallback)
+			OnSaveIniEnum);
 		free(lastsection);
 		fclose(fp);
 	}

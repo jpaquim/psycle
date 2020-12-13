@@ -109,7 +109,7 @@ INLINE CompatConfig* psycleconfig_compat(PsycleConfig* self)
 }
 
 const char* psycleconfig_defaultfontstr(const PsycleConfig* self);
-
+bool psycleconfig_enableaudio(const PsycleConfig* self);
 
 #ifdef __cplusplus
 }

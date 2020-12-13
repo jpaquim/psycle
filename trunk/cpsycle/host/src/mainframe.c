@@ -1204,12 +1204,12 @@ void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
 
 void mainframe_ondockview(MainFrame* self, Workspace* sender,
 	psy_ui_Component* view)
-{	
-	psy_ui_component_resize(view, psy_ui_size_zero());
+{		
+	psy_ui_component_resize(view, psy_ui_size_zero());	
 	psy_ui_component_setparent(view, &self->paramviews);	
 	psy_ui_component_setalign(view, psy_ui_ALIGN_LEFT);	
 	psy_ui_component_align(&self->client);	
-	psy_ui_component_align(&self->paramviews);
+	psy_ui_component_align(&self->paramviews);	
 }
 
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,

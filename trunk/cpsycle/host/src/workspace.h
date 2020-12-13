@@ -121,9 +121,7 @@ typedef struct {
 	psy_audio_MachineFactory machinefactory;	
 	// Psycle settings	
 	PsycleConfig config;
-	psy_Playlist recentsongs;
-	psy_Property* theme;
-	psy_Property* cmds;	
+	psy_Playlist playlist;	
 	psy_ui_Component* mainhandle;	
 	ViewHistory viewhistory;
 	psy_audio_PatternCursor patterneditposition;
@@ -186,7 +184,6 @@ void workspace_setoctave(Workspace*, int octave);
 int workspace_octave(Workspace*);
 void workspace_showpatternnames(Workspace*);
 void workspace_showpatternids(Workspace*);
-int workspace_showparamviewaswindow(Workspace*);
 void workspace_togglepatdefaultline(Workspace*);
 void workspace_configurationchanged(Workspace*, psy_Property* property);
 void workspace_undo(Workspace*);
@@ -209,7 +206,6 @@ void workspace_selectview(Workspace*, int view, uintptr_t section, int option);
 void workspace_floatsection(Workspace*, int view, uintptr_t section);
 void workspace_docksection(Workspace*, int view, uintptr_t section);
 void workspace_parametertweak(Workspace*, int slot, uintptr_t tweak, float value);
-bool workspace_enableaudio(Workspace*);
 void workspace_recordtweaks(Workspace*);
 void workspace_stoprecordtweaks(Workspace*);
 int workspace_recordingtweaks(Workspace*);

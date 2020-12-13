@@ -38,7 +38,7 @@ static const psy_Property* driver_configuration(const psy_EventDriver*);
 static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInput input, psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static const char* driver_target(psy_EventDriver*);
-static void setcmddef(psy_EventDriver*, psy_Property*);
+static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 
 static void init_properties(psy_EventDriver* self);
@@ -303,7 +303,7 @@ const char* driver_target(psy_EventDriver* self)
 	return NULL;
 }
 
-void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
+void setcmddef(psy_EventDriver* driver, const psy_Property* cmddef)
 {
 	if (cmddef && cmddef->children) {
 		psy_MmeMidiDriver* self = (psy_MmeMidiDriver*)driver;

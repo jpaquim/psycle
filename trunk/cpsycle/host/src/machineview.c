@@ -18,8 +18,8 @@
 #include "../../detail/portable.h"
 #include "../../detail/trace.h"
 
-static void machineui_init(MachineUi*, psy_audio_Machine* machine,
-	uintptr_t slot, MachineViewSkin*, Workspace*);
+static void machineui_init(MachineUi*, psy_audio_Machine*, uintptr_t slot,
+	MachineViewSkin*, Workspace*);
 static void machineui_updatecoords(MachineUi*);
 static void machineui_dispose(MachineUi*);
 static void machineui_onframedestroyed(MachineUi*, psy_ui_Component* sender);
@@ -339,14 +339,14 @@ void machineui_updatevolumedisplay(MachineUi* self)
 		memory = psy_audio_machine_buffermemory(self->machine);		
 		self->volumedisplay = (memory)
 			? psy_audio_buffer_rmsdisplay(memory)
-			: 0;		
+			: (psy_dsp_amp_t)0.f;		
 		machineui_updatemaxvolumedisplay(self);
 	}
 }
 
 void machineui_updatemaxvolumedisplay(MachineUi* self)
 {
-	self->volumemaxcounterlife--;
+	--self->volumemaxcounterlife;
 	if ((self->volumedisplay > self->volumemaxdisplay)
 			|| (self->volumemaxcounterlife <= 0)) {
 		self->volumemaxdisplay = self->volumedisplay - 1/32768.f;
@@ -359,14 +359,17 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 	if (self->machine) {		
 		if (!self->frame) {
 			self->frame = machineframe_alloc();
-			machineframe_init(self->frame, parent, workspace_showparamviewaswindow(self->workspace),
+			machineframe_init(self->frame, parent,
+				machineparamconfig_showfloated(
+					psycleconfig_macparam(workspace_conf(self->workspace))),
 				self->workspace);
 			psy_signal_connect(&self->frame->component.signal_destroy, self,
 				machineui_onframedestroyed);
 			if (psy_audio_machine_haseditor(self->machine)) {
 				MachineEditorView* editorview;
 
-				editorview = machineeditorview_allocinit(&self->frame->notebook.component,
+				editorview = machineeditorview_allocinit(
+					psy_ui_notebook_base(&self->frame->notebook),
 					self->machine, self->workspace);
 				if (editorview) {
 					machineframe_setview(self->frame, &editorview->component, self->machine);
@@ -383,7 +386,8 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 		}
 		if (self->frame) {
 			psy_ui_component_show(&self->frame->component);
-			if (!workspace_showparamviewaswindow(self->workspace)) {
+			if (!machineparamconfig_showfloated(
+					psycleconfig_macparam(workspace_conf(self->workspace)))) {
 				workspace_dockview(self->workspace, &self->frame->component);
 			}
 		}		
@@ -392,12 +396,13 @@ void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 
 void machineui_onframedestroyed(MachineUi* self, psy_ui_Component* sender)
 {	
-	self->frame = 0;	
+	self->frame = NULL;	
 }
 
 // MachineWireView
+// prototypes
+static void machinewireview_ondestroy(MachineWireView*);
 static psy_ui_Rectangle machinewireview_bounds(MachineWireView*);
-static void machinewireview_connectuisignals(MachineWireView*);
 static void machinewireview_connectmachinessignals(MachineWireView*);
 static void machinewireview_ondraw(MachineWireView*, psy_ui_Graphics*);
 static void machinewireview_drawmachines(MachineWireView*, psy_ui_Graphics*);
@@ -410,8 +415,6 @@ static void machinewireview_drawwirearrow(MachineWireView*, psy_ui_Graphics*,
 	int x1, int y1, int x2, int y2);
 static psy_ui_IntPoint rotate_point(psy_ui_IntPoint, double phi);
 static psy_ui_IntPoint move_point(psy_ui_IntPoint pt, psy_ui_IntPoint d);
-static void machinewireview_ondestroy(MachineWireView*,
-	psy_ui_Component* component);
 static void machinewireview_onmousedown(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onmouseup(MachineWireView*, psy_ui_MouseEvent*);
 static void machinewireview_onmousemove(MachineWireView*, psy_ui_MouseEvent*);
@@ -454,22 +457,17 @@ static void machinewireview_ondisconnected(MachineWireView*, psy_audio_Connectio
 static void machinewireview_onsongchanged(MachineWireView*, Workspace*,
 	int flag, psy_audio_SongFile*);
 static void machinewireview_buildmachineuis(MachineWireView*);
-static void machinewireview_applyproperties(MachineWireView*, psy_Property*);
+static void machinewireview_updateskin(MachineWireView*);
 static void machinewireview_onshowparameters(MachineWireView*, Workspace*,
 	uintptr_t slot);
 static void machinewireview_onmasterworked(MachineWireView*,
 	psy_audio_Machine*, uintptr_t slot, psy_audio_BufferContext*);
 static void machinewireview_ontimer(MachineWireView*, uintptr_t timerid);
-static void machinewireview_onconfigchanged(MachineWireView*, Workspace*,
-	psy_Property*);
-static void machinewireview_readconfig(MachineWireView*);
-static void machinewireview_showwireview(MachineWireView*,
-	psy_audio_Wire wire);
+static void machinewireview_showwireview(MachineWireView*, psy_audio_Wire);
 static void machinewireview_onwireframedestroyed(MachineWireView*,
 	psy_ui_Component* sender);
-static WireFrame* machinewireview_wireframe(MachineWireView*,
-	psy_audio_Wire wire);
-static psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self,
+static WireFrame* machinewireview_wireframe(MachineWireView*, psy_audio_Wire);
+static psy_ui_Rectangle machinewireview_updaterect(MachineWireView*,
 	uintptr_t slot);
 static void machinewireview_onpreferredsize(MachineWireView* self, const psy_ui_Size* limit,
 	psy_ui_Size* rv);
@@ -481,10 +479,11 @@ static void machineuis_removeall(MachineWireView*);
 static psy_ui_ComponentVtable vtable;
 static bool vtable_initialized = FALSE;
 
-static void vtable_init(MachineWireView* self)
+static psy_ui_ComponentVtable* vtable_init(MachineWireView* self)
 {
 	if (!vtable_initialized) {
 		vtable = *(self->component.vtable);
+		vtable.ondestroy = (psy_ui_fp_component_ondestroy)machinewireview_ondestroy;
 		vtable.ondraw = (psy_ui_fp_component_ondraw)machinewireview_ondraw;
 		vtable.ontimer = (psy_ui_fp_component_ontimer)machinewireview_ontimer;
 		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
@@ -500,13 +499,14 @@ static void vtable_init(MachineWireView* self)
 			machinewireview_onpreferredsize;
 		vtable_initialized = TRUE;
 	}
+	return &vtable;
 }
 
 void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller, Workspace* workspace)
 {
 	psy_ui_component_init(&self->component, parent);
-	vtable_init(self);
+	psy_ui_component_setvtable(&self->component, vtable_init(self));	
 	self->component.vtable = &vtable;
 	self->component.scrollstepy = 10;
 	self->statusbar = 0;
@@ -517,42 +517,30 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->randominsert = 1;
 	self->addeffect = 0;
 	self->drawvumode = FALSE;
+	self->showwirehover = FALSE;
 	self->scroller = scroller;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
 	// skin init
 	machineviewskin_init(&self->skin);
-	machinewireview_applyproperties(self, 0);
+	machinewireview_updateskin(self);
 	psy_table_init(&self->machineuis);
 	machineuis_insert(self, psy_audio_MASTER_INDEX);
 	psy_ui_component_setfont(&self->component, &self->skin.font);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);
-	machinewireview_connectuisignals(self);	
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_SCROLL);		
 	self->dragslot = UINTPTR_MAX;
 	self->dragmode = MACHINEWIREVIEW_DRAG_MACHINE;
-	self->selectedslot = psy_audio_MASTER_INDEX;
-	self->showwirehover = FALSE;
+	self->selectedslot = psy_audio_MASTER_INDEX;	
 	psy_audio_wire_init(&self->selectedwire);
 	psy_audio_wire_init(&self->hoverwire);
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		machinewireview_onsongchanged);	
 	machinewireview_connectmachinessignals(self);
-	psy_signal_connect(&workspace->signal_configchanged, self,
-		machinewireview_onconfigchanged);	
 	psy_signal_connect(&workspace->signal_showparameters, self,
 		machinewireview_onshowparameters);	
 	psy_ui_edit_init(&self->editname, &self->component);
 	psy_ui_component_hide(&self->editname.component);
 	psy_ui_component_starttimer(&self->component, 0, 50);	
-	if (workspace->config.macview.theme) {
-		machinewireview_applyproperties(self, workspace->config.macview.theme);
-	}
-}
-
-void machinewireview_connectuisignals(MachineWireView* self)
-{
-	psy_signal_connect(&self->component.signal_destroy, self,
-		machinewireview_ondestroy);
 }
 
 void machinewireview_connectmachinessignals(MachineWireView* self)
@@ -572,7 +560,7 @@ void machinewireview_connectmachinessignals(MachineWireView* self)
 		machinewireview_onmasterworked);
 }
 
-void machinewireview_ondestroy(MachineWireView* self, psy_ui_Component* sender)
+void machinewireview_ondestroy(MachineWireView* self)
 {	
 	machineuis_removeall(self);
 	psy_table_dispose(&self->machineuis);
@@ -581,37 +569,18 @@ void machinewireview_ondestroy(MachineWireView* self, psy_ui_Component* sender)
 	machineviewskin_dispose(&self->skin);
 }
 
-void machinewireview_onconfigchanged(MachineWireView* self,
-	Workspace* workspace, psy_Property* property)
+void machinewireview_configure(MachineWireView* self, MachineViewConfig* macview)
 {	
-	machinewireview_readconfig(self);
+	self->drawvumeters = machineviewconfig_vumeters(macview);
+	self->skin.drawmachineindexes = machineviewconfig_machineindexes(macview);
+	self->showwirehover = machineviewconfig_wirehover(macview);	
 }
 
-void machinewireview_readconfig(MachineWireView* self)
-{
-	psy_Property* mv;
-	
-	mv = psy_property_findsection(&self->workspace->config.config,
-		"visual.machineview");
-	if (mv) {		
-		self->drawvumeters = psy_property_at_bool(mv, "drawvumeters", 1);
-		psy_ui_component_stoptimer(&self->component, 0);
-		if (self->drawvumeters) {
-			psy_ui_component_starttimer(&self->component, 0, 50);
-		}
-		self->skin.drawmachineindexes = psy_property_at_bool(mv,
-			"drawmachineindexes", 1);
-		self->showwirehover = machineviewconfig_showwirehover(
-			psycleconfig_macview(workspace_conf(self->workspace)));
-	}
-}
-
-void machinewireview_applyproperties(MachineWireView* self, psy_Property* p)
-{
-	machineviewskin_settheme(&self->skin, p,
-		dirconfig_skins(&self->workspace->config.directories));
-	self->skin.drawmachineindexes = machineviewconfig_showmachineindexes(
-		psycleconfig_macview(workspace_conf(self->workspace)));
+void machinewireview_updateskin(MachineWireView* self)
+{		
+	machineviewskin_settheme(&self->skin, 
+		psycleconfig_macview(workspace_conf(self->workspace))->theme,
+		dirconfig_skins(&self->workspace->config.directories));	
 	psy_ui_component_setbackgroundcolour(&self->component, self->skin.colour);	
 }
 
@@ -1607,7 +1576,7 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 	bool updatevus;
 
 	self->drawvumode = TRUE;
-	updatevus = psy_ui_component_visible(&self->component);
+	updatevus = psy_ui_component_visible(&self->component) && self->drawvumeters;
 	if (updatevus) {
 		psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_NONE);
 	}
@@ -1943,6 +1912,7 @@ static void machineview_onmousedoubleclick(MachineView*, psy_ui_MouseEvent*);
 static void machineview_onkeydown(MachineView*, psy_ui_KeyEvent*);
 static void machineview_onfocus(MachineView*, psy_ui_Component* sender);
 static void machineview_onskinchanged(MachineView*, Workspace*);
+static void machineview_onconfigure(MachineView*, Workspace*, psy_Property*);
 static void machineview_selectsection(MachineView*, psy_ui_Component* sender, uintptr_t section);
 
 static psy_ui_ComponentVtable machineview_vtable;
@@ -2006,11 +1976,9 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->component.signal_focus, self,
 		machineview_onfocus);
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
-		machineview_onskinchanged);	
-	if (machineviewconfig_showwirehover(psycleconfig_macview(
-			workspace_conf(workspace)))) {
-		self->wireview.showwirehover = TRUE;
-	}
+		machineview_onskinchanged);
+	psy_signal_connect(&workspace->signal_configchanged, self,
+		machineview_onconfigure);		
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
@@ -2048,8 +2016,7 @@ void machineview_onfocus(MachineView* self, psy_ui_Component* sender)
 
 void machineview_onskinchanged(MachineView* self, Workspace* sender)
 {			
-	machinewireview_applyproperties(&self->wireview,
-		sender->config.macview.theme);
+	machinewireview_updateskin(&self->wireview);
 	newmachine_updateskin(&self->newmachine);
 }
 
@@ -2145,4 +2112,11 @@ void machineview_onsongchanged(MachineView* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
 {
 	tabbar_select(&self->tabbar, 0);
+}
+
+void machineview_onconfigure(MachineView* self, Workspace* sender, psy_Property*
+	property)
+{
+	machinewireview_configure(&self->wireview,
+		psycleconfig_macview(workspace_conf(sender)));
 }

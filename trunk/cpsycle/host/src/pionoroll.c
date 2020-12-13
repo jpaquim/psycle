@@ -7,10 +7,6 @@
 // local
 #include "trackergridstate.h"
 #include "patterncmds.h"
-// std
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 

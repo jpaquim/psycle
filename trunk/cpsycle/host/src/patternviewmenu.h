@@ -35,6 +35,8 @@ typedef struct PatternBlockMenu {
 	psy_ui_Button mixpaste;
 	psy_ui_Button del;
 	psy_ui_Button transform;
+	psy_ui_Button blockswingfill;
+	psy_ui_Button trackswingfill;
 	psy_ui_Button interpolatelinear;
 	psy_ui_Button interpolatecurve;
 	psy_ui_Button changegenerator;

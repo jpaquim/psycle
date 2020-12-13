@@ -158,3 +158,10 @@ const char* psycleconfig_defaultfontstr(const PsycleConfig* self)
 	assert(self && self->visual);
 	return psy_property_at_str(self->visual, "defaultfont", PSYCLE_DEFAULT_FONT);
 }
+
+bool psycleconfig_enableaudio(const PsycleConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->global, "enableaudio", TRUE);
+}

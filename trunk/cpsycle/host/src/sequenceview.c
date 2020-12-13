@@ -733,7 +733,7 @@ static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag, psy_
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 static void sequenceview_onsequencechanged(SequenceView*,
 	psy_audio_Sequence* sender);
-static void sequenceview_onconfigchanged(SequenceView*, Workspace*,
+static void sequenceview_onconfigure(SequenceView*, Workspace*,
 	psy_Property*);
 // implementation
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
@@ -843,7 +843,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 			self, sequenceview_onsequencechanged);
 	}
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		sequenceview_onconfigchanged);
+		sequenceview_onconfigure);
 }
 
 void sequenceview_onnewentry(SequenceView* self)
@@ -1270,7 +1270,7 @@ void sequenceview_onsequencechanged(SequenceView* self,
 	sequenceduration_update(&self->duration);
 }
 
-void sequenceview_onconfigchanged(SequenceView* self, Workspace* workspace,
+void sequenceview_onconfigure(SequenceView* self, Workspace* workspace,
 	psy_Property* property)
 {
 	if (self->listview.showpatternnames != generalconfig_showingpatternnames(

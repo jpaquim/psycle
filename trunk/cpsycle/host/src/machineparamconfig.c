@@ -18,24 +18,22 @@ void machineparamconfig_init(MachineParamConfig* self, psy_Property* parent)
 
 void machineparamconfig_makeparamview(MachineParamConfig* self, psy_Property* parent)
 {
-	psy_Property* paramview;
-
 	assert(self);
 
-	paramview = psy_property_settext(
+	self->paramview = psy_property_settext(
 		psy_property_append_section(parent, "paramview"),
 		"settingsview.native-machine-parameter-window");
 	psy_property_settext(
-		psy_property_append_font(paramview, "font", PSYCLE_DEFAULT_FONT),
+		psy_property_append_font(self->paramview, "font", PSYCLE_DEFAULT_FONT),
 		"settingsview.font");
 	psy_property_setid(psy_property_settext(
-		psy_property_append_action(paramview, "loadcontrolskin"),
+		psy_property_append_action(self->paramview, "loadcontrolskin"),
 		"settingsview.load-dial-bitmap"),
 		PROPERTY_ID_LOADCONTROLSKIN);
 	psy_property_settext(
-		psy_property_append_bool(paramview, "showaswindow", 1),
+		psy_property_append_bool(self->paramview, "showaswindow", 1),
 		"settingsview.show-as-window");
-	machineparamconfig_makeparamtheme(self, paramview);
+	machineparamconfig_makeparamtheme(self, self->paramview);
 }
 
 void machineparamconfig_makeparamtheme(MachineParamConfig* self, psy_Property* parent)
@@ -96,3 +94,11 @@ void machineparamconfig_makeparamtheme(MachineParamConfig* self, psy_Property* p
 			PSY_PROPERTY_HINT_EDITCOLOR),
 		"settingsview.selvalue-font");
 }
+
+bool machineparamconfig_showfloated(const MachineParamConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->paramview, "showaswindow", TRUE);
+}
+

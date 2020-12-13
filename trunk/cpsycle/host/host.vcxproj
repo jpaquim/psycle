@@ -173,6 +173,7 @@
     <ClCompile Include="src\instnotemapview.c" />
     <ClCompile Include="src\instrumentsbox.c" />
     <ClCompile Include="src\instrumentview.c" />
+    <ClCompile Include="src\intedit.c" />
     <ClCompile Include="src\interpolatecurveview.c" />
     <ClCompile Include="src\interpreter.c" />
     <ClCompile Include="src\kbdbox.c" />
@@ -214,6 +215,7 @@
     <ClCompile Include="src\presetsbar.c" />
     <ClCompile Include="src\propertiesview.c" />
     <ClCompile Include="src\psycle.c" />
+    <ClCompile Include="src\realedit.c" />
     <ClCompile Include="src\recentview.c" />
     <ClCompile Include="src\renderview.c" />
     <ClCompile Include="src\sampleeditor.c" />
@@ -233,6 +235,7 @@
     <ClCompile Include="src\stepbox.c" />
     <ClCompile Include="src\stepsequencerview.c" />
     <ClCompile Include="src\stereophase.c" />
+    <ClCompile Include="src\swingfillview.c" />
     <ClCompile Include="src\tabbar.c" />
     <ClCompile Include="src\timebar.c" />
     <ClCompile Include="src\trackergridstate.c" />
@@ -285,6 +288,7 @@
     <ClInclude Include="src\instnotemapview.h" />
     <ClInclude Include="src\instrumentsbox.h" />
     <ClInclude Include="src\instrumentview.h" />
+    <ClInclude Include="src\intedit.h" />
     <ClInclude Include="src\interpolatecurveview.h" />
     <ClInclude Include="src\interpreter.h" />
     <ClInclude Include="src\kbdbox.h" />
@@ -325,6 +329,7 @@
     <ClInclude Include="src\plugineditor.h" />
     <ClInclude Include="src\presetsbar.h" />
     <ClInclude Include="src\propertiesview.h" />
+    <ClInclude Include="src\realedit.h" />
     <ClInclude Include="src\recentview.h" />
     <ClInclude Include="src\renderview.h" />
     <ClInclude Include="src\resources\resource.h" />
@@ -345,6 +350,7 @@
     <ClInclude Include="src\stepbox.h" />
     <ClInclude Include="src\stepsequencerview.h" />
     <ClInclude Include="src\stereophase.h" />
+    <ClInclude Include="src\swingfillview.h" />
     <ClInclude Include="src\tabbar.h" />
     <ClInclude Include="src\timebar.h" />
     <ClInclude Include="src\trackergridstate.h" />

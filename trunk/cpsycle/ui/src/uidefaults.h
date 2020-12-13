@@ -19,6 +19,7 @@ typedef struct psy_ui_Defaults {
 	psy_ui_Style style_common;
 	psy_ui_Margin hmargin;
 	psy_ui_Margin vmargin;
+	psy_ui_Margin cmargin;
 } psy_ui_Defaults;
 
 void psy_ui_defaults_init(psy_ui_Defaults*);
@@ -34,6 +35,15 @@ INLINE psy_ui_Margin psy_ui_defaults_vmargin(const psy_ui_Defaults* self)
 	return self->vmargin;
 }
 
+INLINE psy_ui_Margin psy_ui_defaults_cmargin(const psy_ui_Defaults* self)
+{
+	return self->cmargin;
+}
+
+INLINE const psy_ui_Margin* psy_ui_defaults_pcmargin(const psy_ui_Defaults* self)
+{
+	return &self->cmargin;
+}
 
 #ifdef __cplusplus
 }

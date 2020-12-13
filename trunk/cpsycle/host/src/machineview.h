@@ -91,6 +91,12 @@ typedef struct MachineWireView {
 void machinewireview_init(MachineWireView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_ui_Scroller* scroller, Workspace*);
 void machinewireview_centermaster(MachineWireView*);
+void machinewireview_configure(MachineWireView*, MachineViewConfig*);
+
+INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
+{
+	return &self->component;
+}
 
 typedef struct MachineViewBar {
 	psy_ui_Component component;

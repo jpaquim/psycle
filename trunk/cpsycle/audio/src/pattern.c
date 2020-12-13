@@ -988,6 +988,80 @@ void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 	}	
 }
 
+void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
+	psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end,
+	bool bTrackMode,
+	psy_dsp_big_beat_t bpl,
+	int tempo, int width, float variance, float phase,
+	bool offset)
+{					
+	const float twopi = 2.0f * psy_dsp_PI_F;
+	uintptr_t line;	
+	psy_audio_PatternNode* prev = 0;
+	psy_audio_PatternNode* node;
+	uintptr_t l;
+	float var = (variance / 100.0f);
+	// time to do our fill
+	// first some math
+	// our range has to go from spd+var to spd-var and back in width+1 lines
+	float step = twopi / (width);
+	float index = phase * twopi / 360;
+	float dcoffs = 0;
+
+	begin.line = (uintptr_t)(begin.offset / bpl);
+	end.line = (uintptr_t)(end.offset / bpl);
+	if (bTrackMode) {		
+		begin.line = 0;
+		end.line = (int)(psy_audio_pattern_length(self) / bpl);		
+	}	
+	// remember we are at each speed for the length of time it takes to do one tick
+	// this approximately calculates the offset	
+	if (offset) {
+		float swing = 0;
+		for (l = 0; l < width; l++) {
+			float val = ((sinf(index) * var * tempo) + tempo);
+			swing += (val / tempo) * (val / tempo);
+			index += step;
+		}
+		dcoffs = ((swing - width) * tempo) / width;
+	}
+	// now fill the pattern
+	for (line = begin.line; line < end.line; ++line) {
+		psy_dsp_big_beat_t offset;
+		
+		offset = line * bpl;
+		// -0x20; // ***** proposed change to ffxx command to allow
+		// moreuseable range since the tempo bar only uses this range anyway...
+		int val = (int)((((sinf(index) * var * tempo) + tempo) + dcoffs) + 0.5f);
+		if (val < 1) {
+			val = 1;
+		} else if (val > 255) {
+			val = 255;
+		}
+		index += step;
+		node = psy_audio_pattern_findnode(self, begin.track, offset, bpl,
+			&prev);				
+		if (node) {
+			psy_audio_PatternEntry* entry;
+			psy_audio_PatternEvent* ev;
+
+			entry = node->entry;			
+			ev = psy_audio_patternentry_front(node->entry);
+			ev->cmd = 0xff;
+			ev->parameter = (unsigned char)(val);
+			++self->opcount;										
+		} else {
+			psy_audio_PatternEvent ev;
+
+			psy_audio_patternevent_clear(&ev);
+			ev.cmd = 0xff;
+			ev.parameter = (unsigned char)(val);
+			prev = psy_audio_pattern_insert(self, prev, begin.track, offset, &ev);
+		}		
+	}
+}
+
 void psy_audio_pattern_setdefaultlines(uintptr_t numlines)
 {
 	defaultlines = numlines;
