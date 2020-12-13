@@ -253,8 +253,8 @@ void make_translator_default(psy_Property* lang)
 	// settingsview/machineview
 	psy_property_set_str(section,
 		"draw-machine-indexes", "Draw Machine Indexes");
-	psy_property_set_str(section, "draw-vu-meters", "Draw VU Meters");
-	psy_property_set_str(section, "draw-wire-hover", "Draw VU Meters");
+	psy_property_set_str(section, "draw-vumeters", "Draw VU Meters");
+	psy_property_set_str(section, "draw-wirehover", "Draw Wire Hover");
 	// settingsview/machineview/theme
 	psy_property_set_str(section, "vu-background", "Vu BackGround");
 	psy_property_set_str(section, "vu-bar", "Vu Bar");

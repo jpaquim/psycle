@@ -55,10 +55,9 @@ static const char* searchname;
 static int searchtype;
 static psy_Property* searchresult;
 
-void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Property* dirconfig)
+void plugincatcher_init(psy_audio_PluginCatcher* self)
 {
-	char inipath[_MAX_PATH];
-	psy_Property* p;
+	char inipath[_MAX_PATH];	
 
 	self->plugins = psy_property_setcomment(
 	psy_property_allocinit_key(NULL),
@@ -67,13 +66,8 @@ void plugincatcher_init(psy_audio_PluginCatcher* self, psy_Property* dirconfig)
 	strcpy(inipath, psy_dir_config());
 	strcat(inipath, "\\psycle-plugin-scanner-cache.ini");
 	self->inipath = strdup(inipath);
-	self->dirconfig = dirconfig;
-	p = psy_property_find(self->dirconfig, "app", PSY_PROPERTY_TYPE_NONE);
-	if (p) {
-		self->nativeroot = strdup(psy_property_item_str(p));
-	} else {
-		self->nativeroot = strdup(PSYCLE_APP_DIR);
-	}
+	self->directories = NULL;
+	self->nativeroot = psy_strdup(PSYCLE_APP_DIR);
 	self->saveafterscan = TRUE;
 	self->hasplugincache = FALSE;
 	psy_signal_init(&self->signal_changed);
@@ -85,11 +79,25 @@ void plugincatcher_dispose(psy_audio_PluginCatcher* self)
 	psy_property_deallocate(self->plugins);
 	self->plugins = 0;
 	free(self->inipath);	
-	self->dirconfig = 0;		
+	self->directories = NULL;
 	free(self->nativeroot);
 	self->nativeroot = NULL;
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_scanprogress);
+}
+
+void plugincatcher_setdirectories(psy_audio_PluginCatcher* self, psy_Property*
+	directories)
+{
+	psy_Property* p;
+
+	self->directories = directories;
+	p = psy_property_find(self->directories, "app", PSY_PROPERTY_TYPE_NONE);
+	if (p) {
+		psy_strreset(&self->nativeroot, psy_property_item_str(p));
+	} else {
+		psy_strreset(&self->nativeroot, PSYCLE_APP_DIR);
+	}
 }
 
 void plugincatcher_clear(psy_audio_PluginCatcher* self)
@@ -173,24 +181,24 @@ void plugincatcher_scan_multipath(psy_audio_PluginCatcher* self,
 void plugincatcher_scan(psy_audio_PluginCatcher* self)
 {
 	plugincatcher_clear(self);
-	if (self->dirconfig) {
+	if (self->directories) {
 		const char* path;
 
-		path = psy_property_at_str(self->dirconfig, "plugins", NULL);
+		path = psy_property_at_str(self->directories, "plugins", NULL);
 		if (path) {			
 			psy_dir_enumerate_recursive(self, path, "*"MODULEEXT, MACH_PLUGIN,
 				(psy_fp_findfile)onenumdir);
 		}
-		path = psy_property_at_str(self->dirconfig, "luascripts", NULL);
+		path = psy_property_at_str(self->directories, "luascripts", NULL);
 		if (path) {
 			psy_dir_enumerate(self, path, "*.lua", MACH_LUA,
 				(psy_fp_findfile)onenumdir);
 		}
-		path = psy_property_at_str(self->dirconfig, "vsts32", NULL);
+		path = psy_property_at_str(self->directories, "vsts32", NULL);
 		if (path) {
 			plugincatcher_scan_multipath(self, path, "*"MODULEEXT, MACH_VST);
 		}
-		path = psy_property_at_str(self->dirconfig, "ladspas", NULL);
+		path = psy_property_at_str(self->directories, "ladspas", NULL);
 		if (path) {
 			plugincatcher_scan_multipath(self, path, "*"MODULEEXT,
 				MACH_LADSPA);

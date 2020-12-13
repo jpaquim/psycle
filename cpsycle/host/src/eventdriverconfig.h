@@ -32,8 +32,7 @@ typedef struct EventDriverConfig {
 	psy_Property* eventdriverconfigurations;
 	// references
 	psy_audio_Player* player;
-	psy_Property* config;
-	psy_Property* cmds;
+	psy_Property* config;	
 } EventDriverConfig;
 
 void eventdriverconfig_init(EventDriverConfig*, psy_Property* parent, psy_audio_Player*);

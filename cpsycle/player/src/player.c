@@ -214,7 +214,8 @@ void cmdplayer_initenv(CmdPlayer* self)
 
 void cmdplayer_initplugincatcherandmachinefactory(CmdPlayer* self)
 {
-	plugincatcher_init(&self->plugincatcher, self->directories);
+	plugincatcher_init(&self->plugincatcher);
+	plugincatcher_setdirectories(&self->plugincatcher, self->directories);
 	// psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
 	//	workspace_onscanprogress);
 	if (!plugincatcher_load(&self->plugincatcher)) {

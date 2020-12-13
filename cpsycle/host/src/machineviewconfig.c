@@ -29,12 +29,12 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->machineview,
 			"drawvumeters", TRUE),
-		"settingsview.draw-vu-meters"),
+		"settingsview.draw-vumeters"),
 		PROPERTY_ID_DRAWVUMETERS);
 	psy_property_settext(
 		psy_property_append_bool(self->machineview,
 			"drawwirehover", FALSE),
-		"settingsview.draw-wire-hover");
+		"settingsview.draw-wirehover");
 	machineviewconfig_maketheme(self, self->machineview);
 }
 
@@ -140,7 +140,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 	psy_property_append_string(self->theme, "machine_skin", "");//	
 }
 
-bool machineviewconfig_showmachineindexes(const MachineViewConfig* self)
+bool machineviewconfig_machineindexes(const MachineViewConfig* self)
 {
 	assert(self);
 
@@ -148,9 +148,16 @@ bool machineviewconfig_showmachineindexes(const MachineViewConfig* self)
 		TRUE);
 }
 
-bool machineviewconfig_showwirehover(const MachineViewConfig* self)
+bool machineviewconfig_wirehover(const MachineViewConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->machineview, "drawwirehover", TRUE);
+}
+
+bool machineviewconfig_vumeters(const MachineViewConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->machineview, "drawvumeters", TRUE);
 }

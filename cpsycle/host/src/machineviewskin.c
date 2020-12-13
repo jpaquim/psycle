@@ -34,6 +34,7 @@ void machineviewskin_init(MachineViewSkin* self)
 	psy_ui_fontinfo_init(&fontinfo, "Tahoma", 16);
 	psy_ui_font_init(&self->font, &fontinfo);
 	machineviewskin_initdefaultmachinecoords(self);
+	self->drawmachineindexes = TRUE;
 }
 
 void machineviewskin_dispose(MachineViewSkin* self)

@@ -34,7 +34,7 @@ const char* dirconfig_doc(const DirConfig*);
 const char* dirconfig_config(const DirConfig*);
 const char* dirconfig_userpresets(const DirConfig*);
 
-bool dirconfig_onconfigurationchanged(DirConfig*, psy_Property*);
+bool dirconfig_onconfigure(DirConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

@@ -15,6 +15,7 @@
 #include "trackerlinenumbers.h"
 #include "trackerview.h"
 #include "transformpatternview.h"
+#include "swingfillview.h"
 #include "workspace.h"
 // ui
 #include <uibutton.h>
@@ -70,6 +71,7 @@ typedef struct PatternView {
 	PatternBlockMenu blockmenu;
 	TransformPatternView transformpattern;
 	InterpolateCurveView interpolatecurveview;
+	SwingFillView swingfillview;
 	// internal data
 	TrackerLineState linestate;
 	TrackConfig trackconfig;
@@ -79,6 +81,7 @@ typedef struct PatternView {
 	bool showdefaultline;
 	PatternCursorStepMode pgupdownstepmode;
 	intptr_t pgupdownstep;
+	bool trackmodeswingfill;
 	// references
 	Workspace* workspace;
 } PatternView;
@@ -91,6 +94,7 @@ void patternview_showlinenumbers(PatternView*, int showstate);
 void patternview_toggleblockmenu(PatternView*);
 void patternview_toggleinterpolatecurve(PatternView*, psy_ui_Component* sender);
 void patternview_toggletransformpattern(PatternView*, psy_ui_Component* sender);
+void patternview_toggleswingfill(PatternView*, psy_ui_Component* sender);
 void patternview_oninterpolatelinear(PatternView*);
 void patternview_onpatternimport(PatternView*);
 void patternview_onpatternexport(PatternView*);

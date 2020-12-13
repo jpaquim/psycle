@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 int propertiesio_load(psy_Property*, const char* path, int allowappend);
-void propertiesio_save(psy_Property*, const char* path);
+void propertiesio_save(const psy_Property*, const char* path);
 
 #ifdef __cplusplus
 }

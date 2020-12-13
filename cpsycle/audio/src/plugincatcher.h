@@ -19,19 +19,20 @@ typedef struct {
 	psy_Property* plugins;
 	char* inipath;
 	char* nativeroot;
-	psy_Property* dirconfig;
+	psy_Property* directories;
 	psy_Signal signal_changed;
 	psy_Signal signal_scanprogress;
 	bool saveafterscan;
 	bool hasplugincache;
 } psy_audio_PluginCatcher;
 
-void plugincatcher_init(psy_audio_PluginCatcher*, psy_Property* dirconfig);
+void plugincatcher_init(psy_audio_PluginCatcher*);
 void plugincatcher_dispose(psy_audio_PluginCatcher*);
 void plugincatcher_clear(psy_audio_PluginCatcher*);
 void plugincatcher_scan(psy_audio_PluginCatcher*);
 int plugincatcher_load(psy_audio_PluginCatcher*);
 void plugincatcher_save(psy_audio_PluginCatcher*);
+void plugincatcher_setdirectories(psy_audio_PluginCatcher*, psy_Property*);
 /*const psy_audio_MachineInfo* plugincatcher_machineinfo(psy_audio_PluginCatcher*, MachineType,
 	const char* name);*/
 char* plugincatcher_modulepath(psy_audio_PluginCatcher*, MachineType,

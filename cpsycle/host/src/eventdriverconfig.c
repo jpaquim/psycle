@@ -4,6 +4,8 @@
 #include "../../detail/prefix.h"
 
 #include "eventdriverconfig.h"
+// host
+#include "cmdproperties.h"
 // ui
 #include <uiapp.h>
 #include <uiopendialog.h>
@@ -121,7 +123,11 @@ void eventdriverconfig_configeventdrivers(EventDriverConfig* self)
 					&self->player->eventdrivers,
 					psy_property_item_int(property));
 				if (driver) {
-					psy_eventdriver_setcmddef(driver, self->cmds);
+					psy_Property* cmds;
+
+					cmds = cmdproperties_create();
+					psy_eventdriver_setcmddef(driver, cmds);
+					psy_property_deallocate(cmds);
 				}
 			}
 		}

@@ -343,6 +343,15 @@
     <ClCompile Include="src\dirconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\swingfillview.c">
+      <Filter>pattern</Filter>
+    </ClCompile>
+    <ClCompile Include="src\intedit.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
+    <ClCompile Include="src\realedit.c">
+      <Filter>uicontrols</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -661,6 +670,15 @@
     </ClInclude>
     <ClInclude Include="src\dirconfig.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\swingfillview.h">
+      <Filter>pattern</Filter>
+    </ClInclude>
+    <ClInclude Include="src\intedit.h">
+      <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\realedit.h">
+      <Filter>uicontrols</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

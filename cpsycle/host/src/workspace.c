@@ -97,7 +97,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	psy_audio_machinecallback_init(&self->machinecallback, &self->player, NULL);
 	psy_audio_machinecallbackvtable_init(self);
 	self->machinecallback.vtable = &machinecallback_vtable;
-	psy_audio_exclusivelock_init();
+	psy_audio_exclusivelock_init();	
 #ifdef PSYCLE_USE_SSE
 	psy_dsp_sse2_init(&dsp);
 #else
@@ -116,38 +116,40 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->maximizeview.row2 = 1;	
 	self->undosavepoint = 0;
 	self->machines_undosavepoint = 0;
+	self->navigating = FALSE;
+	self->sequencepaste = NULL;
 	viewhistory_init(&self->viewhistory);
-	psy_playlist_init(&self->recentsongs);
-	psycleconfig_init(&self->config, &self->player,
-		&self->machinefactory);
+	psy_playlist_init(&self->playlist);
 	workspace_initplugincatcherandmachinefactory(self);
+	psycleconfig_init(&self->config, &self->player,
+		&self->machinefactory);	
+	plugincatcher_setdirectories(&self->plugincatcher,
+		psycleconfig_directories(&self->config)->directories);
+	plugincatcher_load(&self->plugincatcher);
 	self->song = psy_audio_song_allocinit(&self->machinefactory);
 	psy_audio_machinecallback_setsong(&self->machinecallback, self->song);
 	psy_audio_sequenceselection_init(&self->sequenceselection, &self->song->sequence);
 	psy_audio_sequence_setplayselection(&self->song->sequence, &self->sequenceselection);
 	psy_signal_connect(&self->sequenceselection.signal_editpositionchanged, self,
 		workspace_onsequenceeditpositionchanged);
-	psy_undoredo_init(&self->undoredo);	
-	self->navigating = 0;
+	psy_undoredo_init(&self->undoredo);		
 	workspace_initsignals(self);	
 	workspace_initplayer(self);
 	eventdriverconfig_registereventdrivers(&self->config.input);
 	psy_audio_patterncursor_init(&self->patterneditposition);
-	psy_audio_pattern_init(&self->patternpaste);
-	self->sequencepaste = 0;	
+	psy_audio_pattern_init(&self->patternpaste);		
 }
 
 void workspace_initplugincatcherandmachinefactory(Workspace* self)
 {
 	assert(self);
 
-	plugincatcher_init(&self->plugincatcher, self->config.directories.directories);
+	plugincatcher_init(&self->plugincatcher); 	
 	psy_signal_connect(&self->plugincatcher.signal_scanprogress, self,
-		workspace_onscanprogress);
-	plugincatcher_load(&self->plugincatcher);
+		workspace_onscanprogress);	
 	psy_audio_machinefactory_init(&self->machinefactory,
 		&self->machinecallback, 
-		&self->plugincatcher);
+		&self->plugincatcher);	
 }
 
 void workspace_initsignals(Workspace* self)
@@ -195,11 +197,9 @@ void workspace_dispose(Workspace* self)
 	viewhistory_dispose(&self->viewhistory);
 	workspace_disposesignals(self);
 	psy_audio_pattern_dispose(&self->patternpaste);
-	workspace_disposesequencepaste(self);
-	psy_property_deallocate(self->cmds);
-	self->cmds = NULL;
+	workspace_disposesequencepaste(self);	
 	psy_audio_sequenceselection_dispose(&self->sequenceselection);	
-	psy_playlist_dispose(&self->recentsongs);
+	psy_playlist_dispose(&self->playlist);
 	psy_audio_exclusivelock_dispose();
 }
 
@@ -241,6 +241,8 @@ void workspace_disposesequencepaste(Workspace* self)
 
 void workspace_initplayer(Workspace* self)
 {
+	psy_Property* cmds;
+
 	assert(self);
 
 #ifdef DIVERSALIS__OS__MICROSOFT
@@ -253,15 +255,15 @@ void workspace_initplayer(Workspace* self)
 #else
 	psy_audio_player_init(&self->player, self->song, 0);
 #endif		
-	self->cmds = cmdproperties_create();
-	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers, self->cmds);
+	cmds = cmdproperties_create();	
+	psy_audio_eventdrivers_setcmds(&self->player.eventdrivers, cmds);
+	psy_property_deallocate(cmds);
 	workspace_initaudio(self);
 }
 
 void workspace_initaudio(Workspace* self)
 {
-	audioconfig_driverconfigure_section(&self->config.audio);
-	self->config.input.cmds = self->cmds;
+	audioconfig_driverconfigure_section(&self->config.audio);	
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input, 0);
 }
@@ -416,7 +418,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 			} else if (psy_property_insection(property,
 					self->config.audio.driverconfigure)) {
 				audioconfig_oneditaudiodriverconfiguration(&self->config.audio,
-					workspace_enableaudio(self));
+					psycleconfig_enableaudio(&self->config));
 				audioconfig_driverconfigure_section(&self->config.audio);
 				return;
 			} else if (psy_property_insection(property,
@@ -495,7 +497,11 @@ void workspace_onaddeventdriver(Workspace* self)
 			driver = psy_audio_player_loadeventdriver(&self->player,
 				psy_property_item_str(choice));
 			if (driver) {
-				psy_eventdriver_setcmddef(driver, self->cmds);
+				psy_Property* cmds;
+
+				cmds = cmdproperties_create();		
+				psy_eventdriver_setcmddef(driver, cmds);
+				psy_property_deallocate(cmds);
 			}
 			eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 			activedrivers = psy_property_at(self->config.input.eventinputs, "activedrivers",
@@ -590,14 +596,6 @@ void workspace_movecursorwhenpaste(Workspace* self, bool on)
 		"visual.patternview.movecursorwhenpaste", on);
 }
 
-int workspace_showparamviewaswindow(Workspace* self)
-{
-	assert(self);
-
-	return psy_property_at_bool(&self->config.config,
-		"visual.paramview.showaswindow", 1);
-}
-
 void workspace_newsong(Workspace* self)
 {			
 	psy_audio_Song* song;	
@@ -664,7 +662,7 @@ void workspace_loadsong(Workspace* self, const char* path, bool play)
 			psy_audio_songfile_dispose(&songfile);
 			if (generalconfig_saverecentsongs(psycleconfig_general(
 					workspace_conf(self)))) {
-				psy_playlist_add(&self->recentsongs, path);
+				psy_playlist_add(&self->playlist, path);
 			}
 			psy_audio_songfile_dispose(&songfile);
 		}
@@ -786,7 +784,7 @@ void workspace_load_configuration(Workspace* self)
 					psy_audiodriver_configuration(self->player.driver)),
 				PSY_PROPERTY_TYPE_NONE);			
 		}
-		if (workspace_enableaudio(self)) {
+		if (psycleconfig_enableaudio(&self->config)) {
 			psy_audio_player_restartdriver(&self->player, driversection);
 		} else if (self->player.driver) {
 			psy_audiodriver_configure(self->player.driver, driversection);
@@ -840,22 +838,22 @@ psy_Property* workspace_recentsongs(Workspace* self)
 {
 	assert(self);
 
-	return self->recentsongs.recentsongs;
+	return self->playlist.recentsongs;
 }
 
 void workspace_load_recentsongs(Workspace* self)
 {	
-	psy_playlist_load(&self->recentsongs);	
+	psy_playlist_load(&self->playlist);	
 }
 
 void workspace_save_recentsongs(Workspace* self)
 {
-	psy_playlist_save(&self->recentsongs);	
+	psy_playlist_save(&self->playlist);
 }
 
 void workspace_clearrecentsongs(Workspace* self)
 {
-	psy_playlist_clear(&self->recentsongs);	
+	psy_playlist_clear(&self->playlist);
 }
 
 void workspace_setoctave(Workspace* self, int octave)
@@ -1127,15 +1125,6 @@ void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak,
 	psy_signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, 
 		value);
 }
-
-bool workspace_enableaudio(Workspace* self)
-{
-	assert(self);
-
-	return psy_property_at_bool(self->config.global, "enableaudio", TRUE);
-}
-
-
 
 void workspace_togglepatdefaultline(Workspace* self)
 {

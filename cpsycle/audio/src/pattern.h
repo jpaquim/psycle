@@ -268,6 +268,13 @@ void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy
 /// transposes all entries of the block with the offset
 void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, int offset);
+/// swingfill
+void psy_audio_pattern_swingfill(psy_audio_Pattern*,
+	psy_audio_PatternCursor begin,
+	psy_audio_PatternCursor end,
+	bool bTrackMode,
+	psy_dsp_big_beat_t bpl,
+	int tempo, int width, float variance, float phase, bool offset);
 /// changes the machine column of all entries of the block with the offset
 void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, int machine);

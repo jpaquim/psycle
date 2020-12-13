@@ -93,7 +93,7 @@ typedef void (*psy_eventdriver_fp_cmd)(struct psy_EventDriver*, const char* sect
 typedef int (*psy_eventdriver_fp_error)(int, const char*);
 typedef psy_EventDriverCmd(*psy_eventdriver_fp_getcmd)(struct psy_EventDriver*, const char* section);
 typedef const char*(*psy_eventdriver_fp_target)(struct psy_EventDriver*);
-typedef void (*psy_eventdriver_fp_setcmddef)(struct psy_EventDriver*, psy_Property*);
+typedef void (*psy_eventdriver_fp_setcmddef)(struct psy_EventDriver*, const psy_Property*);
 typedef void (*psy_eventdriver_fp_idle)(struct psy_EventDriver*);
 
 typedef struct psy_EventDriverVTable {

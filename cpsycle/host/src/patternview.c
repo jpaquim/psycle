@@ -10,6 +10,8 @@
 // ui
 #include <uiopendialog.h>
 #include <uisavedialog.h>
+// std
+#include <math.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -17,7 +19,7 @@
 // prototypes
 static void patternviewbar_ondefaultline(PatternViewBar*,
 	psy_ui_CheckBox* sender);
-static void patternviewbar_onconfigurationchanged(PatternViewBar*, Workspace*,
+static void patternviewbar_onconfigure(PatternViewBar*, Workspace*,
 	psy_Property*);
 static void patternviewbar_onmovecursorwhenpaste(PatternViewBar*,
 	psy_ui_Component* sender);
@@ -53,7 +55,7 @@ void patternviewbar_init(PatternViewBar* self, psy_ui_Component* parent,
 	psy_ui_label_preventtranslation(&self->status);
 	psy_ui_label_setcharnumber(&self->status, 40);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		patternviewbar_onconfigurationchanged);
+		patternviewbar_onconfigure);
 	psy_signal_connect(&workspace->signal_patterncursorchanged, self,
 		patternviewbar_onupdatestatus);
 	psy_signal_connect(&workspace->signal_sequenceselectionchanged,
@@ -115,7 +117,7 @@ static void patternview_onsongchanged(PatternView*, Workspace* sender,
 static void patternview_onsequenceselectionchanged(PatternView*,
 	Workspace* sender);
 static void patternview_onskinchanged(PatternView*, Workspace*);
-static void patternview_onconfigurationchanged(PatternView*, Workspace*,
+static void patternview_onconfigure(PatternView*, Workspace*,
 	psy_Property*);
 static void patternview_configure(PatternView*,	PatternViewConfig*,
 	KeyboardMiscConfig*);
@@ -158,6 +160,7 @@ static void patternview_oncolresize(PatternView*, TrackerGrid* sender);
 static void patternview_updatescrollstep(PatternView*);
 static intptr_t patternview_currpgupdownstep(const PatternView*);
 static psy_audio_PatternSelection patternview_blockselection(PatternView*);
+static void patternview_swingfill(PatternView*, psy_ui_Component* sender);
 
 // vtable
 static psy_ui_ComponentVtable patternview_vtable;
@@ -196,6 +199,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	self->showdefaultline = TRUE;
 	self->pgupdownstepmode = PATTERNCURSOR_STEP_BEAT;
 	self->pgupdownstep = 4;
+	self->trackmodeswingfill = TRUE;
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_signal_connect(&self->component.signal_focus, self, patternview_onfocus);
@@ -219,7 +223,7 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->workspace->signal_skinchanged, self,
 		patternview_onskinchanged);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		patternview_onconfigurationchanged);
+		patternview_onconfigure);
 	// shared states
 	trackconfig_init(&self->trackconfig,
 		patternviewconfig_showwideinstcolumn(
@@ -277,6 +281,14 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(transformpatternview_base(&self->transformpattern),
 		psy_ui_ALIGN_RIGHT);
 	psy_ui_component_hide(transformpatternview_base(&self->transformpattern));
+	// SwingFillView	
+	swingfillview_init(&self->swingfillview, &self->component,
+		workspace);
+	psy_signal_connect(&self->swingfillview.apply.signal_clicked, self,
+		patternview_swingfill);
+	psy_ui_component_setalign(swingfillview_base(&self->swingfillview),
+		psy_ui_ALIGN_RIGHT);
+	psy_ui_component_hide(swingfillview_base(&self->swingfillview));
 	// Interpolate View
 	interpolatecurveview_init(&self->interpolatecurveview, &self->component, 0, 0, 0, workspace);
 	psy_ui_component_setalign(&self->interpolatecurveview.component, psy_ui_ALIGN_BOTTOM);
@@ -471,7 +483,7 @@ void patternviewbar_onmovecursorwhenpaste(PatternViewBar* self, psy_ui_Component
 		psy_ui_checkbox_checked(&self->movecursorwhenpaste));
 }
 
-void patternviewbar_onconfigurationchanged(PatternViewBar* self, Workspace* workspace,
+void patternviewbar_onconfigure(PatternViewBar* self, Workspace* workspace,
 	psy_Property* property)
 {
 	if (patternviewconfig_ismovecursorwhenpaste(psycleconfig_patview(
@@ -560,7 +572,7 @@ void patternview_selectdisplay(PatternView* self, PatternDisplayMode display)
 	}
 }
 
-void patternview_onconfigurationchanged(PatternView* self, Workspace* sender,
+void patternview_onconfigure(PatternView* self, Workspace* sender,
 	psy_Property* property)
 {
 	patternview_configure(self,
@@ -882,7 +894,7 @@ void patternview_initblockmenu(PatternView* self)
 	patternblockmenu_init(&self->blockmenu, &self->component,
 		self, self->workspace);
 	psy_ui_component_setalign(&self->blockmenu.component, psy_ui_ALIGN_RIGHT);	
-	psy_ui_component_hide(&self->blockmenu.component);
+	psy_ui_component_hide(&self->blockmenu.component);	
 }
 
 void patternview_toggleblockmenu(PatternView* self)
@@ -901,8 +913,17 @@ void patternview_toggleinterpolatecurve(PatternView* self, psy_ui_Component* sen
 }
 
 void patternview_toggletransformpattern(PatternView* self, psy_ui_Component* sender)
-{
+{	
 	psy_ui_component_togglevisibility(&self->transformpattern.component);
+}
+
+void patternview_toggleswingfill(PatternView* self, psy_ui_Component* sender)
+{	
+	if (!psy_ui_component_visible(&self->swingfillview.component)) {									
+		swingfillview_reset(&self->swingfillview,
+			(int)psy_audio_player_bpm(&self->workspace->player));
+	}
+	psy_ui_component_togglevisibility(&self->swingfillview.component);
 }
 
 void patternview_onmousedown(PatternView* self, psy_ui_MouseEvent* ev)
@@ -1112,4 +1133,24 @@ intptr_t patternview_currpgupdownstep(const PatternView* self)
 		return psy_audio_player_lpb(workspace_player(self->workspace)) * 4;
 	}
 	return self->pgupdownstep;
+}
+
+void patternview_swingfill(PatternView* self, psy_ui_Component* sender)
+{
+	if (self->trackmodeswingfill || self->tracker.selection.valid) {
+		int tempo;
+		int width;
+		float variance;
+		float phase;
+		bool offset;
+
+		swingfillview_values(&self->swingfillview, &tempo, &width, &variance,
+			&phase, &offset);
+		psy_audio_pattern_swingfill(self->gridstate.pattern,
+			self->tracker.selection.topleft,
+			self->tracker.selection.bottomright,
+			self->trackmodeswingfill,
+			trackerlinestate_bpl(&self->linestate),
+			tempo, width, variance, phase, offset);
+	}
 }

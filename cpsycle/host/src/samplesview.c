@@ -978,7 +978,7 @@ static uintptr_t samplesview_freesampleslot(SamplesView*, uintptr_t startslot,
 	uintptr_t maxslots);
 static void samplesview_onsamplemodified(SamplesView*, SampleEditor* sender,
 	psy_audio_Sample*);
-static void samplesview_onconfigchanged(SamplesView*, Workspace*,
+static void samplesview_onconfigure(SamplesView*, Workspace*,
 	psy_Property*);
 // implementation
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
@@ -1080,10 +1080,10 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
 		samplesview_onsamplemodified);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		samplesview_onconfigchanged);
+		samplesview_onconfigure);
 }
 
-void samplesview_onconfigchanged(SamplesView* self, Workspace* sender,
+void samplesview_onconfigure(SamplesView* self, Workspace* sender,
 	psy_Property* property)
 {
 	self->general.notestabmode = workspace_notetabmode(sender);

@@ -55,7 +55,7 @@ static void driver_cmd(psy_EventDriver*, const char* section, psy_EventDriverInp
 	psy_EventDriverCmd*);
 static psy_EventDriverCmd driver_getcmd(psy_EventDriver*, const char* section);
 static const char* driver_target(psy_EventDriver*);
-static void setcmddef(psy_EventDriver*, psy_Property*);
+static void setcmddef(psy_EventDriver*, const psy_Property*);
 static void driver_idle(psy_EventDriver* self) { }
 static int onerror(int err, const char* msg);
 static void init_properties(psy_EventDriver*);
@@ -305,7 +305,7 @@ const char* driver_target(psy_EventDriver* driver)
 	return NULL;
 }
 
-void setcmddef(psy_EventDriver* driver, psy_Property* cmddef)
+void setcmddef(psy_EventDriver* driver, const psy_Property* cmddef)
 {
 	if (cmddef && cmddef->children) {
 		KbdDriver* self = (KbdDriver*)driver;

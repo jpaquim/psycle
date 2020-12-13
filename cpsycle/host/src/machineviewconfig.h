@@ -27,8 +27,9 @@ typedef struct MachineViewConfig {
 
 void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
 void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent);
-bool machineviewconfig_showmachineindexes(const MachineViewConfig*);
-bool machineviewconfig_showwirehover(const MachineViewConfig*);
+bool machineviewconfig_machineindexes(const MachineViewConfig*);
+bool machineviewconfig_wirehover(const MachineViewConfig*);
+bool machineviewconfig_vumeters(const MachineViewConfig*);
 
 #ifdef __cplusplus
 }

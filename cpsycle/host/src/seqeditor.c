@@ -863,7 +863,7 @@ static void seqeditor_updatesong(SeqEditor*, psy_audio_Song*);
 static void seqeditor_onsequencechanged(SeqEditor*, psy_audio_Sequence*
 	sender);
 static void seqeditor_onscroll(SeqEditor*, psy_ui_Component* sender);
-static void seqeditor_onconfigchanged(SeqEditor*, Workspace* sender,
+static void seqeditor_onconfigure(SeqEditor*, Workspace* sender,
 	psy_Property*);
 static void seqeditor_onzoomboxbeatchanged(SeqEditor*, ZoomBox* sender);
 static void seqeditor_onzoomboxheightchanged(SeqEditor*, ZoomBox* sender);
@@ -930,7 +930,7 @@ void seqeditor_init(SeqEditor* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->tracks.component.signal_scroll, self,
 		seqeditor_onscroll);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		seqeditor_onconfigchanged);
+		seqeditor_onconfigure);
 }
 
 void seqeditor_onsongchanged(SeqEditor* self, Workspace* workspace, int flag,
@@ -969,7 +969,7 @@ void seqeditor_onscroll(SeqEditor* self, psy_ui_Component* sender)
 		psy_ui_component_scrolltop(&self->tracks.component));
 }
 
-void seqeditor_onconfigchanged(SeqEditor* self, Workspace* workspace,
+void seqeditor_onconfigure(SeqEditor* self, Workspace* workspace,
 	psy_Property* property)
 {
 	psy_ui_component_invalidate(&self->tracks.component);
