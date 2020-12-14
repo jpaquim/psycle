@@ -321,7 +321,7 @@ void pinedit_onmousedown(PinEdit* self, psy_ui_MouseEvent* ev)
 psy_List* pinedit_hittest_wire(PinEdit* self, int x, int y)
 {
 	psy_audio_Connections* connections;
-	psy_audio_WireSocketEntry* input;
+	psy_audio_WireSocket* input;
 	psy_List* pinpair;
 	
 	connections = &workspace_song(self->workspace)->machines.connections;
@@ -507,7 +507,7 @@ void pinedit_unselectall(PinEdit* self)
 psy_audio_PinMapping* pinedit_mapping(PinEdit* self)
 {
 	psy_audio_Connections* connections;
-	psy_audio_WireSocketEntry* input;
+	psy_audio_WireSocket* input;
 
 	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);

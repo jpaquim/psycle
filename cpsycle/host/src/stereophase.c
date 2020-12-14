@@ -333,7 +333,7 @@ void stereophase_onsrcmachineworked(StereoPhase* self, psy_audio_Machine* machin
 {	
 	if (bc->output->rms) {
 		psy_audio_Connections* connections;
-		psy_audio_WireSocketEntry* input;	
+		psy_audio_WireSocket* input;	
 
 		connections = &workspace_song(self->workspace)->machines.connections;
 		input = psy_audio_connections_input(connections, self->wire);

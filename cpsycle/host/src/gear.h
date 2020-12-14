@@ -48,6 +48,7 @@ typedef struct Gear {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
+	psy_ui_Component client;
 	TabBar tabbar;
 	psy_ui_Component titlebar;
 	psy_ui_Label title;

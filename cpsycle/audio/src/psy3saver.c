@@ -627,59 +627,70 @@ int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver* self, psy_audio_Machi
 
 int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver* self, uintptr_t slot)
 {
-	psy_audio_MachineSockets* sockets;
-	psy_List* in;
-	psy_List* out;			
-	int incon;
-	int outcon;
-	int c;
+	psy_audio_MachineSockets* sockets;		
 	int status = PSY_OK;
 	
 	sockets = psy_audio_connections_at(&self->songfile->song->machines.connections, slot);
-	if (status = psyfile_write_int32(self->songfile->file, sockets && sockets->inputs
-			? psy_list_size(sockets->inputs) : 0)) {
+	if (status = psyfile_write_int32(self->songfile->file,
+			(int32_t)((sockets) ? wiresockets_size(&sockets->inputs) : 0))) {
 		return status;
 	}
-	if (status = psyfile_write_int32(self->songfile->file, sockets && sockets->outputs
-			? psy_list_size(sockets->outputs) : 0)) {
+	if (status = psyfile_write_int32(self->songfile->file,
+		(int32_t)((sockets) ? wiresockets_size(&sockets->outputs) : 0))) {	
 		return status;
-	}
-	c = 0;	
+	}	
 	if (sockets) {
-		for (in = sockets->inputs, out = sockets->outputs;
-			(in || out) || (c < MAX_CONNECTIONS);
-			in = in ? in->next : 0, out = out ? out->next : 0, ++c) {
-			float invol = 1.f;
-			if (in) {
-				psy_audio_WireSocketEntry* entry;
+		uintptr_t maxkey;
+		//uintptr_t maxkey_in;
+		//uintptr_t maxkey_out;
+		uintptr_t c;
+		bool incon;
+		bool outcon;
+		
+		// maxkey_in = psy_table_maxkey(&sockets->inputs.sockets);
+		// maxkey_out = psy_table_maxkey(&sockets->outputs.sockets);
 
+		// if (maxkey_in == UINTPTR_MAX) {
+		//	maxkey_in = 0;
+		// }
+		// if (maxkey_out == UINTPTR_MAX) {
+		//	maxkey_out = 0;
+		//}
+		//maxkey = psy_max(MAX_CONNECTIONS - 1, psy_max(maxkey_in, maxkey_out));		
+		maxkey = MAX_CONNECTIONS - 1;
+		for (c = 0; c <= maxkey; ++c) {
+			psy_audio_WireSocket* in;
+			psy_audio_WireSocket* out;
+			float invol;
+
+			in = psy_audio_wiresockets_at(&sockets->inputs, c);
+			out = psy_audio_wiresockets_at(&sockets->outputs, c);
+			invol = 1.f;
+		
+			if (in) {								
+				invol = in->volume;
+				if (status = psyfile_write_int32(self->songfile->file,
+						(int32_t)(in->slot))) {
+					return status;
+				}
 				incon = TRUE;
-				entry = (psy_audio_WireSocketEntry*)in->entry;
-				invol = entry->volume;
-				if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-					(entry->slot))) {
+			} else {				
+				if (status = psyfile_write_int32(self->songfile->file, -1)) {
 					return status;
 				}
-			} else {
 				incon = FALSE;
-				if (status = psyfile_write_int32(self->songfile->file, -1)) {
-					return status;
-				}
 			}
-			if (out) {
-				psy_audio_WireSocketEntry* entry;
-
-				outcon = TRUE;
-				entry = (psy_audio_WireSocketEntry*)out->entry;
-				if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-					(entry->slot))) {
+			if (out) {					
+				if (status = psyfile_write_int32(self->songfile->file,
+						(int32_t)(out->slot))) {
 					return status;
 				}
-			} else {
-				outcon = FALSE;
+				outcon = TRUE;
+			} else {				
 				if (status = psyfile_write_int32(self->songfile->file, -1)) {
 					return status;
 				}
+				outcon = FALSE;
 			}
 			// Incoming connections Machine vol
 			if (status = psyfile_write_float(self->songfile->file, invol)) {
@@ -689,10 +700,12 @@ int psy_audio_psy3saver_write_connections(psy_audio_PSY3Saver* self, uintptr_t s
 			if (status = psyfile_write_float(self->songfile->file, 1.f)) {
 				return status;
 			}
-			if (status = psyfile_write_uint8(self->songfile->file, (uint8_t)outcon)) {
+			if (status = psyfile_write_uint8(self->songfile->file,
+					(uint8_t)outcon)) {
 				return status;
 			}
-			if (status = psyfile_write_uint8(self->songfile->file, (uint8_t)incon)) {
+			if (status = psyfile_write_uint8(self->songfile->file,
+					(uint8_t)incon)) {
 				return status;
 			}
 		}

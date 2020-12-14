@@ -136,49 +136,49 @@ psy_List* psy_audio_pinmapping_findnode(psy_audio_PinMapping* self, uintptr_t sr
 	return rv;	
 }
 
-static psy_audio_WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
-	psy_dsp_amp_t volume);
-static void wiresocketentry_dispose(psy_audio_WireSocketEntry*);
-
 void psy_audio_machinesockets_init(psy_audio_MachineSockets* self)
 {
-	self->outputs = 0;
-	self->inputs = 0;
+	wiresockets_init(&self->inputs);
+	wiresockets_init(&self->outputs);	
 }
 
 void psy_audio_machinesockets_dispose(psy_audio_MachineSockets* self)
 {
-	psy_list_deallocate(&self->inputs, (psy_fp_disposefunc)
-		wiresocketentry_dispose);
-	psy_list_deallocate(&self->outputs, (psy_fp_disposefunc)
-		wiresocketentry_dispose);
+	wiresockets_dispose(&self->inputs);
+	wiresockets_dispose(&self->outputs);
 }
 
 void psy_audio_machinesockets_copy(psy_audio_MachineSockets* self,
 	psy_audio_MachineSockets* src)
 {
-	WireSocket* p;
+	psy_TableIterator it;	
 
 	psy_audio_machinesockets_dispose(self);
 	psy_audio_machinesockets_init(self);
-	for (p = src->inputs; p != NULL; psy_list_next(&p)) {
-		psy_audio_WireSocketEntry* entry;
-		psy_audio_WireSocketEntry* newentry;
+	for (it = psy_audio_wiresockets_begin(&src->inputs);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_WireSocket* socket;
+		psy_audio_WireSocket* newsocket;
+		
 
-		entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-		newentry = wiresocketentry_allocinit(entry->slot, entry->volume);
-		psy_audio_wiresocketentry_copy(newentry, entry);
-		psy_list_append(&self->inputs, newentry);
-	}	
-	for (p = src->outputs; p != NULL; psy_list_next(&p)) {
-		psy_audio_WireSocketEntry* entry;
-		psy_audio_WireSocketEntry* newentry;
-
-		entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-		newentry = wiresocketentry_allocinit(entry->slot, entry->volume);
-		psy_audio_wiresocketentry_copy(newentry, entry);
-		psy_list_append(&self->outputs, newentry);
+		socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+		newsocket = psy_audio_wiresocket_allocinit(socket->slot, socket->volume);
+		psy_audio_wiresocket_copy(newsocket, socket);
+		psy_table_insert(&self->inputs.sockets, psy_tableiterator_key(&it), newsocket);		
 	}
+	for (it = psy_audio_wiresockets_begin(&src->outputs);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_WireSocket* socket;
+		psy_audio_WireSocket* newsocket;
+
+
+		socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+		newsocket = psy_audio_wiresocket_allocinit(socket->slot, socket->volume);
+		psy_audio_wiresocket_copy(newsocket, socket);
+		psy_table_insert(&self->outputs.sockets, psy_tableiterator_key(&it), newsocket);
+	}	
 }
 
 psy_audio_MachineSockets* machinesockets_allocinit(void)
@@ -192,61 +192,90 @@ psy_audio_MachineSockets* machinesockets_allocinit(void)
 	return rv;
 }
 
-psy_audio_WireSocketEntry* wiresocketentry_allocinit(uintptr_t slot,
+psy_audio_WireSocket* psy_audio_wiresocket_allocinit(uintptr_t slot,
 	psy_dsp_amp_t volume)
 {
-	psy_audio_WireSocketEntry* rv;
+	psy_audio_WireSocket* rv;
 		
-	rv = (psy_audio_WireSocketEntry*) malloc(sizeof(psy_audio_WireSocketEntry));
+	rv = (psy_audio_WireSocket*) malloc(sizeof(psy_audio_WireSocket));
 	if (rv) {
 		rv->slot = slot;
-		rv->volume = 1.0f;
-		rv->id = -1;
+		rv->volume = 1.0f;		
 		psy_audio_pinmapping_init(&rv->mapping, 2);		
 	}
 	return rv;
 }
 
-void wiresocketentry_dispose(psy_audio_WireSocketEntry* self)
+void psy_audio_wiresocket_dispose(psy_audio_WireSocket* self)
 {	
 	psy_audio_pinmapping_dispose(&self->mapping);
 }
 
-void psy_audio_wiresocketentry_copy(psy_audio_WireSocketEntry* self,
-	psy_audio_WireSocketEntry* src)
-{
-	self->id = src->id;
+void psy_audio_wiresocket_copy(psy_audio_WireSocket* self,
+	psy_audio_WireSocket* src)
+{	
 	self->slot = src->slot;
 	self->volume = src->volume;
 	psy_audio_pinmapping_copy(&self->mapping, &src->mapping);
 }
 
-WireSocket* psy_audio_connection_at(WireSocket* socket, uintptr_t slot)
+psy_audio_WireSocket* psy_audio_connection_at(psy_audio_WireSockets* sockets, uintptr_t slot)
 {	
-	WireSocket* p;
+	psy_TableIterator it;
 	
-	p = socket;
-	while (p && ((psy_audio_WireSocketEntry*)(p->entry))->slot != slot) {
-		psy_list_next(&p);
+	for (it = psy_audio_wiresockets_begin(sockets);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_WireSocket* socket;		
+
+		socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+		if (socket->slot == slot) {
+			break;
+		}
 	}
-	return p;
+	if (!psy_tableiterator_equal(&it, psy_table_end())) {
+		return psy_tableiterator_value(&it);
+	}
+	return NULL;
 }
 
-psy_audio_WireSocketEntry* psy_audio_connections_input(psy_audio_Connections* self, psy_audio_Wire wire)
+uintptr_t psy_audio_connection_id(psy_audio_WireSockets* sockets, uintptr_t slot)
 {
-	psy_audio_WireSocketEntry* rv = 0;
+	psy_TableIterator it;
+
+	for (it = psy_audio_wiresockets_begin(sockets);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_WireSocket* socket;
+
+		socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+		if (socket->slot == slot) {
+			return psy_tableiterator_key(&it);
+		}
+	}	
+	return UINTPTR_MAX;
+}
+
+psy_audio_WireSocket* psy_audio_connections_input(psy_audio_Connections* self, psy_audio_Wire wire)
+{	
 	psy_audio_MachineSockets* sockets;
 
 	sockets = psy_audio_connections_at(self, wire.dst);	
 	if (sockets) {
-		WireSocket* input_socket;
-
-		input_socket = psy_audio_connection_at(sockets->inputs, wire.src);
-		if (input_socket) {			
-			rv = (psy_audio_WireSocketEntry*) input_socket->entry;
-		}
+		return psy_audio_connection_at(&sockets->inputs, wire.src);		
 	}
-	return rv;
+	return NULL;
+}
+
+uintptr_t psy_audio_connections_wireindex(psy_audio_Connections* self, psy_audio_Wire wire)
+{		
+	psy_audio_MachineSockets* sockets;
+
+	sockets = psy_audio_connections_at(self, wire.src);
+	if (sockets) {
+		return psy_audio_connection_id(&sockets->outputs, wire.dst);
+	}
+	return UINTPTR_MAX;
 }
 
 void psy_audio_connections_init(psy_audio_Connections* self)
@@ -309,26 +338,29 @@ psy_audio_MachineSockets* psy_audio_connections_initslot(psy_audio_Connections* 
 }
 
 int psy_audio_connections_connect(psy_audio_Connections* self, psy_audio_Wire wire)
-{
+{	
 	if (wire.src != wire.dst && !psy_audio_connections_connected(self, wire)) {
 		psy_audio_MachineSockets* connections;
-
+		
+		// source machine
 		connections = psy_audio_connections_at(self, wire.src);		
 		if (!connections) {
 			connections = psy_audio_connections_initslot(self, wire.src);
 		}
 		if (connections) {
-			psy_list_append(&connections->outputs,
-				wiresocketentry_allocinit(wire.dst, 1.f));
+			wiresockets_insert(&connections->outputs, wire.src_id,
+				psy_audio_wiresocket_allocinit(wire.dst, 1.f));
 		}
+		// destination machine
 		connections = psy_audio_connections_at(self, wire.dst);
 		if (!connections) {
 			connections = psy_audio_connections_initslot(self, wire.dst);
 		}
 		if (connections) {
-			psy_list_append(&connections->inputs,
-				wiresocketentry_allocinit(wire.src, 1.f));
+			wiresockets_insert(&connections->inputs, wire.dst_id,
+				psy_audio_wiresocket_allocinit(wire.src, 1.f));			
 		}
+		// finished
 		if (!self->filemode) {
 			psy_signal_emit(&self->signal_connected, self, 2, wire.src,
 				wire.dst);
@@ -344,19 +376,17 @@ void psy_audio_connections_disconnect(psy_audio_Connections* self, psy_audio_Wir
 
 	connections = psy_audio_connections_at(self, wire.src);
 	if (connections) {				
-		WireSocket* p;
+		psy_audio_WireSocket* socket;
 
-		p = psy_audio_connection_at(connections->outputs, wire.dst);		
-		if (p) {
-			free(psy_list_entry(p));
-			psy_list_remove(&connections->outputs, p);			
+		socket = psy_audio_connection_at(&connections->outputs, wire.dst);
+		if (socket) {
+			wiresockets_remove(&connections->outputs, socket);			
 		}		
 		connections = psy_audio_connections_at(self, wire.dst);
 		if (connections) {
-			p = psy_audio_connection_at(connections->inputs, wire.src);
-			if (p) {
-				free(psy_list_entry(p));
-				psy_list_remove(&connections->inputs, p);
+			socket = psy_audio_connection_at(&connections->inputs, wire.src);
+			if (socket) {
+				wiresockets_remove(&connections->inputs, socket);				
 			}
 			if (!self->filemode) {
 				psy_signal_emit(&self->signal_disconnected, self, 2,
@@ -369,68 +399,44 @@ void psy_audio_connections_disconnect(psy_audio_Connections* self, psy_audio_Wir
 void psy_audio_connections_disconnectall(psy_audio_Connections* self, uintptr_t slot)
 {
 	psy_audio_MachineSockets* connections;
-	connections = psy_audio_connections_at(self, slot);
-	if (connections) {		
-		WireSocket* out;
-		WireSocket* in;
-				
-		out = connections->outputs;
-		while (out) {			
-			uintptr_t dstslot;
-			psy_audio_MachineSockets* dst;
-			WireSocket* dstinput;
-			dst = psy_audio_connections_at(self,
-				((psy_audio_WireSocketEntry*) out->entry)->slot);
-			dstslot = ((psy_audio_WireSocketEntry*) out->entry)->slot;
-			dstinput = psy_audio_connection_at(dst->inputs, slot);
-			free(dstinput->entry);
-			psy_list_remove(&dst->inputs, dstinput);
-			out = out->next;
-			if (!self->filemode) {
-				psy_signal_emit(&self->signal_disconnected, self, 2, slot,
-					dstslot);
-			}
-		}
-		psy_list_free(connections->outputs);
-		connections->outputs = 0;
-		
-		in = connections->inputs;
-		while (in) {			
-			psy_audio_MachineSockets* src;
-			WireSocket* srcoutput;
-			uintptr_t srcslot;
+	connections = psy_audio_connections_at(self, slot);	
 
-			src = psy_audio_connections_at(self,
-				((psy_audio_WireSocketEntry*) in->entry)->slot);
-			srcslot = ((psy_audio_WireSocketEntry*) in->entry)->slot;
-			srcoutput = psy_audio_connection_at(src->outputs, slot);
-			free(srcoutput->entry);
-			psy_list_remove(&src->outputs, srcoutput);
-			in = in->next;
-			if (!self->filemode) {
-				psy_signal_emit(&self->signal_disconnected, self, 2, srcslot,
-					slot);
-			}
+	if (connections) {	
+		psy_TableIterator it;		
+						
+		while (!wiresockets_empty(&connections->outputs)) {			
+			psy_audio_WireSocket* dst;			
+			
+			it = psy_audio_wiresockets_begin(&connections->outputs);
+			dst = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			psy_audio_connections_disconnect(self,
+				psy_audio_wire_make(slot, dst->slot));
 		}
-		psy_list_free(connections->inputs);
-		connections->inputs = 0;		
+		while (!wiresockets_empty(&connections->inputs)) {
+			psy_audio_WireSocket* src;
+
+			it = psy_audio_wiresockets_begin(&connections->inputs);
+			src = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			psy_audio_connections_disconnect(self,
+				psy_audio_wire_make(src->slot, slot));
+		}
 	}	
 }
 
 int psy_audio_connections_connected(psy_audio_Connections* self, psy_audio_Wire wire)
 {	
-	WireSocket* p = 0;
+	psy_audio_WireSocket* p = 0;
 	psy_audio_MachineSockets* sockets;	
 
 	sockets = psy_audio_connections_at(self, wire.src);
 	if (sockets) {						
-		p = psy_audio_connection_at(sockets->outputs, wire.dst);
+		p = psy_audio_connection_at(&sockets->outputs, wire.dst);
 #if defined(_DEBUG)
 		if (p) {			
 			sockets = psy_audio_connections_at(self, wire.dst);
-			assert(sockets && sockets->inputs);
-			if (sockets && sockets->inputs) {
-				p = psy_audio_connection_at(sockets->inputs, wire.src);
+			// assert(sockets && sockets->inputs.sockets);
+			if (sockets) {
+				p = psy_audio_connection_at(&sockets->inputs, wire.src);
 			}
 			assert(p);
 		}
@@ -443,7 +449,7 @@ void psy_audio_connections_setpinmapping(psy_audio_Connections* self,
 	psy_audio_Wire wire,
 	const psy_audio_PinMapping* mapping)
 {
-	psy_audio_WireSocketEntry* input_entry;
+	psy_audio_WireSocket* input_entry;
 
 	input_entry = psy_audio_connections_input(self, wire);
 	if (input_entry) {
@@ -454,7 +460,7 @@ void psy_audio_connections_setpinmapping(psy_audio_Connections* self,
 void psy_audio_connections_setwirevolume(psy_audio_Connections* self,
 	psy_audio_Wire wire, psy_dsp_amp_t factor)
 {	
-	psy_audio_WireSocketEntry* input_entry;
+	psy_audio_WireSocket* input_entry;
 
 	input_entry = psy_audio_connections_input(self, wire);
 	if (input_entry) {
@@ -465,7 +471,7 @@ void psy_audio_connections_setwirevolume(psy_audio_Connections* self,
 psy_dsp_amp_t psy_audio_connections_wirevolume(psy_audio_Connections* self,
 	psy_audio_Wire wire)
 {	
-	psy_audio_WireSocketEntry* input_entry;
+	psy_audio_WireSocket* input_entry;
 
 	input_entry = psy_audio_connections_input(self, wire);
 	return (input_entry)

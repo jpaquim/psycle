@@ -84,6 +84,7 @@ typedef struct MidiMonitor {
 	// inherits
 	psy_ui_Component component;
 	// ui elements
+	psy_ui_Component client;
 	psy_ui_Component titlebar;
 	psy_ui_Label title;
 	psy_ui_Button configure;

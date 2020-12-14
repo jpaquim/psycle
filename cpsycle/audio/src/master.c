@@ -109,28 +109,27 @@ static void vtable_init(psy_audio_Master* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
-		vtable.generateaudio = (fp_machine_generateaudio) master_generateaudio;
-		vtable.seqtick = (fp_machine_seqtick) master_seqtick;
-		vtable.mode = (fp_machine_mode) master_mode;
-		vtable.info = (fp_machine_info) info;
-		vtable.dispose = (fp_machine_dispose) master_dispose;
-		vtable.info = (fp_machine_info) info;
-		
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
-		vtable.slot = (fp_machine_slot) slot;
-		vtable.loadspecific = (fp_machine_loadspecific) master_loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) master_savespecific;
+		vtable.generateaudio = (fp_machine_generateaudio)master_generateaudio;
+		vtable.seqtick = (fp_machine_seqtick)master_seqtick;
+		vtable.mode = (fp_machine_mode)master_mode;
+		vtable.info = (fp_machine_info)info;
+		vtable.dispose = (fp_machine_dispose)master_dispose;
+		vtable.info = (fp_machine_info)info;		
+		vtable.numinputs = (fp_machine_numinputs)numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
+		vtable.slot = (fp_machine_slot)slot;
+		vtable.loadspecific = (fp_machine_loadspecific)master_loadspecific;
+		vtable.savespecific = (fp_machine_savespecific)master_savespecific;
 		vtable.editname = (fp_machine_editname) master_editname;
 		vtable.setposition = (fp_machine_setposition)setposition;
 		vtable.position = (fp_machine_position)position;
 		// Parameter
-		vtable.parameter = (fp_machine_parameter) parameter;
-		vtable.tweakparameter = (fp_machine_tweakparameter) tweakparameter;
-		vtable.numparametercols = (fp_machine_numparametercols) numparametercols;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;
+		vtable.parameter = (fp_machine_parameter)parameter;
+		vtable.tweakparameter = (fp_machine_tweakparameter)tweakparameter;
+		vtable.numparametercols = (fp_machine_numparametercols)numparametercols;
+		vtable.numparameters = (fp_machine_numparameters)numparameters;
 		vtable.numtweakparameters = (fp_machine_numparameters)numtweakparameters;
-		vtable.amprange = (fp_machine_amprange) amprange;
+		vtable.amprange = (fp_machine_amprange)amprange;
 		// buffermemory
 		vtable.buffermemory = (fp_machine_buffermemory)
 			master_buffermemory;
@@ -228,29 +227,25 @@ void master_seqtick(psy_audio_Master* self, uintptr_t channel,
 
 				nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
 				self->volume = nv * nv * 4.f;				
-				//self->volume = psy_dsp_map_255_1(ev->parameter) * 2;
-			} else
-				if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
-					psy_audio_MachineSockets* sockets;
+				// self->volume = psy_dsp_map_255_1(ev->parameter) * 2;
+			} else if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+				psy_audio_MachineSockets* sockets;
 
-					sockets = psy_audio_connections_at(&machines->connections, ev->vol);
-					if (sockets) {
-						WireSocket* p;
-						uintptr_t c = 0;
-
-						for (p = sockets->outputs; p != NULL && c != ev->inst;
-							psy_list_next(&p), ++c);
-						if (p) {
-							psy_audio_WireSocketEntry* output_entry;
-							psy_dsp_amp_t nv;
-
-							output_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-							nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
-							psy_audio_connections_setwirevolume(&machines->connections,
-								psy_audio_wire_make(ev->vol, output_entry->slot), nv * nv * 4.f);
-						}
+				sockets = psy_audio_connections_at(&machines->connections, ev->vol);
+				if (sockets) {
+					psy_audio_WireSocket* output_socket;
+						
+					output_socket = psy_audio_wiresockets_at(&sockets->outputs, ev->inst);
+					if (output_socket) {
+						psy_dsp_amp_t nv;
+							
+						nv = ev->parameter / (psy_dsp_amp_t)0x1FE;
+						// here ev->vol is used by the sequencer as src mac slot
+						psy_audio_connections_setwirevolume(&machines->connections,
+							psy_audio_wire_make(ev->vol, output_socket->slot), nv * nv * 4.f);
 					}
 				}
+			}
 		}
 	}
 }
@@ -271,17 +266,13 @@ uintptr_t numparameters(psy_audio_Master* self)
 
 unsigned int numparametercols(psy_audio_Master* self)
 {
-	psy_audio_MachineSockets* sockets;
-	WireSocket* input_socket;
+	psy_audio_MachineSockets* sockets;	
 	psy_audio_Machines* machines;
 
 	machines = psy_audio_machine_machines(&self->machine);
 	sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 	if (sockets) {
-		input_socket = sockets->inputs;
-		if (input_socket) {
-			return psy_list_size(input_socket) + 1;
-		}
+		return wiresockets_size(&sockets->inputs) + 1;		
 	}
 	return 1;
 }
@@ -303,21 +294,18 @@ void master_title_describe(psy_audio_Master* self,
 	if (sender->index == 0) {
 		*active = 0;
 	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* p;
+		psy_audio_MachineSockets* sockets;		
 		uintptr_t c = 1;
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
-			for (p = sockets->inputs; p != NULL && c != sender->index;
-				psy_list_next(&p), ++c);
-			if (p) {
-				psy_audio_WireSocketEntry* input_entry;
+			psy_audio_WireSocket* input_socket;
 
-				input_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-				master_describeeditname(self, text, input_entry->slot);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			if (input_socket) {
+				master_describeeditname(self, text, input_socket->slot);
 				*active = 1;
 			}
 		}
@@ -335,20 +323,18 @@ void master_slider_tweak(psy_audio_Master* self,
 			self->volume = value * value * 4.f;
 		}
 	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* p;
+		psy_audio_MachineSockets* sockets;		
 		uintptr_t c = 1;
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
-			for (p = sockets->inputs; p != NULL && c != sender->index; psy_list_next(&p), ++c);
-			if (p) {
-				psy_audio_WireSocketEntry* input_entry;
+			psy_audio_WireSocket* input_socket;
 
-				input_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-				input_entry->volume = value * value * 4.f;
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			if (input_socket) {
+				input_socket->volume = value * value * 4.f;
 			}
 		}
 	}
@@ -361,21 +347,18 @@ void master_slider_normvalue(psy_audio_Master* self,
 	if (sender->index == 0) {		
 		*rv = (float)sqrt(self->volume) * 0.5f;		
 	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* input_socket;
+		psy_audio_MachineSockets* sockets;		
 		uintptr_t c = 1;
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
-			for (input_socket = sockets->inputs; input_socket != 0 && c != sender->index;
-				input_socket = input_socket->next, ++c);
-			if (input_socket) {
-				psy_audio_WireSocketEntry* input_entry;
+			psy_audio_WireSocket* input_socket;
 
-				input_entry = (psy_audio_WireSocketEntry*)input_socket->entry;
-				*rv = (float)sqrt(input_entry->volume) * 0.5f;
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			if (input_socket) {
+				*rv = (float)sqrt(input_socket->volume) * 0.5f;
 			}
 		}
 	}
@@ -397,24 +380,21 @@ void master_level_normvalue(psy_audio_Master* self,
 			*rv = psy_audio_buffer_rmsdisplay(memory);
 		}
 	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* input_socket;
+		psy_audio_MachineSockets* sockets;		
 		uintptr_t c = 1;
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->machine);
 		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		if (sockets) {
-			for (input_socket = sockets->inputs; input_socket != 0 &&
-				c != sender->index;
-				input_socket = input_socket->next, ++c);
-			if (input_socket) {
-				psy_audio_WireSocketEntry* input_entry;
+			psy_audio_WireSocket* input_socket;
+
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			if (input_socket) {							
 				psy_audio_Machine* machine;
 				psy_audio_Buffer* memory;
-
-				input_entry = (psy_audio_WireSocketEntry*)input_socket->entry;				
-				machine = psy_audio_machines_at(machines, input_entry->slot);
+				
+				machine = psy_audio_machines_at(machines, input_socket->slot);
 				if (machine) {
 					memory = psy_audio_machine_buffermemory(machine);
 					if (memory) {
@@ -434,8 +414,7 @@ void master_level_describe(psy_audio_Master* self,
 			(float)psy_dsp_convert_amp_to_db(self->volume));
 		*active = 1;
 	} else {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* p;
+		psy_audio_MachineSockets* sockets;		
 		uintptr_t c = 1;
 		psy_audio_Machines* machines;
 
@@ -443,14 +422,12 @@ void master_level_describe(psy_audio_Master* self,
 		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
 		*active = 0;
 		if (sockets) {
-			for (p = sockets->inputs; p != NULL && c != sender->index;
-				psy_list_next(&p), ++c);
-			if (p) {
-				psy_audio_WireSocketEntry* input_entry;
+			psy_audio_WireSocket* input_socket;
 
-				input_entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			if (input_socket) {				
 				psy_snprintf(text, 10, "%.2f dB",
-					(float)psy_dsp_convert_amp_to_db(input_entry->volume));
+					(float)psy_dsp_convert_amp_to_db(input_socket->volume));
 				*active = 1;
 			}
 		}

@@ -752,7 +752,7 @@ int machine_supports(psy_audio_Machine* self, int option)
 psy_audio_Buffer* mix(psy_audio_Machine* self,
 	size_t slot,
 	uintptr_t amount,
-	psy_audio_MachineSockets* connected_machine_sockets,
+	psy_audio_MachineSockets* sockets,
 	psy_audio_Machines* machines,
 	struct psy_audio_Player* player)
 {			
@@ -763,13 +763,15 @@ psy_audio_Buffer* mix(psy_audio_Machine* self,
 		if (output->preventmixclear == FALSE) {
 			psy_audio_buffer_clearsamples(output, amount);
 		}
-		if (connected_machine_sockets) {
-			WireSocket* input_socket;
-			
-			for (input_socket = connected_machine_sockets->inputs;
-					input_socket != 0; input_socket = input_socket->next) {
-				psy_audio_WireSocketEntry* source = (psy_audio_WireSocketEntry*)
-					input_socket->entry;
+		if (sockets) {
+			psy_TableIterator it;
+
+			for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+				psy_audio_WireSocket* source;
+
+				source = (psy_audio_WireSocket*)psy_tableiterator_value(&it);				
 				psy_audio_buffer_mixsamples(output,
 					psy_audio_machines_outputs(machines, source->slot),
 					amount, source->volume, &source->mapping);
@@ -904,61 +906,58 @@ void savewiremapping(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
 	psy_audio_Connections* connections;
-	psy_audio_MachineSockets* connected_sockets;	
+	psy_audio_MachineSockets* sockets;	
 	uintptr_t i;
 
 	connections = &songfile->song->machines.connections;
-	connected_sockets = psy_audio_connections_at(connections, slot);
-	if (connected_sockets) {
-		WireSocket* p;
+	sockets = psy_audio_connections_at(connections, slot);
+	if (sockets) {
+		psy_TableIterator it;
 
-		for (i = 0, p = connected_sockets->inputs; p != NULL; psy_list_next(&p), ++i) {
-			psy_audio_WireSocketEntry* entry;
+		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* input_socket;
+			psy_List* node;
+			uint32_t numPairs;
 
-			if (i >= MAX_CONNECTIONS) {
+			input_socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);							
+			numPairs = psy_list_size(input_socket->mapping.container);
+			i = psy_tableiterator_key(&it);
+
+			if (i <= INT32_MAX) {
+				psyfile_write_int32(songfile->file, (int32_t)i);
+			} else {
 				psy_audio_songfile_warn(songfile,
-					"savewiremapping old psy3 max connections limit reached");
+					"savewiremapping connection id reached 32 bit limit");
+				return;
 			}
-			entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-			if (entry) {
-				psy_List* node;
-				uint32_t numPairs;
+			if (i <= INT32_MAX) {
+				psyfile_write_int32(songfile->file, (int32_t)numPairs);
+			} else {
+				psy_audio_songfile_warn(songfile,
+					"savewiremapping number of pinconnections reached 32 bit limit");
+				return;
+			}
+			for (node = input_socket->mapping.container; node != NULL; node = node->next) {
+				psy_audio_PinConnection* pair;
 
-				numPairs = psy_list_size(entry->mapping.container);
-				if (i <= INT32_MAX) {
-					psyfile_write_int32(songfile->file, (int32_t)i);
+				pair = (psy_audio_PinConnection*)node->entry;
+				if (pair->src <= INT16_MAX) {
+					psyfile_write_int16(songfile->file, (int16_t)pair->src);
 				} else {
 					psy_audio_songfile_warn(songfile,
-						"savewiremapping connection id reached 32 bit limit");
+						"savewiremapping src pin number reached 16 bit limit");
 					return;
 				}
-				if (i <= INT32_MAX) {
-					psyfile_write_int32(songfile->file, (int32_t)numPairs);
+				if (pair->dst <= INT16_MAX) {
+					psyfile_write_int16(songfile->file, (int16_t)pair->dst);
 				} else {
 					psy_audio_songfile_warn(songfile,
-						"savewiremapping number of pinconnections reached 32 bit limit");
+						"savewiremapping dst pin number reached 16 bit limit");
 					return;
 				}
-				for (node = entry->mapping.container; node != NULL; node = node->next) {
-					psy_audio_PinConnection* pair;
-
-					pair = (psy_audio_PinConnection*)node->entry;
-					if (pair->src <= INT16_MAX) {
-						psyfile_write_int16(songfile->file, (int16_t)pair->src);
-					} else {
-						psy_audio_songfile_warn(songfile,
-							"savewiremapping src pin number reached 16 bit limit");
-						return;
-					}
-					if (pair->dst <= INT16_MAX) {
-						psyfile_write_int16(songfile->file, (int16_t)pair->dst);
-					} else {
-						psy_audio_songfile_warn(songfile,
-							"savewiremapping dst pin number reached 16 bit limit");
-						return;
-					}
-				}
-			}
+			}			
 		}	
 	}
 }
@@ -1006,7 +1005,7 @@ void postload(psy_audio_Machine* self, psy_audio_SongFile* songfile,
 			if (outWire != -1) {
 				psy_audio_Wire newwire;
 
-				newwire = psy_audio_wire_make(wire->_inputMachine, slot);
+				newwire = psy_audio_wire_makeall(wire->_inputMachine, outWire, slot, c);
 				//if (wire.pinMapping.size() > 0) {
 				//	inWires[c].ConnectSource(*_pMachine[wire._inputMachine], 0
 				//		, FindLegacyOutput(_pMachine[wire._inputMachine], _macIndex)

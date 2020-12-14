@@ -71,6 +71,9 @@ typedef const char* (*fp_mcb_capturename)(void*, int index);
 typedef int (*fp_mcb_numcaptures)(void*);
 typedef const char* (*fp_mcb_playbackname)(void*, int index);
 typedef int (*fp_mcb_numplaybacks)(void*);
+typedef int (*fp_mcb_onerror)(void*);
+typedef int (*fp_mcb_onwarning)(void*);
+typedef int (*fp_mcb_onmessage)(void*);
 
 typedef struct  {
 	fp_mcb_samplerate samplerate;
@@ -92,7 +95,7 @@ typedef struct  {
 	fp_mcb_capturename capturename;
 	fp_mcb_numcaptures numcaptures;
 	fp_mcb_playbackname playbackname;
-	fp_mcb_numplaybacks numplaybacks;
+	fp_mcb_numplaybacks numplaybacks;	
 } psy_audio_MachineCallbackVtable;
 
 struct psy_audio_Player;

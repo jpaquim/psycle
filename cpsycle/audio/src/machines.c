@@ -244,7 +244,7 @@ void connectmachinecommand_execute(ConnectMachineCommand* self)
 
 void connectmachinecommand_revert(ConnectMachineCommand* self)
 {
-	psy_audio_WireSocketEntry* socket;
+	psy_audio_WireSocket* socket;
 		
 	self->machines->preventundoredo = TRUE;
 	self->volume = psy_audio_connections_wirevolume(&self->machines->connections,
@@ -310,7 +310,7 @@ void disconnectmachinecommand_dispose(DisconnectMachineCommand* self)
 
 void disconnectmachinecommand_execute(DisconnectMachineCommand* self)
 {
-	psy_audio_WireSocketEntry* socket;
+	psy_audio_WireSocket* socket;
 
 	self->machines->preventundoredo = TRUE;
 	self->volume = psy_audio_connections_wirevolume(&self->machines->connections,
@@ -693,17 +693,19 @@ bool isleaf(psy_audio_Machines* self, uintptr_t slot, psy_Table* worked)
 	psy_audio_MachineSockets* sockets;
 
 	sockets = psy_audio_connections_at(&self->connections, slot);
-	if (!sockets || !sockets->inputs) {
+	if (!sockets || (wiresockets_size(&sockets->inputs) == 0)) {
 		return TRUE;
-	}
-	if (sockets->inputs) {
+	} else {	
 		bool rv = TRUE;
-		psy_List* p;
+		psy_TableIterator it;
 
-		for (p = sockets->inputs; p != NULL; psy_list_next(&p)) {
-			psy_audio_WireSocketEntry* source;
+		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
 
-			source = (psy_audio_WireSocketEntry*) p->entry;
+			psy_audio_WireSocket* source;
+
+			source = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
 			if (!psy_table_exists(worked, source->slot)) {
 				rv = FALSE;
 				break;
@@ -770,24 +772,26 @@ MachineList* psy_audio_compute_path(psy_audio_Machines* self, uintptr_t slot, bo
 void compute_slotpath(psy_audio_Machines* self, uintptr_t slot,
 	psy_List** path)
 {	
-	psy_audio_MachineSockets* connected_sockets;	
+	psy_audio_MachineSockets* sockets;	
 
-	connected_sockets = psy_audio_connections_at(&self->connections, slot);	
-	if (connected_sockets) {
-		WireSocket* p;
+	sockets = psy_audio_connections_at(&self->connections, slot);	
+	if (sockets) {
+		psy_TableIterator it;
 
-		for (p = connected_sockets->inputs; p != NULL; psy_list_next(&p)) {
-			psy_audio_WireSocketEntry* entry;
+		for (it = psy_audio_wiresockets_begin(&sockets->inputs);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
 
-			entry = (psy_audio_WireSocketEntry*)psy_list_entry(p);
-			if (!psy_table_exists(&self->colours, entry->slot)) {
-				psy_table_insert(&self->colours, entry->slot, (void*) 1);
-				compute_slotpath(self, entry->slot, path);
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+			if (!psy_table_exists(&self->colours, socket->slot)) {
+				psy_table_insert(&self->colours, socket->slot, (void*) 1);
+				compute_slotpath(self, socket->slot, path);
 			} else {
 				// cycle detected				
 				// skip
 			}			
-			psy_table_remove(&self->colours, entry->slot);			
+			psy_table_remove(&self->colours, socket->slot);
 		}	
 	}
 	if (psy_table_exists(&self->nopath, slot)) {
