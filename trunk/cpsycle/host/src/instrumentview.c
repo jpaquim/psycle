@@ -10,10 +10,178 @@
 #include <uisavedialog.h>
 
 #include <songio.h>
+#include <machinefactory.h>
+#include "virtualgenerator.h"
 
 #include <math.h>
 
 #include "../../detail/portable.h"
+
+static void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox*);
+static void virtualgeneratorbox_ongeneratorschanged(VirtualGeneratorsBox*, psy_ui_Component* sender, int slot);
+static void virtualgeneratorbox_onsamplerschanged(VirtualGeneratorsBox*, psy_ui_Component* sender, int slot);
+static void virtualgeneratorbox_onactivechanged(VirtualGeneratorsBox*, psy_ui_Component* sender);
+static void virtualgeneratorbox_update(VirtualGeneratorsBox*);
+
+void virtualgeneratorbox_init(VirtualGeneratorsBox* self, psy_ui_Component* parent,
+	Workspace* workspace)
+{	
+	psy_ui_component_init(&self->component, parent);
+	self->workspace = workspace;
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_checkbox_init(&self->active, &self->component);
+	psy_ui_checkbox_settext(&self->active, "Virtual generator");
+	psy_signal_connect(&self->active.signal_clicked, self,
+		virtualgeneratorbox_onactivechanged);
+	psy_ui_combobox_init(&self->generators, &self->component);
+	psy_signal_connect(&self->generators.signal_selchanged, self,
+		virtualgeneratorbox_ongeneratorschanged);
+	psy_ui_label_init_text(&self->on, &self->component, "on");
+	psy_ui_combobox_setcharnumber(&self->generators, 10);
+	psy_ui_combobox_init(&self->samplers, &self->component);
+	psy_signal_connect(&self->samplers.signal_selchanged, self,
+		virtualgeneratorbox_onsamplerschanged);
+	psy_ui_combobox_setcharnumber(&self->samplers, 20);
+	virtualgeneratorbox_updategenerators(self);
+}
+
+void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox* self)
+{
+	if (self->workspace->song) {
+		uintptr_t i;
+		uintptr_t maxkey;
+
+maxkey = psy_table_maxkey(&self->workspace->song->machines.slots);
+
+for (i = 0; i < maxkey; ++i) {
+	psy_audio_Machine* machine;
+
+	machine = (psy_audio_Machine*)psy_audio_machines_at(
+		&self->workspace->song->machines, i);
+	if (machine && machine_supports(machine,
+		MACH_SUPPORTS_INSTRUMENTS)) {
+		char text[512];
+
+		psy_snprintf(text, 512, "%X: %s", (int)i,
+			psy_audio_machine_editname(machine));
+		psy_ui_combobox_addtext(&self->samplers, text);
+	}
+}
+	}
+}
+
+void virtualgeneratorbox_updategenerators(VirtualGeneratorsBox* self)
+{
+	int slot;
+	int start;
+	int end;
+
+	start = 0x81;
+	end = 0xFE;
+
+	for (slot = start; slot <= end; ++slot) {
+		char text[512];
+
+		psy_snprintf(text, 512, "%X", (int)slot);
+		psy_ui_combobox_addtext(&self->generators, text);
+		psy_ui_combobox_setitemdata(&self->generators, slot - start, slot);
+	}
+}
+
+void virtualgeneratorbox_ongeneratorschanged(VirtualGeneratorsBox* self, psy_ui_Component* sender, int slot)
+{
+	virtualgeneratorbox_updategenerator(self);
+}
+
+void virtualgeneratorbox_onsamplerschanged(VirtualGeneratorsBox* self, psy_ui_Component* sender, int slot)
+{
+	virtualgeneratorbox_updategenerator(self);
+}
+
+void virtualgeneratorbox_onactivechanged(VirtualGeneratorsBox* self, psy_ui_Component* sender)
+{
+	virtualgeneratorbox_updategenerator(self);
+}
+
+void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox* self)
+{
+	if (psy_ui_checkbox_checked(&self->active)) {
+		if (psy_ui_combobox_cursel(&self->generators) != -1 &&
+			psy_ui_combobox_cursel(&self->samplers) != -1) {
+			psy_audio_Machine* generator;
+
+			generator = psy_audio_machines_at(&self->workspace->song->machines,
+				psy_ui_combobox_cursel(&self->generators) + 0x81);
+			if (generator) {
+				psy_audio_machines_remove(&self->workspace->song->machines,
+					psy_ui_combobox_cursel(&self->generators) + 0x81);
+			}
+			generator = psy_audio_machinefactory_makemachinefrompath(
+				&self->workspace->machinefactory, MACH_VIRTUALGENERATOR,
+				NULL, (uintptr_t)psy_ui_combobox_itemdata(&self->generators,
+					psy_ui_combobox_cursel(&self->generators)),
+				psy_audio_instruments_selected(&self->workspace->song->instruments).subslot);
+			if (generator) {
+				char editname[256];
+
+				psy_snprintf(editname, 256, "Virtual Generator");
+				psy_audio_machine_seteditname(generator, editname);
+				psy_audio_machines_insert(&self->workspace->song->machines,
+					psy_ui_combobox_cursel(&self->generators) + 0x81, generator);
+			}
+		}
+	} else {
+		if (psy_ui_combobox_cursel(&self->generators) != -1) {
+			psy_audio_Machine* generator;
+
+			generator = psy_audio_machines_at(&self->workspace->song->machines,
+				psy_ui_combobox_cursel(&self->generators) + 0x81);
+			if (generator) {
+				psy_audio_machines_remove(&self->workspace->song->machines,
+					psy_ui_combobox_cursel(&self->generators) + 0x81);
+			}
+		}
+	}	
+}
+
+void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
+{
+	psy_TableIterator it;
+
+	psy_ui_checkbox_disablecheck(&self->active);
+	for (it = psy_audio_machines_begin(&self->workspace->song->machines);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		psy_audio_Machine* machine;
+
+		machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+		if (psy_audio_machine_type(machine) == MACH_VIRTUALGENERATOR) {
+			psy_audio_MachineParam* param;
+			
+			param = psy_audio_machine_parameter(machine, 0);
+			if (param) {
+				intptr_t index;
+
+				index = psy_audio_machine_parameter_scaledvalue(machine, param);
+				if (index == psy_audio_instruments_selected(&self->workspace->song->instruments).subslot) {
+					param = psy_audio_machine_parameter(machine, 1);
+					if (param) {
+						index = psy_audio_machine_parameter_scaledvalue(machine, param);
+						if (index == psy_audio_instruments_selected(&self->workspace->song->instruments).subslot) {
+							psy_ui_combobox_setcursel(&self->samplers, index);							
+						}
+					}
+					psy_ui_combobox_setcursel(&self->generators,
+						psy_audio_machine_slot(machine) - 0x81);
+					psy_ui_checkbox_check(&self->active);
+					break;
+				}
+			}
+
+		}		
+	}	
+}
 
 // InstrumentHeaderView
 // prototypes
@@ -34,7 +202,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	self->view = view;
 	self->instrument = 0;
 	self->instruments = instruments;
-	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_init(&self->component, parent);
 	psy_ui_label_init_text(&self->namelabel, &self->component,
 		"instrumentview.instrument-name");
 	psy_ui_edit_init(&self->nameedit, &self->component);
@@ -46,7 +214,9 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_button_seticon(&self->prevbutton, psy_ui_ICON_LESS);
 	psy_ui_button_init_connect(&self->nextbutton, &self->component,
 		self, instrumentheaderview_onnextinstrument);
-	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);	
+	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);
+	virtualgeneratorbox_init(&self->virtualgenerators, &self->component,
+		workspace);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
@@ -995,11 +1165,14 @@ void instrumentview_oninstrumentslotchanged(InstrumentView* self, psy_audio_Inst
 void instrumentview_onmachinesinsert(InstrumentView* self, psy_audio_Machines* sender,
 	int slot)
 {
+	virtualgeneratorbox_updatesamplers(&self->header.virtualgenerators);
 }
 
 void instrumentview_onmachinesremoved(InstrumentView* self, psy_audio_Machines* sender,
 	int slot)
 {
+	virtualgeneratorbox_updatesamplers(&self->header.virtualgenerators);
+	virtualgeneratorbox_update(&self->header.virtualgenerators);
 }
 
 void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentIndex index)
@@ -1013,6 +1186,7 @@ void instrumentview_setinstrument(InstrumentView* self, psy_audio_InstrumentInde
 	instrumentpanview_setinstrument(&self->pan, instrument);
 	instrumentfilterview_setinstrument(&self->filter, instrument);
 	instrumentpitchview_setinstrument(&self->pitch, instrument);
+	virtualgeneratorbox_update(&self->header.virtualgenerators);
 }
 
 void instrumentview_onsongchanged(InstrumentView* self, Workspace* workspace, int flag, psy_audio_SongFile* songfile)
@@ -1037,12 +1211,13 @@ void instrumentview_onsongchanged(InstrumentView* self, Workspace* workspace, in
 		instrumentsbox_setinstruments(&self->instrumentsbox,
 			&workspace->song->instruments);
 		samplesbox_setsamples(&self->general.notemapview.samplesbox, &workspace->song->samples
-		/*,&workspace->song->instruments*/);
+		/*,&workspace->song->instruments*/);		
 	} else {
 		instrumentsbox_setinstruments(&self->instrumentsbox, 0);
 		samplesbox_setsamples(&self->general.notemapview.samplesbox,
 			&workspace->song->samples);
 	}
+	virtualgeneratorbox_updatesamplers(&self->header.virtualgenerators);
 	instrumentview_setinstrument(self, psy_audio_instrumentindex_make(0, 0));
 }
 

@@ -722,7 +722,7 @@ int luamachine_create(lua_State* L)
 			machinefactory = psy_audio_machine_machinefactory(psy_audio_luaplugin_base(host));
 			if (machinefactory) {
 				machine = psy_audio_machinefactory_makemachine(machinefactory, MACH_PLUGIN,
-					plug_name);
+					plug_name, UINTPTR_MAX);
 				if (machine) {
 					ud = malloc(sizeof(psy_audio_LuaMachine));
 					psy_audio_luamachine_init_machine(ud, machine);

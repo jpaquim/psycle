@@ -26,14 +26,31 @@ extern "C" {
 
 struct InstrumentView;
 
-typedef struct {	
-	psy_ui_Component component;	
+typedef struct {
+	psy_ui_Component component;
+	psy_ui_CheckBox active;
+	psy_ui_ComboBox generators;
+	psy_ui_Label on;
+	psy_ui_ComboBox samplers;
+	// references
+	Workspace* workspace;
+} VirtualGeneratorsBox;
+
+void virtualgeneratorbox_init(VirtualGeneratorsBox*, psy_ui_Component* parent,
+	Workspace*);
+void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox*);
+void virtualgeneratorbox_updategenerators(VirtualGeneratorsBox*);
+void virtualgeneratorbox_update(VirtualGeneratorsBox*);
+
+typedef struct {
+	psy_ui_Component component;
 	psy_ui_Label namelabel;
 	psy_ui_Edit nameedit;	
 	psy_ui_Button prevbutton;
 	psy_ui_Button nextbutton;	
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
+	VirtualGeneratorsBox virtualgenerators;
 	struct InstrumentView* view;
 } InstrumentHeaderView;
 

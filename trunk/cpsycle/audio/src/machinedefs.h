@@ -35,6 +35,7 @@ typedef enum  {
 	MACH_DUPLICATOR2 = 16,
 	MACH_LUA = 17,
 	MACH_LADSPA = 18,
+	MACH_VIRTUALGENERATOR = 19,
 	MACH_DUMMY = 255
 } MachineType;
 

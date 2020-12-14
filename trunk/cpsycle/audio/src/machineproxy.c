@@ -142,7 +142,7 @@ static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int c
 	} else {
 		psy_snprintf(text, 512, "Machine crashed");
 	}
-	psy_audio_machine_output(proxy, text);
+	psy_audio_machine_output(psy_audio_machineproxy_base(proxy), text);
 	// MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
 	return EXCEPTION_EXECUTE_HANDLER;
 }

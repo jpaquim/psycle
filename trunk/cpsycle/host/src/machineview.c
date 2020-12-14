@@ -1796,7 +1796,8 @@ void machinewireview_onnewmachineselected(MachineView* self,
 		&self->workspace->machinefactory,
 		psy_property_at_int(plugininfo, "type", UINTPTR_MAX),
 		psy_property_at_str(plugininfo, "path", ""),
-		psy_property_at_int(plugininfo, "shellidx", 0));
+		psy_property_at_int(plugininfo, "shellidx", 0),
+		UINTPTR_MAX);
 	if (machine) {
 		int favorite;
 

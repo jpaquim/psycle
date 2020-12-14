@@ -71,14 +71,14 @@ int psyfile_readchunkbegin(PsyFile*);
 void psyfile_seekchunkend(PsyFile*);
 int psyfile_error(PsyFile*);
 
-INLINE uint32_t psyfile_fileversion(PsyFile* self)
+INLINE uint32_t psyfile_fileversion(const PsyFile* self)
 {
-	self->fileversion;
+	return self->fileversion;
 }
 
-INLINE uint32_t psyfile_currchunkversion(PsyFile* self)
+INLINE uint32_t psyfile_currchunkversion(const PsyFile* self)
 {
-	self->currchunk.version;
+	return self->currchunk.version;
 }
 
 
