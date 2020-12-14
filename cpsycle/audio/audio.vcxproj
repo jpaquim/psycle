@@ -241,6 +241,7 @@
     </ClCompile>
     <ClCompile Include="src\songio.c" />
     <ClCompile Include="src\ticktimer.c" />
+    <ClCompile Include="src\virtualgenerator.c" />
     <ClCompile Include="src\vstplugin.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
@@ -331,6 +332,7 @@
     <ClInclude Include="src\song.h" />
     <ClInclude Include="src\songio.h" />
     <ClInclude Include="src\ticktimer.h" />
+    <ClInclude Include="src\virtualgenerator.h" />
     <ClInclude Include="src\vstplugin.h" />
     <ClInclude Include="src\waveio.h" />
     <ClInclude Include="src\waveosc.h" />

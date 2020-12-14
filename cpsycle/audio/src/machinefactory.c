@@ -19,6 +19,7 @@
 #include "vstplugin.h"
 #include "ladspaplugin.h"
 #include "machineproxy.h"
+#include "virtualgenerator.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -65,8 +66,8 @@ void psy_audio_machinefactory_createwithoutproxy(psy_audio_MachineFactory* self)
 	self->createasproxy = FALSE;
 }
 
-psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory* self, MachineType type,
-	const char* plugincatchername)
+psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory* self,
+	MachineType type, const char* plugincatchername, uintptr_t instindex)
 {
 	char fullpath[_MAX_PATH];
 
@@ -77,11 +78,12 @@ psy_audio_Machine* psy_audio_machinefactory_makemachine(psy_audio_MachineFactory
 		plugincatcher_modulepath(self->catcher, type,
 		self->loadnewgamefxblitz,
 		plugincatchername, fullpath),
-		plugincatcher_extractshellidx(plugincatchername));
+		plugincatcher_extractshellidx(plugincatchername),
+		instindex);
 }
 
 psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_MachineFactory* self,
-	MachineType type, const char* path, uintptr_t shellidx)
+	MachineType type, const char* path, uintptr_t shellidx, uintptr_t instindex)
 {
 	psy_audio_Machine* rv = 0;
 
@@ -254,11 +256,22 @@ psy_audio_Machine* psy_audio_machinefactory_makemachinefrompath(psy_audio_Machin
 			} else {
 				rv = 0;
 			}
-			break;
-		}		
+			break; }
+		case MACH_VIRTUALGENERATOR: {
+			psy_audio_VirtualGenerator* virtualgenerator;
+
+			virtualgenerator = (psy_audio_VirtualGenerator*)malloc(sizeof(psy_audio_VirtualGenerator));
+			if (virtualgenerator) {
+				psy_audio_virtualgenerator_init(virtualgenerator, self->machinecallback, shellidx, instindex);
+				rv = &virtualgenerator->custommachine.machine;
+			} else {
+				rv = NULL;
+			}
+
+			break; }
 		default:
 			rv = 0;
-		break;
+			break;
 	}
 	if (rv && self->createasproxy) {
 		psy_audio_MachineProxy* proxy;

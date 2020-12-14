@@ -494,11 +494,11 @@ void psy_audio_machines_erase(psy_audio_Machines* self, uintptr_t slot)
 	psy_audio_machines_disconnectall(self, slot);	
 	psy_table_remove(&self->slots, slot);
 	machines_setpath(self, psy_audio_compute_path(self, psy_audio_MASTER_INDEX,
-		TRUE));
+		TRUE));	
 	if (slot == self->maxindex) {
-		slot = machines_findmaxindex(self);
+		self->slot = machines_findmaxindex(self);
 	}
-	psy_signal_emit(&self->signal_removed, self, 1, slot);
+	psy_signal_emit(&self->signal_removed, self, 1, slot);	
 	psy_audio_exclusivelock_leave();	
 }
 

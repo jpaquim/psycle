@@ -55,7 +55,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 		psy_audio_Machine* machine;
 
 		machine = psy_audio_machinefactory_makemachine(self->song->machinefactory,
-			MACH_SAMPLER, "");
+			MACH_SAMPLER, "", UINTPTR_MAX);
 		if (machine) {
 			psy_audio_machines_insert(&self->song->machines, 0, machine);
 			psy_audio_machines_connect(&self->song->machines,

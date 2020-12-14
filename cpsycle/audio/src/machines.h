@@ -27,7 +27,7 @@ typedef enum {
 } Colours;
 
 typedef struct psy_audio_Machines {	
-	psy_Table slots;
+	psy_Table slots;	
 	psy_Table inputbuffers;
 	psy_Table outputbuffers;
 	psy_audio_Connections connections;

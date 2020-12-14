@@ -199,7 +199,7 @@ psy_audio_Machine* internalmachinesconvert_redirect(
 	plugincatcher_catchername(songfile->song->machinefactory->catcher,
 		sDllName, plugincatchername, 0);
 	machine = psy_audio_machinefactory_makemachine(songfile->song->machinefactory,
-		MACH_PLUGIN, plugincatchername);
+		MACH_PLUGIN, plugincatchername, UINTPTR_MAX);
 
 	psyfile_read(songfile->file, _editName, 16);
 	_editName[15] = 0;
