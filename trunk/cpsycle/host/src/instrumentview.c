@@ -50,24 +50,26 @@ void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox* self)
 {
 	if (self->workspace->song) {
 		uintptr_t i;
+		uintptr_t c;
 		uintptr_t maxkey;
 
-maxkey = psy_table_maxkey(&self->workspace->song->machines.slots);
+		maxkey = psy_table_maxkey(&self->workspace->song->machines.slots);
 
-for (i = 0; i < maxkey; ++i) {
-	psy_audio_Machine* machine;
+		for (c = 0, i = 0; i < maxkey; ++i) {
+			psy_audio_Machine* machine;
 
-	machine = (psy_audio_Machine*)psy_audio_machines_at(
-		&self->workspace->song->machines, i);
-	if (machine && machine_supports(machine,
-		MACH_SUPPORTS_INSTRUMENTS)) {
-		char text[512];
+			machine = (psy_audio_Machine*)psy_audio_machines_at(
+				&self->workspace->song->machines, i);
+			if (machine && machine_supports(machine,
+				MACH_SUPPORTS_INSTRUMENTS)) {
+				char text[512];
 
-		psy_snprintf(text, 512, "%X: %s", (int)i,
-			psy_audio_machine_editname(machine));
-		psy_ui_combobox_addtext(&self->samplers, text);
-	}
-}
+				psy_snprintf(text, 512, "%X: %s", (int)i,
+					psy_audio_machine_editname(machine));
+				psy_ui_combobox_addtext(&self->samplers, text);
+				psy_ui_combobox_setitemdata(&self->samplers,  c++, i);
+			}
+		}
 	}
 }
 
@@ -119,8 +121,9 @@ void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox* self)
 			}
 			generator = psy_audio_machinefactory_makemachinefrompath(
 				&self->workspace->machinefactory, MACH_VIRTUALGENERATOR,
-				NULL, (uintptr_t)psy_ui_combobox_itemdata(&self->generators,
-					psy_ui_combobox_cursel(&self->generators)),
+				NULL, 
+				(uintptr_t)psy_ui_combobox_itemdata(&self->samplers,
+					psy_ui_combobox_cursel(&self->samplers)),
 				psy_audio_instruments_selected(&self->workspace->song->instruments).subslot);
 			if (generator) {
 				char editname[256];
@@ -178,7 +181,6 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 					break;
 				}
 			}
-
 		}		
 	}	
 }

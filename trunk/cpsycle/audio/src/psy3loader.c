@@ -36,6 +36,7 @@ static void psy_audio_psy3loader_read_eins(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_read_smid(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_read_macd(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader*);
+static void psy_audio_psy3loader_read_virg(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader*, psy_audio_Instrument* instrument,
 	bool islegacy, uint32_t legacyversion);
 static void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader*, bool legacy, uint32_t legacyversion);
@@ -153,6 +154,7 @@ int psy_audio_psy3loader_load(psy_audio_PSY3Loader* self)
 		} else
 		if (strcmp(header,"VIRG") == 0) {
 			psyfile_readchunkbegin(self->songfile->file);
+			psy_audio_psy3loader_read_virg(self);
 			psyfile_seekchunkend(self->songfile->file);
 		} else {
 			// we are not at a valid header for some weird reason.  
@@ -1645,4 +1647,27 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 		*replaced = TRUE;
 	}
 	return machine;
+}
+
+void psy_audio_psy3loader_read_virg(psy_audio_PSY3Loader* self)
+{
+	if ((self->songfile->file->fileversion & 0xFFFF0000) == VERSION_MAJOR_ZERO)
+	{
+		int32_t virtual_inst;
+		int32_t mac_idx;
+		int32_t inst_idx;
+		psy_audio_Machine* machine;
+
+		psyfile_read(self->songfile->file, &virtual_inst, sizeof(virtual_inst));
+		psyfile_read(self->songfile->file, &mac_idx, sizeof(mac_idx));
+		psyfile_read(self->songfile->file, &inst_idx, sizeof(inst_idx));
+		
+		if (virtual_inst >= MAX_MACHINES && virtual_inst < MAX_VIRTUALINSTS) {
+			// && mac != NULL && (mac->_type == MACH_SAMPLER || mac->_type == MACH_XMSAMPLER))
+			machine = psy_audio_machinefactory_makemachinefrompath(self->songfile->song->machinefactory,
+				MACH_VIRTUALGENERATOR,
+				NULL, mac_idx, inst_idx);		
+			psy_audio_machines_insert(&self->songfile->song->machines, virtual_inst, machine);			
+		}				
+	}	
 }
