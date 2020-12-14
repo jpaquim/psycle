@@ -36,6 +36,7 @@ static int psy_audio_psy3saver_write_epat(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_macd(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_insd(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_smsb(psy_audio_PSY3Saver*);
+static int psy_audio_psy3saver_write_virg(psy_audio_PSY3Saver*);
 static int psy_audio_psy3saver_write_machine(psy_audio_PSY3Saver*, psy_audio_Machine*,
 	uint32_t slot);
 static void psy_audio_psy3saver_savedllnameandindex(psy_audio_PSY3Saver*, const char* name,
@@ -85,6 +86,9 @@ int psy_audio_psy3saver_save(psy_audio_PSY3Saver* self)
 		return status;
 	}
 	if (status = psy_audio_psy3saver_write_smsb(self)) {
+		return status;
+	}
+	if (status = psy_audio_psy3saver_write_virg(self)) {
 		return status;
 	}
 	return status;
@@ -901,7 +905,7 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 int psy_audio_psy3saver_write_smsb(psy_audio_PSY3Saver* self)
 {
 	psy_TableIterator it;
-	uint32_t sizepos;	
+	uint32_t sizepos;
 	int status = PSY_OK;
 
 	for (it = psy_audio_samples_begin(&self->songfile->song->samples);
@@ -1122,4 +1126,56 @@ short* psy_audio_psy3saver_floatbuffertoshort(float* buffer, uintptr_t numframes
 		rv = 0;	
 	}
 	return rv;
+}
+
+
+/*
+===================
+Virtual Instrument (Generator)
+===================
+id = "VIRG";
+*/
+int psy_audio_psy3saver_write_virg(psy_audio_PSY3Saver* self)
+{
+	int status;
+	int32_t i;
+	uint32_t sizepos;	
+
+	status = PSY_OK;	
+	for (i = MAX_MACHINES; i < MAX_VIRTUALINSTS; i++) {
+		psy_audio_Machine* machine;
+		int32_t inst_idx;
+		int32_t mac_idx;
+		inst_idx = -1;
+		mac_idx = -1;
+
+		if (machine = psy_audio_machines_at(&self->songfile->song->machines, i)) {
+			psy_audio_MachineParam* param;			
+			
+			param = psy_audio_machine_parameter(machine, 0);
+			if (param) {				
+				inst_idx = psy_audio_machine_parameter_scaledvalue(machine, param);
+			}
+			param = psy_audio_machine_parameter(machine, 1);
+			if (param) {
+				mac_idx = psy_audio_machine_parameter_scaledvalue(machine, param);
+			}						
+			if (inst_idx != -1 && mac_idx != -1) {
+				if (status = psyfile_writeheader(self->songfile->file, "VIRG",
+					CURRENT_FILE_VERSION_VIRG, 0, &sizepos)) {
+					return status;
+				}
+				if (status = psyfile_write_int32(self->songfile->file, (int32_t)i)) {
+					return status;
+				}
+				if (status = psyfile_write_int32(self->songfile->file, (int32_t)mac_idx)) {
+					return status;
+				}
+				if (status = psyfile_write_int32(self->songfile->file, (int32_t)inst_idx)) {
+					return status;
+				}
+			}
+		}
+	}
+	return PSY_OK;
 }

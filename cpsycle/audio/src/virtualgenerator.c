@@ -106,7 +106,21 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 
 		sampler = psy_audio_machines_at(machines, self->machine_index);
 		if (sampler) {
-			psy_audio_machine_seqtick(sampler, channel, ev);
+			int vol;
+			psy_audio_PatternEvent realevent;
+						
+			vol = ev->inst;
+			realevent = *ev;			
+			realevent.inst = self->instrument_index;
+			if (vol != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {
+					realevent.cmd = 0x1E;
+				} else {
+					realevent.cmd = 0xFC;
+				}
+				realevent.parameter = vol;
+			}
+			psy_audio_machine_seqtick(sampler, channel, &realevent);
 		}
 	}
 }
