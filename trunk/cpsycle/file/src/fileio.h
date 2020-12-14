@@ -71,6 +71,16 @@ int psyfile_readchunkbegin(PsyFile*);
 void psyfile_seekchunkend(PsyFile*);
 int psyfile_error(PsyFile*);
 
+INLINE uint32_t psyfile_fileversion(PsyFile* self)
+{
+	self->fileversion;
+}
+
+INLINE uint32_t psyfile_currchunkversion(PsyFile* self)
+{
+	self->currchunk.version;
+}
+
 
 static uint32_t FourCC(char *psname);
 

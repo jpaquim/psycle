@@ -46,11 +46,16 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		
 	psy_signal_connect(&workspace->signal_songchanged, self,
 		gear_onsongchanged);
-	psy_ui_component_init(gear_base(self), parent);
+	psy_ui_component_init(gear_base(self), parent);	
 	self->workspace = workspace;
 	self->machines = &workspace->song->machines;
+	// client
+	psy_ui_component_init(&self->client, gear_base(self));
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	psy_ui_component_setmargin(&self->client,
+		psy_ui_defaults_pcmargin(psy_ui_defaults()));
 	// titlebar
-	psy_ui_component_init_align(&self->titlebar, gear_base(self),
+	psy_ui_component_init_align(&self->titlebar, &self->client,
 		psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0), psy_ui_value_makeeh(0.5),
@@ -68,12 +73,12 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 		psy_ui_value_makepx(0));
 	psy_ui_component_setmargin(&self->hide.component, &margin);
 	// client
-	tabbar_init(&self->tabbar, gear_base(self));	
+	tabbar_init(&self->tabbar, &self->client);
 	tabbar_append_tabs(&self->tabbar, "gear.generators", "gear.effects",
 		"gear.instruments", "gear.waves", NULL);
 	tabbar_select(&self->tabbar, 0);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_BOTTOM);
-	psy_ui_notebook_init(&self->notebook, gear_base(self));
+	psy_ui_notebook_init(&self->notebook, &self->client);
 	psy_ui_component_setalign(psy_ui_notebook_base(&self->notebook),
 		psy_ui_ALIGN_CLIENT);
 	machinesbox_init(&self->machinesboxgen, psy_ui_notebook_base(&self->notebook), 
@@ -88,7 +93,7 @@ void gear_init(Gear* self, psy_ui_Component* parent, Workspace* workspace)
 	psy_ui_notebook_connectcontroller(&self->notebook,
 		&self->tabbar.signal_change);
 	tabbar_select(&self->tabbar, 0);
-	gearbuttons_init(&self->buttons, gear_base(self), workspace);
+	gearbuttons_init(&self->buttons, &self->client, workspace);
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_RIGHT);
 	psy_signal_connect(&self->buttons.del.signal_clicked, self, gear_ondelete);
 	psy_signal_connect(&self->buttons.clone.signal_clicked, self,

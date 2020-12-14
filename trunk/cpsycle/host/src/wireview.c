@@ -213,7 +213,7 @@ void wireview_onsongchanged(WireView* self, Workspace* workspace)
 void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 {
 	psy_audio_Connections* connections;
-	psy_audio_WireSocketEntry* input;	
+	psy_audio_WireSocket* input;	
 
 	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
@@ -230,7 +230,7 @@ void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 void wireview_ontweakvolume(WireView* self, psy_ui_Slider* slider, float value)
 {
 	psy_audio_Connections* connections;
-	psy_audio_WireSocketEntry* input;	
+	psy_audio_WireSocket* input;	
 
 	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);
@@ -242,7 +242,7 @@ void wireview_ontweakvolume(WireView* self, psy_ui_Slider* slider, float value)
 void wireview_onvaluevolume(WireView* self, psy_ui_Slider* slider, float* value)
 {
 	psy_audio_Connections* connections;
-	psy_audio_WireSocketEntry* input;	
+	psy_audio_WireSocket* input;	
 
 	connections = &workspace_song(self->workspace)->machines.connections;
 	input = psy_audio_connections_input(connections, self->wire);

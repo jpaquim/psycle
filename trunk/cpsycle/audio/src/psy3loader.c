@@ -1543,7 +1543,7 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader* s
 	char modulename[256];
 	char editname[32];	
 	int32_t i;
-	psy_Table* legacywiretable;
+	psy_audio_MachineWires* machinewires;
 	
 	machine = psy_audio_psy3loader_machineloadchunk_createmachine(self, index, modulename, catchername, &replaced);
 	{
@@ -1569,8 +1569,8 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader* s
 		}
 		psy_audio_machine_setpanning(machine, panning / 128.f);
 	}
-	legacywiretable = (psy_Table*)malloc(sizeof(psy_Table));
-	psy_table_init(legacywiretable);
+	machinewires = psy_audio_machinewires_allocinit();
+	
 	for (i = 0; i < MAX_CONNECTIONS; ++i) {
 		int32_t input;
 		int32_t output;
@@ -1595,10 +1595,10 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader* s
 		legacywire = psy_audio_legacywire_allocinit_all(input, incon, inconvol,
 			wiremultiplier, output, connection);
 		if (legacywire) {
-			psy_table_insert(legacywiretable, (uintptr_t)i, (void*)legacywire);
+			psy_audio_machinewires_insert(machinewires, (uintptr_t)i, legacywire);			
 		}
 	}
-	psy_table_insert(&self->songfile->legacywires->legacywires, index, legacywiretable);
+	psy_audio_legacywires_insert(&self->legacywires, index, machinewires);	
 	psyfile_readstring(self->songfile->file, editname, 32);
 	if (replaced) {
 		char text[256];
@@ -1615,15 +1615,16 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader* s
 		psy_audio_machine_seteditname(machine, editname);
 	}	
 	psy_audio_machine_loadspecific(machine, self->songfile, index);
-	if (self->songfile->file->currchunk.version >= 1) {
+	if (psyfile_currchunkversion(self->songfile->file) >= 1) {
 		//TODO: What to do on possibly wrong wire load?
 		psy_audio_machine_loadwiremapping(machine, self->songfile, index);
 	}
 	return machine;	
 }
 
-psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(psy_audio_PSY3Loader* self,
-	int32_t index, char* modulename, char* catchername, bool* replaced)
+psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
+	psy_audio_PSY3Loader* self, int32_t index, char* modulename,
+	char* catchername, bool* replaced)
 {
 	psy_audio_Machine* machine;
 	int32_t type;	

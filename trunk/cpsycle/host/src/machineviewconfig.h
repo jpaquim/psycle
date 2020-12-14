@@ -21,12 +21,12 @@ typedef struct MachineViewConfig {
 	psy_Property* machineview;
 	psy_Property* theme;	
 	// references
-	psy_Property* parent;
-	
+	psy_Property* parent;	
 } MachineViewConfig;
 
 void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
 void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent);
+
 bool machineviewconfig_machineindexes(const MachineViewConfig*);
 bool machineviewconfig_wirehover(const MachineViewConfig*);
 bool machineviewconfig_vumeters(const MachineViewConfig*);

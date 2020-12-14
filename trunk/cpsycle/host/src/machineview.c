@@ -357,12 +357,13 @@ void machineui_updatemaxvolumedisplay(MachineUi* self)
 void machineui_showparameters(MachineUi* self, psy_ui_Component* parent)
 {
 	if (self->machine) {		
-		if (!self->frame) {
+		if (!self->frame) {			
+
 			self->frame = machineframe_alloc();
 			machineframe_init(self->frame, parent,
 				machineparamconfig_showfloated(
 					psycleconfig_macparam(workspace_conf(self->workspace))),
-				self->workspace);
+				self->workspace);			
 			psy_signal_connect(&self->frame->component.signal_destroy, self,
 				machineui_onframedestroyed);
 			if (psy_audio_machine_haseditor(self->machine)) {
@@ -606,18 +607,22 @@ void machinewireview_drawwires(MachineWireView* self, psy_ui_Graphics* g)
 void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 	uintptr_t slot, MachineUi* outmachineui)
 {		
-	psy_audio_MachineSockets* sockets;
-	WireSocket* p;
+	psy_audio_MachineSockets* sockets;	
 	
 	sockets	= psy_audio_connections_at(&self->machines->connections, slot);
 	if (sockets) {
-		for (p = sockets->outputs; p != NULL; p = p->next) {
-			psy_audio_WireSocketEntry* entry =
-				(psy_audio_WireSocketEntry*)p->entry;
-			if (entry->slot != UINTPTR_MAX) {
+		psy_TableIterator it;
+
+		for (it = psy_audio_wiresockets_begin(&sockets->outputs);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			psy_audio_WireSocket* socket;
+
+			socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);		
+			if (socket->slot != UINTPTR_MAX) {
 				MachineUi* inmachineui;				
 
-				inmachineui = machineuis_at(self, entry->slot);
+				inmachineui = machineuis_at(self, socket->slot);
 				if (inmachineui && outmachineui) {
 					psy_ui_Rectangle out;
 					psy_ui_Rectangle in;					
@@ -625,11 +630,11 @@ void machinewireview_drawwire(MachineWireView* self, psy_ui_Graphics* g,
 					out = machineui_position(inmachineui);
 					in = machineui_position(outmachineui);
 					if (self->hoverwire.src == slot &&
-						self->hoverwire.dst == entry->slot) {
+						self->hoverwire.dst == socket->slot) {
 						psy_ui_setcolour(g, self->skin.hoverwirecolour);
 					} else
 					if (self->selectedwire.src == slot &&
-							self->selectedwire.dst == entry->slot) {
+							self->selectedwire.dst == socket->slot) {
 						psy_ui_setcolour(g, self->skin.selwirecolour);
 					} else {
 						psy_ui_setcolour(g, self->skin.wirecolour);
@@ -1405,22 +1410,24 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 	psy_audio_wire_init(&rv);
 	for (it = psy_audio_machines_begin(self->machines); it.curr != 0; 
 			psy_tableiterator_inc(&it)) {
-		psy_audio_MachineSockets* sockets;
-		WireSocket* p;			
+		psy_audio_MachineSockets* sockets;			
 		uintptr_t slot = it.curr->key;
 	
 		sockets	= psy_audio_connections_at(&self->machines->connections, slot);
 		if (sockets) {
-			p = sockets->outputs;	
-			while (p != NULL) {
-				psy_audio_WireSocketEntry* entry;
+			psy_TableIterator it;
 
-				entry =	(psy_audio_WireSocketEntry*) p->entry;
-				if (entry->slot != UINTPTR_MAX) {					
+			for (it = psy_audio_wiresockets_begin(&sockets->outputs);
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+				psy_audio_WireSocket* socket;
+
+				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);											
+				if (socket->slot != UINTPTR_MAX) {
 					MachineUi* inmachineui;
 					MachineUi* outmachineui;
 
-					inmachineui = machineuis_at(self, entry->slot);
+					inmachineui = machineuis_at(self, socket->slot);
 					outmachineui = machineuis_at(self, slot);
 					if (inmachineui && outmachineui) {
 						psy_ui_Rectangle r;
@@ -1441,14 +1448,13 @@ psy_audio_Wire machinewireview_hittestwire(MachineWireView* self, int x, int y)
 						if (psy_ui_rectangle_intersect_segment(&r,
 								mxout + out.width / 2, myout + out.height / 2,
 								mxin + in.width / 2, myin + in.height / 2)) {
-							psy_audio_wire_set(&rv, slot, entry->slot);							
+							psy_audio_wire_set(&rv, slot, socket->slot);
 						}						
 					}
 				}
 				if (psy_audio_wire_valid(&rv)) {
 					break;
-				}
-				p = p->next;
+				}				
 			}
 		}
 	}
@@ -1698,15 +1704,35 @@ void machinewireview_showwireview(MachineWireView* self, psy_audio_Wire wire)
 {			
 	WireFrame* wireframe;
 
+	if (!self->workspace->song) {
+		return;
+	}
 	wireframe = machinewireview_wireframe(self, wire);
 	if (!wireframe) {
 		WireView* wireview;
+		char buf[128];
+		psy_audio_Machines* machines;
+		psy_audio_Machine* srcmachine;
+		psy_audio_Machine* dstmachine;
 
-		wireframe = (WireFrame*)malloc(sizeof(WireFrame));					
-		psy_list_append(&self->wireframes, wireframe);		
-		wireframe_init(wireframe, &self->component, 0);
+		// WireFrame
+		wireframe = (WireFrame*)malloc(sizeof(WireFrame));
+		if (!wireframe) {
+			return;
+		}
+		psy_list_append(&self->wireframes, wireframe);	
+		wireframe_init(wireframe, &self->component, 0);		
+		machines = &self->workspace->song->machines;		
+		srcmachine = psy_audio_machines_at(machines, wire.src);
+		dstmachine = psy_audio_machines_at(machines, wire.dst);
+		psy_snprintf(buf, 128, "[%d] %s -> %s Connection Volume",
+			(int)psy_audio_connections_wireindex(&machines->connections, wire),
+			(srcmachine) ? psy_audio_machine_editname(srcmachine) : "ERR",
+			(dstmachine) ? psy_audio_machine_editname(dstmachine) : "ERR");
+		psy_ui_component_settitle(wireframe_base(wireframe), buf);
 		psy_signal_connect(&wireframe->component.signal_destroyed, self,
 			machinewireview_onwireframedestroyed);
+		// WireView
 		wireview = (WireView*) malloc(sizeof(WireView));
 		if (wireview) {
 			wireview_init(wireview, &wireframe->component, wire,
@@ -2044,20 +2070,24 @@ psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slo
 	MachineUi* machineui;
 	
 	machineui = machineuis_at(self, slot);
-	if (machineui) {
-		WireSocket* p;
+	if (machineui) {		
 		psy_audio_MachineSockets* sockets;
 
 		rv = machineui_position(machineui);
 		sockets = psy_audio_connections_at(&self->machines->connections, slot);
 		if (sockets) {
-			for (p = sockets->outputs; p != NULL; p = p->next) {
-				psy_audio_WireSocketEntry* entry =
-					(psy_audio_WireSocketEntry*)p->entry;
-				if (entry->slot != UINTPTR_MAX) {
+			psy_TableIterator it;
+
+			for (it = psy_audio_wiresockets_begin(&sockets->outputs);
+					!psy_tableiterator_equal(&it, psy_table_end());
+					psy_tableiterator_inc(&it)) {
+				psy_audio_WireSocket* socket;
+
+				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);			
+				if (socket->slot != UINTPTR_MAX) {
 					MachineUi* inmachineui;
 
-					inmachineui = machineuis_at(self, entry->slot);
+					inmachineui = machineuis_at(self, socket->slot);
 					if (inmachineui && machineui) {
 						psy_ui_Rectangle out;						
 
@@ -2066,13 +2096,16 @@ psy_ui_Rectangle machinewireview_updaterect(MachineWireView* self, uintptr_t slo
 					}
 				}
 			}
-			for (p = sockets->inputs; p != NULL; p = p->next) {
-				psy_audio_WireSocketEntry* entry =
-					(psy_audio_WireSocketEntry*)p->entry;
-				if (entry->slot != UINTPTR_MAX) {
+			for(it = psy_audio_wiresockets_begin(&sockets->inputs);
+			!psy_tableiterator_equal(&it, psy_table_end());
+			psy_tableiterator_inc(&it)) {
+				psy_audio_WireSocket* socket;
+
+				socket = (psy_audio_WireSocket*)psy_tableiterator_value(&it);
+				if (socket->slot != UINTPTR_MAX) {
 					MachineUi* outmachineui;
 
-					outmachineui = machineuis_at(self, entry->slot);
+					outmachineui = machineuis_at(self, socket->slot);
 					if (outmachineui && machineui) {						
 						psy_ui_Rectangle in;
 

@@ -132,17 +132,18 @@ static void machineproxy_command(psy_audio_MachineProxy*);
 static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int code,
 	struct _EXCEPTION_POINTERS *ep) 
 {	
-	char txt[512];
+	char text[512];
 	proxy->crashed = 1;	
 		
 	if (psy_audio_machine_info(proxy->client)) {
-		psy_snprintf(txt, 512, "%u: %s crashed \n\r %s",
+		psy_snprintf(text, 512, "%u: %s crashed \n\r %s",
 			(unsigned int)proxy->client->vtable->slot(proxy->client),
 			proxy->client->vtable->info(proxy->client)->ShortName, msg);
 	} else {
-		psy_snprintf(txt, 512, "Machine crashed");
+		psy_snprintf(text, 512, "Machine crashed");
 	}
-	MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
+	psy_audio_machine_output(proxy, text);
+	// MessageBox(0, txt, "Psycle Host Exception", MB_OK | MB_ICONERROR);
 	return EXCEPTION_EXECUTE_HANDLER;
 }
 #endif
@@ -1108,8 +1109,7 @@ struct psy_audio_MachineFactory* machineproxy_machinefactory(psy_audio_MachinePr
 }
 
 void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
-{
-	if (self->crashed == 0) {
+{	
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
@@ -1120,8 +1120,7 @@ void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
 		__except(FilterException(self, "output", GetExceptionCode(),
 			GetExceptionInformation())) {			
 		}
-#endif		
-	}	
+#endif			
 }
 
 bool machineproxy_addcapture(psy_audio_MachineProxy* self, int index)

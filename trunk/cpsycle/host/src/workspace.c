@@ -1491,7 +1491,7 @@ void onmachineterminaloutput(Workspace* self, const char* text)
 {
 	assert(self);
 
-	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
+	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
 }
 
 bool onmachinefileselectload(Workspace* self, char filter[], char inoutname[])
