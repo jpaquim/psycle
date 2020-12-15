@@ -30,19 +30,18 @@ enum {
 typedef struct PsycleConfig {
 	psy_Property config;
 	psy_Property* global;
+	psy_Property* visual;
 	GeneralConfig general;
 	AudioConfig audio;
 	EventDriverConfig input;
 	LanguageConfig language;
-	DirConfig directories;
-	psy_Property* visual;
+	DirConfig directories;	
 	PatternViewConfig patview;
 	MachineViewConfig macview;
 	MachineParamConfig macparam;
 	KeyboardMiscConfig misc;
 	MidiViewConfig midi;
-	CompatConfig compat;
-	char* dialbitmappath;
+	CompatConfig compat;	
 } PsycleConfig;
 
 void psycleconfig_init(PsycleConfig*, psy_audio_Player*,
@@ -51,7 +50,7 @@ void psycleconfig_dispose(PsycleConfig*);
 
 void psycleconfig_loadskin(PsycleConfig*, const char* path);
 void psycleconfig_resetskin(PsycleConfig*);
-void psycleconfig_setcontrolskinpath(PsycleConfig*, const char* path);
+void psycleconfig_resetcontrolskin(PsycleConfig*);
 
 INLINE GeneralConfig* psycleconfig_general(PsycleConfig* self)
 {
@@ -110,6 +109,10 @@ INLINE CompatConfig* psycleconfig_compat(PsycleConfig* self)
 
 const char* psycleconfig_defaultfontstr(const PsycleConfig* self);
 bool psycleconfig_enableaudio(const PsycleConfig* self);
+
+void psycleconfig_notifyall_changed(PsycleConfig*);
+void psycleconfig_notify_changed(PsycleConfig*, psy_Property*);
+void psycleconfig_notify_skinchanged(PsycleConfig*, psy_Property* property);
 
 #ifdef __cplusplus
 }

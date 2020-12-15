@@ -21,6 +21,8 @@ enum {
 };
 
 typedef struct LanguageConfig {
+	// signals
+	psy_Signal signal_changed;
 	psy_Property* languagechoice;
 	// references
 	psy_Property* parent;
@@ -29,10 +31,11 @@ typedef struct LanguageConfig {
 
 void languageconfig_init(LanguageConfig*, psy_Property* parent,
 	psy_Translator*);
+void languageconfig_dispose(LanguageConfig*);
 void languageconfig_updatelanguage(LanguageConfig*);
-
 // Will be called if settingview was changed
-bool languageconfig_onpropertychanged(LanguageConfig*, psy_Property*);
+bool languageconfig_onchanged(LanguageConfig*, psy_Property*);
+bool languageconfig_hasproperty(const LanguageConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

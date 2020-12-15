@@ -101,6 +101,12 @@ void trackergrid_setcentermode(TrackerGrid*, int mode);
 void trackergrid_tweak(TrackerGrid*, int slot, uintptr_t tweak,
 	float normvalue);
 
+INLINE const psy_audio_PatternSelection* trackergrid_selection(
+	const TrackerGrid* self)
+{
+	return &self->selection;
+}
+
 INLINE void trackergrid_enableft2home(TrackerGrid* self)
 {
 	self->ft2home = TRUE;

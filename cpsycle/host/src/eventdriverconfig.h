@@ -27,15 +27,21 @@ enum {
 // Configures and selects the eventdrivers
 
 typedef struct EventDriverConfig {
+	// signals
+	psy_Signal signal_changed;
 	psy_Property* eventinputs;
 	psy_Property* eventdriverconfigure;
 	psy_Property* eventdriverconfigurations;
+	// internal data
+	psy_Property* installeddriver;
+	psy_Property* activedrivers;
 	// references
 	psy_audio_Player* player;
 	psy_Property* config;	
 } EventDriverConfig;
 
 void eventdriverconfig_init(EventDriverConfig*, psy_Property* parent, psy_audio_Player*);
+void eventdriverconfig_dispose(EventDriverConfig*);
 void eventdriverconfig_makeeventinput(EventDriverConfig*);
 void eventdriverconfig_makeeventdriverlist(EventDriverConfig*);
 void eventdriverconfig_registereventdrivers(EventDriverConfig*);
@@ -51,6 +57,9 @@ int eventdriverconfig_curreventdriverconfiguration(EventDriverConfig*);
 const char* eventdriverconfig_eventdriverpath(EventDriverConfig*);
 void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig*);
 psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig*);
+
+bool eventdriverconfig_onchanged(EventDriverConfig*, psy_Property*);
+bool eventdriverconfig_hasproperty(const EventDriverConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

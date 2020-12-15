@@ -14,6 +14,8 @@ extern "C" {
 // CompatConfig
 
 typedef struct CompatConfig {
+	// signals
+	psy_Signal signal_changed;
 	psy_Property* compatibility;
 	// references
 	psy_Property* parent;
@@ -22,9 +24,13 @@ typedef struct CompatConfig {
 
 void compatconfig_init(CompatConfig*, psy_Property* parent,
 	psy_audio_MachineFactory*);
-
+void compatconfig_dispose(CompatConfig*);
 void compatconfig_setloadnewblitz(CompatConfig*, bool mode);
 bool compatconfig_loadnewblitz(const CompatConfig*);
+
+bool compatconfig_onchanged(CompatConfig*, psy_Property*);
+bool compatconfig_hasproperty(const CompatConfig*, psy_Property*);
+
 
 #ifdef __cplusplus
 }

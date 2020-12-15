@@ -5,7 +5,10 @@
 
 #include "patternviewconfig.h"
 
-static void patternviewconfig_makeview(PatternViewConfig*, psy_Property*);
+static void patternviewconfig_makeview(PatternViewConfig*, psy_Property*
+	parent);
+static void patternviewconfig_maketheme(PatternViewConfig*, psy_Property*
+	parent);
 
 void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent)
 {
@@ -13,6 +16,16 @@ void patternviewconfig_init(PatternViewConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	patternviewconfig_makeview(self, parent);
+	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_themechanged);
+}
+
+void patternviewconfig_dispose(PatternViewConfig* self)
+{
+	assert(self);
+		
+	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_themechanged);
 }
 
 void patternviewconfig_makeview(PatternViewConfig* self, psy_Property* parent)
@@ -250,6 +263,41 @@ void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent)
 		"Midline Right");
 }
 
+void patternviewconfig_resettheme(PatternViewConfig* self)
+{
+	assert(self);
+
+	if (self->theme) {
+		psy_property_remove(self->patternview, self->theme);
+	}
+	patternviewconfig_maketheme(self, self->patternview);
+	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+}
+
+void patternviewconfig_settheme(PatternViewConfig* self, psy_Property* skin)
+{
+	assert(self);
+
+	if (self->theme) {
+		psy_property_sync(self->theme, skin);
+		psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+	}
+}
+
+bool patternviewconfig_hasthemeproperty(const PatternViewConfig* self,
+	psy_Property* property)
+{
+	return (self->theme && psy_property_insection(property, self->theme));
+}
+
+bool patternviewconfig_hasproperty(const PatternViewConfig* self,
+	psy_Property* property)
+{
+	assert(self &&  self->patternview);
+
+	return (psy_property_insection(property, self->patternview));
+}
+
 // getter
 bool patternviewconfig_linenumbers(const PatternViewConfig* self)
 {
@@ -332,9 +380,36 @@ bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig* self)
 		TRUE);
 }
 
+void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig* self, bool on)
+{
+	assert(self);
+
+	psy_property_set_bool(self->patternview, "movecursorwhenpaste", on);
+}
+
 bool patternviewconfig_showtrackscopes(const PatternViewConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->patternview, "trackscopes", TRUE);
+}
+// events
+bool patternviewconfig_onchanged(PatternViewConfig* self, psy_Property* property)
+{
+	assert(self);
+
+	if (patternviewconfig_hasthemeproperty(self, property)) {
+		patternviewconfig_onthemechanged(self, property);		
+	} else {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+	return TRUE;
+}
+
+bool patternviewconfig_onthemechanged(PatternViewConfig* self, psy_Property* property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+	return TRUE;
 }

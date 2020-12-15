@@ -406,11 +406,13 @@ void transformpatternview_searchcurrentselection(TransformPatternView* self,
 }
 
 void transformpatternview_setpatternselection(TransformPatternView* self,
-	psy_audio_PatternSelection selection)
+	const psy_audio_PatternSelection* selection)
 {
-	if (self->patternselection.valid != selection.valid) {
-		self->patternselection = selection;
-		if (selection.valid) {
+	assert(self && selection);
+	
+	if (self->patternselection.valid != selection->valid) {
+		self->patternselection = *selection;
+		if (selection->valid) {
 			psy_ui_component_enableinput(psy_ui_label_base(&self->currselection),
 				psy_ui_NONRECURSIVE);
 			transformpatternview_applyto(self, 2);

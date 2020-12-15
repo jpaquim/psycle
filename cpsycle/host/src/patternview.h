@@ -31,12 +31,15 @@ extern "C" {
 //
 // The bar displayed in the mainframe status bar, if the patternview is active
 
-typedef struct {
-	psy_ui_Component component;	
+typedef struct PatternViewBar {
+	// inherits
+	psy_ui_Component component;
+	// ui elements
 	PatternCursorStepBox cursorstep;
 	psy_ui_CheckBox movecursorwhenpaste;
 	psy_ui_CheckBox defaultentries;
-	psy_ui_Label status;	
+	psy_ui_Label status;
+	// references
 	Workspace* workspace;
 } PatternViewBar;
 
@@ -90,7 +93,8 @@ void patternview_init(PatternView*, psy_ui_Component* parent,
 		psy_ui_Component* tabbarparent,	Workspace*);
 void patternview_setpattern(PatternView*, psy_audio_Pattern*);
 void patternview_selectdisplay(PatternView*, PatternDisplayMode);
-void patternview_showlinenumbers(PatternView*, int showstate);
+void patternview_showlinenumbers(PatternView*);
+void patternview_hidelinenumbers(PatternView*);
 void patternview_toggleblockmenu(PatternView*);
 void patternview_toggleinterpolatecurve(PatternView*, psy_ui_Component* sender);
 void patternview_toggletransformpattern(PatternView*, psy_ui_Component* sender);
@@ -98,6 +102,11 @@ void patternview_toggleswingfill(PatternView*, psy_ui_Component* sender);
 void patternview_oninterpolatelinear(PatternView*);
 void patternview_onpatternimport(PatternView*);
 void patternview_onpatternexport(PatternView*);
+
+INLINE psy_ui_Component* patternview_base(PatternView* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

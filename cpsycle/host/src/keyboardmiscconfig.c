@@ -13,6 +13,14 @@ void keyboardmiscconfig_init(KeyboardMiscConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	keyboardmiscconfig_makekeyboardandmisc(self, parent);
+	psy_signal_init(&self->signal_changed);
+}
+
+void keyboardmiscconfig_dispose(KeyboardMiscConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Property* parent)
@@ -90,62 +98,62 @@ void keyboardmiscconfig_makekeyboardandmisc(KeyboardMiscConfig* self, psy_Proper
 		"Allow multiple instances of Psycle");
 }
 
-bool keyboardandmisc_ft2home(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "ft2home", TRUE);
 }
 
-bool keyboardandmisc_ft2delete(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_ft2delete(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "ft2delete", TRUE);
 }
 
-bool keyboardandmisc_effcursoralwaysdown(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_effcursoralwaysdown(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "effcursoralwayssdown", FALSE);
 }
 
-bool keyboardandmisc_playstartwithrctrl(KeyboardMiscConfig* self)
+bool keyboardmiscconfig_playstartwithrctrl(KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "playstartwithrctrl", TRUE);
 }
 
-bool keyboardandmisc_movecursoronestep(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_movecursoronestep(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->keyboard, "movecursoronestep", TRUE);
 }
 
-bool keyboardandmisc_savereminder(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_savereminder(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return  psy_property_at_bool(self->keyboard_misc, "savereminder", TRUE);
 }
 
-bool keyboardandmisc_patdefaultlines(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_int(self->keyboard_misc, "numdefaultlines", 64);
 }
 
-bool keyboardandmisc_allowmultipleinstances(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_allowmultipleinstances(const KeyboardMiscConfig* self)
 {
 	return psy_property_at_bool(self->keyboard_misc, "allowmultiinstances",
 		FALSE);
 }
 
-bool keyboardandmisc_recordtweaksastws(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_recordtweaksastws(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
@@ -153,7 +161,7 @@ bool keyboardandmisc_recordtweaksastws(const KeyboardMiscConfig* self)
 		"recordtweaksastws", 0);
 }
 
-bool keyboardandmisc_advancelineonrecordtweak(const KeyboardMiscConfig* self)
+bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
@@ -161,7 +169,7 @@ bool keyboardandmisc_advancelineonrecordtweak(const KeyboardMiscConfig* self)
 		"advancelineonrecordtweak", 0);
 }
 
-int keyboardandmisc_pgupdowntype(const KeyboardMiscConfig* self)
+int keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig* self)
 {
 	psy_Property* p;
 
@@ -174,9 +182,25 @@ int keyboardandmisc_pgupdowntype(const KeyboardMiscConfig* self)
 	return 0;
 }
 
-int keyboardandmisc_pgupdownstep(const KeyboardMiscConfig* self)
+int keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_int(self->keyboard, "pgupdownstep", 4);
+}
+// events
+void keyboardmiscconfig_onchanged(KeyboardMiscConfig* self, psy_Property*
+	property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+}
+
+bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->keyboard);
+
+	return psy_property_insection(property, self->keyboard);
 }

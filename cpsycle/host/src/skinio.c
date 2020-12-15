@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+static int skinio_loadproperties(FILE* hfile, psy_Property* props);
+
 int _httoi(const char *value)
 {  
 	return (int)strtol(value, 0, 16);
@@ -38,6 +40,21 @@ int skin_load(psy_Property* properties, const char* path)
 				{
 					p[0]=0;					
 					psy_property_append_string(properties, "pattern_fontface", q);
+				}
+			}
+		} else
+		if (strstr(buf, "\"machine_GUI_bitmap\"=\""))
+		{
+			char* q = strchr(buf, 61); // =
+			if (q)
+			{
+				char* p;
+				q += 2;
+				p = strrchr(q, 34); // "
+				if (p)
+				{
+					p[0] = 0;
+					psy_property_append_string(properties, "machineguibitmap", q);
 				}
 			}
 		}
@@ -530,7 +547,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguitopcolour", _httoi(q + 1), 0, 0);			
 			}
 		}
-		else if (strstr(buf, "\"machineGUIFontTopColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIFontTopColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -538,7 +555,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguifonttopcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIBottomColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIBottomColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -546,7 +563,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguibottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIFontBottomColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIFontBottomColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -554,7 +571,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguifontbottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHTopColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHTopColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -562,7 +579,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguihtopcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHFontTopColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHFontTopColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -570,7 +587,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguihfonttopcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHBottomColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHBottomColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -578,7 +595,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguihbottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUIHFontBottomColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUIHFontBottomColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -586,7 +603,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguihfontbottomcolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUITitleColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUITitleColor\"=dword:"))
 		{
 			char* q = strchr(buf, 58); // :
 			if (q)
@@ -594,7 +611,7 @@ int skin_load(psy_Property* properties, const char* path)
 				psy_property_append_int(properties, "machineguititlecolour", _httoi(q + 1), 0, 0);
 			}
 		}
-		else if (strstr(buf, "\"machineGUITitleFontColour\"=dword:"))
+		else if (strstr(buf, "\"machineGUITitleFontColor\"=dword:"))
 		{
 		char* q = strchr(buf, 58); // :
 		if (q)
@@ -686,4 +703,85 @@ void skin_psh_values(const char* str, int maxcount, int* values)
 		++c;
 	}
 
+}
+
+int skin_loadpsc(psy_Property* self, const char* path)
+{
+	FILE* hfile;
+	psy_Property props;
+	const char* strvalue;
+	int success;
+
+	assert(self);
+
+	if (!(hfile = fopen(path, "r")))
+	{
+		//::MessageBox(0, "Couldn't open File for Reading. Operation Aborted",
+			//"File Open Error", MB_ICONERROR | MB_OK);
+		return PSY_ERRFILE;
+	}	
+	psy_property_init(&props);
+	success = skinio_loadproperties(hfile, &props);
+	strvalue = psy_property_at_str(&props, "machinedial_bmp", "Psycle_110_knobs.bmp");
+	if (strvalue) {
+		psy_property_append_string(self, "machinedialbmp", strvalue);
+	}
+	psy_property_dispose(&props);
+	if (hfile) {
+		fclose(hfile);
+	}
+	return success;
+}
+
+int skinio_loadproperties(FILE* hfile, psy_Property* props)
+{
+	char buf[1 << 10];
+	bool loaded = FALSE;
+	while (fgets(buf, sizeof buf, hfile))
+	{
+		if (buf[0] == '#' || (buf[0] == '/' && buf[1] == '/') || buf[0] == '\n')
+		{
+			// Skip comments
+			continue;
+		}
+		char* equal = strchr(buf, '=');
+		if (equal != NULL)
+		{
+			equal[0] = '\0';
+			//Skip the double quotes containing strings
+			char* key;
+			if (buf[0] == '"')
+			{
+				char* tmp = equal - 1;
+				tmp[0] = '\0';
+				tmp = buf + 1;
+				key = tmp;
+			} else { key = buf; }
+
+			char* value = &equal[1];
+			int length = strlen(value);
+			if (value[0] == '"')
+			{
+				length -= 2;
+				value++;
+				value[length - 1] = '\0';
+			} else {
+				//skip the "dword:"  and "hex:" keywords
+				char* twodots = strchr(value, ':');
+				if (twodots != NULL) {
+					value = &twodots[1];
+				}
+			}
+			char* strvalue = value;
+			psy_property_set_str(props, key, strvalue);			
+			loaded = TRUE;
+		}
+	}
+	if (!loaded)
+	{
+		//::MessageBox(0, "No settings found in the specified file",
+			//"File Load Error", MB_ICONERROR | MB_OK);
+		return PSY_ERRFILE;
+	}
+	return PSY_OK;
 }

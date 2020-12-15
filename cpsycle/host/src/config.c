@@ -8,7 +8,9 @@
 #include "defaultlang.h"
 #include "skinio.h"
 // ui
-#include "uicomponent.h"
+#include <uicomponent.h> // Translator
+// file
+#include <dir.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -23,8 +25,7 @@ static void psycleconfig_makemidicontrollers(PsycleConfig*);
 // implementation
 void psycleconfig_init(PsycleConfig* self, psy_audio_Player* player,
 	psy_audio_MachineFactory* machinefactory)
-{
-	self->dialbitmappath = 0;
+{	
 	psy_property_init(&self->config);
 	psy_property_setcomment(&self->config,
 		"Psycle Configuration File created by\r\n; " PSYCLE__BUILD__IDENTIFIER("\r\n; "));
@@ -33,9 +34,18 @@ void psycleconfig_init(PsycleConfig* self, psy_audio_Player* player,
 }
 
 void psycleconfig_dispose(PsycleConfig* self)
-{
-	free(self->dialbitmappath);
-	psy_property_dispose(&self->config);
+{	
+	generalconfig_dispose(&self->general);
+	audioconfig_dispose(&self->audio);
+	eventdriverconfig_dispose(&self->input);
+	languageconfig_dispose(&self->language);
+	dirconfig_dispose(&self->directories);
+	patternviewconfig_dispose(&self->patview);
+	machineviewconfig_dispose(&self->macview);
+	machineparamconfig_dispose(&self->macparam);
+	keyboardmiscconfig_dispose(&self->misc);
+	midiviewconfig_dispose(&self->midi);
+	compatconfig_dispose(&self->compat);
 }
 
 void psycleconfig_definelanguage(PsycleConfig* self)
@@ -110,53 +120,65 @@ void psycleconfig_makevisual(PsycleConfig* self)
 void psycleconfig_loadskin(PsycleConfig* self, const char* path)
 {
 	psy_Property skin;
+	const char* machine_gui_bitmap;
 
 	assert(self);
 
 	psy_property_init(&skin);
 	skin_load(&skin, path);
-	psy_property_sync(self->macparam.paramtheme, &skin);
-	psy_property_sync(self->macview.theme, &skin);
-	psy_property_sync(self->patview.theme, &skin);
+	machine_gui_bitmap = psy_property_at_str(&skin, "machineguibitmap", 0);
+	if (machine_gui_bitmap) {
+		char psc[_MAX_PATH];		
+				
+		psy_dir_findfile(dirconfig_skins(&self->directories),
+			machine_gui_bitmap, psc);
+		if (psc[0] != '\0') {
+			if (skin_loadpsc(&skin, psc) == PSY_OK) {
+				const char* bpm;								
+
+				bpm = psy_property_at_str(&skin, "machinedialbmp", NULL);
+				if (bpm) {					
+					psy_Path full;
+
+					psy_path_init(&full, psc);
+					psy_path_setname(&full, "");
+					psy_path_setext(&full, "");
+					psy_path_setname(&full, bpm);
+					psy_property_set_str(&skin, "machinedialbmp",
+						psy_path_path(&full));
+					psy_path_dispose(&full);
+				}
+			}
+		}		
+	}
+	machineparamconfig_settheme(&self->macparam, &skin);
+	machineviewconfig_settheme(&self->macview, &skin);
+	patternviewconfig_settheme(&self->patview, &skin);
 	psy_property_dispose(&skin);
 }
 
 void psycleconfig_resetskin(PsycleConfig* self)
-{
-	psy_Property* view;
-	psy_Property* theme;
-
-	view = psy_property_findsection(&self->config, "visual.patternview");
-	theme = psy_property_findsection(view, "theme");
-	if (theme) {
-		psy_property_remove(view, theme);
-	}
-	patternviewconfig_maketheme(&self->patview, view);
-	view = psy_property_findsection(&self->config, "visual.machineview");
-	theme = psy_property_findsection(view, "theme");
-	if (theme) {
-		psy_property_remove(view, theme);
-	}
-	machineviewconfig_maketheme(&self->macview, view);
-	view = psy_property_findsection(&self->config, "visual.paramview");
-	theme = psy_property_findsection(view, "theme");
-	if (theme) {
-		psy_property_remove(view, theme);
-	}
-	machineparamconfig_makeparamtheme(&self->macparam, view);	
+{	
+	assert(self);
+		
+	patternviewconfig_resettheme(&self->patview);
+	machineviewconfig_resettheme(&self->macview);
+	machineparamconfig_resettheme(&self->macparam);
 }
 
-void psycleconfig_setcontrolskinpath(PsycleConfig* self, const char* path)
+void psycleconfig_resetcontrolskin(PsycleConfig* self)
 {
 	assert(self);
-
-	psy_strreset(&self->dialbitmappath, path);
+	
+	machineparamconfig_resettheme(&self->macparam);
 }
 
 const char* psycleconfig_defaultfontstr(const PsycleConfig* self)
 {
-	assert(self && self->visual);
-	return psy_property_at_str(self->visual, "defaultfont", PSYCLE_DEFAULT_FONT);
+	assert(self);
+
+	return psy_property_at_str(self->visual, "defaultfont",
+		PSYCLE_DEFAULT_FONT);
 }
 
 bool psycleconfig_enableaudio(const PsycleConfig* self)
@@ -164,4 +186,53 @@ bool psycleconfig_enableaudio(const PsycleConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->global, "enableaudio", TRUE);
+}
+
+void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
+{			
+	if (machineviewconfig_hasproperty(&self->macview, property)) {
+		machineviewconfig_onchanged(&self->macview, property);
+	} else if (patternviewconfig_hasproperty(&self->patview, property)) {
+		patternviewconfig_onchanged(&self->patview, property);
+	} else if (machineparamconfig_hasproperty(&self->macparam, property)) {
+		machineparamconfig_onchanged(&self->macparam, property);
+	} else if (generalconfig_hasproperty(&self->general, property)) {
+		generalconfig_onchanged(&self->general, property);
+	} else if (audioconfig_hasproperty(&self->audio, property)) {
+		audioconfig_onchanged(&self->audio, property);	
+	} else if (eventdriverconfig_hasproperty(&self->input, property)) {
+		eventdriverconfig_onchanged(&self->input, property);
+	} else if (languageconfig_hasproperty(&self->language, property)) {
+		languageconfig_onchanged(&self->language, property);
+	} else if (dirconfig_hasproperty(&self->directories, property)) {
+		dirconfig_onchanged(&self->directories, property);
+	} else if (keyboardmiscconfig_hasproperty(&self->misc, property)) {
+		keyboardmiscconfig_onchanged(&self->misc, property);
+	} else if (midiviewconfig_hasproperty(&self->midi, property)) {
+		midiviewconfig_onchanged(&self->midi, property);
+	} else if (compatconfig_hasproperty(&self->compat, property)) {
+		compatconfig_onchanged(&self->compat, property);
+	}
+}
+
+void psycleconfig_notifyall_changed(PsycleConfig* self)
+{
+	generalconfig_onchanged(&self->general, &self->config);
+	audioconfig_onchanged(&self->audio, &self->config);
+	eventdriverconfig_onchanged(&self->input, &self->config);
+	languageconfig_onchanged(&self->language, &self->config);
+	dirconfig_onchanged(&self->directories, &self->config);
+	machineviewconfig_onchanged(&self->macview, &self->config);
+	machineparamconfig_onchanged(&self->macparam, &self->config);
+	patternviewconfig_onchanged(&self->patview, &self->config);
+	keyboardmiscconfig_onchanged(&self->misc, &self->config);
+	midiviewconfig_onchanged(&self->midi, &self->config);
+	compatconfig_onchanged(&self->compat, &self->config);
+}
+
+void psycleconfig_notify_skinchanged(PsycleConfig* self, psy_Property* property)
+{
+	patternviewconfig_onthemechanged(&self->patview, property);
+	machineviewconfig_onthemechanged(&self->macview, property);
+	machineparamconfig_onthemechanged(&self->macparam, property);
 }

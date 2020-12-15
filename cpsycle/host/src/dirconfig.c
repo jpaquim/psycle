@@ -17,7 +17,15 @@ void dirconfig_init(DirConfig* self, psy_Property* parent)
 	assert(self && parent);
 
 	self->parent = parent;
-	dirconfig_make(self);	
+	dirconfig_make(self);
+	psy_signal_init(&self->signal_changed);
+}
+
+void dirconfig_dispose(DirConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void dirconfig_make(DirConfig* self)
@@ -175,4 +183,20 @@ const char* dirconfig_userpresets(const DirConfig* self)
 
 	return psy_property_at_str(self->directories, "presets",
 		PSYCLE_USERPRESETS_DEFAULT_DIR);
+}
+// events
+bool dirconfig_onchanged(DirConfig* self, psy_Property*
+	property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
+
+bool dirconfig_hasproperty(const DirConfig* self, psy_Property* property)
+{
+	assert(self && self->directories);
+
+	return psy_property_insection(property, self->directories);
 }

@@ -68,15 +68,15 @@ typedef struct TransformPatternView {
 void transformpatternview_init(TransformPatternView*, psy_ui_Component* parent,
 	Workspace*);
 
+void transformpatternview_setpatternselection(TransformPatternView*,
+	const psy_audio_PatternSelection*);
+
 INLINE psy_ui_Component* transformpatternview_base(TransformPatternView* self)
 {
 	assert(self);
 
 	return &self->component;
 }
-
-void transformpatternview_setpatternselection(TransformPatternView*,
-	psy_audio_PatternSelection);
 
 #ifdef __cplusplus
 }

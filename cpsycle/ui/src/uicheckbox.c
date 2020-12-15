@@ -70,12 +70,16 @@ const char* psy_ui_checkbox_text(psy_ui_CheckBox* self)
 
 void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 {
-	self->imp->vtable->dev_check(self->imp);
+	if (!psy_ui_checkbox_checked(self)) {
+		self->imp->vtable->dev_check(self->imp);
+	}
 }
 
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 {
-	self->imp->vtable->dev_disablecheck(self->imp);
+	if (psy_ui_checkbox_checked(self)) {
+		self->imp->vtable->dev_disablecheck(self->imp);
+	}
 }
 
 int psy_ui_checkbox_checked(psy_ui_CheckBox* self)
@@ -223,11 +227,13 @@ const char* psy_ui_checkbox_text(psy_ui_CheckBox* self)
 void psy_ui_checkbox_check(psy_ui_CheckBox* self)
 {
 	self->state = 1;
+	psy_ui_component_invalidate(&self->component);
 }
 
 void psy_ui_checkbox_disablecheck(psy_ui_CheckBox* self)
 {
 	self->state = 0;
+	psy_ui_component_invalidate(&self->component);
 }
 
 int psy_ui_checkbox_checked(psy_ui_CheckBox* self)

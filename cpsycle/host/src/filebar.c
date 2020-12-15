@@ -45,7 +45,7 @@ void filebar_init(FileBar* self, psy_ui_Component* parent, Workspace* workspace)
 
 void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 {
-	if (keyboardandmisc_savereminder(&self->workspace->config.misc) &&
+	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
 		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_NEW);
 	} else {
@@ -55,7 +55,7 @@ void filebar_onnewsong(FileBar* self, psy_ui_Component* sender)
 
 void filebar_onloadsong(FileBar* self, psy_ui_Component* sender)
 {	
-	if (keyboardandmisc_savereminder(&self->workspace->config.misc) &&
+	if (keyboardmiscconfig_savereminder(&self->workspace->config.misc) &&
 			workspace_songmodified(self->workspace)) {
 		workspace_selectview(self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
 	} else {

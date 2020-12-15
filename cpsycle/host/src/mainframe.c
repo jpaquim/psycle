@@ -54,7 +54,6 @@ static void mainframe_initsequenceview(MainFrame*);
 static void mainframe_initplugineditor(MainFrame*);
 static void mainframe_connectworkspace(MainFrame*);
 static void mainframe_initinterpreter(MainFrame*);
-static void mainframe_onskinchanged(MainFrame*, Workspace*);
 static void mainframe_onkeydown(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_checkplaystartwithrctrl(MainFrame*, psy_ui_KeyEvent*);
 static void mainframe_onkeyup(MainFrame*, psy_ui_KeyEvent*);
@@ -637,9 +636,7 @@ void mainframe_connectworkspace(MainFrame* self)
 	psy_signal_connect(&self->workspace.signal_togglegear, self,
 		mainframe_ontogglegearworkspace);	
 	psy_signal_connect(&self->checkunsavedbox.signal_execute, self,
-		mainframe_oncheckunsaved);
-	psy_signal_connect(&self->workspace.signal_skinchanged, self,
-		mainframe_onskinchanged);
+		mainframe_oncheckunsaved);	
 	psy_signal_connect(&self->workspace.signal_selectpatterndisplay, self,
 		mainframe_onselectpatterndisplay);
 	psy_signal_connect(&self->workspace.signal_floatsection, self,
@@ -1285,7 +1282,7 @@ void mainframe_oncheckunsaved(MainFrame* self, CheckUnsavedBox* sender,
 
 bool mainframe_onclose(MainFrame* self)
 {
-	if (keyboardandmisc_savereminder(&self->workspace.config.misc) &&
+	if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
 			workspace_songmodified(&self->workspace)) {
 		workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0,
 			CHECKUNSAVE_CLOSE);		
@@ -1355,12 +1352,6 @@ void mainframe_onfileload(MainFrame* self, FileView* sender)
 }
 #endif
 
-void mainframe_onskinchanged(MainFrame* self, Workspace* sender)
-{
-	// Nothing todo here. The psycle skin sheme only configures the Pattern,
-	// Machine and Parameterview that are set there.
-}
-
 void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 {	
 	mainframe_checkplaystartwithrctrl(self, ev);
@@ -1369,7 +1360,7 @@ void mainframe_onkeydown(MainFrame* self, psy_ui_KeyEvent* ev)
 
 void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyEvent* ev)
 {
-	if (keyboardandmisc_playstartwithrctrl(
+	if (keyboardmiscconfig_playstartwithrctrl(
 			&self->workspace.config.misc)) {
 		if (ev->keycode == psy_ui_KEY_CONTROL) {
 			// todo: this win32 detection obly
