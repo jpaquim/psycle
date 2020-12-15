@@ -5,7 +5,10 @@
 
 #include "machineviewconfig.h"
 
-static void machineviewconfig_makeview(MachineViewConfig*, psy_Property*);
+static void machineviewconfig_makeview(MachineViewConfig*, psy_Property*
+	parent);
+static void machineviewconfig_maketheme(MachineViewConfig*, psy_Property*
+	parent);
 
 void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 {
@@ -13,6 +16,16 @@ void machineviewconfig_init(MachineViewConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	machineviewconfig_makeview(self, parent);
+	psy_signal_init(&self->signal_changed);
+	psy_signal_init(&self->signal_themechanged);
+}
+
+void machineviewconfig_dispose(MachineViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
+	psy_signal_dispose(&self->signal_themechanged);
 }
 
 void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
@@ -44,7 +57,7 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 
 	self->theme = psy_property_settext(
 		psy_property_append_section(parent, "theme"),
-		"settingsview.theme");
+		"settingsview.theme");	
 	psy_property_settext(
 		psy_property_sethint(psy_property_append_int(self->theme,
 			"vu2", 0x00403731, 0, 0),
@@ -140,6 +153,41 @@ void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent)
 	psy_property_append_string(self->theme, "machine_skin", "");//	
 }
 
+void machineviewconfig_resettheme(MachineViewConfig* self)
+{	
+	assert(self);
+
+	if (self->theme) {
+		psy_property_remove(self->machineview, self->theme);
+	}
+	machineviewconfig_maketheme(self, self->machineview);
+	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+}
+
+void machineviewconfig_settheme(MachineViewConfig* self, psy_Property* skin)
+{
+	assert(self);
+
+	if (self->theme) {
+		psy_property_sync(self->theme, skin);
+		psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+	}
+}
+
+bool machineviewconfig_hasthemeproperty(const MachineViewConfig* self,
+	psy_Property* property)
+{
+	return (self->theme && psy_property_insection(property, self->theme));
+}
+
+bool machineviewconfig_hasproperty(const MachineViewConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->machineview);
+
+	return  psy_property_insection(property, self->machineview);
+}
+
 bool machineviewconfig_machineindexes(const MachineViewConfig* self)
 {
 	assert(self);
@@ -160,4 +208,26 @@ bool machineviewconfig_vumeters(const MachineViewConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->machineview, "drawvumeters", TRUE);
+}
+
+// events
+bool machineviewconfig_onchanged(MachineViewConfig* self, psy_Property*
+	property)
+{
+	assert(self);
+
+	if (machineviewconfig_hasthemeproperty(self, property)) {
+		machineviewconfig_onthemechanged(self, property);		
+	} else {
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+	return TRUE;
+}
+
+bool machineviewconfig_onthemechanged(MachineViewConfig* self, psy_Property* property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
+	return TRUE;
 }

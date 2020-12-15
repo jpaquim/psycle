@@ -416,7 +416,7 @@ void psy_audio_pattern_blockremove(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
-	psy_audio_PatternSelection selection, psy_dsp_big_beat_t bpl)
+	const psy_audio_PatternSelection* selection, psy_dsp_big_beat_t bpl)
 {
 	intptr_t startval;
 	intptr_t endval;
@@ -425,10 +425,10 @@ void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern* self,
 	psy_audio_PatternCursor begin;
 	psy_audio_PatternCursor end;
 
-	assert(self);
+	assert(self && selection);
 
-	begin = selection.topleft;
-	end = selection.bottomright;
+	begin = selection->topleft;
+	end = selection->bottomright;
 	begin.line = (uintptr_t)(begin.offset / bpl);
 	end.line = (uintptr_t)(end.offset / bpl);
 	node = psy_audio_pattern_findnode(self, begin.track, begin.line * bpl, bpl, &prev);
@@ -989,8 +989,7 @@ void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 }
 
 void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end,
+	const psy_audio_PatternSelection* selection,	
 	bool bTrackMode,
 	psy_dsp_big_beat_t bpl,
 	int tempo, int width, float variance, float phase,
@@ -1008,7 +1007,13 @@ void psy_audio_pattern_swingfill(psy_audio_Pattern* self,
 	float step = twopi / (width);
 	float index = phase * twopi / 360;
 	float dcoffs = 0;
+	psy_audio_PatternCursor begin;
+	psy_audio_PatternCursor end;
 
+	assert(self && selection);
+
+	begin = selection->topleft;
+	end = selection->bottomright;
 	begin.line = (uintptr_t)(begin.offset / bpl);
 	end.line = (uintptr_t)(end.offset / bpl);
 	if (bTrackMode) {		

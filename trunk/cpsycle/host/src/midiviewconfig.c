@@ -17,6 +17,14 @@ void midiviewconfig_init(MidiViewConfig* self, psy_Property* parent,
 	self->parent = parent;
 	self->player = player;
 	midiviewconfig_make(self, parent);
+	psy_signal_init(&self->signal_changed);
+}
+
+void midiviewconfig_dispose(MidiViewConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void midiviewconfig_make(MidiViewConfig* self, psy_Property* parent)
@@ -165,4 +173,20 @@ void midiviewconfig_makecontrollersave(MidiViewConfig* self)
 		psy_audio_player_midiconfig(self->player));
 	psy_property_setitem_str(controllers, str);
 	free(str);
+}
+// events
+bool midiviewconfig_onchanged(MidiViewConfig* self, psy_Property* property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
+
+bool midiviewconfig_hasproperty(const MidiViewConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->controllers);
+
+	return psy_property_insection(property, self->controllers);
 }

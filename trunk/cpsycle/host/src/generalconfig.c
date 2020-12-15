@@ -13,6 +13,14 @@ void generalconfig_init(GeneralConfig* self, psy_Property* parent)
 
 	self->parent = parent;
 	generalconfig_make(self, parent);
+	psy_signal_init(&self->signal_changed);
+}
+
+void generalconfig_dispose(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void generalconfig_make(GeneralConfig* self, psy_Property* parent)
@@ -109,4 +117,18 @@ bool generalconfig_showstepsequencer(const GeneralConfig* self)
 
 	return psy_property_at_bool(self->general, "showstepsequencer", 0);
 }
+// events
+bool generalconfig_onchanged(GeneralConfig* self, psy_Property*
+	property)
+{
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
 
+bool generalconfig_hasproperty(const GeneralConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->general);
+
+	return psy_property_insection(property, self->general);
+}

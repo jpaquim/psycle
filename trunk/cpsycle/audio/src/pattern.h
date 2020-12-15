@@ -260,7 +260,7 @@ void psy_audio_pattern_blockmixpaste(psy_audio_Pattern* self,
 	psy_dsp_big_beat_t bpl);
 /// interpolates linear all entries of the block
 void psy_audio_pattern_blockinterpolatelinear(psy_audio_Pattern*,
-	psy_audio_PatternSelection, psy_dsp_big_beat_t bpl);
+	const psy_audio_PatternSelection*, psy_dsp_big_beat_t bpl);
 void psy_audio_pattern_blockinterpolaterange(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
 	psy_audio_PatternCursor end, psy_dsp_big_beat_t bpl, intptr_t startval, intptr_t endval);
 void psy_audio_pattern_blockinterpolaterangehermite(psy_audio_Pattern* self, psy_audio_PatternCursor begin,
@@ -270,10 +270,7 @@ void psy_audio_pattern_blocktranspose(psy_audio_Pattern*, psy_audio_PatternCurso
 	psy_audio_PatternCursor end, int offset);
 /// swingfill
 void psy_audio_pattern_swingfill(psy_audio_Pattern*,
-	psy_audio_PatternCursor begin,
-	psy_audio_PatternCursor end,
-	bool bTrackMode,
-	psy_dsp_big_beat_t bpl,
+	const psy_audio_PatternSelection*, bool bTrackMode, psy_dsp_big_beat_t bpl,
 	int tempo, int width, float variance, float phase, bool offset);
 /// changes the machine column of all entries of the block with the offset
 void psy_audio_pattern_changemachine(psy_audio_Pattern*, psy_audio_PatternCursor begin,

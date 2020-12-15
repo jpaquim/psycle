@@ -1631,8 +1631,8 @@ static void pianoroll_ondisplayalltracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_ondisplaycurrenttrack(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_ondisplayactivetracks(Pianoroll*, psy_ui_Button* sender);
 static void pianoroll_updatetrackdisplaybuttons(Pianoroll*);
-static void pianoroll_onskinchanged(Pianoroll*, Workspace*);
-static void pianoroll_updateskin(Pianoroll*);
+static void pianoroll_onthemechanged(Pianoroll*, PatternViewConfig*, psy_Property* theme);
+static void pianoroll_updatetheme(Pianoroll*);
 static void pianoroll_onpatterncursorchanged(Pianoroll*, Workspace* sender);
 
 // vtable
@@ -1710,11 +1710,12 @@ void pianoroll_init(Pianoroll* self, psy_ui_Component* parent,
 		pianoroll_ondisplaycurrenttrack);
 	psy_signal_connect(&self->bar.tracks_active.signal_clicked, self,
 		pianoroll_ondisplayactivetracks);	
-	psy_signal_connect(&self->workspace->signal_skinchanged, self,
-		pianoroll_onskinchanged);
+	psy_signal_connect(
+		&psycleconfig_patview(workspace_conf(workspace))->signal_themechanged,
+		self, pianoroll_onthemechanged);
 	psy_signal_connect(&self->workspace->signal_patterncursorchanged,
 		self, pianoroll_onpatterncursorchanged);
-	pianoroll_updateskin(self);
+	pianoroll_updatetheme(self);
 	psy_ui_component_starttimer(&self->component, 0, PIANOROLL_REFRESHRATE);
 }
 
@@ -1929,31 +1930,6 @@ void pianoroll_updatetrackdisplaybuttons(Pianoroll* self)
 		default:			
 			break;
 	}	
-}
-
-void pianoroll_onskinchanged(Pianoroll* self, Workspace* sender)
-{
-	assert(self);
-
-	pianoroll_updateskin(self);
-}
-
-void pianoroll_updateskin(Pianoroll* self)
-{
-	assert(self);
-
-	if (self->gridstate.skin) {		
-		psy_ui_component_setbackgroundcolour(pianoruler_base(&self->header),
-			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-		psy_ui_component_setbackgroundcolour(zoombox_base(&self->zoombox_beatwidth),
-			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-		psy_ui_component_setbackgroundcolour(&self->scroller.hscroll.sliderpane.component,
-			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-		psy_ui_component_setbackgroundcolour(&self->scroller.vscroll.sliderpane.component,
-			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-		// psy_ui_component_setbackgroundcolour(pianobar_base(&self->bar),
-		// patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
-	}
 }
 
 void pianoroll_makecmds(psy_Property* parent)
@@ -2266,4 +2242,27 @@ void pianoroll_blockend(Pianoroll* self)
 {
 	pianogrid_dragselection(&self->grid, self->gridstate.cursor);	
 	psy_ui_component_invalidate(&self->component);
+}
+
+void pianoroll_onthemechanged(Pianoroll* self, PatternViewConfig* config, psy_Property* theme)
+{
+	pianoroll_updatetheme(self);
+}
+
+void pianoroll_updatetheme(Pianoroll* self)
+{
+	assert(self);
+
+	if (self->gridstate.skin) {
+		psy_ui_component_setbackgroundcolour(pianoruler_base(&self->header),
+			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+		psy_ui_component_setbackgroundcolour(zoombox_base(&self->zoombox_beatwidth),
+			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+		psy_ui_component_setbackgroundcolour(&self->scroller.hscroll.sliderpane.component,
+			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+		psy_ui_component_setbackgroundcolour(&self->scroller.vscroll.sliderpane.component,
+			patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+		// psy_ui_component_setbackgroundcolour(pianobar_base(&self->bar),
+		// patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	}
 }

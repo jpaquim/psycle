@@ -72,6 +72,14 @@ INLINE psy_ui_Component* TrackerLineNumbersLabel_base(TrackerLineNumbersLabel* s
 	return &self->component;
 }
 
+INLINE psy_ui_Component* trackerlinenumberslabel_base(TrackerLineNumbersLabel* self)
+{
+	assert(self);
+
+	return &self->component;
+}
+
+
 typedef struct TrackerLineNumbers {
 	// inherits
 	psy_ui_Component component;

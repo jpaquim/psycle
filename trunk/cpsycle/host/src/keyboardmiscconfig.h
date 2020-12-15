@@ -6,6 +6,7 @@
 
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +20,9 @@ enum {
 };
 
 typedef struct KeyboardMiscConfig {	
+	// signals
+	psy_Signal signal_changed;
+	// internal data
 	psy_Property* keyboard;
 	psy_Property* keyboard_misc;
 	// references
@@ -26,19 +30,23 @@ typedef struct KeyboardMiscConfig {
 } KeyboardMiscConfig;
 
 void keyboardmiscconfig_init(KeyboardMiscConfig*, psy_Property* parent);
+void keyboardmiscconfig_dispose(KeyboardMiscConfig*);
 
-bool keyboardandmisc_ft2home(const KeyboardMiscConfig*);
-bool keyboardandmisc_ft2delete(const KeyboardMiscConfig*);
-bool keyboardandmisc_effcursoralwaysdown(const KeyboardMiscConfig*);
-bool keyboardandmisc_playstartwithrctrl(KeyboardMiscConfig*);
-bool keyboardandmisc_movecursoronestep(const KeyboardMiscConfig*);
-bool keyboardandmisc_savereminder(const KeyboardMiscConfig*);
-bool keyboardandmisc_patdefaultlines(const KeyboardMiscConfig*);
-bool keyboardandmisc_allowmultipleinstances(const KeyboardMiscConfig*);
-bool keyboardandmisc_recordtweaksastws(const KeyboardMiscConfig*);
-bool keyboardandmisc_advancelineonrecordtweak(const KeyboardMiscConfig*);
-int keyboardandmisc_pgupdowntype(const KeyboardMiscConfig*);
-int keyboardandmisc_pgupdownstep(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_ft2home(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_ft2delete(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_effcursoralwaysdown(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_playstartwithrctrl(KeyboardMiscConfig*);
+bool keyboardmiscconfig_movecursoronestep(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_savereminder(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_patdefaultlines(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_allowmultipleinstances(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_recordtweaksastws(const KeyboardMiscConfig*);
+bool keyboardmiscconfig_advancelineonrecordtweak(const KeyboardMiscConfig*);
+int keyboardmiscconfig_pgupdowntype(const KeyboardMiscConfig*);
+int keyboardmiscconfig_pgupdownstep(const KeyboardMiscConfig*);
+
+void keyboardmiscconfig_onchanged(KeyboardMiscConfig*, psy_Property*);
+bool keyboardmiscconfig_hasproperty(const KeyboardMiscConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

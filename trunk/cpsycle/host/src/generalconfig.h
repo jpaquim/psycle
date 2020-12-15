@@ -6,6 +6,7 @@
 
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,12 +19,15 @@ enum {
 };
 
 typedef struct GeneralConfig {
+	// signals
+	psy_Signal signal_changed;
 	psy_Property* general;
 	// references
 	psy_Property* parent;	
 } GeneralConfig;
 
 void generalconfig_init(GeneralConfig*, psy_Property* parent);
+void generalconfig_dispose(GeneralConfig*);
 
 bool generalconfig_showsonginfoonload(const GeneralConfig*);
 bool generalconfig_showaboutatstart(const GeneralConfig*);
@@ -33,6 +37,9 @@ bool generalconfig_playsongafterload(const GeneralConfig*);
 bool generalconfig_showingpatternnames(const GeneralConfig*);
 bool generalconfig_showplaylisteditor(const GeneralConfig*);
 bool generalconfig_showstepsequencer(const GeneralConfig*);
+
+bool generalconfig_onchanged(GeneralConfig*, psy_Property*);
+bool generalconfig_hasproperty(const GeneralConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

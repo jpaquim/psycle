@@ -93,8 +93,7 @@ typedef struct {
 	// Signals
 	psy_Signal signal_octavechanged;
 	psy_Signal signal_songchanged;
-	psy_Signal signal_configchanged;
-	psy_Signal signal_skinchanged;
+	psy_Signal signal_configchanged;	
 	psy_Signal signal_changecontrolskin;
 	psy_Signal signal_patterncursorchanged;
 	psy_Signal signal_sequenceselectionchanged;
@@ -155,19 +154,16 @@ void workspace_loadsong(Workspace*, const char* path, bool play);
 bool workspace_savesong_fileselect(Workspace*);
 void workspace_savesong(Workspace*, const char* path);
 
-
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }
 
 INLINE void workspace_configure_host(Workspace* self)
 {
+	psycleconfig_notifyall_changed(&self->config);
 	psy_signal_emit(&self->signal_configchanged,
 		self, 1, &self->config.config);
 }
 
-INLINE psy_audio_Song* workspace_song(Workspace* self)
-{
-	return self->song;
-}
+INLINE psy_audio_Song* workspace_song(Workspace* self) { return self->song; }
 
 INLINE psy_audio_Player* workspace_player(Workspace* self)
 {
@@ -194,7 +190,7 @@ void workspace_setsequenceselection(Workspace*, psy_audio_SequenceSelection);
 psy_audio_SequenceSelection workspace_sequenceselection(Workspace*);
 void workspace_setcursorstep(Workspace*, int step);
 int workspace_cursorstep(Workspace*);
-void workspace_editquantizechange(Workspace* self, int diff);
+void workspace_editquantizechange(Workspace*, int diff);
 int workspace_hasplugincache(const Workspace*);
 psy_EventDriver* workspace_kbddriver(Workspace*);
 int workspace_followingsong(Workspace*);
@@ -228,9 +224,7 @@ INLINE void workspace_zoom(Workspace* self, double factor)
 		workspace_fontheight(self)));
 }
 
-const char* workspace_dialbitmap_path(Workspace*);
-void workspace_dockview(Workspace*, psy_ui_Component* view);
-void workspace_movecursorwhenpaste(Workspace*, bool on);
+void workspace_dockview(Workspace*, psy_ui_Component*);
 void workspace_connectasmixersend(Workspace*);
 void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(const Workspace*);

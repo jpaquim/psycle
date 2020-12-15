@@ -84,7 +84,7 @@ void interpolatecurvebar_init(InterpolateCurveBar* self, psy_ui_Component* paren
 		psy_ui_value_makepx(0));
 	psy_list_free(psy_ui_components_setmargin(
 		psy_ui_component_children(&self->component, 0),
-		&margin));	
+		&margin));
 }
 
 static psy_ui_ComponentVtable interpolatecurvebox_vtable;
@@ -122,6 +122,7 @@ void interpolatecurvebox_init(InterpolateCurveBox* self,
 	self->pattern = 0;
 	self->dragkeyframe = 0;
 	self->selected = 0;
+	self->bpl = 0.25;
 	self->pattern = NULL;
 	psy_signal_connect(&self->component.signal_destroy, self,
 		interpolatecurvebox_ondestroy);
@@ -138,6 +139,12 @@ void interpolatecurvebox_ondestroy(InterpolateCurveBox* self,
 	interpolatecurvebox_clear(self);
 }
 
+void interpolatecurvebox_setpattern(InterpolateCurveBox* self,
+	psy_audio_Pattern* pattern)
+{
+	self->pattern = pattern;
+}
+
 void interpolatecurvebox_ondraw(InterpolateCurveBox* self,
 	psy_ui_Graphics* g)
 {
@@ -152,18 +159,18 @@ void interpolatecurvebox_drawgrid(InterpolateCurveBox* self,
 		uintptr_t lines;
 		psy_ui_Size size;
 		double scalex;
-		double i;
+		uintptr_t i;
 		psy_ui_TextMetric tm;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_size(&self->component);
-		lines = (uintptr_t)(self->range / 0.25f);
+		lines = (uintptr_t)(self->range / self->bpl);
 		scalex = psy_ui_value_px(&size.width, &tm) / self->range;
 		psy_ui_setcolour(g, psy_ui_colour_make(0x00333333));
-		for (i = 0; i < lines; i += 0.25) {
+		for (i = 0; i < lines; ++i) {
 			int x;
 
-			x = (int)(i * scalex);
+			x = (int)(i * self->bpl * scalex);
 			psy_ui_drawline(g, x, 0, x, psy_ui_value_px(&size.height, &tm));
 		}
 	}
@@ -200,7 +207,7 @@ void interpolatecurvebox_drawkeyframes(InterpolateCurveBox* self,
 	lastcurveval = (int) entry->value;
 	lastoffset = entry->offset;
 	size = psy_ui_component_size(&self->component);
-	lines = (uintptr_t)(self->range / 0.25f);
+	lines = (uintptr_t)(self->range / self->bpl);
 	scalex = psy_ui_value_px(&size.width, &tm) / self->range;
 	scaley = psy_ui_value_px(&size.height, &tm) / (double) 0xFF;
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
@@ -471,10 +478,13 @@ void interpolatecurveview_ondestroy(InterpolateCurveView* self,
 }
 
 void interpolatecurveview_setselection(InterpolateCurveView* self,
-	psy_audio_PatternSelection selection)
+	const psy_audio_PatternSelection* selection)
 {
-	self->box.range = selection.bottomright.offset - selection.topleft.offset;
-	self->box.selection = selection;
+	assert(selection);
+
+	self->box.range = selection->bottomright.offset -
+		selection->topleft.offset;
+	self->box.selection = *selection;
 	interpolatecurvebox_buildkeyframes(&self->box);
 	if (self->box.keyframes) {
 		KeyFrame* keyframe;
@@ -561,7 +571,7 @@ void interpolatecurvebox_buildkeyframes(InterpolateCurveBox* self)
 void interpolatecurveview_setpattern(InterpolateCurveView* self,
 	psy_audio_Pattern* pattern)
 {
-	self->box.pattern = pattern;
+	interpolatecurvebox_setpattern(&self->box, pattern);
 }
 
 void interpolatecurveview_oninterpolate(InterpolateCurveView* self,

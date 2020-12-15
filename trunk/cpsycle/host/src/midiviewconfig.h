@@ -22,6 +22,8 @@ enum {
 };
 
 typedef struct MidiViewConfig {
+	// signals
+	psy_Signal signal_changed;
 	psy_Property* controllers;
 	// references
 	psy_Property* parent;
@@ -30,8 +32,12 @@ typedef struct MidiViewConfig {
 
 void midiviewconfig_init(MidiViewConfig*, psy_Property* parent,
 	psy_audio_Player* player);
+void midiviewconfig_dispose(MidiViewConfig*);
 void midiviewconfig_makecontrollers(MidiViewConfig*);
 void midiviewconfig_makecontrollersave(MidiViewConfig*);
+
+bool midiviewconfig_onchanged(MidiViewConfig*, psy_Property*);
+bool midiviewconfig_hasproperty(const MidiViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

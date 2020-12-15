@@ -6,6 +6,7 @@
 
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,6 +19,9 @@ enum {
 };
 
 typedef struct MachineViewConfig {
+	// signals
+	psy_Signal signal_changed;
+	psy_Signal signal_themechanged;
 	psy_Property* machineview;
 	psy_Property* theme;	
 	// references
@@ -25,11 +29,19 @@ typedef struct MachineViewConfig {
 } MachineViewConfig;
 
 void machineviewconfig_init(MachineViewConfig*, psy_Property* parent);
-void machineviewconfig_maketheme(MachineViewConfig* self, psy_Property* parent);
+void machineviewconfig_dispose(MachineViewConfig*);
+void machineviewconfig_resettheme(MachineViewConfig*);
+void machineviewconfig_settheme(MachineViewConfig*, psy_Property* skin);
+bool machineviewconfig_hasthemeproperty(const MachineViewConfig*,
+	psy_Property*);
+bool machineviewconfig_hasproperty(const MachineViewConfig*, psy_Property*);
 
 bool machineviewconfig_machineindexes(const MachineViewConfig*);
 bool machineviewconfig_wirehover(const MachineViewConfig*);
 bool machineviewconfig_vumeters(const MachineViewConfig*);
+
+bool machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
+bool machineviewconfig_onthemechanged(MachineViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

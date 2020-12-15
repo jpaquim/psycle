@@ -219,6 +219,9 @@ psy_Property* psy_property_sync(psy_Property* self, const psy_Property* source)
 			p = (const psy_Property*)psy_list_entry(i);
 			q = psy_property_at(self, psy_property_key(p),
 					PSY_PROPERTY_TYPE_NONE);
+			if (strcmp(p->item.key, "machineguihfontbottomcolour") == 0) {
+				self = self;
+			}
 			if (q && !psy_property_readonly(q)) {
 				if (psy_property_type(p) == PSY_PROPERTY_TYPE_STRING) {
 					psy_property_set_str(self, psy_property_key(p),

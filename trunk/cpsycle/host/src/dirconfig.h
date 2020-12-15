@@ -6,6 +6,7 @@
 
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,6 +15,8 @@ extern "C" {
 // DirConfig
 
 typedef struct DirConfig {
+	// signals
+	psy_Signal signal_changed;
 	psy_Property* directories;
 	// references
 	psy_Property* parent;
@@ -21,6 +24,7 @@ typedef struct DirConfig {
 } DirConfig;
 
 void dirconfig_init(DirConfig*, psy_Property* parent);
+void dirconfig_dispose(DirConfig*);
 
 const char* dirconfig_songs(const DirConfig*);
 const char* dirconfig_samples(const DirConfig*);
@@ -34,7 +38,8 @@ const char* dirconfig_doc(const DirConfig*);
 const char* dirconfig_config(const DirConfig*);
 const char* dirconfig_userpresets(const DirConfig*);
 
-bool dirconfig_onconfigure(DirConfig*, psy_Property*);
+bool dirconfig_onchanged(DirConfig*, psy_Property*);
+bool dirconfig_hasproperty(const DirConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

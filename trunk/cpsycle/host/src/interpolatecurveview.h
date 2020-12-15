@@ -29,8 +29,10 @@ typedef enum {
 	INTERPOLATECURVETYPE_HERMITE
 } InterpolateCurveType;
 
-typedef struct {
+typedef struct InterpolateCurveBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_Button checktwk;
 	psy_ui_ComboBox combotwk;
 	psy_ui_Edit pos;
@@ -39,7 +41,7 @@ typedef struct {
 	psy_ui_Edit max;
 	psy_ui_ComboBox curvetype;
 	psy_ui_Button ok;
-	psy_ui_Button cancel;
+	psy_ui_Button cancel;	
 } InterpolateCurveBar;
 
 void interpolatecurvebar_init(InterpolateCurveBar*, psy_ui_Component* parent,
@@ -65,7 +67,8 @@ KeyFrame* keyframe_allocinit(psy_dsp_big_beat_t offset, int value,
 
 struct InterpolateCurveView;
 
-typedef struct {
+typedef struct InterpolateCurveBox {
+	// inherits
 	psy_ui_Component component;
 	psy_List* keyframes;
 	psy_dsp_big_beat_t range;
@@ -76,11 +79,13 @@ typedef struct {
 	psy_audio_PatternSelection selection;
 	psy_List* dragkeyframe;
 	psy_List* selected;
+	psy_dsp_big_beat_t bpl;
 	struct InterpolateCurveView* view;
 } InterpolateCurveBox;
 
-void interpolatecurvebox_init(InterpolateCurveBox*, psy_ui_Component* parent, struct InterpolateCurveView* view,
-	Workspace*);
+void interpolatecurvebox_init(InterpolateCurveBox*, psy_ui_Component* parent,
+	struct InterpolateCurveView*, Workspace*);
+void interpolatecurvebox_setpattern(InterpolateCurveBox*, psy_audio_Pattern*);
 
 typedef struct InterpolateCurveView {
 	psy_ui_Component component;	
@@ -92,9 +97,16 @@ typedef struct InterpolateCurveView {
 void interpolatecurveview_init(InterpolateCurveView*, psy_ui_Component* parent,
 	int startsel, int endsel, int lpb, Workspace*);
 void interpolatecurveview_setselection(InterpolateCurveView*,
-	psy_audio_PatternSelection);
+	const psy_audio_PatternSelection*);
 void interpolatecurveview_setpattern(InterpolateCurveView*,
 	psy_audio_Pattern*);
+
+INLINE psy_ui_Component* interpolatecurveview_base(InterpolateCurveView* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

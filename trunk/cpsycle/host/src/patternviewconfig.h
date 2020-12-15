@@ -8,6 +8,7 @@
 #include <notestab.h>
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,15 +26,24 @@ enum {
 };
 
 typedef struct PatternViewConfig {
+	// signals
+	psy_Signal signal_changed;
+	psy_Signal signal_themechanged;
+	// internal data
 	psy_Property* patternview;
 	psy_Property* theme;
 	// references
 	psy_Property* parent;
-	
 } PatternViewConfig;
 
 void patternviewconfig_init(PatternViewConfig*, psy_Property* parent);
-void patternviewconfig_maketheme(PatternViewConfig* self, psy_Property* parent);
+void patternviewconfig_dispose(PatternViewConfig*);
+
+void patternviewconfig_resettheme(PatternViewConfig* self);
+void patternviewconfig_settheme(PatternViewConfig*, psy_Property* skin);
+bool boolpatternviewconfig_hasthemeproperty(const PatternViewConfig*,
+	psy_Property*);
+bool patternviewconfig_hasproperty(const PatternViewConfig*, psy_Property*);
 
 bool patternviewconfig_linenumbers(const PatternViewConfig*);
 bool patternviewconfig_linenumberscursor(const PatternViewConfig*);
@@ -46,7 +56,11 @@ bool patternviewconfig_showbeatoffset(const PatternViewConfig*);
 bool patternviewconfig_showwideinstcolumn(const PatternViewConfig*);
 psy_dsp_NotesTabMode patternviewconfig_notetabmode(const PatternViewConfig*);
 bool patternviewconfig_ismovecursorwhenpaste(const PatternViewConfig*);
+void patternviewconfig_setmovecursorwhenpaste(PatternViewConfig*, bool on);
 bool patternviewconfig_showtrackscopes(const PatternViewConfig*);
+// events
+bool patternviewconfig_onchanged(PatternViewConfig*, psy_Property*);
+bool patternviewconfig_onthemechanged(PatternViewConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

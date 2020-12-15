@@ -23,9 +23,17 @@ void languageconfig_init(LanguageConfig* self, psy_Property* parent,
 
 	self->parent = parent;
 	self->translator = translator;
+	psy_signal_init(&self->signal_changed);
 	languageconfig_makelanguagechoice(self);
 	languageconfig_makelanguagelist(self);
 	languageconfig_setdefaultlanguage(self);
+}
+
+void languageconfig_dispose(LanguageConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void languageconfig_makelanguagechoice(LanguageConfig* self)
@@ -102,7 +110,7 @@ void languageconfig_updatelanguage(LanguageConfig* self)
 	}
 }
 
-bool languageconfig_onpropertychanged(LanguageConfig* self,
+bool languageconfig_onchanged(LanguageConfig* self,
 	psy_Property* property)
 {	
 	psy_Property* choice;	
@@ -112,7 +120,16 @@ bool languageconfig_onpropertychanged(LanguageConfig* self,
 	choice = psy_property_item_choice_parent(property);
 	if (choice && psy_property_hasid(choice, PROPERTY_ID_LANG)) {
 		languageconfig_updatelanguage(self);
+		psy_signal_emit(&self->signal_changed, self, 1, property);
 		return TRUE;
 	}
 	return FALSE;
+}
+
+bool languageconfig_hasproperty(const LanguageConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->languagechoice);
+
+	return psy_property_insection(property, self->languagechoice);
 }

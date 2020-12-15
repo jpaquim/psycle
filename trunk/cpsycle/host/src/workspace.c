@@ -47,6 +47,7 @@ static void workspace_onsequenceeditpositionchanged(Workspace*,
 // configure actions
 static void workspace_onloadskin(Workspace*);
 static void workspace_ondefaultskin(Workspace*);
+static void workspace_ondefaultcontrolskin(Workspace*);
 static void workspace_onloadcontrolskin(Workspace*);
 static void workspace_onaddeventdriver(Workspace*);
 static void workspace_onremoveeventdriver(Workspace*);
@@ -158,8 +159,7 @@ void workspace_initsignals(Workspace* self)
 
 	psy_signal_init(&self->signal_octavechanged);
 	psy_signal_init(&self->signal_songchanged);
-	psy_signal_init(&self->signal_configchanged);
-	psy_signal_init(&self->signal_skinchanged);
+	psy_signal_init(&self->signal_configchanged);	
 	psy_signal_init(&self->signal_changecontrolskin);
 	psy_signal_init(&self->signal_patterncursorchanged);
 	psy_signal_init(&self->signal_sequenceselectionchanged);
@@ -199,8 +199,8 @@ void workspace_dispose(Workspace* self)
 	psy_audio_pattern_dispose(&self->patternpaste);
 	workspace_disposesequencepaste(self);	
 	psy_audio_sequenceselection_dispose(&self->sequenceselection);	
-	psy_playlist_dispose(&self->playlist);
-	psy_audio_exclusivelock_dispose();
+	psy_playlist_dispose(&self->playlist);	
+	psy_audio_exclusivelock_dispose();	
 }
 
 void workspace_disposesignals(Workspace* self)
@@ -209,8 +209,7 @@ void workspace_disposesignals(Workspace* self)
 
 	psy_signal_dispose(&self->signal_octavechanged);
 	psy_signal_dispose(&self->signal_songchanged);	
-	psy_signal_dispose(&self->signal_configchanged);
-	psy_signal_dispose(&self->signal_skinchanged);
+	psy_signal_dispose(&self->signal_configchanged);	
 	psy_signal_dispose(&self->signal_changecontrolskin);
 	psy_signal_dispose(&self->signal_patterncursorchanged);
 	psy_signal_dispose(&self->signal_sequenceselectionchanged);
@@ -340,6 +339,9 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 	case PROPERTY_ID_LOADCONTROLSKIN:
 		workspace_onloadcontrolskin(self);
 		break;
+	case PROPERTY_ID_DEFAULTCONTROLSKIN:
+		workspace_ondefaultcontrolskin(self);
+		break;
 	case PROPERTY_ID_ADDEVENTDRIVER:
 		workspace_onaddeventdriver(self);
 		break;
@@ -404,7 +406,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 				: NULL;
 			if (audioconfig_onpropertychanged(&self->config.audio, property)) {
 				worked = TRUE;
-			} else if (languageconfig_onpropertychanged(
+			} else if (languageconfig_onchanged(
 				&self->config.language, property)) {
 				worked = TRUE;
 			} else if (choice && psy_property_id(choice) ==
@@ -436,6 +438,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 		}
 	}	
 	if (!worked) {
+		psycleconfig_notify_changed(&self->config, property);
 		psy_signal_emit(&self->signal_configchanged, self, 1, property);
 	}
 }
@@ -447,12 +450,11 @@ void workspace_onloadskin(Workspace* self)
 
 	psy_ui_opendialog_init_all(&opendialog, 0,
 		"Load Theme",
-		"Psycle Display psy_audio_Presets|*.psv", "PSV",
+		"Psycle Display Presets|*.psv", "PSV",
 		dirconfig_skins(&self->config.directories));
 	if (psy_ui_opendialog_execute(&opendialog)) {
 		psycleconfig_loadskin(&self->config,
-			psy_ui_opendialog_filename(&opendialog));
-		psy_signal_emit(&self->signal_skinchanged, self, 0);
+			psy_ui_opendialog_filename(&opendialog));	
 	}
 	psy_ui_opendialog_dispose(&opendialog);
 }
@@ -460,7 +462,6 @@ void workspace_onloadskin(Workspace* self)
 void workspace_ondefaultskin(Workspace* self)
 {
 	psycleconfig_resetskin(&self->config);
-	psy_signal_emit(&self->signal_skinchanged, self, 0);
 }
 
 void workspace_onloadcontrolskin(Workspace* self)
@@ -472,12 +473,17 @@ void workspace_onloadcontrolskin(Workspace* self)
 		"Control Skins|*.psc|Bitmaps|*.bmp", "psc",
 		dirconfig_skins(&self->config.directories));
 	if (psy_ui_opendialog_execute(&opendialog)) {
-		psycleconfig_setcontrolskinpath(&self->config,
-			psy_ui_opendialog_filename(&opendialog));
+		machineparamconfig_setdialbpm(psycleconfig_macparam(&self->config),
+			psy_ui_opendialog_filename(&opendialog));		
 		psy_signal_emit(&self->signal_changecontrolskin, self, 1,
 			psy_ui_opendialog_filename(&opendialog));
 	}
 	psy_ui_opendialog_dispose(&opendialog);
+}
+
+void workspace_ondefaultcontrolskin(Workspace* self)
+{
+	psycleconfig_resetcontrolskin(&self->config);
 }
 
 void workspace_onaddeventdriver(Workspace* self)
@@ -586,14 +592,6 @@ void workspace_showpatternids(Workspace* self)
 
 	psy_signal_emit(&self->signal_configchanged, self, 1,
 		psy_property_set_bool(self->config.general.general, "showpatternnames", FALSE));
-}
-
-void workspace_movecursorwhenpaste(Workspace* self, bool on)
-{
-	assert(self);
-
-	psy_property_set_bool(&self->config.config,
-		"visual.patternview.movecursorwhenpaste", on);
 }
 
 void workspace_newsong(Workspace* self)
@@ -767,9 +765,9 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);		
 	propertiesio_load(&self->config.config, psy_path_path(&path), 0);
-	if (keyboardandmisc_patdefaultlines(
+	if (keyboardmiscconfig_patdefaultlines(
 			&self->config.misc) > 0) {
-		psy_audio_pattern_setdefaultlines(keyboardandmisc_patdefaultlines(
+		psy_audio_pattern_setdefaultlines(keyboardmiscconfig_patdefaultlines(
 			&self->config.misc));
 	}
 	languageconfig_updatelanguage(&self->config.language);
@@ -813,8 +811,7 @@ void workspace_load_configuration(Workspace* self)
 		psy_audio_machinefactory_loadoldgamefxandblitzifversionunknown(
 			&self->machinefactory);
 	}
-	psy_signal_emit(&self->signal_configchanged, self, 1, self->config.config);
-	psy_signal_emit(&self->signal_skinchanged, self, 0);
+	psycleconfig_notifyall_changed(&self->config);	
 	psy_path_dispose(&path);
 }
 
@@ -1270,13 +1267,6 @@ void workspace_output(Workspace* self, const char* text)
 	assert(self);
 
 	psy_signal_emit(&self->signal_terminal_out, self, 1, text);
-}
-
-const char* workspace_dialbitmap_path(Workspace* self)
-{
-	assert(self);
-
-	return self->config.dialbitmappath;
 }
 
 void workspace_dockview(Workspace* self, psy_ui_Component* view)

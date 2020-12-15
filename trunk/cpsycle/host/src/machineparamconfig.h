@@ -6,28 +6,45 @@
 
 // container
 #include <properties.h>
+#include <signal.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // MachineParamConfig
-//
+
 enum {
-	PROPERTY_ID_LOADCONTROLSKIN = 9000
+	PROPERTY_ID_LOADCONTROLSKIN = 9000,
+	PROPERTY_ID_DEFAULTCONTROLSKIN
 };
 
 typedef struct MachineParamConfig {
+	// signals
+	psy_Signal signal_changed;
+	psy_Signal signal_themechanged;
+	// internal data
 	psy_Property* paramview;
-	psy_Property* paramtheme;	
+	psy_Property* theme;	
 	// references
-	psy_Property* parent;	
+	psy_Property* parent;
 } MachineParamConfig;
 
 void machineparamconfig_init(MachineParamConfig*, psy_Property* parent);
-void machineparamconfig_makeparamtheme(MachineParamConfig*, psy_Property* parent);
+void machineparamconfig_dispose(MachineParamConfig*);
+
+void machineparamconfig_resettheme(MachineParamConfig*);
+void machineparamconfig_settheme(MachineParamConfig*, psy_Property* skin);
+bool machineparamconfig_hasthemeproperty(const MachineParamConfig*,
+	psy_Property*);
+bool machineparamconfig_hasproperty(const MachineParamConfig*, psy_Property*);
 
 bool machineparamconfig_showfloated(const MachineParamConfig*);
+const char* machineparamconfig_dialbpm(const MachineParamConfig*);
+void machineparamconfig_setdialbpm(MachineParamConfig*, const char*);
+
+bool machineparamconfig_onchanged(MachineParamConfig*, psy_Property*);
+bool machineparamconfig_onthemechanged(MachineParamConfig*, psy_Property*);
 
 #ifdef __cplusplus
 }

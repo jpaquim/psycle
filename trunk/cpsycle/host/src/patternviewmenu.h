@@ -57,7 +57,7 @@ typedef struct PatternBlockMenu {
 void patternblockmenu_init(PatternBlockMenu*, psy_ui_Component*,
 	struct PatternView*, Workspace*);
 
-INLINE PatternViewTarget patternblockmenu_target(PatternBlockMenu* self)
+INLINE PatternViewTarget patternblockmenu_target(const PatternBlockMenu* self)
 {
 	return self->target;
 }

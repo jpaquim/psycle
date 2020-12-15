@@ -15,6 +15,14 @@ void compatconfig_init(CompatConfig* self, psy_Property* parent,
 	self->parent = parent;
 	self->machinefactory = machinefactory;
 	compatconfig_make(self, parent);
+	psy_signal_init(&self->signal_changed);
+}
+
+void compatconfig_dispose(CompatConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void compatconfig_make(CompatConfig* self, psy_Property* parent)
@@ -49,4 +57,18 @@ bool compatconfig_loadnewblitz(const CompatConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->compatibility, "loadnewgamefxblitz", 0);
+}
+// events
+bool compatconfig_onchanged(CompatConfig* self, psy_Property*
+	property)
+{
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
+
+bool compatconfig_hasproperty(const CompatConfig* self, psy_Property* property)
+{
+	assert(self && self->compatibility);
+
+	return psy_property_insection(property, self->compatibility);
 }

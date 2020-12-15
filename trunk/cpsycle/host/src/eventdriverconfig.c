@@ -7,14 +7,10 @@
 // host
 #include "cmdproperties.h"
 // ui
-#include <uiapp.h>
 #include <uiopendialog.h>
 #include <uisavedialog.h>
 // file
 #include <dir.h>
-// std
-#include <stdio.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -23,7 +19,21 @@ void eventdriverconfig_init(EventDriverConfig* self, psy_Property* parent,
 {
 	self->player = player;
 	self->config = parent;
+	self->installeddriver = NULL;
+	self->activedrivers = NULL;
 	eventdriverconfig_makeeventinput(self);
+	psy_signal_init(&self->signal_changed);
+}
+
+void eventdriverconfig_dispose(EventDriverConfig* self)
+{
+	assert(self);
+	
+	psy_signal_dispose(&self->signal_changed);
+	self->player = NULL;
+	self->config = NULL;
+	self->installeddriver = NULL;
+	self->activedrivers = NULL;
 }
 
 void eventdriverconfig_makeeventinput(EventDriverConfig* self)
@@ -41,26 +51,25 @@ void eventdriverconfig_makeeventinput(EventDriverConfig* self)
 
 void eventdriverconfig_makeeventdriverlist(EventDriverConfig* self)
 {
-	psy_Property* installed;
-
 	assert(self);
 
 	psy_property_settext(self->eventinputs, "settingsview.event-input");
 	// change number to set startup driver, if no psycle.ini found
-	installed = psy_property_settext(
+	self->installeddriver = psy_property_settext(
 		psy_property_append_choice(self->eventinputs, "installeddriver", 0),
 		"Input Drivers");
-	psy_property_append_string(installed, "kbd", "kbd");
+	psy_property_append_string(self->installeddriver, "kbd", "kbd");
 #if defined(DIVERSALIS__OS__MICROSOFT)
-	psy_property_append_string(installed, "mmemidi", ".\\mmemidi.dll");
-	psy_property_append_string(installed, "dxjoystick", ".\\dxjoystick.dll");
+	psy_property_append_string(self->installeddriver, "mmemidi", ".\\mmemidi.dll");
+	psy_property_append_string(self->installeddriver, "dxjoystick", ".\\dxjoystick.dll");
 #endif
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->eventinputs, "addeventdriver"),
 		"Add to active drivers"),
 		PROPERTY_ID_ADDEVENTDRIVER);
-	psy_property_enableappend(psy_property_setid(psy_property_settext(
-		psy_property_append_choice(self->eventinputs, "activedrivers", 0),
+	self->activedrivers = psy_property_enableappend(psy_property_setid(
+		psy_property_settext(psy_property_append_choice(
+			self->eventinputs, "activedrivers", 0),
 		"Active Drivers"), PROPERTY_ID_ACTIVEEVENTDRIVERS));
 	psy_property_setid(psy_property_settext(
 		psy_property_append_action(self->eventinputs, "removeeventdriver"),
@@ -74,27 +83,21 @@ void eventdriverconfig_makeeventdriverlist(EventDriverConfig* self)
 
 void eventdriverconfig_registereventdrivers(EventDriverConfig* self)
 {
-	psy_Property* drivers;
+	psy_List* p;
 
-	assert(self);
+	assert(self && self->installeddriver);	
 
-	drivers = psy_property_at(self->eventinputs, "installeddriver",
-		PSY_PROPERTY_TYPE_NONE);
-	if (drivers) {
-		psy_List* p;
+	for (p = psy_property_children(self->installeddriver); p != NULL; psy_list_next(&p)) {
+		psy_Property* property;
+		int guid;
 
-		for (p = psy_property_children(drivers); p != NULL; psy_list_next(&p)) {
-			psy_Property* property;
-			int guid;
-
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
-				guid = psy_audio_eventdrivers_guid(&self->player->eventdrivers,
-					psy_property_item_str(property));
-				if (guid != -1) {
-					psy_audio_eventdrivers_register(&self->player->eventdrivers,
-						guid, psy_property_item_str(property));
-				}
+		property = (psy_Property*)psy_list_entry(p);
+		if (psy_property_type(property) == PSY_PROPERTY_TYPE_STRING) {
+			guid = psy_audio_eventdrivers_guid(&self->player->eventdrivers,
+				psy_property_item_str(property));
+			if (guid != -1) {
+				psy_audio_eventdrivers_register(&self->player->eventdrivers,
+					guid, psy_property_item_str(property));
 			}
 		}
 	}
@@ -102,56 +105,41 @@ void eventdriverconfig_registereventdrivers(EventDriverConfig* self)
 
 void eventdriverconfig_configeventdrivers(EventDriverConfig* self)
 {
-	psy_Property* activedrivers;
+	psy_List* p;
 
-	assert(self);
-
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE);
-	if (activedrivers) {
-		psy_List* p;
-
-		for (p = psy_property_children(activedrivers); p != NULL;
+	assert(self && self->activedrivers);
+		
+	for (p = psy_property_children(self->activedrivers); p != NULL;
 			psy_list_next(&p)) {
-			psy_Property* property;
+		psy_Property* property;
 
-			property = (psy_Property*)psy_list_entry(p);
-			if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
-				psy_EventDriver* driver;
+		property = (psy_Property*)psy_list_entry(p);
+		if (psy_property_type(property) == PSY_PROPERTY_TYPE_INTEGER) {
+			psy_EventDriver* driver;
 
-				driver = psy_audio_eventdrivers_loadbyguid(
-					&self->player->eventdrivers,
-					psy_property_item_int(property));
-				if (driver) {
-					psy_Property* cmds;
+			driver = psy_audio_eventdrivers_loadbyguid(
+				&self->player->eventdrivers,
+				psy_property_item_int(property));
+			if (driver) {
+				psy_Property* cmds;
 
-					cmds = cmdproperties_create();
-					psy_eventdriver_setcmddef(driver, cmds);
-					psy_property_deallocate(cmds);
-				}
+				cmds = cmdproperties_create();
+				psy_eventdriver_setcmddef(driver, cmds);
+				psy_property_deallocate(cmds);
 			}
 		}
-	}
+	}	
 }
 
 void eventdriverconfig_reseteventdriverconfiguration(EventDriverConfig* self)
-{
-	psy_EventDriver* eventdriver;
+{	
 
-	assert(self);
-
-	eventdriver = eventdriverconfig_selectedeventdriver(self);
-	if (eventdriver && psy_eventdriver_configuration(eventdriver)) {
-		psy_Property* activedrivers;
-
-		psy_eventdriver_configure(eventdriver, NULL);
-		activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-			PSY_PROPERTY_TYPE_CHOICE);
-		if (activedrivers) {
-			eventdriverconfig_showactiveeventdriverconfig(self,
-				psy_property_item_int(activedrivers));
-			//eventdriverconfig_update_driverconfigure_section(self);
-		}
+	assert(self && self->activedrivers);
+	
+	if (eventdriverconfig_selectedeventdriver(self)) {
+		psy_eventdriver_configure(eventdriverconfig_selectedeventdriver(self), NULL);
+		eventdriverconfig_showactiveeventdriverconfig(self,
+			psy_property_item_int(self->activedrivers));					
 	}
 }
 
@@ -169,18 +157,15 @@ void eventdriverconfig_loadeventdriverconfiguration(EventDriverConfig* self)
 			"Load Event Driver Configuration",
 			"Psycle Event Driver Configuration|*.psk", "PSK",
 			psy_dir_config());
-		if (psy_ui_opendialog_execute(&opendialog)) {
-			psy_Property* activedrivers;
+		if (psy_ui_opendialog_execute(&opendialog)) {			
 			psy_Property* local;
 
 			local = psy_property_clone(psy_eventdriver_configuration(eventdriver));
 			propertiesio_load(local, psy_ui_opendialog_filename(&opendialog), FALSE);
-			psy_eventdriver_configure(eventdriver, local);
-			activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-				PSY_PROPERTY_TYPE_CHOICE);
-			if (activedrivers) {
+			psy_eventdriver_configure(eventdriver, local);			
+			if (self->activedrivers) {
 				eventdriverconfig_showactiveeventdriverconfig(self,
-					psy_property_item_int(activedrivers));
+					psy_property_item_int(self->activedrivers));
 			}
 			// eventdriverconfig_update_driverconfigure_section(self);
 			psy_property_deallocate(local);
@@ -215,35 +200,31 @@ void eventdriverconfig_saveeventdriverconfiguration(EventDriverConfig* self)
 
 void eventdriverconfig_updateactiveeventdriverlist(EventDriverConfig* self)
 {
-	psy_Property* drivers;
+	uintptr_t numdrivers;
+	uintptr_t i;
 
-	assert(self);
+	assert(self && self->activedrivers);
+			
+		
 
-	drivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE);
-	if (drivers) {
-		uintptr_t numdrivers;
-		uintptr_t i;
+	psy_property_clear(self->activedrivers);
+	numdrivers = psy_audio_player_numeventdrivers(self->player);
+	for (i = 0; i < numdrivers; ++i) {
+		psy_audio_EventDriverEntry* entry;
 
-		psy_property_clear(drivers);
-		numdrivers = psy_audio_player_numeventdrivers(self->player);
-		for (i = 0; i < numdrivers; ++i) {
-			psy_audio_EventDriverEntry* entry;
+		entry = psy_audio_eventdrivers_entry(&self->player->eventdrivers, i);
+		if (entry && entry->eventdriver) {
+			const psy_EventDriverInfo* driverinfo;
 
-			entry = psy_audio_eventdrivers_entry(&self->player->eventdrivers, i);
-			if (entry && entry->eventdriver) {
-				const psy_EventDriverInfo* driverinfo;
+			driverinfo = psy_eventdriver_info(entry->eventdriver);
+			if (driverinfo) {
+				char key[40];
 
-				driverinfo = psy_eventdriver_info(entry->eventdriver);
-				if (driverinfo) {
-					char key[40];
-
-					psy_snprintf(key, 40, "guid-%d", (int)i);
-					psy_property_settext(
-						psy_property_append_int(drivers, key,
-							driverinfo->guid, 0, 0),
-						driverinfo->Name);
-				}
+				psy_snprintf(key, 40, "guid-%d", (int)i);
+				psy_property_settext(
+					psy_property_append_int(self->activedrivers, key,
+						driverinfo->guid, 0, 0),
+					driverinfo->Name);
 			}
 		}
 	}
@@ -326,33 +307,21 @@ void eventdriverconfig_readeventdriverconfigurations(EventDriverConfig* self)
 
 int eventdriverconfig_curreventdriverconfiguration(EventDriverConfig* self)
 {
-	psy_Property* p;
-
-	assert(self);
-
-	if (p = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE)) {
-		return psy_property_item_int(p);
-	}
-	return 0;
+	assert(self && self->activedrivers);
+	
+	return psy_property_item_int(self->activedrivers);	
 }
 
 const char* eventdriverconfig_eventdriverpath(EventDriverConfig* self)
 {
-	psy_Property* activedrivers;
+	assert(self && self->activedrivers);
+		
+	psy_Property* choice;
 
-	assert(self);
-
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_NONE);
-	if (activedrivers) {
-		psy_Property* choice;
-
-		choice = psy_property_at_choice(activedrivers);
-		if (choice) {
-			return psy_property_item_str(choice);
-		}
-	}
+	choice = psy_property_at_choice(self->activedrivers);
+	if (choice) {
+		return psy_property_item_str(choice);
+	}	
 	return NULL;
 }
 
@@ -361,36 +330,46 @@ void eventdriverconfig_showactiveeventdriverconfig(EventDriverConfig* self, int 
 	psy_EventDriver* eventdriver;
 
 	assert(self && self->eventdriverconfigure);
-
+	
 	psy_property_clear(self->eventdriverconfigure);
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventdriverconfigure, "defaults"),
-		"Defaults"), PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS);
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventdriverconfigure, "load"),
-		"Load"), PROPERTY_ID_EVENTDRIVERCONFIGLOAD);
-	psy_property_setid(psy_property_settext(
-		psy_property_append_action(self->eventdriverconfigure, "save"),
-		"Save"), PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE);
 	eventdriver = psy_audio_player_eventdriver(self->player, driverid);
-	if (eventdriver) {
+	if (eventdriver && psy_eventdriver_configuration(eventdriver)) {
+		psy_property_setid(psy_property_settext(
+			psy_property_append_action(self->eventdriverconfigure, "defaults"),
+			"Defaults"), PROPERTY_ID_EVENTDRIVERCONFIGDEFAULTS);
+		psy_property_setid(psy_property_settext(
+			psy_property_append_action(self->eventdriverconfigure, "load"),
+			"Load"), PROPERTY_ID_EVENTDRIVERCONFIGLOAD);
+		psy_property_setid(psy_property_settext(
+			psy_property_append_action(self->eventdriverconfigure, "save"),
+			"Save"), PROPERTY_ID_EVENTDRIVERCONFIGKEYMAPSAVE);		
 		psy_property_preventsave(self->eventdriverconfigure);
 		psy_property_append_property(self->eventdriverconfigure,
-			psy_property_clone(psy_eventdriver_configuration(eventdriver)));
+			psy_property_clone(psy_eventdriver_configuration(eventdriver)));		
 	}
 }
 
 psy_EventDriver* eventdriverconfig_selectedeventdriver(EventDriverConfig* self)
-{
-	psy_EventDriver* rv;
-	psy_Property* activedrivers;
+{	
+	assert(self && self->activedrivers);
 
-	rv = NULL;
-	activedrivers = psy_property_at(self->eventinputs, "activedrivers",
-		PSY_PROPERTY_TYPE_CHOICE);
-	if (activedrivers) {
-		rv = psy_audio_player_eventdriver(self->player,
-			psy_property_item_int(activedrivers));
-	}
-	return rv;
+	return psy_audio_player_eventdriver(self->player,
+		psy_property_item_int(self->activedrivers));
+}
+// events
+bool eventdriverconfig_onchanged(EventDriverConfig* self, psy_Property*
+	property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
+
+bool eventdriverconfig_hasproperty(const EventDriverConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->eventinputs);
+
+	return psy_property_insection(property, self->eventinputs);
 }

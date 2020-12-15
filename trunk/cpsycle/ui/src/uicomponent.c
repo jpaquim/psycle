@@ -532,22 +532,25 @@ void psy_ui_component_show_align(psy_ui_Component* self)
 {
 	assert(self);
 
-	if (psy_ui_component_parent(self)) {
-		self->visible = 1;
-		psy_ui_component_align(psy_ui_component_parent(self));
+	if (!psy_ui_component_visible(self)) {
+		if (psy_ui_component_parent(self)) {
+			self->visible = 1;
+			psy_ui_component_align(psy_ui_component_parent(self));
+		}
+		self->vtable->show(self);
 	}
-	self->vtable->show(self);
 }
 
 void psy_ui_component_hide_align(psy_ui_Component* self)
 {
 	assert(self);
 
-	self->vtable->hide(self);
-	if (psy_ui_component_parent(self)) {
-		psy_ui_component_align(psy_ui_component_parent(self));
+	if (psy_ui_component_visible(self)) {
+		self->vtable->hide(self);
+		if (psy_ui_component_parent(self)) {
+			psy_ui_component_align(psy_ui_component_parent(self));
+		}
 	}
-	
 }
 
 

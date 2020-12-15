@@ -74,7 +74,7 @@ void paramskin_init(ParamView* self)
 		paramskin.checkon = checkon;
 		paramskin.checkoff = checkoff;
 		paramskin_initialized = 1;		
-		theme = self->workspace->config.macparam.paramtheme;
+		theme = self->workspace->config.macparam.theme;
 		paramskin.topcolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguitopcolour", 0x00555555));
 		paramskin.fonttopcolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguifonttopcolour", 0x00CDCDCD));
 		paramskin.bottomcolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguibottomcolour", 0x00444444));
@@ -88,11 +88,10 @@ void paramskin_init(ParamView* self)
 		paramskin.titlecolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguititlecolour", 0x00292929));
 		paramskin.fonttitlecolour = psy_ui_colour_make(psy_property_at_int(theme, "machineguititlefontcolour", 0x00B4B4B4));
 		psy_ui_bitmap_init(&paramskin.knobbitmap);
-		if (!workspace_dialbitmap_path(self->workspace)) {
+		if (!machineparamconfig_dialbpm(psycleconfig_macparam(workspace_conf(self->workspace)))) {
 			psy_ui_bitmap_loadresource(&paramskin.knobbitmap, IDB_PARAMKNOB);
-		} else
-		if (psy_ui_bitmap_load(&paramskin.knobbitmap,
-				workspace_dialbitmap_path(self->workspace))) {
+		} else if (psy_ui_bitmap_load(&paramskin.knobbitmap,
+			machineparamconfig_dialbpm(psycleconfig_macparam(workspace_conf(self->workspace)))) != PSY_OK) {
 			psy_ui_bitmap_loadresource(&paramskin.knobbitmap, IDB_PARAMKNOB);			
 		}
 		psy_ui_bitmap_init(&paramskin.mixerbitmap);

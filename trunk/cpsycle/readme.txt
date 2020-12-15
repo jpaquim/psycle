@@ -11,12 +11,13 @@ Event Input like Midi and Keyboard are now driver orientated and make it
 possible to have more than one midi input or other inputs like a
 a game controller. This still needs to be fully worked out, but at least works
 for the keyboard and midi input. Midi sync is not fully working, too.
-Additional to MFC Psycle, the version has a pianoroll, multitracking and
-optional a sequenceview that displays the sequence in a gantt layout. Besides
-english, more language are possible, and a spanish language file was added.
-Many limititation of Psycle are related to the file format. Internally the use
-of fixed arrays were replaced by dynamic structures, but many limitations
-remain to maintain file compatibility. This needs to be worked out further.
+Additional to MFC Psycle, the version has a pianoroll, multitracking,
+track scopes and optional a sequenceview that displays the sequence in a gantt
+layout. Besides english, more language are possible, and a spanish language
+file was added. Many limititation of Psycle are related to the file format.
+Internally the use of fixed arrays were replaced by dynamic structures,
+but many limitation remain to maintain file compatibility. This needs to be
+worked out further.
 
 Structure of the host
 

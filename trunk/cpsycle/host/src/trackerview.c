@@ -2213,7 +2213,7 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 		value = 0; // machine_parametervalue_scaled(machine, tweak, normvalue);
 		psy_audio_patternevent_init_all(&event,
 			(unsigned char)(
-				(keyboardandmisc_recordtweaksastws(&self->workspace->config.misc))
+				(keyboardmiscconfig_recordtweaksastws(&self->workspace->config.misc))
 				? psy_audio_NOTECOMMANDS_TWEAKSLIDE
 				: psy_audio_NOTECOMMANDS_TWEAK),
 			psy_audio_NOTECOMMANDS_INST_EMPTY,
@@ -2226,7 +2226,7 @@ void trackergrid_tweak(TrackerGrid* self, int slot, uintptr_t tweak,
 		psy_undoredo_execute(&self->workspace->undoredo,
 			&insertcommand_alloc(trackergridstate_pattern(self->gridstate), trackerlinestate_bpl(self->linestate),
 				self->gridstate->cursor, event, self->workspace)->command);
-		if (keyboardandmisc_advancelineonrecordtweak(&self->workspace->config.misc) &&
+		if (keyboardmiscconfig_advancelineonrecordtweak(&self->workspace->config.misc) &&
 			!(workspace_followingsong(self->workspace) &&
 				psy_audio_player_playing(workspace_player(self->workspace)))) {
 			trackergrid_advanceline(self);

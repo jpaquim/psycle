@@ -327,6 +327,13 @@ INLINE PianoTrackDisplay pianogrid_trackdisplay(const Pianogrid* self)
 	return self->trackdisplay;
 }
 
+INLINE const psy_audio_PatternSelection* pianogrid_selection(const Pianogrid* self)
+{
+	assert(self);
+
+	return &self->selection;
+}
+
 INLINE psy_ui_Component* pianogrid_base(Pianogrid* self)
 {
 	assert(self);

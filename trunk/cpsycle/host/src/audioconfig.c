@@ -19,6 +19,14 @@ void audioconfig_init(AudioConfig* self, psy_Property* parent, psy_audio_Player*
 	self->player = player;
 	self->audioenabled = TRUE;
 	audioconfig_makesection(self, parent);
+	psy_signal_init(&self->signal_changed);
+}
+
+void audioconfig_dispose(AudioConfig* self)
+{
+	assert(self);
+
+	psy_signal_dispose(&self->signal_changed);
 }
 
 void audioconfig_makesection(AudioConfig* self, psy_Property* parent)
@@ -276,4 +284,21 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property)
 		return TRUE;				
 	}
 	return FALSE;
+}
+// events
+bool audioconfig_onchanged(AudioConfig* self, psy_Property*
+	property)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1, property);
+	return TRUE;
+}
+
+bool audioconfig_hasproperty(const AudioConfig* self,
+	psy_Property* property)
+{
+	assert(self && self->driverconfigure);
+
+	return psy_property_insection(property, self->inputoutput);
 }

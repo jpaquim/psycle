@@ -192,6 +192,17 @@ INLINE uintptr_t trackergridstate_numsongtracks(TrackerGridState* self)
 	return self->numtracks;
 }
 
+INLINE void trackergridstate_setnumsongtracks(TrackerGridState* self,
+	uintptr_t numtracks)
+{
+	self->numtracks = numtracks;
+}
+
+INLINE psy_audio_PatternCursor trackergridstate_cursor(TrackerGridState* self)
+{
+	return self->cursor;
+}
+
 INLINE uintptr_t trackergridstate_cursorposition_valid(TrackerGridState* self)
 {
 	if (self->pattern) {
