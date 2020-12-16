@@ -298,9 +298,6 @@
     <ClCompile Include="src\navigation.c">
       <Filter>toolbars</Filter>
     </ClCompile>
-    <ClCompile Include="src\settingsview.c">
-      <Filter>configuration</Filter>
-    </ClCompile>
     <ClCompile Include="src\recentview.c">
       <Filter>file</Filter>
     </ClCompile>
@@ -616,9 +613,6 @@
     </ClInclude>
     <ClInclude Include="src\navigation.h">
       <Filter>toolbars</Filter>
-    </ClInclude>
-    <ClInclude Include="src\settingsview.h">
-      <Filter>configuration</Filter>
     </ClInclude>
     <ClInclude Include="src\recentview.h">
       <Filter>file</Filter>

@@ -26,6 +26,8 @@ void keyboardstate_init(KeyboardState* self, PatternViewSkin* skin)
 	self->keymax = 88;	
 	self->defaultkeyheight = psy_ui_value_makeeh(1.0);
 	self->keyheight = self->defaultkeyheight;
+	self->keyheightpx = 13;
+	self->keyboardheightpx = 13 * (self->keymax - self->keymin);
 	self->notemode = psy_dsp_NOTESTAB_A220;
 	self->drawpianokeys = TRUE;
 	self->skin = skin;

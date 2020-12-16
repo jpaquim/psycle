@@ -32,7 +32,6 @@
 #include "stepbox.h"
 #include "stepsequencerview.h"
 #include "samplesview.h"
-#include "settingsview.h"
 #include "songproperties.h"
 #include "tabbar.h"
 #include "trackscopeview.h"

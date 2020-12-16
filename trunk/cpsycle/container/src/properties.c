@@ -712,7 +712,7 @@ const char* psy_property_at_str(const psy_Property* self, const char* key,
 
 	assert(self);
 
-	property = psy_property_at_const(self, key, PSY_PROPERTY_TYPE_STRING);
+	property = psy_property_at_const(self, key, PSY_PROPERTY_TYPE_NONE);
 	if (property && property->item.typ == PSY_PROPERTY_TYPE_STRING ||
 		property && property->item.typ == PSY_PROPERTY_TYPE_FONT) {
 		return property->item.value.s;

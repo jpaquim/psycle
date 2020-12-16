@@ -54,8 +54,7 @@ void trackergridstate_init(TrackerGridState* self, TrackConfig* trackconfig)
 	self->pattern = NULL;
 	self->skin = NULL;	
 	// init internal data
-	psy_audio_patterncursor_init(&self->cursor);
-	self->zoom = 1.0;	
+	psy_audio_patterncursor_init(&self->cursor);	
 	self->numtracks = 16;	
 }
 

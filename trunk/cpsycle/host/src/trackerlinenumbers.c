@@ -33,6 +33,7 @@ static void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 // TrackerLineNumbers
 // prototypes
 static void trackerlinenumbers_ondraw(TrackerLineNumbers*, psy_ui_Graphics*);
+static void trackerlinenumbers_onalign(TrackerLineNumbers*);
 static void trackerlinenumbers_onpreferredsize(TrackerLineNumbers*, psy_ui_Size* limit,
 	psy_ui_Size* rv);
 static void trackerlinennumbers_onpatterncursorchanged(TrackerLineNumbers*,
@@ -47,6 +48,7 @@ static void trackerlinenumbers_vtable_init(TrackerLineNumbers* self)
 	if (!trackerlinenumbers_vtable_initialized) {
 		trackerlinenumbers_vtable = *(self->component.vtable);
 		trackerlinenumbers_vtable.ondraw = (psy_ui_fp_component_ondraw)trackerlinenumbers_ondraw;
+		trackerlinenumbers_vtable.onalign = (psy_ui_fp_component_onalign)trackerlinenumbers_onalign;
 		trackerlinenumbers_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			trackerlinenumbers_onpreferredsize;
 		trackerlinenumbers_vtable_initialized = 1;
@@ -61,8 +63,8 @@ void trackerlinenumbers_init(TrackerLineNumbers* self, psy_ui_Component* parent,
 	self->component.vtable = &trackerlinenumbers_vtable;
 	self->workspace = workspace;
 	self->linestate = linestate;
-	self->showlinenumbercursor = 1;
-	self->showlinenumbersinhex = 1;
+	self->showcursor = TRUE;
+	self->shownumbersinhex = TRUE;
 	trackerlinenumbers_setsharedlinestate(self, linestate);
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setbackgroundcolour(&self->component,
@@ -108,9 +110,9 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 		topoffset = trackerlinestate_pxtobeat(self->linestate, g->clip.top);
 		topline = trackerlinestate_beattoline(self->linestate, topoffset);
 		bottomoffset = trackerlinestate_pxtobeatnotquantized(self->linestate, g->clip.bottom);
-		bottomline = (int)(bottomoffset * self->linestate->lpb + 0.5);
-		cpy = (topline) * self->linestate->lineheight;
+		bottomline = (int)(bottomoffset * self->linestate->lpb + 0.5);		
 		offset = topoffset;
+		cpy = trackerlinestate_beattopx(self->linestate, offset);
 		line = topline;
 		drawbeat = (patternviewconfig_showbeatoffset(psycleconfig_patview(
 			workspace_conf(self->workspace))));
@@ -124,9 +126,9 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			}
 		} else {
 			if (drawbeat) {
-				linecountformat = "%3i %.3f";
+				linecountformat = "%i %.3f";
 			} else {
-				linecountformat = "%3i";
+				linecountformat = "%i";
 			}
 		}
 		while (offset <= bottomoffset &&
@@ -135,33 +137,53 @@ void trackerlinenumbers_ondraw(TrackerLineNumbers* self, psy_ui_Graphics* g)
 			TrackerColumnFlags columnflags;
 			int ystart;			
 			uintptr_t c;
-			int flatsize;
+			uintptr_t numdigits;		
+			uintptr_t maxdigits;
+			uintptr_t startdigit;
+			int blankspace;
 			char digit[2];
-			
+						
 			columnflags.playbar = psy_audio_player_playing(workspace_player(self->workspace)) && 
 				trackerlinestate_testplaybar(self->linestate, offset);
 			columnflags.mid = 0;
-			columnflags.cursor = self->showlinenumbercursor &&
+			columnflags.cursor = self->showcursor &&
 				self->linestate->drawcursor && !self->linestate->cursorchanging &&
 				testcursor(cursor, self->linestate, cursor.track, offset, self->linestate->bpl);
 			columnflags.beat = fmod(offset, 1.0f) == 0.0f;
 			columnflags.beat4 = fmod(offset, 4.0f) == 0.0f;
 			columnflags.selection = 0;
 			setcolumncolour(self->linestate->skin, g, columnflags, 0, 0);			
-			psy_snprintf(buffer, 10, linecountformat, line, offset);
-			flatsize = tm.tmAveCharWidth + 2;
+			psy_snprintf(buffer, 10, linecountformat, line, offset);			
 			digit[1] = '\0';
-			for (c = 0; c <= strlen(buffer); ++c) {				
-				digit[0] = buffer[c];				
-				r = psy_ui_rectangle_make(c * flatsize, cpy, flatsize,
-					tm.tmHeight);
+			numdigits = strlen(buffer);
+			maxdigits = ((psy_ui_value_px(&size.width, &tm) - 4) / self->linestate->flatsize);
+			startdigit = maxdigits - numdigits - 1;
+			for (c = 0; c < maxdigits; ++c) {
+				if (c >= startdigit && c < startdigit + numdigits) {
+					digit[0] = buffer[c - startdigit];
+				} else {
+					digit[0] = ' ';
+				}
+				r = psy_ui_rectangle_make(c * self->linestate->flatsize, cpy,
+					self->linestate->flatsize,
+					self->linestate->lineheightpx - 1);
 				psy_ui_textoutrectangle(g, r.left, r.top,
 					psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
 					digit, strlen(digit));
 			}
-			cpy += self->linestate->lineheight;
+			r.left += self->linestate->flatsize;
+			blankspace = (psy_ui_value_px(&size.width, &tm) - r.left) - 4;
+			if (blankspace > 0) {
+				r = psy_ui_rectangle_make(r.left, cpy, blankspace,
+					self->linestate->lineheightpx - 1);
+				digit[0] = ' ';
+				psy_ui_textoutrectangle(g, r.left, r.top,
+					psy_ui_ETO_OPAQUE | psy_ui_ETO_CLIPPED, r,
+					digit, strlen(digit));
+			}
+			cpy += self->linestate->lineheightpx;
 			ystart = cpy;
-			offset += (1.0 / self->linestate->lpb);
+			offset += self->linestate->bpl;
 			++line;
 		}
 	}
@@ -203,53 +225,56 @@ void trackerlinenumbers_invalidatecursor(TrackerLineNumbers* self,
 	line = trackerlinestate_beattoline(self->linestate, cursor->offset);
 	psy_ui_component_invalidaterect(&self->component,
 		psy_ui_rectangle_make(
-			0, self->linestate->lineheight * line,
-			size.width, self->linestate->lineheight));
+			0, self->linestate->lineheightpx * line,
+			size.width, self->linestate->lineheightpx));
 }
 
 void trackerlinenumbers_invalidateline(TrackerLineNumbers* self, psy_dsp_big_beat_t offset)
-{		
-	if (self->linestate->pattern) {
-		if (offset >= self->linestate->sequenceentryoffset &&
-				offset < self->linestate->sequenceentryoffset +
-				self->linestate->pattern->length) {
-			psy_ui_Size size;
-			psy_ui_TextMetric tm;
-			int line;
+{			
+	if (trackerlinestate_pattern(self->linestate) &&
+			trackerlinestate_testplayposition(self->linestate, offset)) {
+		psy_ui_IntSize size;		
+		int line;
 
-			size = psy_ui_component_size(&self->component);
-			tm = psy_ui_component_textmetric(&self->component);
-			line = (int)((offset - self->linestate->sequenceentryoffset) *
-				self->linestate->lpb);
-			psy_ui_component_invalidaterect(&self->component,
-				psy_ui_rectangle_make(
-					0,
-					self->linestate->lineheight * line,
-					psy_ui_value_px(&size.width, &tm),
-					self->linestate->lineheight));
-		}
+		size = psy_ui_component_intsize(&self->component);		
+		line = trackerlinestate_beattoline(self->linestate,
+			offset - self->linestate->sequenceentryoffset);
+		psy_ui_component_invalidaterect(&self->component,
+			psy_ui_rectangle_make(
+				0, self->linestate->lineheightpx * line,
+				size.width, self->linestate->lineheightpx));
 	}
+}
+
+void trackerlinenumbers_onalign(TrackerLineNumbers* self)
+{
+	psy_ui_TextMetric tm;
+
+	tm = psy_ui_component_textmetric(trackerlinenumbers_base(self));
+	self->linestate->flatsize = (int)(tm.tmAveCharWidth) + 2;
 }
 
 void trackerlinenumbers_onpreferredsize(TrackerLineNumbers* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
-{
+{	
+	static int margin = 4;
+
 	rv->width = ((patternviewconfig_showbeatoffset(psycleconfig_patview(
 		workspace_conf(self->workspace)))))
-			? psy_ui_value_makeew(13)
-			: psy_ui_value_makeew(6);
+			? psy_ui_value_makepx(self->linestate->flatsize * 13 + margin)
+			: psy_ui_value_makepx(self->linestate->flatsize * 6 + margin);
 	rv->height = psy_ui_value_makepx(0);
 }
 
 void trackerlinenumbers_showlinenumbercursor(TrackerLineNumbers* self, bool showstate)
 {
-	self->showlinenumbercursor = showstate;
+	self->showcursor = showstate;
 	psy_ui_component_invalidate(&self->component);
 }
 
 void trackerlinenumbers_showlinenumbersinhex(TrackerLineNumbers* self, bool showstate)
 {
-	self->showlinenumbersinhex = showstate;
+	self->shownumbersinhex = showstate;
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -348,19 +373,22 @@ void trackerlinenumberslabel_onmousedown(TrackerLineNumbersLabel* self,
 void trackerlinenumberslabel_ondraw(TrackerLineNumbersLabel* self, psy_ui_Graphics* g)
 {
 	psy_ui_IntSize size;
-	psy_ui_Rectangle r;
-
+	psy_ui_Rectangle r;	
+	
 	size = psy_ui_component_intsize(&self->component);	
 	psy_ui_setrectangle(&r, 0, 0, size.width, size.height);
 	psy_ui_drawsolidrectangle(g, r, self->linestate->skin->background);
 	psy_ui_setbackgroundcolour(g, self->linestate->skin->background);
 	psy_ui_settextcolour(g, self->linestate->skin->font);
 	psy_ui_textoutrectangle(g, r.left, 0, 0, r, self->linestr, strlen(self->linestr));
-	if (self->showdefaultline) {		
+	if (self->showdefaultline) {
+		if (self->linestate->gridfont) {
+			psy_ui_setfont(g, self->linestate->gridfont);
+		}
 		if ((self->showbeatoffset)) {
 			psy_ui_textoutrectangle(g, r.left, self->headerheight, 0,
 				r, self->defaultstr, strlen(self->defaultstr));
-		} else {
+		} else {			
 			psy_ui_textoutrectangle(g, r.left, self->headerheight, 0,
 				r, "Def", strlen("Def"));
 		}
@@ -372,15 +400,14 @@ void trackerlinenumberslabel_onpreferredsize(TrackerLineNumbersLabel* self,
 {	
 	int height;
 	
-	height = self->headerheight;
-	// todo remove view reference
+	height = self->headerheight;	
 	if (self->showdefaultline) {		
-		height += self->linestate->lineheight;
+		height += self->linestate->lineheightpx;
 	}	
 	rv->height = psy_ui_value_makepx(height);
 	rv->width = (self->showbeatoffset)
 		? psy_ui_value_makeew(10)
-		: psy_ui_value_makeew(5);
+		: psy_ui_value_makepx(0);
 }
 
 void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
@@ -446,8 +473,6 @@ void setcolumncolour(PatternViewSkin* skin, psy_ui_Graphics* g,
 void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* parent,
 	TrackerLineState* linestate, Workspace* workspace)
 {
-	psy_ui_Margin leftmargin;
-
 	psy_ui_component_init(&self->component, parent);	
 	trackerlinenumberslabel_init(&self->linenumberslabel, &self->component, linestate,
 		workspace);
@@ -457,30 +482,6 @@ void trackerlinenumberbar_init(TrackerLineNumberBar* self, psy_ui_Component* par
 	psy_ui_component_setalign(&self->linenumbers.component, psy_ui_ALIGN_CLIENT);
 	zoombox_init(&self->zoombox, &self->component);
 	psy_ui_component_setpreferredsize(&self->zoombox.component,
-		psy_ui_size_make(psy_ui_value_makepx(0),
-			psy_ui_value_makeeh(1.0)));
-	psy_ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_BOTTOM);
-	trackerlinenumberbar_computefontheight(self);
-	psy_ui_margin_init_all(&leftmargin, psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
-		psy_ui_value_makeew(3));
-	psy_ui_component_setmargin(&self->linenumbers.component,
-		&leftmargin);
-	psy_ui_component_setmargin(&self->linenumberslabel.component,
-		&leftmargin);
-}
-
-void trackerlinenumberbar_computefontheight(TrackerLineNumberBar* self)
-{
-	psy_ui_Font* font;
-
-	font = psy_ui_component_font(&self->component);
-	if (font) {
-		psy_ui_FontInfo fontinfo;
-
-		fontinfo = psy_ui_font_fontinfo(font);
-		self->zoomheightbase = fontinfo.lfHeight;
-	} else {
-		self->zoomheightbase = -16;
-	}
+		psy_ui_size_make(psy_ui_value_makepx(0), psy_ui_value_makeeh(1.0)));
+	psy_ui_component_setalign(&self->zoombox.component, psy_ui_ALIGN_BOTTOM);	
 }
