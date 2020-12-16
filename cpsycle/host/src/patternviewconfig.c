@@ -413,3 +413,17 @@ bool patternviewconfig_onthemechanged(PatternViewConfig* self, psy_Property* pro
 	psy_signal_emit(&self->signal_themechanged, self, 1, self->theme);
 	return TRUE;
 }
+
+void patternviewconfig_togglepatdefaultline(PatternViewConfig* self)
+{			
+	psy_Property* property;
+
+	assert(self);
+
+	property = psy_property_at(self->patternview, "griddefaults",
+		PSY_PROPERTY_TYPE_NONE);
+	if (property) {
+		psy_property_setitem_bool(property, !psy_property_item_bool(property));
+		psy_signal_emit(&self->signal_changed, self, 1, property);
+	}
+}

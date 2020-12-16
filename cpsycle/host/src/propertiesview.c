@@ -625,10 +625,12 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 			psy_ui_ColourDialog colourdialog;
 
 			psy_ui_colourdialog_init(&colourdialog, &self->component);
+			psy_ui_colourdialog_setcolour(&colourdialog,
+				psy_ui_colour_make((uint32_t)psy_property_item_int(self->selected)));
 			if (psy_ui_colourdialog_execute(&colourdialog)) {
 				psy_ui_Colour colour;
 
-				colour = psy_ui_colourdialog_colour(&colourdialog);
+				colour = psy_ui_colourdialog_colour(&colourdialog);		
 				psy_property_set_int(self->selected->parent,
 					self->selected->item.key,
 					colour.value);

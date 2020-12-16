@@ -224,7 +224,6 @@
     <ClCompile Include="src\scrollzoom.c" />
     <ClCompile Include="src\seqeditor.c" />
     <ClCompile Include="src\sequenceview.c" />
-    <ClCompile Include="src\settingsview.c" />
     <ClCompile Include="src\skincoord.c" />
     <ClCompile Include="src\skingraphics.c" />
     <ClCompile Include="src\skinio.c" />
@@ -339,7 +338,6 @@
     <ClInclude Include="src\scrollzoom.h" />
     <ClInclude Include="src\seqeditor.h" />
     <ClInclude Include="src\sequenceview.h" />
-    <ClInclude Include="src\settingsview.h" />
     <ClInclude Include="src\skincoord.h" />
     <ClInclude Include="src\skingraphics.h" />
     <ClInclude Include="src\skinio.h" />

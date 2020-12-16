@@ -29,7 +29,12 @@ static int testcursor(psy_audio_PatternCursor cursor, uintptr_t track,
 // implementation
 void trackerlinestate_init(TrackerLineState* self)
 {
-	self->lineheight = 13;
+	assert(self);
+
+	self->defaultlineheight = psy_ui_value_makeeh(1.0);
+	self->lineheight = self->defaultlineheight;
+	self->lineheightpx = 13;
+	self->flatsize = 8;
 	self->lpb = 4;
 	self->bpl = 1.0 / self->lpb;
 	self->skin = NULL;
@@ -39,27 +44,37 @@ void trackerlinestate_init(TrackerLineState* self)
 	self->drawcursor = TRUE;
 	self->visilines = 25;
 	self->cursorchanging = FALSE;
+	self->gridfont = NULL;
 }
 
 void trackerlinestate_dispose(TrackerLineState* self)
 {
+	assert(self);
 }
 
-int trackerlinestate_beattoline(TrackerLineState* self,
+int trackerlinestate_beattoline(const TrackerLineState* self,
 	psy_dsp_big_beat_t offset)
 {
+	assert(self);
+
 	return cast_decimal(offset * self->lpb);	
 }
 
-int trackerlinestate_testplaybar(TrackerLineState* self, psy_dsp_big_beat_t offset)
+bool trackerlinestate_testplaybar(TrackerLineState* self, psy_dsp_big_beat_t offset)
 {
+	assert(self);
+
 	return psy_dsp_testrange(self->lastplayposition - self->sequenceentryoffset,
-		offset, 1.0 / self->lpb);
+		offset, self->bpl);
 }
 
-int trackerlinestate_numlines(TrackerLineState* self)
+uintptr_t trackerlinestate_numlines(const TrackerLineState* self)
 {
-	return (self->pattern)
-		? (int)(psy_audio_pattern_length(self->pattern) * self->lpb)
-		: 0;
+	assert(self);
+
+	if (self->pattern) {
+		return trackerlinestate_beattoline(self, psy_audio_pattern_length(
+			self->pattern));
+	}
+	return 0;
 }

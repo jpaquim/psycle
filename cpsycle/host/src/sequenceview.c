@@ -452,14 +452,14 @@ void sequencelistview_drawprogressbar(SequenceListView* self,
 void sequencelistview_showpatternnames(SequenceListView* self)
 {
 	self->showpatternnames = TRUE;
-	workspace_showpatternnames(self->workspace);
+	generalconfig_showpatternnames(psycleconfig_general(workspace_conf(self->workspace)));
 	psy_ui_component_invalidate(&self->component);
 }
 
 void sequencelistview_showpatternslots(SequenceListView* self)
 {
 	self->showpatternnames = FALSE;
-	workspace_showpatternids(self->workspace);
+	generalconfig_showpatternids(psycleconfig_general(workspace_conf(self->workspace)));
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -733,7 +733,7 @@ static void sequenceview_onsongchanged(SequenceView*, Workspace*, int flag, psy_
 static void sequenceview_onsequenceselectionchanged(SequenceView*, Workspace*);
 static void sequenceview_onsequencechanged(SequenceView*,
 	psy_audio_Sequence* sender);
-static void sequenceview_onconfigure(SequenceView*, Workspace*,
+static void sequenceview_onconfigure(SequenceView*, GeneralConfig*,
 	psy_Property*);
 // implementation
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
@@ -842,7 +842,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		psy_signal_connect(&self->sequence->sequencechanged,
 			self, sequenceview_onsequencechanged);
 	}
-	psy_signal_connect(&self->workspace->signal_configchanged, self,
+	psy_signal_connect(&psycleconfig_general(workspace_conf(workspace))->signal_changed, self,
 		sequenceview_onconfigure);
 }
 
@@ -1270,13 +1270,13 @@ void sequenceview_onsequencechanged(SequenceView* self,
 	sequenceduration_update(&self->duration);
 }
 
-void sequenceview_onconfigure(SequenceView* self, Workspace* workspace,
+void sequenceview_onconfigure(SequenceView* self, GeneralConfig* config,
 	psy_Property* property)
 {
-	if (self->listview.showpatternnames != generalconfig_showingpatternnames(
-			psycleconfig_general(workspace_conf(workspace)))) {
-		self->listview.showpatternnames = generalconfig_showingpatternnames(
-			psycleconfig_general(workspace_conf(workspace)));
+	if (self->listview.showpatternnames !=
+			generalconfig_showingpatternnames(config)) {
+		self->listview.showpatternnames =
+			generalconfig_showingpatternnames(config);
 		psy_ui_component_invalidate(&self->listview.component);
 		if (self->listview.showpatternnames) {
 			psy_ui_checkbox_check(&self->options.shownames);

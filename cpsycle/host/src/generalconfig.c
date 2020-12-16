@@ -132,3 +132,19 @@ bool generalconfig_hasproperty(const GeneralConfig* self,
 
 	return psy_property_insection(property, self->general);
 }
+
+void generalconfig_showpatternnames(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1,
+		psy_property_set_bool(self->general, "showpatternnames", TRUE));
+}
+
+void generalconfig_showpatternids(GeneralConfig* self)
+{
+	assert(self);
+
+	psy_signal_emit(&self->signal_changed, self, 1,
+		psy_property_set_bool(self->general, "showpatternnames", FALSE));
+}

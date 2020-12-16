@@ -85,8 +85,8 @@ typedef struct TrackerLineNumbers {
 	psy_ui_Component component;
 	// internal data
 	psy_audio_PatternCursor lastcursor;	
-	int showlinenumbercursor;
-	int showlinenumbersinhex;
+	bool showcursor;
+	bool shownumbersinhex;
 	// references
 	TrackerLineState* linestate;
 	TrackerLineState defaultlinestate;
@@ -124,7 +124,6 @@ typedef struct TrackerLineNumberBar {
 
 void trackerlinenumberbar_init(TrackerLineNumberBar*, psy_ui_Component*
 	parent, TrackerLineState*, Workspace*);
-void trackerlinenumberbar_computefontheight(TrackerLineNumberBar*);
 
 INLINE psy_ui_Component* trackerlinenumberbar_base(TrackerLineNumberBar* self)
 {

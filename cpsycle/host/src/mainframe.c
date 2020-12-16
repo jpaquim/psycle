@@ -8,7 +8,6 @@
 #include "cmdsgeneral.h"
 #include "paramview.h"
 #include "resources/resource.h"
-#include "settingsview.h"
 // audio
 #include <exclusivelock.h>
 #include <songio.h>
@@ -103,7 +102,7 @@ static void mainframe_onterminalwarning(MainFrame*, Workspace* sender,
 	const char* text);
 static void mainframe_onterminalerror(MainFrame*, Workspace* sender,
 	const char* text);
-static void mainframe_updateterminalbutton(MainFrame* self);
+static void mainframe_updateterminalbutton(MainFrame*);
 static void mainframe_onzoomboxchanged(MainFrame*, ZoomBox* sender);
 static void mainframe_onsongtrackschanged(MainFrame*, psy_audio_Player* sender,
 	uintptr_t numsongtracks);

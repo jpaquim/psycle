@@ -37,6 +37,8 @@ bool generalconfig_playsongafterload(const GeneralConfig*);
 bool generalconfig_showingpatternnames(const GeneralConfig*);
 bool generalconfig_showplaylisteditor(const GeneralConfig*);
 bool generalconfig_showstepsequencer(const GeneralConfig*);
+void generalconfig_showpatternnames(GeneralConfig*);
+void generalconfig_showpatternids(GeneralConfig*);
 
 bool generalconfig_onchanged(GeneralConfig*, psy_Property*);
 bool generalconfig_hasproperty(const GeneralConfig*, psy_Property*);

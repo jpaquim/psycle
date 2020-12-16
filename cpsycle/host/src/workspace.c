@@ -578,22 +578,6 @@ void workspace_setdefaultfont(Workspace* self, psy_Property* property)
 	psy_signal_emit(&self->signal_defaultfontchanged, self, 0);
 }
 
-void workspace_showpatternnames(Workspace* self)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_configchanged, self, 1,
-		psy_property_set_bool(self->config.general.general, "showpatternnames", TRUE));
-}
-
-void workspace_showpatternids(Workspace* self)
-{
-	assert(self);
-
-	psy_signal_emit(&self->signal_configchanged, self, 1,
-		psy_property_set_bool(self->config.general.general, "showpatternnames", FALSE));
-}
-
 void workspace_newsong(Workspace* self)
 {			
 	psy_audio_Song* song;	
@@ -1121,22 +1105,6 @@ void workspace_parametertweak(Workspace* self, int slot, uintptr_t tweak,
 
 	psy_signal_emit(&self->signal_parametertweak, self, 3, slot, tweak, 
 		value);
-}
-
-void workspace_togglepatdefaultline(Workspace* self)
-{
-	psy_Property* pv;
-
-	pv = psy_property_findsection(&self->config.config, "visual.patternview");
-	if (pv) {
-		psy_Property* p;
-
-		p = psy_property_at(pv, "griddefaults", PSY_PROPERTY_TYPE_NONE);
-		if (p) {
-			psy_property_set_bool(pv, "griddefaults", !psy_property_item_int(p));
-			psy_signal_emit(&self->signal_configchanged, self, 1, p);
-		}
-	}
 }
 
 void workspace_recordtweaks(Workspace* self)

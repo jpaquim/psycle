@@ -18,7 +18,10 @@ extern "C" {
 // Stores shared data for the Trackergrid and linenumbers
 
 typedef struct TrackerLineState {	
-	int lineheight;
+	psy_ui_Value lineheight;
+	psy_ui_Value defaultlineheight;
+	int lineheightpx;
+	int flatsize;
 	uintptr_t lpb;
 	psy_dsp_big_beat_t bpl;
 	int drawcursor;
@@ -30,15 +33,16 @@ typedef struct TrackerLineState {
 	// references
 	psy_audio_Pattern* pattern;
 	PatternViewSkin* skin;
+	psy_ui_Font* gridfont;
 } TrackerLineState;
 
 void trackerlinestate_init(TrackerLineState*);
 void trackerlinestate_dispose(TrackerLineState*);
-int trackerlinestate_beattoline(TrackerLineState*,
+int trackerlinestate_beattoline(const TrackerLineState*,
 	psy_dsp_big_beat_t);
-int trackerlinestate_numlines(TrackerLineState*);
-int trackerlinestate_testplaybar(TrackerLineState* self,
-	psy_dsp_big_beat_t offset);
+uintptr_t trackerlinestate_numlines(const TrackerLineState*);
+bool trackerlinestate_testplaybar(TrackerLineState*, psy_dsp_big_beat_t
+	offset);
 
 INLINE void trackerlinestate_setlpb(TrackerLineState* self, uintptr_t lpb)
 {
@@ -71,8 +75,8 @@ INLINE psy_audio_Pattern* trackerlinestate_pattern(TrackerLineState* self)
 	return self->pattern;
 }
 
-INLINE psy_dsp_big_beat_t trackerlinestate_quantize(TrackerLineState* self,
-	psy_dsp_big_beat_t position)
+INLINE psy_dsp_big_beat_t trackerlinestate_quantize(const TrackerLineState*
+	self, psy_dsp_big_beat_t position)
 {
 	assert(self);
 
@@ -86,7 +90,7 @@ INLINE int trackerlinestate_beattopx(TrackerLineState* self,
 {
 	assert(self);
 
-	return self->lineheight * trackerlinestate_beattoline(self, position);
+	return self->lineheightpx * trackerlinestate_beattoline(self, position);
 }
 
 INLINE int trackerlinestate_linetopx(TrackerLineState* self,
@@ -94,28 +98,43 @@ INLINE int trackerlinestate_linetopx(TrackerLineState* self,
 {
 	assert(self);
 
-	return self->lineheight * line;
+	return self->lineheightpx * line;
 }
 
 INLINE int trackerlinestate_lineheight(TrackerLineState* self)
 {
-	return self->lineheight;
+	assert(self);
+
+	return self->lineheightpx;
 }
 
 // quantized
-INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(TrackerLineState* self, int px)
+INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeat(TrackerLineState* self,
+	int px)
 {
 	assert(self);
 
 	return trackerlinestate_quantize(self,
-		(px / (psy_dsp_big_beat_t)self->lineheight) * self->bpl);
+		(px / (psy_dsp_big_beat_t)self->lineheightpx) * self->bpl);
 }
 
 INLINE psy_dsp_big_beat_t trackerlinestate_pxtobeatnotquantized(TrackerLineState* self, int px)
 {
 	assert(self);
 
-	return (px / (psy_dsp_big_beat_t)self->lineheight) * self->bpl;
+	return (px / (psy_dsp_big_beat_t)self->lineheightpx) * self->bpl;
+}
+
+INLINE bool trackerlinestate_testplayposition(TrackerLineState* self,
+	psy_dsp_big_beat_t position)
+{
+	assert(self);
+
+	if (self->pattern) {
+		return psy_dsp_testrange(position, self->sequenceentryoffset,
+			psy_audio_pattern_length(self->pattern));
+	}
+	return FALSE;
 }
 
 #ifdef __cplusplus

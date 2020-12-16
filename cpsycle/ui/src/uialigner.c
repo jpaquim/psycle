@@ -210,7 +210,7 @@ void psy_ui_aligner_align(psy_ui_Aligner* self)
 						&componentsize.height, &c_tm) +
 						psy_ui_margin_height_px(&component->margin, &c_tm);
 				}
-			}				
+			}			
 		}
 	}
 	psy_ui_align_alignclients(self, q, cp_topleft, cp_bottomright);
@@ -239,7 +239,7 @@ void psy_ui_align_alignclients(psy_ui_Aligner* self, psy_List* children,
 				psy_ui_TextMetric c_tm;
 
 				c_tm = psy_ui_component_textmetric(self->component);
-				cp_topleft.y += psy_ui_value_px(&component->margin.top, &c_tm);
+				cp_topleft.y += psy_ui_value_px(&component->margin.top, &c_tm);				
 				psy_ui_component_setposition(component,
 					psy_ui_point_make(
 						psy_ui_value_makepx(cp_topleft.x + psy_ui_value_px(

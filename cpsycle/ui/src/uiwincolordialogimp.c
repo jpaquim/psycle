@@ -22,29 +22,31 @@ extern psy_ui_App app;
 static void dev_dispose(psy_ui_win_ColourDialogImp*);
 static int dev_execute(psy_ui_win_ColourDialogImp*);
 static const char* dev_path(psy_ui_win_ColourDialogImp*);
-psy_ui_Colour dev_colour(psy_ui_win_ColourDialogImp*);
+static psy_ui_Colour dev_colour(psy_ui_win_ColourDialogImp*);
+static void dev_setcolour(psy_ui_win_ColourDialogImp*, psy_ui_Colour);
 
 // VTable init
 static psy_ui_ColourDialogImpVTable imp_vtable;
-static int imp_vtable_initialized = 0;
+static bool imp_vtable_initialized = FALSE;
 
-static void imp_vtable_init(psy_ui_win_ColourDialogImp* self)
+static psy_ui_ColourDialogImpVTable* imp_vtable_init(psy_ui_win_ColourDialogImp* self)
 {
 	if (!imp_vtable_initialized) {
 		imp_vtable = *self->imp.vtable;
-		imp_vtable.dev_dispose = (psy_ui_fp_colourdialogimp_dev_dispose) dev_dispose;
-		imp_vtable.dev_execute = (psy_ui_fp_colourdialogimp_dev_execute) dev_execute;		
-		imp_vtable.dev_colour = (psy_ui_fp_colourdialogimp_dev_colour) dev_colour;
-		imp_vtable_initialized = 1;
+		imp_vtable.dev_dispose = (psy_ui_fp_colourdialogimp_dev_dispose)dev_dispose;
+		imp_vtable.dev_execute = (psy_ui_fp_colourdialogimp_dev_execute)dev_execute;		
+		imp_vtable.dev_colour = (psy_ui_fp_colourdialogimp_dev_colour)dev_colour;
+		imp_vtable.dev_setcolour = (psy_ui_fp_colourdialogimp_dev_setcolour)dev_setcolour;
+		imp_vtable_initialized = TRUE;
 	}
+	return &imp_vtable;
 }
 
 void psy_ui_win_colourdialogimp_init(psy_ui_win_ColourDialogImp* self)
 {
 	psy_ui_colourdialogimp_init(&self->imp);
-	imp_vtable_init(self);	
-	self->imp.vtable = &imp_vtable;
-	self->colour = psy_ui_colour_make(0x00000000);
+	self->imp.vtable = imp_vtable_init(self);	
+	self->colour = psy_ui_colour_make_rgb(0x80, 0x80, 0x80);
 }
 
 // win32 implementation method for psy_ui_ColourDialog
@@ -57,11 +59,17 @@ int dev_execute(psy_ui_win_ColourDialogImp* self)
 	int rv;
 	static CHOOSECOLOR cc;
 	static COLORREF    crCustColours[16];
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
 
+	assert(self);
+	
 	cc.lStructSize = sizeof(CHOOSECOLOR);
 	cc.hwndOwner = NULL;
 	cc.hInstance = NULL;
-	cc.rgbResult = RGB(0x80, 0x80, 0x80);
+	psy_ui_colour_rgb(&self->colour, &r, &g, &b);
+	cc.rgbResult = RGB(r, g, b);
 	cc.lpCustColors = crCustColours;
 	cc.Flags = CC_RGBINIT | CC_FULLOPEN;
 	cc.lCustData = 0;
@@ -78,6 +86,11 @@ int dev_execute(psy_ui_win_ColourDialogImp* self)
 psy_ui_Colour dev_colour(psy_ui_win_ColourDialogImp* self)
 {
 	return self->colour;	
+}
+
+void dev_setcolour(psy_ui_win_ColourDialogImp* self, psy_ui_Colour colour)
+{
+	self->colour = colour;
 }
 
 #endif

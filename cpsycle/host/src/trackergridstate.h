@@ -147,8 +147,7 @@ typedef struct TrackerGridState {
 	psy_Signal signal_cursorchanged;
 	// internal data
 	psy_audio_PatternCursor cursor;	
-	uintptr_t numtracks;
-	double zoom;	
+	uintptr_t numtracks;	
 	// references
 	psy_audio_Pattern* pattern;
 	PatternViewSkin* skin;
