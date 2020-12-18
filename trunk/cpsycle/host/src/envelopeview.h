@@ -4,60 +4,81 @@
 #if !defined(ENVELOPEVIEW_H)
 #define ENVELOPEVIEW_H
 
+// host
 #include "scrollzoom.h"
-#include <uicomponent.h>
+// ui
+#include <uibutton.h>
+#include <uicheckbox.h>
+#include <uilabel.h>
+// dsp
+#include <envelope.h>
+// container
 #include <list.h>
-#include <adsr.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// aim: This modifies the ADSR (Attack-Decay-Sustain-Release) envelope for the
-//      volume and filters, which is shown on a graph.
-//
-// todo: add point free form envelopes
-
-typedef struct {	
-	psy_dsp_EnvelopePoint start;
-	psy_dsp_EnvelopePoint attack;
-	psy_dsp_EnvelopePoint decay;
-	psy_dsp_EnvelopePoint release;
-	psy_dsp_ADSRSettings* settings;
-} ADSRPointMapper;
+// This modifies the envelope for volume and filters shown on a graph.
 
 typedef struct {
 	psy_ui_Component component;
 	int cx;
 	int cy;
-	psy_List* points;
+	psy_dsp_EnvelopeSettings* settings;
 	psy_List* dragpoint;
 	int sustainstage;
 	int dragrelative;
 	psy_ui_Margin spacing;	
-	psy_dsp_ADSRSettings dummysettings;
-	psy_dsp_ADSRSettings* adsr;
-	ADSRPointMapper pointmapper;
-	char* text;
 	float zoomleft;
-	float zoomright;
+	float zoomright;	
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);
-void envelopebox_setadsrenvelope(EnvelopeBox*, psy_dsp_ADSRSettings*);
+void envelopebox_setenvelope(EnvelopeBox* self, psy_dsp_EnvelopeSettings*);
 void envelopebox_update(EnvelopeBox*);
-void envelopebox_settext(EnvelopeBox*, const char* text);
 
-typedef struct {
+INLINE psy_ui_Component* envelopebox_base(EnvelopeBox* self)
+{
+	return &self->component;
+}
+
+typedef struct EnvelopeBar {
 	psy_ui_Component component;
+	psy_ui_CheckBox enabled;
+	psy_ui_Button millisec;
+	psy_ui_Button ticks;
+	psy_ui_Button adsr;
+} EnvelopeBar;
+
+void envelopebar_init(EnvelopeBar*, psy_ui_Component* parent);
+void envelopebar_settext(EnvelopeBar*, const char* text);
+
+INLINE psy_ui_Component* envelopebar_base(EnvelopeBar* self)
+{
+	return &self->component;
+}
+
+typedef struct EnvelopeView {
+	// inherits
+	psy_ui_Component component;
+	// ui elements
+	EnvelopeBar bar;
 	EnvelopeBox envelopebox;
-	ScrollZoom zoom;	
+	ScrollZoom zoom;
+	// references
+	Workspace* workspace;
 } EnvelopeView;
 
-void envelopeview_init(EnvelopeView*, psy_ui_Component* parent);
-void envelopeview_setadsrenvelope(EnvelopeView*, psy_dsp_ADSRSettings*);
+void envelopeview_init(EnvelopeView*, psy_ui_Component* parent, Workspace*);
+void envelopeview_setenvelope(EnvelopeView*, psy_dsp_EnvelopeSettings* settings);
 void envelopeview_update(EnvelopeView*);
 void envelopeview_settext(EnvelopeView*, const char* text);
+
+INLINE psy_ui_Component* envelopeview_base(EnvelopeView* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

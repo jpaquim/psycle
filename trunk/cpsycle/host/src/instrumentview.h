@@ -42,6 +42,24 @@ void virtualgeneratorbox_updatesamplers(VirtualGeneratorsBox*);
 void virtualgeneratorbox_updategenerators(VirtualGeneratorsBox*);
 void virtualgeneratorbox_update(VirtualGeneratorsBox*);
 
+typedef struct InstrumentPredefsBar {
+	psy_ui_Component component;
+	psy_ui_Label predefs;	
+	psy_ui_Button predef_1;
+	psy_ui_Button predef_2;
+	psy_ui_Button predef_3;
+	psy_ui_Button predef_4;
+	psy_ui_Button predef_5;
+	psy_ui_Button predef_6;
+	// references
+	psy_audio_Instrument* instrument;
+	struct InstrumentView* view;
+	Workspace* workspace;
+} InstrumentPredefsBar;
+
+void instrumentpredefsbar_init(InstrumentPredefsBar*, psy_ui_Component* parent,
+	psy_audio_Instrument* instrument, struct InstrumentView* view, Workspace* workspace);
+
 typedef struct {
 	psy_ui_Component component;
 	psy_ui_Label namelabel;
@@ -51,6 +69,7 @@ typedef struct {
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;
 	VirtualGeneratorsBox virtualgenerators;
+	InstrumentPredefsBar predefs;
 	struct InstrumentView* view;
 } InstrumentHeaderView;
 

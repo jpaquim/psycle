@@ -35,6 +35,8 @@ typedef struct psy_ui_Button {
 	psy_ui_Colour restorebgcolour;
 	bool shiftstate;
 	bool ctrlstate;
+	bool buttonstate;
+	bool allowrightclick;
 	char* translation;
 	bool translate;
 	// signals
@@ -64,6 +66,20 @@ INLINE bool psy_ui_button_hasctrl(const psy_ui_Button* self)
 	assert(self);
 
 	return self->ctrlstate;
+}
+
+INLINE bool psy_ui_button_clickstate(const psy_ui_Button* self)
+{
+	assert(self);
+
+	return self->buttonstate;
+}
+
+INLINE void psy_ui_button_allowrightclick(psy_ui_Button* self)
+{
+	assert(self);
+
+	self->allowrightclick = TRUE;
 }
 
 INLINE bool psy_ui_button_hasshift(const psy_ui_Button* self)

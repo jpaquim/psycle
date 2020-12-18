@@ -36,6 +36,11 @@ INLINE float scrollzoom_end(ScrollZoom* self)
 	return self->end;
 }
 
+INLINE psy_ui_Component* scrollzoom_base(ScrollZoom* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

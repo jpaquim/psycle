@@ -7,7 +7,6 @@
 #include "xmsamplerchannel.h"
 #include "samplerdefs.h"
 // dsp
-#include <adsr.h>
 #include <filter.h>
 #include <dspslide.h>
 #include <valuemapper.h>
@@ -29,10 +28,10 @@ typedef struct {
 	struct psy_audio_Instrument* instrument;
 	psy_audio_NewNoteAction nna;
 
-	psy_dsp_ADSR amplitudeenvelope;
-	psy_dsp_ADSR panenvelope;
-	psy_dsp_ADSR pitchenvelope;
-	psy_dsp_ADSR filterenvelope;
+	psy_dsp_Envelope amplitudeenvelope;
+	psy_dsp_Envelope panenvelope;
+	psy_dsp_Envelope pitchenvelope;
+	psy_dsp_Envelope filterenvelope;
 
 	// SampleIterator (WaveDataController)
 	psy_List* positions;

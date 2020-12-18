@@ -48,6 +48,7 @@ typedef void (*psy_ui_fp_component_show)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_showstate)(struct psy_ui_Component*, int state);
 typedef void (*psy_ui_fp_component_hide)(struct psy_ui_Component*);
 typedef int (*psy_ui_fp_component_visible)(struct psy_ui_Component*);
+typedef int (*psy_ui_fp_component_drawvisible)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_move)(struct psy_ui_Component*, psy_ui_Point);
 typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, psy_ui_Size size);
 typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_ui_Size size);
@@ -96,6 +97,7 @@ typedef struct psy_ui_ComponentVTable {
 	psy_ui_fp_component_showstate showstate;
 	psy_ui_fp_component_hide hide;
 	psy_ui_fp_component_visible visible;
+	psy_ui_fp_component_visible drawvisible;
 	psy_ui_fp_component_move move;
 	psy_ui_fp_component_resize resize;
 	psy_ui_fp_component_clientresize clientresize;	
@@ -280,6 +282,7 @@ void psy_ui_component_preventdefault(psy_ui_Component*);
 void psy_ui_component_init_base(psy_ui_Component*);
 void psy_ui_component_init_signals(psy_ui_Component*);
 int psy_ui_component_visible(psy_ui_Component*);
+int psy_ui_component_drawvisible(psy_ui_Component*);
 void psy_ui_component_align(psy_ui_Component*);
 void psy_ui_component_alignall(psy_ui_Component*);
 void psy_ui_component_setmargin(psy_ui_Component*, const psy_ui_Margin*);
@@ -330,6 +333,7 @@ typedef void (*psy_ui_fp_componentimp_dev_show)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_showstate)(struct psy_ui_ComponentImp*, int state);
 typedef void (*psy_ui_fp_componentimp_dev_hide)(struct psy_ui_ComponentImp*);
 typedef int (*psy_ui_fp_componentimp_dev_visible)(struct psy_ui_ComponentImp*);
+typedef int (*psy_ui_fp_componentimp_dev_drawvisible)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_move)(struct psy_ui_ComponentImp*, int left, int top);
 typedef void (*psy_ui_fp_componentimp_dev_resize)(struct psy_ui_ComponentImp*, psy_ui_Size);
 typedef void (*psy_ui_fp_componentimp_dev_clientresize)(struct psy_ui_ComponentImp*, int width, int height);
@@ -372,6 +376,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_showstate dev_showstate;
 	psy_ui_fp_componentimp_dev_hide dev_hide;
 	psy_ui_fp_componentimp_dev_visible dev_visible;
+	psy_ui_fp_componentimp_dev_drawvisible dev_drawvisible;
 	psy_ui_fp_componentimp_dev_move dev_move;
 	psy_ui_fp_componentimp_dev_resize dev_resize;
 	psy_ui_fp_componentimp_dev_clientresize dev_clientresize;
@@ -569,32 +574,58 @@ INLINE void psy_ui_component_setoverflow(psy_ui_Component* self, psy_ui_Overflow
 
 INLINE psy_ui_Overflow psy_ui_component_overflow(psy_ui_Component* self)
 {
+	assert(self);
+
 	return self->overflow;
 }
 
 INLINE void psy_ui_component_setscrollstep(psy_ui_Component* self, int stepx, int stepy)
 {
+	assert(self);
+
 	self->scrollstepx = stepx;
 	self->scrollstepy = stepy;
 }
 
 INLINE void psy_ui_component_setscrollstepx(psy_ui_Component* self, int step)
 {
+	assert(self);
+
 	self->scrollstepx = step;
+}
+
+INLINE int psy_ui_component_scrollstepx(const psy_ui_Component* self)
+{
+	assert(self);
+
+	return self->scrollstepx;
 }
 
 INLINE void psy_ui_component_setscrollstepy(psy_ui_Component* self, int step)
 {
+	assert(self);
+
 	self->scrollstepy = step;
+}
+
+INLINE int psy_ui_component_scrollstepy(const psy_ui_Component* self)
+{
+	assert(self);
+
+	return self->scrollstepy;
 }
 
 INLINE void psy_ui_component_settabindex(psy_ui_Component* self, int index)
 {
+	assert(self);
+
 	self->tabindex = index;
 }
 
 INLINE int psy_ui_component_tabindex(const psy_ui_Component* self)
 {
+	assert(self);
+
 	return self->tabindex;
 }
 

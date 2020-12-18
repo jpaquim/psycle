@@ -3,16 +3,14 @@
 
 #include "../../detail/prefix.h"
 
+// host
 #include "propertiesview.h"
-
+#include "trackergridstate.h" // TRACKER CMDS
+// ui
 #include <uicolordialog.h>
 #include <uifolderdialog.h>
 #include <uifontdialog.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 
 void propertiesrenderlinestate_init(PropertiesRenderLineState* self)
@@ -118,6 +116,11 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	self->col_perc[1] = 0.4f;
 	self->col_perc[2] = 0.2f;
 	self->usefixedwidth = FALSE;
+	self->valuecolour = psy_ui_colour_make(0x00CACACA);
+	self->sectioncolour = psy_ui_colour_make(0x00CACACA);
+	self->separatorcolour = psy_ui_colour_make(0x00333333);
+	self->valueselcolour = psy_ui_colour_make(0x00FFFFFF);
+	self->valueselbackgroundcolour = psy_ui_colour_make(0x009B7800);
 	psy_table_init(&self->linestates);
 	psy_ui_edit_init(&self->edit, &self->component);
 	psy_signal_connect(&self->edit.component.signal_keydown, self,
@@ -129,12 +132,7 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_align, self,
 		propertiesrenderer_onalign);
-	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);
-	self->valuecolour = psy_ui_colour_make(0x00CACACA);
-	self->sectioncolour = psy_ui_colour_make(0x00CACACA);
-	self->separatorcolour = psy_ui_colour_make(0x00333333);
-	self->valueselcolour = psy_ui_colour_make(0x00FFFFFF);
-	self->valueselbackgroundcolour = psy_ui_colour_make(0x009B7800);
+	psy_ui_component_setoverflow(&self->component, psy_ui_OVERFLOW_VSCROLL);	
 }
 
 void propertiesrenderer_ondestroy(PropertiesRenderer* self, psy_ui_Component* sender)
@@ -1036,6 +1034,12 @@ static void propertiesview_onlanguagechanged(PropertiesView*, psy_ui_Component*)
 static void propertiesview_translate(PropertiesView*);
 static int propertiesview_onchangelanguageenum(PropertiesView*,
 	psy_Property*, int level);
+static void propertiesview_oneventdriverinput(PropertiesView*, psy_EventDriver* sender);
+static int propertiesview_checkrange(PropertiesView*, int position);
+static void propertiesview_onfocus(PropertiesView*, psy_ui_Component* sender);
+static void propertiesview_onmousedown(PropertiesView*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
+
 // implementation
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Property* properties,
@@ -1049,6 +1053,10 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesview_ondestroy);
+	psy_signal_connect(&self->component.signal_focus,
+		self, propertiesview_onfocus);
+	psy_signal_connect(&self->component.signal_mousedown,
+		self, propertiesview_onmousedown);
 	psy_ui_component_setbackgroundmode(&self->component,
 		psy_ui_BACKGROUND_NONE);
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
@@ -1074,7 +1082,9 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->renderer.signal_selected, self,
 		propertiesview_onpropertiesrendererselected);
 	psy_signal_connect(&self->component.signal_languagechanged, self,
-		propertiesview_onlanguagechanged);	
+		propertiesview_onlanguagechanged);
+	psy_signal_connect(&workspace_player(self->workspace)->eventdrivers.signal_input,
+		self, propertiesview_oneventdriverinput);
 }
 
 void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
@@ -1195,4 +1205,78 @@ int propertiesview_onchangelanguageenum(PropertiesView* self,
 			psy_property_text(property)));
 	}
 	return TRUE;
+}
+
+void propertiesview_oneventdriverinput(PropertiesView* self, psy_EventDriver* sender)
+{
+	if (psy_ui_component_hasfocus(&self->renderer.component)) {
+		psy_EventDriverCmd cmd;
+
+		cmd = psy_eventdriver_getcmd(sender, "tracker");
+		if (cmd.id != -1) {
+			switch (cmd.id) {
+				case CMD_NAVTOP:
+					psy_ui_component_setscrolltop(&self->renderer.component, 0);
+					break;
+				case CMD_NAVBOTTOM:
+					psy_ui_component_setscrolltop(&self->renderer.component, 
+						propertiesview_checkrange(self, INT32_MAX));
+					break;
+				case CMD_NAVUP:
+					psy_ui_component_setscrolltop(&self->renderer.component,
+						psy_max(0,
+							psy_ui_component_scrolltop(&self->renderer.component) -
+							psy_ui_component_scrollstepy(&self->renderer.component)));
+					break;
+				case CMD_NAVDOWN: {
+					int position;
+
+					position = psy_ui_component_scrolltop(&self->renderer.component) +
+						psy_ui_component_scrollstepy(&self->renderer.component);
+					psy_ui_component_setscrolltop(&self->renderer.component,
+						propertiesview_checkrange(self, position));
+					break; }
+				case CMD_NAVPAGEUP:
+					psy_ui_component_setscrolltop(&self->renderer.component,
+						psy_max(0,
+							psy_ui_component_scrolltop(&self->renderer.component) -
+							psy_ui_component_scrollstepy(&self->renderer.component) * 16));
+					break;
+				case CMD_NAVPAGEDOWN: {					
+					int position;					
+									
+					position = psy_ui_component_scrolltop(&self->renderer.component) +
+						psy_ui_component_scrollstepy(&self->renderer.component) * 16;					
+					psy_ui_component_setscrolltop(&self->renderer.component,
+						propertiesview_checkrange(self, position));
+					break; }
+				default:
+					break;
+			}
+		}	
+	}
+}
+
+int propertiesview_checkrange(PropertiesView* self, int position)
+{
+	int scrollstep;
+	int minval;
+	int maxval;
+
+	psy_ui_component_verticalscrollrange(&self->renderer.component,
+		&minval, &maxval);
+	scrollstep = position / psy_ui_component_scrollstepy(&self->renderer.component);
+	scrollstep = psy_min(maxval, scrollstep);
+	return scrollstep * psy_ui_component_scrollstepy(&self->renderer.component);
+}
+
+void propertiesview_onfocus(PropertiesView* self, psy_ui_Component* sender)
+{
+	psy_ui_component_setfocus(&self->renderer.component);
+}
+
+void propertiesview_onmousedown(PropertiesView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
+{
+	psy_ui_component_setfocus(&self->renderer.component);
 }

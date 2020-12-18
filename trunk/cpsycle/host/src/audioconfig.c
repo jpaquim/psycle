@@ -289,7 +289,7 @@ bool audioconfig_onpropertychanged(AudioConfig* self, psy_Property* property)
 bool audioconfig_onchanged(AudioConfig* self, psy_Property*
 	property)
 {
-	assert(self);
+	assert(self);	
 
 	psy_signal_emit(&self->signal_changed, self, 1, property);
 	return TRUE;

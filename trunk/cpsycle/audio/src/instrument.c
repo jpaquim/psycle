@@ -67,6 +67,7 @@ int psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr
 	return 1;
 }
 
+// psy_audio_Instrument
 void psy_audio_instrument_init(psy_audio_Instrument* self)
 {	
 	self->index = UINTPTR_MAX;
@@ -75,11 +76,18 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	self->loop = FALSE;
 	self->lines = 16;
 	self->nna = psy_audio_NNA_STOP;
-	self->globalvolume = (psy_dsp_amp_t) 1.0f;
+	self->globalvolume = (psy_dsp_amp_t)1.0f;
 	self->randompan = 0;
 	self->filtertype = F_NONE;
-	adsr_settings_initdefault(&self->volumeenvelope);
-	adsr_settings_init(&self->filterenvelope, 0.005f, 0.370f, 0.5f, 0.370f);
+	// adsr_settings_initdefault(&self->volumeenvelope);
+	psy_dsp_envelopesettings_init_adsr(&self->volumeenvelope);	
+	psy_dsp_envelopesettings_init_adsr(&self->filterenvelope);
+	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope, 		
+		1, 0.005f, 1.f);
+	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope,
+		2, 0.005f + 0.370f, 0.5f);
+	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope,
+		3, 0.005f + 0.370f + 0.370f, 0.0f);
 	self->filtermodamount = 1.0f;
 	self->filtercutoff = 1.f;
 	self->filterres = 0.f;
@@ -88,9 +96,12 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 
 void psy_audio_instrument_dispose(psy_audio_Instrument* self)
 {	
+	psy_dsp_envelopesettings_dispose(&self->volumeenvelope);
+	psy_dsp_envelopesettings_dispose(&self->filterenvelope);
 	psy_audio_instrument_disposeentries(self);
 	psy_signal_dispose(&self->signal_namechanged);
 	free(self->name);
+	self->name = NULL;
 }
 
 void psy_audio_instrument_disposeentries(psy_audio_Instrument* self)
@@ -219,3 +230,12 @@ const psy_List* psy_audio_instrument_entries(psy_audio_Instrument* self)
 	return self->entries;
 }
 
+const char* psy_audio_instrument_tostring(psy_audio_Instrument* self)
+{
+	return NULL;
+}
+
+void psy_audio_instrument_fromstring(psy_audio_Instrument* self, const char* str)
+{
+
+}

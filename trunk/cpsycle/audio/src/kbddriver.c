@@ -180,13 +180,14 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 	KbdDriver* self;
 	uintptr_t keycode;	
 	bool ctrl;
+	bool alt;
 
 	assert(driver);
 
 	self = (KbdDriver*)(driver);
 
 	// patternview chordmode
-	psy_audio_decodeinput((uintptr_t)input.param1, &keycode, &self->shift, &ctrl);
+	psy_audio_decodeinput((uintptr_t)input.param1, &keycode, &self->shift, &ctrl, &alt);
 	if (keycode == 0x11 /* psy_ui_KEY_CONTROL */) {
 		return;
 	}
@@ -204,7 +205,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 
 			cmd.id = -1;
 			testnote = input;
-			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl);
+			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
 			driver_cmd(driver, "notes", testnote, &cmd);
 			if (cmd.id != -1 && cmd.id < psy_audio_NOTECOMMANDS_RELEASE) {
 				self->chordmode = TRUE;
@@ -216,7 +217,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 
 			cmd.id = -1;
 			testnote = input;
-			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl);
+			testnote.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
 			driver_cmd(driver, "notes", testnote, &cmd);
 			if (cmd.id == psy_audio_NOTECOMMANDS_RELEASE) {
 				psy_eventdriver_hostevent(driver, PSY_EVENTDRIVER_INSERTNOTEOFF, 1, 0);
@@ -230,7 +231,7 @@ void driver_write(psy_EventDriver* driver, psy_EventDriverInput input)
 	// handle chordmode
 	if (self->chordmode != FALSE) {
 		// remove shift		
-		input.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl);
+		input.param1 = psy_audio_encodeinput(keycode, FALSE, ctrl, FALSE);
 	}
 	self->lastinput = input;
 	psy_signal_emit(&self->driver.signal_input, self, 0);

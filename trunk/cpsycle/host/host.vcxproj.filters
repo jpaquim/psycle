@@ -349,6 +349,9 @@
     <ClCompile Include="src\realedit.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
+    <ClCompile Include="src\predefsconfig.c">
+      <Filter>configuration</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -673,6 +676,9 @@
     </ClInclude>
     <ClInclude Include="src\realedit.h">
       <Filter>uicontrols</Filter>
+    </ClInclude>
+    <ClInclude Include="src\predefsconfig.h">
+      <Filter>configuration</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

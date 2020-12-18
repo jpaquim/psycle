@@ -54,6 +54,8 @@ typedef struct {
 #endif
 
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
+void psy_ui_checkbox_init_text(psy_ui_CheckBox*, psy_ui_Component* parent,
+    const char* text);
 void psy_ui_checkbox_settext(psy_ui_CheckBox*, const char* text);
 const char* psy_ui_checkbox_text(psy_ui_CheckBox*);
 void psy_ui_checkbox_check(psy_ui_CheckBox*);

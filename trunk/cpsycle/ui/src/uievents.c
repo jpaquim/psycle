@@ -6,12 +6,13 @@
 #include "uievents.h"
 
 void psy_ui_keyevent_init(psy_ui_KeyEvent* self, int keycode, int keydata,
-	int shift, int ctrl, int repeat)
+	int shift, int ctrl, int alt, int repeat)
 {
 	self->keycode = keycode;
 	self->keydata = keydata;
 	self->shift = shift;
 	self->ctrl = ctrl;
+	self->alt = alt;
 	self->repeat = repeat;
 	self->bubble = 1;
 	self->preventdefault = FALSE;

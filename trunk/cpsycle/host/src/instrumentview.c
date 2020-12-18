@@ -185,6 +185,64 @@ void virtualgeneratorbox_update(VirtualGeneratorsBox* self)
 	}	
 }
 
+// InstrumentPredefsBar
+
+static void instrumentpredefsbar_onpredefs(InstrumentPredefsBar* self, psy_ui_Button* sender);
+
+void instrumentpredefsbar_init(InstrumentPredefsBar* self, psy_ui_Component* parent,
+	psy_audio_Instrument* instrument, InstrumentView* view, Workspace* workspace)
+{
+	psy_ui_Button* buttons[] = { &self->predef_1, &self->predef_2,
+		&self->predef_3, &self->predef_4, &self->predef_5, &self->predef_6,
+		NULL};	
+	int c;
+
+	psy_ui_component_init(&self->component, parent);
+	self->instrument = instrument;
+	self->workspace = workspace;
+	self->view = view;
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_component_setalignexpand(&self->component,
+		psy_ui_HORIZONTALEXPAND);
+	psy_ui_label_init(&self->predefs, &self->component);	
+	psy_ui_label_preventtranslation(&self->predefs);
+	psy_ui_label_settext(&self->predefs, "Predef.");	
+	for (c = 0; buttons[c] != NULL; ++c) {
+		char text[2];
+
+		psy_snprintf(text, 2, "%i", c + 1);
+		psy_ui_button_init_text(buttons[c], &self->component, text);
+		psy_ui_button_allowrightclick(buttons[c]);		
+		psy_signal_connect(&buttons[c]->signal_clicked, self,
+			instrumentpredefsbar_onpredefs);		
+	}	
+}
+
+void instrumentpredefsbar_onpredefs(InstrumentPredefsBar* self, psy_ui_Button* sender)
+{
+	psy_ui_Button* buttons[] = { &self->predef_1, &self->predef_2,
+		&self->predef_3, &self->predef_4, &self->predef_5, &self->predef_6,
+		NULL };
+	int index;
+
+	if (self->instrument) {
+		index = 0;
+		while (buttons[index] != NULL && sender != buttons[index]) ++index;
+		if (!buttons[index]) {
+			return;
+		}
+		if (psy_ui_button_clickstate(sender) == 1) {
+			predefsconfig_predef(&self->workspace->config.predefs,
+				index, &self->instrument->volumeenvelope);		
+		} else {
+			predefsconfig_storepredef(&self->workspace->config.predefs,
+				index, &self->instrument->volumeenvelope);		
+		}
+		psy_ui_component_invalidate(&self->view->component);
+	}
+}
+
 // InstrumentHeaderView
 // prototypes
 static void instrumentheaderview_onprevinstrument(InstrumentHeaderView*, psy_ui_Component* sender);
@@ -197,6 +255,7 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	Workspace* workspace)
 {	
 	psy_ui_Margin margin;
+	psy_ui_Margin tab;	
 
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(0.5),
@@ -219,16 +278,22 @@ void instrumentheaderview_init(InstrumentHeaderView* self, psy_ui_Component* par
 	psy_ui_button_seticon(&self->nextbutton, psy_ui_ICON_MORE);
 	virtualgeneratorbox_init(&self->virtualgenerators, &self->component,
 		workspace);
+	instrumentpredefsbar_init(&self->predefs, &self->component, NULL,
+		view, workspace);
 	psy_list_free(psy_ui_components_setalign(
 		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
 		psy_ui_ALIGN_LEFT,
-			&margin));	
+			&margin));		
+	tab = margin;
+	tab.right = psy_ui_value_makeew(4.0);
+	psy_ui_component_setmargin(&self->virtualgenerators.component, &tab);
 }
 
 void instrumentheaderview_setinstrument(InstrumentHeaderView* self,
 	psy_audio_Instrument* instrument)
 {
 	self->instrument = instrument;
+	self->predefs.instrument = instrument;
 	psy_signal_prevent(&self->nameedit.signal_change, self,
 		instrumentheaderview_oneditinstrumentname);
 	psy_ui_edit_settext(&self->nameedit,
@@ -550,7 +615,7 @@ void instrumentvolumeview_init(InstrumentVolumeView* self, psy_ui_Component* par
 	self->instruments = instruments;	
 	self->instrument = 0;
 	psy_ui_component_init(&self->component, parent);		
-	envelopeview_init(&self->envelopeview, &self->component);
+	envelopeview_init(&self->envelopeview, &self->component, workspace);
 	envelopeview_settext(&self->envelopeview, "Amplitude envelope");
 	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin,
@@ -600,45 +665,57 @@ void instrumentvolumeview_setinstrument(InstrumentVolumeView* self,
 	psy_audio_Instrument* instrument)
 {	
 	self->instrument = instrument;
-	envelopeview_setadsrenvelope(&self->envelopeview,
-		instrument
-		? &instrument->volumeenvelope
-		: 0);
+	envelopeview_setenvelope(&self->envelopeview,
+		(instrument)
+			? &instrument->volumeenvelope
+			: NULL);
 }
 
 void instrumentvolumeview_onvolumeviewdescribe(InstrumentVolumeView* self,
 	psy_ui_Slider* slidergroup, char* txt)
 {
-	if (slidergroup == &self->attack) {		
+	if (slidergroup == &self->attack) {
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0ms");
 		} else {
-			psy_snprintf(txt, 20, "%.4fms", 
-				adsr_settings_attack(&self->instrument->volumeenvelope) * 1000);				
+			psy_dsp_EnvelopePoint pt;
+
+			pt = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 1);
+			psy_snprintf(txt, 20, "%.4fms", pt.time * 1000);				
 		}		
-	} else
-	if (slidergroup == &self->decay) {		
+	} else if (slidergroup == &self->decay) {		
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0ms");
 		} else {
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 1);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 2);
 			psy_snprintf(txt, 20, "%.4fms",
-				adsr_settings_decay(&self->instrument->volumeenvelope) * 1000);
+				(pt_end.time - pt_start.time) * 1000);
 		}		
-	} else
-	if (slidergroup == &self->sustain) {
+	} else if (slidergroup == &self->sustain) {
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0%%");
 		} else {
-			psy_snprintf(txt, 20, "%d%%", (int)
-				(adsr_settings_sustain(&self->instrument->volumeenvelope) * 100));
+			psy_dsp_EnvelopePoint pt_sustain;
+
+			pt_sustain = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 2);
+			psy_snprintf(txt, 20, "%d%%", (int)(pt_sustain.value * 100));
 		}		
 	} else
 	if (slidergroup == &self->release) {
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0ms");
 		} else {
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 2);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 3);
 			psy_snprintf(txt, 20, "%.4fms",
-				adsr_settings_release(&self->instrument->volumeenvelope) * 1000);
+				(pt_end.time - pt_start.time) * 1000);
 		}		
 	}
 }
@@ -649,7 +726,7 @@ void instrumentvolumeview_onvolumeviewtweak(InstrumentVolumeView* self,
 	if (!self->instrument) {
 		return;
 	}
-	if (slidergroup == &self->attack) {
+	/*if (slidergroup == &self->attack) {
 		adsr_settings_setattack(
 			&self->instrument->volumeenvelope, value * 1.4f);
 	} else
@@ -665,31 +742,52 @@ void instrumentvolumeview_onvolumeviewtweak(InstrumentVolumeView* self,
 		adsr_settings_setrelease(
 			&self->instrument->volumeenvelope, value * 1.4f);
 	}
-	envelopeview_update(&self->envelopeview);
+	envelopeview_update(&self->envelopeview);*/
 }
 
 void instrumentvolumeview_onvolumeviewvalue(InstrumentVolumeView* self,
 	psy_ui_Slider* slidergroup, float* value)
 {
 	if (slidergroup == &self->attack) {
-		*value = self->instrument
-			? adsr_settings_attack(&self->instrument->volumeenvelope) / 1.4f
-			: 0.f;
-	} else 
-	if (slidergroup == &self->decay) {
-		*value = self->instrument
-			? adsr_settings_decay(&self->instrument->volumeenvelope) / 1.4f
-			: 0.f;
-	} else 	
-	if (slidergroup == &self->sustain) {
-		*value = self->instrument
-			? adsr_settings_sustain(&self->instrument->volumeenvelope)
-			: 0.5f;
-	} else
-	if (slidergroup == &self->release) {
-		*value = self->instrument
-			? adsr_settings_release(&self->instrument->volumeenvelope) / 1.4f
-			: 0.5f;
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt;
+
+			pt = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 1);
+			*value = pt.time / 1.4f;
+		} else {
+			*value = 0.f;
+		}
+	} else if (slidergroup == &self->decay) {
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 1);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 2);
+			*value = (pt_end.time - pt_start.time) / 1.4f;
+		} else {
+			*value = 0.f;
+		}	
+	} else if (slidergroup == &self->sustain) {
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_sustain;			
+
+			pt_sustain = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 2);
+			*value = pt_sustain.value;
+		} else {
+			*value = 0.5f;
+		}	
+	} else if (slidergroup == &self->release) {
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 2);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->volumeenvelope, 3);
+			*value = (pt_end.time - pt_start.time) / 1.4f;
+		} else {
+			*value = 0.5f;
+		}	
 	}
 }
 
@@ -782,7 +880,7 @@ void instrumentfilterview_init(InstrumentFilterView* self, psy_ui_Component* par
 	psy_ui_combobox_setcursel(&self->filtertype, (int)F_NONE);
 	psy_signal_connect(&self->filtertype.signal_selchanged, self,
 		instrumentfilterview_onfiltercomboboxchanged);
-	envelopeview_init(&self->envelopeview, &self->component);
+	envelopeview_init(&self->envelopeview, &self->component, workspace);
 	envelopeview_settext(&self->envelopeview, "Filter envelope");
 	psy_ui_component_setalign(&self->envelopeview.component, psy_ui_ALIGN_TOP);
 	psy_ui_margin_init_all(&margin,
@@ -863,11 +961,11 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self, psy_audio_In
 {	
 	self->instrument = instrument;
 	if (self->instrument) {
-		envelopeview_setadsrenvelope(&self->envelopeview,
+		envelopeview_setenvelope(&self->envelopeview,
 			&instrument->filterenvelope);
 		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)instrument->filtertype);
 	} else {
-		envelopeview_setadsrenvelope(&self->envelopeview, NULL);
+		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_combobox_setcursel(&self->filtertype, (intptr_t)F_NONE);
 	}	
 }
@@ -878,36 +976,44 @@ void instrumentfilterview_ondescribe(InstrumentFilterView* self, psy_ui_Slider* 
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0ms");
 		} else {
-			psy_snprintf(txt, 20, "%.4fms", 
-				adsr_settings_attack(
-					&self->instrument->filterenvelope) * 1000);				
+			psy_dsp_EnvelopePoint pt_start;			
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 1);
+			psy_snprintf(txt, 20, "%.4fms", pt_start.time * 1000);
 		}		
 	} else
 	if (slidergroup == &self->decay) {		
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0ms");
 		} else {
-			psy_snprintf(txt, 20, "%.4fms",
-				adsr_settings_decay(
-					&self->instrument->filterenvelope) * 1000);
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 1);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 2);
+			psy_snprintf(txt, 20, "%.4fms",	(pt_end.time - pt_start.time) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->sustain) {
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0%%");
 		} else {
-			psy_snprintf(txt, 20, "%d%%", (int)(
-				adsr_settings_sustain(
-					&self->instrument->filterenvelope) * 100));
+			psy_dsp_EnvelopePoint pt_start;			
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 1);			
+			psy_snprintf(txt, 20, "%d%%", (int)(pt_start.value * 100));
 		}		
 	} else
 	if (slidergroup == &self->release) {
 		if (!self->instrument) {
 			psy_snprintf(txt, 10, "0ms");
 		} else {
-			psy_snprintf(txt, 20, "%.4fms",
-				adsr_settings_release(
-					&self->instrument->filterenvelope) * 1000);
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 2);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 3);
+			psy_snprintf(txt, 20, "%.4fms", (pt_end.time - pt_start.time) * 1000);
 		}		
 	} else
 	if (slidergroup == &self->cutoff) {
@@ -939,7 +1045,7 @@ void instrumentfilterview_ontweak(InstrumentFilterView* self,
 	if (!self->instrument) {
 		return;
 	}
-	if (slidergroup == &self->attack) {
+	/*if (slidergroup == &self->attack) {
 			adsr_settings_setattack(
 				&self->instrument->filterenvelope, value * 1.4f);
 	} else
@@ -963,7 +1069,7 @@ void instrumentfilterview_ontweak(InstrumentFilterView* self,
 	} else
 	if (slidergroup == &self->modamount) {
 		self->instrument->filtermodamount = value - 0.5f;
-	}
+	}*/
 	envelopeview_update(&self->envelopeview);
 }
 
@@ -971,24 +1077,48 @@ void instrumentfilterview_onvalue(InstrumentFilterView* self,
 	psy_ui_Slider* slidergroup, float* value)
 {
 	if (slidergroup == &self->attack) {
-		*value = self->instrument
-			? adsr_settings_attack(&self->instrument->filterenvelope) / 1.4f
-			: 0.f;
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_start;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 1);
+			*value = pt_start.value / 1.4f;
+		} else {
+			*value = 0.f;
+		}			
 	} else 
 	if (slidergroup == &self->decay) {
-		*value = self->instrument
-			? adsr_settings_decay(&self->instrument->filterenvelope) / 1.4f
-			: 0.f;
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 1);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 2);
+			*value = (pt_end.time - pt_start.time) / 1.4f;
+		} else {
+			*value = 0.f;
+		}
 	} else 	
 	if (slidergroup == &self->sustain) {
-		*value = self->instrument
-			? adsr_settings_sustain(&self->instrument->filterenvelope)
-			: 0.5f;
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_start;			
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 2);			
+			*value = pt_start.value;
+		} else {
+			*value = 0.5f;
+		}
 	} else
 	if (slidergroup == &self->release) {
-		*value = self->instrument
-			? adsr_settings_release(&self->instrument->filterenvelope) / 1.4f
-			: 0.5f;
+		if (self->instrument) {
+			psy_dsp_EnvelopePoint pt_start;
+			psy_dsp_EnvelopePoint pt_end;
+
+			pt_start = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 2);
+			pt_end = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, 3);
+			*value = (pt_end.time - pt_start.time) / 1.4f;
+		} else {
+			*value = 0.5f;
+		}
 	} else
 	if (slidergroup == &self->cutoff) {
 		*value = self->instrument

@@ -7,7 +7,7 @@
 #include "patternevent.h"
 #include "samples.h"
 
-#include <adsr.h>
+#include <envelope.h>
 #include <filter.h>
 #include <list.h>
 
@@ -17,14 +17,13 @@ extern "C" {
 
 // psy_audio_Instrument, psy_audio_InstrumentEntry
 //
-// aim: an instrument is a selection of samples with some extra features added
-//      around it. Samples are composed with help of instrument entries.
-//  	A 'psy_audio_InstrumentEntry' stores a 'psy_audio_SampleIndex', the
-//      note and the velocity range to allow a dynamically choice.
+// An instrument is a selection of samples with some extra features added
+// around it. Samples are composed with help of instrument entries.
+// A 'psy_audio_InstrumentEntry' stores a 'psy_audio_SampleIndex', the
+// note and the velocity range to allow a dynamically choice.
 //
 // Structure:
 // psy_audio_Instrument <@>----- psy_audio_InstrumentEntry
-//                             * 
 
 typedef struct {
 	double low;
@@ -71,9 +70,9 @@ typedef struct psy_audio_Instrument {
 	/// channel.
 	psy_audio_NewNoteAction nna;
 	/// [0..1.0f] Global volume affecting all samples of the instrument.
-	psy_dsp_amp_t globalvolume;
-	psy_dsp_ADSRSettings volumeenvelope;
-	psy_dsp_ADSRSettings filterenvelope;	
+	psy_dsp_amp_t globalvolume;	
+	psy_dsp_EnvelopeSettings volumeenvelope;
+	psy_dsp_EnvelopeSettings filterenvelope;	
 	float filtercutoff;	
 	float filterres;		
 	float filtermodamount;	
@@ -115,6 +114,9 @@ INLINE psy_dsp_amp_t psy_audio_instrument_volume(psy_audio_Instrument* self)
 {
 	return self->globalvolume;
 }
+
+const char* psy_audio_instrument_tostring(psy_audio_Instrument*, const char*);
+void psy_audio_instrument_fromstring(psy_audio_Instrument*, const char*);
 
 #ifdef __cplusplus
 }

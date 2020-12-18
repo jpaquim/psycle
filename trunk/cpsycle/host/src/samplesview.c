@@ -461,10 +461,10 @@ void generalview_ondescribe(SamplesGeneralView* self, psy_ui_Slider* slider, cha
 	if (slider == &self->panposition) {		
 		generalview_fillpandescription(self, txt);		
 	} else
-	if (slider == &self->samplednote) {		
+	if (slider == &self->samplednote) {			
 		psy_snprintf(txt, 10, "%s", self->sample
-			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->tune + 60), self->notestabmode)
-			: psy_dsp_notetostr(60, self->notestabmode));		
+			? psy_dsp_notetostr((psy_dsp_note_t)(self->sample->tune), self->notestabmode)
+			: psy_dsp_notetostr(60, self->notestabmode));
 	} else
 	if (slider == &self->pitchfinetune) {
 		psy_snprintf(txt, 10, "%d ct.", self->sample

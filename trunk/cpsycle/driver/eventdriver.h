@@ -124,19 +124,22 @@ typedef struct psy_EventDriver {
 #define psy_SHIFT_OFF	FALSE
 #define psy_CTRL_ON		TRUE
 #define psy_CTRL_OFF	FALSE
+#define psy_ALT_ON		TRUE
+#define psy_ALT_OFF		FALSE
 
 INLINE uintptr_t psy_audio_encodeinput(uintptr_t keycode, bool shift, bool
-	ctrl)
+	ctrl, bool alt)
 {
-	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9);
+	return keycode | ((uintptr_t)shift << 8) | ((uintptr_t)ctrl << 9) | ((uintptr_t)alt << 10);
 }
 
 INLINE void psy_audio_decodeinput(uintptr_t input, uintptr_t* keycode,
-	bool* shift, bool* ctrl)
+	bool* shift, bool* ctrl, bool* alt)
 {
 	*keycode = input & 0xFF;
 	*shift = ((input >> 8) & 0x01) == 0x01;
 	*ctrl = ((input >> 9) & 0x01) == 0x01;
+	*alt = ((input >> 10) & 0x01) == 0x01;
 }
 
 

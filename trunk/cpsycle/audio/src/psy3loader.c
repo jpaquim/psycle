@@ -12,6 +12,7 @@
 #include "machinefactory.h"
 #include "wire.h"
 // dsp
+#include <envelope.h>
 #include <datacompression.h>
 #include <operations.h>
 // file
@@ -646,7 +647,7 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		psyfile_read(self->songfile->file, &index, sizeof index);
 		if(index < MAX_INSTRUMENTS)
 		{	
-			psy_audio_Instrument* instrument;
+			psy_audio_Instrument* instrument;			
 			// Loop stuff
 			unsigned char loop;
 			int32_t lines;
@@ -681,34 +682,38 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			}			
 			psy_audio_instrument_setnna(instrument, nna);
 
+			// read envelopes
+			// ENV_VOL
 			psyfile_read(self->songfile->file, &ENV_AT, sizeof(ENV_AT));
 			psyfile_read(self->songfile->file, &ENV_DT, sizeof(ENV_DT));
 			psyfile_read(self->songfile->file, &ENV_SL, sizeof(ENV_SL));
 			psyfile_read(self->songfile->file, &ENV_RT, sizeof(ENV_RT));
-
-			adsr_settings_setattack(
-				&instrument->volumeenvelope, ENV_AT * 1.f/44100);
-			adsr_settings_setdecay(
-				&instrument->volumeenvelope, ENV_DT * 1.f/44100);
-			adsr_settings_setsustain(
-				&instrument->volumeenvelope, ENV_SL / 100.f);
-			adsr_settings_setrelease(
-				&instrument->volumeenvelope, ENV_RT * 1.f/44100);
-			
+			// ENV_AT
+			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+				1, ENV_AT * 1.f / 44100, 1.f, 0.f);
+			// ENV_DT, ENV_SL
+			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+				2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 100.f);			
+			// ENV_RT
+			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+				3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);
+						
+			// ENV_F
 			psyfile_read(self->songfile->file, &ENV_F_AT, sizeof(ENV_F_AT));
 			psyfile_read(self->songfile->file, &ENV_F_DT, sizeof(ENV_F_DT));
 			psyfile_read(self->songfile->file, &ENV_F_SL, sizeof(ENV_F_SL));
 			psyfile_read(self->songfile->file, &ENV_F_RT, sizeof(ENV_F_RT));
-
-			adsr_settings_setattack(
-				&instrument->filterenvelope, ENV_F_AT * 1.f/44100);
-			adsr_settings_setdecay(
-				&instrument->filterenvelope, ENV_F_DT * 1.f/44100);
-			adsr_settings_setsustain(
-				&instrument->filterenvelope, ENV_F_SL / 128.f);
-			adsr_settings_setrelease(
-				&instrument->filterenvelope, ENV_F_RT * 1.f/44100);
-
+			// ENV_F_AT			
+			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+				1, ENV_AT * 1.f / 44100, 1.f);
+			// ENV_DT, ENV_SL
+			// note: SL map range(128) differs from volume envelope(100)
+			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+				2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 128.f);
+			// ENV_RT
+			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+				3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);
+			
 			psyfile_read(self->songfile->file, &ENV_F_CO, sizeof(ENV_F_CO));
 			psyfile_read(self->songfile->file, &ENV_F_RQ, sizeof(ENV_F_RQ));
 			psyfile_read(self->songfile->file, &ENV_F_EA, sizeof(ENV_F_EA));

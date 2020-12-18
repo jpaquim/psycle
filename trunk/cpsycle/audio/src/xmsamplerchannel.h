@@ -8,7 +8,6 @@
 #include "instrument.h"
 #include "sample.h"
 #include "multiresampler.h"
-#include <adsr.h>
 #include <filter.h>
 #include <hashtbl.h>
 #include <valuemapper.h>

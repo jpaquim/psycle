@@ -333,8 +333,10 @@ psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider* self)
 void psy_ui_slider_ontimer(psy_ui_Slider* self, psy_ui_Component* sender,
 	uintptr_t timerid)
 {	
-	psy_ui_slider_updatevalue(self);
-	psy_ui_slider_describevalue(self);
+	if (psy_ui_component_drawvisible(psy_ui_slider_base(self))) {
+		psy_ui_slider_updatevalue(self);
+		psy_ui_slider_describevalue(self);
+	}
 }
 
 void psy_ui_slider_updatevalue(psy_ui_Slider* self)

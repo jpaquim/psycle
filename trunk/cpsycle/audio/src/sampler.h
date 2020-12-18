@@ -4,13 +4,14 @@
 #ifndef psy_audio_SAMPLER_H
 #define psy_audio_SAMPLER_H
 
+// local
 #include "constants.h"
 #include "custommachine.h"
 #include "sampleiterator.h"
 #include "ticktimer.h"
 #include "instrument.h"
-
-#include <adsr.h>
+// dsp
+#include <envelope.h>
 #include <filter.h>
 
 // Internal Psycle Sampler (PS1)
@@ -68,10 +69,10 @@ extern "C" {
 	{
 		struct psy_audio_Sampler* sampler;
 		psy_audio_SampleIterator controller;
-		psy_dsp_ADSR _envelope;
-		psy_dsp_ADSRSettings _envelopesettings;
-		psy_dsp_ADSR _filterEnv;
-		psy_dsp_ADSRSettings _filterenvsettings;
+		psy_dsp_Envelope _envelope;	
+		//psy_dsp_ADSRSettings _envelopesettings;
+		psy_dsp_Envelope _filterEnv;
+		// psy_dsp_ADSRSettings _filterenvsettings;
 		Filter _filter;
 		psy_audio_Instrument* inst;
 		int instrument;

@@ -49,6 +49,12 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 		psy_ui_checkbox_ondestroy);	
 }
 
+void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent, const char* text)
+{
+	psy_ui_checkbox_init(self, parent);
+	psy_ui_checkbox_settext(self, text);
+}
+
 void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)
 {
 	free(self->text);
@@ -178,6 +184,12 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	psy_signal_init(&self->signal_clicked);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_checkbox_ondestroy);
+}
+
+void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent, const char* text)
+{
+	psy_ui_checkbox_init(self, parent);
+	psy_ui_checkbox_settext(self, text);
 }
 
 void psy_ui_checkbox_ondestroy(psy_ui_CheckBox* self, psy_ui_Component* sender)

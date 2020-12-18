@@ -42,6 +42,7 @@ void audioconfig_driverconfigure_section(AudioConfig*);
 void audioconfig_onaudiodriverselect(AudioConfig*, bool enabled);
 void audioconfig_oneditaudiodriverconfiguration(AudioConfig*, bool enabled);
 
+
 bool audioconfig_onpropertychanged(AudioConfig*, psy_Property*);
 
 const char* audioconfig_driverpath(AudioConfig*);

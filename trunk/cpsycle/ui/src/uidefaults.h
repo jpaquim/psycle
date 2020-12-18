@@ -30,9 +30,19 @@ INLINE psy_ui_Margin psy_ui_defaults_hmargin(const psy_ui_Defaults* self)
 	return self->hmargin;
 }
 
+INLINE const psy_ui_Margin* psy_ui_defaults_phmargin(const psy_ui_Defaults* self)
+{
+	return &self->hmargin;
+}
+
 INLINE psy_ui_Margin psy_ui_defaults_vmargin(const psy_ui_Defaults* self)
 {
 	return self->vmargin;
+}
+
+INLINE const psy_ui_Margin* psy_ui_defaults_pvmargin(const psy_ui_Defaults* self)
+{
+	return &self->vmargin;
 }
 
 INLINE psy_ui_Margin psy_ui_defaults_cmargin(const psy_ui_Defaults* self)

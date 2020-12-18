@@ -420,7 +420,7 @@ void workspace_configurationchanged(Workspace* self, psy_Property* property)
 			} else if (psy_property_insection(property,
 					self->config.audio.driverconfigure)) {
 				audioconfig_oneditaudiodriverconfiguration(&self->config.audio,
-					psycleconfig_enableaudio(&self->config));
+					psycleconfig_audioenabled(&self->config));
 				audioconfig_driverconfigure_section(&self->config.audio);
 				return;
 			} else if (psy_property_insection(property,
@@ -766,7 +766,7 @@ void workspace_load_configuration(Workspace* self)
 					psy_audiodriver_configuration(self->player.driver)),
 				PSY_PROPERTY_TYPE_NONE);			
 		}
-		if (psycleconfig_enableaudio(&self->config)) {
+		if (psycleconfig_audioenabled(&self->config)) {
 			psy_audio_player_restartdriver(&self->player, driversection);
 		} else if (self->player.driver) {
 			psy_audiodriver_configure(self->player.driver, driversection);

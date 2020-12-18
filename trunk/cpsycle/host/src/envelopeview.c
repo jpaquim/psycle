@@ -9,45 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-static psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value,
-	psy_dsp_seconds_t mintime,
-	psy_dsp_seconds_t maxtime, psy_dsp_amp_t minvalue, psy_dsp_amp_t maxvalue);
-
-void adsrpointmapper_init(ADSRPointMapper* self)
-{
-	psy_dsp_envelopepoint_init(&self->start, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
-	psy_dsp_envelopepoint_init(&self->attack, 0.2f, 1.f, 0.f, 5.f, 1.f, 1.f);
-	psy_dsp_envelopepoint_init(&self->decay, 0.4f, 0.5f, 0.f, 5.f, 0.f, 1.f);
-	psy_dsp_envelopepoint_init(&self->release, 0.6f, 0.f, 0.f, 5.f, 0.f, 0.f);
-	self->settings = 0;
-}
-
-void adsrpointmapper_updatepoints(ADSRPointMapper* self)
-{	
-	if (self->settings) {
-		self->attack.time = self->settings->attack;
-		self->decay.time = self->settings->attack +
-			self->settings->decay;
-		self->release.time = self->settings->attack + self->settings->decay +
-			self->settings->release;
-		self->decay.value = self->settings->sustain;
-	} else {
-		adsrpointmapper_init(self);
-	}
-}
-
-void adsrpointmapper_updatesettings(ADSRPointMapper* self)
-{
-	if (self->settings) {
-		self->settings->attack = self->attack.time;
-		self->settings->decay = self->decay.time - self->attack.time;
-		self->settings->sustain = self->decay.value;
-		self->settings->release = self->release.time - self->decay.time;
-	}
-}
-
 static void envelopebox_ondraw(EnvelopeBox*, psy_ui_Graphics*);
-static void envelopebox_drawlabel(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawgrid(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawpoints(EnvelopeBox*, psy_ui_Graphics*);
 static void envelopebox_drawlines(EnvelopeBox*, psy_ui_Graphics*);
@@ -61,6 +23,7 @@ static void envelopebox_shiftsuccessors(EnvelopeBox* self, double timeshift);
 static int envelopebox_pxvalue(EnvelopeBox*, double value);
 static int envelopebox_pxtime(EnvelopeBox*, double t);
 static double envelopebox_pxtotime(EnvelopeBox*, int px);
+static psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox*, int x, int y);
 static psy_dsp_seconds_t envelopebox_displaymaxtime(EnvelopeBox*);
 
 static void checkadjustpointrange(psy_List* p);
@@ -94,59 +57,39 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->zoomright = 1.f;
 	self->cx = 0;
 	self->cy = 0;
-	self->dragpoint = 0;
-	self->points = 0;
+	self->dragpoint = NULL;
+	self->settings = NULL;
 	self->sustainstage = 2;
-	self->dragrelative = 1;
-	self->text = strdup("");
+	self->dragrelative = 1;		
 	psy_ui_margin_init_all(&self->spacing,
-		psy_ui_value_makepx(30),
 		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(4),
+		psy_ui_value_makepx(0),
+		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0));
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(20),
 			psy_ui_value_makeeh(15)));	
-	psy_ui_component_doublebuffer(&self->component);		
-	adsr_settings_init(&self->dummysettings, 0.2f, 0.4f, 0.8f, 0.3f);
-	adsrpointmapper_init(&self->pointmapper);
-	self->points = psy_list_create(&self->pointmapper.start);
-	psy_list_append(&self->points, &self->pointmapper.attack);
-	psy_list_append(&self->points, &self->pointmapper.decay);
-	psy_list_append(&self->points, &self->pointmapper.release);
+	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		envelopebox_ondestroy);	
 }
 
-void envelopebox_setadsrenvelope(EnvelopeBox* self,
-	psy_dsp_ADSRSettings* adsr_settings)
-{			
-	self->pointmapper.settings = adsr_settings;
-	adsrpointmapper_updatepoints(&self->pointmapper);
+void envelopebox_setenvelope(EnvelopeBox* self,
+	psy_dsp_EnvelopeSettings* settings)
+{	
+	self->settings = settings;	
 	psy_ui_component_invalidate(&self->component);
 }
 
 void envelopebox_ondestroy(EnvelopeBox* self, psy_ui_Component* sender)
 {	
-	psy_list_free(self->points);
-	self->points = 0;
-	free(self->text);
-	self->text = 0;	
 }
 
 void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
-{		
-	envelopebox_drawlabel(self, g);
+{	
 	envelopebox_drawgrid(self, g);
 	envelopebox_drawlines(self, g);
-	envelopebox_drawpoints(self, g);
-}
-
-void envelopebox_drawlabel(EnvelopeBox* self, psy_ui_Graphics* g)
-{
-	psy_ui_setbackgroundmode(g, psy_ui_TRANSPARENT);
-	psy_ui_settextcolour(g, psy_ui_colour_make(0x00D1C5B6));
-	psy_ui_textout(g, 0, 0, self->text, strlen(self->text));
+	envelopebox_drawpoints(self, g);	
 }
 
 void envelopebox_drawgrid(EnvelopeBox* self, psy_ui_Graphics* g)
@@ -177,13 +120,19 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_ui_Size ptsize;
 	psy_ui_Size ptsize2;
 	psy_dsp_EnvelopePoint* q = 0;
+	psy_List* points;
 
+	if (self->settings) {
+		points = self->settings->points;
+	} else {
+		return;
+	}
 	tm = psy_ui_component_textmetric(&self->component);
 	ptsize = psy_ui_size_make(psy_ui_value_makepx(5), psy_ui_value_makepx(5));
 	ptsize2 = psy_ui_size_make(
 		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, &tm) / 2),
 		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, &tm) / 2));
-	for (p = self->points; p !=0; p = p->next) {
+	for (p = points; p !=0; p = p->next) {
 		psy_ui_Rectangle r;
 		psy_dsp_EnvelopePoint* pt;
 
@@ -203,9 +152,16 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 	psy_List* p;
 	psy_dsp_EnvelopePoint* q = 0;
 	uintptr_t count = 0;
+	psy_List* points;
+
+	if (self->settings) {
+		points = self->settings->points;
+	} else {
+		return;
+	}
 
 	psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
-	for (p = self->points; p !=0; p = p->next, ++count) {		
+	for (p = points; p !=0; p = p->next, ++count) {		
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;			
@@ -239,9 +195,46 @@ void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 }
 
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
-{
+{	
 	self->dragpoint = envelopebox_hittestpoint(self, ev->x, ev->y);
-	psy_ui_component_capture(&self->component);
+	if (ev->button == 1) {
+		if (!self->dragpoint && self->settings) {
+			psy_dsp_EnvelopePoint pt_new;
+			psy_dsp_EnvelopePoint* pt_insert;
+			psy_List* p;
+
+			pt_new = envelopebox_pxtopoint(self, ev->x, ev->y);
+			p = NULL;
+			if (self->settings->points) {
+				for (p = self->settings->points->tail; p != NULL; p = p->prev) {
+					psy_dsp_EnvelopePoint* pt;
+
+					pt = (psy_dsp_EnvelopePoint*)p->entry;
+					if (pt->time < pt_new.time) {
+						break;
+					}
+				}
+			}
+			pt_insert = psy_dsp_envelopepoint_alloc();
+			if (pt_insert) {				
+				if (p == NULL) {
+					*pt_insert = psy_dsp_envelopepoint_make_all(
+						0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+				} else {
+					*pt_insert = pt_new;
+					pt_insert->maxtime = 5.f;
+					pt_insert->maxvalue = 1.f;
+				}
+				psy_list_insert(&self->settings->points, p, pt_insert);
+				psy_ui_component_invalidate(&self->component);
+			}
+		}
+		psy_ui_component_capture(&self->component);
+	} else if (self->settings && self->dragpoint) {
+		psy_list_remove(&self->settings->points, self->dragpoint);
+		self->dragpoint = NULL;
+		psy_ui_component_invalidate(&self->component);
+	}	
 }
 
 void envelopebox_setzoom(EnvelopeBox* self, float zoomleft, float zoomright)
@@ -263,8 +256,7 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 			(float)self->cy;
 		pt->time = (psy_dsp_beat_t)envelopebox_pxtotime(self, ev->x);
 		checkadjustpointrange(self->dragpoint);
-		envelopebox_shiftsuccessors(self, pt->time - oldtime);
-		adsrpointmapper_updatesettings(&self->pointmapper);
+		envelopebox_shiftsuccessors(self, pt->time - oldtime);		
 		psy_ui_component_invalidate(&self->component);
 	}
 }
@@ -312,15 +304,21 @@ void checkadjustpointrange(psy_List* p)
 
 void envelopebox_onmouseup(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
-	self->dragpoint = 0;
 	psy_ui_component_releasecapture(&self->component);
+	self->dragpoint = NULL;	
 }
 
 psy_List* envelopebox_hittestpoint(EnvelopeBox* self, int x, int y)
 {
 	psy_List* p;
-	
-	for (p = self->points->tail; p != NULL; p = p->prev) {		
+	psy_List* points;
+
+	if (self->settings) {
+		points = self->settings->points;
+	} else {
+		return NULL;
+	}
+	for (p = points->tail; p != NULL; p = p->prev) {		
 		psy_dsp_EnvelopePoint* pt;		
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;			
@@ -330,6 +328,13 @@ psy_List* envelopebox_hittestpoint(EnvelopeBox* self, int x, int y)
 		}
 	}	
 	return p;
+}
+
+psy_dsp_EnvelopePoint envelopebox_pxtopoint(EnvelopeBox* self, int x, int y)
+{	
+	return psy_dsp_envelopepoint_make(
+		envelopebox_pxtotime(self, x),
+		1.f - (y - self->spacing.top.quantity.integer) / (float)self->cy);			
 }
 
 int envelopebox_pxvalue(EnvelopeBox* self, double value)
@@ -382,60 +387,116 @@ psy_dsp_EnvelopePoint* allocpoint(psy_dsp_seconds_t time, psy_dsp_amp_t value,
 	rv->maxvalue = maxvalue;
 	return rv;
 }
-
+ 
 void envelopebox_update(EnvelopeBox* self)
 {
-	if (self->points && !self->dragpoint) {
-		adsrpointmapper_updatepoints(&self->pointmapper);
+	if (self->settings && self->settings->points && !self->dragpoint) {		
 		psy_ui_component_invalidate(&self->component);
 	}
 }
 
-void envelopebox_settext(EnvelopeBox* self, const char* text)
+// EnvelopeBar
+// prototypes
+void envelopebar_enablemillisecs(EnvelopeBar*);
+void envelopebar_enableticks(EnvelopeBar*);
+void envelopebar_onmillisecs(EnvelopeBar*, psy_ui_Component* sender);
+void envelopebar_onticks(EnvelopeBar*, psy_ui_Component* sender);
+// implementation
+void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 {
-	free(self->text);
-	self->text = strdup(text);
+	psy_ui_Margin tab;
+	psy_ui_component_init(&self->component, parent);	
+	psy_ui_component_setdefaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
+	psy_ui_checkbox_init_text(&self->enabled, &self->component, "Envelope");
+	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
+	tab.right = psy_ui_value_makeew(4.0);
+	psy_ui_component_setmargin(&self->enabled.component, &tab);
+	psy_ui_button_init_text_connect(&self->millisec, &self->component, "Millisecs",
+		self, envelopebar_onmillisecs);
+	psy_ui_button_init_text_connect(&self->ticks, &self->component, "Ticks",
+		self, envelopebar_onticks);
+	psy_ui_button_init_text(&self->adsr, &self->component, "ADSR");
+	psy_ui_button_allowrightclick(&self->adsr);
+	envelopebar_enablemillisecs(self);
 }
 
+void envelopebar_settext(EnvelopeBar* self, const char* text)
+{
+	psy_ui_checkbox_settext(&self->enabled, text);	
+}
+
+void envelopebar_enablemillisecs(EnvelopeBar* self)
+{
+	psy_ui_button_highlight(&self->millisec);
+	psy_ui_button_disablehighlight(&self->ticks);
+}
+
+void envelopebar_enableticks(EnvelopeBar* self)
+{
+	psy_ui_button_disablehighlight(&self->millisec);
+	psy_ui_button_highlight(&self->ticks);
+}
+
+void envelopebar_onmillisecs(EnvelopeBar* self, psy_ui_Component* sender)
+{
+	envelopebar_enablemillisecs(self);
+}
+
+void envelopebar_onticks(EnvelopeBar* self, psy_ui_Component* sender)
+{
+	envelopebar_enableticks(self);
+}
 
 // EnvelopeView
 static void envelopeview_onzoom(EnvelopeView*, ScrollZoom* sender);
+static void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender);
 
 static psy_ui_ComponentVtable envelopeview_vtable;
 static int envelopeview_vtable_initialized = 0;
 
-static void envelopeview_vtable_init(EnvelopeView* self)
+static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 {
 	if (!envelopeview_vtable_initialized) {
 		envelopeview_vtable = *(self->component.vtable);	
 		envelopeview_vtable_initialized = 1;
 	}
+	return &envelopeview_vtable;
 }
 
-void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent)
+void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* workspace)
 {
-	psy_ui_component_init(&self->component, parent);
-	envelopeview_vtable_init(self);
-	self->component.vtable = &envelopeview_vtable;	
-	envelopebox_init(&self->envelopebox, &self->component);
-	psy_ui_component_setalign(&self->envelopebox.component, psy_ui_ALIGN_CLIENT);
-	scrollzoom_init(&self->zoom, &self->component);
-	psy_ui_component_setalign(&self->zoom.component, psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setpreferredsize(&self->zoom.component,
+	psy_ui_component_init(envelopeview_base(self), parent);
+	psy_ui_component_setvtable(envelopeview_base(self),
+		envelopeview_vtable_init(self));	
+	self->workspace = workspace;
+	envelopebar_init(&self->bar, envelopeview_base(self));
+	psy_ui_component_setalign(envelopebar_base(&self->bar), psy_ui_ALIGN_TOP);
+	psy_ui_component_setmargin(envelopebar_base(&self->bar),
+		psy_ui_defaults_pvmargin(psy_ui_defaults()));
+	envelopebox_init(&self->envelopebox, envelopeview_base(self));
+	psy_ui_component_setalign(envelopebox_base(&self->envelopebox),
+		psy_ui_ALIGN_CLIENT);
+	scrollzoom_init(&self->zoom, envelopeview_base(self));
+	psy_ui_component_setalign(scrollzoom_base(&self->zoom), psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setpreferredsize(scrollzoom_base(&self->zoom),
 		psy_ui_size_make(psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(1)));
-	psy_signal_connect(&self->zoom.signal_zoom, self, envelopeview_onzoom);	
+	psy_signal_connect(&self->zoom.signal_zoom, self,
+		envelopeview_onzoom);
+	psy_signal_connect(&self->bar.adsr.signal_clicked, self,
+		envelopeview_onpredefs);	
 }
 
 void envelopeview_settext(EnvelopeView* self, const char* text)
 {
-	envelopebox_settext(&self->envelopebox, text);
+	envelopebar_settext(&self->bar, text);	
 }
 
-void envelopeview_setadsrenvelope(EnvelopeView* self,
-	psy_dsp_ADSRSettings* adsr_settings)
+void envelopeview_setenvelope(EnvelopeView* self,
+	psy_dsp_EnvelopeSettings* settings)
 {
-	envelopebox_setadsrenvelope(&self->envelopebox, adsr_settings);
+	envelopebox_setenvelope(&self->envelopebox, settings);
 }
 
 void envelopeview_update(EnvelopeView* self)
@@ -447,4 +508,16 @@ void envelopeview_onzoom(EnvelopeView* self, ScrollZoom* sender)
 {
 	envelopebox_setzoom(&self->envelopebox, scrollzoom_start(sender),
 		scrollzoom_end(sender));
+}
+
+void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender)
+{		
+	/*if (self->envelopebox.settings && psy_ui_button_clickstate(sender) == 1) {
+		predefsconfig_predef(&self->workspace->config.predefs,
+			index, self->envelopebox.settings);		
+		psy_ui_component_invalidate(envelopebox_base(&self->envelopebox));
+	} else {
+		predefsconfig_storepredef(&self->workspace->config.predefs,
+			index, self->envelopebox.settings);		
+	}*/
 }

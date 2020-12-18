@@ -61,7 +61,7 @@
 
 #define PSYCLE_HELPFILES "readme.txt keys.txt tweaking.txt whatsnew.txt"
 
-#define PSYCLE_USE_MACHINEPROXY
+// #define PSYCLE_USE_MACHINEPROXY
 
 // #define PSYCLE_DEFAULT_LANG_ES
 #define PSYCLE_DEFAULT_LANG_EN

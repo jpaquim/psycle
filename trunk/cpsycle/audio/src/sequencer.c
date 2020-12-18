@@ -724,15 +724,15 @@ bool psy_audio_sequencer_executeglobalcommands(psy_audio_Sequencer* self,
 						psy_audio_sequencer_finepatterndelay(self, ev);
 						done = TRUE;
 					} else
-					if (ev->parameter < psy_audio_PATTERNCMD_SET_LINESPERBEAT1) {
+					if (ev->parameter < psy_audio_PATTERNCMD_SET_LINESPERBEAT1) {						
 						self->lpbspeed = ev->parameter /
-							(psy_dsp_big_beat_t)self->lpb;
+							(psy_dsp_big_beat_t)self->lpb;						
 						psy_audio_sequencer_compute_beatspersample(self);
 						done = TRUE;
 					}
 				break;
 				case psy_audio_PATTERNCMD_SET_TEMPO:
-					self->bpm = psy_audio_patternentry_front(patternentry)->parameter;
+					self->bpm = psy_audio_patternentry_front(patternentry)->parameter;					
 					psy_audio_sequencer_compute_beatspersample(self);
 					done = TRUE;
 				break;
@@ -766,7 +766,7 @@ void psy_audio_sequencer_patterndelay(psy_audio_Sequencer* self,
 	rows = (psy_dsp_big_beat_t)(ev->parameter & 0x0F);
 	if (rows > 0) {
 		self->rowdelay.active = 1;
-		self->rowdelay.rowspeed = (psy_dsp_big_beat_t)1.f / rows;
+		self->rowdelay.rowspeed = (psy_dsp_big_beat_t)1.f / rows;		
 	}
 	else {
 		self->rowdelay.rowspeed = (psy_dsp_big_beat_t)1.f;
@@ -785,7 +785,7 @@ void psy_audio_sequencer_finepatterndelay(psy_audio_Sequencer* self,
 	ticks = (psy_dsp_big_beat_t)(ev->parameter & 0x0F);
 	self->rowdelay.active = 1;
 	self->rowdelay.rowspeed =
-		(psy_dsp_big_beat_t) 0.5 / 15 * (psy_dsp_big_beat_t)(30 - ticks);
+		(psy_dsp_big_beat_t) 0.5 / 15 * (psy_dsp_big_beat_t)(30 - ticks);	
 	psy_audio_sequencer_compute_beatspersample(self);
 }
 
@@ -1232,7 +1232,7 @@ void psy_audio_sequencer_compute_beatspersample(psy_audio_Sequencer* self)
 	assert(self->samplerate != 0);
 	
 	self->beatspersample = (self->bpm * psy_audio_sequencer_speed(self)) /
-		(self->samplerate * 60.0);
+		(self->samplerate * 60.0);	
 }
 
 psy_List* psy_audio_sequencer_timedevents(psy_audio_Sequencer* self, uintptr_t

@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "../../detail/portable.h"
 
+#define FT2_INSTRUMENTNAME_LEN 22
+
 static void instrumentsbox_buildlist(InstrumentsBox*);
 static void instrumentsbox_buildgroup(InstrumentsBox*);
 static void instrumentsbox_addstring(InstrumentsBox*, const char* text);
@@ -67,7 +69,7 @@ void instrumentsbox_buildlist(InstrumentsBox* self)
 	psy_audio_Instrument* instrument;
 	int groupslot;
 	int slot = 0;
-	char buffer[20];
+	char buffer[FT2_INSTRUMENTNAME_LEN + 4];
 
 	psy_ui_listbox_clear(&self->instrumentlist);
 	groupslot = psy_ui_listbox_cursel(&self->grouplist);
@@ -76,11 +78,11 @@ void instrumentsbox_buildlist(InstrumentsBox* self)
 	}
 	for ( ; slot < 256; ++slot) {		
 		if (instrument = psy_audio_instruments_at(self->instruments,
-			psy_audio_instrumentindex_make(groupslot, slot))) {
-			psy_snprintf(buffer, 20, "%02X*:%s", slot,
+			psy_audio_instrumentindex_make(groupslot, slot))) {			
+			psy_snprintf(buffer, sizeof(buffer), "%02X*:%s", slot,
 				psy_audio_instrument_name(instrument));
 		} else {
-			psy_snprintf(buffer, 20, "%02X:%s", slot, "");
+			psy_snprintf(buffer, sizeof(buffer), "%02X:%s", slot, "");
 		}
 		instrumentsbox_addstring(self, buffer);
 	}

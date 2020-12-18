@@ -141,11 +141,13 @@ void wireview_initvolumeslider(WireView* self)
 		//psy_ui_value_makepx(0));
 	psy_ui_button_init(&self->percvol, &self->slidergroup);
 	psy_ui_button_settext(&self->percvol, "100%");
+	psy_ui_button_preventtranslation(&self->percvol);
 	psy_ui_button_setcharnumber(&self->percvol, 10);	
 	psy_ui_component_setalign(&self->percvol.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_button_init(&self->dbvol, &self->slidergroup);
 	psy_ui_component_doublebuffer(&self->dbvol.component);
 	psy_ui_button_settext(&self->dbvol, "db 100");
+	psy_ui_button_preventtranslation(&self->dbvol);
 	psy_ui_button_setcharnumber(&self->dbvol, 10);	
 	psy_ui_component_setalign(&self->dbvol.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_slider_init(&self->volslider, &self->slidergroup);
@@ -213,42 +215,32 @@ void wireview_onsongchanged(WireView* self, Workspace* workspace)
 void wireview_ondescribevolume(WireView* self, psy_ui_Slider* slider, char* txt)
 {
 	psy_audio_Connections* connections;
-	psy_audio_WireSocket* input;	
+	char text[128];
+	psy_dsp_amp_t volume;
 
 	connections = &workspace_song(self->workspace)->machines.connections;
-	input = psy_audio_connections_input(connections, self->wire);
-	if (input) {
-		char text[128];
-
-		psy_snprintf(text, 128, "%.1f dB",20.0f * log10(input->volume));
-		psy_ui_button_settext(&self->dbvol, text);
-		psy_snprintf(text, 128, "%.2f %%", (float)(input->volume * 100.0));
-		psy_ui_button_settext(&self->percvol, text);
-	}
+	volume = psy_audio_connections_wirevolume(connections, self->wire);	
+	psy_snprintf(text, 128, "%.1f dB",20.0f * log10(volume));
+	psy_ui_button_settext(&self->dbvol, text);
+	psy_snprintf(text, 128, "%.2f %%", (float)(volume * 100.0));
+	psy_ui_button_settext(&self->percvol, text);	
 }
 
 void wireview_ontweakvolume(WireView* self, psy_ui_Slider* slider, float value)
 {
-	psy_audio_Connections* connections;
-	psy_audio_WireSocket* input;	
+	psy_audio_Connections* connections;	
 
-	connections = &workspace_song(self->workspace)->machines.connections;
-	input = psy_audio_connections_input(connections, self->wire);
-	if (input) {		
-		input->volume = (psy_dsp_amp_t)(value * value * 4);			
-	}
+	connections = &workspace_song(self->workspace)->machines.connections;	
+	psy_audio_connections_setwirevolume(connections, self->wire,
+		(psy_dsp_amp_t)(value * value * 4));
 }
 
 void wireview_onvaluevolume(WireView* self, psy_ui_Slider* slider, float* value)
 {
-	psy_audio_Connections* connections;
-	psy_audio_WireSocket* input;	
+	psy_audio_Connections* connections;	
 
-	connections = &workspace_song(self->workspace)->machines.connections;
-	input = psy_audio_connections_input(connections, self->wire);
-	if (input) {		
-		*value = (float)(sqrt(input->volume) * 0.5);
-	}
+	connections = &workspace_song(self->workspace)->machines.connections;	
+		*value = (float)(sqrt(psy_audio_connections_wirevolume(connections, self->wire)) * 0.5);	
 }
 
 void wireview_ontweakmode(WireView* self, psy_ui_Slider* slider, float value)
