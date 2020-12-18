@@ -19,6 +19,7 @@ extern "C" {
 #include "midiviewconfig.h"
 #include "patternviewconfig.h"
 #include "compatconfig.h"
+#include "predefsconfig.h"
 
 enum {
 	PROPERTY_ID_REGENERATEPLUGINCACHE = 1,
@@ -41,7 +42,8 @@ typedef struct PsycleConfig {
 	MachineParamConfig macparam;
 	KeyboardMiscConfig misc;
 	MidiViewConfig midi;
-	CompatConfig compat;	
+	CompatConfig compat;
+	PredefsConfig predefs;
 } PsycleConfig;
 
 void psycleconfig_init(PsycleConfig*, psy_audio_Player*,
@@ -107,8 +109,14 @@ INLINE CompatConfig* psycleconfig_compat(PsycleConfig* self)
 	return &self->compat;
 }
 
+INLINE PredefsConfig* psycleconfig_predefs(PsycleConfig* self)
+{
+	return &self->predefs;
+}
+
 const char* psycleconfig_defaultfontstr(const PsycleConfig* self);
-bool psycleconfig_enableaudio(const PsycleConfig* self);
+bool psycleconfig_audioenabled(const PsycleConfig*);
+void psycleconfig_enableaudio(PsycleConfig*, bool on);
 
 void psycleconfig_notifyall_changed(PsycleConfig*);
 void psycleconfig_notify_changed(PsycleConfig*, psy_Property*);

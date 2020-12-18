@@ -822,6 +822,29 @@ void mainframe_oneventdriverinput(MainFrame* self, psy_EventDriver* sender)
 				psy_audio_instruments_inc(&self->workspace.song->instruments);
 			}
 			break;
+		case CMD_IMM_SETTINGS:			
+			workspace_selectview(&self->workspace, VIEW_ID_SETTINGSVIEW, 0, 0);
+			break;
+		case CMD_IMM_ENABLEAUDIO: {
+			if (psycleconfig_audioenabled(workspace_conf(&self->workspace))) {
+				psycleconfig_enableaudio(workspace_conf(&self->workspace),
+					FALSE);
+			} else {
+				psycleconfig_enableaudio(workspace_conf(&self->workspace),
+					TRUE);
+			}
+			break; }
+		case CMD_IMM_LOADSONG:
+			if (keyboardmiscconfig_savereminder(&self->workspace.config.misc) &&
+					workspace_songmodified(&self->workspace)) {
+				workspace_selectview(&self->workspace, VIEW_ID_CHECKUNSAVED, 0, CHECKUNSAVE_LOAD);
+			} else {
+				workspace_loadsong_fileselect(&self->workspace);				
+			}
+			break;
+		case CMD_IMM_SAVESONG:			
+			workspace_savesong_fileselect(&self->workspace);			
+			break;
 		case CMD_EDT_EDITQUANTIZEDEC:
 			workspace_editquantizechange(&self->workspace, -1);
 			patterncursorstepbox_update(&self->patternbar.cursorstep);
@@ -1046,7 +1069,7 @@ void mainframe_onsettingsviewchanged(MainFrame* self, PropertiesView* sender,
 
 void mainframe_onrender(MainFrame* self, psy_ui_Component* sender)
 {
-	psy_ui_notebook_select(&self->notebook, VIEW_ID_RENDERVIEW);
+	workspace_selectview(&self->workspace, VIEW_ID_RENDERVIEW, 0, 0);
 }
 
 void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
@@ -1388,7 +1411,7 @@ void mainframe_delegatekeyboard(MainFrame* self, intptr_t message,
 {
 	psy_eventdriver_write(workspace_kbddriver(&self->workspace),
 		psy_eventdriverinput_make(message,
-			psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl),
+			psy_audio_encodeinput(ev->keycode, ev->shift, ev->ctrl, ev->alt),
 			0));
 }
 

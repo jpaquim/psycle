@@ -102,7 +102,7 @@ enum {
 	XMV_PORTA2NOTE		=	0xF0
 };
 
-struct XMFILEHEADER
+typedef struct XMFILEHEADER
 {
 	uint32_t size;
 	uint16_t norder;
@@ -114,31 +114,34 @@ struct XMFILEHEADER
 	uint16_t speed;
 	uint16_t tempo;
 	uint8_t order[256];
-};
+} XMFILEHEADER;
 
-struct XMINSTRUMENTFILEHEADER
+typedef struct XMINSTRUMENTFILEHEADER
 {
 	char extxi[21];		// Extended Instrument:
 	char name[23];		// Name, 1Ah
 	char trkname[20];	// FastTracker v2.00
 	uint16_t shsize;		// 0x0102
-};
-struct XMPATTERNHEADER
+} XMINSTRUMENTFILEHEADER;
+
+typedef struct XMPATTERNHEADER
 {
 	uint32_t size;
 	uint8_t packingtype;
 	uint16_t rows;
 	uint16_t packedsize;
 
-};
-struct XMINSTRUMENTHEADER
+} XMPATTERNHEADER;
+
+typedef struct XMINSTRUMENTHEADER
 {
 	uint32_t size;
 	char name[22];
 	uint8_t type;
 	uint16_t samples;
-};
-struct XMSAMPLEFILEHEADER
+} XMINSTRUMENTHEADER;
+
+typedef struct XMSAMPLEFILEHEADER
 {
 	uint8_t snum[96];
 	uint16_t venv[24];
@@ -150,8 +153,9 @@ struct XMSAMPLEFILEHEADER
 	uint16_t volfade;
 	uint16_t reserved[11];
 	uint16_t reserved2;
-};
-struct XMSAMPLEHEADER
+} XMSAMPLEFILEHEADER;
+
+typedef struct XMSAMPLEHEADER
 {
 	uint32_t shsize;
 	uint8_t snum[96];
@@ -163,7 +167,7 @@ struct XMSAMPLEHEADER
 	uint8_t vibtype, vibsweep, vibdepth, vibrate;
 	uint16_t volfade;
 	uint16_t reserved[11];
-};
+} XMSAMPLEHEADER;
 
 typedef struct XMSAMPLESTRUCT
 {

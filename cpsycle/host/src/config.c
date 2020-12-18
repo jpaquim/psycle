@@ -46,6 +46,7 @@ void psycleconfig_dispose(PsycleConfig* self)
 	keyboardmiscconfig_dispose(&self->misc);
 	midiviewconfig_dispose(&self->midi);
 	compatconfig_dispose(&self->compat);
+	predefsconfig_dispose(&self->predefs);
 }
 
 void psycleconfig_definelanguage(PsycleConfig* self)
@@ -71,6 +72,7 @@ void psycleconfig_initsections(PsycleConfig* self, psy_audio_Player* player,
 	eventdriverconfig_init(&self->input, &self->config, player);
 	midiviewconfig_init(&self->midi, &self->config, player);	
 	compatconfig_init(&self->compat, &self->config, machinefactory);
+	predefsconfig_init(&self->predefs, &self->config);
 }
 
 void psycleconfig_makeglobal(PsycleConfig* self)
@@ -181,11 +183,19 @@ const char* psycleconfig_defaultfontstr(const PsycleConfig* self)
 		PSYCLE_DEFAULT_FONT);
 }
 
-bool psycleconfig_enableaudio(const PsycleConfig* self)
+bool psycleconfig_audioenabled(const PsycleConfig* self)
 {
 	assert(self);
 
 	return psy_property_at_bool(self->global, "enableaudio", TRUE);
+}
+
+void psycleconfig_enableaudio(PsycleConfig* self, bool on)
+{
+	assert(self);
+
+	psy_property_set_bool(self->global, "enableaudio", on);
+	audioconfig_enableaudio(&self->audio, on);
 }
 
 void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
@@ -212,6 +222,8 @@ void psycleconfig_notify_changed(PsycleConfig* self, psy_Property* property)
 		midiviewconfig_onchanged(&self->midi, property);
 	} else if (compatconfig_hasproperty(&self->compat, property)) {
 		compatconfig_onchanged(&self->compat, property);
+	} else if (predefsconfig_hasproperty(&self->predefs, property)) {
+		predefsconfig_onchanged(&self->predefs, property);
 	}
 }
 
@@ -228,6 +240,7 @@ void psycleconfig_notifyall_changed(PsycleConfig* self)
 	keyboardmiscconfig_onchanged(&self->misc, &self->config);
 	midiviewconfig_onchanged(&self->midi, &self->config);
 	compatconfig_onchanged(&self->compat, &self->config);
+	predefsconfig_onchanged(&self->predefs, &self->config);
 }
 
 void psycleconfig_notify_skinchanged(PsycleConfig* self, psy_Property* property)

@@ -17,6 +17,7 @@ static void renderview_onsettingsviewchanged(RenderView*, PropertiesView* sender
 	psy_Property*);
 static void renderview_render(RenderView*);
 static void renderview_onstoprendering(RenderView*, psy_AudioDriver* sender);
+static void renderview_onfocus(RenderView*, psy_ui_Component* sender);
 
 void renderview_init(RenderView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -24,7 +25,9 @@ void renderview_init(RenderView* self, psy_ui_Component* parent,
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_signal_connect(&self->component.signal_destroy, self,
-		renderview_ondestroy);	
+		renderview_ondestroy);
+	psy_signal_connect(&self->component.signal_focus,
+		self, renderview_onfocus);
 	renderview_makeproperties(self);
 	propertiesview_init(&self->view, &self->component, tabbarparent,
 		self->properties, workspace);
@@ -251,4 +254,9 @@ void renderview_onstoprendering(RenderView* self, psy_AudioDriver* sender)
 		self->restoredither);	
 	psy_audiodriver_open(self->curraudiodriver);
 	psy_audiodriver_close(self->fileoutdriver);
+}
+
+void renderview_onfocus(RenderView* self, psy_ui_Component* sender)
+{
+	psy_ui_component_setfocus(&self->view.component);
 }

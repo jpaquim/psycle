@@ -11,9 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\adsr.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\alignedalloc.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -91,9 +88,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\adsr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\alignedalloc.h">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -187,7 +187,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 
 				if (imp->component) {
 					psy_ui_keyevent_init(&ev, (int)wParam, lParam,
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
 						(lParam & 0x40000000) == 0x40000000);
 					imp->component->vtable->onkeydown(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_keydown, imp->component,
@@ -206,7 +206,7 @@ LRESULT CALLBACK ui_com_winproc(HWND hwnd, UINT message,
 
 				if (imp->component) {
 					psy_ui_keyevent_init(&ev, (int)wParam, lParam,
-						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
 						(lParam & 0x40000000) == 0x40000000);
 					imp->component->vtable->onkeyup(imp->component, &ev);
 					psy_signal_emit(&imp->component->signal_keyup, imp->component,
@@ -550,12 +550,12 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				}				
 				break; }
 			case WM_SYSKEYDOWN:
-				if (wParam >= VK_F10 && wParam <= VK_F12) {					
+				if (wParam >= VK_F10 && wParam <= VK_F12 ||
+					wParam >= 0x41 && wParam <= psy_ui_KEY_Z) {
 					psy_ui_KeyEvent ev;
 						
 					psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
-						GetKeyState(VK_SHIFT) < 0,
-						GetKeyState(VK_CONTROL) < 0,
+						GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
 						(lParam & 0x40000000) == 0x40000000);
 					psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
 					imp->component->vtable->onkeydown(imp->component, &ev);
@@ -574,7 +574,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_KeyEvent ev;
 				
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
 					(lParam & 0x40000000) == 0x40000000);
 				psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onkeydown(imp->component, &ev);
@@ -592,7 +592,7 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 				psy_ui_KeyEvent ev;
 								
 				psy_ui_keyevent_init(&ev, (int)wParam, lParam, 
-					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0,
+					GetKeyState(VK_SHIFT) < 0, GetKeyState(VK_CONTROL) < 0, GetKeyState(VK_MENU) < 0,
 					(lParam & 0x40000000) == 0x40000000);
 				psy_ui_keyevent_settarget(&ev, eventtarget(imp->component));
 				imp->component->vtable->onkeyup(imp->component, &ev);

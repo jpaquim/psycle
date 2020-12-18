@@ -161,6 +161,7 @@ static void show(psy_ui_Component*);
 static void showstate(psy_ui_Component*, int state);
 static void hide(psy_ui_Component*);
 static int visible(psy_ui_Component*);
+static int drawvisible(psy_ui_Component*);
 static void move(psy_ui_Component*, psy_ui_Point);
 static void resize(psy_ui_Component*, psy_ui_Size);
 static void clientresize(psy_ui_Component*, psy_ui_Size);
@@ -204,6 +205,7 @@ static void vtable_init(void)
 		vtable.showstate = showstate;
 		vtable.hide = hide;
 		vtable.visible = visible;
+		vtable.drawvisible = drawvisible;
 		vtable.move = move;
 		vtable.resize = resize;
 		vtable.clientresize = clientresize;		
@@ -328,6 +330,11 @@ void hide(psy_ui_Component* self)
 int visible(psy_ui_Component* self)
 {	
 	return self->imp->vtable->dev_visible(self->imp);
+}
+
+int drawvisible(psy_ui_Component* self)
+{
+	return self->imp->vtable->dev_drawvisible(self->imp);
 }
 
 void move(psy_ui_Component* self, psy_ui_Point topleft)
@@ -598,6 +605,12 @@ int psy_ui_component_visible(psy_ui_Component* self)
 	return self->vtable->visible(self);	
 }
 
+int psy_ui_component_drawvisible(psy_ui_Component* self)
+{
+	return self->vtable->drawvisible(self);
+}
+
+
 void psy_ui_component_align(psy_ui_Component* self)
 {		
 	psy_ui_Aligner aligner;
@@ -838,6 +851,7 @@ static void dev_show(psy_ui_ComponentImp* self) { }
 static void dev_showstate(psy_ui_ComponentImp* self, int state) { }
 static void dev_hide(psy_ui_ComponentImp* self) { }
 static int dev_visible(psy_ui_ComponentImp* self) { return 0; }
+static int dev_drawvisible(psy_ui_ComponentImp* self) { return 0; }
 static psy_ui_Rectangle dev_position(psy_ui_ComponentImp* self) { psy_ui_Rectangle rv = { 0, 0, 0, 0 }; return rv; }
 static void dev_move(psy_ui_ComponentImp* self, int x, int y) { }
 static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
@@ -901,6 +915,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_showstate = dev_showstate;
 		imp_vtable.dev_hide = dev_hide;
 		imp_vtable.dev_visible = dev_visible;
+		imp_vtable.dev_drawvisible = dev_drawvisible;
 		imp_vtable.dev_move = dev_move;
 		imp_vtable.dev_resize = dev_resize;
 		imp_vtable.dev_clientresize = dev_clientresize;

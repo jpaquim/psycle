@@ -142,7 +142,7 @@ void xmsongexport_savepatterns(XMSongExport* self, psy_audio_SongFile* songfile)
 void xmsongexport_savesinglepattern(XMSongExport* self, psy_audio_SongFile* songfile, int patIdx)
 {
 	//Temp entries for volume on virtual generators.
-	psy_audio_PatternEvent volumeEntries[32];
+	// psy_audio_PatternEvent volumeEntries[32];
 
 	struct XMPATTERNHEADER ptHeader;
 	memset(&ptHeader, 0, sizeof(ptHeader));

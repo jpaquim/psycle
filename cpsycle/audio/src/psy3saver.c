@@ -787,7 +787,9 @@ int psy_audio_psy3saver_write_insd(psy_audio_PSY3Saver* self)
 int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 	psy_audio_Instrument* instrument)
 {	
-	int status = PSY_OK;
+	int status = PSY_OK;	
+	psy_dsp_EnvelopePoint pt_start;
+	psy_dsp_EnvelopePoint pt_end;
 	
 	// loop	
 	if (status = psyfile_write_uint8(self->songfile->file, instrument->loop != FALSE)) {
@@ -802,43 +804,55 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 		return status;
 	}
 	// env_at
+	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 1);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-		(adsr_settings_attack(&instrument->volumeenvelope) * 44100 + 0.5f))) {
+		(pt_start.time * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_dt	
+	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 1);
+	pt_end = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 2);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-		(adsr_settings_decay(&instrument->volumeenvelope) * 44100 + 0.5f))) {
+		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
-	// env_sl	
+	// env_sl
+	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 2);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-			(adsr_settings_sustain(&instrument->volumeenvelope) * 100))) {
+			(pt_start.value * 100))) {
 		return status;
 	}
-	// env_rt	
+	// env_rt
+	pt_start = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 2);
+	pt_end = psy_dsp_envelopesettings_at(&instrument->volumeenvelope, 3);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-		(adsr_settings_release(&instrument->volumeenvelope) * 44100 + 0.5f))) {
+		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_f_at
+	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 1);	
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-		(adsr_settings_attack(&instrument->filterenvelope) * 44100 + 0.5f))) {
+		(pt_start.time * 44100 + 0.5f))) {
 		return status;
 	}
-	// env_f_dt	
+	// env_f_dt
+	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 1);
+	pt_end = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 2);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-		(adsr_settings_decay(&instrument->filterenvelope) * 44100 + 0.5f))) {
+		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
-	// env_f_sl	
+	// env_f_sl
+	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 2);	
 	if (status = psyfile_write_int32(self->songfile->file,
-		(int32_t)(adsr_settings_sustain(&instrument->filterenvelope) * 128))) {
+		(int32_t)(pt_start.value * 128))) {
 		return status;
 	}
-	// env_f_rt	
+	// env_f_rt
+	pt_start = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 2);
+	pt_end = psy_dsp_envelopesettings_at(&instrument->filterenvelope, 3);
 	if (status = psyfile_write_int32(self->songfile->file, (int32_t)
-		(adsr_settings_release(&instrument->filterenvelope) * 44100 + 0.5f))) {
+		((pt_end.time - pt_start.time) * 44100 + 0.5f))) {
 		return status;
 	}
 	// env_f_co	

@@ -40,6 +40,7 @@ static void dev_show(psy_ui_win_ComponentImp*);
 static void dev_showstate(psy_ui_win_ComponentImp*, int state);
 static void dev_hide(psy_ui_win_ComponentImp*);
 static int dev_visible(psy_ui_win_ComponentImp*);
+static int dev_drawvisible(psy_ui_win_ComponentImp*);
 static void dev_move(psy_ui_win_ComponentImp*, int left, int top);
 static void dev_resize(psy_ui_win_ComponentImp*, psy_ui_Size);
 static void dev_clientresize(psy_ui_win_ComponentImp*, int width, int height);
@@ -96,6 +97,7 @@ static void win_imp_vtable_init(psy_ui_win_ComponentImp* self)
 			dev_showstate;
 		vtable.dev_hide = (psy_ui_fp_componentimp_dev_hide) dev_hide;
 		vtable.dev_visible = (psy_ui_fp_componentimp_dev_visible) dev_visible;
+		vtable.dev_drawvisible = (psy_ui_fp_componentimp_dev_drawvisible)dev_drawvisible;
 		vtable.dev_move = (psy_ui_fp_componentimp_dev_move) dev_move;
 		vtable.dev_resize = (psy_ui_fp_componentimp_dev_resize) dev_resize;
 		vtable.dev_clientresize = (psy_ui_fp_componentimp_dev_clientresize)
@@ -327,6 +329,11 @@ int dev_visible(psy_ui_win_ComponentImp* self)
 {
 	return self->visible;
 	//return IsWindowVisible(self->hwnd);
+}
+
+int dev_drawvisible(psy_ui_win_ComponentImp* self)
+{
+	return IsWindowVisible(self->hwnd);
 }
 
 void dev_move(psy_ui_win_ComponentImp* self, int left, int top)

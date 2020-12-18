@@ -79,9 +79,10 @@ void inputdefiner_text(InputDefiner* self, char* text)
 	uintptr_t keycode;
 	bool shift;
 	bool ctrl;
+	bool alt;
 	
 	text[0] = '\0';
-	psy_audio_decodeinput(self->input, &keycode, &shift, &ctrl);
+	psy_audio_decodeinput(self->input, &keycode, &shift, &ctrl, &alt);
 	if (shift) {
 		strcat(text, "Shift + ");		
 	}
@@ -115,14 +116,14 @@ void onkeydown(InputDefiner* self, psy_ui_KeyEvent* ev)
 #endif    
 	if ((ev->keycode == psy_ui_KEY_SHIFT || ev->keycode == psy_ui_KEY_CONTROL)) {
 		if (self->regularkey == 0) {
-			self->input = psy_audio_encodeinput(0, shift, ctrl);
+			self->input = psy_audio_encodeinput(0, shift, ctrl, 0);
 		} else {
-			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
+			self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, 0);
 		}
 	}
 	if (validkeycode(ev->keycode)) {
 		self->regularkey = ev->keycode;
-		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl);
+		self->input = psy_audio_encodeinput(self->regularkey, shift, ctrl, 0);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyevent_stoppropagation(ev);
@@ -135,6 +136,7 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
 	uintptr_t inputkeycode;
 	bool inputshift;
 	bool inputctrl;
+	bool inputalt;
 
 #if defined DIVERSALIS__OS__MICROSOFT
 	shift = GetKeyState (psy_ui_KEY_SHIFT) < 0;
@@ -143,15 +145,15 @@ void onkeyup(InputDefiner* self, psy_ui_KeyEvent* ev)
     shift = ev->shift;
     ctrl = ev->ctrl;
 #endif        
-	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl);
+	psy_audio_decodeinput(self->input, &inputkeycode, &inputshift, &inputctrl, &inputalt);
 	if (self->regularkey) {		
-		self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl);
+		self->input = psy_audio_encodeinput(inputkeycode, shift, ctrl, 0);
 	}
 	if (validkeycode(ev->keycode)) {
 		self->regularkey = 0;
 	}
 	if (!validkeycode(inputkeycode)) {
-		self->input = psy_audio_encodeinput(0, shift, ctrl);
+		self->input = psy_audio_encodeinput(0, shift, ctrl, 0);
 	}
 	psy_ui_component_invalidate(&self->component);
 	psy_ui_keyevent_stoppropagation(ev);

@@ -71,6 +71,8 @@ void psy_ui_button_init(psy_ui_Button* self, psy_ui_Component* parent)
 	self->textcolour = psy_ui_colour_make(0x00BDBDBD);
 	self->shiftstate = FALSE;
 	self->ctrlstate = FALSE;
+	self->buttonstate = 1;
+	self->allowrightclick = FALSE;
 	psy_signal_init(&self->signal_clicked);	
 }
 
@@ -308,11 +310,12 @@ void onmousedown(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 
 void onmouseup(psy_ui_Button* self, psy_ui_MouseEvent* ev)
 {		
-	psy_ui_component_releasecapture(psy_ui_button_base(self));	
-	if (self->enabled && ev->button == 1) {
+	psy_ui_component_releasecapture(psy_ui_button_base(self));
+	self->buttonstate = ev->button;
+	if (self->enabled && (ev->button == 1) || self->allowrightclick) {
 		psy_ui_Rectangle client_position;
 		psy_ui_IntSize size;
-
+		
 		size = psy_ui_component_intsize(psy_ui_button_base(self));
 		client_position = psy_ui_rectangle_make(0, 0, size.width, size.height);
 		if (psy_ui_rectangle_intersect(&client_position, ev->x, ev->y)) {

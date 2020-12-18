@@ -944,7 +944,7 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		kbd = workspace_kbddriver(self->workspace);
 		input.message = psy_EVENTDRIVER_KEYDOWN;
 		input.param1 = psy_audio_encodeinput(ev->keycode,
-			self->chordmode ? 0 : ev->shift, ev->ctrl);
+			self->chordmode ? 0 : ev->shift, ev->ctrl, ev->alt);
 		input.param2 = workspace_octave(self->workspace) * 12;
 		psy_eventdriver_cmd(kbd, "tracker", input, &cmd);
 		if (cmd.id >= CMD_DIGIT0 && cmd.id <= CMD_DIGITF) {
@@ -960,7 +960,7 @@ void trackergrid_onkeydown(TrackerGrid* self, psy_ui_KeyEvent* ev)
 		}
 		cmd.id = -1;
 		input.message = psy_EVENTDRIVER_KEYDOWN;
-		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl);
+		input.param1 = psy_audio_encodeinput(ev->keycode, 0, ev->ctrl, ev->alt);
 		psy_eventdriver_cmd(kbd, "notes", input, &cmd);
 		if (cmd.id != -1) {
 			trackergrid_inputnote(self,
@@ -2363,7 +2363,7 @@ void setcmdall(psy_Property* cmds, int cmd, uintptr_t keycode, bool shift,
 	psy_snprintf(text, 256, "cmds.%s", key);
 	psy_property_sethint( psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(cmds, key,
-		psy_audio_encodeinput(keycode, shift, ctrl), 0, 0),
+		psy_audio_encodeinput(keycode, shift, ctrl, 0), 0, 0),
 		cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);
 }
 

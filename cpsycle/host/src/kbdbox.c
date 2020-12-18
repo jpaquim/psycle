@@ -173,7 +173,7 @@ void kbdbox_onmousedown(KbdBox* self, psy_ui_MouseEvent* ev)
 			input.message = psy_EVENTDRIVER_KEYDOWN;
 			kbd = workspace_kbddriver(self->workspace);
 			input.param1 = psy_audio_encodeinput(psy_tableiterator_key(&it),
-				shift, ctrl);
+				shift, ctrl, 0);
 			input.param2 = workspace_octave(self->workspace) * 12;
 			psy_eventdriver_write(kbd, input);
 			break;

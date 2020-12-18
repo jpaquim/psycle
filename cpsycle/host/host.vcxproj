@@ -212,6 +212,7 @@
     <ClCompile Include="src\playlisteditor.c" />
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
+    <ClCompile Include="src\predefsconfig.c" />
     <ClCompile Include="src\presetsbar.c" />
     <ClCompile Include="src\propertiesview.c" />
     <ClCompile Include="src\psycle.c" />
@@ -326,6 +327,7 @@
     <ClInclude Include="src\playlisteditor.h" />
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
+    <ClInclude Include="src\predefsconfig.h" />
     <ClInclude Include="src\presetsbar.h" />
     <ClInclude Include="src\propertiesview.h" />
     <ClInclude Include="src\realedit.h" />

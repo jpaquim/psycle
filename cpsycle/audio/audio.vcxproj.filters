@@ -283,6 +283,9 @@
     <ClCompile Include="src\virtualgenerator.c">
       <Filter>machine\internal\sampler</Filter>
     </ClCompile>
+    <ClCompile Include="src\xmsongloader.c">
+      <Filter>file</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\library.h">
@@ -542,6 +545,9 @@
     </ClInclude>
     <ClInclude Include="src\virtualgenerator.h">
       <Filter>machine\internal\sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="src\xmsongloader.h">
+      <Filter>file</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -109,7 +109,6 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\adsr.c" />
     <ClCompile Include="src\alignedalloc.c" />
     <ClCompile Include="src\convert.c" />
     <ClCompile Include="src\dither.c" />
@@ -137,7 +136,6 @@
     <ClCompile Include="src\valuemapper.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\adsr.h" />
     <ClInclude Include="src\alignedalloc.h" />
     <ClInclude Include="src\convert.h" />
     <ClInclude Include="src\dither.h" />

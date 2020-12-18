@@ -100,8 +100,8 @@ int luaenvelope_create(lua_State* L)
 				}
 				lua_pop(L, 1);
 			}
-			psy_dsp_envelopesettings_addpoint(settings,
-				psy_dsp_envelopepoint_make((psy_dsp_seconds_t)t,
+			psy_dsp_envelopesettings_append(settings,
+				psy_dsp_envelopepoint_make_all((psy_dsp_seconds_t)t,
 					(psy_dsp_amp_t)peak, 0, 0, 0, 1));
 			lua_pop(L, 1);
 		}
@@ -112,7 +112,7 @@ int luaenvelope_create(lua_State* L)
 		startpeak = luaL_checknumber(L, 4);
 	}
 	env->startpeak = (psy_dsp_amp_t)startpeak;	
-	env->sustainstage = (int)suspos;
+	env->settings.sustainstage = (int)suspos;
 	psyclescript_createuserdata(L, 1, luaenvelope_meta, env);	
 	return 1;
 }

@@ -226,6 +226,9 @@ INLINE psy_dsp_big_beat_t psy_audio_sequencer_speed(psy_audio_Sequencer* self)
 	if (self->rowdelay.active) {
 		rv *= self->rowdelay.rowspeed;
 	}
+	if (self->calcduration && rv < 0.1) {
+		rv = 1.0;
+	}
 	return rv;
 }
 

@@ -55,6 +55,11 @@ psy_ui_Orientation psy_ui_slider_orientation(psy_ui_Slider*);
 void psy_ui_slider_connect(psy_ui_Slider*, void* context, ui_slider_fpdescribe,
 	ui_slider_fptweak, ui_slider_fpvalue);
 
+INLINE psy_ui_Component* psy_ui_slider_base(psy_ui_Slider* self)
+{
+	return &self->component;
+}
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,7 +13,8 @@
 #include "wavsongio.h"
 #include "wire.h"
 #include "xmdefs.h"
-#include "xm.h"
+//#include "xm.h"
+#include "xmsongloader.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -117,15 +118,19 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);
 			header[strlen(XM_HEADER)] = '\0';
 			if (strcmp(header, XM_HEADER) == 0) {
-				psy_audio_xm_load(self);
+				XMSongLoader loader;
+
+				xmsongloader_init(&loader, self);
+				xmsongloader_load(&loader);
+				xmsongloader_dispose(&loader);
 			} else {
 				psyfile_seek(self->file, 0);
-				if (psy_audio_mod_isvalid(self)) {
-					psyfile_seek(self->file, 0);
-					psy_audio_mod_load(self);
-				} else {
-					self->err = 2;
-				}
+				//if (psy_audio_mod_isvalid(self)) {
+					//psyfile_seek(self->file, 0);
+					//psy_audio_mod_load(self);
+				//} else {
+					//self->err = 2;
+				//}
 			}
 #else
 			status = PSY_ERRFILEFORMAT;

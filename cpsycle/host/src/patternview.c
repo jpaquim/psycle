@@ -343,7 +343,8 @@ void patternview_init(PatternView* self, psy_ui_Component* parent,
 		patternview_onpatterncursorchanged);
 	psy_signal_connect(&self->tracker.component.signal_scroll, self,
 		patternview_ongridscroll);
-	psy_signal_connect(&workspace_player(self->workspace)->eventdrivers.signal_input, self,
+	psy_signal_connect(
+		&workspace_player(self->workspace)->eventdrivers.signal_input, self,
 		patternview_oneventdriverinput);
 	psy_signal_connect(&self->workspace->signal_parametertweak, self,
 		patternview_onparametertweak);

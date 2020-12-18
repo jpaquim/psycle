@@ -533,7 +533,7 @@ void pianogrid_ondraw(Pianogrid* self, psy_ui_Graphics* g)
 {
 	psy_audio_PatternSelection clip;
 
-	assert(self);
+	assert(self);	
 
 	if (!pianogridstate_pattern(self->gridstate)) {
 		psy_ui_drawsolidrectangle(g, g->clip,
@@ -2102,7 +2102,7 @@ void setcmdall(psy_Property* cmds, int cmd, uintptr_t keycode, bool shift,
 	psy_snprintf(text, 256, "cmds.%s", key);
 	psy_property_sethint(psy_property_settext(psy_property_setshorttext(
 		psy_property_setid(psy_property_append_int(cmds, key,
-			psy_audio_encodeinput(keycode, shift, ctrl), 0, 0),
+			psy_audio_encodeinput(keycode, shift, ctrl, 0), 0, 0),
 			cmd), shorttext), text), PSY_PROPERTY_HINT_SHORTCUT);
 }
 

@@ -643,8 +643,8 @@ psy_audio_XMSamplerVoice* activevoice(psy_audio_XMSampler* self, uintptr_t chann
 		psy_audio_XMSamplerVoice* voice;
 
 		voice = (psy_audio_XMSamplerVoice*) p->entry;
-		if (voice->channelnum == channel && voice->amplitudeenvelope.stage != ENV_RELEASE
-				&& voice->amplitudeenvelope.stage != ENV_OFF) {
+		if (voice->channelnum == channel && !psy_dsp_envelope_releasing(&voice->amplitudeenvelope)
+				&& psy_dsp_envelope_playing(&voice->amplitudeenvelope)) {
 			rv = voice;
 			break;
 		}
@@ -661,8 +661,8 @@ void removeunusedvoices(psy_audio_XMSampler* self)
 		psy_audio_XMSamplerVoice* voice;
 
 		q = p->next;
-		voice = (psy_audio_XMSamplerVoice*) p->entry;				
-		if (voice->amplitudeenvelope.stage == ENV_OFF ||
+		voice = (psy_audio_XMSamplerVoice*)p->entry;		
+		if (!psy_dsp_envelope_playing(&voice->amplitudeenvelope) ||
 				!psy_audio_xmsamplervoice_isplaying(voice)) {
 			psy_audio_xmsamplervoice_dispose(voice);
 			free(voice);
