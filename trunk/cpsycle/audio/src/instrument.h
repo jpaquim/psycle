@@ -115,7 +115,7 @@ INLINE psy_dsp_amp_t psy_audio_instrument_volume(psy_audio_Instrument* self)
 	return self->globalvolume;
 }
 
-const char* psy_audio_instrument_tostring(psy_audio_Instrument*, const char*);
+const char* psy_audio_instrument_tostring(const psy_audio_Instrument*);
 void psy_audio_instrument_fromstring(psy_audio_Instrument*, const char*);
 
 #ifdef __cplusplus

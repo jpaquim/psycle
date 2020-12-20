@@ -519,6 +519,7 @@ void machinewireview_init(MachineWireView* self, psy_ui_Component* parent,
 	self->addeffect = 0;
 	self->drawvumode = FALSE;
 	self->showwirehover = FALSE;
+	self->drawvirtualgenerators = FALSE;
 	self->scroller = scroller;
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setwheelscroll(&self->component, 4);
@@ -575,6 +576,7 @@ void machinewireview_configure(MachineWireView* self, MachineViewConfig* config)
 	self->drawvumeters = machineviewconfig_vumeters(config);
 	self->skin.drawmachineindexes = machineviewconfig_machineindexes(config);
 	self->showwirehover = machineviewconfig_wirehover(config);
+	self->drawvirtualgenerators = machineviewconfig_virtualgenerators(config);
 }
 
 void machinewireview_updateskin(MachineWireView* self)
@@ -1034,7 +1036,13 @@ void machinewireview_hittest(MachineWireView* self)
 
 void machinewireview_onmousemove(MachineWireView* self, psy_ui_MouseEvent* ev)
 {		
-	self->mousemoved = TRUE;
+	if (!self->mousemoved) {
+		if (self->mx != ev->x || self->my != ev->y) {
+			self->mousemoved = TRUE;
+		} else {
+			return;
+		}
+	}	
 	if (self->dragslot != UINTPTR_MAX) {
 		if (self->dragmode == MACHINEWIREVIEW_DRAG_PAN) {
 			MachineUi* machineui;
@@ -1187,7 +1195,10 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 					}
 				}
 			} else if (ev->button == 2) {
-				workspace_togglegear(self->workspace);
+				if (!self->workspace->gearvisible) {
+					workspace_togglegear(self->workspace);					
+				}
+				psy_ui_mouseevent_stoppropagation(ev);
 			}			
 		}
 	}
@@ -1521,12 +1532,15 @@ void machinewireview_buildmachineuis(MachineWireView* self)
 
 		machineuis_removeall(self);
 		for (it = psy_audio_machines_begin(self->machines);
-			!psy_tableiterator_equal(&it, psy_table_end());
-			psy_tableiterator_inc(&it)) {
-			psy_audio_Machine* machine;
+				!psy_tableiterator_equal(&it, psy_table_end());
+				psy_tableiterator_inc(&it)) {
+			if (self->drawvirtualgenerators ||
+					!(psy_tableiterator_key(&it) > 0x80 && psy_tableiterator_key(&it) <= 0xFE)) {
+				psy_audio_Machine* machine;
 
-			machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
-			machineuis_insert(self, psy_tableiterator_key(&it));			
+				machine = (psy_audio_Machine*)psy_tableiterator_value(&it);
+				machineuis_insert(self, psy_tableiterator_key(&it));
+			}
 		}
 		if (psy_audio_machines_size(self->machines) == 1) {
 			// if only master exists, center
@@ -2009,36 +2023,48 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 }
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
-{	
-	self->newmachine.pluginsview.calledby = 0;	
-	machineview_selectsection(self, &self->component, 1);
+{		
+	self->newmachine.pluginsview.calledby = VIEW_ID_MACHINEVIEW;
+	machineview_selectsection(self, machineview_base(self),
+		SECTION_ID_MACHINEVIEW_NEWMACHINE);
 }
 
 void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2 && tabbar_selected(&self->tabbar) == 1) {
-		tabbar_select(&self->tabbar, 0);		
+	if (ev->button == 2) {
+		if (tabbar_selected(&self->tabbar) ==
+			SECTION_ID_MACHINEVIEW_NEWMACHINE) {
+			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
+		}
 	}
 	psy_ui_mouseevent_stoppropagation(ev);
 }
 
 void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 {
+	if (ev->button == 2 && tabbar_selected(&self->tabbar) ==
+			SECTION_ID_MACHINEVIEW_WIRES) {
+		workspace_togglegear(self->workspace);
+	}
 }
 
 void machineview_onkeydown(MachineView* self, psy_ui_KeyEvent* ev)
 {
-	if (ev->keycode == psy_ui_KEY_ESCAPE &&
-			tabbar_selected(&self->tabbar) == 1) {
-		tabbar_select(&self->tabbar, 0);
-		psy_ui_component_setfocus(&self->wireview.component);
+	if (ev->keycode == psy_ui_KEY_ESCAPE) {
+		if (tabbar_selected(&self->tabbar) ==
+				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
+			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
+			psy_ui_component_setfocus(machinewireview_base(&self->wireview));
+		} else if (self->workspace->gearvisible) {
+			workspace_togglegear(self->workspace);
+		}
 		psy_ui_keyevent_stoppropagation(ev);
-	}	
+	} 
 }
 
 void machineview_onfocus(MachineView* self, psy_ui_Component* sender)
 {
-	psy_ui_component_setfocus(&self->wireview.component);
+	psy_ui_component_setfocus(machinewireview_base(&self->wireview));
 }
 
 psy_ui_Rectangle machinewireview_bounds(MachineWireView* self)
@@ -2128,24 +2154,28 @@ void machinewireview_onpreferredsize(MachineWireView* self, const psy_ui_Size* l
 void machineview_selectsection(MachineView* self, psy_ui_Component* sender,
 	uintptr_t section)
 {
-	tabbar_select(&self->tabbar, (int) section);
-	if (section == 0) {
-		psy_ui_component_setfocus(&self->wireview.component);
+	tabbar_select(&self->tabbar, (int)section);
+	if (section == SECTION_ID_MACHINEVIEW_NEWMACHINE) {
+		psy_ui_component_setfocus(newmachine_base(&self->newmachine));		
 	} else {
-		psy_ui_component_setfocus(&self->newmachine.component);
+		psy_ui_component_setfocus(machinewireview_base(&self->wireview));
 	}
 }
 
 void machineview_onsongchanged(MachineView* self, Workspace* workspace,
 	int flag, psy_audio_SongFile* songfile)
 {
-	tabbar_select(&self->tabbar, 0);
+	tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
 }
 
 void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 	psy_Property* property)
 {
 	machinewireview_configure(&self->wireview, sender);
+	if (property == psy_property_at(sender->machineview,
+			"drawvirtualgenerators", PSY_PROPERTY_TYPE_NONE)) {
+		machinewireview_buildmachineuis(&self->wireview);
+	}	
 }
 
 void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,

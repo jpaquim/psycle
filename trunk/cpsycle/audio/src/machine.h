@@ -915,6 +915,11 @@ INLINE void psy_audio_machine_setbuffermemorysize(psy_audio_Machine* self,
 	self->vtable->setbuffermemorysize(self, size);
 }
 
+INLINE void psy_audio_machine_resetbuffermemory(psy_audio_Machine* self)
+{
+	psy_audio_machine_setbuffermemorysize(self, psy_audio_MAX_STREAM_SIZE);
+}
+
 void psy_audio_machine_updatememory(psy_audio_Machine*,
 	psy_audio_BufferContext* bc);
 

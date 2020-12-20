@@ -160,6 +160,21 @@ static int16_t const BIGMODPERIODTABLE[37*8] = //((12note*3oct)+1note)*8fine
 	113,113,112,111,110,109,109,108
 };
 
+static int calclpbfromspeed(int trackerspeed, int* outextraticks)
+{
+	int lpb;
+	if (trackerspeed == 0) {
+		trackerspeed = 6;
+		lpb = 4;
+	} else if (trackerspeed == 5) {
+		lpb = 6;
+	} else {
+		lpb = ceil(24.f / trackerspeed);
+	}
+	*outextraticks = trackerspeed - 24 / lpb;
+	return lpb;
+}
+
 // prototypes
 static bool xmsongloader_isvalid(XMSongLoader* self);
 static size_t xmsongloader_loadsampleheader(XMSongLoader*, psy_audio_Sample* _wave, size_t iStart, int iInstrIdx, int iSampleIdx);
@@ -206,6 +221,7 @@ bool xmsongloader_load(XMSongLoader* self)
 	PsyFile* fp;
 	psy_audio_SongProperties songproperties;
 	char* comments;
+	char* pSongName;
 
 	//CExclusiveLock lock(&song.semaphore, 2, true);
 	// check validity
@@ -217,24 +233,22 @@ bool xmsongloader_load(XMSongLoader* self)
 	//song.seqBus=0;
 	// build sampler
 	// m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
+	
+	// build sampler
+	self->sampler = psy_audio_machinefactory_makemachine(
+		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", UINTPTR_MAX);
+	psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);
+	if (self->sampler) {
+		psy_audio_machines_insert(&self->songfile->song->machines, 0,
+			self->sampler);
+		psy_audio_machines_connect(&self->songfile->song->machines,
+			psy_audio_wire_make(0, psy_audio_MASTER_INDEX));
+		psy_audio_connections_setwirevolume(&self->songfile->song->machines.connections,
+			psy_audio_wire_make(0, psy_audio_MASTER_INDEX), 0.355f); //-9dB
+	}	
 	// get song name
-
-	{
-		psy_audio_Machine* machine;
-
-		machine = psy_audio_machinefactory_makemachine(self->songfile->song->machinefactory,
-			MACH_XMSAMPLER, "", UINTPTR_MAX);
-		if (machine) {
-			psy_audio_machines_insert(&self->songfile->song->machines, 0, machine);
-			psy_audio_machines_connect(&self->songfile->song->machines,
-				psy_audio_wire_make(0, psy_audio_MASTER_INDEX));
-			psy_audio_connections_setwirevolume(&self->songfile->song->machines.connections,
-				psy_audio_wire_make(0, psy_audio_MASTER_INDEX), 0.355f); //-9dB
-		}
-	}
-
 	fp = self->songfile->file;
-	char * pSongName = AllocReadStrStart(fp, 20,17);
+	pSongName = AllocReadStrStart(fp, 20,17);
 
 	if (pSongName == NULL)
 		return FALSE;
@@ -296,8 +310,24 @@ size_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>& xm
 	psyfile_seek(fp, 60);
 	psyfile_read(fp, &self->m_Header,sizeof(XMFILEHEADER));
 
-	// m_pSampler->IsAmigaSlides((m_Header.flags & 0x01)?false:true);
-	// m_pSampler->XM_SAMPLER_PanningMode(XM_SAMPLER_PanningMode::TwoWay);
+	{ // IsAmigaSlides
+		psy_audio_MachineParam* param;
+
+		param = psy_audio_machine_tweakparameter(self->sampler, 24);
+		if (param) {
+			psy_audio_machine_parameter_tweak_scaled(self->sampler, param,
+				(self->m_Header.flags & 0x01) ? FALSE : TRUE);
+		}
+	}
+	{ // XM_SAMPLER_PanningMode
+		psy_audio_MachineParam* param;
+
+		param = psy_audio_machine_tweakparameter(self->sampler, 40);
+		if (param) {
+			// XM_SAMPLER_PanningMode::TwoWay
+			psy_audio_machine_parameter_tweak_scaled(self->sampler, param, 1);
+		}
+	}	
 	self->songfile->song->properties.tracks = psy_max((int)self->m_Header.channels, 4);
 	//song.SONGTRACKS = std::max((int)m_Header.channels, 4);
 	self->m_iInstrCnt = self->m_Header.instruments;
@@ -306,10 +336,10 @@ size_t xmsongloader_loadpatterns(XMSongLoader* self) // , std::map<int, int>& xm
 	self->songfile->song->properties.tpb = 24;
 	//song.TicksPerBeat(24);
 	int extraticks=0;
-	self->songfile->song->properties.lpb = 4; // todo
-	//song.LinesPerBeat(XM_SAMPLER_CalcLPBFromSpeed(m_Header.speed,extraticks));
+	self->songfile->song->properties.lpb = calclpbfromspeed(
+		self->m_Header.speed, &extraticks);
 	if (extraticks != 0) {
-		//song.ExtraTicksPerLine(extraticks);
+		self->songfile->song->properties.extraticksperbeat = extraticks;
 	}
 	
 	// for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.norder;i++)
@@ -364,7 +394,6 @@ void xmsongloader_makesequence(XMSongLoader* self, struct XMFILEHEADER* xmheader
 	}
 }
 
-
 // return address of next pattern, 0 for invalid
 size_t xmsongloader_loadsinglepattern(XMSongLoader* self, size_t start, int patIdx, int iTracks) // , std::map<int, int>& xmtovirtual)
 {
@@ -384,8 +413,12 @@ size_t xmsongloader_loadsinglepattern(XMSongLoader* self, size_t start, int patI
 	pattern = psy_audio_pattern_allocinit();
 	psy_audio_pattern_setname(pattern, "unnamed");
 	psy_audio_patterns_insert(&song->patterns, patIdx, pattern);
-	psy_audio_pattern_setlength(pattern, iNumRows * 0.25);
+	psy_audio_pattern_setlength(pattern, iNumRows * 1.0 / self->songfile->song->properties.lpb);
 	//song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
+
+	if (patIdx == 3) {
+		self = self;
+	}
 
 	//PatternEntry e;
 	psy_audio_PatternEvent e;
@@ -644,7 +677,7 @@ size_t xmsongloader_loadsinglepattern(XMSongLoader* self, size_t start, int patI
 						{
 							e.cmd= psy_audio_PATTERNCMD_EXTENDED;
 							int extraticks=0;
-							e.parameter = 0; // XM_SAMPLER_CalcLPBFromSpeed(param, extraticks);
+							e.parameter = calclpbfromspeed(param, &extraticks);
 							if (extraticks != 0) {
 								psy_audio_PatternEvent entry;
 
@@ -891,6 +924,10 @@ bool xmsongloader_writepatternentry(XMSongLoader* self,
 		psy_audio_Pattern* pattern;
 		psy_audio_PatternEvent ev;
 
+		if (e->cmd == 0xFE) {
+			self = self;
+		}
+
 		psy_audio_patternevent_clear(&ev);
 		ev.note = e->note;
 		ev.inst = e->inst;
@@ -901,7 +938,7 @@ bool xmsongloader_writepatternentry(XMSongLoader* self,
 		if (pattern) {
 			// don't overflow song buffer 
 			//if (patIdx >= MAX_PATTERNS) return false;
-			*node = psy_audio_pattern_insert(pattern, *node, col, (psy_dsp_beat_t)(row * 0.25), &ev);
+			*node = psy_audio_pattern_insert(pattern, *node, col, (psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb), &ev);
 
 			//PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx, col, row));
 
@@ -1032,7 +1069,6 @@ size_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, size_t start)
 //{
 	struct XMINSTRUMENTHEADER instrumentheader;
 	psy_audio_Instrument* instrument;
-
 	PsyFile* fp;
 	psy_audio_Song* song;	
 
@@ -1192,8 +1228,8 @@ size_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, size_t start)
 			}
 			sample->numframes = xmsamples[s].samplen / (is16bit ? 2 : 1);
 			sample->samplerate = 8363;
-			sample->defaultvolume = xmsamples[s].vol * 2 / (psy_dsp_amp_t)128.f;
-			sample->tune = xmsamples[s].relnote;
+			sample->defaultvolume = xmsamples[s].vol * 2;
+			sample->tune = xmsamples[s].relnote - 24;
 			// WaveFineTune has +-100 range in Psycle.
 			sample->finetune = (int16_t)(xmsamples[s].finetune / 1.28f);
 			// Sounds Stupid, but it isn't. Some modules save sample
@@ -1311,7 +1347,7 @@ size_t xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* _wave
 
 	_wave->samplerate = 8363; //.WaveSampleRate(8363);
 	// todo check scale
-	_wave->defaultvolume = (iVol * 2) / (psy_dsp_amp_t)0x80; // .WaveVolume(iVol * 2);
+	_wave->defaultvolume = iVol * 2; // .WaveVolume(iVol * 2);
 	_wave->tune = iRelativeNote; // .WaveTune(iRelativeNote);
 	_wave->finetune = (short)(iFineTune / 1.28); // WaveFineTune(iFineTune / 1.28); // WaveFineTune has +-100 range in Psycle.
 	//std::string sName = cName;
@@ -1329,16 +1365,19 @@ size_t xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* _wave
 size_t xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* _wave, size_t iStart, int iInstrIdx, int iSampleIdx)
 {
 	PsyFile* fp;
-
+	BOOL b16Bit;
+	short wNew;
+	char* smpbuf;
+	
 	fp = self->songfile->file;
 	// parse
 		
-	BOOL b16Bit = self->smpFlags[iSampleIdx] & 0x10;
-	short wNew=0;
+	b16Bit = self->smpFlags[iSampleIdx] & 0x10;
+	wNew=0;
 
 	// cache sample data
 	psyfile_seek(fp, iStart);
-	char* smpbuf = (char*)malloc(self->smpLen[iSampleIdx]);
+	smpbuf = (char*)malloc(self->smpLen[iSampleIdx]);
 	if (!smpbuf) {
 		// todo check return value
 		return iStart;
@@ -1379,7 +1418,6 @@ size_t xmsongloader_loadsampledata(XMSongLoader* self, psy_audio_Sample* _wave, 
 	iStart += self->smpLen[iSampleIdx];
 	return iStart;
 }
-
 	
 void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER* sampleHeader)
 {
@@ -1414,10 +1452,10 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 		psy_dsp_envelopesettings_dispose(&ampenvelope);
 	}
 	
-		/*
-		if(sampleHeader.vtype & 2){
-			inst.AmpEnvelope().SustainBegin(sampleHeader.vsustain);
-			inst.AmpEnvelope().SustainEnd(sampleHeader.vsustain);
+		
+		if(sampleHeader->vtype & 2) {
+			psy_dsp_envelopesettings_setsustainbegin(&inst->volumeenvelope, sampleHeader->vsustain);
+			psy_dsp_envelopesettings_setsustainend(&inst->volumeenvelope, sampleHeader->vsustain);			
 		}
 		else
 		{
@@ -1427,7 +1465,7 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 //				inst.AmpEnvelope().SustainEnd(inst.AmpEnvelope().NumOfPoints()-1);
 		}
 
-			
+/*
 		if(sampleHeader.vtype & 4){
 			if(sampleHeader.vloops < sampleHeader.vloope){
 				inst.AmpEnvelope().LoopStart(sampleHeader.vloops);
@@ -1490,11 +1528,31 @@ void xmsongloader_setenvelopes(psy_audio_Instrument* inst, const XMSAMPLEHEADER*
 	}*/
 }	
 
+// MODSongLoader
+//
+// prototypes
+static bool modsongloader_isvalid(MODSongLoader*);
+static void modsongloader_loadpatterns(MODSongLoader*);
+static void modsongloader_loadsinglepattern(MODSongLoader*, int patidx, int tracks);
+static unsigned char modsongloader_convertperiodtonote(unsigned short period);
+static bool modsongloader_writepatternentry(MODSongLoader*,
+	psy_audio_PatternNode** node, const int patIdx,
+	const int row, const int col, const psy_audio_PatternEvent*);
+static void modsongloader_makesequence(MODSongLoader*, struct MODHEADER*);
+static void modsongloader_loadinstrument(MODSongLoader*, int idx);
+static void modsongloader_loadsampleheader(MODSongLoader*, psy_audio_Sample*, int instridx);
+static void modsongloader_loadsampledata(MODSongLoader*, psy_audio_Sample*, int instridx);
+// implementation
 void modsongloader_init(MODSongLoader* self, psy_audio_SongFile* songfile)
 {
 	assert(self);
 
 	self->songfile = songfile;
+	for (int i = 0; i < 32; i++)
+	{
+		self->smpLen[i] = 0;
+	}
+	self->speedpatch = FALSE;
 }
 
 void modsongloader_dispose(MODSongLoader* self)
@@ -1502,523 +1560,561 @@ void modsongloader_dispose(MODSongLoader* self)
 	assert(self);
 }
 
-/*
+bool modsongloader_load(MODSongLoader* self)
+{
+	char* pSongName;
+	char* comments;
+	psy_audio_SongProperties songproperties;
+	PsyFile* fp;
+	psy_audio_Song* song;
+	int i;
 
+	// file pointer	
+	fp = self->songfile->file;
+	song = self->songfile->song;
 
-	
-	MODSongLoader::MODSongLoader(void)
-	{
-		for (int i=0; i<32; i++)
-		{
-			smpLen[i]=0;
-		}
-		speedpatch = false;
+	// check validity
+	if(!modsongloader_isvalid(self)){
+		return FALSE;
 	}
 
-	MODSongLoader::~MODSongLoader(void)
-	{
-
+	// build sampler
+	self->sampler = psy_audio_machinefactory_makemachine(
+		self->songfile->song->machinefactory, MACH_XMSAMPLER, "", UINTPTR_MAX);
+	psy_audio_machine_setposition(self->sampler, rand() / 64, rand() / 80);
+	if (self->sampler) {
+		psy_audio_machines_insert(&self->songfile->song->machines, 0,
+			self->sampler);
+		psy_audio_machines_connect(&self->songfile->song->machines,
+			psy_audio_wire_make(0, psy_audio_MASTER_INDEX));
+		psy_audio_connections_setwirevolume(&self->songfile->song->machines.connections,
+			psy_audio_wire_make(0, psy_audio_MASTER_INDEX), 0.355f); //-9dB
 	}
 
-	bool MODSongLoader::Load(Song& song,CProgressDialog& progress, bool fullopen)
-	{
-		CExclusiveLock lock(&song.semaphore, 2, true);
-		// check validity
-		if(!IsValid()){
-			return false;
-		}
-		song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
+	// song.CreateMachine(MACH_XMSAMPLER, rand()/64, rand()/80, "sampulse",0);
 //		song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.5f); // This is done later, when determining the number of channels.
-		song.seqBus=0;
-		m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
-		m_pSampler->XM_SAMPLER_PanningMode(XM_SAMPLER_PanningMode::TwoWay);
-		// get song name
+	//song.seqBus=0;
+	//m_pSampler = static_cast<XMSampler *>(song._pMachine[0]);
+	//m_pSampler->XM_SAMPLER_PanningMode(XM_SAMPLER_PanningMode::TwoWay);
+	// get song name
 
-		char * pSongName = AllocReadStr(20,0);
-		if(pSongName==NULL)
-			return false;
+	pSongName = AllocReadStrStart(fp, 20,0);
+	if(pSongName==NULL)
+		return FALSE;
 
-		song.name = pSongName;
-		song.author = "";
-		song.comments = "Imported from MOD Module: ";
-		song.comments.append(szName);
-		delete[] pSongName; pSongName = 0;
+	comments = strdup("Imported from MOD Module: ");
+	comments = psy_strcat_realloc(comments, self->songfile->path);
+	psy_audio_songproperties_init(&songproperties, pSongName, "", comments);
+	free(comments);
+	comments = NULL;
+	psy_audio_song_setproperties(self->songfile->song, &songproperties);
+	free(pSongName);
+	pSongName = NULL;	
 
-		// get data
-		Seek(20);
-		for (int i=0;i<31;i++) {
-			XMInstrument::WaveData<> wave;
-			LoadSampleHeader(wave,i);
-			song.samples.SetSample(wave,i);
-		}
-		Seek(950);
-		Read(&m_Header,sizeof(m_Header));
-		
-		char pID[5];
-		pID[0]=m_Header.pID[0];pID[1]=m_Header.pID[1];pID[2]=m_Header.pID[2];pID[3]=m_Header.pID[3];pID[4]=0;
-		
-		
-		m_pSampler->IsAmigaSlides(true);
-		if ( !strncmp(pID,"M.K.",4)) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
-		else if ( !strncmp(pID,"M!K!",4)) { song.SONGTRACKS = 4; song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); }//-9dB
-		else if ( !strncmp(pID+1,"CHN",4)) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song.SONGTRACKS = atoi(tmp);  song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f); } //-9dB
-		else if ( !strncmp(pID+2,"CH",4)) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song.SONGTRACKS = atoi(tmp); song.InsertConnectionNonBlocking(0,MASTER_INDEX,0,0,0.355f);}//-9dB
-		song.BeatsPerMin(125);
-		song.LinesPerBeat(4);
-		song.TicksPerBeat(24);
-		song.ExtraTicksPerLine(0);
+	// get data
+	psyfile_seek(fp, 20);
+	for (int i=0;i<31;i++) {
+		psy_audio_Sample* wave;
 
-		if (song.SONGTRACKS<=8) {
-			for (int i = 0; i< song.SONGTRACKS ; i++ )
-			{
-				if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
-				else m_pSampler->rChannel(i).DefaultPanFactorFloat(0.75,true);
-			}
-		}
-		else {
-			for (int i = 0; i< song.SONGTRACKS ; i++ )
-			{
-				m_pSampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
-			}
-		}
-		std::map<int,int> modtovirtual;
-		int virtidx=MAX_MACHINES;
-		for (int i=0; i < 31;i++) {
-			if (m_Samples[i].sampleLength > 0 ) {
-				modtovirtual[i]=virtidx;
-				virtidx++;
-			}
-		}
-		LoadPatterns(song, modtovirtual);
-		for(int i = 0;i < 31;i++){
-			LoadInstrument(song,i);
-			if (song.xminstruments.IsEnabled(i)) {
-				song.SetVirtualInstrument(modtovirtual[i],0,i);
-			}
-		}
-		return true;
+		wave = psy_audio_sample_allocinit(1);	
+		modsongloader_loadsampleheader(self, wave, i);		
+		psy_audio_samples_insert(&song->samples, wave,
+			sampleindex_make(i, 0));
 	}
+	psyfile_seek(fp, 950);
+	psyfile_read(fp, &self->m_Header,sizeof(self->m_Header));
+		
+	char pID[5];
+	pID[0]=self->m_Header.pID[0];pID[1]=self->m_Header.pID[1];pID[2]= self->m_Header.pID[2];pID[3]= self->m_Header.pID[3];pID[4]=0;
+		
+		
+	//sampler->IsAmigaSlides(true);
+	if ( !strncmp(pID,"M.K.",4)) {
+		song->properties.tracks = 4; }
+	else if ( !strncmp(pID,"M!K!",4)) { song->properties.tracks = 4;  }
+	else if ( !strncmp(pID+1,"CHN",4)) { char tmp[2]; tmp[0] = pID[0]; tmp[1]=0; song->properties.tracks = atoi(tmp); }
+	else if ( !strncmp(pID+2,"CH",4)) { char tmp[3]; tmp[0] = pID[0]; tmp[1]=pID[1]; tmp[2]=0; song->properties.tracks = atoi(tmp); }
+	song->properties.bpm = 125;
+	song->properties.lpb = 4;
+	song->properties.tpb = 24;
+	song->properties.extraticksperbeat = 0;	
 
-	bool MODSongLoader::IsValid()
-	{
-		bool bIsValid = false;
-		char *pID = AllocReadStr(4,1080);
-
-		bIsValid = !strncmp(pID,"M.K.",4);
-		if ( !bIsValid ) bIsValid = !strncmp(pID,"M!K!",4);
-		if ( !bIsValid ) bIsValid = !strncmp(pID+1,"CHN",4);
-		if ( !bIsValid ) bIsValid = !strncmp(pID+2,"CH",4);
-
-		delete[] pID;
-		return bIsValid;
-	}
-
-	void MODSongLoader::LoadPatterns(Song & song, std::map<int,int>& modtovirtual)
-	{
-		int npatterns=0;
-		for(int i = 0;i < MAX_SONG_POSITIONS && i < m_Header.songlength;i++)
+	if (song->properties.tracks<=8) {
+		for (i = 0; i< song->properties.tracks ; i++ )
 		{
-			if ( m_Header.order[i] < MAX_PATTERNS ){
-				song.playOrder[i]=m_Header.order[i];
-				if ( m_Header.order[i] > npatterns) npatterns=m_Header.order[i];
-			} else { 
-				song.playOrder[i]=0;
-				if ( m_Header.order[i] > npatterns) npatterns=m_Header.order[i];
-			}
-		}
-		npatterns++;
-		if ( m_Header.songlength > MAX_SONG_POSITIONS ){
-			song.playLength=MAX_SONG_POSITIONS;
-		} else {
-			song.playLength=m_Header.songlength;
-		}
-
-		// get pattern data
-		Seek(1084);
-		for(int j = 0;j < npatterns ;j++){
-			LoadSinglePattern(song,j,song.SONGTRACKS, modtovirtual );
-		}
-		if(speedpatch) {
-			song.SONGTRACKS++;
+			//if (i%4 == 0 || i%4 == 3) m_pSampler->rChannel(i).DefaultPanFactorFloat(0.25f,true);
+			//else m_pSampler->rChannel(i).DefaultPanFactorFloat(0.75,true);
 		}
 	}
-
-	char * MODSongLoader::AllocReadStr(int32_t size, signed int start)
-	{
-		// allocate space
-		char *pData = new char[size + 1];
-		if(pData==NULL)
-			return NULL;
-
-		// null terminate
-		pData[size]=0;
-
-		// go to offset
-		if(start>=0)
-			Seek(start);
-
-		// read data
-		if(Read(pData,size))
-			return pData;
-
-		delete[] pData;
-		return NULL;
+	else {
+		//for (int i = 0; i< song.SONGTRACKS ; i++ )
+		//{
+			//m_pSampler->rChannel(i).DefaultPanFactorFloat(0.5f,true);
+		//}
 	}
-
-
-
-
-
-	// return address of next pattern, 0 for invalid
-	void MODSongLoader::LoadSinglePattern(Song & song,int patIdx,int iTracks, std::map<int,int>& modtovirtual)
-	{
-
-		short iNumRows = 64;
-
-		song.AllocNewPattern(patIdx,"unnamed",iNumRows,false);
-
-		unsigned char lastmach[64];
-		std::memset(lastmach,255,sizeof(char)*64);
-
-		PatternEntry e;
-		unsigned char mentry[4];
-
-			// get next values
-			for(int row = 0;row < iNumRows;row++)
-			{
-				for(int col=0;col<iTracks;col++)
-				{	
-					// reset
-					unsigned char note=notecommands::empty;
-					unsigned char instr=255;
-					unsigned char type=0;
-					unsigned char param=0;
-					unsigned short period=428;
-
-					// read note
-					mentry[0] = ReadUInt1(); mentry[1] = ReadUInt1(); mentry[2] = ReadUInt1(); mentry[3] = ReadUInt1();
-					instr = ((mentry[0] & 0xF0) + (mentry[2] >> 4));
-					period = ((mentry[0]& 0x0F) << 8) + mentry[1];
-					type = (mentry[2] & 0x0F);
-					param = mentry[3];
-					note = ConvertPeriodtoNote(period);
-
-					// translate
-					e._parameter = param;
-
-					int exchwave[3]={XMInstrument::WaveData<>::WaveForms::SINUS,
-						XMInstrument::WaveData<>::WaveForms::SAWDOWN,
-						XMInstrument::WaveData<>::WaveForms::SQUARE
-					};
-
-					switch(type){
-						case XMCMD_ARPEGGIO:
-							if(param != 0){
-								e._cmd = XM_SAMPLER_CMD_ARPEGGIO;
-							} else {
-								e._cmd = XM_SAMPLER_CMD_NONE;
-							}
-							break;
-						case XMCMD_PORTAUP:
-							e._cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
-							break;
-						case XMCMD_PORTADOWN:
-							e._cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
-							break;
-						case XMCMD_PORTA2NOTE:
-							e._cmd = XM_SAMPLER_CMD_PORTA2NOTE;
-							break;
-						case XMCMD_VIBRATO:
-							e._cmd = XM_SAMPLER_CMD_VIBRATO;
-							break;
-						case XMCMD_TONEPORTAVOL:
-							e._cmd = XM_SAMPLER_CMD_TONEPORTAVOL;
-							break;
-						case XMCMD_VIBRATOVOL:
-							e._cmd = XM_SAMPLER_CMD_VIBRATOVOL;
-							break;
-						case XMCMD_TREMOLO:
-							e._cmd = XM_SAMPLER_CMD_TREMOLO;
-							break;
-						case XMCMD_PANNING:
-							e._cmd = XM_SAMPLER_CMD_PANNING;
-							break;
-						case XMCMD_OFFSET:
-							e._cmd = XM_SAMPLER_CMD_OFFSET;
-							break;
-						case XMCMD_VOLUMESLIDE:
-							e._cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
-							break;
-						case XMCMD_POSITION_JUMP:
-							e._cmd = PatternCMD_JUMP_TO_ORDER;
-							break;
-						case XMCMD_VOLUME:
-							e._cmd = XM_SAMPLER_CMD_VOLUME;
-							e._parameter = param<=0x40?param*2:0x80;
-							break;
-						case XMCMD_PATTERN_BREAK:
-							e._cmd = PatternCMD_BREAK_TO_LINE;
-							e._parameter = ((param&0xF0)>>4)*10 + (param&0x0F);
-							break;
-						case XMCMD_EXTENDED:
-							switch(param & 0xf0){
-							case XMCMD_E::E_FINE_PORTA_UP:
-								e._cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
-								e._parameter= 0xF0+(param&0x0F);
-								break;
-							case XMCMD_E::E_FINE_PORTA_DOWN:
-								e._cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
-								e._parameter= 0xF0+(param&0x0F);
-								break;
-							case XMCMD_E::E_GLISSANDO_STATUS:
-								e._cmd = XM_SAMPLER_CMD_EXTENDED;
-								e._parameter = XM_SAMPLER_CMD_E::E_GLISSANDO_TYPE | ((param==0)?0:1);
-								break;
-							case XMCMD_E::E_VIBRATO_WAVE:
-								e._cmd = XM_SAMPLER_CMD_EXTENDED;
-								e._parameter =XM_SAMPLER_CMD_E::E_VIBRATO_WAVE | exchwave[param & 0x3];
-								break;
-							case XMCMD_E::E_FINETUNE:
-								e._cmd = XM_SAMPLER_CMD_NONE;
-								e._parameter = 0;
-								break;
-							case XMCMD_E::E_PATTERN_LOOP:
-								e._cmd = PatternCMD_EXTENDED;
-								e._parameter = PatternCMD_PATTERN_LOOP | (param & 0xf);
-								break;
-							case XMCMD_E::E_TREMOLO_WAVE:
-								e._cmd = XM_SAMPLER_CMD_EXTENDED;
-								e._parameter = XM_SAMPLER_CMD_E::E_TREMOLO_WAVE | exchwave[param & 0x3];
-								break;
-							case XMCMD_E::E_MOD_RETRIG:
-								e._cmd = XM_SAMPLER_CMD_RETRIG;
-								e._parameter = param & 0xf;
-								break;
-							case XMCMD_E::E_FINE_VOLUME_UP:
-								e._cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
-								e._parameter = 0x0f + ((param & 0xf)<<4);
-								break;
-							case XMCMD_E::E_FINE_VOLUME_DOWN:
-								e._cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
-								e._parameter = 0xf0 + (param & 0xf);
-								break;
-							case XMCMD_E::E_DELAYED_NOTECUT:
-								e._cmd = XM_SAMPLER_CMD_EXTENDED;
-								e._parameter = XM_SAMPLER_CMD_E::E_DELAYED_NOTECUT | (param & 0xf);
-								break;
-							case XMCMD_E::E_NOTE_DELAY:
-								e._cmd = XM_SAMPLER_CMD_EXTENDED;
-								e._parameter = XM_SAMPLER_CMD_E::E_NOTE_DELAY | ( param & 0xf);
-								break;
-							case XMCMD_E::E_PATTERN_DELAY:
-								e._cmd = PatternCMD_EXTENDED;
-								e._parameter =  PatternCMD_PATTERN_DELAY | (param & 0xf);
-								break;
-							default:
-								e._cmd = XM_SAMPLER_CMD_NONE;
-								e._parameter = 0;
-								break;
-							}
-							break;
-						case XMCMD_SETSPEED:
-							if ( param < 32)
-							{
-								e._cmd=PatternCMD_EXTENDED;
-								int extraticks=0;
-								e._parameter = XM_SAMPLER_CalcLPBFromSpeed(param,extraticks);
-								if (extraticks != 0) {
-									speedpatch=true;
-									PatternEntry entry(notecommands::empty,0xFF,0xFF,0,0);
-									entry._cmd = PatternCMD_EXTENDED;
-									entry._parameter = PatternCMD_ROW_EXTRATICKS | extraticks;
-									WritePatternEntry(song,patIdx,row,song.SONGTRACKS,entry);	
-								}
-							}
-							else
-							{
-								e._cmd = PatternCMD_SET_TEMPO;
-							}
-							break;
-						default:
-							e._cmd = XM_SAMPLER_CMD_NONE;
-							break;
-					}
-					// instrument/note
-					if ( note != 255 ) e._note  = note+12;
-					else e._note  = note;
-					if ( instr != 0 ) e._inst = instr-1;
-					else e._inst = 255;
-
-					// If empty, do not inform machine
-					if (e._note == notecommands::empty && e._inst == 255 && e._cmd == 00 && e._parameter == 00) {
-						e._mach = 255;
-					}
-					// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
-					else if (( e._note == notecommands::empty && e._inst != 255 ) || ( e._note < notecommands::release && e._inst == 255)) {
-						e._mach = 0;
-						if (e._inst != 255) {
-							//We cannot use the virtual instrument, but we should remember which it is.
-							std::map<int,int>::const_iterator it = modtovirtual.find(e._inst);
-							if (it != modtovirtual.end()) {
-								lastmach[col]=it->second;
-							}
-						}
-					}
-					//default behaviour, let's find the virtual instrument.
-					else {
-						std::map<int,int>::const_iterator it = modtovirtual.find(e._inst);
-						if (it == modtovirtual.end()) {
-							if (e._inst != 255) {
-								e._mach = 0;
-								lastmach[col] = e._mach;
-							}
-							else if (lastmach[col] != 255) {
-								e._mach = lastmach[col];
-							}
-							else {
-								e._mach = 255;
-							}
-						}
-						else {
-							e._mach=it->second;
-							e._inst=255;
-						}
-					}
-
-					WritePatternEntry(song,patIdx,row,col,e);	
-				}
-			}
+	//std::map<int,int> modtovirtual;
+	//int virtidx=MAX_MACHINES;
+	for (int i=0; i < 31;i++) {
+		//if (m_Samples[i].sampleLength > 0 ) {
+			//modtovirtual[i]=virtidx;
+			//virtidx++;
+		//}
 	}
-	unsigned char MODSongLoader::ConvertPeriodtoNote(unsigned short period)
+	//LoadPatterns(song, modtovirtual);
+	for(i = 0;i < 31;i++){
+		//LoadInstrument(song,i);
+		//if (song.xminstruments.IsEnabled(i)) {
+			//song.SetVirtualInstrument(modtovirtual[i],0,i);
+		//}
+	}
+	modsongloader_makesequence(self, &self->m_Header);
+	return TRUE;
+}
+
+bool modsongloader_isvalid(MODSongLoader* self)
+{
+	bool bIsValid = FALSE;
+	char *pID = AllocReadStrStart(self->songfile->file, 4,1080);
+
+	bIsValid = !strncmp(pID,"M.K.",4);
+	if ( !bIsValid ) bIsValid = !strncmp(pID,"M!K!",4);
+	if ( !bIsValid ) bIsValid = !strncmp(pID+1,"CHN",4);
+	if ( !bIsValid ) bIsValid = !strncmp(pID+2,"CH",4);
+
+	free(pID);
+	return bIsValid;
+}
+
+void modsongloader_loadpatterns(MODSongLoader* self) // Song& song, std::map<int, int>& modtovirtual)
+{
+	int npatterns=0;
+	
+	// get pattern data
+	psyfile_seek(self->songfile->file, 1084);
+	for(int j = 0;j < self->m_Header.songlength ;j++){
+		modsongloader_loadsinglepattern(self, j, self->songfile->song->properties.tracks); // modtovirtual
+	}
+	if(self->speedpatch) {
+		self->songfile->song->properties.tracks++;
+	}
+}
+
+void modsongloader_makesequence(MODSongLoader* self, struct MODHEADER* modheader)
+{
+	uintptr_t i;
+	psy_audio_SequencePosition sequenceposition;
+	psy_audio_Song* song;
+
+	song = self->songfile->song;
+	sequenceposition.tracknode =
+		psy_audio_sequence_appendtrack(&song->sequence, psy_audio_sequencetrack_allocinit());
+	for (i = 0; i < modheader->songlength; ++i) {
+		sequenceposition.trackposition =
+			psy_audio_sequence_last(&song->sequence, sequenceposition.tracknode);
+		psy_audio_sequence_insert(&song->sequence, sequenceposition,
+			modheader->order[i]);
+	}
+}
+
+// return address of next pattern, 0 for invalid
+void modsongloader_loadsinglepattern(MODSongLoader* self, int patidx,int tracks) //, std::map<int,int>& modtovirtual)
+{
+	short iNumRows = 64;
+	psy_audio_Pattern* pattern;
+	PsyFile* fp;
+	psy_audio_Song* song;
+	unsigned char lastmach[64];
+	psy_audio_PatternEvent e;
+	unsigned char mentry[4];
+	int row;
+	int col;
+	psy_audio_PatternNode* node;
+
+	fp = self->songfile->file;
+	song = self->songfile->song;
+	pattern = psy_audio_pattern_allocinit();
+	psy_audio_pattern_setname(pattern, "unnamed");
+	psy_audio_patterns_insert(&song->patterns, patidx, pattern);
+	psy_audio_pattern_setlength(pattern, iNumRows * 1.0 / self->songfile->song->properties.lpb);
+	
+	memset(lastmach,255,sizeof(char)*64);
+	psy_audio_patternevent_clear(&e);
+		
+	// get next values
+	node = NULL;
+	for(row = 0; row < iNumRows; row++)
 	{
-		if (period==0) {
-			return 255;
-		}
-		else if (BIGMODPERIODTABLE[295] <= period && period <= BIGMODPERIODTABLE[0]) {
-			int count2=0;
-			for (;count2<37; count2++)
-			{
-				if (period == BIGMODPERIODTABLE[count2*8]) {
+		for(col=0; col< tracks; col++)
+		{	
+			// reset
+			unsigned char note= psy_audio_NOTECOMMANDS_EMPTY;
+			unsigned char instr=255;
+			unsigned char type=0;
+			unsigned char param=0;
+			unsigned short period=428;
+
+			// read note
+			mentry[0] = ReadUInt1(fp); mentry[1] = ReadUInt1(fp); mentry[2] = ReadUInt1(fp); mentry[3] = ReadUInt1(fp);
+			instr = ((mentry[0] & 0xF0) + (mentry[2] >> 4));
+			period = ((mentry[0]& 0x0F) << 8) + mentry[1];
+			type = (mentry[2] & 0x0F);
+			param = mentry[3];
+			note = modsongloader_convertperiodtonote(period);
+
+			// translate
+			e.parameter = param;
+
+			int exchwave[3] = {
+					psy_audio_WAVEFORMS_SINUS,
+					psy_audio_WAVEFORMS_SAWDOWN,
+					psy_audio_WAVEFORMS_SQUARE
+			};
+
+			switch(type){
+				case XMCMD_ARPEGGIO:
+					if(param != 0){
+						e.cmd = XM_SAMPLER_CMD_ARPEGGIO;
+					} else {
+						e.cmd = XM_SAMPLER_CMD_NONE;
+					}
 					break;
-				}
-				else if (period > BIGMODPERIODTABLE[count2*8]) {
-					if (period < BIGMODPERIODTABLE[(count2*8)-4]) {
+				case XMCMD_PORTAUP:
+					e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
+					break;
+				case XMCMD_PORTADOWN:
+					e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
+					break;
+				case XMCMD_PORTA2NOTE:
+					e.cmd = XM_SAMPLER_CMD_PORTA2NOTE;
+					break;
+				case XMCMD_VIBRATO:
+					e.cmd = XM_SAMPLER_CMD_VIBRATO;
+					break;
+				case XMCMD_TONEPORTAVOL:
+					e.cmd = XM_SAMPLER_CMD_TONEPORTAVOL;
+					break;
+				case XMCMD_VIBRATOVOL:
+					e.cmd = XM_SAMPLER_CMD_VIBRATOVOL;
+					break;
+				case XMCMD_TREMOLO:
+					e.cmd = XM_SAMPLER_CMD_TREMOLO;
+					break;
+				case XMCMD_PANNING:
+					e.cmd = XM_SAMPLER_CMD_PANNING;
+					break;
+				case XMCMD_OFFSET:
+					e.cmd = XM_SAMPLER_CMD_OFFSET;
+					break;
+				case XMCMD_VOLUMESLIDE:
+					e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
+					break;
+				case XMCMD_POSITION_JUMP:
+					e.cmd = psy_audio_PATTERNCMD_JUMP_TO_ORDER;
+					break;
+				case XMCMD_VOLUME:
+					e.cmd = XM_SAMPLER_CMD_VOLUME;
+					e.parameter = param<=0x40?param*2:0x80;
+					break;
+				case XMCMD_PATTERN_BREAK:
+					e.cmd =psy_audio_PATTERNCMD_BREAK_TO_LINE;
+					e.parameter = ((param&0xF0)>>4)*10 + (param&0x0F);
+					break;
+				case XMCMD_EXTENDED:
+					switch(param & 0xf0){
+					case XMCMD_E_FINE_PORTA_UP:
+						e.cmd = XM_SAMPLER_CMD_PORTAMENTO_UP;
+						e.parameter= 0xF0+(param&0x0F);
+						break;
+					case XMCMD_E_FINE_PORTA_DOWN:
+						e.cmd = XM_SAMPLER_CMD_PORTAMENTO_DOWN;
+						e.parameter= 0xF0+(param&0x0F);
+						break;
+					case XMCMD_E_GLISSANDO_STATUS:
+						e.cmd = XM_SAMPLER_CMD_EXTENDED;
+						e.parameter = XM_SAMPLER_CMD_E_GLISSANDO_TYPE | ((param==0)?0:1);
+						break;
+					case XMCMD_E_VIBRATO_WAVE:
+						e.cmd = XM_SAMPLER_CMD_EXTENDED;
+						e.parameter =XM_SAMPLER_CMD_E_VIBRATO_WAVE | exchwave[param & 0x3];
+						break;
+					case XMCMD_E_FINETUNE:
+						e.cmd = XM_SAMPLER_CMD_NONE;
+						e.parameter = 0;
+						break;
+					case XMCMD_E_PATTERN_LOOP:
+						e.cmd =psy_audio_PATTERNCMD_EXTENDED;
+						e.parameter =psy_audio_PATTERNCMD_PATTERN_LOOP | (param & 0xf);
+						break;
+					case XMCMD_E_TREMOLO_WAVE:
+						e.cmd = XM_SAMPLER_CMD_EXTENDED;
+						e.parameter = XM_SAMPLER_CMD_E_TREMOLO_WAVE | exchwave[param & 0x3];
+						break;
+					case XMCMD_E_MOD_RETRIG:
+						e.cmd = XM_SAMPLER_CMD_RETRIG;
+						e.parameter = param & 0xf;
+						break;
+					case XMCMD_E_FINE_VOLUME_UP:
+						e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
+						e.parameter = 0x0f + ((param & 0xf)<<4);
+						break;
+					case XMCMD_E_FINE_VOLUME_DOWN:
+						e.cmd = XM_SAMPLER_CMD_VOLUMESLIDE;
+						e.parameter = 0xf0 + (param & 0xf);
+						break;
+					case XMCMD_E_DELAYED_NOTECUT:
+						e.cmd = XM_SAMPLER_CMD_EXTENDED;
+						e.parameter = XM_SAMPLER_CMD_E_DELAYED_NOTECUT | (param & 0xf);
+						break;
+					case XMCMD_E_NOTE_DELAY:
+						e.cmd = XM_SAMPLER_CMD_EXTENDED;
+						e.parameter = XM_SAMPLER_CMD_E_NOTE_DELAY | ( param & 0xf);
+						break;
+					case XMCMD_E_PATTERN_DELAY:
+						e.cmd =psy_audio_PATTERNCMD_EXTENDED;
+						e.parameter = psy_audio_PATTERNCMD_PATTERN_DELAY | (param & 0xf);
+						break;
+					default:
+						e.cmd = XM_SAMPLER_CMD_NONE;
+						e.parameter = 0;
 						break;
 					}
-					count2--;
 					break;
-					//TODO: Supposedly, we should add the command XMCMD_E::E_FINETUNE
+				case XMCMD_SETSPEED:
+					if ( param < 32)
+					{
+						e.cmd=psy_audio_PATTERNCMD_EXTENDED;
+						int extraticks=0;
+						e.parameter = calclpbfromspeed(param,&extraticks);
+						if (extraticks != 0) {
+							self->speedpatch=TRUE;
+							psy_audio_PatternEvent entry;
+							
+							psy_audio_patternevent_clear(&entry);								
+							entry.cmd =psy_audio_PATTERNCMD_EXTENDED;
+							entry.parameter =psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks;
+							modsongloader_writepatternentry(self, &node, patidx,row,
+								song->properties.tracks,&entry);
+						}
+					}
+					else
+					{
+						e.cmd =psy_audio_PATTERNCMD_SET_TEMPO;
+					}
+					break;
+				default:
+					e.cmd = XM_SAMPLER_CMD_NONE;
+					break;
+			}
+			// instrument/note
+			if ( note != 255 ) e.note  = note+12;
+			else e.note  = note;
+			if ( instr != 0 ) e.inst = instr-1;
+			else e.inst = 255;
+
+			// If empty, do not inform machine
+			if (e.note == psy_audio_NOTECOMMANDS_EMPTY && e.inst == 255 && e.cmd == 00 && e.parameter == 00) {
+				e.mach = 255;
+			}
+			// if instrument without note, or note without instrument, cannot use virtual instrument, so use sampulse directly
+			else if (( e.note == psy_audio_NOTECOMMANDS_EMPTY && e.inst != 255 ) || ( e.note < psy_audio_NOTECOMMANDS_RELEASE && e.inst == 255)) {
+				e.mach = 0;
+				if (e.inst != 255) {
+					//We cannot use the virtual instrument, but we should remember which it is.
+					//std_map<int,int>_const_iterator it = modtovirtual.find(e._inst);
+					//if (it != modtovirtual.end()) {
+						//lastmach[col]=it->second;
+					//}
 				}
 			}
-			return count2-1+36;
-		}
-		else {
-			int note = round<int,double>(152.89760383681376337437517761588 /*48 + 12*log2(1.0/428.0)*/
-				//-log10(static_cast<double>(period)) * 39.863137138648348174443833153873) /*12/log10(2)*/ //;
-				/*
-			return static_cast<unsigned char>(note);
+			//default behaviour, let's find the virtual instrument.
+			else {
+				//std_map<int,int>_const_iterator it = modtovirtual.find(e._inst);
+				//if (it == modtovirtual.end()) {
+					//if (e._inst != 255) {
+						//e.mach = 0;
+						//lastmach[col] = e.mach;
+					//}
+					//else if (lastmach[col] != 255) {
+						//e.mach = lastmach[col];
+					//}
+					//else {
+						//e.mach = 255;
+					//}
+				//}
+				//else {
+					//e.mach=it->second;
+					//e._inst=255;
+				//}
+			}
+			modsongloader_writepatternentry(self, &node, patidx,row,col,&e);
 		}
 	}
-
-	BOOL MODSongLoader::WritePatternEntry(Song & song,
-		const int patIdx, const int row, const int col,PatternEntry &e)
-	{
-		// don't overflow song buffer 
-		if(patIdx>=MAX_PATTERNS) return false;
-
-		PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx,col,row));
-
-		*pData = e;
-
-		return true;
-	}	
-
-	void MODSongLoader::LoadInstrument(Song & song, int idx)
-	{
-		XMInstrument instr;
-		instr.Init();
-		instr.Name(m_Samples[idx].sampleName);
-
-		if (m_Samples[idx].sampleLength > 0 ) 
+}
+	
+unsigned char modsongloader_convertperiodtonote(unsigned short period)
+{
+	if (period==0) {
+		return 255;
+	}
+	else if (BIGMODPERIODTABLE[295] <= period && period <= BIGMODPERIODTABLE[0]) {
+		int count2=0;
+		for (;count2<37; count2++)
 		{
-			LoadSampleData(song.samples.get(idx),idx);
-
-			int i;
-			XMInstrument::NotePair npair;
-			npair.second=idx;
-			for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
-				npair.first=i;
-				instr.NoteToSample(i,npair);
+			if (period == BIGMODPERIODTABLE[count2*8]) {
+				break;
+			}
+			else if (period > BIGMODPERIODTABLE[count2*8]) {
+				if (period < BIGMODPERIODTABLE[(count2*8)-4]) {
+					break;
+				}
+				count2--;
+				break;
+				//TODO: Supposedly, we should add the command XMCMD_E::E_FINETUNE
 			}
 		}
-
-		instr.ValidateEnabled();
-		song.xminstruments.SetInst(instr,idx);
+		return count2-1+36;
 	}
+	else {
+		int note = (int)((152.89760383681376337437517761588 /*48 + 12*log2(1.0/428.0)*/
+			- log10((double)(period)) * 39.863137138648348174443833153873) + 0.5); /*12/log10(2)*/
+		return (unsigned char)(note);
+	}
+}
+	
+bool modsongloader_writepatternentry(MODSongLoader* self,
+	psy_audio_PatternNode** node,
+	const int patIdx, const int row, const int col, const psy_audio_PatternEvent* e)
+{
+	// don't overflow song buffer 
+/*	if(patIdx>=MAX_PATTERNS) return false;
 
-	void MODSongLoader::LoadSampleHeader(XMInstrument::WaveData<>& _wave, int iInstrIdx)
+	PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx,col,row));
+
+	*pData = e;*/
+
+	if (!psy_audio_patternevent_empty(e)) {
+		psy_audio_Pattern* pattern;
+		psy_audio_PatternEvent ev;
+
+		if (e->cmd == 0xFE) {
+			self = self;
+		}
+
+		psy_audio_patternevent_clear(&ev);
+		ev.note = e->note;
+		ev.inst = e->inst;
+		ev.mach = 0;
+		ev.parameter = e->parameter;
+		ev.cmd = e->cmd;
+		pattern = psy_audio_patterns_at(&self->songfile->song->patterns, patIdx);
+		if (pattern) {
+			// don't overflow song buffer 
+			//if (patIdx >= MAX_PATTERNS) return false;
+			*node = psy_audio_pattern_insert(pattern, *node, col, (psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb), &ev);
+
+			//PatternEntry* pData = reinterpret_cast<PatternEntry*>(song._ptrackline(patIdx, col, row));
+
+			//*pData = e;
+		}
+	}
+	return TRUE;
+
+	return TRUE;
+}	
+
+void modsongloader_loadinstrument(MODSongLoader* self, int idx)
+{	
+	psy_audio_Instrument* instrument;
+	PsyFile* fp;
+	psy_audio_Song* song;
+
+	fp = self->songfile->file;
+	song = self->songfile->song;	
+
+	instrument = psy_audio_instrument_allocinit();
+	psy_audio_instrument_setindex(instrument, idx + 1);
+	psy_audio_instruments_insert(&song->instruments, instrument,
+		psy_audio_instrumentindex_make(0, idx));
+	psy_audio_instrument_setname(instrument, self->m_Samples[idx].sampleName);	
+	if (self->m_Samples[idx].sampleLength > 0 ) 
 	{
-		Read(m_Samples[iInstrIdx].sampleName,22);	m_Samples[iInstrIdx].sampleName[21]='\0';
+		modsongloader_loadsampledata(self, psy_audio_samples_at(
+			&song->samples, sampleindex_make(idx, 0)), idx);
 
-		smpLen[iInstrIdx] = (ReadUInt1()*0x100+ReadUInt1())*2; 
-		m_Samples[iInstrIdx].sampleLength = smpLen[iInstrIdx];
-		m_Samples[iInstrIdx].finetune = ReadUInt1();
-		m_Samples[iInstrIdx].volume = ReadUInt1();
-		m_Samples[iInstrIdx].loopStart =((ReadUInt1()*256+ReadUInt1())*2); 
-		m_Samples[iInstrIdx].loopLength = (ReadUInt1()*256+ReadUInt1())*2; 
-
-		// parse
-		BOOL bLoop = (m_Samples[iInstrIdx].loopLength > 3);
-
-		_wave.Init();
-		if ( smpLen[iInstrIdx] > 0 )
-		{
-			_wave.AllocWaveData(smpLen[iInstrIdx],false);
-		}
-
-		if(bLoop)
-		{
-			_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::NORMAL);
-			_wave.WaveLoopStart(m_Samples[iInstrIdx].loopStart);
-			if ( m_Samples[iInstrIdx].loopStart+m_Samples[iInstrIdx].loopLength > smpLen[iInstrIdx]) 
-			{
-					_wave.WaveLoopEnd(smpLen[iInstrIdx]);
-			} else 	_wave.WaveLoopEnd(m_Samples[iInstrIdx].loopStart+m_Samples[iInstrIdx].loopLength);
-		} else {
-			_wave.WaveLoopType(XMInstrument::WaveData<>::LoopType::DO_NOT);
-		}
-
-		_wave.WaveVolume(m_Samples[iInstrIdx].volume * 2);
-		_wave.WaveSampleRate(8363);
-		char tmpfine = (char)m_Samples[iInstrIdx].finetune;
-		if (tmpfine > 7 ) tmpfine -= 16;
-		_wave.WaveFineTune(tmpfine*12.5);// finetune has +-100 range in Psycle
-		std::string sName = m_Samples[iInstrIdx].sampleName;
-		_wave.WaveName(sName);
-
+		/*int i;
+		XMInstrument::NotePair npair;
+		npair.second=idx;
+		for(i = 0;i < XMInstrument::NOTE_MAP_SIZE;i++){
+			npair.first=i;
+			instr.NoteToSample(i,npair);
+		}*/
 	}
 
-	void MODSongLoader::LoadSampleData(XMInstrument::WaveData<>& _wave, int iInstrIdx)
+	//instr.ValidateEnabled();	
+}
+
+void modsongloader_loadsampleheader(MODSongLoader* self, psy_audio_Sample* wave, int instridx)
+{
+	PsyFile* fp;
+	BOOL bLoop;
+
+	fp = self->songfile->file;
+	psyfile_read(fp, self->m_Samples[instridx].sampleName,22);
+	self->m_Samples[instridx].sampleName[21]='\0';
+	self->smpLen[instridx] = (ReadUInt1(fp)*0x100+ReadUInt1(fp))*2; 
+	self->m_Samples[instridx].sampleLength = self->smpLen[instridx];
+	self->m_Samples[instridx].finetune = ReadUInt1(fp);
+	self->m_Samples[instridx].volume = ReadUInt1(fp);
+	self->m_Samples[instridx].loopStart =((ReadUInt1(fp)*256+ReadUInt1(fp))*2);
+	self->m_Samples[instridx].loopLength = (ReadUInt1(fp)*256+ReadUInt1(fp))*2;
+
+	// parse
+	bLoop = (self->m_Samples[instridx].loopLength > 3);
+	
+	if (self->smpLen[instridx] > 0 )
 	{
-		// parse
-		short wNew=0;
-
-		// cache sample data
-		unsigned char * smpbuf = new unsigned char[smpLen[iInstrIdx]];
-		Read(smpbuf,smpLen[iInstrIdx]);
-
-		int sampleCnt = smpLen[iInstrIdx];
-
-		// 8 bit mono sample
-		for(int j=0;j<sampleCnt;j++)
-		{
-			//In mods, samples are signed integer, so we can simply left shift
-			wNew = (smpbuf[j]<<8);
-			*(const_cast<signed short*>(_wave.pWaveDataL()) + j) = wNew;
-		}
-
-		// cleanup
-		delete[] smpbuf;
+		psy_audio_sample_allocwavedata(wave);		
 	}
-*/
 
+	if(bLoop)
+	{		
+		wave->loop.type = psy_audio_SAMPLE_LOOP_NORMAL;
+		wave->loop.start = self->m_Samples[instridx].loopStart;
+		if (self->m_Samples[instridx].loopStart+self->m_Samples[instridx].loopLength > self->smpLen[instridx])
+		{
+			wave->loop.end = self->smpLen[instridx];
+		} else wave->loop.end = self->m_Samples[instridx].loopStart+self->m_Samples[instridx].loopLength;
+	} else {
+		wave->loop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
+	}
+
+	wave->defaultvolume = self->m_Samples[instridx].volume * 2;
+	wave->samplerate = 8363;
+	char tmpfine = (char)self->m_Samples[instridx].finetune;
+	if (tmpfine > 7 ) tmpfine -= 16;
+	wave->finetune = tmpfine*12.5;// finetune has +-100 range in Psycle
+	psy_audio_sample_setname(wave, self->m_Samples[instridx].sampleName);
+}
+
+void modsongloader_loadsampledata(MODSongLoader* self, psy_audio_Sample* _wave, int iinstridx)
+{
+	// parse
+	short wNew=0;
+
+	// cache sample data
+	unsigned char * smpbuf = (unsigned char* )malloc(self->smpLen[iinstridx]);
+	psyfile_read(self->songfile->file, smpbuf,self->smpLen[iinstridx]);
+
+	int sampleCnt = self->smpLen[iinstridx];
+
+	// 8 bit mono sample
+	for(int j=0;j<sampleCnt;j++)
+	{
+		//In mods, samples are signed integer, so we can simply left shift
+		wNew = (smpbuf[j]<<8);
+		_wave->channels.samples[0][j] = (psy_dsp_amp_t)wNew;		
+	}
+
+	// cleanup
+	free(smpbuf);
+}

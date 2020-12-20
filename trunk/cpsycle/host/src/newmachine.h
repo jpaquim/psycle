@@ -83,6 +83,12 @@ typedef struct {
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);
 void newmachine_updateskin(NewMachine*);
 
+INLINE psy_ui_Component* newmachine_base(NewMachine* self)
+{
+	return &self->component;
+}
+
+
 #ifdef __cplusplus
 }
 #endif

@@ -180,7 +180,7 @@ void psy_ui_label_ondraw(psy_ui_Label* self, psy_ui_Graphics* g)
 			if (numoutput < count) {
 				wrap = strrchrpos((char*)token, ' ', numoutput);
 				if (wrap) {
-					++wrap;
+					++wrap;					
 					numoutput = wrap - token;
 				}
 			}

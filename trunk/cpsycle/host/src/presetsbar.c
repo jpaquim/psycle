@@ -109,7 +109,7 @@ void presetsbar_setmachine(PresetsBar* self, psy_audio_Machine* machine)
 			psy_audio_Presets* presets;
 
 			presets = psy_audio_presets_allocinit();
-			status = psy_audio_presetsio_load(psy_path_path(&self->presetpath),
+			status = psy_audio_presetsio_load(psy_path_full(&self->presetpath),
 				presets,
 				psy_audio_machine_numtweakparameters(self->machine),
 				psy_audio_machine_datasize(self->machine),
@@ -146,14 +146,14 @@ bool presetsbar_userpresetpath(PresetsBar* self, psy_Path* path)
 		psy_path_setprefix(path,
 			dirconfig_userpresets(&self->workspace->config.directories));
 		psy_path_setext(path, "prs");
-		if (psy_filereadable(psy_path_path(path))) {
+		if (psy_filereadable(psy_path_full(path))) {
 			return TRUE;
 		}
 		name = strdup(psy_path_name(path));
 		psy_replacechar(name, '-', '_');
 		psy_path_setname(path, name);
 		free(name);
-		if (psy_filereadable(psy_path_path(path))) {
+		if (psy_filereadable(psy_path_full(path))) {
 			return TRUE;
 		}
 	}
@@ -262,7 +262,7 @@ void presetsbar_onsavepresets(PresetsBar* self, psy_ui_Component* sender)
 				}
 				self->userpreset = TRUE;
 			}
-			status = psy_audio_presetsio_save(psy_path_path(&self->presetpath),
+			status = psy_audio_presetsio_save(psy_path_full(&self->presetpath),
 				presets);
 			if (status) {
 				workspace_outputerror(self->workspace,

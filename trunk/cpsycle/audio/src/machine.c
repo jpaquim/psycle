@@ -303,7 +303,7 @@ static void setposition(psy_audio_Machine* self, intptr_t x, intptr_t y) { }
 static void position(psy_audio_Machine* self, intptr_t* x, intptr_t* y) { *x = *y = 0; }
 static const char* editname(psy_audio_Machine* self) { return ""; }
 static void seteditname(psy_audio_Machine* self, const char* name) { }
-static psy_audio_Buffer* buffermemory(psy_audio_Machine* self) { return 0; }
+static psy_audio_Buffer* buffermemory(psy_audio_Machine* self) { return NULL; }
 static uintptr_t buffermemorysize(psy_audio_Machine* self) { return 0; }
 static void setbuffermemorysize(psy_audio_Machine* self, uintptr_t size) { }
 static psy_dsp_amp_range_t amprange(psy_audio_Machine* self)

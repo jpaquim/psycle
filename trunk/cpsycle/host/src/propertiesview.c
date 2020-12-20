@@ -764,6 +764,9 @@ void propertiesrenderer_countblocklines(PropertiesRenderer* self, psy_Property*
 				numoutput = wrap - str;
 			}
 		}
+		if (numoutput == 0) {
+			break;
+		}
 		count -= numoutput;
 		str += numoutput;
 		if (count > 0) {

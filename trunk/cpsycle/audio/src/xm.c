@@ -703,7 +703,7 @@ void psy_audio_mod_loadsampleheader(psy_audio_SongFile* self, psy_audio_Sample* 
 		_wave->loop.type = (psy_audio_SampleLoopType)psy_audio_SAMPLE_LOOP_DO_NOT;
 	}
 
-	_wave->defaultvolume = 1.0f; // m_Samples[iInstrIdx].volume * 2;
+	_wave->defaultvolume = m_Samples[iInstrIdx].volume * 2;
 	_wave->samplerate = 8363;
 	tmpfine = (char)m_Samples[iInstrIdx].finetune;
 	if (tmpfine > 7) tmpfine -= 16;

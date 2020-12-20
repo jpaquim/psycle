@@ -30,7 +30,7 @@ static void vtable_init(psy_ui_CheckBox* self)
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			psy_ui_checkbox_onpreferredsize;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
-			psy_ui_checkbox_onlanguagechanged;
+			psy_ui_checkbox_onlanguagechanged;		
 		vtable_initialized = TRUE;
 	}
 }
@@ -44,9 +44,25 @@ void psy_ui_checkbox_init(psy_ui_CheckBox* self, psy_ui_Component* parent)
 	self->component.vtable = &vtable;
 	self->text = NULL;
 	self->translation = NULL;
+	self->multiline = 0;
 	psy_signal_init(&self->signal_clicked);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		psy_ui_checkbox_ondestroy);	
+}
+
+void psy_ui_checkbox_init_multiline(psy_ui_CheckBox* self, psy_ui_Component* parent)
+{
+	self->imp = psy_ui_impfactory_allocinit_checkboximp_multiline(psy_ui_app_impfactory(&app), &self->component, parent);
+	psy_ui_component_init_imp(psy_ui_checkbox_base(self), parent,
+		&self->imp->component_imp);
+	vtable_init(self);
+	self->component.vtable = &vtable;
+	self->text = NULL;
+	self->translation = NULL;
+	self->multiline = TRUE;
+	psy_signal_init(&self->signal_clicked);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		psy_ui_checkbox_ondestroy);
 }
 
 void psy_ui_checkbox_init_text(psy_ui_CheckBox* self, psy_ui_Component* parent, const char* text)
@@ -97,13 +113,27 @@ void psy_ui_checkbox_onpreferredsize(psy_ui_CheckBox* self, psy_ui_Size* limit,
 	psy_ui_Size* rv)
 {	
 	if (rv) {
-		psy_ui_Size size;
-		psy_ui_TextMetric tm;
+		psy_ui_Size size;		
+		
+		
+		if (self->multiline) {
+			psy_ui_Size preferredsize;
+			psy_ui_TextMetric tm;
 
-		size = psy_ui_component_textsize(&self->component,
-			self->translation);
-		rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 20);
-		rv->height = size.height;
+			tm = psy_ui_component_textmetric(&self->component);			
+			preferredsize = self->imp->component_imp.vtable->dev_preferredsize(&self->imp->component_imp,
+				limit);
+			//rv->width = limit->width;
+			rv->height = preferredsize.height;
+		} else {
+			psy_ui_TextMetric tm;
+
+			tm = psy_ui_component_textmetric(&self->component);				
+			size = psy_ui_component_textsize(&self->component,
+				self->translation);
+				rv->width = psy_ui_value_makepx(psy_ui_value_px(&size.width, &tm) + 20);
+			rv->height = size.height;
+		}
 	}
 }
 

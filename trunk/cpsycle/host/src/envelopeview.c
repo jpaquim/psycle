@@ -241,6 +241,9 @@ void envelopebox_setzoom(EnvelopeBox* self, float zoomleft, float zoomright)
 {
 	self->zoomleft = zoomleft;
 	self->zoomright = zoomright;
+	if (fabs(self->zoomleft - self->zoomright) < 0.001) {
+		self->zoomright = self->zoomleft + 0.001;
+	}
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -401,22 +404,27 @@ void envelopebar_enablemillisecs(EnvelopeBar*);
 void envelopebar_enableticks(EnvelopeBar*);
 void envelopebar_onmillisecs(EnvelopeBar*, psy_ui_Component* sender);
 void envelopebar_onticks(EnvelopeBar*, psy_ui_Component* sender);
+void envelopeview_onenable(EnvelopeView*, psy_ui_CheckBox* sender);
+void envelopeview_oncarry(EnvelopeView*, psy_ui_CheckBox* sender);
 // implementation
 void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 {
 	psy_ui_Margin tab;
+	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
+	tab.right = psy_ui_value_makeew(4.0);
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_setdefaultalign(envelopebar_base(self), psy_ui_ALIGN_LEFT,
 		psy_ui_defaults_hmargin(psy_ui_defaults()));
-	psy_ui_checkbox_init_text(&self->enabled, &self->component, "Envelope");
-	tab = psy_ui_defaults_hmargin(psy_ui_defaults());
-	tab.right = psy_ui_value_makeew(4.0);
-	psy_ui_component_setmargin(&self->enabled.component, &tab);
+	psy_ui_checkbox_init_text(&self->enabled, &self->component, "Envelope");	
+	psy_ui_component_setmargin(psy_ui_checkbox_base(&self->enabled), &tab);
+	psy_ui_checkbox_init_text(&self->carry, &self->component, "Carry (continue)");	
+	psy_ui_component_setmargin(psy_ui_checkbox_base(&self->carry), &tab);
 	psy_ui_button_init_text_connect(&self->millisec, &self->component, "Millisecs",
-		self, envelopebar_onmillisecs);
+		self, envelopebar_onmillisecs);	
 	psy_ui_button_init_text_connect(&self->ticks, &self->component, "Ticks",
 		self, envelopebar_onticks);
-	psy_ui_button_init_text(&self->adsr, &self->component, "ADSR");
+	psy_ui_component_setmargin(&self->ticks.component, &tab);
+	psy_ui_button_init_text(&self->adsr, &self->component, "ADSR");	
 	psy_ui_button_allowrightclick(&self->adsr);
 	envelopebar_enablemillisecs(self);
 }
@@ -485,7 +493,11 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* 
 	psy_signal_connect(&self->zoom.signal_zoom, self,
 		envelopeview_onzoom);
 	psy_signal_connect(&self->bar.adsr.signal_clicked, self,
-		envelopeview_onpredefs);	
+		envelopeview_onpredefs);
+	psy_signal_connect(&self->bar.enabled.signal_clicked, self,
+		envelopeview_onenable);
+	psy_signal_connect(&self->bar.carry.signal_clicked, self,
+		envelopeview_oncarry);
 }
 
 void envelopeview_settext(EnvelopeView* self, const char* text)
@@ -497,6 +509,16 @@ void envelopeview_setenvelope(EnvelopeView* self,
 	psy_dsp_EnvelopeSettings* settings)
 {
 	envelopebox_setenvelope(&self->envelopebox, settings);
+	if (settings && psy_dsp_envelopesettings_isenabled(settings)) {
+		psy_ui_checkbox_check(&self->bar.enabled);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->bar.enabled);
+	}
+	if (settings && psy_dsp_envelopesettings_iscarry(settings)) {
+		psy_ui_checkbox_check(&self->bar.carry);
+	} else {
+		psy_ui_checkbox_disablecheck(&self->bar.carry);
+	}	
 }
 
 void envelopeview_update(EnvelopeView* self)
@@ -508,6 +530,22 @@ void envelopeview_onzoom(EnvelopeView* self, ScrollZoom* sender)
 {
 	envelopebox_setzoom(&self->envelopebox, scrollzoom_start(sender),
 		scrollzoom_end(sender));
+}
+
+void envelopeview_onenable(EnvelopeView* self, psy_ui_CheckBox* sender)
+{
+	if (self->envelopebox.settings) {
+		psy_dsp_envelopesettings_setenabled(self->envelopebox.settings,
+			psy_ui_checkbox_checked(sender));
+	}
+}
+
+void envelopeview_oncarry(EnvelopeView* self, psy_ui_CheckBox* sender)
+{
+	if (self->envelopebox.settings) {
+		psy_dsp_envelopesettings_setcarry(self->envelopebox.settings,
+			psy_ui_checkbox_checked(sender));
+	}
 }
 
 void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender)

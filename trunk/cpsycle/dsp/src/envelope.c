@@ -66,15 +66,24 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 // envelope settings
 void psy_dsp_envelopesettings_init(psy_dsp_EnvelopeSettings* self)
 {
-	self->points = NULL;
-	self->sustainstage = 0;
-	self->time_unit = psy_dsp_ENVELOPETIME_SECONDS;
+	assert(self);
+
+	self->enabled = FALSE;
+	self->carry = FALSE;	
+	self->sustainbegin = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->sustainend = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->loopstart = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->loopend = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->timemode = psy_dsp_ENVELOPETIME_SECONDS;	
 	self->str = NULL;
+	self->points = NULL;
 }
 
 // adsr envelope settings
 void psy_dsp_envelopesettings_init_adsr(psy_dsp_EnvelopeSettings* self)
 {
+	assert(self);
+
 	psy_dsp_envelopesettings_init(self);
 	// start attack
 	psy_dsp_envelopesettings_append(self,
@@ -88,11 +97,14 @@ void psy_dsp_envelopesettings_init_adsr(psy_dsp_EnvelopeSettings* self)
 	// end release
 	psy_dsp_envelopesettings_append(self,
 		psy_dsp_envelopepoint_make_all(0.015f, 0.f, 0.f, 5.f, 0.f, 0.f));
-	psy_dsp_envelopesettings_setsustainstage(self, 2);
+	psy_dsp_envelopesettings_setsustainbegin(self, 2);
+	psy_dsp_envelopesettings_setsustainend(self, 2);	
 }
 
 void psy_dsp_envelopesettings_dispose(psy_dsp_EnvelopeSettings* self)
 {
+	assert(self);
+
 	psy_list_free(self->points);
 	self->points = NULL;
 	free(self->str);
@@ -103,24 +115,35 @@ void psy_dsp_envelopesettings_copy(psy_dsp_EnvelopeSettings* self,
 	const psy_dsp_EnvelopeSettings* source)
 {
 	const psy_List* pts_src;
-	psy_dsp_envelopesettings_dispose(self);
 
+	assert(self);
+
+	psy_dsp_envelopesettings_dispose(self);
 	for (pts_src = source->points; pts_src != NULL; psy_list_next_const(&pts_src)) {
 		const psy_dsp_EnvelopePoint* pt_src;
 
 		pt_src = (psy_dsp_EnvelopePoint*)psy_list_entry_const(pts_src);
 		psy_dsp_envelopesettings_append(self, psy_dsp_envelopepoint_make_all(
-				pt_src->time, pt_src->value,
-				pt_src->mintime, pt_src->maxtime,
-				pt_src->minvalue, pt_src->maxvalue));
+			pt_src->time, pt_src->value,
+			pt_src->mintime, pt_src->maxtime,
+			pt_src->minvalue, pt_src->maxvalue));
 	}
-	self->sustainstage = source->sustainstage;
+	self->enabled = source->enabled;
+	self->carry = source->carry;	
+	self->sustainbegin = source->sustainbegin;
+	self->sustainend = source->sustainend;
+	self->loopstart = source->loopstart;
+	self->loopend = source->loopend;
+	self->timemode = source->timemode;
+	self->str = NULL; // don't copy tostring cache	
 }
 
 void psy_dsp_envelopesettings_append(psy_dsp_EnvelopeSettings* self,
 	psy_dsp_EnvelopePoint point)
 {
 	psy_dsp_EnvelopePoint* newpoint;
+
+	assert(self);
 
 	newpoint = (psy_dsp_EnvelopePoint*)malloc(sizeof(psy_dsp_EnvelopePoint));
 	if (newpoint) {		
@@ -129,9 +152,38 @@ void psy_dsp_envelopesettings_append(psy_dsp_EnvelopeSettings* self,
 	}
 }
 
+void psy_dsp_envelopesettings_delete(psy_dsp_EnvelopeSettings* self,
+	uintptr_t pointindex)
+{	
+	psy_List* node;
+
+	assert(self);
+
+	node = psy_list_at(self->points, pointindex);
+	if (node) {
+		free(psy_list_entry(node));
+		psy_list_remove(&self->points, node);		
+	}
+}
+
+void psy_dsp_envelopesettings_clear(psy_dsp_EnvelopeSettings* self)
+{
+	assert(self);
+
+	psy_list_deallocate(&self->points, (psy_fp_disposefunc)NULL);
+	self->sustainbegin = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->sustainend = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->loopstart = psy_dsp_ENVELOPEPOINT_INVALID;
+	self->loopend = psy_dsp_ENVELOPEPOINT_INVALID;
+	free(self->str);
+	self->str = NULL;
+}
+
 psy_dsp_EnvelopePoint psy_dsp_envelopesettings_at(const psy_dsp_EnvelopeSettings* self,
 	uintptr_t pointindex)
 {
+	assert(self);
+
 	if (self->points) {
 		const psy_List* node;
 
@@ -146,6 +198,8 @@ psy_dsp_EnvelopePoint psy_dsp_envelopesettings_at(const psy_dsp_EnvelopeSettings
 void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings* self,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval)
 {
+	assert(self);
+
 	if (self->points) {
 		psy_List* node;
 
@@ -170,6 +224,8 @@ void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings* self,
 void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings* self,
 	uintptr_t pointindex, psy_dsp_amp_t pointval)
 {
+	assert(self);
+
 	if (self->points) {
 		psy_List* node;
 
@@ -183,17 +239,13 @@ void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings* self,
 	}
 }
 
-void psy_dsp_envelopesettings_setsustainstage(psy_dsp_EnvelopeSettings* self,
-	int stage)
-{
-	self->sustainstage = stage;
-}
-
 const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings* self)
 {	
 	char valuestr[20];
 	char* values;
 	psy_List* p;
+
+	assert(self);
 
 	free(((psy_dsp_EnvelopeSettings*)self)->str);
 	((psy_dsp_EnvelopeSettings*)self)->str = NULL;
@@ -201,7 +253,7 @@ const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings* se
 	if (!self->points) {
 		return NULL;
 	}
-	psy_snprintf(valuestr, 20, "%i ", (int)self->sustainstage);
+	psy_snprintf(valuestr, 20, "%i ", (int)self->sustainbegin);
 	values = strdup(valuestr);
 	for (p = self->points; p != NULL; psy_list_next(&p)) {
 		psy_dsp_EnvelopePoint* pt;
@@ -250,9 +302,10 @@ void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 	self->nexttime = 0;
 	self->startpeak = 0;
 	self->samplecount = 0;
-	self->susdone = FALSE;
-	self->currstage = NULL;
-	self->susstage = NULL;
+	self->susdone = FALSE;	
+	self->currstage = NULL;	
+	self->susbeginstage = NULL;
+	self->susendstage = NULL;
 }
 
 void psy_dsp_envelope_set_settings(psy_dsp_Envelope* self,
@@ -260,8 +313,10 @@ void psy_dsp_envelope_set_settings(psy_dsp_Envelope* self,
 {
 	psy_dsp_envelopesettings_dispose(&self->settings);	
 	psy_dsp_envelopesettings_copy(&self->settings, settings);	
-	self->susstage = psy_list_at(self->settings.points,
-		self->settings.sustainstage);
+	self->susbeginstage = psy_list_at(self->settings.points,
+		self->settings.sustainbegin);
+	self->susendstage = psy_list_at(self->settings.points,
+		self->settings.sustainend);
 }
 
 void psy_dsp_envelope_settimeandvalue(psy_dsp_Envelope* self, uintptr_t pointindex,
@@ -299,12 +354,13 @@ psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
 	if (!psy_dsp_envelope_playing(self)) {
 		return 0.f;
 	}
-	if (self->currstage == self->susstage && !self->susdone) {
+
+	if (self->currstage == self->susbeginstage && !self->susdone) {
 		return self->value;
 	}
 	if (self->nexttime == self->samplecount) {
 		if (self->currstage->next == NULL ||
-				(!self->susdone && self->currstage->next == self->susstage)) {						
+				(!self->susdone && self->currstage->next == self->susbeginstage)) {
 			self->value = psy_dsp_envelope_stagevalue(self);
 			self->step = 0;
 			psy_list_next(&self->currstage);			
@@ -323,8 +379,10 @@ void psy_dsp_envelope_start(psy_dsp_Envelope* self)
 {	
 	if (self->settings.points) {
 		self->currstage = self->settings.points;
-		self->susstage = psy_list_at(self->settings.points,
-			self->settings.sustainstage);
+		self->susbeginstage = psy_list_at(self->settings.points,
+			self->settings.sustainbegin);
+		self->susendstage = psy_list_at(self->settings.points,
+			self->settings.sustainend);
 		self->value = self->startpeak;
 		self->susdone = FALSE;
 		psy_dsp_envelope_startstage(self);
@@ -344,7 +402,7 @@ void psy_dsp_envelope_release(psy_dsp_Envelope* self)
 {
 	if (psy_dsp_envelope_playing(self)) {
 		self->susdone = TRUE;
-		if (self->currstage != self->susstage) {
+		if (self->currstage != self->susbeginstage) {
 			self->currstage = psy_list_last(self->settings.points);
 		}	
 		psy_dsp_envelope_startstage(self);

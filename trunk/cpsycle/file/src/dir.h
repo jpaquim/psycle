@@ -19,6 +19,7 @@ typedef struct psy_Path {
 	char* prefix;
 	char* name;
 	char* ext;
+	char* filename;
 } psy_Path;
 
 void psy_path_init(psy_Path*, const char* path);
@@ -28,24 +29,29 @@ void psy_path_setprefix(psy_Path*, const char* prefix);
 void psy_path_setname(psy_Path*, const char* name);
 void psy_path_setext(psy_Path*, const char* name);
 
-INLINE const char* psy_path_path(psy_Path* self)
+INLINE const char* psy_path_full(const psy_Path* self)
 {
 	return self->path;
 }
 
-INLINE const char* psy_path_name(psy_Path* self)
+INLINE const char* psy_path_name(const psy_Path* self)
 {
 	return self->name;
 }
 
-INLINE const char* psy_path_prefix(psy_Path* self)
+INLINE const char* psy_path_prefix(const psy_Path* self)
 {
 	return self->prefix;
 }
 
-INLINE const char* psy_path_ext(psy_Path* self)
+INLINE const char* psy_path_ext(const psy_Path* self)
 {
 	return self->ext;
+}
+
+INLINE const char* psy_path_filename(const psy_Path* self)
+{
+	return self->filename;
 }
 
 bool psy_path_hasprefix(psy_Path*);

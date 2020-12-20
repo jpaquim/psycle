@@ -90,14 +90,9 @@ void psy_audio_custommachine_init(psy_audio_CustomMachine* self,
 
 void custommachine_init_memory(psy_audio_CustomMachine* self, uintptr_t numframes)
 {
-	uintptr_t channel;
-
 	psy_audio_buffer_init(&self->memorybuffer, 2);
 	self->memorybuffersize = numframes;
-	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
-		self->memorybuffer.samples[channel] = dsp.memory_alloc(
-			self->memorybuffersize, sizeof(psy_dsp_amp_t));		
-	}
+	psy_audio_buffer_allocsamples(&self->memorybuffer, self->memorybuffersize);
 	psy_audio_buffer_clearsamples(&self->memorybuffer, self->memorybuffersize);
 	psy_audio_buffer_enablerms(&self->memorybuffer);
 }
@@ -112,11 +107,7 @@ void psy_audio_custommachine_dispose(psy_audio_CustomMachine* self)
 
 void custommachine_dispose_memory(psy_audio_CustomMachine* self)
 {
-	uintptr_t channel;
-
-	for (channel = 0; channel < self->memorybuffer.numchannels; ++channel) {
-		dsp.memory_dealloc(self->memorybuffer.samples[channel]);
-	}
+	psy_audio_buffer_deallocsamples(&self->memorybuffer);
 	psy_audio_buffer_dispose(&self->memorybuffer);
 }
 

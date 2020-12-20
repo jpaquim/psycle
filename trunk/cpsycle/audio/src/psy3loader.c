@@ -690,7 +690,7 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			psyfile_read(self->songfile->file, &ENV_RT, sizeof(ENV_RT));
 			// ENV_AT
 			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
-				1, ENV_AT * 1.f / 44100, 1.f, 0.f);
+				1, ENV_AT * 1.f / 44100, 1.f);
 			// ENV_DT, ENV_SL
 			psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
 				2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 100.f);			
@@ -903,7 +903,7 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 	wave->globalvolume = ftemp;
 	// default volume
 	psyfile_read(self->songfile->file, &temp16, sizeof(temp16));
-	wave->defaultvolume = temp16 / (psy_dsp_amp_t) 255;
+	wave->defaultvolume = temp16;
 	// wave loop start
 	psyfile_read(self->songfile->file, &temp, sizeof(temp));
 	wave->loop.start = temp;
@@ -1310,7 +1310,7 @@ void psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 			wave->globalvolume = ftemp;
 			// default volume
 			psyfile_read(self->songfile->file, &temp16, sizeof(temp16));
-			wave->defaultvolume = temp16 / (psy_dsp_amp_t) 255;
+			wave->defaultvolume = temp16;
 			// wave loop start
 			psyfile_read(self->songfile->file, &temp, sizeof(temp));
 			wave->loop.start = temp;

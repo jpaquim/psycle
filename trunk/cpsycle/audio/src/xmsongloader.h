@@ -7,6 +7,7 @@
 #include "../../detail/psydef.h"
 
 // local
+#include "machine.h"
 #include "songio.h"
 #include "xmdefs.h"
 
@@ -28,8 +29,8 @@ typedef struct XMSongLoader {
 	short m_iTempoBPM;
 	short m_extracolumn;
 	short m_maxextracolumn;
-	XMFILEHEADER m_Header;
-	// XMSampler* m_pSampler;
+	XMFILEHEADER m_Header;	
+	psy_audio_Machine* sampler;
 	psy_audio_SongFile* songfile;
 } XMSongLoader;
 
@@ -150,12 +151,14 @@ typedef struct MODSongLoader
 	bool speedpatch;
 	MODHEADER m_Header;
 	MODSAMPLEHEADER m_Samples[32];
-	// XMSampler* m_pSampler;
+	psy_audio_Machine* sampler;
 	psy_audio_SongFile* songfile;
 } MODSongLoader;
 
 void modsongloader_init(MODSongLoader*, psy_audio_SongFile*);
 void modsongloader_dispose(MODSongLoader*);
+
+bool modsongloader_load(MODSongLoader* self);
 
 #ifdef __cplusplus
 }

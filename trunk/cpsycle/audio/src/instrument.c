@@ -230,7 +230,7 @@ const psy_List* psy_audio_instrument_entries(psy_audio_Instrument* self)
 	return self->entries;
 }
 
-const char* psy_audio_instrument_tostring(psy_audio_Instrument* self)
+const char* psy_audio_instrument_tostring(const psy_audio_Instrument* self)
 {
 	return NULL;
 }

@@ -4,15 +4,11 @@
 #include "../../detail/prefix.h"
 
 #include "oscilloscope.h"
-
+// audio
 #include <exclusivelock.h>
-#include <operations.h>
-
 #include <songio.h>
+// std
 #include <math.h>
-#include <string.h>
-
-#include "../../detail/portable.h"
 
 #define SCOPE_SPEC_BANDS 256
 #define SCOPE_BUF_SIZE_LOG 13
@@ -27,7 +23,6 @@ static const uint32_t CLBOTH = 0xC0C060;
 
 static void oscilloscope_init_memory(Oscilloscope*);
 static void oscilloscope_ondestroy(Oscilloscope*);
-static void oscilloscope_deallocate_holdbuffer(Oscilloscope*);
 static void oscilloscope_ondraw(Oscilloscope*, psy_ui_Graphics*);
 static void oscilloscope_ontimer(Oscilloscope*, psy_ui_Component* sender, uintptr_t timerid);
 static void oscilloscope_onsrcmachineworked(Oscilloscope*, psy_audio_Machine*,
@@ -100,40 +95,21 @@ void oscilloscope_init_memory(Oscilloscope* self)
 
 void oscilloscope_ondestroy(Oscilloscope* self)
 {
-	psy_audio_Machine* machine;
-	psy_audio_Buffer* memory;
-
-	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
-		oscilloscope_onsongchanged);
+	psy_signal_disconnect_context(&self->workspace->signal_songchanged, self);
 	oscilloscope_disconnectmachinessignals(self, self->workspace);
-	oscilloscope_deallocate_holdbuffer(self);
-	if (workspace_song(self->workspace)) {
-		machine = psy_audio_machines_at(&workspace_song(self->workspace)->machines, self->wire.src);
-		if (machine) {
-			memory = psy_audio_machine_buffermemory(machine);
-			if (memory) {
-				psy_audio_exclusivelock_enter();
-				psy_audio_machine_setbuffermemorysize(machine,
-					psy_audio_MAX_STREAM_SIZE);
-				psy_audio_exclusivelock_leave();
-			}
-		}
-	}
-}
-
-void oscilloscope_deallocate_holdbuffer(Oscilloscope* self)
-{
 	if (self->hold_buffer) {
-		uintptr_t channel;
+		psy_audio_buffer_deallocate(self->hold_buffer);
+	}
+	if (workspace_song(self->workspace)) {
+		psy_audio_Machine* machine;
 
-		for (channel = 0; channel <
-				psy_audio_buffer_numchannels(self->hold_buffer);
-				++channel) {
-			dsp.memory_dealloc(self->hold_buffer->samples[channel]);
+		machine = psy_audio_machines_at(
+			&workspace_song(self->workspace)->machines, self->wire.src);
+		if (machine && psy_audio_machine_buffermemory(machine)) {			
+			psy_audio_exclusivelock_enter();
+			psy_audio_machine_resetbuffermemory(machine);			
+			psy_audio_exclusivelock_leave();			
 		}
-		psy_audio_buffer_dispose(self->hold_buffer);
-		free(self->hold_buffer);
-		self->hold_buffer = NULL;
 	}
 }
 
@@ -217,9 +193,12 @@ psy_audio_Buffer* oscilloscope_buffer(Oscilloscope* self,
 	if (self->hold == FALSE) {
 		buffer = psy_audio_machine_buffermemory(machine);
 		*numsamples = psy_audio_machine_buffermemorysize(machine);
-	} else {
+	} else if (self->hold_buffer) {
 		buffer = self->hold_buffer;
-		*numsamples = self->hold_buffer_numsamples;
+		*numsamples = self->hold_buffer->numsamples;
+	} else {
+		buffer = NULL;
+		*numsamples = 0;
 	}
 	return buffer;
 }
@@ -234,26 +213,13 @@ void oscilloscope_onsrcmachineworked(Oscilloscope* self,
 	psy_audio_Machine* machine, uintptr_t slot,
 	psy_audio_BufferContext* bc)
 {	
-	if (self->hold_buffer == NULL && self->hold == TRUE) {
-		psy_audio_Buffer* memory;
-		uintptr_t channel;
+	assert(self);
+	assert(machine);
 
-		memory = psy_audio_machine_buffermemory(machine);		
-		if (!memory) {
-			return;
-		}
-
-		self->hold_buffer_numsamples = psy_audio_machine_buffermemorysize(machine);
-		self->hold_buffer = psy_audio_buffer_allocinit(psy_audio_buffer_numchannels(memory));
-		for (channel = 0; channel < psy_audio_buffer_numchannels(memory); ++channel) {
-			self->hold_buffer->samples[channel] = dsp.memory_alloc(
-				self->hold_buffer_numsamples, sizeof(psy_dsp_amp_t));			
-		}
-		psy_audio_buffer_clearsamples(self->hold_buffer,
-			self->hold_buffer_numsamples);
-		psy_audio_buffer_addsamples(self->hold_buffer, memory,
-			self->hold_buffer_numsamples, 1.0f);
-		self->hold_buffer->writepos = memory->writepos;		
+	if (self->hold_buffer == NULL && self->hold == TRUE &&
+			psy_audio_machine_buffermemory(machine)) {		
+		self->hold_buffer = psy_audio_buffer_clone(
+			psy_audio_machine_buffermemory(machine));
 	}
 	self->invol = psy_audio_connections_wirevolume(
 		&workspace_song(self->workspace)->machines.connections, self->wire);
@@ -331,9 +297,10 @@ void oscilloscope_hold(Oscilloscope* self)
 }
 
 void oscilloscope_continue(Oscilloscope* self)
-{
+{	
+	psy_audio_buffer_deallocate(self->hold_buffer);
+	self->hold_buffer = NULL;
 	self->hold = FALSE;
-	oscilloscope_deallocate_holdbuffer(self);
 }
 
 bool oscilloscope_stopped(Oscilloscope* self)

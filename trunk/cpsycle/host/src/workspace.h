@@ -58,6 +58,11 @@ enum {
 	VIEW_NUM
 };
 
+enum {
+	SECTION_ID_MACHINEVIEW_WIRES = 0,
+	SECTION_ID_MACHINEVIEW_NEWMACHINE = 1
+};
+
 // The patternview display modes
 typedef enum {
 	PATTERN_DISPLAYMODE_TRACKER,					// only tracker visible
@@ -137,6 +142,7 @@ typedef struct {
 	MaximizedView maximizeview;
 	int fontheight;	
 	bool hasnewline;
+	bool gearvisible;
 	// UndoRedo
 	psy_UndoRedo undoredo;
 	uintptr_t undosavepoint;
@@ -226,6 +232,7 @@ void workspace_connectasmixersend(Workspace*);
 void workspace_connectasmixerinput(Workspace*);
 bool workspace_isconnectasmixersend(const Workspace*);
 void workspace_togglegear(Workspace*);
+bool workspace_gearvisible(const Workspace* self);
 bool workspace_songmodified(const Workspace*);
 bool workspace_currview_hasundo(Workspace*);
 bool workspace_currview_hasredo(Workspace*);

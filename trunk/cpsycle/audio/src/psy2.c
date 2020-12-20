@@ -467,7 +467,7 @@ void psy2loader_readinstruments(PSY2Loader* self)
 
 					pData = malloc(wltemp * sizeof(short) + 4);// +4 to avoid any attempt at buffer overflow by the code
 					psyfile_read(self->songfile->file, pData, wltemp * sizeof(short));
-					wave->numframes = wltemp;
+					wave->numframes = wltemp;					
 					wave->channels.samples[0] =
 						dsp.memory_alloc(wave->numframes, sizeof(float));
 					for (f = 0; f < wave->numframes; ++f) {

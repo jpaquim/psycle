@@ -23,6 +23,7 @@ void psy_path_init(psy_Path* self, const char* path)
 	self->name = strdup("");
 	self->prefix = strdup("");
 	self->ext = strdup("");
+	self->filename = strdup("");
 	psy_path_extract_path(self);
 }
 
@@ -32,6 +33,7 @@ void psy_path_dispose(psy_Path* self)
 	free(self->name);
 	free(self->prefix);
 	free(self->ext);
+	free(self->filename);
 }
 
 void psy_path_setpath(psy_Path* self, const char* path)
@@ -40,10 +42,12 @@ void psy_path_setpath(psy_Path* self, const char* path)
 	free(self->name);
 	free(self->prefix);
 	free(self->ext);
+	free(self->filename);
 	self->path = strdup(path ? path : "");
 	self->name = strdup("");
 	self->prefix = strdup("");
 	self->ext = strdup("");
+	self->filename = strdup("");
 	psy_path_extract_path(self);
 }
 
@@ -134,6 +138,12 @@ void psy_path_extract_path(psy_Path* self)
 	} else {
 		free(self->ext);
 		self->ext = strdup("");
+	}	
+	free(self->filename);
+	self->filename = psy_strdup(self->name);
+	if (psy_strlen(self->ext) != 0) {
+		self->filename = psy_strcat_realloc(self->filename, ".");
+		self->filename = psy_strcat_realloc(self->filename, self->ext);
 	}
 }
 

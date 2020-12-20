@@ -67,6 +67,8 @@ void psy_signal_connect(psy_Signal*, void* context, void* fp);
 bool psy_signal_connected(psy_Signal*, void* context, void* fp);
 // removes a slot (context, function callback pointer) from the slot list 
 void psy_signal_disconnect(psy_Signal*, void* context, void* fp);
+// removes all slots with the context
+void psy_signal_disconnect_context(psy_Signal*, void* context);
 // clears the slot list
 void psy_signal_disconnectall(psy_Signal*);
 // excludes a slot called by psy_signal_emit

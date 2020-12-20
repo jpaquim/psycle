@@ -27,6 +27,7 @@ static void dev_clientresize(psy_ui_win_CheckBoxImp* self, int width, int height
 static psy_ui_Rectangle dev_position(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_position(&self->win_component_imp.imp); }
 static void dev_setposition(psy_ui_win_CheckBoxImp* self, psy_ui_Point topleft, psy_ui_Size size) { self->win_component_imp.imp.vtable->dev_setposition(&self->win_component_imp.imp, topleft, size); }
 static psy_ui_Size dev_size(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_size(&self->win_component_imp.imp); }
+static psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* limits);
 static psy_ui_Size dev_framesize(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_framesize(&self->win_component_imp.imp); }
 static void dev_scrollto(psy_ui_win_CheckBoxImp* self, intptr_t dx, intptr_t dy) { self->win_component_imp.imp.vtable->dev_scrollto(&self->win_component_imp.imp, dx, dy); }
 static psy_ui_Component* dev_parent(psy_ui_win_CheckBoxImp* self) { return self->win_component_imp.imp.vtable->dev_parent(&self->win_component_imp.imp); }
@@ -53,7 +54,7 @@ static void* dev_platform(psy_ui_win_CheckBoxImp* self) { return (void*) &self->
 
 // VTable init
 static psy_ui_ComponentImpVTable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = 0;
 
 static void imp_vtable_init(void)
 {
@@ -70,6 +71,7 @@ static void imp_vtable_init(void)
 		vtable.dev_position = (psy_ui_fp_componentimp_dev_position) dev_position;
 		vtable.dev_setposition = (psy_ui_fp_componentimp_dev_setposition) dev_setposition;
 		vtable.dev_size = (psy_ui_fp_componentimp_dev_size) dev_size;
+		vtable.dev_preferredsize = (psy_ui_fp_componentimp_dev_preferredsize)dev_preferredsize;
 		vtable.dev_framesize = (psy_ui_fp_componentimp_dev_framesize) dev_framesize;
 		vtable.dev_scrollto = (psy_ui_fp_componentimp_dev_scrollto) dev_scrollto;
 		vtable.dev_parent = (psy_ui_fp_componentimp_dev_parent) dev_parent;
@@ -131,7 +133,26 @@ void psy_ui_win_checkboximp_init(psy_ui_win_CheckBoxImp* self,
 		parent,
 		TEXT("BUTTON"),
 		0, 0, 100, 20,
-		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
+		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | BS_FLAT,
+		1);
+	imp_vtable_init();
+	self->imp.component_imp.vtable = &vtable;
+	psy_ui_checkboximp_init(&self->imp);
+	checkboximp_imp_vtable_init(self);
+	self->imp.vtable = &checkboximp_vtable;
+	psy_signal_connect(&self->win_component_imp.imp.signal_command, component, oncommand);
+}
+
+void psy_ui_win_checkboximp_init_multiline(psy_ui_win_CheckBoxImp* self,
+	psy_ui_Component* component,
+	psy_ui_ComponentImp* parent)
+{
+	psy_ui_win_componentimp_init(&self->win_component_imp,
+		component,
+		parent,
+		TEXT("BUTTON"),
+		0, 0, 100, 20,
+		WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX | BS_MULTILINE | BS_FLAT,
 		1);
 	imp_vtable_init();
 	self->imp.component_imp.vtable = &vtable;
@@ -155,6 +176,19 @@ psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_allocinit(
 	rv = psy_ui_win_checkboximp_alloc();
 	if (rv) {
 		psy_ui_win_checkboximp_init(rv, component, parent);
+	}
+	return rv;
+}
+
+psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_allocinit_multiline(
+	struct psy_ui_Component* component,
+	psy_ui_ComponentImp* parent)
+{
+	psy_ui_win_CheckBoxImp* rv;
+
+	rv = psy_ui_win_checkboximp_alloc();
+	if (rv) {
+		psy_ui_win_checkboximp_init_multiline(rv, component, parent);
 	}
 	return rv;
 }
@@ -188,6 +222,33 @@ int dev_checked(psy_ui_win_CheckBoxImp* self)
 {
 	return SendMessage(self->win_component_imp.hwnd, BM_GETCHECK, (WPARAM)0,
 		(LPARAM)0) != 0;
+}
+
+psy_ui_Size dev_preferredsize(psy_ui_win_CheckBoxImp* self, const psy_ui_Size* limits)
+{
+	psy_ui_Size rv;
+	psy_ui_Graphics g;
+	HDC hdc;
+	HWND hwnd;
+	char text[512];
+	RECT rect = { 0 };
+	psy_ui_TextMetric tm;
+
+	hwnd = self->win_component_imp.hwnd;
+
+	hdc = GetDC(NULL);	
+	psy_ui_graphics_init(&g, hdc);
+	//psy_ui_setfont(&g, font);
+	dev_text(self, text);	
+	tm = dev_textmetric(self);
+	rect.left = 0;
+	rect.right = psy_ui_value_px(&limits->width, &tm) - 40;
+	DrawText(hdc, text, -1, &rect, DT_LEFT | DT_WORDBREAK | DT_CALCRECT);	
+	psy_ui_graphics_dispose(&g);	
+	ReleaseDC(NULL, hdc);
+	rv.width = psy_ui_value_makepx(rect.right);
+	rv.height = psy_ui_value_makepx(rect.bottom);
+	return rv;
 }
 
 void oncommand(psy_ui_CheckBox* self, psy_ui_Component* sender,

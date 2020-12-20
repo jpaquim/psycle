@@ -44,6 +44,8 @@ void psy_ui_scrollbarpane_init(psy_ui_ScrollBarPane* self, psy_ui_Component* par
 	psy_ui_component_doublebuffer(&self->component);
 	psy_ui_component_setbackgroundcolour(&self->component,
 		psy_ui_colour_make(0x00292929));
+	psy_ui_component_setcolour(&self->component,
+		psy_ui_colour_make(0x00666666));
 	self->pos = 0;
 	self->drag = 0;
 	self->screenpos = 0;	
@@ -78,11 +80,11 @@ void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self, psy_ui_Graphics* g)
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component),
 		&tm);
 	if (self->orientation == psy_ui_HORIZONTAL) {
-		r = psy_ui_rectangle_make(self->screenpos, 0, 20, size.height);		
+		r = psy_ui_rectangle_make(self->screenpos, 2, 20, size.height - 4);		
 	} else {
-		r = psy_ui_rectangle_make(0, self->screenpos, size.width, 20);
+		r = psy_ui_rectangle_make(2, self->screenpos, size.width - 4, 20);
 	}
-	psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00666666));
+	psy_ui_drawsolidrectangle(g, r, psy_ui_component_colour(self));
 }
 
 void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self, psy_ui_MouseEvent* ev)

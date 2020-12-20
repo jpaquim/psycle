@@ -600,25 +600,29 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			if (frame > self->context.sample->loop.end) {
 				self->dragmode = WAVEBOX_DRAG_LOOP_CONT_RIGHT;
 				psy_audio_sample_setcontloop(self->context.sample,
-					self->context.sample->loop.type,
-					self->context.sample->loop.end, frame);
+					psy_audio_sampleloop_make(
+						self->context.sample->loop.type,
+						self->context.sample->loop.end, frame));
 			} else {
 				psy_audio_sample_setcontloop(self->context.sample,
-					self->context.sample->loop.type,
-					frame, self->context.sample->loop.end);
+					psy_audio_sampleloop_make(
+						self->context.sample->loop.type,
+						frame, self->context.sample->loop.end));
 			}
 			changed = TRUE;			
 		} else
 		if (self->dragmode == WAVEBOX_DRAG_LOOP_CONT_RIGHT) {
 			if (frame < self->context.sample->loop.start) {
 				psy_audio_sample_setcontloop(self->context.sample,
-					self->context.sample->loop.type,
-					frame, self->context.sample->loop.start);
+					psy_audio_sampleloop_make(
+						self->context.sample->loop.type,
+						frame, self->context.sample->loop.start));
 				self->dragmode = WAVEBOX_DRAG_LOOP_CONT_LEFT;
 			} else {
 				psy_audio_sample_setcontloop(self->context.sample,
-					self->context.sample->loop.type,
-					self->context.sample->loop.start, frame);
+					psy_audio_sampleloop_make(
+						self->context.sample->loop.type,
+						self->context.sample->loop.start, frame));
 			}
 			changed = TRUE;			
 		} else
@@ -626,28 +630,32 @@ void wavebox_onmousemove(WaveBox* self, psy_ui_Component* sender,
 			if (frame > self->context.sample->sustainloop.end) {
 				self->dragmode = WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT;
 				psy_audio_sample_setsustainloop(self->context.sample,
-					self->context.sample->sustainloop.type,
-					self->context.sample->sustainloop.end,
-					frame);
+					psy_audio_sampleloop_make(
+						self->context.sample->sustainloop.type,
+						self->context.sample->sustainloop.end,
+						frame));
 			} else {
 				psy_audio_sample_setsustainloop(self->context.sample,
-					self->context.sample->sustainloop.type,
-					frame,
-					self->context.sample->sustainloop.end);
+					psy_audio_sampleloop_make(
+						self->context.sample->sustainloop.type,
+						frame,
+						self->context.sample->sustainloop.end));
 			}
 			changed = TRUE;			
 		} else
 		if (self->dragmode == WAVEBOX_DRAG_LOOP_SUSTAIN_RIGHT) {			
 			if (frame < self->context.sample->sustainloop.start) {
 				psy_audio_sample_setsustainloop(self->context.sample,
-					self->context.sample->sustainloop.type,
-					frame, self->context.sample->sustainloop.start);
+					psy_audio_sampleloop_make(
+						self->context.sample->sustainloop.type,
+						frame, self->context.sample->sustainloop.start));
 				self->dragmode = WAVEBOX_DRAG_LOOP_SUSTAIN_LEFT;
 			} else {
 				psy_audio_sample_setsustainloop(self->context.sample,
-					self->context.sample->sustainloop.type,
-					self->context.sample->sustainloop.start,
-					frame);
+					psy_audio_sampleloop_make(
+						self->context.sample->sustainloop.type,
+						self->context.sample->sustainloop.start,
+						frame));
 			}
 			changed = TRUE;			
 		} else

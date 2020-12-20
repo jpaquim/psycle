@@ -37,6 +37,7 @@ typedef struct psy_ui_CheckBox {
    // internal data
    char* text;
    char* translation;
+   int multiline;
    // signals
    psy_Signal signal_clicked;   
 } psy_ui_CheckBox;
@@ -54,6 +55,7 @@ typedef struct {
 #endif
 
 void psy_ui_checkbox_init(psy_ui_CheckBox*, psy_ui_Component* parent);
+void psy_ui_checkbox_init_multiline(psy_ui_CheckBox*, psy_ui_Component* parent);
 void psy_ui_checkbox_init_text(psy_ui_CheckBox*, psy_ui_Component* parent,
     const char* text);
 void psy_ui_checkbox_settext(psy_ui_CheckBox*, const char* text);

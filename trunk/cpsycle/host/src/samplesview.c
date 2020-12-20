@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <dir.h>
+
 #include "../../detail/portable.h"
 
 // SamplesViewButtons
@@ -55,17 +57,16 @@ static void samplessongimportview_onsamplesboxchanged(SamplesSongImportView*,
 void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* parent,
 	SamplesView* view, Workspace* workspace)
 {	
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
-		psy_ui_value_makepx(0));
 	self->view = view;
 	self->source = 0;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
 	psy_ui_component_init(&self->header, &self->component);
 	psy_ui_component_setalign(&self->header, psy_ui_ALIGN_TOP);
+	psy_ui_component_setdefaultalign(&self->header, psy_ui_ALIGN_LEFT,
+		psy_ui_margin_make(psy_ui_value_makepx(0),
+			psy_ui_value_makeew(0.5), psy_ui_value_makeeh(1.0),
+			psy_ui_value_makepx(0)));
 	psy_ui_label_init(&self->label, &self->header);
 	psy_ui_label_settext(&self->label, "Source");	
 	psy_ui_label_init(&self->songname, &self->header);
@@ -74,17 +75,14 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	psy_ui_button_init(&self->browse, &self->header);
 	psy_ui_button_settext(&self->browse, "Select a song");
 	psy_signal_connect(&self->browse.signal_clicked, self,
-		samplessongimportview_onloadsong);	
-	psy_list_free(psy_ui_components_setalign(		
-		psy_ui_component_children(&self->header, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-		&margin));
+		samplessongimportview_onloadsong);		
 	// bar
 	psy_ui_component_init(&self->bar, &self->component);
-	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_LEFT);
+	psy_ui_component_setalign(&self->bar, psy_ui_ALIGN_LEFT);		
+	psy_ui_component_setminimumsize(&self->bar, psy_ui_size_makeem(12, 1));
 	psy_ui_button_init(&self->add, &self->bar);
-	psy_ui_button_settext(&self->add, "<- Copy");
-	psy_ui_component_setalign(&self->add.component, psy_ui_ALIGN_TOP);
+	psy_ui_button_settext(&self->add, "<- Copy");	
+	psy_ui_component_setalign(&self->add.component, psy_ui_ALIGN_CENTER);
 	psy_signal_connect(&self->add.signal_clicked, self,
 		samplessongimportview_oncopy);
 	// samplesbox
@@ -96,21 +94,16 @@ void samplessongimportview_init(SamplesSongImportView* self, psy_ui_Component* p
 	// samplebox
 	wavebox_init(&self->samplebox, &self->component, workspace);
 	psy_ui_component_setalign(&self->samplebox.component,
-		psy_ui_ALIGN_BOTTOM);
-	psy_ui_component_setpreferredsize(&self->samplebox.component,
-		psy_ui_size_make(
-		psy_ui_value_makepx(0),
-		psy_ui_value_makeeh(15)));
+		psy_ui_ALIGN_BOTTOM);	
 }
 
 void samplessongimportview_ondestroy(SamplesSongImportView* self,
 	psy_ui_Component* sender)
 {
 	if (self->source) {
-		psy_audio_song_dispose(self->source);
-		free(self->source);
-	}
-	self->source = 0;
+		psy_audio_song_deallocate(self->source);
+		self->source = NULL;
+	}	
 }
 
 void samplessongimportview_onloadsong(SamplesSongImportView* self,
@@ -119,14 +112,14 @@ void samplessongimportview_onloadsong(SamplesSongImportView* self,
 	psy_ui_OpenDialog dialog;
 	
 	psy_ui_opendialog_init_all(&dialog, 0, "Load Song",
-		psy_audio_songfile_loadfilter(), "PSY",
+		psy_audio_songfile_loadfilter(),
+		psy_audio_songfile_defaultloadextension(),
 		dirconfig_songs(&self->workspace->config.directories));
 	if (psy_ui_opendialog_execute(&dialog)) {
 		psy_audio_SongFile songfile;
 
 		if (self->source) {
-			psy_audio_song_dispose(self->source);
-			free(self->source);
+			psy_audio_song_deallocate(self->source);			
 		}	
 		self->source = psy_audio_song_allocinit(
 			&self->workspace->machinefactory);
@@ -399,7 +392,7 @@ void generalview_ontweak(SamplesGeneralView* self, psy_ui_Slider* slider,
 {
 	if (self->sample) {			
 		if (slider == &self->defaultvolume) {
-			self->sample->defaultvolume = value;
+			self->sample->defaultvolume = (uint16_t)(value * 128.f);
 		} else
 		if (slider == &self->globalvolume) {		
 			self->sample->globalvolume = (value * value) * 4.f;
@@ -420,7 +413,7 @@ void generalview_onvalue(SamplesGeneralView* self, psy_ui_Slider* slider,
 	float* value)
 {	
 	if (slider == &self->defaultvolume) {
-		*value = self->sample ? self->sample->defaultvolume : 1.0f;
+		*value = self->sample ? self->sample->defaultvolume / 128.f : 1.0f;
 	} else 
 	if (slider == &self->globalvolume) {
 		if (self->sample) {			
@@ -444,7 +437,7 @@ void generalview_ondescribe(SamplesGeneralView* self, psy_ui_Slider* slider, cha
 {		
 	if (slider == &self->defaultvolume) {		
 		psy_snprintf(txt, 10, "C%02X", self->sample 
-			? map_1_128(self->sample->defaultvolume)
+			? self->sample->defaultvolume
 			: 0x80);
 	} else
 	if (slider == &self->globalvolume) {		
@@ -1152,9 +1145,12 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			psy_audio_SampleIndex index;
 			psy_audio_Instrument* instrument;
 			psy_audio_InstrumentEntry entry;
+			psy_Path path;
 
 			sample = psy_audio_sample_allocinit(2);
-			psy_audio_sample_load(sample, psy_ui_opendialog_filename(&dialog));
+			psy_path_init(&path, psy_ui_opendialog_filename(&dialog));
+			psy_audio_sample_load(sample, &path);
+			psy_path_dispose(&path);
 			index = samplesbox_selected(&self->samplesbox);
 			psy_audio_samples_insert(&workspace_song(self->workspace)->samples, sample,
 				index);
@@ -1187,6 +1183,7 @@ void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 		"Wav Files (*.wav)|*.wav|"
 		"IFF psy_audio_Samples (*.iff)|*.iff|"
 		"All Files (*.*)|*.*";
+	psy_Path path;
 
 	psy_ui_savedialog_init_all(&dialog, 0,
 		"Save Sample",
@@ -1194,8 +1191,9 @@ void samplesview_onsavesample(SamplesView* self, psy_ui_Component* sender)
 		"WAV",
 		dirconfig_samples(&self->workspace->config.directories));
 	if (wavebox_sample(&self->wavebox) && psy_ui_savedialog_execute(&dialog)) {
-		psy_audio_sample_save(wavebox_sample(&self->wavebox),
-			psy_ui_savedialog_filename(&dialog));
+		psy_path_init(&path, psy_ui_savedialog_filename(&dialog));
+		psy_audio_sample_save(wavebox_sample(&self->wavebox), &path);
+		psy_path_dispose(&path);
 	}
 	psy_ui_savedialog_dispose(&dialog);
 }

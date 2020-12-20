@@ -46,6 +46,7 @@ INLINE psy_ui_Component* envelopebox_base(EnvelopeBox* self)
 typedef struct EnvelopeBar {
 	psy_ui_Component component;
 	psy_ui_CheckBox enabled;
+	psy_ui_CheckBox carry;
 	psy_ui_Button millisec;
 	psy_ui_Button ticks;
 	psy_ui_Button adsr;
