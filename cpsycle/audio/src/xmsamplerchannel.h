@@ -40,7 +40,7 @@ typedef struct psy_audio_XMSamplerChannel {
 	// (0..1.0f) <-> (0..200)
 	bool surround;// value used for playback (is channel set to surround?)
 	
-	FilterType defaultfiltertype;	
+	psy_dsp_FilterType defaultfiltertype;	
 	psy_audio_InfoMachineParam param_channel;
 	psy_audio_IntMachineParam filter_cutoff;
 	psy_audio_IntMachineParam filter_res;
@@ -102,7 +102,7 @@ typedef struct psy_audio_XMSamplerChannel {
 	int ressonance;
 	int defaultcutoff;
 	int defaultressonance;
-	FilterType m_DefaultFilterType;
+	psy_dsp_FilterType m_DefaultFilterType;
 } psy_audio_XMSamplerChannel;
 
 void psy_audio_xmsamplerchannel_init(psy_audio_XMSamplerChannel*, uintptr_t index);

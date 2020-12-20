@@ -37,8 +37,8 @@ void psy_ui_defaults_init(psy_ui_Defaults* self)
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(0.5), psy_ui_value_makepx(0));
 	psy_ui_margin_init_all(&self->cmargin,
-		psy_ui_value_makeew(0.5), psy_ui_value_makeew(0.5),
-		psy_ui_value_makeeh(0.5), psy_ui_value_makeeh(0.5));
+		psy_ui_value_makepx(0), psy_ui_value_makeew(0.5),
+		psy_ui_value_makeeh(0.5), psy_ui_value_makeew(0.5));
 	// orange 0x002279F1
 	// green 0x00B1C8B0
 }

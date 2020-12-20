@@ -8,6 +8,8 @@
 
 #include "../../detail/trace.h"
 
+static const psy_dsp_seconds_t defaultfastrelease = 0.003f;
+
 // envelope point
 void psy_dsp_envelopepoint_init(psy_dsp_EnvelopePoint* self, 
 	psy_dsp_seconds_t time, psy_dsp_amp_t value,
@@ -306,6 +308,7 @@ void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 	self->currstage = NULL;	
 	self->susbeginstage = NULL;
 	self->susendstage = NULL;
+	self->fastrelease = FALSE;	
 }
 
 void psy_dsp_envelope_set_settings(psy_dsp_Envelope* self,
@@ -352,6 +355,7 @@ void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope* self,
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
 {
 	if (!psy_dsp_envelope_playing(self)) {
+		self->fastrelease = FALSE;
 		return 0.f;
 	}
 
@@ -375,6 +379,41 @@ psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
 	return self->value;
 }
 
+psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope* self)
+{
+	psy_dsp_EnvelopePoint* pt;
+
+	if (!psy_dsp_envelope_playing(self)) {
+		self->fastrelease = FALSE;
+		return 0.f;
+	}
+
+	if (self->currstage == self->susbeginstage && !self->susdone) {
+		return self->value;
+	}
+	if (self->currstage && self->currstage->next) {
+		pt = (psy_dsp_EnvelopePoint*)self->currstage->next;
+	} else {
+		return 0.f;
+	}
+	if ((self->step == 0) || (self->step > 0 && self->value > pt->value) || 
+		(self->step < 0 && self->value < pt->value)) {
+		if (self->currstage->next == NULL ||
+			(!self->susdone && self->currstage->next == self->susbeginstage)) {
+			self->value = psy_dsp_envelope_stagevalue(self);
+			self->step = 0;
+			psy_list_next(&self->currstage);
+			return self->value;
+		}
+		self->value = psy_dsp_envelope_stagevalue(self);
+		psy_list_next(&self->currstage);
+		psy_dsp_envelope_startstage(self);
+	}
+	self->value += self->step;
+	++self->samplecount;
+	return self->value;
+}
+
 void psy_dsp_envelope_start(psy_dsp_Envelope* self)
 {	
 	if (self->settings.points) {
@@ -385,6 +424,7 @@ void psy_dsp_envelope_start(psy_dsp_Envelope* self)
 			self->settings.sustainend);
 		self->value = self->startpeak;
 		self->susdone = FALSE;
+		self->step = 0;
 		psy_dsp_envelope_startstage(self);
 	}
 }
@@ -409,6 +449,25 @@ void psy_dsp_envelope_release(psy_dsp_Envelope* self)
 	}
 }
 
+void psy_dsp_envelope_fastrelease(psy_dsp_Envelope* self)
+{		
+	if (psy_dsp_envelope_playing(self)) {
+		self->susdone = TRUE;
+		if (self->currstage != self->susbeginstage) {
+			self->currstage = psy_list_last(self->settings.points);
+		}
+		if (self->currstage) {
+			psy_dsp_EnvelopePoint* pt;
+
+			pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage);
+			self->nexttime = (uintptr_t)(defaultfastrelease * self->samplerate);
+			self->samplecount = 0;
+			self->step = (self->value) / self->nexttime;
+			self->fastrelease = TRUE;
+		}
+	}
+}
+
 void psy_dsp_envelope_startstage(psy_dsp_Envelope* self)
 {
 	if (self->currstage) {
@@ -417,7 +476,11 @@ void psy_dsp_envelope_startstage(psy_dsp_Envelope* self)
 		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage);
 		self->nexttime = (uintptr_t)(pt->time * self->samplerate);
 		self->samplecount = 0;
-		self->step = (pt->value - self->value) / self->nexttime;
+		if (self->nexttime > 0) {
+			self->step = (pt->value - self->value) / self->nexttime;
+		} else {
+			self->step = 0;
+		}
 	}
 }
 

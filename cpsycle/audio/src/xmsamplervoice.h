@@ -203,7 +203,7 @@ INLINE void psy_audio_xmsamplervoice_setstopping(psy_audio_XMSamplerVoice* self,
 	self->stopping = stop;
 }
 
-INLINE FilterType psy_audio_xmsamplervoice_filtertype(psy_audio_XMSamplerVoice* self)
+INLINE psy_dsp_FilterType psy_audio_xmsamplervoice_filtertype(psy_audio_XMSamplerVoice* self)
 {
 	return filter_type(&self->_filter);
 }

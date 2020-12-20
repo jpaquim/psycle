@@ -209,7 +209,6 @@
     <ClCompile Include="src\patternviewskin.c" />
     <ClCompile Include="src\pionoroll.c" />
     <ClCompile Include="src\playbar.c" />
-    <ClCompile Include="src\playlisteditor.c" />
     <ClCompile Include="src\playposbar.c" />
     <ClCompile Include="src\plugineditor.c" />
     <ClCompile Include="src\predefsconfig.c" />
@@ -324,7 +323,6 @@
     <ClInclude Include="src\patternviewskin.h" />
     <ClInclude Include="src\pianoroll.h" />
     <ClInclude Include="src\playbar.h" />
-    <ClInclude Include="src\playlisteditor.h" />
     <ClInclude Include="src\playposbar.h" />
     <ClInclude Include="src\plugineditor.h" />
     <ClInclude Include="src\predefsconfig.h" />

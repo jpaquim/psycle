@@ -40,8 +40,7 @@ void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 }
 
 void psy_audio_sample_dispose(psy_audio_Sample* self)
-{
-	psy_audio_buffer_deallocsamples(&self->channels);	
+{	
 	psy_audio_buffer_dispose(&self->channels);
 	self->numframes = 0;
 	free(self->name);
@@ -72,8 +71,7 @@ void psy_audio_sample_copy(psy_audio_Sample* self,
 		self->vibrato.speed = src->vibrato.speed;
 		self->vibrato.type = src->vibrato.type;
 		self->numframes = src->numframes;
-		self->stereo = src->stereo;
-		psy_audio_buffer_deallocsamples(&self->channels);
+		self->stereo = src->stereo;		
 		psy_audio_buffer_dispose(&self->channels);
 		psy_audio_buffer_init(&self->channels, src->channels.numchannels);
 		psy_audio_buffer_allocsamples(&self->channels, src->numframes);

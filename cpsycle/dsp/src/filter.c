@@ -82,7 +82,7 @@ void filtercoeff_setsamplerate(FilterCoeff* self, float samplerate)
 
 				for (q = 0; q < 128; q++)
 				{
-					filtercoeff_computecoeffs(self, (FilterType)(t), f, q);
+					filtercoeff_computecoeffs(self, (psy_dsp_FilterType)(t), f, q);
 					self->_coeffs[tdest][f][q][0] = (float)self->_coeff[0];
 					self->_coeffs[tdest][f][q][1] = (float)self->_coeff[1];
 					self->_coeffs[tdest][f][q][2] = (float)self->_coeff[2];
@@ -94,7 +94,7 @@ void filtercoeff_setsamplerate(FilterCoeff* self, float samplerate)
 	}
 }
 
-float filtercoeff_cutoff(FilterType ft, int freq)
+float filtercoeff_cutoff(psy_dsp_FilterType ft, int freq)
 {
 	if (ft == F_NONE) {
 		return 0.f;
@@ -110,7 +110,7 @@ float filtercoeff_cutoff(FilterType ft, int freq)
 	}
 }
 
-float filtercoeff_resonance(FilterType ft, int freq, int r)
+float filtercoeff_resonance(psy_dsp_FilterType ft, int freq, int r)
 {
 	if (ft == F_NONE) {
 		return 0.f;
@@ -182,7 +182,7 @@ double filtercoeff_resonancempt(int resonance)
 	return 1.0 / dmpfac;
 }
 
-void filtercoeff_computecoeffs(FilterCoeff* self, FilterType t, int freq, int r)
+void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq, int r)
 {
 	double frequency;
 	double samplerate_d;
@@ -456,7 +456,7 @@ void itfilter_workstereo(ITFilter* self, float* left, float* right)
 	*right = y;
 }
 
-const char* filter_name(FilterType type)
+const char* filter_name(psy_dsp_FilterType type)
 {
 	static const char* names[] = {
 		"LowPass 2p (old)",

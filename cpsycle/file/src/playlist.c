@@ -7,6 +7,9 @@
 // local
 #include "dir.h"
 #include "propertiesio.h"
+// container
+#include <hashtbl.h>
+// file
 // platform
 #include "../../detail/portable.h"
 // std
@@ -50,16 +53,20 @@ void psy_playlist_dispose(psy_Playlist* self)
 
 void psy_playlist_add(psy_Playlist* self, const char* filename)
 {
+	char hashkey[256];
+
 	assert(self);
 	
-	if (!psy_property_find(self->recentfiles, filename,
+	psy_snprintf(hashkey, 256, "%u", (unsigned int)psy_strhash(filename));
+	if (!psy_property_find(self->recentfiles, hashkey,
 			PSY_PROPERTY_TYPE_NONE)) {
 		psy_Path path;
-
-		psy_path_init(&path, filename);
-		psy_property_preventtranslate(psy_property_settext(psy_property_setreadonly(
-			psy_property_append_string(self->recentfiles,
-				filename, ""), TRUE), psy_path_name(&path)));
+		
+		psy_path_init(&path, filename);		
+		psy_property_preventtranslate(psy_property_settext(
+			psy_property_setreadonly(psy_property_append_string(
+				self->recentfiles, hashkey, filename), TRUE),
+			psy_path_name(&path)));
 		psy_playlist_save(self);
 		psy_path_dispose(&path);
 	}
@@ -85,7 +92,7 @@ void psy_playlist_load(psy_Playlist* self)
 			psy_Path path;
 
 			property = (psy_Property*)psy_list_entry(p);
-			psy_path_init(&path, psy_property_key(property));
+			psy_path_init(&path, psy_property_item_str(property));
 			psy_property_settext(property, psy_path_name(&path));
 			psy_property_setreadonly(property, TRUE);
 			psy_property_preventtranslate(property);

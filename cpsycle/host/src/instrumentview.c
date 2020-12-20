@@ -951,13 +951,13 @@ void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
 {
 	uintptr_t ft;
 	for (ft = 0; ft < filter_numfilters(); ++ft) {
-		psy_ui_combobox_addtext(&self->filtertype, filter_name((FilterType)ft));
+		psy_ui_combobox_addtext(&self->filtertype, filter_name((psy_dsp_FilterType)ft));
 	}
 }
 
 void instrumentfilterview_onfiltercomboboxchanged(InstrumentFilterView* self, psy_ui_ComboBox* sender, int index)
 {
-	self->instrument->filtertype = (FilterType)index;
+	self->instrument->filtertype = (psy_dsp_FilterType)index;
 }
 
 void instrumentfilterview_setinstrument(InstrumentFilterView* self, psy_audio_Instrument* instrument)

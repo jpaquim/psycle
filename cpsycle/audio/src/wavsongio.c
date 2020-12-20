@@ -21,7 +21,7 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	psy_audio_SampleIndex index;
 	psy_Path path;
 	
-	sample = psy_audio_sample_allocinit(2);
+	sample = psy_audio_sample_allocinit(0);
 	psy_path_init(&path, self->path);
 	psy_audio_sample_load(sample, &path);
 	psy_path_dispose(&path);

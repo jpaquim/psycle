@@ -76,7 +76,7 @@ extern "C" {
 		Filter _filter;
 		psy_audio_Instrument* inst;
 		int instrument;
-		int channel;
+		uintptr_t channel;
 
 		// Amount of samples since line Tick on this voice.
 		int _sampleCounter;

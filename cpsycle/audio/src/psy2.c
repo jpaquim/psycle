@@ -301,7 +301,7 @@ void psy2loader_readinstruments(PSY2Loader* self)
 	int32_t ENV_F_RQ[OLD_MAX_INSTRUMENTS];
 	/// EnvAmount [-128,128]
 	int32_t ENV_F_EA[OLD_MAX_INSTRUMENTS];
-	/// psy_dsp_Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
+	/// psy_dsp_Filter Type. See psycle::helpers::dsp::psy_dsp_FilterType. [0..6]
 	int32_t ENV_F_TP[OLD_MAX_INSTRUMENTS];
 	///\}
 
@@ -444,7 +444,7 @@ void psy2loader_readinstruments(PSY2Loader* self)
 					short* pData;
 					uint32_t f;
 
-					wave = psy_audio_sample_allocinit(2);
+					wave = psy_audio_sample_allocinit(1);
 					//Old format assumed 44Khz
 					wave->samplerate = 44100;
 					wave->panfactor = (float)pans[i] / 256.f; //(value_mapper::map_256_1(pan));
@@ -467,30 +467,26 @@ void psy2loader_readinstruments(PSY2Loader* self)
 
 					pData = malloc(wltemp * sizeof(short) + 4);// +4 to avoid any attempt at buffer overflow by the code
 					psyfile_read(self->songfile->file, pData, wltemp * sizeof(short));
-					wave->numframes = wltemp;					
-					wave->channels.samples[0] =
-						dsp.memory_alloc(wave->numframes, sizeof(float));
+					wave->numframes = wltemp;
+					psy_audio_sample_allocwavedata(wave);
 					for (f = 0; f < wave->numframes; ++f) {
 						short val = (short)pData[f];
 						wave->channels.samples[0][f] = (float)val;
 					}
 					free(pData);
-					pData = 0;
-					wave->channels.numchannels = 1;
+					pData = 0;					
 					if (wave->stereo)
 					{
 						uint32_t f;
 						pData = malloc(wltemp * sizeof(short) + 4);// +4 to avoid any attempt at buffer overflow by the code
 						psyfile_read(self->songfile->file, pData, wltemp * sizeof(short));
-						wave->channels.samples[1] =
-							dsp.memory_alloc(wave->numframes, sizeof(float));
+						psy_audio_sample_resize(wave, 2);
 						for (f = 0; f < wave->numframes; ++f) {
 							short val = (short)pData[f];
 							wave->channels.samples[1][f] = (float)val;
 						}
 						free(pData);
-						pData = 0;
-						wave->channels.numchannels = 2;
+						pData = 0;						
 					}
 					psy_audio_samples_insert(&self->songfile->song->samples, wave,
 						sampleindex_make(i, 0));

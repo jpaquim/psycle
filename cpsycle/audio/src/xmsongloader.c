@@ -1242,8 +1242,7 @@ size_t xmsongloader_loadinstrument(XMSongLoader* self, int slot, size_t start)
 
 				smpbuf = malloc(xmsamples[s].samplen);
 				psyfile_read(fp, smpbuf, xmsamples[s].samplen);
-				sample->channels.samples[0] = dsp.memory_alloc(sample->numframes,
-					sizeof(psy_dsp_amp_t));
+				psy_audio_sample_allocwavedata(sample);				
 				oldvalue = 0;
 				for (i = 0, j = 0; i < sample->numframes; ++i) {
 					int16_t value;
@@ -1303,12 +1302,10 @@ size_t xmsongloader_loadsampleheader(XMSongLoader* self, psy_audio_Sample* _wave
 
 	ASSERT(iLen < (1 << 30)); // Since in some places, signed values are used, we cannot use the whole range.
 
-	psy_audio_sample_init(_wave, 1);	
+	psy_audio_sample_init(_wave, b16Bit ? iLen / 2 : iLen);
 	if ( iLen > 0 ) // Sounds Stupid, but it isn't. Some modules save sample header when there is no sample.
-	{
-		_wave->channels.samples[0] = dsp.memory_alloc(_wave->numframes, iLen);
-			//sizeof(psy_dsp_amp_t));
-		//_wave.AllocWaveData(b16Bit?iLen / 2:iLen,FALSE);
+	{		
+		psy_audio_sample_allocwavedata(_wave);			
 	}
 	_wave->panenabled = TRUE; // PanEnabled(true);
 	_wave->panfactor = iPanning / 255.0f; // .PanFactor(iPanning/255.0f);

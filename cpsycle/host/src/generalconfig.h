@@ -35,7 +35,6 @@ bool generalconfig_showmaximizedatstart(const GeneralConfig*);
 bool generalconfig_saverecentsongs(const GeneralConfig*);
 bool generalconfig_playsongafterload(const GeneralConfig*);
 bool generalconfig_showingpatternnames(const GeneralConfig*);
-bool generalconfig_showplaylisteditor(const GeneralConfig*);
 bool generalconfig_showstepsequencer(const GeneralConfig*);
 void generalconfig_showpatternnames(GeneralConfig*);
 void generalconfig_showpatternids(GeneralConfig*);

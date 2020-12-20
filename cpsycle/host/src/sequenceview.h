@@ -5,7 +5,6 @@
 #define SEQUENCERVIEW_H
 
 // host
-#include "playlisteditor.h"
 #include "workspace.h"
 // audio
 #include <patterns.h>
@@ -115,8 +114,7 @@ typedef struct SequencerOptionsBar {
 	psy_ui_Component component;
 	// ui elements
 	psy_ui_CheckBox followsong;
-	psy_ui_CheckBox shownames;
-	psy_ui_CheckBox showplaylist;
+	psy_ui_CheckBox shownames;	
 	psy_ui_CheckBox recordnoteoff;
 	psy_ui_CheckBox recordtweak;
 	psy_ui_CheckBox multichannelaudition;
@@ -139,9 +137,7 @@ typedef struct SequenceView {
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
 	SequenceViewTrackHeader trackheader;
-	SequenceViewDuration duration;
-	PlayListEditor playlisteditor;
-	psy_ui_SplitBar splitbar;
+	SequenceViewDuration duration;	
 	SequencerOptionsBar options;	
 	// references
 	psy_audio_Patterns* patterns;

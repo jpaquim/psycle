@@ -112,6 +112,7 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	self->keyselected = 0;
 	self->choiceproperty = 0;
 	self->button = 0;
+	self->showkeyselection = FALSE;
 	self->col_perc[0] = 0.4f;
 	self->col_perc[1] = 0.4f;
 	self->col_perc[2] = 0.2f;
@@ -320,7 +321,7 @@ void propertiesrenderer_setlinebackground(PropertiesRenderer* self,
 
 void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property,
 	int column)
-{	
+{		
 	if (psy_property_type(property) == PSY_PROPERTY_TYPE_ACTION) {
 		propertiesrenderer_drawbutton(self, property, column + 1);
 	} else {
@@ -335,6 +336,17 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property
 
 		psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
 		psy_ui_settextcolour(self->g, psy_ui_component_colour(&self->component));
+
+		if (self->showkeyselection) {
+			// psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
+			if (self->selected == property) {
+				//psy_ui_setbackgroundmode(self->g, psy_ui_OPAQUE);
+				//psy_ui_setbackgroundcolour(self->g, self->valueselbackgroundcolour);
+				psy_ui_settextcolour(self->g, psy_ui_colour_make(0x00B1C8B0));
+			} else {
+				psy_ui_settextcolour(self->g, psy_ui_component_colour(&self->component));
+			}
+		}
 		
 		numcolumnavgchars = (uintptr_t)(propertiesrenderer_columnwidth(self, column) /
 			(int)(tm.tmAveCharWidth * 1.70));
@@ -361,6 +373,8 @@ void propertiesrenderer_drawkey(PropertiesRenderer* self, psy_Property* property
 				++self->numblocklines;
 			}
 		}
+		psy_ui_setbackgroundmode(self->g, psy_ui_TRANSPARENT);
+		psy_ui_settextcolour(self->g, psy_ui_component_colour(&self->component));
 	}
 }
 
@@ -587,6 +601,9 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* pro
 
 void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent* ev)
 {
+	if (ev->button != 1) {
+		return;
+	}
 	psy_ui_component_setfocus(&self->component);
 	if (psy_ui_component_visible(&self->edit.component)) {
 		propertiesrenderer_oneditchange(self, &self->edit);
@@ -605,8 +622,7 @@ void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent*
 	propertiesrenderer_preparepropertiesenum(self);
 	psy_property_enumerate(self->properties, self,
 		(psy_PropertyCallback)propertiesrenderer_onpropertieshittestenum);
-	if (self->selected) {
-		printf("selected\n");
+	if (self->selected) {		
 		if (self->button && psy_property_hint(self->selected) ==
 				PSY_PROPERTY_HINT_EDITDIR) {
 			psy_ui_FolderDialog dialog;

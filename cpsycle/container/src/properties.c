@@ -315,6 +315,44 @@ psy_Property* psy_property_remove(psy_Property* self, psy_Property* property)
 	return NULL;
 }
 
+psy_Property* psy_property_moveup(psy_Property* self)
+{
+	if (self->parent) {
+		psy_Property* parent;
+		psy_List* node;
+
+		parent = self->parent;
+		node = psy_list_findentry(parent->children, self);
+		if (node && node->prev) {
+			psy_List* prev;
+
+			prev = node->prev->prev;
+			psy_list_remove(&parent->children, node);
+			psy_list_insert(&parent->children, prev, self);
+		}
+	}
+	return self;
+}
+
+psy_Property* psy_property_movedown(psy_Property* self)
+{
+	if (self->parent) {
+		psy_Property* parent;
+		psy_List* node;
+
+		parent = self->parent;
+		node = psy_list_findentry(parent->children, self);
+		if (node && node->next) {
+			psy_List* next;
+
+			next = node->next;
+			psy_list_remove(&parent->children, node);
+			psy_list_insert(&parent->children, next, self);
+		}
+	}
+	return self;
+}
+
 void psy_property_clear(psy_Property* self)
 {
 	psy_List* p;

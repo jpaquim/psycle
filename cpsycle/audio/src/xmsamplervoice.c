@@ -688,6 +688,20 @@ void psy_audio_xmsamplervoice_updatefadeout(psy_audio_XMSamplerVoice* self, psy_
 	}
 }
 
+/*void psy_audio_xmsamplervoice_notefadeout(psy_audio_XMSamplerVoice* self)
+{
+	self->stopping = TRUE;
+	self->volumefadespeed = self->instrument->volumefadespeed /
+		psy_audio_machine_samplespertick(self->sampler);
+	self->volumefadeamount = 1.0f;	
+	//if (RealVolume() * rChannel().Volume() == 0.0f) IsPlaying(false);
+	//The following is incorrect, at least with looped envelopes that also have sustain loops.
+	//else if ( m_AmplitudeEnvelope.Envelope().IsEnabled() && m_AmplitudeEnvelope.ModulationAmount() == 0.0f) IsPlaying(false);
+
+	//This might not be correct, but since we are saying "IsStopping(true"), then the controller needs to recalculate the buffers.
+	//m_WaveDataController.NoteOff();
+}*/
+
 void psy_audio_xmsamplervoice_setresamplerquality(psy_audio_XMSamplerVoice* self, 
 	psy_dsp_ResamplerQuality quality)
 {

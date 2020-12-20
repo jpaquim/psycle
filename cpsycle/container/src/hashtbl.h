@@ -67,6 +67,8 @@ INLINE bool psy_table_empty(const psy_Table* self)
 
 void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc);
 
+uintptr_t psy_strhash(const unsigned char* str);
+
 #ifdef __cplusplus
 }
 #endif

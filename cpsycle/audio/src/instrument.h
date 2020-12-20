@@ -48,6 +48,16 @@ typedef enum {
 	psy_audio_NNA_FADEOUT = 0x3
 } psy_audio_NewNoteAction;
 
+/// In some cases, the default NNA is not adequate. This option lets choose one type of element
+/// that, if it is equal than the currently playing, will apply the DCAction intead.
+/// A common example is using NNA NOTEOFF, DCT NOTE and DCA STOP
+typedef enum psy_audio_DupeCheck {	
+	psy_audio_DUPECHECK_NONE = 0x0,
+	psy_audio_DUPECHECK_NOTE,
+	psy_audio_DUPECHECK_SAMPLE,
+	psy_audio_DUPECHECK_INSTRUMENT	
+} psy_audio_DupeCheck;
+
 typedef struct {
 	psy_audio_SampleIndex sampleindex;
 	psy_audio_FrequencyRange freqrange;
@@ -62,25 +72,75 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry*);
 psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void);
 psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void);
 
-typedef struct psy_audio_Instrument {	
+typedef struct psy_audio_Instrument {
+	bool enabled;
 	char* name;
 	bool loop;
-	uintptr_t lines;
+	uintptr_t lines;	
+	
+	/// envelope range = [0.0f..1.0f]
+	psy_dsp_EnvelopeSettings volumeenvelope;
+	/// envelope range = [-1.0f..1.0f]
+	psy_dsp_EnvelopeSettings panenvelope;
+	/// envelope range = [-1.0f..1.0f]
+	psy_dsp_EnvelopeSettings pitchenvelope;
+	/// envelope range = [0.0f..1.0f]
+	psy_dsp_EnvelopeSettings filterenvelope;
+
+	/// [0..1.0f] Global volume affecting all samples of the instrument.
+	psy_dsp_amp_t globalvolume;
+	/// [0..1.0f] Fadeout speed. Decreasing amount for each tracker tick.
+	float volumefadespeed;
+	// Paninng
+	bool panenabled;
+	/// Initial panFactor (if enabled) [-1..1]
+	float initpan;
+	bool surround;
+	/// Note number for center pan position
+	uint8_t notemodpancenter;
+	/// -32..32. 1/256th of panFactor change per seminote.
+	int8_t notemodpansep;
+
+	/// Cutoff Frequency [0..1]
+	float filtercutoff;
+	unsigned char _RCUT;
+	/// Resonance [0..1]	
+	float filterres;
+	unsigned char _RRES;
+	float filtermodamount;
+	/// Filter Type. See psy_dsp_FilterType
+	psy_dsp_FilterType filtertype;		
+	int randompan;
+
+	// Randomness. Applies on new notes.
+
+	/// Random Volume % [ 0.0 -> No randomize. 1.0 = randomize full scale.]
+	float randomvolume;
+	/// Random Panning (same)
+	float randompanning;
+	/// Random CutOff (same)
+	float randomcutoff;
+	/// Random Resonance (same)
+	float randomresonance;
+
 	/// Action to take on the playing voice when any new note comes in the same
 	/// channel.
 	psy_audio_NewNoteAction nna;
-	/// [0..1.0f] Global volume affecting all samples of the instrument.
-	psy_dsp_amp_t globalvolume;	
-	psy_dsp_EnvelopeSettings volumeenvelope;
-	psy_dsp_EnvelopeSettings filterenvelope;	
-	float filtercutoff;	
-	float filterres;		
-	float filtermodamount;	
-	FilterType filtertype;		
-	int randompan;
-	unsigned char _RCUT;
-	unsigned char _RRES;
+	/// Check to do when a new event comes in the channel.
+	psy_audio_DupeCheck dct;
+	/// Action to take on the playing voice when the action defined by DCT comes in the same channel 
+	/// (like the same note value).
+	psy_audio_NewNoteAction dca;
+
+	/// List of InstrumentEntries selecting for a note, frequency or/and velocity
+	/// a sample to be played
+	/// replaced psycle-mfc: NotePair m_AssignNoteToSample[NOTE_MAP_SIZE];
+	///	     Table of mapped notes to samples
+	///      (note number=first, sample number=second)
+	///      \todo Could it be interesting to map other things like
+	///       volume,panning, cutoff...?
 	psy_List* entries;
+
 	uintptr_t index;
 	psy_Signal signal_addentry;
 	psy_Signal signal_removeentry;

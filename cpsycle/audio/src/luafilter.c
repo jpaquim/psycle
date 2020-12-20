@@ -170,7 +170,7 @@ int luafilter_setfiltertype(lua_State* L) {
 
 	filter = psyclescript_checkself(L, 1, luafilter_meta);
 	q = (int)luaL_checkinteger(L, 2);
-	filter_settype(filter, (FilterType) q);
+	filter_settype(filter, (psy_dsp_FilterType) q);
 	return psyclescript_chaining(L);
 }
 

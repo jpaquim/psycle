@@ -43,9 +43,6 @@ void generalconfig_make(GeneralConfig* self, psy_Property* parent)
 	psy_property_settext(
 		psy_property_append_bool(self->general, "showmaximizedatstart", TRUE),
 		"settingsview.show-maximized-at-startup");
-	psy_property_settext(
-		psy_property_append_bool(self->general, "showplaylisteditor", FALSE),
-		"settingsview.show-playlist-editor");
 	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->general, "showstepsequencer", TRUE),
 		"settingsview.show-sequencestepbar"),
@@ -101,14 +98,6 @@ bool generalconfig_showingpatternnames(const GeneralConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->general, "showpatternnames", 1);
-}
-
-bool generalconfig_showplaylisteditor(const GeneralConfig* self)
-{
-	assert(self);
-
-	return psy_property_at_bool(self->general, "showplaylisteditor",
-		0);
 }
 
 bool generalconfig_showstepsequencer(const GeneralConfig* self)

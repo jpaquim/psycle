@@ -43,7 +43,7 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 			psyfile_read(&file, &format.wBitsPerSample, 2);		
 			// psyfile_read(&file, &format.cbSize, 2);
 			sample->samplerate = format.nSamplesPerSec;
-			psy_audio_buffer_resize(&sample->channels, format.nChannels);
+			psy_audio_sample_resize(sample, format.nChannels);
 			psyfile_seek(&file, pcmbegin + pcmsize);
 			psyfile_read(&file, header, 4);
 			header[4] = 0;			
@@ -59,10 +59,7 @@ void psy_audio_wave_load(psy_audio_Sample* sample, const char* path)
 				sample->numframes = numsamples / 
 					format.nChannels / (format.wBitsPerSample / 8);
 				sample->stereo = (format.nChannels == 2);
-
-				for (channel = 0; channel < format.nChannels; ++channel) {
-					sample->channels.samples[channel] = dsp.memory_alloc(numsamples, sizeof(float));
-				}
+				psy_audio_sample_allocwavedata(sample);				
 				for (frame = 0; frame < sample->numframes; ++frame) {
 					for (channel = 0; channel < format.nChannels; ++channel) {
 						switch (format.wBitsPerSample) {

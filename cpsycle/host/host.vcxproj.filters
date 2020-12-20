@@ -262,9 +262,6 @@
     <ClCompile Include="src\propertiesview.c">
       <Filter>uicontrols</Filter>
     </ClCompile>
-    <ClCompile Include="src\playlisteditor.c">
-      <Filter>sequence</Filter>
-    </ClCompile>
     <ClCompile Include="src\sequenceview.c">
       <Filter>sequence</Filter>
     </ClCompile>
@@ -577,9 +574,6 @@
     </ClInclude>
     <ClInclude Include="src\machinesbox.h">
       <Filter>machine</Filter>
-    </ClInclude>
-    <ClInclude Include="src\playlisteditor.h">
-      <Filter>sequence</Filter>
     </ClInclude>
     <ClInclude Include="src\sequenceview.h">
       <Filter>sequence</Filter>

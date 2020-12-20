@@ -658,10 +658,7 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 		"sequencerview.follow-song");
 	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);
 	psy_ui_checkbox_settext(&self->shownames,
-		"sequencerview.show-pattern-names");
-	psy_ui_checkbox_init_multiline(&self->showplaylist, &self->component);
-	psy_ui_checkbox_settext(&self->showplaylist,
-		"sequencerview.show-playlist");
+		"sequencerview.show-pattern-names");		
 	psy_ui_checkbox_init_multiline(&self->recordnoteoff, &self->component);
 	psy_ui_checkbox_settext(&self->recordnoteoff,
 		"sequencerview.record-noteoff");
@@ -722,7 +719,6 @@ static void sequenceview_oncopy(SequenceView*);
 static void sequenceview_onpaste(SequenceView*);
 static void sequenceview_onsingleselection(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onmultiselection(SequenceView*, psy_ui_Button* sender);
-static void sequenceview_onshowplaylist(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onshowpatternnames(SequenceView*, psy_ui_CheckBox* sender);
 static void sequenceview_onfollowsong(SequenceView*, psy_ui_Button* sender);
 static void sequenceview_onfollowsongchanged(SequenceView*, Workspace* sender);
@@ -745,17 +741,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	self->patterns = &workspace->song->patterns;
 	self->selection = &workspace->sequenceselection;
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
-	playlisteditor_init(&self->playlisteditor, &self->component,
-		workspace);
-	psy_ui_component_setalign(&self->playlisteditor.component, psy_ui_ALIGN_TOP);
-	psy_ui_splitbar_init(&self->splitbar, &self->component);
-	psy_ui_component_setalign(&self->splitbar.component, psy_ui_ALIGN_TOP);
-	if (!generalconfig_showplaylisteditor(psycleconfig_general(
-			workspace_conf(self->workspace)))) {
-		psy_ui_component_hide(&self->playlisteditor.component);
-		psy_ui_component_hide(&self->splitbar.component);
-	}
+		psy_ui_BACKGROUND_NONE);	
 	sequencelistview_init(&self->listview, &self->component, self,
 		self->sequence, self->patterns, workspace);
 #if 1
@@ -771,11 +757,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->buttons.component, psy_ui_ALIGN_TOP);
 	sequenceviewtrackheader_init(&self->trackheader, &self->component, self);
 	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);
-	sequenceroptionsbar_init(&self->options, &self->component, workspace);
-	if (generalconfig_showplaylisteditor(psycleconfig_general(
-			workspace_conf(workspace)))) {
-		psy_ui_checkbox_check(&self->options.showplaylist);
-	}
+	sequenceroptionsbar_init(&self->options, &self->component, workspace);	
 	psy_ui_component_setalign(&self->options.component, psy_ui_ALIGN_BOTTOM);
 	sequenceduration_init(&self->duration, &self->component, self->sequence, workspace);
 	psy_ui_component_setalign(&self->duration.component, psy_ui_ALIGN_BOTTOM);
@@ -809,8 +791,6 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_onsingleselection);
 	psy_signal_connect(&self->buttons.multisel.signal_clicked, self,
 		sequenceview_onmultiselection);
-	psy_signal_connect(&self->options.showplaylist.signal_clicked, self,
-		sequenceview_onshowplaylist);
 	psy_signal_connect(&self->options.followsong.signal_clicked, self,
 		sequenceview_onfollowsong);
 	if (self->listview.showpatternnames) {
@@ -1116,26 +1096,6 @@ void sequenceview_onfollowsongchanged(SequenceView* self, Workspace* sender)
 	} else {
 		psy_ui_checkbox_disablecheck(&self->options.followsong);
 	}
-}
-
-void sequenceview_onshowplaylist(SequenceView* self, psy_ui_Button* sender)
-{
-	psy_ui_Size size;
-
-	size = psy_ui_component_size(&self->component);
-	if (psy_ui_component_visible(&self->playlisteditor.component)) {
-		psy_ui_component_hide(&self->playlisteditor.component);
-		psy_ui_component_hide(&self->splitbar.component);
-		psy_property_set_bool(self->workspace->config.general.general,
-			"showplaylisteditor", 0);
-	} else {
-		self->playlisteditor.component.visible = 1;
-		psy_ui_component_show(&self->splitbar.component);
-		psy_ui_component_show(&self->playlisteditor.component);
-		psy_property_set_bool(self->workspace->config.general.general,
-			"showplaylisteditor", 1);
-	}
-	psy_ui_component_align(&self->component);
 }
 
 void sequenceview_onshowpatternnames(SequenceView* self, psy_ui_CheckBox* sender)
