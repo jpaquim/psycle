@@ -305,19 +305,19 @@ void plugineditor_oncreatenewplugin(PluginEditor* self, psy_ui_Component* sender
 	psy_path_init(&path, "");
 	psy_path_setprefix(&path, dir);
 	psy_path_setname(&path, "newplugin.lua");
-	writetext(psy_path_path(&path), pluginsource);
+	writetext(psy_path_full(&path), pluginsource);
 	psy_path_dispose(&path);
 	psy_path_init(&plugindir, "");
 	psy_path_setprefix(&plugindir, dir);
 	psy_path_setname(&plugindir, "newplugin");
-	if (!psy_direxists(psy_path_path(&plugindir))) {
-		psy_mkdir(psy_path_path(&plugindir));
+	if (!psy_direxists(psy_path_full(&plugindir))) {
+		psy_mkdir(psy_path_full(&plugindir));
 	}
 	psy_path_init(&path, "");
-	psy_path_setprefix(&path, psy_path_path(&plugindir));
+	psy_path_setprefix(&path, psy_path_full(&plugindir));
 	psy_path_dispose(&plugindir);	
 	psy_path_setname(&path, "machine.lua");
-	writetext(psy_path_path(&path), machinesource);
+	writetext(psy_path_full(&path), machinesource);
 	psy_path_dispose(&path);
 }
 

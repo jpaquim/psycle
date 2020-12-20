@@ -703,26 +703,18 @@ void sampleeditor_init(SampleEditor* self, psy_ui_Component* parent,
 }
 
 void sampleeditor_initsampler(SampleEditor* self)
-{
-	uintptr_t c;
-
+{	
 	psy_audio_xmsampler_init(&self->sampler,
 		self->workspace->machinefactory.machinecallback);
 	psy_audio_buffer_init(&self->samplerbuffer, 2);
-	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
-		self->samplerbuffer.samples[c] = dsp.memory_alloc(psy_audio_MAX_STREAM_SIZE,
-			sizeof(float));
-	}	
+	psy_audio_buffer_allocsamples(&self->samplerbuffer, psy_audio_MAX_STREAM_SIZE);	
+	psy_audio_buffer_clearsamples(&self->samplerbuffer, psy_audio_MAX_STREAM_SIZE);
 }
 
 void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
-{
-	uintptr_t c;
-
+{		
 	psy_audio_machine_dispose(&self->sampler.custommachine.machine);
-	for (c = 0; c < self->samplerbuffer.numchannels; ++c) {
-		dsp.memory_dealloc(self->samplerbuffer.samples[c]);
-	}
+	psy_audio_buffer_deallocsamples(&self->samplerbuffer);
 	psy_audio_buffer_dispose(&self->samplerbuffer);	
 	psy_signal_dispose(&self->signal_samplemodified);
 	psy_signal_disconnect(&self->workspace->signal_songchanged, self,

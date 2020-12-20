@@ -74,7 +74,7 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 		c = 0;
 		while (token != 0) {
 			if (c == 0) {
-				rv->sustainstage = atoi(token);
+				rv->sustainbegin = atoi(token);
 			} else {
 				if ((c % 2) != 0) {
 					time = atof(token);

@@ -911,9 +911,9 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 
 				self->effretTicks--;
 				self->_triggerNoteDelay = self->_sampleCounter + self->effVal;
-				pt = psy_dsp_envelope_at(&self->inst->volumeenvelope, 1);
+				pt = psy_dsp_envelopesettings_at(&self->inst->volumeenvelope, 1);
 				self->_envelope.step = (1.0f / (pt.time * self->_envelope.samplerate));
-				pt = psy_dsp_envelope_at(&self->inst->filterenvelope, 1);
+				pt = psy_dsp_envelopesettings_at(&self->inst->filterenvelope, 1);
 				self->_filterEnv.step = (1.0f / (pt.time * self->_envelope.samplerate));
 				self->controller.pos.QuadPart = 0;
 				if (self->effretMode == 1)

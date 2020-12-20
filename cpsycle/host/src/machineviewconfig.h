@@ -39,6 +39,7 @@ bool machineviewconfig_hasproperty(const MachineViewConfig*, psy_Property*);
 bool machineviewconfig_machineindexes(const MachineViewConfig*);
 bool machineviewconfig_wirehover(const MachineViewConfig*);
 bool machineviewconfig_vumeters(const MachineViewConfig*);
+bool machineviewconfig_virtualgenerators(const MachineViewConfig*);
 
 bool machineviewconfig_onchanged(MachineViewConfig*, psy_Property*);
 bool machineviewconfig_onthemechanged(MachineViewConfig*, psy_Property*);

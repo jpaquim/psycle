@@ -11,19 +11,15 @@
 extern "C" {
 #endif
 
-typedef enum
-{
-	ENV_OFF = 0,
-	ENV_ATTACK = 1,
-	ENV_DECAY = 2,
-	ENV_SUSTAIN = 3,
-	ENV_RELEASE = 4,
-	ENV_FASTRELEASE = 5
-} psy_dsp_EnvelopeStage;
+/// Invalid point. Used to indicate that sustain/normal loop is disabled, or an out of range point.
+/// BEWARE!!! UINTPTR_T, not minus one.
+#define psy_dsp_ENVELOPEPOINT_INVALID UINTPTR_MAX
 
 typedef struct {
-	psy_dsp_amp_t value;
+	/// time at which to set the value. Unit can be different things depending on the context.
 	psy_dsp_beat_t time;
+	/// 0 .. 1.0f . (or -1.0 1.0 or whatever else) Use it as a multiplier.
+	psy_dsp_amp_t value;
 	psy_dsp_amp_t minvalue;
 	psy_dsp_amp_t maxvalue;
 	psy_dsp_beat_t mintime;
@@ -52,15 +48,35 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 	psy_dsp_seconds_t time,
 	psy_dsp_amp_t value);
 
+// Mode defines what the first value of a PointValue means
+// TICK = one tracker tick ( speed depends on the BPM )
+// MILIS = a millisecond. (independant of BPM).
 typedef enum {
-	psy_dsp_ENVELOPETIME_SECONDS,
-	psy_dsp_ENVELOPETIME_FT2FRAMES
-} psy_dsp_EnvelopeTime;
+	psy_dsp_ENVELOPETIME_TICK,
+	psy_dsp_ENVELOPETIME_SECONDS
+} psy_dsp_EnvelopeTimeMode;
+
+/// The envelope is made of a list of pointvalues.
+typedef psy_List* psy_dsp_EnvelopePoints;
 
 typedef struct psy_dsp_EnvelopeSettings {
-	psy_List* points;
-	int sustainstage;
-	psy_dsp_EnvelopeTime time_unit;
+	/// Envelope is enabled or disabled
+	bool enabled;
+	/// if m_Carry and a new note enters, the envelope position is set to that of the previous note *on the same channel*
+	bool carry;
+	/// Array of Points of the envelope.
+	psy_dsp_EnvelopePoints points;
+	/// Loop Start Point
+	uintptr_t loopstart;
+	/// Loop End Point
+	uintptr_t loopend;	
+	/// Sustain Start Point
+	uintptr_t sustainbegin;
+	/// Sustain End Point
+	uintptr_t sustainend;
+	/// Envelope mode (meaning of the time value)
+	psy_dsp_EnvelopeTimeMode timemode;
+	/// tostring return string
 	char* str;
 } psy_dsp_EnvelopeSettings;
 
@@ -73,14 +89,18 @@ void psy_dsp_envelopesettings_copy(psy_dsp_EnvelopeSettings* self,
 /// note: be sure that the pointtime is the highest of the points
 void psy_dsp_envelopesettings_append(psy_dsp_EnvelopeSettings*,
 	psy_dsp_EnvelopePoint);
+/// Removes a point from the points Array.
+void psy_dsp_envelopesettings_delete(psy_dsp_EnvelopeSettings*, 
+	uintptr_t pointindex);
+/// Clears the points Array
+void psy_dsp_envelopesettings_clear(psy_dsp_EnvelopeSettings* self);
+
 psy_dsp_EnvelopePoint psy_dsp_envelopesettings_at(const psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex);
 void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
 void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_amp_t pointval);
-void psy_dsp_envelopesettings_setsustainstage(psy_dsp_EnvelopeSettings*,
-	int stage);
 const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings*);
 
 INLINE bool psy_dsp_envelopesettings_empty(const psy_dsp_EnvelopeSettings* self)
@@ -88,12 +108,103 @@ INLINE bool psy_dsp_envelopesettings_empty(const psy_dsp_EnvelopeSettings* self)
 	return self->points == NULL;
 }
 
+// Properties
+/// Set or Get the point Index for Sustain and Loop.
+INLINE uintptr_t psy_dsp_envelopesettings_sustainbegin(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return self->sustainbegin;
+}
+/// value has to be an existing point!
+INLINE void psy_dsp_envelopesettings_setsustainbegin(
+	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+{
+	self->sustainbegin = value;
+}
+
+INLINE uintptr_t psy_dsp_envelopesettings_sustainend(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return self->sustainend;
+}
+/// value has to be an existing point!
+INLINE void psy_dsp_envelopesettings_setsustainend(
+	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+{
+	self->sustainend = value;
+}
+INLINE uintptr_t psy_dsp_envelopesettings_loopstart(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return self->loopstart;
+}
+/// value has to be an existing point!
+INLINE void psy_dsp_envelopesettings_setloopstart(
+	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+{
+	self->loopstart = value;
+}
+
+INLINE uintptr_t psy_dsp_envelopesettings_loopend(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return self->loopend;
+}
+/// value has to be an existing point!
+INLINE void psy_dsp_envelopesettings_setloopend(
+	psy_dsp_EnvelopeSettings* self, const uintptr_t value)
+{
+	self->loopend = value;
+}
+
+INLINE uintptr_t psy_dsp_envelopesettings_numofpoints(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return psy_list_size(self->points);	
+}
+
+//// If the envelope IsEnabled, it is used and triggered. Else, it is not.
+INLINE bool psy_dsp_envelopesettings_isenabled(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return self->enabled;
+}
+
+INLINE void psy_dsp_envelopesettings_setenabled(
+	psy_dsp_EnvelopeSettings* self, const bool value)
+{
+	self->enabled = value;
+}
+
+/// if IsCarry() and a new note enters, the envelope position is set to that of the previous note *on the same channel*
+INLINE bool psy_dsp_envelopesettings_iscarry(
+	const psy_dsp_EnvelopeSettings* self)
+{
+	return self->carry;
+}
+
+INLINE void psy_dsp_envelopesettings_setcarry(
+	psy_dsp_EnvelopeSettings* self, const bool value)
+{
+	self->carry = value;
+}
+
+INLINE psy_dsp_EnvelopeTimeMode psy_dsp_envelopesettings_mode(
+	const psy_dsp_EnvelopeSettings* self) 
+{
+	return self->timemode;
+}
+//The extra parameters are used to convert the existing points from one unit to the other.
+//void psy_dsp_envelopesettings_mode(psy_dsp_EnvelopeSettings* self,
+//	const Mode::Type _mode, const int bpm = 125, const int tpb = 24, const int onemilli = 1);
+
 typedef struct psy_dsp_Envelope {
 	int rsvd;
 	psy_dsp_EnvelopeSettings settings;	
 	uintptr_t samplerate;	
-	psy_List* currstage;
-	psy_List* susstage;
+	psy_List* currstage;	
+	psy_List* susbeginstage;
+	psy_List* susendstage;
 	psy_dsp_amp_t startpeak;
 	psy_dsp_amp_t value;
 	psy_dsp_amp_t step;	

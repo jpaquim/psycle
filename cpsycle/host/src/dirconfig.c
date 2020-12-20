@@ -82,7 +82,7 @@ void dirconfig_makedefaultuserpresets(DirConfig* self)
 	psy_path_init(&defaultuserpresetpath, psy_dir_home());
 	psy_path_setname(&defaultuserpresetpath, "Presets");
 	dirconfig_append(self, "presets", "User Presets directory",
-		psy_path_path(&defaultuserpresetpath));
+		psy_path_full(&defaultuserpresetpath));
 	psy_path_dispose(&defaultuserpresetpath);
 }
 

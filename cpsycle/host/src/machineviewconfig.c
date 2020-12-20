@@ -48,6 +48,10 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->machineview,
 			"drawwirehover", FALSE),
 		"settingsview.draw-wirehover");
+	psy_property_settext(
+		psy_property_append_bool(self->machineview,
+			"drawvirtualgenerators", FALSE),
+		"settingsview.draw-virtualgenerators");
 	machineviewconfig_maketheme(self, self->machineview);
 }
 
@@ -208,6 +212,13 @@ bool machineviewconfig_vumeters(const MachineViewConfig* self)
 	assert(self);
 
 	return psy_property_at_bool(self->machineview, "drawvumeters", TRUE);
+}
+
+bool machineviewconfig_virtualgenerators(const MachineViewConfig* self)
+{
+	assert(self);
+
+	return psy_property_at_bool(self->machineview, "drawvirtualgenerators", FALSE);
 }
 
 // events

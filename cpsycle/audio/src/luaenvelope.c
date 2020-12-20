@@ -112,7 +112,7 @@ int luaenvelope_create(lua_State* L)
 		startpeak = luaL_checknumber(L, 4);
 	}
 	env->startpeak = (psy_dsp_amp_t)startpeak;	
-	env->settings.sustainstage = (int)suspos;
+	env->settings.sustainbegin= (int)suspos;
 	psyclescript_createuserdata(L, 1, luaenvelope_meta, env);	
 	return 1;
 }

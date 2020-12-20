@@ -19,9 +19,12 @@ void psy_audio_wav_songio_load(psy_audio_SongFile* self)
 	psy_audio_Sample* sample;
 	psy_audio_Instrument* instrument;	
 	psy_audio_SampleIndex index;
+	psy_Path path;
 	
 	sample = psy_audio_sample_allocinit(2);
-	psy_audio_sample_load(sample, self->path);
+	psy_path_init(&path, self->path);
+	psy_audio_sample_load(sample, &path);
+	psy_path_dispose(&path);
 	index = index = sampleindex_make(0, 0);
 	psy_audio_samples_insert(&self->song->samples, sample, index);
 	instrument = psy_audio_instrument_allocinit();

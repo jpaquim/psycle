@@ -61,6 +61,11 @@ struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp(psy_ui_ImpFac
 	return self->vtable->allocinit_checkboximp(self, component, parent);
 }
 
+struct psy_ui_CheckBoxImp* psy_ui_impfactory_allocinit_checkboximp_multiline(psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent)
+{
+	return self->vtable->allocinit_checkboximp_multiline(self, component, parent);
+}
+
 struct psy_ui_ColourDialogImp* psy_ui_impfactory_allocinit_colourdialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent)
 {
 	return self->vtable->allocinit_colourdialogimp(self, parent);
@@ -126,6 +131,7 @@ static struct psy_ui_ListBoxImp* allocinit_listboximp(struct psy_ui_ImpFactory* 
 static struct psy_ui_ListBoxImp* allocinit_listboximp_multiselect(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_ComboBoxImp* allocinit_comboboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_CheckBoxImp* allocinit_checkboximp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
+static struct psy_ui_CheckBoxImp* allocinit_checkboximp_multiline(struct psy_ui_ImpFactory* self, struct psy_ui_Component* component, struct psy_ui_Component* parent) { return 0; }
 static struct psy_ui_ColourDialogImp* allocinit_colourdialogimp(struct psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
 struct psy_ui_OpenDialogImp* allocinit_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent) { return 0; }
 struct psy_ui_OpenDialogImp* allocinit_all_opendialogimp(psy_ui_ImpFactory* self, struct psy_ui_Component* parent,
@@ -172,6 +178,7 @@ static void vtable_init(void)
 		vtable.allocinit_listboximp_multiselect = allocinit_listboximp_multiselect;
 		vtable.allocinit_comboboximp = allocinit_comboboximp;
 		vtable.allocinit_checkboximp = allocinit_checkboximp;
+		vtable.allocinit_checkboximp_multiline = allocinit_checkboximp_multiline;
 		vtable.allocinit_colourdialogimp = allocinit_colourdialogimp;
 		vtable.allocinit_opendialogimp = allocinit_opendialogimp;
 		vtable.allocinit_all_opendialogimp = allocinit_all_opendialogimp;

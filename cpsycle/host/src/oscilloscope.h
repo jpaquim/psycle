@@ -35,8 +35,7 @@ typedef struct {
 	uintptr_t scope_begin;
 	psy_dsp_amp_t ampzoom;
 	Workspace* workspace;
-	psy_audio_Buffer* hold_buffer;
-	uintptr_t hold_buffer_numsamples;
+	psy_audio_Buffer* hold_buffer;	
 	OscilloscopeChannelMode channelmode;
 	bool running;
 } Oscilloscope;

@@ -81,6 +81,7 @@ typedef struct MachineWireView {
 	bool mousemoved;
 	bool showwirehover;
 	bool drawvumode;
+	bool drawvirtualgenerators;
 	// references
 	struct MachineViewBar* statusbar;
 	psy_audio_Machines* machines;

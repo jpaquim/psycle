@@ -4,7 +4,7 @@
 #ifndef psy_audio_MASTER_H
 #define psy_audio_MASTER_H
 
-#include "machine.h"
+#include "custommachine.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,15 +25,11 @@ extern "C" {
 //      psy_audio_Master
 
 typedef struct psy_audio_Master {
-	psy_audio_Machine machine;
+	psy_audio_CustomMachine custommachine;
 	psy_audio_CustomMachineParam param_info;
 	psy_audio_CustomMachineParam param_slider;
-	psy_audio_CustomMachineParam param_level;
-	psy_audio_Buffer memorybuffer;
-	uintptr_t memorybuffersize;
-	psy_dsp_amp_t volume;
-	intptr_t x;
-	intptr_t y;
+	psy_audio_CustomMachineParam param_level;	
+	psy_dsp_amp_t volume;	
 } psy_audio_Master;
 
 void psy_audio_master_init(psy_audio_Master* self, psy_audio_MachineCallback*);

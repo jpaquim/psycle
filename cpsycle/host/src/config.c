@@ -147,7 +147,7 @@ void psycleconfig_loadskin(PsycleConfig* self, const char* path)
 					psy_path_setext(&full, "");
 					psy_path_setname(&full, bpm);
 					psy_property_set_str(&skin, "machinedialbmp",
-						psy_path_path(&full));
+						psy_path_full(&full));
 					psy_path_dispose(&full);
 				}
 			}

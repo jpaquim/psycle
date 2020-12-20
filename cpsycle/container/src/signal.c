@@ -105,11 +105,33 @@ void psy_signal_disconnect(psy_Signal* self, void* context, void* fp)
 	}
 }
 
+void psy_signal_disconnect_context(psy_Signal* self, void* context)
+{
+	assert(self);
+	
+	if (self->slots) {
+		psy_List* p;
+		psy_List* q;
+				 
+		for (q = p = self->slots; q != NULL; p = q) {
+			psy_Slot* slot;
+
+			slot = (psy_Slot*)psy_list_entry(p);
+			q = p->next;
+			if (slot->context == context) {				
+				free(p->entry);
+				psy_list_remove(&self->slots, p);				
+			}
+		}
+	}	
+}
+
 void psy_signal_disconnectall(psy_Signal* self)
 {
 	assert(self);
 
 	psy_signal_dispose(self);
+	psy_signal_init(self);
 }
 
 void psy_signal_prevent(psy_Signal* self, void* context, void* fp)

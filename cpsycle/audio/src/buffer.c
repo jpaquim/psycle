@@ -22,6 +22,7 @@ void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 	self->volumedisplay = 0;
 	self->preventmixclear = FALSE;
 	self->writepos = 0;
+	self->shared = TRUE;
 	psy_audio_buffer_resize(self, channels);
 }
 
@@ -51,6 +52,26 @@ void psy_audio_buffer_dispose(psy_audio_Buffer* self)
 	psy_audio_buffer_disablerms(self);
 }
 
+void psy_audio_buffer_copy(psy_audio_Buffer* self, const psy_audio_Buffer* src)
+{
+	if (self != src && src) {
+		psy_audio_buffer_deallocsamples(self);
+		psy_audio_buffer_dispose(self);			
+		psy_audio_buffer_init(self, src->numchannels);
+		self->numsamples = src->numsamples;
+		psy_audio_buffer_allocsamples(self, self->numsamples);		
+		psy_audio_buffer_clearsamples(self, self->numsamples);			
+		psy_audio_buffer_addsamples(self, src, self->numsamples, 1.0f);		
+		self->writepos = src->writepos;
+		self->offset = src->offset;
+		self->preventmixclear = src->preventmixclear;
+		self->range = src->range;
+		self->volumedisplay = src->volumedisplay;		
+		self->rms = NULL;
+		self->shared = FALSE;
+	}
+}
+
 psy_audio_Buffer* psy_audio_buffer_alloc(void)
 {
 	return (psy_audio_Buffer*) malloc(sizeof(psy_audio_Buffer));
@@ -65,6 +86,28 @@ psy_audio_Buffer* psy_audio_buffer_allocinit(uintptr_t channels)
 		psy_audio_buffer_init(rv, channels);
 	}
 	return rv;
+}
+
+psy_audio_Buffer* psy_audio_buffer_clone(const psy_audio_Buffer* src)
+{
+	psy_audio_Buffer* rv;
+
+	rv = psy_audio_buffer_allocinit(0);
+	if (rv) {
+		psy_audio_buffer_copy(rv, src);
+	}
+	return rv;
+}
+
+void psy_audio_buffer_deallocate(psy_audio_Buffer* self)
+{	
+	assert(self);
+
+	if (!self->shared) {
+		psy_audio_buffer_deallocsamples(self);
+	}
+	psy_audio_buffer_dispose(self);
+	free(self);	
 }
 
 void psy_audio_buffer_resize(psy_audio_Buffer* self, uintptr_t numchannels)
@@ -102,7 +145,8 @@ void psy_audio_buffer_clearsamples(psy_audio_Buffer* self, uintptr_t numsamples)
 	}
 }
 
-void psy_audio_buffer_addsamples(psy_audio_Buffer* self, psy_audio_Buffer* source,
+void psy_audio_buffer_addsamples(psy_audio_Buffer* self,
+	const psy_audio_Buffer* source,
 	uintptr_t numsamples,
 	psy_dsp_amp_t vol)
 {
@@ -298,7 +342,8 @@ void psy_audio_buffer_scale(psy_audio_Buffer* self, psy_dsp_amp_range_t range,
 	}
 }
 
-psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer* self, psy_dsp_amp_range_t range)
+psy_dsp_amp_t psy_audio_buffer_rangefactor(const psy_audio_Buffer* self,
+	psy_dsp_amp_range_t range)
 {
 	psy_dsp_amp_t rv;
 
@@ -383,4 +428,35 @@ void psy_audio_buffer_make_monoaureal(psy_audio_Buffer* self,
 			numsamples,
 			1.f);
 	}
+}
+
+void psy_audio_buffer_allocsamples(psy_audio_Buffer* self, uintptr_t numframes)
+{
+	uintptr_t channel;
+
+	psy_audio_buffer_deallocsamples(self);
+	self->numsamples = numframes;	
+	for (channel = 0; channel < self->numchannels; ++channel) {
+		if (numframes) {
+			self->samples[channel] = dsp.memory_alloc(numframes,
+				sizeof(psy_dsp_amp_t));
+		} else {
+			self->samples[channel] = NULL;
+		}
+	}
+	self->shared = FALSE;
+}
+
+void psy_audio_buffer_deallocsamples(psy_audio_Buffer* self)
+{
+	uintptr_t channel;
+
+	for (channel = 0; channel < self->numchannels; ++channel) {
+		if (self->samples[channel]) {
+			dsp.memory_dealloc(self->samples[channel]);
+			self->samples[channel] = NULL;
+		}		
+	}
+	self->numsamples = 0;
+	self->shared = TRUE;
 }

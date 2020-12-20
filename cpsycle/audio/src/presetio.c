@@ -62,7 +62,7 @@ int psy_audio_presetsio_load(const char* filename, psy_audio_Presets* presets,
 
 		psy_path_init(&path, filename);
 		psy_path_setprefix(&path, pluginroot);		
-		fp = fopen(psy_path_path(&path), "rb");
+		fp = fopen(psy_path_full(&path), "rb");
 		psy_path_dispose(&path);
 	}
 	// if not found, check if it finds underscore names
@@ -75,7 +75,7 @@ int psy_audio_presetsio_load(const char* filename, psy_audio_Presets* presets,
 		psy_replacechar(name, '-', '_');
 		psy_path_setname(&path, name);				
 		free(name);
-		fp = fopen(psy_path_path(&path), "rb");
+		fp = fopen(psy_path_full(&path), "rb");
 		psy_path_dispose(&path);
 	}	
 	if (fp != NULL) {

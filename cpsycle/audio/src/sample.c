@@ -4,12 +4,12 @@
 #include "../../detail/prefix.h"
 
 #include "sample.h"
+// local
 #include "waveio.h"
-#include <string.h>
-#include <stdlib.h>
-#include <operations.h>
+// dsp
 #include <alignedalloc.h>
-
+#include <operations.h>
+// platform
 #include "../../detail/portable.h"
 
 void psy_audio_vibrato_init(psy_audio_Vibrato* self)
@@ -22,43 +22,70 @@ void psy_audio_vibrato_init(psy_audio_Vibrato* self)
 
 void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 {
-	psy_audio_buffer_init(&self->channels, numchannels);
-	self->stereo = 1;
+	self->name = strdup("");
 	self->numframes = 0;
-	self->samplerate = 44100;
-	self->defaultvolume = 1.f;
 	self->globalvolume = 1.f;
-	self->loop.start = 0;
-	self->loop.end = 0;
-	self->loop.type  = psy_audio_SAMPLE_LOOP_DO_NOT;
-	self->sustainloop.start = 0;
-	self->sustainloop.end = 0;
-	self->sustainloop.type = psy_audio_SAMPLE_LOOP_DO_NOT;
+	self->defaultvolume = 0x80;
+	psy_audio_sampleloop_init(&self->loop);
+	psy_audio_sampleloop_init(&self->sustainloop);
+	psy_audio_buffer_init(&self->channels, numchannels);
+	self->samplerate = 44100;
 	self->tune = 0;
 	self->finetune = 0;
-	self->panfactor = 0.5f;
-	self->panenabled = 0;
-	self->surround = 0;
-	self->name = strdup("");	
+	self->stereo = TRUE;
+	self->panenabled = TRUE;
+	self->panfactor = psy_audio_PAN_CENTER;
+	self->surround = FALSE;		
 	psy_audio_vibrato_init(&self->vibrato);
 }
 
 void psy_audio_sample_dispose(psy_audio_Sample* self)
 {
-	uintptr_t channel;
-
-	for (channel = 0; channel < self->channels.numchannels; ++channel) {
-		dsp.memory_dealloc(self->channels.samples[channel]);
-		self->channels.samples[channel] = 0;
-	}
+	psy_audio_buffer_deallocsamples(&self->channels);	
 	psy_audio_buffer_dispose(&self->channels);
 	self->numframes = 0;
 	free(self->name);
+	self->name = NULL;
+}
+
+void psy_audio_sample_copy(psy_audio_Sample* self,
+	const psy_audio_Sample* src)
+{	
+	if (self != src) {
+		self->samplerate = src->samplerate;
+		self->defaultvolume = src->defaultvolume;
+		self->globalvolume = src->globalvolume;
+		self->loop.start = src->loop.start;
+		self->loop.end = src->loop.end;
+		self->loop.type = src->loop.type;
+		self->sustainloop.start = src->sustainloop.start;
+		self->sustainloop.end = src->sustainloop.end;
+		self->sustainloop.type = src->sustainloop.type;
+		self->tune = src->tune;
+		self->finetune = src->finetune;
+		self->panfactor = src->panfactor;
+		self->panenabled = src->panenabled;
+		self->surround = src->surround;
+		psy_strreset(&self->name, src->name);
+		self->vibrato.attack = src->vibrato.attack;
+		self->vibrato.depth = src->vibrato.depth;
+		self->vibrato.speed = src->vibrato.speed;
+		self->vibrato.type = src->vibrato.type;
+		self->numframes = src->numframes;
+		self->stereo = src->stereo;
+		psy_audio_buffer_deallocsamples(&self->channels);
+		psy_audio_buffer_dispose(&self->channels);
+		psy_audio_buffer_init(&self->channels, src->channels.numchannels);
+		psy_audio_buffer_allocsamples(&self->channels, src->numframes);
+		psy_audio_buffer_clearsamples(&self->channels, src->numframes);
+		psy_audio_buffer_addsamples(&self->channels, &src->channels,
+			src->numframes, 1.0f);
+	}	
 }
 
 psy_audio_Sample* psy_audio_sample_alloc(void)
 {
-	return (psy_audio_Sample*) malloc(sizeof(psy_audio_Sample));
+	return (psy_audio_Sample*)malloc(sizeof(psy_audio_Sample));
 }
 
 psy_audio_Sample* psy_audio_sample_allocinit(uintptr_t numchannels)
@@ -72,72 +99,19 @@ psy_audio_Sample* psy_audio_sample_allocinit(uintptr_t numchannels)
 	return rv;
 }
 
-psy_audio_Sample* psy_audio_sample_clone(psy_audio_Sample* src)
+psy_audio_Sample* psy_audio_sample_clone(const psy_audio_Sample* src)
 {
-	psy_audio_Sample* rv = 0;
-	
-	rv = psy_audio_sample_alloc();
-	if (rv) {
-		uintptr_t channel;
+	psy_audio_Sample* rv;
 
-		rv->samplerate = src->samplerate;
-		rv->defaultvolume = src->defaultvolume;
-		rv->globalvolume = src->globalvolume;
-		rv->loop.start = src->loop.start;
-		rv->loop.end = src->loop.end;
-		rv->loop.type = src->loop.type;
-		rv->sustainloop.start = src->sustainloop.start;
-		rv->sustainloop.end = src->sustainloop.end;
-		rv->sustainloop.type = src->sustainloop.type;
-		rv->tune = src->tune;
-		rv->finetune = src->finetune;
-		rv->panfactor = src->panfactor;
-		rv->panenabled = src->panenabled;
-		rv->surround = src->surround;
-		rv->name = strdup(src->name);
-		rv->vibrato.attack = src->vibrato.attack;
-		rv->vibrato.depth = src->vibrato.depth;
-		rv->vibrato.speed = src->vibrato.speed;
-		rv->vibrato.type = src->vibrato.type;
-		rv->numframes = src->numframes;
-		rv->stereo = src->stereo;
-		psy_audio_buffer_init(&rv->channels, src->channels.numchannels);
-		for (channel = 0; channel < rv->channels.numchannels; ++channel) {
-			rv->channels.samples[channel] = dsp.memory_alloc(src->numframes,
-				sizeof(float));
-		}
-		psy_audio_buffer_clearsamples(&rv->channels, src->numframes);
-		psy_audio_buffer_addsamples(&rv->channels, &src->channels, src->numframes, 1.0f);
+	rv = psy_audio_sample_allocinit(0);
+	if (rv) {
+		psy_audio_sample_copy(rv, src);
 	}
 	return rv;
 }
 
-void psy_audio_sample_load(psy_audio_Sample* self, const char* path)
-{
-	char* delim;
-
-	psy_audio_wave_load(self, path);
-	delim = strrchr(path, '\\');	
-	psy_audio_sample_setname(self, delim ? delim + 1 : path);
-}
-
-void psy_audio_sample_save(psy_audio_Sample* self, const char* path)
-{
-	psy_audio_wave_save(self, path);
-}
-
-void psy_audio_sample_setname(psy_audio_Sample* self, const char* name)
-{
-	psy_strreset(&self->name, name);	
-}
-
-const char* psy_audio_sample_name(psy_audio_Sample* self)
-{
-	return self->name;
-}
-
-psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample* self,
-	psy_dsp_ResamplerQuality quality)
+psy_audio_SampleIterator* psy_audio_sample_allociterator(
+	psy_audio_Sample* self, psy_dsp_ResamplerQuality quality)
 {
 	psy_audio_SampleIterator* rv;
 
@@ -148,16 +122,24 @@ psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample* self,
 	return rv;
 }
 
-void psy_audio_sample_setcontloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
-	uintptr_t loopstart, uintptr_t loopend)
+void psy_audio_sample_allocwavedata(psy_audio_Sample* self)
 {
-	psy_audio_sampleloop_init_all(&self->loop, looptype, loopstart,
-		loopend);
+	psy_audio_buffer_allocsamples(&self->channels, self->numframes);
 }
 
-void psy_audio_sample_setsustainloop(psy_audio_Sample* self, psy_audio_SampleLoopType looptype,
-	uintptr_t loopstart, uintptr_t loopend)
+void psy_audio_sample_load(psy_audio_Sample* self, const psy_Path* path)
+{	
+	psy_audio_wave_load(self, psy_path_full(path));		
+	psy_audio_sample_setname(self, psy_path_filename(path));	
+}
+
+void psy_audio_sample_save(psy_audio_Sample* self, const psy_Path* path)
 {
-	psy_audio_sampleloop_init_all(&self->sustainloop, looptype, loopstart,
-		loopend);
+	psy_audio_wave_save(self, psy_path_full(path));
+}
+
+// Properties
+void psy_audio_sample_setname(psy_audio_Sample* self, const char* name)
+{
+	psy_strreset(&self->name, name);	
 }

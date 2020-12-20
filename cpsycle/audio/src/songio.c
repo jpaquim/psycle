@@ -125,12 +125,13 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 				xmsongloader_dispose(&loader);
 			} else {
 				psyfile_seek(self->file, 0);
-				//if (psy_audio_mod_isvalid(self)) {
-					//psyfile_seek(self->file, 0);
-					//psy_audio_mod_load(self);
-				//} else {
-					//self->err = 2;
-				//}
+				MODSongLoader loader;
+
+				modsongloader_init(&loader, self);
+				if (!modsongloader_load(&loader)) {
+					self->err = 2;
+				}
+				modsongloader_dispose(&loader);				
 			}
 #else
 			status = PSY_ERRFILEFORMAT;

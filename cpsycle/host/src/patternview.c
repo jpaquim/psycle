@@ -901,8 +901,12 @@ void patternview_updateksin(PatternView* self)
 		patternviewskin_fontcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.hscroll.sliderpane.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setcolour(&self->trackerscroller.hscroll.sliderpane.component,
+		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_setbackgroundcolour(&self->trackerscroller.vscroll.sliderpane.component,
 		patternviewskin_backgroundcolour(self->gridstate.skin, 0, 0));
+	psy_ui_component_setcolour(&self->trackerscroller.vscroll.sliderpane.component,
+		patternviewskin_rowcolour(self->gridstate.skin, 0, 0));
 	psy_ui_component_invalidate(&self->component);
 }
 

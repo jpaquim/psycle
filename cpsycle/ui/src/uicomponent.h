@@ -340,6 +340,7 @@ typedef void (*psy_ui_fp_componentimp_dev_clientresize)(struct psy_ui_ComponentI
 typedef psy_ui_Rectangle (*psy_ui_fp_componentimp_dev_position)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_setposition)(struct psy_ui_ComponentImp*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_size)(struct psy_ui_ComponentImp*);
+typedef psy_ui_Size(*psy_ui_fp_componentimp_dev_preferredsize)(struct psy_ui_ComponentImp*, const psy_ui_Size* limits);
 typedef psy_ui_Size (*psy_ui_fp_componentimp_dev_framesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_updatesize)(struct psy_ui_ComponentImp*);
 typedef void (*psy_ui_fp_componentimp_dev_scrollto)(struct psy_ui_ComponentImp*, intptr_t dx, intptr_t dy);
@@ -383,6 +384,7 @@ typedef struct {
 	psy_ui_fp_componentimp_dev_position dev_position;
 	psy_ui_fp_componentimp_dev_setposition dev_setposition;
 	psy_ui_fp_componentimp_dev_size dev_size;
+	psy_ui_fp_componentimp_dev_preferredsize dev_preferredsize;
 	psy_ui_fp_componentimp_dev_updatesize dev_updatesize;
 	psy_ui_fp_componentimp_dev_framesize dev_framesize;
 	psy_ui_fp_componentimp_dev_scrollto dev_scrollto;

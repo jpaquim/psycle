@@ -25,12 +25,18 @@ typedef struct psy_ui_win_CheckBoxImp {
 	struct psy_ui_Component* component;	
 } psy_ui_win_CheckBoxImp;
 
-void psy_ui_win_checkboximp_init(psy_ui_win_CheckBoxImp* self,
-	struct psy_ui_Component* component,
+void psy_ui_win_checkboximp_init(psy_ui_win_CheckBoxImp*,
+	struct psy_ui_Component*,
 	struct psy_ui_ComponentImp* parent);
+void psy_ui_win_checkboximp_init_multiline(psy_ui_win_CheckBoxImp*,
+	psy_ui_Component*,
+	psy_ui_ComponentImp*);
 
 psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_alloc(void);
 psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_allocinit(
+	struct psy_ui_Component* component,
+	psy_ui_ComponentImp* parent);
+psy_ui_win_CheckBoxImp* psy_ui_win_checkboximp_allocinit_multiline(
 	struct psy_ui_Component* component,
 	psy_ui_ComponentImp* parent);
 

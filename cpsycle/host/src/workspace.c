@@ -116,6 +116,7 @@ void workspace_init(Workspace* self, void* mainhandle)
 	self->maximizeview.row1 = 1;
 	self->maximizeview.row2 = 1;	
 	self->undosavepoint = 0;
+	self->gearvisible = FALSE;
 	self->machines_undosavepoint = 0;
 	self->navigating = FALSE;
 	self->sequencepaste = NULL;
@@ -748,7 +749,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_path_init(&path, NULL);
 	psy_path_setprefix(&path, dirconfig_config(&self->config.directories));
 	psy_path_setname(&path, PSYCLE_INI);		
-	propertiesio_load(&self->config.config, psy_path_path(&path), 0);
+	propertiesio_load(&self->config.config, psy_path_full(&path), 0);
 	if (keyboardmiscconfig_patdefaultlines(
 			&self->config.misc) > 0) {
 		psy_audio_pattern_setdefaultlines(keyboardmiscconfig_patdefaultlines(
@@ -777,7 +778,7 @@ void workspace_load_configuration(Workspace* self)
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_updateactiveeventdriverlist(&self->config.input);
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
-	propertiesio_load(&self->config.config, psy_path_path(&path), 0);
+	propertiesio_load(&self->config.config, psy_path_full(&path), 0);
 	eventdriverconfig_readeventdriverconfigurations(&self->config.input);
 	psy_audio_eventdrivers_restartall(&self->player.eventdrivers);
 	eventdriverconfig_showactiveeventdriverconfig(&self->config.input,
@@ -811,7 +812,7 @@ void workspace_save_configuration(Workspace* self)
 	eventdriverconfig_makeeventdriverconfigurations(&self->config.input);
 	midiviewconfig_makecontrollersave(
 		psycleconfig_midi(&self->config));
-	propertiesio_save(&self->config.config, psy_path_path(&path));
+	propertiesio_save(&self->config.config, psy_path_full(&path));
 	psy_path_dispose(&path);
 }
 
@@ -1268,8 +1269,13 @@ bool workspace_isconnectasmixersend(const Workspace* self)
 void workspace_togglegear(Workspace* self)
 {
 	assert(self);
-
+	self->gearvisible = !self->gearvisible;
 	psy_signal_emit(&self->signal_togglegear, self, 0);
+}
+
+bool workspace_gearvisible(const Workspace* self)
+{
+	return self->gearvisible;
 }
 
 bool workspace_songmodified(const Workspace* self)

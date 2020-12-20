@@ -29,22 +29,27 @@ typedef struct psy_audio_Buffer {
 	bool preventmixclear;
 	struct psy_dsp_RMSVol* rms;
 	uintptr_t writepos;
+	bool shared;
 } psy_audio_Buffer;
 
 void psy_audio_buffer_init(psy_audio_Buffer*, uintptr_t channels);
 void psy_audio_buffer_init_shared(psy_audio_Buffer*, psy_audio_Buffer* src,
 	uintptr_t offset);
 void psy_audio_buffer_dispose(psy_audio_Buffer*);
+void psy_audio_buffer_copy(psy_audio_Buffer*, const psy_audio_Buffer* src);
+
 psy_audio_Buffer* psy_audio_buffer_alloc(void);
 psy_audio_Buffer* psy_audio_buffer_allocinit(uintptr_t channels);
+psy_audio_Buffer* psy_audio_buffer_clone(const psy_audio_Buffer* src);
+void psy_audio_buffer_deallocate(psy_audio_Buffer*);
 void psy_audio_buffer_resize(psy_audio_Buffer*, uintptr_t channels);
 void psy_audio_buffer_move(psy_audio_Buffer*, uintptr_t offset);
 void psy_audio_buffer_setoffset(psy_audio_Buffer*, uintptr_t offset);
 uintptr_t psy_audio_buffer_offset(psy_audio_Buffer*);
 psy_dsp_amp_t* psy_audio_buffer_at(psy_audio_Buffer*, uintptr_t channel);
 void psy_audio_buffer_clearsamples(psy_audio_Buffer*, uintptr_t numsamples);
-void psy_audio_buffer_addsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
-	uintptr_t numsamples, psy_dsp_amp_t vol);
+void psy_audio_buffer_addsamples(psy_audio_Buffer*,
+	const psy_audio_Buffer* source, uintptr_t numsamples, psy_dsp_amp_t vol);
 void psy_audio_buffer_mixsamples(psy_audio_Buffer*, psy_audio_Buffer* source,
 	uintptr_t numsamples, psy_dsp_amp_t vol,
 	const struct psy_audio_PinMapping* mapping);
@@ -73,10 +78,13 @@ psy_dsp_amp_t psy_audio_buffer_rmsvolume(psy_audio_Buffer*);
 psy_dsp_amp_t psy_audio_buffer_rmsdisplay(psy_audio_Buffer*);
 psy_dsp_amp_t psy_audio_buffer_rmsscale(psy_audio_Buffer*,
 	psy_dsp_amp_t rms_volume);
-psy_dsp_amp_t psy_audio_buffer_rangefactor(psy_audio_Buffer*,
+psy_dsp_amp_t psy_audio_buffer_rangefactor(const psy_audio_Buffer*,
 	psy_dsp_amp_range_t);
 void psy_audio_buffer_make_monoaureal(psy_audio_Buffer*,
 	uintptr_t numsamples);
+void psy_audio_buffer_allocsamples(psy_audio_Buffer*,
+	uintptr_t numframes);
+void psy_audio_buffer_deallocsamples(psy_audio_Buffer*);
 
 #ifdef __cplusplus
 }

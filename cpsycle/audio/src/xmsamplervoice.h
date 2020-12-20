@@ -163,9 +163,9 @@ INLINE float psy_audio_xmsamplervoice_realvolume(psy_audio_XMSamplerVoice* self,
 
 	//Since we have top +12dB in waveglobvolume and we have to clip randvol, we use the current globvol as top.
 	//This isn't exactly what Impulse tracker did, but it's a reasonable compromise.
-	float tmp_rand = psy_audio_instrument_volume(self->instrument) * self->currrandvol * psy_audio_sample_volume(sample);
-	if (tmp_rand > psy_audio_sample_volume(sample)) {
-		tmp_rand = psy_audio_sample_volume(sample);
+	float tmp_rand = psy_audio_instrument_volume(self->instrument) * self->currrandvol * psy_audio_sample_globvolume(sample);
+	if (tmp_rand > psy_audio_sample_globvolume(sample)) {
+		tmp_rand = psy_audio_sample_globvolume(sample);
 	}
 	realvolume = psy_dsp_map_128_1(self->volume) * tmp_rand;
 	return (!self->tremormute)

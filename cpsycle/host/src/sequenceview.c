@@ -653,25 +653,25 @@ void sequenceroptionsbar_init(SequencerOptionsBar* self,
 	
 	psy_ui_component_init(&self->component, parent);
 	self->workspace = workspace;
-	psy_ui_checkbox_init(&self->followsong, &self->component);
+	psy_ui_checkbox_init_multiline(&self->followsong, &self->component);
 	psy_ui_checkbox_settext(&self->followsong,
 		"sequencerview.follow-song");
-	psy_ui_checkbox_init(&self->shownames, &self->component);
+	psy_ui_checkbox_init_multiline(&self->shownames, &self->component);
 	psy_ui_checkbox_settext(&self->shownames,
 		"sequencerview.show-pattern-names");
-	psy_ui_checkbox_init(&self->showplaylist, &self->component);
+	psy_ui_checkbox_init_multiline(&self->showplaylist, &self->component);
 	psy_ui_checkbox_settext(&self->showplaylist,
 		"sequencerview.show-playlist");
-	psy_ui_checkbox_init(&self->recordnoteoff, &self->component);
+	psy_ui_checkbox_init_multiline(&self->recordnoteoff, &self->component);
 	psy_ui_checkbox_settext(&self->recordnoteoff,
 		"sequencerview.record-noteoff");
-	psy_ui_checkbox_init(&self->recordtweak, &self->component);
+	psy_ui_checkbox_init_multiline(&self->recordtweak, &self->component);
 	psy_ui_checkbox_settext(&self->recordtweak,
 		"sequencerview.record-tweak");
-	psy_ui_checkbox_init(&self->multichannelaudition, &self->component);
+	psy_ui_checkbox_init_multiline(&self->multichannelaudition, &self->component);
 	psy_ui_checkbox_settext(&self->multichannelaudition,
-		"sequencerview.multichannel-audition");
-	psy_ui_checkbox_init(&self->allownotestoeffect, &self->component);
+		"sequencerview.multichannel-audition");		
+	psy_ui_checkbox_init_multiline(&self->allownotestoeffect, &self->component);
 	psy_ui_checkbox_settext(&self->allownotestoeffect,
 		"sequencerview.allow-notes-to_effect");	
 	{

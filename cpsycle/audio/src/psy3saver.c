@@ -997,7 +997,7 @@ int psy_audio_psy3saver_save_sample(psy_audio_PSY3Saver* self, psy_audio_Sample*
 		return status;
 	}
 	if (status = psyfile_write_uint16(self->songfile->file, (uint16_t)
-			(sample->defaultvolume * 255))) {
+			(sample->defaultvolume))) {
 		free(data1);
 		free(wavedata_left);
 		return status;

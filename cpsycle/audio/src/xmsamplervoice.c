@@ -195,10 +195,11 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	psy_dsp_envelope_setsamplerate(&self->pitchenvelope, samplerate);
 	if (instrument) {
 		psy_dsp_envelope_set_settings(&self->amplitudeenvelope, &instrument->volumeenvelope);
-		psy_dsp_envelope_set_settings(&self->filterenvelope, &instrument->volumeenvelope);		
+		psy_dsp_envelope_set_settings(&self->filterenvelope, &instrument->filterenvelope);		
 	}	
 	// Init Filter
 	filter_init_samplerate(&self->_filter, samplerate);
+	psy_audio_xmsamplervoice_initfilter(self, instrument);
 	self->usedefaultvolume = 1;
 	self->positions = 0;
 	self->effcmd = XM_SAMPLER_CMD_NONE;
@@ -216,26 +217,19 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	self->_cutoff = 127;
 	self->m_Ressonance = 0;
 	self->_coModify = 0;
-
 	self->play = FALSE;
 	self->stopping = FALSE;
-	self->period = 0;
-	self->note = psy_audio_NOTECOMMANDS_EMPTY;
-	self->volume = 128;
-	psy_dsp_slider_resetto(&self->rampl, 0.f);
-	psy_dsp_slider_resetto(&self->rampr, 0.f);
-
 	self->panfactor = 0.5f;
 	self->panrange = 0.5f;
 	self->surround = FALSE;
-	psy_dsp_slider_init(&self->rampl);
-	psy_dsp_slider_init(&self->rampr);
-	
-	psy_audio_xmsamplervoice_initfilter(self, instrument);
 	self->effects = NULL;
-	psy_audio_xmsamplervoice_reseteffects(self);
 	// ps1
 	self->effcmd = XM_SAMPLER_CMD_NONE, 0, 0;
+	psy_audio_xmsamplervoice_reseteffects(self);
+	psy_dsp_slider_init(&self->rampl);
+	psy_dsp_slider_init(&self->rampr);
+	psy_dsp_slider_resetto(&self->rampl, 0.f);
+	psy_dsp_slider_resetto(&self->rampr, 0.f);		
 }
 
 void psy_audio_xmsamplervoice_initfilter(psy_audio_XMSamplerVoice* self,
@@ -729,7 +723,7 @@ void psy_audio_xmsamplervoice_currvolume(psy_audio_XMSamplerVoice* self,
 
 	*svol = psy_audio_xmsamplervoice_volume(self) *
 		(self->usedefaultvolume || self->effcmd == XM_SAMPLER_CMD_VOLUMESLIDE)
-			? sample->defaultvolume 
+			? sample->defaultvolume / (psy_dsp_amp_t)0x80
 			: psy_audio_xmsamplervoice_realvolume(self, sample);
 	*svol *= sample->globalvolume;
 	cvol = self->channel ? self->channel->volume : (psy_dsp_amp_t)1.f;	

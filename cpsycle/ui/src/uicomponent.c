@@ -858,6 +858,7 @@ static void dev_resize(psy_ui_ComponentImp* self, psy_ui_Size size) { }
 static void dev_clientresize(psy_ui_ComponentImp* self, int width, int height) { }
 static void dev_setposition(psy_ui_ComponentImp* self, psy_ui_Point topleft, psy_ui_Size size) { }
 static psy_ui_Size dev_size(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
+static psy_ui_Size dev_preferredsize(psy_ui_ComponentImp* self, const psy_ui_Size* limit) { return psy_ui_size_zero(); }
 static void dev_updatesize(psy_ui_ComponentImp* self) { }
 static psy_ui_Size dev_framesize(psy_ui_ComponentImp* self) { return psy_ui_size_zero(); }
 static void dev_scrollto(psy_ui_ComponentImp* self, intptr_t dx, intptr_t dy) { }
@@ -922,6 +923,7 @@ static void imp_vtable_init(void)
 		imp_vtable.dev_position = dev_position;
 		imp_vtable.dev_setposition = dev_setposition;
 		imp_vtable.dev_size = dev_size;
+		imp_vtable.dev_preferredsize = dev_preferredsize;
 		imp_vtable.dev_updatesize = dev_updatesize;
 		imp_vtable.dev_framesize = dev_framesize;
 		imp_vtable.dev_scrollto = dev_scrollto;
