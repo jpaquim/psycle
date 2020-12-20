@@ -48,7 +48,8 @@ typedef enum {
 	PSY_PROPERTY_HINT_EDITHEX,
 	PSY_PROPERTY_HINT_SHORTCUT,
 	PSY_PROPERTY_HINT_LIST,
-	PSY_PROPERTY_HINT_CHECK	
+	PSY_PROPERTY_HINT_CHECK,
+	PSY_PROPERTY_HINT_SELECTION
 } psy_PropertyHint;
 
 typedef struct psy_PropertyItem {
@@ -120,6 +121,8 @@ const psy_List* psy_property_children_const(const psy_Property*);
 psy_Property* psy_property_first(psy_Property*);
 psy_Property* psy_property_parent(const psy_Property*);
 psy_Property* psy_property_remove(psy_Property*, psy_Property*);
+psy_Property* psy_property_moveup(psy_Property*);
+psy_Property* psy_property_movedown(psy_Property*);
 void psy_property_clear(psy_Property*);
 bool psy_property_insection(const psy_Property*, psy_Property* section);
 void psy_property_enumerate(psy_Property*, void* target, psy_PropertyCallback);

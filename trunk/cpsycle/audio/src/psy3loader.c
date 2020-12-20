@@ -17,9 +17,6 @@
 #include <operations.h>
 // file
 #include <dir.h>
-// std
-#include <stdlib.h>
-#include <string.h>
 // platform
 #include "../../detail/portable.h"
 
@@ -628,7 +625,7 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 	int32_t ENV_F_RQ;	
 	/// EnvAmount [-128,128]
 	int32_t ENV_F_EA;	
-	/// psy_dsp_Filter Type. See psycle::helpers::dsp::FilterType. [0..6]
+	/// psy_dsp_Filter Type. See psycle::helpers::dsp::psy_dsp_FilterType. [0..6]
 	int32_t ENV_F_TP;	
 	///\}
 	unsigned char _RPAN;
@@ -724,7 +721,7 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 			
 			psyfile_read(self->songfile->file, &val, sizeof(val));
 			ENV_F_TP = val;
-			instrument->filtertype = (FilterType) val;
+			instrument->filtertype = (psy_dsp_FilterType) val;
 
 			psyfile_read(self->songfile->file, &pan, sizeof(pan));
 			psyfile_read(self->songfile->file, &_RPAN, sizeof(_RPAN));
@@ -892,7 +889,7 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 	unsigned char btemp;
 	psy_audio_Sample* wave;
 
-	wave = psy_audio_sample_allocinit(2);
+	wave = psy_audio_sample_allocinit(1);
 	psyfile_readstring(self->songfile->file, wavename, sizeof(wavename));
 	psy_audio_sample_setname(wave, wavename);
 	// wavelength
@@ -986,14 +983,13 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 		psyfile_read(self->songfile->file, pData, size1);
 		sounddesquash(pData, &pDest);
 		free(pData);
-		wave->channels.samples[0] = dsp.memory_alloc(wave->numframes, sizeof(float));
+		psy_audio_sample_allocwavedata(wave);
 		for (i = 0; i < wave->numframes; i++) {
 			short val = (short) pDest[i];
 			wave->channels.samples[0][i] = (float) val;				
 		}
 		free(pDest);
-		pData = 0;
-		wave->channels.numchannels = 1;
+		pData = 0;		
 		if (wave->stereo)
 		{
 			uint32_t i;
@@ -1002,14 +998,13 @@ psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader* self)
 			psyfile_read(self->songfile->file, pData, size1);
 			sounddesquash(pData, &pDest);
 			free(pData);
-			wave->channels.samples[1] = dsp.memory_alloc(wave->numframes, sizeof(float));
+			psy_audio_sample_resize(wave, 2);			
 			for (i = 0; i < wave->numframes; i++) {
 				short val = (short) pDest[i];
 				wave->channels.samples[1][i] = (float) val;					
 			}
 			free(pDest);
-			pData = 0;
-			wave->channels.numchannels = 2;
+			pData = 0;			
 		}		
 	}
 	return wave;
@@ -1071,36 +1066,102 @@ void psy_audio_psy3loader_loadxminstrument(psy_audio_PSY3Loader* self, psy_audio
 		instrument->globalvolume = m_GlobVol;	
 	}
 	psyfile_read(self->songfile->file, &m_VolumeFadeSpeed, sizeof(m_VolumeFadeSpeed));
+	if (instrument) {
+		instrument->volumefadespeed = m_VolumeFadeSpeed;
+	}
 
 	psyfile_read(self->songfile->file, &m_InitPan, sizeof(m_InitPan));
+	if (instrument) {
+		instrument->initpan = m_InitPan;
+	}
 	psyfile_read(self->songfile->file, &m_PanEnabled, sizeof(m_PanEnabled));
+	if (instrument) {
+		instrument->panenabled = m_PanEnabled;
+	}
 	if (self->songfile->file->currchunk.version == 0) {
 		m_Surround = FALSE;
-	}
-	else {
+	} else {
 		psyfile_read(self->songfile->file, &m_Surround, sizeof(m_Surround));
 	}
-
+	if (instrument) {
+		instrument->surround = m_Surround;
+	}
 	psyfile_read(self->songfile->file, &m_NoteModPanCenter, sizeof(m_NoteModPanCenter));
+	if (instrument) {
+		instrument->notemodpancenter = m_NoteModPanCenter;
+	}
 	psyfile_read(self->songfile->file, &m_NoteModPanSep, sizeof(m_NoteModPanSep));
+	if (instrument) {
+		instrument->notemodpansep = m_NoteModPanSep;
+	}	
 
 	psyfile_read(self->songfile->file, &m_FilterCutoff, sizeof(m_FilterCutoff));
+	if (instrument) {
+		instrument->filtercutoff = m_FilterCutoff / 127.f;
+	}
 	psyfile_read(self->songfile->file, &m_FilterResonance, sizeof(m_FilterResonance));
+	if (instrument) {
+		instrument->filterres = m_FilterResonance / 127.f;
+	}
 	{ 
 		uint16_t unused = 0;
 		psyfile_read(self->songfile->file, &unused, sizeof(unused));
 	}
 	{
 		uint32_t i = 0;
+		psy_dsp_FilterType ft;
+
 		psyfile_read(self->songfile->file, &i, sizeof(i));
-		m_FilterType = i;
+		if (instrument) {
+			m_FilterType = i;
+			switch (i) {
+			case 0: ft = F_LOWPASS12;
+				break;
+			case 1: ft = F_HIGHPASS12;
+				break;
+			case 2: ft = F_BANDPASS12;
+				break;
+			case 3: ft = F_BANDREJECT12;
+				break;
+			case 4:	ft = F_NONE;//This one is kept here because it is used in load/save. Also used in Sampulse instrument filter as "use channel default"
+				break;
+			case 5: ft = F_ITLOWPASS;
+				break;
+			case 6: ft = F_MPTLOWPASSE;
+				break;
+			case 7:	ft = F_MPTHIGHPASSE;
+				break;
+			case 8:	ft = F_LOWPASS12E;
+				break;
+			case 9:	ft = F_HIGHPASS12E;
+				break;
+			case 10:ft = F_BANDPASS12E;
+				break;
+			case 11:ft = F_BANDREJECT12E;
+				break;
+			default:
+				ft = F_NONE;
+				break;
+			}
+			instrument->filtertype = ft;
+		}
 	}
-
 	psyfile_read(self->songfile->file, &m_RandomVolume, sizeof(m_RandomVolume));
+	if (instrument) {
+		instrument->randomvolume = m_RandomVolume;
+	}
 	psyfile_read(self->songfile->file, &m_RandomPanning, sizeof(m_RandomPanning));
+	if (instrument) {
+		instrument->randompanning = m_RandomPanning;
+	}
 	psyfile_read(self->songfile->file, &m_RandomCutoff, sizeof(m_RandomCutoff));
+	if (instrument) {
+		instrument->randomcutoff = m_RandomCutoff;
+	}
 	psyfile_read(self->songfile->file, &m_RandomResonance, sizeof(m_RandomResonance));
-
+	if (instrument) {
+		instrument->randomresonance = m_RandomResonance;
+	}
 	{
 		uint32_t i = 0;		
 
@@ -1299,7 +1360,7 @@ void psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 			unsigned char btemp;
 			psy_audio_Sample* wave;
 
-			wave = psy_audio_sample_allocinit(2);
+			wave = psy_audio_sample_allocinit(1);
 			psyfile_readstring(self->songfile->file, wavename, sizeof(wavename));
 			psy_audio_sample_setname(wave, wavename);
 			// wavelength
@@ -1381,9 +1442,9 @@ void psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 			// vibrato type
 			psyfile_read(self->songfile->file, &temp8, sizeof(temp8));
 			if (temp8 <= psy_audio_WAVEFORMS_RANDOM) {
-				// wave->vibratotype = (psy_audio_WaveForms) temp8;
+				 wave->vibrato.type = (psy_audio_WaveForms)temp8;
 			} else { 
-				// wave->vibratotype = (psy_audio_WaveForms) psy_audio_WAVEFORMS_SINUS;
+				 wave->vibrato.type = (psy_audio_WaveForms) psy_audio_WAVEFORMS_SINUS;
 			}														
 			{ // wave data
 				byte* pData;
@@ -1394,30 +1455,29 @@ void psy_audio_psy3loader_read_smsb(psy_audio_PSY3Loader* self)
 				psyfile_read(self->songfile->file, pData, size1);
 				sounddesquash(pData, &pDest);
 				free(pData);
-				wave->channels.samples[0] = dsp.memory_alloc(wave->numframes, sizeof(float));
+				psy_audio_sample_allocwavedata(wave);				
 				for (i = 0; i < wave->numframes; i++) {
 					short val = (short) pDest[i];
 					wave->channels.samples[0][i] = (float) val;				
 				}
 				free(pDest);
-				pData = 0;
-				wave->channels.numchannels = 1;
+				pData = 0;				
 				if (wave->stereo)
 				{
 					uint32_t i;
+
+					psy_audio_sample_resize(wave, 2);
 					psyfile_read(self->songfile->file, &size2, sizeof(size2));
 					pData = malloc(size2);
 					psyfile_read(self->songfile->file, pData, size2);
 					sounddesquash(pData, &pDest);
-					free(pData);
-					wave->channels.samples[1] = dsp.memory_alloc(wave->numframes, sizeof(float));
+					free(pData);					
 					for (i = 0; i < wave->numframes; i++) {
 						short val = (short) pDest[i];
 						wave->channels.samples[1][i] = (float) val;					
 					}
 					free(pDest);
-					pData = 0;
-					wave->channels.numchannels = 2;
+					pData = 0;					
 				}
 				psy_audio_samples_insert(&self->songfile->song->samples, wave,
 					sampleindex_make(sampleidx, 0));
@@ -1452,7 +1512,7 @@ void psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self, int32_t i
 		byte* pData;
 		int16_t* pDest;
 		
-		sample = psy_audio_sample_allocinit(2);
+		sample = psy_audio_sample_allocinit(1);
 		sample->panfactor = (float) pan / 256.f ; //(value_mapper::map_256_1(pan));
 		sample->samplerate = 44100;				
 		legacyindex = psyfile_read_uint32(self->songfile->file);
@@ -1479,8 +1539,7 @@ void psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self, int32_t i
 			psyfile_read(self->songfile->file, pData, packedsize);
 			sounddesquash(pData, &pDest);		
 			free(pData);
-			sample->channels.samples[0] = dsp.memory_alloc(
-				sample->numframes, sizeof(float));
+			psy_audio_sample_allocwavedata(sample);			
 			for (i = 0; i < sample->numframes; i++) {
 				short val = (short) pDest[i];
 				sample->channels.samples[0][i] = (float) val;				
@@ -1502,8 +1561,7 @@ void psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader* self, int32_t i
 				psyfile_read(self->songfile->file, pData,packedsize);
 				sounddesquash(pData, &pDest);
 				free(pData);
-				sample->channels.samples[1] = dsp.memory_alloc(
-					sample->numframes, sizeof(float));
+				psy_audio_sample_resize(sample, 2);				
 				for (i = 0; i < sample->numframes; ++i) {
 					short val = (short) pDest[i];
 					sample->channels.samples[1][i] = (float) val;					

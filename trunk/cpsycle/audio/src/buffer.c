@@ -23,6 +23,7 @@ void psy_audio_buffer_init(psy_audio_Buffer* self, uintptr_t channels)
 	self->preventmixclear = FALSE;
 	self->writepos = 0;
 	self->shared = TRUE;
+	self->numchannels = 0;
 	psy_audio_buffer_resize(self, channels);
 }
 
@@ -48,14 +49,16 @@ void psy_audio_buffer_move(psy_audio_Buffer* self, uintptr_t offset)
 
 void psy_audio_buffer_dispose(psy_audio_Buffer* self)
 {
+	if (!self->shared) {
+		psy_audio_buffer_deallocsamples(self);
+	}
 	free(self->samples);
 	psy_audio_buffer_disablerms(self);
 }
 
 void psy_audio_buffer_copy(psy_audio_Buffer* self, const psy_audio_Buffer* src)
 {
-	if (self != src && src) {
-		psy_audio_buffer_deallocsamples(self);
+	if (self != src && src) {		
 		psy_audio_buffer_dispose(self);			
 		psy_audio_buffer_init(self, src->numchannels);
 		self->numsamples = src->numsamples;
@@ -103,22 +106,37 @@ void psy_audio_buffer_deallocate(psy_audio_Buffer* self)
 {	
 	assert(self);
 
-	if (!self->shared) {
-		psy_audio_buffer_deallocsamples(self);
-	}
 	psy_audio_buffer_dispose(self);
 	free(self);	
 }
 
 void psy_audio_buffer_resize(psy_audio_Buffer* self, uintptr_t numchannels)
 {
-	free(self->samples);
-	self->samples = 0;	
+	psy_dsp_amp_t** old;	
+
+	old = self->samples;
 	if (numchannels > 0) {
-		self->samples = (psy_dsp_amp_t**) malloc(sizeof(psy_dsp_amp_t*)*numchannels);		
-		memset(self->samples, 0, sizeof(psy_dsp_amp_t*)*numchannels);
+		uintptr_t numold;
+
+		numold = self->numchannels;	
+		self->samples = (psy_dsp_amp_t**)malloc(sizeof(psy_dsp_amp_t*)*numchannels);
+		if (self->samples) {
+			uintptr_t c;
+
+			memset(self->samples, 0, sizeof(psy_dsp_amp_t*) * numchannels);
+			for (c = 0; c < numold; ++c) {
+				self->samples[c] = old[c];				
+			}
+			if (!self->shared && self->numsamples > 0) {
+				for (; c < numchannels; ++c) {
+					self->samples[c] = dsp.memory_alloc(self->numsamples,
+						sizeof(float));
+				}
+			}
+		}
 	}
-	self->numchannels = numchannels;
+	free(old);
+	self->numchannels = numchannels;	
 }
 
 void psy_audio_buffer_setoffset(psy_audio_Buffer* self, uintptr_t offset)

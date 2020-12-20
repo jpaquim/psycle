@@ -1393,8 +1393,8 @@ void mainframe_checkplaystartwithrctrl(MainFrame* self, psy_ui_KeyEvent* ev)
 				return;
 			}
 		} else if (psy_audio_player_playing(&self->workspace.player) &&
-			ev->keycode == psy_ui_KEY_SPACE) {
-			psy_audio_player_stop(&self->workspace.player);
+			ev->keycode == psy_ui_KEY_SPACE) {			
+			psy_audio_player_stop(&self->workspace.player);			
 			return;
 		}
 	}

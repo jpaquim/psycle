@@ -210,7 +210,8 @@ typedef struct psy_dsp_Envelope {
 	psy_dsp_amp_t step;	
 	uintptr_t samplecount;
 	uintptr_t nexttime;
-	bool susdone;	
+	bool susdone;
+	bool fastrelease;	
 } psy_dsp_Envelope;
 
 void psy_dsp_envelope_init(psy_dsp_Envelope*);
@@ -228,9 +229,11 @@ psy_dsp_EnvelopePoint psy_dsp_envelope_at(const psy_dsp_Envelope*,
 psy_List*  psy_dsp_envelope_begin(psy_dsp_Envelope*);
 void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, uintptr_t samplerate);
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope*);
+psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope*);
 void psy_dsp_envelope_start(psy_dsp_Envelope*);
 void psy_dsp_envelope_stop(psy_dsp_Envelope*);
 void psy_dsp_envelope_release(psy_dsp_Envelope*);
+void psy_dsp_envelope_fastrelease(psy_dsp_Envelope*);
 
 INLINE bool psy_dsp_envelope_releasing(psy_dsp_Envelope* self)
 {

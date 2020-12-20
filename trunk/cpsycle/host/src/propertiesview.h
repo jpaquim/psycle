@@ -54,6 +54,7 @@ typedef struct {
 	int centery;
 	int numblocklines;	
 	int identwidth;
+	bool showkeyselection;
 	float col_perc[PROPERTIESRENDERER_NUMCOLS];	
 	int col_width[PROPERTIESRENDERER_NUMCOLS];	
 	int col_start[PROPERTIESRENDERER_NUMCOLS];	

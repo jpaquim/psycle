@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-typedef enum FilterType {
+typedef enum psy_dsp_FilterType {
 	F_LOWPASS12 = 0,
 	F_HIGHPASS12 = 1,
 	F_BANDPASS12 = 2,
@@ -26,7 +26,7 @@ typedef enum FilterType {
 	F_BANDREJECT12E = 11,
 
 	F_NUMFILTERS
-} FilterType;
+} psy_dsp_FilterType;
 
 
 #define TPI 6.28318530717958647692528676655901
@@ -39,11 +39,11 @@ typedef struct FilterCoeff {
 
 void filtercoeff_init(FilterCoeff*);
 void filtercoeff_dispose(FilterCoeff*);
-float filtercoeff_cutoff(FilterType ft, int v);
-float filtercoeff_resonance(FilterType ft, int freq, int r);
+float filtercoeff_cutoff(psy_dsp_FilterType ft, int v);
+float filtercoeff_resonance(psy_dsp_FilterType ft, int freq, int r);
 void filtercoeff_setsamplerate(FilterCoeff* self, float samplerate);
 INLINE float filtercoeff_getsamplerate(FilterCoeff* self) { return self->samplerate; };
-void filtercoeff_computecoeffs(FilterCoeff* self, FilterType t, int freq, int r);
+void filtercoeff_computecoeffs(FilterCoeff* self, psy_dsp_FilterType t, int freq, int r);
 float filtercoeff_cutoffinternal(int v);
 float filtercoeff_resonanceinternal(float v);
 float filtercoeff_bandwidthinternal(int v);
@@ -75,7 +75,7 @@ typedef struct FilterVtable {
 
 typedef struct Filter {
 	FilterVtable* vtable;
-	FilterType _type;
+	psy_dsp_FilterType _type;
 	int _cutoff;
 	int _q;
 
@@ -93,7 +93,7 @@ void filter_init_samplerate(Filter*, int sampleRate);
 void filter_reset(Filter*);//Same as init, without samplerate
 void filter_dispose(Filter*);
 void filter_update(Filter*);
-const char* filter_name(FilterType);
+const char* filter_name(psy_dsp_FilterType);
 uintptr_t filter_numfilters(void);
 
 INLINE void filter_setcutoff(Filter* self, int iCutoff)
@@ -130,7 +130,7 @@ INLINE void filter_setsamplerate(Filter* self, int iSampleRate)
 	}
 }
 
-INLINE void filter_settype(Filter* self, FilterType newftype)
+INLINE void filter_settype(Filter* self, psy_dsp_FilterType newftype)
 {
 	if (newftype != self->_type) {
 		self->_type = newftype;
@@ -138,7 +138,7 @@ INLINE void filter_settype(Filter* self, FilterType newftype)
 	}
 }
 
-INLINE FilterType filter_type(Filter* self)
+INLINE psy_dsp_FilterType filter_type(Filter* self)
 {
 	return self->_type;
 }

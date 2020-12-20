@@ -106,8 +106,7 @@ void psy_audio_custommachine_dispose(psy_audio_CustomMachine* self)
 }
 
 void custommachine_dispose_memory(psy_audio_CustomMachine* self)
-{
-	psy_audio_buffer_deallocsamples(&self->memorybuffer);
+{	
 	psy_audio_buffer_dispose(&self->memorybuffer);
 }
 

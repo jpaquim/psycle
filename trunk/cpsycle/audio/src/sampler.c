@@ -76,7 +76,7 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self, psy_audio_Sampler
 	self->sampler = sampler;
 	self->inst = NULL;
 	self->instrument = 0xFF;
-	self->channel = -1;
+	self->channel = UINTPTR_MAX;
 	self->_sampleCounter = 0;
 	self->_cutoff = 0;
 	self->effCmd = PS1_SAMPLER_CMD_NONE;	
@@ -108,7 +108,7 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 		
 	psy_dsp_envelope_stop(&self->_filterEnv);
 	psy_dsp_envelope_stop(&self->_envelope);	
-	self->channel = -1;
+	self->channel = UINTPTR_MAX;
 	self->_triggerNoteOff = 0;
 	self->_triggerNoteDelay = 0;
 	self->effretTicks = 0;
@@ -144,7 +144,7 @@ static void psy_audio_sampler_stopinstrument(psy_audio_Sampler*,
 	int insIdx);
 static void psy_audio_sampler_setsamplerate(psy_audio_Sampler*, int sr);
 static bool psy_audio_sampler_playstrack(psy_audio_Sampler*, int track);
-static int psy_audio_sampler_getcurrentvoice(psy_audio_Sampler*, int track);
+static uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler*, int track);
 static void psy_audio_sampler_newline(psy_audio_Sampler*);
 static void psy_audio_sampler_clearmulticmdmem(psy_audio_Sampler*);
 static uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler*);
@@ -368,7 +368,7 @@ bool psy_audio_sampler_playstrack(psy_audio_Sampler* self, int track)
 }
 
 // mfc-psycle: Sampler::GetCurrentVoice(int track) const
-int psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, int track)
+uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, int track)
 {
 	uintptr_t voice;
 
@@ -377,12 +377,12 @@ int psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, int track)
 		// ENV_OFF is not checked, because channel will be -1
 		if (self->_voices[voice].channel == track &&
 			(self->_voices[voice]._triggerNoteDelay > 0) ||
-				psy_dsp_envelope_playing(&self->_voices[voice]._envelope)) {
-				//self->_voices[voice]._envelope.stage != ENV_FASTRELEASE)) {
+				(psy_dsp_envelope_playing(&self->_voices[voice]._envelope) &&
+				!(self->_voices[voice]._envelope.fastrelease))) {
 			return voice;
 		}
 	}
-	return -1;
+	return UINTPTR_MAX;
 }
 
 // mfc-psycle: Sampler::NewLine()
@@ -929,7 +929,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 			{
 				self->_triggerNoteDelay = 0;
 			}
-			psy_dsp_envelope_reset(&self->_envelope);
+			psy_dsp_envelope_start(&self->_envelope);
 			//self->_envelope.stage = ENV_ATTACK;
 		} else if (!psy_dsp_envelope_playing(&self->_envelope))  //self->_envelope.stage == ENV_OFF)
 		{
@@ -964,14 +964,14 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 				}
 				// Amplitude section
 				{
-					psy_dsp_envelope_tick(&self->_envelope);
+					psy_dsp_envelope_tick_ps1(&self->_envelope);
 					psy_audio_samplervoice_rampvolume(self);
 				}
 				// Filter section
 				//
 				if (filter_type(&self->_filter) != F_NONE)
 				{
-					psy_dsp_envelope_tick(&self->_filterEnv);
+					psy_dsp_envelope_tick_ps1(&self->_filterEnv);
 					int newcutoff = (int)(self->_cutoff + self->_filterEnv.value * self->_coModify + 0.5f);
 					if (newcutoff < 0) {
 						newcutoff = 0;
@@ -1042,10 +1042,8 @@ void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice* self)
 {
 	assert(self);
-	//psy_dsp_envelope_fastrelease(&self->_envelope);
-	psy_dsp_envelope_release(&self->_envelope);
-	// psy_dsp_envelope_fastrelease(&self->_filterEnv);
-	psy_dsp_envelope_release(&self->_filterEnv);
+	psy_dsp_envelope_fastrelease(&self->_envelope);	
+	psy_dsp_envelope_fastrelease(&self->_filterEnv);	
 	self->_triggerNoteDelay = 0;
 	self->_triggerNoteOff = 0;
 }

@@ -312,7 +312,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 					self->cutoff = realvalue;
 					//if (voice)
 					//{
-					//	if (voice->FilterType() == F_NONE) voice->FilterType(self->defaultfiltertype);
+					//	if (voice->psy_dsp_FilterType() == F_NONE) voice->psy_dsp_FilterType(self->defaultfiltertype);
 					//	voice->CutOff(m_Cutoff);
 					//}
 					break;
@@ -320,7 +320,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 					self->ressonance = realvalue;
 					//if (voice)
 					//{
-					//	if (voice->FilterType() == F_NONE) voice->FilterType(m_DefaultFilterType);
+					//	if (voice->psy_dsp_FilterType() == F_NONE) voice->psy_dsp_FilterType(m_DefaultFilterType);
 					//	voice->Ressonance(m_Ressonance);
 					//}
 					break;
@@ -354,7 +354,7 @@ void psy_audio_xmsamplerchannel_seteffect(psy_audio_XMSamplerChannel* self,
 						} else { // 1E..1F
 							self->defaultfiltertype = F_BANDREJECT12E;
 						}
-						// if (voice) { voice->FilterType(m_DefaultFilterType); }
+						// if (voice) { voice->psy_dsp_FilterType(m_DefaultFilterType); }
 					}
 					break;
 				default:
@@ -662,7 +662,7 @@ bool  psy_audio_xmsamplerchannel_load(psy_audio_XMSamplerChannel* self,
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));
 	self->defaultressonance = temp32;
 	psyfile_read(songfile->file, &temp32, sizeof(temp32));
-	self->defaultfiltertype = (FilterType)temp32;
+	self->defaultfiltertype = (psy_dsp_FilterType)temp32;
 	return TRUE;
 }
 

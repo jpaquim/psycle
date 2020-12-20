@@ -422,8 +422,7 @@ void xm_readinstrument(psy_audio_SongFile* self, uint32_t slot, uint32_t start, 
 
 				smpbuf = malloc(xmsamples[s].samplen);
 				psyfile_read(self->file, smpbuf, xmsamples[s].samplen);
-				sample->channels.samples[0] = dsp.memory_alloc(sample->numframes,
-					sizeof(psy_dsp_amp_t));
+				psy_audio_sample_allocwavedata(sample);				
 				oldvalue = 0;
 				for (i = 0, j = 0; i < sample->numframes; ++i) {
 					int16_t value;
@@ -723,8 +722,9 @@ void psy_audio_mod_loadsampledata(psy_audio_SongFile* self, psy_audio_Sample* _w
 	psyfile_read(self->file, smpbuf, smplen);
 
 	sampleCnt = smplen;
-	_wave->channels.samples[0] = dsp.memory_alloc(smplen, sizeof(psy_dsp_amp_t));
+	psy_audio_sample_resize(_wave, 1);
 	_wave->numframes = smplen;
+	psy_audio_sample_allocwavedata(_wave);	
 	// 8 bit mono sample
 	for (j = 0; j < sampleCnt; j++)
 	{

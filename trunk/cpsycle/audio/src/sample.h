@@ -280,6 +280,12 @@ INLINE uintptr_t psy_audio_sample_numchannels(psy_audio_Sample* self)
 	return psy_audio_buffer_numchannels(&self->channels);
 }
 
+INLINE void psy_audio_sample_resize(psy_audio_Sample* self,
+	uintptr_t numchannels)
+{
+	psy_audio_buffer_resize(&self->channels, numchannels);	
+}
+
 #ifdef __cplusplus
 }
 #endif

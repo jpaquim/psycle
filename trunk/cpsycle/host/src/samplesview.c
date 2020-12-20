@@ -1147,7 +1147,7 @@ void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 			psy_audio_InstrumentEntry entry;
 			psy_Path path;
 
-			sample = psy_audio_sample_allocinit(2);
+			sample = psy_audio_sample_allocinit(0);
 			psy_path_init(&path, psy_ui_opendialog_filename(&dialog));
 			psy_audio_sample_load(sample, &path);
 			psy_path_dispose(&path);

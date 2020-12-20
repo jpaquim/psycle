@@ -713,8 +713,7 @@ void sampleeditor_initsampler(SampleEditor* self)
 
 void sampleeditor_ondestroy(SampleEditor* self, psy_ui_Component* sender)
 {		
-	psy_audio_machine_dispose(&self->sampler.custommachine.machine);
-	psy_audio_buffer_deallocsamples(&self->samplerbuffer);
+	psy_audio_machine_dispose(&self->sampler.custommachine.machine);	
 	psy_audio_buffer_dispose(&self->samplerbuffer);	
 	psy_signal_dispose(&self->signal_samplemodified);
 	psy_signal_disconnect(&self->workspace->signal_songchanged, self,
