@@ -101,7 +101,7 @@ void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* s
 	psy_audio_Machine* machine, intptr_t width, intptr_t height)
 {
 	if (machine == self->machine) {		
-		psy_ui_component_setpreferredsize(self,
+		psy_ui_component_setpreferredsize(machineeditorview_base(self),
 			psy_ui_size_make(
 				psy_ui_value_makepx(width),
 				psy_ui_value_makepx(height)));

@@ -20,7 +20,10 @@
 #include <uisavedialog.h>
 #ifdef DIVERSALIS__OS__MICROSOFT
 // For directx drivers to get the win32 mainwindow handle
-#include <uiwincomponentimp.h> 
+#include <uiwincomponentimp.h>
+// thread for pluginscan
+#include <windows.h>
+#include <process.h>
 #endif
 // platform
 #include "../../detail/portable.h"
@@ -310,11 +313,24 @@ const char* workspace_driverpath(Workspace* self)
 	return audioconfig_driverpath(&self->config.audio);
 }
 
+#ifdef DIVERSALIS__OS__MICROSOFT
+static void pluginscanthread(void* context)
+{
+	Workspace* self;
+
+	self = context;
+	plugincatcher_scan(&self->plugincatcher);
+}
+#endif
+
 void workspace_scanplugins(Workspace* self)
 {		
 	assert(self);
-
+#ifdef DIVERSALIS__OS__MICROSOFT
+	_beginthread(pluginscanthread, 0, self);	
+#else
 	plugincatcher_scan(&self->plugincatcher);
+#endif
 }
 
 void workspace_onscanprogress(Workspace* self, psy_audio_PluginCatcher* sender,

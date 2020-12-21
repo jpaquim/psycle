@@ -91,6 +91,8 @@ typedef struct NewMachine {
 	MachineViewSkin* skin;
 	psy_ui_Scroller scroller_fav;
 	psy_ui_Scroller scroller_main;
+	// internal data
+	bool scanending;
 	// Signals
 	psy_Signal signal_selected;
 	// references
