@@ -17,6 +17,7 @@
 #include <datacompression.h>
 #include <operations.h>
 // std
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 // platform
@@ -44,7 +45,7 @@ static void psy2loader_readvsts(PSY2Loader*);
 static void psy2loader_readmachines(PSY2Loader*);
 static void psy2loader_addmachines(PSY2Loader*);
 static void psy2loader_machine_load(PSY2Loader*, uintptr_t slot);
-static void psy2loader_master_load(PSY2Loader*, uintptr_t slot);
+static void psy2loader_master_load(PSY2Loader*, psy_audio_Machine*, uintptr_t slot);
 static void psy2loader_sampler_load(PSY2Loader*, psy_audio_Machine*, uintptr_t slot);
 static void psy2loader_plugin_load(PSY2Loader*, psy_audio_Machine*,
 	uintptr_t slot);
@@ -368,12 +369,12 @@ void psy2loader_readinstruments(PSY2Loader* self)
 		int32_t tmp;
 		psyfile_read(self->songfile->file, &tmp, sizeof tmp);
 		//Truncate to 220 samples boundaries, and ensure it is not zero.
-		tmp = (tmp / 220) * 220; if (tmp <= 0) tmp = 1;
+		tmp = (tmp / 220) * 220; if (tmp <= 0) tmp = 1;		
 		ENV_F_DT[i] = tmp;
 	}
 	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
 	{
-		psyfile_read(self->songfile->file, &ENV_F_SL, sizeof ENV_F_SL[0]);
+		psyfile_read(self->songfile->file, &ENV_F_SL[i], sizeof ENV_F_SL[0]);
 	}
 	for (i = 0; i < OLD_MAX_INSTRUMENTS; i++)
 	{
@@ -498,11 +499,42 @@ void psy2loader_readinstruments(PSY2Loader* self)
 						psy_audio_instrument_setindex(instrument, i);
 						psy_audio_instruments_insert(&self->songfile->song->instruments,
 							instrument, psy_audio_instrumentindex_make(0, i));
-					}
+						// read envelopes
+												// ENV_AT
+						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+							1, ENV_AT[i] *1.f / 44100, 1.f);
+						// ENV_DT, ENV_SL
+						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+							2, (ENV_AT[i] + ENV_DT[i]) * 1.f / 44100, ENV_SL[i] / 100.f);
+						// ENV_RT
+						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+							3, (ENV_AT[i] + ENV_DT[i] + ENV_RT[i]) * 1.f / 44100, 0.f);
 
+						// ENV_F_AT			
+						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+							1, ENV_AT[i] * 1.f / 44100, 1.f);
+						// ENV_DT, ENV_SL
+						// note: SL map range(128) differs from volume envelope(100)
+						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+							2, (ENV_AT[i] + ENV_DT[i]) * 1.f / 44100, ENV_SL[i] / 128.f);
+						// ENV_RT
+						psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
+							3, (ENV_AT[i] + ENV_DT[i] + ENV_RT[i]) * 1.f / 44100, 0.f);
+
+						instrument->filtercutoff = ENV_F_CO[i] / 127.f;
+						instrument->filterres = ENV_F_RQ[i] / 127.f;
+						instrument->filtermodamount = ENV_F_EA[i] / 255.f + 0.5f;
+						
+						instrument->filtertype = (psy_dsp_FilterType)ENV_F_TP[i];
+
+						instrument->randompan = _RPAN[i];
+						instrument->_RCUT = _RCUT[i];
+						instrument->_RRES = _RRES[i];
+					}
 				} else
 				{
 					unsigned char stereo;
+
 					psyfile_skip(self->songfile->file, 42 + sizeof(unsigned char));
 					psyfile_read(self->songfile->file, &stereo, sizeof(unsigned char));
 					psyfile_skip(self->songfile->file, wltemp);
@@ -565,7 +597,7 @@ void psy2loader_readmachines(PSY2Loader* self)
 				case MACH_MASTER:
 					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_MASTER, "", UINTPTR_MAX);
 					// psy_audio_machines_insert(&songfile->song->machines, psy_audio_MASTER_INDEX, pMac[i]);
-					psy2loader_master_load(self, i);
+					psy2loader_master_load(self, self->pMac[i], i);
 					break;
 				case MACH_SAMPLER: {
 					self->pMac[i] = psy_audio_machinefactory_makemachine(factory, MACH_SAMPLER, "", UINTPTR_MAX);
@@ -978,7 +1010,7 @@ void psy2loader_machine_load(PSY2Loader* self, uintptr_t slot)
 	psyfile_skip(self->songfile->file, 109);
 }
 
-void psy2loader_master_load(PSY2Loader* self, uintptr_t slot)
+void psy2loader_master_load(PSY2Loader* self, psy_audio_Machine* master, uintptr_t slot)
 {
 	char editname[32];
 	cpoint_t connectionpoint[PSY2_MAX_CONNECTIONS];
@@ -1002,6 +1034,15 @@ void psy2loader_master_load(PSY2Loader* self, uintptr_t slot)
 
 	// outdry
 	psyfile_read(self->songfile->file, &_outDry, sizeof(int));
+	{
+		psy_audio_MachineParam* param;
+
+		param = psy_audio_machine_tweakparameter(master, 0);
+		if (param) {
+			psy_audio_machine_parameter_tweak(master,
+				param, sqrt(_outDry / 256.f / 4.f));
+		}
+	}
 	psyfile_skip(self->songfile->file, 65);
 }
 

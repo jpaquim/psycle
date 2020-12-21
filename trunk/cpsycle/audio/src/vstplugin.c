@@ -27,6 +27,24 @@
 static const VstInt32 kBlockSize = 512;
 static const VstInt32 kNumProcessCycles = 5;
 
+static void vsttimeinfo_init_default(struct VstTimeInfo* rv)
+{	
+	rv->samplePos = 0.0;
+	rv->sampleRate = 44100.0;
+	rv->nanoSeconds = 0.0;
+	rv->ppqPos = 0.0;
+	rv->tempo = 120.0;
+	rv->barStartPos = 0.0;
+	rv->cycleStartPos = 0.0;
+	rv->cycleEndPos = 0.0;
+	rv->timeSigNumerator = 4;
+	rv->timeSigDenominator = 4;
+	rv->smpteOffset = 0;
+	rv->smpteFrameRate = 1;
+	rv->samplesToNextClock = 0;
+	rv->flags = 0;
+}
+
 // Parameter
 static int vstpluginparam_name(psy_audio_VstPluginMachineParam*, char* text);
 static int vstpluginparam_label(psy_audio_VstPluginMachineParam*, char* text);
@@ -188,6 +206,8 @@ static void vstplugin_onfileselect(psy_audio_VstPlugin*, struct VstFileSelect*);
 static void initparameters(psy_audio_VstPlugin*);
 static void disposeparameters(psy_audio_VstPlugin*);
 
+static void update_vsttimeinfo(psy_audio_VstPlugin*);
+
 // init vstplugin class vtable
 static MachineVtable vtable;
 static int vtable_initialized = 0;
@@ -240,6 +260,8 @@ void psy_audio_vstplugin_init(psy_audio_VstPlugin* self, psy_audio_MachineCallba
 	self->editorhandle = 0;
 	self->events = 0;
 	self->plugininfo = 0;
+	self->vsttimeinfo = (struct VstTimeInfo*)malloc(sizeof(struct VstTimeInfo));	
+	vsttimeinfo_init_default(self->vsttimeinfo);
 	psy_table_init(&self->tracknote);
 	psy_library_init(&self->library);
 	psy_library_load(&self->library, path);		
@@ -303,6 +325,7 @@ void dispose(psy_audio_VstPlugin* self)
 	}
 	psy_table_dispose(&self->tracknote);
 	disposeparameters(self);
+	free(self->vsttimeinfo);
 	psy_audio_custommachine_dispose(&self->custommachine);
 }
 
@@ -350,9 +373,16 @@ int psy_audio_plugin_vst_test(const char* path, psy_audio_MachineInfo* rv)
 			mainentry = getmainentry(&library);
 			if (mainentry) {
 				AEffect* effect;
-				
-				effect = mainentry(hostcallback);				
-				vst = effect && makemachineinfo(effect, rv, path, 0) == 0;
+								
+				effect = mainentry(hostcallback);
+				if (effect) {
+					effect->user = NULL;
+					effect->dispatcher(effect, effOpen, 0, 0, 0, 0);
+					vst = effect && makemachineinfo(effect, rv, path, 0) == 0;
+					effect->dispatcher(effect, effClose, 0, 0, 0, 0);
+				} else {
+					vst = 0;
+				}
 			}	
 		}
 		psy_library_dispose(&library);	
@@ -882,11 +912,17 @@ int mode(psy_audio_VstPlugin* self)
 		: MACHMODE_FX;
 }
 
-VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
+VstIntPtr VSTCALLBACK hostcallback(AEffect* effect, VstInt32 opcode, VstInt32 index, VstIntPtr value, void* ptr, float opt)
 {
 	VstIntPtr result = 0;
 	psy_audio_VstPlugin* self;	
 	
+	if (opcode != 7) {
+		TRACE("vst-opcode: ");
+		TRACE_INT(opcode);
+		TRACE("\n");
+	}
+
 	if (effect) {
 		self = (psy_audio_VstPlugin*) effect->user;
 	} else
@@ -899,9 +935,20 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 	{
 		case audioMasterVersion :
 			result = kVstVersion;
-		break;		
+			break;		
 		case audioMasterIdle:            
-        break;
+			break;
+		case audioMasterGetCurrentProcessLevel:
+			result = kVstProcessLevelUnknown;
+			break;
+		case audioMasterGetVendorString:
+			psy_snprintf((char*)(ptr), kVstMaxVendorStrLen, "Psycledelics");
+			result = TRUE;
+			break;
+		case audioMasterGetProductString:
+			psy_snprintf((char*)(ptr), kVstMaxProductStrLen, "Psycle VSTHost");
+			result = TRUE;
+			break;
 		case audioMasterGetSampleRate:
 			if (self) {
 				result = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
@@ -909,11 +956,35 @@ VstIntPtr VSTCALLBACK hostcallback (AEffect* effect, VstInt32 opcode, VstInt32 i
 			} else {
 				result = 44100;
 			}
-		break;
+			break;
+		case audioMasterGetTime:
+			if (self && self->vsttimeinfo) {
+				update_vsttimeinfo(self);
+				result = (VstIntPtr)self->vsttimeinfo;
+			}			
+			break;
 		case audioMasterOpenFileSelector :
 			if (self) {
 				vstplugin_onfileselect(self, (struct VstFileSelect*)ptr);
 			}
+		case audioMasterSizeWindow:
+			if (self) {
+				result = psy_audio_machine_editresize(
+					psy_audio_vstplugin_base(self),
+					(intptr_t)index, (intptr_t)value);
+			}			
+			break;
+		case audioMasterCanDo: {
+			char* str;
+
+			str = (char*)ptr;
+			if (strcmp(str, "sizeWindow") == 0) {
+				result = TRUE;
+			} else {
+				result = FALSE;
+			}
+			self = self;
+			break; }
 		break;		
 		default:
 		break;
@@ -1019,4 +1090,10 @@ void currentpreset(psy_audio_VstPlugin* self, psy_audio_Preset* preset)
 	preset->id = self->effect->uniqueID;
 	preset->magic = self->effect->magic;
 	preset->version = self->effect->version;
+}
+
+void update_vsttimeinfo(psy_audio_VstPlugin* self)
+{	
+	self->vsttimeinfo->sampleRate = psy_audio_machine_samplerate(psy_audio_vstplugin_base(
+		self));	
 }

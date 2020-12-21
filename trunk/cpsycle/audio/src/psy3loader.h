@@ -14,7 +14,10 @@ struct psy_audio_SongFile;
 
 typedef struct psy_audio_PSY3Loader {
 	struct psy_audio_SongFile* songfile;
-	psy_audio_LegacyWires legacywires;
+	psy_audio_LegacyWires legacywires;	
+	struct PsyFile* fp;
+	struct psy_audio_Song* song;
+	int progress;
 } psy_audio_PSY3Loader;
 
 void psy_audio_psy3loader_init(psy_audio_PSY3Loader*,

@@ -400,14 +400,14 @@ psy_audio_MachineParam* parameter(psy_audio_Master* self, uintptr_t id)
 	if (row == 2) {
 		self->param_level.index = col;
 		return &self->param_level.machineparam;
-	}
+	}	
 	return NULL;	
 }
 
 psy_audio_MachineParam* tweakparameter(psy_audio_Master* self, uintptr_t id)
 {
 	if (id == 0) {
-		self->param_slider.index = 0;
+		self->param_slider.index = 0;		
 		return &self->param_slider.machineparam;
 	}
 	return NULL;

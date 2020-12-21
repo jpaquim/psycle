@@ -11,7 +11,7 @@ extern "C" {
 struct psy_audio_SongFile;
 
 typedef struct psy_audio_PSY3Saver {
-	struct psy_audio_SongFile* songfile;
+	struct psy_audio_SongFile* songfile;	
 } psy_audio_PSY3Saver;
 
 void psy_audio_psy3saver_init(psy_audio_PSY3Saver*, struct psy_audio_SongFile*);

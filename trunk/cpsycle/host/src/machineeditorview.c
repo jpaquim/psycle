@@ -14,6 +14,8 @@ static void machineeditorview_ondestroy(MachineEditorView*, psy_ui_Component* se
 static void machineeditorview_onpreferredsize(MachineEditorView*,
 	psy_ui_Size* limit, psy_ui_Size* rv);
 static void machineeditorview_ontimer(MachineEditorView*, uintptr_t id);
+static void machineeditorview_onmachineeditresize(MachineEditorView*,
+	Workspace* sender, psy_audio_Machine*, intptr_t w, intptr_t h);
 
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 static psy_ui_win_ComponentImp* psy_ui_win_component_details(psy_ui_Component* self)
@@ -42,12 +44,15 @@ void machineeditorview_init(MachineEditorView* self, psy_ui_Component* parent,
 	machineeditorview_vtable_init(self);
 	self->component.vtable = &machineeditorview_vtable;
 	self->machine = machine;
+	self->workspace = workspace;
 #if PSYCLE_USE_TK == PSYCLE_TK_WIN32
 	psy_audio_machine_seteditorhandle(machine,
 		(void*) psy_ui_win_component_details(&self->component)->hwnd);
 #endif
 	psy_signal_connect(&self->component.signal_destroy, self,
 		machineeditorview_ondestroy);
+	psy_signal_connect(&workspace->signal_machineeditresize, self,
+		machineeditorview_onmachineeditresize);
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
@@ -55,6 +60,7 @@ void machineeditorview_ondestroy(MachineEditorView* self, psy_ui_Component* send
 {
 	if (self->machine) {
 		psy_audio_machine_seteditorhandle(self->machine, NULL);
+		psy_signal_disconnect_context(&self->workspace->signal_machineeditresize, self);
 	}
 }
 
@@ -89,4 +95,16 @@ void machineeditorview_onpreferredsize(MachineEditorView* self, psy_ui_Size* lim
 	psy_audio_machine_editorsize(self->machine, &width, &height);
 	rv->width = psy_ui_value_makepx(width);
 	rv->height = psy_ui_value_makepx(height);	
+}
+
+void machineeditorview_onmachineeditresize(MachineEditorView* self, Workspace* sender,
+	psy_audio_Machine* machine, intptr_t width, intptr_t height)
+{
+	if (machine == self->machine) {		
+		psy_ui_component_setpreferredsize(self,
+			psy_ui_size_make(
+				psy_ui_value_makepx(width),
+				psy_ui_value_makepx(height)));
+		psy_signal_emit(&self->component.signal_preferredsizechanged, self, 0);
+	}
 }

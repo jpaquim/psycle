@@ -113,41 +113,23 @@ void virtualgeneratorbox_updategenerator(VirtualGeneratorsBox* self)
 {
 	if (psy_ui_checkbox_checked(&self->active)) {
 		if (psy_ui_combobox_cursel(&self->generators) != -1 &&
-			psy_ui_combobox_cursel(&self->samplers) != -1) {
-			psy_audio_Machine* generator;
-
-			generator = psy_audio_machines_at(&self->workspace->song->machines,
-				psy_ui_combobox_cursel(&self->generators) + 0x81);
-			if (generator) {
-				psy_audio_machines_remove(&self->workspace->song->machines,
-					psy_ui_combobox_cursel(&self->generators) + 0x81);
-			}
-			generator = psy_audio_machinefactory_makemachinefrompath(
-				&self->workspace->machinefactory, MACH_VIRTUALGENERATOR,
-				NULL, 
+				psy_ui_combobox_cursel(&self->samplers) != -1) {			
+			psy_audio_song_insertvirtualgenerator(self->workspace->song,
+				psy_ui_combobox_cursel(&self->generators) + 0x81,
 				(uintptr_t)psy_ui_combobox_itemdata(&self->samplers,
 					psy_ui_combobox_cursel(&self->samplers)),
-				psy_audio_instruments_selected(&self->workspace->song->instruments).subslot);
-			if (generator) {
-				char editname[256];
-
-				psy_snprintf(editname, 256, "Virtual Generator");
-				psy_audio_machine_seteditname(generator, editname);
-				psy_audio_machines_insert(&self->workspace->song->machines,
-					psy_ui_combobox_cursel(&self->generators) + 0x81, generator);
-			}
+				psy_audio_instruments_selected(
+					&self->workspace->song->instruments).subslot);
 		}
-	} else {
-		if (psy_ui_combobox_cursel(&self->generators) != -1) {
-			psy_audio_Machine* generator;
+	} else if (psy_ui_combobox_cursel(&self->generators) != -1) {
+		psy_audio_Machine* generator;
 
-			generator = psy_audio_machines_at(&self->workspace->song->machines,
+		generator = psy_audio_machines_at(&self->workspace->song->machines,
+			psy_ui_combobox_cursel(&self->generators) + 0x81);
+		if (generator) {
+			psy_audio_machines_remove(&self->workspace->song->machines,
 				psy_ui_combobox_cursel(&self->generators) + 0x81);
-			if (generator) {
-				psy_audio_machines_remove(&self->workspace->song->machines,
-					psy_ui_combobox_cursel(&self->generators) + 0x81);
-			}
-		}
+		}		
 	}	
 }
 

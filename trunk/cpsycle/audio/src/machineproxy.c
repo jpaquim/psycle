@@ -79,6 +79,7 @@ static struct psy_audio_Machines* machineproxy_machines(psy_audio_MachineProxy*)
 static struct psy_audio_Instruments* machineproxy_instruments(psy_audio_MachineProxy*);
 static struct psy_audio_MachineFactory* machineproxy_machinefactory(psy_audio_MachineProxy*);
 static void machineproxy_output(psy_audio_MachineProxy*, const char* text);
+static bool machineproxy_editresize(psy_audio_MachineProxy*, intptr_t w, intptr_t h);
 static bool machineproxy_addcapture(psy_audio_MachineProxy*, int index);
 static bool machineproxy_removecapture(psy_audio_MachineProxy*, int index);
 static void machineproxy_readbuffers(psy_audio_MachineProxy*, int index, float** pleft, float** pright, int numsamples);
@@ -218,6 +219,8 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_machinefactory;
 		vtable.output = (fp_machine_output)
 			machineproxy_output;
+		vtable.editresize = (fp_machine_editresize)
+			machineproxy_editresize;
 		vtable.addcapture = (fp_machine_addcapture) machineproxy_addcapture;
 		vtable.removecapture = (fp_machine_removecapture) machineproxy_removecapture;
 		vtable.readbuffers = (fp_machine_readbuffers) machineproxy_readbuffers;
@@ -1122,6 +1125,24 @@ void machineproxy_output(psy_audio_MachineProxy* self, const char* text)
 		}
 #endif			
 }
+
+bool machineproxy_editresize(psy_audio_MachineProxy* self, intptr_t w, intptr_t h)
+{
+	bool rv = FALSE;
+#if defined DIVERSALIS__OS__MICROSOFT        
+	__try
+#endif		
+	{
+		rv = psy_audio_machine_editresize(self->client, w, h);
+	}
+#if defined DIVERSALIS__OS__MICROSOFT		
+	__except (FilterException(self, "editresize", GetExceptionCode(),
+		GetExceptionInformation())) {
+	}
+#endif			
+	return rv;
+}
+
 
 bool machineproxy_addcapture(psy_audio_MachineProxy* self, int index)
 {

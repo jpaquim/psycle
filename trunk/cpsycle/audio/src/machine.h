@@ -62,6 +62,7 @@ typedef	struct psy_audio_MachineFactory* (*fp_mcb_machinefactory)(void*);
 typedef	bool (*fp_mcb_fileselect_load)(void*, char filter[], char inoutName[]);
 typedef	bool (*fp_mcb_fileselect_save)(void*, char filter[], char inoutName[]);
 typedef	void (*fp_mcb_fileselect_directory)(void*);
+typedef	bool (*fp_mcb_editresize)(void*, void* sender, intptr_t w, intptr_t h);
 typedef	void (*fp_mcb_output)(void*, const char* text);
 typedef	bool (*fp_mcb_addcapture)(void*, int index);
 typedef	bool (*fp_mcb_removecapture)(void*, int index);
@@ -87,7 +88,8 @@ typedef struct  {
 	fp_mcb_machinefactory machinefactory;
 	fp_mcb_fileselect_load fileselect_load;
 	fp_mcb_fileselect_save fileselect_save;
-	fp_mcb_fileselect_directory fileselect_directory;
+	fp_mcb_fileselect_directory fileselect_directory;	
+	fp_mcb_editresize editresize;
 	fp_mcb_output output;
 	fp_mcb_addcapture addcapture;
 	fp_mcb_removecapture removecapture;
@@ -257,6 +259,7 @@ typedef	struct psy_audio_Instruments* (*fp_machine_instruments)(struct
 typedef	struct psy_audio_MachineFactory* (*fp_machine_machinefactory)(struct
 	psy_audio_Machine*);
 typedef void (*fp_machine_output)(struct psy_audio_Machine*, const char* text);
+typedef	bool(*fp_machine_editresize)(struct psy_audio_Machine*, intptr_t w, intptr_t h);
 typedef bool (*fp_machine_addcapture)(struct psy_audio_Machine*, int idx);
 typedef bool (*fp_machine_removecapture)(struct psy_audio_Machine*, int idx);
 typedef void (*fp_machine_readbuffers)(struct psy_audio_Machine*, int index,
@@ -360,6 +363,7 @@ typedef struct {
 	fp_machine_haseditor haseditor;
 	fp_machine_seteditorhandle seteditorhandle;
 	fp_machine_editorsize editorsize;
+	fp_machine_editresize editresize;
 	fp_machine_editoridle editoridle;
 	fp_machine_setposition setposition;
 	fp_machine_position position;
@@ -989,6 +993,12 @@ INLINE struct psy_audio_Instruments* psy_audio_machine_instruments(
 	psy_audio_Machine* self)
 {
 	return self->vtable->instruments(self);
+}
+
+INLINE bool psy_audio_machine_editresize(psy_audio_Machine* self,
+	uintptr_t width, uintptr_t height)
+{
+	return self->vtable->editresize(self, width, height);
 }
 
 INLINE struct psy_audio_MachineFactory* psy_audio_machine_machinefactory(

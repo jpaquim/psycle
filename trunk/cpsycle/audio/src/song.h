@@ -100,6 +100,9 @@ psy_audio_Song* psy_audio_song_allocinit(struct psy_audio_MachineFactory*);
 void psy_audio_song_deallocate(psy_audio_Song*);
 /// clears the song completly (no master, no pattern, no sequence track/entry)
 void psy_audio_song_clear(psy_audio_Song*);
+/// adds a virtual generator
+void psy_audio_song_insertvirtualgenerator(psy_audio_Song*,
+	uintptr_t virtual_inst, uintptr_t mac_idx, uintptr_t inst_idx);
 /// getter of the song parts
 INLINE psy_audio_Machines* psy_audio_song_machines(psy_audio_Song* self)
 {

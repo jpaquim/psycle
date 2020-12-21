@@ -1172,6 +1172,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 	if (self->dragslot != UINTPTR_MAX) {
 		if (machinewireview_dragging_machine(self)) {
 			psy_ui_component_updateoverflow(&self->component);
+			psy_ui_mouseevent_stoppropagation(ev);
 		} else if (machinewireview_dragging_connection(self)) {
 			if (self->mousemoved) {
 				uintptr_t slot = self->dragslot;
@@ -1180,13 +1181,13 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 				if (self->dragslot != UINTPTR_MAX) {
 					if (!machinewireview_dragging_newconnection(self)) {
 						psy_audio_machines_disconnect(self->machines,
-							self->selectedwire);
+							self->selectedwire);						
 					}
 					if (self->dragmode < MACHINEWIREVIEW_DRAG_RIGHTCONNECTION) {
 						if (psy_audio_machines_valid_connection(self->machines,
 							psy_audio_wire_make(slot, self->dragslot))) {
 							psy_audio_machines_connect(self->machines,
-								psy_audio_wire_make(slot, self->dragslot));
+								psy_audio_wire_make(slot, self->dragslot));							
 						}
 					} else if (psy_audio_machines_valid_connection(self->machines,
 							psy_audio_wire_make(self->dragslot, slot))) {
@@ -1194,6 +1195,7 @@ void machinewireview_onmouseup(MachineWireView* self, psy_ui_MouseEvent* ev)
 							psy_audio_wire_make(self->dragslot, slot));						
 					}
 				}
+				psy_ui_mouseevent_stoppropagation(ev);
 			} else if (ev->button == 2) {
 				if (!self->workspace->gearvisible) {
 					workspace_togglegear(self->workspace);					
@@ -2030,21 +2032,19 @@ void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 }
 
 void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
-{
-	if (ev->button == 2) {
-		if (tabbar_selected(&self->tabbar) ==
-			SECTION_ID_MACHINEVIEW_NEWMACHINE) {
-			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);
-		}
-	}
+{	
 	psy_ui_mouseevent_stoppropagation(ev);
 }
 
 void machineview_onmouseup(MachineView* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button == 2 && tabbar_selected(&self->tabbar) ==
-			SECTION_ID_MACHINEVIEW_WIRES) {
-		workspace_togglegear(self->workspace);
+	if (ev->button == 2) {
+		if (tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
+			workspace_togglegear(self->workspace);
+		} else if (tabbar_selected(&self->tabbar) ==
+				SECTION_ID_MACHINEVIEW_NEWMACHINE) {
+			tabbar_select(&self->tabbar, SECTION_ID_MACHINEVIEW_WIRES);			
+		}
 	}
 }
 

@@ -18,7 +18,8 @@ extern "C" {
 
 typedef struct {
    psy_ui_Component component;   
-   psy_audio_Machine* machine;      
+   psy_audio_Machine* machine;
+   Workspace* workspace;
 } MachineEditorView;
 
 void machineeditorview_init(MachineEditorView*, psy_ui_Component* parent,

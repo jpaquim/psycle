@@ -90,7 +90,8 @@ static void machineframe_setdockbar(MachineFrame*);
 static void ondefaultfontchanged(MachineFrame*, Workspace* sender);
 static void machineframe_onzoomboxchanged(MachineFrame*, ZoomBox* sender);
 static void machineframe_onmouseup(MachineFrame*, psy_ui_Component* sender,
-	psy_ui_MouseEvent* ev);
+	psy_ui_MouseEvent*);
+
 // implementation
 void machineframe_init(MachineFrame* self, psy_ui_Component* parent,
 	bool floated, Workspace* workspace)

@@ -89,6 +89,11 @@ static struct psy_audio_MachineFactory* machinecallback_machinefactory(psy_audio
 }
 static bool machinecallback_fileselect_load(psy_audio_MachineCallback* self) { return FALSE; }
 static bool machinecallback_fileselect_save(psy_audio_MachineCallback* self) { return FALSE; }
+static bool machinecallback_editresize(psy_audio_MachineCallback* self, psy_audio_Machine* sender,
+	intptr_t w, intptr_t h)
+{
+	return FALSE;
+}
 static void machinecallback_fileselect_directory(psy_audio_MachineCallback* self) { }
 static void machinecallback_output(psy_audio_MachineCallback* self, const char* text) { }
 
@@ -167,6 +172,8 @@ static void psy_audio_machinecallbackvtable_init(void)
 			machinecallback_fileselect_load;
 		psy_audio_machinecallbackvtable_vtable.fileselect_save = (fp_mcb_fileselect_save)
 			machinecallback_fileselect_save;
+		psy_audio_machinecallbackvtable_vtable.editresize = (fp_mcb_editresize)
+			machinecallback_editresize;
 		psy_audio_machinecallbackvtable_vtable.fileselect_directory =
 			(fp_mcb_fileselect_directory)machinecallback_fileselect_directory;
 		psy_audio_machinecallbackvtable_vtable.output = (fp_mcb_output)
@@ -454,6 +461,11 @@ static void output(psy_audio_Machine* self, const char* text)
 	}
 }
 
+static bool editresize(psy_audio_Machine* self, intptr_t w, intptr_t h)
+{
+	return self->callback->vtable->editresize(self->callback, self, w, h);
+}
+
 static bool addcapture(psy_audio_Machine* self, int index)
 {
 	return (self->callback)
@@ -557,6 +569,7 @@ static void vtable_init(void)
 		vtable.samples = samples;
 		vtable.machines = machines;
 		vtable.output = output;
+		vtable.editresize = editresize;
 		vtable.addcapture = addcapture;
 		vtable.removecapture = removecapture;
 		vtable.readbuffers = readbuffers;

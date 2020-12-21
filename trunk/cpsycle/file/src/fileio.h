@@ -82,6 +82,7 @@ INLINE uint32_t psyfile_currchunkversion(const PsyFile* self)
 }
 
 
+
 static uint32_t FourCC(char *psname);
 
 #ifdef __cplusplus

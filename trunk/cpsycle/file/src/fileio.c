@@ -8,6 +8,12 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define VERSION_MAJOR_ZERO			0x00000000
+#define VERSION_MAJOR_ONE			0x00010000
+
+
+static bool psyfile_ischunkversion_major_zero(const PsyFile* self);
+
 uint32_t FourCC(char *psName)
 {
 	int32_t retbuf = 0x20202020;   // four spaces (padding)
@@ -322,7 +328,7 @@ int psyfile_readchunkbegin(PsyFile* self)
 	psyfile_read(self, &self->currchunk.version, sizeof(uint32_t));
 	psyfile_read(self, &self->currchunk.size, sizeof(uint32_t));
 	self->currchunk.begins = psyfile_getpos(self);
-	return 1;
+	return psyfile_ischunkversion_major_zero(self);
 }
 
 void psyfile_seekchunkend(PsyFile* self)
@@ -333,4 +339,9 @@ void psyfile_seekchunkend(PsyFile* self)
 int psyfile_error(PsyFile* self)
 {
 	return ferror(self->_file);
+}
+
+bool psyfile_ischunkversion_major_zero(const PsyFile* self)
+{
+	return (psyfile_currchunkversion(self) & 0xFFFF0000) == VERSION_MAJOR_ZERO;
 }

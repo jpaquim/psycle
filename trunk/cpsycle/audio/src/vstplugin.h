@@ -7,6 +7,8 @@
 #include "custommachine.h"
 #include "library.h"
 
+struct AEffect;
+
 typedef struct psy_audio_VstPluginMachineParam {
 	psy_audio_CustomMachineParam custommachineparam;
 	struct AEffect* effect;
@@ -23,6 +25,9 @@ typedef struct {
 	unsigned char midichan;
 } VstNote;
 
+struct VstTimeInfo;
+struct VstEvents;
+
 typedef struct {
 	psy_audio_CustomMachine custommachine;		
 	psy_Library library;
@@ -30,10 +35,11 @@ typedef struct {
 	psy_audio_MachineInfo* info;
 	void* editorhandle;
 	struct VstEvents* events;
+	struct VstTimeInfo* vsttimeinfo;
 	int eventcap;	
 	psy_audio_MachineInfo* plugininfo;
 	psy_Table tracknote;
-	psy_Table parameters;
+	psy_Table parameters;	
 } psy_audio_VstPlugin;
 
 void psy_audio_vstplugin_init(psy_audio_VstPlugin*, psy_audio_MachineCallback*, const char* path);
