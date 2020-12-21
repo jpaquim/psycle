@@ -138,7 +138,8 @@ typedef struct MainFrame {
 	// internal data
 	int startup;
 	bool startpage;
-	bool playrow;	
+	bool playrow;
+	int pluginscanprogress;
 	psy_audio_SequencerPlayMode restoreplaymode;
 	psy_dsp_big_beat_t restorenumplaybeats;
 	bool restoreloop;

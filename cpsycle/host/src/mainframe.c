@@ -180,6 +180,7 @@ void mainframe_init(MainFrame* self)
 void mainframe_initframe(MainFrame* self)
 {
 	self->startup = TRUE;
+	self->pluginscanprogress = -1;
 	psy_ui_frame_init_main(mainframe_base(self));
 	psy_ui_component_setvtable(mainframe_base(self), vtable_init(self));
 	psy_ui_component_seticonressource(mainframe_base(self), IDI_PSYCLEICON);
@@ -913,11 +914,7 @@ void mainframe_onsongloadprogress(MainFrame* self, Workspace* workspace,
 void mainframe_onpluginscanprogress(MainFrame* self, Workspace* workspace,
 	int progress)
 {	
-	if (progress == 0) {
-		psy_ui_progressbar_setprogress(&self->progressbar, 0);
-	} else {
-		psy_ui_progressbar_tick(&self->progressbar);
-	}
+	self->pluginscanprogress = progress;	
 }
 
 void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
@@ -1092,6 +1089,14 @@ void mainframe_ontimer(MainFrame* self, uintptr_t timerid)
 			psy_audio_sequencer_stoploop(&self->workspace.player.sequencer);
 		}
 		self->workspace.player.sequencer.playtrack = UINTPTR_MAX;
+	}
+	if (self->pluginscanprogress != -1) {
+		if (self->pluginscanprogress == 0) {
+			psy_ui_progressbar_setprogress(&self->progressbar, 0);
+			self->pluginscanprogress = -1;
+		} else {
+			psy_ui_progressbar_tick(&self->progressbar);
+		}
 	}
 }
 

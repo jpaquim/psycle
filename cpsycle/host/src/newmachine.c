@@ -638,6 +638,7 @@ static void newmachine_onfocus(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onrescan(NewMachine*, psy_ui_Component* sender);
 static void newmachine_onpluginscanprogress(NewMachine*, Workspace*,
 	int progress);
+static void newmachine_ontimer(NewMachine*, uintptr_t timerid);
 
 // vtable
 static psy_ui_ComponentVtable newmachine_vtable;
@@ -649,6 +650,8 @@ static void newmachine_vtable_init(NewMachine* self)
 		newmachine_vtable = *(self->component.vtable);				
 		newmachine_vtable.onkeydown = (psy_ui_fp_component_onkeydown)
 			newmachine_onkeydown;		
+		newmachine_vtable.ontimer = (psy_ui_fp_component_ontimer)
+			newmachine_ontimer;
 	}
 }
 // implementation
@@ -663,6 +666,7 @@ void newmachine_init(NewMachine* self, psy_ui_Component* parent,
 	self->component.vtable = &newmachine_vtable;
 	self->skin = skin;
 	self->workspace = workspace;
+	self->scanending = FALSE;
 	newmachinedetail_init(&self->detail, &self->component, workspace);
 	psy_ui_component_setalign(&self->detail.component, psy_ui_ALIGN_LEFT);
 	psy_ui_notebook_init(&self->notebook, &self->component);
@@ -1003,6 +1007,8 @@ void newmachine_onfocus(NewMachine* self, psy_ui_Component* sender)
 
 void newmachine_onrescan(NewMachine* self, psy_ui_Component* sender)
 {
+	self->scanending = FALSE;
+	psy_ui_component_starttimer(newmachine_base(self), 0, 50);
 	psy_ui_notebook_select(&self->notebook, 1);
 	workspace_scanplugins(self->workspace);
 }
@@ -1011,8 +1017,16 @@ void newmachine_onpluginscanprogress(NewMachine* self, Workspace* workspace,
 	int progress)
 {
 	if (progress == 0) {
-		psy_ui_notebook_select(&self->notebook, 0);
+		self->scanending = TRUE;		
 	} else {
 		
+	}
+}
+
+void  newmachine_ontimer(NewMachine* self, uintptr_t timerid)
+{
+	if (self->scanending) {
+		psy_ui_notebook_select(&self->notebook, 0);
+		psy_ui_component_stoptimer(newmachine_base(self), 0);
 	}
 }

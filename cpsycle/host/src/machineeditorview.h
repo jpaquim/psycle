@@ -14,10 +14,13 @@
 extern "C" {
 #endif
 
-// Displays a plugin custom ui. So far only vsts use this view.
+// Displays a plugin custom ui instead the paramview. So far only vsts use
+// this view.
 
 typedef struct {
-   psy_ui_Component component;   
+	// inherits
+   psy_ui_Component component;
+   // references
    psy_audio_Machine* machine;
    Workspace* workspace;
 } MachineEditorView;
@@ -27,6 +30,13 @@ void machineeditorview_init(MachineEditorView*, psy_ui_Component* parent,
 MachineEditorView* machineeditorview_alloc(void);
 MachineEditorView* machineeditorview_allocinit(psy_ui_Component* parent,
 	psy_audio_Machine*, Workspace*);
+
+INLINE psy_ui_Component* machineeditorview_base(MachineEditorView* self)
+{
+	assert(self);
+
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

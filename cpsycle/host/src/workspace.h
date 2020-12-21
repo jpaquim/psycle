@@ -160,6 +160,7 @@ void workspace_loadsong_fileselect(Workspace*);
 void workspace_loadsong(Workspace*, const char* path, bool play);
 bool workspace_savesong_fileselect(Workspace*);
 void workspace_savesong(Workspace*, const char* path);
+void workspace_scanplugins(Workspace*);
 
 INLINE PsycleConfig* workspace_conf(Workspace* self) { return &self->config; }
 
@@ -177,7 +178,6 @@ INLINE psy_audio_Player* workspace_player(Workspace* self)
 	return &self->player;
 }
 
-void workspace_scanplugins(Workspace*);
 psy_Property* workspace_pluginlist(Workspace*);
 psy_Property* workspace_recentsongs(Workspace*);
 void workspace_load_recentsongs(Workspace*);
