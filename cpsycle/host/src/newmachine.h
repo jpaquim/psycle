@@ -10,6 +10,7 @@
 #include <uilabel.h>
 #include <uicheckbox.h>
 #include <uiscroller.h>
+#include <uinotebook.h>
 #include <plugincatcher.h>
 #include <hashtbl.h>
 
@@ -45,6 +46,15 @@ typedef struct {
 void newmachinedetail_init(NewMachineDetail*, psy_ui_Component* parent,
 	Workspace*);
 
+typedef struct PluginScanView {
+	// inherits
+	psy_ui_Component component;
+	// ui elements
+	psy_ui_Label scan;
+} PluginScanView;
+
+void pluginscanview_init(PluginScanView*, psy_ui_Component* parent);
+
 typedef struct {
    psy_ui_Component component;
    int count;
@@ -66,18 +76,25 @@ typedef struct {
 
 void pluginsview_init(PluginsView*, psy_ui_Component* parent, bool favorites, Workspace*);
 
-typedef struct {
-   psy_ui_Component component;
-   psy_ui_Label favoriteheader;
-   PluginsView favoriteview;
-   psy_ui_Label pluginsheader;
-   PluginsView pluginsview;
-   NewMachineDetail detail;   
-   MachineViewSkin* skin;
-   psy_ui_Scroller scroller_fav;
-   psy_ui_Scroller scroller_main;
-   // Signals
-   psy_Signal signal_selected;
+typedef struct NewMachine {
+	// inherits
+	psy_ui_Component component;
+	// ui elements	
+	psy_ui_Notebook notebook;
+	psy_ui_Component client;
+	psy_ui_Label favoriteheader;
+	PluginsView favoriteview;
+	psy_ui_Label pluginsheader;
+	PluginsView pluginsview;
+	NewMachineDetail detail;
+	PluginScanView scanview;
+	MachineViewSkin* skin;
+	psy_ui_Scroller scroller_fav;
+	psy_ui_Scroller scroller_main;
+	// Signals
+	psy_Signal signal_selected;
+	// references
+	Workspace* workspace;
 } NewMachine;
 
 void newmachine_init(NewMachine*, psy_ui_Component* parent, MachineViewSkin*, Workspace*);

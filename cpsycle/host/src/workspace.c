@@ -59,6 +59,7 @@ static bool onmachinefileselectload(Workspace*, char filter[], char inoutName[])
 static bool onmachinefileselectsave(Workspace*, char filter[], char inoutName[]);
 static void onmachinefileselectdirectory(Workspace*);
 static void onmachineterminaloutput(Workspace*, const char* text);
+static bool onmachineeditresize(Workspace*, psy_audio_Machine* sender, intptr_t w, intptr_t h);
 /// terminal
 static void workspace_onterminalwarning(Workspace*,
 	psy_audio_SongFile* sender, const char* text);
@@ -85,6 +86,8 @@ static void psy_audio_machinecallbackvtable_init(Workspace* self)
 			(fp_mcb_fileselect_save)onmachinefileselectsave;
 		machinecallback_vtable.fileselect_directory =
 			(fp_mcb_fileselect_directory)onmachinefileselectdirectory;
+		machinecallback_vtable.editresize =
+			(fp_mcb_editresize)onmachineeditresize;
 		machinecallback_vtable.output = (fp_mcb_output)
 			onmachineterminaloutput;
 		machinecallback_vtable_initialized = TRUE;
@@ -180,6 +183,7 @@ void workspace_initsignals(Workspace* self)
 	psy_signal_init(&self->signal_selectpatterndisplay);
 	psy_signal_init(&self->signal_floatsection);
 	psy_signal_init(&self->signal_docksection);
+	psy_signal_init(&self->signal_machineeditresize);
 }
 
 void workspace_dispose(Workspace* self)
@@ -230,6 +234,7 @@ void workspace_disposesignals(Workspace* self)
 	psy_signal_dispose(&self->signal_selectpatterndisplay);
 	psy_signal_dispose(&self->signal_floatsection);
 	psy_signal_dispose(&self->signal_docksection);
+	psy_signal_dispose(&self->signal_machineeditresize);
 }
 
 void workspace_disposesequencepaste(Workspace* self)
@@ -1456,6 +1461,12 @@ void onmachineterminaloutput(Workspace* self, const char* text)
 	assert(self);
 
 	psy_signal_emit(&self->signal_terminal_error, self, 1, text);
+}
+
+static bool onmachineeditresize(Workspace* self, psy_audio_Machine* sender, intptr_t w, intptr_t h)
+{
+	psy_signal_emit(&self->signal_machineeditresize, self, 3, sender, w, h);
+	return TRUE;
 }
 
 bool onmachinefileselectload(Workspace* self, char filter[], char inoutname[])

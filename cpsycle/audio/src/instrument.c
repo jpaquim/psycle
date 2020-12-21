@@ -200,20 +200,6 @@ const char* psy_audio_instrument_name(psy_audio_Instrument* self)
 	return self->name;
 }
 
-void psy_audio_instrument_setnna(psy_audio_Instrument* self, psy_audio_NewNoteAction nna)
-{
-	assert(self);
-
-	self->nna = nna;
-}
-
-psy_audio_NewNoteAction psy_audio_instrument_nna(psy_audio_Instrument* self)
-{
-	assert(self);
-
-	return self->nna;
-}
-
 psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument* self, uintptr_t key,
 	uintptr_t velocity, double frequency)
 {

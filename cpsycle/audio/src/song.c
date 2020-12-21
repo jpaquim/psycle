@@ -4,6 +4,7 @@
 #include "../../detail/prefix.h"
 
 #include "song.h"
+#include "constants.h"
 
 #include "machinefactory.h"
 
@@ -227,4 +228,27 @@ void psy_audio_song_setbpm(psy_audio_Song* self, psy_dsp_big_beat_t bpm)
 	assert(self);
 
 	psy_audio_songproperties_setbpm(&self->properties, bpm);		
+}
+
+void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
+	uintptr_t virtual_inst, uintptr_t mac_idx, uintptr_t inst_idx)
+{
+	assert(self);
+
+	// && mac != NULL && (mac->_type == MACH_SAMPLER || mac->_type == MACH_XMSAMPLER))
+	if (virtual_inst >= MAX_MACHINES && virtual_inst < MAX_VIRTUALINSTS) {
+		psy_audio_Machine* machine;
+		
+		machine = psy_audio_machines_at(&self->machines, virtual_inst);
+		if (machine) {
+			psy_audio_machines_remove(&self->machines, virtual_inst);
+		}
+		machine = psy_audio_machinefactory_makemachinefrompath(
+			self->machinefactory, MACH_VIRTUALGENERATOR, NULL,
+			mac_idx, inst_idx);
+		if (machine) {
+			psy_audio_machine_seteditname(machine, "Virtual Generator");
+			psy_audio_machines_insert(&self->machines, virtual_inst, machine);
+		}
+	}
 }

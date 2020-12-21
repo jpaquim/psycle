@@ -140,6 +140,7 @@ void psy_audio_custommachineparam_init(psy_audio_CustomMachineParam* self,
 	self->minval = minval;
 	self->maxval = maxval;
 	self->type = type;
+	self->row = 0;
 }
 
 void psy_audio_custommachineparam_dispose(psy_audio_CustomMachineParam* self)

@@ -156,9 +156,6 @@ void psy_audio_instrument_setname(psy_audio_Instrument*, const char* name);
 void psy_audio_instrument_setindex(psy_audio_Instrument*, uintptr_t index);
 uintptr_t psy_audio_instrument_index(psy_audio_Instrument*);
 const char* psy_audio_instrument_name(psy_audio_Instrument*);
-void psy_audio_instrument_setnna(psy_audio_Instrument*,
-	psy_audio_NewNoteAction);
-psy_audio_NewNoteAction psy_audio_instrument_nna(psy_audio_Instrument*);
 psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument*,
 	uintptr_t key, uintptr_t velocity, double frequency);
 void psy_audio_instrument_clearentries(psy_audio_Instrument*);
@@ -177,6 +174,122 @@ INLINE psy_dsp_amp_t psy_audio_instrument_volume(psy_audio_Instrument* self)
 
 const char* psy_audio_instrument_tostring(const psy_audio_Instrument*);
 void psy_audio_instrument_fromstring(psy_audio_Instrument*, const char*);
+
+// Properties
+
+INLINE float psy_audio_instrument_filtercutoff(const psy_audio_Instrument* self)
+{
+	return self->filtercutoff;
+}
+
+INLINE void psy_audio_instrument_setfiltercutoff(psy_audio_Instrument* self, float value)
+{
+	self->filtercutoff = value;
+}
+
+INLINE const float psy_audio_instrument_filterresonance(const psy_audio_Instrument* self)
+{
+	return self->filterres;
+}
+
+INLINE void psy_audio_instrument_setfilterresonance(psy_audio_Instrument* self, float value)
+{
+	self->filterres = value;
+}
+
+INLINE psy_dsp_FilterType psy_audio_instrument_filtertype(
+	const psy_audio_Instrument* self)
+{
+	return self->filtertype;
+}
+
+INLINE void psy_audio_instrument_setfiltertype(psy_audio_Instrument* self,
+	psy_dsp_FilterType value)
+{
+	self->filtertype = value;
+}
+
+INLINE float psy_audio_instrument_randomvolume(
+	const psy_audio_Instrument* self)
+{
+	return self->randomvolume;
+}
+
+INLINE void psy_audio_instrument_setrandomvolume(psy_audio_Instrument* self,
+	float value)
+{
+	self->randomvolume = value;
+}
+
+INLINE float psy_audio_instrument_randompanning(
+	const psy_audio_Instrument* self)
+{
+	return self->randompanning;
+}
+
+INLINE void psy_audio_instrument_setrandompanning(psy_audio_Instrument* self,
+	float value)
+{
+	self->randompanning = value;
+}
+
+INLINE float psy_audio_instrument_randomcutoff(
+	const psy_audio_Instrument* self)
+{
+	return self->randomcutoff;
+}
+
+INLINE void psy_audio_instrument_setrandomcutoff(psy_audio_Instrument* self,
+	float value)
+{
+	self->randomcutoff = value;
+}
+
+INLINE float psy_audio_instrument_randomresonance(
+	const psy_audio_Instrument* self)
+{
+	return self->randomresonance;
+}
+
+INLINE void psy_audio_instrument_setrandomresonance(psy_audio_Instrument* self,
+	float value)
+{
+	self->randomresonance = value;
+}
+
+INLINE psy_audio_NewNoteAction psy_audio_instrument_nna(
+	const psy_audio_Instrument* self)
+{
+	return self->nna;
+}
+
+INLINE void psy_audio_instrument_setnna(psy_audio_Instrument* self,
+	psy_audio_NewNoteAction value)
+{
+	self->nna = value;
+}
+
+INLINE psy_audio_DupeCheck psy_audio_instrument_dct(const psy_audio_Instrument* self)
+{
+	return self->dct;
+}
+
+INLINE void psy_audio_instrument_setdct(psy_audio_Instrument* self,
+	psy_audio_DupeCheck value)
+{
+	self->dct = value;
+}
+
+INLINE psy_audio_NewNoteAction psy_audio_instrument_dca(psy_audio_Instrument* self)
+{
+	return self->dca;
+}
+
+INLINE void psy_audio_instrument_setdca(psy_audio_Instrument* self,
+	psy_audio_NewNoteAction value)
+{
+	self->dca = value;
+}
 
 #ifdef __cplusplus
 }
