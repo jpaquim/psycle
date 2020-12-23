@@ -4,12 +4,12 @@
 #ifndef psy_audio_INSTRUMENT_H
 #define psy_audio_INSTRUMENT_H
 
+// local
 #include "patternevent.h"
 #include "samples.h"
-
+// dsp
 #include <envelope.h>
 #include <filter.h>
-#include <list.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,8 +48,9 @@ typedef enum {
 	psy_audio_NNA_FADEOUT = 0x3
 } psy_audio_NewNoteAction;
 
-/// In some cases, the default NNA is not adequate. This option lets choose one type of element
-/// that, if it is equal than the currently playing, will apply the DCAction intead.
+/// In some cases, the default NNA is not adequate. This option lets choose
+/// one type of element that, if it is equal than the currently playing, will
+/// apply the DCAction intead.
 /// A common example is using NNA NOTEOFF, DCT NOTE and DCA STOP
 typedef enum psy_audio_DupeCheck {	
 	psy_audio_DUPECHECK_NONE = 0x0,
@@ -63,14 +64,17 @@ typedef struct {
 	psy_audio_FrequencyRange freqrange;
 	psy_audio_ParameterRange keyrange;
 	psy_audio_ParameterRange velocityrange;	
-	int use_keyrange;
-	int use_velrange;
-	int use_freqrange;
+	bool use_keyrange;
+	bool use_velrange;
+	bool use_freqrange;
 } psy_audio_InstrumentEntry;
 
 void psy_audio_instrumententry_init(psy_audio_InstrumentEntry*);
 psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void);
 psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void);
+
+bool psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry*,
+	uintptr_t key, uintptr_t velocity, double frequency);
 
 typedef struct psy_audio_Instrument {
 	bool enabled;
@@ -91,9 +95,11 @@ typedef struct psy_audio_Instrument {
 	psy_dsp_amp_t globalvolume;
 	/// [0..1.0f] Fadeout speed. Decreasing amount for each tracker tick.
 	float volumefadespeed;
+
 	// Paninng
-	bool panenabled;
-	/// Initial panFactor (if enabled) [-1..1]
+	bool panenabled;	
+	/// Default position for panning ( 0..1 ) 0left 1 right.
+	/// psycle mfc: todo wrong comment? (Initial panFactor (if enabled) [-1..1])
 	float initpan;
 	bool surround;
 	/// Note number for center pan position
@@ -102,15 +108,13 @@ typedef struct psy_audio_Instrument {
 	int8_t notemodpansep;
 
 	/// Cutoff Frequency [0..1]
-	float filtercutoff;
-	unsigned char _RCUT;
+	float filtercutoff;	
 	/// Resonance [0..1]	
 	float filterres;
 	unsigned char _RRES;
 	float filtermodamount;
 	/// Filter Type. See psy_dsp_FilterType
-	psy_dsp_FilterType filtertype;		
-	int randompan;
+	psy_dsp_FilterType filtertype;	
 
 	// Randomness. Applies on new notes.
 
@@ -128,12 +132,12 @@ typedef struct psy_audio_Instrument {
 	psy_audio_NewNoteAction nna;
 	/// Check to do when a new event comes in the channel.
 	psy_audio_DupeCheck dct;
-	/// Action to take on the playing voice when the action defined by DCT comes in the same channel 
-	/// (like the same note value).
+	/// Action to take on the playing voice when the action defined by DCT
+	/// comes in the same channel (like the same note value).
 	psy_audio_NewNoteAction dca;
 
-	/// List of InstrumentEntries selecting for a note, frequency or/and velocity
-	/// a sample to be played
+	/// List of InstrumentEntries selecting for a note, frequency or/and
+	/// velocity a sample to be played
 	/// replaced psycle-mfc: NotePair m_AssignNoteToSample[NOTE_MAP_SIZE];
 	///	     Table of mapped notes to samples
 	///      (note number=first, sample number=second)
@@ -141,7 +145,7 @@ typedef struct psy_audio_Instrument {
 	///       volume,panning, cutoff...?
 	psy_List* entries;
 
-	uintptr_t index;
+	// Signals
 	psy_Signal signal_addentry;
 	psy_Signal signal_removeentry;
 	psy_Signal signal_namechanged;
@@ -151,10 +155,12 @@ void psy_audio_instrument_init(psy_audio_Instrument*);
 void psy_audio_instrument_dispose(psy_audio_Instrument*);
 psy_audio_Instrument* psy_audio_instrument_alloc(void);
 psy_audio_Instrument* psy_audio_instrument_allocinit(void);
+void psy_audio_instrument_deallocate(psy_audio_Instrument*);
+
 void psy_audio_instrument_load(psy_audio_Instrument*, const char* path);
 void psy_audio_instrument_setname(psy_audio_Instrument*, const char* name);
 void psy_audio_instrument_setindex(psy_audio_Instrument*, uintptr_t index);
-uintptr_t psy_audio_instrument_index(psy_audio_Instrument*);
+// uintptr_t psy_audio_instrument_index(psy_audio_Instrument*);
 const char* psy_audio_instrument_name(psy_audio_Instrument*);
 psy_List* psy_audio_instrument_entriesintersect(psy_audio_Instrument*,
 	uintptr_t key, uintptr_t velocity, double frequency);
@@ -177,22 +183,26 @@ void psy_audio_instrument_fromstring(psy_audio_Instrument*, const char*);
 
 // Properties
 
-INLINE float psy_audio_instrument_filtercutoff(const psy_audio_Instrument* self)
+INLINE float psy_audio_instrument_filtercutoff(
+	const psy_audio_Instrument* self)
 {
 	return self->filtercutoff;
 }
 
-INLINE void psy_audio_instrument_setfiltercutoff(psy_audio_Instrument* self, float value)
+INLINE void psy_audio_instrument_setfiltercutoff(psy_audio_Instrument* self,
+	float value)
 {
 	self->filtercutoff = value;
 }
 
-INLINE const float psy_audio_instrument_filterresonance(const psy_audio_Instrument* self)
+INLINE const float psy_audio_instrument_filterresonance(
+	const psy_audio_Instrument* self)
 {
 	return self->filterres;
 }
 
-INLINE void psy_audio_instrument_setfilterresonance(psy_audio_Instrument* self, float value)
+INLINE void psy_audio_instrument_setfilterresonance(psy_audio_Instrument* self,
+	float value)
 {
 	self->filterres = value;
 }
@@ -269,7 +279,8 @@ INLINE void psy_audio_instrument_setnna(psy_audio_Instrument* self,
 	self->nna = value;
 }
 
-INLINE psy_audio_DupeCheck psy_audio_instrument_dct(const psy_audio_Instrument* self)
+INLINE psy_audio_DupeCheck psy_audio_instrument_dct(
+	const psy_audio_Instrument* self)
 {
 	return self->dct;
 }
@@ -280,7 +291,8 @@ INLINE void psy_audio_instrument_setdct(psy_audio_Instrument* self,
 	self->dct = value;
 }
 
-INLINE psy_audio_NewNoteAction psy_audio_instrument_dca(psy_audio_Instrument* self)
+INLINE psy_audio_NewNoteAction psy_audio_instrument_dca(
+	psy_audio_Instrument* self)
 {
 	return self->dca;
 }

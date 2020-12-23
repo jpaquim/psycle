@@ -32,8 +32,8 @@ static int psycle_run(uintptr_t instance, int options);
 
 // The WinMain function is called by the system as the initial entry point for
 // a Win32-based application
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	PSTR szCmdLine, int iCmdShow)
+int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
+	_In_ PSTR szCmdLine, _In_ int iCmdShow)
 {
 	int err;
 	

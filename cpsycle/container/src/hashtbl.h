@@ -39,7 +39,8 @@ extern psy_TableIterator tableend;
 
 void psy_tableiterator_init(psy_TableIterator*, psy_Table*);
 void psy_tableiterator_inc(psy_TableIterator*);
-uintptr_t psy_tableiterator_equal(const psy_TableIterator* lhs, const psy_TableIterator* rhs);
+uintptr_t psy_tableiterator_equal(const psy_TableIterator* lhs,
+	const psy_TableIterator* rhs);
 uintptr_t psy_tableiterator_key(psy_TableIterator*);
 int psy_tableiterator_strhash_equals(psy_TableIterator*, const char* str);
 void* psy_tableiterator_value(psy_TableIterator*);
@@ -50,6 +51,7 @@ void psy_table_insert(psy_Table*, uintptr_t key, void* value);
 void psy_table_insert_strhash(psy_Table*, const char* strkey, void* value);
 void psy_table_remove(psy_Table*, uintptr_t key);
 void* psy_table_at(psy_Table*, uintptr_t key);
+const void* psy_table_at_const(const psy_Table*, uintptr_t key);
 void* psy_table_at_strhash(psy_Table*, const char* strkey);
 uintptr_t psy_table_size(const psy_Table*);
 uintptr_t psy_table_maxkey(const psy_Table*);
@@ -65,6 +67,9 @@ INLINE bool psy_table_empty(const psy_Table* self)
 	return self->count == 0;
 }
 
+/// Deallocates all entries of the table and disposes the table
+/// For all entries: disposefunc is not NULL, call disposefunc, then
+/// always (even if disposefunc is NULL) free entry
 void psy_table_disposeall(psy_Table* self, psy_fp_disposefunc disposefunc);
 
 uintptr_t psy_strhash(const unsigned char* str);

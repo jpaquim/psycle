@@ -779,7 +779,7 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 {	
 	int status = PSY_OK;	
 	psy_dsp_EnvelopePoint pt_start;
-	psy_dsp_EnvelopePoint pt_end;
+	psy_dsp_EnvelopePoint pt_end;	
 	
 	// loop	
 	if (status = psyfile_write_uint8(self->songfile->file, instrument->loop != FALSE)) {
@@ -870,11 +870,11 @@ int psy_audio_psy3saver_save_instrument(psy_audio_PSY3Saver* self,
 		return status;
 	}
 	if (status = psyfile_write_uint8(self->songfile->file, (uint8_t)
-			instrument->randompan)) {
+			instrument->randompanning != 0.f)) {
 		return status;
 	}
 	if (status = psyfile_write_uint8(self->songfile->file, (uint8_t)
-			instrument->_RCUT)) {
+			instrument->randomcutoff != 0.f)) {
 		return status;
 	}
 	if (status = psyfile_write_uint8(self->songfile->file, (uint8_t)

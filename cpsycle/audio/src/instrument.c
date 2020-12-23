@@ -34,13 +34,14 @@ void psy_audio_instrumententry_init(psy_audio_InstrumentEntry* self)
 	assert(self);
 
 	self->sampleindex = sampleindex_make(UINTPTR_MAX, UINTPTR_MAX);
-	psy_audio_parameterrange_init(&self->keyrange, 0, psy_audio_NOTECOMMANDS_RELEASE - 1, 0,
-		psy_audio_NOTECOMMANDS_RELEASE - 1);
+	psy_audio_parameterrange_init(&self->keyrange,
+		0, psy_audio_NOTECOMMANDS_RELEASE - 1,
+		0, psy_audio_NOTECOMMANDS_RELEASE - 1);
 	psy_audio_parameterrange_init(&self->velocityrange, 0, 0xFF, 0, 0xFF);
-	psy_audio_frequencyrange_init(&self->freqrange, 0, 0, 0, 0);	
-	self->use_keyrange = 1;
-	self->use_velrange = 0;
-	self->use_freqrange = 0;
+	psy_audio_frequencyrange_init(&self->freqrange, 0, 0, 0, 0);
+	self->use_keyrange = TRUE;
+	self->use_velrange = FALSE;
+	self->use_freqrange = FALSE;
 }
 
 psy_audio_InstrumentEntry* psy_audio_instrumententry_alloc(void)
@@ -59,7 +60,7 @@ psy_audio_InstrumentEntry* psy_audio_instrumententry_allocinit(void)
 	return rv;
 }
 
-int psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
+bool psy_audio_instrumententry_intersect(psy_audio_InstrumentEntry* self, uintptr_t key,
 	uintptr_t velocity, double frequency)
 {
 	assert(self);
@@ -84,7 +85,6 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	self->enabled = TRUE;
 	self->name = strdup("");
 	self->lines = 16;
-	self->index = UINTPTR_MAX;
 	self->entries = NULL;		
 	self->loop = FALSE;		
 	self->globalvolume = (psy_dsp_amp_t)1.0f;
@@ -93,8 +93,7 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	self->initpan = 0.5f;
 	self->surround = FALSE;
 	self->notemodpancenter = psy_audio_NOTECOMMANDS_MIDDLEC;
-	self->notemodpansep = 0;
-	self->randompan = 0;
+	self->notemodpansep = 0;	
 	self->filtertype = F_NONE;
 	self->randomvolume = 0;
 	self->randompanning = 0;
@@ -114,8 +113,7 @@ void psy_audio_instrument_init(psy_audio_Instrument* self)
 	psy_dsp_envelopesettings_settimeandvalue(&self->filterenvelope,
 		3, 0.005f + 0.370f + 0.370f, 0.0f);
 	self->filtermodamount = 1.0f;
-	self->filtercutoff = 1.f;
-	self->_RCUT = 0;
+	self->filtercutoff = 1.f;	
 	self->filterres = 0.f;
 	self->_RRES = 0;
 	psy_dsp_envelopesettings_init_adsr(&self->panenvelope);
@@ -160,6 +158,12 @@ psy_audio_Instrument* psy_audio_instrument_allocinit(void)
 	return rv;
 }
 
+void psy_audio_instrument_deallocate(psy_audio_Instrument* self)
+{
+	psy_audio_instrument_dispose(self);
+	free(self);
+}
+
 void psy_audio_instrument_load(psy_audio_Instrument* self, const char* path)
 {
 	assert(self);
@@ -183,14 +187,6 @@ void psy_audio_instrument_setindex(psy_audio_Instrument* self, uintptr_t index)
 	psy_audio_instrumententry_init(&entry);	
 	entry.sampleindex = sampleindex_make(index, 0);	
 	psy_audio_instrument_addentry(self, &entry);
-	self->index = index;
-}
-
-uintptr_t psy_audio_instrument_index(psy_audio_Instrument* self)
-{
-	assert(self);
-
-	return self->index;
 }
 
 const char* psy_audio_instrument_name(psy_audio_Instrument* self)

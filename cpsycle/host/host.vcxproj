@@ -171,6 +171,11 @@
     <ClCompile Include="src\helpview.c" />
     <ClCompile Include="src\inputdefiner.c" />
     <ClCompile Include="src\instnotemapview.c" />
+    <ClCompile Include="src\instrumentampview.c" />
+    <ClCompile Include="src\instrumentfilterview.c" />
+    <ClCompile Include="src\instrumentgenview.c" />
+    <ClCompile Include="src\instrumentpanview.c" />
+    <ClCompile Include="src\instrumentpitchview.c" />
     <ClCompile Include="src\instrumentsbox.c" />
     <ClCompile Include="src\instrumentview.c" />
     <ClCompile Include="src\intedit.c" />
@@ -285,6 +290,11 @@
     <ClInclude Include="src\helpview.h" />
     <ClInclude Include="src\inputdefiner.h" />
     <ClInclude Include="src\instnotemapview.h" />
+    <ClInclude Include="src\instrumentampview.h" />
+    <ClInclude Include="src\instrumentfilterview.h" />
+    <ClInclude Include="src\instrumentgenview.h" />
+    <ClInclude Include="src\instrumentpanview.h" />
+    <ClInclude Include="src\instrumentpitchview.h" />
     <ClInclude Include="src\instrumentsbox.h" />
     <ClInclude Include="src\instrumentview.h" />
     <ClInclude Include="src\intedit.h" />

@@ -250,14 +250,14 @@ INLINE void psy_ui_component_setverticalscrollrange(psy_ui_Component* self, int 
 {
 	self->vscrollrange.x = minval;
 	self->vscrollrange.y = psy_max(minval, maxval);
-	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_VERTICAL);
+	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_VERTICAL);	
 }
 
 INLINE void psy_ui_component_sethorizontalscrollrange(psy_ui_Component* self, int minval, int maxval)
-{
+{	
 	self->hscrollrange.x = minval;
-	self->hscrollrange.y = psy_max(minval, maxval);
-	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_HORIZONTAL);
+	self->hscrollrange.y = psy_max(minval, maxval);	
+	psy_signal_emit(&self->signal_scrollrangechanged, self, 1, psy_ui_HORIZONTAL);	
 }
 
 INLINE void psy_ui_component_verticalscrollrange(psy_ui_Component* self, int* scrollmin,

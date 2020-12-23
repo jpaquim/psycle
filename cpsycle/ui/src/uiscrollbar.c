@@ -84,10 +84,12 @@ void psy_ui_scrollbarpane_ondraw(psy_ui_ScrollBarPane* self, psy_ui_Graphics* g)
 	} else {
 		r = psy_ui_rectangle_make(2, self->screenpos, size.width - 4, 20);
 	}
-	psy_ui_drawsolidrectangle(g, r, psy_ui_component_colour(self));
+	psy_ui_drawsolidrectangle(g, r,
+		psy_ui_component_colour(&self->component));
 }
 
-void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->orientation == psy_ui_HORIZONTAL) {
 		self->dragoffset = ev->x - self->screenpos;
@@ -98,14 +100,16 @@ void psy_ui_scrollbarpane_onmousedown(psy_ui_ScrollBarPane* self, psy_ui_MouseEv
 	psy_ui_component_capture(&self->component);
 }
 
-void psy_ui_scrollbarpane_onmouseup(psy_ui_ScrollBarPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_scrollbarpane_onmouseup(psy_ui_ScrollBarPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	psy_ui_scrollbarpane_setthumbposition(self, self->pos);
 	self->drag = 0;
 	psy_ui_component_releasecapture(&self->component);	
 }
 
-void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self, psy_ui_MouseEvent* ev)
+void psy_ui_scrollbarpane_onmousemove(psy_ui_ScrollBarPane* self,
+	psy_ui_MouseEvent* ev)
 {
 	if (self->drag) {
 		double step;

@@ -223,6 +223,32 @@ void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings* self,
 	}
 }
 
+void psy_dsp_envelopesettings_settime(psy_dsp_EnvelopeSettings* self,
+	uintptr_t pointindex, psy_dsp_seconds_t pointtime)
+{
+	assert(self);
+
+	if (self->points) {
+		psy_List* node;
+
+		node = psy_list_at(self->points, pointindex);
+		if (node) {
+			psy_dsp_EnvelopePoint* pt;
+			psy_dsp_seconds_t shift;
+
+			pt = (psy_dsp_EnvelopePoint*)psy_list_entry(node);
+			shift = pointtime - pt->time;
+			pt->time = pointtime;			
+			psy_list_next(&node);
+			for (; node != NULL; psy_list_next(&node)) {
+				pt = (psy_dsp_EnvelopePoint*)psy_list_entry(node);
+				pt->time += shift;
+			}
+		}
+	}
+}
+
+
 void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings* self,
 	uintptr_t pointindex, psy_dsp_amp_t pointval)
 {
@@ -392,7 +418,7 @@ psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope* self)
 		return self->value;
 	}
 	if (self->currstage && self->currstage->next) {
-		pt = (psy_dsp_EnvelopePoint*)self->currstage->next;
+		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage->next);
 	} else {
 		return 0.f;
 	}

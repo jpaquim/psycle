@@ -23,9 +23,11 @@ extern "C" {
 
 typedef struct {
 	psy_ui_Component component;
+	psy_ui_Component groupheader;
 	psy_ui_ListBox grouplist;
+	psy_ui_Component instheader;
 	psy_ui_Label header;
-	psy_ui_Label group;
+	psy_ui_Label group;	
 	psy_ui_ListBox instrumentlist;	
 	psy_audio_Instruments* instruments;
 } InstrumentsBox;
@@ -33,7 +35,7 @@ typedef struct {
 void instrumentsbox_init(InstrumentsBox*, psy_ui_Component* parent, psy_audio_Instruments*,
 	Workspace*);
 void instrumentsbox_setinstruments(InstrumentsBox*, psy_audio_Instruments* instruments);
-int instrumentsbox_selected(InstrumentsBox*);
+psy_audio_InstrumentIndex instrumentsbox_selected(InstrumentsBox*);
 void instrumentsbox_rebuild(InstrumentsBox*);
 
 #ifdef __cplusplus

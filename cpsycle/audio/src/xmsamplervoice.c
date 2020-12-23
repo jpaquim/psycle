@@ -241,7 +241,7 @@ void psy_audio_xmsamplervoice_initfilter(psy_audio_XMSamplerVoice* self,
 			(instrument->_RRES)
 			? alteRand((int)(instrument->filterres * 127))
 			: (int)(instrument->filterres * 127));
-		self->_cutoff = (instrument->_RCUT)
+		self->_cutoff = (instrument->randomcutoff != 0.f)
 			? alteRand((int)(instrument->filtercutoff * 127))
 			: (int)instrument->filtercutoff * 127;
 		self->_coModify = (instrument->filtermodamount - 0.5f) * 255.f;

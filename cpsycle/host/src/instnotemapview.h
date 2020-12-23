@@ -66,11 +66,10 @@ typedef struct {
 	InstrumentNoteMapMetrics metrics;
 } InstrumentParameterView;
 
-void instrumentparameterview_setinstrument(InstrumentParameterView*,
-	psy_audio_Instrument*);
 void instrumentparameterview_init(InstrumentParameterView*,
 	psy_ui_Component* parent);
-
+void instrumentparameterview_setinstrument(InstrumentParameterView*,
+	psy_audio_Instrument*);
 
 typedef struct {
 	psy_ui_Component component;	

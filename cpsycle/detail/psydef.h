@@ -35,6 +35,10 @@ typedef uint8_t bool;
 #define PSY_ERRFILE 1
 #define PSY_ERRFILEFORMAT 2
 
+/// Invalid index. Used to indicate index is disabled, or an out of range index.
+/// BEWARE!!! UINTPTR_T, not minus one.
+#define psy_INDEX_INVALID UINTPTR_MAX
+
 #ifndef INLINE
 # if __GNUC__ && !__GNUC_STDC_INLINE__
 #  define INLINE static inline

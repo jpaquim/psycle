@@ -11,6 +11,7 @@ static void psy_ui_defaults_initcolours(psy_ui_Defaults*);
 void psy_ui_defaults_init(psy_ui_Defaults* self)
 {	
 	psy_ui_defaults_initcolours(self);
+	// common
 	psy_ui_colour_set(&self->style_common.colour, psy_ui_colour_make(0x00D1C5B6));
 	psy_ui_colour_set(&self->style_common.backgroundcolour,
 		psy_ui_colour_make(0x00232323));
@@ -29,7 +30,8 @@ void psy_ui_defaults_init(psy_ui_Defaults* self)
 	
 		psy_ui_fontinfo_init(&fontinfo, "Tahoma", 80);	
 		psy_ui_font_init(&self->style_common.font, &fontinfo);
-	}	
+	}			
+	// group
 	psy_ui_margin_init_all(&self->hmargin,
 		psy_ui_value_makepx(0), psy_ui_value_makeew(1.0),
 		psy_ui_value_makepx(0), psy_ui_value_makepx(0));

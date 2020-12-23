@@ -111,6 +111,9 @@ typedef struct psy_audio_Sample {
 	/// [ -100 .. 100] full range = -/+ 1 seminote
 	int16_t finetune;	
 	bool stereo;
+	// Wave data, (use psy_audio_sample_allocwavedata to create the memory,
+	//             else only the channel structure is created without
+	//             a buffer memory)	
 	psy_audio_Buffer channels;
 	bool panenabled;
 	/// Default position for panning (0..1) 0 = left 1 = right.
@@ -126,10 +129,13 @@ void psy_audio_sample_copy(psy_audio_Sample*, const psy_audio_Sample*);
 psy_audio_Sample* psy_audio_sample_alloc(void);
 psy_audio_Sample* psy_audio_sample_allocinit(uintptr_t numchannels);
 psy_audio_Sample* psy_audio_sample_clone(const psy_audio_Sample*);
+void psy_audio_sample_deallocate(psy_audio_Sample*);
 
-// psycle-mfc: WaveDataController
+/// psycle-mfc: WaveDataController
 psy_audio_SampleIterator* psy_audio_sample_allociterator(psy_audio_Sample*,
 	psy_dsp_ResamplerQuality);
+/// allocates ALIGNED sample memory for all channels
+/// (psycle-mfc: The memory is NOT aligned.)
 void psy_audio_sample_allocwavedata(psy_audio_Sample*);
 
 void psy_audio_sample_load(psy_audio_Sample*, const psy_Path* path);

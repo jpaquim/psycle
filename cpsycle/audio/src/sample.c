@@ -14,6 +14,8 @@
 
 void psy_audio_vibrato_init(psy_audio_Vibrato* self)
 {
+	assert(self);
+
 	self->attack = 0;
 	self->depth = 0;
 	self->speed = 0;
@@ -22,6 +24,8 @@ void psy_audio_vibrato_init(psy_audio_Vibrato* self)
 
 void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 {
+	assert(self);
+
 	self->name = strdup("");
 	self->numframes = 0;
 	self->globalvolume = 1.f;
@@ -40,7 +44,9 @@ void psy_audio_sample_init(psy_audio_Sample* self, uintptr_t numchannels)
 }
 
 void psy_audio_sample_dispose(psy_audio_Sample* self)
-{	
+{
+	assert(self);
+
 	psy_audio_buffer_dispose(&self->channels);
 	self->numframes = 0;
 	free(self->name);
@@ -50,6 +56,9 @@ void psy_audio_sample_dispose(psy_audio_Sample* self)
 void psy_audio_sample_copy(psy_audio_Sample* self,
 	const psy_audio_Sample* src)
 {	
+	assert(self);
+	assert(src);
+
 	if (self != src) {
 		self->samplerate = src->samplerate;
 		self->defaultvolume = src->defaultvolume;
@@ -88,7 +97,7 @@ psy_audio_Sample* psy_audio_sample_alloc(void)
 
 psy_audio_Sample* psy_audio_sample_allocinit(uintptr_t numchannels)
 {
-	psy_audio_Sample* rv;
+	psy_audio_Sample* rv;	
 
 	rv = psy_audio_sample_alloc();
 	if (rv) {
@@ -101,11 +110,21 @@ psy_audio_Sample* psy_audio_sample_clone(const psy_audio_Sample* src)
 {
 	psy_audio_Sample* rv;
 
+	assert(src);
+
 	rv = psy_audio_sample_allocinit(0);
 	if (rv) {
 		psy_audio_sample_copy(rv, src);
 	}
 	return rv;
+}
+
+void psy_audio_sample_deallocate(psy_audio_Sample* self)
+{
+	assert(self);
+
+	psy_audio_sample_dispose(self);
+	free(self);
 }
 
 psy_audio_SampleIterator* psy_audio_sample_allociterator(
@@ -122,22 +141,30 @@ psy_audio_SampleIterator* psy_audio_sample_allociterator(
 
 void psy_audio_sample_allocwavedata(psy_audio_Sample* self)
 {
+	assert(self);
+
 	psy_audio_buffer_allocsamples(&self->channels, self->numframes);
 }
 
 void psy_audio_sample_load(psy_audio_Sample* self, const psy_Path* path)
 {	
+	assert(self);
+
 	psy_audio_wave_load(self, psy_path_full(path));		
 	psy_audio_sample_setname(self, psy_path_filename(path));	
 }
 
 void psy_audio_sample_save(psy_audio_Sample* self, const psy_Path* path)
 {
+	assert(self);
+
 	psy_audio_wave_save(self, psy_path_full(path));
 }
 
 // Properties
 void psy_audio_sample_setname(psy_audio_Sample* self, const char* name)
 {
+	assert(self);
+
 	psy_strreset(&self->name, name);	
 }

@@ -404,8 +404,6 @@ void envelopebar_enablemillisecs(EnvelopeBar*);
 void envelopebar_enableticks(EnvelopeBar*);
 void envelopebar_onmillisecs(EnvelopeBar*, psy_ui_Component* sender);
 void envelopebar_onticks(EnvelopeBar*, psy_ui_Component* sender);
-void envelopeview_onenable(EnvelopeView*, psy_ui_CheckBox* sender);
-void envelopeview_oncarry(EnvelopeView*, psy_ui_CheckBox* sender);
 // implementation
 void envelopebar_init(EnvelopeBar* self, psy_ui_Component* parent)
 {
@@ -459,6 +457,10 @@ void envelopebar_onticks(EnvelopeBar* self, psy_ui_Component* sender)
 // EnvelopeView
 static void envelopeview_onzoom(EnvelopeView*, ScrollZoom* sender);
 static void envelopeview_onpredefs(EnvelopeView* self, psy_ui_Button* sender);
+static void envelopeview_onenable(EnvelopeView*, psy_ui_CheckBox* sender);
+static void envelopeview_oncarry(EnvelopeView*, psy_ui_CheckBox* sender);
+static void envelopeview_onmillisecs(EnvelopeView*, psy_ui_Button* sender);
+static void envelopeview_onticks(EnvelopeView*, psy_ui_Button* sender);
 
 static psy_ui_ComponentVtable envelopeview_vtable;
 static int envelopeview_vtable_initialized = 0;
@@ -498,6 +500,10 @@ void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* 
 		envelopeview_onenable);
 	psy_signal_connect(&self->bar.carry.signal_clicked, self,
 		envelopeview_oncarry);
+	psy_signal_connect(&self->bar.millisec.signal_clicked, self,
+		envelopeview_onmillisecs);
+	psy_signal_connect(&self->bar.ticks.signal_clicked, self,
+		envelopeview_onticks);
 }
 
 void envelopeview_settext(EnvelopeView* self, const char* text)
@@ -518,7 +524,17 @@ void envelopeview_setenvelope(EnvelopeView* self,
 		psy_ui_checkbox_check(&self->bar.carry);
 	} else {
 		psy_ui_checkbox_disablecheck(&self->bar.carry);
-	}	
+	}
+	if (settings && settings->timemode == psy_dsp_ENVELOPETIME_TICK) {
+		psy_ui_button_highlight(&self->bar.ticks);
+	} else {
+		psy_ui_button_disablehighlight(&self->bar.ticks);
+	}
+	if (!settings || (settings && settings->timemode == psy_dsp_ENVELOPETIME_SECONDS)) {
+		psy_ui_button_highlight(&self->bar.millisec);
+	} else {
+		psy_ui_button_disablehighlight(&self->bar.millisec);
+	}
 }
 
 void envelopeview_update(EnvelopeView* self)
@@ -545,6 +561,20 @@ void envelopeview_oncarry(EnvelopeView* self, psy_ui_CheckBox* sender)
 	if (self->envelopebox.settings) {
 		psy_dsp_envelopesettings_setcarry(self->envelopebox.settings,
 			psy_ui_checkbox_checked(sender));
+	}
+}
+
+void envelopeview_onmillisecs(EnvelopeView* self, psy_ui_Button* sender)
+{
+	if (self->envelopebox.settings) {
+		self->envelopebox.settings->timemode = psy_dsp_ENVELOPETIME_SECONDS;
+	}
+}
+
+void envelopeview_onticks(EnvelopeView* self, psy_ui_Button* sender)
+{
+	if (self->envelopebox.settings) {
+		self->envelopebox.settings->timemode = psy_dsp_ENVELOPETIME_TICK;
 	}
 }
 

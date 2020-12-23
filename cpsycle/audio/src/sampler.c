@@ -736,7 +736,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		self->_rVolCurr = self->_rVolDest;
 		if (!dovol) { dovol = TRUE; self->_vol = 1.f; }
 		if (!dopan) {
-			if (self->inst->randompan) {
+			if (self->inst->randompanning != 0.f) {
 				dopan = TRUE;
 				self->_pan = psy_dsp_map_32768_1(rand());
 			} else {
@@ -748,10 +748,29 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 			if (self->inst) {
 				psy_dsp_envelope_set_settings(&self->_envelope,
 					&self->inst->volumeenvelope);
+				psy_dsp_envelope_set_settings(&self->_filterEnv,
+					&self->inst->filterenvelope);
+				//psy_dsp_envelope_start(&self->_envelope);
+				//psy_dsp_envelope_tick_ps1(&self->_envelope);
 			}
 			psy_dsp_envelope_start(&self->_envelope);
 			psy_dsp_envelope_start(&self->_filterEnv);			
 		}
+
+		//Init filter
+		if (self->inst) {
+			bool rcut;
+
+			rcut = self->inst->randomcutoff != 0.f;
+			self->_cutoff = (rcut) ? alteRand(self->inst->filtercutoff * 127) : self->inst->filtercutoff * 127;
+			filter_setressonance(&self->_filter, (self->inst->_RRES) ? alteRand(self->inst->filterres * 127) : self->inst->filterres * 127);
+			filter_settype(&self->_filter, self->inst->filtertype);
+			self->_coModify = (float)(self->inst->filtermodamount / 128.f);
+		}
+		//_filterEnv._sustain = value_mapper::map_128_1(inst->ENV_F_SL);
+		//_filterEnv._step = (1.0f / inst->ENV_F_AT) * _envelope.sratefactor;
+		//_filterEnv._value = 0;
+
 		triggered = 1;
 	}
 
