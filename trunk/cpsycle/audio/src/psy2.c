@@ -527,8 +527,8 @@ void psy2loader_readinstruments(PSY2Loader* self)
 						
 						instrument->filtertype = (psy_dsp_FilterType)ENV_F_TP[i];
 
-						instrument->randompan = _RPAN[i];
-						instrument->_RCUT = _RCUT[i];
+						instrument->randompanning = (_RPAN[i]) ? 1.f : 0.f;
+						instrument->randomcutoff = (_RCUT[i]) ? 1.f : 0.f;
 						instrument->_RRES = _RRES[i];
 					}
 				} else
@@ -1040,7 +1040,7 @@ void psy2loader_master_load(PSY2Loader* self, psy_audio_Machine* master, uintptr
 		param = psy_audio_machine_tweakparameter(master, 0);
 		if (param) {
 			psy_audio_machine_parameter_tweak(master,
-				param, sqrt(_outDry / 256.f / 4.f));
+				param, (float)sqrt(_outDry / 256.f / 4.f));
 		}
 	}
 	psyfile_skip(self->songfile->file, 65);

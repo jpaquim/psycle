@@ -43,10 +43,47 @@ typedef struct {
 psy_audio_InstrumentIndex psy_audio_instrumentindex_make(uintptr_t groupslot,
 	uintptr_t subslot);
 
+INLINE uintptr_t psy_audio_instrumentindex_group(const psy_audio_InstrumentIndex* self)
+{
+	assert(self);
+
+	return self->groupslot;
+}
+
+INLINE uintptr_t psy_audio_instrumentindex_subslot(
+	const psy_audio_InstrumentIndex* self)
+{
+	assert(self);
+
+	return self->subslot;
+}
+
+INLINE bool psy_audio_instrumentindex_invalid(const psy_audio_InstrumentIndex* self)
+{
+	assert(self);
+
+	return (self->groupslot == psy_INDEX_INVALID) ||
+		(self->subslot == psy_INDEX_INVALID);
+}
+
 typedef struct {
 	char* name;
 	psy_Table container;
 } psy_audio_InstrumentsGroup;
+
+void psy_audio_instrumentsgroup_init(psy_audio_InstrumentsGroup*);
+void psy_audio_instrumentsgroup_dispose(psy_audio_InstrumentsGroup*);
+psy_audio_InstrumentsGroup* psy_audio_instrumentsgroup_alloc(void);
+psy_audio_InstrumentsGroup* psy_audio_instrumentsgroup_allocinit(void);
+
+void psy_audio_instrumentsgroup_insert(psy_audio_InstrumentsGroup*,
+psy_audio_Instrument*, uintptr_t slot);
+void psy_audio_instrumentsgroup_remove(psy_audio_InstrumentsGroup*,
+uintptr_t slot);
+psy_audio_Instrument* psy_audio_instrumentsgroup_at(psy_audio_InstrumentsGroup*,
+uintptr_t slot);
+uintptr_t psy_audio_instrumentsgroup_size(const psy_audio_InstrumentsGroup*);
+
 
 typedef struct psy_audio_Instruments {
 	psy_Table groups;
@@ -81,7 +118,12 @@ psy_TableIterator psy_audio_instruments_begin(psy_audio_Instruments*);
 psy_TableIterator psy_audio_instruments_groupbegin(psy_audio_Instruments*,
 	uintptr_t slot);
 uintptr_t psy_audio_instruments_groupsize(psy_audio_Instruments*);
-
+void psy_audio_instruments_insertgroup(psy_audio_Instruments*,
+	psy_audio_InstrumentsGroup*, uintptr_t groupslot);
+void psy_audio_instruments_removegroup(psy_audio_Instruments*,
+	uintptr_t groupslot);
+psy_audio_InstrumentsGroup* psy_audio_instruments_group_at(psy_audio_Instruments*,
+	uintptr_t groupslot);
 #ifdef __cplusplus
 }
 #endif

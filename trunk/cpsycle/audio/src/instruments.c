@@ -16,6 +16,7 @@ psy_audio_InstrumentIndex psy_audio_instrumentindex_make(uintptr_t groupslot,
 	return rv;
 }
 
+
 // InstrumentsGroup
 void psy_audio_instrumentsgroup_init(psy_audio_InstrumentsGroup* self)
 {
@@ -44,9 +45,16 @@ psy_audio_InstrumentsGroup* psy_audio_instrumentsgroup_allocinit(void)
 	return rv;
 }
 
-void psy_audio_instrumentsgroup_insert(psy_audio_InstrumentsGroup* self, psy_audio_Instrument* instrument, uintptr_t slot)
+void psy_audio_instrumentsgroup_insert(psy_audio_InstrumentsGroup* self,
+	psy_audio_Instrument* instrument, uintptr_t slot)
 {
 	if (instrument) {
+		psy_audio_Instrument* oldinstrument;
+
+		oldinstrument = psy_table_at(&self->container, slot);
+		if (oldinstrument) {
+			psy_audio_instrument_deallocate(oldinstrument);
+		}
 		psy_table_insert(&self->container, slot, instrument);
 	}
 }
@@ -56,7 +64,7 @@ void psy_audio_instrumentsgroup_remove(psy_audio_InstrumentsGroup* self, uintptr
 	psy_audio_Instrument* instrument;
 
 	instrument = psy_table_at(&self->container, slot);
-	if (instrument) {
+	if (instrument) {		
 		psy_table_remove(&self->container, slot);
 		psy_audio_instrument_dispose(instrument);
 		free(instrument);
@@ -68,7 +76,7 @@ psy_audio_Instrument* psy_audio_instrumentsgroup_at(psy_audio_InstrumentsGroup* 
 	return psy_table_at(&self->container, slot);
 }
 
-uintptr_t psy_audio_instrumentsgroup_size(psy_audio_InstrumentsGroup* self)
+uintptr_t psy_audio_instrumentsgroup_size(const psy_audio_InstrumentsGroup* self)
 {
 	return psy_table_size(&self->container);
 }
@@ -121,8 +129,8 @@ void psy_audio_instruments_remove(psy_audio_Instruments* self, psy_audio_Instrum
 			psy_table_remove(&self->groups, index.groupslot);
 			psy_audio_instrumentsgroup_dispose(group);
 			free(group);
-			psy_signal_emit(&self->signal_removed, self, 1, &index);
 		}
+		psy_signal_emit(&self->signal_removed, self, 1, &index);
 	}
 }
 
@@ -200,4 +208,41 @@ psy_TableIterator psy_audio_instruments_groupbegin(psy_audio_Instruments* self,
 		return psy_table_begin(&group->container);
 	}
 	return tableend;
+}
+
+void psy_audio_instruments_insertgroup(psy_audio_Instruments* self,
+	psy_audio_InstrumentsGroup* group, uintptr_t groupslot)
+{
+	psy_audio_InstrumentsGroup* oldgroup;
+
+	oldgroup = psy_table_at(&self->groups, groupslot);
+	if (oldgroup) {
+		psy_table_remove(&self->groups, groupslot);
+		psy_audio_instrumentsgroup_dispose(oldgroup);
+		free(oldgroup);
+	}
+	psy_table_insert(&self->groups, groupslot, group);
+}
+
+void psy_audio_instruments_removegroup(psy_audio_Instruments* self,
+	uintptr_t groupslot)
+{
+	psy_audio_InstrumentsGroup* group;
+
+	group = psy_table_at(&self->groups, groupslot);
+	if (group) {
+		psy_audio_InstrumentIndex index;
+
+		psy_table_remove(&self->groups, groupslot);
+		psy_audio_instrumentsgroup_dispose(group);
+		free(group);
+		index = psy_audio_instrumentindex_make(groupslot, 0);
+		psy_signal_emit(&self->signal_removed, self, 1, &index);
+	}	
+}
+
+psy_audio_InstrumentsGroup* psy_audio_instruments_group_at(
+	psy_audio_Instruments* self, uintptr_t groupslot)
+{
+	return (psy_audio_InstrumentsGroup*)psy_table_at(&self->groups, groupslot);
 }

@@ -99,6 +99,8 @@ psy_dsp_EnvelopePoint psy_dsp_envelopesettings_at(const psy_dsp_EnvelopeSettings
 	uintptr_t pointindex);
 void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
+void psy_dsp_envelopesettings_settime(psy_dsp_EnvelopeSettings*,
+	uintptr_t pointindex, psy_dsp_seconds_t pointtime);
 void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_amp_t pointval);
 const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings*);

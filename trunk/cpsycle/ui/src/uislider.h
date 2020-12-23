@@ -32,7 +32,7 @@ typedef struct {
 	psy_Signal signal_changed;
 	psy_Signal signal_describevalue;
 	psy_Signal signal_tweakvalue;
-	psy_Signal signal_value;	
+	psy_Signal signal_value;
 } psy_ui_Slider;
 
 typedef void (*ui_slider_fpdescribe)(void*, psy_ui_Slider*, char* txt);

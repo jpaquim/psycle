@@ -4,20 +4,18 @@
 #include "../../detail/prefix.h"
 
 #include "samplesview.h"
-#include <instruments.h>
-
+// audio
 #include <exclusivelock.h>
+#include <instruments.h>
 #include <songio.h>
-
+// ui
 #include <uiopendialog.h>
 #include <uisavedialog.h>
-
-#include <string.h>
-#include <stdlib.h>
+// std
 #include <math.h>
-
+// file
 #include <dir.h>
-
+// platform
 #include "../../detail/portable.h"
 
 // SamplesViewButtons

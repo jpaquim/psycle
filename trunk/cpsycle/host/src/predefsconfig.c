@@ -64,8 +64,8 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 		char* token;
 		char seps[] = " ";
 		int c;
-		float time;
-		float value;
+		psy_dsp_seconds_t time;
+		psy_dsp_amp_t value;
 
 		text = psy_strdup(values);
 		token = strtok(text, seps);
@@ -77,17 +77,18 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 				rv->sustainbegin = atoi(token);
 			} else {
 				if ((c % 2) != 0) {
-					time = atof(token);
+					time = (psy_dsp_seconds_t)atof(token);
 				} else {
-					value = atof(token);
+					value = (psy_dsp_amp_t)atof(token);
 					if (c == 2) { // first point
-						psy_dsp_envelopesettings_append(rv, psy_dsp_envelopepoint_make_all(
-							time, value, 0.f, 0.f, 0.f, 0.f));
+						psy_dsp_envelopesettings_append(rv,
+							psy_dsp_envelopepoint_make_all(
+								time, value, 0.f, 0.f, 0.f, 0.f));
 					} else {
-						psy_dsp_envelopesettings_append(rv, psy_dsp_envelopepoint_make_all(
-							time, value, 0.f, 5.f, 0.f, 1.f));
+						psy_dsp_envelopesettings_append(rv,
+							psy_dsp_envelopepoint_make_all(
+								time, value, 0.f, 5.f, 0.f, 1.f));
 					}
-
 				}
 			}			
 			token = strtok(0, seps);
@@ -97,7 +98,8 @@ void predefsconfig_predef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettin
 	}
 }
 
-void predefsconfig_storepredef(PredefsConfig* self, int index, psy_dsp_EnvelopeSettings* env)
+void predefsconfig_storepredef(PredefsConfig* self, int index,
+	psy_dsp_EnvelopeSettings* env)
 {
 	char key[10];	
 

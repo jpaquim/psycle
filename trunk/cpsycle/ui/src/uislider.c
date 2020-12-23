@@ -42,10 +42,14 @@ static void vtable_init(psy_ui_Slider* self)
 		vtable.onalign = (psy_ui_fp_component_onalign) psy_ui_slider_onalign;
 		vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
 			psy_ui_slider_onpreferredsize;
-		vtable.onmousedown = (psy_ui_fp_component_onmousedown) psy_ui_slider_onmousedown;
-		vtable.onmousemove = (psy_ui_fp_component_onmousemove) psy_ui_slider_onmousemove;
-		vtable.onmousewheel = (psy_ui_fp_component_onmousewheel) psy_ui_slider_onmousewheel;
-		vtable.onmouseup = (psy_ui_fp_component_onmouseup) psy_ui_slider_onmouseup;
+		vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+			psy_ui_slider_onmousedown;
+		vtable.onmousemove = (psy_ui_fp_component_onmousemove)
+			psy_ui_slider_onmousemove;
+		vtable.onmousewheel = (psy_ui_fp_component_onmousewheel)
+			psy_ui_slider_onmousewheel;
+		vtable.onmouseup = (psy_ui_fp_component_onmouseup)
+			psy_ui_slider_onmouseup;
 		vtable.onlanguagechanged = (psy_ui_fp_component_onlanguagechanged)
 			psy_ui_slider_onlanguagechanged;
 		vtable_initialized = TRUE;
@@ -253,6 +257,8 @@ void psy_ui_slider_onmousemove(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 	if (self->tweakbase != -1) {
 		psy_ui_Size size;
 		psy_ui_TextMetric tm;
+		float value;
+		float* pvalue;
 
 		tm = psy_ui_component_textmetric(&self->component);
 		size = psy_ui_component_size(&self->component);
@@ -268,8 +274,14 @@ void psy_ui_slider_onmousemove(psy_ui_Slider* self, psy_ui_MouseEvent* ev)
 				min(1.f, 1 - (ev->y - self->tweakbase) / (float)(
 					psy_ui_value_px(&size.height, &tm) - self->slidersize)));
 		}
-		psy_signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);
-		psy_signal_emit(&self->signal_changed, self, 0);
+		psy_signal_emit_float(&self->signal_tweakvalue, self, (float)self->value);		
+		pvalue = &value;
+		value = 0.f;
+		psy_signal_emit(&self->signal_value, self, 1, pvalue);
+		if (self->value != value) {
+			self->value = value;
+			psy_signal_emit(&self->signal_changed, self, 0);			
+		}
 		psy_ui_component_invalidate(&self->component);
 	}
 }

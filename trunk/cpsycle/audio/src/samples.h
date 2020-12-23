@@ -38,7 +38,6 @@ extern "C" {
 //          2 upper keys
 // 2 Guitar 0 Guitar
 //
-// sampleindex_make(1, 2) addresses the sample 'upper keys'
 
 typedef struct {
 	uintptr_t slot;
@@ -46,6 +45,29 @@ typedef struct {
 } psy_audio_SampleIndex;
 
 psy_audio_SampleIndex sampleindex_make(uintptr_t slot, uintptr_t subslot);
+
+INLINE uintptr_t psy_audio_sampleindex_slot(const psy_audio_SampleIndex* self)
+{
+	assert(self);
+
+	return self->slot;
+}
+
+INLINE uintptr_t psy_audio_sampleindex_subslot(
+	const psy_audio_SampleIndex* self)
+{
+	assert(self);
+
+	return self->subslot;
+}
+
+INLINE bool psy_audio_sampleindex_invalid(const psy_audio_SampleIndex* self)
+{
+	assert(self);
+
+	return (self->slot == psy_INDEX_INVALID) ||
+		   (self->subslot == psy_INDEX_INVALID);
+}
 
 typedef struct {
 	char* name;
@@ -60,14 +82,24 @@ typedef struct psy_audio_Samples {
 
 void psy_audio_samples_init(psy_audio_Samples*);
 void psy_audio_samples_dispose(psy_audio_Samples*);
+
+/// Removes and deallocates the sample at the index and
+/// inserts the new sample
 void psy_audio_samples_insert(psy_audio_Samples*, psy_audio_Sample*,
 	psy_audio_SampleIndex);
+/// Removes and deallocates the sample at the index
 void psy_audio_samples_remove(psy_audio_Samples*, psy_audio_SampleIndex);
+/// Removes the sample (not deallocated) at the index
+void psy_audio_samples_erase(psy_audio_Samples*, psy_audio_SampleIndex);
+/// Return sample at the index or NULL
 psy_audio_Sample* psy_audio_samples_at(psy_audio_Samples*, psy_audio_SampleIndex);
-uintptr_t psy_audio_samples_size(psy_audio_Samples*, uintptr_t slot);
-
-uintptr_t psy_audio_samples_groupsize(psy_audio_Samples*);
+/// Return number of samples in the group of the slot
+uintptr_t psy_audio_samples_size(const psy_audio_Samples*, uintptr_t slot);
+/// Return number of groups
+uintptr_t psy_audio_samples_groupsize(const psy_audio_Samples*);
+/// Iterator of the groups pointing to the start
 psy_TableIterator psy_audio_samples_begin(psy_audio_Samples*);
+/// Iterator of the samples pointing to the start of the group of the slot
 psy_TableIterator psy_audio_samples_groupbegin(psy_audio_Samples*,
 	uintptr_t slot);
 

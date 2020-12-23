@@ -90,12 +90,13 @@ static void instrumentkeyboardview_vtable_init(InstrumentKeyboardView* self)
 
 void instrumentkeyboardview_init(InstrumentKeyboardView* self,
 	psy_ui_Component* parent)
-{
+{	
+	psy_ui_component_init(&self->component, parent);		
+	instrumentkeyboardview_vtable_init(self);	
+	self->component.vtable = &instrumentkeyboardview_vtable;
 	self->metrics.keysize = 6;
 	self->metrics.lineheight = 15;
-	psy_ui_component_init(&self->component, parent);
-	instrumentkeyboardview_vtable_init(self);
-	self->component.vtable = &instrumentkeyboardview_vtable;
+	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 		psy_ui_value_makeeh(3)));	
@@ -171,9 +172,12 @@ void instrumentkeyboardview_updatemetrics(InstrumentKeyboardView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
+	self->component.scrollstepy = self->metrics.lineheight * 3;
 }
 
 // entry view
+static void instrumententryview_onpreferredsize(InstrumentEntryView*, psy_ui_Size* limit,
+	psy_ui_Size* rv);
 static void instrumententryview_ondraw(InstrumentEntryView*, psy_ui_Graphics*);
 static void instrumententryview_onsize(InstrumentEntryView*, psy_ui_Size*);
 static void instrumententryview_onscroll(InstrumentEntryView*, psy_ui_Component* sender);
@@ -203,25 +207,26 @@ static void instrumententryview_vtable_init(InstrumentEntryView* self)
 			instrumententryview_onmouseup;
 		instrumententryview_vtable.onsize = (psy_ui_fp_component_onsize)
 			instrumententryview_onsize;
+		instrumententryview_vtable.onpreferredsize = (psy_ui_fp_component_onpreferredsize)
+			instrumententryview_onpreferredsize;
 		instrumententryview_vtable_initialized = 1;
 	}
 }
 
 void instrumententryview_init(InstrumentEntryView* self,
 	psy_ui_Component* parent, InstrumentParameterView* parameterview)
-{
-	
-	psy_ui_component_init(&self->component, parent);
+{	
+	psy_ui_component_init(&self->component, parent);	
 	instrumententryview_vtable_init(self);
 	self->component.vtable = &instrumententryview_vtable;
+	psy_ui_component_doublebuffer(&self->component);
 	self->parameterview = parameterview;
 	self->instrument = 0;
 	self->metrics.keysize = 8;
 	self->metrics.lineheight = 15;
 	self->dragmode = 0;
 	self->selected = UINTPTR_MAX;
-	self->component.scrollstepy = 45;
-	psy_ui_component_doublebuffer(&self->component);
+	self->component.scrollstepy = 45;	
 	instrumententryview_updatemetrics(self);
 	psy_signal_connect(&self->component.signal_scroll, self,
 		instrumententryview_onscroll);	
@@ -233,8 +238,11 @@ void instrumententryview_setinstrument(InstrumentEntryView* self,
 	self->instrument = instrument;
 	self->selected = UINTPTR_MAX;
 	psy_ui_component_setscrolltop(&self->component, 0);
-	instrumententryview_adjustscroll(self);
+	psy_ui_component_setscrolltop(&self->parameterview->component, 0);
+	psy_ui_component_updateoverflow(&self->component);
+	psy_ui_component_updateoverflow(&self->parameterview->component);
 	psy_ui_component_invalidate(&self->component);
+	psy_ui_component_invalidate(&self->parameterview->component);
 }
 
 void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
@@ -260,7 +268,7 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 		size = psy_ui_intsize_init_size(
 			psy_ui_component_size(&self->component), &tm);
 		cpy = 0;
-		if (self->selected != UINTPTR_MAX && self->instrument) {
+		if (self->selected != UINTPTR_MAX && self->instrument && self->instrument->entries) {
 			psy_audio_InstrumentEntry* entry;
 			int startx;
 			int endx;
@@ -279,7 +287,10 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					numwhitekeys * size.width) +
 					(int)(isblack(entry->keyrange.low + 1)
 						? self->metrics.keysize / 2 : 0);
-				psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
+				psy_ui_setrectangle(&r, startx,
+					psy_ui_component_scrolltop(&self->component),
+					endx - startx,
+					psy_ui_component_scrolltop(&self->component) + size.height);
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00272727));
 				startx = (int)(
 					(float)numwhitekey(entry->keyrange.high) /
@@ -291,7 +302,11 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 					numwhitekeys * size.width) +
 					(int)(isblack(entry->keyrange.high + 1)
 						? self->metrics.keysize / 2 : 0);
-				psy_ui_setrectangle(&r, startx, 0, endx - startx, size.height);
+				psy_ui_setrectangle(&r,
+					startx,
+					psy_ui_component_scrolltop(&self->component),
+					endx - startx,
+					psy_ui_component_scrolltop(&self->component) + size.height);
 				psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00272727));
 			}
 		}
@@ -322,13 +337,42 @@ void instrumententryview_ondraw(InstrumentEntryView* self, psy_ui_Graphics* g)
 			psy_ui_drawline(g, endx, cpy, endx, cpy + 10);			
 			cpy += self->metrics.lineheight * 3;
 		}		
+		if (!self->instrument->entries) {
+			static const char* nomapping = "No Instrument Mapping";
+
+			psy_ui_textout(g, 
+				(size.width - tm.tmAveCharWidth * strlen(nomapping)) / 2,
+				(size.height - tm.tmHeight) / 2,
+				nomapping, strlen(nomapping));
+		}
+	} else {
+		psy_ui_TextMetric tm;
+		psy_ui_IntSize size;
+		static const char* noinst = "No Instrument";
+
+		tm = psy_ui_component_textmetric(&self->component);
+		size =  psy_ui_component_intsize(&self->component);
+		psy_ui_textout(g,
+			(size.width - tm.tmAveCharWidth * strlen(noinst)) / 2,
+			(size.height - tm.tmHeight) / 2,
+			noinst, strlen(noinst));		
 	}
 }
 
 void instrumententryview_onsize(InstrumentEntryView* self, psy_ui_Size* size)
 {
 	instrumententryview_updatemetrics(self);
-	instrumententryview_adjustscroll(self);
+}
+
+void instrumententryview_onpreferredsize(InstrumentEntryView* self, psy_ui_Size* limit,
+	psy_ui_Size* rv)
+{
+	if (self->instrument && self->instrument->entries) {		
+		rv->height = psy_ui_value_makepx(
+			(self->metrics.lineheight * 3) * psy_list_size(self->instrument->entries));
+	} else {
+		*rv = psy_ui_size_zero();
+	}
 }
 
 void instrumententryview_updatemetrics(InstrumentEntryView* self)
@@ -350,31 +394,15 @@ void instrumententryview_updatemetrics(InstrumentEntryView* self)
 	size = psy_ui_intsize_init_size(
 		psy_ui_component_size(&self->component), &tm);
 	self->metrics.keysize = size.width / (double)numwhitekeys;
+	self->component.scrollstepy = self->metrics.lineheight * 3;
 }
 
 void instrumententryview_onscroll(InstrumentEntryView* self,
 	psy_ui_Component* sender)
 {
+	self->parameterview->component.scrollstepy = self->component.scrollstepy;
 	psy_ui_component_setscrolltop(&self->parameterview->component,
 		psy_ui_component_scrolltop(&self->component));
-}
-
-void instrumententryview_adjustscroll(InstrumentEntryView* self)
-{
-	psy_ui_Size size;
-	int vscrollmax;
-	int numentries;
-	int visientries;
-	psy_ui_TextMetric tm;
-
-	tm = psy_ui_component_textmetric(&self->component);
-	size = psy_ui_component_size(&self->component);
-	numentries = self->instrument
-		? psy_list_size(psy_audio_instrument_entries(self->instrument))
-		: 0;	
-	visientries = psy_ui_value_px(&size.height, &tm) / (self->metrics.lineheight * 3);
-	vscrollmax = numentries < visientries ? 0 : numentries - visientries;
-	psy_ui_component_setverticalscrollrange(&self->component, 0, vscrollmax);
 }
 
 void instrumententryview_onmousedown(InstrumentEntryView* self,
@@ -488,7 +516,7 @@ static void instrumentparameterview_ondraw(InstrumentParameterView*,
 	psy_ui_Graphics*);
 
 static psy_ui_ComponentVtable instrumentparameterview_vtable;
-static int instrumentparameterview_vtable_initialized = 0;
+static bool instrumentparameterview_vtable_initialized = FALSE;
 
 static void instrumentparameterview_vtable_init(InstrumentParameterView* self)
 {
@@ -496,7 +524,7 @@ static void instrumentparameterview_vtable_init(InstrumentParameterView* self)
 		instrumentparameterview_vtable = *(self->component.vtable);
 		instrumentparameterview_vtable.ondraw = (psy_ui_fp_component_ondraw)
 			instrumentparameterview_ondraw;		
-		instrumentparameterview_vtable_initialized = 1;
+		instrumentparameterview_vtable_initialized = TRUE;
 	}
 }
 
@@ -507,7 +535,8 @@ void instrumentparameterview_init(InstrumentParameterView* self,
 	instrumentparameterview_vtable_init(self);
 	self->component.vtable = &instrumentparameterview_vtable;
 	self->instrument = NULL;
-	psy_ui_component_doublebuffer(&self->component);		
+	psy_ui_component_doublebuffer(&self->component);
+	psy_ui_component_preventalign(&self->component);
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(20),
 			psy_ui_value_makeeh(20)));
@@ -554,21 +583,14 @@ void instrumentparameterview_ondraw(InstrumentParameterView* self,
 
 void instrumentnotemapbuttons_init(InstrumentNoteMapButtons* self,
 	psy_ui_Component* parent)
-{
-	psy_ui_Margin margin;
-
-	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
-		psy_ui_value_makeew(1.5), psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
-	psy_ui_component_init(&self->component, parent);	
+{	
+	psy_ui_component_init(&self->component, parent);
+	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_LEFT,
+		psy_ui_defaults_hmargin(psy_ui_defaults()));
 	psy_ui_button_init(&self->add, &self->component);
 	psy_ui_button_settext(&self->add, "Add");
 	psy_ui_button_init(&self->remove, &self->component);
-	psy_ui_button_settext(&self->remove, "Remove");
-	psy_list_free(psy_ui_components_setalign(
-		psy_ui_component_children(&self->component, psy_ui_NONRECURSIVE),
-		psy_ui_ALIGN_LEFT,
-			&margin));
+	psy_ui_button_settext(&self->remove, "Remove");	
 }
 
 // InstrumentNoteMapView
@@ -644,6 +666,8 @@ void instrumentnotemapview_setmetrics(InstrumentNoteMapView* self,
 
 void instrumentnotemapview_update(InstrumentNoteMapView* self)
 {
-	instrumententryview_adjustscroll(&self->entryview);
-	psy_ui_component_invalidate(&self->component);
+	instrumentkeyboardview_updatemetrics(&self->keyboard);
+	instrumententryview_updatemetrics(&self->entryview);
+	psy_ui_component_updateoverflow(&self->entryview.component);
+	psy_ui_component_invalidate(&self->component);	
 }

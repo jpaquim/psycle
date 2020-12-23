@@ -16,7 +16,7 @@ extern "C" {
 
 typedef struct psy_ui_Defaults {
 	uint32_t errorcolour;
-	psy_ui_Style style_common;
+	psy_ui_Style style_common;	
 	psy_ui_Margin hmargin;
 	psy_ui_Margin vmargin;
 	psy_ui_Margin cmargin;

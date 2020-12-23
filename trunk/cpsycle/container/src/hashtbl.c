@@ -161,6 +161,11 @@ void* psy_table_at(psy_Table* self, uintptr_t k)
 	return rv;
 }
 
+const void* psy_table_at_const(const psy_Table* self, uintptr_t k)
+{
+	return psy_table_at((psy_Table*)self, k);
+}
+
 void* psy_table_at_strhash(psy_Table* self, const char* strkey)
 {
 	return psy_table_at(self, psy_strhash(strkey));

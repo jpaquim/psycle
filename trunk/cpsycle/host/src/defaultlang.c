@@ -322,6 +322,10 @@ void make_translator_default(psy_Property* lang)
 	psy_property_set_str(section, "global-volume", "Global volume");
 	psy_property_set_str(section,
 		"amplitude-envelope", "Amplitude envelope");
+	psy_property_set_str(section,
+		"pan-envelope", "Pan envelope");
+	psy_property_set_str(section,
+		"pitch-envelope", "Pitch envelope");
 	psy_property_set_str(section, "attack", "Attack");
 	psy_property_set_str(section, "decay", "Decay");
 	psy_property_set_str(section, "sustain-level", "Sustain level");

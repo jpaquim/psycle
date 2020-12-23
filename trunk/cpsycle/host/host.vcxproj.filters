@@ -349,6 +349,21 @@
     <ClCompile Include="src\predefsconfig.c">
       <Filter>configuration</Filter>
     </ClCompile>
+    <ClCompile Include="src\instrumentampview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentfilterview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentgenview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentpanview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
+    <ClCompile Include="src\instrumentpitchview.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -673,6 +688,21 @@
     </ClInclude>
     <ClInclude Include="src\predefsconfig.h">
       <Filter>configuration</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentampview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentfilterview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentgenview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentpanview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\instrumentpitchview.h">
+      <Filter>machine\instrument</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
