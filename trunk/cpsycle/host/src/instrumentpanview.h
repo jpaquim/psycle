@@ -5,6 +5,7 @@
 #define INSTRUMENTPANVIEW_H
 
 // host
+#include "adsrsliders.h"
 #include "envelopeview.h"
 #include "workspace.h"
 // ui
@@ -31,6 +32,7 @@ typedef struct InstrumentPanView {
 	psy_ui_Slider notemodcenternote;
 	psy_ui_Slider notemodamount;
 	EnvelopeView envelopeview;
+	AdsrSliders adsrsliders;
 	// references
 	Workspace* workspace;
 } InstrumentPanView;

@@ -4,7 +4,9 @@
 #ifndef psy_audio_VIRTUALGENERATOR_H
 #define psy_audio_VIRTUALGENERATOR_H
 
+// local
 #include "custommachine.h"
+#include "instruments.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,8 +17,11 @@ typedef struct psy_audio_VirtualGenerator {
 	psy_audio_CustomMachine custommachine;	
 	// internal data
 	int32_t machine_index;
-	int32_t instrument_index;
-	psy_audio_IntMachineParam param_inst;
+	// index subslot used as instrument index
+	// instrument group is not used, because the sammpler defines it
+	psy_audio_InstrumentIndex instrument_index;
+	// parameters
+	psy_audio_UIntPtrMachineParam param_inst;
 	psy_audio_IntMachineParam param_sampler;
 } psy_audio_VirtualGenerator;
 

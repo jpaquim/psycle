@@ -62,49 +62,49 @@ bool generalconfig_showsonginfoonload(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showsonginfoonload", 1);
+	return psy_property_at_bool(self->general, "showsonginfoonload", TRUE);
 }
 
 bool generalconfig_showaboutatstart(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showaboutatstart", 1);
+	return psy_property_at_bool(self->general, "showaboutatstart", TRUE);
 }
 
 bool generalconfig_showmaximizedatstart(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showmaximizedatstart", 1);
+	return psy_property_at_bool(self->general, "showmaximizedatstart", TRUE);
 }
 
 bool generalconfig_saverecentsongs(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "saverecentsongs", 1);
+	return psy_property_at_bool(self->general, "saverecentsongs", TRUE);
 }
 
 bool generalconfig_playsongafterload(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "playsongafterload", 1);
+	return psy_property_at_bool(self->general, "playsongafterload", TRUE);
 }
 
 bool generalconfig_showingpatternnames(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showpatternnames", 1);
+	return psy_property_at_bool(self->general, "showpatternnames", TRUE);
 }
 
 bool generalconfig_showstepsequencer(const GeneralConfig* self)
 {
 	assert(self);
 
-	return psy_property_at_bool(self->general, "showstepsequencer", 0);
+	return psy_property_at_bool(self->general, "showstepsequencer", FALSE);
 }
 // events
 bool generalconfig_onchanged(GeneralConfig* self, psy_Property*

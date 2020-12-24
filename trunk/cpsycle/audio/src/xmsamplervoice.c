@@ -172,6 +172,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	struct psy_audio_XMSampler* sampler,
 	struct psy_audio_Samples* samples,
 	struct psy_audio_Instrument* instrument,
+	uintptr_t instidx,
 	psy_audio_XMSamplerChannel* channel,
 	uintptr_t channelnum,
 	uintptr_t samplerate,
@@ -181,6 +182,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	self->sampler = sampler;
 	self->samples = samples;
 	self->instrument = instrument;
+	self->instidx = instidx;
 	self->channelnum = channelnum;
 	self->channel = channel;
 	// Init Envelopes
@@ -273,6 +275,7 @@ psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_alloc(void)
 
 psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_allocinit(psy_audio_XMSampler* sampler,
 	psy_audio_Instrument* instrument,
+	uintptr_t instidx,
 	psy_audio_XMSamplerChannel* channel,
 	uintptr_t channelnum,
 	uintptr_t samplerate)
@@ -285,6 +288,7 @@ psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_allocinit(psy_audio_XMSampler
 			sampler,
 			psy_audio_machine_samples(psy_audio_xmsampler_base(sampler)),
 			instrument,
+			instidx,
 			channel,
 			channelnum,
 			samplerate,
@@ -298,7 +302,7 @@ void psy_audio_xmsamplervoice_seqtick(psy_audio_XMSamplerVoice* self,
 	const psy_audio_PatternEvent* ev)
 {
 	psy_audio_xmsamplervoice_seteffect(self, ev);
-	if (ev->note < psy_audio_NOTECOMMANDS_RELEASE) {		
+	if (ev->note < psy_audio_NOTECOMMANDS_RELEASE) {
 		psy_audio_xmsamplervoice_noteon(self, ev->note);
 	}
 }
@@ -451,6 +455,9 @@ void psy_audio_xmsamplervoice_nna(psy_audio_XMSamplerVoice* self)
 			case psy_audio_NNA_NOTEOFF:
 				psy_audio_xmsamplervoice_noteoff(self);
 			break;
+			case psy_audio_NNA_FADEOUT:
+				psy_audio_xmsamplervoice_release(self);
+				break;
 			case psy_audio_NNA_CONTINUE:				
 			break;
 			default:
@@ -496,7 +503,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 		psy_audio_xmsamplervoice_setisplaying(self, FALSE);
 		return;
 	}
-	if (self->positions && psy_dsp_envelope_playing(&self->amplitudeenvelope)) {
+	if (self->positions && psy_dsp_envelope_playing(&self->amplitudeenvelope) || self->play) {
 		psy_List* p;
 		psy_dsp_amp_t* env;
 		psy_dsp_amp_t* filterenv;
@@ -504,15 +511,29 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 		
 		env = malloc(amount * sizeof(psy_dsp_amp_t));
 		for (i = 0; i < amount; ++i) {
-			psy_dsp_envelope_tick(&self->amplitudeenvelope);
-			env[i] = self->amplitudeenvelope.value;
+			if (psy_dsp_envelope_playing(&self->amplitudeenvelope)) {
+				psy_dsp_envelope_updatespeed(&self->amplitudeenvelope,
+					psy_audio_machine_ticksperbeat(self->sampler),
+					psy_audio_machine_bpm(self->sampler));
+				psy_dsp_envelope_tick(&self->amplitudeenvelope);
+				env[i] = self->amplitudeenvelope.value;
+			} else {
+				env[i] = 1.f;
+			}
 		}
 		filterenv = NULL;
 		if (filter_type(&self->_filter) != F_NONE) {
 			filterenv = malloc(amount * sizeof(psy_dsp_amp_t));
 			for (i = 0; i < amount; ++i) {
-				psy_dsp_envelope_tick(&self->filterenvelope);
-				filterenv[i] = self->filterenvelope.value;
+				if (psy_dsp_envelope_playing(&self->filterenvelope)) {
+					psy_dsp_envelope_updatespeed(&self->filterenvelope,
+						psy_audio_machine_ticksperbeat(self->sampler),
+						psy_audio_machine_bpm(self->sampler));
+					psy_dsp_envelope_tick(&self->filterenvelope);
+					filterenv[i] = self->filterenvelope.value;
+				} else {
+					filterenv[i] = 1.f;
+				}
 			}
 		}
 

@@ -5,10 +5,9 @@
 #define INSTRUMENTAMPVIEW_H
 
 // host
+#include "adsrsliders.h"
 #include "envelopeview.h"
 #include "workspace.h"
-// ui
-#include <uislider.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -21,10 +20,7 @@ typedef struct InstrumentVolumeView {
 	psy_ui_Slider randomvolume;
 	psy_ui_Slider volumefadespeed;
 	EnvelopeView envelopeview;
-	psy_ui_Slider attack;
-	psy_ui_Slider decay;
-	psy_ui_Slider sustain;
-	psy_ui_Slider release;
+	AdsrSliders adsrsliders;
 	// references
 	psy_audio_Player* player;
 	psy_audio_Instrument* instrument;

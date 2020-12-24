@@ -228,10 +228,10 @@ void about_onalign(About* self)
 	tm = psy_ui_component_textmetric(&self->component);
 	bitmapsize = psy_ui_bitmap_size(&self->image.bitmap);
 	bitmapsize.width = psy_ui_value_makepx(
-		max(tm.tmAveCharWidth * 40,
+		psy_max(tm.tmAveCharWidth * 40,
 			psy_ui_value_px(&bitmapsize.width, &tm)));
 	bitmapsize.height = psy_ui_value_makepx(
-		max(tm.tmHeight * 20,
+		psy_max(tm.tmHeight * 20,
 			psy_ui_value_px(&bitmapsize.height, &tm) + tm.tmHeight * 4));
 	centerx = (psy_ui_value_px(&size.width, &tm) - psy_ui_value_px(&bitmapsize.width, &tm)) / 2;
 	centery = (psy_ui_value_px(&size.height, &tm) - psy_ui_value_px(&bitmapsize.height, &tm)) / 2;

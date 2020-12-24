@@ -143,6 +143,7 @@ static void releaseallvoices(psy_audio_XMSampler*);
 static psy_audio_XMSamplerVoice* activevoice(psy_audio_XMSampler*,
 	uintptr_t channel);
 static void releasevoices(psy_audio_XMSampler*, uintptr_t channel);
+static void releaseinst(psy_audio_XMSampler*, uintptr_t channel, uintptr_t inst);
 static void nnavoices(psy_audio_XMSampler*, uintptr_t channel);
 static void removeunusedvoices(psy_audio_XMSampler* self);
 static uintptr_t numinputs(psy_audio_XMSampler*);
@@ -506,7 +507,11 @@ void seqtick(psy_audio_XMSampler* self, uintptr_t channelnum,
 		psy_audio_xmsamplerchannel_seteffect(channel, &event);
 	}
 	if (event.note == psy_audio_NOTECOMMANDS_RELEASE) {
-		releasevoices(self, channelnum);
+		//if (event.inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
+			releasevoices(self, channelnum);
+		//} else {
+			//releaseinst(self, channelnum, event.inst);
+		//}
 		return;
 	}
 	if (event.note < psy_audio_NOTECOMMANDS_RELEASE) {
@@ -516,14 +521,17 @@ void seqtick(psy_audio_XMSampler* self, uintptr_t channelnum,
 	}
 	if (!voice) {
 		psy_audio_Instrument* instrument;
-		
+		psy_audio_InstrumentIndex index;
+
+		index = currslot(self, channelnum, &event);
 		instrument = psy_audio_instruments_at(psy_audio_machine_instruments(
 			psy_audio_xmsampler_base(self)),
-			currslot(self, channelnum, &event));
+			index);
 		if (instrument) {
 			voice = psy_audio_xmsamplervoice_allocinit(self, instrument,
+				index.subslot,
 				channel,
-				channelnum,
+				channelnum,				
 				psy_audio_machine_samplerate(psy_audio_xmsampler_base(self)));
 			psy_list_append(&self->voices, voice);
 		}
@@ -615,6 +623,20 @@ void releasevoices(psy_audio_XMSampler* self, uintptr_t channel)
 
 		voice = (psy_audio_XMSamplerVoice*) p->entry;
 		if (voice->channelnum == channel) {			
+			psy_audio_xmsamplervoice_release(voice);
+		}
+	}
+}
+
+void releaseinst(psy_audio_XMSampler* self, uintptr_t channel, uintptr_t inst)
+{
+	psy_List* p;
+
+	for (p = self->voices; p != NULL; psy_list_next(&p)) {
+		psy_audio_XMSamplerVoice* voice;
+
+		voice = (psy_audio_XMSamplerVoice*)p->entry;
+		if (voice->channelnum == channel && voice->instidx) {
 			psy_audio_xmsamplervoice_release(voice);
 		}
 	}

@@ -71,10 +71,11 @@ void psy_audio_virtualgenerator_init(psy_audio_VirtualGenerator* self,
 	psy_audio_custommachine_init(&self->custommachine, callback);
 	vtable_init(self);
 	self->custommachine.machine.vtable = &vtable;
-	self->machine_index = macindex;
-	self->instrument_index = instindex;
-	psy_audio_intmachineparam_init(&self->param_inst,
-		"Instrument", "Inst", MPF_STATE, &self->instrument_index, 0, 0xFF);
+	self->machine_index = macindex;	
+	self->instrument_index = psy_audio_instrumentindex_make(0, instindex);
+	psy_audio_uintptrmachineparam_init(&self->param_inst,
+		"Instrument", "Inst", MPF_STATE, &self->instrument_index.subslot,
+		0, 0xFF);
 	psy_audio_intmachineparam_init(&self->param_sampler,
 		"Sampler", "Sampler", MPF_STATE, &self->machine_index, 0, 0xFF);
 }
@@ -84,7 +85,7 @@ void psy_audio_virtualgenerator_setinstrument(psy_audio_VirtualGenerator* self,
 {
 	assert(self);
 
-	self->instrument_index = index;
+	self->instrument_index.subslot = index;
 }
 
 uintptr_t psy_audio_virtualgenerator_instrumentindex(const
@@ -92,7 +93,7 @@ uintptr_t psy_audio_virtualgenerator_instrumentindex(const
 {
 	assert(self);
 
-	return self->instrument_index;
+	return self->instrument_index.subslot;
 }
 
 void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
@@ -105,20 +106,18 @@ void seqtick(psy_audio_VirtualGenerator* self, uintptr_t channel,
 		psy_audio_Machine* sampler;
 
 		sampler = psy_audio_machines_at(machines, self->machine_index);
-		if (sampler) {
-			int vol;
+		if (sampler) {			
 			psy_audio_PatternEvent realevent;
-						
-			vol = ev->inst;
-			realevent = *ev;			
-			realevent.inst = self->instrument_index;
-			if (vol != psy_audio_NOTECOMMANDS_INST_EMPTY) {
+									
+			realevent = *ev;
+			realevent.inst = self->instrument_index.subslot;
+			if (ev->inst != psy_audio_NOTECOMMANDS_INST_EMPTY) {				
 				if (psy_audio_machine_type(sampler) == MACH_XMSAMPLER) {
 					realevent.cmd = 0x1E;
 				} else {
 					realevent.cmd = 0xFC;
 				}
-				realevent.parameter = vol;
+				realevent.parameter = ev->inst;
 			}
 			psy_audio_machine_seqtick(sampler, channel, &realevent);
 		}

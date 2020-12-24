@@ -20,6 +20,8 @@ static void instrumentpanview_ontweak(InstrumentPanView*,
 	psy_ui_Slider*, float value);
 static void instrumentpanview_onvalue(InstrumentPanView*,
 	psy_ui_Slider*, float* value);
+static void instrumentpanview_onadsrtweaked(InstrumentPanView*,
+	AdsrSliders*);
 // implementation
 void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
@@ -70,14 +72,18 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_ui_slider_init(&self->notemodamount, &self->top);
 	psy_ui_slider_settext(&self->notemodamount,
 		"Note Mod Amount");
-
 	envelopeview_init(&self->envelopeview, &self->component, workspace);
 	envelopeview_settext(&self->envelopeview,
 		psy_ui_translate("instrumentview.pan-envelope"));
 	psy_ui_component_setalign(&self->envelopeview.component,
-		psy_ui_ALIGN_CLIENT);	
+		psy_ui_ALIGN_CLIENT);
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
 	margin.top = psy_ui_value_makeeh(1.0);
+	adsrsliders_init(&self->adsrsliders, &self->component);
+	psy_ui_component_setalign(&self->adsrsliders.component, psy_ui_ALIGN_BOTTOM);
+	psy_ui_component_setmargin(&self->adsrsliders.component, &margin);
+	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
+		instrumentpanview_onadsrtweaked);
 	for (i = 0; i < 3; ++i) {
 		psy_ui_slider_setcharnumber(sliders[i], 25);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);
@@ -93,6 +99,7 @@ void instrumentpanview_setinstrument(InstrumentPanView* self,
 {	
 	self->instrument = instrument;
 	if (self->instrument) {
+		adsrsliders_setenvelope(&self->adsrsliders, &instrument->panenvelope);
 		envelopeview_setenvelope(&self->envelopeview,
 			&instrument->panenvelope);
 		if (instrument->panenabled) {
@@ -101,6 +108,7 @@ void instrumentpanview_setinstrument(InstrumentPanView* self,
 			psy_ui_checkbox_disablecheck(&self->instpanenabled);
 		}
 	} else {
+		adsrsliders_setenvelope(&self->adsrsliders, NULL);
 		envelopeview_setenvelope(&self->envelopeview, NULL);
 		psy_ui_checkbox_disablecheck(&self->instpanenabled);
 	}
@@ -208,3 +216,8 @@ void instrumentpanview_onvalue(InstrumentPanView* self,
 	}
 }
 
+void instrumentpanview_onadsrtweaked(InstrumentPanView* self,
+	AdsrSliders* sender)
+{
+	envelopeview_update(&self->envelopeview);
+}
