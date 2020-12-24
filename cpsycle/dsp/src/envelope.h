@@ -101,8 +101,28 @@ void psy_dsp_envelopesettings_settimeandvalue(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
 void psy_dsp_envelopesettings_settime(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_seconds_t pointtime);
+
+INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_time(
+	const psy_dsp_EnvelopeSettings* self, uintptr_t pointindex)
+{
+	psy_dsp_EnvelopePoint rv;
+
+	rv = psy_dsp_envelopesettings_at(self, pointindex);
+	return rv.time;
+}
+
 void psy_dsp_envelopesettings_setvalue(psy_dsp_EnvelopeSettings*,
 	uintptr_t pointindex, psy_dsp_amp_t pointval);
+
+INLINE psy_dsp_amp_t psy_dsp_envelopesettings_value(
+	const psy_dsp_EnvelopeSettings* self, uintptr_t pointindex)
+{
+	psy_dsp_EnvelopePoint rv;
+
+	rv = psy_dsp_envelopesettings_at(self, pointindex);
+	return rv.value;
+}
+
 const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings*);
 
 INLINE bool psy_dsp_envelopesettings_empty(const psy_dsp_EnvelopeSettings* self)
@@ -200,10 +220,85 @@ INLINE psy_dsp_EnvelopeTimeMode psy_dsp_envelopesettings_mode(
 //void psy_dsp_envelopesettings_mode(psy_dsp_EnvelopeSettings* self,
 //	const Mode::Type _mode, const int bpm = 125, const int tpb = 24, const int onemilli = 1);
 
+
+// Only meaningful when used as adsr 
+// INLINE void psy_dsp_envelopesettings_AttackTime(int time, bool rezoom = true);
+INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_attacktime(const
+	psy_dsp_EnvelopeSettings* self)
+{
+	assert(self);
+
+	return psy_dsp_envelopesettings_time(self, 1);	
+}
+
+INLINE void psy_dsp_envelopesettings_setattacktime(
+	psy_dsp_EnvelopeSettings* self, psy_dsp_seconds_t time)
+{
+	assert(self);
+
+	psy_dsp_envelopesettings_settime(self, 1, time);
+}
+
+INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_decaytime(const
+	psy_dsp_EnvelopeSettings* self)
+{
+	assert(self);
+
+	return psy_dsp_envelopesettings_time(self, 2) -
+		psy_dsp_envelopesettings_time(self, 1);	
+}
+
+INLINE void psy_dsp_envelopesettings_setdecaytime(
+	psy_dsp_EnvelopeSettings* self, psy_dsp_seconds_t time)
+{
+	assert(self);
+
+	psy_dsp_envelopesettings_settime(self, 2,
+		psy_dsp_envelopesettings_attacktime(self) + time);
+}
+
+INLINE void psy_dsp_envelopesettings_setsustainvalue(
+	psy_dsp_EnvelopeSettings* self, psy_dsp_amp_t sustain)
+{
+	assert(self);
+
+	psy_dsp_envelopesettings_setvalue(self, 2, sustain);
+}
+
+INLINE psy_dsp_amp_t psy_dsp_envelopesettings_sustainvalue(const
+	psy_dsp_EnvelopeSettings* self)
+{
+	assert(self);
+
+	return psy_dsp_envelopesettings_value(self, 2);
+}
+
+INLINE psy_dsp_seconds_t psy_dsp_envelopesettings_releasetime(const
+	psy_dsp_EnvelopeSettings* self)
+{
+	assert(self);
+
+	return psy_dsp_envelopesettings_time(self, 3) -
+		psy_dsp_envelopesettings_time(self, 2);
+}
+
+INLINE void psy_dsp_envelopesettings_setreleasetime(
+	psy_dsp_EnvelopeSettings* self, psy_dsp_seconds_t time)
+{
+	assert(self);
+
+	psy_dsp_envelopesettings_settime(self, 3,
+		psy_dsp_envelopesettings_attacktime(self) +
+		psy_dsp_envelopesettings_decaytime(self) +
+		time);
+}
+
 typedef struct psy_dsp_Envelope {
 	int rsvd;
 	psy_dsp_EnvelopeSettings settings;	
-	uintptr_t samplerate;	
+	uintptr_t samplerate;
+	float bpm;
+	int tpb;
 	psy_List* currstage;	
 	psy_List* susbeginstage;
 	psy_List* susendstage;
@@ -213,7 +308,7 @@ typedef struct psy_dsp_Envelope {
 	uintptr_t samplecount;
 	uintptr_t nexttime;
 	bool susdone;
-	bool fastrelease;	
+	bool fastrelease;		
 } psy_dsp_Envelope;
 
 void psy_dsp_envelope_init(psy_dsp_Envelope*);
@@ -230,6 +325,7 @@ psy_dsp_EnvelopePoint psy_dsp_envelope_at(const psy_dsp_Envelope*,
 	uintptr_t pointindex);
 psy_List*  psy_dsp_envelope_begin(psy_dsp_Envelope*);
 void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, uintptr_t samplerate);
+void psy_dsp_envelope_updatespeed(psy_dsp_Envelope*, int tpb, int bpm);
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope*);
 psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope*);
 void psy_dsp_envelope_start(psy_dsp_Envelope*);

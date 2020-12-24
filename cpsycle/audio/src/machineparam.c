@@ -458,6 +458,152 @@ void psy_audio_intmachineparam_setmask(psy_audio_IntMachineParam* self, const ch
 	self->mask = (mask) ? strdup(mask) : 0; 
 }
 
+
+// UIntPtrMachineParam
+static void uintptrmachineparam_tweak(psy_audio_UIntPtrMachineParam*, float val);
+static float uintptrmachineparam_normvalue(psy_audio_UIntPtrMachineParam*);
+static void uintptrmachineparam_range(psy_audio_UIntPtrMachineParam*,
+	uintptr_t* minval, uintptr_t* maxval);
+static int uintptrmachineparam_type(psy_audio_UIntPtrMachineParam*);
+static int uintptrmachineparam_label(psy_audio_UIntPtrMachineParam*, char* text);
+static int uintptrmachineparam_name(psy_audio_UIntPtrMachineParam*, char* text);
+static int uintptrmachineparam_describe(psy_audio_UIntPtrMachineParam*, char* text);
+
+static MachineParamVtable uintptrmachineparam_vtable;
+static bool uintptrmachineparam_vtable_initialized = FALSE;
+
+static void uintptrmachineparam_vtable_init(psy_audio_UIntPtrMachineParam* self)
+{
+	if (!uintptrmachineparam_vtable_initialized) {
+		uintptrmachineparam_vtable = *(self->machineparam.vtable);
+		uintptrmachineparam_vtable.tweak = (fp_machineparam_tweak)uintptrmachineparam_tweak;
+		uintptrmachineparam_vtable.normvalue = (fp_machineparam_normvalue)uintptrmachineparam_normvalue;
+		uintptrmachineparam_vtable.range = (fp_machineparam_range)uintptrmachineparam_range;
+		uintptrmachineparam_vtable.name = (fp_machineparam_name)uintptrmachineparam_name;
+		uintptrmachineparam_vtable.label = (fp_machineparam_label)uintptrmachineparam_label;
+		uintptrmachineparam_vtable.type = (fp_machineparam_type)uintptrmachineparam_type;
+		uintptrmachineparam_vtable.describe = (fp_machineparam_describe)uintptrmachineparam_describe;
+		uintptrmachineparam_vtable_initialized = TRUE;
+	}
+}
+
+void psy_audio_uintptrmachineparam_init(psy_audio_UIntPtrMachineParam* self,
+	const char* name, const char* label, int type, uintptr_t* data,
+	uintptr_t minval, uintptr_t maxval)
+{
+	psy_audio_machineparam_init(&self->machineparam);
+	uintptrmachineparam_vtable_init(self);
+	self->machineparam.vtable = &uintptrmachineparam_vtable;
+	self->name = (name) ? strdup(name) : 0;
+	self->label = (label) ? strdup(label) : 0;
+	self->mask = 0;
+	self->minval = minval;
+	self->maxval = maxval;
+	self->type = type;
+	self->data = data;
+}
+
+void psy_audio_uintptrmachineparam_dispose(psy_audio_UIntPtrMachineParam* self)
+{
+	psy_audio_machineparam_dispose(&self->machineparam);
+	free(self->name);
+	free(self->label);
+	free(self->mask);
+}
+
+psy_audio_UIntPtrMachineParam* psy_audio_uintptrmachineparam_alloc(void)
+{
+	return (psy_audio_UIntPtrMachineParam*)malloc(sizeof(psy_audio_UIntPtrMachineParam));
+}
+
+psy_audio_UIntPtrMachineParam* psy_audio_uintptrmachineparam_allocinit(
+	const char* name, const char* label, int type, uintptr_t* data,
+	uintptr_t minval, uintptr_t maxval)
+{
+	psy_audio_UIntPtrMachineParam* rv;
+
+	rv = psy_audio_uintptrmachineparam_alloc();
+	if (rv) {
+		psy_audio_uintptrmachineparam_init(rv, name, label, type, data, minval, maxval);
+	}
+	return rv;
+}
+
+void uintptrmachineparam_range(psy_audio_UIntPtrMachineParam* self,
+	uintptr_t* minval, uintptr_t* maxval)
+{
+	*minval = self->minval;
+	*maxval = self->maxval;
+}
+
+void uintptrmachineparam_tweak(psy_audio_UIntPtrMachineParam* self, float value)
+{
+	if (self->data) {
+		uintptr_t scaled;
+
+		scaled = (uintptr_t)(value * (self->maxval - self->minval) + 0.5f) +
+			self->minval;
+		*self->data = scaled;
+	}
+}
+
+float uintptrmachineparam_normvalue(psy_audio_UIntPtrMachineParam* self)
+{
+	float rv = 0.f;
+
+	if (self->data) {
+		rv = ((self->maxval - self->minval) != 0)
+			? (*self->data - self->minval) /
+			(float)(self->maxval - self->minval)
+			: 0.f;
+	} else {
+		psy_signal_emit(&self->machineparam.signal_normvalue, self, 1, (void*)(&rv));
+	}
+	return rv;
+}
+
+int uintptrmachineparam_describe(psy_audio_UIntPtrMachineParam* self, char* text)
+{
+	int rv = 1;
+
+	psy_snprintf(text, 128, (self->mask) ? self->mask : "%u",
+		(unsigned int)psy_audio_machineparam_scaledvalue(
+			psy_audio_uintptrmachineparam_base(self)));
+	return rv;
+}
+
+int uintptrmachineparam_label(psy_audio_UIntPtrMachineParam* self, char* text)
+{
+	if (self->label) {
+		psy_snprintf(text, 128, "%s", self->label);
+		psy_signal_emit(&self->machineparam.signal_label, self, 1, text);
+		return 1;
+	}
+	return 0;
+}
+
+int uintptrmachineparam_name(psy_audio_UIntPtrMachineParam* self, char* text)
+{
+	if (self->name) {
+		psy_snprintf(text, 128, "%s", self->name);
+		psy_signal_emit(&self->machineparam.signal_name, self, 1, text);
+		return 1;
+	}
+	return 0;
+}
+
+int uintptrmachineparam_type(psy_audio_UIntPtrMachineParam* self)
+{
+	return self->type;
+}
+
+void psy_audio_uintptrmachineparam_setmask(psy_audio_UIntPtrMachineParam* self, const char* mask)
+{
+	free(self->mask);
+	self->mask = (mask) ? strdup(mask) : 0;
+}
+
+
 // FloatMachineParam
 static void floatmachineparam_tweak(psy_audio_FloatMachineParam*, float val);
 static float floatmachineparam_normvalue(psy_audio_FloatMachineParam*);

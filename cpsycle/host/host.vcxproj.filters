@@ -364,6 +364,9 @@
     <ClCompile Include="src\instrumentpitchview.c">
       <Filter>machine\instrument</Filter>
     </ClCompile>
+    <ClCompile Include="src\adsrsliders.c">
+      <Filter>machine\instrument</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -702,6 +705,9 @@
       <Filter>machine\instrument</Filter>
     </ClInclude>
     <ClInclude Include="src\instrumentpitchview.h">
+      <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\adsrsliders.h">
       <Filter>machine\instrument</Filter>
     </ClInclude>
   </ItemGroup>

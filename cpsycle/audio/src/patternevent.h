@@ -8,6 +8,9 @@
 
 #include <dsptypes.h>
 #include "../../detail/psydef.h"
+// std
+#include <assert.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,6 +93,16 @@ typedef struct psy_audio_PatternEvent {
 	uint8_t parameter;	
 } psy_audio_PatternEvent;
 
+INLINE void psy_audio_patternevent_init(psy_audio_PatternEvent* self)
+{
+	self->note = psy_audio_NOTECOMMANDS_EMPTY;
+	self->inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
+	self->mach = psy_audio_NOTECOMMANDS_MACH_EMPTY;
+	self->vol = psy_audio_NOTECOMMANDS_VOL_EMPTY;
+	self->cmd = 0;
+	self->parameter = 0;
+}
+
 void psy_audio_patternevent_init_all(psy_audio_PatternEvent*,
 	uint8_t note,
 	uint16_t inst,
@@ -97,6 +110,40 @@ void psy_audio_patternevent_init_all(psy_audio_PatternEvent*,
 	uint8_t vol,
 	uint8_t cmd,
 	uint8_t parameter);
+
+INLINE psy_audio_PatternEvent* psy_audio_patternevent_alloc(void)
+{
+	return (psy_audio_PatternEvent*)malloc(sizeof(psy_audio_PatternEvent));	
+}
+
+INLINE psy_audio_PatternEvent* psy_audio_patternevent_allocinit(void)
+{
+	psy_audio_PatternEvent* rv;
+
+	rv = psy_audio_patternevent_alloc();
+	if (rv) {
+		psy_audio_patternevent_init(rv);
+	}
+	return rv;
+}
+
+INLINE psy_audio_PatternEvent* psy_audio_patternevent_clone(const psy_audio_PatternEvent* source)
+{
+	psy_audio_PatternEvent* rv;
+
+	assert(source);
+
+	rv = psy_audio_patternevent_alloc();
+	if (rv) {
+		*rv = *source;
+	}
+	return rv;
+}
+
+INLINE void psy_audio_patternevent_deallocate(psy_audio_PatternEvent* self)
+{
+	free(self);
+}
 
 void psy_audio_patternevent_clear(psy_audio_PatternEvent*);
 int psy_audio_patternevent_empty(const psy_audio_PatternEvent*);

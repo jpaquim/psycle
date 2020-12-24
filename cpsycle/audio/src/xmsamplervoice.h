@@ -26,6 +26,7 @@ typedef struct {
 	struct psy_audio_Samples* samples;
 
 	struct psy_audio_Instrument* instrument;
+	uintptr_t instidx;
 	psy_audio_NewNoteAction nna;
 
 	psy_dsp_Envelope amplitudeenvelope;
@@ -111,6 +112,7 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice*,
 	struct psy_audio_XMSampler* sampler,
 	struct psy_audio_Samples*,
 	struct psy_audio_Instrument*,
+	uintptr_t instidx,
 	psy_audio_XMSamplerChannel* channel,
 	uintptr_t channelnum, uintptr_t samplerate,
 	psy_dsp_ResamplerQuality quality,
@@ -119,6 +121,7 @@ void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice*);
 psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_alloc(void);
 psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_allocinit(struct psy_audio_XMSampler*,
 	psy_audio_Instrument*,
+	uintptr_t instidx,
 	psy_audio_XMSamplerChannel* channel,
 	uintptr_t channelnum,
 	uintptr_t samplerate);

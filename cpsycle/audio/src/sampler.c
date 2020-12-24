@@ -53,19 +53,21 @@ const psy_audio_MachineInfo* psy_audio_sampler_info(void)
 }
 
 // Voice
-static void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice* self);
+// prototypes
+static void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice*);
+static bool psy_audio_samplervoice_sample_deleted(psy_audio_SamplerVoice*);
 // implementation
 // psycle-mfc: Voice::Voice()
-void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self, psy_audio_Sampler* sampler)
+void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
+	psy_audio_Sampler* sampler)
 {
 	assert(self);	
 
-	// This uses the XMWaveDataController
-	// instead a separate Controller like in mfc psycle
-	// The missing Controller variables are added to the
-	// voice
+	// The voice uses the XMWaveDataController instead a separate controller
+	// like in mfc psycle. The missing ps1 controller variables are added here:
 	self->_pan = 0.5f;
 	self->_vol = 0.f;
+	// used to ramp volume during work
 	self->_lVolDest = 0;
 	self->_rVolDest = 0;
 	self->_lVolCurr = 0;
@@ -167,6 +169,9 @@ static psy_audio_MachineParam* psy_audio_sampler_parameter(psy_audio_Sampler*,
 	uintptr_t param);
 static void psy_audio_sampler_resamplingmethod_tweak(psy_audio_Sampler*,
 	psy_audio_ChoiceMachineParam* sender, float value);
+static void psy_audio_sampler_defaultC4(psy_audio_Sampler*, bool correct);
+static bool psy_audio_sampler_isdefaultC4(const psy_audio_Sampler*);
+
 
 static const psy_audio_MachineInfo* psy_audio_sampler_vinfo(psy_audio_Sampler*
 	self)
@@ -273,23 +278,6 @@ void psy_audio_sampler_init_voices(psy_audio_Sampler* self)
 	for (i = 0; i < PS1_SAMPLER_MAX_POLYPHONY; ++i) {
 		psy_audio_samplervoice_init(&self->_voices[i], self);
 	}
-}
-
-psy_audio_Sampler* psy_audio_sampler_alloc(void)
-{
-	return (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
-}
-
-psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback*
-	callback)
-{
-	psy_audio_Sampler* rv;
-
-	rv = psy_audio_sampler_alloc();
-	if (rv) {
-		psy_audio_sampler_init(rv, callback);
-	}
-	return rv;
 }
 
 // psycle-mfc: Sampler::~Sampler()
@@ -464,8 +452,7 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	const psy_audio_PatternEvent* pData)
 {
 	assert(self);
-	// if (_mute) return; // Avoid new note entering when muted.
-	psy_audio_PatternEvent* copy;
+		
 	psy_audio_PatternEvent data = *pData;
 	psy_audio_Samples* samples;
 	psy_List* ite;
@@ -473,38 +460,44 @@ void psy_audio_sampler_seqtick(psy_audio_Sampler* self, uintptr_t channel,
 	uintptr_t voice;
 	bool doporta = FALSE;
 
+	// machine work already does this
+	// if (_mute) return; // Avoid new note entering when muted.
+
 	if (data.note == psy_audio_NOTECOMMANDS_MIDICC) {
-		//TODO: This has one problem, it requires a non-mcm command to trigger the memory.
-		data.inst = channel;
-		copy = malloc(sizeof(psy_audio_PatternEvent));
-		*copy = data;
-		psy_list_append(&self->multicmdMem, copy);
+		// TODO: This has one problem, it requires a non-mcm command to trigger
+		// the memory.
+		psy_audio_PatternEvent* cmdmem;
+		
+		cmdmem = psy_audio_patternevent_clone(&data);
+		cmdmem->inst = channel;		
+		psy_list_append(&self->multicmdMem, cmdmem);
 		return;
-	} else if (data.note > psy_audio_NOTECOMMANDS_RELEASE && data.note != psy_audio_NOTECOMMANDS_EMPTY) {
+	} else if (data.note > psy_audio_NOTECOMMANDS_RELEASE &&
+			data.note != psy_audio_NOTECOMMANDS_EMPTY) {
 		// don't process twk , twf of Mcm Commands
 		return;
 	}
-	if (data.inst == 255) {
+	if (data.inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
 		data.inst = self->lastInstrument[channel];
-		if (data.inst == 255) {
+		if (data.inst == psy_audio_NOTECOMMANDS_INST_EMPTY) {
 			return;  // no previous sample. Skip
 		}
 	} else {
 		self->lastInstrument[channel] = data.inst;
 	}
 	samples = psy_audio_machine_samples(psy_audio_sampler_base(self));
-	if (!psy_audio_samples_at(samples,
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                	if (!psy_audio_samples_at(samples,
 			sampleindex_make(data.inst, self->instrumentbank))) {
 		return; // if no wave, return.
 	}
 	voice = psy_audio_sampler_getcurrentvoice(self, channel);
 	if (data.cmd != PS1_SAMPLER_CMD_NONE) {
 		// Adding also the current command, to make the loops easier.
-		psy_audio_PatternEvent data2 = data;
-		data2.inst = channel;
-		copy = malloc(sizeof(psy_audio_PatternEvent));
-		*copy = data2;
-		psy_list_append(&self->multicmdMem, copy);
+		psy_audio_PatternEvent* cmdmem;
+
+		cmdmem = psy_audio_patternevent_clone(&data);
+		cmdmem->inst = channel;
+		psy_list_append(&self->multicmdMem, cmdmem);			
 	}
 	doporta = FALSE;
 	for (ite = self->multicmdMem; ite != NULL; psy_list_next(&ite)) {
@@ -807,6 +800,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 void psy_audio_sampler_generateaudio(psy_audio_Sampler* self, psy_audio_BufferContext* bc)
 {
 	assert(self);
+
 	if (!self->linearslide) {
 		uintptr_t voice;
 		
@@ -845,9 +839,10 @@ void psy_audio_sampler_ontimerwork(psy_audio_Sampler* self,
 	uintptr_t voice;
 
 	assert(self);
+
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		psy_audio_samplervoice_work(&self->_voices[voice],
-			bc->numsamples,
+			psy_audio_buffercontext_numsamples(bc),			
 			psy_audio_buffer_at(bc->output, 0),
 			psy_audio_buffer_at(bc->output, 1));
 	}
@@ -912,9 +907,7 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 
 	assert(self);
 	// If the sample has been deleted while playing...
-	if (!psy_audio_samples_at(
-		psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
-		sampleindex_make(self->instrument, 0))) {
+	if (psy_audio_samplervoice_sample_deleted(self)) {
 		psy_audio_samplervoice_setup(self);
 		return;
 	}
@@ -981,15 +974,11 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 				if (self->controller.sample->stereo) {
 					right_output = psy_audio_sampleiterator_work(&self->controller, 1);
 				}
-				// Amplitude section
-				{
-					psy_dsp_envelope_tick_ps1(&self->_envelope);
-					psy_audio_samplervoice_rampvolume(self);
-				}
+				// Amplitude section				
+				psy_dsp_envelope_tick_ps1(&self->_envelope);
+				psy_audio_samplervoice_rampvolume(self);				
 				// Filter section
-				//
-				if (filter_type(&self->_filter) != F_NONE)
-				{
+				if (filter_type(&self->_filter) != F_NONE) {
 					psy_dsp_envelope_tick_ps1(&self->_filterEnv);
 					int newcutoff = (int)(self->_cutoff + self->_filterEnv.value * self->_coModify + 0.5f);
 					if (newcutoff < 0) {
@@ -1024,6 +1013,15 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 				break;
 			}
 		}
+}
+
+// mfc-psycle: if check in work method
+// If the sample has been deleted while playing...
+bool psy_audio_samplervoice_sample_deleted(psy_audio_SamplerVoice* self)
+{
+	return !psy_audio_samples_at(
+		psy_audio_machine_samples(psy_audio_sampler_base(self->sampler)),
+		sampleindex_make(self->instrument, 0));
 }
 
 // mfc-psycle: WaveDataController::RampVolume
@@ -1154,6 +1152,7 @@ void psy_audio_sampler_setresamplerquality(psy_audio_Sampler* self,
 	uintptr_t voice;
 
 	assert(self);
+
 	for (voice = 0; voice < self->numvoices; ++voice) {
 		psy_audio_sampleiterator_setquality(&self->_voices[voice].controller,
 			quality);
@@ -1161,13 +1160,17 @@ void psy_audio_sampler_setresamplerquality(psy_audio_Sampler* self,
 }
 
 // mfc-psycle: Sampler::LoadSpecificChunk(RiffFile* pFile, int version)
-void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
-	uintptr_t slot)
+void psy_audio_sampler_loadspecific(psy_audio_Sampler* self,
+	psy_audio_SongFile* songfile, uintptr_t machslot)
 {
 	uint32_t size;
 	psy_dsp_ResamplerQuality resamplerquality;
 
 	assert(self);
+
+	// mfc-psycle has no instrument banks. If a song comes from mfc-psycle the
+	// sampler uses bank 0 (sampulse bank 1) else the saved one is used.
+	// (see internalversion 3 loading)
 	self->instrumentbank = 0;
 	psy_audio_sampler_defaultC4(self, FALSE);
 	self->linearslide = FALSE;
@@ -1176,9 +1179,12 @@ void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile*
 	if (size) {
 		/// Version 0
 		int32_t temp;
-		psyfile_read(songfile->file, &temp, sizeof(temp)); // numSubtracks
+
+		// numvoices
+		psyfile_read(songfile->file, &temp, sizeof(temp));
 		self->numvoices = temp;
-		psyfile_read(songfile->file, &temp, sizeof(temp)); // quality		
+		// quality
+		psyfile_read(songfile->file, &temp, sizeof(temp));
 		switch (temp) {
 			case 2:
 				resamplerquality = psy_dsp_RESAMPLERQUALITY_SPLINE;
@@ -1194,8 +1200,7 @@ void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile*
 				resamplerquality = psy_dsp_RESAMPLERQUALITY_LINEAR;
 				break;
 		}
-		psy_audio_sampler_setresamplerquality(self, resamplerquality);
-		self->instrumentbank = 0;
+		psy_audio_sampler_setresamplerquality(self, resamplerquality);		
 		if (size > 3 * sizeof(uint32_t)) {
 			uint32_t internalversion;
 
@@ -1203,7 +1208,6 @@ void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile*
 				sizeof(internalversion));
 			if (internalversion >= 1) {
 				uint8_t defaultC4;
-
 				// correct A4 frequency.
 				psyfile_read(songfile->file, &defaultC4, sizeof(defaultC4));
 				psy_audio_sampler_defaultC4(self, defaultC4 != FALSE);
@@ -1216,7 +1220,7 @@ void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile*
 			}
 			if (internalversion >= 3) {
 				uint32_t instrbank;
-				// instrument bank.
+				// use instrument bank (not available in mfc-psycle)
 				psyfile_read(songfile->file, &instrbank, sizeof(instrbank));
 				self->instrumentbank = instrbank;
 			}
@@ -1225,8 +1229,8 @@ void psy_audio_sampler_loadspecific(psy_audio_Sampler* self, psy_audio_SongFile*
 }
 
 // mfc-psycle: Sampler::SaveSpecificChunk(RiffFile* pFile) 
-void psy_audio_sampler_savespecific(psy_audio_Sampler* self, psy_audio_SongFile* songfile,
-	uintptr_t slot)
+void psy_audio_sampler_savespecific(psy_audio_Sampler* self,
+	psy_audio_SongFile* songfile, uintptr_t macslot)
 {
 	uint32_t temp;
 	uint32_t size;
@@ -1297,6 +1301,7 @@ void psy_audio_sampler_initparameters(psy_audio_Sampler* self)
 void psy_audio_sampler_disposeparameters(psy_audio_Sampler* self)
 {
 	assert(self);
+
 	psy_audio_intmachineparam_dispose(&self->param_numvoices);
 	psy_audio_choicemachineparam_dispose(&self->param_resamplingmethod);
 	psy_audio_choicemachineparam_dispose(&self->param_defaultspeed);
@@ -1306,12 +1311,14 @@ void psy_audio_sampler_disposeparameters(psy_audio_Sampler* self)
 uintptr_t psy_audio_sampler_numparameters(psy_audio_Sampler* self)
 {
 	assert(self);
+
 	return 4;
 }
 
 uintptr_t psy_audio_sampler_numparametercols(psy_audio_Sampler* self)
 {
 	assert(self);
+
 	return 4;
 }
 
@@ -1319,6 +1326,7 @@ psy_audio_MachineParam* psy_audio_sampler_parameter(psy_audio_Sampler* self,
 	uintptr_t param)
 {
 	assert(self);
+
 	switch (param) {
 		case 0:
 			return psy_audio_intmachineparam_base(&self->param_numvoices);
@@ -1342,6 +1350,19 @@ void psy_audio_sampler_resamplingmethod_tweak(psy_audio_Sampler* self,
 	psy_audio_ChoiceMachineParam* sender, float value)
 {
 	assert(self);
+
 	psy_audio_sampler_setresamplerquality(self,
 		psy_audio_choicemachineparam_choice(sender));		
+}
+
+void psy_audio_sampler_defaultC4(psy_audio_Sampler* self, bool correct)
+{
+	assert(self);
+	self->defaultspeed = correct;
+}
+
+bool psy_audio_sampler_isdefaultC4(const psy_audio_Sampler* self)
+{
+	assert(self);
+	return self->defaultspeed;
 }

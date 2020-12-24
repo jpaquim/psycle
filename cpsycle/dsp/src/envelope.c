@@ -324,7 +324,9 @@ void psy_dsp_envelope_dispose(psy_dsp_Envelope* self)
 
 void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 {
-	self->samplerate = 44100;	
+	self->samplerate = 44100;
+	self->bpm = 125;
+	self->tpb = 24;
 	self->value = 0.f;
 	self->step = 0;
 	self->nexttime = 0;
@@ -334,7 +336,7 @@ void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 	self->currstage = NULL;	
 	self->susbeginstage = NULL;
 	self->susendstage = NULL;
-	self->fastrelease = FALSE;	
+	self->fastrelease = FALSE;		
 }
 
 void psy_dsp_envelope_set_settings(psy_dsp_Envelope* self,
@@ -376,6 +378,12 @@ void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope* self,
 	uintptr_t samplerate)
 {
 	self->samplerate = samplerate;
+}
+
+void psy_dsp_envelope_updatespeed(psy_dsp_Envelope* self, int tpb, int bpm)
+{
+	self->tpb = tpb;
+	self->bpm = (float)bpm;
 }
 
 psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
@@ -496,12 +504,28 @@ void psy_dsp_envelope_fastrelease(psy_dsp_Envelope* self)
 
 void psy_dsp_envelope_startstage(psy_dsp_Envelope* self)
 {
-	if (self->currstage) {
+	if (self->currstage) {		
 		psy_dsp_EnvelopePoint* pt;
+		float prevtime;
+		
+		if (self->currstage->prev) {
+			psy_dsp_EnvelopePoint* pt_prev;
 
+			pt_prev = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage->prev);
+			prevtime = pt_prev->time;
+		} else {
+			prevtime = 0;
+		}
 		pt = (psy_dsp_EnvelopePoint*)psy_list_entry(self->currstage);
-		self->nexttime = (uintptr_t)(pt->time * self->samplerate);
-		self->samplecount = 0;
+		if (self->settings.timemode == psy_dsp_ENVELOPETIME_TICK) {
+			float srdeviation;
+
+			srdeviation = (self->samplerate * 60) / (self->bpm * self->tpb);
+			self->nexttime = (uintptr_t)((pt->time - prevtime) * srdeviation);
+		} else {
+			self->nexttime = (uintptr_t)((pt->time - prevtime) * self->samplerate);
+		}
+		self->samplecount = 0; 
 		if (self->nexttime > 0) {
 			self->step = (pt->value - self->value) / self->nexttime;
 		} else {

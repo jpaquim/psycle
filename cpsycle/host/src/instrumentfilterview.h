@@ -5,6 +5,7 @@
 #define INSTRUMENTFILTERVIEW_H
 
 // host
+#include "adsrsliders.h"
 #include "envelopeview.h"
 #include "workspace.h"
 // ui
@@ -27,10 +28,7 @@ typedef struct InstrumentFilterView {
 	psy_ui_Slider randomresonance;
 	EnvelopeView envelopeview;
 	psy_ui_Component bottom;
-	psy_ui_Slider attack;
-	psy_ui_Slider decay;
-	psy_ui_Slider sustain;
-	psy_ui_Slider release;
+	AdsrSliders adsrsliders;
 	psy_ui_Slider cutoff;
 	psy_ui_Slider res;
 	psy_ui_Slider modamount;	

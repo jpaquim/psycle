@@ -143,27 +143,32 @@ extern "C" {
 		bool linearslide;
 	} psy_audio_Sampler;
 
-	void psy_audio_sampler_init(psy_audio_Sampler*, psy_audio_MachineCallback*);
-	psy_audio_Sampler* psy_audio_sampler_alloc(void);
-	psy_audio_Sampler* psy_audio_sampler_allocinit(psy_audio_MachineCallback*);
+	void psy_audio_sampler_init(psy_audio_Sampler*,
+		psy_audio_MachineCallback*);
+
+	INLINE psy_audio_Sampler* psy_audio_sampler_alloc(void)
+	{
+		return (psy_audio_Sampler*)malloc(sizeof(psy_audio_Sampler));
+	}
+
+	INLINE psy_audio_Sampler* psy_audio_sampler_allocinit(
+		psy_audio_MachineCallback* callback)
+	{
+		psy_audio_Sampler* rv;
+
+		rv = psy_audio_sampler_alloc();
+		if (rv) {
+			psy_audio_sampler_init(rv, callback);
+		}
+		return rv;
+	}
+	
 	const psy_audio_MachineInfo* psy_audio_sampler_info(void);
 
 	INLINE psy_audio_Machine* psy_audio_sampler_base(psy_audio_Sampler* self)
 	{
 		assert(self);
 		return &(self->custommachine.machine);
-	}
-
-	INLINE void psy_audio_sampler_defaultC4(psy_audio_Sampler* self, bool correct)
-	{
-		assert(self);
-		self->defaultspeed = correct;
-	}
-
-	INLINE bool psy_audio_sampler_isdefaultC4(const psy_audio_Sampler* self)
-	{
-		assert(self);
-		return self->defaultspeed;
 	}
 
 	void psy_audio_sampler_setresamplerquality(psy_audio_Sampler* self,

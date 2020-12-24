@@ -39,6 +39,8 @@ typedef struct Vumeter {
 	// internal data
 	psy_dsp_amp_t leftavg;
 	psy_dsp_amp_t rightavg;
+	psy_dsp_amp_t l_log;
+	psy_dsp_amp_t r_log;
 	// references
 	Workspace* workspace;
 } Vumeter;

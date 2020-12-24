@@ -5,6 +5,7 @@
 #define INSTRUMENTPITCHVIEW_H
 
 // host
+#include "adsrsliders.h"
 #include "envelopeview.h"
 #include "workspace.h"
 // ui
@@ -19,10 +20,7 @@ typedef struct InstrumentPitchView {
 	psy_ui_Component component;
 	// ui elements
 	EnvelopeView envelopeview;
-	psy_ui_Slider attack;
-	psy_ui_Slider decay;
-	psy_ui_Slider sustain;
-	psy_ui_Slider release;
+	AdsrSliders adsrsliders;
 	// references
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;

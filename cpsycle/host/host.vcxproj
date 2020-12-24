@@ -150,6 +150,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\about.c" />
+    <ClCompile Include="src\adsrsliders.c" />
     <ClCompile Include="src\audioconfig.c" />
     <ClCompile Include="src\channelmappingview.c" />
     <ClCompile Include="src\checkunsaved.c" />
@@ -267,6 +268,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\about.h" />
+    <ClInclude Include="src\adsrsliders.h" />
     <ClInclude Include="src\audioconfig.h" />
     <ClInclude Include="src\channelmappingview.h" />
     <ClInclude Include="src\checkunsaved.h" />

@@ -86,7 +86,7 @@ void psy_audio_waveosc_work(psy_audio_WaveOsc* self, int amount, float* data)
 		while (numsamples) {
 			intptr_t nextsamples;
 			
-			nextsamples = min(psy_audio_sampleiterator_prework(
+			nextsamples = psy_min(psy_audio_sampleiterator_prework(
 				&self->sampleiterator, 1, FALSE), 1);
 			numsamples -= nextsamples;
 			while (nextsamples) {

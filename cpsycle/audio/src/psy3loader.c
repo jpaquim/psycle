@@ -675,6 +675,10 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		psyfile_read(self->fp, &ENV_DT, sizeof(ENV_DT));
 		psyfile_read(self->fp, &ENV_SL, sizeof(ENV_SL));
 		psyfile_read(self->fp, &ENV_RT, sizeof(ENV_RT));
+		//Truncate to 220 samples boundaries, and ensure it is not zero.
+		ENV_AT = (ENV_AT / 220) * 220; if (ENV_AT <= 0) ENV_AT = 1;
+		ENV_DT = (ENV_DT / 220) * 220; if (ENV_DT <= 0) ENV_DT = 1;
+		if (ENV_RT == 16) ENV_RT = 220;
 		// ENV_AT
 		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
 			1, ENV_AT * 1.f / 44100, 1.f);
@@ -690,16 +694,19 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		psyfile_read(self->fp, &ENV_F_DT, sizeof(ENV_F_DT));
 		psyfile_read(self->fp, &ENV_F_SL, sizeof(ENV_F_SL));
 		psyfile_read(self->fp, &ENV_F_RT, sizeof(ENV_F_RT));
+		ENV_F_AT = (ENV_F_AT / 220) * 220; if (ENV_F_AT <= 0) ENV_F_AT = 1;
+		ENV_F_DT = (ENV_F_DT / 220) * 220; if (ENV_F_DT <= 0) ENV_F_DT = 1;
+		ENV_F_RT = (ENV_F_RT / 220) * 220; if (ENV_F_RT <= 0) ENV_F_RT = 1;
 		// ENV_F_AT			
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
-			1, ENV_AT * 1.f / 44100, 1.f);
+		psy_dsp_envelopesettings_settimeandvalue(&instrument->filterenvelope,
+			1, ENV_F_AT * 1.f / 44100, 1.f);
 		// ENV_DT, ENV_SL
 		// note: SL map range(128) differs from volume envelope(100)
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
-			2, (ENV_AT + ENV_DT) * 1.f / 44100, ENV_SL / 128.f);
+		psy_dsp_envelopesettings_settimeandvalue(&instrument->filterenvelope,
+			2, (ENV_F_AT + ENV_F_DT) * 1.f / 44100, ENV_F_SL / 128.f);
 		// ENV_RT
-		psy_dsp_envelopesettings_settimeandvalue(&instrument->volumeenvelope,
-			3, (ENV_AT + ENV_DT + ENV_RT) * 1.f / 44100, 0.f);
+		psy_dsp_envelopesettings_settimeandvalue(&instrument->filterenvelope,
+			3, (ENV_F_AT + ENV_F_DT + ENV_F_RT) * 1.f / 44100, 0.f);
 			
 		psyfile_read(self->fp, &ENV_F_CO, sizeof(ENV_F_CO));
 		psyfile_read(self->fp, &ENV_F_RQ, sizeof(ENV_F_RQ));
@@ -738,15 +745,7 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 		}
 
 		//Ensure validity of values read
-		if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) { _LOCKINST=FALSE; sampler_to_use = -1; }
-		//Truncate to 220 samples boundaries, and ensure it is not zero.
-		ENV_AT = (ENV_AT/220)*220; if (ENV_AT <=0) ENV_AT=1;
-		ENV_DT = (ENV_DT/220)*220; if (ENV_DT <=0) ENV_DT=1;
-		if (ENV_RT == 16) ENV_RT = 220;
-		else { ENV_RT = (ENV_RT/220)*220; if (ENV_RT <=0) ENV_RT=1; }
-		ENV_F_AT = (ENV_F_AT/220)*220; if (ENV_F_AT <=0) ENV_F_AT=1;
-		ENV_F_DT = (ENV_F_DT/220)*220; if (ENV_F_DT <=0) ENV_F_DT=1;
-		ENV_F_RT = (ENV_F_RT/220)*220; if (ENV_F_RT <=0) ENV_F_RT=1;			
+		if (sampler_to_use < 0 || sampler_to_use >= MAX_BUSES) { _LOCKINST=FALSE; sampler_to_use = -1; }				
 		psy_audio_instrument_setname(instrument, instrum_name);
 		psy_audio_instrument_setindex(instrument, index);
 		psy_audio_instruments_insert(&self->song->instruments, instrument,
