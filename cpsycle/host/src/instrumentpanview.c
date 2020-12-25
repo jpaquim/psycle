@@ -12,6 +12,8 @@
 #include "../../detail/portable.h"
 
 // prototypes
+static void instrumentpanview_ondestroy(InstrumentPanView*,
+	psy_ui_Component* sender);
 static void instrumentpanview_oninstpanenabled(InstrumentPanView*,
 	psy_ui_CheckBox* sender);
 static void instrumentpanview_ondescribe(InstrumentPanView*,
@@ -20,8 +22,8 @@ static void instrumentpanview_ontweak(InstrumentPanView*,
 	psy_ui_Slider*, float value);
 static void instrumentpanview_onvalue(InstrumentPanView*,
 	psy_ui_Slider*, float* value);
-static void instrumentpanview_onadsrtweaked(InstrumentPanView*,
-	AdsrSliders*);
+static void instrumentpanview_ontweaked(InstrumentPanView*,
+	psy_ui_Component*, int pointindex);
 // implementation
 void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_audio_Instruments* instruments, Workspace* workspace)
@@ -38,6 +40,9 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	self->instruments = instruments;
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		instrumentpanview_ondestroy);
+	psy_signal_init(&self->signal_status);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->top, &self->component);
@@ -83,7 +88,9 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 	psy_ui_component_setalign(&self->adsrsliders.component, psy_ui_ALIGN_BOTTOM);
 	psy_ui_component_setmargin(&self->adsrsliders.component, &margin);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
-		instrumentpanview_onadsrtweaked);
+		instrumentpanview_ontweaked);
+	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
+		instrumentpanview_ontweaked);
 	for (i = 0; i < 3; ++i) {
 		psy_ui_slider_setcharnumber(sliders[i], 25);
 		psy_ui_slider_setvaluecharnumber(sliders[i], 15);
@@ -92,6 +99,12 @@ void instrumentpanview_init(InstrumentPanView* self, psy_ui_Component* parent,
 			(ui_slider_fptweak)instrumentpanview_ontweak,
 			(ui_slider_fpvalue)instrumentpanview_onvalue);
 	}
+}
+
+void instrumentpanview_ondestroy(InstrumentPanView* self,
+	psy_ui_Component* sender)
+{
+	psy_signal_dispose(&self->signal_status);
 }
 
 void instrumentpanview_setinstrument(InstrumentPanView* self,
@@ -216,8 +229,17 @@ void instrumentpanview_onvalue(InstrumentPanView* self,
 	}
 }
 
-void instrumentpanview_onadsrtweaked(InstrumentPanView* self,
-	AdsrSliders* sender)
+void instrumentpanview_ontweaked(InstrumentPanView* self,
+	psy_ui_Component* sender, int pointindex)
 {
-	envelopeview_update(&self->envelopeview);
+	if (self->instrument) {
+		char statustext[256];
+		psy_dsp_EnvelopePoint pt;
+
+		envelopeview_update(&self->envelopeview);
+		pt = psy_dsp_envelopesettings_at(&self->instrument->panenvelope, pointindex);
+		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
+			(float)pt.time, (float)pt.value);
+		psy_signal_emit(&self->signal_status, self, 1, statustext);
+	}
 }

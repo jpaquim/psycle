@@ -29,10 +29,10 @@ typedef struct {
 	uintptr_t instidx;
 	psy_audio_NewNoteAction nna;
 
-	psy_dsp_Envelope amplitudeenvelope;
-	psy_dsp_Envelope panenvelope;
-	psy_dsp_Envelope pitchenvelope;
-	psy_dsp_Envelope filterenvelope;
+	psy_dsp_EnvelopeController amplitudeenvelope;
+	psy_dsp_EnvelopeController panenvelope;
+	psy_dsp_EnvelopeController pitchenvelope;
+	psy_dsp_EnvelopeController filterenvelope;
 
 	// SampleIterator (WaveDataController)
 	psy_List* positions;

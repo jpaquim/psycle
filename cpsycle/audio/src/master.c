@@ -19,6 +19,8 @@
 
 #include "../../detail/portable.h"
 
+#define psy_audio_MASTER_MINCOLS 6
+
 static void master_generateaudio(psy_audio_Master*, psy_audio_BufferContext*);
 static void master_seqtick(psy_audio_Master*, uintptr_t channel,
 	const psy_audio_PatternEvent* ev);
@@ -37,13 +39,13 @@ static uintptr_t numinputs(psy_audio_Master* self) { return 2; }
 static uintptr_t numoutputs(psy_audio_Master* self) { return 2; }
 static uintptr_t slot(psy_audio_Master* self) { return psy_audio_MASTER_INDEX; }
 // Parameters
-static psy_audio_MachineParam* parameter(psy_audio_Master* self,
-	uintptr_t param);
-static psy_audio_MachineParam* tweakparameter(psy_audio_Master* self,
+static psy_audio_MachineParam* parameter(psy_audio_Master*, uintptr_t param);
+static psy_audio_MachineParam* tweakparameter(psy_audio_Master*,
 	uintptr_t param);
 static uintptr_t numparameters(psy_audio_Master*);
 static uintptr_t numtweakparameters(psy_audio_Master*);
 static unsigned int numparametercols(psy_audio_Master*);
+static unsigned int numinputwires(psy_audio_Master*);
 static void master_describeeditname(psy_audio_Master*, char* text, uintptr_t slot);
 
 static void master_title_name(psy_audio_Master*,
@@ -209,31 +211,13 @@ void master_describeeditname(psy_audio_Master* self, char* text, uintptr_t slot)
 		psy_audio_machine_editname(machine) : "");
 }
 
-uintptr_t numparameters(psy_audio_Master* self)
-{	
-	return numparametercols(self) * NUMROWS;
-}
-
-unsigned int numparametercols(psy_audio_Master* self)
-{
-	psy_audio_MachineSockets* sockets;	
-	psy_audio_Machines* machines;
-
-	machines = psy_audio_machine_machines(&self->custommachine.machine);
-	sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
-	if (sockets) {
-		return wiresockets_size(&sockets->inputs) + 1;		
-	}
-	return 1;
-}
-
 void master_title_name(psy_audio_Master* self,
 	psy_audio_CustomMachineParam* sender, char* text)
 {
 	if (sender->index == 0) {
 		psy_snprintf(text, 128, "%s", "Master");
 	} else {
-		psy_snprintf(text, 10, "m%d", (int)sender->index);
+		psy_snprintf(text, 10, "m%d", (int)sender->index - 1);
 	}
 }
 
@@ -253,7 +237,7 @@ void master_title_describe(psy_audio_Master* self,
 		if (sockets) {
 			psy_audio_WireSocket* input_socket;
 
-			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index - 1);
 			if (input_socket) {
 				master_describeeditname(self, text, input_socket->slot);
 				*active = 1;
@@ -282,7 +266,7 @@ void master_slider_tweak(psy_audio_Master* self,
 		if (sockets) {
 			psy_audio_WireSocket* input_socket;
 
-			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index - 1);
 			if (input_socket) {
 				input_socket->volume = value * value * 4.f;
 			}
@@ -306,7 +290,7 @@ void master_slider_normvalue(psy_audio_Master* self,
 		if (sockets) {
 			psy_audio_WireSocket* input_socket;
 
-			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index - 1);
 			if (input_socket) {
 				*rv = (float)sqrt(input_socket->volume) * 0.5f;
 			}
@@ -339,7 +323,7 @@ void master_level_normvalue(psy_audio_Master* self,
 		if (sockets) {
 			psy_audio_WireSocket* input_socket;
 
-			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index - 1);
 			if (input_socket) {							
 				psy_audio_Machine* machine;
 				psy_audio_Buffer* memory;
@@ -364,17 +348,18 @@ void master_level_describe(psy_audio_Master* self,
 			(float)psy_dsp_convert_amp_to_db(self->volume));
 		*active = 1;
 	} else {
+		
 		psy_audio_MachineSockets* sockets;		
 		uintptr_t c = 1;
 		psy_audio_Machines* machines;
 
 		machines = psy_audio_machine_machines(&self->custommachine.machine);
-		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
+		sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);		
 		*active = 0;
 		if (sockets) {
 			psy_audio_WireSocket* input_socket;
 
-			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index);
+			input_socket = psy_audio_wiresockets_at(&sockets->inputs, sender->index - 1);
 			if (input_socket) {				
 				psy_snprintf(text, 10, "%.2f dB",
 					(float)psy_dsp_convert_amp_to_db(input_socket->volume));
@@ -389,18 +374,18 @@ psy_audio_MachineParam* parameter(psy_audio_Master* self, uintptr_t id)
 	int col = id / NUMROWS;
 	int row = id % NUMROWS;
 
-	if (row == 0) {
-		self->param_info.index = col;
-		return &self->param_info.machineparam;
-	} else
-	if (row == 1) {
-		self->param_slider.index = col;
-		return &self->param_slider.machineparam;
-	} else
-	if (row == 2) {
-		self->param_level.index = col;
-		return &self->param_level.machineparam;
-	}	
+	if (col < numinputwires(self) + 1) {
+		if (row == 0) {
+			self->param_info.index = col;
+			return &self->param_info.machineparam;
+		} else if (row == 1) {
+			self->param_slider.index = col;
+			return &self->param_slider.machineparam;
+		} else if (row == 2) {
+			self->param_level.index = col;
+			return &self->param_level.machineparam;
+		}
+	}
 	return NULL;	
 }
 
@@ -416,6 +401,29 @@ psy_audio_MachineParam* tweakparameter(psy_audio_Master* self, uintptr_t id)
 uintptr_t numtweakparameters(psy_audio_Master* self)
 {
 	return numparametercols(self);
+}
+
+uintptr_t numparameters(psy_audio_Master* self)
+{
+	return numparametercols(self) * NUMROWS;
+}
+
+unsigned int numparametercols(psy_audio_Master* self)
+{	
+	return psy_max(numinputwires(self) + 1, psy_audio_MASTER_MINCOLS);	
+}
+
+unsigned int numinputwires(psy_audio_Master* self)
+{
+	psy_audio_MachineSockets* sockets;
+	psy_audio_Machines* machines;
+
+	machines = psy_audio_machine_machines(&self->custommachine.machine);
+	sockets = psy_audio_connections_at(&machines->connections, psy_audio_MASTER_INDEX);
+	if (sockets) {
+		return wiresockets_size(&sockets->inputs);
+	}
+	return 0;
 }
 
 void master_loadspecific(psy_audio_Master* self, psy_audio_SongFile* songfile,

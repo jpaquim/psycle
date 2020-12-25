@@ -49,6 +49,8 @@ typedef struct HelpView {
 void helpview_init(HelpView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 
+// float to side bar (see propertiesview, too)
+// todo make it more general
 void helpview_float(HelpView*, HelpViewSection section, psy_ui_Component* dest);
 void helpview_dock(HelpView*, HelpViewSection section, psy_ui_Component* src);
 

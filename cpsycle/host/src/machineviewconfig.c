@@ -48,10 +48,11 @@ void machineviewconfig_makeview(MachineViewConfig* self, psy_Property* parent)
 		psy_property_append_bool(self->machineview,
 			"drawwirehover", FALSE),
 		"settingsview.draw-wirehover");
-	psy_property_settext(
+	psy_property_setid(psy_property_settext(
 		psy_property_append_bool(self->machineview,
 			"drawvirtualgenerators", FALSE),
-		"settingsview.draw-virtualgenerators");
+		"settingsview.draw-virtualgenerators"),
+		PROPERTY_ID_DRAWVIRTUALGENERATORS);
 	machineviewconfig_maketheme(self, self->machineview);
 }
 

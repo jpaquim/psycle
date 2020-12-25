@@ -105,6 +105,26 @@ typedef struct InstrumentEmpty {
 
 void instrumentempty_init(InstrumentEmpty*, psy_ui_Component* parent);
 
+
+// InstrumentViewBar
+typedef struct InstrumentsViewBar {
+	// inherits
+	psy_ui_Component component;
+	// ui elements	
+	psy_ui_Label status;
+	// references
+	Workspace* workspace;
+} InstrumentsViewBar;
+
+void instrumentsviewbar_init(InstrumentsViewBar*, psy_ui_Component* parent, Workspace*);
+void instrumentsviewbar_settext(InstrumentsViewBar*, const char* text);
+
+INLINE psy_ui_Component* instrumentsviewbar_base(InstrumentsViewBar* self)
+{
+	return &self->component;
+}
+
+// InstrumentView
 typedef struct InstrumentView {
 	// inherits
 	psy_ui_Component component;
@@ -126,12 +146,24 @@ typedef struct InstrumentView {
 	InstrumentFilterView filter;
 	InstrumentPitchView pitch;
 	// references
+	InstrumentsViewBar* statusbar;
 	psy_audio_Player* player;
 	Workspace* workspace;
 } InstrumentView;
 
 void instrumentview_init(InstrumentView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
+
+INLINE void instrumentsview_setstatusbar(InstrumentView* self,
+	InstrumentsViewBar* statusbar)
+{
+	self->statusbar = statusbar;
+}
+
+INLINE psy_ui_Component* instrumentview_base(InstrumentView* self)
+{
+	return &self->component;
+}
 
 #ifdef __cplusplus
 }

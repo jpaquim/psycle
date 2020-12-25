@@ -74,6 +74,7 @@ typedef struct MODSongLoader
 	MODHEADER header;
 	MODSAMPLEHEADER samples[32];
 	psy_audio_Machine* sampler;
+	psy_Table xmtovirtual;
 	// references
 	psy_audio_SongFile* songfile;
 } MODSongLoader;

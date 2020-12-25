@@ -149,6 +149,7 @@
     <ClCompile Include="src\instruments.c">
       <RuntimeTypeInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</RuntimeTypeInfo>
     </ClCompile>
+    <ClCompile Include="src\itmodule2.c" />
     <ClCompile Include="src\kbddriver.c" />
     <ClCompile Include="src\ladspaplugin.c" />
     <ClCompile Include="src\library.c">
@@ -280,6 +281,7 @@
     <ClInclude Include="src\fileoutdriver.h" />
     <ClInclude Include="src\instrument.h" />
     <ClInclude Include="src\instruments.h" />
+    <ClInclude Include="src\itmodule2.h" />
     <ClInclude Include="src\kbddriver.h" />
     <ClInclude Include="src\ladspaplugin.h" />
     <ClInclude Include="src\library.h" />

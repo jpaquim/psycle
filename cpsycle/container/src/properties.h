@@ -195,7 +195,8 @@ psy_Property* psy_property_setitem_str(psy_Property*, const char* str);
 const char* psy_property_item_str(const psy_Property*);
 psy_Property* psy_property_setitem_font(psy_Property*, const char* value);
 const char* psy_property_item_font(const psy_Property*);
-psy_Property* psy_property_item_choice_parent(psy_Property* self);
+psy_Property* psy_property_item_choice_parent(psy_Property*);
+bool psy_property_haskey(const psy_Property*, const char* key);
 
 // Description
 psy_Property* psy_property_setid(psy_Property*, intptr_t id);

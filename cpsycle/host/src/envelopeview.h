@@ -22,16 +22,20 @@ extern "C" {
 // This modifies the envelope for volume and filters shown on a graph.
 
 typedef struct {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_tweaked;
 	int cx;
 	int cy;
 	psy_dsp_EnvelopeSettings* settings;
 	psy_List* dragpoint;
+	uintptr_t dragpointindex;
 	int sustainstage;
 	int dragrelative;
 	psy_ui_Margin spacing;	
 	float zoomleft;
-	float zoomright;	
+	float zoomright;
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);

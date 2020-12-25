@@ -16,12 +16,14 @@ extern "C" {
 typedef struct InstrumentVolumeView {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_status;
 	// ui elements
 	psy_ui_Slider randomvolume;
 	psy_ui_Slider volumefadespeed;
 	EnvelopeView envelopeview;
 	AdsrSliders adsrsliders;
-	// references
+	// references	
 	psy_audio_Player* player;
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;

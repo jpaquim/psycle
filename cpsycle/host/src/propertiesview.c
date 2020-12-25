@@ -112,6 +112,7 @@ void propertiesrenderer_init(PropertiesRenderer* self, psy_ui_Component* parent,
 	self->keyselected = 0;
 	self->choiceproperty = 0;
 	self->button = 0;
+	self->floated = 0;
 	self->showkeyselection = FALSE;
 	self->col_perc[0] = 0.4f;
 	self->col_perc[1] = 0.4f;
@@ -601,7 +602,7 @@ void propertiesrenderer_drawcheckbox(PropertiesRenderer* self, psy_Property* pro
 
 void propertiesrenderer_onmousedown(PropertiesRenderer* self, psy_ui_MouseEvent* ev)
 {
-	if (ev->button != 1) {
+	if (ev->button != 1) {		
 		return;
 	}
 	psy_ui_component_setfocus(&self->component);
@@ -1014,7 +1015,11 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 
 	memcpy(col_perc, self->col_perc, sizeof(col_perc));
 	memcpy(col_width, self->col_width, sizeof(col_width));
-	memcpy(col_start, self->col_start, sizeof(col_start));	
+	memcpy(col_start, self->col_start, sizeof(col_start));
+	if (self->floated) {
+		rv->width = psy_ui_value_makeew(140);
+		propertiesrenderer_computecolumns(self, rv);		
+	} else
 	if (!self->usefixedwidth) {
 		propertiesrenderer_computecolumns(self, limit);
 		rv->width = limit->width;
@@ -1035,11 +1040,13 @@ void propertiesrenderer_onpreferredsize(PropertiesRenderer* self,
 	memcpy(self->col_perc, col_perc, sizeof(col_perc));
 	memcpy(self->col_width, col_width, sizeof(col_width));
 	memcpy(self->col_start, col_start, sizeof(col_start));
+	
 }
 
 // PropertiesView
 // prototypes
 static void propertiesview_ondestroy(PropertiesView*, psy_ui_Component* sender);
+static void propertiesview_initsectionfloated(PropertiesView*);
 static void propertiesview_selectsection(PropertiesView*, psy_ui_Component* sender,
 	uintptr_t section);
 static void propertiesview_updatetabbarsections(PropertiesView*);
@@ -1058,6 +1065,8 @@ static int propertiesview_checkrange(PropertiesView*, int position);
 static void propertiesview_onfocus(PropertiesView*, psy_ui_Component* sender);
 static void propertiesview_onmousedown(PropertiesView*, psy_ui_Component* sender,
 	psy_ui_MouseEvent*);
+static void propertiesview_onmouseup(PropertiesView*, psy_ui_Component* sender,
+	psy_ui_MouseEvent*);
 
 // implementation
 void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
@@ -1068,26 +1077,32 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 
 	self->workspace = workspace;
 	psy_ui_component_init(&self->component, parent);
+	psy_ui_notebook_init(&self->notebook, propertiesview_base(self));
+	psy_ui_component_setalign(&self->notebook.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_init(&self->signal_changed);
 	psy_signal_init(&self->signal_selected);
 	psy_signal_connect(&self->component.signal_destroy, self,
 		propertiesview_ondestroy);
 	psy_signal_connect(&self->component.signal_focus,
-		self, propertiesview_onfocus);
-	psy_signal_connect(&self->component.signal_mousedown,
-		self, propertiesview_onmousedown);
+		self, propertiesview_onfocus);	
 	psy_ui_component_setbackgroundmode(&self->component,
-		psy_ui_BACKGROUND_NONE);
+		psy_ui_BACKGROUND_NONE);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
-	propertiesrenderer_init(&self->renderer, &self->component, properties,
+	psy_ui_component_init(&self->client, &self->notebook.component);
+	psy_signal_connect(&self->client.signal_mousedown,
+		self, propertiesview_onmousedown);
+	psy_signal_connect(&self->client.signal_mouseup,
+		self, propertiesview_onmouseup);
+	psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+	propertiesrenderer_init(&self->renderer, &self->client, properties,
 		workspace);
 	psy_ui_scroller_init(&self->scroller, &self->renderer.component,
-		&self->component);
+		&self->client);
 	psy_ui_component_setalign(&self->scroller.component, psy_ui_ALIGN_CLIENT);
 	psy_signal_connect(&self->component.signal_selectsection, self,
 		propertiesview_selectsection);
 	propertiesview_translate(self);
-	tabbar_init(&self->tabbar, &self->component);
+	tabbar_init(&self->tabbar, &self->client);
 	psy_ui_component_setalign(tabbar_base(&self->tabbar), psy_ui_ALIGN_RIGHT);
 	self->tabbar.tabalignment = psy_ui_ALIGN_RIGHT;
 	psy_ui_margin_init_all(&tabmargin, psy_ui_value_makepx(0),
@@ -1104,12 +1119,25 @@ void propertiesview_init(PropertiesView* self, psy_ui_Component* parent,
 		propertiesview_onlanguagechanged);
 	psy_signal_connect(&workspace_player(self->workspace)->eventdrivers.signal_input,
 		self, propertiesview_oneventdriverinput);
+	propertiesview_initsectionfloated(self);
+	psy_ui_notebook_select(&self->notebook, 0);
 }
 
 void propertiesview_ondestroy(PropertiesView* self, psy_ui_Component* sender)
 {
 	psy_signal_dispose(&self->signal_changed);
 	psy_signal_dispose(&self->signal_selected);
+}
+
+void propertiesview_initsectionfloated(PropertiesView* self)
+{
+	psy_ui_component_init(&self->sectionfloated, psy_ui_notebook_base(&self->notebook));
+	psy_ui_component_hide(&self->sectionfloated);
+	psy_ui_label_init(&self->floatdesc, &self->sectionfloated);
+	psy_ui_label_preventtranslation(&self->floatdesc);
+	psy_ui_label_settext(&self->floatdesc, "This view is floated.");
+	psy_ui_component_setalign(&self->floatdesc.component,
+		psy_ui_ALIGN_CENTER);
 }
 
 void propertiesview_selectsection(PropertiesView* self,
@@ -1296,6 +1324,51 @@ void propertiesview_onfocus(PropertiesView* self, psy_ui_Component* sender)
 
 void propertiesview_onmousedown(PropertiesView* self, psy_ui_Component* sender,
 	psy_ui_MouseEvent* ev)
+{	
+	//psy_ui_component_setfocus(&self->renderer.component);
+	if (ev->button == 2) {
+		if (psy_ui_component_visible(&self->sectionfloated)) {
+			workspace_docksection(self->workspace, VIEW_ID_SETTINGSVIEW, 0);			
+		} else {
+			workspace_floatsection(self->workspace, VIEW_ID_SETTINGSVIEW, 0);
+		}		
+		psy_ui_mouseevent_stoppropagation(ev);
+	}
+}
+
+void propertiesview_onmouseup(PropertiesView* self, psy_ui_Component* sender,
+	psy_ui_MouseEvent* ev)
 {
-	psy_ui_component_setfocus(&self->renderer.component);
+	psy_ui_mouseevent_stoppropagation(ev);
+}
+
+void propertiesview_float(PropertiesView* self, int section, psy_ui_Component* dest)
+{
+//	if (section == HELPVIEWSECTION_HELP) {		
+		psy_ui_component_hide(&self->client);		
+		psy_ui_component_insert(dest, &self->client, NULL);
+		psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);		
+		self->renderer.floated = TRUE;
+		//psy_ui_component_preventalign(&self->renderer.component);		
+		psy_ui_component_show_align(&self->client);		
+		psy_ui_notebook_select(&self->notebook, 0);
+		propertiesrenderer_updatelinestates(&self->renderer);
+		
+//	}
+}
+
+void propertiesview_dock(PropertiesView* self, int section, psy_ui_Component* dest)
+{
+//	if (section == HELPVIEWSECTION_HELP) {
+		self->renderer.floated = FALSE;
+		psy_ui_component_hide(&self->sectionfloated);	
+		psy_ui_component_insert(&self->notebook.component,
+			&self->client, NULL);
+		psy_ui_component_enablealign(&self->client);
+		psy_ui_component_setalign(&self->client, psy_ui_ALIGN_CLIENT);
+		psy_ui_component_show_align(&self->client);
+		psy_ui_component_align(&self->client);
+		psy_ui_notebook_select(&self->notebook, 0);
+		propertiesrenderer_updatelinestates(&self->renderer);
+//	}
 }

@@ -12,6 +12,8 @@
 #include "../../detail/portable.h"
 
 // prototypes
+static void instrumentfilterview_ondestroy(InstrumentFilterView*,
+	psy_ui_Component* sender);
 static void instrumentfilterview_fillfiltercombobox(InstrumentFilterView*);
 static void instrumentfilterview_ondescribe(InstrumentFilterView*,
 	psy_ui_Slider*, char* text);
@@ -21,8 +23,8 @@ static void instrumentfilterview_onvalue(InstrumentFilterView*,
 	psy_ui_Slider*, float* value);
 static void instrumentfilterview_onfiltercomboboxchanged(InstrumentFilterView*,
 	psy_ui_ComboBox* sender, int index);
-static void instrumentfilterview_onadsrtweaked(InstrumentFilterView*,
-	AdsrSliders*);
+static void instrumentfilterview_ontweaked(InstrumentFilterView*,
+	psy_ui_Component*, int pointindex);
 // implementation
 void instrumentfilterview_init(InstrumentFilterView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
@@ -41,9 +43,12 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 	self->instruments = instruments;
 	self->instrument = NULL;
 	psy_ui_component_init(&self->component, parent);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		instrumentfilterview_ondestroy);
+	psy_signal_init(&self->signal_status);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
-	psy_ui_component_init(&self->top, &self->component);	
+	psy_ui_component_init(&self->top, &self->component);
 	psy_ui_component_setdefaultalign(&self->top, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	psy_ui_component_init(&self->filter, &self->top);
@@ -84,7 +89,9 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));
 	adsrsliders_init(&self->adsrsliders, &self->bottom);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
-		instrumentfilterview_onadsrtweaked);
+		instrumentfilterview_ontweaked);
+	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
+		instrumentfilterview_ontweaked);
 	psy_ui_slider_init(&self->cutoff, &self->bottom);
 	psy_ui_slider_settext(&self->cutoff, "instrumentview.cut-off");
 	psy_ui_slider_init(&self->res, &self->bottom);
@@ -99,6 +106,12 @@ void instrumentfilterview_init(InstrumentFilterView* self,
 			(ui_slider_fptweak)instrumentfilterview_ontweak,
 			(ui_slider_fpvalue)instrumentfilterview_onvalue);
 	}
+}
+
+void instrumentfilterview_ondestroy(InstrumentFilterView* self,
+	psy_ui_Component* sender)
+{
+	psy_signal_dispose(&self->signal_status);
 }
 
 void instrumentfilterview_fillfiltercombobox(InstrumentFilterView* self)
@@ -191,7 +204,7 @@ void instrumentfilterview_ontweak(InstrumentFilterView* self,
 	} else if (slider == &self->res) {
 		self->instrument->filterres = value;
 	} else if (slider == &self->modamount) {
-		self->instrument->filtermodamount = value - 0.5f;
+		self->instrument->filtermodamount = value;
 	} else if (slider == &self->randomcutoff) {
 		self->instrument->randomcutoff = value;
 	} else if (slider == &self->randomresonance) {
@@ -213,7 +226,7 @@ void instrumentfilterview_onvalue(InstrumentFilterView* self,
 			: 0.5f;
 	} else if (slider == &self->modamount) {
 		*value = self->instrument
-			? self->instrument->filtermodamount + 0.5f
+			? self->instrument->filtermodamount
 			: 0.5f;
 	} else if (slider == &self->randomcutoff) {
 		*value = self->instrument
@@ -226,8 +239,17 @@ void instrumentfilterview_onvalue(InstrumentFilterView* self,
 	}
 }
 
-void instrumentfilterview_onadsrtweaked(InstrumentFilterView* self,
-	AdsrSliders* sender)
+void instrumentfilterview_ontweaked(InstrumentFilterView* self,
+	psy_ui_Component* sender, int pointindex)
 {
-	envelopeview_update(&self->envelopeview);
+	if (self->instrument) {
+		char statustext[256];
+		psy_dsp_EnvelopePoint pt;
+
+		envelopeview_update(&self->envelopeview);
+		pt = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, pointindex);
+		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
+			(float)pt.time, (float)pt.value);
+		psy_signal_emit(&self->signal_status, self, 1, statustext);
+	}
 }

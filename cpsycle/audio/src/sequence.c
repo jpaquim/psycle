@@ -538,7 +538,11 @@ void psy_audio_sequencetrackiterator_inc(psy_audio_SequenceTrackIterator* self)
 				self->sequencentrynode = self->sequencentrynode->next;
 				entry = (psy_audio_SequenceEntry*) self->sequencentrynode->entry;
 				pattern = psy_audio_patterns_at(self->patterns, entry->patternslot);
-				self->patternnode = pattern->events;
+				if (pattern) {
+					self->patternnode = pattern->events;
+				} else {
+					self->patternnode = NULL;
+				}
 			}
 		}
 	}
@@ -554,7 +558,11 @@ void psy_audio_sequencetrackiterator_inc_entry(psy_audio_SequenceTrackIterator* 
 
 			entry = (psy_audio_SequenceEntry*) self->sequencentrynode->entry;
 			pattern = psy_audio_patterns_at(self->patterns, entry->patternslot);
-			self->patternnode = pattern->events;
+			if (pattern) {
+				self->patternnode = pattern->events;
+			} else {
+				self->patternnode = 0;
+			}
 		} else {
 			self->patternnode = 0;
 		}

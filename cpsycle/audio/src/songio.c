@@ -13,8 +13,8 @@
 #include "wavsongio.h"
 #include "wire.h"
 #include "xmdefs.h"
-//#include "xm.h"
 #include "xmsongloader.h"
+#include "itmodule2.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -113,6 +113,14 @@ int psy_audio_songfile_load(psy_audio_SongFile* self, const char* path)
 				psyfile_close(self->file);		
 				psy_audio_wav_songio_load(self);
 			}
+		} else if (strcmp(riff, "IMPM") == 0) {
+			ITModule2 itmodule;
+
+			psyfile_seek(self->file, 0);
+			itmodule2_init(&itmodule, self);
+			itmodule2_load(&itmodule);
+			itmodule2_dispose(&itmodule);
+			psyfile_close(self->file);
 		} else {
 #ifdef PSYCLE_USE_XM
 			psyfile_read(self->file, header + 8, strlen(XM_HEADER) - 8);

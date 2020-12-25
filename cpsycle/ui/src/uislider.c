@@ -85,6 +85,13 @@ void psy_ui_slider_init(psy_ui_Slider* self, psy_ui_Component* parent)
 	psy_ui_component_starttimer(&self->component, 0, 50);
 }
 
+void psy_ui_slider_init_text(psy_ui_Slider* self, psy_ui_Component* parent,
+	const char* text)
+{
+	psy_ui_slider_init(self, parent);
+	psy_ui_slider_settext(self, text);
+}
+
 void psy_ui_slider_initsignals(psy_ui_Slider* self)
 {
 	psy_signal_init(&self->signal_clicked);

@@ -151,7 +151,7 @@ void psy_audio_xmsamplerchannel_effectinit(psy_audio_XMSamplerChannel* self)
 	self->chanvolslidespeed = 0.0f;
 	self->chanvolslidemem = 0;
 	// pitchslide
-	self->pitchslidespeed = 0.0f;
+	self->pitchslidespeed = 0;
 	self->pitchslidemem = 0;
 	// pan
 	self->panslidespeed = 0.0f;

@@ -60,7 +60,8 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->dragpoint = NULL;
 	self->settings = NULL;
 	self->sustainstage = 2;
-	self->dragrelative = 1;		
+	self->dragrelative = 1;	
+	self->dragpointindex = UINTPTR_MAX;
 	psy_ui_margin_init_all(&self->spacing,
 		psy_ui_value_makepx(0),
 		psy_ui_value_makepx(0),
@@ -72,6 +73,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	psy_ui_component_doublebuffer(&self->component);	
 	psy_signal_connect(&self->component.signal_destroy, self,
 		envelopebox_ondestroy);	
+	psy_signal_init(&self->signal_tweaked);
 }
 
 void envelopebox_setenvelope(EnvelopeBox* self,
@@ -82,7 +84,8 @@ void envelopebox_setenvelope(EnvelopeBox* self,
 }
 
 void envelopebox_ondestroy(EnvelopeBox* self, psy_ui_Component* sender)
-{	
+{
+	psy_signal_dispose(&self->signal_tweaked);
 }
 
 void envelopebox_ondraw(EnvelopeBox* self, psy_ui_Graphics* g)
@@ -197,6 +200,7 @@ void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
 void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 {	
 	self->dragpoint = envelopebox_hittestpoint(self, ev->x, ev->y);
+	self->dragpointindex = UINTPTR_MAX;
 	if (ev->button == 1) {
 		if (!self->dragpoint && self->settings) {
 			psy_dsp_EnvelopePoint pt_new;
@@ -227,7 +231,14 @@ void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 				}
 				psy_list_insert(&self->settings->points, p, pt_insert);
 				psy_ui_component_invalidate(&self->component);
+				self->dragpointindex = psy_list_entry_index(
+					self->settings->points, pt_insert);
+				psy_signal_emit(&self->signal_tweaked, self, 1, self->dragpointindex);
 			}
+		} else  if (self->settings && self->settings->points) {
+			self->dragpointindex = psy_list_entry_index(
+				self->settings->points, self->dragpoint->entry);
+			psy_signal_emit(&self->signal_tweaked, self, 1, self->dragpointindex);
 		}
 		psy_ui_component_capture(&self->component);
 	} else if (self->settings && self->dragpoint) {
@@ -261,6 +272,7 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 		checkadjustpointrange(self->dragpoint);
 		envelopebox_shiftsuccessors(self, pt->time - oldtime);		
 		psy_ui_component_invalidate(&self->component);
+		psy_signal_emit(&self->signal_tweaked, self, 1, self->dragpointindex);
 	}
 }
 
@@ -316,9 +328,10 @@ psy_List* envelopebox_hittestpoint(EnvelopeBox* self, int x, int y)
 	psy_List* p;
 	psy_List* points;
 
-	if (self->settings) {
-		points = self->settings->points;
-	} else {
+	points = (self->settings)
+		? self->settings->points
+		: NULL;		
+	if (!points) {
 		return NULL;
 	}
 	for (p = points->tail; p != NULL; p = p->prev) {		

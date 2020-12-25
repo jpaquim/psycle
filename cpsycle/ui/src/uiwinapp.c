@@ -413,13 +413,21 @@ LRESULT CALLBACK ui_winproc (HWND hwnd, UINT message,
 						}
 						if (imp->component->backgroundmode ==
 								psy_ui_BACKGROUND_SET) {
+							//int level;
+							// psy_ui_Colour c;
+							// float gain;
 							// draw background
 							psy_ui_Rectangle r;
 							psy_ui_setrectangle(&r,
 								ps.rcPaint.left - dblbuffer_offset.x,
 								ps.rcPaint.top - dblbuffer_offset.y,
 								clipsize.x, clipsize.y);
-							psy_ui_drawsolidrectangle(&g, r,
+							// level = psy_ui_component_level(imp->component);
+							// c = psy_ui_component_backgroundcolour(
+							//	imp->component);
+							// gain = 1.f + level * 0.03f;
+							// psy_ui_colour_mul_rgb(&c, gain, gain, gain);
+							psy_ui_drawsolidrectangle(&g, r, // c);
 								psy_ui_component_backgroundcolour(
 									imp->component));
 						}						

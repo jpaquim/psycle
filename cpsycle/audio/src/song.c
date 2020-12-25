@@ -102,6 +102,12 @@ void psy_audio_songproperties_setbpm(psy_audio_SongProperties* self, psy_dsp_big
 	}	
 }
 
+const char* psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
+	const char* comments)
+{
+	psy_strreset(&self->comments, comments);
+}
+
 void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 	machinefactory)
 {

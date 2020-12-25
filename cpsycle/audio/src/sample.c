@@ -144,6 +144,7 @@ void psy_audio_sample_allocwavedata(psy_audio_Sample* self)
 	assert(self);
 
 	psy_audio_buffer_allocsamples(&self->channels, self->numframes);
+	psy_audio_buffer_clearsamples(&self->channels, self->numframes);
 }
 
 void psy_audio_sample_load(psy_audio_Sample* self, const psy_Path* path)

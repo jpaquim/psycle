@@ -5,15 +5,18 @@
 #if !defined(PROPERTIESVIEW)
 #define PROPERTIESVIEW
 
-#include <uicomponent.h>
-#include <uiedit.h>
-#include <properties.h>
-#include <uiscroller.h>
+// host
 #include "inputdefiner.h"
 #include "tabbar.h"
 #include "workspace.h"
-
+// ui
+#include <uiedit.h>
+#include <uilabel.h>
+#include <uiscroller.h>
+#include <uinotebook.h>
+// container
 #include <hashtbl.h>
+#include <properties.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,12 +37,10 @@ typedef struct PropertiesRenderLineState {
 void propertiesrenderlinestate_init(PropertiesRenderLineState*);
 void propertiesrenderlinestate_dispose(PropertiesRenderLineState*);
 
-typedef struct {
+typedef struct PropertiesRenderer {
+	// inherits
 	psy_ui_Component component;
-	psy_Property* properties;
-	psy_Property* selected;
-	psy_Property* search;
-	psy_Property* choiceproperty;
+	// internal data	
 	psy_ui_Graphics* g;
 	psy_ui_Rectangle selrect;
 	int lastlevel;	
@@ -72,6 +73,12 @@ typedef struct {
 	psy_ui_Colour separatorcolour;
 	psy_ui_Colour valueselcolour;
 	psy_ui_Colour valueselbackgroundcolour;
+	bool floated;
+	// references
+	psy_Property* properties;
+	psy_Property* selected;
+	psy_Property* search;
+	psy_Property* choiceproperty;
 	Workspace* workspace;
 } PropertiesRenderer;
 
@@ -85,19 +92,31 @@ INLINE psy_ui_Component* propertiesrenderer_base(PropertiesRenderer* self)
 	return &self->component;
 }
 
-typedef struct {
+typedef struct PropertiesView {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
+	psy_ui_Notebook notebook;
+	psy_ui_Component client;
+	psy_ui_Component sectionfloated;
+	psy_ui_Label floatdesc;
 	psy_ui_Component viewtabbar;	
 	TabBar tabbar;
 	PropertiesRenderer renderer;
 	psy_ui_Scroller scroller;
 	psy_Signal signal_changed;
 	psy_Signal signal_selected;
+	// references
 	Workspace* workspace;
 } PropertiesView;
 
 void propertiesview_init(PropertiesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, psy_Property*, Workspace*);
+
+// float to side bar (see helpview, too)
+// todo make it more general
+void propertiesview_float(PropertiesView*, int section, psy_ui_Component* dest);
+void propertiesview_dock(PropertiesView*, int section, psy_ui_Component* src);
 
 INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
 	float col0_perc, float col1_perc, float col2_perc)
@@ -105,6 +124,11 @@ INLINE void propertiesview_setcolumnwidth(PropertiesView* self,
 	self->renderer.col_perc[0] = col0_perc;
 	self->renderer.col_perc[1] = col1_perc;
 	self->renderer.col_perc[2] = col2_perc;	
+}
+
+INLINE psy_ui_Component* propertiesview_base(PropertiesView* self)
+{
+	return &self->component;
 }
 
 #ifdef __cplusplus

@@ -183,6 +183,18 @@ void psy_audio_instrument_fromstring(psy_audio_Instrument*, const char*);
 
 // Properties
 
+INLINE float psy_audio_instrument_volumefadespeed(const
+	psy_audio_Instrument* self)
+{
+	return self->volumefadespeed;
+}
+
+INLINE void psy_audio_instrument_setvolumefadespeed(
+	psy_audio_Instrument* self, float value)
+{
+	self->volumefadespeed = value;
+}
+
 INLINE float psy_audio_instrument_filtercutoff(
 	const psy_audio_Instrument* self)
 {
@@ -223,6 +235,12 @@ INLINE float psy_audio_instrument_randomvolume(
 	const psy_audio_Instrument* self)
 {
 	return self->randomvolume;
+}
+
+INLINE bool psy_audio_instrument_randomvolume_enabled(
+	const psy_audio_Instrument* self)
+{
+	return self->randomvolume != 0.f;
 }
 
 INLINE void psy_audio_instrument_setrandomvolume(psy_audio_Instrument* self,

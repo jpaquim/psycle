@@ -326,6 +326,8 @@ void make_translator_default(psy_Property* lang)
 		"pan-envelope", "Pan envelope");
 	psy_property_set_str(section,
 		"pitch-envelope", "Pitch envelope");
+	psy_property_set_str(section, "swing", "Swing (Randomize)");
+	psy_property_set_str(section, "fadeout", "Fadeout");
 	psy_property_set_str(section, "attack", "Attack");
 	psy_property_set_str(section, "decay", "Decay");
 	psy_property_set_str(section, "sustain-level", "Sustain level");

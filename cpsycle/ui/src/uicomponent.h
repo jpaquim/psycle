@@ -642,6 +642,8 @@ INLINE psy_ui_IntSize psy_ui_component_intsize(psy_ui_Component* self)
 	return psy_ui_intsize_init_size(psy_ui_component_size(self), &tm);
 }
 
+int psy_ui_component_level(const psy_ui_Component* self);
+
 void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType, psy_ui_Margin margin);
 
