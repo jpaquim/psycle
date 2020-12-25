@@ -82,12 +82,12 @@ void psy_audio_samplervoice_init(psy_audio_SamplerVoice* self,
 	self->_sampleCounter = 0;
 	self->_cutoff = 0;
 	self->effCmd = PS1_SAMPLER_CMD_NONE;	
-	psy_dsp_envelope_init_adsr(&self->_envelope);	
-	psy_dsp_envelope_setsamplerate(&self->_envelope,
+	psy_dsp_envelopecontroller_init_adsr(&self->_envelope);	
+	psy_dsp_envelopecontroller_setsamplerate(&self->_envelope,
 		psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
 	filter_init(&self->_filter);
-	psy_dsp_envelope_init_adsr(&self->_filterEnv);
-	psy_dsp_envelope_setsamplerate(&self->_filterEnv,
+	psy_dsp_envelopecontroller_init_adsr(&self->_filterEnv);
+	psy_dsp_envelopecontroller_setsamplerate(&self->_filterEnv,
 		psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));	
 	psy_audio_samplervoice_setup(self);
 }
@@ -97,8 +97,8 @@ void psy_audio_samplervoice_dispose(psy_audio_SamplerVoice* self)
 {
 	assert(self);
 
-	psy_dsp_envelope_dispose(&self->_envelope);
-	psy_dsp_envelope_dispose(&self->_filterEnv);
+	psy_dsp_envelopecontroller_dispose(&self->_envelope);
+	psy_dsp_envelopecontroller_dispose(&self->_filterEnv);
 	psy_audio_sampleiterator_dispose(&self->controller);
 	filter_dispose(&self->_filter);
 }
@@ -108,8 +108,8 @@ void psy_audio_samplervoice_setup(psy_audio_SamplerVoice* self)
 {	
 	assert(self);
 		
-	psy_dsp_envelope_stop(&self->_filterEnv);
-	psy_dsp_envelope_stop(&self->_envelope);	
+	psy_dsp_envelopecontroller_stop(&self->_filterEnv);
+	psy_dsp_envelopecontroller_stop(&self->_envelope);	
 	self->channel = UINTPTR_MAX;
 	self->_triggerNoteOff = 0;
 	self->_triggerNoteDelay = 0;
@@ -322,7 +322,7 @@ void psy_audio_sampler_stopinstrument(psy_audio_Sampler* self,
 	for (i = 0; i < self->numvoices; ++i) {
 		psy_audio_SamplerVoice* pVoice = &self->_voices[i];
 		if (pVoice->instrument == insIdx &&
-			(psy_dsp_envelope_playing(&pVoice->_envelope) || //.stage != ENV_OFF ||
+			(psy_dsp_envelopecontroller_playing(&pVoice->_envelope) || //.stage != ENV_OFF ||
 				pVoice->_triggerNoteDelay > 0)) {
 			psy_audio_samplervoice_setup(pVoice);
 		}
@@ -341,8 +341,8 @@ void psy_audio_sampler_setsamplerate(psy_audio_Sampler* self, int sr)
 	//Machine::SetSampleRate(sr);
 	for (i = 0; i < self->numvoices; ++i) {
 		filter_setsamplerate(&self->_voices[i]._filter, sr);
-		psy_dsp_envelope_setsamplerate(&self->_voices[i]._envelope, sr);
-		psy_dsp_envelope_setsamplerate(&self->_voices[i]._filterEnv, sr);		
+		psy_dsp_envelopecontroller_setsamplerate(&self->_voices[i]._envelope, sr);
+		psy_dsp_envelopecontroller_setsamplerate(&self->_voices[i]._filterEnv, sr);		
 	}
 }
 
@@ -365,7 +365,7 @@ uintptr_t psy_audio_sampler_getcurrentvoice(psy_audio_Sampler* self, int track)
 		// ENV_OFF is not checked, because channel will be -1
 		if (self->_voices[voice].channel == track &&
 			(self->_voices[voice]._triggerNoteDelay > 0) ||
-				(psy_dsp_envelope_playing(&self->_voices[voice]._envelope) &&
+				(psy_dsp_envelopecontroller_playing(&self->_voices[voice]._envelope) &&
 				!(self->_voices[voice]._envelope.fastrelease))) {
 			return voice;
 		}
@@ -417,7 +417,7 @@ uintptr_t psy_audio_sampler_getfreevoice(psy_audio_Sampler* self)
 	assert(self);
 	for (voice = 0; voice < self->numvoices; ++voice)	// Find a voice to apply the new note
 	{
-		if (!psy_dsp_envelope_playing(&self->_voices[voice]._envelope)) {
+		if (!psy_dsp_envelopecontroller_playing(&self->_voices[voice]._envelope)) {
 			useVoice = voice;
 			voice = self->numvoices; // Ok, we can go out from the loop already.
 		} else if (&self->_voices[voice]._envelope.susdone) {
@@ -618,7 +618,7 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 				self->effCmd = ev->cmd;
 			} break;
 			case PS1_SAMPLER_CMD_PORTA2NOTE: {
-				if (psy_dsp_envelope_playing(&self->_envelope)) { //.stage != ENV_OFF) {
+				if (psy_dsp_envelopecontroller_playing(&self->_envelope)) { //.stage != ENV_OFF) {
 					self->effCmd = ev->cmd;
 					self->effVal = ev->parameter;
 					if (pEntry->note < psy_audio_NOTECOMMANDS_RELEASE) {
@@ -723,8 +723,8 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		//		
 		//psy_dsp_adsr_init(&self->_envelope, &self->_envelopesettings,
 			//psy_audio_machine_samplerate(psy_audio_sampler_base(self->sampler)));
-		//psy_dsp_envelope_set_settings(&self->_envelope, &self->inst->volumeenvelope.settings);
-		//psy_dsp_envelope_reset(&self->_envelope);
+		//psy_dsp_envelopecontroller_set_settings(&self->_envelope, &self->inst->volumeenvelope.settings);
+		//psy_dsp_envelopecontroller_reset(&self->_envelope);
 		self->_lVolCurr = self->_lVolDest;
 		self->_rVolCurr = self->_rVolDest;
 		if (!dovol) { dovol = TRUE; self->_vol = 1.f; }
@@ -739,15 +739,15 @@ int psy_audio_samplervoice_tick(psy_audio_SamplerVoice* self, psy_audio_PatternE
 		}				
 		if (self->_triggerNoteDelay == 0) {
 			if (self->inst) {
-				psy_dsp_envelope_set_settings(&self->_envelope,
+				psy_dsp_envelopecontroller_set_settings(&self->_envelope,
 					&self->inst->volumeenvelope);
-				psy_dsp_envelope_set_settings(&self->_filterEnv,
+				psy_dsp_envelopecontroller_set_settings(&self->_filterEnv,
 					&self->inst->filterenvelope);
-				//psy_dsp_envelope_start(&self->_envelope);
-				//psy_dsp_envelope_tick_ps1(&self->_envelope);
+				//psy_dsp_envelopecontroller_start(&self->_envelope);
+				//psy_dsp_envelopecontroller_tick_ps1(&self->_envelope);
 			}
-			psy_dsp_envelope_start(&self->_envelope);
-			psy_dsp_envelope_start(&self->_filterEnv);			
+			psy_dsp_envelopecontroller_start(&self->_envelope);
+			psy_dsp_envelopecontroller_start(&self->_filterEnv);			
 		}
 
 		//Init filter
@@ -941,14 +941,14 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 			{
 				self->_triggerNoteDelay = 0;
 			}
-			psy_dsp_envelope_start(&self->_envelope);
+			psy_dsp_envelopecontroller_start(&self->_envelope);
 			//self->_envelope.stage = ENV_ATTACK;
-		} else if (!psy_dsp_envelope_playing(&self->_envelope))  //self->_envelope.stage == ENV_OFF)
+		} else if (!psy_dsp_envelopecontroller_playing(&self->_envelope))  //self->_envelope.stage == ENV_OFF)
 		{
 			return;
 		}
 	} else
-		if (!psy_dsp_envelope_playing(&self->_envelope)) //self->_envelope.stage == ENV_OFF)
+		if (!psy_dsp_envelopecontroller_playing(&self->_envelope)) //self->_envelope.stage == ENV_OFF)
 		{
 			psy_audio_samplervoice_setup(self);
 			return;
@@ -975,12 +975,15 @@ void psy_audio_samplervoice_work(psy_audio_SamplerVoice* self, int numsamples, f
 					right_output = psy_audio_sampleiterator_work(&self->controller, 1);
 				}
 				// Amplitude section				
-				psy_dsp_envelope_tick_ps1(&self->_envelope);
+				psy_dsp_envelopecontroller_tick_ps1(&self->_envelope);
 				psy_audio_samplervoice_rampvolume(self);				
 				// Filter section
 				if (filter_type(&self->_filter) != F_NONE) {
-					psy_dsp_envelope_tick_ps1(&self->_filterEnv);
-					int newcutoff = (int)(self->_cutoff + self->_filterEnv.value * self->_coModify + 0.5f);
+					int newcutoff;
+
+					psy_dsp_envelopecontroller_tick_ps1(&self->_filterEnv);
+					newcutoff = self->_cutoff + psy_dsp_roundf(
+						self->_filterEnv.value * self->_coModify);
 					if (newcutoff < 0) {
 						newcutoff = 0;
 					} else if (newcutoff > 127) {
@@ -1049,8 +1052,8 @@ void psy_audio_samplervoice_rampvolume(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 {
 	assert(self);
-	psy_dsp_envelope_release(&self->_envelope);
-	psy_dsp_envelope_release(&self->_filterEnv);
+	psy_dsp_envelopecontroller_release(&self->_envelope);
+	psy_dsp_envelopecontroller_release(&self->_filterEnv);
 	self->_triggerNoteDelay = 0;
 	self->_triggerNoteOff = 0;
 }
@@ -1059,8 +1062,8 @@ void psy_audio_samplervoice_noteoff(psy_audio_SamplerVoice* self)
 void psy_audio_samplervoice_noteofffast(psy_audio_SamplerVoice* self)
 {
 	assert(self);
-	psy_dsp_envelope_fastrelease(&self->_envelope);	
-	psy_dsp_envelope_fastrelease(&self->_filterEnv);	
+	psy_dsp_envelopecontroller_fastrelease(&self->_envelope);	
+	psy_dsp_envelopecontroller_fastrelease(&self->_filterEnv);	
 	self->_triggerNoteDelay = 0;
 	self->_triggerNoteOff = 0;
 }

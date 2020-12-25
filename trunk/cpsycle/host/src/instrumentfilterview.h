@@ -19,7 +19,11 @@ extern "C" {
 #endif
 
 typedef struct InstrumentFilterView {
+	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_status;
+	// ui elements
 	psy_ui_Component top;
 	psy_ui_Component filter;
 	psy_ui_Label filtertypeheader;
@@ -31,7 +35,8 @@ typedef struct InstrumentFilterView {
 	AdsrSliders adsrsliders;
 	psy_ui_Slider cutoff;
 	psy_ui_Slider res;
-	psy_ui_Slider modamount;	
+	psy_ui_Slider modamount;
+	// references
 	psy_audio_Player* player;
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;

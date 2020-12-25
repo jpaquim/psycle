@@ -220,9 +220,9 @@ void mainframe_initemptystatusbar(MainFrame* self)
 }
 
 void mainframe_inittoparea(MainFrame* self)
-{
+{	
 	psy_ui_component_init(&self->top, mainframe_base(self));
-	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);
+	psy_ui_component_setalign(&self->top, psy_ui_ALIGN_TOP);	
 }
 
 void mainframe_initclientarea(MainFrame* self)
@@ -287,7 +287,10 @@ void mainframe_initstatusbar(MainFrame* self)
 	sampleeditorbar_init(&self->samplesview.sampleeditor.sampleeditortbar,
 		psy_ui_notebook_base(&self->viewstatusbars),
 		&self->samplesview.sampleeditor,
-		&self->workspace);	
+		&self->workspace);
+	instrumentsviewbar_init(&self->instrumentsviewbar, &self->viewstatusbars.component,
+		&self->workspace);
+	instrumentsview_setstatusbar(&self->instrumentsview, &self->instrumentsviewbar);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(1.0), psy_ui_value_makeeh(0.5),
 		psy_ui_value_makeew(0));
@@ -1244,6 +1247,9 @@ void mainframe_onfloatsection(MainFrame* self, Workspace* sender,
 			helpview_float(&self->helpview, section, &self->right);
 			psy_ui_component_align(&self->client);
 		}
+	} else if (view == VIEW_ID_SETTINGSVIEW) {
+		propertiesview_float(&self->settingsview, section, &self->right);
+		psy_ui_component_align(&self->client);
 	}
 }
 
@@ -1255,6 +1261,9 @@ void mainframe_ondocksection(MainFrame* self, Workspace* sender,
 			helpview_dock(&self->helpview, section, &self->right);
 			psy_ui_component_align(&self->client);
 		}
+	} else if (view == VIEW_ID_SETTINGSVIEW) {
+		propertiesview_dock(&self->settingsview, section, &self->right);
+		psy_ui_component_align(&self->client);
 	}
 }
 

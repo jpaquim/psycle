@@ -6,6 +6,8 @@
 
 #include "../../detail/psydef.h"
 
+#include <math.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +58,25 @@ INLINE int cast_decimal(psy_dsp_big_beat_t value)
 	}
 
 	return (int)(value) + roundup;
+}
+
+
+/// C1999 *round* - converts a floating point number to an integer by rounding
+/// to the nearest integer. This function has the same semantic as C1999's
+/// *round* series of functions.
+/// note: it is unspecified whether rounding x.5 rounds up, down or towards the
+/// even integer.
+
+/// float
+INLINE int psy_dsp_roundf(float x)
+{
+	return (int)((x > 0) ? floorf(x + 0.5f) : ceilf(x - 0.5f));
+}
+
+// double
+INLINE intptr_t psy_dsp_round(double x)
+{
+	return (intptr_t)((x > 0) ? floor(x + 0.5) : ceil(x - 0.5));
 }
 
 #ifdef __cplusplus

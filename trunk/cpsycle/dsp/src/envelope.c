@@ -299,30 +299,30 @@ const char* psy_dsp_envelopesettings_tostring(const psy_dsp_EnvelopeSettings* se
 	return self->str;
 }
 
-// psy_dsp_Envelope
+// psy_dsp_EnvelopeController
 // prototypes
-static void psy_dsp_envelope_startstage(psy_dsp_Envelope*);
-static psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_Envelope*);
+static void psy_dsp_envelope_startstage(psy_dsp_EnvelopeController*);
+static psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_EnvelopeController*);
 
 // implementation
-void psy_dsp_envelope_init(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_init(psy_dsp_EnvelopeController* self)
 {
 	psy_dsp_envelopesettings_init(&self->settings);	
-	psy_dsp_envelope_reset(self);
+	psy_dsp_envelopecontroller_reset(self);
 }
 
-void psy_dsp_envelope_init_adsr(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_init_adsr(psy_dsp_EnvelopeController* self)
 {	
 	psy_dsp_envelopesettings_init_adsr(&self->settings);
-	psy_dsp_envelope_reset(self);	
+	psy_dsp_envelopecontroller_reset(self);	
 }
 
-void psy_dsp_envelope_dispose(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_dispose(psy_dsp_EnvelopeController* self)
 {	
 	psy_dsp_envelopesettings_dispose(&self->settings);	
 }
 
-void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_reset(psy_dsp_EnvelopeController* self)
 {
 	self->samplerate = 44100;
 	self->bpm = 125;
@@ -339,7 +339,7 @@ void psy_dsp_envelope_reset(psy_dsp_Envelope* self)
 	self->fastrelease = FALSE;		
 }
 
-void psy_dsp_envelope_set_settings(psy_dsp_Envelope* self,
+void psy_dsp_envelopecontroller_set_settings(psy_dsp_EnvelopeController* self,
 	const psy_dsp_EnvelopeSettings* settings)
 {
 	psy_dsp_envelopesettings_dispose(&self->settings);	
@@ -350,45 +350,46 @@ void psy_dsp_envelope_set_settings(psy_dsp_Envelope* self,
 		self->settings.sustainend);
 }
 
-void psy_dsp_envelope_settimeandvalue(psy_dsp_Envelope* self, uintptr_t pointindex,
+void psy_dsp_envelopecontroller_settimeandvalue(psy_dsp_EnvelopeController* self, uintptr_t pointindex,
 	psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval)
 {
 	psy_dsp_envelopesettings_settimeandvalue(&self->settings,
 		pointindex, pointtime, pointval);
 }
 
-void psy_dsp_envelope_setvalue(psy_dsp_Envelope* self, uintptr_t pointindex,
+void psy_dsp_envelopecontroller_setvalue(psy_dsp_EnvelopeController* self, uintptr_t pointindex,
 	psy_dsp_amp_t pointval)
 {
 	psy_dsp_envelopesettings_setvalue(&self->settings,
 		pointindex, pointval);
 }
 
-psy_dsp_EnvelopePoint psy_dsp_envelope_at(const psy_dsp_Envelope* self, uintptr_t pointindex)
+psy_dsp_EnvelopePoint psy_dsp_envelopecontroller_at(const
+	psy_dsp_EnvelopeController* self, uintptr_t pointindex)
 {
 	return psy_dsp_envelopesettings_at(&self->settings, pointindex);
 }
 
-psy_List* psy_dsp_envelope_begin(psy_dsp_Envelope* self)
+psy_List* psy_dsp_envelopecontroller_begin(psy_dsp_EnvelopeController* self)
 {
 	return self->settings.points;
 }
 
-void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope* self,
+void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController* self,
 	uintptr_t samplerate)
 {
 	self->samplerate = samplerate;
 }
 
-void psy_dsp_envelope_updatespeed(psy_dsp_Envelope* self, int tpb, int bpm)
+void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController* self, int tpb, int bpm)
 {
 	self->tpb = tpb;
 	self->bpm = (float)bpm;
 }
 
-psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
+psy_dsp_amp_t psy_dsp_envelopecontroller_tick(psy_dsp_EnvelopeController* self)
 {
-	if (!psy_dsp_envelope_playing(self)) {
+	if (!psy_dsp_envelopecontroller_playing(self)) {
 		self->fastrelease = FALSE;
 		return 0.f;
 	}
@@ -413,11 +414,11 @@ psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope* self)
 	return self->value;
 }
 
-psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope* self)
+psy_dsp_amp_t psy_dsp_envelopecontroller_tick_ps1(psy_dsp_EnvelopeController* self)
 {
 	psy_dsp_EnvelopePoint* pt;
 
-	if (!psy_dsp_envelope_playing(self)) {
+	if (!psy_dsp_envelopecontroller_playing(self)) {
 		self->fastrelease = FALSE;
 		return 0.f;
 	}
@@ -448,7 +449,7 @@ psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope* self)
 	return self->value;
 }
 
-void psy_dsp_envelope_start(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_start(psy_dsp_EnvelopeController* self)
 {	
 	if (self->settings.points) {
 		self->currstage = self->settings.points;
@@ -463,7 +464,7 @@ void psy_dsp_envelope_start(psy_dsp_Envelope* self)
 	}
 }
 
-void psy_dsp_envelope_stop(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_stop(psy_dsp_EnvelopeController* self)
 {
 	if (self->settings.points) {
 		self->currstage = NULL;		
@@ -472,9 +473,9 @@ void psy_dsp_envelope_stop(psy_dsp_Envelope* self)
 	}
 }
 
-void psy_dsp_envelope_release(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_release(psy_dsp_EnvelopeController* self)
 {
-	if (psy_dsp_envelope_playing(self)) {
+	if (psy_dsp_envelopecontroller_playing(self)) {
 		self->susdone = TRUE;
 		if (self->currstage != self->susbeginstage) {
 			self->currstage = psy_list_last(self->settings.points);
@@ -483,9 +484,9 @@ void psy_dsp_envelope_release(psy_dsp_Envelope* self)
 	}
 }
 
-void psy_dsp_envelope_fastrelease(psy_dsp_Envelope* self)
+void psy_dsp_envelopecontroller_fastrelease(psy_dsp_EnvelopeController* self)
 {		
-	if (psy_dsp_envelope_playing(self)) {
+	if (psy_dsp_envelopecontroller_playing(self)) {
 		self->susdone = TRUE;
 		if (self->currstage != self->susbeginstage) {
 			self->currstage = psy_list_last(self->settings.points);
@@ -502,7 +503,7 @@ void psy_dsp_envelope_fastrelease(psy_dsp_Envelope* self)
 	}
 }
 
-void psy_dsp_envelope_startstage(psy_dsp_Envelope* self)
+void psy_dsp_envelope_startstage(psy_dsp_EnvelopeController* self)
 {
 	if (self->currstage) {		
 		psy_dsp_EnvelopePoint* pt;
@@ -534,7 +535,7 @@ void psy_dsp_envelope_startstage(psy_dsp_Envelope* self)
 	}
 }
 
-psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_Envelope* self)
+psy_dsp_amp_t psy_dsp_envelope_stagevalue(psy_dsp_EnvelopeController* self)
 {
 	if (self->currstage) {
 		psy_dsp_EnvelopePoint* pt;

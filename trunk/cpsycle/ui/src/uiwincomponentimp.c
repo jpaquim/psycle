@@ -484,13 +484,20 @@ void dev_insert(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp* child,
 {
 	SetParent(child->hwnd, self->hwnd);
 	if (insertafter) {
+		// psy_ui_WinApp* winapp;
+		// HINSTANCE instance;
+		int err = 0;
 		SetWindowPos(
 			child->hwnd,
 			(insertafter) ? insertafter->hwnd : (HWND)NULL,
 			0, 0, 0, 0,
 			SWP_NOMOVE | SWP_NOSIZE
 		);
+		// winapp = (psy_ui_WinApp*)app.platform;
+		// psy_list_free(winapp->targetids);
+		// winapp->targetids = NULL;
 	}
+	
 }
 
 void dev_setorder(psy_ui_win_ComponentImp* self, psy_ui_win_ComponentImp*

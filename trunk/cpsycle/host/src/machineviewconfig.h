@@ -16,6 +16,7 @@ extern "C" {
 
 enum {
 	PROPERTY_ID_DRAWVUMETERS = 6000,
+	PROPERTY_ID_DRAWVIRTUALGENERATORS
 };
 
 typedef struct MachineViewConfig {

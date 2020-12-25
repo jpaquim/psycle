@@ -71,6 +71,9 @@ INLINE const char* psy_audio_songproperties_title(const psy_audio_SongProperties
 	return self->title;
 }
 
+const char* psy_audio_songproperties_setcomments(psy_audio_SongProperties*,
+	const char* comments);
+
 typedef struct psy_audio_Song {
 	// signals
 	psy_Signal signal_loadprogress;

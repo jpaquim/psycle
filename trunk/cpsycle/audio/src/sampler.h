@@ -69,9 +69,9 @@ extern "C" {
 	{
 		struct psy_audio_Sampler* sampler;
 		psy_audio_SampleIterator controller;
-		psy_dsp_Envelope _envelope;	
+		psy_dsp_EnvelopeController _envelope;	
 		//psy_dsp_ADSRSettings _envelopesettings;
-		psy_dsp_Envelope _filterEnv;
+		psy_dsp_EnvelopeController _filterEnv;
 		// psy_dsp_ADSRSettings _filterenvsettings;
 		Filter _filter;
 		psy_audio_Instrument* inst;

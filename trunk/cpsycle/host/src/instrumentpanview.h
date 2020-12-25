@@ -21,6 +21,8 @@ struct InstrumentView;
 typedef struct InstrumentPanView {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_status;
 	// ui elements
 	psy_audio_Instrument* instrument;
 	psy_audio_Instruments* instruments;

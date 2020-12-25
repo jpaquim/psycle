@@ -731,6 +731,9 @@ static void sequenceview_onsequencechanged(SequenceView*,
 	psy_audio_Sequence* sender);
 static void sequenceview_onconfigure(SequenceView*, GeneralConfig*,
 	psy_Property*);
+static void sequenceview_onthemechanged(SequenceView*, MachineViewConfig*,
+	psy_Property* theme);
+static void sequenceview_updateskin(SequenceView*);
 // implementation
 void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	Workspace* workspace)
@@ -824,6 +827,10 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	}
 	psy_signal_connect(&psycleconfig_general(workspace_conf(workspace))->signal_changed, self,
 		sequenceview_onconfigure);
+	psy_signal_connect(
+		&psycleconfig_macview(workspace_conf(workspace))->signal_themechanged,
+		self, sequenceview_onthemechanged);
+	sequenceview_updateskin(self);
 }
 
 void sequenceview_onnewentry(SequenceView* self)
@@ -1244,4 +1251,19 @@ void sequenceview_onconfigure(SequenceView* self, GeneralConfig* config,
 			psy_ui_checkbox_disablecheck(&self->options.shownames);
 		}
 	}
+}
+
+void sequenceview_onthemechanged(SequenceView* self, MachineViewConfig* config,
+	psy_Property* theme)
+{
+	sequenceview_updateskin(self);
+}
+
+void sequenceview_updateskin(SequenceView* self)
+{
+	// psy_ui_Colour bg;	
+	
+	// bg = psy_ui_colour_make(psy_property_at_int(
+	//	self->workspace->config.macview.theme, "mv_colour", 0x00232323));
+	// psy_ui_component_setbackgroundcolour(&self->component, bg);
 }

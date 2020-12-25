@@ -186,18 +186,18 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	self->channelnum = channelnum;
 	self->channel = channel;
 	// Init Envelopes
-	psy_dsp_envelope_init(&self->amplitudeenvelope);
-	psy_dsp_envelope_init_adsr(&self->amplitudeenvelope);
-	psy_dsp_envelope_init_adsr(&self->panenvelope);
-	psy_dsp_envelope_init_adsr(&self->pitchenvelope);
-	psy_dsp_envelope_init_adsr(&self->filterenvelope);
-	psy_dsp_envelope_setsamplerate(&self->amplitudeenvelope, samplerate);
-	psy_dsp_envelope_setsamplerate(&self->filterenvelope, samplerate);
-	psy_dsp_envelope_setsamplerate(&self->panenvelope, samplerate);
-	psy_dsp_envelope_setsamplerate(&self->pitchenvelope, samplerate);
+	psy_dsp_envelopecontroller_init(&self->amplitudeenvelope);
+	psy_dsp_envelopecontroller_init_adsr(&self->amplitudeenvelope);
+	psy_dsp_envelopecontroller_init_adsr(&self->panenvelope);
+	psy_dsp_envelopecontroller_init_adsr(&self->pitchenvelope);
+	psy_dsp_envelopecontroller_init_adsr(&self->filterenvelope);
+	psy_dsp_envelopecontroller_setsamplerate(&self->amplitudeenvelope, samplerate);
+	psy_dsp_envelopecontroller_setsamplerate(&self->filterenvelope, samplerate);
+	psy_dsp_envelopecontroller_setsamplerate(&self->panenvelope, samplerate);
+	psy_dsp_envelopecontroller_setsamplerate(&self->pitchenvelope, samplerate);
 	if (instrument) {
-		psy_dsp_envelope_set_settings(&self->amplitudeenvelope, &instrument->volumeenvelope);
-		psy_dsp_envelope_set_settings(&self->filterenvelope, &instrument->filterenvelope);		
+		psy_dsp_envelopecontroller_set_settings(&self->amplitudeenvelope, &instrument->volumeenvelope);
+		psy_dsp_envelopecontroller_set_settings(&self->filterenvelope, &instrument->filterenvelope);		
 	}	
 	// Init Filter
 	filter_init_samplerate(&self->_filter, samplerate);
@@ -262,10 +262,10 @@ void psy_audio_xmsamplervoice_dispose(psy_audio_XMSamplerVoice* self)
 	self->positions = 0;
 	psy_list_free(self->effects);
 	self->effects = NULL;
-	psy_dsp_envelope_dispose(&self->amplitudeenvelope);
-	psy_dsp_envelope_dispose(&self->filterenvelope);
-	psy_dsp_envelope_dispose(&self->panenvelope);
-	psy_dsp_envelope_dispose(&self->pitchenvelope);
+	psy_dsp_envelopecontroller_dispose(&self->amplitudeenvelope);
+	psy_dsp_envelopecontroller_dispose(&self->filterenvelope);
+	psy_dsp_envelopecontroller_dispose(&self->panenvelope);
+	psy_dsp_envelopecontroller_dispose(&self->pitchenvelope);
 }
 
 psy_audio_XMSamplerVoice* psy_audio_xmsamplervoice_alloc(void)
@@ -361,8 +361,8 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 	}	
 	psy_list_free(entries);	
 	if (self->positions) {		
-		psy_dsp_envelope_start(&self->amplitudeenvelope);
-		psy_dsp_envelope_start(&self->filterenvelope);
+		psy_dsp_envelopecontroller_start(&self->amplitudeenvelope);
+		psy_dsp_envelopecontroller_start(&self->filterenvelope);
 	}
 	psy_audio_xmsamplervoice_setisplaying(self,
 		TRUE);
@@ -374,7 +374,7 @@ void psy_audio_xmsamplervoice_noteon(psy_audio_XMSamplerVoice* self,
 
 void psy_audio_xmsamplervoice_updatespeed(psy_audio_XMSamplerVoice* self)
 {
-	if (self->positions && psy_dsp_envelope_playing(&self->amplitudeenvelope)) {
+	if (self->positions && psy_dsp_envelopecontroller_playing(&self->amplitudeenvelope)) {
 		psy_List* p;
 
 		for (p = self->positions; p != NULL; psy_list_next(&p)) {
@@ -434,8 +434,8 @@ void psy_audio_xmsamplervoice_noteon_frequency(psy_audio_XMSamplerVoice* self,
 	}
 	psy_list_free(entries);
 	if (self->positions) {
-		psy_dsp_envelope_start(&self->amplitudeenvelope);
-		psy_dsp_envelope_start(&self->filterenvelope);
+		psy_dsp_envelopecontroller_start(&self->amplitudeenvelope);
+		psy_dsp_envelopecontroller_start(&self->filterenvelope);
 	}	
 }
 
@@ -474,8 +474,8 @@ void psy_audio_xmsamplervoice_noteoff(psy_audio_XMSamplerVoice* self)
 		return;
 	}
 	psy_audio_xmsamplervoice_setstopping(self, TRUE);
-	psy_dsp_envelope_release(&self->amplitudeenvelope);
-	psy_dsp_envelope_release(&self->filterenvelope);
+	psy_dsp_envelopecontroller_release(&self->amplitudeenvelope);
+	psy_dsp_envelopecontroller_release(&self->filterenvelope);
 	self->stopping = TRUE;
 }
 
@@ -485,9 +485,9 @@ void psy_audio_xmsamplervoice_fastnoteoff(psy_audio_XMSamplerVoice* self)
 		return;
 	}
 	psy_audio_xmsamplervoice_setstopping(self, TRUE);
-	psy_dsp_envelope_release(&self->amplitudeenvelope);
+	psy_dsp_envelopecontroller_release(&self->amplitudeenvelope);
 	// psy_dsp_adsr_fastrelease(&self->amplitudeenvelope);
-	psy_dsp_envelope_release(&self->filterenvelope);
+	psy_dsp_envelopecontroller_release(&self->filterenvelope);
 	//psy_dsp_adsr_fastrelease(&self->filterenvelope);
 	// Fade Out Volume
 	self->volumefadespeed = 1000.0f / (3.f * psy_audio_machine_samplerate(
@@ -503,7 +503,7 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 		psy_audio_xmsamplervoice_setisplaying(self, FALSE);
 		return;
 	}
-	if (self->positions && psy_dsp_envelope_playing(&self->amplitudeenvelope) || self->play) {
+	if (self->positions && psy_dsp_envelopecontroller_playing(&self->amplitudeenvelope) || self->play) {
 		psy_List* p;
 		psy_dsp_amp_t* env;
 		psy_dsp_amp_t* filterenv;
@@ -511,11 +511,11 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 		
 		env = malloc(amount * sizeof(psy_dsp_amp_t));
 		for (i = 0; i < amount; ++i) {
-			if (psy_dsp_envelope_playing(&self->amplitudeenvelope)) {
-				psy_dsp_envelope_updatespeed(&self->amplitudeenvelope,
+			if (psy_dsp_envelopecontroller_playing(&self->amplitudeenvelope)) {
+				psy_dsp_envelopecontroller_updatespeed(&self->amplitudeenvelope,
 					psy_audio_machine_ticksperbeat(self->sampler),
 					psy_audio_machine_bpm(self->sampler));
-				psy_dsp_envelope_tick(&self->amplitudeenvelope);
+				psy_dsp_envelopecontroller_tick(&self->amplitudeenvelope);
 				env[i] = self->amplitudeenvelope.value;
 			} else {
 				env[i] = 1.f;
@@ -525,11 +525,11 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 		if (filter_type(&self->_filter) != F_NONE) {
 			filterenv = malloc(amount * sizeof(psy_dsp_amp_t));
 			for (i = 0; i < amount; ++i) {
-				if (psy_dsp_envelope_playing(&self->filterenvelope)) {
-					psy_dsp_envelope_updatespeed(&self->filterenvelope,
+				if (psy_dsp_envelopecontroller_playing(&self->filterenvelope)) {
+					psy_dsp_envelopecontroller_updatespeed(&self->filterenvelope,
 						psy_audio_machine_ticksperbeat(self->sampler),
 						psy_audio_machine_bpm(self->sampler));
-					psy_dsp_envelope_tick(&self->filterenvelope);
+					psy_dsp_envelopecontroller_tick(&self->filterenvelope);
 					filterenv[i] = self->filterenvelope.value;
 				} else {
 					filterenv[i] = 1.f;
@@ -727,7 +727,7 @@ void psy_audio_xmsamplervoice_setresamplerquality(psy_audio_XMSamplerVoice* self
 	psy_dsp_ResamplerQuality quality)
 {
 	self->resamplertype = quality;
-	if (self->positions && psy_dsp_envelope_playing(&self->amplitudeenvelope)) {
+	if (self->positions && psy_dsp_envelopecontroller_playing(&self->amplitudeenvelope)) {
 		psy_List* p;
 		for (p = self->positions; p != NULL; psy_list_next(&p)) {
 			psy_audio_SampleIterator* iterator;
@@ -794,17 +794,17 @@ psy_dsp_amp_t psy_audio_xmsamplervoice_workfilter(psy_audio_XMSamplerVoice* self
 void psy_audio_xmsamplervoice_release(psy_audio_XMSamplerVoice* self)
 {
 	self->effcmd = XM_SAMPLER_CMD_NONE;
-	psy_dsp_envelope_release(&self->amplitudeenvelope);
-	psy_dsp_envelope_release(&self->filterenvelope);
+	psy_dsp_envelopecontroller_release(&self->amplitudeenvelope);
+	psy_dsp_envelopecontroller_release(&self->filterenvelope);
 }
 
 void psy_audio_xmsamplervoice_fastrelease(psy_audio_XMSamplerVoice* self)
 {
 	self->effcmd = XM_SAMPLER_CMD_NONE;
 	//psy_dsp_adsr_fastrelease(&self->amplitudeenvelope);
-	psy_dsp_envelope_release(&self->amplitudeenvelope);
-	//psy_dsp_envelope_fastrelease(&self->filterenvelope);
-	psy_dsp_envelope_release(&self->filterenvelope);
+	psy_dsp_envelopecontroller_release(&self->amplitudeenvelope);
+	//psy_dsp_envelopecontroller_fastrelease(&self->filterenvelope);
+	psy_dsp_envelopecontroller_release(&self->filterenvelope);
 }
 
 // Voice Effects

@@ -293,7 +293,7 @@ INLINE void psy_dsp_envelopesettings_setreleasetime(
 		time);
 }
 
-typedef struct psy_dsp_Envelope {
+typedef struct psy_dsp_EnvelopeController {
 	int rsvd;
 	psy_dsp_EnvelopeSettings settings;	
 	uintptr_t samplerate;
@@ -309,36 +309,36 @@ typedef struct psy_dsp_Envelope {
 	uintptr_t nexttime;
 	bool susdone;
 	bool fastrelease;		
-} psy_dsp_Envelope;
+} psy_dsp_EnvelopeController;
 
-void psy_dsp_envelope_init(psy_dsp_Envelope*);
-void psy_dsp_envelope_init_adsr(psy_dsp_Envelope*);
-void psy_dsp_envelope_dispose(psy_dsp_Envelope*);
-void psy_dsp_envelope_reset(psy_dsp_Envelope*);
-void psy_dsp_envelope_set_settings(psy_dsp_Envelope*,
+void psy_dsp_envelopecontroller_init(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_init_adsr(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_dispose(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_reset(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_set_settings(psy_dsp_EnvelopeController*,
 	const psy_dsp_EnvelopeSettings*);
-void psy_dsp_envelope_settimeandvalue(psy_dsp_Envelope*, uintptr_t pointindex,
+void psy_dsp_envelopecontroller_settimeandvalue(psy_dsp_EnvelopeController*, uintptr_t pointindex,
 	psy_dsp_seconds_t pointtime, psy_dsp_amp_t pointval);
-void psy_dsp_envelope_setvalue(psy_dsp_Envelope*, uintptr_t pointindex,
+void psy_dsp_envelopecontroller_setvalue(psy_dsp_EnvelopeController*, uintptr_t pointindex,
 	psy_dsp_amp_t pointval);
-psy_dsp_EnvelopePoint psy_dsp_envelope_at(const psy_dsp_Envelope*,
+psy_dsp_EnvelopePoint psy_dsp_envelopecontroller_at(const psy_dsp_EnvelopeController*,
 	uintptr_t pointindex);
-psy_List*  psy_dsp_envelope_begin(psy_dsp_Envelope*);
-void psy_dsp_envelope_setsamplerate(psy_dsp_Envelope*, uintptr_t samplerate);
-void psy_dsp_envelope_updatespeed(psy_dsp_Envelope*, int tpb, int bpm);
-psy_dsp_amp_t psy_dsp_envelope_tick(psy_dsp_Envelope*);
-psy_dsp_amp_t psy_dsp_envelope_tick_ps1(psy_dsp_Envelope*);
-void psy_dsp_envelope_start(psy_dsp_Envelope*);
-void psy_dsp_envelope_stop(psy_dsp_Envelope*);
-void psy_dsp_envelope_release(psy_dsp_Envelope*);
-void psy_dsp_envelope_fastrelease(psy_dsp_Envelope*);
+psy_List*  psy_dsp_envelopecontroller_begin(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_setsamplerate(psy_dsp_EnvelopeController*, uintptr_t samplerate);
+void psy_dsp_envelopecontroller_updatespeed(psy_dsp_EnvelopeController*, int tpb, int bpm);
+psy_dsp_amp_t psy_dsp_envelopecontroller_tick(psy_dsp_EnvelopeController*);
+psy_dsp_amp_t psy_dsp_envelopecontroller_tick_ps1(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_start(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_stop(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_release(psy_dsp_EnvelopeController*);
+void psy_dsp_envelopecontroller_fastrelease(psy_dsp_EnvelopeController*);
 
-INLINE bool psy_dsp_envelope_releasing(psy_dsp_Envelope* self)
+INLINE bool psy_dsp_envelopecontroller_releasing(psy_dsp_EnvelopeController* self)
 {
 	return (self->settings.points && self->currstage == self->settings.points->tail);
 }
 
-INLINE bool psy_dsp_envelope_playing(psy_dsp_Envelope* self)
+INLINE bool psy_dsp_envelopecontroller_playing(psy_dsp_EnvelopeController* self)
 {	
 	return self->currstage != NULL;	
 }

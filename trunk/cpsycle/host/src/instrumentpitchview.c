@@ -4,10 +4,14 @@
 #include "../../detail/prefix.h"
 
 #include "instrumentpitchview.h"
+// platform
+#include "../../detail/portable.h"
 
 // prototypes
-static void instrumentpitchview_onadsrtweaked(InstrumentPitchView*,
-	AdsrSliders*);
+void instrumentpitchview_ondestroy(InstrumentPitchView*,
+	psy_ui_Component* sender);
+static void instrumentpitchview_ontweaked(InstrumentPitchView*,
+	psy_ui_Component*, int pointindex);
 // implementation
 void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_Component* parent, psy_audio_Instruments* instruments,
@@ -18,6 +22,9 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	self->instruments = instruments;
 	self->instrument = 0;
 	psy_ui_component_init(&self->component, parent);
+	psy_signal_connect(&self->component.signal_destroy, self,
+		instrumentpitchview_ondestroy);
+	psy_signal_init(&self->signal_status);
 	psy_ui_component_setdefaultalign(&self->component, psy_ui_ALIGN_TOP,
 		psy_ui_defaults_vmargin(psy_ui_defaults()));	
 	margin = psy_ui_defaults_vmargin(psy_ui_defaults());
@@ -27,7 +34,15 @@ void instrumentpitchview_init(InstrumentPitchView* self,
 	psy_ui_component_setmargin(&self->envelopeview.component, &margin);	
 	adsrsliders_init(&self->adsrsliders, &self->component);
 	psy_signal_connect(&self->adsrsliders.signal_tweaked, self,
-		instrumentpitchview_onadsrtweaked);
+		instrumentpitchview_ontweaked);
+	psy_signal_connect(&self->envelopeview.envelopebox.signal_tweaked, self,
+		instrumentpitchview_ontweaked);
+}
+
+void instrumentpitchview_ondestroy(InstrumentPitchView* self,
+	psy_ui_Component* sender)
+{
+	psy_signal_dispose(&self->signal_status);
 }
 
 void instrumentpitchview_setinstrument(InstrumentPitchView* self,
@@ -45,8 +60,17 @@ void instrumentpitchview_setinstrument(InstrumentPitchView* self,
 	}
 }
 
-void instrumentpitchview_onadsrtweaked(InstrumentPitchView* self,
-	AdsrSliders* sender)
+void instrumentpitchview_ontweaked(InstrumentPitchView* self,
+	psy_ui_Component* sender, int pointindex)
 {
-	envelopeview_update(&self->envelopeview);
+	if (self->instrument) {
+		char statustext[256];
+		psy_dsp_EnvelopePoint pt;
+
+		envelopeview_update(&self->envelopeview);
+		pt = psy_dsp_envelopesettings_at(&self->instrument->pitchenvelope, pointindex);
+		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,
+			(float)pt.time, (float)pt.value);
+		psy_signal_emit(&self->signal_status, self, 1, statustext);
+	}
 }

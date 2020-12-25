@@ -356,6 +356,38 @@ void instrumentempty_init(InstrumentEmpty* self, psy_ui_Component* parent)
 		psy_ui_ALIGN_CENTER);
 }
 
+// InstrumentViewBar
+static void instrumentsviewbar_onsongchanged(InstrumentsViewBar*, Workspace*,
+	int flag, psy_audio_SongFile*);
+
+void instrumentsviewbar_init(InstrumentsViewBar* self, psy_ui_Component* parent,
+	Workspace* workspace)
+{
+	psy_ui_component_init(instrumentsviewbar_base(self), parent);
+	self->workspace = workspace;
+	psy_ui_component_setdefaultalign(instrumentsviewbar_base(self),
+		psy_ui_ALIGN_LEFT, psy_ui_margin_make(
+			psy_ui_value_makepx(0), psy_ui_value_makeew(4),
+			psy_ui_value_makepx(0), psy_ui_value_makepx(0)));		
+	psy_ui_label_init(&self->status, instrumentsviewbar_base(self));
+	psy_ui_label_preventtranslation(&self->status);
+	psy_ui_label_setcharnumber(&self->status, 44);
+	instrumentsviewbar_settext(self, "instrumentviewbar");
+	psy_ui_component_doublebuffer(psy_ui_label_base(&self->status));
+	psy_signal_connect(&workspace->signal_songchanged, self,
+		instrumentsviewbar_onsongchanged);
+}
+
+void instrumentsviewbar_settext(InstrumentsViewBar* self, const char* text)
+{
+	psy_ui_label_settext(&self->status, text);
+}
+
+void instrumentsviewbar_onsongchanged(InstrumentsViewBar* self, Workspace* workspace,
+	int flag, psy_audio_SongFile* songfile)
+{	
+}
+
 // InstrumentView
 // prototypes
 // instruments
@@ -385,6 +417,8 @@ static void instrumentview_onmachinesremoved(InstrumentView*,
 	psy_audio_Machines* sender, int slot);
 static void instrumentview_onsongchanged(InstrumentView*,
 	Workspace* sender, int flag, psy_audio_SongFile*);
+static void instrumentview_onstatuschanged(InstrumentView*,
+	psy_ui_Component* sender, char* text);
 // implementation
 void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -394,6 +428,7 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 
 	psy_ui_component_init(&self->component, parent);	
 	psy_ui_component_init(&self->viewtabbar, tabbarparent);
+	self->statusbar = NULL;
 	self->player = &workspace->player;
 	self->workspace = workspace;
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
@@ -491,6 +526,14 @@ void instrumentview_init(InstrumentView* self, psy_ui_Component* parent,
 		instrumentview_onaddentry);
 	psy_signal_connect(&self->general.notemapview.buttons.remove.signal_clicked, self,
 		instrumentview_onremoveentry);	
+	psy_signal_connect(&self->volume.signal_status, self,
+		instrumentview_onstatuschanged);
+	psy_signal_connect(&self->pan.signal_status, self,
+		instrumentview_onstatuschanged);
+	psy_signal_connect(&self->pitch.signal_status, self,
+		instrumentview_onstatuschanged);
+	psy_signal_connect(&self->filter.signal_status, self,
+		instrumentview_onstatuschanged);
 	psy_ui_notebook_select(&self->clientnotebook, 0);
 }
 
@@ -657,5 +700,13 @@ void instrumentview_onremoveentry(InstrumentView* self, psy_ui_Component* sender
 			self->general.notemapview.entryview.selected);
 		self->general.notemapview.entryview.selected = UINTPTR_MAX;
 		instrumentnotemapview_update(&self->general.notemapview);
+	}
+}
+
+void instrumentview_onstatuschanged(InstrumentView* self,
+	psy_ui_Component* sender, char* text)
+{
+	if (self->statusbar) {
+		instrumentsviewbar_settext(self->statusbar, text);
 	}
 }

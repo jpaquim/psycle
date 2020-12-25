@@ -58,7 +58,7 @@ int luaenvelope_create(lua_State* L)
 {
 	int n;
 	int self = 1;
-	psy_dsp_Envelope* env;
+	psy_dsp_EnvelopeController* env;
 	lua_Integer suspos;
 	lua_Number startpeak;
 
@@ -67,11 +67,11 @@ int luaenvelope_create(lua_State* L)
 		return luaL_error(L,
 			"Got %d arguments expected 3 (self, points, sustainpos)", n);
 	}
-	env = (psy_dsp_Envelope*)malloc(sizeof(psy_dsp_Envelope));
+	env = (psy_dsp_EnvelopeController*)malloc(sizeof(psy_dsp_EnvelopeController));
 	if (!env) {
 		return luaL_error(L, "Memory Error");
 	}
-	psy_dsp_envelope_init(env);
+	psy_dsp_envelopecontroller_init(env);
 	if (lua_istable(L, 2)) {
 		psy_dsp_EnvelopeSettings* settings;
 
@@ -119,9 +119,9 @@ int luaenvelope_create(lua_State* L)
 
 int luaenvelope_gc(lua_State* L)
 {
-	psy_dsp_Envelope** ud = (psy_dsp_Envelope**)
+	psy_dsp_EnvelopeController** ud = (psy_dsp_EnvelopeController**)
 		luaL_checkudata(L, 1, luaenvelope_meta);	
-	psy_dsp_envelope_dispose(*ud);	
+	psy_dsp_envelopecontroller_dispose(*ud);	
 	free(*ud);
 	return 0;
 }
@@ -130,7 +130,7 @@ int work(lua_State* L)
 {
 	int n = lua_gettop(L);
 	if (n == 2) {		
-		psy_dsp_Envelope* self;
+		psy_dsp_EnvelopeController* self;
 		uintptr_t i;
 
 		self = psyclescript_checkself(L, 1, luaenvelope_meta);
@@ -141,7 +141,7 @@ int work(lua_State* L)
 		for (i = 0; i < num; ++i) {
 			psy_dsp_amp_t value;
 
-			value = psy_dsp_envelope_tick(self);
+			value = psy_dsp_envelopecontroller_tick(self);
 			psy_audio_array_set(*rv, i, value);
 		}		
 		luaL_setmetatable(L, luaarraybind_meta);
@@ -153,36 +153,36 @@ int work(lua_State* L)
 
 int release(lua_State* L)
 {
-	psy_dsp_Envelope* self;
+	psy_dsp_EnvelopeController* self;
 
 	self = psyclescript_checkself(L, 1, luaenvelope_meta);
-	psy_dsp_envelope_release(self);
+	psy_dsp_envelopecontroller_release(self);
 	return psyclescript_chaining(L);
 }
 
 int start(lua_State* L)
 {
-	psy_dsp_Envelope* self;
+	psy_dsp_EnvelopeController* self;
 
 	self = psyclescript_checkself(L, 1, luaenvelope_meta);
-	psy_dsp_envelope_start(self);
+	psy_dsp_envelopecontroller_start(self);
 	return psyclescript_chaining(L);
 }
 
 int isplaying(lua_State* L)
 {
-	psy_dsp_Envelope* self;
+	psy_dsp_EnvelopeController* self;
 	bool playing;
 
 	self = psyclescript_checkself(L, 1, luaenvelope_meta);
-	playing = psy_dsp_envelope_playing(self);
+	playing = psy_dsp_envelopecontroller_playing(self);
 	lua_pushboolean(L, playing);
 	return 1;
 }
 
 int setpeak(lua_State* L)
 {
-	psy_dsp_Envelope* self;
+	psy_dsp_EnvelopeController* self;
 	psy_List* p;	
 	lua_Integer stage;
 
@@ -216,7 +216,7 @@ int tostring(lua_State* L)
 
 int setstagetime(lua_State* L)
 {
-	psy_dsp_Envelope* self;
+	psy_dsp_EnvelopeController* self;
 	psy_List* p;
 	lua_Integer stage;
 

@@ -132,6 +132,7 @@ typedef struct MainFrame {
 	psy_ui_Label statusbarlabel;
 	PatternViewBar patternbar;
 	MachineViewBar machineviewbar;
+	InstrumentsViewBar instrumentsviewbar;
 	CheckUnsavedBox checkunsavedbox;
 	TerminalMsgType terminalmsgtype;
 	Interpreter interpreter;

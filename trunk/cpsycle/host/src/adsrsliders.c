@@ -108,14 +108,17 @@ void adsrsliders_onvolumeviewtweak(AdsrSliders* self,
 	}
 	if (slider == &self->attack) {
 		psy_dsp_envelopesettings_setattacktime(self->envelope, value * 5.f);
+		psy_signal_emit(&self->signal_tweaked, self, 1, 1);
 	} else if (slider == &self->decay) {
 		psy_dsp_envelopesettings_setdecaytime(self->envelope, value * 5.f);
+		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->sustain) {
-		psy_dsp_envelopesettings_setsustainvalue(self->envelope, value);		
+		psy_dsp_envelopesettings_setsustainvalue(self->envelope, value);
+		psy_signal_emit(&self->signal_tweaked, self, 1, 2);
 	} else if (slider == &self->release) {
 		psy_dsp_envelopesettings_setreleasetime(self->envelope, value * 5.f);
-	}
-	psy_signal_emit(&self->signal_tweaked, self, 0);
+		psy_signal_emit(&self->signal_tweaked, self, 1, 3);
+	}	
 }
 
 void adsrsliders_onvolumeviewvalue(AdsrSliders* self,

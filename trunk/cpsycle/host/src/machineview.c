@@ -564,6 +564,11 @@ void machinewireview_connectmachinessignals(MachineWireView* self)
 
 void machinewireview_ondestroy(MachineWireView* self)
 {	
+	if (self->workspace->song) {
+		psy_signal_disconnect_context(
+			&psy_audio_machines_master(&self->workspace->song->machines)->signal_worked,
+			self);
+	}
 	machineuis_removeall(self);
 	psy_table_dispose(&self->machineuis);
 	psy_list_deallocate(&self->wireframes, (psy_fp_disposefunc)
@@ -796,42 +801,44 @@ void machinewireview_centermaster(MachineWireView* self)
 
 void machinewireview_onmousedoubleclick(MachineWireView* self, psy_ui_MouseEvent* ev)
 {	
-	self->mx = ev->x;
-	self->my = ev->y;
-	machinewireview_hittest(self);
-	if (self->dragslot == UINTPTR_MAX) {
-		self->selectedwire = machinewireview_hittestwire(self, ev->x, ev->y);
-		if (self->selectedwire.dst != UINTPTR_MAX) {			
-			machinewireview_showwireview(self, self->selectedwire);
-			psy_ui_component_invalidate(&self->component);
-		} else {
+	if (ev->button == 1) {
+		self->mx = ev->x;
+		self->my = ev->y;
+		machinewireview_hittest(self);
+		if (self->dragslot == UINTPTR_MAX) {
+			self->selectedwire = machinewireview_hittestwire(self, ev->x, ev->y);
+			if (self->selectedwire.dst != UINTPTR_MAX) {
+				machinewireview_showwireview(self, self->selectedwire);
+				psy_ui_component_invalidate(&self->component);
+			} else {
+				self->dragslot = UINTPTR_MAX;
+				self->randominsert = 0;
+				return;
+			}
+		} else
+			if (machinewireview_hittesteditname(self, ev->x, ev->y, self->dragslot)) {
+				if (machineuis_at(self, self->dragslot)) {
+					machineui_editname(machineuis_at(self, self->dragslot),
+						&self->editname, psy_ui_component_scroll(&self->component));
+					psy_ui_component_scrolltop(&self->component);
+				}
+			} else
+				if (machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_GENERATOR,
+					&self->skin.generator.solo) ||
+					machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_FX,
+						&self->skin.effect.bypass) ||
+					machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_GENERATOR,
+						&self->skin.generator.mute) ||
+					machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_FX,
+						&self->skin.effect.mute) ||
+					machinewireview_hittestpan(self, ev->x, ev->y,
+						self->dragslot, &self->mx)) {
+				} else {
+					workspace_showparameters(self->workspace, self->dragslot);
+				}
 			self->dragslot = UINTPTR_MAX;
-			self->randominsert = 0;
-			return;
-		}
-	} else		 
-	if (machinewireview_hittesteditname(self, ev->x, ev->y, self->dragslot)) {
-		if (machineuis_at(self, self->dragslot)) {
-			machineui_editname(machineuis_at(self, self->dragslot),
-				&self->editname, psy_ui_component_scroll(&self->component));
-				psy_ui_component_scrolltop(&self->component);
-		}
-	} else
-	if (machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_GENERATOR,
-			&self->skin.generator.solo) ||				
-	    machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_FX,
-			&self->skin.effect.bypass) ||	
-	    machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_GENERATOR,
-			&self->skin.generator.mute) ||
-		machinewireview_hittestcoord(self, ev->x, ev->y, MACHMODE_FX,
-			&self->skin.effect.mute) ||
-	    machinewireview_hittestpan(self, ev->x, ev->y,
-			self->dragslot, &self->mx)) {
-	} else {
-		workspace_showparameters(self->workspace, self->dragslot);
-	}		
-	self->dragslot = UINTPTR_MAX;
-	psy_ui_mouseevent_stoppropagation(ev);
+			psy_ui_mouseevent_stoppropagation(ev);
+	}
 }
 
 void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
@@ -873,8 +880,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 					psy_ui_component_invalidate(&self->component);
 				}
 				self->dragslot = UINTPTR_MAX;
-			} else
-			if (machinewireview_hittestcoord(self, ev->x, ev->y,
+			} else if (machinewireview_hittestcoord(self, ev->x, ev->y,
 					MACHMODE_FX, &self->skin.effect.bypass)) {
 				psy_audio_Machine* machine = psy_audio_machines_at(self->machines,
 					self->dragslot);
@@ -886,8 +892,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 					}
 					self->dragslot = UINTPTR_MAX;
 				}
-			} else
-			if (machinewireview_hittestcoord(self, ev->x, ev->y,
+			} else if (machinewireview_hittestcoord(self, ev->x, ev->y,
 					MACHMODE_GENERATOR, &self->skin.generator.mute) ||
 				machinewireview_hittestcoord(self, ev->x, ev->y,
 					MACHMODE_FX, &self->skin.effect.mute)) {
@@ -901,11 +906,10 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 					}
 				}
 				self->dragslot = UINTPTR_MAX;
-			} else
-			if (machinewireview_hittestpan(self, ev->x, ev->y,
+			} else if (machinewireview_hittestpan(self, ev->x, ev->y,
 					self->dragslot, &self->mx)) {
 				self->dragmode = MACHINEWIREVIEW_DRAG_PAN;				
-			} else  {
+			} else {
 				MachineUi* machineui;
 
 				machineui = machineuis_at(self, self->dragslot);
@@ -921,8 +925,7 @@ void machinewireview_onmousedown(MachineWireView* self, psy_ui_MouseEvent* ev)
 				}
 			}
 			
-		} else
-		if (ev->button == 2) {
+		} else if (ev->button == 2) {
 			psy_audio_Machine* machine;
 
 			machine = psy_audio_machines_at(self->machines, self->dragslot);
@@ -2026,9 +2029,11 @@ void machineview_init(MachineView* self, psy_ui_Component* parent,
 
 void machineview_onmousedoubleclick(MachineView* self, psy_ui_MouseEvent* ev)
 {		
-	self->newmachine.pluginsview.calledby = VIEW_ID_MACHINEVIEW;
-	machineview_selectsection(self, machineview_base(self),
-		SECTION_ID_MACHINEVIEW_NEWMACHINE);
+	if (ev->button == 1 && tabbar_selected(&self->tabbar) == SECTION_ID_MACHINEVIEW_WIRES) {
+		self->newmachine.pluginsview.calledby = VIEW_ID_MACHINEVIEW;
+		machineview_selectsection(self, machineview_base(self),
+			SECTION_ID_MACHINEVIEW_NEWMACHINE);
+	}
 }
 
 void machineview_onmousedown(MachineView* self, psy_ui_MouseEvent* ev)
@@ -2172,10 +2177,10 @@ void machineview_onconfigure(MachineView* self, MachineViewConfig* sender,
 	psy_Property* property)
 {
 	machinewireview_configure(&self->wireview, sender);
-	if (property == psy_property_at(sender->machineview,
-			"drawvirtualgenerators", PSY_PROPERTY_TYPE_NONE)) {
+	if (psy_property_hasid(property, PROPERTY_ID_DRAWVIRTUALGENERATORS)) {
 		machinewireview_buildmachineuis(&self->wireview);
-	}	
+	}
+	psy_ui_component_invalidate(&self->component);
 }
 
 void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
@@ -2183,4 +2188,5 @@ void machineview_onthemechanged(MachineView* self, MachineViewConfig* sender,
 {
 	machinewireview_updateskin(&self->wireview);
 	newmachine_updateskin(&self->newmachine);
+	psy_ui_component_invalidate(&self->component);
 }

@@ -1204,6 +1204,19 @@ void psy_ui_component_focus_prev(psy_ui_Component* self)
 	}
 }
 
+int psy_ui_component_level(const psy_ui_Component* self)
+{
+	int rv;
+	psy_ui_Component* component;
+
+	rv = 0;
+	component = self;
+	while (psy_ui_component_parent(component)) {
+		component = psy_ui_component_parent(component);
+		++rv;
+	}
+	return rv;
+}
 
 void psy_ui_component_setdefaultalign(psy_ui_Component* self,
 	psy_ui_AlignType aligntype, psy_ui_Margin margin)

@@ -99,10 +99,14 @@ INLINE psy_ui_Component* machinewireview_base(MachineWireView* self)
 	return &self->component;
 }
 
+// MachineViewBar
 typedef struct MachineViewBar {
+	// inherits
 	psy_ui_Component component;
+	// ui elements
 	psy_ui_CheckBox mixersend;
 	psy_ui_Label status;
+	// references
 	Workspace* workspace;
 } MachineViewBar;
 
@@ -114,6 +118,7 @@ INLINE psy_ui_Component* machineviewbar_base(MachineViewBar* self)
 	return &self->component;
 }
 
+// MachineView
 typedef struct MachineView {
 	// inherits
 	psy_ui_Component component;

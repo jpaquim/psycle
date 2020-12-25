@@ -18,6 +18,8 @@ extern "C" {
 typedef struct InstrumentPitchView {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_status;
 	// ui elements
 	EnvelopeView envelopeview;
 	AdsrSliders adsrsliders;
