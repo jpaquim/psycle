@@ -6,6 +6,7 @@
 
 #include <uibutton.h>
 #include <uicheckbox.h>
+#include <uicombobox.h>
 #include <uiedit.h>
 #include <uieditor.h>
 #include <uilabel.h>
@@ -35,6 +36,8 @@ typedef struct {
 	psy_ui_CheckBox doublecontloop;
 	psy_ui_CheckBox doublesustainloop;
 	psy_ui_CheckBox drawlines;
+	psy_ui_Label visualrepresentationdesc;
+	psy_ui_ComboBox visualrepresentation;
 	psy_ui_Label selstartlabel;
 	psy_ui_Edit selstartedit;
 	psy_ui_Label selendlabel;
@@ -133,6 +136,11 @@ typedef struct SampleBox {
 } SampleBox;
 
 void samplebox_init(SampleBox*, psy_ui_Component* parent, Workspace*);
+void samplebox_setzoom(SampleBox*, float zoomleft, float zoomright);
+void samplebox_setloopviewmode(SampleBox*, WaveBoxLoopViewMode);
+void samplebox_drawlines(SampleBox*);
+void samplebox_drawbars(SampleBox*);
+void samplebox_setquality(SampleBox*, psy_dsp_ResamplerQuality);
 
 typedef struct SampleEditor {	
 	psy_ui_Component component;
@@ -161,6 +169,7 @@ void sampleeditor_showdoublesustainloop(SampleEditor*);
 void sampleeditor_showsinglesustainloop(SampleEditor*);
 void sampleeditor_drawlines(SampleEditor*);
 void sampleeditor_drawbars(SampleEditor*);
+void sampleeditor_setquality(SampleEditor*, psy_dsp_ResamplerQuality);
 
 #ifdef __cplusplus
 }

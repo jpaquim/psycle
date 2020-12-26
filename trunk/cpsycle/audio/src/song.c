@@ -7,21 +7,22 @@
 #include "constants.h"
 
 #include "machinefactory.h"
-
-#include <stdlib.h>
-#include <string.h>
-
+// platform
 #include "../../detail/portable.h"
 
+// psy_audio_SongProperties
+// prototypes
 static void song_initproperties(psy_audio_Song*);
 static void song_initmachines(psy_audio_Song*);
 static void song_initpatterns(psy_audio_Song*);
 static void song_initsequence(psy_audio_Song*);
 static void song_initsignals(psy_audio_Song*);
 static void song_disposesignals(psy_audio_Song*);
-
-void psy_audio_songproperties_init(psy_audio_SongProperties* self, const char* title,
-	const char* credits, const char* comments)
+// implementation
+void psy_audio_songproperties_init(psy_audio_SongProperties* self,
+	const char* title,
+	const char* credits,
+	const char* comments)
 {
 	assert(self);
 
@@ -88,26 +89,14 @@ void psy_audio_songproperties_copy(psy_audio_SongProperties* self, const psy_aud
 	}
 }
 
-void psy_audio_songproperties_setbpm(psy_audio_SongProperties* self, psy_dsp_big_beat_t bpm)
-{
-	assert(self);
-
-	if (bpm < 32) {
-		self->bpm = 32;
-	} else
-	if (bpm > 999) {
-		self->bpm = 999;
-	} else {
-		self->bpm = bpm;
-	}	
-}
-
-const char* psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
+// Properties
+void psy_audio_songproperties_setcomments(psy_audio_SongProperties* self,
 	const char* comments)
 {
 	psy_strreset(&self->comments, comments);
 }
 
+// psy_audio_Song
 void psy_audio_song_init(psy_audio_Song* self, psy_audio_MachineFactory*
 	machinefactory)
 {
@@ -154,7 +143,8 @@ void song_initsequence(psy_audio_Song* self)
 		psy_audio_sequence_appendtrack(&self->sequence,
 			psy_audio_sequencetrack_allocinit());
 	sequenceposition.trackposition =
-		psy_audio_sequence_begin(&self->sequence, sequenceposition.tracknode, 0);
+		psy_audio_sequence_begin(&self->sequence,
+			sequenceposition.tracknode, 0);
 	psy_audio_sequence_insert(&self->sequence, sequenceposition, 0);
 }
 
@@ -206,10 +196,10 @@ psy_audio_Song* psy_audio_song_allocinit(psy_audio_MachineFactory*
 
 void psy_audio_song_deallocate(psy_audio_Song* self)
 {
-	if (self) {
-		psy_audio_song_dispose(self);
-		free(self);
-	}
+	assert(self);
+	
+	psy_audio_song_dispose(self);
+	free(self);	
 }
 
 void psy_audio_song_clear(psy_audio_Song* self)
@@ -241,7 +231,8 @@ void psy_audio_song_insertvirtualgenerator(psy_audio_Song* self,
 {
 	assert(self);
 
-	// && mac != NULL && (mac->_type == MACH_SAMPLER || mac->_type == MACH_XMSAMPLER))
+	// && mac != NULL && (mac->_type == MACH_SAMPLER ||
+	//    mac->_type == MACH_XMSAMPLER))
 	if (virtual_inst >= MAX_MACHINES && virtual_inst < MAX_VIRTUALINSTS) {
 		psy_audio_Machine* machine;
 		

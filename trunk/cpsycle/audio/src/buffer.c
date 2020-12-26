@@ -130,7 +130,7 @@ void psy_audio_buffer_resize(psy_audio_Buffer* self, uintptr_t numchannels)
 			if (!self->shared && self->numsamples > 0) {
 				for (; c < numchannels; ++c) {
 					self->samples[c] = dsp.memory_alloc(self->numsamples,
-						sizeof(float));
+						sizeof(psy_dsp_amp_t));
 				}
 			}
 		}

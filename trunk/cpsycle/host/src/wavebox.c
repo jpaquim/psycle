@@ -5,6 +5,9 @@
 
 #include "wavebox.h"
 
+// dsp
+#include <operations.h>
+// std
 #include <stdlib.h>
 #include <string.h>
 
@@ -73,15 +76,25 @@ void waveboxcontext_init(WaveBoxContext* self, psy_ui_Component* component)
 	self->offsetstep = 1.0;
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
-	self->sample = 0;
+	self->sample = 0;	
+	self->channel = 0;
 	waveboxselection_init(&self->selection);	
 	psy_ui_size_init_all(&self->size, psy_ui_value_makeew(10),
 		psy_ui_value_makeeh(10));
+	psy_dsp_multiresampler_init(&self->resampler,
+		psy_dsp_RESAMPLERQUALITY_SPLINE);
 }
 
-void waveboxcontext_setsample(WaveBoxContext* self, psy_audio_Sample* sample)
+void waveboxcontext_dispose(WaveBoxContext* self)
 {
-	self->sample = sample;
+	self->resampler.resampler.vtable->dispose(&self->resampler.resampler);	
+}
+
+void waveboxcontext_setsample(WaveBoxContext* self, psy_audio_Sample* sample,
+	uintptr_t channel)
+{
+	self->sample = sample;	
+	self->channel = channel;	
 	waveboxcontext_updateoffsetstep(self);
 }
 
@@ -192,6 +205,25 @@ void waveboxcontext_updateoffsetstep(WaveBoxContext* self)
 	}
 }
 
+psy_dsp_amp_t waveboxcontext_frame_at(WaveBoxContext* self, float frame)
+{
+	if (self->sample && self->sample->numframes > 0) {				
+		return psy_dsp_resampler_work_float(
+			&self->resampler.resampler,
+			// ptr to sample data absolute start (frame 0)
+			self->sample->channels.samples[self->channel], 
+			frame, // offset in float
+			// bound checks
+			self->sample->numframes,
+			// ptr to loop begin data
+			self->sample->channels.samples[self->channel],
+			// ptr to loop end data
+			self->sample->channels.samples[self->channel] +
+				(self->sample->numframes - 1));
+	}
+	return 0.f;
+}
+
 
 static void wavebox_updatetext(WaveBox*);
 static void wavebox_onlanguagechanged(WaveBox*, psy_ui_Component* sender);
@@ -213,7 +245,7 @@ static int wavebox_hittest_range(WaveBox*, uintptr_t framemin, uintptr_t framema
 static uintptr_t wavebox_screentoframe(WaveBox*, int x);
 static int wavebox_frametoscreen(WaveBox*, uintptr_t frame);
 static void  wavebox_onsize(WaveBox*, psy_ui_Size*);
-static psy_dsp_amp_t wavebox_amp(WaveBox*, uintptr_t frame);
+static psy_dsp_amp_t wavebox_amp(WaveBox*, float frame);
 
 static psy_ui_ComponentVtable vtable;
 static int vtable_initialized = 0;
@@ -234,8 +266,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 	vtable_init(self);
 	self->component.vtable = &vtable;
 	psy_ui_component_preventalign(&self->component);
-	psy_ui_component_doublebuffer(&self->component);
-	self->channel = 0;	
+	psy_ui_component_doublebuffer(&self->component);	
 	self->nowavetext = strdup("");
 	self->context.loopviewmode = WAVEBOX_LOOPVIEW_CONT_SINGLE;
 	self->preventdrawonselect = FALSE;
@@ -259,6 +290,7 @@ void wavebox_init(WaveBox* self, psy_ui_Component* parent, Workspace* workspace)
 
 void wavebox_ondestroy(WaveBox* self, psy_ui_Component* sender)
 {	
+	waveboxcontext_dispose(&self->context);
 	psy_signal_dispose(&self->selectionchanged);
 	free(self->nowavetext);
 }
@@ -298,13 +330,10 @@ void wavebox_setnowavetext(WaveBox* self, const char* text)
 	}
 }
 
-void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample, uintptr_t channel)
-{
-	psy_ui_Size size;
-
-	self->channel = channel;
-	size = psy_ui_component_size(&self->component);
-	waveboxcontext_setsample(&self->context, sample);		
+void wavebox_setsample(WaveBox* self, psy_audio_Sample* sample,
+	uintptr_t channel)
+{		
+	waveboxcontext_setsample(&self->context, sample, channel);
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -388,8 +417,8 @@ void wavebox_ondraw(WaveBox* self, psy_ui_Graphics* g)
 			lastframevalue = wavebox_amp(self, prevframe);
 		}
 		for (x = g->clip.left; x < g->clip.right; ++x) {
-			uintptr_t frame = (int)(self->context.offsetstep * x +
-				(int)(waveboxcontext_numframes(&self->context) * self->context.zoomleft));			
+			float frame = (self->context.offsetstep * x +
+				(waveboxcontext_numframes(&self->context) * self->context.zoomleft));
 			uintptr_t realframe;
 			psy_dsp_amp_t framevalue;
 			psy_ui_Rectangle r;
@@ -784,30 +813,30 @@ int wavebox_frametoscreen(WaveBox* self, uintptr_t frame)
 	return waveboxcontext_frametoscreen(&self->context, frame);
 }
 
-static psy_dsp_amp_t wavebox_amp(WaveBox* self, uintptr_t frame)
+static psy_dsp_amp_t wavebox_amp(WaveBox* self, float frame)
 {
 	if (self->context.sample) {
 		if (self->context.loopviewmode == WAVEBOX_LOOPVIEW_CONT_DOUBLE) {
 			if (self->context.sample->loop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 				if (frame <= self->context.sample->loop.end) {
-					return self->context.sample->channels.samples[self->channel][frame];
+					return waveboxcontext_frame_at(&self->context, frame);
 				} else {
-					return self->context.sample->channels.samples[self->channel]
-						[frame - waveboxcontext_numloopframes(&self->context)];
+					return waveboxcontext_frame_at(&self->context,
+						frame - waveboxcontext_numloopframes(&self->context));
 				}
 			} 
 		} else
 		if (self->context.loopviewmode == WAVEBOX_LOOPVIEW_SUSTAIN_DOUBLE) {
 			if (self->context.sample->sustainloop.type != psy_audio_SAMPLE_LOOP_DO_NOT) {
 				if (frame <= self->context.sample->sustainloop.end) {
-					return self->context.sample->channels.samples[self->channel][frame];
+					return waveboxcontext_frame_at(&self->context, frame);
 				} else {
-					return self->context.sample->channels.samples[self->channel]
-						[frame - waveboxcontext_numsustainloopframes(&self->context)];
+					return waveboxcontext_frame_at(&self->context,						
+						frame - waveboxcontext_numsustainloopframes(&self->context));
 				}
 			}
 		}
-		return self->context.sample->channels.samples[self->channel][frame];
+		return waveboxcontext_frame_at(&self->context, frame);
 	}
 	return 0.f;
 }
@@ -870,4 +899,10 @@ void wavebox_refresh(WaveBox* self)
 void  wavebox_onsize(WaveBox* self, psy_ui_Size* size)
 {	
 	waveboxcontext_setsize(&self->context, size);	
+}
+
+void wavebox_setquality(WaveBox* self, psy_dsp_ResamplerQuality quality)
+{
+	psy_dsp_multiresampler_setquality(&self->context.resampler, quality);
+	psy_ui_component_invalidate(&self->component);
 }

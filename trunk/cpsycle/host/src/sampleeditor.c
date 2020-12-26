@@ -53,18 +53,35 @@ void sampleeditorbar_init(SampleEditorBar* self, psy_ui_Component* parent,
 	psy_ui_label_settext(&self->selendlabel, "Selection End");
 	psy_ui_edit_init(&self->selendedit, &self->component);
 	psy_ui_edit_setcharnumber(&self->selendedit, 10);
+	psy_ui_label_init(&self->visualrepresentationdesc, &self->component);
+	psy_ui_label_settext(&self->visualrepresentationdesc, "Visual");
 	psy_ui_checkbox_init(&self->doublecontloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop View");		
+	psy_ui_checkbox_settext(&self->doublecontloop, "Double Cont Loop");		
 	psy_signal_connect(&self->doublecontloop.signal_clicked, self,
 		sampleeditorbar_ondoublecontloop);
 	psy_ui_checkbox_init(&self->doublesustainloop, &self->component);
-	psy_ui_checkbox_settext(&self->doublesustainloop, "Double Sustain Loop View");
+	psy_ui_checkbox_settext(&self->doublesustainloop, "Double Sus Loop");
 	psy_signal_connect(&self->doublesustainloop.signal_clicked, self,
-		sampleeditorbar_ondoublesustainloop);
+		sampleeditorbar_ondoublesustainloop);	
 	psy_ui_checkbox_init(&self->drawlines, &self->component);
-	psy_ui_checkbox_settext(&self->drawlines, "Draw Lines");
+	psy_ui_checkbox_settext(&self->drawlines, "Lines");
 	psy_signal_connect(&self->drawlines.signal_clicked, self,
 		sampleeditorbar_ondrawlines);
+	{	// resampling methods
+		int quality;
+		
+		psy_ui_combobox_init(&self->visualrepresentation, &self->component);
+		psy_ui_combobox_setcharnumber(&self->visualrepresentation, 12);
+		for (quality = 0; quality < psy_dsp_RESAMPLERQUALITY_NUMRESAMPLERS;
+				++quality) {
+			psy_ui_combobox_addtext(&self->visualrepresentation,
+				psy_dsp_multiresampler_name(
+					(psy_dsp_ResamplerQuality)quality));
+		}
+	}
+	// set to default in wavebox, change it there, too
+	psy_ui_combobox_setcursel(&self->visualrepresentation,
+		psy_dsp_RESAMPLERQUALITY_SPLINE);	
 	sampleeditorbar_clearselection(self);
 	psy_ui_margin_init_all(&margin, psy_ui_value_makepx(0),
 		psy_ui_value_makeew(2.0), psy_ui_value_makepx(0),
@@ -124,7 +141,6 @@ void sampleeditorbar_ondrawlines(SampleEditorBar* self, psy_ui_Component* sender
 		sampleeditor_drawbars(self->editor);
 	}	
 }
-
 
 static void sampleeditoroperations_initalign(SampleEditorOperations*);
 
@@ -505,10 +521,6 @@ static void samplebox_ondestroyed(SampleBox*, psy_ui_Component* sender);
 static void samplebox_clearwaveboxes(SampleBox*);
 static void samplebox_buildwaveboxes(SampleBox*, psy_audio_Sample*,
 	WaveBoxLoopViewMode);
-static void samplebox_setzoom(SampleBox*, float zoomleft, float zoomright);
-static void samplebox_setloopviewmode(SampleBox*, WaveBoxLoopViewMode);
-static void samplebox_drawlines(SampleBox*);
-static void samplebox_drawbars(SampleBox*);
 static void samplebox_onselectionchanged(SampleBox*, WaveBox* sender);
 
 void samplebox_init(SampleBox* self, psy_ui_Component* parent, Workspace* workspace)
@@ -618,6 +630,20 @@ void samplebox_drawlines(SampleBox* self)
 		wavebox_drawlines(wavebox);
 	}
 	psy_ui_component_invalidate(&self->component);
+}
+
+void samplebox_setquality(SampleBox* self, psy_dsp_ResamplerQuality quality)
+{
+	psy_TableIterator it;
+
+	for (it = psy_table_begin(&self->waveboxes);
+		!psy_tableiterator_equal(&it, psy_table_end());
+		psy_tableiterator_inc(&it)) {
+		WaveBox* wavebox;
+
+		wavebox = (WaveBox*)psy_tableiterator_value(&it);
+		wavebox_setquality(wavebox, quality);
+	}	
 }
 
 void samplebox_drawbars(SampleBox* self)
@@ -1173,4 +1199,9 @@ void sampleeditor_drawlines(SampleEditor* self)
 void sampleeditor_drawbars(SampleEditor* self)
 {
 	samplebox_drawbars(&self->samplebox);
+}
+
+void sampleeditor_setquality(SampleEditor* self, psy_dsp_ResamplerQuality quality)
+{
+	samplebox_setquality(&self->samplebox, quality);
 }

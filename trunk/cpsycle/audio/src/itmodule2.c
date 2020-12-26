@@ -21,11 +21,16 @@
 #include <string.h>
 // platform
 #include "../../detail/portable.h"
+#include "../../detail/trace.h"
 
-typedef bool BOOL;
-
+#ifndef ASSERT
 #define ASSERT assert
+#endif
 
+/*
+#ifndef BOOL
+typedef bool BOOL;
+#endif*/
 
 
 static int calclpbfromspeed(int trackerspeed, int* outextraticks)
@@ -50,11 +55,13 @@ bool bitsblock_readblock(BitsBlock* self, PsyFile* file)
 {
 	// block layout : uint16 size, <size> bytes data
 	uint16_t size;
+
 	psyfile_read(file, &size, 2);
-	self->pdata = malloc(size);
-	if (!self->pdata) return FALSE;
-	if (!psyfile_read(file, self->pdata, size))
-	{
+	self->pdata = (uint8_t*)malloc(size);
+	if (!self->pdata) {
+		return FALSE;
+	}
+	if (!psyfile_read(file, self->pdata, size)) {
 		free(self->pdata);
 		return FALSE;
 	}
@@ -66,18 +73,24 @@ bool bitsblock_readblock(BitsBlock* self, PsyFile* file)
 
 uint32_t bitsblock_readbits(BitsBlock* self, unsigned char bitwidth)
 {
-	uint32_t val = 0;
-	int b = 0;
+	uint32_t val;
+	int32_t b;
 
+	val = 0;
+	b = 0;
 	// If reached the end of the buffer, exit.
-	if (self->rpos >= self->rend) return val;
-
+	if (self->rpos >= self->rend) {
+		return val;
+	}
 	// while we have more bits to read than the remaining bits in this byte
 	while (bitwidth > self->rembits) {
-		// add to val, the data-bits from rpos, shifting the necessary number of bits.
+		// add to val, the data-bits from rpos, shifting the necessary number
+		// of bits.
 		val |= *(self->rpos++) << b;
 		//if reached the end, exit.
-		if (self->rpos >= self->rend) return val;
+		if (self->rpos >= self->rend) {
+			return val;
+		}
 		// increment the shift
 		b += self->rembits;
 		// decrease the remaining bits to read
@@ -85,13 +98,13 @@ uint32_t bitsblock_readbits(BitsBlock* self, unsigned char bitwidth)
 		// set back the number of bits.
 		self->rembits = 8;
 	}
-	// Filter the bottom-most bitwidth bytes from rpos, and shift them by b to add to the final value.
+	// Filter the bottom-most bitwidth bytes from rpos, and shift them by b to add
+	// to the final value.
 	val |= ((*self->rpos) & ((1 << bitwidth) - 1)) << b;
 	// shift down the remaining bits so that they are read the next time.
 	*(self->rpos) >>= bitwidth;
 	// reduce the remaining bits.
 	self->rembits -= bitwidth;
-
 	return val;
 }
 
@@ -101,18 +114,21 @@ static void itmodule2_reset(ITModule2*);
 static void itmodule2_makesequence(ITModule2*);
 static bool itmodule2_loaditpattern(ITModule2*, int patIdx, int* numchans);
 static bool itmodule_writepatternentry(ITModule2*,
-	psy_audio_PatternNode** node, psy_audio_Pattern*,
+	psy_audio_PatternNode**, bool append, psy_audio_Pattern*,
 	const int row, const int col, const psy_audio_PatternEvent*);
-static void itmodule2_parseeffect(ITModule2*, psy_audio_PatternEvent* pent,
+static bool itmodule2_parseeffect(ITModule2*, psy_audio_PatternEvent*,
 	psy_audio_PatternNode**, psy_audio_Pattern*, int patIdx,
 	int row, int command, int param, int channel);
 static bool itmodule2_loads3mpatternx(ITModule2*, uint16_t patidx);
-static bool itmodule2_loadolditinst(ITModule2*, const itInsHeader1x* curH, psy_audio_Instrument*);
-static bool itmodule2_loaditinst(ITModule2*, const itInsHeader2x* curH, psy_audio_Instrument*);
-
+static bool itmodule2_loadolditinst(ITModule2*, const itInsHeader1x* curH,
+	psy_audio_Instrument*);
+static bool itmodule2_loaditinst(ITModule2*, const itInsHeader2x* curH,
+	psy_audio_Instrument*);
 static bool itmodule2_loaditsample(ITModule2*, psy_audio_Sample*);
-static bool itmodule2_loaditsampledata(ITModule2*, psy_audio_Sample*, uint32_t iLen, bool bstereo, bool b16Bit, unsigned char convert);
-static bool itmodule2_loaditcompresseddata(ITModule2*, psy_dsp_amp_t* pWavedata, uint32_t iLen, bool b16Bit, unsigned char convert);
+static bool itmodule2_loaditsampledata(ITModule2*, psy_audio_Sample*,
+	uint32_t iLen, bool bstereo, bool b16Bit, unsigned char convert);
+static bool itmodule2_loaditcompresseddata(ITModule2*,
+	psy_dsp_amp_t* pWavedata, uint32_t iLen, bool b16Bit, unsigned char convert);
 
 // implementation
 void itmodule2_init(ITModule2* self, psy_audio_SongFile* songfile)
@@ -290,18 +306,20 @@ bool itmodule2_load(ITModule2* self)
 			psyfile_skip(fp, skipnum * 8); // This is some strange data. It is not documented.
 			psyfile_read(fp, self->embeddeddata, sizeof(EmbeddedMIDIData));
 		}
-		if (self->fileheader.special & IT2_SPECIAL_FLAGS_HASMESSAGE)
-		{
-			char comments_[65536];
-
+		if ((self->fileheader.special & IT2_SPECIAL_FLAGS_HASMESSAGE) != 0 &&
+				self->fileheader.msgLen > 0) {
+			char* comments;
+						
 			psyfile_seek(fp, self->fileheader.msgOffset);
 			// NewLine = 0Dh (13 dec)
 			// EndOfMsg = 0
-			psyfile_read(fp, comments_,
-				psy_min(sizeof(comments_), self->fileheader.msgLen));
-			comments_[65535] = '\0';
+			comments = malloc(self->fileheader.msgLen + 2);			
+			psyfile_read(fp, comments,
+				self->fileheader.msgLen);
+			comments[self->fileheader.msgLen + 1] = '\0';
 			psy_audio_songproperties_setcomments(
-				&self->songfile->song->properties, comments_);
+				&self->songfile->song->properties, comments);
+			free(comments);
 		}
 
 		virtualInst = MAX_MACHINES;
@@ -322,6 +340,9 @@ bool itmodule2_load(ITModule2* self)
 				psyfile_read(fp, &curH, sizeof(curH));
 				itmodule2_loaditinst(self, &curH, instrument);
 			}
+			psy_table_insert(&self->xmtovirtual, i, (void*)(uintptr_t)virtualInst);			
+			psy_audio_song_insertvirtualgenerator(self->songfile->song,
+				virtualInst++, 0, i);
 			// song.xminstruments.SetInst(instr, i);
 			//if (song.xminstruments.IsEnabled(i)) {
 				// ittovirtual[i] = virtualInst;
@@ -355,6 +376,7 @@ bool itmodule2_load(ITModule2* self)
 			//		instrument.NoteToSample(j, npair);
 			//	}
 			//	instrument.ValidateEnabled();
+
 			//	ittovirtual[i] = virtualInst;
 			//	song.SetVirtualInstrument(virtualInst++, 0, i);
 			//}
@@ -881,6 +903,7 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	psy_audio_PatternNode* node;
 	PsyFile* fp;
 	psy_audio_Song* song;
+	bool append;
 	
 	fp = self->songfile->file;
 	song = self->songfile->song;
@@ -893,8 +916,9 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	memset(mask, 255, sizeof(char) * 64);
 	
 	pempty.note = 255;
-	pempty.mach = 255;
 	pempty.inst = 255;
+	pempty.mach = 255;	
+	pempty.vol = psy_audio_NOTECOMMANDS_VOL_EMPTY;
 	pempty.cmd = 0;
 	pempty.parameter = 0;
 
@@ -914,11 +938,12 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 	
 	//char* packedpattern = new char[packedSize];
 	//Read(packedpattern, packedSize);
-	node = NULL;
+	node = NULL;	
 	for (int row = 0; row < rowCount; row++)
 	{
 		self->extracolumn = *numchans + 1;
 		psyfile_read(fp, &newEntry, 1);
+		append = TRUE;
 		while (newEntry)
 		{
 			unsigned char channel;
@@ -994,7 +1019,8 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 				unsigned char command = psyfile_read_uint8(fp);
 				unsigned char param = psyfile_read_uint8(fp);
 				if (command != 0) pent.parameter = param;
-				// ParseEffect(pent, patidx, row, command, param, channel);
+				append = itmodule2_parseeffect(self, &pent, &node, pattern, patidx, row,
+					command, param, channel);
 				lastcom[channel] = pent.cmd;
 				lasteff[channel] = pent.parameter;
 			} else if (mask[channel] & 0x80)
@@ -1049,7 +1075,9 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 						e.mach = pent.mach;
 						e.cmd = XM_SAMPLER_CMD_SENDTOVOLUME;
 						e.parameter = volume;
-						itmodule_writepatternentry(self, &node, pattern, row, self->extracolumn, &e);
+						append = FALSE;
+						itmodule_writepatternentry(self, &node, append, pattern,
+							row, self->extracolumn, &e);
 						self->extracolumn++;						
 					}
 				} else if (volume < 0x40) {
@@ -1063,7 +1091,8 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 				pent.inst = volume;
 			}
 							
-			itmodule_writepatternentry(self, &node, pattern, row, channel, &pent);			
+			itmodule_writepatternentry(self, &node, append, pattern, row, channel,
+				&pent);
 			pent = pempty;
 
 			*numchans = psy_max((int)channel, *numchans);
@@ -1076,14 +1105,22 @@ bool itmodule2_loaditpattern(ITModule2* self, int patidx, int* numchans)
 }
 
 bool itmodule_writepatternentry(ITModule2* self,
-	psy_audio_PatternNode** node, psy_audio_Pattern* pattern,
-	const int row, const int col, const psy_audio_PatternEvent* e)
+	psy_audio_PatternNode** node, bool append,
+	psy_audio_Pattern* pattern, const int row, const int col,
+	const psy_audio_PatternEvent* e)
 {
 	assert(self);
 	assert(pattern && node && e);
 
+	TRACE_INT(row);
+	TRACE(", ");
+	TRACE_INT(col);
+	TRACE("\n");
+
 	if (!psy_audio_patternevent_empty(e)) {
 		psy_audio_PatternEvent ev;
+		psy_audio_PatternNode* insert;
+		psy_audio_PatternNode* prev;
 
 		ev = *e;
 		if (e->inst == psy_audio_NOTECOMMANDS_EMPTY) {
@@ -1091,17 +1128,35 @@ bool itmodule_writepatternentry(ITModule2* self,
 			// correct it to psy_audio_NOTECOMMANDS_INST_EMPTY (16bit)
 			ev.inst = psy_audio_NOTECOMMANDS_INST_EMPTY;
 		}		
-		*node = psy_audio_pattern_insert(pattern, *node, col,
-			(psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb),
-			&ev);
+
+		if (!append) {
+			insert = psy_audio_pattern_findnode(pattern, col,
+				(psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb),
+				self->songfile->song->properties.lpb,
+				&prev);
+		} else {
+			insert = NULL;
+		}
+		if (!insert) {
+			*node = psy_audio_pattern_insert(pattern, *node, col,
+				(psy_dsp_beat_t)(row * 1.0 / self->songfile->song->properties.lpb),
+				&ev);
+		} else {
+			psy_audio_PatternEntry* entry;
+
+			entry = psy_audio_patternnode_entry(insert);
+			assert(psy_audio_patternentry_front(entry));
+			*psy_audio_patternentry_front(entry) = ev;			
+		}
 	}
 	return TRUE;
 }
 
-void itmodule2_parseeffect(ITModule2* self, psy_audio_PatternEvent* pent,
+bool itmodule2_parseeffect(ITModule2* self, psy_audio_PatternEvent* pent,
 	psy_audio_PatternNode** node, psy_audio_Pattern* pattern, int patIdx,
 	int row, int command, int param, int channel)
 {
+	bool rv_append;
 	int exchwave[4] = {
 		psy_audio_WAVEFORMS_SINUS,
 		psy_audio_WAVEFORMS_SAWDOWN,
@@ -1109,6 +1164,7 @@ void itmodule2_parseeffect(ITModule2* self, psy_audio_PatternEvent* pent,
 		psy_audio_WAVEFORMS_RANDOM
 	};
 	
+	rv_append = TRUE;
 	switch (command) {
 	case IT2_CMD_SET_SPEED:
 	{
@@ -1125,9 +1181,10 @@ void itmodule2_parseeffect(ITModule2* self, psy_audio_PatternEvent* pent,
 			e.inst = 255;
 			e.mach = pent->mach;
 			e.cmd = psy_audio_PATTERNCMD_EXTENDED;
-			e.parameter = psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks;
-
-			itmodule_writepatternentry(self, node, pattern, row, self->extracolumn, &e);
+			e.parameter = psy_audio_PATTERNCMD_ROW_EXTRATICKS | extraticks;			
+			rv_append = FALSE;
+			itmodule_writepatternentry(self, node, rv_append, pattern, row,
+				self->extracolumn, &e);
 			self->extracolumn++;
 		}
 	}
@@ -1290,6 +1347,7 @@ void itmodule2_parseeffect(ITModule2* self, psy_audio_PatternEvent* pent,
 		pent->cmd = XM_SAMPLER_CMD_NONE;
 		break;
 	}
+	return rv_append;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1401,7 +1459,11 @@ bool itmodule2_loads3msampledatax(ITModule2* self, psy_audio_Sample* wave, uint3
 
 		//+2=stereo (after Length bytes for LEFT channel, another Length bytes for RIGHT channel)
 		//+4=16-bit sample (intel LO-HI byteorder) (+2/+4 not supported by ST3.01)
-		psy_audio_sample_allocwavedata(wave); // .AllocWaveData(iLen, bstereo);
+		if (bstereo) {
+			psy_audio_sample_resize(wave, 2);
+		}
+		wave->numframes = iLen;
+		psy_audio_sample_allocwavedata(wave);
 		if (b16Bit) {
 			int out = 0;
 			for (unsigned int j = 0; j < iLen * 2; j += 2, out++)
@@ -1449,6 +1511,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 	psy_audio_PatternEvent pent;
 	psy_audio_Pattern* pattern;
 	psy_audio_PatternNode* node;
+	bool append;
 	PsyFile* fp;
 	psy_audio_Song* song;
 
@@ -1456,8 +1519,9 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 	song = self->songfile->song;
 
 	pempty.note = 255;
-	pempty.mach = 255;
 	pempty.inst = 255;
+	pempty.mach = 255;	
+	pempty.vol = psy_audio_NOTECOMMANDS_VOL_EMPTY;
 	pempty.cmd = 0;
 	pempty.parameter = 0;
 
@@ -1478,6 +1542,7 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 	{
 		self->extracolumn = song->properties.tracks;
 		psyfile_read(fp, &newEntry, 1);
+		append = TRUE;
 		while (newEntry)
 		{
 			uint8_t channel = newEntry & 31;
@@ -1500,7 +1565,8 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 				uint8_t command = psyfile_read_uint8(fp);
 				uint8_t param = psyfile_read_uint8(fp);
 				if (command != 0) pent.parameter = param;
-				// ParseEffect(pent, patIdx, row, command, param, channel);
+				append = itmodule2_parseeffect(self, &pent, &node, pattern,
+					patidx, row, command, param, channel);
 				if (pent.cmd == psy_audio_PATTERNCMD_BREAK_TO_LINE)
 				{
 					pent.parameter = ((pent.parameter & 0xF0) >> 4) * 10 + (pent.parameter & 0x0F);
@@ -1562,7 +1628,9 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 						e.mach = pent.mach;
 						e.cmd = XM_SAMPLER_CMD_SENDTOVOLUME;
 						e.parameter = volume;
-						itmodule_writepatternentry(self, &node, pattern, row, self->extracolumn, &e);
+						append = FALSE;
+						itmodule_writepatternentry(self, &node, append, pattern,
+							row, self->extracolumn, &e);
 						self->extracolumn++;
 					}
 				} else if (volume < 0x40) {
@@ -1576,7 +1644,8 @@ bool itmodule2_loads3mpatternx(ITModule2* self, uint16_t patidx)
 				pent.cmd = volume;
 			}
 			if (channel < song->properties.tracks) {				
-				itmodule_writepatternentry(self, &node, pattern, row, channel, &pent);				
+				itmodule_writepatternentry(self, &node, append, pattern,
+					row, channel, &pent);
 			}
 			pent = pempty;
 
