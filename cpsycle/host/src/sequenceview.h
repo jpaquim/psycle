@@ -30,9 +30,7 @@ typedef struct SequenceButtons {
 	psy_ui_Button newentry;
 	psy_ui_Button insertentry;
 	psy_ui_Button delentry;
-	psy_ui_Button cloneentry;
-	psy_ui_Button newtrack;
-	psy_ui_Button deltrack;	
+	psy_ui_Button cloneentry;	
 	psy_ui_Button clear;
 	psy_ui_Button rename;
 	psy_ui_Button cut;
@@ -47,19 +45,35 @@ typedef struct SequenceButtons {
 void sequencebuttons_init(SequenceButtons*, psy_ui_Component* parent,
 	Workspace*);
 
+INLINE psy_ui_Component* sequencebuttons_base(SequenceButtons* self)
+{
+	return &self->component;
+}
+
+typedef struct SequenceListViewState {
+	// public data
+	int margin;
+	int trackwidth;
+	int selectedtrack;
+	// references
+	psy_audio_Sequence* sequence;
+} SequenceListViewState;
+
+void sequencelistviewstate_init(SequenceListViewState*);
+
+struct SequenceView;
+
 typedef struct SequenceListView {
 	// inherits
 	psy_ui_Component component;
 	// ui elements	
 	psy_ui_Edit rename;
 	// internal data
-	int selected;
-	int selectedtrack;
+	int selected;	
 	int foundselected;
 	int lineheight;
 	int textoffsety;
-	int textheight;
-	int trackwidth;
+	int textheight;	
 	int identwidth;   
 	int avgcharwidth;	
 	bool showpatternnames;
@@ -67,20 +81,29 @@ typedef struct SequenceListView {
 	int refreshcount;
 	uintptr_t lastplayrow;
 	// references
-	psy_audio_Player* player;
-	psy_audio_Sequence* sequence;
+	psy_audio_Player* player;	
 	psy_audio_SequenceSelection* selection;
 	psy_audio_Patterns* patterns;	
+	// references
+	SequenceListViewState* state;
 	struct SequenceView* view;
 	Workspace* workspace;
 } SequenceListView;
 
 void sequencelistview_init(SequenceListView*, psy_ui_Component* parent,
-	struct SequenceView*, psy_audio_Sequence*, psy_audio_Patterns*, Workspace*);
+	SequenceListViewState*, struct SequenceView*,
+	psy_audio_Patterns*, Workspace*);
 void sequencelistview_showpatternnames(SequenceListView*);
 void sequencelistview_showpatternslots(SequenceListView*);
 void sequencelistview_rename(SequenceListView*);
 void sequencelistview_computetextsizes(SequenceListView*);
+void sequencelistview_select(SequenceListView*,
+	uintptr_t track, uintptr_t row);
+
+INLINE psy_ui_Component* sequencelistview_base(SequenceListView* self)
+{
+	return &self->component;
+}
 
 typedef struct SequenceViewDuration {
 	// inherits
@@ -99,15 +122,34 @@ void sequenceduration_init(SequenceViewDuration*, psy_ui_Component* parent,
 	psy_audio_Sequence*, Workspace*);
 void sequenceduration_update(SequenceViewDuration*);
 
+INLINE psy_ui_Component* sequenceduration_base(SequenceViewDuration* self)
+{
+	return &self->component;
+}
+
 typedef struct SequenceViewTrackHeader {
 	// inherits
 	psy_ui_Component component;
+	// signals
+	psy_Signal signal_newtrack;
+	psy_Signal signal_deltrack;
+	psy_Signal signal_trackselected;
+	// internal data
+	psy_ui_Colour colour;
+	psy_ui_Colour colour_highlight;
+	psy_ui_Colour colour_font;	
 	// references
-	struct SequenceView* view;
+	SequenceListViewState* state;	
 } SequenceViewTrackHeader;
 
 void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
-	psy_ui_Component* parent, struct SequenceView*);
+	psy_ui_Component* parent, SequenceListViewState*);
+
+INLINE psy_ui_Component* sequenceviewtrackheader_base(
+	SequenceViewTrackHeader* self)
+{
+	return &self->component;
+}
 
 typedef struct SequencerOptionsBar {
 	// inherits
@@ -119,9 +161,12 @@ typedef struct SequencerOptionsBar {
 	psy_ui_CheckBox recordtweak;
 	psy_ui_CheckBox multichannelaudition;
 	psy_ui_CheckBox allownotestoeffect;
-	psy_ui_Component top;
+	psy_ui_Component seqedit;
 	psy_ui_Button toggleseqedit;
 	psy_ui_Button toggleseqediticon;
+	psy_ui_Component stepseq;
+	psy_ui_Button togglestepseq;
+	psy_ui_Button togglestepseqicon;
 	// references
 	Workspace* workspace;
 } SequencerOptionsBar;
@@ -129,19 +174,26 @@ typedef struct SequencerOptionsBar {
 void sequenceroptionsbar_init(SequencerOptionsBar* self, psy_ui_Component* parent,
 	Workspace*);
 
+INLINE psy_ui_Component* sequenceroptionsbar_base(SequencerOptionsBar* self)
+{
+	return &self->component;
+}
+
 typedef struct SequenceView {
 	// inherits
 	psy_ui_Component component;
-	// ui elements
+	// ui elements	
 	SequenceListView listview;
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
+	psy_ui_Component spacer;
 	SequenceViewTrackHeader trackheader;
 	SequenceViewDuration duration;	
-	SequencerOptionsBar options;	
+	SequencerOptionsBar options;
+	// internal data
+	SequenceListViewState state;
 	// references
-	psy_audio_Patterns* patterns;
-	psy_audio_Sequence* sequence;
+	psy_audio_Patterns* patterns;	
 	psy_audio_SequenceSelection* selection;
 	Workspace* workspace;
 } SequenceView;

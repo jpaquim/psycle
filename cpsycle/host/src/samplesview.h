@@ -206,6 +206,7 @@ typedef struct SamplesView {
 void samplesview_init(SamplesView*, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace*);
 void samplesview_setsample(SamplesView*, psy_audio_SampleIndex);
+void samplesview_connectstatusbar(SamplesView*);
 
 INLINE psy_ui_Component* samplesview_base(SamplesView* self)
 {

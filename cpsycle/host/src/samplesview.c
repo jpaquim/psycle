@@ -971,6 +971,8 @@ static void samplesview_onsamplemodified(SamplesView*, SampleEditor* sender,
 	psy_audio_Sample*);
 static void samplesview_onconfigure(SamplesView*, Workspace*,
 	psy_Property*);
+static void samplesview_onresamplermethodchanged(SamplesView*,
+	psy_ui_Component* sender, int index);
 // implementation
 void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_ui_Component* tabbarparent, Workspace* workspace)
@@ -1071,7 +1073,7 @@ void samplesview_init(SamplesView* self, psy_ui_Component* parent,
 	psy_signal_connect(&self->sampleeditor.signal_samplemodified, self,
 		samplesview_onsamplemodified);
 	psy_signal_connect(&self->workspace->signal_configchanged, self,
-		samplesview_onconfigure);
+		samplesview_onconfigure);	
 }
 
 void samplesview_onconfigure(SamplesView* self, Workspace* sender,
@@ -1126,6 +1128,14 @@ void samplesview_setsample(SamplesView* self, psy_audio_SampleIndex index)
 	samplesloopview_setsample(&self->waveloop, sample);
 	samplesbox_select(&self->samplesbox, index);
 }
+
+void samplesview_connectstatusbar(SamplesView* self)
+{		
+	psy_signal_connect(
+		&self->sampleeditor.sampleeditortbar.visualrepresentation.signal_selchanged,
+		self, samplesview_onresamplermethodchanged);
+}
+
 
 void samplesview_onloadsample(SamplesView* self, psy_ui_Component* sender)
 {
@@ -1284,4 +1294,11 @@ void samplesview_onsongchanged(SamplesView* self, Workspace* workspace, int flag
 		samplesview_oninstrumentslotchanged);
 	samplesbox_setsamples(&self->samplesbox, &workspace->song->samples);
 	samplesview_setsample(self, sampleindex_make(0, 0));
+}
+
+void samplesview_onresamplermethodchanged(SamplesView* self,
+	psy_ui_Component* sender, int index)
+{
+	wavebox_setquality(&self->wavebox, (psy_dsp_ResamplerQuality)index);
+	sampleeditor_setquality(&self->sampleeditor, (psy_dsp_ResamplerQuality)index);
 }

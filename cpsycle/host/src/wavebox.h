@@ -13,8 +13,9 @@
 
 // WaveBox
 //
-// Shows PCM Wave data, allows frame and loop point selection.
-// The view can optionally doubled at the loop slice points.
+// Shows PCM wave data, allows frame and loop point selection. The view can
+// optionally doubled at the loop slice points. The resampler interpolates
+// the frames with the specific quality. Todo: sinc not working correctly
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,11 +67,14 @@ typedef struct {
 	WaveBoxSelection selection;
 	WaveBoxSelection oldselection;
 	psy_audio_Sample* sample;
+	uintptr_t channel;
 	psy_ui_Component* component;
+	psy_dsp_MultiResampler resampler;	
 } WaveBoxContext;
 
 void waveboxcontext_init(WaveBoxContext*, psy_ui_Component* component);
-void waveboxcontext_setsample(WaveBoxContext*, psy_audio_Sample*);
+void waveboxcontext_setsample(WaveBoxContext*, psy_audio_Sample*,
+	uintptr_t channel);
 
 INLINE psy_audio_Sample* waveboxcontext_sample(WaveBoxContext* self)
 {
@@ -83,9 +87,11 @@ void waveboxcontext_setzoom(WaveBoxContext*, float zoomleft,
 uintptr_t waveboxcontext_numframes(WaveBoxContext*);
 int waveboxcontext_frametoscreen(WaveBoxContext*, uintptr_t frame);
 uintptr_t waveboxcontext_realframe(WaveBoxContext*, uintptr_t frame);
-void waveboxcontext_setselection(WaveBoxContext* self, uintptr_t selectionstart,
+void waveboxcontext_setselection(WaveBoxContext*, uintptr_t selectionstart,
 	uintptr_t selectionend);
-void waveboxcontext_clearselection(WaveBoxContext* self);
+void waveboxcontext_clearselection(WaveBoxContext*);
+void waveboxcontext_refreshdisplay(WaveBoxContext*);
+psy_dsp_amp_t waveboxcontext_frame_at(WaveBoxContext*, float frame);
 
 typedef struct {	
 	psy_ui_Component component;	
@@ -94,9 +100,8 @@ typedef struct {
 	int dragoffset;
 	psy_Signal selectionchanged;
 	char* nowavetext;
-	bool preventdrawonselect;
-	uintptr_t channel;
-	bool drawline;
+	bool preventdrawonselect;	
+	bool drawline;	
 	WaveBoxContext context;
 } WaveBox;
 
@@ -111,6 +116,8 @@ void wavebox_setselection(WaveBox*, uintptr_t selectionstart,
 	uintptr_t selectionend);
 void wavebox_clearselection(WaveBox*);
 void wavebox_refresh(WaveBox*);
+void wavebox_setquality(WaveBox*, psy_dsp_ResamplerQuality);
+
 
 INLINE WaveBoxContext* wavebox_metric(WaveBox* self)
 {

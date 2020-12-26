@@ -93,6 +93,9 @@ static void mainframe_ontimer(MainFrame*, uintptr_t timerid);
 static void mainframe_maximizeorminimizeview(MainFrame*);
 static void mainframe_oneventdriverinput(MainFrame*, psy_EventDriver* sender);
 static void mainframe_ontoggleseqeditor(MainFrame*, psy_ui_Component* sender);
+static void mainframe_ontogglestepsequencer(MainFrame*, psy_ui_Component* sender);
+static void mainframe_updatestepsequencerbuttons(MainFrame*);
+static void mainframe_connectstepsequencerbuttons(MainFrame*);
 static void mainframe_ontoggleterminal(MainFrame*, psy_ui_Component* sender);
 static void mainframe_ontogglekbdhelp(MainFrame*, psy_ui_Component* sender);
 static void mainframe_onselectpatterndisplay(MainFrame*, psy_ui_Component* sender, PatternDisplayMode);
@@ -175,6 +178,8 @@ void mainframe_init(MainFrame* self)
 	mainframe_initinterpreter(self);
 	mainframe_updateterminalbutton(self);
 	mainframe_connectworkspace(self);
+	mainframe_updatestepsequencerbuttons(self);
+	mainframe_connectstepsequencerbuttons(self);
 }
 
 void mainframe_initframe(MainFrame* self)
@@ -288,6 +293,7 @@ void mainframe_initstatusbar(MainFrame* self)
 		psy_ui_notebook_base(&self->viewstatusbars),
 		&self->samplesview.sampleeditor,
 		&self->workspace);
+	samplesview_connectstatusbar(&self->samplesview);
 	instrumentsviewbar_init(&self->instrumentsviewbar, &self->viewstatusbars.component,
 		&self->workspace);
 	instrumentsview_setstatusbar(&self->instrumentsview, &self->instrumentsviewbar);
@@ -549,11 +555,10 @@ void mainframe_initstepsequencerview(MainFrame* self)
 	stepsequencerview_init(&self->stepsequencerview, &self->client,
 		&self->workspace);
 	psy_ui_component_setalign(stepsequencerview_base(&self->stepsequencerview),
-		psy_ui_ALIGN_BOTTOM);
+		psy_ui_ALIGN_BOTTOM);	
 	if (!generalconfig_showstepsequencer(psycleconfig_general(
-			workspace_conf(&self->workspace)))) {
-		psy_ui_component_hide(stepsequencerview_base(
-			&self->stepsequencerview));
+		workspace_conf(&self->workspace)))) {
+		psy_ui_component_hide(stepsequencerview_base(&self->stepsequencerview));
 	}
 }
 
@@ -1346,6 +1351,50 @@ void mainframe_ontoggleseqeditor(MainFrame* self, psy_ui_Component* sender)
 		psy_ui_button_highlight(&self->sequenceview.options.toggleseqedit);
 	}
 	psy_ui_component_togglevisibility(seqeditor_base(&self->seqeditor));
+}
+
+void mainframe_ontogglestepsequencer(MainFrame* self, psy_ui_Component* sender)
+{		
+	psy_ui_component_togglevisibility(stepsequencerview_base(
+		&self->stepsequencerview));		
+	generalconfig_setstepsequencershowstate(psycleconfig_general(
+		workspace_conf(&self->workspace)),
+		psy_ui_component_visible(stepsequencerview_base(
+			&self->stepsequencerview)));
+	mainframe_updatestepsequencerbuttons(self);
+}
+
+void mainframe_updatestepsequencerbuttons(MainFrame* self)
+{
+	if (generalconfig_showstepsequencer(psycleconfig_general(
+			workspace_conf(&self->workspace)))) {
+		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
+			"Hide Stepsequencer");
+		psy_ui_button_highlight(&self->sequenceview.options.togglestepseq);
+		psy_ui_button_seticon(&self->sequenceview.options.togglestepseqicon,
+			psy_ui_ICON_LESS);
+	} else {
+		psy_ui_button_settext(&self->sequenceview.options.togglestepseq,
+			"Show Stepsequencer");
+		psy_ui_button_disablehighlight(
+			&self->sequenceview.options.togglestepseq);
+		psy_ui_button_seticon(&self->sequenceview.options.togglestepseqicon,
+			psy_ui_ICON_MORE);		
+	}
+}
+
+void mainframe_connectstepsequencerbuttons(MainFrame* self)
+{
+	psy_signal_connect(
+		&self->sequenceview.options.togglestepseqicon.signal_clicked, self,
+		mainframe_ontogglestepsequencer);
+	psy_signal_connect(
+		&self->sequenceview.options.togglestepseq.signal_clicked, self,
+		mainframe_ontogglestepsequencer);
+	if (!generalconfig_showstepsequencer(psycleconfig_general(
+		workspace_conf(&self->workspace)))) {
+		psy_ui_component_hide(seqeditor_base(&self->seqeditor));
+	}
 }
 
 void mainframe_ontoggleterminal(MainFrame* self, psy_ui_Component* sender)

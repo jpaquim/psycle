@@ -199,13 +199,13 @@ enum {
 // Extra class for Reading of IT compressed samples.
 typedef struct BitsBlock {
 	/// pointer to data
-	unsigned char* pdata;
+	uint8_t* pdata;
 	/// read position
-	unsigned char* rpos;
+	uint8_t* rpos;
 	/// read end
-	unsigned char* rend;
+	uint8_t* rend;
 	/// remaining bits in current pos
-	unsigned char rembits;
+	uint8_t rembits;
 } BitsBlock;
 
 INLINE void bitsblock_init(BitsBlock* self)
