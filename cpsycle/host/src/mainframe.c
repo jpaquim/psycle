@@ -213,9 +213,7 @@ void mainframe_initworkspace(MainFrame* self)
 	workspace_load_recentsongs(&self->workspace);
 	if (!workspace_hasplugincache(&self->workspace)) {
 		workspace_scanplugins(&self->workspace);
-	}
-	psy_signal_connect(&self->workspace.signal_songchanged, self,
-		mainframe_onsongchanged);
+	}	
 }
 
 void mainframe_initemptystatusbar(MainFrame* self)
@@ -653,6 +651,8 @@ void mainframe_connectworkspace(MainFrame* self)
 		mainframe_ondocksection);
 	psy_audio_eventdrivers_setcallback(&self->workspace.player.eventdrivers,
 		mainframe_eventdrivercallback, self);
+	psy_signal_connect(&self->workspace.signal_songchanged, self,
+		mainframe_onsongchanged);
 	psy_ui_component_starttimer(mainframe_base(self), 0, 50);
 }
 
@@ -934,7 +934,11 @@ void mainframe_onsongchanged(MainFrame* self, Workspace* sender, int flag,
 			tabbar_select(&self->tabbar, VIEW_ID_SONGPROPERTIES);
 		}		
 	}	
-	mainframe_updatesongtitle(self);	
+	mainframe_updatesongtitle(self);
+	psy_ui_component_align(&self->client);
+	if (flag == WORKSPACE_NEWSONG) {
+		machinewireview_centermaster(&self->machineview.wireview);
+	}
 }
 
 void mainframe_updatesongtitle(MainFrame* self)
@@ -1236,12 +1240,12 @@ void mainframe_onchangecontrolskin(MainFrame* self, Workspace* sender,
 
 void mainframe_ondockview(MainFrame* self, Workspace* sender,
 	psy_ui_Component* view)
-{		
+{			
 	psy_ui_component_resize(view, psy_ui_size_zero());	
 	psy_ui_component_setparent(view, &self->paramviews);	
 	psy_ui_component_setalign(view, psy_ui_ALIGN_LEFT);	
-	psy_ui_component_align(&self->client);	
-	psy_ui_component_align(&self->paramviews);	
+	psy_ui_component_align(&self->client);
+	psy_ui_component_align(&self->paramviews);
 }
 
 void mainframe_onfloatsection(MainFrame* self, Workspace* sender,

@@ -173,7 +173,7 @@ static psy_List* children(psy_ui_Component*, int recursive);
 static void enableinput(psy_ui_Component*);
 static void preventinput(psy_ui_Component*);
 // events
-static void ondestroy(psy_ui_Component* self) { }
+static void ondestroy(psy_ui_Component* self) {	}
 static void ondestroyed(psy_ui_Component* self) { }
 static void onsize(psy_ui_Component* self, const psy_ui_Size* size) { }
 static void onalign(psy_ui_Component* self) { }
@@ -473,7 +473,7 @@ void psy_ui_component_init_base(psy_ui_Component* self) {
 	self->backgroundmode = psy_ui_BACKGROUND_SET;
 	self->mousetracking = 0;
 	self->cursor = psy_ui_CURSOR_DEFAULT;
-	self->tabindex = -1;
+	self->tabindex = -1;	
 	psy_ui_intpoint_init(&self->scroll);	
 	psy_ui_component_updatefont(self);
 	if (self->imp) {

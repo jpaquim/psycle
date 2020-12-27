@@ -1,0 +1,57 @@
+// This source is free software ; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation ; either version 2, or (at your option) any later version.
+// copyright 2000-2020 members of the psycle project http://psycle.sourceforge.net
+
+#if !defined(SEQUENCETRACKBOX_H)
+#define SEQUENCETRACKBOX_H
+
+// host
+#include "workspace.h"
+// audio
+#include <patterns.h>
+#include <sequence.h>
+// ui
+#include <uibutton.h>
+#include <uicheckbox.h>
+#include <uiedit.h>
+#include <uilabel.h>
+#include <uiscroller.h>
+#include <uisplitbar.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef enum {
+	SEQUENCETRACKBOXEVENT_SELECT = 1,
+	SEQUENCETRACKBOXEVENT_MUTE,
+	SEQUENCETRACKBOXEVENT_SOLO,
+	SEQUENCETRACKBOXEVENT_DEL	
+} SequenceTrackBoxEvent;
+
+typedef struct SequenceTrackBox {
+	psy_ui_Rectangle position;
+	psy_audio_SequenceTrack* track;
+	int trackindex;
+	bool selected;
+	psy_ui_Colour colour;
+	psy_ui_Colour colour_highlight;
+	psy_ui_Colour colour_font;
+	psy_ui_Colour colour_fonthighlight;
+	psy_ui_IntSize size;
+	psy_ui_TextMetric tm;	
+} SequenceTrackBox;
+
+void sequencetrackbox_init(SequenceTrackBox*,
+	psy_ui_Rectangle position, psy_ui_TextMetric,
+	psy_audio_SequenceTrack*,
+	int trackindex, bool selected);
+
+void sequencetrackbox_draw(SequenceTrackBox*, psy_ui_Graphics*);
+SequenceTrackBoxEvent sequencetrackbox_hittest(const SequenceTrackBox*,
+	int x, int y);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* SEQUENCETRACKBOX_H */

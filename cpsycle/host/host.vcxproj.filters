@@ -367,6 +367,9 @@
     <ClCompile Include="src\adsrsliders.c">
       <Filter>machine\instrument</Filter>
     </ClCompile>
+    <ClCompile Include="src\sequencetrackbox.c">
+      <Filter>sequence</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\resources\resource.rc">
@@ -709,6 +712,9 @@
     </ClInclude>
     <ClInclude Include="src\adsrsliders.h">
       <Filter>machine\instrument</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sequencetrackbox.h">
+      <Filter>sequence</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

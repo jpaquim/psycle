@@ -140,6 +140,7 @@ void psy_audio_sequencetrack_init(psy_audio_SequenceTrack* self)
 {
 	self->entries = NULL;
 	self->name = psy_strdup("seq");
+	self->mute = FALSE;
 }
 
 void psy_audio_sequencetrack_dispose(psy_audio_SequenceTrack* self)
