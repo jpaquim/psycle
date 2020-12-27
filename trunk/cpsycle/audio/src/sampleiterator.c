@@ -183,7 +183,7 @@ psy_dsp_amp_t psy_audio_sampleiterator_work(psy_audio_SampleIterator* self, uint
 	src = psy_audio_buffer_at(&self->sample->channels, channel);
 	return psy_dsp_resampler_work_float_unchecked(
 		psy_dsp_multiresampler_base(&self->resampler),
-		(channel == 0) ? self->m_pL : self->m_pR,
+		(channel == 0) ? self->left : self->right,
 		self->pos.LowPart);
 }
 
@@ -387,13 +387,13 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 	//TRACE("RealPos %d\n",pos);
 	if (psy_audio_sampleiterator_currentloopdirection(self) == psy_audio_LOOPDIRECTION_FORWARD) {
 		if (pos < presamples && !self->looped) {
-			self->m_pL = &self->lBuffer[presamples + pos];
-			self->m_pR = &self->rBuffer[presamples + pos];
+			self->left = &self->lBuffer[presamples + pos];
+			self->right = &self->rBuffer[presamples + pos];
 			max = presamples - pos;
 			//TRACE("Begin buffer at pos %d for samples %d\n" ,pos+presamples , max);
 		} else if (pos + postsamples >= self->currentloopend && pos < self->currentloopend + presamples) {
-			self->m_pL = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
-			self->m_pR = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
+			self->left = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
+			self->right = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopend)];
 			if ((released || psy_audio_sampleiterator_sustainlooptype(self) == psy_audio_SAMPLE_LOOP_DO_NOT)
 				&& psy_audio_sampleiterator_looptype(self) == psy_audio_SAMPLE_LOOP_DO_NOT) {
 				max = self->currentloopend - pos;
@@ -405,17 +405,17 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 		} else if (self->looped && pos + postsamples >= self->currentloopstart && pos < self->currentloopstart + presamples) {
 			if ((!released && psy_audio_sampleiterator_sustainlooptype(self) == psy_audio_SAMPLE_LOOP_NORMAL)
 				|| (psy_audio_sampleiterator_sustainlooptype(self) == psy_audio_SAMPLE_LOOP_DO_NOT && self->sample->loop.type == psy_audio_SAMPLE_LOOP_NORMAL)) {
-				self->m_pL = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
-				self->m_pR = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
+				self->left = &self->lBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
+				self->right = &self->rBuffer[secbegin + (totalsamples + pos - self->currentloopstart)];
 			} else {
-				self->m_pL = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
-				self->m_pR = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+				self->left = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+				self->right = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
 			}
 			max = presamples + self->currentloopstart - pos;
 			//TRACE("forward-loop buffer at pos %d for samples %d\n" , secbegin+(pos+totalsamples-m_CurrentLoopEnd) , max);
 		} else {
-			self->m_pL = (psy_dsp_amp_t*)(self->sample->channels.samples[0] + pos);
-			self->m_pR = (psy_dsp_amp_t*)(self->sample->channels.samples[1] + pos);
+			self->left = (psy_dsp_amp_t*)(self->sample->channels.samples[0] + pos);
+			self->right = (psy_dsp_amp_t*)(self->sample->channels.samples[1] + pos);
 			if ((int32_t)(amount.HighPart) + postsamples < self->currentloopend) {
 				return numSamples;
 			}
@@ -432,13 +432,13 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 		amount.QuadPart -= self->pos.LowPart;
 	} else if (psy_audio_sampleiterator_currentloopdirection(self) == psy_audio_LOOPDIRECTION_BACKWARD) {
 		if (pos - presamples <= self->currentloopstart) {
-			self->m_pL = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
-			self->m_pR = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+			self->left = &self->lBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
+			self->right = &self->rBuffer[thirdbegin + (totalsamples + pos - self->currentloopstart)];
 			max = pos - self->currentloopstart;
 			//TRACE("backward-loop buffer at pos %d for samples %d\n" ,thirdbegin+(pos+totalsamples-m_CurrentLoopStart) , max);
 		} else {
-			self->m_pL = (psy_dsp_amp_t*)(self->sample->channels.samples[0] + pos);
-			self->m_pR = (psy_dsp_amp_t*)(self->sample->channels.samples[1] + pos);
+			self->left = (psy_dsp_amp_t*)(self->sample->channels.samples[0] + pos);
+			self->right = (psy_dsp_amp_t*)(self->sample->channels.samples[1] + pos);
 			if ((int32_t)(amount.HighPart) - presamples >= self->currentloopstart) {
 				return numSamples;
 			}
@@ -454,8 +454,8 @@ int psy_audio_sampleiterator_prework(psy_audio_SampleIterator* self, int numSamp
 		amount.LowPart = self->pos.LowPart;
 	}
 #ifndef NDEBUG
-	// if (*m_pL != *(m_pWave->pWaveDataL() + pos) && pos < Length()) {
-		// TRACE("368 ERROR. Samples differ! %d - %d (%d,%d)\n", *m_pL, *(m_pWave->pWaveDataL() + pos), (m_pL - lBuffer), pos);
+	// if (*left != *(m_pWave->pWaveDataL() + pos) && pos < Length()) {
+		// TRACE("368 ERROR. Samples differ! %d - %d (%d,%d)\n", *left, *(m_pWave->pWaveDataL() + pos), (left - lBuffer), pos);
 	// }
 #endif
 	if (psy_audio_sampleiterator_speed(self) != 0) {

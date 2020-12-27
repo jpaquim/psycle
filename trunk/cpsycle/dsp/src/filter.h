@@ -76,7 +76,7 @@ typedef struct FilterVtable {
 typedef struct Filter {
 	FilterVtable* vtable;
 	psy_dsp_FilterType _type;
-	int _cutoff;
+	int cutoff;
 	int _q;
 
 	float _coeff0;
@@ -98,15 +98,15 @@ uintptr_t filter_numfilters(void);
 
 INLINE void filter_setcutoff(Filter* self, int iCutoff)
 {
-	if (self->_cutoff != iCutoff) {
-		self->_cutoff = iCutoff;
+	if (self->cutoff != iCutoff) {
+		self->cutoff = iCutoff;
 		filter_update(self);
 	}
 }
 
 INLINE int filter_cutoff(Filter* self)
 {
-	return self->_cutoff;
+	return self->cutoff;
 }
 
 INLINE void filter_setressonance(Filter* self, int iRes)

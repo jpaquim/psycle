@@ -139,6 +139,8 @@ void instrumentfilterview_setinstrument(InstrumentFilterView* self,
 			&self->instrument->filterenvelope);
 		envelopeview_setenvelope(&self->envelopeview,
 			&instrument->filterenvelope);		
+		envelopeview_setmodamount(&self->envelopeview,
+			instrument->filtermodamount);
 		psy_ui_combobox_setcursel(&self->filtertype,
 			(intptr_t)instrument->filtertype);
 	} else {
@@ -174,7 +176,7 @@ void instrumentfilterview_ondescribe(InstrumentFilterView* self,
 			(int)(self->instrument->filterres * 100));				
 	} else if (slider == &self->modamount) {		
 		psy_snprintf(text, 20, "%d%%",
-			(int)(self->instrument->filtermodamount) * 100);				
+			(int)(self->instrument->filtermodamount * 100));		
 	} else if (slider == &self->randomcutoff) {
 		if (!self->instrument->randomcutoff == 0.f) {
 			psy_snprintf(text, 10, "off");
@@ -204,12 +206,14 @@ void instrumentfilterview_ontweak(InstrumentFilterView* self,
 	} else if (slider == &self->res) {
 		self->instrument->filterres = value;
 	} else if (slider == &self->modamount) {
-		self->instrument->filtermodamount = value;
+		self->instrument->filtermodamount = (value - 0.5f) * 2;
 	} else if (slider == &self->randomcutoff) {
 		self->instrument->randomcutoff = value;
 	} else if (slider == &self->randomresonance) {
 		self->instrument->randomresonance = value;
 	}
+	envelopeview_setmodamount(&self->envelopeview,
+		self->instrument->filtermodamount);
 	envelopeview_update(&self->envelopeview);
 }
 
@@ -226,8 +230,8 @@ void instrumentfilterview_onvalue(InstrumentFilterView* self,
 			: 0.5f;
 	} else if (slider == &self->modamount) {
 		*value = self->instrument
-			? self->instrument->filtermodamount
-			: 0.5f;
+			? self->instrument->filtermodamount / 2 + 0.5f
+			: 0.f;
 	} else if (slider == &self->randomcutoff) {
 		*value = self->instrument
 			? self->instrument->randomcutoff
@@ -246,6 +250,8 @@ void instrumentfilterview_ontweaked(InstrumentFilterView* self,
 		char statustext[256];
 		psy_dsp_EnvelopePoint pt;
 
+		envelopeview_setmodamount(&self->envelopeview,
+			self->instrument->filtermodamount);
 		envelopeview_update(&self->envelopeview);
 		pt = psy_dsp_envelopesettings_at(&self->instrument->filterenvelope, pointindex);
 		psy_snprintf(statustext, 256, "Point %d (%f, %f)", pointindex,

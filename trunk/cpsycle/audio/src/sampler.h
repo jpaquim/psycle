@@ -69,41 +69,41 @@ extern "C" {
 	{
 		struct psy_audio_Sampler* sampler;
 		psy_audio_SampleIterator controller;
-		psy_dsp_EnvelopeController _envelope;	
+		psy_dsp_EnvelopeController envelope;	
 		//psy_dsp_ADSRSettings _envelopesettings;
-		psy_dsp_EnvelopeController _filterEnv;
+		psy_dsp_EnvelopeController filterenv;
 		// psy_dsp_ADSRSettings _filterenvsettings;
-		Filter _filter;
+		Filter filter;
 		psy_audio_Instrument* inst;
 		int instrument;
 		uintptr_t channel;
 
 		// Amount of samples since line Tick on this voice.
-		int _sampleCounter;
+		int samplecounter;
 		// Amount of samples previous to do a delayed noteoff
-		int _triggerNoteOff;
+		int triggernoteoff;
 		// Amount of samples previous to do a delayed noteon (Also used for
 		// retrig)
-		int _triggerNoteDelay;
-		int _cutoff;
-		float _coModify;
-		int64_t _effPortaSpeed;
+		int triggernotedelay;
+		int cutoff;
+		float comodify;
+		int64_t effportaspeed;
 		// Line memory for command being executed
 		// running command (like porta or retrig).
-		int effCmd;
+		int effcmd;
 		//value related to the running command (like porta or retrig)
-		int effVal;
+		int effval;
 		// retrig
-		int effretTicks; // Number of ticks remaining for retrig
+		int effretticks; // Number of ticks remaining for retrig
 		float effretVol; // volume change amount
-		int effretMode;  // volume change mode (multipler or sum)
+		int effretmode;  // volume change mode (multipler or sum)
 		// WaveDataController
-		float _vol; // 0..1 value of this voice volume,
-		float _pan;
-		float _lVolDest;
-		float _rVolDest;
-		float _lVolCurr;
-		float _rVolCurr;
+		float vol; // 0..1 value of this voice volume,
+		float pan;
+		float lvoldest;
+		float rvoldest;
+		float lvolcurr;
+		float rvolcurr;
 	} psy_audio_SamplerVoice;
 
 	void psy_audio_samplervoice_init(psy_audio_SamplerVoice*, struct psy_audio_Sampler*);
@@ -135,9 +135,9 @@ extern "C" {
 		int32_t usefilters;
 		int32_t panningmode;
 
-		uint16_t lastInstrument[MAX_TRACKS];
+		uint16_t lastinstrument[MAX_TRACKS];
 		uintptr_t numvoices;
-		psy_audio_SamplerVoice _voices[PS1_SAMPLER_MAX_POLYPHONY];
+		psy_audio_SamplerVoice voices[PS1_SAMPLER_MAX_POLYPHONY];
 		// psycle::helpers::dsp::cubic_resampler _resampler;
 		psy_List* multicmdMem; // PatternEvent
 		bool linearslide;
@@ -171,7 +171,7 @@ extern "C" {
 		return &(self->custommachine.machine);
 	}
 
-	void psy_audio_sampler_setresamplerquality(psy_audio_Sampler* self,
+	void psy_audio_sampler_changeresamplerquality(psy_audio_Sampler* self,
 		psy_dsp_ResamplerQuality quality);
 
 	INLINE psy_dsp_ResamplerQuality psy_audio_sampler_resamplerquality(psy_audio_Sampler* self)

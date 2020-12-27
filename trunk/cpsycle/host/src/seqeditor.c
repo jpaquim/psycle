@@ -498,8 +498,9 @@ void seqeditortrackheader_ondraw(SeqEditorTrackHeader* self,
 void seqeditortrackheader_onpreferredsize(SeqEditorTrackHeader* self,
 	const psy_ui_Size* limit, psy_ui_Size* rv)
 {
-	rv->width = psy_ui_value_makeew(15.0);
-	rv->height = psy_ui_value_makeeh(2.0);
+	assert(rv);
+
+	*rv = psy_ui_size_makeem(15.0, 2.0);	
 }
 
 bool seqeditortrackheader_onmousedown(SeqEditorTrackHeader* self,

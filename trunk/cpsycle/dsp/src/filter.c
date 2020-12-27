@@ -351,7 +351,7 @@ void filter_init_samplerate(Filter* self, int sampleRate)
 
 void filter_reset(Filter* self) //Same as init, without samplerate
 {
-	self->_cutoff = 127;
+	self->cutoff = 127;
 	self->_q = 0;
 	self->_type = F_NONE;
 	self->_x1 = self->_x2 = self->_y1 = self->_y2 = 0;
@@ -376,11 +376,11 @@ void filter_update(Filter* self)
 	} else {
 		int type = self->_type;
 		if (type > F_NONE) type--;
-		self->_coeff0 = filtercoeff._coeffs[type][self->_cutoff][self->_q][0];
-		self->_coeff1 = filtercoeff._coeffs[type][self->_cutoff][self->_q][1];
-		self->_coeff2 = filtercoeff._coeffs[type][self->_cutoff][self->_q][2];
-		self->_coeff3 = filtercoeff._coeffs[type][self->_cutoff][self->_q][3];
-		self->_coeff4 = filtercoeff._coeffs[type][self->_cutoff][self->_q][4];
+		self->_coeff0 = filtercoeff._coeffs[type][self->cutoff][self->_q][0];
+		self->_coeff1 = filtercoeff._coeffs[type][self->cutoff][self->_q][1];
+		self->_coeff2 = filtercoeff._coeffs[type][self->cutoff][self->_q][2];
+		self->_coeff3 = filtercoeff._coeffs[type][self->cutoff][self->_q][3];
+		self->_coeff4 = filtercoeff._coeffs[type][self->cutoff][self->_q][4];
 	}
 }
 

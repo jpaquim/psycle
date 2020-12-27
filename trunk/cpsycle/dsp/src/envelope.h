@@ -48,6 +48,8 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 	psy_dsp_seconds_t time,
 	psy_dsp_amp_t value);
 
+psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make_start(void);
+
 // Mode defines what the first value of a PointValue means
 // TICK = one tracker tick ( speed depends on the BPM )
 // MILIS = a millisecond. (independant of BPM).

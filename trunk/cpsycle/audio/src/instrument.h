@@ -112,6 +112,7 @@ typedef struct psy_audio_Instrument {
 	/// Resonance [0..1]	
 	float filterres;
 	unsigned char _RRES;
+	// [-1.0 .. 1.0]
 	float filtermodamount;
 	/// Filter Type. See psy_dsp_FilterType
 	psy_dsp_FilterType filtertype;	

@@ -55,6 +55,7 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->component.vtable = &envelopebox_vtable;
 	self->zoomleft = 0.f;
 	self->zoomright = 1.f;
+	self->modamount = 1.f;
 	self->cx = 0;
 	self->cy = 0;
 	self->dragpoint = NULL;
@@ -63,10 +64,10 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 	self->dragrelative = 1;	
 	self->dragpointindex = UINTPTR_MAX;
 	psy_ui_margin_init_all(&self->spacing,
-		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0),
-		psy_ui_value_makepx(0));
+		psy_ui_value_makepx(5),
+		psy_ui_value_makepx(5),
+		psy_ui_value_makepx(5),
+		psy_ui_value_makepx(5));
 	psy_ui_component_setpreferredsize(&self->component,
 		psy_ui_size_make(psy_ui_value_makeew(20),
 			psy_ui_value_makeeh(15)));	
@@ -79,7 +80,8 @@ void envelopebox_init(EnvelopeBox* self, psy_ui_Component* parent)
 void envelopebox_setenvelope(EnvelopeBox* self,
 	psy_dsp_EnvelopeSettings* settings)
 {	
-	self->settings = settings;	
+	self->settings = settings;
+	self->modamount = 1.f;
 	psy_ui_component_invalidate(&self->component);
 }
 
@@ -135,14 +137,14 @@ void envelopebox_drawpoints(EnvelopeBox* self, psy_ui_Graphics* g)
 	ptsize2 = psy_ui_size_make(
 		psy_ui_value_makepx(psy_ui_value_px(&ptsize.width, &tm) / 2),
 		psy_ui_value_makepx(psy_ui_value_px(&ptsize.height, &tm) / 2));
-	for (p = points; p !=0; p = p->next) {
+	for (p = points; p != 0; p = p->next) {
 		psy_ui_Rectangle r;
 		psy_dsp_EnvelopePoint* pt;
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;
-		psy_ui_setrectangle(&r, 
+		psy_ui_setrectangle(&r,
 			envelopebox_pxtime(self, pt->time) - psy_ui_value_px(&ptsize2.width, &tm),
-			envelopebox_pxvalue(self, pt->value) - psy_ui_value_px(&ptsize2.height, &tm),
+			envelopebox_pxvalue(self, pt->value * self->modamount) - psy_ui_value_px(&ptsize2.height, &tm),
 			psy_ui_value_px(&ptsize.width, &tm),
 			psy_ui_value_px(&ptsize.height, &tm));
 		psy_ui_drawsolidrectangle(g, r, psy_ui_colour_make(0x00B1C8B0));
@@ -171,19 +173,21 @@ void envelopebox_drawlines(EnvelopeBox* self, psy_ui_Graphics* g)
 		if (q) {
 			psy_ui_drawline(g,
 				envelopebox_pxtime(self, q->time),
-				envelopebox_pxvalue(self, q->value),
+				envelopebox_pxvalue(self, q->value * self->modamount),
 				envelopebox_pxtime(self, pt->time),
-				envelopebox_pxvalue(self, pt->value));
+				envelopebox_pxvalue(self, pt->value * self->modamount));
 		}
 		q = pt;
 		if (count == self->sustainstage) {
+			psy_ui_setcolour(g, psy_ui_colour_make(0x00516850));
 			psy_ui_drawline(g,
 				envelopebox_pxtime(self, q->time),
 				self->spacing.top.quantity.integer,
 				envelopebox_pxtime(self, q->time),
 				self->spacing.top.quantity.integer + self->cy);
+			psy_ui_setcolour(g, psy_ui_colour_make(0x00B1C8B0));
 		}
-	}
+	}	
 }
 
 void envelopebox_onsize(EnvelopeBox* self, const psy_ui_Size* size)
@@ -221,13 +225,21 @@ void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 			}
 			pt_insert = psy_dsp_envelopepoint_alloc();
 			if (pt_insert) {				
-				if (p == NULL) {
+				if (p == NULL) { // first?
 					*pt_insert = psy_dsp_envelopepoint_make_all(
 						0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
 				} else {
 					*pt_insert = pt_new;
 					pt_insert->maxtime = 5.f;
 					pt_insert->maxvalue = 1.f;
+				}
+				if (p && p->next == NULL) {
+					psy_dsp_EnvelopePoint* pt;
+
+					pt = (psy_dsp_EnvelopePoint*)p->entry;
+					pt->maxvalue = 1.f;
+					pt_insert->maxvalue = 0.f;
+					pt_insert->value = 0.f; // last point
 				}
 				psy_list_insert(&self->settings->points, p, pt_insert);
 				psy_ui_component_invalidate(&self->component);
@@ -242,8 +254,26 @@ void envelopebox_onmousedown(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 		}
 		psy_ui_component_capture(&self->component);
 	} else if (self->settings && self->dragpoint) {
-		psy_list_remove(&self->settings->points, self->dragpoint);
+		psy_List* p;
+		bool first;
+
+		first = self->settings->points == self->dragpoint;
+		p = psy_list_remove(&self->settings->points, self->dragpoint);
 		self->dragpoint = NULL;
+		if (first && self->settings->points) {
+			psy_dsp_EnvelopePoint* pt;
+
+			pt = (psy_dsp_EnvelopePoint*)(psy_list_entry(self->settings->points));
+			*pt = psy_dsp_envelopepoint_make_start();
+			psy_signal_emit(&self->signal_tweaked, self, 1, self->dragpointindex);
+		} else if (p == NULL && self->settings->points) {
+			psy_dsp_EnvelopePoint* pt;
+
+			pt = (psy_dsp_EnvelopePoint*)(psy_list_entry(psy_list_last(self->settings->points)));			
+			pt->maxvalue = 0.f;
+			pt->value = 0.f;
+			psy_signal_emit(&self->signal_tweaked, self, 1, self->dragpointindex);
+		}		
 		psy_ui_component_invalidate(&self->component);
 	}	
 }
@@ -266,8 +296,8 @@ void envelopebox_onmousemove(EnvelopeBox* self, psy_ui_MouseEvent* ev)
 
 		pt = (psy_dsp_EnvelopePoint*)self->dragpoint->entry;
 		oldtime = pt->time;
-		pt->value = 1.f - (ev->y - self->spacing.top.quantity.integer) /
-			(float)self->cy;
+		pt->value = (1.f - ((ev->y - self->spacing.top.quantity.integer) /
+			(float)self->cy)) / self->modamount;
 		pt->time = (psy_dsp_beat_t)envelopebox_pxtotime(self, ev->x);
 		checkadjustpointrange(self->dragpoint);
 		envelopebox_shiftsuccessors(self, pt->time - oldtime);		
@@ -339,7 +369,7 @@ psy_List* envelopebox_hittestpoint(EnvelopeBox* self, int x, int y)
 
 		pt = (psy_dsp_EnvelopePoint*)p->entry;			
 		if (abs(envelopebox_pxtime(self, pt->time) - x) < 5 &&
-				abs(envelopebox_pxvalue(self, pt->value) - y) < 5) {
+				abs(envelopebox_pxvalue(self, pt->value * self->modamount) - y) < 5) {
 			break;
 		}
 	}	
@@ -361,8 +391,8 @@ int envelopebox_pxvalue(EnvelopeBox* self, double value)
 
 int envelopebox_pxtime(EnvelopeBox* self, double t)
 {
-	float offsetstep = (float) (float)envelopebox_displaymaxtime(self) 
-		/ self->cx * (self->zoomright - self->zoomleft);		
+	float offsetstep = (float)(float)envelopebox_displaymaxtime(self)
+		/ self->cx * (self->zoomright - self->zoomleft);
 	return (int)((t - (envelopebox_displaymaxtime(self) *
 		self->zoomleft)) / offsetstep) + self->spacing.left.quantity.integer;
 }
@@ -372,8 +402,8 @@ double envelopebox_pxtotime(EnvelopeBox* self, int px)
 	double t;
 	float offsetstep = (float)envelopebox_displaymaxtime(self)
 		/ self->cx * (self->zoomright - self->zoomleft);
-	t = (offsetstep * px) + (envelopebox_displaymaxtime(self) *
-		self->zoomleft);
+	t = (offsetstep * (px - self->spacing.left.quantity.integer)) +
+		(envelopebox_displaymaxtime(self) * self->zoomleft);
 	if (t < 0) {
 		t = 0;
 	} else
@@ -488,7 +518,7 @@ static psy_ui_ComponentVtable* envelopeview_vtable_init(EnvelopeView* self)
 }
 
 void envelopeview_init(EnvelopeView* self, psy_ui_Component* parent, Workspace* workspace)
-{
+{	
 	psy_ui_component_init(envelopeview_base(self), parent);
 	psy_ui_component_setvtable(envelopeview_base(self),
 		envelopeview_vtable_init(self));	

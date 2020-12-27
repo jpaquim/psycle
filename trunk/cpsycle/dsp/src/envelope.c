@@ -65,6 +65,20 @@ psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make(
 	return rv;
 }
 
+psy_dsp_EnvelopePoint psy_dsp_envelopepoint_make_start(void)
+{
+	psy_dsp_EnvelopePoint rv;
+
+	rv.time = (psy_dsp_seconds_t)0.f;
+	rv.value = (psy_dsp_amp_t)0.f;
+	rv.mintime = (psy_dsp_seconds_t)0.f;
+	rv.maxtime = (psy_dsp_seconds_t)0.f;
+	rv.minvalue = (psy_dsp_amp_t)0.f;
+	rv.maxvalue = (psy_dsp_amp_t)0.f;
+
+	return rv;
+}
+
 // envelope settings
 void psy_dsp_envelopesettings_init(psy_dsp_EnvelopeSettings* self)
 {
@@ -88,8 +102,7 @@ void psy_dsp_envelopesettings_init_adsr(psy_dsp_EnvelopeSettings* self)
 
 	psy_dsp_envelopesettings_init(self);
 	// start attack
-	psy_dsp_envelopesettings_append(self,
-		psy_dsp_envelopepoint_make(0.f, 0.f));
+	psy_dsp_envelopesettings_append(self, psy_dsp_envelopepoint_make_start());
 	// start decay
 	psy_dsp_envelopesettings_append(self,
 		psy_dsp_envelopepoint_make_all(0.005f, 1.f, 0.f, 5.f, 1.f, 1.f));
