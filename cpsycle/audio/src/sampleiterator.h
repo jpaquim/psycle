@@ -65,8 +65,8 @@ typedef struct {
 	// psy_audio_Buffer buffer;
 	psy_dsp_amp_t* lBuffer;
 	psy_dsp_amp_t* rBuffer;
-	psy_dsp_amp_t* m_pL;
-	psy_dsp_amp_t* m_pR;
+	psy_dsp_amp_t* left;
+	psy_dsp_amp_t* right;
 } psy_audio_SampleIterator;
 
 void psy_audio_sampleiterator_init(psy_audio_SampleIterator*, struct psy_audio_Sample*,

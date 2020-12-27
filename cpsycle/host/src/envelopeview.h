@@ -36,10 +36,17 @@ typedef struct {
 	psy_ui_Margin spacing;	
 	float zoomleft;
 	float zoomright;
+	psy_dsp_amp_t modamount;
 } EnvelopeBox;
 
 void envelopebox_init(EnvelopeBox*, psy_ui_Component* parent);
 void envelopebox_setenvelope(EnvelopeBox* self, psy_dsp_EnvelopeSettings*);
+
+INLINE void envelopebox_setmodamount(EnvelopeBox* self, psy_dsp_amp_t amount)
+{
+	self->modamount = amount;
+}
+
 void envelopebox_update(EnvelopeBox*);
 
 INLINE psy_ui_Component* envelopebox_base(EnvelopeBox* self)
@@ -77,6 +84,12 @@ typedef struct EnvelopeView {
 
 void envelopeview_init(EnvelopeView*, psy_ui_Component* parent, Workspace*);
 void envelopeview_setenvelope(EnvelopeView*, psy_dsp_EnvelopeSettings* settings);
+
+INLINE void envelopeview_setmodamount(EnvelopeView* self, psy_dsp_amp_t amount)
+{	
+	envelopebox_setmodamount(&self->envelopebox, amount);
+}
+
 void envelopeview_update(EnvelopeView*);
 void envelopeview_settext(EnvelopeView*, const char* text);
 

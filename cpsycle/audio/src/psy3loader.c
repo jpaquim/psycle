@@ -714,7 +714,7 @@ void psy_audio_psy3loader_read_insd(psy_audio_PSY3Loader* self)
 
 		instrument->filtercutoff = ENV_F_CO / 127.f;
 		instrument->filterres = ENV_F_RQ / 127.f;
-		instrument->filtermodamount = ENV_F_EA / 255.f + 0.5f;
+		instrument->filtermodamount = ENV_F_EA / 128.f; // -128 .. 128 to [-1 .. 1]
 			
 		psyfile_read(self->fp, &val, sizeof(val));
 		ENV_F_TP = val;

@@ -836,7 +836,7 @@ psy_List* sequencerinsert(psy_audio_XMSampler* self, psy_List* events)
 				psy_audio_PatternEntry* noteoff;
 
 				// This means there is always 6 ticks per row whatever number of rows.
-				//_triggerNoteOff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
+				//triggernoteoff = (Global::player().SamplesPerRow()/6.f)*(ite->_parameter & 0x0f);
 				noteoff = psy_audio_patternentry_allocinit();
 				psy_audio_patternentry_front(noteoff)->note = psy_audio_NOTECOMMANDS_RELEASE;
 				psy_audio_patternentry_front(noteoff)->mach = psy_audio_patternentry_front(entry)->mach;

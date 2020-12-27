@@ -42,9 +42,9 @@ typedef struct {
 	//dsp::ITFilter m_FilterIT;
 	//dsp::Filter m_FilterClassic;
 	Filter _filter;
-	int _cutoff;
+	int cutoff;
 	int m_Ressonance;
-	float _coModify;
+	float comodify;
 
 	bool play;
 	bool stopping;

@@ -216,9 +216,9 @@ void psy_audio_xmsamplervoice_init(psy_audio_XMSamplerVoice* self,
 	self->currrandvol = 1.f;
 	self->volume = 128;
 	self->note = psy_audio_NOTECOMMANDS_EMPTY;
-	self->_cutoff = 127;
+	self->cutoff = 127;
 	self->m_Ressonance = 0;
-	self->_coModify = 0;
+	self->comodify = 0;
 	self->play = FALSE;
 	self->stopping = FALSE;
 	self->panfactor = 0.5f;
@@ -243,11 +243,11 @@ void psy_audio_xmsamplervoice_initfilter(psy_audio_XMSamplerVoice* self,
 			(instrument->_RRES)
 			? alteRand((int)(instrument->filterres * 127))
 			: (int)(instrument->filterres * 127));
-		self->_cutoff = (instrument->randomcutoff != 0.f)
+		self->cutoff = (instrument->randomcutoff != 0.f)
 			? alteRand((int)(instrument->filtercutoff * 127))
 			: (int)instrument->filtercutoff * 127;
-		self->_coModify = (instrument->filtermodamount - 0.5f) * 255.f;
-		filter_setcutoff(&self->_filter, self->_cutoff);
+		self->comodify = (instrument->filtermodamount - 0.5f) * 255.f;
+		filter_setcutoff(&self->_filter, self->cutoff);
 	}
 }
 
@@ -675,9 +675,9 @@ void psy_audio_xmsamplervoice_work(psy_audio_XMSamplerVoice* self,
 					++dstpos;
 					nextsamples--;
 					diff = psy_audio_sampleiterator_inc(position);
-					position->m_pL += diff;
+					position->left += diff;
 					if (psy_audio_buffer_numchannels(&position->sample->channels) > 1) {
-						position->m_pR += diff;
+						position->right += diff;
 					}
 				}
 				psy_audio_sampleiterator_postwork(position);
@@ -779,7 +779,7 @@ psy_dsp_amp_t psy_audio_xmsamplervoice_workfilter(psy_audio_XMSamplerVoice* self
 {		
 	if (filter_type(&self->_filter) != F_NONE)
 	{
-		int newcutoff = (int)(self->_cutoff + (filterenv[pos] * self->_coModify + 0.5f));
+		int newcutoff = (int)(self->cutoff + (filterenv[pos] * self->comodify + 0.5f));
 		if (newcutoff < 0) {
 			newcutoff = 0;
 		} else if (newcutoff > 127) {
@@ -978,7 +978,7 @@ void psy_audio_xmsamplervoice_seteffect(psy_audio_XMSamplerVoice* self,
 					if (psy_audio_xmsamplervoice_filtertype(self) == F_NONE) {
 						filter_settype(&self->_filter, self->channel->defaultfiltertype);					
 					}
-					self->_cutoff = self->channel->cutoff;
+					self->cutoff = self->channel->cutoff;
 				}
 				break;
 			case 1:
