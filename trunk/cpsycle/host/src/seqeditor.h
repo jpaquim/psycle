@@ -44,11 +44,11 @@ struct SeqEditorTracks;
 typedef void (*seqeditortrack_fp_ondraw)(struct SeqEditorTrack*, psy_ui_Graphics*, int x, int y);
 typedef void (*seqeditortrack_fp_onpreferredsize)(struct SeqEditorTrack*,
 	const psy_ui_Size* limit, psy_ui_Size* rv);
-typedef void (*seqeditortrack_fp_onmousedown)(struct SeqEditorTrack*,
+typedef bool (*seqeditortrack_fp_onmousedown)(struct SeqEditorTrack*,
 	psy_ui_MouseEvent*);
-typedef void (*seqeditortrack_fp_onmousemove)(struct SeqEditorTrack*,
+typedef bool (*seqeditortrack_fp_onmousemove)(struct SeqEditorTrack*,
 	psy_ui_MouseEvent*);
-typedef void (*seqeditortrack_fp_onmouseup)(struct SeqEditorTrack*,
+typedef bool (*seqeditortrack_fp_onmouseup)(struct SeqEditorTrack*,
 	psy_ui_MouseEvent*);
 
 typedef struct SeqEditorTrackVTable {
@@ -67,7 +67,7 @@ typedef struct SeqEditorTrack {
 	SeqEditorTrackState* trackstate;
 	bool dragstarting;
 	psy_audio_SequenceEntryNode* drag_sequenceitem_node;
-	psy_dsp_big_beat_t itemdragposition;
+	psy_dsp_big_beat_t itemdragposition;	
 	Workspace* workspace;
 } SeqEditorTrack;
 
@@ -104,28 +104,28 @@ INLINE void seqeditortrack_onpreferredsize(SeqEditorTrack* self,
 	self->vtable->onpreferredsize(self, limit, rv);
 }
 
-INLINE void seqeditortrack_onmousedown(SeqEditorTrack* self,
+INLINE bool seqeditortrack_onmousedown(SeqEditorTrack* self,
 	psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	self->vtable->onmousedown(self, ev);
+	return self->vtable->onmousedown(self, ev);
 }
 
-INLINE void seqeditortrack_onmousemove(SeqEditorTrack* self,
+INLINE bool seqeditortrack_onmousemove(SeqEditorTrack* self,
 	psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	self->vtable->onmousemove(self, ev);
+	return self->vtable->onmousemove(self, ev);
 }
 
-INLINE void seqeditortrack_onmouseup(SeqEditorTrack* self,
+INLINE bool seqeditortrack_onmouseup(SeqEditorTrack* self,
 	psy_ui_MouseEvent* ev)
 {
 	assert(self);
 
-	self->vtable->onmouseup(self, ev);
+	return self->vtable->onmouseup(self, ev);
 }
 
 typedef struct SeqEditorTrackHeader {

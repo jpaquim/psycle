@@ -50,8 +50,8 @@ typedef void (*psy_ui_fp_component_hide)(struct psy_ui_Component*);
 typedef int (*psy_ui_fp_component_visible)(struct psy_ui_Component*);
 typedef int (*psy_ui_fp_component_drawvisible)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_move)(struct psy_ui_Component*, psy_ui_Point);
-typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, psy_ui_Size size);
-typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_ui_Size size);
+typedef void (*psy_ui_fp_component_resize)(struct psy_ui_Component*, psy_ui_Size);
+typedef void (*psy_ui_fp_component_clientresize)(struct psy_ui_Component*, psy_ui_Size);
 typedef void (*psy_ui_fp_component_setposition)(struct psy_ui_Component*, psy_ui_Point, psy_ui_Size);
 typedef psy_ui_Size(*psy_ui_fp_component_framesize)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_scrollto)(struct psy_ui_Component*, intptr_t dx, intptr_t dy);
@@ -64,7 +64,7 @@ typedef void (*psy_ui_fp_component_hideverticalscrollbar)(struct psy_ui_Componen
 typedef void (*psy_ui_fp_component_setverticalscrollrange)(struct psy_ui_Component*, int min, int max);
 typedef void (*psy_ui_fp_component_verticalscrollrange)(struct psy_ui_Component* self, int* scrollmin,
 	int* scrollmax);
-typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component* self, int recursive);
+typedef psy_List* (*psy_ui_fp_component_children)(struct psy_ui_Component*, int recursive);
 typedef void (*psy_ui_fp_component_enableinput)(struct psy_ui_Component*);
 typedef void (*psy_ui_fp_component_preventinput)(struct psy_ui_Component*);
 // vtable events function pointers 
@@ -199,7 +199,7 @@ typedef struct psy_ui_Component {
 	int tabindex;
 	int preventpreferredsizeatalign;
 	psy_ui_AlignType insertaligntype;
-	psy_ui_Margin insertmargin;
+	psy_ui_Margin insertmargin;	
 } psy_ui_Component;
 
 void psy_ui_replacedefaultfont(psy_ui_Component* main, psy_ui_Font*);

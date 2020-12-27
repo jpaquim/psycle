@@ -78,7 +78,8 @@ typedef psy_List psy_audio_SequenceEntryNode;
 
 typedef struct {
 	psy_audio_SequenceEntryNode* entries;	
-	char* name;	
+	char* name;
+	bool mute;
 } psy_audio_SequenceTrack;
 
 void psy_audio_sequencetrack_init(psy_audio_SequenceTrack*);

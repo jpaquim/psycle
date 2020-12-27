@@ -86,8 +86,9 @@ void machineui_dispose(MachineUi* self)
 		psy_ui_component_destroy(&self->paramview->component);
 		free(self->paramview);
 	}
-	if (self->frame) {
+	if (self->frame) {		
 		psy_ui_component_destroy(&self->frame->component);
+
 		free(self->frame);
 	}	
 	free(self->restorename);
@@ -1595,7 +1596,7 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 	psy_List* q;
 	psy_TableIterator it;
 	bool updatevus;
-
+	
 	self->drawvumode = TRUE;
 	updatevus = psy_ui_component_visible(&self->component) && self->drawvumeters;
 	if (updatevus) {
@@ -1629,6 +1630,8 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				psy_audio_Machine* machine;
 				psy_ui_Component* dockparent;
 
+				psy_ui_component_setbackgroundmode(&self->component,
+					psy_ui_BACKGROUND_SET);
 				frame = machineui->frame;
 				psy_ui_component_init(&temp, &self->component);
 				view = frame->view;
@@ -1640,8 +1643,10 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				frame->view = 0;
 				psy_ui_component_destroy(&frame->component);
 				frame = machineframe_alloc();
-				machineframe_init(frame, &self->component, TRUE, self->workspace);
-				psy_ui_component_insert(&frame->notebook.component, view, &frame->help.component);
+				machineframe_init(frame, &self->component, TRUE,
+					self->workspace);
+				psy_ui_component_insert(&frame->notebook.component, view,
+					&frame->help.component);
 				if (paramview) {
 					machineframe_setparamview(frame, paramview, machine);
 				} else {
@@ -1659,8 +1664,10 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				psy_ui_Component temp;
 				psy_ui_Component* view;
 				ParamView* paramview;
-				psy_audio_Machine* machine;
+				psy_audio_Machine* machine;				
 
+				psy_ui_component_setbackgroundmode(&self->component,
+					psy_ui_BACKGROUND_SET);				
 				frame = machineui->frame;
 				psy_ui_component_init(&temp, &self->component);
 				view = frame->view;
@@ -1672,7 +1679,8 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 				psy_ui_component_destroy(&frame->component);
 				frame = machineframe_alloc();
 				machineframe_init(frame, &self->component, FALSE, self->workspace);
-				psy_ui_component_insert(&frame->notebook.component, view, &frame->help.component);
+				psy_ui_component_insert(&frame->notebook.component, view,
+					&frame->help.component);
 				if (paramview) {
 					machineframe_setparamview(frame, paramview, machine);
 				} else {
@@ -1687,10 +1695,12 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 			} else if (machineui->frame->doclose) {
 				psy_ui_Component* dockparent;
 
+				psy_ui_component_setbackgroundmode(&self->component,
+					psy_ui_BACKGROUND_SET);
 				dockparent = psy_ui_component_parent(&machineui->frame->component);
 				psy_ui_component_destroy(&machineui->frame->component);
 				psy_ui_component_align(psy_ui_component_parent(dockparent));
-				psy_ui_component_align(dockparent);
+				psy_ui_component_align(dockparent);				
 			}
 		}
 		if (updatevus) {
@@ -1700,7 +1710,8 @@ void machinewireview_ontimer(MachineWireView* self, uintptr_t timerid)
 	if (updatevus) {
 		psy_ui_component_update(&self->component);
 		self->drawvumode = FALSE;
-		psy_ui_component_setbackgroundmode(&self->component, psy_ui_BACKGROUND_SET);
+		psy_ui_component_setbackgroundmode(&self->component,
+			psy_ui_BACKGROUND_SET);
 	}
 }
 

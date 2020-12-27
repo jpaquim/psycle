@@ -353,7 +353,8 @@ void psy_audio_sequencer_makecurrtracks(psy_audio_Sequencer* self,
 		psy_audio_SequencerTrack* track;
 
 		track = malloc(sizeof(psy_audio_SequencerTrack));
-		if (track) {
+		if (track) {			
+			track->track = (psy_audio_SequenceTrack*)p->entry;
 			track->channeloffset = trackindex * 64;
 			track->iterator = (psy_audio_SequenceTrackIterator*)
 				malloc(sizeof(psy_audio_SequenceTrackIterator));
@@ -646,10 +647,10 @@ void psy_audio_sequencer_insertevents(psy_audio_Sequencer* self)
 						}
 					}
 				}				
-				if (track->iterator->patternnode) {
+				if (track->iterator->patternnode) {					
 					offset = psy_audio_sequencetrackiterator_offset(track->iterator);
 					if (psy_audio_sequencer_isoffsetinwindow(self, offset)) {						
-						psy_audio_sequencer_executeline(self, track, offset);
+						psy_audio_sequencer_executeline(self, track, offset);						
 						work = TRUE;
 					}
 				}
@@ -683,7 +684,7 @@ void psy_audio_sequencer_executeline(psy_audio_Sequencer* self,
 		psy_audio_PatternEntry* entry;
 
 		entry = psy_audio_sequencetrackiterator_patternentry(track->iterator);
-		if (entry && !psy_audio_patterns_istrackmuted(self->sequence->patterns,
+		if (!track->track->mute && entry && !psy_audio_patterns_istrackmuted(self->sequence->patterns,
 				entry->track)) {
 			psy_audio_sequencer_executeglobalcommands(self,
 				entry, track, offset);

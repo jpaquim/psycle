@@ -5,6 +5,7 @@
 #define SEQUENCERVIEW_H
 
 // host
+#include "sequencetrackbox.h"
 #include "workspace.h"
 // audio
 #include <patterns.h>
@@ -127,26 +128,25 @@ INLINE psy_ui_Component* sequenceduration_base(SequenceViewDuration* self)
 	return &self->component;
 }
 
-typedef struct SequenceViewTrackHeader {
+typedef struct SequenceTrackHeaders {
 	// inherits
 	psy_ui_Component component;
 	// signals
 	psy_Signal signal_newtrack;
 	psy_Signal signal_deltrack;
 	psy_Signal signal_trackselected;
-	// internal data
-	psy_ui_Colour colour;
-	psy_ui_Colour colour_highlight;
-	psy_ui_Colour colour_font;	
+	psy_Signal signal_mutetrack;
+	psy_Signal signal_solotrack;
+	// internal data	
 	// references
 	SequenceListViewState* state;	
-} SequenceViewTrackHeader;
+} SequenceTrackHeaders;
 
-void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
+void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_ui_Component* parent, SequenceListViewState*);
 
-INLINE psy_ui_Component* sequenceviewtrackheader_base(
-	SequenceViewTrackHeader* self)
+INLINE psy_ui_Component* sequencetrackheader_base(
+	SequenceTrackHeaders* self)
 {
 	return &self->component;
 }
@@ -187,7 +187,7 @@ typedef struct SequenceView {
 	psy_ui_Scroller scroller;
 	SequenceButtons buttons;
 	psy_ui_Component spacer;
-	SequenceViewTrackHeader trackheader;
+	SequenceTrackHeaders trackheader;
 	SequenceViewDuration duration;	
 	SequencerOptionsBar options;
 	// internal data

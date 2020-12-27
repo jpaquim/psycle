@@ -176,40 +176,38 @@ void sequencelistviewstate_init(SequenceListViewState* self)
 	self->selectedtrack = 0;
 }
 
-// SequenceViewTrackHeader
+// SequenceTrackHeaders
 // prototypes
-static void sequenceviewtrackheader_ondestroy(SequenceViewTrackHeader*);
-static void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader*,
+static void sequencetrackheaders_ondestroy(SequenceTrackHeaders*);
+static void sequencetrackheaders_ondraw(SequenceTrackHeaders*,
 	psy_ui_Graphics*);
-static void sequenceviewtrackheader_drawtext(SequenceViewTrackHeader*,
-	psy_ui_Graphics*, int x, int y, const char* text);
-static void sequenceviewtrackheader_onmousedown(SequenceViewTrackHeader*,
+static void sequencetrackheaders_onmousedown(SequenceTrackHeaders*,
 	psy_ui_MouseEvent*);
 // vtable
-static psy_ui_ComponentVtable trackheaderview_vtable;
-static bool trackheaderview_vtable_initialized = FALSE;
+static psy_ui_ComponentVtable trackheaderviews_vtable;
+static bool trackheaderviews_vtable_initialized = FALSE;
 
-static void trackheaderview_vtable_init(SequenceViewTrackHeader* self)
+static void trackheaderview_vtable_init(SequenceTrackHeaders* self)
 {
-	if (!trackheaderview_vtable_initialized) {
-		trackheaderview_vtable = *(self->component.vtable);
-		trackheaderview_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
-			sequenceviewtrackheader_ondestroy;
-		trackheaderview_vtable.ondraw = (psy_ui_fp_component_ondraw)
-			sequenceviewtrackheader_ondraw;
-		trackheaderview_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
-			sequenceviewtrackheader_onmousedown;
-		trackheaderview_vtable_initialized = TRUE;
+	if (!trackheaderviews_vtable_initialized) {
+		trackheaderviews_vtable = *(self->component.vtable);
+		trackheaderviews_vtable.ondestroy = (psy_ui_fp_component_ondestroy)
+			sequencetrackheaders_ondestroy;
+		trackheaderviews_vtable.ondraw = (psy_ui_fp_component_ondraw)
+			sequencetrackheaders_ondraw;
+		trackheaderviews_vtable.onmousedown = (psy_ui_fp_component_onmousedown)
+			sequencetrackheaders_onmousedown;
+		trackheaderviews_vtable_initialized = TRUE;
 	}
 }
 
 // implemenetation
-void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
+void sequencetrackheaders_init(SequenceTrackHeaders* self,
 	psy_ui_Component* parent, SequenceListViewState* state)
 {	
 	psy_ui_component_init(&self->component, parent);
 	trackheaderview_vtable_init(self);
-	self->component.vtable = &trackheaderview_vtable;
+	self->component.vtable = &trackheaderviews_vtable;
 	self->state = state;	
 	//psy_ui_component_setbackgroundcolour(&self->component,
 		//psy_ui_colour_make(0x00262626));
@@ -217,77 +215,55 @@ void sequenceviewtrackheader_init(SequenceViewTrackHeader* self,
 		psy_ui_size_make(psy_ui_value_makepx(0),
 			psy_ui_value_makeeh(1)));
 	psy_ui_component_preventalign(&self->component);
-	self->colour = psy_ui_colour_make(0x00303030);
-	self->colour_highlight = psy_ui_colour_make(0x00545454);
-	self->colour_font = psy_ui_colour_make(0x00B2B2B2);	
+	
 	psy_signal_init(&self->signal_newtrack);
 	psy_signal_init(&self->signal_deltrack);
 	psy_signal_init(&self->signal_trackselected);
+	psy_signal_init(&self->signal_mutetrack);
+	psy_signal_init(&self->signal_solotrack);
 }
 
-void sequenceviewtrackheader_ondestroy(SequenceViewTrackHeader* self)
+void sequencetrackheaders_ondestroy(SequenceTrackHeaders* self)
 {
 	psy_signal_dispose(&self->signal_newtrack);
 	psy_signal_dispose(&self->signal_deltrack);
 	psy_signal_dispose(&self->signal_trackselected);
+	psy_signal_dispose(&self->signal_mutetrack);
+	psy_signal_dispose(&self->signal_solotrack);
 }
 
-void sequenceviewtrackheader_ondraw(SequenceViewTrackHeader* self,
+void sequencetrackheaders_ondraw(SequenceTrackHeaders* self,
 	psy_ui_Graphics* g)
 {
 	if (self->state->sequence) {
 		psy_audio_SequenceTrackNode* p;
-		int cpx = 0;
-		int centery;
-		int lineheight = 1;		
-		int c = 0;
-		psy_ui_Rectangle r;
+		int t;
+		int cpx;
 		psy_ui_IntSize size;
 		psy_ui_TextMetric tm;
+		SequenceTrackBox trackheader;	
 
 		size = psy_ui_component_intsize(&self->component);
-		tm = psy_ui_component_textmetric(&self->component);
-		centery = size.height - 1; // lineheight) / 2;
-		cpx = self->state->margin;		
-		psy_ui_settextcolour(g, self->colour_font);
-		for (p = self->state->sequence->tracks; p != NULL; p = p->next,
-			cpx += self->state->trackwidth, ++c) {
-			char text[64];
-
-			psy_ui_setrectangle(&r,
-				cpx, 0, self->state->trackwidth - 5, size.height);			
-			if (self->state->selectedtrack != c) {
-				psy_ui_setcolour(g, self->colour);				
-			} else {
-				psy_ui_setcolour(g, self->colour_highlight);				
-			}
-			psy_ui_drawrectangle(g, r);
-			psy_snprintf(text, 64, "%.2X", (int)c);			
-			sequenceviewtrackheader_drawtext(self, g, cpx + (int)(tm.tmAveCharWidth * 0.2), 0, text);
-			sequenceviewtrackheader_drawtext(self, g, cpx + (int)(tm.tmAveCharWidth * 5), 0, "S");
-			sequenceviewtrackheader_drawtext(self, g, cpx + (int)(tm.tmAveCharWidth * 8), 0, "M");
-			if (c != 0) {
-				sequenceviewtrackheader_drawtext(self, g, cpx + self->state->trackwidth -
-					(int)(tm.tmAveCharWidth * 3.5), 0, "X");
-			}
+		tm = psy_ui_component_textmetric(&self->component);		
+		for (cpx = self->state->margin, p = self->state->sequence->tracks, t = 0;
+				p != NULL; psy_list_next(&p),
+				cpx += self->state->trackwidth, ++t) {			
+			psy_audio_SequenceTrack* track;
+			track = (psy_audio_SequenceTrack*)p->entry;			
+			sequencetrackbox_init(&trackheader,
+				psy_ui_rectangle_make(cpx, 0, self->state->trackwidth, size.height),
+				tm, track, t,
+				self->state->selectedtrack == t);
+			sequencetrackbox_draw(&trackheader, g);
 		}
-		psy_ui_setrectangle(&r,
-			cpx, 0, self->state->trackwidth - 5, size.height);
-		psy_ui_setcolour(g, self->colour);
-		psy_ui_drawrectangle(g, r);
-		sequenceviewtrackheader_drawtext(self, g,
-			cpx + (int)((self->state->trackwidth - tm.tmAveCharWidth * 6) / 2), 0,
-			"Add");
+		sequencetrackbox_init(&trackheader,
+			psy_ui_rectangle_make(cpx, 0, self->state->trackwidth, size.height),
+			tm, NULL, 0, 0);
+		sequencetrackbox_draw(&trackheader, g);
 	}	
 }
 
-void sequenceviewtrackheader_drawtext(SequenceViewTrackHeader* self,
-	psy_ui_Graphics* g, int x, int y, const char* text)
-{	
-	psy_ui_textout(g, x + 3, y, text, psy_strlen(text));
-}
-
-void sequenceviewtrackheader_onmousedown(SequenceViewTrackHeader* self,
+void sequencetrackheaders_onmousedown(SequenceTrackHeaders* self,
 	psy_ui_MouseEvent* ev)
 {	
 	uintptr_t selectedtrack;
@@ -296,17 +272,40 @@ void sequenceviewtrackheader_onmousedown(SequenceViewTrackHeader* self,
 	if (selectedtrack >= psy_audio_sequence_sizetracks(self->state->sequence)) {
 		psy_signal_emit(&self->signal_newtrack, self, 1,
 			(int)psy_audio_sequence_sizetracks(self->state->sequence));
-	} else {
+	} else {				
 		psy_ui_TextMetric tm;
-		
+		psy_ui_IntSize size;
+		SequenceTrackBox trackbox;
+		psy_audio_SequenceTrack* track;
+
 		tm = psy_ui_component_textmetric(&self->component);
-		if (selectedtrack != 0 && ev->x >= selectedtrack * self->state->trackwidth + self->state->trackwidth -
-				(int)(tm.tmAveCharWidth * 3.5)) {
-			psy_signal_emit(&self->signal_deltrack, self, 1, (int)selectedtrack);
-		} else {
-			psy_signal_emit(&self->signal_trackselected, self, 1, (int)selectedtrack);
-		}
+		size = psy_ui_component_intsize(&self->component);		
+		track = (psy_audio_SequenceTrack*)psy_audio_sequence_track_at(
+			self->state->sequence, selectedtrack);
+		sequencetrackbox_init(&trackbox,
+			psy_ui_rectangle_make(
+				selectedtrack * self->state->trackwidth, 0,
+				self->state->trackwidth, size.height),
+			tm, track, selectedtrack,
+			self->state->selectedtrack == selectedtrack);
+		switch (sequencetrackbox_hittest(&trackbox, ev->x, ev->y)) {		
+			case SEQUENCETRACKBOXEVENT_MUTE:
+				psy_signal_emit(&self->signal_mutetrack, self, 1, (int)selectedtrack);
+				break;
+			case SEQUENCETRACKBOXEVENT_SOLO:
+				psy_signal_emit(&self->signal_solotrack, self, 1, (int)selectedtrack);
+				break;
+			case SEQUENCETRACKBOXEVENT_DEL:
+				psy_signal_emit(&self->signal_deltrack, self, 1, (int)selectedtrack);
+				break;
+			// fallthrough
+			case SEQUENCETRACKBOXEVENT_SELECT:				
+			default:
+				psy_signal_emit(&self->signal_trackselected, self, 1, (int)selectedtrack);
+				break;
+		}		
 	}
+	psy_ui_component_invalidate(&self->component);
 }
 
 // SequenceListView
@@ -823,6 +822,10 @@ static void sequenceview_ontrackselected(SequenceView*, psy_ui_Component* sender
 	uintptr_t trackindex);
 static void sequenceview_ondeltrack(SequenceView*, psy_ui_Component* sender,
 	uintptr_t trackindex);
+static void sequenceview_onsolotrack(SequenceView*, psy_ui_Component* sender,
+	uintptr_t trackindex);
+static void sequenceview_onmutetrack(SequenceView*, psy_ui_Component* sender,
+	uintptr_t trackindex);
 static void sequenceview_onclear(SequenceView*);
 static void sequenceview_onrename(SequenceView*);
 static void sequenceview_oncut(SequenceView*);
@@ -886,7 +889,7 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 	psy_ui_component_preventalign(&self->spacer);
 	psy_ui_component_setalign(&self->spacer, psy_ui_ALIGN_TOP);
 	// header
-	sequenceviewtrackheader_init(&self->trackheader, &self->component,
+	sequencetrackheaders_init(&self->trackheader, &self->component,
 		&self->state);
 	psy_ui_component_setalign(&self->trackheader.component, psy_ui_ALIGN_TOP);
 	// options
@@ -913,6 +916,10 @@ void sequenceview_init(SequenceView* self, psy_ui_Component* parent,
 		sequenceview_ontrackselected);	
 	psy_signal_connect(&self->trackheader.signal_deltrack, self,
 		sequenceview_ondeltrack);
+	psy_signal_connect(&self->trackheader.signal_solotrack, self,
+		sequenceview_onsolotrack);
+	psy_signal_connect(&self->trackheader.signal_mutetrack, self,
+		sequenceview_onmutetrack);
 	psy_signal_connect(&self->buttons.clear.signal_clicked, self,
 		sequenceview_onclear);
 	psy_signal_connect(&self->buttons.rename.signal_clicked, self,
@@ -1147,6 +1154,23 @@ void sequenceview_ondeltrack(SequenceView* self, psy_ui_Component* sender,
 	psy_ui_component_updateoverflow(&self->listview.component);
 	psy_ui_component_invalidate(&self->component);
 	sequencelistview_select(&self->listview, trackindex, 0);
+}
+
+void sequenceview_onsolotrack(SequenceView* self, psy_ui_Component* sender,
+	uintptr_t trackindex)
+{
+
+}
+
+void sequenceview_onmutetrack(SequenceView* self, psy_ui_Component* sender,
+	uintptr_t trackindex)
+{
+	psy_audio_SequenceTrack* track;
+
+	track = psy_audio_sequence_track_at(self->state.sequence, trackindex);
+	if (track) {
+		track->mute = !track->mute;
+	}
 }
 
 void sequenceview_onclear(SequenceView* self)
