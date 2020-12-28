@@ -8,6 +8,8 @@
 #include "mainframe.h"
 // ui
 #include <uiapp.h>
+// std
+#include <stdlib.h>
 // file
 #include <dir.h>
 
@@ -60,7 +62,7 @@ int psycle_run(uintptr_t instance, int options)
 	char workpath[_MAX_PATH];
 	const char* env = 0;
 	extern psy_ui_App app;
-	MainFrame mainframe;
+	MainFrame* mainframe;
 	
 	// Adds the app path to the environment path to find some
 	// modules (scilexer ...)
@@ -73,25 +75,29 @@ int psycle_run(uintptr_t instance, int options)
 	// Initialize the ui
 	psy_ui_app_init(&app, instance);
 	// Creates the mainframe
-	mainframe_init(&mainframe);
-	// The mainframe has been initialized, so show it.
-	if (mainframe_showmaximizedatstart(&mainframe)) {
+	mainframe = (MainFrame*)malloc(sizeof(MainFrame));
+	if (mainframe) {
+		mainframe_init(mainframe);
+		// The mainframe has been initialized, so show it.
+		if (mainframe_showmaximizedatstart(mainframe)) {
 #ifdef DIVERSALIS__OS__MICROSOFT		
-		psy_ui_component_showstate(&mainframe.component, SW_MAXIMIZE);
+			psy_ui_component_showstate(&mainframe->component, SW_MAXIMIZE);
 #else
-		psy_ui_component_resize(&mainframe.component,
-			psy_ui_size_make(
-				psy_ui_value_makepx(1024),
-				psy_ui_value_makepx(768)));
-		psy_ui_component_showstate(&mainframe.component, 0);
+			psy_ui_component_resize(&mainframe.component,
+				psy_ui_size_make(
+					psy_ui_value_makepx(1024),
+					psy_ui_value_makepx(768)));
+			psy_ui_component_showstate(&mainframe.component, 0);
 #endif		
-	} else {
-		psy_ui_component_showstate(&mainframe.component, options);
+		} else {
+			psy_ui_component_showstate(&mainframe->component, options);
+		}
+		// Starts the app event loop
+		err = psy_ui_app_run(&app);
+		// The event loop has finished, dispose any global ui resources
 	}
-	// Starts the app event loop
-	err = psy_ui_app_run(&app);
-	// The event loop has finished, dispose any global ui resources
 	psy_ui_app_dispose(&app);
+	free(mainframe);
 	// Restores the environment path
 	if (env) {
 		setpathenv(env);

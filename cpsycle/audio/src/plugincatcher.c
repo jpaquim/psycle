@@ -243,6 +243,9 @@ int onenumdir(psy_audio_PluginCatcher* self, const char* path, int type)
 			}
 			break;
 		case MACH_VST:
+			if (strstr(path, "VK-1")) {
+				self = self;
+			}
 			if (psy_audio_plugin_vst_test(path, &macinfo)) {
 				plugincatcher_catchername(self, path, name, macinfo.shellidx);
 				plugincatcher_makeplugininfo(self, name, path, macinfo.type,

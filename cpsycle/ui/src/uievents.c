@@ -5,8 +5,8 @@
 
 #include "uievents.h"
 
-void psy_ui_keyevent_init(psy_ui_KeyEvent* self, int keycode, int keydata,
-	int shift, int ctrl, int alt, int repeat)
+void psy_ui_keyevent_init(psy_ui_KeyEvent* self, intptr_t keycode, intptr_t keydata,
+	bool shift, bool ctrl, bool alt, int repeat)
 {
 	self->keycode = keycode;
 	self->keydata = keydata;
@@ -29,8 +29,8 @@ void psy_ui_keyevent_preventdefault(psy_ui_KeyEvent* self)
 	self->preventdefault = TRUE;
 }
 
-void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, int x, int y, int button,
-	int delta, int shift, int ctrl)
+void psy_ui_mouseevent_init(psy_ui_MouseEvent* self, intptr_t x, intptr_t y, intptr_t button,
+	intptr_t delta, bool shift, bool ctrl)
 {
 	self->x = x;
 	self->y = y;

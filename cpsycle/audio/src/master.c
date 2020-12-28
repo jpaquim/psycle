@@ -371,8 +371,8 @@ void master_level_describe(psy_audio_Master* self,
 
 psy_audio_MachineParam* parameter(psy_audio_Master* self, uintptr_t id)
 {
-	int col = id / NUMROWS;
-	int row = id % NUMROWS;
+	uintptr_t col = id / NUMROWS;
+	uintptr_t row = id % NUMROWS;
 
 	if (col < numinputwires(self) + 1) {
 		if (row == 0) {

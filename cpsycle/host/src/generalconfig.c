@@ -107,7 +107,7 @@ bool generalconfig_showstepsequencer(const GeneralConfig* self)
 	return psy_property_at_bool(self->general, "showstepsequencer", FALSE);
 }
 
-bool generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)
+void generalconfig_setstepsequencershowstate(GeneralConfig* self, bool state)
 {
 	assert(self);
 

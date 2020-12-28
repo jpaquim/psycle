@@ -31,6 +31,8 @@
 
 #include <xmmintrin.h>
 
+#define USE_SSE2
+
 /* yes I know, the top of this file is quite ugly */
 
 #ifdef _MSC_VER /* visual c++ */
@@ -459,6 +461,7 @@ v4sf cos_ps(v4sf x) { // any x
   /* scale by 4/Pi */
   y = _mm_mul_ps(x, *(v4sf*)_ps_cephes_FOPI);
   
+
 #ifdef USE_SSE2
   /* store the integer part of y in mm0 */
   emm2 = _mm_cvttps_epi32(y);

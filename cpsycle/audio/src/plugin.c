@@ -138,7 +138,7 @@ int pluginparam_describe(psy_audio_PluginMachineParam* self, char* text)
 
 void pluginparam_range(psy_audio_PluginMachineParam* self, intptr_t* minval,
 	intptr_t* maxval)
-{
+{		
 	*minval = self->cinfo->Parameters[self->index]->MinValue;
 	*maxval = self->cinfo->Parameters[self->index]->MaxValue;
 }
@@ -203,17 +203,17 @@ static void disposeparameters(psy_audio_Plugin*);
 static void tweakdefaults(psy_audio_Plugin*, CMachineInfo* info);
 static void clearparameters(psy_audio_Plugin* self);
 // programs
-static void programname(psy_audio_Plugin*, int bnkidx, int prgIdx, char* val);
-static int numprograms(psy_audio_Plugin*);
-static void setcurrprogram(psy_audio_Plugin*, int prgIdx);
-static int currprogram(psy_audio_Plugin*);
-static void bankname(psy_audio_Plugin*, int bnkidx, char* val);
-static int numbanks(psy_audio_Plugin*);
-static void setcurrbank(psy_audio_Plugin*, int bnkIdx);
-static int currbank(psy_audio_Plugin*);
+static void programname(psy_audio_Plugin*, uintptr_t bnkidx, uintptr_t prgidx, char* val);
+static uintptr_t numprograms(psy_audio_Plugin*);
+static void setcurrprogram(psy_audio_Plugin*, uintptr_t prgidx);
+static uintptr_t currprogram(psy_audio_Plugin*);
+static void bankname(psy_audio_Plugin*, uintptr_t bnkidx, char* val);
+static uintptr_t numbanks(psy_audio_Plugin*);
+static void setcurrbank(psy_audio_Plugin*, uintptr_t bnkidx);
+static uintptr_t currbank(psy_audio_Plugin*);
 
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_Plugin* self)
 {
@@ -221,22 +221,21 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable = *(psy_audio_plugin_base(self)->vtable);
 		vtable.setcallback = (fp_machine_setcallback)setcallback;
 		vtable.clone = (fp_machine_clone)clone;
-		vtable.hostevent = (fp_machine_hostevent) hostevent;
-		vtable.seqtick = (fp_machine_seqtick) seqtick;
+		vtable.hostevent = (fp_machine_hostevent)hostevent;
+		vtable.seqtick = (fp_machine_seqtick)seqtick;
 		vtable.stop = (fp_machine_stop) stop;
-		vtable.newline = (fp_machine_newline)
-			newline;
+		vtable.newline = (fp_machine_newline)newline;
 		vtable.info = (fp_machine_info) info;
 		vtable.modulepath = (fp_machine_modulepath)modulepath;
 		vtable.shellidx = (fp_machine_shellidx)shellidx;
 		vtable.numparametercols = (fp_machine_numparametercols)
 			numparametercols;
-		vtable.numparameters = (fp_machine_numparameters) numparameters;
-		vtable.parameter = (fp_machine_parameter) parameter;
-		vtable.dispose = (fp_machine_dispose) dispose;
-		vtable.generateaudio = (fp_machine_generateaudio) generateaudio;
-		vtable.numinputs = (fp_machine_numinputs) numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) numoutputs;
+		vtable.numparameters = (fp_machine_numparameters)numparameters;
+		vtable.parameter = (fp_machine_parameter)parameter;
+		vtable.dispose = (fp_machine_dispose)dispose;
+		vtable.generateaudio = (fp_machine_generateaudio)generateaudio;
+		vtable.numinputs = (fp_machine_numinputs)numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)numoutputs;
 		vtable.putdata = (fp_machine_putdata)putdata;
 		vtable.data = (fp_machine_data)data;
 		vtable.datasize = (fp_machine_datasize)datasize;
@@ -245,8 +244,8 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.presets = (fp_machine_presets)presets;
 		vtable.acceptpresets = (fp_machine_acceptpresets)acceptpresets;
 		vtable.command = (fp_machine_command)command;
-		vtable.loadspecific = (fp_machine_loadspecific) loadspecific;
-		vtable.savespecific = (fp_machine_savespecific) savespecific;
+		vtable.loadspecific = (fp_machine_loadspecific)loadspecific;
+		vtable.savespecific = (fp_machine_savespecific)savespecific;
 		vtable.programname = (fp_machine_programname)programname;
 		vtable.numprograms = (fp_machine_numprograms)numprograms;
 		vtable.setcurrprogram = (fp_machine_setcurrprogram)setcurrprogram;
@@ -255,7 +254,7 @@ static void vtable_init(psy_audio_Plugin* self)
 		vtable.numbanks = (fp_machine_numbanks)numbanks;
 		vtable.setcurrbank = (fp_machine_setcurrbank)setcurrbank;
 		vtable.currbank = (fp_machine_currbank)currbank;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -436,12 +435,6 @@ void seqtick(psy_audio_Plugin* self, uintptr_t channel,
 	}
 }
 
-void stop(psy_audio_Plugin* self)
-{
-	mi_stop(self->mi);
-	psy_audio_logicalchannels_reset(&self->logicalchannels);
-}
-
 void generateaudio(psy_audio_Plugin* self, psy_audio_BufferContext* bc)
 {	
 	mi_work(self->mi,
@@ -454,6 +447,14 @@ int hostevent(psy_audio_Plugin* self, int const eventNr, int val1, float val2)
 {
 	return mi_hostevent(self->mi, eventNr, val1, val2);
 }
+
+
+void stop(psy_audio_Plugin* self)
+{
+	mi_stop(self->mi);
+	psy_audio_logicalchannels_reset(&self->logicalchannels);
+}
+
 
 void newline(psy_audio_Plugin* self)
 {	
@@ -590,9 +591,23 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 			int32_t temp;
 			psy_audio_MachineParam* param;
 			
-			psyfile_read(songfile->file, &temp, sizeof(temp));			
-			param = psy_audio_machine_parameter(psy_audio_plugin_base(self), i);
-			psy_audio_machine_parameter_tweak_scaled(psy_audio_plugin_base(self), param, temp);			
+			psyfile_read(songfile->file, &temp, sizeof(temp));
+			if (i < numparameters(self)) {
+				intptr_t minval;
+				intptr_t maxval;
+
+				param = psy_audio_machine_parameter(psy_audio_plugin_base(self), i);
+				if (param) {
+					psy_audio_machine_parameter_range(psy_audio_plugin_base(self),
+						param, &minval, &maxval);
+					// skip out of range values (mfc-psycle behaviour), because
+					// tweak will set them to min or maxval
+					if (temp >= minval && temp <= maxval) {
+						psy_audio_machine_parameter_tweak_scaled(
+							psy_audio_plugin_base(self), param, temp);
+					}
+				}
+			}
 		}
 		size -= sizeof(numparams) + sizeof(int) * numparams;
 		if(size) {
@@ -613,11 +628,12 @@ void loadspecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 	uintptr_t slot)
 {
-	uint32_t count = psy_audio_machine_numparameters(psy_audio_plugin_base(self));
-	uint32_t size2 = 0;
+	uint32_t count;
+	uint32_t size2;
 	uint32_t size;
 	uint32_t i;
 
+	count = psy_audio_machine_numparameters(psy_audio_plugin_base(self));
 	size2 = mi_getdatasize(self->mi);
 	size = size2 + sizeof(count) + sizeof(int) * count;
 	psyfile_write(songfile->file, &size, sizeof(size));
@@ -633,13 +649,13 @@ void savespecific(psy_audio_Plugin* self, psy_audio_SongFile* songfile,
 		psyfile_write_int32(songfile->file, scaled);
 	}
 	if (size2) {
-		unsigned char* pData;
+		unsigned char* data;
 
-		pData = malloc(size2);
-		mi_getdata(self->mi, pData);
-		psyfile_write(songfile->file, pData, size2); //data chunk
-		free(pData);
-		pData = 0;
+		data = malloc(size2);
+		mi_getdata(self->mi, data);
+		psyfile_write(songfile->file, data, size2); //data chunk
+		free(data);
+		data = NULL;
 	}
 }
 
@@ -667,12 +683,12 @@ void command(psy_audio_Plugin* self)
 	mi_command(self->mi);
 }
 
-void programname(psy_audio_Plugin* self, int bnkidx, int prgIdx, char* val)
+void programname(psy_audio_Plugin* self, uintptr_t bnkidx, uintptr_t prgidx, char* val)
 {
 	if (self->presets && bnkidx == 0) {
 		psy_audio_Preset* preset;
 
-		preset = psy_audio_presets_at(self->presets, prgIdx);
+		preset = psy_audio_presets_at(self->presets, prgidx);
 		if (preset) {
 			psy_snprintf(val, 256, "%s", psy_audio_preset_name(preset));
 			return;
@@ -681,7 +697,7 @@ void programname(psy_audio_Plugin* self, int bnkidx, int prgIdx, char* val)
 	val[0] = '\0';
 }
 
-int numprograms(psy_audio_Plugin* self)
+uintptr_t numprograms(psy_audio_Plugin* self)
 {
 	if (self->presets) {
 		return psy_audio_presets_size(self->presets);
@@ -689,14 +705,17 @@ int numprograms(psy_audio_Plugin* self)
 	return 0;
 }
 
-void setcurrprogram(psy_audio_Plugin* self, int prgIdx)
+void setcurrprogram(psy_audio_Plugin* self, uintptr_t prgidx)
 {
-	self->currprog = prgIdx;
+	self->currprog = prgidx;
 	if (self->presets) {
 		psy_audio_Preset* preset;
 
-		preset = psy_table_at(&self->presets->container, (uintptr_t)self->currprog);
-		psy_audio_plugin_tweakpreset(self, preset);
+		preset = (psy_audio_Preset*)psy_table_at(
+			&self->presets->container, self->currprog);
+		if (preset) {
+			psy_audio_plugin_tweakpreset(self, preset);
+		}
 	}
 }
 
@@ -710,11 +729,11 @@ void psy_audio_plugin_tweakpreset(psy_audio_Plugin* self, psy_audio_Preset* pres
 			psy_tableiterator_inc(&it)) {
 			psy_audio_MachineParam* param;
 
-			param = psy_audio_machine_tweakparameter(psy_audio_plugin_base(self),
-				psy_tableiterator_key(&it));
+			param = psy_audio_machine_tweakparameter(
+				psy_audio_plugin_base(self), psy_tableiterator_key(&it));
 			if (param) {
-				psy_audio_machine_parameter_tweak_scaled(psy_audio_plugin_base(self),
-					param,
+				psy_audio_machine_parameter_tweak_scaled(
+					psy_audio_plugin_base(self), param,
 					(intptr_t)psy_tableiterator_value(&it));
 			}
 		}
@@ -724,14 +743,14 @@ void psy_audio_plugin_tweakpreset(psy_audio_Plugin* self, psy_audio_Preset* pres
 	}
 }
 
-int currprogram(psy_audio_Plugin* self)
+uintptr_t currprogram(psy_audio_Plugin* self)
 {
 	return  (self->currprog != UINTPTR_MAX)
 		? (int)self->currprog
 		: 0;
 }
 
-void bankname(psy_audio_Plugin* self, int bnkidx, char* val)
+void bankname(psy_audio_Plugin* self, uintptr_t bnkidx, char* val)
 {
 	if (bnkidx < numbanks(self)) {
 		psy_snprintf(val, 256, "Internal %d", bnkidx + 1);
@@ -740,16 +759,16 @@ void bankname(psy_audio_Plugin* self, int bnkidx, char* val)
 	}
 }
 
-int numbanks(psy_audio_Plugin* self)
+uintptr_t numbanks(psy_audio_Plugin* self)
 {
 	return 1;
 }
 
-void setcurrbank(psy_audio_Plugin* self, int bnkIdx)
+void setcurrbank(psy_audio_Plugin* self, uintptr_t bnkidx)
 {	
 }
 
-int currbank(psy_audio_Plugin* self)
+uintptr_t currbank(psy_audio_Plugin* self)
 {
 	return 0;
 }

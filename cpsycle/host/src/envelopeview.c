@@ -283,7 +283,7 @@ void envelopebox_setzoom(EnvelopeBox* self, float zoomleft, float zoomright)
 	self->zoomleft = zoomleft;
 	self->zoomright = zoomright;
 	if (fabs(self->zoomleft - self->zoomright) < 0.001) {
-		self->zoomright = self->zoomleft + 0.001;
+		self->zoomright = self->zoomleft + 0.001f;
 	}
 	psy_ui_component_invalidate(&self->component);
 }

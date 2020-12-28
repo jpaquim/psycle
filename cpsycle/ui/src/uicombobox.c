@@ -127,14 +127,14 @@ void onownerdraw(psy_ui_ComboBox* self, psy_ui_Graphics* g)
 	psy_ui_IntPoint arrow_down[4];
 	psy_ui_IntPoint arrow_left[4];
 	psy_ui_IntPoint arrow_right[4];
-	int ax;
-	int ay;
+	intptr_t ax;
+	intptr_t ay;
 	intptr_t sel;
 	psy_ui_TextMetric tm;
-	int vcenter;
-	int varrowcenter;
-	unsigned int arrowcolour = 0x00777777;
-	unsigned int arrowhighlightcolour = 0x00FFFFFF;
+	intptr_t vcenter;
+	intptr_t varrowcenter;
+	uint32_t arrowcolour = 0x00777777;
+	uint32_t arrowhighlightcolour = 0x00FFFFFF;
 
 	size = psy_ui_component_size(&self->component);
 	tm = psy_ui_component_textmetric(&self->component);

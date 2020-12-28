@@ -129,3 +129,14 @@ const char* translator_remove_section(psy_Translator* self, const char* key)
 	}
 	return rv;
 }
+
+const char* psy_translator_langid(const psy_Translator* self)
+{
+	psy_Property* p;
+
+	p = psy_property_at(self->dictionary, "lang", PSY_PROPERTY_TYPE_NONE);
+	if (p) {
+		return psy_property_item_str(p);
+	}
+	return "en";
+}

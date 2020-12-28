@@ -59,9 +59,9 @@ void splitbar_ondraw(psy_ui_SplitBar* self, psy_ui_Graphics* g)
 {
 	psy_ui_IntSize size;
 	psy_ui_TextMetric tm;
-	int center;
-	int thumbsize;
-	int ident;
+	intptr_t center;
+	intptr_t thumbsize;
+	intptr_t ident;
 	
 	size = psy_ui_intsize_init_size(psy_ui_component_size(&self->component), &tm);
 	thumbsize = 30;

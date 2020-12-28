@@ -245,7 +245,7 @@ void cpuview_ontimer(CPUView* self, psy_ui_Component* sender,
 		(lpBuffer.ullTotalPageFile / (float)(1 << 20)));
 	psy_ui_label_settext(&self->resources_swap.value, buffer);
 #if defined _WIN64
-	psy_snsprintf(buffer, 128, "%.0fG (of %.0fG)",
+	psy_snprintf(buffer, 128, "%.0fG (of %.0fG)",
 		(lpBuffer.ullAvailVirtual / (float)(1 << 30)),
 		(lpBuffer.ullTotalVirtual / (float)(1 << 30)));
 #elif defined _WIN32

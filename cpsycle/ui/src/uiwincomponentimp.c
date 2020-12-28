@@ -41,9 +41,9 @@ static void dev_showstate(psy_ui_win_ComponentImp*, int state);
 static void dev_hide(psy_ui_win_ComponentImp*);
 static int dev_visible(psy_ui_win_ComponentImp*);
 static int dev_drawvisible(psy_ui_win_ComponentImp*);
-static void dev_move(psy_ui_win_ComponentImp*, int left, int top);
+static void dev_move(psy_ui_win_ComponentImp*, intptr_t left, intptr_t top);
 static void dev_resize(psy_ui_win_ComponentImp*, psy_ui_Size);
-static void dev_clientresize(psy_ui_win_ComponentImp*, int width, int height);
+static void dev_clientresize(psy_ui_win_ComponentImp*, intptr_t width, intptr_t height);
 static psy_ui_Rectangle dev_position(psy_ui_win_ComponentImp*);
 static void dev_setposition(psy_ui_win_ComponentImp*, psy_ui_Point topleft,
 	psy_ui_Size);
@@ -336,10 +336,10 @@ int dev_drawvisible(psy_ui_win_ComponentImp* self)
 	return IsWindowVisible(self->hwnd);
 }
 
-void dev_move(psy_ui_win_ComponentImp* self, int left, int top)
+void dev_move(psy_ui_win_ComponentImp* self, intptr_t left, intptr_t top)
 {
 	SetWindowPos(self->hwnd, NULL,
-		left, top,
+		(int)left, (int)top,
 		0, 0,
 		SWP_NOZORDER | SWP_NOSIZE);
 }
@@ -352,22 +352,22 @@ void dev_resize(psy_ui_win_ComponentImp* self, psy_ui_Size size)
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, NULL,
 		0, 0,
-		psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm),
+		(int)psy_ui_value_px(&size.width, &tm),
+		(int)psy_ui_value_px(&size.height, &tm),
 		SWP_NOZORDER | SWP_NOMOVE);
 	
 	self->sizecache = size;
 	self->sizecachevalid = TRUE;
 }
 
-void dev_clientresize(psy_ui_win_ComponentImp* self, int width, int height)
+void dev_clientresize(psy_ui_win_ComponentImp* self, intptr_t width, intptr_t height)
 {
 	RECT rc;
 	
 	rc.left = 0;
 	rc.top = 0;
-	rc.right = width;
-	rc.bottom = height;
+	rc.right = (int)width;
+	rc.bottom = (int)height;
 	AdjustWindowRectEx(&rc, windowstyle(self),
 		GetMenu(self->hwnd) != NULL,
 		windowexstyle(self));
@@ -404,9 +404,10 @@ void dev_setposition(psy_ui_win_ComponentImp* self, psy_ui_Point topleft,
 	tm = dev_textmetric(self);
 	self->sizecachevalid = FALSE;
 	SetWindowPos(self->hwnd, 0,
-		psy_ui_value_px(&topleft.x, &tm),
-		psy_ui_value_px(&topleft.y, &tm),
-		psy_ui_value_px(&size.width, &tm), psy_ui_value_px(&size.height, &tm),
+		(int)psy_ui_value_px(&topleft.x, &tm),
+		(int)psy_ui_value_px(&topleft.y, &tm),
+		(int)psy_ui_value_px(&size.width, &tm),
+		(int)psy_ui_value_px(&size.height, &tm),
 		SWP_NOZORDER);	
 	dev_updatesize(self);
 }
@@ -452,7 +453,7 @@ psy_ui_Size dev_framesize(psy_ui_win_ComponentImp* self)
 
 void dev_scrollto(psy_ui_win_ComponentImp* self, intptr_t dx, intptr_t dy)
 {
-	ScrollWindow(self->hwnd, dx, dy, NULL, NULL);
+	ScrollWindow(self->hwnd, (int)dx, (int)dy, NULL, NULL);
 	UpdateWindow(self->hwnd);
 }
 
@@ -531,10 +532,10 @@ void dev_invalidaterect(psy_ui_win_ComponentImp* self,
 {
 	RECT rc;
 
-	rc.left = r->left - self->component->scroll.x;
-	rc.top = r->top - self->component->scroll.y;
-	rc.right = r->right - self->component->scroll.x;
-	rc.bottom = r->bottom - self->component->scroll.y;
+	rc.left = (int)(r->left - self->component->scroll.x);
+	rc.top = (int)(r->top - self->component->scroll.y);
+	rc.right = (int)(r->right - self->component->scroll.x);
+	rc.bottom = (int)(r->bottom - self->component->scroll.y);
 	InvalidateRect(self->hwnd, &rc, FALSE);
 }
 
@@ -747,7 +748,7 @@ void dev_setcursor(psy_ui_win_ComponentImp* self, psy_ui_CursorStyle
 void dev_starttimer(psy_ui_win_ComponentImp* self, uintptr_t id,
 	uintptr_t interval)
 {
-	SetTimer(self->hwnd, id, interval, 0);
+	SetTimer(self->hwnd, id, (UINT)interval, 0);
 }
 
 void dev_stoptimer(psy_ui_win_ComponentImp* self, uintptr_t id)
@@ -834,7 +835,7 @@ int windowstyle(psy_ui_win_ComponentImp* self)
 {
 	int rv;
 #if defined(_WIN64)		
-	rv = (int)GetWindowLongPtr(self->hwnd, GWLP_STYLE);
+	rv = (int)GetWindowLongPtr(self->hwnd, GWL_STYLE);
 #else
 	rv = (int)GetWindowLong(self->hwnd, GWL_STYLE);
 #endif
@@ -845,7 +846,7 @@ int windowexstyle(psy_ui_win_ComponentImp* self)
 {
 	int rv;
 #if defined(_WIN64)		
-	rv = (int) GetWindowLongPtr(self->hwnd, GWLP_EXSTYLE);
+	rv = (int)GetWindowLongPtr(self->hwnd, GWL_EXSTYLE);
 #else
 	rv = (int)GetWindowLong(self->hwnd, GWL_EXSTYLE);
 #endif

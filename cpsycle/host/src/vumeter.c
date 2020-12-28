@@ -88,8 +88,8 @@ void vumeter_ondraw(Vumeter* self, psy_ui_Graphics* g)
 	right.right = (int) (self->rightavg * size.width);
 	psy_ui_drawsolidrectangle(g, left, self->skin.rms);
 	psy_ui_drawsolidrectangle(g, right, self->skin.rms);
-	vuprevL = (40.0f + self->l_log) * size.width / 40.f;
-	vuprevR = (40.0f + self->r_log) * size.width / 40.f;
+	vuprevL = (int)((40.0f + self->l_log) * size.width / 40.f);
+	vuprevR = (int)((40.0f + self->r_log) * size.width / 40.f);
 	if (vuprevL > size.width) vuprevL = size.width;
 	if (vuprevR > size.width) vuprevR = size.width;
 	if (vuprevL > left.left) {		

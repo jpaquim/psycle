@@ -48,7 +48,7 @@ typedef int (*psy_audiodriver_fp_close)(struct psy_AudioDriver*);
 typedef void (*psy_audiodriver_fp_connect)(struct psy_AudioDriver*, void* context,
 	AUDIODRIVERWORKFN callback,
 	void* handle);
-typedef unsigned int (*psy_audiodriver_fp_samplerate)(struct psy_AudioDriver*);
+typedef uintptr_t(*psy_audiodriver_fp_samplerate)(struct psy_AudioDriver*);
 typedef const char* (*psy_audiodriver_fp_capturename)(struct psy_AudioDriver*, int index);
 typedef int (*psy_audiodriver_fp_numcaptures)(struct psy_AudioDriver*);
 typedef const char* (*psy_audiodriver_fp_playbackname)(struct psy_AudioDriver*, int index);
@@ -140,7 +140,7 @@ INLINE void psy_audiodriver_connect(psy_AudioDriver* self, void* context,
 	self->handle = handle;
 }
 
-INLINE unsigned int psy_audiodriver_samplerate(psy_AudioDriver* self)
+INLINE uintptr_t psy_audiodriver_samplerate(psy_AudioDriver* self)
 {
 	return self->vtable->samplerate(self);
 }

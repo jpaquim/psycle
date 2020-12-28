@@ -36,7 +36,7 @@ bool generalconfig_saverecentsongs(const GeneralConfig*);
 bool generalconfig_playsongafterload(const GeneralConfig*);
 bool generalconfig_showingpatternnames(const GeneralConfig*);
 bool generalconfig_showstepsequencer(const GeneralConfig*);
-bool generalconfig_setstepsequencershowstate(GeneralConfig*, bool state);
+void generalconfig_setstepsequencershowstate(GeneralConfig*, bool state);
 void generalconfig_showpatternnames(GeneralConfig*);
 void generalconfig_showpatternids(GeneralConfig*);
 
@@ -47,4 +47,4 @@ bool generalconfig_hasproperty(const GeneralConfig*, psy_Property*);
 }
 #endif
 
-#endif /* MACHINEVIEWCONFIG_H */
+#endif /* GENERALCONFIG_H */

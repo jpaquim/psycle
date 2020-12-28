@@ -24,8 +24,8 @@ typedef struct {
 	uintptr_t tracks;
 	int octave;
 	uintptr_t lpb;
-	int tpb;
-	int extraticksperbeat;	
+	uintptr_t tpb;
+	uintptr_t extraticksperbeat;
 	// read-only
 	char* title;
 	char* credits;

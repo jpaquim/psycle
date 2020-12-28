@@ -54,7 +54,7 @@ static void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader*,
 static psy_audio_Sample* psy_audio_psy3loader_xmloadwav(psy_audio_PSY3Loader*);
 static void psy_audio_psy3loader_loadwavesubchunk(psy_audio_PSY3Loader*, int32_t instrIdx,
 	int32_t pan, char * instrum_name, int32_t fullopen, int32_t loadIdx);
-static psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader*,
+static void psy_audio_psy3loader_machineloadchunk(psy_audio_PSY3Loader*,
 	int32_t index);
 static psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(
 	psy_audio_PSY3Loader*, int32_t index, char* modulename, char* catchername,
@@ -1315,7 +1315,9 @@ void psy_audio_psy3loader_xminstrumentenvelopeload(psy_audio_PSY3Loader* self,
 			psyfile_read(self->fp, &value.second, sizeof(value.second));
 			// todo range
 			psy_dsp_envelopesettings_append(envelope,
-				psy_dsp_envelopepoint_make_all(value.first, value.second, 0.f,
+				psy_dsp_envelopepoint_make_all(
+					(psy_dsp_seconds_t)value.first,
+					value.second, 0.f,
 					100000.f, -1.f, 1.f));			
 			// m_Points.push_back(value);
 		}
@@ -1612,17 +1614,11 @@ void psy_audio_psy3loader_read_macd(psy_audio_PSY3Loader* self)
 
 	psyfile_read(self->fp, &index, sizeof index);
 	if (index < MAX_MACHINES) {			
-		psy_audio_Machine* machine;
-			
-		machine = psy_audio_psy3loader_machineloadchunk(self, index);
-		if (machine) {
-			psy_audio_machines_insert(&self->song->machines, index,
-				machine);
-		}
+		psy_audio_psy3loader_machineloadchunk(self, index);		
 	}		
 }
 
-psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(
+void psy_audio_psy3loader_machineloadchunk(
 	psy_audio_PSY3Loader* self, int32_t index)
 {
 	psy_audio_Machine* machine;
@@ -1635,6 +1631,9 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(
 	
 	machine = psy_audio_psy3loader_machineloadchunk_createmachine(self, index,
 		modulename, catchername, &replaced);
+	if (machine) {
+		psy_audio_machines_insert(&self->song->machines, index, machine);
+	}
 	{
 		unsigned char bypass;
 		unsigned char mute;
@@ -1708,8 +1707,7 @@ psy_audio_Machine* psy_audio_psy3loader_machineloadchunk(
 	if (psyfile_currchunkversion(self->fp) >= 1) {
 		//TODO: What to do on possibly wrong wire load?
 		psy_audio_machine_loadwiremapping(machine, self->songfile, index);
-	}
-	return machine;	
+	}	
 }
 
 psy_audio_Machine* psy_audio_psy3loader_machineloadchunk_createmachine(

@@ -226,11 +226,11 @@ INLINE bool psy_audio_player_recordingnoteoff(const psy_audio_Player* self)
 
 // event driver
 psy_EventDriver* psy_audio_player_loadeventdriver(psy_audio_Player*, const char* path);
-void psy_audio_player_removeeventdriver(psy_audio_Player*, int id);
-void psy_audio_player_restarteventdriver(psy_audio_Player*, int id,
+void psy_audio_player_removeeventdriver(psy_audio_Player*, intptr_t id);
+void psy_audio_player_restarteventdriver(psy_audio_Player*, intptr_t id,
 	psy_Property* configuration);
 psy_EventDriver* psy_audio_player_kbddriver(psy_audio_Player*);
-psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, int id);
+psy_EventDriver* psy_audio_player_eventdriver(psy_audio_Player*, intptr_t id);
 uintptr_t psy_audio_player_numeventdrivers(psy_audio_Player*);
 void psy_audio_player_write_eventdrivers(psy_audio_Player*, psy_EventDriverInput input);
 void psy_audio_player_workmachine(psy_audio_Player*, uintptr_t amount,

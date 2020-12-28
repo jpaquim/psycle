@@ -87,6 +87,7 @@ static const char* machineproxy_capturename(psy_audio_MachineProxy*, int index);
 static int machineproxy_numcaptures(psy_audio_MachineProxy*);
 static const char* machineproxy_playbackname(psy_audio_MachineProxy*, int index);
 static int machineproxy_numplaybacks(psy_audio_MachineProxy*);
+static const char* machineproxy_language(psy_audio_MachineProxy*);
 
 static void machineproxy_setcallback(psy_audio_MachineProxy*, psy_audio_MachineCallback*);
 static int machineproxy_haseditor(psy_audio_MachineProxy*);
@@ -115,14 +116,15 @@ static void machineproxy_putdata(psy_audio_MachineProxy*, uint8_t* data);
 static uint8_t* machineproxy_data(psy_audio_MachineProxy*);
 static uintptr_t machineproxy_datasize(psy_audio_MachineProxy*);
 // programs
-static void machineproxy_programname(psy_audio_MachineProxy*, int bnkidx, int prgIdx, char* val);
-static int machineproxy_numprograms(psy_audio_MachineProxy*);
-static void machineproxy_setcurrprogram(psy_audio_MachineProxy*, int prgIdx);
-static int machineproxy_currprogram(psy_audio_MachineProxy*);
-static void machineproxy_bankname(psy_audio_MachineProxy*, int bnkidx, char* val);
-static int machineproxy_numbanks(psy_audio_MachineProxy*);
-static void machineproxy_setcurrbank(psy_audio_MachineProxy*, int prgIdx);
-static int machineproxy_currbank(psy_audio_MachineProxy*);
+static void machineproxy_programname(psy_audio_MachineProxy*, uintptr_t bnkidx,
+	uintptr_t prgidx, char* val);
+static uintptr_t machineproxy_numprograms(psy_audio_MachineProxy*);
+static void machineproxy_setcurrprogram(psy_audio_MachineProxy*, uintptr_t prgidx);
+static uintptr_t machineproxy_currprogram(psy_audio_MachineProxy*);
+static void machineproxy_bankname(psy_audio_MachineProxy*, uintptr_t bnkidx, char* val);
+static uintptr_t machineproxy_numbanks(psy_audio_MachineProxy*);
+static void machineproxy_setcurrbank(psy_audio_MachineProxy*, uintptr_t prgidx);
+static uintptr_t machineproxy_currbank(psy_audio_MachineProxy*);
 static void machineproxy_currentpreset(psy_audio_MachineProxy*, struct psy_audio_Preset*);
 static void machineproxy_setpresets(psy_audio_MachineProxy*, struct psy_audio_Presets*);
 static struct psy_audio_Presets* machineproxy_presets(psy_audio_MachineProxy*);
@@ -150,41 +152,41 @@ static int FilterException(psy_audio_MachineProxy* proxy, const char* msg, int c
 #endif
 
 static MachineVtable vtable;
-static int vtable_initialized = 0;
+static bool vtable_initialized = FALSE;
 
 static void vtable_init(psy_audio_MachineProxy* self)
 {
 	if (!vtable_initialized) {
 		vtable = *self->machine.vtable;
-		vtable.mix = (fp_machine_mix) machineproxy_mix;
-		vtable.work = (fp_machine_work) machineproxy_work;
+		vtable.mix = (fp_machine_mix)machineproxy_mix;
+		vtable.work = (fp_machine_work)machineproxy_work;
 		vtable.generateaudio = (fp_machine_generateaudio)
 			machineproxy_generateaudio;
-		vtable.seqtick = (fp_machine_seqtick) machineproxy_seqtick;
+		vtable.seqtick = (fp_machine_seqtick)machineproxy_seqtick;
 		vtable.sequencertick = (fp_machine_sequencertick)
 			machineproxy_sequencertick;
 		vtable.newline = (fp_machine_newline)
 			machineproxy_newline;
 		vtable.sequencerinsert = (fp_machine_sequencerinsert)
 			machineproxy_sequencerinsert;
-		vtable.stop = (fp_machine_stop) machineproxy_stop;
-		vtable.dispose = (fp_machine_dispose) machineproxy_dispose;
-		vtable.reload = (fp_machine_reload) machineproxy_reload;
+		vtable.stop = (fp_machine_stop)machineproxy_stop;
+		vtable.dispose = (fp_machine_dispose)machineproxy_dispose;
+		vtable.reload = (fp_machine_reload)machineproxy_reload;
 		vtable.clone = (fp_machine_clone)machineproxy_clone;
-		vtable.mode = (fp_machine_mode) machineproxy_mode;
+		vtable.mode = (fp_machine_mode)machineproxy_mode;
 		vtable.modulepath = (fp_machine_modulepath)machineproxy_modulepath;
 		vtable.shellidx = (fp_machine_shellidx)machineproxy_shellidx;
-		vtable.numinputs = (fp_machine_numinputs) machineproxy_numinputs;
-		vtable.numoutputs = (fp_machine_numoutputs) machineproxy_numoutputs;
-		vtable.setpanning = (fp_machine_setpanning) machineproxy_setpanning;
-		vtable.panning = (fp_machine_panning) machineproxy_panning;
-		vtable.mute = (fp_machine_mute) machineproxy_mute;
-		vtable.unmute = (fp_machine_unmute) machineproxy_unmute;
-		vtable.muted = (fp_machine_muted) machineproxy_muted;
-		vtable.bypass = (fp_machine_bypass) machineproxy_bypass;
-		vtable.unbypass = (fp_machine_unbypass) machineproxy_unbypass;
-		vtable.bypassed = (fp_machine_bypassed) machineproxy_bypassed;
-		vtable.info = (fp_machine_info) machineproxy_info;
+		vtable.numinputs = (fp_machine_numinputs)machineproxy_numinputs;
+		vtable.numoutputs = (fp_machine_numoutputs)machineproxy_numoutputs;
+		vtable.setpanning = (fp_machine_setpanning)machineproxy_setpanning;
+		vtable.panning = (fp_machine_panning)machineproxy_panning;
+		vtable.mute = (fp_machine_mute)machineproxy_mute;
+		vtable.unmute = (fp_machine_unmute)machineproxy_unmute;
+		vtable.muted = (fp_machine_muted)machineproxy_muted;
+		vtable.bypass = (fp_machine_bypass)machineproxy_bypass;
+		vtable.unbypass = (fp_machine_unbypass)machineproxy_unbypass;
+		vtable.bypassed = (fp_machine_bypassed)machineproxy_bypassed;
+		vtable.info = (fp_machine_info)machineproxy_info;
 		vtable.parameter = (fp_machine_parameter)
 			machineproxy_parameter;
 		vtable.tweakparameter = (fp_machine_tweakparameter)
@@ -221,45 +223,46 @@ static void vtable_init(psy_audio_MachineProxy* self)
 			machineproxy_output;
 		vtable.editresize = (fp_machine_editresize)
 			machineproxy_editresize;
-		vtable.addcapture = (fp_machine_addcapture) machineproxy_addcapture;
-		vtable.removecapture = (fp_machine_removecapture) machineproxy_removecapture;
-		vtable.readbuffers = (fp_machine_readbuffers) machineproxy_readbuffers;
-		vtable.capturename = (fp_machine_capturename) machineproxy_capturename;
-		vtable.numcaptures = (fp_machine_numcaptures) machineproxy_numcaptures;
-		vtable.playbackname = (fp_machine_playbackname) machineproxy_playbackname;
-		vtable.numplaybacks = (fp_machine_numplaybacks) machineproxy_numplaybacks;
+		vtable.addcapture = (fp_machine_addcapture)machineproxy_addcapture;
+		vtable.removecapture = (fp_machine_removecapture)machineproxy_removecapture;
+		vtable.readbuffers = (fp_machine_readbuffers)machineproxy_readbuffers;
+		vtable.capturename = (fp_machine_capturename)machineproxy_capturename;
+		vtable.numcaptures = (fp_machine_numcaptures)machineproxy_numcaptures;
+		vtable.playbackname = (fp_machine_playbackname)machineproxy_playbackname;
+		vtable.numplaybacks = (fp_machine_numplaybacks)machineproxy_numplaybacks;
+		vtable.language = (fp_machine_language)machineproxy_language;
 		vtable.samples = (fp_machine_samples)
 			machineproxy_samples;
 		vtable.setcallback = (fp_machine_setcallback)
 			machineproxy_setcallback;
-		vtable.setslot = (fp_machine_setslot) machineproxy_setslot;
-		vtable.slot = (fp_machine_slot) machineproxy_slot;
-		vtable.haseditor = (fp_machine_haseditor) machineproxy_haseditor;
+		vtable.setslot = (fp_machine_setslot)machineproxy_setslot;
+		vtable.slot = (fp_machine_slot)machineproxy_slot;
+		vtable.haseditor = (fp_machine_haseditor)machineproxy_haseditor;
 		vtable.seteditorhandle = (fp_machine_seteditorhandle)
 			machineproxy_seteditorhandle;
-		vtable.editorsize = (fp_machine_editorsize) machineproxy_editorsize;
-		vtable.editoridle = (fp_machine_editoridle) machineproxy_editoridle;
+		vtable.editorsize = (fp_machine_editorsize)machineproxy_editorsize;
+		vtable.editoridle = (fp_machine_editoridle)machineproxy_editoridle;
 		vtable.setposition = (fp_machine_setposition)machineproxy_setposition;
 		vtable.position = (fp_machine_position)machineproxy_position;
-		vtable.seteditname = (fp_machine_seteditname) machineproxy_seteditname;
-		vtable.editname = (fp_machine_editname) machineproxy_editname;
-		vtable.buffermemory = (fp_machine_buffermemory) machineproxy_buffermemory;
+		vtable.seteditname = (fp_machine_seteditname)machineproxy_seteditname;
+		vtable.editname = (fp_machine_editname)machineproxy_editname;
+		vtable.buffermemory = (fp_machine_buffermemory)machineproxy_buffermemory;
 		vtable.buffermemorysize = (fp_machine_buffermemorysize)
 			machineproxy_buffermemorysize;
 		vtable.setbuffermemorysize = (fp_machine_setbuffermemorysize)
 			machineproxy_setbuffermemorysize;
-		vtable.amprange = (fp_machine_amprange) machineproxy_amprange;
-		vtable.putdata = (fp_machine_putdata) machineproxy_putdata;
-		vtable.data = (fp_machine_data) machineproxy_data;
-		vtable.datasize = (fp_machine_datasize) machineproxy_datasize;
-		vtable.programname = (fp_machine_programname) machineproxy_programname;
-		vtable.numprograms = (fp_machine_numprograms) machineproxy_numprograms;
-		vtable.setcurrprogram = (fp_machine_setcurrprogram) machineproxy_setcurrprogram;
-		vtable.currprogram = (fp_machine_currprogram) machineproxy_currprogram;
-		vtable.bankname = (fp_machine_bankname) machineproxy_bankname;
-		vtable.numbanks = (fp_machine_numbanks) machineproxy_numbanks;
-		vtable.setcurrbank = (fp_machine_setcurrbank) machineproxy_setcurrbank;
-		vtable.currbank = (fp_machine_currbank) machineproxy_currbank;
+		vtable.amprange = (fp_machine_amprange)machineproxy_amprange;
+		vtable.putdata = (fp_machine_putdata)machineproxy_putdata;
+		vtable.data = (fp_machine_data)machineproxy_data;
+		vtable.datasize = (fp_machine_datasize)machineproxy_datasize;
+		vtable.programname = (fp_machine_programname)machineproxy_programname;
+		vtable.numprograms = (fp_machine_numprograms)machineproxy_numprograms;
+		vtable.setcurrprogram = (fp_machine_setcurrprogram)machineproxy_setcurrprogram;
+		vtable.currprogram = (fp_machine_currprogram)machineproxy_currprogram;
+		vtable.bankname = (fp_machine_bankname)machineproxy_bankname;
+		vtable.numbanks = (fp_machine_numbanks)machineproxy_numbanks;
+		vtable.setcurrbank = (fp_machine_setcurrbank)machineproxy_setcurrbank;
+		vtable.currbank = (fp_machine_currbank)machineproxy_currbank;
 		vtable.currentpreset = (fp_machine_currentpreset)machineproxy_currentpreset;
 		vtable.setpresets = (fp_machine_setpresets)machineproxy_setpresets;
 		vtable.presets = (fp_machine_presets)machineproxy_presets;
@@ -273,7 +276,7 @@ static void vtable_init(psy_audio_MachineProxy* self)
 		vtable.parameter_label = (fp_machine_param_label)machineproxy_param_label;
 		vtable.parameter_name = (fp_machine_param_name)machineproxy_param_name;
 		vtable.parameter_describe = (fp_machine_param_describe)machineproxy_param_describe;
-		vtable_initialized = 1;
+		vtable_initialized = TRUE;
 	}
 }
 
@@ -1555,7 +1558,7 @@ uintptr_t machineproxy_datasize(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_programname(psy_audio_MachineProxy* self, int bnkidx, int prgIdx, char* val)
+void machineproxy_programname(psy_audio_MachineProxy* self, uintptr_t bnkidx, uintptr_t prgIdx, char* val)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1572,7 +1575,7 @@ void machineproxy_programname(psy_audio_MachineProxy* self, int bnkidx, int prgI
 	}
 }
 
-int machineproxy_numprograms(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_numprograms(psy_audio_MachineProxy* self)
 {
 	int rv = 0;
 
@@ -1592,7 +1595,7 @@ int machineproxy_numprograms(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_bankname(psy_audio_MachineProxy* self, int bnkidx, char* val)
+void machineproxy_bankname(psy_audio_MachineProxy* self, uintptr_t bnkidx, char* val)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1609,9 +1612,9 @@ void machineproxy_bankname(psy_audio_MachineProxy* self, int bnkidx, char* val)
 	}
 }
 
-int machineproxy_numbanks(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_numbanks(psy_audio_MachineProxy* self)
 {
-	int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1629,14 +1632,14 @@ int machineproxy_numbanks(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_setcurrprogram(psy_audio_MachineProxy* self, int prgIdx)
+void machineproxy_setcurrprogram(psy_audio_MachineProxy* self, uintptr_t prgidx)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			psy_audio_machine_setcurrprogram(self->client, prgIdx);
+			psy_audio_machine_setcurrprogram(self->client, prgidx);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "programname",
@@ -1646,9 +1649,9 @@ void machineproxy_setcurrprogram(psy_audio_MachineProxy* self, int prgIdx)
 	}
 }
 
-int machineproxy_currprogram(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_currprogram(psy_audio_MachineProxy* self)
 {
-	int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1666,14 +1669,14 @@ int machineproxy_currprogram(psy_audio_MachineProxy* self)
 	return rv;
 }
 
-void machineproxy_setcurrbank(psy_audio_MachineProxy* self, int prgIdx)
+void machineproxy_setcurrbank(psy_audio_MachineProxy* self, uintptr_t prgidx)
 {
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
 		__try
 #endif		
 		{
-			psy_audio_machine_setcurrbank(self->client, prgIdx);
+			psy_audio_machine_setcurrbank(self->client, prgidx);
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "bankname",
@@ -1683,9 +1686,9 @@ void machineproxy_setcurrbank(psy_audio_MachineProxy* self, int prgIdx)
 	}
 }
 
-int machineproxy_currbank(psy_audio_MachineProxy* self)
+uintptr_t machineproxy_currbank(psy_audio_MachineProxy* self)
 {
-	int rv = 0;
+	uintptr_t rv = 0;
 
 	if (self->crashed == 0) {
 #if defined DIVERSALIS__OS__MICROSOFT        
@@ -1868,6 +1871,26 @@ int machineproxy_numplaybacks(psy_audio_MachineProxy* self)
 		}
 #if defined DIVERSALIS__OS__MICROSOFT		
 		__except (FilterException(self, "numplaybacks", GetExceptionCode(),
+			GetExceptionInformation())) {
+		}
+#endif		
+	}
+	return rv;
+}
+
+const char* machineproxy_language(psy_audio_MachineProxy* self)
+{
+	const char* rv = 0;
+
+	if (self->crashed == 0) {
+#if defined DIVERSALIS__OS__MICROSOFT        
+		__try
+#endif		
+		{
+			rv = psy_audio_machine_language(self->client);
+		}
+#if defined DIVERSALIS__OS__MICROSOFT		
+		__except (FilterException(self, "language", GetExceptionCode(),
 			GetExceptionInformation())) {
 		}
 #endif		

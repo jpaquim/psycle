@@ -16,9 +16,9 @@ extern psy_ui_App app;
 
 // VTable Prototypes
 static void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp*);
-static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, int x, int y, const char*, size_t len);
-static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, int x, int y, unsigned int options,
-	psy_ui_Rectangle r, const char* text, size_t len);
+static void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp*, intptr_t x, intptr_t y, const char*, uintptr_t len);
+static void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp*, intptr_t x, intptr_t y, uintptr_t options,
+	psy_ui_Rectangle r, const char* text, uintptr_t len);
 static void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle);
 static void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle,
 	psy_ui_Size cornersize);
@@ -28,25 +28,25 @@ static void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp*, const p
 static void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp*, const psy_ui_Rectangle r,
 	psy_ui_Size cornersize, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp*, psy_ui_IntPoint*,
-	unsigned int numpoints, unsigned int inner, unsigned int outter);
-static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, int x1, int y1, int x2, int y2);
-static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y);
-static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
-	int height, int xsrc, int ysrc);
-static void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, int x, int y, int width,
-	int height, int xsrc, int ysrc, int wsrc, int hsrc);
+	uintptr_t numpoints, uint32_t inner, uint32_t outter);
+static void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp*, intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2);
+static void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, intptr_t x, intptr_t y);
+static void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, intptr_t x, intptr_t y, intptr_t width,
+	intptr_t height, intptr_t xsrc, intptr_t ysrc);
+static void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp*, psy_ui_Bitmap*, intptr_t x, intptr_t y, intptr_t width,
+	intptr_t height, intptr_t xsrc, intptr_t ysrc, intptr_t wsrc, intptr_t hsrc);
 static void psy_ui_win_g_imp_setbackgroundcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
-static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, unsigned int mode);
+static void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp*, uintptr_t mode);
 static void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
-static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, unsigned int align);
+static void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp*, uintptr_t align);
 static void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp*, psy_ui_Colour colour);
 static void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp*, psy_ui_Font* font);
 static void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint pt);
 static void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp*, psy_ui_IntPoint control_p1,
 	psy_ui_IntPoint control_p2, psy_ui_IntPoint p);
 static void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp*,
-	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4);
-static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, unsigned int width);
+	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4);
+static void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, uintptr_t width);
 static unsigned int psy_ui_win_g_devlinewidth(psy_ui_win_GraphicsImp* self);
 
 static psy_ui_TextMetric converttextmetric(const TEXTMETRIC*);
@@ -112,17 +112,17 @@ void psy_ui_win_g_imp_dispose(psy_ui_win_GraphicsImp* self)
 	}
 }
 
-void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, int x, int y,
-	const char* str, size_t len)
+void psy_ui_win_g_imp_textout(psy_ui_win_GraphicsImp* self, intptr_t x, intptr_t y,
+	const char* str, uintptr_t len)
 {
-	TextOut(self->hdc, x, y, str, (int)len);
+	TextOut(self->hdc, (int)x, (int)y, str, (int)len);
 }
 
-void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, int x, int y, unsigned int options,
-	psy_ui_Rectangle r, const char* text, size_t len)
+void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, intptr_t x, intptr_t y, uintptr_t options,
+	psy_ui_Rectangle r, const char* text, uintptr_t len)
 {
 	RECT rect;
-	int woptions = 0;
+	uintptr_t woptions = 0;
 
 	if ((options & psy_ui_ETO_OPAQUE) == psy_ui_ETO_OPAQUE) {
 		woptions |= ETO_OPAQUE;
@@ -130,8 +130,8 @@ void psy_ui_win_g_imp_textoutrectangle(psy_ui_win_GraphicsImp* self, int x, int 
 	if ((options & psy_ui_ETO_CLIPPED) == psy_ui_ETO_CLIPPED) {
 		woptions |= ETO_CLIPPED;
 	}
-    SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     	
-	ExtTextOut(self->hdc, x, y, woptions, &rect, text, (int)len, NULL);
+    SetRect (&rect, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom) ;
+	ExtTextOut(self->hdc, (int)x, (int)y, (UINT)woptions, &rect, text, (int)len, NULL);
 }
 
 psy_ui_Size psy_ui_win_g_imp_textsize(psy_ui_win_GraphicsImp* self, const char* text)
@@ -158,7 +158,7 @@ void psy_ui_win_g_imp_drawrectangle(psy_ui_win_GraphicsImp* self, const psy_ui_R
 
 	hBrush = GetStockObject (NULL_BRUSH);
 	hOldBrush = SelectObject (self->hdc, hBrush);
-	Rectangle(self->hdc, r.left, r.top, r.right, r.bottom);
+	Rectangle(self->hdc, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom);
 	SelectObject(self->hdc, hOldBrush);
 }
 
@@ -173,9 +173,9 @@ void psy_ui_win_g_imp_drawroundrectangle(psy_ui_win_GraphicsImp* self, const psy
 	hOldBrush = SelectObject(self->hdc, hBrush);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
-	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom,
-		psy_ui_value_px(&cornersize.width, &tm),
-		psy_ui_value_px(&cornersize.height, &tm));
+	RoundRect(self->hdc, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom,
+		(int)psy_ui_value_px(&cornersize.width, &tm),
+		(int)psy_ui_value_px(&cornersize.height, &tm));
 	SelectObject(self->hdc, hOldBrush);
 }
 
@@ -184,7 +184,7 @@ void psy_ui_win_g_imp_drawsolidrectangle(psy_ui_win_GraphicsImp* self, const psy
      HBRUSH hBrush;     
      RECT   rect;	 
 	                
-     SetRect (&rect, r.left, r.top, r.right, r.bottom) ;     
+     SetRect (&rect, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom) ;
      hBrush = CreateSolidBrush(colour.value);
      FillRect (self->hdc, &rect, hBrush);     
      DeleteObject (hBrush) ;
@@ -206,9 +206,9 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 	hOldPen = SelectObject(self->hdc, hPen);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
-	RoundRect(self->hdc, r.left, r.top, r.right, r.bottom,
-		psy_ui_value_px(&cornersize.width, &tm),
-		psy_ui_value_px(&cornersize.height, &tm));
+	RoundRect(self->hdc, (int)r.left, (int)r.top, (int)r.right, (int)r.bottom,
+		(int)psy_ui_value_px(&cornersize.width, &tm),
+		(int)psy_ui_value_px(&cornersize.height, &tm));
 	SelectObject(self->hdc, hOldBrush);
 	SelectObject(self->hdc, hOldPen);
 	DeleteObject(hBrush) ;
@@ -216,25 +216,25 @@ void psy_ui_win_g_imp_drawsolidroundrectangle(psy_ui_win_GraphicsImp* self, cons
 }
 
 void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint* pts,
-	unsigned int numpoints, unsigned int inner, unsigned int outter)
+	uintptr_t numpoints, uint32_t inner, uint32_t outter)
 {
 	HBRUSH hBrush;     
 	HBRUSH hBrushPrev;
 	HPEN hPen;     
 	HPEN hPenPrev;
 	POINT* wpts;
-	unsigned int i;
+	uintptr_t i;
 
 	wpts = (POINT*)malloc(sizeof(POINT) * numpoints);
 	for (i = 0; i < numpoints; ++i) {
-		wpts[i].x = pts[i].x;
-		wpts[i].y = pts[i].y;
+		wpts[i].x = (int)pts[i].x;
+		wpts[i].y = (int)pts[i].y;
 	}    
     hBrush = CreateSolidBrush(inner);
 	hBrushPrev = SelectObject(self->hdc, hBrush);
 	hPen = CreatePen(PS_SOLID, 1, outter);
 	hPenPrev = SelectObject(self->hdc, hPen);	
-	Polygon(self->hdc, wpts, numpoints);
+	Polygon(self->hdc, wpts, (int)numpoints);
 	SelectObject(self->hdc, hBrushPrev);
 	SelectObject(self->hdc, hPenPrev);
     DeleteObject (hBrush);
@@ -242,7 +242,7 @@ void psy_ui_win_g_imp_drawsolidpolygon(psy_ui_win_GraphicsImp* self, psy_ui_IntP
 	free(wpts);
 }
 
-void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, int x, int y)
+void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y)
 {
 	HDC hdcmem;
 	psy_ui_Size size;
@@ -256,14 +256,14 @@ void psy_ui_win_g_imp_drawfullbitmap(psy_ui_win_GraphicsImp* self, psy_ui_Bitmap
 	size = psy_ui_bitmap_size(bitmap);
 	GetTextMetrics(self->hdc, &win_tm);
 	tm = converttextmetric(&win_tm);
-	BitBlt(self->hdc, x, y, psy_ui_value_px(&size.width, &tm),
-		psy_ui_value_px(&size.height, &tm), hdcmem, 0, 0, SRCCOPY);
+	BitBlt(self->hdc, (int)x, (int)y, (int)psy_ui_value_px(&size.width, &tm),
+		(int)psy_ui_value_px(&size.height, &tm), hdcmem, 0, 0, SRCCOPY);
 	DeleteDC(hdcmem);
 }
 
 void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
-	psy_ui_Bitmap* bitmap, int x, int y, int width,
-	int height, int xsrc, int ysrc)
+	psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y, intptr_t width,
+	intptr_t height, intptr_t xsrc, intptr_t ysrc)
 {
 	HDC hdcmem;
 	HBITMAP wbitmap;
@@ -271,13 +271,13 @@ void psy_ui_win_g_imp_drawbitmap(psy_ui_win_GraphicsImp* self,
 	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
 	hdcmem = CreateCompatibleDC (self->hdc) ;
 	SelectObject (hdcmem, wbitmap) ;
-	BitBlt(self->hdc, x, y, width, height, hdcmem, xsrc, ysrc, SRCCOPY);
+	BitBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, SRCCOPY);
 	DeleteDC (hdcmem);
 }
 
 void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
-	psy_ui_Bitmap* bitmap, int x, int y, int width,
-	int height, int xsrc, int ysrc, int wsrc, int hsrc)
+	psy_ui_Bitmap* bitmap, intptr_t x, intptr_t y, intptr_t width,
+	intptr_t height, intptr_t xsrc, intptr_t ysrc, intptr_t wsrc, intptr_t hsrc)
 {
 	HDC hdcmem;
 	HBITMAP wbitmap;
@@ -285,7 +285,7 @@ void psy_ui_win_g_imp_drawstretchedbitmap(psy_ui_win_GraphicsImp* self,
 	wbitmap = ((psy_ui_win_BitmapImp*)bitmap->imp)->bitmap;
 	hdcmem = CreateCompatibleDC(self->hdc);
 	SelectObject(hdcmem, wbitmap);
-	StretchBlt(self->hdc, x, y, width, height, hdcmem, xsrc, ysrc, wsrc, hsrc,
+	StretchBlt(self->hdc, (int)x, (int)y, (int)width, (int)height, hdcmem, (int)xsrc, (int)ysrc, (int)wsrc, (int)hsrc,
 		SRCCOPY);
 	DeleteDC(hdcmem);
 }
@@ -305,7 +305,7 @@ void psy_ui_win_g_imp_setcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour colo
 	self->pen = pen;
 }
 
-void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, unsigned int mode)
+void psy_ui_win_g_imp_setbackgroundmode(psy_ui_win_GraphicsImp* self, uintptr_t mode)
 {
 	if (mode == psy_ui_TRANSPARENT) {
 		SetBkMode(self->hdc, TRANSPARENT);
@@ -325,9 +325,9 @@ void psy_ui_win_g_imp_settextcolour(psy_ui_win_GraphicsImp* self, psy_ui_Colour 
 	SetTextColor(self->hdc, colour.value);
 }
 
-void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, unsigned int align)
+void psy_ui_win_g_imp_settextalign(psy_ui_win_GraphicsImp* self, uintptr_t align)
 {	
-	SetTextAlign(self->hdc, align);
+	SetTextAlign(self->hdc, (UINT)align);
 }
 
 void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
@@ -337,15 +337,15 @@ void psy_ui_win_g_imp_setfont(psy_ui_win_GraphicsImp* self, psy_ui_Font* font)
 	}
 }
 
-void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, int x1, int y1, int x2, int y2)
+void psy_ui_win_g_imp_drawline(psy_ui_win_GraphicsImp* self, intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2)
 {
-	MoveToEx(self->hdc, x1, y1, NULL) ;
-	LineTo(self->hdc, x2, y2);
+	MoveToEx(self->hdc, (int)x1, (int)y1, NULL) ;
+	LineTo(self->hdc, (int)x2, (int)y2);
 }
 
 void psy_ui_win_g_imp_moveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint pt)
 {	
-	MoveToEx(self->hdc, pt.x, pt.y, NULL);
+	MoveToEx(self->hdc, (int)pt.x, (int)pt.y, NULL);
 }
 
 void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint control_p1,
@@ -353,28 +353,28 @@ void psy_ui_win_g_imp_devcurveto(psy_ui_win_GraphicsImp* self, psy_ui_IntPoint c
 {
 	POINT pts[3];
    
-	pts[0].x = control_p1.x;
-	pts[0].y = control_p1.y;
-	pts[1].x = control_p2.x;
-	pts[1].y = control_p2.y;
-	pts[2].x = p.x;
-	pts[2].y = p.y;
+	pts[0].x = (int)control_p1.x;
+	pts[0].y = (int)control_p1.y;
+	pts[1].x = (int)control_p2.x;
+	pts[1].y = (int)control_p2.y;
+	pts[2].x = (int)p.x;
+	pts[2].y = (int)p.y;
 	PolyBezierTo(self->hdc, pts, 3);
 }
 
 void psy_ui_win_g_imp_devdrawarc(psy_ui_win_GraphicsImp* self,
-	int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
+	intptr_t x1, intptr_t y1, intptr_t x2, intptr_t y2, intptr_t x3, intptr_t y3, intptr_t x4, intptr_t y4)
 {
-	Arc(self->hdc, x1, y1, x2, y2, x3, y3, x4, y4);
+	Arc(self->hdc, (int)x1, (int)y1, (int)x2, (int)y2, (int)x3, (int)y3, (int)x4, (int)y4);
 }
 
-void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, unsigned int width)
+void psy_ui_win_g_devsetlinewidth(psy_ui_win_GraphicsImp* self, uintptr_t width)
 {
 	LOGPEN currpen;
 	HPEN pen;
 
 	GetObject(self->pen, sizeof(LOGPEN), &currpen);
-	currpen.lopnWidth.x = width;	
+	currpen.lopnWidth.x = (int)width;	
 	pen = CreatePenIndirect(&currpen);
 	SelectObject(self->hdc, pen);
 	if (self->pen) {

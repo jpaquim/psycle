@@ -4,6 +4,10 @@
 #ifndef psy_audio_MACHINEDEFS_H
 #define psy_audio_MACHINEDEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum {
 	MACH_SUPPORTS_INSTRUMENTS = 128
 };
@@ -40,5 +44,9 @@ typedef enum  {
 } MachineType;
 
 #define MACHINE_USES_INSTRUMENTS 64
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* psy_audio_MACHINEDEFS_H */

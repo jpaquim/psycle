@@ -102,7 +102,7 @@ static void oncommand(psy_ui_ComboBox*, psy_ui_Component* sender, WPARAM wParam,
 
 // ComboBoxImp VTable
 
-static int dev_addtext(psy_ui_win_ComboBoxImp*, const char* text);
+static intptr_t dev_addtext(psy_ui_win_ComboBoxImp*, const char* text);
 static void dev_settext(psy_ui_win_ComboBoxImp*, const char* text, intptr_t index);
 static void dev_text(psy_ui_win_ComboBoxImp*, char* text);
 static void dev_setstyle(psy_ui_win_ComboBoxImp*, int style);
@@ -183,7 +183,7 @@ psy_ui_win_ComboBoxImp* psy_ui_win_comboboximp_allocinit(
 	return rv;
 }
 
-int dev_addtext(psy_ui_win_ComboBoxImp* self, const char* text)
+intptr_t dev_addtext(psy_ui_win_ComboBoxImp* self, const char* text)
 {
 	return SendMessage(self->win_combo_imp.hwnd, CB_ADDSTRING, 0, (LPARAM)text);
 }
